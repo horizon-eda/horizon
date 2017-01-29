@@ -1,0 +1,16 @@
+main
+horizon-imp
+horizon-pool
+horizon-pool-update
+horizon-pool-update-parametric
+horizon-prj
+*.o
+*.d
+*~
+.gdb_history
+resources.cpp
+.cproject
+.settings
+.project
+example/pool/*.db
+\#*.ui\#
