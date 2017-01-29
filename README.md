@@ -12,6 +12,8 @@ architecture is there.
 - Copy/paste for some objects
 - Builds and runs on Linux and Windows
 
+Screenshots are over [there](screenshots/)
+
 # Features for developers
 - Written in modern C++, legacy-free codebase!
 - Uses JSON as on-disk format
