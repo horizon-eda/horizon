@@ -4,8 +4,8 @@
 namespace horizon {
 	Placement::Placement(const json &j):
 		shift(j.at("shift").get<std::vector<int64_t>>()),
-		angle(j.at("angle").get<int>()),
-		mirror(j.at("mirror").get<bool>())
+		mirror(j.at("mirror").get<bool>()),
+		angle(j.at("angle").get<int>())
 		{
 		}
 	json Placement::serialize() const {
@@ -50,12 +50,33 @@ namespace horizon {
 				angle+=65536;
 			}
 			angle %= 65536;
+			mirror ^= q.mirror;
 	}
 
 	void Placement::invert_angle() {
-		angle *= -1;
+		set_angle(-angle);
+	}
+
+	void Placement::set_angle(int a) {
+		angle = a;
 		while(angle<0)
 			angle += 65536;
+	}
+
+	void Placement::inc_angle(int a) {
+		set_angle(angle+a);
+	}
+
+	void Placement::set_angle_deg(int a) {
+		set_angle((a*65536)/360);
+	}
+
+	void Placement::inc_angle_deg(int a) {
+		inc_angle((a*65536)/360);
+	}
+
+	int Placement::get_angle() const {
+		return angle;
 	}
 
 }

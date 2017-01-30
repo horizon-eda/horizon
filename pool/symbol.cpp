@@ -174,8 +174,8 @@ namespace horizon {
 		}
 		if(all) {
 			for(const auto &it: texts) {
-				a = Coordi::min(a, it.second.position);
-				b = Coordi::max(b, it.second.position);
+				a = Coordi::min(a, it.second.placement.shift);
+				b = Coordi::max(b, it.second.placement.shift);
 			}
 		}
 		return std::make_pair(a,b);

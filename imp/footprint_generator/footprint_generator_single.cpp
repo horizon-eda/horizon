@@ -44,7 +44,7 @@ namespace horizon {
 				auto padstack = core->m_pool->get_padstack(padstack_button->property_selected_uuid());
 				auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
 				pad.placement.shift = {0, y0-pitch*i};
-				pad.placement.angle = 49152;
+				pad.placement.set_angle_deg(270);
 				pad.name = std::to_string(i+1);
 			}
 

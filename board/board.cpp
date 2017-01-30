@@ -420,20 +420,6 @@ namespace horizon {
 				}
 				for(auto &it2: it.second.package.texts) {
 					flip_package_layer(it2.second.layer);
-					switch(it2.second.orientation) {
-						case Orientation::RIGHT :
-							it2.second.orientation = Orientation::LEFT;
-						break;
-						case Orientation::LEFT :
-							it2.second.orientation = Orientation::RIGHT;
-						break;
-						case Orientation::DOWN :
-							it2.second.orientation = Orientation::UP;
-						break;
-						case Orientation::UP:
-							it2.second.orientation = Orientation::DOWN;
-						break;
-					}
 				}
 				for(auto &it2: it.second.package.polygons) {
 					flip_package_layer(it2.second.layer);

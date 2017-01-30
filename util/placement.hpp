@@ -7,7 +7,7 @@ namespace horizon {
 
 	class Placement {
 		public :
-			Placement(const Coordi &sh={0,0}, int a=0, bool m = false):shift(sh), angle(a), mirror(m){}
+			Placement(const Coordi &sh={0,0}, int a=0, bool m = false):shift(sh), mirror(m), angle(a){}
 			Placement(const json &j);
 			template<typename T>Coord<T> transform(const Coord<T> &c) const {
 				Coord<T> r = c;
@@ -42,14 +42,21 @@ namespace horizon {
 				r += shift;
 				return r;
 			}
-		void angle_from_deg(int a) {angle = (a*65536)/360;}
 		void reset() {shift={0,0}, angle=0, mirror=false;}
 		void accumulate(const Placement &p);
 		void invert_angle();
+		void set_angle(int a);
+		void inc_angle(int a);
+		void inc_angle_deg(int a);
+		void set_angle_deg(int a);
+		int get_angle() const;
 		Coordi shift;
-		int angle = 0;
+
 		bool mirror = false;
 		json serialize() const;
+	private:
+		int angle = 0;
+
 	};
 
 }

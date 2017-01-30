@@ -259,7 +259,105 @@ enum HersheyFonts {
 
 	extern const char* hershey_glyphs[];
 
-	std::pair<Coordf, Coordf> Canvas::draw_text(const Coordf &p, float size, const std::string &rtext, Orientation orientation, TextPlacement placement, const Color &color, bool tr, uint64_t width, bool draw) {
+	std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const std::string &rtext, int angle, bool flip, TextOrigin origin, const Color &color, bool tr, uint64_t width, bool draw) {
+
+		Glib::ustring text(rtext);
+		std::vector<gunichar> vtext;
+		vtext.reserve(text.size());
+		for(const auto &it: text) {
+			vtext.push_back(it);
+		}
+		float x0 = 0;
+		float y0 = 0;
+		int fontFace = FONT_HERSHEY_SIMPLEX;
+		const int* ascii = getFontData(fontFace);
+		float sc = size / 21;
+		float yshift = (origin==TextOrigin::CENTER)?-size/2:(origin==TextOrigin::BOTTOM?size/2:0);
+
+
+		while(angle<0)
+			angle += 65536;
+		angle %= 65536;
+
+
+		bool backwards = (angle > 16384) && (angle <= 49152);
+		y0 += yshift;
+		int i = 0;
+		Placement tf;
+		tf.shift.x = p.x;
+		tf.shift.y = p.y;
+		if(backwards) {
+			std::reverse(vtext.begin(), vtext.end());
+			tf.set_angle(angle-32768);
+		}
+		else {
+			tf.set_angle(angle);
+		}
+		tf.mirror = flip;
+
+
+		Coordf a = p;
+		Coordf b = p;
+
+		for(const gunichar c: vtext) {
+			const char *s = hershey_glyphs[codepoint_to_hershey(c)];
+
+			float step;
+			{
+
+				int left = s[0] - 'R';
+				int right = s[1] - 'R';
+				size_t n = 0;
+				int x,y, x2, y2;
+				for( s += 2;; ) {
+					if( *s == ' ' || !*s ) {
+						if( !*s++ )
+							break;
+						n = 0;
+					}
+					else {
+						x = s[0] - 'R';
+						y = -(s[1] - 'R')+9;
+						s += 2;
+						if(n > 0) {
+							int xshift;
+							if(backwards) {
+								xshift = left;
+							}
+							else {
+								xshift = -left;
+							}
+							Coordf p0, p1;
+							p0 = tf.transform(Coordi(x0+(x+xshift)*sc, y0+y*sc));
+							p1 = tf.transform(Coordi(x0+(x2+xshift)*sc, y0+y2*sc));
+							if(draw) {
+								img_text_line(Coordi(p0.x, p0.y), Coordi(p1.x, p1.y), width);
+								draw_line(p0, p1, color, false, width);
+							}
+							a=Coordf::min(a, Coordf::min(p0, p1));
+							b=Coordf::max(b, Coordf::max(p0, p1));
+						}
+
+						x2 = x;
+						y2 = y;
+
+						n++;
+					}
+				}
+				step = (right-left)*sc;
+			}
+			if(backwards) {
+				x0 -= step;
+			}
+			else {
+				x0 += step;
+			}
+			i++;
+		}
+		return {a,b};
+	}
+	std::pair<Coordf, Coordf> Canvas::draw_text(const Coordf &p, float size, const std::string &rtext, Orientation orientation, TextOrigin origin, const Color &color, bool tr, uint64_t width, bool draw) {
+
 		Glib::ustring text(rtext);
 		std::vector<gunichar> vtext;
 		vtext.reserve(text.size());
@@ -271,7 +369,7 @@ enum HersheyFonts {
 		int fontFace = FONT_HERSHEY_SIMPLEX;
 		const int* ascii = getFontData(fontFace);
 		float sc = size / 21;
-		float yshift = (placement==TextPlacement::CENTER)?-size/2:(placement==TextPlacement::BOTTOM?size/2:0);
+		float yshift = (origin==TextOrigin::CENTER)?-size/2:(origin==TextOrigin::BOTTOM?size/2:0);
 		if(orientation == Orientation::LEFT || orientation == Orientation::RIGHT) {
 			y0 += yshift;
 		}

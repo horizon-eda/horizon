@@ -202,10 +202,10 @@ namespace horizon {
 			auto &x = sheet->texts.emplace(uu, uu).first->second;
 			x.from_smash = true;
 			x.overridden = true;
+			x.placement = sym->placement;
+			x.placement.accumulate(it.second.placement);
 			x.text = it.second.text;
 			x.layer = it.second.layer;
-			x.position = sym->placement.transform(it.second.position);
-			x.orientation = it.second.orientation;
 			x.size = it.second.size;
 			x.width = it.second.width;
 			sym->texts.push_back(&x);

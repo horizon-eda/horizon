@@ -16,20 +16,20 @@ namespace horizon {
 		
 		temp = core.r->insert_text(UUID::random());
 		temp->text = "TEXT";
-		temp->position = args.coords;
+		temp->placement.shift = args.coords;
 		
 		return ToolResponse();
 	}
 	ToolResponse ToolPlaceText::update(const ToolArgs &args) {
 		if(args.type == ToolEventType::MOVE) {
-			temp->position = args.coords;
+			temp->placement.shift = args.coords;
 		}
 		else if(args.type == ToolEventType::CLICK) {
 			if(args.button == 1) {
 				texts_placed.push_front(temp);
 				temp = core.r->insert_text(UUID::random());
 				temp->text = "TEXT";
-				temp->position = args.coords;
+				temp->placement.shift = args.coords;
 			}
 			else if(args.button == 3) {
 				core.r->delete_text(temp->uuid);

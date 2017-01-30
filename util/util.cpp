@@ -13,4 +13,15 @@ namespace horizon {
 		ofs << std::setw(4) << j;
 		ofs.close();
 	}
+
+	int orientation_to_angle(Orientation o) {
+		int angle=0;
+		switch(o) {
+			case Orientation::RIGHT: angle=0; break;
+			case Orientation::LEFT: angle=32768; break;
+			case Orientation::UP: angle=16384; break;
+			case Orientation::DOWN: angle=49152; break;
+		}
+		return angle;
+	}
 }

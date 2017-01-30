@@ -55,7 +55,7 @@ namespace horizon {
 				auto x = core.r->insert_text(u);
 				*x = Text(u, it.value());
 				fix_layer(x->layer);
-				apply_shift(x->position, args.coords);
+				apply_shift(x->placement.shift, args.coords);
 				core.r->selection.emplace(u, ObjectType::TEXT);
 			}
 		}

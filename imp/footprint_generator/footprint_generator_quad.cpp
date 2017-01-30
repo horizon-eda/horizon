@@ -74,11 +74,11 @@ namespace horizon {
 					auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
 					pad.placement.shift = {it*spacing_h, y0-pitch*i};
 					if(it < 0) {
-						pad.placement.angle = 49152;
+						pad.placement.set_angle_deg(270);
 						pad.name = std::to_string(i+1);
 					}
 					else {
-						pad.placement.angle = 16384;
+						pad.placement.set_angle_deg(90);
 						pad.name = std::to_string(pad_count_v*2+pad_count_h-i);
 					}
 				}
@@ -93,11 +93,11 @@ namespace horizon {
 					auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
 					pad.placement.shift = {x0+pitch*i, it*spacing_v};
 					if(it < 0) {
-						pad.placement.angle = 0;
+						pad.placement.set_angle_deg(0);
 						pad.name = std::to_string(i+1+pad_count_v);
 					}
 					else {
-						pad.placement.angle = 32768;
+						pad.placement.set_angle_deg(180);
 						pad.name = std::to_string(pad_count_v*2+pad_count_h*2-i);
 					}
 				}

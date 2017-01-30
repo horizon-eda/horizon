@@ -61,7 +61,7 @@ namespace horizon {
 		draw_line({x,      y+3*sc}, {x+1*sc,   y+6*sc}, c, tr);
 		draw_line({x,      y+3*sc}, {x-1*sc,   y+6*sc}, c, tr);
 		draw_line({x-1*sc, y+6*sc}, {x+1*sc,   y+6*sc}, c, tr);
-		draw_text({x-5*sc, y-1.5f*sc}, 0.25_mm, text, Orientation::RIGHT,  TextPlacement::BASELINE, c, tr);
+		draw_text({x-5*sc, y-1.5f*sc}, 0.25_mm, text, Orientation::RIGHT,  TextOrigin::BASELINE, c, tr);
 	}
 
 	std::tuple<Coordf, Coordf, Coordi> Canvas::draw_flag(const Coordf &position, const std::string &txt, int64_t size, Orientation orientation, const Color &c) {
@@ -83,7 +83,7 @@ namespace horizon {
 		}
 
 		double enlarge = size/4;
-		auto extents = draw_text(position+shift, size, txt, orientation, TextPlacement::CENTER, c, false);
+		auto extents = draw_text(position+shift, size, txt, orientation, TextOrigin::CENTER, c, false);
 		extents.first -= Coordf(enlarge, enlarge);
 		extents.second += Coordf(enlarge, enlarge);
 		switch(orientation) {

@@ -4,6 +4,7 @@
 #include "common.hpp"
 #include "object.hpp"
 #include "uuid_provider.hpp"
+#include "placement.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -11,7 +12,7 @@
 
 namespace horizon {
 	using json = nlohmann::json;
-	enum class TextPlacement {BASELINE, CENTER, BOTTOM};
+	enum class TextOrigin {BASELINE, CENTER, BOTTOM};
 
 	class Text: public UUIDProvider {
 		public :
@@ -19,10 +20,9 @@ namespace horizon {
 			Text(const UUID &uu);
 
 			UUID uuid;
-			Coordi position;
 
-			TextPlacement placement = TextPlacement::CENTER;
-			Orientation orientation = Orientation::RIGHT;
+			TextOrigin origin = TextOrigin::CENTER;
+			Placement placement;
 			std::string text;
 			uint64_t size = 1250000;
 			uint64_t width = 0;

@@ -78,9 +78,9 @@ namespace horizon {
 					auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
 					pad.placement.shift = {it*spacing, y0-pitch*i};
 					if(it < 0)
-						pad.placement.angle = 49152;
+						pad.placement.set_angle_deg(270);
 					else
-						pad.placement.angle = 16384;
+						pad.placement.set_angle_deg(90);
 					if(!zigzag) {
 						if(it < 0) {
 							pad.name = std::to_string(i+1);

@@ -164,9 +164,22 @@ namespace horizon {
 
 				case ObjectType::TEXT: {
 					Text *txt = core.r->get_text(it.uuid);
-					transform(txt->position, center, rotate);
+					transform(txt->placement.shift, center, rotate);
 					bool rev = core.r->get_layers().at(txt->layer).reverse;
-					txt->orientation = transform_orienation(txt->orientation, rotate, rev);
+					if(rotate) {
+						if(txt->placement.mirror) {
+							txt->placement.inc_angle_deg(90);
+						}
+						else {
+							txt->placement.inc_angle_deg(-90);
+						}
+					}
+					else {
+						txt->placement.mirror = !txt->placement.mirror;
+					}
+
+
+					//txt->orientation = transform_orienation(txt->orientation, rotate, rev);
 				} break;
 
 				case ObjectType::ARC :
@@ -186,10 +199,10 @@ namespace horizon {
 					transform(sym->placement.shift, center, rotate);
 					if(rotate) {
 						if(sym->placement.mirror) {
-							sym->placement.angle = (sym->placement.angle+16384)%65536;
+							sym->placement.inc_angle_deg(90);
 						}
 						else {
-							sym->placement.angle = (sym->placement.angle+(65536-16384))%65536;
+							sym->placement.inc_angle_deg(-90);
 						}
 					}
 					else {
@@ -206,7 +219,7 @@ namespace horizon {
 					//		sym->placement.angle = (sym->placement.angle+16384)%65536;
 					//	}
 						//else {
-							pkg->placement.angle = (pkg->placement.angle+(65536-16384))%65536;
+							pkg->placement.inc_angle_deg(-90);
 					//	}
 					}
 
@@ -218,7 +231,7 @@ namespace horizon {
 					Pad *pad = &core.k->get_package()->pads.at(it.uuid);
 					transform(pad->placement.shift, center, rotate);
 					if(rotate) {
-						pad->placement.angle = (pad->placement.angle+(65536-16384))%65536;
+						pad->placement.inc_angle(-90);
 					}
 				}break;
 
@@ -260,7 +273,7 @@ namespace horizon {
 					accu.accumulate(core.k->get_package()->pads.at(it.uuid).placement.shift);
 				break;
 				case ObjectType::TEXT :
-					accu.accumulate(core.r->get_text(it.uuid)->position);
+					accu.accumulate(core.r->get_text(it.uuid)->placement.shift);
 				break;
 				case ObjectType::POLYGON_VERTEX :
 					accu.accumulate(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).position);
@@ -335,7 +348,7 @@ namespace horizon {
 					core.k->get_package()->pads.at(it.uuid).placement.shift += delta;
 				break;
 				case ObjectType::TEXT :
-					core.r->get_text(it.uuid)->position += delta;
+					core.r->get_text(it.uuid)->placement.shift += delta;
 				break;
 				case ObjectType::POLYGON_VERTEX :
 					core.r->get_polygon(it.uuid)->vertices.at(it.vertex).position += delta;

@@ -28,6 +28,7 @@
 #include "core/buffer.hpp"
 #include "board.hpp"
 #include "track.hpp"
+#include "util.hpp"
 #include "core/core_board.hpp"
 
 namespace horizon {
@@ -87,14 +88,14 @@ namespace horizon {
 		selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0,0}, {-1.25_mm, -2.5_mm}, {1.25_mm, 0_mm}, Selectable::Enlarge::FORCE);
 		transform.reset();
 
-		auto text_orientation = Orientation::RIGHT;
+		int text_angle = 0;
 		Coordi text_offset(1.25_mm, -1.875_mm);
 		if(sym.mirror) {
 			text_offset.x *= -1;
-			text_orientation = Orientation::LEFT;
+			text_angle = 32768;
 		}
 
-		draw_text(sym.junction->position+text_offset, 1.25_mm, sym.junction->net->name, text_orientation, TextPlacement::CENTER, c);
+		draw_text0(sym.junction->position+text_offset, 1.25_mm, sym.junction->net->name, text_angle, false, TextOrigin::CENTER, c);
 	}
 	
 	uint8_t Canvas::get_triangle_flags_for_line(int layer) {
@@ -203,13 +204,13 @@ namespace horizon {
 		Coordi p_pad = p0;
 
 		Orientation pin_orientation = pin.orientation;
-		if(transform.angle == 16384) {
+		if(transform.get_angle() == 16384) {
 			pin_orientation = omap_90.at(pin_orientation);
 		}
-		if(transform.angle == 32768) {
+		if(transform.get_angle() == 32768) {
 			pin_orientation = omap_180.at(pin_orientation);
 		}
-		if(transform.angle == 49152) {
+		if(transform.get_angle() == 49152) {
 			pin_orientation = omap_270.at(pin_orientation);
 		}
 		if(transform.mirror) {
@@ -266,11 +267,11 @@ namespace horizon {
 			c_pad = {0.5, 0.5, 0.5};
 		}
 		if(interactive || pin.name_visible) {
-			draw_text(p_name, 1.25_mm, pin.name, name_orientation, TextPlacement::CENTER, c_name, false);
+			draw_text0(p_name, 1.25_mm, pin.name, orientation_to_angle(name_orientation), false, TextOrigin::CENTER, c_name, false);
 		}
 		std::pair<Coordf, Coordf> pad_extents;
 		if(interactive || pin.pad_visible) {
-			pad_extents = draw_text(p_pad, 0.75_mm, pin.pad, pad_orientation, TextPlacement::BASELINE, c_pad, false);
+			pad_extents = draw_text0(p_pad, 0.75_mm, pin.pad, orientation_to_angle(pad_orientation), false, TextOrigin::BASELINE, c_pad, false);
 		}
 		switch(pin.connector_style) {
 			case SymbolPin::ConnectorStyle::BOX :
@@ -337,64 +338,20 @@ namespace horizon {
 			c = layer_display.at(text.layer).color;
 		}
 
-
-		Coordi p0 = transform.transform(text.position);
-		Orientation text_orientation = text.orientation;
 		bool rev = core->get_layers().at(text.layer).reverse;
-		int angle = 0;
-		if(!rev) {
-			if((transform.angle == 16384)) {
-				text_orientation = omap_90.at(text_orientation);
-			}
-			else if(transform.angle == 32768) {
-				text_orientation = omap_180.at(text_orientation);
-			}
-			else if(transform.angle == 49152) {
-				text_orientation = omap_270.at(text_orientation);
-			}
-			else {
-				angle = transform.angle;
-			}
-		}
-		else {
-			if((transform.angle == 16384)) {
-				text_orientation = omap_270.at(text_orientation);
-			}
-			else if(transform.angle == 32768) {
-				text_orientation = omap_180.at(text_orientation);
-			}
-			else if(transform.angle == 49152) {
-				text_orientation = omap_90.at(text_orientation);
-			}
-			else {
-				angle = -transform.angle;
-			}
-		}
-
-
-		if(transform.mirror) {
-			text_orientation = omap_mirror.at(text_orientation);
-			angle = -angle;
-		}
-
 		transform_save();
-		transform.reset();
-		transform.shift = p0;
-		transform.mirror  = rev;
-		transform.angle = angle;
+		transform.accumulate(text.placement);
+		auto angle = transform.get_angle();
+		if(transform.mirror ^ rev) {
+			angle = 32768-angle;
+		}
 
 		img_text_layer(text.layer);
-		auto extents = draw_text({0,0}, text.size, text.overridden?text.text_override:text.text, text_orientation, text.placement, c, true, text.width);
+		auto extents = draw_text0(transform.shift, text.size, text.overridden?text.text_override:text.text, angle, rev, text.origin, c, true, text.width);
 		img_text_layer(10000);
-		if(img_mode) {
-			transform_restore();
-			return;
-		}
-
-		if(interactive)
-			selectables.append(text.uuid, ObjectType::TEXT, {0,0}, extents.first, extents.second, Selectable::Enlarge::FORCE, 0, text.layer);
 		transform_restore();
-
+		if(interactive)
+			selectables.append(text.uuid, ObjectType::TEXT, text.placement.shift, extents.first, extents.second, Selectable::Enlarge::FORCE, 0, text.layer);
 	}
 
 	template <typename T>
@@ -429,7 +386,7 @@ namespace horizon {
 			selectables.append(label.uuid, ObjectType::NET_LABEL, label.junction->position+shift, extents.first, extents.second, Selectable::Enlarge::FORCE);
 		}
 		else {
-			auto extents = draw_text(label.junction->position, label.size, txt, label.orientation, TextPlacement::BASELINE, {0,1,0}, false);
+			auto extents = draw_text0(label.junction->position, label.size, txt, orientation_to_angle(label.orientation), false, TextOrigin::BASELINE, {0,1,0}, false);
 			selectables.append(label.uuid, ObjectType::NET_LABEL, label.junction->position+Coordi(0, 1000000), extents.first, extents.second, Selectable::Enlarge::FORCE);
 		}
 	}
@@ -456,7 +413,7 @@ namespace horizon {
 		if(ripper.connection_count < 1) {
 			draw_box(connector_pos, 0.25_mm, c);
 		}
-		auto extents = draw_text(connector_pos+Coordi(0, 0.125_mm), 1.25_mm, ripper.bus_member->name, Orientation::RIGHT, TextPlacement::BASELINE, c);
+		auto extents = draw_text0(connector_pos+Coordi(0, 0.125_mm), 1.25_mm, ripper.bus_member->name, 0, false, TextOrigin::BASELINE, c);
 		targets.emplace(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos);
 		selectables.append(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos, extents.first, extents.second, Selectable::Enlarge::FORCE);
 	}
@@ -597,6 +554,28 @@ namespace horizon {
 				render(it.second, !on_sheet);
 			}
 		}
+		/*
+		Coordi p(10_mm, 5_mm);
+		draw_text2(p, 1_mm, "Hallo 0", 0, false, TextOrigin::BASELINE, {1,1,1});
+		draw_text2(p, 1_mm, "Hallo 45", 8192,  false, TextOrigin::BASELINE, {1,1,1});
+		draw_text2(p, 1_mm, "Hallo 90", 8192*2,false, TextOrigin::BASELINE, {1,1,1});
+		draw_text2(p, 1_mm, "Hallo 135", 8192*3,false, TextOrigin::BASELINE, {1,1,1});
+		draw_text2(p, 1_mm, "Hallo 180", 8192*4,false, TextOrigin::BASELINE, {1,1,1});
+		draw_text2(p, 1_mm, "Hallo 225", 8192*5, false,TextOrigin::BASELINE, {1,1,1});
+		draw_text2(p, 1_mm, "Hallo 270", 8192*6, false,TextOrigin::BASELINE, {1,1,1});
+		draw_text2(p, 1_mm, "Hallo 315", 8192*7, false,TextOrigin::BASELINE, {1,1,1});
+
+		p.x = 30_mm;
+		p.y = 20_mm;
+		draw_text2(p, 1_mm, "Hallo 0", 0, true, TextOrigin::BASELINE, {1,1,1});
+		draw_text2(p, 1_mm, "Hallo 45", 8192,  true, TextOrigin::BASELINE, {1,1,1});
+		draw_text2(p, 1_mm, "Hallo 90", 8192*2,true, TextOrigin::BASELINE, {1,1,1});
+		draw_text2(p, 1_mm, "Hallo 135", 8192*3,true, TextOrigin::BASELINE, {1,1,1});
+		draw_text2(p, 1_mm, "Hallo 180", 8192*4,true, TextOrigin::BASELINE, {1,1,1});
+		draw_text2(p, 1_mm, "Hallo 225", 8192*5, true,TextOrigin::BASELINE, {1,1,1});
+		draw_text2(p, 1_mm, "Hallo 270", 8192*6, true,TextOrigin::BASELINE, {1,1,1});
+		draw_text2(p, 1_mm, "Hallo 315", 8192*7, true,TextOrigin::BASELINE, {1,1,1});*/
+
 	}
 	void Canvas::render(const Sheet &sheet) {
 		for(const auto &it: sheet.junctions) {
@@ -692,24 +671,24 @@ namespace horizon {
 				Coordi b(std::max(bb.first.x, bb.second.x), std::max(bb.first.y, bb.second.y));
 				{
 					Coordi text_pos = {a.x, (a.y+b.y)/2+abs(a.y-b.y)/4};
-					auto text_bb = draw_text(text_pos, 1_mm, it.second.name, Orientation::RIGHT, TextPlacement::CENTER, {1,1,1}, true, 0, false);
+					auto text_bb = draw_text(text_pos, 1_mm, it.second.name, Orientation::RIGHT, TextOrigin::CENTER, {1,1,1}, true, 0, false);
 					float scale_x = (text_bb.second.x-text_bb.first.x)/(float)(b.x-a.x);
 					float scale_y = ((text_bb.second.y-text_bb.first.y)*2)/(float)(b.y-a.y);
 					float sc = std::max(scale_x, scale_y);
 					text_pos.x += (b.x-a.x)/2-(text_bb.second.x-text_bb.first.x)/(2*sc);
 
 
-					draw_text(text_pos, 0.8_mm/sc, it.second.name, Orientation::RIGHT, TextPlacement::CENTER, {1,1,1});
+					draw_text(text_pos, 0.8_mm/sc, it.second.name, Orientation::RIGHT, TextOrigin::CENTER, {1,1,1});
 				}
 				if(it.second.net) {
 					Coordi text_pos = {a.x, (a.y+b.y)/2-abs(a.y-b.y)/4};
-					auto text_bb = draw_text(text_pos, 1_mm, it.second.net->name, Orientation::RIGHT, TextPlacement::CENTER, {1,1,1}, true, 0, false);
+					auto text_bb = draw_text(text_pos, 1_mm, it.second.net->name, Orientation::RIGHT, TextOrigin::CENTER, {1,1,1}, true, 0, false);
 					float scale_x = (text_bb.second.x-text_bb.first.x)/(float)(b.x-a.x);
 					float scale_y = ((text_bb.second.y-text_bb.first.y)*2)/(float)(b.y-a.y);
 					float sc = std::max(scale_x, scale_y);
 					text_pos.x += (b.x-a.x)/2-(text_bb.second.x-text_bb.first.x)/(2*sc);
 
-					draw_text(text_pos, 0.8_mm/sc, it.second.net->name, Orientation::RIGHT, TextPlacement::CENTER, {1,1,1});
+					draw_text(text_pos, 0.8_mm/sc, it.second.net->name, Orientation::RIGHT, TextOrigin::CENTER, {1,1,1});
 				}
 				transform_restore();
 			}
@@ -802,9 +781,7 @@ namespace horizon {
 	void Canvas::render(const BoardPackage &pkg, int layer) {
 		transform = pkg.placement;
 		if(pkg.flip) {
-			transform.angle *= -1;
-			while(transform.angle<0)
-				transform.angle += 65536;
+			transform.invert_angle();
 		}
 		if(layer == 10000) {
 			//targets.emplace(pkg.uuid, ObjectType::BOARD_PACKAGE, pkg.placement.shift);

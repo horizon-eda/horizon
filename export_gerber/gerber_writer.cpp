@@ -109,7 +109,7 @@ namespace horizon {
 	}
 
 	void GerberWriter::draw_padstack(const UUID &padstack_uuid, const Polygon &poly, const Placement &transform) {
-		auto key = std::make_tuple(padstack_uuid, transform.angle, transform.mirror);
+		auto key = std::make_tuple(padstack_uuid, transform.get_angle(), transform.mirror);
 		GerberWriter::PolygonAperture *ap = nullptr;
 		if(apertures_polygon.count(key)) {
 			ap = &apertures_polygon.at(key);
