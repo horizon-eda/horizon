@@ -578,7 +578,7 @@ namespace horizon {
 							n = v.back()+1;
 						}
 					}
-					if(n/sheet_incr != sheet->index) {
+					if(sheet_incr && n/sheet_incr != sheet->index) {
 						n = sheet_offset+1;
 					}
 					v.push_back(n);
