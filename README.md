@@ -107,7 +107,7 @@ horizon-prj create-board <schematic filename> <block filename> <constraints file
 
 ## get started
 After having built horizon, you should setup a pool somewhere (e.g. 
-clone https://github.com/carrotIndustries/horizon-pool) and make the `HORIZON_POOL` environment variable point to it. Then run `horizon-pool-update` and `horizon-pool-update-parametric` to update both databasess. Since the pool is pretty empty, there's no senisble example project right now.
+clone https://github.com/carrotIndustries/horizon-pool) and make the `HORIZON_POOL` environment variable point to it. Then run `horizon-pool-update` and `horizon-pool-update-parametric` to update both databases. Since the pool is pretty empty, there's no sensible example project right now.
 
 Create block, constraints, schematic and board:
 ```
