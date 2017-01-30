@@ -46,6 +46,8 @@ namespace horizon {
 			std::map<UUIDPath<2>, Connection> connections;
 			std::map<UUIDPath<2>, int> pin_names;
 
+			std::string replace_text(const std::string &t, bool *replaced = nullptr) const;
+
 			json serialize() const;
 			virtual ~Component() {}
 

@@ -40,6 +40,8 @@ namespace horizon {
 			void disconnect_package(BoardPackage *pkg);
 			void delete_dependants();
 			void vacuum_junctions();
+			void smash_package(BoardPackage *pkg);
+			void unsmash_package(BoardPackage *pkg);
 
 			UUID uuid;
 			Block *block;

@@ -136,6 +136,9 @@ namespace horizon {
 			for(auto &it_pad: it.second.package.pads) {
 				it_pad.second.net.update(block->nets);
 			}
+			for(auto &it_text: it.second.texts) {
+				it_text.update(texts);
+			}
 		}
 		for(auto &it: tracks) {
 			it.second.update_refs(*this);
@@ -431,11 +434,17 @@ namespace horizon {
 				}
 			}
 
+			it.second.texts.erase(std::remove_if(it.second.texts.begin(), it.second.texts.end(), [this](const auto &a){
+				return texts.count(a.uuid) == 0;
+			}), it.second.texts.end());
+
 			for(auto &it_text: it.second.package.texts) {
-				if((it_text.second.text == "$REFDES") || (it_text.second.text == "$RD")) {
-					it_text.second.text = it.second.component->refdes;
-				}
+				it_text.second.text = it.second.replace_text(it_text.second.text);
 			}
+			for(auto it_text: it.second.texts) {
+				it_text->text_override = it.second.replace_text(it_text->text, &it_text->overridden);
+			}
+
 		}
 
 
@@ -492,6 +501,39 @@ namespace horizon {
 					j->position = c;
 					it_ft->connect(j);
 				}
+			}
+		}
+	}
+
+	void Board::smash_package(BoardPackage *pkg) {
+		if(pkg->smashed)
+			return;
+		pkg->smashed = true;
+		for(const auto &it: pkg->pool_package->texts) {
+			auto uu = UUID::random();
+			auto &x = texts.emplace(uu, uu).first->second;
+			x.from_smash = true;
+			x.overridden = true;
+			x.placement = pkg->placement;
+			x.placement.accumulate(it.second.placement);
+			x.text = it.second.text;
+			x.layer = it.second.layer;
+			if(pkg->flip)
+				flip_package_layer(x.layer);
+
+			x.size = it.second.size;
+			x.width = it.second.width;
+			pkg->texts.push_back(&x);
+		}
+	}
+
+	void Board::unsmash_package(BoardPackage *pkg) {
+		if(!pkg->smashed)
+			return;
+		pkg->smashed = false;
+		for(auto &it: pkg->texts) {
+			if(it->from_smash) {
+				texts.erase(it->uuid); //expand will delete from sym->texts
 			}
 		}
 	}

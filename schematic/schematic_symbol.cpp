@@ -44,29 +44,13 @@ namespace horizon {
 	std::string SchematicSymbol::replace_text(const std::string &t, bool *replaced) const {
 		if(replaced)
 			*replaced = false;
-		if(t == "$REFDES") {
+		if(t == "$REFDES" || t=="$RD") {
 			if(replaced)
 				*replaced = true;
 			return component->refdes + gate->suffix;
 		}
-		else if(t == "$VALUE") {
-			if(replaced)
-				*replaced = true;
-			if(component->part)
-				return component->part->get_value();
-			else
-				return component->value;
-		}
-		else if(t == "$MPN") {
-			if(component->part) {
-				if(replaced)
-					*replaced = true;
-				return component->part->get_MPN();
-			}
-			return t;
-		}
 		else {
-			return t;
+			return component->replace_text(t, replaced);
 		}
 	}
 }

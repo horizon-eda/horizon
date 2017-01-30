@@ -59,6 +59,35 @@ namespace horizon {
 		return uuid;
 	}
 
+	std::string Component::replace_text(const std::string &t, bool *replaced) const {
+		if(replaced)
+			*replaced = false;
+		if(t == "$REFDES" || t == "$RD") {
+			if(replaced)
+				*replaced = true;
+			return refdes;
+		}
+		else if(t == "$VALUE") {
+			if(replaced)
+				*replaced = true;
+			if(part)
+				return part->get_value();
+			else
+				return value;
+		}
+		else if(t == "$MPN") {
+			if(part) {
+				if(replaced)
+					*replaced = true;
+				return part->get_MPN();
+			}
+			return t;
+		}
+		else {
+			return t;
+		}
+	}
+
 	json Component::serialize() const {
 		json j;
 		j["refdes"] = refdes;

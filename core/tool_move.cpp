@@ -88,6 +88,12 @@ namespace horizon {
 						new_sel.emplace(itt->uuid, ObjectType::TEXT);
 					}
 				} break;
+				case ObjectType::BOARD_PACKAGE : {
+					BoardPackage *pkg = &core.b->get_board()->packages.at(it.uuid);
+					for(const auto &itt: pkg->texts) {
+						new_sel.emplace(itt->uuid, ObjectType::TEXT);
+					}
+				} break;
 
 				default:;
 			}

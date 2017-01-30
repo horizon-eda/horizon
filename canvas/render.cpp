@@ -653,7 +653,7 @@ namespace horizon {
 		render(padstack, 10000, interactive);
 	}
 
-	void Canvas::render(const Package &pkg, int layer, bool interactive) {
+	void Canvas::render(const Package &pkg, int layer, bool interactive, bool smashed) {
 		if(layer == 10000) {
 			if(interactive) {
 				for(const auto &it: pkg.junctions) {
@@ -697,9 +697,11 @@ namespace horizon {
 			if(it.second.layer == layer)
 				render(it.second, interactive);
 		}
-		for(const auto &it: pkg.texts) {
-			if(it.second.layer == layer)
-				render(it.second, interactive);
+		if(!smashed) {
+			for(const auto &it: pkg.texts) {
+				if(it.second.layer == layer)
+					render(it.second, interactive);
+			}
 		}
 		for(const auto &it: pkg.arcs) {
 			if(it.second.layer == layer)
@@ -793,7 +795,7 @@ namespace horizon {
 
 		}
 
-		render(pkg.package, layer, false);
+		render(pkg.package, layer, false, pkg.smashed);
 
 		transform.reset();
 	}

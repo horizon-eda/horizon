@@ -1,6 +1,7 @@
 #include "tool_smash.hpp"
 #include <iostream>
 #include "core_schematic.hpp"
+#include "core_board.hpp"
 
 namespace horizon {
 
@@ -10,6 +11,9 @@ namespace horizon {
 	bool ToolSmash::can_begin() {
 		for(const auto &it : core.r->selection) {
 			if(it.type == ObjectType::SCHEMATIC_SYMBOL) {
+				return true;
+			}
+			else if(it.type == ObjectType::BOARD_PACKAGE) {
 				return true;
 			}
 		}
@@ -25,8 +29,14 @@ namespace horizon {
 				else
 					core.c->get_schematic()->unsmash_symbol(core.c->get_sheet(), core.c->get_schematic_symbol(it.uuid));
 			}
+			if(it.type == ObjectType::BOARD_PACKAGE) {
+				if(tool_id == ToolID::SMASH)
+					core.b->get_board()->smash_package(&core.b->get_board()->packages.at(it.uuid));
+				else
+					core.b->get_board()->unsmash_package(&core.b->get_board()->packages.at(it.uuid));
+			}
 		}
-		core.c->commit();
+		core.r->commit();
 		return ToolResponse::end();
 	}
 	ToolResponse ToolSmash::update(const ToolArgs &args) {

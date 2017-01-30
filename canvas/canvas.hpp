@@ -55,7 +55,7 @@ namespace horizon {
 			void render(const class Polygon &polygon, bool interactive=true);
 			void render(const class Hole &hole, bool interactive=true);
 			void render(const class Package &package, bool interactive=true);
-			void render(const class Package &package, int layer, bool interactive=true);
+			void render(const class Package &package, int layer, bool interactive=true, bool smashed = false);
 			void render(const class Pad &pad, int layer);
 			void render(const class Buffer &buf);
 			void render(const class Buffer &buf, int layer);
