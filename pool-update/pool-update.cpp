@@ -196,6 +196,7 @@ bool update_parts(SQLite::Database &db, horizon::Pool &pool, const std::string &
 					}
 				}
 				if(!skipthis) {
+					db.execute("BEGIN TRANSACTION");
 					auto part = horizon::Part::new_from_file(filename, pool);
 					SQLite::Query q(db, "INSERT INTO parts (uuid, MPN, manufacturer, entity, package, filename) VALUES ($uuid, $MPN, $manufacturer, $entity, $package, $filename)");
 					q.bind("$uuid", part.uuid);
@@ -212,6 +213,7 @@ bool update_parts(SQLite::Database &db, horizon::Pool &pool, const std::string &
 						q2.bind("$tag", it_tag);
 						q2.step();
 					}
+					db.execute("COMMIT");
 				}
 			}
 			else if(Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
@@ -270,11 +272,7 @@ int main(int c_argc, char *c_argv[]) {
 	update_packages(db, pool, Glib::build_filename(pool_base_path, "packages"));
 	db.execute("COMMIT");
 
-	db.execute("BEGIN TRANSACTION");
 	update_parts(db, pool, Glib::build_filename(pool_base_path, "parts"));
-	db.execute("COMMIT");
-
-
 
 	return 0;
 }
