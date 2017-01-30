@@ -1,9 +1,9 @@
 #!/bin/bash
 DISTDIR=dist
-#rm -rf $DISTDIR
-#mkdir $DISTDIR
-#cp horizon-* $DISTDIR
-#strip $DISTDIR/horizon-*
+rm -rf $DISTDIR
+mkdir $DISTDIR
+cp horizon-* $DISTDIR
+strip $DISTDIR/horizon-*
 LIBS=(
 	libstdc++-6.dll\
 	libgcc_s_seh-1.dll\
