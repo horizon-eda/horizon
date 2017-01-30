@@ -252,12 +252,28 @@ int main(int c_argc, char *c_argv[]) {
 	db.execute("BEGIN TRANSACTION");
 	db.execute("DELETE FROM tags");
 	update_units(db, Glib::build_filename(pool_base_path, "units"));
+	db.execute("COMMIT");
+
+	db.execute("BEGIN TRANSACTION");
 	update_entities(db, pool, Glib::build_filename(pool_base_path, "entities"));
+	db.execute("COMMIT");
+
+	db.execute("BEGIN TRANSACTION");
 	update_symbols(db, pool, Glib::build_filename(pool_base_path, "symbols"));
+	db.execute("COMMIT");
+
+	db.execute("BEGIN TRANSACTION");
 	update_padstacks(db, Glib::build_filename(pool_base_path, "packages"));
+	db.execute("COMMIT");
+
+	db.execute("BEGIN TRANSACTION");
 	update_packages(db, pool, Glib::build_filename(pool_base_path, "packages"));
+	db.execute("COMMIT");
+
+	db.execute("BEGIN TRANSACTION");
 	update_parts(db, pool, Glib::build_filename(pool_base_path, "parts"));
 	db.execute("COMMIT");
+
 
 
 	return 0;
