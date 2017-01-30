@@ -14,3 +14,6 @@ resources.cpp
 .project
 example/pool/*.db
 \#*.ui\#
+*.exe
+*.zip
+dist
