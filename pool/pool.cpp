@@ -29,7 +29,9 @@ namespace horizon {
 		if(entities.count(uu) == 0) {
 			SQLite::Query q(db, "SELECT filename FROM entities WHERE uuid = ?");
 			q.bind(1, uu);
-			q.step();
+			if(!q.step()) {
+				throw std::runtime_error("entity not found");
+			}
 			std::string path = base_path+"/entities/"+q.get<std::string>(0);
 			Entity e = Entity::new_from_file(path, *this);
 			entities.insert(std::make_pair(uu, e));
@@ -40,7 +42,9 @@ namespace horizon {
 		if(symbols.count(uu) == 0) {
 			SQLite::Query q(db, "SELECT filename FROM symbols WHERE uuid = ?");
 			q.bind(1, uu);
-			q.step();
+			if(!q.step()) {
+				throw std::runtime_error("symbol not found");
+			}
 			std::string path = base_path+"/symbols/"+q.get<std::string>(0);
 			Symbol s = Symbol::new_from_file(path, *this);
 			symbols.insert(std::make_pair(uu, s));
@@ -51,7 +55,9 @@ namespace horizon {
 		if(packages.count(uu) == 0) {
 			SQLite::Query q(db, "SELECT filename FROM packages WHERE uuid = ?");
 			q.bind(1, uu);
-			q.step();
+			if(!q.step()) {
+				throw std::runtime_error("package not found");
+			}
 			std::string path = base_path+"/packages/"+q.get<std::string>(0);
 			Package p = Package::new_from_file(path, *this);
 			packages.emplace(uu, p);
@@ -62,7 +68,9 @@ namespace horizon {
 		if(padstacks.count(uu) == 0) {
 			SQLite::Query q(db, "SELECT filename FROM padstacks WHERE uuid = ?");
 			q.bind(1, uu);
-			q.step();
+			if(!q.step()) {
+				throw std::runtime_error("padstack not found");
+			}
 			std::string path = base_path+"/packages/"+q.get<std::string>(0);
 			Padstack p = Padstack::new_from_file(path);
 			padstacks.insert(std::make_pair(uu, p));
@@ -73,7 +81,9 @@ namespace horizon {
 		if(parts.count(uu) == 0) {
 			SQLite::Query q(db, "SELECT filename FROM parts WHERE uuid = ?");
 			q.bind(1, uu);
-			q.step();
+			if(!q.step()) {
+				throw std::runtime_error("part not found");
+			}
 			std::string path = base_path+"/parts/"+q.get<std::string>(0);
 			Part p = Part::new_from_file(path, *this);
 			parts.insert(std::make_pair(uu, p));
