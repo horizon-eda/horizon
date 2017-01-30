@@ -200,7 +200,7 @@ accordingly by means of the core. When needed, a tool may bring up additional di
 requesting information from the user. 
 
 ### Property editor
-Low-complexity adjustments such as line with don't warrant their own 
+Low-complexity adjustments such as line width don't warrant their own 
 tool, that's why the the core provides a property interface. The 
 property editor's widgets are automatically generated from the object's 
 description.
