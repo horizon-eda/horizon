@@ -172,10 +172,10 @@ namespace horizon {
 		dia.sp_x->select_region(0, -1);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
-			return {true, {dia.sp_x->get_value_as_int(), dia.sp_y->get_value_as_int()}, {dia.cb_x->get_active(), dia.cb_y->get_active()}};
+			return std::make_tuple<bool, Coordi, std::pair<bool, bool>>(true, {dia.sp_x->get_value_as_int(), dia.sp_y->get_value_as_int()}, std::make_pair(dia.cb_x->get_active(), dia.cb_y->get_active()));
 		}
 		else {
-			return {false, Coordi(), {false, false}};
+			return std::make_tuple<bool, Coordi, std::pair<bool, bool>>(false, Coordi(), {false, false});
 		}
 	}
 

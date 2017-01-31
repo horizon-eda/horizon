@@ -7,9 +7,9 @@ namespace horizon {
 		uuid(uu),
 		inherit_tags(j.value("inherit_tags", false))
 	{
-		attributes[Attribute::MPN] = {j.at("MPN").at(0),j.at("MPN").at(1)};
-		attributes[Attribute::VALUE] = {j.at("value").at(0),j.at("value").at(1)};
-		attributes[Attribute::MANUFACTURER] = {j.at("manufacturer").at(0),j.at("manufacturer").at(1)};
+		attributes[Attribute::MPN] = {j.at("MPN").at(0).get<bool>(), j.at("MPN").at(1).get<std::string>()};
+		attributes[Attribute::VALUE] = {j.at("value").at(0).get<bool>(), j.at("value").at(1).get<std::string>()};
+		attributes[Attribute::MANUFACTURER] = {j.at("manufacturer").at(0).get<bool>(), j.at("manufacturer").at(1).get<std::string>()};
 		if(j.count("base")) {
 			base = pool.get_part(j.at("base").get<std::string>());
 			entity = base->entity;

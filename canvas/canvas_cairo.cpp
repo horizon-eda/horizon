@@ -1,4 +1,5 @@
 #include "canvas_cairo.hpp"
+#include <cmath>
 
 namespace horizon {
 		CanvasCairo::CanvasCairo(Cairo::RefPtr<Cairo::Context> c) : Canvas::Canvas(), cr(c) {}
@@ -10,7 +11,7 @@ namespace horizon {
 			cr->set_line_width(.05);
 			cr->set_line_cap(Cairo::LINE_CAP_ROUND);
 			for(const auto &it: triangles) {
-				if(isnan(it.y2)) {
+				if(std::isnan(it.y2)) {
 					cr->set_line_width(std::max(it.x2/1e6, .05));
 					cr->move_to(it.x0/1e6,it.y0/1e6);
 					cr->line_to(it.x1/1e6,it.y1/1e6);

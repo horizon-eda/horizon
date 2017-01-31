@@ -75,7 +75,7 @@ namespace horizon {
 						line->net = core.c->get_schematic()->block->insert_net();
 						line->from.connect(schsym, pin);
 						line->to.connect(temp);
-						schsym->component->connections.emplace(UUIDPath<2>(schsym->gate->uuid, pin->uuid), line->net);
+						schsym->component->connections.emplace(UUIDPath<2>(schsym->gate->uuid, pin->uuid), static_cast<Net*>(line->net));
 
 						temp->temp = false;
 						temp->net = line->net;

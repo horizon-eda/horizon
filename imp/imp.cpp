@@ -182,7 +182,11 @@ namespace horizon {
 					}
 					tool_popover->set_can_begin(can_begin);
 
-					tool_popover->popup();
+					#if GTK_CHECK_VERSION(3,22,0)
+						tool_popover->popup();
+					#else
+						tool_popover->show();
+					#endif
 					return true;
 				}
 				else if((key_event->keyval == GDK_KEY_Home)) {

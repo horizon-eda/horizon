@@ -82,7 +82,7 @@ namespace horizon {
 					if(it_junc->second.net == nullptr) {
 						it_junc->second.net = block->insert_net();
 					}
-					sym->component->connections.emplace(UUIDPath<2>(sym->gate->uuid, it_pin.first), it_junc->second.net);
+					sym->component->connections.emplace(UUIDPath<2>(sym->gate->uuid, it_pin.first), static_cast<Net*>(it_junc->second.net));
 					bool has_power_sym = false;
 					for(const auto &it_ps: sheet->power_symbols) {
 						if(it_ps.second.junction->uuid == it_junc->first) {
@@ -143,7 +143,7 @@ namespace horizon {
 			}
 			for(auto &it_rip: sheet->bus_rippers) {
 				if(pin_pos == it_rip.second.get_connector_pos()) {
-					sym->component->connections.emplace(UUIDPath<2>(sym->gate->uuid, it_pin.first), it_rip.second.bus_member->net);
+					sym->component->connections.emplace(UUIDPath<2>(sym->gate->uuid, it_pin.first), static_cast<Net*>(it_rip.second.bus_member->net));
 					auto uu = UUID::random();
 					auto *line = &sheet->net_lines.emplace(uu, uu).first->second;
 					line->net = it_rip.second.bus_member->net;

@@ -112,19 +112,23 @@ namespace horizon {
 	}
 
 	bool CanvasGL::on_scroll_event(GdkEventScroll *scroll_event) {
-		auto *dev = gdk_event_get_source_device((GdkEvent*)scroll_event);
-		auto src = gdk_device_get_source(dev);
-		if(src == GDK_SOURCE_TRACKPOINT) {
-			if(scroll_event->state & GDK_CONTROL_MASK) {
-				pan_zoom(scroll_event, false);
+		#if GTK_CHECK_VERSION(3,22,0)
+			auto *dev = gdk_event_get_source_device((GdkEvent*)scroll_event);
+			auto src = gdk_device_get_source(dev);
+			if(src == GDK_SOURCE_TRACKPOINT) {
+				if(scroll_event->state & GDK_CONTROL_MASK) {
+					pan_zoom(scroll_event, false);
+				}
+				else {
+					pan_drag_move(scroll_event);
+				}
 			}
 			else {
-				pan_drag_move(scroll_event);
+				pan_zoom(scroll_event);
 			}
-		}
-		else {
+		#else
 			pan_zoom(scroll_event);
-		}
+		#endif
 
 		return Gtk::GLArea::on_scroll_event(scroll_event);
 	}

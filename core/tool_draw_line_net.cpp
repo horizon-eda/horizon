@@ -194,7 +194,7 @@ namespace horizon {
 							else { //temp line has net
 								net = temp_line->net;
 							}
-							sym->component->connections.emplace(connpath, temp_line->net);
+							sym->component->connections.emplace(connpath, static_cast<Net*>(temp_line->net));
 							//terminate line
 							temp_line->to.connect(sym, &sym->pool_symbol->pins.at(args.target.path.at(1)));
 							have_line = true;

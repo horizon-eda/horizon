@@ -152,7 +152,11 @@ namespace horizon {
 							la->show();
 							ca->clarify_menu->append(*la);
 						}
-						ca->clarify_menu->popup_at_pointer((GdkEvent*)button_event);
+						#if GTK_CHECK_VERSION(3,22,0)
+							ca->clarify_menu->popup_at_pointer((GdkEvent*)button_event);
+						#else
+							ca->clarify_menu->popup(0, gtk_get_current_event_time());
+						#endif
 					}
 					else if(in_selection.size()==1){
 						ca->set_selection({ca->selectables.items_ref[in_selection.front()]});

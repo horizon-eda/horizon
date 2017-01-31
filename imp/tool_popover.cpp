@@ -71,7 +71,11 @@ namespace horizon {
 	void ToolPopover::emit_tool_activated() {
 		auto it = view->get_selection()->get_selected();
 		if(it) {
-			popdown();
+			#if GTK_CHECK_VERSION(3,22,0)
+				popdown();
+			#else
+				hide();
+			#endif
 			Gtk::TreeModel::Row row = *it;
 			s_signal_tool_activated.emit(row[list_columns.tool_id]);
 
