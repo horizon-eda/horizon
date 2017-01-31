@@ -26,7 +26,7 @@ Screenshots are over [there](screenshots/)
 ## build all this
 It's as easy as `make`.
 
-For building on Windows, use MSYS2
+For building on Windows, use see [this guide](build_win32.md)
 
 Dependencies:
 
@@ -131,7 +131,6 @@ horizon-imp -b board.json block.json constr.json vias
 To see the available key bindings, hit "?" when no tool is active. 
 "Space" brings up a popover showing tools that can be activated. So 
 far, there is no documentation on the tools itself, good luck!
-
 
 # Theory of operation
 ## Pool
