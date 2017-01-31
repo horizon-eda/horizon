@@ -282,4 +282,13 @@ namespace horizon {
 		return target_current;
 	}
 
+	// copied from https://github.com/solvespace/solvespace/blob/master/src/platform/gtkmain.cpp#L357
+	// thanks to whitequark for running into this issue as well
+
+	// Work around a bug fixed in GTKMM 3.22:
+	// https://mail.gnome.org/archives/gtkmm-list/2016-April/msg00020.html
+	Glib::RefPtr<Gdk::GLContext> CanvasGL::on_create_context() {
+		return get_window()->create_gl_context();
+	}
+
 }

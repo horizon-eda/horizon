@@ -199,6 +199,7 @@ namespace horizon {
 			virtual bool on_button_release_event (GdkEventButton* button_event);
 			virtual bool on_motion_notify_event (GdkEventMotion* motion_event);
 			virtual bool on_scroll_event (GdkEventScroll* scroll_event);
+			Glib::RefPtr<Gdk::GLContext> on_create_context() override;
 			
 			type_signal_selection_changed s_signal_selection_changed;
 			type_signal_cursor_moved s_signal_cursor_moved;
