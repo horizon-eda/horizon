@@ -134,6 +134,8 @@ far, there is no documentation on the tools itself, good luck!
 
 # Theory of operation
 ## Pool
+[Diagram of the pool](doc/pool.pdf)
+
 To explain horizon's operation it's best to start with the library 
 structure: Actually, there are no "libraries" in horizon. Instead, all 
 library data is stored in the central pool.
