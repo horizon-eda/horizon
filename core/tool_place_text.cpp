@@ -16,6 +16,7 @@ namespace horizon {
 		
 		temp = core.r->insert_text(UUID::random());
 		temp->text = "TEXT";
+		temp->layer = args.work_layer;
 		temp->placement.shift = args.coords;
 		
 		return ToolResponse();
@@ -29,6 +30,7 @@ namespace horizon {
 				texts_placed.push_front(temp);
 				temp = core.r->insert_text(UUID::random());
 				temp->text = "TEXT";
+				temp->layer = args.work_layer;
 				temp->placement.shift = args.coords;
 			}
 			else if(args.button == 3) {
