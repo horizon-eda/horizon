@@ -13,11 +13,11 @@ namespace horizon {
 			bool can_begin() override;
 
 		private:
-			void create_attached();
-			void delete_attached();
-			bool begin_attached();
-			bool update_attached(const ToolArgs &args);
-			bool check_line(LineNet *li);
+			void create_attached() override;
+			void delete_attached() override;
+			bool begin_attached() override;
+			bool update_attached(const ToolArgs &args) override;
+			bool check_line(LineNet *li) override;
 			BusLabel *la= nullptr;
 			std::forward_list<BusLabel*> labels_placed;
 			Bus* bus = nullptr;

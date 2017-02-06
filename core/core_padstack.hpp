@@ -13,12 +13,12 @@ namespace horizon {
 			CorePadstack(const std::string &filename, Pool &pool);
 			bool has_object_type(ObjectType ty) override;
 
-			const std::map<int, Layer> &get_layers();
+			const std::map<int, Layer> &get_layers() override;
 
-			void rebuild(bool from_undo=false);
-			void commit();
-			void revert();
-			void save();
+			void rebuild(bool from_undo=false) override;
+			void commit() override;
+			void revert() override;
+			void save() override;
 
 			Padstack *get_padstack(bool work = true);
 
@@ -38,7 +38,7 @@ namespace horizon {
 				HistoryItem(const Padstack &s):padstack(s) {}
 				Padstack padstack;
 			};
-			void history_push();
-			void history_load(unsigned int i);
+			void history_push() override;
+			void history_load(unsigned int i) override;
 	};
 }

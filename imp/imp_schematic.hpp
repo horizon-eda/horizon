@@ -11,14 +11,14 @@ namespace horizon {
 			void construct() override;
 			ToolID handle_key(guint k) override;
 		private:
-			void canvas_update();
+			void canvas_update() override;
 			CoreSchematic core_schematic;
 			int handle_ask_net_merge(class Net *net, class Net *into);
 			int handle_ask_delete_component(class Component *comp);
 			void handle_select_sheet(Sheet *sh);
 			void handle_remove_sheet(Sheet *sh);
 			void handle_core_rebuilt();
-			void handle_tool_change(ToolID id);
+			void handle_tool_change(ToolID id) override;
 			void handle_export_pdf();
 			std::string last_pdf_filename;
 

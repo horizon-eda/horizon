@@ -11,7 +11,7 @@ namespace horizon {
 			void construct() override;
 			ToolID handle_key(guint k) override;
 		private:
-			void canvas_update();
+			void canvas_update() override;
 			CoreSymbol core_symbol;
 
 			Gtk::Entry *name_entry;

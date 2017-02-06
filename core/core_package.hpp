@@ -22,15 +22,15 @@ namespace horizon {
 			Hole *get_hole(const UUID &uu, bool work=true);
 			void delete_hole(const UUID &uu, bool work = true);*/
 
-			const std::map<int, Layer> &get_layers();
+			const std::map<int, Layer> &get_layers() override;
 
-			virtual std::string get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr);
-			virtual void set_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, const std::string &value, bool *handled=nullptr);
+			std::string get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
+			void set_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, const std::string &value, bool *handled=nullptr) override;
 
-			void rebuild(bool from_undo=false);
-			void commit();
-			void revert();
-			void save();
+			void rebuild(bool from_undo=false) override;
+			void commit() override;
+			void revert() override;
+			void save() override;
 
 
 			const Package *get_canvas_data();
@@ -56,7 +56,7 @@ namespace horizon {
 				HistoryItem(const Package &k):package(k) {}
 				Package package;
 			};
-			void history_push();
-			void history_load(unsigned int i);
+			void history_push() override;
+			void history_load(unsigned int i) override;
 	};
 }

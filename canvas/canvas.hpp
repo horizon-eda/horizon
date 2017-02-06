@@ -146,8 +146,8 @@ namespace horizon {
 			Glib::PropertyProxy<float> property_layer_opacity() { return p_property_layer_opacity.get_proxy(); }
 
 		protected:
-			virtual void push();
-			virtual void request_push();
+			void push() override;
+			void request_push() override;
 
 		private :
 			static const int MAT3_XX = 0;
@@ -192,13 +192,13 @@ namespace horizon {
 			Gtk::Menu *clarify_menu;
 
 		protected :
-			virtual void on_size_allocate(Gtk::Allocation &alloc);
-			virtual void on_realize();
-			virtual bool on_render(const Glib::RefPtr<Gdk::GLContext> &context);
-			virtual bool on_button_press_event (GdkEventButton* button_event);
-			virtual bool on_button_release_event (GdkEventButton* button_event);
-			virtual bool on_motion_notify_event (GdkEventMotion* motion_event);
-			virtual bool on_scroll_event (GdkEventScroll* scroll_event);
+			void on_size_allocate(Gtk::Allocation &alloc) override;
+			void on_realize() override;
+			bool on_render(const Glib::RefPtr<Gdk::GLContext> &context) override;
+			bool on_button_press_event (GdkEventButton* button_event) override;
+			bool on_button_release_event (GdkEventButton* button_event) override;
+			bool on_motion_notify_event (GdkEventMotion* motion_event) override;
+			bool on_scroll_event (GdkEventScroll* scroll_event) override;
 			Glib::RefPtr<Gdk::GLContext> on_create_context() override;
 			
 			type_signal_selection_changed s_signal_selection_changed;

@@ -13,22 +13,22 @@ namespace horizon {
 			CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &constraints_filename, const std::string &via_dir, Pool &pool);
 			bool has_object_type(ObjectType ty) override;
 
-			const std::map<int, Layer> &get_layers();
+			const std::map<int, Layer> &get_layers() override;
 
-			virtual bool get_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
-			virtual void set_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool value, bool *handled=nullptr) override;
-			virtual int64_t get_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
-			virtual void set_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, int64_t value, bool *handled=nullptr) override;
-			virtual std::string get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
+			bool get_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
+			void set_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool value, bool *handled=nullptr) override;
+			int64_t get_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
+			void set_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, int64_t value, bool *handled=nullptr) override;
+			std::string get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
 
-			virtual bool property_is_settable(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr);
+			bool property_is_settable(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
 
 			std::vector<Track*> get_tracks(bool work=true);
 
-			virtual void rebuild(bool from_undo=false);
-			virtual void commit();
-			virtual void revert();
-			virtual void save();
+			void rebuild(bool from_undo=false) override;
+			void commit() override;
+			void revert() override;
+			void save() override;
 			void reload_netlist();
 
 			const Board *get_canvas_data();
@@ -67,7 +67,7 @@ namespace horizon {
 				Block block;
 				Board brd;
 			};
-			void history_push();
-			void history_load(unsigned int i);
+			void history_push() override;
+			void history_load(unsigned int i) override;
 	};
 }

@@ -13,10 +13,10 @@ namespace horizon {
 
 		protected:
 			std::forward_list<NetLabel*> labels_placed;
-			void create_attached();
-			void delete_attached();
-			bool update_attached(const ToolArgs &args);
-			bool check_line(LineNet *li);
+			void create_attached() override;
+			void delete_attached() override;
+			bool update_attached(const ToolArgs &args) override;
+			bool check_line(LineNet *li) override;
 			NetLabel *la = nullptr;
 			Orientation last_orientation = Orientation::RIGHT;
 

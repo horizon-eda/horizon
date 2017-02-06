@@ -12,10 +12,10 @@ namespace horizon {
 			bool can_begin() override;
 
 		protected:
-			void create_attached();
-			void delete_attached();
-			bool begin_attached();
-			bool update_attached(const ToolArgs &args);
+			void create_attached() override;
+			void delete_attached() override;
+			bool begin_attached() override;
+			bool update_attached(const ToolArgs &args) override;
 			Via *via = nullptr;
 			Padstack *padstack = nullptr;
 			std::forward_list<Via*> vias_placed;

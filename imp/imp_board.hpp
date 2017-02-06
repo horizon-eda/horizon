@@ -15,7 +15,7 @@ namespace horizon {
 			void construct() override;
 			ToolID handle_key(guint k) override;
 		private:
-			void canvas_update();
+			void canvas_update() override;
 
 			CoreBoard core_board;
 
