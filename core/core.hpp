@@ -147,12 +147,12 @@ namespace horizon {
 			type_signal_request_save_meta signal_request_save_meta() {return s_signal_request_save_meta;}
 
 		protected :
-			virtual std::map<const UUID, Junction> *get_junction_map(bool work=true) {return nullptr;}
-			virtual std::map<const UUID, Line> *get_line_map(bool work=true) {return nullptr;}
-			virtual std::map<const UUID, Arc> *get_arc_map(bool work=true) {return nullptr;}
-			virtual std::map<const UUID, Text> *get_text_map(bool work=true) {return nullptr;}
-			virtual std::map<const UUID, Polygon> *get_polygon_map(bool work=true) {return nullptr;}
-			virtual std::map<const UUID, Hole> *get_hole_map(bool work=true) {return nullptr;}
+			virtual std::map<UUID, Junction> *get_junction_map(bool work=true) {return nullptr;}
+			virtual std::map<UUID, Line> *get_line_map(bool work=true) {return nullptr;}
+			virtual std::map<UUID, Arc> *get_arc_map(bool work=true) {return nullptr;}
+			virtual std::map<UUID, Text> *get_text_map(bool work=true) {return nullptr;}
+			virtual std::map<UUID, Polygon> *get_polygon_map(bool work=true) {return nullptr;}
+			virtual std::map<UUID, Hole> *get_hole_map(bool work=true) {return nullptr;}
 
 
 			bool reverted = false;

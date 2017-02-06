@@ -24,7 +24,7 @@ namespace horizon {
 			std::string name;
 			std::string prefix;
 			std::set<std::string> tags;
-			std::map<const UUID, Gate> gates;
+			std::map<UUID, Gate> gates;
 			void serialize_yaml(YAML::Emitter &em) const;
 			json serialize() const;
 	};

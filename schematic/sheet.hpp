@@ -40,15 +40,15 @@ namespace horizon {
 			std::string name;
 			unsigned int index;
 
-			std::map<const UUID, Junction> junctions;
-			std::map<const UUID, SchematicSymbol> symbols;
-			//std::map<const UUID, class JunctionPin> junction_pins;
-			std::map<const UUID, class LineNet> net_lines;
-			std::map<const UUID, class Text> texts;
-			std::map<const UUID, NetLabel> net_labels;
-			std::map<const UUID, PowerSymbol> power_symbols;
-			std::map<const UUID, BusLabel> bus_labels;
-			std::map<const UUID, BusRipper> bus_rippers;
+			std::map<UUID, Junction> junctions;
+			std::map<UUID, SchematicSymbol> symbols;
+			//std::map<UUID, class JunctionPin> junction_pins;
+			std::map<UUID, class LineNet> net_lines;
+			std::map<UUID, class Text> texts;
+			std::map<UUID, NetLabel> net_labels;
+			std::map<UUID, PowerSymbol> power_symbols;
+			std::map<UUID, BusLabel> bus_labels;
+			std::map<UUID, BusRipper> bus_rippers;
 			std::vector<Warning> warnings;
 
 			LineNet *split_line_net(LineNet *it, Junction *ju);
@@ -57,7 +57,7 @@ namespace horizon {
 			void simplify_net_lines();
 			void delete_dependants();
 			void propagate_net_segments();
-			std::map<const UUID, NetSegmentInfo> analyze_net_segments(bool place_warnings=false);
+			std::map<UUID, NetSegmentInfo> analyze_net_segments(bool place_warnings=false);
 			std::set<UUIDPath<3>> get_pins_connected_to_net_segment(const UUID &uu_segment);
 
 			void replace_junction(Junction *j, SchematicSymbol *sym, SymbolPin *pin);

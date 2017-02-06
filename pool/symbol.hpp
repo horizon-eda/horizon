@@ -36,7 +36,7 @@ namespace horizon {
 			std::string name;
 			std::string pad;
 			ConnectorStyle connector_style = ConnectorStyle::BOX;
-			std::map<const UUID, class LineNet*> connected_net_lines;
+			std::map<UUID, class LineNet*> connected_net_lines;
 			UUID net_segment;
 
 
@@ -62,11 +62,11 @@ namespace horizon {
 			UUID uuid;
 			Unit *unit;
 			std::string name;
-			std::map<const UUID, SymbolPin> pins;
-			std::map<const UUID, Junction> junctions;
-			std::map<const UUID, Line> lines;
-			std::map<const UUID, Arc> arcs;
-			std::map<const UUID, Text> texts;
+			std::map<UUID, SymbolPin> pins;
+			std::map<UUID, Junction> junctions;
+			std::map<UUID, Line> lines;
+			std::map<UUID, Arc> arcs;
+			std::map<UUID, Text> texts;
 			
 		private :
 			void update_refs();

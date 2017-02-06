@@ -38,12 +38,12 @@ namespace horizon {
 			std::string name;
 			std::set<std::string> tags;
 
-			std::map<const UUID, Junction> junctions;
-			std::map<const UUID, Line> lines;
-			std::map<const UUID, Arc> arcs;
-			std::map<const UUID, Text> texts;
-			std::map<const UUID, Pad> pads;
-			std::map<const UUID, Polygon> polygons;
+			std::map<UUID, Junction> junctions;
+			std::map<UUID, Line> lines;
+			std::map<UUID, Arc> arcs;
+			std::map<UUID, Text> texts;
+			std::map<UUID, Pad> pads;
+			std::map<UUID, Polygon> polygons;
 			std::vector<Warning> warnings;
 
 		private :

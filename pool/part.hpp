@@ -46,7 +46,7 @@ namespace horizon {
 
 			std::map<std::string, std::string> parametric;
 
-			std::map<const UUID, PadMapItem> pad_map;
+			std::map<UUID, PadMapItem> pad_map;
 			json serialize() const;
 	};
 

@@ -50,7 +50,7 @@ namespace horizon {
 			std::pair<Coordi,Coordi> get_bbox() override;
 
 		private:
-			std::map<const UUID, Text> *get_text_map(bool work=true) override;
+			std::map<UUID, Text> *get_text_map(bool work=true) override;
 
 
 			Symbol sym;

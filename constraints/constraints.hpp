@@ -16,8 +16,8 @@ namespace horizon {
 			static Constraints new_from_file(const std::string &filename);
 			Constraints();
 
-			std::map<const UUID, NetClass> net_classes;
-			std::map<const UUIDPath<2>, Clearance> clearances;
+			std::map<UUID, NetClass> net_classes;
+			std::map<UUIDPath<2>, Clearance> clearances;
 			Clearance *get_clearance(const NetClass *nc_a, const NetClass *nc_b);
 			Clearance default_clearance;
 			NetClass *default_net_class = nullptr;

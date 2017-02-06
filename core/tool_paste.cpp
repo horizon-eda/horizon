@@ -11,7 +11,7 @@ namespace horizon {
 
 	class JunctionProvider: public Object {
 		public:
-			JunctionProvider(Core *c, const std::map<const UUID, const UUID> &xj):core(c), junction_xlat(xj) {}
+			JunctionProvider(Core *c, const std::map<UUID, const UUID> &xj):core(c), junction_xlat(xj) {}
 			virtual ~JunctionProvider() {}
 
 			Junction *get_junction(const UUID &uu) override {
@@ -21,7 +21,7 @@ namespace horizon {
 
 		private:
 			Core *core;
-			const std::map<const UUID, const UUID> &junction_xlat;
+			const std::map<UUID, const UUID> &junction_xlat;
 	};
 
 	void ToolPaste::fix_layer(int &la) {
@@ -59,7 +59,7 @@ namespace horizon {
 				core.r->selection.emplace(u, ObjectType::TEXT);
 			}
 		}
-		std::map<const UUID, const UUID> junction_xlat;
+		std::map<UUID, const UUID> junction_xlat;
 		if(j.count("junctions")){
 			const json &o = j["junctions"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {

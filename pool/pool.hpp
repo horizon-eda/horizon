@@ -30,12 +30,12 @@ namespace horizon {
 		private :
 			std::string base_path;
 
-			std::map<const UUID, Unit> units;
-			std::map<const UUID, Entity> entities;
-			std::map<const UUID, Symbol> symbols;
-			std::map<const UUID, Padstack> padstacks;
-			std::map<const UUID, Package> packages;
-			std::map<const UUID, Part> parts;
+			std::map<UUID, Unit> units;
+			std::map<UUID, Entity> entities;
+			std::map<UUID, Symbol> symbols;
+			std::map<UUID, Padstack> padstacks;
+			std::map<UUID, Package> packages;
+			std::map<UUID, Part> parts;
 
 		
 	};

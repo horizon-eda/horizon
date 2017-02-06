@@ -38,12 +38,12 @@ namespace horizon {
 			json get_meta() override;
 
 		private:
-			std::map<const UUID, Junction> *get_junction_map(bool work=true) override;
-			std::map<const UUID, Line> *get_line_map(bool work=true) override;
-			std::map<const UUID, Arc> *get_arc_map(bool work=true) override;
-			std::map<const UUID, Text> *get_text_map(bool work=true) override;
-			std::map<const UUID, Polygon> *get_polygon_map(bool work=true) override;
-			std::map<const UUID, Hole> *get_hole_map(bool work=true) override;
+			std::map<UUID, Junction> *get_junction_map(bool work=true) override;
+			std::map<UUID, Line> *get_line_map(bool work=true) override;
+			std::map<UUID, Arc> *get_arc_map(bool work=true) override;
+			std::map<UUID, Text> *get_text_map(bool work=true) override;
+			std::map<UUID, Polygon> *get_polygon_map(bool work=true) override;
+			std::map<UUID, Hole> *get_hole_map(bool work=true) override;
 
 
 

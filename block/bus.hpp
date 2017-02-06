@@ -32,7 +32,7 @@ namespace horizon {
 			virtual UUID get_uuid() const;
 			UUID uuid;
 			std::string name;
-			std::map<const UUID, Member> members;
+			std::map<UUID, Member> members;
 			bool is_referenced = false;
 			void update_refs(Block &block);
 			json serialize() const;

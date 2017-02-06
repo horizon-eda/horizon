@@ -24,17 +24,17 @@ namespace horizon {
 			void clear();
 			void load_from_symbol(std::set<SelectableRef> selection);
 
-			std::map<const UUID, Text> texts;
-			std::map<const UUID, Junction> junctions;
-			std::map<const UUID, Line> lines;
-			std::map<const UUID, Arc> arcs;
-			std::map<const UUID, Pad> pads;
-			std::map<const UUID, Polygon> polygons;
-			std::map<const UUID, Component> components;
-			std::map<const UUID, SchematicSymbol> symbols;
-			std::map<const UUID, SymbolPin> pins;
-			std::map<const UUID, Net> nets;
-			std::map<const UUID, Hole> holes;
+			std::map<UUID, Text> texts;
+			std::map<UUID, Junction> junctions;
+			std::map<UUID, Line> lines;
+			std::map<UUID, Arc> arcs;
+			std::map<UUID, Pad> pads;
+			std::map<UUID, Polygon> polygons;
+			std::map<UUID, Component> components;
+			std::map<UUID, SchematicSymbol> symbols;
+			std::map<UUID, SymbolPin> pins;
+			std::map<UUID, Net> nets;
+			std::map<UUID, Hole> holes;
 
 			json serialize();
 

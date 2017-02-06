@@ -22,9 +22,9 @@ namespace horizon {
 			virtual Net *get_net(const UUID &uu);
 			UUID uuid;
 			std::string name;
-			std::map<const UUID, Net> nets;
-			std::map<const UUID, Bus> buses;
-			std::map<const UUID, Component> components;
+			std::map<UUID, Net> nets;
+			std::map<UUID, Bus> buses;
+			std::map<UUID, Component> components;
 
 			Block(const Block &block);
 			void operator=(const Block &block);

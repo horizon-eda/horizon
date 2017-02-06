@@ -22,7 +22,7 @@ namespace horizon {
 			void handle_export_pdf();
 			std::string last_pdf_filename;
 
-			std::map<const UUID, std::pair<float, Coordf>> sheet_views;
+			std::map<UUID, std::pair<float, Coordf>> sheet_views;
 			SheetBox *sheet_box;
 	};
 }

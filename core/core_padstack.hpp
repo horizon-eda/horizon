@@ -26,8 +26,8 @@ namespace horizon {
 			std::pair<Coordi,Coordi> get_bbox() override;
 
 		private:
-			std::map<const UUID, Polygon> *get_polygon_map(bool work=true) override;
-			std::map<const UUID, Hole> *get_hole_map(bool work=true) override;
+			std::map<UUID, Polygon> *get_polygon_map(bool work=true) override;
+			std::map<UUID, Hole> *get_hole_map(bool work=true) override;
 
 			Padstack padstack;
 			Padstack padstack_work;

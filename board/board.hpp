@@ -24,7 +24,7 @@ namespace horizon {
 			Board(const UUID &uu, const json &, Block &block, Pool &pool, ViaPadstackProvider &vpp);
 			//unsigned int update_nets();
 			bool propagate_net_segments();
-			std::map<const UUID, uuid_ptr<Net>> net_segments;
+			std::map<UUID, uuid_ptr<Net>> net_segments;
 
 
 		public :
@@ -47,14 +47,14 @@ namespace horizon {
 			Block *block;
 			std::string name;
 			unsigned int n_inner_layers = 0;
-			std::map<const UUID, Polygon> polygons;
-			std::map<const UUID, Hole> holes;
-			std::map<const UUID, BoardPackage> packages;
-			std::map<const UUID, Junction> junctions;
-			std::map<const UUID, Track> tracks;
-			std::map<const UUID, Track> airwires;
-			std::map<const UUID, Via> vias;
-			std::map<const UUID, Text> texts;
+			std::map<UUID, Polygon> polygons;
+			std::map<UUID, Hole> holes;
+			std::map<UUID, BoardPackage> packages;
+			std::map<UUID, Junction> junctions;
+			std::map<UUID, Track> tracks;
+			std::map<UUID, Track> airwires;
+			std::map<UUID, Via> vias;
+			std::map<UUID, Text> texts;
 
 			std::vector<Warning> warnings;
 

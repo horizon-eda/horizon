@@ -85,7 +85,7 @@ namespace horizon {
 	void Padstack::expand_inner(unsigned int n_inner) {
 		if(n_inner == 0)
 			return;
-		std::map<const UUID, Polygon> new_polygons;
+		std::map<UUID, Polygon> new_polygons;
 		for(const auto &it: polygons) {
 			if(it.second.layer == -1) {
 				for(unsigned int i=0; i<(n_inner-1); i++) {

@@ -36,7 +36,7 @@ namespace horizon {
 			UUID uuid;
 			Block *block;
 			std::string name;
-			std::map<const UUID, Sheet> sheets;
+			std::map<UUID, Sheet> sheets;
 
 			class Annotation {
 				public:

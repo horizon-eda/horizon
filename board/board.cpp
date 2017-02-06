@@ -269,7 +269,7 @@ namespace horizon {
 		airwires.clear();
 		for(const auto &it: nets_with_more_than_one_net_segment) {
 			std::cout<< "need air wire " << it.first->name << " " << it.second.size() << std::endl;
-			std::map<const UUID, std::deque<Track::Connection>> ns_points;
+			std::map<UUID, std::deque<Track::Connection>> ns_points;
 			for(const auto &it_ns: it.second) {
 				ns_points[it_ns];
 				for(auto &it_junc: junctions) {

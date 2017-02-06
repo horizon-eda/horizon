@@ -56,27 +56,27 @@ namespace horizon {
 		return work?&package_work:&package;
 	}
 
-	std::map<const UUID, Junction> *CorePackage::get_junction_map(bool work) {
+	std::map<UUID, Junction> *CorePackage::get_junction_map(bool work) {
 		auto &p = work?package_work:package;
 		return &p.junctions;
 	}
-	std::map<const UUID, Line> *CorePackage::get_line_map(bool work) {
+	std::map<UUID, Line> *CorePackage::get_line_map(bool work) {
 		auto &p = work?package_work:package;
 		return &p.lines;
 	}
-	std::map<const UUID, Arc> *CorePackage::get_arc_map(bool work) {
+	std::map<UUID, Arc> *CorePackage::get_arc_map(bool work) {
 		auto &p = work?package_work:package;
 		return &p.arcs;
 	}
-	std::map<const UUID, Text> *CorePackage::get_text_map(bool work) {
+	std::map<UUID, Text> *CorePackage::get_text_map(bool work) {
 		auto &p = work?package_work:package;
 		return &p.texts;
 	}
-	std::map<const UUID, Polygon> *CorePackage::get_polygon_map(bool work) {
+	std::map<UUID, Polygon> *CorePackage::get_polygon_map(bool work) {
 		auto &p = work?package_work:package;
 		return &p.polygons;
 	}
-	std::map<const UUID, Hole> *CorePackage::get_hole_map(bool work) {
+	std::map<UUID, Hole> *CorePackage::get_hole_map(bool work) {
 		auto &p = work?package_work:package;
 		//return &p.holes;
 		return nullptr;

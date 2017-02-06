@@ -40,7 +40,7 @@ namespace horizon {
 
 			T *ptr;
 			UUID uuid;
-			void update(std::map<const UUID, T> &map) {
+			void update(std::map<UUID, T> &map) {
 				if(uuid) {
 					if(map.count(uuid)) {
 						ptr = &map.at(uuid);

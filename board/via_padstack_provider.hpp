@@ -28,12 +28,12 @@ namespace horizon {
 					std::string path;
 					std::string name;
 			};
-			const std::map<const UUID, PadstackEntry> &get_padstacks_available() const;
+			const std::map<UUID, PadstackEntry> &get_padstacks_available() const;
 
 		private :
 			std::string base_path;
-			std::map<const UUID, Padstack> padstacks;
-			std::map<const UUID, PadstackEntry> padstacks_available;
+			std::map<UUID, Padstack> padstacks;
+			std::map<UUID, PadstackEntry> padstacks_available;
 
 
 	};

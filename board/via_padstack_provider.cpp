@@ -23,7 +23,7 @@ namespace horizon {
 		}
 	}
 
-	const std::map<const UUID, ViaPadstackProvider::PadstackEntry> &ViaPadstackProvider::get_padstacks_available() const {
+	const std::map<UUID, ViaPadstackProvider::PadstackEntry> &ViaPadstackProvider::get_padstacks_available() const {
 		return padstacks_available;
 	}
 

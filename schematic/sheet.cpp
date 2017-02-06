@@ -340,8 +340,8 @@ namespace horizon {
 		return false;
 	}
 
-	std::map<const UUID, NetSegmentInfo> Sheet::analyze_net_segments(bool place_warnings) {
-		std::map<const UUID, NetSegmentInfo> net_segments;
+	std::map<UUID, NetSegmentInfo> Sheet::analyze_net_segments(bool place_warnings) {
+		std::map<UUID, NetSegmentInfo> net_segments;
 		for(auto &it: net_lines) {
 			auto ns = it.second.net_segment;
 			net_segments.emplace(ns, NetSegmentInfo(&it.second));

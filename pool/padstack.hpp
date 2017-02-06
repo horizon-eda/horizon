@@ -29,8 +29,8 @@ namespace horizon {
 			UUID uuid;
 			std::string name;
 			Type type = Type::TOP;
-			std::map<const UUID, Polygon> polygons;
-			std::map<const UUID, Hole> holes;
+			std::map<UUID, Polygon> polygons;
+			std::map<UUID, Hole> holes;
 			UUID get_uuid() const override;
 			std::pair<Coordi, Coordi> get_bbox() const;
 			void expand_inner(unsigned int n_inner);

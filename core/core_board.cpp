@@ -107,19 +107,19 @@ namespace horizon {
 		return false;
 	}
 
-	std::map<const UUID, Polygon> *CoreBoard::get_polygon_map(bool work) {
+	std::map<UUID, Polygon> *CoreBoard::get_polygon_map(bool work) {
 		auto &p = work?brd_work:brd;
 		return &p.polygons;
 	}
-	std::map<const UUID, Hole> *CoreBoard::get_hole_map(bool work) {
+	std::map<UUID, Hole> *CoreBoard::get_hole_map(bool work) {
 		auto &p = work?brd_work:brd;
 		return &p.holes;
 	}
-	std::map<const UUID, Junction> *CoreBoard::get_junction_map(bool work) {
+	std::map<UUID, Junction> *CoreBoard::get_junction_map(bool work) {
 		auto &p = work?brd_work:brd;
 		return &p.junctions;
 	}
-	std::map<const UUID, Text> *CoreBoard::get_text_map(bool work) {
+	std::map<UUID, Text> *CoreBoard::get_text_map(bool work) {
 		auto &p = work?brd_work:brd;
 		return &p.texts;
 	}

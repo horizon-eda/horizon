@@ -29,7 +29,7 @@ namespace horizon {
 		return false;
 	}
 
-	std::map<const UUID, Text> *CoreSymbol::get_text_map(bool work) {
+	std::map<UUID, Text> *CoreSymbol::get_text_map(bool work) {
 		auto &s = work?sym_work:sym;
 		return &s.texts;
 	}

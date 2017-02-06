@@ -41,11 +41,11 @@ namespace horizon {
 		return layers;
 	}
 
-	std::map<const UUID, Polygon> *CorePadstack::get_polygon_map(bool work) {
+	std::map<UUID, Polygon> *CorePadstack::get_polygon_map(bool work) {
 		auto &p = work?padstack_work:padstack;
 		return &p.polygons;
 	}
-	std::map<const UUID, Hole> *CorePadstack::get_hole_map(bool work) {
+	std::map<UUID, Hole> *CorePadstack::get_hole_map(bool work) {
 		auto &p = work?padstack_work:padstack;
 		return &p.holes;
 	}
