@@ -154,6 +154,7 @@ SRC_IMP = \
 	widgets/layer_box.cpp\
 	widgets/spin_button_dim.cpp\
 	widgets/chooser_buttons.cpp\
+	widgets/cell_renderer_layer_display.cpp\
 	export_pdf.cpp\
 	imp/key_sequence.cpp\
 	imp/keyseq_dialog.cpp\

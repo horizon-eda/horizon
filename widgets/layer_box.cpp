@@ -1,126 +1,10 @@
 #include "layer_box.hpp"
 #include "json.hpp"
+#include "cell_renderer_layer_display.hpp"
 #include <algorithm>
 #include <iostream>
 
 namespace horizon {
-
-
-	class MyCellRenderer: public Gtk::CellRenderer {
-		public:
-			MyCellRenderer();
-			virtual ~MyCellRenderer() {};
-
-			typedef Glib::Property<Gdk::RGBA> type_property_color;
-			Glib::PropertyProxy<Gdk::RGBA> property_color() { return p_property_color.get_proxy(); }
-			typedef Glib::Property<int> type_property_display_mode;
-			Glib::PropertyProxy<int> property_display_mode() { return p_property_display_mode.get_proxy(); }
-			typedef sigc::signal<void, const Glib::ustring&> type_signal_activate;
-			type_signal_activate signal_activate() {return s_signal_activate;}
-
-
-		protected:
-
-
-			virtual void render_vfunc( const Cairo::RefPtr<Cairo::Context>& cr,
-									   Gtk::Widget& widget,
-									   const Gdk::Rectangle& background_area,
-									   const Gdk::Rectangle& cell_area,
-									   Gtk::CellRendererState flags );
-
-			virtual void get_preferred_width_vfunc(Gtk::Widget& widget,
-												   int& min_w,
-												   int& nat_w) const;
-
-			virtual void get_preferred_height_vfunc(Gtk::Widget& widget,
-													int& min_h,
-													int& nat_h) const;
-
-			virtual bool activate_vfunc(GdkEvent *event,
-										Gtk::Widget &widget,
-										const Glib::ustring &path,
-										const Gdk::Rectangle &background_area,
-										const Gdk::Rectangle &cell_area,
-										Gtk::CellRendererState flags);
-
-		private:
-			type_property_color p_property_color;
-			type_property_display_mode p_property_display_mode;
-			type_signal_activate s_signal_activate;
-	};
-
-	MyCellRenderer::MyCellRenderer(): Glib::ObjectBase(typeid(MyCellRenderer)),
-			Gtk::CellRenderer(),
-			p_property_color(*this, "color"),
-			p_property_display_mode(*this, "display-mode") {
-		property_mode() = Gtk::CELL_RENDERER_MODE_ACTIVATABLE;
-	}
-
-	void MyCellRenderer::get_preferred_height_vfunc(Gtk::Widget& widget,
-                                              int& min_h,
-                                              int& nat_h) const
-	{
-		min_h = nat_h = 16;
-	}
-
-	void MyCellRenderer::get_preferred_width_vfunc(Gtk::Widget& widget,
-												 int& min_w,
-												 int& nat_w) const
-	{
-		min_w = nat_w = 16;
-	}
-
-	void MyCellRenderer::render_vfunc( const Cairo::RefPtr<Cairo::Context>& cr,
-                                 Gtk::Widget& widget,
-                                 const Gdk::Rectangle& background_area,
-                                 const Gdk::Rectangle& cell_area,
-                                 Gtk::CellRendererState flags )
-	{
-		cr->save();
-		const auto c = p_property_color.get_value();
-
-		const unsigned int d = 16;
-		cr->translate(cell_area.get_x()+(cell_area.get_width()-d)/2, cell_area.get_y()+(cell_area.get_height()-d)/2);
-		cr->rectangle(0, 0, 16, 16);
-		cr->set_source_rgb(0,0,0);
-		cr->fill_preserve();
-		cr->set_source_rgb(c.get_red(), c.get_green(), c.get_blue());
-		cr->set_line_width(2);
-		const auto dm = p_property_display_mode.get_value();
-		if(dm == 0) {
-			cr->fill_preserve();
-		}
-
-		cr->stroke();
-
-		if(dm == 1) {
-			cr->move_to(0,16);
-			cr->line_to(16,0);
-			cr->stroke();
-			cr->move_to(0,9);
-			cr->line_to(9,0);
-			cr->stroke();
-			cr->move_to(7,16);
-			cr->line_to(16,7);
-			cr->stroke();
-		}
-
-		cr->restore();
-
-	}
-
-	bool MyCellRenderer::activate_vfunc(GdkEvent *event,
-										Gtk::Widget &widget,
-										const Glib::ustring &path,
-										const Gdk::Rectangle &background_area,
-										const Gdk::Rectangle &cell_area,
-										Gtk::CellRendererState flags)
-	{
-		s_signal_activate.emit(path);
-		return false;
-	}
-
-
 	LayerBox::LayerBox(Core *c):
 		Glib::ObjectBase(typeid(LayerBox)),
 		Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 2),
@@ -167,7 +51,7 @@ namespace horizon {
 			view->append_column(*tvc);
 		}
 		{
-			auto cr = Gtk::manage(new MyCellRenderer());
+			auto cr = Gtk::manage(new CellRendererLayerDisplay());
 			cr->signal_activate().connect(sigc::mem_fun(this, &LayerBox::activated));
 			auto tvc = Gtk::manage(new Gtk::TreeViewColumn("D", *cr));
 			tvc->add_attribute(cr->property_color(), list_columns.color);
