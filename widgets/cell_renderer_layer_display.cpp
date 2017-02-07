@@ -3,8 +3,8 @@
 namespace horizon {
 	CellRendererLayerDisplay::CellRendererLayerDisplay(): Glib::ObjectBase(typeid(CellRendererLayerDisplay)),
 			Gtk::CellRenderer(),
-			p_property_color(*this, "color"),
-			p_property_display_mode(*this, "display-mode") {
+			p_property_color(*this, "color", Gdk::RGBA()),
+			p_property_display_mode(*this, "display-mode", 0) {
 		property_mode() = Gtk::CELL_RENDERER_MODE_ACTIVATABLE;
 	}
 
