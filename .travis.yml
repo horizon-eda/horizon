@@ -1,3 +1,15 @@
 language: cpp
 dist: trusty
+addons:
+  apt:
+    packages:
+      - libgtkmm-3.0-dev
+      - libepoxy-dev
+      - libcairomm-1.0-dev
+      - librsvg2-dev
+      - util-linux
+      - libyaml-cpp-dev
+      - sqlite
+      - uuid-dev
+      - libboost-dev
 script: make
