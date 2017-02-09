@@ -13,4 +13,6 @@ addons:
       - sqlite
       - uuid-dev
       - libboost-dev
+      - libc++1
+      - libc++-dev
 script: make
