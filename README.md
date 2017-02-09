@@ -37,6 +37,8 @@ Dependencies:
 - util-linux (on linux only)
 - yaml-cpp
 - sqlite
+- uuid
+- boost
  
 ## run
 `HORIZON_POOL` needs to be set appropriately for all commands below
