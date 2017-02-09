@@ -15,4 +15,4 @@ addons:
       - libboost-dev
       - libc++1
       - libc++-dev
-script: make
+script: CFLAGS=-stdlib=libc++ make
