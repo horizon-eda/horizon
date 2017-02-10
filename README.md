@@ -37,6 +37,14 @@ Dependencies:
 - util-linux (on linux only)
 - yaml-cpp
 - sqlite
+- uuid
+- boost
+
+On Ubuntu run:
+```
+sudo apt install libyaml-cpp-dev libsqlite3-dev util-linux librsvg2-dev \
+    libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev
+```
  
 ## run
 `HORIZON_POOL` needs to be set appropriately for all commands below
