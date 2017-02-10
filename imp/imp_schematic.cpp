@@ -1,6 +1,7 @@
 #include "imp_schematic.hpp"
 #include "export_pdf.hpp"
 #include "part.hpp"
+#include "checks/checks_window.hpp"
 
 namespace horizon {
 	ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename, const std::string &constraints_filename, const std::string &pool_path) :ImpBase(pool_path),
@@ -94,6 +95,14 @@ namespace horizon {
 		core.r->signal_tool_changed().connect([print_button](ToolID t){print_button->set_sensitive(t==ToolID::NONE);});
 
 		grid_spin_button->set_sensitive(false);
+
+		checks_window->signal_goto().connect([this] (Coordi location, UUID sheet) {
+			auto sch = core_schematic.get_schematic();
+			if(sch->sheets.count(sheet)) {
+				sheet_box->select_sheet(sheet);
+				canvas->center_and_zoom(location);
+			}
+		});
 	}
 
 	void ImpSchematic::handle_export_pdf() {

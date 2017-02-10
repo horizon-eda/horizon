@@ -82,6 +82,7 @@ SRC_IMP = \
 	canvas/image.cpp\
 	canvas/selection_filter.cpp\
 	canvas/polypartition/polypartition.cpp\
+	canvas/marker.cpp\
 	core/core.cpp \
 	core/core_properties.cpp\
 	core/tool_catalog.cpp\
@@ -170,7 +171,14 @@ SRC_IMP = \
 	imp/footprint_generator/footprint_generator_dual.cpp\
 	imp/footprint_generator/footprint_generator_single.cpp\
 	imp/footprint_generator/footprint_generator_quad.cpp\
-	imp/footprint_generator/svg_overlay.cpp
+	imp/footprint_generator/svg_overlay.cpp\
+	checks/check_runner.cpp\
+	checks/check.cpp\
+	checks/cache.cpp\
+	checks/single_pin_net.cpp\
+	imp/checks/checks_window.cpp\
+	imp/checks/check_settings_dialog.cpp\
+	
 
 SRC_POOL_UTIL = \
 	pool-util/util_main.cpp\

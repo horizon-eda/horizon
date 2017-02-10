@@ -132,5 +132,16 @@ namespace horizon {
 		}
 	}
 
+	void SheetBox::select_sheet(const UUID &sheet_uuid) {
+		Gtk::TreeModel::Row row;
+		for(const auto &it: store->children()) {
+			row = *it;
+			if(row[list_columns.uuid] == sheet_uuid) {
+				view->get_selection()->select(it);
+				break;
+			}
+		}
+	}
+
 
 }

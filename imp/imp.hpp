@@ -16,6 +16,7 @@
 #include "selection_filter_dialog.hpp"
 #include "keyseq_dialog.hpp"
 #include "widgets/spin_button_dim.hpp"
+#include "checks/check_runner.hpp"
 
 namespace horizon {
 	class ImpBase {
@@ -42,6 +43,10 @@ namespace horizon {
 			Glib::RefPtr<Glib::Binding> grid_spacing_binding;
 			KeySequence key_seq;
 			
+			std::unique_ptr<class CheckRunner> check_runner=nullptr;
+			class ChecksWindow *checks_window = nullptr;
+
+
 			virtual void canvas_update() = 0;
 			virtual ToolID handle_key(guint k) = 0;
 			void sc(void);

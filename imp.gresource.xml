@@ -16,6 +16,8 @@
     <file>imp/footprint_generator/single.svg</file>
     <file>imp/footprint_generator/quad.svg</file>
     
+    <file>imp/checks/checks_window.ui</file>
+    
     <file>canvas/shaders/grid-vertex.glsl</file>
     <file>canvas/shaders/grid-fragment.glsl</file>
     
@@ -29,5 +31,9 @@
     <file>canvas/shaders/triangle-vertex.glsl</file>
     <file>canvas/shaders/triangle-fragment.glsl</file>
     <file>canvas/shaders/triangle-geometry.glsl</file>
+    
+    <file>canvas/shaders/marker-vertex.glsl</file>
+    <file>canvas/shaders/marker-fragment.glsl</file>
+    <file>canvas/shaders/marker-geometry.glsl</file>
   </gresource>
 </gresources>

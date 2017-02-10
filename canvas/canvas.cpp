@@ -14,6 +14,7 @@ namespace horizon {
 		selectables.clear();
 		triangles.clear();
 		targets.clear();
+		sheet_current_uuid = UUID();
 	}
 
 	void Canvas::update(const Symbol &sym) {
@@ -24,6 +25,8 @@ namespace horizon {
 	
 	void Canvas::update(const Sheet &sheet) {
 		clear();
+		sheet_current_uuid = sheet.uuid;
+		update_markers();
 		render(sheet);
 		request_push();
 	}

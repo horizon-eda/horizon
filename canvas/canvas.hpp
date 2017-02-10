@@ -13,6 +13,7 @@
 #include "layer_display.hpp"
 #include "selection_filter.hpp"
 #include "sheet.hpp"
+#include "marker.hpp"
 
 namespace horizon {
 	class Canvas: public sigc::trackable {
@@ -28,6 +29,8 @@ namespace horizon {
 			void update(const class Package &pkg);
 			void update(const class Buffer &buf);
 			void update(const class Board &brd);
+			virtual void update_markers() {}
+
 			void set_core(Core *c);
 			void set_layer_display(int index, const LayerDisplay &ld);
 			class SelectionFilter selection_filter;
@@ -105,6 +108,8 @@ namespace horizon {
 			int work_layer = 0;
 			std::map<int, LayerDisplay> layer_display;
 
+			UUID sheet_current_uuid;
+
 
 		private:
 			void img_text_layer(int l);
@@ -117,6 +122,8 @@ namespace horizon {
 		friend BoxSelection;
 		friend SelectablesRenderer;
 		friend TriangleRenderer;
+		friend MarkerRenderer;
+		friend Markers;
 		public:
 			CanvasGL();
 
@@ -144,6 +151,8 @@ namespace horizon {
 			Glib::PropertyProxy<int> property_work_layer() { return p_property_work_layer.get_proxy(); }
 			Glib::PropertyProxy<uint64_t> property_grid_spacing() { return p_property_grid_spacing.get_proxy(); }
 			Glib::PropertyProxy<float> property_layer_opacity() { return p_property_layer_opacity.get_proxy(); }
+			Markers markers;
+			void update_markers() override;
 
 		protected:
 			void push() override;
@@ -169,6 +178,8 @@ namespace horizon {
 			BoxSelection box_selection;
 			SelectablesRenderer selectables_renderer;
 			TriangleRenderer triangle_renderer;
+
+			MarkerRenderer marker_renderer;
 			
 			void pan_drag_begin(GdkEventButton* button_event);
 			void pan_drag_end(GdkEventButton* button_event);

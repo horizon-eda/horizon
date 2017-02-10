@@ -9,6 +9,7 @@ namespace horizon {
 			SheetBox(CoreSchematic *c);
 
 			void update();
+			void select_sheet(const UUID &sheet_uuid);
 			typedef sigc::signal<void, Sheet*> type_signal_select_sheet;
 			type_signal_select_sheet signal_select_sheet() {return s_signal_select_sheet;}
 			typedef sigc::signal<void> type_signal_add_sheet;

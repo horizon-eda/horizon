@@ -14,8 +14,9 @@ namespace horizon {
 		offset = ofs;
 	}
 
-	CanvasGL::CanvasGL() : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), grid(this), box_selection(this), selectables_renderer(this, &selectables),
+	CanvasGL::CanvasGL() : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), markers(this), grid(this), box_selection(this), selectables_renderer(this, &selectables),
 			triangle_renderer(this, triangles),
+			marker_renderer(this, markers),
 			p_property_work_layer(*this, "work-layer"),
 			p_property_grid_spacing(*this, "grid-spacing"),
 			p_property_layer_opacity(*this, "layer-opacity")
@@ -62,6 +63,7 @@ namespace horizon {
 		box_selection.realize();
 		selectables_renderer.realize();
 		triangle_renderer.realize();
+		marker_renderer.realize();
 	}
 
 
@@ -85,6 +87,7 @@ namespace horizon {
 		box_selection.render();
 
 		grid.render_cursor(cursor_pos_grid);
+		marker_renderer.render();
 		glFlush();
 		return Gtk::GLArea::on_render(context);
 	}
@@ -226,6 +229,12 @@ namespace horizon {
 	void CanvasGL::push() {
 		selectables_renderer.push();
 		triangle_renderer.push();
+		marker_renderer.push();
+	}
+
+	void CanvasGL::update_markers() {
+		marker_renderer.update();
+		request_push();
 	}
 
 	Coordf CanvasGL::screen2canvas(const Coordf &p) const {
