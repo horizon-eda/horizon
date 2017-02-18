@@ -2,7 +2,6 @@
 #include "uuid.hpp"
 #include "common.hpp"
 #include "object.hpp"
-#include "position_provider.hpp"
 #include "uuid_provider.hpp"
 #include "net.hpp"
 #include "uuid_ptr.hpp"
@@ -17,7 +16,7 @@ namespace horizon {
 	using json = nlohmann::json;
 	
 	
-	class Junction: public PositionProvider {
+	class Junction: public UUIDProvider {
 		public :
 			Junction(const UUID &uu, const json &j);
 			Junction(const UUID &uu);
@@ -28,7 +27,6 @@ namespace horizon {
 			uuid_ptr<Bus> bus = nullptr;
 			UUID net_segment = UUID();
 
-			virtual Coordi get_position() const ;
 			virtual UUID get_uuid() const ;
 			
 			//not stored

@@ -50,8 +50,8 @@ namespace horizon {
 			if(it.type == ObjectType::LINE) {
 				line_mode = true;
 				auto li = core.r->get_line(it.uuid);
-				auto p0 = li->from->get_position();
-				auto p1 = li->to->get_position();
+				auto p0 = li->from->position;
+				auto p1 = li->to->position;
 				ai.accumulate(sqrt((p0-p1).mag_sq()));
 			}
 			if(it.type == ObjectType::PAD) {

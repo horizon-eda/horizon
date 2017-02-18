@@ -12,9 +12,6 @@ namespace horizon {
 	{
 	}
 	
-	Coordi Junction::get_position() const {
-		return position;
-	}
 	UUID Junction::get_uuid() const {
 		return uuid;
 	}

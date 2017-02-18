@@ -4,7 +4,6 @@
 #include "common.hpp"
 #include "junction.hpp"
 #include "object.hpp"
-#include "position_provider.hpp"
 #include "uuid_ptr.hpp"
 #include <deque>
 #include <map>

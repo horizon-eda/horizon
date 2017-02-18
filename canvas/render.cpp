@@ -52,7 +52,7 @@ namespace horizon {
 
 		if(draw) {
 			if(junc.connection_count == 2) {
-				draw_plus(junc.get_position(), 250000, c);
+				draw_plus(junc.position, 250000, c);
 			}
 			else if(junc.connection_count >= 3  && core->has_object_type(ObjectType::SCHEMATIC_SYMBOL)) {
 				draw_line(junc.position, junc.position+Coordi(0, 10), c, true, 0.5_mm);
@@ -110,15 +110,15 @@ namespace horizon {
 		if(layer_display.count(line.layer)) {
 			c = layer_display.at(line.layer).color;
 		}
-		img_line(line.from->get_position(), line.to->get_position(), line.width, line.layer);
+		img_line(line.from->position, line.to->position, line.width, line.layer);
 		if(img_mode)
 			return;
 		auto flags = get_triangle_flags_for_line(line.layer);
 		if(line.width == 0)
 			flags = 0;
-		draw_line(line.from->get_position(), line.to->get_position(), c, true, line.width, flags);
+		draw_line(line.from->position, line.to->position, c, true, line.width, flags);
 		if(interactive)
-			selectables.append(line.uuid, ObjectType::LINE, (line.from->get_position()+line.to->get_position())/2, Coordf::min(line.from->get_position(), line.to->get_position()), Coordf::max(line.from->get_position(), line.to->get_position()), Selectable::Enlarge::AUTO, 0, line.layer);
+			selectables.append(line.uuid, ObjectType::LINE, (line.from->position+line.to->position)/2, Coordf::min(line.from->position, line.to->position), Coordf::max(line.from->position, line.to->position), Selectable::Enlarge::AUTO, 0, line.layer);
 	}
 	
 	void Canvas::render(const LineNet &line) {
@@ -299,9 +299,9 @@ namespace horizon {
 		if(layer_display.count(arc.layer)) {
 			co = layer_display.at(arc.layer).color;
 		}
-		Coordf a(arc.from->get_position());// ,b,c;
-		Coordf b(arc.to->get_position());// ,b,c;
-		Coordf c(arc.center->get_position());// ,b,c;
+		Coordf a(arc.from->position);// ,b,c;
+		Coordf b(arc.to->position);// ,b,c;
+		Coordf c(arc.center->position);// ,b,c;
 		if((sq(c.x-a.x) + sq(c.y-a.y)) != (sq(c.x-b.x) + sq(c.y-b.y))) {
 			Color ce(1,0,0);
 			draw_line(c, a, ce);

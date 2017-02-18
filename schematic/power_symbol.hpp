@@ -3,7 +3,6 @@
 #include "json_fwd.hpp"
 #include "common.hpp"
 #include "object.hpp"
-#include "position_provider.hpp"
 #include "uuid_provider.hpp"
 #include "block.hpp"
 #include "uuid_ptr.hpp"
