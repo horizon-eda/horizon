@@ -51,6 +51,10 @@ LIBS=(
 	liblzma-5.dll\
 	libcroco-0.6-3.dll\
 	libtiff-5.dll\
+	libzmq.dll\
+	libsodium-18.dll\
+	gspawn-win64-helper.exe\
+	gspawn-win64-helper-console.exe
 )
 for LIB in "${LIBS[@]}"
 do
@@ -65,3 +69,6 @@ rm -rf $DISTDIR/share/icons/Adwaita/cursors
 mkdir -p $DISTDIR/lib
 cp -r /mingw64/lib/gdk-pixbuf-2.0 $DISTDIR/lib
 rm $DISTDIR/lib/gdk-pixbuf-*/*/loaders/*.a
+
+mkdir -p $DISTDIR/share/glib-2.0/schemas
+cp /mingw64/share/glib-2.0/schemas/gschemas.compiled $DISTDIR/share/glib-2.0/schemas

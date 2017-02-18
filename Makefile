@@ -1,7 +1,7 @@
 CC=g++
 PKGCONFIG=pkg-config
 
-all: horizon-imp horizon-pool horizon-pool-update horizon-prj horizon-pool-update-parametric
+all: horizon-imp horizon-pool horizon-pool-update horizon-prj horizon-pool-update-parametric horizon-prj-mgr
 
 SRC_COMMON = \
 	util/uuid.cpp \
@@ -46,6 +46,7 @@ SRC_COMMON = \
 	constraints/net_class.cpp\
 	constraints/constraints.cpp\
 	constraints/clearance.cpp \
+	project/project.cpp\
 	resources.cpp\
 	
 ifeq ($(OS),Windows_NT)
@@ -198,7 +199,14 @@ SRC_POOL_UPDATE_PARA = \
 SRC_PRJ_UTIL = \
 	prj-util/util_main.cpp
 
-SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_POOL_UPDATE) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA))
+SRC_PRJ_MGR = \
+	prj-mgr/prj-mgr-main.cpp\
+	prj-mgr/prj-mgr-app.cpp\
+	prj-mgr/prj-mgr-app_win.cpp\
+	prj-mgr/prj-mgr-prefs.cpp\
+	prj-mgr/editor_process.cpp\
+
+SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_POOL_UPDATE) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PRJ_MGR))
 
 INC = -I. -Iblock -Iboard -Icommon -Iimp -Ipackage -Ipool -Ischematic -Iutil -Iconstraints
 
@@ -208,7 +216,7 @@ LIBS_COMMON = sqlite3 yaml-cpp
 ifneq ($(OS),Windows_NT)
 	LIBS_COMMON += uuid
 endif
-LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 
+LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq
 
 OPTIMIZE=-fdata-sections -ffunction-sections
 DEBUG   =-g3
@@ -216,9 +224,11 @@ CFLAGS  =$(DEBUG) $(DEFINES) $(OPTIMIZE) $(shell pkg-config --cflags $(LIBS_ALL)
 LDFLAGS = -lm -lpthread
 GLIB_COMPILE_RESOURCES = $(shell $(PKGCONFIG) --variable=glib_compile_resources gio-2.0)
 
+LDFLAGS_GUI=
 ifeq ($(OS),Windows_NT)
     LDFLAGS += -lrpcrt4
     DEFINES += -DWIN32_UUID
+    LDFLAGS_GUI = -Wl,-subsystem,windows
 endif
 
 # Object files
@@ -229,7 +239,7 @@ resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=.
 	$(GLIB_COMPILE_RESOURCES) imp.gresource.xml --target=$@ --sourcedir=. --generate-source
 
 horizon-imp: $(OBJ_COMMON) $(SRC_IMP:.cpp=.o)
-	$(CC) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0) -o $@
+	$(CC) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq) -o $@
 
 horizon-pool: $(OBJ_COMMON) $(SRC_POOL_UTIL:.cpp=.o)
 	$(CC) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0) -o $@
@@ -243,11 +253,14 @@ horizon-pool-update-parametric: $(OBJ_COMMON) $(SRC_POOL_UPDATE_PARA:.cpp=.o)
 horizon-prj: $(OBJ_COMMON) $(SRC_PRJ_UTIL:.cpp=.o)
 	$(CC) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
+horizon-prj-mgr: $(OBJ_COMMON) $(SRC_PRJ_MGR:.cpp=.o)
+	$(CC) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 libzmq) -o $@
+
 $(OBJ_ALL): %.o: %.cpp
 	$(CC) -c $(INC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-update horizon-pool-update-parametric $(OBJ_ALL:.o=.d)
+	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-update horizon-pool-update-parametric horizon-prj-mgr $(OBJ_ALL:.o=.d)
 
 -include  $(OBJ_ALL:.o=.d)
 

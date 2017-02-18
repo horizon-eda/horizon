@@ -1,6 +1,11 @@
 #include "util.hpp"
 #include "json.hpp"
 #include <fstream>
+#include <unistd.h>
+#include <glibmm/miscutils.h>
+#ifdef G_OS_WIN32
+	#include <windows.h>
+#endif
 
 
 namespace horizon {
@@ -24,4 +29,32 @@ namespace horizon {
 		}
 		return angle;
 	}
+
+	#ifdef G_OS_WIN32
+	std::string get_exe_dir() {
+		TCHAR szPath[MAX_PATH];
+		if(!GetModuleFileName(NULL, szPath, MAX_PATH)) {
+			throw std::runtime_error("can't find executable");
+			return "";
+        }
+		else {
+			return Glib::path_get_dirname(szPath);
+		}
+	}
+
+	#else
+	std::string get_exe_dir() {
+
+		char buf[1024];
+		ssize_t len;
+        if((len = readlink("/proc/self/exe", buf, sizeof(buf)-1)) != -1) {
+        	buf[len] = '\0';
+        	return Glib::path_get_dirname(buf);
+        }
+        else {
+        	throw std::runtime_error("can't find executable");
+			return "";
+        }
+	}
+	#endif
 }

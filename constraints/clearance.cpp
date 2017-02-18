@@ -13,7 +13,7 @@ namespace horizon {
 	}
 
 	Clearance::Clearance(const json &j): routing_clearance(j.at("routing_clearance")) {}
-	Clearance::Clearance(): routing_clearance(1_mm){}
+	Clearance::Clearance(): routing_clearance(0.5_mm){}
 
 	json Clearance::serialize() const {
 		json j;

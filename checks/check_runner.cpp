@@ -8,7 +8,7 @@ namespace horizon {
 	CheckRunner::CheckRunner(Core *c): core(c), cache(c) {
 		Cores cores(c);
 		if(cores.c) {
-			checks.emplace(CheckID::SINGLE_PIN_NET, new CheckSinglePinNet());
+			checks.emplace(CheckID::SINGLE_PIN_NET, std::make_unique<CheckSinglePinNet>());
 		}
 	}
 

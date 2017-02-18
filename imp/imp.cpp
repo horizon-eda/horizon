@@ -8,13 +8,49 @@
 #include "part.hpp"
 #include "checks/checks_window.hpp"
 #include <iomanip>
+#include <glibmm/main.h>
 
 namespace horizon {
 	
 	ImpBase::ImpBase(const std::string &pool_filename):
 		pool(pool_filename),
-		core(nullptr)
+		core(nullptr),
+		sock_broadcast_rx(zctx, ZMQ_SUB)
 	{
+		auto ep = Glib::getenv("HORIZON_EP_BROADCAST");
+		if(ep.size()) {
+			sock_broadcast_rx.connect(ep);
+			{
+				unsigned int prefix = 0;
+				sock_broadcast_rx.setsockopt(ZMQ_SUBSCRIBE, &prefix, 4);
+				prefix = getpid();
+				sock_broadcast_rx.setsockopt(ZMQ_SUBSCRIBE, &prefix, 4);
+			}
+			Glib::RefPtr<Glib::IOChannel> chan;
+			#ifdef G_OS_WIN32
+				SOCKET fd = sock_broadcast_rx.getsockopt<SOCKET>(ZMQ_FD);
+				chan = Glib::IOChannel::create_from_win32_socket(fd);
+			#else
+				int fd = sock_broadcast_rx.getsockopt<int>(ZMQ_FD);
+				chan = Glib::IOChannel::create_from_fd(fd);
+			#endif
+
+			Glib::signal_io().connect([this](Glib::IOCondition cond){
+				while(sock_broadcast_rx.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
+					zmq::message_t msg;
+					sock_broadcast_rx.recv(&msg);
+					int prefix;
+					memcpy(&prefix, msg.data(), 4);
+					char *data = ((char*)msg.data())+4;
+					json j = json::parse(data);
+					if(prefix == 0 || prefix==getpid()) {
+						handle_broadcast(j);
+					}
+
+				}
+				return true;
+			}, chan, Glib::IO_IN | Glib::IO_HUP);
+		}
 	}
 	
 	void ImpBase::run(int argc, char *argv[]) {
@@ -418,6 +454,16 @@ namespace horizon {
 
 	void ImpBase::handle_warning_selected(const Coordi &pos) {
 		canvas->center_and_zoom(pos);
+	}
+
+	void ImpBase::handle_broadcast(const json &j) {
+		std::string op = j.at("op");
+		if(op == "present") {
+			main_window->present();
+		}
+		else if(op == "save") {
+			core.r->save();
+		}
 	}
 
 	void ImpBase::key_seq_append_default(KeySequence &ks) {

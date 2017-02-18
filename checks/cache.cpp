@@ -30,7 +30,7 @@ namespace horizon {
 					if(found)
 						break;
 				}
-				net_pins.at(it_conn.second.net.ptr).push_back({&it.second, gate, pin, sheet_uuid, location});
+				net_pins.at(it_conn.second.net.ptr).push_back(std::make_tuple(&it.second, gate, pin, sheet_uuid, location));
 			}
 		}
 
@@ -49,7 +49,7 @@ namespace horizon {
 				break;
 
 				case CheckCacheID::NET_PINS :
-					cache.emplace(id, new CheckCacheNetPins(core));
+					cache.emplace(id, std::make_unique<CheckCacheNetPins>(core));
 				break;
 			}
 		}

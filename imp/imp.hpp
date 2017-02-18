@@ -17,6 +17,12 @@
 #include "keyseq_dialog.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "checks/check_runner.hpp"
+#ifdef G_OS_WIN32
+	#include "zmq_win.hpp"
+	#undef DELETE
+#else
+	#include <zmq.hpp>
+#endif
 
 namespace horizon {
 	class ImpBase {
@@ -26,6 +32,7 @@ namespace horizon {
 			virtual void handle_tool_change(ToolID id);
 			virtual void construct() = 0;
 			void canvas_update_from_pp();
+			virtual ~ImpBase() {}
 
 		protected :
 			MainWindow *main_window;
@@ -46,6 +53,9 @@ namespace horizon {
 			std::unique_ptr<class CheckRunner> check_runner=nullptr;
 			class ChecksWindow *checks_window = nullptr;
 
+			zmq::context_t zctx;
+			zmq::socket_t sock_broadcast_rx;
+
 
 			virtual void canvas_update() = 0;
 			virtual ToolID handle_key(guint k) = 0;
@@ -57,6 +67,7 @@ namespace horizon {
 			void tool_begin(ToolID id);
 			void add_tool_button(ToolID id, const std::string &label);
 			void handle_warning_selected(const Coordi &pos);
+			virtual void handle_broadcast(const json &j);
 
 			void key_seq_append_default(KeySequence &ks);
 			

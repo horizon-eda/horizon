@@ -4,6 +4,7 @@ horizon-pool
 horizon-pool-update
 horizon-pool-update-parametric
 horizon-prj
+horizon-prj-mgr
 *.o
 *.d
 *~

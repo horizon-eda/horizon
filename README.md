@@ -21,6 +21,53 @@ Screenshots are over [there](screenshots/)
 - OpenGL 3 accelerated rendering
 - Everything is referenced by UUIDs
 
+# Quickstart using the project manager
+## Windows
+Download binaries from [there](http://0x83.eu/horizon/), extract the
+zip to a directory and open a command window in that directory.
+
+### Set up the pool
+Clone or download [the pool](https://github.com/carrotIndustries/horizon-pool/).
+If you chose to download the pool, extract the zip somewhere. In the
+command window, you opened in the previous step, type:
+```
+set HORIZON_POOL=<DIRECTORY WITH THE pool.json IN IT>
+```
+and run
+```
+horizon-pool-update
+```
+If you see `created db from schema` everything is alright.
+
+### Launch the project manager
+Double-click `horizon-prj-mgr.exe` in the directory that you opened
+the command window in. You should now see a window titled "Horizon
+project manager". Click on the application icon in the top left corner,
+and add the pool you've set up in the preferences dialog. Now, you're
+ready to create a project and use the interactive manipulator.
+
+
+## Linux
+Look in your distributions documentation, which packages to install to
+satisfy the dependencies listed below and build horizon.
+
+### Set up the pool
+Clone or download [the pool](https://github.com/carrotIndustries/horizon-pool/).
+If you chose to download the pool, extract the zip somewhere.
+In the directory where you've built horizon, run
+```
+HORIZON_POOL=<DIRECTORY WITH THE pool.json IN IT> ./horizon-pool-update
+```
+If you see `created db from schema` everything is alright.
+
+### Launch the project manager
+Run
+```
+./horizon-prj-mgr
+````
+and follow the instructions from the "Windows" section above.
+
+
 
 # How do I...
 ## build all this
@@ -39,11 +86,13 @@ Dependencies:
 - sqlite
 - uuid
 - boost
+- zeromq
 
 On Ubuntu run:
 ```
 sudo apt install libyaml-cpp-dev libsqlite3-dev util-linux librsvg2-dev \
-    libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev
+    libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev \
+    libzmq5 libzmq3-dev
 ```
  
 ## run

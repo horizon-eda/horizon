@@ -23,7 +23,10 @@ start it again.
 # Install dependencies
 Type/paste
 ```
-pacman -S mingw-w64-x86_64-gtkmm3 git base-devel mingw-w64-x86_64-yaml-cpp mingw-w64-x86_64-boost mingw-w64-x86_64-sqlite3  mingw-w64-x86_64-toolchain  --needed
+pacman -S mingw-w64-x86_64-gtkmm3 git base-devel \
+mingw-w64-x86_64-yaml-cpp mingw-w64-x86_64-boost \
+mingw-w64-x86_64-sqlite3  mingw-w64-x86_64-toolchain  \
+mingw-w64-x86_64-zeromq --needed
 ```
 
 When prompted, just hit return. Sit back and wait for it to install 

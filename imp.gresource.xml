@@ -10,6 +10,13 @@
     <file>dialogs/pool_browser.ui</file>
     <file>dialogs/pool_browser_part.ui</file>
     
+    <file>prj-mgr/window.ui</file>
+    <file>prj-mgr/app_menu.ui</file>
+    <file>prj-mgr/prefs.ui</file>
+    
+    <file preprocess="xml-stripblanks">icons/scalable/actions/edit-schematic-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/edit-board-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icon.svg</file>
     
     <file>imp/footprint_generator/footprint_generator.ui</file>
     <file>imp/footprint_generator/dual.svg</file>
