@@ -55,6 +55,12 @@ namespace horizon {
 					}
 				}
 			}
+			else if(it.type == ObjectType::NET_LABEL) {
+				Junction *ju = core.c->get_sheet()->net_labels.at(it.uuid).junction;
+				if(ju->connection_count == 0) {
+					delete_extra.emplace(ju->uuid, ObjectType::JUNCTION);
+				}
+			}
 			else if(it.type == ObjectType::SCHEMATIC_SYMBOL) {
 				core.c->get_schematic()->disconnect_symbol(core.c->get_sheet(), core.c->get_schematic_symbol(it.uuid));
 			}
