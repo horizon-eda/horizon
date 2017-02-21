@@ -16,6 +16,10 @@
 
 namespace horizon {
 	enum class ToolEventType {MOVE, CLICK, KEY, DATA};
+
+	/**
+	 * Add new tools here.
+	 */
 	enum class ToolID {NONE, MOVE, PLACE_JUNCTION, DRAW_LINE,
 		DELETE, DRAW_ARC, ROTATE, MIRROR, MAP_PIN, MAP_SYMBOL,
 		DRAW_NET, ADD_COMPONENT, PLACE_TEXT, PLACE_NET_LABEL,
@@ -27,6 +31,10 @@ namespace horizon {
 		ROUTE_TRACK, DRAG_KEEP_SLOPE, ADD_PART, ANNOTATE, SMASH, UNSMASH
 	};
 
+	/**
+	 * This is what a Tool receives when the user did something.
+	 * i.e. moved the cursor or pressed key
+	 */
 	class ToolArgs {
 		public :
 			ToolEventType type;
@@ -40,22 +48,53 @@ namespace horizon {
 			ToolArgs() {}
 	};
 
+	/**
+	 * To signal back to the core what the Tool did, a Tool returns a ToolResponse.
+	 */
 	class ToolResponse {
 		public :
 			ToolID next_tool = ToolID::NONE;
 			bool end_tool = false;
 			int layer = 10000;
 			ToolResponse() {}
+			/**
+			 * Use this if you're done. The Core will then delete the active tool and initiate a rebuild.
+			 */
 			static ToolResponse end() {ToolResponse r; r.end_tool=true; return r;}
+
+			/**
+			 * Use this for changing the work layer from a Tool.
+			 */
 			static ToolResponse change_layer(int l) {ToolResponse r; r.layer=l; return r;}
+
+			/**
+			 * If you want another Tool to be launched you've finished, use this one.
+			 */
 			static ToolResponse next(ToolID t) {ToolResponse r; r.end_tool=true; r.next_tool = t; return r;};
 	};
 
+	/**
+	 * Common interface for all Tools
+	 */
 	class ToolBase {
 		public :
 			ToolBase(class Core *c, ToolID tid);
+
+			/**
+			 * Gets called right after the constructor has finished.
+			 * Used to get the initial placement right and set things up.
+			 * For non-interactive Tools (e.g. DELETE), this one may return ToolResponse::end()
+			 */
 			virtual ToolResponse begin(const ToolArgs &args) = 0;
+
+			/**
+			 * Gets called whenever the user generated some sort of input.
+			 */
 			virtual ToolResponse update(const ToolArgs &args) = 0;
+
+			/**
+			 * @returns true if this Tool can begin in sensible way
+			 */
 			virtual bool can_begin() {return false;}
 			virtual ~ToolBase() {}
 			std::string name;
@@ -65,6 +104,25 @@ namespace horizon {
 			ToolID tool_id = ToolID::NONE;
 	};
 
+	/**
+	 * Where Tools and and documents meet.
+	 * The Core provides a unified interface for Tools to access
+	 * the objects common to all documents (whatever is being edited).
+	 * It also provides the property interface for the property editor.
+	 *
+	 * A Core always stores to copies of the document, one of which is
+	 * the working copy. Tools always operate on this one. Tools use Core::commit() to
+	 * commit their changes by replacing the non-working document with the working document.
+	 * Core::revert() does the opposite thing by replacing the working document with
+	 * the non-working document, thereby discarding the changes made to the working copy.
+	 * Usually, calling Core::commit() or Core::revert() is the last thing a Tool does before
+	 * finishing.
+	 *
+	 * After a Tool has finished its work by returning ToolResponse::end(), the Core will
+	 * initiate a rebuild. For CoreSchematic, a rebuild will update the Schematic according to its Block.
+	 *
+	 * The Core also handles undo/redo by storing a full copy for each step.
+	 */
 	class Core :public sigc::trackable {
 		public :
 			const std::string get_tool_name();
@@ -96,6 +154,10 @@ namespace horizon {
 			virtual std::vector<Line*> get_lines(bool work=true);
 			virtual std::vector<Arc*> get_arcs(bool work=true);
 			
+			/**
+			 * Expands the non-working document.
+			 * And copies the non-working document to the working document.
+			 */
 			virtual void rebuild(bool from_undo = false);
 			ToolResponse tool_begin(ToolID tool_id, const ToolArgs &args);
 			ToolResponse tool_update(const ToolArgs &args);
@@ -127,6 +189,10 @@ namespace horizon {
 			virtual const std::map<int, Layer> &get_layers();
 			const std::vector<int> &get_layers_sorted();
 
+			/**
+			 * @returns the current document's meta information.
+			 * Meta information contains grid spacing and layer setup.
+			 */
 			virtual json get_meta();
 
 			virtual Constraints *get_constraints() {return nullptr;}
@@ -135,15 +201,27 @@ namespace horizon {
 			virtual ~Core() {}
 			std::set<SelectableRef> selection;
 			Pool *m_pool;
+
+			/**
+			 * These are used by Tools to query information from the user in a modal
+			 * way.
+			 */
 			Dialogs dialogs;
 			
 			typedef sigc::signal<void, ToolID> type_signal_tool_changed;
 			type_signal_tool_changed signal_tool_changed() {return s_signal_tool_changed;}
 			typedef sigc::signal<void> type_signal_rebuilt;
 			type_signal_rebuilt signal_rebuilt() {return s_signal_rebuilt;}
+			/**
+			 * Gets emitted right before saving. Gives the Imp an opportunity to write additional
+			 * information to the document.
+			 */
 			type_signal_rebuilt signal_save() {return s_signal_save;}
 
 			typedef sigc::signal<json> type_signal_request_save_meta;
+			/**
+			 * connect to this signal for providing meta information when the document is saved
+			 */
 			type_signal_request_save_meta signal_request_save_meta() {return s_signal_request_save_meta;}
 
 		protected :

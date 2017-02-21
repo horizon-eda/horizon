@@ -3,6 +3,9 @@
 
 namespace horizon {
 	
+	/**
+	 * Interface for classes that store objects identified by UUID (e.g.\ Line or Junction)
+	 */
 	class Object {
 		public :
 			virtual class Line *get_line(const UUID &uu) {

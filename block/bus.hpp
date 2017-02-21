@@ -12,6 +12,12 @@
 namespace horizon {
 	using json = nlohmann::json;
 
+	/**
+	 * A Bus is used for grouping nets.
+	 * A Net becomes member of a Bus by creating a Bus::Member
+	 * for the Net. The member's name is independent from
+	 * the the Net's name.
+	 */
 	class Bus :public UUIDProvider{
 		public :
 			class Member: public UUIDProvider {

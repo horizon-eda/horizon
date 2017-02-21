@@ -12,6 +12,17 @@
 namespace horizon {
 	using json = nlohmann::json;
 
+	/**
+	 * A Schematic is the visual representation of a Block.
+	 * Contrary to other EDA systems, the Schematic isn't the
+	 * source of truth to horizon, the Block is. During editing,
+	 * Block and Schematic are edited in sync. After Editing is done,
+	 * Schematic::expand() updates the Schematic according to the Block,
+	 * filling in reference designators and assigning nets to LineNets.
+	 *
+	 * A Schematic is made up of one or many Sheets.
+	 *
+	 */
 	class Schematic {
 		private :
 			Schematic(const UUID &uu, const json &, Block &block, Object &pool);
@@ -21,15 +32,41 @@ namespace horizon {
 		public :
 			static Schematic new_from_file(const std::string &filename, Block &block, Object &pool);
 			Schematic(const UUID &uu, Block &block);
+
+			/**
+			 * This is where the magic happens.
+			 * \param carful when true, superfluous things will get cleaned up. Don't do this when you may hold pointers to these.
+			 */
 			void expand(bool careful=false);
 
 			Schematic(const Schematic &sch);
 			void operator=(const Schematic &sch);
+			/**
+			 * objects owned by the Sheets may hold pointers to other objects of the same sheet
+			 * or the Block associated with the Schematic. When pointing block to a different block, call this
+			 * method to fix up pointers. When copying Schematic, the copy constructor will call this method.
+			 */
 			void update_refs();
 			void merge_nets(Net *net, Net *into);
+
+			/**
+			 * Removes all connections from sym and connects the dangling net lines to junctions
+			 */
 			void disconnect_symbol(Sheet *sheet, SchematicSymbol *sym);
+
+			/**
+			 * Connects unconnected pins of sym to Nets specified by junctions coincident with pins.
+			 */
 			void autoconnect_symbol(Sheet *sheet, SchematicSymbol *sym);
+
+			/**
+			 * Turns sym's texts to regular text objects.
+			 */
 			void smash_symbol(Sheet *sheet, SchematicSymbol *sym);
+
+			/**
+			 * Undoes what smash_symbol did.
+			 */
 			void unsmash_symbol(Sheet *sheet, SchematicSymbol *sym);
 
 

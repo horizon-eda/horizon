@@ -190,6 +190,8 @@ To see the available key bindings, hit "?" when no tool is active.
 far, there is no documentation on the tools itself, good luck!
 
 # Theory of operation
+run `doxygen doxygen.config` to generate HTML documentation
+
 ## Pool
 [Diagram of the pool](doc/pool.pdf)
 

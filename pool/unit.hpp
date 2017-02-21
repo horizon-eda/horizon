@@ -11,6 +11,9 @@
 namespace horizon {
 	using json = nlohmann::json;
 	
+	/**
+	 * A Pin represents a logical pin of a Unit.
+	 */
 
 	class Pin {
 		public :
@@ -21,15 +24,29 @@ namespace horizon {
 			Pin(const UUID &uu);
 
 			const UUID uuid;
+			/**
+			 * The Pin's primary name. i.e. PB0 on an MCU.
+			 */
 			std::string primary_name;
 			Direction direction = Direction::INPUT;
+			/**
+			 * Pins of the same swap_group can be pinswapped.
+			 * The swap group 0 is for unswappable pins.
+			 */
 			unsigned int swap_group = 0;
+			/**
+			 * The Pin's alternate names. i.e. UART_RX or I2C_SDA on an MCU.
+			 */
 			std::vector<std::string> names;
 
 			json serialize() const;
 			void serialize_yaml(YAML::Emitter &em) const;
 	};
-	
+	/**
+	 * A Unit is the template for a Gate inside of an Entity.
+	 * An example for a Unit may be a "single-ended NAND gate".
+	 * \ref Unit "Units" are stored in an Entity.
+	 */
 	class Unit {
 		private :
 			Unit(const UUID &uu, const json &j);

@@ -13,7 +13,11 @@
 namespace horizon {
 	using json = nlohmann::json;
 	
-	
+	/**
+	 * Graphical line. A Line is purely decorative, it doesn't
+	 * imply electrical connection. For drawing closed regions, use
+	 * Polygon.
+	 */
 	class Line {
 		public :
 			Line(const UUID &uu, const json &j, Object &obj);

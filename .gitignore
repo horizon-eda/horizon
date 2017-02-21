@@ -20,3 +20,5 @@ example/pool/*.db
 *.zip
 dist
 *.trace
+docs
+

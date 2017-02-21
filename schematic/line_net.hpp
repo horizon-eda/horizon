@@ -19,7 +19,10 @@
 namespace horizon {
 	using json = nlohmann::json;
 	
-	
+	/**
+	 * LineNet is similar to Line, except it denotes electrical connection.
+	 * When connected to a BusLabel, it denotes a Bus.
+	 */
 	class LineNet : public UUIDProvider{
 		public :
 			enum class End {TO, FROM};

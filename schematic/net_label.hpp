@@ -13,6 +13,11 @@
 namespace horizon {
 	using json = nlohmann::json;
 
+	/**
+	 * Displays the junction's Net name it is attached to. A net
+	 * label doesn't 'force' its Net on the attached junction, it merely
+	 * tells its Net name.
+	 */
 	class NetLabel {
 		public :
 			NetLabel(const UUID &uu, const json &j, class Sheet &sheet);

@@ -8,13 +8,22 @@
 
 namespace horizon {
 	enum class Orientation {LEFT, RIGHT, UP, DOWN};
+	/**
+	 * Used in conjunction with a UUID/UUIDPath to identify an object.
+	 */
 	enum class ObjectType {
 		INVALID, JUNCTION, LINE, SYMBOL_PIN, ARC, SCHEMATIC_SYMBOL,
 		TEXT, LINE_NET, COMPONENT, NET, NET_LABEL, POWER_SYMBOL, BUS,
 		BUS_LABEL, BUS_RIPPER, POLYGON, POLYGON_VERTEX, POLYGON_EDGE, POLYGON_ARC_CENTER,
 		HOLE, PAD, BOARD_PACKAGE, TRACK, VIA
 	};
-	
+	/**
+	 * Your typical coordinate class.
+	 * Supports some mathematical operators as required.
+	 * Unless otherwise noted, 1 equals 1 nm (that is nanometer, not nautical mile)
+	 * Instead of instantiating the template on your own, you want to use Coordf (float) for calculations
+	 * that will end up only on screen and Coordi (int64_t) for everything else.
+	 */
 	template <typename T>class Coord {
 		public :
 			T x;
@@ -38,18 +47,38 @@ namespace horizon {
 			bool operator== (const Coord<T>  &a) const {return a.x == x && a.y==y;}
 			bool operator!= (const Coord<T>  &a) const {return !(a==*this);}
 			
+			/**
+			 * @returns element-wise minimum of \p a and \p b
+			 */
 			static Coord<T> min(const Coord<T> &a, const Coord<T> &b) {
 				return Coord<T>(std::min(a.x, b.x), std::min(a.y, b.y));
 			}
+
+			/**
+			 * @returns element-wise maximum of \p a and \p b
+			 */
 			static Coord<T> max(const Coord<T> &a, const Coord<T> &b) {
 				return Coord<T>(std::max(a.x, b.x), std::max(a.y, b.y));
 			}
 			
+			/**
+			 * @param r magnitude
+			 * @param phi angle in radians
+			 * @returns coordinate specified by \p r and \p phi
+			 */
 			static Coord<float> euler(float r, float phi) {
 				return Coord<float>(r*cos(phi), r*sin(phi));
 			}
 			
+			/**
+			 * @param a other coordinate
+			 * @returns dot product of \p a and this
+			 */
 			T dot(const Coord<T> &a) const {return x*a.x+y*a.y;}
+
+			/**
+			 * @returns squared magnitude of this
+			 */
 			T mag_sq() const {return x*x+y*y;}
 
 			void operator+= (const Coord<T> a) {x+=a.x; y+=a.y;}
@@ -62,7 +91,6 @@ namespace horizon {
 	};
 	
 
-	
 	typedef Coord<float> Coordf;
 	typedef Coord<int64_t> Coordi;
 	

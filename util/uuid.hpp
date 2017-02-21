@@ -8,6 +8,10 @@
 #include <iostream>
 
 namespace horizon {
+	/**
+	 *  This class encapsulates a %UUID and allows it to be uses as a value type.
+	 *  It uses uuid.h from libutil or the %UUID function from the win32 rpc api ( see util/uuid_win32.hpp )
+	 */
 	class UUID {
 		public :
 			UUID();
@@ -19,7 +23,9 @@ namespace horizon {
 				uuid_unparse(uu, str);
 				return std::string(str);
 			}
-			
+			/**
+			 *  @return true if uuid is non-null, false otherwise
+			 */
 			operator bool() const {
 				return !uuid_is_null(uu);
 			}

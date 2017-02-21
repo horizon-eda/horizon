@@ -14,6 +14,13 @@
 namespace horizon {
 	using json = nlohmann::json;
 
+	/**
+	 * A block is one level of hierarchy in the netlist.
+	 * Right now, horizon doesn't support hierarchical designs, but provisions have been made
+	 * where necessary.
+	 *
+	 * A block stores Components (instances of Entities), Buses and Nets.
+	 */
 	class Block:public Object {
 		public :
 			Block(const UUID &uu, const json &, Pool &pool, Constraints *constr);
@@ -30,9 +37,26 @@ namespace horizon {
 			void operator=(const Block &block);
 
 			void merge_nets(Net *net, Net *into);
+
+			/**
+			 * deletes unreferenced nets
+			 */
 			void vacuum_nets();
+
+			/**
+			 * Takes pins specified by pins and moves them over to net
+			 * \param pins UUIDPath of component, gate and pin UUID
+			 * \param net the destination Net or nullptr for new Net
+			 */
 			Net *extract_pins(const std::set<UUIDPath<3>> &pins, Net *net=nullptr);
+
+
 			void update_connection_count();
+
+			/**
+			 * creates new net
+			 * \returns pointer to new Net
+			 */
 			Net *insert_net();
 
 			json serialize();

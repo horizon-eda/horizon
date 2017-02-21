@@ -5,12 +5,20 @@
 
 namespace horizon {
 
+	/**
+	 * Stores a sequence of up to 3 UUIDs.
+	 * Is used in various places for referencing objects owned by another object,
+	 * i.e. Pin of a Unit
+	 */
 	template<unsigned int N> class UUIDPath {
 		public :
 			UUIDPath() {}
 			UUIDPath(const UUID &uu):path({uu, uu}) {}
 			UUIDPath(const UUID &uu0, const UUID &uu1):path({uu0, uu1}) {}
 			UUIDPath(const UUID &uu0, const UUID &uu1, const UUID &uu2):path({uu0, uu1, uu2}) {}
+			/**
+			 * Constructs UUIDPath from up to two UUIDs separated by a /
+			 */
 			UUIDPath(const std::string &str) {
 				if(N==1) {
 					path[0] = str;
@@ -20,6 +28,9 @@ namespace horizon {
 					path[1] = str.substr(37, 36);
 				}
 			}
+			/**
+			 * @returns a string representation of the path with the individual UUIDs separated by a /
+			 */
 			operator std::string() const {
 				if(N==1) {
 					return path[0];

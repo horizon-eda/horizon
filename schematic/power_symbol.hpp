@@ -15,6 +15,10 @@ namespace horizon {
 	using json = nlohmann::json;
 
 
+	/**
+	 * GND symbols and the like. A PowerSymbol is associated with a power Net and will make
+	 * its junction connected to this Net.
+	 */
 	class PowerSymbol: UUIDProvider{
 		public :
 			PowerSymbol(const UUID &uu, const json &j, class Sheet &sheet, class Block &block);

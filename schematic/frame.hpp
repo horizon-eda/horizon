@@ -10,6 +10,9 @@
 namespace horizon {
 	using json = nlohmann::json;
 
+	/**
+	 * Border around a sheet. Will include title block in future releases.
+	 */
 	class Frame {
 		public :
 			Frame(const json &j);

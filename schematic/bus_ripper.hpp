@@ -15,6 +15,9 @@
 namespace horizon {
 	using json = nlohmann::json;
 
+	/**
+	 * Make a Bus member's Net available on the schematic.
+	 */
 	class BusRipper : public UUIDProvider{
 		public :
 			BusRipper(const UUID &uu, const json &j, class Sheet &sheet, class Block &block);

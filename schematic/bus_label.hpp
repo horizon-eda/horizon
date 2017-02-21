@@ -14,6 +14,10 @@
 namespace horizon {
 	using json = nlohmann::json;
 
+	/**
+	 * Makes a Bus available on the schematic. Contrary to NetLabel, a BusLabel
+	 * forces its Bus on the attached Junction.
+	 */
 	class BusLabel {
 		public :
 			BusLabel(const UUID &uu, const json &j, class Sheet &sheet, class Block &block);

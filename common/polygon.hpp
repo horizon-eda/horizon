@@ -13,7 +13,10 @@
 namespace horizon {
 	using json = nlohmann::json;
 
-
+	/**
+	 * Polygon used in Padstack, Package and Board for
+	 * specifying filled Regions. Edges may either be straight lines or arcs.
+	 */
 	class Polygon {
 		public :
 			class Vertex {
@@ -29,6 +32,10 @@ namespace horizon {
 				Type type = Type::LINE;
 				Coordi position;
 				Coordi arc_center;
+				/**
+				 * false: counter clockwise \n
+				 * true: clockwise
+				 */
 				bool arc_reverse = false;
 			};
 
@@ -37,7 +44,15 @@ namespace horizon {
 			Polygon(const UUID &uu);
 			Vertex *append_vertex(const Coordi &pos=Coordi());
 			std::pair<unsigned int, unsigned int> get_vertices_for_edge(unsigned int edge);
+			/**
+			 * @param precision how many line segments per arc
+			 * @returns a new Polygon that has the arcs replaced by straight line segments
+			 */
 			Polygon remove_arcs(unsigned int precision=16) const;
+
+			/**
+			 * @returns true if any edge is an arc
+			 */
 			bool has_arcs() const;
 			bool is_valid() const;
 

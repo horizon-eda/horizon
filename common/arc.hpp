@@ -13,7 +13,12 @@
 namespace horizon {
 	using json = nlohmann::json;
 	
-	
+	/**
+	 * Graphical arc. Same as a Line, an Arc is decorative only.
+	 * Since the Arc is over-dimensioned by three coordinates,
+	 * the renderer may choose not to render it when its coordinates
+	 * don't form a correct arc.
+	 */
 	class Arc {
 		public :
 			Arc(const UUID &uu, const json &j, Object &obj);

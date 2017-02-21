@@ -55,6 +55,9 @@ namespace horizon {
 			
 			json serialize() const ;
 
+			/**
+			 * fills in information from the referenced unit
+			 */
 			void expand();
 			Symbol(const Symbol &sym);
 			void operator=(Symbol const &sym);

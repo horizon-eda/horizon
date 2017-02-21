@@ -15,7 +15,14 @@
 namespace horizon {
 	using json = nlohmann::json;
 	
-	
+	/**
+	 * A Junction is a point in 2D-Space.
+	 * A Junction is referenced by Line, Arc, LineNet, etc.\ for storing coordinates.
+	 * This allows for actually storing Line connections instead of relying
+	 * on coincident coordinates.
+	 * When used on a Board or a Sheet, a Junction may get assigned a Net
+	 * or a Bus and a net segment.
+	 */
 	class Junction: public UUIDProvider {
 		public :
 			Junction(const UUID &uu, const json &j);
@@ -23,13 +30,14 @@ namespace horizon {
 
 			UUID uuid;
 			Coord<int64_t> position;
-			uuid_ptr<Net> net=nullptr;
-			uuid_ptr<Bus> bus = nullptr;
-			UUID net_segment = UUID();
+
 
 			virtual UUID get_uuid() const ;
 			
 			//not stored
+			uuid_ptr<Net> net=nullptr;
+			uuid_ptr<Bus> bus = nullptr;
+			UUID net_segment = UUID();
 			bool temp;
 			bool warning = false;
 			int layer = 10000;
