@@ -3,11 +3,7 @@
 #include "uuid.hpp"
 #include "json_fwd.hpp"
 #include <map>
-#ifdef G_OS_WIN32
-	#include "zmq_win.hpp"
-#else
-	#include <zmq.hpp>
-#endif
+#include <zmq.hpp>
 
 namespace horizon {
 	using json = nlohmann::json;

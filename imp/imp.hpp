@@ -17,11 +17,10 @@
 #include "keyseq_dialog.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "checks/check_runner.hpp"
+#include <zmq.hpp>
+
 #ifdef G_OS_WIN32
-	#include "zmq_win.hpp"
 	#undef DELETE
-#else
-	#include <zmq.hpp>
 #endif
 
 namespace horizon {
