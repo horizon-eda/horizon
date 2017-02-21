@@ -225,7 +225,7 @@ namespace horizon {
 
 		get_content_area()->pack_start(*box, true, true, 0);
 		get_content_area()->set_border_width(0);
-
+		update_bus_removable();
 		show_all();
 	}
 
@@ -239,9 +239,15 @@ namespace horizon {
 	}
 
 	void ManageBusesDialog::update_bus_removable() {
-		auto bus_current_uuid = UUID(stack->get_visible_child_name());
-		const auto bus = core->get_schematic()->block->buses.at(bus_current_uuid);
-		delete_button->set_sensitive(!bus.is_referenced);
+		auto vc = stack->get_visible_child_name();
+		if(vc.size()) {
+			auto bus_current_uuid = UUID(stack->get_visible_child_name());
+			const auto bus = core->get_schematic()->block->buses.at(bus_current_uuid);
+			delete_button->set_sensitive(!bus.is_referenced);
+		}
+		else {
+			delete_button->set_sensitive(false);
+		}
 	}
 
 	void ManageBusesDialog::add_bus() {
