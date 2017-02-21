@@ -48,6 +48,7 @@ SRC_COMMON = \
 	constraints/clearance.cpp \
 	project/project.cpp\
 	resources.cpp\
+	gitversion.cpp\
 	
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += util/uuid_win32.cpp
@@ -237,6 +238,9 @@ OBJ_COMMON = $(SRC_COMMON:.cpp=.o)
 
 resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=. --generate-dependencies imp.gresource.xml)
 	$(GLIB_COMPILE_RESOURCES) imp.gresource.xml --target=$@ --sourcedir=. --generate-source
+
+gitversion.cpp: .git/HEAD .git/index
+	echo "const char *gitversion = \"$(shell git log -1 --pretty="format:%h %ci %s")\";" > $@
 
 horizon-imp: $(OBJ_COMMON) $(SRC_IMP:.cpp=.o)
 	$(CC) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq) -o $@

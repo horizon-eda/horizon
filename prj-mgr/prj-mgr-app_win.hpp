@@ -74,6 +74,7 @@ namespace horizon {
 			Gtk::Button *button_save = nullptr;
 			Gtk::HeaderBar *header = nullptr;
 			Gtk::RecentChooserWidget *recent_chooser = nullptr;
+			Gtk::Label *label_gitversion = nullptr;
 
 			std::unique_ptr<Project> project= nullptr;
 			std::string project_filename;

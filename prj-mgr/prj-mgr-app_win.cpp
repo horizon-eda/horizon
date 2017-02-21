@@ -4,6 +4,7 @@
 #include "project/project.hpp"
 #include "json.hpp"
 #include "util.hpp"
+extern const char *gitversion;
 
 namespace horizon {
 
@@ -187,6 +188,7 @@ namespace horizon {
 		builder->get_widget("button_save", button_save);
 		builder->get_widget("header", header);
 		builder->get_widget("recent_chooser", recent_chooser);
+		builder->get_widget("label_gitversion", label_gitversion);
 		set_view_mode(ViewMode::OPEN);
 
 		button_open->signal_clicked().connect(sigc::mem_fun(this, &ProjectManagerAppWindow::handle_open));
@@ -198,6 +200,7 @@ namespace horizon {
 		recent_chooser->signal_item_activated().connect(sigc::mem_fun(this, &ProjectManagerAppWindow::handle_recent));
 
 		view_create.signal_valid_change().connect([this] (bool v) {button_create->set_sensitive(v);});
+		label_gitversion->set_label(gitversion);
 
 		set_icon(Gdk::Pixbuf::create_from_resource("/net/carrotIndustries/horizon/icon.svg"));
 	}

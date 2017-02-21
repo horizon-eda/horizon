@@ -10,6 +10,7 @@ horizon-prj-mgr
 *~
 .gdb_history
 resources.cpp
+gitversion.cpp
 .cproject
 .settings
 .project
@@ -18,3 +19,4 @@ example/pool/*.db
 *.exe
 *.zip
 dist
+*.trace
