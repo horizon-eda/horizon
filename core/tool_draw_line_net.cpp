@@ -16,39 +16,38 @@ namespace horizon {
 	ToolResponse ToolDrawLineNet::begin(const ToolArgs &args) {
 		std::cout << "tool draw net line junction\n";
 		
-		temp_junc = core.c->insert_junction(UUID::random());
-		temp_junc->temp = true;
-		temp_junc->position = args.coords;
-		temp_line = nullptr;
+		temp_junc_head = core.c->insert_junction(UUID::random());
+		temp_junc_head->temp = true;
+		temp_junc_head->position = args.coords;
 		core.c->selection.clear();
-		
+
 		return ToolResponse();
 	}
 
 	void ToolDrawLineNet::move_temp_junc(const Coordi &c) {
-		if(!temp_line) {
-			temp_junc->position = c;
-		}
-		else {
-			switch(restrict_mode) {
-				case Restrict::NONE :
-					temp_junc->position = c;
-				break;
+		temp_junc_head->position = c;
+		if(temp_line_head){
+			auto tail_pos = temp_line_mid->from.get_position();
+			auto head_pos = temp_junc_head->position;
 
-				case Restrict::X :
-					temp_junc->position = {c.x, temp_line->from.get_position().y};
-				break;
-				case Restrict::Y :
-					temp_junc->position = {temp_line->from.get_position().x, c.y};
-				break;
+			if(bend_mode == BendMode::XY) {
+				temp_junc_mid->position = {head_pos.x, tail_pos.y};
+			}
+			else if(bend_mode == BendMode::YX) {
+				temp_junc_mid->position = {tail_pos.x, head_pos.y};
+			}
+			else if(bend_mode == BendMode::ARB) {
+				temp_junc_mid->position = tail_pos;
 			}
 		}
 	}
 
 	int ToolDrawLineNet::merge_nets(Net *net, Net *into) {
-		//fixme: mergeing bussed power nets :|
 		if(net->is_bussed || into->is_bussed) {
-			if(net->is_bussed && into->is_bussed) {
+			if(net->is_power || into->is_power) {
+				return 1; //don't merge power and bus
+			}
+			else if(net->is_bussed && into->is_bussed) {
 				return 1; //can't merge bussed nets
 			}
 			else if(!net->is_bussed && into->is_bussed) {
@@ -57,6 +56,7 @@ namespace horizon {
 			else if(net->is_bussed && !into->is_bussed) {
 				std::swap(net, into);
 			}
+
 		}
 		else if(net->is_power || into->is_power) {
 			if(net->is_power && into->is_power) {
@@ -89,15 +89,18 @@ namespace horizon {
 		core.c->get_schematic()->expand(true); //be careful
 
 		std::cout << "merging nets" << std::endl;
-		return 0;
+		return 0; //merged, 1: error
 	}
 
-	ToolResponse ToolDrawLineNet::end(bool delete_junction) {
-		temp_junc->temp = false;
-		if(delete_junction)
-			core.c->delete_junction(temp_junc->uuid);
-		core.c->commit();
-		return ToolResponse::end();
+	Junction *ToolDrawLineNet::make_temp_junc(const Coordi &c) {
+		Junction *j = core.r->insert_junction(UUID::random());
+		j->position = c;
+		j->temp = true;
+		return j;
+	}
+
+	ToolResponse ToolDrawLineNet::end() {
+		return ToolResponse::next(ToolID::DRAW_NET);
 	}
 
 	ToolResponse ToolDrawLineNet::update(const ToolArgs &args) {
@@ -106,223 +109,260 @@ namespace horizon {
 		}
 		else if(args.type == ToolEventType::CLICK) {
 			if(args.button == 1) {
-				if(args.target.type == ObjectType::JUNCTION) {
-					uuid_ptr<Junction> j = core.c->get_junction(args.target.path.at(0));
-					if(temp_line != nullptr) {
-						UUID tlu = temp_line->uuid;
-						if(temp_line->bus || j->bus) { //either is bus
-							if(temp_line->net || j->net)
-								return ToolResponse(); //bus-net illegal
-
-							if(temp_line->bus && j->bus) { //both are bus
-								if(temp_line->bus != j->bus) //not the same bus
-									return ToolResponse(); //illegal
-							}
-							else if(temp_line->bus && !j->bus) {
-								j->bus = temp_line->bus;
-							}
-							else if(!temp_line->bus && j->bus) {
-								temp_line->bus = j->bus;
-							}
-						}
-						if(temp_line->net && j->net && j->net.uuid != temp_line->net->uuid) {
-							if(merge_nets(j->net, temp_line->net)) {
-								return ToolResponse();
-							}
-						}
-						if(j->net) {
-							temp_line->net = j->net;
-						}
-						else {
-							j->net = temp_line->net;
-						}
-						temp_line->to.connect(j);
-						Sheet *sh = core.c->get_sheet();
-						assert(sh->junctions.count(j.uuid));
-						assert(sh->net_lines.count(tlu));
-
-						return end();
-
+				Junction *ju = nullptr;
+				SchematicSymbol *sym = nullptr;
+				SymbolPin *pin = nullptr;
+				BusRipper *rip = nullptr;
+				Net *net = nullptr;
+				Bus *bus = nullptr;
+				if(!temp_line_head) { //no line yet, first click
+					if(args.target.type == ObjectType::JUNCTION) {
+						ju = core.r->get_junction(args.target.path.at(0));
+						net = ju->net;
+						bus = ju->bus;
 					}
+					else if(args.target.type == ObjectType::SYMBOL_PIN) {
+						sym = core.c->get_schematic_symbol(args.target.path.at(0));
+						pin = &sym->pool_symbol->pins.at(args.target.path.at(1));
+						UUIDPath<2> connpath(sym->gate->uuid, args.target.path.at(1));
 
-					temp_line = core.c->insert_line_net(UUID::random());
-					temp_junc->net = j->net;
-					temp_junc->bus = j->bus;
-					temp_line->from.connect(j);
-					temp_line->to.connect(temp_junc);
-					temp_line->net = j->net;
-					temp_line->bus = j->bus;
-
-				}
-				else if(args.target.type == ObjectType::SYMBOL_PIN) {
-					SchematicSymbol *sym = core.c->get_schematic_symbol(args.target.path.at(0));
-					UUIDPath<2> connpath(sym->gate->uuid, args.target.path.at(1));
-
-					if(sym->component->connections.count(connpath)) {
-						Connection &conn = sym->component->connections.at(connpath);
-						if(temp_line != nullptr) {
-							if(temp_line->bus) {
-								return ToolResponse();
-							}
-							if(temp_line->net && (temp_line->net->uuid != conn.net->uuid)) {
-								if(merge_nets(conn.net, temp_line->net)) {
-									return ToolResponse();
-								}
-							}
-							temp_line->to.connect(sym, &sym->pool_symbol->pins.at(args.target.path.at(1)));
-							return end();
+						if(sym->component->connections.count(connpath)) { //pin is connected
+							Connection &conn = sym->component->connections.at(connpath);
+							net = conn.net;
 						}
-						else {
-							temp_line = core.c->insert_line_net(UUID::random());
-							temp_line->from.connect(sym, &sym->pool_symbol->pins.at(args.target.path.at(1)));
-							temp_line->to.connect(temp_junc);
-							temp_junc->net = conn.net;
-							temp_line->net = conn.net;
-						}
-					}
-					else {
-						Net *net = nullptr;
-						bool have_line = false;
-						if(temp_line != nullptr) { //already have line
-							if(temp_line->bus) {
-								return ToolResponse();
-							}
-							if(!temp_line->net) { //temp line has no net, create one
-								net = core.c->get_schematic()->block->insert_net();
-								temp_line->net = net;
-							}
-							else { //temp line has net
-								net = temp_line->net;
-							}
-							sym->component->connections.emplace(connpath, static_cast<Net*>(temp_line->net));
-							//terminate line
-							temp_line->to.connect(sym, &sym->pool_symbol->pins.at(args.target.path.at(1)));
-							have_line = true;
-						}
-						//create new line and net
-						if(!net) {
+						else { //pin needs net
 							net = core.c->get_schematic()->block->insert_net();
 							sym->component->connections.emplace(connpath, net);
 						}
-						if(have_line) {
-							return end();
+					}
+					else if(args.target.type == ObjectType::BUS_RIPPER) {
+						rip = &core.c->get_sheet()->bus_rippers.at(args.target.path.at(0));
+						net = rip->bus_member->net;
+					}
+					else { //unknown or no target
+						ju = make_temp_junc(args.coords);
+						for(auto it: core.c->get_net_lines()) {
+							if(it->coord_on_line(temp_junc_head->position)) {
+								if(it != temp_line_head && it != temp_line_mid) {
+									bool is_temp_line = false;
+									for(const auto &it_ft: {it->from, it->to}) {
+										if(it_ft.is_junc()) {
+											if(it_ft.junc->temp)
+												is_temp_line = true;
+										}
+									}
+									if(!is_temp_line) {
+										auto li = core.c->get_sheet()->split_line_net(it, ju);
+										net = li->net;
+										bus = li->bus;
+										ju->net = li->net;
+										ju->bus = li->bus;
+										ju->connection_count = 3;
+										break;
+									}
+								}
+							}
 						}
-
-						temp_line = core.c->insert_line_net(UUID::random());
-						temp_line->from.connect(sym, &sym->pool_symbol->pins.at(args.target.path.at(1)));
-						temp_line->to.connect(temp_junc);
-						temp_junc->net = net;
-						temp_line->net = net;
 
 					}
 
+					temp_junc_mid = make_temp_junc(args.coords);
+					temp_junc_mid->net = net;
+					temp_junc_mid->bus = bus;
+					temp_junc_head->net = net;
+					temp_junc_head->bus = bus;
+
 				}
-				else if(args.target.type == ObjectType::BUS_RIPPER) {
-					BusRipper *ripper = &core.c->get_sheet()->bus_rippers.at(args.target.path.at(0));
-					if(temp_line != nullptr) {
-						if(temp_line->bus) {
+				else { //already have net line
+					if(args.target.type == ObjectType::JUNCTION) {
+						ju = core.r->get_junction(args.target.path.at(0));
+						if(temp_line_head->bus || ju->bus) { //either is bus
+							if(temp_line_head->net || ju->net)
+								return ToolResponse(); //bus-net illegal
+
+							if(temp_line_head->bus && ju->bus) { //both are bus
+								if(temp_line_head->bus != ju->bus) { //not the same bus
+									return ToolResponse(); //illegal
+								}
+								else  {
+									temp_line_head->to.connect(ju);
+									core.r->delete_junction(temp_junc_head->uuid);
+									core.r->commit();
+									return end();
+								}
+							}
+							if((temp_line_head->bus && !ju->bus) || (!temp_line_head->bus && ju->bus)) {
+								temp_line_head->to.connect(ju);
+								core.r->delete_junction(temp_junc_head->uuid);
+								core.r->commit();
+								return end();
+							}
+							assert(false); //dont go here
+						}
+						else if(temp_line_head->net && ju->net && ju->net.uuid != temp_line_head->net->uuid) { //both have nets, need to merge
+							if(merge_nets(ju->net, temp_line_head->net)) {
+								return ToolResponse();
+							}
+							else {
+								temp_line_head->to.connect(ju);
+								core.r->delete_junction(temp_junc_head->uuid);
+								core.r->commit();
+								return end();
+							}
+						}
+						else  { //just connect it
+							temp_line_head->to.connect(ju);
+							core.r->delete_junction(temp_junc_head->uuid);
+							core.r->commit();
+							return end();
+						}
+					}
+					else if(args.target.type == ObjectType::SYMBOL_PIN) {
+						sym = core.c->get_schematic_symbol(args.target.path.at(0));
+						pin = &sym->pool_symbol->pins.at(args.target.path.at(1));
+						UUIDPath<2> connpath(sym->gate->uuid, args.target.path.at(1));
+						if(temp_line_head->bus) { //can't connect bus to pin
 							return ToolResponse();
 						}
-						if(temp_line->net && (temp_line->net->uuid != ripper->bus_member->net->uuid)) {
-							if(merge_nets(ripper->bus_member->net, temp_line->net)) {
+						if(sym->component->connections.count(connpath)) { //pin is connected
+							Connection &conn = sym->component->connections.at(connpath);
+							if(temp_line_head->net && (temp_line_head->net->uuid != conn.net->uuid)) { //has net
+								if(merge_nets(conn.net, temp_line_head->net)) {
+									return ToolResponse();
+								}
+							}
+						}
+						else { //pin needs net
+							if(temp_junc_head->net) {
+								net = temp_junc_head->net;
+							}
+							else {
+								net = core.c->get_schematic()->block->insert_net();
+							}
+							sym->component->connections.emplace(connpath, net);
+						}
+						temp_line_head->to.connect(sym, pin);
+						core.r->delete_junction(temp_junc_head->uuid);
+						core.r->commit();
+						return end();
+					}
+					else if(args.target.type == ObjectType::BUS_RIPPER) {
+						rip = &core.c->get_sheet()->bus_rippers.at(args.target.path.at(0));
+						net = rip->bus_member->net;
+						if(temp_line_head->bus) { //can't connect bus to bus ripper
+							return ToolResponse();
+						}
+						if(temp_line_head->net && (temp_line_head->net->uuid != net->uuid)) { //has net
+							if(merge_nets(net, temp_line_head->net)) {
 								return ToolResponse();
 							}
 						}
-						temp_line->to.connect(ripper);
+
+						temp_line_head->to.connect(rip);
+						core.r->delete_junction(temp_junc_head->uuid);
+						core.r->commit();
 						return end();
 					}
-					temp_line = core.c->insert_line_net(UUID::random());
-					temp_line->from.connect(ripper);
-					temp_line->to.connect(temp_junc);
-					temp_junc->net = ripper->bus_member->net;
-					temp_line->net = ripper->bus_member->net;
-				}
-
-				else {
-					Junction *last = temp_junc;
-
-
-					for(auto it: core.c->get_net_lines()) {
-						if(it->coord_on_line(temp_junc->position)) {
-							if(it != temp_line) {
-								bool is_temp_line = false;
-								for(const auto &it_ft: {it->from, it->to}) {
-									if(it_ft.is_junc()) {
-										if(it_ft.junc->temp)
-											is_temp_line = true;
-									}
-								}
-								if(!is_temp_line) {
-									std::cout << "on line" << (std::string)it->uuid << std::endl;
-									if(temp_junc->bus || it->bus) { //either is bus
-										if(temp_junc->net || it->net)
-											return ToolResponse(); //bus-net illegal
-
-										if(temp_junc->bus && it->bus) { //both are bus
-											if(temp_junc->bus != it->bus) //not the same bus
-												return ToolResponse(); //illegal
-										}
-										else if(temp_junc->bus && !it->bus) {
-											it->bus = temp_junc->bus;
-										}
-										else if(!temp_junc->bus && it->bus) {
-											temp_junc->bus = it->bus;
+					else { //unknown or no target
+						ju = temp_junc_head;
+						for(auto it: core.c->get_net_lines()) {
+							if(it->coord_on_line(temp_junc_head->position)) {
+								if(it != temp_line_head && it != temp_line_mid) {
+									bool is_temp_line = false;
+									for(const auto &it_ft: {it->from, it->to}) {
+										if(it_ft.is_junc()) {
+											if(it_ft.junc->temp)
+												is_temp_line = true;
 										}
 									}
-									if(temp_junc->net && it->net && it->net.uuid != temp_junc->net->uuid) {
-										if(merge_nets(it->net, temp_junc->net)) {
-											return ToolResponse();
+									if(!is_temp_line) {
+										net = it->net;
+										bus = it->bus;
+
+										if(temp_line_head->bus || it->bus) { //either is bus
+											if(temp_line_head->net || it->net)
+												return ToolResponse(); //bus-net illegal
+
+											if(temp_line_head->bus && it->bus) { //both are bus
+												if(temp_line_head->bus != it->bus) { //not the same bus
+													return ToolResponse(); //illegal
+												}
+												else  {
+													core.c->get_sheet()->split_line_net(it, ju);
+													core.r->commit();
+													return end();
+												}
+											}
+											if((temp_line_head->bus && !ju->bus) || (!temp_line_head->bus && ju->bus)) {
+												core.c->get_sheet()->split_line_net(it, ju);
+												core.r->commit();
+												return end();
+											}
+											assert(false); //dont go here
 										}
+										else if(temp_line_head->net && it->net && it->net.uuid != temp_line_head->net->uuid) { //both have nets, need to merge
+											if(merge_nets(it->net, temp_line_head->net)) {
+												return ToolResponse();
+											}
+											else {
+												core.c->get_sheet()->split_line_net(it, ju);
+												core.r->commit();
+												return end();
+											}
+										}
+										else  { //just connect it
+											core.c->get_sheet()->split_line_net(it, ju);
+											core.r->commit();
+											return end();
+										}
+										break;
 									}
-									auto li = core.c->get_sheet()->split_line_net(it, temp_junc);
-									temp_junc->net = li->net;
-									temp_junc->bus = li->bus;
-
-									if(temp_line)
-										return end(false);
-
-									break;
 								}
 							}
 						}
-					}
-					temp_junc = core.c->insert_junction(UUID::random());
-					temp_junc->temp = true;
-					temp_junc->position = args.coords;
-					if(last && temp_line) {
-						temp_line->net = last->net;
-						temp_line->bus = last->bus;
-					}
-					if(temp_line) {
-						temp_junc->net = temp_line->net;
-						temp_junc->bus = temp_line->bus;
-					}
-					if(last) {
-						temp_junc->net = last->net;
-						temp_junc->bus = last->bus;
-					}
-					
-					temp_line = core.c->insert_line_net(UUID::random());
-					temp_line->from.connect(last);
-					temp_line->to.connect(temp_junc);
-					temp_line->net = last->net;
-					temp_line->bus = last->bus;
+						net = ju->net;
+						bus = ju->bus;
+						temp_junc_mid = make_temp_junc(args.coords);
+						temp_junc_mid->net = net;
+						temp_junc_mid->bus= bus;
 
-					if(restrict_mode == Restrict::X) {
-						restrict_mode = Restrict::Y;
-					}
-					else if(restrict_mode == Restrict::Y) {
-						restrict_mode = Restrict::X;
+						temp_junc_head = make_temp_junc(args.coords);
+						temp_junc_head->net = net;
+						temp_junc_head->bus= bus;
 					}
 				}
+				temp_line_mid = core.c->insert_line_net(UUID::random());
+				temp_line_mid->net = net;
+				temp_line_mid->bus = bus;
+				if(ju) {
+					temp_line_mid->from.connect(ju);
+				}
+				else if(sym){
+					temp_line_mid->from.connect(sym, pin);
+				}
+				else if(rip){
+					temp_line_mid->from.connect(rip);
+				}
+				else {
+					assert(false);
+				}
+				temp_line_mid->to.connect(temp_junc_mid);
+
+				temp_line_head = core.c->insert_line_net(UUID::random());
+				temp_line_head->net = net;
+				temp_line_head->bus = bus;
+				temp_line_head->from.connect(temp_junc_mid);
+				temp_line_head->to.connect(temp_junc_head);
+
 			}
 			else if(args.button == 3) {
-				if(temp_line) {
-					core.c->delete_line_net(temp_line->uuid);
-					temp_line = nullptr;
+				if(temp_line_head) {
+					core.c->delete_line_net(temp_line_head->uuid);
+					core.c->delete_line_net(temp_line_mid->uuid);
+					core.r->delete_junction(temp_junc_mid->uuid);
 				}
-				core.c->delete_junction(temp_junc->uuid);
-				temp_junc = nullptr;
+				core.r->delete_junction(temp_junc_head->uuid);
+
 				core.c->commit();
 				return ToolResponse::end();
 			}
@@ -332,20 +372,46 @@ namespace horizon {
 				core.c->revert();
 				return ToolResponse::end();
 			}
-			if(args.key == GDK_KEY_slash) {
-				if(restrict_mode == Restrict::NONE) {
-					restrict_mode = Restrict::X;
+			else if(args.key == GDK_KEY_space) {
+				Junction *ju = temp_junc_head;
+				temp_junc_mid = make_temp_junc(args.coords);
+				temp_junc_mid->net = ju->net;
+				temp_junc_mid->bus= ju->bus;
+
+				temp_junc_head = make_temp_junc(args.coords);
+				temp_junc_head->net = ju->net;
+				temp_junc_head->bus= ju->bus;
+
+				temp_line_mid = core.c->insert_line_net(UUID::random());
+				temp_line_mid->net = ju->net;
+				temp_line_mid->bus = ju->bus;
+				temp_line_mid->from.connect(ju);
+				temp_line_mid->to.connect(temp_junc_mid);
+
+				temp_line_head = core.c->insert_line_net(UUID::random());
+				temp_line_head->net = ju->net;
+				temp_line_head->bus = ju->bus;
+				temp_line_head->from.connect(temp_junc_mid);
+				temp_line_head->to.connect(temp_junc_head);
+
+			}
+			else if(args.key == GDK_KEY_Return) {
+				core.c->commit();
+				return ToolResponse::end();
+			}
+			else if(args.key == GDK_KEY_slash) {
+				switch(bend_mode) {
+					case BendMode::XY: bend_mode=BendMode::YX; break;
+					case BendMode::YX: bend_mode=BendMode::XY; break;
+					default: bend_mode=BendMode::XY;
 				}
-				else if(restrict_mode == Restrict::X) {
-					restrict_mode = Restrict::Y;
-				}
-				else if(restrict_mode == Restrict::Y) {
-					restrict_mode = Restrict::NONE;
-				}
+				move_temp_junc(args.coords);
+			}
+			else if(args.key == GDK_KEY_a) {
+				bend_mode = BendMode::ARB;
 				move_temp_junc(args.coords);
 			}
 		}
 		return ToolResponse();
 	}
-	
 }
