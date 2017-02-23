@@ -62,7 +62,11 @@ namespace horizon {
 				}
 			}
 			else if(it.type == ObjectType::SCHEMATIC_SYMBOL) {
-				core.c->get_schematic()->disconnect_symbol(core.c->get_sheet(), core.c->get_schematic_symbol(it.uuid));
+				auto sym = core.c->get_schematic_symbol(it.uuid);
+				core.c->get_schematic()->disconnect_symbol(core.c->get_sheet(), sym);
+				for(const auto &it_text: sym->texts) {
+					delete_extra.emplace(it_text->uuid, ObjectType::TEXT);
+				}
 			}
 			else if(it.type == ObjectType::BOARD_PACKAGE) {
 				core.b->get_board()->disconnect_package(&core.b->get_board()->packages.at(it.uuid));
