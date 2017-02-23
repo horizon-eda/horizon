@@ -125,6 +125,11 @@ namespace horizon {
 		selection_filter_button->show();
 		main_window->top_panel->pack_start(*selection_filter_button, false, false, 0);
 
+		auto help_button = Gtk::manage(new Gtk::Button("Help"));
+		help_button->signal_clicked().connect([this]{key_sequence_dialog->show();});
+		help_button->show();
+		main_window->top_panel->pack_end(*help_button, false, false, 0);
+
 		checks_window = ChecksWindow::create(main_window, check_runner.get(), canvas);
 
 		{
