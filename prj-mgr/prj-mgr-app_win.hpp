@@ -96,6 +96,7 @@ namespace horizon {
 
 			bool close_project();
 			bool on_delete_event(GdkEventAny *ev) override;
+			bool check_pools();
 
 	};
 };

@@ -177,6 +177,17 @@ namespace horizon {
 		}
 	}
 
+	bool ProjectManagerAppWindow::check_pools() {
+		auto mapp = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
+		if(mapp->pools.size()==0){
+			Gtk::MessageDialog md(*this,  "No pools set up", false , Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK);
+			md.set_secondary_text("You haven't set up any pools, add some in the preferences dialog");
+			md.run();
+			return false;
+		}
+		return true;
+	}
+
 	ProjectManagerAppWindow::ProjectManagerAppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refBuilder):
 			Gtk::ApplicationWindow(cobject), builder(refBuilder), view_create(builder), view_project(builder, this) {
 		builder->get_widget("stack", stack);
@@ -203,9 +214,21 @@ namespace horizon {
 		label_gitversion->set_label(gitversion);
 
 		set_icon(Gdk::Pixbuf::create_from_resource("/net/carrotIndustries/horizon/icon.svg"));
+
+		/*
+		 * 	auto mapp = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
+		if(mapp && mapp->pools.size()==0){
+			Gtk::MessageDialog md(*this,  "No pools set up", false , Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK);
+			md.set_secondary_text("You haven't set up any pools, add some in the preferences dialog");
+			md.run();
+		}
+		 */
+		Glib::signal_idle().connect_once([this]{check_pools();});
 	}
 
 	void ProjectManagerAppWindow::handle_new() {
+		if(!check_pools())
+			return;
 		set_view_mode(ViewMode::CREATE);
 	}
 
@@ -272,13 +295,6 @@ namespace horizon {
 	}
 
 	void ProjectManagerAppWindow::set_view_mode(ViewMode mode) {
-		auto mapp = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
-		if(mapp && mapp->pools.size()==0){
-			Gtk::MessageDialog md(*this,  "No pools set up", false , Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK);
-			md.set_secondary_text("You haven't set up any pools, add some in the preferences dialog");
-			md.run();
-		}
-
 		button_open->hide();
 		button_close->hide();
 		button_new->hide();
