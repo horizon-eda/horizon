@@ -657,19 +657,6 @@ namespace horizon {
 			}*/
 		}
 	}
-	/*
-	void Schematic::merge_nets(Net *net, Net *into) {
-		assert(net->uuid==nets.at(net->uuid).uuid);
-		assert(into->uuid==nets.at(into->uuid).uuid);
-		for(auto &it_comp: components) {
-			for(auto &it_conn: it_comp.second.connections) {
-				if(it_conn.second.net == net) {
-					it_conn.second.net = into;
-				}
-			}
-		}
-		nets.erase(net->uuid);
-	}*/
 
 	json Schematic::serialize() const {
 		json j;

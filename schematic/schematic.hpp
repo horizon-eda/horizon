@@ -47,7 +47,6 @@ namespace horizon {
 			 * method to fix up pointers. When copying Schematic, the copy constructor will call this method.
 			 */
 			void update_refs();
-			void merge_nets(Net *net, Net *into);
 
 			/**
 			 * Removes all connections from sym and connects the dangling net lines to junctions
