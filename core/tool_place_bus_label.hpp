@@ -19,6 +19,7 @@ namespace horizon {
 			bool update_attached(const ToolArgs &args) override;
 			bool check_line(LineNet *li) override;
 			BusLabel *la= nullptr;
+			Orientation last_orientation = Orientation::RIGHT;
 			std::forward_list<BusLabel*> labels_placed;
 			Bus* bus = nullptr;
 

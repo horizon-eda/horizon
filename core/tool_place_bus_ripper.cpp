@@ -15,6 +15,8 @@ namespace horizon {
 
 	ToolResponse ToolPlaceBusRipper::begin(const ToolArgs &args) {
 		std::cout << "tool place bus ripper\n";
+
+		core.r->tool_bar_set_tip("<b>LMB:</b>place <b>RMB:</b>finish");
 		return ToolResponse();
 	}
 
@@ -23,8 +25,10 @@ namespace horizon {
 			if(args.button == 1) {
 				if(args.target.type == ObjectType::JUNCTION) {
 					Junction *j = core.c->get_junction(args.target.path.at(0));
-					if(!j->bus)
+					if(!j->bus) {
+						core.r->tool_bar_flash("junction doesn't have bus");
 						return ToolResponse();
+					}
 					Bus *bus = j->bus;
 					bool r;
 					UUID bus_member_uuid;
@@ -44,8 +48,10 @@ namespace horizon {
 					for(auto it: core.c->get_net_lines()) {
 						if(it->coord_on_line(args.coords)) {
 							std::cout << "on line" << std::endl;
-							if(!it->bus)
+							if(!it->bus) {
+								core.r->tool_bar_flash("line doesn't have bus");
 								return ToolResponse();
+							}
 							Bus *bus = it->bus;
 							bool r;
 							UUID bus_member_uuid;
@@ -68,11 +74,14 @@ namespace horizon {
 							rip->junction = j;
 
 
-							break;
+							return ToolResponse();
 						}
 					}
 
-
+					core.r->tool_bar_flash("can only place bus ripper on buses");
+				}
+				else {
+					core.r->tool_bar_flash("can only place bus ripper on buses");
 				}
 			}
 			else if(args.button == 3) {

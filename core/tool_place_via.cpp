@@ -20,6 +20,7 @@ namespace horizon {
 			return false;
 		}
 		padstack = core.b->get_via_padstack_provider()->get_padstack(padstack_uuid);
+		core.r->tool_bar_set_tip("<b>LMB:</b>place via <b>RMB:</b>delete current via and finish");
 		return true;
 	}
 

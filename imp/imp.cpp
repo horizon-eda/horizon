@@ -7,6 +7,7 @@
 #include "export_gerber/gerber_export.hpp"
 #include "part.hpp"
 #include "checks/checks_window.hpp"
+#include "util.hpp"
 #include <iomanip>
 #include <glibmm/main.h>
 
@@ -141,6 +142,14 @@ namespace horizon {
 		}
 
 		core.r->signal_tool_changed().connect([save_button, selection_filter_button](ToolID t){save_button->set_sensitive(t==ToolID::NONE); selection_filter_button->set_sensitive(t==ToolID::NONE);});
+		core.r->signal_update_tool_bar().connect([this](bool flash, const std::string &s){
+			if(flash) {
+				main_window->tool_bar_flash(s);
+			}
+			else {
+				main_window->tool_bar_set_tool_tip(s);
+			}
+		});
 
 		construct();
 		for(const auto &it: key_seq.get_sequences()) {
@@ -314,24 +323,7 @@ namespace horizon {
 			ToolResponse r = core.r->tool_update(args);
 			tool_process(r);
 		}
-		std::ostringstream ss;
-		ss << "X:";
-		if(pos.x >= 0) {
-			ss << "+";
-		}
-		else {
-			ss << "−"; //this is U+2212 MINUS SIGN, has same width as +
-		}
-		ss << std::fixed << std::setprecision(3)  << std::setw(7) << std::setfill('0') << std::internal << std::abs(pos.x/1e6) << " mm ";
-		ss << "Y:";
-		if(pos.y >= 0) {
-			ss << "+";
-		}
-		else {
-			ss << "−";
-		}
-		ss << std::setw(7) << std::abs(pos.y/1e6) << " mm";
-		main_window->cursor_label->set_text(ss.str());
+		main_window->cursor_label->set_text(coord_to_string(pos));
 	}
 	
 	bool ImpBase::handle_click(GdkEventButton *button_event) {
@@ -455,6 +447,12 @@ namespace horizon {
 	void ImpBase::handle_tool_change(ToolID id) {
 		panels->set_sensitive(id == ToolID::NONE);
 		canvas->set_selection_allowed(id == ToolID::NONE);
+		if(id!=ToolID::NONE) {
+			main_window->tool_bar_set_tool_name(tool_catalog.at(id).name);
+			main_window->tool_bar_set_tool_tip("");
+		}
+		main_window->tool_bar_set_visible(id!=ToolID::NONE);
+
 	}
 
 	void ImpBase::handle_warning_selected(const Coordi &pos) {

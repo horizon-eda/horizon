@@ -5,6 +5,7 @@
 #include "core_package.hpp"
 #include "core_board.hpp"
 #include "accumulator.hpp"
+#include "util.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -114,7 +115,7 @@ namespace horizon {
 		}
 	}
 
-	static Orientation transform_orienation(Orientation orientation, bool rotate, bool reverse=false) {
+	Orientation ToolMove::transform_orienation(Orientation orientation, bool rotate, bool reverse) {
 		Orientation new_orientation;
 		if(rotate) {
 			if(!reverse) {
@@ -300,6 +301,7 @@ namespace horizon {
 	ToolResponse ToolMove::begin(const ToolArgs &args) {
 		std::cout << "tool move\n";
 		last = args.coords;
+		origin = args.coords;
 
 		if(!can_begin()) {
 			return ToolResponse::end();
@@ -322,7 +324,7 @@ namespace horizon {
 			core.r->commit();
 			return ToolResponse::end();
 		}
-
+		update_tip();
 		return ToolResponse();
 	}
 
@@ -330,6 +332,11 @@ namespace horizon {
 	bool ToolMove::can_begin() {
 		expand_selection();
 		return core.r->selection.size()>0;
+	}
+
+	void ToolMove::update_tip() {
+		auto delta = last-origin;
+		core.r->tool_bar_set_tip("<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate <b>e:</b>mirror "+coord_to_string(delta, true));
 	}
 
 	void ToolMove::do_move(const Coordi &delta) {
@@ -376,6 +383,7 @@ namespace horizon {
 			if(core.b) {
 				core.b->get_board()->update_airwires();
 			}
+			update_tip();
 		}
 		else if(args.type == ToolEventType::CLICK) {
 			if(args.button == 1) {

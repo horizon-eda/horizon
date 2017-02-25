@@ -208,6 +208,9 @@ namespace horizon {
 			 */
 			Dialogs dialogs;
 			
+			void tool_bar_set_tip(const std::string &s);
+			void tool_bar_flash(const std::string &s);
+
 			typedef sigc::signal<void, ToolID> type_signal_tool_changed;
 			type_signal_tool_changed signal_tool_changed() {return s_signal_tool_changed;}
 			typedef sigc::signal<void> type_signal_rebuilt;
@@ -224,6 +227,12 @@ namespace horizon {
 			 */
 			type_signal_request_save_meta signal_request_save_meta() {return s_signal_request_save_meta;}
 
+			typedef sigc::signal<void, bool, std::string> type_signal_update_tool_bar;
+			/**
+			 * connect to this signal for providing meta information when the document is saved
+			 */
+			type_signal_update_tool_bar signal_update_tool_bar() {return s_signal_update_tool_bar;}
+
 		protected :
 			virtual std::map<UUID, Junction> *get_junction_map(bool work=true) {return nullptr;}
 			virtual std::map<UUID, Line> *get_line_map(bool work=true) {return nullptr;}
@@ -239,6 +248,7 @@ namespace horizon {
 			type_signal_rebuilt s_signal_rebuilt;
 			type_signal_rebuilt s_signal_save;
 			type_signal_request_save_meta s_signal_request_save_meta;
+			type_signal_update_tool_bar s_signal_update_tool_bar;
 			
 			class HistoryItem {
 				public:

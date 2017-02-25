@@ -380,5 +380,13 @@ namespace horizon {
 		return j;
 	}
 
+	void Core::tool_bar_set_tip(const std::string &s) {
+		s_signal_update_tool_bar.emit(false, s);
+	}
+
+	void Core::tool_bar_flash(const std::string &s) {
+		s_signal_update_tool_bar.emit(true, s);
+	}
+
 	ToolBase::ToolBase(Core *c, ToolID tid): core(c), tool_id(tid) {}
 }

@@ -27,9 +27,26 @@ namespace horizon {
 		from_junc = nullptr;
 		to_junc = nullptr;
 		state = DrawArcState::FROM;
-		
+		update_tip();
 		return ToolResponse();
 	}
+
+	void ToolDrawArc::update_tip() {
+		std::stringstream ss;
+		ss << "<b>LMB:</b>";
+		if(state == DrawArcState::FROM) {
+			ss << "place from junction";
+		}
+		else if(state == DrawArcState::TO) {
+			ss << "place to junction";
+		}
+		else if(state == DrawArcState::CENTER) {
+			ss << "place center junction";
+		}
+		ss << " <b>RMB:</b>cancel <b>e:</b>reverse arc direction";
+		core.r->tool_bar_set_tip(ss.str());
+	}
+
 	ToolResponse ToolDrawArc::update(const ToolArgs &args) {
 		if(args.type == ToolEventType::MOVE) {
 			temp_junc->position = args.coords;
@@ -92,6 +109,7 @@ namespace horizon {
 				}
 			}
 		}
+		update_tip();
 		return ToolResponse();
 	}
 	

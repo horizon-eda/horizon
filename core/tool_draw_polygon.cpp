@@ -23,9 +23,27 @@ namespace horizon {
 		vertex = temp->append_vertex();
 		vertex->position = args.coords;
 
-
+		update_tip();
 		return ToolResponse();
 	}
+
+	void ToolDrawPolygon::update_tip() {
+		std::stringstream ss;
+		ss << "<b>LMB:</b>";
+		if(arc_mode) {
+			ss << "place arc center";
+		}
+		else {
+			ss << "place vertex";
+		}
+
+		ss << " <b>RMB:</b>delete last vertex and finish <b>a:</b> make the current edge an arc ";
+		if(last_vertex && (last_vertex->type == Polygon::Vertex::Type::ARC)) {
+			ss << "<b>e:</b> reverse arc direction";
+		}
+		core.r->tool_bar_set_tip(ss.str());
+	}
+
 	ToolResponse ToolDrawPolygon::update(const ToolArgs &args) {
 		if(args.type == ToolEventType::MOVE) {
 			if(arc_mode && last_vertex) {
@@ -76,6 +94,7 @@ namespace horizon {
 				return ToolResponse::end();
 			}
 		}
+		update_tip();
 		return ToolResponse();
 	}
 

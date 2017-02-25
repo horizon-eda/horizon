@@ -18,6 +18,6 @@ namespace horizon {
 			Junction *to_junc = 0;
 			Arc *temp_arc = 0;
 			Junction *make_junction(const Coordi &coords);
-		
+			void update_tip();
 	};
 }

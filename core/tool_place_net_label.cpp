@@ -1,4 +1,5 @@
 #include "tool_place_net_label.hpp"
+#include "tool_move.hpp"
 #include <iostream>
 #include "core_schematic.hpp"
 
@@ -26,30 +27,14 @@ namespace horizon {
 		}
 	}
 
-	static Orientation transform_orienation(Orientation orientation, bool rotate) {
-		Orientation new_orientation;
-		if(rotate) {
-			switch(orientation) {
-				case Orientation::UP:    new_orientation=Orientation::RIGHT; break;
-				case Orientation::DOWN:  new_orientation=Orientation::LEFT; break;
-				case Orientation::LEFT:  new_orientation=Orientation::UP; break;
-				case Orientation::RIGHT: new_orientation=Orientation::DOWN; break;
-			}
-		}
-		else {
-			switch(orientation) {
-				case Orientation::UP:    new_orientation=Orientation::UP; break;
-				case Orientation::DOWN:  new_orientation=Orientation::DOWN; break;
-				case Orientation::LEFT:  new_orientation=Orientation::RIGHT; break;
-				case Orientation::RIGHT: new_orientation=Orientation::LEFT; break;
-			}
-		}
-		return new_orientation;
-	}
-
 	bool ToolPlaceNetLabel::check_line(LineNet *li) {
 		if(li->bus)
 			return false;
+		return true;
+	}
+
+	bool ToolPlaceNetLabel::begin_attached() {
+		core.r->tool_bar_set_tip("<b>LMB:</b>place label <b>RMB:</b>delete current label and finish <b>r:</b>rotate <b>e:</b>mirror <b>+-:</b>change label size");
 		return true;
 	}
 
@@ -95,8 +80,8 @@ namespace horizon {
 		}
 		else if(args.type == ToolEventType::KEY) {
 			if(la) {
-				if(args.key == GDK_KEY_r) {
-					la->orientation = transform_orienation(la->orientation, true);
+				if(args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
+					la->orientation = ToolMove::transform_orienation(la->orientation, args.key == GDK_KEY_r);
 					last_orientation = la->orientation;
 					return true;
 				}

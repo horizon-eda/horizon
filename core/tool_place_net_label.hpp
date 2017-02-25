@@ -15,6 +15,7 @@ namespace horizon {
 			std::forward_list<NetLabel*> labels_placed;
 			void create_attached() override;
 			void delete_attached() override;
+			bool begin_attached() override;
 			bool update_attached(const ToolArgs &args) override;
 			bool check_line(LineNet *li) override;
 			NetLabel *la = nullptr;

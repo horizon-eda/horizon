@@ -20,6 +20,7 @@ namespace horizon {
 			void move_temp_junc(const Coordi &c);
 			int merge_nets(Net *net, Net *into);
 			ToolResponse end();
+			void update_tip();
 
 			Junction *make_temp_junc(const Coordi &c);
 	};

@@ -24,6 +24,7 @@ namespace horizon {
 			void update_track(const Coordi &c);
 			bool check_track_path(const ClipperLib::Path &p);
 			void update_temp_track();
+			void update_tip();
 			bool bend_mode = false;
 			ClipperLib::Paths obstacles;
 			ClipperLib::Path track_path;

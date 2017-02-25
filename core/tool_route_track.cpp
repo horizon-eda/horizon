@@ -16,6 +16,7 @@ namespace horizon {
 	ToolResponse ToolRouteTrack::begin(const ToolArgs &args) {
 		std::cout << "tool route track\n";
 		core.r->selection.clear();
+		update_tip();
 		return ToolResponse();
 	}
 
@@ -212,6 +213,24 @@ namespace horizon {
 		return drc_okay;
 	}
 
+	void ToolRouteTrack::update_tip() {
+		std::stringstream ss;
+		ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete last segment <b>backspace:</b>delete last segment <b>v:</b>place via <b>/:</b>track posture   <i>";
+		if(net) {
+			if(net->name.size()) {
+				ss << "routing net \"" << net->name << "\"";
+			}
+			else {
+				ss << "routing unnamed net";
+			}
+		}
+		else {
+			ss << "select starting point";
+		}
+		ss<<"</i>";
+		core.r->tool_bar_set_tip(ss.str());
+	}
+
 	ToolResponse ToolRouteTrack::update(const ToolArgs &args) {
 		if(args.type == ToolEventType::KEY) {
 			if(args.key == GDK_KEY_Escape) {
@@ -247,8 +266,11 @@ namespace horizon {
 						begin_track(a);
 						conn_start.connect(pkg, pad);
 						std::cout << "begin net" << std::endl;
-
+						update_tip();
 						return ToolResponse::change_layer(a.work_layer);
+					}
+					else {
+						core.r->tool_bar_flash("pad is not connected to a net");
 					}
 				}
 				else if(args.target.type == ObjectType::JUNCTION) {
@@ -268,7 +290,11 @@ namespace horizon {
 						begin_track(a);
 						conn_start.connect(junc);
 						std::cout << "begin net" << std::endl;
+						update_tip();
 						return ToolResponse::change_layer(a.work_layer);
+					}
+					else {
+						core.r->tool_bar_flash("junction is not connected to a net");
 					}
 				}
 			}
@@ -291,13 +317,17 @@ namespace horizon {
 						try_move_track(args);
 					}
 					else {
-						if(!try_move_track(args)) //drc not okay
+						if(!try_move_track(args)) { //drc not okay
+							core.r->tool_bar_flash("can't connect due to DRC violation");
 							return ToolResponse();
+						}
 						if(args.target.type == ObjectType::PAD) {
 							auto pkg = &core.b->get_board()->packages.at(args.target.path.at(0));
 							auto pad = &pkg->package.pads.at(args.target.path.at(1));
-							if(pad->net != net)
+							if(pad->net != net) {
+								core.r->tool_bar_flash("pad connected to wrong net");
 								return ToolResponse();
+							}
 							temp_tracks.back()->to.connect(pkg, pad);
 						}
 						else if(args.target.type == ObjectType::JUNCTION) {
@@ -307,8 +337,10 @@ namespace horizon {
 							}
 
 							auto junc = core.r->get_junction(args.target.path.at(0));
-							if(junc->net && (junc->net != net))
+							if(junc->net && (junc->net != net)) {
+								core.r->tool_bar_flash("junction connected to wrong net");
 								return ToolResponse();
+							}
 							temp_tracks.back()->to.connect(junc);
 						}
 						else {
@@ -396,6 +428,7 @@ namespace horizon {
 				}
 			}
 		}
+		update_tip();
 		return ToolResponse();
 	}
 

@@ -57,4 +57,31 @@ namespace horizon {
         }
 	}
 	#endif
+
+	std::string coord_to_string(const Coordf &pos, bool delta) {
+		std::ostringstream ss;
+		if(delta) {
+			ss << "Δ";
+		}
+		ss << "X:";
+		if(pos.x >= 0) {
+			ss << "+";
+		}
+		else {
+			ss << "−"; //this is U+2212 MINUS SIGN, has same width as +
+		}
+		ss << std::fixed << std::setprecision(3)  << std::setw(7) << std::setfill('0') << std::internal << std::abs(pos.x/1e6) << " mm ";
+		if(delta) {
+			ss << "Δ";
+		}
+		ss << "Y:";
+		if(pos.y >= 0) {
+			ss << "+";
+		}
+		else {
+			ss << "−";
+		}
+		ss << std::setw(7) << std::abs(pos.y/1e6) << " mm";
+		return ss.str();
+	}
 }

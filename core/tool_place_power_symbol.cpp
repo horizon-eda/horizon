@@ -20,6 +20,7 @@ namespace horizon {
 			return false;
 		}
 		net = &core.c->get_schematic()->block->nets.at(net_uuid);
+		core.r->tool_bar_set_tip("<b>LMB:</b>place power symbol <b>RMB:</b>delete current power symbol and finish <b>e:</b>mirror");
 		return true;
 	}
 
@@ -49,7 +50,11 @@ namespace horizon {
 		}
 		else if(!other->is_power && other != net) {
 			core.c->get_schematic()->block->merge_nets(other, net);
-			core.c->get_schematic()->expand();
+			core.r->tool_bar_flash("merged net \"" + other->name + "\" into power net\"" + net->name + "\"");
+			core.c->get_schematic()->expand(true);
+			return true;
+		}
+		else if(other->is_power && other == net) {
 			return true;
 		}
 		return false;

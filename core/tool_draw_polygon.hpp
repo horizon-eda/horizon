@@ -16,6 +16,6 @@ namespace horizon {
 			Polygon::Vertex *vertex = nullptr;
 			Polygon::Vertex *last_vertex = nullptr;
 			bool arc_mode = false;
-
+			void update_tip();
 	};
 }

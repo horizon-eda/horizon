@@ -21,6 +21,7 @@ namespace horizon {
 		temp_junc_head->position = args.coords;
 		core.c->selection.clear();
 
+		update_tip();
 		return ToolResponse();
 	}
 
@@ -45,9 +46,11 @@ namespace horizon {
 	int ToolDrawLineNet::merge_nets(Net *net, Net *into) {
 		if(net->is_bussed || into->is_bussed) {
 			if(net->is_power || into->is_power) {
+				core.r->tool_bar_flash("can't merge power and bussed net");
 				return 1; //don't merge power and bus
 			}
 			else if(net->is_bussed && into->is_bussed) {
+				core.r->tool_bar_flash("can't merge bussed nets");
 				return 1; //can't merge bussed nets
 			}
 			else if(!net->is_bussed && into->is_bussed) {
@@ -60,6 +63,7 @@ namespace horizon {
 		}
 		else if(net->is_power || into->is_power) {
 			if(net->is_power && into->is_power) {
+				core.r->tool_bar_flash("can't merge power nets");
 				return 1;
 			}
 			else if(!net->is_power && into->is_power) {
@@ -85,6 +89,8 @@ namespace horizon {
 		else if(net->is_named()) {
 			std::swap(net, into);
 		}
+
+		core.r->tool_bar_flash("merged net \""+net->name+"\" into net \"" + into->name +"\"");
 		core.c->get_schematic()->block->merge_nets(net, into); //net will be erased
 		core.c->get_schematic()->expand(true); //be careful
 
@@ -101,6 +107,33 @@ namespace horizon {
 
 	ToolResponse ToolDrawLineNet::end() {
 		return ToolResponse::next(ToolID::DRAW_NET);
+	}
+
+	void ToolDrawLineNet::update_tip() {
+		std::stringstream ss;
+		ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete last segment <b>space:</b>place junction <b>⏎:</b>finish <b>/:</b>line posture <b>a:</b>arbitrary angle   <i>";
+		if(temp_line_head) {
+			if(temp_line_head->net) {
+				if(temp_line_head->net->name.size()) {
+					ss << "drawing net \"" << temp_line_head->net->name << "\"";
+				}
+				else {
+					ss << "drawing unnamed net";
+				}
+			}
+			else if(temp_line_head->bus) {
+				ss << "drawing bus \"" << temp_line_head->bus->name << "\"";
+			}
+			else {
+				ss << "drawing no net";
+			}
+
+		}
+		else {
+			ss << "select starting point";
+		}
+		ss<<"</i>";
+		core.r->tool_bar_set_tip(ss.str());
 	}
 
 	ToolResponse ToolDrawLineNet::update(const ToolArgs &args) {
@@ -152,6 +185,7 @@ namespace horizon {
 										}
 									}
 									if(!is_temp_line) {
+										core.r->tool_bar_flash("split net line");
 										auto li = core.c->get_sheet()->split_line_net(it, ju);
 										net = li->net;
 										bus = li->bus;
@@ -177,11 +211,14 @@ namespace horizon {
 					if(args.target.type == ObjectType::JUNCTION) {
 						ju = core.r->get_junction(args.target.path.at(0));
 						if(temp_line_head->bus || ju->bus) { //either is bus
-							if(temp_line_head->net || ju->net)
+							if(temp_line_head->net || ju->net) {
+								core.r->tool_bar_flash("can't connect bus and net");
 								return ToolResponse(); //bus-net illegal
+							}
 
 							if(temp_line_head->bus && ju->bus) { //both are bus
 								if(temp_line_head->bus != ju->bus) { //not the same bus
+									core.r->tool_bar_flash("can't connect different buses");
 									return ToolResponse(); //illegal
 								}
 								else  {
@@ -276,15 +313,19 @@ namespace horizon {
 										}
 									}
 									if(!is_temp_line) {
+										core.r->tool_bar_flash("split net line");
 										net = it->net;
 										bus = it->bus;
 
 										if(temp_line_head->bus || it->bus) { //either is bus
-											if(temp_line_head->net || it->net)
+											if(temp_line_head->net || it->net) {
+												core.r->tool_bar_flash("can't connect bus and net");
 												return ToolResponse(); //bus-net illegal
+											}
 
 											if(temp_line_head->bus && it->bus) { //both are bus
 												if(temp_line_head->bus != it->bus) { //not the same bus
+													core.r->tool_bar_flash("can't connect different buses");
 													return ToolResponse(); //illegal
 												}
 												else  {
@@ -412,6 +453,7 @@ namespace horizon {
 				move_temp_junc(args.coords);
 			}
 		}
+		update_tip();
 		return ToolResponse();
 	}
 }

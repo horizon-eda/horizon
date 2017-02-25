@@ -23,6 +23,8 @@ namespace horizon {
 
 		padstack = core.r->m_pool->get_padstack(padstack_uuid);
 		create_pad(args.coords);
+
+		core.r->tool_bar_set_tip("<b>LMB:</b>place pad <b>RMB:</b>delete current pad and finish");
 		return ToolResponse();
 	}
 

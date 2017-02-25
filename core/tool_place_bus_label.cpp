@@ -1,4 +1,5 @@
 #include "tool_place_bus_label.hpp"
+#include "tool_move.hpp"
 #include <iostream>
 #include "core_schematic.hpp"
 
@@ -20,6 +21,7 @@ namespace horizon {
 			return false;
 		}
 		bus = &core.c->get_schematic()->block->buses.at(net_uuid);
+		core.r->tool_bar_set_tip("<b>LMB:</b>place bus label <b>RMB:</b>delete current label and finish <b>r:</b>rotate <b>e:</b>mirror");
 		return true;
 	}
 
@@ -27,6 +29,7 @@ namespace horizon {
 		auto uu = UUID::random();
 		la = &core.c->get_sheet()->bus_labels.emplace(uu, uu).first->second;
 		la->bus =bus;
+		la->orientation = last_orientation;
 		la->junction = temp;
 		temp->bus = bus;
 	}
@@ -64,15 +67,12 @@ namespace horizon {
 				}
 			}
 		}
-		/*else if(args.type == ToolEventType::KEY) {
-			if(la) {
-				if(args.key == GDK_KEY_r) {
-					la->orientation = transform_orienation(la->orientation, true);
-					last_orientation = la->orientation;
-					return true;
-				}
-			}
-		}*/
+		if(args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
+			la->orientation = ToolMove::transform_orienation(la->orientation, args.key == GDK_KEY_r);
+			last_orientation = la->orientation;
+			return true;
+		}
+
 
 		return false;
 	}
