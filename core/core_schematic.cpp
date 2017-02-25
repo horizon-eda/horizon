@@ -258,6 +258,7 @@ namespace horizon {
 				;
 		}
 		rebuild();
+		set_needs_save(true);
 	}
 
 	void CoreSchematic::set_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool value, bool *handled) {
@@ -298,6 +299,7 @@ namespace horizon {
 				;
 		}
 		rebuild();
+		set_needs_save(true);
 	}
 
 	bool CoreSchematic::get_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
@@ -376,6 +378,7 @@ namespace horizon {
 				;
 		}
 		rebuild();
+		set_needs_save(true);
 	}
 
 	bool CoreSchematic::property_is_settable(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
@@ -472,6 +475,7 @@ namespace horizon {
 		sch_work.block = &block_work;
 		sch.update_refs();
 		sch_work.update_refs();
+		set_needs_save(true);
 	}
 
 	void CoreSchematic::revert() {
@@ -508,6 +512,7 @@ namespace horizon {
 	void CoreSchematic::save() {
 		save_json_to_file(m_schematic_filename, sch.serialize());
 		save_json_to_file(m_block_filename, block.serialize());
+		set_needs_save(false);
 
 
 		//json j = block.serialize();

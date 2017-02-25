@@ -86,6 +86,7 @@ namespace horizon {
 
 	void CorePadstack::commit() {
 		padstack = padstack_work;
+		set_needs_save(true);
 	}
 
 	void CorePadstack::revert() {
@@ -104,5 +105,7 @@ namespace horizon {
 		json j = padstack.serialize();
 		ofs << std::setw(4) << j;
 		ofs.close();
+
+		set_needs_save(false);
 	}
 }

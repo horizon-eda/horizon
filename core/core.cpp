@@ -388,5 +388,16 @@ namespace horizon {
 		s_signal_update_tool_bar.emit(true, s);
 	}
 
+	void Core::set_needs_save(bool v) {
+		if(v!=needs_save) {
+			needs_save = v;
+			s_signal_needs_save.emit(v);
+		}
+	}
+
+	bool Core::get_needs_save() const {
+		return needs_save;
+	}
+
 	ToolBase::ToolBase(Core *c, ToolID tid): core(c), tool_id(tid) {}
 }

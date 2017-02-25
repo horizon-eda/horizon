@@ -189,6 +189,7 @@ namespace horizon {
 				;
 		}
 		rebuild();
+		set_needs_save(true);
 	}
 	int64_t CoreSymbol::get_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
 		bool h = false;
@@ -231,6 +232,7 @@ namespace horizon {
 				;
 		}
 		rebuild();
+		set_needs_save(true);
 	}
 
 	void CoreSymbol::rebuild(bool from_undo) {
@@ -270,6 +272,7 @@ namespace horizon {
 
 	void CoreSymbol::commit() {
 		sym = sym_work;
+		set_needs_save(true);
 	}
 
 	void CoreSymbol::revert() {
@@ -288,5 +291,6 @@ namespace horizon {
 		json j = sym.serialize();
 		ofs << std::setw(4) << j;
 		ofs.close();
+		set_needs_save(false);
 	}
 }

@@ -181,6 +181,7 @@ namespace horizon {
 				;
 		}
 		rebuild();
+		set_needs_save(true);
 	}
 	int64_t CoreBoard::get_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
 		bool h = false;
@@ -247,6 +248,7 @@ namespace horizon {
 				;
 		}
 		rebuild();
+		set_needs_save(true);
 	}
 
 	std::string CoreBoard::get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
@@ -354,6 +356,7 @@ namespace horizon {
 		brd_work.block = &block_work;
 		brd.update_refs();
 		brd_work.update_refs();
+		set_needs_save(true);
 	}
 
 	void CoreBoard::revert() {
@@ -419,6 +422,8 @@ namespace horizon {
 		j["_imp"] = save_meta;
 		save_json_to_file(m_board_filename, j);
 		save_json_to_file(m_block_filename, block.serialize());
+
+		set_needs_save(false);
 
 
 		//json j = block.serialize();

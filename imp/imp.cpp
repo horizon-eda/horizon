@@ -54,6 +54,34 @@ namespace horizon {
 		}
 	}
 	
+	bool ImpBase::handle_close(GdkEventAny *ev) {
+		bool dontask = false;
+		Glib::getenv("HORIZON_NOEXITCONFIRM", dontask);
+		if(dontask)
+			return false;
+
+		if(!core.r->get_needs_save())
+			return false;
+
+		Gtk::MessageDialog md(*main_window,  "Save changes before closing?", false /* use_markup */, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
+		md.set_secondary_text("If you don't save, all your changes will be permanently lost.");
+		md.add_button("Close without Saving", 1);
+		md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+		md.add_button("Save", 2);
+		switch(md.run()) {
+			case 1:
+				return false; //close
+
+			case 2:
+				core.r->save();
+				return false; //close
+
+			default:
+				return true; //keep window open
+		}
+		return false;
+	}
+
 	void ImpBase::run(int argc, char *argv[]) {
 		auto app = Gtk::Application::create(argc, argv, "net.carrotIndustries.horizon.Imp", Gio::APPLICATION_NON_UNIQUE);
 
@@ -150,6 +178,8 @@ namespace horizon {
 				main_window->tool_bar_set_tool_tip(s);
 			}
 		});
+
+		main_window->signal_delete_event().connect(sigc::mem_fun(this, &ImpBase::handle_close));
 
 		construct();
 		for(const auto &it: key_seq.get_sequences()) {

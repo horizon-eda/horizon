@@ -211,6 +211,8 @@ namespace horizon {
 			void tool_bar_set_tip(const std::string &s);
 			void tool_bar_flash(const std::string &s);
 
+			bool get_needs_save() const;
+
 			typedef sigc::signal<void, ToolID> type_signal_tool_changed;
 			type_signal_tool_changed signal_tool_changed() {return s_signal_tool_changed;}
 			typedef sigc::signal<void> type_signal_rebuilt;
@@ -229,9 +231,12 @@ namespace horizon {
 
 			typedef sigc::signal<void, bool, std::string> type_signal_update_tool_bar;
 			/**
-			 * connect to this signal for providing meta information when the document is saved
+			 * used for signaling changes to the tool bar true: flash, false: tip
 			 */
 			type_signal_update_tool_bar signal_update_tool_bar() {return s_signal_update_tool_bar;}
+
+			typedef sigc::signal<void, bool> type_signal_needs_save;
+			type_signal_needs_save signal_needs_save() {return s_signal_needs_save;}
 
 		protected :
 			virtual std::map<UUID, Junction> *get_junction_map(bool work=true) {return nullptr;}
@@ -249,6 +254,9 @@ namespace horizon {
 			type_signal_rebuilt s_signal_save;
 			type_signal_request_save_meta s_signal_request_save_meta;
 			type_signal_update_tool_bar s_signal_update_tool_bar;
+			type_signal_needs_save s_signal_needs_save;
+			bool needs_save = false;
+			void set_needs_save(bool v);
 			
 			class HistoryItem {
 				public:

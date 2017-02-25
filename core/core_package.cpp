@@ -133,6 +133,7 @@ namespace horizon {
 				;
 		}
 		rebuild();
+		set_needs_save(true);
 	}
 
 	void CorePackage::rebuild(bool from_undo) {
@@ -156,6 +157,7 @@ namespace horizon {
 
 	void CorePackage::commit() {
 		package = package_work;
+		set_needs_save(true);
 	}
 
 	void CorePackage::revert() {
@@ -191,5 +193,7 @@ namespace horizon {
 
 		ofs << std::setw(4) << j;
 		ofs.close();
+
+		set_needs_save(false);
 	}
 }

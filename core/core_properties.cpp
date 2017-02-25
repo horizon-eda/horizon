@@ -41,6 +41,7 @@ namespace horizon {
 				NOT_HANDLED
 		}
 		rebuild();
+		set_needs_save(true);
 	}
 
 	int64_t Core::get_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
@@ -201,6 +202,7 @@ namespace horizon {
 				return;
 		}
 		rebuild();
+		set_needs_save(true);
 	}
 
 	std::string Core::get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
@@ -239,6 +241,7 @@ namespace horizon {
 				return;
 		}
 		rebuild();
+		set_needs_save(true);
 	}
 
 }

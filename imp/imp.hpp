@@ -67,6 +67,7 @@ namespace horizon {
 			void add_tool_button(ToolID id, const std::string &label);
 			void handle_warning_selected(const Coordi &pos);
 			virtual void handle_broadcast(const json &j);
+			bool handle_close(GdkEventAny *ev);
 
 			void key_seq_append_default(KeySequence &ks);
 			
