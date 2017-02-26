@@ -25,9 +25,12 @@ namespace horizon {
 
 		}
 
-		void CanvasGerber::img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer) {
+		void CanvasGerber::img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer, bool tr) {
 			if(GerberWriter *wr = exporter->get_writer_for_layer(layer)) {
-				wr->draw_line(transform.transform(p0), transform.transform(p1), width);
+				if(tr)
+					wr->draw_line(transform.transform(p0), transform.transform(p1), width);
+				else
+					wr->draw_line(p0, p1, width);
 			}
 
 		}

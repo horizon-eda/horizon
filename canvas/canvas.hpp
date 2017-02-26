@@ -88,7 +88,7 @@ namespace horizon {
 			virtual void img_net(const Net *net) {}
 			virtual void img_polygon(const Polygon &poly) {}
 			virtual void img_padstack(const Padstack &ps) {}
-			virtual void img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer=10000);
+			virtual void img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer=10000, bool tr=true);
 			virtual void img_hole(const Hole &hole) {}
 			bool img_mode = false;
 
@@ -114,7 +114,7 @@ namespace horizon {
 		private:
 			void img_text_layer(int l);
 			int img_text_last_layer = 10000;
-			void img_text_line(const Coordi &p0, const Coordi &p1, const uint64_t width);
+			void img_text_line(const Coordi &p0, const Coordi &p1, const uint64_t width, bool tr=true);
 	};
 
 	class CanvasGL: public Canvas, public Gtk::GLArea {

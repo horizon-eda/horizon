@@ -331,7 +331,7 @@ enum HersheyFonts {
 							p0 = tf.transform(Coordi(x0+(x+xshift)*sc, y0+y*sc));
 							p1 = tf.transform(Coordi(x0+(x2+xshift)*sc, y0+y2*sc));
 							if(draw) {
-								img_text_line(Coordi(p0.x, p0.y), Coordi(p1.x, p1.y), width);
+								img_text_line(Coordi(p0.x, p0.y), Coordi(p1.x, p1.y), width, false);
 								draw_line(p0, p1, color, false, width);
 							}
 							a=Coordf::min(a, Coordf::min(p0, p1));
