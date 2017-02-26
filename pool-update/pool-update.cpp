@@ -11,7 +11,6 @@
 #include "pool.hpp"
 #include "package.hpp"
 #include "part.hpp"
-#include "json.hpp"
 
 using json = nlohmann::json;
 
@@ -110,7 +109,7 @@ void update_padstacks(SQLite::Database &db, const std::string &directory, const 
 				}
 				ifs>>j;
 				ifs.close();
-				pkg_uuid = j.at("uuid");
+				pkg_uuid = j.at("uuid").get<std::string>();
 			}
 
 			auto padstacks_path = Glib::build_filename(pkgpath, "padstacks");

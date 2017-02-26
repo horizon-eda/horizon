@@ -1,5 +1,4 @@
 #include "polygon.hpp"
-#include "json.hpp"
 #include "lut.hpp"
 
 namespace horizon {

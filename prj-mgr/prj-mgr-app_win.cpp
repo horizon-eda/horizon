@@ -2,7 +2,6 @@
 #include "prj-mgr-app.hpp"
 #include <iostream>
 #include "project/project.hpp"
-#include "json.hpp"
 #include "util.hpp"
 extern const char *gitversion;
 

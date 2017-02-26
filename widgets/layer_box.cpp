@@ -1,5 +1,4 @@
 #include "layer_box.hpp"
-#include "json.hpp"
 #include "cell_renderer_layer_display.hpp"
 #include <algorithm>
 #include <iostream>

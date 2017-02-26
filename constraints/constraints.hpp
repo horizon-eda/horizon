@@ -1,6 +1,6 @@
 #pragma once
 #include "uuid.hpp"
-#include "json_fwd.hpp"
+#include "json.hpp"
 #include "net_class.hpp"
 #include "clearance.hpp"
 #include <map>

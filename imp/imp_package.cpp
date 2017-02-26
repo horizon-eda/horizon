@@ -1,5 +1,4 @@
 #include "imp_package.hpp"
-#include "json.hpp"
 #include "part.hpp"
 #include "footprint_generator/footprint_generator_window.hpp"
 

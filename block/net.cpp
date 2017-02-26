@@ -1,5 +1,4 @@
 #include "net.hpp"
-#include "json.hpp"
 
 namespace horizon {
 

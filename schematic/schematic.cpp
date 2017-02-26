@@ -1,7 +1,6 @@
 #include "schematic.hpp"
 #include <set>
 #include <forward_list>
-#include "json.hpp"
 
 namespace horizon {
 

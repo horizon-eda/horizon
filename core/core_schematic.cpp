@@ -1,6 +1,5 @@
 #include "core_schematic.hpp"
 #include <algorithm>
-#include "json.hpp"
 #include "part.hpp"
 #include "util.hpp"
 

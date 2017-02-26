@@ -10,7 +10,7 @@
 #include "cores.hpp"
 #include "dialogs/dialogs.hpp"
 #include "layer.hpp"
-#include "json_fwd.hpp"
+#include "json.hpp"
 #include "constraints.hpp"
 #include <gdk/gdkkeysyms.h>
 

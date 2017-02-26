@@ -1,5 +1,4 @@
 #include "imp_layer.hpp"
-#include "json.hpp"
 #include "part.hpp"
 
 namespace horizon {

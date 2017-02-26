@@ -5,7 +5,7 @@
 #include "uuid_provider.hpp"
 #include "net.hpp"
 #include "uuid_ptr.hpp"
-#include "json_fwd.hpp"
+#include "json.hpp"
 #include "bus.hpp"
 #include <vector>
 #include <map>

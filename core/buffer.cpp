@@ -1,5 +1,4 @@
 #include "buffer.hpp"
-#include "json.hpp"
 #include "core_package.hpp"
 #include "core_schematic.hpp"
 #include "core_symbol.hpp"

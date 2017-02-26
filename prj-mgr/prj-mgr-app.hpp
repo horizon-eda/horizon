@@ -1,7 +1,7 @@
 #pragma once
 #include <gtkmm.h>
 #include "uuid.hpp"
-#include "json_fwd.hpp"
+#include "json.hpp"
 #include <map>
 #include <zmq.hpp>
 

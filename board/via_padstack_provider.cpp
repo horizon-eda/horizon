@@ -1,6 +1,5 @@
 #include "via_padstack_provider.hpp"
 #include <glibmm/fileutils.h>
-#include "json.hpp"
 
 namespace horizon {
 	ViaPadstackProvider::ViaPadstackProvider(const std::string &bp):base_path(bp) {

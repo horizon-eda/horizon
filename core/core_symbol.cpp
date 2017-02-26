@@ -1,7 +1,6 @@
 #include "core_symbol.hpp"
 #include <algorithm>
 #include <fstream>
-#include "json.hpp"
 
 namespace horizon {
 	CoreSymbol::CoreSymbol(const std::string &filename, Pool &pool):

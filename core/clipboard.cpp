@@ -1,6 +1,5 @@
 #include "clipboard.hpp"
 #include "canvas/canvas_cairo.hpp"
-#include "json.hpp"
 
 
 namespace horizon {

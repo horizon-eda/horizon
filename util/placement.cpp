@@ -1,5 +1,4 @@
 #include "placement.hpp"
-#include "json.hpp"
 
 namespace horizon {
 	Placement::Placement(const json &j):

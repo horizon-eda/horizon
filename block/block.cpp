@@ -1,5 +1,4 @@
 #include "block.hpp"
-#include "json.hpp"
 #include <set>
 
 namespace horizon {

@@ -1,6 +1,5 @@
 #include "line.hpp"
 #include "lut.hpp"
-#include "json.hpp"
 #include "object.hpp"
 
 namespace horizon {

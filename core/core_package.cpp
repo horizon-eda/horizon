@@ -1,7 +1,6 @@
 #include "core_package.hpp"
 #include <algorithm>
 #include <fstream>
-#include "json.hpp"
 
 namespace horizon {
 	CorePackage::CorePackage(const std::string &filename, Pool &pool):

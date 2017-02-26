@@ -2,7 +2,6 @@
 #include "dialogs/pool_browser_entity.hpp"
 #include "dialogs/pool_browser_package.hpp"
 #include "dialogs/pool_browser_part.hpp"
-#include "json.hpp"
 #include "util.hpp"
 #include <iterator>
 

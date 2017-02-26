@@ -1,6 +1,5 @@
 #include "tool_paste.hpp"
 #include <iostream>
-#include "json.hpp"
 #include "core_package.hpp"
 
 namespace horizon {

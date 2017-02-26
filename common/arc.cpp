@@ -1,6 +1,5 @@
 #include "arc.hpp"
 #include "lut.hpp"
-#include "json.hpp"
 #include "object.hpp"
 #include <algorithm>
 

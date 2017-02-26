@@ -1,6 +1,6 @@
 #pragma once
 #include "uuid.hpp"
-#include "json_fwd.hpp"
+#include "json.hpp"
 #include "pool.hpp"
 #include "net.hpp"
 #include "component.hpp"

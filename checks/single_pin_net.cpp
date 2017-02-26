@@ -2,7 +2,6 @@
 #include "core/core.hpp"
 #include "core/core_schematic.hpp"
 #include "cache.hpp"
-#include "json.hpp"
 
 namespace horizon {
 	CheckSinglePinNet::CheckSinglePinNet(): CheckBase() {

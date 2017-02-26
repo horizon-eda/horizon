@@ -1,5 +1,5 @@
 #pragma once
-#include "json_fwd.hpp"
+#include "json.hpp"
 #include "common.hpp"
 #include <string>
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "common.hpp"
-#include "json_fwd.hpp"
+#include "json.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;

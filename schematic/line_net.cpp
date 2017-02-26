@@ -1,6 +1,5 @@
 #include "line_net.hpp"
 #include "lut.hpp"
-#include "json.hpp"
 #include "object.hpp"
 #include "schematic_symbol.hpp"
 #include "sheet.hpp"

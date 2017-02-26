@@ -2,7 +2,7 @@
 #include "uuid.hpp"
 #include "common.hpp"
 #include "uuid_provider.hpp"
-#include "json_fwd.hpp"
+#include "json.hpp"
 #include <vector>
 #include <map>
 #include <fstream>

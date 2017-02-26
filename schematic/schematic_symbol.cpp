@@ -1,5 +1,4 @@
 #include "schematic_symbol.hpp"
-#include "json.hpp"
 #include "part.hpp"
 
 namespace horizon {

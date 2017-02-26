@@ -1,5 +1,4 @@
 #include "bus.hpp"
-#include "json.hpp"
 #include "block.hpp"
 
 namespace horizon {

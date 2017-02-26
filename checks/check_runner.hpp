@@ -2,7 +2,7 @@
 #include <vector>
 #include "check.hpp"
 #include "cache.hpp"
-#include "json_fwd.hpp"
+#include "json.hpp"
 #include <memory>
 #include <map>
 #include <set>

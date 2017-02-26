@@ -1,5 +1,4 @@
 #include "cam_job.hpp"
-#include "json.hpp"
 #include <fstream>
 
 namespace horizon {

@@ -31,7 +31,6 @@
 #include "tool_drag_keep_slope.hpp"
 #include "tool_add_part.hpp"
 #include "tool_smash.hpp"
-#include "json.hpp"
 #include <memory>
 
 namespace horizon {

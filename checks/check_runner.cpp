@@ -1,7 +1,6 @@
 #include "check_runner.hpp"
 #include "core/core.hpp"
 #include "core/cores.hpp"
-#include "json.hpp"
 #include "single_pin_net.hpp"
 
 namespace horizon {

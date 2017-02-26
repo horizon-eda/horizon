@@ -1,5 +1,4 @@
 #include "board_package.hpp"
-#include "json.hpp"
 #include "part.hpp"
 
 namespace horizon {

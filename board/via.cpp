@@ -1,6 +1,5 @@
 #include "via.hpp"
 #include "board.hpp"
-#include "json.hpp"
 #include "via_padstack_provider.hpp"
 
 namespace horizon {

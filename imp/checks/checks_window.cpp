@@ -3,7 +3,6 @@
 #include "check_settings_dialog.hpp"
 #include "widgets/cell_renderer_layer_display.hpp"
 #include "canvas/canvas.hpp"
-#include "json.hpp"
 #include "util.hpp"
 
 namespace horizon {

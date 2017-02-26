@@ -1,5 +1,4 @@
 #include "package.hpp"
-#include "json.hpp"
 #include "pool.hpp"
 
 namespace horizon {

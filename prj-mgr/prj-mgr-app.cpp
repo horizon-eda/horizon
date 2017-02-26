@@ -3,7 +3,6 @@
 #include "prj-mgr-prefs.hpp"
 #include <glibmm/miscutils.h>
 #include <fstream>
-#include "json.hpp"
 #include "util/util.hpp"
 
 namespace horizon {

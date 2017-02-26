@@ -1,5 +1,4 @@
 #include "project.hpp"
-#include "json.hpp"
 #include <fstream>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>

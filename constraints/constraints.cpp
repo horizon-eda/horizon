@@ -1,5 +1,4 @@
 #include "constraints.hpp"
-#include "json.hpp"
 #include <fstream>
 
 namespace horizon {

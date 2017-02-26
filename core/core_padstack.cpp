@@ -1,7 +1,6 @@
 #include "core_padstack.hpp"
 #include <algorithm>
 #include <fstream>
-#include "json.hpp"
 
 namespace horizon {
 	CorePadstack::CorePadstack(const std::string &filename, Pool &pool):

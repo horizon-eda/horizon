@@ -1,7 +1,7 @@
 #pragma once
 #include "uuid.hpp"
 #include "uuid_path.hpp"
-#include "json_fwd.hpp"
+#include "json.hpp"
 #include "net_class.hpp"
 #include <stdint.h>
 
