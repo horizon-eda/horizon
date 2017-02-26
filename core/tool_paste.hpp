@@ -11,8 +11,6 @@ namespace horizon {
 			virtual ToolResponse update(const ToolArgs &args);
 
 		private:
-			void on_clipboard_received(const Gtk::SelectionData& selection_data);
-			Glib::RefPtr<Gtk::Clipboard> ref_clipboard;
 			void fix_layer(int &la);
 			void apply_shift(Coordi &c, const Coordi &cursor_pos);
 			Coordi shift;

@@ -1,6 +1,7 @@
 #include "tool_paste.hpp"
 #include <iostream>
 #include "core_package.hpp"
+#include "core_schematic.hpp"
 
 namespace horizon {
 
@@ -34,9 +35,7 @@ namespace horizon {
 	}
 
 	ToolResponse ToolPaste::begin(const ToolArgs &args) {
-		ref_clipboard = Gtk::Clipboard::get();
-		//ref_clipboard->request_contents("imp-buffer",
-		//		sigc::mem_fun(this, &ToolPaste::on_clipboard_received) );
+		auto ref_clipboard = Gtk::Clipboard::get();
 		auto seld = ref_clipboard->wait_for_contents("imp-buffer");
 		if(seld.gobj())
 			std::cout <<  "len " << seld.get_length() <<std::endl;
@@ -47,10 +46,13 @@ namespace horizon {
 		Coordi cursor_pos = j.at("cursor_pos").get<std::vector<int64_t>>();
 		core.r->selection.clear();
 		shift = args.coords - cursor_pos;
+
+		std::map<UUID, const UUID> text_xlat;
 		if(j.count("texts")){
 			const json &o = j["texts"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto u = UUID::random();
+				text_xlat.emplace(it.key(), u);
 				auto x = core.r->insert_text(u);
 				*x = Text(u, it.value());
 				fix_layer(x->layer);
@@ -124,16 +126,37 @@ namespace horizon {
 				core.r->selection.emplace(u, ObjectType::POLYGON);
 			}
 		}
+		std::map<UUID, const UUID> component_xlat;
+		if(j.count("components") && core.c){
+			const json &o = j["components"];
+			auto block = core.c->get_schematic()->block;
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID::random();
+				component_xlat.emplace(it.key(), u);
+				block->components.emplace(u, Component(u, it.value(), *core.r->m_pool, *block));
+			}
+		}
+		if(j.count("symbols") && core.c){
+			const json &o = j["symbols"];
+			auto sheet = core.c->get_sheet();
+			auto block = core.c->get_schematic()->block;
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				std::cout << "paste sym" << std::endl;
+				auto u = UUID::random();
+				json k = it.value();
+				k["component"] = (std::string)component_xlat.at(k.at("component").get<std::string>());
+				auto x = &sheet->symbols.emplace(u, SchematicSymbol(u, k, *block ,*core.r->m_pool)).first->second;
+				for(auto &it_txt: x->texts) {
+					it_txt = core.r->get_text(text_xlat.at(it_txt.uuid));
+				}
+				x->placement.shift += shift;
+				core.r->selection.emplace(u, ObjectType::SCHEMATIC_SYMBOL);
+			}
+
+		}
 		core.r->commit();
 		return ToolResponse::next(ToolID::MOVE);
 	}
-
-	void ToolPaste::on_clipboard_received(const Gtk::SelectionData& selection_data) {
-		auto clipboard_data = selection_data.get_data_as_string();
-		auto targ = selection_data.get_length();
-		std::cout << "paste " << targ <<":" << clipboard_data << std::endl;
-	}
-
 
 	ToolResponse ToolPaste::update(const ToolArgs &args) {
 		return ToolResponse();

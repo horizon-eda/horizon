@@ -14,6 +14,8 @@ namespace horizon {
 		pads.clear();
 		holes.clear();
 		polygons.clear();
+		components.clear();
+		symbols.clear();
 	}
 
 	void Buffer::load_from_symbol(std::set<SelectableRef> selection) {
@@ -43,6 +45,9 @@ namespace horizon {
 				case ObjectType::SCHEMATIC_SYMBOL : {
 					auto &sym = core.c->get_sheet()->symbols.at(it.uuid);
 					new_sel.emplace(sym.component->uuid , ObjectType::COMPONENT);
+					for(const auto &it_txt: sym.texts) {
+						new_sel.emplace(it_txt->uuid, ObjectType::TEXT);
+					}
 				} break;
 
 				/*
@@ -78,17 +83,18 @@ namespace horizon {
 			}
 		}
 		selection.insert(new_sel.begin(), new_sel.end());
-		new_sel.clear();
+
+		//don't need nets from components
+		/*new_sel.clear();
 		for(const auto &it : selection) {
 			if(it.type == ObjectType::COMPONENT) {
 				auto &comp = core.c->get_schematic()->block->components.at(it.uuid);
 				for(const auto &it_conn: comp.connections) {
 					new_sel.emplace(it_conn.second.net->uuid, ObjectType::NET);
 				}
-
 			}
 		}
-		selection.insert(new_sel.begin(), new_sel.end());
+		selection.insert(new_sel.begin(), new_sel.end());*/
 
 
 
@@ -140,15 +146,17 @@ namespace horizon {
 			else if(it.type == ObjectType::COMPONENT) {
 				auto &x = core.c->get_schematic()->block->components.at(it.uuid);
 				auto &comp = components.emplace(x.uuid, x).first->second;
-				for(auto &it_conn: comp.connections) {
-					it_conn.second.net.update(nets);
-				}
+				comp.connections.clear();
+				comp.refdes = comp.entity->prefix + "?";
 			}
 		}
 		for(const auto &it: selection) {
 			if(it.type == ObjectType::SCHEMATIC_SYMBOL) {
 				auto &x = core.c->get_sheet()->symbols.at(it.uuid);
 				auto &sym = symbols.emplace(x.uuid, x).first->second;
+				for(auto &it_txt: sym.texts) {
+					it_txt.update(texts);
+				}
 				sym.component.update(components);
 				sym.gate.update(sym.component->entity->gates);
 			}
@@ -184,6 +192,14 @@ namespace horizon {
 		j["polygons"] = json::object();
 		for(const auto &it: polygons) {
 			j["polygons"][(std::string)it.first] = it.second.serialize();
+		}
+		j["components"] = json::object();
+		for(const auto &it: components) {
+			j["components"][(std::string)it.first] = it.second.serialize();
+		}
+		j["symbols"] = json::object();
+		for(const auto &it: symbols) {
+			j["symbols"][(std::string)it.first] = it.second.serialize();
 		}
 		return j;
 	}
