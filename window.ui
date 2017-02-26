@@ -96,6 +96,7 @@
                             <property name="can_focus">False</property>
                             <property name="valign">end</property>
                             <property name="transition_type">slide-up</property>
+                            <property name="transition_duration">100</property>
                             <property name="reveal_child">True</property>
                             <child>
                               <object class="GtkFrame">
@@ -127,6 +128,7 @@
                                       <object class="GtkStack" id="tool_bar_stack">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
+                                        <property name="transition_duration">100</property>
                                         <property name="transition_type">slide-up-down</property>
                                         <child>
                                           <object class="GtkLabel" id="tool_bar_tip">

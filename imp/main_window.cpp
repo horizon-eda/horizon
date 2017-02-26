@@ -31,6 +31,9 @@ namespace horizon {
 		}
 		else {
 			tool_bar->set_reveal_child(v);
+			if(v) {
+				tool_bar_queue_close = false;
+			}
 		}
 	}
 
