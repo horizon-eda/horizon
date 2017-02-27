@@ -1,7 +1,7 @@
 #!/bin/bash
-DISTDIR=dist
-rm -rf $DISTDIR
-mkdir $DISTDIR
+DISTDIR=dist/horizon
+rm -rf dist
+mkdir -p $DISTDIR
 cp horizon-* $DISTDIR
 strip $DISTDIR/horizon-*
 LIBS=(
@@ -72,3 +72,7 @@ rm $DISTDIR/lib/gdk-pixbuf-*/*/loaders/*.a
 
 mkdir -p $DISTDIR/share/glib-2.0/schemas
 cp /mingw64/share/glib-2.0/schemas/gschemas.compiled $DISTDIR/share/glib-2.0/schemas
+
+git log -10 | unix2dos > dist/log.txt
+cd dist
+zip -r horizon.zip horizon log.txt
