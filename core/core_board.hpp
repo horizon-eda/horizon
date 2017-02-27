@@ -24,6 +24,7 @@ namespace horizon {
 			bool property_is_settable(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
 
 			std::vector<Track*> get_tracks(bool work=true);
+			std::vector<Line*> get_lines(bool work=true) override;
 
 			void rebuild(bool from_undo=false) override;
 			void commit() override;
@@ -44,6 +45,7 @@ namespace horizon {
 			std::map<UUID, Hole> *get_hole_map(bool work=true) override;
 			std::map<UUID, Junction> *get_junction_map(bool work=true) override;
 			std::map<UUID, Text> *get_text_map(bool work=true) override;
+			std::map<UUID, Line> *get_line_map(bool work=true) override;
 
 			Constraints constraints;
 			ViaPadstackProvider via_padstack_provider;

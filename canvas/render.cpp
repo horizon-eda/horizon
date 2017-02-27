@@ -844,6 +844,10 @@ namespace horizon {
 		for(const auto &it: brd.vias) {
 			render(it.second, layer);
 		}
+		for(const auto &it: brd.lines) {
+			if(it.second.layer == layer)
+				render(it.second);
+		}
 	}
 
 	void Canvas::render(const Board &brd) {

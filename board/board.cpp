@@ -76,6 +76,13 @@ namespace horizon {
 				texts.emplace(std::make_pair(u, Text(u, it.value())));
 			}
 		}
+		if(j.count("lines")) {
+			const json &o = j["lines"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID(it.key());
+				lines.emplace(std::make_pair(u, Line(u, it.value(), *this)));
+			}
+		}
 	}
 
 	Board Board::new_from_file(const std::string &filename, Block &block, Pool &pool, ViaPadstackProvider &vpp) {
@@ -93,6 +100,10 @@ namespace horizon {
 
 	}
 
+	Junction *Board::get_junction(const UUID &uu) {
+		return &junctions.at(uu);
+	}
+
 	Board::Board(const Board &brd):
 		uuid(brd.uuid),
 		block(brd.block),
@@ -106,6 +117,7 @@ namespace horizon {
 		airwires(brd.airwires),
 		vias(brd.vias),
 		texts(brd.texts),
+		lines(brd.lines),
 		warnings(brd.warnings)
 	{
 		update_refs();
@@ -125,6 +137,7 @@ namespace horizon {
 		airwires = brd.airwires;
 		vias = brd.vias;
 		texts = brd.texts;
+		lines = brd.lines;
 		warnings = brd.warnings;
 		update_refs();
 	}
@@ -153,6 +166,11 @@ namespace horizon {
 		}
 		for(auto &it: junctions) {
 			it.second.net.update(block->nets);
+		}
+		for(auto &it: lines) {
+			auto &line = it.second;
+			line.to = &junctions.at(line.to.uuid);
+			line.from = &junctions.at(line.from.uuid);
 		}
 	}
 
@@ -391,6 +409,11 @@ namespace horizon {
 			}
 		}
 
+		for(const auto &it: lines) {
+			it.second.from->connection_count++;
+			it.second.to->connection_count++;
+		}
+
 		for(auto &it: vias) {
 			it.second.junction->has_via = true;
 			it.second.padstack = *it.second.vpp_padstack;
@@ -584,6 +607,10 @@ namespace horizon {
 		j["texts"] = json::object();
 		for(const auto &it: texts) {
 			j["texts"][(std::string)it.first] = it.second.serialize();
+		}
+		j["lines"] = json::object();
+		for(const auto &it: lines) {
+			j["lines"][(std::string)it.first] = it.second.serialize();
 		}
 		return j;
 	}

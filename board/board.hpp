@@ -19,7 +19,7 @@
 namespace horizon {
 	using json = nlohmann::json;
 
-	class Board {
+	class Board: public Object {
 		private :
 			Board(const UUID &uu, const json &, Block &block, Pool &pool, ViaPadstackProvider &vpp);
 			//unsigned int update_nets();
@@ -42,6 +42,7 @@ namespace horizon {
 			void vacuum_junctions();
 			void smash_package(BoardPackage *pkg);
 			void unsmash_package(BoardPackage *pkg);
+			Junction *get_junction(const UUID &uu) override;
 
 			UUID uuid;
 			Block *block;
@@ -55,6 +56,7 @@ namespace horizon {
 			std::map<UUID, Track> airwires;
 			std::map<UUID, Via> vias;
 			std::map<UUID, Text> texts;
+			std::map<UUID, Line> lines;
 
 			std::vector<Warning> warnings;
 

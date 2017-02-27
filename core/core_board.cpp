@@ -122,6 +122,10 @@ namespace horizon {
 		auto &p = work?brd_work:brd;
 		return &p.texts;
 	}
+	std::map<UUID, Line> *CoreBoard::get_line_map(bool work) {
+		auto &p = work?brd_work:brd;
+		return &p.lines;
+	}
 
 	bool CoreBoard::get_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
 		bool h = false;
@@ -314,6 +318,15 @@ namespace horizon {
 		auto &p = work?brd_work:brd;
 		std::vector<Track*> r;
 		for(auto &it: p.tracks) {
+			r.push_back(&it.second);
+		}
+		return r;
+	}
+
+	std::vector<Line*> CoreBoard::get_lines(bool work) {
+		auto &p = work?brd_work:brd;
+		std::vector<Line*> r;
+		for(auto &it: p.lines) {
 			r.push_back(&it.second);
 		}
 		return r;
