@@ -4,18 +4,18 @@
 #include <set>
 #include "common.hpp"
 #include "uuid.hpp"
-#include "core/core_schematic.hpp"
+#include "block.hpp"
 namespace horizon {
 
 
 	class ManageBusesDialog: public Gtk::Dialog {
 		public:
-			ManageBusesDialog(Gtk::Window *parent, CoreSchematic *c);
+			ManageBusesDialog(Gtk::Window *parent, Block *b);
 			bool valid = false;
 
 
 		private :
-			CoreSchematic *core = nullptr;
+			Block *block = nullptr;
 			Gtk::Stack *stack;
 			Gtk::ToolButton *delete_button;
 			void add_bus();

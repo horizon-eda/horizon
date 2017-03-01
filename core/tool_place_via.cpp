@@ -1,6 +1,7 @@
 #include "tool_place_via.hpp"
 #include <iostream>
 #include "core_board.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -15,12 +16,12 @@ namespace horizon {
 	bool ToolPlaceVia::begin_attached() {
 		bool r;
 		UUID padstack_uuid;
-		std::tie(r, padstack_uuid) = core.r->dialogs.select_via_padstack(core.b->get_via_padstack_provider());
+		std::tie(r, padstack_uuid) = imp->dialogs.select_via_padstack(core.b->get_via_padstack_provider());
 		if(!r) {
 			return false;
 		}
 		padstack = core.b->get_via_padstack_provider()->get_padstack(padstack_uuid);
-		core.r->tool_bar_set_tip("<b>LMB:</b>place via <b>RMB:</b>delete current via and finish");
+		imp->tool_bar_set_tip("<b>LMB:</b>place via <b>RMB:</b>delete current via and finish");
 		return true;
 	}
 

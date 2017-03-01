@@ -1,5 +1,6 @@
 #include "tool_edit_shape.hpp"
 #include "core_padstack.hpp"
+#include "imp_interface.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -24,7 +25,7 @@ namespace horizon {
 		auto uu = std::find_if(core.r->selection.begin(), core.r->selection.end(), [](const auto &x){return x.type == ObjectType::SHAPE;})->uuid;
 		auto shape = &padstack->shapes.at(uu);
 
-		bool r = core.r->dialogs.edit_shape(shape);
+		bool r = imp->dialogs.edit_shape(shape);
 		if(r) {
 			core.r->commit();
 		}

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include "core_symbol.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -47,7 +48,7 @@ namespace horizon {
 
 		bool r;
 		UUID selected_pin;
-		std::tie(r, selected_pin) = core.r->dialogs.map_pin(pins);
+		std::tie(r, selected_pin) = imp->dialogs.map_pin(pins);
 		if(!r) {
 			return ToolResponse::end();
 		}
@@ -118,7 +119,7 @@ namespace horizon {
 			else if(args.key == GDK_KEY_space) {
 				bool r;
 				UUID selected_pin;
-				std::tie(r, selected_pin) = core.r->dialogs.map_pin(pins);
+				std::tie(r, selected_pin) = imp->dialogs.map_pin(pins);
 				if(r) {
 					core.y->get_symbol()->pins.erase(pin->uuid);
 

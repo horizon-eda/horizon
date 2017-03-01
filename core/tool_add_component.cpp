@@ -1,6 +1,7 @@
 #include "tool_add_component.hpp"
 #include <iostream>
 #include "core_schematic.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -16,7 +17,7 @@ namespace horizon {
 		std::cout << "tool add comp\n";
 		bool r;
 		UUID entity_uuid;
-		std::tie(r, entity_uuid) = core.r->dialogs.select_entity();
+		std::tie(r, entity_uuid) = imp->dialogs.select_entity(core.r->m_pool);
 		if(!r) {
 			return ToolResponse::end();
 		}

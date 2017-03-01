@@ -3,6 +3,7 @@
 #include "core_package.hpp"
 #include "polygon.hpp"
 #include "accumulator.hpp"
+#include "imp_interface.hpp"
 #include <iostream>
 #include <cmath>
 
@@ -64,7 +65,7 @@ namespace horizon {
 			return ToolResponse::end();
 		}
 		if(edge_mode) {
-			auto r = core.r->dialogs.ask_datum("Edge length", ai.get());
+			auto r = imp->dialogs.ask_datum("Edge length", ai.get());
 			if(!r.first) {
 				return ToolResponse::end();
 			}
@@ -119,7 +120,7 @@ namespace horizon {
 
 		}
 		if(line_mode) {
-			auto r = core.r->dialogs.ask_datum("Line length", ai.get());
+			auto r = imp->dialogs.ask_datum("Line length", ai.get());
 			if(!r.first) {
 				return ToolResponse::end();
 			}
@@ -158,7 +159,7 @@ namespace horizon {
 
 		}
 		if(arc_mode) {
-			auto r = core.r->dialogs.ask_datum("Arc radius");
+			auto r = imp->dialogs.ask_datum("Arc radius");
 			if(!r.first) {
 				return ToolResponse::end();
 			}
@@ -180,7 +181,7 @@ namespace horizon {
 			}
 		}
 		if(hole_mode) {
-			auto r = core.r->dialogs.ask_datum_coord("Hole position", ac.get());
+			auto r = imp->dialogs.ask_datum_coord("Hole position", ac.get());
 			if(!r.first) {
 				return ToolResponse::end();
 			}
@@ -194,7 +195,7 @@ namespace horizon {
 			bool r;
 			Coordi c;
 			std::pair<bool, bool> rc;
-			std::tie(r, c, rc)= core.r->dialogs.ask_datum_coord2("Junction position", ac.get());
+			std::tie(r, c, rc)= imp->dialogs.ask_datum_coord2("Junction position", ac.get());
 
 			if(!r) {
 				return ToolResponse::end();
@@ -209,7 +210,7 @@ namespace horizon {
 			}
 		}
 		if(pad_mode) {
-			auto r = core.r->dialogs.ask_datum_coord("Pad position", ac.get());
+			auto r = imp->dialogs.ask_datum_coord("Pad position", ac.get());
 			if(!r.first) {
 				return ToolResponse::end();
 			}

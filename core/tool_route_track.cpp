@@ -2,6 +2,7 @@
 #include <iostream>
 #include "core_board.hpp"
 #include "obstacle/canvas_obstacle.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -228,7 +229,7 @@ namespace horizon {
 			ss << "select starting point";
 		}
 		ss<<"</i>";
-		core.r->tool_bar_set_tip(ss.str());
+		imp->tool_bar_set_tip(ss.str());
 	}
 
 	ToolResponse ToolRouteTrack::update(const ToolArgs &args) {
@@ -270,7 +271,7 @@ namespace horizon {
 						return ToolResponse::change_layer(a.work_layer);
 					}
 					else {
-						core.r->tool_bar_flash("pad is not connected to a net");
+						imp->tool_bar_flash("pad is not connected to a net");
 					}
 				}
 				else if(args.target.type == ObjectType::JUNCTION) {
@@ -294,7 +295,7 @@ namespace horizon {
 						return ToolResponse::change_layer(a.work_layer);
 					}
 					else {
-						core.r->tool_bar_flash("junction is not connected to a net");
+						imp->tool_bar_flash("junction is not connected to a net");
 					}
 				}
 			}
@@ -318,14 +319,14 @@ namespace horizon {
 					}
 					else {
 						if(!try_move_track(args)) { //drc not okay
-							core.r->tool_bar_flash("can't connect due to DRC violation");
+							imp->tool_bar_flash("can't connect due to DRC violation");
 							return ToolResponse();
 						}
 						if(args.target.type == ObjectType::PAD) {
 							auto pkg = &core.b->get_board()->packages.at(args.target.path.at(0));
 							auto pad = &pkg->package.pads.at(args.target.path.at(1));
 							if(pad->net != net) {
-								core.r->tool_bar_flash("pad connected to wrong net");
+								imp->tool_bar_flash("pad connected to wrong net");
 								return ToolResponse();
 							}
 							temp_tracks.back()->to.connect(pkg, pad);
@@ -338,7 +339,7 @@ namespace horizon {
 
 							auto junc = core.r->get_junction(args.target.path.at(0));
 							if(junc->net && (junc->net != net)) {
-								core.r->tool_bar_flash("junction connected to wrong net");
+								imp->tool_bar_flash("junction connected to wrong net");
 								return ToolResponse();
 							}
 							temp_tracks.back()->to.connect(junc);
@@ -386,7 +387,7 @@ namespace horizon {
 					if(via == nullptr) {
 						UUID padstack_uuid;
 						bool r;
-						std::tie(r, padstack_uuid) = core.r->dialogs.select_via_padstack(core.b->get_via_padstack_provider());
+						std::tie(r, padstack_uuid) = imp->dialogs.select_via_padstack(core.b->get_via_padstack_provider());
 						if(r) {
 							auto uu = UUID::random();
 							via = &core.b->get_board()->vias.emplace(uu, Via(uu, core.b->get_via_padstack_provider()->get_padstack(padstack_uuid))).first->second;

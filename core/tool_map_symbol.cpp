@@ -1,6 +1,7 @@
 #include "tool_map_symbol.hpp"
 #include <iostream>
 #include "core_schematic.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -54,7 +55,7 @@ namespace horizon {
 		UUIDPath<2> selected_gate;
 		bool r;
 		if(gates_out.size()>1) {
-			std::tie(r, selected_gate) = core.r->dialogs.map_symbol(gates_out);
+			std::tie(r, selected_gate) = imp->dialogs.map_symbol(gates_out);
 			if(!r) {
 				return ToolResponse::end();
 			}
@@ -65,7 +66,7 @@ namespace horizon {
 		Component *comp = &sch->block->components.at(selected_gate.at(0));
 		Gate *gate = &comp->entity->gates.at(selected_gate.at(1));
 		UUID selected_symbol;
-		std::tie(r, selected_symbol) = core.r->dialogs.select_symbol(gate->unit->uuid);
+		std::tie(r, selected_symbol) = imp->dialogs.select_symbol(core.r, gate->unit->uuid);
 		if(!r) {
 			return ToolResponse::end();
 		}

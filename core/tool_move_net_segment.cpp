@@ -2,6 +2,7 @@
 #include "tool_place_power_symbol.hpp"
 #include <iostream>
 #include "core_schematic.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -84,7 +85,7 @@ namespace horizon {
 
 		bool r;
 		UUID net_uuid;
-		std::tie(r, net_uuid) = core.r->dialogs.select_net(false);
+		std::tie(r, net_uuid) = imp->dialogs.select_net(core.c->get_schematic()->block, false);
 		if(!r) {
 			return ToolResponse::end();
 		}

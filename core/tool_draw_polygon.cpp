@@ -1,5 +1,6 @@
 #include "tool_draw_polygon.hpp"
 #include "core_padstack.hpp"
+#include "imp_interface.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -41,7 +42,7 @@ namespace horizon {
 		if(last_vertex && (last_vertex->type == Polygon::Vertex::Type::ARC)) {
 			ss << "<b>e:</b> reverse arc direction";
 		}
-		core.r->tool_bar_set_tip(ss.str());
+		imp->tool_bar_set_tip(ss.str());
 	}
 
 	ToolResponse ToolDrawPolygon::update(const ToolArgs &args) {

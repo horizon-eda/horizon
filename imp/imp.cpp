@@ -87,8 +87,6 @@ namespace horizon {
 
 		main_window = MainWindow::create();
 		canvas = main_window->canvas;
-		core.r->dialogs.set_parent(main_window);
-		core.r->dialogs.set_core(core.r);
 		clipboard.reset(new ClipboardManager(core.r));
 
 		canvas->signal_selection_changed().connect(sigc::mem_fun(this, &ImpBase::sc));
@@ -115,7 +113,7 @@ namespace horizon {
 			args.coords = canvas->get_cursor_pos();
 			args.selection = canvas->get_selection();
 			args.work_layer = canvas->property_work_layer();
-			ToolResponse r= core.r->tool_begin(tool_id, args);
+			ToolResponse r= core.r->tool_begin(tool_id, args, imp_interface.get());
 			main_window->active_tool_label->set_text("Active tool: "+core.r->get_tool_name());
 			tool_process(r);
 		});
@@ -170,14 +168,6 @@ namespace horizon {
 		}
 
 		core.r->signal_tool_changed().connect([save_button, selection_filter_button](ToolID t){save_button->set_sensitive(t==ToolID::NONE); selection_filter_button->set_sensitive(t==ToolID::NONE);});
-		core.r->signal_update_tool_bar().connect([this](bool flash, const std::string &s){
-			if(flash) {
-				main_window->tool_bar_flash(s);
-			}
-			else {
-				main_window->tool_bar_set_tool_tip(s);
-			}
-		});
 
 		main_window->signal_delete_event().connect(sigc::mem_fun(this, &ImpBase::handle_close));
 
@@ -185,6 +175,9 @@ namespace horizon {
 		for(const auto &it: key_seq.get_sequences()) {
 			key_sequence_dialog->add_sequence(it.keys, tool_catalog.at(it.tool_id).name);
 		}
+
+
+		imp_interface = std::make_unique<ImpInterface>(this);
 
 		canvas_update();
 
@@ -207,7 +200,7 @@ namespace horizon {
 		args.coords = canvas->get_cursor_pos();
 		args.selection = canvas->get_selection();
 		args.work_layer = canvas->property_work_layer();
-		ToolResponse r= core.r->tool_begin(id, args);
+		ToolResponse r= core.r->tool_begin(id, args, imp_interface.get());
 		main_window->active_tool_label->set_text("Active tool: "+core.r->get_tool_name());
 		tool_process(r);
 	}
@@ -239,7 +232,7 @@ namespace horizon {
 				args.coords = canvas->get_cursor_pos();
 				args.selection = canvas->get_selection();
 				args.work_layer = canvas->property_work_layer();
-				ToolResponse r= core.r->tool_begin(t, args);
+				ToolResponse r= core.r->tool_begin(t, args, imp_interface.get());
 				main_window->active_tool_label->set_text("Active tool: "+core.r->get_tool_name());
 				tool_process(r);
 				return true;
@@ -385,7 +378,7 @@ namespace horizon {
 			ToolArgs args;
 			args.coords = canvas->get_cursor_pos();
 			args.keep_selection = true;
-			ToolResponse r = core.r->tool_begin(resp.next_tool, args);
+			ToolResponse r = core.r->tool_begin(resp.next_tool, args, imp_interface.get());
 			main_window->active_tool_label->set_text("Active tool: "+core.r->get_tool_name());
 			tool_process(r);
 		}

@@ -2,6 +2,7 @@
 #include "core.hpp"
 #include "component.hpp"
 #include <forward_list>
+#include "imp_interface.hpp"
 
 namespace horizon {
 

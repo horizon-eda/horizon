@@ -4,6 +4,7 @@
 #include "core_padstack.hpp"
 #include "core_package.hpp"
 #include "core_board.hpp"
+#include "imp_interface.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -110,7 +111,7 @@ namespace horizon {
 						Block *b = core.c->get_schematic()->block;
 						if(!net->is_named() && !net->is_power && !net->is_bussed) {
 							//net is unnamed, not bussed and not a power net, user does't care which pins get extracted
-							core.r->tool_bar_flash("net split");
+							imp->tool_bar_flash("net split");
 							b->extract_pins(pins_to);
 						}
 						else if(net->is_power) {
@@ -123,16 +124,16 @@ namespace horizon {
 								}
 								else if(inf_from.has_power_sym && !inf_to.has_power_sym) {
 									//from has label, to not, extracts pins on to net segment
-									core.r->tool_bar_flash("net split");
+									imp->tool_bar_flash("net split");
 									b->extract_pins(pins_to);
 								}
 								else if(!inf_from.has_power_sym && inf_to.has_power_sym) {
 									//to has label, from not, extract pins on from segment
-									core.r->tool_bar_flash("net split");
+									imp->tool_bar_flash("net split");
 									b->extract_pins(pins_from);
 								}
 								else {
-									core.r->tool_bar_flash("net split");
+									imp->tool_bar_flash("net split");
 									b->extract_pins(pins_from);
 								}
 							}
@@ -147,17 +148,17 @@ namespace horizon {
 								}
 								else if(inf_from.has_label && !inf_to.has_label) {
 									//from has label, to not, extracts pins on to net segment
-									core.r->tool_bar_flash("net split");
+									imp->tool_bar_flash("net split");
 									b->extract_pins(pins_to);
 								}
 								else if(!inf_from.has_label && inf_to.has_label) {
 									//to has label, from not, extract pins on from segment
-									core.r->tool_bar_flash("net split");
+									imp->tool_bar_flash("net split");
 									b->extract_pins(pins_from);
 								}
 								else if(!inf_from.has_label && !inf_to.has_label) {
 									//both segments are unlabeled, so don't care
-									core.r->tool_bar_flash("net split");
+									imp->tool_bar_flash("net split");
 									b->extract_pins(pins_from);
 								}
 							}
@@ -264,7 +265,7 @@ namespace horizon {
 						}
 					}
 					if(found == false) {
-						if((comp->entity->gates.size()==1) || core.r->dialogs.ask_delete_component(comp)) {
+						if((comp->entity->gates.size()==1) || imp->dialogs.ask_delete_component(comp)) {
 							sch->block->components.erase(comp->uuid);
 							comp = nullptr;
 						}

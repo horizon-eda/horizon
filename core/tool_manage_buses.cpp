@@ -14,11 +14,12 @@ namespace horizon {
 
 	ToolResponse ToolManageBuses::begin(const ToolArgs &args) {
 		bool r;
+		auto sch = core.c->get_schematic();
 		if(tool_id == ToolID::MANAGE_BUSES) {
-			r = core.r->dialogs.manage_buses();
+			r = imp->dialogs.manage_buses(sch->block);
 		}
 		else if(tool_id == ToolID::ANNOTATE) {
-			r = core.r->dialogs.annotate();
+			r = imp->dialogs.annotate(sch);
 		}
 		if(r) {
 			core.r->commit();

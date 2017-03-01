@@ -1,5 +1,6 @@
 #include "tool_edit_component_pin_names.hpp"
 #include "core_schematic.hpp"
+#include "imp_interface.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -36,7 +37,7 @@ namespace horizon {
 		if(!comp) {
 			return ToolResponse::end();
 		}
-		bool r = core.r->dialogs.edit_component_pin_names(comp);
+		bool r = imp->dialogs.edit_component_pin_names(comp);
 		if(r) {
 			core.r->commit();
 		}

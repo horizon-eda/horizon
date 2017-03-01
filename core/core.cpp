@@ -158,13 +158,14 @@ namespace horizon {
 		}
 	}
 
-	ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args) {
+	ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInterface *imp) {
 		if(!args.keep_selection) {
 			selection.clear();
 			selection = args.selection;
 		}
 		
 		tool = create_tool(tool_id);
+		tool->set_imp_interface(imp);
 		if(tool) {
 			s_signal_tool_changed.emit(tool_id);
 			auto r = tool->begin(args);
@@ -387,14 +388,6 @@ namespace horizon {
 		return j;
 	}
 
-	void Core::tool_bar_set_tip(const std::string &s) {
-		s_signal_update_tool_bar.emit(false, s);
-	}
-
-	void Core::tool_bar_flash(const std::string &s) {
-		s_signal_update_tool_bar.emit(true, s);
-	}
-
 	void Core::set_needs_save(bool v) {
 		if(v!=needs_save) {
 			needs_save = v;
@@ -407,4 +400,9 @@ namespace horizon {
 	}
 
 	ToolBase::ToolBase(Core *c, ToolID tid): core(c), tool_id(tid) {}
+	void ToolBase::set_imp_interface(ImpInterface *i) {
+		if(imp==nullptr) {
+			imp = i;
+		}
+	}
 }

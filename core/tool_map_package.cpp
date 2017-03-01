@@ -1,6 +1,7 @@
 #include "tool_map_package.hpp"
 #include <iostream>
 #include "core_board.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -33,7 +34,7 @@ namespace horizon {
 
 		UUID selected_component;
 		bool r;
-		std::tie(r, selected_component) = core.r->dialogs.map_package(components);
+		std::tie(r, selected_component) = imp->dialogs.map_package(components);
 		if(!r) {
 			return ToolResponse::end();
 		}

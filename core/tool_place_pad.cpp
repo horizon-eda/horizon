@@ -1,6 +1,7 @@
 #include "tool_place_pad.hpp"
 #include <iostream>
 #include "core_package.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -16,7 +17,7 @@ namespace horizon {
 		std::cout << "tool add comp\n";
 		bool r;
 		UUID padstack_uuid;
-		std::tie(r, padstack_uuid) = core.r->dialogs.select_padstack(core.k->get_package()->uuid);
+		std::tie(r, padstack_uuid) = imp->dialogs.select_padstack(core.r->m_pool, core.k->get_package()->uuid);
 		if(!r) {
 			return ToolResponse::end();
 		}
@@ -24,7 +25,7 @@ namespace horizon {
 		padstack = core.r->m_pool->get_padstack(padstack_uuid);
 		create_pad(args.coords);
 
-		core.r->tool_bar_set_tip("<b>LMB:</b>place pad <b>RMB:</b>delete current pad and finish");
+		imp->tool_bar_set_tip("<b>LMB:</b>place pad <b>RMB:</b>delete current pad and finish");
 		return ToolResponse();
 	}
 

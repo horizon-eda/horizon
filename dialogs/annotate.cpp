@@ -29,9 +29,9 @@ namespace horizon {
 
 	}
 
-	AnnotateDialog::AnnotateDialog(Gtk::Window *parent, CoreSchematic *c) :
+	AnnotateDialog::AnnotateDialog(Gtk::Window *parent, Schematic *s) :
 		Gtk::Dialog("Annotation", *parent, Gtk::DialogFlags::DIALOG_MODAL|Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
-		core(c)
+		sch(s)
 		{
 		add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
 		auto ok_button = add_button("Annotate", Gtk::ResponseType::RESPONSE_OK);
@@ -49,7 +49,6 @@ namespace horizon {
 		grid->set_halign(Gtk::ALIGN_CENTER);
 
 		int top = 0;
-		auto sch = core->get_schematic();
 		{
 			auto la = Gtk::manage(new Gtk::Label("Order"));
 			la->set_halign(Gtk::ALIGN_END);
@@ -106,7 +105,6 @@ namespace horizon {
 	}
 
 	void AnnotateDialog::ok_clicked() {
-		auto sch = core->get_schematic();
 		sch->annotation.order = static_cast<Schematic::Annotation::Order>(std::stoi(w_order->get_active_id()));
 		sch->annotation.mode = static_cast<Schematic::Annotation::Mode>(std::stoi(w_mode->get_active_id()));
 		sch->annotation.fill_gaps = w_fill_gaps->get_active();

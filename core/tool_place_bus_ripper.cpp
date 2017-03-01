@@ -1,6 +1,7 @@
 #include "tool_place_bus_ripper.hpp"
 #include <iostream>
 #include "core_schematic.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -16,7 +17,7 @@ namespace horizon {
 	ToolResponse ToolPlaceBusRipper::begin(const ToolArgs &args) {
 		std::cout << "tool place bus ripper\n";
 
-		core.r->tool_bar_set_tip("<b>LMB:</b>place <b>RMB:</b>finish");
+		imp->tool_bar_set_tip("<b>LMB:</b>place <b>RMB:</b>finish");
 		return ToolResponse();
 	}
 
@@ -26,14 +27,14 @@ namespace horizon {
 				if(args.target.type == ObjectType::JUNCTION) {
 					Junction *j = core.c->get_junction(args.target.path.at(0));
 					if(!j->bus) {
-						core.r->tool_bar_flash("junction doesn't have bus");
+						imp->tool_bar_flash("junction doesn't have bus");
 						return ToolResponse();
 					}
 					Bus *bus = j->bus;
 					bool r;
 					UUID bus_member_uuid;
 
-					std::tie(r, bus_member_uuid) = core.r->dialogs.select_bus_member(bus->uuid);
+					std::tie(r, bus_member_uuid) = imp->dialogs.select_bus_member(core.c->get_schematic()->block, bus->uuid);
 					if(!r)
 						return ToolResponse();
 					Bus::Member *bus_member = &bus->members.at(bus_member_uuid);
@@ -49,14 +50,14 @@ namespace horizon {
 						if(it->coord_on_line(args.coords)) {
 							std::cout << "on line" << std::endl;
 							if(!it->bus) {
-								core.r->tool_bar_flash("line doesn't have bus");
+								imp->tool_bar_flash("line doesn't have bus");
 								return ToolResponse();
 							}
 							Bus *bus = it->bus;
 							bool r;
 							UUID bus_member_uuid;
 
-							std::tie(r, bus_member_uuid) = core.r->dialogs.select_bus_member(bus->uuid);
+							std::tie(r, bus_member_uuid) = imp->dialogs.select_bus_member(core.c->get_schematic()->block, bus->uuid);
 							if(!r)
 								return ToolResponse();
 							Bus::Member *bus_member = &bus->members.at(bus_member_uuid);
@@ -78,10 +79,10 @@ namespace horizon {
 						}
 					}
 
-					core.r->tool_bar_flash("can only place bus ripper on buses");
+					imp->tool_bar_flash("can only place bus ripper on buses");
 				}
 				else {
-					core.r->tool_bar_flash("can only place bus ripper on buses");
+					imp->tool_bar_flash("can only place bus ripper on buses");
 				}
 			}
 			else if(args.button == 3) {

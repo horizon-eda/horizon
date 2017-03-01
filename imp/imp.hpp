@@ -17,6 +17,7 @@
 #include "keyseq_dialog.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "checks/check_runner.hpp"
+#include "imp_interface.hpp"
 #include <zmq.hpp>
 
 #ifdef G_OS_WIN32
@@ -25,6 +26,7 @@
 
 namespace horizon {
 	class ImpBase {
+		friend class ImpInterface;
 		public :
 			ImpBase(const std::string &pool_path);
 			void run(int argc, char *argv[]);
@@ -46,6 +48,7 @@ namespace horizon {
 			Cores core;
 			std::unique_ptr<ClipboardManager> clipboard=nullptr;
 			std::unique_ptr<KeySequenceDialog> key_sequence_dialog=nullptr;
+			std::unique_ptr<ImpInterface> imp_interface=nullptr;
 			Glib::RefPtr<Glib::Binding> grid_spacing_binding;
 			KeySequence key_seq;
 			

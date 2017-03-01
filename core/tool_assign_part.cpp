@@ -2,6 +2,7 @@
 #include "core_schematic.hpp"
 #include "part.hpp"
 #include <iostream>
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -40,7 +41,7 @@ namespace horizon {
 			return ToolResponse::end();
 		}
 		UUID part_uuid = comp->part?comp->part->uuid:UUID();
-		auto r = core.r->dialogs.select_part(entity->uuid, part_uuid);
+		auto r = imp->dialogs.select_part(core.r->m_pool, entity->uuid, part_uuid);
 		if(r.first) {
 			Part *part = nullptr;
 			if(r.second) {

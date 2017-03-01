@@ -80,6 +80,7 @@ namespace horizon {
 	class ToolBase {
 		public :
 			ToolBase(class Core *c, ToolID tid);
+			void set_imp_interface(class ImpInterface *i);
 
 			/**
 			 * Gets called right after the constructor has finished.
@@ -102,6 +103,7 @@ namespace horizon {
 
 		protected :
 			Cores core;
+			class ImpInterface *imp = nullptr;
 			ToolID tool_id = ToolID::NONE;
 	};
 
@@ -160,7 +162,7 @@ namespace horizon {
 			 * And copies the non-working document to the working document.
 			 */
 			virtual void rebuild(bool from_undo = false);
-			ToolResponse tool_begin(ToolID tool_id, const ToolArgs &args);
+			ToolResponse tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInterface *imp);
 			ToolResponse tool_update(const ToolArgs &args);
 			bool tool_can_begin(ToolID tool_id, const std::set<SelectableRef> &selection);
 			virtual void commit() = 0;
@@ -203,15 +205,6 @@ namespace horizon {
 			std::set<SelectableRef> selection;
 			Pool *m_pool;
 
-			/**
-			 * These are used by Tools to query information from the user in a modal
-			 * way.
-			 */
-			Dialogs dialogs;
-			
-			void tool_bar_set_tip(const std::string &s);
-			void tool_bar_flash(const std::string &s);
-
 			bool get_needs_save() const;
 
 			typedef sigc::signal<void, ToolID> type_signal_tool_changed;
@@ -229,12 +222,6 @@ namespace horizon {
 			 * connect to this signal for providing meta information when the document is saved
 			 */
 			type_signal_request_save_meta signal_request_save_meta() {return s_signal_request_save_meta;}
-
-			typedef sigc::signal<void, bool, std::string> type_signal_update_tool_bar;
-			/**
-			 * used for signaling changes to the tool bar true: flash, false: tip
-			 */
-			type_signal_update_tool_bar signal_update_tool_bar() {return s_signal_update_tool_bar;}
 
 			typedef sigc::signal<void, bool> type_signal_needs_save;
 			type_signal_needs_save signal_needs_save() {return s_signal_needs_save;}
@@ -254,7 +241,6 @@ namespace horizon {
 			type_signal_rebuilt s_signal_rebuilt;
 			type_signal_rebuilt s_signal_save;
 			type_signal_request_save_meta s_signal_request_save_meta;
-			type_signal_update_tool_bar s_signal_update_tool_bar;
 			type_signal_needs_save s_signal_needs_save;
 			bool needs_save = false;
 			void set_needs_save(bool v);

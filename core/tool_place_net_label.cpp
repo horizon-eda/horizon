@@ -2,6 +2,7 @@
 #include "tool_move.hpp"
 #include <iostream>
 #include "core_schematic.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -34,7 +35,7 @@ namespace horizon {
 	}
 
 	bool ToolPlaceNetLabel::begin_attached() {
-		core.r->tool_bar_set_tip("<b>LMB:</b>place label <b>RMB:</b>delete current label and finish <b>r:</b>rotate <b>e:</b>mirror <b>+-:</b>change label size");
+		imp->tool_bar_set_tip("<b>LMB:</b>place label <b>RMB:</b>delete current label and finish <b>r:</b>rotate <b>e:</b>mirror <b>+-:</b>change label size");
 		return true;
 	}
 

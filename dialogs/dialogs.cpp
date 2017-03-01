@@ -25,10 +25,6 @@ namespace horizon {
 		parent = w;
 	}
 
-	void Dialogs::set_core(Core *c) {
-		cores = std::make_unique<Cores>(c);
-	}
-
 	std::pair<bool, UUID> Dialogs::map_pin(const std::vector<std::pair<const Pin*, bool>> &pins) {
 		MapPinDialog dia(parent, pins);
 		auto r = dia.run();
@@ -50,8 +46,8 @@ namespace horizon {
 		}
 	}
 
-	std::pair<bool, UUID> Dialogs::select_symbol(const UUID &unit_uuid) {
-		PoolBrowserDialogSymbol dia(parent, cores->r, unit_uuid);
+	std::pair<bool, UUID> Dialogs::select_symbol(Core *c, const UUID &unit_uuid) {
+		PoolBrowserDialogSymbol dia(parent, c, unit_uuid);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
 			return {dia.selection_valid, dia.selected_uuid};
@@ -61,8 +57,8 @@ namespace horizon {
 		}
 	}
 
-	std::pair<bool, UUID> Dialogs::select_padstack(const UUID &package_uuid) {
-		PoolBrowserDialogPadstack dia(parent, cores->r->m_pool, package_uuid);
+	std::pair<bool, UUID> Dialogs::select_padstack(Pool *pool, const UUID &package_uuid) {
+		PoolBrowserDialogPadstack dia(parent, pool, package_uuid);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
 			return {dia.selection_valid, dia.selected_uuid};
@@ -71,8 +67,8 @@ namespace horizon {
 			return {false, UUID()};
 		}
 	}
-	std::pair<bool, UUID> Dialogs::select_entity() {
-		PoolBrowserDialogEntity dia(parent, cores->r->m_pool);
+	std::pair<bool, UUID> Dialogs::select_entity(Pool *pool) {
+		PoolBrowserDialogEntity dia(parent, pool);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
 			return {dia.selection_valid, dia.selected_uuid};
@@ -81,8 +77,8 @@ namespace horizon {
 			return {false, UUID()};
 		}
 	}
-	std::pair<bool, UUID> Dialogs::select_net(bool power_only) {
-		SelectNetDialog dia(parent, cores->c->get_schematic()->block, "Select net");
+	std::pair<bool, UUID> Dialogs::select_net(class Block *block, bool power_only) {
+		SelectNetDialog dia(parent, block, "Select net");
 		dia.net_selector->set_power_only(power_only);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
@@ -92,8 +88,8 @@ namespace horizon {
 			return {false, UUID()};
 		}
 	}
-	std::pair<bool, UUID> Dialogs::select_bus() {
-		SelectNetDialog dia(parent, cores->c->get_schematic()->block, "Select bus");
+	std::pair<bool, UUID> Dialogs::select_bus(class Block *block) {
+		SelectNetDialog dia(parent, block, "Select bus");
 		dia.net_selector->set_bus_mode(true);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
@@ -103,8 +99,8 @@ namespace horizon {
 			return {false, UUID()};
 		}
 	}
-	std::pair<bool, UUID> Dialogs::select_bus_member(const UUID &bus_uuid) {
-		SelectNetDialog dia(parent, cores->c->get_schematic()->block, "Select bus member");
+	std::pair<bool, UUID> Dialogs::select_bus_member(class Block *block, const UUID &bus_uuid) {
+		SelectNetDialog dia(parent, block, "Select bus member");
 		dia.net_selector->set_bus_member_mode(bus_uuid);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
@@ -135,13 +131,13 @@ namespace horizon {
 		return dia.run()==Gtk::RESPONSE_OK;
 	}
 
-	bool Dialogs::manage_buses() {
-		ManageBusesDialog dia(parent, cores->c);
+	bool Dialogs::manage_buses(Block *b) {
+		ManageBusesDialog dia(parent, b);
 		return dia.run()==Gtk::RESPONSE_OK;
 	}
 
-	bool Dialogs::annotate() {
-		AnnotateDialog dia(parent, cores->c);
+	bool Dialogs::annotate(Schematic *s) {
+		AnnotateDialog dia(parent, s);
 		return dia.run()==Gtk::RESPONSE_OK;
 	}
 
@@ -185,10 +181,10 @@ namespace horizon {
 		}
 	}
 
-	std::pair<bool, UUID> Dialogs::select_part(const UUID &entity_uuid, const UUID &part_uuid) {
-		PoolBrowserDialogPart dia(parent, cores->r->m_pool, entity_uuid);
+	std::pair<bool, UUID> Dialogs::select_part(Pool *pool, const UUID &entity_uuid, const UUID &part_uuid) {
+		PoolBrowserDialogPart dia(parent, pool, entity_uuid);
 		if(part_uuid) {
-			auto part = cores->r->m_pool->get_part(part_uuid);
+			auto part = pool->get_part(part_uuid);
 			dia.set_MPN(part->get_MPN());
 		}
 		auto r = dia.run();

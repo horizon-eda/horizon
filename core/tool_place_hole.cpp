@@ -1,6 +1,7 @@
 #include "tool_place_hole.hpp"
 #include <iostream>
 #include "core_padstack.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 	
@@ -17,7 +18,7 @@ namespace horizon {
 
 		create_hole(args.coords);
 		
-		core.r->tool_bar_set_tip("<b>LMB:</b>place hole <b>RMB:</b>delete current hole and finish");
+		imp->tool_bar_set_tip("<b>LMB:</b>place hole <b>RMB:</b>delete current hole and finish");
 		return ToolResponse();
 	}
 

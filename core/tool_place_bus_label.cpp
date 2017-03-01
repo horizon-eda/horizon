@@ -2,6 +2,7 @@
 #include "tool_move.hpp"
 #include <iostream>
 #include "core_schematic.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -16,12 +17,12 @@ namespace horizon {
 	bool ToolPlaceBusLabel::begin_attached() {
 		bool r;
 		UUID net_uuid;
-		std::tie(r, net_uuid) = core.r->dialogs.select_bus();
+		std::tie(r, net_uuid) = imp->dialogs.select_bus(core.c->get_schematic()->block);
 		if(!r) {
 			return false;
 		}
 		bus = &core.c->get_schematic()->block->buses.at(net_uuid);
-		core.r->tool_bar_set_tip("<b>LMB:</b>place bus label <b>RMB:</b>delete current label and finish <b>r:</b>rotate <b>e:</b>mirror");
+		imp->tool_bar_set_tip("<b>LMB:</b>place bus label <b>RMB:</b>delete current label and finish <b>r:</b>rotate <b>e:</b>mirror");
 		return true;
 	}
 

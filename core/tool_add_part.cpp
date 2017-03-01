@@ -2,6 +2,7 @@
 #include <iostream>
 #include "core_schematic.hpp"
 #include "part.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -17,7 +18,7 @@ namespace horizon {
 		std::cout << "tool add part\n";
 		bool r;
 		UUID part_uuid;
-		std::tie(r, part_uuid) = core.r->dialogs.select_part(UUID(), UUID());
+		std::tie(r, part_uuid) = imp->dialogs.select_part(core.r->m_pool, UUID(), UUID());
 		if(!r) {
 			return ToolResponse::end();
 		}

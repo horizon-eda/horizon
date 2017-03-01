@@ -184,6 +184,7 @@ SRC_IMP = \
 	checks/single_pin_net.cpp\
 	imp/checks/checks_window.cpp\
 	imp/checks/check_settings_dialog.cpp\
+	imp/imp_interface.cpp
 	
 
 SRC_POOL_UTIL = \

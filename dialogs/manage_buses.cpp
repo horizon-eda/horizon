@@ -8,7 +8,7 @@ namespace horizon {
 
 	class BusMemberEditor: public Gtk::Box {
 		public:
-		BusMemberEditor(Bus *b, Bus::Member *m, CoreSchematic *c):Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4), bus(b), bus_member(m), core(c) {
+		BusMemberEditor(Bus *b, Bus::Member *m, Block *bl):Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4), bus(b), bus_member(m), block(bl) {
 			set_margin_start(8);
 			set_margin_end(8);
 			set_margin_top(4);
@@ -28,7 +28,7 @@ namespace horizon {
 			});
 			pack_start(*auto_name_button, false,false, 0);
 
-			net_button = Gtk::manage(new NetButton(core->get_schematic()->block));
+			net_button = Gtk::manage(new NetButton(block));
 			net_button->set_net(bus_member->net->uuid);
 			net_button->signal_changed().connect(sigc::mem_fun(this, &BusMemberEditor::bus_net_changed));
 			net_button->set_sensitive(!bus_member->net->has_bus_rippers);
@@ -52,7 +52,7 @@ namespace horizon {
 			}
 
 			void bus_net_changed(const UUID &uu) {
-				bus_member->net = &core->get_schematic()->block->nets.at(uu);
+				bus_member->net = &block->nets.at(uu);
 			}
 
 			void bus_member_remove() {
@@ -63,13 +63,13 @@ namespace horizon {
 
 			Bus *bus;
 			Bus::Member *bus_member;
-			CoreSchematic *core;
+			Block *block;
 	};
 
 
 	class BusEditor: public Gtk::Box {
 		public :
-			BusEditor(Bus *bu, CoreSchematic *c):Gtk::Box(Gtk::ORIENTATION_VERTICAL,0), bus(bu), core(c) {
+			BusEditor(Bus *bu, Block *bl):Gtk::Box(Gtk::ORIENTATION_VERTICAL,0), bus(bu), block(bl) {
 				auto labelbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
 				labelbox->set_margin_start(12);
 				labelbox->set_margin_end(4);
@@ -115,14 +115,14 @@ namespace horizon {
 
 		private :
 			Bus *bus;
-			CoreSchematic *core;
+			Block *block;
 			Gtk::Entry *bus_name_entry;
 			Gtk::ListBox *listbox;
 			Glib::RefPtr<Gtk::SizeGroup> sg_entry;
 			Glib::RefPtr<Gtk::SizeGroup> sg_button;
 
 			void add_row(Bus::Member *mem) {
-				auto ed = Gtk::manage(new BusMemberEditor(bus, mem, core));
+				auto ed = Gtk::manage(new BusMemberEditor(bus, mem, block));
 				sg_entry->add_widget(*ed->entry);
 				sg_button->add_widget(*ed->net_button);
 				listbox->insert(*ed, -1);
@@ -146,7 +146,7 @@ namespace horizon {
 				Bus::Member *newmember = &bus->members.emplace(uu, uu).first->second;
 				newmember->name = "fixme";
 				uu = UUID::random();
-				Net *newnet = core->get_schematic()->block->insert_net();
+				Net *newnet = block->insert_net();
 				newnet->name = "changeme";
 				newnet->is_bussed = true;
 				newmember->net = newnet;
@@ -158,9 +158,9 @@ namespace horizon {
 
 
 
-	ManageBusesDialog::ManageBusesDialog(Gtk::Window *parent, CoreSchematic *c) :
+	ManageBusesDialog::ManageBusesDialog(Gtk::Window *parent, Block *bl) :
 		Gtk::Dialog("Manage buses", *parent, Gtk::DialogFlags::DIALOG_MODAL|Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
-		core(c)
+		block(bl)
 		{
 		add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
 		add_button("OK", Gtk::ResponseType::RESPONSE_OK);
@@ -209,14 +209,14 @@ namespace horizon {
 		box->pack_start(*stack, true, true, 0);
 
 		std::deque<Bus*> buses_sorted;
-		for(auto &it: core->get_schematic()->block->buses) {
+		for(auto &it: block->buses) {
 			buses_sorted.push_back(&it.second);
 		}
 		std::sort(buses_sorted.begin(), buses_sorted.end(), [](const auto  &a, const auto &b) {return a->name < b->name;});
 
 
 		for(auto it: buses_sorted) {
-			auto ed = Gtk::manage(new BusEditor(it, core));
+			auto ed = Gtk::manage(new BusEditor(it, block));
 			//auto sc = Gtk::manage(new Gtk::ScrolledWindow());
 			//sc->add(*ed);
 			stack->add(*ed, (std::string)it->uuid, it->name);
@@ -231,18 +231,18 @@ namespace horizon {
 
 	void ManageBusesDialog::remove_bus() {
 		auto bus_current_uuid = UUID(stack->get_visible_child_name());
-		const auto bus = core->get_schematic()->block->buses.at(bus_current_uuid);
+		const auto bus = block->buses.at(bus_current_uuid);
 		if(bus.is_referenced)
 			return;
 		delete stack->get_visible_child();
-		core->get_schematic()->block->buses.erase(bus_current_uuid);
+		block->buses.erase(bus_current_uuid);
 	}
 
 	void ManageBusesDialog::update_bus_removable() {
 		auto vc = stack->get_visible_child_name();
 		if(vc.size()) {
 			auto bus_current_uuid = UUID(stack->get_visible_child_name());
-			const auto bus = core->get_schematic()->block->buses.at(bus_current_uuid);
+			const auto bus = block->buses.at(bus_current_uuid);
 			delete_button->set_sensitive(!bus.is_referenced);
 		}
 		else {
@@ -252,9 +252,9 @@ namespace horizon {
 
 	void ManageBusesDialog::add_bus() {
 		auto uu = UUID::random();
-		Bus *newbus = &core->get_schematic()->block->buses.emplace(uu,uu).first->second;
+		Bus *newbus = &block->buses.emplace(uu,uu).first->second;
 		newbus->name = "NEW";
-		auto ed = Gtk::manage(new BusEditor(newbus, core));
+		auto ed = Gtk::manage(new BusEditor(newbus, block));
 		//auto sc = Gtk::manage(new Gtk::ScrolledWindow());
 		//sc->add(*ed);
 		stack->add(*ed, (std::string)newbus->uuid, newbus->name);

@@ -1,6 +1,7 @@
 #include "tool_place_shape.hpp"
 #include <iostream>
 #include "core_padstack.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -18,7 +19,7 @@ namespace horizon {
 		create_shape(args.coords);
 		temp->layer = args.work_layer;
 
-		core.r->tool_bar_set_tip("<b>LMB:</b>place shape <b>RMB:</b>delete current shape and finish");
+		imp->tool_bar_set_tip("<b>LMB:</b>place shape <b>RMB:</b>delete current shape and finish");
 		return ToolResponse();
 	}
 
@@ -59,7 +60,7 @@ namespace horizon {
 				return ToolResponse::end();
 			}
 			else if(args.key == GDK_KEY_i) {
-				 core.r->dialogs.edit_shape(temp);
+				 imp->dialogs.edit_shape(temp);
 			}
 			else if(args.key == GDK_KEY_r) {
 				 temp->placement.inc_angle_deg(90);

@@ -1,6 +1,7 @@
 #include "tool_bend_line_net.hpp"
 #include <iostream>
 #include "core_schematic.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -34,7 +35,7 @@ namespace horizon {
 
 		LineNet *li = &core.c->get_sheet()->net_lines.at(it->uuid);
 		core.c->get_sheet()->split_line_net(li, temp);
-		core.r->tool_bar_set_tip("<b>LMB:</b>place junction <b>RMB:</b>cancel");
+		imp->tool_bar_set_tip("<b>LMB:</b>place junction <b>RMB:</b>cancel");
 		return ToolResponse();
 	}
 	ToolResponse ToolBendLineNet::update(const ToolArgs &args) {

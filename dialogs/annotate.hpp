@@ -4,18 +4,18 @@
 #include <set>
 #include "common.hpp"
 #include "uuid.hpp"
-#include "core/core_schematic.hpp"
+#include "schematic.hpp"
 namespace horizon {
 
 
 	class AnnotateDialog: public Gtk::Dialog {
 		public:
-			AnnotateDialog(Gtk::Window *parent, CoreSchematic *c);
+			AnnotateDialog(Gtk::Window *parent, Schematic *s);
 			bool valid = false;
 
 
 		private :
-			CoreSchematic *core = nullptr;
+			Schematic *sch = nullptr;
 			Gtk::Switch *w_fill_gaps = nullptr;
 			Gtk::Switch *w_keep = nullptr;
 			Gtk::ComboBoxText *w_order = nullptr;

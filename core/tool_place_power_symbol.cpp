@@ -1,6 +1,7 @@
 #include "tool_place_power_symbol.hpp"
 #include <iostream>
 #include "core_schematic.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 
@@ -15,12 +16,12 @@ namespace horizon {
 	bool ToolPlacePowerSymbol::begin_attached() {
 		bool r;
 		UUID net_uuid;
-		std::tie(r, net_uuid) = core.r->dialogs.select_net(true);
+		std::tie(r, net_uuid) = imp->dialogs.select_net(core.c->get_schematic()->block, true);
 		if(!r) {
 			return false;
 		}
 		net = &core.c->get_schematic()->block->nets.at(net_uuid);
-		core.r->tool_bar_set_tip("<b>LMB:</b>place power symbol <b>RMB:</b>delete current power symbol and finish <b>e:</b>mirror");
+		imp->tool_bar_set_tip("<b>LMB:</b>place power symbol <b>RMB:</b>delete current power symbol and finish <b>e:</b>mirror");
 		return true;
 	}
 
@@ -50,7 +51,7 @@ namespace horizon {
 		}
 		else if(!other->is_power && other != net) {
 			core.c->get_schematic()->block->merge_nets(other, net);
-			core.r->tool_bar_flash("merged net \"" + other->name + "\" into power net\"" + net->name + "\"");
+			imp->tool_bar_flash("merged net \"" + other->name + "\" into power net\"" + net->name + "\"");
 			core.c->get_schematic()->expand(true);
 			return true;
 		}

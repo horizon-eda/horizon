@@ -5,6 +5,7 @@
 #include "core_package.hpp"
 #include "core_board.hpp"
 #include "accumulator.hpp"
+#include "imp_interface.hpp"
 #include "util.hpp"
 #include <iostream>
 
@@ -327,7 +328,7 @@ namespace horizon {
 			return ToolResponse::end();
 		}
 		if(tool_id == ToolID::MOVE_EXACTLY) {
-			auto r = core.r->dialogs.ask_datum_coord("Move exactly");
+			auto r = imp->dialogs.ask_datum_coord("Move exactly");
 			if(!r.first) {
 				return ToolResponse::end();
 			}
@@ -347,7 +348,7 @@ namespace horizon {
 
 	void ToolMove::update_tip() {
 		auto delta = last-origin;
-		core.r->tool_bar_set_tip("<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate <b>e:</b>mirror "+coord_to_string(delta, true));
+		imp->tool_bar_set_tip("<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate <b>e:</b>mirror "+coord_to_string(delta, true));
 	}
 
 	void ToolMove::do_move(const Coordi &delta) {

@@ -1,4 +1,5 @@
 #include "tool_place_text.hpp"
+#include "imp_interface.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -18,7 +19,7 @@ namespace horizon {
 		temp->text = "TEXT";
 		temp->layer = args.work_layer;
 		temp->placement.shift = args.coords;
-		core.r->tool_bar_set_tip("<b>LMB:</b>place text <b>RMB:</b>delete current text and finish");
+		imp->tool_bar_set_tip("<b>LMB:</b>place text <b>RMB:</b>delete current text and finish");
 		return ToolResponse();
 	}
 	ToolResponse ToolPlaceText::update(const ToolArgs &args) {

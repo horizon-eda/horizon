@@ -1,4 +1,5 @@
 #include "tool_draw_arc.hpp"
+#include "imp_interface.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -44,7 +45,7 @@ namespace horizon {
 			ss << "place center junction";
 		}
 		ss << " <b>RMB:</b>cancel <b>e:</b>reverse arc direction";
-		core.r->tool_bar_set_tip(ss.str());
+		imp->tool_bar_set_tip(ss.str());
 	}
 
 	ToolResponse ToolDrawArc::update(const ToolArgs &args) {
