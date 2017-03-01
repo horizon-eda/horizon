@@ -279,6 +279,9 @@ namespace horizon {
 				case ObjectType::VIA :
 					core.b->get_board()->vias.erase(it.uuid);
 				break;
+				case ObjectType::SHAPE:
+					core.a->get_padstack()->shapes.erase(it.uuid);
+				break;
 				case ObjectType::TEXT :
 					core.r->delete_text(it.uuid);
 				break;

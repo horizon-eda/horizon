@@ -18,6 +18,7 @@
 #include "core/core_schematic.hpp"
 #include "core/cores.hpp"
 #include "part.hpp"
+#include "edit_shape.hpp"
 
 namespace horizon {
 	void Dialogs::set_parent(Gtk::Window *w) {
@@ -116,6 +117,11 @@ namespace horizon {
 
 	bool Dialogs::edit_component_pin_names(Component *comp) {
 		ComponentPinNamesDialog dia(parent, comp);
+		return dia.run() == Gtk::RESPONSE_OK;
+	}
+
+	bool Dialogs::edit_shape(Shape *shape) {
+		ShapeDialog dia(parent, shape);
 		return dia.run() == Gtk::RESPONSE_OK;
 	}
 

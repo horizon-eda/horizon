@@ -6,6 +6,7 @@
 #include "polygon.hpp"
 #include "hole.hpp"
 #include "lut.hpp"
+#include "shape.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -31,6 +32,7 @@ namespace horizon {
 			Type type = Type::TOP;
 			std::map<UUID, Polygon> polygons;
 			std::map<UUID, Hole> holes;
+			std::map<UUID, Shape> shapes;
 			UUID get_uuid() const override;
 			std::pair<Coordi, Coordi> get_bbox() const;
 			void expand_inner(unsigned int n_inner);

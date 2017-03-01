@@ -14,6 +14,7 @@
 #include "selection_filter.hpp"
 #include "sheet.hpp"
 #include "marker.hpp"
+#include "shape.hpp"
 
 namespace horizon {
 	class Canvas: public sigc::trackable {
@@ -56,6 +57,7 @@ namespace horizon {
 			void render(const class Padstack &padstack, int layer, bool interactive);
 			void render(const class Padstack &padstack, bool interactive=true);
 			void render(const class Polygon &polygon, bool interactive=true);
+			void render(const class Shape &shape, bool interactive=true);
 			void render(const class Hole &hole, bool interactive=true);
 			void render(const class Package &package, bool interactive=true);
 			void render(const class Package &package, int layer, bool interactive=true, bool smashed = false);
@@ -88,6 +90,7 @@ namespace horizon {
 			virtual void img_net(const Net *net) {}
 			virtual void img_polygon(const Polygon &poly) {}
 			virtual void img_padstack(const Padstack &ps) {}
+			virtual void img_set_padstack(bool v) {}
 			virtual void img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer=10000, bool tr=true);
 			virtual void img_hole(const Hole &hole) {}
 			bool img_mode = false;

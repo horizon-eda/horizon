@@ -10,9 +10,12 @@ namespace horizon {
 		key_seq_append_default(key_seq);
 		key_seq.append_sequence({
 				{{GDK_KEY_d, GDK_KEY_y}, 	ToolID::DRAW_POLYGON},
+				{{GDK_KEY_p, GDK_KEY_s}, 	ToolID::PLACE_SHAPE},
 				{{GDK_KEY_p, GDK_KEY_h}, 	ToolID::PLACE_HOLE},
 				{{GDK_KEY_y}, 				ToolID::DRAW_POLYGON},
-				{{GDK_KEY_h}, 				ToolID::PLACE_HOLE}
+				{{GDK_KEY_h}, 				ToolID::PLACE_HOLE},
+				{{GDK_KEY_s}, 				ToolID::PLACE_SHAPE},
+				{{GDK_KEY_i}, 				ToolID::EDIT_SHAPE}
 		});
 		key_seq.signal_update_hint().connect([this] (const std::string &s) {main_window->tool_hint_label->set_text(s);});
 		//core_symbol.signal_rebuilt().connect(sigc::mem_fun(this, &ImpBase::handle_core_rebuilt));

@@ -15,6 +15,7 @@
 #include "hole.hpp"
 #include "polygon.hpp"
 #include "net.hpp"
+#include "shape.hpp"
 #include "json.hpp"
 
 namespace horizon {
@@ -35,6 +36,7 @@ namespace horizon {
 			std::map<UUID, SymbolPin> pins;
 			std::map<UUID, Net> nets;
 			std::map<UUID, Hole> holes;
+			std::map<UUID, Shape> shapes;
 
 			json serialize();
 

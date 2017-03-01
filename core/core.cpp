@@ -31,6 +31,8 @@
 #include "tool_drag_keep_slope.hpp"
 #include "tool_add_part.hpp"
 #include "tool_smash.hpp"
+#include "tool_place_shape.hpp"
+#include "tool_edit_shape.hpp"
 #include <memory>
 
 namespace horizon {
@@ -143,6 +145,12 @@ namespace horizon {
 
 			case ToolID::UNSMASH:
 				return std::make_unique<ToolSmash>(this, tool_id);
+
+			case ToolID::PLACE_SHAPE:
+				return std::make_unique<ToolPlaceShape>(this, tool_id);
+
+			case ToolID::EDIT_SHAPE:
+				return std::make_unique<ToolEditShape>(this, tool_id);
 
 
 			default:

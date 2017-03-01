@@ -36,6 +36,7 @@ namespace horizon {
 			std::pair<bool, int64_t> ask_datum(const std::string &label, int64_t def=0);
 			std::pair<bool, Coordi> ask_datum_coord(const std::string &label, Coordi def=Coordi());
 			std::tuple<bool, Coordi, std::pair<bool, bool>> ask_datum_coord2(const std::string &label, Coordi def=Coordi());
+			bool edit_shape(class Shape *shape);
 
 
 		private:

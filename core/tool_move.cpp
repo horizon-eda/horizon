@@ -242,6 +242,14 @@ namespace horizon {
 					}
 				}break;
 
+				case ObjectType::SHAPE: {
+					Shape *shape = &core.a->get_padstack()->shapes.at(it.uuid);
+					transform(shape->placement.shift, center, rotate);
+					if(rotate) {
+						shape->placement.inc_angle_deg(-90);
+					}
+				}break;
+
 				case ObjectType::NET_LABEL : {
 					auto sheet = core.c->get_sheet();
 					auto *label = &sheet->net_labels.at(it.uuid);
@@ -287,6 +295,9 @@ namespace horizon {
 				break;
 				case ObjectType::POLYGON_ARC_CENTER :
 					accu.accumulate(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center);
+				break;
+				case ObjectType::SHAPE:
+					accu.accumulate(core.a->get_padstack()->shapes.at(it.uuid).placement.shift);
 				break;
 				default:;
 
@@ -368,6 +379,9 @@ namespace horizon {
 				break;
 				case ObjectType::POLYGON_ARC_CENTER :
 					core.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center += delta;
+				break;
+				case ObjectType::SHAPE:
+					core.a->get_padstack()->shapes.at(it.uuid).placement.shift += delta;
 				break;
 				default:;
 

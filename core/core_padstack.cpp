@@ -27,6 +27,7 @@ namespace horizon {
 			case ObjectType::POLYGON_VERTEX:
 			case ObjectType::POLYGON_EDGE:
 			case ObjectType::POLYGON_ARC_CENTER:
+			case ObjectType::SHAPE:
 				return true;
 			break;
 			default:
@@ -34,6 +35,52 @@ namespace horizon {
 		}
 
 		return false;
+	}
+
+	int64_t CorePadstack::get_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
+		bool h = false;
+		int64_t r= Core::get_property_int(uu, type, property, &h);
+		if(h)
+			return r;
+		switch(type) {
+			case ObjectType::SHAPE :
+				switch(property) {
+					case ObjectProperty::ID::LAYER:
+						return padstack.shapes.at(uu).layer;
+					default :
+						return 0;
+				}
+			break;
+
+			default :
+				return 0;
+		}
+	}
+	void CorePadstack::set_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, int64_t value, bool *handled) {
+		if(tool_is_active())
+			return;
+		bool h = false;
+		Core::set_property_int(uu, type, property, value, &h);
+		if(h)
+			return;
+		switch(type) {
+			case ObjectType::SHAPE :
+				switch(property) {
+					case ObjectProperty::ID::LAYER:
+						if(value == padstack.shapes.at(uu).layer)
+							return;
+						padstack.shapes.at(uu).layer = value;
+					break;
+					default :
+						;
+				}
+			break;
+
+			default :
+				;
+		}
+		rebuild();
+		set_needs_save(true);
 	}
 
 	const std::map<int, Layer> &CorePadstack::get_layers() {

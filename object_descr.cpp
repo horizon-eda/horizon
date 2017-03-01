@@ -28,6 +28,9 @@ namespace horizon {
 		}}},
 		{ObjectType::VIA, {"Via", "Vias", {
 		}}},
+		{ObjectType::SHAPE, {"Shape", "Shapes", {
+			{ObjectProperty::ID::LAYER, {ObjectProperty::Type::LAYER, "Layer"}},
+		}}},
 		{ObjectType::LINE, {"Line", "Lines", {
 			{ObjectProperty::ID::WIDTH, {ObjectProperty::Type::LENGTH, "Width"}},
 			{ObjectProperty::ID::LAYER, {ObjectProperty::Type::LAYER, "Layer"}},

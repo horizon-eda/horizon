@@ -32,6 +32,7 @@ SRC_COMMON = \
 	pool/padstack.cpp\
 	common/polygon.cpp\
 	common/hole.cpp\
+	common/shape.cpp\
 	pool/package.cpp\
 	package/pad.cpp\
 	board/board.cpp\
@@ -120,6 +121,8 @@ SRC_IMP = \
 	core/tool_drag_keep_slope.cpp\
 	core/tool_add_part.cpp\
 	core/tool_smash.cpp\
+	core/tool_place_shape.cpp\
+	core/tool_edit_shape.cpp\
 	core/cores.cpp\
 	core/clipboard.cpp\
 	core/buffer.cpp\
@@ -140,6 +143,7 @@ SRC_IMP = \
 	dialogs/dialogs.cpp\
 	dialogs/pool_browser_box.cpp\
 	dialogs/annotate.cpp\
+	dialogs/edit_shape.cpp\
 	util/sort_controller.cpp\
 	core/core_symbol.cpp\
 	core/core_schematic.cpp\

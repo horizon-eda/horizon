@@ -28,6 +28,13 @@ namespace horizon {
 				holes.emplace(std::make_pair(u, Hole(u, it.value())));
 			}
 		}
+		if(j.count("shapes")) {
+			const json &o = j["shapes"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID(it.key());
+				shapes.emplace(std::make_pair(u, Shape(u, it.value())));
+			}
+		}
 		if(j.count("padstack_type")) {
 			type = type_lut.lookup(j.at("padstack_type"));
 		}
@@ -61,6 +68,10 @@ namespace horizon {
 		for(const auto &it: holes) {
 			j["holes"][(std::string)it.first] = it.second.serialize();
 		}
+		j["shapes"] = json::object();
+		for(const auto &it: shapes) {
+			j["shapes"][(std::string)it.first] = it.second.serialize();
+		}
 		return j;
 	}
 
@@ -78,6 +89,12 @@ namespace horizon {
 				b = Coordi::max(b, v.position);
 			}
 		}
+		for(const auto &it: shapes) {
+			auto bb = it.second.get_bbox();
+			a = Coordi::min(a, bb.first);
+			b = Coordi::max(b, bb.second);
+		}
+
 		return std::make_pair(a,b);
 	}
 

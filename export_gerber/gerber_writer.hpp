@@ -22,7 +22,7 @@ namespace horizon {
 			unsigned int get_or_create_aperture_circle(uint64_t diameter);
 			//unsigned int get_or_create_aperture_padstack(const class Padstack *ps, int layer, )
 			void draw_line(const Coordi &from, const Coordi &to, uint64_t width);
-			void draw_padstack(const UUID &padstack_uuid, const Polygon &poly, const Placement &transform);
+			void draw_padstack(const Padstack &ps, int layer, const Placement &transform);
 			const std::string &get_filename();
 
 		private:
@@ -34,24 +34,54 @@ namespace horizon {
 					unsigned int aperture;
 			};
 
-			class PolygonAperture {
+			class ApertureMacro {
 				public:
-					PolygonAperture(unsigned int n):name(n){}
+					class Primitive {
+						public:
+						enum class Code {CIRCLE=1, CENTER_LINE=21, OUTLINE=4};
+						const Code code;
+						std::vector<int64_t> modifiers;
+						Primitive(Code c): code(c) {}
+						virtual ~Primitive() {}
+					};
+
+					class PrimitiveCircle: public Primitive {
+						public:
+							PrimitiveCircle(): Primitive(Code::CIRCLE) {};
+							int64_t diameter=0;
+							Coordi center;
+					};
+
+					class PrimitiveCenterLine: public Primitive {
+						public:
+							PrimitiveCenterLine(): Primitive(Code::CENTER_LINE) {};
+							int64_t width=0;
+							int64_t height=0;
+							int angle=0;
+							Coordi center;
+					};
+					class PrimitiveOutline: public Primitive {
+						public:
+							PrimitiveOutline(): Primitive(Code::OUTLINE) {};
+							std::vector<Coordi> vertices;
+					};
+
+					ApertureMacro(unsigned int n):name(n){}
 
 					unsigned int name;
-					std::vector<Coordi> vertices;
+					std::vector<std::unique_ptr<Primitive>> primitives;
 			};
 
 			std::ofstream ofs;
 			std::string out_filename;
 			void check_open();
 			std::map<uint64_t, unsigned int> apertures_circle;
-			std::map<std::tuple<UUID, int, bool>, PolygonAperture> apertures_polygon;
+			std::map<std::tuple<UUID, int, bool>, ApertureMacro> apertures_macro;
 
 			unsigned int aperture_n=10;
 
 			std::deque<Line> lines;
 			std::deque<std::pair<unsigned int, Coordi>> pads;
-			void write_coord(const Coordi &c);
+			void write_decimal(int64_t x, bool comma=true);
 	};
 }

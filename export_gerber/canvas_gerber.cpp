@@ -13,6 +13,8 @@ namespace horizon {
 		}
 
 		void CanvasGerber::img_polygon(const Polygon &ipoly) {
+			if(padstack_mode)
+				return;
 			auto poly = ipoly.remove_arcs(16);
 			if(poly.layer == 50) { //outline
 				auto last = poly.vertices.cbegin();
@@ -36,12 +38,22 @@ namespace horizon {
 		}
 
 		void CanvasGerber::img_padstack(const Padstack &padstack) {
+			std::set<int> layers;
 			for(const auto &it: padstack.polygons) {
-				auto poly = it.second.remove_arcs(32);
-				if(GerberWriter *wr = exporter->get_writer_for_layer(poly.layer)) {
-					wr->draw_padstack(padstack.uuid, poly, transform);
+				layers.insert(it.second.layer);
+			}
+			for(const auto &it: padstack.shapes) {
+				layers.insert(it.second.layer);
+			}
+			for(const auto layer: layers) {
+				if(GerberWriter *wr = exporter->get_writer_for_layer(layer)) {
+					wr->draw_padstack(padstack, layer, transform);
 				}
 			}
+		}
+
+		void CanvasGerber::img_set_padstack(bool v) {
+			padstack_mode = v;
 		}
 
 		void CanvasGerber::img_hole(const Hole &hole) {

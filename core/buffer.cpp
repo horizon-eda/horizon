@@ -2,6 +2,7 @@
 #include "core_package.hpp"
 #include "core_schematic.hpp"
 #include "core_symbol.hpp"
+#include "core_padstack.hpp"
 
 namespace horizon {
 	Buffer::Buffer(Core *co):core(co) {}
@@ -16,6 +17,7 @@ namespace horizon {
 		polygons.clear();
 		components.clear();
 		symbols.clear();
+		shapes.clear();
 	}
 
 	void Buffer::load_from_symbol(std::set<SelectableRef> selection) {
@@ -127,6 +129,10 @@ namespace horizon {
 				auto x = core.r->get_polygon(it.uuid);
 				polygons.emplace(x->uuid, *x);
 			}
+			else if(it.type == ObjectType::SHAPE) {
+				auto x = &core.a->get_padstack()->shapes.at(it.uuid);
+				shapes.emplace(x->uuid, *x);
+			}
 
 		}
 		for(const auto &it: selection) {
@@ -200,6 +206,10 @@ namespace horizon {
 		j["symbols"] = json::object();
 		for(const auto &it: symbols) {
 			j["symbols"][(std::string)it.first] = it.second.serialize();
+		}
+		j["shapes"] = json::object();
+		for(const auto &it: shapes) {
+			j["shapes"][(std::string)it.first] = it.second.serialize();
 		}
 		return j;
 	}

@@ -2,6 +2,7 @@
 #include <iostream>
 #include "core_package.hpp"
 #include "core_schematic.hpp"
+#include "core_padstack.hpp"
 
 namespace horizon {
 
@@ -153,6 +154,15 @@ namespace horizon {
 				core.r->selection.emplace(u, ObjectType::SCHEMATIC_SYMBOL);
 			}
 
+		}
+		if(j.count("shapes")){
+			const json &o = j["shapes"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID::random();
+				auto x = &core.a->get_padstack()->shapes.emplace(u, Shape(u, it.value())).first->second;
+				x->placement.shift += shift;
+				core.r->selection.emplace(u, ObjectType::SHAPE);
+			}
 		}
 		core.r->commit();
 		return ToolResponse::next(ToolID::MOVE);

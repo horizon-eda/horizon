@@ -453,6 +453,9 @@ namespace horizon {
 					for(auto &it3: it2.second.padstack.polygons) {
 						flip_package_layer(it3.second.layer);
 					}
+					for(auto &it3: it2.second.padstack.shapes) {
+						flip_package_layer(it3.second.layer);
+					}
 				}
 			}
 

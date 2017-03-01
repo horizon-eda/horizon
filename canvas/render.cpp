@@ -507,6 +507,15 @@ namespace horizon {
 
 	}
 
+	void Canvas::render(const Shape &shape, bool interactive) {
+		Polygon poly = shape.to_polygon();
+		if(interactive) {
+			auto bb = shape.get_bbox();
+			selectables.append(shape.uuid, ObjectType::SHAPE, shape.placement.shift, shape.placement.transform(bb.first), shape.placement.transform(bb.second), Selectable::Enlarge::OFF, 0, shape.layer);
+		}
+		render(poly, false);
+	}
+
 	void Canvas::render(const Hole &hole, bool interactive) {
 		Color co(1,1,1);
 		img_hole(hole);
@@ -633,10 +642,16 @@ namespace horizon {
 			}
 			img_padstack(padstack);
 		}
+		img_set_padstack(true);
 		for(const auto &it: padstack.polygons) {
 			if(it.second.layer == layer)
 				render(it.second, interactive);
 		}
+		for(const auto &it: padstack.shapes) {
+			if(it.second.layer == layer)
+				render(it.second, interactive);
+		}
+		img_set_padstack(false);
 	}
 
 	void Canvas::render(const Padstack &padstack, bool interactive) {

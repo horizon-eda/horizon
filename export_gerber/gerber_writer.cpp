@@ -50,34 +50,61 @@ namespace horizon {
 		}
 	}
 
+	void GerberWriter::write_decimal(int64_t x, bool comma) {
+		ofs << std::fixed << (double)x/1e6;
+		if(comma) {
+			ofs << ",";
+		}
+	}
+
 	void GerberWriter::write_apertures() {
 		ofs.precision(6);
 		for(const auto &it: apertures_circle) {
 			ofs << "%ADD" << it.second << "C," << std::fixed << (double)it.first/1e6 << "*%" << std::endl;
 		}
 
-		/*%AMOUTLINE*
-		4,1,3,
-		0.1,0.2,
-		0.5,0.1,
-		0.5,0.5,
-		0.1,0.5,
-		0.1,0.1,
-		0*%
-		%ADD18OUTLINE*%
-		*/
-
-		for(const auto &it: apertures_polygon) {
+		for(const auto &it: apertures_macro) {
 			ofs << "%AMPS" << it.second.name << "*" << std::endl;
-			ofs << "4,1," << it.second.vertices.size() << "," << std::endl;
+			for(const auto &itp: it.second.primitives) {
+				ofs << static_cast<int>(itp->code) << ",";
+				switch(itp->code) {
+					case ApertureMacro::Primitive::Code::CIRCLE: {
+						auto prim = dynamic_cast<ApertureMacro::PrimitiveCircle*>(itp.get());
+						ofs << "1,";  //exposure
+						write_decimal(prim->diameter);
+						write_decimal(prim->center.x);
+						write_decimal(prim->center.y);
+						ofs << "0"; //angle
+					} break;
+					case ApertureMacro::Primitive::Code::CENTER_LINE: {
+						auto prim = dynamic_cast<ApertureMacro::PrimitiveCenterLine*>(itp.get());
+						ofs << "1,";  //exposure
+						write_decimal(prim->width);
+						write_decimal(prim->height);
+						write_decimal(prim->center.x); //x
+						write_decimal(prim->center.y); //y
+						ofs << std::fixed << (prim->angle)*(360./65536.);
+					} break;
+					case ApertureMacro::Primitive::Code::OUTLINE: {
+						auto prim = dynamic_cast<ApertureMacro::PrimitiveOutline*>(itp.get());
+						ofs << "1," << prim->vertices.size() << "," << std::endl;
 
-			auto write_vertex = [this](const Coordi &c){ofs << std::fixed << (double)c.x/1e6 << "," << (double)c.y/1e6 << "," << std::endl;};
-			for(const auto &v: it.second.vertices) {
-				write_vertex(v);
+						auto write_vertex = [this](const Coordi &c){ofs << std::fixed << (double)c.x/1e6 << "," << (double)c.y/1e6 << "," << std::endl;};
+						for(const auto &v: prim->vertices) {
+							write_vertex(v);
+						}
+						write_vertex(prim->vertices.front());
+						ofs << "0" << std::endl;
+
+
+					} break;
+				}
+				ofs << "*" <<std::endl;
+
 			}
-			write_vertex(it.second.vertices.front());
 
-			ofs << "0*%" << std::endl;
+
+			ofs << "%" << std::endl;
 			ofs << "%ADD" << it.second.name << "PS" << it.second.name << "*%"<< std::endl;
 		}
 	}
@@ -108,22 +135,51 @@ namespace horizon {
 		lines.emplace_back(from, to, ap);
 	}
 
-	void GerberWriter::draw_padstack(const UUID &padstack_uuid, const Polygon &poly, const Placement &transform) {
-		auto key = std::make_tuple(padstack_uuid, transform.get_angle(), transform.mirror);
-		GerberWriter::PolygonAperture *ap = nullptr;
-		if(apertures_polygon.count(key)) {
-			ap = &apertures_polygon.at(key);
+	void GerberWriter::draw_padstack(const Padstack &ps, int layer, const Placement &transform) {
+		auto key = std::make_tuple(ps.uuid, transform.get_angle(), transform.mirror);
+		ApertureMacro *am = nullptr;
+		if(apertures_macro.count(key)) {
+			am = &apertures_macro.at(key);
 		}
 		else {
 			auto n = aperture_n++;
-			ap = &apertures_polygon.emplace(key, n).first->second;
-			ap->vertices.reserve(poly.vertices.size());
+			am = &apertures_macro.emplace(key, n).first->second;
 			auto tr = transform;
 			tr.shift = Coordi();
-			for(const auto &it: poly.vertices) {
-				ap->vertices.push_back(tr.transform(it.position));
+			for(const auto &it: ps.shapes) {
+				if(it.second.layer == layer) {
+					switch(it.second.form) {
+						case Shape::Form::CIRCLE : {
+							am->primitives.push_back(std::make_unique<ApertureMacro::PrimitiveCircle>());
+							auto prim = dynamic_cast<ApertureMacro::PrimitiveCircle*>(am->primitives.back().get());
+							prim->diameter = it.second.params.at(0);
+							prim->center = tr.transform(it.second.placement.shift);
+						} break;
+
+						case Shape::Form::RECTANGLE: {
+							am->primitives.push_back(std::make_unique<ApertureMacro::PrimitiveCenterLine>());
+							auto prim = dynamic_cast<ApertureMacro::PrimitiveCenterLine*>(am->primitives.back().get());
+							prim->width = it.second.params.at(0);
+							prim->height = it.second.params.at(1);
+							prim->center = tr.transform(it.second.placement.shift);
+							auto tr2 = tr;
+							tr2.accumulate(it.second.placement);
+							prim->angle = tr2.get_angle();
+						} break;
+					}
+
+				}
+			}
+			for(const auto &it: ps.polygons) {
+				if(it.second.layer == layer) {
+					am->primitives.push_back(std::make_unique<ApertureMacro::PrimitiveOutline>());
+					auto prim = dynamic_cast<ApertureMacro::PrimitiveOutline*>(am->primitives.back().get());
+					for(const auto &itv: it.second.vertices) {
+						prim->vertices.push_back(tr.transform(itv.position));
+					}
+				}
 			}
 		}
-		pads.emplace_back(ap->name, transform.shift);
+		pads.emplace_back(am->name, transform.shift);
 	}
 }

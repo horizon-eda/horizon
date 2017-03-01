@@ -22,6 +22,9 @@ namespace horizon {
 
 			Padstack *get_padstack(bool work = true);
 
+			int64_t get_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
+			void set_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, int64_t value, bool *handled=nullptr) override;
+
 			const Padstack *get_canvas_data();
 			std::pair<Coordi,Coordi> get_bbox() override;
 

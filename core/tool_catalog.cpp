@@ -41,5 +41,7 @@ namespace horizon {
 		{ToolID::ANNOTATE, {"Annotate"}},
 		{ToolID::SMASH, {"Smash"}},
 		{ToolID::UNSMASH, {"Unsmash"}},
+		{ToolID::PLACE_SHAPE, {"Place shape"}},
+		{ToolID::EDIT_SHAPE, {"Edit shape"}},
 	};
 }
