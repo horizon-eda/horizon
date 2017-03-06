@@ -7,7 +7,7 @@ namespace horizon {
 	void CanvasGL::pan_drag_begin(GdkEventButton* button_event) {
 		gdouble x,y;
 		gdk_event_get_coords((GdkEvent*)button_event, &x, &y);
-		if(button_event->button==2) { //inside of grid and middle mouse button
+		if(button_event->button==2 || button_event->button==3) {
 			pan_dragging = true;
 			pan_pointer_pos_orig = {(float)x, (float)y};
 			pan_offset_orig = offset;
