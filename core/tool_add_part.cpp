@@ -17,11 +17,14 @@ namespace horizon {
 	ToolResponse ToolAddPart::begin(const ToolArgs &args) {
 		std::cout << "tool add part\n";
 		bool r;
-		UUID part_uuid;
-		std::tie(r, part_uuid) = imp->dialogs.select_part(core.r->m_pool, UUID(), UUID());
-		if(!r) {
-			return ToolResponse::end();
+		UUID part_uuid = imp->take_part();
+		if(!part_uuid) {
+			std::tie(r, part_uuid) = imp->dialogs.select_part(core.r->m_pool, UUID(), UUID());
+			if(!r) {
+				return ToolResponse::end();
+			}
 		}
+		imp->part_placed(part_uuid);
 		auto part = core.c->m_pool->get_part(part_uuid);
 		Schematic *sch = core.c->get_schematic();
 		auto uu = UUID::random();

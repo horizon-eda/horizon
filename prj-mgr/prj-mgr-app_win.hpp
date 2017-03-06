@@ -3,6 +3,7 @@
 #include "project/project.hpp"
 #include "editor_process.hpp"
 #include <memory>
+#include <zmq.hpp>
 
 namespace horizon {
 
@@ -38,9 +39,11 @@ namespace horizon {
 			ProjectManagerAppWindow *win = nullptr;
 			Gtk::Button *button_top_schematic = nullptr;
 			Gtk::Button *button_board = nullptr;
+			Gtk::Button *button_part_browser= nullptr;
 
 			void handle_button_top_schematic();
 			void handle_button_board();
+			void handle_button_part_browser();
 
 
 	};
@@ -57,9 +60,10 @@ namespace horizon {
 	class ProjectManagerAppWindow : public Gtk::ApplicationWindow {
 		friend class ProjectManagerViewProject;
 		public:
-			ProjectManagerAppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refBuilder);
+			ProjectManagerAppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refBuilder, class ProjectManagerApplication *app);
+			~ProjectManagerAppWindow();
 
-			static ProjectManagerAppWindow* create();
+			static ProjectManagerAppWindow* create(class ProjectManagerApplication *app);
 
 			void open_file_view(const Glib::RefPtr<Gio::File>& file);
 			void spawn_imp(ProjectManagerProcess::Type type, const UUID &pool_uuid, const std::vector<std::string> &args);
@@ -79,6 +83,7 @@ namespace horizon {
 			std::unique_ptr<Project> project= nullptr;
 			std::string project_filename;
 			std::map<std::string, ProjectManagerProcess> processes;
+			class PartBrowserWindow *part_browser_window = nullptr;
 
 
 			enum class ViewMode {OPEN, PROJECT, CREATE};
@@ -91,12 +96,17 @@ namespace horizon {
 			void handle_close();
 			void handle_save();
 			void handle_recent();
+			void handle_place_part(const UUID &uu);
+			json handle_req(const json &j);
 			ProjectManagerViewCreate view_create;
 			ProjectManagerViewProject view_project;
 
 			bool close_project();
 			bool on_delete_event(GdkEventAny *ev) override;
 			bool check_pools();
+
+			zmq::socket_t sock_project;
+			std::string sock_project_ep;
 
 	};
 };

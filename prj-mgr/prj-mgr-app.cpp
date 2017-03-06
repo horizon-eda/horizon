@@ -42,7 +42,7 @@ namespace horizon {
 	}
 
 	ProjectManagerAppWindow* ProjectManagerApplication::create_appwindow() {
-		auto appwindow = ProjectManagerAppWindow::create();
+		auto appwindow = ProjectManagerAppWindow::create(this);
 
 		// Make sure that the application runs for as long this window is still open.
 		add_window(*appwindow);
@@ -118,6 +118,12 @@ namespace horizon {
 					add_pool(pool_filename);
 				}
 			}
+			if(j.count("part_favorites")) {
+				const json &o = j.at("part_favorites");
+				for (auto it = o.cbegin(); it != o.cend(); ++it) {
+					part_favorites.push_back(it.value().get<std::string>());
+				}
+			}
 
 		}
 
@@ -133,11 +139,23 @@ namespace horizon {
 			Gio::File::create_for_path(config_dir)->make_directory_with_parents();
 
 		json j;
-		json k;
-		for(const auto &it: pools) {
-			k.push_back(Glib::build_filename(it.second.path, "pool.json"));
+		{
+			json k;
+			for(const auto &it: pools) {
+				k.push_back(Glib::build_filename(it.second.path, "pool.json"));
+			}
+			j["pools"] = k;
 		}
-		j["pools"] = k;
+		{
+			json k;
+			for(const auto &it: part_favorites) {
+				k.push_back((std::string)it);
+			}
+			j["part_favorites"] = k;
+		}
+
+
+
 		save_json_to_file(config_filename, j);
 	}
 

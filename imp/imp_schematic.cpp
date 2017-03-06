@@ -74,6 +74,18 @@ namespace horizon {
 		canvas_update();
 	}
 
+	bool ImpSchematic::handle_broadcast(const json &j) {
+		if(!ImpBase::handle_broadcast(j)) {
+			std::string op = j.at("op");
+			if(op == "place-part") {
+				main_window->present();
+				part_from_project_manager = j.at("part").get<std::string>();
+				tool_begin(ToolID::ADD_PART);
+			}
+		}
+		return true;
+	}
+
 	void ImpSchematic::construct() {
 		canvas->set_core(core.r);
 		sheet_box = Gtk::manage(new SheetBox(&core_schematic));

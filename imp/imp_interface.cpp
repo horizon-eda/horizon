@@ -1,4 +1,5 @@
 #include "imp_interface.hpp"
+#include "imp_schematic.hpp"
 #include "imp.hpp"
 #include "part.hpp"
 
@@ -13,5 +14,20 @@ namespace horizon {
 
 	void ImpInterface::tool_bar_flash(const std::string &s) {
 		imp->main_window->tool_bar_flash(s);
+	}
+
+	UUID ImpInterface::take_part() {
+		if(auto imp_sch=dynamic_cast<ImpSchematic*>(imp)) {
+			auto uu = imp_sch->part_from_project_manager;
+			imp_sch->part_from_project_manager = UUID();
+			return uu;
+		}
+		else {
+			return UUID();
+		}
+	}
+
+	void ImpInterface::part_placed(const UUID &uu) {
+		imp->send_json({{"op", "part-placed"}, {"part", (std::string)uu}});
 	}
 }

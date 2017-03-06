@@ -181,8 +181,9 @@ namespace horizon {
 		}
 	}
 
-	std::pair<bool, UUID> Dialogs::select_part(Pool *pool, const UUID &entity_uuid, const UUID &part_uuid) {
+	std::pair<bool, UUID> Dialogs::select_part(Pool *pool, const UUID &entity_uuid, const UUID &part_uuid, bool show_none) {
 		PoolBrowserDialogPart dia(parent, pool, entity_uuid);
+		dia.set_show_none(show_none);
 		if(part_uuid) {
 			auto part = pool->get_part(part_uuid);
 			dia.set_MPN(part->get_MPN());

@@ -57,6 +57,7 @@ namespace horizon {
 
 			zmq::context_t zctx;
 			zmq::socket_t sock_broadcast_rx;
+			zmq::socket_t sock_project;
 
 
 			virtual void canvas_update() = 0;
@@ -69,8 +70,9 @@ namespace horizon {
 			void tool_begin(ToolID id);
 			void add_tool_button(ToolID id, const std::string &label);
 			void handle_warning_selected(const Coordi &pos);
-			virtual void handle_broadcast(const json &j);
+			virtual bool handle_broadcast(const json &j);
 			bool handle_close(GdkEventAny *ev);
+			json send_json(const json &j);
 
 			void key_seq_append_default(KeySequence &ks);
 			

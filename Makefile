@@ -184,8 +184,8 @@ SRC_IMP = \
 	checks/single_pin_net.cpp\
 	imp/checks/checks_window.cpp\
 	imp/checks/check_settings_dialog.cpp\
-	imp/imp_interface.cpp
-	
+	imp/imp_interface.cpp\
+	widgets/pool_browser_part.cpp\
 
 SRC_POOL_UTIL = \
 	pool-util/util_main.cpp\
@@ -195,6 +195,7 @@ SRC_POOL_UTIL = \
 	dialogs/pool_browser_part.cpp\
 	dialogs/pool_browser_box.cpp\
 	util/sort_controller.cpp\
+	widgets/pool_browser_part.cpp\
 	
 SRC_POOL_UPDATE = \
 	pool-update/pool-update.cpp\
@@ -211,6 +212,9 @@ SRC_PRJ_MGR = \
 	prj-mgr/prj-mgr-app_win.cpp\
 	prj-mgr/prj-mgr-prefs.cpp\
 	prj-mgr/editor_process.cpp\
+	prj-mgr/part_browser/part_browser_window.cpp\
+	widgets/pool_browser_part.cpp\
+	util/sort_controller.cpp\
 
 SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_POOL_UPDATE) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PRJ_MGR))
 

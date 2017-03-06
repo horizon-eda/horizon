@@ -24,10 +24,12 @@ namespace horizon {
 		public:
 			static Glib::RefPtr<ProjectManagerApplication> create();
 			std::map<UUID, ProjectManagerPool> pools;
+			std::deque<UUID> part_favorites;
 			void add_pool(const std::string &p);
 			std::string get_config_filename();
 			const std::string &get_ep_broadcast() const;
 			void send_json(int pid, const json &j);
+			zmq::context_t zctx;
 
 		protected:
 			// Override default signal handlers:
@@ -36,7 +38,6 @@ namespace horizon {
 			void on_shutdown();
 			void on_open(const Gio::Application::type_vec_files& files,
 				const Glib::ustring& hint) override;
-			zmq::context_t zctx;
 
 			std::string sock_broadcast_ep;
 

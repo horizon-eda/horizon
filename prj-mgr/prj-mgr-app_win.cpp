@@ -3,6 +3,7 @@
 #include <iostream>
 #include "project/project.hpp"
 #include "util.hpp"
+#include "part_browser/part_browser_window.hpp"
 extern const char *gitversion;
 
 namespace horizon {
@@ -115,6 +116,7 @@ namespace horizon {
 	ProjectManagerViewProject::ProjectManagerViewProject(const Glib::RefPtr<Gtk::Builder>& builder, ProjectManagerAppWindow *w):win(w) {
 		builder->get_widget("button_top_schematic", button_top_schematic);
 		builder->get_widget("button_board", button_board);
+		builder->get_widget("button_part_browser", button_part_browser);
 		builder->get_widget("entry_project_title", entry_project_title);
 		builder->get_widget("label_pool_name", label_pool_name);
 		builder->get_widget("info_bar", info_bar);
@@ -125,6 +127,7 @@ namespace horizon {
 
 		button_top_schematic->signal_clicked().connect(sigc::mem_fun(this, &ProjectManagerViewProject::handle_button_top_schematic));
 		button_board->signal_clicked().connect(sigc::mem_fun(this, &ProjectManagerViewProject::handle_button_board));
+		button_part_browser->signal_clicked().connect(sigc::mem_fun(this, &ProjectManagerViewProject::handle_button_part_browser));
 	}
 
 	void ProjectManagerViewProject::handle_button_top_schematic() {
@@ -145,12 +148,16 @@ namespace horizon {
 		}
 	}
 
+	void ProjectManagerViewProject::handle_button_part_browser() {
+		win->part_browser_window->present();
+	}
+
 	void ProjectManagerAppWindow::spawn_imp(ProjectManagerProcess::Type type, const UUID &pool_uuid, const std::vector<std::string> &args) {
 		auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
 		if(processes.count(args.at(0)) == 0) { //need to launch imp
 			auto pool_path = app->pools.at(pool_uuid).path;
 			auto ep_broadcast = app->get_ep_broadcast();
-			std::vector<std::string> env = {"HORIZON_POOL="+pool_path, "HORIZON_EP_BROADCAST="+ep_broadcast};
+			std::vector<std::string> env = {"HORIZON_POOL="+pool_path, "HORIZON_EP_BROADCAST="+ep_broadcast, "HORIZON_EP_PROJECT="+sock_project_ep};
 			std::string filename = args.at(0);
 			auto &proc = processes.emplace(std::piecewise_construct, std::forward_as_tuple(filename),
 					std::forward_as_tuple(type, args, env)).first->second;
@@ -187,8 +194,8 @@ namespace horizon {
 		return true;
 	}
 
-	ProjectManagerAppWindow::ProjectManagerAppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refBuilder):
-			Gtk::ApplicationWindow(cobject), builder(refBuilder), view_create(builder), view_project(builder, this) {
+	ProjectManagerAppWindow::ProjectManagerAppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refBuilder, ProjectManagerApplication *app):
+			Gtk::ApplicationWindow(cobject), builder(refBuilder), view_create(builder), view_project(builder, this), sock_project(app->zctx, ZMQ_REP) {
 		builder->get_widget("stack", stack);
 		builder->get_widget("button_open", button_open);
 		builder->get_widget("button_close", button_close);
@@ -214,15 +221,54 @@ namespace horizon {
 
 		set_icon(Gdk::Pixbuf::create_from_resource("/net/carrotIndustries/horizon/icon.svg"));
 
-		/*
-		 * 	auto mapp = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
-		if(mapp && mapp->pools.size()==0){
-			Gtk::MessageDialog md(*this,  "No pools set up", false , Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK);
-			md.set_secondary_text("You haven't set up any pools, add some in the preferences dialog");
-			md.run();
-		}
-		 */
+		sock_project.bind("tcp://127.0.0.1:*");
+		char ep[1024];
+		size_t sz = sizeof(ep);
+		sock_project.getsockopt(ZMQ_LAST_ENDPOINT, ep, &sz);
+		sock_project_ep = ep;
+
+		Glib::RefPtr<Glib::IOChannel> chan;
+		#ifdef G_OS_WIN32
+			SOCKET fd = sock_project.getsockopt<SOCKET>(ZMQ_FD);
+			chan = Glib::IOChannel::create_from_win32_socket(fd);
+		#else
+			int fd = sock_project.getsockopt<int>(ZMQ_FD);
+			chan = Glib::IOChannel::create_from_fd(fd);
+		#endif
+
+		Glib::signal_io().connect([this](Glib::IOCondition cond){
+			while(sock_project.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
+				zmq::message_t msg;
+				sock_project.recv(&msg);
+				char *data = (char*)msg.data();
+				json jrx = json::parse(data);
+				json jtx = handle_req(jrx);
+
+				std::string stx = jtx.dump();
+				zmq::message_t tx(stx.size()+1);
+				memcpy(((uint8_t*)tx.data()), stx.c_str(), stx.size());
+				auto m = (char*)tx.data();
+				m[tx.size()-1] = 0;
+				sock_project.send(tx);
+			}
+			return true;
+		}, chan, Glib::IO_IN | Glib::IO_HUP);
+
 		Glib::signal_idle().connect_once([this]{check_pools();});
+	}
+
+	json ProjectManagerAppWindow::handle_req(const json &j) {
+		std::string op = j.at("op");
+		if(op == "part-placed") {
+			UUID part = j.at("part").get<std::string>();
+			part_browser_window->placed_part(part);
+		}
+		return nullptr;
+	}
+
+	ProjectManagerAppWindow::~ProjectManagerAppWindow() {
+		if(part_browser_window)
+			delete part_browser_window;
 	}
 
 	void ProjectManagerAppWindow::handle_new() {
@@ -278,6 +324,12 @@ namespace horizon {
 		close_project();
 	}
 
+	void ProjectManagerAppWindow::handle_place_part(const UUID &uu) {
+		std::cout << "place part " << (std::string)uu << std::endl;
+		auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
+		app->send_json(0, {{"op", "place-part"},{"part", (std::string)uu}});
+	}
+
 	bool ProjectManagerAppWindow::close_project() {
 		if(!project)
 			return true;
@@ -289,6 +341,9 @@ namespace horizon {
 		}
 
 		project.reset();
+		if(part_browser_window)
+			delete part_browser_window;
+		part_browser_window = nullptr;
 		set_view_mode(ViewMode::OPEN);
 		return true;
 	}
@@ -326,17 +381,19 @@ namespace horizon {
 		}
 	}
 
-	ProjectManagerAppWindow* ProjectManagerAppWindow::create() {
+	ProjectManagerAppWindow* ProjectManagerAppWindow::create(ProjectManagerApplication *app) {
 		// Load the Builder file and instantiate its widgets.
 		auto refBuilder = Gtk::Builder::create_from_resource("/net/carrotIndustries/horizon/prj-mgr/window.ui");
 
 		ProjectManagerAppWindow* window = nullptr;
-		refBuilder->get_widget_derived("app_window", window);
+		refBuilder->get_widget_derived("app_window", window, app);
 
 		if (!window)
 			throw std::runtime_error("No \"app_window\" object in window.ui");
 		return window;
 	}
+
+
 
 	void ProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File>& file) {
 		auto path = file->get_path();
@@ -351,13 +408,15 @@ namespace horizon {
 			view_project.entry_project_title->set_text(project->title);
 			auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
 			view_project.label_pool_name->set_text(app->pools.at(project->pool_uuid).name);
+
+			part_browser_window = PartBrowserWindow::create(this, app->pools.at(project->pool_uuid).path, app->part_favorites);
+			part_browser_window->signal_place_part().connect(sigc::mem_fun(this, &ProjectManagerAppWindow::handle_place_part));
 		}
 		catch (const std::exception& e) {
 			Gtk::MessageDialog md(*this,  "Error opening project", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
 			md.set_secondary_text(e.what());
 			md.run();
-			project.reset();
-			set_view_mode(ViewMode::OPEN);
+			close_project();
 		}
 
 	}

@@ -41,7 +41,7 @@ namespace horizon {
 			return ToolResponse::end();
 		}
 		UUID part_uuid = comp->part?comp->part->uuid:UUID();
-		auto r = imp->dialogs.select_part(core.r->m_pool, entity->uuid, part_uuid);
+		auto r = imp->dialogs.select_part(core.r->m_pool, entity->uuid, part_uuid, true);
 		if(r.first) {
 			Part *part = nullptr;
 			if(r.second) {

@@ -8,7 +8,7 @@
     <file>pool-update/schema.sql</file>
     <file>pool-update-parametric/schema.sql</file>
     <file>dialogs/pool_browser.ui</file>
-    <file>dialogs/pool_browser_part.ui</file>
+    <file>widgets/pool_browser_part.ui</file>
     
     <file>prj-mgr/window.ui</file>
     <file>prj-mgr/app_menu.ui</file>
@@ -24,6 +24,7 @@
     <file>imp/footprint_generator/quad.svg</file>
     
     <file>imp/checks/checks_window.ui</file>
+    <file>prj-mgr/part_browser/part_browser.ui</file>
     
     <file>canvas/shaders/grid-vertex.glsl</file>
     <file>canvas/shaders/grid-fragment.glsl</file>

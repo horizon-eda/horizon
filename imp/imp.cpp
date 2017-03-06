@@ -16,11 +16,12 @@ namespace horizon {
 	ImpBase::ImpBase(const std::string &pool_filename):
 		pool(pool_filename),
 		core(nullptr),
-		sock_broadcast_rx(zctx, ZMQ_SUB)
+		sock_broadcast_rx(zctx, ZMQ_SUB),
+		sock_project(zctx, ZMQ_REQ)
 	{
-		auto ep = Glib::getenv("HORIZON_EP_BROADCAST");
-		if(ep.size()) {
-			sock_broadcast_rx.connect(ep);
+		auto ep_broadcast = Glib::getenv("HORIZON_EP_BROADCAST");
+		if(ep_broadcast.size()) {
+			sock_broadcast_rx.connect(ep_broadcast);
 			{
 				unsigned int prefix = 0;
 				sock_broadcast_rx.setsockopt(ZMQ_SUBSCRIBE, &prefix, 4);
@@ -52,8 +53,27 @@ namespace horizon {
 				return true;
 			}, chan, Glib::IO_IN | Glib::IO_HUP);
 		}
+		auto ep_project = Glib::getenv("HORIZON_EP_PROJECT");
+		if(ep_project.size()) {
+			sock_project.connect(ep_project);
+		}
 	}
 	
+	json ImpBase::send_json(const json &j) {
+		std::string s = j.dump();
+		zmq::message_t msg(s.size()+1);
+		memcpy(((uint8_t*)msg.data()), s.c_str(), s.size());
+		auto m = (char*)msg.data();
+		m[msg.size()-1] = 0;
+		sock_project.send(msg);
+
+		zmq::message_t rx;
+		sock_project.recv(&rx);
+		char *rxdata = ((char*)rx.data());
+		std::cout << "imp rx " << rxdata << std::endl;
+		return json::parse(rxdata);
+	}
+
 	bool ImpBase::handle_close(GdkEventAny *ev) {
 		bool dontask = false;
 		Glib::getenv("HORIZON_NOEXITCONFIRM", dontask);
@@ -163,7 +183,7 @@ namespace horizon {
 			auto button = Gtk::manage(new Gtk::Button("Checks"));
 			main_window->top_panel->pack_start(*button, false, false, 0);
 			button->show();
-			button->signal_clicked().connect([this]{checks_window->show_all();});
+			button->signal_clicked().connect([this]{checks_window->present();});
 			core.r->signal_tool_changed().connect([button](ToolID t){button->set_sensitive(t==ToolID::NONE);});
 		}
 
@@ -482,14 +502,17 @@ namespace horizon {
 		canvas->center_and_zoom(pos);
 	}
 
-	void ImpBase::handle_broadcast(const json &j) {
+	bool ImpBase::handle_broadcast(const json &j) {
 		std::string op = j.at("op");
 		if(op == "present") {
 			main_window->present();
+			return true;
 		}
 		else if(op == "save") {
 			core.r->save();
+			return true;
 		}
+		return false;
 	}
 
 	void ImpBase::key_seq_append_default(KeySequence &ks) {
