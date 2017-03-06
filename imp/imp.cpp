@@ -57,9 +57,13 @@ namespace horizon {
 		if(ep_project.size()) {
 			sock_project.connect(ep_project);
 		}
+		sockets_connected = ep_project.size() && ep_broadcast.size();
 	}
 	
 	json ImpBase::send_json(const json &j) {
+		if(!sockets_connected)
+			return nullptr;
+
 		std::string s = j.dump();
 		zmq::message_t msg(s.size()+1);
 		memcpy(((uint8_t*)msg.data()), s.c_str(), s.size());
