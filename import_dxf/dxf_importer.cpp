@@ -42,13 +42,14 @@ namespace horizon {
 			Junction *get_or_create_junction(double x, double y) {
 				double sc = 1e6*scale;
 				Coordi c(fix(x*sc), fix(y*sc));
+				c+=shift;
 				auto j = std::find_if(junctions.begin(), junctions.end(), [&c](auto a){return a->position==c;});
 				if(j != junctions.end()) {
 					return *j;
 				}
 				else {
 					auto ju = core->insert_junction(UUID::random());
-					ju->position = c+shift;
+					ju->position = c;
 					junctions.insert(ju);
 					return ju;
 				}
