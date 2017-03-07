@@ -233,13 +233,19 @@ namespace horizon {
 
 				}break;
 
-
+				case ObjectType::HOLE : {
+					Hole *hole = core.r->get_hole(it.uuid);
+					transform(hole->placement.shift, center, rotate);
+					if(rotate) {
+						hole->placement.inc_angle_deg(-90);
+					}
+				}break;
 
 				case ObjectType::PAD : {
 					Pad *pad = &core.k->get_package()->pads.at(it.uuid);
 					transform(pad->placement.shift, center, rotate);
 					if(rotate) {
-						pad->placement.inc_angle(-90);
+						pad->placement.inc_angle_deg(-90);
 					}
 				}break;
 
@@ -274,7 +280,7 @@ namespace horizon {
 					accu.accumulate(core.r->get_junction(it.uuid)->position);
 				break;
 				case ObjectType::HOLE :
-					accu.accumulate(core.r->get_hole(it.uuid)->position);
+					accu.accumulate(core.r->get_hole(it.uuid)->placement.shift);
 				break;
 				case ObjectType::SYMBOL_PIN :
 					accu.accumulate(core.y->get_symbol_pin(it.uuid)->position);
@@ -358,7 +364,7 @@ namespace horizon {
 					core.r->get_junction(it.uuid)->position += delta;
 				break;
 				case ObjectType::HOLE :
-					core.r->get_hole(it.uuid)->position += delta;
+					core.r->get_hole(it.uuid)->placement.shift += delta;
 				break;
 				case ObjectType::SYMBOL_PIN :
 					core.y->get_symbol_pin(it.uuid)->position += delta;

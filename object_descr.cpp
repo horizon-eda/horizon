@@ -1,4 +1,5 @@
 #include "object_descr.hpp"
+#include "hole.hpp"
 
 namespace horizon {
 	const std::map<ObjectType, ObjectDescription> object_descriptions = {
@@ -66,7 +67,14 @@ namespace horizon {
 		}}},
 		{ObjectType::HOLE, {"Hole", "Holes", {
 			{ObjectProperty::ID::DIAMETER, {ObjectProperty::Type::LENGTH, "Diameter"}},
+			{ObjectProperty::ID::LENGTH, {ObjectProperty::Type::LENGTH, "Length"}},
 			{ObjectProperty::ID::PLATED, {ObjectProperty::Type::BOOL, "Plated"}},
+			{ObjectProperty::ID::SHAPE, {ObjectProperty::Type::ENUM, "Shape",
+				{
+					{static_cast<int>(Hole::Shape::ROUND), "Round"},
+					{static_cast<int>(Hole::Shape::SLOT), "Slot"},
+				}
+			}},
 		}}},
 		{ObjectType::PAD, {"Pad", "Pads", {
 			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING, "Name"}},

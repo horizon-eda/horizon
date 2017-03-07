@@ -237,4 +237,32 @@ namespace horizon {
 		auto o = dynamic_cast<PropertyEditorNetClass*>(other);
 		combo->set_active_id(o->combo->get_active_id());
 	}
+
+
+	Gtk::Widget *PropertyEditorEnum::create_editor() {
+		combo = Gtk::manage(new Gtk::ComboBoxText());
+		for(const auto &it: property.enum_items) {
+			combo->insert(0, std::to_string(it.first), it.second);
+		}
+		reload();
+		combo->signal_changed().connect(sigc::mem_fun(this, &PropertyEditorEnum::changed));
+		return combo;
+	}
+
+	void PropertyEditorEnum::reload() {
+		combo->set_active_id(std::to_string(core->get_property_int(uuid, type, property_id)));
+	}
+
+	void PropertyEditorEnum::changed() {
+		int la = std::stoi(combo->get_active_id());
+		core->set_property_int(uuid, type, property_id, la);
+		parent->parent->parent->signal_update().emit();
+	}
+
+	void PropertyEditorEnum::set_from_other(PropertyEditor *other) {
+		auto o = dynamic_cast<PropertyEditorEnum*>(other);
+		combo->set_active_id(o->combo->get_active_id());
+	}
+
+
 }

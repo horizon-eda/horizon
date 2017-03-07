@@ -110,7 +110,7 @@ namespace horizon {
 				auto u = UUID::random();
 				auto x = core.r->insert_hole(u);
 				*x = Hole(u, it.value());
-				apply_shift(x->position, args.coords);
+				apply_shift(x->placement.shift, args.coords);
 				core.r->selection.emplace(u, ObjectType::HOLE);
 			}
 		}

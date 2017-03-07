@@ -38,6 +38,9 @@ namespace horizon {
 				case ObjectProperty::Type::NET_CLASS:
 					e = new PropertyEditorNetClass(uuid, type, it.first, core, this);
 				break;
+				case ObjectProperty::Type::ENUM:
+					e = new PropertyEditorEnum(uuid, type, it.first, core, this);
+				break;
 
 				default :
 					e = new PropertyEditor(uuid, type, it.first, core, this);

@@ -516,15 +516,30 @@ namespace horizon {
 		if(img_mode)
 			return;
 
-		draw_arc(hole.position, hole.diameter/2, 0, 2*M_PI, co);
-		if(hole.plated) {
-			draw_arc(hole.position, 0.9*hole.diameter/2, 0, 2*M_PI, co);
+		transform_save();
+		transform.accumulate(hole.placement);
+		int64_t l = hole.length/2;
+		int64_t d = hole.diameter/2;
+		if(hole.shape == Hole::Shape::ROUND) {
+			draw_arc(Coordi(), d, 0, 2*M_PI, co);
+			if(hole.plated) {
+				draw_arc(Coordi(), 0.9*d, 0, 2*M_PI, co);
+			}
+			float x = hole.diameter/2/M_SQRT2;
+			draw_line(Coordi(-x, -x), Coordi(x,x), co);
+			draw_line(Coordi(x, -x), Coordi(-x,x), co);
+			if(interactive)
+				selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-d, -d), Coordi(d, d), Selectable::Enlarge::OFF);
 		}
-		float x = hole.diameter/2/M_SQRT2;
-		draw_line(hole.position+Coordi(-x, -x), hole.position+Coordi(x,x), co);
-		draw_line(hole.position+Coordi(x, -x), hole.position+Coordi(-x,x), co);
-		if(interactive)
-			selectables.append(hole.uuid, ObjectType::HOLE, hole.position, Selectable::Enlarge::OFF);
+		else if(hole.shape == Hole::Shape::SLOT) {
+			draw_arc(Coordi(-l, 0), d, 0, 2*M_PI, co);
+			draw_arc(Coordi( l, 0), d, 0, 2*M_PI, co);
+			draw_line(Coordi(-l, -d), Coordi(l, -d), co);
+			draw_line(Coordi(-l,  d), Coordi(l,  d), co);
+			if(interactive)
+				selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-l-d, -d), Coordi(l+d, +d), Selectable::Enlarge::OFF);
+		}
+		transform_restore();
 	}
 
 	void Canvas::render(const Pad &pad, int layer) {

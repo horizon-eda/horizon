@@ -44,7 +44,7 @@ namespace horizon {
 		write_line("M71");
 	}
 
-	void ExcellonWriter::draw_hole(const Coordi &pos, uint64_t diameter) {
+	unsigned int ExcellonWriter::get_tool_for_diameter(uint64_t diameter) {
 		unsigned int tool;
 		if(tools.count(diameter)) {
 			tool = tools.at(diameter);
@@ -53,15 +53,45 @@ namespace horizon {
 			tool = tool_n++;
 			tools.emplace(diameter, tool);
 		}
+		return tool;
+	}
+
+	void ExcellonWriter::draw_hole(const Coordi &pos, uint64_t diameter) {
+		unsigned int tool = get_tool_for_diameter(diameter);
 		holes.emplace_back(pos, tool);
+	}
+
+	void ExcellonWriter::draw_slot(const Coordi &pos, uint64_t diameter, uint64_t length, int angle) {
+		unsigned int tool = get_tool_for_diameter(diameter);
+		double d = length/2;
+		double phi = (angle/65536.0)*2*M_PI;
+		double dx = d*cos(phi);
+		double dy = d*sin(phi);
+
+		Coordi p0(pos.x-dx, pos.y-dy);
+		Coordi p1(pos.x+dx, pos.y+dy);
+		slots.emplace_back(p0, p1, tool);
 	}
 
 	void ExcellonWriter::write_holes() {
 		ofs.precision(3);
-		for(const auto &it: holes) {
-			ofs << "T" << it.second << std::endl;
-			ofs << "X" << std::fixed << (double)it.first.x/1e6 << "Y" << std::fixed << (double)it.first.y/1e6 << std::endl;
+		for(const auto &itt: tools) {
+			auto tool = itt.second;
+			ofs << "T" << tool << std::endl;
+			for(const auto &it: holes) {
+				if(it.second == tool)
+					ofs << "X" << std::fixed << (double)it.first.x/1e6 << "Y" << std::fixed << (double)it.first.y/1e6 << std::endl;
+			}
+			for(const auto &it: slots) {
+				Coordi p0;
+				Coordi p1;
+				unsigned int this_tool;
+				std::tie(p0, p1, this_tool) = it;
+				if(this_tool == tool)
+					ofs << "X" << std::fixed << (double)p0.x/1e6 << "Y" << std::fixed << (double)p0.y/1e6 << "G85" << "X" << std::fixed << (double)p1.x/1e6 << "Y" << std::fixed << (double)p1.y/1e6 << std::endl;
+			}
 		}
+
 	}
 
 

@@ -42,7 +42,7 @@ namespace horizon {
 			}
 			if(it.type == ObjectType::HOLE) {
 				hole_mode = true;
-				ac.accumulate(core.r->get_hole(it.uuid)->position);
+				ac.accumulate(core.r->get_hole(it.uuid)->placement.shift);
 			}
 			if(it.type == ObjectType::JUNCTION) {
 				junction_mode = true;
@@ -187,7 +187,7 @@ namespace horizon {
 			}
 			for(const auto &it : args.selection) {
 				if(it.type == ObjectType::HOLE) {
-					core.r->get_hole(it.uuid)->position = r.second;
+					core.r->get_hole(it.uuid)->placement.shift = r.second;
 				}
 			}
 		}

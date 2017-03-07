@@ -103,6 +103,12 @@ namespace horizon {
 					case ObjectProperty::ID::DIAMETER:
 						HANDLED
 						return get_hole(uu, false)->diameter;
+					case ObjectProperty::ID::LENGTH:
+						HANDLED
+						return get_hole(uu, false)->length;
+					case ObjectProperty::ID::SHAPE:
+						HANDLED
+						return static_cast<int>(get_hole(uu, false)->shape);
 					default :
 						NOT_HANDLED
 						return 0;
@@ -192,6 +198,18 @@ namespace horizon {
 							return;
 						get_hole(uu, false)->diameter = newv;
 					break;
+					case ObjectProperty::ID::LENGTH:
+						HANDLED
+						newv = std::max(value, 0_mm);
+						if(newv == (int64_t)get_hole(uu, false)->length)
+							return;
+						get_hole(uu, false)->length = newv;
+					break;
+					case ObjectProperty::ID::SHAPE:
+						HANDLED
+						get_hole(uu, false)->shape = static_cast<Hole::Shape>(value);
+					break;
+
 					default :
 						NOT_HANDLED
 				}
@@ -242,6 +260,24 @@ namespace horizon {
 		}
 		rebuild();
 		set_needs_save(true);
+	}
+
+	bool Core::property_is_settable(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
+		switch(type) {
+			case ObjectType::HOLE :
+				switch(property) {
+					case ObjectProperty::ID::LENGTH :
+						HANDLED
+						return get_hole(uu, false)->shape == Hole::Shape::SLOT;
+					break;
+					default :
+						NOT_HANDLED
+				}
+			break;
+			default:
+				NOT_HANDLED
+		}
+		return true;
 	}
 
 }

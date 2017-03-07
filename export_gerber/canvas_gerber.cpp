@@ -58,7 +58,13 @@ namespace horizon {
 
 		void CanvasGerber::img_hole(const Hole &hole) {
 			auto wr = exporter->get_drill_writer(hole.plated);
-			wr->draw_hole(transform.transform(hole.position), hole.diameter);
+			if(hole.shape == Hole::Shape::ROUND)
+				wr->draw_hole(transform.transform(hole.placement.shift), hole.diameter);
+			else if(hole.shape == Hole::Shape::SLOT) {
+				auto tr = transform;
+				tr.accumulate(hole.placement);
+				wr->draw_slot(tr.shift, hole.diameter, hole.length, tr.get_angle());
+			}
 		}
 
 

@@ -5,14 +5,15 @@
 namespace horizon {
 	class ObjectProperty {
 		public :
-		enum class Type {BOOL, INT, STRING, STRING_RO, LENGTH, LAYER, LAYER_COPPER, NET_CLASS};
+		enum class Type {BOOL, INT, STRING, STRING_RO, LENGTH, LAYER, LAYER_COPPER, NET_CLASS, ENUM};
 		enum class ID {NAME, NAME_VISIBLE, PAD_VISIBLE, LENGTH, SIZE, TEXT, REFDES, VALUE, IS_POWER, OFFSHEET_REFS, WIDTH, LAYER,
-			DIAMETER, PLATED, FLIPPED, NET_CLASS, WIDTH_FROM_NET_CLASS, MPN
+			DIAMETER, PLATED, FLIPPED, NET_CLASS, WIDTH_FROM_NET_CLASS, MPN, SHAPE
 		};
-		ObjectProperty(Type t, const std::string &l): type(t), label(l) {}
+		ObjectProperty(Type t, const std::string &l, const std::vector<std::pair<int, std::string>> &its = {}): type(t), label(l), enum_items(its) {}
 
 		Type type;
 		std::string label;
+		std::vector<std::pair<int, std::string>> enum_items;
 	};
 
 	class ObjectDescription {

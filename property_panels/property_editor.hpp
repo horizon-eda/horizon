@@ -108,5 +108,19 @@ namespace horizon {
 			virtual void set_from_other(PropertyEditor *other);
 	};
 
+	class PropertyEditorEnum: public PropertyEditor {
+		using PropertyEditor::PropertyEditor;
+		public:
+			virtual void reload();
+
+		protected:
+			virtual Gtk::Widget *create_editor();
+
+		private :
+			Gtk::ComboBoxText *combo;
+			void changed();
+			virtual void set_from_other(PropertyEditor *other);
+	};
+
 
 }

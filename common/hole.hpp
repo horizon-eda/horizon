@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include "placement.hpp"
 
 
 namespace horizon {
@@ -20,13 +21,19 @@ namespace horizon {
 			Hole(const UUID &uu);
 
 			UUID uuid;
-			Coord<int64_t> position;
-			uint64_t diameter=0.5_mm;
+			Placement placement;
+			uint64_t diameter = 0.5_mm;
+			uint64_t length = 0.5_mm;
+
 			/**
 			 * true if this hole is PTH, false if NPTH.
 			 * Used by the gerber exporter.
 			 */
 			bool plated = false;
+
+			enum class Shape {ROUND, SLOT};
+			Shape shape = Shape::ROUND;
+
 
 			virtual UUID get_uuid() const ;
 

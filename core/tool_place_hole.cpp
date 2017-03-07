@@ -24,12 +24,12 @@ namespace horizon {
 
 	void ToolPlaceHole::create_hole(const Coordi &c) {
 		temp = core.r->insert_hole(UUID::random());
-		temp->position = c;
+		temp->placement.shift = c;
 	}
 
 	ToolResponse ToolPlaceHole::update(const ToolArgs &args) {
 		if(args.type == ToolEventType::MOVE) {
-			temp->position = args.coords;
+			temp->placement.shift = args.coords;
 		}
 		else if(args.type == ToolEventType::CLICK) {
 			if(args.button == 1) {
