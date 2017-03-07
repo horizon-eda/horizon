@@ -160,25 +160,38 @@ namespace horizon {
 			target_current = Target();
 		}
 
-		const auto sel = get_selection();
-		auto target_in_selection = [this, &sel](const Target &ta){
-			return std::find_if(sel.begin(), sel.end(), [ta](const auto &a){
-				if(ta.type == ObjectType::SYMBOL_PIN && a.type == ObjectType::SCHEMATIC_SYMBOL) {
-					return ta.path.at(0) == a.uuid;
+		auto target_in_selection = [this](const Target &ta){
+			if(ta.type == ObjectType::SYMBOL_PIN) {
+				SelectableRef key(ta.path.at(0), ObjectType::SCHEMATIC_SYMBOL, ta.vertex);
+				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).flags&1)) {
+					return true;
 				}
-				else if(ta.type == ObjectType::PAD && a.type == ObjectType::BOARD_PACKAGE) {
-					return ta.path.at(0) == a.uuid;
+			}
+			else if(ta.type == ObjectType::PAD) {
+				SelectableRef key(ta.path.at(0), ObjectType::BOARD_PACKAGE, ta.vertex);
+				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).flags&1)) {
+					return true;
 				}
-				else if(ta.type == ObjectType::POLYGON_EDGE && a.type == ObjectType::POLYGON_VERTEX) {
-					return ta.path.at(0) == a.uuid;
+			}
+			else if(ta.type == ObjectType::POLYGON_EDGE) {
+				SelectableRef key(ta.path.at(0), ObjectType::POLYGON_VERTEX, ta.vertex);
+				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).flags&1)) {
+					return true;
 				}
-				return (ta.type == a.type) && (ta.path.at(0) == a.uuid) && (ta.vertex == a.vertex);
-			}) != sel.end();
+			}
+			else {
+				SelectableRef key(ta.path.at(0), ta.type, ta.vertex);
+				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).flags&1)) {
+					return true;
+				}
+			}
+			return false;
 
 		};
+
 		auto dfn = [this, target_in_selection](const Target &ta) -> float{
 			//return inf if target in selection and tool active (selection not allowed)
-			if(target_in_selection(ta) && !selection_allowed)
+			if(!selection_allowed && target_in_selection(ta))
 				return INFINITY;
 			else
 				return (cursor_pos-(Coordf)ta.p).mag_sq();
@@ -261,10 +274,9 @@ namespace horizon {
 			it.flags = 0;
 		}
 		for(const auto &it:sel) {
-			const auto &f = std::find_if(selectables.items_ref.begin(), selectables.items_ref.end(), [it](const auto &a)->bool{return (a.uuid==it.uuid) && (a.vertex == it.vertex) && (a.type == it.type);});
-			if(f != selectables.items_ref.end()) {
-				const auto n = f-selectables.items_ref.begin();
-				selectables.items[n].flags = 1;
+			SelectableRef key(it.uuid, it.type, it.vertex);
+			if(selectables.items_map.count(key)) {
+				selectables.items.at(selectables.items_map.at(key)).flags = 1;
 			}
 		}
 		if(emit)

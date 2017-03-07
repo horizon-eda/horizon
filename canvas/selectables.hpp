@@ -2,6 +2,7 @@
 #include "common.hpp"
 #include "uuid.hpp"
 #include <epoxy/gl.h>
+#include <map>
 
 namespace horizon {
 	class Selectable {
@@ -106,6 +107,7 @@ namespace horizon {
 			Canvas *ca;
 			std::vector<Selectable> items;
 			std::vector<SelectableRef> items_ref;
+			std::map<SelectableRef, unsigned int> items_map;
 
 
 	};

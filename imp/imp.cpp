@@ -453,42 +453,6 @@ namespace horizon {
 			sel.insert(sel_extra.begin(), sel_extra.end());
 			panels->update_objects(sel);
 		}
-		//for(const auto it: canvas->get_selection()) {
-		//	std::cout << (std::string)it.uuid << std::endl;
-		//}
-		//std::cout << "---" << std::endl;
-		std::set<UUID> net_segments;
-		for(const auto it: canvas->get_selection()) {
-			if(it.type == ObjectType::LINE_NET) {
-				auto s_uuid = core.c->get_sheet()->net_lines.at(it.uuid).net_segment;
-				assert(s_uuid);
-				net_segments.insert(s_uuid);
-			}
-			if(it.type == ObjectType::TRACK) {
-				auto s_uuid = core.b->get_board()->tracks.at(it.uuid).net_segment;
-				net_segments.insert(s_uuid);
-			}
-			if(it.type == ObjectType::JUNCTION) {
-				if(core.c) {
-					auto s_uuid = core.c->get_sheet()->junctions.at(it.uuid).net_segment;
-					net_segments.insert(s_uuid);
-				}
-				if(core.b) {
-					auto s_uuid = core.b->get_board()->junctions.at(it.uuid).net_segment;
-					net_segments.insert(s_uuid);
-				}
-			}
-			if(it.type == ObjectType::POWER_SYMBOL) {
-				if(core.c) {
-					auto s_uuid = core.c->get_sheet()->power_symbols.at(it.uuid).junction->net_segment;
-					net_segments.insert(s_uuid);
-				}
-			}
-		}
-		for(const auto &it :net_segments) {
-			std::cout << "net seg " <<(std::string)it << std::endl;
-		}
-		//std::cout << "---" << std::endl;
 	}
 
 	void ImpBase::handle_tool_change(ToolID id) {
