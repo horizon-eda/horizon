@@ -37,6 +37,7 @@ namespace horizon {
 			case ObjectType::PAD:
 			case ObjectType::TEXT:
 			case ObjectType::LINE:
+			case ObjectType::ARC:
 
 				return true;
 			break;

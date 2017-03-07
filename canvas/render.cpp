@@ -302,18 +302,12 @@ namespace horizon {
 		Coordf a(arc.from->position);// ,b,c;
 		Coordf b(arc.to->position);// ,b,c;
 		Coordf c(arc.center->position);// ,b,c;
-		if((sq(c.x-a.x) + sq(c.y-a.y)) != (sq(c.x-b.x) + sq(c.y-b.y))) {
-			Color ce(1,0,0);
-			draw_line(c, a, ce);
-			draw_line(c, b, ce);
-			draw_error(c, 2e5, "Arc center");
-			return;
-		}
-		float radius = sqrt(sq(c.x-a.x) + sq(c.y-a.y));
+		float radius0 = sqrt(sq(c.x-a.x) + sq(c.y-a.y));
+		float radius1 = sqrt(sq(c.x-b.x) + sq(c.y-b.y));
 		float a0 = atan2f(a.y-c.y, a.x-c.x);
 		float a1 = atan2f(b.y-c.y, b.x-c.x);
-		draw_arc(c, radius, a0, a1, co, true, arc.width);
-		Coordf t(radius, radius);
+		draw_arc2(c, radius0, a0, radius1, a1, co, true, arc.width);
+		Coordf t(radius0, radius0);
 		if(interactive)
 			selectables.append(arc.uuid, ObjectType::ARC, c, c-t, c+t, Selectable::Enlarge::AUTO, 0, arc.layer);
 		

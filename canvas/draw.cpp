@@ -45,6 +45,27 @@ namespace horizon {
 			a0 += dphi;
 		}
 	}
+	void Canvas::draw_arc2(const Coordf &center, float radius0, float a0, float radius1, float a1, const Color &color, bool tr, uint64_t width) {
+		unsigned int segments = 64;
+		if(a0 < 0) {
+			a0 += 2*M_PI;
+		}
+		if(a1 < 0) {
+			a1 += 2*M_PI;
+		}
+		float dphi = a1-a0;
+		if(dphi < 0) {
+			dphi += 2*M_PI;
+		}
+		float dr = radius1-radius0;
+		dr /= segments;
+		dphi /= segments;
+		while(segments--) {
+			draw_line(center+Coordf::euler(radius0, a0), center+Coordf::euler(radius0+dr, a0+dphi), color, tr, width);
+			a0 += dphi;
+			radius0 += dr;
+		}
+	}
 	
 	void Canvas::draw_error(const Coordf &center, float sc, const std::string &text, bool tr) {
 		float x = center.x;

@@ -219,4 +219,66 @@ namespace horizon {
 		}
 	}
 
+	std::tuple<bool, std::string, int, int64_t, double> Dialogs::ask_dxf_filename(Core *core) {
+		Gtk::FileChooserDialog fc(*parent, "Import DXF", Gtk::FILE_CHOOSER_ACTION_OPEN);
+		fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
+		fc.add_button("_Open", Gtk::RESPONSE_ACCEPT);
+		auto filter= Gtk::FileFilter::create();
+		filter->set_name("DXF drawing");
+		filter->add_mime_type("image/vnd.dxf");
+		fc.add_filter(filter);
+
+		auto extrabox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
+		auto add_extra_label = [extrabox](const std::string &txt) {
+			auto la = Gtk::manage(new Gtk::Label(txt));
+			extrabox->pack_start(*la, false, false, 0);
+		};
+
+		add_extra_label("Layer:");
+		auto layer_combo = Gtk::manage(new Gtk::ComboBoxText());
+		for(const auto &it: core->get_layers()) {
+			layer_combo->insert(0, std::to_string(it.first), it.second.name);
+		}
+		layer_combo->set_active_id("0");
+		extrabox->pack_start(*layer_combo, false, false, 0);
+		layer_combo->set_margin_right(4);
+
+
+		add_extra_label("Line Width:");
+		auto width_sp = Gtk::manage(new SpinButtonDim());
+		width_sp->set_range(0, 100_mm);
+		extrabox->pack_start(*width_sp, false, false, 0);
+		width_sp->set_margin_right(4);
+
+		add_extra_label("Scale:");
+		auto scale_sp = Gtk::manage(new Gtk::SpinButton());
+		scale_sp->set_digits(4);
+		scale_sp->set_range(1e-3, 1e3);
+		scale_sp->set_value(1);
+		scale_sp->set_increments(.1, .1);
+		extrabox->pack_start(*scale_sp, false, false, 0);
+		scale_sp->set_margin_right(4);
+
+
+		fc.set_extra_widget(*extrabox);
+		extrabox->show_all();
+
+
+		std::string filename;
+		int layer = 0;
+		int64_t width=0;
+		double scale=1;
+
+		if(fc.run()==Gtk::RESPONSE_ACCEPT) {
+			filename = fc.get_filename();
+			layer = std::stoi(layer_combo->get_active_id());
+			width = width_sp->get_value_as_int();
+			scale = scale_sp->get_value();
+			return {true, filename, layer, width, scale};
+		}
+		else {
+			return {false, filename, layer, width, scale};
+		}
+	}
+
 }

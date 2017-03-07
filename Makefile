@@ -123,6 +123,7 @@ SRC_IMP = \
 	core/tool_smash.cpp\
 	core/tool_place_shape.cpp\
 	core/tool_edit_shape.cpp\
+	core/tool_import_dxf.cpp\
 	core/cores.cpp\
 	core/clipboard.cpp\
 	core/buffer.cpp\
@@ -186,6 +187,9 @@ SRC_IMP = \
 	imp/checks/check_settings_dialog.cpp\
 	imp/imp_interface.cpp\
 	widgets/pool_browser_part.cpp\
+	dxflib/dl_dxf.cpp\
+	dxflib/dl_writer_ascii.cpp\
+	import_dxf/dxf_importer.cpp
 
 SRC_POOL_UTIL = \
 	pool-util/util_main.cpp\

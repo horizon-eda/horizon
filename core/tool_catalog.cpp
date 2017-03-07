@@ -43,5 +43,6 @@ namespace horizon {
 		{ToolID::UNSMASH, {"Unsmash"}},
 		{ToolID::PLACE_SHAPE, {"Place shape"}},
 		{ToolID::EDIT_SHAPE, {"Edit shape"}},
+		{ToolID::IMPORT_DXF, {"Import DXF"}},
 	};
 }

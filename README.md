@@ -270,3 +270,4 @@ description.
 - https://github.com/nlohmann/json/
 - http://www.angusj.com/delphi/clipper.php
 - https://github.com/ivanfratric/polypartition/
+- https://qcad.org/en/what-is-dxflib

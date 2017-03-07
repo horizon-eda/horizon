@@ -38,7 +38,7 @@ namespace horizon {
 			uuid_ptr<Net> net=nullptr;
 			uuid_ptr<Bus> bus = nullptr;
 			UUID net_segment = UUID();
-			bool temp;
+			bool temp = false;
 			bool warning = false;
 			int layer = 10000;
 			bool needs_via = false;

@@ -46,6 +46,8 @@ namespace horizon {
 			core.r->signal_tool_changed().connect([button](ToolID t){button->set_sensitive(t==ToolID::NONE);});
 		}
 
+		add_tool_button(ToolID::IMPORT_DXF, "Import DXF");
+
 		auto name_entry = Gtk::manage(new Gtk::Entry());
 		name_entry->show();
 		main_window->top_panel->pack_start(*name_entry, false, false, 0);

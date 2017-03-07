@@ -33,6 +33,7 @@
 #include "tool_smash.hpp"
 #include "tool_place_shape.hpp"
 #include "tool_edit_shape.hpp"
+#include "tool_import_dxf.hpp"
 #include <memory>
 
 namespace horizon {
@@ -151,6 +152,9 @@ namespace horizon {
 
 			case ToolID::EDIT_SHAPE:
 				return std::make_unique<ToolEditShape>(this, tool_id);
+
+			case ToolID::IMPORT_DXF:
+				return std::make_unique<ToolImportDXF>(this, tool_id);
 
 
 			default:

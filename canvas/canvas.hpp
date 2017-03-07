@@ -82,6 +82,7 @@ namespace horizon {
 			void draw_plus(const Coord<float> &o, float size, const Color &color, bool tr = true, uint64_t width=0);
 			void draw_box(const Coord<float> &o, float size, const Color &color, bool tr = true, uint64_t width=0);
 			void draw_arc(const Coord<float> &center, float radius, float a0, float a1, const Color &color, bool tr = true, uint64_t width=0);
+			void draw_arc2(const Coord<float> &center, float radius0, float a0, float radius1, float a1, const Color &color, bool tr = true, uint64_t width=0);
 			std::pair<Coordf, Coordf> draw_text(const Coordf &p, float size, const std::string &text, Orientation orientation, TextOrigin placement, const Color &color, bool tr = true, uint64_t width=0, bool draw=true);
 			std::pair<Coordf, Coordf> draw_text0(const Coordf &p, float size, const std::string &rtext, int angle, bool flip, TextOrigin origin, const Color &color, bool tr=true, uint64_t width=0, bool draw=true);
 			void draw_error(const Coordf &center, float scale, const std::string &text, bool tr = true);
