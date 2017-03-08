@@ -63,7 +63,7 @@ namespace horizon {
 
 	void ExcellonWriter::draw_slot(const Coordi &pos, uint64_t diameter, uint64_t length, int angle) {
 		unsigned int tool = get_tool_for_diameter(diameter);
-		double d = length/2;
+		double d = std::max(((int64_t)length - (int64_t)diameter)/2, (int64_t)0);
 		double phi = (angle/65536.0)*2*M_PI;
 		double dx = d*cos(phi);
 		double dy = d*sin(phi);

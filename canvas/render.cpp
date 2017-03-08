@@ -518,8 +518,8 @@ namespace horizon {
 
 		transform_save();
 		transform.accumulate(hole.placement);
-		int64_t l = hole.length/2;
 		int64_t d = hole.diameter/2;
+		int64_t l = std::max((int64_t)hole.length/2-d, (int64_t)0);
 		if(hole.shape == Hole::Shape::ROUND) {
 			draw_arc(Coordi(), d, 0, 2*M_PI, co);
 			if(hole.plated) {
