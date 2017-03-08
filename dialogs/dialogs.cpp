@@ -158,6 +158,8 @@ namespace horizon {
 		dia.sp_x->set_value(def.x);
 		dia.sp_y->set_value(def.y);
 		dia.sp_x->select_region(0, -1);
+		dia.cb_x->set_sensitive(false);
+		dia.cb_y->set_sensitive(false);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
 			return {true, {dia.sp_x->get_value_as_int(), dia.sp_y->get_value_as_int()}};

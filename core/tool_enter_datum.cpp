@@ -210,13 +210,20 @@ namespace horizon {
 			}
 		}
 		if(pad_mode) {
-			auto r = imp->dialogs.ask_datum_coord("Pad position", ac.get());
-			if(!r.first) {
+			bool r;
+			Coordi c;
+			std::pair<bool, bool> rc;
+			std::tie(r, c, rc)= imp->dialogs.ask_datum_coord2("Pad position", ac.get());
+
+			if(!r) {
 				return ToolResponse::end();
 			}
 			for(const auto &it : args.selection) {
 				if(it.type == ObjectType::PAD) {
-					core.k->get_package()->pads.at(it.uuid).placement.shift = r.second;
+					if(rc.first)
+						core.k->get_package()->pads.at(it.uuid).placement.shift.x = c.x;
+					if(rc.second)
+						core.k->get_package()->pads.at(it.uuid).placement.shift.y = c.y;
 				}
 			}
 		}
