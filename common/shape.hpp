@@ -25,7 +25,7 @@ namespace horizon {
 			Placement placement;
 			int layer = 0;
 
-			enum class Form {CIRCLE, RECTANGLE};
+			enum class Form {CIRCLE, RECTANGLE, OBROUND};
 			Form form = Form::CIRCLE;
 			std::vector<int64_t> params;
 

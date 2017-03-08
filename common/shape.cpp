@@ -5,6 +5,7 @@ namespace horizon {
 	static const LutEnumStr<Shape::Form> form_lut = {
 		{"circle", 		Shape::Form::CIRCLE},
 		{"rectangle",	Shape::Form::RECTANGLE},
+		{"obround",		Shape::Form::OBROUND},
 	};
 
 	Shape::Shape(const UUID &uu, const json &j):
@@ -45,6 +46,26 @@ namespace horizon {
 				v->arc_reverse = true;
 				poly.append_vertex({r, 0});
 			} break;
+
+			case Form::OBROUND : {
+				assert(params.size()>=2);
+				auto h = params.at(1)/2;
+				auto w = params.at(0)/2;
+				w = std::max(w-h, (int64_t)0);
+
+				Polygon::Vertex *v;
+				v = poly.append_vertex({ w,  h});
+				v->type = Polygon::Vertex::Type::ARC;
+				v->arc_center = {w, 0};
+				v->arc_reverse = true;
+				poly.append_vertex({ w, -h});
+				v = poly.append_vertex({-w, -h});
+				v->type = Polygon::Vertex::Type::ARC;
+				v->arc_center = {-w, 0};
+				v->arc_reverse = true;
+				poly.append_vertex({-w,  h});
+
+			} break;
 		}
 		for(auto &it: poly.vertices) {
 			it.position = placement.transform(it.position);
@@ -55,6 +76,7 @@ namespace horizon {
 
 	std::pair<Coordi, Coordi> Shape::get_bbox() const {
 		switch(form) {
+			case Form::OBROUND :
 			case Form::RECTANGLE : {
 				auto w = params.at(0)/2;
 				auto h = params.at(1)/2;

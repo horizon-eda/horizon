@@ -31,6 +31,7 @@ namespace horizon {
 			w_form = Gtk::manage(new Gtk::ComboBoxText());
 			w_form->append(std::to_string(static_cast<int>(Shape::Form::CIRCLE)), "Circle");
 			w_form->append(std::to_string(static_cast<int>(Shape::Form::RECTANGLE)), "Rectangle");
+			w_form->append(std::to_string(static_cast<int>(Shape::Form::OBROUND)), "Obround");
 			w_form->signal_changed().connect(sigc::mem_fun(this, &ShapeDialog::update));
 			w_form->set_active_id(std::to_string(static_cast<int>(shape->form)));
 			w_form->set_hexpand(true);
@@ -71,7 +72,7 @@ namespace horizon {
 		}
 		widgets.clear();
 		int top = 1;
-		if(form == Shape::Form::RECTANGLE) {
+		if(form == Shape::Form::RECTANGLE || form == Shape::Form::OBROUND) {
 			auto w = add_dim("Width", top++);
 			w->set_range(0, 1000_mm);
 			w->set_value(get_or_0(shape->params, 0));
