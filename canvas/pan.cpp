@@ -84,7 +84,7 @@ namespace horizon {
 			gdk_event_get_scroll_deltas((GdkEvent*)scroll_event, &sx, &sy);
 			scale_new = sc * powf(1.5, -sy);
 		}
-		if(scale_new < 1e-7 || scale_new > 1e-3) {
+		if(scale_new < 1e-7 || scale_new > 1e-2) {
 			return;
 		}
 		this->scale = scale_new;
