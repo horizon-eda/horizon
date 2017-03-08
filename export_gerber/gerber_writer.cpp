@@ -81,8 +81,12 @@ namespace horizon {
 						ofs << "1,";  //exposure
 						write_decimal(prim->width);
 						write_decimal(prim->height);
-						write_decimal(prim->center.x); //x
-						write_decimal(prim->center.y); //y
+
+						Placement tr;
+						tr.set_angle(-prim->angle);
+						auto c = tr.transform(prim->center);
+						write_decimal(c.x); //x
+						write_decimal(c.y); //y
 						ofs << std::fixed << (prim->angle)*(360./65536.);
 					} break;
 					case ApertureMacro::Primitive::Code::OUTLINE: {
@@ -161,10 +165,31 @@ namespace horizon {
 							auto prim = dynamic_cast<ApertureMacro::PrimitiveCenterLine*>(am->primitives.back().get());
 							prim->width = it.second.params.at(0);
 							prim->height = it.second.params.at(1);
-							prim->center = tr.transform(it.second.placement.shift);
 							auto tr2 = tr;
 							tr2.accumulate(it.second.placement);
+							prim->center = tr2.shift;
 							prim->angle = tr2.get_angle();
+						} break;
+
+						case Shape::Form::OBROUND: {
+							am->primitives.push_back(std::make_unique<ApertureMacro::PrimitiveCenterLine>());
+							auto prim = dynamic_cast<ApertureMacro::PrimitiveCenterLine*>(am->primitives.back().get());
+							prim->height = it.second.params.at(1);
+							prim->width = it.second.params.at(0)-prim->height;
+							auto tr2 = tr;
+							tr2.accumulate(it.second.placement);
+							prim->center = tr2.shift;
+							prim->angle = tr2.get_angle();
+
+							am->primitives.push_back(std::make_unique<ApertureMacro::PrimitiveCircle>());
+							auto prim_c1 = dynamic_cast<ApertureMacro::PrimitiveCircle*>(am->primitives.back().get());
+							prim_c1->diameter = prim->height;
+							prim_c1->center = tr2.transform(Coordi(prim->width/2, 0));
+
+							am->primitives.push_back(std::make_unique<ApertureMacro::PrimitiveCircle>());
+							auto prim_c2 = dynamic_cast<ApertureMacro::PrimitiveCircle*>(am->primitives.back().get());
+							prim_c2->diameter = prim->height;
+							prim_c2->center = tr2.transform(Coordi(-prim->width/2, 0));
 						} break;
 					}
 
