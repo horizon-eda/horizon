@@ -9,7 +9,8 @@ namespace horizon {
 	
 	void Selectables::append(const UUID &uu, ObjectType ot, const Coordf &center, const Coordf &a, const Coordf &b, Selectable::Enlarge enlarge, unsigned int vertex, int layer) {
 		items_map.emplace(std::piecewise_construct, std::forward_as_tuple(uu, ot, vertex, layer), std::forward_as_tuple(items.size()));
-		items.emplace_back(ca->transform.transform(center), ca->transform.transform(a), ca->transform.transform(b), enlarge);
+		auto bb = ca->transform.transform_bb(std::make_pair(a,b));
+		items.emplace_back(ca->transform.transform(center), bb.first, bb.second, enlarge);
 		items_ref.emplace_back(uu, ot, vertex, layer);
 	}
 	

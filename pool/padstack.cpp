@@ -90,7 +90,8 @@ namespace horizon {
 			}
 		}
 		for(const auto &it: shapes) {
-			auto bb = it.second.get_bbox();
+			auto bb = it.second.placement.transform_bb(it.second.get_bbox());
+
 			a = Coordi::min(a, bb.first);
 			b = Coordi::max(b, bb.second);
 		}

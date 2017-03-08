@@ -42,6 +42,24 @@ namespace horizon {
 				r += shift;
 				return r;
 			}
+
+
+		template<typename T> std::pair<Coord<T>, Coord<T>> transform_bb(const std::pair<Coord<T>, Coord<T>> &bb) const {
+			int64_t xa = std::min(bb.first.x, bb.second.x);
+			int64_t xb = std::max(bb.first.x, bb.second.x);
+			int64_t ya = std::min(bb.first.y, bb.second.y);
+			int64_t yb = std::max(bb.first.y, bb.second.y);
+
+			auto a = transform(Coord<T>(xa,ya));
+			auto b = transform(Coord<T>(xa,yb));
+			auto c = transform(Coord<T>(xb,ya));
+			auto d = transform(Coord<T>(xb,yb));
+
+			auto pa = Coord<T>::min(a, Coord<T>::min(b, Coord<T>::min(c, d)));
+			auto pb = Coord<T>::max(a, Coord<T>::max(b, Coord<T>::max(c, d)));
+			return {pa, pb};
+		}
+
 		void reset() {shift={0,0}, angle=0, mirror=false;}
 		void accumulate(const Placement &p);
 		void invert_angle();

@@ -120,12 +120,8 @@ namespace horizon {
 		Coordi a;
 		Coordi b;
 		for(const auto &it: pads) {
-			auto bb_pad = it.second.padstack.get_bbox();
-			bb_pad.first = it.second.placement.transform(bb_pad.first);
-			bb_pad.second = it.second.placement.transform(bb_pad.second);
+			auto bb_pad = it.second.placement.transform_bb(it.second.padstack.get_bbox());
 			a = Coordi::min(a, bb_pad.first);
-			a = Coordi::min(a, bb_pad.second);
-			b = Coordi::max(b, bb_pad.first);
 			b = Coordi::max(b, bb_pad.second);
 		}
 		return std::make_pair(a,b);
