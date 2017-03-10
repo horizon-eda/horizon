@@ -163,25 +163,25 @@ namespace horizon {
 		auto target_in_selection = [this](const Target &ta){
 			if(ta.type == ObjectType::SYMBOL_PIN) {
 				SelectableRef key(ta.path.at(0), ObjectType::SCHEMATIC_SYMBOL, ta.vertex);
-				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).flags&1)) {
+				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).get_flag(horizon::Selectable::Flag::SELECTED))) {
 					return true;
 				}
 			}
 			else if(ta.type == ObjectType::PAD) {
 				SelectableRef key(ta.path.at(0), ObjectType::BOARD_PACKAGE, ta.vertex);
-				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).flags&1)) {
+				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).get_flag(horizon::Selectable::Flag::SELECTED))) {
 					return true;
 				}
 			}
 			else if(ta.type == ObjectType::POLYGON_EDGE) {
 				SelectableRef key(ta.path.at(0), ObjectType::POLYGON_VERTEX, ta.vertex);
-				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).flags&1)) {
+				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).get_flag(horizon::Selectable::Flag::SELECTED))) {
 					return true;
 				}
 			}
 			else {
 				SelectableRef key(ta.path.at(0), ta.type, ta.vertex);
-				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).flags&1)) {
+				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).get_flag(horizon::Selectable::Flag::SELECTED))) {
 					return true;
 				}
 			}
@@ -261,7 +261,7 @@ namespace horizon {
 		std::set<SelectableRef> r;
 		unsigned int i = 0;
 		for(const auto it: selectables.items) {
-			if(it.flags&1) {
+			if(it.get_flag(horizon::Selectable::Flag::SELECTED)) {
 				r.emplace(selectables.items_ref.at(i));
 			}
 			i++;
@@ -271,12 +271,13 @@ namespace horizon {
 
 	void CanvasGL::set_selection(const std::set<SelectableRef> &sel, bool emit) {
 		for(auto &it:selectables.items) {
-			it.flags = 0;
+			it.set_flag(horizon::Selectable::Flag::SELECTED, false);
+			it.set_flag(horizon::Selectable::Flag::PRELIGHT, false);
 		}
 		for(const auto &it:sel) {
 			SelectableRef key(it.uuid, it.type, it.vertex);
 			if(selectables.items_map.count(key)) {
-				selectables.items.at(selectables.items_map.at(key)).flags = 1;
+				selectables.items.at(selectables.items_map.at(key)).set_flag(horizon::Selectable::Flag::SELECTED, true);
 			}
 		}
 		if(emit)

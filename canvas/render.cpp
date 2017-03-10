@@ -85,7 +85,7 @@ namespace horizon {
 		draw_line({-1.25_mm, -1.25_mm}, {1.25_mm, -1.25_mm}, c);
 		draw_line({-1.25_mm, -1.25_mm}, {0, -2.5_mm}, c);
 		draw_line({1.25_mm, -1.25_mm}, {0, -2.5_mm}, c);
-		selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0,0}, {-1.25_mm, -2.5_mm}, {1.25_mm, 0_mm}, Selectable::Enlarge::FORCE);
+		selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0,0}, {-1.25_mm, -2.5_mm}, {1.25_mm, 0_mm});
 		transform.reset();
 
 		int text_angle = 0;
@@ -104,6 +104,20 @@ namespace horizon {
 		return hatch | (outline_mode<<1);
 	}
 
+	static auto get_line_bb(const Coordf &from, const Coordf &to, float width) {
+		auto center = (from+to)/2;
+		auto v = to-from;
+		float length = sqrt(v.mag_sq());
+		auto phi = atan2f(v.y, v.x);
+		auto bb = std::make_pair(Coordf(-length/2-width/2, -width/2), Coordf(length/2+width/2, width/2));
+		Placement tr;
+		tr.set_angle(phi/(2*M_PI)*65536);
+		auto bbt = tr.transform_bb(bb);
+		bbt.first += center;
+		bbt.second += center;
+		return bbt;
+	}
+
 	void Canvas::render(const Line &line, bool interactive) {
 		Color c(1,1,0);
 		c = core->get_layers().at(line.layer).color;
@@ -117,8 +131,12 @@ namespace horizon {
 		if(line.width == 0)
 			flags = 0;
 		draw_line(line.from->position, line.to->position, c, true, line.width, flags);
-		if(interactive)
-			selectables.append(line.uuid, ObjectType::LINE, (line.from->position+line.to->position)/2, Coordf::min(line.from->position, line.to->position), Coordf::max(line.from->position, line.to->position), Selectable::Enlarge::AUTO, 0, line.layer);
+		if(interactive) {
+			auto center = (line.from->position + line.to->position)/2;
+			auto bb = get_line_bb(line.from->position, line.to->position, line.width);
+
+			selectables.append(line.uuid, ObjectType::LINE, center, bb.first, bb.second , 0, line.layer);
+		}
 	}
 	
 	void Canvas::render(const LineNet &line) {
@@ -132,7 +150,7 @@ namespace horizon {
 			width = 0.2_mm;
 		}
 		draw_line(line.from.get_position(), line.to.get_position(), c, true, width);
-		selectables.append(line.uuid, ObjectType::LINE_NET, (line.from.get_position()+line.to.get_position())/2, Coordf::min(line.from.get_position(), line.to.get_position()), Coordf::max(line.from.get_position(), line.to.get_position()), Selectable::Enlarge::AUTO);
+		selectables.append(line.uuid, ObjectType::LINE_NET, (line.from.get_position()+line.to.get_position())/2, Coordf::min(line.from.get_position(), line.to.get_position()), Coordf::max(line.from.get_position(), line.to.get_position()));
 	}
 
 	void Canvas::render(const Track &track) {
@@ -167,8 +185,12 @@ namespace horizon {
 		if(width == 0)
 			flags = 0;
 		draw_line(track.from.get_position(), track.to.get_position(), c, true, width, flags);
-		if(!track.is_air)
-			selectables.append(track.uuid, ObjectType::TRACK, (track.from.get_position()+track.to.get_position())/2, Coordf::min(track.from.get_position(), track.to.get_position()), Coordf::max(track.from.get_position(), track.to.get_position()), Selectable::Enlarge::AUTO, 0, track.layer);
+		if(!track.is_air) {
+			auto center = (track.from.get_position()+ track.to.get_position())/2;
+			auto bb = get_line_bb(track.from.get_position(), track.to.get_position(), width);
+
+			selectables.append(track.uuid, ObjectType::TRACK, center, bb.first, bb.second , 0, track.layer);
+		}
 	}
 
 	static const std::map<Orientation, Orientation> omap_90 = {
@@ -286,7 +308,7 @@ namespace horizon {
 		}
 		draw_line(p0, p1, c, false);
 		if(interactive)
-			selectables.append(pin.uuid, ObjectType::SYMBOL_PIN, p0, Coordf::min(pad_extents.first, Coordf::min(p0, p1)), Coordf::max(pad_extents.second, Coordf::max(p0, p1)), Selectable::Enlarge::FORCE);
+			selectables.append(pin.uuid, ObjectType::SYMBOL_PIN, p0, Coordf::min(pad_extents.first, Coordf::min(p0, p1)), Coordf::max(pad_extents.second, Coordf::max(p0, p1)));
 	}
 	
 	static int64_t sq(int64_t x) {
@@ -309,7 +331,7 @@ namespace horizon {
 		draw_arc2(c, radius0, a0, radius1, a1, co, true, arc.width);
 		Coordf t(radius0, radius0);
 		if(interactive)
-			selectables.append(arc.uuid, ObjectType::ARC, c, c-t, c+t, Selectable::Enlarge::AUTO, 0, arc.layer);
+			selectables.append(arc.uuid, ObjectType::ARC, c, c-t, c+t, 0, arc.layer);
 		
 	}
 	
@@ -321,7 +343,7 @@ namespace horizon {
 			targets.emplace(UUIDPath<2>(sym.uuid, it.second.uuid), ObjectType::SYMBOL_PIN, transform.transform(it.second.position));
 		}
 		auto bb = sym.symbol.get_bbox();
-		selectables.append(sym.uuid, ObjectType::SCHEMATIC_SYMBOL, {0,0}, bb.first, bb.second, Selectable::Enlarge::FORCE);
+		selectables.append(sym.uuid, ObjectType::SCHEMATIC_SYMBOL, {0,0}, bb.first, bb.second);
 		transform.reset();
 	}
 
@@ -345,7 +367,7 @@ namespace horizon {
 		img_text_layer(10000);
 		transform_restore();
 		if(interactive)
-			selectables.append(text.uuid, ObjectType::TEXT, text.placement.shift, extents.first, extents.second, Selectable::Enlarge::FORCE, 0, text.layer);
+			selectables.append(text.uuid, ObjectType::TEXT, text.placement.shift, extents.first, extents.second, 0, text.layer);
 	}
 
 	template <typename T>
@@ -377,11 +399,11 @@ namespace horizon {
 			std::pair<Coordf, Coordf> extents;
 			Coordi shift;
 			std::tie(extents.first, extents.second, shift)= draw_flag(label.junction->position, txt, label.size, label.orientation, c);
-			selectables.append(label.uuid, ObjectType::NET_LABEL, label.junction->position+shift, extents.first, extents.second, Selectable::Enlarge::FORCE);
+			selectables.append(label.uuid, ObjectType::NET_LABEL, label.junction->position+shift, extents.first, extents.second);
 		}
 		else {
 			auto extents = draw_text0(label.junction->position, label.size, txt, orientation_to_angle(label.orientation), false, TextOrigin::BASELINE, {0,1,0}, false);
-			selectables.append(label.uuid, ObjectType::NET_LABEL, label.junction->position+Coordi(0, 1000000), extents.first, extents.second, Selectable::Enlarge::FORCE);
+			selectables.append(label.uuid, ObjectType::NET_LABEL, label.junction->position+Coordi(0, 1000000), extents.first, extents.second);
 		}
 	}
 	void Canvas::render(const BusLabel &label) {
@@ -397,7 +419,7 @@ namespace horizon {
 		std::pair<Coordf, Coordf> extents;
 		Coordi shift;
 		std::tie(extents.first, extents.second, shift)= draw_flag(label.junction->position, txt, label.size, label.orientation, c);
-		selectables.append(label.uuid, ObjectType::BUS_LABEL, label.junction->position+shift, extents.first, extents.second, Selectable::Enlarge::FORCE);
+		selectables.append(label.uuid, ObjectType::BUS_LABEL, label.junction->position+shift, extents.first, extents.second);
 	}
 
 	void Canvas::render(const BusRipper &ripper) {
@@ -409,7 +431,7 @@ namespace horizon {
 		}
 		auto extents = draw_text0(connector_pos+Coordi(0, 0.125_mm), 1.25_mm, ripper.bus_member->name, 0, false, TextOrigin::BASELINE, c);
 		targets.emplace(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos);
-		selectables.append(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos, extents.first, extents.second, Selectable::Enlarge::FORCE);
+		selectables.append(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos, extents.first, extents.second);
 	}
 
 	void Canvas::render(const Warning &warn) {
@@ -476,17 +498,17 @@ namespace horizon {
 				if(v_last) {
 					auto center = (v_last->position + it.position)/2;
 					if(v_last->type != Polygon::Vertex::Type::ARC) {
-						selectables.append(poly.uuid, ObjectType::POLYGON_EDGE, center, v_last->position, it.position, Selectable::Enlarge::OFF, i-1, poly.layer);
+						selectables.append(poly.uuid, ObjectType::POLYGON_EDGE, center, v_last->position, it.position, i-1, poly.layer);
 
 						targets.emplace(poly.uuid, ObjectType::POLYGON_EDGE, center, i-1);
 					}
 				}
 				//draw_cross(it.position, 0.25_mm, c);
-				selectables.append(poly.uuid, ObjectType::POLYGON_VERTEX, it.position, Selectable::Enlarge::OFF, i, poly.layer);
+				selectables.append(poly.uuid, ObjectType::POLYGON_VERTEX, it.position, i, poly.layer);
 				targets.emplace(poly.uuid, ObjectType::POLYGON_VERTEX, it.position, i);
 				if(it.type == Polygon::Vertex::Type::ARC) {
 					//draw_plus(it.arc_center, 0.25_mm, c);
-					selectables.append(poly.uuid, ObjectType::POLYGON_ARC_CENTER, it.arc_center, Selectable::Enlarge::OFF, i, poly.layer);
+					selectables.append(poly.uuid, ObjectType::POLYGON_ARC_CENTER, it.arc_center, i, poly.layer);
 					targets.emplace(poly.uuid, ObjectType::POLYGON_ARC_CENTER, it.arc_center, i);
 				}
 				v_last = &it;
@@ -495,7 +517,7 @@ namespace horizon {
 			if(ipoly.vertices.back().type != Polygon::Vertex::Type::ARC) {
 				auto center = (ipoly.vertices.front().position + ipoly.vertices.back().position)/2;
 				targets.emplace(poly.uuid, ObjectType::POLYGON_EDGE, center, i-1);
-				selectables.append(poly.uuid, ObjectType::POLYGON_EDGE, center, ipoly.vertices.front().position, ipoly.vertices.back().position, Selectable::Enlarge::OFF, i-1, poly.layer);
+				selectables.append(poly.uuid, ObjectType::POLYGON_EDGE, center, ipoly.vertices.front().position, ipoly.vertices.back().position, i-1, poly.layer);
 			}
 		}
 
@@ -505,7 +527,7 @@ namespace horizon {
 		Polygon poly = shape.to_polygon();
 		if(interactive) {
 			auto bb = shape.get_bbox();
-			selectables.append(shape.uuid, ObjectType::SHAPE, shape.placement.shift, shape.placement.transform(bb.first), shape.placement.transform(bb.second), Selectable::Enlarge::OFF, 0, shape.layer);
+			selectables.append(shape.uuid, ObjectType::SHAPE, shape.placement.shift, shape.placement.transform(bb.first), shape.placement.transform(bb.second), 0, shape.layer);
 		}
 		render(poly, false);
 	}
@@ -529,7 +551,7 @@ namespace horizon {
 			draw_line(Coordi(-x, -x), Coordi(x,x), co);
 			draw_line(Coordi(x, -x), Coordi(-x,x), co);
 			if(interactive)
-				selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-d, -d), Coordi(d, d), Selectable::Enlarge::OFF);
+				selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-d, -d), Coordi(d, d));
 		}
 		else if(hole.shape == Hole::Shape::SLOT) {
 			draw_arc(Coordi(-l, 0), d, 0, 2*M_PI, co);
@@ -537,7 +559,7 @@ namespace horizon {
 			draw_line(Coordi(-l, -d), Coordi(l, -d), co);
 			draw_line(Coordi(-l,  d), Coordi(l,  d), co);
 			if(interactive)
-				selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-l-d, -d), Coordi(l+d, +d), Selectable::Enlarge::OFF);
+				selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-l-d, -d), Coordi(l+d, +d));
 		}
 		transform_restore();
 	}
@@ -681,7 +703,11 @@ namespace horizon {
 		if(layer == 10000) {
 			if(interactive) {
 				for(const auto &it: pkg.junctions) {
-					render(it.second, interactive);
+					auto &junc = it.second;
+					selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, 10000, true);
+					if(!junc.temp) {
+						targets.emplace(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
+					}
 				}
 			}
 			for(const auto &it: pkg.pads) {
@@ -761,7 +787,7 @@ namespace horizon {
 			transform_save();
 			transform.accumulate(it.second.placement);
 			auto bb = it.second.padstack.get_bbox();
-			selectables.append(it.second.uuid, ObjectType::PAD, {0,0}, bb.first, bb.second, Selectable::Enlarge::OFF);
+			selectables.append(it.second.uuid, ObjectType::PAD, {0,0}, bb.first, bb.second);
 			transform_restore();
 			targets.emplace(it.second.uuid, ObjectType::PAD, it.second.placement.shift);
 		}
@@ -812,7 +838,7 @@ namespace horizon {
 		if(layer == 10000) {
 			//targets.emplace(pkg.uuid, ObjectType::BOARD_PACKAGE, pkg.placement.shift);
 			auto bb = pkg.package.get_bbox();
-			selectables.append(pkg.uuid, ObjectType::BOARD_PACKAGE, {0,0}, bb.first, bb.second, Selectable::Enlarge::OFF);
+			selectables.append(pkg.uuid, ObjectType::BOARD_PACKAGE, {0,0}, bb.first, bb.second);
 			for(const auto &it: pkg.package.pads) {
 				targets.emplace(UUIDPath<2>(pkg.uuid, it.first), ObjectType::PAD, transform.transform(it.second.placement.shift));
 			}
@@ -830,7 +856,7 @@ namespace horizon {
 		transform.shift = via.junction->position;
 		if(layer == 10000) {
 			auto bb = via.padstack.get_bbox();
-			selectables.append(via.uuid, ObjectType::VIA, {0,0}, bb.first, bb.second, Selectable::Enlarge::OFF);
+			selectables.append(via.uuid, ObjectType::VIA, {0,0}, bb.first, bb.second);
 		}
 		img_net(via.junction->net);
 		render(via.padstack, layer, false);

@@ -99,14 +99,14 @@ namespace horizon {
 			if(active==2) {
 				bool add = button_event->state & Gdk::SHIFT_MASK;
 				for(auto &it: ca->selectables.items) {
-					if(it.flags & 2) {
-						it.flags |= 1;
+					if(it.get_flag(Selectable::Flag::PRELIGHT)) {
+						it.set_flag(Selectable::Flag::SELECTED, true);
 					}
 					else {
 						if(!add)
-							it.flags &= ~1;
+							it.set_flag(Selectable::Flag::SELECTED, false);
 					}
-					it.flags &= ~2;
+					it.set_flag(Selectable::Flag::PRELIGHT, false);
 				}
 				ca->request_push();
 				ca->s_signal_selection_changed.emit();
@@ -124,7 +124,8 @@ namespace horizon {
 					std::vector<unsigned int> in_selection;
 					unsigned int i = 0;
 					for(auto &it: ca->selectables.items) {
-						it.flags=0 ;
+						it.set_flag(Selectable::Flag::PRELIGHT, false);
+						it.set_flag(Selectable::Flag::SELECTED, false);
 						if(it.inside(c, 10/ca->scale) && ca->selection_filter.can_select(ca->selectables.items_ref[i])) {
 							in_selection.push_back(i);
 						}
@@ -183,10 +184,10 @@ namespace horizon {
 		float ymax = std::max(sel_a.y, sel_b.y);
 		unsigned int i = 0;
 		for(auto &it: ca->selectables.items) {
-			it.flags &= ~2;
+			it.set_flag(Selectable::Flag::PRELIGHT, false);
 			if(it.x > xmin && it.x < xmax && it.y > ymin && it.y < ymax) {
 				if(ca->selection_filter.can_select(ca->selectables.items_ref[i]))
-					it.flags |= 2;
+					it.set_flag(Selectable::Flag::PRELIGHT, true);
 			}
 			i++;
 		}

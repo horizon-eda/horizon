@@ -4,18 +4,65 @@
 #include <iostream>
 
 namespace horizon {
+
+	Selectable::Selectable(const Coordf &center, const Coordf &a, const Coordf &b, bool always) :
+			x(center.x),
+			y(center.y),
+			a_x(a.x),
+			a_y(a.y),
+			b_x(b.x),
+			b_y(b.y),
+			flags(always?4:0)
+	{fix_rect();}
+
+	bool Selectable::inside(const Coordf &c, float expand) const {
+		return (c.x >= a_x-expand) && (c.x <= b_x+expand) && (c.y >= a_y-expand) && (c.y <= b_y+expand);
+	}
+	float Selectable::area() const {
+		return abs(a_x-b_x)*abs(a_y-b_y);
+	}
+	void Selectable::fix_rect() {
+		if(a_x > b_x) {
+			float t = a_x;
+			a_x = b_x;
+			b_x = t;
+		}
+		if(a_y > b_y) {
+			float t = a_y;
+			a_y = b_y;
+			b_y = t;
+		}
+	}
+
+	void Selectable::set_flag(Selectable::Flag f, bool v) {
+		auto mask = static_cast<int>(f);
+		if(v) {
+			flags |= mask;
+		}
+		else {
+			flags &= ~mask;
+		}
+	}
+
+	bool Selectable::get_flag(Selectable::Flag f) const {
+		auto mask = static_cast<int>(f);
+		return flags & mask;
+	}
+
+
+
 	Selectables::Selectables(class Canvas *c): ca(c) {
 	}
 	
-	void Selectables::append(const UUID &uu, ObjectType ot, const Coordf &center, const Coordf &a, const Coordf &b, Selectable::Enlarge enlarge, unsigned int vertex, int layer) {
+	void Selectables::append(const UUID &uu, ObjectType ot, const Coordf &center, const Coordf &a, const Coordf &b, unsigned int vertex, int layer, bool always) {
 		items_map.emplace(std::piecewise_construct, std::forward_as_tuple(uu, ot, vertex, layer), std::forward_as_tuple(items.size()));
 		auto bb = ca->transform.transform_bb(std::make_pair(a,b));
-		items.emplace_back(ca->transform.transform(center), bb.first, bb.second, enlarge);
+		items.emplace_back(ca->transform.transform(center), bb.first, bb.second, always);
 		items_ref.emplace_back(uu, ot, vertex, layer);
 	}
 	
-	void Selectables::append(const UUID &uu, ObjectType ot, const Coordf &center, Selectable::Enlarge enlarge, unsigned int vertex, int layer) {
-		append(uu, ot, center, center, center, enlarge, vertex, layer);
+	void Selectables::append(const UUID &uu, ObjectType ot, const Coordf &center, unsigned int vertex, int layer, bool always) {
+		append(uu, ot, center, center, center, vertex, layer, always);
 	}
 	
 	static GLuint create_vao (GLuint program, GLuint &vbo_out) {

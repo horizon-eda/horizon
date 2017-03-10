@@ -17,7 +17,7 @@ namespace horizon {
 		int area_min_i = -1;
 		unsigned int i = 0;
 		for(auto &it: selectables.items) {
-			it.flags=0 ;
+			it.set_flag(horizon::Selectable::Flag::SELECTED, false);
 			if(it.inside(c, 10/scale) && selection_filter.can_select(selectables.items_ref[i])) {
 				if(it.area()<area_min) {
 					area_min = it.area();
@@ -27,7 +27,7 @@ namespace horizon {
 			i++;
 		}
 		if(area_min_i != -1) {
-			selectables.items[area_min_i].flags = 1;
+			selectables.items[area_min_i].set_flag(horizon::Selectable::Flag::SELECTED, true);
 		}
 		request_push();
 	}

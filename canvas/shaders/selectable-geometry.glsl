@@ -8,22 +8,31 @@ in vec2 origin_to_geom[1];
 in vec4 bb_to_geom[1];
 in uint flags_to_geom[1];
 out vec3 color_to_fragment;
+out vec2 dot_to_fragment;
 
 vec4 t(vec2 p) {
     return vec4((screenmat*vec3(scale*p.x+offset.x , -scale*p.y+offset.y, 1)), 1);
 }
 
 void fbox(vec2 bl, vec2 tr) {
+	float wp = abs((tr.x-bl.x)*scale);
+	float hp = abs((tr.y-bl.y)*scale);
+	
+	
 	gl_Position = t(bl);
+	dot_to_fragment = vec2(0,0);
 	EmitVertex();
 
 	gl_Position = t(vec2(tr.x, bl.y));
+	dot_to_fragment = vec2(wp,0);
 	EmitVertex();
 	
 	gl_Position = t(vec2(bl.x, tr.y));
+	dot_to_fragment = vec2(0,hp);
 	EmitVertex();
 	
 	gl_Position = t(tr);
+	dot_to_fragment = vec2(wp,hp);
 	EmitVertex();
 
 	EndPrimitive();
@@ -49,12 +58,18 @@ void hbox(vec2 bl, vec2 tr) {
 }
 
 void main() {
-	float origin_size = 10/scale;
+	
 	vec2 p = origin_to_geom[0];
 	vec2 bb_bl = bb_to_geom[0].xy;
 	vec2 bb_tr = bb_to_geom[0].zw;
 	
 	const float min_sz = 10;
+	bool no_bb = (bb_tr.x==bb_bl.x)&&(bb_tr.y == bb_bl.y);
+	float origin_size = 10/scale;
+	if(no_bb)
+		origin_size = 5/scale;
+	
+	
 	if(abs(bb_tr.x - bb_bl.x) < min_sz/scale) {
 		bb_tr.x += .5*min_sz/scale;
 		bb_bl.x -= .5*min_sz/scale;
@@ -63,14 +78,29 @@ void main() {
 		bb_tr.y += .5*min_sz/scale;
 		bb_bl.y -= .5*min_sz/scale;
 	}
+	
+	float border_width = 3;
+	bb_tr.x += border_width/scale;
+	bb_bl.x -= border_width/scale;
+	bb_tr.y += border_width/scale;
+	bb_bl.y -= border_width/scale;
+	
 	uint flags = flags_to_geom[0];
 	if(flags == uint(0)) {
 		return;
 	}
 	color_to_fragment = vec3(1,0,1);
+	
+	if((flags & uint(4))!=uint(0)) { //always
+		color_to_fragment = vec3(1,1,0);
+	}
+	if((flags & uint(1))!=uint(0)) { //selected
+		color_to_fragment = vec3(1,0,1);
+	}
 	if((flags & uint(2))!=uint(0)) { //prelight
 		color_to_fragment = vec3(.5,0,.5);
 	}
+	
 	vec3 c_save = color_to_fragment;
 	
 	float os = origin_size;
@@ -107,7 +137,8 @@ void main() {
 	
 	color_to_fragment = c_save;
 	
-	hbox(bb_bl, bb_tr);
+	if(!no_bb)
+		hbox(bb_bl, bb_tr);
 
 	EndPrimitive();
 	
