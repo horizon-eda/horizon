@@ -111,6 +111,9 @@ namespace horizon {
 		//delete b
 		junctions.erase(ju->uuid);
 		net_lines.erase(b->uuid);
+		if(a->from.is_junc() && a->to.is_junc() &&  a->from.junc == a->to.junc) {
+			net_lines.erase(a->uuid);
+		}
 	}
 
 	void Sheet::expand_symbols(void) {
