@@ -433,7 +433,6 @@ namespace horizon {
 		auto save_meta = s_signal_request_save_meta.emit();
 		j["_imp"] = save_meta;
 		save_json_to_file(m_board_filename, j);
-		save_json_to_file(m_block_filename, block.serialize());
 
 		set_needs_save(false);
 
