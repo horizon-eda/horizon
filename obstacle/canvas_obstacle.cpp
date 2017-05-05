@@ -36,9 +36,9 @@ namespace horizon {
 
 			ClipperLib::Paths t_ofs;
 			Cores cores(core);
-			auto clearance = &cores.b->get_constraints()->default_clearance;
+			auto clearance = &cores.b->get_net_classes()->default_clearance;
 			if(net && routing_net)
-				clearance = cores.b->get_constraints()->get_clearance(net->net_class, routing_net->net_class);
+				clearance = cores.b->get_net_classes()->get_clearance(net->net_class, routing_net->net_class);
 			uint64_t expand = clearance->routing_clearance;
 			ofs.Execute(t_ofs, expand+routing_width/2);
 			assert(t_ofs.size()==1);

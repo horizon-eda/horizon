@@ -118,7 +118,7 @@ namespace horizon {
 		uuid(uu),
 		layer(j.value("layer", 0)),
 		width(j.value("width", 0)),
-		width_from_net_class(j.value("width_from_net_class", true)),
+		width_from_rules(j.value("width_from_net_class", true)),
 		from(j["from"], brd),
 		to(j["to"], brd)
 	{
@@ -143,7 +143,7 @@ namespace horizon {
 		j["to"] = to.serialize();
 		j["layer"] = layer;
 		j["width"] = width;
-		j["width_from_net_class"] = width_from_net_class;
+		j["width_from_net_class"] = width_from_rules;
 
 		return j;
 	}

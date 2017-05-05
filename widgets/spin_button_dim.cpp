@@ -3,7 +3,7 @@
 
 namespace horizon {
 	SpinButtonDim::SpinButtonDim() : Gtk::SpinButton() {
-		set_increments(.1e6, 10);
+		set_increments(.1e6, .01e6);
 		set_width_chars(10);
 	}
 

@@ -4,7 +4,6 @@
 #include "core.hpp"
 #include "schematic.hpp"
 #include "block.hpp"
-#include "constraints.hpp"
 #include <memory>
 #include <iostream>
 
@@ -61,14 +60,14 @@ namespace horizon {
 			void add_sheet();
 			void delete_sheet(const UUID &uu);
 
-			Constraints *get_constraints() override;
+			NetClasses *get_net_classes() override;
 
 			void set_sheet(const UUID &uu);
 			const Sheet *get_canvas_data();
 			std::pair<Coordi,Coordi> get_bbox() override;
 
 		private:
-			Constraints constraints;
+			NetClasses constraints;
 			Block block;
 			Block block_work;
 

@@ -3,7 +3,7 @@
 
 namespace horizon {
 
-	Block::Block(const UUID &uu, const json &j, Pool &pool, Constraints *constr):
+	Block::Block(const UUID &uu, const json &j, Pool &pool, NetClasses *constr):
 			uuid(uu),
 			name(j.at("name").get<std::string>()),
 			constraints(constr)
@@ -33,7 +33,7 @@ namespace horizon {
 
 	Block::Block(const UUID &uu): uuid(uu) {}
 
-	Block Block::new_from_file(const std::string &filename, Pool &obj, Constraints *constr) {
+	Block Block::new_from_file(const std::string &filename, Pool &obj, NetClasses *constr) {
 		json j;
 		std::ifstream ifs(filename);
 		if(!ifs.is_open()) {

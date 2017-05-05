@@ -1,8 +1,8 @@
-#include "constraints.hpp"
+#include "net_classes.hpp"
 #include <fstream>
 
 namespace horizon {
-	Constraints::Constraints(const json &j):
+	NetClasses::NetClasses(const json &j):
 	default_clearance(j.at("default_clearance"))
 	{
 		if(j.count("net_classes")) {
@@ -22,12 +22,12 @@ namespace horizon {
 		default_net_class = &net_classes.at(j.at("default_net_class").get<std::string>());
 	}
 
-	Constraints::Constraints() {
+	NetClasses::NetClasses() {
 		auto uu = UUID::random();
 		default_net_class = &net_classes.emplace(uu,uu).first->second;
 	}
 
-	Constraints Constraints::new_from_file(const std::string &filename) {
+	NetClasses NetClasses::new_from_file(const std::string &filename) {
 		json j;
 		std::ifstream ifs(filename);
 		if(!ifs.is_open()) {
@@ -35,10 +35,10 @@ namespace horizon {
 		}
 		ifs>>j;
 		ifs.close();
-		return Constraints(j);
+		return NetClasses(j);
 	}
 
-	Clearance *Constraints::get_clearance(const NetClass *nc_a, const NetClass *nc_b) {
+	Clearance *NetClasses::get_clearance(const NetClass *nc_a, const NetClass *nc_b) {
 		UUIDPath<2> uup(nc_a->uuid, nc_b->uuid);
 		if(clearances.count(uup)) {
 			return &clearances.at(uup);
@@ -50,7 +50,7 @@ namespace horizon {
 		return &default_clearance;
 	}
 
-	json Constraints::serialize() const {
+	json NetClasses::serialize() const {
 		json j;
 		j["type"] = "constraints";
 

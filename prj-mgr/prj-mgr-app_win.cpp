@@ -134,7 +134,7 @@ namespace horizon {
 		auto prj = win->project.get();
 		auto top_block = std::find_if(prj->blocks.begin(), prj->blocks.end(), [](const auto &a){return a.second.is_top;});
 		if(top_block != prj->blocks.end()) {
-			std::vector<std::string> args = {top_block->second.schematic_filename, top_block->second.block_filename, prj->constraints_filename};
+			std::vector<std::string> args = {top_block->second.schematic_filename, top_block->second.block_filename, prj->net_classes_filename};
 			win->spawn_imp(ProjectManagerProcess::Type::IMP_SCHEMATIC, prj->pool_uuid, args);
 		}
 	}
@@ -143,7 +143,7 @@ namespace horizon {
 		auto prj = win->project.get();
 		auto top_block = std::find_if(prj->blocks.begin(), prj->blocks.end(), [](const auto &a){return a.second.is_top;});
 		if(top_block != prj->blocks.end()) {
-			std::vector<std::string> args = {prj->board_filename, top_block->second.block_filename, prj->constraints_filename, prj->vias_directory};
+			std::vector<std::string> args = {prj->board_filename, top_block->second.block_filename, prj->net_classes_filename, prj->vias_directory};
 			win->spawn_imp(ProjectManagerProcess::Type::IMP_BOARD, prj->pool_uuid, args);
 		}
 	}

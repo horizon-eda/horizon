@@ -5,7 +5,7 @@
 
 namespace horizon {
 	CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, const std::string &constraints_filename, Pool &pool) :
-		constraints(Constraints::new_from_file(constraints_filename)),
+		constraints(NetClasses::new_from_file(constraints_filename)),
 		block(Block::new_from_file(block_filename, pool, &constraints)),
 		block_work(block),
 		sch(Schematic::new_from_file(schematic_filename, block, pool)),
@@ -411,7 +411,7 @@ namespace horizon {
 		return true;
 	}
 
-	Constraints *CoreSchematic::get_constraints() {
+	NetClasses *CoreSchematic::get_net_classes() {
 		return &constraints;
 	}
 

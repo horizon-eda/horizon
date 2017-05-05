@@ -7,6 +7,7 @@
 #include "export_gerber/gerber_export.hpp"
 #include "part.hpp"
 #include "checks/checks_window.hpp"
+#include "rules/rules_window.hpp"
 #include "util.hpp"
 #include <iomanip>
 #include <glibmm/main.h>
@@ -189,6 +190,20 @@ namespace horizon {
 			button->show();
 			button->signal_clicked().connect([this]{checks_window->present();});
 			core.r->signal_tool_changed().connect([button](ToolID t){button->set_sensitive(t==ToolID::NONE);});
+		}
+
+		if(core.r->get_rules()) {
+			rules_window = RulesWindow::create(main_window, canvas, core.r->get_rules(), core.r);
+			rules_window->signal_canvas_update().connect(sigc::mem_fun(this, &ImpBase::canvas_update_from_pp));
+
+			{
+				auto button = Gtk::manage(new Gtk::Button("Rules..."));
+				main_window->top_panel->pack_start(*button, false, false, 0);
+				button->show();
+				button->signal_clicked().connect([this]{rules_window->present();});
+				core.r->signal_tool_changed().connect([button](ToolID t){button->set_sensitive(t==ToolID::NONE);});
+
+			}
 		}
 
 		core.r->signal_tool_changed().connect([save_button, selection_filter_button](ToolID t){save_button->set_sensitive(t==ToolID::NONE); selection_filter_button->set_sensitive(t==ToolID::NONE);});

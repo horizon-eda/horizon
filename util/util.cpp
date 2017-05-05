@@ -83,4 +83,16 @@ namespace horizon {
 		ss << std::setw(7) << std::abs(pos.y/1e6) << " mm";
 		return ss.str();
 	}
+
+	std::string dim_to_string(int64_t x) {
+		std::ostringstream ss;
+		if(x >= 0) {
+			ss << "+";
+		}
+		else {
+			ss << "−"; //this is U+2212 MINUS SIGN, has same width as +
+		}
+		ss << std::fixed << std::setprecision(3)  << std::setw(7) << std::setfill('0') << std::internal << std::abs(x/1e6) << " mm ";
+		return ss.str();
+	}
 }

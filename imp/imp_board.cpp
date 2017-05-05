@@ -1,5 +1,6 @@
 #include "imp_board.hpp"
 #include "part.hpp"
+#include "rules/rules_window.hpp"
 
 namespace horizon {
 	ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &constraints_filename, const std::string &via_dir, const std::string &pool_path):
@@ -59,6 +60,10 @@ namespace horizon {
 
 
 		cam_job_window = CAMJobWindow::create(main_window, core.b);
+
+		rules_window->signal_goto().connect([this] (Coordi location, UUID sheet) {
+			canvas->center_and_zoom(location);
+		});
 	}
 
 	ToolID ImpBoard::handle_key(guint k) {

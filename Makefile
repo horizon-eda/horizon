@@ -40,16 +40,24 @@ SRC_COMMON = \
 	board/track.cpp\
 	board/via_padstack_provider.cpp\
 	board/via.cpp\
+	board/board_rules.cpp\
+	board/rule_hole_size.cpp\
+	board/rule_clearance_silk_exp_copper.cpp\
+	board/rule_track_width.cpp\
 	pool/pool.cpp \
 	util/placement.cpp\
 	util/util.cpp\
 	object_descr.cpp\
 	constraints/net_class.cpp\
-	constraints/constraints.cpp\
+	constraints/net_classes.cpp\
 	constraints/clearance.cpp \
 	project/project.cpp\
 	resources.cpp\
 	gitversion.cpp\
+	rules/rules.cpp\
+	rules/rule.cpp\
+	rules/rule_descr.cpp\
+	rules/rule_match.cpp\
 	
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += util/uuid_win32.cpp
@@ -189,7 +197,14 @@ SRC_IMP = \
 	widgets/pool_browser_part.cpp\
 	dxflib/dl_dxf.cpp\
 	dxflib/dl_writer_ascii.cpp\
-	import_dxf/dxf_importer.cpp
+	import_dxf/dxf_importer.cpp\
+	imp/rules/rules_window.cpp\
+	imp/rules/rule_editor.cpp\
+	imp/rules/rule_match_editor.cpp\
+	imp/rules/rule_editor_hole_size.cpp\
+	imp/rules/rule_editor_clearance_silk_exp_copper.cpp\
+	imp/rules/rule_editor_track_width.cpp\
+	rules/rules_with_core.cpp\
 
 SRC_POOL_UTIL = \
 	pool-util/util_main.cpp\

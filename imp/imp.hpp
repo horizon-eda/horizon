@@ -54,6 +54,7 @@ namespace horizon {
 			
 			std::unique_ptr<class CheckRunner> check_runner=nullptr;
 			class ChecksWindow *checks_window = nullptr;
+			class RulesWindow *rules_window = nullptr;
 
 			zmq::context_t zctx;
 			zmq::socket_t sock_broadcast_rx;

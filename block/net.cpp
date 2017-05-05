@@ -2,7 +2,7 @@
 
 namespace horizon {
 
-	Net::Net(const UUID &uu, const json &j, const Constraints &constr):
+	Net::Net(const UUID &uu, const json &j, const NetClasses &constr):
 			uuid(uu),
 			name(j.at("name").get<std::string>()),
 			is_power(j.value("is_power", false))

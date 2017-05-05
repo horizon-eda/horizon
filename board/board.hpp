@@ -12,6 +12,7 @@
 #include "via.hpp"
 #include "clipper/clipper.hpp"
 #include "warning.hpp"
+#include "board_rules.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -59,6 +60,8 @@ namespace horizon {
 			std::map<UUID, Line> lines;
 
 			std::vector<Warning> warnings;
+
+			BoardRules rules;
 
 			ClipperLib::Paths obstacles;
 			ClipperLib::Path  track_path;

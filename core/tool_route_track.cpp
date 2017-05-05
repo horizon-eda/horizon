@@ -3,6 +3,7 @@
 #include "core_board.hpp"
 #include "obstacle/canvas_obstacle.hpp"
 #include "imp_interface.hpp"
+#include "board/board_rules.hpp"
 
 namespace horizon {
 
@@ -18,6 +19,7 @@ namespace horizon {
 		std::cout << "tool route track\n";
 		core.r->selection.clear();
 		update_tip();
+		rules = dynamic_cast<BoardRules*>(core.r->get_rules());
 		return ToolResponse();
 	}
 
@@ -26,7 +28,7 @@ namespace horizon {
 		CanvasObstacle ca;
 		ca.routing_layer = args.work_layer;
 		routing_layer = args.work_layer;
-		ca.routing_width = net->net_class->default_width;
+		ca.routing_width = rules->get_default_track_width(net, args.work_layer);
 		ca.routing_net = net;
 		ca.set_core(core.r);
 		ca.update(*core.b->get_board());
@@ -151,6 +153,7 @@ namespace horizon {
 					tr->net = net;
 					tr->net_segment = net_segment;
 					tr->layer = routing_layer;
+					tr->width = rules->get_default_track_width(net, routing_layer);
 					temp_tracks.push_back(tr);
 
 					auto ju = core.r->insert_junction(UUID::random());

@@ -5,12 +5,13 @@
 
 namespace horizon {
 	CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &constraints_filename, const std::string &via_dir, Pool &pool) :
-		constraints(Constraints::new_from_file(constraints_filename)),
+		constraints(NetClasses::new_from_file(constraints_filename)),
 		via_padstack_provider(via_dir),
 		block(Block::new_from_file(block_filename, pool, &constraints)),
 		block_work(block),
 		brd(Board::new_from_file(board_filename, block, pool, via_padstack_provider)),
 		brd_work(brd),
+		rules(brd.rules),
 		m_board_filename(board_filename),
 		m_block_filename(block_filename),
 		m_constraints_filename(constraints_filename),
@@ -143,8 +144,8 @@ namespace horizon {
 			break;
 			case ObjectType::TRACK :
 				switch(property) {
-					case ObjectProperty::ID::WIDTH_FROM_NET_CLASS :
-						return brd.tracks.at(uu).width_from_net_class;
+					case ObjectProperty::ID::WIDTH_FROM_RULES :
+						return brd.tracks.at(uu).width_from_rules;
 					default :
 						return false;
 				}
@@ -173,8 +174,8 @@ namespace horizon {
 			break;
 			case ObjectType::TRACK :
 				switch(property) {
-					case ObjectProperty::ID::WIDTH_FROM_NET_CLASS :
-						brd.tracks.at(uu).width_from_net_class = value;
+					case ObjectProperty::ID::WIDTH_FROM_RULES :
+						brd.tracks.at(uu).width_from_rules = value;
 					break;
 					default :
 						;
@@ -196,17 +197,7 @@ namespace horizon {
 				switch(property) {
 					case ObjectProperty::ID::WIDTH : {
 						auto &tr = brd.tracks.at(uu);
-						if(tr.width_from_net_class) {
-							if(tr.net) {
-								return tr.net->net_class->default_width;
-							}
-							else {
-								return 0;
-							}
-						}
-						else {
-							return brd.tracks.at(uu).width;
-						}
+						return brd.tracks.at(uu).width;
 					} break;
 					case ObjectProperty::ID::LAYER :
 						return brd.tracks.at(uu).layer;
@@ -231,13 +222,9 @@ namespace horizon {
 				switch(property) {
 					case ObjectProperty::ID::WIDTH : {
 						auto &tr = brd.tracks.at(uu);
-						if(tr.width_from_net_class)
+						if(tr.width_from_rules)
 							return;
 						value = std::max((int64_t)0, value);
-						if(tr.net) {
-							value = std::max((int64_t)tr.net->net_class->min_width, value);
-						}
-
 						tr.width = value;
 					} break;
 					case ObjectProperty::ID::LAYER :
@@ -302,7 +289,7 @@ namespace horizon {
 			case ObjectType::TRACK :
 				switch(property) {
 					case ObjectProperty::ID::WIDTH:
-						return !brd.tracks.at(uu).width_from_net_class;
+						return !brd.tracks.at(uu).width_from_rules;
 					break;
 					default :
 						;
@@ -353,8 +340,12 @@ namespace horizon {
 		return work?&brd_work:&brd;
 	}
 
-	Constraints *CoreBoard::get_constraints() {
+	NetClasses *CoreBoard::get_net_classes() {
 		return &constraints;
+	}
+
+	Rules *CoreBoard::get_rules() {
+		return &rules;
 	}
 
 	ViaPadstackProvider *CoreBoard::get_via_padstack_provider() {
@@ -429,6 +420,7 @@ namespace horizon {
 	}
 
 	void CoreBoard::save() {
+		brd.rules = rules;
 		auto j = brd.serialize();
 		auto save_meta = s_signal_request_save_meta.emit();
 		j["_imp"] = save_meta;

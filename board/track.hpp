@@ -33,7 +33,7 @@ namespace horizon {
 			UUID net_segment = UUID();
 			int layer = 0;
 			uint64_t width = 0;
-			bool width_from_net_class = true;
+			bool width_from_rules = true;
 			bool is_air = false;
 
 

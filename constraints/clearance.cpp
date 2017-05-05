@@ -1,9 +1,9 @@
+#include "net_classes.hpp"
 #include "clearance.hpp"
-#include "constraints.hpp"
 #include "common.hpp"
 
 namespace horizon {
-	Clearance::Clearance(const UUIDPath<2> &uu, const json &j, Constraints &co):
+	Clearance::Clearance(const UUIDPath<2> &uu, const json &j, NetClasses &co):
 		netclass_a(&co.net_classes.at(uu.at(0))),
 		netclass_b(&co.net_classes.at(uu.at(1))),
 		routing_clearance(j.at("routing_clearance"))

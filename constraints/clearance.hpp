@@ -10,7 +10,7 @@ namespace horizon {
 
 	class Clearance {
 		public :
-			Clearance(const UUIDPath<2> &uu, const json &j, class Constraints &co);
+			Clearance(const UUIDPath<2> &uu, const json &j, class NetClasses &co);
 			Clearance(const json &j);
 			Clearance();
 			NetClass *netclass_a = nullptr;

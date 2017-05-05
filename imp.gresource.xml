@@ -24,6 +24,10 @@
     <file>imp/footprint_generator/quad.svg</file>
     
     <file>imp/checks/checks_window.ui</file>
+    <file>imp/rules/rules_window.ui</file>
+    <file>imp/rules/rule_editor_hole_size.ui</file>
+    <file>imp/rules/rule_editor_clearance_silk_exp_copper.ui</file>
+    <file>imp/rules/rule_editor_track_width.ui</file>
     <file>prj-mgr/part_browser/part_browser.ui</file>
     
     <file>canvas/shaders/grid-vertex.glsl</file>

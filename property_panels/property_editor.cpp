@@ -212,7 +212,7 @@ namespace horizon {
 
 	Gtk::Widget *PropertyEditorNetClass::create_editor() {
 		combo = Gtk::manage(new Gtk::ComboBoxText());
-		auto constraints = core->get_constraints();
+		auto constraints = core->get_net_classes();
 		if(constraints) {
 			for(const auto &it: constraints->net_classes) {
 				combo->insert(0, (std::string)it.first, it.second.name);

@@ -48,6 +48,11 @@ namespace horizon {
 	Polygon Polygon::remove_arcs(unsigned int precision) const {
 		Polygon out(uuid);
 		out.layer = layer;
+		if(!has_arcs()) {
+			out.vertices = vertices;
+			return out;
+		}
+
 		for(auto it=vertices.cbegin(); it<vertices.cend(); it++) {
 			if(it->type == Polygon::Vertex::Type::LINE) {
 				out.vertices.emplace_back(*it);

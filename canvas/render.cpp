@@ -166,14 +166,6 @@ namespace horizon {
 			c = {0,1,1};
 		}
 		auto width = track.width;
-		if(track.width_from_net_class) {
-			if(track.net) {
-				width = track.net->net_class->default_width;
-			}
-			else {
-				width = 0;
-			}
-		}
 		if(!track.is_air && track.net) {
 			img_net(track.net);
 			img_line(track.from.get_position(), track.to.get_position(), width, track.layer);

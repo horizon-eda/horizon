@@ -4,17 +4,17 @@
 #include "object.hpp"
 #include "unit.hpp"
 #include "uuid_provider.hpp"
-#include "constraints.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
+#include "constraints/net_classes.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;
 
 	class Net :public UUIDProvider{
 		public :
-			Net(const UUID &uu, const json &, const Constraints &constr);
+			Net(const UUID &uu, const json &, const NetClasses &constr);
 			Net(const UUID &uu);
 			virtual UUID get_uuid() const;
 			UUID uuid;

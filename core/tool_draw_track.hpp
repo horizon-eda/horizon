@@ -15,5 +15,6 @@ namespace horizon {
 			Junction *temp_junc = 0;
 			Track *temp_track = 0;
 			Track *create_temp_track();
+			class BoardRules *rules;
 	};
 }

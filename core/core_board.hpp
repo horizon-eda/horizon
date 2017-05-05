@@ -3,7 +3,6 @@
 #include "core.hpp"
 #include "board.hpp"
 #include "block.hpp"
-#include "constraints.hpp"
 #include <memory>
 #include <iostream>
 
@@ -35,7 +34,8 @@ namespace horizon {
 			const Board *get_canvas_data();
 			Board *get_board(bool work = true);
 			ViaPadstackProvider *get_via_padstack_provider();
-			Constraints *get_constraints() override;
+			NetClasses *get_net_classes() override;
+			class Rules *get_rules() override;
 			std::pair<Coordi,Coordi> get_bbox() override;
 
 			json get_meta() override;
@@ -47,7 +47,7 @@ namespace horizon {
 			std::map<UUID, Text> *get_text_map(bool work=true) override;
 			std::map<UUID, Line> *get_line_map(bool work=true) override;
 
-			Constraints constraints;
+			NetClasses constraints;
 			ViaPadstackProvider via_padstack_provider;
 
 			Block block;
@@ -55,6 +55,8 @@ namespace horizon {
 
 			Board brd;
 			Board brd_work;
+
+			BoardRules rules;
 
 			std::string m_board_filename;
 			std::string m_block_filename;

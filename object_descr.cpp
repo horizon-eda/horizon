@@ -89,7 +89,7 @@ namespace horizon {
 			{ObjectProperty::ID::LAYER, {ObjectProperty::Type::LAYER_COPPER, "Layer"}},
 			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Net"}},
 			{ObjectProperty::ID::NET_CLASS, {ObjectProperty::Type::STRING_RO, "Net class"}},
-			{ObjectProperty::ID::WIDTH_FROM_NET_CLASS, {ObjectProperty::Type::BOOL, "Width from net class"}},
+			{ObjectProperty::ID::WIDTH_FROM_RULES, {ObjectProperty::Type::BOOL, "Width from rules"}},
 		}}},
 	};
 

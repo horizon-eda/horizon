@@ -15,6 +15,7 @@ namespace horizon {
 	}
 
 	void NetButton::on_toggled() {
+		ns->update();
 		ns->select_net(net_current);
 		Gtk::ToggleButton::on_toggled();
 	}
@@ -26,7 +27,12 @@ namespace horizon {
 	}
 
 	void NetButton::set_net(const UUID &uu) {
-		net_current = uu;
+		if(block->nets.count(uu)) {
+			net_current = uu;
+		}
+		else {
+			net_current = UUID();
+		}
 		update_label();
 	}
 

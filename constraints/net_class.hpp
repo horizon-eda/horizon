@@ -12,8 +12,6 @@ namespace horizon {
 			NetClass(const UUID &uu);
 			UUID uuid;
 			std::string name;
-			uint64_t min_width;
-			uint64_t default_width;
 
 			json serialize() const;
 	};

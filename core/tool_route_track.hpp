@@ -33,6 +33,7 @@ namespace horizon {
 			Track::Connection conn_end;
 			std::deque<Junction*> temp_junctions;
 			std::deque<Track*> temp_tracks;
+			class BoardRules *rules;
 
 			Via *via = nullptr;
 	};

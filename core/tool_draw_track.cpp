@@ -1,6 +1,7 @@
 #include "tool_draw_track.hpp"
 #include <iostream>
 #include "core_board.hpp"
+#include "board/board_rules.hpp"
 
 namespace horizon {
 
@@ -21,6 +22,8 @@ namespace horizon {
 		temp_junc->position = args.coords;
 		temp_track = nullptr;
 		core.b->selection.clear();
+
+		rules = dynamic_cast<BoardRules*>(core.r->get_rules());
 
 		return ToolResponse();
 	}
@@ -62,7 +65,7 @@ namespace horizon {
 					temp_track->net = j->net;
 					temp_track->net_segment = j->net_segment;
 					if(j->net) {
-						temp_track->width = j->net->net_class->default_width;
+						temp_track->width = rules->get_default_track_width(j->net, 0);
 					}
 
 
@@ -86,7 +89,7 @@ namespace horizon {
 					temp_junc->net = pad->net;
 					temp_junc->net_segment = pad->net_segment;
 					if(pad->net) {
-						temp_track->width = pad->net->net_class->default_width;
+						temp_track->width = rules->get_default_track_width(pad->net, 0);
 					}
 				}
 
@@ -149,7 +152,7 @@ namespace horizon {
 					temp_track->net = last->net;
 					temp_track->net_segment = last->net_segment;
 					if(last->net) {
-						temp_track->width = last->net->net_class->default_width;
+						temp_track->width = rules->get_default_track_width(last->net, 0);
 					}
 				}
 			}

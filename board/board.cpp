@@ -83,6 +83,11 @@ namespace horizon {
 				lines.emplace(std::make_pair(u, Line(u, it.value(), *this)));
 			}
 		}
+
+		if(j.count("rules")) {
+			rules.load_from_json(j.at("rules"));
+		}
+
 	}
 
 	Board Board::new_from_file(const std::string &filename, Block &block, Pool &pool, ViaPadstackProvider &vpp) {
@@ -118,7 +123,8 @@ namespace horizon {
 		vias(brd.vias),
 		texts(brd.texts),
 		lines(brd.lines),
-		warnings(brd.warnings)
+		warnings(brd.warnings),
+		rules(brd.rules)
 	{
 		update_refs();
 	}
@@ -139,6 +145,7 @@ namespace horizon {
 		texts = brd.texts;
 		lines = brd.lines;
 		warnings = brd.warnings;
+		rules = brd.rules;
 		update_refs();
 	}
 
@@ -583,6 +590,8 @@ namespace horizon {
 		j["block"] = (std::string)block->uuid;
 		j["name"] = name;
 		j["n_inner_layers"] = n_inner_layers;
+		j["rules"] = rules.serialize();
+
 		j["polygons"] = json::object();
 		for(const auto &it: polygons) {
 			j["polygons"][(std::string)it.first] = it.second.serialize();

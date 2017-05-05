@@ -8,13 +8,13 @@
 namespace horizon {
 	using json = nlohmann::json;
 
-	class Constraints {
+	class NetClasses {
 		private :
-			Constraints(const json &j);
+			NetClasses(const json &j);
 
 		public :
-			static Constraints new_from_file(const std::string &filename);
-			Constraints();
+			static NetClasses new_from_file(const std::string &filename);
+			NetClasses();
 
 			std::map<UUID, NetClass> net_classes;
 			std::map<UUIDPath<2>, Clearance> clearances;

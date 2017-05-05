@@ -11,8 +11,8 @@
 #include "dialogs/dialogs.hpp"
 #include "layer.hpp"
 #include "json.hpp"
-#include "constraints.hpp"
 #include <gdk/gdkkeysyms.h>
+#include "constraints/net_classes.hpp"
 
 namespace horizon {
 	enum class ToolEventType {MOVE, CLICK, KEY, DATA};
@@ -198,7 +198,8 @@ namespace horizon {
 			 */
 			virtual json get_meta();
 
-			virtual Constraints *get_constraints() {return nullptr;}
+			virtual NetClasses *get_net_classes() {return nullptr;}
+			virtual class Rules *get_rules() {return nullptr;}
 			virtual std::pair<Coordi,Coordi> get_bbox() = 0;
 
 			virtual ~Core() {}
