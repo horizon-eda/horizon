@@ -171,6 +171,7 @@ SRC_IMP = \
 	widgets/spin_button_dim.cpp\
 	widgets/chooser_buttons.cpp\
 	widgets/cell_renderer_layer_display.cpp\
+	widgets/net_class_button.cpp\
 	export_pdf.cpp\
 	imp/key_sequence.cpp\
 	imp/keyseq_dialog.cpp\
@@ -205,6 +206,7 @@ SRC_IMP = \
 	imp/rules/rule_editor_clearance_silk_exp_copper.cpp\
 	imp/rules/rule_editor_track_width.cpp\
 	rules/rules_with_core.cpp\
+
 
 SRC_POOL_UTIL = \
 	pool-util/util_main.cpp\

@@ -11,7 +11,10 @@ namespace horizon {
 	};
 
 	RuleMatch::RuleMatch() {}
-	RuleMatch::RuleMatch(const json &j): mode(mode_lut.lookup(j.at("mode"))), net(j.at("net").get<std::string>()) {
+	RuleMatch::RuleMatch(const json &j): mode(mode_lut.lookup(j.at("mode"))),
+			net(j.at("net").get<std::string>()),
+			net_class(j.at("net_class").get<std::string>()),
+			net_name_regex(j.at("net_name_regex").get<std::string>()) {
 
 	}
 
@@ -19,6 +22,9 @@ namespace horizon {
 		json j;
 		j["mode"] = mode_lut.lookup_reverse(mode);
 		j["net"] = static_cast<std::string>(net);
+		j["net_class"] = static_cast<std::string>(net_class);
+		j["net_name_regex"] = net_name_regex;
+
 		return j;
 	}
 

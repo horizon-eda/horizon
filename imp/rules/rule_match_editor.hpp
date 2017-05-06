@@ -12,6 +12,7 @@ namespace horizon {
 			Gtk::ComboBoxText *combo_mode = nullptr;
 			Gtk::Stack *sel_stack = nullptr;
 			class NetButton *net_button = nullptr;
+			class NetClassButton *net_class_button = nullptr;
 			RuleMatch *match;
 			class Core *core;
 			type_signal_updated s_signal_updated;

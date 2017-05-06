@@ -1,6 +1,7 @@
 #include "rule_match_editor.hpp"
 #include "rules/rule_match.hpp"
 #include "widgets/net_button.hpp"
+#include "widgets/net_class_button.hpp"
 #include "block.hpp"
 #include "core/core_board.hpp"
 
@@ -28,12 +29,23 @@ namespace horizon {
 			block = co->get_board()->block;
 		}
 		assert(block);
+
 		net_button = Gtk::manage(new NetButton(block));
 		net_button->set_net(match->net);
 		net_button->signal_changed().connect([this](const UUID &uu) {
 			match->net = uu;
 		});
 		sel_stack->add(*net_button, std::to_string(static_cast<int>(RuleMatch::Mode::NET)));
+
+		net_class_button = Gtk::manage(new NetClassButton(core));
+		if(!match->net_class) {
+			match->net_class = core->get_net_classes()->default_net_class->uuid;
+		}
+		net_class_button->set_net_class(match->net_class);
+		net_class_button->signal_net_class_changed().connect([this](const UUID &uu) {
+			match->net_class = uu;
+		});
+		sel_stack->add(*net_class_button, std::to_string(static_cast<int>(RuleMatch::Mode::NET_CLASS)));
 
 		auto *dummy_label = Gtk::manage(new Gtk::Label("matches all nets"));
 		sel_stack->add(*dummy_label, std::to_string(static_cast<int>(RuleMatch::Mode::ALL)));
