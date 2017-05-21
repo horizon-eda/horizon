@@ -5,6 +5,7 @@
 #include <set>
 #include <deque>
 #include "common.hpp"
+#include "clipper/clipper.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;
@@ -23,6 +24,7 @@ namespace horizon {
 			Coordi location;
 			std::string comment;
 			bool has_location=false;
+			ClipperLib::Paths error_polygons;
 	};
 
 	class RulesCheckResult {

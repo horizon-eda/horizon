@@ -18,7 +18,7 @@ namespace horizon {
 
 			const Net *net = nullptr;
 			virtual void img_net(const Net *net) override;
-			virtual void img_polygon(const Polygon &poly) override;
+			virtual void img_polygon(const Polygon &poly, bool tr) override;
 
 	};
 }

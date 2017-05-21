@@ -6,7 +6,7 @@
 namespace horizon {
 	using json = nlohmann::json;
 
-	enum class RuleID {NONE, HOLE_SIZE, CLEARANCE_SILKSCREEN_EXPOSED_COPPER, TRACK_WIDTH};
+	enum class RuleID {NONE, HOLE_SIZE, CLEARANCE_SILKSCREEN_EXPOSED_COPPER, TRACK_WIDTH, CLEARANCE_COPPER};
 
 	class Rule {
 		public:

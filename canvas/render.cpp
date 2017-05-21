@@ -166,9 +166,11 @@ namespace horizon {
 			c = {0,1,1};
 		}
 		auto width = track.width;
-		if(!track.is_air && track.net) {
+		if(!track.is_air) {
 			img_net(track.net);
+			img_patch_type(PatchType::TRACK);
 			img_line(track.from.get_position(), track.to.get_position(), width, track.layer);
+			img_patch_type(PatchType::OTHER);
 			img_net(nullptr);
 		}
 		if(img_mode)
@@ -560,7 +562,9 @@ namespace horizon {
 		transform_save();
 		transform.accumulate(pad.placement);
 		img_net(pad.net);
+		img_patch_type(PatchType::PAD);
 		render(pad.padstack, layer, false);
+		img_patch_type(PatchType::OTHER);
 		img_net(nullptr);
 		transform_restore();
 	}
@@ -851,8 +855,10 @@ namespace horizon {
 			selectables.append(via.uuid, ObjectType::VIA, {0,0}, bb.first, bb.second);
 		}
 		img_net(via.junction->net);
+		img_patch_type(PatchType::VIA);
 		render(via.padstack, layer, false);
 		img_net(nullptr);
+		img_patch_type(PatchType::OTHER);
 		transform_restore();
 	}
 

@@ -96,7 +96,7 @@ namespace horizon {
 		glUniform1f(alpha_loc, ca->property_layer_opacity()/100);
 		glUniform2f(offset_loc, ca->offset.x, ca->offset.y);
 
-		glDrawArrays (GL_POINTS, 0, triangles.size());
+		glDrawArrays (GL_POINTS, 0, render_triangles_count);
 
 
 		glBindVertexArray (0);
@@ -105,6 +105,15 @@ namespace horizon {
 
 	void TriangleRenderer::push() {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(Triangle)*triangles.size(), triangles.data(), GL_STREAM_DRAW);
+		if(!ca->error_polygons.visible) {
+			glBufferData(GL_ARRAY_BUFFER, sizeof(Triangle)*triangles.size(), triangles.data(), GL_STREAM_DRAW);
+			render_triangles_count = triangles.size();
+		}
+		else {
+			glBufferData(GL_ARRAY_BUFFER, sizeof(Triangle)*(triangles.size()+ca->error_polygons.triangles.size()), nullptr, GL_STREAM_DRAW);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Triangle)*triangles.size(), triangles.data());
+			glBufferSubData(GL_ARRAY_BUFFER, sizeof(Triangle)*triangles.size(), sizeof(Triangle)*ca->error_polygons.triangles.size(), ca->error_polygons.triangles.data());
+			render_triangles_count = triangles.size()+triangles.size();
+		}
 	}
 }

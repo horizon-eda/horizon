@@ -15,8 +15,11 @@
 #include "sheet.hpp"
 #include "marker.hpp"
 #include "shape.hpp"
+#include "error_polygons.hpp"
 
 namespace horizon {
+
+
 	class Canvas: public sigc::trackable {
 		friend Selectables;
 		friend class SelectionFilter;
@@ -89,11 +92,12 @@ namespace horizon {
 			std::tuple<Coordf, Coordf, Coordi> draw_flag(const Coordf &position, const std::string &txt, int64_t size, Orientation orientation, const Color &c);
 
 			virtual void img_net(const Net *net) {}
-			virtual void img_polygon(const Polygon &poly) {}
+			virtual void img_polygon(const Polygon &poly, bool tr=true) {}
 			virtual void img_padstack(const Padstack &ps) {}
 			virtual void img_set_padstack(bool v) {}
 			virtual void img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer=10000, bool tr=true);
 			virtual void img_hole(const Hole &hole) {}
+			virtual void img_patch_type(PatchType type) {}
 			bool img_mode = false;
 
 
@@ -128,6 +132,7 @@ namespace horizon {
 		friend TriangleRenderer;
 		friend MarkerRenderer;
 		friend Markers;
+		friend ErrorPolygons;
 		public:
 			CanvasGL();
 
@@ -157,6 +162,8 @@ namespace horizon {
 			Glib::PropertyProxy<float> property_layer_opacity() { return p_property_layer_opacity.get_proxy(); }
 			Markers markers;
 			void update_markers() override;
+
+			ErrorPolygons error_polygons;
 
 		protected:
 			void push() override;

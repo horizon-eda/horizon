@@ -1,6 +1,7 @@
 #include "imp_board.hpp"
 #include "part.hpp"
 #include "rules/rules_window.hpp"
+#include "canvas/canvas_patch.hpp"
 
 namespace horizon {
 	ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &constraints_filename, const std::string &via_dir, const std::string &pool_path):
@@ -57,6 +58,33 @@ namespace horizon {
 		reload_netlist_button->show();
 		reload_netlist_button->signal_clicked().connect([this]{core_board.reload_netlist();canvas_update();});
 		core.r->signal_tool_changed().connect([reload_netlist_button](ToolID t){reload_netlist_button->set_sensitive(t==ToolID::NONE);});
+
+		auto test_button = Gtk::manage(new Gtk::Button("Test"));
+		main_window->top_panel->pack_start(*test_button, false, false, 0);
+		test_button->show();
+		test_button->signal_clicked().connect([this] {
+			CanvasPatch cp;
+			cp.set_core(core.r);
+			cp.update(*core_board.get_board());
+
+			std::ofstream ofs("/tmp/patches");
+			int i = 0;
+			for(const auto &it: cp.patches) {
+				if(it.first.layer != 0)
+					continue;
+				for(const auto &itp: it.second) {
+					ofs << "#" << static_cast<int>(it.first.type) << " " << it.first.layer << " " << (std::string)it.first.net << "\n";
+					for(const auto &itc: itp) {
+						ofs << itc.X << " " << itc.Y << " " << i << "\n";
+					}
+					ofs << itp.front().X << " " << itp.front().Y << " " << i  << "\n\n";
+				}
+				ofs << "\n";
+				i++;
+			}
+
+
+		});
 
 
 		cam_job_window = CAMJobWindow::create(main_window, core.b);

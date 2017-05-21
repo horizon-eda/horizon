@@ -3,10 +3,10 @@
 #include "board/board_rules.hpp"
 
 namespace horizon {
-	RulesCheckResult rules_check(Rules *r, RuleID id, class Core *c) {
+	RulesCheckResult rules_check(Rules *r, RuleID id, class Core *c, RulesCheckCache &cache) {
 		if(auto rules = dynamic_cast<BoardRules*>(r)) {
 			auto core = dynamic_cast<CoreBoard*>(c);
-			return rules->check(id, core->get_board());
+			return rules->check(id, core->get_board(), cache);
 		}
 		return RulesCheckResult();
 	}

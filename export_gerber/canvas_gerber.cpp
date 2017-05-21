@@ -12,7 +12,7 @@ namespace horizon {
 
 		}
 
-		void CanvasGerber::img_polygon(const Polygon &ipoly) {
+		void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr) {
 			if(padstack_mode)
 				return;
 			auto poly = ipoly.remove_arcs(16);

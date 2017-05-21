@@ -12,7 +12,7 @@ namespace horizon {
 			net = n;
 		}
 
-		void CanvasObstacle::img_polygon(const Polygon &poly) {
+		void CanvasObstacle::img_polygon(const Polygon &poly, bool tr) {
 			if(net == routing_net)
 				return;
 			if(!net)

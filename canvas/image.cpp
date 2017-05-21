@@ -34,7 +34,7 @@ namespace horizon {
 
 		auto polyr = poly.remove_arcs();
 
-		img_polygon(polyr);
+		img_polygon(polyr, tr);
 	}
 
 	void Canvas::img_text_layer(int l) {

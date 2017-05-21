@@ -33,6 +33,7 @@ SRC_COMMON = \
 	common/polygon.cpp\
 	common/hole.cpp\
 	common/shape.cpp\
+	common/patch_type_names.cpp\
 	pool/package.cpp\
 	package/pad.cpp\
 	board/board.cpp\
@@ -44,6 +45,7 @@ SRC_COMMON = \
 	board/rule_hole_size.cpp\
 	board/rule_clearance_silk_exp_copper.cpp\
 	board/rule_track_width.cpp\
+	board/rule_clearance_copper.cpp\
 	pool/pool.cpp \
 	util/placement.cpp\
 	util/util.cpp\
@@ -94,6 +96,7 @@ SRC_IMP = \
 	canvas/selection_filter.cpp\
 	canvas/polypartition/polypartition.cpp\
 	canvas/marker.cpp\
+	canvas/error_polygons.cpp\
 	core/core.cpp \
 	core/core_properties.cpp\
 	core/tool_catalog.cpp\
@@ -177,6 +180,7 @@ SRC_IMP = \
 	imp/keyseq_dialog.cpp\
 	clipper/clipper.cpp\
 	obstacle/canvas_obstacle.cpp\
+	canvas/canvas_patch.cpp\
 	export_gerber/gerber_writer.cpp\
 	export_gerber/excellon_writer.cpp\
 	export_gerber/gerber_export.cpp\
@@ -205,7 +209,10 @@ SRC_IMP = \
 	imp/rules/rule_editor_hole_size.cpp\
 	imp/rules/rule_editor_clearance_silk_exp_copper.cpp\
 	imp/rules/rule_editor_track_width.cpp\
+	imp/rules/rule_editor_clearance_copper.cpp\
 	rules/rules_with_core.cpp\
+	rules/cache.cpp\
+	board/board_rules_check.cpp\
 
 
 SRC_POOL_UTIL = \

@@ -7,8 +7,10 @@
 #include "rule_editor_hole_size.hpp"
 #include "rule_editor_clearance_silk_exp_copper.hpp"
 #include "rule_editor_track_width.hpp"
+#include "rule_editor_clearance_copper.hpp"
 #include "widgets/cell_renderer_layer_display.hpp"
 #include "rules/rules_with_core.hpp"
+#include "rules/cache.hpp"
 
 namespace horizon {
 
@@ -169,8 +171,8 @@ namespace horizon {
 		}
 		check_result_treeview->append_column("Comment", tree_columns.comment);
 
-		signal_show().connect([this]{canvas->markers.set_domain_visible(MarkerDomain::CHECK, true);});
-		signal_hide().connect([this]{canvas->markers.set_domain_visible(MarkerDomain::CHECK, false);});
+		signal_show().connect([this]{canvas->markers.set_domain_visible(MarkerDomain::CHECK, true); canvas->error_polygons.set_visible(true);});
+		signal_hide().connect([this]{canvas->markers.set_domain_visible(MarkerDomain::CHECK, false); canvas->error_polygons.set_visible(false);});
 
 		check_result_treeview->signal_row_activated().connect([this] (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column) {
 			auto it = check_result_store->get_iter(path);
@@ -190,9 +192,10 @@ namespace horizon {
 		check_result_store->clear();
 		auto &dom = canvas->markers.get_domain(MarkerDomain::CHECK);
 		dom.clear();
-
+		RulesCheckCache cache(core);
+		canvas->error_polygons.clear_polygons();
 		for(auto rule_id: rules->get_rule_ids()) {
-			auto result = rules_check(rules, rule_id, core);
+			auto result = rules_check(rules, rule_id, core, cache);
 			if(result.level != RulesCheckErrorLevel::NOT_RUN || true) {
 				Gtk::TreeModel::iterator iter = check_result_store->append();
 				Gtk::TreeModel::Row row = *iter;
@@ -211,6 +214,7 @@ namespace horizon {
 					if(it_err.has_location) {
 						dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level), it_err.sheet);
 					}
+					canvas->error_polygons.add_polygons(it_err.error_polygons);
 				}
 			}
 		}
@@ -268,6 +272,10 @@ namespace horizon {
 
 			case RuleID::TRACK_WIDTH :
 				e = new RuleEditorTrackWidth(r, core);
+			break;
+
+			case RuleID::CLEARANCE_COPPER :
+				e = new RuleEditorClearanceCopper(r, core);
 			break;
 
 			default:

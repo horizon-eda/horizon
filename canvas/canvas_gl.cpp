@@ -14,7 +14,7 @@ namespace horizon {
 		offset = ofs;
 	}
 
-	CanvasGL::CanvasGL() : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), markers(this), grid(this), box_selection(this), selectables_renderer(this, &selectables),
+	CanvasGL::CanvasGL() : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), markers(this), error_polygons(this), grid(this), box_selection(this), selectables_renderer(this, &selectables),
 			triangle_renderer(this, triangles),
 			marker_renderer(this, markers),
 			p_property_work_layer(*this, "work-layer"),

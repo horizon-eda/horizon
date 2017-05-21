@@ -17,6 +17,8 @@ namespace horizon {
 		BUS_LABEL, BUS_RIPPER, POLYGON, POLYGON_VERTEX, POLYGON_EDGE, POLYGON_ARC_CENTER,
 		HOLE, PAD, BOARD_PACKAGE, TRACK, VIA, SHAPE
 	};
+	enum class PatchType {OTHER, TRACK, PAD, PAD_TH, VIA, PLANE};
+
 	/**
 	 * Your typical coordinate class.
 	 * Supports some mathematical operators as required.

@@ -43,6 +43,7 @@ namespace horizon {
 		private :
 			CanvasGL *ca;
 			std::vector<Triangle> &triangles;
+			size_t render_triangles_count;
 
 			GLuint program;
 			GLuint vao;
