@@ -42,6 +42,7 @@ namespace horizon {
 			}
 		}
 		if(std::all_of(pins.begin(), pins.end(), [](const auto &a){return a.second;})) {
+			imp->tool_bar_flash("No pins left to place");
 			return ToolResponse::end();
 		}
 
@@ -59,6 +60,7 @@ namespace horizon {
 
 		create_pin(selected_pin);
 		pin->position = args.coords;
+		imp->tool_bar_set_tip("<b>LMB:</b>place pin <b>RMB:</b>delete current pin and finish <b>r:</b>rotate <b>Space</b>:select pin <b>Return:</b>autoplace");
 
 		core.r->selection.clear();
 
