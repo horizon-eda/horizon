@@ -30,6 +30,16 @@ namespace horizon {
 		return sequences;
 	}
 
+	std::set<std::vector<unsigned int>> KeySequence::get_sequences_for_tool(ToolID id) const {
+		std::set<std::vector<unsigned int>> r;
+		for(const auto &it: sequences) {
+			if(it.tool_id == id) {
+				r.emplace(it.keys);
+			}
+		}
+		return r;
+	}
+
 	ToolID KeySequence::handle_key(guint k) {
 		if(k == GDK_KEY_Escape) {
 			keys.clear();

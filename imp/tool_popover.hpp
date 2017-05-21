@@ -6,7 +6,7 @@ namespace horizon {
 
 	class ToolPopover : public Gtk::Popover {
 		public:
-			ToolPopover(Gtk::Widget *parent);
+			ToolPopover(Gtk::Widget *parent, const class KeySequence *key_seq);
 			typedef sigc::signal<void, ToolID> type_signal_tool_activated;
 			//type_signal_selected signal_selected() {return s_signal_selected;}
 			type_signal_tool_activated signal_tool_activated() {return s_signal_tool_activated;}
@@ -20,10 +20,12 @@ namespace horizon {
 						Gtk::TreeModelColumnRecord::add( name ) ;
 						Gtk::TreeModelColumnRecord::add( tool_id ) ;
 						Gtk::TreeModelColumnRecord::add( can_begin ) ;
+						Gtk::TreeModelColumnRecord::add( keys ) ;
 					}
 					Gtk::TreeModelColumn<Glib::ustring> name;
 					Gtk::TreeModelColumn<ToolID> tool_id;
 					Gtk::TreeModelColumn<bool> can_begin;
+					Gtk::TreeModelColumn<Glib::ustring> keys;
 			} ;
 			ListColumns list_columns;
 			Gtk::TreeView *view;

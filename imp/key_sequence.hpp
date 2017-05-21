@@ -17,6 +17,7 @@ namespace horizon {
 			ToolID handle_key(unsigned int key);
 			void append_sequence(const Sequence &s);
 			void append_sequence(std::initializer_list<Sequence> s);
+			std::set<std::vector<unsigned int>> get_sequences_for_tool(ToolID id) const;
 			const std::vector<Sequence> &get_sequences();
 
 			KeySequence() {}

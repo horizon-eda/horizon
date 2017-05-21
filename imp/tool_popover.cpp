@@ -1,8 +1,9 @@
 #include "tool_popover.hpp"
 #include "core/tool_catalog.hpp"
+#include "key_sequence.hpp"
 
 namespace horizon {
-	ToolPopover::ToolPopover(Gtk::Widget *parent):Gtk::Popover(*parent) {
+	ToolPopover::ToolPopover(Gtk::Widget *parent, const KeySequence *key_seq):Gtk::Popover(*parent) {
 		auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4));
 		search_entry = Gtk::manage(new Gtk::SearchEntry());
 		box->pack_start(*search_entry, false, false, 0);
@@ -40,6 +41,7 @@ namespace horizon {
 		view = Gtk::manage(new Gtk::TreeView(store_filtered));
 		view->get_selection()->set_mode(Gtk::SELECTION_BROWSE);
 		view->append_column("Tool", list_columns.name);
+		view->append_column("Keys", list_columns.keys);
 		view->set_enable_search(false);
 		view->signal_key_press_event().connect([this](GdkEventKey* ev)->bool{std::cout << "handle ev" << std::endl; search_entry->grab_focus_without_selecting(); return search_entry->handle_event(ev);});
 
@@ -60,6 +62,13 @@ namespace horizon {
 			row[list_columns.name] = it.second.name;
 			row[list_columns.tool_id] = it.first;
 			row[list_columns.can_begin] = true;
+			auto keys = key_seq->get_sequences_for_tool(it.first);
+			std::stringstream ss;
+			for(const auto &itk: keys) {
+				std::transform(itk.begin(), itk.end(), std::ostream_iterator<std::string>(ss), [](const auto &x){return gdk_keyval_name(x);});
+				ss << " ";
+			}
+			row[list_columns.keys] = ss.str();
 		}
 
 

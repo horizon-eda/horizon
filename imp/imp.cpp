@@ -131,18 +131,6 @@ namespace horizon {
 		warnings_box->signal_selected().connect(sigc::mem_fun(this, &ImpBase::handle_warning_selected));
 		main_window->left_panel->pack_end(*warnings_box, false, false, 0);
 
-		tool_popover = Gtk::manage(new ToolPopover(canvas));
-		tool_popover->set_position(Gtk::POS_BOTTOM);
-		tool_popover->signal_tool_activated().connect([this](ToolID tool_id){
-			ToolArgs args;
-			args.coords = canvas->get_cursor_pos();
-			args.selection = canvas->get_selection();
-			args.work_layer = canvas->property_work_layer();
-			ToolResponse r= core.r->tool_begin(tool_id, args, imp_interface.get());
-			main_window->active_tool_label->set_text("Active tool: "+core.r->get_tool_name());
-			tool_process(r);
-		});
-
 		selection_filter_dialog = std::make_unique<SelectionFilterDialog>(this->main_window, &canvas->selection_filter, core.r);
 
 		key_sequence_dialog  = std::make_unique<KeySequenceDialog>(this->main_window);
@@ -214,6 +202,18 @@ namespace horizon {
 		for(const auto &it: key_seq.get_sequences()) {
 			key_sequence_dialog->add_sequence(it.keys, tool_catalog.at(it.tool_id).name);
 		}
+
+		tool_popover = Gtk::manage(new ToolPopover(canvas, &key_seq));
+		tool_popover->set_position(Gtk::POS_BOTTOM);
+		tool_popover->signal_tool_activated().connect([this](ToolID tool_id){
+			ToolArgs args;
+			args.coords = canvas->get_cursor_pos();
+			args.selection = canvas->get_selection();
+			args.work_layer = canvas->property_work_layer();
+			ToolResponse r= core.r->tool_begin(tool_id, args, imp_interface.get());
+			main_window->active_tool_label->set_text("Active tool: "+core.r->get_tool_name());
+			tool_process(r);
+		});
 
 
 		imp_interface = std::make_unique<ImpInterface>(this);
