@@ -41,7 +41,7 @@ namespace horizon {
 		brd_work.block = &block_work;
 		brd.update_refs();
 		brd_work.update_refs();
-		rebuild(true);
+		rebuild();
 	}
 
 	void CoreBoard::reload_netlist() {
