@@ -10,6 +10,7 @@ namespace horizon {
 	void Buffer::clear() {
 		texts.clear();
 		lines.clear();
+		pins.clear();
 		junctions.clear();
 		arcs.clear();
 		pads.clear();
