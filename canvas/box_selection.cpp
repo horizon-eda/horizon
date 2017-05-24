@@ -96,8 +96,8 @@ namespace horizon {
 	
 	void BoxSelection::drag_end(GdkEventButton *button_event) {
 		if(button_event->button==1) { //inside of grid and middle mouse button {
+			bool add = button_event->state & Gdk::SHIFT_MASK;
 			if(active==2) {
-				bool add = button_event->state & Gdk::SHIFT_MASK;
 				for(auto &it: ca->selectables.items) {
 					if(it.get_flag(Selectable::Flag::PRELIGHT)) {
 						it.set_flag(Selectable::Flag::SELECTED, true);
@@ -118,21 +118,27 @@ namespace horizon {
 					ca->s_signal_selection_changed.emit();
 				}
 				else {
+					std::set<SelectableRef> selection;
+					if(add) {
+						selection = ca->get_selection();
+					}
 					gdouble x,y;
 					gdk_event_get_coords((GdkEvent*)button_event, &x, &y);
 					auto c = ca->screen2canvas({(float)x,(float)y});
 					std::vector<unsigned int> in_selection;
-					unsigned int i = 0;
-					for(auto &it: ca->selectables.items) {
-						it.set_flag(Selectable::Flag::PRELIGHT, false);
-						it.set_flag(Selectable::Flag::SELECTED, false);
-						if(it.inside(c, 10/ca->scale) && ca->selection_filter.can_select(ca->selectables.items_ref[i])) {
-							in_selection.push_back(i);
+					{
+						unsigned int i = 0;
+						for(auto &it: ca->selectables.items) {
+							it.set_flag(Selectable::Flag::PRELIGHT, false);
+							it.set_flag(Selectable::Flag::SELECTED, false);
+							if(it.inside(c, 10/ca->scale) && ca->selection_filter.can_select(ca->selectables.items_ref[i])) {
+								in_selection.push_back(i);
+							}
+							i++;
 						}
-						i++;
 					}
 					if(in_selection.size()>1) {
-						ca->set_selection({}, false);
+						ca->set_selection(selection, false);
 						for(const auto it: ca->clarify_menu->get_children()) {
 							ca->clarify_menu->remove(*it);
 						}
@@ -141,14 +147,18 @@ namespace horizon {
 
 							auto text = object_descriptions.at(sr.type).name;
 							auto la =  Gtk::manage(new Gtk::MenuItem(text));
-							la->signal_select().connect([this, sr] {
-								ca->set_selection({sr}, false);
+							la->signal_select().connect([this, sr, selection] {
+								auto sel = selection;
+								sel.emplace(sr);
+								ca->set_selection(sel, false);
 							});
-							la->signal_deselect().connect([this] {
-								ca->set_selection({}, false);
+							la->signal_deselect().connect([this, selection] {
+								ca->set_selection(selection, false);
 							});
-							la->signal_activate().connect([this, sr] {
-								ca->set_selection({sr}, true);
+							la->signal_activate().connect([this, sr, selection] {
+								auto sel = selection;
+								sel.emplace(sr);
+								ca->set_selection(sel, true);
 							});
 							la->show();
 							ca->clarify_menu->append(*la);
@@ -160,17 +170,13 @@ namespace horizon {
 						#endif
 					}
 					else if(in_selection.size()==1){
-						ca->set_selection({ca->selectables.items_ref[in_selection.front()]});
+						selection.emplace(ca->selectables.items_ref[in_selection.front()]);
+						ca->set_selection(selection);
 					}
 					else if(in_selection.size()==0){
-						ca->set_selection({});
+						ca->set_selection(selection);
 					}
-
-
-
 				}
-
-
 			}
 			active = 0;
 			ca->queue_draw();
