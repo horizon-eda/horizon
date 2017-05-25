@@ -20,7 +20,7 @@ namespace horizon {
 		return j;
 	}
 
-	std::string RuleClearanceSilkscreenExposedCopper::get_brief() const {
+	std::string RuleClearanceSilkscreenExposedCopper::get_brief(const class Block *block) const {
 		return "";
 	}
 

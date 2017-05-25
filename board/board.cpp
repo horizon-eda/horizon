@@ -102,7 +102,7 @@ namespace horizon {
 	}
 
 	Board::Board(const UUID &uu, Block &bl): uuid(uu), block(&bl) {
-
+		//fixme: add sensible default rules
 	}
 
 	Junction *Board::get_junction(const UUID &uu) {

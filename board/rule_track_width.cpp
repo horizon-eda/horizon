@@ -40,12 +40,8 @@ namespace horizon {
 		return j;
 	}
 
-	std::string RuleTrackWidth::get_brief() const {
-		std::stringstream ss;
-		//ss << "min. dia="<<dim_to_string(diameter_min)<<std::endl;
-		//ss << "max. dia="<<dim_to_string(diameter_max);
-		ss << "lel";
-		return ss.str();
+	std::string RuleTrackWidth::get_brief(const class Block *block) const {
+		return "Match " + match.get_brief(block);
 	}
 
 }

@@ -12,6 +12,9 @@
 #include "rules/rules_with_core.hpp"
 #include "rules/cache.hpp"
 
+#include "core/core_board.hpp"
+#include "core/core_schematic.hpp"
+
 namespace horizon {
 
 	class RuleLabel: public Gtk::Box {
@@ -24,7 +27,8 @@ namespace horizon {
 
 				label_order = Gtk::manage(new Gtk::Label(std::to_string(o)));
 				label_order->set_xalign(1);
-				label_text = Gtk::manage(new Gtk::Label(t));
+				label_text = Gtk::manage(new Gtk::Label());
+				label_text->set_markup(t);
 				label_text->set_xalign(0);
 				pack_start(*label_order, false, false, 0);
 				pack_start(*label_text, true, true, 0);
@@ -36,7 +40,7 @@ namespace horizon {
 			}
 
 			void set_text(const std::string &t) {
-				label_text->set_text(t);
+				label_text->set_markup(t);
 			}
 
 			void set_order(int o ) {
@@ -285,6 +289,16 @@ namespace horizon {
 		return e;
 	}
 
+	Block *RulesWindow::get_block() {
+		if(auto c = dynamic_cast<CoreBoard*>(core)) {
+			return c->get_board()->block;
+		}
+		if(auto c = dynamic_cast<CoreSchematic*>(core)) {
+			return c->get_schematic()->block;
+		}
+		return nullptr;
+	}
+
 	void RulesWindow::update_rule_instances(RuleID id) {
 		auto inst = rules->get_rules(id);
 		auto row = lb_multi->get_selected_row();
@@ -296,7 +310,7 @@ namespace horizon {
 			delete it;
 		}
 		for(const auto &it: inst) {
-			auto la = Gtk::manage(new RuleLabel(sg_order, it.second->get_brief(), id, it.first, it.second->order));
+			auto la = Gtk::manage(new RuleLabel(sg_order, it.second->get_brief(get_block()), id, it.first, it.second->order));
 			la->set_sensitive(it.second->enabled);
 			la->show();
 			lb_multi->append(*la);
@@ -315,7 +329,7 @@ namespace horizon {
 		for(auto ch: lb_multi->get_children()) {
 			auto la = dynamic_cast<RuleLabel*>(dynamic_cast<Gtk::ListBoxRow*>(ch)->get_child());
 			auto rule = rules->get_rule(la->id, la->uuid);
-			la->set_text(rule->get_brief());
+			la->set_text(rule->get_brief(get_block()));
 			la->set_sensitive(rule->enabled);
 			la->set_order(rule->order);
 		}

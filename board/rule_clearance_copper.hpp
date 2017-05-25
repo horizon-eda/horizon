@@ -9,7 +9,7 @@ namespace horizon {
 			RuleClearanceCopper(const UUID &uu, const json &j);
 			json serialize() const override;
 
-			std::string get_brief() const;
+			std::string get_brief(const class Block *block = nullptr) const;
 
 			RuleMatch match_1;
 			RuleMatch match_2;

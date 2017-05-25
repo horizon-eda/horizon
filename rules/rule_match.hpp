@@ -10,6 +10,7 @@ namespace horizon {
 			RuleMatch();
 			RuleMatch(const json &j);
 			json serialize() const;
+			std::string get_brief(const class Block *block=nullptr) const;
 
 			enum class Mode {ALL, NET, NET_CLASS, NET_NAME_REGEX};
 			Mode mode = Mode::ALL;

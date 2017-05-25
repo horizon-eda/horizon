@@ -41,6 +41,7 @@ namespace horizon {
 			CanvasGL *canvas = nullptr;
 			Rules *rules = nullptr;
 			Core *core = nullptr;
+			class Block *get_block();
 			type_signal_goto s_signal_goto;
 			type_signal_canvas_update s_signal_canvas_update;
 			RuleID rule_current = RuleID::NONE;

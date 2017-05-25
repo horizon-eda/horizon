@@ -22,11 +22,8 @@ namespace horizon {
 		return j;
 	}
 
-	std::string RuleHoleSize::get_brief() const {
-		std::stringstream ss;
-		ss << "min. dia="<<dim_to_string(diameter_min)<<std::endl;
-		ss << "max. dia="<<dim_to_string(diameter_max);
-		return ss.str();
+	std::string RuleHoleSize::get_brief(const class Block *block) const {
+		return "Match " + match.get_brief(block);
 	}
 
 }

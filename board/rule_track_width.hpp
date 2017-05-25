@@ -20,7 +20,7 @@ namespace horizon {
 			RuleTrackWidth(const UUID &uu, const json &j);
 			json serialize() const override;
 
-			std::string get_brief() const;
+			std::string get_brief(const class Block *block = nullptr) const;
 
 			RuleMatch match;
 			std::map<int, Widths> widths;

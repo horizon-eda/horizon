@@ -34,6 +34,7 @@ namespace horizon {
 		net_button->set_net(match->net);
 		net_button->signal_changed().connect([this](const UUID &uu) {
 			match->net = uu;
+			s_signal_updated.emit();
 		});
 		sel_stack->add(*net_button, std::to_string(static_cast<int>(RuleMatch::Mode::NET)));
 
@@ -44,6 +45,7 @@ namespace horizon {
 		net_class_button->set_net_class(match->net_class);
 		net_class_button->signal_net_class_changed().connect([this](const UUID &uu) {
 			match->net_class = uu;
+			s_signal_updated.emit();
 		});
 		sel_stack->add(*net_class_button, std::to_string(static_cast<int>(RuleMatch::Mode::NET_CLASS)));
 

@@ -17,11 +17,11 @@ namespace horizon {
 			UUID uuid;
 			int order = 0;
 			RuleID id = RuleID::NONE;
-			bool enabled = false;
+			bool enabled = true;
 
 
 			virtual json serialize() const;
-			virtual std::string get_brief() const = 0;
+			virtual std::string get_brief(const class Block *block=nullptr) const = 0;
 
 
 		virtual ~Rule();

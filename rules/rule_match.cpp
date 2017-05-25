@@ -1,6 +1,7 @@
 #include "rule_match.hpp"
 #include "lut.hpp"
 #include "net.hpp"
+#include "block.hpp"
 
 namespace horizon {
 	static const LutEnumStr<RuleMatch::Mode> mode_lut = {
@@ -43,5 +44,39 @@ namespace horizon {
 				return false; //todo
 		}
 		return false;
+	}
+
+	std::string RuleMatch::get_brief(const Block *block) const {
+		if(block) {
+			switch(mode) {
+				case Mode::ALL :
+					return "All";
+
+				case Mode::NET :
+					return "Net "+(net?block->nets.at(net).name:"?");
+
+				case Mode::NET_CLASS :
+					return "TBD";
+					//return "NC:"+(net_class?block->->net_classes.at(net_class).name:"?");
+
+				case Mode::NET_NAME_REGEX :
+					return "TBD";
+			}
+		}
+		else {
+			switch(mode) {
+				case Mode::ALL :
+					return "All";
+
+				case Mode::NET :
+					return "Net";
+
+				case Mode::NET_CLASS :
+					return "Net class";
+
+				case Mode::NET_NAME_REGEX :
+					return "Net name regex";
+			}
+		}
 	}
 }
