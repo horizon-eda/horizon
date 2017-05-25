@@ -156,6 +156,17 @@ namespace horizon {
 		}
 	}
 
+	void Sheet::vacuum_junctions() {
+		for(auto it = junctions.begin(); it != junctions.end();) {
+			if(it->second.connection_count == 0 && !it->second.has_via) {
+				it = junctions.erase(it);
+			}
+			else {
+				it++;
+			}
+		}
+	}
+
 	void Sheet::simplify_net_lines() {
 		unsigned int n_merged = 1;
 		while(n_merged) {
@@ -163,6 +174,7 @@ namespace horizon {
 			for(auto &it_junc: junctions) {
 				it_junc.second.net = nullptr;
 				it_junc.second.connection_count = 0;
+				it_junc.second.has_via = false;
 			}
 			for(auto &it_rip: bus_rippers) {
 				it_rip.second.connection_count = 0;
@@ -170,12 +182,15 @@ namespace horizon {
 			std::set<UUID> junctions_with_label;
 			for(const auto &it: net_labels) {
 				junctions_with_label.emplace(it.second.junction->uuid);
+				it.second.junction->has_via = true;
 			}
 			for(const auto &it: bus_labels) {
 				junctions_with_label.emplace(it.second.junction->uuid);
+				it.second.junction->has_via = true;
 			}
 			for(const auto &it: bus_rippers) {
 				junctions_with_label.emplace(it.second.junction->uuid);
+				it.second.junction->has_via = true;
 			}
 			for(const auto &it: power_symbols) {
 				junctions_with_label.emplace(it.second.junction->uuid);

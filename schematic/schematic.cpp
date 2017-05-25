@@ -324,12 +324,13 @@ namespace horizon {
 				it_line.second.bus = nullptr;
 			}
 
-
 			sheet.delete_dependants();
 			if(!careful) {
 				sheet.simplify_net_lines();
 			}
 			sheet.propagate_net_segments();
+			if(!careful)
+				sheet.vacuum_junctions();
 
 			auto net_segments = sheet.analyze_net_segments();
 

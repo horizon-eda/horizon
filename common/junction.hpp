@@ -42,7 +42,7 @@ namespace horizon {
 			bool warning = false;
 			int layer = 10000;
 			bool needs_via = false;
-			bool has_via = false;
+			bool has_via = false; //in schematic: true if has net label, etc.
 			unsigned int connection_count = 0;
 
 			json serialize() const;

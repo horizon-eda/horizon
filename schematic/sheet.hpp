@@ -55,6 +55,7 @@ namespace horizon {
 			void merge_net_lines(LineNet *a, LineNet *b, Junction *ju);
 			void expand_symbols();
 			void simplify_net_lines();
+			void vacuum_junctions();
 			void delete_dependants();
 			void propagate_net_segments();
 			std::map<UUID, NetSegmentInfo> analyze_net_segments(bool place_warnings=false);
