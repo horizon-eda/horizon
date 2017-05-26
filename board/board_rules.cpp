@@ -29,7 +29,7 @@ namespace horizon {
 				auto u = UUID(it.key());
 				rule_clearance_copper.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
 			}
-			fix_order(RuleID::TRACK_WIDTH);
+			fix_order(RuleID::CLEARANCE_COPPER);
 		}
 		if(j.count("clearance_silkscreen_exposed_copper")) {
 			const json &o = j["clearance_silkscreen_exposed_copper"];
