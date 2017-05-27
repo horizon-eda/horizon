@@ -56,7 +56,9 @@ namespace horizon {
 	}
 
 	Net *Block::get_net(const UUID &uu) {
-		return &nets.at(uu);
+		if(nets.count(uu))
+			return &nets.at(uu);
+		return nullptr;
 	}
 
 	Net *Block::insert_net() {

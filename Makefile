@@ -178,7 +178,6 @@ SRC_IMP = \
 	imp/key_sequence.cpp\
 	imp/keyseq_dialog.cpp\
 	clipper/clipper.cpp\
-	obstacle/canvas_obstacle.cpp\
 	canvas/canvas_patch.cpp\
 	export_gerber/gerber_writer.cpp\
 	export_gerber/excellon_writer.cpp\

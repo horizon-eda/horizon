@@ -30,4 +30,8 @@ namespace horizon {
 	void ImpInterface::part_placed(const UUID &uu) {
 		imp->send_json({{"op", "part-placed"}, {"part", (std::string)uu}});
 	}
+
+	void ImpInterface::set_work_layer(int layer) {
+		imp->canvas->property_work_layer() = layer;
+	}
 }

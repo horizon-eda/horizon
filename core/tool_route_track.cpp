@@ -1,9 +1,9 @@
 #include "tool_route_track.hpp"
 #include <iostream>
 #include "core_board.hpp"
-#include "obstacle/canvas_obstacle.hpp"
 #include "imp_interface.hpp"
 #include "board/board_rules.hpp"
+#include "util.hpp"
 
 namespace horizon {
 
@@ -27,22 +27,47 @@ namespace horizon {
 	}
 
 	void ToolRouteTrack::begin_track(const ToolArgs &args) {
-		auto c = args.target.p;
-		CanvasObstacle ca;
-		ca.routing_layer = args.work_layer;
+		Coordi c;
+		if(args.target.is_valid())
+			c = args.target.p;
+		else
+			c = args.coords;
+
 		routing_layer = args.work_layer;
-		ca.routing_width = rules->get_default_track_width(net, args.work_layer);
-		ca.routing_net = net;
-		ca.set_core(core.r);
-		ca.update(*core.b->get_board());
+		routing_width = rules->get_default_track_width(net, routing_layer);
 		obstacles.clear();
-		ca.clipper.Execute(ClipperLib::ctUnion, obstacles, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
-		core.b->get_board()->obstacles = obstacles;
+		update_obstacles();
 		track_path.clear();
 		track_path.emplace_back(c.x, c.y);
 		track_path.emplace_back(c.x, c.y);
 		track_path.emplace_back(c.x, c.y);
 		track_path_known_good = track_path;
+	}
+
+	void ToolRouteTrack::update_obstacles() {
+		obstacles.clear();
+		canvas_patch.patches.clear();
+		canvas_patch.set_core(core.r);
+		canvas_patch.update(*core.b->get_board());
+
+		ClipperLib::Clipper clipper;
+
+		for(const auto &it: canvas_patch.patches) {
+			if(it.first.layer == routing_layer && it.first.net != net->uuid && !(it.first.type == PatchType::TRACK && it.first.net == UUID())) { //patch is an obstacle
+				ClipperLib::ClipperOffset ofs;
+				ofs.ArcTolerance = 10e3;
+				ofs.AddPaths(it.second, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+				auto clearance = rules->get_clearance_copper(core.b->get_block()->get_net(it.first.net), net, routing_layer);
+				auto expand = clearance->get_clearance(it.first.type, PatchType::TRACK);
+
+				ClipperLib::Paths t_ofs;
+				ofs.Execute(t_ofs, expand+routing_width/2);
+				clipper.AddPaths(t_ofs, ClipperLib::ptSubject, true);
+			}
+		}
+		clipper.Execute(ClipperLib::ctUnion, obstacles, ClipperLib::pftNonZero);
+		core.b->get_board()->obstacles = obstacles;
+
 	}
 
 	void ToolRouteTrack::update_track(const Coordi &c) {
@@ -156,7 +181,8 @@ namespace horizon {
 					tr->net = net;
 					tr->net_segment = net_segment;
 					tr->layer = routing_layer;
-					tr->width = rules->get_default_track_width(net, routing_layer);
+					tr->width = routing_width;
+					tr->width_from_rules = routing_width_use_default;
 					temp_tracks.push_back(tr);
 
 					auto ju = core.r->insert_junction(UUID::random());
@@ -222,19 +248,23 @@ namespace horizon {
 
 	void ToolRouteTrack::update_tip() {
 		std::stringstream ss;
-		ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete last segment <b>backspace:</b>delete last segment <b>v:</b>place via <b>/:</b>track posture   <i>";
 		if(net) {
+			ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete last segment <b>backspace:</b>delete last segment <b>v:</b>place via <b>/:</b>track posture <b>w:</b>change track width <b>W:</b>default track width  <b>Return:</b>save track <i>";
 			if(net->name.size()) {
 				ss << "routing net \"" << net->name << "\"";
 			}
 			else {
 				ss << "routing unnamed net";
 			}
+			ss << "  track width " << dim_to_string(routing_width);
+			if(routing_width_use_default) {
+				ss << " (default)";
+			}
+			ss<<"</i>";
 		}
 		else {
-			ss << "select starting point";
+			ss << "<b>LMB:</b>select starting junction/pad <b>RMB:</b>cancel";
 		}
-		ss<<"</i>";
 		imp->tool_bar_set_tip(ss.str());
 	}
 
@@ -403,6 +433,44 @@ namespace horizon {
 					else {
 						core.b->get_board()->vias.erase(via->uuid);
 						via = nullptr;
+					}
+				}
+				else if(args.key == GDK_KEY_w || args.key == GDK_KEY_W) {
+					auto use_default_before = routing_width_use_default;
+					auto routing_width_before= routing_width;
+					if(args.key == GDK_KEY_w) {
+						auto r = imp->dialogs.ask_datum("Track width", rules->get_default_track_width(net, routing_layer));
+						if(r.first) {
+							routing_width_use_default = false;
+							routing_width = r.second;
+						}
+						else {
+							return ToolResponse();
+						}
+					}
+					else {
+						routing_width_use_default = true;
+						routing_width = rules->get_default_track_width(net, routing_layer);
+					}
+					update_obstacles();
+					if(!check_track_path(track_path)) { //true if no drc error
+						routing_width = routing_width_before;
+						routing_width_use_default = use_default_before;
+						imp->tool_bar_flash("Couldn't change width due to DRC error");
+						update_obstacles();
+					}
+
+					update_temp_track();
+				}
+				else if(args.key == GDK_KEY_Return) {
+					if(temp_junctions.size()>0) {
+						auto junc = temp_junctions.back();
+						temp_junctions.clear();
+						temp_tracks.clear();
+						begin_track(args);
+						conn_start.connect(junc);
+						update_tip();
+						update_temp_track();
 					}
 				}
 				else if(args.key == GDK_KEY_BackSpace) {

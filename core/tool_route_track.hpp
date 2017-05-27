@@ -20,12 +20,15 @@ namespace horizon {
 			Net *net = nullptr;
 			UUID net_segment;
 			int routing_layer;
+			uint64_t routing_width = 0;
+			bool routing_width_use_default = true;
 			void begin_track(const ToolArgs &args);
 			bool try_move_track(const ToolArgs &args);
 			void update_track(const Coordi &c);
 			bool check_track_path(const ClipperLib::Path &p);
 			void update_temp_track();
 			void update_tip();
+			void update_obstacles();
 			bool bend_mode = false;
 			ClipperLib::Paths obstacles;
 			ClipperLib::Path track_path;
