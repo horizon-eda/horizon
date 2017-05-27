@@ -50,9 +50,7 @@ SRC_COMMON = \
 	util/placement.cpp\
 	util/util.cpp\
 	object_descr.cpp\
-	constraints/net_class.cpp\
-	constraints/net_classes.cpp\
-	constraints/clearance.cpp \
+	block/net_class.cpp\
 	project/project.cpp\
 	resources.cpp\
 	gitversion.cpp\
@@ -156,6 +154,7 @@ SRC_IMP = \
 	dialogs/pool_browser_box.cpp\
 	dialogs/annotate.cpp\
 	dialogs/edit_shape.cpp\
+	dialogs/manage_net_classes.cpp\
 	util/sort_controller.cpp\
 	core/core_symbol.cpp\
 	core/core_schematic.cpp\

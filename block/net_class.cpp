@@ -16,4 +16,8 @@ namespace horizon {
 		j["name"] = name;
 		return j;
 	}
+
+	UUID NetClass::get_uuid() const {
+		return uuid;
+	}
 }

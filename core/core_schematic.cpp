@@ -4,15 +4,13 @@
 #include "util.hpp"
 
 namespace horizon {
-	CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, const std::string &constraints_filename, Pool &pool) :
-		constraints(NetClasses::new_from_file(constraints_filename)),
-		block(Block::new_from_file(block_filename, pool, &constraints)),
+	CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, Pool &pool) :
+		block(Block::new_from_file(block_filename, pool)),
 		block_work(block),
 		sch(Schematic::new_from_file(schematic_filename, block, pool)),
 		sch_work(sch),
 		m_schematic_filename(schematic_filename),
-		m_block_filename(block_filename),
-		m_constraints_filename(constraints_filename)
+		m_block_filename(block_filename)
 	{
 		auto x = std::find_if(sch.sheets.cbegin(), sch.sheets.cend(), [](const auto &a){return a.second.index == 1;});
 		assert(x!=sch.sheets.cend());
@@ -43,6 +41,11 @@ namespace horizon {
 	Schematic *CoreSchematic::get_schematic(bool work) {
 		return work?&sch_work:&sch;
 	}
+
+	Block *CoreSchematic::get_block(bool work) {
+		return get_schematic(work)->block;
+	}
+
 	Sheet *CoreSchematic::get_sheet(bool work) {
 		auto &s = work?sch_work:sch;
 		return &s.sheets.at(sheet_uuid);
@@ -246,7 +249,7 @@ namespace horizon {
 					break;
 					case ObjectProperty::ID::NET_CLASS : {
 						UUID nc = value;
-						block.nets.at(uu).net_class = &constraints.net_classes.at(nc);
+						block.nets.at(uu).net_class = &block.net_classes.at(nc);
 					}break;
 					default :
 						;
@@ -409,10 +412,6 @@ namespace horizon {
 				;
 		}
 		return true;
-	}
-
-	NetClasses *CoreSchematic::get_net_classes() {
-		return &constraints;
 	}
 
 	void CoreSchematic::add_sheet() {

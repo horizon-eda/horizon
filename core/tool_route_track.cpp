@@ -20,6 +20,9 @@ namespace horizon {
 		core.r->selection.clear();
 		update_tip();
 		rules = dynamic_cast<BoardRules*>(core.r->get_rules());
+		canvas_patch.set_core(core.r);
+		canvas_patch.update(*core.b->get_board());
+
 		return ToolResponse();
 	}
 

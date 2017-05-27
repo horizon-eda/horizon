@@ -34,7 +34,6 @@ namespace horizon {
 			std::string title;
 			std::map<UUID, ProjectBlock> blocks;
 
-			std::string net_classes_filename;
 			UUID pool_uuid;
 			std::string vias_directory;
 			std::string board_filename;

@@ -1,5 +1,6 @@
 #include "net_class_button.hpp"
 #include "core/core.hpp"
+#include "block.hpp"
 
 namespace horizon {
 	NetClassButton::NetClassButton(Core *c): Gtk::ComboBoxText(), core(c) {
@@ -16,7 +17,7 @@ namespace horizon {
 	}
 
 	void NetClassButton::update() {
-		for(const auto &it: core->get_net_classes()->net_classes) {
+		for(const auto &it: core->get_block()->net_classes) {
 			insert(0, (std::string)it.first, it.second.name);
 		}
 	}

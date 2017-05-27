@@ -48,21 +48,15 @@ int main(int c_argc, char *c_argv[]) {
 		}
 		save_json_to_file(argv.at(2), block.serialize());
 	}
-	else if(argv.at(1) == "create-constraints") {
-		horizon::NetClasses net_classes;
-		save_json_to_file(argv.at(2), net_classes.serialize());
-	}
 	else if(argv.at(1) == "create-schematic") {
 		horizon::Pool pool(pool_base_path);
-		auto net_classes = horizon::NetClasses::new_from_file(argv.at(4));
-		auto block = horizon::Block::new_from_file(argv.at(3), pool, &net_classes);
+		auto block = horizon::Block::new_from_file(argv.at(3), pool);
 		horizon::Schematic sch(horizon::UUID::random(), block);
 		save_json_to_file(argv.at(2), sch.serialize());
 	}
 	else if(argv.at(1) == "create-board") {
 		horizon::Pool pool(pool_base_path);
-		auto net_classes = horizon::NetClasses::new_from_file(argv.at(4));
-		auto block = horizon::Block::new_from_file(argv.at(3), pool, &net_classes);
+		auto block = horizon::Block::new_from_file(argv.at(3), pool);
 		horizon::Board brd(horizon::UUID::random(), block);
 		save_json_to_file(argv.at(2), brd.serialize());
 	}

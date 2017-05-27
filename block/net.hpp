@@ -4,23 +4,24 @@
 #include "object.hpp"
 #include "unit.hpp"
 #include "uuid_provider.hpp"
+#include "util/uuid_ptr.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
-#include "constraints/net_classes.hpp"
+#include "net_class.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;
 
 	class Net :public UUIDProvider{
 		public :
-			Net(const UUID &uu, const json &, const NetClasses &constr);
+			Net(const UUID &uu, const json &, class Block &block);
 			Net(const UUID &uu);
 			virtual UUID get_uuid() const;
 			UUID uuid;
 			std::string name;
 			bool is_power = false;
-			const NetClass *net_class = nullptr;
+			uuid_ptr<NetClass> net_class;
 
 			//not saved
 			bool is_power_forced = false;

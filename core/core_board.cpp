@@ -4,17 +4,15 @@
 #include "part.hpp"
 
 namespace horizon {
-	CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &constraints_filename, const std::string &via_dir, Pool &pool) :
-		constraints(NetClasses::new_from_file(constraints_filename)),
+	CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir, Pool &pool) :
 		via_padstack_provider(via_dir),
-		block(Block::new_from_file(block_filename, pool, &constraints)),
+		block(Block::new_from_file(block_filename, pool)),
 		block_work(block),
 		brd(Board::new_from_file(board_filename, block, pool, via_padstack_provider)),
 		brd_work(brd),
 		rules(brd.rules),
 		m_board_filename(board_filename),
 		m_block_filename(block_filename),
-		m_constraints_filename(constraints_filename),
 		m_via_dir(via_dir),
 		m_layers({
 		{50, {50, "Outline", {.6,.6, 0}}},
@@ -45,7 +43,7 @@ namespace horizon {
 	}
 
 	void CoreBoard::reload_netlist() {
-		block = Block::new_from_file(m_block_filename, *m_pool, &constraints);
+		block = Block::new_from_file(m_block_filename, *m_pool);
 		brd.block = &block;
 		brd.update_refs();
 		for(auto it=brd.packages.begin(); it!=brd.packages.end();) {
@@ -340,8 +338,8 @@ namespace horizon {
 		return work?&brd_work:&brd;
 	}
 
-	NetClasses *CoreBoard::get_net_classes() {
-		return &constraints;
+	Block *CoreBoard::get_block(bool work) {
+		return get_board(work)->block;
 	}
 
 	Rules *CoreBoard::get_rules() {

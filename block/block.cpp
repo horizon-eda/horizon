@@ -3,44 +3,56 @@
 
 namespace horizon {
 
-	Block::Block(const UUID &uu, const json &j, Pool &pool, NetClasses *constr):
+	Block::Block(const UUID &uu, const json &j, Pool &pool):
 			uuid(uu),
-			name(j.at("name").get<std::string>()),
-			constraints(constr)
+			name(j.at("name").get<std::string>())
 		{
+			if(j.count("net_classes")) {
+				const json &o = j["net_classes"];
+				for (auto it = o.cbegin(); it != o.cend(); ++it) {
+					auto u = UUID(it.key());
+					net_classes.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
+				}
+			}
+			net_class_default = &net_classes.at(j.at("net_class_default").get<std::string>());
 			{
 				const json &o = j["nets"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					nets.emplace(std::make_pair(u, Net(u, it.value(), *constraints)));
+					nets.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
 				}
 			}
+
 			{
 				const json &o = j["buses"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					buses.emplace(std::make_pair(u, Bus(u, it.value(), *this)));
+					buses.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
 				}
 			}
 			{
 				const json &o = j["components"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					components.emplace(std::make_pair(u, Component(u, it.value(), pool, *this)));
+					components.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), pool, *this));
 				}
 			}
 		}
 
-	Block::Block(const UUID &uu): uuid(uu) {}
+	Block::Block(const UUID &uu): uuid(uu) {
+		auto nuu = UUID::random();
+		net_classes.emplace(std::piecewise_construct, std::forward_as_tuple(nuu), std::forward_as_tuple(nuu));
+		net_class_default = &net_classes.begin()->second;
+	}
 
-	Block Block::new_from_file(const std::string &filename, Pool &obj, NetClasses *constr) {
+	Block Block::new_from_file(const std::string &filename, Pool &obj) {
 		json j;
 		std::ifstream ifs(filename);
 		if(!ifs.is_open()) {
 			throw std::runtime_error("file "  +filename+ " not opened");
 		}
 		ifs>>j;
-		return Block(UUID(j["uuid"].get<std::string>()), j, obj, constr);
+		return Block(UUID(j["uuid"].get<std::string>()), j, obj);
 	}
 
 	Net *Block::get_net(const UUID &uu) {
@@ -50,7 +62,7 @@ namespace horizon {
 	Net *Block::insert_net() {
 		auto uu = UUID::random();
 		auto n = &nets.emplace(uu, uu).first->second;
-		n->net_class = constraints->default_net_class;
+		n->net_class = net_class_default;
 		return n;
 	}
 
@@ -75,6 +87,10 @@ namespace horizon {
 		}
 		for(auto &it_bus: buses) {
 			it_bus.second.update_refs(*this);
+		}
+		net_class_default.update(net_classes);
+		for(auto &it_net: nets) {
+			it_net.second.net_class.update(net_classes);
 		}
 	}
 
@@ -120,7 +136,8 @@ namespace horizon {
 		nets(block.nets),
 		buses(block.buses),
 		components(block.components),
-		constraints(block.constraints)
+		net_classes(block.net_classes),
+		net_class_default(block.net_class_default)
 	{
 		update_refs();
 	}
@@ -131,7 +148,8 @@ namespace horizon {
 		nets = block.nets;
 		buses = block.buses;
 		components = block.components;
-		constraints = block.constraints;
+		net_classes = block.net_classes;
+		net_class_default = block.net_class_default;
 		update_refs();
 	}
 
@@ -139,6 +157,7 @@ namespace horizon {
 		json j;
 		j["name"] = name;
 		j["uuid"] = (std::string)uuid;
+		j["net_class_default"] = (std::string)net_class_default->uuid;
 		j["nets"] = json::object();
 		for(const auto &it : nets) {
 			j["nets"][(std::string)it.first] = it.second.serialize();
@@ -150,6 +169,10 @@ namespace horizon {
 		j["buses"] = json::object();
 		for(const auto &it : buses) {
 			j["buses"][(std::string)it.first] = it.second.serialize();
+		}
+		j["net_classes"] = json::object();
+		for(const auto &it: net_classes) {
+			j["net_classes"][(std::string)it.first] = it.second.serialize();
 		}
 
 		return j;

@@ -9,8 +9,10 @@
 namespace horizon {
 	class CoreBoard: public Core {
 		public:
-			CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &constraints_filename, const std::string &via_dir, Pool &pool);
+			CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir, Pool &pool);
 			bool has_object_type(ObjectType ty) override;
+
+			class Block *get_block(bool work=true) override;
 
 			const std::map<int, Layer> &get_layers() override;
 
@@ -34,7 +36,6 @@ namespace horizon {
 			const Board *get_canvas_data();
 			Board *get_board(bool work = true);
 			ViaPadstackProvider *get_via_padstack_provider();
-			NetClasses *get_net_classes() override;
 			class Rules *get_rules() override;
 			std::pair<Coordi,Coordi> get_bbox() override;
 
@@ -47,7 +48,6 @@ namespace horizon {
 			std::map<UUID, Text> *get_text_map(bool work=true) override;
 			std::map<UUID, Line> *get_line_map(bool work=true) override;
 
-			NetClasses constraints;
 			ViaPadstackProvider via_padstack_provider;
 
 			Block block;
@@ -60,7 +60,6 @@ namespace horizon {
 
 			std::string m_board_filename;
 			std::string m_block_filename;
-			std::string m_constraints_filename;
 			std::string m_via_dir;
 
 			std::map<int, Layer> m_layers;

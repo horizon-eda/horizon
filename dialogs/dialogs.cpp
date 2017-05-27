@@ -11,6 +11,7 @@
 #include "ask_net_merge.hpp"
 #include "ask_delete_component.hpp"
 #include "manage_buses.hpp"
+#include "manage_net_classes.hpp"
 #include "ask_datum.hpp"
 #include "select_via_padstack.hpp"
 #include "annotate.hpp"
@@ -133,6 +134,11 @@ namespace horizon {
 
 	bool Dialogs::manage_buses(Block *b) {
 		ManageBusesDialog dia(parent, b);
+		return dia.run()==Gtk::RESPONSE_OK;
+	}
+
+	bool Dialogs::manage_net_classes(Block *b) {
+		ManageNetClassesDialog dia(parent, b);
 		return dia.run()==Gtk::RESPONSE_OK;
 	}
 

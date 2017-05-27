@@ -5,6 +5,7 @@
 #include <deque>
 #include "track.hpp"
 #include "via.hpp"
+#include "canvas/canvas_patch.hpp"
 
 namespace horizon {
 
@@ -34,6 +35,7 @@ namespace horizon {
 			std::deque<Junction*> temp_junctions;
 			std::deque<Track*> temp_tracks;
 			class BoardRules *rules;
+			CanvasPatch canvas_patch;
 
 			Via *via = nullptr;
 	};

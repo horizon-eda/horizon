@@ -40,7 +40,7 @@ namespace horizon {
 
 		net_class_button = Gtk::manage(new NetClassButton(core));
 		if(!match->net_class) {
-			match->net_class = core->get_net_classes()->default_net_class->uuid;
+			match->net_class = core->get_block()->net_class_default->uuid;
 		}
 		net_class_button->set_net_class(match->net_class);
 		net_class_button->signal_net_class_changed().connect([this](const UUID &uu) {

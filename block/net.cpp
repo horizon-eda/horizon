@@ -1,19 +1,15 @@
 #include "net.hpp"
+#include "block.hpp"
 
 namespace horizon {
 
-	Net::Net(const UUID &uu, const json &j, const NetClasses &constr):
+	Net::Net(const UUID &uu, const json &j, Block &block):
 			uuid(uu),
 			name(j.at("name").get<std::string>()),
 			is_power(j.value("is_power", false))
 		{
-			if(j.count("net_class")) {
-				net_class = &constr.net_classes.at(j.at("net_class").get<std::string>());
-			}
-			else {
-				net_class = constr.default_net_class;
-			}
-		}
+		net_class = &block.net_classes.at(j.at("net_class").get<std::string>());
+	}
 
 	Net::Net (const UUID &uu): uuid(uu){};
 

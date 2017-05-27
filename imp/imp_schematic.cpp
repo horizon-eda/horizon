@@ -4,8 +4,8 @@
 #include "checks/checks_window.hpp"
 
 namespace horizon {
-	ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename, const std::string &constraints_filename, const std::string &pool_path) :ImpBase(pool_path),
-			core_schematic(schematic_filename, block_filename, constraints_filename, pool)
+	ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename, const std::string &pool_path) :ImpBase(pool_path),
+			core_schematic(schematic_filename, block_filename, pool)
 	{
 		core = &core_schematic;
 		core_schematic.signal_tool_changed().connect(sigc::mem_fun(this, &ImpSchematic::handle_tool_change));
@@ -102,6 +102,7 @@ namespace horizon {
 
 		add_tool_button(ToolID::ANNOTATE, "Annotate");
 		add_tool_button(ToolID::MANAGE_BUSES, "Buses...");
+		add_tool_button(ToolID::MANAGE_NET_CLASSES, "Net classes...");
 		add_tool_button(ToolID::ADD_PART, "Place part");
 
 		core.r->signal_tool_changed().connect([print_button](ToolID t){print_button->set_sensitive(t==ToolID::NONE);});

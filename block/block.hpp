@@ -9,7 +9,6 @@
 #include <map>
 #include <fstream>
 #include <set>
-#include "constraints/net_classes.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;
@@ -23,15 +22,17 @@ namespace horizon {
 	 */
 	class Block:public Object {
 		public :
-			Block(const UUID &uu, const json &, Pool &pool, NetClasses *constr);
+			Block(const UUID &uu, const json &, Pool &pool);
 			Block(const UUID &uu);
-			static Block new_from_file(const std::string &filename, Pool &pool,  NetClasses *constr);
+			static Block new_from_file(const std::string &filename, Pool &pool);
 			virtual Net *get_net(const UUID &uu);
 			UUID uuid;
 			std::string name;
 			std::map<UUID, Net> nets;
 			std::map<UUID, Bus> buses;
 			std::map<UUID, Component> components;
+			std::map<UUID, NetClass> net_classes;
+			uuid_ptr<NetClass> net_class_default = nullptr;
 
 			Block(const Block &block);
 			void operator=(const Block &block);
@@ -63,7 +64,6 @@ namespace horizon {
 
 		private:
 			void update_refs();
-			NetClasses *constraints = nullptr;
 	};
 
 }

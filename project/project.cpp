@@ -3,7 +3,6 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 #include <giomm/file.h>
-#include "constraints/net_classes.hpp"
 #include "util.hpp"
 #include "block.hpp"
 #include "schematic.hpp"
@@ -15,7 +14,6 @@ namespace horizon {
 			uuid(uu),
 			name(j.at("name").get<std::string>()),
 			title(j.at("title").get<std::string>()),
-			net_classes_filename(Glib::build_filename(base, j.at("net_classes_filename"))),
 			pool_uuid(j.at("pool_uuid").get<std::string>()),
 			vias_directory(Glib::build_filename(base, j.at("vias_directory"))),
 			board_filename(Glib::build_filename(base, j.at("board_filename")))
@@ -68,10 +66,6 @@ namespace horizon {
 				throw std::runtime_error("mkdir failed");
 			}
 		}
-		net_classes_filename = Glib::build_filename(base_path, "net_classes.json");
-
-		NetClasses net_classes;
-		save_json_to_file(net_classes_filename, net_classes.serialize());
 
 		blocks.clear();
 		auto block_filename = Glib::build_filename(base_path, "top_block.json");
@@ -111,7 +105,6 @@ namespace horizon {
 		j["name"] = name;
 		j["title"] = title;
 		j["pool_uuid"] = (std::string)pool_uuid;
-		j["net_classes_filename"] = get_filename_rel(net_classes_filename);
 		j["vias_directory"] = get_filename_rel(vias_directory);
 		j["board_filename"] = get_filename_rel(board_filename);
 		{

@@ -5,7 +5,7 @@ namespace horizon {
 	class ImpSchematic : public ImpBase {
 		friend class ImpInterface;
 		public :
-			ImpSchematic(const std::string &schematic_filename, const std::string &block_filename, const std::string &constraints_filename, const std::string &pool_path);
+			ImpSchematic(const std::string &schematic_filename, const std::string &block_filename, const std::string &pool_path);
 
 
 		protected:

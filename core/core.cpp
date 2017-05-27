@@ -156,6 +156,9 @@ namespace horizon {
 			case ToolID::IMPORT_DXF:
 				return std::make_unique<ToolImportDXF>(this, tool_id);
 
+			case ToolID::MANAGE_NET_CLASSES:
+				return std::make_unique<ToolManageBuses>(this, tool_id);
+
 
 			default:
 				return nullptr;

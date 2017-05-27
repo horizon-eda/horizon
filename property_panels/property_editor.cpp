@@ -3,6 +3,9 @@
 #include "property_editors.hpp"
 #include "property_panel.hpp"
 #include "property_panels.hpp"
+#include "block/block.hpp"
+#include "core/core_schematic.hpp"
+#include "core/core_board.hpp"
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
@@ -212,9 +215,15 @@ namespace horizon {
 
 	Gtk::Widget *PropertyEditorNetClass::create_editor() {
 		combo = Gtk::manage(new Gtk::ComboBoxText());
-		auto constraints = core->get_net_classes();
-		if(constraints) {
-			for(const auto &it: constraints->net_classes) {
+		Block *block = nullptr;
+		if(auto c = dynamic_cast<CoreSchematic*>(core)) {
+			block = c->get_schematic()->block;
+		}
+		if(auto c = dynamic_cast<CoreBoard*>(core)) {
+			block = c->get_board()->block;
+		}
+		if(block) {
+			for(const auto &it: block->net_classes) {
 				combo->insert(0, (std::string)it.first, it.second.name);
 			}
 		}

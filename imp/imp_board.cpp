@@ -4,9 +4,9 @@
 #include "canvas/canvas_patch.hpp"
 
 namespace horizon {
-	ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &constraints_filename, const std::string &via_dir, const std::string &pool_path):
+	ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir, const std::string &pool_path):
 			ImpLayer(pool_path),
-			core_board(board_filename, block_filename, constraints_filename, via_dir, pool) {
+			core_board(board_filename, block_filename, via_dir, pool) {
 		core = &core_board;
 		core_board.signal_tool_changed().connect(sigc::mem_fun(this, &ImpBase::handle_tool_change));
 

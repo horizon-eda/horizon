@@ -21,6 +21,9 @@ namespace horizon {
 		else if(tool_id == ToolID::ANNOTATE) {
 			r = imp->dialogs.annotate(sch);
 		}
+		else if(tool_id == ToolID::MANAGE_NET_CLASSES) {
+			r = imp->dialogs.manage_net_classes(sch->block);
+		}
 		if(r) {
 			core.r->commit();
 		}

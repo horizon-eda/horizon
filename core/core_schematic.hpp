@@ -10,7 +10,7 @@
 namespace horizon {
 	class CoreSchematic: public Core {
 		public:
-			CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, const std::string &constraints_filename, Pool &pool);
+			CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, Pool &pool);
 			bool has_object_type(ObjectType ty) override;
 
 			Junction *get_junction(const UUID &uu, bool work = true) override;
@@ -41,6 +41,8 @@ namespace horizon {
 			std::vector<LineNet*> get_net_lines(bool work=true);
 			std::vector<NetLabel*> get_net_labels(bool work=true);
 
+			class Block *get_block(bool work=true) override;
+
 			bool property_is_settable(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
 
 			std::string get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
@@ -60,14 +62,11 @@ namespace horizon {
 			void add_sheet();
 			void delete_sheet(const UUID &uu);
 
-			NetClasses *get_net_classes() override;
-
 			void set_sheet(const UUID &uu);
 			const Sheet *get_canvas_data();
 			std::pair<Coordi,Coordi> get_bbox() override;
 
 		private:
-			NetClasses constraints;
 			Block block;
 			Block block_work;
 
@@ -77,7 +76,6 @@ namespace horizon {
 			UUID sheet_uuid;
 			std::string m_schematic_filename;
 			std::string m_block_filename;
-			std::string m_constraints_filename;
 
 			class HistoryItem: public Core::HistoryItem {
 				public:

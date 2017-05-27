@@ -12,7 +12,6 @@
 #include "layer.hpp"
 #include "json.hpp"
 #include <gdk/gdkkeysyms.h>
-#include "constraints/net_classes.hpp"
 
 namespace horizon {
 	enum class ToolEventType {MOVE, CLICK, KEY, DATA};
@@ -29,7 +28,7 @@ namespace horizon {
 		MANAGE_BUSES, DRAW_POLYGON, ENTER_DATUM, MOVE_EXACTLY, PLACE_HOLE,
 		PLACE_PAD, PASTE, ASSIGN_PART, MAP_PACKAGE, DRAW_TRACK, PLACE_VIA,
 		ROUTE_TRACK, DRAG_KEEP_SLOPE, ADD_PART, ANNOTATE, SMASH, UNSMASH,
-		PLACE_SHAPE, EDIT_SHAPE, IMPORT_DXF
+		PLACE_SHAPE, EDIT_SHAPE, IMPORT_DXF, MANAGE_NET_CLASSES
 	};
 
 	/**
@@ -157,6 +156,8 @@ namespace horizon {
 			virtual std::vector<Line*> get_lines(bool work=true);
 			virtual std::vector<Arc*> get_arcs(bool work=true);
 			
+			virtual class Block *get_block(bool work=true) {return nullptr;}
+
 			/**
 			 * Expands the non-working document.
 			 * And copies the non-working document to the working document.
@@ -198,7 +199,6 @@ namespace horizon {
 			 */
 			virtual json get_meta();
 
-			virtual NetClasses *get_net_classes() {return nullptr;}
 			virtual class Rules *get_rules() {return nullptr;}
 			virtual std::pair<Coordi,Coordi> get_bbox() = 0;
 
