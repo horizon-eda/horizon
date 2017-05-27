@@ -56,8 +56,7 @@ namespace horizon {
 					return "Net "+(net?block->nets.at(net).name:"?");
 
 				case Mode::NET_CLASS :
-					return "TBD";
-					//return "NC:"+(net_class?block->->net_classes.at(net_class).name:"?");
+					return "Net Class "+(net_class?block->net_classes.at(net_class).name:"?");
 
 				case Mode::NET_NAME_REGEX :
 					return "TBD";
