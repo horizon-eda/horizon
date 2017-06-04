@@ -1,6 +1,7 @@
 #include "cache.hpp"
 #include "core/core.hpp"
 #include "core/core_schematic.hpp"
+#include "entity.hpp"
 
 namespace horizon {
 	CheckCacheNetPins::CheckCacheNetPins(Core *c) {

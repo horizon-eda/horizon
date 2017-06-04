@@ -3,6 +3,7 @@
 #include "core_schematic.hpp"
 #include "core_symbol.hpp"
 #include "core_padstack.hpp"
+#include "entity.hpp"
 
 namespace horizon {
 	Buffer::Buffer(Core *co):core(co) {}

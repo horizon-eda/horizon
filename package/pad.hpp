@@ -8,6 +8,7 @@
 #include "placement.hpp"
 #include "uuid_provider.hpp"
 #include "pool.hpp"
+#include "padstack.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -18,9 +19,9 @@ namespace horizon {
 	class Pad: public UUIDProvider {
 		public :
 			Pad(const UUID &uu, const json &, Pool &pool);
-			Pad(const UUID &uu, Padstack *ps);
+			Pad(const UUID &uu, const Padstack *ps);
 			UUID uuid;
-			Padstack *pool_padstack;
+			const Padstack *pool_padstack;
 			Padstack padstack;
 			Placement placement;
 			std::string name;

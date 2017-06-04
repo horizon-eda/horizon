@@ -1,4 +1,6 @@
 #include "schematic.hpp"
+#include "lut.hpp"
+#include "entity.hpp"
 #include <set>
 #include <forward_list>
 
@@ -158,7 +160,7 @@ namespace horizon {
 	void Schematic::disconnect_symbol(Sheet *sheet, SchematicSymbol *sym) {
 		assert(sheet == &sheets.at(sheet->uuid));
 		assert(sym == &sheet->symbols.at(sym->uuid));
-		std::map<SymbolPin*,Junction*> pin_junctions;
+		std::map<const SymbolPin*,Junction*> pin_junctions;
 		for(auto &it_line: sheet->net_lines) {
 			LineNet *line = &it_line.second;
 			//if((line->to_symbol && line->to_symbol->uuid == it.uuid) || (line->from_symbol &&line->from_symbol->uuid == it.uuid)) {
@@ -384,8 +386,8 @@ namespace horizon {
 				SchematicSymbol &schsym = it_sym.second;
 				Component *comp = schsym.component;
 				for(const auto &it_conn: comp->connections) {
-					Gate &gate_conn = comp->entity->gates.at(it_conn.first.at(0));
-					Pin &pin = gate_conn.unit->pins.at(it_conn.first.at(1));
+					const Gate &gate_conn = comp->entity->gates.at(it_conn.first.at(0));
+					const Pin &pin = gate_conn.unit->pins.at(it_conn.first.at(1));
 					if((gate_conn.uuid == schsym.gate->uuid) && it_conn.second.net) {//connection with net
 						SymbolPin &sympin = schsym.symbol.pins.at(pin.uuid);
 						sympin.connector_style = SymbolPin::ConnectorStyle::NONE;

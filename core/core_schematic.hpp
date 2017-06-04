@@ -27,7 +27,7 @@ namespace horizon {
 			void delete_line(const UUID &uu, bool work = true) override;
 			Arc *insert_arc(const UUID &uu, bool work = true) override;
 			void delete_arc(const UUID &uu, bool work = true) override;
-			SchematicSymbol *insert_schematic_symbol(const UUID &uu, Symbol *sym, bool work = true);
+			SchematicSymbol *insert_schematic_symbol(const UUID &uu, const Symbol *sym, bool work = true);
 			void delete_schematic_symbol(const UUID &uu, bool work = true);
 
 			LineNet *insert_line_net(const UUID &uu, bool work = true);

@@ -3,6 +3,7 @@
 #include "json.hpp"
 #include "unit.hpp"
 #include "symbol.hpp"
+#include "gate.hpp"
 #include "block.hpp"
 #include "uuid_ptr.hpp"
 #include "placement.hpp"
@@ -18,12 +19,12 @@ namespace horizon {
 	class SchematicSymbol: public UUIDProvider {
 		public :
 			SchematicSymbol(const UUID &uu, const json &, Block &block, Pool &pool);
-			SchematicSymbol(const UUID &uu, Symbol *sym);
+			SchematicSymbol(const UUID &uu, const Symbol *sym);
 			UUID uuid;
-			Symbol *pool_symbol;
+			const Symbol *pool_symbol;
 			Symbol symbol;
 			uuid_ptr<Component> component;
-			uuid_ptr<Gate> gate;
+			uuid_ptr<const Gate> gate;
 			Placement placement;
 			std::vector<uuid_ptr<Text>> texts;
 			bool smashed = false;

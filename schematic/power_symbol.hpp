@@ -5,9 +5,11 @@
 #include "uuid_provider.hpp"
 #include "block.hpp"
 #include "uuid_ptr.hpp"
+#include "junction.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
+
 
 namespace horizon {
 	using json = nlohmann::json;

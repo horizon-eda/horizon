@@ -13,7 +13,7 @@ namespace horizon {
 			bool can_begin() override;
 
 		private:
-			class Entity *get_entity();
+			const class Entity *get_entity();
 			Component *comp;
 
 	};

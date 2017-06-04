@@ -20,7 +20,7 @@ namespace horizon {
 			BoardPackage(const UUID &uu, Component *comp);
 			UUID uuid;
 			uuid_ptr<Component> component;
-			Package *pool_package;
+			const Package *pool_package;
 			Package package;
 
 			Placement placement;

@@ -20,7 +20,7 @@ namespace horizon {
 			std::string name;
 			std::string suffix;
 			unsigned int swap_group = 0;
-			Unit *unit = nullptr;
+			const Unit *unit = nullptr;
 
 			json serialize() const;
 			void serialize_yaml(YAML::Emitter &em) const;

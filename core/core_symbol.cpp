@@ -109,9 +109,9 @@ namespace horizon {
 		return r;
 	}
 
-	std::vector<Pin*> CoreSymbol::get_pins(bool work) {
+	std::vector<const Pin*> CoreSymbol::get_pins(bool work) {
 		auto &s = work?sym_work:sym;
-		std::vector<Pin*> r;
+		std::vector<const Pin*> r;
 		for(auto &it: s.unit->pins) {
 			r.push_back(&it.second);
 		}

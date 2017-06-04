@@ -19,7 +19,7 @@ namespace horizon {
 				}
 			}
 		}
-	SchematicSymbol::SchematicSymbol(const UUID &uu, Symbol *sym): uuid(uu), pool_symbol(sym), symbol(*sym) {}
+	SchematicSymbol::SchematicSymbol(const UUID &uu, const Symbol *sym): uuid(uu), pool_symbol(sym), symbol(*sym) {}
 
 	json SchematicSymbol::serialize() const {
 			json j;

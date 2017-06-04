@@ -595,8 +595,8 @@ void PartEditor::save() {
 	part.pad_map.clear();
 	for(const auto &it: pad_store->children()) {
 		if(it[pad_list_columns.gate_uuid] != horizon::UUID()) {
-			horizon::Gate *gate = &part.entity->gates.at(it[pad_list_columns.gate_uuid]);
-			horizon::Pin *pin = &gate->unit->pins.at(it[pad_list_columns.pin_uuid]);
+			const horizon::Gate *gate = &part.entity->gates.at(it[pad_list_columns.gate_uuid]);
+			const horizon::Pin *pin = &gate->unit->pins.at(it[pad_list_columns.pin_uuid]);
 			part.pad_map.emplace(it[pad_list_columns.pad_uuid], horizon::Part::PadMapItem(gate, pin));
 		}
 	}

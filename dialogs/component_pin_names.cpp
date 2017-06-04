@@ -1,4 +1,6 @@
 #include "component_pin_names.hpp"
+#include "gate.hpp"
+#include "entity.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>

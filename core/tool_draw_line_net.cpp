@@ -157,7 +157,7 @@ namespace horizon {
 					}
 					else if(args.target.type == ObjectType::SYMBOL_PIN) {
 						sym = core.c->get_schematic_symbol(args.target.path.at(0));
-						pin = &sym->pool_symbol->pins.at(args.target.path.at(1));
+						pin = &sym->symbol.pins.at(args.target.path.at(1));
 						UUIDPath<2> connpath(sym->gate->uuid, args.target.path.at(1));
 
 						if(sym->component->connections.count(connpath)) { //pin is connected
@@ -257,7 +257,7 @@ namespace horizon {
 					}
 					else if(args.target.type == ObjectType::SYMBOL_PIN) {
 						sym = core.c->get_schematic_symbol(args.target.path.at(0));
-						pin = &sym->pool_symbol->pins.at(args.target.path.at(1));
+						pin = &sym->symbol.pins.at(args.target.path.at(1));
 						UUIDPath<2> connpath(sym->gate->uuid, args.target.path.at(1));
 						if(temp_line_head->bus) { //can't connect bus to pin
 							return ToolResponse();

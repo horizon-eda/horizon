@@ -2,6 +2,7 @@
 #include <iostream>
 #include "core_schematic.hpp"
 #include "imp_interface.hpp"
+#include "entity.hpp"
 
 namespace horizon {
 
@@ -43,7 +44,7 @@ namespace horizon {
 		std::map<UUIDPath<2>, std::string> gates_out;
 		for(const auto &it: gates) {
 			Component *comp = &sch->block->components.at(it.at(0));
-			Gate *gate = &comp->entity->gates.at(it.at(1));
+			const Gate *gate = &comp->entity->gates.at(it.at(1));
 			if(!filter_uuid || filter_uuid==comp->uuid) {
 				gates_out.emplace(std::make_pair(it, comp->refdes+gate->suffix));
 			}
@@ -64,14 +65,14 @@ namespace horizon {
 			selected_gate = gates_out.begin()->first;
 		}
 		Component *comp = &sch->block->components.at(selected_gate.at(0));
-		Gate *gate = &comp->entity->gates.at(selected_gate.at(1));
+		const Gate *gate = &comp->entity->gates.at(selected_gate.at(1));
 		UUID selected_symbol;
 		std::tie(r, selected_symbol) = imp->dialogs.select_symbol(core.r, gate->unit->uuid);
 		if(!r) {
 			return ToolResponse::end();
 		}
 
-		Symbol *sym = core.c->m_pool->get_symbol(selected_symbol);
+		const Symbol *sym = core.c->m_pool->get_symbol(selected_symbol);
 		SchematicSymbol *schsym = core.c->insert_schematic_symbol(UUID::random(), sym);
 		schsym->component = comp;
 		schsym->gate = gate;

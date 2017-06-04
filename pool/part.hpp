@@ -17,9 +17,9 @@ namespace horizon {
 		public :
 			class PadMapItem {
 				public:
-				PadMapItem(Gate *g, Pin *p): gate(g), pin(p) {}
-				Gate *gate;
-				Pin *pin;
+				PadMapItem(const Gate *g, const Pin *p): gate(g), pin(p) {}
+				const Gate *gate;
+				const Pin *pin;
 			};
 			Part(const UUID &uu);
 
@@ -39,9 +39,9 @@ namespace horizon {
 
 			std::set<std::string> tags;
 			bool inherit_tags = false;
-			Entity *entity = nullptr;
-			Package *package = nullptr;
-			class Part *base = nullptr;
+			const Entity *entity = nullptr;
+			const Package *package = nullptr;
+			const class Part *base = nullptr;
 
 			std::map<std::string, std::string> parametric;
 

@@ -2,6 +2,7 @@
 #include <iostream>
 #include "core_schematic.hpp"
 #include "imp_interface.hpp"
+#include "entity.hpp"
 
 namespace horizon {
 

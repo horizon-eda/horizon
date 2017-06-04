@@ -10,7 +10,7 @@ namespace horizon {
 			name(j.at("name").get<std::string>())
 		{
 		}
-	Pad::Pad(const UUID &uu, Padstack *ps): uuid(uu), pool_padstack(ps), padstack(*ps) {}
+	Pad::Pad(const UUID &uu, const Padstack *ps): uuid(uu), pool_padstack(ps), padstack(*ps) {}
 
 	json Pad::serialize() const {
 			json j;

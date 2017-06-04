@@ -17,7 +17,7 @@ namespace horizon {
 	class CheckCacheNetPins: public CheckCacheBase {
 		public:
 			CheckCacheNetPins(class Core *c);
-			std::map<class Net*, std::deque<std::tuple<class Component*, class Gate *, class Pin*, UUID, Coordi>>> net_pins;
+			std::map<class Net*, std::deque<std::tuple<class Component*, const class Gate *, const class Pin*, UUID, Coordi>>> net_pins;
 
 	};
 

@@ -14,8 +14,8 @@ namespace horizon {
 		return get_entity() != nullptr;
 	}
 
-	Entity *ToolAssignPart::get_entity() {
-		Entity *entity = nullptr;
+	const Entity *ToolAssignPart::get_entity() {
+		const Entity *entity = nullptr;
 		for(const auto &it : core.r->selection) {
 			if(it.type == ObjectType::SCHEMATIC_SYMBOL) {
 				auto sym = core.c->get_schematic_symbol(it.uuid);
@@ -35,7 +35,7 @@ namespace horizon {
 
 	ToolResponse ToolAssignPart::begin(const ToolArgs &args) {
 		std::cout << "tool assing part\n";
-		Entity *entity = get_entity();
+		const Entity *entity = get_entity();
 
 		if(!entity) {
 			return ToolResponse::end();
@@ -43,7 +43,7 @@ namespace horizon {
 		UUID part_uuid = comp->part?comp->part->uuid:UUID();
 		auto r = imp->dialogs.select_part(core.r->m_pool, entity->uuid, part_uuid, true);
 		if(r.first) {
-			Part *part = nullptr;
+			const Part *part = nullptr;
 			if(r.second) {
 				part = core.r->m_pool->get_part(r.second);
 			}

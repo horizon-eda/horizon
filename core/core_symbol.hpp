@@ -32,7 +32,7 @@ namespace horizon {
 
 			std::vector<Line*> get_lines(bool work=true) override;
 			std::vector<Arc*> get_arcs(bool work=true) override;
-			std::vector<Pin*> get_pins(bool work=true);
+			std::vector<const Pin*> get_pins(bool work=true);
 
 			void rebuild(bool from_undo=false) override;
 			void commit() override;

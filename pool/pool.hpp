@@ -2,10 +2,6 @@
 #include "uuid.hpp"
 #include "json.hpp"
 #include "common.hpp"
-#include "unit.hpp"
-#include "entity.hpp"
-#include "symbol.hpp"
-#include "padstack.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -25,12 +21,12 @@ namespace horizon {
 			 * @param base_path Path to the pool containing the pool.db
 			 */
 			Pool(const std::string &base_path);
-			virtual Unit *get_unit(const UUID &uu);
-			virtual Entity *get_entity(const UUID &uu);
-			virtual Symbol *get_symbol(const UUID &uu);
-			virtual Padstack *get_padstack(const UUID &uu);
-			virtual class Package *get_package(const UUID &uu);
-			virtual class Part *get_part(const UUID &uu);
+			const class Unit *get_unit(const UUID &uu);
+			const class Entity *get_entity(const UUID &uu);
+			const class Symbol *get_symbol(const UUID &uu);
+			const class Padstack *get_padstack(const UUID &uu);
+			const class Package *get_package(const UUID &uu);
+			const class Part *get_part(const UUID &uu);
 			/**
 			 * The database connection.
 			 * You may use it to perform more advanced queries on the pool.

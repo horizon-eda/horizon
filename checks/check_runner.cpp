@@ -2,6 +2,7 @@
 #include "core/core.hpp"
 #include "core/cores.hpp"
 #include "single_pin_net.hpp"
+#include "lut.hpp"
 
 namespace horizon {
 	CheckRunner::CheckRunner(Core *c): core(c), cache(c) {

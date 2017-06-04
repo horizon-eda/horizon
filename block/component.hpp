@@ -2,11 +2,6 @@
 #include "uuid.hpp"
 #include "json.hpp"
 #include "common.hpp"
-#include "unit.hpp"
-#include "junction.hpp"
-#include "line.hpp"
-#include "arc.hpp"
-#include "entity.hpp"
 #include "uuid_path.hpp"
 #include "uuid_ptr.hpp"
 #include "net.hpp"
@@ -50,8 +45,8 @@ namespace horizon {
 			virtual UUID get_uuid() const ;
 
 			UUID uuid;
-			Entity *entity;
-			class Part *part = nullptr;
+			const class Entity *entity;
+			const class Part *part = nullptr;
 			std::string refdes;
 			std::string value;
 

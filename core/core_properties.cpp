@@ -1,4 +1,6 @@
 #include "core.hpp"
+#include "hole.hpp"
+#include "polygon.hpp"
 
 namespace horizon {
 	#define HANDLED if(handled){*handled=true;}

@@ -1,6 +1,10 @@
 #include "pool.hpp"
+#include "padstack.hpp"
 #include "package.hpp"
 #include "part.hpp"
+#include "unit.hpp"
+#include "entity.hpp"
+#include "symbol.hpp"
 
 namespace horizon {
 	Pool::Pool(const std::string &bp) :db(bp+"/pool.db", SQLITE_OPEN_READONLY), base_path(bp)  {
@@ -10,7 +14,7 @@ namespace horizon {
 		units.clear();
 	}
 
-	Unit *Pool::get_unit(const UUID &uu) {
+	const Unit *Pool::get_unit(const UUID &uu) {
 		if(units.count(uu) == 0) {
 			SQLite::Query q(db, "SELECT filename FROM units WHERE uuid = ?");
 			q.bind(1, uu);
@@ -24,7 +28,7 @@ namespace horizon {
 		return &units.at(uu);
 	}
 	
-	Entity *Pool::get_entity(const UUID &uu) {
+	const Entity *Pool::get_entity(const UUID &uu) {
 		if(entities.count(uu) == 0) {
 			SQLite::Query q(db, "SELECT filename FROM entities WHERE uuid = ?");
 			q.bind(1, uu);
@@ -37,7 +41,8 @@ namespace horizon {
 		}
 		return &entities.at(uu);
 	}
-	Symbol *Pool::get_symbol(const UUID &uu) {
+
+	const Symbol *Pool::get_symbol(const UUID &uu) {
 		if(symbols.count(uu) == 0) {
 			SQLite::Query q(db, "SELECT filename FROM symbols WHERE uuid = ?");
 			q.bind(1, uu);
@@ -50,7 +55,8 @@ namespace horizon {
 		}
 		return &symbols.at(uu);
 	}
-	Package *Pool::get_package(const UUID &uu) {
+
+	const Package *Pool::get_package(const UUID &uu) {
 		if(packages.count(uu) == 0) {
 			SQLite::Query q(db, "SELECT filename FROM packages WHERE uuid = ?");
 			q.bind(1, uu);
@@ -63,7 +69,8 @@ namespace horizon {
 		}
 		return &packages.at(uu);
 	}
-	Padstack *Pool::get_padstack(const UUID &uu) {
+
+	const Padstack *Pool::get_padstack(const UUID &uu) {
 		if(padstacks.count(uu) == 0) {
 			SQLite::Query q(db, "SELECT filename FROM padstacks WHERE uuid = ?");
 			q.bind(1, uu);
@@ -76,7 +83,8 @@ namespace horizon {
 		}
 		return &padstacks.at(uu);
 	}
-	Part *Pool::get_part(const UUID &uu) {
+
+	const Part *Pool::get_part(const UUID &uu) {
 		if(parts.count(uu) == 0) {
 			SQLite::Query q(db, "SELECT filename FROM parts WHERE uuid = ?");
 			q.bind(1, uu);

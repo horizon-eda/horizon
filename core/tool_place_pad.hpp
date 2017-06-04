@@ -11,7 +11,7 @@ namespace horizon {
 			bool can_begin() override;
 
 		private :
-			Padstack *padstack = nullptr;
+			const Padstack *padstack = nullptr;
 			Pad *temp = nullptr;
 			void create_pad(const Coordi &c);
 	};

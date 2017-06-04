@@ -7,6 +7,8 @@
 
 namespace horizon {
 	template <typename T>class uuid_ptr {
+		private:
+			typedef typename std::remove_const<T>::type T_without_const;
 		public :
 			uuid_ptr():ptr(nullptr) {}
 			uuid_ptr(const UUID &uu):ptr(nullptr), uuid(uu) {}
@@ -41,6 +43,16 @@ namespace horizon {
 			T *ptr;
 			UUID uuid;
 			void update(std::map<UUID, T> &map) {
+				if(uuid) {
+					if(map.count(uuid)) {
+						ptr = &map.at(uuid);
+					}
+					else {
+						ptr = nullptr;
+					}
+				}
+			}
+			void update(const std::map<UUID, T_without_const> &map) {
 				if(uuid) {
 					if(map.count(uuid)) {
 						ptr = &map.at(uuid);

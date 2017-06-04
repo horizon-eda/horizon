@@ -90,7 +90,7 @@ namespace horizon {
 		auto &sheet = s.sheets.at(sheet_uuid);
 		sheet.symbols.erase(uu);
 	}
-	SchematicSymbol *CoreSchematic::insert_schematic_symbol(const UUID &uu, Symbol *sym, bool work) {
+	SchematicSymbol *CoreSchematic::insert_schematic_symbol(const UUID &uu, const Symbol *sym, bool work) {
 		auto &s = work?sch_work:sch;
 		auto &sheet = s.sheets.at(sheet_uuid);
 		auto x = sheet.symbols.emplace(std::make_pair(uu, SchematicSymbol{uu, sym}));

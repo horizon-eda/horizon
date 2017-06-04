@@ -1,5 +1,6 @@
 #include "chooser_buttons.hpp"
 #include "dialogs/pool_browser_padstack.hpp"
+#include "padstack.hpp"
 
 namespace horizon {
 	PadstackButton::PadstackButton(Pool &p, const UUID &pkg_uuid):Glib::ObjectBase (typeid(PadstackButton)),  Gtk::Button("fixme"), p_property_selected_uuid(*this, "selected-uuid"), pool(p), package_uuid(pkg_uuid) {

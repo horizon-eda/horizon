@@ -1,5 +1,6 @@
 #include "pool_browser_part.hpp"
 #include "pool.hpp"
+#include <set>
 
 namespace horizon {
 	PoolBrowserPart::PoolBrowserPart(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x, Pool *p, const UUID &e_uuid) :

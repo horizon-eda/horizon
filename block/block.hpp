@@ -20,7 +20,7 @@ namespace horizon {
 	 *
 	 * A block stores Components (instances of Entities), Buses and Nets.
 	 */
-	class Block:public ObjectProvider {
+	class Block {
 		public :
 			Block(const UUID &uu, const json &, Pool &pool);
 			Block(const UUID &uu);
