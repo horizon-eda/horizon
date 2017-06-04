@@ -1,11 +1,12 @@
 #include "gerber_export.hpp"
 #include "canvas_gerber.hpp"
+#include "board.hpp"
 
 namespace horizon {
-	GerberExporter::GerberExporter(CoreBoard *c, const CAMJob &j, const std::string &prefix): core(c), job(j) {
+	GerberExporter::GerberExporter(const Board *b, const CAMJob &j, const std::string &prefix): brd(b), job(j) {
 
 		for(const auto &it: job.layers) {
-			if(core->get_board()->get_layers().count(it.first))
+			if(brd->get_layers().count(it.first))
 				writers.emplace(it.first, prefix+it.second);
 		}
 
@@ -17,7 +18,7 @@ namespace horizon {
 
 	void GerberExporter::save() {
 		CanvasGerber ca(this);
-		ca.update(*core->get_board());
+		ca.update(*brd);
 
 		for(auto &it: writers) {
 			it.second.write_format();
@@ -25,7 +26,7 @@ namespace horizon {
 			it.second.write_lines();
 			it.second.write_pads();
 			it.second.close();
-			log << "Wrote layer "<< core->get_board()->get_layers().at(it.first).name  << " to gerber file " << it.second.get_filename() << std::endl;
+			log << "Wrote layer "<< brd->get_layers().at(it.first).name  << " to gerber file " << it.second.get_filename() << std::endl;
 		}
 		for(auto it: {drill_writer_npth.get(), drill_writer_pth.get()}) {
 			if(it) {

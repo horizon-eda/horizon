@@ -54,7 +54,7 @@ namespace horizon {
 		if(!job)
 			return;
 		std::string prefix = w_output_dir->get_filename()+"/"+w_prefix->get_text();
-		GerberExporter ex(core, *job, prefix);
+		GerberExporter ex(core->get_board(), *job, prefix);
 		ex.save();
 		w_output->get_buffer()->set_text(ex.get_log());
 	}
