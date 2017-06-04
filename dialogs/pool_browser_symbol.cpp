@@ -87,7 +87,6 @@ namespace horizon {
 		box->pack_start(*sc, false, false, 0);
 		box->pack_start(*Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_VERTICAL)), false, false, 0);
 		canvas = Gtk::manage(new CanvasGL());
-		canvas->set_core(core);
 		canvas->set_selection_allowed(false);
 		box->pack_start(*canvas, true, true, 0);
 

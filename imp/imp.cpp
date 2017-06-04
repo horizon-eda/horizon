@@ -279,8 +279,12 @@ namespace horizon {
 			else {
 				if((key_event->keyval == GDK_KEY_Page_Up) || (key_event->keyval == GDK_KEY_Page_Down)) {
 					int wl = canvas->property_work_layer();
-					auto layers = core.r->get_layers_sorted();
-					int idx = std::find(layers.begin(), layers.end(), wl) - layers.begin();
+					auto layers = core.r->get_layer_provider()->get_layers();
+					std::vector<int> layer_indexes;
+					layer_indexes.reserve(layers.size());
+					std::transform(layers.begin(), layers.end(), std::back_inserter(layer_indexes), [](const auto &x){return x.first;});
+
+					int idx = std::find(layer_indexes.begin(), layer_indexes.end(), wl) - layer_indexes.begin();
 					if(key_event->keyval == GDK_KEY_Page_Up) {
 						idx++;
 					}
@@ -288,7 +292,7 @@ namespace horizon {
 						idx--;
 					}
 					if(idx>=0 && idx < (int)layers.size()) {
-						canvas->property_work_layer() = layers.at(idx);
+						canvas->property_work_layer() = layer_indexes.at(idx);
 					}
 					return true;
 				}
@@ -330,7 +334,7 @@ namespace horizon {
 					else {
 						layer = -(n-2);
 					}
-					if(core.r->get_layers().count(layer)) {
+					if(core.r->get_layer_provider()->get_layers().count(layer)) {
 						canvas->property_work_layer() = layer;
 					}
 				}

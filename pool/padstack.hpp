@@ -7,6 +7,7 @@
 #include "hole.hpp"
 #include "lut.hpp"
 #include "shape.hpp"
+#include "layer_provider.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -16,7 +17,7 @@ namespace horizon {
 	using json = nlohmann::json;
 
 
-	class Padstack : public UUIDProvider {
+	class Padstack : public UUIDProvider, public LayerProvider {
 		public :
 			enum class Type {TOP, BOTTOM, THROUGH};
 			static const LutEnumStr<Padstack::Type> type_lut;
@@ -36,6 +37,7 @@ namespace horizon {
 			UUID get_uuid() const override;
 			std::pair<Coordi, Coordi> get_bbox() const;
 			void expand_inner(unsigned int n_inner);
+			const std::map<int, Layer> &get_layers() const override;
 
 		private :
 			void update_refs();

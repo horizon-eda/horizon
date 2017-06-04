@@ -179,7 +179,7 @@ namespace horizon {
 					case ObjectProperty::ID::LAYER:
 						HANDLED
 						newv = value;
-						if(get_layers().count(newv) == 0)
+						if(get_layer_provider()->get_layers().count(newv) == 0)
 							return;
 						if(newv == (int64_t)get_polygon(uu, false)->layer)
 							return;

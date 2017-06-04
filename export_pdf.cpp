@@ -11,7 +11,6 @@ namespace horizon {
 
 		Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create(surface);
 		CanvasCairo ca(cr);
-		ca.set_core(c);
 		for(const auto &it: sch.sheets) {
 			ca.update(it.second);
 

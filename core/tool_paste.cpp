@@ -26,7 +26,7 @@ namespace horizon {
 	};
 
 	void ToolPaste::fix_layer(int &la) {
-		if(core.r->get_layers().count(la) == 0) {
+		if(core.r->get_layer_provider()->get_layers().count(la) == 0) {
 			la = 0;
 		}
 	}

@@ -29,7 +29,6 @@ namespace horizon {
 	}
 
 	void ImpSymbol::construct() {
-		canvas->set_core(core.r);
 
 		name_entry = Gtk::manage(new Gtk::Entry());
 		name_entry->show();

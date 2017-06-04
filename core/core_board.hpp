@@ -13,8 +13,7 @@ namespace horizon {
 			bool has_object_type(ObjectType ty) override;
 
 			class Block *get_block(bool work=true) override;
-
-			const std::map<int, Layer> &get_layers() override;
+			class LayerProvider *get_layer_provider() override;
 
 			bool get_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
 			void set_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool value, bool *handled=nullptr) override;
@@ -61,8 +60,6 @@ namespace horizon {
 			std::string m_board_filename;
 			std::string m_block_filename;
 			std::string m_via_dir;
-
-			std::map<int, Layer> m_layers;
 
 			class HistoryItem: public Core::HistoryItem {
 				public:

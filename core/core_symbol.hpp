@@ -28,6 +28,7 @@ namespace horizon {
 			SymbolPin *insert_symbol_pin(const UUID &uu, bool work=true);
 			void delete_symbol_pin(const UUID &uu, bool work=true);
 
+			class LayerProvider *get_layer_provider() override;
 
 			std::vector<Line*> get_lines(bool work=true) override;
 			std::vector<Arc*> get_arcs(bool work=true) override;

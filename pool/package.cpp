@@ -127,6 +127,24 @@ namespace horizon {
 		return std::make_pair(a,b);
 	}
 
+	const std::map<int, Layer> &Package::get_layers() const {
+			static const std::map<int, Layer> layers = {
+			{40, {40, "Top Courtyard", {.5,.5,.5}}},
+			{30, {30, "Top Placement", {.5,.5,.5}}},
+			{20, {20, "Top Silkscreen", {.9,.9,.9}}},
+			{10, {10, "Top Mask", {1,.5,.5}}},
+			{0, {0, "Top Copper", {1,0,0}}},
+			{-1, {-1, "Inner", {1,1,0}}},
+			{-100, {-100, "Bottom Copper", {0,1,0}, true}},
+			{-110, {-110, "Bottom Mask", {.5,1,.5}, true}},
+			{-120, {-120, "Bottom Silkscreen", {.9,.9,.9}, true}},
+			{-130, {-130, "Bottom Placement", {.5,.5,.5}}},
+			{-140, {-140, "Bottom Courtyard", {.5,.5,.5}}},
+
+		};
+		return layers;
+	}
+
 
 	json Package::serialize() const {
 		json j;

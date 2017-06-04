@@ -43,7 +43,6 @@ namespace horizon {
 
 
 	void ImpBoard::construct() {
-		canvas->set_core(core.r);
 		ImpLayer::construct();
 
 
@@ -64,7 +63,6 @@ namespace horizon {
 		test_button->show();
 		test_button->signal_clicked().connect([this] {
 			CanvasPatch cp;
-			cp.set_core(core.r);
 			cp.update(*core_board.get_board());
 
 			std::ofstream ofs("/tmp/patches");

@@ -87,7 +87,6 @@ namespace horizon {
 	}
 
 	void ImpSchematic::construct() {
-		canvas->set_core(core.r);
 		sheet_box = Gtk::manage(new SheetBox(&core_schematic));
 		sheet_box->show_all();
 		sheet_box->signal_add_sheet().connect([this]{core_schematic.add_sheet(); std::cout<<"add sheet"<<std::endl;});

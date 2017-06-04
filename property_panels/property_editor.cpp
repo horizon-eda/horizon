@@ -189,7 +189,7 @@ namespace horizon {
 
 	Gtk::Widget *PropertyEditorLayer::create_editor() {
 		combo = Gtk::manage(new Gtk::ComboBoxText());
-		for(const auto &it: core->get_layers()) {
+		for(const auto &it: core->get_layer_provider()->get_layers()) {
 			if(!copper_only || it.second.copper)
 				combo->insert(0, std::to_string(it.first), it.second.name);
 		}

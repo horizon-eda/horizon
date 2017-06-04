@@ -198,27 +198,6 @@ namespace horizon {
 		return r;
 	}
 
-	static const std::map<int, Layer> layers = {
-		{0, {0, "Default", {1,1,0}}},
-	};
-
-	const std::map<int, Layer> &Core::get_layers() {
-		return layers;
-	}
-
-	static std::vector<int> layers_sorted;
-
-	const std::vector<int> &Core::get_layers_sorted() {
-		if(layers_sorted.size() == 0) {
-			layers_sorted.reserve(layers.size());
-			for(const auto &it: get_layers()) {
-				layers_sorted.push_back(it.first);
-			}
-			std::sort(layers_sorted.begin(), layers_sorted.end());
-		}
-		return layers_sorted;
-	}
-
 	ToolResponse Core::tool_update(const ToolArgs &args) {
 		if(tool) {
 			auto r = tool->update(args);

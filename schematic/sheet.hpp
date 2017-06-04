@@ -13,6 +13,7 @@
 #include "power_symbol.hpp"
 #include "frame.hpp"
 #include "warning.hpp"
+#include "layer_provider.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -32,7 +33,7 @@ namespace horizon {
 		bool is_bus() const;
 	};
 
-	class Sheet {
+	class Sheet: public LayerProvider {
 		public :
 			Sheet(const UUID &uu, const json &, Block &Block, Object &pool);
 			Sheet(const UUID &uu);

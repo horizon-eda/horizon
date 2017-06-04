@@ -2,6 +2,7 @@
 #include "uuid.hpp"
 #include "json.hpp"
 #include "common.hpp"
+#include "layer_provider.hpp"
 #include "unit.hpp"
 #include "junction.hpp"
 #include "line.hpp"
@@ -44,7 +45,7 @@ namespace horizon {
 			virtual UUID get_uuid() const;
 	};
 	
-	class Symbol : public Object {
+	class Symbol : public Object, public LayerProvider {
 		public :
 			Symbol(const UUID &uu, const json &j, Object &obj);
 			Symbol(const UUID &uu);

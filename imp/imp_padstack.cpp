@@ -27,7 +27,6 @@ namespace horizon {
 	}
 
 	void ImpPadstack::construct() {
-		canvas->set_core(core.r);
 		ImpLayer::construct();
 
 		auto name_entry = Gtk::manage(new Gtk::Entry());

@@ -32,8 +32,16 @@
 #include "core/core_board.hpp"
 
 namespace horizon {
+
+	Color Canvas::get_layer_color(int layer) {
+		Color c = layer_provider->get_layers().at(layer).color;
+		if(layer_display.count(layer)) {
+			c = layer_display.at(layer).color;
+		}
+		return c;
+	}
 	
-	void Canvas::render(const Junction &junc, bool interactive) {
+	void Canvas::render(const Junction &junc, bool interactive, ObjectType mode) {
 		Color c(1,1,0);
 		if(junc.net) {
 			c = Color(0,1,0);
@@ -47,14 +55,14 @@ namespace horizon {
 		bool draw = true;
 
 
-		if(dynamic_cast<CoreBoard*>(core) && junc.connection_count >= 2)
+		if(mode == ObjectType::BOARD && junc.connection_count >= 2)
 			draw = false;
 
 		if(draw) {
 			if(junc.connection_count == 2) {
 				draw_plus(junc.position, 250000, c);
 			}
-			else if(junc.connection_count >= 3  && core->has_object_type(ObjectType::SCHEMATIC_SYMBOL)) {
+			else if(junc.connection_count >= 3  && mode == ObjectType::SCHEMATIC) {
 				draw_line(junc.position, junc.position+Coordi(0, 10), c, true, 0.5_mm);
 			}
 			else {
@@ -119,11 +127,7 @@ namespace horizon {
 	}
 
 	void Canvas::render(const Line &line, bool interactive) {
-		Color c(1,1,0);
-		c = core->get_layers().at(line.layer).color;
-		if(layer_display.count(line.layer)) {
-			c = layer_display.at(line.layer).color;
-		}
+		Color c = get_layer_color(line.layer);
 		img_line(line.from->position, line.to->position, line.width, line.layer);
 		if(img_mode)
 			return;
@@ -154,11 +158,7 @@ namespace horizon {
 	}
 
 	void Canvas::render(const Track &track) {
-		Color c(1,1,0);
-		c = core->get_layers().at(track.layer).color;
-		if(layer_display.count(track.layer)) {
-			c = layer_display.at(track.layer).color;
-		}
+		Color c = get_layer_color(track.layer);
 		if(track.net == nullptr) {
 			c = Color::new_from_int(0xff, 0x66, 0);
 		}
@@ -310,11 +310,7 @@ namespace horizon {
 	}
 	
 	void Canvas::render(const Arc &arc, bool interactive) {
-		Color co(1,1,0);
-		co = core->get_layers().at(arc.layer).color;
-		if(layer_display.count(arc.layer)) {
-			co = layer_display.at(arc.layer).color;
-		}
+		Color co = get_layer_color(arc.layer);
 		Coordf a(arc.from->position);// ,b,c;
 		Coordf b(arc.to->position);// ,b,c;
 		Coordf c(arc.center->position);// ,b,c;
@@ -342,13 +338,9 @@ namespace horizon {
 	}
 
 	void Canvas::render(const Text &text, bool interactive, bool reorient) {
-		Color c(1,1,0);
-		c = core->get_layers().at(text.layer).color;
-		if(layer_display.count(text.layer)) {
-			c = layer_display.at(text.layer).color;
-		}
+		Color c = get_layer_color(text.layer);
 
-		bool rev = core->get_layers().at(text.layer).reverse;
+		bool rev = layer_provider->get_layers().at(text.layer).reverse;
 		transform_save();
 		transform.accumulate(text.placement);
 		auto angle = transform.get_angle();
@@ -444,11 +436,7 @@ namespace horizon {
 		img_polygon(poly);
 		if(img_mode)
 			return;
-		Color c(1,1,0);
-		c = core->get_layers().at(poly.layer).color;
-		if(layer_display.count(poly.layer)) {
-			c = layer_display.at(poly.layer).color;
-		}
+		Color c = get_layer_color(poly.layer);
 
 		TPPLPoly po;
 		po.Init(poly.vertices.size());
@@ -615,7 +603,7 @@ namespace horizon {
 	}
 	void Canvas::render(const Sheet &sheet) {
 		for(const auto &it: sheet.junctions) {
-			render(it.second);
+			render(it.second, true, ObjectType::SCHEMATIC);
 		}
 		for(const auto &it: sheet.symbols) {
 			render(it.second);
@@ -682,14 +670,14 @@ namespace horizon {
 	}
 
 	void Canvas::render(const Padstack &padstack, bool interactive) {
-		auto layers_sorted = core->get_layers_sorted();
-		for(const auto &la: layers_sorted) {
-			if(la == work_layer)
+		auto layers = layer_provider->get_layers();
+		for(const auto &la: layers) {
+			if(la.first == work_layer)
 				continue;
-			if(layer_display.count(la))
-				if(!layer_display.at(la).visible)
+			if(layer_display.count(la.first))
+				if(!layer_display.at(la.first).visible)
 					continue;
-			render(padstack, la, interactive);
+			render(padstack, la.first, interactive);
 		}
 		render(padstack, work_layer, interactive);
 		render(padstack, 10000, interactive);
@@ -763,14 +751,14 @@ namespace horizon {
 	}
 
 	void Canvas::render(const Package &pkg, bool interactive) {
-		auto layers_sorted = core->get_layers_sorted();
-		for(const auto &la: layers_sorted) {
-			if(la == work_layer)
+		auto layers = layer_provider->get_layers();
+		for(const auto &la: layers) {
+			if(la.first == work_layer)
 				continue;
-			if(layer_display.count(la))
-				if(!layer_display.at(la).visible)
+			if(layer_display.count(la.first))
+				if(!layer_display.at(la.first).visible)
 					continue;
-			render(pkg, la, interactive);
+			render(pkg, la.first, interactive);
 		}
 		render(pkg, work_layer, interactive);
 		render(pkg, 10000, interactive);
@@ -819,9 +807,9 @@ namespace horizon {
 	}
 
 	void Canvas::render(const Buffer &buf) {
-		auto layers_sorted = core->get_layers_sorted();
-		for(const auto &la: layers_sorted) {
-			render(buf, la);
+		auto layers = layer_provider->get_layers();
+		for(const auto &la: layers) {
+			render(buf, la.first);
 		}
 		render(buf, 10000);
 	}
@@ -868,7 +856,7 @@ namespace horizon {
 				render(it.second);
 			}
 			for(const auto &it: brd.junctions) {
-				render(it.second);
+				render(it.second, true, ObjectType::BOARD);
 			}
 			for(const auto &it: brd.airwires) {
 				render(it.second);
@@ -900,14 +888,14 @@ namespace horizon {
 
 	void Canvas::render(const Board &brd) {
 		clock_t begin = clock();
-		auto layers_sorted = core->get_layers_sorted();
-		for(const auto &la: layers_sorted) {
-			if(la == work_layer)
+		auto layers = layer_provider->get_layers();
+		for(const auto &la: layers) {
+			if(la.first == work_layer)
 				continue;
-			if(layer_display.count(la))
-				if(!layer_display.at(la).visible)
+			if(layer_display.count(la.first))
+				if(!layer_display.at(la.first).visible)
 					continue;
-			render(brd, la);
+			render(brd, la.first);
 		}
 		render(brd, work_layer);
 		render(brd, 10000);

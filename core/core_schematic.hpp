@@ -42,6 +42,7 @@ namespace horizon {
 			std::vector<NetLabel*> get_net_labels(bool work=true);
 
 			class Block *get_block(bool work=true) override;
+			class LayerProvider *get_layer_provider() override;
 
 			bool property_is_settable(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
 

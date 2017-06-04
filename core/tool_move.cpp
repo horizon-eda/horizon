@@ -173,7 +173,7 @@ namespace horizon {
 				case ObjectType::TEXT: {
 					Text *txt = core.r->get_text(it.uuid);
 					transform(txt->placement.shift, center, rotate);
-					bool rev = core.r->get_layers().at(txt->layer).reverse;
+					bool rev = core.r->get_layer_provider()->get_layers().at(txt->layer).reverse;
 					if(rotate) {
 						if(txt->placement.mirror) {
 							txt->placement.inc_angle_deg(90);

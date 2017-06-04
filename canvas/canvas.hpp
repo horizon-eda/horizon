@@ -31,11 +31,10 @@ namespace horizon {
 			void update(const class Sheet &sheet);
 			void update(const class Padstack &padstack);
 			void update(const class Package &pkg);
-			void update(const class Buffer &buf);
+			void update(const class Buffer &buf, class LayerProvider *lp);
 			void update(const class Board &brd);
 			virtual void update_markers() {}
 
-			void set_core(Core *c);
 			void set_layer_display(int index, const LayerDisplay &ld);
 			class SelectionFilter selection_filter;
 			
@@ -43,7 +42,7 @@ namespace horizon {
 		protected:
 			std::vector<Triangle> triangles;
 			void render(const class Symbol &sym, bool on_sheet = false, bool smashed = false);
-			void render(const class Junction &junc, bool interactive = true);
+			void render(const class Junction &junc, bool interactive = true, ObjectType mode = ObjectType::INVALID);
 			void render(const class Line &line, bool interactive = true);
 			void render(const class SymbolPin &pin, bool interactive = true);
 			void render(const class Arc &arc, bool interactive = true);
@@ -112,7 +111,8 @@ namespace horizon {
 			Target target_current;
 
 
-			Core *core = nullptr;
+			const class LayerProvider *layer_provider = nullptr;
+			Color get_layer_color(int layer);
 			int work_layer = 0;
 			std::map<int, LayerDisplay> layer_display;
 

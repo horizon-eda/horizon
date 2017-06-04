@@ -13,7 +13,7 @@ namespace horizon {
 			CorePadstack(const std::string &filename, Pool &pool);
 			bool has_object_type(ObjectType ty) override;
 
-			const std::map<int, Layer> &get_layers() override;
+			class LayerProvider *get_layer_provider() override;
 
 			void rebuild(bool from_undo=false) override;
 			void commit() override;

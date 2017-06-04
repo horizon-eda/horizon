@@ -35,7 +35,6 @@ namespace horizon {
 	}
 
 	void ImpPackage::construct() {
-		canvas->set_core(core.r);
 		ImpLayer::construct();
 
 		{

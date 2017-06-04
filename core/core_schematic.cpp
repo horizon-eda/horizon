@@ -46,6 +46,10 @@ namespace horizon {
 		return get_schematic(work)->block;
 	}
 
+	LayerProvider *CoreSchematic::get_layer_provider() {
+		return get_sheet();
+	}
+
 	Sheet *CoreSchematic::get_sheet(bool work) {
 		auto &s = work?sch_work:sch;
 		return &s.sheets.at(sheet_uuid);

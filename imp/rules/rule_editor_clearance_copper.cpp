@@ -34,7 +34,7 @@ namespace horizon {
 		Gtk::ComboBoxText *layer_combo;
 		builder->get_widget("layer_combo", layer_combo);
 
-		for(const auto &it: core->get_layers()) {
+		for(const auto &it: core->get_layer_provider()->get_layers()) {
 			if(it.second.copper)
 				layer_combo->insert(0, std::to_string(it.first), it.second.name + ": " + std::to_string(it.first));
 		}

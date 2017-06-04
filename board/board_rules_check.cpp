@@ -120,7 +120,7 @@ namespace horizon {
 		std::set<int> layers;
 		const auto &patches = c->get_canvas()->patches;
 		for(const auto &it: patches) { //collect copper layers
-			if(it.first.layer <= 0 && it.first.layer >= -100) { //can't use is_copper layer since no core
+			if(brd->get_layers().at(it.first.layer).copper) {
 				layers.emplace(it.first.layer);
 			}
 		}

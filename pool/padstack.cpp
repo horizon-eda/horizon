@@ -99,6 +99,17 @@ namespace horizon {
 		return std::make_pair(a,b);
 	}
 
+	const std::map<int, Layer> &Padstack::get_layers() const {
+		static const std::map<int, Layer> layers = {
+			{10, {10, "Top Mask", {1,.5,.5}}},
+			{0, {0, "Top Copper", {1,0,0}}},
+			{-1, {-1, "Inner", {1,1,0}}},
+			{-100, {-100, "Bottom Copper", {0,1,0}}},
+			{-110, {-110, "Bottom Mask", {.5,1,.5}}}
+		};
+		return layers;
+	}
+
 	void Padstack::expand_inner(unsigned int n_inner) {
 		if(n_inner == 0)
 			return;

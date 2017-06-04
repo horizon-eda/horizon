@@ -10,7 +10,6 @@ namespace horizon {
 
 	RulesCheckCacheBoardImage::RulesCheckCacheBoardImage(Core *c) {
 		auto core = dynamic_cast<CoreBoard*>(c);
-		canvas.set_core(c);
 		canvas.update(*core->get_board());
 	}
 

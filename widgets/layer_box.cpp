@@ -175,7 +175,7 @@ namespace horizon {
 
 
 	void LayerBox::update() {
-		auto layers = core->get_layers();
+		auto layers = core->get_layer_provider()->get_layers();
 		Gtk::TreeModel::Row row;
 		store->freeze_notify();
 		store->clear();
@@ -195,7 +195,7 @@ namespace horizon {
 		store->thaw_notify();
 	}
 	void LayerBox::update_work_layer() {
-		auto layers = core->get_layers();
+		auto layers = core->get_layer_provider()->get_layers();
 		Gtk::TreeModel::Row row;
 		store->freeze_notify();
 		for(auto &it: store->children()) {

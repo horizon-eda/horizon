@@ -12,21 +12,6 @@ namespace horizon {
 		m_pool = &pool;
 	}
 
-	static const std::map<int, Layer> layers = {
-		{40, {40, "Top Courtyard", {.5,.5,.5}}},
-		{30, {30, "Top Placement", {.5,.5,.5}}},
-		{20, {20, "Top Silkscreen", {.9,.9,.9}}},
-		{10, {10, "Top Mask", {1,.5,.5}}},
-		{0, {0, "Top Copper", {1,0,0}}},
-		{-1, {-1, "Inner", {1,1,0}}},
-		{-100, {-100, "Bottom Copper", {0,1,0}, true}},
-		{-110, {-110, "Bottom Mask", {.5,1,.5}, true}},
-		{-120, {-120, "Bottom Silkscreen", {.9,.9,.9}, true}},
-		{-130, {-130, "Bottom Placement", {.5,.5,.5}}},
-		{-140, {-140, "Bottom Courtyard", {.5,.5,.5}}},
-
-	};
-
 	bool CorePackage::has_object_type(ObjectType ty) {
 		switch(ty) {
 			case ObjectType::JUNCTION:
@@ -48,8 +33,8 @@ namespace horizon {
 		return false;
 	}
 
-	const std::map<int, Layer> &CorePackage::get_layers() {
-		return layers;
+	LayerProvider *CorePackage::get_layer_provider() {
+		return &package;
 	}
 
 	Package *CorePackage::get_package(bool work) {

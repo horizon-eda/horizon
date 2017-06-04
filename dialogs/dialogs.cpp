@@ -244,7 +244,7 @@ namespace horizon {
 
 		add_extra_label("Layer:");
 		auto layer_combo = Gtk::manage(new Gtk::ComboBoxText());
-		for(const auto &it: core->get_layers()) {
+		for(const auto &it: core->get_layer_provider()->get_layers()) {
 			layer_combo->insert(0, std::to_string(it.first), it.second.name);
 		}
 		layer_combo->set_active_id("0");

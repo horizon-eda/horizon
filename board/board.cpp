@@ -9,6 +9,7 @@ namespace horizon {
 			name(j.at("name").get<std::string>()),
 			n_inner_layers(j.value("n_inner_layers", 0))
 		{
+		set_n_inner_layers(n_inner_layers);
 		if(j.count("polygons")) {
 			const json &o = j["polygons"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -114,11 +115,15 @@ namespace horizon {
 		return &junctions.at(uu);
 	}
 
+	const std::map<int, Layer> &Board::get_layers() const {
+		return layers;
+	}
+
 	Board::Board(const Board &brd):
+		layers(brd.layers),
 		uuid(brd.uuid),
 		block(brd.block),
 		name(brd.name),
-		n_inner_layers(brd.n_inner_layers),
 		polygons(brd.polygons),
 		holes(brd.holes),
 		packages(brd.packages),
@@ -129,12 +134,14 @@ namespace horizon {
 		texts(brd.texts),
 		lines(brd.lines),
 		warnings(brd.warnings),
-		rules(brd.rules)
+		rules(brd.rules),
+		n_inner_layers(brd.n_inner_layers)
 	{
 		update_refs();
 	}
 
 	void Board::operator=(const Board &brd) {
+		layers = brd.layers;
 		uuid = brd.uuid;
 		block = brd.block;
 		name = brd.name;
@@ -183,6 +190,32 @@ namespace horizon {
 			auto &line = it.second;
 			line.to = &junctions.at(line.to.uuid);
 			line.from = &junctions.at(line.from.uuid);
+		}
+	}
+
+	unsigned int Board::get_n_inner_layers() const {
+		return n_inner_layers;
+	}
+
+	void Board::set_n_inner_layers(unsigned int n) {
+		n_inner_layers = n;
+		layers.clear();
+		layers = {
+		{50, {50, "Outline", {.6,.6, 0}}},
+		{40, {40, "Top Courtyard", {.5,.5,.5}}},
+		{30, {30, "Top Placement", {.5,.5,.5}}},
+		{20, {20, "Top Silkscreen", {.9,.9,.9}}},
+		{10, {10, "Top Mask", {1,.5,.5}}},
+		{0, {0, "Top Copper", {1,0,0}, false, true}},
+		{-100, {-100, "Bottom Copper", {0,.5,0}, true, true}},
+		{-110, {-110, "Bottom Mask", {.25,.5,.25}, true}},
+		{-120, {-120, "Bottom Silkscreen", {.9,.9,.9}, true}},
+		{-130, {-130, "Bottom Placement", {.5,.5,.5}}},
+		{-140, {-140, "Bottom Courtyard", {.5,.5,.5}}}
+		};
+		for(unsigned int i = 0; i<n_inner_layers; i++) {
+			auto j = i+1;
+			layers.emplace(std::make_pair(-j, Layer(-j, "Inner "+std::to_string(j), {1,1,0}, false, true)));
 		}
 	}
 

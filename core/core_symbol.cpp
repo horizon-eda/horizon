@@ -250,6 +250,10 @@ namespace horizon {
 		rebuild(true);
 	}
 
+	LayerProvider *CoreSymbol::get_layer_provider() {
+		return &sym;
+	}
+
 	const Symbol *CoreSymbol::get_canvas_data() {
 		return &sym_work;
 	}

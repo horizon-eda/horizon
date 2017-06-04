@@ -12,6 +12,7 @@
 #include "text.hpp"
 #include "pad.hpp"
 #include "warning.hpp"
+#include "layer_provider.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -21,7 +22,7 @@ namespace horizon {
 	using json = nlohmann::json;
 
 
-	class Package : public Object {
+	class Package : public Object, public LayerProvider {
 		public :
 			Package(const UUID &uu, const json &j, class Pool &pool);
 			Package(const UUID &uu);
@@ -30,6 +31,7 @@ namespace horizon {
 			json serialize() const ;
 			virtual Junction *get_junction(const UUID &uu);
 			std::pair<Coordi, Coordi> get_bbox() const;
+			const std::map<int, Layer> &get_layers() const override;
 
 			Package(const Package &pkg);
 			void operator=(Package const &pkg);

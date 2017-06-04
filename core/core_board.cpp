@@ -13,27 +13,8 @@ namespace horizon {
 		rules(brd.rules),
 		m_board_filename(board_filename),
 		m_block_filename(block_filename),
-		m_via_dir(via_dir),
-		m_layers({
-		{50, {50, "Outline", {.6,.6, 0}}},
-		{40, {40, "Top Courtyard", {.5,.5,.5}}},
-		{30, {30, "Top Placement", {.5,.5,.5}}},
-		{20, {20, "Top Silkscreen", {.9,.9,.9}}},
-		{10, {10, "Top Mask", {1,.5,.5}}},
-		{0, {0, "Top Copper", {1,0,0}, false, true}},
-		{-100, {-100, "Bottom Copper", {0,.5,0}, true, true}},
-		{-110, {-110, "Bottom Mask", {.25,.5,.25}, true}},
-		{-120, {-120, "Bottom Silkscreen", {.9,.9,.9}, true}},
-		{-130, {-130, "Bottom Placement", {.5,.5,.5}}},
-		{-140, {-140, "Bottom Courtyard", {.5,.5,.5}}},
-
-	})
+		m_via_dir(via_dir)
 	{
-		for(unsigned int i = 0; i<brd.n_inner_layers; i++) {
-			auto j = i+1;
-			m_layers.emplace(std::make_pair(-j, Layer(-j, "Inner "+std::to_string(j), {1,1,0}, false, true)));
-		}
-
 		m_pool = &pool;
 		brd.block = &block;
 		brd_work.block = &block_work;
@@ -326,8 +307,8 @@ namespace horizon {
 		Core::rebuild(from_undo);
 	}
 
-	const std::map<int, Layer> &CoreBoard::get_layers() {
-		return m_layers;
+	LayerProvider *CoreBoard::get_layer_provider() {
+		return &brd;
 	}
 
 	const Board *CoreBoard::get_canvas_data() {

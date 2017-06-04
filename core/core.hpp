@@ -190,8 +190,7 @@ namespace horizon {
 			//void set_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool value);
 			//virtual bool *get_set_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property) {return nullptr;}
 
-			virtual const std::map<int, Layer> &get_layers();
-			const std::vector<int> &get_layers_sorted();
+			virtual class LayerProvider *get_layer_provider() {return nullptr;};
 
 			/**
 			 * @returns the current document's meta information.

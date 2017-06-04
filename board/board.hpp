@@ -16,16 +16,18 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include "common/layer_provider.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;
 
-	class Board: public Object {
+	class Board: public Object, public LayerProvider {
 		private :
 			Board(const UUID &uu, const json &, Block &block, Pool &pool, ViaPadstackProvider &vpp);
 			//unsigned int update_nets();
 			bool propagate_net_segments();
 			std::map<UUID, uuid_ptr<Net>> net_segments;
+			std::map<int, Layer> layers;
 
 
 		public :
@@ -44,11 +46,13 @@ namespace horizon {
 			void smash_package(BoardPackage *pkg);
 			void unsmash_package(BoardPackage *pkg);
 			Junction *get_junction(const UUID &uu) override;
+			const std::map<int, Layer> &get_layers() const override;
+			void set_n_inner_layers(unsigned int n);
+			unsigned int get_n_inner_layers() const;
 
 			UUID uuid;
 			Block *block;
 			std::string name;
-			unsigned int n_inner_layers = 0;
 			std::map<UUID, Polygon> polygons;
 			std::map<UUID, Hole> holes;
 			std::map<UUID, BoardPackage> packages;
@@ -67,6 +71,9 @@ namespace horizon {
 			ClipperLib::Path  track_path;
 
 			json serialize() const;
+
+		private:
+			unsigned int n_inner_layers = 0;
 	};
 
 }

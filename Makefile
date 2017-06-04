@@ -13,6 +13,7 @@ SRC_COMMON = \
 	common/junction.cpp \
 	common/line.cpp \
 	common/arc.cpp \
+	common/layer_provider.cpp \
 	pool/gate.cpp\
 	block/net.cpp\
 	block/bus.cpp\

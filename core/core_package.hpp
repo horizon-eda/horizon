@@ -22,7 +22,7 @@ namespace horizon {
 			Hole *get_hole(const UUID &uu, bool work=true);
 			void delete_hole(const UUID &uu, bool work = true);*/
 
-			const std::map<int, Layer> &get_layers() override;
+			class LayerProvider *get_layer_provider() override;
 
 			std::string get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
 			void set_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, const std::string &value, bool *handled=nullptr) override;

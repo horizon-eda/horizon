@@ -20,7 +20,6 @@ namespace horizon {
 		core.r->selection.clear();
 		update_tip();
 		rules = dynamic_cast<BoardRules*>(core.r->get_rules());
-		canvas_patch.set_core(core.r);
 		canvas_patch.update(*core.b->get_board());
 
 		return ToolResponse();
@@ -47,7 +46,6 @@ namespace horizon {
 	void ToolRouteTrack::update_obstacles() {
 		obstacles.clear();
 		canvas_patch.patches.clear();
-		canvas_patch.set_core(core.r);
 		canvas_patch.update(*core.b->get_board());
 
 		ClipperLib::Clipper clipper;
@@ -286,7 +284,7 @@ namespace horizon {
 					net_segment = pad->net_segment;
 					if(net) {
 						ToolArgs a(args);
-						if(!core.b->get_layers().at(a.work_layer).copper) {
+						if(!core.b->get_board()->get_layers().at(a.work_layer).copper) {
 							a.work_layer = 0;
 						}
 						if((pad->padstack.type == Padstack::Type::TOP) ^ pkg->flip) {
@@ -316,7 +314,7 @@ namespace horizon {
 					net_segment = junc->net_segment;
 					if(net) {
 						ToolArgs a(args);
-						if(!core.b->get_layers().at(a.work_layer).copper) {
+						if(!core.b->get_board()->get_layers().at(a.work_layer).copper) {
 							a.work_layer = 0;
 						}
 						if(!junc->has_via) {

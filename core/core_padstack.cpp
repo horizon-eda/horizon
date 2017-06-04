@@ -12,14 +12,6 @@ namespace horizon {
 		m_pool = &pool;
 	}
 
-	static const std::map<int, Layer> layers = {
-		{10, {10, "Top Mask", {1,.5,.5}}},
-		{0, {0, "Top Copper", {1,0,0}}},
-		{-1, {-1, "Inner", {1,1,0}}},
-		{-100, {-100, "Bottom Copper", {0,1,0}}},
-		{-110, {-110, "Bottom Mask", {.5,1,.5}}}
-	};
-
 	bool CorePadstack::has_object_type(ObjectType ty) {
 		switch(ty) {
 			case ObjectType::HOLE:
@@ -83,8 +75,8 @@ namespace horizon {
 		set_needs_save(true);
 	}
 
-	const std::map<int, Layer> &CorePadstack::get_layers() {
-		return layers;
+	LayerProvider *CorePadstack::get_layer_provider() {
+		return &padstack;
 	}
 
 	std::map<UUID, Polygon> *CorePadstack::get_polygon_map(bool work) {
