@@ -1,7 +1,6 @@
 #pragma once
 #include "uuid.hpp"
 #include "json.hpp"
-#include "object.hpp"
 #include "unit.hpp"
 #include "gate.hpp"
 #include <vector>
@@ -13,13 +12,13 @@ namespace horizon {
 
 	class Entity {
 		private :
-			Entity(const UUID &uu, const json &, Object &objj);
+			Entity(const UUID &uu, const json &, class Pool &pool);
 
 		public :
 			Entity(const UUID &uu);
-			Entity(const UUID &uu, const YAML::Node &n, Object &objj);
+			Entity(const UUID &uu, const YAML::Node &n, Pool &pool);
 
-			static Entity new_from_file(const std::string &filename, Object &obj);
+			static Entity new_from_file(const std::string &filename, Pool &pool);
 			UUID uuid;
 			std::string name;
 			std::string prefix;

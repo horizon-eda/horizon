@@ -4,7 +4,6 @@
 #include "common.hpp"
 #include "unit.hpp"
 #include "entity.hpp"
-#include "object.hpp"
 #include "symbol.hpp"
 #include "padstack.hpp"
 #include <vector>

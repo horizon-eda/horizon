@@ -1,5 +1,6 @@
 #include "component.hpp"
 #include "part.hpp"
+#include "block.hpp"
 
 namespace horizon {
 
@@ -9,10 +10,10 @@ namespace horizon {
 		return j;
 	}
 
-	Connection::Connection(const json &j, Object &obj):net(obj.get_net(j.at("net").get<std::string>())){
+	Connection::Connection(const json &j, Block &block):net(block.get_net(j.at("net").get<std::string>())){
 		}
 
-	Component::Component(const UUID &uu, const json &j, Pool &pool, Object &block):
+	Component::Component(const UUID &uu, const json &j, Pool &pool, Block &block):
 			uuid(uu),
 			entity(pool.get_entity(j.at("entity").get<std::string>())),
 			refdes(j.at("refdes").get<std::string>()),

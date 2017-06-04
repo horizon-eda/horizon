@@ -7,13 +7,13 @@
 #include "junction.hpp"
 #include "line.hpp"
 #include "arc.hpp"
-#include "object.hpp"
 #include "text.hpp"
 #include "uuid_provider.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
 #include <set>
+#include "object_provider.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;
@@ -45,11 +45,11 @@ namespace horizon {
 			virtual UUID get_uuid() const;
 	};
 	
-	class Symbol : public Object, public LayerProvider {
+	class Symbol : public ObjectProvider, public LayerProvider {
 		public :
-			Symbol(const UUID &uu, const json &j, Object &obj);
+			Symbol(const UUID &uu, const json &j, class Pool &pool);
 			Symbol(const UUID &uu);
-			static Symbol new_from_file(const std::string &filename, Object &obj);
+			static Symbol new_from_file(const std::string &filename, Pool &pool);
 			std::pair<Coordi, Coordi> get_bbox(bool all=false) const;
 			virtual Junction *get_junction(const UUID &uu);
 			virtual SymbolPin *get_symbol_pin(const UUID &uu);

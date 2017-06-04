@@ -1,25 +1,26 @@
 #include "gate.hpp"
+#include "pool.hpp"
 
 namespace horizon {
 
-	Gate::Gate(const UUID &uu, const json &j, Object &obj):
+	Gate::Gate(const UUID &uu, const json &j, Pool &pool):
 			uuid(uu),
 			name(j.at("name").get<std::string>()),
 			suffix(j.at("suffix").get<std::string>()),
 			swap_group(j.value("swap_group", 0)),
-			unit(obj.get_unit(j.at("unit").get<std::string>()))
+			unit(pool.get_unit(j.at("unit").get<std::string>()))
 
 		{
 		}
 
 	Gate::Gate(const UUID &uu): uuid(uu) {}
 
-	Gate::Gate(const UUID &uu, const YAML::Node &n, Object &obj) :
+	Gate::Gate(const UUID &uu, const YAML::Node &n, Pool &pool) :
 		uuid(uu),
 		name(n["name"].as<std::string>()),
 		suffix(n["suffix"].as<std::string>(name)),
 		swap_group(n["swap_group"].as<unsigned int>(0)),
-		unit(obj.get_unit(n["unit"].as<std::string>()))
+		unit(pool.get_unit(n["unit"].as<std::string>()))
 	{}
 
 	UUID Gate::get_uuid() const {

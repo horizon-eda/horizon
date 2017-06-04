@@ -1,7 +1,6 @@
 #pragma once
 #include "uuid.hpp"
 #include "json.hpp"
-#include "object.hpp"
 #include "unit.hpp"
 #include "block.hpp"
 #include "schematic_symbol.hpp"
@@ -35,7 +34,7 @@ namespace horizon {
 
 	class Sheet: public LayerProvider {
 		public :
-			Sheet(const UUID &uu, const json &, Block &Block, Object &pool);
+			Sheet(const UUID &uu, const json &, Block &Block, class Pool &pool);
 			Sheet(const UUID &uu);
 			UUID uuid;
 			std::string name;

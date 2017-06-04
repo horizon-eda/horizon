@@ -2,7 +2,6 @@
 #include "uuid.hpp"
 #include "json.hpp"
 #include "common.hpp"
-#include "object.hpp"
 #include "uuid_provider.hpp"
 #include "junction.hpp"
 #include "line.hpp"
@@ -17,12 +16,13 @@
 #include <map>
 #include <fstream>
 #include <set>
+#include "object_provider.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;
 
 
-	class Package : public Object, public LayerProvider {
+	class Package : public ObjectProvider, public LayerProvider {
 		public :
 			Package(const UUID &uu, const json &j, class Pool &pool);
 			Package(const UUID &uu);

@@ -1,7 +1,6 @@
 #pragma once
 #include "uuid.hpp"
 #include "json.hpp"
-#include "object.hpp"
 #include "unit.hpp"
 #include "uuid_provider.hpp"
 #include <vector>
@@ -13,9 +12,9 @@ namespace horizon {
 
 	class Gate : public UUIDProvider {
 		public :
-			Gate(const UUID &uu, const json &, Object &objj);
+			Gate(const UUID &uu, const json &, class Pool &pool);
 			Gate(const UUID &uu);
-			Gate(const UUID &uu, const YAML::Node &n, Object &objj);
+			Gate(const UUID &uu, const YAML::Node &n, Pool &pool);
 			virtual UUID get_uuid()const ;
 			UUID uuid;
 			std::string name;

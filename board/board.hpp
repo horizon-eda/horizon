@@ -21,7 +21,7 @@
 namespace horizon {
 	using json = nlohmann::json;
 
-	class Board: public Object, public LayerProvider {
+	class Board: public ObjectProvider, public LayerProvider {
 		private :
 			Board(const UUID &uu, const json &, Block &block, Pool &pool, ViaPadstackProvider &vpp);
 			//unsigned int update_nets();

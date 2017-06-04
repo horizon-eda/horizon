@@ -1,7 +1,6 @@
 #pragma once
 #include "uuid.hpp"
 #include "json.hpp"
-#include "object.hpp"
 #include "unit.hpp"
 #include "symbol.hpp"
 #include "block.hpp"

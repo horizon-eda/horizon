@@ -1,9 +1,10 @@
 #include "sheet.hpp"
 #include "part.hpp"
+#include "pool.hpp"
 
 namespace horizon {
 
-	Sheet::Sheet(const UUID &uu, const json &j, Block &block, Object &pool):
+	Sheet::Sheet(const UUID &uu, const json &j, Block &block, Pool &pool):
 			uuid(uu),
 			name(j.at("name").get<std::string>()),
 			index(j.at("index").get<unsigned int>())
@@ -19,7 +20,7 @@ namespace horizon {
 				const json &o = j["symbols"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					symbols.emplace(std::make_pair(u, SchematicSymbol(u, it.value(), block, dynamic_cast<Pool&>(pool))));
+					symbols.emplace(std::make_pair(u, SchematicSymbol(u, it.value(), block, pool)));
 				}
 			}
 			/*{

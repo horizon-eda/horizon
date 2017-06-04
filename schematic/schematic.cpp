@@ -34,7 +34,7 @@ namespace horizon {
 		return j;
 	}
 
-	Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, Object &pool):
+	Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, Pool &pool):
 			uuid(uu),
 			block(&iblock),
 			name(j.at("name").get<std::string>()),
@@ -50,7 +50,7 @@ namespace horizon {
 			update_refs();
 		}
 
-	Schematic Schematic::new_from_file(const std::string &filename, Block &block, Object &pool) {
+	Schematic Schematic::new_from_file(const std::string &filename, Block &block, Pool &pool) {
 		json j;
 		std::ifstream ifs(filename);
 		if(!ifs.is_open()) {

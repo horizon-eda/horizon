@@ -10,7 +10,7 @@ namespace horizon {
 		name = "Paste";
 	}
 
-	class JunctionProvider: public Object {
+	class JunctionProvider: public ObjectProvider {
 		public:
 			JunctionProvider(Core *c, const std::map<UUID, const UUID> &xj):core(c), junction_xlat(xj) {}
 			virtual ~JunctionProvider() {}

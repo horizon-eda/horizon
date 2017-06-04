@@ -4,12 +4,12 @@
 #include "common.hpp"
 #include "unit.hpp"
 #include "entity.hpp"
-#include "object.hpp"
 #include "symbol.hpp"
 #include "padstack.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
+
 #include "sqlite.hpp"
 
 namespace horizon {
@@ -18,7 +18,7 @@ namespace horizon {
 	 * Stores objects (Unit, Entity, Symbol, Part, etc.) from the pool.
 	 * Objects are lazy-loaded when they're accessed for the first time.
 	 */
-	class Pool : public Object {
+	class Pool {
 		public :
 			/**
 			 * Constructs a Pool

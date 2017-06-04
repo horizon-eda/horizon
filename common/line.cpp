@@ -1,10 +1,10 @@
+#include "object_provider.hpp"
 #include "line.hpp"
 #include "lut.hpp"
-#include "object.hpp"
 
 namespace horizon {
 	
-	Line::Line(const UUID &uu, const json &j, Object &obj):
+	Line::Line(const UUID &uu, const json &j, ObjectProvider &obj):
 		uuid(uu),
 		to(obj.get_junction(j.at("to").get<std::string>())),
 		from(obj.get_junction(j.at("from").get<std::string>())),

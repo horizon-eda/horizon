@@ -1,7 +1,6 @@
 #pragma once
 #include "uuid.hpp"
 #include "json.hpp"
-#include "object.hpp"
 #include "unit.hpp"
 #include "block.hpp"
 #include "sheet.hpp"
@@ -25,12 +24,12 @@ namespace horizon {
 	 */
 	class Schematic {
 		private :
-			Schematic(const UUID &uu, const json &, Block &block, Object &pool);
+			Schematic(const UUID &uu, const json &, Block &block, class Pool &pool);
 			unsigned int update_nets();
 
 
 		public :
-			static Schematic new_from_file(const std::string &filename, Block &block, Object &pool);
+			static Schematic new_from_file(const std::string &filename, Block &block, Pool &pool);
 			Schematic(const UUID &uu, Block &block);
 
 			/**

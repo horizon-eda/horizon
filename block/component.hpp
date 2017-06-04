@@ -6,7 +6,6 @@
 #include "junction.hpp"
 #include "line.hpp"
 #include "arc.hpp"
-#include "object.hpp"
 #include "entity.hpp"
 #include "uuid_path.hpp"
 #include "uuid_ptr.hpp"
@@ -21,7 +20,7 @@ namespace horizon {
 
 	class Connection {
 		public:
-		Connection(const json &j, Object &obj);
+		Connection(const json &j, class Block &block);
 		Connection(Net *n):net(n){}
 		uuid_ptr<Net> net;
 
@@ -42,9 +41,9 @@ namespace horizon {
 	 * exchanging parts for logically identical parts of the same kind.
 	 * When a part Pis assigned, the value of the Component gets overriden by the Part.
 	 */
-	class Component : public Object, public UUIDProvider {
+	class Component : public UUIDProvider {
 		public :
-			Component(const UUID &uu, const json &j, Pool &pool, Object &block);
+			Component(const UUID &uu, const json &j, Pool &pool, class Block &block);
 			Component(const UUID &uu);
 
 

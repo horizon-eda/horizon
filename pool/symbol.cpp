@@ -2,6 +2,7 @@
 #include "junction.hpp"
 #include "line.hpp"
 #include "lut.hpp"
+#include "pool.hpp"
 #include <iostream>
 #include <algorithm>
 
@@ -40,9 +41,9 @@ namespace horizon {
 		return uuid;
 	}
 
-	Symbol::Symbol(const UUID &uu, const json &j, Object &obj):
+	Symbol::Symbol(const UUID &uu, const json &j, Pool &pool):
 		uuid(uu),
-		unit(obj.get_unit(j.at("unit").get<std::string>())),
+		unit(pool.get_unit(j.at("unit").get<std::string>())),
 		name(j.value("name", ""))
 	{
 		if(j.count("junctions")) {
@@ -84,7 +85,7 @@ namespace horizon {
 	
 	Symbol::Symbol(const UUID &uu): uuid(uu) {}
 
-	Symbol Symbol::new_from_file(const std::string &filename, Object &obj) {
+	Symbol Symbol::new_from_file(const std::string &filename, Pool &pool) {
 				json j;
 				std::ifstream ifs(filename);
 				if(!ifs.is_open()) {
@@ -92,7 +93,7 @@ namespace horizon {
 				}
 				ifs>>j;
 				ifs.close();
-				return Symbol(UUID(j["uuid"].get<std::string>()), j, obj);
+				return Symbol(UUID(j["uuid"].get<std::string>()), j, pool);
 			}
 
 	Junction *Symbol::get_junction(const UUID &uu)  {

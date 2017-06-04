@@ -2,13 +2,11 @@
 #include "uuid.hpp"
 #include "json.hpp"
 #include "common.hpp"
-#include "object.hpp"
 #include "uuid_provider.hpp"
 #include "placement.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
-
 
 namespace horizon {
 	using json = nlohmann::json;

@@ -3,12 +3,10 @@
 #include "json.hpp"
 #include "common.hpp"
 #include "junction.hpp"
-#include "object.hpp"
 #include "uuid_ptr.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
-		
 
 namespace horizon {
 	using json = nlohmann::json;
@@ -20,7 +18,7 @@ namespace horizon {
 	 */
 	class Line {
 		public :
-			Line(const UUID &uu, const json &j, Object &obj);
+			Line(const UUID &uu, const json &j, class ObjectProvider &obj);
 			Line(UUID uu);
 
 			UUID uuid;

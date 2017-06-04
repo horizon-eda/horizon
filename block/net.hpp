@@ -1,13 +1,13 @@
 #pragma once
 #include "uuid.hpp"
 #include "json.hpp"
-#include "object.hpp"
 #include "unit.hpp"
 #include "uuid_provider.hpp"
 #include "util/uuid_ptr.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
+
 #include "net_class.hpp"
 
 namespace horizon {

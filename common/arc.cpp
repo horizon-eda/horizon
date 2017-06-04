@@ -1,11 +1,11 @@
+#include "object_provider.hpp"
 #include "arc.hpp"
 #include "lut.hpp"
-#include "object.hpp"
 #include <algorithm>
 
 namespace horizon {
 	
-	Arc::Arc(const UUID &uu, const json &j, Object &obj):
+	Arc::Arc(const UUID &uu, const json &j, ObjectProvider &obj):
 		uuid(uu),
 		to(obj.get_junction(j["to"].get<std::string>())),
 		from(obj.get_junction(j["from"].get<std::string>())),

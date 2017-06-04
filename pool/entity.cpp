@@ -1,8 +1,9 @@
 #include "entity.hpp"
+#include "pool.hpp"
 
 namespace horizon {
 
-	Entity::Entity(const UUID &uu, const json &j, Object &obj):
+	Entity::Entity(const UUID &uu, const json &j, Pool &pool):
 			uuid(uu),
 			name(j.at("name").get<std::string>()),
 			prefix(j.at("prefix").get<std::string>())
@@ -12,7 +13,7 @@ namespace horizon {
 				const json &o = j["gates"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					gates.emplace(std::make_pair(u, Gate(u, it.value(), obj)));
+					gates.emplace(std::make_pair(u, Gate(u, it.value(), pool)));
 				}
 			}
 			if(j.count("tags")) {
@@ -22,7 +23,7 @@ namespace horizon {
 
 	Entity::Entity(const UUID &uu): uuid(uu) {}
 
-	Entity::Entity(const UUID &uu, const YAML::Node &n, Object &obj) :
+	Entity::Entity(const UUID &uu, const YAML::Node &n, Pool &pool) :
 		uuid(uu),
 		name(n["name"].as<std::string>()),
 		prefix(n["prefix"].as<std::string>())
@@ -31,11 +32,11 @@ namespace horizon {
 		tags.insert(tv.begin(), tv.end());
 		for(const auto &it: n["gates"]) {
 			UUID g_uuid = it["uuid"].as<std::string>(UUID::random());
-			gates.insert(std::make_pair(g_uuid, Gate(g_uuid, it, obj)));
+			gates.insert(std::make_pair(g_uuid, Gate(g_uuid, it, pool)));
 		}
 	}
 
-	Entity Entity::new_from_file(const std::string &filename, Object &obj) {
+	Entity Entity::new_from_file(const std::string &filename, Pool &pool) {
 		json j;
 		std::ifstream ifs(filename);
 		if(!ifs.is_open()) {
@@ -43,7 +44,7 @@ namespace horizon {
 		}
 		ifs>>j;
 		ifs.close();
-		return Entity(UUID(j["uuid"].get<std::string>()), j, obj);
+		return Entity(UUID(j["uuid"].get<std::string>()), j, pool);
 	}
 
 	json Entity::serialize() const {
