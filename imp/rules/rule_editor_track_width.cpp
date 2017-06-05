@@ -22,9 +22,9 @@ namespace horizon {
 		builder->get_widget("layer_grid", layer_grid);
 		auto layers = core->get_layer_provider()->get_layers();
 		int top = 1;
-		for(const auto &it: layers) {
-			auto &la = it.second;
-			auto i = it.first;
+		for(auto it = layers.rbegin(); it != layers.rend(); it++) {
+			auto &la = it->second;
+			auto i = it->first;
 			if(la.copper) {
 				std::cout << "have cu layer " << la.name << std::endl;
 				if(rule2->widths.count(i) == 0) {

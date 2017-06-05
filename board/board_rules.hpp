@@ -37,8 +37,5 @@ namespace horizon {
 			RulesCheckResult check_track_width(const class Board *b);
 			RulesCheckResult check_hole_size(const class Board *b);
 			RulesCheckResult check_clearance_copper(const class Board *b, class RulesCheckCache &cache);
-
-
-
 	};
 }
