@@ -87,6 +87,7 @@ namespace horizon {
 
 		if(j.count("rules")) {
 			rules.load_from_json(j.at("rules"));
+			rules.cleanup(block);
 		}
 
 	}

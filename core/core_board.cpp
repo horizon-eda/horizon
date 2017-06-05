@@ -59,6 +59,7 @@ namespace horizon {
 			}
 		}
 		brd.update_refs();
+		rules.cleanup(&block);
 
 		rebuild(true);
 

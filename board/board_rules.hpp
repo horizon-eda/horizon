@@ -24,6 +24,7 @@ namespace horizon {
 			std::map<UUID, Rule*> get_rules(RuleID id);
 			void remove_rule(RuleID id, const UUID &uu);
 			Rule *add_rule(RuleID id);
+			void cleanup(const class Block *block);
 
 			uint64_t get_default_track_width(class Net *net, int layer);
 			const RuleClearanceCopper *get_clearance_copper(Net *net_a, Net *net_b, int layer);

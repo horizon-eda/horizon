@@ -1,5 +1,6 @@
 #include "board_rules.hpp"
 #include "board.hpp"
+#include "block.hpp"
 #include "util.hpp"
 #include "rules/cache.hpp"
 
@@ -34,6 +35,19 @@ namespace horizon {
 		if(j.count("clearance_silkscreen_exposed_copper")) {
 			const json &o = j["clearance_silkscreen_exposed_copper"];
 			rule_clearance_silkscreen_exposed_copper = RuleClearanceSilkscreenExposedCopper(o);
+		}
+	}
+
+	void BoardRules::cleanup(const Block *block) {
+		for(auto &it: rule_hole_size) {
+			it.second.match.cleanup(block);
+		}
+		for(auto &it: rule_clearance_copper) {
+			it.second.match_1.cleanup(block);
+			it.second.match_2.cleanup(block);
+		}
+		for(auto &it: rule_track_width) {
+			it.second.match.cleanup(block);
 		}
 	}
 

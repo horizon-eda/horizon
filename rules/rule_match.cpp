@@ -46,6 +46,13 @@ namespace horizon {
 		return false;
 	}
 
+	void RuleMatch::cleanup(const Block *block) {
+		if(!block->nets.count(net))
+			net = UUID();
+		if(!block->net_classes.count(net_class))
+			net_class = block->net_class_default->uuid;
+	}
+
 	std::string RuleMatch::get_brief(const Block *block) const {
 		if(block) {
 			switch(mode) {
