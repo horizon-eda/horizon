@@ -16,7 +16,6 @@
 #include "selection_filter_dialog.hpp"
 #include "keyseq_dialog.hpp"
 #include "widgets/spin_button_dim.hpp"
-#include "checks/check_runner.hpp"
 #include "imp_interface.hpp"
 #include <zmq.hpp>
 
@@ -52,8 +51,6 @@ namespace horizon {
 			Glib::RefPtr<Glib::Binding> grid_spacing_binding;
 			KeySequence key_seq;
 			
-			std::unique_ptr<class CheckRunner> check_runner=nullptr;
-			class ChecksWindow *checks_window = nullptr;
 			class RulesWindow *rules_window = nullptr;
 
 			zmq::context_t zctx;

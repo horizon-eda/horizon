@@ -6,7 +6,6 @@
 #include "widgets/spin_button_dim.hpp"
 #include "export_gerber/gerber_export.hpp"
 #include "part.hpp"
-#include "checks/checks_window.hpp"
 #include "rules/rules_window.hpp"
 #include "util.hpp"
 #include <iomanip>
@@ -144,10 +143,6 @@ namespace horizon {
 		key_sequence_dialog->add_sequence("Ctrl+I", "Selection filter");
 		key_sequence_dialog->add_sequence("Esc", "Hover select");
 
-
-		check_runner = std::make_unique<CheckRunner>(core.r);
-
-
 		grid_spin_button = Gtk::manage(new SpinButtonDim());
 		grid_spin_button->set_range(0.1_mm, 10_mm);
 		grid_spacing_binding = Glib::Binding::bind_property(grid_spin_button->property_value(), canvas->property_grid_spacing(), Glib::BINDING_BIDIRECTIONAL);
@@ -169,16 +164,6 @@ namespace horizon {
 		help_button->signal_clicked().connect([this]{key_sequence_dialog->show();});
 		help_button->show();
 		main_window->top_panel->pack_end(*help_button, false, false, 0);
-
-		checks_window = ChecksWindow::create(main_window, check_runner.get(), canvas);
-
-		{
-			auto button = Gtk::manage(new Gtk::Button("Checks"));
-			main_window->top_panel->pack_start(*button, false, false, 0);
-			button->show();
-			button->signal_clicked().connect([this]{checks_window->present();});
-			core.r->signal_tool_changed().connect([button](ToolID t){button->set_sensitive(t==ToolID::NONE);});
-		}
 
 		if(core.r->get_rules()) {
 			rules_window = RulesWindow::create(main_window, canvas, core.r->get_rules(), core.r);

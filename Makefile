@@ -193,12 +193,6 @@ SRC_IMP = \
 	imp/footprint_generator/footprint_generator_single.cpp\
 	imp/footprint_generator/footprint_generator_quad.cpp\
 	imp/footprint_generator/svg_overlay.cpp\
-	checks/check_runner.cpp\
-	checks/check.cpp\
-	checks/cache.cpp\
-	checks/single_pin_net.cpp\
-	imp/checks/checks_window.cpp\
-	imp/checks/check_settings_dialog.cpp\
 	imp/imp_interface.cpp\
 	widgets/pool_browser_part.cpp\
 	dxflib/dl_dxf.cpp\
