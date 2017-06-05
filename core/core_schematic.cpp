@@ -9,6 +9,7 @@ namespace horizon {
 		block_work(block),
 		sch(Schematic::new_from_file(schematic_filename, block, pool)),
 		sch_work(sch),
+		rules(sch.rules),
 		m_schematic_filename(schematic_filename),
 		m_block_filename(block_filename)
 	{
@@ -169,6 +170,10 @@ namespace horizon {
 		}
 
 		return false;
+	}
+
+	Rules *CoreSchematic::get_rules() {
+		return &rules;
 	}
 
 
@@ -512,6 +517,7 @@ namespace horizon {
 	}
 
 	void CoreSchematic::save() {
+		sch.rules = rules;
 		save_json_to_file(m_schematic_filename, sch.serialize());
 		save_json_to_file(m_block_filename, block.serialize());
 		set_needs_save(false);

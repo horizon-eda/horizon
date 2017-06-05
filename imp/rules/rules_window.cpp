@@ -8,6 +8,7 @@
 #include "rule_editor_clearance_silk_exp_copper.hpp"
 #include "rule_editor_track_width.hpp"
 #include "rule_editor_clearance_copper.hpp"
+#include "rule_editor_single_pin_net.hpp"
 #include "widgets/cell_renderer_layer_display.hpp"
 #include "rules/rules_with_core.hpp"
 #include "rules/cache.hpp"
@@ -280,6 +281,10 @@ namespace horizon {
 
 			case RuleID::CLEARANCE_COPPER :
 				e = new RuleEditorClearanceCopper(r, core);
+			break;
+
+			case RuleID::SINGLE_PIN_NET :
+				e = new RuleEditorSinglePinNet(r, core);
 			break;
 
 			default:

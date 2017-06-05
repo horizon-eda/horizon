@@ -7,7 +7,7 @@
 #include "canvas/canvas_patch.hpp"
 
 namespace horizon {
-	enum class RulesCheckCacheID {NONE, BOARD_IMAGE};
+	enum class RulesCheckCacheID {NONE, BOARD_IMAGE, NET_PINS};
 
 	class RulesCheckCacheBase {
 		public:
@@ -21,6 +21,16 @@ namespace horizon {
 
 		private:
 			CanvasPatch canvas;
+	};
+
+	class RulesCheckCacheNetPins: public RulesCheckCacheBase {
+		public:
+			RulesCheckCacheNetPins(class Core *c);
+			const std::map<class Net*, std::deque<std::tuple<class Component*, const class Gate *, const class Pin*, UUID, Coordi>>> &get_net_pins() const;
+
+		private :
+			std::map<class Net*, std::deque<std::tuple<class Component*, const class Gate *, const class Pin*, UUID, Coordi>>> net_pins;
+
 	};
 
 	class RulesCheckCache {

@@ -4,6 +4,7 @@
 #include "unit.hpp"
 #include "block.hpp"
 #include "sheet.hpp"
+#include "schematic_rules.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -72,6 +73,8 @@ namespace horizon {
 			Block *block;
 			std::string name;
 			std::map<UUID, Sheet> sheets;
+			SchematicRules rules;
+
 
 			class Annotation {
 				public:

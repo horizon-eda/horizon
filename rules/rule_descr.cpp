@@ -7,5 +7,6 @@ namespace horizon {
 		{RuleID::TRACK_WIDTH, {"Track width", true}},
 		{RuleID::CLEARANCE_COPPER, {"Copper clearance", true}},
 		{RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, {"Clearance\nSilkscreen - Exposed copper", false}},
+		{RuleID::SINGLE_PIN_NET, {"Single pin nets", false}},
 	};
 }

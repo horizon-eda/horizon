@@ -30,6 +30,8 @@ SRC_COMMON = \
 	schematic/schematic_symbol.cpp\
 	schematic/power_symbol.cpp\
 	schematic/frame.cpp\
+	schematic/schematic_rules.cpp\
+	schematic/rule_single_pin_net.cpp\
 	pool/padstack.cpp\
 	common/polygon.cpp\
 	common/hole.cpp\
@@ -209,9 +211,11 @@ SRC_IMP = \
 	imp/rules/rule_editor_clearance_silk_exp_copper.cpp\
 	imp/rules/rule_editor_track_width.cpp\
 	imp/rules/rule_editor_clearance_copper.cpp\
+	imp/rules/rule_editor_single_pin_net.cpp\
 	rules/rules_with_core.cpp\
 	rules/cache.cpp\
 	board/board_rules_check.cpp\
+	schematic/schematic_rules_check.cpp\
 
 
 SRC_POOL_UTIL = \

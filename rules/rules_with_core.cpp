@@ -1,12 +1,18 @@
 #include "rules_with_core.hpp"
 #include "core/core_board.hpp"
+#include "core/core_schematic.hpp"
 #include "board/board_rules.hpp"
+#include "schematic/schematic_rules.hpp"
 
 namespace horizon {
 	RulesCheckResult rules_check(Rules *r, RuleID id, class Core *c, RulesCheckCache &cache) {
 		if(auto rules = dynamic_cast<BoardRules*>(r)) {
 			auto core = dynamic_cast<CoreBoard*>(c);
 			return rules->check(id, core->get_board(), cache);
+		}
+		if(auto rules = dynamic_cast<SchematicRules*>(r)) {
+			auto core = dynamic_cast<CoreSchematic*>(c);
+			return rules->check(id, core->get_schematic(), cache);
 		}
 		return RulesCheckResult();
 	}

@@ -49,6 +49,9 @@ namespace horizon {
 					sheets.emplace(std::make_pair(u, Sheet(u, it.value(), *block, pool)));
 				}
 			}
+			if(j.count("rules")) {
+				rules.load_from_json(j.at("rules"));
+			}
 			update_refs();
 		}
 
@@ -600,6 +603,7 @@ namespace horizon {
 		block(sch.block),
 		name(sch.name),
 		sheets(sch.sheets),
+		rules(sch.rules),
 		annotation(sch.annotation)
 	{
 		update_refs();
@@ -610,6 +614,7 @@ namespace horizon {
 		block = sch.block;
 		name = sch.name;
 		sheets = sch.sheets;
+		rules = sch.rules;
 		annotation = sch.annotation;
 		update_refs();
 	}
@@ -653,10 +658,6 @@ namespace horizon {
 			for(auto &it_sym: sheet.bus_rippers) {
 				it_sym.second.update_refs(sheet, *block);
 			}
-			/*for(auto &it_junc: sheet.junction_pins) {
-				JunctionPin &junc = it_junc.second;
-				junc.sym = &sheet.symbols.at(junc.pin_path.at(0));
-			}*/
 		}
 	}
 
@@ -667,6 +668,7 @@ namespace horizon {
 		j["block"] = (std::string)block->uuid;
 		j["name"] = name;
 		j["annotation"] = annotation.serialize();
+		j["rules"] = rules.serialize();
 
 
 		j["sheets"] = json::object();

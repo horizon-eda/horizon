@@ -55,6 +55,8 @@ namespace horizon {
 			bool get_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
 			void set_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool value, bool *handled=nullptr) override;
 
+			class Rules *get_rules() override;
+
 			void rebuild(bool from_undo=false) override;
 			void commit() override;
 			void revert() override;
@@ -73,6 +75,8 @@ namespace horizon {
 
 			Schematic sch;
 			Schematic sch_work;
+
+			SchematicRules rules;
 
 			UUID sheet_uuid;
 			std::string m_schematic_filename;
