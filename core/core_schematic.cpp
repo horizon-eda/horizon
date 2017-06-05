@@ -163,6 +163,7 @@ namespace horizon {
 			case ObjectType::NET_LABEL:
 			case ObjectType::LINE_NET:
 			case ObjectType::POWER_SYMBOL:
+			case ObjectType::TEXT:
 				return true;
 			break;
 			default:

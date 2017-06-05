@@ -352,8 +352,10 @@ namespace horizon {
 		auto extents = draw_text0(transform.shift, text.size, text.overridden?text.text_override:text.text, angle, rev, text.origin, c, true, text.width);
 		img_text_layer(10000);
 		transform_restore();
-		if(interactive)
+		if(interactive) {
 			selectables.append(text.uuid, ObjectType::TEXT, text.placement.shift, extents.first, extents.second, 0, text.layer);
+			targets.emplace(text.uuid, ObjectType::TEXT, transform.transform(text.placement.shift));
+		}
 	}
 
 	template <typename T>
