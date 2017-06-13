@@ -167,23 +167,21 @@ namespace horizon {
 					return true;
 				}
 			}
-			else if(ta.type == ObjectType::PAD) {
+			if(ta.type == ObjectType::PAD) {
 				SelectableRef key(ta.path.at(0), ObjectType::BOARD_PACKAGE, ta.vertex);
 				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).get_flag(horizon::Selectable::Flag::SELECTED))) {
 					return true;
 				}
 			}
-			else if(ta.type == ObjectType::POLYGON_EDGE) {
+			if(ta.type == ObjectType::POLYGON_EDGE) {
 				SelectableRef key(ta.path.at(0), ObjectType::POLYGON_VERTEX, ta.vertex);
 				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).get_flag(horizon::Selectable::Flag::SELECTED))) {
 					return true;
 				}
 			}
-			else {
-				SelectableRef key(ta.path.at(0), ta.type, ta.vertex);
-				if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).get_flag(horizon::Selectable::Flag::SELECTED))) {
-					return true;
-				}
+			SelectableRef key(ta.path.at(0), ta.type, ta.vertex);
+			if(selectables.items_map.count(key) && (selectables.items.at(selectables.items_map.at(key)).get_flag(horizon::Selectable::Flag::SELECTED))) {
+				return true;
 			}
 			return false;
 
