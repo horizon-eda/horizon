@@ -1,6 +1,7 @@
 #include "imp_package.hpp"
 #include "part.hpp"
 #include "footprint_generator/footprint_generator_window.hpp"
+#include "imp/parameter_window.hpp"
 
 namespace horizon {
 	ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path):
@@ -74,6 +75,61 @@ namespace horizon {
 
 		footprint_generator_window = FootprintGeneratorWindow::create(main_window, &core_package);
 		footprint_generator_window->signal_generated().connect(sigc::mem_fun(this, &ImpBase::canvas_update_from_pp));
+
+		auto parameter_window = new ParameterWindow(main_window, &core_package.parameter_program_code, &core_package.parameter_set);
+		{
+			auto button = Gtk::manage(new Gtk::Button("Parameters..."));
+			main_window->top_panel->pack_start(*button, false, false, 0);
+			button->show();
+			button->signal_clicked().connect([this, parameter_window]{parameter_window->present();});
+		}
+		{
+			auto button = Gtk::manage(new Gtk::Button("Polygon expand"));
+			parameter_window->add_button(button);
+			button->signal_clicked().connect([this, parameter_window] {
+				auto sel = canvas->get_selection();
+				if(sel.size()==1) {
+					auto &s = *sel.begin();
+					if(s.type == ObjectType::POLYGON_EDGE || s.type == ObjectType::POLYGON_VERTEX) {
+						auto poly = core.r->get_polygon(s.uuid);
+						if(!poly->has_arcs()) {
+							std::stringstream ss;
+							ss << "expand-polygon [ " << poly->parameter_class << " ";
+							for(const auto &it: poly->vertices) {
+								ss << it.position.x << " " << it.position.y << " ";
+							}
+							ss << "]\n";
+							parameter_window->insert_text(ss.str());
+						}
+
+					}
+				}
+			});
+		}
+		parameter_window->signal_apply().connect([this, parameter_window] {
+			if(core.r->tool_is_active())
+				return;
+			auto ps = core_package.get_package(false);
+			auto r_compile = ps->parameter_program.set_code(core_package.parameter_program_code);
+			if(r_compile.first) {
+				parameter_window->set_error_message("<b>Compile error:</b>"+r_compile.second);
+				return;
+			}
+			else {
+				parameter_window->set_error_message("");
+			}
+			ps->parameter_set = core_package.parameter_set;
+			auto r = ps->parameter_program.run(ps->parameter_set);
+			if(r.first) {
+				parameter_window->set_error_message("<b>Run error:</b>"+r.second);
+				return;
+			}
+			else {
+				parameter_window->set_error_message("");
+			}
+			core_package.rebuild();
+			canvas_update();
+		});
 
 
 	}

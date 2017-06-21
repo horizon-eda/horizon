@@ -76,7 +76,7 @@ namespace horizon {
 			std::string out_filename;
 			void check_open();
 			std::map<uint64_t, unsigned int> apertures_circle;
-			std::map<std::tuple<UUID, int, bool>, ApertureMacro> apertures_macro;
+			std::map<std::tuple<UUID, std::string, int, bool>, ApertureMacro> apertures_macro;
 
 			unsigned int aperture_n=10;
 

@@ -6,7 +6,9 @@ namespace horizon {
 	CorePadstack::CorePadstack(const std::string &filename, Pool &pool):
 		padstack(Padstack::new_from_file(filename)),
 		padstack_work(padstack),
-		m_filename(filename)
+		m_filename(filename),
+		parameter_program_code(padstack.parameter_program.get_code()),
+		parameter_set(padstack.parameter_set)
 	{
 		rebuild();
 		m_pool = &pool;
@@ -39,6 +41,10 @@ namespace horizon {
 				switch(property) {
 					case ObjectProperty::ID::LAYER:
 						return padstack.shapes.at(uu).layer;
+					case ObjectProperty::ID::POSITION_X:
+						return padstack.shapes.at(uu).placement.shift.x;
+					case ObjectProperty::ID::POSITION_Y:
+						return padstack.shapes.at(uu).placement.shift.y;
 					default :
 						return 0;
 				}
@@ -58,11 +64,27 @@ namespace horizon {
 		switch(type) {
 			case ObjectType::SHAPE :
 				switch(property) {
-					case ObjectProperty::ID::LAYER:
-						if(value == padstack.shapes.at(uu).layer)
+					case ObjectProperty::ID::LAYER: {
+						auto &t = padstack.shapes.at(uu).layer;
+						if(value == t)
 							return;
-						padstack.shapes.at(uu).layer = value;
-					break;
+						t = value;
+					} break;
+
+					case ObjectProperty::ID::POSITION_X: {
+						auto &t = padstack.shapes.at(uu).placement.shift.x;
+						if(value == t)
+							return;
+						t = value;
+					} break;
+
+					case ObjectProperty::ID::POSITION_Y: {
+						auto &t = padstack.shapes.at(uu).placement.shift.y;
+						if(value == t)
+							return;
+						t = value;
+					} break;
+
 					default :
 						;
 				}
@@ -70,6 +92,56 @@ namespace horizon {
 
 			default :
 				;
+		}
+		rebuild();
+		set_needs_save(true);
+	}
+
+	std::string CorePadstack::get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
+		switch(type) {
+			case ObjectType::SHAPE :
+				switch(property) {
+					case ObjectProperty::ID::PARAMETER_CLASS :
+						return get_padstack(false)->shapes.at(uu).parameter_class;
+					break;
+					default :;
+				}
+			break;
+			case ObjectType::HOLE :
+				switch(property) {
+					case ObjectProperty::ID::PARAMETER_CLASS :
+						return get_padstack(false)->holes.at(uu).parameter_class;
+					break;
+					default :;
+				}
+			break;
+			default:;
+		}
+		return "<not handled>";
+	}
+
+	void CorePadstack::set_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, const std::string &value, bool *handled) {
+		switch(type) {
+			case ObjectType::SHAPE :
+				switch(property) {
+					case ObjectProperty::ID::PARAMETER_CLASS :
+						get_padstack(false)->shapes.at(uu).parameter_class = value;
+					break;
+					default :
+						return;
+				}
+			break;
+			case ObjectType::HOLE :
+				switch(property) {
+					case ObjectProperty::ID::PARAMETER_CLASS :
+						get_padstack(false)->holes.at(uu).parameter_class = value;
+					break;
+					default :
+						return;
+				}
+			break;
+			default:
+				return;
 		}
 		rebuild();
 		set_needs_save(true);
@@ -133,6 +205,9 @@ namespace horizon {
 	}
 
 	void CorePadstack::save() {
+		padstack.parameter_program.set_code(parameter_program_code);
+		padstack.parameter_set = parameter_set;
+
 		s_signal_save.emit();
 
 		std::ofstream ofs(m_filename);

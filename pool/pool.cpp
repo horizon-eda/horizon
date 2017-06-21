@@ -77,7 +77,7 @@ namespace horizon {
 			if(!q.step()) {
 				throw std::runtime_error("padstack not found");
 			}
-			std::string path = base_path+"/packages/"+q.get<std::string>(0);
+			std::string path = base_path+"/"+q.get<std::string>(0);
 			Padstack p = Padstack::new_from_file(path);
 			padstacks.insert(std::make_pair(uu, p));
 		}

@@ -45,6 +45,14 @@ namespace horizon {
 			s_signal_updated.emit();
 		});
 
+		auto sp_routing_offset = create_spinbutton("routing_offset_box");
+		sp_routing_offset->set_value(rule2->routing_offset);
+		sp_routing_offset->set_range(0, 10_mm);
+		sp_routing_offset->signal_value_changed().connect([this, sp_routing_offset]{
+			rule2->routing_offset = sp_routing_offset->get_value_as_int();
+			s_signal_updated.emit();
+		});
+
 		auto cssp = Gtk::CssProvider::create();
 		cssp->load_from_data(" \
 				.imp-rule-editor-tiny-button-row {min-width:0px; padding:0px;}\

@@ -24,6 +24,21 @@ namespace horizon {
 
 	class Package : public ObjectProvider, public LayerProvider {
 		public :
+			class MyParameterProgram: public ParameterProgram {
+				friend Package;
+				private:
+					ParameterProgram::CommandHandler get_command(const std::string &cmd) override;
+					class Package *pkg = nullptr;
+
+					std::pair<bool, std::string> set_polygon(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack);
+					std::pair<bool, std::string> expand_polygon(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack);
+
+				public:
+					MyParameterProgram(class Package *p, const std::string &code);
+
+
+			};
+
 			Package(const UUID &uu, const json &j, class Pool &pool);
 			Package(const UUID &uu);
 			static Package new_from_file(const std::string &filename, class Pool &pool);
@@ -32,12 +47,14 @@ namespace horizon {
 			virtual Junction *get_junction(const UUID &uu);
 			std::pair<Coordi, Coordi> get_bbox() const;
 			const std::map<int, Layer> &get_layers() const override;
+			std::pair<bool, std::string> apply_parameter_set(const ParameterSet &ps);
 
 			Package(const Package &pkg);
 			void operator=(Package const &pkg);
 
 			UUID uuid;
 			std::string name;
+			std::string manufacturer;
 			std::set<std::string> tags;
 
 			std::map<UUID, Junction> junctions;
@@ -46,6 +63,10 @@ namespace horizon {
 			std::map<UUID, Text> texts;
 			std::map<UUID, Pad> pads;
 			std::map<UUID, Polygon> polygons;
+
+			ParameterSet parameter_set;
+			MyParameterProgram parameter_program;
+
 			std::vector<Warning> warnings;
 
 		private :

@@ -45,5 +45,7 @@ namespace horizon {
 		{ToolID::EDIT_SHAPE, {"Edit shape"}},
 		{ToolID::IMPORT_DXF, {"Import DXF"}},
 		{ToolID::MANAGE_NET_CLASSES, {"Manage net classes"}},
+		{ToolID::EDIT_PAD_PARAMETER_SET, {"Edit pad parameter set"}},
+		{ToolID::MANAGE_VIA_TEMPLATES, {"Manage via templates"}},
 	};
 }

@@ -24,6 +24,11 @@ namespace horizon {
 				case ObjectProperty::Type::LENGTH:
 					e = new PropertyEditorLength(uuid, type, it.first, core, this);
 				break;
+				case ObjectProperty::Type::DIM: {
+					auto pe = new PropertyEditorLength(uuid, type, it.first, core, this);
+					pe->set_range(-1e9, 1e9);
+					e = pe;
+				} break;
 				case ObjectProperty::Type::STRING:
 					e = new PropertyEditorString(uuid, type, it.first, core, this);
 				break;

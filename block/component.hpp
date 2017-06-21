@@ -5,7 +5,6 @@
 #include "uuid_path.hpp"
 #include "uuid_ptr.hpp"
 #include "net.hpp"
-#include "pool.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -38,7 +37,7 @@ namespace horizon {
 	 */
 	class Component : public UUIDProvider {
 		public :
-			Component(const UUID &uu, const json &j, Pool &pool, class Block &block);
+			Component(const UUID &uu, const json &j, class Pool &pool, class Block &block);
 			Component(const UUID &uu);
 
 

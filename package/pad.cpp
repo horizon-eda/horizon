@@ -9,6 +9,9 @@ namespace horizon {
 			placement(j.at("placement")),
 			name(j.at("name").get<std::string>())
 		{
+			if(j.count("parameter_set")) {
+				parameter_set = parameter_set_from_json(j.at("parameter_set"));
+			}
 		}
 	Pad::Pad(const UUID &uu, const Padstack *ps): uuid(uu), pool_padstack(ps), padstack(*ps) {}
 
@@ -17,6 +20,7 @@ namespace horizon {
 			j["padstack"] = (std::string)pool_padstack->uuid;
 			j["placement"] = placement.serialize();
 			j["name"] = name;
+			j["parameter_set"] = parameter_set_serialize(parameter_set);
 
 
 			return j;

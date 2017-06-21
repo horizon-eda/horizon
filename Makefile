@@ -1,7 +1,7 @@
 CC=g++
 PKGCONFIG=pkg-config
 
-all: horizon-imp horizon-pool horizon-pool-update horizon-prj horizon-pool-update-parametric horizon-prj-mgr
+all: horizon-imp horizon-pool horizon-pool-update horizon-prj horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test
 
 SRC_COMMON = \
 	util/uuid.cpp \
@@ -49,6 +49,8 @@ SRC_COMMON = \
 	board/rule_clearance_silk_exp_copper.cpp\
 	board/rule_track_width.cpp\
 	board/rule_clearance_copper.cpp\
+	board/rule_parameters.cpp\
+	board/via_template.cpp\
 	pool/pool.cpp \
 	util/placement.cpp\
 	util/util.cpp\
@@ -61,6 +63,9 @@ SRC_COMMON = \
 	rules/rule.cpp\
 	rules/rule_descr.cpp\
 	rules/rule_match.cpp\
+	parameter/program.cpp\
+	parameter/set.cpp\
+	clipper/clipper.cpp\
 	
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += util/uuid_win32.cpp
@@ -136,6 +141,8 @@ SRC_IMP = \
 	core/tool_place_shape.cpp\
 	core/tool_edit_shape.cpp\
 	core/tool_import_dxf.cpp\
+	core/tool_edit_parameter_program.cpp\
+	core/tool_edit_pad_parameter_set.cpp\
 	core/cores.cpp\
 	core/clipboard.cpp\
 	core/buffer.cpp\
@@ -158,6 +165,11 @@ SRC_IMP = \
 	dialogs/annotate.cpp\
 	dialogs/edit_shape.cpp\
 	dialogs/manage_net_classes.cpp\
+	dialogs/edit_parameter_program.cpp\
+	dialogs/edit_parameter_set.cpp\
+	dialogs/edit_pad_parameter_set.cpp\
+	dialogs/manage_via_templates.cpp\
+	dialogs/select_via_template.cpp\
 	util/sort_controller.cpp\
 	core/core_symbol.cpp\
 	core/core_schematic.cpp\
@@ -177,16 +189,17 @@ SRC_IMP = \
 	widgets/chooser_buttons.cpp\
 	widgets/cell_renderer_layer_display.cpp\
 	widgets/net_class_button.cpp\
+	widgets/parameter_set_editor.cpp\
 	export_pdf.cpp\
 	imp/key_sequence.cpp\
 	imp/keyseq_dialog.cpp\
-	clipper/clipper.cpp\
 	canvas/canvas_patch.cpp\
 	export_gerber/gerber_writer.cpp\
 	export_gerber/excellon_writer.cpp\
 	export_gerber/gerber_export.cpp\
 	export_gerber/canvas_gerber.cpp\
 	export_gerber/cam_job.cpp\
+	export_gerber/hash.cpp\
 	imp/footprint_generator/footprint_generator_window.cpp\
 	imp/footprint_generator/footprint_generator_base.cpp\
 	imp/footprint_generator/footprint_generator_dual.cpp\
@@ -194,6 +207,7 @@ SRC_IMP = \
 	imp/footprint_generator/footprint_generator_quad.cpp\
 	imp/footprint_generator/svg_overlay.cpp\
 	imp/imp_interface.cpp\
+	imp/parameter_window.cpp\
 	widgets/pool_browser_part.cpp\
 	dxflib/dl_dxf.cpp\
 	dxflib/dl_writer_ascii.cpp\
@@ -241,7 +255,11 @@ SRC_PRJ_MGR = \
 	widgets/pool_browser_part.cpp\
 	util/sort_controller.cpp\
 
-SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_POOL_UPDATE) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PRJ_MGR))
+SRC_PGM_TEST = \
+	pgm-test.cpp
+
+
+SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_POOL_UPDATE) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PRJ_MGR) $(SRC_PGM_TEST))
 
 INC = -I. -Iblock -Iboard -Icommon -Iimp -Ipackage -Ipool -Ischematic -Iutil -Iconstraints
 
@@ -294,11 +312,14 @@ horizon-prj: $(OBJ_COMMON) $(SRC_PRJ_UTIL:.cpp=.o)
 horizon-prj-mgr: $(OBJ_COMMON) $(SRC_PRJ_MGR:.cpp=.o)
 	$(CC) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 libzmq) -o $@
 
+horizon-pgm-test: $(OBJ_COMMON) $(SRC_PGM_TEST:.cpp=.o)
+	$(CC) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
+
 $(OBJ_ALL): %.o: %.cpp
 	$(CC) -c $(INC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-update horizon-pool-update-parametric horizon-prj-mgr $(OBJ_ALL:.o=.d)
+	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-update horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test $(OBJ_ALL:.o=.d)
 
 -include  $(OBJ_ALL:.o=.d)
 

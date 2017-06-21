@@ -1,8 +1,9 @@
 #include "via_padstack_provider.hpp"
+#include "pool.hpp"
 #include <glibmm/fileutils.h>
 
 namespace horizon {
-	ViaPadstackProvider::ViaPadstackProvider(const std::string &bp):base_path(bp) {
+	ViaPadstackProvider::ViaPadstackProvider(const std::string &bp, Pool &po):base_path(bp), pool(po) {
 		update_available();
 	}
 
@@ -18,7 +19,11 @@ namespace horizon {
 			}
 			ifs>>j;
 			ifs.close();
-			padstacks_available.emplace(UUID(j.at("uuid").get<std::string>()), ViaPadstackProvider::PadstackEntry(filename, j.at("name")));
+			padstacks_available.emplace(UUID(j.at("uuid").get<std::string>()), PadstackEntry(filename, j.at("name").get<std::string>()+ " (local)"));
+		}
+		SQLite::Query q(pool.db, "SELECT padstacks.uuid, padstacks.name FROM padstacks WHERE padstacks.type = 'via'");
+		while(q.step()) {
+			padstacks_available.emplace(UUID(q.get<std::string>(0)), PadstackEntry("", q.get<std::string>(1)));
 		}
 	}
 
@@ -26,13 +31,19 @@ namespace horizon {
 		return padstacks_available;
 	}
 
-	Padstack *ViaPadstackProvider::get_padstack(const UUID &uu) {
+	const Padstack *ViaPadstackProvider::get_padstack(const UUID &uu) {
 		if(padstacks.count(uu)) {
 			return &padstacks.at(uu);
 		}
 		if(padstacks_available.count(uu)) {
-			padstacks.emplace(uu, Padstack::new_from_file(padstacks_available.at(uu).path));
-			return &padstacks.at(uu);
+			const auto &it = padstacks_available.at(uu);
+			if(it.path.size()) {
+				padstacks.emplace(uu, Padstack::new_from_file(it.path));
+				return &padstacks.at(uu);
+			}
+			else {
+				return pool.get_padstack(uu);
+			}
 		}
 		return nullptr;
 	}

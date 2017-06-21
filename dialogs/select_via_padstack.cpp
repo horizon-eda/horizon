@@ -52,6 +52,7 @@ namespace horizon {
 		auto sc = Gtk::manage(new Gtk::ScrolledWindow());
 		sc->add(*view);
 		get_content_area()->pack_start(*sc, true, true, 0);
+		get_content_area()->set_border_width(0);
 
 		show_all();
 	}

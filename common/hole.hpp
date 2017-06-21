@@ -24,6 +24,7 @@ namespace horizon {
 			Placement placement;
 			uint64_t diameter = 0.5_mm;
 			uint64_t length = 0.5_mm;
+			std::string parameter_class;
 
 			/**
 			 * true if this hole is PTH, false if NPTH.

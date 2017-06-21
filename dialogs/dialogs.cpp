@@ -20,6 +20,11 @@
 #include "core/cores.hpp"
 #include "part.hpp"
 #include "edit_shape.hpp"
+#include "edit_parameter_program.hpp"
+#include "edit_parameter_set.hpp"
+#include "edit_pad_parameter_set.hpp"
+#include "manage_via_templates.hpp"
+#include "select_via_template.hpp"
 
 namespace horizon {
 	void Dialogs::set_parent(Gtk::Window *w) {
@@ -137,6 +142,11 @@ namespace horizon {
 		return dia.run()==Gtk::RESPONSE_OK;
 	}
 
+	bool Dialogs::manage_via_templates(Board *b, ViaPadstackProvider *vpp) {
+		ManageViaTemplatesDialog dia(parent, b, vpp);
+		return dia.run()==Gtk::RESPONSE_OK;
+	}
+
 	bool Dialogs::manage_net_classes(Block *b) {
 		ManageNetClassesDialog dia(parent, b);
 		return dia.run()==Gtk::RESPONSE_OK;
@@ -144,6 +154,30 @@ namespace horizon {
 
 	bool Dialogs::annotate(Schematic *s) {
 		AnnotateDialog dia(parent, s);
+		return dia.run()==Gtk::RESPONSE_OK;
+	}
+
+	bool Dialogs::edit_parameter_program(class ParameterProgram *pgm) {
+		ParameterProgramDialog dia(parent, pgm);
+		while(true) {
+			auto r = dia.run();
+			if(r != Gtk::RESPONSE_OK)
+				return false;
+			else {
+				if(dia.valid)
+					return true;
+			}
+		}
+		return dia.run()==Gtk::RESPONSE_OK;
+	}
+
+	bool Dialogs::edit_parameter_set(ParameterSet *pset) {
+		ParameterSetDialog dia(parent, pset);
+		return dia.run()==Gtk::RESPONSE_OK;
+	}
+
+	bool Dialogs::edit_pad_parameter_set(std::set<class Pad*> &pads) {
+		PadParameterSetDialog dia(parent, pads);
 		return dia.run()==Gtk::RESPONSE_OK;
 	}
 
@@ -218,6 +252,17 @@ namespace horizon {
 
 	std::pair<bool, UUID> Dialogs::select_via_padstack(class ViaPadstackProvider *vpp) {
 		SelectViaPadstackDialog dia(parent, vpp);
+		auto r = dia.run();
+		if(r == Gtk::RESPONSE_OK) {
+			return {dia.selection_valid, dia.selected_uuid};
+		}
+		else {
+			return {false, UUID()};
+		}
+	}
+
+	std::pair<bool, UUID> Dialogs::select_via_template(class Board *brd) {
+		SelectViaTemplateDialog dia(parent, brd);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
 			return {dia.selection_valid, dia.selected_uuid};

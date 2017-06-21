@@ -63,11 +63,18 @@ namespace horizon {
 				}
 			}
 		}
+		if(j.count("via_templates")) {
+			const json &o = j["via_templates"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID(it.key());
+				via_templates.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), vpp));
+			}
+		}
 		if(j.count("vias")) {
 			const json &o = j["vias"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto u = UUID(it.key());
-				vias.emplace(std::make_pair(u, Via(u, it.value(), *this, vpp)));
+				vias.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
 			}
 		}
 		if(j.count("texts")) {
@@ -84,6 +91,7 @@ namespace horizon {
 				lines.emplace(std::make_pair(u, Line(u, it.value(), *this)));
 			}
 		}
+
 
 		if(j.count("rules")) {
 			rules.load_from_json(j.at("rules"));
@@ -134,6 +142,8 @@ namespace horizon {
 		vias(brd.vias),
 		texts(brd.texts),
 		lines(brd.lines),
+		via_templates(brd.via_templates),
+
 		warnings(brd.warnings),
 		rules(brd.rules),
 		n_inner_layers(brd.n_inner_layers)
@@ -157,6 +167,7 @@ namespace horizon {
 		vias = brd.vias;
 		texts = brd.texts;
 		lines = brd.lines;
+		via_templates = brd.via_templates;
 		warnings = brd.warnings;
 		rules = brd.rules;
 		update_refs();
@@ -183,6 +194,7 @@ namespace horizon {
 		}
 		for(auto &it: vias) {
 			it.second.junction.update(junctions);
+			it.second.via_template.update(via_templates);
 		}
 		for(auto &it: junctions) {
 			it.second.net.update(block->nets);
@@ -202,17 +214,21 @@ namespace horizon {
 		n_inner_layers = n;
 		layers.clear();
 		layers = {
-		{50, {50, "Outline", {.6,.6, 0}}},
-		{40, {40, "Top Courtyard", {.5,.5,.5}}},
-		{30, {30, "Top Placement", {.5,.5,.5}}},
+		{100, {100, "Outline", {.6,.6, 0}}},
+		{60, {60, "Top Courtyard", {.5,.5,.5}}},
+		{50, {50, "Top Assembly", {.5,.5,.5}}},
+		{40, {40, "Top Package", {.5,.5,.5}}},
+		{30, {30, "Top Paste", {.8,.8,.8}}},
 		{20, {20, "Top Silkscreen", {.9,.9,.9}}},
 		{10, {10, "Top Mask", {1,.5,.5}}},
 		{0, {0, "Top Copper", {1,0,0}, false, true}},
 		{-100, {-100, "Bottom Copper", {0,.5,0}, true, true}},
 		{-110, {-110, "Bottom Mask", {.25,.5,.25}, true}},
 		{-120, {-120, "Bottom Silkscreen", {.9,.9,.9}, true}},
-		{-130, {-130, "Bottom Placement", {.5,.5,.5}}},
-		{-140, {-140, "Bottom Courtyard", {.5,.5,.5}}}
+		{-130, {-130, "Bottom Paste", {.8,.8,.8}}},
+		{-140, {-140, "Bottom Package", {.5,.5,.5}}},
+		{-150, {-150, "Bottom Assembly", {.5,.5,.5}, true}},
+		{-160, {-160, "Bottom Courtyard", {.5,.5,.5}}}
 		};
 		for(unsigned int i = 0; i<n_inner_layers; i++) {
 			auto j = i+1;
@@ -460,9 +476,15 @@ namespace horizon {
 			it.second.to->connection_count++;
 		}
 
+		for(auto &it: via_templates) {
+			it.second.is_referenced = false;
+		}
+
 		for(auto &it: vias) {
 			it.second.junction->has_via = true;
-			it.second.padstack = *it.second.vpp_padstack;
+			it.second.padstack = *it.second.via_template->padstack;
+			it.second.padstack.apply_parameter_set(it.second.via_template->parameter_set);
+			it.second.via_template->is_referenced = true;
 			it.second.padstack.expand_inner(n_inner_layers);
 		}
 
@@ -474,9 +496,18 @@ namespace horizon {
 
 		vacuum_junctions();
 
+		auto params = rules.get_parameters();
+		ParameterSet pset = {
+			{ParameterID::COURTYARD_EXPANSION, params->courtyard_expansion},
+			{ParameterID::PASTE_MASK_CONTRACTION, params->paste_mask_contraction},
+			{ParameterID::SOLDER_MASK_EXPANSION, params->solder_mask_expansion},
+
+		};
+
 		for(auto &it: packages) {
 			it.second.pool_package = it.second.component->part->package;
 			it.second.package = *it.second.pool_package;
+			auto r = it.second.package.apply_parameter_set(pset);
 			it.second.placement.mirror = it.second.flip;
 			for(auto &it2: it.second.package.pads) {
 				it2.second.padstack.expand_inner(n_inner_layers);
@@ -521,11 +552,16 @@ namespace horizon {
 
 		for(auto &it: packages) {
 			for(auto &it_pad: it.second.package.pads) {
-				const auto &pad_map_item = it.second.component->part->pad_map.at(it_pad.first);
-				auto pin_path = UUIDPath<2>(pad_map_item.gate->uuid, pad_map_item.pin->uuid);
-				if(it.second.component->connections.count(pin_path)) {
-					const auto &conn = it.second.component->connections.at(pin_path);
-					it_pad.second.net = conn.net;
+				if(it.second.component->part->pad_map.count(it_pad.first)) {
+					const auto &pad_map_item = it.second.component->part->pad_map.at(it_pad.first);
+					auto pin_path = UUIDPath<2>(pad_map_item.gate->uuid, pad_map_item.pin->uuid);
+					if(it.second.component->connections.count(pin_path)) {
+						const auto &conn = it.second.component->connections.at(pin_path);
+						it_pad.second.net = conn.net;
+					}
+					else {
+						it_pad.second.net = nullptr;
+					}
 				}
 				else {
 					it_pad.second.net = nullptr;
@@ -581,20 +617,22 @@ namespace horizon {
 			return;
 		pkg->smashed = true;
 		for(const auto &it: pkg->pool_package->texts) {
-			auto uu = UUID::random();
-			auto &x = texts.emplace(uu, uu).first->second;
-			x.from_smash = true;
-			x.overridden = true;
-			x.placement = pkg->placement;
-			x.placement.accumulate(it.second.placement);
-			x.text = it.second.text;
-			x.layer = it.second.layer;
-			if(pkg->flip)
-				flip_package_layer(x.layer);
+			if(it.second.layer == 20 || it.second.layer==120) { //top or bottom silkscreen
+				auto uu = UUID::random();
+				auto &x = texts.emplace(uu, uu).first->second;
+				x.from_smash = true;
+				x.overridden = true;
+				x.placement = pkg->placement;
+				x.placement.accumulate(it.second.placement);
+				x.text = it.second.text;
+				x.layer = it.second.layer;
+				if(pkg->flip)
+					flip_package_layer(x.layer);
 
-			x.size = it.second.size;
-			x.width = it.second.width;
-			pkg->texts.push_back(&x);
+				x.size = it.second.size;
+				x.width = it.second.width;
+				pkg->texts.push_back(&x);
+			}
 		}
 	}
 
@@ -662,6 +700,10 @@ namespace horizon {
 		j["lines"] = json::object();
 		for(const auto &it: lines) {
 			j["lines"][(std::string)it.first] = it.second.serialize();
+		}
+		j["via_templates"] = json::object();
+		for(const auto &it: via_templates) {
+			j["via_templates"][(std::string)it.first] = it.second.serialize();
 		}
 		return j;
 	}

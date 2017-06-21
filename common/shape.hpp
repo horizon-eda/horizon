@@ -24,6 +24,7 @@ namespace horizon {
 			UUID uuid;
 			Placement placement;
 			int layer = 0;
+			std::string parameter_class;
 
 			enum class Form {CIRCLE, RECTANGLE, OBROUND};
 			Form form = Form::CIRCLE;

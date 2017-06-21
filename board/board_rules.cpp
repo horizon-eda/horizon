@@ -36,6 +36,10 @@ namespace horizon {
 			const json &o = j["clearance_silkscreen_exposed_copper"];
 			rule_clearance_silkscreen_exposed_copper = RuleClearanceSilkscreenExposedCopper(o);
 		}
+		if(j.count("parameters")) {
+			const json &o = j["parameters"];
+			rule_parameters = RuleParameters(o);
+		}
 	}
 
 	void BoardRules::cleanup(const Block *block) {
@@ -62,6 +66,9 @@ namespace horizon {
 				}
 			}
 		}
+		else if(id == RuleID::PARAMETERS) {
+			brd->rules.rule_parameters = rule_parameters;
+		}
 	}
 
 	json BoardRules::serialize() const {
@@ -79,16 +86,20 @@ namespace horizon {
 			j["clearance_copper"][(std::string)it.first] = it.second.serialize();
 		}
 		j["clearance_silkscreen_exposed_copper"] = rule_clearance_silkscreen_exposed_copper.serialize();
+		j["parameters"] = rule_parameters.serialize();
 		return j;
 	}
 
 	std::set<RuleID> BoardRules::get_rule_ids() const {
-		return {RuleID::HOLE_SIZE, RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, RuleID::TRACK_WIDTH, RuleID::CLEARANCE_COPPER};
+		return {RuleID::HOLE_SIZE, RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, RuleID::TRACK_WIDTH, RuleID::CLEARANCE_COPPER, RuleID::PARAMETERS};
 	}
 
 	Rule *BoardRules::get_rule(RuleID id) {
 		if(id == RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER) {
 			return &rule_clearance_silkscreen_exposed_copper;
+		}
+		else if(id == RuleID::PARAMETERS) {
+			return &rule_parameters;
 		}
 		return nullptr;
 	}
@@ -198,5 +209,9 @@ namespace horizon {
 			}
 		}
 		return nullptr;
+	}
+
+	const RuleParameters *BoardRules::get_parameters() {
+		return &rule_parameters;
 	}
 }

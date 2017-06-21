@@ -21,6 +21,13 @@ namespace horizon {
 				return fwd.at(s);
 			}
 
+			const T lookup(const std::string &s, T def) const {
+				if(fwd.count(s))
+					return fwd.at(s);
+				else
+					return def;
+			}
+
 			/**
 			 * @returns the string corresponding to enum \p s
 			 */

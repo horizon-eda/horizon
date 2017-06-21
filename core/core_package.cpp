@@ -6,7 +6,9 @@ namespace horizon {
 	CorePackage::CorePackage(const std::string &filename, Pool &pool):
 		package(Package::new_from_file(filename, pool)),
 		package_work(package),
-		m_filename(filename)
+		m_filename(filename),
+		parameter_program_code(package.parameter_program.get_code()),
+		parameter_set(package.parameter_set)
 	{
 		rebuild();
 		m_pool = &pool;
@@ -88,6 +90,8 @@ namespace horizon {
 				switch(property) {
 					case ObjectProperty::ID::NAME :
 						return package.pads.at(uu).name;
+					case ObjectProperty::ID::VALUE :
+						return package.pads.at(uu).pool_padstack->name;
 					default :
 						return "<invalid prop>";
 				}
@@ -122,6 +126,7 @@ namespace horizon {
 	}
 
 	void CorePackage::rebuild(bool from_undo) {
+		package.apply_parameter_set({});
 		package_work = package;
 		Core::rebuild(from_undo);
 	}
@@ -165,6 +170,9 @@ namespace horizon {
 	}
 
 	void CorePackage::save() {
+		package.parameter_set = parameter_set;
+		package.parameter_program.set_code(parameter_program_code);
+
 		s_signal_save.emit();
 
 		std::ofstream ofs(m_filename);

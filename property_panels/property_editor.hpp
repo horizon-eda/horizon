@@ -52,6 +52,8 @@ namespace horizon {
 
 	class PropertyEditorLength : public PropertyEditor {
 		using PropertyEditor::PropertyEditor;
+		public:
+			void set_range(int64_t min, int64_t max);
 		protected:
 			virtual Gtk::Widget *create_editor();
 		private :
@@ -61,6 +63,7 @@ namespace horizon {
 			void changed();
 			virtual void set_from_other(PropertyEditor *other);
 			virtual void reload();
+			std::pair<int64_t, int64_t> range = {0, 1e9};
 	};
 
 	class PropertyEditorString: public PropertyEditor {

@@ -15,19 +15,20 @@ namespace horizon {
 
 	bool ToolPlaceVia::begin_attached() {
 		bool r;
-		UUID padstack_uuid;
-		std::tie(r, padstack_uuid) = imp->dialogs.select_via_padstack(core.b->get_via_padstack_provider());
+		UUID template_uuid;
+		std::tie(r, template_uuid) = imp->dialogs.select_via_template(core.b->get_board());
 		if(!r) {
 			return false;
 		}
-		padstack = core.b->get_via_padstack_provider()->get_padstack(padstack_uuid);
+		vt = &core.b->get_board()->via_templates.at(template_uuid);
 		imp->tool_bar_set_tip("<b>LMB:</b>place via <b>RMB:</b>delete current via and finish");
 		return true;
 	}
 
 	void ToolPlaceVia::create_attached() {
 		auto uu = UUID::random();
-		via = &core.b->get_board()->vias.emplace(uu, Via(uu, padstack)).first->second;
+		via = &core.b->get_board()->vias.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, vt)).first->second;
+		via->padstack.apply_parameter_set(via->via_template->parameter_set);
 		via->junction = temp;
 	}
 

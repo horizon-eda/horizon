@@ -25,6 +25,9 @@ namespace horizon {
 			int64_t get_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
 			void set_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, int64_t value, bool *handled=nullptr) override;
 
+			std::string get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr) override;
+			void set_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, const std::string &value, bool *handled=nullptr) override;
+
 			const Padstack *get_canvas_data();
 			std::pair<Coordi,Coordi> get_bbox() override;
 
@@ -43,5 +46,9 @@ namespace horizon {
 			};
 			void history_push() override;
 			void history_load(unsigned int i) override;
+
+		public:
+			std::string parameter_program_code;
+			ParameterSet parameter_set;
 	};
 }

@@ -58,5 +58,9 @@ namespace horizon {
 			};
 			void history_push() override;
 			void history_load(unsigned int i) override;
+
+		public:
+			std::string parameter_program_code;
+			ParameterSet parameter_set;
 	};
 }

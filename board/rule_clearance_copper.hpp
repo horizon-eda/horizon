@@ -14,6 +14,7 @@ namespace horizon {
 			RuleMatch match_1;
 			RuleMatch match_2;
 			int layer = 10000;
+			uint64_t routing_offset = 0.05_mm;
 
 			uint64_t get_clearance(PatchType a, PatchType b) const;
 			void set_clearance(PatchType a, PatchType b, uint64_t c);

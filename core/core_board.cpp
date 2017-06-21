@@ -5,7 +5,7 @@
 
 namespace horizon {
 	CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir, Pool &pool) :
-		via_padstack_provider(via_dir),
+		via_padstack_provider(via_dir, pool),
 		block(Block::new_from_file(block_filename, pool)),
 		block_work(block),
 		brd(Board::new_from_file(board_filename, block, pool, via_padstack_provider)),

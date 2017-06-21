@@ -512,6 +512,7 @@ namespace horizon {
 		if(interactive) {
 			auto bb = shape.get_bbox();
 			selectables.append(shape.uuid, ObjectType::SHAPE, shape.placement.shift, shape.placement.transform(bb.first), shape.placement.transform(bb.second), 0, shape.layer);
+			targets.emplace(shape.uuid, ObjectType::SHAPE, shape.placement.shift);
 		}
 		render(poly, false);
 	}
@@ -733,11 +734,9 @@ namespace horizon {
 			if(it.second.layer == layer)
 				render(it.second, interactive);
 		}
-		if(!smashed) {
-			for(const auto &it: pkg.texts) {
-				if(it.second.layer == layer)
-					render(it.second, interactive);
-			}
+		for(const auto &it: pkg.texts) {
+			if(it.second.layer == layer && (!smashed || !(it.second.layer == 20 || it.second.layer == 120)))
+				render(it.second, interactive);
 		}
 		for(const auto &it: pkg.arcs) {
 			if(it.second.layer == layer)

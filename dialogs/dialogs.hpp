@@ -4,6 +4,7 @@
 #include "common.hpp"
 #include "uuid_path.hpp"
 #include "component.hpp"
+#include "parameter/set.hpp"
 #include <map>
 
 namespace Gtk {
@@ -24,6 +25,7 @@ namespace horizon {
 			std::pair<bool, UUID> select_entity(class Pool *pool);
 			std::pair<bool, UUID> select_padstack(class Pool *pool, const UUID &package_uuid);
 			std::pair<bool, UUID> select_via_padstack(class ViaPadstackProvider *vpp);
+			std::pair<bool, UUID> select_via_template(class Board *brd);
 			std::pair<bool, UUID> select_net(class Block *block, bool power_only);
 			std::pair<bool, UUID> select_bus(class Block *block);
 			std::pair<bool, UUID> select_bus_member(class Block *block, const UUID &bus_uuid);
@@ -32,6 +34,10 @@ namespace horizon {
 			bool ask_delete_component(Component *comp);
 			bool manage_buses(class Block *b);
 			bool manage_net_classes(class Block *b);
+			bool manage_via_templates(class Board *b, class ViaPadstackProvider *vpp);
+			bool edit_parameter_program(class ParameterProgram *program);
+			bool edit_parameter_set(ParameterSet *pset);
+			bool edit_pad_parameter_set(std::set<class Pad*> &pads);
 			bool annotate(class Schematic *s);
 			std::pair<bool, int64_t> ask_datum(const std::string &label, int64_t def=0);
 			std::pair<bool, Coordi> ask_datum_coord(const std::string &label, Coordi def=Coordi());

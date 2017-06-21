@@ -10,6 +10,7 @@
 #include "track.hpp"
 #include "via_padstack_provider.hpp"
 #include "via.hpp"
+#include "via_template.hpp"
 #include "clipper/clipper.hpp"
 #include "warning.hpp"
 #include "board_rules.hpp"
@@ -62,6 +63,7 @@ namespace horizon {
 			std::map<UUID, Via> vias;
 			std::map<UUID, Text> texts;
 			std::map<UUID, Line> lines;
+			std::map<UUID, ViaTemplate> via_templates;
 
 			std::vector<Warning> warnings;
 

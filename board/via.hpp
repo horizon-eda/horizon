@@ -5,6 +5,7 @@
 #include "uuid_ptr.hpp"
 #include "junction.hpp"
 #include "padstack.hpp"
+#include "via_template.hpp"
 #include <vector>
 #include <map>
 #include <set>
@@ -16,13 +17,13 @@ namespace horizon {
 
 	class Via {
 		public :
-			Via(const UUID &uu, const json &j, class Board &brd, class ViaPadstackProvider &vpp);
-			Via(const UUID &uu, Padstack *ps);
+			Via(const UUID &uu, const json &j, class Board &brd);
+			Via(const UUID &uu, class ViaTemplate *vt);
 
 			UUID uuid;
 
 			uuid_ptr<Junction> junction = nullptr;
-			Padstack *vpp_padstack = nullptr;
+			uuid_ptr<class ViaTemplate> via_template;
 			Padstack padstack;
 
 

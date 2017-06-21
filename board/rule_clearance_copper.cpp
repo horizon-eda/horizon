@@ -19,7 +19,7 @@ namespace horizon {
 	}
 
 	RuleClearanceCopper::RuleClearanceCopper(const UUID &uu, const json &j): Rule(uu, j),
-			match_1(j.at("match_1")), match_2(j.at("match_2")), layer(j.at("layer")){
+			match_1(j.at("match_1")), match_2(j.at("match_2")), layer(j.at("layer")), routing_offset(j.value("routing_offset", 0.05_mm)){
 		id = RuleID::CLEARANCE_COPPER;
 		{
 			const json &o = j["clearances"];
@@ -37,6 +37,7 @@ namespace horizon {
 		j["match_1"] = match_1.serialize();
 		j["match_2"] = match_2.serialize();
 		j["layer"] = layer;
+		j["routing_offset"] = routing_offset;
 		j["clearances"] = json::array();
 		for(const auto &it: clearances) {
 			json k;

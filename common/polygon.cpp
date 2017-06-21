@@ -29,7 +29,8 @@ namespace horizon {
 
 	Polygon::Polygon(const UUID &uu, const json &j):
 			uuid(uu),
-			layer(j.value("layer", 0))
+			layer(j.value("layer", 0)),
+			parameter_class(j.value("parameter_class", ""))
 		{
 			{
 				const json &o = j["vertices"];
@@ -131,6 +132,7 @@ namespace horizon {
 	json Polygon::serialize() const {
 		json j;
 		j["layer"] = layer;
+		j["parameter_class"] = parameter_class;
 		j["vertices"] = json::array();
 		for(const auto &it: vertices) {
 			j["vertices"].push_back(it.serialize());

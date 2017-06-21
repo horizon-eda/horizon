@@ -31,6 +31,9 @@ namespace horizon {
 		}}},
 		{ObjectType::SHAPE, {"Shape", "Shapes", {
 			{ObjectProperty::ID::LAYER, {ObjectProperty::Type::LAYER, "Layer"}},
+			{ObjectProperty::ID::PARAMETER_CLASS, {ObjectProperty::Type::STRING, "Parameter class"}},
+			{ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X"}},
+			{ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y"}},
 		}}},
 		{ObjectType::LINE, {"Line", "Lines", {
 			{ObjectProperty::ID::WIDTH, {ObjectProperty::Type::LENGTH, "Width"}},
@@ -64,6 +67,7 @@ namespace horizon {
 		}}},
 		{ObjectType::POLYGON, {"Polygon", "Polygons", {
 			{ObjectProperty::ID::LAYER, {ObjectProperty::Type::LAYER, "Layer"}},
+			{ObjectProperty::ID::PARAMETER_CLASS, {ObjectProperty::Type::STRING, "Parameter class"}},
 		}}},
 		{ObjectType::HOLE, {"Hole", "Holes", {
 			{ObjectProperty::ID::DIAMETER, {ObjectProperty::Type::LENGTH, "Diameter"}},
@@ -75,9 +79,11 @@ namespace horizon {
 					{static_cast<int>(Hole::Shape::SLOT), "Slot"},
 				}
 			}},
+			{ObjectProperty::ID::PARAMETER_CLASS, {ObjectProperty::Type::STRING, "Parameter class"}},
 		}}},
 		{ObjectType::PAD, {"Pad", "Pads", {
 			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING, "Name"}},
+			{ObjectProperty::ID::VALUE, {ObjectProperty::Type::STRING_RO, "Padstack"}},
 		}}},
 		{ObjectType::BOARD_PACKAGE, {"Package", "Packages", {
 			{ObjectProperty::ID::FLIPPED, {ObjectProperty::Type::BOOL, "Flipped"}},

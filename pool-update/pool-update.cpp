@@ -91,9 +91,6 @@ void update_symbols(SQLite::Database &db, horizon::Pool &pool, const std::string
 }
 
 void update_padstacks(SQLite::Database &db, const std::string &directory, const std::string &prefix="") {
-	if(prefix.size()==0) {
-		db.execute("DELETE from padstacks");
-	}
 	Glib::Dir dir(directory);
 	for(const auto &it: dir) {
 		auto pkgpath = Glib::build_filename(directory, it);
@@ -118,11 +115,12 @@ void update_padstacks(SQLite::Database &db, const std::string &directory, const 
 				if(endswidth(it2, ".json")) {
 					std::string filename = Glib::build_filename(padstacks_path, it2);
 					auto padstack = horizon::Padstack::new_from_file(filename);
-					SQLite::Query q(db, "INSERT INTO padstacks (uuid, name, filename, package) VALUES ($uuid, $name, $filename, $package)");
+					SQLite::Query q(db, "INSERT INTO padstacks (uuid, name, filename, package, type) VALUES ($uuid, $name, $filename, $package, $type)");
 					q.bind("$uuid", padstack.uuid);
 					q.bind("$name", padstack.name);
+					q.bind("$type", horizon::Padstack::type_lut.lookup_reverse(padstack.type));
 					q.bind("$package", pkg_uuid);
-					q.bind("$filename", Glib::build_filename(prefix, it, "padstacks", it2));
+					q.bind("$filename", Glib::build_filename("packages", prefix, it, "padstacks", it2));
 					q.step();
 				}
 			}
@@ -130,6 +128,32 @@ void update_padstacks(SQLite::Database &db, const std::string &directory, const 
 		else if(Glib::file_test(pkgpath, Glib::FILE_TEST_IS_DIR)) {
 			update_padstacks(db, pkgpath, Glib::build_filename(prefix,it));
 		}
+
+	}
+}
+
+void update_padstacks_global(SQLite::Database &db, const std::string &directory, const std::string &prefix="") {
+	if(prefix.size()==0) {
+		db.execute("DELETE from padstacks");
+	}
+	Glib::Dir dir(directory);
+	for(const auto &it: dir) {
+		std::string filename = Glib::build_filename(directory, it);
+		if(endswidth(it, ".json")) {
+			auto padstack = horizon::Padstack::new_from_file(filename);
+			SQLite::Query q(db, "INSERT INTO padstacks (uuid, name, filename, package, type) VALUES ($uuid, $name, $filename, $package, $type)");
+			q.bind("$uuid", padstack.uuid);
+			q.bind("$name", padstack.name);
+			q.bind("$type", horizon::Padstack::type_lut.lookup_reverse(padstack.type));
+			q.bind("$package", horizon::UUID());
+			q.bind("$filename", Glib::build_filename("padstacks", prefix, it));
+			q.step();
+		}
+		else if(Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
+			update_padstacks(db, filename, Glib::build_filename(prefix,it));
+		}
+
+
 
 	}
 }
@@ -264,6 +288,7 @@ int main(int c_argc, char *c_argv[]) {
 	db.execute("COMMIT");
 
 	db.execute("BEGIN TRANSACTION");
+	update_padstacks_global(db, Glib::build_filename(pool_base_path, "padstacks"));
 	update_padstacks(db, Glib::build_filename(pool_base_path, "packages"));
 	db.execute("COMMIT");
 

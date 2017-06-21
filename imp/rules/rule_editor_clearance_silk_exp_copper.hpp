@@ -7,6 +7,8 @@ namespace horizon {
 		public:
 			void populate() override;
 		private:
-			class RuleClearanceSilkscreenExposedCopper *rule2;
+			Gtk::Grid *grid=nullptr;
+			int top = 0;
+			class SpinButtonDim *create_sp_dim(const std::string &label);
 	};
 }

@@ -161,7 +161,7 @@ namespace horizon {
 				switch(property) {
 					case ObjectProperty::ID::SIZE:
 						HANDLED
-						get_text(uu, false)->size = std::max(value, (int64_t)500000);
+						get_text(uu, false)->size = std::max(value, (int64_t)100000);
 					break;
 					case ObjectProperty::ID::WIDTH:
 						HANDLED
@@ -237,6 +237,17 @@ namespace horizon {
 						NOT_HANDLED
 				}
 			break;
+			case ObjectType::POLYGON :
+				switch(property) {
+					case ObjectProperty::ID::PARAMETER_CLASS :
+						HANDLED
+						return get_polygon(uu, false)->parameter_class;
+					break;
+					default :
+						NOT_HANDLED
+				}
+			break;
+
 			default:
 				NOT_HANDLED
 		}
@@ -250,6 +261,17 @@ namespace horizon {
 					case ObjectProperty::ID::TEXT :
 						HANDLED
 						get_text(uu, false)->text = value;
+					break;
+					default :
+						NOT_HANDLED
+						return;
+				}
+			break;
+			case ObjectType::POLYGON :
+				switch(property) {
+					case ObjectProperty::ID::PARAMETER_CLASS :
+						HANDLED
+						get_polygon(uu, false)->parameter_class = value;
 					break;
 					default :
 						NOT_HANDLED

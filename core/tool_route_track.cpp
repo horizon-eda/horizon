@@ -56,7 +56,7 @@ namespace horizon {
 				ofs.ArcTolerance = 10e3;
 				ofs.AddPaths(it.second, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
 				auto clearance = rules->get_clearance_copper(core.b->get_block()->get_net(it.first.net), net, routing_layer);
-				auto expand = clearance->get_clearance(it.first.type, PatchType::TRACK);
+				auto expand = clearance->get_clearance(it.first.type, PatchType::TRACK)+clearance->routing_offset;
 
 				ClipperLib::Paths t_ofs;
 				ofs.Execute(t_ofs, expand+routing_width/2);
@@ -419,12 +419,14 @@ namespace horizon {
 				}
 				else if(args.key == GDK_KEY_v) {
 					if(via == nullptr) {
-						UUID padstack_uuid;
+						UUID template_uuid;
 						bool r;
-						std::tie(r, padstack_uuid) = imp->dialogs.select_via_padstack(core.b->get_via_padstack_provider());
+						std::tie(r, template_uuid) = imp->dialogs.select_via_template(core.b->get_board());
 						if(r) {
 							auto uu = UUID::random();
-							via = &core.b->get_board()->vias.emplace(uu, Via(uu, core.b->get_via_padstack_provider()->get_padstack(padstack_uuid))).first->second;
+							auto vt = &core.b->get_board()->via_templates.at(template_uuid);
+							via = &core.b->get_board()->vias.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, vt)).first->second;
+							via->padstack.apply_parameter_set(via->via_template->parameter_set);
 							update_temp_track();
 						}
 					}

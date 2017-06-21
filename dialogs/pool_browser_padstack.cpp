@@ -41,7 +41,7 @@ namespace horizon {
 
 		store = Gtk::ListStore::create(list_columns);
 		Gtk::TreeModel::Row row;
-		SQLite::Query q(pool->db, "SELECT padstacks.uuid, padstacks.name FROM padstacks WHERE padstacks.package=?");
+		SQLite::Query q(pool->db, "SELECT padstacks.uuid, padstacks.name FROM padstacks WHERE padstacks.type != 'via' AND (padstacks.package=? OR padstacks.package = '00000000-0000-0000-0000-000000000000')");
 		q.bind(1, package_uuid);
 		unsigned int n = 0;
 		while(q.step()) {

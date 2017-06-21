@@ -26,13 +26,6 @@ CREATE TABLE IF NOT EXISTS "packages" (
 	`filename`	TEXT NOT NULL,
 	PRIMARY KEY(`uuid`)
 );
-CREATE TABLE IF NOT EXISTS "padstacks" (
-	`uuid`	TEXT NOT NULL UNIQUE,
-	`name`	TEXT NOT NULL,
-	`package`	TEXT NOT NULL,
-	`filename`	TEXT NOT NULL,
-	PRIMARY KEY(`uuid`)
-);
 CREATE TABLE IF NOT EXISTS "parts" (
 	`uuid`	TEXT NOT NULL UNIQUE,
 	`MPN`	TEXT,
@@ -47,4 +40,12 @@ CREATE TABLE `tags` (
 	`uuid`	TEXT NOT NULL,
 	`type`	TEXT NOT NULL,
 	PRIMARY KEY(`tag`,`uuid`)
+);
+CREATE TABLE IF NOT EXISTS "padstacks" (
+	`uuid`	TEXT NOT NULL UNIQUE,
+	`name`	TEXT NOT NULL,
+	`package`	TEXT NOT NULL,
+	`filename`	TEXT NOT NULL,
+	`type`	TEXT NOT NULL,
+	PRIMARY KEY(`uuid`)
 );

@@ -233,6 +233,7 @@ namespace horizon {
 		rev_multi->set_reveal_child(multi);
 		rule_current = id;
 		if(multi) {
+			show_editor(nullptr);
 			update_rule_instances(id);
 		}
 		else {
@@ -272,6 +273,10 @@ namespace horizon {
 			break;
 
 			case RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER :
+				e = new RuleEditorClearanceSilkscreenExposedCopper(r, core);
+			break;
+
+			case RuleID::PARAMETERS :
 				e = new RuleEditorClearanceSilkscreenExposedCopper(r, core);
 			break;
 

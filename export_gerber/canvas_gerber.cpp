@@ -16,7 +16,7 @@ namespace horizon {
 			if(padstack_mode)
 				return;
 			auto poly = ipoly.remove_arcs(16);
-			if(poly.layer == 50) { //outline
+			if(poly.layer == 100) { //outline
 				auto last = poly.vertices.cbegin();
 				for(auto it = last+1; it<poly.vertices.cend(); it++) {
 					img_line(last->position, it->position, 0, poly.layer);

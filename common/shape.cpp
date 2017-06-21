@@ -12,6 +12,7 @@ namespace horizon {
 		uuid(uu),
 		placement(j.at("placement")),
 		layer(j.at("layer")),
+		parameter_class(j.value("parameter_class", "")),
 		form(form_lut.lookup(j.at("form"))),
 		params(j.at("params").get<std::vector<int64_t>>())
 	{
@@ -97,6 +98,7 @@ namespace horizon {
 		j["layer"] = layer;
 		j["form"] = form_lut.lookup_reverse(form);
 		j["params"] = params;
+		j["parameter_class"] = parameter_class;
 		return j;
 	}
 }

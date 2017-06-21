@@ -17,7 +17,7 @@ namespace horizon {
 			bool begin_attached() override;
 			bool update_attached(const ToolArgs &args) override;
 			Via *via = nullptr;
-			Padstack *padstack = nullptr;
+			ViaTemplate *vt = nullptr;
 			std::forward_list<Via*> vias_placed;
 
 		private:

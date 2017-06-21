@@ -57,6 +57,8 @@ namespace horizon {
 			UUID uuid;
 			std::deque<Vertex> vertices;
 			int layer = 0;
+			std::string parameter_class;
+
 			bool temp = false;
 			json serialize() const;
 	};

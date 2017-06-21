@@ -1,23 +1,23 @@
 #include "via.hpp"
 #include "board.hpp"
-#include "via_padstack_provider.hpp"
+#include "via_template.hpp"
 
 namespace horizon {
 
-	Via::Via(const UUID &uu, const json &j, Board &brd, ViaPadstackProvider &vpp):
+	Via::Via(const UUID &uu, const json &j, Board &brd):
 		uuid(uu),
 		junction(&brd.junctions.at(j.at("junction").get<std::string>())),
-		vpp_padstack(vpp.get_padstack(j.at("padstack").get<std::string>())),
-		padstack(*vpp_padstack)
+		via_template(&brd.via_templates.at(j.at("via_template").get<std::string>())),
+		padstack(*via_template->padstack)
 	{
 	}
 
-	Via::Via(const UUID &uu, Padstack *ps): uuid(uu), vpp_padstack(ps), padstack(*vpp_padstack) {}
+	Via::Via(const UUID &uu, ViaTemplate *vt): uuid(uu), via_template(vt), padstack(*vt->padstack) {}
 
 	json Via::serialize() const {
 		json j;
 		j["junction"] = (std::string)junction->uuid;
-		j["padstack"] = (std::string)vpp_padstack->uuid;
+		j["via_template"] = (std::string)via_template->uuid;
 		return j;
 	}
 }

@@ -15,6 +15,7 @@ namespace horizon {
 		placement(j.at("placement")),
 		diameter(j.at("diameter").get<uint64_t>()),
 		length(j.at("length").get<uint64_t>()),
+		parameter_class(j.value("parameter_class", "")),
 		plated(j.at("plated").get<bool>()),
 		shape(shape_lut.lookup(j.value("shape", "round")))
 	{
@@ -33,6 +34,7 @@ namespace horizon {
 		j["length"] = length;
 		j["shape"] = shape_lut.lookup_reverse(shape);
 		j["plated"] = plated;
+		j["parameter_class"] = parameter_class;
 		return j;
 	}
 }

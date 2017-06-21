@@ -92,7 +92,7 @@ namespace horizon {
 
 	Gtk::Widget *PropertyEditorLength::create_editor() {
 		sp = Gtk::manage(new Gtk::SpinButton());
-		sp->set_range(0, 1e9);
+		sp->set_range(range.first, range.second);
 		reload();
 		sp->set_increments(.5e6, 10);
 		sp->signal_output().connect(sigc::mem_fun(this, &PropertyEditorLength::sp_output));
@@ -106,12 +106,16 @@ namespace horizon {
 		sp->set_sensitive(core->property_is_settable(uuid,type, property_id));
 	}
 
+	void PropertyEditorLength::set_range(int64_t min, int64_t max) {
+		range = {min, max};
+	}
+
 	bool PropertyEditorLength::sp_output() {
 		auto adj = sp->get_adjustment();
 		double value = adj->get_value();
 
 		std::stringstream stream;
-		stream << std::fixed << std::setprecision(2) << value/1e6 << " mm";
+		stream << std::fixed << std::setprecision(3) << value/1e6 << " mm";
 
 		sp->set_text(stream.str());
 		return true;

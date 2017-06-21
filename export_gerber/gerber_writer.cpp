@@ -1,4 +1,5 @@
 #include "gerber_writer.hpp"
+#include "hash.hpp"
 #include <iomanip>
 
 namespace horizon {
@@ -140,7 +141,9 @@ namespace horizon {
 	}
 
 	void GerberWriter::draw_padstack(const Padstack &ps, int layer, const Placement &transform) {
-		auto key = std::make_tuple(ps.uuid, transform.get_angle(), transform.mirror);
+		auto hash = GerberHash::hash(ps);
+		//the hash thing is needed since we have parameters and the same uuid doens't imply the same padstack anymore
+		auto key = std::make_tuple(ps.uuid, hash, transform.get_angle(), transform.mirror);
 		ApertureMacro *am = nullptr;
 		if(apertures_macro.count(key)) {
 			am = &apertures_macro.at(key);

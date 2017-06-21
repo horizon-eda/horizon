@@ -1,5 +1,6 @@
 #include "tool_manage_buses.hpp"
 #include "core_schematic.hpp"
+#include "core_board.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -9,20 +10,30 @@ namespace horizon {
 	}
 
 	bool ToolManageBuses::can_begin() {
-		return core.c;
+		if(tool_id == ToolID::MANAGE_BUSES || tool_id == ToolID::ANNOTATE || tool_id == ToolID::MANAGE_NET_CLASSES)
+			return core.c;
+		else if(tool_id == ToolID::MANAGE_VIA_TEMPLATES)
+			return core.b;
+		return false;
 	}
 
 	ToolResponse ToolManageBuses::begin(const ToolArgs &args) {
 		bool r;
-		auto sch = core.c->get_schematic();
+
 		if(tool_id == ToolID::MANAGE_BUSES) {
+			auto sch = core.c->get_schematic();
 			r = imp->dialogs.manage_buses(sch->block);
 		}
 		else if(tool_id == ToolID::ANNOTATE) {
+			auto sch = core.c->get_schematic();
 			r = imp->dialogs.annotate(sch);
 		}
 		else if(tool_id == ToolID::MANAGE_NET_CLASSES) {
+			auto sch = core.c->get_schematic();
 			r = imp->dialogs.manage_net_classes(sch->block);
+		}
+		else if(tool_id == ToolID::MANAGE_VIA_TEMPLATES) {
+			r = imp->dialogs.manage_via_templates(core.b->get_board(), core.b->get_via_padstack_provider());
 		}
 		if(r) {
 			core.r->commit();

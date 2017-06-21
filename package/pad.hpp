@@ -9,6 +9,7 @@
 #include "uuid_provider.hpp"
 #include "pool.hpp"
 #include "padstack.hpp"
+#include "parameter/set.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -25,6 +26,7 @@ namespace horizon {
 			Padstack padstack;
 			Placement placement;
 			std::string name;
+			ParameterSet parameter_set;
 
 			uuid_ptr<Net> net = nullptr;
 			UUID net_segment;

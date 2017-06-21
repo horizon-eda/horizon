@@ -58,6 +58,8 @@ namespace horizon {
 		reload_netlist_button->signal_clicked().connect([this]{core_board.reload_netlist();canvas_update();});
 		core.r->signal_tool_changed().connect([reload_netlist_button](ToolID t){reload_netlist_button->set_sensitive(t==ToolID::NONE);});
 
+		add_tool_button(ToolID::MANAGE_VIA_TEMPLATES, "Via templates...");
+
 		auto test_button = Gtk::manage(new Gtk::Button("Test"));
 		main_window->top_panel->pack_start(*test_button, false, false, 0);
 		test_button->show();

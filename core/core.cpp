@@ -34,6 +34,8 @@
 #include "tool_place_shape.hpp"
 #include "tool_edit_shape.hpp"
 #include "tool_import_dxf.hpp"
+#include "tool_edit_parameter_program.hpp"
+#include "tool_edit_pad_parameter_set.hpp"
 #include <memory>
 
 namespace horizon {
@@ -157,6 +159,18 @@ namespace horizon {
 				return std::make_unique<ToolImportDXF>(this, tool_id);
 
 			case ToolID::MANAGE_NET_CLASSES:
+				return std::make_unique<ToolManageBuses>(this, tool_id);
+
+			case ToolID::EDIT_PARAMETER_PROGRAM:
+				return std::make_unique<ToolEditParameterProgram>(this, tool_id);
+
+			case ToolID::EDIT_PARAMETER_SET:
+				return std::make_unique<ToolEditParameterProgram>(this, tool_id);
+
+			case ToolID::EDIT_PAD_PARAMETER_SET:
+				return std::make_unique<ToolEditPadParameterSet>(this, tool_id);
+
+			case ToolID::MANAGE_VIA_TEMPLATES:
 				return std::make_unique<ToolManageBuses>(this, tool_id);
 
 
