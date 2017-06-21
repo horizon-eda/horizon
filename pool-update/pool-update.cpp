@@ -110,18 +110,20 @@ void update_padstacks(SQLite::Database &db, const std::string &directory, const 
 			}
 
 			auto padstacks_path = Glib::build_filename(pkgpath, "padstacks");
-			Glib::Dir dir2(padstacks_path);
-			for(const auto &it2: dir2) {
-				if(endswidth(it2, ".json")) {
-					std::string filename = Glib::build_filename(padstacks_path, it2);
-					auto padstack = horizon::Padstack::new_from_file(filename);
-					SQLite::Query q(db, "INSERT INTO padstacks (uuid, name, filename, package, type) VALUES ($uuid, $name, $filename, $package, $type)");
-					q.bind("$uuid", padstack.uuid);
-					q.bind("$name", padstack.name);
-					q.bind("$type", horizon::Padstack::type_lut.lookup_reverse(padstack.type));
-					q.bind("$package", pkg_uuid);
-					q.bind("$filename", Glib::build_filename("packages", prefix, it, "padstacks", it2));
-					q.step();
+			if(Glib::file_test(padstacks_path, Glib::FileTest::FILE_TEST_IS_DIR)) {
+				Glib::Dir dir2(padstacks_path);
+				for(const auto &it2: dir2) {
+					if(endswidth(it2, ".json")) {
+						std::string filename = Glib::build_filename(padstacks_path, it2);
+						auto padstack = horizon::Padstack::new_from_file(filename);
+						SQLite::Query q(db, "INSERT INTO padstacks (uuid, name, filename, package, type) VALUES ($uuid, $name, $filename, $package, $type)");
+						q.bind("$uuid", padstack.uuid);
+						q.bind("$name", padstack.name);
+						q.bind("$type", horizon::Padstack::type_lut.lookup_reverse(padstack.type));
+						q.bind("$package", pkg_uuid);
+						q.bind("$filename", Glib::build_filename("packages", prefix, it, "padstacks", it2));
+						q.step();
+					}
 				}
 			}
 		}
