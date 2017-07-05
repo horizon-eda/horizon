@@ -5,11 +5,15 @@ uniform mat3 screenmat;
 uniform float scale;
 uniform vec2 offset;
 uniform float alpha;
+uniform int work_layer;
+uniform uint types_visible;
 in vec2 p0_to_geom[1];
 in vec2 p1_to_geom[1];
 in vec2 p2_to_geom[1];
-in vec3 color_to_geom[1];
-in int flags_to_geom[1];
+in int oid_to_geom[1];
+in int type_to_geom[1];
+in int color_to_geom[1];
+in int layer_to_geom[1];
 smooth out vec3 color_to_fragment;
 smooth out float striper_to_fragment;
 smooth out float alpha_to_fragment;
@@ -18,6 +22,20 @@ flat out float line_length_to_fragment;
 flat out float line_height_px_to_fragment;
 flat out int flags_to_fragment;
 
+struct layer_display {
+	vec3 color;
+	int flags;
+};
+
+
+layout (std140) uniform layer_setup
+{ 
+	vec3 colors[11];
+	layer_display layers[36];
+};
+
+int layer = layer_to_geom[0];
+int mode = (layers[layer].flags>>1)&3;
 
 #define PI 3.1415926535897932384626433832795
 
@@ -26,7 +44,7 @@ vec4 t(vec2 p) {
 }
 
 float t2(vec2 p) {
-	if((flags_to_geom[0]&1)!=0)
+	if(mode==1)
 		return scale*p.x -scale*p.y;
 	return 0.0;
 }
@@ -39,12 +57,30 @@ void main() {
 	vec2 p0 = p0_to_geom[0];
 	vec2 p1 = p1_to_geom[0];
 	vec2 p2 = p2_to_geom[0];
-	vec3 color = color_to_geom[0];
-	color_to_fragment = color;
-	flags_to_fragment = flags_to_geom[0];
+	color_to_fragment = vec3(1,0,0);
+	
+	if((types_visible & uint(1<<type_to_geom[0])) == uint(0))
+		return;
+	
+	if(layer != work_layer && (layers[layer].flags & int(1)) == 0) {
+		return;
+	}
+	
+	if(color_to_geom[0] == 0) {
+		color_to_fragment = layers[layer].color;
+	}
+	else {
+		color_to_fragment = colors[color_to_geom[0]];
+	}
+	
+	flags_to_fragment = 0;
+	if(mode == 0) {
+		flags_to_fragment = 2;
+	}
 	if(!isnan(p2.y)) {
 		round_pos_to_fragment = vec2(0,0);
 		line_height_px_to_fragment = 10;
+		line_length_to_fragment = 10;
 		
 		gl_Position = t(p0);
 		striper_to_fragment = t2(p0);

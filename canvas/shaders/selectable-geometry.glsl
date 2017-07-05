@@ -100,6 +100,7 @@ void main() {
 	if((flags & uint(2))!=uint(0)) { //prelight
 		color_to_fragment = vec3(.5,0,.5);
 	}
+	dot_to_fragment = vec2(0,0);
 	
 	vec3 c_save = color_to_fragment;
 	

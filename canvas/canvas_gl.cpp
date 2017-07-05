@@ -31,7 +31,7 @@ namespace horizon {
 		           Gdk::KEY_PRESS_MASK
 		);
 		set_can_focus(true);
-		property_work_layer().signal_changed().connect([this]{work_layer=property_work_layer();});
+		property_work_layer().signal_changed().connect([this]{work_layer=property_work_layer(); request_push();});
 		property_grid_spacing().signal_changed().connect([this]{grid.spacing=property_grid_spacing(); queue_draw();});
 		property_layer_opacity() = 100;
 		property_layer_opacity().signal_changed().connect([this]{queue_draw();});
@@ -216,6 +216,18 @@ namespace horizon {
 
 	void CanvasGL::request_push() {
 		needs_push = true;
+		auto or_work_layer = [this](int l) {
+			if(l == 35) {
+				return 1001;
+			}
+			else if(l == compress_layer(work_layer)) {
+				return 1000;
+			}
+			else {
+				return l;
+			}
+		};
+		std::sort(triangles.begin(), triangles.end(), [this, or_work_layer](const auto &a, const auto &b){return or_work_layer(a.layer) < or_work_layer(b.layer);});
 		queue_draw();
 	}
 
@@ -246,6 +258,15 @@ namespace horizon {
 	void CanvasGL::update_markers() {
 		marker_renderer.update();
 		request_push();
+	}
+
+	void CanvasGL::set_type_visible(Triangle::Type ty, bool v) {
+		auto mask = 1<<static_cast<int>(ty);
+		if(v)
+			triangle_renderer.types_visible |= mask;
+		else
+			triangle_renderer.types_visible &= ~mask;
+		queue_draw();
 	}
 
 	Coordf CanvasGL::screen2canvas(const Coordf &p) const {

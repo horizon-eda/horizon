@@ -8,14 +8,15 @@ namespace horizon {
 	static GLuint create_vao (GLuint program, GLuint &vbo_out) {
 		auto err = glGetError();
 		if(err != GL_NO_ERROR) {
-			std::cout << "gl error a " << err << std::endl;
+			std::cout << "gl error t " << err << std::endl;
 		}
 		GLuint p0_index = glGetAttribLocation (program, "p0");
 		GLuint p1_index = glGetAttribLocation (program, "p1");
 		GLuint p2_index = glGetAttribLocation (program, "p2");
+		GLuint oid_index = glGetAttribLocation (program, "oid");
+		GLuint type_index = glGetAttribLocation (program, "type");
 		GLuint color_index = glGetAttribLocation (program, "color");
-		GLuint flags_index = glGetAttribLocation (program, "flags");
-
+		GLuint layer_index = glGetAttribLocation (program, "layer");
 
 		GLuint vao, buffer;
 
@@ -53,15 +54,25 @@ namespace horizon {
 							 sizeof(Triangle),
 							 (void*)offsetof(Triangle, x2));
 
-		glEnableVertexAttribArray (color_index);
-		glVertexAttribPointer (color_index, 3, GL_FLOAT, GL_FALSE,
+		glEnableVertexAttribArray (oid_index);
+		glVertexAttribIPointer (oid_index, 1, GL_UNSIGNED_INT,
 							 sizeof(Triangle),
-							 (void*)offsetof(Triangle, r));
+							 (void*)offsetof(Triangle, oid));
 
-		glEnableVertexAttribArray (flags_index);
-		glVertexAttribIPointer (flags_index, 1,  GL_UNSIGNED_BYTE,
+		glEnableVertexAttribArray (type_index);
+		glVertexAttribIPointer (type_index, 1, GL_UNSIGNED_BYTE,
+							 sizeof(Triangle),
+							 (void*)offsetof(Triangle, type));
+
+		glEnableVertexAttribArray (color_index);
+		glVertexAttribIPointer (color_index, 1, GL_UNSIGNED_BYTE,
+							 sizeof(Triangle),
+							 (void*)offsetof(Triangle, color));
+
+		glEnableVertexAttribArray (layer_index);
+		glVertexAttribIPointer (layer_index, 1,  GL_UNSIGNED_BYTE,
 								sizeof(Triangle),
-								(void*)offsetof(Triangle, flags));
+								(void*)offsetof(Triangle, layer));
 
 
 
@@ -81,11 +92,25 @@ namespace horizon {
 
 	void TriangleRenderer::realize() {
 		program = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl", "/net/carrotIndustries/horizon/canvas/shaders/triangle-fragment.glsl", "/net/carrotIndustries/horizon/canvas/shaders/triangle-geometry.glsl");
+
+		glGenBuffers(1, &ubo);
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+		float testd[3] = {1,1,1};
+		glBufferData(GL_UNIFORM_BUFFER, sizeof(testd), &testd, GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+		unsigned int block_index = glGetUniformBlockIndex(program, "layer_setup");
+		GLuint binding_point_index = 0;
+		glBindBufferBase(GL_UNIFORM_BUFFER, binding_point_index, ubo);
+		glUniformBlockBinding(program, block_index, binding_point_index);
+
 		vao = create_vao(program, vbo);
 		GET_LOC(this, screenmat);
 		GET_LOC(this, scale);
 		GET_LOC(this, offset);
 		GET_LOC(this, alpha);
+		GET_LOC(this, work_layer);
+		GET_LOC(this, types_visible);
 	}
 
 	void TriangleRenderer::render() {
@@ -95,8 +120,10 @@ namespace horizon {
 		glUniform1f(scale_loc, ca->scale);
 		glUniform1f(alpha_loc, ca->property_layer_opacity()/100);
 		glUniform2f(offset_loc, ca->offset.x, ca->offset.y);
+		glUniform1i(work_layer_loc, ca->compress_layer(ca->work_layer));
+		glUniform1ui(types_visible_loc, types_visible);
 
-		glDrawArrays (GL_POINTS, 0, render_triangles_count);
+		glDrawArrays (GL_POINTS, 0, triangles.size());
 
 
 		glBindVertexArray (0);
@@ -104,16 +131,12 @@ namespace horizon {
 	}
 
 	void TriangleRenderer::push() {
+
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+		glBufferData(GL_UNIFORM_BUFFER, sizeof(ca->layer_setup), &ca->layer_setup, GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		if(!ca->error_polygons.visible) {
-			glBufferData(GL_ARRAY_BUFFER, sizeof(Triangle)*triangles.size(), triangles.data(), GL_STREAM_DRAW);
-			render_triangles_count = triangles.size();
-		}
-		else {
-			glBufferData(GL_ARRAY_BUFFER, sizeof(Triangle)*(triangles.size()+ca->error_polygons.triangles.size()), nullptr, GL_STREAM_DRAW);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Triangle)*triangles.size(), triangles.data());
-			glBufferSubData(GL_ARRAY_BUFFER, sizeof(Triangle)*triangles.size(), sizeof(Triangle)*ca->error_polygons.triangles.size(), ca->error_polygons.triangles.data());
-			render_triangles_count = triangles.size()+triangles.size();
-		}
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Triangle)*triangles.size(), triangles.data(), GL_STREAM_DRAW);
 	}
 }

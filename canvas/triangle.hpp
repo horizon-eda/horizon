@@ -4,6 +4,8 @@
 
 namespace horizon {
 
+	enum class ColorP {FROM_LAYER, RED, GREEN, YELLOW, WHITE, ERROR, NET, BUS, SYMBOL, FRAME, AIRWIRE, LAST};
+
 	class Triangle {
 			public:
 			float x0;
@@ -12,22 +14,26 @@ namespace horizon {
 			float y1;
 			float x2;
 			float y2;
-			float r;
-			float g;
-			float b;
-			uint8_t flags;
+			enum class Type {NONE, TRACK, VIA, PAD, POUR, ERROR};
 
-			Triangle(const Coordf &p0, const Coordf &p1, const Coordf &p2, const Color &co, uint8_t f=0):
+			uint32_t oid;
+			uint8_t type;
+			uint8_t color;
+			uint8_t layer;
+			uint8_t _pad;
+
+			Triangle(const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t la, uint32_t oi, Type ty):
 				x0(p0.x),
 				y0(p0.y),
 				x1(p1.x),
 				y1(p1.y),
 				x2(p2.x),
 				y2(p2.y),
-				r(co.r),
-				g(co.g),
-				b(co.b),
-				flags(f)
+				oid(oi),
+				type(static_cast<uint8_t>(ty)),
+				color(static_cast<uint8_t>(co)),
+				layer(la),
+				_pad(0)
 			{}
 		} __attribute__((packed));
 
@@ -43,16 +49,19 @@ namespace horizon {
 		private :
 			CanvasGL *ca;
 			std::vector<Triangle> &triangles;
-			size_t render_triangles_count;
+			uint32_t types_visible=0xffffffff;
 
 			GLuint program;
 			GLuint vao;
 			GLuint vbo;
+			GLuint ubo;
 
 			GLuint screenmat_loc;
 			GLuint scale_loc;
 			GLuint offset_loc;
 			GLuint alpha_loc;
+			GLuint work_layer_loc;
+			GLuint types_visible_loc;
 	};
 
 }

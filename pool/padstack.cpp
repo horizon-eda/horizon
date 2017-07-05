@@ -292,8 +292,24 @@ namespace horizon {
 	}
 
 	void Padstack::expand_inner(unsigned int n_inner) {
-		if(n_inner == 0)
-			return;
+		if(n_inner == 0) {
+			for (auto it = shapes.begin(); it != shapes.end();) {
+				if(it->second.layer == -1) {
+					shapes.erase(it++);
+				}
+				else {
+					it++;
+				}
+			}
+			for (auto it = polygons.begin(); it != polygons.end();) {
+				if(it->second.layer == -1) {
+					polygons.erase(it++);
+				}
+				else {
+					it++;
+				}
+			}
+		}
 		std::map<UUID, Polygon> new_polygons;
 		for(const auto &it: polygons) {
 			if(it.second.layer == -1) {
@@ -306,6 +322,19 @@ namespace horizon {
 			}
 		}
 		polygons.insert(new_polygons.begin(), new_polygons.end());
+
+		std::map<UUID, Shape> new_shapes;
+		for(const auto &it: shapes) {
+			if(it.second.layer == -1) {
+				for(unsigned int i=0; i<(n_inner-1); i++) {
+					auto uu = UUID::random();
+					auto &np = new_shapes.emplace(uu, it.second).first->second;
+					np.uuid = uu;
+					np.layer = -2-i;
+				}
+			}
+		}
+		shapes.insert(new_shapes.begin(), new_shapes.end());
 	}
 
 }

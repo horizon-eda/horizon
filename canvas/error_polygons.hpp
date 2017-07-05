@@ -18,8 +18,6 @@ namespace horizon {
 
 		private:
 			CanvasGL *ca;
-			bool visible = false;
-			std::vector<Triangle> triangles;
 
 	};
 }

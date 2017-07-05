@@ -6,15 +6,35 @@
 
 namespace horizon {
 
-	Canvas::Canvas(): selection_filter(this), selectables(this) {}
+	Canvas::Canvas(): selection_filter(this), selectables(this) {
+		//RED, GREEN, YELLOW, WHITE, ERROR, NET, BUS, SYMBOL, FRAME, AIRWIRE, LAST}
+		layer_setup.colors.at(static_cast<int>(ColorP::RED)) = {1,0,0};
+		layer_setup.colors.at(static_cast<int>(ColorP::GREEN)) = {0,1,0};
+		layer_setup.colors.at(static_cast<int>(ColorP::YELLOW)) = {1,1,0};
+		layer_setup.colors.at(static_cast<int>(ColorP::WHITE)) = {1,1,1};
+		layer_setup.colors.at(static_cast<int>(ColorP::ERROR)) = {1,0,0};
+		layer_setup.colors.at(static_cast<int>(ColorP::NET)) = {0,1,0};
+		layer_setup.colors.at(static_cast<int>(ColorP::BUS)) = {1,.4,0};
+		layer_setup.colors.at(static_cast<int>(ColorP::SYMBOL)) = {1,1,1};
+		layer_setup.colors.at(static_cast<int>(ColorP::FRAME)) = {0,.5,0};
+		layer_setup.colors.at(static_cast<int>(ColorP::AIRWIRE)) = {0,1,1};
+	}
 
 	void Canvas::set_layer_display(int index, const LayerDisplay &ld) {
-		layer_display[index] = ld;
+		layer_setup.layer_display.at(compress_layer(index)) = ld;
+		request_push();
 	}
+
+	LayerDisplayGL::LayerDisplayGL(const LayerDisplay &ld): r(ld.color.r), g(ld.color.g), b(ld.color.b),
+		flags(ld.visible|((static_cast<int>(ld.mode)&3)<<1)) {}
+
+	LayerDisplayGL::LayerDisplayGL() {}
 
 	void Canvas::clear() {
 		selectables.clear();
-		triangles.clear();
+		triangles.erase(std::remove_if(triangles.begin(),
+						triangles.end(),
+						[](const auto &t){return static_cast<Triangle::Type>(t.type) != Triangle::Type::ERROR;}), triangles.end());
 		targets.clear();
 		sheet_current_uuid = UUID();
 	}

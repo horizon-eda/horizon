@@ -259,7 +259,7 @@ enum HersheyFonts {
 
 	extern const char* hershey_glyphs[];
 
-	std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const std::string &rtext, int angle, bool flip, TextOrigin origin, const Color &color, bool tr, uint64_t width, bool draw) {
+	std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const std::string &rtext, int angle, bool flip, TextOrigin origin, ColorP color, int layer, uint64_t width, bool draw) {
 
 		Glib::ustring text(rtext);
 		std::vector<gunichar> vtext;
@@ -332,7 +332,7 @@ enum HersheyFonts {
 							p1 = tf.transform(Coordi(x0+(x2+xshift)*sc, y0+y2*sc));
 							if(draw) {
 								img_text_line(Coordi(p0.x, p0.y), Coordi(p1.x, p1.y), width, false);
-								draw_line(p0, p1, color, false, width);
+								draw_line(p0, p1, color, layer, false, width);
 							}
 							a=Coordf::min(a, Coordf::min(p0, p1));
 							b=Coordf::max(b, Coordf::max(p0, p1));
@@ -351,110 +351,6 @@ enum HersheyFonts {
 			}
 			else {
 				x0 += step;
-			}
-			i++;
-		}
-		return {a,b};
-	}
-	std::pair<Coordf, Coordf> Canvas::draw_text(const Coordf &p, float size, const std::string &rtext, Orientation orientation, TextOrigin origin, const Color &color, bool tr, uint64_t width, bool draw) {
-
-		Glib::ustring text(rtext);
-		std::vector<gunichar> vtext;
-		vtext.reserve(text.size());
-		for(const auto &it: text) {
-			vtext.push_back(it);
-		}
-		float x0 = p.x;
-		float y0 = p.y;
-		int fontFace = FONT_HERSHEY_SIMPLEX;
-		const int* ascii = getFontData(fontFace);
-		float sc = size / 21;
-		float yshift = (origin==TextOrigin::CENTER)?-size/2:(origin==TextOrigin::BOTTOM?size/2:0);
-		if(orientation == Orientation::LEFT || orientation == Orientation::RIGHT) {
-			y0 += yshift;
-		}
-		else {
-			x0 -= yshift;
-		}
-		int i = 0;
-		if(orientation == Orientation::LEFT || orientation == Orientation::DOWN) {
-			std::reverse(vtext.begin(), vtext.end());
-		}
-		
-		Coordf a = p;
-		Coordf b = p;
-		
-		for(const gunichar c: vtext) {
-			//char c = ci;
-			//readCheck(&c, &i, text.data(), fontFace);
-			const char *s = hershey_glyphs[codepoint_to_hershey(c)];
-			
-			float step;
-			{
-				
-				int left = s[0] - 'R';
-				int right = s[1] - 'R';
-				size_t n = 0;
-				int x,y, x2, y2;
-				for( s += 2;; ) {
-					if( *s == ' ' || !*s ) {
-						if( !*s++ )
-							break;
-						n = 0;
-					}
-					else {
-						x = s[0] - 'R';
-						y = -(s[1] - 'R')+9;
-						s += 2;
-						if(n > 0) {
-							int xshift;
-							if(orientation == Orientation::LEFT || orientation == Orientation::DOWN) {
-								xshift = left;
-							}
-							else {
-								xshift = -left;
-							}
-							Coordf p0, p1;
-							if(orientation == Orientation::LEFT || orientation == Orientation::RIGHT) {
-								p0 ={x0+(x+xshift)*sc, y0+y*sc};
-								p1 = { x0+(x2+xshift)*sc, y0+y2*sc};
-							}
-							else { //UP, DOWN
-								p0 = {x0-(y*sc), y0+(x+xshift)*sc};
-								p1 = {x0-(y2*sc), y0+(x2+xshift)*sc};
-							}
-							if(draw) {
-								img_text_line(Coordi(p0.x, p0.y), Coordi(p1.x, p1.y), width);
-								draw_line(p0, p1, color, tr, width);
-							}
-							a=Coordf::min(a, Coordf::min(p0, p1));
-							b=Coordf::max(b, Coordf::max(p0, p1));
-						}
-						
-						x2 = x;
-						y2 = y;
-						
-						n++;
-					}
-				}
-				step = (right-left)*sc;
-			}
-			switch(orientation) {
-				case Orientation::LEFT :
-					x0 -= step;
-				break;
-				
-				case Orientation::RIGHT :
-					x0 += step;
-				break;
-				
-				case Orientation::UP :
-					y0 += step;
-				break;
-				
-				case Orientation::DOWN :
-					y0 -= step;
-				break;
 			}
 			i++;
 		}

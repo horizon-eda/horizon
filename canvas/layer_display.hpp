@@ -13,4 +13,14 @@ namespace horizon {
 			Mode mode=Mode::FILL;
 			Color color;
 	};
+
+	class LayerDisplayGL {
+		public:
+		LayerDisplayGL(const LayerDisplay &ld);
+		LayerDisplayGL();
+		float r=1;
+		float g=1;
+		float b=1;
+		uint32_t flags=1;
+	};
 }

@@ -33,21 +33,47 @@
 
 namespace horizon {
 
+
+
 	Color Canvas::get_layer_color(int layer) {
 		Color c = layer_provider->get_layers().at(layer).color;
-		if(layer_display.count(layer)) {
-			c = layer_display.at(layer).color;
-		}
 		return c;
 	}
 	
+	uint8_t Canvas::compress_layer(int layer) {
+		const int inner_offset = 27;
+		switch(layer) {
+			case 10000: return inner_offset+8;
+			case   100: return inner_offset+7;
+			case    60: return inner_offset+6;
+			case    50: return inner_offset+5;
+			case    40: return inner_offset+4;
+			case    30: return inner_offset+3;
+			case    20: return inner_offset+2;
+			case    10: return inner_offset+1;
+			case     0: return inner_offset+0;
+
+			case -100: return 6;
+			case -110: return 5;
+			case -120: return 4;
+			case -130: return 3;
+			case -140: return 2;
+			case -150: return 1;
+			case -160: return 0;
+			default :
+				assert(layer<0 && layer > -100);
+				return inner_offset+layer;
+		}
+
+	}
+
 	void Canvas::render(const Junction &junc, bool interactive, ObjectType mode) {
-		Color c(1,1,0);
+		ColorP c = ColorP::YELLOW;
 		if(junc.net) {
-			c = Color(0,1,0);
+			c = ColorP::NET;
 		}
 		if(junc.bus) {
-			c = Color::new_from_int(0xff, 0x66, 00);
+			c = ColorP::BUS;
 		}
 		if(junc.warning) {
 			draw_error(junc.position, 2e5, "");
@@ -63,7 +89,7 @@ namespace horizon {
 				draw_plus(junc.position, 250000, c);
 			}
 			else if(junc.connection_count >= 3  && mode == ObjectType::SCHEMATIC) {
-				draw_line(junc.position, junc.position+Coordi(0, 10), c, true, 0.5_mm);
+				draw_line(junc.position, junc.position+Coordi(0, 10), c, 0, true, 0.5_mm);
 			}
 			else {
 				draw_cross(junc.position, 0.25_mm, c);
@@ -77,8 +103,9 @@ namespace horizon {
 			}
 		}
 	}
+
 	void Canvas::render(const PowerSymbol &sym) {
-		Color c(1,1,0);
+		auto c = ColorP::NET;
 		/*if(sym.connection_count == 2) {
 			draw_plus(sym.junction->position, 0.25_mm, c);
 		}
@@ -106,12 +133,6 @@ namespace horizon {
 		draw_text0(sym.junction->position+text_offset, 1.25_mm, sym.junction->net->name, text_angle, false, TextOrigin::CENTER, c);
 	}
 	
-	uint8_t Canvas::get_triangle_flags_for_line(int layer) {
-		bool hatch = (layer_display.count(layer) && layer_display.at(layer).mode == LayerDisplay::Mode::HATCH);
-		bool outline_mode = (layer_display.count(layer) && layer_display.at(layer).mode == LayerDisplay::Mode::OUTLINE);
-		return hatch | (outline_mode<<1);
-	}
-
 	static auto get_line_bb(const Coordf &from, const Coordf &to, float width) {
 		auto center = (from+to)/2;
 		auto v = to-from;
@@ -127,14 +148,10 @@ namespace horizon {
 	}
 
 	void Canvas::render(const Line &line, bool interactive) {
-		Color c = get_layer_color(line.layer);
 		img_line(line.from->position, line.to->position, line.width, line.layer);
 		if(img_mode)
 			return;
-		auto flags = get_triangle_flags_for_line(line.layer);
-		if(line.width == 0)
-			flags = 0;
-		draw_line(line.from->position, line.to->position, c, true, line.width, flags);
+		draw_line(line.from->position, line.to->position, ColorP::FROM_LAYER, line.layer, true, line.width);
 		if(interactive) {
 			auto center = (line.from->position + line.to->position)/2;
 			auto bb = get_line_bb(line.from->position, line.to->position, line.width);
@@ -142,28 +159,28 @@ namespace horizon {
 			selectables.append(line.uuid, ObjectType::LINE, center, bb.first, bb.second , 0, line.layer);
 		}
 	}
-	
+
 	void Canvas::render(const LineNet &line) {
 		uint64_t width = 0;
-		Color c(0,1,0);
+		ColorP c = ColorP::NET;
 		if(line.net == nullptr) {
-			c = Color(1,0,0);
+			c = ColorP::ERROR;
 		}
 		if(line.bus) {
-			c = Color::new_from_int(0xff, 0x66, 0);
+			c = ColorP::BUS;
 			width = 0.2_mm;
 		}
-		draw_line(line.from.get_position(), line.to.get_position(), c, true, width);
+		draw_line(line.from.get_position(), line.to.get_position(), c, 0, true, width);
 		selectables.append(line.uuid, ObjectType::LINE_NET, (line.from.get_position()+line.to.get_position())/2, Coordf::min(line.from.get_position(), line.to.get_position()), Coordf::max(line.from.get_position(), line.to.get_position()));
 	}
 
 	void Canvas::render(const Track &track) {
-		Color c = get_layer_color(track.layer);
+		auto c = ColorP::FROM_LAYER;
 		if(track.net == nullptr) {
-			c = Color::new_from_int(0xff, 0x66, 0);
+			c = ColorP::BUS;
 		}
 		if(track.is_air) {
-			c = {0,1,1};
+			c = ColorP::AIRWIRE;
 		}
 		auto width = track.width;
 		if(!track.is_air) {
@@ -175,10 +192,7 @@ namespace horizon {
 		}
 		if(img_mode)
 			return;
-		auto flags = get_triangle_flags_for_line(track.layer);
-		if(width == 0)
-			flags = 0;
-		draw_line(track.from.get_position(), track.to.get_position(), c, true, width, flags);
+		draw_line(track.from.get_position(), track.to.get_position(), c, track.layer, true, width);
 		if(!track.is_air) {
 			auto center = (track.from.get_position()+ track.to.get_position())/2;
 			auto bb = get_line_bb(track.from.get_position(), track.to.get_position(), width);
@@ -283,34 +297,33 @@ namespace horizon {
 			c_pad = {0.5, 0.5, 0.5};
 		}
 		if(interactive || pin.name_visible) {
-			draw_text0(p_name, 1.25_mm, pin.name, orientation_to_angle(name_orientation), false, TextOrigin::CENTER, c_name, false);
+			draw_text0(p_name, 1.25_mm, pin.name, orientation_to_angle(name_orientation), false, TextOrigin::CENTER, ColorP::FROM_LAYER, 0);
 		}
 		std::pair<Coordf, Coordf> pad_extents;
 		if(interactive || pin.pad_visible) {
-			pad_extents = draw_text0(p_pad, 0.75_mm, pin.pad, orientation_to_angle(pad_orientation), false, TextOrigin::BASELINE, c_pad, false);
+			pad_extents = draw_text0(p_pad, 0.75_mm, pin.pad, orientation_to_angle(pad_orientation), false, TextOrigin::BASELINE, ColorP::FROM_LAYER, 0);
 		}
 		switch(pin.connector_style) {
 			case SymbolPin::ConnectorStyle::BOX :
-				draw_box(p0, 0.25_mm, c, false);
+				draw_box(p0, 0.25_mm, ColorP::FROM_LAYER, 0, false);
 			break;
 
 			case SymbolPin::ConnectorStyle::NONE :
 			break;
 		}
 		if(pin.connected_net_lines.size()>1) {
-			draw_line(p0, p0+Coordi(0, 10), c, false, 0.5_mm);
+			//draw_line(p0, p0+Coordi(0, 10), c, false, 0.5_mm);
 		}
-		draw_line(p0, p1, c, false);
+		draw_line(p0, p1, ColorP::FROM_LAYER, 0, false);
 		if(interactive)
 			selectables.append(pin.uuid, ObjectType::SYMBOL_PIN, p0, Coordf::min(pad_extents.first, Coordf::min(p0, p1)), Coordf::max(pad_extents.second, Coordf::max(p0, p1)));
 	}
-	
+
 	static int64_t sq(int64_t x) {
 		return x*x;
 	}
 	
 	void Canvas::render(const Arc &arc, bool interactive) {
-		Color co = get_layer_color(arc.layer);
 		Coordf a(arc.from->position);// ,b,c;
 		Coordf b(arc.to->position);// ,b,c;
 		Coordf c(arc.center->position);// ,b,c;
@@ -318,15 +331,14 @@ namespace horizon {
 		float radius1 = sqrt(sq(c.x-b.x) + sq(c.y-b.y));
 		float a0 = atan2f(a.y-c.y, a.x-c.x);
 		float a1 = atan2f(b.y-c.y, b.x-c.x);
-		draw_arc2(c, radius0, a0, radius1, a1, co, true, arc.width);
+		draw_arc2(c, radius0, a0, radius1, a1, ColorP::FROM_LAYER, arc.layer, true, arc.width);
 		Coordf t(radius0, radius0);
 		if(interactive)
 			selectables.append(arc.uuid, ObjectType::ARC, c, c-t, c+t, 0, arc.layer);
 		
 	}
-	
+
 	void Canvas::render(const SchematicSymbol &sym) {
-		//draw_error(sym.placement.shift, 2e5, "sch sym");
 		transform = sym.placement;
 		render(sym.symbol, true, sym.smashed);
 		for(const auto &it: sym.symbol.pins) {
@@ -338,8 +350,6 @@ namespace horizon {
 	}
 
 	void Canvas::render(const Text &text, bool interactive, bool reorient) {
-		Color c = get_layer_color(text.layer);
-
 		bool rev = layer_provider->get_layers().at(text.layer).reverse;
 		transform_save();
 		transform.accumulate(text.placement);
@@ -349,7 +359,7 @@ namespace horizon {
 		}
 
 		img_text_layer(text.layer);
-		auto extents = draw_text0(transform.shift, text.size, text.overridden?text.text_override:text.text, angle, rev, text.origin, c, true, text.width);
+		auto extents = draw_text0(transform.shift, text.size, text.overridden?text.text_override:text.text, angle, rev, text.origin, ColorP::FROM_LAYER, text.layer, text.width);
 		img_text_layer(10000);
 		transform_restore();
 		if(interactive) {
@@ -381,16 +391,16 @@ namespace horizon {
 		if(label.on_sheets.size() > 0 && label.offsheet_refs){
 			txt += " ["+join(label.on_sheets, ",")+"]";
 		}
-
+		auto c = ColorP::NET;
 		if(label.style==NetLabel::Style::FLAG) {
-			Color c{0,1,0};
+
 			std::pair<Coordf, Coordf> extents;
 			Coordi shift;
 			std::tie(extents.first, extents.second, shift)= draw_flag(label.junction->position, txt, label.size, label.orientation, c);
 			selectables.append(label.uuid, ObjectType::NET_LABEL, label.junction->position+shift, extents.first, extents.second);
 		}
 		else {
-			auto extents = draw_text0(label.junction->position, label.size, txt, orientation_to_angle(label.orientation), false, TextOrigin::BASELINE, {0,1,0}, false);
+			auto extents = draw_text0(label.junction->position, label.size, txt, orientation_to_angle(label.orientation), false, TextOrigin::BASELINE, c);
 			selectables.append(label.uuid, ObjectType::NET_LABEL, label.junction->position+Coordi(0, 1000000), extents.first, extents.second);
 		}
 	}
@@ -403,15 +413,14 @@ namespace horizon {
 			txt += " ["+join(label.on_sheets, ",")+"]";
 		}
 
-		auto c = Color::new_from_int(0xff, 0x66, 00);
 		std::pair<Coordf, Coordf> extents;
 		Coordi shift;
-		std::tie(extents.first, extents.second, shift)= draw_flag(label.junction->position, txt, label.size, label.orientation, c);
+		std::tie(extents.first, extents.second, shift)= draw_flag(label.junction->position, txt, label.size, label.orientation, ColorP::BUS);
 		selectables.append(label.uuid, ObjectType::BUS_LABEL, label.junction->position+shift, extents.first, extents.second);
 	}
 
 	void Canvas::render(const BusRipper &ripper) {
-		auto c = Color::new_from_int(0xff, 0xb1, 00);
+		auto c = ColorP::BUS;
 		auto connector_pos = ripper.get_connector_pos();
 		draw_line(ripper.junction->position, connector_pos, c);
 		if(ripper.connection_count < 1) {
@@ -438,7 +447,6 @@ namespace horizon {
 		img_polygon(poly);
 		if(img_mode)
 			return;
-		Color c = get_layer_color(poly.layer);
 
 		TPPLPoly po;
 		po.Init(poly.vertices.size());
@@ -448,17 +456,16 @@ namespace horizon {
 		unsigned int i = 0;
 		for(const auto &it: poly.vertices) {
 			if(v_last) {
-				draw_line(v_last->position, it.position, c);
+				draw_line(v_last->position, it.position, ColorP::FROM_LAYER, poly.layer);
 			}
 			po[i].x  = it.position.x;
 			po[i].y  = it.position.y;
 			v_last = &it;
 			i++;
 		}
-		draw_line(poly.vertices.front().position, poly.vertices.back().position, c);
+		draw_line(poly.vertices.front().position, poly.vertices.back().position, ColorP::FROM_LAYER, poly.layer);
 
-		bool draw_tris = !(layer_display.count(poly.layer) && layer_display.at(poly.layer).mode == LayerDisplay::Mode::OUTLINE);
-		bool hatch = (layer_display.count(poly.layer) && layer_display.at(poly.layer).mode == LayerDisplay::Mode::HATCH);
+		bool draw_tris = static_cast<LayerDisplay::Mode>((layer_setup.layer_display.at(compress_layer(poly.layer)).flags>>1)&3)!=LayerDisplay::Mode::OUTLINE;
 
 		if(draw_tris) {
 			po.SetOrientation(TPPL_CCW);
@@ -472,7 +479,7 @@ namespace horizon {
 				Coordf p0 = transform.transform(coordf_from_pt(tri[0]));
 				Coordf p1 = transform.transform(coordf_from_pt(tri[1]));
 				Coordf p2 = transform.transform(coordf_from_pt(tri[2]));
-				triangles.emplace_back(p0, p1, p2, c, hatch);
+				triangles.emplace_back(p0, p1, p2, ColorP::FROM_LAYER, compress_layer(poly.layer), oid_current, triangle_type_current);
 			}
 		}
 		if(interactive && !ipoly.temp) {
@@ -487,11 +494,9 @@ namespace horizon {
 						targets.emplace(poly.uuid, ObjectType::POLYGON_EDGE, center, i-1);
 					}
 				}
-				//draw_cross(it.position, 0.25_mm, c);
 				selectables.append(poly.uuid, ObjectType::POLYGON_VERTEX, it.position, i, poly.layer);
 				targets.emplace(poly.uuid, ObjectType::POLYGON_VERTEX, it.position, i);
 				if(it.type == Polygon::Vertex::Type::ARC) {
-					//draw_plus(it.arc_center, 0.25_mm, c);
 					selectables.append(poly.uuid, ObjectType::POLYGON_ARC_CENTER, it.arc_center, i, poly.layer);
 					targets.emplace(poly.uuid, ObjectType::POLYGON_ARC_CENTER, it.arc_center, i);
 				}
@@ -518,7 +523,7 @@ namespace horizon {
 	}
 
 	void Canvas::render(const Hole &hole, bool interactive) {
-		Color co(1,1,1);
+		auto co = ColorP::WHITE;
 		img_hole(hole);
 		if(img_mode)
 			return;
@@ -549,17 +554,16 @@ namespace horizon {
 		transform_restore();
 	}
 
-	void Canvas::render(const Pad &pad, int layer) {
+	void Canvas::render(const Pad &pad) {
 		transform_save();
 		transform.accumulate(pad.placement);
 		img_net(pad.net);
 		img_patch_type(PatchType::PAD);
-		render(pad.padstack, layer, false);
+		render(pad.padstack, false);
 		img_patch_type(PatchType::OTHER);
 		img_net(nullptr);
 		transform_restore();
 	}
-
 
 	void Canvas::render(const Symbol &sym, bool on_sheet, bool smashed) {
 		if(!on_sheet) {
@@ -581,29 +585,9 @@ namespace horizon {
 				render(it.second, !on_sheet);
 			}
 		}
-		/*
-		Coordi p(10_mm, 5_mm);
-		draw_text2(p, 1_mm, "Hallo 0", 0, false, TextOrigin::BASELINE, {1,1,1});
-		draw_text2(p, 1_mm, "Hallo 45", 8192,  false, TextOrigin::BASELINE, {1,1,1});
-		draw_text2(p, 1_mm, "Hallo 90", 8192*2,false, TextOrigin::BASELINE, {1,1,1});
-		draw_text2(p, 1_mm, "Hallo 135", 8192*3,false, TextOrigin::BASELINE, {1,1,1});
-		draw_text2(p, 1_mm, "Hallo 180", 8192*4,false, TextOrigin::BASELINE, {1,1,1});
-		draw_text2(p, 1_mm, "Hallo 225", 8192*5, false,TextOrigin::BASELINE, {1,1,1});
-		draw_text2(p, 1_mm, "Hallo 270", 8192*6, false,TextOrigin::BASELINE, {1,1,1});
-		draw_text2(p, 1_mm, "Hallo 315", 8192*7, false,TextOrigin::BASELINE, {1,1,1});
-
-		p.x = 30_mm;
-		p.y = 20_mm;
-		draw_text2(p, 1_mm, "Hallo 0", 0, true, TextOrigin::BASELINE, {1,1,1});
-		draw_text2(p, 1_mm, "Hallo 45", 8192,  true, TextOrigin::BASELINE, {1,1,1});
-		draw_text2(p, 1_mm, "Hallo 90", 8192*2,true, TextOrigin::BASELINE, {1,1,1});
-		draw_text2(p, 1_mm, "Hallo 135", 8192*3,true, TextOrigin::BASELINE, {1,1,1});
-		draw_text2(p, 1_mm, "Hallo 180", 8192*4,true, TextOrigin::BASELINE, {1,1,1});
-		draw_text2(p, 1_mm, "Hallo 225", 8192*5, true,TextOrigin::BASELINE, {1,1,1});
-		draw_text2(p, 1_mm, "Hallo 270", 8192*6, true,TextOrigin::BASELINE, {1,1,1});
-		draw_text2(p, 1_mm, "Hallo 315", 8192*7, true,TextOrigin::BASELINE, {1,1,1});*/
-
 	}
+
+
 	void Canvas::render(const Sheet &sheet) {
 		for(const auto &it: sheet.junctions) {
 			render(it.second, true, ObjectType::SCHEMATIC);
@@ -646,265 +630,197 @@ namespace horizon {
 		Coordf tr(width-border, height-border);
 		Coordf tl(border, height-border);
 
-		Color c(0,.5,.0);
+		auto c = ColorP::FRAME;
 		draw_line(bl, br, c);
 		draw_line(br, tr, c);
 		draw_line(tr, tl, c);
 		draw_line(tl, bl, c);
 	}
 
-	void Canvas::render(const Padstack &padstack, int layer, bool interactive) {
-		if(layer == 10000) {
-			for(const auto &it: padstack.holes) {
-				render(it.second, interactive);
-			}
-			img_padstack(padstack);
+	void Canvas::render(const Padstack &padstack, bool interactive) {
+		for(const auto &it: padstack.holes) {
+			render(it.second, interactive);
 		}
+		img_padstack(padstack);
 		img_set_padstack(true);
 		for(const auto &it: padstack.polygons) {
-			if(it.second.layer == layer)
-				render(it.second, interactive);
+			render(it.second, interactive);
 		}
 		for(const auto &it: padstack.shapes) {
-			if(it.second.layer == layer)
-				render(it.second, interactive);
+			render(it.second, interactive);
 		}
 		img_set_padstack(false);
 	}
 
-	void Canvas::render(const Padstack &padstack, bool interactive) {
-		auto layers = layer_provider->get_layers();
-		for(const auto &la: layers) {
-			if(la.first == work_layer)
-				continue;
-			if(layer_display.count(la.first))
-				if(!layer_display.at(la.first).visible)
-					continue;
-			render(padstack, la.first, interactive);
-		}
-		render(padstack, work_layer, interactive);
-		render(padstack, 10000, interactive);
-	}
-
-	void Canvas::render(const Package &pkg, int layer, bool interactive, bool smashed) {
-		if(layer == 10000) {
-			if(interactive) {
-				for(const auto &it: pkg.junctions) {
-					auto &junc = it.second;
-					selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, 10000, true);
-					if(!junc.temp) {
-						targets.emplace(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
-					}
+	void Canvas::render(const Package &pkg, bool interactive, bool smashed) {
+		if(interactive) {
+			for(const auto &it: pkg.junctions) {
+				auto &junc = it.second;
+				selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, 10000, true);
+				if(!junc.temp) {
+					targets.emplace(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
 				}
 			}
-			for(const auto &it: pkg.pads) {
-				transform_save();
-				transform.accumulate(it.second.placement);
-				auto bb = it.second.padstack.get_bbox();
-				bb.first = transform.transform(bb.first);
-				bb.second = transform.transform(bb.second);
-				transform.reset();
-				Coordi a(std::min(bb.first.x, bb.second.x), std::min(bb.first.y, bb.second.y));
-				Coordi b(std::max(bb.first.x, bb.second.x), std::max(bb.first.y, bb.second.y));
-				{
-					Coordi text_pos = {a.x, (a.y+b.y)/2+abs(a.y-b.y)/4};
-					auto text_bb = draw_text(text_pos, 1_mm, it.second.name, Orientation::RIGHT, TextOrigin::CENTER, {1,1,1}, true, 0, false);
-					float scale_x = (text_bb.second.x-text_bb.first.x)/(float)(b.x-a.x);
-					float scale_y = ((text_bb.second.y-text_bb.first.y)*2)/(float)(b.y-a.y);
-					float sc = std::max(scale_x, scale_y);
-					text_pos.x += (b.x-a.x)/2-(text_bb.second.x-text_bb.first.x)/(2*sc);
-
-
-					draw_text(text_pos, 0.8_mm/sc, it.second.name, Orientation::RIGHT, TextOrigin::CENTER, {1,1,1});
-				}
-				if(it.second.net) {
-					Coordi text_pos = {a.x, (a.y+b.y)/2-abs(a.y-b.y)/4};
-					auto text_bb = draw_text(text_pos, 1_mm, it.second.net->name, Orientation::RIGHT, TextOrigin::CENTER, {1,1,1}, true, 0, false);
-					float scale_x = (text_bb.second.x-text_bb.first.x)/(float)(b.x-a.x);
-					float scale_y = ((text_bb.second.y-text_bb.first.y)*2)/(float)(b.y-a.y);
-					float sc = std::max(scale_x, scale_y);
-					text_pos.x += (b.x-a.x)/2-(text_bb.second.x-text_bb.first.x)/(2*sc);
-
-					draw_text(text_pos, 0.8_mm/sc, it.second.net->name, Orientation::RIGHT, TextOrigin::CENTER, {1,1,1});
-				}
-				transform_restore();
-			}
-		}
-		for(const auto &it: pkg.lines) {
-			if(it.second.layer == layer)
-				render(it.second, interactive);
-		}
-		for(const auto &it: pkg.texts) {
-			if(it.second.layer == layer && (!smashed || !(it.second.layer == 20 || it.second.layer == 120)))
-				render(it.second, interactive);
-		}
-		for(const auto &it: pkg.arcs) {
-			if(it.second.layer == layer)
-				render(it.second, interactive);
 		}
 		for(const auto &it: pkg.pads) {
-			render(it.second, layer);
-		}
-		for(const auto &it: pkg.polygons) {
-			if(it.second.layer == layer)
-				render(it.second, interactive);
-		}
-	}
-
-	void Canvas::render(const Package &pkg, bool interactive) {
-		auto layers = layer_provider->get_layers();
-		for(const auto &la: layers) {
-			if(la.first == work_layer)
-				continue;
-			if(layer_display.count(la.first))
-				if(!layer_display.at(la.first).visible)
-					continue;
-			render(pkg, la.first, interactive);
-		}
-		render(pkg, work_layer, interactive);
-		render(pkg, 10000, interactive);
-		std::set<std::string> pad_names;
-		for(const auto &it: pkg.pads) {
-			auto x = pad_names.insert(it.second.name);
-			if(!x.second) {
-				draw_error(it.second.placement.shift, 2e5, "duplicate pad name");
-			}
 			transform_save();
 			transform.accumulate(it.second.placement);
 			auto bb = it.second.padstack.get_bbox();
-			selectables.append(it.second.uuid, ObjectType::PAD, {0,0}, bb.first, bb.second);
-			transform_restore();
-			targets.emplace(it.second.uuid, ObjectType::PAD, it.second.placement.shift);
-		}
-	}
+			bb.first = transform.transform(bb.first);
+			bb.second = transform.transform(bb.second);
+			transform.reset();
+			Coordi a(std::min(bb.first.x, bb.second.x), std::min(bb.first.y, bb.second.y));
+			Coordi b(std::max(bb.first.x, bb.second.x), std::max(bb.first.y, bb.second.y));
+			{
+				Coordi text_pos = {a.x, (a.y+b.y)/2+abs(a.y-b.y)/4};
+				auto text_bb = draw_text0(text_pos, 1_mm, it.second.name, 0, false, TextOrigin::CENTER, ColorP::WHITE, 10000, 0, false);
+				float scale_x = (text_bb.second.x-text_bb.first.x)/(float)(b.x-a.x);
+				float scale_y = ((text_bb.second.y-text_bb.first.y)*2)/(float)(b.y-a.y);
+				float sc = std::max(scale_x, scale_y);
+				text_pos.x += (b.x-a.x)/2-(text_bb.second.x-text_bb.first.x)/(2*sc);
 
-	void Canvas::render(const Buffer &buf, int layer) {
-		if(layer == 10000) {
-			for(const auto &it: buf.junctions) {
-				render(it.second);
+
+				draw_text0(text_pos, 0.8_mm/sc, it.second.name, 0, false, TextOrigin::CENTER, ColorP::WHITE);
 			}
-			for(const auto &it: buf.pins) {
-				render(it.second);
+			if(it.second.net) {
+				Coordi text_pos = {a.x, (a.y+b.y)/2-abs(a.y-b.y)/4};
+				auto text_bb = draw_text0(text_pos, 1_mm, it.second.net->name, 0, false, TextOrigin::CENTER, ColorP::WHITE, 10000, 0, false);
+				float scale_x = (text_bb.second.x-text_bb.first.x)/(float)(b.x-a.x);
+				float scale_y = ((text_bb.second.y-text_bb.first.y)*2)/(float)(b.y-a.y);
+				float sc = std::max(scale_x, scale_y);
+				text_pos.x += (b.x-a.x)/2-(text_bb.second.x-text_bb.first.x)/(2*sc);
+
+				draw_text0(text_pos, 0.8_mm/sc, it.second.net->name, 0, false, TextOrigin::CENTER, ColorP::WHITE);
 			}
-			for(const auto &it: buf.holes) {
-				render(it.second);
+			transform_restore();
+		}
+		for(const auto &it: pkg.lines) {
+			render(it.second, interactive);
+		}
+		for(const auto &it: pkg.texts) {
+			if(!smashed || !(it.second.layer == 20 || it.second.layer == 120))
+				render(it.second, interactive);
+		}
+		for(const auto &it: pkg.arcs) {
+			render(it.second, interactive);
+		}
+		for(const auto &it: pkg.pads) {
+			render(it.second);
+		}
+		for(const auto &it: pkg.polygons) {
+			render(it.second, interactive);
+		}
+
+
+		if(interactive) {
+			std::set<std::string> pad_names;
+			for(const auto &it: pkg.pads) {
+				auto x = pad_names.insert(it.second.name);
+				if(!x.second) {
+					draw_error(it.second.placement.shift, 2e5, "duplicate pad name");
+				}
+				transform_save();
+				transform.accumulate(it.second.placement);
+				auto bb = it.second.padstack.get_bbox();
+				selectables.append(it.second.uuid, ObjectType::PAD, {0,0}, bb.first, bb.second);
+				transform_restore();
+				targets.emplace(it.second.uuid, ObjectType::PAD, it.second.placement.shift);
 			}
-		}
-		for(const auto &it: buf.lines) {
-			if(it.second.layer == layer)
-				render(it.second);
-		}
-		for(const auto &it: buf.texts) {
-			if(it.second.layer == layer)
-				render(it.second);
-		}
-		for(const auto &it: buf.arcs) {
-			if(it.second.layer == layer)
-				render(it.second);
-		}
-		for(const auto &it: buf.pads) {
-			render(it.second, layer);
 		}
 	}
 
 	void Canvas::render(const Buffer &buf) {
-		auto layers = layer_provider->get_layers();
-		for(const auto &la: layers) {
-			render(buf, la.first);
+		for(const auto &it: buf.junctions) {
+			render(it.second);
 		}
-		render(buf, 10000);
+		for(const auto &it: buf.pins) {
+			render(it.second);
+		}
+		for(const auto &it: buf.holes) {
+			render(it.second);
+		}
+		for(const auto &it: buf.lines) {
+				render(it.second);
+		}
+		for(const auto &it: buf.texts) {
+				render(it.second);
+		}
+		for(const auto &it: buf.arcs) {
+				render(it.second);
+		}
+		for(const auto &it: buf.pads) {
+			render(it.second);
+		}
 	}
 
-	void Canvas::render(const BoardPackage &pkg, int layer) {
+	void Canvas::render(const BoardPackage &pkg) {
 		transform = pkg.placement;
 		if(pkg.flip) {
 			transform.invert_angle();
 		}
-		if(layer == 10000) {
-			//targets.emplace(pkg.uuid, ObjectType::BOARD_PACKAGE, pkg.placement.shift);
-			auto bb = pkg.package.get_bbox();
-			selectables.append(pkg.uuid, ObjectType::BOARD_PACKAGE, {0,0}, bb.first, bb.second);
-			for(const auto &it: pkg.package.pads) {
-				targets.emplace(UUIDPath<2>(pkg.uuid, it.first), ObjectType::PAD, transform.transform(it.second.placement.shift));
-			}
-
+		targets.emplace(pkg.uuid, ObjectType::BOARD_PACKAGE, pkg.placement.shift);
+		auto bb = pkg.package.get_bbox();
+		selectables.append(pkg.uuid, ObjectType::BOARD_PACKAGE, {0,0}, bb.first, bb.second);
+		for(const auto &it: pkg.package.pads) {
+			targets.emplace(UUIDPath<2>(pkg.uuid, it.first), ObjectType::PAD, transform.transform(it.second.placement.shift));
 		}
 
-		render(pkg.package, layer, false, pkg.smashed);
+		render(pkg.package, false, pkg.smashed);
 
 		transform.reset();
 	}
 
-	void Canvas::render(const Via &via, int layer) {
+	void Canvas::render(const Via &via) {
 		transform_save();
 		transform.reset();
 		transform.shift = via.junction->position;
-		if(layer == 10000) {
-			auto bb = via.padstack.get_bbox();
-			selectables.append(via.uuid, ObjectType::VIA, {0,0}, bb.first, bb.second);
-		}
+		auto bb = via.padstack.get_bbox();
+		selectables.append(via.uuid, ObjectType::VIA, {0,0}, bb.first, bb.second);
 		img_net(via.junction->net);
 		img_patch_type(PatchType::VIA);
-		render(via.padstack, layer, false);
+		render(via.padstack, false);
 		img_net(nullptr);
 		img_patch_type(PatchType::OTHER);
 		transform_restore();
 	}
 
-	void Canvas::render(const Board &brd, int layer) {
-		if(layer == 10000) {
-			for(const auto &it: brd.holes) {
-				render(it.second);
-			}
-			for(const auto &it: brd.junctions) {
-				render(it.second, true, ObjectType::BOARD);
-			}
-			for(const auto &it: brd.airwires) {
-				render(it.second);
-			}
-		}
-		for(const auto &it: brd.polygons) {
-			if(it.second.layer == layer)
-				render(it.second);
-		}
-		for(const auto &it: brd.texts) {
-			if(it.second.layer == layer)
-				render(it.second);
-		}
-		for(const auto &it: brd.tracks) {
-			if(it.second.layer == layer)
-				render(it.second);
-		}
-		for(const auto &it: brd.packages) {
-			render(it.second, layer);
-		}
-		for(const auto &it: brd.vias) {
-			render(it.second, layer);
-		}
-		for(const auto &it: brd.lines) {
-			if(it.second.layer == layer)
-				render(it.second);
-		}
-	}
-
 	void Canvas::render(const Board &brd) {
 		clock_t begin = clock();
-		auto layers = layer_provider->get_layers();
-		for(const auto &la: layers) {
-			if(la.first == work_layer)
-				continue;
-			if(layer_display.count(la.first))
-				if(!layer_display.at(la.first).visible)
-					continue;
-			render(brd, la.first);
+
+		for(const auto &it: brd.holes) {
+			render(it.second);
 		}
-		render(brd, work_layer);
-		render(brd, 10000);
+		for(const auto &it: brd.junctions) {
+			render(it.second, true, ObjectType::BOARD);
+		}
+		for(const auto &it: brd.airwires) {
+			render(it.second);
+		}
+		for(const auto &it: brd.polygons) {
+			render(it.second);
+		}
+		for(const auto &it: brd.texts) {
+			render(it.second);
+		}
+		for(const auto &it: brd.tracks) {
+			render(it.second);
+		}
+		for(const auto &it: brd.packages) {
+			render(it.second);
+		}
+		for(const auto &it: brd.vias) {
+			render(it.second);
+		}
+		for(const auto &it: brd.lines) {
+			render(it.second);
+		}
+
+
 		for(const auto &path: brd.obstacles) {
 			for(auto it=path.cbegin(); it<path.cend(); it++) {
 				if(it != path.cbegin()) {
 					auto b = it-1;
-					draw_line(Coordf(b->X, b->Y), Coordf(it->X, it->Y), {1,0,1}, false, 0);
+					draw_line(Coordf(b->X, b->Y), Coordf(it->X, it->Y), ColorP::AIRWIRE, 10000, false, 0);
 				}
 			}
 		}
@@ -913,10 +829,10 @@ namespace horizon {
 		for(auto it=brd.track_path.cbegin(); it<brd.track_path.cend(); it++) {
 			if(it != brd.track_path.cbegin()) {
 				auto b = it-1;
-				draw_line(Coordf(b->X, b->Y),Coordf(it->X, it->Y), {1,0,1}, false, 0);
+				draw_line(Coordf(b->X, b->Y),Coordf(it->X, it->Y), ColorP::AIRWIRE, 10000, false, 0);
 			}
 			if(i%2==0) {
-				draw_line(Coordf(it->X, it->Y), Coordf(it->X, it->Y), {1,0,1}, false, .1_mm);
+				draw_line(Coordf(it->X, it->Y), Coordf(it->X, it->Y), ColorP::AIRWIRE, 10000, false, .1_mm);
 			}
 			i++;
 		}
@@ -928,4 +844,5 @@ namespace horizon {
 	  clock_t end = clock();
 	  double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 	}
+
 }

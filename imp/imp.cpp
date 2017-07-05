@@ -183,6 +183,10 @@ namespace horizon {
 
 		main_window->signal_delete_event().connect(sigc::mem_fun(this, &ImpBase::handle_close));
 
+		for(const auto &la: core.r->get_layer_provider()->get_layers()) {
+			canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL, la.second.color));
+		}
+
 		construct();
 		for(const auto &it: key_seq.get_sequences()) {
 			key_sequence_dialog->add_sequence(it.keys, tool_catalog.at(it.tool_id).name);
