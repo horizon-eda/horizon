@@ -116,9 +116,10 @@ namespace horizon {
 			Color get_layer_color(int layer);
 			int work_layer = 0;
 			class LayerSetup {
+				//keep this in sync with shaders/triangle-geometry.glsl
 				public:
 				LayerSetup(){}
-				std::array<std::array<float, 4>, 11> colors;
+				std::array<std::array<float, 4>, 13> colors;
 				std::array<LayerDisplayGL, 36> layer_display;
 			};
 

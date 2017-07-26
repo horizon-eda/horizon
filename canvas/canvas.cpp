@@ -18,6 +18,8 @@ namespace horizon {
 		layer_setup.colors.at(static_cast<int>(ColorP::SYMBOL)) = {1,1,1};
 		layer_setup.colors.at(static_cast<int>(ColorP::FRAME)) = {0,.5,0};
 		layer_setup.colors.at(static_cast<int>(ColorP::AIRWIRE)) = {0,1,1};
+		layer_setup.colors.at(static_cast<int>(ColorP::PIN)) = {1,1,1};
+		layer_setup.colors.at(static_cast<int>(ColorP::PIN_HIDDEN)) = {.5,.5,.5};
 	}
 
 	void Canvas::set_layer_display(int index, const LayerDisplay &ld) {

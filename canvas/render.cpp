@@ -287,21 +287,20 @@ namespace horizon {
 				pad_orientation = Orientation::DOWN;
 			break;
 		}
-		Color c(1,1,0);
-		Color c_name(1,1,1);
-		Color c_pad(1,1,1);
+		ColorP c_name = ColorP::PIN;
+		ColorP c_pad = ColorP::PIN;
 		if(!pin.name_visible) {
-			c_name = {0.5, 0.5, 0.5};
+			c_name = ColorP::PIN_HIDDEN;
 		}
 		if(!pin.pad_visible) {
-			c_pad = {0.5, 0.5, 0.5};
+			c_pad = ColorP::PIN_HIDDEN;
 		}
 		if(interactive || pin.name_visible) {
-			draw_text0(p_name, 1.25_mm, pin.name, orientation_to_angle(name_orientation), false, TextOrigin::CENTER, ColorP::FROM_LAYER, 0);
+			draw_text0(p_name, 1.25_mm, pin.name, orientation_to_angle(name_orientation), false, TextOrigin::CENTER, c_name, 0);
 		}
 		std::pair<Coordf, Coordf> pad_extents;
 		if(interactive || pin.pad_visible) {
-			pad_extents = draw_text0(p_pad, 0.75_mm, pin.pad, orientation_to_angle(pad_orientation), false, TextOrigin::BASELINE, ColorP::FROM_LAYER, 0);
+			pad_extents = draw_text0(p_pad, 0.75_mm, pin.pad, orientation_to_angle(pad_orientation), false, TextOrigin::BASELINE, c_pad, 0);
 		}
 		switch(pin.connector_style) {
 			case SymbolPin::ConnectorStyle::BOX :

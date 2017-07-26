@@ -30,7 +30,7 @@ struct layer_display {
 
 layout (std140) uniform layer_setup
 { 
-	vec3 colors[11];
+	vec3 colors[13];
 	layer_display layers[36];
 };
 
