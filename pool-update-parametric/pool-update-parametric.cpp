@@ -14,8 +14,12 @@
 
 using json = nlohmann::json;
 
-bool endswidth(const std::string &haystack, const std::string &needle) {
-	return (haystack.size()-haystack.rfind(needle)) == needle.size();
+bool endswith(const std::string &haystack, const std::string &needle) {
+	auto pos = haystack.rfind(needle);
+	if(pos == std::string::npos)
+		return false;
+	else
+		return (haystack.size()-haystack.rfind(needle)) == needle.size();
 }
 
 

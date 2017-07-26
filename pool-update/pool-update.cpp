@@ -14,8 +14,12 @@
 
 using json = nlohmann::json;
 
-bool endswidth(const std::string &haystack, const std::string &needle) {
-	return (haystack.size()-haystack.rfind(needle)) == needle.size();
+bool endswith(const std::string &haystack, const std::string &needle) {
+	auto pos = haystack.rfind(needle);
+	if(pos == std::string::npos)
+		return false;
+	else
+		return (haystack.size()-haystack.rfind(needle)) == needle.size();
 }
 
 void update_units(SQLite::Database &db, const std::string &directory, const std::string &prefix="") {
@@ -25,7 +29,7 @@ void update_units(SQLite::Database &db, const std::string &directory, const std:
 	Glib::Dir dir(directory);
 	for(const auto &it: dir) {
 		std::string filename = Glib::build_filename(directory, it);
-		if(endswidth(it, ".json")) {
+		if(endswith(it, ".json")) {
 			auto unit = horizon::Unit::new_from_file(filename);
 			SQLite::Query q(db, "INSERT INTO units (uuid, name, filename) VALUES ($uuid, $name, $filename)");
 			q.bind("$uuid", unit.uuid);
@@ -46,7 +50,7 @@ void update_entities(SQLite::Database &db, horizon::Pool &pool, const std::strin
 	Glib::Dir dir(directory);
 	for(const auto &it: dir) {
 		std::string filename = Glib::build_filename(directory, it);
-		if(endswidth(it, ".json")) {
+		if(endswith(it, ".json")) {
 			auto entity = horizon::Entity::new_from_file(filename, pool);
 			SQLite::Query q(db, "INSERT INTO entities (uuid, name, filename, n_gates, prefix) VALUES ($uuid, $name, $filename, $n_gates, $prefix)");
 			q.bind("$uuid", entity.uuid);
@@ -75,7 +79,7 @@ void update_symbols(SQLite::Database &db, horizon::Pool &pool, const std::string
 	Glib::Dir dir(directory);
 	for(const auto &it: dir) {
 		std::string filename = Glib::build_filename(directory, it);
-		if(endswidth(it, ".json")) {
+		if(endswith(it, ".json")) {
 			auto symbol = horizon::Symbol::new_from_file(filename, pool);
 			SQLite::Query q(db, "INSERT INTO symbols (uuid, name, filename, unit) VALUES ($uuid, $name, $filename, $unit)");
 			q.bind("$uuid", symbol.uuid);
@@ -113,7 +117,7 @@ void update_padstacks(SQLite::Database &db, const std::string &directory, const 
 			if(Glib::file_test(padstacks_path, Glib::FileTest::FILE_TEST_IS_DIR)) {
 				Glib::Dir dir2(padstacks_path);
 				for(const auto &it2: dir2) {
-					if(endswidth(it2, ".json")) {
+					if(endswith(it2, ".json")) {
 						std::string filename = Glib::build_filename(padstacks_path, it2);
 						auto padstack = horizon::Padstack::new_from_file(filename);
 						SQLite::Query q(db, "INSERT INTO padstacks (uuid, name, filename, package, type) VALUES ($uuid, $name, $filename, $package, $type)");
@@ -141,7 +145,7 @@ void update_padstacks_global(SQLite::Database &db, const std::string &directory,
 	Glib::Dir dir(directory);
 	for(const auto &it: dir) {
 		std::string filename = Glib::build_filename(directory, it);
-		if(endswidth(it, ".json")) {
+		if(endswith(it, ".json")) {
 			auto padstack = horizon::Padstack::new_from_file(filename);
 			SQLite::Query q(db, "INSERT INTO padstacks (uuid, name, filename, package, type) VALUES ($uuid, $name, $filename, $package, $type)");
 			q.bind("$uuid", padstack.uuid);
@@ -200,7 +204,7 @@ bool update_parts(SQLite::Database &db, horizon::Pool &pool, const std::string &
 		skipped = false;
 		for(const auto &it: dir) {
 			std::string filename = Glib::build_filename(directory, it);
-			if(endswidth(it, ".json")) {
+			if(endswith(it, ".json")) {
 				bool skipthis = false;
 				{
 					std::ifstream ifs(filename);
