@@ -16,7 +16,7 @@ namespace horizon {
 
 	class Pin {
 		public :
-			enum class Direction {INPUT, OUTPUT, POWER_INPUT, PASSIVE};
+			enum class Direction {INPUT, OUTPUT, BIDIRECTIONAL, OPEN_COLLECTOR, POWER_INPUT, POWER_OUTPUT, PASSIVE};
 
 			Pin(const UUID &uu, const json &j);
 			Pin(const UUID &uu, const YAML::Node &n);

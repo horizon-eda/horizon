@@ -3,10 +3,13 @@
 
 namespace horizon {
 	static const LutEnumStr<Pin::Direction> pin_direction_lut = {
-		{"output", 		Pin::Direction::OUTPUT},
-		{"input", 		Pin::Direction::INPUT},
-		{"power_input",	Pin::Direction::POWER_INPUT},
-		{"passive",		Pin::Direction::PASSIVE},
+		{"output", 			Pin::Direction::OUTPUT},
+		{"input", 			Pin::Direction::INPUT},
+		{"bidirectional", 	Pin::Direction::BIDIRECTIONAL},
+		{"open_collector", 	Pin::Direction::OPEN_COLLECTOR},
+		{"power_input",		Pin::Direction::POWER_INPUT},
+		{"power_output",	Pin::Direction::POWER_OUTPUT},
+		{"passive",			Pin::Direction::PASSIVE},
 	};
 
 	Pin::Pin(const UUID &uu, const json &j):
