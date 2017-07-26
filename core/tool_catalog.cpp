@@ -47,5 +47,6 @@ namespace horizon {
 		{ToolID::MANAGE_NET_CLASSES, {"Manage net classes"}},
 		{ToolID::EDIT_PAD_PARAMETER_SET, {"Edit pad parameter set"}},
 		{ToolID::MANAGE_VIA_TEMPLATES, {"Manage via templates"}},
+		{ToolID::DRAW_POLYGON_RECTANGLE, {"Draw polygon rectangle"}},
 	};
 }

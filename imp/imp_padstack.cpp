@@ -14,6 +14,7 @@ namespace horizon {
 				{{GDK_KEY_p, GDK_KEY_s}, 	ToolID::PLACE_SHAPE},
 				{{GDK_KEY_p, GDK_KEY_h}, 	ToolID::PLACE_HOLE},
 				{{GDK_KEY_y}, 				ToolID::DRAW_POLYGON},
+				{{GDK_KEY_d, GDK_KEY_r}, 	ToolID::DRAW_POLYGON_RECTANGLE},
 				{{GDK_KEY_h}, 				ToolID::PLACE_HOLE},
 				{{GDK_KEY_s}, 				ToolID::PLACE_SHAPE},
 				{{GDK_KEY_i}, 				ToolID::EDIT_SHAPE}

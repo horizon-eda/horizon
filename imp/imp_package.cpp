@@ -21,6 +21,7 @@ namespace horizon {
 				{{GDK_KEY_a},				ToolID::DRAW_ARC},
 				{{GDK_KEY_d, GDK_KEY_y}, 	ToolID::DRAW_POLYGON},
 				{{GDK_KEY_y}, 				ToolID::DRAW_POLYGON},
+				{{GDK_KEY_d, GDK_KEY_r}, 	ToolID::DRAW_POLYGON_RECTANGLE},
 				{{GDK_KEY_p, GDK_KEY_t},	ToolID::PLACE_TEXT},
 				{{GDK_KEY_t},				ToolID::PLACE_TEXT},
 				{{GDK_KEY_p, GDK_KEY_p},	ToolID::PLACE_PAD},

@@ -36,6 +36,7 @@
 #include "tool_import_dxf.hpp"
 #include "tool_edit_parameter_program.hpp"
 #include "tool_edit_pad_parameter_set.hpp"
+#include "tool_draw_polygon_rectangle.hpp"
 #include <memory>
 
 namespace horizon {
@@ -172,6 +173,9 @@ namespace horizon {
 
 			case ToolID::MANAGE_VIA_TEMPLATES:
 				return std::make_unique<ToolManageBuses>(this, tool_id);
+
+			case ToolID::DRAW_POLYGON_RECTANGLE:
+				return std::make_unique<ToolDrawPolygonRectangle>(this, tool_id);
 
 
 			default:

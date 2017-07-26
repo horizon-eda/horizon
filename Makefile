@@ -143,6 +143,7 @@ SRC_IMP = \
 	core/tool_import_dxf.cpp\
 	core/tool_edit_parameter_program.cpp\
 	core/tool_edit_pad_parameter_set.cpp\
+	core/tool_draw_polygon_rectangle.cpp\
 	core/cores.cpp\
 	core/clipboard.cpp\
 	core/buffer.cpp\
