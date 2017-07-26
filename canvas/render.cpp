@@ -446,6 +446,8 @@ namespace horizon {
 		img_polygon(poly);
 		if(img_mode)
 			return;
+		if(poly.vertices.size()==0)
+			return;
 
 		TPPLPoly po;
 		po.Init(poly.vertices.size());
