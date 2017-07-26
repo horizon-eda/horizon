@@ -41,6 +41,7 @@ namespace horizon {
 		type_combo->append("bottom", "Bottom");
 		type_combo->append("through", "Through");
 		type_combo->append("via", "Via / Hole");
+		type_combo->append("mechanical", "Mechanical");
 		type_combo->show();
 		main_window->top_panel->pack_start(*type_combo, false, false, 0);
 		type_combo->set_active_id(Padstack::type_lut.lookup_reverse(core_padstack.get_padstack(false)->type));

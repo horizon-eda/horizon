@@ -84,6 +84,7 @@ namespace horizon {
 		{ObjectType::PAD, {"Pad", "Pads", {
 			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING, "Name"}},
 			{ObjectProperty::ID::VALUE, {ObjectProperty::Type::STRING_RO, "Padstack"}},
+			{ObjectProperty::ID::PAD_TYPE, {ObjectProperty::Type::STRING_RO, "Pad type"}},
 		}}},
 		{ObjectType::BOARD_PACKAGE, {"Package", "Packages", {
 			{ObjectProperty::ID::FLIPPED, {ObjectProperty::Type::BOOL, "Flipped"}},

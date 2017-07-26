@@ -36,7 +36,7 @@ namespace horizon {
 			};
 
 
-			enum class Type {TOP, BOTTOM, THROUGH, VIA};
+			enum class Type {TOP, BOTTOM, THROUGH, VIA, MECHANICAL};
 			static const LutEnumStr<Padstack::Type> type_lut;
 
 			Padstack(const UUID &uu, const json &j);

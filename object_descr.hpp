@@ -7,7 +7,8 @@ namespace horizon {
 		public :
 		enum class Type {BOOL, INT, STRING, STRING_RO, LENGTH, LAYER, LAYER_COPPER, NET_CLASS, ENUM, DIM};
 		enum class ID {NAME, NAME_VISIBLE, PAD_VISIBLE, LENGTH, SIZE, TEXT, REFDES, VALUE, IS_POWER, OFFSHEET_REFS, WIDTH, LAYER,
-			DIAMETER, PLATED, FLIPPED, NET_CLASS, WIDTH_FROM_RULES, MPN, SHAPE, PARAMETER_CLASS, POSITION_X, POSITION_Y
+			DIAMETER, PLATED, FLIPPED, NET_CLASS, WIDTH_FROM_RULES, MPN, SHAPE, PARAMETER_CLASS, POSITION_X, POSITION_Y,
+			PAD_TYPE
 		};
 		ObjectProperty(Type t, const std::string &l, const std::vector<std::pair<int, std::string>> &its = {}): type(t), label(l), enum_items(its) {}
 

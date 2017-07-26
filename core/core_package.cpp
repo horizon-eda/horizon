@@ -92,6 +92,16 @@ namespace horizon {
 						return package.pads.at(uu).name;
 					case ObjectProperty::ID::VALUE :
 						return package.pads.at(uu).pool_padstack->name;
+					case ObjectProperty::ID::PAD_TYPE : {
+						const auto ps = package.pads.at(uu).pool_padstack;
+						switch(ps->type) {
+							case Padstack::Type::MECHANICAL:	return "Mechanical";
+							case Padstack::Type::BOTTOM:		return "Bottom";
+							case Padstack::Type::TOP:			return "Top";
+							case Padstack::Type::THROUGH:		return "Through";
+							default:							return "Invalid";
+						}
+					} break;
 					default :
 						return "<invalid prop>";
 				}
