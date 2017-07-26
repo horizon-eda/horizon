@@ -14,15 +14,6 @@
 
 using json = nlohmann::json;
 
-bool endswith(const std::string &haystack, const std::string &needle) {
-	auto pos = haystack.rfind(needle);
-	if(pos == std::string::npos)
-		return false;
-	else
-		return (haystack.size()-haystack.rfind(needle)) == needle.size();
-}
-
-
 void update_resistor(SQLite::Database &db, const horizon::Part *part) {
 	SQLite::Query q(db, "INSERT INTO resistors (part, value, pmax, tolerance) VALUES ($part, $value, $pmax, $tolerance)");
 	q.bind("$part", part->uuid);

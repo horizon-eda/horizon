@@ -95,4 +95,12 @@ namespace horizon {
 		ss << std::fixed << std::setprecision(3)  << std::setw(7) << std::setfill('0') << std::internal << std::abs(x/1e6) << " mm ";
 		return ss.str();
 	}
+
+	bool endswith(const std::string &haystack, const std::string &needle) {
+		auto pos = haystack.rfind(needle);
+		if(pos == std::string::npos)
+			return false;
+		else
+			return (haystack.size()-haystack.rfind(needle)) == needle.size();
+	}
 }

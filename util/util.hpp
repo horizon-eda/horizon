@@ -18,4 +18,6 @@ namespace horizon {
 		std::transform(cin.begin(), cin.end(), std::back_inserter(out), [](auto x){return dynamic_cast<T>(x);});
 		return out;
 	}
+
+	bool endswith(const std::string &haystack, const std::string &needle);
 }
