@@ -36,7 +36,6 @@ namespace horizon {
 					}
 					temp_line = core.r->insert_line(UUID::random());
 					temp_line->from = core.r->get_junction(args.target.path.at(0));
-					temp_line->to = temp_junc;
 				}
 				else {
 					Junction *last = temp_junc;
@@ -44,12 +43,12 @@ namespace horizon {
 					temp_junc = core.r->insert_junction(UUID::random());
 					temp_junc->temp = true;
 					temp_junc->position = args.coords;
-					
+
 					temp_line = core.r->insert_line(UUID::random());
-					temp_line->layer = args.work_layer;
 					temp_line->from = last;
-					temp_line->to = temp_junc;
 				}
+				temp_line->layer = args.work_layer;
+				temp_line->to = temp_junc;
 			}
 			else if(args.button == 3) {
 				if(temp_line) {

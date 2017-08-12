@@ -67,7 +67,7 @@ void main() {
 	bool no_bb = (bb_tr.x==bb_bl.x)&&(bb_tr.y == bb_bl.y);
 	float origin_size = 10/scale;
 	if(no_bb)
-		origin_size = 5/scale;
+		origin_size = 7/scale;
 	
 	
 	if(abs(bb_tr.x - bb_bl.x) < min_sz/scale) {
@@ -96,6 +96,7 @@ void main() {
 	}
 	if((flags & uint(1))!=uint(0)) { //selected
 		color_to_fragment = vec3(1,0,1);
+		origin_size = 10/scale;
 	}
 	if((flags & uint(2))!=uint(0)) { //prelight
 		color_to_fragment = vec3(.5,0,.5);

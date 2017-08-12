@@ -118,6 +118,7 @@ namespace horizon {
 		temp = core.r->insert_polygon(UUID::random());
 		temp->temp = true;
 		temp->layer = args.work_layer;
+		first_pos = args.coords;
 
 		update_tip();
 		return ToolResponse();
@@ -126,13 +127,22 @@ namespace horizon {
 	void ToolDrawPolygonRectangle::update_tip() {
 		std::stringstream ss;
 		ss << "<b>LMB:</b>";
-		if(step == 0) {
-			ss << "place first corner";
+		if(mode == Mode::CENTER) {
+			if(step == 0) {
+				ss << "place center";
+			}
+			else {
+				ss << "place corner";
+			}
 		}
 		else {
-			ss << "place second corner";
+			if(step == 0) {
+				ss << "place first corner";
+			}
+			else {
+				ss << "place second corner";
+			}
 		}
-
 		ss << " <b>RMB:</b>cancel";
 		ss << " <b>c:</b>switch mode <b>d:</b>switch decoration <b>p:</b>decoration position <b>s:</b>decoration size";
 

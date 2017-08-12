@@ -569,7 +569,11 @@ namespace horizon {
 	void Canvas::render(const Symbol &sym, bool on_sheet, bool smashed) {
 		if(!on_sheet) {
 			for(const auto &it: sym.junctions) {
-				render(it.second, !on_sheet);
+				auto &junc = it.second;
+				selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, 10000, true);
+				if(!junc.temp) {
+					targets.emplace(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
+				}
 			}
 		}
 		for(const auto &it: sym.lines) {
