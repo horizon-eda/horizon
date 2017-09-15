@@ -1,0 +1,78 @@
+#include "pool_browser_package.hpp"
+#include "pool.hpp"
+#include <set>
+
+namespace horizon {
+	PoolBrowserPackage::PoolBrowserPackage(Pool *p): PoolBrowser(p) {
+		construct();
+		name_entry = create_search_entry("Name");
+		tags_entry = create_search_entry("Tags");
+		search();
+	}
+
+	Glib::RefPtr<Gtk::ListStore> PoolBrowserPackage::create_list_store() {
+		return Gtk::ListStore::create(list_columns);
+	}
+
+	void PoolBrowserPackage::create_columns() {
+		treeview->append_column("Package", list_columns.name);
+		treeview->append_column("Manufacturer", list_columns.manufacturer);
+		treeview->append_column("Pads", list_columns.n_pads);
+		treeview->append_column("Tags", list_columns.tags);
+	}
+
+	void PoolBrowserPackage::add_sort_controller_columns() {
+		sort_controller->add_column(0, "packages.name");
+		sort_controller->add_column(1, "packages.manufacturer");
+	}
+
+	void PoolBrowserPackage::search() {
+		auto selected_uuid = get_selected();
+		store->freeze_notify();
+		store->clear();
+		Gtk::TreeModel::Row row;
+		std::string name_search = name_entry->get_text();
+
+		std::istringstream iss(tags_entry->get_text());
+		std::set<std::string> tags{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
+		std::string query;
+		if(tags.size() == 0) {
+			query = "SELECT packages.uuid, packages.name, packages.manufacturer,  packages.n_pads, GROUP_CONCAT(tags.tag, ' ') FROM packages LEFT JOIN tags ON tags.uuid = packages.uuid WHERE packages.name LIKE ? GROUP by packages.uuid ORDER BY name";
+		}
+		else {
+			std::ostringstream qs;
+			qs << "SELECT packages.uuid, packages.name, packages.manufacturer, packages.n_pads, (SELECT GROUP_CONCAT(tags.tag, ' ') FROM tags WHERE tags.uuid = packages.uuid) FROM packages LEFT JOIN tags ON tags.uuid = packages.uuid WHERE packages.name LIKE ? ";
+			qs << "AND (";
+			for(const auto &it: tags) {
+				qs << "tags.tag LIKE ? OR ";
+			}
+			qs << "0) GROUP by packages.uuid HAVING count(*) >= $ntags";
+			qs << sort_controller->get_order_by();
+			query = qs.str();
+		}
+		SQLite::Query q(pool->db, query);
+		q.bind(1, "%"+name_search+"%");
+		int i = 0;
+		for(const auto &it: tags) {
+			q.bind(i+2, it+"%");
+			i++;
+		}
+		if(tags.size())
+			q.bind("$ntags", tags.size());
+		while(q.step()) {
+			row = *(store->append());
+			row[list_columns.uuid] = q.get<std::string>(0);
+			row[list_columns.name] = q.get<std::string>(1);
+			row[list_columns.manufacturer] = q.get<std::string>(2);
+			row[list_columns.n_pads] = q.get<int>(3);
+			row[list_columns.tags] = q.get<std::string>(4);
+		}
+		store->thaw_notify();
+		select_uuid(selected_uuid);
+		scroll_to_selection();
+	}
+
+	UUID PoolBrowserPackage::uuid_from_row(const Gtk::TreeModel::Row &row) {
+		return row[list_columns.uuid];
+	}
+}

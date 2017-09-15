@@ -27,6 +27,7 @@ namespace horizon {
 			const class Padstack *get_padstack(const UUID &uu);
 			const class Package *get_package(const UUID &uu);
 			const class Part *get_part(const UUID &uu);
+			std::string get_filename(ObjectType type, const UUID &uu);
 			/**
 			 * The database connection.
 			 * You may use it to perform more advanced queries on the pool.

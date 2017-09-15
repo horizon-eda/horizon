@@ -75,7 +75,7 @@ namespace horizon {
 			}
 			else {
 				std::stringstream ss;
-				ss << "ORDER BY " << x->second.first << " ";
+				ss << " ORDER BY " << x->second.first << " ";
 				if(x->second.second == Sort::ASC) {
 					ss << "ASC";
 				}

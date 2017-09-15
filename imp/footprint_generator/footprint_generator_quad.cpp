@@ -1,4 +1,5 @@
 #include "footprint_generator_quad.hpp"
+#include "widgets/chooser_buttons.hpp"
 
 namespace horizon {
 	FootprintGeneratorQuad::FootprintGeneratorQuad(CorePackage *c): Glib::ObjectBase (typeid(FootprintGeneratorQuad)), FootprintGeneratorBase("/net/carrotIndustries/horizon/imp/footprint_generator/quad.svg", c) {
@@ -70,7 +71,7 @@ namespace horizon {
 			for(auto it: {-1, 1}) {
 				for(unsigned int i = 0; i<pad_count_v; i++) {
 					auto uu = UUID::random();
-					auto padstack = core->m_pool->get_padstack(padstack_button->property_selected_uuid());
+					auto padstack = core->m_pool->get_padstack(browser_button->property_selected_uuid());
 					auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
 					pad.placement.shift = {it*spacing_h, y0-pitch*i};
 					if(it < 0) {
@@ -89,7 +90,7 @@ namespace horizon {
 			for(auto it: {-1, 1}) {
 				for(unsigned int i = 0; i<pad_count_h; i++) {
 					auto uu = UUID::random();
-					auto padstack = core->m_pool->get_padstack(padstack_button->property_selected_uuid());
+					auto padstack = core->m_pool->get_padstack(browser_button->property_selected_uuid());
 					auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
 					pad.placement.shift = {x0+pitch*i, it*spacing_v};
 					if(it < 0) {

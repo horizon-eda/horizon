@@ -1,5 +1,6 @@
 #pragma once
 #include "uuid.hpp"
+#include "uuid_provider.hpp"
 #include "package.hpp"
 #include "entity.hpp"
 #include <vector>
@@ -9,7 +10,7 @@
 namespace horizon {
 	using json = nlohmann::json;
 
-	class Part {
+	class Part: public UUIDProvider {
 		private :
 			Part(const UUID &uu, const json &j, Pool &pool);
 			const std::string empty;
@@ -18,8 +19,8 @@ namespace horizon {
 			class PadMapItem {
 				public:
 				PadMapItem(const Gate *g, const Pin *p): gate(g), pin(p) {}
-				const Gate *gate;
-				const Pin *pin;
+				uuid_ptr<const Gate> gate;
+				uuid_ptr<const Pin> pin;
 			};
 			Part(const UUID &uu);
 
@@ -39,9 +40,12 @@ namespace horizon {
 
 			std::set<std::string> tags;
 			bool inherit_tags = false;
-			const Entity *entity = nullptr;
-			const Package *package = nullptr;
-			const class Part *base = nullptr;
+			uuid_ptr<const Entity> entity;
+			uuid_ptr<const Package> package;
+			uuid_ptr<const Part> base;
+
+			void update_refs(Pool &pool);
+			UUID get_uuid() const;
 
 			std::map<std::string, std::string> parametric;
 

@@ -1,7 +1,7 @@
 CC=g++
 PKGCONFIG=pkg-config
 
-all: horizon-imp horizon-pool horizon-pool-update horizon-prj horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test
+all: horizon-imp horizon-pool horizon-prj horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test horizon-pool-mgr
 
 SRC_COMMON = \
 	util/uuid.cpp \
@@ -70,7 +70,29 @@ SRC_COMMON = \
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += util/uuid_win32.cpp
 endif
-	
+
+
+SRC_CANVAS = \
+	canvas/canvas.cpp \
+	canvas/canvas_gl.cpp \
+	canvas/canvas_cairo.cpp \
+	canvas/grid.cpp \
+	canvas/gl_util.cpp \
+	canvas/pan.cpp \
+	canvas/render.cpp \
+	canvas/draw.cpp \
+	canvas/text.cpp \
+	canvas/hershey_fonts.cpp \
+	canvas/box_selection.cpp \
+	canvas/selectables.cpp \
+	canvas/hover_prelight.cpp\
+	canvas/triangle.cpp\
+	canvas/image.cpp\
+	canvas/selection_filter.cpp\
+	canvas/polypartition/polypartition.cpp\
+	canvas/marker.cpp\
+	canvas/error_polygons.cpp\
+
 SRC_IMP = \
 	imp/imp_main.cpp \
 	imp/main_window.cpp \
@@ -150,10 +172,6 @@ SRC_IMP = \
 	dialogs/map_pin.cpp\
 	dialogs/map_symbol.cpp\
 	dialogs/map_package.cpp\
-	dialogs/pool_browser_symbol.cpp\
-	dialogs/pool_browser_entity.cpp\
-	dialogs/pool_browser_padstack.cpp\
-	dialogs/pool_browser_part.cpp\
 	dialogs/ask_net_merge.cpp\
 	dialogs/ask_delete_component.cpp\
 	dialogs/select_net.cpp\
@@ -162,7 +180,6 @@ SRC_IMP = \
 	dialogs/ask_datum.cpp\
 	dialogs/select_via_padstack.cpp\
 	dialogs/dialogs.cpp\
-	dialogs/pool_browser_box.cpp\
 	dialogs/annotate.cpp\
 	dialogs/edit_shape.cpp\
 	dialogs/manage_net_classes.cpp\
@@ -171,6 +188,7 @@ SRC_IMP = \
 	dialogs/edit_pad_parameter_set.cpp\
 	dialogs/manage_via_templates.cpp\
 	dialogs/select_via_template.cpp\
+	dialogs/pool_browser_dialog.cpp\
 	util/sort_controller.cpp\
 	core/core_symbol.cpp\
 	core/core_schematic.cpp\
@@ -191,6 +209,7 @@ SRC_IMP = \
 	widgets/cell_renderer_layer_display.cpp\
 	widgets/net_class_button.cpp\
 	widgets/parameter_set_editor.cpp\
+	widgets/pool_browser.cpp\
 	export_pdf.cpp\
 	imp/key_sequence.cpp\
 	imp/keyseq_dialog.cpp\
@@ -210,6 +229,12 @@ SRC_IMP = \
 	imp/imp_interface.cpp\
 	imp/parameter_window.cpp\
 	widgets/pool_browser_part.cpp\
+	widgets/pool_browser_entity.cpp\
+	widgets/pool_browser_padstack.cpp\
+	widgets/pool_browser_package.cpp\
+	widgets/pool_browser_padstack.cpp\
+	widgets/pool_browser_unit.cpp\
+	widgets/pool_browser_symbol.cpp\
 	dxflib/dl_dxf.cpp\
 	dxflib/dl_writer_ascii.cpp\
 	import_dxf/dxf_importer.cpp\
@@ -229,17 +254,8 @@ SRC_IMP = \
 
 SRC_POOL_UTIL = \
 	pool-util/util_main.cpp\
-	pool-util/part-editor.cpp\
-	dialogs/pool_browser_entity.cpp\
-	dialogs/pool_browser_package.cpp\
-	dialogs/pool_browser_part.cpp\
-	dialogs/pool_browser_box.cpp\
-	util/sort_controller.cpp\
-	widgets/pool_browser_part.cpp\
-	
-SRC_POOL_UPDATE = \
-	pool-update/pool-update.cpp\
-	
+	pool-update/pool-update.cpp
+
 SRC_POOL_UPDATE_PARA = \
 	pool-update-parametric/pool-update-parametric.cpp\
 	
@@ -251,16 +267,40 @@ SRC_PRJ_MGR = \
 	prj-mgr/prj-mgr-app.cpp\
 	prj-mgr/prj-mgr-app_win.cpp\
 	prj-mgr/prj-mgr-prefs.cpp\
-	prj-mgr/editor_process.cpp\
+	util/editor_process.cpp\
 	prj-mgr/part_browser/part_browser_window.cpp\
 	widgets/pool_browser_part.cpp\
 	util/sort_controller.cpp\
+	widgets/pool_browser.cpp\
+
+SRC_POOL_MGR = \
+	pool-mgr/pool-mgr-main.cpp\
+	pool-mgr/pool-mgr-app.cpp\
+	pool-mgr/pool-mgr-app_win.cpp\
+	pool-mgr/pool_notebook.cpp\
+	pool-mgr/unit_editor.cpp\
+	pool-mgr/part_editor.cpp\
+	pool-mgr/entity_editor.cpp\
+	pool-mgr/editor_window.cpp\
+	pool-mgr/create_part_dialog.cpp\
+	widgets/pool_browser.cpp\
+	widgets/pool_browser_unit.cpp\
+	widgets/pool_browser_symbol.cpp\
+	widgets/pool_browser_entity.cpp\
+	widgets/pool_browser_padstack.cpp\
+	widgets/pool_browser_part.cpp\
+	widgets/pool_browser_package.cpp\
+	dialogs/pool_browser_dialog.cpp\
+	util/sort_controller.cpp\
+	util/editor_process.cpp\
+	$(SRC_CANVAS)\
+	pool-update/pool-update.cpp\
 
 SRC_PGM_TEST = \
 	pgm-test.cpp
 
 
-SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_POOL_UPDATE) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PRJ_MGR) $(SRC_PGM_TEST))
+SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PRJ_MGR) $(SRC_PGM_TEST) $(SRC_POOL_MGR))
 
 INC = -I. -Iblock -Iboard -Icommon -Iimp -Ipackage -Ipool -Ischematic -Iutil -Iconstraints
 
@@ -274,7 +314,7 @@ LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq
 
 OPTIMIZE=-fdata-sections -ffunction-sections
 DEBUG   =-g3
-CFLAGS  =$(DEBUG) $(DEFINES) $(OPTIMIZE) $(shell pkg-config --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -std=c++14
+CFLAGS  =$(DEBUG) $(DEFINES) $(OPTIMIZE) $(shell pkg-config --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -std=c++14 -O3
 LDFLAGS = -lm -lpthread
 GLIB_COMPILE_RESOURCES = $(shell $(PKGCONFIG) --variable=glib_compile_resources gio-2.0)
 
@@ -301,9 +341,6 @@ horizon-imp: $(OBJ_COMMON) $(SRC_IMP:.cpp=.o)
 horizon-pool: $(OBJ_COMMON) $(SRC_POOL_UTIL:.cpp=.o)
 	$(CC) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0) -o $@
 
-horizon-pool-update: $(OBJ_COMMON) $(SRC_POOL_UPDATE:.cpp=.o)
-	$(CC) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
-
 horizon-pool-update-parametric: $(OBJ_COMMON) $(SRC_POOL_UPDATE_PARA:.cpp=.o)
 	$(CC) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
@@ -312,6 +349,9 @@ horizon-prj: $(OBJ_COMMON) $(SRC_PRJ_UTIL:.cpp=.o)
 
 horizon-prj-mgr: $(OBJ_COMMON) $(SRC_PRJ_MGR:.cpp=.o)
 	$(CC) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 libzmq) -o $@
+
+horizon-pool-mgr: $(OBJ_COMMON) $(SRC_POOL_MGR:.cpp=.o)
+	$(CC) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy libzmq) -o $@
 
 horizon-pgm-test: $(OBJ_COMMON) $(SRC_PGM_TEST:.cpp=.o)
 	$(CC) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@

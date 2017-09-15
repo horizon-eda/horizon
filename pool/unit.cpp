@@ -58,9 +58,14 @@ namespace horizon {
 		return n;*/
 	}
 
+	UUID Pin::get_uuid() const {
+		return uuid;
+	}
+
 	Unit::Unit(const UUID &uu, const json &j):
 		uuid(uu),
-		name(j["name"].get<std::string>())
+		name(j["name"].get<std::string>()),
+		manufacturer(j.value("manufacturer", ""))
 	{
 		const json &o = j["pins"];
 		for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -71,7 +76,8 @@ namespace horizon {
 	
 	Unit::Unit(const UUID &uu, const YAML::Node &n) :
 		uuid(uu),
-		name(n["name"].as<std::string>())
+		name(n["name"].as<std::string>()),
+		manufacturer(n["manufacturer"].as<std::string>())
 	{
 		for(const auto &it: n["pins"]) {
 			UUID pin_uuid = it["uuid"].as<std::string>(UUID::random());
@@ -96,6 +102,7 @@ namespace horizon {
 		json j;
 		j["type"] = "unit";
 		j["name"] = name;
+		j["manufacturer"] = manufacturer;
 		j["uuid"] = (std::string)uuid;
 		j["pins"] = json::object();
 		for(const auto &it: pins) {
@@ -108,6 +115,7 @@ namespace horizon {
 		using namespace YAML;
 		em << BeginMap;
 		em << Key << "name" << Value << name;
+		em << Key << "manufacturer" << Value << manufacturer;
 		em << Key << "uuid" << Value << (std::string)uuid;
 		em << Key << "pins" << Value << BeginSeq;
 		for(const auto &it: pins) {
@@ -115,6 +123,10 @@ namespace horizon {
 		}
 		em << EndSeq;
 		em << EndMap;
+	}
+
+	UUID Unit::get_uuid() const {
+		return uuid;
 	}
 
 }

@@ -5,7 +5,6 @@
 #include "common.hpp"
 #include "uuid.hpp"
 #include "core/core_package.hpp"
-#include "widgets/chooser_buttons.hpp"
 #include "svg_overlay.hpp"
 namespace horizon {
 	class FootprintGeneratorBase: public Gtk::Box {
@@ -17,7 +16,7 @@ namespace horizon {
 
 		protected :
 			Glib::Property<bool> p_property_can_generate;
-			PadstackButton *padstack_button = nullptr;
+			class PoolBrowserButton *browser_button = nullptr;
 
 			SVGOverlay *overlay = nullptr;
 			Gtk::Box *box_top = nullptr;

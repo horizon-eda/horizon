@@ -31,10 +31,13 @@ namespace horizon {
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto pad_uuid = UUID(it.key());
 				if(package->pads.count(pad_uuid)) {
-					auto gate = &entity->gates.at(it->at("gate").get<std::string>());
-					auto pin = &gate->unit->pins.at(it->at("pin").get<std::string>());
+					auto pad = &package->pads.at(pad_uuid);
+					if(pad->pool_padstack->type != Padstack::Type::MECHANICAL) {
+						auto gate = &entity->gates.at(it->at("gate").get<std::string>());
+						auto pin = &gate->unit->pins.at(it->at("pin").get<std::string>());
 
-					pad_map.insert(std::make_pair(pad_uuid, PadMapItem(gate, pin)));
+						pad_map.insert(std::make_pair(pad_uuid, PadMapItem(gate, pin)));
+					}
 				}
 			}
 		}
@@ -144,6 +147,21 @@ namespace horizon {
 		}
 
 		return j;
+	}
+
+	UUID Part::get_uuid() const {
+		return uuid;
+	}
+
+	void Part::update_refs(Pool &pool) {
+		entity = pool.get_entity(entity.uuid);
+		package = pool.get_package(package.uuid);
+		if(base.ptr)
+			base = pool.get_part(base.uuid);
+		for(auto &it: pad_map) {
+			it.second.gate = &entity->gates.at(it.second.gate.uuid);
+			it.second.pin = &it.second.gate->unit->pins.at(it.second.pin.uuid);
+		}
 	}
 
 }

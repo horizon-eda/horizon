@@ -75,4 +75,4 @@ cp /mingw64/share/glib-2.0/schemas/gschemas.compiled $DISTDIR/share/glib-2.0/sch
 
 git log -10 | unix2dos > dist/log.txt
 cd dist
-zip -r horizon.zip horizon log.txt
+zip -r horizon-$(date +%Y-%m-%d-%H%M).zip horizon log.txt

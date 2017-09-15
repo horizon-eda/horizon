@@ -64,7 +64,7 @@ namespace horizon {
 			void operator=(Symbol const &sym);
 
 			UUID uuid;
-			const Unit *unit;
+			uuid_ptr<const Unit> unit;
 			std::string name;
 			std::map<UUID, SymbolPin> pins;
 			std::map<UUID, Junction> junctions;

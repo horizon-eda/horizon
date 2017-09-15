@@ -8,6 +8,7 @@ architecture is there.
 - Netlist-aware schematic editor
 - Crude obstacle-avoiding router
 - Lag- and glitch-free rendering
+- DRC/ERC (WIP)
 - Undo/redo
 - Copy/paste for some objects
 - Builds and runs on Linux and Windows
@@ -35,7 +36,7 @@ set HORIZON_POOL=<DIRECTORY WITH THE pool.json IN IT>
 ```
 and run
 ```
-horizon-pool-update
+horizon-pool update
 ```
 If you see `created db from schema` everything is alright.
 
@@ -43,8 +44,13 @@ If you see `created db from schema` everything is alright.
 Double-click `horizon-prj-mgr.exe` in the directory that you opened
 the command window in. You should now see a window titled "Horizon
 project manager". Click on the application icon in the top left corner,
-and add the pool you've set up in the preferences dialog. Now, you're
+and add the pool you've set up. Now, you're
 ready to create a project and use the interactive manipulator.
+
+### Launch the pool manager
+Double-click `horizon-pool-mgr.exe` in the directory that you opened
+the command window in. You can use the pool manager to create and edit
+Pool items such as Units, Entities, Symbols and the like.
 
 
 ## Linux
@@ -56,7 +62,7 @@ Clone or download [the pool](https://github.com/carrotIndustries/horizon-pool/).
 If you chose to download the pool, extract the zip somewhere.
 In the directory where you've built horizon, run
 ```
-HORIZON_POOL=<DIRECTORY WITH THE pool.json IN IT> ./horizon-pool-update
+HORIZON_POOL=<DIRECTORY WITH THE pool.json IN IT> ./horizon-pool update
 ```
 If you see `created db from schema` everything is alright.
 
@@ -64,6 +70,13 @@ If you see `created db from schema` everything is alright.
 Run
 ```
 ./horizon-prj-mgr
+````
+and follow the instructions from the "Windows" section above.
+
+### Launch the pool manager
+Run
+```
+./horizon-pool-mgr
 ````
 and follow the instructions from the "Windows" section above.
 
@@ -125,22 +138,14 @@ horizon-pool create-symbol <symbol file> <unit file>
 horizon-pool create-entity <entity file> [<unit file> ...]
 horizon-pool edit-entity <entity file>
 
-#these have a GUI!
-horizon-pool create-part <part file>
-horizon-pool edit-part <part file>
-
 horizon-pool create-package <package file>
 horizon-pool create-padstack <padstack file>
+
+horizon-pool update #Recreates the pool's SQLite database.
 ```
 
-Remember to run `horizon-pool-update` after creating things
+Remember to run `horizon-pool update` after creating things
 
-### horizon-pool-update
-```
-horizon-pool-update
-```
-
-Recreates the pool's SQLite database.
 
 ### horizon-pool-update-parametric
 ```
@@ -164,7 +169,7 @@ horizon-prj create-board <schematic filename> <block filename> <constraints file
 
 ## get started
 After having built horizon, you should setup a pool somewhere (e.g. 
-clone https://github.com/carrotIndustries/horizon-pool) and make the `HORIZON_POOL` environment variable point to it. Then run `horizon-pool-update` and `horizon-pool-update-parametric` to update both databases. Since the pool is pretty empty, there's no sensible example project right now.
+clone https://github.com/carrotIndustries/horizon-pool) and make the `HORIZON_POOL` environment variable point to it. Then run `horizon-pool update` and `horizon-pool-update-parametric` to update both databases. Since the pool is pretty empty, there's no sensible example project right now.
 
 Create block, constraints, schematic and board:
 ```

@@ -1,4 +1,5 @@
 #include "footprint_generator_dual.hpp"
+#include "widgets/chooser_buttons.hpp"
 
 namespace horizon {
 	FootprintGeneratorDual::FootprintGeneratorDual(CorePackage *c): Glib::ObjectBase (typeid(FootprintGeneratorDual)), FootprintGeneratorBase("/net/carrotIndustries/horizon/imp/footprint_generator/dual.svg", c) {
@@ -74,7 +75,7 @@ namespace horizon {
 			for(auto it: {-1, 1}) {
 				for(unsigned int i = 0; i<pad_count/2; i++) {
 					auto uu = UUID::random();
-					auto padstack = core->m_pool->get_padstack(padstack_button->property_selected_uuid());
+					auto padstack = core->m_pool->get_padstack(browser_button->property_selected_uuid());
 					auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
 					pad.placement.shift = {it*spacing, y0-pitch*i};
 					if(it < 0)

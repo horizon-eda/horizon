@@ -116,6 +116,7 @@ namespace horizon {
 	Package::Package(const UUID &uu, const json &j, Pool &pool):
 			uuid(uu),
 			name(j.at("name").get<std::string>()),
+			manufacturer(j.value("manufacturer", "")),
 			parameter_program(this, j.value("parameter_program", ""))
 		{
 		{
@@ -189,6 +190,7 @@ namespace horizon {
 	Package::Package(const Package &pkg):
 		uuid(pkg.uuid),
 		name(pkg.name),
+		manufacturer(pkg.manufacturer),
 		tags(pkg.tags),
 		junctions(pkg.junctions),
 		lines(pkg.lines),
@@ -206,6 +208,7 @@ namespace horizon {
 	void Package::operator=(Package const &pkg) {
 		uuid = pkg.uuid;
 		name = pkg.name;
+		manufacturer = pkg.manufacturer;
 		tags = pkg.tags;
 		junctions = pkg.junctions;
 		lines = pkg.lines;
@@ -303,6 +306,7 @@ namespace horizon {
 		j["uuid"] = (std::string)uuid;
 		j["type"] = "package";
 		j["name"] = name;
+		j["manufacturer"] = manufacturer;
 		j["tags"] = tags;
 		j["parameter_program"] = parameter_program.get_code();
 		j["parameter_set"] = parameter_set_serialize(parameter_set);
@@ -332,6 +336,10 @@ namespace horizon {
 			j["polygons"][(std::string)it.first] = it.second.serialize();
 		}
 		return j;
+	}
+
+	UUID Package::get_uuid() const {
+		return uuid;
 	}
 
 }

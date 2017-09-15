@@ -1,7 +1,7 @@
 #pragma once
 #include <gtkmm.h>
 #include "project/project.hpp"
-#include "editor_process.hpp"
+#include "util/editor_process.hpp"
 #include <memory>
 #include <zmq.hpp>
 

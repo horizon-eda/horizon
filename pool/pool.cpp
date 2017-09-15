@@ -12,16 +12,77 @@ namespace horizon {
 
 	void Pool::clear() {
 		units.clear();
+		symbols.clear();
+		entities.clear();
+		padstacks.clear();
+		packages.clear();
+		parts.clear();
+	}
+
+
+	std::string Pool::get_filename(ObjectType type, const UUID &uu) {
+		std::string query;
+		switch(type) {
+			case ObjectType::UNIT :
+				query = "SELECT filename FROM units WHERE uuid = ?";
+			break;
+
+			case ObjectType::ENTITY :
+				query = "SELECT filename FROM entities WHERE uuid = ?";
+			break;
+
+			case ObjectType::SYMBOL :
+				query = "SELECT filename FROM symbols WHERE uuid = ?";
+			break;
+
+			case ObjectType::PACKAGE :
+				query = "SELECT filename FROM packages WHERE uuid = ?";
+			break;
+
+			case ObjectType::PADSTACK :
+				query = "SELECT filename FROM padstacks WHERE uuid = ?";
+			break;
+
+			case ObjectType::PART :
+				query = "SELECT filename FROM parts WHERE uuid = ?";
+			break;
+
+			default:
+				return "";
+		}
+		SQLite::Query q(db, query);
+		q.bind(1, uu);
+		if(!q.step()) {
+			throw std::runtime_error("not found");
+		}
+		auto filename = q.get<std::string>(0);
+		switch(type) {
+			case ObjectType::UNIT :
+				return base_path+"/units/"+filename;
+
+			case ObjectType::ENTITY :
+				return base_path+"/entities/"+filename;
+
+			case ObjectType::SYMBOL :
+				return base_path+"/symbols/"+filename;
+
+			case ObjectType::PACKAGE :
+				return base_path+"/packages/"+filename;
+
+			case ObjectType::PADSTACK :
+				return base_path+"/"+filename;
+
+			case ObjectType::PART :
+				return base_path+"/parts/"+filename;
+
+			default:
+				return "";
+		}
 	}
 
 	const Unit *Pool::get_unit(const UUID &uu) {
 		if(units.count(uu) == 0) {
-			SQLite::Query q(db, "SELECT filename FROM units WHERE uuid = ?");
-			q.bind(1, uu);
-			if(!q.step()) {
-				throw std::runtime_error("unit not found");
-			}
-			std::string path = base_path+"/units/"+q.get<std::string>(0);
+			std::string path = get_filename(ObjectType::UNIT, uu);
 			Unit u = Unit::new_from_file(path);
 			units.insert(std::make_pair(uu, u));
 		}
@@ -30,12 +91,7 @@ namespace horizon {
 	
 	const Entity *Pool::get_entity(const UUID &uu) {
 		if(entities.count(uu) == 0) {
-			SQLite::Query q(db, "SELECT filename FROM entities WHERE uuid = ?");
-			q.bind(1, uu);
-			if(!q.step()) {
-				throw std::runtime_error("entity not found");
-			}
-			std::string path = base_path+"/entities/"+q.get<std::string>(0);
+			std::string path = get_filename(ObjectType::ENTITY, uu);
 			Entity e = Entity::new_from_file(path, *this);
 			entities.insert(std::make_pair(uu, e));
 		}
@@ -44,12 +100,7 @@ namespace horizon {
 
 	const Symbol *Pool::get_symbol(const UUID &uu) {
 		if(symbols.count(uu) == 0) {
-			SQLite::Query q(db, "SELECT filename FROM symbols WHERE uuid = ?");
-			q.bind(1, uu);
-			if(!q.step()) {
-				throw std::runtime_error("symbol not found");
-			}
-			std::string path = base_path+"/symbols/"+q.get<std::string>(0);
+			std::string path = get_filename(ObjectType::SYMBOL, uu);
 			Symbol s = Symbol::new_from_file(path, *this);
 			symbols.insert(std::make_pair(uu, s));
 		}
@@ -58,12 +109,7 @@ namespace horizon {
 
 	const Package *Pool::get_package(const UUID &uu) {
 		if(packages.count(uu) == 0) {
-			SQLite::Query q(db, "SELECT filename FROM packages WHERE uuid = ?");
-			q.bind(1, uu);
-			if(!q.step()) {
-				throw std::runtime_error("package not found");
-			}
-			std::string path = base_path+"/packages/"+q.get<std::string>(0);
+			std::string path = get_filename(ObjectType::PACKAGE, uu);
 			Package p = Package::new_from_file(path, *this);
 			packages.emplace(uu, p);
 		}
@@ -72,12 +118,7 @@ namespace horizon {
 
 	const Padstack *Pool::get_padstack(const UUID &uu) {
 		if(padstacks.count(uu) == 0) {
-			SQLite::Query q(db, "SELECT filename FROM padstacks WHERE uuid = ?");
-			q.bind(1, uu);
-			if(!q.step()) {
-				throw std::runtime_error("padstack not found");
-			}
-			std::string path = base_path+"/"+q.get<std::string>(0);
+			std::string path = get_filename(ObjectType::PADSTACK, uu);
 			Padstack p = Padstack::new_from_file(path);
 			padstacks.insert(std::make_pair(uu, p));
 		}
@@ -86,12 +127,7 @@ namespace horizon {
 
 	const Part *Pool::get_part(const UUID &uu) {
 		if(parts.count(uu) == 0) {
-			SQLite::Query q(db, "SELECT filename FROM parts WHERE uuid = ?");
-			q.bind(1, uu);
-			if(!q.step()) {
-				throw std::runtime_error("part not found");
-			}
-			std::string path = base_path+"/parts/"+q.get<std::string>(0);
+			std::string path = get_filename(ObjectType::PART, uu);
 			Part p = Part::new_from_file(path, *this);
 			parts.insert(std::make_pair(uu, p));
 		}

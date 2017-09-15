@@ -3,52 +3,50 @@
 #include <set>
 
 namespace horizon {
-	PoolBrowserPart::PoolBrowserPart(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x, Pool *p, const UUID &e_uuid) :
-		Gtk::Box(cobject),
-		pool(p), entity_uuid(e_uuid){
-		x->get_widget("treeview", w_treeview);
-		x->get_widget("MPN_entry", w_MPN_entry);
-		x->get_widget("manufacturer_entry", w_manufacturer_entry);
-		x->get_widget("tags_entry", w_tags_entry);
+	PoolBrowserPart::PoolBrowserPart(Pool *p, const UUID &uu): PoolBrowser(p), entity_uuid(uu) {
+		construct();
+		MPN_entry = create_search_entry("MPN");
+		manufacturer_entry = create_search_entry("Manufacturer");
+		tags_entry = create_search_entry("Tags");
+		search();
+	}
 
-		store = Gtk::ListStore::create(list_columns);
-		auto view = w_treeview;
-		view->set_model(store);
-		view->append_column("MPN", list_columns.MPN);
-		view->append_column("Manufacturer", list_columns.manufacturer);
-		view->append_column("Package", list_columns.package);
-		view->append_column("Tags", list_columns.tags);
-		view->get_selection()->set_mode(Gtk::SelectionMode::SELECTION_BROWSE);
+	void PoolBrowserPart::set_MPN(const std::string &s) {
+		MPN_entry->set_text(s);
+		search();
+	}
 
-		sort_controller = std::make_unique<SortController>(view);
-		sort_controller->set_simple(true);
+	void PoolBrowserPart::set_entity_uuid(const UUID &uu) {
+		entity_uuid = uu;
+		search();
+	}
+
+	Glib::RefPtr<Gtk::ListStore> PoolBrowserPart::create_list_store() {
+		return Gtk::ListStore::create(list_columns);
+	}
+
+	void PoolBrowserPart::create_columns() {
+		treeview->append_column("MPN", list_columns.MPN);
+		treeview->append_column("Manufacturer", list_columns.manufacturer);
+		treeview->append_column("Package", list_columns.package);
+		treeview->append_column("Tags", list_columns.tags);
+	}
+
+	void PoolBrowserPart::add_sort_controller_columns() {
 		sort_controller->add_column(0, "parts.MPN");
 		sort_controller->add_column(1, "parts.manufacturer");
 		sort_controller->add_column(2, "packages.name");
-		sort_controller->set_sort(0, SortController::Sort::ASC);
-		sort_controller->signal_changed().connect(sigc::mem_fun(this, &PoolBrowserPart::search));
-
-
-		search();
-
-		dynamic_cast<Gtk::CellRendererText*>(view->get_column_cell_renderer(3))->property_ellipsize() = Pango::ELLIPSIZE_END;
-		view->get_selection()->set_mode(Gtk::SelectionMode::SELECTION_BROWSE);
-		view->signal_row_activated().connect(sigc::mem_fun(this, &PoolBrowserPart::row_activated));
-		view->get_selection()->signal_changed().connect(sigc::mem_fun(this, &PoolBrowserPart::selection_changed));
-
-		w_MPN_entry->signal_changed().connect(sigc::mem_fun(this, &PoolBrowserPart::search));
-		w_manufacturer_entry->signal_changed().connect(sigc::mem_fun(this, &PoolBrowserPart::search));
-		w_tags_entry->signal_changed().connect(sigc::mem_fun(this, &PoolBrowserPart::search));
 	}
 
 	void PoolBrowserPart::search() {
+		auto selected_uuid = get_selected();
 		store->freeze_notify();
 		store->clear();
 		Gtk::TreeModel::Row row;
-		std::string MPN_search = w_MPN_entry->get_text();
-		std::string manufacturer_search = w_manufacturer_entry->get_text();
+		std::string MPN_search = MPN_entry->get_text();
+		std::string manufacturer_search = manufacturer_entry->get_text();
 
-		std::istringstream iss(w_tags_entry->get_text());
+		std::istringstream iss(tags_entry->get_text());
 		std::set<std::string> tags{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
 		std::stringstream query;
 		if(tags.size() == 0) {
@@ -94,50 +92,11 @@ namespace horizon {
 			row[list_columns.tags] = q.get<std::string>(4);
 		}
 		store->thaw_notify();
+		select_uuid(selected_uuid);
+		scroll_to_selection();
 	}
 
-	void PoolBrowserPart::row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column) {
-		auto it = store->get_iter(path);
-		if(it) {
-			s_signal_part_activated.emit();
-		}
-	}
-
-	void PoolBrowserPart::selection_changed() {
-		auto it = w_treeview->get_selection()->get_selected();
-		if(it) {
-			Gtk::TreeModel::Row row = *it;
-			UUID uu = row[list_columns.uuid];
-			std::cout << "selected " << (std::string)uu << std::endl;
-			s_signal_part_selected.emit();
-		}
-	}
-
-	UUID PoolBrowserPart::get_selected_part() {
-		auto it = w_treeview->get_selection()->get_selected();
-		if(it) {
-			Gtk::TreeModel::Row row = *it;
-			return row[list_columns.uuid];
-		}
-		return UUID();
-	}
-
-	void PoolBrowserPart::set_MPN(const std::string &s) {
-		w_MPN_entry->set_text(s);
-		search();
-	}
-
-	void PoolBrowserPart::set_show_none(bool v) {
-		show_none = v;
-		search();
-	}
-
-	PoolBrowserPart *PoolBrowserPart::create(class Pool *p, const UUID &e_uuid) {
-		PoolBrowserPart* w;
-		Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-		x->add_from_resource("/net/carrotIndustries/horizon/widgets/pool_browser_part.ui");
-		x->get_widget_derived("browser_box", w, p, e_uuid);
-		w->reference();
-		return w;
+	UUID PoolBrowserPart::uuid_from_row(const Gtk::TreeModel::Row &row) {
+		return row[list_columns.uuid];
 	}
 }

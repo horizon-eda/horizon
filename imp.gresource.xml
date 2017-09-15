@@ -4,16 +4,19 @@
     <file>window.ui</file>
     <file>property_panels/property_panel.ui</file>
     <file>imp/cam_job.ui</file>
-    <file>pool-util/part-editor.ui</file>
     <file>pool-update/schema.sql</file>
     <file>pool-update-parametric/schema.sql</file>
-    <file>dialogs/pool_browser.ui</file>
-    <file>widgets/pool_browser_part.ui</file>
     
     <file>prj-mgr/window.ui</file>
     <file>prj-mgr/app_menu.ui</file>
     <file>prj-mgr/prefs.ui</file>
     
+    <file>pool-mgr/window.ui</file>
+    <file>pool-mgr/app_menu.ui</file>
+    <file>pool-mgr/unit_editor.ui</file>
+    <file>pool-mgr/entity_editor.ui</file>
+    <file>pool-mgr/part_editor.ui</file>
+
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-schematic-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-board-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icon.svg</file>

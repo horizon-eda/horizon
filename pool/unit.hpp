@@ -1,6 +1,7 @@
 #pragma once
 #include "uuid.hpp"
 #include "json.hpp"
+#include "uuid_provider.hpp"
 #include <yaml-cpp/yaml.h>
 #include <vector>
 #include <map>
@@ -14,7 +15,7 @@ namespace horizon {
 	 * A Pin represents a logical pin of a Unit.
 	 */
 
-	class Pin {
+	class Pin: public UUIDProvider {
 		public :
 			enum class Direction {INPUT, OUTPUT, BIDIRECTIONAL, OPEN_COLLECTOR, POWER_INPUT, POWER_OUTPUT, PASSIVE};
 
@@ -40,13 +41,14 @@ namespace horizon {
 
 			json serialize() const;
 			void serialize_yaml(YAML::Emitter &em) const;
+			UUID get_uuid() const;
 	};
 	/**
 	 * A Unit is the template for a Gate inside of an Entity.
 	 * An example for a Unit may be a "single-ended NAND gate".
 	 * \ref Unit "Units" are stored in an Entity.
 	 */
-	class Unit {
+	class Unit: public UUIDProvider {
 		private :
 			Unit(const UUID &uu, const json &j);
 		
@@ -56,9 +58,11 @@ namespace horizon {
 			Unit(const UUID &uu, const YAML::Node &n);
 			UUID uuid;
 			std::string name;
+			std::string manufacturer;
 			std::map<UUID, Pin> pins;
 			json serialize() const;
 			void serialize_yaml(YAML::Emitter &em) const;
+			UUID get_uuid() const;
 	};
 	
 }

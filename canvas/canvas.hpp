@@ -34,11 +34,11 @@ namespace horizon {
 			void update(const class Buffer &buf, class LayerProvider *lp);
 			void update(const class Board &brd);
 
-			void add(const class Line &line);
-			void remove(const SelectableRef &r);
-			void hide(const SelectableRef &r);
-			void show(const SelectableRef &r);
-			void show_all();
+			void add_obj(const class Line &line);
+			void remove_obj(const SelectableRef &r);
+			void hide_obj(const SelectableRef &r);
+			void show_obj(const SelectableRef &r);
+			void show_all_obj();
 
 
 			virtual void update_markers() {}

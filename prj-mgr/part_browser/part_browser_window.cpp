@@ -154,11 +154,11 @@ namespace horizon {
 
 	void PartBrowserWindow::update_part_current() {
 		auto page = notebook->get_nth_page(notebook->get_current_page());
-		PartProvider *prv = nullptr;
+		SelectionProvider *prv = nullptr;
 		prv = dynamic_cast<PoolBrowserPart*>(page);
 
 		if(prv) {
-			part_current = prv->get_selected_part();
+			part_current = prv->get_selected();
 		}
 		else {
 			if(page->get_name()== "fav") {
@@ -195,7 +195,7 @@ namespace horizon {
 	}
 
 	void PartBrowserWindow::handle_add_search() {
-		auto ch = PoolBrowserPart::create(&pool);
+		auto ch = Gtk::manage(new PoolBrowserPart(&pool));
 		ch->get_style_context()->add_class("background");
 		auto tab_label = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
 		auto la = Gtk::manage(new Gtk::Label("MPN Search"));
@@ -211,9 +211,8 @@ namespace horizon {
 		notebook->set_current_page(index);
 
 		search_views.insert(ch);
-		ch->unreference();
-		ch->signal_part_selected().connect(sigc::mem_fun(this, &PartBrowserWindow::update_part_current));
-		ch->signal_part_activated().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_place_part));
+		ch->signal_selected().connect(sigc::mem_fun(this, &PartBrowserWindow::update_part_current));
+		ch->signal_activated().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_place_part));
 	}
 
 	PartBrowserWindow* PartBrowserWindow::create(Gtk::Window *p, const std::string &pool_path, std::deque<UUID> &favs) {

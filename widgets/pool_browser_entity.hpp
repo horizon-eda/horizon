@@ -1,50 +1,42 @@
 #pragma once
-#include <gtkmm.h>
-#include <array>
-#include <set>
-#include "common.hpp"
-#include "uuid.hpp"
-#include "uuid_path.hpp"
-#include "pool.hpp"
-#include "pool_browser_box.hpp"
+
+#include "pool_browser.hpp"
+
 namespace horizon {
-
-
-	class PoolBrowserDialogEntity: public Gtk::Dialog {
+	class PoolBrowserEntity: public PoolBrowser {
 		public:
-		PoolBrowserDialogEntity(Gtk::Window *parent, Pool *ipool);
-			UUID selected_uuid;
-			bool selection_valid = false;
-			//virtual ~MainWindow();
-		private :
-			Pool *pool;
+			PoolBrowserEntity(class Pool *p);
+			void search() override;
 
+		protected:
+			Glib::RefPtr<Gtk::ListStore> create_list_store() override;
+			void create_columns() override;
+			void add_sort_controller_columns() override;
+			UUID uuid_from_row(const Gtk::TreeModel::Row &row) override;
+
+		private:
 			class ListColumns : public Gtk::TreeModelColumnRecord {
 				public:
 					ListColumns() {
 						Gtk::TreeModelColumnRecord::add( entity_name ) ;
+						Gtk::TreeModelColumnRecord::add( entity_manufacturer ) ;
 						Gtk::TreeModelColumnRecord::add( prefix ) ;
 						Gtk::TreeModelColumnRecord::add( n_gates ) ;
 						Gtk::TreeModelColumnRecord::add( uuid ) ;
 						Gtk::TreeModelColumnRecord::add( tags ) ;
 					}
 					Gtk::TreeModelColumn<Glib::ustring> entity_name;
+					Gtk::TreeModelColumn<Glib::ustring> entity_manufacturer;
 					Gtk::TreeModelColumn<Glib::ustring> prefix;
 					Gtk::TreeModelColumn<Glib::ustring> tags;
 					Gtk::TreeModelColumn<UUID> uuid;
 					Gtk::TreeModelColumn<unsigned int> n_gates;
 			} ;
 			ListColumns list_columns;
+			Gtk::Entry *name_entry = nullptr;
+			Gtk::Entry *tags_entry = nullptr;
 
-			PoolBrowserBox *box;
-			Glib::RefPtr<Gtk::ListStore> store;
-
-			void search();
-
-
-			void ok_clicked();
-			void row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
-			bool auto_ok();
 
 	};
+
 }

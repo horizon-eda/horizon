@@ -76,7 +76,7 @@ export HORIZON_POOL=$(realpath ../horizon-pool)
 and update the pool database
 
 ```
-./horizon-pool-update
+./horizon-pool update
 ```
 If it completes with "created db from schema", it's alright.
 

@@ -13,10 +13,12 @@
 #include <glib/gstdio.h>
 #include <glibmm/datetime.h>
 #include <giomm/file.h>
+#include <giomm/init.h>
 #include "package.hpp"
 #include "part.hpp"
-#include "part-editor.hpp"
 #include "util.hpp"
+#include "pool-update/pool-update.hpp"
+
 
 
 YAML::Node edit_yaml(const YAML::Emitter &em) {
@@ -118,12 +120,6 @@ int main(int c_argc, char *c_argv[]) {
 		horizon::save_json_to_file(filename, j);
 	}
 
-	else if(argv.at(1) == "edit-part" || argv.at(1) == "create-part") {
-		const auto &filename = argv.at(2);
-		PartEditor pe(filename, argv.at(1) == "create-part");
-		pe.run();
-	}
-
 	else if(argv.at(1) == "create-package") {
 		auto &base_path = argv.at(2);
 		{
@@ -140,6 +136,10 @@ int main(int c_argc, char *c_argv[]) {
 		horizon::Padstack ps(horizon::UUID::random());
 		auto j = ps.serialize();
 		horizon::save_json_to_file(argv.at(2), j);
+	}
+
+	else if(argv.at(1) == "update") {
+		horizon::pool_update(pool_base_path);
 	}
 
 

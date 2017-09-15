@@ -64,12 +64,25 @@ namespace horizon {
 		else {
 			selected_gate = gates_out.begin()->first;
 		}
+
 		Component *comp = &sch->block->components.at(selected_gate.at(0));
 		const Gate *gate = &comp->entity->gates.at(selected_gate.at(1));
 		UUID selected_symbol;
-		std::tie(r, selected_symbol) = imp->dialogs.select_symbol(core.r, gate->unit->uuid);
-		if(!r) {
-			return ToolResponse::end();
+
+		std::string query  = "SELECT symbols.uuid FROM symbols WHERE symbols.unit = ?";
+		SQLite::Query q(core.r->m_pool->db, query);
+		q.bind(1, gate->unit->uuid);
+		int n = 0;
+		while(q.step()) {
+			selected_symbol = q.get<std::string>(0);
+			n++;
+		}
+
+		if(n!=1) {
+			std::tie(r, selected_symbol) = imp->dialogs.select_symbol(core.r->m_pool, gate->unit->uuid);
+			if(!r) {
+				return ToolResponse::end();
+			}
 		}
 
 		const Symbol *sym = core.c->m_pool->get_symbol(selected_symbol);

@@ -2,10 +2,10 @@
 #include "map_pin.hpp"
 #include "map_symbol.hpp"
 #include "map_package.hpp"
-#include "pool_browser_symbol.hpp"
-#include "pool_browser_entity.hpp"
-#include "pool_browser_padstack.hpp"
-#include "pool_browser_part.hpp"
+#include "pool_browser_dialog.hpp"
+#include "widgets/pool_browser_part.hpp"
+#include "widgets/pool_browser_symbol.hpp"
+#include "widgets/pool_browser_padstack.hpp"
 #include "component_pin_names.hpp"
 #include "select_net.hpp"
 #include "ask_net_merge.hpp"
@@ -52,11 +52,14 @@ namespace horizon {
 		}
 	}
 
-	std::pair<bool, UUID> Dialogs::select_symbol(Core *c, const UUID &unit_uuid) {
-		PoolBrowserDialogSymbol dia(parent, c, unit_uuid);
+	std::pair<bool, UUID> Dialogs::select_symbol(Pool *pool, const UUID &unit_uuid) {
+		PoolBrowserDialog dia(parent, ObjectType::SYMBOL, pool);
+		auto br = dynamic_cast<PoolBrowserSymbol*>(dia.get_browser());
+		br->set_unit_uuid(unit_uuid);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
-			return {dia.selection_valid, dia.selected_uuid};
+			auto uu = br->get_selected();
+			return {uu, uu};
 		}
 		else {
 			return {false, UUID()};
@@ -64,20 +67,25 @@ namespace horizon {
 	}
 
 	std::pair<bool, UUID> Dialogs::select_padstack(Pool *pool, const UUID &package_uuid) {
-		PoolBrowserDialogPadstack dia(parent, pool, package_uuid);
+		PoolBrowserDialog dia(parent, ObjectType::PADSTACK, pool);
+		auto br = dynamic_cast<PoolBrowserPadstack*>(dia.get_browser());
+		br->set_package_uuid(package_uuid);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
-			return {dia.selection_valid, dia.selected_uuid};
+			auto uu = br->get_selected();
+			return {uu, uu};
 		}
 		else {
 			return {false, UUID()};
 		}
 	}
+
 	std::pair<bool, UUID> Dialogs::select_entity(Pool *pool) {
-		PoolBrowserDialogEntity dia(parent, pool);
+		PoolBrowserDialog dia(parent, ObjectType::ENTITY, pool);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
-			return {dia.selection_valid, dia.selected_uuid};
+			auto uu = dia.get_browser()->get_selected();
+			return {uu, uu};
 		}
 		else {
 			return {false, UUID()};
@@ -224,15 +232,18 @@ namespace horizon {
 	}
 
 	std::pair<bool, UUID> Dialogs::select_part(Pool *pool, const UUID &entity_uuid, const UUID &part_uuid, bool show_none) {
-		PoolBrowserDialogPart dia(parent, pool, entity_uuid);
-		dia.set_show_none(show_none);
+		PoolBrowserDialog dia(parent, ObjectType::PART, pool);
+		auto br = dynamic_cast<PoolBrowserPart*>(dia.get_browser());
+		br->set_show_none(show_none);
+		br->set_entity_uuid(entity_uuid);
 		if(part_uuid) {
 			auto part = pool->get_part(part_uuid);
-			dia.set_MPN(part->get_MPN());
+			br->set_MPN(part->get_MPN());
 		}
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
-			return {dia.selection_valid, dia.selected_uuid};
+			auto uu = br->get_selected();
+			return {uu, uu};
 		}
 		else {
 			return {false, UUID()};

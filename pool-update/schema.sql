@@ -1,12 +1,14 @@
 CREATE TABLE IF NOT EXISTS "units" (
 	`uuid`	TEXT NOT NULL UNIQUE,
 	`name`	TEXT NOT NULL,
+	`manufacturer`	TEXT NOT NULL,
 	`filename`	TEXT NOT NULL,
 	PRIMARY KEY(`uuid`)
 );
 CREATE TABLE IF NOT EXISTS "entities" (
 	`uuid`	TEXT NOT NULL UNIQUE,
 	`name`	TEXT NOT NULL,
+	`manufacturer`	TEXT NOT NULL,
 	`n_gates`	INTEGER NOT NULL,
 	`prefix`	TEXT NOT NULL,
 	`filename`	TEXT NOT NULL,
@@ -22,6 +24,7 @@ CREATE TABLE IF NOT EXISTS "symbols" (
 CREATE TABLE IF NOT EXISTS "packages" (
 	`uuid`	TEXT NOT NULL UNIQUE,
 	`name`	TEXT NOT NULL,
+	`manufacturer`	TEXT NOT NULL,
 	`n_pads`	INTEGER NOT NULL,
 	`filename`	TEXT NOT NULL,
 	PRIMARY KEY(`uuid`)

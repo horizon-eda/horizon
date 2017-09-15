@@ -1,35 +1,48 @@
 #include "chooser_buttons.hpp"
 #include "dialogs/dialogs.hpp"
 #include "board/via_padstack_provider.hpp"
-#include "dialogs/pool_browser_padstack.hpp"
 #include "padstack.hpp"
+#include "pool.hpp"
+#include "widgets/pool_browser.hpp"
 
 namespace horizon {
-	PadstackButton::PadstackButton(Pool &p, const UUID &pkg_uuid):Glib::ObjectBase (typeid(PadstackButton)),  Gtk::Button("fixme"), p_property_selected_uuid(*this, "selected-uuid"), pool(p), package_uuid(pkg_uuid) {
-				update_label();
-				property_selected_uuid().signal_changed().connect([this]{update_label();});
-			}
+	PoolBrowserButton::PoolBrowserButton(ObjectType ty, Pool *ipool): Glib::ObjectBase (typeid(PoolBrowserButton)), Gtk::Button("fixme"), p_property_selected_uuid(*this, "selected-uuid"), pool(ipool), type(ty),
+		dia(nullptr, type, pool) {
+		update_label();
+	}
 
-	void PadstackButton::on_clicked() {
+	class PoolBrowser *PoolBrowserButton::get_browser() {
+		return dia.get_browser();
+	}
+
+	void PoolBrowserButton::on_clicked() {
 		Gtk::Button::on_clicked();
 		auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-		PoolBrowserDialogPadstack pb(top, &pool, package_uuid);
-		pb.run();
-		if(pb.selection_valid) {
-			p_property_selected_uuid = pb.selected_uuid;
+		dia.set_parent(*top);
+		if(dia.run() == Gtk::RESPONSE_OK) {
+			selected_uuid = dia.get_browser()->get_selected();
+			p_property_selected_uuid.set_value(selected_uuid);
 			update_label();
 		}
+		dia.hide();
 	}
 
-	void PadstackButton::update_label() {
-		UUID uu = p_property_selected_uuid;
-		if(uu) {
-			set_label(pool.get_padstack(uu)->name);
+	void PoolBrowserButton::update_label() {
+		if(!selected_uuid) {
+			set_label("none");
+			return;
 		}
-		else {
-			set_label("no padstack");
+		switch(type) {
+			case ObjectType::PADSTACK :
+				set_label(pool->get_padstack(selected_uuid)->name);
+			break;
+			default:
+				set_label("fixme");
+
 		}
+
 	}
+
 
 	ViaPadstackButton::ViaPadstackButton(ViaPadstackProvider &vpp):Glib::ObjectBase (typeid(ViaPadstackButton)),  Gtk::Button("fixme"), p_property_selected_uuid(*this, "selected-uuid"), via_padstack_provider(vpp) {
 				update_label();

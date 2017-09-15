@@ -1,18 +1,23 @@
 #pragma once
 #include <gtkmm.h>
 #include "uuid.hpp"
+#include "common.hpp"
+#include "dialogs/pool_browser_dialog.hpp"
 
 namespace horizon {
-	class PadstackButton: public Gtk::Button {
+
+	class PoolBrowserButton: public Gtk::Button {
 		public:
-			PadstackButton(class Pool &p, const UUID &pkg_uuid);
+			PoolBrowserButton(ObjectType type, Pool *ipool);
+			class PoolBrowser *get_browser();
 			Glib::PropertyProxy<horizon::UUID> property_selected_uuid() { return p_property_selected_uuid.get_proxy(); }
 
-		protected :
+		private:
 			Glib::Property<UUID> p_property_selected_uuid;
-			Pool &pool;
-			UUID package_uuid;
-
+			Pool *pool;
+			ObjectType type;
+			UUID selected_uuid;
+			PoolBrowserDialog dia;
 			void on_clicked() override;
 			void update_label();
 	};

@@ -6,6 +6,7 @@ horizon-pool-update-parametric
 horizon-prj
 horizon-prj-mgr
 horizon-pgm-test
+horizon-pool-mgr
 *.o
 *.d
 *~

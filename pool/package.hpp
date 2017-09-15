@@ -22,7 +22,7 @@ namespace horizon {
 	using json = nlohmann::json;
 
 
-	class Package : public ObjectProvider, public LayerProvider {
+	class Package : public ObjectProvider, public LayerProvider, public UUIDProvider {
 		public :
 			class MyParameterProgram: public ParameterProgram {
 				friend Package;
@@ -48,6 +48,8 @@ namespace horizon {
 			std::pair<Coordi, Coordi> get_bbox() const;
 			const std::map<int, Layer> &get_layers() const override;
 			std::pair<bool, std::string> apply_parameter_set(const ParameterSet &ps);
+
+			UUID get_uuid() const;
 
 			Package(const Package &pkg);
 			void operator=(Package const &pkg);

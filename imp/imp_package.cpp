@@ -49,31 +49,6 @@ namespace horizon {
 
 		add_tool_button(ToolID::IMPORT_DXF, "Import DXF");
 
-		auto name_entry = Gtk::manage(new Gtk::Entry());
-		name_entry->show();
-		main_window->top_panel->pack_start(*name_entry, false, false, 0);
-		name_entry->set_text(core_package.get_package(false)->name);
-		core_package.signal_save().connect([this, name_entry]{core_package.get_package(false)->name = name_entry->get_text();});
-
-		auto tags_entry = Gtk::manage(new Gtk::Entry());
-		tags_entry->show();
-		main_window->top_panel->pack_start(*tags_entry, false, false, 0);
-		{
-			auto pkg = core_package.get_package(false);
-			std::stringstream s;
-			std::copy(pkg->tags.begin(), pkg->tags.end(), std::ostream_iterator<std::string>(s, " "));
-			tags_entry->set_text(s.str());
-		}
-		core_package.signal_save().connect([this, tags_entry]{
-			auto pkg = core_package.get_package(false);
-			std::stringstream ss(tags_entry->get_text());
-			std::istream_iterator<std::string> begin(ss);
-			std::istream_iterator<std::string> end;
-			std::vector<std::string> tags(begin, end);
-			pkg->tags.clear();
-			pkg->tags.insert(tags.begin(), tags.end());
-		});
-
 		footprint_generator_window = FootprintGeneratorWindow::create(main_window, &core_package);
 		footprint_generator_window->signal_generated().connect(sigc::mem_fun(this, &ImpBase::canvas_update_from_pp));
 
@@ -130,6 +105,54 @@ namespace horizon {
 			}
 			core_package.rebuild();
 			canvas_update();
+		});
+
+		auto meta_button = Gtk::manage(new Gtk::MenuButton());
+		main_window->top_panel->pack_start(*meta_button, false, false, 0);
+		meta_button->show();
+		auto meta_popover = Gtk::manage(new Gtk::Popover(*meta_button));
+		meta_button->set_popover(*meta_popover);
+		auto gr = Gtk::manage(new Gtk::Grid());
+		gr->set_row_spacing(10);
+		gr->set_column_spacing(10);
+		gr->set_margin_start(20);
+		gr->set_margin_end(20);
+		gr->set_margin_top(20);
+		gr->set_margin_bottom(20);
+		auto attach_label = [gr](const std::string &las, int y) {
+			auto la = Gtk::manage(new Gtk::Label(las));
+			la->set_halign(Gtk::ALIGN_END);
+			la->get_style_context()->add_class("dim-label");
+			gr->attach(*la, 0, y, 1, 1);
+			auto entry = Gtk::manage(new Gtk::Entry());
+			gr->attach(*entry, 1, y, 1, 1);
+			return entry;
+		};
+		auto entry_name = attach_label("Name", 0);
+		auto entry_manufacturer = attach_label("Manufacturer", 1);
+		auto entry_tags = attach_label("Tags", 2);
+		gr->show_all();
+		meta_popover->add(*gr);
+
+		{
+			auto pkg = core_package.get_package(false);
+			entry_name->set_text(pkg->name);
+			entry_manufacturer->set_text(pkg->manufacturer);
+			std::stringstream s;
+			std::copy(pkg->tags.begin(), pkg->tags.end(), std::ostream_iterator<std::string>(s, " "));
+			entry_tags->set_text(s.str());
+		}
+
+		core_package.signal_save().connect([this, entry_name, entry_manufacturer, entry_tags]{
+			auto pkg = core_package.get_package(false);
+			std::stringstream ss(entry_tags->get_text());
+			std::istream_iterator<std::string> begin(ss);
+			std::istream_iterator<std::string> end;
+			std::vector<std::string> tags(begin, end);
+			pkg->tags.clear();
+			pkg->tags.insert(tags.begin(), tags.end());
+			pkg->name = entry_name->get_text();
+			pkg->manufacturer = entry_manufacturer->get_text();
 		});
 
 

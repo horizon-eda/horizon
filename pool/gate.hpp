@@ -3,6 +3,7 @@
 #include "json.hpp"
 #include "unit.hpp"
 #include "uuid_provider.hpp"
+#include "uuid_ptr.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -20,7 +21,7 @@ namespace horizon {
 			std::string name;
 			std::string suffix;
 			unsigned int swap_group = 0;
-			const Unit *unit = nullptr;
+			uuid_ptr<const Unit> unit;
 
 			json serialize() const;
 			void serialize_yaml(YAML::Emitter &em) const;

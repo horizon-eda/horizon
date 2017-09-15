@@ -6,6 +6,7 @@ namespace horizon {
 	Entity::Entity(const UUID &uu, const json &j, Pool &pool):
 			uuid(uu),
 			name(j.at("name").get<std::string>()),
+			manufacturer(j.value("manufacturer", "")),
 			prefix(j.at("prefix").get<std::string>())
 
 		{
@@ -26,6 +27,7 @@ namespace horizon {
 	Entity::Entity(const UUID &uu, const YAML::Node &n, Pool &pool) :
 		uuid(uu),
 		name(n["name"].as<std::string>()),
+		manufacturer(n["manufacturer"].as<std::string>()),
 		prefix(n["prefix"].as<std::string>())
 	{
 		auto tv = n["tags"].as<std::vector<std::string>>(std::vector<std::string>());
@@ -51,6 +53,7 @@ namespace horizon {
 		json j;
 		j["type"] = "entity";
 		j["name"] = name;
+		j["manufacturer"] = manufacturer;
 		j["uuid"] = (std::string)uuid;
 		j["prefix"] = prefix;
 		j["tags"] = tags;
@@ -65,6 +68,7 @@ namespace horizon {
 		using namespace YAML;
 		em << BeginMap;
 		em << Key << "name" << Value << name;
+		em << Key << "manufacturer" << Value << manufacturer;
 		em << Key << "uuid" << Value << (std::string)uuid;
 		em << Key << "prefix" << Value << prefix;
 		em << Key << "tags" << Value << tags;
@@ -74,5 +78,15 @@ namespace horizon {
 		}
 		em << EndSeq;
 		em << EndMap;
+	}
+
+	void Entity::update_refs(Pool &pool) {
+		for(auto &it: gates) {
+			it.second.unit = pool.get_unit(it.second.unit.uuid);
+		}
+	}
+
+	UUID Entity::get_uuid() const {
+		return uuid;
 	}
 }
