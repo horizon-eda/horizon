@@ -62,6 +62,7 @@ namespace horizon {
 
 		dir_combo->set_active_id(std::to_string(static_cast<int>(pin->direction)));
 		dir_combo->signal_changed().connect([this, propagate] {
+			pin->direction = static_cast<Pin::Direction>(std::stoi(dir_combo->get_active_id()));
 			propagate([this](PinEditor *ed){ed->dir_combo->set_active_id(dir_combo->get_active_id());});
 		});
 		swap_group_spin_button->set_value(pin->swap_group);
@@ -206,8 +207,8 @@ namespace horizon {
 		auto children = pins_listbox->get_children();
 		for(auto &ch: children) {
 			auto row = dynamic_cast<Gtk::ListBoxRow*>(ch);
-			auto ed = dynamic_cast<PinEditor*>(row->get_child());
-			if(ed->pin->uuid == uu) {
+			auto ed_row = dynamic_cast<PinEditor*>(row->get_child());
+			if(ed_row->pin->uuid == uu) {
 				pins_listbox->unselect_all();
 				pins_listbox->select_row(*row);
 				break;

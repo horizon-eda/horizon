@@ -16,9 +16,12 @@
     <file>pool-mgr/unit_editor.ui</file>
     <file>pool-mgr/entity_editor.ui</file>
     <file>pool-mgr/part_editor.ui</file>
+    <file>pool-mgr/part_wizard/part_wizard.ui</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-schematic-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-board-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-link-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-unlink-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icon.svg</file>
     
     <file>imp/footprint_generator/footprint_generator.ui</file>

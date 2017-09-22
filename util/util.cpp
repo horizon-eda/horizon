@@ -11,7 +11,7 @@ namespace horizon {
 	void save_json_to_file(const std::string &filename, const json &j) {
 		std::ofstream ofs(filename);
 		if(!ofs.is_open()) {
-			std::cout << "can't save json " << filename <<std::endl;
+			throw std::runtime_error("can't save json " + filename);
 			return;
 		}
 		ofs << std::setw(4) << j;

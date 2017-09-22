@@ -166,6 +166,8 @@ SRC_IMP = \
 	core/tool_edit_parameter_program.cpp\
 	core/tool_edit_pad_parameter_set.cpp\
 	core/tool_draw_polygon_rectangle.cpp\
+	core/tool_draw_line_rectangle.cpp\
+	core/tool_edit_line_rectangle.cpp\
 	core/cores.cpp\
 	core/clipboard.cpp\
 	core/buffer.cpp\
@@ -283,6 +285,10 @@ SRC_POOL_MGR = \
 	pool-mgr/entity_editor.cpp\
 	pool-mgr/editor_window.cpp\
 	pool-mgr/create_part_dialog.cpp\
+	pool-mgr/part_wizard/part_wizard.cpp\
+	pool-mgr/part_wizard/pad_editor.cpp\
+	pool-mgr/part_wizard/gate_editor.cpp\
+	pool-mgr/part_wizard/location_entry.cpp\
 	widgets/pool_browser.cpp\
 	widgets/pool_browser_unit.cpp\
 	widgets/pool_browser_symbol.cpp\

@@ -105,21 +105,12 @@ namespace horizon {
 	}
 
 	void Canvas::render(const PowerSymbol &sym) {
-		auto c = ColorP::NET;
-		/*if(sym.connection_count == 2) {
-			draw_plus(sym.junction->position, 0.25_mm, c);
-		}
-		else if(sym.connection_count >= 3 ) {
-			draw_arc(sym.junction->position, 0.25_mm, 0, 2*M_PI, c);
-		}
-		else {
-			draw_cross(sym.position, 0.25_mm, c);
-		}*/
+		auto c = ColorP::FROM_LAYER;
 		transform.shift = sym.junction->position;
-		draw_line({0,0}, {0, -1.25_mm}, c);
-		draw_line({-1.25_mm, -1.25_mm}, {1.25_mm, -1.25_mm}, c);
-		draw_line({-1.25_mm, -1.25_mm}, {0, -2.5_mm}, c);
-		draw_line({1.25_mm, -1.25_mm}, {0, -2.5_mm}, c);
+		draw_line({0,0}, {0, -1.25_mm}, c, 0);
+		draw_line({-1.25_mm, -1.25_mm}, {1.25_mm, -1.25_mm}, c, 0);
+		draw_line({-1.25_mm, -1.25_mm}, {0, -2.5_mm}, c, 0);
+		draw_line({1.25_mm, -1.25_mm}, {0, -2.5_mm}, c, 0);
 		selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0,0}, {-1.25_mm, -2.5_mm}, {1.25_mm, 0_mm});
 		transform.reset();
 
@@ -130,7 +121,7 @@ namespace horizon {
 			text_angle = 32768;
 		}
 
-		draw_text0(sym.junction->position+text_offset, 1.25_mm, sym.junction->net->name, text_angle, false, TextOrigin::CENTER, c);
+		draw_text0(sym.junction->position+text_offset, 1.25_mm, sym.junction->net->name, text_angle, false, TextOrigin::CENTER, c, 0);
 	}
 	
 	static auto get_line_bb(const Coordf &from, const Coordf &to, float width) {
@@ -192,7 +183,10 @@ namespace horizon {
 		}
 		if(img_mode)
 			return;
-		draw_line(track.from.get_position(), track.to.get_position(), c, track.layer, true, width);
+		auto layer = track.layer;
+		if(track.is_air)
+			layer = 10000;
+		draw_line(track.from.get_position(), track.to.get_position(), c, layer, true, width);
 		if(!track.is_air) {
 			auto center = (track.from.get_position()+ track.to.get_position())/2;
 			auto bb = get_line_bb(track.from.get_position(), track.to.get_position(), width);

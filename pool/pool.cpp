@@ -5,6 +5,9 @@
 #include "unit.hpp"
 #include "entity.hpp"
 #include "symbol.hpp"
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
 
 namespace horizon {
 	Pool::Pool(const std::string &bp) :db(bp+"/pool.db", SQLITE_OPEN_READONLY), base_path(bp)  {
@@ -53,27 +56,59 @@ namespace horizon {
 		SQLite::Query q(db, query);
 		q.bind(1, uu);
 		if(!q.step()) {
-			throw std::runtime_error("not found");
+			auto tf = get_tmp_filename(type, uu);
+
+			if(tf.size() && Glib::file_test(tf, Glib::FILE_TEST_IS_REGULAR))
+				return tf;
+			else
+				throw std::runtime_error("not found");
 		}
 		auto filename = q.get<std::string>(0);
 		switch(type) {
 			case ObjectType::UNIT :
-				return base_path+"/units/"+filename;
+				return Glib::build_filename(base_path, "units", filename);
 
 			case ObjectType::ENTITY :
-				return base_path+"/entities/"+filename;
+				return Glib::build_filename(base_path, "entities", filename);
 
 			case ObjectType::SYMBOL :
-				return base_path+"/symbols/"+filename;
+				return Glib::build_filename(base_path, "symbols", filename);
 
 			case ObjectType::PACKAGE :
-				return base_path+"/packages/"+filename;
+				return Glib::build_filename(base_path, "packages", filename);
 
 			case ObjectType::PADSTACK :
-				return base_path+"/"+filename;
+				return Glib::build_filename(base_path, filename);
 
 			case ObjectType::PART :
-				return base_path+"/parts/"+filename;
+				return Glib::build_filename(base_path, "parts", filename);
+
+			default:
+				return "";
+		}
+	}
+
+	std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) {
+		auto suffix = static_cast<std::string>(uu)+".json";
+		auto base = Glib::build_filename(base_path, "tmp");
+		switch(type) {
+			case ObjectType::UNIT :
+				return Glib::build_filename(base, "unit_"+suffix);
+
+			case ObjectType::ENTITY :
+				return Glib::build_filename(base, "entity_"+suffix);
+
+			case ObjectType::SYMBOL :
+				return Glib::build_filename(base, "sym_"+suffix);
+
+			case ObjectType::PACKAGE :
+				return Glib::build_filename(base, "pkg_"+suffix);
+
+			case ObjectType::PADSTACK :
+				return Glib::build_filename(base, "ps_"+suffix);
+
+			case ObjectType::PART :
+				return Glib::build_filename(base, "part_"+suffix);
 
 			default:
 				return "";

@@ -41,5 +41,6 @@ namespace horizon {
 			Pool pool;
 			std::map<std::string, PoolManagerProcess> processes;
 			std::set<class PoolBrowser*> browsers;
+			class PartWizard *part_wizard = nullptr;
 	};
 }

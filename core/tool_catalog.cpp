@@ -48,5 +48,7 @@ namespace horizon {
 		{ToolID::EDIT_PAD_PARAMETER_SET, {"Edit pad parameter set"}},
 		{ToolID::MANAGE_VIA_TEMPLATES, {"Manage via templates"}},
 		{ToolID::DRAW_POLYGON_RECTANGLE, {"Draw polygon rectangle"}},
+		{ToolID::DRAW_LINE_RECTANGLE, {"Draw line rectangle"}},
+		{ToolID::EDIT_LINE_RECTANGLE, {"Edit line rectangle"}},
 	};
 }

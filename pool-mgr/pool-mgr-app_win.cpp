@@ -40,7 +40,7 @@ namespace horizon {
 	}
 
 	void PoolManagerAppWindow::handle_open() {
-		Gtk::FileChooserDialog fc(*this, "Open Project", Gtk::FILE_CHOOSER_ACTION_OPEN);
+		Gtk::FileChooserDialog fc(*this, "Open Pool", Gtk::FILE_CHOOSER_ACTION_OPEN);
 		fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
 		fc.add_button("_Open", Gtk::RESPONSE_ACCEPT);
 		auto filter= Gtk::FileFilter::create();

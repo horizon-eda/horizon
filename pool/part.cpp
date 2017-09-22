@@ -95,9 +95,9 @@ namespace horizon {
 
 
 	Part::Part(const UUID &uu): uuid(uu) {
-		attributes[Attribute::MPN];
-		attributes[Attribute::MANUFACTURER];
-		attributes[Attribute::VALUE];
+		attributes[Attribute::MPN] = {false, ""};
+		attributes[Attribute::MANUFACTURER] = {false, ""};
+		attributes[Attribute::VALUE] = {false, ""};
 	}
 
 	Part Part::new_from_file(const std::string &filename, Pool &pool) {

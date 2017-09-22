@@ -11,6 +11,7 @@
 #include <zmq.hpp>
 #include "editor_window.hpp"
 #include "create_part_dialog.hpp"
+#include "part_wizard/part_wizard.hpp"
 
 namespace horizon {
 
@@ -59,10 +60,9 @@ namespace horizon {
 			}
 			win->present();
 
-			win->signal_delete_event().connect([this](GdkEventAny *ev){
+			win->signal_hide().connect([this] {
 				delete win;
 				s_signal_exited.emit(0);
-				return true;
 			});
 		}
 	}
@@ -524,6 +524,31 @@ namespace horizon {
 					}
 				});
 			}
+			{
+				auto bu = Gtk::manage(new Gtk::Button("Part wizard..."));
+				bbox->pack_start(*bu, false, false,0);
+				bu->signal_clicked().connect([this, br]{
+					if(!br->get_selected())
+						return;
+					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
+					if(!part_wizard) {
+						auto pkg = pool.get_package(br->get_selected());
+						part_wizard = PartWizard::create(pkg, base_path, &pool);
+						part_wizard->present();
+						part_wizard->signal_hide().connect([this]{
+							if(part_wizard->get_has_finished()) {
+								pool_update();
+							}
+							delete part_wizard;
+							part_wizard = nullptr;
+						});
+					}
+					else {
+						part_wizard->present();
+					}
+
+				});
+			}
 
 			bbox->show_all();
 
@@ -616,8 +641,8 @@ namespace horizon {
 					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
 					Gtk::FileChooserDialog fc(*top, "Save Part", Gtk::FILE_CHOOSER_ACTION_SAVE);
 					fc.set_do_overwrite_confirmation(true);
-					fc.set_current_name("part.json");
-					fc.set_current_folder(Glib::build_filename(base_path, "parts"));
+					fc.set_current_name(base_part->get_MPN()+".json");
+					fc.set_current_folder(Glib::path_get_dirname(pool.get_filename(ObjectType::PART, uu)));
 					fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
 					fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
 					if(fc.run()==Gtk::RESPONSE_ACCEPT) {
@@ -650,7 +675,7 @@ namespace horizon {
 	}
 
 	bool PoolNotebook::can_close() {
-		return processes.size() == 0;
+		return processes.size() == 0 && part_wizard==nullptr;
 	}
 
 	void PoolNotebook::pool_update() {

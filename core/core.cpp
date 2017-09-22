@@ -37,6 +37,8 @@
 #include "tool_edit_parameter_program.hpp"
 #include "tool_edit_pad_parameter_set.hpp"
 #include "tool_draw_polygon_rectangle.hpp"
+#include "tool_draw_line_rectangle.hpp"
+#include "tool_edit_line_rectangle.hpp"
 #include <memory>
 
 namespace horizon {
@@ -176,6 +178,12 @@ namespace horizon {
 
 			case ToolID::DRAW_POLYGON_RECTANGLE:
 				return std::make_unique<ToolDrawPolygonRectangle>(this, tool_id);
+
+			case ToolID::DRAW_LINE_RECTANGLE:
+				return std::make_unique<ToolDrawLineRectangle>(this, tool_id);
+
+			case ToolID::EDIT_LINE_RECTANGLE:
+				return std::make_unique<ToolEditLineRectangle>(this, tool_id);
 
 
 			default:

@@ -16,6 +16,8 @@ namespace horizon {
 				{{GDK_KEY_l},				ToolID::DRAW_LINE},
 				{{GDK_KEY_d, GDK_KEY_a}, 	ToolID::DRAW_ARC},
 				{{GDK_KEY_a},				ToolID::DRAW_ARC},
+				{{GDK_KEY_d, GDK_KEY_r},	ToolID::DRAW_LINE_RECTANGLE},
+				{{GDK_KEY_i},				ToolID::EDIT_LINE_RECTANGLE},
 				{{GDK_KEY_p, GDK_KEY_p},	ToolID::MAP_PIN},
 				{{GDK_KEY_p, GDK_KEY_t},	ToolID::PLACE_TEXT},
 				{{GDK_KEY_t},				ToolID::PLACE_TEXT},

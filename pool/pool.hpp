@@ -38,10 +38,12 @@ namespace horizon {
 			 * Doing so will invalidate all references pointers by get_entity and friends.
 			 */
 			void clear();
+			std::string get_tmp_filename(ObjectType type, const UUID &uu);
 
 		
 		private :
 			std::string base_path;
+
 
 			std::map<UUID, Unit> units;
 			std::map<UUID, Entity> entities;
