@@ -1,3 +1,4 @@
+#include "canvas/canvas.hpp"
 #include "pool_notebook.hpp"
 #include "widgets/pool_browser_unit.hpp"
 #include "widgets/pool_browser_symbol.hpp"
@@ -5,7 +6,6 @@
 #include "widgets/pool_browser_padstack.hpp"
 #include "widgets/pool_browser_package.hpp"
 #include "widgets/pool_browser_part.hpp"
-#include "canvas/canvas.hpp"
 #include "util/util.hpp"
 #include "pool-update/pool-update.hpp"
 #include <zmq.hpp>
