@@ -153,7 +153,13 @@
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkSpinner" id="spinner_update">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="position">4</property>
+          </packing>
         </child>
         <child>
           <placeholder/>

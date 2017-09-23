@@ -39,6 +39,7 @@ namespace horizon {
 		name_entry->set_text(pin->primary_name);
 		name_entry->signal_changed().connect([this]{
 			pin->primary_name = name_entry->get_text();
+			parent->needs_save = true;
 		});
 
 		{
@@ -64,11 +65,13 @@ namespace horizon {
 		dir_combo->signal_changed().connect([this, propagate] {
 			pin->direction = static_cast<Pin::Direction>(std::stoi(dir_combo->get_active_id()));
 			propagate([this](PinEditor *ed){ed->dir_combo->set_active_id(dir_combo->get_active_id());});
+			parent->needs_save = true;
 		});
 		swap_group_spin_button->set_value(pin->swap_group);
 		swap_group_spin_button->signal_value_changed().connect([this, propagate] {
 			pin->swap_group = swap_group_spin_button->get_value_as_int();
 			propagate([this](PinEditor *ed){ed->swap_group_spin_button->set_value(pin->swap_group);});
+			parent->needs_save = true;
 		});
 	}
 
@@ -93,10 +96,12 @@ namespace horizon {
 		name_entry->set_text(unit->name);
 		name_entry->signal_changed().connect([this]{
 			unit->name = name_entry->get_text();
+			needs_save = true;
 		});
 		manufacturer_entry->set_text(unit->manufacturer);
 		manufacturer_entry->signal_changed().connect([this]{
 			unit->manufacturer = manufacturer_entry->get_text();
+			needs_save = true;
 		});
 
 
@@ -162,6 +167,7 @@ namespace horizon {
 			if(row)
 				pins_listbox->select_row(*row);
 		}
+		needs_save = true;
 	}
 
 	static std::string inc_pin_name(const std::string &s, int inc=1) {
@@ -214,7 +220,7 @@ namespace horizon {
 				break;
 			}
 		}
-
+		needs_save = true;
 		pins_listbox->invalidate_sort();
 	}
 

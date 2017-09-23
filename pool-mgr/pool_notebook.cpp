@@ -12,6 +12,8 @@
 #include "editor_window.hpp"
 #include "create_part_dialog.hpp"
 #include "part_wizard/part_wizard.hpp"
+#include "pool-mgr-app_win.hpp"
+#include <thread>
 
 namespace horizon {
 
@@ -102,7 +104,43 @@ namespace horizon {
 		}
 	}
 
-	PoolNotebook::PoolNotebook(const std::string &bp): Gtk::Notebook(), base_path(bp), pool(bp) {\
+	void PoolNotebook::pool_updated() {
+		appwin->set_pool_updating(false);
+		for(auto &br: browsers) {
+			br->search();
+		}
+		pool.clear();
+		for(auto &it: processes) {
+			it.second.reload();
+		}
+	}
+
+	PoolNotebook::PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw): Gtk::Notebook(), base_path(bp), pool(bp), appwin(aw), zctx(aw->zctx), sock_pool_update(zctx, ZMQ_SUB) {
+		sock_pool_update_ep = "inproc://pool-update";
+		sock_pool_update.bind(sock_pool_update_ep);
+		{
+			int dummy = 0;
+			sock_pool_update.setsockopt(ZMQ_SUBSCRIBE, &dummy, 0);
+			Glib::RefPtr<Glib::IOChannel> chan;
+			#ifdef G_OS_WIN32
+				SOCKET fd = sock_pool_update.getsockopt<SOCKET>(ZMQ_FD);
+				chan = Glib::IOChannel::create_from_win32_socket(fd);
+			#else
+				int fd = sock_pool_update.getsockopt<int>(ZMQ_FD);
+				chan = Glib::IOChannel::create_from_fd(fd);
+			#endif
+
+			Glib::signal_io().connect([this](Glib::IOCondition cond){
+				while(sock_pool_update.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
+					zmq::message_t msg;
+					sock_pool_update.recv(&msg);
+					std::cout << "pool sock rx" << std::endl;
+					pool_updated();
+				}
+				return true;
+			}, chan, Glib::IO_IN | Glib::IO_HUP);
+		}
+
 		{
 			auto br = Gtk::manage(new PoolBrowserUnit(&pool));
 			br->signal_activated().connect([this, br] {
@@ -678,18 +716,22 @@ namespace horizon {
 		return processes.size() == 0 && part_wizard==nullptr;
 	}
 
+	static void pool_update_thread(const std::string &pool_base_path, zmq::context_t &zctx, const std::string &ep) {
+		std::cout << "hello from thread" << std::endl;
+		zmq::socket_t sock(zctx, ZMQ_PUB);
+		sock.connect(ep);
+
+		horizon::pool_update(pool_base_path);
+
+		std::string msgs("done");
+		zmq::message_t msg(msgs.data(), msgs.size()+1);
+		sock.send(msg);
+	}
+
 	void PoolNotebook::pool_update() {
-		horizon::pool_update(base_path);
-		for(auto &br: browsers) {
-			br->search();
-		}
-		pool.clear();
-		for(auto &it: processes) {
-			it.second.reload();
-		}
+		appwin->set_pool_updating(true);
+		std::thread thr(pool_update_thread, std::ref(base_path), std::ref(zctx), std::ref(sock_pool_update_ep));
+		thr.detach();
 	}
 
-	void PoolNotebook::populate() {
-
-	}
 }

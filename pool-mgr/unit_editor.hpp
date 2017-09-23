@@ -2,10 +2,11 @@
 #include <gtkmm.h>
 #include "common.hpp"
 #include "core/core.hpp"
+#include "editor_interface.hpp"
 
 namespace horizon {
 
-	class UnitEditor: public Gtk::Box {
+	class UnitEditor: public Gtk::Box, public PoolEditorInterface {
 		friend class PinEditor;
 		public:
 			UnitEditor(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x, class Unit *u);

@@ -93,6 +93,7 @@ namespace horizon {
 
 	PartEditor::PartEditor(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x, Part *p, Pool *po) :
 		Gtk::Box(cobject), part(p), pool(po) {
+		needs_save = true;
 
 		auto add_entry = [x](const char *name) {
 			Gtk::Box *t;

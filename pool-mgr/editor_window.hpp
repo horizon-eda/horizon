@@ -18,11 +18,15 @@ namespace horizon {
 		public:
 			EditorWindow(ObjectType type, const std::string &filename, class Pool *p);
 			void reload();
+			bool get_need_update();
 
 		private:
 			std::unique_ptr<EditorWindowStore> store = nullptr;
 			PoolEditorInterface *iface = nullptr;
+			Gtk::Button *save_button = nullptr;
 			class Pool *pool;
+			void save();
+			bool need_update = false;
 
 	};
 }

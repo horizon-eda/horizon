@@ -33,16 +33,19 @@ namespace horizon {
 		name_entry->set_text(gate->name);
 		name_entry->signal_changed().connect([this]{
 			gate->name = name_entry->get_text();
+			parent->needs_save = true;
 		});
 
 		suffix_entry->set_text(gate->suffix);
 		suffix_entry->signal_changed().connect([this]{
 			gate->suffix = suffix_entry->get_text();
+			parent->needs_save = true;
 		});
 
 		swap_group_spin_button->set_value(gate->swap_group);
 		swap_group_spin_button->signal_value_changed().connect([this] {
 			gate->swap_group = swap_group_spin_button->get_value_as_int();
+			parent->needs_save = true;
 		});
 
 		unit_label->set_text(gate->unit->name);
@@ -61,10 +64,11 @@ namespace horizon {
 		return w;
 	}
 
-	static void bind_entry(Gtk::Entry *e, std::string &s) {
+	static void bind_entry(Gtk::Entry *e, std::string &s, bool &needs_save) {
 		e->set_text(s);
-		e->signal_changed().connect([e, &s]{
+		e->signal_changed().connect([e, &s, &needs_save]{
 			s = e->get_text();
+			needs_save = true;
 		});
 
 	}
@@ -80,9 +84,9 @@ namespace horizon {
 		x->get_widget("gate_add", add_button);
 		x->get_widget("gate_delete", delete_button);
 
-		bind_entry(name_entry, entity->name);
-		bind_entry(manufacturer_entry, entity->manufacturer);
-		bind_entry(prefix_entry, entity->prefix);
+		bind_entry(name_entry, entity->name, needs_save);
+		bind_entry(manufacturer_entry, entity->manufacturer, needs_save);
+		bind_entry(prefix_entry, entity->prefix, needs_save);
 
 		{
 			std::stringstream s;
@@ -97,6 +101,7 @@ namespace horizon {
 			std::vector<std::string> tags(begin, end);
 			entity->tags.clear();
 			entity->tags.insert(tags.begin(), tags.end());
+			needs_save = true;
 		});
 
 		gates_listbox->set_sort_func([](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b){
@@ -162,6 +167,7 @@ namespace horizon {
 			if(row)
 				gates_listbox->select_row(*row);
 		}
+		needs_save = true;
 	}
 
 
@@ -195,6 +201,7 @@ namespace horizon {
 
 			}
 		}
+		needs_save = true;
 	}
 
 	EntityEditor* EntityEditor::create(Entity *e, class Pool *p) {

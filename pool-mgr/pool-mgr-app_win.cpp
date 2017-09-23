@@ -9,11 +9,12 @@ extern const char *gitversion;
 namespace horizon {
 
 	PoolManagerAppWindow::PoolManagerAppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refBuilder, PoolManagerApplication *app):
-			Gtk::ApplicationWindow(cobject), builder(refBuilder) {
+			Gtk::ApplicationWindow(cobject), builder(refBuilder), zctx(app->zctx) {
 		builder->get_widget("stack", stack);
 		builder->get_widget("button_open", button_open);
 		builder->get_widget("button_close", button_close);
 		builder->get_widget("button_update", button_update);
+		builder->get_widget("spinner_update", spinner_update);
 		builder->get_widget("header", header);
 		builder->get_widget("recent_chooser", recent_chooser);
 		builder->get_widget("label_gitversion", label_gitversion);
@@ -28,6 +29,14 @@ namespace horizon {
 		label_gitversion->set_text(gitversion);
 
 		set_icon(Gdk::Pixbuf::create_from_resource("/net/carrotIndustries/horizon/icon.svg"));
+	}
+
+	void PoolManagerAppWindow::set_pool_updating(bool v) {
+		button_update->set_sensitive(!v);
+		if(v)
+			spinner_update->start();
+		else
+			spinner_update->stop();
 	}
 
 	PoolManagerAppWindow::~PoolManagerAppWindow() {
@@ -122,10 +131,9 @@ namespace horizon {
 				pool_update(pool_base_path);
 			}
 			set_view_mode(ViewMode::POOL);
-			pool_notebook = new PoolNotebook(pool_base_path);
+			pool_notebook = new PoolNotebook(pool_base_path, this);
 			pool_box->pack_start(*pool_notebook, true, true, 0);
 			pool_notebook->show();
-			pool_notebook->populate();
 		}
 		catch (const std::exception& e) {
 			Gtk::MessageDialog md(*this,  "Error opening pool", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);

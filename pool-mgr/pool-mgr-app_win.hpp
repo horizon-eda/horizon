@@ -24,6 +24,7 @@ namespace horizon {
 			Gtk::Button *button_open = nullptr;
 			Gtk::Button *button_close = nullptr;
 			Gtk::Button *button_update = nullptr;
+			Gtk::Spinner *spinner_update = nullptr;
 			Gtk::HeaderBar *header = nullptr;
 			Gtk::RecentChooserWidget *recent_chooser = nullptr;
 			Gtk::Label *label_gitversion = nullptr;
@@ -43,6 +44,11 @@ namespace horizon {
 
 			bool close_pool();
 			bool on_delete_event(GdkEventAny *ev) override;
+
+		public:
+			zmq::context_t &zctx;
+			void set_pool_updating(bool v);
+
 	};
 };
 

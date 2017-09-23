@@ -67,8 +67,8 @@ namespace horizon {
 		else {
 			save_label = "Save as..";
 		}
-		auto save_buton = Gtk::manage(new Gtk::Button(save_label));
-		hb->pack_start(*save_buton);
+		save_button = Gtk::manage(new Gtk::Button(save_label));
+		hb->pack_start(*save_button);
 
 		hb->show_all();
 		hb->set_show_close_button(true);
@@ -80,7 +80,9 @@ namespace horizon {
         	case ObjectType::UNIT: {
         		auto st = new UnitStore(filename);
         		store.reset(st);
-        		editor = UnitEditor::create(&st->unit);
+        		auto ed = UnitEditor::create(&st->unit);
+        		editor = ed;
+        		iface = ed;
         		hb->set_title("Unit Editor");
         	} break;
         	case ObjectType::ENTITY: {
@@ -106,32 +108,62 @@ namespace horizon {
         editor->unreference();
         set_default_size(-1, 600);
 
-        save_buton->signal_clicked().connect([this, save_buton]{
-        	if(iface)
-        		iface->save();
+        signal_delete_event().connect([this](GdkEventAny *ev) {
+			if(iface && iface->get_needs_save()) {
+				Gtk::MessageDialog md(*this,  "Save changes before closing?", false /* use_markup */, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
+				md.set_secondary_text("If you don't save, all your changes will be permanently lost.");
+				md.add_button("Close without Saving", 1);
+				md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+				md.add_button("Save", 2);
+				switch(md.run()) {
+					case 1:
+						return false; //close
 
-        	if(store->filename.size()) {
-        		store->save();
-        	}
-        	else {
-        		Gtk::FileChooserDialog fc(*this, "Save as", Gtk::FILE_CHOOSER_ACTION_SAVE);
-				fc.set_do_overwrite_confirmation(true);
-				fc.set_current_name("something.json");
-				fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-				fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
-				if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-					std::string fn = fc.get_filename();
-					store->save_as(fn);
-					save_buton->set_label("Save");
+					case 2:
+						save();
+						return false; //close
+
+					default:
+						return true; //keep window open
 				}
-        	}
+				return false;
+			}
+			return false;
+		});
 
-        });
+        save_button->signal_clicked().connect(sigc::mem_fun(this, &EditorWindow::save));
+	}
+
+	void EditorWindow::save() {
+		if(iface)
+			iface->save();
+
+		if(store->filename.size()) {
+			store->save();
+		}
+		else {
+			Gtk::FileChooserDialog fc(*this, "Save as", Gtk::FILE_CHOOSER_ACTION_SAVE);
+			fc.set_do_overwrite_confirmation(true);
+			fc.set_current_name("something.json");
+			fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
+			fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
+			if(fc.run()==Gtk::RESPONSE_ACCEPT) {
+				std::string fn = fc.get_filename();
+				store->save_as(fn);
+				save_button->set_label("Save");
+			}
+		}
+		need_update = true;
+
 	}
 
 	void EditorWindow::reload() {
 		if(iface) {
 			iface->reload();
 		}
+	}
+
+	bool EditorWindow::get_need_update() {
+		return need_update;
 	}
 }

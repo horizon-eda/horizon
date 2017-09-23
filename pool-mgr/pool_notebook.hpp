@@ -11,6 +11,7 @@
 
 #include "pool.hpp"
 #include "util/editor_process.hpp"
+#include <zmq.hpp>
 
 namespace horizon {
 
@@ -30,7 +31,7 @@ namespace horizon {
 
 	class PoolNotebook: public Gtk::Notebook {
 		public:
-			PoolNotebook(const std::string &bp);
+			PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw);
 			void populate();
 			void spawn(PoolManagerProcess::Type type, const std::vector<std::string> &args);
 			bool can_close();
@@ -39,8 +40,14 @@ namespace horizon {
 		private:
 			const std::string base_path;
 			Pool pool;
+			class PoolManagerAppWindow *appwin;
 			std::map<std::string, PoolManagerProcess> processes;
 			std::set<class PoolBrowser*> browsers;
 			class PartWizard *part_wizard = nullptr;
+
+			zmq::context_t &zctx;
+			zmq::socket_t sock_pool_update;
+			std::string sock_pool_update_ep;
+			void pool_updated();
 	};
 }
