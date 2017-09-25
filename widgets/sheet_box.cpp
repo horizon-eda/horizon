@@ -1,6 +1,7 @@
 #include "sheet_box.hpp"
 #include <algorithm>
 #include <iostream>
+#include "core/core_schematic.hpp"
 
 namespace horizon {
 	SheetBox::SheetBox(CoreSchematic *c):
@@ -63,11 +64,44 @@ namespace horizon {
 			tb->insert(*tbo, -1);
 			remove_button = tbo;
 		}
+		{
+			auto tbo = Gtk::manage(new Gtk::ToolButton());
+			tbo->set_icon_name("go-up-symbolic");
+			tbo->signal_clicked().connect([this] {sheet_move(-1);});
+			tb->insert(*tbo, -1);
+			move_up_button = tbo;
+		}
+		{
+			auto tbo = Gtk::manage(new Gtk::ToolButton());
+			tbo->set_icon_name("go-down-symbolic");
+			tbo->signal_clicked().connect([this] {sheet_move(1);});
+			tb->insert(*tbo, -1);
+			move_down_button = tbo;
+		}
 		update();
 		selection_changed();
 		tb->show_all();
 		pack_start(*tb, false, false, 0);
 
+	}
+
+	void SheetBox::sheet_move(int dir) {
+		auto it = view->get_selection()->get_selected();
+		if(it) {
+			Gtk::TreeModel::Row row = *it;
+			auto sch = core->get_schematic();
+			auto &sheets = sch->sheets;
+			auto *sheet = &sch->sheets.at(row[list_columns.uuid]);
+			if(dir < 0 && sheet->index==1)
+				return;
+			if(dir > 0 && sheet->index == sch->sheets.size())
+				return;
+			auto sheet_other = std::find_if(sheets.begin(), sheets.end(), [sheet, dir](const auto x){return x.second.index == sheet->index+dir;});
+			assert(sheet_other != sheets.end());
+			std::swap(sheet_other->second.index, sheet->index);
+			core->commit();
+			core->rebuild();
+		}
 	}
 
 	void SheetBox::remove_clicked() {
@@ -86,10 +120,13 @@ namespace horizon {
 		if(it) {
 			Gtk::TreeModel::Row row = *it;
 			if(core->get_schematic()->sheets.count(row[list_columns.uuid])) {
-				auto sh = &core->get_schematic()->sheets.at(row[list_columns.uuid]);
+				auto &sheets = core->get_schematic()->sheets;
+				auto sh = &sheets.at(row[list_columns.uuid]);
 				signal_select_sheet().emit(sh);
 				auto s = sh->symbols.size()==0;
 				remove_button->set_sensitive(s);
+				move_up_button->set_sensitive(sh->index != 1);
+				move_down_button->set_sensitive(sh->index != sheets.size());
 			}
 		}
 	}

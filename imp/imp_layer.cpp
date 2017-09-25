@@ -1,5 +1,6 @@
 #include "imp_layer.hpp"
 #include "part.hpp"
+#include "widgets/layer_box.hpp"
 
 namespace horizon {
 	void ImpLayer::construct() {

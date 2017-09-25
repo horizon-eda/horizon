@@ -2,6 +2,7 @@
 #include "export_pdf.hpp"
 #include "part.hpp"
 #include "rules/rules_window.hpp"
+#include "widgets/sheet_box.hpp"
 
 namespace horizon {
 	ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename, const std::string &pool_path) :ImpBase(pool_path),

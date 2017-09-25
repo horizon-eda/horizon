@@ -1,16 +1,15 @@
 #pragma once
 #include <gtkmm.h>
-#include "core/core_schematic.hpp"
-#include "sheet.hpp"
+#include "uuid.hpp"
 
 namespace horizon {
 	class SheetBox: public Gtk::Box {
 		public:
-			SheetBox(CoreSchematic *c);
+			SheetBox(class CoreSchematic *c);
 
 			void update();
 			void select_sheet(const UUID &sheet_uuid);
-			typedef sigc::signal<void, Sheet*> type_signal_select_sheet;
+			typedef sigc::signal<void, class Sheet*> type_signal_select_sheet;
 			type_signal_select_sheet signal_select_sheet() {return s_signal_select_sheet;}
 			typedef sigc::signal<void> type_signal_add_sheet;
 			type_signal_add_sheet signal_add_sheet() {return s_signal_add_sheet;}
@@ -34,7 +33,9 @@ namespace horizon {
 			ListColumns list_columns;
 
 			CoreSchematic *core;
-			Gtk::ToolButton *remove_button;
+			Gtk::ToolButton *remove_button = nullptr;
+			Gtk::ToolButton *move_up_button = nullptr;
+			Gtk::ToolButton *move_down_button = nullptr;
 
 			Gtk::TreeView *view;
 			Glib::RefPtr<Gtk::ListStore> store;
@@ -45,6 +46,7 @@ namespace horizon {
 			void selection_changed(void);
 			void remove_clicked(void);
 			void name_edited(const Glib::ustring& path, const Glib::ustring& new_text);
+			void sheet_move(int dir);
 	};
 
 

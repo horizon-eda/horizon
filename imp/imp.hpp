@@ -7,8 +7,6 @@
 #include "core/core_package.hpp"
 #include "property_panels/property_panels.hpp"
 #include "widgets/warnings_box.hpp"
-#include "widgets/sheet_box.hpp"
-#include "widgets/layer_box.hpp"
 #include "core/cores.hpp"
 #include "core/clipboard.hpp"
 #include "key_sequence.hpp"

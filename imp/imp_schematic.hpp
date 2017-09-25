@@ -26,6 +26,6 @@ namespace horizon {
 			UUID part_from_project_manager;
 
 			std::map<UUID, std::pair<float, Coordf>> sheet_views;
-			SheetBox *sheet_box;
+			class SheetBox *sheet_box;
 	};
 }
