@@ -134,10 +134,13 @@ namespace horizon {
 				}
 			}
 			if(schsym.component->part) {
+				for(auto &it_pin: schsym.symbol.pins) {
+					it_pin.second.pad = "";
+				}
 				for(const auto &it_pad_map: schsym.component->part->pad_map) {
 					if(it_pad_map.second.gate == schsym.gate) {
 						if(schsym.symbol.pins.count(it_pad_map.second.pin->uuid)) {
-							schsym.symbol.pins.at(it_pad_map.second.pin->uuid).pad = schsym.component->part->package->pads.at(it_pad_map.first).name;
+							schsym.symbol.pins.at(it_pad_map.second.pin->uuid).pad += schsym.component->part->package->pads.at(it_pad_map.first).name + " ";
 						}
 					}
 
