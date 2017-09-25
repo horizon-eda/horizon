@@ -25,6 +25,7 @@ namespace horizon {
 		x->get_widget("pads_lb", pads_lb);
 		x->get_widget("link_pads", button_link_pads);
 		x->get_widget("unlink_pads", button_unlink_pads);
+		x->get_widget("import_pads", button_import_pads);
 		x->get_widget("page_assign", page_assign);
 		x->get_widget("page_edit", page_edit);
 		x->get_widget("edit_left_box", edit_left_box);
@@ -54,24 +55,7 @@ namespace horizon {
 			row[list_columns.name] = "Main";
 		}
 
-		for(auto &it: pkg->pads) {
-			if(it.second.pool_padstack->type != Padstack::Type::MECHANICAL) {
-				auto ed = PadEditor::create(&it.second, this);
-				ed->pin_name_entry->signal_activate().connect([this, ed] {
-					auto row = dynamic_cast<Gtk::ListBoxRow*>(ed->get_ancestor(GTK_TYPE_LIST_BOX_ROW));
-					auto index = row->get_index();
-					if(index >= 0) {
-						if(auto nextrow = pads_lb->get_row_at_index(index+1)) {
-							auto ed_next = dynamic_cast<PadEditor*>(nextrow->get_child());
-							ed_next->pin_name_entry->grab_focus();
-						}
-					}
-				});
-				ed->show_all();
-				pads_lb->append(*ed);
-				ed->unreference();
-			}
-		}
+		create_pad_editors();
 
 		pads_lb->set_sort_func([](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b){
 			auto na = dynamic_cast<PadEditor*>(a->get_child())->names.front();
@@ -90,6 +74,7 @@ namespace horizon {
 
 		button_link_pads->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::handle_link));
 		button_unlink_pads->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::handle_unlink));
+		button_import_pads->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::handle_import));
 		button_next->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::handle_next));
 		button_back->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::handle_back));
 		button_finish->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::handle_finish));
@@ -105,6 +90,27 @@ namespace horizon {
 		});
 
 		set_mode(Mode::ASSIGN);
+	}
+
+	void PartWizard::create_pad_editors() {
+		for(auto &it: pkg->pads) {
+			if(it.second.pool_padstack->type != Padstack::Type::MECHANICAL) {
+				auto ed = PadEditor::create(&it.second, this);
+				ed->pin_name_entry->signal_activate().connect([this, ed] {
+					auto row = dynamic_cast<Gtk::ListBoxRow*>(ed->get_ancestor(GTK_TYPE_LIST_BOX_ROW));
+					auto index = row->get_index();
+					if(index >= 0) {
+						if(auto nextrow = pads_lb->get_row_at_index(index+1)) {
+							auto ed_next = dynamic_cast<PadEditor*>(nextrow->get_child());
+							ed_next->pin_name_entry->grab_focus();
+						}
+					}
+				});
+				ed->show_all();
+				pads_lb->append(*ed);
+				ed->unreference();
+			}
+		}
 	}
 
 	void PartWizard::set_mode(PartWizard::Mode mo) {
@@ -144,6 +150,11 @@ namespace horizon {
 			Gtk::Window::close();
 		}
 		catch (const std::exception& e) {
+			Gtk::MessageDialog md(*this,  "Error Saving part", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+			md.set_secondary_text(e.what());
+			md.run();
+		}
+		catch (const Gio::Error& e) {
 			Gtk::MessageDialog md(*this,  "Error Saving part", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
 			md.set_secondary_text(e.what());
 			md.run();
@@ -212,6 +223,10 @@ namespace horizon {
 			auto ed = dynamic_cast<PadEditor*>(row->get_child());
 			editors.push_back(ed);
 		}
+		link_pads(editors);
+	}
+
+	void PartWizard::link_pads(const std::deque<PadEditor*> &editors) {
 		PadEditor *target = nullptr;
 		if(editors.size() < 2)
 			return;
@@ -271,8 +286,83 @@ namespace horizon {
 		pads_lb->invalidate_sort();
 	}
 
-	void PartWizard::update_gate_names() {
+	void PartWizard::handle_import() {
+		Gtk::FileChooserDialog fc(*this, "Open", Gtk::FILE_CHOOSER_ACTION_OPEN);
+		fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
+		fc.add_button("_Open", Gtk::RESPONSE_ACCEPT);
+		auto filter= Gtk::FileFilter::create();
+		filter->set_name("json documents");
+		filter->add_pattern("*.json");
+		fc.add_filter(filter);
 
+		if(fc.run()==Gtk::RESPONSE_ACCEPT) {
+			auto filename = fc.get_filename();
+			try {
+				json j;
+				std::ifstream ifs(filename);
+				if(!ifs.is_open()) {
+					throw std::runtime_error("file "  +filename+ " not opened");
+				}
+				ifs>>j;
+				ifs.close();
+				import_pads(j);
+			}
+			catch (const std::exception& e) {
+				Gtk::MessageDialog md(*this,  "Error importing", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+				md.set_secondary_text(e.what());
+				md.run();
+			}
+			catch (...) {
+				Gtk::MessageDialog md(*this,  "Error importing", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+				md.set_secondary_text("unknown error");
+				md.run();
+			}
+		}
+
+	}
+
+	void PartWizard::import_pads(const json &j) {
+		auto chs = pads_lb->get_children();
+		for(auto ch: chs) {
+			delete ch;
+		}
+		create_pad_editors();
+		frozen = true;
+		for(auto &ch: pads_lb->get_children()) {
+			auto ed = dynamic_cast<PadEditor*>(dynamic_cast<Gtk::ListBoxRow*>(ch)->get_child());
+			auto pad_name = (*ed->pads.begin())->name;
+			if(j.count(pad_name)) {
+				auto &k = j.at(pad_name);
+				ed->pin_name_entry->set_text(k.value("pin", ""));
+				ed->combo_gate_entry->set_text(k.value("gate", "Main"));
+				if(k.count("alt")) {
+					std::stringstream ss;
+					for(auto &it: k.at("alt")) {
+						ss << it.get<std::string>() << " ";
+					}
+					ed->pin_names_entry->set_text(ss.str());
+				}
+			}
+		}
+		autolink_pads();
+		frozen = false;
+		update_gate_names();
+		update_pin_warnings();
+	}
+
+	void PartWizard::autolink_pads() {
+		auto pin_names = get_pin_names();
+		for(const auto &it: pin_names) {
+			if(it.second.size() > 1) {
+				std::deque<PadEditor*> pads(it.second.begin(), it.second.end());
+				link_pads(pads);
+			}
+		}
+	}
+
+	void PartWizard::update_gate_names() {
+		if(frozen)
+			return;
 		std::set<std::string> names;
 		names.insert("Main");
 		for(auto &ch: pads_lb->get_children()) {
@@ -327,8 +417,8 @@ namespace horizon {
 
 	}
 
-	void PartWizard::update_pin_warnings() {
-		pin_names.clear();
+	std::map<std::pair<std::string, std::string>, std::set<class PadEditor*>> PartWizard::get_pin_names() {
+		std::map<std::pair<std::string, std::string>, std::set<class PadEditor*>> pin_names;
 		for(auto &ch: pads_lb->get_children()) {
 			auto ed = dynamic_cast<PadEditor*>(dynamic_cast<Gtk::ListBoxRow*>(ch)->get_child());
 			std::pair<std::string, std::string> key(ed->combo_gate_entry->get_text(), ed->pin_name_entry->get_text());
@@ -337,6 +427,13 @@ namespace horizon {
 				pin_names[key].insert(ed);
 			}
 		}
+		return pin_names;
+	}
+
+	void PartWizard::update_pin_warnings() {
+		if(frozen)
+			return;
+		auto pin_names = get_pin_names();
 		bool has_warning = pin_names.size()==0;
 		for(auto &it: pin_names) {
 			std::string icon_name;

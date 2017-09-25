@@ -31,6 +31,8 @@ namespace horizon {
 			Gtk::ListBox *pads_lb = nullptr;
 			Gtk::ToolButton *button_link_pads = nullptr;
 			Gtk::ToolButton *button_unlink_pads = nullptr;
+			Gtk::ToolButton *button_import_pads = nullptr;
+
 			Glib::RefPtr<Gtk::SizeGroup> sg_name;
 			Gtk::Box *page_assign = nullptr;
 			Gtk::Box *page_edit = nullptr;
@@ -63,10 +65,16 @@ namespace horizon {
 			Glib::RefPtr<Gtk::ListStore> gate_name_store;
 			void update_gate_names();
 			void update_pin_warnings();
-			std::map<std::pair<std::string, std::string>, std::set<class PadEditor*>> pin_names;
+			std::map<std::pair<std::string, std::string>, std::set<class PadEditor*>> get_pin_names();
 			void handle_link();
 			void handle_unlink();
+			void handle_import();
 			void update_part();
+			void import_pads(const json &j);
+			void create_pad_editors();
+			void autolink_pads();
+			void link_pads(const std::deque<class PadEditor*> &eds);
+			bool frozen = true;
 
 			enum class Mode {ASSIGN, EDIT};
 
