@@ -7,7 +7,6 @@
 #include "tool_map_pin.hpp"
 #include "tool_map_symbol.hpp"
 #include "tool_draw_line_net.hpp"
-#include "tool_add_component.hpp"
 #include "tool_place_text.hpp"
 #include "tool_place_net_label.hpp"
 #include "tool_disconnect.hpp"
@@ -73,7 +72,7 @@ namespace horizon {
 				return std::make_unique<ToolDrawLineNet>(this, tool_id);
 
 			case ToolID::ADD_COMPONENT:
-				return std::make_unique<ToolAddComponent>(this, tool_id);
+				return std::make_unique<ToolAddPart>(this, tool_id);
 
 			case ToolID::PLACE_TEXT:
 				return std::make_unique<ToolPlaceText>(this, tool_id);

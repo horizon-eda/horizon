@@ -1,16 +1,15 @@
 #pragma once
 #include "core.hpp"
+#include "tool_helper_move.hpp"
 
 namespace horizon {
 	
-	class ToolMove : public ToolBase {
+	class ToolMove : public ToolHelperMove {
 		public :
 			ToolMove(Core *c, ToolID tid);
 			ToolResponse begin(const ToolArgs &args) override ;
 			ToolResponse update(const ToolArgs &args) override;
 			bool can_begin() override;
-			static Orientation transform_orienation(Orientation orientation, bool rotate, bool reverse=false);
-
 			
 		private:
 			Coordi last;
@@ -18,9 +17,6 @@ namespace horizon {
 			Coordi selection_center;
 			void update_selection_center();
 			void expand_selection();
-			void transform(Coordi &a, const Coordi &center, bool rotate);
-			void mirror_or_rotate(const Coordi &center, bool rotate);
-			void do_move(const Coordi &delta);
 			void update_tip();
 		
 	};

@@ -136,7 +136,6 @@ SRC_IMP = \
 	core/tool_map_pin.cpp\
 	core/tool_map_symbol.cpp\
 	core/tool_draw_line_net.cpp\
-	core/tool_add_component.cpp\
 	core/tool_place_text.cpp\
 	core/tool_place_net_label.cpp\
 	core/tool_disconnect.cpp\
@@ -168,6 +167,8 @@ SRC_IMP = \
 	core/tool_draw_polygon_rectangle.cpp\
 	core/tool_draw_line_rectangle.cpp\
 	core/tool_edit_line_rectangle.cpp\
+	core/tool_helper_map_symbol.cpp\
+	core/tool_helper_move.cpp\
 	core/cores.cpp\
 	core/clipboard.cpp\
 	core/buffer.cpp\

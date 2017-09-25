@@ -19,12 +19,16 @@ namespace horizon {
 		Schematic *sch = core.c->get_schematic();
 		//collect gates
 		std::set<UUIDPath<2>> gates;
+
+		//find all gates
 		for(const auto &it_component: sch->block->components) {
 			for(const auto &it_gate: it_component.second.entity->gates) {
 				gates.emplace(it_component.first, it_gate.first);
 			}
 		}
 
+
+		//remove placed gates
 		for(auto &it_sheet: sch->sheets) {
 			Sheet &sheet = it_sheet.second;
 
@@ -35,21 +39,16 @@ namespace horizon {
 				}
 			}
 		}
-		UUID filter_uuid;
-		if(core.c->selection.size() == 1) {
-			if(core.c->selection.begin()->type == ObjectType::COMPONENT) {
-				filter_uuid = core.c->selection.begin()->uuid;
-			}
-		}
-		std::map<UUIDPath<2>, std::string> gates_out;
+
+
 		for(const auto &it: gates) {
 			Component *comp = &sch->block->components.at(it.at(0));
 			const Gate *gate = &comp->entity->gates.at(it.at(1));
-			if(!filter_uuid || filter_uuid==comp->uuid) {
-				gates_out.emplace(std::make_pair(it, comp->refdes+gate->suffix));
-			}
+			gates_out.emplace(std::make_pair(it, comp->refdes+gate->suffix));
 		}
+
 		if(gates_out.size() == 0) {
+			imp->tool_bar_flash("all symbols placed");
 			return ToolResponse::end();
 		}
 
@@ -67,38 +66,77 @@ namespace horizon {
 
 		Component *comp = &sch->block->components.at(selected_gate.at(0));
 		const Gate *gate = &comp->entity->gates.at(selected_gate.at(1));
-		UUID selected_symbol;
 
-		std::string query  = "SELECT symbols.uuid FROM symbols WHERE symbols.unit = ?";
-		SQLite::Query q(core.r->m_pool->db, query);
-		q.bind(1, gate->unit->uuid);
-		int n = 0;
-		while(q.step()) {
-			selected_symbol = q.get<std::string>(0);
-			n++;
+		sym_current = map_symbol(comp, gate);
+		sym_current->placement.shift = args.coords;
+
+		core.c->selection.clear();
+		core.c->selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
+
+		move_init(args.coords);
+
+		return ToolResponse();
+	}
+	void ToolMapSymbol::update_tip() {
+		imp->tool_bar_set_tip("<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate <b>e:</b>mirror");
+	}
+
+	ToolResponse ToolMapSymbol::update(const ToolArgs &args) {
+		if(args.type == ToolEventType::MOVE) {
+			move_do_cursor(args.coords);
 		}
+		else if(args.type == ToolEventType::CLICK) {
+			if(args.button == 1) {
 
-		if(n!=1) {
-			std::tie(r, selected_symbol) = imp->dialogs.select_symbol(core.r->m_pool, gate->unit->uuid);
-			if(!r) {
+				gates_out.erase(UUIDPath<2>(sym_current->component->uuid, sym_current->gate->uuid));
+
+				UUIDPath<2> selected_gate;
+				bool r;
+				if(gates_out.size() == 0) {
+					core.r->commit();
+					return ToolResponse::end();
+				}
+				else if (gates_out.size()==1){
+					selected_gate = gates_out.begin()->first;
+				}
+				else {
+					std::tie(r, selected_gate) = imp->dialogs.map_symbol(gates_out);
+					if(!r) {
+						core.r->commit();
+						return ToolResponse::end();
+					}
+				}
+				Schematic *sch = core.c->get_schematic();
+
+
+				Component *comp = &sch->block->components.at(selected_gate.at(0));
+				const Gate *gate = &comp->entity->gates.at(selected_gate.at(1));
+
+				sym_current = map_symbol(comp, gate);
+				sym_current->placement.shift = args.coords;
+
+				core.c->selection.clear();
+				core.c->selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
+
+			}
+			else {
+				core.c->delete_schematic_symbol(sym_current->uuid);
+				sym_current=nullptr;
+				core.r->commit();
 				return ToolResponse::end();
 			}
 		}
-
-		const Symbol *sym = core.c->m_pool->get_symbol(selected_symbol);
-		SchematicSymbol *schsym = core.c->insert_schematic_symbol(UUID::random(), sym);
-		schsym->component = comp;
-		schsym->gate = gate;
-		schsym->placement.shift = args.coords;
-
-		core.c->selection.clear();
-		core.c->selection.emplace(schsym->uuid, ObjectType::SCHEMATIC_SYMBOL);
-		core.c->commit();
-
-
-		return ToolResponse::next(ToolID::MOVE);
-	}
-	ToolResponse ToolMapSymbol::update(const ToolArgs &args) {
+		else if(args.type == ToolEventType::KEY) {
+			if(args.key == GDK_KEY_Escape) {
+				core.r->revert();
+				return ToolResponse::end();
+			}
+			else if(args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
+				bool rotate = args.key == GDK_KEY_r;
+				move_mirror_or_rotate(sym_current->placement.shift, rotate);
+			}
+		}
+		update_tip();
 		return ToolResponse();
 	}
 }

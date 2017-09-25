@@ -1,5 +1,5 @@
 #include "tool_place_bus_label.hpp"
-#include "tool_move.hpp"
+#include "tool_helper_move.hpp"
 #include <iostream>
 #include "core_schematic.hpp"
 #include "imp_interface.hpp"
@@ -69,7 +69,7 @@ namespace horizon {
 			}
 		}
 		if(args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
-			la->orientation = ToolMove::transform_orienation(la->orientation, args.key == GDK_KEY_r);
+			la->orientation = ToolHelperMove::transform_orienation(la->orientation, args.key == GDK_KEY_r);
 			last_orientation = la->orientation;
 			return true;
 		}
