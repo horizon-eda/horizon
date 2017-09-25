@@ -69,7 +69,7 @@ namespace horizon {
 			return ToolResponse::end();
 
 		if(tool_id == ToolID::MOVE_NET_SEGMENT_NEW || tool_id == ToolID::MOVE_NET_SEGMENT) {
-			if(nsinfo.has_power_sym) {
+			if(nsinfo.has_power_sym || nsinfo.net->is_bussed) {
 				return ToolResponse::end();
 			}
 		}
