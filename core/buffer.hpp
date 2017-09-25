@@ -8,7 +8,6 @@
 #include "arc.hpp"
 #include "pad.hpp"
 #include "cores.hpp"
-#include "core.hpp"
 #include "component.hpp"
 #include "schematic_symbol.hpp"
 #include "symbol.hpp"
@@ -17,11 +16,12 @@
 #include "net.hpp"
 #include "shape.hpp"
 #include "json.hpp"
+#include "canvas/selectables.hpp"
 
 namespace horizon {
 	class Buffer {
 		public:
-			Buffer(Core *co);
+			Buffer(class Core *co);
 			void clear();
 			void load_from_symbol(std::set<SelectableRef> selection);
 

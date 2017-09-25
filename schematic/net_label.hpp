@@ -30,7 +30,7 @@ namespace horizon {
 
 			uuid_ptr<Junction> junction;
 			Orientation orientation = Orientation::RIGHT;
-			uint64_t size = 1.25_mm;
+			uint64_t size = 1.5_mm;
 			std::set<unsigned int> on_sheets;
 			bool offsheet_refs = true;
 

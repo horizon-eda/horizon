@@ -5,8 +5,7 @@ namespace horizon {
 		CanvasCairo::CanvasCairo(Cairo::RefPtr<Cairo::Context> c) : Canvas::Canvas(), cr(c) {}
 		void CanvasCairo::request_push() {
 			cr->save();
-			cr->scale(2.83465, -2.83465);
-			cr->translate(0, -209.9);
+
 			cr->set_source_rgb(0,0,0);
 			cr->set_line_width(.05);
 			cr->set_line_cap(Cairo::LINE_CAP_ROUND);

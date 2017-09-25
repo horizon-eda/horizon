@@ -22,18 +22,14 @@
 #include "hole.hpp"
 #include "package.hpp"
 #include "pad.hpp"
-#include "core/core.hpp"
 #include "layer_display.hpp"
 #include "selection_filter.hpp"
 #include "core/buffer.hpp"
 #include "board.hpp"
 #include "track.hpp"
 #include "util.hpp"
-#include "core/core_board.hpp"
 
 namespace horizon {
-
-
 
 	Color Canvas::get_layer_color(int layer) {
 		Color c = layer_provider->get_layers().at(layer).color;
@@ -121,7 +117,7 @@ namespace horizon {
 			text_angle = 32768;
 		}
 
-		draw_text0(sym.junction->position+text_offset, 1.25_mm, sym.junction->net->name, text_angle, false, TextOrigin::CENTER, c, 0);
+		draw_text0(sym.junction->position+text_offset, 1.5_mm, sym.junction->net->name, text_angle, false, TextOrigin::CENTER, c, 0);
 	}
 	
 	static auto get_line_bb(const Coordf &from, const Coordf &to, float width) {
@@ -243,7 +239,7 @@ namespace horizon {
 
 		Orientation name_orientation;
 		Orientation pad_orientation;
-		int64_t text_shift = 0.1_mm;
+		int64_t text_shift = 0.5_mm;
 		switch(pin_orientation) {
 			case Orientation::LEFT :
 				p1.x += pin.length;
@@ -290,7 +286,7 @@ namespace horizon {
 			c_pad = ColorP::PIN_HIDDEN;
 		}
 		if(interactive || pin.name_visible) {
-			draw_text0(p_name, 1.25_mm, pin.name, orientation_to_angle(name_orientation), false, TextOrigin::CENTER, c_name, 0);
+			draw_text0(p_name, 1.5_mm, pin.name, orientation_to_angle(name_orientation), false, TextOrigin::CENTER, c_name, 0);
 		}
 		std::pair<Coordf, Coordf> pad_extents;
 		if(interactive || pin.pad_visible) {
@@ -419,7 +415,7 @@ namespace horizon {
 		if(ripper.connection_count < 1) {
 			draw_box(connector_pos, 0.25_mm, c);
 		}
-		auto extents = draw_text0(connector_pos+Coordi(0, 0.125_mm), 1.25_mm, ripper.bus_member->name, 0, false, TextOrigin::BASELINE, c);
+		auto extents = draw_text0(connector_pos+Coordi(0, 0.5_mm), 1.5_mm, ripper.bus_member->name, 0, false, TextOrigin::BASELINE, c);
 		targets.emplace(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos);
 		selectables.append(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos, extents.first, extents.second);
 	}

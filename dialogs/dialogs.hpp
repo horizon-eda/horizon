@@ -39,6 +39,7 @@ namespace horizon {
 			bool edit_parameter_set(ParameterSet *pset);
 			bool edit_pad_parameter_set(std::set<class Pad*> &pads);
 			bool annotate(class Schematic *s);
+			bool edit_schematic_properties(class Schematic *s);
 			std::pair<bool, int64_t> ask_datum(const std::string &label, int64_t def=0);
 			std::pair<bool, Coordi> ask_datum_coord(const std::string &label, Coordi def=Coordi());
 			std::tuple<bool, Coordi, std::pair<bool, bool>> ask_datum_coord2(const std::string &label, Coordi def=Coordi());

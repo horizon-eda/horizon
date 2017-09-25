@@ -102,6 +102,7 @@ namespace horizon {
 		add_tool_button(ToolID::ANNOTATE, "Annotate");
 		add_tool_button(ToolID::MANAGE_BUSES, "Buses...");
 		add_tool_button(ToolID::MANAGE_NET_CLASSES, "Net classes...");
+		add_tool_button(ToolID::EDIT_SCHEMATIC_PROPERTIES, "Schematic properties...");
 		add_tool_button(ToolID::ADD_PART, "Place part");
 
 		core.r->signal_tool_changed().connect([print_button](ToolID t){print_button->set_sensitive(t==ToolID::NONE);});

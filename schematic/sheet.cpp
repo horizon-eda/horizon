@@ -9,6 +9,9 @@ namespace horizon {
 			name(j.at("name").get<std::string>()),
 			index(j.at("index").get<unsigned int>())
 		{
+			if(j.count("frame")) {
+				frame = Frame(j.at("frame"));
+			}
 			{
 				const json &o = j["junctions"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -485,6 +488,7 @@ namespace horizon {
 			json j;
 			j["name"] = name;
 			j["index"] = index;
+			j["frame"] = frame.serialize();
 			j["symbols"] = json::object();
 
 			for(const auto &it : symbols) {

@@ -10,15 +10,23 @@ namespace horizon {
 	}
 
 	bool ToolManageBuses::can_begin() {
-		if(tool_id == ToolID::MANAGE_BUSES || tool_id == ToolID::ANNOTATE || tool_id == ToolID::MANAGE_NET_CLASSES)
-			return core.c;
-		else if(tool_id == ToolID::MANAGE_VIA_TEMPLATES)
-			return core.b;
-		return false;
+		switch(tool_id) {
+			case ToolID::MANAGE_BUSES:
+			case ToolID::ANNOTATE:
+			case ToolID::MANAGE_NET_CLASSES:
+			case ToolID::EDIT_SCHEMATIC_PROPERTIES:
+				return core.c;
+
+			case ToolID::MANAGE_VIA_TEMPLATES:
+				return core.b;
+
+			default:
+				return false;
+		}
 	}
 
 	ToolResponse ToolManageBuses::begin(const ToolArgs &args) {
-		bool r;
+		bool r=false;
 
 		if(tool_id == ToolID::MANAGE_BUSES) {
 			auto sch = core.c->get_schematic();
@@ -34,6 +42,9 @@ namespace horizon {
 		}
 		else if(tool_id == ToolID::MANAGE_VIA_TEMPLATES) {
 			r = imp->dialogs.manage_via_templates(core.b->get_board(), core.b->get_via_padstack_provider());
+		}
+		else if(tool_id == ToolID::EDIT_SCHEMATIC_PROPERTIES) {
+			r = imp->dialogs.edit_schematic_properties(core.c->get_schematic());
 		}
 		if(r) {
 			core.r->commit();

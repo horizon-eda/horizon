@@ -185,6 +185,8 @@ namespace horizon {
 			case ToolID::EDIT_LINE_RECTANGLE:
 				return std::make_unique<ToolEditLineRectangle>(this, tool_id);
 
+			case ToolID::EDIT_SCHEMATIC_PROPERTIES:
+				return std::make_unique<ToolManageBuses>(this, tool_id);
 
 			default:
 				return nullptr;

@@ -25,6 +25,7 @@
 #include "edit_pad_parameter_set.hpp"
 #include "manage_via_templates.hpp"
 #include "select_via_template.hpp"
+#include "schematic_properties.hpp"
 
 namespace horizon {
 	void Dialogs::set_parent(Gtk::Window *w) {
@@ -186,6 +187,11 @@ namespace horizon {
 
 	bool Dialogs::edit_pad_parameter_set(std::set<class Pad*> &pads) {
 		PadParameterSetDialog dia(parent, pads);
+		return dia.run()==Gtk::RESPONSE_OK;
+	}
+
+	bool Dialogs::edit_schematic_properties(class Schematic *sch) {
+		SchematicPropertiesDialog dia(parent, sch);
 		return dia.run()==Gtk::RESPONSE_OK;
 	}
 

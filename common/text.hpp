@@ -25,7 +25,7 @@ namespace horizon {
 			TextOrigin origin = TextOrigin::CENTER;
 			Placement placement;
 			std::string text;
-			uint64_t size = 1250000;
+			uint64_t size = 1.5_mm;
 			uint64_t width = 0;
 			int layer = 0;
 			std::string text_override;

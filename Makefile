@@ -191,6 +191,7 @@ SRC_IMP = \
 	dialogs/manage_via_templates.cpp\
 	dialogs/select_via_template.cpp\
 	dialogs/pool_browser_dialog.cpp\
+	dialogs/schematic_properties.cpp\
 	util/sort_controller.cpp\
 	core/core_symbol.cpp\
 	core/core_schematic.cpp\
