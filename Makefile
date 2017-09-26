@@ -169,6 +169,7 @@ SRC_IMP = \
 	core/tool_edit_line_rectangle.cpp\
 	core/tool_helper_map_symbol.cpp\
 	core/tool_helper_move.cpp\
+	core/tool_helper_merge.cpp\
 	core/cores.cpp\
 	core/clipboard.cpp\
 	core/buffer.cpp\

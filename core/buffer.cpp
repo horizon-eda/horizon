@@ -4,6 +4,7 @@
 #include "core_symbol.hpp"
 #include "core_padstack.hpp"
 #include "entity.hpp"
+#include "util.hpp"
 
 namespace horizon {
 	Buffer::Buffer(Core *co):core(co) {}
@@ -20,6 +21,7 @@ namespace horizon {
 		components.clear();
 		symbols.clear();
 		shapes.clear();
+		net_lines.clear();
 	}
 
 	void Buffer::load_from_symbol(std::set<SelectableRef> selection) {
@@ -53,6 +55,15 @@ namespace horizon {
 						new_sel.emplace(it_txt->uuid, ObjectType::TEXT);
 					}
 				} break;
+				case ObjectType::LINE_NET : {
+					auto line = &core.c->get_sheet()->net_lines.at(it.uuid);
+					for(auto &it_ft: {line->from, line->to}) {
+						if(it_ft.is_junc()) {
+							new_sel.emplace(it_ft.junc.uuid, ObjectType::JUNCTION);
+						}
+						new_sel.emplace(line->net->uuid, ObjectType::NET);
+					}
+				} break;
 
 				/*
 				case ObjectType::NET_LABEL : {
@@ -72,14 +83,7 @@ namespace horizon {
 					new_sel.emplace(rip.junction->uuid, ObjectType::JUNCTION);
 				} break;
 
-				case ObjectType::LINE_NET : {
-					auto line = &core.c->get_sheet()->net_lines.at(it.uuid);
-					for(auto &it_ft: {line->from, line->to}) {
-						if(it_ft.is_junc()) {
-							new_sel.emplace(it_ft.junc.uuid, ObjectType::JUNCTION);
-						}
-					}
-				} break;
+
 				*/
 
 
@@ -154,7 +158,6 @@ namespace horizon {
 			else if(it.type == ObjectType::COMPONENT) {
 				auto &x = core.c->get_schematic()->block->components.at(it.uuid);
 				auto &comp = components.emplace(x.uuid, x).first->second;
-				comp.connections.clear();
 				comp.refdes = comp.entity->prefix + "?";
 			}
 		}
@@ -169,6 +172,68 @@ namespace horizon {
 				sym.gate.update(sym.component->entity->gates);
 			}
 		}
+		for(const auto &it: selection) {
+			if(it.type == ObjectType::LINE_NET) {
+				auto &x = core.c->get_sheet()->net_lines.at(it.uuid);
+				bool valid = true;
+				for(auto &it_ft: {x.from, x.to}) {
+					if(it_ft.is_bus_ripper()) {
+						valid = false;
+					}
+					else if(it_ft.is_pin()) {
+						if(symbols.count(it_ft.symbol->uuid) == 0) {
+							valid = false;
+						}
+					}
+				}
+				if(valid) {
+					auto &li = net_lines.emplace(x.uuid, x).first->second;
+					li.net.update(nets);
+					auto update_conn = [this](LineNet::Connection &c) {
+						if(c.symbol) {
+							c.symbol.update(symbols);
+							c.pin.update(c.symbol->symbol.pins);
+						}
+						if(c.junc) {
+							c.junc.update(junctions);
+						}
+					};
+					update_conn(li.from);
+					update_conn(li.to);
+				}
+			}
+		}
+		for(const auto &it: selection) {
+			if(it.type == ObjectType::COMPONENT) {
+				auto comp = &components.at(it.uuid);
+				map_erase_if(comp->connections, [this](auto &x){
+					return nets.count(x.second.net.uuid)==0;
+				});
+				for(auto &it_conn: comp->connections) {
+					it_conn.second.net.update(nets);
+				}
+				map_erase_if(comp->connections, [this, comp](auto &x){
+					for(auto &it_line: net_lines) {
+						if(it_line.second.net == x.second.net) {
+							for(auto &it_ft: {it_line.second.from, it_line.second.to}) {
+								if(it_ft.is_pin()) {
+									for(const auto &it_sym: symbols) {
+										if(it_sym.second.component == comp && it_ft.symbol == &it_sym.second) {
+											return false;
+										}
+									}
+								}
+							}
+							//return true;
+						}
+					}
+					return true;
+				});
+
+			}
+		}
+
+
 	}
 
 	json Buffer::serialize() {
@@ -212,6 +277,14 @@ namespace horizon {
 		j["shapes"] = json::object();
 		for(const auto &it: shapes) {
 			j["shapes"][(std::string)it.first] = it.second.serialize();
+		}
+		j["nets"] = json::object();
+		for(const auto &it: nets) {
+			j["nets"][(std::string)it.first] = it.second.serialize();
+		}
+		j["net_lines"] = json::object();
+		for(const auto &it: net_lines) {
+			j["net_lines"][(std::string)it.first] = it.second.serialize();
 		}
 		return j;
 	}

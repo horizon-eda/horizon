@@ -44,61 +44,6 @@ namespace horizon {
 		}
 	}
 
-	int ToolDrawLineNet::merge_nets(Net *net, Net *into) {
-		if(net->is_bussed || into->is_bussed) {
-			if(net->is_power || into->is_power) {
-				imp->tool_bar_flash("can't merge power and bussed net");
-				return 1; //don't merge power and bus
-			}
-			else if(net->is_bussed && into->is_bussed) {
-				imp->tool_bar_flash("can't merge bussed nets");
-				return 1; //can't merge bussed nets
-			}
-			else if(!net->is_bussed && into->is_bussed) {
-				//merging non-bussed net into bussed net is fine
-			}
-			else if(net->is_bussed && !into->is_bussed) {
-				std::swap(net, into);
-			}
-
-		}
-		else if(net->is_power || into->is_power) {
-			if(net->is_power && into->is_power) {
-				imp->tool_bar_flash("can't merge power nets");
-				return 1;
-			}
-			else if(!net->is_power && into->is_power) {
-				//merging non-power net into power net is fine
-			}
-			else if(net->is_power && !into->is_power) {
-				std::swap(net, into);
-			}
-		}
-		else if(net->is_named() && into->is_named()) {
-			int r = imp->dialogs.ask_net_merge(net, into);
-			if(r==1) {
-				//nop, nets are already as we want them to
-			}
-			else if(r == 2) {
-				std::swap(net, into);
-			}
-			else {
-				//don't merge nets
-				return 1;
-			}
-		}
-		else if(net->is_named()) {
-			std::swap(net, into);
-		}
-
-		imp->tool_bar_flash("merged net \""+net->name+"\" into net \"" + into->name +"\"");
-		core.c->get_schematic()->block->merge_nets(net, into); //net will be erased
-		core.c->get_schematic()->expand(true); //be careful
-
-		std::cout << "merging nets" << std::endl;
-		return 0; //merged, 1: error
-	}
-
 	Junction *ToolDrawLineNet::make_temp_junc(const Coordi &c) {
 		Junction *j = core.r->insert_junction(UUID::random());
 		j->position = c;
@@ -211,48 +156,15 @@ namespace horizon {
 				else { //already have net line
 					if(args.target.type == ObjectType::JUNCTION) {
 						ju = core.r->get_junction(args.target.path.at(0));
-						if(temp_line_head->bus || ju->bus) { //either is bus
-							if(temp_line_head->net || ju->net) {
-								imp->tool_bar_flash("can't connect bus and net");
-								return ToolResponse(); //bus-net illegal
-							}
-
-							if(temp_line_head->bus && ju->bus) { //both are bus
-								if(temp_line_head->bus != ju->bus) { //not the same bus
-									imp->tool_bar_flash("can't connect different buses");
-									return ToolResponse(); //illegal
-								}
-								else  {
-									temp_line_head->to.connect(ju);
-									core.r->delete_junction(temp_junc_head->uuid);
-									core.r->commit();
-									return end();
-								}
-							}
-							if((temp_line_head->bus && !ju->bus) || (!temp_line_head->bus && ju->bus)) {
-								temp_line_head->to.connect(ju);
-								core.r->delete_junction(temp_junc_head->uuid);
-								core.r->commit();
-								return end();
-							}
-							assert(false); //dont go here
-						}
-						else if(temp_line_head->net && ju->net && ju->net.uuid != temp_line_head->net->uuid) { //both have nets, need to merge
-							if(merge_nets(ju->net, temp_line_head->net)) {
-								return ToolResponse();
-							}
-							else {
-								temp_line_head->to.connect(ju);
-								core.r->delete_junction(temp_junc_head->uuid);
-								core.r->commit();
-								return end();
-							}
-						}
-						else  { //just connect it
+						auto do_merge = merge_bus_net(temp_line_head->net, temp_line_head->bus, ju->net, ju->bus);
+						if(do_merge) {
 							temp_line_head->to.connect(ju);
 							core.r->delete_junction(temp_junc_head->uuid);
 							core.r->commit();
 							return end();
+						}
+						else {
+							return ToolResponse();
 						}
 					}
 					else if(args.target.type == ObjectType::SYMBOL_PIN) {
@@ -318,44 +230,14 @@ namespace horizon {
 										net = it->net;
 										bus = it->bus;
 
-										if(temp_line_head->bus || it->bus) { //either is bus
-											if(temp_line_head->net || it->net) {
-												imp->tool_bar_flash("can't connect bus and net");
-												return ToolResponse(); //bus-net illegal
-											}
-
-											if(temp_line_head->bus && it->bus) { //both are bus
-												if(temp_line_head->bus != it->bus) { //not the same bus
-													imp->tool_bar_flash("can't connect different buses");
-													return ToolResponse(); //illegal
-												}
-												else  {
-													core.c->get_sheet()->split_line_net(it, ju);
-													core.r->commit();
-													return end();
-												}
-											}
-											if((temp_line_head->bus && !ju->bus) || (!temp_line_head->bus && ju->bus)) {
-												core.c->get_sheet()->split_line_net(it, ju);
-												core.r->commit();
-												return end();
-											}
-											assert(false); //dont go here
-										}
-										else if(temp_line_head->net && it->net && it->net.uuid != temp_line_head->net->uuid) { //both have nets, need to merge
-											if(merge_nets(it->net, temp_line_head->net)) {
-												return ToolResponse();
-											}
-											else {
-												core.c->get_sheet()->split_line_net(it, ju);
-												core.r->commit();
-												return end();
-											}
-										}
-										else  { //just connect it
+										auto do_merge = merge_bus_net(temp_line_head->net, temp_line_head->bus, it->net, it->bus);
+										if(do_merge) {
 											core.c->get_sheet()->split_line_net(it, ju);
 											core.r->commit();
 											return end();
+										}
+										else {
+											return ToolResponse(); //bus-net illegal
 										}
 										break;
 									}

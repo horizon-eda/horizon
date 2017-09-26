@@ -16,6 +16,7 @@ namespace horizon {
 	class Net :public UUIDProvider{
 		public :
 			Net(const UUID &uu, const json &, class Block &block);
+			Net(const UUID &uu, const json &);
 			Net(const UUID &uu);
 			virtual UUID get_uuid() const;
 			UUID uuid;

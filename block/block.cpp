@@ -34,7 +34,7 @@ namespace horizon {
 				const json &o = j["components"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					components.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), pool, *this));
+					components.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), pool, this));
 				}
 			}
 		}

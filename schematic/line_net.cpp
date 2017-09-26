@@ -5,17 +5,29 @@
 
 namespace horizon {
 
-	LineNet::Connection::Connection(const json &j, Sheet &sheet) {
+	LineNet::Connection::Connection(const json &j, Sheet *sheet) {
 		if(!j.at("junc").is_null()) {
-			junc = &sheet.junctions.at(j.at("junc").get<std::string>());
+			if(sheet)
+				junc = &sheet->junctions.at(j.at("junc").get<std::string>());
+			else
+				junc.uuid = j.at("junc").get<std::string>();
 		}
 		else if(!j.at("pin").is_null()) {
 			UUIDPath<2> pin_path(j.at("pin").get<std::string>());
-			symbol = &sheet.symbols.at(pin_path.at(0));
-			pin = &symbol->symbol.pins.at(pin_path.at(1));
+			if(sheet) {
+				symbol = &sheet->symbols.at(pin_path.at(0));
+				pin = &symbol->symbol.pins.at(pin_path.at(1));
+			}
+			else {
+				symbol.uuid = pin_path.at(0);
+				pin.uuid = pin_path.at(1);
+			}
 		}
 		else if(!j.at("bus_ripper").is_null()) {
-			bus_ripper = &sheet.bus_rippers.at(j.at("bus_ripper").get<std::string>());
+			if(sheet)
+				bus_ripper = &sheet->bus_rippers.at(j.at("bus_ripper").get<std::string>());
+			else
+				bus_ripper.uuid = j.at("bus_ripper").get<std::string>();
 		}
 		else {
 			assert(false);
@@ -134,7 +146,7 @@ namespace horizon {
 	}
 
 	
-	LineNet::LineNet(const UUID &uu, const json &j, Sheet &sheet):
+	LineNet::LineNet(const UUID &uu, const json &j, Sheet *sheet):
 		uuid(uu),
 		from(j["from"], sheet),
 		to(j["to"], sheet)
@@ -171,6 +183,8 @@ namespace horizon {
 	bool LineNet::coord_on_line(const Coordi &p) const {
 		Coordi a = Coordi::min(from.get_position(), to.get_position());
 		Coordi b = Coordi::max(from.get_position(), to.get_position());
+		if(from.get_position() == p || to.get_position() == p)
+			return false;
 		if(p.x >= a.x && p.x <= b.x && p.y >= a.y && p.y <= b.y) { //inside bbox
 			auto c = to.get_position()-from.get_position();
 			auto d = p-from.get_position();

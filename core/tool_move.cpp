@@ -206,6 +206,9 @@ namespace horizon {
 						core.c->get_schematic()->autoconnect_symbol(core.c->get_sheet(), core.c->get_schematic_symbol(it.uuid));
 					}
 				}
+				if(core.c) {
+					merge_selected_junctions();
+				}
 				core.r->commit();
 			}
 			else {

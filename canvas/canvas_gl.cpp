@@ -96,13 +96,14 @@ namespace horizon {
 		grab_focus();
 		pan_drag_begin(button_event);
 		box_selection.drag_begin(button_event);
+		cursor_move((GdkEvent*)button_event);
 		return Gtk::GLArea::on_button_press_event(button_event);
 	}
 
 	bool CanvasGL::on_motion_notify_event(GdkEventMotion *motion_event) {
 		grab_focus();
 		pan_drag_move(motion_event);
-		cursor_move(motion_event);
+		cursor_move((GdkEvent*)motion_event);
 		box_selection.drag_move(motion_event);
 		hover_prelight_update(motion_event);
 		return Gtk::GLArea::on_motion_notify_event(motion_event);
@@ -136,15 +137,17 @@ namespace horizon {
 		return Gtk::GLArea::on_scroll_event(scroll_event);
 	}
 
-	void CanvasGL::cursor_move(GdkEventMotion *motion_event) {
+	void CanvasGL::cursor_move(GdkEvent*motion_event) {
 		gdouble x,y;
-		gdk_event_get_coords((GdkEvent*)motion_event, &x, &y);
+		gdk_event_get_coords(motion_event, &x, &y);
 		cursor_pos.x = (x-offset.x)/scale;
 		cursor_pos.y = (y-offset.y)/-scale;
 
 
 		auto sp = grid.spacing;
-		if(motion_event->state & Gdk::MOD1_MASK) {
+		GdkModifierType state;
+		gdk_event_get_state(motion_event, &state);
+		if(state & Gdk::MOD1_MASK) {
 			sp /= 10;
 		}
 

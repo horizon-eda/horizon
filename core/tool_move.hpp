@@ -1,10 +1,11 @@
 #pragma once
 #include "core.hpp"
 #include "tool_helper_move.hpp"
+#include "tool_helper_merge.hpp"
 
 namespace horizon {
 	
-	class ToolMove : public ToolHelperMove {
+	class ToolMove : public ToolHelperMove, public ToolHelperMerge {
 		public :
 			ToolMove(Core *c, ToolID tid);
 			ToolResponse begin(const ToolArgs &args) override ;

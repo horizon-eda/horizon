@@ -14,7 +14,7 @@ namespace horizon {
 
 	class Connection {
 		public:
-		Connection(const json &j, class Block &block);
+		Connection(const json &j, class Block *block);
 		Connection(Net *n):net(n){}
 		uuid_ptr<Net> net;
 
@@ -37,7 +37,7 @@ namespace horizon {
 	 */
 	class Component : public UUIDProvider {
 		public :
-			Component(const UUID &uu, const json &j, class Pool &pool, class Block &block);
+			Component(const UUID &uu, const json &j, class Pool &pool, class Block *block=nullptr);
 			Component(const UUID &uu);
 
 

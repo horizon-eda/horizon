@@ -18,7 +18,7 @@ namespace horizon {
 
 	class SchematicSymbol: public UUIDProvider {
 		public :
-			SchematicSymbol(const UUID &uu, const json &, Block &block, Pool &pool);
+			SchematicSymbol(const UUID &uu, const json &, Pool &pool, Block *block = nullptr);
 			SchematicSymbol(const UUID &uu, const Symbol *sym);
 			UUID uuid;
 			const Symbol *pool_symbol;

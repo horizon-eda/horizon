@@ -6,14 +6,18 @@ namespace horizon {
 
 	json Connection::serialize() const {
 		json j;
-		j["net"] = net.uuid;
+		j["net"] = net->uuid;
 		return j;
 	}
 
-	Connection::Connection(const json &j, Block &block):net(block.get_net(j.at("net").get<std::string>())){
-		}
+	Connection::Connection(const json &j, Block *block){
+		if(block)
+			net = block->get_net(j.at("net").get<std::string>());
+		else
+			net.uuid = j.at("net").get<std::string>();
+	}
 
-	Component::Component(const UUID &uu, const json &j, Pool &pool, Block &block):
+	Component::Component(const UUID &uu, const json &j, Pool &pool, Block *block):
 			uuid(uu),
 			entity(pool.get_entity(j.at("entity").get<std::string>())),
 			refdes(j.at("refdes").get<std::string>()),

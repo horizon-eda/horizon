@@ -3,15 +3,21 @@
 
 namespace horizon {
 
-	SchematicSymbol::SchematicSymbol(const UUID &uu, const json &j, Block &block, Pool &pool):
+	SchematicSymbol::SchematicSymbol(const UUID &uu, const json &j, Pool &pool, Block *block):
 			uuid(uu),
 			pool_symbol(pool.get_symbol(j.at("symbol").get<std::string>())),
 			symbol(*pool_symbol),
-			component(&block.components.at(j.at("component").get<std::string>())),
-			gate(&component->entity->gates.at(j.at("gate").get<std::string>())),
 			placement(j.at("placement")),
 			smashed(j.value("smashed", false))
 		{
+			if(block) {
+				component = &block->components.at(j.at("component").get<std::string>());
+				gate = &component->entity->gates.at(j.at("gate").get<std::string>());
+			}
+			else {
+				component.uuid = j.at("component").get<std::string>();
+				gate.uuid = j.at("gate").get<std::string>();
+			}
 			if(j.count("texts")) {
 				const json &o = j.at("texts");
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {

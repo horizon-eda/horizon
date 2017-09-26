@@ -218,7 +218,7 @@ namespace horizon {
 			void pan_drag_move(GdkEventMotion *motion_event);
 			void pan_drag_move(GdkEventScroll *scroll_event);
 			void pan_zoom(GdkEventScroll *scroll_event, bool to_cursor=true);
-			void cursor_move(GdkEventMotion *motion_event);
+			void cursor_move(GdkEvent *motion_event);
 			void hover_prelight_update(GdkEventMotion *motion_event);
 			bool pan_dragging = false;
 			Coord<float> pan_pointer_pos_orig;

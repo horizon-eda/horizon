@@ -35,6 +35,7 @@ namespace horizon {
 			std::map<UUID, SchematicSymbol> symbols;
 			std::map<UUID, SymbolPin> pins;
 			std::map<UUID, Net> nets;
+			std::map<UUID, LineNet> net_lines;
 			std::map<UUID, Hole> holes;
 			std::map<UUID, Shape> shapes;
 

@@ -1,9 +1,10 @@
 #pragma once
 #include "core.hpp"
+#include "tool_helper_merge.hpp"
 
 namespace horizon {
 	
-	class ToolDrawLineNet : public ToolBase {
+	class ToolDrawLineNet: public ToolHelperMerge {
 		public :
 			ToolDrawLineNet(Core *c, ToolID tid);
 			ToolResponse begin(const ToolArgs &args) override;
@@ -13,12 +14,11 @@ namespace horizon {
 		private:
 			Junction *temp_junc_head = 0;
 			Junction *temp_junc_mid = 0;
-			LineNet *temp_line_head = 0;
-			LineNet *temp_line_mid = 0;
+			class LineNet *temp_line_head = 0;
+			class LineNet *temp_line_mid = 0;
 			enum class BendMode{XY, YX, ARB};
 			BendMode bend_mode=BendMode::XY;
 			void move_temp_junc(const Coordi &c);
-			int merge_nets(Net *net, Net *into);
 			ToolResponse end();
 			void update_tip();
 

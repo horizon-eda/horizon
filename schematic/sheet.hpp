@@ -63,6 +63,9 @@ namespace horizon {
 
 			void replace_junction(Junction *j, SchematicSymbol *sym, SymbolPin *pin);
 			Junction *replace_bus_ripper(BusRipper *rip);
+
+			void merge_junction(Junction *j, Junction *into); //merge junction j into "into" j will be deleted
+
 			//void replace_junction(Junction *j, PowerSymbol *sym);
 			//void replace_power_symbol(PowerSymbol *sym, Junction *j);
 			//void connect(SchematicSymbol *sym, SymbolPin *pin, PowerSymbol *power_sym);

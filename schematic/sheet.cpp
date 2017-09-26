@@ -23,7 +23,7 @@ namespace horizon {
 				const json &o = j["symbols"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					symbols.emplace(std::make_pair(u, SchematicSymbol(u, it.value(), block, pool)));
+					symbols.emplace(std::make_pair(u, SchematicSymbol(u, it.value(), pool, &block)));
 				}
 			}
 			/*{
@@ -66,7 +66,7 @@ namespace horizon {
 				const json &o = j["net_lines"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					net_lines.emplace(std::make_pair(u, LineNet(u, it.value(), *this)));
+					net_lines.emplace(std::make_pair(u, LineNet(u, it.value(), this)));
 				}
 			}
 			{
@@ -452,6 +452,35 @@ namespace horizon {
 				}
 			}
 		}
+	}
+
+	void Sheet::merge_junction(Junction *j, Junction *into) {
+		for(auto &it: net_lines) {
+			if(it.second.from.junc == j) {
+				it.second.from.junc = into;
+			}
+			if(it.second.to.junc == j) {
+				it.second.to.junc = into;
+			}
+		}
+		for(auto &it: net_labels) {
+			if(it.second.junction == j)
+				it.second.junction = into;
+		}
+		for(auto &it: bus_labels) {
+			if(it.second.junction == j)
+				it.second.junction = into;
+		}
+		for(auto &it:bus_rippers) {
+			if(it.second.junction == j)
+				it.second.junction = into;
+		}
+		for(auto &it: power_symbols) {
+			if(it.second.junction == j)
+				it.second.junction = into;
+		}
+
+		junctions.erase(j->uuid);
 	}
 
 	Junction *Sheet::replace_bus_ripper(BusRipper *rip) {

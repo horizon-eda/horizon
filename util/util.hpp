@@ -19,5 +19,12 @@ namespace horizon {
 		return out;
 	}
 
+	template <typename Map, typename F>
+	static void map_erase_if(Map& m, F pred) {
+    for (typename Map::iterator i = m.begin();
+         (i = std::find_if(i, m.end(), pred)) != m.end();
+         m.erase(i++));
+	}
+
 	bool endswith(const std::string &haystack, const std::string &needle);
 }

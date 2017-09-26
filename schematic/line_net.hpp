@@ -25,7 +25,7 @@ namespace horizon {
 		public :
 			enum class End {TO, FROM};
 
-			LineNet(const UUID &uu, const json &j, class Sheet &sheet);
+			LineNet(const UUID &uu, const json &j, class Sheet *sheet=nullptr);
 			LineNet(const UUID &uu);
 
 			void update_refs(class Sheet &sheet);
@@ -43,7 +43,7 @@ namespace horizon {
 			class Connection {
 				public:
 					Connection() {}
-					Connection(const json &j, Sheet &sheet);
+					Connection(const json &j, Sheet *sheet);
 					uuid_ptr<Junction> junc = nullptr;
 					uuid_ptr<SchematicSymbol> symbol = nullptr;
 					uuid_ptr<SymbolPin> pin = nullptr;

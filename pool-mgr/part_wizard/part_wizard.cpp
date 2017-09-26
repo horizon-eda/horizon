@@ -448,13 +448,6 @@ namespace horizon {
 		button_next->set_sensitive(!has_warning);
 	}
 
-	template <typename Map, typename F>
-	static void map_erase_if(Map& m, F pred) {
-    for (typename Map::iterator i = m.begin();
-         (i = std::find_if(i, m.end(), pred)) != m.end();
-         m.erase(i++));
-	}
-
 	void PartWizard::update_part() {
 		std::cout << "upd part" << std::endl;
 		std::set<UUID> pins_used;
