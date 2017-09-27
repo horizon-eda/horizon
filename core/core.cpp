@@ -38,6 +38,7 @@
 #include "tool_draw_polygon_rectangle.hpp"
 #include "tool_draw_line_rectangle.hpp"
 #include "tool_edit_line_rectangle.hpp"
+#include "tool_route_track_interactive.hpp"
 #include <memory>
 
 namespace horizon {
@@ -186,6 +187,9 @@ namespace horizon {
 
 			case ToolID::EDIT_SCHEMATIC_PROPERTIES:
 				return std::make_unique<ToolManageBuses>(this, tool_id);
+
+			case ToolID::ROUTE_TRACK_INTERACTIVE :
+				return std::make_unique<ToolRouteTrackInteractive>(this, tool_id);
 
 			default:
 				return nullptr;

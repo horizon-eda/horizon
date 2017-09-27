@@ -12,8 +12,12 @@ namespace horizon {
 			UUID take_part();
 			void part_placed(const UUID &uu);
 			void set_work_layer(int layer);
+			int get_work_layer();
+			void set_no_update(bool v);
+			void canvas_update();
+			class CanvasGL *get_canvas();
 
 		private:
-			ImpBase *imp;
+			class ImpBase *imp;
 	};
 }

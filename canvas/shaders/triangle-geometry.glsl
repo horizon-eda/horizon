@@ -14,6 +14,7 @@ in int oid_to_geom[1];
 in int type_to_geom[1];
 in int color_to_geom[1];
 in int layer_to_geom[1];
+in int flags_to_geom[1];
 smooth out vec3 color_to_fragment;
 smooth out float striper_to_fragment;
 smooth out float alpha_to_fragment;
@@ -59,19 +60,32 @@ void main() {
 	vec2 p2 = p2_to_geom[0];
 	color_to_fragment = vec3(1,0,0);
 	
-	if((types_visible & uint(1<<type_to_geom[0])) == uint(0))
+	int flags = flags_to_geom[0];
+	if((flags & (1<<0)) != 0) { //hidden
+		return;
+	}
+	int type = type_to_geom[0];
+	
+	if((types_visible & uint(1<<type)) == uint(0))
 		return;
 	
 	if(layer != work_layer && (layers[layer].flags & int(1)) == 0) {
 		return;
 	}
 	
+	vec3 color;
 	if(color_to_geom[0] == 0) {
-		color_to_fragment = layers[layer].color;
+		color = layers[layer].color;
 	}
 	else {
-		color_to_fragment = colors[color_to_geom[0]];
+		color = colors[color_to_geom[0]];
 	}
+	
+	if(type == 2) { //track_preview
+		color += .3; //ugly lighten
+	}
+	
+	color_to_fragment = color;
 	
 	flags_to_fragment = 0;
 	if(mode == 0) {

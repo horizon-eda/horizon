@@ -287,10 +287,10 @@ namespace horizon {
 						if(!core.b->get_board()->get_layers().at(a.work_layer).copper) {
 							a.work_layer = 0;
 						}
-						if((pad->padstack.type == Padstack::Type::TOP) ^ pkg->flip) {
+						if((pad->padstack.type == Padstack::Type::TOP)) {
 							a.work_layer = 0; //top
 						}
-						else if((pad->padstack.type == Padstack::Type::BOTTOM) ^ pkg->flip) {
+						else if((pad->padstack.type == Padstack::Type::BOTTOM)) {
 							a.work_layer = -100;
 						}
 						else if(pad->padstack.type == Padstack::Type::THROUGH) {

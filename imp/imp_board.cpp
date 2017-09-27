@@ -29,7 +29,8 @@ namespace horizon {
 				{{GDK_KEY_d, GDK_KEY_t},	ToolID::DRAW_TRACK},
 				{{GDK_KEY_p, GDK_KEY_v},	ToolID::PLACE_VIA},
 				{{GDK_KEY_v},				ToolID::PLACE_VIA},
-				{{GDK_KEY_x},				ToolID::ROUTE_TRACK},
+				{{GDK_KEY_X},				ToolID::ROUTE_TRACK},
+				{{GDK_KEY_x},				ToolID::ROUTE_TRACK_INTERACTIVE},
 				{{GDK_KEY_g},				ToolID::DRAG_KEEP_SLOPE},
 		});
 		key_seq.signal_update_hint().connect([this] (const std::string &s) {main_window->tool_hint_label->set_text(s);});

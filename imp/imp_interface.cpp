@@ -34,4 +34,20 @@ namespace horizon {
 	void ImpInterface::set_work_layer(int layer) {
 		imp->canvas->property_work_layer() = layer;
 	}
+
+	int ImpInterface::get_work_layer() {
+		return imp->canvas->property_work_layer();
+	}
+
+	class CanvasGL *ImpInterface::get_canvas() {
+		return imp->canvas;
+	}
+
+	void ImpInterface::set_no_update(bool v) {
+		imp->no_update = v;
+	}
+
+	void ImpInterface::canvas_update() {
+		imp->canvas_update();
+	}
 }

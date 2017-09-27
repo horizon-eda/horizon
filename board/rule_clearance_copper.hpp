@@ -18,6 +18,7 @@ namespace horizon {
 
 			uint64_t get_clearance(PatchType a, PatchType b) const;
 			void set_clearance(PatchType a, PatchType b, uint64_t c);
+			uint64_t get_max_clearance() const;
 
 		private:
 			std::map<std::pair<PatchType, PatchType>, uint64_t> clearances;

@@ -134,6 +134,28 @@ namespace horizon {
 		return bbt;
 	}
 
+	void Canvas::add_obj(const Line &line) {
+		render(line, false);
+		request_push();
+	}
+
+	SelectableRef Canvas::add_line(const std::deque<Coordi> &pts, int64_t width, ColorP color, int layer) {
+		auto uu = UUID::random();
+		SelectableRef sr(uu, ObjectType::LINE);
+		set_oid(sr);
+		triangle_type_current = Triangle::Type::TRACK_PREVIEW;
+		if(pts.size() >= 2) {
+			for(size_t i = 1; i<pts.size(); i++) {
+				auto pt1 = pts.at(i-1);
+				auto pt2 = pts.at(i);
+				draw_line(pt1, pt2, color, layer, false, width);
+			}
+		}
+		triangle_type_current = Triangle::Type::NONE;
+		request_push();
+		return sr;
+	}
+
 	void Canvas::render(const Line &line, bool interactive) {
 		img_line(line.from->position, line.to->position, line.width, line.layer);
 		if(img_mode)
@@ -182,7 +204,9 @@ namespace horizon {
 		auto layer = track.layer;
 		if(track.is_air)
 			layer = 10000;
+		set_oid(SelectableRef(track.uuid, ObjectType::TRACK));
 		draw_line(track.from.get_position(), track.to.get_position(), c, layer, true, width);
+		unset_oid();
 		if(!track.is_air) {
 			auto center = (track.from.get_position()+ track.to.get_position())/2;
 			auto bb = get_line_bb(track.from.get_position(), track.to.get_position(), width);

@@ -29,6 +29,7 @@ namespace horizon {
 
 			uint64_t get_default_track_width(class Net *net, int layer);
 			const RuleClearanceCopper *get_clearance_copper(Net *net_a, Net *net_b, int layer);
+			uint64_t get_max_clearance();
 			const RuleParameters *get_parameters();
 
 		private:

@@ -39,7 +39,63 @@ namespace horizon {
 						[](const auto &t){return static_cast<Triangle::Type>(t.type) != Triangle::Type::ERROR;}), triangles.end());
 		targets.clear();
 		sheet_current_uuid = UUID();
+		clear_oids();
 	}
+
+	void Canvas::set_oid(const SelectableRef &r) {
+		if(oid_map.count(r)) {
+			oid_current = oid_map.at(r);
+		}
+		else {
+			oid_max++;
+			oid_current = oid_max;
+			oid_map[r] = oid_current;
+		}
+	}
+
+	void Canvas::unset_oid() {
+		oid_current = 0;
+	}
+
+	void Canvas::clear_oids() {
+		oid_map.clear();
+		oid_max = 1;
+		oid_current = 1;
+	}
+
+	void Canvas::remove_obj(const SelectableRef &r) {
+		auto oid = oid_map.at(r);
+		triangles.erase(std::remove_if(triangles.begin(),  triangles.end(), [oid](auto &x){return x.oid==oid;}), triangles.end());
+		request_push();
+	}
+
+	void Canvas::hide_obj(const SelectableRef &r) {
+		auto oid = oid_map.at(r);
+		std::cout << "hide oid " << oid <<std::endl;
+		for(auto &it: triangles) {
+			if(it.oid == oid)
+				it.flags |= Triangle::FLAG_HIDDEN;
+		}
+		request_push();
+	}
+
+	void Canvas::show_obj(const SelectableRef &r) {
+		auto oid = oid_map.at(r);
+		for(auto &it: triangles) {
+			if(it.oid == oid)
+				it.flags &= ~Triangle::FLAG_HIDDEN;
+		}
+		request_push();
+	}
+
+	void Canvas::show_all_obj() {
+		for(auto &it: triangles) {
+			it.flags &= ~Triangle::FLAG_HIDDEN;
+		}
+		request_push();
+	}
+
+
 
 	void Canvas::update(const Symbol &sym) {
 		clear();

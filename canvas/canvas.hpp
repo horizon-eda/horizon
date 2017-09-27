@@ -35,6 +35,7 @@ namespace horizon {
 			void update(const class Board &brd);
 
 			void add_obj(const class Line &line);
+			SelectableRef add_line(const std::deque<Coordi> &pts, int64_t width, ColorP color, int layer);
 			void remove_obj(const SelectableRef &r);
 			void hide_obj(const SelectableRef &r);
 			void show_obj(const SelectableRef &r);
@@ -43,11 +44,13 @@ namespace horizon {
 
 			virtual void update_markers() {}
 
+
 			void set_layer_display(int index, const LayerDisplay &ld);
 			class SelectionFilter selection_filter;
 			
 			
 		protected:
+			static uint8_t compress_layer(int layer);
 			std::vector<Triangle> triangles;
 			void render(const class Symbol &sym, bool on_sheet = false, bool smashed = false);
 			void render(const class Junction &junc, bool interactive = true, ObjectType mode = ObjectType::INVALID);
@@ -80,7 +83,7 @@ namespace horizon {
 			virtual void request_push() = 0;
 			virtual void push() = 0;
 
-			uint8_t compress_layer(int layer);
+
 			void draw_line(const Coord<float> &a, const Coord<float> &b, ColorP color=ColorP::FROM_LAYER, int layer = 10000, bool tr = true, uint64_t width=0);
 			void draw_cross(const Coord<float> &o, float size, ColorP color=ColorP::FROM_LAYER, int layer = 10000, bool tr = true, uint64_t width=0);
 			void draw_plus(const Coord<float> &o, float size, ColorP color=ColorP::FROM_LAYER, int layer = 10000, bool tr = true, uint64_t width=0);
@@ -131,16 +134,19 @@ namespace horizon {
 
 			Triangle::Type triangle_type_current = Triangle::Type::NONE;
 
-			uint32_t get_oid(const SelectableRef &r);
+			void set_oid(const SelectableRef &r);
+			void unset_oid();
 			void clear_oids();
 			std::map<SelectableRef, uint32_t> oid_map;
-			uint32_t oid_current=1;
+
 
 
 		private:
 			void img_text_layer(int l);
 			int img_text_last_layer = 10000;
 			void img_text_line(const Coordi &p0, const Coordi &p1, const uint64_t width, bool tr=true);
+			uint32_t oid_current=0;
+			uint32_t oid_max=1;
 
 
 	};
@@ -161,12 +167,15 @@ namespace horizon {
 
 			std::set<SelectableRef> get_selection();
 			void set_selection(const std::set<SelectableRef> &sel, bool emit=true);
+			void set_cursor_pos(const Coordi &c);
+			void set_cursor_external(bool v);
 			Coordi get_cursor_pos();
 			Coordf get_cursor_pos_win();
 			Target get_current_target();
 			void set_selection_allowed(bool a);
 			std::pair<float, Coordf> get_scale_and_offset();
 			void set_scale_and_offset(float sc, Coordf ofs);
+			Coordi snap_to_grid(const Coordi &c);
 
 			typedef sigc::signal<void> type_signal_selection_changed;
 			type_signal_selection_changed signal_selection_changed() {return s_signal_selection_changed;}
@@ -202,6 +211,7 @@ namespace horizon {
 			Coord<float> offset;
 			Coord<float> cursor_pos;
 			Coord<int64_t> cursor_pos_grid;
+			bool cursor_external=false;
 			bool warped = false;
 			
 			

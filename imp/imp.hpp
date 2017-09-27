@@ -55,6 +55,7 @@ namespace horizon {
 			zmq::socket_t sock_broadcast_rx;
 			zmq::socket_t sock_project;
 			bool sockets_connected = false;
+			bool no_update = false;
 
 
 			virtual void canvas_update() = 0;

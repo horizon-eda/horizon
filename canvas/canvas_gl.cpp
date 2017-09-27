@@ -137,11 +137,25 @@ namespace horizon {
 		return Gtk::GLArea::on_scroll_event(scroll_event);
 	}
 
+	Coordi CanvasGL::snap_to_grid(const Coordi &c) {
+		auto sp = grid.spacing;
+		int64_t xi = round(c.x/sp)*sp;
+		int64_t yi = round(c.y/sp)*sp;
+		Coordi t(xi, yi);
+		return t;
+	}
+
 	void CanvasGL::cursor_move(GdkEvent*motion_event) {
 		gdouble x,y;
 		gdk_event_get_coords(motion_event, &x, &y);
 		cursor_pos.x = (x-offset.x)/scale;
 		cursor_pos.y = (y-offset.y)/-scale;
+
+		if(cursor_external) {
+			Coordi c(cursor_pos.x, cursor_pos.y);
+			s_signal_cursor_moved.emit(c);
+			return;
+		}
 
 
 		auto sp = grid.spacing;
@@ -311,8 +325,22 @@ namespace horizon {
 		selection_allowed = a;
 	}
 
+	void CanvasGL::set_cursor_pos(const Coordi &c) {
+		if(cursor_external) {
+			cursor_pos_grid = c;
+			queue_draw();
+		}
+	}
+
+	void CanvasGL::set_cursor_external(bool v) {
+		cursor_external = v;
+	}
+
 	Coordi CanvasGL::get_cursor_pos() {
-		return cursor_pos_grid;
+		if(cursor_external)
+			return Coordi(cursor_pos.x, cursor_pos.y);
+		else
+			return cursor_pos_grid;
 	}
 
 	Coordf CanvasGL::get_cursor_pos_win() {

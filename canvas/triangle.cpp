@@ -17,6 +17,7 @@ namespace horizon {
 		GLuint type_index = glGetAttribLocation (program, "type");
 		GLuint color_index = glGetAttribLocation (program, "color");
 		GLuint layer_index = glGetAttribLocation (program, "layer");
+		GLuint flags_index = glGetAttribLocation (program, "flags");
 
 		GLuint vao, buffer;
 
@@ -73,6 +74,11 @@ namespace horizon {
 		glVertexAttribIPointer (layer_index, 1,  GL_UNSIGNED_BYTE,
 								sizeof(Triangle),
 								(void*)offsetof(Triangle, layer));
+
+		glEnableVertexAttribArray (flags_index);
+		glVertexAttribIPointer (flags_index, 1,  GL_UNSIGNED_BYTE,
+								sizeof(Triangle),
+								(void*)offsetof(Triangle, flags));
 
 
 

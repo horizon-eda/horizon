@@ -375,6 +375,7 @@ namespace horizon {
 			ToolArgs args;
 			args.type = ToolEventType::MOVE;
 			args.coords = pos;
+			args.work_layer = canvas->property_work_layer();
 			ToolResponse r = core.r->tool_update(args);
 			tool_process(r);
 		}
@@ -399,10 +400,13 @@ namespace horizon {
 		if(!core.r->tool_is_active()) {
 			main_window->active_tool_label->set_text("Active tool: None");
 			main_window->tool_hint_label->set_text(">");
-
+			canvas->set_cursor_external(false);
+			no_update = false;
 		}
-		canvas_update();
-		canvas->set_selection(core.r->selection);
+		if(!no_update) {
+			canvas_update();
+			canvas->set_selection(core.r->selection);
+		}
 		if(resp.layer != 10000) {
 			canvas->property_work_layer() = resp.layer;
 		}

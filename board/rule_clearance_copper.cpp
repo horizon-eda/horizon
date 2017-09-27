@@ -60,6 +60,14 @@ namespace horizon {
 		return .1_mm;
 	}
 
+	uint64_t RuleClearanceCopper::get_max_clearance() const {
+		uint64_t max_clearance = 0;
+		for(auto &it: clearances) {
+			max_clearance = std::max(max_clearance, it.second);
+		}
+		return max_clearance;
+	}
+
 	void RuleClearanceCopper::set_clearance(PatchType a, PatchType b, uint64_t c) {
 		std::pair<PatchType, PatchType> key;
 		if(a<b) {

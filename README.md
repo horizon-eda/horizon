@@ -6,7 +6,7 @@ architecture is there.
 - Sane library management
 - Unified editor for everything from schematic symbol to board
 - Netlist-aware schematic editor
-- Crude obstacle-avoiding router
+- KiCad's awesome push'n shove router
 - Lag- and glitch-free rendering
 - DRC/ERC (WIP)
 - Undo/redo
@@ -276,3 +276,4 @@ description.
 - http://www.angusj.com/delphi/clipper.php
 - https://github.com/ivanfratric/polypartition/
 - https://qcad.org/en/what-is-dxflib
+- https://git.launchpad.net/kicad/tree/pcbnew/router

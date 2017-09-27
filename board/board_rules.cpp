@@ -211,6 +211,17 @@ namespace horizon {
 		return nullptr;
 	}
 
+	uint64_t BoardRules::get_max_clearance() {
+		uint64_t max_clearance = 0;
+		auto rules = dynamic_cast_vector<RuleClearanceCopper*>(get_rules_sorted(RuleID::CLEARANCE_COPPER));
+		for(auto ru: rules) {
+			if(ru->enabled) {
+				max_clearance = std::max(max_clearance, ru->get_max_clearance());
+			}
+		}
+		return max_clearance;
+	}
+
 	const RuleParameters *BoardRules::get_parameters() {
 		return &rule_parameters;
 	}

@@ -398,20 +398,14 @@ namespace horizon {
 					if(true) {
 						assert(pt_a);
 						assert(pt_b);
-						std::cout << "add aw " << (std::string) it_ns.first << " " << (std::string)ns_other << std::endl;
-						std::cout << "add am " << (std::string) ns_map.at(it_ns.first) << " " << (std::string)ns_map.at(ns_other) << std::endl;
 						//merge net segs
 						for(auto &it_map: ns_map) {
 							if(it_map.second == ns_map.at(it_ns.first)) {
 								it_map.second = ns_map.at(ns_other);
 							}
 						}
-						std::cout << "ns map" << std::endl;
-						for(const auto &it_map: ns_map) {
-							std::cout<< (std::string)it_map.first << " " << (std::string)it_map.second << std::endl;
-						}
 
-						std::cout << "--" << std::endl;
+
 						auto uu = UUID::random();
 						auto &aw = airwires.emplace(uu, uu).first->second;
 						aw.from = *pt_a;
@@ -527,6 +521,12 @@ namespace horizon {
 					flip_package_layer(it2.second.layer);
 				}
 				for(auto &it2: it.second.package.pads) {
+					if(it2.second.padstack.type == Padstack::Type::TOP) {
+						it2.second.padstack.type = Padstack::Type::BOTTOM;
+					}
+					else if(it2.second.padstack.type == Padstack::Type::BOTTOM) {
+						it2.second.padstack.type = Padstack::Type::TOP;
+					}
 					for(auto &it3: it2.second.padstack.polygons) {
 						flip_package_layer(it3.second.layer);
 					}

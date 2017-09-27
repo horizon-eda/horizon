@@ -256,6 +256,42 @@ SRC_IMP = \
 	board/board_rules_check.cpp\
 	schematic/schematic_rules_check.cpp\
 
+SRC_ROUTER = \
+	router/router/pns_router.cpp \
+	router/router/pns_item.cpp \
+	router/router/pns_node.cpp \
+	router/router/pns_solid.cpp \
+	router/router/pns_optimizer.cpp \
+	router/router/pns_topology.cpp \
+	router/router/pns_walkaround.cpp \
+	router/router/pns_utils.cpp \
+	router/router/pns_algo_base.cpp \
+	router/router/pns_diff_pair_placer.cpp \
+	router/router/pns_diff_pair.cpp \
+	router/router/pns_dp_meander_placer.cpp\
+	router/router/pns_dragger.cpp\
+	router/router/pns_itemset.cpp \
+	router/router/pns_line_placer.cpp \
+	router/router/pns_line.cpp \
+	router/router/pns_via.cpp \
+	router/router/pns_logger.cpp \
+	router/router/pns_meander_placer_base.cpp\
+	router/router/pns_meander_placer.cpp\
+	router/router/pns_meander_skew_placer.cpp\
+	router/router/pns_meander.cpp\
+	router/router/pns_shove.cpp \
+	router/router/time_limit.cpp \
+	router/router/pns_routing_settings.cpp \
+	router/router/pns_sizes_settings.cpp \
+	router/common/geometry/shape_line_chain.cpp\
+	router/common/geometry/shape.cpp \
+	router/common/geometry/shape_collisions.cpp\
+	router/common/geometry/seg.cpp\
+	router/common/math/math_util.cpp\
+	router/wx_compat.cpp\
+	router/pns_horizon_iface.cpp\
+	core/tool_route_track_interactive.cpp\
+
 
 SRC_POOL_UTIL = \
 	pool-util/util_main.cpp\
@@ -336,7 +372,10 @@ endif
 
 # Object files
 OBJ_ALL = $(SRC_ALL:.cpp=.o)
+OBJ_ROUTER = $(SRC_ROUTER:.cpp=.o)
 OBJ_COMMON = $(SRC_COMMON:.cpp=.o)
+
+INC_ROUTER = -Irouter/include/ -Irouter
 
 resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=. --generate-dependencies imp.gresource.xml)
 	$(GLIB_COMPILE_RESOURCES) imp.gresource.xml --target=$@ --sourcedir=. --generate-source
@@ -344,7 +383,7 @@ resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=.
 gitversion.cpp: .git/HEAD .git/index
 	echo "const char *gitversion = \"$(shell git log -1 --pretty="format:%h %ci %s")\";" > $@
 
-horizon-imp: $(OBJ_COMMON) $(SRC_IMP:.cpp=.o)
+horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(SRC_IMP:.cpp=.o)
 	$(CC) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq) -o $@
 
 horizon-pool: $(OBJ_COMMON) $(SRC_POOL_UTIL:.cpp=.o)
@@ -368,9 +407,16 @@ horizon-pgm-test: $(OBJ_COMMON) $(SRC_PGM_TEST:.cpp=.o)
 $(OBJ_ALL): %.o: %.cpp
 	$(CC) -c $(INC) $(CFLAGS) $< -o $@
 
-clean:
+$(OBJ_ROUTER): %.o: %.cpp
+	$(CC) -c $(INC) $(INC_ROUTER) $(CFLAGS) $< -o $@
+
+clean: clean_router
 	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-update horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test $(OBJ_ALL:.o=.d)
 
--include  $(OBJ_ALL:.o=.d)
+clean_router:
+	rm -f $(OBJ_ROUTER) $(OBJ_ROUTER:.o=.d)
 
-.PHONY: clean
+-include  $(OBJ_ALL:.o=.d)
+-include  $(OBJ_ROUTER:.o=.d)
+
+.PHONY: clean clean_router
