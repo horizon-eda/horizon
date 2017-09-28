@@ -137,10 +137,14 @@ namespace horizon {
 		return Gtk::GLArea::on_scroll_event(scroll_event);
 	}
 
+	static int64_t round_multiple(int64_t x, int64_t mul) {
+		return ((x+mul/2)/mul)*mul;
+	}
+
 	Coordi CanvasGL::snap_to_grid(const Coordi &c) {
 		auto sp = grid.spacing;
-		int64_t xi = round(c.x/sp)*sp;
-		int64_t yi = round(c.y/sp)*sp;
+		int64_t xi = round_multiple(cursor_pos.x, sp);
+		int64_t yi = round_multiple(cursor_pos.y, sp);
 		Coordi t(xi, yi);
 		return t;
 	}
@@ -165,8 +169,8 @@ namespace horizon {
 			sp /= 10;
 		}
 
-		int64_t xi = round(cursor_pos.x/sp)*sp;
-		int64_t yi = round(cursor_pos.y/sp)*sp;
+		int64_t xi = round_multiple(cursor_pos.x, sp);
+		int64_t yi = round_multiple(cursor_pos.y, sp);
 		Coordi t(xi, yi);
 
 		const auto &f = std::find_if(targets.begin(), targets.end(), [t](const auto &a)->bool{return a.p==t;});
