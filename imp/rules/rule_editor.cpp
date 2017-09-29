@@ -6,6 +6,8 @@
 namespace horizon {
 	RuleEditor::RuleEditor(Rule *r, class Core *c): Gtk::Box(Gtk::ORIENTATION_VERTICAL, 20), rule(r), core(c) {
 		enable_cb = Gtk::manage(new Gtk::CheckButton("Enable this rule"));
+		enable_cb->set_margin_start(20);
+		enable_cb->set_margin_top(20);
 		pack_start(*enable_cb, false, false,0);
 		enable_cb->show();
 		enable_cb->set_active(rule->enabled);

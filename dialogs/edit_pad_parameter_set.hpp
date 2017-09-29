@@ -14,7 +14,6 @@ namespace horizon {
 
 
 		private :
-			void ok_clicked();
 			class MyParameterSetEditor *editor = nullptr;
 	};
 }

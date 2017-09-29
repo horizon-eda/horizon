@@ -421,12 +421,12 @@ namespace horizon {
 					if(via == nullptr) {
 						UUID template_uuid;
 						bool r;
-						std::tie(r, template_uuid) = imp->dialogs.select_via_template(core.b->get_board());
+						//std::tie(r, template_uuid) = imp->dialogs.select_via_template(core.b->get_board());
 						if(r) {
 							auto uu = UUID::random();
-							auto vt = &core.b->get_board()->via_templates.at(template_uuid);
-							via = &core.b->get_board()->vias.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, vt)).first->second;
-							via->padstack.apply_parameter_set(via->via_template->parameter_set);
+							//auto vt = &core.b->get_board()->via_templates.at(template_uuid);
+							//via = &core.b->get_board()->vias.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, vt)).first->second;
+							//via->padstack.apply_parameter_set(via->via_template->parameter_set);
 							update_temp_track();
 						}
 					}

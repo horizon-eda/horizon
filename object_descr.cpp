@@ -28,6 +28,7 @@ namespace horizon {
 		{ObjectType::POLYGON_ARC_CENTER, {"Polygon arc center", "Polygon arc centers", {
 		}}},
 		{ObjectType::VIA, {"Via", "Vias", {
+			{ObjectProperty::ID::FROM_RULES, {ObjectProperty::Type::BOOL, "From rules"}},
 		}}},
 		{ObjectType::SHAPE, {"Shape", "Shapes", {
 			{ObjectProperty::ID::LAYER, {ObjectProperty::Type::LAYER, "Layer"}},

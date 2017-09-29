@@ -10,7 +10,7 @@
 
 
 namespace horizon {
-	Pool::Pool(const std::string &bp) :db(bp+"/pool.db", SQLITE_OPEN_READONLY), base_path(bp)  {
+	Pool::Pool(const std::string &bp) :db(bp+"/pool.db", SQLITE_OPEN_READONLY, 1000), base_path(bp)  {
 	}
 
 	void Pool::clear() {

@@ -25,7 +25,6 @@ namespace horizon {
 			std::pair<bool, UUID> select_entity(class Pool *pool);
 			std::pair<bool, UUID> select_padstack(class Pool *pool, const UUID &package_uuid);
 			std::pair<bool, UUID> select_via_padstack(class ViaPadstackProvider *vpp);
-			std::pair<bool, UUID> select_via_template(class Board *brd);
 			std::pair<bool, UUID> select_net(class Block *block, bool power_only);
 			std::pair<bool, UUID> select_bus(class Block *block);
 			std::pair<bool, UUID> select_bus_member(class Block *block, const UUID &bus_uuid);
@@ -44,6 +43,7 @@ namespace horizon {
 			std::pair<bool, Coordi> ask_datum_coord(const std::string &label, Coordi def=Coordi());
 			std::tuple<bool, Coordi, std::pair<bool, bool>> ask_datum_coord2(const std::string &label, Coordi def=Coordi());
 			bool edit_shape(class Shape *shape);
+			bool edit_via(class Via *via, class ViaPadstackProvider &vpp);
 			std::tuple<bool, std::string, int, int64_t, double> ask_dxf_filename(class Core *core);
 
 

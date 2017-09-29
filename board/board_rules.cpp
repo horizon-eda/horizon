@@ -32,6 +32,14 @@ namespace horizon {
 			}
 			fix_order(RuleID::CLEARANCE_COPPER);
 		}
+		if(j.count("via")) {
+			const json &o = j["via"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID(it.key());
+				rule_via.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
+			}
+			fix_order(RuleID::CLEARANCE_COPPER);
+		}
 		if(j.count("clearance_silkscreen_exposed_copper")) {
 			const json &o = j["clearance_silkscreen_exposed_copper"];
 			rule_clearance_silkscreen_exposed_copper = RuleClearanceSilkscreenExposedCopper(o);
@@ -53,11 +61,14 @@ namespace horizon {
 		for(auto &it: rule_track_width) {
 			it.second.match.cleanup(block);
 		}
+		for(auto &it: rule_via) {
+			it.second.match.cleanup(block);
+		}
 	}
 
 
 
-	void BoardRules::apply(RuleID id, Board *brd) {
+	void BoardRules::apply(RuleID id, Board *brd, ViaPadstackProvider &vpp) {
 		if(id == RuleID::TRACK_WIDTH) {
 			for(auto &it: brd->tracks) {
 				auto &track = it.second;
@@ -68,6 +79,17 @@ namespace horizon {
 		}
 		else if(id == RuleID::PARAMETERS) {
 			brd->rules.rule_parameters = rule_parameters;
+		}
+		else if(id == RuleID::VIA) {
+			for(auto &it: brd->vias) {
+				auto &via = it.second;
+				if(via.from_rules && via.junction->net) {
+					if(auto ps = vpp.get_padstack(get_via_padstack_uuid(via.junction->net))) {
+						via.parameter_set = get_via_parameter_set(via.junction->net);
+						via.vpp_padstack = ps;
+					}
+				}
+			}
 		}
 	}
 
@@ -85,13 +107,17 @@ namespace horizon {
 		for(const auto &it: rule_clearance_copper) {
 			j["clearance_copper"][(std::string)it.first] = it.second.serialize();
 		}
+		j["via"] = json::object();
+		for(const auto &it: rule_via) {
+			j["via"][(std::string)it.first] = it.second.serialize();
+		}
 		j["clearance_silkscreen_exposed_copper"] = rule_clearance_silkscreen_exposed_copper.serialize();
 		j["parameters"] = rule_parameters.serialize();
 		return j;
 	}
 
 	std::set<RuleID> BoardRules::get_rule_ids() const {
-		return {RuleID::HOLE_SIZE, RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, RuleID::TRACK_WIDTH, RuleID::CLEARANCE_COPPER, RuleID::PARAMETERS};
+		return {RuleID::HOLE_SIZE, RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, RuleID::TRACK_WIDTH, RuleID::CLEARANCE_COPPER, RuleID::PARAMETERS, RuleID::VIA};
 	}
 
 	Rule *BoardRules::get_rule(RuleID id) {
@@ -112,6 +138,8 @@ namespace horizon {
 				return &rule_track_width.at(uu);
 			case RuleID::CLEARANCE_COPPER :
 				return &rule_clearance_copper.at(uu);
+			case RuleID::VIA :
+				return &rule_via.at(uu);
 			default :
 				return nullptr;
 		}
@@ -136,6 +164,12 @@ namespace horizon {
 				}
 			break;
 
+			case RuleID::VIA:
+				for(auto &it: rule_via) {
+					r[it.first] = &it.second;
+				}
+			break;
+
 			default:;
 		}
 		return r;
@@ -155,6 +189,10 @@ namespace horizon {
 				rule_clearance_copper.erase(uu);
 			break;
 
+			case RuleID::VIA :
+				rule_via.erase(uu);
+			break;
+
 			default:;
 		}
 		fix_order(id);
@@ -166,22 +204,28 @@ namespace horizon {
 		switch(id) {
 			case RuleID::HOLE_SIZE :
 				r = &rule_hole_size.emplace(uu, uu).first->second;
-				r->order = rule_hole_size.size()-1;
+				r->order = -1;
 			break;
 
 			case RuleID::TRACK_WIDTH :
 				r = &rule_track_width.emplace(uu, uu).first->second;
-				r->order = rule_track_width.size()-1;
+				r->order = -1;
 			break;
 
 			case RuleID::CLEARANCE_COPPER :
 				r = &rule_clearance_copper.emplace(uu, uu).first->second;
-				r->order = rule_clearance_copper.size()-1;
+				r->order = -1;
+			break;
+
+			case RuleID::VIA :
+				r = &rule_via.emplace(uu, uu).first->second;
+				r->order = -1;
 			break;
 
 			default:
 				return nullptr;
 		}
+		fix_order(id);
 		return r;
 	}
 
@@ -224,5 +268,27 @@ namespace horizon {
 
 	const RuleParameters *BoardRules::get_parameters() {
 		return &rule_parameters;
+	}
+
+	UUID BoardRules::get_via_padstack_uuid(class Net *net) {
+		auto rules = dynamic_cast_vector<RuleVia*>(get_rules_sorted(RuleID::VIA));
+		for(auto rule: rules) {
+			if(rule->enabled && rule->match.match(net)) {
+				return rule->padstack;
+			}
+		}
+		return UUID();
+	}
+
+	static const ParameterSet ps_empty;
+
+	const ParameterSet &BoardRules::get_via_parameter_set(class Net *net) {
+		auto rules = dynamic_cast_vector<RuleVia*>(get_rules_sorted(RuleID::VIA));
+		for(auto rule: rules) {
+			if(rule->enabled && rule->match.match(net)) {
+				return rule->parameter_set;
+			}
+		}
+		return ps_empty;
 	}
 }

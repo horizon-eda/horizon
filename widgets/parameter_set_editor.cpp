@@ -71,14 +71,13 @@ namespace horizon {
 	};
 
 	ParameterSetEditor::ParameterSetEditor(ParameterSet *ps, bool populate_init): Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), parameter_set(ps) {
-		auto add_button = Gtk::manage(new Gtk::MenuButton());
+		add_button = Gtk::manage(new Gtk::MenuButton());
 		add_button->set_label("Add parameter");
-		//add_button->signal_clicked().connect(sigc::mem_fun(this, &ManageNetClassesDialog::handle_add_net_class));
 		add_button->set_halign(Gtk::ALIGN_START);
-		add_button->set_margin_bottom(8);
-		add_button->set_margin_top(8);
-		add_button->set_margin_start(8);
-		add_button->set_margin_end(8);
+		add_button->set_margin_bottom(10);
+		add_button->set_margin_top(10);
+		add_button->set_margin_start(10);
+		add_button->set_margin_end(10);
 		add_button->show();
 		pack_start(*add_button, false, false, 0);
 
@@ -102,6 +101,10 @@ namespace horizon {
 
 		sc->show_all();
 		pack_start(*sc, true, true ,0);
+	}
+
+	void ParameterSetEditor::set_button_margin_left(int margin) {
+		add_button->set_margin_start(margin);
 	}
 
 	void ParameterSetEditor::populate() {

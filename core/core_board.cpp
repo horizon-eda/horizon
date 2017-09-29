@@ -130,6 +130,14 @@ namespace horizon {
 						return false;
 				}
 			break;
+			case ObjectType::VIA :
+				switch(property) {
+					case ObjectProperty::ID::FROM_RULES :
+						return brd.vias.at(uu).from_rules;
+					default :
+						return false;
+				}
+			break;
 			default :
 				return false;
 		}
@@ -156,6 +164,15 @@ namespace horizon {
 				switch(property) {
 					case ObjectProperty::ID::WIDTH_FROM_RULES :
 						brd.tracks.at(uu).width_from_rules = value;
+					break;
+					default :
+						;
+				}
+			break;
+			case ObjectType::VIA :
+				switch(property) {
+					case ObjectProperty::ID::FROM_RULES :
+						brd.vias.at(uu).from_rules = value;
 					break;
 					default :
 						;

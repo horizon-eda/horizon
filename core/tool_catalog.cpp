@@ -46,11 +46,11 @@ namespace horizon {
 		{ToolID::IMPORT_DXF, {"Import DXF"}},
 		{ToolID::MANAGE_NET_CLASSES, {"Manage net classes"}},
 		{ToolID::EDIT_PAD_PARAMETER_SET, {"Edit pad parameter set"}},
-		{ToolID::MANAGE_VIA_TEMPLATES, {"Manage via templates"}},
 		{ToolID::DRAW_POLYGON_RECTANGLE, {"Draw polygon rectangle"}},
 		{ToolID::DRAW_LINE_RECTANGLE, {"Draw line rectangle"}},
 		{ToolID::EDIT_LINE_RECTANGLE, {"Edit line rectangle"}},
 		{ToolID::EDIT_SCHEMATIC_PROPERTIES, {"Edit schematic properties"}},
 		{ToolID::ROUTE_TRACK_INTERACTIVE, {"Route track interactive"}},
+		{ToolID::EDIT_VIA, {"Edit via"}},
 	};
 }

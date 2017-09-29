@@ -7,6 +7,7 @@
 #include "rule_track_width.hpp"
 #include "rule_clearance_copper.hpp"
 #include "rule_parameters.hpp"
+#include "rule_via.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;
@@ -17,7 +18,7 @@ namespace horizon {
 
 			void load_from_json(const json &j);
 			RulesCheckResult check(RuleID id, const class Board *b, class RulesCheckCache &cache);
-			void apply(RuleID id, class Board *b);
+			void apply(RuleID id, class Board *b, class ViaPadstackProvider &vpp);
 			json serialize() const;
 			std::set<RuleID> get_rule_ids() const;
 			Rule *get_rule(RuleID id);
@@ -30,12 +31,17 @@ namespace horizon {
 			uint64_t get_default_track_width(class Net *net, int layer);
 			const RuleClearanceCopper *get_clearance_copper(Net *net_a, Net *net_b, int layer);
 			uint64_t get_max_clearance();
+
 			const RuleParameters *get_parameters();
+
+			UUID get_via_padstack_uuid(class Net *net);
+			const ParameterSet &get_via_parameter_set(class Net *net);
 
 		private:
 			std::map<UUID, RuleHoleSize> rule_hole_size;
 			std::map<UUID, RuleTrackWidth> rule_track_width;
 			std::map<UUID, RuleClearanceCopper> rule_clearance_copper;
+			std::map<UUID, RuleVia> rule_via;
 			RuleClearanceSilkscreenExposedCopper rule_clearance_silkscreen_exposed_copper;
 			RuleParameters rule_parameters;
 

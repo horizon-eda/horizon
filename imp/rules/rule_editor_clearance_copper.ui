@@ -5,6 +5,9 @@
   <object class="GtkBox" id="editor">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="margin_left">20</property>
+    <property name="margin_right">20</property>
+    <property name="margin_bottom">20</property>
     <property name="orientation">vertical</property>
     <property name="spacing">20</property>
     <child>
@@ -141,12 +144,8 @@
       <object class="GtkGrid" id="clearance_grid">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">4</property>
-        <property name="margin_right">4</property>
-        <property name="margin_top">4</property>
-        <property name="margin_bottom">4</property>
-        <property name="row_spacing">8</property>
-        <property name="column_spacing">8</property>
+        <property name="row_spacing">10</property>
+        <property name="column_spacing">10</property>
         <child>
           <placeholder/>
         </child>

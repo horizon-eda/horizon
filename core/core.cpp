@@ -39,6 +39,7 @@
 #include "tool_draw_line_rectangle.hpp"
 #include "tool_edit_line_rectangle.hpp"
 #include "tool_route_track_interactive.hpp"
+#include "tool_edit_via.hpp"
 #include <memory>
 
 namespace horizon {
@@ -173,9 +174,6 @@ namespace horizon {
 			case ToolID::EDIT_PAD_PARAMETER_SET:
 				return std::make_unique<ToolEditPadParameterSet>(this, tool_id);
 
-			case ToolID::MANAGE_VIA_TEMPLATES:
-				return std::make_unique<ToolManageBuses>(this, tool_id);
-
 			case ToolID::DRAW_POLYGON_RECTANGLE:
 				return std::make_unique<ToolDrawPolygonRectangle>(this, tool_id);
 
@@ -190,6 +188,9 @@ namespace horizon {
 
 			case ToolID::ROUTE_TRACK_INTERACTIVE :
 				return std::make_unique<ToolRouteTrackInteractive>(this, tool_id);
+
+			case ToolID::EDIT_VIA :
+				return std::make_unique<ToolEditVia>(this, tool_id);
 
 			default:
 				return nullptr;

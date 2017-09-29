@@ -23,9 +23,8 @@
 #include "edit_parameter_program.hpp"
 #include "edit_parameter_set.hpp"
 #include "edit_pad_parameter_set.hpp"
-#include "manage_via_templates.hpp"
-#include "select_via_template.hpp"
 #include "schematic_properties.hpp"
+#include "edit_via.hpp"
 
 namespace horizon {
 	void Dialogs::set_parent(Gtk::Window *w) {
@@ -136,6 +135,11 @@ namespace horizon {
 		return dia.run() == Gtk::RESPONSE_OK;
 	}
 
+	bool Dialogs::edit_via(class Via *via, class ViaPadstackProvider &vpp) {
+		EditViaDialog dia(parent, via, vpp);
+		return dia.run() == Gtk::RESPONSE_OK;
+	}
+
 	unsigned int Dialogs::ask_net_merge(Net *net, Net *into) {
 		AskNetMergeDialog dia(parent, net, into);
 		return dia.run();
@@ -148,11 +152,6 @@ namespace horizon {
 
 	bool Dialogs::manage_buses(Block *b) {
 		ManageBusesDialog dia(parent, b);
-		return dia.run()==Gtk::RESPONSE_OK;
-	}
-
-	bool Dialogs::manage_via_templates(Board *b, ViaPadstackProvider *vpp) {
-		ManageViaTemplatesDialog dia(parent, b, vpp);
 		return dia.run()==Gtk::RESPONSE_OK;
 	}
 
@@ -269,17 +268,6 @@ namespace horizon {
 
 	std::pair<bool, UUID> Dialogs::select_via_padstack(class ViaPadstackProvider *vpp) {
 		SelectViaPadstackDialog dia(parent, vpp);
-		auto r = dia.run();
-		if(r == Gtk::RESPONSE_OK) {
-			return {dia.selection_valid, dia.selected_uuid};
-		}
-		else {
-			return {false, UUID()};
-		}
-	}
-
-	std::pair<bool, UUID> Dialogs::select_via_template(class Board *brd) {
-		SelectViaTemplateDialog dia(parent, brd);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
 			return {dia.selection_valid, dia.selected_uuid};

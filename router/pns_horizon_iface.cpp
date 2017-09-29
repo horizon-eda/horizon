@@ -8,6 +8,7 @@
 #include "router/pns_debug_decorator.h"
 #include "geometry/shape_convex.h"
 #include "board_layers.hpp"
+#include "board/via_padstack_provider.hpp"
 
 namespace PNS {
 
@@ -112,6 +113,8 @@ namespace PNS {
 			layer = layers_a.Start();
 		else if(layers_a.IsMultilayer() && !layers_b.IsMultilayer()) //a is muli
 			layer = layers_b.Start();
+		else if(layers_a.IsMultilayer() && layers_b.IsMultilayer()) //both are multi
+			layer = layers_b.Start(); //fixme, good enough for now
 
 		assert(layer != UNDEFINED_LAYER);
 
@@ -280,6 +283,10 @@ namespace PNS {
 		rules = ru;
 	}
 
+	void PNS_HORIZON_IFACE::SetViaPadstackProvider( horizon::ViaPadstackProvider *v) {
+		vpp = v;
+	}
+
 	int PNS_HORIZON_IFACE::get_net_code(const horizon::UUID &uu) {
 		if(net_code_map.count(uu)) {
 			return net_code_map.at(uu);
@@ -395,13 +402,14 @@ namespace PNS {
 		std::unique_ptr<PNS::VIA> pvia( new PNS::VIA(
             VECTOR2I(pos.x, pos.y),
             LAYER_RANGE( layer_to_router(horizon::BoardLayers::TOP_COPPER),  layer_to_router(horizon::BoardLayers::BOTTOM_COPPER)),
-            via->via_template->parameter_set.at(horizon::ParameterID::VIA_DIAMETER),
-            via->via_template->parameter_set.at(horizon::ParameterID::HOLE_DIAMETER),
+            via->parameter_set.at(horizon::ParameterID::VIA_DIAMETER),
+            via->parameter_set.at(horizon::ParameterID::HOLE_DIAMETER),
             get_net_code(via->junction->net->uuid),
             VIA_THROUGH )
 		);
 
 		//via->SetParent( aVia );
+		pvia->SetParent( get_ref_code(horizon::SelectableRef(via->uuid, horizon::ObjectType::VIA)) );
 
 		//if( aVia->IsLocked() )
         //via->Mark( PNS::MK_LOCKED );
@@ -485,6 +493,18 @@ namespace PNS {
 			int la = seg_item->Layer();
 			m_preview_items.insert(canvas->add_line(pts, seg_item->Width(), horizon::ColorP::FROM_LAYER, layer_from_router(la)));
 		}
+		else if(aItem->Kind() == PNS::ITEM::VIA_T) {
+			auto via_item = dynamic_cast<const PNS::VIA*>(aItem);
+			auto pos = via_item->Pos();
+
+			std::deque<horizon::Coordi> pts;
+			pts.emplace_back(pos.x, pos.y);
+			pts.emplace_back(pos.x+10, pos.y);
+			int la = via_item->Layers().Start();
+			m_preview_items.insert(canvas->add_line(pts, via_item->Diameter(), horizon::ColorP::FROM_LAYER, layer_from_router(la)));
+			la = via_item->Layers().End();
+			m_preview_items.insert(canvas->add_line(pts, via_item->Diameter(), horizon::ColorP::FROM_LAYER, layer_from_router(la)));
+		}
 		else {
 			assert(false);
 		}
@@ -542,7 +562,7 @@ namespace PNS {
 
 	horizon::Junction *PNS_HORIZON_IFACE::find_junction(int layer, const horizon::Coordi &c) {
 		for(auto &it: board->junctions) {
-			if((it.second.layer == layer || it.second.layer == 10001) && it.second.position == c) {
+			if((layer == 10000 || it.second.layer == layer || it.second.has_via) && it.second.position == c) {
 				return &it.second;
 			}
 		}
@@ -591,8 +611,32 @@ namespace PNS {
 
 			} break;
 
+			case PNS::ITEM::VIA_T: {
+				PNS::VIA* pvia = static_cast<PNS::VIA*>( aItem );
+				auto uu = horizon::UUID::random();
+				auto net = get_net_for_code(pvia->Net());
+				auto padstack = vpp->get_padstack(rules->get_via_padstack_uuid(net));
+				if(padstack) {
+					auto ps = rules->get_via_parameter_set(net);
+					auto via = &board->vias.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, padstack)).first->second;
+					via->parameter_set = ps;
+
+					horizon::Coordi c(pvia->Pos().x, pvia->Pos().y);
+					auto j = find_junction(10000, c);
+					if(j) {
+						via->junction = j;
+					}
+					else {
+						auto juu = horizon::UUID::random();
+						auto ju = &board->junctions.emplace(juu, juu).first->second;
+						ju->position = c;
+						via->junction = ju;
+					}
+				}
+			} break;
+
 			default:
-				std::cout << "unhandled add " << aItem->KindStr() << std::endl;
+				std::cout << "!!!unhandled add " << aItem->KindStr() << std::endl;
 		}
 		board->expand(true);
 	}

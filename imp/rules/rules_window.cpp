@@ -9,6 +9,7 @@
 #include "rule_editor_track_width.hpp"
 #include "rule_editor_clearance_copper.hpp"
 #include "rule_editor_single_pin_net.hpp"
+#include "rule_editor_via.hpp"
 #include "widgets/cell_renderer_layer_display.hpp"
 #include "rules/rules_with_core.hpp"
 #include "rules/cache.hpp"
@@ -118,6 +119,7 @@ namespace horizon {
 		button_rule_instance_add->signal_clicked().connect([this]{
 			rules->add_rule(rule_current);
 			update_rule_instances(rule_current);
+			lb_multi->select_row(*lb_multi->get_row_at_index(0));
 		});
 
 		button_rule_instance_move_up->signal_clicked().connect([this]{
@@ -290,6 +292,10 @@ namespace horizon {
 
 			case RuleID::SINGLE_PIN_NET :
 				e = new RuleEditorSinglePinNet(r, core);
+			break;
+
+			case RuleID::VIA :
+				e = new RuleEditorVia(r, core);
 			break;
 
 			default:

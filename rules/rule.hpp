@@ -6,7 +6,7 @@
 namespace horizon {
 	using json = nlohmann::json;
 
-	enum class RuleID {NONE, HOLE_SIZE, CLEARANCE_SILKSCREEN_EXPOSED_COPPER, TRACK_WIDTH, CLEARANCE_COPPER, SINGLE_PIN_NET, PARAMETERS};
+	enum class RuleID {NONE, HOLE_SIZE, CLEARANCE_SILKSCREEN_EXPOSED_COPPER, TRACK_WIDTH, CLEARANCE_COPPER, SINGLE_PIN_NET, PARAMETERS, VIA};
 
 	class Rule {
 		public:
@@ -25,12 +25,5 @@ namespace horizon {
 
 
 		virtual ~Rule();
-	};
-
-	class RuleUnary: public Rule {
-		public:
-			using Rule::Rule;
-			RuleMatch match;
-
 	};
 }

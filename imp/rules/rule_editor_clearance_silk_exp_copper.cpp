@@ -23,6 +23,9 @@ namespace horizon {
 		grid = Gtk::manage(new Gtk::Grid());
 		grid->set_row_spacing(10);
 		grid->set_column_spacing(10);
+		grid->set_margin_start(20);
+		grid->set_margin_end(20);
+		grid->set_margin_bottom(20);
 		pack_start(*grid, true, true, 0);
 
 		if(auto rule2 = dynamic_cast<RuleClearanceSilkscreenExposedCopper*>(rule)) {

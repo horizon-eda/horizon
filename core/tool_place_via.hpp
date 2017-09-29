@@ -1,7 +1,6 @@
 #pragma once
 #include "core.hpp"
 #include "tool_place_junction.hpp"
-#include "via.hpp"
 #include <forward_list>
 
 namespace horizon {
@@ -16,9 +15,10 @@ namespace horizon {
 			void delete_attached() override;
 			bool begin_attached() override;
 			bool update_attached(const ToolArgs &args) override;
-			Via *via = nullptr;
-			ViaTemplate *vt = nullptr;
-			std::forward_list<Via*> vias_placed;
+			class Via *via = nullptr;
+			const class Padstack *padstack = nullptr;
+
+			std::forward_list<class Via*> vias_placed;
 
 		private:
 

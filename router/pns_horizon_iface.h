@@ -13,6 +13,7 @@ namespace horizon {
 	class Junction;
 	class Net;
 	class BoardRules;
+	class ViaPadstackProvider;
 	template<typename T> class Coord;
 }
 
@@ -27,6 +28,7 @@ namespace PNS {
 			void SetBoard ( horizon::Board *brd);
 			void SetCanvas (class horizon::CanvasGL *ca);
 			void SetRules (horizon::BoardRules *rules);
+			void SetViaPadstackProvider (horizon::ViaPadstackProvider *v);
 
 			void SyncWorld( PNS::NODE* aWorld ) override;
 			void EraseView() override;
@@ -57,6 +59,7 @@ namespace PNS {
 			horizon::Board *board = nullptr;
 			class horizon::CanvasGL *canvas = nullptr;
 			class horizon::BoardRules *rules = nullptr;
+			class horizon::ViaPadstackProvider *vpp = nullptr;
 			PNS::NODE* m_world;
 			PNS::ROUTER* m_router;
 

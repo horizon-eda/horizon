@@ -63,18 +63,11 @@ namespace horizon {
 				}
 			}
 		}
-		if(j.count("via_templates")) {
-			const json &o = j["via_templates"];
-			for (auto it = o.cbegin(); it != o.cend(); ++it) {
-				auto u = UUID(it.key());
-				via_templates.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), vpp));
-			}
-		}
 		if(j.count("vias")) {
 			const json &o = j["vias"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto u = UUID(it.key());
-				vias.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
+				vias.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this, vpp));
 			}
 		}
 		if(j.count("texts")) {
@@ -142,7 +135,6 @@ namespace horizon {
 		vias(brd.vias),
 		texts(brd.texts),
 		lines(brd.lines),
-		via_templates(brd.via_templates),
 
 		warnings(brd.warnings),
 		rules(brd.rules),
@@ -167,7 +159,6 @@ namespace horizon {
 		vias = brd.vias;
 		texts = brd.texts;
 		lines = brd.lines;
-		via_templates = brd.via_templates;
 		warnings = brd.warnings;
 		rules = brd.rules;
 		update_refs();
@@ -194,7 +185,6 @@ namespace horizon {
 		}
 		for(auto &it: vias) {
 			it.second.junction.update(junctions);
-			it.second.via_template.update(via_templates);
 		}
 		for(auto &it: junctions) {
 			it.second.net.update(block->nets);
@@ -470,15 +460,10 @@ namespace horizon {
 			it.second.to->connection_count++;
 		}
 
-		for(auto &it: via_templates) {
-			it.second.is_referenced = false;
-		}
-
 		for(auto &it: vias) {
 			it.second.junction->has_via = true;
-			it.second.padstack = *it.second.via_template->padstack;
-			it.second.padstack.apply_parameter_set(it.second.via_template->parameter_set);
-			it.second.via_template->is_referenced = true;
+			it.second.padstack = *it.second.vpp_padstack;
+			it.second.padstack.apply_parameter_set(it.second.parameter_set);
 			it.second.padstack.expand_inner(n_inner_layers);
 		}
 
@@ -700,10 +685,6 @@ namespace horizon {
 		j["lines"] = json::object();
 		for(const auto &it: lines) {
 			j["lines"][(std::string)it.first] = it.second.serialize();
-		}
-		j["via_templates"] = json::object();
-		for(const auto &it: via_templates) {
-			j["via_templates"][(std::string)it.first] = it.second.serialize();
 		}
 		return j;
 	}

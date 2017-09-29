@@ -5,6 +5,9 @@
   <object class="GtkBox" id="editor">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="margin_left">20</property>
+    <property name="margin_right">20</property>
+    <property name="margin_bottom">20</property>
     <property name="orientation">vertical</property>
     <property name="spacing">20</property>
     <child>
@@ -30,8 +33,8 @@
         <property name="margin_right">4</property>
         <property name="margin_top">4</property>
         <property name="margin_bottom">4</property>
-        <property name="row_spacing">4</property>
-        <property name="column_spacing">4</property>
+        <property name="row_spacing">10</property>
+        <property name="column_spacing">10</property>
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
@@ -82,30 +85,6 @@
             <property name="left_attach">2</property>
             <property name="top_attach">0</property>
           </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
         </child>
       </object>
       <packing>

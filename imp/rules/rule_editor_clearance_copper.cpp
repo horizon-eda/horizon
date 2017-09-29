@@ -46,8 +46,8 @@ namespace horizon {
 		});
 
 		auto sp_routing_offset = create_spinbutton("routing_offset_box");
-		sp_routing_offset->set_value(rule2->routing_offset);
 		sp_routing_offset->set_range(0, 10_mm);
+		sp_routing_offset->set_value(rule2->routing_offset);
 		sp_routing_offset->signal_value_changed().connect([this, sp_routing_offset]{
 			rule2->routing_offset = sp_routing_offset->get_value_as_int();
 			s_signal_updated.emit();
@@ -65,7 +65,7 @@ namespace horizon {
 		{
 			int left = 1;
 			for(const auto it: patch_types) {
-				auto *box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 2));
+				auto *box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
 
 				auto *bu = Gtk::manage(new Gtk::Button());
 				bu->set_image_from_icon_name("pan-down-symbolic", Gtk::ICON_SIZE_BUTTON);
@@ -85,7 +85,7 @@ namespace horizon {
 			}
 			int top = 1;
 			for(const auto it: patch_types) {
-				auto *box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 2));
+				auto *box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
 				auto *la = Gtk::manage(new Gtk::Label(patch_type_names.at(it)));
 				la->set_xalign(1);
 				box->pack_start(*la, true, true, 0);

@@ -9,5 +9,6 @@ namespace horizon {
 		{RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, {"Clearance\nSilkscreen - Exposed copper", false}},
 		{RuleID::PARAMETERS, {"Parameters", false}},
 		{RuleID::SINGLE_PIN_NET, {"Single pin nets", false}},
+		{RuleID::VIA, {"Vias", true}},
 	};
 }

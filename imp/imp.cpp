@@ -204,6 +204,15 @@ namespace horizon {
 			tool_process(r);
 		});
 
+		canvas->property_work_layer().signal_changed().connect([this]{
+			ToolArgs args;
+			args.type = ToolEventType::LAYER_CHANGE;
+			args.coords = canvas->get_cursor_pos();
+			args.work_layer = canvas->property_work_layer();
+			ToolResponse r = core.r->tool_update(args);
+			tool_process(r);
+		});
+
 
 		imp_interface = std::make_unique<ImpInterface>(this);
 
@@ -244,6 +253,53 @@ namespace horizon {
 	}
 
 	bool ImpBase::handle_key_press(GdkEventKey *key_event) {
+		bool is_layer_change = (key_event->keyval == GDK_KEY_Page_Up) || (key_event->keyval == GDK_KEY_Page_Down) || (key_event->keyval >= GDK_KEY_0 && key_event->keyval <= GDK_KEY_9);
+		if(is_layer_change) {
+			if((key_event->keyval == GDK_KEY_Page_Up) || (key_event->keyval == GDK_KEY_Page_Down)) {
+				int wl = canvas->property_work_layer();
+				auto layers = core.r->get_layer_provider()->get_layers();
+				std::vector<int> layer_indexes;
+				layer_indexes.reserve(layers.size());
+				std::transform(layers.begin(), layers.end(), std::back_inserter(layer_indexes), [](const auto &x){return x.first;});
+
+				int idx = std::find(layer_indexes.begin(), layer_indexes.end(), wl) - layer_indexes.begin();
+				if(key_event->keyval == GDK_KEY_Page_Up) {
+					idx++;
+				}
+				else {
+					idx--;
+				}
+				if(idx>=0 && idx < (int)layers.size()) {
+					canvas->property_work_layer() = layer_indexes.at(idx);
+				}
+			}
+			else if(key_event->keyval >= GDK_KEY_0 && key_event->keyval <= GDK_KEY_9) {
+				int n = key_event->keyval - GDK_KEY_0;
+				int layer = 0;
+				if(n == 1) {
+					layer = 0;
+				}
+				else if(n == 2) {
+					layer = -100;
+				}
+				else {
+					layer = -(n-2);
+				}
+				if(core.r->get_layer_provider()->get_layers().count(layer)) {
+					canvas->property_work_layer() = layer;
+				}
+			}
+			if(core.r->tool_is_active()) { //inform tool about layer change
+				ToolArgs args;
+				args.type = ToolEventType::LAYER_CHANGE;
+				args.coords = canvas->get_cursor_pos();
+				args.work_layer = canvas->property_work_layer();
+				ToolResponse r = core.r->tool_update(args);
+				tool_process(r);
+			}
+			return true;
+		}
+
 		if(!core.r->tool_is_active()) {
 			if(key_event->keyval == GDK_KEY_Escape) {
 				canvas->selection_mode = CanvasGL::SelectionMode::HOVER;
@@ -256,36 +312,11 @@ namespace horizon {
 			}
 
 			if(t != ToolID::NONE) {
-				ToolArgs args;
-				args.coords = canvas->get_cursor_pos();
-				args.selection = canvas->get_selection();
-				args.work_layer = canvas->property_work_layer();
-				ToolResponse r= core.r->tool_begin(t, args, imp_interface.get());
-				main_window->active_tool_label->set_text("Active tool: "+core.r->get_tool_name());
-				tool_process(r);
+				tool_begin(t);
 				return true;
 			}
 			else {
-				if((key_event->keyval == GDK_KEY_Page_Up) || (key_event->keyval == GDK_KEY_Page_Down)) {
-					int wl = canvas->property_work_layer();
-					auto layers = core.r->get_layer_provider()->get_layers();
-					std::vector<int> layer_indexes;
-					layer_indexes.reserve(layers.size());
-					std::transform(layers.begin(), layers.end(), std::back_inserter(layer_indexes), [](const auto &x){return x.first;});
-
-					int idx = std::find(layer_indexes.begin(), layer_indexes.end(), wl) - layer_indexes.begin();
-					if(key_event->keyval == GDK_KEY_Page_Up) {
-						idx++;
-					}
-					else {
-						idx--;
-					}
-					if(idx>=0 && idx < (int)layers.size()) {
-						canvas->property_work_layer() = layer_indexes.at(idx);
-					}
-					return true;
-				}
-				else if((key_event->keyval == GDK_KEY_space)) {
+				if((key_event->keyval == GDK_KEY_space)) {
 					Gdk::Rectangle rect;
 					auto c = canvas->get_cursor_pos_win();
 					rect.set_x(c.x);
@@ -310,22 +341,7 @@ namespace horizon {
 				else if((key_event->keyval == GDK_KEY_Home)) {
 					auto bbox = core.r->get_bbox();
 					canvas->zoom_to_bbox(bbox.first, bbox.second);
-				}
-				else if(key_event->keyval >= GDK_KEY_0 && key_event->keyval <= GDK_KEY_9) {
-					int n = key_event->keyval - GDK_KEY_0;
-					int layer = 0;
-					if(n == 1) {
-						layer = 0;
-					}
-					else if(n == 2) {
-						layer = -100;
-					}
-					else {
-						layer = -(n-2);
-					}
-					if(core.r->get_layer_provider()->get_layers().count(layer)) {
-						canvas->property_work_layer() = layer;
-					}
+					return true;
 				}
 				else if(key_event->keyval == GDK_KEY_question) {
 					key_sequence_dialog->show();

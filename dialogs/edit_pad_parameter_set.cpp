@@ -33,7 +33,6 @@ namespace horizon {
 		set_default_size(400, 300);
 		add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
 		add_button("OK", Gtk::ResponseType::RESPONSE_OK);
-		signal_response().connect([this](int r){if(r==Gtk::RESPONSE_OK){ok_clicked();}});
 		set_default_response(Gtk::ResponseType::RESPONSE_OK);
 
 		auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
@@ -80,8 +79,5 @@ namespace horizon {
 
 
 		show_all();
-	}
-	void PadParameterSetDialog::ok_clicked() {
-
 	}
 }

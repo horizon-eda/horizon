@@ -8,6 +8,7 @@
 #include "router/pns_horizon_iface.h"
 #include "canvas/canvas.hpp"
 #include "router/pns_solid.h"
+#include "board_layers.hpp"
 
 namespace horizon {
 
@@ -62,6 +63,7 @@ namespace horizon {
 		iface->create_debug_decorator(imp->get_canvas());
 		iface->SetCanvas( imp->get_canvas() );
 		iface->SetRules(rules);
+		iface->SetViaPadstackProvider(core.b->get_via_padstack_provider());
 		//m_iface->SetHostFrame( m_frame );
 
 		router = new PNS::ROUTER;
@@ -327,24 +329,6 @@ namespace horizon {
 
 		tool->imp->set_work_layer(PNS::PNS_HORIZON_IFACE::layer_from_router(routingLayer));
 
-		// fixme: switch on invisible layer
-
-		// for some reason I don't understand, GetNetclass() may return null sometimes...
-		/*
-		if( m_startItem && m_startItem->Net() >= 0 &&
-			m_startItem->Parent() && m_startItem->Parent()->GetNetClass() )
-		{
-			highlightNet( true, m_startItem->Net() );
-			// Update track width and via size shown in main toolbar comboboxes
-			m_frame->SetCurrentNetClass( m_startItem->Parent()->GetNetClass()->GetName() );
-		}
-		else
-			m_frame->SetCurrentNetClass( NETCLASS::Default );
-
-		m_ctls->ForceCursorPosition( false );
-		m_ctls->SetAutoPan( true );
-		*/
-
 		PNS::SIZES_SETTINGS sizes( tool->router->Sizes() );
 
 		int64_t track_width = 0;
@@ -371,6 +355,18 @@ namespace horizon {
 		}
 
 		sizes.SetTrackWidth(track_width);
+
+		if(m_startItem) {
+			auto netcode = m_startItem->Net();
+			auto net = tool->iface->get_net_for_code(netcode);
+			auto vps = tool->rules->get_via_parameter_set(net);
+			if(vps.count(horizon::ParameterID::VIA_DIAMETER)) {
+				sizes.SetViaDiameter(vps.at(horizon::ParameterID::VIA_DIAMETER));
+			}
+			if(vps.count(horizon::ParameterID::HOLE_DIAMETER)) {
+				sizes.SetViaDrill(vps.at(horizon::ParameterID::HOLE_DIAMETER));
+			}
+		}
 
 		/*sizes.Init( m_board, m_startItem );
 		sizes.AddLayerPair( m_frame->GetScreen()->m_Route_Layer_TOP,
@@ -484,9 +480,21 @@ namespace horizon {
 					return ToolResponse::end();
 				}
 			}
+			else if(args.type == ToolEventType::LAYER_CHANGE) {
+				if(BoardLayers::is_copper(args.work_layer)) {
+					router->SwitchLayer(PNS::PNS_HORIZON_IFACE::layer_to_router(args.work_layer));
+					wrapper->updateEndItem( args );
+					router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
+				}
+			}
 			else if(args.type == ToolEventType::KEY) {
 				if(args.key == GDK_KEY_slash) {
 					 router->FlipPosture();
+					 wrapper->updateEndItem( args );
+					 router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
+				}
+				else if(args.key == GDK_KEY_v) {
+					 router->ToggleViaPlacement();
 					 wrapper->updateEndItem( args );
 					 router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
 				}
@@ -517,6 +525,7 @@ namespace horizon {
 					router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
 				}
 			}
+
 			else if(args.key == GDK_KEY_Escape) {
 				core.b->revert();
 				core.b->get_board()->obstacles.clear();
@@ -532,7 +541,7 @@ namespace horizon {
 	void ToolRouteTrackInteractive::update_tip() {
 		std::stringstream ss;
 		if(state==State::ROUTING) {
-			ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete last segment <b>/:</b>track posture <i>";
+			ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete last segment <b>/:</b>track posture <b>v:</b>toggle via <i>";
 			auto nets = router->GetCurrentNets();
 			Net *net = nullptr;
 			for(auto x: nets) {

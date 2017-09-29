@@ -303,5 +303,6 @@ namespace horizon {
 
 		std::cout << "parts" <<std::endl;
 		update_parts(db, pool, Glib::build_filename(pool_base_path, "parts"));
+		std::cout << "done" <<std::endl;
 	}
 }

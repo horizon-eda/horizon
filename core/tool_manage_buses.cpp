@@ -17,9 +17,6 @@ namespace horizon {
 			case ToolID::EDIT_SCHEMATIC_PROPERTIES:
 				return core.c;
 
-			case ToolID::MANAGE_VIA_TEMPLATES:
-				return core.b;
-
 			default:
 				return false;
 		}
@@ -39,9 +36,6 @@ namespace horizon {
 		else if(tool_id == ToolID::MANAGE_NET_CLASSES) {
 			auto sch = core.c->get_schematic();
 			r = imp->dialogs.manage_net_classes(sch->block);
-		}
-		else if(tool_id == ToolID::MANAGE_VIA_TEMPLATES) {
-			r = imp->dialogs.manage_via_templates(core.b->get_board(), core.b->get_via_padstack_provider());
 		}
 		else if(tool_id == ToolID::EDIT_SCHEMATIC_PROPERTIES) {
 			r = imp->dialogs.edit_schematic_properties(core.c->get_schematic());

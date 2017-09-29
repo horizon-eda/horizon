@@ -50,7 +50,7 @@ SRC_COMMON = \
 	board/rule_track_width.cpp\
 	board/rule_clearance_copper.cpp\
 	board/rule_parameters.cpp\
-	board/via_template.cpp\
+	board/rule_via.cpp\
 	pool/pool.cpp \
 	util/placement.cpp\
 	util/util.cpp\
@@ -170,6 +170,7 @@ SRC_IMP = \
 	core/tool_helper_map_symbol.cpp\
 	core/tool_helper_move.cpp\
 	core/tool_helper_merge.cpp\
+	core/tool_edit_via.cpp\
 	core/cores.cpp\
 	core/clipboard.cpp\
 	core/buffer.cpp\
@@ -190,8 +191,7 @@ SRC_IMP = \
 	dialogs/edit_parameter_program.cpp\
 	dialogs/edit_parameter_set.cpp\
 	dialogs/edit_pad_parameter_set.cpp\
-	dialogs/manage_via_templates.cpp\
-	dialogs/select_via_template.cpp\
+	dialogs/edit_via.cpp\
 	dialogs/pool_browser_dialog.cpp\
 	dialogs/schematic_properties.cpp\
 	util/sort_controller.cpp\
@@ -251,6 +251,7 @@ SRC_IMP = \
 	imp/rules/rule_editor_track_width.cpp\
 	imp/rules/rule_editor_clearance_copper.cpp\
 	imp/rules/rule_editor_single_pin_net.cpp\
+	imp/rules/rule_editor_via.cpp\
 	rules/rules_with_core.cpp\
 	rules/cache.cpp\
 	board/board_rules_check.cpp\

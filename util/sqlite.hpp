@@ -57,7 +57,7 @@ namespace SQLite {
 	class Database {
 		friend Query;
 		public:
-			Database(const std::string &filename, int flags=SQLITE_OPEN_READONLY);
+			Database(const std::string &filename, int flags=SQLITE_OPEN_READONLY, int timeout_ms=0);
 			~Database();
 			void execute(const std::string &query);
 			void execute(const char *query);

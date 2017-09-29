@@ -2,10 +2,11 @@
 
 
 namespace SQLite {
-	Database::Database(const std::string &filename, int flags) {
+	Database::Database(const std::string &filename, int flags, int timeout_ms) {
 		if(sqlite3_open_v2(filename.c_str(), &db, flags, nullptr) != SQLITE_OK) {
 			throw std::runtime_error(sqlite3_errmsg(db));
 		}
+		sqlite3_busy_timeout(db, timeout_ms);
 	}
 
 	void Database::execute(const std::string &query) {
@@ -36,7 +37,7 @@ namespace SQLite {
 
 	bool Query::step() {
 		auto rc = sqlite3_step(stmt);
-		if(rc == SQLITE_ERROR) {
+		if(rc == SQLITE_ERROR || rc == SQLITE_BUSY) {
 			throw std::runtime_error(sqlite3_errmsg(db.db));
 		}
 		return rc == SQLITE_ROW;

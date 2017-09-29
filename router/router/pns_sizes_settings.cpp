@@ -90,7 +90,6 @@ void SIZES_SETTINGS::AddLayerPair( int aL1, int aL2 )
 
 int SIZES_SETTINGS::GetLayerTop() const
 {
-    assert(false);
 	if( m_layerPairs.empty() )
         return F_Cu;
     else
@@ -100,7 +99,6 @@ int SIZES_SETTINGS::GetLayerTop() const
 
 int SIZES_SETTINGS::GetLayerBottom() const
 {
-	assert(false);
     if( m_layerPairs.empty() )
         return B_Cu;
     else
