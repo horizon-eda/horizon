@@ -13,6 +13,7 @@
 #include "manage_buses.hpp"
 #include "manage_net_classes.hpp"
 #include "ask_datum.hpp"
+#include "ask_datum_string.hpp"
 #include "select_via_padstack.hpp"
 #include "annotate.hpp"
 #include "core/core.hpp"
@@ -25,6 +26,7 @@
 #include "edit_pad_parameter_set.hpp"
 #include "schematic_properties.hpp"
 #include "edit_via.hpp"
+#include "widgets/spin_button_dim.hpp"
 
 namespace horizon {
 	void Dialogs::set_parent(Gtk::Window *w) {
@@ -206,6 +208,20 @@ namespace horizon {
 			return {false, 0};
 		}
 	}
+
+	std::pair<bool, std::string> Dialogs::ask_datum_string(const std::string &label, const std::string &def) {
+		AskDatumStringDialog dia(parent, label);
+		dia.entry->set_text(def);
+		dia.entry->select_region(0, -1);
+		auto r = dia.run();
+		if(r == Gtk::RESPONSE_OK) {
+			return {true, dia.entry->get_text()};
+		}
+		else {
+			return {false, 0};
+		}
+	}
+
 	std::pair<bool, Coordi> Dialogs::ask_datum_coord(const std::string &label, Coordi def) {
 		AskDatumDialog dia(parent, label, true);
 		dia.sp_x->set_value(def.x);

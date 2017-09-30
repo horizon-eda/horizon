@@ -19,7 +19,7 @@ namespace horizon {
 		temp->text = "TEXT";
 		temp->layer = args.work_layer;
 		temp->placement.shift = args.coords;
-		imp->tool_bar_set_tip("<b>LMB:</b>place text <b>RMB:</b>delete current text and finish");
+		imp->tool_bar_set_tip("<b>LMB:</b>place text <b>RMB:</b>delete current text and finish <b>space:</b>enter text");
 		return ToolResponse();
 	}
 	ToolResponse ToolPlaceText::update(const ToolArgs &args) {
@@ -44,8 +44,16 @@ namespace horizon {
 				return ToolResponse::end();
 			}
 		}
+		else if(args.type == ToolEventType::LAYER_CHANGE) {
+			temp->layer = args.work_layer;
+		}
 		else if(args.type == ToolEventType::KEY) {
-			if(args.key == GDK_KEY_Escape) {
+			if(args.key == GDK_KEY_space) {
+				auto r = imp->dialogs.ask_datum_string("Enter text", temp->text);
+				if(r.first)
+					temp->text = r.second;
+			}
+			else if(args.key == GDK_KEY_Escape) {
 				core.r->revert();
 				return ToolResponse::end();
 			}

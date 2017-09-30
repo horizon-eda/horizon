@@ -183,6 +183,7 @@ SRC_IMP = \
 	dialogs/component_pin_names.cpp\
 	dialogs/manage_buses.cpp\
 	dialogs/ask_datum.cpp\
+	dialogs/ask_datum_string.cpp\
 	dialogs/select_via_padstack.cpp\
 	dialogs/dialogs.cpp\
 	dialogs/annotate.cpp\

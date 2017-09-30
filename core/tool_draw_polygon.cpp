@@ -65,18 +65,21 @@ namespace horizon {
 					vertex = temp->append_vertex();
 					vertex->position = args.coords;
 					}
-				}
-				else if(args.button == 3) {
-					temp->vertices.pop_back();
-					temp->temp = false;
-					vertex = nullptr;
-					if(!temp->is_valid()) {
-						core.r->delete_polygon(temp->uuid);
-					}
-					core.r->commit();
-					return ToolResponse::end();
-				}
 			}
+			else if(args.button == 3) {
+				temp->vertices.pop_back();
+				temp->temp = false;
+				vertex = nullptr;
+				if(!temp->is_valid()) {
+					core.r->delete_polygon(temp->uuid);
+				}
+				core.r->commit();
+				return ToolResponse::end();
+			}
+		}
+		else if(args.type == ToolEventType::LAYER_CHANGE) {
+			temp->layer = args.work_layer;
+		}
 		else if(args.type == ToolEventType::KEY) {
 			if(args.key == GDK_KEY_a) {
 				if(last_vertex) {

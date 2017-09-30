@@ -42,6 +42,7 @@ namespace horizon {
 			std::pair<bool, int64_t> ask_datum(const std::string &label, int64_t def=0);
 			std::pair<bool, Coordi> ask_datum_coord(const std::string &label, Coordi def=Coordi());
 			std::tuple<bool, Coordi, std::pair<bool, bool>> ask_datum_coord2(const std::string &label, Coordi def=Coordi());
+			std::pair<bool, std::string> ask_datum_string(const std::string &label, const std::string &def);
 			bool edit_shape(class Shape *shape);
 			bool edit_via(class Via *via, class ViaPadstackProvider &vpp);
 			std::tuple<bool, std::string, int, int64_t, double> ask_dxf_filename(class Core *core);

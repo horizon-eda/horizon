@@ -54,6 +54,9 @@ namespace horizon {
 				return ToolResponse::end();
 			}
 		}
+		else if(args.type == ToolEventType::LAYER_CHANGE) {
+			temp->layer = args.work_layer;
+		}
 		else if(args.type == ToolEventType::KEY) {
 			if(args.key == GDK_KEY_Escape) {
 				core.r->revert();
