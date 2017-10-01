@@ -91,7 +91,7 @@ SRC_CANVAS = \
 	canvas/selection_filter.cpp\
 	canvas/polypartition/polypartition.cpp\
 	canvas/marker.cpp\
-	canvas/error_polygons.cpp\
+	canvas/annotation.cpp \
 
 SRC_IMP = \
 	imp/imp_main.cpp \
@@ -106,25 +106,7 @@ SRC_IMP = \
 	imp/tool_popover.cpp\
 	imp/selection_filter_dialog.cpp\
 	imp/cam_job_dialog.cpp\
-	canvas/canvas.cpp \
-	canvas/canvas_gl.cpp \
-	canvas/canvas_cairo.cpp \
-	canvas/grid.cpp \
-	canvas/gl_util.cpp \
-	canvas/pan.cpp \
-	canvas/render.cpp \
-	canvas/draw.cpp \
-	canvas/text.cpp \
-	canvas/hershey_fonts.cpp \
-	canvas/box_selection.cpp \
-	canvas/selectables.cpp \
-	canvas/hover_prelight.cpp\
-	canvas/triangle.cpp\
-	canvas/image.cpp\
-	canvas/selection_filter.cpp\
-	canvas/polypartition/polypartition.cpp\
-	canvas/marker.cpp\
-	canvas/error_polygons.cpp\
+	$(SRC_CANVAS) \
 	core/core.cpp \
 	core/core_properties.cpp\
 	core/tool_catalog.cpp\

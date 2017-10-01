@@ -4,7 +4,7 @@
 
 namespace horizon {
 	void ImpLayer::construct() {
-		layer_box = Gtk::manage(new LayerBox(core.r));
+		layer_box = Gtk::manage(new LayerBox(core.r->get_layer_provider()));
 		layer_box->show_all();
 		main_window->left_panel->pack_start(*layer_box, false, false, 0);
 		work_layer_binding = Glib::Binding::bind_property(layer_box->property_work_layer(), canvas->property_work_layer(), Glib::BINDING_BIDIRECTIONAL);

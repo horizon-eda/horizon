@@ -1,13 +1,15 @@
 #include "layer_box.hpp"
 #include "cell_renderer_layer_display.hpp"
+#include "layer_provider.hpp"
+#include "lut.hpp"
 #include <algorithm>
 #include <iostream>
 
 namespace horizon {
-	LayerBox::LayerBox(Core *c):
+	LayerBox::LayerBox(LayerProvider *lpr):
 		Glib::ObjectBase(typeid(LayerBox)),
 		Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 2),
-		core(c),
+		lp(lpr),
 		p_property_work_layer(*this, "work-layer"),
 		p_property_select_work_layer_only(*this, "select-work-layer-only"),
 		p_property_layer_opacity(*this, "layer-opacity")
@@ -132,13 +134,7 @@ namespace horizon {
 	void LayerBox::emit_layer_display(const Gtk::TreeModel::Row &row) {
 		const Gdk::RGBA &co = row[list_columns.color];
 		Color c(co.get_red(), co.get_green(),co.get_blue());
-		LayerDisplay::Mode dm;
-		switch(row[list_columns.display_mode]) {
-			case 0: dm=LayerDisplay::Mode::FILL; break;
-			case 1: dm=LayerDisplay::Mode::HATCH; break;
-			default: dm=LayerDisplay::Mode::OUTLINE;
-		}
-		s_signal_set_layer_display.emit(row[list_columns.index], LayerDisplay(row[list_columns.visible], dm, c));
+		s_signal_set_layer_display.emit(row[list_columns.index], LayerDisplay(row[list_columns.visible], row[list_columns.display_mode], c));
 	}
 
 
@@ -167,7 +163,9 @@ namespace horizon {
 		auto it = store->get_iter(path);
 		if(it) {
 			Gtk::TreeModel::Row row = *it;
-			row[list_columns.display_mode] = (row[list_columns.display_mode]+1)%3;
+			LayerDisplay::Mode mode = row[list_columns.display_mode];
+			auto new_mode = static_cast<LayerDisplay::Mode>((static_cast<int>(mode)+1)%static_cast<int>(LayerDisplay::Mode::N_MODES));
+			row[list_columns.display_mode] = new_mode;
 			emit_layer_display(row);
 		}
 	}
@@ -175,7 +173,7 @@ namespace horizon {
 
 
 	void LayerBox::update() {
-		auto layers = core->get_layer_provider()->get_layers();
+		auto layers = lp->get_layers();
 		Gtk::TreeModel::Row row;
 		store->freeze_notify();
 		store->clear();
@@ -190,12 +188,12 @@ namespace horizon {
 			auto c = Gdk::RGBA();
 			c.set_rgba(co.r, co.g, co.b);
 			row[list_columns.color] = c;
-			row[list_columns.display_mode] = 0;
+			row[list_columns.display_mode] = LayerDisplay::Mode::FILL;
 		}
 		store->thaw_notify();
 	}
 	void LayerBox::update_work_layer() {
-		auto layers = core->get_layer_provider()->get_layers();
+		auto layers = lp->get_layers();
 		Gtk::TreeModel::Row row;
 		store->freeze_notify();
 		for(auto &it: store->children()) {
@@ -204,13 +202,20 @@ namespace horizon {
 		store->thaw_notify();
 	}
 
+	static const LutEnumStr<LayerDisplay::Mode> dm_lut = {
+		{"outline", LayerDisplay::Mode::OUTLINE},
+		{"hatch", LayerDisplay::Mode::HATCH},
+		{"fill", LayerDisplay::Mode::FILL},
+		{"fill_only", LayerDisplay::Mode::FILL_ONLY},
+	};
+
 	json LayerBox::serialize() {
 		json j;
 		j["layer_opacity"] = property_layer_opacity().get_value();
 		for(auto &it: store->children()) {
 			json k;
 			k["visible"] = static_cast<bool>(it[list_columns.visible]);
-			k["display_mode"] = static_cast<int>(it[list_columns.display_mode]);
+			k["display_mode"] = dm_lut.lookup_reverse(it[list_columns.display_mode]);
 			int index = it[list_columns.index];
 			j["layers"][std::to_string(index)] = k;
 		}
@@ -226,7 +231,12 @@ namespace horizon {
 				if(j2.count(index_str)) {
 					auto &k = j2.at(index_str);
 					it[list_columns.visible] = static_cast<bool>(k["visible"]);
-					it[list_columns.display_mode] = static_cast<int>(k["display_mode"]);
+					try {
+						it[list_columns.display_mode] = dm_lut.lookup(k["display_mode"]);
+					}
+					catch(...) {
+						it[list_columns.display_mode] = LayerDisplay::Mode::FILL;
+					}
 					emit_layer_display(it);
 				}
 			}

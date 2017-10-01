@@ -21,7 +21,7 @@ namespace horizon {
 			pb = transform.transform(b);
 		}
 		//ColorP co, uint8_t la, uint32_t oi, uint8_t ty
-		triangles.emplace_back(pa, pb, Coordf(width, NAN), color, compress_layer(layer), oid_current, triangle_type_current);
+		triangles[layer].emplace_back(pa, pb, Coordf(width, NAN), color, oid_current, triangle_type_current);
 	}
 	
 	void Canvas::draw_cross(const Coordf &p, float size, ColorP color, int layer, bool tr, uint64_t width) {

@@ -3,11 +3,11 @@
 #include <algorithm>
 #include "board/board.hpp"
 #include "common/layer_provider.hpp"
+#include "util.hpp"
 
 namespace horizon {
 
 	Canvas::Canvas(): selection_filter(this), selectables(this) {
-		//RED, GREEN, YELLOW, WHITE, ERROR, NET, BUS, SYMBOL, FRAME, AIRWIRE, LAST}
 		layer_setup.colors.at(static_cast<int>(ColorP::RED)) = {1,0,0};
 		layer_setup.colors.at(static_cast<int>(ColorP::GREEN)) = {0,1,0};
 		layer_setup.colors.at(static_cast<int>(ColorP::YELLOW)) = {1,1,0};
@@ -20,23 +20,17 @@ namespace horizon {
 		layer_setup.colors.at(static_cast<int>(ColorP::AIRWIRE)) = {0,1,1};
 		layer_setup.colors.at(static_cast<int>(ColorP::PIN)) = {1,1,1};
 		layer_setup.colors.at(static_cast<int>(ColorP::PIN_HIDDEN)) = {.5,.5,.5};
+
+		layer_display[10000] = LayerDisplay(true, LayerDisplay::Mode::FILL, {1,1,1});
 	}
 
 	void Canvas::set_layer_display(int index, const LayerDisplay &ld) {
-		layer_setup.layer_display.at(compress_layer(index)) = ld;
-		request_push();
+		layer_display[index] = ld;
 	}
-
-	LayerDisplayGL::LayerDisplayGL(const LayerDisplay &ld): r(ld.color.r), g(ld.color.g), b(ld.color.b),
-		flags(ld.visible|((static_cast<int>(ld.mode)&3)<<1)) {}
-
-	LayerDisplayGL::LayerDisplayGL() {}
 
 	void Canvas::clear() {
 		selectables.clear();
-		triangles.erase(std::remove_if(triangles.begin(),
-						triangles.end(),
-						[](const auto &t){return static_cast<Triangle::Type>(t.type) != Triangle::Type::ERROR;}), triangles.end());
+		map_erase_if(triangles, [](auto &x){return x.first<20000;});
 		targets.clear();
 		sheet_current_uuid = UUID();
 		clear_oids();
@@ -65,7 +59,10 @@ namespace horizon {
 
 	void Canvas::remove_obj(const SelectableRef &r) {
 		auto oid = oid_map.at(r);
-		triangles.erase(std::remove_if(triangles.begin(),  triangles.end(), [oid](auto &x){return x.oid==oid;}), triangles.end());
+		for(auto &it: triangles) {
+			auto &v = it.second;
+			v.erase(std::remove_if(v.begin(),  v.end(), [oid](auto &x){return x.oid==oid;}), v.end());
+		}
 		request_push();
 	}
 
@@ -73,8 +70,10 @@ namespace horizon {
 		auto oid = oid_map.at(r);
 		std::cout << "hide oid " << oid <<std::endl;
 		for(auto &it: triangles) {
-			if(it.oid == oid)
-				it.flags |= Triangle::FLAG_HIDDEN;
+			for(auto &it2: it.second)  {
+				if(it2.oid == oid)
+					it2.flags |= Triangle::FLAG_HIDDEN;
+			}
 		}
 		request_push();
 	}
@@ -82,15 +81,19 @@ namespace horizon {
 	void Canvas::show_obj(const SelectableRef &r) {
 		auto oid = oid_map.at(r);
 		for(auto &it: triangles) {
-			if(it.oid == oid)
-				it.flags &= ~Triangle::FLAG_HIDDEN;
+			for(auto &it2: it.second)  {
+				if(it2.oid == oid)
+					it2.flags &= ~Triangle::FLAG_HIDDEN;
+			}
 		}
 		request_push();
 	}
 
 	void Canvas::show_all_obj() {
 		for(auto &it: triangles) {
-			it.flags &= ~Triangle::FLAG_HIDDEN;
+			for(auto &it2: it.second)  {
+				it2.flags &= ~Triangle::FLAG_HIDDEN;
+			}
 		}
 		request_push();
 	}

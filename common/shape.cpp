@@ -25,7 +25,8 @@ namespace horizon {
 	Shape::Shape(const UUID &uu): uuid(uu), params({.5_mm}) {}
 
 	Polygon Shape::to_polygon() const {
-		Polygon poly(UUID::random());
+		auto uu = UUID();
+		Polygon poly(uu);
 		poly.layer = layer;
 		switch(form) {
 			case Form::RECTANGLE : {

@@ -5,7 +5,6 @@ in vec2 p2;
 in int oid;
 in int type;
 in int color;
-in int layer;
 in int flags;
 
 out vec2 p0_to_geom;
@@ -14,17 +13,15 @@ out vec2 p2_to_geom;
 out int oid_to_geom;
 out int type_to_geom;
 out int color_to_geom;
-out int layer_to_geom;
 out int flags_to_geom;
 
 
 void main() {
-	p0_to_geom = p0+oid*1e-6+type*1e-6+color*1e-6+layer*1e-6;
+	p0_to_geom = p0;
 	p1_to_geom = p1;
 	p2_to_geom = p2;
 	oid_to_geom = oid;
 	type_to_geom = type;
 	color_to_geom = color;
-	layer_to_geom = layer;
 	flags_to_geom = flags;
 }

@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include <array>
 #include <set>
+#include <unordered_map>
 #include "common.hpp"
 #include "grid.hpp"
 #include "box_selection.hpp"
@@ -15,7 +16,7 @@
 #include "sheet.hpp"
 #include "marker.hpp"
 #include "shape.hpp"
-#include "error_polygons.hpp"
+#include "annotation.hpp"
 
 namespace horizon {
 
@@ -23,6 +24,7 @@ namespace horizon {
 	class Canvas: public sigc::trackable {
 		friend Selectables;
 		friend class SelectionFilter;
+		friend CanvasAnnotation;
 		public:
 			Canvas();
 			virtual ~Canvas() {}
@@ -41,6 +43,9 @@ namespace horizon {
 			void show_obj(const SelectableRef &r);
 			void show_all_obj();
 
+			CanvasAnnotation *create_annotation();
+			void remove_annotation(CanvasAnnotation *a);
+
 
 			virtual void update_markers() {}
 
@@ -50,8 +55,7 @@ namespace horizon {
 			
 			
 		protected:
-			static uint8_t compress_layer(int layer);
-			std::vector<Triangle> triangles;
+			std::unordered_map<int, std::vector<Triangle>> triangles;
 			void render(const class Symbol &sym, bool on_sheet = false, bool smashed = false);
 			void render(const class Junction &junc, bool interactive = true, ObjectType mode = ObjectType::INVALID);
 			void render(const class Line &line, bool interactive = true);
@@ -118,12 +122,12 @@ namespace horizon {
 			const class LayerProvider *layer_provider = nullptr;
 			Color get_layer_color(int layer);
 			int work_layer = 0;
+			std::map<int, LayerDisplay> layer_display;
 			class LayerSetup {
 				//keep this in sync with shaders/triangle-geometry.glsl
 				public:
 				LayerSetup(){}
 				std::array<std::array<float, 4>, 13> colors;
-				std::array<LayerDisplayGL, 36> layer_display;
 			};
 
 			LayerSetup layer_setup;
@@ -148,6 +152,8 @@ namespace horizon {
 			uint32_t oid_current=0;
 			uint32_t oid_max=1;
 
+			int annotation_layer_current = 20000;
+			std::map<int, CanvasAnnotation> annotations;
 
 	};
 
@@ -158,7 +164,6 @@ namespace horizon {
 		friend TriangleRenderer;
 		friend MarkerRenderer;
 		friend Markers;
-		friend ErrorPolygons;
 		public:
 			CanvasGL();
 
@@ -193,7 +198,6 @@ namespace horizon {
 			void update_markers() override;
 			void set_type_visible(Triangle::Type ty, bool v);
 
-			ErrorPolygons error_polygons;
 
 		protected:
 			void push() override;

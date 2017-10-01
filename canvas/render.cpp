@@ -36,33 +36,6 @@ namespace horizon {
 		return c;
 	}
 	
-	uint8_t Canvas::compress_layer(int layer) {
-		const int inner_offset = 27;
-		switch(layer) {
-			case 10000: return inner_offset+8;
-			case   100: return inner_offset+7;
-			case    60: return inner_offset+6;
-			case    50: return inner_offset+5;
-			case    40: return inner_offset+4;
-			case    30: return inner_offset+3;
-			case    20: return inner_offset+2;
-			case    10: return inner_offset+1;
-			case     0: return inner_offset+0;
-
-			case -100: return 6;
-			case -110: return 5;
-			case -120: return 4;
-			case -130: return 3;
-			case -140: return 2;
-			case -150: return 1;
-			case -160: return 0;
-			default :
-				assert(layer<0 && layer > -100);
-				return inner_offset+layer;
-		}
-
-	}
-
 	void Canvas::render(const Junction &junc, bool interactive, ObjectType mode) {
 		ColorP c = ColorP::YELLOW;
 		if(junc.net) {
@@ -467,10 +440,14 @@ namespace horizon {
 		po.Init(poly.vertices.size());
 		po.SetHole(false);
 
+		if(!layer_display.count(poly.layer))
+			return;
+		auto display_mode = layer_display.at(poly.layer).mode;
+
 		const Polygon::Vertex *v_last = nullptr;
 		unsigned int i = 0;
 		for(const auto &it: poly.vertices) {
-			if(v_last) {
+			if(v_last && display_mode != LayerDisplay::Mode::FILL_ONLY) {
 				draw_line(v_last->position, it.position, ColorP::FROM_LAYER, poly.layer);
 			}
 			po[i].x  = it.position.x;
@@ -478,9 +455,10 @@ namespace horizon {
 			v_last = &it;
 			i++;
 		}
-		draw_line(poly.vertices.front().position, poly.vertices.back().position, ColorP::FROM_LAYER, poly.layer);
+		if(display_mode != LayerDisplay::Mode::FILL_ONLY)
+			draw_line(poly.vertices.front().position, poly.vertices.back().position, ColorP::FROM_LAYER, poly.layer);
 
-		bool draw_tris = static_cast<LayerDisplay::Mode>((layer_setup.layer_display.at(compress_layer(poly.layer)).flags>>1)&3)!=LayerDisplay::Mode::OUTLINE;
+		bool draw_tris = display_mode!=LayerDisplay::Mode::OUTLINE;
 
 		if(draw_tris) {
 			po.SetOrientation(TPPL_CCW);
@@ -494,7 +472,7 @@ namespace horizon {
 				Coordf p0 = transform.transform(coordf_from_pt(tri[0]));
 				Coordf p1 = transform.transform(coordf_from_pt(tri[1]));
 				Coordf p2 = transform.transform(coordf_from_pt(tri[2]));
-				triangles.emplace_back(p0, p1, p2, ColorP::FROM_LAYER, compress_layer(poly.layer), oid_current, triangle_type_current);
+				triangles[poly.layer].emplace_back(p0, p1, p2, ColorP::FROM_LAYER, oid_current, triangle_type_current);
 			}
 		}
 		if(interactive && !ipoly.temp) {
@@ -684,9 +662,7 @@ namespace horizon {
 		for(const auto &it: pkg.pads) {
 			transform_save();
 			transform.accumulate(it.second.placement);
-			auto bb = it.second.padstack.get_bbox();
-			bb.first = transform.transform(bb.first);
-			bb.second = transform.transform(bb.second);
+			auto bb = transform.transform_bb(it.second.padstack.get_bbox());
 			transform.reset();
 			Coordi a(std::min(bb.first.x, bb.second.x), std::min(bb.first.y, bb.second.y));
 			Coordi b(std::max(bb.first.x, bb.second.x), std::max(bb.first.y, bb.second.y));

@@ -13,12 +13,10 @@ namespace horizon {
 		GLuint p0_index = glGetAttribLocation (program, "p0");
 		GLuint p1_index = glGetAttribLocation (program, "p1");
 		GLuint p2_index = glGetAttribLocation (program, "p2");
-		GLuint oid_index = glGetAttribLocation (program, "oid");
 		GLuint type_index = glGetAttribLocation (program, "type");
 		GLuint color_index = glGetAttribLocation (program, "color");
-		GLuint layer_index = glGetAttribLocation (program, "layer");
 		GLuint flags_index = glGetAttribLocation (program, "flags");
-
+		GL_CHECK_ERROR;
 		GLuint vao, buffer;
 
 		/* we need to create a VAO to store the other buffers */
@@ -44,43 +42,33 @@ namespace horizon {
 		glVertexAttribPointer (p0_index, 2, GL_FLOAT, GL_FALSE,
 							 sizeof(Triangle),
 							 (void*)offsetof(Triangle, x0));
-
 		glEnableVertexAttribArray (p1_index);
 		glVertexAttribPointer (p1_index, 2, GL_FLOAT, GL_FALSE,
 							 sizeof(Triangle),
 							 (void*)offsetof(Triangle, x1));
-
 		glEnableVertexAttribArray (p2_index);
 		glVertexAttribPointer (p2_index, 2, GL_FLOAT, GL_FALSE,
 							 sizeof(Triangle),
 							 (void*)offsetof(Triangle, x2));
-
-		glEnableVertexAttribArray (oid_index);
+		/*glEnableVertexAttribArray (oid_index);
 		glVertexAttribIPointer (oid_index, 1, GL_UNSIGNED_INT,
 							 sizeof(Triangle),
-							 (void*)offsetof(Triangle, oid));
-
+							 (void*)offsetof(Triangle, oid));*/
 		glEnableVertexAttribArray (type_index);
 		glVertexAttribIPointer (type_index, 1, GL_UNSIGNED_BYTE,
 							 sizeof(Triangle),
 							 (void*)offsetof(Triangle, type));
-
 		glEnableVertexAttribArray (color_index);
 		glVertexAttribIPointer (color_index, 1, GL_UNSIGNED_BYTE,
 							 sizeof(Triangle),
 							 (void*)offsetof(Triangle, color));
-
-		glEnableVertexAttribArray (layer_index);
-		glVertexAttribIPointer (layer_index, 1,  GL_UNSIGNED_BYTE,
-								sizeof(Triangle),
-								(void*)offsetof(Triangle, layer));
 
 		glEnableVertexAttribArray (flags_index);
 		glVertexAttribIPointer (flags_index, 1,  GL_UNSIGNED_BYTE,
 								sizeof(Triangle),
 								(void*)offsetof(Triangle, flags));
 
-
+		GL_CHECK_ERROR;
 
 		/* enable and set the color attribute */
 		/* reset the state; we will re-enable the VAO when needed */
@@ -94,55 +82,113 @@ namespace horizon {
 		return vao;
 	}
 
-	TriangleRenderer::TriangleRenderer(CanvasGL *c, std::vector<Triangle> &tris) : ca(c), triangles(tris) {}
+	TriangleRenderer::TriangleRenderer(CanvasGL *c, std::unordered_map<int, std::vector<Triangle>> &tris) : ca(c), triangles(tris) {}
 
 	void TriangleRenderer::realize() {
 		program = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl", "/net/carrotIndustries/horizon/canvas/shaders/triangle-fragment.glsl", "/net/carrotIndustries/horizon/canvas/shaders/triangle-geometry.glsl");
-
+		GL_CHECK_ERROR;
 		glGenBuffers(1, &ubo);
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo);
 		float testd[3] = {1,1,1};
 		glBufferData(GL_UNIFORM_BUFFER, sizeof(testd), &testd, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
+		GL_CHECK_ERROR;
 		unsigned int block_index = glGetUniformBlockIndex(program, "layer_setup");
 		GLuint binding_point_index = 0;
 		glBindBufferBase(GL_UNIFORM_BUFFER, binding_point_index, ubo);
 		glUniformBlockBinding(program, block_index, binding_point_index);
-
+		GL_CHECK_ERROR;
 		vao = create_vao(program, vbo);
 		GET_LOC(this, screenmat);
 		GET_LOC(this, scale);
 		GET_LOC(this, offset);
 		GET_LOC(this, alpha);
-		GET_LOC(this, work_layer);
+		GET_LOC(this, layer_color);
+		GET_LOC(this, layer_flags);
 		GET_LOC(this, types_visible);
+		GL_CHECK_ERROR;
+	}
+
+	void TriangleRenderer::render_layer(int layer) {
+		const auto &ld = ca->layer_display.at(layer);
+		glUniform3f(layer_color_loc, ld.color.r, ld.color.g, ld.color.b);
+		glUniform1i(layer_flags_loc, static_cast<int>(ld.mode));
+		if(ld.mode == LayerDisplay::Mode::FILL_ONLY)
+			glStencilFunc(GL_GREATER, stencil, 0xff);
+		else
+			glStencilFunc(GL_ALWAYS, stencil, 0xff);
+		glDrawArrays (GL_POINTS, layer_offsets[layer], triangles[layer].size());
+		stencil++;
 	}
 
 	void TriangleRenderer::render() {
+		GL_CHECK_ERROR
 		glUseProgram(program);
 		glBindVertexArray (vao);
 		glUniformMatrix3fv(screenmat_loc, 1, GL_TRUE, ca->screenmat.data());
 		glUniform1f(scale_loc, ca->scale);
 		glUniform1f(alpha_loc, ca->property_layer_opacity()/100);
 		glUniform2f(offset_loc, ca->offset.x, ca->offset.y);
-		glUniform1i(work_layer_loc, ca->compress_layer(ca->work_layer));
 		glUniform1ui(types_visible_loc, types_visible);
+		GL_CHECK_ERROR
 
-		glDrawArrays (GL_POINTS, 0, triangles.size());
+		std::vector<int> layers;
+		layers.reserve(layer_offsets.size());
+		for(const auto &it: layer_offsets) {
+			if(ca->layer_display.count(it.first))
+				layers.push_back(it.first);
+		}
+		std::sort(layers.begin(), layers.end());
 
+		glClear(GL_STENCIL_BUFFER_BIT);
+		glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
+		glEnable(GL_STENCIL_TEST);
+		stencil = 1;
+		for(auto layer: layers) {
+			const auto &ld = ca->layer_display.at(layer);
+			if(layer != ca->work_layer && layer < 10000 && ld.visible) {
+				render_layer(layer);
+			}
+		}
+		if(ca->layer_display.count(ca->work_layer))
+			render_layer(ca->work_layer);
+		for(auto layer: layers) {
+			const auto &ld = ca->layer_display.at(layer);
+			if(layer >= 10000 && ld.visible) {
+				render_layer(layer);
+			}
+		}
+		glDisable(GL_STENCIL_TEST);
+
+		GL_CHECK_ERROR
 
 		glBindVertexArray (0);
 		glUseProgram (0);
+		GL_CHECK_ERROR
 	}
 
 	void TriangleRenderer::push() {
-
+		GL_CHECK_ERROR
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo);
 		glBufferData(GL_UNIFORM_BUFFER, sizeof(ca->layer_setup), &ca->layer_setup, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
+		GL_CHECK_ERROR
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(Triangle)*triangles.size(), triangles.data(), GL_STREAM_DRAW);
+		n_tris = 0;
+		for(const auto &it: triangles) {
+			n_tris += it.second.size();
+		}
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Triangle)*n_tris, nullptr, GL_STREAM_DRAW);
+		GL_CHECK_ERROR
+		size_t ofs = 0;
+		layer_offsets.clear();
+		for(const auto &it: triangles) {
+			glBufferSubData(GL_ARRAY_BUFFER, ofs*sizeof(Triangle), it.second.size()*sizeof(Triangle), it.second.data());
+			layer_offsets[it.first] = ofs;
+			ofs += it.second.size();
+		}
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		GL_CHECK_ERROR
 	}
 }

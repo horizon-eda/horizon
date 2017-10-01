@@ -419,14 +419,13 @@ namespace horizon {
 				}
 				else if(args.key == GDK_KEY_v) {
 					if(via == nullptr) {
-						UUID template_uuid;
-						bool r;
-						//std::tie(r, template_uuid) = imp->dialogs.select_via_template(core.b->get_board());
-						if(r) {
+						auto vpp = core.b->get_via_padstack_provider();
+						auto padstack = vpp->get_padstack(rules->get_via_padstack_uuid(net));
+						if(padstack) {
 							auto uu = UUID::random();
-							//auto vt = &core.b->get_board()->via_templates.at(template_uuid);
-							//via = &core.b->get_board()->vias.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, vt)).first->second;
-							//via->padstack.apply_parameter_set(via->via_template->parameter_set);
+							auto ps = rules->get_via_parameter_set(net);
+							via = &core.b->get_board()->vias.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, padstack)).first->second;
+							via->parameter_set = ps;
 							update_temp_track();
 						}
 					}

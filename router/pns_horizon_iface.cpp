@@ -399,12 +399,15 @@ namespace PNS {
 
 	std::unique_ptr<PNS::VIA>     PNS_HORIZON_IFACE::syncVia(const horizon::Via *via) {
 		auto pos = via->junction->position;
+		int net = PNS::ITEM::UnusedNet;
+		if(via->junction->net)
+			net = get_net_code(via->junction->net->uuid);
 		std::unique_ptr<PNS::VIA> pvia( new PNS::VIA(
             VECTOR2I(pos.x, pos.y),
             LAYER_RANGE( layer_to_router(horizon::BoardLayers::TOP_COPPER),  layer_to_router(horizon::BoardLayers::BOTTOM_COPPER)),
             via->parameter_set.at(horizon::ParameterID::VIA_DIAMETER),
             via->parameter_set.at(horizon::ParameterID::HOLE_DIAMETER),
-            get_net_code(via->junction->net->uuid),
+            net,
             VIA_THROUGH )
 		);
 

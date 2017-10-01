@@ -390,7 +390,7 @@ namespace horizon {
 				}
 				Padstack ps = *pool.get_padstack(sel);
 				for(const auto &la: ps.get_layers()) {
-					canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL, la.second.color));
+					canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL_ONLY, la.second.color));
 				}
 				canvas->property_layer_opacity() = 75;
 				canvas->update(ps);
@@ -482,7 +482,11 @@ namespace horizon {
 				}
 				Package pkg = *pool.get_package(sel);
 				for(const auto &la: pkg.get_layers()) {
-					canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::OUTLINE, la.second.color));
+					auto ld = LayerDisplay::Mode::OUTLINE;
+					if(la.second.copper)
+						ld = LayerDisplay::Mode::FILL_ONLY;
+
+					canvas->set_layer_display(la.first, LayerDisplay(true, ld, la.second.color));
 				}
 				pkg.apply_parameter_set({});
 				canvas->property_layer_opacity() = 75;

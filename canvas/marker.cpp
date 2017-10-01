@@ -47,10 +47,10 @@ namespace horizon {
 							 sizeof(Marker),
 							 (void*)offsetof(Marker, r));
 
-		glEnableVertexAttribArray (flags_index);
+		/*glEnableVertexAttribArray (flags_index);
 		glVertexAttribIPointer (flags_index, 1,  GL_UNSIGNED_BYTE,
 								sizeof(Marker),
-								(void*)offsetof(Marker, flags));
+								(void*)offsetof(Marker, flags));*/
 
 
 

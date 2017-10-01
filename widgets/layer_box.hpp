@@ -1,13 +1,12 @@
 #pragma once
 #include <gtkmm.h>
-#include "core/core.hpp"
 #include "sheet.hpp"
 #include "canvas/layer_display.hpp"
 
 namespace horizon {
 	class LayerBox: public Gtk::Box {
 		public:
-			LayerBox(Core *c);
+			LayerBox(class LayerProvider *lp);
 
 			void update();
 			Glib::PropertyProxy<int> property_work_layer() { return p_property_work_layer.get_proxy(); }
@@ -37,11 +36,11 @@ namespace horizon {
 					Gtk::TreeModelColumn<bool> visible;
 					Gtk::TreeModelColumn<bool> is_work;
 					Gtk::TreeModelColumn<Gdk::RGBA> color;
-					Gtk::TreeModelColumn<int> display_mode;
+					Gtk::TreeModelColumn<LayerDisplay::Mode> display_mode;
 			} ;
 			ListColumns list_columns;
 
-			Core *core;
+			class LayerProvider *lp;
 
 			Gtk::TreeView *view;
 			Glib::RefPtr<Gtk::ListStore> store;

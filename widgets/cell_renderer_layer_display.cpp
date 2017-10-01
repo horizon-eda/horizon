@@ -4,7 +4,7 @@ namespace horizon {
 	CellRendererLayerDisplay::CellRendererLayerDisplay(): Glib::ObjectBase(typeid(CellRendererLayerDisplay)),
 			Gtk::CellRenderer(),
 			p_property_color(*this, "color", Gdk::RGBA()),
-			p_property_display_mode(*this, "display-mode", 0) {
+			p_property_display_mode(*this, "display-mode", LayerDisplay::Mode::FILL) {
 		property_mode() = Gtk::CELL_RENDERER_MODE_ACTIVATABLE;
 	}
 
@@ -38,14 +38,19 @@ namespace horizon {
 		cr->fill_preserve();
 		cr->set_source_rgb(c.get_red(), c.get_green(), c.get_blue());
 		cr->set_line_width(2);
-		const auto dm = p_property_display_mode.get_value();
-		if(dm == 0) {
+		LayerDisplay::Mode dm = p_property_display_mode.get_value();
+		if(dm == LayerDisplay::Mode::FILL || dm == LayerDisplay::Mode::FILL_ONLY) {
 			cr->fill_preserve();
 		}
 
+		cr->save();
+		if(dm == LayerDisplay::Mode::FILL_ONLY) {
+			cr->set_source_rgb(0,0,0);
+		}
 		cr->stroke();
+		cr->restore();
 
-		if(dm == 1) {
+		if(dm == LayerDisplay::Mode::HATCH) {
 			cr->move_to(0,16);
 			cr->line_to(16,0);
 			cr->stroke();

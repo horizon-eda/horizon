@@ -14,7 +14,7 @@ namespace horizon {
 		offset = ofs;
 	}
 
-	CanvasGL::CanvasGL() : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), markers(this), error_polygons(this), grid(this), box_selection(this), selectables_renderer(this, &selectables),
+	CanvasGL::CanvasGL() : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), markers(this), grid(this), box_selection(this), selectables_renderer(this, &selectables),
 			triangle_renderer(this, triangles),
 			marker_renderer(this, markers),
 			p_property_work_layer(*this, "work-layer"),
@@ -58,12 +58,18 @@ namespace horizon {
 	void CanvasGL::on_realize() {
 		Gtk::GLArea::on_realize();
 		make_current();
-
+		set_has_stencil_buffer(true);
+		GL_CHECK_ERROR
 		grid.realize();
+		GL_CHECK_ERROR
 		box_selection.realize();
+		GL_CHECK_ERROR
 		selectables_renderer.realize();
+		GL_CHECK_ERROR
 		triangle_renderer.realize();
+		GL_CHECK_ERROR
 		marker_renderer.realize();
+		GL_CHECK_ERROR
 	}
 
 
@@ -72,23 +78,27 @@ namespace horizon {
 			push();
 			needs_push = false;
 		}
+		GL_CHECK_ERROR
 		glClearColor(background_color.r, background_color.g ,background_color.b, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
-
+		GL_CHECK_ERROR
 		grid.render();
-
+		GL_CHECK_ERROR
 		glEnable (GL_BLEND);
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		GL_CHECK_ERROR
 		triangle_renderer.render();
 		glDisable(GL_BLEND);
-
+		GL_CHECK_ERROR
 
 		selectables_renderer.render();
+		GL_CHECK_ERROR
 		box_selection.render();
-
+		GL_CHECK_ERROR
 		grid.render_cursor(cursor_pos_grid);
 		marker_renderer.render();
 		glFlush();
+		GL_CHECK_ERROR
 		return Gtk::GLArea::on_render(context);
 	}
 
@@ -237,18 +247,6 @@ namespace horizon {
 
 	void CanvasGL::request_push() {
 		needs_push = true;
-		auto or_work_layer = [this](int l) {
-			if(l == 35) {
-				return 1001;
-			}
-			else if(l == compress_layer(work_layer)) {
-				return 1000;
-			}
-			else {
-				return l;
-			}
-		};
-		std::sort(triangles.begin(), triangles.end(), [this, or_work_layer](const auto &a, const auto &b){return or_work_layer(a.layer) < or_work_layer(b.layer);});
 		queue_draw();
 	}
 
@@ -271,9 +269,12 @@ namespace horizon {
 	}
 
 	void CanvasGL::push() {
+		GL_CHECK_ERROR
 		selectables_renderer.push();
+		GL_CHECK_ERROR
 		triangle_renderer.push();
 		marker_renderer.push();
+		GL_CHECK_ERROR
 	}
 
 	void CanvasGL::update_markers() {
