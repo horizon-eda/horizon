@@ -1,5 +1,6 @@
 #include "padstack.hpp"
 #include "lut.hpp"
+#include "board_layers.hpp"
 
 namespace horizon {
 
@@ -238,21 +239,25 @@ namespace horizon {
 		return uuid;
 	}
 
-	std::pair<Coordi, Coordi> Padstack::get_bbox() const {
+	std::pair<Coordi, Coordi> Padstack::get_bbox(bool copper_only) const {
 		Coordi a;
 		Coordi b;
 		for(const auto &it: polygons) {
-			auto poly = it.second.remove_arcs(8);
-			for(const auto &v: poly.vertices) {
-				a = Coordi::min(a, v.position);
-				b = Coordi::max(b, v.position);
+			if(!copper_only || BoardLayers::is_copper(it.second.layer)) {
+				auto poly = it.second.remove_arcs(8);
+				for(const auto &v: poly.vertices) {
+					a = Coordi::min(a, v.position);
+					b = Coordi::max(b, v.position);
+				}
 			}
 		}
 		for(const auto &it: shapes) {
-			auto bb = it.second.placement.transform_bb(it.second.get_bbox());
+			if(!copper_only || BoardLayers::is_copper(it.second.layer)) {
+				auto bb = it.second.placement.transform_bb(it.second.get_bbox());
 
-			a = Coordi::min(a, bb.first);
-			b = Coordi::max(b, bb.second);
+				a = Coordi::min(a, bb.first);
+				b = Coordi::max(b, bb.second);
+			}
 		}
 
 		return std::make_pair(a,b);

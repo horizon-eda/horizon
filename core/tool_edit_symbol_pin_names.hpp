@@ -5,15 +5,15 @@
 
 namespace horizon {
 
-	class ToolEditComponentPinNames : public ToolBase {
+	class ToolEditSymbolPinNames : public ToolBase {
 		public :
-		ToolEditComponentPinNames(Core *c, ToolID tid);
+		ToolEditSymbolPinNames(Core *c, ToolID tid);
 			ToolResponse begin(const ToolArgs &args) override;
 			ToolResponse update(const ToolArgs &args) override;
 			bool can_begin() override;
 
 		private:
-			class Component *get_component();
+			class SchematicSymbol *get_symbol();
 
 	};
 }

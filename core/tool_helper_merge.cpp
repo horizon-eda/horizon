@@ -98,6 +98,8 @@ namespace horizon {
 	}
 
 	void ToolHelperMerge::merge_selected_junctions() {
+		if(!core.c)
+			return;
 		for(const auto &it:core.r->selection) {
 			if(it.type == ObjectType::JUNCTION) {
 				auto ju = core.c->get_junction(it.uuid);

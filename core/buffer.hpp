@@ -15,6 +15,8 @@
 #include "polygon.hpp"
 #include "net.hpp"
 #include "shape.hpp"
+#include "net_label.hpp"
+#include "power_symbol.hpp"
 #include "json.hpp"
 #include "canvas/selectables.hpp"
 
@@ -38,10 +40,13 @@ namespace horizon {
 			std::map<UUID, LineNet> net_lines;
 			std::map<UUID, Hole> holes;
 			std::map<UUID, Shape> shapes;
+			std::map<UUID, PowerSymbol> power_symbols;
+			std::map<UUID, NetLabel> net_labels;
 
 			json serialize();
 
 		private:
 			Cores core;
+			NetClass net_class_dummy;
 	};
 }

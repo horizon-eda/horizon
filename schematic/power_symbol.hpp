@@ -21,7 +21,7 @@ namespace horizon {
 	 */
 	class PowerSymbol: UUIDProvider{
 		public :
-			PowerSymbol(const UUID &uu, const json &j, class Sheet &sheet, class Block &block);
+			PowerSymbol(const UUID &uu, const json &j, class Sheet *sheet=nullptr, class Block *block=nullptr);
 			PowerSymbol(const UUID &uu);
 
 			const UUID uuid;

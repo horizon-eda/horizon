@@ -5,13 +5,20 @@
 namespace horizon {
 
 
-	PowerSymbol::PowerSymbol(const UUID &uu, const json &j, Sheet &sheet, Block &block):
+	PowerSymbol::PowerSymbol(const UUID &uu, const json &j, Sheet *sheet, Block *block):
 		uuid(uu),
-		junction(&sheet.junctions.at(j.at("junction").get<std::string>())),
-		net(&block.nets.at(j.at("net").get<std::string>())),
 		mirror(j.value("mirror", false)),
 		temp(false)
 	{
+		if(sheet)
+			junction = &sheet->junctions.at(j.at("junction").get<std::string>());
+		else
+			junction.uuid = j.at("junction").get<std::string>();
+
+		if(block)
+			net = &block->nets.at(j.at("net").get<std::string>());
+		else
+			net.uuid = j.at("net").get<std::string>();
 	}
 
 	UUID PowerSymbol::get_uuid() const {

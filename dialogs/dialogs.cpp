@@ -6,7 +6,7 @@
 #include "widgets/pool_browser_part.hpp"
 #include "widgets/pool_browser_symbol.hpp"
 #include "widgets/pool_browser_padstack.hpp"
-#include "component_pin_names.hpp"
+#include "symbol_pin_names.hpp"
 #include "select_net.hpp"
 #include "ask_net_merge.hpp"
 #include "ask_delete_component.hpp"
@@ -127,8 +127,8 @@ namespace horizon {
 		}
 	}
 
-	bool Dialogs::edit_component_pin_names(Component *comp) {
-		ComponentPinNamesDialog dia(parent, comp);
+	bool Dialogs::edit_symbol_pin_names(SchematicSymbol *sym) {
+		SymbolPinNamesDialog dia(parent, sym);
 		return dia.run() == Gtk::RESPONSE_OK;
 	}
 
@@ -218,7 +218,7 @@ namespace horizon {
 			return {true, dia.entry->get_text()};
 		}
 		else {
-			return {false, 0};
+			return {false, ""};
 		}
 	}
 
@@ -271,7 +271,7 @@ namespace horizon {
 		}
 	}
 
-	std::pair<bool, UUID> Dialogs::map_package(std::set<const Component*> &components) {
+	std::pair<bool, UUID> Dialogs::map_package(const std::vector<std::pair<Component*, bool>> &components) {
 		MapPackageDialog dia(parent, components);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {

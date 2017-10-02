@@ -10,7 +10,7 @@ namespace horizon {
 
 	class MapPackageDialog: public Gtk::Dialog {
 		public:
-			MapPackageDialog(Gtk::Window *parent, std::set<const Component*> &components);
+			MapPackageDialog(Gtk::Window *parent, const std::vector<std::pair<Component*, bool>> &components);
 			UUID selected_uuid;
 			bool selection_valid = false;
 			//virtual ~MainWindow();

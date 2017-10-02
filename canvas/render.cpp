@@ -58,7 +58,7 @@ namespace horizon {
 				draw_plus(junc.position, 250000, c);
 			}
 			else if(junc.connection_count >= 3  && mode == ObjectType::SCHEMATIC) {
-				draw_line(junc.position, junc.position+Coordi(0, 10), c, 0, true, 0.5_mm);
+				draw_line(junc.position, junc.position+Coordi(0, 1000), c, 0, true, 0.5_mm);
 			}
 			else {
 				draw_cross(junc.position, 0.25_mm, c);
@@ -662,7 +662,7 @@ namespace horizon {
 		for(const auto &it: pkg.pads) {
 			transform_save();
 			transform.accumulate(it.second.placement);
-			auto bb = transform.transform_bb(it.second.padstack.get_bbox());
+			auto bb = transform.transform_bb(it.second.padstack.get_bbox(true)); //only copper
 			transform.reset();
 			Coordi a(std::min(bb.first.x, bb.second.x), std::min(bb.first.y, bb.second.y));
 			Coordi b(std::max(bb.first.x, bb.second.x), std::max(bb.first.y, bb.second.y));
@@ -744,6 +744,18 @@ namespace horizon {
 				render(it.second);
 		}
 		for(const auto &it: buf.pads) {
+			render(it.second);
+		}
+		for(const auto &it: buf.symbols) {
+			render(it.second);
+		}
+		for(const auto &it: buf.net_lines) {
+			render(it.second);
+		}
+		for(const auto &it: buf.power_symbols) {
+			render(it.second);
+		}
+		for(const auto &it: buf.net_labels) {
 			render(it.second);
 		}
 	}

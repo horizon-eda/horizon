@@ -15,7 +15,7 @@ namespace horizon {
 		{ToolID::DRAW_LINE, {"Draw line"}},
 		{ToolID::DRAW_NET, {"Draw net line"}},
 		{ToolID::DRAW_POLYGON, {"Draw polyon"}},
-		{ToolID::EDIT_COMPONENT_PIN_NAMES, {"Edit component pin names"}},
+		{ToolID::EDIT_SYMBOL_PIN_NAMES, {"Edit symbol pin names"}},
 		{ToolID::ENTER_DATUM, {"Enter datum"}},
 		{ToolID::MANAGE_BUSES, {"Manage buses"}},
 		{ToolID::MAP_PIN, {"Map pin"}},

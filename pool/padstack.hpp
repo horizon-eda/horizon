@@ -61,7 +61,7 @@ namespace horizon {
 
 
 			UUID get_uuid() const override;
-			std::pair<Coordi, Coordi> get_bbox() const;
+			std::pair<Coordi, Coordi> get_bbox(bool copper_only=false) const;
 			void expand_inner(unsigned int n_inner);
 			const std::map<int, Layer> &get_layers() const override;
 

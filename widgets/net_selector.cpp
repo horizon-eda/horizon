@@ -61,6 +61,7 @@ namespace horizon {
 			}
 		}
 		store->thaw_notify();
+		view->grab_focus();
 	}
 
 	void NetSelector::set_power_only(bool p) {

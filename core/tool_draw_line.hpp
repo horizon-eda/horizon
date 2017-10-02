@@ -13,6 +13,7 @@ namespace horizon {
 		private:
 			Junction *temp_junc = 0;
 			Line *temp_line = 0;
+			void update_tip();
 		
 	};
 }

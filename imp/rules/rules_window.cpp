@@ -202,6 +202,7 @@ namespace horizon {
 		auto &dom = canvas->markers.get_domain(MarkerDomain::CHECK);
 		dom.clear();
 		RulesCheckCache cache(core);
+		annotation->clear();
 		for(auto rule_id: rules->get_rule_ids()) {
 			auto result = rules_check(rules, rule_id, core, cache);
 			if(result.level != RulesCheckErrorLevel::NOT_RUN || true) {
@@ -223,7 +224,7 @@ namespace horizon {
 						dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level), it_err.sheet);
 					}
 
-					annotation->clear();
+
 
 					for(const auto &path: it_err.error_polygons) {
 						ClipperLib::IntPoint last = path.back();

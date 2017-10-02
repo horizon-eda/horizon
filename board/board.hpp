@@ -35,6 +35,7 @@ namespace horizon {
 			Board(const UUID &uu, Block &block);
 
 			void expand(bool careful=false);
+			void expand_packages();
 
 			Board(const Board &brd);
 			void operator=(const Board &brd);

@@ -115,7 +115,7 @@ namespace horizon {
 		pan_drag_move(motion_event);
 		cursor_move((GdkEvent*)motion_event);
 		box_selection.drag_move(motion_event);
-		hover_prelight_update(motion_event);
+		hover_prelight_update((GdkEvent*)motion_event);
 		return Gtk::GLArea::on_motion_notify_event(motion_event);
 	}
 
@@ -147,8 +147,12 @@ namespace horizon {
 		return Gtk::GLArea::on_scroll_event(scroll_event);
 	}
 
+	static int64_t sgn(int64_t x) {
+		return x>0?1:-1;
+	}
+
 	static int64_t round_multiple(int64_t x, int64_t mul) {
-		return ((x+mul/2)/mul)*mul;
+		return ((x+sgn(x)*mul/2)/mul)*mul;
 	}
 
 	Coordi CanvasGL::snap_to_grid(const Coordi &c) {

@@ -475,6 +475,48 @@ namespace horizon {
 
 		vacuum_junctions();
 
+		expand_packages();
+
+
+		for(auto &it: packages) {
+			for(auto &it_pad: it.second.package.pads) {
+				if(it.second.component->part->pad_map.count(it_pad.first)) {
+					const auto &pad_map_item = it.second.component->part->pad_map.at(it_pad.first);
+					auto pin_path = UUIDPath<2>(pad_map_item.gate->uuid, pad_map_item.pin->uuid);
+					if(it.second.component->connections.count(pin_path)) {
+						const auto &conn = it.second.component->connections.at(pin_path);
+						it_pad.second.net = conn.net;
+					}
+					else {
+						it_pad.second.net = nullptr;
+					}
+				}
+				else {
+					it_pad.second.net = nullptr;
+				}
+			}
+		}
+
+		do {
+			for(auto &it: packages) {
+				for(auto &it_pad: it.second.package.pads) {
+					it_pad.second.net_segment = UUID();
+				}
+			}
+			for(auto &it: tracks) {
+				it.second.update_refs(*this);
+				it.second.net = nullptr;
+				it.second.net_segment = UUID();
+			}
+			for(auto &it: junctions) {
+				it.second.net = nullptr;
+				it.second.net_segment = UUID();
+			}
+		} while(propagate_net_segments() == false);
+		update_airwires();
+	}
+
+	void Board::expand_packages() {
 		auto params = rules.get_parameters();
 		ParameterSet pset = {
 			{ParameterID::COURTYARD_EXPANSION, params->courtyard_expansion},
@@ -533,44 +575,6 @@ namespace horizon {
 			}
 
 		}
-
-
-		for(auto &it: packages) {
-			for(auto &it_pad: it.second.package.pads) {
-				if(it.second.component->part->pad_map.count(it_pad.first)) {
-					const auto &pad_map_item = it.second.component->part->pad_map.at(it_pad.first);
-					auto pin_path = UUIDPath<2>(pad_map_item.gate->uuid, pad_map_item.pin->uuid);
-					if(it.second.component->connections.count(pin_path)) {
-						const auto &conn = it.second.component->connections.at(pin_path);
-						it_pad.second.net = conn.net;
-					}
-					else {
-						it_pad.second.net = nullptr;
-					}
-				}
-				else {
-					it_pad.second.net = nullptr;
-				}
-			}
-		}
-
-		do {
-			for(auto &it: packages) {
-				for(auto &it_pad: it.second.package.pads) {
-					it_pad.second.net_segment = UUID();
-				}
-			}
-			for(auto &it: tracks) {
-				it.second.update_refs(*this);
-				it.second.net = nullptr;
-				it.second.net_segment = UUID();
-			}
-			for(auto &it: junctions) {
-				it.second.net = nullptr;
-				it.second.net_segment = UUID();
-			}
-		} while(propagate_net_segments() == false);
-		update_airwires();
 	}
 
 	void Board::disconnect_package(BoardPackage *pkg) {

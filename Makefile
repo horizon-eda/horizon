@@ -124,7 +124,7 @@ SRC_IMP = \
 	core/tool_bend_line_net.cpp\
 	core/tool_move_net_segment.cpp\
 	core/tool_place_power_symbol.cpp\
-	core/tool_edit_component_pin_names.cpp\
+	core/tool_edit_symbol_pin_names.cpp\
 	core/tool_place_bus_label.cpp\
 	core/tool_place_bus_ripper.cpp\
 	core/tool_manage_buses.cpp\
@@ -162,7 +162,7 @@ SRC_IMP = \
 	dialogs/ask_net_merge.cpp\
 	dialogs/ask_delete_component.cpp\
 	dialogs/select_net.cpp\
-	dialogs/component_pin_names.cpp\
+	dialogs/symbol_pin_names.cpp\
 	dialogs/manage_buses.cpp\
 	dialogs/ask_datum.cpp\
 	dialogs/ask_datum_string.cpp\

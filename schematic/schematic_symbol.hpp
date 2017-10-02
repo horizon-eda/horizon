@@ -28,6 +28,8 @@ namespace horizon {
 			Placement placement;
 			std::vector<uuid_ptr<Text>> texts;
 			bool smashed = false;
+			enum class PinDisplayMode {SELECTED_ONLY, BOTH, ALL};
+			PinDisplayMode pin_display_mode = PinDisplayMode::SELECTED_ONLY;
 
 			std::string replace_text(const std::string &t, bool *replaced = nullptr) const;
 

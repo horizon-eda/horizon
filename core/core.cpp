@@ -13,7 +13,7 @@
 #include "tool_bend_line_net.hpp"
 #include "tool_move_net_segment.hpp"
 #include "tool_place_power_symbol.hpp"
-#include "tool_edit_component_pin_names.hpp"
+#include "tool_edit_symbol_pin_names.hpp"
 #include "tool_place_bus_label.hpp"
 #include "tool_place_bus_ripper.hpp"
 #include "tool_manage_buses.hpp"
@@ -96,8 +96,8 @@ namespace horizon {
 			case ToolID::PLACE_POWER_SYMBOL:
 				return std::make_unique<ToolPlacePowerSymbol>(this, tool_id);
 
-			case ToolID::EDIT_COMPONENT_PIN_NAMES:
-				return std::make_unique<ToolEditComponentPinNames>(this, tool_id);
+			case ToolID::EDIT_SYMBOL_PIN_NAMES:
+				return std::make_unique<ToolEditSymbolPinNames>(this, tool_id);
 
 			case ToolID::PLACE_BUS_LABEL:
 				return std::make_unique<ToolPlaceBusLabel>(this, tool_id);

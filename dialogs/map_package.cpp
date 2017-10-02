@@ -25,7 +25,7 @@ namespace horizon {
 		}
 	}
 
-	MapPackageDialog::MapPackageDialog(Gtk::Window *parent, std::set<const Component*> &components) :
+	MapPackageDialog::MapPackageDialog(Gtk::Window *parent, const std::vector<std::pair<Component*, bool>> &components) :
 		Gtk::Dialog("Map Package", *parent, Gtk::DialogFlags::DIALOG_MODAL|Gtk::DialogFlags::DIALOG_USE_HEADER_BAR) {
 		Gtk::Button *button_ok = add_button("OK", Gtk::ResponseType::RESPONSE_OK);
 		add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
@@ -37,10 +37,12 @@ namespace horizon {
 		store = Gtk::ListStore::create(list_columns);
 		Gtk::TreeModel::Row row;
 		for(auto it: components) {
-			row = *(store->append());
-			row[list_columns.uuid] = it->uuid;
-			row[list_columns.name] = it->refdes;
-			row[list_columns.package] = it->part->package->name;
+			if(it.second == false) {
+				row = *(store->append());
+				row[list_columns.uuid] = it.first->uuid;
+				row[list_columns.name] = it.first->refdes;
+				row[list_columns.package] = it.first->part->package->name;
+			}
 		}
 
 		view = Gtk::manage(new Gtk::TreeView(store));

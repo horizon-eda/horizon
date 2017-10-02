@@ -19,7 +19,7 @@ namespace horizon {
 
 			std::pair<bool, UUID> map_pin(const std::vector<std::pair<const Pin*, bool>> &pins);
 			std::pair<bool, UUIDPath<2>> map_symbol(const std::map<UUIDPath<2>, std::string> &gates);
-			std::pair<bool, UUID> map_package(std::set<const Component*> &components);
+			std::pair<bool, UUID> map_package(const std::vector<std::pair<Component*, bool>> &components);
 			std::pair<bool, UUID> select_symbol(class Pool *p, const UUID &unit_uuid);
 			std::pair<bool, UUID> select_part(class Pool *p, const UUID &entity_uuid, const UUID &part_uuid, bool show_none=false);
 			std::pair<bool, UUID> select_entity(class Pool *pool);
@@ -28,7 +28,7 @@ namespace horizon {
 			std::pair<bool, UUID> select_net(class Block *block, bool power_only);
 			std::pair<bool, UUID> select_bus(class Block *block);
 			std::pair<bool, UUID> select_bus_member(class Block *block, const UUID &bus_uuid);
-			bool edit_component_pin_names(class Component *comp);
+			bool edit_symbol_pin_names(class SchematicSymbol *symbol);
 			unsigned int ask_net_merge(class Net *net, class Net *into);
 			bool ask_delete_component(Component *comp);
 			bool manage_buses(class Block *b);

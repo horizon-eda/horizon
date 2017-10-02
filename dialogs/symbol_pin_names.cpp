@@ -1,6 +1,7 @@
-#include "component_pin_names.hpp"
+#include "symbol_pin_names.hpp"
 #include "gate.hpp"
 #include "entity.hpp"
+#include "schematic_symbol.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>
@@ -78,42 +79,39 @@ namespace horizon {
 
 
 
-	ComponentPinNamesDialog::ComponentPinNamesDialog(Gtk::Window *parent, Component *c) :
-		Gtk::Dialog("Component "+c->refdes+" pin names", *parent, Gtk::DialogFlags::DIALOG_MODAL|Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
-		comp(c)
+	SymbolPinNamesDialog::SymbolPinNamesDialog(Gtk::Window *parent, SchematicSymbol *s) :
+		Gtk::Dialog("Symbol "+s->component->refdes+s->gate->suffix+" pin names", *parent, Gtk::DialogFlags::DIALOG_MODAL|Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
+		sym(s)
 		{
 		add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
 		add_button("OK", Gtk::ResponseType::RESPONSE_OK);
 		set_default_response(Gtk::ResponseType::RESPONSE_OK);
 		set_default_size(400, 300);
 
-		auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL,0));
+		auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL,0));
+		auto mode_combo = Gtk::manage(new Gtk::ComboBoxText());
+		mode_combo->set_margin_start(8);
+		mode_combo->set_margin_end(8);
+		mode_combo->set_margin_top(8);
+		mode_combo->set_margin_bottom(8);
+		mode_combo->append(std::to_string(static_cast<int>(SchematicSymbol::PinDisplayMode::SELECTED_ONLY)), "Selected only");
+		mode_combo->append(std::to_string(static_cast<int>(SchematicSymbol::PinDisplayMode::BOTH)), "Both");
+		mode_combo->append(std::to_string(static_cast<int>(SchematicSymbol::PinDisplayMode::ALL)), "All");
+		mode_combo->set_active_id(std::to_string(static_cast<int>(sym->pin_display_mode)));
+		mode_combo->signal_changed().connect([this, mode_combo]{
+			sym->pin_display_mode = static_cast<SchematicSymbol::PinDisplayMode>(std::stoi(mode_combo->get_active_id()));
+		});
 
-		auto stack = Gtk::manage(new Gtk::Stack());
-		stack->set_transition_type(Gtk::STACK_TRANSITION_TYPE_SLIDE_RIGHT);
-		stack->set_transition_duration(100);
-		auto sidebar = Gtk::manage(new Gtk::StackSidebar());
-		sidebar->set_stack(*stack);
+		box->pack_start(*mode_combo, false, false, 0);
 
-		box->pack_start(*sidebar, false, false, 0);
-		box->pack_start(*stack, true, true, 0);
-
-		std::deque<const Gate*> gates_sorted;
-		for(const auto &it: comp->entity->gates) {
-			gates_sorted.push_back(&it.second);
-		}
-		std::sort(gates_sorted.begin(), gates_sorted.end(), [](const auto  &a, const auto &b) {return a->name < b->name;});
-
-
-		for(auto it: gates_sorted) {
-			auto ed = Gtk::manage(new GatePinEditor(comp, it));
-			auto sc = Gtk::manage(new Gtk::ScrolledWindow());
-			sc->add(*ed);
-			stack->add(*sc, (std::string)it->uuid, "Gate "+it->name);
-		}
+		auto ed = Gtk::manage(new GatePinEditor(sym->component, sym->gate));
+		auto sc = Gtk::manage(new Gtk::ScrolledWindow());
+		sc->add(*ed);
+		box->pack_start(*sc, true, true, 0);
 
 
 		get_content_area()->pack_start(*box, true, true, 0);
+		get_content_area()->set_border_width(0);
 
 		show_all();
 	}

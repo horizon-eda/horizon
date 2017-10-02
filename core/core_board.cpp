@@ -266,6 +266,10 @@ namespace horizon {
 						return brd.packages.at(uu).component->refdes;
 					case ObjectProperty::ID::NAME :
 						return brd.packages.at(uu).component->part->package->name;
+					case ObjectProperty::ID::VALUE :
+						return brd.packages.at(uu).component->part->get_value();
+					case ObjectProperty::ID::MPN :
+						return brd.packages.at(uu).component->part->get_MPN();
 					default :
 						return "meh";
 				}

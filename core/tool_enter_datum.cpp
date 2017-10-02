@@ -1,6 +1,7 @@
 #include "tool_enter_datum.hpp"
 #include "core_padstack.hpp"
 #include "core_package.hpp"
+#include "core_schematic.hpp"
 #include "polygon.hpp"
 #include "accumulator.hpp"
 #include "imp_interface.hpp"
@@ -22,6 +23,7 @@ namespace horizon {
 		bool junction_mode = false;
 		bool line_mode = false;
 		bool pad_mode = false;
+		bool net_mode = false;
 
 		Accumulator<int64_t> ai;
 		Accumulator<Coordi> ac;
@@ -59,8 +61,14 @@ namespace horizon {
 				pad_mode = true;
 				ac.accumulate(core.k->get_package()->pads.at(it.uuid).placement.shift);
 			}
+			if(it.type == ObjectType::NET_LABEL) {
+				net_mode = true;
+			}
+			if(it.type == ObjectType::LINE_NET) {
+				net_mode = true;
+			}
 		}
-		int m_total = edge_mode + arc_mode + hole_mode + junction_mode + line_mode + pad_mode;
+		int m_total = edge_mode + arc_mode + hole_mode + junction_mode + line_mode + pad_mode + net_mode;
 		if(m_total != 1) {
 			return ToolResponse::end();
 		}
@@ -225,6 +233,41 @@ namespace horizon {
 					if(rc.second)
 						core.k->get_package()->pads.at(it.uuid).placement.shift.y = c.y;
 				}
+			}
+		}
+		if(net_mode) {
+			Net *net = nullptr;
+			for(const auto &it : args.selection) {
+				if(it.type == ObjectType::NET_LABEL) {
+					auto la = &core.c->get_sheet()->net_labels.at(it.uuid);
+					if(net) {
+						if(net != la->junction->net)
+							return ToolResponse::end();
+					}
+					else {
+						net = la->junction->net;
+					}
+
+				}
+				if(it.type == ObjectType::LINE_NET) {
+					auto li = &core.c->get_sheet()->net_lines.at(it.uuid);
+					if(net) {
+						if(net != li->net)
+							return ToolResponse::end();
+					}
+					else {
+						net = li->net;
+					}
+
+				}
+			}
+			if(!net)
+				return ToolResponse::end();
+			bool r = false;
+			std::string net_name;
+			std::tie(r, net_name) = imp->dialogs.ask_datum_string("Enter net name", net->name);
+			if(r) {
+				net->name = net_name;
 			}
 		}
 

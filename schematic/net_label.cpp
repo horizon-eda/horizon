@@ -11,13 +11,16 @@ namespace horizon {
 		{"right",	Orientation::RIGHT},
 	};
 
-	NetLabel::NetLabel(const UUID &uu, const json &j, Sheet &sheet):
+	NetLabel::NetLabel(const UUID &uu, const json &j, Sheet *sheet):
 		uuid(uu),
-		junction(&sheet.junctions.at(j.at("junction").get<std::string>())),
 		orientation(orientation_lut.lookup(j["orientation"])),
 		size(j.value("size", 2500000)),
 		offsheet_refs(j.value("offsheet_refs", true))
 	{
+		if(sheet)
+			junction = &sheet->junctions.at(j.at("junction").get<std::string>());
+		else
+			junction.uuid = j.at("junction").get<std::string>();
 	}
 
 	NetLabel::NetLabel(const UUID &uu): uuid(uu) {}

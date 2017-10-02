@@ -91,6 +91,8 @@ namespace horizon {
 			{ObjectProperty::ID::FLIPPED, {ObjectProperty::Type::BOOL, "Flipped"}},
 			{ObjectProperty::ID::REFDES, {ObjectProperty::Type::STRING_RO, "Ref. Desig."}},
 			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Package"}},
+			{ObjectProperty::ID::VALUE, {ObjectProperty::Type::STRING_RO, "Value"}},
+			{ObjectProperty::ID::MPN, {ObjectProperty::Type::STRING_RO, "MPN"}},
 		}}},
 		{ObjectType::TRACK, {"Track", "Tracks", {
 			{ObjectProperty::ID::WIDTH, {ObjectProperty::Type::LENGTH, "Width"}},

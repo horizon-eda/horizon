@@ -1,7 +1,14 @@
 #include "schematic_symbol.hpp"
 #include "part.hpp"
+#include "lut.hpp"
 
 namespace horizon {
+
+	static const LutEnumStr<SchematicSymbol::PinDisplayMode> pdm_lut = {
+		{"selected_only",	SchematicSymbol::PinDisplayMode::SELECTED_ONLY},
+		{"both",			SchematicSymbol::PinDisplayMode::BOTH},
+		{"all",				SchematicSymbol::PinDisplayMode::ALL},
+	};
 
 	SchematicSymbol::SchematicSymbol(const UUID &uu, const json &j, Pool &pool, Block *block):
 			uuid(uu),
@@ -10,6 +17,8 @@ namespace horizon {
 			placement(j.at("placement")),
 			smashed(j.value("smashed", false))
 		{
+			if(j.count("pin_display_mode"))
+				pin_display_mode = pdm_lut.lookup(j.at("pin_display_mode"));
 			if(block) {
 				component = &block->components.at(j.at("component").get<std::string>());
 				gate = &component->entity->gates.at(j.at("gate").get<std::string>());
@@ -34,6 +43,7 @@ namespace horizon {
 			j["symbol"] = (std::string)pool_symbol->uuid;
 			j["placement"] = placement.serialize();
 			j["smashed"] = smashed;
+			j["pin_display_mode"] = pdm_lut.lookup_reverse(pin_display_mode);
 			j["texts"] = json::array();
 			for(const auto &it: texts) {
 				j["texts"].push_back((std::string)it->uuid);

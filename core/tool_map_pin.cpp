@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "core_symbol.hpp"
 #include "imp_interface.hpp"
+#include "tool_helper_move.hpp"
 
 namespace horizon {
 
@@ -60,7 +61,7 @@ namespace horizon {
 
 		create_pin(selected_pin);
 		pin->position = args.coords;
-		imp->tool_bar_set_tip("<b>LMB:</b>place pin <b>RMB:</b>delete current pin and finish <b>r:</b>rotate <b>Space</b>:select pin <b>Return:</b>autoplace");
+		imp->tool_bar_set_tip("<b>LMB:</b>place pin <b>RMB:</b>delete current pin and finish <b>r:</b>rotate <b>e:</b>mirror <b>Space</b>:select pin <b>Return:</b>autoplace");
 
 		core.r->selection.clear();
 
@@ -137,13 +138,8 @@ namespace horizon {
 					pin_last = p1;
 				}
 			}
-			else if(args.key == GDK_KEY_r) {
-				switch(pin->orientation) {
-					case Orientation::UP:    pin->orientation=Orientation::LEFT; break;
-					case Orientation::DOWN:  pin->orientation=Orientation::RIGHT; break;
-					case Orientation::LEFT:  pin->orientation=Orientation::DOWN; break;
-					case Orientation::RIGHT: pin->orientation=Orientation::UP; break;
-				}
+			else if(args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
+				pin->orientation = ToolHelperMove::transform_orienation(pin->orientation, args.key == GDK_KEY_r);
 			}
 			else if(args.key == GDK_KEY_Escape) {
 				core.r->revert();

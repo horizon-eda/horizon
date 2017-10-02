@@ -5,13 +5,13 @@
 
 namespace horizon {
 
-	void CanvasGL::hover_prelight_update(GdkEventMotion *motion_event) {
+	void CanvasGL::hover_prelight_update(GdkEvent *motion_event) {
 		if(!selection_allowed)
 			return;
 		if(selection_mode != CanvasGL::SelectionMode::HOVER)
 			return;
 		gdouble x,y;
-		gdk_event_get_coords((GdkEvent*)motion_event, &x, &y);
+		gdk_event_get_coords(motion_event, &x, &y);
 		auto c = screen2canvas({(float)x,(float)y});
 		float area_min = 1e99;
 		int area_min_i = -1;

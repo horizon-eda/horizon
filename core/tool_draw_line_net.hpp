@@ -16,11 +16,12 @@ namespace horizon {
 			Junction *temp_junc_mid = 0;
 			class LineNet *temp_line_head = 0;
 			class LineNet *temp_line_mid = 0;
+			class NetLabel *net_label = nullptr;
 			enum class BendMode{XY, YX, ARB};
 			BendMode bend_mode=BendMode::XY;
 			void move_temp_junc(const Coordi &c);
-			ToolResponse end();
 			void update_tip();
+			void restart(const Coordi &c);
 
 			Junction *make_temp_junc(const Coordi &c);
 	};

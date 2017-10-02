@@ -123,11 +123,12 @@ namespace horizon {
 				auto u = UUID::random();
 				auto x = core.r->insert_polygon(u);
 				*x = Polygon(u, it.value());
+				int vertex = 0;
 				for(auto &itv: x->vertices) {
 					itv.arc_center += shift;
 					itv.position += shift;
+					core.r->selection.emplace(u, ObjectType::POLYGON_VERTEX, vertex++);
 				}
-				core.r->selection.emplace(u, ObjectType::POLYGON);
 			}
 		}
 		std::map<UUID, const UUID> net_xlat;
@@ -149,6 +150,7 @@ namespace horizon {
 				}
 				if(!net_new) {
 					net_new = block->insert_net();
+					net_new->is_power = net_from_json.is_power;
 					net_new->name = net_name;
 				}
 				net_xlat.emplace(it.key(), net_new->uuid);
@@ -209,6 +211,28 @@ namespace horizon {
 				update_net_line_conn(line.to);
 				sheet->net_lines.emplace(u, line);
 				core.r->selection.emplace(u, ObjectType::LINE_NET);
+			}
+		}
+		if(j.count("net_labels") && core.c){
+			const json &o = j["net_labels"];
+			auto sheet = core.c->get_sheet();
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID::random();
+				auto x = &core.c->get_sheet()->net_labels.emplace(u, NetLabel(u, it.value())).first->second;
+				x->junction = &sheet->junctions.at(junction_xlat.at(x->junction.uuid));
+				core.r->selection.emplace(u, ObjectType::NET_LABEL);
+			}
+		}
+		if(j.count("power_symbols") && core.c){
+			const json &o = j["power_symbols"];
+			auto sheet = core.c->get_sheet();
+			auto block = core.c->get_schematic()->block;
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID::random();
+				auto x = &core.c->get_sheet()->power_symbols.emplace(u, PowerSymbol(u, it.value())).first->second;
+				x->junction = &sheet->junctions.at(junction_xlat.at(x->junction.uuid));
+				x->net = &block->nets.at(net_xlat.at(x->net.uuid));
+				core.r->selection.emplace(u, ObjectType::NET_LABEL);
 			}
 		}
 		if(j.count("shapes")){

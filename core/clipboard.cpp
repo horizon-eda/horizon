@@ -47,11 +47,11 @@ namespace horizon {
 				, 10e3, 10e3);
 
 				Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create(surface);
-				cr->translate(1e3, 0);
+				cr->scale(1, -1);
+				cr->translate(1e3, -1e3);
 				CanvasCairo ca(cr);
 				ca.update(buffer, core->get_layer_provider());
 			}
-
 			selection_data.set("image/svg+xml", stream.str());
 		}
 

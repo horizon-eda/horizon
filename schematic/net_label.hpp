@@ -20,7 +20,7 @@ namespace horizon {
 	 */
 	class NetLabel {
 		public :
-			NetLabel(const UUID &uu, const json &j, class Sheet &sheet);
+			NetLabel(const UUID &uu, const json &j, class Sheet *sheet=nullptr);
 			NetLabel(const UUID &uu);
 
 			const UUID uuid;

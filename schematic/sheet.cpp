@@ -45,14 +45,14 @@ namespace horizon {
 				const json &o = j["net_labels"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					net_labels.emplace(std::make_pair(u, NetLabel(u, it.value(), *this)));
+					net_labels.emplace(std::make_pair(u, NetLabel(u, it.value(), this)));
 				}
 			}
 			{
 				const json &o = j["power_symbols"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					power_symbols.emplace(std::make_pair(u, PowerSymbol(u, it.value(), *this, block)));
+					power_symbols.emplace(std::make_pair(u, PowerSymbol(u, it.value(), this, &block)));
 				}
 			}
 			{
@@ -128,11 +128,27 @@ namespace horizon {
 			}
 			schsym.symbol = *schsym.pool_symbol;
 			schsym.symbol.expand();
-			for(const auto &it_name_index: schsym.component->pin_names) {
-				if(it_name_index.first.at(0) == schsym.gate->uuid) {
-					if(it_name_index.second != -1) {
-						auto pin_uuid = it_name_index.first.at(1);
-						schsym.symbol.pins.at(pin_uuid).name =  schsym.gate->unit->pins.at(pin_uuid).names.at(it_name_index.second);
+
+			if(schsym.pin_display_mode == SchematicSymbol::PinDisplayMode::ALL) {
+				for(auto &it_pin: schsym.symbol.pins) {
+					auto pin_uuid = it_pin.first;
+					it_pin.second.name = "";
+					for(auto &pin_name: schsym.gate->unit->pins.at(pin_uuid).names) {
+						it_pin.second.name += pin_name + " ";
+					}
+					it_pin.second.name += "(" + schsym.gate->unit->pins.at(pin_uuid).primary_name + ")";
+				}
+			}
+			else {
+				for(const auto &it_name_index: schsym.component->pin_names) {
+					if(it_name_index.first.at(0) == schsym.gate->uuid) {
+						if(it_name_index.second != -1) {
+							auto pin_uuid = it_name_index.first.at(1);
+							if(schsym.pin_display_mode == SchematicSymbol::PinDisplayMode::SELECTED_ONLY)
+								schsym.symbol.pins.at(pin_uuid).name =  schsym.gate->unit->pins.at(pin_uuid).names.at(it_name_index.second);
+							else if(schsym.pin_display_mode == SchematicSymbol::PinDisplayMode::BOTH)
+								schsym.symbol.pins.at(pin_uuid).name =  schsym.gate->unit->pins.at(pin_uuid).names.at(it_name_index.second) + " (" + schsym.gate->unit->pins.at(pin_uuid).primary_name + ")";
+						}
 					}
 				}
 			}

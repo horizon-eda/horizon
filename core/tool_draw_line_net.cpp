@@ -2,6 +2,7 @@
 #include <iostream>
 #include "core_schematic.hpp"
 #include "imp_interface.hpp"
+#include "tool_helper_move.hpp"
 
 namespace horizon {
 	
@@ -24,6 +25,16 @@ namespace horizon {
 
 		update_tip();
 		return ToolResponse();
+	}
+
+	void ToolDrawLineNet::restart(const Coordi &c) {
+		core.c->get_schematic()->expand(); //gets rid of warnings...
+		temp_junc_head = core.c->insert_junction(UUID::random());
+		temp_junc_head->temp = true;
+		temp_junc_head->position = c;
+		temp_line_head = nullptr;
+		temp_line_mid = nullptr;
+		update_tip();
 	}
 
 	void ToolDrawLineNet::move_temp_junc(const Coordi &c) {
@@ -51,15 +62,13 @@ namespace horizon {
 		return j;
 	}
 
-	ToolResponse ToolDrawLineNet::end() {
-		return ToolResponse::next(ToolID::DRAW_NET);
-	}
-
 	void ToolDrawLineNet::update_tip() {
 		std::stringstream ss;
-		ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete last segment <b>space:</b>place junction <b>⏎:</b>finish <b>/:</b>line posture <b>a:</b>arbitrary angle   <i>";
+		ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete last segment <b>space:</b>place junction <b>⏎:</b>finish <b>/:</b>line posture <b>a:</b>arbitrary angle ";
 		if(temp_line_head) {
 			if(temp_line_head->net) {
+				ss << "<b>b:</b>toggle label <b>r:</b>rotate label";
+				ss << " <i>";
 				if(temp_line_head->net->name.size()) {
 					ss << "drawing net \"" << temp_line_head->net->name << "\"";
 				}
@@ -76,6 +85,7 @@ namespace horizon {
 
 		}
 		else {
+			ss << " <i>";
 			ss << "select starting point";
 		}
 		ss<<"</i>";
@@ -160,8 +170,8 @@ namespace horizon {
 						if(do_merge) {
 							temp_line_head->to.connect(ju);
 							core.r->delete_junction(temp_junc_head->uuid);
-							core.r->commit();
-							return end();
+							restart(args.coords);
+							return ToolResponse();
 						}
 						else {
 							return ToolResponse();
@@ -193,8 +203,8 @@ namespace horizon {
 						}
 						temp_line_head->to.connect(sym, pin);
 						core.r->delete_junction(temp_junc_head->uuid);
-						core.r->commit();
-						return end();
+						restart(args.coords);
+						return ToolResponse();
 					}
 					else if(args.target.type == ObjectType::BUS_RIPPER) {
 						rip = &core.c->get_sheet()->bus_rippers.at(args.target.path.at(0));
@@ -210,10 +220,15 @@ namespace horizon {
 
 						temp_line_head->to.connect(rip);
 						core.r->delete_junction(temp_junc_head->uuid);
-						core.r->commit();
-						return end();
+						restart(args.coords);
+						return ToolResponse();
 					}
 					else { //unknown or no target
+						if(temp_line_mid->from.get_position() == args.coords) {
+							restart(args.coords);
+							return ToolResponse();
+						}
+
 						ju = temp_junc_head;
 						for(auto it: core.c->get_net_lines()) {
 							if(it->coord_on_line(temp_junc_head->position)) {
@@ -233,8 +248,8 @@ namespace horizon {
 										auto do_merge = merge_bus_net(temp_line_head->net, temp_line_head->bus, it->net, it->bus);
 										if(do_merge) {
 											core.c->get_sheet()->split_line_net(it, ju);
-											core.r->commit();
-											return end();
+											restart(args.coords);
+											return ToolResponse();
 										}
 										else {
 											return ToolResponse(); //bus-net illegal
@@ -330,6 +345,23 @@ namespace horizon {
 					default: bend_mode=BendMode::XY;
 				}
 				move_temp_junc(args.coords);
+			}
+			else if(args.key == GDK_KEY_b) {
+				if(temp_junc_head && !temp_junc_head->bus) {
+					if(!net_label) {
+						auto uu = UUID::random();
+						net_label = &core.c->get_sheet()->net_labels.emplace(uu, uu).first->second;
+						net_label->junction = temp_junc_head;
+					}
+					else {
+						core.c->get_sheet()->net_labels.erase(net_label->uuid);
+						net_label = nullptr;
+					}
+				}
+			}
+			else if(args.key == GDK_KEY_r) {
+				if(net_label)
+					net_label->orientation = ToolHelperMove::transform_orienation(net_label->orientation, args.key == GDK_KEY_r);
 			}
 			else if(args.key == GDK_KEY_a) {
 				bend_mode = BendMode::ARB;

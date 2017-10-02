@@ -7,7 +7,7 @@
 #include "util.hpp"
 
 namespace horizon {
-	Buffer::Buffer(Core *co):core(co) {}
+	Buffer::Buffer(Core *co):core(co),net_class_dummy(UUID::random()) {}
 
 	void Buffer::clear() {
 		texts.clear();
@@ -22,6 +22,8 @@ namespace horizon {
 		symbols.clear();
 		shapes.clear();
 		net_lines.clear();
+		power_symbols.clear();
+		net_labels.clear();
 	}
 
 	void Buffer::load_from_symbol(std::set<SelectableRef> selection) {
@@ -61,23 +63,26 @@ namespace horizon {
 						if(it_ft.is_junc()) {
 							new_sel.emplace(it_ft.junc.uuid, ObjectType::JUNCTION);
 						}
-						new_sel.emplace(line->net->uuid, ObjectType::NET);
+						if(line->net)
+							new_sel.emplace(line->net->uuid, ObjectType::NET);
 					}
 				} break;
-
-				/*
 				case ObjectType::NET_LABEL : {
 					auto &la = core.c->get_sheet()->net_labels.at(it.uuid);
 					new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
 				} break;
+				case ObjectType::POWER_SYMBOL : {
+					auto &ps = core.c->get_sheet()->power_symbols.at(it.uuid);
+					new_sel.emplace(ps.net->uuid, ObjectType::NET);
+					new_sel.emplace(ps.junction->uuid, ObjectType::JUNCTION);
+				} break;
+
+				/*
 				case ObjectType::BUS_LABEL : {
 					auto &la = core.c->get_sheet()->bus_labels.at(it.uuid);
 					new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
 				} break;
-				case ObjectType::POWER_SYMBOL : {
-					auto &ps = core.c->get_sheet()->power_symbols.at(it.uuid);
-					new_sel.emplace(ps.junction->uuid, ObjectType::JUNCTION);
-				} break;
+
 				case ObjectType::BUS_RIPPER : {
 					auto &rip = core.c->get_sheet()->bus_rippers.at(it.uuid);
 					new_sel.emplace(rip.junction->uuid, ObjectType::JUNCTION);
@@ -121,7 +126,8 @@ namespace horizon {
 			}
 			else if(it.type == ObjectType::NET) {
 				auto &x = core.c->get_schematic()->block->nets.at(it.uuid);
-				nets.emplace(x.uuid, x);
+				auto net = &nets.emplace(x.uuid, x).first->second;
+				net->net_class = &net_class_dummy;
 			}
 			else if(it.type == ObjectType::SYMBOL_PIN) {
 				auto x = core.y->get_symbol_pin(it.uuid);
@@ -201,6 +207,17 @@ namespace horizon {
 					update_conn(li.from);
 					update_conn(li.to);
 				}
+			}
+			if(it.type == ObjectType::NET_LABEL) {
+				auto x = &core.c->get_sheet()->net_labels.at(it.uuid);
+				auto &la = net_labels.emplace(x->uuid, *x).first->second;
+				la.junction.update(junctions);
+			}
+			if(it.type == ObjectType::POWER_SYMBOL) {
+				auto x = &core.c->get_sheet()->power_symbols.at(it.uuid);
+				auto &ps = power_symbols.emplace(x->uuid, *x).first->second;
+				ps.junction.update(junctions);
+				ps.net.update(nets);
 			}
 		}
 		for(const auto &it: selection) {
@@ -285,6 +302,14 @@ namespace horizon {
 		j["net_lines"] = json::object();
 		for(const auto &it: net_lines) {
 			j["net_lines"][(std::string)it.first] = it.second.serialize();
+		}
+		j["net_labels"] = json::object();
+		for(const auto &it: net_labels) {
+			j["net_labels"][(std::string)it.first] = it.second.serialize();
+		}
+		j["power_symbols"] = json::object();
+		for(const auto &it: power_symbols) {
+			j["power_symbols"][(std::string)it.first] = it.second.serialize();
 		}
 		return j;
 	}

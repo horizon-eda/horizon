@@ -70,7 +70,11 @@ namespace horizon {
 				}
 			}
 			else if(it.type == ObjectType::BOARD_PACKAGE) {
+				auto pkg = &core.b->get_board()->packages.at(it.uuid);
 				core.b->get_board()->disconnect_package(&core.b->get_board()->packages.at(it.uuid));
+				for(const auto &it_text: pkg->texts) {
+					delete_extra.emplace(it_text->uuid, ObjectType::TEXT);
+				}
 			}
 			else if(it.type == ObjectType::POLYGON_EDGE) {
 				Polygon *poly = core.r->get_polygon(it.uuid);

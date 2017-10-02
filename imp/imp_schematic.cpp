@@ -39,7 +39,7 @@ namespace horizon {
 				{{GDK_KEY_o},				ToolID::PLACE_POWER_SYMBOL},
 				{{GDK_KEY_v},				ToolID::MOVE_NET_SEGMENT},
 				{{GDK_KEY_V},				ToolID::MOVE_NET_SEGMENT_NEW},
-				{{GDK_KEY_i},				ToolID::EDIT_COMPONENT_PIN_NAMES},
+				{{GDK_KEY_i},				ToolID::EDIT_SYMBOL_PIN_NAMES},
 				{{GDK_KEY_p, GDK_KEY_u},	ToolID::PLACE_BUS_LABEL},
 				{{GDK_KEY_u},				ToolID::PLACE_BUS_LABEL},
 				{{GDK_KEY_p, GDK_KEY_r},	ToolID::PLACE_BUS_RIPPER},
