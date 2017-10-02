@@ -23,4 +23,4 @@ example/pool/*.db
 dist
 *.trace
 docs
-
+*/__pycache__

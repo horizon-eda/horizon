@@ -277,3 +277,4 @@ description.
 - https://github.com/ivanfratric/polypartition/
 - https://qcad.org/en/what-is-dxflib
 - https://git.launchpad.net/kicad/tree/pcbnew/router
+- https://github.com/russdill/pybis
