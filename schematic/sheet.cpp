@@ -128,6 +128,7 @@ namespace horizon {
 			}
 			schsym.symbol = *schsym.pool_symbol;
 			schsym.symbol.expand();
+			schsym.symbol.apply_placement(schsym.placement);
 
 			if(schsym.pin_display_mode == SchematicSymbol::PinDisplayMode::ALL) {
 				for(auto &it_pin: schsym.symbol.pins) {

@@ -29,7 +29,7 @@ namespace horizon {
 			Canvas();
 			virtual ~Canvas() {}
 			void clear();
-			void update(const class Symbol &sym);
+			void update(const class Symbol &sym, const Placement &transform=Placement());
 			void update(const class Sheet &sheet);
 			void update(const class Padstack &padstack);
 			void update(const class Package &pkg);

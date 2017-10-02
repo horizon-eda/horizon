@@ -239,6 +239,8 @@ SRC_IMP = \
 	rules/cache.cpp\
 	board/board_rules_check.cpp\
 	schematic/schematic_rules_check.cpp\
+	imp/symbol_preview/symbol_preview_window.cpp\
+	imp/symbol_preview/preview_box.cpp\
 
 SRC_ROUTER = \
 	router/router/pns_router.cpp \

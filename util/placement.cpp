@@ -60,6 +60,7 @@ namespace horizon {
 		angle = a;
 		while(angle<0)
 			angle += 65536;
+		angle = angle%65536;
 	}
 
 	void Placement::inc_angle(int a) {
@@ -76,6 +77,10 @@ namespace horizon {
 
 	int Placement::get_angle() const {
 		return angle;
+	}
+
+	int Placement::get_angle_deg() const {
+		return (angle*360)/65536;
 	}
 
 }

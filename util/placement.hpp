@@ -68,6 +68,7 @@ namespace horizon {
 		void inc_angle_deg(int a);
 		void set_angle_deg(int a);
 		int get_angle() const;
+		int get_angle_deg() const;
 		Coordi shift;
 
 		bool mirror = false;

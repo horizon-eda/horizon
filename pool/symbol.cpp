@@ -81,6 +81,23 @@ namespace horizon {
 				texts.emplace(std::make_pair(u, Text(u, it.value())));
 			}
 		}
+		if(j.count("text_placements")) {
+			const json &o = j["text_placements"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				std::string view_str(it.key());
+				int angle = std::stoi(view_str);
+				int mirror = view_str.find("m")!=std::string::npos;
+				const json &k = it.value();
+				for (auto it2 = k.cbegin(); it2 != k.cend(); ++it2) {
+					UUID u(it2.key());
+					if(texts.count(u)) {
+						Placement placement (it2.value());
+						std::tuple<int, bool, UUID> key (angle ,mirror, u);
+						text_placements[key] = placement;
+					}
+				}
+			}
+		}
 	}
 	
 	Symbol::Symbol(const UUID &uu): uuid(uu) {}
@@ -126,7 +143,8 @@ namespace horizon {
 		junctions(sym.junctions),
 		lines(sym.lines),
 		arcs(sym.arcs),
-		texts(sym.texts)
+		texts(sym.texts),
+		text_placements(sym.text_placements)
 	{
 		update_refs();
 	}
@@ -140,6 +158,7 @@ namespace horizon {
 		lines = sym.lines;
 		arcs = sym.arcs;
 		texts = sym.texts;
+		text_placements = sym.text_placements;
 		update_refs();
 	}
 	
@@ -181,6 +200,15 @@ namespace horizon {
 		return std::make_pair(a,b);
 	}
 
+	void Symbol::apply_placement(const Placement &p) {
+		for(auto &it: texts) {
+			std::tuple<int, bool, UUID> key (p.get_angle_deg() , p.mirror, it.second.uuid);
+			if(text_placements.count(key)) {
+				it.second.placement = text_placements.at(key);
+			}
+		}
+	}
+
 	json Symbol::serialize() const {
 		json j;
 		j["type"] = "symbol";
@@ -206,6 +234,21 @@ namespace horizon {
 		j["texts"] = json::object();
 		for(const auto &it: texts) {
 			j["texts"][(std::string)it.first] = it.second.serialize();
+		}
+		j["text_placements"] = json::object();
+		for(const auto &it: text_placements) {
+			int angle;
+			bool mirror;
+			UUID uu;
+			std::tie(angle, mirror, uu) = it.first;
+			std::string k = std::to_string(angle);
+			if(mirror) {
+				k+="m";
+			}
+			else {
+				k+="n";
+			}
+			j["text_placements"][k][(std::string)uu] = it.second.serialize();
 		}
 		return j;
 	}

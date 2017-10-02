@@ -14,6 +14,7 @@ namespace horizon {
 			void canvas_update() override;
 			CoreSymbol core_symbol;
 
-			Gtk::Entry *name_entry;
+			Gtk::Entry *name_entry = nullptr;
+			class SymbolPreviewWindow *symbol_preview_window = nullptr;
 	};
 }

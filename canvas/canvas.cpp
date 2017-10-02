@@ -100,9 +100,10 @@ namespace horizon {
 
 
 
-	void Canvas::update(const Symbol &sym) {
+	void Canvas::update(const Symbol &sym, const Placement &tr) {
 		clear();
 		layer_provider = &sym;
+		transform = tr;
 		render(sym);
 		request_push();
 	}

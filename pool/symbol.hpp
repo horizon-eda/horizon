@@ -72,6 +72,9 @@ namespace horizon {
 			std::map<UUID, Arc> arcs;
 			std::map<UUID, Text> texts;
 			
+			std::map<std::tuple<int, bool, UUID>, Placement> text_placements;
+			void apply_placement(const Placement &p);
+
 		private :
 			void update_refs();
 	};
