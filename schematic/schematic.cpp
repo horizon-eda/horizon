@@ -201,7 +201,7 @@ namespace horizon {
 		if(sym->smashed)
 			return;
 		sym->smashed = true;
-		for(const auto &it: sym->pool_symbol->texts) {
+		for(const auto &it: sym->symbol.texts) {
 			auto uu = UUID::random();
 			auto &x = sheet->texts.emplace(uu, uu).first->second;
 			x.from_smash = true;

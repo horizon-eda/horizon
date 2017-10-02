@@ -173,6 +173,7 @@ namespace horizon {
 				SymbolPin &p = pins.at(uu);
 				p.pad = "$PAD";
 				p.name = unit->pins.at(uu).primary_name;
+				p.direction = unit->pins.at(uu).direction;
 			}
 			else {
 				pins.erase(uu);

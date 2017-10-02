@@ -30,6 +30,7 @@ namespace horizon {
 			bool smashed = false;
 			enum class PinDisplayMode {SELECTED_ONLY, BOTH, ALL};
 			PinDisplayMode pin_display_mode = PinDisplayMode::SELECTED_ONLY;
+			bool display_directions = false;
 
 			std::string replace_text(const std::string &t, bool *replaced = nullptr) const;
 

@@ -15,7 +15,8 @@ namespace horizon {
 			pool_symbol(pool.get_symbol(j.at("symbol").get<std::string>())),
 			symbol(*pool_symbol),
 			placement(j.at("placement")),
-			smashed(j.value("smashed", false))
+			smashed(j.value("smashed", false)),
+			display_directions(j.value("display_directions", false))
 		{
 			if(j.count("pin_display_mode"))
 				pin_display_mode = pdm_lut.lookup(j.at("pin_display_mode"));
@@ -44,6 +45,7 @@ namespace horizon {
 			j["placement"] = placement.serialize();
 			j["smashed"] = smashed;
 			j["pin_display_mode"] = pdm_lut.lookup_reverse(pin_display_mode);
+			j["display_directions"] = display_directions;
 			j["texts"] = json::array();
 			for(const auto &it: texts) {
 				j["texts"].push_back((std::string)it->uuid);

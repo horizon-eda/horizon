@@ -306,6 +306,17 @@ namespace horizon {
 						;
 				}
 			break;
+			case ObjectType::SCHEMATIC_SYMBOL :
+				switch(property) {
+					case ObjectProperty::ID::DISPLAY_DIRECTIONS :
+						if(sheet.symbols.at(uu).display_directions == value)
+							return;
+						sheet.symbols.at(uu).display_directions = value;
+					break;
+					default :
+						;
+				}
+			break;
 
 			default:
 				;
@@ -333,6 +344,14 @@ namespace horizon {
 				switch(property) {
 					case ObjectProperty::ID::OFFSHEET_REFS :
 						return sheet.net_labels.at(uu).offsheet_refs;
+					default :
+						;
+				}
+			break;
+			case ObjectType::SCHEMATIC_SYMBOL :
+				switch(property) {
+					case ObjectProperty::ID::DISPLAY_DIRECTIONS :
+						return sheet.symbols.at(uu).display_directions;
 					default :
 						;
 				}

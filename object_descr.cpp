@@ -18,6 +18,7 @@ namespace horizon {
 		{ObjectType::BUS_RIPPER, {"Bus ripper", "Bus rippers", {
 		}}},
 		{ObjectType::SCHEMATIC_SYMBOL, {"Symbol", "Symbols", {
+			{ObjectProperty::ID::DISPLAY_DIRECTIONS, {ObjectProperty::Type::BOOL, "Pin directions"}},
 		}}},
 		{ObjectType::POWER_SYMBOL, {"Power symbol", "Power symbols", {
 		}}},

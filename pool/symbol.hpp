@@ -39,6 +39,7 @@ namespace horizon {
 			ConnectorStyle connector_style = ConnectorStyle::BOX;
 			std::map<UUID, class LineNet*> connected_net_lines;
 			UUID net_segment;
+			Pin::Direction direction = Pin::Direction::BIDIRECTIONAL;
 
 
 			json serialize() const;

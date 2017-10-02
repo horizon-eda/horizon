@@ -58,7 +58,7 @@ namespace horizon {
 				draw_plus(junc.position, 250000, c);
 			}
 			else if(junc.connection_count >= 3  && mode == ObjectType::SCHEMATIC) {
-				draw_line(junc.position, junc.position+Coordi(0, 1000), c, 0, true, 0.5_mm);
+				draw_line(junc.position, junc.position+Coordi(0, 1000), c, 0, true, 0.75_mm);
 			}
 			else {
 				draw_cross(junc.position, 0.25_mm, c);
@@ -234,8 +234,8 @@ namespace horizon {
 			pin_orientation = omap_mirror.at(pin_orientation);
 		}
 
-		Orientation name_orientation;
-		Orientation pad_orientation;
+		Orientation name_orientation = Orientation::LEFT;
+		Orientation pad_orientation = Orientation::LEFT;
 		int64_t text_shift = 0.5_mm;
 		switch(pin_orientation) {
 			case Orientation::LEFT :
@@ -289,6 +289,60 @@ namespace horizon {
 		if(interactive || pin.pad_visible) {
 			pad_extents = draw_text0(p_pad, 0.75_mm, pin.pad, orientation_to_angle(pad_orientation), false, TextOrigin::BASELINE, c_pad, 0);
 		}
+
+		transform_save();
+		transform.accumulate(pin.position);
+		transform.set_angle(0);
+		transform.mirror = false;
+		switch(pin_orientation) {
+			case Orientation::RIGHT :
+			break;
+			case Orientation::LEFT :
+				transform.mirror ^= true;
+			break;
+			case Orientation::UP :
+				transform.inc_angle_deg(90);
+			break;
+			case Orientation::DOWN :
+				transform.inc_angle_deg(-90);
+				transform.mirror = true;
+			break;
+		}
+		auto dl = [this](float ax, float ay, float bx, float by) {
+			draw_line(Coordf(ax*1_mm, ay*1_mm), Coordf(bx*1_mm, by*1_mm), ColorP::PIN, 0, true, 0);
+		};
+		switch(pin.direction) {
+			case Pin::Direction::OUTPUT :
+				dl(0, -.6, -1, -.2);
+				dl(0, -.6, -1, -1);
+			break;
+			case Pin::Direction::INPUT :
+				dl(-1, -.6, 0, -.2);
+				dl(-1, -.6, 0, -1);
+			break;
+			case Pin::Direction::POWER_INPUT :
+				dl(-1, -.6, 0, -.2);
+				dl(-1, -.6, 0, -1);
+				dl(-1.4, -.6, -.4, -.2);
+				dl(-1.4, -.6, -.4, -1);
+			break;
+			case Pin::Direction::POWER_OUTPUT :
+				dl(0, -.6, -1, -.2);
+				dl(0, -.6, -1, -1);
+				dl(-.4, -.6, -1.4, -.2);
+				dl(-.4, -.6, -1.4, -1);
+			break;
+			case Pin::Direction::BIDIRECTIONAL :
+				dl(0, -.6, -1, -.2);
+				dl(0, -.6, -1, -1);
+				dl(-2, -.6, -1, -.2);
+				dl(-2, -.6, -1, -1);
+			break;
+			default:;
+		}
+		//draw_line(Coordf(0, -.5_mm), Coordf(-1_mm, -.5_mm), ColorP::PIN, 0, true, 0);
+		transform_restore();
+
 		switch(pin.connector_style) {
 			case SymbolPin::ConnectorStyle::BOX :
 				draw_box(p0, 0.25_mm, ColorP::FROM_LAYER, 0, false);

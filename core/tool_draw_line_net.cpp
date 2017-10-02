@@ -77,9 +77,11 @@ namespace horizon {
 				}
 			}
 			else if(temp_line_head->bus) {
+				ss << " <i>";
 				ss << "drawing bus \"" << temp_line_head->bus->name << "\"";
 			}
 			else {
+				ss << " <i>";
 				ss << "drawing no net";
 			}
 
