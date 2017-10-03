@@ -72,6 +72,7 @@ namespace horizon {
 		PoolBrowserDialog dia(parent, ObjectType::PADSTACK, pool);
 		auto br = dynamic_cast<PoolBrowserPadstack*>(dia.get_browser());
 		br->set_package_uuid(package_uuid);
+		br->set_include_padstack_type(Padstack::Type::MECHANICAL, true);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
 			auto uu = br->get_selected();

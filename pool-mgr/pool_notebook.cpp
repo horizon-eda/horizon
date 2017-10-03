@@ -366,6 +366,8 @@ namespace horizon {
 
 		{
 			auto br = Gtk::manage(new PoolBrowserPadstack(&pool));
+			br->set_include_padstack_type(Padstack::Type::VIA, true);
+			br->set_include_padstack_type(Padstack::Type::MECHANICAL, true);
 			br->signal_activated().connect([this, br] {
 				auto uu = br->get_selected();
 				auto path = pool.get_filename(ObjectType::PADSTACK, uu);

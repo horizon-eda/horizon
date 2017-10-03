@@ -1,6 +1,5 @@
 #include "canvas_patch.hpp"
-#include "assert.h"
-#include "core/core_board.hpp"
+#include "hole.hpp"
 
 namespace horizon {
 		CanvasPatch::CanvasPatch() : Canvas::Canvas() {
@@ -16,6 +15,24 @@ namespace horizon {
 
 		void CanvasPatch::img_patch_type(PatchType pt) {
 			patch_type = pt;
+		}
+
+		void CanvasPatch::img_hole(const Hole &hole) {
+			//create patch of type HOLE_PTH/HOLE_NPTH on layer 10000
+			//for NPTH, set net to 0
+			auto net_saved = net;
+			auto patch_type_saved = patch_type;
+			if(!hole.plated) {
+				net = nullptr;
+				patch_type = PatchType::HOLE_NPTH;
+			}
+			else {
+				patch_type = PatchType::HOLE_PTH;
+			}
+			auto poly = hole.to_polygon().remove_arcs(64);
+			img_polygon(poly, true);
+			net = net_saved;
+			patch_type = patch_type_saved;
 		}
 
 		void CanvasPatch::img_polygon(const Polygon &poly, bool tr) {

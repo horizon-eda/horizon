@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include "uuid_provider.hpp"
 #include "json.hpp"
+#include "polygon.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -34,6 +35,8 @@ namespace horizon {
 
 			enum class Shape {ROUND, SLOT};
 			Shape shape = Shape::ROUND;
+
+			Polygon to_polygon() const;
 
 
 			virtual UUID get_uuid() const ;

@@ -269,7 +269,7 @@ namespace horizon {
 		return tl;
 	}
 
-	int inheritTrackWidth( PNS::ITEM* aItem )	{
+	const PNS::PNS_HORIZON_PARENT_ITEM *inheritTrackWidth( PNS::ITEM* aItem )	{
 		using namespace PNS;
 		VECTOR2I p;
 
@@ -302,19 +302,19 @@ namespace horizon {
 		ITEM_SET linkedSegs = jt->Links();
 		linkedSegs.ExcludeItem( aItem ).FilterKinds( ITEM::SEGMENT_T );
 
-		uint32_t parent_code = 0;
+		const PNS::PNS_HORIZON_PARENT_ITEM * parent = 0;
 
 		for( ITEM* item : linkedSegs.Items() )
 		{
 			int w = static_cast<SEGMENT*>( item )->Width();
 			if(w < mval) {
-				parent_code = item->Parent();
+				parent = item->Parent();
 				mval = w;
 			}
 			mval = std::min( w, mval );
 		}
 
-		return ( mval == INT_MAX ? 0 : parent_code );
+		return ( mval == INT_MAX ? 0 : parent);
 	}
 
 
@@ -335,9 +335,8 @@ namespace horizon {
 
 		if(m_startItem) {
 			auto parent = inheritTrackWidth(m_startItem);
-			auto ref = tool->iface->get_ref_for_parent(parent);
-			if(ref.type == ObjectType::TRACK) {
-				auto track = &tool->board->tracks.at(ref.uuid);
+			if(parent && parent->track) {
+				auto track = parent->track;
 				sizes.SetWidthFromRules(track->width_from_rules);
 				track_width = track->width;
 			}

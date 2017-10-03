@@ -19,6 +19,37 @@ namespace horizon {
 
 
 namespace PNS {
+	class PNS_HORIZON_PARENT_ITEM {
+		public:
+			PNS_HORIZON_PARENT_ITEM(const horizon::Track *tr): track(tr) {}
+			PNS_HORIZON_PARENT_ITEM(const horizon::Via *v): via(v) {}
+			PNS_HORIZON_PARENT_ITEM(const horizon::BoardPackage *pkg, const horizon::Pad *p): package(pkg), pad(p) {}
+
+			const horizon::Track *track = nullptr;
+			const horizon::Via *via = nullptr;
+			const horizon::BoardPackage *package = nullptr;
+			const horizon::Pad *pad = nullptr;
+
+			bool operator< (const PNS_HORIZON_PARENT_ITEM &other) const {
+				if(track < other.track)
+					return true;
+				else if(track > other.track)
+					return false;
+
+				if(via < other.via)
+					return true;
+				else if(via > other.via)
+					return false;
+
+				if(package < other.package)
+					return true;
+				else if(package > other.package)
+					return false;
+
+				return pad < other.pad;
+			}
+	};
+
 	class PNS_HORIZON_IFACE : public PNS::ROUTER_IFACE {
 		public:
 			PNS_HORIZON_IFACE();
@@ -48,8 +79,6 @@ namespace PNS {
 			static int layer_to_router(int l);
 			static int layer_from_router(int l);
 			horizon::Net *get_net_for_code(int code);
-			horizon::SelectableRef get_ref_for_parent(uint32_t parent);
-
 
 		private:
 			class PNS_HORIZON_RULE_RESOLVER* m_ruleResolver = nullptr;
@@ -71,12 +100,10 @@ namespace PNS {
 			int net_code_max = 0;
 			int get_net_code(const horizon::UUID &uu);
 
-
-
-			std::map<uint32_t, horizon::SelectableRef> selectable_ref_map;
-			std::map<horizon::SelectableRef, uint32_t> selectable_ref_map_r;
-			uint32_t selectable_ref_max = 0;
-			uint32_t get_ref_code(const horizon::SelectableRef &ref);
+			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::Track *track);
+			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::Via *via);
+			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::BoardPackage *pkg, const horizon::Pad *pad);
+			std::set<PNS_HORIZON_PARENT_ITEM> parents;
 
 			std::pair<horizon::BoardPackage *, horizon::Pad *> find_pad(int layer, const horizon::Coord<int64_t> &c);
 			horizon::Junction *find_junction(int layer, const horizon::Coord<int64_t> &c);

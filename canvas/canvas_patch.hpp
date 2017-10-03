@@ -37,6 +37,7 @@ namespace horizon {
 			PatchType patch_type = PatchType::OTHER;
 			virtual void img_net(const Net *net) override;
 			virtual void img_polygon(const Polygon &poly, bool tr) override;
+			virtual void img_hole(const class Hole &hole) override;
 			virtual void img_patch_type(PatchType type) override;
 
 	};

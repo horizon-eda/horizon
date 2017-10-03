@@ -289,7 +289,7 @@ namespace horizon {
 
 	std::pair<bool, std::string> Padstack::apply_parameter_set(const ParameterSet &ps) {
 		auto ps_this = parameter_set;
-		copy_param(ps_this, ps, {ParameterID::PAD_HEIGHT, ParameterID::PAD_WIDTH,
+		copy_param(ps_this, ps, {ParameterID::PAD_HEIGHT, ParameterID::PAD_WIDTH, ParameterID::PAD_DIAMETER,
 		                         ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION,
 								 ParameterID::HOLE_DIAMETER, ParameterID::HOLE_LENGTH, ParameterID::VIA_DIAMETER,
 								 ParameterID::HOLE_SOLDER_MASK_EXPANSION, ParameterID::VIA_SOLDER_MASK_EXPANSION

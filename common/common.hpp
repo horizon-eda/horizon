@@ -18,7 +18,7 @@ namespace horizon {
 		HOLE, PAD, BOARD_PACKAGE, TRACK, VIA, SHAPE, BOARD, SCHEMATIC,
 		UNIT, ENTITY, SYMBOL, PACKAGE, PADSTACK, PART
 	};
-	enum class PatchType {OTHER, TRACK, PAD, PAD_TH, VIA, PLANE};
+	enum class PatchType {OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH};
 
 	/**
 	 * Your typical coordinate class.

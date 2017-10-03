@@ -1,6 +1,6 @@
 #pragma once
-
 #include "pool_browser.hpp"
+#include "padstack.hpp"
 
 namespace horizon {
 	class PoolBrowserPadstack: public PoolBrowser {
@@ -8,6 +8,7 @@ namespace horizon {
 			PoolBrowserPadstack(class Pool *p);
 			void search() override;
 			void set_package_uuid(const UUID &uu);
+			void set_include_padstack_type(Padstack::Type ty, bool v);
 
 		protected:
 			Glib::RefPtr<Gtk::ListStore> create_list_store() override;
@@ -33,6 +34,7 @@ namespace horizon {
 
 			Gtk::Entry *name_entry = nullptr;
 			UUID package_uuid;
+			std::set<Padstack::Type> padstacks_included = {Padstack::Type::TOP, Padstack::Type::BOTTOM, Padstack::Type::THROUGH};
 	};
 
 }

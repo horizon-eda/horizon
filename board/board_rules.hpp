@@ -8,6 +8,7 @@
 #include "rule_clearance_copper.hpp"
 #include "rule_parameters.hpp"
 #include "rule_via.hpp"
+#include "rule_clearance_npth_copper.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;
@@ -30,6 +31,7 @@ namespace horizon {
 
 			uint64_t get_default_track_width(class Net *net, int layer);
 			const RuleClearanceCopper *get_clearance_copper(Net *net_a, Net *net_b, int layer);
+			uint64_t get_clearance_npth_copper(Net *net, int layer);
 			uint64_t get_max_clearance();
 
 			const RuleParameters *get_parameters();
@@ -42,11 +44,14 @@ namespace horizon {
 			std::map<UUID, RuleTrackWidth> rule_track_width;
 			std::map<UUID, RuleClearanceCopper> rule_clearance_copper;
 			std::map<UUID, RuleVia> rule_via;
+			std::map<UUID, RuleClearanceNPTHCopper> rule_clearance_npth_copper;
+
 			RuleClearanceSilkscreenExposedCopper rule_clearance_silkscreen_exposed_copper;
 			RuleParameters rule_parameters;
 
 			RulesCheckResult check_track_width(const class Board *b);
 			RulesCheckResult check_hole_size(const class Board *b);
 			RulesCheckResult check_clearance_copper(const class Board *b, class RulesCheckCache &cache);
+			RulesCheckResult check_clearance_npth_copper(const class Board *b, class RulesCheckCache &cache);
 	};
 }

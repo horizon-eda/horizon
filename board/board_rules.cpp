@@ -38,7 +38,15 @@ namespace horizon {
 				auto u = UUID(it.key());
 				rule_via.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
 			}
-			fix_order(RuleID::CLEARANCE_COPPER);
+			fix_order(RuleID::VIA);
+		}
+		if(j.count("clearance_npth_copper")) {
+			const json &o = j["clearance_npth_copper"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID(it.key());
+				rule_clearance_npth_copper.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
+			}
+			fix_order(RuleID::CLEARANCE_NPTH_COPPER);
 		}
 		if(j.count("clearance_silkscreen_exposed_copper")) {
 			const json &o = j["clearance_silkscreen_exposed_copper"];
@@ -62,6 +70,9 @@ namespace horizon {
 			it.second.match.cleanup(block);
 		}
 		for(auto &it: rule_via) {
+			it.second.match.cleanup(block);
+		}
+		for(auto &it: rule_clearance_npth_copper) {
 			it.second.match.cleanup(block);
 		}
 	}
@@ -111,13 +122,17 @@ namespace horizon {
 		for(const auto &it: rule_via) {
 			j["via"][(std::string)it.first] = it.second.serialize();
 		}
+		j["clearance_npth_copper"] = json::object();
+		for(const auto &it: rule_clearance_npth_copper) {
+			j["clearance_npth_copper"][(std::string)it.first] = it.second.serialize();
+		}
 		j["clearance_silkscreen_exposed_copper"] = rule_clearance_silkscreen_exposed_copper.serialize();
 		j["parameters"] = rule_parameters.serialize();
 		return j;
 	}
 
 	std::set<RuleID> BoardRules::get_rule_ids() const {
-		return {RuleID::HOLE_SIZE, RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, RuleID::TRACK_WIDTH, RuleID::CLEARANCE_COPPER, RuleID::PARAMETERS, RuleID::VIA};
+		return {RuleID::HOLE_SIZE, RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, RuleID::TRACK_WIDTH, RuleID::CLEARANCE_COPPER, RuleID::PARAMETERS, RuleID::VIA, RuleID::CLEARANCE_NPTH_COPPER};
 	}
 
 	Rule *BoardRules::get_rule(RuleID id) {
@@ -140,6 +155,8 @@ namespace horizon {
 				return &rule_clearance_copper.at(uu);
 			case RuleID::VIA :
 				return &rule_via.at(uu);
+			case RuleID::CLEARANCE_NPTH_COPPER :
+				return &rule_clearance_npth_copper.at(uu);
 			default :
 				return nullptr;
 		}
@@ -170,6 +187,12 @@ namespace horizon {
 				}
 			break;
 
+			case RuleID::CLEARANCE_NPTH_COPPER:
+				for(auto &it: rule_clearance_npth_copper) {
+					r[it.first] = &it.second;
+				}
+			break;
+
 			default:;
 		}
 		return r;
@@ -191,6 +214,10 @@ namespace horizon {
 
 			case RuleID::VIA :
 				rule_via.erase(uu);
+			break;
+
+			case RuleID::CLEARANCE_NPTH_COPPER :
+				rule_clearance_npth_copper.erase(uu);
 			break;
 
 			default:;
@@ -222,6 +249,11 @@ namespace horizon {
 				r->order = -1;
 			break;
 
+			case RuleID::CLEARANCE_NPTH_COPPER :
+				r = &rule_clearance_npth_copper.emplace(uu, uu).first->second;
+				r->order = -1;
+			break;
+
 			default:
 				return nullptr;
 		}
@@ -249,18 +281,37 @@ namespace horizon {
 			   && (ru->layer == layer || ru->layer == 10000)
 			) {
 				return ru;
-				break;
 			}
 		}
 		return nullptr;
 	}
 
+	uint64_t BoardRules::get_clearance_npth_copper(Net *net, int layer) {
+		auto rules = dynamic_cast_vector<RuleClearanceNPTHCopper*>(get_rules_sorted(RuleID::CLEARANCE_NPTH_COPPER));
+		for(auto ru: rules) {
+			if(ru->enabled && (ru->match.match(net) && (ru->layer == layer || ru->layer == 10000))) {
+				return ru->clearance;
+			}
+		}
+		return 0;
+	}
+
 	uint64_t BoardRules::get_max_clearance() {
 		uint64_t max_clearance = 0;
-		auto rules = dynamic_cast_vector<RuleClearanceCopper*>(get_rules_sorted(RuleID::CLEARANCE_COPPER));
-		for(auto ru: rules) {
-			if(ru->enabled) {
-				max_clearance = std::max(max_clearance, ru->get_max_clearance());
+		{
+			auto rules = dynamic_cast_vector<RuleClearanceCopper*>(get_rules_sorted(RuleID::CLEARANCE_COPPER));
+			for(auto ru: rules) {
+				if(ru->enabled) {
+					max_clearance = std::max(max_clearance, ru->get_max_clearance());
+				}
+			}
+		}
+		{
+			auto rules = dynamic_cast_vector<RuleClearanceNPTHCopper*>(get_rules_sorted(RuleID::CLEARANCE_NPTH_COPPER));
+			for(auto ru: rules) {
+				if(ru->enabled) {
+					max_clearance = std::max(max_clearance, ru->clearance);
+				}
 			}
 		}
 		return max_clearance;

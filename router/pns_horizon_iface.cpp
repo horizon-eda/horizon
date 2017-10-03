@@ -103,8 +103,35 @@ namespace PNS {
 		auto pt_a = patch_type_from_kind(aA->Kind());
 		auto pt_b = patch_type_from_kind(aB->Kind());
 
+		auto parent_a = aA->Parent();
+		auto parent_b = aB->Parent();
+
 		auto layers_a = aA->Layers();
 		auto layers_b = aB->Layers();
+
+		if(parent_a && parent_a->pad && parent_a->pad->padstack.type == horizon::Padstack::Type::THROUGH)
+			pt_a = horizon::PatchType::PAD_TH;
+
+		if(parent_b && parent_b->pad && parent_b->pad->padstack.type == horizon::Padstack::Type::THROUGH)
+			pt_b = horizon::PatchType::PAD_TH;
+
+		if((parent_a && parent_a->pad && parent_a->pad->padstack.type == horizon::Padstack::Type::MECHANICAL) ||
+			(parent_b && parent_b->pad && parent_b->pad->padstack.type == horizon::Padstack::Type::MECHANICAL))
+		{
+			 //any is mechanical (NPTH)
+			auto net = net_a?net_a:net_b; //only one has net
+			assert(net);
+			auto a_is_npth = parent_a && parent_a->pad && parent_a->pad->padstack.type == horizon::Padstack::Type::MECHANICAL;
+
+			//use layers of non-npth ting
+			auto layers = a_is_npth?layers_b:layers_a;
+
+			//fixme: handle multiple layers for non-npth thing
+			auto layer = layers.Start();
+
+			return m_rules->get_clearance_npth_copper(net, PNS_HORIZON_IFACE::layer_from_router(layer));
+		}
+
 
 		int layer = UNDEFINED_LAYER;
 		if(!layers_a.IsMultilayer() && !layers_b.IsMultilayer()) //all on single layer
@@ -307,22 +334,19 @@ namespace PNS {
 		return &board->block->nets.at(net_code_map_r.at(code));
 	}
 
-	horizon::SelectableRef PNS_HORIZON_IFACE::get_ref_for_parent(uint32_t parent) {
-		if(selectable_ref_map.count(parent))
-			return selectable_ref_map.at(parent);
-		return horizon::SelectableRef(horizon::UUID(), horizon::ObjectType::INVALID);
+	const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::Track *track) {
+		PNS_HORIZON_PARENT_ITEM it(track);
+		return &*parents.insert(it).first;
 	}
 
-	uint32_t PNS_HORIZON_IFACE::get_ref_code(const horizon::SelectableRef &ref) {
-		if(selectable_ref_map_r.count(ref)) {
-			return selectable_ref_map_r.at(ref);
-		}
-		else {
-			selectable_ref_max++;
-			selectable_ref_map.emplace(selectable_ref_max, ref);
-			selectable_ref_map_r.emplace(ref, selectable_ref_max);
-			return selectable_ref_max;
-		}
+	const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::Via *via) {
+		PNS_HORIZON_PARENT_ITEM it(via);
+		return &*parents.insert(it).first;
+	}
+
+	const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::BoardPackage *pkg, const horizon::Pad *pad) {
+		PNS_HORIZON_PARENT_ITEM it(pkg, pad);
+		return &*parents.insert(it).first;
 	}
 
 	std::unique_ptr<PNS::SEGMENT> PNS_HORIZON_IFACE::syncTrack(const horizon::Track *track) {
@@ -337,7 +361,7 @@ namespace PNS {
 
 		segment->SetWidth(track->width);
 		segment->SetLayer(layer_to_router(track->layer));
-		segment->SetParent( get_ref_code(horizon::SelectableRef(track->uuid, horizon::ObjectType::TRACK)) );
+		segment->SetParent( get_parent(track) );
 
 		//if( aTrack->IsLocked() )
 			//segment->Mark( PNS::MK_LOCKED );
@@ -356,10 +380,28 @@ namespace PNS {
 
 		ClipperLib::Clipper clipper;
 
-		for(auto &it: pad->padstack.shapes) {
-			if(horizon::BoardLayers::is_copper(it.second.layer)) { //on copper layer
-				layer_min = std::min(layer_min, it.second.layer);
-				layer_max = std::max(layer_max, it.second.layer);
+		if(pad->padstack.type != horizon::Padstack::Type::MECHANICAL) { //normal pad
+			for(auto &it: pad->padstack.shapes) {
+				if(horizon::BoardLayers::is_copper(it.second.layer)) { //on copper layer
+					layer_min = std::min(layer_min, it.second.layer);
+					layer_max = std::max(layer_max, it.second.layer);
+					auto poly = it.second.to_polygon().remove_arcs();
+					ClipperLib::Path path;
+					for(auto &v: poly.vertices) {
+						auto p = tr.transform(v.position);
+						path.emplace_back(p.x, p.y);
+					}
+					if(ClipperLib::Orientation(path)) {
+						std::reverse(path.begin(), path.end());
+					}
+					clipper.AddPath(path, ClipperLib::ptSubject, true);
+				}
+			}
+		}
+		else { //npth pad
+			layer_min = horizon::BoardLayers::BOTTOM_COPPER;
+			layer_max = horizon::BoardLayers::TOP_COPPER;
+			for(auto &it: pad->padstack.holes) {
 				auto poly = it.second.to_polygon().remove_arcs();
 				ClipperLib::Path path;
 				for(auto &v: poly.vertices) {
@@ -382,7 +424,7 @@ namespace PNS {
 		solid->SetLayers( LAYER_RANGE( layer_to_router(layer_max), layer_to_router(layer_min) ));
 		if(pad->net)
 			solid->SetNet( get_net_code(pad->net->uuid) );
-		//solid->SetParent( aPad );
+		solid->SetParent( get_parent(pkg, pad) );
 
 		solid->SetOffset( VECTOR2I( 0,0 ) );
 		solid->SetPos ( VECTOR2I( tr.shift.x, tr.shift.y) );
@@ -412,7 +454,7 @@ namespace PNS {
 		);
 
 		//via->SetParent( aVia );
-		pvia->SetParent( get_ref_code(horizon::SelectableRef(via->uuid, horizon::ObjectType::VIA)) );
+		pvia->SetParent( get_parent(via) );
 
 		//if( aVia->IsLocked() )
         //via->Mark( PNS::MK_LOCKED );
@@ -426,6 +468,7 @@ namespace PNS {
 			wxLogTrace( "PNS", "No board attached, aborting sync." );
 			return;
 		}
+		parents.clear();
 
 		for(const auto &it: board->tracks) {
 			auto segment = syncTrack( &it.second );
@@ -519,8 +562,10 @@ namespace PNS {
 		std::cout << "iface hide item" << std::endl;
 		auto parent = aItem->Parent();
 		if(parent) {
-			auto ref = selectable_ref_map.at(parent);
-			canvas->hide_obj(ref);
+			if(parent->track) {
+				horizon::SelectableRef ref(parent->track->uuid, horizon::ObjectType::TRACK);
+				canvas->hide_obj(ref);
+			}
 		}
 	}
 
@@ -530,12 +575,8 @@ namespace PNS {
 		auto parent = aItem->Parent();
 		std::cout << "!!!iface remove item " << parent << " " << aItem->KindStr()  << std::endl;
 		if(parent) {
-			auto ref = selectable_ref_map.at(parent);
-			switch(ref.type) {
-				case horizon::ObjectType::TRACK :
-					board->tracks.erase(ref.uuid);
-				break;
-				default:;
+			if(parent->track) {
+				board->tracks.erase(parent->track->uuid);
 			}
 		}
 		board->expand(true);
@@ -610,7 +651,7 @@ namespace PNS {
 				connect(track->from, from);
 				connect(track->to, to);
 				track->width_from_rules = m_router->Sizes().WidthFromRules();
-				aItem->SetParent( get_ref_code(horizon::SelectableRef(track->uuid, horizon::ObjectType::TRACK)) );
+				aItem->SetParent( get_parent(track) );
 
 			} break;
 

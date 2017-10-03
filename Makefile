@@ -51,6 +51,7 @@ SRC_COMMON = \
 	board/rule_clearance_copper.cpp\
 	board/rule_parameters.cpp\
 	board/rule_via.cpp\
+	board/rule_clearance_npth_copper.cpp\
 	pool/pool.cpp \
 	util/placement.cpp\
 	util/util.cpp\
@@ -235,6 +236,7 @@ SRC_IMP = \
 	imp/rules/rule_editor_clearance_copper.cpp\
 	imp/rules/rule_editor_single_pin_net.cpp\
 	imp/rules/rule_editor_via.cpp\
+	imp/rules/rule_editor_clearance_npth_copper.cpp\
 	rules/rules_with_core.cpp\
 	rules/cache.cpp\
 	board/board_rules_check.cpp\

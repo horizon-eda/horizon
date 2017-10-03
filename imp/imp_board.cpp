@@ -70,7 +70,7 @@ namespace horizon {
 			std::ofstream ofs("/tmp/patches");
 			int i = 0;
 			for(const auto &it: cp.patches) {
-				if(it.first.layer != 0)
+				if(it.first.layer != 10000)
 					continue;
 				for(const auto &itp: it.second) {
 					ofs << "#" << static_cast<int>(it.first.type) << " " << it.first.layer << " " << (std::string)it.first.net << "\n";

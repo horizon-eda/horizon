@@ -5,6 +5,7 @@ namespace horizon {
 	static const LutEnumStr<ParameterID> parameter_id_lut = {
 		{"pad_width",					ParameterID::PAD_WIDTH},
 		{"pad_height",					ParameterID::PAD_HEIGHT},
+		{"pad_diameter",				ParameterID::PAD_DIAMETER},
 		{"solder_mask_expansion",		ParameterID::SOLDER_MASK_EXPANSION},
 		{"paste_mask_contraction",		ParameterID::PASTE_MASK_CONTRACTION},
 		{"hole_diameter",				ParameterID::HOLE_DIAMETER},
@@ -26,6 +27,7 @@ namespace horizon {
 	static const std::map<ParameterID, std::string> parameter_id_names = {
 		{ParameterID::PAD_HEIGHT, "Pad height"},
 		{ParameterID::PAD_WIDTH, "Pad width"},
+		{ParameterID::PAD_DIAMETER, "Pad diameter"},
 		{ParameterID::SOLDER_MASK_EXPANSION, "Solder mask expansion"},
 		{ParameterID::PASTE_MASK_CONTRACTION, "Paste mask contraction"},
 		{ParameterID::HOLE_LENGTH, "Hole length"},

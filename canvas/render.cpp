@@ -605,7 +605,10 @@ namespace horizon {
 		transform_save();
 		transform.accumulate(pad.placement);
 		img_net(pad.net);
-		img_patch_type(PatchType::PAD);
+		if(pad.padstack.type == Padstack::Type::THROUGH)
+			img_patch_type(PatchType::PAD_TH);
+		else
+			img_patch_type(PatchType::PAD);
 		render(pad.padstack, false);
 		img_patch_type(PatchType::OTHER);
 		img_net(nullptr);

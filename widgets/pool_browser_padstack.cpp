@@ -28,6 +28,16 @@ namespace horizon {
 		search();
 	}
 
+	void PoolBrowserPadstack::set_include_padstack_type(Padstack::Type ty, bool v) {
+		if(padstacks_included.count(ty)) {
+			if(!v)
+				padstacks_included.erase(ty);
+		}
+		if(v)
+			padstacks_included.insert(ty);
+		search();
+	}
+
 	void PoolBrowserPadstack::search() {
 		auto selected_uuid = get_selected();
 		store->freeze_notify();
@@ -35,10 +45,35 @@ namespace horizon {
 
 		std::string name_search = name_entry->get_text();
 
-		SQLite::Query q(pool->db, "SELECT padstacks.uuid, padstacks.name, padstacks.type, packages.name FROM padstacks LEFT JOIN packages ON padstacks.package = packages.uuid WHERE (packages.uuid=? OR ? OR (padstacks.package = '00000000-0000-0000-0000-000000000000' AND padstacks.type NOT IN ('via', 'mechanical'))) AND padstacks.name LIKE ?"+sort_controller->get_order_by());
+		SQLite::Query q(pool->db, "SELECT padstacks.uuid, padstacks.name, padstacks.type, packages.name FROM padstacks LEFT JOIN packages ON padstacks.package = packages.uuid WHERE (packages.uuid=? OR ? OR padstacks.package = '00000000-0000-0000-0000-000000000000')  AND padstacks.name LIKE ? AND padstacks.type IN (?, ?, ?, ?, ?) "+sort_controller->get_order_by());
 		q.bind(1, package_uuid);
 		q.bind(2, package_uuid==UUID());
 		q.bind(3, "%"+name_search+"%");
+		if(padstacks_included.count(Padstack::Type::TOP))
+			q.bind(4, std::string("top"));
+		else
+			q.bind(4, std::string(""));
+
+		if(padstacks_included.count(Padstack::Type::BOTTOM))
+			q.bind(5, std::string("bottom"));
+		else
+			q.bind(5, std::string(""));
+
+		if(padstacks_included.count(Padstack::Type::THROUGH))
+			q.bind(6, std::string("through"));
+		else
+			q.bind(6, std::string(""));
+
+		if(padstacks_included.count(Padstack::Type::MECHANICAL))
+			q.bind(7, std::string("mechanical"));
+		else
+			q.bind(7, std::string(""));
+
+		if(padstacks_included.count(Padstack::Type::VIA))
+			q.bind(8, std::string("via"));
+		else
+			q.bind(8, std::string(""));
+
 
 		Gtk::TreeModel::Row row;
 		if(show_none) {

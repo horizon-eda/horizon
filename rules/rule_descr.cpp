@@ -10,5 +10,6 @@ namespace horizon {
 		{RuleID::PARAMETERS, {"Parameters", false}},
 		{RuleID::SINGLE_PIN_NET, {"Single pin nets", false}},
 		{RuleID::VIA, {"Vias", true}},
+		{RuleID::CLEARANCE_NPTH_COPPER, {"Copper-NPTH clearance", true}},
 	};
 }

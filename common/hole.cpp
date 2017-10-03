@@ -25,6 +25,46 @@ namespace horizon {
 		return uuid;
 	}
 
+	Polygon Hole::to_polygon() const {
+		auto uu = UUID();
+		Polygon poly(uu);
+		poly.layer = 10000;
+		switch(shape) {
+			case Shape::ROUND : {
+				int64_t r = diameter/2;
+				Polygon::Vertex *v;
+				v = poly.append_vertex({r, 0});
+				v->type = Polygon::Vertex::Type::ARC;
+				v->arc_reverse = true;
+				poly.append_vertex({r, 0});
+			} break;
+
+			case Shape::SLOT : {
+				int64_t h = diameter/2;
+				int64_t w = length/2;
+				w = std::max(w-h, (int64_t)0);
+
+				Polygon::Vertex *v;
+				v = poly.append_vertex({ w,  h});
+				v->type = Polygon::Vertex::Type::ARC;
+				v->arc_center = {w, 0};
+				v->arc_reverse = true;
+				poly.append_vertex({ w, -h});
+				v = poly.append_vertex({-w, -h});
+				v->type = Polygon::Vertex::Type::ARC;
+				v->arc_center = {-w, 0};
+				v->arc_reverse = true;
+				poly.append_vertex({-w,  h});
+
+			} break;
+		}
+		for(auto &it: poly.vertices) {
+			it.position = placement.transform(it.position);
+			it.arc_center = placement.transform(it.arc_center);
+		}
+		return poly;
+	}
+
 	Hole::Hole(const UUID &uu): uuid(uu) {}
 
 	json Hole::serialize() const {

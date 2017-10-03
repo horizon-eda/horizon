@@ -35,6 +35,7 @@ class BOARD_CONNECTED_ITEM;
 namespace PNS {
 
 class NODE;
+class PNS_HORIZON_PARENT_ITEM;
 
 enum LineMarker {
     MK_HEAD         = ( 1 << 0 ),
@@ -144,7 +145,7 @@ public:
      *
      * Sets the corresponding parent object in the host application's model.
      */
-    void SetParent( uint32_t aParent )
+    void SetParent( const PNS_HORIZON_PARENT_ITEM *aParent )
     {
         m_parent = aParent;
     }
@@ -154,7 +155,7 @@ public:
      *
      * Returns the corresponding parent object in the host application's model.
      */
-    uint32_t Parent() const
+    auto Parent() const
     {
         return m_parent;
     }
@@ -345,7 +346,7 @@ private:
 protected:
     PnsKind                 m_kind;
 
-    uint32_t		   m_parent;
+    const PNS_HORIZON_PARENT_ITEM*		   m_parent;
     NODE*               m_owner;
     LAYER_RANGE            m_layers;
 
