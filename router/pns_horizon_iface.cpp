@@ -120,7 +120,6 @@ namespace PNS {
 		{
 			 //any is mechanical (NPTH)
 			auto net = net_a?net_a:net_b; //only one has net
-			assert(net);
 			auto a_is_npth = parent_a && parent_a->pad && parent_a->pad->padstack.type == horizon::Padstack::Type::MECHANICAL;
 
 			//use layers of non-npth ting
