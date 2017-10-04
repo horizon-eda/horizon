@@ -560,13 +560,23 @@ namespace horizon {
 	}
 
 	void Canvas::render(const Shape &shape, bool interactive) {
-		Polygon poly = shape.to_polygon();
+
 		if(interactive) {
 			auto bb = shape.get_bbox();
 			selectables.append(shape.uuid, ObjectType::SHAPE, shape.placement.shift, shape.placement.transform(bb.first), shape.placement.transform(bb.second), 0, shape.layer);
 			targets.emplace(shape.uuid, ObjectType::SHAPE, shape.placement.shift);
 		}
-		render(poly, false);
+		if(shape.form == Shape::Form::CIRCLE) {
+			auto r = shape.params.at(0);
+			transform_save();
+			transform.accumulate(shape.placement);
+			draw_line(Coordf(0,0), Coordf(1e3, 0), ColorP::FROM_LAYER, shape.layer, true, r);
+			transform_restore();
+		}
+		else {
+			Polygon poly = shape.to_polygon();
+			render(poly, false);
+		}
 	}
 
 	void Canvas::render(const Hole &hole, bool interactive) {
