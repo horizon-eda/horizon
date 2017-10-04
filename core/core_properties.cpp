@@ -41,6 +41,7 @@ namespace horizon {
 
 			default:
 				NOT_HANDLED
+				return;
 		}
 		rebuild();
 		set_needs_save(true);

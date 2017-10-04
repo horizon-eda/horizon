@@ -6,9 +6,7 @@
 namespace horizon {
 	CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, Pool &pool) :
 		block(Block::new_from_file(block_filename, pool)),
-		block_work(block),
 		sch(Schematic::new_from_file(schematic_filename, block, pool)),
-		sch_work(sch),
 		rules(sch.rules),
 		m_schematic_filename(schematic_filename),
 		m_block_filename(block_filename)
@@ -17,30 +15,23 @@ namespace horizon {
 		assert(x!=sch.sheets.cend());
 		sheet_uuid = x->first;
 		m_pool = &pool;
-		sch.block = &block;
-		sch_work.block = &block_work;
-		sch.update_refs();
-		sch_work.update_refs();
 		rebuild();
 	}
 
 	Junction *CoreSchematic::get_junction(const UUID &uu, bool work) {
-		auto &s = work?sch_work:sch;
-		auto &sheet = s.sheets.at(sheet_uuid);
+		auto &sheet = sch.sheets.at(sheet_uuid);
 		return &sheet.junctions.at(uu);
 	}
 	SchematicSymbol *CoreSchematic::get_schematic_symbol(const UUID &uu, bool work) {
-		auto &s = work?sch_work:sch;
-		auto &sheet = s.sheets.at(sheet_uuid);
+		auto &sheet = sch.sheets.at(sheet_uuid);
 		return &sheet.symbols.at(uu);
 	}
 	Text *CoreSchematic::get_text(const UUID &uu, bool work) {
-		auto &s = work?sch_work:sch;
-		auto &sheet = s.sheets.at(sheet_uuid);
+		auto &sheet = sch.sheets.at(sheet_uuid);
 		return &sheet.texts.at(uu);
 	}
 	Schematic *CoreSchematic::get_schematic(bool work) {
-		return work?&sch_work:&sch;
+		return &sch;
 	}
 
 	Block *CoreSchematic::get_block(bool work) {
@@ -52,8 +43,7 @@ namespace horizon {
 	}
 
 	Sheet *CoreSchematic::get_sheet(bool work) {
-		auto &s = work?sch_work:sch;
-		return &s.sheets.at(sheet_uuid);
+		return &sch.sheets.at(sheet_uuid);
 	}
 	Line *CoreSchematic::get_line(const UUID &uu, bool work) {
 		return nullptr;
@@ -63,37 +53,31 @@ namespace horizon {
 	}
 
 	Junction *CoreSchematic::insert_junction(const UUID &uu, bool work) {
-		auto &s = work?sch_work:sch;
-		auto &sheet = s.sheets.at(sheet_uuid);
+		auto &sheet = sch.sheets.at(sheet_uuid);
 		auto x = sheet.junctions.emplace(std::make_pair(uu, uu));
 		return &(x.first->second);
 	}
 
 	LineNet *CoreSchematic::insert_line_net(const UUID &uu, bool work) {
-		auto &s = work?sch_work:sch;
-		auto &sheet = s.sheets.at(sheet_uuid);
+		auto &sheet = sch.sheets.at(sheet_uuid);
 		auto x = sheet.net_lines.emplace(std::make_pair(uu, uu));
 		return &(x.first->second);
 		}
 
 	void CoreSchematic::delete_junction(const UUID &uu, bool work) {
-		auto &s = work?sch_work:sch;
-		auto &sheet = s.sheets.at(sheet_uuid);
+		auto &sheet = sch.sheets.at(sheet_uuid);
 		sheet.junctions.erase(uu);
 	}
 	void CoreSchematic::delete_line_net(const UUID &uu, bool work) {
-		auto &s = work?sch_work:sch;
-		auto &sheet = s.sheets.at(sheet_uuid);
+		auto &sheet = sch.sheets.at(sheet_uuid);
 		sheet.net_lines.erase(uu);
 	}
 	void CoreSchematic::delete_schematic_symbol(const UUID &uu, bool work) {
-		auto &s = work?sch_work:sch;
-		auto &sheet = s.sheets.at(sheet_uuid);
+		auto &sheet = sch.sheets.at(sheet_uuid);
 		sheet.symbols.erase(uu);
 	}
 	SchematicSymbol *CoreSchematic::insert_schematic_symbol(const UUID &uu, const Symbol *sym, bool work) {
-		auto &s = work?sch_work:sch;
-		auto &sheet = s.sheets.at(sheet_uuid);
+		auto &sheet = sch.sheets.at(sheet_uuid);
 		auto x = sheet.symbols.emplace(std::make_pair(uu, SchematicSymbol{uu, sym}));
 		return &(x.first->second);
 		return nullptr;
@@ -114,8 +98,7 @@ namespace horizon {
 	}
 
 	std::vector<LineNet*> CoreSchematic::get_net_lines(bool work) {
-		auto &s = work?sch_work:sch;
-		auto &sheet = s.sheets.at(sheet_uuid);
+		auto &sheet = sch.sheets.at(sheet_uuid);
 		std::vector<LineNet*> r;
 		for(auto &it: sheet.net_lines) {
 			r.push_back(&it.second);
@@ -123,8 +106,7 @@ namespace horizon {
 		return r;
 	}
 	std::vector<NetLabel*> CoreSchematic::get_net_labels(bool work) {
-		auto &s = work?sch_work:sch;
-		auto &sheet = s.sheets.at(sheet_uuid);
+		auto &sheet = sch.sheets.at(sheet_uuid);
 		std::vector<NetLabel*> r;
 		for(auto &it: sheet.net_labels) {
 			r.push_back(&it.second);
@@ -143,13 +125,11 @@ namespace horizon {
 	}
 
 	void CoreSchematic::delete_text(const UUID &uu, bool work) {
-		auto &s = work?sch_work:sch;
-		auto &sheet = s.sheets.at(sheet_uuid);
+		auto &sheet = sch.sheets.at(sheet_uuid);
 		sheet.texts.erase(uu);
 	}
 	Text *CoreSchematic::insert_text(const UUID &uu, bool work) {
-		auto &s = work?sch_work:sch;
-		auto &sheet = s.sheets.at(sheet_uuid);
+		auto &sheet = sch.sheets.at(sheet_uuid);
 		auto x = sheet.texts.emplace(std::make_pair(uu, uu));
 		return &(x.first->second);
 	}
@@ -483,35 +463,19 @@ namespace horizon {
 
 	void CoreSchematic::rebuild(bool from_undo) {
 		sch.expand();
-		sch_work = sch;
-		block_work = block;
-		sch_work.block = &block_work;
-		sch_work.update_refs();
-		sch.update_refs();
 		Core::rebuild(from_undo);
 	}
 
 	const Sheet *CoreSchematic::get_canvas_data() {
-		return &sch_work.sheets.at(sheet_uuid);
+		return &sch.sheets.at(sheet_uuid);
 	}
 
 	void CoreSchematic::commit() {
-		sch = sch_work;
-		block = block_work;
-		sch.block = &block;
-		sch_work.block = &block_work;
-		sch.update_refs();
-		sch_work.update_refs();
 		set_needs_save(true);
 	}
 
 	void CoreSchematic::revert() {
-		sch_work = sch;
-		block_work = block;
-		sch.block = &block;
-		sch_work.block = &block_work;
-		sch.update_refs();
-		sch_work.update_refs();
+		history_load(history_current);
 		reverted = true;
 	}
 
@@ -528,7 +492,7 @@ namespace horizon {
 		block = x->block;
 		sch.block = &block;
 		sch.update_refs();
-		rebuild(true);
+		s_signal_rebuilt.emit();
 	}
 
 

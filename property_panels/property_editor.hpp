@@ -18,6 +18,7 @@ namespace horizon {
 			Core *core;
 			const UUID uuid;
 			const ObjectType type;
+			bool mute = false;
 
 			const ObjectProperty &property;
 			Gtk::Button *apply_all_button;

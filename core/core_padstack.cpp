@@ -5,7 +5,6 @@
 namespace horizon {
 	CorePadstack::CorePadstack(const std::string &filename, Pool &pool):
 		padstack(Padstack::new_from_file(filename)),
-		padstack_work(padstack),
 		m_filename(filename),
 		parameter_program_code(padstack.parameter_program.get_code()),
 		parameter_set(padstack.parameter_set)
@@ -152,16 +151,13 @@ namespace horizon {
 	}
 
 	std::map<UUID, Polygon> *CorePadstack::get_polygon_map(bool work) {
-		auto &p = work?padstack_work:padstack;
-		return &p.polygons;
+		return &padstack.polygons;
 	}
 	std::map<UUID, Hole> *CorePadstack::get_hole_map(bool work) {
-		auto &p = work?padstack_work:padstack;
-		return &p.holes;
+		return &padstack.holes;
 	}
 
 	void CorePadstack::rebuild(bool from_undo) {
-		padstack_work = padstack;
 		Core::rebuild(from_undo);
 	}
 
@@ -172,19 +168,19 @@ namespace horizon {
 	void CorePadstack::history_load(unsigned int i) {
 		auto x = dynamic_cast<CorePadstack::HistoryItem*>(history.at(history_current).get());
 		padstack = x->padstack;
-		rebuild(true);
+		s_signal_rebuilt.emit();
 	}
 
 	const Padstack *CorePadstack::get_canvas_data() {
-		return &padstack_work;
+		return &padstack;
 	}
 
 	Padstack *CorePadstack::get_padstack(bool work) {
-		return work?&padstack_work:&padstack;
+		return &padstack;
 	}
 
 	std::pair<Coordi,Coordi> CorePadstack::get_bbox() {
-		auto bb = padstack_work.get_bbox();
+		auto bb = padstack.get_bbox();
 		int64_t pad = 1_mm;
 		bb.first.x -= pad;
 		bb.first.y -= pad;
@@ -195,12 +191,11 @@ namespace horizon {
 	}
 
 	void CorePadstack::commit() {
-		padstack = padstack_work;
 		set_needs_save(true);
 	}
 
 	void CorePadstack::revert() {
-		padstack_work = padstack;
+		history_load(history_current);
 		reverted = true;
 	}
 

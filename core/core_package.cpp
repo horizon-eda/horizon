@@ -5,7 +5,6 @@
 namespace horizon {
 	CorePackage::CorePackage(const std::string &filename, Pool &pool):
 		package(Package::new_from_file(filename, pool)),
-		package_work(package),
 		m_filename(filename),
 		parameter_program_code(package.parameter_program.get_code()),
 		parameter_set(package.parameter_set)
@@ -40,37 +39,30 @@ namespace horizon {
 	}
 
 	Package *CorePackage::get_package(bool work) {
-		return work?&package_work:&package;
+		return &package;
 	}
 
 	std::map<UUID, Junction> *CorePackage::get_junction_map(bool work) {
-		auto &p = work?package_work:package;
-		return &p.junctions;
+		return &package.junctions;
 	}
 	std::map<UUID, Line> *CorePackage::get_line_map(bool work) {
-		auto &p = work?package_work:package;
-		return &p.lines;
+		return &package.lines;
 	}
 	std::map<UUID, Arc> *CorePackage::get_arc_map(bool work) {
-		auto &p = work?package_work:package;
-		return &p.arcs;
+		return &package.arcs;
 	}
 	std::map<UUID, Text> *CorePackage::get_text_map(bool work) {
-		auto &p = work?package_work:package;
-		return &p.texts;
+		return &package.texts;
 	}
 	std::map<UUID, Polygon> *CorePackage::get_polygon_map(bool work) {
-		auto &p = work?package_work:package;
-		return &p.polygons;
+		return &package.polygons;
 	}
 	std::map<UUID, Hole> *CorePackage::get_hole_map(bool work) {
-		auto &p = work?package_work:package;
-		//return &p.holes;
 		return nullptr;
 	}
 
 	std::pair<Coordi,Coordi> CorePackage::get_bbox() {
-		auto bb = package_work.get_bbox();
+		auto bb = package.get_bbox();
 		int64_t pad = 1_mm;
 		bb.first.x -= pad;
 		bb.first.y -= pad;
@@ -137,7 +129,6 @@ namespace horizon {
 
 	void CorePackage::rebuild(bool from_undo) {
 		package.apply_parameter_set({});
-		package_work = package;
 		Core::rebuild(from_undo);
 	}
 
@@ -148,20 +139,18 @@ namespace horizon {
 	void CorePackage::history_load(unsigned int i) {
 		auto x = dynamic_cast<CorePackage::HistoryItem*>(history.at(history_current).get());
 		package = x->package;
-		rebuild(true);
 	}
 
 	const Package *CorePackage::get_canvas_data() {
-		return &package_work;
+		return &package;
 	}
 
 	void CorePackage::commit() {
-		package = package_work;
 		set_needs_save(true);
 	}
 
 	void CorePackage::revert() {
-		package_work = package;
+		history_load(history_current);
 		reverted = true;
 	}
 

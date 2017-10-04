@@ -2,24 +2,19 @@
 #include <algorithm>
 #include "util.hpp"
 #include "part.hpp"
+#include "board_layers.hpp"
 
 namespace horizon {
 	CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir, Pool &pool) :
 		via_padstack_provider(via_dir, pool),
 		block(Block::new_from_file(block_filename, pool)),
-		block_work(block),
 		brd(Board::new_from_file(board_filename, block, pool, via_padstack_provider)),
-		brd_work(brd),
 		rules(brd.rules),
 		m_board_filename(board_filename),
 		m_block_filename(block_filename),
 		m_via_dir(via_dir)
 	{
 		m_pool = &pool;
-		brd.block = &block;
-		brd_work.block = &block_work;
-		brd.update_refs();
-		brd_work.update_refs();
 		rebuild();
 	}
 
@@ -88,24 +83,19 @@ namespace horizon {
 	}
 
 	std::map<UUID, Polygon> *CoreBoard::get_polygon_map(bool work) {
-		auto &p = work?brd_work:brd;
-		return &p.polygons;
+		return &brd.polygons;
 	}
 	std::map<UUID, Hole> *CoreBoard::get_hole_map(bool work) {
-		auto &p = work?brd_work:brd;
-		return &p.holes;
+		return &brd.holes;
 	}
 	std::map<UUID, Junction> *CoreBoard::get_junction_map(bool work) {
-		auto &p = work?brd_work:brd;
-		return &p.junctions;
+		return &brd.junctions;
 	}
 	std::map<UUID, Text> *CoreBoard::get_text_map(bool work) {
-		auto &p = work?brd_work:brd;
-		return &p.texts;
+		return &brd.texts;
 	}
 	std::map<UUID, Line> *CoreBoard::get_line_map(bool work) {
-		auto &p = work?brd_work:brd;
-		return &p.lines;
+		return &brd.lines;
 	}
 
 	bool CoreBoard::get_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
@@ -303,18 +293,16 @@ namespace horizon {
 	}
 
 	std::vector<Track*> CoreBoard::get_tracks(bool work) {
-		auto &p = work?brd_work:brd;
 		std::vector<Track*> r;
-		for(auto &it: p.tracks) {
+		for(auto &it: brd.tracks) {
 			r.push_back(&it.second);
 		}
 		return r;
 	}
 
 	std::vector<Line*> CoreBoard::get_lines(bool work) {
-		auto &p = work?brd_work:brd;
 		std::vector<Line*> r;
-		for(auto &it: p.lines) {
+		for(auto &it: brd.lines) {
 			r.push_back(&it.second);
 		}
 		return r;
@@ -322,10 +310,6 @@ namespace horizon {
 
 	void CoreBoard::rebuild(bool from_undo) {
 		brd.expand();
-		brd_work = brd;
-		block_work = block;
-		brd_work.block = &block_work;
-		brd_work.update_refs();
 		Core::rebuild(from_undo);
 	}
 
@@ -334,11 +318,11 @@ namespace horizon {
 	}
 
 	const Board *CoreBoard::get_canvas_data() {
-		return &brd_work;
+		return &brd;
 	}
 
 	Board *CoreBoard::get_board(bool work) {
-		return work?&brd_work:&brd;
+		return &brd;
 	}
 
 	Block *CoreBoard::get_block(bool work) {
@@ -354,22 +338,11 @@ namespace horizon {
 	}
 
 	void CoreBoard::commit() {
-		brd = brd_work;
-		block = block_work;
-		brd.block = &block;
-		brd_work.block = &block_work;
-		brd.update_refs();
-		brd_work.update_refs();
 		set_needs_save(true);
 	}
 
 	void CoreBoard::revert() {
-		brd_work = brd;
-		block_work = block;
-		brd.block = &block;
-		brd_work.block = &block_work;
-		brd.update_refs();
-		brd_work.update_refs();
+		history_load(history_current);
 		reverted = true;
 	}
 
@@ -386,7 +359,6 @@ namespace horizon {
 		block = x->block;
 		brd.block = &block;
 		brd.update_refs();
-		rebuild(true);
 	}
 
 	json CoreBoard::get_meta() {
@@ -406,8 +378,8 @@ namespace horizon {
 	std::pair<Coordi,Coordi> CoreBoard::get_bbox() {
 		Coordi a,b;
 		bool found = false;
-		for(const auto &it: brd_work.polygons) {
-			if(it.second.layer == 50) { //outline
+		for(const auto &it: brd.polygons) {
+			if(it.second.layer == BoardLayers::L_OUTLINE) { //outline
 				found = true;
 				for(const auto &v: it.second.vertices) {
 					a = Coordi::min(a, v.position);

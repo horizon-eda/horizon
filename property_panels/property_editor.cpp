@@ -64,7 +64,10 @@ namespace horizon {
 	}
 
 	void PropertyEditorBool::changed() {
+		if(mute)
+			return;
 		bool st = sw->get_active();
+		std::cout << "ch " << st << std::endl;
 		core->set_property_bool(uuid,type, property_id, st);
 		reload();
 		parent->parent->parent->signal_update().emit();
@@ -76,8 +79,10 @@ namespace horizon {
 	}
 
 	void PropertyEditorBool::reload() {
+		mute = true;
 		sw->set_active(core->get_property_bool(uuid,type, property_id));
 		sw->set_sensitive(core->property_is_settable(uuid,type, property_id));
+		mute = false;
 	}
 
 	Gtk::Widget *PropertyEditorStringRO::create_editor() {
@@ -102,8 +107,10 @@ namespace horizon {
 	}
 
 	void PropertyEditorLength::reload() {
+		mute = true;
 		sp->set_value(core->get_property_int(uuid,type, property_id));
 		sp->set_sensitive(core->property_is_settable(uuid,type, property_id));
+		mute = false;
 	}
 
 	void PropertyEditorLength::set_range(int64_t min, int64_t max) {
@@ -137,6 +144,8 @@ namespace horizon {
 	}
 
 	void PropertyEditorLength::changed() {
+		if(mute)
+			return;
 		int64_t va = sp->get_value_as_int();
 		core->set_property_int(uuid,type, property_id, va);
 		sp->set_value(core->get_property_int(uuid,type, property_id));
@@ -203,10 +212,14 @@ namespace horizon {
 	}
 
 	void PropertyEditorLayer::reload() {
+		mute = true;
 		combo->set_active_id(std::to_string(core->get_property_int(uuid, type, property_id)));
+		mute = false;
 	}
 
 	void PropertyEditorLayer::changed() {
+		if(mute)
+			return;
 		int la = std::stoi(combo->get_active_id());
 		core->set_property_int(uuid, type, property_id, la);
 		parent->parent->parent->signal_update().emit();
@@ -237,10 +250,14 @@ namespace horizon {
 	}
 
 	void PropertyEditorNetClass::reload() {
+		mute = true;
 		combo->set_active_id(core->get_property_string(uuid, type, property_id));
+		mute = false;
 	}
 
 	void PropertyEditorNetClass::changed() {
+		if(mute)
+			return;
 		std::string nc = combo->get_active_id();
 		core->set_property_string(uuid, type, property_id, nc);
 		parent->parent->parent->signal_update().emit();
@@ -263,10 +280,14 @@ namespace horizon {
 	}
 
 	void PropertyEditorEnum::reload() {
+		mute = true;
 		combo->set_active_id(std::to_string(core->get_property_int(uuid, type, property_id)));
+		mute = false;
 	}
 
 	void PropertyEditorEnum::changed() {
+		if(mute)
+			return;
 		int la = std::stoi(combo->get_active_id());
 		core->set_property_int(uuid, type, property_id, la);
 		parent->parent->parent->signal_update().emit();

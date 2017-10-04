@@ -50,10 +50,7 @@ namespace horizon {
 			ViaPadstackProvider via_padstack_provider;
 
 			Block block;
-			Block block_work;
-
 			Board brd;
-			Board brd_work;
 
 			BoardRules rules;
 

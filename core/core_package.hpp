@@ -48,7 +48,6 @@ namespace horizon {
 
 
 			Package package;
-			Package package_work;
 			std::string m_filename;
 
 			class HistoryItem: public Core::HistoryItem {

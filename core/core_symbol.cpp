@@ -5,11 +5,10 @@
 namespace horizon {
 	CoreSymbol::CoreSymbol(const std::string &filename, Pool &pool):
 		sym(Symbol::new_from_file(filename, pool)),
-		sym_work(sym),
 		m_filename(filename)
 	{
-		rebuild();
 		m_pool = &pool;
+		rebuild();
 	}
 
 	bool CoreSymbol::has_object_type(ObjectType ty) {
@@ -29,90 +28,74 @@ namespace horizon {
 	}
 
 	std::map<UUID, Text> *CoreSymbol::get_text_map(bool work) {
-		auto &s = work?sym_work:sym;
-		return &s.texts;
+		return &sym.texts;
 	}
 
 
 	Junction *CoreSymbol::get_junction(const UUID &uu, bool work) {
-		auto &s = work?sym_work:sym;
-		return s.get_junction(uu);
+		return sym.get_junction(uu);
 	}
 	Line *CoreSymbol::get_line(const UUID &uu, bool work) {
-		auto &s = work?sym_work:sym;
-		return &s.lines.at(uu);
+		return &sym.lines.at(uu);
 	}
 	SymbolPin *CoreSymbol::get_symbol_pin(const UUID &uu, bool work) {
-		auto &s = work?sym_work:sym;
-		return s.get_symbol_pin(uu);
+		return sym.get_symbol_pin(uu);
 	}
 	Arc *CoreSymbol::get_arc(const UUID &uu, bool work) {
-		auto &s = work?sym_work:sym;
-		return &s.arcs.at(uu);
+		return &sym.arcs.at(uu);
 	}
 
 	Junction *CoreSymbol::insert_junction(const UUID &uu, bool work) {
-		auto &s = work?sym_work:sym;
-		auto x = s.junctions.emplace(std::make_pair(uu, uu));
+		auto x = sym.junctions.emplace(std::make_pair(uu, uu));
 		return &(x.first->second);
 	}
 	void CoreSymbol::delete_junction(const UUID &uu, bool work) {
-		auto &s = work?sym_work:sym;
-		s.junctions.erase(uu);
+		sym.junctions.erase(uu);
 	}
 
 	Line *CoreSymbol::insert_line(const UUID &uu, bool work) {
-		auto &s = work?sym_work:sym;
-		auto x = s.lines.emplace(std::make_pair(uu, uu));
+		auto x = sym.lines.emplace(std::make_pair(uu, uu));
 		return &(x.first->second);
 	}
 	void CoreSymbol::delete_line(const UUID &uu, bool work) {
-		auto &s = work?sym_work:sym;
-		s.lines.erase(uu);
+		sym.lines.erase(uu);
 	}
 
 	Arc *CoreSymbol::insert_arc(const UUID &uu, bool work) {
-		auto &s = work?sym_work:sym;
-		auto x = s.arcs.emplace(std::make_pair(uu, uu));
+		auto x = sym.arcs.emplace(std::make_pair(uu, uu));
 		return &(x.first->second);
 	}
 	void CoreSymbol::delete_arc(const UUID &uu, bool work) {
-		auto &s = work?sym_work:sym;
-		s.arcs.erase(uu);
+		sym.arcs.erase(uu);
 	}
 
 	void CoreSymbol::delete_symbol_pin(const UUID &uu, bool work) {
-			auto &s = work?sym_work:sym;
-			s.pins.erase(uu);
+			sym.pins.erase(uu);
 	}
 	SymbolPin *CoreSymbol::insert_symbol_pin(const UUID &uu, bool work) {
-			auto &s = work?sym_work:sym;
-			auto x = s.pins.emplace(std::make_pair(uu, uu));
+			auto x = sym.pins.emplace(std::make_pair(uu, uu));
 			return &(x.first->second);
 	}
 
 	std::vector<Line*> CoreSymbol::get_lines(bool work) {
-		auto &s = work?sym_work:sym;
 		std::vector<Line*> r;
-		for(auto &it: s.lines) {
+		for(auto &it: sym.lines) {
 			r.push_back(&it.second);
 		}
 		return r;
 	}
 
 	std::vector<Arc*> CoreSymbol::get_arcs(bool work) {
-		auto &s = work?sym_work:sym;
 		std::vector<Arc*> r;
-		for(auto &it: s.arcs) {
+		for(auto &it: sym.arcs) {
 			r.push_back(&it.second);
 		}
 		return r;
 	}
 
 	std::vector<const Pin*> CoreSymbol::get_pins(bool work) {
-		auto &s = work?sym_work:sym;
 		std::vector<const Pin*> r;
-		for(auto &it: s.unit->pins) {
+		for(auto &it: sym.unit->pins) {
 			r.push_back(&it.second);
 		}
 		return r;
@@ -236,7 +219,6 @@ namespace horizon {
 
 	void CoreSymbol::rebuild(bool from_undo) {
 		sym.expand();
-		sym_work = sym;
 		Core::rebuild(from_undo);
 	}
 
@@ -247,7 +229,7 @@ namespace horizon {
 	void CoreSymbol::history_load(unsigned int i) {
 		auto x = dynamic_cast<CoreSymbol::HistoryItem*>(history.at(history_current).get());
 		sym = x->sym;
-		rebuild(true);
+		s_signal_rebuilt.emit();
 	}
 
 	LayerProvider *CoreSymbol::get_layer_provider() {
@@ -255,11 +237,11 @@ namespace horizon {
 	}
 
 	const Symbol *CoreSymbol::get_canvas_data() {
-		return &sym_work;
+		return &sym;
 	}
 
 	std::pair<Coordi,Coordi> CoreSymbol::get_bbox() {
-		auto bb = sym_work.get_bbox(true);
+		auto bb = sym.get_bbox(true);
 		int64_t pad = 1_mm;
 		bb.first.x -= pad;
 		bb.first.y -= pad;
@@ -270,16 +252,15 @@ namespace horizon {
 	}
 
 	Symbol *CoreSymbol::get_symbol(bool work) {
-		return work?&sym_work:&sym;
+		return &sym;
 	}
 
 	void CoreSymbol::commit() {
-		sym = sym_work;
 		set_needs_save(true);
 	}
 
 	void CoreSymbol::revert() {
-		sym_work = sym;
+		history_load(history_current);
 		reverted = true;
 	}
 

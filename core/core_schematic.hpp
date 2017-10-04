@@ -71,10 +71,8 @@ namespace horizon {
 
 		private:
 			Block block;
-			Block block_work;
 
 			Schematic sch;
-			Schematic sch_work;
 
 			SchematicRules rules;
 

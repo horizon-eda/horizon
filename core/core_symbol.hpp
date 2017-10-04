@@ -55,7 +55,6 @@ namespace horizon {
 
 
 			Symbol sym;
-			Symbol sym_work;
 			std::string m_filename;
 
 			class HistoryItem: public Core::HistoryItem {

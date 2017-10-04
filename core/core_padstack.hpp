@@ -36,7 +36,6 @@ namespace horizon {
 			std::map<UUID, Hole> *get_hole_map(bool work=true) override;
 
 			Padstack padstack;
-			Padstack padstack_work;
 			std::string m_filename;
 
 			class HistoryItem: public Core::HistoryItem {
