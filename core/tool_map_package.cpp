@@ -60,8 +60,7 @@ namespace horizon {
 		auto uu = UUID::random();
 		pkg = &brd->packages.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, comp)).first->second;
 		pkg->placement.shift = c;
-		brd->expand_packages();
-		brd->update_refs();
+		brd->expand(true);
 		core.r->selection.clear();
 		core.r->selection.emplace(uu, ObjectType::BOARD_PACKAGE);
 	}
@@ -69,6 +68,7 @@ namespace horizon {
 	ToolResponse ToolMapPackage::update(const ToolArgs &args) {
 		if(args.type == ToolEventType::MOVE) {
 			pkg->placement.shift = args.coords;
+			core.b->get_board()->update_airwires();
 		}
 		else if(args.type == ToolEventType::CLICK) {
 			if(args.button == 1) {

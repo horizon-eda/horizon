@@ -681,11 +681,12 @@ namespace PNS {
 			default:
 				std::cout << "!!!unhandled add " << aItem->KindStr() << std::endl;
 		}
-		board->expand(true);
+
 	}
 
 
 	void PNS_HORIZON_IFACE::Commit() {
+		board->expand(true);
 		EraseView();
 	}
 

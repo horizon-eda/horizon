@@ -45,6 +45,8 @@ namespace horizon {
 					uuid_ptr<Junction> junc = nullptr;
 					uuid_ptr<BoardPackage> package = nullptr;
 					uuid_ptr<Pad> pad = nullptr;
+					bool operator<(const Track::Connection &other) const;
+					bool operator==(const Track::Connection &other) const;
 
 					void connect(Junction *j);
 					void connect(BoardPackage *pkg, Pad *pad);

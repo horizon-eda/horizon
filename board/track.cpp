@@ -112,6 +112,14 @@ namespace horizon {
 		}
 	}
 
+	bool Track::Connection::operator <(const Track::Connection &other) const {
+		if(junc < other.junc)
+			return true;
+		if(junc > other.junc)
+			return false;
+		return pad < other.pad;
+	}
+
 	
 	Track::Track(const UUID &uu, const json &j, Board &brd):
 		uuid(uu),
