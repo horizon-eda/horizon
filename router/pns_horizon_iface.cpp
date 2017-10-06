@@ -675,6 +675,7 @@ namespace PNS {
 						ju->position = c;
 						via->junction = ju;
 					}
+					via->junction->has_via = true;
 				}
 			} break;
 
