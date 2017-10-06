@@ -13,6 +13,8 @@ namespace horizon {
 	std::string dim_to_string(int64_t x);
 	std::string angle_to_string(int angle, bool pos_only = true);
 
+	int64_t round_multiple(int64_t x, int64_t mul);
+
 	template <typename T, typename U> std::vector<T> dynamic_cast_vector(const std::vector<U> &cin) {
 		std::vector<T> out;
 		out.reserve(cin.size());

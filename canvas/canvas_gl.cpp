@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <epoxy/gl.h>
 #include "gl_util.hpp"
+#include "util.hpp"
 
 namespace horizon {
 	std::pair<float, Coordf> CanvasGL::get_scale_and_offset() {
@@ -145,14 +146,6 @@ namespace horizon {
 		#endif
 
 		return Gtk::GLArea::on_scroll_event(scroll_event);
-	}
-
-	static int64_t sgn(int64_t x) {
-		return x>0?1:-1;
-	}
-
-	static int64_t round_multiple(int64_t x, int64_t mul) {
-		return ((x+sgn(x)*mul/2)/mul)*mul;
 	}
 
 	Coordi CanvasGL::snap_to_grid(const Coordi &c) {

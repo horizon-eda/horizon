@@ -115,6 +115,14 @@ namespace horizon {
 		return ss.str();
 	}
 
+	static int64_t sgn(int64_t x) {
+		return x>0?1:-1;
+	}
+
+	int64_t round_multiple(int64_t x, int64_t mul) {
+		return ((x+sgn(x)*mul/2)/mul)*mul;
+	}
+
 	bool endswith(const std::string &haystack, const std::string &needle) {
 		auto pos = haystack.rfind(needle);
 		if(pos == std::string::npos)

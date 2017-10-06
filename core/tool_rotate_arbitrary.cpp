@@ -165,14 +165,6 @@ namespace horizon {
 		}
 	}
 
-	static int64_t sgn(int64_t x) {
-		return x>0?1:-1;
-	}
-
-	static int64_t round_multiple(int64_t x, int64_t mul) {
-		return ((x+sgn(x)*mul/2)/mul)*mul;
-	}
-
 
 	ToolResponse ToolRotateArbitrary::update(const ToolArgs &args) {
 		if(args.type == ToolEventType::MOVE) {
