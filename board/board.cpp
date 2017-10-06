@@ -93,6 +93,7 @@ namespace horizon {
 			rules.load_from_json(j.at("rules"));
 			rules.cleanup(block);
 		}
+		update_refs(); //fill in smashed texts
 
 	}
 
