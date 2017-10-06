@@ -140,6 +140,8 @@ namespace horizon {
 		key_sequence_dialog->add_sequence("Ctrl+Z", "Undo");
 		key_sequence_dialog->add_sequence("Ctrl+Y", "Redo");
 		key_sequence_dialog->add_sequence("Ctrl+C", "Copy");
+		key_sequence_dialog->add_sequence("Ctrl+V", "Paste");
+		key_sequence_dialog->add_sequence("Ctrl+D", "Duplicate");
 		key_sequence_dialog->add_sequence("Ctrl+I", "Selection filter");
 		key_sequence_dialog->add_sequence("Esc", "Hover select");
 
@@ -205,12 +207,14 @@ namespace horizon {
 		});
 
 		canvas->property_work_layer().signal_changed().connect([this]{
-			ToolArgs args;
-			args.type = ToolEventType::LAYER_CHANGE;
-			args.coords = canvas->get_cursor_pos();
-			args.work_layer = canvas->property_work_layer();
-			ToolResponse r = core.r->tool_update(args);
-			tool_process(r);
+			if(core.r->tool_is_active()) {
+				ToolArgs args;
+				args.type = ToolEventType::LAYER_CHANGE;
+				args.coords = canvas->get_cursor_pos();
+				args.work_layer = canvas->property_work_layer();
+				ToolResponse r = core.r->tool_update(args);
+				tool_process(r);
+			}
 		});
 
 
@@ -363,6 +367,15 @@ namespace horizon {
 					}
 					else if(key_event->keyval == GDK_KEY_c) {
 						clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos());
+						return true;
+					}
+					else if(key_event->keyval == GDK_KEY_v) {
+						tool_begin(ToolID::PASTE);
+						return true;
+					}
+					else if(key_event->keyval == GDK_KEY_d) {
+						clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos());
+						tool_begin(ToolID::PASTE);
 						return true;
 					}
 					else if(key_event->keyval == GDK_KEY_i) {
