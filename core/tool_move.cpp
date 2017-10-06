@@ -185,19 +185,50 @@ namespace horizon {
 
 	void ToolMove::update_tip() {
 		auto delta = last-origin;
-		imp->tool_bar_set_tip("<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate <b>e:</b>mirror "+coord_to_string(delta, true));
+		std::string s ="<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate <b>e:</b>mirror <b>/:</b>restrict <i>"+coord_to_string(delta, true) + " ";
+		switch(mode) {
+			case Mode::ARB :
+				s += "any direction";
+			break;
+			case Mode::X :
+				s += "X only";
+			break;
+			case Mode::Y :
+				s += "Y only";
+			break;
+		}
+
+		s+="</i>";
+		imp->tool_bar_set_tip(s);
+	}
+
+	Coordi ToolMove::get_coord(const Coordi &c) {
+		switch(mode) {
+			case Mode::ARB :
+				return c;
+			case Mode::X :
+				return {c.x, origin.y};
+			case Mode::Y :
+				return {origin.x, c.y};
+		}
+		return c;
 	}
 
 
+	void ToolMove::do_move(const Coordi &d) {
+		auto c = get_coord(d);
+		Coordi delta = c - last;
+		move_do(delta);
+		last = c;
+		if(core.b) {
+			core.b->get_board()->update_airwires();
+		}
+		update_tip();
+	}
+
 	ToolResponse ToolMove::update(const ToolArgs &args) {
 		if(args.type == ToolEventType::MOVE) {
-			Coordi delta = args.coords - last;
-			move_do(delta);
-			last = args.coords;
-			if(core.b) {
-				core.b->get_board()->update_airwires();
-			}
-			update_tip();
+			do_move(args.coords);
 		}
 		else if(args.type == ToolEventType::CLICK) {
 			if(args.button == 1) {
@@ -220,6 +251,14 @@ namespace horizon {
 			if(args.key == GDK_KEY_Escape) {
 				core.r->revert();
 				return ToolResponse::end();
+			}
+			else if(args.key == GDK_KEY_slash) {
+				switch(mode) {
+					case Mode::ARB : mode = Mode::X; break;
+					case Mode::X: mode = Mode::Y; break;
+					case Mode::Y: mode = Mode::ARB; break;
+				}
+				do_move(args.coords);
 			}
 			else if(args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
 				bool rotate = args.key == GDK_KEY_r;
