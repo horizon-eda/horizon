@@ -560,7 +560,10 @@ namespace horizon {
 	}
 
 	void Canvas::render(const Shape &shape, bool interactive) {
-
+		if(img_mode) {
+			img_polygon(shape.to_polygon().remove_arcs(64));
+			return;
+		}
 		if(interactive) {
 			auto bb = shape.get_bbox();
 			selectables.append(shape.uuid, ObjectType::SHAPE, shape.placement.shift, shape.placement.transform(bb.first), shape.placement.transform(bb.second), 0, shape.layer);
@@ -642,6 +645,9 @@ namespace horizon {
 			render(it.second, !on_sheet);
 		}
 		for(const auto &it: sym.arcs) {
+			render(it.second, !on_sheet);
+		}
+		for(const auto &it: sym.polygons) {
 			render(it.second, !on_sheet);
 		}
 		if(!smashed) {
