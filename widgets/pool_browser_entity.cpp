@@ -42,7 +42,7 @@ namespace horizon {
 		}
 		else {
 			std::ostringstream qs;
-			qs << "SELECT entities.uuid, entities.name, entities.prefix, entities.n_gates, (SELECT GROUP_CONCAT(tags.tag, ' '), entities.manufacturer FROM tags WHERE tags.uuid = entities.uuid) FROM entities LEFT JOIN tags ON tags.uuid = entities.uuid WHERE entities.name LIKE ? ";
+			qs << "SELECT entities.uuid, entities.name, entities.prefix, entities.n_gates, (SELECT GROUP_CONCAT(tags.tag, ' ') FROM tags WHERE tags.uuid = entities.uuid), entities.manufacturer FROM entities LEFT JOIN tags ON tags.uuid = entities.uuid WHERE entities.name LIKE ? ";
 			qs << "AND (";
 			for(const auto &it: tags) {
 				qs << "tags.tag LIKE ? OR ";
