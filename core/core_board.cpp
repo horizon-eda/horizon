@@ -56,8 +56,7 @@ namespace horizon {
 		brd.update_refs();
 		rules.cleanup(&block);
 
-		rebuild(true);
-
+		rebuild();
 	}
 
 	bool CoreBoard::has_object_type(ObjectType ty) {
