@@ -22,6 +22,9 @@ namespace horizon {
 				{{GDK_KEY_p, GDK_KEY_p},	ToolID::MAP_PIN},
 				{{GDK_KEY_p, GDK_KEY_t},	ToolID::PLACE_TEXT},
 				{{GDK_KEY_t},				ToolID::PLACE_TEXT},
+				{{GDK_KEY_d, GDK_KEY_y}, 	ToolID::DRAW_POLYGON},
+				{{GDK_KEY_y}, 				ToolID::DRAW_POLYGON},
+				{{GDK_KEY_d, GDK_KEY_c}, 	ToolID::DRAW_POLYGON_RECTANGLE},
 		});
 		key_seq.signal_update_hint().connect([this] (const std::string &s) {main_window->tool_hint_label->set_text(s);});
 

@@ -52,6 +52,7 @@ namespace horizon {
 
 		private:
 			std::map<UUID, Text> *get_text_map(bool work=true) override;
+			std::map<UUID, Polygon> *get_polygon_map(bool work=true) override;
 
 
 			Symbol sym;

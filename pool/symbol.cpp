@@ -81,6 +81,13 @@ namespace horizon {
 				texts.emplace(std::make_pair(u, Text(u, it.value())));
 			}
 		}
+		if(j.count("polygons")) {
+			const json &o = j["polygons"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID(it.key());
+				polygons.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
+			}
+		}
 		if(j.count("text_placements")) {
 			const json &o = j["text_placements"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -144,6 +151,7 @@ namespace horizon {
 		lines(sym.lines),
 		arcs(sym.arcs),
 		texts(sym.texts),
+		polygons(sym.polygons),
 		text_placements(sym.text_placements)
 	{
 		update_refs();
@@ -158,6 +166,7 @@ namespace horizon {
 		lines = sym.lines;
 		arcs = sym.arcs;
 		texts = sym.texts;
+		polygons = sym.polygons;
 		text_placements = sym.text_placements;
 		update_refs();
 	}
@@ -231,6 +240,10 @@ namespace horizon {
 		j["arcs"] = json::object();
 		for(const auto &it: arcs) {
 			j["arcs"][(std::string)it.first] = it.second.serialize();
+		}
+		j["polygons"] = json::object();
+		for(const auto &it: polygons) {
+			j["polygons"][(std::string)it.first] = it.second.serialize();
 		}
 		j["texts"] = json::object();
 		for(const auto &it: texts) {

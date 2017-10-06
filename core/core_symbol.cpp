@@ -18,6 +18,9 @@ namespace horizon {
 			case ObjectType::ARC:
 			case ObjectType::SYMBOL_PIN:
 			case ObjectType::TEXT:
+			case ObjectType::POLYGON:
+			case ObjectType::POLYGON_EDGE:
+			case ObjectType::POLYGON_VERTEX:
 				return true;
 			break;
 			default:
@@ -29,6 +32,10 @@ namespace horizon {
 
 	std::map<UUID, Text> *CoreSymbol::get_text_map(bool work) {
 		return &sym.texts;
+	}
+
+	std::map<UUID, Polygon> *CoreSymbol::get_polygon_map(bool work) {
+		return &sym.polygons;
 	}
 
 

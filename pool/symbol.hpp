@@ -9,6 +9,7 @@
 #include "arc.hpp"
 #include "text.hpp"
 #include "uuid_provider.hpp"
+#include "polygon.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -72,6 +73,7 @@ namespace horizon {
 			std::map<UUID, Line> lines;
 			std::map<UUID, Arc> arcs;
 			std::map<UUID, Text> texts;
+			std::map<UUID, Polygon> polygons;
 			
 			std::map<std::tuple<int, bool, UUID>, Placement> text_placements;
 			void apply_placement(const Placement &p);
