@@ -17,6 +17,13 @@ namespace horizon {
 						cr->line_to(it2.x1/1e6,it2.y1/1e6);
 						cr->stroke();
 					}
+					else {
+						cr->move_to(it2.x0/1e6,it2.y0/1e6);
+						cr->line_to(it2.x1/1e6,it2.y1/1e6);
+						cr->line_to(it2.x2/1e6,it2.y2/1e6);
+						cr->close_path();
+						cr->fill();
+					}
 				}
 			}
 			cr->restore();
