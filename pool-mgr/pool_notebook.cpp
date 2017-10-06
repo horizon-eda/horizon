@@ -45,7 +45,7 @@ namespace horizon {
 				default:;
 			}
 			proc = std::make_unique<EditorProcess>(argv, env);
-			proc->signal_exited().connect([this](auto rc){s_signal_exited.emit(rc);});
+			proc->signal_exited().connect([this](auto rc){s_signal_exited.emit(rc, true);});
 		}
 		else {
 			switch(type) {
@@ -63,8 +63,9 @@ namespace horizon {
 			win->present();
 
 			win->signal_hide().connect([this] {
+				auto need_update = win->get_need_update();
 				delete win;
-				s_signal_exited.emit(0);
+				s_signal_exited.emit(0, need_update);
 			});
 		}
 	}
@@ -82,7 +83,7 @@ namespace horizon {
 			auto &proc = processes.emplace(std::piecewise_construct, std::forward_as_tuple(filename),
 					std::forward_as_tuple(type, args, env, &pool)).first->second;
 
-			proc.signal_exited().connect([filename, this](int status) {
+			proc.signal_exited().connect([filename, this](int status, bool need_update) {
 				std::cout << "exit stat " << status << std::endl;
 				/*if(status != 0) {
 					view_project.info_bar_label->set_text("Editor for '"+filename+"' exited with status "+std::to_string(status));
@@ -94,7 +95,8 @@ namespace horizon {
 					parent->child_property_padding(*view_project.info_bar) = 0;
 				}*/
 				processes.erase(filename);
-				pool_update();
+				if(need_update)
+					pool_update();
 			});
 		}
 		else { //present imp

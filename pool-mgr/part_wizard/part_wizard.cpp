@@ -564,7 +564,7 @@ namespace horizon {
 					std::forward_as_tuple(type, args, env, pool)).first->second;
 			button_finish->set_sensitive(false);
 			button_back->set_sensitive(false);
-			proc.signal_exited().connect([filename, this](int status) {
+			proc.signal_exited().connect([filename, this](int status, bool need_update) {
 				std::cout << "exit stat " << status << std::endl;
 				/*if(status != 0) {
 					view_project.info_bar_label->set_text("Editor for '"+filename+"' exited with status "+std::to_string(status));

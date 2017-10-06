@@ -21,8 +21,8 @@ namespace horizon {
 			PoolManagerProcess(Type ty, const std::vector<std::string>& args, const std::vector<std::string>& env, class Pool *pool);
 			Type type;
 			std::unique_ptr<EditorProcess> proc=nullptr;
-			Gtk::Window *win = nullptr;
-			typedef sigc::signal<void, int> type_signal_exited;
+			class EditorWindow *win = nullptr;
+			typedef sigc::signal<void, int, bool> type_signal_exited;
 			type_signal_exited signal_exited() {return s_signal_exited;}
 			void reload();
 		private:
