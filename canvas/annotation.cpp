@@ -11,6 +11,8 @@ namespace horizon {
 	void Canvas::remove_annotation(CanvasAnnotation *a) {
 		auto layer = a->layer;
 		annotations.erase(layer);
+		if(triangles.count(layer))
+			triangles.erase(layer);
 	}
 
 	CanvasAnnotation::CanvasAnnotation(Canvas *c, int l): ca(c), layer(l) {

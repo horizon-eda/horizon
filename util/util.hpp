@@ -11,6 +11,7 @@ namespace horizon {
 	std::string get_exe_dir();
 	std::string coord_to_string(const Coordf &c, bool delta=false);
 	std::string dim_to_string(int64_t x);
+	std::string angle_to_string(int angle, bool pos_only = true);
 
 	template <typename T, typename U> std::vector<T> dynamic_cast_vector(const std::vector<U> &cin) {
 		std::vector<T> out;

@@ -40,6 +40,7 @@
 #include "tool_edit_line_rectangle.hpp"
 #include "tool_route_track_interactive.hpp"
 #include "tool_edit_via.hpp"
+#include "tool_rotate_arbitrary.hpp"
 #include <memory>
 
 namespace horizon {
@@ -191,6 +192,9 @@ namespace horizon {
 
 			case ToolID::EDIT_VIA :
 				return std::make_unique<ToolEditVia>(this, tool_id);
+
+			case ToolID::ROTATE_ARBITRARY :
+				return std::make_unique<ToolRotateArbitrary>(this, tool_id);
 
 			default:
 				return nullptr;

@@ -52,5 +52,6 @@ namespace horizon {
 		{ToolID::EDIT_SCHEMATIC_PROPERTIES, {"Edit schematic properties"}},
 		{ToolID::ROUTE_TRACK_INTERACTIVE, {"Route track interactive"}},
 		{ToolID::EDIT_VIA, {"Edit via"}},
+		{ToolID::ROTATE_ARBITRARY, {"Rotate arbitrary"}},
 	};
 }

@@ -96,6 +96,25 @@ namespace horizon {
 		return ss.str();
 	}
 
+	std::string angle_to_string(int x, bool pos_only) {
+		while(x<0) {
+			x+=65536;
+		}
+		x %= 65536;
+		if(!pos_only && x>32768)
+			x -= 65536;
+
+		std::ostringstream ss;
+		if(x >= 0) {
+			ss << "+";
+		}
+		else {
+			ss << "−"; //this is U+2212 MINUS SIGN, has same width as +
+		}
+		ss << std::fixed << std::setprecision(3)  << std::setw(7) << std::setfill('0') << std::internal << std::abs((x/65536.0)*360) << " ° ";
+		return ss.str();
+	}
+
 	bool endswith(const std::string &haystack, const std::string &needle) {
 		auto pos = haystack.rfind(needle);
 		if(pos == std::string::npos)

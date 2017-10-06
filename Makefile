@@ -154,6 +154,7 @@ SRC_IMP = \
 	core/tool_helper_move.cpp\
 	core/tool_helper_merge.cpp\
 	core/tool_edit_via.cpp\
+	core/tool_rotate_arbitrary.cpp\
 	core/cores.cpp\
 	core/clipboard.cpp\
 	core/buffer.cpp\
