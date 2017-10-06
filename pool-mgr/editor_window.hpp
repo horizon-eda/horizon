@@ -21,6 +21,7 @@ namespace horizon {
 			bool get_need_update();
 
 		private:
+			ObjectType type;
 			std::unique_ptr<EditorWindowStore> store = nullptr;
 			PoolEditorInterface *iface = nullptr;
 			Gtk::Button *save_button = nullptr;

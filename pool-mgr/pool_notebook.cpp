@@ -188,7 +188,8 @@ namespace horizon {
 					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
 					Gtk::FileChooserDialog fc(*top, "Save Symbol", Gtk::FILE_CHOOSER_ACTION_SAVE);
 					fc.set_do_overwrite_confirmation(true);
-					fc.set_current_name("symbol.json");
+					auto unit_filename = pool.get_filename(ObjectType::UNIT, br->get_selected());
+					auto basename = Gio::File::create_for_path(unit_filename)->get_basename();
 					fc.set_current_folder(Glib::build_filename(base_path, "symbols"));
 					fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
 					fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
@@ -213,7 +214,9 @@ namespace horizon {
 					Gtk::FileChooserDialog fc(*top, "Save entity", Gtk::FILE_CHOOSER_ACTION_SAVE);
 					fc.set_do_overwrite_confirmation(true);
 					fc.set_current_folder(Glib::build_filename(base_path, "entities"));
-					fc.set_current_name("entity.json");
+					auto unit_filename = pool.get_filename(ObjectType::UNIT, br->get_selected());
+					auto basename = Gio::File::create_for_path(unit_filename)->get_basename();
+					fc.set_current_name(basename);
 					fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
 					fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
 					if(fc.run()==Gtk::RESPONSE_ACCEPT) {
@@ -576,7 +579,6 @@ namespace horizon {
 				bu->signal_clicked().connect([this, br]{
 					if(!br->get_selected())
 						return;
-					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
 					if(!part_wizard) {
 						auto pkg = pool.get_package(br->get_selected());
 						part_wizard = PartWizard::create(pkg, base_path, &pool);

@@ -93,7 +93,6 @@ namespace horizon {
 
 	PartEditor::PartEditor(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x, Part *p, Pool *po) :
 		Gtk::Box(cobject), part(p), pool(po) {
-		needs_save = true;
 
 		auto add_entry = [x](const char *name) {
 			Gtk::Box *t;
@@ -135,17 +134,21 @@ namespace horizon {
 				it.second->set_text_inherit(part->base->attributes.at(it.first).second);
 				it.second->property_inherit() = part->attributes.at(it.first).first;
 			}
+			it.second->entry->signal_changed().connect([this]{needs_save = true;});
+			it.second->button->signal_toggled().connect([this]{needs_save = true;});
 		}
 
 		update_entries();
 
 		w_tags_inherit->set_active(part->inherit_tags);
+		w_tags_inherit->signal_toggled().connect([this]{needs_save = true;});
+
 		{
 			std::stringstream s;
 			std::copy(part->tags.begin(), part->tags.end(), std::ostream_iterator<std::string>(s, " "));
 			w_tags->set_text(s.str());
+			w_tags->signal_changed().connect([this]{needs_save = true;});
 		}
-
 
 		pin_store = Gtk::ListStore::create(pin_list_columns);
 		w_tv_pins->set_model(pin_store);
@@ -200,6 +203,7 @@ namespace horizon {
 				row[pad_list_columns.gate_uuid] = UUID();
 			}
 			update_mapped();
+			needs_save = true;
 		});
 
 		w_button_map->signal_clicked().connect([this] {
@@ -228,6 +232,7 @@ namespace horizon {
 					}
 				}
 				update_mapped();
+				needs_save = true;
 			}
 		});
 
@@ -235,10 +240,12 @@ namespace horizon {
 
 		w_parametric_from_base->set_sensitive(part->base);
 		w_parametric->get_buffer()->set_text(serialize_parametric(part->parametric));
+		w_parametric->get_buffer()->signal_changed().connect([this]{needs_save=true;});
 
 		w_parametric_from_base->signal_clicked().connect([this] {
 			if(part->base) {
 				w_parametric->get_buffer()->set_text(serialize_parametric(part->base->parametric));
+				needs_save = true;
 			}
 		});
 
@@ -303,6 +310,7 @@ namespace horizon {
 				part->pad_map.emplace(it[pad_list_columns.pad_uuid], horizon::Part::PadMapItem(gate, pin));
 			}
 		}
+		needs_save = false;
 	}
 
 

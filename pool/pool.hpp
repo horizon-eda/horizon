@@ -28,6 +28,7 @@ namespace horizon {
 			const class Package *get_package(const UUID &uu);
 			const class Part *get_part(const UUID &uu);
 			std::string get_filename(ObjectType type, const UUID &uu);
+			const std::string &get_base_path() const;
 			/**
 			 * The database connection.
 			 * You may use it to perform more advanced queries on the pool.
@@ -38,7 +39,7 @@ namespace horizon {
 			 * Doing so will invalidate all references pointers by get_entity and friends.
 			 */
 			void clear();
-			std::string get_tmp_filename(ObjectType type, const UUID &uu);
+			std::string get_tmp_filename(ObjectType type, const UUID &uu) const;
 
 		
 		private :

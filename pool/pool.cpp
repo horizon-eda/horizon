@@ -88,7 +88,11 @@ namespace horizon {
 		}
 	}
 
-	std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) {
+	const std::string &Pool::get_base_path() const {
+		return base_path;
+	}
+
+	std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) const {
 		auto suffix = static_cast<std::string>(uu)+".json";
 		auto base = Glib::build_filename(base_path, "tmp");
 		switch(type) {

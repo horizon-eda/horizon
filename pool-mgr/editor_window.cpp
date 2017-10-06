@@ -55,7 +55,7 @@ namespace horizon {
 
 	};
 
-	EditorWindow::EditorWindow(ObjectType type, const std::string &filename, Pool *p): Gtk::Window(), pool(p) {
+	EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p): Gtk::Window(), type(ty), pool(p) {
 		set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 		auto hb = Gtk::manage(new Gtk::HeaderBar());
 		set_titlebar(*hb);
@@ -145,6 +145,16 @@ namespace horizon {
 			Gtk::FileChooserDialog fc(*this, "Save as", Gtk::FILE_CHOOSER_ACTION_SAVE);
 			fc.set_do_overwrite_confirmation(true);
 			fc.set_current_name("something.json");
+			switch(type) {
+				case ObjectType::UNIT :
+					fc.set_current_folder(Glib::build_filename(pool->get_base_path(), "units"));
+				break;
+				case ObjectType::ENTITY :
+					fc.set_current_folder(Glib::build_filename(pool->get_base_path(), "entities"));
+				break;
+				default:;
+			}
+
 			fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
 			fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
 			if(fc.run()==Gtk::RESPONSE_ACCEPT) {
