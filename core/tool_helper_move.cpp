@@ -118,7 +118,13 @@ namespace horizon {
 					SymbolPin *pin = core.y->get_symbol_pin(it.uuid);
 					transform(pin->position, center, rotate);
 					pin->orientation = transform_orienation(pin->orientation, rotate);
+				} break;
 
+				case ObjectType::BUS_RIPPER: {
+					if(!rotate) {
+						auto &x = core.c->get_sheet()->bus_rippers.at(it.uuid).mirror;
+						x = !x;
+					}
 				} break;
 
 				case ObjectType::TEXT: {

@@ -1,8 +1,6 @@
 #pragma once
 #include "core.hpp"
-#include "bus.hpp"
 #include "tool_place_junction.hpp"
-#include "bus_label.hpp"
 #include <forward_list>
 
 namespace horizon {
@@ -17,11 +15,11 @@ namespace horizon {
 			void delete_attached() override;
 			bool begin_attached() override;
 			bool update_attached(const ToolArgs &args) override;
-			bool check_line(LineNet *li) override;
-			BusLabel *la= nullptr;
+			bool check_line(class LineNet *li) override;
+			class BusLabel *la= nullptr;
 			Orientation last_orientation = Orientation::RIGHT;
-			std::forward_list<BusLabel*> labels_placed;
-			Bus* bus = nullptr;
+			std::forward_list<class BusLabel*> labels_placed;
+			class Bus* bus = nullptr;
 
 	};
 }

@@ -1,21 +1,13 @@
 #include "bus_ripper.hpp"
-#include "lut.hpp"
 #include "sheet.hpp"
 #include "block.hpp"
 
 namespace horizon {
 
-	static const LutEnumStr<Orientation> orientation_lut = {
-		{"up", 		Orientation::UP},
-		{"down", 	Orientation::DOWN},
-		{"left", 	Orientation::LEFT},
-		{"right",	Orientation::RIGHT},
-	};
-
 	BusRipper::BusRipper(const UUID &uu, const json &j, Sheet &sheet, Block &block):
 		uuid(uu),
 		junction(&sheet.junctions.at(j.at("junction").get<std::string>())),
-		orientation(orientation_lut.lookup(j.at("orientation"))),
+		mirror(j.value("mirror", false)),
 		bus(&block.buses.at(j.at("bus").get<std::string>())),
 		bus_member(&bus->members.at(j.at("bus_member").get<std::string>()))
 	{
@@ -26,14 +18,17 @@ namespace horizon {
 	json BusRipper::serialize() const {
 		json j;
 			j["junction"] = (std::string)junction->uuid;
-			j["orientation"] = orientation_lut.lookup_reverse(orientation);
+			j["mirror"] = mirror;
 			j["bus"] = (std::string)bus->uuid;
 			j["bus_member"] = (std::string)bus_member->uuid;
 		return j;
 	}
 
 	Coordi BusRipper::get_connector_pos() const {
-		return junction->position+Coordi(1.25_mm, 1.25_mm);
+		if(!mirror)
+			return junction->position+Coordi(1.25_mm, 1.25_mm);
+		else
+			return junction->position+Coordi(-1.25_mm, 1.25_mm);
 	}
 
 	UUID BusRipper::get_uuid() const {

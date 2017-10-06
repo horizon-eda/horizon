@@ -24,9 +24,10 @@ namespace horizon {
 			BusRipper(const UUID &uu);
 			virtual UUID get_uuid() const;
 			const UUID uuid;
+			bool temp = false;
 
 			uuid_ptr<Junction> junction;
-			Orientation orientation = Orientation::RIGHT;
+			bool mirror = false;
 			uuid_ptr<Bus> bus = nullptr;
 			uuid_ptr<Bus::Member> bus_member = nullptr;
 			unsigned int connection_count = 0;

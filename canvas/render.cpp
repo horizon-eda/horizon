@@ -466,8 +466,9 @@ namespace horizon {
 		if(ripper.connection_count < 1) {
 			draw_box(connector_pos, 0.25_mm, c);
 		}
-		auto extents = draw_text0(connector_pos+Coordi(0, 0.5_mm), 1.5_mm, ripper.bus_member->name, 0, false, TextOrigin::BASELINE, c);
-		targets.emplace(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos);
+		auto extents = draw_text0(connector_pos+Coordi(0, 0.5_mm), 1.5_mm, ripper.bus_member->name, ripper.mirror?32768:0, false, TextOrigin::BASELINE, c);
+		if(!ripper.temp)
+			targets.emplace(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos);
 		selectables.append(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos, extents.first, extents.second);
 	}
 
