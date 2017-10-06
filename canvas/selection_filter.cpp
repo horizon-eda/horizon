@@ -10,7 +10,7 @@ namespace horizon {
 			return true;
 		if(work_layer_only && (ca->work_layer != sel.layer))
 			return false;
-		if(!ca->layer_display.at(sel.layer).visible) //layer not visible
+		if(!ca->layer_display.at(sel.layer).visible && (sel.layer!=ca->work_layer)) //layer not visible and not work layer
 			return false;
 		return true;
 	}
