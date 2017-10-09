@@ -2,9 +2,6 @@
 #include "uuid.hpp"
 #include "json.hpp"
 #include "common.hpp"
-#include "unit.hpp"
-#include "entity.hpp"
-#include "symbol.hpp"
 #include "padstack.hpp"
 #include <vector>
 #include <map>

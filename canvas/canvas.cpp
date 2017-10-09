@@ -4,6 +4,7 @@
 #include "board/board.hpp"
 #include "common/layer_provider.hpp"
 #include "util.hpp"
+#include "sheet.hpp"
 
 namespace horizon {
 

@@ -48,6 +48,14 @@ namespace horizon {
 			}
 			fix_order(RuleID::CLEARANCE_NPTH_COPPER);
 		}
+		if(j.count("plane")) {
+			const json &o = j["plane"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID(it.key());
+				rule_plane.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
+			}
+			fix_order(RuleID::PLANE);
+		}
 		if(j.count("clearance_silkscreen_exposed_copper")) {
 			const json &o = j["clearance_silkscreen_exposed_copper"];
 			rule_clearance_silkscreen_exposed_copper = RuleClearanceSilkscreenExposedCopper(o);
@@ -73,6 +81,9 @@ namespace horizon {
 			it.second.match.cleanup(block);
 		}
 		for(auto &it: rule_clearance_npth_copper) {
+			it.second.match.cleanup(block);
+		}
+		for(auto &it: rule_plane) {
 			it.second.match.cleanup(block);
 		}
 	}
@@ -102,6 +113,14 @@ namespace horizon {
 				}
 			}
 		}
+		else if(id == RuleID::PLANE) {
+			for(auto &it: brd->planes) {
+				auto &plane = it.second;
+				if(plane.from_rules && plane.net) {
+					plane.settings = get_plane_settings(plane.net, plane.polygon->layer);
+				}
+			}
+		}
 	}
 
 	json BoardRules::serialize() const {
@@ -122,6 +141,10 @@ namespace horizon {
 		for(const auto &it: rule_via) {
 			j["via"][(std::string)it.first] = it.second.serialize();
 		}
+		j["plane"] = json::object();
+		for(const auto &it: rule_plane) {
+			j["plane"][(std::string)it.first] = it.second.serialize();
+		}
 		j["clearance_npth_copper"] = json::object();
 		for(const auto &it: rule_clearance_npth_copper) {
 			j["clearance_npth_copper"][(std::string)it.first] = it.second.serialize();
@@ -132,7 +155,7 @@ namespace horizon {
 	}
 
 	std::set<RuleID> BoardRules::get_rule_ids() const {
-		return {RuleID::HOLE_SIZE, RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, RuleID::TRACK_WIDTH, RuleID::CLEARANCE_COPPER, RuleID::PARAMETERS, RuleID::VIA, RuleID::CLEARANCE_NPTH_COPPER};
+		return {RuleID::HOLE_SIZE, RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, RuleID::TRACK_WIDTH, RuleID::CLEARANCE_COPPER, RuleID::PARAMETERS, RuleID::VIA, RuleID::CLEARANCE_NPTH_COPPER, RuleID::PLANE};
 	}
 
 	Rule *BoardRules::get_rule(RuleID id) {
@@ -157,6 +180,8 @@ namespace horizon {
 				return &rule_via.at(uu);
 			case RuleID::CLEARANCE_NPTH_COPPER :
 				return &rule_clearance_npth_copper.at(uu);
+			case RuleID::PLANE :
+				return &rule_plane.at(uu);
 			default :
 				return nullptr;
 		}
@@ -193,6 +218,12 @@ namespace horizon {
 				}
 			break;
 
+			case RuleID::PLANE:
+				for(auto &it: rule_plane) {
+					r[it.first] = &it.second;
+				}
+			break;
+
 			default:;
 		}
 		return r;
@@ -218,6 +249,10 @@ namespace horizon {
 
 			case RuleID::CLEARANCE_NPTH_COPPER :
 				rule_clearance_npth_copper.erase(uu);
+			break;
+
+			case RuleID::PLANE :
+				rule_plane.erase(uu);
 			break;
 
 			default:;
@@ -251,6 +286,11 @@ namespace horizon {
 
 			case RuleID::CLEARANCE_NPTH_COPPER :
 				r = &rule_clearance_npth_copper.emplace(uu, uu).first->second;
+				r->order = -1;
+			break;
+
+			case RuleID::PLANE :
+				r = &rule_plane.emplace(uu, uu).first->second;
 				r->order = -1;
 			break;
 
@@ -341,5 +381,17 @@ namespace horizon {
 			}
 		}
 		return ps_empty;
+	}
+
+	static const PlaneSettings plane_settings_default;
+
+	const PlaneSettings &BoardRules::get_plane_settings(Net *net, int layer) {
+		auto rules = dynamic_cast_vector<RulePlane*>(get_rules_sorted(RuleID::PLANE));
+		for(auto rule: rules) {
+			if(rule->enabled && rule->match.match(net) && (rule->layer == layer || rule->layer==10000)) {
+				return rule->settings;
+			}
+		}
+		return plane_settings_default;
 	}
 }

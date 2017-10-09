@@ -323,6 +323,18 @@ namespace horizon {
 		request_push();
 	}
 
+	std::set<SelectableRef> CanvasGL::get_selection_at(const Coordi &c) {
+		std::set<SelectableRef> in_selection;
+		unsigned int i = 0;
+		for(auto &it: selectables.items) {
+			if(it.inside(c, 10/scale) && selection_filter.can_select(selectables.items_ref[i])) {
+				in_selection.insert(selectables.items_ref[i]);
+			}
+			i++;
+		}
+		return in_selection;
+	}
+
 	void CanvasGL::set_selection_allowed(bool a) {
 		selection_allowed = a;
 	}

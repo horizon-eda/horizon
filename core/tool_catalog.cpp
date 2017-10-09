@@ -53,5 +53,11 @@ namespace horizon {
 		{ToolID::ROUTE_TRACK_INTERACTIVE, {"Route track interactive"}},
 		{ToolID::EDIT_VIA, {"Edit via"}},
 		{ToolID::ROTATE_ARBITRARY, {"Rotate arbitrary"}},
+		{ToolID::ADD_PLANE, {"Add Plane"}},
+		{ToolID::EDIT_PLANE, {"Edit Plane"}},
+		{ToolID::CLEAR_PLANE, {"Clear Plane"}},
+		{ToolID::UPDATE_PLANE, {"Update Plane"}},
+		{ToolID::UPDATE_ALL_PLANES, {"Update all Planes"}},
+		{ToolID::CLEAR_ALL_PLANES, {"Clear all Planes"}},
 	};
 }

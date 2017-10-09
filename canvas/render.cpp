@@ -28,6 +28,7 @@
 #include "board.hpp"
 #include "track.hpp"
 #include "util.hpp"
+#include "poly2tri/poly2tri.h"
 
 namespace horizon {
 
@@ -476,11 +477,12 @@ namespace horizon {
 		draw_error(warn.position, 2e5, warn.text);
 	}
 
+	static const Coordf coordf_from_pt(const p2t::Point *pt) {
+		return Coordf(pt->x, pt->y);
+	}
+
 	static const Coordf coordf_from_pt(const TPPLPoint &p) {
-		Coordf r;
-		r.x = p.x;
-		r.y = p.y;
-		return r;
+		return Coordf(p.x, p.y);
 	}
 
 	void Canvas::render(const Polygon &ipoly, bool interactive) {
@@ -491,48 +493,102 @@ namespace horizon {
 		if(poly.vertices.size()==0)
 			return;
 
-		TPPLPoly po;
-		po.Init(poly.vertices.size());
-		po.SetHole(false);
-
 		if(!layer_display.count(poly.layer))
 			return;
 		auto display_mode = layer_display.at(poly.layer).mode;
 
-		const Polygon::Vertex *v_last = nullptr;
-		unsigned int i = 0;
-		for(const auto &it: poly.vertices) {
-			if(v_last && display_mode != LayerDisplay::Mode::FILL_ONLY) {
-				draw_line(v_last->position, it.position, ColorP::FROM_LAYER, poly.layer);
-			}
-			po[i].x  = it.position.x;
-			po[i].y  = it.position.y;
-			v_last = &it;
-			i++;
-		}
-		if(display_mode != LayerDisplay::Mode::FILL_ONLY)
-			draw_line(poly.vertices.front().position, poly.vertices.back().position, ColorP::FROM_LAYER, poly.layer);
 
 		bool draw_tris = display_mode!=LayerDisplay::Mode::OUTLINE;
+		bool draw_outline = display_mode != LayerDisplay::Mode::FILL_ONLY;
+		bool draw_polygon_outline = draw_outline;
 
-		if(draw_tris) {
-			po.SetOrientation(TPPL_CCW);
 
-			std::list<TPPLPoly> outpolys;
-			TPPLPartition part;
-			part.Triangulate_EC(&po, &outpolys);
+		if(auto plane = dynamic_cast<Plane*>(poly.usage.ptr)) {
+			for(const auto &frag: plane->fragments) {
+				std::vector<p2t::Point> point_store;
+				size_t pts_total = 0;
+				for(const auto &it: frag.paths)
+					pts_total += it.size();
+				point_store.reserve(pts_total); //important so that iterators won't get invalidated
 
-			for(auto &tri: outpolys) {
-				assert(tri.GetNumPoints() ==3);
-				Coordf p0 = transform.transform(coordf_from_pt(tri[0]));
-				Coordf p1 = transform.transform(coordf_from_pt(tri[1]));
-				Coordf p2 = transform.transform(coordf_from_pt(tri[2]));
-				triangles[poly.layer].emplace_back(p0, p1, p2, ColorP::FROM_LAYER, oid_current, triangle_type_current);
+				std::vector<p2t::Point*> contour;
+				contour.reserve(frag.paths.front().size());
+				for(const auto &p: frag.paths.front()) {
+					point_store.emplace_back(p.X, p.Y);
+					contour.push_back(&point_store.back());
+				}
+				p2t::CDT cdt(contour);
+				for(size_t i = 1; i<frag.paths.size(); i++) {
+					auto &path = frag.paths.at(i);
+					std::vector<p2t::Point*> hole;
+					hole.reserve(path.size());
+					for(const auto &p: path) {
+						point_store.emplace_back(p.X, p.Y);
+						hole.push_back(&point_store.back());
+					}
+					cdt.AddHole(hole);
+				}
+				cdt.Triangulate();
+				auto tris = cdt.GetTriangles();
+				ColorP co = ColorP::FROM_LAYER;
+				if(frag.orphan == true)
+					co = ColorP::YELLOW;
+				if(draw_tris) {
+					for(const auto tri: tris) {
+						auto p0 = coordf_from_pt(tri->GetPoint(0));
+						auto p1 = coordf_from_pt(tri->GetPoint(1));
+						auto p2 = coordf_from_pt(tri->GetPoint(2));
+						triangles[poly.layer].emplace_back(p0, p1, p2, co, oid_current, triangle_type_current);
+					}
+				}
+				if(draw_outline) {
+					for(const auto &path: frag.paths) {
+						for(size_t i = 0; i<path.size(); i++) {
+							auto &c0 = path[i];
+							auto &c1 = path[(i+1)%path.size()];
+							draw_line(Coordf(c0.X, c0.Y), Coordf(c1.X, c1.Y), co, poly.layer);
+						}
+					}
+					draw_polygon_outline = false;
+				}
+			}
+			if(plane->fragments.size()==0)
+				draw_polygon_outline = true; //draw outline anyhow
+
+		}
+		else { //normal polygon
+			if(draw_tris) {
+				TPPLPoly po;
+				po.Init(poly.vertices.size());
+				po.SetHole(false);
+				size_t i = 0;
+				for(auto &it: poly.vertices) {
+					po[i].x  = it.position.x;
+					po[i].y  = it.position.y;
+					i++;
+				}
+				std::list<TPPLPoly> outpolys;
+				TPPLPartition part;
+				po.SetOrientation(TPPL_CCW);
+				part.Triangulate_EC(&po, &outpolys);
+				for(auto &tri: outpolys) {
+					assert(tri.GetNumPoints() ==3);
+					Coordf p0 = transform.transform(coordf_from_pt(tri[0]));
+					Coordf p1 = transform.transform(coordf_from_pt(tri[1]));
+					Coordf p2 = transform.transform(coordf_from_pt(tri[2]));
+					triangles[poly.layer].emplace_back(p0, p1, p2, ColorP::FROM_LAYER, oid_current, triangle_type_current);
+				}
 			}
 		}
+		if(draw_polygon_outline) {
+			for(size_t i = 0; i<poly.vertices.size(); i++) {
+				draw_line(poly.vertices[i].position, poly.vertices[(i+1)%poly.vertices.size()].position, ColorP::FROM_LAYER, poly.layer);
+			}
+		}
+
 		if(interactive && !ipoly.temp) {
-			v_last = nullptr;
-			i = 0;
+			const Polygon::Vertex *v_last = nullptr;
+			size_t i = 0;
 			for(const auto &it: ipoly.vertices) {
 				if(v_last) {
 					auto center = (v_last->position + it.position)/2;
@@ -575,6 +631,30 @@ namespace horizon {
 			transform_save();
 			transform.accumulate(shape.placement);
 			draw_line(Coordf(0,0), Coordf(1e3, 0), ColorP::FROM_LAYER, shape.layer, true, r);
+			transform_restore();
+		}
+		else if(shape.form == Shape::Form::RECTANGLE) {
+			if(!layer_display.count(shape.layer))
+				return;
+			auto display_mode = layer_display.at(shape.layer).mode;
+			std::array<Coordi, 4> pts;
+			transform_save();
+			transform.accumulate(shape.placement);
+			auto w = shape.params.at(0)/2;
+			auto h = shape.params.at(1)/2;
+			pts[0] = transform.transform(Coordi(w, h));
+			pts[1] = transform.transform(Coordi(w, -h));
+			pts[2] = transform.transform(Coordi(-w, -h));
+			pts[3] = transform.transform(Coordi(-w, h));
+			if(display_mode != LayerDisplay::Mode::FILL_ONLY) {
+				for(size_t i = 1; i<pts.size()+1; i++) {
+					draw_line(pts[(i-1)%pts.size()], pts[i%pts.size()], ColorP::FROM_LAYER, shape.layer, false);
+				}
+			}
+			if(display_mode!=LayerDisplay::Mode::OUTLINE) {
+				triangles[shape.layer].emplace_back(pts[0], pts[1], pts[2], ColorP::FROM_LAYER, oid_current, triangle_type_current);
+				triangles[shape.layer].emplace_back(pts[0], pts[3], pts[2], ColorP::FROM_LAYER, oid_current, triangle_type_current);
+			}
 			transform_restore();
 		}
 		else {

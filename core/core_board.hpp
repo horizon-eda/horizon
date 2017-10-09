@@ -36,6 +36,8 @@ namespace horizon {
 			Board *get_board(bool work = true);
 			ViaPadstackProvider *get_via_padstack_provider();
 			class Rules *get_rules() override;
+			void update_rules() override;
+
 			std::pair<Coordi,Coordi> get_bbox() override;
 
 			json get_meta() override;

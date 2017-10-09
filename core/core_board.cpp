@@ -127,6 +127,14 @@ namespace horizon {
 						return false;
 				}
 			break;
+			case ObjectType::PLANE :
+				switch(property) {
+					case ObjectProperty::ID::FROM_RULES :
+						return brd.planes.at(uu).from_rules;
+					default :
+						return false;
+				}
+			break;
 			default :
 				return false;
 		}
@@ -167,6 +175,15 @@ namespace horizon {
 						;
 				}
 			break;
+			case ObjectType::PLANE :
+				switch(property) {
+					case ObjectProperty::ID::FROM_RULES :
+						brd.planes.at(uu).from_rules = value;
+					break;
+					default :
+						;
+				}
+			break;
 			default :
 				;
 		}
@@ -182,11 +199,19 @@ namespace horizon {
 			case ObjectType::TRACK :
 				switch(property) {
 					case ObjectProperty::ID::WIDTH : {
-						auto &tr = brd.tracks.at(uu);
 						return brd.tracks.at(uu).width;
 					} break;
 					case ObjectProperty::ID::LAYER :
 						return brd.tracks.at(uu).layer;
+					default :
+						return false;
+				}
+			break;
+			case ObjectType::PLANE :
+				switch(property) {
+					case ObjectProperty::ID::WIDTH : {
+						return brd.planes.at(uu).settings.min_width;
+					} break;
 					default :
 						return false;
 				}
@@ -216,6 +241,19 @@ namespace horizon {
 					case ObjectProperty::ID::LAYER :
 						brd.tracks.at(uu).layer = value;
 					break;
+					default :
+						;
+				}
+			break;
+			case ObjectType::PLANE:
+				switch(property) {
+					case ObjectProperty::ID::WIDTH : {
+						auto &pl = brd.planes.at(uu);
+						if(pl.from_rules)
+							return;
+						value = std::max((int64_t)0, value);
+						pl.settings.min_width = value;
+					} break;
 					default :
 						;
 				}
@@ -263,6 +301,17 @@ namespace horizon {
 						return "meh";
 				}
 			break;
+			case ObjectType::PLANE :
+				switch(property) {
+					case ObjectProperty::ID::NAME :
+						if(brd.planes.at(uu).net) {
+							return brd.planes.at(uu).net->name;
+						}
+						return "<no net>";
+					default:
+						return "meh";
+				}
+			break;
 
 			default :
 				return "meh";
@@ -280,6 +329,15 @@ namespace horizon {
 				switch(property) {
 					case ObjectProperty::ID::WIDTH:
 						return !brd.tracks.at(uu).width_from_rules;
+					break;
+					default :
+						;
+				}
+			break;
+			case ObjectType::PLANE :
+				switch(property) {
+					case ObjectProperty::ID::WIDTH:
+						return !brd.planes.at(uu).from_rules;
 					break;
 					default :
 						;
@@ -330,6 +388,10 @@ namespace horizon {
 
 	Rules *CoreBoard::get_rules() {
 		return &rules;
+	}
+
+	void CoreBoard::update_rules() {
+		brd.rules = rules;
 	}
 
 	ViaPadstackProvider *CoreBoard::get_via_padstack_provider() {

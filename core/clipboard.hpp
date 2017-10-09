@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include "canvas/selectables.hpp"
 #include "core.hpp"
+#include "line_net.hpp"
 #include "buffer.hpp"
 #include <set>
 

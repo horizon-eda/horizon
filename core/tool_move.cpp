@@ -221,7 +221,7 @@ namespace horizon {
 		move_do(delta);
 		last = c;
 		if(core.b) {
-			core.b->get_board()->update_airwires();
+			core.b->get_board()->update_airwires(true);
 		}
 		update_tip();
 	}

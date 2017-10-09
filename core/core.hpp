@@ -32,7 +32,8 @@ namespace horizon {
 		EDIT_PARAMETER_SET, EDIT_PARAMETER_PROGRAM, EDIT_PAD_PARAMETER_SET,
 		DRAW_POLYGON_RECTANGLE, DRAW_LINE_RECTANGLE,
 		EDIT_LINE_RECTANGLE, EDIT_SCHEMATIC_PROPERTIES, ROUTE_TRACK_INTERACTIVE,
-		EDIT_VIA, ROTATE_ARBITRARY
+		EDIT_VIA, ROTATE_ARBITRARY, ADD_PLANE, EDIT_PLANE, UPDATE_PLANE, UPDATE_ALL_PLANES,
+		CLEAR_PLANE, CLEAR_ALL_PLANES
 	};
 
 	/**
@@ -101,6 +102,12 @@ namespace horizon {
 			 * @returns true if this Tool can begin in sensible way
 			 */
 			virtual bool can_begin() {return false;}
+
+			/**
+			 * @returns true if this Tool is specific to the selection
+			 */
+			virtual bool is_specific() {return false;}
+
 			virtual ~ToolBase() {}
 			std::string name;
 
@@ -170,7 +177,7 @@ namespace horizon {
 			virtual void rebuild(bool from_undo = false);
 			ToolResponse tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInterface *imp);
 			ToolResponse tool_update(const ToolArgs &args);
-			bool tool_can_begin(ToolID tool_id, const std::set<SelectableRef> &selection);
+			std::pair<bool, bool> tool_can_begin(ToolID tool_id, const std::set<SelectableRef> &selection);
 			virtual void commit() = 0;
 			virtual void revert() = 0;
 			virtual void save() = 0;
@@ -204,6 +211,8 @@ namespace horizon {
 			virtual json get_meta();
 
 			virtual class Rules *get_rules() {return nullptr;}
+			virtual void update_rules() {}
+
 			virtual std::pair<Coordi,Coordi> get_bbox() = 0;
 
 			virtual ~Core() {}

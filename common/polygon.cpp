@@ -42,6 +42,10 @@ namespace horizon {
 
 	Polygon::Polygon(const UUID &uu): uuid(uu) {}
 
+	UUID Polygon::get_uuid() const {
+		return uuid;
+	}
+
 	static int64_t sq(int64_t x) {
 		return x*x;
 	}
@@ -49,6 +53,7 @@ namespace horizon {
 	Polygon Polygon::remove_arcs(unsigned int precision) const {
 		Polygon out(uuid);
 		out.layer = layer;
+		out.usage = usage;
 		if(!has_arcs()) {
 			out.vertices = vertices;
 			return out;

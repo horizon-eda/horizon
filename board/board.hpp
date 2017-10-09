@@ -10,6 +10,7 @@
 #include "track.hpp"
 #include "via_padstack_provider.hpp"
 #include "via.hpp"
+#include "plane.hpp"
 #include "clipper/clipper.hpp"
 #include "warning.hpp"
 #include "board_rules.hpp"
@@ -29,6 +30,9 @@ namespace horizon {
 			std::map<UUID, uuid_ptr<Net>> net_segments;
 			std::map<int, Layer> layers;
 
+			void delete_dependants();
+			void vacuum_junctions();
+
 
 		public :
 			static Board new_from_file(const std::string &filename, Block &block, Pool &pool, ViaPadstackProvider &vpp);
@@ -40,16 +44,17 @@ namespace horizon {
 			Board(const Board &brd);
 			void operator=(const Board &brd);
 			void update_refs();
-			void update_airwires();
+			void update_airwires(bool fast=false);
 			void disconnect_package(BoardPackage *pkg);
-			void delete_dependants();
-			void vacuum_junctions();
+
 			void smash_package(BoardPackage *pkg);
 			void unsmash_package(BoardPackage *pkg);
 			Junction *get_junction(const UUID &uu) override;
 			const std::map<int, Layer> &get_layers() const override;
 			void set_n_inner_layers(unsigned int n);
 			unsigned int get_n_inner_layers() const;
+			void update_plane(Plane *plane, class CanvasPatch *ca=nullptr); //when ca is given, patches will be read from it
+			void update_planes();
 
 			UUID uuid;
 			Block *block;
@@ -63,6 +68,7 @@ namespace horizon {
 			std::map<UUID, Via> vias;
 			std::map<UUID, Text> texts;
 			std::map<UUID, Line> lines;
+			std::map<UUID, Plane> planes;
 
 			std::vector<Warning> warnings;
 

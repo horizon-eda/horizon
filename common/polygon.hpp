@@ -11,11 +11,20 @@
 namespace horizon {
 	using json = nlohmann::json;
 
+
+	class PolygonUsage: public UUIDProvider {
+		public:
+		enum class Type {INVALID, PLANE};
+		virtual Type get_type() const = 0;
+		virtual UUID get_uuid() const = 0;
+		virtual ~PolygonUsage() {};
+	};
+
 	/**
 	 * Polygon used in Padstack, Package and Board for
 	 * specifying filled Regions. Edges may either be straight lines or arcs.
 	 */
-	class Polygon {
+	class Polygon: public UUIDProvider {
 		public :
 			class Vertex {
 			public:
@@ -40,6 +49,8 @@ namespace horizon {
 
 			Polygon(const UUID &uu, const json &j);
 			Polygon(const UUID &uu);
+			UUID get_uuid() const;
+
 			Vertex *append_vertex(const Coordi &pos=Coordi());
 			std::pair<unsigned int, unsigned int> get_vertices_for_edge(unsigned int edge);
 			/**
@@ -60,6 +71,7 @@ namespace horizon {
 			std::string parameter_class;
 
 			bool temp = false;
+			uuid_ptr<PolygonUsage> usage;
 			json serialize() const;
 	};
 }

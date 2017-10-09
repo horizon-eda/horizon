@@ -244,6 +244,22 @@ namespace horizon {
 						HANDLED
 						return get_polygon(uu, false)->parameter_class;
 					break;
+					case ObjectProperty::ID::USAGE : {
+						HANDLED
+						auto poly = get_polygon(uu, false);
+						if(poly->usage) {
+							if(poly->usage->get_type() == PolygonUsage::Type::PLANE) {
+								return "Plane";
+							}
+							else {
+								return "Invalid";
+							}
+						}
+						else {
+							return "None";
+						}
+					}break;
+
 					default :
 						NOT_HANDLED
 				}

@@ -1,6 +1,8 @@
 #include "box_selection.hpp"
 #include "gl_util.hpp"
 #include "canvas.hpp"
+#include "object_descr.hpp"
+#include "layer_provider.hpp"
 
 namespace horizon {
 	BoxSelection::BoxSelection(class CanvasGL *c): ca(c), active(0) {
@@ -145,7 +147,11 @@ namespace horizon {
 						for(auto i: in_selection) {
 							const auto sr = ca->selectables.items_ref[i];
 
-							auto text = object_descriptions.at(sr.type).name;
+							std::string text = object_descriptions.at(sr.type).name;
+							auto layers = ca->layer_provider->get_layers();
+							if(layers.count(sr.layer)) {
+								text += " ("+layers.at(sr.layer).name+")";
+							}
 							auto la =  Gtk::manage(new Gtk::MenuItem(text));
 							la->signal_select().connect([this, sr, selection] {
 								auto sel = selection;

@@ -5,6 +5,7 @@
 #include "uuid.hpp"
 #include "common.hpp"
 #include "canvas/canvas_patch.hpp"
+#include "entity.hpp"
 
 namespace horizon {
 	enum class RulesCheckCacheID {NONE, BOARD_IMAGE, NET_PINS};

@@ -38,6 +38,7 @@ namespace horizon {
 			PropertyPanels *panels;
 			WarningsBox *warnings_box;
 			ToolPopover *tool_popover;
+			Gtk::Menu *context_menu;
 			SpinButtonDim *grid_spin_button;
 			std::unique_ptr<SelectionFilterDialog> selection_filter_dialog;
 
@@ -64,6 +65,7 @@ namespace horizon {
 			bool handle_key_press(GdkEventKey *key_event);
 			void handle_cursor_move(const Coordi &pos);
 			bool handle_click(GdkEventButton *button_event);
+			bool handle_context_menu(GdkEventButton *button_event);
 			void tool_process(const ToolResponse &resp);
 			void tool_begin(ToolID id);
 			void add_tool_button(ToolID id, const std::string &label);

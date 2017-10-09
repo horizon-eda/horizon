@@ -5,6 +5,7 @@
 #include "core_package.hpp"
 #include "core_board.hpp"
 #include "imp_interface.hpp"
+#include "entity.hpp"
 #include <iostream>
 
 namespace horizon {

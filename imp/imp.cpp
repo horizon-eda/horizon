@@ -217,6 +217,8 @@ namespace horizon {
 			}
 		});
 
+		context_menu = Gtk::manage(new Gtk::Menu());
+
 
 		imp_interface = std::make_unique<ImpInterface>(this);
 
@@ -330,7 +332,7 @@ namespace horizon {
 					std::map<ToolID, bool> can_begin;
 					auto sel = canvas->get_selection();
 					for(const auto &it: tool_catalog) {
-						bool r = core.r->tool_can_begin(it.first, sel);
+						bool r = core.r->tool_can_begin(it.first, sel).first;
 						can_begin[it.first] = r;
 					}
 					tool_popover->set_can_begin(can_begin);
@@ -422,6 +424,83 @@ namespace horizon {
 			ToolResponse r = core.r->tool_update(args);
 			tool_process(r);
 		}
+		else if(!core.r->tool_is_active() && button_event->button == 3) {
+			for(const auto it: context_menu->get_children()) {
+				delete it;
+			}
+			std::set<SelectableRef> sel_for_menu;
+			if(canvas->selection_mode == CanvasGL::SelectionMode::HOVER) {
+				sel_for_menu = canvas->get_selection();
+
+			}
+			else {
+				auto c = canvas->screen2canvas(Coordf(button_event->x, button_event->y));
+				auto sel = canvas->get_selection_at(Coordi(c.x, c.y));
+				auto sel_from_canvas = canvas->get_selection();
+				std::set<SelectableRef> isect;
+				std::set_intersection(sel.begin(), sel.end(), sel_from_canvas.begin(), sel_from_canvas.end(), std::inserter(isect, isect.begin()));
+				if(isect.size()) { //was in selection
+					sel_for_menu = sel_from_canvas;
+				}
+				else if(sel.size()==1){ //there's exactly one item
+					canvas->set_selection(sel, false);
+					sel_for_menu = sel;
+				}
+				else if(sel.size()>1){ //multiple items: do our own menu
+					canvas->set_selection({}, false);
+					for(const auto &sr: sel) {
+						std::string text = object_descriptions.at(sr.type).name;
+						auto layers = core.r->get_layer_provider()->get_layers();
+						if(layers.count(sr.layer)) {
+							text += " ("+layers.at(sr.layer).name+")";
+						}
+						auto la =  Gtk::manage(new Gtk::MenuItem(text));
+						la->signal_select().connect([this, sr] {
+							canvas->set_selection({sr}, false);
+						});
+						la->signal_deselect().connect([this] {
+							canvas->set_selection({}, false);
+						});
+						auto submenu = Gtk::manage(new Gtk::Menu);
+
+						for(const auto &it: tool_catalog) {
+							auto r = core.r->tool_can_begin(it.first, {sr});
+							if(r.first && r.second) {
+								auto la_sub =  Gtk::manage(new Gtk::MenuItem(it.second.name));
+								ToolID tool_id = it.first;
+								la_sub->signal_activate().connect([this, tool_id, sr] {
+									canvas->set_selection({sr}, false);
+									tool_begin(tool_id);
+								});
+								la_sub->show();
+								submenu->append(*la_sub);
+							}
+						}
+						la->set_submenu(*submenu);
+						la->show();
+						context_menu->append(*la);
+					}
+					context_menu->popup_at_pointer((GdkEvent*)button_event);
+					sel_for_menu.clear();
+				}
+			}
+			if(sel_for_menu.size()) {
+				for(const auto &it: tool_catalog) {
+					auto r = core.r->tool_can_begin(it.first, sel_for_menu);
+					if(r.first && r.second) {
+						auto la =  Gtk::manage(new Gtk::MenuItem(it.second.name));
+						ToolID tool_id = it.first;
+						la->signal_activate().connect([this, tool_id] {
+							tool_begin(tool_id);
+						});
+						la->show();
+						context_menu->append(*la);
+					}
+				}
+				context_menu->popup_at_pointer((GdkEvent*)button_event);
+			}
+
+		}
 		return false;
 	}
 
@@ -486,6 +565,10 @@ namespace horizon {
 					case ObjectType::POLYGON_EDGE:
 					case ObjectType::POLYGON_VERTEX: {
 						sel_extra.emplace(it.uuid, ObjectType::POLYGON);
+						auto poly = core.r->get_polygon(it.uuid);
+						if(poly->usage && poly->usage->get_type() == PolygonUsage::Type::PLANE) {
+							sel_extra.emplace(poly->usage->get_uuid(), ObjectType::PLANE);
+						}
 					}break;
 					default: ;
 				}

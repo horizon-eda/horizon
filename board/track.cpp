@@ -2,6 +2,7 @@
 #include "lut.hpp"
 #include "board_package.hpp"
 #include "board.hpp"
+#include "board_layers.hpp"
 
 namespace horizon {
 
@@ -80,6 +81,26 @@ namespace horizon {
 		else {
 			assert(false);
 		}
+	}
+
+	int Track::Connection::get_layer() const {
+		if(is_junc()) {
+			if(junc->has_via)
+				return 10002;
+			return junc->layer;
+		}
+		else if(is_pad()){
+			if(pad->padstack.type == Padstack::Type::TOP) {
+				return BoardLayers::TOP_COPPER;
+			}
+			else if(pad->padstack.type == Padstack::Type::BOTTOM) {
+				return BoardLayers::BOTTOM_COPPER;
+			}
+			else if(pad->padstack.type == Padstack::Type::THROUGH) {
+				return 10002;
+			}
+		}
+		return 10000;
 	}
 
 	json Track::Connection::serialize() const {

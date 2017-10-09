@@ -56,6 +56,8 @@ namespace horizon {
 					UUID get_net_segment() const;
 					void update_refs(class Board &brd);
 					Coordi get_position() const;
+					int get_layer() const;
+
 					json serialize() const;
 			};
 

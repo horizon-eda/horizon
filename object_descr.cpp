@@ -70,6 +70,7 @@ namespace horizon {
 		{ObjectType::POLYGON, {"Polygon", "Polygons", {
 			{ObjectProperty::ID::LAYER, {ObjectProperty::Type::LAYER, "Layer"}},
 			{ObjectProperty::ID::PARAMETER_CLASS, {ObjectProperty::Type::STRING, "Parameter class"}},
+			{ObjectProperty::ID::USAGE, {ObjectProperty::Type::STRING_RO, "Usage"}},
 		}}},
 		{ObjectType::HOLE, {"Hole", "Holes", {
 			{ObjectProperty::ID::DIAMETER, {ObjectProperty::Type::LENGTH, "Diameter"}},
@@ -101,6 +102,11 @@ namespace horizon {
 			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Net"}},
 			{ObjectProperty::ID::NET_CLASS, {ObjectProperty::Type::STRING_RO, "Net class"}},
 			{ObjectProperty::ID::WIDTH_FROM_RULES, {ObjectProperty::Type::BOOL, "Width from rules"}},
+		}}},
+		{ObjectType::PLANE, {"Plane", "Planes", {
+			{ObjectProperty::ID::WIDTH, {ObjectProperty::Type::LENGTH, "Min. Width"}},
+			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Net"}},
+			{ObjectProperty::ID::FROM_RULES, {ObjectProperty::Type::BOOL, "From rules"}},
 		}}},
 	};
 

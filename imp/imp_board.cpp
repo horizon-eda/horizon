@@ -32,6 +32,8 @@ namespace horizon {
 				{{GDK_KEY_X},				ToolID::ROUTE_TRACK},
 				{{GDK_KEY_x},				ToolID::ROUTE_TRACK_INTERACTIVE},
 				{{GDK_KEY_g},				ToolID::DRAG_KEEP_SLOPE},
+				{{GDK_KEY_q},				ToolID::UPDATE_ALL_PLANES},
+				{{GDK_KEY_Q},				ToolID::CLEAR_ALL_PLANES},
 		});
 		key_seq.signal_update_hint().connect([this] (const std::string &s) {main_window->tool_hint_label->set_text(s);});
 
@@ -60,14 +62,13 @@ namespace horizon {
 		reload_netlist_button->signal_clicked().connect([this]{core_board.reload_netlist();canvas_update();});
 		core.r->signal_tool_changed().connect([reload_netlist_button](ToolID t){reload_netlist_button->set_sensitive(t==ToolID::NONE);});
 
+		add_tool_button(ToolID::UPDATE_ALL_PLANES, "Update Planes");
+
 		auto test_button = Gtk::manage(new Gtk::Button("Test"));
 		main_window->top_panel->pack_start(*test_button, false, false, 0);
 		test_button->show();
 		test_button->signal_clicked().connect([this] {
-			CanvasPatch cp;
-			cp.update(*core_board.get_board());
-
-			std::ofstream ofs("/tmp/patches");
+			/*std::ofstream ofs("/tmp/patches");
 			int i = 0;
 			for(const auto &it: cp.patches) {
 				if(it.first.layer != 10000)
@@ -81,7 +82,7 @@ namespace horizon {
 				}
 				ofs << "\n";
 				i++;
-			}
+			}*/
 
 
 		});

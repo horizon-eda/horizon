@@ -7,5 +7,6 @@ namespace horizon {
 		{PatchType::PAD_TH, "TH pad"},
 		{PatchType::PLANE, "Plane"},
 		{PatchType::VIA, "Via"},
+		{PatchType::OTHER, "Other"},
 	};
 }

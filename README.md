@@ -275,6 +275,7 @@ description.
 - https://github.com/nlohmann/json/
 - http://www.angusj.com/delphi/clipper.php
 - https://github.com/ivanfratric/polypartition/
+- https://github.com/jhasse/poly2tri
 - https://qcad.org/en/what-is-dxflib
 - https://git.launchpad.net/kicad/tree/pcbnew/router
 - https://github.com/russdill/pybis

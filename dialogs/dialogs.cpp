@@ -26,6 +26,7 @@
 #include "edit_pad_parameter_set.hpp"
 #include "schematic_properties.hpp"
 #include "edit_via.hpp"
+#include "edit_plane.hpp"
 #include "widgets/spin_button_dim.hpp"
 
 namespace horizon {
@@ -292,6 +293,11 @@ namespace horizon {
 		else {
 			return {false, UUID()};
 		}
+	}
+
+	bool Dialogs::edit_plane(class Plane *plane, class Board *brd, class Block *block) {
+		EditPlaneDialog dia(parent, plane, brd, block);
+		return dia.run()==Gtk::RESPONSE_OK;
 	}
 
 	std::tuple<bool, std::string, int, int64_t, double> Dialogs::ask_dxf_filename(Core *core) {

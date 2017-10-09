@@ -41,6 +41,8 @@
 #include "tool_route_track_interactive.hpp"
 #include "tool_edit_via.hpp"
 #include "tool_rotate_arbitrary.hpp"
+#include "tool_edit_plane.hpp"
+#include "tool_update_all_planes.hpp"
 #include <memory>
 
 namespace horizon {
@@ -196,6 +198,18 @@ namespace horizon {
 			case ToolID::ROTATE_ARBITRARY :
 				return std::make_unique<ToolRotateArbitrary>(this, tool_id);
 
+			case ToolID::ADD_PLANE :
+				return std::make_unique<ToolEditPlane>(this, tool_id);
+
+			case ToolID::EDIT_PLANE :
+			case ToolID::CLEAR_PLANE :
+			case ToolID::UPDATE_PLANE :
+				return std::make_unique<ToolEditPlane>(this, tool_id);
+
+			case ToolID::CLEAR_ALL_PLANES:
+			case ToolID::UPDATE_ALL_PLANES :
+				return std::make_unique<ToolUpdateAllPlanes>(this, tool_id);
+
 			default:
 				return nullptr;
 		}
@@ -206,7 +220,7 @@ namespace horizon {
 			selection.clear();
 			selection = args.selection;
 		}
-		
+		update_rules(); //write rules to board, so tool has the current rules
 		tool = create_tool(tool_id);
 		tool->set_imp_interface(imp);
 		if(tool) {
@@ -225,13 +239,14 @@ namespace horizon {
 	}
 	
 
-	bool Core::tool_can_begin(ToolID tool_id, const std::set<SelectableRef> &sel) {
+	std::pair<bool, bool> Core::tool_can_begin(ToolID tool_id, const std::set<SelectableRef> &sel) {
 		auto t = create_tool(tool_id);
 		auto sel_saved = selection;
 		selection = sel;
 		auto r = t->can_begin();
+		auto s = t->is_specific();
 		selection = sel_saved;
-		return r;
+		return {r, s};
 	}
 
 	ToolResponse Core::tool_update(const ToolArgs &args) {

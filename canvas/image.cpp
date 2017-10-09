@@ -1,12 +1,14 @@
 #include "canvas.hpp"
 #include <iostream>
 #include <algorithm>
+#include "polygon.hpp"
 
 namespace horizon {
 	void Canvas::img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer, bool tr) {
 		if(!img_mode)
 			return;
-		Polygon poly(UUID::random());
+		UUID uu;
+		Polygon poly(uu);
 		poly.layer = layer;
 		auto v = p1-p0;
 		Coord<double> vn = v;

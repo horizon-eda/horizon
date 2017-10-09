@@ -9,6 +9,7 @@
 #include "rule_parameters.hpp"
 #include "rule_via.hpp"
 #include "rule_clearance_npth_copper.hpp"
+#include "rule_plane.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;
@@ -39,12 +40,15 @@ namespace horizon {
 			UUID get_via_padstack_uuid(class Net *net);
 			const ParameterSet &get_via_parameter_set(class Net *net);
 
+			const PlaneSettings &get_plane_settings(class Net *net, int layer);
+
 		private:
 			std::map<UUID, RuleHoleSize> rule_hole_size;
 			std::map<UUID, RuleTrackWidth> rule_track_width;
 			std::map<UUID, RuleClearanceCopper> rule_clearance_copper;
 			std::map<UUID, RuleVia> rule_via;
 			std::map<UUID, RuleClearanceNPTHCopper> rule_clearance_npth_copper;
+			std::map<UUID, RulePlane> rule_plane;
 
 			RuleClearanceSilkscreenExposedCopper rule_clearance_silkscreen_exposed_copper;
 			RuleParameters rule_parameters;

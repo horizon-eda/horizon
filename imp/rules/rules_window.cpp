@@ -11,6 +11,7 @@
 #include "rule_editor_single_pin_net.hpp"
 #include "rule_editor_via.hpp"
 #include "rule_editor_clearance_npth_copper.hpp"
+#include "rule_editor_plane.hpp"
 #include "widgets/cell_renderer_layer_display.hpp"
 #include "rules/rules_with_core.hpp"
 #include "rules/cache.hpp"
@@ -206,7 +207,7 @@ namespace horizon {
 		annotation->clear();
 		for(auto rule_id: rules->get_rule_ids()) {
 			auto result = rules_check(rules, rule_id, core, cache);
-			if(result.level != RulesCheckErrorLevel::NOT_RUN || true) {
+			if(result.level != RulesCheckErrorLevel::NOT_RUN) {
 				Gtk::TreeModel::iterator iter = check_result_store->append();
 				Gtk::TreeModel::Row row = *iter;
 				row[tree_columns.name] = rule_descriptions.at(rule_id).name;
@@ -224,8 +225,6 @@ namespace horizon {
 					if(it_err.has_location) {
 						dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level), it_err.sheet);
 					}
-
-
 
 					for(const auto &path: it_err.error_polygons) {
 						ClipperLib::IntPoint last = path.back();
@@ -312,6 +311,10 @@ namespace horizon {
 
 			case RuleID::CLEARANCE_NPTH_COPPER :
 				e = new RuleEditorClearanceNPTHCopper(r, core);
+			break;
+
+			case RuleID::PLANE :
+				e = new RuleEditorPlane(r, core);
 			break;
 
 			default:

@@ -10,13 +10,11 @@
 #include "placement.hpp"
 #include "target.hpp"
 #include "triangle.hpp"
-#include "core/core.hpp"
 #include "layer_display.hpp"
 #include "selection_filter.hpp"
-#include "sheet.hpp"
 #include "marker.hpp"
-#include "shape.hpp"
 #include "annotation.hpp"
+#include "text.hpp"
 
 namespace horizon {
 
@@ -98,7 +96,7 @@ namespace horizon {
 			void draw_error(const Coordf &center, float scale, const std::string &text, bool tr = true);
 			std::tuple<Coordf, Coordf, Coordi> draw_flag(const Coordf &position, const std::string &txt, int64_t size, Orientation orientation, ColorP color=ColorP::FROM_LAYER);
 
-			virtual void img_net(const Net *net) {}
+			virtual void img_net(const class Net *net) {}
 			virtual void img_polygon(const Polygon &poly, bool tr=true) {}
 			virtual void img_padstack(const Padstack &ps) {}
 			virtual void img_set_padstack(bool v) {}
@@ -198,6 +196,9 @@ namespace horizon {
 			void update_markers() override;
 			void set_type_visible(Triangle::Type ty, bool v);
 
+			std::set<SelectableRef> get_selection_at(const Coordi &c);
+			Coordf screen2canvas(const Coordf &p) const;
+
 
 		protected:
 			void push() override;
@@ -238,7 +239,7 @@ namespace horizon {
 			Coord<float> pan_pointer_pos_orig;
 			Coord<float> pan_offset_orig;
 			
-			Coordf screen2canvas(const Coordf &p) const;
+
 
 			
 			bool selection_allowed = true;

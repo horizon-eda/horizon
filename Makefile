@@ -44,6 +44,7 @@ SRC_COMMON = \
 	board/track.cpp\
 	board/via_padstack_provider.cpp\
 	board/via.cpp\
+	board/plane.cpp\
 	board/board_rules.cpp\
 	board/rule_hole_size.cpp\
 	board/rule_clearance_silk_exp_copper.cpp\
@@ -52,6 +53,8 @@ SRC_COMMON = \
 	board/rule_parameters.cpp\
 	board/rule_via.cpp\
 	board/rule_clearance_npth_copper.cpp\
+	board/rule_plane.cpp\
+	board/airwires.cpp\
 	pool/pool.cpp \
 	util/placement.cpp\
 	util/util.cpp\
@@ -93,6 +96,11 @@ SRC_CANVAS = \
 	canvas/polypartition/polypartition.cpp\
 	canvas/marker.cpp\
 	canvas/annotation.cpp \
+	canvas/poly2tri/common/shapes.cpp\
+	canvas/poly2tri/sweep/cdt.cpp\
+	canvas/poly2tri/sweep/sweep.cpp\
+	canvas/poly2tri/sweep/sweep_context.cpp\
+	canvas/poly2tri/sweep/advancing_front.cpp\
 
 SRC_IMP = \
 	imp/imp_main.cpp \
@@ -155,6 +163,8 @@ SRC_IMP = \
 	core/tool_helper_merge.cpp\
 	core/tool_edit_via.cpp\
 	core/tool_rotate_arbitrary.cpp\
+	core/tool_edit_plane.cpp\
+	core/tool_update_all_planes.cpp\
 	core/cores.cpp\
 	core/clipboard.cpp\
 	core/buffer.cpp\
@@ -179,6 +189,7 @@ SRC_IMP = \
 	dialogs/edit_via.cpp\
 	dialogs/pool_browser_dialog.cpp\
 	dialogs/schematic_properties.cpp\
+	dialogs/edit_plane.cpp\
 	util/sort_controller.cpp\
 	core/core_symbol.cpp\
 	core/core_schematic.cpp\
@@ -225,6 +236,7 @@ SRC_IMP = \
 	widgets/pool_browser_padstack.cpp\
 	widgets/pool_browser_unit.cpp\
 	widgets/pool_browser_symbol.cpp\
+	widgets/plane_editor.cpp\
 	dxflib/dl_dxf.cpp\
 	dxflib/dl_writer_ascii.cpp\
 	import_dxf/dxf_importer.cpp\
@@ -238,12 +250,15 @@ SRC_IMP = \
 	imp/rules/rule_editor_single_pin_net.cpp\
 	imp/rules/rule_editor_via.cpp\
 	imp/rules/rule_editor_clearance_npth_copper.cpp\
+	imp/rules/rule_editor_plane.cpp\
 	rules/rules_with_core.cpp\
 	rules/cache.cpp\
 	board/board_rules_check.cpp\
 	schematic/schematic_rules_check.cpp\
+	board/plane_update.cpp\
 	imp/symbol_preview/symbol_preview_window.cpp\
 	imp/symbol_preview/preview_box.cpp\
+	util/gtk_util.cpp
 
 SRC_ROUTER = \
 	router/router/pns_router.cpp \
@@ -349,7 +364,7 @@ LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq
 OPTIMIZE=-fdata-sections -ffunction-sections
 DEBUG   =-g3
 CFLAGS  =$(DEBUG) $(DEFINES) $(OPTIMIZE) $(shell pkg-config --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -std=c++14 -O3
-LDFLAGS = -lm -lpthread
+LDFLAGS = -lm -lpthread -fuse-ld=gold
 GLIB_COMPILE_RESOURCES = $(shell $(PKGCONFIG) --variable=glib_compile_resources gio-2.0)
 
 LDFLAGS_GUI=
