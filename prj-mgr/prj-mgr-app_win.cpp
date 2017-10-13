@@ -4,6 +4,7 @@
 #include "project/project.hpp"
 #include "util.hpp"
 #include "part_browser/part_browser_window.hpp"
+#include "pool-update/pool-update.hpp"
 extern const char *gitversion;
 
 namespace horizon {
@@ -407,6 +408,12 @@ namespace horizon {
 			header->set_subtitle(project->title);
 			view_project.entry_project_title->set_text(project->title);
 			auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
+			if(!app->pools.count(project->pool_uuid)) {
+				throw std::runtime_error("pool not found");
+			}
+			if(!Glib::file_test(Glib::build_filename(app->pools.at(project->pool_uuid).path, "pool.db"), Glib::FILE_TEST_IS_REGULAR)) {
+				pool_update(app->pools.at(project->pool_uuid).path);
+			}
 			view_project.label_pool_name->set_text(app->pools.at(project->pool_uuid).name);
 
 			part_browser_window = PartBrowserWindow::create(this, app->pools.at(project->pool_uuid).path, app->part_favorites);

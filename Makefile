@@ -317,6 +317,7 @@ SRC_PRJ_MGR = \
 	widgets/pool_browser_part.cpp\
 	util/sort_controller.cpp\
 	widgets/pool_browser.cpp\
+	pool-update/pool-update.cpp\
 
 SRC_POOL_MGR = \
 	pool-mgr/pool-mgr-main.cpp\
