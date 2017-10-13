@@ -384,10 +384,13 @@ namespace horizon {
 			it.second.to->connection_count++;
 		}
 
+		auto params = rules.get_parameters();
 		for(auto &it: vias) {
 			it.second.junction->has_via = true;
 			it.second.padstack = *it.second.vpp_padstack;
-			it.second.padstack.apply_parameter_set(it.second.parameter_set);
+			ParameterSet ps_via = it.second.parameter_set;
+			ps_via[ParameterID::VIA_SOLDER_MASK_EXPANSION] = params->via_solder_mask_expansion;
+			it.second.padstack.apply_parameter_set(ps_via);
 			it.second.padstack.expand_inner(n_inner_layers);
 		}
 
@@ -435,6 +438,7 @@ namespace horizon {
 			{ParameterID::COURTYARD_EXPANSION, params->courtyard_expansion},
 			{ParameterID::PASTE_MASK_CONTRACTION, params->paste_mask_contraction},
 			{ParameterID::SOLDER_MASK_EXPANSION, params->solder_mask_expansion},
+			{ParameterID::HOLE_SOLDER_MASK_EXPANSION, params->hole_solder_mask_expansion},
 
 		};
 

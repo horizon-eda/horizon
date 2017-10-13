@@ -13,5 +13,7 @@ namespace horizon {
 			uint64_t solder_mask_expansion = 0.1_mm;
 			uint64_t paste_mask_contraction = 0;
 			uint64_t courtyard_expansion = 0.25_mm;
+			uint64_t via_solder_mask_expansion = 0.1_mm;
+			uint64_t hole_solder_mask_expansion = 0.1_mm;
 	};
 }

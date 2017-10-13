@@ -48,16 +48,33 @@ namespace horizon {
 			auto sp_solder = create_sp_dim("Solder mask expansion");
 			auto sp_paste = create_sp_dim("Paste mask contraction");
 			auto sp_courtyard = create_sp_dim("Courtyard expansion");
+			auto sp_via_solder = create_sp_dim("Via solder mask expansion");
+			auto sp_hole_solder = create_sp_dim("Hole solder mask expansion");
 			sp_solder->set_range(0, 100_mm);
+			sp_hole_solder->set_range(0, 100_mm);
+			sp_via_solder->set_range(0, 100_mm);
 			sp_paste->set_range(0, 100_mm);
 			sp_courtyard->set_range(0, 100_mm);
 
 			sp_solder->set_value(rule2->solder_mask_expansion);
+			sp_via_solder->set_value(rule2->via_solder_mask_expansion);
+			sp_hole_solder->set_value(rule2->hole_solder_mask_expansion);
 			sp_paste->set_value(rule2->paste_mask_contraction);
 			sp_courtyard->set_value(rule2->courtyard_expansion);
 
+
 			sp_solder->signal_value_changed().connect([this, sp_solder, rule2]{
 				rule2->solder_mask_expansion = sp_solder->get_value_as_int();
+				s_signal_updated.emit();
+			});
+
+			sp_via_solder->signal_value_changed().connect([this, sp_via_solder, rule2]{
+				rule2->via_solder_mask_expansion = sp_via_solder->get_value_as_int();
+				s_signal_updated.emit();
+			});
+
+			sp_hole_solder->signal_value_changed().connect([this, sp_hole_solder, rule2]{
+				rule2->hole_solder_mask_expansion = sp_hole_solder->get_value_as_int();
 				s_signal_updated.emit();
 			});
 

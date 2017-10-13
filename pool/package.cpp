@@ -256,10 +256,9 @@ namespace horizon {
 			return r;
 		}
 
-
 		for(auto &it: pads) {
 			auto ps_pad = it.second.parameter_set;
-			copy_param(ps_pad, ps, {ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION});
+			copy_param(ps_pad, ps, {ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION, ParameterID::HOLE_SOLDER_MASK_EXPANSION});
 			auto r = it.second.padstack.apply_parameter_set(ps_pad);
 			if(r.first) {
 				return r;

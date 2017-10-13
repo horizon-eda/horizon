@@ -12,6 +12,8 @@ namespace horizon {
 		solder_mask_expansion = j.at("solder_mask_expansion");
 		paste_mask_contraction = j.at("paste_mask_contraction");
 		courtyard_expansion = j.at("courtyard_expansion");
+		via_solder_mask_expansion = j.value("via_solder_mask_expansion", .1_mm);
+		hole_solder_mask_expansion = j.value("hole_solder_mask_expansion", .1_mm);
 	}
 
 	json RuleParameters::serialize() const {
@@ -19,6 +21,8 @@ namespace horizon {
 		j["solder_mask_expansion"] = solder_mask_expansion;
 		j["paste_mask_contraction"] = paste_mask_contraction;
 		j["courtyard_expansion"] = courtyard_expansion;
+		j["via_solder_mask_expansion"] = via_solder_mask_expansion;
+		j["hole_solder_mask_expansion"] = hole_solder_mask_expansion;
 		return j;
 	}
 
