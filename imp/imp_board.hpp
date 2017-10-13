@@ -1,7 +1,6 @@
 #pragma once
 #include "imp_layer.hpp"
 #include "core/core_board.hpp"
-#include "cam_job_dialog.hpp"
 
 namespace horizon {
 	class ImpBoard : public ImpLayer {
@@ -19,7 +18,7 @@ namespace horizon {
 
 			CoreBoard core_board;
 
-			CAMJobWindow *cam_job_window;
+			class FabOutputWindow *fab_output_window = nullptr;
 
 	};
 }

@@ -18,6 +18,7 @@
 #include <map>
 #include <fstream>
 #include "common/layer_provider.hpp"
+#include "fab_output_settings.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;
@@ -73,6 +74,7 @@ namespace horizon {
 			std::vector<Warning> warnings;
 
 			BoardRules rules;
+			FabOutputSettings fab_output_settings;
 
 			ClipperLib::Paths obstacles;
 			ClipperLib::Path  track_path;

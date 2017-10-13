@@ -55,6 +55,7 @@ SRC_COMMON = \
 	board/rule_clearance_npth_copper.cpp\
 	board/rule_plane.cpp\
 	board/airwires.cpp\
+	board/fab_output_settings.cpp\
 	pool/pool.cpp \
 	util/placement.cpp\
 	util/util.cpp\
@@ -114,7 +115,6 @@ SRC_IMP = \
 	imp/imp_board.cpp\
 	imp/tool_popover.cpp\
 	imp/selection_filter_dialog.cpp\
-	imp/cam_job_dialog.cpp\
 	$(SRC_CANVAS) \
 	core/core.cpp \
 	core/core_properties.cpp\
@@ -219,7 +219,6 @@ SRC_IMP = \
 	export_gerber/excellon_writer.cpp\
 	export_gerber/gerber_export.cpp\
 	export_gerber/canvas_gerber.cpp\
-	export_gerber/cam_job.cpp\
 	export_gerber/hash.cpp\
 	imp/footprint_generator/footprint_generator_window.cpp\
 	imp/footprint_generator/footprint_generator_base.cpp\
@@ -258,7 +257,8 @@ SRC_IMP = \
 	board/plane_update.cpp\
 	imp/symbol_preview/symbol_preview_window.cpp\
 	imp/symbol_preview/preview_box.cpp\
-	util/gtk_util.cpp
+	util/gtk_util.cpp\
+	imp/fab_output_window.cpp
 
 SRC_ROUTER = \
 	router/router/pns_router.cpp \

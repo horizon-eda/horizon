@@ -1,28 +1,34 @@
 #include "gerber_export.hpp"
 #include "canvas_gerber.hpp"
 #include "board.hpp"
+#include "fab_output_settings.hpp"
 
 namespace horizon {
-	GerberExporter::GerberExporter(const Board *b, const CAMJob &j, const std::string &prefix): brd(b), job(j) {
+	GerberExporter::GerberExporter(const Board *b, const FabOutputSettings *s): brd(b), settings(s) {
 
-		for(const auto &it: job.layers) {
-			if(brd->get_layers().count(it.first))
-				writers.emplace(it.first, prefix+it.second);
+		for(const auto &it: settings->layers) {
+			if(brd->get_layers().count(it.first) && it.second.enabled)
+				writers.emplace(it.first, Glib::build_filename(settings->output_directory,  settings->prefix+it.second.filename));
 		}
 
-		drill_writer_pth = std::make_unique<ExcellonWriter>(prefix+job.drill_pth);
-		if(!job.merge_npth) {
-			drill_writer_npth = std::make_unique<ExcellonWriter>(prefix+job.drill_npth);
+		drill_writer_pth = std::make_unique<ExcellonWriter>(Glib::build_filename(settings->output_directory, settings->prefix+settings->drill_pth_filename));
+		if(settings->drill_mode == FabOutputSettings::DrillMode::INDIVIDUAL) {
+			drill_writer_npth = std::make_unique<ExcellonWriter>(Glib::build_filename(settings->output_directory, settings->prefix+settings->drill_npth_filename));
+		}
+		else {
+			drill_writer_npth = nullptr;
 		}
 	}
 
-	void GerberExporter::save() {
+	void GerberExporter::generate() {
 		CanvasGerber ca(this);
+		ca.outline_width = settings->outline_width;
 		ca.update(*brd);
 
 		for(auto &it: writers) {
 			it.second.write_format();
 			it.second.write_apertures();
+			it.second.write_regions();
 			it.second.write_lines();
 			it.second.write_pads();
 			it.second.close();
@@ -51,7 +57,7 @@ namespace horizon {
 	}
 
 	ExcellonWriter *GerberExporter::get_drill_writer(bool pth) {
-		if(job.merge_npth) {
+		if(settings->drill_mode == FabOutputSettings::DrillMode::MERGED) {
 			return drill_writer_pth.get();
 		}
 		else {

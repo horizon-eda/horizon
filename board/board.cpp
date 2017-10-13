@@ -93,12 +93,14 @@ namespace horizon {
 				planes.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
 			}
 		}
-
-
 		if(j.count("rules")) {
 			rules.load_from_json(j.at("rules"));
 			rules.cleanup(block);
 		}
+		if(j.count("fab_output_settings")) {
+			fab_output_settings = FabOutputSettings(j.at("fab_output_settings"));
+		}
+		fab_output_settings.update_for_board(this);
 		update_refs(); //fill in smashed texts
 
 	}
@@ -148,6 +150,7 @@ namespace horizon {
 		planes(brd.planes),
 		warnings(brd.warnings),
 		rules(brd.rules),
+		fab_output_settings(brd.fab_output_settings),
 		n_inner_layers(brd.n_inner_layers)
 	{
 		update_refs();
@@ -172,6 +175,7 @@ namespace horizon {
 		planes = brd.planes;
 		warnings = brd.warnings;
 		rules = brd.rules;
+		fab_output_settings = brd.fab_output_settings;
 		update_refs();
 	}
 
@@ -578,6 +582,7 @@ namespace horizon {
 		j["name"] = name;
 		j["n_inner_layers"] = n_inner_layers;
 		j["rules"] = rules.serialize();
+		j["fab_output_settings"] = fab_output_settings.serialize();
 
 		j["polygons"] = json::object();
 		for(const auto &it: polygons) {

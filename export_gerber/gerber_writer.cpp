@@ -135,9 +135,32 @@ namespace horizon {
 		}
 	}
 
+	void GerberWriter::write_regions() {
+		write_line("*G01");
+		for(const auto &it: regions) {
+			if(it.dark) {
+				write_line("%LPD*%");
+			}
+			else {
+				write_line("%LPC*%");
+			}
+			write_line("G36*");
+			ofs << Coordi(it.path.back().X, it.path.back().Y) << "D02*" << std::endl;
+			for(const auto &pt: it.path) {
+				ofs << Coordi(pt.X, pt.Y) << "D01*" << std::endl;
+			}
+			write_line("D02*");
+			write_line("G37*");
+		}
+	}
+
 	void GerberWriter::draw_line(const Coordi &from, const Coordi &to, uint64_t width) {
 		auto ap = get_or_create_aperture_circle(width);
 		lines.emplace_back(from, to, ap);
+	}
+
+	void GerberWriter::draw_region(const ClipperLib::Path &path, bool dark) {
+		regions.emplace_back(path, dark);
 	}
 
 	void GerberWriter::draw_padstack(const Padstack &ps, int layer, const Placement &transform) {

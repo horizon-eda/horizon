@@ -7,6 +7,7 @@ namespace horizon {
 		CanvasGerber(class GerberExporter *exp);
 		void push() override {}
 		void request_push() override;
+		uint64_t outline_width = 0;
 		private :
 
 			void img_net(const Net *net) override;

@@ -10,7 +10,7 @@ namespace horizon {
 		public:
 			PlaneSettings(const json &j);
 			PlaneSettings() {}
-			enum class Style {ROUND, SQUARE};
+			enum class Style {ROUND, SQUARE, MITER};
 			uint64_t min_width = 0.2_mm;
 			Style style = Style::ROUND;
 			uint64_t extra_clearance = 0;

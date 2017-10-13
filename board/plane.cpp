@@ -1,16 +1,30 @@
 #include "plane.hpp"
 #include "board.hpp"
+#include "lut.hpp"
+
 
 namespace horizon {
 
+	static const LutEnumStr<PlaneSettings::Style> style_lut = {
+		{"square",	PlaneSettings::Style::SQUARE},
+		{"miter",	PlaneSettings::Style::MITER},
+		{"round",	PlaneSettings::Style::ROUND},
+	};
+
+
 	PlaneSettings::PlaneSettings(const json &j): min_width(j.at("min_width")),
 		keep_orphans(j.at("keep_orphans"))
-			{}
+	{
+		if(j.count("style")) {
+			style = style_lut.lookup(j.at("style"));
+		}
+	}
 
 	json PlaneSettings::serialize() const {
 		json j;
 		j["min_width"] = min_width;
 		j["keep_orphans"] = keep_orphans;
+		j["style"] = style_lut.lookup_reverse(style);
 		return j;
 	}
 

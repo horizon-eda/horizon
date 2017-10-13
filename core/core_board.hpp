@@ -36,6 +36,7 @@ namespace horizon {
 			Board *get_board(bool work = true);
 			ViaPadstackProvider *get_via_padstack_provider();
 			class Rules *get_rules() override;
+			FabOutputSettings *get_fab_output_settings() {return &fab_output_settings;}
 			void update_rules() override;
 
 			std::pair<Coordi,Coordi> get_bbox() override;
@@ -55,6 +56,7 @@ namespace horizon {
 			Board brd;
 
 			BoardRules rules;
+			FabOutputSettings fab_output_settings;
 
 			std::string m_board_filename;
 			std::string m_block_filename;

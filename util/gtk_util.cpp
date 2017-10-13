@@ -33,4 +33,11 @@ namespace horizon {
 				v = sp->get_value_as_int();
 		});
 	}
+
+	void bind_widget(Gtk::Entry *en, std::string &v) {
+		en->set_text(v);
+		en->signal_changed().connect([en, &v]{
+				v = en->get_text();
+		});
+	}
 }

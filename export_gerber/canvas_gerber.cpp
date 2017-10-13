@@ -1,6 +1,7 @@
 #include "canvas_gerber.hpp"
 #include "core/core_board.hpp"
 #include "gerber_export.hpp"
+#include "board_layers.hpp"
 
 namespace horizon {
 		CanvasGerber::CanvasGerber(GerberExporter *exp) : Canvas::Canvas(), exporter(exp) {
@@ -16,13 +17,25 @@ namespace horizon {
 			if(padstack_mode)
 				return;
 			auto poly = ipoly.remove_arcs(16);
-			if(poly.layer == 100) { //outline
+			if(poly.layer == BoardLayers::L_OUTLINE) { //outline, convert poly to lines
 				auto last = poly.vertices.cbegin();
 				for(auto it = last+1; it<poly.vertices.cend(); it++) {
-					img_line(last->position, it->position, 0, poly.layer);
+					img_line(last->position, it->position, outline_width, poly.layer);
 					last = it;
 				}
-				img_line(poly.vertices.front().position, poly.vertices.back().position, 0, poly.layer);
+				img_line(poly.vertices.front().position, poly.vertices.back().position, outline_width, poly.layer);
+			}
+			else if(auto plane = dynamic_cast<const Plane*>(ipoly.usage.ptr)) {
+				if(GerberWriter *wr = exporter->get_writer_for_layer(ipoly.layer)) {
+					for(const auto &frag: plane->fragments) {
+						bool dark = true; //first path ist outline, the rest are holes
+						for(const auto &path: frag.paths) {
+							wr->draw_region(path, dark);
+							dark = false;
+						}
+
+					}
+				}
 			}
 
 		}

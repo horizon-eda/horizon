@@ -2,6 +2,7 @@
 #include "part.hpp"
 #include "rules/rules_window.hpp"
 #include "canvas/canvas_patch.hpp"
+#include "fab_output_window.hpp"
 
 namespace horizon {
 	ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir, const std::string &pool_path):
@@ -49,12 +50,14 @@ namespace horizon {
 	void ImpBoard::construct() {
 		ImpLayer::construct();
 
-
-		auto cam_job_button = Gtk::manage(new Gtk::Button("CAM Job"));
-		main_window->top_panel->pack_start(*cam_job_button, false, false, 0);
-		cam_job_button->show();
-		cam_job_button->signal_clicked().connect([this]{cam_job_window->show_all();});
-		core.r->signal_tool_changed().connect([cam_job_button](ToolID t){cam_job_button->set_sensitive(t==ToolID::NONE);});
+		auto fab_out_button = Gtk::manage(new Gtk::Button("Fab. outp."));
+		main_window->top_panel->pack_start(*fab_out_button, false, false, 0);
+		fab_out_button->show();
+		fab_out_button->signal_clicked().connect([this]{fab_output_window->present();});
+		core.r->signal_tool_changed().connect([fab_out_button, this](ToolID t){
+			fab_out_button->set_sensitive(t==ToolID::NONE);
+			fab_output_window->set_can_generate(t==ToolID::NONE);
+		});
 
 		auto reload_netlist_button = Gtk::manage(new Gtk::Button("Reload netlist"));
 		main_window->top_panel->pack_start(*reload_netlist_button, false, false, 0);
@@ -88,7 +91,7 @@ namespace horizon {
 		});
 
 
-		cam_job_window = CAMJobWindow::create(main_window, core.b);
+		fab_output_window = FabOutputWindow::create(main_window, core.b->get_board(), core.b->get_fab_output_settings());
 
 		rules_window->signal_goto().connect([this] (Coordi location, UUID sheet) {
 			canvas->center_and_zoom(location);

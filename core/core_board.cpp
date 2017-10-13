@@ -10,6 +10,7 @@ namespace horizon {
 		block(Block::new_from_file(block_filename, pool)),
 		brd(Board::new_from_file(board_filename, block, pool, via_padstack_provider)),
 		rules(brd.rules),
+		fab_output_settings(brd.fab_output_settings),
 		m_board_filename(board_filename),
 		m_block_filename(block_filename),
 		m_via_dir(via_dir)
@@ -455,6 +456,7 @@ namespace horizon {
 
 	void CoreBoard::save() {
 		brd.rules = rules;
+		brd.fab_output_settings = fab_output_settings;
 		auto j = brd.serialize();
 		auto save_meta = s_signal_request_save_meta.emit();
 		j["_imp"] = save_meta;

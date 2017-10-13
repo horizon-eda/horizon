@@ -41,7 +41,20 @@ namespace horizon {
 		for(const auto &pt: poly.vertices) {
 			poly_path.emplace_back(ClipperLib::IntPoint(pt.position.x, pt.position.y));
 		}
-		ClipperLib::JoinType jt = plane->settings.style==PlaneSettings::Style::ROUND?ClipperLib::jtRound:ClipperLib::jtSquare;
+		ClipperLib::JoinType jt  = ClipperLib::jtRound;
+		switch(plane->settings.style) {
+			case PlaneSettings::Style::ROUND :
+				jt = ClipperLib::jtRound;
+			break;
+
+			case PlaneSettings::Style::SQUARE :
+				jt = ClipperLib::jtSquare;
+			break;
+
+			case PlaneSettings::Style::MITER :
+				jt = ClipperLib::jtMiter;
+			break;
+		}
 
 		{
 			ClipperLib::ClipperOffset ofs_poly; //shrink polygon contour by min_width/2

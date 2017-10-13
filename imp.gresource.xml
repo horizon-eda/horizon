@@ -3,7 +3,6 @@
   <gresource prefix="/net/carrotIndustries/horizon">
     <file>window.ui</file>
     <file>property_panels/property_panel.ui</file>
-    <file>imp/cam_job.ui</file>
     <file>pool-update/schema.sql</file>
     <file>pool-update-parametric/schema.sql</file>
     
@@ -33,6 +32,7 @@
     <file>imp/rules/rule_editor_hole_size.ui</file>
     <file>imp/rules/rule_editor_track_width.ui</file>
     <file>imp/rules/rule_editor_clearance_copper.ui</file>
+    <file>imp/fab_output.ui</file>
     <file>prj-mgr/part_browser/part_browser.ui</file>
     
     <file>canvas/shaders/grid-vertex.glsl</file>

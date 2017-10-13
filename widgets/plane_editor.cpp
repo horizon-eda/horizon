@@ -64,9 +64,26 @@ namespace horizon {
 			b2->join_group(*b1);
 			box->pack_start(*b2, true, true, 0);
 
+			auto b3 = Gtk::manage(new Gtk::RadioButton("Miter"));
+			b3->set_mode(false);
+			b3->join_group(*b1);
+			box->pack_start(*b3, true, true, 0);
+
+			b1->set_active(settings->style==PlaneSettings::Style::ROUND);
 			b2->set_active(settings->style==PlaneSettings::Style::SQUARE);
+			b3->set_active(settings->style==PlaneSettings::Style::MITER);
+
+			b1->signal_toggled().connect([b1, settings]{
+				if(b1->get_active())
+					settings->style = PlaneSettings::Style::ROUND;
+			});
 			b2->signal_toggled().connect([b2, settings]{
-				settings->style = b2->get_active()?PlaneSettings::Style::SQUARE:PlaneSettings::Style::ROUND;
+				if(b2->get_active())
+					settings->style = PlaneSettings::Style::SQUARE;
+			});
+			b3->signal_toggled().connect([b3, settings]{
+				if(b3->get_active())
+					settings->style = PlaneSettings::Style::MITER;
 			});
 
 			attach(*la, 0, top, 1, 1);

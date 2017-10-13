@@ -8,4 +8,5 @@ namespace horizon {
 	void bind_widget(Gtk::Switch *sw, bool &v);
 	void bind_widget(Gtk::CheckButton *sw, bool &v);
 	void bind_widget(Gtk::SpinButton *sp, int &v);
+	void bind_widget(Gtk::Entry *en, std::string &v);
 }
