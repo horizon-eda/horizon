@@ -1,6 +1,8 @@
 #include "via_padstack_provider.hpp"
 #include "pool.hpp"
 #include <glibmm/fileutils.h>
+#include <glibmm.h>
+#include "util.hpp"
 
 namespace horizon {
 	ViaPadstackProvider::ViaPadstackProvider(const std::string &bp, Pool &po):base_path(bp), pool(po) {
@@ -11,15 +13,17 @@ namespace horizon {
 		Glib::Dir dir(base_path);
 		padstacks_available.clear();
 		for(const auto &it: dir) {
-			std::string filename = base_path + "/" +it;
-			json j;
-			std::ifstream ifs(filename);
-			if(!ifs.is_open()) {
-				throw std::runtime_error("file "  +filename+ " not opened");
+			std::string filename = Glib::build_filename(base_path, it);
+			if(endswith(filename, ".json")) {
+				json j;
+				std::ifstream ifs(filename);
+				if(!ifs.is_open()) {
+					throw std::runtime_error("file "  +filename+ " not opened");
+				}
+				ifs>>j;
+				ifs.close();
+				padstacks_available.emplace(UUID(j.at("uuid").get<std::string>()), PadstackEntry(filename, j.at("name").get<std::string>()+ " (local)"));
 			}
-			ifs>>j;
-			ifs.close();
-			padstacks_available.emplace(UUID(j.at("uuid").get<std::string>()), PadstackEntry(filename, j.at("name").get<std::string>()+ " (local)"));
 		}
 		SQLite::Query q(pool.db, "SELECT padstacks.uuid, padstacks.name FROM padstacks WHERE padstacks.type = 'via'");
 		while(q.step()) {
