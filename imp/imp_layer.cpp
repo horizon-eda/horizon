@@ -3,6 +3,13 @@
 #include "widgets/layer_box.hpp"
 
 namespace horizon {
+
+	static json json_from_resource(const std::string &rsrc) {
+		auto json_bytes = Gio::Resource::lookup_data_global(rsrc);
+		gsize size = json_bytes->get_size();
+		return json::parse((const char*)json_bytes->get_data(size));
+	}
+
 	void ImpLayer::construct() {
 		layer_box = Gtk::manage(new LayerBox(core.r->get_layer_provider()));
 		layer_box->show_all();
@@ -22,11 +29,16 @@ namespace horizon {
 		key_sequence_dialog->add_sequence("3...9", "inner layers");
 
 		json j = core.r->get_meta();
+		bool layers_loaded = false;
 		if(!j.is_null()) {
 			canvas->property_grid_spacing() = j.value("grid_spacing", 1.25_mm);
 			if(j.count("layer_display")) {
 				layer_box->load_from_json(j.at("layer_display"));
+				layers_loaded = true;
 			}
+		}
+		if(!layers_loaded) {
+			layer_box->load_from_json(json_from_resource("/net/carrotIndustries/horizon/imp/layer_display_default.json"));
 		}
 	}
 }

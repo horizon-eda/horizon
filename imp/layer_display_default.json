@@ -1,0 +1,65 @@
+{
+"layer_opacity": 50.0,
+"layers": {
+	"-100": {
+		"display_mode": "fill_only",
+		"visible": true
+	},
+	"-110": {
+		"display_mode": "outline",
+		"visible": true
+	},
+	"-120": {
+		"display_mode": "fill_only",
+		"visible": false
+	},
+	"-130": {
+		"display_mode": "fill",
+		"visible": false
+	},
+	"-140": {
+		"display_mode": "outline",
+		"visible": true
+	},
+	"-150": {
+		"display_mode": "outline",
+		"visible": true
+	},
+	"-160": {
+		"display_mode": "outline",
+		"visible": true
+	},
+	"0": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"10": {
+		"display_mode": "outline",
+		"visible": true
+	},
+	"100": {
+		"display_mode": "outline",
+		"visible": true
+	},
+	"20": {
+		"display_mode": "fill_only",
+		"visible": false
+	},
+	"30": {
+		"display_mode": "fill",
+		"visible": false
+	},
+	"40": {
+		"display_mode": "outline",
+		"visible": false
+	},
+	"50": {
+		"display_mode": "outline",
+		"visible": true
+	},
+	"60": {
+		"display_mode": "outline",
+		"visible": true
+	}
+}
+}

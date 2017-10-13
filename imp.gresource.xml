@@ -2,6 +2,7 @@
 <gresources>
   <gresource prefix="/net/carrotIndustries/horizon">
     <file>window.ui</file>
+    <file>imp/layer_display_default.json</file>
     <file>property_panels/property_panel.ui</file>
     <file>pool-update/schema.sql</file>
     <file>pool-update-parametric/schema.sql</file>
