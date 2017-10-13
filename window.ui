@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.20.1 -->
 <interface>
   <requires lib="gtk+" version="3.18"/>
   <object class="GtkWindow" id="mainWindow">
     <property name="can_focus">False</property>
+    <property name="default_width">1000</property>
+    <property name="default_height">700</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
