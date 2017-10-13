@@ -486,7 +486,26 @@ namespace horizon {
 				}
 			}
 		}
-
+		std::map<std::string, std::set<const Net*>> net_names;
+		for(const auto &it: block->nets) {
+			if(it.second.is_named()) {
+				net_names[it.second.name];
+				net_names[it.second.name].insert(&it.second);
+			}
+		}
+		std::set<const Net*> nets_duplicate;
+		for(const auto &it: net_names) {
+			if(it.second.size()>1) { //duplicate net name
+				nets_duplicate.insert(it.second.begin(), it.second.end());
+			}
+		}
+		for(auto &it_sheet: sheets) {
+			for(const auto &it: it_sheet.second.analyze_net_segments()) {
+				if(nets_duplicate.count(it.second.net)) {
+					it_sheet.second.warnings.emplace_back(it.second.position, "Duplicate net name");
+				}
+			}
+		}
 
 	}
 
