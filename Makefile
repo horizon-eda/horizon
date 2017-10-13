@@ -364,14 +364,15 @@ LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq
 OPTIMIZE=-fdata-sections -ffunction-sections
 DEBUG   =-g3
 CFLAGS  =$(DEBUG) $(DEFINES) $(OPTIMIZE) $(shell pkg-config --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -std=c++14 -O3
-LDFLAGS = -lm -lpthread -fuse-ld=gold
+LDFLAGS = -lm -lpthread
 GLIB_COMPILE_RESOURCES = $(shell $(PKGCONFIG) --variable=glib_compile_resources gio-2.0)
 
-LDFLAGS_GUI=
 ifeq ($(OS),Windows_NT)
     LDFLAGS += -lrpcrt4
     DEFINES += -DWIN32_UUID
     LDFLAGS_GUI = -Wl,-subsystem,windows
+else
+    LDFLAGS += -fuse-ld=gold
 endif
 
 # Object files

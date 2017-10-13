@@ -81,7 +81,7 @@ namespace horizon {
 				if(temp_line) {
 					auto r = imp->dialogs.ask_datum("Enter width", temp_line->width);
 					if(r.first) {
-						temp_line->width = std::max(r.second, 0L);
+						temp_line->width = std::max(r.second, (int64_t)0);
 					}
 				}
 			}
