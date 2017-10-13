@@ -70,6 +70,9 @@ namespace horizon {
 		treeview->get_selection()->set_mode(Gtk::SelectionMode::SELECTION_BROWSE);
 		treeview->signal_row_activated().connect(sigc::mem_fun(this, &PoolBrowser::row_activated));
 		treeview->get_selection()->signal_changed().connect(sigc::mem_fun(this, &PoolBrowser::selection_changed));
+		if(path_column > 0) {
+			treeview->get_column(path_column)->set_visible(false);
+		}
 	}
 
 	void PoolBrowser::row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column) {
@@ -94,6 +97,15 @@ namespace horizon {
 
 	void PoolBrowser::set_show_none(bool v) {
 		show_none = v;
+		search();
+	}
+
+	void PoolBrowser::set_show_path(bool v) {
+		show_path = v;
+		if(path_column > 0) {
+			if(auto col = treeview->get_column(path_column))
+				col->set_visible(v);
+		}
 		search();
 	}
 

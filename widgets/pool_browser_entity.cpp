@@ -20,6 +20,7 @@ namespace horizon {
 		treeview->append_column("Prefix", list_columns.prefix);
 		treeview->append_column("Gates", list_columns.n_gates);
 		treeview->append_column("Tags", list_columns.tags);
+		path_column = treeview->append_column("Path", list_columns.path)-1;
 	}
 
 	void PoolBrowserEntity::add_sort_controller_columns() {
@@ -38,11 +39,11 @@ namespace horizon {
 		std::set<std::string> tags{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
 		std::string query;
 		if(tags.size() == 0) {
-			query = "SELECT entities.uuid, entities.name, entities.prefix, entities.n_gates, GROUP_CONCAT(tags.tag, ' '), entities.manufacturer FROM entities LEFT JOIN tags ON tags.uuid = entities.uuid WHERE entities.name LIKE ? GROUP by entities.uuid"+sort_controller->get_order_by();
+			query = "SELECT entities.uuid, entities.name, entities.prefix, entities.n_gates, GROUP_CONCAT(tags.tag, ' '), entities.manufacturer, entities.filename FROM entities LEFT JOIN tags ON tags.uuid = entities.uuid WHERE entities.name LIKE ? GROUP by entities.uuid"+sort_controller->get_order_by();
 		}
 		else {
 			std::ostringstream qs;
-			qs << "SELECT entities.uuid, entities.name, entities.prefix, entities.n_gates, (SELECT GROUP_CONCAT(tags.tag, ' ') FROM tags WHERE tags.uuid = entities.uuid), entities.manufacturer FROM entities LEFT JOIN tags ON tags.uuid = entities.uuid WHERE entities.name LIKE ? ";
+			qs << "SELECT entities.uuid, entities.name, entities.prefix, entities.n_gates, (SELECT GROUP_CONCAT(tags.tag, ' ') FROM tags WHERE tags.uuid = entities.uuid), entities.manufacturer, entities.filename FROM entities LEFT JOIN tags ON tags.uuid = entities.uuid WHERE entities.name LIKE ? ";
 			qs << "AND (";
 			for(const auto &it: tags) {
 				qs << "tags.tag LIKE ? OR ";
@@ -76,6 +77,7 @@ namespace horizon {
 			row[list_columns.n_gates] = q.get<int>(3);
 			row[list_columns.tags] = q.get<std::string>(4);
 			row[list_columns.entity_manufacturer] = q.get<std::string>(5);
+			row[list_columns.path] = q.get<std::string>(6);
 		}
 		store->thaw_notify();
 		select_uuid(selected_uuid);

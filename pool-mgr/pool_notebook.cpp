@@ -145,6 +145,7 @@ namespace horizon {
 
 		{
 			auto br = Gtk::manage(new PoolBrowserUnit(&pool));
+			br->set_show_path(true);
 			br->signal_activated().connect([this, br] {
 				auto uu = br->get_selected();
 				auto path = pool.get_filename(ObjectType::UNIT, uu);
@@ -249,6 +250,7 @@ namespace horizon {
 		}
 		{
 			auto br = Gtk::manage(new PoolBrowserSymbol(&pool));
+			br->set_show_path(true);
 			browsers.insert(br);
 			br->show();
 			auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
@@ -319,6 +321,7 @@ namespace horizon {
 
 		{
 			auto br = Gtk::manage(new PoolBrowserEntity(&pool));
+			br->set_show_path(true);
 			br->signal_activated().connect([this, br] {
 				auto uu = br->get_selected();
 				if(!uu)
@@ -371,6 +374,7 @@ namespace horizon {
 
 		{
 			auto br = Gtk::manage(new PoolBrowserPadstack(&pool));
+			br->set_show_path(true);
 			br->set_include_padstack_type(Padstack::Type::VIA, true);
 			br->set_include_padstack_type(Padstack::Type::MECHANICAL, true);
 			br->signal_activated().connect([this, br] {
@@ -465,6 +469,7 @@ namespace horizon {
 
 		{
 			auto br = Gtk::manage(new PoolBrowserPackage(&pool));
+			br->set_show_path(true);
 			br->signal_activated().connect([this, br] {
 				auto uu = br->get_selected();
 				auto path = pool.get_filename(ObjectType::PACKAGE, uu);
@@ -613,6 +618,7 @@ namespace horizon {
 
 		{
 			auto br = Gtk::manage(new PoolBrowserPart(&pool));
+			br->set_show_path(true);
 			br->signal_activated().connect([this, br] {
 				auto uu = br->get_selected();
 				if(!uu)

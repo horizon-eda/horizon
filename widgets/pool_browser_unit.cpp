@@ -15,6 +15,7 @@ namespace horizon {
 	void PoolBrowserUnit::create_columns() {
 		treeview->append_column("Unit", list_columns.name);
 		treeview->append_column("Manufacturer", list_columns.manufacturer);
+		path_column = treeview->append_column("Path", list_columns.path)-1;
 	}
 
 	void PoolBrowserUnit::add_sort_controller_columns() {
@@ -29,7 +30,7 @@ namespace horizon {
 
 		std::string name_search = name_entry->get_text();
 
-		std::string query  = "SELECT units.uuid, units.name, units.manufacturer FROM units WHERE units.name LIKE ?"+sort_controller->get_order_by();
+		std::string query  = "SELECT units.uuid, units.name, units.manufacturer, units.filename FROM units WHERE units.name LIKE ?"+sort_controller->get_order_by();
 		SQLite::Query q(pool->db, query);
 		q.bind(1, "%"+name_search+"%");
 
@@ -45,6 +46,7 @@ namespace horizon {
 			row[list_columns.uuid] = q.get<std::string>(0);
 			row[list_columns.name] = q.get<std::string>(1);
 			row[list_columns.manufacturer] = q.get<std::string>(2);
+			row[list_columns.path] = q.get<std::string>(3);
 		}
 		store->thaw_notify();
 		select_uuid(selected_uuid);

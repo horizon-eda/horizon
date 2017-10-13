@@ -19,6 +19,7 @@ namespace horizon {
 		treeview->append_column("Manufacturer", list_columns.manufacturer);
 		treeview->append_column("Pads", list_columns.n_pads);
 		treeview->append_column("Tags", list_columns.tags);
+		path_column = treeview->append_column("Path", list_columns.path)-1;
 	}
 
 	void PoolBrowserPackage::add_sort_controller_columns() {
@@ -37,11 +38,11 @@ namespace horizon {
 		std::set<std::string> tags{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
 		std::string query;
 		if(tags.size() == 0) {
-			query = "SELECT packages.uuid, packages.name, packages.manufacturer,  packages.n_pads, GROUP_CONCAT(tags.tag, ' ') FROM packages LEFT JOIN tags ON tags.uuid = packages.uuid WHERE packages.name LIKE ? GROUP by packages.uuid ORDER BY name";
+			query = "SELECT packages.uuid, packages.name, packages.manufacturer,  packages.n_pads, GROUP_CONCAT(tags.tag, ' '), packages.filename FROM packages LEFT JOIN tags ON tags.uuid = packages.uuid WHERE packages.name LIKE ? GROUP by packages.uuid ORDER BY name";
 		}
 		else {
 			std::ostringstream qs;
-			qs << "SELECT packages.uuid, packages.name, packages.manufacturer, packages.n_pads, (SELECT GROUP_CONCAT(tags.tag, ' ') FROM tags WHERE tags.uuid = packages.uuid) FROM packages LEFT JOIN tags ON tags.uuid = packages.uuid WHERE packages.name LIKE ? ";
+			qs << "SELECT packages.uuid, packages.name, packages.manufacturer, packages.n_pads, (SELECT GROUP_CONCAT(tags.tag, ' ') FROM tags WHERE tags.uuid = packages.uuid), packages.filename FROM packages LEFT JOIN tags ON tags.uuid = packages.uuid WHERE packages.name LIKE ? ";
 			qs << "AND (";
 			for(const auto &it: tags) {
 				qs << "tags.tag LIKE ? OR ";
@@ -66,6 +67,7 @@ namespace horizon {
 			row[list_columns.manufacturer] = q.get<std::string>(2);
 			row[list_columns.n_pads] = q.get<int>(3);
 			row[list_columns.tags] = q.get<std::string>(4);
+			row[list_columns.path] = q.get<std::string>(5);
 		}
 		store->thaw_notify();
 		select_uuid(selected_uuid);

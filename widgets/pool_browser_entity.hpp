@@ -24,11 +24,13 @@ namespace horizon {
 						Gtk::TreeModelColumnRecord::add( n_gates ) ;
 						Gtk::TreeModelColumnRecord::add( uuid ) ;
 						Gtk::TreeModelColumnRecord::add( tags ) ;
+						Gtk::TreeModelColumnRecord::add( path ) ;
 					}
 					Gtk::TreeModelColumn<Glib::ustring> entity_name;
 					Gtk::TreeModelColumn<Glib::ustring> entity_manufacturer;
 					Gtk::TreeModelColumn<Glib::ustring> prefix;
 					Gtk::TreeModelColumn<Glib::ustring> tags;
+					Gtk::TreeModelColumn<Glib::ustring> path;
 					Gtk::TreeModelColumn<UUID> uuid;
 					Gtk::TreeModelColumn<unsigned int> n_gates;
 			} ;

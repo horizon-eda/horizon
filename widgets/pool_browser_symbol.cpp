@@ -22,6 +22,7 @@ namespace horizon {
 		sort_controller->add_column(0, "symbols.name");
 		sort_controller->add_column(1, "units.name");
 		sort_controller->add_column(2, "units.manufacturer");
+		path_column = treeview->append_column("Path", list_columns.path)-1;
 	}
 
 	void PoolBrowserSymbol::set_unit_uuid(const UUID &uu) {
@@ -36,7 +37,7 @@ namespace horizon {
 
 		std::string name_search = name_entry->get_text();
 
-		std::string query  = "SELECT symbols.uuid, symbols.name, units.name, units.manufacturer FROM symbols,units WHERE symbols.unit = units.uuid AND (units.uuid=? OR ?) AND symbols.name LIKE ?"+sort_controller->get_order_by();
+		std::string query  = "SELECT symbols.uuid, symbols.name, units.name, units.manufacturer, units.filename FROM symbols,units WHERE symbols.unit = units.uuid AND (units.uuid=? OR ?) AND symbols.name LIKE ?"+sort_controller->get_order_by();
 		SQLite::Query q(pool->db, query);
 		q.bind(1, unit_uuid);
 		q.bind(2, unit_uuid==UUID());
@@ -56,6 +57,7 @@ namespace horizon {
 			row[list_columns.name] = q.get<std::string>(1);
 			row[list_columns.unit_name] = q.get<std::string>(2);
 			row[list_columns.unit_manufacturer] = q.get<std::string>(3);
+			row[list_columns.path] = q.get<std::string>(4);
 		}
 		store->thaw_notify();
 		select_uuid(selected_uuid);

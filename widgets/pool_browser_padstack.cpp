@@ -17,6 +17,7 @@ namespace horizon {
 		treeview->append_column("Padstack", list_columns.padstack_name);
 		treeview->append_column("Type", list_columns.padstack_type);
 		treeview->append_column("Package", list_columns.package_name);
+		path_column = treeview->append_column("Path", list_columns.path)-1;
 	}
 
 	void PoolBrowserPadstack::add_sort_controller_columns() {
@@ -45,7 +46,7 @@ namespace horizon {
 
 		std::string name_search = name_entry->get_text();
 
-		SQLite::Query q(pool->db, "SELECT padstacks.uuid, padstacks.name, padstacks.type, packages.name FROM padstacks LEFT JOIN packages ON padstacks.package = packages.uuid WHERE (packages.uuid=? OR ? OR padstacks.package = '00000000-0000-0000-0000-000000000000')  AND padstacks.name LIKE ? AND padstacks.type IN (?, ?, ?, ?, ?) "+sort_controller->get_order_by());
+		SQLite::Query q(pool->db, "SELECT padstacks.uuid, padstacks.name, padstacks.type, packages.name, padstacks.filename FROM padstacks LEFT JOIN packages ON padstacks.package = packages.uuid WHERE (packages.uuid=? OR ? OR padstacks.package = '00000000-0000-0000-0000-000000000000')  AND padstacks.name LIKE ? AND padstacks.type IN (?, ?, ?, ?, ?) "+sort_controller->get_order_by());
 		q.bind(1, package_uuid);
 		q.bind(2, package_uuid==UUID());
 		q.bind(3, "%"+name_search+"%");
@@ -88,6 +89,7 @@ namespace horizon {
 			row[list_columns.padstack_name] = q.get<std::string>(1);
 			row[list_columns.padstack_type] = q.get<std::string>(2);
 			row[list_columns.package_name] = q.get<std::string>(3);
+			row[list_columns.path] = q.get<std::string>(4);
 		}
 		store->thaw_notify();
 		select_uuid(selected_uuid);

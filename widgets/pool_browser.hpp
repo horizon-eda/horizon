@@ -11,12 +11,16 @@ namespace horizon {
 			PoolBrowser(class Pool *pool);
 			UUID get_selected() override;
 			void set_show_none(bool v);
+			void set_show_path(bool v);
 			virtual void search() = 0;
 
 		protected:
 			void construct();
 			class Pool *pool = nullptr;
 			bool show_none = false;
+			bool show_path = false;
+			int path_column = -1;
+
 
 			Gtk::TreeView *treeview = nullptr;
 

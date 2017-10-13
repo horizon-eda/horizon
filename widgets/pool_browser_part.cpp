@@ -30,6 +30,7 @@ namespace horizon {
 		treeview->append_column("Manufacturer", list_columns.manufacturer);
 		treeview->append_column("Package", list_columns.package);
 		treeview->append_column("Tags", list_columns.tags);
+		path_column = treeview->append_column("Path", list_columns.path)-1;
 	}
 
 	void PoolBrowserPart::add_sort_controller_columns() {
@@ -50,10 +51,10 @@ namespace horizon {
 		std::set<std::string> tags{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
 		std::stringstream query;
 		if(tags.size() == 0) {
-			query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, packages.name, GROUP_CONCAT(tags.tag, ' ') FROM parts LEFT JOIN tags ON tags.uuid = parts.uuid LEFT JOIN packages ON packages.uuid = parts.package WHERE parts.MPN LIKE ? AND parts.manufacturer LIKE ? AND (parts.entity=? or ?) GROUP BY parts.uuid ";
+			query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, packages.name, GROUP_CONCAT(tags.tag, ' '), parts.filename FROM parts LEFT JOIN tags ON tags.uuid = parts.uuid LEFT JOIN packages ON packages.uuid = parts.package WHERE parts.MPN LIKE ? AND parts.manufacturer LIKE ? AND (parts.entity=? or ?) GROUP BY parts.uuid ";
 		}
 		else {
-			query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, packages.name, (SELECT GROUP_CONCAT(tags.tag, ' ') FROM tags WHERE tags.uuid = parts.uuid) FROM parts LEFT JOIN tags ON tags.uuid = parts.uuid LEFT JOIN packages ON packages.uuid = parts.package WHERE parts.MPN LIKE ? AND parts.manufacturer LIKE ? AND (parts.entity=? or ?) ";
+			query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, packages.name, (SELECT GROUP_CONCAT(tags.tag, ' ') FROM tags WHERE tags.uuid = parts.uuid), parts.filename FROM parts LEFT JOIN tags ON tags.uuid = parts.uuid LEFT JOIN packages ON packages.uuid = parts.package WHERE parts.MPN LIKE ? AND parts.manufacturer LIKE ? AND (parts.entity=? or ?) ";
 			query << "AND (";
 			for(const auto &it: tags) {
 				query << "tags.tag LIKE ? OR ";
@@ -90,6 +91,7 @@ namespace horizon {
 			row[list_columns.manufacturer] = q.get<std::string>(2);
 			row[list_columns.package] = q.get<std::string>(3);
 			row[list_columns.tags] = q.get<std::string>(4);
+			row[list_columns.path] = q.get<std::string>(5);
 		}
 		store->thaw_notify();
 		select_uuid(selected_uuid);
