@@ -2,6 +2,7 @@
 #include "lut.hpp"
 #include "net.hpp"
 #include "block.hpp"
+#include <glibmm.h>
 
 namespace horizon {
 	static const LutEnumStr<RuleMatch::Mode> mode_lut = {
@@ -40,8 +41,10 @@ namespace horizon {
 			case Mode::NET_CLASS :
 				return n && n->net_class->uuid == net_class;
 
-			case Mode::NET_NAME_REGEX :
-				return false; //todo
+			case Mode::NET_NAME_REGEX : {
+				const auto re = Glib::Regex::create(net_name_regex);
+				return n && re->match(n->name);
+			}
 		}
 		return false;
 	}
@@ -63,10 +66,10 @@ namespace horizon {
 					return "Net "+(net?block->nets.at(net).name:"?");
 
 				case Mode::NET_CLASS :
-					return "Net Class "+(net_class?block->net_classes.at(net_class).name:"?");
+					return "Net class "+(net_class?block->net_classes.at(net_class).name:"?");
 
 				case Mode::NET_NAME_REGEX :
-					return "TBD";
+					return "Net name regex";
 			}
 		}
 		else {

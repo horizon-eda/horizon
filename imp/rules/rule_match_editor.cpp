@@ -49,6 +49,14 @@ namespace horizon {
 		});
 		sel_stack->add(*net_class_button, std::to_string(static_cast<int>(RuleMatch::Mode::NET_CLASS)));
 
+		net_name_regex_entry = Gtk::manage(new Gtk::Entry());
+		net_name_regex_entry->set_text(match->net_name_regex);
+		net_name_regex_entry->signal_changed().connect([this] {
+			match->net_name_regex = net_name_regex_entry->get_text();
+			s_signal_updated.emit();
+		});
+		sel_stack->add(*net_name_regex_entry, std::to_string(static_cast<int>(RuleMatch::Mode::NET_NAME_REGEX)));
+
 		auto *dummy_label = Gtk::manage(new Gtk::Label("matches all nets"));
 		sel_stack->add(*dummy_label, std::to_string(static_cast<int>(RuleMatch::Mode::ALL)));
 

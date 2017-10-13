@@ -13,6 +13,7 @@ namespace horizon {
 			Gtk::Stack *sel_stack = nullptr;
 			class NetButton *net_button = nullptr;
 			class NetClassButton *net_class_button = nullptr;
+			Gtk::Entry *net_name_regex_entry = nullptr;
 			RuleMatch *match;
 			class Core *core;
 			type_signal_updated s_signal_updated;
