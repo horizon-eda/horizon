@@ -30,7 +30,13 @@ namespace horizon {
 		treeview->append_column("Manufacturer", list_columns.manufacturer);
 		treeview->append_column("Package", list_columns.package);
 		treeview->append_column("Tags", list_columns.tags);
-		path_column = treeview->append_column("Path", list_columns.path)-1;
+		{
+			auto cr = Gtk::manage(new Gtk::CellRendererText());
+			auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Path", *cr));
+			tvc->add_attribute(cr->property_text(), list_columns.path);
+			cr->property_ellipsize() = Pango::ELLIPSIZE_START;
+			path_column = treeview->append_column(*tvc)-1;
+		}
 	}
 
 	void PoolBrowserPart::add_sort_controller_columns() {

@@ -18,7 +18,7 @@ namespace horizon {
 		//set_default_size(300, 300);
 
 
-		auto *box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4));
+		auto *box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
 		auto *ba = Gtk::manage(new Gtk::Button("Merge \""+net->name+"\" into \""+into->name+"\""));
 		box->pack_start(*ba, true, true, 0);
 		auto *bb = Gtk::manage(new Gtk::Button("Merge \""+into->name+"\" into \""+net->name+"\""));
@@ -28,6 +28,7 @@ namespace horizon {
 		bb->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(this, &Gtk::Dialog::response), 2));
 
 		get_content_area()->pack_start(*box, true, true, 0);
+		get_content_area()->set_border_width(10);
 
 		show_all();
 	}
