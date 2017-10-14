@@ -66,12 +66,13 @@ namespace horizon {
 		core.r->signal_tool_changed().connect([reload_netlist_button](ToolID t){reload_netlist_button->set_sensitive(t==ToolID::NONE);});
 
 		add_tool_button(ToolID::UPDATE_ALL_PLANES, "Update Planes");
+		add_tool_button(ToolID::MAP_PACKAGE, "Place package");
 
-		auto test_button = Gtk::manage(new Gtk::Button("Test"));
+		/*auto test_button = Gtk::manage(new Gtk::Button("Test"));
 		main_window->top_panel->pack_start(*test_button, false, false, 0);
 		test_button->show();
 		test_button->signal_clicked().connect([this] {
-			/*std::ofstream ofs("/tmp/patches");
+			std::ofstream ofs("/tmp/patches");
 			int i = 0;
 			for(const auto &it: cp.patches) {
 				if(it.first.layer != 10000)
@@ -85,10 +86,10 @@ namespace horizon {
 				}
 				ofs << "\n";
 				i++;
-			}*/
+			}
 
 
-		});
+		});*/
 
 
 		fab_output_window = FabOutputWindow::create(main_window, core.b->get_board(), core.b->get_fab_output_settings());
