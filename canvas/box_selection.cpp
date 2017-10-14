@@ -98,7 +98,7 @@ namespace horizon {
 	
 	void BoxSelection::drag_end(GdkEventButton *button_event) {
 		if(button_event->button==1) { //inside of grid and middle mouse button {
-			bool add = button_event->state & Gdk::SHIFT_MASK;
+			bool add = button_event->state & Gdk::CONTROL_MASK;
 			if(active==2) {
 				for(auto &it: ca->selectables.items) {
 					if(it.get_flag(Selectable::Flag::PRELIGHT)) {

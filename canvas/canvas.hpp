@@ -256,6 +256,8 @@ namespace horizon {
 			bool on_render(const Glib::RefPtr<Gdk::GLContext> &context) override;
 			bool on_button_press_event (GdkEventButton* button_event) override;
 			bool on_button_release_event (GdkEventButton* button_event) override;
+			bool on_key_press_event (GdkEventKey* key_event) override;
+			bool on_key_release_event (GdkEventKey* key_event) override;
 			bool on_motion_notify_event (GdkEventMotion* motion_event) override;
 			bool on_scroll_event (GdkEventScroll* scroll_event) override;
 			Glib::RefPtr<Gdk::GLContext> on_create_context() override;

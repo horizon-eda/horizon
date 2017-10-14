@@ -156,6 +156,23 @@ namespace horizon {
 		return Gtk::GLArea::on_scroll_event(scroll_event);
 	}
 
+	bool CanvasGL::on_key_press_event(GdkEventKey *key_event) {
+		if(key_event->keyval == GDK_KEY_Shift_L) {
+			pan_dragging = true;
+			pan_pointer_pos_orig = get_cursor_pos_win();
+			pan_offset_orig = offset;
+		}
+		return Gtk::GLArea::on_key_press_event(key_event);
+	}
+
+	bool CanvasGL::on_key_release_event(GdkEventKey *key_event) {
+		if(key_event->keyval == GDK_KEY_Shift_L) {
+			pan_dragging = false;
+		}
+		return Gtk::GLArea::on_key_release_event(key_event);
+	}
+
+
 	Coordi CanvasGL::snap_to_grid(const Coordi &c) {
 		auto sp = grid.spacing;
 		int64_t xi = round_multiple(cursor_pos.x, sp);
