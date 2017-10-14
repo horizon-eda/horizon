@@ -120,6 +120,14 @@ namespace horizon {
 		return Gtk::GLArea::on_motion_notify_event(motion_event);
 	}
 
+	void CanvasGL::update_cursor_pos(double x, double y) {
+		GdkEventMotion motion_event;
+		motion_event.type = GDK_MOTION_NOTIFY;
+		motion_event.x = x;
+		motion_event.y = y;
+		cursor_move((GdkEvent*)&motion_event);
+	}
+
 	bool CanvasGL::on_button_release_event(GdkEventButton *button_event) {
 		pan_drag_end(button_event);
 		box_selection.drag_end(button_event);

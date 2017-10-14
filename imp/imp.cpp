@@ -413,6 +413,20 @@ namespace horizon {
 		main_window->cursor_label->set_text(coord_to_string(pos));
 	}
 	
+	void ImpBase::fix_cursor_pos() {
+		auto ev = gtk_get_current_event();
+		auto dev = gdk_event_get_device(ev);
+		auto win = canvas->get_window()->gobj();
+		gdouble x,y;
+		gdk_window_get_device_position_double(win, dev, &x, &y, nullptr);
+		if(!canvas->get_has_window()) {
+			auto alloc = canvas->get_allocation();
+			x-=alloc.get_x();
+			y-=alloc.get_y();
+		}
+		canvas->update_cursor_pos(x, y);
+	}
+
 	bool ImpBase::handle_click(GdkEventButton *button_event) {
 		if(core.r->tool_is_active() && button_event->button != 2) {
 			ToolArgs args;
@@ -470,6 +484,7 @@ namespace horizon {
 								ToolID tool_id = it.first;
 								la_sub->signal_activate().connect([this, tool_id, sr] {
 									canvas->set_selection({sr}, false);
+									fix_cursor_pos();
 									tool_begin(tool_id);
 								});
 								la_sub->show();
@@ -491,6 +506,7 @@ namespace horizon {
 						auto la =  Gtk::manage(new Gtk::MenuItem(it.second.name));
 						ToolID tool_id = it.first;
 						la->signal_activate().connect([this, tool_id] {
+							fix_cursor_pos();
 							tool_begin(tool_id);
 						});
 						la->show();

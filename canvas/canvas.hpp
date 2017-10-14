@@ -198,6 +198,7 @@ namespace horizon {
 
 			std::set<SelectableRef> get_selection_at(const Coordi &c);
 			Coordf screen2canvas(const Coordf &p) const;
+			void update_cursor_pos(double x, double y);
 
 
 		protected:

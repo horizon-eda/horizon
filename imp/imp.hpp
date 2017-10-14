@@ -76,6 +76,9 @@ namespace horizon {
 
 			void key_seq_append_default(KeySequence &ks);
 			
+		private:
+			void fix_cursor_pos();
+
 	};
 }
 
