@@ -1,6 +1,7 @@
 #include "sheet.hpp"
 #include "part.hpp"
 #include "pool.hpp"
+#include "util.hpp"
 
 namespace horizon {
 
@@ -87,6 +88,7 @@ namespace horizon {
 		li->to = it->to;
 		li->net = it->net;
 		li->bus = it->bus;
+		li->net_segment = it->net_segment;
 
 		it->to.connect(ju);
 		return li;
@@ -266,6 +268,39 @@ namespace horizon {
 				}
 			}
 		}
+	}
+
+	void Sheet::fix_junctions() {
+		for(auto &it_junc: junctions) {
+			auto ju = &it_junc.second;
+			for(auto &it_li: net_lines) {
+				auto li = &it_li.second;
+				if(ju->net_segment == li->net_segment && li->from.junc != ju && li->to.junc != ju) {
+					if(li->coord_on_line(ju->position)) {
+						split_line_net(li, ju);
+						ju->connection_count += 2;
+					}
+				}
+			}
+		}
+	}
+
+	void Sheet::delete_duplicate_net_lines() {
+		std::set<std::pair<LineNet::Connection,LineNet::Connection>> conns;
+		map_erase_if(net_lines, [&conns](auto &li) {
+			bool del = false;
+			if(conns.emplace(li.second.from, li.second.to).second == false)
+				del = true;
+			if(conns.emplace(li.second.to, li.second.from).second == false)
+				del = true;
+			if(del) {
+				for(const auto &it_ft: {li.second.from, li.second.to}) {
+					if(it_ft.is_junc() && it_ft.junc->connection_count)
+						it_ft.junc->connection_count--;
+				}
+			}
+			return del;
+		});
 	}
 
 	void Sheet::delete_dependants() {

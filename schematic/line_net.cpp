@@ -145,6 +145,18 @@ namespace horizon {
 		}
 	}
 
+	bool LineNet::Connection::operator <(const LineNet::Connection &other) const {
+		if(junc < other.junc)
+			return true;
+		if(junc > other.junc)
+			return false;
+		if(bus_ripper < other.bus_ripper)
+			return true;
+		if(bus_ripper > other.bus_ripper)
+			return false;
+		return pin < other.pin;
+	}
+
 	
 	LineNet::LineNet(const UUID &uu, const json &j, Sheet *sheet):
 		uuid(uu),

@@ -424,6 +424,10 @@ namespace horizon {
 
 		for(auto &it_sheet: sheets) {
 			Sheet &sheet = it_sheet.second;
+			if(!careful) {
+				sheet.fix_junctions();
+				sheet.delete_duplicate_net_lines();
+			}
 			sheet.analyze_net_segments(true);
 		}
 

@@ -48,6 +48,8 @@ namespace horizon {
 					uuid_ptr<SchematicSymbol> symbol = nullptr;
 					uuid_ptr<SymbolPin> pin = nullptr;
 					uuid_ptr<BusRipper> bus_ripper = nullptr;
+					bool operator<(const Connection &other) const;
+					bool operator==(const Connection &other) const;
 
 					void connect(Junction *j);
 					void connect(BusRipper *r);
