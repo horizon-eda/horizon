@@ -34,6 +34,7 @@
     <file>imp/rules/rule_editor_track_width.ui</file>
     <file>imp/rules/rule_editor_clearance_copper.ui</file>
     <file>imp/fab_output.ui</file>
+    <file>imp/3d_view.ui</file>
     <file>prj-mgr/part_browser/part_browser.ui</file>
     
     <file>canvas/shaders/grid-vertex.glsl</file>
@@ -53,5 +54,13 @@
     <file>canvas/shaders/marker-vertex.glsl</file>
     <file>canvas/shaders/marker-fragment.glsl</file>
     <file>canvas/shaders/marker-geometry.glsl</file>
+
+    <file>canvas3d/shaders/cover-vertex.glsl</file>
+    <file>canvas3d/shaders/cover-fragment.glsl</file>
+    <file>canvas3d/shaders/cover-geometry.glsl</file>
+
+    <file>canvas3d/shaders/wall-vertex.glsl</file>
+    <file>canvas3d/shaders/wall-fragment.glsl</file>
+    <file>canvas3d/shaders/wall-geometry.glsl</file>
   </gresource>
 </gresources>

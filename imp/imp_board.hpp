@@ -19,6 +19,7 @@ namespace horizon {
 			CoreBoard core_board;
 
 			class FabOutputWindow *fab_output_window = nullptr;
+			class View3DWindow *view_3d_window = nullptr;
 
 	};
 }

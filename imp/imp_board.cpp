@@ -3,6 +3,7 @@
 #include "rules/rules_window.hpp"
 #include "canvas/canvas_patch.hpp"
 #include "fab_output_window.hpp"
+#include "3d_view.hpp"
 
 namespace horizon {
 	ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir, const std::string &pool_path):
@@ -65,6 +66,11 @@ namespace horizon {
 		reload_netlist_button->signal_clicked().connect([this]{core_board.reload_netlist();canvas_update();});
 		core.r->signal_tool_changed().connect([reload_netlist_button](ToolID t){reload_netlist_button->set_sensitive(t==ToolID::NONE);});
 
+		auto view_3d_button = Gtk::manage(new Gtk::Button("3D"));
+		main_window->top_panel->pack_start(*view_3d_button, false, false, 0);
+		view_3d_button->show();
+		view_3d_button->signal_clicked().connect([this]{view_3d_window->update(); view_3d_window->present();});
+
 		add_tool_button(ToolID::UPDATE_ALL_PLANES, "Update Planes");
 		add_tool_button(ToolID::MAP_PACKAGE, "Place package");
 
@@ -93,6 +99,7 @@ namespace horizon {
 
 
 		fab_output_window = FabOutputWindow::create(main_window, core.b->get_board(), core.b->get_fab_output_settings());
+		view_3d_window = View3DWindow::create(core_board.get_board());
 
 		rules_window->signal_goto().connect([this] (Coordi location, UUID sheet) {
 			canvas->center_and_zoom(location);

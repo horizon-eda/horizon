@@ -258,7 +258,11 @@ SRC_IMP = \
 	imp/symbol_preview/symbol_preview_window.cpp\
 	imp/symbol_preview/preview_box.cpp\
 	util/gtk_util.cpp\
-	imp/fab_output_window.cpp
+	imp/fab_output_window.cpp\
+	imp/3d_view.cpp\
+	canvas3d/canvas3d.cpp\
+	canvas3d/cover.cpp\
+	canvas3d/wall.cpp\
 
 SRC_ROUTER = \
 	router/router/pns_router.cpp \
