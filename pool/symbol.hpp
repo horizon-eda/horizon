@@ -33,6 +33,7 @@ namespace horizon {
 			bool name_visible;
 			bool pad_visible;
 			Orientation orientation;
+			Orientation get_orientation_for_placement(const Placement &p) const;
 			
 			//not stored
 			std::string name;

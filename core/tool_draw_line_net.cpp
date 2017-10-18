@@ -34,6 +34,7 @@ namespace horizon {
 		temp_junc_head->position = c;
 		temp_line_head = nullptr;
 		temp_line_mid = nullptr;
+		component_floating = nullptr;
 		update_tip();
 	}
 
@@ -115,7 +116,21 @@ namespace horizon {
 					else if(args.target.type == ObjectType::SYMBOL_PIN) {
 						sym = core.c->get_schematic_symbol(args.target.path.at(0));
 						pin = &sym->symbol.pins.at(args.target.path.at(1));
+						pin_start = pin;
 						UUIDPath<2> connpath(sym->gate->uuid, args.target.path.at(1));
+
+						auto orientation = pin->get_orientation_for_placement(sym->placement);
+						switch(orientation) {
+							case Orientation::UP:
+							case Orientation::DOWN:
+								bend_mode = BendMode::YX;
+							break;
+
+							case Orientation::LEFT:
+							case Orientation::RIGHT:
+								bend_mode = BendMode::XY;
+							break;
+						}
 
 						if(sym->component->connections.count(connpath)) { //pin is connected
 							Connection &conn = sym->component->connections.at(connpath);
@@ -124,6 +139,8 @@ namespace horizon {
 						else { //pin needs net
 							net = core.c->get_schematic()->block->insert_net();
 							sym->component->connections.emplace(connpath, net);
+							component_floating = sym->component;
+							connpath_floating = connpath;
 						}
 					}
 					else if(args.target.type == ObjectType::BUS_RIPPER) {
@@ -166,6 +183,7 @@ namespace horizon {
 
 				}
 				else { //already have net line
+					component_floating = nullptr;
 					if(args.target.type == ObjectType::JUNCTION) {
 						ju = core.r->get_junction(args.target.path.at(0));
 						auto do_merge = merge_bus_net(temp_line_head->net, temp_line_head->bus, ju->net, ju->bus);
@@ -182,6 +200,8 @@ namespace horizon {
 					else if(args.target.type == ObjectType::SYMBOL_PIN) {
 						sym = core.c->get_schematic_symbol(args.target.path.at(0));
 						pin = &sym->symbol.pins.at(args.target.path.at(1));
+						if(pin == pin_start) //do noting
+							return ToolResponse();
 						UUIDPath<2> connpath(sym->gate->uuid, args.target.path.at(1));
 						if(temp_line_head->bus) { //can't connect bus to pin
 							return ToolResponse();
@@ -303,6 +323,8 @@ namespace horizon {
 					core.r->delete_junction(temp_junc_mid->uuid);
 				}
 				core.r->delete_junction(temp_junc_head->uuid);
+				if(component_floating)
+					component_floating->connections.erase(connpath_floating);
 
 				core.c->commit();
 				return ToolResponse::end();

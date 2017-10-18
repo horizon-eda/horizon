@@ -23,6 +23,10 @@ namespace horizon {
 			void update_tip();
 			void restart(const Coordi &c);
 
+			class Component *component_floating = nullptr;
+			UUIDPath<2> connpath_floating;
+			class SymbolPin *pin_start = nullptr;
+
 			Junction *make_temp_junc(const Coordi &c);
 	};
 }

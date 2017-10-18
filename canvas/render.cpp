@@ -189,31 +189,6 @@ namespace horizon {
 		}
 	}
 
-	static const std::map<Orientation, Orientation> omap_90 = {
-		{Orientation::LEFT, Orientation::DOWN},
-		{Orientation::UP, Orientation::LEFT},
-		{Orientation::RIGHT, Orientation::UP},
-		{Orientation::DOWN, Orientation::RIGHT},
-	};
-	static const std::map<Orientation, Orientation> omap_180 = {
-		{Orientation::LEFT, Orientation::RIGHT},
-		{Orientation::UP, Orientation::DOWN},
-		{Orientation::RIGHT, Orientation::LEFT},
-		{Orientation::DOWN, Orientation::UP},
-	};
-	static const std::map<Orientation, Orientation> omap_270 = {
-		{Orientation::LEFT, Orientation::UP},
-		{Orientation::UP, Orientation::RIGHT},
-		{Orientation::RIGHT, Orientation::DOWN},
-		{Orientation::DOWN, Orientation::LEFT},
-	};
-	static const std::map<Orientation, Orientation> omap_mirror = {
-		{Orientation::LEFT, Orientation::RIGHT},
-		{Orientation::UP, Orientation::UP},
-		{Orientation::RIGHT, Orientation::LEFT},
-		{Orientation::DOWN, Orientation::DOWN},
-	};
-
 	void Canvas::render(const SymbolPin &pin, bool interactive) {
 		Coordi p0 = transform.transform(pin.position);
 		Coordi p1 = p0;
@@ -221,19 +196,7 @@ namespace horizon {
 		Coordi p_name = p0;
 		Coordi p_pad = p0;
 
-		Orientation pin_orientation = pin.orientation;
-		if(transform.get_angle() == 16384) {
-			pin_orientation = omap_90.at(pin_orientation);
-		}
-		if(transform.get_angle() == 32768) {
-			pin_orientation = omap_180.at(pin_orientation);
-		}
-		if(transform.get_angle() == 49152) {
-			pin_orientation = omap_270.at(pin_orientation);
-		}
-		if(transform.mirror) {
-			pin_orientation = omap_mirror.at(pin_orientation);
-		}
+		Orientation pin_orientation = pin.get_orientation_for_placement(transform);
 
 		Orientation name_orientation = Orientation::LEFT;
 		Orientation pad_orientation = Orientation::LEFT;
