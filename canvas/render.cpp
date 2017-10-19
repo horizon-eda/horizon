@@ -316,7 +316,7 @@ namespace horizon {
 			break;
 		}
 		if(pin.connected_net_lines.size()>1) {
-			//draw_line(p0, p0+Coordi(0, 10), c, false, 0.5_mm);
+			draw_line(p0, p0+Coordi(0, 10), ColorP::FROM_LAYER, 0, false, 0.75_mm);
 		}
 		draw_line(p0, p1, ColorP::FROM_LAYER, 0, false);
 		if(interactive)
