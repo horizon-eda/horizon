@@ -103,7 +103,7 @@ namespace horizon {
 			if(args.button == 1) {
 				Junction *ju = nullptr;
 				SchematicSymbol *sym = nullptr;
-				SymbolPin *pin = nullptr;
+				uuid_ptr<SymbolPin> pin = nullptr;
 				BusRipper *rip = nullptr;
 				Net *net = nullptr;
 				Bus *bus = nullptr;
@@ -212,6 +212,7 @@ namespace horizon {
 								if(merge_nets(conn.net, temp_line_head->net)) {
 									return ToolResponse();
 								}
+								pin = &sym->symbol.pins.at(args.target.path.at(1)); //update pin after merge, since merge replaces pins
 							}
 						}
 						else { //pin needs net
