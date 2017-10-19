@@ -428,6 +428,7 @@ namespace horizon {
 				sheet.fix_junctions();
 				sheet.delete_duplicate_net_lines();
 			}
+			sheet.propagate_net_segments();
 			sheet.analyze_net_segments(true);
 		}
 
