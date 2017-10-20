@@ -69,7 +69,15 @@ namespace horizon {
 		auto view_3d_button = Gtk::manage(new Gtk::Button("3D"));
 		main_window->top_panel->pack_start(*view_3d_button, false, false, 0);
 		view_3d_button->show();
-		view_3d_button->signal_clicked().connect([this]{view_3d_window->update(); view_3d_window->present();});
+		view_3d_button->signal_clicked().connect([this]{
+			#ifdef G_OS_WIN32
+			Gtk::MessageDialog md(*this,  "Due to a bug in Gtk, this feature isn't available on windows", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+				md.set_secondary_text("This feature will get enabled as soon as the bug is fixed");
+				md.run();
+			#else
+			view_3d_window->update(); view_3d_window->present();
+			#endif
+		});
 
 		add_tool_button(ToolID::UPDATE_ALL_PLANES, "Update Planes");
 		add_tool_button(ToolID::MAP_PACKAGE, "Place package");
