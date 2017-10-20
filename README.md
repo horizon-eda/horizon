@@ -2,6 +2,8 @@ Horizon is a free EDA package. It's far from finished, but the overall
 architecture is there. See [the wiki](https://github.com/carrotIndustries/horizon/wiki/Feature-overview) for an overview
 of horizon's top features.
 
+![collage](https://raw.githubusercontent.com/wiki/carrotIndustries/horizon/images/collage.png)
+
 # Features for users so far
 - Complete design flow from schematic entry to gerber export
 - Sane library management
