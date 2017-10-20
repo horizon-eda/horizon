@@ -46,7 +46,7 @@ namespace horizon {
 			button->show();
 			button->signal_clicked().connect([this]{
 				#ifdef G_OS_WIN32
-				Gtk::MessageDialog md(*this,  "Due to a bug in Gtk, this feature isn't available on windows", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+				Gtk::MessageDialog md(*main_window,  "Due to a bug in Gtk, this feature isn't available on windows", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
 				md.set_secondary_text("This feature will get enabled as soon as the bug is fixed");
 				md.run();
 				#else
