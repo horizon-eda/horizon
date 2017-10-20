@@ -1,4 +1,5 @@
-Horizon is a free EDA package. It's far from finished, but the overall 
+# Horizon is a free EDA package
+It's far from finished, but the overall 
 architecture is there. See [the wiki](https://github.com/carrotIndustries/horizon/wiki/Feature-overview) for an overview
 of horizon's top features.
 
