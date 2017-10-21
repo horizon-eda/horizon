@@ -44,7 +44,7 @@ namespace horizon {
 	#else
 	std::string get_exe_dir() {
 
-		char buf[1024];
+		char buf[PATH_MAX];
 		ssize_t len;
         if((len = readlink("/proc/self/exe", buf, sizeof(buf)-1)) != -1) {
         	buf[len] = '\0';
