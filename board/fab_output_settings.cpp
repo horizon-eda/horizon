@@ -72,19 +72,23 @@ namespace horizon {
 		map_erase_if(layers, [layers_from_board](const auto &it){return layers_from_board.count(it.first)==0;});
 
 		//add new layers
-		layers.emplace(std::piecewise_construct, std::make_tuple(BoardLayers::L_OUTLINE), std::make_tuple(BoardLayers::L_OUTLINE));
-		layers.emplace(std::piecewise_construct, std::make_tuple(BoardLayers::TOP_PASTE), std::make_tuple(BoardLayers::TOP_PASTE));
-		layers.emplace(std::piecewise_construct, std::make_tuple(BoardLayers::TOP_SILKSCREEN), std::make_tuple(BoardLayers::TOP_SILKSCREEN));
-		layers.emplace(std::piecewise_construct, std::make_tuple(BoardLayers::TOP_MASK), std::make_tuple(BoardLayers::TOP_MASK));
-		layers.emplace(std::piecewise_construct, std::make_tuple(BoardLayers::TOP_COPPER), std::make_tuple(BoardLayers::TOP_COPPER));
+		auto add_layer = [this](int l) {
+			layers.emplace(l, l);
+		};
+
+		add_layer(BoardLayers::L_OUTLINE);
+		add_layer(BoardLayers::TOP_PASTE);
+		add_layer(BoardLayers::TOP_SILKSCREEN);
+		add_layer(BoardLayers::TOP_MASK);
+		add_layer(BoardLayers::TOP_COPPER);
 		for(const auto &la: layers_from_board) {
 			if(BoardLayers::is_copper(la.first) && la.first > BoardLayers::BOTTOM_COPPER && la.first < BoardLayers::TOP_COPPER)
-				layers.emplace(std::piecewise_construct, std::make_tuple(la.first), std::make_tuple(la.first));
+				add_layer(la.first);
 		}
-		layers.emplace(std::piecewise_construct, std::make_tuple(BoardLayers::BOTTOM_COPPER), std::make_tuple(BoardLayers::BOTTOM_COPPER));
-		layers.emplace(std::piecewise_construct, std::make_tuple(BoardLayers::BOTTOM_MASK), std::make_tuple(BoardLayers::BOTTOM_MASK));
-		layers.emplace(std::piecewise_construct, std::make_tuple(BoardLayers::BOTTOM_SILKSCREEN), std::make_tuple(BoardLayers::BOTTOM_SILKSCREEN));
-		layers.emplace(std::piecewise_construct, std::make_tuple(BoardLayers::BOTTOM_PASTE), std::make_tuple(BoardLayers::BOTTOM_PASTE));
+		add_layer(BoardLayers::BOTTOM_COPPER);
+		add_layer(BoardLayers::BOTTOM_MASK);
+		add_layer(BoardLayers::BOTTOM_SILKSCREEN);
+		add_layer(BoardLayers::BOTTOM_PASTE);
 	}
 
 	json FabOutputSettings::serialize() const {
