@@ -727,7 +727,7 @@ namespace horizon {
 
 					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Part",
 						top->gobj(),
-						GTK_FILE_CHOOSER_SAVE,
+						GTK_FILE_CHOOSER_ACTION_SAVE,
 						"_Save",
 						"_Cancel");
 					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
