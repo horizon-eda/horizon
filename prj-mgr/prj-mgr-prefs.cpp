@@ -102,20 +102,22 @@ namespace horizon {
 		update();
 
 		box->button_add_pool->signal_clicked().connect([this] {
-			Gtk::FileChooserDialog fc(*this, "Add Pool", Gtk::FILE_CHOOSER_ACTION_OPEN);
-			fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-			fc.add_button("_Open", Gtk::RESPONSE_ACCEPT);
-			auto filter= Gtk::FileFilter::create();
+			GtkFileChooserNative *native = gtk_file_chooser_native_new ("Add Pool",
+				GTK_WINDOW(gobj()),
+				GTK_FILE_CHOOSER_ACTION_OPEN,
+				"_Open",
+				"_Cancel");
+			auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+			auto filter = Gtk::FileFilter::create();
 			filter->set_name("Horizon pool (pool.json)");
 			filter->add_pattern("pool.json");
-			fc.add_filter(filter);
+			chooser->add_filter(filter);
 
-			if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-				auto path = fc.get_filename();
+			if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+				auto path = chooser->get_filename();
 				auto mapp = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(app);
 				mapp->add_pool(path);
 				update();
-
 			}
 		});
 

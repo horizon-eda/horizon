@@ -142,23 +142,26 @@ namespace horizon {
 			store->save();
 		}
 		else {
-			Gtk::FileChooserDialog fc(*this, "Save as", Gtk::FILE_CHOOSER_ACTION_SAVE);
-			fc.set_do_overwrite_confirmation(true);
-			fc.set_current_name("something.json");
+			GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save",
+				GTK_WINDOW(gobj()),
+				GTK_FILE_CHOOSER_ACTION_SAVE,
+				"_Save",
+				"_Cancel");
+			auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+			chooser->set_do_overwrite_confirmation(true);
+			chooser->set_current_name("something.json");
 			switch(type) {
 				case ObjectType::UNIT :
-					fc.set_current_folder(Glib::build_filename(pool->get_base_path(), "units"));
+					chooser->set_current_folder(Glib::build_filename(pool->get_base_path(), "units"));
 				break;
 				case ObjectType::ENTITY :
-					fc.set_current_folder(Glib::build_filename(pool->get_base_path(), "entities"));
+					chooser->set_current_folder(Glib::build_filename(pool->get_base_path(), "entities"));
 				break;
 				default:;
 			}
 
-			fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-			fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
-			if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-				std::string fn = fc.get_filename();
+			if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+				std::string fn = chooser->get_filename();
 				store->save_as(fn);
 				save_button->set_label("Save");
 			}

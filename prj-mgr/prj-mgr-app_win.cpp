@@ -297,16 +297,19 @@ namespace horizon {
 	}
 
 	void ProjectManagerAppWindow::handle_open() {
-		Gtk::FileChooserDialog fc(*this, "Open Project", Gtk::FILE_CHOOSER_ACTION_OPEN);
-		fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-		fc.add_button("_Open", Gtk::RESPONSE_ACCEPT);
-		auto filter= Gtk::FileFilter::create();
+		GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open Project",
+			GTK_WINDOW(gobj()),
+			GTK_FILE_CHOOSER_ACTION_OPEN,
+			"_Open",
+			"_Cancel");
+		auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+		auto filter = Gtk::FileFilter::create();
 		filter->set_name("Horizon projects");
 		filter->add_pattern("*.hprj");
-		fc.add_filter(filter);
+		chooser->add_filter(filter);
 
-		if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-			auto file = fc.get_file();
+		if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+			auto file = chooser->get_file();
 			open_file_view(file);
 		}
 	}

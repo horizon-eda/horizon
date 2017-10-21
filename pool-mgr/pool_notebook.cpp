@@ -187,15 +187,21 @@ namespace horizon {
 					if(!br->get_selected())
 						return;
 					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-					Gtk::FileChooserDialog fc(*top, "Save Symbol", Gtk::FILE_CHOOSER_ACTION_SAVE);
-					fc.set_do_overwrite_confirmation(true);
+
+					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Symbol",
+						top->gobj(),
+						GTK_FILE_CHOOSER_ACTION_SAVE,
+						"_Save",
+						"_Cancel");
+					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+					chooser->set_do_overwrite_confirmation(true);
 					auto unit_filename = pool.get_filename(ObjectType::UNIT, br->get_selected());
 					auto basename = Gio::File::create_for_path(unit_filename)->get_basename();
-					fc.set_current_folder(Glib::build_filename(base_path, "symbols"));
-					fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-					fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
-					if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-						std::string fn = fc.get_filename();
+					chooser->set_current_folder(Glib::build_filename(base_path, "symbols"));
+					chooser->set_current_name(basename);
+
+					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+						std::string fn = chooser->get_filename();
 						Symbol sym(horizon::UUID::random());
 						auto unit = pool.get_unit(br->get_selected());
 						sym.name = unit->name;
@@ -212,16 +218,21 @@ namespace horizon {
 					if(!br->get_selected())
 						return;
 					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-					Gtk::FileChooserDialog fc(*top, "Save entity", Gtk::FILE_CHOOSER_ACTION_SAVE);
-					fc.set_do_overwrite_confirmation(true);
-					fc.set_current_folder(Glib::build_filename(base_path, "entities"));
+
+					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Entity",
+						top->gobj(),
+						GTK_FILE_CHOOSER_ACTION_SAVE,
+						"_Save",
+						"_Cancel");
+					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+					chooser->set_do_overwrite_confirmation(true);
 					auto unit_filename = pool.get_filename(ObjectType::UNIT, br->get_selected());
 					auto basename = Gio::File::create_for_path(unit_filename)->get_basename();
-					fc.set_current_name(basename);
-					fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-					fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
-					if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-						std::string fn = fc.get_filename();
+					chooser->set_current_folder(Glib::build_filename(base_path, "symbols"));
+					chooser->set_current_name(basename);
+
+					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+						std::string fn = chooser->get_filename();
 						Entity entity(horizon::UUID::random());
 						auto unit = pool.get_unit(br->get_selected());
 						entity.name = unit->name;
@@ -428,14 +439,19 @@ namespace horizon {
 				bbox->pack_start(*bu, false, false,0);
 				bu->signal_clicked().connect([this]{
 					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-					Gtk::FileChooserDialog fc(*top, "Save Padstack", Gtk::FILE_CHOOSER_ACTION_SAVE);
-					fc.set_do_overwrite_confirmation(true);
-					fc.set_current_name("padstack.json");
-					fc.set_current_folder(Glib::build_filename(base_path, "padstacks"));
-					fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-					fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
-					if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-						std::string fn = fc.get_filename();
+
+					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Padstack",
+						top->gobj(),
+						GTK_FILE_CHOOSER_ACTION_SAVE,
+						"_Save",
+						"_Cancel");
+					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+					chooser->set_do_overwrite_confirmation(true);
+					chooser->set_current_name("padstack.json");
+					chooser->set_current_folder(Glib::build_filename(base_path, "padstacks"));
+
+					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+						std::string fn = chooser->get_filename();
 						Padstack ps(horizon::UUID::random());
 						save_json_to_file(fn, ps.serialize());
 						spawn(PoolManagerProcess::Type::IMP_PADSTACK, {fn});
@@ -526,14 +542,19 @@ namespace horizon {
 				bbox->pack_start(*bu, false, false,0);
 				bu->signal_clicked().connect([this]{
 					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-					Gtk::FileChooserDialog fc(*top, "Save Package", Gtk::FILE_CHOOSER_ACTION_CREATE_FOLDER);
-					fc.set_do_overwrite_confirmation(true);
-					fc.set_current_name("package");
-					fc.set_current_folder(Glib::build_filename(base_path, "packages"));
-					fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-					fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
-					if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-						std::string fn = fc.get_filename();
+
+					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Package",
+						top->gobj(),
+						GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER,
+						"_Save",
+						"_Cancel");
+					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+					chooser->set_do_overwrite_confirmation(true);
+					chooser->set_current_name("package");
+					chooser->set_current_folder(Glib::build_filename(base_path, "packages"));
+
+					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+						std::string fn = chooser->get_filename();
 						auto fi = Gio::File::create_for_path(Glib::build_filename(fn, "padstacks"));
 						fi->make_directory_with_parents();
 						Package pkg(horizon::UUID::random());
@@ -561,16 +582,21 @@ namespace horizon {
 					if(!br->get_selected())
 						return;
 					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-					Gtk::FileChooserDialog fc(*top, "Save Padstack", Gtk::FILE_CHOOSER_ACTION_SAVE);
-					fc.set_do_overwrite_confirmation(true);
+
+					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Padstack",
+						top->gobj(),
+						GTK_FILE_CHOOSER_ACTION_SAVE,
+						"_Save",
+						"_Cancel");
+					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+					chooser->set_do_overwrite_confirmation(true);
+					chooser->set_current_name("pad.json");
 					auto pkg_filename = pool.get_filename(ObjectType::PACKAGE, br->get_selected());
 					auto pkg_dir = Glib::path_get_dirname(pkg_filename);
-					fc.set_current_folder(Glib::build_filename(pkg_dir, "padstacks"));
-					fc.set_current_name("padstack.json");
-					fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-					fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
-					if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-						std::string fn = fc.get_filename();
+					chooser->set_current_folder(Glib::build_filename(pkg_dir, "padstacks"));
+
+					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+						std::string fn = chooser->get_filename();
 						Padstack ps(horizon::UUID::random());
 						ps.name = "Pad";
 						save_json_to_file(fn, ps.serialize());
@@ -653,16 +679,21 @@ namespace horizon {
 					}
 					if(!(entity_uuid && package_uuid))
 						return;
-					Gtk::FileChooserDialog fc(*top, "Save Part", Gtk::FILE_CHOOSER_ACTION_SAVE);
-					fc.set_do_overwrite_confirmation(true);
-					fc.set_current_name("package");
-					fc.set_current_folder(Glib::build_filename(base_path, "parts"));
-					fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-					fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
-					if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-						std::string fn = fc.get_filename();
+
+					auto entity = pool.get_entity(entity_uuid);
+					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Part",
+						top->gobj(),
+						GTK_FILE_CHOOSER_ACTION_SAVE,
+						"_Save",
+						"_Cancel");
+					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+					chooser->set_do_overwrite_confirmation(true);
+					chooser->set_current_name(entity->name+".json");
+					chooser->set_current_folder(Glib::build_filename(base_path, "parts"));
+
+					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+						std::string fn = chooser->get_filename();
 						Part part(horizon::UUID::random());
-						auto entity = pool.get_entity(entity_uuid);
 						auto package = pool.get_package(package_uuid);
 						part.attributes[Part::Attribute::MPN] = {false, entity->name};
 						part.attributes[Part::Attribute::MANUFACTURER] = {false, entity->manufacturer};
@@ -693,14 +724,19 @@ namespace horizon {
 						return;
 					auto base_part = pool.get_part(uu);
 					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-					Gtk::FileChooserDialog fc(*top, "Save Part", Gtk::FILE_CHOOSER_ACTION_SAVE);
-					fc.set_do_overwrite_confirmation(true);
-					fc.set_current_name(base_part->get_MPN()+".json");
-					fc.set_current_folder(Glib::path_get_dirname(pool.get_filename(ObjectType::PART, uu)));
-					fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-					fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
-					if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-						std::string fn = fc.get_filename();
+
+					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Part",
+						top->gobj(),
+						GTK_FILE_CHOOSER_SAVE,
+						"_Save",
+						"_Cancel");
+					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+					chooser->set_do_overwrite_confirmation(true);
+					chooser->set_current_name(base_part->get_MPN()+".json");
+					chooser->set_current_folder(Glib::path_get_dirname(pool.get_filename(ObjectType::PART, uu)));
+
+					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+						std::string fn = chooser->get_filename();
 						Part part(horizon::UUID::random());
 						part.base = base_part;
 						part.attributes[Part::Attribute::MPN] = {true, base_part->get_MPN()};

@@ -72,13 +72,17 @@ namespace horizon {
 
 		generate_button->signal_clicked().connect(sigc::mem_fun(this, &FabOutputWindow::generate));
 		directory_button->signal_clicked().connect([this]{
-			Gtk::FileChooserDialog fc(*this, "Choose directory", Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
-			fc.set_do_overwrite_confirmation(true);
-			fc.set_filename(directory_entry->get_text());
-			fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-			fc.add_button("Select", Gtk::RESPONSE_ACCEPT);
-			if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-				directory_entry->set_text(fc.get_filename());
+			GtkFileChooserNative *native = gtk_file_chooser_native_new ("Select output directory",
+				GTK_WINDOW(gobj()),
+				GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+				"Select",
+				"_Cancel");
+			auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+			chooser->set_do_overwrite_confirmation(true);
+			chooser->set_filename(directory_entry->get_text());
+
+			if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+				directory_entry->set_text(chooser->get_filename());
 			}
 		});
 

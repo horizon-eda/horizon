@@ -287,16 +287,19 @@ namespace horizon {
 	}
 
 	void PartWizard::handle_import() {
-		Gtk::FileChooserDialog fc(*this, "Open", Gtk::FILE_CHOOSER_ACTION_OPEN);
-		fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-		fc.add_button("_Open", Gtk::RESPONSE_ACCEPT);
+		GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open",
+			gobj(),
+			GTK_FILE_CHOOSER_ACTION_OPEN,
+			"_Save",
+			"_Cancel");
+		auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
 		auto filter= Gtk::FileFilter::create();
 		filter->set_name("json documents");
 		filter->add_pattern("*.json");
-		fc.add_filter(filter);
+		chooser->add_filter(filter);
 
-		if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-			auto filename = fc.get_filename();
+		if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+			auto filename = chooser->get_filename();
 			try {
 				json j;
 				std::ifstream ifs(filename);

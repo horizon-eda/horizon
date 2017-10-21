@@ -120,18 +120,22 @@ namespace horizon {
 	}
 
 	void ImpSchematic::handle_export_pdf() {
-		Gtk::FileChooserDialog fc(*main_window, "Save PDF", Gtk::FILE_CHOOSER_ACTION_SAVE);
-		fc.set_do_overwrite_confirmation(true);
+		GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save PDF",
+			main_window->gobj(),
+			GTK_FILE_CHOOSER_ACTION_SAVE,
+			"_Open",
+			"_Cancel");
+		auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+		chooser->set_do_overwrite_confirmation(true);
 		if(last_pdf_filename.size()) {
-			fc.set_filename(last_pdf_filename);
+			chooser->set_filename(last_pdf_filename);
 		}
 		else {
-			fc.set_current_name("schematic.pdf");
+			chooser->set_current_name("schematic.pdf");
 		}
-		fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-		fc.add_button("_Save", Gtk::RESPONSE_ACCEPT);
-		if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-			std::string fn = fc.get_filename();
+
+		if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+			std::string fn = chooser->get_filename();
 			last_pdf_filename = fn;
 			export_pdf(fn, *core.c->get_schematic(), core.r);
 		}

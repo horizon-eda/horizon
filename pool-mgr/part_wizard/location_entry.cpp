@@ -24,13 +24,18 @@ namespace horizon {
 
 	void LocationEntry::handle_button() {
 		auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-		Gtk::FileChooserDialog fc(*top, "Save", Gtk::FILE_CHOOSER_ACTION_SAVE);
-		fc.set_do_overwrite_confirmation(true);
-		fc.set_filename(entry->get_text());
-		fc.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-		fc.add_button("Set", Gtk::RESPONSE_ACCEPT);
-		if(fc.run()==Gtk::RESPONSE_ACCEPT) {
-			entry->set_text(fc.get_filename());
+
+		GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save",
+			top->gobj(),
+			GTK_FILE_CHOOSER_ACTION_SAVE,
+			"Set",
+			"_Cancel");
+		auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+		chooser->set_do_overwrite_confirmation(true);
+		chooser->set_filename(entry->get_text());
+
+		if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+			entry->set_text(chooser->get_filename());
 		}
 	}
 
