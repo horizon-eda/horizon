@@ -79,6 +79,19 @@ int main(int argc, char *argv[]) {
 	options.parse(argc, argv);
 
 	auto pool_base_path = Glib::getenv("HORIZON_POOL");
+	#ifdef G_OS_WIN32
+	struct comma : std::numpunct<char> {
+		char do_decimal_point()   const { return ','; }  //comma
+	};
+	TCHAR szSep[8];
+	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDECIMAL, szSep, 8);
+	if(szSep[0] == ',') {
+		std::locale::global(std::locale(std::cout.getloc(), new comma));
+	}
+	#else
+	std::locale::global(std::locale(""));
+	#endif
+
 
 	std::unique_ptr<horizon::ImpBase> imp = nullptr;
 	if(mode_sch) {
