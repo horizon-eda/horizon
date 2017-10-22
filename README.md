@@ -10,7 +10,7 @@ of horizon's top features.
 - Sane library management
 - Unified editor for everything from symbol to board
 - Netlist-aware schematic editor
-- KiCad's awesome push'n shove router
+- KiCad's awesome interactive router
 - Lag- and glitch-free rendering
 - Rule-based DRC
 - Undo/redo
