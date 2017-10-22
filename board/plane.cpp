@@ -60,7 +60,7 @@ namespace horizon {
 
 	bool Plane::Fragment::contains(const Coordi &c) const {
 		ClipperLib::IntPoint pt(c.x, c.y);
-		if(ClipperLib::PointInPolygon(pt, paths.front())==1) { //point is within contour
+		if(ClipperLib::PointInPolygon(pt, paths.front())!=0) { //point is within or on contour
 			for(size_t i=1; i<paths.size(); i++) { //check all holes
 				if(ClipperLib::PointInPolygon(pt, paths[i]) == 1) { //point is in hole
 					return false;
