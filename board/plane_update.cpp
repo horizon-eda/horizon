@@ -1,5 +1,6 @@
 #include "board.hpp"
 #include "canvas/canvas_patch.hpp"
+#include "board_layers.hpp"
 
 namespace horizon {
 
@@ -125,7 +126,9 @@ namespace horizon {
 						if(pad->net == plane->net) {
 							Track::Connection conn(pkg, pad);
 							auto pos = conn.get_position();
-							if(frag.contains(pos)) {
+							auto ps_type = pad->padstack.type;
+							auto layer = plane->polygon->layer;
+							if(frag.contains(pos) && (ps_type == Padstack::Type::THROUGH || (ps_type == Padstack::Type::TOP && layer == BoardLayers::TOP_COPPER) || (ps_type == Padstack::Type::BOTTOM && layer == BoardLayers::BOTTOM_COPPER))) {
 								frag.orphan = false;
 								break;
 							}
