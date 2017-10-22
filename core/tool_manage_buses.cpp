@@ -17,6 +17,9 @@ namespace horizon {
 			case ToolID::EDIT_SCHEMATIC_PROPERTIES:
 				return core.c;
 
+			case ToolID::EDIT_STACKUP :
+				return core.b;
+
 			default:
 				return false;
 		}
@@ -39,6 +42,9 @@ namespace horizon {
 		}
 		else if(tool_id == ToolID::EDIT_SCHEMATIC_PROPERTIES) {
 			r = imp->dialogs.edit_schematic_properties(core.c->get_schematic());
+		}
+		else if(tool_id == ToolID::EDIT_STACKUP) {
+			r = imp->dialogs.edit_stackup(core.b->get_board());
 		}
 		if(r) {
 			core.r->commit();

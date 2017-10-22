@@ -69,11 +69,17 @@ namespace horizon {
 			canvas->prepare();
 		});
 
+		Gtk::Switch *substrate_switch;
+		x->get_widget("substrate_switch", substrate_switch);
+		substrate_switch->property_active().signal_changed().connect([this, substrate_switch]{
+			canvas->show_substrate = substrate_switch->get_active();
+			canvas->prepare();
+		});
+
 	}
 
 	void View3DWindow::update() {
 		canvas->patches.clear();
-		canvas->update(*board);
-		canvas->prepare();
+		canvas->update2(*board);
 	}
 }

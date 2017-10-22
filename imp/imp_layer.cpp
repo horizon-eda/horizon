@@ -24,6 +24,10 @@ namespace horizon {
 			j["grid_spacing"] = canvas->property_grid_spacing().get_value();
 		return j;
 		});
+		core.r->signal_rebuilt().connect([this] {
+			layer_box->update();
+		});
+
 		key_sequence_dialog->add_sequence("1", "Top layer");
 		key_sequence_dialog->add_sequence("2", "Bottom layer");
 		key_sequence_dialog->add_sequence("3...9", "inner layers");

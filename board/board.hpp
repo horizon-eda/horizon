@@ -76,6 +76,18 @@ namespace horizon {
 			BoardRules rules;
 			FabOutputSettings fab_output_settings;
 
+			class StackupLayer {
+				public:
+					StackupLayer(int l, const json &j);
+					StackupLayer(int l);
+					json serialize() const;
+					int layer;
+					uint64_t thickness = 0.035_mm;
+					uint64_t substrate_thickness = .1_mm;
+			};
+			std::map<int, StackupLayer> stackup;
+
+
 			ClipperLib::Paths obstacles;
 			ClipperLib::Path  track_path;
 

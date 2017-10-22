@@ -210,6 +210,9 @@ namespace horizon {
 			case ToolID::UPDATE_ALL_PLANES :
 				return std::make_unique<ToolUpdateAllPlanes>(this, tool_id);
 
+			case ToolID::EDIT_STACKUP:
+				return std::make_unique<ToolManageBuses>(this, tool_id);
+
 			default:
 				return nullptr;
 		}
@@ -409,6 +412,7 @@ namespace horizon {
 		if(history_current) {
 			history_current--;
 			history_load(history_current);
+			signal_rebuilt().emit();
 		}
 	}
 
@@ -418,6 +422,7 @@ namespace horizon {
 		std::cout<< "can redo"<<std::endl;
 		history_current++;
 		history_load(history_current);
+		signal_rebuilt().emit();
 	}
 
 	json Core::get_meta() {

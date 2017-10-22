@@ -2,8 +2,20 @@
 #include "part.hpp"
 #include <list>
 #include "util.hpp"
+#include "board_layers.hpp"
 
 namespace horizon {
+
+	Board::StackupLayer::StackupLayer(int l): layer(l) {}
+	Board::StackupLayer::StackupLayer(int l, const json &j):
+		layer(l), thickness(j.at("thickness")), substrate_thickness(j.at("substrate_thickness")) {}
+
+	json Board::StackupLayer::serialize() const {
+		json j;
+		j["thickness"] = thickness;
+		j["substrate_thickness"] = substrate_thickness;
+		return j;
+	}
 
 	Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadstackProvider &vpp):
 			uuid(uu),
@@ -11,6 +23,13 @@ namespace horizon {
 			name(j.at("name").get<std::string>()),
 			n_inner_layers(j.value("n_inner_layers", 0))
 		{
+		if(j.count("stackup")) {
+			const json &o = j["stackup"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				int l = std::stoi(it.key());
+				stackup.emplace(std::piecewise_construct, std::forward_as_tuple(l), std::forward_as_tuple(l, it.value()));
+			}
+		}
 		set_n_inner_layers(n_inner_layers);
 		if(j.count("polygons")) {
 			const json &o = j["polygons"];
@@ -151,6 +170,7 @@ namespace horizon {
 		warnings(brd.warnings),
 		rules(brd.rules),
 		fab_output_settings(brd.fab_output_settings),
+		stackup(brd.stackup),
 		n_inner_layers(brd.n_inner_layers)
 	{
 		update_refs();
@@ -176,6 +196,7 @@ namespace horizon {
 		warnings = brd.warnings;
 		rules = brd.rules;
 		fab_output_settings = brd.fab_output_settings;
+		stackup = brd.stackup;
 		update_refs();
 	}
 
@@ -240,10 +261,15 @@ namespace horizon {
 		{-150, {-150, "Bottom Assembly", {.5,.5,.5}, true}},
 		{-160, {-160, "Bottom Courtyard", {.5,.5,.5}}}
 		};
+		stackup.emplace(0, 0);
+		stackup.emplace(-100, -100);
+		stackup.at(-100).substrate_thickness=0;
 		for(unsigned int i = 0; i<n_inner_layers; i++) {
 			auto j = i+1;
 			layers.emplace(std::make_pair(-j, Layer(-j, "Inner "+std::to_string(j), {1,1,0}, false, true)));
+			stackup.emplace(-j, -j);
 		}
+		map_erase_if(stackup, [this](const auto &x){return layers.count(x.first)==0;});
 	}
 
 	static void flip_package_layer(int &layer) {
@@ -623,6 +649,10 @@ namespace horizon {
 		j["planes"] = json::object();
 		for(const auto &it: planes) {
 			j["planes"][(std::string)it.first] = it.second.serialize();
+		}
+		j["stackup"] = json::object();
+		for(const auto &it: stackup) {
+			j["stackup"][std::to_string(it.first)] = it.second.serialize();
 		}
 		return j;
 	}

@@ -190,6 +190,7 @@ SRC_IMP = \
 	dialogs/pool_browser_dialog.cpp\
 	dialogs/schematic_properties.cpp\
 	dialogs/edit_plane.cpp\
+	dialogs/edit_stackup.cpp\
 	util/sort_controller.cpp\
 	core/core_symbol.cpp\
 	core/core_schematic.cpp\

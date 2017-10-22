@@ -81,6 +81,8 @@ namespace horizon {
 
 		add_tool_button(ToolID::UPDATE_ALL_PLANES, "Update Planes");
 		add_tool_button(ToolID::MAP_PACKAGE, "Place package");
+		add_tool_button(ToolID::EDIT_STACKUP, "Stackup...");
+
 
 		/*auto test_button = Gtk::manage(new Gtk::Button("Test"));
 		main_window->top_panel->pack_start(*test_button, false, false, 0);

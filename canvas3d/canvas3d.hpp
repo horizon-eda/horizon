@@ -27,8 +27,10 @@ namespace horizon {
 			Color solder_mask_color;
 			bool show_solder_mask = true;
 			bool show_silkscreen = true;
+			bool show_substrate = true;
 
 			void request_push();
+			void update2(const class Board &brd);
 			void prepare();
 
 			class Layer3D {
@@ -87,6 +89,9 @@ namespace horizon {
 
 			void prepare_layer(int layer);
 			void prepare_soldermask(int layer);
+			float get_layer_offset(int layer);
+			const class Board *brd = nullptr;
+			void add_path(int layer, const ClipperLib::Path &path);
 
 
 			std::unordered_map<int, Layer3D> layers;

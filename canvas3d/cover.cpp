@@ -90,7 +90,7 @@ namespace horizon {
 			glEnable (GL_BLEND);
 		auto &co = ca->layers[layer].color;
 		glUniform4f(layer_color_loc, co.r, co.g, co.b, ca->layers[layer].alpha);
-		glUniform1f(layer_offset_loc, ca->layers[layer].offset+ca->layers[layer].explode_mul*ca->explode);
+		glUniform1f(layer_offset_loc, ca->get_layer_offset(layer));
 		glUniform1f(layer_thickness_loc, ca->layers[layer].thickness);
 		glDrawArrays (GL_TRIANGLES, layer_offsets[layer], ca->layers[layer].tris.size());
 		glDisable (GL_BLEND);

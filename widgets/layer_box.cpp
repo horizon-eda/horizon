@@ -175,20 +175,39 @@ namespace horizon {
 	void LayerBox::update() {
 		auto layers = lp->get_layers();
 		Gtk::TreeModel::Row row;
-		store->freeze_notify();
-		store->clear();
+		std::set<int> layers_from_lp;
+		std::set<int> layers_from_store;
 		for(const auto &it: layers) {
-			row = *(store->append());
+			layers_from_lp.emplace(it.first);
+		}
 
-			row[list_columns.name] = it.second.name;
-			row[list_columns.index] = it.first;
-			row[list_columns.is_work] = (it.first==p_property_work_layer);
-			row[list_columns.visible] = true;
-			const auto & co = it.second.color;
-			auto c = Gdk::RGBA();
-			c.set_rgba(co.r, co.g, co.b);
-			row[list_columns.color] = c;
-			row[list_columns.display_mode] = LayerDisplay::Mode::FILL;
+		store->freeze_notify();
+		auto ch = store->children();
+		for(auto it = ch.begin(); it!=ch.end();) {
+			row = *it;
+			if(layers_from_lp.count(row[list_columns.index])==0) {
+				store->erase(it++);
+			}
+			else {
+				layers_from_store.insert(row[list_columns.index]);
+				it++;
+			}
+		}
+
+		for(const auto &it: layers) {
+			if(layers_from_store.count(it.first) == 0) {
+				row = *(store->append());
+
+				row[list_columns.name] = it.second.name;
+				row[list_columns.index] = it.first;
+				row[list_columns.is_work] = (it.first==p_property_work_layer);
+				row[list_columns.visible] = true;
+				const auto & co = it.second.color;
+				auto c = Gdk::RGBA();
+				c.set_rgba(co.r, co.g, co.b);
+				row[list_columns.color] = c;
+				row[list_columns.display_mode] = LayerDisplay::Mode::FILL;
+			}
 		}
 		store->thaw_notify();
 	}

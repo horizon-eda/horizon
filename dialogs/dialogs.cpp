@@ -27,6 +27,7 @@
 #include "schematic_properties.hpp"
 #include "edit_via.hpp"
 #include "edit_plane.hpp"
+#include "edit_stackup.hpp"
 #include "widgets/spin_button_dim.hpp"
 
 namespace horizon {
@@ -297,6 +298,11 @@ namespace horizon {
 
 	bool Dialogs::edit_plane(class Plane *plane, class Board *brd, class Block *block) {
 		EditPlaneDialog dia(parent, plane, brd, block);
+		return dia.run()==Gtk::RESPONSE_OK;
+	}
+
+	bool Dialogs::edit_stackup(class Board *brd) {
+		EditStackupDialog dia(parent, brd);
 		return dia.run()==Gtk::RESPONSE_OK;
 	}
 

@@ -29,8 +29,12 @@ namespace PNS {
 	int PNS_HORIZON_IFACE::layer_from_router(int l) {
 		int lo = 0;
 		switch(l) {
-			case F_Cu: lo=horizon::BoardLayers::TOP_COPPER; break;
-			case B_Cu: lo=horizon::BoardLayers::BOTTOM_COPPER; break;
+			case F_Cu:     lo=horizon::BoardLayers::TOP_COPPER; break;
+			case B_Cu:     lo=horizon::BoardLayers::BOTTOM_COPPER; break;
+			case In1_Cu:   lo=horizon::BoardLayers::IN1_COPPER; break;
+			case In2_Cu:   lo=horizon::BoardLayers::IN2_COPPER; break;
+			case In3_Cu:   lo=horizon::BoardLayers::IN3_COPPER; break;
+			case In4_Cu:   lo=horizon::BoardLayers::IN4_COPPER; break;
 			default:
 				assert(false);
 		}

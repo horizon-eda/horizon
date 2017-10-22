@@ -10,6 +10,7 @@
 #include "hole.hpp"
 #include "canvas/poly2tri/poly2tri.h"
 #include "board_layers.hpp"
+#include "board.hpp"
 
 namespace horizon {
 
@@ -107,6 +108,13 @@ namespace horizon {
 		GL_CHECK_ERROR
 	}
 
+	void Canvas3D::add_path(int layer, const ClipperLib::Path &path) {
+		for(size_t i = 0; i<path.size(); i++) {
+			layers[layer].walls.emplace_back(path[i].X, path[i].Y);
+			layers[layer].walls.emplace_back(path[(i+1)%path.size()].X, path[(i+1)%path.size()].Y);
+		}
+	}
+
 	void Canvas3D::polynode_to_tris(const ClipperLib::PolyNode *node, int layer) {
 		assert(node->IsHole()==false);
 
@@ -142,17 +150,10 @@ namespace horizon {
 			}
 		}
 
-		auto add_path = [this, layer](const ClipperLib::Path &path) {
-			for(size_t i = 0; i<path.size(); i++) {
-				layers[layer].walls.emplace_back(path[i].X, path[i].Y);
-				layers[layer].walls.emplace_back(path[(i+1)%path.size()].X, path[(i+1)%path.size()].Y);
-			}
-		};
-
 		layers[layer].walls.reserve(pts_total);
-		add_path(node->Contour);
+		add_path(layer, node->Contour);
 		for(auto child: node->Childs) {
-			add_path(child->Contour);
+			add_path(layer, child->Contour);
 		}
 
 		for(auto child: node->Childs) {
@@ -163,31 +164,69 @@ namespace horizon {
 		}
 	}
 
+	void Canvas3D::update2(const Board &b) {
+		brd = &b;
+		update(*brd);
+		prepare();
+	}
+
 	void Canvas3D::prepare() {
 		layers.clear();
 
-		float board_thickness = 2;
+		float board_thickness = -((float)brd->stackup.at(0).thickness);
+		int n_inner_layers = brd->get_n_inner_layers();
+		for(const auto &it: brd->stackup) {
+			board_thickness += it.second.thickness + it.second.substrate_thickness;
+		}
+		board_thickness /= 1e6;
 
 		int layer = BoardLayers::TOP_COPPER;
 		layers[layer].offset=0;
-		layers[layer].thickness=0.035;
+		layers[layer].thickness = brd->stackup.at(0).thickness/1e6;
 		layers[layer].color = {1, .8, 0};
 		layers[layer].explode_mul=1;
 		prepare_layer(layer);
 
 		layer = BoardLayers::BOTTOM_COPPER;
 		layers[layer].offset=-board_thickness;
-		layers[layer].thickness=-0.035;
+		layers[layer].thickness = +(brd->stackup.at(layer).thickness/1e6);
 		layers[layer].color = {1, .8, 0};
-		layers[layer].explode_mul=-1;
+		layers[layer].explode_mul=-2*n_inner_layers-1;
 		prepare_layer(layer);
 
-		layer = BoardLayers::L_OUTLINE;
-		layers[layer].offset=0;
-		layers[layer].thickness=-board_thickness;
-		layers[layer].explode_mul=0;
-		layers[layer].color = {.2, .15, 0};
-		prepare_layer(layer);
+		{
+			float offset = -(brd->stackup.at(0).substrate_thickness/1e6);
+			for(int i = 0; i<n_inner_layers; i++) {
+				layer = -i-1;
+				layers[layer].offset=offset;
+				layers[layer].thickness=-(brd->stackup.at(layer).thickness/1e6);
+				layers[layer].color = {1, .8, 0};
+				layers[layer].explode_mul=-1-2*i;
+				offset -= brd->stackup.at(layer).thickness/1e6+brd->stackup.at(layer).substrate_thickness/1e6;
+				prepare_layer(layer);
+			}
+		}
+
+		if(show_substrate) {
+			layer = BoardLayers::L_OUTLINE;
+			layers[layer].offset=0;
+			layers[layer].thickness=-(brd->stackup.at(0).substrate_thickness/1e6);
+			layers[layer].explode_mul=0;
+			layers[layer].color = {.2, .15, 0};
+			prepare_layer(layer);
+
+			float offset = -(brd->stackup.at(0).substrate_thickness/1e6);
+			for(int i = 0; i<n_inner_layers; i++) {
+				int l = 10000+i;
+				offset -= brd->stackup.at(-i-1).thickness/1e6;
+				layers[l] = layers[layer];
+				layers[l].offset = offset;
+				layers[l].thickness = -(brd->stackup.at(-i-1).substrate_thickness/1e6);
+				layers[l].explode_mul = -2-2*i;
+
+				offset -= brd->stackup.at(-i-1).substrate_thickness/1e6;
+			}
+		}
 
 		if(show_solder_mask) {
 			layer = BoardLayers::TOP_MASK;
@@ -203,7 +242,7 @@ namespace horizon {
 			layers[layer].thickness=0.035;
 			layers[layer].color = solder_mask_color;
 			layers[layer].alpha = .8;
-			layers[layer].explode_mul=-2;
+			layers[layer].explode_mul=-2*n_inner_layers-2;
 			prepare_soldermask(layer);
 		}
 
@@ -219,9 +258,27 @@ namespace horizon {
 			layers[layer].offset=-board_thickness-.07;
 			layers[layer].thickness=-0.035;
 			layers[layer].color = {1, 1, 1};
-			layers[layer].explode_mul=-3;
+			layers[layer].explode_mul=-2*n_inner_layers-3;
 			prepare_layer(layer);
 		}
+
+		layer = 20000; //pth holes
+		layers[layer].offset = 0;
+		layers[layer].thickness = -board_thickness;
+		layers[layer].color = {1, .8, 0};
+		for(const auto &it: patches) {
+			if(it.first.layer == 10000 && it.first.type == PatchType::HOLE_PTH) {
+				ClipperLib::ClipperOffset ofs;
+				ofs.AddPaths(it.second, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+				ClipperLib::Paths res;
+				ofs.Execute(res, -.001_mm);
+				for(const auto &path: res) {
+					add_path(layer, path);
+				}
+			}
+		}
+
+
 
 		bbox.first = glm::vec3();
 		bbox.second = glm::vec3();
@@ -286,6 +343,10 @@ namespace horizon {
 		}
 	}
 
+	float Canvas3D::get_layer_offset(int layer) {
+		return layers[layer].offset+layers[layer].explode_mul*explode;
+	}
+
 
 	bool Canvas3D::on_render(const Glib::RefPtr<Gdk::GLContext> &context) {
 		if(needs_push) {
@@ -297,6 +358,9 @@ namespace horizon {
 		glClearDepth(10);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		GL_CHECK_ERROR
+
+		layers[20000].offset = get_layer_offset(BoardLayers::TOP_COPPER);
+		layers[20000].thickness = -(get_layer_offset(BoardLayers::TOP_COPPER)-get_layer_offset(BoardLayers::BOTTOM_COPPER));
 
 		float r = cam_distance;
 		float phi = glm::radians(cam_azimuth);
@@ -316,14 +380,20 @@ namespace horizon {
 			glm::vec3(0,0,1)
 		);
 
-		float cam_dist_min = std::max(std::abs(cam_pos.z)-(10+explode*3), 1.0f);
+		float cam_dist_min = std::max(std::abs(cam_pos.z)-(10+explode*(brd->get_n_inner_layers()*2+3)), 1.0f);
 		float cam_dist_max = 0;
 
-		std::array<glm::vec3, 4> bbs = {
-			glm::vec3(bbox.first.x, bbox.first.y, 0),
-			glm::vec3(bbox.first.x, bbox.second.y, 0),
-			glm::vec3(bbox.second.x, bbox.first.y, 0),
-			glm::vec3(bbox.second.x, bbox.second.y, 0)
+		float zmin = -10-explode*(brd->get_n_inner_layers()*2+3);
+		float zmax = 10+explode*2;
+		std::array<glm::vec3, 8> bbs = {
+			glm::vec3(bbox.first.x, bbox.first.y, zmin),
+			glm::vec3(bbox.first.x, bbox.second.y, zmin),
+			glm::vec3(bbox.second.x, bbox.first.y, zmin),
+			glm::vec3(bbox.second.x, bbox.second.y, zmin),
+			glm::vec3(bbox.first.x, bbox.first.y, zmax),
+			glm::vec3(bbox.first.x, bbox.second.y, zmax),
+			glm::vec3(bbox.second.x, bbox.first.y, zmax),
+			glm::vec3(bbox.second.x, bbox.second.y, zmax)
 		};
 
 		for(const auto &bb: bbs) {

@@ -198,7 +198,11 @@ namespace horizon {
 				ts.push_back(std::make_unique<TokenInt>(std::stoi(ma.fetch(1))));
 			}
 			else if(regex_dim->match(token, ma)) {
-				ts.push_back(std::make_unique<TokenInt>(1e6*std::stod(ma.fetch(1))));
+				double f;
+				std::istringstream istr(ma.fetch(1));
+				istr.imbue(std::locale("C"));
+				istr >> f;
+				ts.push_back(std::make_unique<TokenInt>(1e6*f));
 			}
 			else if(regex_str->match(token, ma) && !arg_mode) {
 				tokens.push_back(std::make_unique<TokenCommand>(ma.fetch(1)));

@@ -59,5 +59,6 @@ namespace horizon {
 		{ToolID::UPDATE_PLANE, {"Update Plane"}},
 		{ToolID::UPDATE_ALL_PLANES, {"Update all Planes"}},
 		{ToolID::CLEAR_ALL_PLANES, {"Clear all Planes"}},
+		{ToolID::EDIT_STACKUP, {"Edit Stackup"}},
 	};
 }
