@@ -3,9 +3,7 @@
 #include "dxflib/dl_creationadapter.h"
 #include "dxflib/dl_dxf.h"
 
-
 namespace horizon {
-
 	static int64_t fix(int64_t x) {
 		int sign = x<0?-1:1;
 		x = llabs(x);

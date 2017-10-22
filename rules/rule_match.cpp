@@ -87,5 +87,6 @@ namespace horizon {
 					return "Net name regex";
 			}
 		}
+		return "";
 	}
 }

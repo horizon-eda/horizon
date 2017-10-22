@@ -1550,7 +1550,7 @@ struct DXFLIB_EXPORT DL_HatchEdgeData {
     /**
      * Edge type. 1=line, 2=arc, 3=elliptic arc, 4=spline.
      */
-    int type;
+    int type = 1;
 
     // line edges:
 
@@ -1564,47 +1564,47 @@ struct DXFLIB_EXPORT DL_HatchEdgeData {
     double y2;
 
     /*! Center point of arc or ellipse arc (X). */
-    double cx;
+    double cx = 0;
     /*! Center point of arc or ellipse arc (Y). */
-    double cy;
+    double cy = 0;
     /*! Arc radius. */
-    double radius;
+    double radius = 0;
     /*! Start angle of arc or ellipse arc. */
-    double angle1;
+    double angle1 = 0;
     /*! End angle of arc or ellipse arc. */
-    double angle2;
+    double angle2 = 0;
     /*! Counterclockwise flag for arc or ellipse arc. */
-    bool ccw;
+    bool ccw = 0;
 
     /*! Major axis end point (X). */
-    double mx;
+    double mx = 0;
     /*! Major axis end point (Y). */
-    double my;
+    double my = 0;
     /*! Axis ratio */
-    double ratio;
+    double ratio = 0;
 
 
     /*! Spline degree */
-    unsigned int degree;
-    bool rational;
-    bool periodic;
+    unsigned int degree = 0;
+    bool rational = 0;
+    bool periodic = 0;
     /*! Number of knots. */
-    unsigned int nKnots;
+    unsigned int nKnots = 0;
     /*! Number of control points. */
-    unsigned int nControl;
+    unsigned int nControl = 0;
     /*! Number of fit points. */
-    unsigned int nFit;
+    unsigned int nFit = 0;
 
     std::vector<std::vector<double> > controlPoints;
     std::vector<double> knots;
     std::vector<double> weights;
     std::vector<std::vector<double> > fitPoints;
 
-    double startTangentX;
-    double startTangentY;
+    double startTangentX = 0;
+    double startTangentY = 0;
 
-    double endTangentX;
-    double endTangentY;
+    double endTangentX = 0;
+    double endTangentY = 0;
 
     /** Polyline boundary vertices (x y [bulge])*/
     std::vector<std::vector<double> > vertices;
