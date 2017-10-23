@@ -52,7 +52,7 @@ SRC_COMMON = \
 	board/rule_clearance_copper.cpp\
 	board/rule_parameters.cpp\
 	board/rule_via.cpp\
-	board/rule_clearance_npth_copper.cpp\
+	board/rule_clearance_copper_non_copper.cpp\
 	board/rule_plane.cpp\
 	board/airwires.cpp\
 	board/fab_output_settings.cpp\
@@ -249,7 +249,7 @@ SRC_IMP = \
 	imp/rules/rule_editor_clearance_copper.cpp\
 	imp/rules/rule_editor_single_pin_net.cpp\
 	imp/rules/rule_editor_via.cpp\
-	imp/rules/rule_editor_clearance_npth_copper.cpp\
+	imp/rules/rule_editor_clearance_copper_non_copper.cpp\
 	imp/rules/rule_editor_plane.cpp\
 	rules/rules_with_core.cpp\
 	rules/cache.cpp\

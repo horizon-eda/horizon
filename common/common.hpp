@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <math.h>
 #include <array>
+#include "lut.hpp"
 
 namespace horizon {
 	enum class Orientation {LEFT, RIGHT, UP, DOWN};
@@ -18,7 +19,19 @@ namespace horizon {
 		HOLE, PAD, BOARD_PACKAGE, TRACK, VIA, SHAPE, BOARD, SCHEMATIC,
 		UNIT, ENTITY, SYMBOL, PACKAGE, PADSTACK, PART, PLANE
 	};
-	enum class PatchType {OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH};
+	enum class PatchType {OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH, BOARD_EDGE};
+
+	static const LutEnumStr<PatchType> patch_type_lut = {
+		{"other",      PatchType::OTHER},
+		{"pad",        PatchType::PAD},
+		{"pad_th",     PatchType::PAD_TH},
+		{"plane",      PatchType::PLANE},
+		{"track",      PatchType::TRACK},
+		{"via",        PatchType::VIA},
+		{"hole_pth",   PatchType::HOLE_PTH},
+		{"hole_npth",  PatchType::HOLE_NPTH},
+		{"board_edge", PatchType::BOARD_EDGE},
+	};
 
 	/**
 	 * Your typical coordinate class.

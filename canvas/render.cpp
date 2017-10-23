@@ -463,7 +463,6 @@ namespace horizon {
 
 		bool draw_tris = display_mode!=LayerDisplay::Mode::OUTLINE;
 		bool draw_outline = display_mode != LayerDisplay::Mode::FILL_ONLY;
-		bool draw_polygon_outline = draw_outline;
 
 
 		if(auto plane = dynamic_cast<Plane*>(poly.usage.ptr)) {
@@ -512,11 +511,8 @@ namespace horizon {
 							draw_line(Coordf(c0.X, c0.Y), Coordf(c1.X, c1.Y), co, poly.layer);
 						}
 					}
-					draw_polygon_outline = false;
 				}
 			}
-			if(plane->fragments.size()==0)
-				draw_polygon_outline = true; //draw outline anyhow
 
 		}
 		else { //normal polygon
@@ -543,7 +539,7 @@ namespace horizon {
 				}
 			}
 		}
-		if(draw_polygon_outline) {
+		if(draw_outline) {
 			for(size_t i = 0; i<poly.vertices.size(); i++) {
 				draw_line(poly.vertices[i].position, poly.vertices[(i+1)%poly.vertices.size()].position, ColorP::FROM_LAYER, poly.layer);
 			}
@@ -902,7 +898,9 @@ namespace horizon {
 		selectables.append(via.uuid, ObjectType::VIA, {0,0}, bb.first, bb.second);
 		img_net(via.junction->net);
 		img_patch_type(PatchType::VIA);
+		set_oid(SelectableRef(via.uuid, ObjectType::VIA));
 		render(via.padstack, false);
+		unset_oid();
 		img_net(nullptr);
 		img_patch_type(PatchType::OTHER);
 		transform_restore();

@@ -72,6 +72,7 @@ namespace horizon {
 		router->SyncWorld();
 
 		PNS::ROUTING_SETTINGS settings;
+
 		PNS::SIZES_SETTINGS sizes_settings;
 
 		router->LoadSettings(settings);
@@ -372,6 +373,9 @@ namespace horizon {
 							m_frame->GetScreen()->m_Route_Layer_BOTTOM );
 		*/
 		tool->router->UpdateSizes( sizes );
+		PNS::ROUTING_SETTINGS settings(tool->router->Settings());
+		settings.SetMode(tool->shove?PNS::RM_Shove:PNS::RM_Walkaround);
+		tool->router->LoadSettings(settings);
 
 		if( !tool->router->StartRouting( m_startSnapPoint, m_startItem, routingLayer ) )
 		{
@@ -433,7 +437,12 @@ namespace horizon {
 			if(args.type == ToolEventType::MOVE) {
 				wrapper->updateStartItem(args);
 			}
-			if(args.type == ToolEventType::CLICK) {
+			else if(args.type == ToolEventType::KEY) {
+				if(args.key == GDK_KEY_s) {
+					shove ^= true;
+				}
+			}
+			else if(args.type == ToolEventType::CLICK) {
 				if(args.button == 1) {
 					state = State::ROUTING;
 					if(!wrapper->prepareInteractive()) {
@@ -451,7 +460,7 @@ namespace horizon {
 				wrapper->updateEndItem( args );
 				router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
 			}
-			if(args.type == ToolEventType::CLICK) {
+			else if(args.type == ToolEventType::CLICK) {
 				if(args.button == 1) {
 					  wrapper->updateEndItem( args );
 					  bool needLayerSwitch = router->IsPlacingVia();
@@ -566,13 +575,23 @@ namespace horizon {
 			ss<<"</i>";
 		}
 		else {
-			ss << "<b>LMB:</b>select starting junction/pad <b>RMB:</b>cancel ";
+			ss << "<b>LMB:</b>select starting junction/pad <b>RMB:</b>cancel <b>s:</b>shove/walkaround ";
+			ss << "<i>";
+			ss << "Mode: ";
+			if(shove)
+				ss << "shove";
+			else
+				ss << "walkaround";
 			if(wrapper->m_startItem) {
 				auto nc = wrapper->m_startItem->Net();
 				auto net = iface->get_net_for_code(nc);
+
 				if(net)
-					ss << "<i>Current Net: " << net->name << "</i>";
+					ss << " Current Net: " << net->name;;
+
+
 			}
+			ss << "</i>";
 		}
 		imp->tool_bar_set_tip(ss.str());
 	}

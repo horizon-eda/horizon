@@ -13,6 +13,7 @@ namespace horizon {
 	class Junction;
 	class Net;
 	class BoardRules;
+	class Polygon;
 	class ViaPadstackProvider;
 	template<typename T> class Coord;
 }
@@ -21,6 +22,7 @@ namespace horizon {
 namespace PNS {
 	class PNS_HORIZON_PARENT_ITEM {
 		public:
+			PNS_HORIZON_PARENT_ITEM() {}
 			PNS_HORIZON_PARENT_ITEM(const horizon::Track *tr): track(tr) {}
 			PNS_HORIZON_PARENT_ITEM(const horizon::Via *v): via(v) {}
 			PNS_HORIZON_PARENT_ITEM(const horizon::BoardPackage *pkg, const horizon::Pad *p): package(pkg), pad(p) {}
@@ -95,6 +97,7 @@ namespace PNS {
 			std::unique_ptr<PNS::SOLID>   syncPad(const horizon::BoardPackage *pkg, const horizon::Pad *pad);
 			std::unique_ptr<PNS::SEGMENT> syncTrack(const horizon::Track *track);
 			std::unique_ptr<PNS::VIA>     syncVia(const horizon::Via *via);
+			void syncOutline(const horizon::Polygon *poly, PNS::NODE *aWorld);
 			std::map<horizon::UUID, int> net_code_map;
 			std::map<int, horizon::UUID> net_code_map_r;
 			int net_code_max = 0;

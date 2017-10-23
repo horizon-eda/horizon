@@ -33,6 +33,7 @@ namespace horizon {
 
 			Board *board = nullptr;
 			class BoardRules *rules;
+			bool shove = false;
 
 			void update_tip();
 	};

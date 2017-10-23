@@ -85,7 +85,7 @@ namespace horizon {
 					}
 				}
 				else { //npth
-					clearance = rules.get_clearance_npth_copper(plane->net, poly.layer);
+					clearance = rules.get_clearance_copper_non_copper(plane->net, poly.layer)->get_clearance(PatchType::PLANE, PatchType::HOLE_NPTH);
 				}
 				double expand = clearance+plane->settings.min_width/2+twiddle;
 
@@ -95,6 +95,43 @@ namespace horizon {
 		}
 		ClipperLib::Paths out; //the plane before expanding by min_width
 		cl_plane.Execute(ClipperLib::ctDifference, out, ClipperLib::pftNonZero); //do cutouts
+
+
+		//do board outline clearance
+		CanvasPatch::PatchKey outline_key;
+		outline_key.layer = BoardLayers::L_OUTLINE;
+		outline_key.net = UUID();
+		outline_key.type = PatchType::OTHER;
+		if(ca->patches.count(outline_key) != 0) {
+			auto &patch_outline = ca->patches.at(outline_key);
+			//cleanup board outline so that it conforms to nonzero filling rule
+			ClipperLib::Paths board_outline;
+			{
+				ClipperLib::Clipper cl_outline;
+				cl_outline.AddPaths(patch_outline, ClipperLib::ptSubject, true);
+				cl_outline.Execute(ClipperLib::ctUnion, board_outline, ClipperLib::pftEvenOdd);
+			}
+
+			//board outline contracted by clearance
+			ClipperLib::Paths paths_ofs;
+			{
+				ClipperLib::ClipperOffset ofs;
+				ofs.ArcTolerance = 10e3;
+				ofs.AddPaths(board_outline, jt, ClipperLib::etClosedPolygon);
+				auto clearance = rules.get_clearance_copper_non_copper(plane->net, poly.layer)->get_clearance(PatchType::PLANE, PatchType::BOARD_EDGE);
+				ofs.Execute(paths_ofs, -1.0*(clearance+plane->settings.min_width/2+twiddle*2));
+			}
+
+			//intersect polygon with contracted board outline
+			ClipperLib::Paths temp;
+			{
+				ClipperLib::Clipper isect;
+				isect.AddPaths(paths_ofs, ClipperLib::ptClip, true);
+				isect.AddPaths(out, ClipperLib::ptSubject, true);
+				isect.Execute(ClipperLib::ctIntersection, temp, ClipperLib::pftNonZero);
+			}
+			out = temp;
+		}
 
 		ClipperLib::PolyTree tree;
 		ClipperLib::ClipperOffset ofs;
@@ -159,6 +196,7 @@ namespace horizon {
 		ca.update(*this);
 		for(auto plane: planes_sorted) {
 			update_plane(plane, &ca);
+			ca.patches.clear();
 			ca.update(*this); //update so that new plane sees other planes
 		}
 	}

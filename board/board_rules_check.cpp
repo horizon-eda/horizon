@@ -4,6 +4,7 @@
 #include "rules/cache.hpp"
 #include "util/accumulator.hpp"
 #include "common/patch_type_names.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 	RulesCheckResult BoardRules::check_track_width(const Board *brd) {
@@ -198,7 +199,7 @@ namespace horizon {
 		return r;
 	}
 
-	RulesCheckResult BoardRules::check_clearance_npth_copper(const Board *brd, RulesCheckCache &cache) {
+	RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board *brd, RulesCheckCache &cache) {
 		RulesCheckResult r;
 		r.level = RulesCheckErrorLevel::PASS;
 		auto c = dynamic_cast<RulesCheckCacheBoardImage*>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
@@ -217,7 +218,7 @@ namespace horizon {
 			if(brd->get_layers().count(it.first.layer) && brd->get_layers().at(it.first.layer).copper) { //need to check copper layer
 				Net *net = it.first.net?&brd->block->nets.at(it.first.net):nullptr;
 
-				auto clearance = get_clearance_npth_copper(net, it.first.layer);
+				auto clearance = get_clearance_copper_non_copper(net, it.first.layer)->get_clearance(it.first.type, PatchType::HOLE_NPTH);
 
 				//expand npth patch by clearance
 				ClipperLib::ClipperOffset ofs;
@@ -251,6 +252,64 @@ namespace horizon {
 			}
 		}
 		r.update();
+
+		CanvasPatch::PatchKey outline_key;
+		outline_key.layer = BoardLayers::L_OUTLINE;
+		outline_key.net = UUID();
+		outline_key.type = PatchType::OTHER;
+		if(patches.count(outline_key) == 0) {
+			return r;
+		}
+		auto &patch_outline = patches.at(outline_key);
+
+		//cleanup board outline so that it conforms to nonzero filling rule
+		ClipperLib::Paths board_outline;
+		{
+			ClipperLib::Clipper cl_outline;
+			cl_outline.AddPaths(patch_outline, ClipperLib::ptSubject, true);
+			cl_outline.Execute(ClipperLib::ctUnion, board_outline, ClipperLib::pftEvenOdd);
+		}
+
+		for(const auto &it: patches) {
+			if(brd->get_layers().count(it.first.layer) && brd->get_layers().at(it.first.layer).copper) { //need to check copper layer
+				Net *net = it.first.net?&brd->block->nets.at(it.first.net):nullptr;
+
+				auto clearance = get_clearance_copper_non_copper(net, it.first.layer)->get_clearance(it.first.type, PatchType::BOARD_EDGE);
+
+				//contract board outline patch by clearance
+				ClipperLib::ClipperOffset ofs;
+				ofs.ArcTolerance = 10e3;
+				ofs.AddPaths(board_outline, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+				ClipperLib::Paths paths_ofs;
+				ofs.Execute(paths_ofs, clearance*-1.0);
+
+				//subtract board outline from patch
+				ClipperLib::Clipper clipper;
+				clipper.AddPaths(paths_ofs, ClipperLib::ptClip, true);
+				clipper.AddPaths(it.second, ClipperLib::ptSubject, true);
+				ClipperLib::Paths errors;
+				clipper.Execute(ClipperLib::ctDifference, errors, ClipperLib::pftNonZero, ClipperLib::pftEvenOdd);
+
+				//no remaining: no clearance violation
+				if(errors.size() > 0) {
+					for(const auto &ite: errors) {
+						r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+						auto &e = r.errors.back();
+						e.has_location = true;
+						Accumulator<Coordi> acc;
+						for(const auto &ite2: ite) {
+							acc.accumulate({ite2.X, ite2.Y});
+						}
+						e.location = acc.get();
+						e.comment = patch_type_names.at(it.first.type) + "(" + (net?net->name:"") + ") near Board edge";
+						e.error_polygons = {ite};
+					}
+				}
+			}
+		}
+
+
+		r.update();
 		return r;
 	}
 
@@ -265,8 +324,8 @@ namespace horizon {
 			case RuleID::CLEARANCE_COPPER :
 				return BoardRules::check_clearance_copper(brd, cache);
 
-			case RuleID::CLEARANCE_NPTH_COPPER :
-				return BoardRules::check_clearance_npth_copper(brd, cache);
+			case RuleID::CLEARANCE_COPPER_NON_COPPER :
+				return BoardRules::check_clearance_copper_non_copper(brd, cache);
 
 			default:
 				return RulesCheckResult();

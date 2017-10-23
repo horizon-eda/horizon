@@ -8,5 +8,7 @@ namespace horizon {
 		{PatchType::PLANE, "Plane"},
 		{PatchType::VIA, "Via"},
 		{PatchType::OTHER, "Other"},
+		{PatchType::HOLE_NPTH, "NPTH hole"},
+		{PatchType::BOARD_EDGE, "Board edge"},
 	};
 }

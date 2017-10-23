@@ -10,7 +10,7 @@
 #include "rule_editor_clearance_copper.hpp"
 #include "rule_editor_single_pin_net.hpp"
 #include "rule_editor_via.hpp"
-#include "rule_editor_clearance_npth_copper.hpp"
+#include "rule_editor_clearance_copper_non_copper.hpp"
 #include "rule_editor_plane.hpp"
 #include "widgets/cell_renderer_layer_display.hpp"
 #include "rules/rules_with_core.hpp"
@@ -80,6 +80,13 @@ namespace horizon {
 		x->get_widget("apply_button", apply_button);
 		x->get_widget("stack", stack);
 		sg_order = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
+
+		auto cssp = Gtk::CssProvider::create();
+		cssp->load_from_data(" \
+				.imp-rule-editor-tiny-button-row {min-width:0px; padding:0px;}\
+				.imp-rule-editor-tiny-button-column {min-height:0px; padding-bottom:0px; padding-top:0px;}\
+		");
+		Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 700);
 
 		lb_rules->signal_row_selected().connect([this](Gtk::ListBoxRow *row){rule_selected(dynamic_cast<RuleLabel*>(row->get_child())->id);});
 		for(const auto id: rules->get_rule_ids()) {
@@ -309,8 +316,8 @@ namespace horizon {
 				e = new RuleEditorVia(r, core);
 			break;
 
-			case RuleID::CLEARANCE_NPTH_COPPER :
-				e = new RuleEditorClearanceNPTHCopper(r, core);
+			case RuleID::CLEARANCE_COPPER_NON_COPPER :
+				e = new RuleEditorClearanceCopperNonCopper(r, core);
 			break;
 
 			case RuleID::PLANE :

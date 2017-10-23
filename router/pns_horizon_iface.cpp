@@ -100,6 +100,8 @@ namespace PNS {
 		return horizon::PatchType::OTHER;
 	}
 
+	static const PNS_HORIZON_PARENT_ITEM parent_dummy_outline;
+
 	int PNS_HORIZON_RULE_RESOLVER::Clearance( const PNS::ITEM* aA, const PNS::ITEM* aB ) const {
 		auto net_a = m_iface->get_net_for_code(aA->Net());
 		auto net_b = m_iface->get_net_for_code(aB->Net());
@@ -119,6 +121,21 @@ namespace PNS {
 		if(parent_b && parent_b->pad && parent_b->pad->padstack.type == horizon::Padstack::Type::THROUGH)
 			pt_b = horizon::PatchType::PAD_TH;
 
+		if(parent_a == &parent_dummy_outline || parent_b == &parent_dummy_outline) { //one is the board edge
+			auto a_is_edge = parent_a == &parent_dummy_outline;
+
+			//use layers of non-edge thing
+			auto layers = a_is_edge?layers_b:layers_a;
+			auto pt = a_is_edge?pt_b:pt_a;
+			auto net = net_a?net_a:net_b; //only one has net
+
+			//fixme: handle multiple layers for non-edge thing
+			auto layer = layers.Start();
+
+			auto clearance = m_rules->get_clearance_copper_non_copper(net, PNS_HORIZON_IFACE::layer_from_router(layer));
+			return clearance->get_clearance(pt, horizon::PatchType::BOARD_EDGE)+clearance->routing_offset;
+		}
+
 		if((parent_a && parent_a->pad && parent_a->pad->padstack.type == horizon::Padstack::Type::MECHANICAL) ||
 			(parent_b && parent_b->pad && parent_b->pad->padstack.type == horizon::Padstack::Type::MECHANICAL))
 		{
@@ -128,11 +145,13 @@ namespace PNS {
 
 			//use layers of non-npth ting
 			auto layers = a_is_npth?layers_b:layers_a;
+			auto pt = a_is_npth?pt_b:pt_a;
 
 			//fixme: handle multiple layers for non-npth thing
 			auto layer = layers.Start();
 
-			return m_rules->get_clearance_npth_copper(net, PNS_HORIZON_IFACE::layer_from_router(layer));
+			auto clearance = m_rules->get_clearance_copper_non_copper(net, PNS_HORIZON_IFACE::layer_from_router(layer));
+			return clearance->get_clearance(pt, horizon::PatchType::HOLE_NPTH)+clearance->routing_offset;
 		}
 
 
@@ -372,6 +391,31 @@ namespace PNS {
 		return segment;
 	}
 
+	void PNS_HORIZON_IFACE::syncOutline(const horizon::Polygon *ipoly, PNS::NODE *aWorld) {
+		auto poly = ipoly->remove_arcs();
+		for(size_t i = 0; i<poly.vertices.size(); i++) {
+			auto from = poly.vertices[i].position;
+			auto to = poly.vertices[(i+1)%poly.vertices.size()].position;
+
+			std::set<int> layers = {horizon::BoardLayers::TOP_COPPER, horizon::BoardLayers::BOTTOM_COPPER};
+			for(unsigned int j = 0; j<board->get_n_inner_layers(); j++) {
+				layers.insert(-j-1);
+			}
+			for(const auto layer: layers) {
+				std::unique_ptr< PNS::SEGMENT > segment(
+					new PNS::SEGMENT( SEG(from.x, from.y, to.x, to.y),  PNS::ITEM::UnusedNet)
+				);
+				segment->SetWidth(10);//very small
+				segment->SetLayers(layer_to_router(layer));
+				segment->SetParent(&parent_dummy_outline);
+				segment->Mark( PNS::MK_LOCKED );
+				aWorld->Add( std::move( segment ) );
+			}
+
+		}
+
+	}
+
 	std::unique_ptr<PNS::SOLID>   PNS_HORIZON_IFACE::syncPad(const horizon::BoardPackage *pkg, const horizon::Pad *pad) {
 		horizon::Placement tr(pkg->placement);
 		if(pkg->flip) {
@@ -495,6 +539,11 @@ namespace PNS {
 				}
 			}
 		}
+		for(const auto &it: board->polygons) {
+			if(it.second.layer == horizon::BoardLayers::L_OUTLINE) {
+				syncOutline(&it.second, aWorld);
+			}
+		}
 		int worstClearance = rules->get_max_clearance();
 
 		delete m_ruleResolver;
@@ -569,6 +618,10 @@ namespace PNS {
 				horizon::SelectableRef ref(parent->track->uuid, horizon::ObjectType::TRACK);
 				canvas->hide_obj(ref);
 			}
+			else if(parent->via) {
+				horizon::SelectableRef ref(parent->via->uuid, horizon::ObjectType::VIA);
+				canvas->hide_obj(ref);
+			}
 		}
 	}
 
@@ -581,8 +634,11 @@ namespace PNS {
 			if(parent->track) {
 				board->tracks.erase(parent->track->uuid);
 			}
+			else if(parent->via) {
+				board->vias.erase(parent->via->uuid);
+			}
 		}
-		board->expand(true);
+		//board->expand(true);
 	}
 
 	std::pair<horizon::BoardPackage *, horizon::Pad *> PNS_HORIZON_IFACE::find_pad(int layer, const horizon::Coordi &c) {

@@ -5,15 +5,6 @@
 
 namespace horizon {
 
-	static const LutEnumStr<PatchType> patch_type_lut = {
-		{"other",	PatchType::OTHER},
-		{"pad",		PatchType::PAD},
-		{"pad_th",	PatchType::PAD_TH},
-		{"plane",	PatchType::PLANE},
-		{"track",	PatchType::TRACK},
-		{"via",		PatchType::VIA},
-	};
-
 	RuleClearanceCopper::RuleClearanceCopper(const UUID &uu): Rule(uu) {
 		id = RuleID::CLEARANCE_COPPER;
 	}
