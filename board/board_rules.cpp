@@ -313,6 +313,8 @@ namespace horizon {
 		return 0;
 	}
 
+	static const RuleClearanceCopper fallback_clearance_copper = UUID();
+
 	const RuleClearanceCopper *BoardRules::get_clearance_copper(Net *net1, Net *net2, int layer) {
 		auto rules = dynamic_cast_vector<RuleClearanceCopper*>(get_rules_sorted(RuleID::CLEARANCE_COPPER));
 		for(auto ru: rules) {
@@ -323,8 +325,10 @@ namespace horizon {
 				return ru;
 			}
 		}
-		return nullptr;
+		return &fallback_clearance_copper;
 	}
+
+	static const RuleClearanceCopperNonCopper fallback_clearance_copper_non_copper = UUID();
 
 	const RuleClearanceCopperNonCopper *BoardRules::get_clearance_copper_non_copper(Net *net, int layer) {
 		auto rules = dynamic_cast_vector<RuleClearanceCopperNonCopper*>(get_rules_sorted(RuleID::CLEARANCE_COPPER_NON_COPPER));
@@ -333,7 +337,7 @@ namespace horizon {
 				return ru;
 			}
 		}
-		return nullptr;
+		return &fallback_clearance_copper_non_copper;
 	}
 
 	uint64_t BoardRules::get_max_clearance() {
