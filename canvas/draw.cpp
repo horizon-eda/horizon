@@ -13,6 +13,19 @@
 #include "util.hpp"
 
 namespace horizon {
+
+	void Canvas::set_lod_size(float size) {
+		if(size<0) {
+			lod_current = 0;
+		}
+		else {
+			lod_current = CLAMP(size/0.02_mm, 1, 255);
+			if(lod_current == 255)
+				lod_current = 0;
+		}
+	}
+
+
 	void Canvas::draw_line(const Coord<float> &a, const Coord<float> &b, ColorP color, int layer, bool tr, uint64_t width) {
 		auto pa = a;
 		auto pb = b;
@@ -21,7 +34,7 @@ namespace horizon {
 			pb = transform.transform(b);
 		}
 		//ColorP co, uint8_t la, uint32_t oi, uint8_t ty
-		triangles[layer].emplace_back(pa, pb, Coordf(width, NAN), color, oid_current, triangle_type_current);
+		triangles[layer].emplace_back(pa, pb, Coordf(width, NAN), color, oid_current, triangle_type_current, 0, lod_current);
 	}
 	
 	void Canvas::draw_cross(const Coordf &p, float size, ColorP color, int layer, bool tr, uint64_t width) {

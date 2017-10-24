@@ -17,6 +17,7 @@ in int oid_to_geom[1];
 in int type_to_geom[1];
 in int color_to_geom[1];
 in int flags_to_geom[1];
+in int lod_to_geom[1];
 smooth out vec3 color_to_fragment;
 smooth out float striper_to_fragment;
 smooth out float alpha_to_fragment;
@@ -48,6 +49,14 @@ vec2 p2r(float phi, float l) {
 }
 
 void main() {
+	if(lod_to_geom[0] != 0) {
+		float lod_size = lod_to_geom[0]*.02e6;
+		float lod_size_px = lod_size*scale;
+		if(lod_size_px<5)
+			return;
+	}
+
+
 	vec2 p0 = p0_to_geom[0];
 	vec2 p1 = p1_to_geom[0];
 	vec2 p2 = p2_to_geom[0];

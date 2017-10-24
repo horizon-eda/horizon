@@ -86,6 +86,8 @@ namespace horizon {
 			virtual void push() = 0;
 
 
+			void set_lod_size(float size);
+
 			void draw_line(const Coord<float> &a, const Coord<float> &b, ColorP color=ColorP::FROM_LAYER, int layer = 10000, bool tr = true, uint64_t width=0);
 			void draw_cross(const Coord<float> &o, float size, ColorP color=ColorP::FROM_LAYER, int layer = 10000, bool tr = true, uint64_t width=0);
 			void draw_plus(const Coord<float> &o, float size, ColorP color=ColorP::FROM_LAYER, int layer = 10000, bool tr = true, uint64_t width=0);
@@ -156,6 +158,8 @@ namespace horizon {
 
 			int annotation_layer_current = 20000;
 			std::map<int, CanvasAnnotation> annotations;
+
+			uint8_t lod_current=0;
 
 	};
 
