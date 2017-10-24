@@ -4,6 +4,7 @@
 namespace horizon {
 	class ToolHelperMove : public virtual ToolBase {
 		public:
+			ToolHelperMove(class Core *c, ToolID tid): ToolBase(c, tid) {}
 			static Orientation transform_orienation(Orientation orientation, bool rotate, bool reverse=false);
 
 		protected:
