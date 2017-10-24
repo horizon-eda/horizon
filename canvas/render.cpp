@@ -772,33 +772,24 @@ namespace horizon {
 				}
 			}
 		}
+
+
 		for(const auto &it: pkg.pads) {
 			transform_save();
 			transform.accumulate(it.second.placement);
-			auto bb = transform.transform_bb(it.second.padstack.get_bbox(true)); //only copper
-			transform.reset();
-			Coordi a(std::min(bb.first.x, bb.second.x), std::min(bb.first.y, bb.second.y));
-			Coordi b(std::max(bb.first.x, bb.second.x), std::max(bb.first.y, bb.second.y));
-			{
-				Coordi text_pos = {a.x, (a.y+b.y)/2+abs(a.y-b.y)/4};
-				auto text_bb = draw_text0(text_pos, 1_mm, it.second.name, 0, false, TextOrigin::CENTER, ColorP::WHITE, 10000, 0, false);
-				float scale_x = (text_bb.second.x-text_bb.first.x)/(float)(b.x-a.x);
-				float scale_y = ((text_bb.second.y-text_bb.first.y)*2)/(float)(b.y-a.y);
-				float sc = std::max(scale_x, scale_y);
-				text_pos.x += (b.x-a.x)/2-(text_bb.second.x-text_bb.first.x)/(2*sc);
+			auto bb = it.second.padstack.get_bbox(true); //only copper
+			auto a = bb.first;
+			auto b = bb.second;
 
+			auto pad_width = abs(b.x-a.x);
+			auto pad_height = abs(b.y-a.y);
 
-				draw_text0(text_pos, 0.8_mm/sc, it.second.name, 0, false, TextOrigin::CENTER, ColorP::WHITE);
-			}
 			if(it.second.net) {
-				Coordi text_pos = {a.x, (a.y+b.y)/2-abs(a.y-b.y)/4};
-				auto text_bb = draw_text0(text_pos, 1_mm, it.second.net->name, 0, false, TextOrigin::CENTER, ColorP::WHITE, 10000, 0, false);
-				float scale_x = (text_bb.second.x-text_bb.first.x)/(float)(b.x-a.x);
-				float scale_y = ((text_bb.second.y-text_bb.first.y)*2)/(float)(b.y-a.y);
-				float sc = std::max(scale_x, scale_y);
-				text_pos.x += (b.x-a.x)/2-(text_bb.second.x-text_bb.first.x)/(2*sc);
-
-				draw_text0(text_pos, 0.8_mm/sc, it.second.net->name, 0, false, TextOrigin::CENTER, ColorP::WHITE);
+				draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, 10000, 0, TextBoxMode::UPPER);
+				draw_text_box(transform, pad_width, pad_height, it.second.net->name, ColorP::WHITE, 10000, 0, TextBoxMode::LOWER);
+			}
+			else {
+				draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, 10000, 0, TextBoxMode::FULL);
 			}
 			transform_restore();
 		}

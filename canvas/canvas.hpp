@@ -93,6 +93,10 @@ namespace horizon {
 			void draw_arc(const Coord<float> &center, float radius, float a0, float a1, ColorP color=ColorP::FROM_LAYER, int layer = 10000, bool tr = true, uint64_t width=0);
 			void draw_arc2(const Coord<float> &center, float radius0, float a0, float radius1, float a1, ColorP color=ColorP::FROM_LAYER, int layer = 10000, bool tr = true, uint64_t width=0);
 			std::pair<Coordf, Coordf> draw_text0(const Coordf &p, float size, const std::string &rtext, int angle, bool flip, TextOrigin origin, ColorP color, int layer=10000, uint64_t width=0, bool draw=true);
+
+			enum class TextBoxMode {FULL, LOWER, UPPER};
+			void draw_text_box(const Placement &q, float width, float height, const std::string &s, ColorP color, int layer, uint64_t text_width, TextBoxMode mode);
+
 			void draw_error(const Coordf &center, float scale, const std::string &text, bool tr = true);
 			std::tuple<Coordf, Coordf, Coordi> draw_flag(const Coordf &position, const std::string &txt, int64_t size, Orientation orientation, ColorP color=ColorP::FROM_LAYER);
 
