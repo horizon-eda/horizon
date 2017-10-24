@@ -495,7 +495,11 @@ namespace horizon {
 						la->show();
 						context_menu->append(*la);
 					}
-					context_menu->popup_at_pointer((GdkEvent*)button_event);
+					#if GTK_CHECK_VERSION(3,22,0)
+						context_menu->popup_at_pointer((GdkEvent*)button_event);
+					#else
+						context_menu->popup(0, gtk_get_current_event_time());
+					#endif
 					sel_for_menu.clear();
 				}
 			}
@@ -513,7 +517,11 @@ namespace horizon {
 						context_menu->append(*la);
 					}
 				}
-				context_menu->popup_at_pointer((GdkEvent*)button_event);
+				#if GTK_CHECK_VERSION(3,22,0)
+					context_menu->popup_at_pointer((GdkEvent*)button_event);
+				#else
+					context_menu->popup(0, gtk_get_current_event_time());
+				#endif
 			}
 
 		}
