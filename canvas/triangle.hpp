@@ -71,6 +71,7 @@ namespace horizon {
 			GLuint types_visible_loc;
 
 			void render_layer(int layer);
+			void render_layer_with_overlay(int layer);
 			int stencil = 0;
 	};
 

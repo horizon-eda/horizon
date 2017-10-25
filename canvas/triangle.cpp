@@ -126,6 +126,12 @@ namespace horizon {
 		stencil++;
 	}
 
+	void TriangleRenderer::render_layer_with_overlay(int layer) {
+		render_layer(layer);
+		if(ca->overlay_layers.count(layer))
+			render_layer(ca->overlay_layers.at(layer));
+	}
+
 	void TriangleRenderer::render() {
 		GL_CHECK_ERROR
 		glUseProgram(program);
@@ -152,14 +158,14 @@ namespace horizon {
 		for(auto layer: layers) {
 			const auto &ld = ca->layer_display.at(layer);
 			if(layer != ca->work_layer && layer < 10000 && ld.visible) {
-				render_layer(layer);
+				render_layer_with_overlay(layer);
 			}
 		}
 		if(ca->layer_display.count(ca->work_layer))
-			render_layer(ca->work_layer);
+			render_layer_with_overlay(ca->work_layer);
 		for(auto layer: layers) {
 			const auto &ld = ca->layer_display.at(layer);
-			if(layer >= 10000 && ld.visible) {
+			if(layer >= 10000 && layer < 30000 && ld.visible) {
 				render_layer(layer);
 			}
 		}

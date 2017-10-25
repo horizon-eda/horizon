@@ -31,7 +31,7 @@ namespace horizon {
 
 	void Canvas::clear() {
 		selectables.clear();
-		map_erase_if(triangles, [](auto &x){return x.first<20000;});
+		map_erase_if(triangles, [](auto &x){return x.first<20000 || x.first >= 30000;});
 		targets.clear();
 		sheet_current_uuid = UUID();
 		clear_oids();
@@ -154,6 +154,18 @@ namespace horizon {
 			transform = transforms.back();
 			transforms.pop_back();
 		}
+	}
+
+	int Canvas::get_overlay_layer(int layer) {
+		if(overlay_layers.count(layer)==0) {
+			auto ol = overlay_layer_current++;
+			overlay_layers[layer] = ol;
+			layer_display[ol].color = Color(1,1,1);
+			layer_display[ol].visible = true;
+			layer_display[ol].mode = LayerDisplay::Mode::OUTLINE;
+		}
+
+		return overlay_layers.at(layer);
 	}
 }
 

@@ -147,7 +147,9 @@ namespace horizon {
 			void clear_oids();
 			std::map<SelectableRef, uint32_t> oid_map;
 
-
+			std::map<int, int> overlay_layers;
+			int overlay_layer_current = 30000;
+			int get_overlay_layer(int layer);
 
 		private:
 			void img_text_layer(int l);

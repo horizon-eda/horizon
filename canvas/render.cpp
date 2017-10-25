@@ -29,6 +29,7 @@
 #include "track.hpp"
 #include "util.hpp"
 #include "poly2tri/poly2tri.h"
+#include "board_layers.hpp"
 
 namespace horizon {
 
@@ -784,13 +785,15 @@ namespace horizon {
 			auto pad_width = abs(b.x-a.x);
 			auto pad_height = abs(b.y-a.y);
 
+			auto overlay_layer = get_overlay_layer(it.second.padstack.type==Padstack::Type::TOP?BoardLayers::TOP_COPPER:BoardLayers::BOTTOM_COPPER);
+
 			set_lod_size(std::min(pad_height, pad_width));
 			if(it.second.net) {
-				draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, 10000, 0, TextBoxMode::UPPER);
-				draw_text_box(transform, pad_width, pad_height, it.second.net->name, ColorP::WHITE, 10000, 0, TextBoxMode::LOWER);
+				draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, overlay_layer, 0, TextBoxMode::UPPER);
+				draw_text_box(transform, pad_width, pad_height, it.second.net->name, ColorP::WHITE, overlay_layer, 0, TextBoxMode::LOWER);
 			}
 			else {
-				draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, 10000, 0, TextBoxMode::FULL);
+				draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, overlay_layer, 0, TextBoxMode::FULL);
 			}
 			set_lod_size(-1);
 			transform_restore();
