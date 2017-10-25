@@ -207,6 +207,7 @@ namespace horizon {
 				c.set_rgba(co.r, co.g, co.b);
 				row[list_columns.color] = c;
 				row[list_columns.display_mode] = LayerDisplay::Mode::FILL;
+				emit_layer_display(row);
 			}
 		}
 		store->thaw_notify();
