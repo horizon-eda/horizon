@@ -52,8 +52,10 @@ namespace horizon {
 		bool draw = true;
 
 
-		if(mode == ObjectType::BOARD && junc.connection_count >= 2)
+		if(mode == ObjectType::BOARD)
 			draw = false;
+
+		auto layer = layer_display.count(junc.layer)?junc.layer:10000;
 
 		if(draw) {
 			if(junc.connection_count == 2) {
@@ -68,7 +70,7 @@ namespace horizon {
 		}
 
 		if(interactive) {
-			selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position);
+			selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, layer);
 			if(!junc.temp) {
 				targets.emplace(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
 			}

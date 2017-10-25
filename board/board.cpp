@@ -409,6 +409,11 @@ namespace horizon {
 		for(const auto &it: lines) {
 			it.second.from->connection_count++;
 			it.second.to->connection_count++;
+			for(const auto &ju: {it.second.from, it.second.to}) {
+				if(ju->layer == 10000) { //none assigned
+					ju->layer = it.second.layer;
+				}
+			}
 		}
 
 		auto params = rules.get_parameters();
