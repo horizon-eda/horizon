@@ -132,7 +132,12 @@ namespace horizon {
 			if(parameter_set->count(id) == 0) {
 				auto bu = Gtk::manage(new Gtk::Button(parameter_id_to_name(id)));
 				bu->signal_clicked().connect([this, id] {
-					dynamic_cast<Gtk::Popover*>(popover_box->get_ancestor(GTK_TYPE_POPOVER))->popdown();
+					auto popover = dynamic_cast<Gtk::Popover*>(popover_box->get_ancestor(GTK_TYPE_POPOVER));
+					#if GTK_CHECK_VERSION(3,22,0)
+						popover->popdown();
+					#else
+						popover->hide();
+					#endif
 					(*parameter_set)[id] = 0.5_mm;
 					auto pe = Gtk::manage(new ParameterEditor(id, this));
 					listbox->add(*pe);
