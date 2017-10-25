@@ -21,7 +21,7 @@ namespace horizon {
 	void RuleEditorClearanceCopperNonCopper::populate() {
 		rule2 = dynamic_cast<RuleClearanceCopperNonCopper*>(rule);
 
-		auto editor = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
+		auto editor = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 20));
 		editor->set_margin_start(20);
 		editor->set_margin_end(20);
 		editor->set_margin_bottom(20);
