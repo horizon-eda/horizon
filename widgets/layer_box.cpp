@@ -70,6 +70,7 @@ namespace horizon {
 		}
 		//view->append_column("", list_columns.index);
 		view->append_column("Name", list_columns.name);
+		view->signal_button_press_event().connect_notify(sigc::mem_fun(this, &LayerBox::handle_button));
 
 		view->show();
 		auto sc = Gtk::manage(new Gtk::ScrolledWindow());
@@ -111,6 +112,39 @@ namespace horizon {
 		frb->show_all();
 		frb->pack_start(*ab, false, false, 0);
 		pack_start(*fr, true, true, 0);
+
+		{
+			auto item = Gtk::manage(new Gtk::MenuItem("Reset color"));
+			item->signal_activate().connect([this] {
+				auto layers = lp->get_layers();
+				int idx = row_for_menu[list_columns.index];
+				const auto & co = layers.at(idx).color;
+				auto c = Gdk::RGBA();
+				c.set_rgba(co.r, co.g, co.b);
+				row_for_menu[list_columns.color] = c;
+				emit_layer_display(row_for_menu);
+			});
+			item->show();
+			menu.append(*item);
+		}
+		{
+			auto item = Gtk::manage(new Gtk::MenuItem("Select color"));
+
+			item->signal_activate().connect([this] {
+				Gtk::ColorChooserDialog dia("Layer color");
+				dia.set_transient_for(*dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW)));
+				dia.set_rgba(row_for_menu[list_columns.color]);
+				dia.property_show_editor() = true;
+				dia.set_use_alpha(false);
+
+				if(dia.run() == Gtk::RESPONSE_OK) {
+					row_for_menu[list_columns.color] = dia.get_rgba();
+					emit_layer_display(row_for_menu);
+				}
+			});
+			item->show();
+			menu.append(*item);
+		}
 
 
 
@@ -212,6 +246,22 @@ namespace horizon {
 		}
 		store->thaw_notify();
 	}
+
+	void LayerBox::handle_button(GdkEventButton* button_event) {
+		if(button_event->window == view->get_bin_window()->gobj() && button_event->button == 3) {
+			Gtk::TreeModel::Path path;
+			if(view->get_path_at_pos(button_event->x, button_event->y, path)) {
+				auto it = store->get_iter(path);
+				row_for_menu = *it;
+				#if GTK_CHECK_VERSION(3,22,0)
+					menu.popup_at_pointer((GdkEvent*)button_event);
+				#else
+					menu.popup(button_event->button, button_event->time);
+				#endif
+			}
+		}
+	}
+
 	void LayerBox::update_work_layer() {
 		auto layers = lp->get_layers();
 		Gtk::TreeModel::Row row;
@@ -229,6 +279,22 @@ namespace horizon {
 		{"fill_only", LayerDisplay::Mode::FILL_ONLY},
 	};
 
+	static json rgba_to_json(const Gdk::RGBA &c) {
+		json j;
+		j["r"] = c.get_red();
+		j["g"] = c.get_green();
+		j["b"] = c.get_blue();
+		return j;
+	}
+
+	static Gdk::RGBA rgba_from_json(const json &j) {
+		Gdk::RGBA r;
+		r.set_red(j.value("r", 0.0));
+		r.set_green(j.value("g", 0.0));
+		r.set_blue(j.value("b", 0.0));
+		return r;
+	}
+
 	json LayerBox::serialize() {
 		json j;
 		j["layer_opacity"] = property_layer_opacity().get_value();
@@ -236,6 +302,7 @@ namespace horizon {
 			json k;
 			k["visible"] = static_cast<bool>(it[list_columns.visible]);
 			k["display_mode"] = dm_lut.lookup_reverse(it[list_columns.display_mode]);
+			k["color"] = rgba_to_json(it[list_columns.color]);
 			int index = it[list_columns.index];
 			j["layers"][std::to_string(index)] = k;
 		}
@@ -256,6 +323,9 @@ namespace horizon {
 					}
 					catch(...) {
 						it[list_columns.display_mode] = LayerDisplay::Mode::FILL;
+					}
+					if(k.count("color")){
+						it[list_columns.color] = rgba_from_json(k.at("color"));
 					}
 					emit_layer_display(it);
 				}

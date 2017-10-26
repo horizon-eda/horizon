@@ -58,9 +58,10 @@ namespace horizon {
 			Glib::RefPtr<Glib::Binding> binding_select_work_layer_only;
 			Glib::RefPtr<Glib::Binding> binding_layer_opacity;
 			void visible_cell_data_func(Gtk::CellRenderer *cr, const Gtk::TreeModel::iterator &it);
+			void handle_button(GdkEventButton* button_event);
 
-
-
+			Gtk::Menu menu;
+			Gtk::TreeModel::Row row_for_menu;
 	};
 
 
