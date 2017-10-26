@@ -11,7 +11,7 @@ namespace horizon {
 	}
 
 	KeySequenceDialog::KeySequenceDialog(Gtk::Window *parent) :
-		Gtk::Dialog("Key Sequences", *parent, Gtk::DialogFlags::DIALOG_MODAL|Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
+		Gtk::Dialog("Key Sequences", *parent, Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
 	{
 		lb = Gtk::manage(new Gtk::ListBox());
 		lb->set_selection_mode(Gtk::SELECTION_NONE);
