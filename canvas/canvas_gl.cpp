@@ -205,7 +205,7 @@ namespace horizon {
 		int64_t yi = round_multiple(cursor_pos.y, sp);
 		Coordi t(xi, yi);
 
-		const auto &f = std::find_if(targets.begin(), targets.end(), [t, this](const auto &a)->bool{return a.p==t && layer_is_visible(a.layer);});
+		const auto &f = std::find_if(targets.begin(), targets.end(), [t, this](const auto &a)->bool{return a.p==t && this->layer_is_visible(a.layer);});
 		if(f != targets.end()) {
 			target_current = *f;
 		}
@@ -240,7 +240,7 @@ namespace horizon {
 
 		};
 
-		auto dfn = [this, target_in_selection, this](const Target &ta) -> float{
+		auto dfn = [this, target_in_selection](const Target &ta) -> float{
 			//return inf if target in selection and tool active (selection not allowed)
 			if(!layer_is_visible(ta.layer))
 				return INFINITY;
