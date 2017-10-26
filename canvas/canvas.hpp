@@ -51,6 +51,7 @@ namespace horizon {
 			void set_layer_display(int index, const LayerDisplay &ld);
 			class SelectionFilter selection_filter;
 			
+			bool layer_is_visible(int layer) const;
 			
 		protected:
 			std::unordered_map<int, std::vector<Triangle>> triangles;

@@ -72,7 +72,7 @@ namespace horizon {
 		if(interactive) {
 			selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, layer);
 			if(!junc.temp) {
-				targets.emplace(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
+				targets.emplace(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position), 0, layer);
 			}
 		}
 	}
@@ -371,7 +371,7 @@ namespace horizon {
 		transform_restore();
 		if(interactive) {
 			selectables.append(text.uuid, ObjectType::TEXT, text.placement.shift, extents.first, extents.second, 0, text.layer);
-			targets.emplace(text.uuid, ObjectType::TEXT, transform.transform(text.placement.shift));
+			targets.emplace(text.uuid, ObjectType::TEXT, transform.transform(text.placement.shift), 0, text.layer);
 		}
 	}
 
@@ -557,21 +557,21 @@ namespace horizon {
 					if(v_last->type != Polygon::Vertex::Type::ARC) {
 						selectables.append(poly.uuid, ObjectType::POLYGON_EDGE, center, v_last->position, it.position, i-1, poly.layer);
 
-						targets.emplace(poly.uuid, ObjectType::POLYGON_EDGE, center, i-1);
+						targets.emplace(poly.uuid, ObjectType::POLYGON_EDGE, center, i-1, poly.layer);
 					}
 				}
 				selectables.append(poly.uuid, ObjectType::POLYGON_VERTEX, it.position, i, poly.layer);
-				targets.emplace(poly.uuid, ObjectType::POLYGON_VERTEX, it.position, i);
+				targets.emplace(poly.uuid, ObjectType::POLYGON_VERTEX, it.position, i, poly.layer);
 				if(it.type == Polygon::Vertex::Type::ARC) {
 					selectables.append(poly.uuid, ObjectType::POLYGON_ARC_CENTER, it.arc_center, i, poly.layer);
-					targets.emplace(poly.uuid, ObjectType::POLYGON_ARC_CENTER, it.arc_center, i);
+					targets.emplace(poly.uuid, ObjectType::POLYGON_ARC_CENTER, it.arc_center, i, poly.layer);
 				}
 				v_last = &it;
 				i++;
 			}
 			if(ipoly.vertices.back().type != Polygon::Vertex::Type::ARC) {
 				auto center = (ipoly.vertices.front().position + ipoly.vertices.back().position)/2;
-				targets.emplace(poly.uuid, ObjectType::POLYGON_EDGE, center, i-1);
+				targets.emplace(poly.uuid, ObjectType::POLYGON_EDGE, center, i-1, poly.layer);
 				selectables.append(poly.uuid, ObjectType::POLYGON_EDGE, center, ipoly.vertices.front().position, ipoly.vertices.back().position, i-1, poly.layer);
 			}
 		}
@@ -586,7 +586,7 @@ namespace horizon {
 		if(interactive) {
 			auto bb = shape.get_bbox();
 			selectables.append(shape.uuid, ObjectType::SHAPE, shape.placement.shift, shape.placement.transform(bb.first), shape.placement.transform(bb.second), 0, shape.layer);
-			targets.emplace(shape.uuid, ObjectType::SHAPE, shape.placement.shift);
+			targets.emplace(shape.uuid, ObjectType::SHAPE, shape.placement.shift, 0, shape.layer);
 		}
 		if(shape.form == Shape::Form::CIRCLE) {
 			auto r = shape.params.at(0);
@@ -878,7 +878,7 @@ namespace horizon {
 		}
 		targets.emplace(pkg.uuid, ObjectType::BOARD_PACKAGE, pkg.placement.shift);
 		auto bb = pkg.package.get_bbox();
-		selectables.append(pkg.uuid, ObjectType::BOARD_PACKAGE, {0,0}, bb.first, bb.second);
+		selectables.append(pkg.uuid, ObjectType::BOARD_PACKAGE, {0,0}, bb.first, bb.second, 0, pkg.flip?BoardLayers::BOTTOM_PACKAGE:BoardLayers::TOP_PACKAGE);
 		for(const auto &it: pkg.package.pads) {
 			targets.emplace(UUIDPath<2>(pkg.uuid, it.first), ObjectType::PAD, transform.transform(it.second.placement.shift));
 		}

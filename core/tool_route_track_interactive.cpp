@@ -72,6 +72,7 @@ namespace horizon {
 		router->SyncWorld();
 
 		PNS::ROUTING_SETTINGS settings;
+		settings.SetShoveVias(false);
 
 		PNS::SIZES_SETTINGS sizes_settings;
 
@@ -84,7 +85,8 @@ namespace horizon {
 	}
 
 	PNS::ITEM* ToolWrapper::pickSingleItem( const VECTOR2I& aWhere, int aNet, int aLayer ) {
-		int tl = work_layer;
+		int tl = PNS::PNS_HORIZON_IFACE::layer_to_router(tool->imp->get_work_layer());
+
 
 		if( aLayer > 0 )
 			tl = aLayer;
@@ -101,6 +103,9 @@ namespace horizon {
 			// fixme: this causes flicker with live loop removal...
 			//if( item->Parent() && !item->Parent()->ViewIsVisible() )
 			//    continue;
+			auto la = PNS::PNS_HORIZON_IFACE::layer_from_router(item->Layers().Start());
+			if(!tool->canvas->layer_is_visible(la))
+				continue;
 
 			if( aNet < 0 || item->Net() == aNet )
 			{
@@ -129,10 +134,10 @@ namespace horizon {
 		{
 			PNS::ITEM* item = prioritized[i];
 
-			/*if( displ_opts->m_ContrastModeDisplay )
+			if( tool->canvas->selection_filter.work_layer_only )
 				if( item && !item->Layers().Overlaps( tl ) )
 					item = NULL;
-			*/
+
 			if( item )
 			{
 				rv = item;

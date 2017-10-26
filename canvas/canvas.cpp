@@ -29,6 +29,10 @@ namespace horizon {
 		layer_display[index] = ld;
 	}
 
+	bool Canvas::layer_is_visible(int layer) const {
+		return layer == work_layer || layer_display.at(layer).visible;
+	}
+
 	void Canvas::clear() {
 		selectables.clear();
 		map_erase_if(triangles, [](auto &x){return x.first<20000 || x.first >= 30000;});

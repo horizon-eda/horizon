@@ -9,7 +9,8 @@ namespace horizon {
 			ObjectType type;
 			Coordi p;
 			unsigned int vertex = 0;
-			Target(const UUIDPath<2> &uu, ObjectType ot, const Coordi &pi, unsigned int v=0) : path(uu), type(ot), p(pi), vertex(v) {};
+			int layer = 10000;
+			Target(const UUIDPath<2> &uu, ObjectType ot, const Coordi &pi, unsigned int v=0, int l=10000) : path(uu), type(ot), p(pi), vertex(v), layer(l){};
 			Target() :type(ObjectType::INVALID) {};
 			bool is_valid() const {return type != ObjectType::INVALID;}
 			bool operator< (const Target &other) const {
