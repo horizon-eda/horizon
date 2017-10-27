@@ -553,14 +553,33 @@ namespace horizon {
 					chooser->set_current_name("package");
 					chooser->set_current_folder(Glib::build_filename(base_path, "packages"));
 
-					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-						std::string fn = chooser->get_filename();
-						auto fi = Gio::File::create_for_path(Glib::build_filename(fn, "padstacks"));
-						fi->make_directory_with_parents();
-						Package pkg(horizon::UUID::random());
-						auto pkg_filename = Glib::build_filename(fn, "package.json");
-						save_json_to_file(pkg_filename, pkg.serialize());
-						spawn(PoolManagerProcess::Type::IMP_PACKAGE, {pkg_filename});
+					while(true) {
+						chooser->set_current_folder(Glib::build_filename(base_path, "packages"));
+						if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+							std::string fn = chooser->get_filename();
+							std::cout << "pkg " << fn << std::endl;
+
+							Glib::Dir dir(fn);
+							int n = 0;
+							for(const auto &it: dir) {
+								(void)it;
+								n++;
+							}
+							if(n>0) {
+								Gtk::MessageDialog md(*top,  "Folder must be empty", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+								md.run();
+								continue;
+							}
+							else {
+								auto fi = Gio::File::create_for_path(Glib::build_filename(fn, "padstacks"));
+								fi->make_directory_with_parents();
+								Package pkg(horizon::UUID::random());
+								auto pkg_filename = Glib::build_filename(fn, "package.json");
+								save_json_to_file(pkg_filename, pkg.serialize());
+								spawn(PoolManagerProcess::Type::IMP_PACKAGE, {pkg_filename});
+							}
+						}
+						break;
 					}
 				});
 			}
