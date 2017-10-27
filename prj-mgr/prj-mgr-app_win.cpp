@@ -237,7 +237,7 @@ namespace horizon {
 			chan = Glib::IOChannel::create_from_fd(fd);
 		#endif
 
-		Glib::signal_io().connect([this](Glib::IOCondition cond){
+		sock_project_conn = Glib::signal_io().connect([this](Glib::IOCondition cond){
 			while(sock_project.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
 				zmq::message_t msg;
 				sock_project.recv(&msg);
@@ -268,6 +268,7 @@ namespace horizon {
 	}
 
 	ProjectManagerAppWindow::~ProjectManagerAppWindow() {
+		sock_project_conn.disconnect();
 		if(part_browser_window)
 			delete part_browser_window;
 	}

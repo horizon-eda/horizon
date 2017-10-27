@@ -108,6 +108,8 @@ namespace horizon {
 			zmq::socket_t sock_project;
 			std::string sock_project_ep;
 
+			sigc::connection sock_project_conn;
+
 	};
 };
 
