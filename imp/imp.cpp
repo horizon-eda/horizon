@@ -390,10 +390,17 @@ namespace horizon {
 		}
 		else {
 			ToolArgs args;
-			args.type = ToolEventType::KEY;
 			args.coords = canvas->get_cursor_pos();
-			args.key = key_event->keyval;
 			args.work_layer = canvas->property_work_layer();
+			if(key_event->keyval == GDK_KEY_Escape) {
+				args.type = ToolEventType::CLICK;
+				args.button = 3;
+			}
+			else {
+				args.type = ToolEventType::KEY;
+				args.key = key_event->keyval;
+			}
+
 			ToolResponse r = core.r->tool_update(args);
 			tool_process(r);
 			return true;
