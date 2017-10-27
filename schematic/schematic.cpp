@@ -331,7 +331,7 @@ namespace horizon {
 
 			sheet.delete_dependants();
 			if(!careful) {
-				sheet.simplify_net_lines();
+				sheet.simplify_net_lines(false);
 			}
 			sheet.propagate_net_segments();
 			if(!careful)
@@ -427,10 +427,12 @@ namespace horizon {
 			if(!careful) {
 				sheet.fix_junctions();
 				sheet.delete_duplicate_net_lines();
+				sheet.simplify_net_lines(true);
 			}
 			sheet.propagate_net_segments();
 			sheet.analyze_net_segments(true);
 		}
+		update_refs();
 
 		//warn juncs
 		for(auto &it_sheet: sheets) {

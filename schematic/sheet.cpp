@@ -198,14 +198,16 @@ namespace horizon {
 		}
 	}
 
-	void Sheet::simplify_net_lines() {
+	void Sheet::simplify_net_lines(bool simplify) {
 		unsigned int n_merged = 1;
 		while(n_merged) {
 			n_merged = 0;
 			for(auto &it_junc: junctions) {
-				it_junc.second.net = nullptr;
+				if(!simplify) {
+					it_junc.second.net = nullptr;
+					it_junc.second.has_via = false;
+				}
 				it_junc.second.connection_count = 0;
-				it_junc.second.has_via = false;
 			}
 			for(auto &it_rip: bus_rippers) {
 				it_rip.second.connection_count = 0;
@@ -230,7 +232,9 @@ namespace horizon {
 
 			std::map<UUID,std::set<UUID>> junction_connections;
 			for(auto &it_line: net_lines) {
-				it_line.second.net = nullptr;
+				if(!simplify) {
+					it_line.second.net = nullptr;
+				}
 				for(auto &it_ft: {it_line.second.from, it_line.second.to}) {
 					if(it_ft.is_junc()) {
 						it_ft.junc->connection_count++;
@@ -244,25 +248,27 @@ namespace horizon {
 					}
 				}
 			}
-			for(const auto &it: junction_connections) {
-				if(it.second.size() == 2) {
-					const auto &connections = it.second;
-					auto itc = connections.begin();
-					if(net_lines.count(*itc) == 0)
-						continue;
-					auto &line_a = net_lines.at(*itc);
-					itc++;
-					if(net_lines.count(*itc) == 0)
-						continue;
-					auto &line_b = net_lines.at(*itc);
+			if(simplify) {
+				for(const auto &it: junction_connections) {
+					if(it.second.size() == 2) {
+						const auto &connections = it.second;
+						auto itc = connections.begin();
+						if(net_lines.count(*itc) == 0)
+							continue;
+						auto &line_a = net_lines.at(*itc);
+						itc++;
+						if(net_lines.count(*itc) == 0)
+							continue;
+						auto &line_b = net_lines.at(*itc);
 
-					auto va = line_a.to.get_position()-line_a.from.get_position();
-					auto vb = line_b.to.get_position()-line_b.from.get_position();
+						auto va = line_a.to.get_position()-line_a.from.get_position();
+						auto vb = line_b.to.get_position()-line_b.from.get_position();
 
-					if((va.dot(vb))*(va.dot(vb)) == va.mag_sq()*vb.mag_sq()) {
-						if(junctions_with_label.count(it.first) == 0) {
-							merge_net_lines(&line_a, &line_b, &junctions.at(it.first));
-							n_merged++;
+						if((va.dot(vb))*(va.dot(vb)) == va.mag_sq()*vb.mag_sq()) {
+							if(junctions_with_label.count(it.first) == 0) {
+								merge_net_lines(&line_a, &line_b, &junctions.at(it.first));
+								n_merged++;
+							}
 						}
 					}
 				}
