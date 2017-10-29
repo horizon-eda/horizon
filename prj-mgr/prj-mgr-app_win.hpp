@@ -67,6 +67,7 @@ namespace horizon {
 
 			void open_file_view(const Glib::RefPtr<Gio::File>& file);
 			void spawn_imp(ProjectManagerProcess::Type type, const UUID &pool_uuid, const std::vector<std::string> &args);
+			bool close_project();
 		protected:
 			Glib::RefPtr<Gtk::Builder> builder;
 			Gtk::Stack *stack = nullptr;
@@ -101,7 +102,6 @@ namespace horizon {
 			ProjectManagerViewCreate view_create;
 			ProjectManagerViewProject view_project;
 
-			bool close_project();
 			bool on_delete_event(GdkEventAny *ev) override;
 			bool check_pools();
 

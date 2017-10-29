@@ -196,13 +196,23 @@ namespace horizon {
 		// counts in both of them. If we want the destructors to be called, we
 		// must remove the window from the application. One way of doing this
 		// is to hide the window. See comment in create_appwindow().
+
+		bool close_failed = false;
 		auto windows = get_windows();
-		for (auto window : windows)
-			window->hide();
+		for (auto window : windows) {
+			auto win = dynamic_cast<ProjectManagerAppWindow*>(window);
+			if(!win->close_project()) {
+				close_failed = true;
+			}
+			else {
+				win->hide();
+			}
+		}
 
 		// Not really necessary, when Gtk::Widget::hide() is called, unless
 		// Gio::Application::hold() has been called without a corresponding call
 		// to Gio::Application::release().
-		quit();
+		if(!close_failed)
+			quit();
 	}
 }

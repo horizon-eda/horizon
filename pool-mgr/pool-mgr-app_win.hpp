@@ -18,6 +18,7 @@ namespace horizon {
 			static PoolManagerAppWindow* create(class PoolManagerApplication *app);
 
 			void open_file_view(const Glib::RefPtr<Gio::File>& file);
+			bool close_pool();
 		protected:
 			Glib::RefPtr<Gtk::Builder> builder;
 			Gtk::Stack *stack = nullptr;
@@ -42,7 +43,6 @@ namespace horizon {
 			void handle_update();
 			json handle_req(const json &j);
 
-			bool close_pool();
 			bool on_delete_event(GdkEventAny *ev) override;
 
 		public:
