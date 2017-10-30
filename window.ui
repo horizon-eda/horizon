@@ -2,244 +2,151 @@
 <!-- Generated with glade 3.20.1 -->
 <interface>
   <requires lib="gtk+" version="3.18"/>
-  <object class="GtkWindow" id="mainWindow">
+  <object class="GtkApplicationWindow" id="mainWindow">
     <property name="can_focus">False</property>
-    <property name="default_width">1000</property>
-    <property name="default_height">700</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkBox" id="top_panel">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">8</property>
-            <property name="margin_right">8</property>
-            <property name="margin_top">8</property>
-            <property name="margin_bottom">8</property>
-            <property name="spacing">16</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="spacing">4</property>
+            <property name="orientation">vertical</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkBox" id="left_panel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_left">10</property>
+                    <property name="margin_right">10</property>
+                    <property name="margin_top">10</property>
+                    <property name="margin_bottom">10</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">10</property>
                     <child>
-                      <object class="GtkBox" id="left_panel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_left">8</property>
-                        <property name="margin_right">8</property>
-                        <property name="margin_top">8</property>
-                        <property name="margin_bottom">8</property>
-                        <property name="orientation">vertical</property>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
+                      <placeholder/>
                     </child>
                     <child>
-                      <object class="GtkOverlay">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <child>
-                          <object class="GtkBox" id="gl_container">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="orientation">vertical</property>
-                            <child>
-                              <placeholder/>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="index">-1</property>
-                          </packing>
-                        </child>
-                        <child type="overlay">
-                          <object class="GtkRevealer" id="tool_bar">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="valign">end</property>
-                            <property name="transition_type">slide-up</property>
-                            <property name="transition_duration">100</property>
-                            <property name="reveal_child">True</property>
-                            <child>
-                              <object class="GtkFrame">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label_xalign">0</property>
-                                <property name="shadow_type">none</property>
-                                <child>
-                                  <object class="GtkBox">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="spacing">20</property>
-                                    <child>
-                                      <object class="GtkLabel" id="tool_bar_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Tool frobnicate</property>
-                                        <attributes>
-                                          <attribute name="weight" value="bold"/>
-                                        </attributes>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkStack" id="tool_bar_stack">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="transition_duration">100</property>
-                                        <property name="transition_type">slide-up-down</property>
-                                        <child>
-                                          <object class="GtkLabel" id="tool_bar_tip">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="halign">start</property>
-                                            <property name="label" translatable="yes">tip</property>
-                                          </object>
-                                          <packing>
-                                            <property name="name">tip</property>
-                                            <property name="title" translatable="yes">page0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkLabel" id="tool_bar_flash">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="halign">start</property>
-                                            <property name="label" translatable="yes">flash</property>
-                                          </object>
-                                          <packing>
-                                            <property name="name">flash</property>
-                                            <property name="title" translatable="yes">page1</property>
-                                            <property name="position">1</property>
-                                          </packing>
-                                        </child>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">True</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">1</property>
-                                      </packing>
-                                    </child>
-                                  </object>
-                                </child>
-                                <child type="label_item">
-                                  <placeholder/>
-                                </child>
-                                <style>
-                                  <class name="app-notification"/>
-                                </style>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">True</property>
+                    <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkOverlay">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_top">2</property>
-                    <property name="margin_bottom">2</property>
-                    <property name="spacing">8</property>
-                    <property name="homogeneous">True</property>
                     <child>
-                      <object class="GtkLabel" id="active_tool_label">
+                      <object class="GtkBox" id="gl_container">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Active tool: None</property>
-                        <property name="xalign">0</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <placeholder/>
+                        </child>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
+                        <property name="index">-1</property>
                       </packing>
                     </child>
-                    <child>
-                      <object class="GtkLabel" id="cursor_label">
+                    <child type="overlay">
+                      <object class="GtkRevealer" id="tool_bar">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">label</property>
-                        <property name="xalign">0</property>
+                        <property name="valign">end</property>
+                        <property name="transition_type">slide-up</property>
+                        <property name="transition_duration">100</property>
+                        <property name="reveal_child">True</property>
+                        <child>
+                          <object class="GtkFrame">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label_xalign">0</property>
+                            <property name="shadow_type">none</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="spacing">20</property>
+                                <child>
+                                  <object class="GtkLabel" id="tool_bar_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Tool frobnicate</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"/>
+                                    </attributes>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkStack" id="tool_bar_stack">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="transition_duration">100</property>
+                                    <property name="transition_type">slide-up-down</property>
+                                    <child>
+                                      <object class="GtkLabel" id="tool_bar_tip">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">start</property>
+                                        <property name="label" translatable="yes">tip</property>
+                                      </object>
+                                      <packing>
+                                        <property name="name">tip</property>
+                                        <property name="title" translatable="yes">page0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="tool_bar_flash">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">start</property>
+                                        <property name="label" translatable="yes">flash</property>
+                                      </object>
+                                      <packing>
+                                        <property name="name">flash</property>
+                                        <property name="title" translatable="yes">page1</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                            </child>
+                            <child type="label_item">
+                              <placeholder/>
+                            </child>
+                            <style>
+                              <class name="app-notification"/>
+                            </style>
+                          </object>
+                        </child>
                       </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="tool_hint_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">&gt;</property>
-                        <property name="xalign">0</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
                   </packing>
@@ -252,21 +159,51 @@
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow">
+              <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="hscrollbar_policy">never</property>
-                <property name="shadow_type">in</property>
+                <property name="can_focus">False</property>
+                <property name="margin_top">2</property>
+                <property name="margin_bottom">2</property>
+                <property name="spacing">8</property>
+                <property name="homogeneous">True</property>
                 <child>
-                  <object class="GtkViewport" id="property_viewport">
+                  <object class="GtkLabel" id="active_tool_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_left">4</property>
-                    <property name="margin_right">8</property>
-                    <child>
-                      <placeholder/>
-                    </child>
+                    <property name="label" translatable="yes">Active tool: None</property>
+                    <property name="xalign">0</property>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="cursor_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">label</property>
+                    <property name="xalign">0</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="tool_hint_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">&gt;</property>
+                    <property name="xalign">0</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
                 </child>
               </object>
               <packing>
@@ -279,13 +216,45 @@
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="property_scrolled_window">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hscrollbar_policy">never</property>
+            <child>
+              <object class="GtkViewport" id="property_viewport">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
+                <property name="margin_top">10</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
       </object>
     </child>
     <child type="titlebar">
-      <placeholder/>
+      <object class="GtkHeaderBar" id="header">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="title">Interactive Manipulator</property>
+        <property name="show_close_button">True</property>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
     </child>
   </object>
 </interface>

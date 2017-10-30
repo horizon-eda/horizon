@@ -31,6 +31,9 @@ namespace horizon {
 				   Gdk::SMOOTH_SCROLL_MASK|
 		           Gdk::KEY_PRESS_MASK
 		);
+		width = 1000;
+		height = 500;
+
 		set_can_focus(true);
 		property_work_layer().signal_changed().connect([this]{work_layer=property_work_layer(); request_push();});
 		property_grid_spacing().signal_changed().connect([this]{grid.spacing=property_grid_spacing(); queue_draw();});

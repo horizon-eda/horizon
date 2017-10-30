@@ -4,7 +4,7 @@
 
 namespace horizon {
 
-	class MainWindow: public Gtk::Window {
+	class MainWindow: public Gtk::ApplicationWindow{
 		public:
 			MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x);
 			static MainWindow* create();
@@ -13,8 +13,9 @@ namespace horizon {
 			Gtk::Label *tool_hint_label = nullptr;
 			Gtk::Label *cursor_label = nullptr;
 			Gtk::Box *left_panel = nullptr;
-			Gtk::Box *top_panel = nullptr;
 			Gtk::Viewport *property_viewport = nullptr;
+			Gtk::ScrolledWindow *property_scrolled_window = nullptr;
+			Gtk::HeaderBar *header = nullptr;
 
 			void tool_bar_set_visible(bool v);
 			void tool_bar_set_tool_name(const std::string &s);

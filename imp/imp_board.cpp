@@ -51,32 +51,39 @@ namespace horizon {
 	void ImpBoard::construct() {
 		ImpLayer::construct();
 
-		auto fab_out_button = Gtk::manage(new Gtk::Button("Fab. outp."));
-		main_window->top_panel->pack_start(*fab_out_button, false, false, 0);
-		fab_out_button->show();
-		fab_out_button->signal_clicked().connect([this]{fab_output_window->present();});
-		core.r->signal_tool_changed().connect([fab_out_button, this](ToolID t){
-			fab_out_button->set_sensitive(t==ToolID::NONE);
-			fab_output_window->set_can_generate(t==ToolID::NONE);
-		});
-
-		auto reload_netlist_button = Gtk::manage(new Gtk::Button("Reload netlist"));
-		main_window->top_panel->pack_start(*reload_netlist_button, false, false, 0);
-		reload_netlist_button->show();
-		reload_netlist_button->signal_clicked().connect([this]{core_board.reload_netlist();canvas_update();});
-		core.r->signal_tool_changed().connect([reload_netlist_button](ToolID t){reload_netlist_button->set_sensitive(t==ToolID::NONE);});
-
 		auto view_3d_button = Gtk::manage(new Gtk::Button("3D"));
-		main_window->top_panel->pack_start(*view_3d_button, false, false, 0);
+		main_window->header->pack_start(*view_3d_button);
 		view_3d_button->show();
 		view_3d_button->signal_clicked().connect([this]{
 			view_3d_window->update(); view_3d_window->present();
 		});
 
-		add_tool_button(ToolID::UPDATE_ALL_PLANES, "Update Planes");
-		add_tool_button(ToolID::MAP_PACKAGE, "Place package");
-		add_tool_button(ToolID::EDIT_STACKUP, "Stackup...");
 
+		auto hamburger_menu = add_hamburger_menu();
+
+		hamburger_menu->append("Fabrication output", "win.fab_out");
+		main_window->add_action("fab_out", [this] {
+			fab_output_window->present();
+		});
+
+		hamburger_menu->append("Stackup...", "win.edit_stackup");
+		add_tool_action(ToolID::EDIT_STACKUP, "edit_stackup");
+
+		hamburger_menu->append("Reload netlist", "win.reload_netlist");
+		main_window->add_action("reload_netlist", [this] {
+			core_board.reload_netlist();
+			canvas_update();
+		});
+
+		hamburger_menu->append("Update all planes", "win.update_all_planes");
+		add_tool_action(ToolID::UPDATE_ALL_PLANES, "update_all_planes");
+
+		hamburger_menu->append("Clear all planes", "win.clear_all_planes");
+		add_tool_action(ToolID::CLEAR_ALL_PLANES, "clear_all_planes");
+
+
+
+		add_tool_button(ToolID::MAP_PACKAGE, "Place package", false);
 
 		/*auto test_button = Gtk::manage(new Gtk::Button("Test"));
 		main_window->top_panel->pack_start(*test_button, false, false, 0);
@@ -104,6 +111,10 @@ namespace horizon {
 
 		fab_output_window = FabOutputWindow::create(main_window, core.b->get_board(), core.b->get_fab_output_settings());
 		view_3d_window = View3DWindow::create(core_board.get_board());
+
+		core.r->signal_tool_changed().connect([this](ToolID t){
+			fab_output_window->set_can_generate(t==ToolID::NONE);
+		});
 
 		rules_window->signal_goto().connect([this] (Coordi location, UUID sheet) {
 			canvas->center_and_zoom(location);

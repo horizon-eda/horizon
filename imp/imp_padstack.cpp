@@ -1,6 +1,7 @@
 #include "imp_padstack.hpp"
 #include "part.hpp"
 #include "parameter_window.hpp"
+#include "header_button.hpp"
 
 namespace horizon {
 	ImpPadstack::ImpPadstack(const std::string &padstack_filename, const std::string &pool_path):
@@ -31,11 +32,19 @@ namespace horizon {
 	void ImpPadstack::construct() {
 		ImpLayer::construct();
 
-		auto name_entry = Gtk::manage(new Gtk::Entry());
-		name_entry->show();
-		main_window->top_panel->pack_start(*name_entry, false, false, 0);
+		auto header_button = Gtk::manage(new HeaderButton);
+		header_button->set_label(core_padstack.get_padstack(false)->name);
+		main_window->header->set_custom_title(*header_button);
+		header_button->show();
+
+		auto name_entry = header_button->add_entry("Name");
 		name_entry->set_text(core_padstack.get_padstack(false)->name);
-		core_padstack.signal_save().connect([this, name_entry]{core_padstack.get_padstack(false)->name = name_entry->get_text();});
+		name_entry->set_width_chars(core_padstack.get_padstack(false)->name.size());
+		core_padstack.signal_save().connect([this, name_entry, header_button]{
+			core_padstack.get_padstack(false)->name = name_entry->get_text();
+			header_button->set_label(core_padstack.get_padstack(false)->name);
+		});
+
 
 		auto type_combo = Gtk::manage(new Gtk::ComboBoxText());
 		type_combo->append("top", "Top");
@@ -44,13 +53,13 @@ namespace horizon {
 		type_combo->append("via", "Via / Hole");
 		type_combo->append("mechanical", "Mechanical");
 		type_combo->show();
-		main_window->top_panel->pack_start(*type_combo, false, false, 0);
+		header_button->add_widget("Type", type_combo);
 		type_combo->set_active_id(Padstack::type_lut.lookup_reverse(core_padstack.get_padstack(false)->type));
 
 		auto parameter_window = new ParameterWindow(main_window, &core_padstack.parameter_program_code, &core_padstack.parameter_set);
 		{
 			auto button = Gtk::manage(new Gtk::Button("Parameters..."));
-			main_window->top_panel->pack_start(*button, false, false, 0);
+			main_window->header->pack_start(*button);
 			button->show();
 			button->signal_clicked().connect([this, parameter_window]{parameter_window->present();});
 		}

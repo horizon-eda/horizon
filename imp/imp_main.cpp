@@ -115,5 +115,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	imp->run(argc, argv);
+
 	return 0;
 }

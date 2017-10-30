@@ -144,28 +144,29 @@ namespace horizon {
 		key_sequence_dialog->add_sequence("Ctrl+D", "Duplicate");
 		key_sequence_dialog->add_sequence("Ctrl+I", "Selection filter");
 		key_sequence_dialog->add_sequence("Esc", "Hover select");
+		key_sequence_dialog->add_sequence("Alt (hold)", "Fine grid");
 
 		grid_spin_button = Gtk::manage(new SpinButtonDim());
 		grid_spin_button->set_range(0.1_mm, 10_mm);
 		grid_spacing_binding = Glib::Binding::bind_property(grid_spin_button->property_value(), canvas->property_grid_spacing(), Glib::BINDING_BIDIRECTIONAL);
 		grid_spin_button->set_value(1.25_mm);
 		grid_spin_button->show_all();
-		main_window->top_panel->pack_start(*grid_spin_button, false, false, 0);
+		main_window->left_panel->pack_start(*grid_spin_button, false, false, 0);
 
 		auto save_button = Gtk::manage(new Gtk::Button("Save"));
 		save_button->signal_clicked().connect([this]{core.r->save();});
 		save_button->show();
-		main_window->top_panel->pack_start(*save_button, false, false, 0);
+		main_window->header->pack_start(*save_button);
 
 		auto selection_filter_button = Gtk::manage(new Gtk::Button("Selection filter"));
 		selection_filter_button->signal_clicked().connect([this]{selection_filter_dialog->show();});
 		selection_filter_button->show();
-		main_window->top_panel->pack_start(*selection_filter_button, false, false, 0);
+		main_window->header->pack_start(*selection_filter_button);
 
 		auto help_button = Gtk::manage(new Gtk::Button("Help"));
 		help_button->signal_clicked().connect([this]{key_sequence_dialog->show();});
 		help_button->show();
-		main_window->top_panel->pack_end(*help_button, false, false, 0);
+		main_window->header->pack_end(*help_button);
 
 		if(core.r->get_rules()) {
 			rules_window = RulesWindow::create(main_window, canvas, core.r->get_rules(), core.r);
@@ -173,7 +174,7 @@ namespace horizon {
 
 			{
 				auto button = Gtk::manage(new Gtk::Button("Rules..."));
-				main_window->top_panel->pack_start(*button, false, false, 0);
+				main_window->header->pack_start(*button);
 				button->show();
 				button->signal_clicked().connect([this]{rules_window->present();});
 				core.r->signal_tool_changed().connect([button](ToolID t){button->set_sensitive(t==ToolID::NONE);});
@@ -229,6 +230,24 @@ namespace horizon {
 
 		handle_cursor_move(Coordi()); //fixes label
 
+		Gtk::IconTheme::get_default()->add_resource_path("/net/carrotIndustries/horizon/icons");
+
+		app->signal_startup().connect([this, app] {
+			auto refBuilder = Gtk::Builder::create();
+			refBuilder->add_from_resource("/net/carrotIndustries/horizon/imp/app_menu.ui");
+
+			auto object = refBuilder->get_object("appmenu");
+			auto app_menu = Glib::RefPtr<Gio::MenuModel>::cast_dynamic(object);
+			app->set_app_menu(app_menu);
+			app->add_window(*main_window);
+			app->add_action("quit", [this]{
+				main_window->close();
+			});
+		});
+
+		sc();
+
+
 		app->run(*main_window);
 	}
 	
@@ -248,14 +267,36 @@ namespace horizon {
 		tool_process(r);
 	}
 
-	void ImpBase::add_tool_button(ToolID id, const std::string &label) {
+	void ImpBase::add_tool_button(ToolID id, const std::string &label, bool left) {
 		auto button = Gtk::manage(new Gtk::Button(label));
 		button->signal_clicked().connect([this, id]{
 			tool_begin(id);
 		});
 		button->show();
 		core.r->signal_tool_changed().connect([button](ToolID t){button->set_sensitive(t==ToolID::NONE);});
-		main_window->top_panel->pack_start(*button, false, false, 0);
+		if(left)
+			main_window->header->pack_start(*button);
+		else
+			main_window->header->pack_end(*button);
+	}
+
+	void ImpBase::add_tool_action(ToolID tid, const std::string &action) {
+		auto tool_action = main_window->add_action(action, [this, tid] {
+			tool_begin(tid);
+		});
+	}
+
+	Glib::RefPtr<Gio::Menu> ImpBase::add_hamburger_menu() {
+		auto hamburger_button = Gtk::manage(new Gtk::MenuButton);
+		hamburger_button->set_image_from_icon_name("open-menu-symbolic", Gtk::ICON_SIZE_BUTTON);
+		core.r->signal_tool_changed().connect([hamburger_button](ToolID t){hamburger_button->set_sensitive(t==ToolID::NONE);});
+
+		auto hamburger_menu = Gio::Menu::create();
+		hamburger_button->set_menu_model(hamburger_menu);
+		hamburger_button->show();
+		main_window->header->pack_end(*hamburger_button);
+
+		return hamburger_menu;
 	}
 
 	bool ImpBase::handle_key_press(GdkEventKey *key_event) {
@@ -607,6 +648,7 @@ namespace horizon {
 
 			sel.insert(sel_extra.begin(), sel_extra.end());
 			panels->update_objects(sel);
+			main_window->property_scrolled_window->set_visible(sel.size()>0);
 		}
 	}
 

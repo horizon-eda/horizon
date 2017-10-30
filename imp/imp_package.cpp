@@ -2,6 +2,7 @@
 #include "part.hpp"
 #include "footprint_generator/footprint_generator_window.hpp"
 #include "imp/parameter_window.hpp"
+#include "header_button.hpp"
 
 namespace horizon {
 	ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path):
@@ -39,23 +40,13 @@ namespace horizon {
 	void ImpPackage::construct() {
 		ImpLayer::construct();
 
-		{
-			auto button = Gtk::manage(new Gtk::Button("Footprint gen."));
-			main_window->top_panel->pack_start(*button, false, false, 0);
-			button->show();
-			button->signal_clicked().connect([this]{footprint_generator_window->show_all();});
-			core.r->signal_tool_changed().connect([button](ToolID t){button->set_sensitive(t==ToolID::NONE);});
-		}
-
-		add_tool_button(ToolID::IMPORT_DXF, "Import DXF");
-
 		footprint_generator_window = FootprintGeneratorWindow::create(main_window, &core_package);
 		footprint_generator_window->signal_generated().connect(sigc::mem_fun(this, &ImpBase::canvas_update_from_pp));
 
 		auto parameter_window = new ParameterWindow(main_window, &core_package.parameter_program_code, &core_package.parameter_set);
 		{
 			auto button = Gtk::manage(new Gtk::Button("Parameters..."));
-			main_window->top_panel->pack_start(*button, false, false, 0);
+			main_window->header->pack_start(*button);
 			button->show();
 			button->signal_clicked().connect([this, parameter_window]{parameter_window->present();});
 		}
@@ -107,32 +98,14 @@ namespace horizon {
 			canvas_update();
 		});
 
-		auto meta_button = Gtk::manage(new Gtk::MenuButton());
-		main_window->top_panel->pack_start(*meta_button, false, false, 0);
-		meta_button->show();
-		auto meta_popover = Gtk::manage(new Gtk::Popover(*meta_button));
-		meta_button->set_popover(*meta_popover);
-		auto gr = Gtk::manage(new Gtk::Grid());
-		gr->set_row_spacing(10);
-		gr->set_column_spacing(10);
-		gr->set_margin_start(20);
-		gr->set_margin_end(20);
-		gr->set_margin_top(20);
-		gr->set_margin_bottom(20);
-		auto attach_label = [gr](const std::string &las, int y) {
-			auto la = Gtk::manage(new Gtk::Label(las));
-			la->set_halign(Gtk::ALIGN_END);
-			la->get_style_context()->add_class("dim-label");
-			gr->attach(*la, 0, y, 1, 1);
-			auto entry = Gtk::manage(new Gtk::Entry());
-			gr->attach(*entry, 1, y, 1, 1);
-			return entry;
-		};
-		auto entry_name = attach_label("Name", 0);
-		auto entry_manufacturer = attach_label("Manufacturer", 1);
-		auto entry_tags = attach_label("Tags", 2);
-		gr->show_all();
-		meta_popover->add(*gr);
+		auto header_button = Gtk::manage(new HeaderButton);
+		header_button->set_label(core_package.get_package(false)->name);
+		main_window->header->set_custom_title(*header_button);
+		header_button->show();
+
+		auto entry_name = header_button->add_entry("Name");
+		auto entry_manufacturer = header_button->add_entry("Manufacturer");
+		auto entry_tags = header_button->add_entry("Tags");
 
 		{
 			auto pkg = core_package.get_package(false);
@@ -143,7 +116,20 @@ namespace horizon {
 			entry_tags->set_text(s.str());
 		}
 
-		core_package.signal_save().connect([this, entry_name, entry_manufacturer, entry_tags]{
+		auto hamburger_menu = add_hamburger_menu();
+		hamburger_menu->append("Import DXF", "win.import_dxf");
+		hamburger_menu->append("Footprint generator", "win.footprint_gen");
+
+		add_tool_action(ToolID::IMPORT_DXF, "import_dxf");
+
+		{
+			auto tool_action = main_window->add_action("footprint_gen");
+			tool_action->signal_activate().connect([this](const Glib::VariantBase& var){
+				footprint_generator_window->show_all();
+			});
+		}
+
+		core_package.signal_save().connect([this, entry_name, entry_manufacturer, entry_tags, header_button]{
 			auto pkg = core_package.get_package(false);
 			std::stringstream ss(entry_tags->get_text());
 			std::istream_iterator<std::string> begin(ss);
@@ -153,6 +139,7 @@ namespace horizon {
 			pkg->tags.insert(tags.begin(), tags.end());
 			pkg->name = entry_name->get_text();
 			pkg->manufacturer = entry_manufacturer->get_text();
+			header_button->set_label(pkg->name);
 		});
 
 

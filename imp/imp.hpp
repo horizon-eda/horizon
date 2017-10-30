@@ -68,13 +68,15 @@ namespace horizon {
 			bool handle_context_menu(GdkEventButton *button_event);
 			void tool_process(const ToolResponse &resp);
 			void tool_begin(ToolID id);
-			void add_tool_button(ToolID id, const std::string &label);
+			void add_tool_button(ToolID id, const std::string &label, bool left=true);
 			void handle_warning_selected(const Coordi &pos);
 			virtual bool handle_broadcast(const json &j);
 			bool handle_close(GdkEventAny *ev);
 			json send_json(const json &j);
 
 			void key_seq_append_default(KeySequence &ks);
+			void add_tool_action(ToolID tid, const std::string &action);
+			Glib::RefPtr<Gio::Menu> add_hamburger_menu();
 			
 		private:
 			void fix_cursor_pos();

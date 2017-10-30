@@ -1,6 +1,7 @@
 #include "imp_symbol.hpp"
 #include "part.hpp"
 #include "symbol_preview/symbol_preview_window.hpp"
+#include "header_button.hpp"
 
 namespace horizon {
 	ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool_path):
@@ -42,7 +43,7 @@ namespace horizon {
 
 		{
 			auto button = Gtk::manage(new Gtk::Button("Preview..."));
-			main_window->top_panel->pack_start(*button, false, false, 0);
+			main_window->header->pack_start(*button);
 			button->show();
 			button->signal_clicked().connect([this]{
 				symbol_preview_window->present();
@@ -50,14 +51,19 @@ namespace horizon {
 		}
 
 
-		name_entry = Gtk::manage(new Gtk::Entry());
-		name_entry->show();
-		main_window->top_panel->pack_start(*name_entry, false, false, 0);
-		name_entry->set_text(core.y->get_symbol()->name);
+		auto header_button = Gtk::manage(new HeaderButton);
+		header_button->set_label(core.y->get_symbol()->name);
+		main_window->header->set_custom_title(*header_button);
+		header_button->show();
 
-		core.r->signal_save().connect([this]{
+		name_entry = header_button->add_entry("Name");
+		name_entry->set_text(core.y->get_symbol()->name);
+		name_entry->set_width_chars(core.y->get_symbol()->name.size());
+
+		core.r->signal_save().connect([this, header_button]{
 			auto sym = core.y->get_symbol(false);
 			sym->name = name_entry->get_text();
+			header_button->set_label(sym->name);
 			sym->text_placements = symbol_preview_window->get_text_placements();
 		});
 		grid_spin_button->set_sensitive(false);

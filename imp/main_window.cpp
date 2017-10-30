@@ -4,13 +4,12 @@
 namespace horizon {
 
 	MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x) :
-		Gtk::Window(cobject) {
+		Gtk::ApplicationWindow(cobject) {
 
 		x->get_widget("gl_container", gl_container);
 		x->get_widget("active_tool_label", active_tool_label);
 		x->get_widget("tool_hint_label", tool_hint_label);
 		x->get_widget("left_panel", left_panel);
-		x->get_widget("top_panel", top_panel);
 		x->get_widget("cursor_label", cursor_label);
 		x->get_widget("property_viewport", property_viewport);
 		x->get_widget("tool_bar", tool_bar);
@@ -18,11 +17,16 @@ namespace horizon {
 		x->get_widget("tool_bar_stack", tool_bar_stack);
 		x->get_widget("tool_bar_tip", tool_bar_tip_label);
 		x->get_widget("tool_bar_flash", tool_bar_flash_label);
+		x->get_widget("header", header);
+		x->get_widget("property_scrolled_window", property_scrolled_window);
+
+		set_icon(Gdk::Pixbuf::create_from_resource("/net/carrotIndustries/horizon/icon.svg"));
 
 		canvas = Gtk::manage(new CanvasGL());
 		gl_container->pack_start(*canvas, true, true, 0);
+		canvas->show();
 		tool_bar_set_visible(false);
-		show_all();
+		//show_all();
 	}
 
 	void MainWindow::tool_bar_set_visible(bool v) {

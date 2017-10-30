@@ -95,18 +95,27 @@ namespace horizon {
 		sheet_box->signal_select_sheet().connect(sigc::mem_fun(this, &ImpSchematic::handle_select_sheet));
 		main_window->left_panel->pack_start(*sheet_box, false, false, 0);
 
-		auto print_button = Gtk::manage(new Gtk::Button("Export PDF"));
-		print_button->signal_clicked().connect(sigc::mem_fun(this, &ImpSchematic::handle_export_pdf));
-		print_button->show();
-		main_window->top_panel->pack_start(*print_button, false, false, 0);
+		auto hamburger_menu = add_hamburger_menu();
+		hamburger_menu->append("Annotate", "win.annotate");
+		add_tool_action(ToolID::ANNOTATE, "annotate");
 
-		add_tool_button(ToolID::ANNOTATE, "Annotate");
-		add_tool_button(ToolID::MANAGE_BUSES, "Buses...");
-		add_tool_button(ToolID::MANAGE_NET_CLASSES, "Net classes...");
-		add_tool_button(ToolID::EDIT_SCHEMATIC_PROPERTIES, "Schematic properties...");
-		add_tool_button(ToolID::ADD_PART, "Place part");
+		hamburger_menu->append("Buses...", "win.manage_buses");
+		add_tool_action(ToolID::MANAGE_BUSES, "manage_buses");
 
-		core.r->signal_tool_changed().connect([print_button](ToolID t){print_button->set_sensitive(t==ToolID::NONE);});
+		hamburger_menu->append("Net classes...", "win.manage_nc");
+		add_tool_action(ToolID::MANAGE_NET_CLASSES, "manage_nc");
+
+		hamburger_menu->append("Schematic properties", "win.sch_properties");
+		add_tool_action(ToolID::EDIT_SCHEMATIC_PROPERTIES, "sch_properties");
+
+		hamburger_menu->append("Export PDF", "win.export_pdf");
+
+		main_window->add_action("export_pdf", [this] {
+			handle_export_pdf();
+		});
+
+
+		add_tool_button(ToolID::ADD_PART, "Place part", false);
 
 		grid_spin_button->set_sensitive(false);
 
@@ -121,7 +130,7 @@ namespace horizon {
 
 	void ImpSchematic::handle_export_pdf() {
 		GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save PDF",
-			main_window->gobj(),
+			GTK_WINDOW(main_window->gobj()),
 			GTK_FILE_CHOOSER_ACTION_SAVE,
 			"_Open",
 			"_Cancel");
