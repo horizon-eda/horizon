@@ -106,6 +106,7 @@
                                         <property name="can_focus">False</property>
                                         <property name="halign">start</property>
                                         <property name="label" translatable="yes">tip</property>
+                                        <property name="wrap">True</property>
                                       </object>
                                       <packing>
                                         <property name="name">tip</property>
@@ -143,6 +144,9 @@
                           </object>
                         </child>
                       </object>
+                      <packing>
+                        <property name="pass_through">True</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>

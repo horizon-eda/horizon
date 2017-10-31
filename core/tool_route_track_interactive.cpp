@@ -554,7 +554,7 @@ namespace horizon {
 	void ToolRouteTrackInteractive::update_tip() {
 		std::stringstream ss;
 		if(state==State::ROUTING) {
-			ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete last segment <b>/:</b>track posture <b>v:</b>toggle via <i>";
+			ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete last segment <b>/:</b>track posture <b>v:</b>toggle via <b>w:</b>track width <b>W:</b>default track width <i> ";
 			auto nets = router->GetCurrentNets();
 			Net *net = nullptr;
 			for(auto x: nets) {

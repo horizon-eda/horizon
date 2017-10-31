@@ -69,7 +69,7 @@ namespace horizon {
 		else {
 			ss << "−"; //this is U+2212 MINUS SIGN, has same width as +
 		}
-		ss << std::fixed << std::setprecision(3)  << std::setw(7) << std::setfill('0') << std::internal << std::abs(pos.x/1e6) << " mm ";
+		ss << std::fixed << std::setprecision(3)  << std::setw(7) << std::setfill('0') << std::internal << std::abs(pos.x/1e6) << " mm "; //NBSP
 		if(delta) {
 			ss << "Δ";
 		}
@@ -80,7 +80,7 @@ namespace horizon {
 		else {
 			ss << "−";
 		}
-		ss << std::setw(7) << std::abs(pos.y/1e6) << " mm";
+		ss << std::setw(7) << std::abs(pos.y/1e6) << " mm"; //NBSP
 		return ss.str();
 	}
 
@@ -92,7 +92,7 @@ namespace horizon {
 		else {
 			ss << "−"; //this is U+2212 MINUS SIGN, has same width as +
 		}
-		ss << std::fixed << std::setprecision(3)  << std::setw(7) << std::setfill('0') << std::internal << std::abs(x/1e6) << " mm ";
+		ss << std::fixed << std::setprecision(3)  << std::setw(7) << std::setfill('0') << std::internal << std::abs(x/1e6) << " mm"; //NBSP
 		return ss.str();
 	}
 
@@ -111,7 +111,7 @@ namespace horizon {
 		else {
 			ss << "−"; //this is U+2212 MINUS SIGN, has same width as +
 		}
-		ss << std::fixed << std::setprecision(3)  << std::setw(7) << std::setfill('0') << std::internal << std::abs((x/65536.0)*360) << " ° ";
+		ss << std::fixed << std::setprecision(3)  << std::setw(7) << std::setfill('0') << std::internal << std::abs((x/65536.0)*360) << " °"; //NBSP
 		return ss.str();
 	}
 
