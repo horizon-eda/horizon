@@ -38,7 +38,7 @@ namespace horizon {
 	GerberLayerEditor* GerberLayerEditor::create(FabOutputWindow *pa, FabOutputSettings::GerberLayer *la) {
 		GerberLayerEditor* w;
 		Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-		x->add_from_resource("/net/carrotIndustries/horizon/imp/fab_output.ui");
+		x->add_from_resource("/net/carrotIndustries/horizon/imp/fab_output.ui", "gerber_layer_editor");
 		x->get_widget_derived("gerber_layer_editor", w, pa, la);
 		w->reference();
 		return w;
