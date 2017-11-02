@@ -56,11 +56,8 @@ namespace horizon {
 		glUniform2f(offset_loc, ca->offset.x, ca->offset.y);
 		glUniform2f(a_loc, sel_a.x, sel_a.y);
 		glUniform2f(b_loc, sel_b.x, sel_b.y);
-		glEnable (GL_BLEND);
-		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
-		glDisable(GL_BLEND);
 
 		glBindVertexArray (0);
 		glUseProgram (0);

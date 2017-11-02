@@ -12,6 +12,8 @@ namespace horizon {
 			Glib::RefPtr<Glib::Binding> work_layer_binding;
 			Glib::RefPtr<Glib::Binding> layer_opacity_binding;
 
+			CanvasPreferences *get_canvas_preferences() override {return &preferences.canvas_layer;}
+
 		~ImpLayer() {}
 
 

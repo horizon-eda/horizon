@@ -197,6 +197,10 @@ namespace horizon {
 			typedef sigc::signal<void, const Coordi&> type_signal_cursor_moved;
 			type_signal_cursor_moved signal_cursor_moved() {return s_signal_cursor_moved;}
 
+			typedef sigc::signal<void, unsigned int> type_signal_grid_mul_changed;
+			type_signal_grid_mul_changed signal_grid_mul_changed() {return s_signal_grid_mul_changed;}
+			unsigned int get_grid_mul() const {return grid.mul;}
+
 			void center_and_zoom(const Coordi &center);
 			void zoom_to_bbox(const Coordi &a, const Coordi &b);
 
@@ -210,6 +214,11 @@ namespace horizon {
 			std::set<SelectableRef> get_selection_at(const Coordi &c);
 			Coordf screen2canvas(const Coordf &p) const;
 			void update_cursor_pos(double x, double y);
+
+			void set_background_color(const Color &c);
+			void set_grid_color(const Color &c);
+			void set_grid_style(Grid::Style st);
+			void set_grid_alpha(float a);
 
 
 		protected:
@@ -251,9 +260,6 @@ namespace horizon {
 			Coord<float> pan_pointer_pos_orig;
 			Coord<float> pan_offset_orig;
 			
-
-
-			
 			bool selection_allowed = true;
 			Glib::Property<int> p_property_work_layer;
 			Glib::Property<uint64_t> p_property_grid_spacing;
@@ -275,9 +281,7 @@ namespace horizon {
 			
 			type_signal_selection_changed s_signal_selection_changed;
 			type_signal_cursor_moved s_signal_cursor_moved;
-
-	
-			
+			type_signal_grid_mul_changed s_signal_grid_mul_changed;
 	};
 	
 	

@@ -42,6 +42,36 @@ namespace horizon {
 		clarify_menu = Gtk::manage(new Gtk::Menu);
 	}
 
+	void CanvasGL::set_background_color(const Color &c) {
+		background_color = c;
+		queue_draw();
+	}
+
+	void CanvasGL::set_grid_color(const Color &c) {
+		grid.color = c;
+		queue_draw();
+	}
+
+	void CanvasGL::set_grid_alpha(float a) {
+		grid.alpha = a;
+		queue_draw();
+	}
+
+	void CanvasGL::set_grid_style(horizon::Grid::Style st) {
+		switch(st) {
+			case Grid::Style::CROSS :
+				grid.mark_size = 5;
+			break;
+			case Grid::Style::DOT :
+				grid.mark_size = 1;
+			break;
+			case Grid::Style::GRID :
+				grid.mark_size = 2000;
+			break;
+		}
+
+	}
+
 	void CanvasGL::on_size_allocate(Gtk::Allocation &alloc) {
 		width = alloc.get_width();
 		height = alloc.get_height();
@@ -86,13 +116,11 @@ namespace horizon {
 		glClearColor(background_color.r, background_color.g ,background_color.b, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		GL_CHECK_ERROR
-		grid.render();
-		GL_CHECK_ERROR
 		glEnable (GL_BLEND);
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		grid.render();
 		GL_CHECK_ERROR
 		triangle_renderer.render();
-		glDisable(GL_BLEND);
 		GL_CHECK_ERROR
 
 		selectables_renderer.render();
@@ -101,6 +129,7 @@ namespace horizon {
 		GL_CHECK_ERROR
 		grid.render_cursor(cursor_pos_grid);
 		marker_renderer.render();
+		glDisable(GL_BLEND);
 		glFlush();
 		GL_CHECK_ERROR
 		return Gtk::GLArea::on_render(context);

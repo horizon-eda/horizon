@@ -8,5 +8,17 @@ namespace horizon {
 	void bind_widget(Gtk::Switch *sw, bool &v);
 	void bind_widget(Gtk::CheckButton *sw, bool &v);
 	void bind_widget(Gtk::SpinButton *sp, int &v);
+	void bind_widget(Gtk::Scale *sc, float &v);
 	void bind_widget(Gtk::Entry *en, std::string &v);
+	template <typename T> void bind_widget(std::map<T, Gtk::RadioButton*> &widgets, T &v) {
+		widgets[v]->set_active(true);
+		for(auto &it: widgets) {
+			T key = it.first;
+			Gtk::RadioButton *w = it.second;
+			it.second->signal_toggled().connect([key, w, &v] {
+				if(w->get_active())
+					v = key;
+			});
+		}
+	}
 }

@@ -264,7 +264,9 @@ SRC_IMP = \
 	canvas3d/canvas3d.cpp\
 	canvas3d/cover.cpp\
 	canvas3d/wall.cpp\
-	imp/header_button.cpp
+	imp/header_button.cpp\
+	imp/preferences.cpp\
+	imp/preferences_window.cpp\
 
 SRC_ROUTER = \
 	router/router/pns_router.cpp \

@@ -10,6 +10,8 @@ namespace horizon {
 		x->get_widget("active_tool_label", active_tool_label);
 		x->get_widget("tool_hint_label", tool_hint_label);
 		x->get_widget("left_panel", left_panel);
+		x->get_widget("grid_box", grid_box);
+		x->get_widget("grid_mul_label", grid_mul_label);
 		x->get_widget("cursor_label", cursor_label);
 		x->get_widget("property_viewport", property_viewport);
 		x->get_widget("tool_bar", tool_bar);

@@ -15,6 +15,7 @@
 #include "keyseq_dialog.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "imp_interface.hpp"
+#include "preferences.hpp"
 #include <zmq.hpp>
 
 #ifdef G_OS_WIN32
@@ -78,8 +79,16 @@ namespace horizon {
 			void add_tool_action(ToolID tid, const std::string &action);
 			Glib::RefPtr<Gio::Menu> add_hamburger_menu();
 			
+			ImpPreferences preferences;
+			class ImpPreferencesWindow *preferences_window = nullptr;
+
+			virtual CanvasPreferences *get_canvas_preferences() {return &preferences.canvas_non_layer;}
+
 		private:
 			void fix_cursor_pos();
+			void apply_settings();
+			Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
+			void show_preferences_window();
 
 	};
 }

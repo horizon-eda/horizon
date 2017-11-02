@@ -103,10 +103,7 @@ namespace horizon {
 		glUniform1f(alpha_loc, ca->property_layer_opacity()/100);
 		glUniform2f(offset_loc, ca->offset.x, ca->offset.y);
 
-		glEnable (GL_BLEND);
-		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDrawArrays (GL_POINTS, 0, markers.size());
-		glDisable (GL_BLEND);
 
 		glBindVertexArray (0);
 		glUseProgram (0);

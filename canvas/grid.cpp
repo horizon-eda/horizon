@@ -3,7 +3,7 @@
 #include "canvas.hpp"
 
 namespace horizon {
-	Grid::Grid(class CanvasGL *c): ca(c), spacing(1.25_mm), mark_size(5), color(Color::new_from_int(0, 51, 136)) {
+	Grid::Grid(class CanvasGL *c): ca(c), spacing(1.25_mm), mark_size(5), color(Color::new_from_int(0, 51, 136)), alpha(1) {
 		
 	}
 	
@@ -74,29 +74,50 @@ namespace horizon {
 		glUniform1f(scale_loc, ca->scale);
 		glUniform2f(offset_loc, ca->offset.x, ca->offset.y);
 		glUniform1f(mark_size_loc, mark_size);
-		glUniform3f(color_loc, color.r, color.g, color.b);
-		
-		Coord<float> grid_0;
-		grid_0.x = (round((-ca->offset.x/ca->scale)/spacing)-1)*spacing;
-		grid_0.y = (round((-(ca->height-ca->offset.y)/ca->scale)/spacing)-1)*spacing;
-		
+		glUniform4f(color_loc, color.r, color.g, color.b, alpha);
 		
 		float sp = spacing;
+		float sp_px = sp*ca->scale;
+		unsigned int newmul = 1;
+		while(sp_px < 20) {
+			 newmul *= 2;
+			 sp  = spacing*newmul;
+			 sp_px = sp*ca->scale;
+		}
 
-		int n;
-		do {
-			glUniform1f(grid_size_loc, sp);
-			glUniform2f(grid_0_loc, grid_0.x, grid_0.y);
-			int mod = (ca->width/ca->scale)/sp+4;
-			glUniform1i(grid_mod_loc, mod);
-			n = mod * ((ca->height/ca->scale)/sp+4);
-			sp*=2;
-		} while(n>.5e6);
+		Coord<float> grid_0;
+		grid_0.x = (round((-ca->offset.x/ca->scale)/sp)-1)*sp;
+		grid_0.y = (round((-(ca->height-ca->offset.y)/ca->scale)/sp)-1)*sp;
+
+		if(mul != newmul) {
+			mul = newmul;
+			ca->s_signal_grid_mul_changed.emit(mul);
+		}
+
+		glUniform1f(grid_size_loc, sp);
+		glUniform2f(grid_0_loc, grid_0.x, grid_0.y);
 
 		glLineWidth(1);
-		glDrawArraysInstanced (GL_LINES, 0, 4, n);
-		
-		
+		if(mark_size > 100) {
+			glUniform1f(mark_size_loc, ca->height*2);
+			int n = (ca->width/ca->scale)/sp+4;
+			glUniform1i(grid_mod_loc, n+1);
+			glDrawArraysInstanced (GL_LINES, 0, 2, n);
+
+			glUniform1f(mark_size_loc, ca->width*2);
+			n = (ca->height/ca->scale)/sp+4;
+			glUniform1i(grid_mod_loc, 1);
+			glDrawArraysInstanced (GL_LINES, 2, 2, n);
+		}
+		else {
+			int mod = (ca->width/ca->scale)/sp+4;
+			glUniform1i(grid_mod_loc, mod);
+			int n = mod * ((ca->height/ca->scale)/sp+4);
+			glDrawArraysInstanced (GL_LINES, 0, 4, n);
+		}
+
+
+
 		//draw origin
 		grid_0.x = 0;
 		grid_0.y = 0;
@@ -105,7 +126,7 @@ namespace horizon {
 		glUniform2f(grid_0_loc, grid_0.x, grid_0.y);
 		glUniform1i(grid_mod_loc, 1);
 		glUniform1f(mark_size_loc, 15);
-		glUniform3f(color_loc, 0, 1, 0);
+		glUniform4f(color_loc, 0, 1, 0, 1);
 		
 		glLineWidth(1);
 		glDrawArraysInstanced (GL_LINES, 0, 4, 1);
@@ -132,15 +153,15 @@ namespace horizon {
 
 
 
-		glUniform3f(color_loc, ca->background_color.r, ca->background_color.g, ca->background_color.b);
+		glUniform4f(color_loc, ca->background_color.r, ca->background_color.g, ca->background_color.b, 1);
 		glLineWidth(4);
 		glDrawArraysInstanced (GL_LINES, 0, 12, 1);
 
 		if(ca->target_current.is_valid()) {
-			glUniform3f(color_loc, 1, 0, 0);
+			glUniform4f(color_loc, 1, 0, 0, 1);
 		}
 		else {
-			glUniform3f(color_loc, 0, 1, 0);
+			glUniform4f(color_loc, 0, 1, 0, 1);
 		}
 		glLineWidth(1);
 		glDrawArraysInstanced (GL_LINES, 0, 12, 1);

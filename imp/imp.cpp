@@ -8,6 +8,7 @@
 #include "part.hpp"
 #include "rules/rules_window.hpp"
 #include "util.hpp"
+#include "preferences_window.hpp"
 #include <iomanip>
 #include <glibmm/main.h>
 
@@ -84,8 +85,11 @@ namespace horizon {
 		if(dontask)
 			return false;
 
-		if(!core.r->get_needs_save())
+		if(!core.r->get_needs_save()) {
+			if(preferences_window)
+				preferences_window->hide();
 			return false;
+		}
 
 		Gtk::MessageDialog md(*main_window,  "Save changes before closing?", false /* use_markup */, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
 		md.set_secondary_text("If you don't save, all your changes will be permanently lost.");
@@ -94,6 +98,8 @@ namespace horizon {
 		md.add_button("Save", 2);
 		switch(md.run()) {
 			case 1:
+				if(preferences_window)
+					preferences_window->hide();
 				return false; //close
 
 			case 2:
@@ -104,6 +110,22 @@ namespace horizon {
 				return true; //keep window open
 		}
 		return false;
+	}
+
+	void ImpBase::show_preferences_window() {
+		if(!preferences_window) {
+			preferences.load();
+			preferences_window = new ImpPreferencesWindow(&preferences);
+			preferences_window->set_transient_for(*main_window);
+
+			preferences_window->signal_hide().connect([this] {
+				delete preferences_window;
+				preferences_window = nullptr;
+				preferences.save();
+				preferences.unlock();
+			});
+		}
+		preferences_window->present();
 	}
 
 	void ImpBase::run(int argc, char *argv[]) {
@@ -151,7 +173,7 @@ namespace horizon {
 		grid_spacing_binding = Glib::Binding::bind_property(grid_spin_button->property_value(), canvas->property_grid_spacing(), Glib::BINDING_BIDIRECTIONAL);
 		grid_spin_button->set_value(1.25_mm);
 		grid_spin_button->show_all();
-		main_window->left_panel->pack_start(*grid_spin_button, false, false, 0);
+		main_window->grid_box->pack_start(*grid_spin_button, true, true, 0);
 
 		auto save_button = Gtk::manage(new Gtk::Button("Save"));
 		save_button->signal_clicked().connect([this]{core.r->save();});
@@ -181,6 +203,34 @@ namespace horizon {
 
 			}
 		}
+
+		preferences.signal_changed().connect(sigc::mem_fun(this, &ImpBase::apply_settings));
+
+		preferences.load();
+
+		preferences_monitor = Gio::File::create_for_path(ImpPreferences::get_preferences_filename())->monitor();
+
+		preferences_monitor->signal_changed().connect([this](const Glib::RefPtr<Gio::File> &file,const Glib::RefPtr<Gio::File> &file_other, Gio::FileMonitorEvent ev){
+			preferences.load();
+		});
+
+		main_window->add_action("preferences", [this] {
+			if(preferences.lock()) {
+				show_preferences_window();
+			}
+			else {
+				Gtk::MessageDialog md(*main_window,  "Can't lock preferences", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_NONE);
+				md.add_button("OK", Gtk::RESPONSE_OK);
+				md.add_button("Force unlock", 1);
+				md.set_secondary_text("Close all other preferences dialogs first");
+				if(md.run() == 1) {
+					preferences.unlock();
+					preferences.lock();
+					show_preferences_window();
+				}
+			}
+		});
+
 
 		core.r->signal_tool_changed().connect([save_button, selection_filter_button](ToolID t){save_button->set_sensitive(t==ToolID::NONE); selection_filter_button->set_sensitive(t==ToolID::NONE);});
 
@@ -218,6 +268,10 @@ namespace horizon {
 			}
 		});
 
+		canvas->signal_grid_mul_changed().connect([this] (unsigned int mul) {
+			main_window->grid_mul_label->set_text("×"+std::to_string(mul));
+		});
+
 		context_menu = Gtk::manage(new Gtk::Menu());
 
 
@@ -251,6 +305,20 @@ namespace horizon {
 		app->run(*main_window);
 	}
 	
+	void ImpBase::apply_settings() {
+		auto canvas_prefs = get_canvas_preferences();
+		if(canvas_prefs->background_color == CanvasPreferences::BackgroundColor::BLUE) {
+			canvas->set_background_color(Color::new_from_int(0, 24, 64));
+			canvas->set_grid_color(Color::new_from_int(0, 78, 208));
+		}
+		else {
+			canvas->set_grid_color({1,1,1});
+			canvas->set_background_color({0,0,0});
+		}
+		canvas->set_grid_style(canvas_prefs->grid_style);
+		canvas->set_grid_alpha(canvas_prefs->grid_opacity);
+	}
+
 	void ImpBase::canvas_update_from_pp() {
 		auto sel = canvas->get_selection();
 		canvas_update();

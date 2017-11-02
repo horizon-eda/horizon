@@ -10,12 +10,15 @@ namespace horizon {
 			void realize();
 			void render();
 			void render_cursor(Coord<int64_t> &coord);
+			enum class Style {CROSS, DOT, GRID};
 		
 		private :
 			CanvasGL *ca;
 			int64_t spacing;
 			float mark_size;
 			Color color;
+			float alpha;
+			unsigned int mul = 0;
 			
 			GLuint program;
 			GLuint vao;

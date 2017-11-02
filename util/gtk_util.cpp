@@ -34,6 +34,13 @@ namespace horizon {
 		});
 	}
 
+	void bind_widget(Gtk::Scale *sc, float &v) {
+		sc->set_value(v);
+		sc->signal_value_changed().connect([sc, &v]{
+				v = sc->get_value();
+		});
+	}
+
 	void bind_widget(Gtk::Entry *en, std::string &v) {
 		en->set_text(v);
 		en->signal_changed().connect([en, &v]{
