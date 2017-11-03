@@ -77,9 +77,9 @@ namespace horizon {
 		height = alloc.get_height();
 
 		screenmat.fill(0);
-		screenmat[MAT3_XX] = 2.0/(width*get_scale_factor());
+		screenmat[MAT3_XX] = 2.0/(width);
 		screenmat[MAT3_X0] = -1;
-		screenmat[MAT3_YY] = -2.0/(height*get_scale_factor());
+		screenmat[MAT3_YY] = -2.0/(height);
 		screenmat[MAT3_Y0] = 1;
 		screenmat[8] = 1;
 

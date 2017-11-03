@@ -97,7 +97,7 @@ namespace horizon {
 		glUniform1f(grid_size_loc, sp);
 		glUniform2f(grid_0_loc, grid_0.x, grid_0.y);
 
-		glLineWidth(1);
+		glLineWidth(1*ca->get_scale_factor());
 		if(mark_size > 100) {
 			glUniform1f(mark_size_loc, ca->height*2);
 			int n = (ca->width/ca->scale)/sp+4;
@@ -128,7 +128,7 @@ namespace horizon {
 		glUniform1f(mark_size_loc, 15);
 		glUniform4f(color_loc, 0, 1, 0, 1);
 		
-		glLineWidth(1);
+		glLineWidth(1*ca->get_scale_factor());
 		glDrawArraysInstanced (GL_LINES, 0, 4, 1);
 		
 		glBindVertexArray (0);
@@ -154,7 +154,7 @@ namespace horizon {
 
 
 		glUniform4f(color_loc, ca->background_color.r, ca->background_color.g, ca->background_color.b, 1);
-		glLineWidth(4);
+		glLineWidth(4*ca->get_scale_factor());
 		glDrawArraysInstanced (GL_LINES, 0, 12, 1);
 
 		if(ca->target_current.is_valid()) {
@@ -163,7 +163,7 @@ namespace horizon {
 		else {
 			glUniform4f(color_loc, 0, 1, 0, 1);
 		}
-		glLineWidth(1);
+		glLineWidth(1*ca->get_scale_factor());
 		glDrawArraysInstanced (GL_LINES, 0, 12, 1);
 
 		glBindVertexArray (0);
