@@ -1,5 +1,6 @@
 #include "object_descr.hpp"
 #include "hole.hpp"
+#include "dimension.hpp"
 
 namespace horizon {
 	const std::map<ObjectType, ObjectDescription> object_descriptions = {
@@ -108,6 +109,16 @@ namespace horizon {
 			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Net"}},
 			{ObjectProperty::ID::FROM_RULES, {ObjectProperty::Type::BOOL, "From rules"}},
 		}}},
+		{ObjectType::DIMENSION, {"Dimension", "Dimensions", {
+			{ObjectProperty::ID::SIZE, {ObjectProperty::Type::LENGTH, "Size"}},
+			{ObjectProperty::ID::MODE, {ObjectProperty::Type::ENUM, "Mode",
+				{
+					{static_cast<int>(Dimension::Mode::DISTANCE), "Distance"},
+					{static_cast<int>(Dimension::Mode::HORIZONTAL), "Horizontal"},
+					{static_cast<int>(Dimension::Mode::VERTICAL), "Vertical"},
+				}
+			}},
+		}}}
 	};
 
 }

@@ -73,6 +73,7 @@ namespace horizon {
 			case ObjectType::LINE:
 			case ObjectType::BOARD_PACKAGE:
 			case ObjectType::VIA:
+			case ObjectType::DIMENSION:
 				return true;
 			break;
 			default:
@@ -96,6 +97,9 @@ namespace horizon {
 	}
 	std::map<UUID, Line> *CoreBoard::get_line_map(bool work) {
 		return &brd.lines;
+	}
+	std::map<UUID, Dimension> *CoreBoard::get_dimension_map() {
+		return &brd.dimensions;
 	}
 
 	bool CoreBoard::get_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {

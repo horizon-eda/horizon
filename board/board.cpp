@@ -112,6 +112,13 @@ namespace horizon {
 				planes.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
 			}
 		}
+		if(j.count("dimensions")) {
+			const json &o = j["dimensions"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID(it.key());
+				dimensions.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
+			}
+		}
 		if(j.count("rules")) {
 			rules.load_from_json(j.at("rules"));
 			rules.cleanup(block);
@@ -168,6 +175,7 @@ namespace horizon {
 		texts(brd.texts),
 		lines(brd.lines),
 		planes(brd.planes),
+		dimensions(brd.dimensions),
 		warnings(brd.warnings),
 		rules(brd.rules),
 		fab_output_settings(brd.fab_output_settings),
@@ -194,6 +202,7 @@ namespace horizon {
 		texts = brd.texts;
 		lines = brd.lines;
 		planes = brd.planes;
+		dimensions = brd.dimensions;
 		warnings = brd.warnings;
 		rules = brd.rules;
 		fab_output_settings = brd.fab_output_settings;
@@ -659,6 +668,10 @@ namespace horizon {
 		j["stackup"] = json::object();
 		for(const auto &it: stackup) {
 			j["stackup"][std::to_string(it.first)] = it.second.serialize();
+		}
+		j["dimensions"] = json::object();
+		for(const auto &it: dimensions) {
+			j["dimensions"][(std::string)it.first] = it.second.serialize();
 		}
 		return j;
 	}

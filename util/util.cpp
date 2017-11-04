@@ -84,13 +84,15 @@ namespace horizon {
 		return ss.str();
 	}
 
-	std::string dim_to_string(int64_t x) {
+	std::string dim_to_string(int64_t x, bool with_sign) {
 		std::ostringstream ss;
-		if(x >= 0) {
-			ss << "+";
-		}
-		else {
-			ss << "−"; //this is U+2212 MINUS SIGN, has same width as +
+		if(with_sign) {
+			if(x >= 0) {
+				ss << "+";
+			}
+			else {
+				ss << "−"; //this is U+2212 MINUS SIGN, has same width as +
+			}
 		}
 		ss << std::fixed << std::setprecision(3)  << std::setw(7) << std::setfill('0') << std::internal << std::abs(x/1e6) << " mm"; //NBSP
 		return ss.str();
@@ -113,10 +115,6 @@ namespace horizon {
 		}
 		ss << std::fixed << std::setprecision(3)  << std::setw(7) << std::setfill('0') << std::internal << std::abs((x/65536.0)*360) << " °"; //NBSP
 		return ss.str();
-	}
-
-	static int64_t sgn(int64_t x) {
-		return x>0?1:-1;
 	}
 
 	int64_t round_multiple(int64_t x, int64_t mul) {

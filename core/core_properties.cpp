@@ -1,6 +1,7 @@
 #include "core.hpp"
 #include "hole.hpp"
 #include "polygon.hpp"
+#include "dimension.hpp"
 
 namespace horizon {
 	#define HANDLED if(handled){*handled=true;}
@@ -91,6 +92,19 @@ namespace horizon {
 						return 0;
 				}
 			break;
+			case ObjectType::DIMENSION :
+				switch(property) {
+					case ObjectProperty::ID::SIZE:
+						HANDLED
+						return get_dimension(uu)->label_size;
+					case ObjectProperty::ID::MODE:
+						HANDLED
+						return static_cast<int>(get_dimension(uu)->mode);
+					default :
+						NOT_HANDLED
+						return 0;
+				}
+			break;
 			case ObjectType::POLYGON :
 				switch(property) {
 					case ObjectProperty::ID::LAYER:
@@ -172,6 +186,22 @@ namespace horizon {
 						HANDLED
 						get_text(uu, false)->layer = value;
 					break;
+					default :
+						NOT_HANDLED
+						return;
+				}
+			break;
+			case ObjectType::DIMENSION :
+				switch(property) {
+					case ObjectProperty::ID::SIZE:
+						HANDLED
+						get_dimension(uu)->label_size = std::max(value, (int64_t)100000);
+					break;
+					case ObjectProperty::ID::MODE:
+						HANDLED
+						get_dimension(uu)->mode= static_cast<Dimension::Mode>(value);
+					break;
+
 					default :
 						NOT_HANDLED
 						return;

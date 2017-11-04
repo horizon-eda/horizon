@@ -49,6 +49,7 @@ namespace horizon {
 			std::map<UUID, Junction> *get_junction_map(bool work=true) override;
 			std::map<UUID, Text> *get_text_map(bool work=true) override;
 			std::map<UUID, Line> *get_line_map(bool work=true) override;
+			std::map<UUID, Dimension> *get_dimension_map() override;
 
 			ViaPadstackProvider via_padstack_provider;
 

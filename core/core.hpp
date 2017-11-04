@@ -33,7 +33,7 @@ namespace horizon {
 		DRAW_POLYGON_RECTANGLE, DRAW_LINE_RECTANGLE,
 		EDIT_LINE_RECTANGLE, EDIT_SCHEMATIC_PROPERTIES, ROUTE_TRACK_INTERACTIVE,
 		EDIT_VIA, ROTATE_ARBITRARY, ADD_PLANE, EDIT_PLANE, UPDATE_PLANE, UPDATE_ALL_PLANES,
-		CLEAR_PLANE, CLEAR_ALL_PLANES, EDIT_STACKUP
+		CLEAR_PLANE, CLEAR_ALL_PLANES, EDIT_STACKUP, DRAW_DIMENSION
 	};
 
 	/**
@@ -165,6 +165,10 @@ namespace horizon {
 			virtual class Hole *get_hole(const UUID &uu, bool work=true);
 			virtual void delete_hole(const UUID &uu, bool work = true);
 
+			virtual class Dimension *insert_dimension(const UUID &uu);
+			virtual class Dimension *get_dimension(const UUID &uu);
+			virtual void delete_dimension(const UUID &uu);
+
 			virtual std::vector<Line*> get_lines(bool work=true);
 			virtual std::vector<Arc*> get_arcs(bool work=true);
 			
@@ -247,6 +251,7 @@ namespace horizon {
 			virtual std::map<UUID, Text> *get_text_map(bool work=true) {return nullptr;}
 			virtual std::map<UUID, Polygon> *get_polygon_map(bool work=true) {return nullptr;}
 			virtual std::map<UUID, Hole> *get_hole_map(bool work=true) {return nullptr;}
+			virtual std::map<UUID, Dimension> *get_dimension_map() {return nullptr;}
 
 
 			bool reverted = false;

@@ -43,6 +43,9 @@
 #include "tool_rotate_arbitrary.hpp"
 #include "tool_edit_plane.hpp"
 #include "tool_update_all_planes.hpp"
+#include "tool_draw_dimension.hpp"
+
+#include "dimension.hpp"
 #include <memory>
 
 namespace horizon {
@@ -212,6 +215,9 @@ namespace horizon {
 
 			case ToolID::EDIT_STACKUP:
 				return std::make_unique<ToolManageBuses>(this, tool_id);
+
+			case ToolID::DRAW_DIMENSION:
+				return std::make_unique<ToolDrawDimension>(this, tool_id);
 
 			default:
 				return nullptr;
@@ -390,6 +396,22 @@ namespace horizon {
 
 	void Core::delete_hole(const UUID &uu, bool work) {
 		auto map = get_hole_map(work);
+		map->erase(uu);
+	}
+
+	Dimension *Core::insert_dimension(const UUID &uu) {
+		auto map = get_dimension_map();
+		auto x = map->emplace(std::make_pair(uu, uu));
+		return &(x.first->second);
+	}
+
+	Dimension *Core::get_dimension(const UUID &uu) {
+		auto map = get_dimension_map();
+		return &map->at(uu);
+	}
+
+	void Core::delete_dimension(const UUID &uu) {
+		auto map = get_dimension_map();
 		map->erase(uu);
 	}
 

@@ -71,6 +71,7 @@ SRC_COMMON = \
 	parameter/program.cpp\
 	parameter/set.cpp\
 	clipper/clipper.cpp\
+	common/dimension.cpp
 	
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += util/uuid_win32.cpp
@@ -165,6 +166,7 @@ SRC_IMP = \
 	core/tool_rotate_arbitrary.cpp\
 	core/tool_edit_plane.cpp\
 	core/tool_update_all_planes.cpp\
+	core/tool_draw_dimension.cpp\
 	core/cores.cpp\
 	core/clipboard.cpp\
 	core/buffer.cpp\

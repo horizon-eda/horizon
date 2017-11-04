@@ -14,6 +14,7 @@
 #include "clipper/clipper.hpp"
 #include "warning.hpp"
 #include "board_rules.hpp"
+#include "dimension.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -70,6 +71,7 @@ namespace horizon {
 			std::map<UUID, Text> texts;
 			std::map<UUID, Line> lines;
 			std::map<UUID, Plane> planes;
+			std::map<UUID, Dimension> dimensions;
 
 			std::vector<Warning> warnings;
 

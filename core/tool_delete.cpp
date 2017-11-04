@@ -300,6 +300,9 @@ namespace horizon {
 					Polygon *poly = core.r->get_polygon(it.uuid);
 					poly->vertices.at(it.vertex).type = Polygon::Vertex::Type::LINE;
 				} break;
+				case ObjectType::DIMENSION : {
+					core.r->delete_dimension(it.uuid);
+				} break;
 
 				case ObjectType::INVALID :
 				break;

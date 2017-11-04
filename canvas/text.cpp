@@ -250,6 +250,7 @@ enum HersheyFonts {
 				case 0xb5: return 638;
 				case 0x2126: return 550;
 				case 0x3a9: return 550;
+				case 0xa0: return codepoint_to_hershey(' ');
 
 				default: return 870;
 			}

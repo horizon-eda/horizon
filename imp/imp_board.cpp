@@ -31,6 +31,7 @@ namespace horizon {
 				{{GDK_KEY_d, GDK_KEY_t},	ToolID::DRAW_TRACK},
 				{{GDK_KEY_p, GDK_KEY_v},	ToolID::PLACE_VIA},
 				{{GDK_KEY_v},				ToolID::PLACE_VIA},
+				{{GDK_KEY_d, GDK_KEY_d}, 	ToolID::DRAW_DIMENSION},
 				{{GDK_KEY_X},				ToolID::ROUTE_TRACK},
 				{{GDK_KEY_x},				ToolID::ROUTE_TRACK_INTERACTIVE},
 				{{GDK_KEY_g},				ToolID::DRAG_KEEP_SLOPE},

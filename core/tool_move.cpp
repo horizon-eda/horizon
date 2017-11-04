@@ -96,7 +96,6 @@ namespace horizon {
 						new_sel.emplace(itt->uuid, ObjectType::TEXT);
 					}
 				} break;
-
 				default:;
 			}
 		}
@@ -130,6 +129,12 @@ namespace horizon {
 				break;
 				case ObjectType::POLYGON_VERTEX :
 					accu.accumulate(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).position);
+				break;
+				case ObjectType::DIMENSION :
+					if(it.vertex<2) {
+						auto dim = core.r->get_dimension(it.uuid);
+						accu.accumulate(it.vertex==0?dim->p0:dim->p1);
+					}
 				break;
 				case ObjectType::POLYGON_ARC_CENTER :
 					accu.accumulate(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center);

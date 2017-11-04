@@ -10,7 +10,22 @@ namespace horizon {
 		last = c;
 	}
 
+	static Coordi *get_dim_coord(Dimension *dim, int vertex) {
+		if(vertex == 0)
+			return &dim->p0;
+		else if(vertex == 1)
+			return &dim->p1;
+		else
+			return nullptr;
+	}
+
 	void ToolHelperMove::move_do(const Coordi &delta) {
+		std::set<UUID> no_label_distance;
+		for(const auto &it:core.r->selection) {
+			if(it.type == ObjectType::DIMENSION && it.vertex<2) {
+				no_label_distance.emplace(it.uuid);
+			}
+		}
 		for(const auto &it:core.r->selection) {
 			switch(it.type) {
 				case ObjectType::JUNCTION :
@@ -43,6 +58,16 @@ namespace horizon {
 				case ObjectType::SHAPE:
 					core.a->get_padstack()->shapes.at(it.uuid).placement.shift += delta;
 				break;
+				case ObjectType::DIMENSION : {
+					auto dim = core.r->get_dimension(it.uuid);
+					if(it.vertex < 2) {
+						Coordi *c = get_dim_coord(dim, it.vertex);
+						*c += delta;
+					}
+					else if(no_label_distance.count(it.uuid)==0){
+						dim->label_distance += dim->project(delta);
+					}
+				} break;
 				default:;
 			}
 		}
@@ -106,6 +131,16 @@ namespace horizon {
 				break;
 				case ObjectType::POLYGON_VERTEX :
 					transform(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).position, center, rotate);
+				break;
+				case ObjectType::DIMENSION :
+					if(it.vertex < 2) {
+						transform(*get_dim_coord(core.r->get_dimension(it.uuid), it.vertex), center, rotate);
+					}
+					else if(rotate==false) {
+						auto dim = core.r->get_dimension(it.uuid);
+						std::swap(dim->p0, dim->p1);
+						dim->label_distance *= -1;
+					}
 				break;
 				case ObjectType::POLYGON_ARC_CENTER :
 					transform(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center, center, rotate);

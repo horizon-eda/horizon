@@ -904,6 +904,88 @@ namespace horizon {
 		transform_restore();
 	}
 
+
+	void Canvas::render(const class Dimension &dim) {
+		typedef Coord<double> Coordd;
+
+		Coordd p0 = dim.p0;
+		Coordd p1 = dim.p1;
+
+		if(dim.mode == Dimension::Mode::HORIZONTAL) {
+			p1 = Coordd(p1.x, p0.y);
+		}
+		else if(dim.mode == Dimension::Mode::VERTICAL) {
+			p1 = Coordd(p0.x, p1.y);
+		}
+
+		Coordd v = p1-p0;
+		auto vn = v/sqrt(v.mag_sq());
+		Coordd w = Coordd(-v.y, v.x);
+		auto wn = w/sqrt(w.mag_sq());
+
+		if(v.mag_sq()) {
+
+			auto q0 = p0+wn*dim.label_distance;
+			auto q1 = p1+wn*dim.label_distance;
+
+			draw_line(dim.p0, p0+wn*(dim.label_distance+sgn(dim.label_distance)*(int64_t)dim.label_size/2), ColorP::WHITE, 10000, true, 0);
+			draw_line(dim.p1, p1+wn*(dim.label_distance+sgn(dim.label_distance)*(int64_t)dim.label_size/2), ColorP::WHITE, 10000, true, 0);
+
+			auto length = sqrt(v.mag_sq());
+			auto s = dim_to_string(length, false);
+
+			auto text_bb = draw_text0({0,0}, dim.label_size, s, 0, false, TextOrigin::CENTER, ColorP::WHITE, 10000, 0, false);
+			auto text_width = std::abs(text_bb.second.x - text_bb.first.x);
+
+			Coordf text_pos = (q0+v/2)-(vn*text_width/2);
+			auto angle = atan2(v.y, v.x);
+			int angle_i = (angle/M_PI)*32768;
+
+			if((text_width+2*dim.label_size) > length) {
+				text_pos = q1;
+				draw_line(q0, q1, ColorP::WHITE, 10000, true, 0);
+			}
+			else {
+				draw_line(q0, (q0+v/2)-(vn*(text_width/2+.5*dim.label_size)), ColorP::WHITE, 10000, true, 0);
+				draw_line(q1, (q0+v/2)+(vn*(text_width/2+.5*dim.label_size)), ColorP::WHITE, 10000, true, 0);
+			}
+
+			float arrow_mul;
+			if(length > dim.label_size*2) {
+				arrow_mul = 1;
+			}
+			else {
+				text_pos = q1+vn*dim.label_size;
+				arrow_mul = -1;
+			}
+			transform_save();
+			transform.reset();
+			transform.shift = Coordi(q0.x, q0.y);
+			transform.set_angle(angle_i);
+			draw_line({0,0}, Coordf(arrow_mul*dim.label_size, dim.label_size/2), ColorP::WHITE, 10000, true, 0);
+			draw_line({0,0}, Coordf(arrow_mul*dim.label_size, (int64_t)dim.label_size/-2), ColorP::WHITE, 10000, true, 0);
+
+			transform.shift = Coordi(q1.x, q1.y);
+			draw_line({0,0}, Coordf(-arrow_mul*dim.label_size, dim.label_size/2), ColorP::WHITE, 10000, true, 0);
+			draw_line({0,0}, Coordf(-arrow_mul*dim.label_size, (int64_t)dim.label_size/-2), ColorP::WHITE, 10000, true, 0);
+			transform_restore();
+
+			auto real_text_bb = draw_text0(text_pos, dim.label_size, s, angle_i, false, TextOrigin::CENTER, ColorP::WHITE, 10000, 0, true);
+
+			selectables.append(dim.uuid, ObjectType::DIMENSION, q0, real_text_bb.first, real_text_bb.second, 2);
+			targets.emplace(dim.uuid, ObjectType::DIMENSION, Coordi(q0.x, q0.y), 2);
+		}
+
+		selectables.append(dim.uuid, ObjectType::DIMENSION, dim.p0, 0);
+		selectables.append(dim.uuid, ObjectType::DIMENSION, dim.p1, 1);
+
+
+		if(!dim.temp) {
+			targets.emplace(dim.uuid, ObjectType::DIMENSION, dim.p0, 0);
+			targets.emplace(dim.uuid, ObjectType::DIMENSION, dim.p1, 1);
+		}
+	}
+
 	void Canvas::render(const Board &brd) {
 		clock_t begin = clock();
 
@@ -932,6 +1014,9 @@ namespace horizon {
 			render(it.second);
 		}
 		for(const auto &it: brd.lines) {
+			render(it.second);
+		}
+		for(const auto &it: brd.dimensions) {
 			render(it.second);
 		}
 

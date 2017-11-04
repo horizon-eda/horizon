@@ -81,6 +81,7 @@ namespace horizon {
 			void render(const class BoardPackage &pkg);
 			void render(const class Track &track);
 			void render(const class Via &via);
+			void render(const class Dimension &dim);
 
 			bool needs_push = true;
 			virtual void request_push() = 0;
