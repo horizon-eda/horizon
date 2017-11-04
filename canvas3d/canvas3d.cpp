@@ -405,8 +405,8 @@ namespace horizon {
 		projmat = glm::perspective(glm::radians(cam_fov), width/height, cam_dist_min, cam_dist_max);
 
 		cam_normal = glm::normalize(cam_offset);
-		cover_renderer.render();
 		wall_renderer.render();
+		cover_renderer.render();
 		glFlush();
 
 		return Gtk::GLArea::on_render(context);
