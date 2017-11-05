@@ -371,6 +371,12 @@ namespace horizon {
 			if(vps.count(horizon::ParameterID::HOLE_DIAMETER)) {
 				sizes.SetViaDrill(vps.at(horizon::ParameterID::HOLE_DIAMETER));
 			}
+			if(net) {
+				auto &highlights = tool->imp->get_highlights();
+				highlights.clear();
+				highlights.emplace(ObjectType::NET, net->uuid);
+				tool->imp->update_highlights();
+			}
 		}
 
 		/*sizes.Init( m_board, m_startItem );

@@ -2,6 +2,7 @@
 #include "router/pns_router.h"
 #include "uuid.hpp"
 #include "canvas/selectables.hpp"
+#include "canvas/triangle.hpp"
 
 namespace horizon {
 	class Board;
@@ -85,7 +86,7 @@ namespace PNS {
 		private:
 			class PNS_HORIZON_RULE_RESOLVER* m_ruleResolver = nullptr;
 			class PNS_HORIZON_DEBUG_DECORATOR *m_debugDecorator = nullptr;
-			std::set<horizon::SelectableRef> m_preview_items;
+			std::set<horizon::ObjectRef> m_preview_items;
 
 			horizon::Board *board = nullptr;
 			class horizon::CanvasGL *canvas = nullptr;

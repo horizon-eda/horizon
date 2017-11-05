@@ -311,7 +311,7 @@ namespace PNS {
 
 	private:
 		horizon::CanvasGL * m_canvas;
-		std::set<horizon::SelectableRef> lines;
+		std::set<horizon::ObjectRef> lines;
 	};
 
 	PNS_HORIZON_IFACE::PNS_HORIZON_IFACE() {
@@ -615,11 +615,11 @@ namespace PNS {
 		auto parent = aItem->Parent();
 		if(parent) {
 			if(parent->track) {
-				horizon::SelectableRef ref(parent->track->uuid, horizon::ObjectType::TRACK);
+				horizon::ObjectRef ref(horizon::ObjectType::TRACK, parent->track->uuid);
 				canvas->hide_obj(ref);
 			}
 			else if(parent->via) {
-				horizon::SelectableRef ref(parent->via->uuid, horizon::ObjectType::VIA);
+				horizon::ObjectRef ref(horizon::ObjectType::VIA, parent->via->uuid);
 				canvas->hide_obj(ref);
 			}
 		}

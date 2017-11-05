@@ -111,15 +111,10 @@ namespace horizon {
 		return bbt;
 	}
 
-	void Canvas::add_obj(const Line &line) {
-		render(line, false);
-		request_push();
-	}
-
-	SelectableRef Canvas::add_line(const std::deque<Coordi> &pts, int64_t width, ColorP color, int layer) {
+	ObjectRef Canvas::add_line(const std::deque<Coordi> &pts, int64_t width, ColorP color, int layer) {
 		auto uu = UUID::random();
-		SelectableRef sr(uu, ObjectType::LINE);
-		set_oid(sr);
+		ObjectRef sr(ObjectType::LINE, uu);
+		object_refs_current.push_back(sr);
 		triangle_type_current = Triangle::Type::TRACK_PREVIEW;
 		if(pts.size() >= 2) {
 			for(size_t i = 1; i<pts.size(); i++) {
@@ -128,7 +123,11 @@ namespace horizon {
 				draw_line(pt1, pt2, color, layer, false, width);
 			}
 		}
+		else {
+			object_refs[sr];
+		}
 		triangle_type_current = Triangle::Type::NONE;
+		object_refs_current.pop_back();
 		request_push();
 		return sr;
 	}
@@ -181,9 +180,10 @@ namespace horizon {
 		auto layer = track.layer;
 		if(track.is_air)
 			layer = 10000;
-		set_oid(SelectableRef(track.uuid, ObjectType::TRACK));
+
+		object_refs_current.emplace_back(ObjectType::TRACK, track.uuid);
 		draw_line(track.from.get_position(), track.to.get_position(), c, layer, true, width);
-		unset_oid();
+		object_refs_current.pop_back();
 		if(!track.is_air) {
 			auto center = (track.from.get_position()+ track.to.get_position())/2;
 			auto bb = get_line_bb(track.from.get_position(), track.to.get_position(), width);
@@ -503,7 +503,7 @@ namespace horizon {
 						auto p0 = coordf_from_pt(tri->GetPoint(0));
 						auto p1 = coordf_from_pt(tri->GetPoint(1));
 						auto p2 = coordf_from_pt(tri->GetPoint(2));
-						triangles[poly.layer].emplace_back(p0, p1, p2, co, oid_current, triangle_type_current);
+						add_triangle(poly.layer, p0, p1, p2, co);
 					}
 				}
 				if(draw_outline) {
@@ -538,7 +538,7 @@ namespace horizon {
 					Coordf p0 = transform.transform(coordf_from_pt(tri[0]));
 					Coordf p1 = transform.transform(coordf_from_pt(tri[1]));
 					Coordf p2 = transform.transform(coordf_from_pt(tri[2]));
-					triangles[poly.layer].emplace_back(p0, p1, p2, ColorP::FROM_LAYER, oid_current, triangle_type_current);
+					add_triangle(poly.layer, p0, p1, p2, ColorP::FROM_LAYER);
 				}
 			}
 		}
@@ -614,8 +614,8 @@ namespace horizon {
 				}
 			}
 			if(display_mode!=LayerDisplay::Mode::OUTLINE) {
-				triangles[shape.layer].emplace_back(pts[0], pts[1], pts[2], ColorP::FROM_LAYER, oid_current, triangle_type_current);
-				triangles[shape.layer].emplace_back(pts[0], pts[3], pts[2], ColorP::FROM_LAYER, oid_current, triangle_type_current);
+				add_triangle(shape.layer, pts[0], pts[1], pts[2], ColorP::FROM_LAYER);
+				add_triangle(shape.layer, pts[0], pts[3], pts[2], ColorP::FROM_LAYER);
 			}
 			transform_restore();
 		}
@@ -810,8 +810,18 @@ namespace horizon {
 		for(const auto &it: pkg.arcs) {
 			render(it.second, interactive);
 		}
-		for(const auto &it: pkg.pads) {
-			render(it.second);
+		if(object_refs_current.size() && object_refs_current.back().type == ObjectType::BOARD_PACKAGE) {
+			auto pkg_uuid = object_refs_current.back().uuid;
+			for(const auto &it: pkg.pads) {
+				object_refs_current.emplace_back(ObjectType::PAD, it.second.uuid, pkg_uuid);
+				render(it.second);
+				object_refs_current.pop_back();
+			}
+		}
+		else {
+			for(const auto &it: pkg.pads) {
+				render(it.second);
+			}
 		}
 		for(const auto &it: pkg.polygons) {
 			render(it.second, interactive);
@@ -882,8 +892,9 @@ namespace horizon {
 		for(const auto &it: pkg.package.pads) {
 			targets.emplace(UUIDPath<2>(pkg.uuid, it.first), ObjectType::PAD, transform.transform(it.second.placement.shift));
 		}
-
+		object_refs_current.emplace_back(ObjectType::BOARD_PACKAGE, pkg.uuid);
 		render(pkg.package, false, pkg.smashed);
+		object_refs_current.pop_back();
 
 		transform.reset();
 	}
@@ -896,9 +907,9 @@ namespace horizon {
 		selectables.append(via.uuid, ObjectType::VIA, {0,0}, bb.first, bb.second);
 		img_net(via.junction->net);
 		img_patch_type(PatchType::VIA);
-		set_oid(SelectableRef(via.uuid, ObjectType::VIA));
+		object_refs_current.emplace_back(ObjectType::VIA, via.uuid);
 		render(via.padstack, false);
-		unset_oid();
+		object_refs_current.pop_back();
 		img_net(nullptr);
 		img_patch_type(PatchType::OTHER);
 		transform_restore();

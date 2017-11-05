@@ -47,4 +47,16 @@ namespace horizon {
 				v = en->get_text();
 		});
 	}
+
+	Gtk::Label *grid_attach_label_and_widget(Gtk::Grid *gr, const std::string &label, Gtk::Widget *w, int &top) {
+		auto la = Gtk::manage(new Gtk::Label(label));
+		la->get_style_context()->add_class("dim-label");
+		la->set_halign(Gtk::ALIGN_END);
+		la->show();
+		gr->attach(*la, 0, top, 1, 1);
+		w->show();
+		gr->attach(*w, 1, top, 1, 1);
+		top++;
+		return la;
+	}
 }

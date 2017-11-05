@@ -8,6 +8,7 @@ namespace horizon {
 			ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir, const std::string &pool_path);
 
 			const std::map<int, Layer> &get_layers();
+			void update_highlights() override;
 
 
 		protected:

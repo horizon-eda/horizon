@@ -403,6 +403,16 @@ namespace horizon {
 		return in_selection;
 	}
 
+	void CanvasGL::set_highlight_mode(CanvasGL::HighlightMode mode) {
+		highlight_mode = mode;
+		queue_draw();
+	}
+
+	void CanvasGL::set_highlight_enabled(bool v) {
+		highlight_enabled = v;
+		queue_draw();
+	}
+
 	void CanvasGL::set_selection_allowed(bool a) {
 		selection_allowed = a;
 	}

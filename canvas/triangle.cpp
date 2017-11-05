@@ -111,6 +111,7 @@ namespace horizon {
 		GET_LOC(this, layer_color);
 		GET_LOC(this, layer_flags);
 		GET_LOC(this, types_visible);
+		GET_LOC(this, highlight_mode);
 		GL_CHECK_ERROR;
 	}
 
@@ -141,6 +142,8 @@ namespace horizon {
 		glUniform1f(alpha_loc, ca->property_layer_opacity()/100);
 		glUniform2f(offset_loc, ca->offset.x, ca->offset.y);
 		glUniform1ui(types_visible_loc, types_visible);
+		glUniform1i(highlight_mode_loc, ca->highlight_enabled?static_cast<int>(ca->highlight_mode):0);
+
 		GL_CHECK_ERROR
 
 		std::vector<int> layers;

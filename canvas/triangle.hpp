@@ -1,11 +1,42 @@
 #pragma once
 #include "common.hpp"
+#include "uuid.hpp"
 #include <epoxy/gl.h>
 #include <unordered_map>
 
 namespace horizon {
 
 	enum class ColorP {FROM_LAYER, RED, GREEN, YELLOW, WHITE, ERROR, NET, BUS, SYMBOL, FRAME, AIRWIRE, PIN, PIN_HIDDEN};
+
+	class ObjectRef {
+		public:
+			ObjectRef(ObjectType ty, const UUID &uu, const UUID &uu2=UUID()): type(ty), uuid(uu), uuid2(uu2) {}
+			ObjectRef(): type(ObjectType::INVALID) {}
+			ObjectType type;
+			UUID uuid;
+			UUID uuid2;
+			bool operator< (const ObjectRef &other) const {
+				if(type < other.type) {
+					return true;
+				}
+				if(type > other.type) {
+					return false;
+				}
+				if(uuid<other.uuid) {
+					return true;
+				}
+				else if(uuid>other.uuid) {
+					return false;
+				}
+				return uuid2 < other.uuid2;
+			}
+			bool operator== (const ObjectRef &other) const {
+				return (type == other.type) && (uuid == other.uuid) && (uuid2 == other.uuid2);
+			}
+			bool operator!= (const ObjectRef &other) const {
+				return !(*this == other);
+			}
+	};
 
 	class Triangle {
 			public:
@@ -17,23 +48,21 @@ namespace horizon {
 			float y2;
 			enum class Type {NONE, TRACK, TRACK_PREVIEW, VIA, PAD, POUR, ERROR};
 
-			uint32_t oid;
 			uint8_t type;
 			uint8_t color;
 			uint8_t lod;
 			uint8_t flags;
 
 			static const int FLAG_HIDDEN = 1<<0;
-			static const int FLAG_RECTANGLE = 1<<1;
+			static const int FLAG_HIGHLIGHT = 1<<1;
 
-			Triangle(const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint32_t oi, Type ty, uint8_t flg=0, uint8_t ilod=0):
+			Triangle(const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, Type ty, uint8_t flg=0, uint8_t ilod=0):
 				x0(p0.x),
 				y0(p0.y),
 				x1(p1.x),
 				y1(p1.y),
 				x2(p2.x),
 				y2(p2.y),
-				oid(oi),
 				type(static_cast<uint8_t>(ty)),
 				color(static_cast<uint8_t>(co)),
 				lod(ilod),
@@ -69,6 +98,7 @@ namespace horizon {
 			GLuint layer_color_loc;
 			GLuint layer_flags_loc;
 			GLuint types_visible_loc;
+			GLuint highlight_mode_loc;
 
 			void render_layer(int layer);
 			void render_layer_with_overlay(int layer);

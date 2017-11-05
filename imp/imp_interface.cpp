@@ -50,4 +50,12 @@ namespace horizon {
 	void ImpInterface::canvas_update() {
 		imp->canvas_update();
 	}
+
+	void ImpInterface::update_highlights() {
+		imp->update_highlights();
+	}
+
+	std::set<ObjectRef> &ImpInterface::get_highlights() {
+		return imp->highlights;
+	}
 }

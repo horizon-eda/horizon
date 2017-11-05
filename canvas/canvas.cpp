@@ -38,71 +38,105 @@ namespace horizon {
 		map_erase_if(triangles, [](auto &x){return x.first<20000 || x.first >= 30000;});
 		targets.clear();
 		sheet_current_uuid = UUID();
-		clear_oids();
+		object_refs.clear();
+		object_refs_current.clear();
 	}
 
-	void Canvas::set_oid(const SelectableRef &r) {
-		if(oid_map.count(r)) {
-			oid_current = oid_map.at(r);
+	void Canvas::remove_obj(const ObjectRef &r) {
+		if(!object_refs.count(r))
+			return;
+		std::set<int> layers;
+		for(const auto &it: object_refs.at(r)) {
+			auto layer = it.first;
+			layers.insert(layer);
+			for(const auto &idxs: it.second) {
+				auto begin = triangles[layer].begin();
+				auto first = begin+idxs.first;
+				auto last = begin+idxs.second+1;
+				triangles[layer].erase(first, last);
+			}
 		}
-		else {
-			oid_max++;
-			oid_current = oid_max;
-			oid_map[r] = oid_current;
+
+		//fix refs that changed due to triangles being deleted
+		for(auto &it: object_refs) {
+			if(it.first != r) {
+				for(auto layer: layers) {
+					if(it.second.count(layer)) {
+						auto &idxs = it.second.at(layer);
+						for(const auto &idx_removed: object_refs.at(r).at(layer)) {
+							auto n_removed = (idx_removed.second-idx_removed.first)+1;
+							for(auto &idx: idxs) {
+								if(idx.first > idx_removed.first) {
+									idx.first -= n_removed;
+									idx.second -= n_removed;
+								}
+							}
+						}
+					}
+				}
+			}
 		}
-	}
+		object_refs.erase(r);
 
-	void Canvas::unset_oid() {
-		oid_current = 0;
-	}
-
-	void Canvas::clear_oids() {
-		oid_map.clear();
-		oid_max = 1;
-		oid_current = 1;
-	}
-
-	void Canvas::remove_obj(const SelectableRef &r) {
-		auto oid = oid_map.at(r);
-		for(auto &it: triangles) {
-			auto &v = it.second;
-			v.erase(std::remove_if(v.begin(),  v.end(), [oid](auto &x){return x.oid==oid;}), v.end());
-		}
 		request_push();
 	}
 
-	void Canvas::hide_obj(const SelectableRef &r) {
-		auto oid = oid_map.at(r);
-		std::cout << "hide oid " << oid <<std::endl;
-		for(auto &it: triangles) {
-			for(auto &it2: it.second)  {
-				if(it2.oid == oid)
-					it2.flags |= Triangle::FLAG_HIDDEN;
+	void Canvas::set_flags(const ObjectRef &r, uint8_t mask_set, uint8_t mask_clear) {
+		if(!object_refs.count(r))
+			return;
+		for(const auto &it: object_refs.at(r)) {
+			auto layer = it.first;
+			for(const auto &idxs: it.second) {
+				for(auto i = idxs.first; i<=idxs.second; i++) {
+					triangles[layer][i].flags |= mask_set;
+					triangles[layer][i].flags &= ~mask_clear;
+				}
 			}
 		}
 		request_push();
 	}
 
-	void Canvas::show_obj(const SelectableRef &r) {
-		auto oid = oid_map.at(r);
+	void Canvas::set_flags_all(uint8_t mask_set, uint8_t mask_clear) {
 		for(auto &it: triangles) {
 			for(auto &it2: it.second)  {
-				if(it2.oid == oid)
-					it2.flags &= ~Triangle::FLAG_HIDDEN;
+				it2.flags |= mask_set;
+				it2.flags &= ~mask_clear;
 			}
 		}
 		request_push();
+	}
+
+	void Canvas::hide_obj(const ObjectRef &r) {
+		set_flags(r, Triangle::FLAG_HIDDEN, 0);
+	}
+
+	void Canvas::show_obj(const ObjectRef &r) {
+		set_flags(r, 0, Triangle::FLAG_HIDDEN);
 	}
 
 	void Canvas::show_all_obj() {
-		for(auto &it: triangles) {
-			for(auto &it2: it.second)  {
-				it2.flags &= ~Triangle::FLAG_HIDDEN;
-			}
-		}
-		request_push();
+		set_flags_all(0, Triangle::FLAG_HIDDEN);
 	}
 
+	void Canvas::add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP color, uint8_t flags) {
+		triangles[layer].emplace_back(p0, p1, p2, color, triangle_type_current, flags, lod_current);
+		auto idx = triangles[layer].size()-1;
+		for(auto &ref: object_refs_current) {
+			auto &idxs = object_refs[ref][layer];
+			if(idxs.size()) {
+				auto &last = idxs.back();
+				if(last.second == idx-1) {
+					last.second = idx;
+				}
+				else {
+					idxs.emplace_back(idx, idx);
+				}
+			}
+			else {
+				idxs.emplace_back(idx, idx);
+			}
+		}
+	}
 
 
 	void Canvas::update(const Symbol &sym, const Placement &tr) {

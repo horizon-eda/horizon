@@ -650,6 +650,8 @@ namespace horizon {
 			main_window->tool_hint_label->set_text(">");
 			canvas->set_cursor_external(false);
 			no_update = false;
+			highlights.clear();
+			update_highlights();
 		}
 		if(!no_update) {
 			canvas_update();

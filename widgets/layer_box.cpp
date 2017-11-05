@@ -2,6 +2,7 @@
 #include "cell_renderer_layer_display.hpp"
 #include "layer_provider.hpp"
 #include "lut.hpp"
+#include "gtk_util.hpp"
 #include <algorithm>
 #include <iostream>
 
@@ -12,7 +13,8 @@ namespace horizon {
 		lp(lpr),
 		p_property_work_layer(*this, "work-layer"),
 		p_property_select_work_layer_only(*this, "select-work-layer-only"),
-		p_property_layer_opacity(*this, "layer-opacity")
+		p_property_layer_opacity(*this, "layer-opacity"),
+		p_property_highlight_mode(*this, "highlight-mode")
 	{
 		auto *la = Gtk::manage(new Gtk::Label());
 		la->set_markup("<b>Layers</b>");
@@ -82,7 +84,6 @@ namespace horizon {
 		frb->pack_start(*sc, true, true, 0);
 
 		auto ab = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 2));
-		ab->set_homogeneous(true);
 		ab->set_margin_top(4);
 		ab->set_margin_bottom(4);
 		ab->set_margin_start(4);
@@ -93,21 +94,37 @@ namespace horizon {
 		property_select_work_layer_only() = false;
 		ab->pack_start(*sel_only_work_layer_tb);
 
-		auto layer_opacity_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
-		layer_opacity_box->set_margin_start(4);
-		auto la2 = Gtk::manage(new Gtk::Label("Layer Opacity"));
-		layer_opacity_box->pack_start(*la2, false, false, 0);
+		auto layer_opacity_grid = Gtk::manage(new Gtk::Grid);
+		layer_opacity_grid->set_hexpand(false);
+		layer_opacity_grid->set_hexpand_set(true);
+		layer_opacity_grid->set_row_spacing(4);
+		layer_opacity_grid->set_column_spacing(4);
+		int top = 0;
+		layer_opacity_grid->set_margin_start(4);
 
 		auto adj = Gtk::Adjustment::create(90.0, 10.0, 100.0, 1.0, 10.0, 0.0);
 		binding_layer_opacity = Glib::Binding::bind_property(adj->property_value(), property_layer_opacity(), Glib::BINDING_BIDIRECTIONAL);
 
 		auto layer_opacity_scale = Gtk::manage(new Gtk::Scale(adj, Gtk::ORIENTATION_HORIZONTAL));
+		layer_opacity_scale->set_hexpand(true);
 		layer_opacity_scale->set_digits(0);
 		layer_opacity_scale->set_value_pos(Gtk::POS_LEFT);
-		layer_opacity_box->pack_start(*layer_opacity_scale, true, true, 0);
+		grid_attach_label_and_widget(layer_opacity_grid, "Layer Opacity", layer_opacity_scale, top);
 
 
-		ab->pack_start(*layer_opacity_box);
+		auto highlight_mode_combo = Gtk::manage(new Gtk::ComboBoxText);
+		highlight_mode_combo->append(std::to_string(static_cast<int>(CanvasGL::HighlightMode::HIGHLIGHT)), "Highlight");
+		highlight_mode_combo->append(std::to_string(static_cast<int>(CanvasGL::HighlightMode::DIM)), "Dim other");
+		highlight_mode_combo->append(std::to_string(static_cast<int>(CanvasGL::HighlightMode::SHADOW)), "Shadow other");
+		highlight_mode_combo->set_hexpand(true);
+		highlight_mode_combo->signal_changed().connect([this, highlight_mode_combo]{
+			p_property_highlight_mode.set_value(static_cast<CanvasGL::HighlightMode>(std::stoi(highlight_mode_combo->get_active_id())));
+		});
+		highlight_mode_combo->set_active(1);
+		grid_attach_label_and_widget(layer_opacity_grid, "Highlight mode", highlight_mode_combo, top);
+
+
+		ab->pack_start(*layer_opacity_grid);
 
 		frb->show_all();
 		frb->pack_start(*ab, false, false, 0);

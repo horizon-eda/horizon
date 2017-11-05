@@ -1,4 +1,5 @@
 #include "header_button.hpp"
+#include "gtk_util.hpp"
 
 namespace horizon {
 	HeaderButton::HeaderButton(): Gtk::MenuButton() {
@@ -33,19 +34,12 @@ namespace horizon {
 	}
 
 	void HeaderButton::add_widget(const std::string &l, Gtk::Widget *w) {
-		auto la = Gtk::manage(new Gtk::Label(l));
-		la->set_halign(Gtk::ALIGN_END);
-		la->get_style_context()->add_class("dim-label");
-		grid->attach(*la, 0, top, 1, 1);
-		grid->attach(*w, 1, top, 1, 1);
-		la->show();
-		w->show();
-		top++;
+		grid_attach_label_and_widget(grid, l, w, top);
 	}
 
 	Gtk::Entry *HeaderButton::add_entry(const std::string &l) {
 		auto entry = Gtk::manage(new Gtk::Entry());
-		add_widget(l, entry);
+		grid_attach_label_and_widget(grid, l, entry, top);
 		return entry;
 	}
 }

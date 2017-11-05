@@ -1,5 +1,6 @@
 #pragma once
 #include "dialogs/dialogs.hpp"
+#include "canvas/triangle.hpp"
 
 
 namespace horizon {
@@ -16,6 +17,9 @@ namespace horizon {
 			void set_no_update(bool v);
 			void canvas_update();
 			class CanvasGL *get_canvas();
+
+			void update_highlights();
+			std::set<ObjectRef> &get_highlights();
 
 		private:
 			class ImpBase *imp;

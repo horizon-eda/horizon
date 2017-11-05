@@ -33,6 +33,9 @@ namespace horizon {
 			void canvas_update_from_pp();
 			virtual ~ImpBase() {}
 
+			std::set<ObjectRef> highlights;
+			virtual void update_highlights() {};
+
 		protected :
 			MainWindow *main_window;
 			CanvasGL *canvas;

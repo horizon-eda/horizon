@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include "sheet.hpp"
 #include "canvas/layer_display.hpp"
+#include "canvas/canvas.hpp"
 
 namespace horizon {
 	class LayerBox: public Gtk::Box {
@@ -15,6 +16,7 @@ namespace horizon {
 
 
 			Glib::PropertyProxy<float> property_layer_opacity() { return p_property_layer_opacity.get_proxy(); }
+			Glib::PropertyProxy<CanvasGL::HighlightMode> property_highlight_mode() { return p_property_highlight_mode.get_proxy(); }
 
 			Glib::PropertyProxy<bool> property_select_work_layer_only() { return p_property_select_work_layer_only.get_proxy(); }
 			json serialize();
@@ -51,6 +53,7 @@ namespace horizon {
 			Glib::Property<int> p_property_work_layer;
 			Glib::Property<bool> p_property_select_work_layer_only;
 			Glib::Property<float> p_property_layer_opacity;
+			Glib::Property<CanvasGL::HighlightMode> p_property_highlight_mode;
 			type_signal_set_layer_display s_signal_set_layer_display;
 			void emit_layer_display(const Gtk::TreeModel::Row &row);
 			void update_work_layer();

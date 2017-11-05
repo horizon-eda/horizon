@@ -34,11 +34,13 @@ namespace horizon {
 			void update(const class Buffer &buf, class LayerProvider *lp);
 			void update(const class Board &brd);
 
-			void add_obj(const class Line &line);
-			SelectableRef add_line(const std::deque<Coordi> &pts, int64_t width, ColorP color, int layer);
-			void remove_obj(const SelectableRef &r);
-			void hide_obj(const SelectableRef &r);
-			void show_obj(const SelectableRef &r);
+			ObjectRef add_line(const std::deque<Coordi> &pts, int64_t width, ColorP color, int layer);
+			void remove_obj(const ObjectRef &r);
+			void hide_obj(const ObjectRef &r);
+			void show_obj(const ObjectRef &r);
+			void set_flags(const ObjectRef &r, uint8_t mask_set, uint8_t mask_clear);
+			void set_flags_all(uint8_t mask_set, uint8_t mask_clear);
+
 			void show_all_obj();
 
 			CanvasAnnotation *create_annotation();
@@ -55,6 +57,10 @@ namespace horizon {
 			
 		protected:
 			std::unordered_map<int, std::vector<Triangle>> triangles;
+			void add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t flg=0);
+
+			std::map<ObjectRef, std::map<int, std::deque<std::pair<size_t, size_t>>>> object_refs;
+			std::vector<ObjectRef> object_refs_current;
 			void render(const class Symbol &sym, bool on_sheet = false, bool smashed = false);
 			void render(const class Junction &junc, bool interactive = true, ObjectType mode = ObjectType::INVALID);
 			void render(const class Line &line, bool interactive = true);
@@ -144,11 +150,6 @@ namespace horizon {
 
 			Triangle::Type triangle_type_current = Triangle::Type::NONE;
 
-			void set_oid(const SelectableRef &r);
-			void unset_oid();
-			void clear_oids();
-			std::map<SelectableRef, uint32_t> oid_map;
-
 			std::map<int, int> overlay_layers;
 			int overlay_layer_current = 30000;
 			int get_overlay_layer(int layer);
@@ -157,8 +158,6 @@ namespace horizon {
 			void img_text_layer(int l);
 			int img_text_last_layer = 10000;
 			void img_text_line(const Coordi &p0, const Coordi &p1, const uint64_t width, bool tr=true);
-			uint32_t oid_current=0;
-			uint32_t oid_max=1;
 
 			int annotation_layer_current = 20000;
 			std::map<int, CanvasAnnotation> annotations;
@@ -179,6 +178,11 @@ namespace horizon {
 
 			enum class SelectionMode {HOVER, NORMAL, CLARIFY};
 			SelectionMode selection_mode = SelectionMode::HOVER;
+
+			enum class HighlightMode {HIGHLIGHT, DIM, SHADOW};
+			void set_highlight_mode(HighlightMode mode);
+			HighlightMode get_highlight_mode() const;
+			void set_highlight_enabled(bool x);
 
 			std::set<SelectableRef> get_selection();
 			void set_selection(const std::set<SelectableRef> &sel, bool emit=true);
@@ -267,6 +271,9 @@ namespace horizon {
 			Glib::Property<float> p_property_layer_opacity;
 
 			Gtk::Menu *clarify_menu;
+
+			HighlightMode highlight_mode = HighlightMode::HIGHLIGHT;
+			bool highlight_enabled = false;
 
 		protected :
 			void on_size_allocate(Gtk::Allocation &alloc) override;
