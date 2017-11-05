@@ -114,6 +114,63 @@ namespace horizon {
 			handle_export_pdf();
 		});
 
+		if(sockets_connected) {
+			canvas->signal_selection_changed().connect([this] {
+				json j;
+				j["op"] = "schematic-select";
+				j["selection"] = nullptr;
+				for(const auto &it: canvas->get_selection()) {
+					json k;
+					ObjectType type = ObjectType::INVALID;
+					UUID uu;
+					auto sheet = core_schematic.get_sheet();
+					switch(it.type) {
+						case ObjectType::LINE_NET :{
+							auto &li = sheet->net_lines.at(it.uuid);
+							if(li.net) {
+								type = ObjectType::NET;
+								uu = li.net->uuid;
+							}
+						} break;
+						case ObjectType::NET_LABEL :{
+							auto &la = sheet->net_labels.at(it.uuid);
+							if(la.junction->net) {
+								type = ObjectType::NET;
+								uu = la.junction->net->uuid;
+							}
+						} break;
+						case ObjectType::POWER_SYMBOL :{
+							auto &sym = sheet->power_symbols.at(it.uuid);
+							if(sym.junction->net) {
+								type = ObjectType::NET;
+								uu = sym.junction->net->uuid;
+							}
+						} break;
+						case ObjectType::JUNCTION :{
+							auto &ju = sheet->junctions.at(it.uuid);
+							if(ju.net) {
+								type = ObjectType::NET;
+								uu = ju.net->uuid;
+							}
+						} break;
+						case ObjectType::SCHEMATIC_SYMBOL :{
+							auto &sym = sheet->symbols.at(it.uuid);
+							type = ObjectType::COMPONENT;
+							uu = sym.component->uuid;
+						} break;
+						default:;
+					}
+
+					if(type != ObjectType::INVALID) {
+						k["type"] = static_cast<int>(type);
+						k["uuid"] = (std::string)uu;
+						j["selection"].push_back(k);
+					}
+				}
+				send_json(j);
+			});
+		}
+
 
 		add_tool_button(ToolID::ADD_PART, "Place part", false);
 

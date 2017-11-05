@@ -264,6 +264,16 @@ namespace horizon {
 			UUID part = j.at("part").get<std::string>();
 			part_browser_window->placed_part(part);
 		}
+		else if(op == "schematic-select") {
+			auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
+			if(processes.count(project->board_filename)) {
+				auto pid = processes.at(project->board_filename).proc->get_pid();
+				json tx;
+				tx["op"] = "highlight";
+				tx["objects"] = j.at("selection");
+				app->send_json(pid, tx);
+			}
+		}
 		return nullptr;
 	}
 

@@ -14,6 +14,7 @@ namespace horizon {
 		protected:
 			void construct() override;
 			ToolID handle_key(guint k) override;
+			bool handle_broadcast(const json &j) override;
 		private:
 			void canvas_update() override;
 
@@ -21,6 +22,7 @@ namespace horizon {
 
 			class FabOutputWindow *fab_output_window = nullptr;
 			class View3DWindow *view_3d_window = nullptr;
+			bool cross_probing_enabled = false;
 
 	};
 }

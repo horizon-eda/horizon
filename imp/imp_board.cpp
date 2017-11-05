@@ -74,10 +74,37 @@ namespace horizon {
 					}
 				}
 			}
+			if(it.type == ObjectType::COMPONENT) {
+				for(const auto &it_pkg: core_board.get_board()->packages) {
+					if(it_pkg.second.component->uuid == it.uuid) {
+						ObjectRef ref(ObjectType::BOARD_PACKAGE, it_pkg.first);
+						canvas->set_flags(ref, Triangle::FLAG_HIGHLIGHT, 0);
+					}
+				}
+			}
 			else {
 				canvas->set_flags(it, Triangle::FLAG_HIGHLIGHT, 0);
 			}
 		}
+	}
+
+	bool ImpBoard::handle_broadcast(const json &j) {
+		if(!ImpBase::handle_broadcast(j)) {
+			std::string op = j.at("op");
+			if(op == "highlight" && cross_probing_enabled) {
+				if(!core_board.tool_is_active()) {
+					highlights.clear();
+					const json &o = j["objects"];
+					for (auto it = o.cbegin(); it != o.cend(); ++it) {
+						auto type = static_cast<ObjectType>(it.value().at("type").get<int>());
+						UUID uu(it.value().at("uuid").get<std::string>());
+						highlights.emplace(type, uu);
+					}
+					update_highlights();
+				}
+			}
+		}
+		return true;
 	}
 
 
@@ -113,6 +140,20 @@ namespace horizon {
 
 		hamburger_menu->append("Clear all planes", "win.clear_all_planes");
 		add_tool_action(ToolID::CLEAR_ALL_PLANES, "clear_all_planes");
+
+		if(sockets_connected) {
+			hamburger_menu->append("Cross probing", "win.cross_probing");
+			auto cp_action = main_window->add_action_bool("cross_probing", true);
+			cross_probing_enabled = true;
+			cp_action->signal_change_state().connect([this, cp_action] (const Glib::VariantBase& v) {
+				cross_probing_enabled = Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(v).get();
+				cp_action->set_state(v);
+				if(!cross_probing_enabled && !core_board.tool_is_active()) {
+					highlights.clear();
+					update_highlights();
+				}
+			});
+		}
 
 
 

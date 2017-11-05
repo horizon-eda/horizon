@@ -674,6 +674,9 @@ namespace horizon {
 		//std::cout << "Selection changed\n";
 		//std::cout << "---" << std::endl;
 		if(!core.r->tool_is_active()) {
+			highlights.clear();
+			update_highlights();
+
 			auto sel = canvas->get_selection();
 			decltype(sel) sel_extra;
 			for(const auto &it: sel) {
