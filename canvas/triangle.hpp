@@ -99,6 +99,9 @@ namespace horizon {
 			GLuint layer_flags_loc;
 			GLuint types_visible_loc;
 			GLuint highlight_mode_loc;
+			GLuint highlight_dim_loc;
+			GLuint highlight_shadow_loc;
+			GLuint highlight_lighten_loc;
 
 			void render_layer(int layer);
 			void render_layer_with_overlay(int layer);

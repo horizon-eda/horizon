@@ -41,6 +41,9 @@ namespace horizon {
 		j["background_color"] = bg_color_lut.lookup_reverse(background_color);
 		j["grid_style"] = grid_style_lut.lookup_reverse(grid_style);
 		j["grid_opacity"] = grid_opacity;
+		j["highlight_shadow"] = highlight_shadow;
+		j["highlight_dim"] = highlight_dim;
+		j["highlight_lighten"] = highlight_lighten;
 		return j;
 	}
 
@@ -48,6 +51,9 @@ namespace horizon {
 		background_color = bg_color_lut.lookup(j.at("background_color"));
 		grid_style = grid_style_lut.lookup(j.at("grid_style"));
 		grid_opacity = j.value("grid_opacity", .4);
+		highlight_dim = j.value("highlight_dim", .3);
+		highlight_shadow = j.value("highlight_shadow", .3);
+		highlight_lighten = j.value("highlight_lighten", .3);
 	}
 
 	json ImpPreferences::serialize() const {

@@ -10,6 +10,9 @@ uniform uint types_visible;
 uniform vec3 layer_color;
 uniform int layer_flags;
 uniform int highlight_mode;
+uniform float highlight_dim;
+uniform float highlight_shadow;
+uniform float highlight_lighten;
 
 in vec2 p0_to_geom[1];
 in vec2 p1_to_geom[1];
@@ -84,25 +87,19 @@ void main() {
 	
 	if(highlight_mode == 0) {
 		if(highlight)
-			color += .3; //ugly lighten
+			color += highlight_lighten; //ugly lighten
 	}
 	else if(highlight_mode == 1) { //dim
 		if(!highlight)
-			color *= .3; //ugly darken
+			color *= highlight_dim; //ugly darken
 		else if(type == 2)
-			color += .3; //ugly lighten
+			color += highlight_lighten; //ugly lighten
 	}
 	else if(highlight_mode == 2) { //shadow
 		if(!highlight)
-			color = vec3(.3, .3, .3);
+			color = vec3(1, 1, 1)*highlight_shadow;
 		else if(type == 2)
-			color += .3; //ugly lighten
-	}
-	
-	if(type == 2 || ((flags & (1<<1)) != 0)) { //track_preview or hilight
-		if(highlight_mode == 0) {
-			color += .3; //ugly lighten
-		}
+			color += highlight_lighten; //ugly lighten
 	}
 	
 	color_to_fragment = color;

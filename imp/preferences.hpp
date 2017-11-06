@@ -14,6 +14,9 @@ namespace horizon {
 
 			Grid::Style grid_style = Grid::Style::CROSS;
 			float grid_opacity = .5;
+			float highlight_dim = .3;
+			float highlight_shadow = .3;
+			float highlight_lighten = .3;
 
 			void load_from_json(const json &j);
 			json serialize() const;

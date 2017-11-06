@@ -317,6 +317,9 @@ namespace horizon {
 		}
 		canvas->set_grid_style(canvas_prefs->grid_style);
 		canvas->set_grid_alpha(canvas_prefs->grid_opacity);
+		canvas->set_highlight_dim(canvas_prefs->highlight_dim);
+		canvas->set_highlight_shadow(canvas_prefs->highlight_shadow);
+		canvas->set_highlight_lighten(canvas_prefs->highlight_lighten);
 	}
 
 	void ImpBase::canvas_update_from_pp() {

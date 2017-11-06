@@ -23,9 +23,13 @@ namespace horizon {
 		GET_WIDGET(canvas_grid_style_cross);
 		GET_WIDGET(canvas_grid_style_dot);
 		GET_WIDGET(canvas_grid_style_grid);
+		GET_WIDGET(canvas_grid_style_grid);
 
-		Gtk::Scale *canvas_grid_opacity;
+		Gtk::Scale *canvas_grid_opacity, *canvas_highlight_dim, *canvas_highlight_shadow, *canvas_highlight_lighten;
 		GET_WIDGET(canvas_grid_opacity);
+		GET_WIDGET(canvas_highlight_dim);
+		GET_WIDGET(canvas_highlight_shadow);
+		GET_WIDGET(canvas_highlight_lighten);
 
 		Gtk::Label *canvas_label;
 		GET_WIDGET(canvas_label);
@@ -51,6 +55,9 @@ namespace horizon {
 		bind_widget(bgcolor_widgets, canvas_preferences->background_color);
 		bind_widget(grid_style_widgets, canvas_preferences->grid_style);
 		bind_widget(canvas_grid_opacity, canvas_preferences->grid_opacity);
+		bind_widget(canvas_highlight_dim, canvas_preferences->highlight_dim);
+		bind_widget(canvas_highlight_shadow, canvas_preferences->highlight_shadow);
+		bind_widget(canvas_highlight_lighten, canvas_preferences->highlight_lighten);
 
 		for(auto &it: grid_style_widgets) {
 			it.second->signal_toggled().connect([this] {preferences->signal_changed().emit();});
@@ -59,13 +66,15 @@ namespace horizon {
 			it.second->signal_toggled().connect([this] {preferences->signal_changed().emit();});
 		}
 		canvas_grid_opacity->signal_value_changed().connect([this]{preferences->signal_changed().emit();});
-
+		canvas_highlight_dim->signal_value_changed().connect([this]{preferences->signal_changed().emit();});
+		canvas_highlight_shadow->signal_value_changed().connect([this]{preferences->signal_changed().emit();});
+		canvas_highlight_lighten->signal_value_changed().connect([this]{preferences->signal_changed().emit();});
 	}
 
 	CanvasPreferencesEditor* CanvasPreferencesEditor::create(ImpPreferences *prefs, CanvasPreferences *canvas_prefs) {
 		CanvasPreferencesEditor* w;
 		Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-		std::vector<Glib::ustring> widgets = {"canvas_grid", "adjustment1"};
+		std::vector<Glib::ustring> widgets = {"canvas_grid", "adjustment1", "adjustment2", "adjustment3", "adjustment4"};
 		x->add_from_resource("/net/carrotIndustries/horizon/imp/preferences.ui", widgets);
 		x->get_widget_derived("canvas_grid", w, prefs, canvas_prefs);
 		w->reference();

@@ -413,6 +413,21 @@ namespace horizon {
 		queue_draw();
 	}
 
+	void CanvasGL::set_highlight_dim(float a) {
+		highlight_dim = a;
+		queue_draw();
+	}
+
+	void CanvasGL::set_highlight_shadow(float a) {
+		highlight_shadow = a;
+		queue_draw();
+	}
+
+	void CanvasGL::set_highlight_lighten(float a) {
+		highlight_lighten= a;
+		queue_draw();
+	}
+
 	void CanvasGL::set_selection_allowed(bool a) {
 		selection_allowed = a;
 	}

@@ -225,6 +225,10 @@ namespace horizon {
 			void set_grid_style(Grid::Style st);
 			void set_grid_alpha(float a);
 
+			void set_highlight_dim(float a);
+			void set_highlight_shadow(float a);
+			void set_highlight_lighten(float a);
+
 
 		protected:
 			void push() override;
@@ -274,6 +278,9 @@ namespace horizon {
 
 			HighlightMode highlight_mode = HighlightMode::HIGHLIGHT;
 			bool highlight_enabled = false;
+			float highlight_dim = .5;
+			float highlight_shadow = .3;
+			float highlight_lighten = .3;
 
 		protected :
 			void on_size_allocate(Gtk::Allocation &alloc) override;
