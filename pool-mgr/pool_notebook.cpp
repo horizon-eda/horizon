@@ -228,7 +228,7 @@ namespace horizon {
 					chooser->set_do_overwrite_confirmation(true);
 					auto unit_filename = pool.get_filename(ObjectType::UNIT, br->get_selected());
 					auto basename = Gio::File::create_for_path(unit_filename)->get_basename();
-					chooser->set_current_folder(Glib::build_filename(base_path, "symbols"));
+					chooser->set_current_folder(Glib::build_filename(base_path, "entities"));
 					chooser->set_current_name(basename);
 
 					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
