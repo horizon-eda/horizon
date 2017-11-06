@@ -133,11 +133,9 @@ namespace horizon {
 
 	void ProjectManagerViewProject::handle_button_top_schematic() {
 		auto prj = win->project.get();
-		auto top_block = std::find_if(prj->blocks.begin(), prj->blocks.end(), [](const auto &a){return a.second.is_top;});
-		if(top_block != prj->blocks.end()) {
-			std::vector<std::string> args = {top_block->second.schematic_filename, top_block->second.block_filename};
-			win->spawn_imp(ProjectManagerProcess::Type::IMP_SCHEMATIC, prj->pool_uuid, args);
-		}
+		auto top_block = prj->get_top_block();
+		std::vector<std::string> args = {top_block.schematic_filename, top_block.block_filename};
+		win->spawn_imp(ProjectManagerProcess::Type::IMP_SCHEMATIC, prj->pool_uuid, args);
 	}
 
 	void ProjectManagerViewProject::handle_button_board() {
@@ -268,6 +266,17 @@ namespace horizon {
 			auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
 			if(processes.count(project->board_filename)) {
 				auto pid = processes.at(project->board_filename).proc->get_pid();
+				json tx;
+				tx["op"] = "highlight";
+				tx["objects"] = j.at("selection");
+				app->send_json(pid, tx);
+			}
+		}
+		else if(op == "board-select") {
+			auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
+			auto top_block = project->get_top_block();
+			if(processes.count(top_block.schematic_filename)) {
+				auto pid = processes.at(top_block.schematic_filename).proc->get_pid();
 				json tx;
 				tx["op"] = "highlight";
 				tx["objects"] = j.at("selection");

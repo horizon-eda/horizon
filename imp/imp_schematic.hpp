@@ -6,6 +6,7 @@ namespace horizon {
 		friend class ImpInterface;
 		public :
 			ImpSchematic(const std::string &schematic_filename, const std::string &block_filename, const std::string &pool_path);
+			void update_highlights() override;
 
 
 		protected:
@@ -27,5 +28,7 @@ namespace horizon {
 
 			std::map<UUID, std::pair<float, Coordf>> sheet_views;
 			class SheetBox *sheet_box;
+			void handle_selection_cross_probe();
+			bool cross_probing_enabled = false;
 	};
 }

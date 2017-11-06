@@ -211,7 +211,8 @@ namespace horizon {
 		preferences_monitor = Gio::File::create_for_path(ImpPreferences::get_preferences_filename())->monitor();
 
 		preferences_monitor->signal_changed().connect([this](const Glib::RefPtr<Gio::File> &file,const Glib::RefPtr<Gio::File> &file_other, Gio::FileMonitorEvent ev){
-			preferences.load();
+			if(ev == Gio::FILE_MONITOR_EVENT_CHANGES_DONE_HINT)
+				preferences.load();
 		});
 
 		main_window->add_action("preferences", [this] {

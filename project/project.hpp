@@ -25,6 +25,7 @@ namespace horizon {
 		public :
 			static Project new_from_file(const std::string &filename);
 			Project(const UUID &uu);
+			ProjectBlock &get_top_block();
 
 			std::string create();
 

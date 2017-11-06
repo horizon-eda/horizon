@@ -17,6 +17,7 @@ namespace horizon {
 			bool handle_broadcast(const json &j) override;
 		private:
 			void canvas_update() override;
+			void handle_selection_cross_probe();
 
 			CoreBoard core_board;
 

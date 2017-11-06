@@ -68,11 +68,72 @@ namespace horizon {
 			auto v2 = sheet_views.at(sh->uuid);
 			canvas->set_scale_and_offset(v2.first, v2.second);
 		}
+		update_highlights();
 	}
 
 	void ImpSchematic::handle_remove_sheet(Sheet *sh) {
 		core_schematic.delete_sheet(sh->uuid);
 		canvas_update();
+	}
+
+	void ImpSchematic::update_highlights() {
+		std::map<UUID, std::set<ObjectRef>> highlights_for_sheet;
+		auto sch = core_schematic.get_schematic();
+		for(const auto &it_sheet: sch->sheets) {
+			auto sheet = &it_sheet.second;
+			for(const auto &it: highlights) {
+				if(it.type == ObjectType::NET) {
+				for(const auto &it_line: sheet->net_lines) {
+					if(it_line.second.net.uuid == it.uuid) {
+							highlights_for_sheet[sheet->uuid].emplace(ObjectType::LINE_NET, it_line.first);
+						}
+					}
+					for(const auto &it_junc: sheet->junctions) {
+						if(it_junc.second.net.uuid == it.uuid) {
+							highlights_for_sheet[sheet->uuid].emplace(ObjectType::JUNCTION, it_junc.first);
+						}
+					}
+					for(const auto &it_label: sheet->net_labels) {
+						if(it_label.second.junction->net.uuid == it.uuid) {
+							highlights_for_sheet[sheet->uuid].emplace(ObjectType::NET_LABEL, it_label.first);
+						}
+					}
+					for(const auto &it_sym: sheet->power_symbols) {
+						if(it_sym.second.junction->net.uuid == it.uuid) {
+							highlights_for_sheet[sheet->uuid].emplace(ObjectType::POWER_SYMBOL, it_sym.first);
+						}
+					}
+					for(const auto &it_sym: sheet->symbols) {
+						auto component = it_sym.second.component;
+						for(const auto &it_pin: it_sym.second.symbol.pins) {
+							UUIDPath<2> connpath(it_sym.second.gate->uuid, it_pin.second.uuid);
+							if(component->connections.count(connpath)) {
+								auto net = component->connections.at(connpath).net;
+								if(net.uuid == it.uuid) {
+									highlights_for_sheet[sheet->uuid].emplace(ObjectType::SYMBOL_PIN, it_pin.first, it_sym.first);
+								}
+							}
+						}
+					}
+				}
+				else if(it.type == ObjectType::COMPONENT) {
+					for(const auto &it_sym: sheet->symbols) {
+						auto component = it_sym.second.component;
+						if(component->uuid == it.uuid) {
+							highlights_for_sheet[sheet->uuid].emplace(ObjectType::SCHEMATIC_SYMBOL, it_sym.first);
+						}
+					}
+				}
+			}
+			sheet_box->update_highlights(sheet->uuid, highlights_for_sheet[sheet->uuid].size());
+		}
+
+		auto sheet = core_schematic.get_sheet();
+		canvas->set_flags_all(0, Triangle::FLAG_HIGHLIGHT);
+		canvas->set_highlight_enabled(highlights_for_sheet[sheet->uuid].size());
+		for(const auto &it: highlights_for_sheet[sheet->uuid]) {
+			canvas->set_flags(it, Triangle::FLAG_HIGHLIGHT, 0);
+		}
 	}
 
 	bool ImpSchematic::handle_broadcast(const json &j) {
@@ -83,8 +144,75 @@ namespace horizon {
 				part_from_project_manager = j.at("part").get<std::string>();
 				tool_begin(ToolID::ADD_PART);
 			}
+			else if(op == "highlight" && cross_probing_enabled) {
+				if(!core_schematic.tool_is_active()) {
+					highlights.clear();
+					const json &o = j["objects"];
+					for (auto it = o.cbegin(); it != o.cend(); ++it) {
+						auto type = static_cast<ObjectType>(it.value().at("type").get<int>());
+						UUID uu(it.value().at("uuid").get<std::string>());
+						highlights.emplace(type, uu);
+					}
+					update_highlights();
+				}
+			}
 		}
 		return true;
+	}
+
+	void ImpSchematic::handle_selection_cross_probe() {
+		json j;
+		j["op"] = "schematic-select";
+		j["selection"] = nullptr;
+		for(const auto &it: canvas->get_selection()) {
+			json k;
+			ObjectType type = ObjectType::INVALID;
+			UUID uu;
+			auto sheet = core_schematic.get_sheet();
+			switch(it.type) {
+				case ObjectType::LINE_NET :{
+					auto &li = sheet->net_lines.at(it.uuid);
+					if(li.net) {
+						type = ObjectType::NET;
+						uu = li.net->uuid;
+					}
+				} break;
+				case ObjectType::NET_LABEL :{
+					auto &la = sheet->net_labels.at(it.uuid);
+					if(la.junction->net) {
+						type = ObjectType::NET;
+						uu = la.junction->net->uuid;
+					}
+				} break;
+				case ObjectType::POWER_SYMBOL :{
+					auto &sym = sheet->power_symbols.at(it.uuid);
+					if(sym.junction->net) {
+						type = ObjectType::NET;
+						uu = sym.junction->net->uuid;
+					}
+				} break;
+				case ObjectType::JUNCTION :{
+					auto &ju = sheet->junctions.at(it.uuid);
+					if(ju.net) {
+						type = ObjectType::NET;
+						uu = ju.net->uuid;
+					}
+				} break;
+				case ObjectType::SCHEMATIC_SYMBOL :{
+					auto &sym = sheet->symbols.at(it.uuid);
+					type = ObjectType::COMPONENT;
+					uu = sym.component->uuid;
+				} break;
+				default:;
+			}
+
+			if(type != ObjectType::INVALID) {
+				k["type"] = static_cast<int>(type);
+				k["uuid"] = (std::string)uu;
+				j["selection"].push_back(k);
+			}
+		}
+		send_json(j);
 	}
 
 	void ImpSchematic::construct() {
@@ -115,62 +243,21 @@ namespace horizon {
 		});
 
 		if(sockets_connected) {
-			canvas->signal_selection_changed().connect([this] {
-				json j;
-				j["op"] = "schematic-select";
-				j["selection"] = nullptr;
-				for(const auto &it: canvas->get_selection()) {
-					json k;
-					ObjectType type = ObjectType::INVALID;
-					UUID uu;
-					auto sheet = core_schematic.get_sheet();
-					switch(it.type) {
-						case ObjectType::LINE_NET :{
-							auto &li = sheet->net_lines.at(it.uuid);
-							if(li.net) {
-								type = ObjectType::NET;
-								uu = li.net->uuid;
-							}
-						} break;
-						case ObjectType::NET_LABEL :{
-							auto &la = sheet->net_labels.at(it.uuid);
-							if(la.junction->net) {
-								type = ObjectType::NET;
-								uu = la.junction->net->uuid;
-							}
-						} break;
-						case ObjectType::POWER_SYMBOL :{
-							auto &sym = sheet->power_symbols.at(it.uuid);
-							if(sym.junction->net) {
-								type = ObjectType::NET;
-								uu = sym.junction->net->uuid;
-							}
-						} break;
-						case ObjectType::JUNCTION :{
-							auto &ju = sheet->junctions.at(it.uuid);
-							if(ju.net) {
-								type = ObjectType::NET;
-								uu = ju.net->uuid;
-							}
-						} break;
-						case ObjectType::SCHEMATIC_SYMBOL :{
-							auto &sym = sheet->symbols.at(it.uuid);
-							type = ObjectType::COMPONENT;
-							uu = sym.component->uuid;
-						} break;
-						default:;
-					}
-
-					if(type != ObjectType::INVALID) {
-						k["type"] = static_cast<int>(type);
-						k["uuid"] = (std::string)uu;
-						j["selection"].push_back(k);
-					}
+			canvas->signal_selection_changed().connect(sigc::mem_fun(this, &ImpSchematic::handle_selection_cross_probe));
+			hamburger_menu->append("Cross probing", "win.cross_probing");
+			auto cp_action = main_window->add_action_bool("cross_probing", true);
+			cross_probing_enabled = true;
+			cp_action->signal_change_state().connect([this, cp_action] (const Glib::VariantBase& v) {
+				cross_probing_enabled = Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(v).get();
+				cp_action->set_state(v);
+				if(!cross_probing_enabled && !core_schematic.tool_is_active()) {
+					highlights.clear();
+					update_highlights();
 				}
-				send_json(j);
 			});
 		}
 
+		canvas->set_highlight_mode(CanvasGL::HighlightMode::DIM);
 
 		add_tool_button(ToolID::ADD_PART, "Place part", false);
 

@@ -56,6 +56,11 @@ namespace horizon {
 	Project::Project(const UUID &uu): uuid(uu) {
 	}
 
+	ProjectBlock &Project::get_top_block() {
+		auto top_block = std::find_if(blocks.begin(), blocks.end(), [](const auto &a){return a.second.is_top;});
+		return top_block->second;
+	}
+
 	std::string Project::create() {
 		if(Glib::file_test(base_path, Glib::FILE_TEST_EXISTS)) {
 			throw std::runtime_error("project directory already exists");

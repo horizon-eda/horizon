@@ -8,6 +8,7 @@ namespace horizon {
 			SheetBox(class CoreSchematic *c);
 
 			void update();
+			void update_highlights(const UUID &uu, bool has_highlights);
 			void select_sheet(const UUID &sheet_uuid);
 			typedef sigc::signal<void, class Sheet*> type_signal_select_sheet;
 			type_signal_select_sheet signal_select_sheet() {return s_signal_select_sheet;}
@@ -24,11 +25,13 @@ namespace horizon {
 						Gtk::TreeModelColumnRecord::add(uuid) ;
 						Gtk::TreeModelColumnRecord::add(index) ;
 						Gtk::TreeModelColumnRecord::add(has_warnings) ;
+						Gtk::TreeModelColumnRecord::add(has_highlights) ;
 					}
 					Gtk::TreeModelColumn<Glib::ustring> name;
 					Gtk::TreeModelColumn<UUID> uuid;
 					Gtk::TreeModelColumn<unsigned int> index;
 					Gtk::TreeModelColumn<bool> has_warnings;
+					Gtk::TreeModelColumn<bool> has_highlights;
 			} ;
 			ListColumns list_columns;
 

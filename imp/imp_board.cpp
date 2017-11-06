@@ -107,6 +107,54 @@ namespace horizon {
 		return true;
 	}
 
+	void ImpBoard::handle_selection_cross_probe() {
+		json j;
+		j["op"] = "board-select";
+		j["selection"] = nullptr;
+		for(const auto &it: canvas->get_selection()) {
+			json k;
+			ObjectType type = ObjectType::INVALID;
+			UUID uu;
+			auto board = core_board.get_board();
+			switch(it.type) {
+				case ObjectType::TRACK :{
+					auto &track = board->tracks.at(it.uuid);
+					if(track.net) {
+						type = ObjectType::NET;
+						uu = track.net->uuid;
+					}
+				} break;
+				case ObjectType::VIA :{
+					auto &via= board->vias.at(it.uuid);
+					if(via.junction->net) {
+						type = ObjectType::NET;
+						uu = via.junction->net->uuid;
+					}
+				} break;
+				case ObjectType::JUNCTION :{
+					auto &ju = board->junctions.at(it.uuid);
+					if(ju.net) {
+						type = ObjectType::NET;
+						uu = ju.net->uuid;
+					}
+				} break;
+				case ObjectType::BOARD_PACKAGE :{
+					auto &pkg = board->packages.at(it.uuid);
+					type = ObjectType::COMPONENT;
+					uu = pkg.component->uuid;
+				} break;
+				default:;
+			}
+
+			if(type != ObjectType::INVALID) {
+				k["type"] = static_cast<int>(type);
+				k["uuid"] = (std::string)uu;
+				j["selection"].push_back(k);
+			}
+		}
+		send_json(j);
+	}
+
 
 	void ImpBoard::construct() {
 		ImpLayer::construct();
@@ -181,6 +229,10 @@ namespace horizon {
 
 
 		});*/
+
+		if(sockets_connected) {
+			canvas->signal_selection_changed().connect(sigc::mem_fun(this, &ImpBoard::handle_selection_cross_probe));
+		}
 
 
 		fab_output_window = FabOutputWindow::create(main_window, core.b->get_board(), core.b->get_fab_output_settings());

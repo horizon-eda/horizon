@@ -30,8 +30,14 @@ namespace horizon {
 		{
 			auto cr = Gtk::manage(new Gtk::CellRendererPixbuf());
 			cr->property_icon_name().set_value("dialog-warning-symbolic");
+			cr->property_xalign() = 0;
+			auto cr_hi = Gtk::manage(new Gtk::CellRendererPixbuf());
+			cr_hi->property_icon_name().set_value("display-brightness-symbolic");
+			cr_hi->property_xalign() = 0;
 			auto tvc = Gtk::manage(new Gtk::TreeViewColumn("", *cr));
 			tvc->add_attribute(*cr, "visible", list_columns.has_warnings);
+			tvc->pack_start(*cr_hi, false);
+			tvc->add_attribute(*cr_hi, "visible", list_columns.has_highlights);
 			view->append_column(*tvc);
 		}
 
@@ -141,6 +147,15 @@ namespace horizon {
 		}
 	}
 
+	void SheetBox::update_highlights(const UUID &uu, bool v) {
+		for(const auto &it: store->children()) {
+			Gtk::TreeModel::Row row = *it;
+			if(row[list_columns.uuid] == uu) {
+				row[list_columns.has_highlights] = v;
+				break;
+			}
+		}
+	}
 
 	void SheetBox::update() {
 		auto uuid_from_core = core->get_sheet()->uuid;

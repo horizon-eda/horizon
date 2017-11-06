@@ -57,6 +57,7 @@ namespace horizon {
 
 		auto layer = layer_display.count(junc.layer)?junc.layer:10000;
 
+		object_refs_current.emplace_back(ObjectType::JUNCTION, junc.uuid);
 		if(draw) {
 			if(junc.connection_count == 2) {
 				draw_plus(junc.position, 250000, c);
@@ -68,6 +69,7 @@ namespace horizon {
 				draw_cross(junc.position, 0.25_mm, c);
 			}
 		}
+		object_refs_current.pop_back();
 
 		if(interactive) {
 			selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, layer);
@@ -80,6 +82,7 @@ namespace horizon {
 	void Canvas::render(const PowerSymbol &sym) {
 		auto c = ColorP::FROM_LAYER;
 		transform.shift = sym.junction->position;
+		object_refs_current.emplace_back(ObjectType::POWER_SYMBOL, sym.uuid);
 		draw_line({0,0}, {0, -1.25_mm}, c, 0);
 		draw_line({-1.25_mm, -1.25_mm}, {1.25_mm, -1.25_mm}, c, 0);
 		draw_line({-1.25_mm, -1.25_mm}, {0, -2.5_mm}, c, 0);
@@ -95,6 +98,7 @@ namespace horizon {
 		}
 
 		draw_text0(sym.junction->position+text_offset, 1.5_mm, sym.junction->net->name, text_angle, false, TextOrigin::CENTER, c, 0);
+		object_refs_current.pop_back();
 	}
 	
 	static auto get_line_bb(const Coordf &from, const Coordf &to, float width) {
@@ -155,7 +159,9 @@ namespace horizon {
 			c = ColorP::BUS;
 			width = 0.2_mm;
 		}
+		object_refs_current.emplace_back(ObjectType::LINE_NET, line.uuid);
 		draw_line(line.from.get_position(), line.to.get_position(), c, 0, true, width);
+		object_refs_current.pop_back();
 		selectables.append(line.uuid, ObjectType::LINE_NET, (line.from.get_position()+line.to.get_position())/2, Coordf::min(line.from.get_position(), line.to.get_position()), Coordf::max(line.from.get_position(), line.to.get_position()));
 	}
 
@@ -347,7 +353,9 @@ namespace horizon {
 
 	void Canvas::render(const SchematicSymbol &sym) {
 		transform = sym.placement;
+		object_refs_current.emplace_back(ObjectType::SCHEMATIC_SYMBOL, sym.uuid);
 		render(sym.symbol, true, sym.smashed);
+		object_refs_current.pop_back();
 		for(const auto &it: sym.symbol.pins) {
 			targets.emplace(UUIDPath<2>(sym.uuid, it.second.uuid), ObjectType::SYMBOL_PIN, transform.transform(it.second.position));
 		}
@@ -399,6 +407,7 @@ namespace horizon {
 			txt += " ["+join(label.on_sheets, ",")+"]";
 		}
 		auto c = ColorP::NET;
+		object_refs_current.emplace_back(ObjectType::NET_LABEL, label.uuid);
 		if(label.style==NetLabel::Style::FLAG) {
 
 			std::pair<Coordf, Coordf> extents;
@@ -410,6 +419,7 @@ namespace horizon {
 			auto extents = draw_text0(label.junction->position, label.size, txt, orientation_to_angle(label.orientation), false, TextOrigin::BASELINE, c);
 			selectables.append(label.uuid, ObjectType::NET_LABEL, label.junction->position+Coordi(0, 1000000), extents.first, extents.second);
 		}
+		object_refs_current.pop_back();
 	}
 	void Canvas::render(const BusLabel &label) {
 		std::string txt = "<no bus>";
@@ -684,9 +694,21 @@ namespace horizon {
 		for(const auto &it: sym.lines) {
 			render(it.second, !on_sheet);
 		}
-		for(const auto &it: sym.pins) {
-			render(it.second, !on_sheet);
+
+		if(object_refs_current.size() && object_refs_current.back().type == ObjectType::SCHEMATIC_SYMBOL) {
+			auto sym_uuid = object_refs_current.back().uuid;
+			for(const auto &it: sym.pins) {
+				object_refs_current.emplace_back(ObjectType::SYMBOL_PIN, it.second.uuid, sym_uuid);
+				render(it.second, !on_sheet);
+				object_refs_current.pop_back();
+			}
 		}
+		else {
+			for(const auto &it: sym.pins) {
+				render(it.second, !on_sheet);
+			}
+		}
+
 		for(const auto &it: sym.arcs) {
 			render(it.second, !on_sheet);
 		}
