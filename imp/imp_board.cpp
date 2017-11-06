@@ -91,17 +91,34 @@ namespace horizon {
 	bool ImpBoard::handle_broadcast(const json &j) {
 		if(!ImpBase::handle_broadcast(j)) {
 			std::string op = j.at("op");
-			if(op == "highlight" && cross_probing_enabled) {
-				if(!core_board.tool_is_active()) {
-					highlights.clear();
-					const json &o = j["objects"];
-					for (auto it = o.cbegin(); it != o.cend(); ++it) {
-						auto type = static_cast<ObjectType>(it.value().at("type").get<int>());
-						UUID uu(it.value().at("uuid").get<std::string>());
-						highlights.emplace(type, uu);
-					}
-					update_highlights();
+			if(op == "highlight" && cross_probing_enabled && !core_board.tool_is_active()) {
+				highlights.clear();
+				const json &o = j["objects"];
+				for (auto it = o.cbegin(); it != o.cend(); ++it) {
+					auto type = static_cast<ObjectType>(it.value().at("type").get<int>());
+					UUID uu(it.value().at("uuid").get<std::string>());
+					highlights.emplace(type, uu);
 				}
+				update_highlights();
+			}
+			else if(op == "place" && !core_board.tool_is_active()) {
+				main_window->present();
+				std::set<SelectableRef> components;
+				const json &o = j["components"];
+				for (auto it = o.cbegin(); it != o.cend(); ++it) {
+					auto type = static_cast<ObjectType>(it.value().at("type").get<int>());
+					if(type == ObjectType::COMPONENT) {
+						UUID uu(it.value().at("uuid").get<std::string>());
+						components.emplace(uu, type);
+					}
+				}
+				ToolArgs args;
+				args.coords = canvas->get_cursor_pos();
+				args.selection = components;
+				args.work_layer = canvas->property_work_layer();
+				ToolResponse r= core.r->tool_begin(ToolID::MAP_PACKAGE, args, imp_interface.get());
+				main_window->active_tool_label->set_text("Active tool: "+core.r->get_tool_name());
+				tool_process(r);
 			}
 		}
 		return true;

@@ -283,6 +283,16 @@ namespace horizon {
 				app->send_json(pid, tx);
 			}
 		}
+		else if(op == "to-board") {
+			auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
+			if(processes.count(project->board_filename)) {
+				auto pid = processes.at(project->board_filename).proc->get_pid();
+				json tx;
+				tx["op"] = "place";
+				tx["components"] = j.at("selection");
+				app->send_json(pid, tx);
+			}
+		}
 		return nullptr;
 	}
 

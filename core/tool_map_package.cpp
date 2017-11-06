@@ -15,37 +15,57 @@ namespace horizon {
 	ToolResponse ToolMapPackage::begin(const ToolArgs &args) {
 		Board *brd = core.b->get_board();
 
-		std::set<Component*> componets_placed;
-		for(auto &it: brd->block->components) {
-			if(it.second.part)
-				componets_placed.insert(&it.second);
+		std::set<Component*> components_from_selection; //used for placing from schematic
+		for(const auto &it: args.selection) {
+			if(it.type == ObjectType::COMPONENT) {
+				if(brd->block->components.count(it.uuid)) {
+					components_from_selection.insert(&brd->block->components.at(it.uuid));
+				}
+			}
+		}
+
+		std::set<Component*> components_placed;
+		if(components_from_selection.size() > 0) {
+			components_placed = components_from_selection;
+		}
+		else {
+			for(auto &it: brd->block->components) {
+				if(it.second.part)
+					components_placed.insert(&it.second);
+			}
 		}
 
 		for(auto &it: brd->packages) {
-			componets_placed.erase(it.second.component);
+			components_placed.erase(it.second.component);
 		}
 
-		if(componets_placed.size()==0) {
+		if(components_placed.size()==0) {
 			imp->tool_bar_flash("No packages left to place");
 			return ToolResponse::end();
 		}
 
-		for(auto &it: componets_placed) {
+		for(auto &it: components_placed) {
 			components.push_back({it, false});
 		}
 
 		std::sort(components.begin(), components.end(), [](const auto &a, const auto &b){return a.first->refdes < b.first->refdes;});
 
-		bool r;
 		UUID selected_component;
-		std::tie(r, selected_component) = imp->dialogs.map_package(components);
-		if(!r) {
-			return ToolResponse::end();
-		}
+		if(components_from_selection.size() == 0) {
+			bool r;
+			std::tie(r, selected_component) = imp->dialogs.map_package(components);
+			if(!r) {
+				return ToolResponse::end();
+			}
 
-		auto x = std::find_if(components.begin(), components.end(), [selected_component](const auto &a){return a.first->uuid == selected_component;});
-		assert(x != components.end());
-		component_index = x-components.begin();
+			auto x = std::find_if(components.begin(), components.end(), [selected_component](const auto &a){return a.first->uuid == selected_component;});
+			assert(x != components.end());
+			component_index = x-components.begin();
+		}
+		else {
+			component_index = 0;
+			selected_component = components.front().first->uuid;
+		}
 
 		Component *comp = &brd->block->components.at(selected_component);
 		place_package(comp, args.coords);

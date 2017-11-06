@@ -261,6 +261,30 @@ namespace horizon {
 
 		add_tool_button(ToolID::ADD_PART, "Place part", false);
 
+		if(sockets_connected){
+			auto button = Gtk::manage(new Gtk::Button("To board"));
+			button->set_tooltip_text("Place selected components on board");
+			button->signal_clicked().connect([this]{
+				json j;
+				j["op"] = "to-board";
+				j["selection"] = nullptr;
+				for(const auto &it: canvas->get_selection()) {
+					auto sheet = core_schematic.get_sheet();
+					if(it.type == ObjectType::SCHEMATIC_SYMBOL) {
+						auto &sym = sheet->symbols.at(it.uuid);
+						json k;
+						k["type"] = static_cast<int>(ObjectType::COMPONENT);
+						k["uuid"] = (std::string)sym.component->uuid;
+						j["selection"].push_back(k);
+					}
+				}
+				send_json(j);
+			});
+			button->show();
+			core.r->signal_tool_changed().connect([button](ToolID t){button->set_sensitive(t==ToolID::NONE);});
+			main_window->header->pack_end(*button);
+		}
+
 		grid_spin_button->set_sensitive(false);
 
 		rules_window->signal_goto().connect([this] (Coordi location, UUID sheet) {
