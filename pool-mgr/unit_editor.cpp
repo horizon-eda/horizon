@@ -47,6 +47,14 @@ namespace horizon {
 			std::copy(pin->names.begin(), pin->names.end(), std::ostream_iterator<std::string>(s, " "));
 			names_entry->set_text(s.str());
 		}
+		names_entry->signal_changed().connect([this]{
+			std::stringstream ss(names_entry->get_text());
+			std::istream_iterator<std::string> begin(ss);
+			std::istream_iterator<std::string> end;
+			std::vector<std::string> names(begin, end);
+			pin->names = names;
+			parent->needs_save = true;
+		});
 
 		auto propagate = [this](std::function<void(PinEditor*)> fn){
 			auto lb = dynamic_cast<Gtk::ListBox*>(get_ancestor(GTK_TYPE_LIST_BOX));
