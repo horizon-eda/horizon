@@ -427,7 +427,7 @@ $(OBJ_ROUTER): %.o: %.cpp
 	$(CC) -c $(INC) $(INC_ROUTER) $(CFLAGS) $< -o $@
 
 clean: clean_router
-	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-update horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test $(OBJ_ALL:.o=.d)
+	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test $(OBJ_ALL:.o=.d)
 
 clean_router:
 	rm -f $(OBJ_ROUTER) $(OBJ_ROUTER:.o=.d)
