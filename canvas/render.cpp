@@ -1049,6 +1049,9 @@ namespace horizon {
 		for(const auto &it: brd.lines) {
 			render(it.second);
 		}
+		for(const auto &it: brd.arcs) {
+			render(it.second);
+		}
 		for(const auto &it: brd.dimensions) {
 			render(it.second);
 		}

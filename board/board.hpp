@@ -70,6 +70,7 @@ namespace horizon {
 			std::map<UUID, Via> vias;
 			std::map<UUID, Text> texts;
 			std::map<UUID, Line> lines;
+			std::map<UUID, Arc> arcs;
 			std::map<UUID, Plane> planes;
 			std::map<UUID, Dimension> dimensions;
 

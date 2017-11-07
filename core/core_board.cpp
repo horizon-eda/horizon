@@ -71,6 +71,7 @@ namespace horizon {
 			case ObjectType::POLYGON_ARC_CENTER:
 			case ObjectType::TEXT:
 			case ObjectType::LINE:
+			case ObjectType::ARC:
 			case ObjectType::BOARD_PACKAGE:
 			case ObjectType::VIA:
 			case ObjectType::DIMENSION:
@@ -97,6 +98,9 @@ namespace horizon {
 	}
 	std::map<UUID, Line> *CoreBoard::get_line_map(bool work) {
 		return &brd.lines;
+	}
+	std::map<UUID, Arc> *CoreBoard::get_arc_map(bool work) {
+		return &brd.arcs;
 	}
 	std::map<UUID, Dimension> *CoreBoard::get_dimension_map() {
 		return &brd.dimensions;

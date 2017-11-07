@@ -119,6 +119,13 @@ namespace horizon {
 				dimensions.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
 			}
 		}
+		if(j.count("arcs")) {
+			const json &o = j["arcs"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID(it.key());
+				arcs.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
+			}
+		}
 		if(j.count("rules")) {
 			rules.load_from_json(j.at("rules"));
 			rules.cleanup(block);
@@ -174,6 +181,7 @@ namespace horizon {
 		vias(brd.vias),
 		texts(brd.texts),
 		lines(brd.lines),
+		arcs(brd.arcs),
 		planes(brd.planes),
 		dimensions(brd.dimensions),
 		warnings(brd.warnings),
@@ -201,6 +209,7 @@ namespace horizon {
 		vias = brd.vias;
 		texts = brd.texts;
 		lines = brd.lines;
+		arcs = brd.arcs;
 		planes = brd.planes;
 		dimensions = brd.dimensions;
 		warnings = brd.warnings;
@@ -239,6 +248,12 @@ namespace horizon {
 			auto &line = it.second;
 			line.to = &junctions.at(line.to.uuid);
 			line.from = &junctions.at(line.from.uuid);
+		}
+		for(auto &it: arcs) {
+			auto &arc = it.second;
+			arc.to.update(junctions);
+			arc.from.update(junctions);
+			arc.center.update(junctions);
 		}
 		for(auto &it: planes) {
 			it.second.net.update(block->nets);
@@ -419,6 +434,16 @@ namespace horizon {
 			it.second.from->connection_count++;
 			it.second.to->connection_count++;
 			for(const auto &ju: {it.second.from, it.second.to}) {
+				if(ju->layer == 10000) { //none assigned
+					ju->layer = it.second.layer;
+				}
+			}
+		}
+		for(const auto &it: arcs) {
+			it.second.from->connection_count++;
+			it.second.to->connection_count++;
+			it.second.center->connection_count++;
+			for(const auto &ju: {it.second.from, it.second.to, it.second.center}) {
 				if(ju->layer == 10000) { //none assigned
 					ju->layer = it.second.layer;
 				}
@@ -660,6 +685,10 @@ namespace horizon {
 		j["lines"] = json::object();
 		for(const auto &it: lines) {
 			j["lines"][(std::string)it.first] = it.second.serialize();
+		}
+		j["arcs"] = json::object();
+		for(const auto &it: arcs) {
+			j["arcs"][(std::string)it.first] = it.second.serialize();
 		}
 		j["planes"] = json::object();
 		for(const auto &it: planes) {
