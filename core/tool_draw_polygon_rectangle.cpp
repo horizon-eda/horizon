@@ -30,82 +30,113 @@ namespace horizon {
 			Coordi p0 = Coordi::min(p0t, p1t);
 			Coordi p1 = Coordi::max(p0t, p1t);
 
-			if(decoration == Decoration::NONE) {
-				temp->vertices.emplace_back(p0);
-				temp->vertices.emplace_back(Coordi(p0.x, p1.y));
-				temp->vertices.emplace_back(p1);
-				temp->vertices.emplace_back(Coordi(p1.x, p0.y));
+			if(corner_radius > 0) {
+				Polygon::Vertex *v;
+				v = temp->append_vertex(Coordi(p0.x + corner_radius, p0.y));
+				v->type = Polygon::Vertex::Type::ARC;
+				v->arc_reverse = true;
+				v->arc_center = Coordi(p0.x + corner_radius, p0.y + corner_radius);
+
+				temp->append_vertex(Coordi(p0.x, p0.y + corner_radius));
+
+
+				v=  temp->append_vertex(Coordi(p0.x, p1.y - corner_radius));
+				v->type = Polygon::Vertex::Type::ARC;
+				v->arc_reverse = true;
+				v->arc_center = Coordi(p0.x + corner_radius, p1.y-corner_radius);
+				temp->append_vertex(Coordi(p0.x + corner_radius, p1.y));
+
+				v = temp->append_vertex(Coordi(p1.x - corner_radius, p1.y));
+				v->type = Polygon::Vertex::Type::ARC;
+				v->arc_reverse = true;
+				v->arc_center = Coordi(p1.x - corner_radius, p1.y-corner_radius);
+				temp->append_vertex(Coordi(p1.x, p1.y - corner_radius));
+
+				v = temp->append_vertex(Coordi(p1.x, p0.y + corner_radius));
+				v->type = Polygon::Vertex::Type::ARC;
+				v->arc_reverse = true;
+				v->arc_center = Coordi(p1.x - corner_radius, p0.y+corner_radius);
+				temp->append_vertex(Coordi(p1.x - corner_radius, p0.y));
 			}
-			else if(decoration == Decoration::CHAMFER) {
-				if(decoration_pos == 0) {
-					temp->vertices.emplace_back(p0);
-					temp->vertices.emplace_back(Coordi(p0.x, p1.y-decoration_size));
-					temp->vertices.emplace_back(Coordi(p0.x+decoration_size, p1.y));
-					temp->vertices.emplace_back(p1);
-					temp->vertices.emplace_back(Coordi(p1.x, p0.y));
-				}
-				else if(decoration_pos == 1) {
-					temp->vertices.emplace_back(p0);
-					temp->vertices.emplace_back(Coordi(p0.x, p1.y));
-					temp->vertices.emplace_back(Coordi(p1.x-decoration_size, p1.y));
-					temp->vertices.emplace_back(Coordi(p1.x, p1.y-decoration_size));
-					temp->vertices.emplace_back(Coordi(p1.x, p0.y));
-				}
-				else if(decoration_pos == 2) {
-					temp->vertices.emplace_back(p0);
-					temp->vertices.emplace_back(Coordi(p0.x, p1.y));
-					temp->vertices.emplace_back(p1);
-					temp->vertices.emplace_back(Coordi(p1.x, p0.y+decoration_size));
-					temp->vertices.emplace_back(Coordi(p1.x-decoration_size, p0.y));
-				}
-				else if(decoration_pos == 3) {
-					temp->vertices.emplace_back(Coordi(p0.x+decoration_size, p0.y));
-					temp->vertices.emplace_back(Coordi(p0.x, p0.y+decoration_size));
-					temp->vertices.emplace_back(Coordi(p0.x, p1.y));
-					temp->vertices.emplace_back(p1);
-					temp->vertices.emplace_back(Coordi(p1.x, p0.y));
-				}
-			}
-			else if(decoration == Decoration::NOTCH) {
-				if(decoration_pos == 0) {
-					temp->vertices.emplace_back(p0);
-					temp->vertices.emplace_back(Coordi(p0.x, p1.y));
-					auto c = (Coordi(p0.x, p1.y)+p1)/2;
-					temp->vertices.emplace_back(Coordi(c.x-decoration_size/2, c.y));
-					temp->vertices.emplace_back(Coordi(c.x, c.y-decoration_size/2));
-					temp->vertices.emplace_back(Coordi(c.x+decoration_size/2, c.y));
-					temp->vertices.emplace_back(p1);
-					temp->vertices.emplace_back(Coordi(p1.x, p0.y));
-				}
-				if(decoration_pos == 1) {
-					temp->vertices.emplace_back(p0);
-					temp->vertices.emplace_back(Coordi(p0.x, p1.y));
-					temp->vertices.emplace_back(p1);
-					auto c = (Coordi(p1.x, p0.y)+p1)/2;
-					temp->vertices.emplace_back(Coordi(c.x, c.y+decoration_size/2));
-					temp->vertices.emplace_back(Coordi(c.x-decoration_size/2, c.y));
-					temp->vertices.emplace_back(Coordi(c.x, c.y-decoration_size/2));
-					temp->vertices.emplace_back(Coordi(p1.x, p0.y));
-				}
-				if(decoration_pos == 2) {
+			else {
+
+				if(decoration == Decoration::NONE) {
 					temp->vertices.emplace_back(p0);
 					temp->vertices.emplace_back(Coordi(p0.x, p1.y));
 					temp->vertices.emplace_back(p1);
 					temp->vertices.emplace_back(Coordi(p1.x, p0.y));
-					auto c = (Coordi(p1.x, p0.y)+p0)/2;
-					temp->vertices.emplace_back(Coordi(c.x+decoration_size/2, c.y));
-					temp->vertices.emplace_back(Coordi(c.x, c.y+decoration_size/2));
-					temp->vertices.emplace_back(Coordi(c.x-decoration_size/2, c.y));
 				}
-				if(decoration_pos == 3) {
-					temp->vertices.emplace_back(p0);
-					auto c = (Coordi(p0.x, p1.y)+p0)/2;
-					temp->vertices.emplace_back(Coordi(c.x, c.y-decoration_size/2));
-					temp->vertices.emplace_back(Coordi(c.x+decoration_size/2, c.y));
-					temp->vertices.emplace_back(Coordi(c.x, c.y+decoration_size/2));
-					temp->vertices.emplace_back(Coordi(p0.x, p1.y));
-					temp->vertices.emplace_back(p1);
-					temp->vertices.emplace_back(Coordi(p1.x, p0.y));
+				else if(decoration == Decoration::CHAMFER) {
+					if(decoration_pos == 0) {
+						temp->vertices.emplace_back(p0);
+						temp->vertices.emplace_back(Coordi(p0.x, p1.y-decoration_size));
+						temp->vertices.emplace_back(Coordi(p0.x+decoration_size, p1.y));
+						temp->vertices.emplace_back(p1);
+						temp->vertices.emplace_back(Coordi(p1.x, p0.y));
+					}
+					else if(decoration_pos == 1) {
+						temp->vertices.emplace_back(p0);
+						temp->vertices.emplace_back(Coordi(p0.x, p1.y));
+						temp->vertices.emplace_back(Coordi(p1.x-decoration_size, p1.y));
+						temp->vertices.emplace_back(Coordi(p1.x, p1.y-decoration_size));
+						temp->vertices.emplace_back(Coordi(p1.x, p0.y));
+					}
+					else if(decoration_pos == 2) {
+						temp->vertices.emplace_back(p0);
+						temp->vertices.emplace_back(Coordi(p0.x, p1.y));
+						temp->vertices.emplace_back(p1);
+						temp->vertices.emplace_back(Coordi(p1.x, p0.y+decoration_size));
+						temp->vertices.emplace_back(Coordi(p1.x-decoration_size, p0.y));
+					}
+					else if(decoration_pos == 3) {
+						temp->vertices.emplace_back(Coordi(p0.x+decoration_size, p0.y));
+						temp->vertices.emplace_back(Coordi(p0.x, p0.y+decoration_size));
+						temp->vertices.emplace_back(Coordi(p0.x, p1.y));
+						temp->vertices.emplace_back(p1);
+						temp->vertices.emplace_back(Coordi(p1.x, p0.y));
+					}
+				}
+				else if(decoration == Decoration::NOTCH) {
+					if(decoration_pos == 0) {
+						temp->vertices.emplace_back(p0);
+						temp->vertices.emplace_back(Coordi(p0.x, p1.y));
+						auto c = (Coordi(p0.x, p1.y)+p1)/2;
+						temp->vertices.emplace_back(Coordi(c.x-decoration_size/2, c.y));
+						temp->vertices.emplace_back(Coordi(c.x, c.y-decoration_size/2));
+						temp->vertices.emplace_back(Coordi(c.x+decoration_size/2, c.y));
+						temp->vertices.emplace_back(p1);
+						temp->vertices.emplace_back(Coordi(p1.x, p0.y));
+					}
+					if(decoration_pos == 1) {
+						temp->vertices.emplace_back(p0);
+						temp->vertices.emplace_back(Coordi(p0.x, p1.y));
+						temp->vertices.emplace_back(p1);
+						auto c = (Coordi(p1.x, p0.y)+p1)/2;
+						temp->vertices.emplace_back(Coordi(c.x, c.y+decoration_size/2));
+						temp->vertices.emplace_back(Coordi(c.x-decoration_size/2, c.y));
+						temp->vertices.emplace_back(Coordi(c.x, c.y-decoration_size/2));
+						temp->vertices.emplace_back(Coordi(p1.x, p0.y));
+					}
+					if(decoration_pos == 2) {
+						temp->vertices.emplace_back(p0);
+						temp->vertices.emplace_back(Coordi(p0.x, p1.y));
+						temp->vertices.emplace_back(p1);
+						temp->vertices.emplace_back(Coordi(p1.x, p0.y));
+						auto c = (Coordi(p1.x, p0.y)+p0)/2;
+						temp->vertices.emplace_back(Coordi(c.x+decoration_size/2, c.y));
+						temp->vertices.emplace_back(Coordi(c.x, c.y+decoration_size/2));
+						temp->vertices.emplace_back(Coordi(c.x-decoration_size/2, c.y));
+					}
+					if(decoration_pos == 3) {
+						temp->vertices.emplace_back(p0);
+						auto c = (Coordi(p0.x, p1.y)+p0)/2;
+						temp->vertices.emplace_back(Coordi(c.x, c.y-decoration_size/2));
+						temp->vertices.emplace_back(Coordi(c.x+decoration_size/2, c.y));
+						temp->vertices.emplace_back(Coordi(c.x, c.y+decoration_size/2));
+						temp->vertices.emplace_back(Coordi(p0.x, p1.y));
+						temp->vertices.emplace_back(p1);
+						temp->vertices.emplace_back(Coordi(p1.x, p0.y));
+					}
 				}
 			}
 		}
@@ -144,7 +175,10 @@ namespace horizon {
 			}
 		}
 		ss << " <b>RMB:</b>cancel";
-		ss << " <b>c:</b>switch mode <b>d:</b>switch decoration <b>p:</b>decoration position <b>s:</b>decoration size";
+		ss << " <b>c:</b>switch mode <b>r:</b>corner radius";
+
+		if(corner_radius == 0)
+			ss << "<b>d:</b>switch decoration <b>p:</b>decoration position <b>s:</b>decoration size";
 
 		ss << " <i>";
 		if(mode == Mode::CENTER) {
@@ -192,18 +226,18 @@ namespace horizon {
 				mode = mode==Mode::CENTER?Mode::CORNER:Mode::CENTER;
 				update_polygon();
 			}
-			else if(args.key == GDK_KEY_p) {
+			else if(args.key == GDK_KEY_p && corner_radius == 0) {
 				decoration_pos = (decoration_pos+1)%4;
 				update_polygon();
 			}
-			else if(args.key == GDK_KEY_s) {
+			else if(args.key == GDK_KEY_s && corner_radius == 0) {
 				auto r = imp->dialogs.ask_datum("Decoration size", decoration_size);
 				if(r.first) {
 					decoration_size = r.second;
 				}
 				update_polygon();
 			}
-			else if(args.key == GDK_KEY_d) {
+			else if(args.key == GDK_KEY_d && corner_radius == 0) {
 				if(decoration == Decoration::NONE) {
 					decoration = Decoration::CHAMFER;
 				}
@@ -214,7 +248,15 @@ namespace horizon {
 					decoration = Decoration::NONE;
 				}
 				update_polygon();
-			}/*
+			}
+			else if(args.key == GDK_KEY_r) {
+				auto r = imp->dialogs.ask_datum("Corner radius", corner_radius);
+				if(r.first) {
+					corner_radius = r.second;
+				}
+				update_polygon();
+			}
+			/*
 			if(args.key == GDK_KEY_e) {
 				if(last_vertex && (last_vertex->type == Polygon::Vertex::Type::ARC)) {
 					last_vertex->arc_reverse ^= 1;
