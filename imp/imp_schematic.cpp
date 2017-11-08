@@ -249,7 +249,7 @@ namespace horizon {
 			cross_probing_enabled = true;
 			cp_action->signal_change_state().connect([this, cp_action] (const Glib::VariantBase& v) {
 				cross_probing_enabled = Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(v).get();
-				cp_action->set_state(v);
+				g_simple_action_set_state(cp_action->gobj(), g_variant_new_boolean(cross_probing_enabled));
 				if(!cross_probing_enabled && !core_schematic.tool_is_active()) {
 					highlights.clear();
 					update_highlights();
