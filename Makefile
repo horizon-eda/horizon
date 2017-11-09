@@ -1,7 +1,7 @@
 CC=g++
 PKGCONFIG=pkg-config
 
-all: horizon-imp horizon-pool horizon-prj horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test horizon-pool-mgr
+all: horizon-imp horizon-pool horizon-prj horizon-pool-update-parametric horizon-prj-mgr horizon-pool-mgr
 
 SRC_COMMON = \
 	util/uuid.cpp \
@@ -427,7 +427,7 @@ $(OBJ_ROUTER): %.o: %.cpp
 	$(CC) -c $(INC) $(INC_ROUTER) $(CFLAGS) $< -o $@
 
 clean: clean_router
-	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test $(OBJ_ALL:.o=.d)
+	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test $(OBJ_ALL:.o=.d) resources.cpp gitversion.cpp
 
 clean_router:
 	rm -f $(OBJ_ROUTER) $(OBJ_ROUTER:.o=.d)
