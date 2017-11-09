@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.20.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkBox" id="gate_editor">
@@ -111,7 +111,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">end</property>
-            <property name="label" translatable="yes">Unit Location</property>
+            <property name="label" translatable="yes">Unit filename</property>
             <style>
               <class name="dim-label"/>
             </style>
@@ -140,7 +140,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">end</property>
-            <property name="label" translatable="yes">Symbol Location</property>
+            <property name="label" translatable="yes">Symbol filename</property>
             <style>
               <class name="dim-label"/>
             </style>
@@ -528,7 +528,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="halign">end</property>
-                            <property name="label" translatable="yes">Location</property>
+                            <property name="label" translatable="yes">Filename</property>
                             <style>
                               <class name="dim-label"/>
                             </style>
@@ -681,7 +681,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="halign">end</property>
-                        <property name="label" translatable="yes">Location</property>
+                        <property name="label" translatable="yes">Filename</property>
                         <style>
                           <class name="dim-label"/>
                         </style>
