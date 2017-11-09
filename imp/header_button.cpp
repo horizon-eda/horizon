@@ -7,6 +7,7 @@ namespace horizon {
 		label = Gtk::manage(new Gtk::Label);
 		label->get_style_context()->add_class("title");
 		box->pack_start(*label, true, true, 0);
+		set_label("");
 
 		auto arrow = Gtk::manage(new Gtk::Image);
 		arrow->set_from_icon_name("go-down-symbolic", Gtk::ICON_SIZE_BUTTON);
@@ -30,7 +31,10 @@ namespace horizon {
 	}
 
 	void HeaderButton::set_label(const std::string &l) {
-		label->set_text(l);
+		if(!l.size())
+			label->set_markup("<i>click here to set name</i>");
+		else
+			label->set_text(l);
 	}
 
 	void HeaderButton::add_widget(const std::string &l, Gtk::Widget *w) {
