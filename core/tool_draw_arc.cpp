@@ -78,6 +78,7 @@ namespace horizon {
 					temp_arc->from = from_junc;
 					temp_arc->to = to_junc;
 					temp_arc->center = temp_junc;
+					temp_arc->layer = args.work_layer;
 					state = DrawArcState::CENTER;
 				}
 				else if(state == DrawArcState::CENTER) {
@@ -98,6 +99,10 @@ namespace horizon {
 				core.r->revert();
 				return ToolResponse::end();
 			}
+		}
+		else if(args.type == ToolEventType::LAYER_CHANGE) {
+			if(temp_arc)
+				temp_arc->layer = args.work_layer;
 		}
 		else if(args.type == ToolEventType::KEY) {
 			if(args.key == GDK_KEY_Escape) {
