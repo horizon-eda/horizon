@@ -6,8 +6,13 @@
 #include "location_entry.hpp"
 
 namespace horizon {
-	static auto pack_location_entry(const Glib::RefPtr<Gtk::Builder>& x, const std::string &w) {
+	LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder>& x, const std::string &w, Gtk::Button **button_other) {
 		auto en = Gtk::manage(new LocationEntry());
+		if(button_other) {
+			*button_other = Gtk::manage(new Gtk::Button());
+			en->pack_start(**button_other, false, false);
+			(*button_other)->show();
+		}
 		Gtk::Box *box;
 		x->get_widget(w, box);
 		box->pack_start(*en, true, true, 0);
@@ -31,6 +36,7 @@ namespace horizon {
 		x->get_widget("edit_left_box", edit_left_box);
 
 		x->get_widget("entity_name", entity_name_entry);
+		x->get_widget("entity_name_from_mpn", entity_name_from_mpn_button);
 		x->get_widget("entity_prefix", entity_prefix_entry);
 		x->get_widget("entity_tags", entity_tags_entry);
 
@@ -41,8 +47,24 @@ namespace horizon {
 
 		part_location_entry = pack_location_entry(x, "part_location_box");
 		part_location_entry->set_filename(Glib::build_filename(pool_base_path, "parts"));
-		entity_location_entry = pack_location_entry(x, "entity_location_box");
-		entity_location_entry->set_filename(Glib::build_filename(pool_base_path, "entities"));
+		{
+			Gtk::Button *from_part_button;
+			entity_location_entry = pack_location_entry(x, "entity_location_box", &from_part_button);
+			from_part_button->set_label("From part");
+			from_part_button->signal_clicked().connect([this] {
+				auto part_fn = Gio::File::create_for_path(part_location_entry->get_filename());
+				auto part_base = Gio::File::create_for_path(Glib::build_filename(pool_base_path, "parts"));
+				auto rel = part_base->get_relative_path(part_fn);
+				entity_location_entry->set_filename(Glib::build_filename(pool_base_path, "entities", rel));
+			});
+			entity_location_entry->set_filename(Glib::build_filename(pool_base_path, "entities"));
+		}
+
+		entity_name_from_mpn_button->signal_clicked().connect([this]{
+			entity_name_entry->set_text(part_mpn_entry->get_text());
+		});
+
+		entity_prefix_entry->set_text("U");
 
 		sg_name = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
@@ -187,9 +209,18 @@ namespace horizon {
 
 		entity.manufacturer = part.get_manufacturer();
 
+		std::vector<std::string> filenames;
+		filenames.push_back(entity_location_entry->get_filename());
+		filenames.push_back(part_location_entry->get_filename());
+
 		auto children = edit_left_box->get_children();
 		for(auto ch: children) {
 			if(auto ed = dynamic_cast<GateEditorWizard*>(ch)) {
+				auto unit_filename = ed->unit_location_entry->get_filename();
+				auto symbol_filename = ed->symbol_location_entry->get_filename();
+				filenames.push_back(unit_filename);
+				filenames.push_back(symbol_filename);
+
 				auto unit = &units.at(ed->gate->name);
 				assert(unit == ed->gate->unit);
 
@@ -197,6 +228,17 @@ namespace horizon {
 				unit->name = ed->unit_name_entry->get_text();
 				unit->manufacturer = part.get_manufacturer();
 			}
+		}
+
+		for(const auto &it: filenames) {
+			if(!endswith(it, ".json")) {
+				throw std::runtime_error("Filename "+it+" doesn't end in .json");
+			}
+		}
+
+		for(const auto &it: filenames) {
+			auto dir = Glib::path_get_dirname(it);
+			Gio::File::create_for_path(dir)->make_directory_with_parents();
 		}
 
 		for(auto ch: children) {

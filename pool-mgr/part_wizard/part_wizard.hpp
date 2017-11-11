@@ -39,6 +39,7 @@ namespace horizon {
 			Gtk::Box *edit_left_box = nullptr;
 
 			Gtk::Entry *entity_name_entry = nullptr;
+			Gtk::Button *entity_name_from_mpn_button = nullptr;
 			Gtk::Entry *entity_prefix_entry = nullptr;
 			Gtk::Entry *entity_tags_entry = nullptr;
 
@@ -92,5 +93,7 @@ namespace horizon {
 
 			void spawn(PoolManagerProcess::Type type, const std::vector<std::string> &args);
 			std::map<std::string, PoolManagerProcess> processes;
+
+			static class LocationEntry *pack_location_entry(const Glib::RefPtr<Gtk::Builder>& x, const std::string &w, Gtk::Button **button_other=nullptr);
 	};
 }

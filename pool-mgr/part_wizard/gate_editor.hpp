@@ -24,6 +24,7 @@ namespace horizon {
 			class LocationEntry *unit_location_entry = nullptr;
 			class LocationEntry *symbol_location_entry = nullptr;
 			Gtk::Entry *unit_name_entry = nullptr;
+			Gtk::Button *unit_name_from_mpn_button = nullptr;
 			Gtk::Entry *suffix_entry = nullptr;
 	};
 }
