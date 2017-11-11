@@ -16,8 +16,13 @@ namespace horizon {
 			title(j.at("title").get<std::string>()),
 			pool_uuid(j.at("pool_uuid").get<std::string>()),
 			vias_directory(Glib::build_filename(base, j.at("vias_directory"))),
-			board_filename(Glib::build_filename(base, j.at("board_filename")))
+			board_filename(Glib::build_filename(base, j.at("board_filename"))),
+			pool_cache_directory(Glib::build_filename(base, j.value("pool_cache_directory", "cache")))
 		{
+			if(!Glib::file_test(pool_cache_directory, Glib::FILE_TEST_IS_DIR)) {
+				auto fi = Gio::File::create_for_path(pool_cache_directory);
+				fi->make_directory();
+			}
 			if(j.count("blocks")){
 				const json &o = j.at("blocks");
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -89,6 +94,11 @@ namespace horizon {
 			auto fi = Gio::File::create_for_path(vias_directory);
 			fi->make_directory();
 		}
+		pool_cache_directory= Glib::build_filename(base_path, "cache");
+		{
+			auto fi = Gio::File::create_for_path(pool_cache_directory);
+			fi->make_directory();
+		}
 
 		Board board(UUID::random(), block);
 		board_filename = Glib::build_filename(base_path, "board.json");
@@ -112,6 +122,7 @@ namespace horizon {
 		j["pool_uuid"] = (std::string)pool_uuid;
 		j["vias_directory"] = get_filename_rel(vias_directory);
 		j["board_filename"] = get_filename_rel(board_filename);
+		j["pool_cache_directory"] = get_filename_rel(pool_cache_directory);
 		{
 			json k;
 			for(const auto &it: blocks) {

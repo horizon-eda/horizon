@@ -7,7 +7,7 @@
 namespace horizon {
 	ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path):
 			ImpLayer(pool_path),
-			core_package(package_filename, pool) {
+			core_package(package_filename, *pool) {
 		core = &core_package;
 		core_package.signal_tool_changed().connect(sigc::mem_fun(this, &ImpBase::handle_tool_change));
 

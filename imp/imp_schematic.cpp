@@ -5,8 +5,8 @@
 #include "widgets/sheet_box.hpp"
 
 namespace horizon {
-	ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename, const std::string &pool_path) :ImpBase(pool_path),
-			core_schematic(schematic_filename, block_filename, pool)
+	ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,  const PoolParams &pool_params) :ImpBase(pool_params),
+			core_schematic(schematic_filename, block_filename, *pool)
 	{
 		core = &core_schematic;
 		core_schematic.signal_tool_changed().connect(sigc::mem_fun(this, &ImpSchematic::handle_tool_change));

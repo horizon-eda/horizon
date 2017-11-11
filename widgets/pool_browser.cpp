@@ -1,6 +1,7 @@
 #include "pool_browser.hpp"
 #include "pool.hpp"
 #include <set>
+#include "gtk_util.hpp"
 
 namespace horizon {
 	PoolBrowser::PoolBrowser(Pool *p) :
@@ -110,11 +111,7 @@ namespace horizon {
 	}
 
 	void PoolBrowser::scroll_to_selection() {
-		auto it = treeview->get_selection()->get_selected();
-		if(it) {
-			auto path = treeview->get_model()->get_path(it);
-			treeview->scroll_to_cell(path, *treeview->get_column(0));
-		}
+		tree_view_scroll_to_selection(treeview);
 	}
 
 	void PoolBrowser::select_uuid(const UUID &uu) {

@@ -6,7 +6,7 @@
 namespace horizon {
 	ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool_path):
 			ImpBase(pool_path),
-			core_symbol(symbol_filename, pool) {
+			core_symbol(symbol_filename, *pool) {
 		core = &core_symbol;
 		core_symbol.signal_tool_changed().connect(sigc::mem_fun(this, &ImpBase::handle_tool_change));
 

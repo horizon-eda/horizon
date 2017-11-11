@@ -6,9 +6,9 @@
 #include "3d_view.hpp"
 
 namespace horizon {
-	ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir, const std::string &pool_path):
-			ImpLayer(pool_path),
-			core_board(board_filename, block_filename, via_dir, pool) {
+	ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,  const PoolParams &pool_params):
+			ImpLayer(pool_params),
+			core_board(board_filename, block_filename, via_dir, *pool) {
 		core = &core_board;
 		core_board.signal_tool_changed().connect(sigc::mem_fun(this, &ImpBase::handle_tool_change));
 

@@ -5,6 +5,7 @@
 #include "util.hpp"
 #include "part_browser/part_browser_window.hpp"
 #include "pool-update/pool-update.hpp"
+#include "pool_cache_window.hpp"
 extern const char *gitversion;
 
 namespace horizon {
@@ -118,6 +119,7 @@ namespace horizon {
 		builder->get_widget("button_top_schematic", button_top_schematic);
 		builder->get_widget("button_board", button_board);
 		builder->get_widget("button_part_browser", button_part_browser);
+		builder->get_widget("button_pool_cache", button_pool_cache);
 		builder->get_widget("entry_project_title", entry_project_title);
 		builder->get_widget("label_pool_name", label_pool_name);
 		builder->get_widget("info_bar", info_bar);
@@ -129,6 +131,7 @@ namespace horizon {
 		button_top_schematic->signal_clicked().connect(sigc::mem_fun(this, &ProjectManagerViewProject::handle_button_top_schematic));
 		button_board->signal_clicked().connect(sigc::mem_fun(this, &ProjectManagerViewProject::handle_button_board));
 		button_part_browser->signal_clicked().connect(sigc::mem_fun(this, &ProjectManagerViewProject::handle_button_part_browser));
+		button_pool_cache->signal_clicked().connect(sigc::mem_fun(this, &ProjectManagerViewProject::handle_button_pool_cache));
 	}
 
 	void ProjectManagerViewProject::handle_button_top_schematic() {
@@ -151,12 +154,17 @@ namespace horizon {
 		win->part_browser_window->present();
 	}
 
+	void ProjectManagerViewProject::handle_button_pool_cache() {
+		win->pool_cache_window->refresh_list();
+		win->pool_cache_window->present();
+	}
+
 	void ProjectManagerAppWindow::spawn_imp(ProjectManagerProcess::Type type, const UUID &pool_uuid, const std::vector<std::string> &args) {
 		auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
 		if(processes.count(args.at(0)) == 0) { //need to launch imp
 			auto pool_path = app->pools.at(pool_uuid).path;
 			auto ep_broadcast = app->get_ep_broadcast();
-			std::vector<std::string> env = {"HORIZON_POOL="+pool_path, "HORIZON_EP_BROADCAST="+ep_broadcast, "HORIZON_EP_PROJECT="+sock_project_ep};
+			std::vector<std::string> env = {"HORIZON_POOL="+pool_path, "HORIZON_EP_BROADCAST="+ep_broadcast, "HORIZON_EP_PROJECT="+sock_project_ep, "HORIZON_POOL_CACHE="+project->pool_cache_directory};
 			std::string filename = args.at(0);
 			auto &proc = processes.emplace(std::piecewise_construct, std::forward_as_tuple(filename),
 					std::forward_as_tuple(type, args, env)).first->second;
@@ -300,6 +308,8 @@ namespace horizon {
 		sock_project_conn.disconnect();
 		if(part_browser_window)
 			delete part_browser_window;
+		if(pool_cache_window)
+			delete pool_cache_window;
 	}
 
 	void ProjectManagerAppWindow::handle_new() {
@@ -378,6 +388,9 @@ namespace horizon {
 		if(part_browser_window)
 			delete part_browser_window;
 		part_browser_window = nullptr;
+		if(pool_cache_window)
+			delete pool_cache_window;
+		pool_cache_window = nullptr;
 		set_view_mode(ViewMode::OPEN);
 		return true;
 	}
@@ -451,6 +464,8 @@ namespace horizon {
 
 			part_browser_window = PartBrowserWindow::create(this, app->pools.at(project->pool_uuid).path, app->part_favorites);
 			part_browser_window->signal_place_part().connect(sigc::mem_fun(this, &ProjectManagerAppWindow::handle_place_part));
+
+			pool_cache_window = PoolCacheWindow::create(this, project->pool_cache_directory, app->pools.at(project->pool_uuid).path);
 		}
 		catch (const std::exception& e) {
 			Gtk::MessageDialog md(*this,  "Error opening project", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);

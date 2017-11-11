@@ -6,7 +6,7 @@
 namespace horizon {
 	ImpPadstack::ImpPadstack(const std::string &padstack_filename, const std::string &pool_path):
 			ImpLayer(pool_path),
-			core_padstack(padstack_filename, pool) {
+			core_padstack(padstack_filename, *pool) {
 		core = &core_padstack;
 		core_padstack.signal_tool_changed().connect(sigc::mem_fun(this, &ImpBase::handle_tool_change));
 		key_seq_append_default(key_seq);

@@ -27,6 +27,8 @@ using json = nlohmann::json;
 
 
 int main(int argc, char *argv[]) {
+	Gio::init();
+
 	Glib::OptionContext options;
 	options.set_summary("horizon interactive manipulator");
 	options.set_help_enabled();
@@ -79,6 +81,7 @@ int main(int argc, char *argv[]) {
 	options.parse(argc, argv);
 
 	auto pool_base_path = Glib::getenv("HORIZON_POOL");
+	auto pool_cache_path = Glib::getenv("HORIZON_POOL_CACHE");
 	#ifdef G_OS_WIN32
 	struct comma : std::numpunct<char> {
 		char do_decimal_point()   const { return ','; }  //comma
@@ -95,7 +98,7 @@ int main(int argc, char *argv[]) {
 
 	std::unique_ptr<horizon::ImpBase> imp = nullptr;
 	if(mode_sch) {
-		imp.reset(new horizon::ImpSchematic(filenames.at(0), filenames.at(1), pool_base_path));
+		imp.reset(new horizon::ImpSchematic(filenames.at(0), filenames.at(1), {pool_base_path, pool_cache_path}));
 	}
 	else if(mode_symbol) {
 		imp.reset(new horizon::ImpSymbol(filenames.at(0), pool_base_path));
@@ -107,7 +110,7 @@ int main(int argc, char *argv[]) {
 		imp.reset(new horizon::ImpPackage(filenames.at(0), pool_base_path));
 	}
 	else if(mode_board) {
-		imp.reset(new horizon::ImpBoard(filenames.at(0), filenames.at(1), filenames.at(2), pool_base_path));
+		imp.reset(new horizon::ImpBoard(filenames.at(0), filenames.at(1), filenames.at(2), {pool_base_path, pool_cache_path}));
 	}
 	else {
 		std::cout << "wrong invocation" << std::endl;

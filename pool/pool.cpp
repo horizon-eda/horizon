@@ -13,6 +13,8 @@ namespace horizon {
 	Pool::Pool(const std::string &bp) :db(bp+"/pool.db", SQLITE_OPEN_READONLY, 1000), base_path(bp)  {
 	}
 
+	Pool::~Pool() {}
+
 	void Pool::clear() {
 		units.clear();
 		symbols.clear();
@@ -95,24 +97,29 @@ namespace horizon {
 	std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) const {
 		auto suffix = static_cast<std::string>(uu)+".json";
 		auto base = Glib::build_filename(base_path, "tmp");
+		return Glib::build_filename(base, get_flat_filename(type, uu));
+	}
+
+	std::string Pool::get_flat_filename(ObjectType type, const UUID &uu) const {
+		auto suffix = static_cast<std::string>(uu)+".json";
 		switch(type) {
 			case ObjectType::UNIT :
-				return Glib::build_filename(base, "unit_"+suffix);
+				return "unit_"+suffix;
 
 			case ObjectType::ENTITY :
-				return Glib::build_filename(base, "entity_"+suffix);
+				return "entity_"+suffix;
 
 			case ObjectType::SYMBOL :
-				return Glib::build_filename(base, "sym_"+suffix);
+				return "sym_"+suffix;
 
 			case ObjectType::PACKAGE :
-				return Glib::build_filename(base, "pkg_"+suffix);
+				return "pkg_"+suffix;
 
 			case ObjectType::PADSTACK :
-				return Glib::build_filename(base, "ps_"+suffix);
+				return "ps_"+suffix;
 
 			case ObjectType::PART :
-				return Glib::build_filename(base, "part_"+suffix);
+				return "part_"+suffix;
 
 			default:
 				return "";

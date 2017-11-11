@@ -12,6 +12,20 @@ namespace horizon {
 		}}},
 		{ObjectType::JUNCTION, {"Junction", "Junctions", {
 		}}},
+		{ObjectType::INVALID, {"Invalid", "Invalid", {
+		}}},
+		{ObjectType::SYMBOL, {"Symbol", "Symbols", {
+		}}},
+		{ObjectType::UNIT, {"Unit", "Units", {
+		}}},
+		{ObjectType::ENTITY, {"Entity", "Entities", {
+		}}},
+		{ObjectType::PACKAGE, {"Package", "Packages", {
+		}}},
+		{ObjectType::PADSTACK, {"Padstack", "Padstacks", {
+		}}},
+		{ObjectType::PART, {"Part", "Parts", {
+		}}},
 		{ObjectType::LINE_NET, {"Net line", "Net lines", {
 		}}},
 		{ObjectType::BUS_LABEL, {"Bus label", "Bus labels", {

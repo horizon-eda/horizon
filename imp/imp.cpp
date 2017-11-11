@@ -1,6 +1,7 @@
 #include "imp.hpp"
 #include <gtkmm.h>
 #include "block.hpp"
+#include "pool_cached.hpp"
 #include "core/core_board.hpp"
 #include "core/tool_catalog.hpp"
 #include "widgets/spin_button_dim.hpp"
@@ -13,9 +14,18 @@
 #include <glibmm/main.h>
 
 namespace horizon {
+
+	std::unique_ptr<Pool> make_pool(const PoolParams &p) {
+		if(p.cache_path.size() && Glib::file_test(p.cache_path, Glib::FILE_TEST_IS_DIR)) {
+			return std::make_unique<PoolCached>(p.base_path, p.cache_path);
+		}
+		else {
+			return std::make_unique<Pool>(p.base_path);
+		}
+	}
 	
-	ImpBase::ImpBase(const std::string &pool_filename):
-		pool(pool_filename),
+	ImpBase::ImpBase(const PoolParams &params):
+		pool(make_pool(params)),
 		core(nullptr),
 		sock_broadcast_rx(zctx, ZMQ_SUB),
 		sock_project(zctx, ZMQ_REQ)

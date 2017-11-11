@@ -40,10 +40,12 @@ namespace horizon {
 			Gtk::Button *button_top_schematic = nullptr;
 			Gtk::Button *button_board = nullptr;
 			Gtk::Button *button_part_browser= nullptr;
+			Gtk::Button *button_pool_cache = nullptr;
 
 			void handle_button_top_schematic();
 			void handle_button_board();
 			void handle_button_part_browser();
+			void handle_button_pool_cache();
 
 
 	};
@@ -85,6 +87,7 @@ namespace horizon {
 			std::string project_filename;
 			std::map<std::string, ProjectManagerProcess> processes;
 			class PartBrowserWindow *part_browser_window = nullptr;
+			class PoolCacheWindow *pool_cache_window = nullptr;
 
 
 			enum class ViewMode {OPEN, PROJECT, CREATE};

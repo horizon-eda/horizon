@@ -23,4 +23,6 @@ namespace horizon {
 	}
 
 	Gtk::Label *grid_attach_label_and_widget(Gtk::Grid *gr, const std::string &label, Gtk::Widget *w, int &top);
+
+	void tree_view_scroll_to_selection(Gtk::TreeView *view);
 }

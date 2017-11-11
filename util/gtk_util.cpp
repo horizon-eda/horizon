@@ -59,4 +59,11 @@ namespace horizon {
 		top++;
 		return la;
 	}
+
+	void tree_view_scroll_to_selection(Gtk::TreeView *view) {
+		auto rows = view->get_selection()->get_selected_rows();
+		if(rows.size()) {
+			view->scroll_to_cell(rows[0], *view->get_column(0));
+		}
+	}
 }

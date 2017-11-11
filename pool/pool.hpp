@@ -27,7 +27,7 @@ namespace horizon {
 			const class Padstack *get_padstack(const UUID &uu);
 			const class Package *get_package(const UUID &uu);
 			const class Part *get_part(const UUID &uu);
-			std::string get_filename(ObjectType type, const UUID &uu);
+			virtual std::string get_filename(ObjectType type, const UUID &uu);
 			const std::string &get_base_path() const;
 			/**
 			 * The database connection.
@@ -40,10 +40,12 @@ namespace horizon {
 			 */
 			void clear();
 			std::string get_tmp_filename(ObjectType type, const UUID &uu) const;
+			virtual ~Pool();
 
 		
-		private :
+		protected :
 			std::string base_path;
+			std::string get_flat_filename(ObjectType type, const UUID &uu) const;
 
 
 			std::map<UUID, Unit> units;

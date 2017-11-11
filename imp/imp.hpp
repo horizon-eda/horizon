@@ -23,10 +23,20 @@
 #endif
 
 namespace horizon {
+
+	class PoolParams {
+		public:
+		PoolParams (const std::string &bp, const std::string &cp=""): base_path(bp), cache_path(cp) {}
+		std::string base_path;
+		std::string cache_path;
+	};
+
+	std::unique_ptr<Pool> make_pool(const PoolParams &params);
+
 	class ImpBase {
 		friend class ImpInterface;
 		public :
-			ImpBase(const std::string &pool_path);
+			ImpBase(const PoolParams &params);
 			void run(int argc, char *argv[]);
 			virtual void handle_tool_change(ToolID id);
 			virtual void construct() = 0;
@@ -46,7 +56,7 @@ namespace horizon {
 			SpinButtonDim *grid_spin_button;
 			std::unique_ptr<SelectionFilterDialog> selection_filter_dialog;
 
-			Pool pool;
+			std::unique_ptr<Pool> pool;
 			Cores core;
 			std::unique_ptr<ClipboardManager> clipboard=nullptr;
 			std::unique_ptr<KeySequenceDialog> key_sequence_dialog=nullptr;

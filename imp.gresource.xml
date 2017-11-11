@@ -12,6 +12,7 @@
     <file>prj-mgr/window.ui</file>
     <file>prj-mgr/app_menu.ui</file>
     <file>prj-mgr/prefs.ui</file>
+    <file>prj-mgr/pool_cache_window.ui</file>
     
     <file>pool-mgr/window.ui</file>
     <file>pool-mgr/app_menu.ui</file>
