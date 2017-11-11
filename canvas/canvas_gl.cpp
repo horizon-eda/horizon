@@ -229,7 +229,7 @@ namespace horizon {
 		auto sp = grid.spacing;
 		GdkModifierType state;
 		gdk_event_get_state(motion_event, &state);
-		if(state & Gdk::MOD1_MASK) {
+		if(state & grid_fine_modifier) {
 			sp /= 10;
 		}
 

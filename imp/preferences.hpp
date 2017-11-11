@@ -18,6 +18,9 @@ namespace horizon {
 			float highlight_shadow = .3;
 			float highlight_lighten = .3;
 
+			enum class GridFineModifier {CTRL, ALT};
+			GridFineModifier grid_fine_modifier = GridFineModifier::ALT;
+
 			void load_from_json(const json &j);
 			json serialize() const;
 	};

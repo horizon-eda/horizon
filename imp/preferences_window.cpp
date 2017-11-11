@@ -17,13 +17,15 @@ namespace horizon {
 	CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x, ImpPreferences *prefs, CanvasPreferences *canvas_prefs) :
 		Gtk::Grid(cobject), preferences(prefs), canvas_preferences(canvas_prefs) {
 
-		Gtk::RadioButton *canvas_bgcolor_blue, *canvas_bgcolor_black, *canvas_grid_style_cross, *canvas_grid_style_dot, *canvas_grid_style_grid;
+		Gtk::RadioButton *canvas_bgcolor_blue, *canvas_bgcolor_black, *canvas_grid_style_cross, *canvas_grid_style_dot, *canvas_grid_style_grid, *canvas_grid_fine_mod_alt, *canvas_grid_fine_mod_ctrl;
 		GET_WIDGET(canvas_bgcolor_blue);
 		GET_WIDGET(canvas_bgcolor_black);
 		GET_WIDGET(canvas_grid_style_cross);
 		GET_WIDGET(canvas_grid_style_dot);
 		GET_WIDGET(canvas_grid_style_grid);
 		GET_WIDGET(canvas_grid_style_grid);
+		GET_WIDGET(canvas_grid_fine_mod_alt);
+		GET_WIDGET(canvas_grid_fine_mod_ctrl);
 
 		Gtk::Scale *canvas_grid_opacity, *canvas_highlight_dim, *canvas_highlight_shadow, *canvas_highlight_lighten;
 		GET_WIDGET(canvas_grid_opacity);
@@ -52,8 +54,14 @@ namespace horizon {
 			{horizon::Grid::Style::GRID, canvas_grid_style_grid},
 		};
 
+		std::map<CanvasPreferences::GridFineModifier, Gtk::RadioButton*> grid_fine_mod_widgets = {
+			{CanvasPreferences::GridFineModifier::ALT, canvas_grid_fine_mod_alt},
+			{CanvasPreferences::GridFineModifier::CTRL, canvas_grid_fine_mod_ctrl},
+		};
+
 		bind_widget(bgcolor_widgets, canvas_preferences->background_color);
 		bind_widget(grid_style_widgets, canvas_preferences->grid_style);
+		bind_widget(grid_fine_mod_widgets, canvas_preferences->grid_fine_modifier);
 		bind_widget(canvas_grid_opacity, canvas_preferences->grid_opacity);
 		bind_widget(canvas_highlight_dim, canvas_preferences->highlight_dim);
 		bind_widget(canvas_highlight_shadow, canvas_preferences->highlight_shadow);
@@ -63,6 +71,9 @@ namespace horizon {
 			it.second->signal_toggled().connect([this] {preferences->signal_changed().emit();});
 		}
 		for(auto &it: bgcolor_widgets) {
+			it.second->signal_toggled().connect([this] {preferences->signal_changed().emit();});
+		}
+		for(auto &it: grid_fine_mod_widgets) {
 			it.second->signal_toggled().connect([this] {preferences->signal_changed().emit();});
 		}
 		canvas_grid_opacity->signal_value_changed().connect([this]{preferences->signal_changed().emit();});

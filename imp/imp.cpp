@@ -331,6 +331,14 @@ namespace horizon {
 		canvas->set_highlight_dim(canvas_prefs->highlight_dim);
 		canvas->set_highlight_shadow(canvas_prefs->highlight_shadow);
 		canvas->set_highlight_lighten(canvas_prefs->highlight_lighten);
+		switch(canvas_prefs->grid_fine_modifier) {
+			case CanvasPreferences::GridFineModifier::ALT :
+				canvas->grid_fine_modifier = Gdk::MOD1_MASK;
+			break;
+			case CanvasPreferences::GridFineModifier::CTRL :
+				canvas->grid_fine_modifier = Gdk::CONTROL_MASK;
+			break;
+		}
 	}
 
 	void ImpBase::canvas_update_from_pp() {

@@ -229,6 +229,7 @@ namespace horizon {
 			void set_highlight_shadow(float a);
 			void set_highlight_lighten(float a);
 
+			Gdk::ModifierType grid_fine_modifier = Gdk::MOD1_MASK;
 
 		protected:
 			void push() override;

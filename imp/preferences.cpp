@@ -19,6 +19,11 @@ namespace horizon {
 		{"grid",	Grid::Style::GRID},
 	};
 
+	static const LutEnumStr<CanvasPreferences::GridFineModifier> grid_fine_mod_lut = {
+		{"alt",	 CanvasPreferences::GridFineModifier::ALT},
+		{"ctrl", CanvasPreferences::GridFineModifier::CTRL},
+	};
+
 	ImpPreferences::ImpPreferences() {
 
 	}
@@ -44,6 +49,7 @@ namespace horizon {
 		j["highlight_shadow"] = highlight_shadow;
 		j["highlight_dim"] = highlight_dim;
 		j["highlight_lighten"] = highlight_lighten;
+		j["grid_fine_modifier"] = grid_fine_mod_lut.lookup_reverse(grid_fine_modifier);
 		return j;
 	}
 
@@ -54,6 +60,7 @@ namespace horizon {
 		highlight_dim = j.value("highlight_dim", .3);
 		highlight_shadow = j.value("highlight_shadow", .3);
 		highlight_lighten = j.value("highlight_lighten", .3);
+		grid_fine_modifier = grid_fine_mod_lut.lookup(j.value("grid_fine_modifier", "alt"));
 	}
 
 	json ImpPreferences::serialize() const {
