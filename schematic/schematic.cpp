@@ -436,17 +436,23 @@ namespace horizon {
 
 		//warn juncs
 		for(auto &it_sheet: sheets) {
+			std::set<Coordi> pin_coords;
+			std::set<Coordi> junction_coords;
 			Sheet &sheet = it_sheet.second;
+			for(auto &it_junc: sheet.junctions) {
+				Junction &junc = it_junc.second;
+				junction_coords.insert(junc.position);
+			}
 			for(auto &it_sym: sheet.symbols) {
 				SchematicSymbol &schsym = it_sym.second;
 				for(auto &it_pin: schsym.symbol.pins) {
 					auto pin_pos = schsym.placement.transform(it_pin.second.position);
-					for(auto &it_junc: sheet.junctions) {
-						Junction &junc = it_junc.second;
-						if(junc.position == pin_pos) {
-							sheet.warnings.emplace_back(junc.position, "Pin on junction");
-						}
-					}
+					auto r = pin_coords.insert(pin_pos);
+					if(!r.second)
+						sheet.warnings.emplace_back(pin_pos, "Pin on pin");
+					if(junction_coords.count(pin_pos))
+						sheet.warnings.emplace_back(pin_pos, "Pin on junction");
+
 					for(auto &it_line: sheet.net_lines) {
 						LineNet &line = it_line.second;
 						if(line.coord_on_line(pin_pos)) {

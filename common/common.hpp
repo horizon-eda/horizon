@@ -62,6 +62,13 @@ namespace horizon {
 			Coord<T> operator/ (T r) const {return Coord<T>(x/r, y/r);}
 			bool operator== (const Coord<T>  &a) const {return a.x == x && a.y==y;}
 			bool operator!= (const Coord<T>  &a) const {return !(a==*this);}
+			bool operator< (const Coord<T>  &a) const {
+				if(x < a.x)
+					return true;
+				if(x > a.x)
+					return false;
+				return y < a.y;
+			}
 			
 			/**
 			 * @returns element-wise minimum of \p a and \p b
