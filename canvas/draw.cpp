@@ -86,7 +86,12 @@ namespace horizon {
 		dr /= segments;
 		dphi /= segments;
 		while(segments--) {
-			draw_line(center+Coordf::euler(radius0, a0), center+Coordf::euler(radius0+dr, a0+dphi), color, layer, tr, width);
+			Coordf p0 = center+Coordf::euler(radius0, a0);
+			Coordf p1 = center+Coordf::euler(radius0+dr, a0+dphi);
+			if(img_mode)
+				img_line(Coordi(p0.x, p0.y), Coordi(p1.x, p1.y), width, layer, tr);
+			else
+				draw_line(p0, p1, color, layer, tr, width);
 			a0 += dphi;
 			radius0 += dr;
 		}
