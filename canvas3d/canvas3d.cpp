@@ -171,6 +171,8 @@ namespace horizon {
 	}
 
 	void Canvas3D::prepare() {
+		if(!brd)
+			return;
 		layers.clear();
 
 		float board_thickness = -((float)brd->stackup.at(0).thickness);

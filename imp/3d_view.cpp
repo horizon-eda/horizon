@@ -19,7 +19,6 @@ namespace horizon {
 		x->get_widget("gl_box", gl_box);
 
 		canvas = Gtk::manage(new Canvas3D);
-		update();
 		gl_box->pack_start(*canvas, true, true, 0);
 		canvas->show();
 
