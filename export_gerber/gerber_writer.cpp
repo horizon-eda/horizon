@@ -93,6 +93,7 @@ namespace horizon {
 					} break;
 					case ApertureMacro::Primitive::Code::OUTLINE: {
 						auto prim = dynamic_cast<ApertureMacro::PrimitiveOutline*>(itp.get());
+						assert(prim->vertices.size()>0);
 						ofs << "1," << prim->vertices.size() << "," << std::endl;
 
 						auto write_vertex = [this](const Coordi &c){ofs << std::fixed << (double)c.x/1e6 << "," << (double)c.y/1e6 << "," << std::endl;};
@@ -224,10 +225,12 @@ namespace horizon {
 			}
 			for(const auto &it: ps.polygons) {
 				if(it.second.layer == layer) {
-					am->primitives.push_back(std::make_unique<ApertureMacro::PrimitiveOutline>());
-					auto prim = dynamic_cast<ApertureMacro::PrimitiveOutline*>(am->primitives.back().get());
-					for(const auto &itv: it.second.vertices) {
-						prim->vertices.push_back(tr.transform(itv.position));
+					if(it.second.vertices.size()) {
+						am->primitives.push_back(std::make_unique<ApertureMacro::PrimitiveOutline>());
+						auto prim = dynamic_cast<ApertureMacro::PrimitiveOutline*>(am->primitives.back().get());
+						for(const auto &itv: it.second.vertices) {
+							prim->vertices.push_back(tr.transform(itv.position));
+						}
 					}
 				}
 			}
