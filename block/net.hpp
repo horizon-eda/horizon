@@ -23,6 +23,8 @@ namespace horizon {
 			std::string name;
 			bool is_power = false;
 			uuid_ptr<NetClass> net_class;
+			uuid_ptr<Net> diffpair;
+			bool diffpair_master = false;
 
 			//not saved
 			bool is_power_forced = false;

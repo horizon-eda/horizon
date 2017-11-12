@@ -15,8 +15,7 @@ namespace horizon {
 		view->get_selection()->set_mode(Gtk::SELECTION_BROWSE);
 		view->append_column("fixme", list_columns.name);
 		view->get_column(0)->set_sort_column(list_columns.name);
-		view->get_column(0)->set_sort_order(Gtk::SORT_ASCENDING);
-		view->get_column(0)->set_sort_indicator(true);
+		store->set_sort_column(list_columns.name, Gtk::SORT_ASCENDING);
 		update();
 
 		view->signal_row_activated().connect(sigc::mem_fun(this, &NetSelector::row_activated));

@@ -82,6 +82,7 @@ namespace PNS {
 			static int layer_to_router(int l);
 			static int layer_from_router(int l);
 			horizon::Net *get_net_for_code(int code);
+			int get_net_code(const horizon::UUID &uu);
 
 		private:
 			class PNS_HORIZON_RULE_RESOLVER* m_ruleResolver = nullptr;
@@ -102,7 +103,7 @@ namespace PNS {
 			std::map<horizon::UUID, int> net_code_map;
 			std::map<int, horizon::UUID> net_code_map_r;
 			int net_code_max = 0;
-			int get_net_code(const horizon::UUID &uu);
+
 
 			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::Track *track);
 			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::Via *via);

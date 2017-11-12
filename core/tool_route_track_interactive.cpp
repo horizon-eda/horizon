@@ -68,6 +68,10 @@ namespace horizon {
 
 		router = new PNS::ROUTER;
 		router->SetInterface(iface);
+		if(tool_id == ToolID::ROUTE_DIFFPAIR_INTERACTIVE)
+			router->SetMode(PNS::ROUTER_MODE::PNS_MODE_ROUTE_DIFF_PAIR);
+		else
+			router->SetMode(PNS::ROUTER_MODE::PNS_MODE_ROUTE_SINGLE);
 		router->ClearWorld();
 		router->SyncWorld();
 
@@ -360,6 +364,16 @@ namespace horizon {
 		}
 
 		sizes.SetTrackWidth(track_width);
+		if(tool->tool_id == ToolID::ROUTE_DIFFPAIR_INTERACTIVE && m_startItem) {
+			auto netcode = m_startItem->Net();
+			auto net = tool->iface->get_net_for_code(netcode);
+			auto rules_dp = tool->rules->get_diffpair(net->net_class, PNS::PNS_HORIZON_IFACE::layer_from_router(routingLayer));
+			sizes.SetDiffPairGap(rules_dp->track_gap);
+			sizes.SetDiffPairWidth(rules_dp->track_width);
+			sizes.SetDiffPairViaGap(rules_dp->via_gap);
+			sizes.SetDiffPairViaGapSameAsTraceGap(false);
+			sizes.SetWidthFromRules(false);
+		}
 
 		if(m_startItem) {
 			auto netcode = m_startItem->Net();
@@ -375,6 +389,10 @@ namespace horizon {
 				auto &highlights = tool->imp->get_highlights();
 				highlights.clear();
 				highlights.emplace(ObjectType::NET, net->uuid);
+				if(tool->tool_id == ToolID::ROUTE_DIFFPAIR_INTERACTIVE) {
+					if(net->diffpair)
+						highlights.emplace(ObjectType::NET, net->diffpair->uuid);
+				}
 				tool->imp->update_highlights();
 			}
 		}

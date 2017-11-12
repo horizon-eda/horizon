@@ -61,5 +61,8 @@ namespace horizon {
 		{ToolID::CLEAR_ALL_PLANES, {"Clear all Planes"}},
 		{ToolID::EDIT_STACKUP, {"Edit Stackup"}},
 		{ToolID::DRAW_DIMENSION, {"Draw Dimension"}},
+		{ToolID::SET_DIFFPAIR, {"Set diff. pair"}},
+		{ToolID::CLEAR_DIFFPAIR, {"Clear diff. pair"}},
+		{ToolID::ROUTE_DIFFPAIR_INTERACTIVE, {"Route diff. pair"}},
 	};
 }

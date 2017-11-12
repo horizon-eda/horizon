@@ -12,5 +12,6 @@ namespace horizon {
 		{RuleID::VIA, {"Vias", true}},
 		{RuleID::CLEARANCE_COPPER_NON_COPPER, {"Clearance Copper - Non-copper", true}},
 		{RuleID::PLANE, {"Planes", true}},
+		{RuleID::DIFFPAIR, {"Diffpair", true}},
 	};
 }

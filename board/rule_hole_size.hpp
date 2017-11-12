@@ -1,3 +1,4 @@
+#pragma once
 #include "rules/rule.hpp"
 #include "common.hpp"
 

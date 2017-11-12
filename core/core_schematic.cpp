@@ -171,6 +171,15 @@ namespace horizon {
 						return block.nets.at(uu).name;
 					case ObjectProperty::ID::NET_CLASS :
 						return block.nets.at(uu).net_class->uuid;
+					case ObjectProperty::ID::DIFFPAIR : {
+						auto &net = block.nets.at(uu);
+						if(net.diffpair) {
+							return (net.diffpair_master?"Master: ":"Slave: ")+net.diffpair->name ;
+						}
+						else {
+							return "None";
+						}
+					}
 					default :
 						return "<invalid prop>";
 				}

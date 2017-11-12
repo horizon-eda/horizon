@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-	enum class ColorP {FROM_LAYER, RED, GREEN, YELLOW, WHITE, ERROR, NET, BUS, SYMBOL, FRAME, AIRWIRE, PIN, PIN_HIDDEN};
+	enum class ColorP {FROM_LAYER, RED, GREEN, YELLOW, WHITE, ERROR, NET, BUS, SYMBOL, FRAME, AIRWIRE, PIN, PIN_HIDDEN, DIFFPAIR, N_COLORS};
 
 	class ObjectRef {
 		public:

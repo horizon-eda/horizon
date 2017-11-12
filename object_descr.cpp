@@ -76,6 +76,7 @@ namespace horizon {
 			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING, "Name"}},
 			{ObjectProperty::ID::IS_POWER, {ObjectProperty::Type::BOOL, "Is power net"}},
 			{ObjectProperty::ID::NET_CLASS, {ObjectProperty::Type::NET_CLASS, "Net class"}},
+			{ObjectProperty::ID::DIFFPAIR, {ObjectProperty::Type::STRING_RO, "Diff. pair"}},
 		}}},
 		{ObjectType::NET_LABEL, {"Net label", "Net labels", {
 			{ObjectProperty::ID::SIZE, {ObjectProperty::Type::LENGTH, "Size"}},

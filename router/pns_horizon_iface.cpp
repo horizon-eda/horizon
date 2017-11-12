@@ -190,32 +190,40 @@ namespace PNS {
 
 	int PNS_HORIZON_RULE_RESOLVER::DpCoupledNet( int aNet )
 	{
-		/*wxString refName = m_board->FindNet( aNet )->GetNetname();
-		wxString dummy, coupledNetName;
-
-		if( matchDpSuffix( refName, coupledNetName, dummy ) )
-		{
-			NETINFO_ITEM* net = m_board->FindNet( coupledNetName );
-
-			if( !net )
-				return -1;
-
-			return net->GetNet();
-		}*/
-
+		auto net = m_iface->get_net_for_code(aNet);
+		if(net->diffpair) {
+			return m_iface->get_net_code(net->diffpair->uuid);
+		}
 		return -1;
 	}
 
 
 	int PNS_HORIZON_RULE_RESOLVER::DpNetPolarity( int aNet )
 	{
-	   return 0;
+	   if(m_iface->get_net_for_code(aNet)->diffpair_master)
+		   return 1;
+	   else
+		   return -1;
 	}
 
 
 	bool PNS_HORIZON_RULE_RESOLVER::DpNetPair( PNS::ITEM* aItem, int& aNetP, int& aNetN )
 	{
-		return true;
+		if(!aItem)
+			return false;
+		auto net = m_iface->get_net_for_code(aItem->Net());
+		if(net->diffpair) {
+			if(net->diffpair_master) {
+				aNetP = m_iface->get_net_code(net->uuid);
+				aNetN = m_iface->get_net_code(net->diffpair->uuid);
+			}
+			else {
+				aNetN = m_iface->get_net_code(net->uuid);
+				aNetP = m_iface->get_net_code(net->diffpair->uuid);
+			}
+			return true;
+		}
+		return false;
 	}
 
 		class PNS_HORIZON_DEBUG_DECORATOR: public PNS::DEBUG_DECORATOR

@@ -21,6 +21,7 @@ namespace horizon {
 		layer_setup.colors.at(static_cast<int>(ColorP::AIRWIRE)) = {0,1,1};
 		layer_setup.colors.at(static_cast<int>(ColorP::PIN)) = {1,1,1};
 		layer_setup.colors.at(static_cast<int>(ColorP::PIN_HIDDEN)) = {.5,.5,.5};
+		layer_setup.colors.at(static_cast<int>(ColorP::DIFFPAIR)) = {.5,1,0};
 
 		layer_display[10000] = LayerDisplay(true, LayerDisplay::Mode::FILL, {1,1,1});
 	}

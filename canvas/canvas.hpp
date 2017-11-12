@@ -139,7 +139,7 @@ namespace horizon {
 				//keep this in sync with shaders/triangle-geometry.glsl
 				public:
 				LayerSetup(){}
-				std::array<std::array<float, 4>, 13> colors;
+				std::array<std::array<float, 4>, 14> colors; //14==ColorP::N_COLORS
 			};
 
 			LayerSetup layer_setup;

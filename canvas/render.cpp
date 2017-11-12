@@ -41,7 +41,10 @@ namespace horizon {
 	void Canvas::render(const Junction &junc, bool interactive, ObjectType mode) {
 		ColorP c = ColorP::YELLOW;
 		if(junc.net) {
-			c = ColorP::NET;
+			if(junc.net->diffpair)
+				c = ColorP::DIFFPAIR;
+			else
+				c = ColorP::NET;
 		}
 		if(junc.bus) {
 			c = ColorP::BUS;
@@ -154,6 +157,12 @@ namespace horizon {
 		ColorP c = ColorP::NET;
 		if(line.net == nullptr) {
 			c = ColorP::ERROR;
+		}
+		else {
+			if(line.net->diffpair) {
+				c = ColorP::DIFFPAIR;
+				width = 0.2_mm;
+			}
 		}
 		if(line.bus) {
 			c = ColorP::BUS;
@@ -397,8 +406,11 @@ namespace horizon {
 
 	void Canvas::render(const NetLabel &label) {
 		std::string txt = "<no net>";
+		auto c = ColorP::NET;
 		if(label.junction->net) {
 			txt = label.junction->net->name;
+			if(label.junction->net->diffpair)
+				c = ColorP::DIFFPAIR;
 		}
 		if(txt == "") {
 			txt = "? plz fix";
@@ -406,7 +418,7 @@ namespace horizon {
 		if(label.on_sheets.size() > 0 && label.offsheet_refs){
 			txt += " ["+join(label.on_sheets, ",")+"]";
 		}
-		auto c = ColorP::NET;
+
 		object_refs_current.emplace_back(ObjectType::NET_LABEL, label.uuid);
 		if(label.style==NetLabel::Style::FLAG) {
 

@@ -12,6 +12,7 @@
 #include "rule_editor_via.hpp"
 #include "rule_editor_clearance_copper_non_copper.hpp"
 #include "rule_editor_plane.hpp"
+#include "rule_editor_diffpair.hpp"
 #include "widgets/cell_renderer_layer_display.hpp"
 #include "rules/rules_with_core.hpp"
 #include "rules/cache.hpp"
@@ -322,6 +323,10 @@ namespace horizon {
 
 			case RuleID::PLANE :
 				e = new RuleEditorPlane(r, core);
+			break;
+
+			case RuleID::DIFFPAIR :
+				e = new RuleEditorDiffpair(r, core);
 			break;
 
 			default:

@@ -56,6 +56,14 @@ namespace horizon {
 			}
 			fix_order(RuleID::PLANE);
 		}
+		if(j.count("diffpair")) {
+			const json &o = j["diffpair"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID(it.key());
+				rule_diffpair.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
+			}
+			fix_order(RuleID::DIFFPAIR);
+		}
 		if(j.count("clearance_silkscreen_exposed_copper")) {
 			const json &o = j["clearance_silkscreen_exposed_copper"];
 			rule_clearance_silkscreen_exposed_copper = RuleClearanceSilkscreenExposedCopper(o);
@@ -85,6 +93,10 @@ namespace horizon {
 		}
 		for(auto &it: rule_plane) {
 			it.second.match.cleanup(block);
+		}
+		for(auto &it: rule_diffpair) {
+			if(!block->net_classes.count(it.second.net_class))
+				it.second.net_class = block->net_class_default->uuid;
 		}
 	}
 
@@ -145,6 +157,10 @@ namespace horizon {
 		for(const auto &it: rule_plane) {
 			j["plane"][(std::string)it.first] = it.second.serialize();
 		}
+		j["diffpair"] = json::object();
+		for(const auto &it: rule_diffpair) {
+			j["diffpair"][(std::string)it.first] = it.second.serialize();
+		}
 		j["clearance_copper_non_copper"] = json::object();
 		for(const auto &it: rule_clearance_copper_non_copper) {
 			j["clearance_copper_non_copper"][(std::string)it.first] = it.second.serialize();
@@ -155,7 +171,7 @@ namespace horizon {
 	}
 
 	std::set<RuleID> BoardRules::get_rule_ids() const {
-		return {RuleID::HOLE_SIZE, RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, RuleID::TRACK_WIDTH, RuleID::CLEARANCE_COPPER, RuleID::PARAMETERS, RuleID::VIA, RuleID::CLEARANCE_COPPER_NON_COPPER, RuleID::PLANE};
+		return {RuleID::HOLE_SIZE, RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, RuleID::TRACK_WIDTH, RuleID::CLEARANCE_COPPER, RuleID::PARAMETERS, RuleID::VIA, RuleID::CLEARANCE_COPPER_NON_COPPER, RuleID::PLANE, RuleID::DIFFPAIR};
 	}
 
 	Rule *BoardRules::get_rule(RuleID id) {
@@ -182,6 +198,8 @@ namespace horizon {
 				return &rule_clearance_copper_non_copper.at(uu);
 			case RuleID::PLANE :
 				return &rule_plane.at(uu);
+			case RuleID::DIFFPAIR:
+				return &rule_diffpair.at(uu);
 			default :
 				return nullptr;
 		}
@@ -224,6 +242,12 @@ namespace horizon {
 				}
 			break;
 
+			case RuleID::DIFFPAIR:
+				for(auto &it: rule_diffpair) {
+					r[it.first] = &it.second;
+				}
+			break;
+
 			default:;
 		}
 		return r;
@@ -253,6 +277,10 @@ namespace horizon {
 
 			case RuleID::PLANE :
 				rule_plane.erase(uu);
+			break;
+
+			case RuleID::DIFFPAIR :
+				rule_diffpair.erase(uu);
 			break;
 
 			default:;
@@ -291,6 +319,11 @@ namespace horizon {
 
 			case RuleID::PLANE :
 				r = &rule_plane.emplace(uu, uu).first->second;
+				r->order = -1;
+			break;
+
+			case RuleID::DIFFPAIR :
+				r = &rule_diffpair.emplace(uu, uu).first->second;
 				r->order = -1;
 			break;
 
@@ -338,6 +371,18 @@ namespace horizon {
 			}
 		}
 		return &fallback_clearance_copper_non_copper;
+	}
+
+	static const RuleDiffpair diffpair_fallback = UUID();
+
+	const RuleDiffpair *BoardRules::get_diffpair(NetClass *net_class, int layer) {
+		auto rules = dynamic_cast_vector<RuleDiffpair*>(get_rules_sorted(RuleID::DIFFPAIR));
+		for(auto ru: rules) {
+			if(ru->enabled && (ru->net_class == net_class->uuid && (ru->layer == layer || ru->layer == 10000))) {
+				return ru;
+			}
+		}
+		return &diffpair_fallback;
 	}
 
 	uint64_t BoardRules::get_max_clearance() {

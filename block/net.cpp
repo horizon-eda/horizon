@@ -11,8 +11,15 @@ namespace horizon {
 			uuid(uu),
 			name(j.at("name").get<std::string>()),
 			is_power(j.value("is_power", false))
-		{
+	{
 		net_class.uuid = j.at("net_class").get<std::string>();
+		if(j.count("diffpair")) {
+			UUID diffpair_uuid(j.at("diffpair").get<std::string>());
+			if(diffpair_uuid) {
+				diffpair.uuid = diffpair_uuid;
+				diffpair_master = true;
+			}
+		}
 	}
 
 	Net::Net (const UUID &uu): uuid(uu){};
@@ -26,6 +33,8 @@ namespace horizon {
 		j["name"] = name;
 		j["is_power"] = is_power;
 		j["net_class"] = net_class->uuid;
+		if(diffpair_master)
+			j["diffpair"] = diffpair->uuid;
 		return j;
 	}
 

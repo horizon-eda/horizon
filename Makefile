@@ -54,6 +54,7 @@ SRC_COMMON = \
 	board/rule_via.cpp\
 	board/rule_clearance_copper_non_copper.cpp\
 	board/rule_plane.cpp\
+	board/rule_diffpair.cpp\
 	board/airwires.cpp\
 	board/fab_output_settings.cpp\
 	pool/pool.cpp \
@@ -167,6 +168,7 @@ SRC_IMP = \
 	core/tool_edit_plane.cpp\
 	core/tool_update_all_planes.cpp\
 	core/tool_draw_dimension.cpp\
+	core/tool_set_diffpair.cpp\
 	core/cores.cpp\
 	core/clipboard.cpp\
 	core/buffer.cpp\
@@ -253,6 +255,7 @@ SRC_IMP = \
 	imp/rules/rule_editor_via.cpp\
 	imp/rules/rule_editor_clearance_copper_non_copper.cpp\
 	imp/rules/rule_editor_plane.cpp\
+	imp/rules/rule_editor_diffpair.cpp\
 	rules/rules_with_core.cpp\
 	rules/cache.cpp\
 	board/board_rules_check.cpp\

@@ -44,6 +44,7 @@
 #include "tool_edit_plane.hpp"
 #include "tool_update_all_planes.hpp"
 #include "tool_draw_dimension.hpp"
+#include "tool_set_diffpair.hpp"
 
 #include "dimension.hpp"
 #include <memory>
@@ -193,6 +194,7 @@ namespace horizon {
 				return std::make_unique<ToolManageBuses>(this, tool_id);
 
 			case ToolID::ROUTE_TRACK_INTERACTIVE :
+			case ToolID::ROUTE_DIFFPAIR_INTERACTIVE :
 				return std::make_unique<ToolRouteTrackInteractive>(this, tool_id);
 
 			case ToolID::EDIT_VIA :
@@ -218,6 +220,10 @@ namespace horizon {
 
 			case ToolID::DRAW_DIMENSION:
 				return std::make_unique<ToolDrawDimension>(this, tool_id);
+
+			case ToolID::SET_DIFFPAIR:
+			case ToolID::CLEAR_DIFFPAIR:
+				return std::make_unique<ToolSetDiffpair>(this, tool_id);
 
 			default:
 				return nullptr;

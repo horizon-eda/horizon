@@ -22,6 +22,10 @@ namespace horizon {
 					nets.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
 				}
 			}
+			for(auto &it: nets) {
+				it.second.diffpair.update(nets);
+			}
+			update_diffpairs();
 
 			{
 				const json &o = j["buses"];
@@ -38,6 +42,21 @@ namespace horizon {
 				}
 			}
 		}
+
+	void Block::update_diffpairs() {
+		for(auto &it: nets) {
+			if(!it.second.diffpair_master)
+				it.second.diffpair = nullptr;
+		}
+		for(auto &it: nets) {
+			if(it.second.diffpair_master) {
+				if(nets.count(it.second.diffpair.uuid))
+					it.second.diffpair->diffpair = &it.second;
+				else
+					it.second.diffpair = nullptr;
+			}
+		}
+	}
 
 	Block::Block(const UUID &uu): uuid(uu) {
 		auto nuu = UUID::random();
@@ -93,6 +112,7 @@ namespace horizon {
 		net_class_default.update(net_classes);
 		for(auto &it_net: nets) {
 			it_net.second.net_class.update(net_classes);
+			it_net.second.diffpair.update(nets);
 		}
 	}
 

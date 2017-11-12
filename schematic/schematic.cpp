@@ -242,6 +242,7 @@ namespace horizon {
 				it_mem.second.net->is_bussed = true;
 			}
 		}
+		block->update_diffpairs();
 
 		for(auto &it_sheet: sheets) {
 			Sheet &sheet = it_sheet.second;

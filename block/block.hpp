@@ -5,6 +5,7 @@
 #include "net.hpp"
 #include "component.hpp"
 #include "bus.hpp"
+#include "net_class.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -25,7 +26,7 @@ namespace horizon {
 			Block(const UUID &uu, const json &, Pool &pool);
 			Block(const UUID &uu);
 			static Block new_from_file(const std::string &filename, Pool &pool);
-			virtual Net *get_net(const UUID &uu);
+			Net *get_net(const UUID &uu);
 			UUID uuid;
 			std::string name;
 			std::map<UUID, Net> nets;
@@ -53,6 +54,8 @@ namespace horizon {
 
 
 			void update_connection_count();
+
+			void update_diffpairs();
 
 			/**
 			 * creates new net

@@ -31,7 +31,7 @@ flat out float line_height_px_to_fragment;
 
 layout (std140) uniform layer_setup
 { 
-	vec3 colors[13];
+	vec3 colors[14];
 };
 
 int mode = layer_flags;
