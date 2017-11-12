@@ -299,6 +299,7 @@ namespace horizon {
 				case ObjectType::POLYGON_ARC_CENTER : {
 					Polygon *poly = core.r->get_polygon(it.uuid);
 					poly->vertices.at(it.vertex).type = Polygon::Vertex::Type::LINE;
+					polys_del.insert(poly);
 				} break;
 				case ObjectType::DIMENSION : {
 					core.r->delete_dimension(it.uuid);

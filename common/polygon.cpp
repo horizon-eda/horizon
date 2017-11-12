@@ -120,8 +120,9 @@ namespace horizon {
 
 	bool Polygon::is_valid() const {
 		if(has_arcs())
-			return true;
-		return vertices.size()>=3;
+			return vertices.size()>=2;
+		else
+			return vertices.size()>=3;
 	}
 
 	Polygon::Vertex *Polygon::append_vertex(const Coordi &pos) {
