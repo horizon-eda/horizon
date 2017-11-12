@@ -242,7 +242,6 @@ namespace horizon {
 				it_mem.second.net->is_bussed = true;
 			}
 		}
-		block->update_diffpairs();
 
 		for(auto &it_sheet: sheets) {
 			Sheet &sheet = it_sheet.second;
@@ -254,6 +253,8 @@ namespace horizon {
 
 		if(!careful)
 			block->vacuum_nets();
+
+		block->update_diffpairs();
 
 		block->update_connection_count(); //also sets has_bus_rippers to false
 		for(auto &it: block->buses) {
