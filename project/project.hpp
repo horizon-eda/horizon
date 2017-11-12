@@ -27,7 +27,7 @@ namespace horizon {
 			Project(const UUID &uu);
 			ProjectBlock &get_top_block();
 
-			std::string create();
+			std::string create(const UUID &default_via = UUID());
 
 			std::string base_path;
 			UUID uuid;

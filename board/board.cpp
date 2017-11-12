@@ -153,6 +153,7 @@ namespace horizon {
 		rules.add_rule(RuleID::CLEARANCE_COPPER);
 		rules.add_rule(RuleID::CLEARANCE_COPPER_NON_COPPER);
 		rules.add_rule(RuleID::TRACK_WIDTH);
+		rules.add_rule(RuleID::PLANE);
 		auto r = dynamic_cast<RuleTrackWidth*>(rules.get_rules(RuleID::TRACK_WIDTH).begin()->second);
 		r->widths.emplace(std::piecewise_construct, std::forward_as_tuple(0), std::forward_as_tuple());
 		//TBD: inner layers

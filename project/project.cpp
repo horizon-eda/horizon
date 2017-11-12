@@ -66,7 +66,7 @@ namespace horizon {
 		return top_block->second;
 	}
 
-	std::string Project::create() {
+	std::string Project::create(const UUID &default_via) {
 		if(Glib::file_test(base_path, Glib::FILE_TEST_EXISTS)) {
 			throw std::runtime_error("project directory already exists");
 		}
@@ -101,6 +101,11 @@ namespace horizon {
 		}
 
 		Board board(UUID::random(), block);
+		if(default_via) {
+			auto rule_via = dynamic_cast<RuleVia*>(board.rules.add_rule(RuleID::VIA));
+			rule_via->padstack = default_via;
+		}
+
 		board_filename = Glib::build_filename(base_path, "board.json");
 		save_json_to_file(board_filename, board.serialize());
 

@@ -9,7 +9,11 @@ namespace horizon {
 
 	ProjectManagerPool::ProjectManagerPool(const json &j, const std::string &p): path(p),
 			name(j.at("name").get<std::string>()),
-			uuid(j.at("uuid").get<std::string>()){
+			uuid(j.at("uuid").get<std::string>())
+	{
+		if(j.count("default_via")) {
+			default_via = UUID(j.at("default_via").get<std::string>());
+		}
 
 	}
 

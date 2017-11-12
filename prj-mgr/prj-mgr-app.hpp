@@ -14,6 +14,7 @@ namespace horizon {
 			std::string path;
 			std::string name;
 			UUID uuid;
+			UUID default_via;
 	};
 
 

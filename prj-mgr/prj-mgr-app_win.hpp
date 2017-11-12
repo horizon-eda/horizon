@@ -9,7 +9,7 @@ namespace horizon {
 
 	class ProjectManagerViewCreate: public sigc::trackable {
 		public:
-			ProjectManagerViewCreate(const Glib::RefPtr<Gtk::Builder>& refBuilder);
+			ProjectManagerViewCreate(const Glib::RefPtr<Gtk::Builder>& refBuilder, class ProjectManagerAppWindow *w);
 			void clear();
 			std::pair<bool, std::string> create();
 			typedef sigc::signal<void, bool> type_signal_valid_change;
@@ -17,6 +17,7 @@ namespace horizon {
 			void populate_pool_combo(const Glib::RefPtr<Gtk::Application> &app);
 
 		private:
+			ProjectManagerAppWindow *win = nullptr;
 			Gtk::Entry *project_name_entry = nullptr;
 			Gtk::Entry *project_description_entry = nullptr;
 			Gtk::FileChooserButton *project_path_chooser = nullptr;
@@ -61,6 +62,7 @@ namespace horizon {
 
 	class ProjectManagerAppWindow : public Gtk::ApplicationWindow {
 		friend class ProjectManagerViewProject;
+		friend class ProjectManagerViewCreate;
 		public:
 			ProjectManagerAppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refBuilder, class ProjectManagerApplication *app);
 			~ProjectManagerAppWindow();

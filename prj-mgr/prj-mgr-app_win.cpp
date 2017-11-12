@@ -10,7 +10,7 @@ extern const char *gitversion;
 
 namespace horizon {
 
-	ProjectManagerViewCreate::ProjectManagerViewCreate(const Glib::RefPtr<Gtk::Builder>& builder) {
+	ProjectManagerViewCreate::ProjectManagerViewCreate(const Glib::RefPtr<Gtk::Builder>& builder, class ProjectManagerAppWindow *w): win(w) {
 		builder->get_widget("create_project_name_entry", project_name_entry);
 		builder->get_widget("create_project_description_entry", project_description_entry);
 		builder->get_widget("create_project_path_chooser", project_path_chooser);
@@ -48,7 +48,9 @@ namespace horizon {
 			prj.base_path = Glib::build_filename(project_path_chooser->get_file()->get_path(), prj.name);
 			prj.title = project_description_entry->get_text();
 			prj.pool_uuid = static_cast<std::string>(project_pool_combo->get_active_id());
-			s = prj.create();
+
+			auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(win->get_application());
+			s = prj.create(app->pools.at(prj.pool_uuid).default_via);
 			r = true;
 		}
 		catch (const std::exception& e) {
@@ -202,7 +204,7 @@ namespace horizon {
 	}
 
 	ProjectManagerAppWindow::ProjectManagerAppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refBuilder, ProjectManagerApplication *app):
-			Gtk::ApplicationWindow(cobject), builder(refBuilder), view_create(builder), view_project(builder, this), sock_project(app->zctx, ZMQ_REP) {
+			Gtk::ApplicationWindow(cobject), builder(refBuilder), view_create(builder, this), view_project(builder, this), sock_project(app->zctx, ZMQ_REP) {
 		builder->get_widget("stack", stack);
 		builder->get_widget("button_open", button_open);
 		builder->get_widget("button_close", button_close);
