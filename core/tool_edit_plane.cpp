@@ -33,6 +33,8 @@ namespace horizon {
 	}
 
 	bool ToolEditPlane::can_begin() {
+		if(!core.b)
+			return false;
 		auto poly = get_poly();
 		if(!poly)
 			return false;
