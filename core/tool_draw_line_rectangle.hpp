@@ -11,6 +11,7 @@ namespace horizon {
 			bool can_begin() override;
 
 		private:
+			std::set<class Line*> lines;
 			enum class Mode {CENTER, CORNER};
 
 			Mode mode = Mode::CENTER;

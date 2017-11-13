@@ -46,6 +46,8 @@ namespace horizon {
 
 		for(int i=0; i<4; i++) {
 			auto line = core.r->insert_line(UUID::random());
+			lines.insert(line);
+			line->layer = args.work_layer;
 			line->from = junctions[i];
 			line->to = junctions[(i+1)%4];
 		}
@@ -125,6 +127,11 @@ namespace horizon {
 			else if(args.key == GDK_KEY_Escape) {
 				core.r->revert();
 				return ToolResponse::end();
+			}
+		}
+		else if(args.type == ToolEventType::LAYER_CHANGE) {
+			for(auto it: lines) {
+				it->layer = args.work_layer;
 			}
 		}
 		update_tip();
