@@ -1,6 +1,7 @@
 #include "unit_editor.hpp"
 #include <iostream>
 #include "unit.hpp"
+#include "util.hpp"
 #include <glibmm.h>
 
 namespace horizon {
@@ -116,15 +117,7 @@ namespace horizon {
 		pins_listbox->set_sort_func([](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b){
 			auto na = dynamic_cast<PinEditor*>(a->get_child())->pin->primary_name;
 			auto nb = dynamic_cast<PinEditor*>(b->get_child())->pin->primary_name;
-			if(na > nb) {
-				return 1;
-			}
-			else if(na < nb) {
-				return -1;
-			}
-			else {
-				return 0;
-			}
+			return strcmp_natural(na, nb);
 		});
 
 		for(auto &it: unit->pins) {

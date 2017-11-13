@@ -4,6 +4,7 @@
 #include "core_symbol.hpp"
 #include "imp_interface.hpp"
 #include "tool_helper_move.hpp"
+#include "util.hpp"
 
 namespace horizon {
 
@@ -35,7 +36,7 @@ namespace horizon {
 		for(const auto &it : core.y->get_pins()) {
 			pins.push_back({it, false});
 		}
-		std::sort(pins.begin(), pins.end(), [](const auto &a, const auto &b){return a.first->primary_name < b.first->primary_name;});
+		std::sort(pins.begin(), pins.end(), [](const auto &a, const auto &b){return strcmp_natural(a.first->primary_name, b.first->primary_name)<0;});
 
 		for(auto &it: pins) {
 			if(core.y->get_symbol_pin(it.first->uuid)) {

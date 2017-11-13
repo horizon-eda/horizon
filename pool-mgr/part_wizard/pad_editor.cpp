@@ -1,5 +1,6 @@
 #include "pad_editor.hpp"
 #include "part_wizard.hpp"
+#include "util.hpp"
 
 namespace horizon {
 	void PadEditor::update_names() {
@@ -9,12 +10,7 @@ namespace horizon {
 		}
 
 		std::sort(names.begin(), names.end(), [](const auto &a, const auto &b){
-			auto ca = g_utf8_collate_key_for_filename(a.c_str(), -1);
-			auto cb = g_utf8_collate_key_for_filename(b.c_str(), -1);
-			auto r = strcmp(ca, cb);
-			g_free(ca);
-			g_free(cb);
-			return r < 0;
+			return strcmp_natural(a,b) < 0;
 		});
 
 		{

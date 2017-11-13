@@ -1,6 +1,7 @@
 #include "part_editor.hpp"
 #include <iostream>
 #include "part.hpp"
+#include "util.hpp"
 #include <glibmm.h>
 
 namespace horizon {
@@ -173,12 +174,7 @@ namespace horizon {
 			Gtk::TreeModel::Row rb = *ib;
 			Glib::ustring a = ra[pad_list_columns.pad_name];
 			Glib::ustring b = rb[pad_list_columns.pad_name];
-			auto ca = g_utf8_collate_key_for_filename(a.c_str(), -1);
-			auto cb = g_utf8_collate_key_for_filename(b.c_str(), -1);
-			auto r = strcmp(ca, cb);
-			g_free(ca);
-			g_free(cb);
-			return r;
+			return strcmp_natural(a, b);
 		});
 		w_tv_pads->set_model(pad_store);
 		w_tv_pads->append_column("Pad", pad_list_columns.pad_name);

@@ -82,12 +82,7 @@ namespace horizon {
 		pads_lb->set_sort_func([](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b){
 			auto na = dynamic_cast<PadEditor*>(a->get_child())->names.front();
 			auto nb = dynamic_cast<PadEditor*>(b->get_child())->names.front();
-			auto ca = g_utf8_collate_key_for_filename(na.c_str(), -1);
-			auto cb = g_utf8_collate_key_for_filename(nb.c_str(), -1);
-			auto r = strcmp(ca, cb);
-			g_free(ca);
-			g_free(cb);
-			return r;
+			return strcmp_natural(na, nb);
 		});
 
 		part.package = pkg;
