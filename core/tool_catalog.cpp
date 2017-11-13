@@ -64,5 +64,6 @@ namespace horizon {
 		{ToolID::SET_DIFFPAIR, {"Set diff. pair"}},
 		{ToolID::CLEAR_DIFFPAIR, {"Clear diff. pair"}},
 		{ToolID::ROUTE_DIFFPAIR_INTERACTIVE, {"Route diff. pair"}},
+		{ToolID::SELECT_MORE, {"Select more"}},
 	};
 }

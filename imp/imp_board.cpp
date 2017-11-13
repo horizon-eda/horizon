@@ -37,6 +37,8 @@ namespace horizon {
 				{{GDK_KEY_g},				ToolID::DRAG_KEEP_SLOPE},
 				{{GDK_KEY_q},				ToolID::UPDATE_ALL_PLANES},
 				{{GDK_KEY_Q},				ToolID::CLEAR_ALL_PLANES},
+				{{GDK_KEY_o},				ToolID::SELECT_MORE},
+				{{GDK_KEY_O},				ToolID::SELECT_NET_SEGMENT},
 		});
 		key_seq.signal_update_hint().connect([this] (const std::string &s) {main_window->tool_hint_label->set_text(s);});
 
