@@ -1,7 +1,7 @@
 #include "tool_move_net_segment.hpp"
-#include "tool_place_power_symbol.hpp"
 #include <iostream>
 #include "core_schematic.hpp"
+#include "core_board.hpp"
 #include "imp_interface.hpp"
 
 namespace horizon {
@@ -11,8 +11,15 @@ namespace horizon {
 	}
 
 	bool ToolMoveNetSegment::can_begin() {
-		if(!core.c) {
-			return false;
+		if(tool_id == ToolID::SELECT_NET_SEGMENT) {
+			if(!core.c && !core.b) {
+				return false;
+			}
+		}
+		else {
+			if(!core.c) {
+				return false;
+			}
 		}
 		return get_net_segment();
 	}
@@ -21,7 +28,7 @@ namespace horizon {
 		for(const auto &it: core.r->selection) {
 			UUID this_ns;
 			if(it.type == ObjectType::JUNCTION) {
-				this_ns = core.c->get_junction(it.uuid)->net_segment;
+				this_ns = core.r->get_junction(it.uuid)->net_segment;
 			}
 			else if(it.type == ObjectType::LINE_NET) {
 				this_ns = core.c->get_sheet()->net_lines.at(it.uuid).net_segment;
@@ -31,6 +38,9 @@ namespace horizon {
 			}
 			else if(it.type == ObjectType::NET_LABEL) {
 				this_ns = core.c->get_sheet()->net_labels.at(it.uuid).junction->net_segment;
+			}
+			else if(it.type == ObjectType::TRACK) {
+				this_ns = core.b->get_board()->tracks.at(it.uuid).net_segment;
 			}
 			if(this_ns && !net_segment) {
 				net_segment = this_ns;
@@ -47,10 +57,19 @@ namespace horizon {
 	ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args) {
 		std::cout << "tool select net seg\n";
 		net_segment = get_net_segment();
-		core.c->selection.clear();
+		core.r->selection.clear();
 		if(!net_segment) {
 			return ToolResponse::end();
 		}
+		if(core.b) {
+			for(const auto &it: core.b->get_board()->tracks) {
+				if(it.second.net_segment == net_segment) {
+					core.r->selection.emplace(it.first, ObjectType::TRACK);
+				}
+			}
+			return ToolResponse::end();
+		}
+
 		auto nsinfo = core.c->get_sheet()->analyze_net_segments().at(net_segment);
 		if(nsinfo.bus)
 			return ToolResponse::end();
