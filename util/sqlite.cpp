@@ -23,7 +23,6 @@ namespace SQLite {
 		}
 		sqlite3_busy_timeout(db, timeout_ms);
 
-		//add collation function
 		if(sqlite3_create_collation(db, "naturalCompare", SQLITE_UTF8, nullptr, natural_compare) != SQLITE_OK) {
 			throw std::runtime_error(sqlite3_errmsg(db));
 		}
@@ -104,7 +103,9 @@ namespace SQLite {
 	}
 
 	Database::~Database() {
-		sqlite3_close_v2(db);
+		if(sqlite3_close_v2(db) != SQLITE_OK) {
+			std::cout << "error closing database" << std::endl;
+		}
 	}
 
 

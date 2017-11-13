@@ -107,14 +107,19 @@ namespace horizon {
 	}
 
 	void PoolNotebook::pool_updated() {
+		pool_updating = false;
 		appwin->set_pool_updating(false);
+		pool.clear();
 		for(auto &br: browsers) {
 			br->search();
 		}
-		pool.clear();
 		for(auto &it: processes) {
 			it.second.reload();
 		}
+	}
+
+	PoolNotebook::~PoolNotebook() {
+		sock_pool_update_conn.disconnect();
 	}
 
 	PoolNotebook::PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw): Gtk::Notebook(), base_path(bp), pool(bp), appwin(aw), zctx(aw->zctx), sock_pool_update(zctx, ZMQ_SUB) {
@@ -132,7 +137,7 @@ namespace horizon {
 				chan = Glib::IOChannel::create_from_fd(fd);
 			#endif
 
-			Glib::signal_io().connect([this](Glib::IOCondition cond){
+			sock_pool_update_conn = Glib::signal_io().connect([this](Glib::IOCondition cond){
 				while(sock_pool_update.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
 					zmq::message_t msg;
 					sock_pool_update.recv(&msg);
@@ -272,6 +277,7 @@ namespace horizon {
 			paned->show_all();
 			br->signal_selected().connect([this, br, canvas]{
 				auto sel = br->get_selected();
+				std::cout << "sym sel " << (std::string) sel << std::endl;
 				if(!sel) {
 					canvas->clear();
 					return;
@@ -784,7 +790,7 @@ namespace horizon {
 	}
 
 	bool PoolNotebook::can_close() {
-		return processes.size() == 0 && part_wizard==nullptr;
+		return processes.size() == 0 && part_wizard==nullptr && !pool_updating;
 	}
 
 	static void pool_update_thread(const std::string &pool_base_path, zmq::context_t &zctx, const std::string &ep) {
@@ -801,6 +807,7 @@ namespace horizon {
 
 	void PoolNotebook::pool_update() {
 		appwin->set_pool_updating(true);
+		pool_updating = true;
 		std::thread thr(pool_update_thread, std::ref(base_path), std::ref(zctx), std::ref(sock_pool_update_ep));
 		thr.detach();
 	}

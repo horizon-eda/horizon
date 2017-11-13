@@ -47,7 +47,7 @@ namespace horizon {
 
 	void PoolBrowserPadstack::search() {
 		auto selected_uuid = get_selected();
-		store->freeze_notify();
+		treeview->unset_model();
 		store->clear();
 
 		std::string name_search = name_entry->get_text();
@@ -97,7 +97,7 @@ namespace horizon {
 			row[list_columns.package_name] = q.get<std::string>(3);
 			row[list_columns.path] = q.get<std::string>(4);
 		}
-		store->thaw_notify();
+		treeview->set_model(store);
 		select_uuid(selected_uuid);
 		scroll_to_selection();
 	}

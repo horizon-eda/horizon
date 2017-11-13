@@ -36,6 +36,7 @@ namespace horizon {
 			void spawn(PoolManagerProcess::Type type, const std::vector<std::string> &args);
 			bool can_close();
 			void pool_update();
+			~PoolNotebook();
 
 		private:
 			const std::string base_path;
@@ -48,6 +49,8 @@ namespace horizon {
 			zmq::context_t &zctx;
 			zmq::socket_t sock_pool_update;
 			std::string sock_pool_update_ep;
+			sigc::connection sock_pool_update_conn;
+			bool pool_updating = false;
 			void pool_updated();
 	};
 }

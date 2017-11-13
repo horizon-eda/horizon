@@ -34,4 +34,6 @@ namespace horizon {
 	template <typename T> int sgn(T val) {
 		return (T(0) < val) - (val < T(0));
 	}
+
+	int strcmp_natural(const std::string &a, const std::string &b);
 }

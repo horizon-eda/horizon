@@ -128,4 +128,13 @@ namespace horizon {
 		else
 			return (haystack.size()-haystack.rfind(needle)) == needle.size();
 	}
+
+	int strcmp_natural(const std::string &a, const std::string &b) {
+		auto ca = g_utf8_collate_key_for_filename(a.c_str(), -1);
+		auto cb = g_utf8_collate_key_for_filename(b.c_str(), -1);
+		auto r = strcmp(ca, cb);
+		g_free(ca);
+		g_free(cb);
+		return r;
+	}
 }
