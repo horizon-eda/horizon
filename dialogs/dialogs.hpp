@@ -36,7 +36,7 @@ namespace horizon {
 			bool manage_via_templates(class Board *b, class ViaPadstackProvider *vpp);
 			bool edit_parameter_program(class ParameterProgram *program);
 			bool edit_parameter_set(ParameterSet *pset);
-			bool edit_pad_parameter_set(std::set<class Pad*> &pads);
+			bool edit_pad_parameter_set(std::set<class Pad*> &pads, class Pool *pool, class Package *pkg);
 			bool annotate(class Schematic *s);
 			bool edit_plane(class Plane *plane, class Board *brd, class Block *block);
 			bool edit_stackup(class Board *brd);

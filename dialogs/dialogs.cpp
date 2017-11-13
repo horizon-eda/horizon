@@ -189,8 +189,8 @@ namespace horizon {
 		return dia.run()==Gtk::RESPONSE_OK;
 	}
 
-	bool Dialogs::edit_pad_parameter_set(std::set<class Pad*> &pads) {
-		PadParameterSetDialog dia(parent, pads);
+	bool Dialogs::edit_pad_parameter_set(std::set<class Pad*> &pads, Pool *pool, class Package *pkg) {
+		PadParameterSetDialog dia(parent, pads, pool, pkg);
 		return dia.run()==Gtk::RESPONSE_OK;
 	}
 

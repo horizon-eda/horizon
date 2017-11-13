@@ -9,6 +9,10 @@ namespace horizon {
 	PoolBrowserButton::PoolBrowserButton(ObjectType ty, Pool *ipool): Glib::ObjectBase (typeid(PoolBrowserButton)), Gtk::Button("fixme"), p_property_selected_uuid(*this, "selected-uuid"), pool(ipool), type(ty),
 		dia(nullptr, type, pool) {
 		update_label();
+		property_selected_uuid().signal_changed().connect([this] {
+			selected_uuid = property_selected_uuid();
+			update_label();
+		});
 	}
 
 	class PoolBrowser *PoolBrowserButton::get_browser() {
@@ -18,7 +22,7 @@ namespace horizon {
 	void PoolBrowserButton::on_clicked() {
 		Gtk::Button::on_clicked();
 		auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-		dia.set_parent(*top);
+		dia.set_transient_for(*top);
 		if(dia.run() == Gtk::RESPONSE_OK) {
 			selected_uuid = dia.get_browser()->get_selected();
 			p_property_selected_uuid.set_value(selected_uuid);

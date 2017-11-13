@@ -45,7 +45,7 @@ namespace horizon {
 		{ToolID::EDIT_SHAPE, {"Edit shape"}},
 		{ToolID::IMPORT_DXF, {"Import DXF"}},
 		{ToolID::MANAGE_NET_CLASSES, {"Manage net classes"}},
-		{ToolID::EDIT_PAD_PARAMETER_SET, {"Edit pad parameter set"}},
+		{ToolID::EDIT_PAD_PARAMETER_SET, {"Edit pad"}},
 		{ToolID::DRAW_POLYGON_RECTANGLE, {"Draw polygon rectangle"}},
 		{ToolID::DRAW_LINE_RECTANGLE, {"Draw line rectangle"}},
 		{ToolID::EDIT_LINE_RECTANGLE, {"Edit line rectangle"}},
