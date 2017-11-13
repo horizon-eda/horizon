@@ -233,7 +233,9 @@ namespace horizon {
 
 		for(const auto &it: filenames) {
 			auto dir = Glib::path_get_dirname(it);
-			Gio::File::create_for_path(dir)->make_directory_with_parents();
+			if(!Glib::file_test(dir, Glib::FILE_TEST_IS_DIR)) {
+				Gio::File::create_for_path(dir)->make_directory_with_parents();
+			}
 		}
 
 		for(auto ch: children) {
