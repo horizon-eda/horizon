@@ -1,12 +1,32 @@
 #include "sqlite.hpp"
-
+#include <glib.h>
+#include <string.h>
 
 namespace SQLite {
+
+	static int natural_compare(void* pArg,
+		int len1, const void* data1,
+		int len2, const void* data2)
+	{
+		auto ca = g_utf8_collate_key_for_filename(static_cast<const char*>(data1), len1);
+		auto cb = g_utf8_collate_key_for_filename(static_cast<const char*>(data2), len2);
+		auto r = strcmp(ca, cb);
+		g_free(ca);
+		g_free(cb);
+		return r;
+	}
+
+
 	Database::Database(const std::string &filename, int flags, int timeout_ms) {
 		if(sqlite3_open_v2(filename.c_str(), &db, flags, nullptr) != SQLITE_OK) {
 			throw std::runtime_error(sqlite3_errmsg(db));
 		}
 		sqlite3_busy_timeout(db, timeout_ms);
+
+		//add collation function
+		if(sqlite3_create_collation(db, "naturalCompare", SQLITE_UTF8, nullptr, natural_compare) != SQLITE_OK) {
+			throw std::runtime_error(sqlite3_errmsg(db));
+		}
 	}
 
 	void Database::execute(const std::string &query) {
