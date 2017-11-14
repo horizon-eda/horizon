@@ -14,7 +14,7 @@ namespace horizon {
 
 	void ExcellonWriter::write_line(const std::string &s) {
 		check_open();
-		ofs << s << std::endl;
+		ofs << s << "\r\n";
 	}
 
 	void ExcellonWriter::check_open() {
@@ -37,7 +37,7 @@ namespace horizon {
 	void ExcellonWriter::write_header() {
 		ofs.precision(3);
 		for(const auto &it: tools) {
-			ofs << "T" << it.second << "C" << std::fixed << (double)it.first/1e6  << std::endl;
+			ofs << "T" << it.second << "C" << std::fixed << (double)it.first/1e6  << "\r\n";
 		}
 		write_line("%");
 		write_line("G90");
@@ -78,10 +78,10 @@ namespace horizon {
 		ofs.precision(3);
 		for(const auto &itt: tools) {
 			auto tool = itt.second;
-			ofs << "T" << tool << std::endl;
+			ofs << "T" << tool << "\r\n";
 			for(const auto &it: holes) {
 				if(it.second == tool)
-					ofs << "X" << std::fixed << (double)it.first.x/1e6 << "Y" << std::fixed << (double)it.first.y/1e6 << std::endl;
+					ofs << "X" << std::fixed << (double)it.first.x/1e6 << "Y" << std::fixed << (double)it.first.y/1e6 << "\r\n";
 			}
 			for(const auto &it: slots) {
 				Coordi p0;
@@ -89,7 +89,7 @@ namespace horizon {
 				unsigned int this_tool;
 				std::tie(p0, p1, this_tool) = it;
 				if(this_tool == tool)
-					ofs << "X" << std::fixed << (double)p0.x/1e6 << "Y" << std::fixed << (double)p0.y/1e6 << "G85" << "X" << std::fixed << (double)p1.x/1e6 << "Y" << std::fixed << (double)p1.y/1e6 << std::endl;
+					ofs << "X" << std::fixed << (double)p0.x/1e6 << "Y" << std::fixed << (double)p0.y/1e6 << "G85" << "X" << std::fixed << (double)p1.x/1e6 << "Y" << std::fixed << (double)p1.y/1e6 << "\r\n";
 			}
 		}
 
