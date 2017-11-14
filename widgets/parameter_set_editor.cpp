@@ -27,7 +27,7 @@ namespace horizon {
 				sp = Gtk::manage(new SpinButtonDim());
 				sp->set_range(-1e9, 1e9);
 				sp->set_value(parent->parameter_set->at(id));
-				sp->signal_changed().connect([this] {(*parent->parameter_set)[parameter_id] = sp->get_value_as_int();});
+				sp->signal_value_changed().connect([this] {(*parent->parameter_set)[parameter_id] = sp->get_value_as_int();});
 				sp->signal_activate().connect([this] {
 					auto widgets = parent->listbox->get_children();
 					auto my_row = sp->get_ancestor(GTK_TYPE_LIST_BOX_ROW);

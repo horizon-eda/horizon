@@ -16,20 +16,20 @@ namespace horizon {
 	}
 	void bind_widget(SpinButtonDim *sp, int64_t &v) {
 		sp->set_value(v);
-		sp->signal_changed().connect([sp, &v]{
+		sp->signal_value_changed().connect([sp, &v]{
 				v = sp->get_value_as_int();
 		});
 	}
 	void bind_widget(SpinButtonDim *sp, uint64_t &v) {
 		sp->set_value(v);
-		sp->signal_changed().connect([sp, &v]{
+		sp->signal_value_changed().connect([sp, &v]{
 				v = sp->get_value_as_int();
 		});
 	}
 
 	void bind_widget(Gtk::SpinButton *sp, int &v) {
 		sp->set_value(v);
-		sp->signal_changed().connect([sp, &v]{
+		sp->signal_value_changed().connect([sp, &v]{
 				v = sp->get_value_as_int();
 		});
 	}
