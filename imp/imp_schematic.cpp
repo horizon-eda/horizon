@@ -259,7 +259,20 @@ namespace horizon {
 
 		canvas->set_highlight_mode(CanvasGL::HighlightMode::DIM);
 
-		add_tool_button(ToolID::ADD_PART, "Place part", false);
+		if(!sockets_connected) {
+			add_tool_button(ToolID::ADD_PART, "Place part", false);
+		}
+		else {
+			auto button = Gtk::manage(new Gtk::Button("Place part"));
+			button->signal_clicked().connect([this]{
+				json j;
+				j["op"] = "show-browser";
+				send_json(j);
+			});
+			button->show();
+			core.r->signal_tool_changed().connect([button](ToolID t){button->set_sensitive(t==ToolID::NONE);});
+			main_window->header->pack_end(*button);
+		}
 
 		if(sockets_connected){
 			auto button = Gtk::manage(new Gtk::Button("To board"));
