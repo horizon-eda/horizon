@@ -28,6 +28,14 @@ namespace horizon {
 				sp->set_range(-1e9, 1e9);
 				sp->set_value(parent->parameter_set->at(id));
 				sp->signal_value_changed().connect([this] {(*parent->parameter_set)[parameter_id] = sp->get_value_as_int();});
+				sp->signal_key_press_event().connect([this] (GdkEventKey* ev){
+					if(ev->keyval == GDK_KEY_Return && (ev->state & GDK_SHIFT_MASK)) {
+						sp->activate();
+						parent->s_signal_apply_all.emit(parameter_id);
+						return true;
+					}
+					return false;
+				});
 				sp->signal_activate().connect([this] {
 					auto widgets = parent->listbox->get_children();
 					auto my_row = sp->get_ancestor(GTK_TYPE_LIST_BOX_ROW);

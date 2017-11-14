@@ -13,17 +13,13 @@ namespace horizon {
 
 	class MyParameterSetEditor: public ParameterSetEditor {
 		public:
-			typedef sigc::signal<void, ParameterID> type_signal_apply_all;
-			type_signal_apply_all signal_apply_all() {return s_signal_apply_all;}
 
 		private:
-			type_signal_apply_all s_signal_apply_all;
-
 			using ParameterSetEditor::ParameterSetEditor;
 			Gtk::Widget *create_extra_widget(ParameterID id) override {
 				auto w = Gtk::manage(new Gtk::Button());
 				w->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
-				w->set_tooltip_text("Apply to all pads");
+				w->set_tooltip_text("Apply to all pads (Shift+Enter)");
 				w->signal_clicked().connect([this, id] {
 					s_signal_apply_all.emit(id);
 				});
