@@ -34,7 +34,7 @@ namespace horizon {
 		Gtk::Dialog("Edit pad", *parent, Gtk::DialogFlags::DIALOG_MODAL|Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
 		pool(p)
 		{
-		set_default_size(400, 300);
+		set_default_size(300, 600);
 		add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
 		add_button("OK", Gtk::ResponseType::RESPONSE_OK);
 		set_default_response(Gtk::ResponseType::RESPONSE_OK);
