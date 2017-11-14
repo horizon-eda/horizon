@@ -4,6 +4,7 @@
 #include "package/pad.hpp"
 #include "widgets/pool_browser_padstack.hpp"
 #include "package.hpp"
+#include "util.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>
@@ -72,7 +73,7 @@ namespace horizon {
 
 		std::map<UUID, Pad*> padmap;
 		std::deque<Pad*> pads_sorted(pads.begin(), pads.end());
-		std::sort(pads_sorted.begin(), pads_sorted.end(), [](const auto a, const auto b){return a->name < b->name;});
+		std::sort(pads_sorted.begin(), pads_sorted.end(), [](const auto a, const auto b){return strcmp_natural(a->name, b->name)<0;});
 
 		for(auto it: pads_sorted) {
 			combo->append(static_cast<std::string>(it->uuid), it->name);
