@@ -631,6 +631,7 @@ namespace horizon {
 			}
 			{
 				auto bu = Gtk::manage(new Gtk::Button("Part wizard..."));
+				bu->get_style_context()->add_class("suggested-action");
 				bbox->pack_start(*bu, false, false,0);
 				bu->signal_clicked().connect([this, br]{
 					if(!br->get_selected())

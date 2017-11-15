@@ -118,15 +118,18 @@ namespace horizon {
 
 		auto hamburger_menu = add_hamburger_menu();
 		hamburger_menu->append("Import DXF", "win.import_dxf");
-		hamburger_menu->append("Footprint generator", "win.footprint_gen");
 
 		add_tool_action(ToolID::IMPORT_DXF, "import_dxf");
 
 		{
-			auto tool_action = main_window->add_action("footprint_gen");
-			tool_action->signal_activate().connect([this](const Glib::VariantBase& var){
+			auto button = Gtk::manage(new Gtk::Button("Footprint gen."));
+			button->signal_clicked().connect([this]{
+				footprint_generator_window->present();
 				footprint_generator_window->show_all();
 			});
+			button->show();
+			core.r->signal_tool_changed().connect([button](ToolID t){button->set_sensitive(t==ToolID::NONE);});
+			main_window->header->pack_end(*button);
 		}
 
 		core_package.signal_save().connect([this, entry_name, entry_manufacturer, entry_tags, header_button]{
