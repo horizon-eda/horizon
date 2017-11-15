@@ -33,10 +33,15 @@ namespace horizon {
 				if(package->pads.count(pad_uuid)) {
 					auto pad = &package->pads.at(pad_uuid);
 					if(pad->pool_padstack->type != Padstack::Type::MECHANICAL) {
-						auto gate = &entity->gates.at(it->at("gate").get<std::string>());
-						auto pin = &gate->unit->pins.at(it->at("pin").get<std::string>());
-
-						pad_map.insert(std::make_pair(pad_uuid, PadMapItem(gate, pin)));
+						auto gate_uuid = it->at("gate").get<std::string>();
+						auto pin_uuid = it->at("pin").get<std::string>();
+						if(entity->gates.count(gate_uuid)) {
+							auto gate = &entity->gates.at(gate_uuid);
+							if(gate->unit->pins.count(pin_uuid)) {
+								auto pin = &gate->unit->pins.at(pin_uuid);
+								pad_map.insert(std::make_pair(pad_uuid, PadMapItem(gate, pin)));
+							}
+						}
 					}
 				}
 			}
