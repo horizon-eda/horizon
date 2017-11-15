@@ -11,12 +11,22 @@ namespace horizon {
 		{"round",	PlaneSettings::Style::ROUND},
 	};
 
+	static const LutEnumStr<PlaneSettings::ConnectStyle> connect_style_lut = {
+		{"solid",	PlaneSettings::ConnectStyle::SOLID},
+		{"thermal",	PlaneSettings::ConnectStyle::THERMAL},
+	};
+
 
 	PlaneSettings::PlaneSettings(const json &j): min_width(j.at("min_width")),
-		keep_orphans(j.at("keep_orphans"))
+		keep_orphans(j.at("keep_orphans")),
+		thermal_gap_width(j.value("thermal_gap_width", 0.1_mm)),
+		thermal_spoke_width(j.value("thermal_spoke_width", 0.2_mm))
 	{
 		if(j.count("style")) {
 			style = style_lut.lookup(j.at("style"));
+		}
+		if(j.count("connect_style")) {
+			connect_style = connect_style_lut.lookup(j.at("connect_style"));
 		}
 	}
 
@@ -25,6 +35,9 @@ namespace horizon {
 		j["min_width"] = min_width;
 		j["keep_orphans"] = keep_orphans;
 		j["style"] = style_lut.lookup_reverse(style);
+		j["connect_style"] = connect_style_lut.lookup_reverse(connect_style);
+		j["thermal_gap_width"] = thermal_gap_width;
+		j["thermal_spoke_width"] = thermal_spoke_width;
 		return j;
 	}
 

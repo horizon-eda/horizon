@@ -55,7 +55,7 @@ namespace horizon {
 			const std::map<int, Layer> &get_layers() const override;
 			void set_n_inner_layers(unsigned int n);
 			unsigned int get_n_inner_layers() const;
-			void update_plane(Plane *plane, class CanvasPatch *ca=nullptr); //when ca is given, patches will be read from it
+			void update_plane(Plane *plane, class CanvasPatch *ca=nullptr, class CanvasPads *ca_pads=nullptr); //when ca is given, patches will be read from it
 			void update_planes();
 
 			UUID uuid;
@@ -98,6 +98,7 @@ namespace horizon {
 
 		private:
 			unsigned int n_inner_layers = 0;
+			ClipperLib::Paths get_thermals(class Plane *plane, class CanvasPads *ca) const;
 	};
 
 }

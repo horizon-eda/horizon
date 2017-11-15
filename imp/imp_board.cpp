@@ -1,7 +1,7 @@
 #include "imp_board.hpp"
 #include "part.hpp"
 #include "rules/rules_window.hpp"
-#include "canvas/canvas_patch.hpp"
+#include "canvas/canvas_pads.hpp"
 #include "fab_output_window.hpp"
 #include "3d_view.hpp"
 
@@ -174,6 +174,15 @@ namespace horizon {
 		send_json(j);
 	}
 
+	void transform_path(ClipperLib::Path &path, const Placement &tr) {
+		for(auto &it: path) {
+			Coordi p(it.X, it.Y);
+			auto q = tr.transform(p);
+			it.X = q.x;
+			it.Y = q.y;
+		}
+	}
+
 
 	void ImpBoard::construct() {
 		ImpLayer::construct();
@@ -226,28 +235,91 @@ namespace horizon {
 
 		add_tool_button(ToolID::MAP_PACKAGE, "Place package", false);
 
-		/*auto test_button = Gtk::manage(new Gtk::Button("Test"));
-		main_window->top_panel->pack_start(*test_button, false, false, 0);
+		auto test_button = Gtk::manage(new Gtk::Button("Test"));
+		main_window->header->pack_start(*test_button);
 		test_button->show();
 		test_button->signal_clicked().connect([this] {
-			std::ofstream ofs("/tmp/patches");
+			CanvasPads cp;
+			cp.update(*core.b->get_board());
+
+
+			std::ofstream ofi("/tmp/patches");
+			ofi.imbue(std::locale("C"));
 			int i = 0;
-			for(const auto &it: cp.patches) {
-				if(it.first.layer != 10000)
+			for(const auto &it: cp.pads) {
+				if(it.first.layer != 0)
 					continue;
-				for(const auto &itp: it.second) {
-					ofs << "#" << static_cast<int>(it.first.type) << " " << it.first.layer << " " << (std::string)it.first.net << "\n";
-					for(const auto &itc: itp) {
-						ofs << itc.X << " " << itc.Y << " " << i << "\n";
+				ClipperLib::Paths uni;
+				{
+					ClipperLib::Clipper cl;
+					for(const auto &it2: it.second.second) {
+						std::cout << ClipperLib::Orientation(it2) << std::endl;
 					}
-					ofs << itp.front().X << " " << itp.front().Y << " " << i  << "\n\n";
+					std::cout << std::endl;
+					cl.AddPaths(it.second.second, ClipperLib::ptSubject, true);
+					cl.Execute(ClipperLib::ctUnion, uni, ClipperLib::pftNonZero);
 				}
-				ofs << "\n";
+
+
+				ClipperLib::ClipperOffset ofs; //expand patch for cutout
+				ofs.ArcTolerance = 2e3;
+				ofs.AddPaths(uni, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
+				ClipperLib::Paths patch_exp;
+
+				int64_t gap_width = .1_mm;
+				double expand = gap_width;
+				ofs.Execute(patch_exp, expand);
+
+				auto p0 = patch_exp.front().front();
+				Coordi pc0(p0.X, p0.Y);
+				std::pair<Coordi, Coordi> bb(pc0, pc0);
+				for(const auto &itp: patch_exp) {
+					for(const auto &itc: itp) {
+						Coordi p(itc.X, itc.Y);
+						bb.first = Coordi::min(bb.first, p);
+						bb.second = Coordi::max(bb.second, p);
+					}
+				}
+				auto w = bb.second.x - bb.first.x;
+				auto h = bb.second.y - bb.first.y;
+				auto l = std::max(w,h);
+
+				int64_t spoke_width = .3_mm;
+				ClipperLib::Path spoke;
+				spoke.emplace_back(spoke_width/2+.01_mm, -spoke_width/2);
+				spoke.emplace_back(spoke_width/2+.01_mm, spoke_width/2);
+				spoke.emplace_back(l, spoke_width/2);
+				spoke.emplace_back(l, -spoke_width/2);
+
+				ClipperLib::Paths antipad;
+				{
+					ClipperLib::Clipper cl;
+					cl.AddPaths(patch_exp, ClipperLib::ptSubject, true);
+					for(int angle = 0; angle<360; angle+=90) {
+						ClipperLib::Path r1 = spoke;
+						Placement tr;
+						tr.set_angle_deg(angle);
+						transform_path(r1, tr);
+						transform_path(r1, it.second.first);
+						cl.AddPath(r1, ClipperLib::ptClip, true);
+					}
+					cl.Execute(ClipperLib::ctDifference, antipad, ClipperLib::pftNonZero);
+				}
+
+				for(const auto &itp: antipad) {
+					ofi << "#" << " " << it.first.layer << " " << (std::string)it.first.package << "/" << (std::string)it.first.pad << "\n";
+					for(const auto &itc: itp) {
+						ofi << itc.X << " " << itc.Y << " " << i << "\n";
+					}
+					ofi << itp.front().X << " " << itp.front().Y << " " << i  << "\n\n";
+
+				}
+				ofi << "\n";
 				i++;
 			}
 
 
-		});*/
+		});
 
 		if(sockets_connected) {
 			canvas->signal_selection_changed().connect(sigc::mem_fun(this, &ImpBoard::handle_selection_cross_probe));

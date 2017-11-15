@@ -273,7 +273,8 @@ SRC_IMP = \
 	imp/header_button.cpp\
 	imp/preferences.cpp\
 	imp/preferences_window.cpp\
-	pool/pool_cached.cpp
+	pool/pool_cached.cpp\
+	canvas/canvas_pads.cpp\
 
 SRC_ROUTER = \
 	router/router/pns_router.cpp \

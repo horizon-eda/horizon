@@ -16,6 +16,12 @@ namespace horizon {
 			uint64_t extra_clearance = 0;
 			bool keep_orphans = false;
 
+			enum class ConnectStyle {SOLID, THERMAL};
+			ConnectStyle connect_style = ConnectStyle::SOLID;
+
+			uint64_t thermal_gap_width = 0.2_mm;
+			uint64_t thermal_spoke_width = 0.2_mm;
+
 			json serialize() const;
 	};
 
