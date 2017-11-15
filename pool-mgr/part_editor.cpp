@@ -152,6 +152,13 @@ namespace horizon {
 		}
 
 		pin_store = Gtk::ListStore::create(pin_list_columns);
+		pin_store->set_sort_func(pin_list_columns.pin_name, [this](const Gtk::TreeModel::iterator &ia, const Gtk::TreeModel::iterator &ib) {
+			Gtk::TreeModel::Row ra = *ia;
+			Gtk::TreeModel::Row rb = *ib;
+			Glib::ustring a = ra[pin_list_columns.pin_name];
+			Glib::ustring b = rb[pin_list_columns.pin_name];
+			return strcmp_natural(a, b);
+		});
 		w_tv_pins->set_model(pin_store);
 
 		w_tv_pins->append_column("Gate", pin_list_columns.gate_name);
@@ -168,6 +175,8 @@ namespace horizon {
 		w_tv_pins->get_column(0)->set_sort_column(pin_list_columns.gate_name);
 		w_tv_pins->get_column(1)->set_sort_column(pin_list_columns.pin_name);
 
+		pin_store->set_sort_column(pin_list_columns.gate_name, Gtk::SORT_ASCENDING);
+
 		pad_store = Gtk::ListStore::create(pad_list_columns);
 		pad_store->set_sort_func(pad_list_columns.pad_name, [this](const Gtk::TreeModel::iterator &ia, const Gtk::TreeModel::iterator &ib) {
 			Gtk::TreeModel::Row ra = *ia;
@@ -182,6 +191,8 @@ namespace horizon {
 		w_tv_pads->append_column("Gate", pad_list_columns.gate_name);
 		w_tv_pads->append_column("Pin", pad_list_columns.pin_name);
 		w_tv_pads->get_column(0)->set_sort_column(pad_list_columns.pad_name);
+
+		pad_store->set_sort_column(pad_list_columns.pad_name, Gtk::SORT_ASCENDING);
 
 		update_treeview();
 
