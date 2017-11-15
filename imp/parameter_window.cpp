@@ -24,13 +24,10 @@ namespace horizon {
 
 		auto tbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
 		extra_button_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL,0));
-		extra_button_box->set_margin_start(8);
-		extra_button_box->set_margin_end(8);
-		extra_button_box->set_margin_top(8);
-		extra_button_box->set_margin_bottom(8);
-
-		//auto bu = Gtk::manage(new Gtk::Button("lol"));
-		//bbox->pack_start(*bu, false, false, 0);
+		extra_button_box->set_margin_start(10);
+		extra_button_box->set_margin_end(10);
+		extra_button_box->set_margin_top(10);
+		extra_button_box->set_margin_bottom(10);
 
 		tbox->pack_start(*extra_button_box, false, false, 0);
 		auto sc = Gtk::manage(new Gtk::ScrolledWindow());
