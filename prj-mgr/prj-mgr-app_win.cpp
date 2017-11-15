@@ -14,7 +14,7 @@ namespace horizon {
 		builder->get_widget("create_project_name_entry", project_name_entry);
 		builder->get_widget("create_project_description_entry", project_description_entry);
 		builder->get_widget("create_project_path_chooser", project_path_chooser);
-		builder->get_widget("create_project_dir_entry", project_dir_entry);
+		builder->get_widget("create_project_dir_label", project_dir_label);
 		builder->get_widget("create_project_pool_combo", project_pool_combo);
 
 		project_name_entry->signal_changed().connect(sigc::mem_fun(this, &ProjectManagerViewCreate::update));
@@ -26,7 +26,7 @@ namespace horizon {
 	void ProjectManagerViewCreate::clear() {
 		project_name_entry->set_text("");
 		project_description_entry->set_text("");
-		project_dir_entry->set_text("");
+		project_dir_label->set_text("");
 		project_path_chooser->unselect_all();
 	}
 
@@ -83,10 +83,10 @@ namespace horizon {
 		if(valid) {
 			auto base_path = project_path_chooser->get_file()->get_path();
 			auto dir = Glib::build_filename(base_path, project_name_entry->get_text());
-			project_dir_entry->set_text(dir);
+			project_dir_label->set_text(dir);
 		}
 		else {
-			project_dir_entry->set_text("");
+			project_dir_label->set_text("");
 		}
 		signal_valid_change().emit(valid);
 	}

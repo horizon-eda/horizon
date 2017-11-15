@@ -21,7 +21,7 @@ namespace horizon {
 			Gtk::Entry *project_name_entry = nullptr;
 			Gtk::Entry *project_description_entry = nullptr;
 			Gtk::FileChooserButton *project_path_chooser = nullptr;
-			Gtk::Entry *project_dir_entry = nullptr;
+			Gtk::Label *project_dir_label = nullptr;
 			Gtk::ComboBoxText *project_pool_combo = nullptr;
 			void update();
 
