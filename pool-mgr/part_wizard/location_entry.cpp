@@ -16,10 +16,22 @@ namespace horizon {
 		pack_start(*entry, true, true, 0);
 		entry->show();
 
+		entry->signal_changed().connect([this] {s_signal_changed.emit();});
+
 		auto button = Gtk::manage(new Gtk::Button("Browse..."));
 		pack_start(*button, false, false, 0);
 		button->signal_clicked().connect(sigc::mem_fun(this, &LocationEntry::handle_button));
 		button->show();
+	}
+
+	void LocationEntry::set_warning(const std::string &text) {
+		if(text.size()) {
+			entry->set_icon_from_icon_name("dialog-warning-symbolic", Gtk::ENTRY_ICON_SECONDARY);
+			entry->set_icon_tooltip_text(text, Gtk::ENTRY_ICON_SECONDARY);
+		}
+		else {
+			entry->unset_icon(Gtk::ENTRY_ICON_SECONDARY);
+		}
 	}
 
 	void LocationEntry::handle_button() {

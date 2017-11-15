@@ -66,4 +66,14 @@ namespace horizon {
 			view->scroll_to_cell(rows[0], *view->get_column(0));
 		}
 	}
+
+	void entry_set_warning(Gtk::Entry *e, const std::string &text) {
+		if(text.size()) {
+			e->set_icon_from_icon_name("dialog-warning-symbolic", Gtk::ENTRY_ICON_SECONDARY);
+			e->set_icon_tooltip_text(text, Gtk::ENTRY_ICON_SECONDARY);
+		}
+		else {
+			e->unset_icon(Gtk::ENTRY_ICON_SECONDARY);
+		}
+	}
 }

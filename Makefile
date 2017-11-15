@@ -7,6 +7,7 @@ SRC_COMMON = \
 	util/uuid.cpp \
 	util/uuid_path.cpp\
 	util/sqlite.cpp\
+	util/str_util.cpp\
 	pool/unit.cpp \
 	pool/symbol.cpp \
 	pool/part.cpp\

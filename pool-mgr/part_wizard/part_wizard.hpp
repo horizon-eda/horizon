@@ -47,6 +47,7 @@ namespace horizon {
 			Gtk::Entry *part_value_entry = nullptr;
 			Gtk::Entry *part_manufacturer_entry = nullptr;
 			Gtk::Entry *part_tags_entry = nullptr;
+			Gtk::Button *part_autofill_button = nullptr;
 
 			class LocationEntry *entity_location_entry = nullptr;
 			class LocationEntry *part_location_entry = nullptr;
@@ -84,6 +85,10 @@ namespace horizon {
 			void handle_finish();
 			void finish();
 			bool has_finished = false;
+
+			std::string get_rel_part_filename();
+			void update_can_finish();
+			void autofill();
 
 			Mode mode = Mode::ASSIGN;
 			void set_mode(Mode mo);

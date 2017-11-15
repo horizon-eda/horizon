@@ -26,5 +26,7 @@ namespace horizon {
 			Gtk::Entry *unit_name_entry = nullptr;
 			Gtk::Button *unit_name_from_mpn_button = nullptr;
 			Gtk::Entry *suffix_entry = nullptr;
+
+			std::string get_suffixed_filename_from_part();
 	};
 }

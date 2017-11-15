@@ -4,6 +4,8 @@
 #include "pad_editor.hpp"
 #include "gate_editor.hpp"
 #include "location_entry.hpp"
+#include "str_util.hpp"
+#include "gtk_util.hpp"
 
 namespace horizon {
 	LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder>& x, const std::string &w, Gtk::Button **button_other) {
@@ -44,20 +46,27 @@ namespace horizon {
 		x->get_widget("part_value", part_value_entry);
 		x->get_widget("part_manufacturer", part_manufacturer_entry);
 		x->get_widget("part_tags", part_tags_entry);
+		x->get_widget("part_autofill", part_autofill_button);
+
+		part_mpn_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));
+		entity_name_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));
+		entity_prefix_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));
+
+		part_autofill_button->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::autofill));
 
 		part_location_entry = pack_location_entry(x, "part_location_box");
 		part_location_entry->set_filename(Glib::build_filename(pool_base_path, "parts"));
+		part_location_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));
 		{
 			Gtk::Button *from_part_button;
 			entity_location_entry = pack_location_entry(x, "entity_location_box", &from_part_button);
 			from_part_button->set_label("From part");
 			from_part_button->signal_clicked().connect([this] {
-				auto part_fn = Gio::File::create_for_path(part_location_entry->get_filename());
-				auto part_base = Gio::File::create_for_path(Glib::build_filename(pool_base_path, "parts"));
-				auto rel = part_base->get_relative_path(part_fn);
+				auto rel = get_rel_part_filename();
 				entity_location_entry->set_filename(Glib::build_filename(pool_base_path, "entities", rel));
 			});
 			entity_location_entry->set_filename(Glib::build_filename(pool_base_path, "entities"));
+			entity_location_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));
 		}
 
 		entity_name_from_mpn_button->signal_clicked().connect([this]{
@@ -107,6 +116,20 @@ namespace horizon {
 		});
 
 		set_mode(Mode::ASSIGN);
+
+		signal_delete_event().connect([this](GdkEventAny *ev) {
+			Gtk::MessageDialog md(*this,  "Really close?", false /* use_markup */, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
+			md.set_secondary_text("By closing the part wizard, all changes to the new part will be lost");
+			md.add_button("Close and discard changes", 1);
+			md.add_button("Keep open", Gtk::RESPONSE_CANCEL);
+			switch(md.run()) {
+				case 1:
+					return false; //close
+
+				default:
+					return true; //keep window open
+			}
+		});
 	}
 
 	void PartWizard::create_pad_editors() {
@@ -139,6 +162,7 @@ namespace horizon {
 		else {
 			prepare_edit();
 			stack->set_visible_child("edit");
+			update_can_finish();
 		}
 
 		button_back->set_visible(mo == Mode::EDIT);
@@ -190,6 +214,13 @@ namespace horizon {
 		std::set<std::string> tagss;
 		tagss.insert(tags.begin(), tags.end());
 		return tagss;
+	}
+
+	std::string PartWizard::get_rel_part_filename() {
+		auto part_fn = Gio::File::create_for_path(part_location_entry->get_filename());
+		auto part_base = Gio::File::create_for_path(Glib::build_filename(pool_base_path, "parts"));
+		auto rel = part_base->get_relative_path(part_fn);
+		return rel;
 	}
 
 	void PartWizard::finish() {
@@ -375,8 +406,12 @@ namespace horizon {
 			auto pad_name = (*ed->pads.begin())->name;
 			if(j.count(pad_name)) {
 				auto &k = j.at(pad_name);
-				ed->pin_name_entry->set_text(k.value("pin", ""));
-				ed->combo_gate_entry->set_text(k.value("gate", "Main"));
+				std::string pin_name = k.value("pin", "");
+				std::string gate_name = k.value("gate", "Main");
+				trim(pin_name);
+				trim(gate_name);
+				ed->pin_name_entry->set_text(pin_name);
+				ed->combo_gate_entry->set_text(gate_name);
 				if(k.count("alt")) {
 					std::stringstream ss;
 					for(auto &it: k.at("alt")) {
@@ -598,14 +633,118 @@ namespace horizon {
 		}
 	}
 
+	void PartWizard::autofill() {
+		entity_name_entry->set_text(part_mpn_entry->get_text());
+		auto rel = get_rel_part_filename();
+		entity_location_entry->set_filename(Glib::build_filename(pool_base_path, "entities", rel));
+		auto children = edit_left_box->get_children();
+		for(auto ch: children) {
+			if(auto ed = dynamic_cast<GateEditorWizard*>(ch)) {
+				std::string suffix = ed->suffix_entry->get_text();
+				trim(suffix);
+				if(suffix.size()) {
+					ed->unit_name_entry->set_text(part_mpn_entry->get_text() + " " + suffix);
+				}
+				else {
+					ed->unit_name_entry->set_text(part_mpn_entry->get_text());
+				}
+				ed->unit_location_entry->set_filename(Glib::build_filename(pool_base_path, "units", ed->get_suffixed_filename_from_part()));
+				ed->symbol_location_entry->set_filename(Glib::build_filename(pool_base_path, "symbols", ed->get_suffixed_filename_from_part()));
+			}
+		}
+	}
+
+	void PartWizard::update_can_finish() {
+		bool editors_open = processes.size()>0;
+		button_back->set_sensitive(!editors_open);
+		bool valid = true;
+
+		auto check_entry_not_empty = [this, &valid] (Gtk::Entry *e, const std:: string &msg) {
+			std::string t = e->get_text();
+			trim(t);
+			if(!t.size()) {
+				entry_set_warning(e, msg);
+				valid = false;
+			}
+			else {
+				entry_set_warning(e, "");
+			}
+		};
+		auto check_location_ends_json = [this, &valid] (LocationEntry *e) {
+			std::string t = e->get_filename();
+			if(!endswith(t, ".json")) {
+				e->set_warning("Filename has to end in .json");
+				valid = false;
+			}
+			else {
+				e->set_warning("");
+			}
+		};
+
+		check_entry_not_empty(part_mpn_entry, "MPN is empty");
+		check_entry_not_empty(entity_name_entry, "Entity name is empty");
+		check_entry_not_empty(entity_prefix_entry, "Entity prefix is empty");
+		check_location_ends_json(part_location_entry);
+
+		std::set<std::string> symbol_filenames;
+		std::set<std::string> unit_filenames;
+		std::set<std::string> suffixes;
+		std::set<std::string> unit_names;
+
+		auto children = edit_left_box->get_children();
+		for(auto ch: children) {
+			if(auto ed = dynamic_cast<GateEditorWizard*>(ch)) {
+				ed->unit_location_entry->set_warning("");
+				ed->symbol_location_entry->set_warning("");
+				entry_set_warning(ed->suffix_entry, "");
+				entry_set_warning(ed->unit_name_entry, "");
+
+				check_location_ends_json(ed->unit_location_entry);
+				check_location_ends_json(ed->symbol_location_entry);
+
+				check_entry_not_empty(ed->unit_name_entry, "Unit name is empty");
+				std::string unit_filename = ed->unit_location_entry->get_filename();
+				trim(unit_filename);
+
+				if(!unit_filenames.insert(unit_filename).second) {
+					ed->unit_location_entry->set_warning("Duplicate unit filename");
+					valid = false;
+				}
+
+				std::string symbol_filename = ed->symbol_location_entry->get_filename();
+				trim(symbol_filename);
+
+				if(!symbol_filenames.insert(symbol_filename).second) {
+					ed->symbol_location_entry->set_warning("Duplicate symbol filename");
+					valid = false;
+				}
+
+				std::string suffix = ed->suffix_entry->get_text();
+				trim(suffix);
+				if(!suffixes.insert(suffix).second) {
+					entry_set_warning(ed->suffix_entry, "Duplicate unit suffix");
+					valid = false;
+				}
+
+				std::string unit_name = ed->unit_name_entry->get_text();
+				trim(unit_name);
+				if(!unit_names.insert(unit_name).second) {
+					entry_set_warning(ed->unit_name_entry, "Duplicate unit name");
+					valid = false;
+				}
+			}
+		}
+
+		button_finish->set_sensitive(!editors_open && valid);
+	}
+
 	void PartWizard::spawn(PoolManagerProcess::Type type, const std::vector<std::string> &args) {
 		if(processes.count(args.at(0)) == 0) { //need to launch imp
 			std::vector<std::string> env = {"HORIZON_POOL="+pool_base_path};
 			std::string filename = args.at(0);
 			auto &proc = processes.emplace(std::piecewise_construct, std::forward_as_tuple(filename),
 					std::forward_as_tuple(type, args, env, pool)).first->second;
-			button_finish->set_sensitive(false);
-			button_back->set_sensitive(false);
+			update_can_finish();
 			proc.signal_exited().connect([filename, this](int status, bool need_update) {
 				std::cout << "exit stat " << status << std::endl;
 				/*if(status != 0) {
@@ -618,8 +757,7 @@ namespace horizon {
 					parent->child_property_padding(*view_project.info_bar) = 0;
 				}*/
 				processes.erase(filename);
-				button_finish->set_sensitive(processes.size()==0);
-				button_back->set_sensitive(processes.size()==0);
+				update_can_finish();
 			});
 		}
 		else { //present imp
