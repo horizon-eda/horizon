@@ -205,12 +205,6 @@ namespace horizon {
 		hamburger_menu->append("Stackup...", "win.edit_stackup");
 		add_tool_action(ToolID::EDIT_STACKUP, "edit_stackup");
 
-		hamburger_menu->append("Reload netlist", "win.reload_netlist");
-		main_window->add_action("reload_netlist", [this] {
-			core_board.reload_netlist();
-			canvas_update();
-		});
-
 		hamburger_menu->append("Update all planes", "win.update_all_planes");
 		add_tool_action(ToolID::UPDATE_ALL_PLANES, "update_all_planes");
 
@@ -232,6 +226,17 @@ namespace horizon {
 		}
 
 		add_tool_button(ToolID::MAP_PACKAGE, "Place package", false);
+
+		{
+			auto button = Gtk::manage(new Gtk::Button("Reload netlist"));
+			button->signal_clicked().connect([this]{
+				core_board.reload_netlist();
+				canvas_update();
+			});
+			button->show();
+			core.r->signal_tool_changed().connect([button](ToolID t){button->set_sensitive(t==ToolID::NONE);});
+			main_window->header->pack_end(*button);
+		}
 
 		if(sockets_connected) {
 			canvas->signal_selection_changed().connect(sigc::mem_fun(this, &ImpBoard::handle_selection_cross_probe));
