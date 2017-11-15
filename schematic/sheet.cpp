@@ -164,13 +164,19 @@ namespace horizon {
 				for(auto &it_pin: schsym.symbol.pins) {
 					it_pin.second.pad = "";
 				}
+				std::map<SymbolPin*, std::vector<std::string>> pads;
 				for(const auto &it_pad_map: schsym.component->part->pad_map) {
 					if(it_pad_map.second.gate == schsym.gate) {
 						if(schsym.symbol.pins.count(it_pad_map.second.pin->uuid)) {
-							schsym.symbol.pins.at(it_pad_map.second.pin->uuid).pad += schsym.component->part->package->pads.at(it_pad_map.first).name + " ";
+							 pads[&schsym.symbol.pins.at(it_pad_map.second.pin->uuid)].push_back(schsym.component->part->package->pads.at(it_pad_map.first).name);
 						}
 					}
-
+				}
+				for(auto &it_pin: pads) {
+					std::sort(it_pin.second.begin(), it_pin.second.end(),  [](const auto &a, const auto &b){return strcmp_natural(a,b)<0;});
+					for(const auto &pad: it_pin.second) {
+						it_pin.first->pad += pad + " ";
+					}
 				}
 			}
 			for(auto &it_text: schsym.symbol.texts) {
