@@ -19,6 +19,7 @@ namespace horizon {
 			EditorWindow(ObjectType type, const std::string &filename, class Pool *p);
 			void reload();
 			bool get_need_update();
+			static std::string fix_filename(std::string s);
 
 		private:
 			ObjectType type;

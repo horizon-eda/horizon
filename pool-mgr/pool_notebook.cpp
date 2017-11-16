@@ -206,7 +206,7 @@ namespace horizon {
 					chooser->set_current_name(basename);
 
 					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-						std::string fn = chooser->get_filename();
+						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
 						Symbol sym(horizon::UUID::random());
 						auto unit = pool.get_unit(br->get_selected());
 						sym.name = unit->name;
@@ -237,7 +237,7 @@ namespace horizon {
 					chooser->set_current_name(basename);
 
 					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-						std::string fn = chooser->get_filename();
+						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
 						Entity entity(horizon::UUID::random());
 						auto unit = pool.get_unit(br->get_selected());
 						entity.name = unit->name;
@@ -457,7 +457,7 @@ namespace horizon {
 					chooser->set_current_folder(Glib::build_filename(base_path, "padstacks"));
 
 					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-						std::string fn = chooser->get_filename();
+						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
 						Padstack ps(horizon::UUID::random());
 						save_json_to_file(fn, ps.serialize());
 						spawn(PoolManagerProcess::Type::IMP_PADSTACK, {fn});
@@ -621,7 +621,7 @@ namespace horizon {
 					chooser->set_current_folder(Glib::build_filename(pkg_dir, "padstacks"));
 
 					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-						std::string fn = chooser->get_filename();
+						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
 						Padstack ps(horizon::UUID::random());
 						ps.name = "Pad";
 						save_json_to_file(fn, ps.serialize());
@@ -718,7 +718,7 @@ namespace horizon {
 					chooser->set_current_folder(Glib::build_filename(base_path, "parts"));
 
 					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-						std::string fn = chooser->get_filename();
+						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
 						Part part(horizon::UUID::random());
 						auto package = pool.get_package(package_uuid);
 						part.attributes[Part::Attribute::MPN] = {false, entity->name};
@@ -762,7 +762,7 @@ namespace horizon {
 					chooser->set_current_folder(Glib::path_get_dirname(pool.get_filename(ObjectType::PART, uu)));
 
 					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-						std::string fn = chooser->get_filename();
+						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
 						Part part(horizon::UUID::random());
 						part.base = base_part;
 						part.attributes[Part::Attribute::MPN] = {true, base_part->get_MPN()};

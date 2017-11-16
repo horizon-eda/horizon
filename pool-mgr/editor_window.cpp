@@ -6,6 +6,7 @@
 #include "entity.hpp"
 #include "part.hpp"
 #include "util.hpp"
+#include "util/str_util.hpp"
 #include "pool.hpp"
 
 namespace horizon {
@@ -161,13 +162,21 @@ namespace horizon {
 			}
 
 			if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-				std::string fn = chooser->get_filename();
+				std::string fn = fix_filename(chooser->get_filename());
 				store->save_as(fn);
 				save_button->set_label("Save");
 			}
 		}
 		need_update = true;
 
+	}
+
+	std::string EditorWindow::fix_filename(std::string s) {
+		trim(s);
+		if(!endswith(s, ".jsom")) {
+			s += ".json";
+		}
+		return s;
 	}
 
 	void EditorWindow::reload() {
