@@ -64,6 +64,8 @@ namespace horizon {
 	}
 	
 	void BoxSelection::drag_begin(GdkEventButton *button_event) {
+		if(button_event->state & Gdk::SHIFT_MASK)
+			return;
 		if(!ca->selection_allowed)
 			return;
 		gdouble x,y;

@@ -7,7 +7,7 @@ namespace horizon {
 	void CanvasGL::pan_drag_begin(GdkEventButton* button_event) {
 		gdouble x,y;
 		gdk_event_get_coords((GdkEvent*)button_event, &x, &y);
-		if(button_event->button==2) {
+		if(button_event->button==2 || (button_event->button == 1 && (button_event->state&Gdk::SHIFT_MASK))) {
 			pan_dragging = true;
 			pan_pointer_pos_orig = {(float)x, (float)y};
 			pan_offset_orig = offset;
@@ -72,17 +72,21 @@ namespace horizon {
 		}
 		float sc = this->scale;
 		
+		float factor = 1.5;
+		if(scroll_event->state & Gdk::SHIFT_MASK)
+			factor = 1.1;
+
 		float scale_new=1;
 		if(scroll_event->direction == GDK_SCROLL_UP) {
-			scale_new = sc*1.5;
+			scale_new = sc*factor;
 		}
 		else if(scroll_event->direction == GDK_SCROLL_DOWN) {
-			scale_new = sc/1.5;
+			scale_new = sc/factor;
 		}
 		else if(scroll_event->direction == GDK_SCROLL_SMOOTH) {
 			gdouble sx, sy;
 			gdk_event_get_scroll_deltas((GdkEvent*)scroll_event, &sx, &sy);
-			scale_new = sc * powf(1.5, -sy);
+			scale_new = sc * powf(factor, -sy);
 		}
 		if(scale_new < 1e-7 || scale_new > 1e-2) {
 			return;
