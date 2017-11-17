@@ -35,6 +35,7 @@ namespace horizon {
 			Gtk::Label *pool_update_status_label = nullptr;
 			Gtk::Revealer *pool_update_status_rev = nullptr;
 			Gtk::Button *pool_update_status_close_button = nullptr;
+			Gtk::ProgressBar *pool_update_progress = nullptr;
 
 			std::string pool_base_path;
 
@@ -53,6 +54,7 @@ namespace horizon {
 			zmq::context_t &zctx;
 			void set_pool_updating(bool v, bool success);
 			void set_pool_update_status_text(const std::string &txt);
+			void set_pool_update_progress(float progress);
 
 	};
 };

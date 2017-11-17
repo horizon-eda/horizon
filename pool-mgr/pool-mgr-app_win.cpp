@@ -22,6 +22,7 @@ namespace horizon {
 		builder->get_widget("pool_update_status_label", pool_update_status_label);
 		builder->get_widget("pool_update_status_rev", pool_update_status_rev);
 		builder->get_widget("pool_update_status_close_button", pool_update_status_close_button);
+		builder->get_widget("pool_update_progress", pool_update_progress);
 		set_view_mode(ViewMode::OPEN);
 
 		button_open->signal_clicked().connect(sigc::mem_fun(this, &PoolManagerAppWindow::handle_open));
@@ -60,6 +61,15 @@ namespace horizon {
 
 	void PoolManagerAppWindow::set_pool_update_status_text(const std::string &txt) {
 		pool_update_status_label->set_markup("<b>Updating pool:</b> " + txt);
+	}
+
+	void PoolManagerAppWindow::set_pool_update_progress(float progress) {
+		if(progress < 0) {
+			pool_update_progress->pulse();
+		}
+		else {
+			pool_update_progress->set_fraction(progress);
+		}
 	}
 
 	PoolManagerAppWindow::~PoolManagerAppWindow() {

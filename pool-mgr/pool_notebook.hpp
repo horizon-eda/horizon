@@ -53,5 +53,7 @@ namespace horizon {
 			bool pool_updating = false;
 			void pool_updated(bool success);
 			std::string pool_update_last_file;
+			unsigned int pool_update_n_files = 0;
+			unsigned int pool_update_n_files_last = 0;
 	};
 }

@@ -151,9 +151,17 @@ namespace horizon {
 					appwin->set_pool_update_status_text(msg->msg);
 					if(msg->status == PoolUpdateStatus::DONE) {
 						pool_updated(true);
+						pool_update_n_files_last = pool_update_n_files;
 					}
 					else if(msg->status == PoolUpdateStatus::FILE) {
 						pool_update_last_file = msg->msg;
+						pool_update_n_files++;
+						if(pool_update_n_files_last) {
+							appwin->set_pool_update_progress((float)pool_update_n_files/pool_update_n_files_last);
+						}
+						else {
+							appwin->set_pool_update_progress(-1);
+						}
 					}
 					else if(msg->status == PoolUpdateStatus::ERROR) {
 						appwin->set_pool_update_status_text(std::string(msg->msg) + " Last file:"+pool_update_last_file);
@@ -842,6 +850,7 @@ namespace horizon {
 
 	void PoolNotebook::pool_update() {
 		appwin->set_pool_updating(true, true);
+		pool_update_n_files = 0;
 		pool_updating = true;
 		std::thread thr(pool_update_thread, std::ref(base_path), std::ref(zctx), std::ref(sock_pool_update_ep));
 		thr.detach();
