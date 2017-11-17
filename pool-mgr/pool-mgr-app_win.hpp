@@ -32,6 +32,10 @@ namespace horizon {
 			Gtk::Box *pool_box = nullptr;
 			class PoolNotebook *pool_notebook = nullptr;
 
+			Gtk::Label *pool_update_status_label = nullptr;
+			Gtk::Revealer *pool_update_status_rev = nullptr;
+			Gtk::Button *pool_update_status_close_button = nullptr;
+
 			std::string pool_base_path;
 
 			enum class ViewMode {OPEN, POOL};
@@ -47,7 +51,8 @@ namespace horizon {
 
 		public:
 			zmq::context_t &zctx;
-			void set_pool_updating(bool v);
+			void set_pool_updating(bool v, bool success);
+			void set_pool_update_status_text(const std::string &txt);
 
 	};
 };

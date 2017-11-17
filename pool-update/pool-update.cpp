@@ -12,12 +12,13 @@
 #include "package.hpp"
 #include "part.hpp"
 #include "util.hpp"
+#include "pool-update.hpp"
 
 namespace horizon {
 
 	using json = nlohmann::json;
 
-	static void update_units(SQLite::Database &db, const std::string &directory, const std::string &prefix="") {
+	static void update_units(SQLite::Database &db, const std::string &directory, pool_update_cb_t status_cb, const std::string &prefix="") {
 		if(prefix.size()==0) {
 			db.execute("DELETE from units");
 		}
@@ -25,6 +26,7 @@ namespace horizon {
 		for(const auto &it: dir) {
 			std::string filename = Glib::build_filename(directory, it);
 			if(endswith(it, ".json")) {
+				status_cb(PoolUpdateStatus::FILE, filename);
 				auto unit = Unit::new_from_file(filename);
 				SQLite::Query q(db, "INSERT INTO units (uuid, name, manufacturer, filename) VALUES ($uuid, $name, $manufacturer, $filename)");
 				q.bind("$uuid", unit.uuid);
@@ -34,12 +36,12 @@ namespace horizon {
 				q.step();
 			}
 			else if(Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
-				update_units(db, filename, Glib::build_filename(prefix, it));
+				update_units(db, filename, status_cb, Glib::build_filename(prefix, it));
 			}
 		}
 	}
 
-	static void update_entities(SQLite::Database &db, Pool &pool, const std::string &directory, const std::string &prefix="") {
+	static void update_entities(SQLite::Database &db, Pool &pool, const std::string &directory, pool_update_cb_t status_cb, const std::string &prefix="") {
 		if(prefix.size()==0) {
 			db.execute("DELETE from entities");
 		}
@@ -47,6 +49,7 @@ namespace horizon {
 		for(const auto &it: dir) {
 			std::string filename = Glib::build_filename(directory, it);
 			if(endswith(it, ".json")) {
+				status_cb(PoolUpdateStatus::FILE, filename);
 				auto entity = Entity::new_from_file(filename, pool);
 				SQLite::Query q(db, "INSERT INTO entities (uuid, name, manufacturer, filename, n_gates, prefix) VALUES ($uuid, $name, $manufacturer, $filename, $n_gates, $prefix)");
 				q.bind("$uuid", entity.uuid);
@@ -64,12 +67,12 @@ namespace horizon {
 				}
 			}
 			else if(Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
-				update_entities(db, pool, filename, Glib::build_filename(prefix,it));
+				update_entities(db, pool, filename, status_cb, Glib::build_filename(prefix,it));
 			}
 		}
 	}
 
-	static void update_symbols(SQLite::Database &db, Pool &pool, const std::string &directory, const std::string &prefix="") {
+	static void update_symbols(SQLite::Database &db, Pool &pool, const std::string &directory, pool_update_cb_t status_cb, const std::string &prefix="") {
 		if(prefix.size() == 0) {
 			db.execute("DELETE from symbols");
 		}
@@ -77,6 +80,7 @@ namespace horizon {
 		for(const auto &it: dir) {
 			std::string filename = Glib::build_filename(directory, it);
 			if(endswith(it, ".json")) {
+				status_cb(PoolUpdateStatus::FILE, filename);
 				auto symbol = Symbol::new_from_file(filename, pool);
 				SQLite::Query q(db, "INSERT INTO symbols (uuid, name, filename, unit) VALUES ($uuid, $name, $filename, $unit)");
 				q.bind("$uuid", symbol.uuid);
@@ -86,12 +90,12 @@ namespace horizon {
 				q.step();
 			}
 			else if(Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
-				update_symbols(db, pool, filename, Glib::build_filename(prefix,it));
+				update_symbols(db, pool, filename, status_cb, Glib::build_filename(prefix,it));
 			}
 		}
 	}
 
-	static void update_padstacks(SQLite::Database &db, const std::string &directory, const std::string &prefix="") {
+	static void update_padstacks(SQLite::Database &db, const std::string &directory, pool_update_cb_t status_cb, const std::string &prefix="") {
 		Glib::Dir dir(directory);
 		for(const auto &it: dir) {
 			auto pkgpath = Glib::build_filename(directory, it);
@@ -116,6 +120,7 @@ namespace horizon {
 					for(const auto &it2: dir2) {
 						if(endswith(it2, ".json")) {
 							std::string filename = Glib::build_filename(padstacks_path, it2);
+							status_cb(PoolUpdateStatus::FILE, filename);
 							auto padstack = Padstack::new_from_file(filename);
 							SQLite::Query q(db, "INSERT INTO padstacks (uuid, name, filename, package, type) VALUES ($uuid, $name, $filename, $package, $type)");
 							q.bind("$uuid", padstack.uuid);
@@ -129,13 +134,13 @@ namespace horizon {
 				}
 			}
 			else if(Glib::file_test(pkgpath, Glib::FILE_TEST_IS_DIR)) {
-				update_padstacks(db, pkgpath, Glib::build_filename(prefix,it));
+				update_padstacks(db, pkgpath, status_cb, Glib::build_filename(prefix,it));
 			}
 
 		}
 	}
 
-	static void update_padstacks_global(SQLite::Database &db, const std::string &directory, const std::string &prefix="") {
+	static void update_padstacks_global(SQLite::Database &db, const std::string &directory, pool_update_cb_t status_cb, const std::string &prefix="") {
 		if(prefix.size()==0) {
 			db.execute("DELETE from padstacks");
 		}
@@ -143,6 +148,7 @@ namespace horizon {
 		for(const auto &it: dir) {
 			std::string filename = Glib::build_filename(directory, it);
 			if(endswith(it, ".json")) {
+				status_cb(PoolUpdateStatus::FILE, filename);
 				auto padstack = Padstack::new_from_file(filename);
 				SQLite::Query q(db, "INSERT INTO padstacks (uuid, name, filename, package, type) VALUES ($uuid, $name, $filename, $package, $type)");
 				q.bind("$uuid", padstack.uuid);
@@ -153,7 +159,7 @@ namespace horizon {
 				q.step();
 			}
 			else if(Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
-				update_padstacks(db, filename, Glib::build_filename(prefix,it));
+				update_padstacks(db, filename, status_cb, Glib::build_filename(prefix,it));
 			}
 
 
@@ -161,7 +167,7 @@ namespace horizon {
 		}
 	}
 
-	static void update_packages(SQLite::Database &db, Pool &pool, const std::string &directory, const std::string &prefix="") {
+	static void update_packages(SQLite::Database &db, Pool &pool, const std::string &directory, pool_update_cb_t status_cb, const std::string &prefix="") {
 		if(prefix.size()==0) {
 			db.execute("DELETE from packages");
 		}
@@ -171,6 +177,7 @@ namespace horizon {
 			auto pkgfilename = Glib::build_filename(pkgpath, "package.json");
 			if(Glib::file_test(pkgfilename, Glib::FileTest::FILE_TEST_IS_REGULAR)) {
 				std::string filename = Glib::build_filename(pkgpath, "package.json");
+				status_cb(PoolUpdateStatus::FILE, filename);
 				auto package = Package::new_from_file(filename, pool);
 				SQLite::Query q(db, "INSERT INTO packages (uuid, name, manufacturer, filename, n_pads) VALUES ($uuid, $name, $manufacturer, $filename, $n_pads)");
 				q.bind("$uuid", package.uuid);
@@ -187,12 +194,12 @@ namespace horizon {
 				}
 			}
 			else if(Glib::file_test(pkgpath, Glib::FILE_TEST_IS_DIR)) {
-				update_packages(db, pool, pkgpath, Glib::build_filename(prefix,it));
+				update_packages(db, pool, pkgpath, status_cb, Glib::build_filename(prefix,it));
 			}
 		}
 	}
 
-	static bool update_parts(SQLite::Database &db, Pool &pool, const std::string &directory, const std::string &prefix="") {
+	static bool update_parts(SQLite::Database &db, Pool &pool, const std::string &directory, pool_update_cb_t status_cb, const std::string &prefix="") {
 		if(prefix.size()==0)
 			db.execute("DELETE from parts");
 
@@ -225,6 +232,7 @@ namespace horizon {
 						}
 					}
 					if(!skipthis) {
+						status_cb(PoolUpdateStatus::FILE, filename);
 						auto part = Part::new_from_file(filename, pool);
 						SQLite::Query q(db, "INSERT INTO parts (uuid, MPN, manufacturer, entity, package, filename) VALUES ($uuid, $MPN, $manufacturer, $entity, $package, $filename)");
 						q.bind("$uuid", part.uuid);
@@ -244,7 +252,7 @@ namespace horizon {
 					}
 				}
 				else if(Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
-					if(update_parts(db, pool, filename, Glib::build_filename(prefix,it)))
+					if(update_parts(db, pool, filename, status_cb, Glib::build_filename(prefix,it)))
 						skipped = true;
 				}
 			}
@@ -257,8 +265,14 @@ namespace horizon {
 
 	}
 
-	void pool_update(const std::string &pool_base_path) {
+	void status_cb_nop(PoolUpdateStatus st, const std::string msg) {}
+
+	void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb) {
 		auto pool_db_path = Glib::build_filename(pool_base_path, "pool.db");
+		if(!status_cb)
+			status_cb = &status_cb_nop;
+
+		status_cb(PoolUpdateStatus::INFO, "start");
 		SQLite::Database db(pool_db_path, SQLITE_OPEN_CREATE|SQLITE_OPEN_READWRITE);
 		{
 			SQLite::Query q(db, "SELECT name FROM sqlite_master WHERE type='table' AND name='units'");
@@ -274,35 +288,35 @@ namespace horizon {
 
 		Pool pool(pool_base_path);
 
-		std::cout << "tags" <<std::endl;
+		status_cb(PoolUpdateStatus::INFO, "tags");
 		db.execute("BEGIN TRANSACTION");
 		db.execute("DELETE FROM tags");
-		update_units(db, Glib::build_filename(pool_base_path, "units"));
+		update_units(db, Glib::build_filename(pool_base_path, "units"), status_cb);
 		db.execute("COMMIT");
 
-		std::cout << "entities" <<std::endl;
+		status_cb(PoolUpdateStatus::INFO, "entities");
 		db.execute("BEGIN TRANSACTION");
-		update_entities(db, pool, Glib::build_filename(pool_base_path, "entities"));
+		update_entities(db, pool, Glib::build_filename(pool_base_path, "entities"), status_cb);
 		db.execute("COMMIT");
 
-		std::cout << "symbols" <<std::endl;
+		status_cb(PoolUpdateStatus::INFO, "symbols");
 		db.execute("BEGIN TRANSACTION");
-		update_symbols(db, pool, Glib::build_filename(pool_base_path, "symbols"));
+		update_symbols(db, pool, Glib::build_filename(pool_base_path, "symbols"), status_cb);
 		db.execute("COMMIT");
 
-		std::cout << "padstacks" <<std::endl;
+		status_cb(PoolUpdateStatus::INFO, "padstacks");
 		db.execute("BEGIN TRANSACTION");
-		update_padstacks_global(db, Glib::build_filename(pool_base_path, "padstacks"));
-		update_padstacks(db, Glib::build_filename(pool_base_path, "packages"));
+		update_padstacks_global(db, Glib::build_filename(pool_base_path, "padstacks"), status_cb);
+		update_padstacks(db, Glib::build_filename(pool_base_path, "packages"), status_cb);
 		db.execute("COMMIT");
 
-		std::cout << "packages" <<std::endl;
+		status_cb(PoolUpdateStatus::INFO, "packages");
 		db.execute("BEGIN TRANSACTION");
-		update_packages(db, pool, Glib::build_filename(pool_base_path, "packages"));
+		update_packages(db, pool, Glib::build_filename(pool_base_path, "packages"), status_cb);
 		db.execute("COMMIT");
 
-		std::cout << "parts" <<std::endl;
-		update_parts(db, pool, Glib::build_filename(pool_base_path, "parts"));
-		std::cout << "done" <<std::endl;
+		status_cb(PoolUpdateStatus::INFO, "parts");
+		update_parts(db, pool, Glib::build_filename(pool_base_path, "parts"), status_cb);
+		status_cb(PoolUpdateStatus::DONE, "done");
 	}
 }

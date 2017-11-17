@@ -106,9 +106,9 @@ namespace horizon {
 		}
 	}
 
-	void PoolNotebook::pool_updated() {
+	void PoolNotebook::pool_updated(bool success) {
 		pool_updating = false;
-		appwin->set_pool_updating(false);
+		appwin->set_pool_updating(false, success);
 		pool.clear();
 		for(auto &br: browsers) {
 			br->search();
@@ -121,6 +121,11 @@ namespace horizon {
 	PoolNotebook::~PoolNotebook() {
 		sock_pool_update_conn.disconnect();
 	}
+
+	typedef struct {
+		PoolUpdateStatus status;
+		char msg[1];
+	} pool_update_msg_t;
 
 	PoolNotebook::PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw): Gtk::Notebook(), base_path(bp), pool(bp), appwin(aw), zctx(aw->zctx), sock_pool_update(zctx, ZMQ_SUB) {
 		sock_pool_update_ep = "inproc://pool-update";
@@ -139,10 +144,21 @@ namespace horizon {
 
 			sock_pool_update_conn = Glib::signal_io().connect([this](Glib::IOCondition cond){
 				while(sock_pool_update.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
-					zmq::message_t msg;
-					sock_pool_update.recv(&msg);
+					zmq::message_t zmsg;
+					sock_pool_update.recv(&zmsg);
+					auto msg = reinterpret_cast<const pool_update_msg_t *>(zmsg.data());
 					std::cout << "pool sock rx" << std::endl;
-					pool_updated();
+					appwin->set_pool_update_status_text(msg->msg);
+					if(msg->status == PoolUpdateStatus::DONE) {
+						pool_updated(true);
+					}
+					else if(msg->status == PoolUpdateStatus::FILE) {
+						pool_update_last_file = msg->msg;
+					}
+					else if(msg->status == PoolUpdateStatus::ERROR) {
+						appwin->set_pool_update_status_text(std::string(msg->msg) + " Last file:"+pool_update_last_file);
+						pool_updated(false);
+					}
 				}
 				return true;
 			}, chan, Glib::IO_IN | Glib::IO_HUP);
@@ -794,20 +810,38 @@ namespace horizon {
 		return processes.size() == 0 && part_wizard==nullptr && !pool_updating;
 	}
 
+	static void send_msg(zmq::socket_t &sock, PoolUpdateStatus st, const std::string &s) {
+		size_t sz = sizeof(pool_update_msg_t)+s.size()+1;
+		auto msg = reinterpret_cast<pool_update_msg_t *>(alloca(sz));
+		msg->status = st;
+		strcpy(msg->msg, s.data());
+		zmq::message_t zmsg(msg, sz);
+		sock.send(zmsg);
+	}
+
 	static void pool_update_thread(const std::string &pool_base_path, zmq::context_t &zctx, const std::string &ep) {
 		std::cout << "hello from thread" << std::endl;
 		zmq::socket_t sock(zctx, ZMQ_PUB);
 		sock.connect(ep);
 
-		horizon::pool_update(pool_base_path);
-
-		std::string msgs("done");
-		zmq::message_t msg(msgs.data(), msgs.size()+1);
-		sock.send(msg);
+		try {
+			horizon::pool_update(pool_base_path, [&sock](PoolUpdateStatus st, std::string s){
+				send_msg(sock, st, s);
+			});
+		}
+		catch(const std::runtime_error &e) {
+			send_msg(sock, PoolUpdateStatus::ERROR, std::string("runtime exception: ")+e.what());
+		}
+		catch(const std::exception &e) {
+			send_msg(sock, PoolUpdateStatus::ERROR, std::string("generic exception: ")+e.what());
+		}
+		catch(...) {
+			send_msg(sock, PoolUpdateStatus::ERROR, "unknown exception");
+		}
 	}
 
 	void PoolNotebook::pool_update() {
-		appwin->set_pool_updating(true);
+		appwin->set_pool_updating(true, true);
 		pool_updating = true;
 		std::thread thr(pool_update_thread, std::ref(base_path), std::ref(zctx), std::ref(sock_pool_update_ep));
 		thr.detach();

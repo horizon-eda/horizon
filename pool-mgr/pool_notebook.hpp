@@ -51,6 +51,7 @@ namespace horizon {
 			std::string sock_pool_update_ep;
 			sigc::connection sock_pool_update_conn;
 			bool pool_updating = false;
-			void pool_updated();
+			void pool_updated(bool success);
+			std::string pool_update_last_file;
 	};
 }

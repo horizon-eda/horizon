@@ -1,6 +1,11 @@
 #pragma once
 #include <string>
+#include <functional>
 
 namespace horizon {
-	void pool_update(const std::string &pool_base_path);
+
+	enum class PoolUpdateStatus {INFO, FILE, ERROR, DONE};
+	typedef std::function<void(PoolUpdateStatus, std::string)> pool_update_cb_t;
+
+	void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb = nullptr);
 }

@@ -19,6 +19,9 @@ namespace horizon {
 		builder->get_widget("recent_chooser", recent_chooser);
 		builder->get_widget("label_gitversion", label_gitversion);
 		builder->get_widget("pool_box", pool_box);
+		builder->get_widget("pool_update_status_label", pool_update_status_label);
+		builder->get_widget("pool_update_status_rev", pool_update_status_rev);
+		builder->get_widget("pool_update_status_close_button", pool_update_status_close_button);
 		set_view_mode(ViewMode::OPEN);
 
 		button_open->signal_clicked().connect(sigc::mem_fun(this, &PoolManagerAppWindow::handle_open));
@@ -26,17 +29,37 @@ namespace horizon {
 		button_update->signal_clicked().connect(sigc::mem_fun(this, &PoolManagerAppWindow::handle_update));
 		recent_chooser->signal_item_activated().connect(sigc::mem_fun(this, &PoolManagerAppWindow::handle_recent));
 
+		pool_update_status_close_button->signal_clicked().connect([this] {
+			pool_update_status_rev->set_reveal_child(false);
+		});
+
 		label_gitversion->set_text(gitversion);
 
 		set_icon(Gdk::Pixbuf::create_from_resource("/net/carrotIndustries/horizon/icon.svg"));
 	}
 
-	void PoolManagerAppWindow::set_pool_updating(bool v) {
+	void PoolManagerAppWindow::set_pool_updating(bool v, bool success) {
 		button_update->set_sensitive(!v);
+		pool_update_status_close_button->set_visible(!success);
+		if(success) {
+			if(v) { //show immediately
+				pool_update_status_rev->set_reveal_child(v);
+			}
+			else {
+				Glib::signal_timeout().connect([this]{
+					pool_update_status_rev->set_reveal_child(false);
+					return false;
+				}, 500);
+			}
+		}
 		if(v)
 			spinner_update->start();
 		else
 			spinner_update->stop();
+	}
+
+	void PoolManagerAppWindow::set_pool_update_status_text(const std::string &txt) {
+		pool_update_status_label->set_markup("<b>Updating pool:</b> " + txt);
 	}
 
 	PoolManagerAppWindow::~PoolManagerAppWindow() {
