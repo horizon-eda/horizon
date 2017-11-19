@@ -201,9 +201,11 @@ namespace horizon {
 		object_refs_current.pop_back();
 		if(!track.is_air) {
 			auto center = (track.from.get_position()+ track.to.get_position())/2;
-			auto bb = get_line_bb(track.from.get_position(), track.to.get_position(), width);
-
-			selectables.append(track.uuid, ObjectType::TRACK, center, bb.first, bb.second , 0, track.layer);
+			float box_height = track.width;
+			Coordf delta = track.to.get_position() - track.from.get_position();
+			float box_width = track.width+sqrt(delta.mag_sq());
+			float angle = atan2(delta.y, delta.x);
+			selectables.append_angled(track.uuid, ObjectType::TRACK, center, center, Coordf(box_width, box_height), angle, 0, track.layer);
 		}
 	}
 

@@ -5,33 +5,29 @@
 
 namespace horizon {
 
-	Selectable::Selectable(const Coordf &center, const Coordf &a, const Coordf &b, bool always) :
+	Selectable::Selectable(const Coordf &center, const Coordf &box_center, const Coordf &box_dim, float a, bool always) :
 			x(center.x),
 			y(center.y),
-			a_x(a.x),
-			a_y(a.y),
-			b_x(b.x),
-			b_y(b.y),
+			c_x(box_center.x),
+			c_y(box_center.y),
+			width(box_dim.x),
+			height(box_dim.y),
+			angle(a),
 			flags(always?4:0)
-	{fix_rect();}
+	{}
 
 	bool Selectable::inside(const Coordf &c, float expand) const {
-		return (c.x >= a_x-expand) && (c.x <= b_x+expand) && (c.y >= a_y-expand) && (c.y <= b_y+expand);
+		Coordf d = c-Coordf(c_x, c_y);
+		float a = -angle;
+		float dx = d.x*cos(a)-d.y*sin(a);
+		float dy = d.x*sin(a)+d.y*cos(a);
+		float w = width/2;
+		float h = height/2;
+
+		return (dx >= -w-expand) && (dx <= w+expand) && (dy >= -h-expand) && (dy <= h+expand);
 	}
 	float Selectable::area() const {
-		return abs(a_x-b_x)*abs(a_y-b_y);
-	}
-	void Selectable::fix_rect() {
-		if(a_x > b_x) {
-			float t = a_x;
-			a_x = b_x;
-			b_x = t;
-		}
-		if(a_y > b_y) {
-			float t = a_y;
-			a_y = b_y;
-			b_y = t;
-		}
+		return width*height;
 	}
 
 	void Selectable::set_flag(Selectable::Flag f, bool v) {
@@ -55,19 +51,29 @@ namespace horizon {
 	}
 	
 	void Selectables::append(const UUID &uu, ObjectType ot, const Coordf &center, const Coordf &a, const Coordf &b, unsigned int vertex, int layer, bool always) {
-		items_map.emplace(std::piecewise_construct, std::forward_as_tuple(uu, ot, vertex, layer), std::forward_as_tuple(items.size()));
-		auto bb = ca->transform.transform_bb(std::make_pair(a,b));
-		items.emplace_back(ca->transform.transform(center), bb.first, bb.second, always);
-		items_ref.emplace_back(uu, ot, vertex, layer);
+		Placement tr = ca->transform;
+		if(tr.mirror)
+			tr.invert_angle();
+		auto box_center = tr.transform((b+a)/2);
+		auto box_dim = b-a;
+		append_angled(uu, ot, center, box_center, box_dim, (tr.get_angle()*M_PI)/32768.0, vertex, layer, always);
 	}
 	
 	void Selectables::append(const UUID &uu, ObjectType ot, const Coordf &center, unsigned int vertex, int layer, bool always) {
 		append(uu, ot, center, center, center, vertex, layer, always);
 	}
 	
+	void Selectables::append_angled(const UUID &uu, ObjectType ot, const Coordf &center, const Coordf &box_center, const Coordf &box_dim, float angle, unsigned int vertex, int layer, bool always) {
+		items_map.emplace(std::piecewise_construct, std::forward_as_tuple(uu, ot, vertex, layer), std::forward_as_tuple(items.size()));
+		items.emplace_back(ca->transform.transform(center), box_center, box_dim, angle, always);
+		items_ref.emplace_back(uu, ot, vertex, layer);
+	}
+
 	static GLuint create_vao (GLuint program, GLuint &vbo_out) {
 		GLuint origin_index = glGetAttribLocation (program, "origin");
-		GLuint bb_index = glGetAttribLocation (program, "bb");
+		GLuint box_center_index = glGetAttribLocation (program, "box_center");
+		GLuint box_dim_index = glGetAttribLocation (program, "box_dim");
+		GLuint angle_index = glGetAttribLocation (program, "angle");
 		GLuint flags_index = glGetAttribLocation (program, "flags");
 		GLuint vao, buffer;
 
@@ -92,16 +98,23 @@ namespace horizon {
 		glEnableVertexAttribArray (origin_index);
 		glVertexAttribPointer (origin_index, 2, GL_FLOAT, GL_FALSE,
 							 sizeof(Selectable),
-							 0);
-		glEnableVertexAttribArray (bb_index);
-		glVertexAttribPointer (bb_index, 4, GL_FLOAT, GL_FALSE,
+							 (void*)offsetof(Selectable, x));
+		glEnableVertexAttribArray (box_center_index);
+		glVertexAttribPointer (box_center_index, 2, GL_FLOAT, GL_FALSE,
 							 sizeof(Selectable),
-							 (void*)(2*sizeof (GLfloat)));
+							 (void*)offsetof(Selectable, c_x));
+		glEnableVertexAttribArray (box_dim_index);
+		glVertexAttribPointer (box_dim_index, 2, GL_FLOAT, GL_FALSE,
+							 sizeof(Selectable),
+							 (void*)offsetof(Selectable, width));
+		glEnableVertexAttribArray (angle_index);
+		glVertexAttribPointer (angle_index, 1, GL_FLOAT, GL_FALSE,
+							 sizeof(Selectable),
+							 (void*)offsetof(Selectable, angle));
 		glEnableVertexAttribArray (flags_index);
 		glVertexAttribIPointer (flags_index, 1,  GL_UNSIGNED_BYTE,
 							 sizeof(Selectable),
-							 (void*)(6*sizeof (GLfloat)));
-
+							 (void*)offsetof(Selectable, flags));
 		/* enable and set the color attribute */
 		/* reset the state; we will re-enable the VAO when needed */
 		glBindBuffer (GL_ARRAY_BUFFER, 0);
@@ -116,10 +129,15 @@ namespace horizon {
 
 	void SelectablesRenderer::realize() {
 		program = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/selectable-vertex.glsl", "/net/carrotIndustries/horizon/canvas/shaders/selectable-fragment.glsl", "/net/carrotIndustries/horizon/canvas/shaders/selectable-geometry.glsl");
+		GL_CHECK_ERROR
 		vao = create_vao(program, vbo);
+		GL_CHECK_ERROR
 		GET_LOC(this, screenmat);
+		GL_CHECK_ERROR
 		GET_LOC(this, scale);
+		GL_CHECK_ERROR
 		GET_LOC(this, offset);
+		GL_CHECK_ERROR
 	}
 	
 	void SelectablesRenderer::render() {

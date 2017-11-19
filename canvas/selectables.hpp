@@ -9,23 +9,19 @@ namespace horizon {
 		public:
 		float x;
 		float y;
-		float a_x;
-		float a_y;
-		float b_x;
-		float b_y;
-		private:
+		float c_x;
+		float c_y;
+		float width;
+		float height;
+		float angle;
 		uint8_t flags;
-		public:
-
 		enum class Flag {SELECTED=1, PRELIGHT=2};
 		bool get_flag(Flag f) const;
 		void set_flag(Flag f, bool v);
 
-		Selectable(const Coordf &center, const Coordf &a, const Coordf &b, bool always=false);
+		Selectable(const Coordf &center, const Coordf &box_center, const Coordf &box_dim, float angle=0, bool always=false);
 		bool inside(const Coordf &c, float expand=0) const;
 		float area() const;
-		private:
-		void fix_rect();
 	} __attribute__((packed));
 	
 	class SelectableRef {
@@ -63,14 +59,13 @@ namespace horizon {
 			void clear();
 			void append(const UUID &uu, ObjectType ot, const Coordf &center, const Coordf &a, const Coordf &b, unsigned int vertex=0, int layer=10000, bool always=false);
 			void append(const UUID &uu, ObjectType ot, const Coordf &center, unsigned int vertex=0, int layer=10000, bool always=false);
+			void append_angled(const UUID &uu, ObjectType ot, const Coordf &center, const Coordf &box_center, const Coordf &box_dim, float angle, unsigned int vertex=0, int layer=10000, bool always=false);
 
 		private:
 			Canvas *ca;
 			std::vector<Selectable> items;
 			std::vector<SelectableRef> items_ref;
 			std::map<SelectableRef, unsigned int> items_map;
-
-
 	};
 
 	class SelectablesRenderer {
