@@ -17,7 +17,7 @@ namespace horizon {
 		view->show();
 		auto sc = Gtk::manage(new Gtk::ScrolledWindow());
 		sc->set_shadow_type(Gtk::SHADOW_IN);
-		sc->set_min_content_height(300);
+		sc->set_min_content_height(100);
 		sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 		sc->add(*view);
 		sc->show_all();

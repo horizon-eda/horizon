@@ -45,6 +45,7 @@ namespace horizon {
 		}}},
 		{ObjectType::VIA, {"Via", "Vias", {
 			{ObjectProperty::ID::FROM_RULES, {ObjectProperty::Type::BOOL, "From rules"}},
+			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Net"}},
 		}}},
 		{ObjectType::SHAPE, {"Shape", "Shapes", {
 			{ObjectProperty::ID::LAYER, {ObjectProperty::Type::LAYER, "Layer"}},

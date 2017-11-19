@@ -21,6 +21,7 @@ namespace horizon {
 
 			UUID uuid;
 
+			uuid_ptr<Net> net_set = nullptr;
 			uuid_ptr<Junction> junction = nullptr;
 			uuid_ptr<const Padstack> vpp_padstack;
 			Padstack padstack;

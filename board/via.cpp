@@ -12,6 +12,8 @@ namespace horizon {
 		parameter_set(parameter_set_from_json(j.at("parameter_set"))),
 		from_rules(j.at("from_rules"))
 	{
+		if(j.count("net_set"))
+			net_set = &brd.block->nets.at(j.at("net_set").get<std::string>());
 	}
 
 	Via::Via(const UUID &uu, const Padstack *ps): uuid(uu), vpp_padstack(ps), padstack(*vpp_padstack) {
@@ -26,6 +28,8 @@ namespace horizon {
 		j["padstack"] = (std::string)vpp_padstack->uuid;
 		j["parameter_set"] = parameter_set_serialize(parameter_set);
 		j["from_rules"] = from_rules;
+		if(net_set)
+			j["net_set"] = (std::string)net_set->uuid;
 		return j;
 	}
 }

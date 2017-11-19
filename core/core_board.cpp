@@ -296,6 +296,20 @@ namespace horizon {
 						return "meh";
 				}
 			break;
+			case ObjectType::VIA :
+				switch(property) {
+					case ObjectProperty::ID::NAME :
+						if(brd.vias.at(uu).junction->net) {
+							std::string nn = brd.vias.at(uu).junction->net->name;
+							if(brd.vias.at(uu).net_set)
+								nn += " (set)";
+							return nn;
+						}
+						return "<no net>";
+					default :
+						return "meh";
+				}
+			break;
 			case ObjectType::BOARD_PACKAGE :
 				switch(property) {
 					case ObjectProperty::ID::REFDES :

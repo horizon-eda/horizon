@@ -241,6 +241,7 @@ namespace horizon {
 		}
 		for(auto &it: vias) {
 			it.second.junction.update(junctions);
+			it.second.net_set.update(block->nets);
 		}
 		for(auto &it: junctions) {
 			it.second.net.update(block->nets);
@@ -324,9 +325,20 @@ namespace horizon {
 				if(run)
 					break;
 			}
-			if(run == false) { //no pad needing assigment found, done
-				break;
+			if(run == false) { //no pad needing assignment found, look at vias
+				for(auto &it_via: vias) {
+					auto ju = it_via.second.junction;
+					if(!ju->net_segment && it_via.second.net_set) {
+						ju->net_segment = UUID::random();
+						net_segments.emplace(ju->net_segment, it_via.second.net_set);
+						run = true;
+						break;
+					}
+				}
 			}
+			if(run == false) //done with pads and vias
+				break;
+
 			unsigned int n_assigned = 1;
 			while(n_assigned) {
 				n_assigned = 0;
@@ -496,6 +508,16 @@ namespace horizon {
 				it.second.net_segment = UUID();
 			}
 		} while(propagate_net_segments() == false); //run as long as propagate net_segments deletes tracks
+
+		for(auto &it: vias) {
+			if(it.second.junction->net == nullptr && !it.second.net_set) {
+				warnings.emplace_back(it.second.junction->position, "Via without net");
+			}
+			else if(it.second.junction->net && it.second.net_set && (it.second.junction->net != it.second.net_set)) {
+				warnings.emplace_back(it.second.junction->position, "Via net mismatch");
+			}
+		}
+
 		update_airwires();
 	}
 

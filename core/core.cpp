@@ -46,6 +46,7 @@
 #include "tool_draw_dimension.hpp"
 #include "tool_set_diffpair.hpp"
 #include "tool_select_more.hpp"
+#include "tool_set_via_net.hpp"
 
 #include "dimension.hpp"
 #include <memory>
@@ -228,6 +229,10 @@ namespace horizon {
 
 			case ToolID::SELECT_MORE:
 				return std::make_unique<ToolSelectMore>(this, tool_id);
+
+			case ToolID::SET_VIA_NET:
+			case ToolID::CLEAR_VIA_NET:
+				return std::make_unique<ToolSetViaNet>(this, tool_id);
 
 			default:
 				return nullptr;
