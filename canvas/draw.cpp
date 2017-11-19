@@ -182,6 +182,11 @@ namespace horizon {
 				p.inc_angle_deg(90);
 			}
 
+			auto aspect = width/height;
+			if(aspect < 1.1) {
+				p.inc_angle(-p.get_angle());
+			}
+
 			if(p.get_angle() > 16384 && p.get_angle()<= 49152) {
 				if(mode == TextBoxMode::UPPER)
 					mode = TextBoxMode::LOWER;
