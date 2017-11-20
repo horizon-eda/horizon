@@ -566,7 +566,7 @@ namespace horizon {
 	}
 
 	bool ImpBase::handle_click(GdkEventButton *button_event) {
-		if(core.r->tool_is_active() && button_event->button != 2) {
+		if(core.r->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)) {
 			ToolArgs args;
 			args.type = ToolEventType::CLICK;
 			args.coords = canvas->get_cursor_pos();
