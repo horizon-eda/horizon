@@ -35,6 +35,22 @@ namespace horizon {
 			overlay->add_at_sub(*sp_pitch, "#pitch");
 			sp_pitch->show();
 
+			sp_pad_height = Gtk::manage(new SpinButtonDim());
+			sp_pad_height->set_range(0, 50_mm);
+			sp_pad_height->set_valign(Gtk::ALIGN_CENTER);
+			sp_pad_height->set_halign(Gtk::ALIGN_START);
+			sp_pad_height->set_value(.5_mm);
+			overlay->add_at_sub(*sp_pad_height, "#pad_height");
+			sp_pad_height->show();
+
+			sp_pad_width = Gtk::manage(new SpinButtonDim());
+			sp_pad_width->set_range(0, 50_mm);
+			sp_pad_width->set_valign(Gtk::ALIGN_CENTER);
+			sp_pad_width->set_halign(Gtk::ALIGN_START);
+			sp_pad_width->set_value(.5_mm);
+			overlay->add_at_sub(*sp_pad_width, "#pad_width");
+			sp_pad_width->show();
+
 			sp_count->signal_value_changed().connect([this]{pad_count = sp_count->get_value_as_int(); update_preview();});
 
 			{
@@ -72,12 +88,22 @@ namespace horizon {
 			int64_t spacing = sp_spacing->get_value_as_int();
 			int64_t pitch = sp_pitch->get_value_as_int();
 			int64_t y0 = (pad_count/2-1)*(pitch/2);
+			int64_t pad_width = sp_pad_width->get_value_as_int();
+			int64_t pad_height = sp_pad_height->get_value_as_int();
+			auto padstack = core->m_pool->get_padstack(browser_button->property_selected_uuid());
 			for(auto it: {-1, 1}) {
 				for(unsigned int i = 0; i<pad_count/2; i++) {
 					auto uu = UUID::random();
-					auto padstack = core->m_pool->get_padstack(browser_button->property_selected_uuid());
+
 					auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
 					pad.placement.shift = {it*spacing, y0-pitch*i};
+					if(padstack->parameter_set.count(ParameterID::PAD_DIAMETER)) {
+						pad.parameter_set[ParameterID::PAD_DIAMETER] = std::min(pad_width, pad_height);
+					}
+					else {
+						pad.parameter_set[ParameterID::PAD_HEIGHT] = pad_height;
+						pad.parameter_set[ParameterID::PAD_WIDTH] = pad_width;
+					}
 					if(it < 0)
 						pad.placement.set_angle_deg(270);
 					else

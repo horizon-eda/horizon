@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.20.1 -->
 <interface>
   <requires lib="gtk+" version="3.18"/>
   <object class="GtkWindow" id="window">
@@ -10,6 +10,7 @@
       <object class="GtkStack" id="stack">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="hhomogeneous">False</property>
         <property name="transition_duration">100</property>
         <property name="transition_type">crossfade</property>
         <child>

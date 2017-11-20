@@ -15,7 +15,7 @@ namespace horizon {
 			sp_spacing_v = Gtk::manage(new SpinButtonDim());
 			sp_spacing_v->set_range(0, 100_mm);
 			sp_spacing_v->set_valign(Gtk::ALIGN_CENTER);
-			sp_spacing_v->set_valign(Gtk::ALIGN_START);
+			sp_spacing_v->set_halign(Gtk::ALIGN_START);
 			sp_spacing_v->set_value(30_mm);
 			overlay->add_at_sub(*sp_spacing_v, "#spacing_v");
 			sp_spacing_v->show();
@@ -27,6 +27,22 @@ namespace horizon {
 			sp_pitch->set_value(3_mm);
 			overlay->add_at_sub(*sp_pitch, "#pitch");
 			sp_pitch->show();
+
+			sp_pad_height = Gtk::manage(new SpinButtonDim());
+			sp_pad_height->set_range(0, 50_mm);
+			sp_pad_height->set_valign(Gtk::ALIGN_CENTER);
+			sp_pad_height->set_halign(Gtk::ALIGN_END);
+			sp_pad_height->set_value(.5_mm);
+			overlay->add_at_sub(*sp_pad_height, "#pad_height");
+			sp_pad_height->show();
+
+			sp_pad_width = Gtk::manage(new SpinButtonDim());
+			sp_pad_width->set_range(0, 50_mm);
+			sp_pad_width->set_valign(Gtk::ALIGN_CENTER);
+			sp_pad_width->set_halign(Gtk::ALIGN_END);
+			sp_pad_width->set_value(.5_mm);
+			overlay->add_at_sub(*sp_pad_width, "#pad_width");
+			sp_pad_width->show();
 
 			{
 				auto tbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
@@ -68,12 +84,22 @@ namespace horizon {
 			int64_t pitch = sp_pitch->get_value_as_int();
 			int64_t spacing_h = sp_spacing_h->get_value_as_int();
 			int64_t y0 = (pad_count_v-1)*(pitch/2);
+			int64_t pad_width = sp_pad_width->get_value_as_int();
+			int64_t pad_height = sp_pad_height->get_value_as_int();
+
+			auto padstack = core->m_pool->get_padstack(browser_button->property_selected_uuid());
 			for(auto it: {-1, 1}) {
 				for(unsigned int i = 0; i<pad_count_v; i++) {
 					auto uu = UUID::random();
-					auto padstack = core->m_pool->get_padstack(browser_button->property_selected_uuid());
 					auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
 					pad.placement.shift = {it*spacing_h, y0-pitch*i};
+					if(padstack->parameter_set.count(ParameterID::PAD_DIAMETER)) {
+						pad.parameter_set[ParameterID::PAD_DIAMETER] = std::min(pad_width, pad_height);
+					}
+					else {
+						pad.parameter_set[ParameterID::PAD_HEIGHT] = pad_height;
+						pad.parameter_set[ParameterID::PAD_WIDTH] = pad_width;
+					}
 					if(it < 0) {
 						pad.placement.set_angle_deg(270);
 						pad.name = std::to_string(i+1);
@@ -90,9 +116,15 @@ namespace horizon {
 			for(auto it: {-1, 1}) {
 				for(unsigned int i = 0; i<pad_count_h; i++) {
 					auto uu = UUID::random();
-					auto padstack = core->m_pool->get_padstack(browser_button->property_selected_uuid());
 					auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
 					pad.placement.shift = {x0+pitch*i, it*spacing_v};
+					if(padstack->parameter_set.count(ParameterID::PAD_DIAMETER)) {
+						pad.parameter_set[ParameterID::PAD_DIAMETER] = std::min(pad_width, pad_height);
+					}
+					else {
+						pad.parameter_set[ParameterID::PAD_HEIGHT] = pad_height;
+						pad.parameter_set[ParameterID::PAD_WIDTH] = pad_width;
+					}
 					if(it < 0) {
 						pad.placement.set_angle_deg(0);
 						pad.name = std::to_string(i+1+pad_count_v);

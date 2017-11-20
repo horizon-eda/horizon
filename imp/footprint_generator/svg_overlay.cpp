@@ -13,6 +13,9 @@ namespace horizon {
 	}
 
 	bool SVGOverlay::draw(const Cairo::RefPtr<Cairo::Context> &cr) {
+		cr->set_source_rgb(.95, .95, .95);
+		cr->paint();
+
 		rsvg_handle_render_cairo(handle, cr->cobj());
 
 

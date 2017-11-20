@@ -184,7 +184,7 @@ namespace horizon {
 
 			auto aspect = width/height;
 			if(aspect < 1.1) {
-				p.inc_angle(-p.get_angle());
+				p.set_angle(0);
 			}
 
 			if(p.get_angle() > 16384 && p.get_angle()<= 49152) {
