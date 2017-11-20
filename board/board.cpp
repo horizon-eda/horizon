@@ -74,7 +74,11 @@ namespace horizon {
 							auto &pkg = packages.at(path.at(0));
 							if(pkg.component->part->pad_map.count(path.at(1))==0) {
 								valid = false;
+								break;
 							}
+						}
+						else {
+							break;
 						}
 					}
 				}
