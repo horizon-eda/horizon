@@ -70,6 +70,14 @@ enum ROUTER_MODE {
     PNS_MODE_TUNE_DIFF_PAIR_SKEW
 };
 
+enum DRAG_MODE
+{
+    DM_CORNER = 0x1,
+    DM_SEGMENT = 0x2,
+    DM_VIA = 0x4,
+    DM_FREE_ANGLE = 0x8,
+    DM_ANY = 0x7
+};
 /**
  * Class ROUTER
  *
@@ -127,6 +135,7 @@ public:
     bool StartRouting( const VECTOR2I& aP, ITEM* aItem, int aLayer );
     void Move( const VECTOR2I& aP, ITEM* aItem );
     bool FixRoute( const VECTOR2I& aP, ITEM* aItem );
+    void BreakSegment( ITEM *aItem, const VECTOR2I& aP );
 
     void StopRouting();
 
@@ -162,7 +171,7 @@ public:
     const ITEM_SET   QueryHoverItems( const VECTOR2I& aP );
     const VECTOR2I      SnapToItem( ITEM* aItem, VECTOR2I aP, bool& aSplitsSegment );
 
-    bool StartDragging( const VECTOR2I& aP, ITEM* aItem );
+    bool StartDragging( const VECTOR2I& aP, ITEM* aItem, int aDragMode = DM_ANY );
 
     void SetIterLimit( int aX ) { m_iterLimit = aX; }
     int GetIterLimit() const { return m_iterLimit; };
@@ -252,6 +261,7 @@ private:
     bool m_showInterSteps;
     int m_snapshotIter;
     bool m_violation;
+    bool m_forceMarkObstaclesMode = false;
 
     ROUTING_SETTINGS m_settings;
     SIZES_SETTINGS m_sizes;

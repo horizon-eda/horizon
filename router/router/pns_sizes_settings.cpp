@@ -90,7 +90,7 @@ void SIZES_SETTINGS::AddLayerPair( int aL1, int aL2 )
 
 int SIZES_SETTINGS::GetLayerTop() const
 {
-	if( m_layerPairs.empty() )
+    if( m_layerPairs.empty() )
         return F_Cu;
     else
         return m_layerPairs.begin()->first;

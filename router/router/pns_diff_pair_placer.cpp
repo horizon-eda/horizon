@@ -406,17 +406,6 @@ bool DIFF_PAIR_PLACER::SetLayer( int aLayer )
 }
 
 
-bool endswidth(const std::string &haystack, const std::string &needle) {
-	return (haystack.size()-haystack.rfind(needle)) == needle.size();
-}
-
-int DIFF_PAIR_PLACER::matchDpSuffix( std::string aNetName, std::string& aComplementNet, std::string& aBaseDpName )
-{
-	//not used
-    return 0;
-}
-
-
 OPT_VECTOR2I DIFF_PAIR_PLACER::getDanglingAnchor( NODE* aNode, ITEM* aItem )
 {
     switch( aItem->Kind() )

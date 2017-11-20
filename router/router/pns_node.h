@@ -24,9 +24,10 @@
 
 #include <vector>
 #include <list>
+#include <unordered_set>
+#include <set>
+#include <unordered_map>
 
-#include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
 #include <boost/optional.hpp>
 
 #include <geometry/shape.h>
@@ -420,7 +421,7 @@ public:
 
 private:
     struct DEFAULT_OBSTACLE_VISITOR;
-    typedef boost::unordered_multimap<JOINT::HASH_TAG, JOINT> JOINT_MAP;
+    typedef std::unordered_multimap<JOINT::HASH_TAG, JOINT, JOINT::JOINT_TAG_HASH> JOINT_MAP;
     typedef JOINT_MAP::value_type TagJointPair;
 
     /// nodes are not copyable
@@ -486,7 +487,7 @@ private:
     std::set<NODE*> m_children;
 
     ///> hash of root's items that have been changed in this node
-    boost::unordered_set<ITEM*> m_override;
+    std::unordered_set<ITEM*> m_override;
 
     ///> worst case item-item clearance
     int m_maxClearance;
@@ -500,7 +501,7 @@ private:
     ///> depth of the node (number of parent nodes in the inheritance chain)
     int m_depth;
 
-    boost::unordered_set<ITEM*> m_garbageItems;
+    std::unordered_set<ITEM*> m_garbageItems;
 };
 
 }
