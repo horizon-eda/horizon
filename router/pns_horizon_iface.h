@@ -84,6 +84,10 @@ namespace PNS {
 			horizon::Net *get_net_for_code(int code);
 			int get_net_code(const horizon::UUID &uu);
 
+			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::Track *track);
+			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::Via *via);
+			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::BoardPackage *pkg, const horizon::Pad *pad);
+
 		private:
 			class PNS_HORIZON_RULE_RESOLVER* m_ruleResolver = nullptr;
 			class PNS_HORIZON_DEBUG_DECORATOR *m_debugDecorator = nullptr;
@@ -105,9 +109,7 @@ namespace PNS {
 			int net_code_max = 0;
 
 
-			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::Track *track);
-			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::Via *via);
-			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::BoardPackage *pkg, const horizon::Pad *pad);
+
 			std::set<PNS_HORIZON_PARENT_ITEM> parents;
 
 			std::pair<horizon::BoardPackage *, horizon::Pad *> find_pad(int layer, const horizon::Coord<int64_t> &c);

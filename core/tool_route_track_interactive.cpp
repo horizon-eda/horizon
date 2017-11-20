@@ -37,13 +37,37 @@ namespace horizon {
 	}
 
 	bool ToolRouteTrackInteractive::can_begin() {
-		return core.b;
+		if(tool_id == ToolID::DRAG_TRACK_INTERACTIVE) {
+			return core.b && get_track(core.r->selection);
+		}
+		else {
+			return core.b;
+		}
 	}
 
 	ToolRouteTrackInteractive::~ToolRouteTrackInteractive() {
 		delete router;
 		delete iface;
 		delete wrapper;
+	}
+
+	bool ToolRouteTrackInteractive::is_specific() {
+		return tool_id == ToolID::DRAG_TRACK_INTERACTIVE;
+	}
+
+	Track *ToolRouteTrackInteractive::get_track(const std::set<SelectableRef> &sel) {
+		Track *track = nullptr;
+		for(const auto &it: sel) {
+			if(it.type == ObjectType::TRACK) {
+				if(track == nullptr) {
+					track = &core.b->get_board()->tracks.at(it.uuid);
+				}
+				else {
+					return nullptr;
+				}
+			}
+		}
+		return track;
 	}
 
 	ToolResponse ToolRouteTrackInteractive::begin(const ToolArgs &args) {
@@ -85,6 +109,22 @@ namespace horizon {
 
 		imp->canvas_update();
 		update_tip();
+
+		if(tool_id == ToolID::DRAG_TRACK_INTERACTIVE) {
+			Track *track = get_track(args.selection);
+			if(!track) {
+				return ToolResponse::end();
+			}
+			auto parent = iface->get_parent(track);
+			wrapper->m_startItem = router->GetWorld()->FindItemByParent(parent, iface->get_net_code(track->net.uuid));
+
+			VECTOR2I p0(args.coords.x, args.coords.y);
+			if(!router->StartDragging( p0, wrapper->m_startItem, PNS::DM_ANY ))
+				return ToolResponse::end();
+
+
+		}
+
 		return ToolResponse();
 	}
 
@@ -462,112 +502,135 @@ namespace horizon {
 	}
 
 	ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args) {
-		if(state == State::START) {
-			if(args.type == ToolEventType::MOVE) {
-				wrapper->updateStartItem(args);
-			}
-			else if(args.type == ToolEventType::KEY) {
-				if(args.key == GDK_KEY_s) {
-					shove ^= true;
-				}
-			}
-			else if(args.type == ToolEventType::CLICK) {
-				if(args.button == 1) {
-					state = State::ROUTING;
-					if(!wrapper->prepareInteractive()) {
-						return ToolResponse::end();
-					}
-				}
-				else if(args.button == 3) {
-					core.r->commit();
-					return ToolResponse::end();
-				}
-			}
-		}
-		else if(state==State::ROUTING) {
+		if(tool_id == ToolID::DRAG_TRACK_INTERACTIVE) {
 			if(args.type == ToolEventType::MOVE) {
 				wrapper->updateEndItem( args );
 				router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
 			}
 			else if(args.type == ToolEventType::CLICK) {
 				if(args.button == 1) {
-					  wrapper->updateEndItem( args );
-					  bool needLayerSwitch = router->IsPlacingVia();
-
-					  if(router->FixRoute( wrapper->m_endSnapPoint, wrapper->m_endItem ) ) {
-						  router->StopRouting();
-						  imp->canvas_update();
-						  state = State::START;
-						  update_tip();
-						  return ToolResponse();
-					  }
+					wrapper->updateEndItem( args );
+					if(router->FixRoute( wrapper->m_endSnapPoint, wrapper->m_endItem ) ) {
+					  router->StopRouting();
 					  imp->canvas_update();
-
-					  //if( needLayerSwitch )
-					  //	  switchLayerOnViaPlacement();
-
-					  // Synchronize the indicated layer
-					  imp->set_work_layer(PNS::PNS_HORIZON_IFACE::layer_from_router(router->GetCurrentLayer()) );
-					  wrapper->updateEndItem( args );
-					  router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
-					  wrapper->m_startItem = NULL;
+					  core.b->commit();
+					  return ToolResponse::end();
+				  }
 				}
 				else if(args.button == 3) {
-					core.r->commit();
+					core.r->revert();
 					return ToolResponse::end();
 				}
 			}
-			else if(args.type == ToolEventType::LAYER_CHANGE) {
-				if(BoardLayers::is_copper(args.work_layer)) {
-					router->SwitchLayer(PNS::PNS_HORIZON_IFACE::layer_to_router(args.work_layer));
-					wrapper->updateEndItem( args );
-					router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
-				}
-			}
-			else if(args.type == ToolEventType::KEY) {
-				if(args.key == GDK_KEY_slash) {
-					 router->FlipPosture();
-					 wrapper->updateEndItem( args );
-					 router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
-				}
-				else if(args.key == GDK_KEY_v) {
-					 router->ToggleViaPlacement();
-					 wrapper->updateEndItem( args );
-					 router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
-				}
-			}
 		}
-		if(args.type == ToolEventType::KEY) {
-			if(args.key == GDK_KEY_w) {
-				PNS::SIZES_SETTINGS sz (router->Sizes());
-				auto r = imp->dialogs.ask_datum("Track width", sz.TrackWidth());
-				if(r.first) {
-					sz.SetTrackWidth(r.second);
-					sz.SetWidthFromRules(false);
-					router->UpdateSizes(sz);
-					router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
+		else {
+			if(state == State::START) {
+				if(args.type == ToolEventType::MOVE) {
+					wrapper->updateStartItem(args);
+				}
+				else if(args.type == ToolEventType::KEY) {
+					if(args.key == GDK_KEY_s) {
+						shove ^= true;
+					}
+				}
+				else if(args.type == ToolEventType::CLICK) {
+					if(args.button == 1) {
+						state = State::ROUTING;
+						if(!wrapper->prepareInteractive()) {
+							return ToolResponse::end();
+						}
+					}
+					else if(args.button == 3) {
+						core.r->commit();
+						return ToolResponse::end();
+					}
 				}
 			}
-			if(args.key == GDK_KEY_W) {
-				auto nets = router->GetCurrentNets();
-				Net *net = nullptr;
-				for(auto x: nets) {
-					net = iface->get_net_for_code(x);
+			else if(state==State::ROUTING) {
+				if(args.type == ToolEventType::MOVE) {
+					wrapper->updateEndItem( args );
+					router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
 				}
-				if(net) {
-					PNS::SIZES_SETTINGS sz (router->Sizes());
-					sz.SetTrackWidth(rules->get_default_track_width(net, PNS::PNS_HORIZON_IFACE::layer_from_router(router->GetCurrentLayer())));
-					sz.SetWidthFromRules(true);
-					router->UpdateSizes(sz);
-					router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
-				}
-			}
+				else if(args.type == ToolEventType::CLICK) {
+					if(args.button == 1) {
+						  wrapper->updateEndItem( args );
+						  bool needLayerSwitch = router->IsPlacingVia();
 
-			else if(args.key == GDK_KEY_Escape) {
-				core.b->revert();
-				core.b->get_board()->obstacles.clear();
-				core.b->get_board()->track_path.clear();
-				return ToolResponse::end();
+						  if(router->FixRoute( wrapper->m_endSnapPoint, wrapper->m_endItem ) ) {
+							  router->StopRouting();
+							  imp->canvas_update();
+							  state = State::START;
+							  update_tip();
+							  return ToolResponse();
+						  }
+						  imp->canvas_update();
+
+						  //if( needLayerSwitch )
+						  //	  switchLayerOnViaPlacement();
+
+						  // Synchronize the indicated layer
+						  imp->set_work_layer(PNS::PNS_HORIZON_IFACE::layer_from_router(router->GetCurrentLayer()) );
+						  wrapper->updateEndItem( args );
+						  router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
+						  wrapper->m_startItem = NULL;
+					}
+					else if(args.button == 3) {
+						core.r->commit();
+						return ToolResponse::end();
+					}
+				}
+				else if(args.type == ToolEventType::LAYER_CHANGE) {
+					if(BoardLayers::is_copper(args.work_layer)) {
+						router->SwitchLayer(PNS::PNS_HORIZON_IFACE::layer_to_router(args.work_layer));
+						wrapper->updateEndItem( args );
+						router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
+					}
+				}
+				else if(args.type == ToolEventType::KEY) {
+					if(args.key == GDK_KEY_slash) {
+						 router->FlipPosture();
+						 wrapper->updateEndItem( args );
+						 router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
+					}
+					else if(args.key == GDK_KEY_v) {
+						 router->ToggleViaPlacement();
+						 wrapper->updateEndItem( args );
+						 router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
+					}
+				}
+			}
+			if(args.type == ToolEventType::KEY) {
+				if(args.key == GDK_KEY_w) {
+					PNS::SIZES_SETTINGS sz (router->Sizes());
+					auto r = imp->dialogs.ask_datum("Track width", sz.TrackWidth());
+					if(r.first) {
+						sz.SetTrackWidth(r.second);
+						sz.SetWidthFromRules(false);
+						router->UpdateSizes(sz);
+						router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
+					}
+				}
+				if(args.key == GDK_KEY_W) {
+					auto nets = router->GetCurrentNets();
+					Net *net = nullptr;
+					for(auto x: nets) {
+						net = iface->get_net_for_code(x);
+					}
+					if(net) {
+						PNS::SIZES_SETTINGS sz (router->Sizes());
+						sz.SetTrackWidth(rules->get_default_track_width(net, PNS::PNS_HORIZON_IFACE::layer_from_router(router->GetCurrentLayer())));
+						sz.SetWidthFromRules(true);
+						router->UpdateSizes(sz);
+						router->Move( wrapper->m_endSnapPoint, wrapper->m_endItem );
+					}
+				}
+
+				else if(args.key == GDK_KEY_Escape) {
+					core.b->revert();
+					core.b->get_board()->obstacles.clear();
+					core.b->get_board()->track_path.clear();
+					return ToolResponse::end();
+				}
 			}
 		}
 		update_tip();
@@ -577,6 +640,10 @@ namespace horizon {
 
 	void ToolRouteTrackInteractive::update_tip() {
 		std::stringstream ss;
+		if(tool_id == ToolID::DRAG_TRACK_INTERACTIVE) {
+			imp->tool_bar_set_tip("<b>LMB:</b>place <b>RMB:</b>cancel");
+			return;
+		}
 		if(state==State::ROUTING) {
 			ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete last segment <b>/:</b>track posture <b>v:</b>toggle via <b>w:</b>track width <b>W:</b>default track width <i> ";
 			auto nets = router->GetCurrentNets();

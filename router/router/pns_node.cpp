@@ -1325,14 +1325,13 @@ SEGMENT* NODE::findRedundantSegment( SEGMENT* aSeg )
 }
 
 
-ITEM *NODE::FindItemByParent( const BOARD_CONNECTED_ITEM* aParent )
+ITEM *NODE::FindItemByParent( const PNS_HORIZON_PARENT_ITEM* aParent, int net )
 {
-    /*INDEX::NET_ITEMS_LIST* l_cur = m_index->GetItemsForNet( aParent->GetNetCode() );
+    INDEX::NET_ITEMS_LIST* l_cur = m_index->GetItemsForNet( net );
 
     for( ITEM*item : *l_cur )
         if( item->Parent() == aParent )
             return item;
-	*/
     return NULL;
 }
 

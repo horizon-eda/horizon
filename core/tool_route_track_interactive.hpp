@@ -2,6 +2,7 @@
 #include "core.hpp"
 #include <deque>
 #include <memory>
+#include <set>
 
 namespace PNS {
  class ROUTER;
@@ -19,6 +20,7 @@ namespace horizon {
 			ToolResponse begin(const ToolArgs &args) override ;
 			ToolResponse update(const ToolArgs &args) override;
 			bool can_begin() override;
+			bool is_specific() override;
 
 			~ToolRouteTrackInteractive();
 
@@ -32,10 +34,11 @@ namespace horizon {
 			State state = State::START;
 
 			Board *board = nullptr;
-			class BoardRules *rules;
+			class BoardRules *rules = nullptr;
 			bool shove = false;
 
 			void update_tip();
+			class Track *get_track(const std::set<SelectableRef> &sel);
 	};
 
 }

@@ -197,6 +197,7 @@ namespace horizon {
 
 			case ToolID::ROUTE_TRACK_INTERACTIVE :
 			case ToolID::ROUTE_DIFFPAIR_INTERACTIVE :
+			case ToolID::DRAG_TRACK_INTERACTIVE:
 				return std::make_unique<ToolRouteTrackInteractive>(this, tool_id);
 
 			case ToolID::EDIT_VIA :

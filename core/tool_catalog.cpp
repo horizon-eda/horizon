@@ -67,5 +67,6 @@ namespace horizon {
 		{ToolID::SELECT_MORE, {"Select more"}},
 		{ToolID::SET_VIA_NET, {"Set via net"}},
 		{ToolID::CLEAR_VIA_NET, {"Clear via net"}},
+		{ToolID::DRAG_TRACK_INTERACTIVE, {"Drag track interactive"}},
 	};
 }
