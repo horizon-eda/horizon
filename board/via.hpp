@@ -29,6 +29,7 @@ namespace horizon {
 			ParameterSet parameter_set;
 
 			bool from_rules = true;
+			bool locked = false;
 
 
 			json serialize() const;

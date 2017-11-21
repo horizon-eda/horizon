@@ -393,8 +393,8 @@ namespace PNS {
 		segment->SetLayer(layer_to_router(track->layer));
 		segment->SetParent( get_parent(track) );
 
-		//if( aTrack->IsLocked() )
-			//segment->Mark( PNS::MK_LOCKED );
+		if(track->locked)
+			segment->Mark( PNS::MK_LOCKED );
 
 		return segment;
 	}
@@ -511,8 +511,8 @@ namespace PNS {
 		//via->SetParent( aVia );
 		pvia->SetParent( get_parent(via) );
 
-		//if( aVia->IsLocked() )
-        //via->Mark( PNS::MK_LOCKED );
+		if(via->locked)
+			pvia->Mark( PNS::MK_LOCKED );
 
 		return pvia;
 	}

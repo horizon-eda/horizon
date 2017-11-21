@@ -109,6 +109,7 @@ namespace horizon {
 
 			void draw_error(const Coordf &center, float scale, const std::string &text, bool tr = true);
 			std::tuple<Coordf, Coordf, Coordi> draw_flag(const Coordf &position, const std::string &txt, int64_t size, Orientation orientation, ColorP color=ColorP::FROM_LAYER);
+			void draw_lock(const Coordf &center, float size, ColorP color=ColorP::FROM_LAYER, int layer=10000, bool tr = true);
 
 			virtual void img_net(const class Net *net) {}
 			virtual void img_polygon(const Polygon &poly, bool tr=true) {}

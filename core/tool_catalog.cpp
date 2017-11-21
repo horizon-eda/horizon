@@ -68,5 +68,8 @@ namespace horizon {
 		{ToolID::SET_VIA_NET, {"Set via net"}},
 		{ToolID::CLEAR_VIA_NET, {"Clear via net"}},
 		{ToolID::DRAG_TRACK_INTERACTIVE, {"Drag track interactive"}},
+		{ToolID::LOCK, {"Lock"}},
+		{ToolID::UNLOCK, {"Unlock"}},
+		{ToolID::UNLOCK_ALL, {"Unlock all"}},
 	};
 }

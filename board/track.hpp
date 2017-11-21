@@ -34,6 +34,7 @@ namespace horizon {
 			bool width_from_rules = true;
 			bool is_air = false;
 
+			bool locked = false;
 
 
 			class Connection {

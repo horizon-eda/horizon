@@ -147,6 +147,7 @@ namespace horizon {
 		layer(j.value("layer", 0)),
 		width(j.value("width", 0)),
 		width_from_rules(j.value("width_from_net_class", true)),
+		locked(j.value("locked", false)),
 		from(j["from"], brd),
 		to(j["to"], brd)
 	{
@@ -172,6 +173,7 @@ namespace horizon {
 		j["layer"] = layer;
 		j["width"] = width;
 		j["width_from_net_class"] = width_from_rules;
+		j["locked"] = locked;
 
 		return j;
 	}

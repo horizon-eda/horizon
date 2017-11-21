@@ -124,6 +124,8 @@ namespace horizon {
 				switch(property) {
 					case ObjectProperty::ID::WIDTH_FROM_RULES :
 						return brd.tracks.at(uu).width_from_rules;
+					case ObjectProperty::ID::LOCKED :
+						return brd.tracks.at(uu).locked;
 					default :
 						return false;
 				}
@@ -132,6 +134,8 @@ namespace horizon {
 				switch(property) {
 					case ObjectProperty::ID::FROM_RULES :
 						return brd.vias.at(uu).from_rules;
+					case ObjectProperty::ID::LOCKED :
+						return brd.vias.at(uu).locked;
 					default :
 						return false;
 				}
@@ -171,6 +175,9 @@ namespace horizon {
 					case ObjectProperty::ID::WIDTH_FROM_RULES :
 						brd.tracks.at(uu).width_from_rules = value;
 					break;
+					case ObjectProperty::ID::LOCKED :
+						brd.tracks.at(uu).locked = value;
+					break;
 					default :
 						;
 				}
@@ -179,6 +186,9 @@ namespace horizon {
 				switch(property) {
 					case ObjectProperty::ID::FROM_RULES :
 						brd.vias.at(uu).from_rules = value;
+					break;
+					case ObjectProperty::ID::LOCKED :
+						brd.vias.at(uu).locked = value;
 					break;
 					default :
 						;

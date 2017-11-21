@@ -196,11 +196,16 @@ namespace horizon {
 		if(track.is_air)
 			layer = 10000;
 
+		auto center = (track.from.get_position()+ track.to.get_position())/2;
 		object_refs_current.emplace_back(ObjectType::TRACK, track.uuid);
 		draw_line(track.from.get_position(), track.to.get_position(), c, layer, true, width);
+		if(track.locked && !track.is_air) {
+			auto ol = get_overlay_layer(layer);
+			draw_lock(center, 0.7*track.width, ColorP::WHITE, ol, true);
+		}
 		object_refs_current.pop_back();
 		if(!track.is_air) {
-			auto center = (track.from.get_position()+ track.to.get_position())/2;
+
 			float box_height = track.width;
 			Coordf delta = track.to.get_position() - track.from.get_position();
 			float box_width = track.width+sqrt(delta.mag_sq());
@@ -945,6 +950,10 @@ namespace horizon {
 		img_patch_type(PatchType::VIA);
 		object_refs_current.emplace_back(ObjectType::VIA, via.uuid);
 		render(via.padstack, false);
+		if(via.locked) {
+			auto ol = get_overlay_layer(BoardLayers::TOP_COPPER);
+			draw_lock({0,0}, 0.7*std::min(std::abs(bb.second.x - bb.first.x), std::abs(bb.second.y- bb.first.y)), ColorP::WHITE, ol, true);
+		}
 		object_refs_current.pop_back();
 		img_net(nullptr);
 		img_patch_type(PatchType::OTHER);

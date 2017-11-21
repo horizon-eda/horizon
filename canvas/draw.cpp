@@ -172,6 +172,49 @@ namespace horizon {
 		return std::make_tuple(extents.first, extents.second, shift);
 	}
 
+	void Canvas::draw_lock(const Coordf &center, float size, ColorP color, int layer, bool tr) {
+		float scale = size/14;
+		const std::vector<Coordf> pts = {
+			{-6*scale, -6*scale},
+			{ 6*scale, -6*scale},
+			{ 6*scale, 0},
+			{ 5*scale,  1*scale},
+			{-5*scale,  1*scale},
+			{-6*scale, 0},
+			{-6*scale, -6*scale},
+		};
+		const std::vector<Coordf> pts2 = {
+			{ 4*scale,  1*scale},
+			{ 4*scale,  5*scale},
+			{ 2*scale,  7*scale},
+			{-2*scale,  7*scale},
+			{-4*scale,  5*scale},
+			{-4*scale,  1*scale},
+		};
+		const std::vector<Coordf> pts3 = {
+			{ 2*scale,  1*scale},
+			{ 2*scale,  4*scale},
+			{ 1*scale,  5*scale},
+			{-1*scale,  5*scale},
+			{-2*scale,  4*scale},
+			{-2*scale,  1*scale},
+		};
+		set_lod_size(size);
+		auto sz = pts.size();
+		for(size_t i = 0; i<sz; i++) {
+			draw_line(center+pts[i], center+pts[(i+1)%sz], color, layer, tr, 0);
+		}
+		sz = pts2.size();
+		for(size_t i = 1; i<sz; i++) {
+			draw_line(center+pts2[i], center+pts2[i-1], color, layer, tr, 0);
+		}
+		sz = pts3.size();
+		for(size_t i = 1; i<sz; i++) {
+			draw_line(center+pts3[i], center+pts3[i-1], color, layer, tr, 0);
+		}
+		set_lod_size(-1);
+	}
+
 	void Canvas::draw_text_box (const Placement &q, float width, float height, const std::string &s, ColorP color, int layer, uint64_t text_width, TextBoxMode mode) {
 			Placement p = q;
 			if(p.mirror)

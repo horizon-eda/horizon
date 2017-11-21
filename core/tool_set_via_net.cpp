@@ -44,6 +44,7 @@ namespace horizon {
 		if(tool_id == ToolID::CLEAR_VIA_NET) {
 			for(auto via: vias)
 				via->net_set = nullptr;
+			core.r->commit();
 			return ToolResponse::end();
 		}
 
@@ -55,7 +56,7 @@ namespace horizon {
 					via->net_set = net;
 			}
 		}
-
+		core.r->commit();
 		return ToolResponse::end();
 	}
 	ToolResponse ToolSetViaNet::update(const ToolArgs &args) {

@@ -46,6 +46,7 @@ namespace horizon {
 		{ObjectType::VIA, {"Via", "Vias", {
 			{ObjectProperty::ID::FROM_RULES, {ObjectProperty::Type::BOOL, "From rules"}},
 			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Net"}},
+			{ObjectProperty::ID::LOCKED, {ObjectProperty::Type::BOOL, "Locked"}},
 		}}},
 		{ObjectType::SHAPE, {"Shape", "Shapes", {
 			{ObjectProperty::ID::LAYER, {ObjectProperty::Type::LAYER, "Layer"}},
@@ -119,6 +120,7 @@ namespace horizon {
 			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Net"}},
 			{ObjectProperty::ID::NET_CLASS, {ObjectProperty::Type::STRING_RO, "Net class"}},
 			{ObjectProperty::ID::WIDTH_FROM_RULES, {ObjectProperty::Type::BOOL, "Width from rules"}},
+			{ObjectProperty::ID::LOCKED, {ObjectProperty::Type::BOOL, "Locked"}},
 		}}},
 		{ObjectType::PLANE, {"Plane", "Planes", {
 			{ObjectProperty::ID::WIDTH, {ObjectProperty::Type::LENGTH, "Min. Width"}},
