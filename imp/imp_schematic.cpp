@@ -216,6 +216,9 @@ namespace horizon {
 	}
 
 	void ImpSchematic::construct() {
+
+		main_window->set_title("Schematic - Interactive Manipulator");
+
 		sheet_box = Gtk::manage(new SheetBox(&core_schematic));
 		sheet_box->show_all();
 		sheet_box->signal_add_sheet().connect([this]{core_schematic.add_sheet(); std::cout<<"add sheet"<<std::endl;});

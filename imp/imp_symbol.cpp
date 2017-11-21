@@ -38,6 +38,8 @@ namespace horizon {
 
 	void ImpSymbol::construct() {
 
+		main_window->set_title("Symbol - Interactive Manipulator");
+
 		symbol_preview_window = new SymbolPreviewWindow(main_window);
 		symbol_preview_window->set_text_placements(core.y->get_symbol(false)->text_placements);
 
@@ -59,6 +61,7 @@ namespace horizon {
 		name_entry = header_button->add_entry("Name");
 		name_entry->set_text(core.y->get_symbol()->name);
 		name_entry->set_width_chars(core.y->get_symbol()->name.size());
+		name_entry->signal_changed().connect([this, header_button] {header_button->set_label(name_entry->get_text());});
 
 		core.r->signal_save().connect([this, header_button]{
 			auto sym = core.y->get_symbol(false);

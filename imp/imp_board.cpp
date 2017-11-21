@@ -190,6 +190,8 @@ namespace horizon {
 	void ImpBoard::construct() {
 		ImpLayer::construct();
 
+		main_window->set_title("Board - Interactive Manipulator");
+
 		auto view_3d_button = Gtk::manage(new Gtk::Button("3D"));
 		main_window->header->pack_start(*view_3d_button);
 		view_3d_button->show();

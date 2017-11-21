@@ -32,6 +32,8 @@ namespace horizon {
 	void ImpPadstack::construct() {
 		ImpLayer::construct();
 
+		main_window->set_title("Padstack - Interactive Manipulator");
+
 		auto header_button = Gtk::manage(new HeaderButton);
 		header_button->set_label(core_padstack.get_padstack(false)->name);
 		main_window->header->set_custom_title(*header_button);
@@ -40,6 +42,8 @@ namespace horizon {
 		auto name_entry = header_button->add_entry("Name");
 		name_entry->set_text(core_padstack.get_padstack(false)->name);
 		name_entry->set_width_chars(core_padstack.get_padstack(false)->name.size());
+		name_entry->signal_changed().connect([name_entry, header_button] {header_button->set_label(name_entry->get_text());});
+
 		core_padstack.signal_save().connect([this, name_entry, header_button]{
 			core_padstack.get_padstack(false)->name = name_entry->get_text();
 			header_button->set_label(core_padstack.get_padstack(false)->name);

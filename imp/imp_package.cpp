@@ -40,6 +40,8 @@ namespace horizon {
 	void ImpPackage::construct() {
 		ImpLayer::construct();
 
+		main_window->set_title("Package - Interactive Manipulator");
+
 		footprint_generator_window = FootprintGeneratorWindow::create(main_window, &core_package);
 		footprint_generator_window->signal_generated().connect(sigc::mem_fun(this, &ImpBase::canvas_update_from_pp));
 
@@ -106,6 +108,8 @@ namespace horizon {
 		auto entry_name = header_button->add_entry("Name");
 		auto entry_manufacturer = header_button->add_entry("Manufacturer");
 		auto entry_tags = header_button->add_entry("Tags");
+
+		entry_name->signal_changed().connect([entry_name, header_button] {header_button->set_label(entry_name->get_text());});
 
 		{
 			auto pkg = core_package.get_package(false);
