@@ -16,19 +16,21 @@ namespace horizon {
 	void ToolDrawPolygonRectangle::update_polygon() {
 		temp->vertices.clear();
 		if(step == 1) {
-			Coordi p0t, p1t;
+			Coordi p0, p1;
+			Coordi min_size(corner_radius*2+100, corner_radius*2+100);
 			if(mode == Mode::CORNER) {
-				p0t = first_pos;
-				p1t = second_pos;
+				p0 = Coordi::min(first_pos, second_pos);
+				p1 = Coordi::max(Coordi::max(first_pos, second_pos), p0+min_size);
 			}
 			else {
 				auto &center = first_pos;
 				auto a = second_pos-center;
-				p0t = center-a;
-				p1t = second_pos;
+				a.x = std::max(std::abs(a.x), corner_radius+50);
+				a.y = std::max(std::abs(a.y), corner_radius+50);
+				p0 = center-a;
+				p1 = center+a;
 			}
-			Coordi p0 = Coordi::min(p0t, p1t);
-			Coordi p1 = Coordi::max(p0t, p1t);
+
 
 			if(corner_radius > 0) {
 				Polygon::Vertex *v;
@@ -175,7 +177,7 @@ namespace horizon {
 			}
 		}
 		ss << " <b>RMB:</b>cancel";
-		ss << " <b>c:</b>switch mode <b>r:</b>corner radius";
+		ss << " <b>c:</b>switch mode <b>r:</b>corner radius ";
 
 		if(corner_radius == 0)
 			ss << "<b>d:</b>switch decoration <b>p:</b>decoration position <b>s:</b>decoration size";
