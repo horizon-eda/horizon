@@ -10,8 +10,8 @@ namespace horizon {
 			y(center.y),
 			c_x(box_center.x),
 			c_y(box_center.y),
-			width(box_dim.x),
-			height(box_dim.y),
+			width(std::abs(box_dim.x)),
+			height(std::abs(box_dim.y)),
 			angle(a),
 			flags(always?4:0)
 	{}
