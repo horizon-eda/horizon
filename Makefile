@@ -173,6 +173,7 @@ SRC_IMP = \
 	core/tool_select_more.cpp\
 	core/tool_set_via_net.cpp\
 	core/tool_lock.cpp\
+	core/tool_add_vertex.cpp\
 	core/cores.cpp\
 	core/clipboard.cpp\
 	core/buffer.cpp\

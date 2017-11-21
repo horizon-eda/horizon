@@ -48,6 +48,7 @@
 #include "tool_select_more.hpp"
 #include "tool_set_via_net.hpp"
 #include "tool_lock.hpp"
+#include "tool_add_vertex.hpp"
 
 #include "dimension.hpp"
 #include <memory>
@@ -240,6 +241,9 @@ namespace horizon {
 			case ToolID::UNLOCK:
 			case ToolID::UNLOCK_ALL:
 				return std::make_unique<ToolLock>(this, tool_id);
+
+			case ToolID::ADD_VERTEX:
+				return std::make_unique<ToolAddVertex>(this, tool_id);
 
 			default:
 				return nullptr;

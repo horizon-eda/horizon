@@ -71,5 +71,6 @@ namespace horizon {
 		{ToolID::LOCK, {"Lock"}},
 		{ToolID::UNLOCK, {"Unlock"}},
 		{ToolID::UNLOCK_ALL, {"Unlock all"}},
+		{ToolID::ADD_VERTEX, {"Add vertex"}},
 	};
 }
