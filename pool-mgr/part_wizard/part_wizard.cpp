@@ -47,6 +47,7 @@ namespace horizon {
 		x->get_widget("part_manufacturer", part_manufacturer_entry);
 		x->get_widget("part_tags", part_tags_entry);
 		x->get_widget("part_autofill", part_autofill_button);
+		x->get_widget("steps_grid", steps_grid);
 
 		part_mpn_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));
 		entity_name_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));
@@ -657,9 +658,9 @@ namespace horizon {
 	void PartWizard::update_can_finish() {
 		bool editors_open = processes.size()>0;
 		button_back->set_sensitive(!editors_open);
-		bool valid = true;
+		valid = true;
 
-		auto check_entry_not_empty = [this, &valid] (Gtk::Entry *e, const std:: string &msg) {
+		auto check_entry_not_empty = [this] (Gtk::Entry *e, const std:: string &msg, bool *v=nullptr) {
 			std::string t = e->get_text();
 			trim(t);
 			if(!t.size()) {
@@ -669,27 +670,36 @@ namespace horizon {
 			else {
 				entry_set_warning(e, "");
 			}
+			if(v)
+				*v = t.size();
 		};
-		auto check_location_ends_json = [this, &valid] (LocationEntry *e) {
+		auto check_location_ends_json = [this] (LocationEntry *e, bool *v=nullptr) {
 			std::string t = e->get_filename();
 			if(!endswith(t, ".json")) {
 				e->set_warning("Filename has to end in .json");
 				valid = false;
+				if(v)
+					*v = false;
 			}
 			else {
 				e->set_warning("");
+				if(v)
+					*v = true;
 			}
 		};
 
-		check_entry_not_empty(part_mpn_entry, "MPN is empty");
+		check_entry_not_empty(part_mpn_entry, "MPN is empty", &mpn_valid);
 		check_entry_not_empty(entity_name_entry, "Entity name is empty");
 		check_entry_not_empty(entity_prefix_entry, "Entity prefix is empty");
-		check_location_ends_json(part_location_entry);
+		check_location_ends_json(part_location_entry, &part_filename_valid);
 
 		std::set<std::string> symbol_filenames;
 		std::set<std::string> unit_filenames;
 		std::set<std::string> suffixes;
 		std::set<std::string> unit_names;
+
+		gates_valid = true;
+		int n_gates = entity.gates.size();
 
 		auto children = edit_left_box->get_children();
 		for(auto ch: children) {
@@ -724,6 +734,12 @@ namespace horizon {
 				if(!suffixes.insert(suffix).second) {
 					entry_set_warning(ed->suffix_entry, "Duplicate unit suffix");
 					valid = false;
+					gates_valid = false;
+				}
+				if(suffix.size() == 0 && (n_gates>1)) {
+					entry_set_warning(ed->suffix_entry, "Unit suffix is empty");
+					valid = false;
+					gates_valid = false;
 				}
 
 				std::string unit_name = ed->unit_name_entry->get_text();
@@ -734,8 +750,80 @@ namespace horizon {
 				}
 			}
 		}
-
+		update_steps();
 		button_finish->set_sensitive(!editors_open && valid);
+	}
+
+	void PartWizard::update_steps() {
+		auto chs = steps_grid->get_children();
+		for(auto ch: chs) {
+			delete ch;
+		}
+		int top = 0;
+		auto add_step = [this, &top](const std::string &t, int st) {
+			auto la = Gtk::manage(new Gtk::Label(t));
+			la->set_halign(Gtk::ALIGN_START);
+			steps_grid->attach(*la, 1, top, 1, 1);
+
+			auto im = Gtk::manage(new Gtk::Image());
+			if(st == 1) {
+				im->set_from_icon_name("pan-end-symbolic", Gtk::ICON_SIZE_BUTTON);
+			}
+			else if(st ==2) {
+				im->set_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
+			}
+			steps_grid->attach(*im, 0, top, 1, 1);
+
+			top++;
+		};
+
+		int progress = 0;
+
+		auto compare_progress = [&progress](int x) {
+			if(x == progress)
+				return 1;
+			else if(x < progress)
+				return 2;
+			return 0;
+		};
+
+
+		if(entity.gates.size() == 1) {
+			if(mpn_valid) {
+				progress = 1;
+				if(part_filename_valid) {
+					progress = 2;
+					if(valid) {
+						progress = 3;
+					}
+				}
+			}
+			add_step("Enter MPN (and Manufacturer)", compare_progress(0));
+			add_step("Enter part filename", compare_progress(1));
+			add_step("Press Autofill", compare_progress(2));
+		}
+		else {
+			if(mpn_valid) {
+				progress = 1;
+				if(part_filename_valid) {
+					progress = 2;
+					if(gates_valid) {
+						progress = 3;
+						if(valid) {
+							progress = 4;
+						}
+					}
+				}
+			}
+			add_step("Enter MPN (and Manufacturer)", compare_progress(0));
+			add_step("Enter part filename", compare_progress(1));
+			add_step("Enter Gate suffixes", compare_progress(2));
+			add_step("Press Autofill", compare_progress(3));
+		}
+
+
+
+		steps_grid->show_all();
 	}
 
 	void PartWizard::spawn(PoolManagerProcess::Type type, const std::vector<std::string> &args) {

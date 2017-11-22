@@ -52,6 +52,8 @@ namespace horizon {
 			class LocationEntry *entity_location_entry = nullptr;
 			class LocationEntry *part_location_entry = nullptr;
 
+			Gtk::Grid *steps_grid = nullptr;
+
 			Part part;
 			Entity entity;
 
@@ -89,6 +91,11 @@ namespace horizon {
 			std::string get_rel_part_filename();
 			void update_can_finish();
 			void autofill();
+			void update_steps();
+			bool valid = false;
+			bool mpn_valid = false;
+			bool part_filename_valid = false;
+			bool gates_valid = false;
 
 			Mode mode = Mode::ASSIGN;
 			void set_mode(Mode mo);
