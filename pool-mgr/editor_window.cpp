@@ -173,7 +173,7 @@ namespace horizon {
 
 	std::string EditorWindow::fix_filename(std::string s) {
 		trim(s);
-		if(!endswith(s, ".jsom")) {
+		if(!endswith(s, ".json")) {
 			s += ".json";
 		}
 		return s;
