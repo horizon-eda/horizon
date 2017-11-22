@@ -96,6 +96,7 @@ namespace horizon {
 			bool mpn_valid = false;
 			bool part_filename_valid = false;
 			bool gates_valid = false;
+			std::vector<std::string> get_filenames();
 
 			Mode mode = Mode::ASSIGN;
 			void set_mode(Mode mo);

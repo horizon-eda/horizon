@@ -185,7 +185,50 @@ namespace horizon {
 		set_mode(Mode::ASSIGN);
 	}
 
+	std::vector<std::string> PartWizard::get_filenames() {
+		std::vector<std::string> filenames;
+		filenames.push_back(entity_location_entry->get_filename());
+		filenames.push_back(part_location_entry->get_filename());
+		auto children = edit_left_box->get_children();
+		for(auto ch: children) {
+			if(auto ed = dynamic_cast<GateEditorWizard*>(ch)) {
+				auto unit_filename = ed->unit_location_entry->get_filename();
+				auto symbol_filename = ed->symbol_location_entry->get_filename();
+				filenames.push_back(unit_filename);
+				filenames.push_back(symbol_filename);
+			}
+		}
+
+		return filenames;
+	}
+
 	void PartWizard::handle_finish() {
+		auto filenames = get_filenames();
+		std::vector<std::string> filenames_existing;
+		for(const auto &filename: filenames) {
+			if(Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
+				filenames_existing.push_back(filename);
+			}
+		}
+		if(filenames_existing.size() > 0) {
+			Gtk::MessageDialog md(*this,  "Overwrite?", false /* use_markup */, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
+			std::string sec = "Creating this part will overwrite these files:\n";
+			for(const auto &fn: filenames_existing) {
+				sec += fn+"\n";
+			}
+			md.set_secondary_text(sec);
+			md.add_button("Overwrite", 1);
+			md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+			switch(md.run()) {
+				case 1:
+					//nop, go ahead
+				break;
+				default:
+					return;
+			}
+		}
+
+
 		try {
 			finish();
 			has_finished = true;
@@ -279,7 +322,7 @@ namespace horizon {
 				auto symbol_filename_src = pool->get_tmp_filename(ObjectType::SYMBOL, symbols.at(ed->gate->unit->uuid));
 				auto fi_src = Gio::File::create_for_path(symbol_filename_src);
 				auto fi_dest = Gio::File::create_for_path(symbol_filename_dest);
-				fi_src->copy(fi_dest);
+				fi_src->copy(fi_dest, Gio::FILE_COPY_OVERWRITE);
 			}
 		}
 		save_json_to_file(entity_location_entry->get_filename(), entity.serialize());
