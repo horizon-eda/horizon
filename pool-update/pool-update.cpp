@@ -214,6 +214,7 @@ namespace horizon {
 				if(endswith(it, ".json")) {
 					bool skipthis = false;
 					{
+						status_cb(PoolUpdateStatus::FILE, filename);
 						std::ifstream ifs(filename);
 						json j;
 						if(!ifs.is_open()) {
