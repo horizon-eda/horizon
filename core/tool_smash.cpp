@@ -11,10 +11,14 @@ namespace horizon {
 	bool ToolSmash::can_begin() {
 		for(const auto &it : core.r->selection) {
 			if(it.type == ObjectType::SCHEMATIC_SYMBOL) {
-				return true;
+				auto sym = core.c->get_schematic_symbol(it.uuid);
+				if(sym->smashed == (tool_id==ToolID::UNSMASH))
+					return true;
 			}
 			else if(it.type == ObjectType::BOARD_PACKAGE) {
-				return true;
+				auto pkg = &core.b->get_board()->packages.at(it.uuid);
+				if(pkg->smashed == (tool_id==ToolID::UNSMASH))
+					return true;
 			}
 		}
 		return false;
