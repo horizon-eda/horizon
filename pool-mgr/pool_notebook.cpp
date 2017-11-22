@@ -823,7 +823,8 @@ namespace horizon {
 		auto msg = reinterpret_cast<pool_update_msg_t *>(alloca(sz));
 		msg->status = st;
 		strcpy(msg->msg, s.data());
-		zmq::message_t zmsg(msg, sz);
+		zmq::message_t zmsg(sz);
+		memcpy(zmsg.data(), msg, sz);
 		sock.send(zmsg);
 	}
 
