@@ -1,4 +1,3 @@
-CXX?=g++
 PKGCONFIG=pkg-config
 
 all: horizon-imp horizon-pool horizon-prj horizon-pool-update-parametric horizon-prj-mgr horizon-pool-mgr
@@ -389,7 +388,7 @@ LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq
 
 OPTIMIZE=-fdata-sections -ffunction-sections
 DEBUG   =-g3
-CFLAGS  =$(DEBUG) $(DEFINES) $(OPTIMIZE) $(shell pkg-config --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -std=c++14 -O3
+CXXFLAGS  =$(DEBUG) $(DEFINES) $(OPTIMIZE) $(shell pkg-config --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -std=c++14 -O3
 LDFLAGS = -lm -lpthread
 GLIB_COMPILE_RESOURCES = $(shell $(PKGCONFIG) --variable=glib_compile_resources gio-2.0)
 
@@ -436,10 +435,10 @@ horizon-pgm-test: $(OBJ_COMMON) $(SRC_PGM_TEST:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
 $(OBJ_ALL): %.o: %.cpp
-	$(CXX) -c $(INC) $(CFLAGS) $< -o $@
+	$(CXX) -c $(INC) $(CXXFLAGS) $< -o $@
 
 $(OBJ_ROUTER): %.o: %.cpp
-	$(CXX) -c $(INC) $(INC_ROUTER) $(CFLAGS) $< -o $@
+	$(CXX) -c $(INC) $(INC_ROUTER) $(CXXFLAGS) $< -o $@
 
 clean: clean_router
 	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test $(OBJ_ALL:.o=.d) resources.cpp gitversion.cpp
