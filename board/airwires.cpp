@@ -144,11 +144,13 @@ namespace horizon {
 					auto la_to = it.second.to.get_layer();
 
 					if((la_from == la || la_from == 10002) && (la_to == la || la_to == 10002)) { //only add connection if layers match
-						auto i_from = connmap.at(it.second.from);
-						auto i_to = connmap.at(it.second.to);
-						if(i_from>i_to)
-							std::swap(i_to, i_from);
-						edges_from_board.emplace(i_to, i_from);
+						if(connmap.count(it.second.from) && connmap.count(it.second.to)) {
+							auto i_from = connmap.at(it.second.from);
+							auto i_to = connmap.at(it.second.to);
+							if(i_from>i_to)
+								std::swap(i_to, i_from);
+							edges_from_board.emplace(i_to, i_from);
+						}
 					}
 				}
 			}

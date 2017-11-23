@@ -37,7 +37,7 @@ namespace horizon {
 	ToolResponse ToolDrawTrack::update(const ToolArgs &args) {
 		if(args.type == ToolEventType::MOVE) {
 			temp_junc->position = args.coords;
-			core.b->get_board()->update_airwires();
+			core.b->get_board()->update_airwires(true);
 		}
 		else if(args.type == ToolEventType::CLICK) {
 			if(args.button == 1) {
