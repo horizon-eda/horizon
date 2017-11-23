@@ -92,7 +92,14 @@ int main(int argc, char *argv[]) {
 		std::locale::global(std::locale(std::cout.getloc(), new comma));
 	}
 	#else
-	std::locale::global(std::locale(""));
+	try {
+	    // Try setting the "native locale", in order to retain
+	    // things like decimal separator.  This might fail in
+	    // case the user has no notion of a native locale.
+	    std::locale::global(std::locale(""));
+	} catch(...) {
+	    // just proceed
+	}
 	#endif
 
 
