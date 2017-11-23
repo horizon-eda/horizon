@@ -33,6 +33,7 @@ namespace horizon {
 		ImpLayer::construct();
 
 		main_window->set_title("Padstack - Interactive Manipulator");
+		state_store = std::make_unique<WindowStateStore>(main_window, "imp-padstack");
 
 		auto header_button = Gtk::manage(new HeaderButton);
 		header_button->set_label(core_padstack.get_padstack(false)->name);

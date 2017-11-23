@@ -5,6 +5,7 @@
 #include "part.hpp"
 #include "entity.hpp"
 #include "../pool_notebook.hpp" //for processes
+#include "util/window_state_store.hpp"
 
 namespace horizon {
 
@@ -108,5 +109,7 @@ namespace horizon {
 			std::map<std::string, PoolManagerProcess> processes;
 
 			static class LocationEntry *pack_location_entry(const Glib::RefPtr<Gtk::Builder>& x, const std::string &w, Gtk::Button **button_other=nullptr);
+
+			WindowStateStore state_store;
 	};
 }

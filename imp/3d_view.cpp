@@ -13,7 +13,7 @@ namespace horizon {
 	}
 
 	View3DWindow::View3DWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x, const class Board *bo) :
-		Gtk::Window(cobject), board(bo) {
+		Gtk::Window(cobject), board(bo), state_store(this, "imp-board-3d") {
 
 		Gtk::Box *gl_box;
 		x->get_widget("gl_box", gl_box);

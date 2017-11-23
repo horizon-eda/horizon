@@ -1,5 +1,6 @@
 #pragma once
 #include <gtkmm.h>
+#include "util/window_state_store.hpp"
 
 namespace horizon {
 	class View3DWindow: public Gtk::Window {
@@ -11,5 +12,7 @@ namespace horizon {
 		private:
 			class Canvas3D *canvas = nullptr;
 			const class Board *board;
+
+			WindowStateStore state_store;
 	};
 }

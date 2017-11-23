@@ -278,6 +278,7 @@ SRC_IMP = \
 	imp/preferences_window.cpp\
 	pool/pool_cached.cpp\
 	canvas/canvas_pads.cpp\
+	util/window_state_store.cpp
 
 SRC_ROUTER = \
 	router/router/pns_router.cpp \
@@ -340,7 +341,8 @@ SRC_PRJ_MGR = \
 	pool-update/pool-update.cpp\
 	widgets/cell_renderer_layer_display.cpp\
 	pool/pool_cached.cpp\
-	util/gtk_util.cpp
+	util/gtk_util.cpp\
+	util/window_state_store.cpp\
 
 SRC_POOL_MGR = \
 	pool-mgr/pool-mgr-main.cpp\
@@ -368,7 +370,8 @@ SRC_POOL_MGR = \
 	util/editor_process.cpp\
 	$(SRC_CANVAS)\
 	pool-update/pool-update.cpp\
-	util/gtk_util.cpp
+	util/gtk_util.cpp\
+	util/window_state_store.cpp
 
 SRC_PGM_TEST = \
 	pgm-test.cpp

@@ -9,7 +9,7 @@ extern const char *gitversion;
 namespace horizon {
 
 	PoolManagerAppWindow::PoolManagerAppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refBuilder, PoolManagerApplication *app):
-			Gtk::ApplicationWindow(cobject), builder(refBuilder), zctx(app->zctx) {
+			Gtk::ApplicationWindow(cobject), builder(refBuilder), state_store(this, "pool-mgr"), zctx(app->zctx) {
 		builder->get_widget("stack", stack);
 		builder->get_widget("button_open", button_open);
 		builder->get_widget("button_close", button_close);

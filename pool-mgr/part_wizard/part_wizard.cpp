@@ -23,7 +23,7 @@ namespace horizon {
 	}
 
 	PartWizard::PartWizard(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x, const Package *p, const std::string &bp, class Pool *po) :
-		Gtk::Window(cobject), pkg(p), pool_base_path(bp), pool(po), part(UUID::random()), entity(UUID::random()) {
+		Gtk::Window(cobject), pkg(p), pool_base_path(bp), pool(po), part(UUID::random()), entity(UUID::random()), state_store(this, "part-wizard") {
 		x->get_widget("stack", stack);
 		x->get_widget("button_back", button_back);
 		x->get_widget("button_next", button_next);

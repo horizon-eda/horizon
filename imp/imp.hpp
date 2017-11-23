@@ -16,6 +16,7 @@
 #include "widgets/spin_button_dim.hpp"
 #include "imp_interface.hpp"
 #include "preferences.hpp"
+#include "util/window_state_store.hpp"
 #include <zmq.hpp>
 
 #ifdef G_OS_WIN32
@@ -96,6 +97,8 @@ namespace horizon {
 			class ImpPreferencesWindow *preferences_window = nullptr;
 
 			virtual CanvasPreferences *get_canvas_preferences() {return &preferences.canvas_non_layer;}
+
+			std::unique_ptr<WindowStateStore> state_store=nullptr;
 
 		private:
 			void fix_cursor_pos();

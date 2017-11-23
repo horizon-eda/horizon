@@ -218,6 +218,7 @@ namespace horizon {
 	void ImpSchematic::construct() {
 
 		main_window->set_title("Schematic - Interactive Manipulator");
+		state_store = std::make_unique<WindowStateStore>(main_window, "imp-schematic");
 
 		sheet_box = Gtk::manage(new SheetBox(&core_schematic));
 		sheet_box->show_all();

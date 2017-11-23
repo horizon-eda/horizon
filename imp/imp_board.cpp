@@ -191,6 +191,7 @@ namespace horizon {
 		ImpLayer::construct();
 
 		main_window->set_title("Board - Interactive Manipulator");
+		state_store = std::make_unique<WindowStateStore>(main_window, "imp-board");
 
 		auto view_3d_button = Gtk::manage(new Gtk::Button("3D"));
 		main_window->header->pack_start(*view_3d_button);

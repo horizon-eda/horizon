@@ -39,6 +39,7 @@ namespace horizon {
 	void ImpSymbol::construct() {
 
 		main_window->set_title("Symbol - Interactive Manipulator");
+		state_store = std::make_unique<WindowStateStore>(main_window, "imp-symbol");
 
 		symbol_preview_window = new SymbolPreviewWindow(main_window);
 		symbol_preview_window->set_text_placements(core.y->get_symbol(false)->text_placements);

@@ -2,6 +2,7 @@
 <gresources>
   <gresource prefix="/net/carrotIndustries/horizon">
     <file>window.ui</file>
+    <file>util/window_state_schema.sql</file>
     <file>imp/layer_display_default.json</file>
     <file>imp/app_menu.ui</file>
     <file>imp/preferences.ui</file>

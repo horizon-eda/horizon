@@ -20,7 +20,8 @@ namespace horizon {
 	PartBrowserWindow::PartBrowserWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x, const std::string &pool_path, std::deque<UUID> &favs) :
 		Gtk::Window(cobject),
 		pool(pool_path),
-		favorites(favs){
+		favorites(favs),
+		state_store(this, "part-browser"){
 		x->get_widget("notebook", notebook);
 		x->get_widget("add_search_button", add_search_button);
 		x->get_widget("place_part_button", place_part_button);

@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include "project/project.hpp"
 #include "util/editor_process.hpp"
+#include "util/window_state_store.hpp"
 #include <memory>
 #include <zmq.hpp>
 
@@ -114,6 +115,8 @@ namespace horizon {
 			std::string sock_project_ep;
 
 			sigc::connection sock_project_conn;
+
+			WindowStateStore state_store;
 
 	};
 };

@@ -41,6 +41,7 @@ namespace horizon {
 		ImpLayer::construct();
 
 		main_window->set_title("Package - Interactive Manipulator");
+		state_store = std::make_unique<WindowStateStore>(main_window, "imp-package");
 
 		footprint_generator_window = FootprintGeneratorWindow::create(main_window, &core_package);
 		footprint_generator_window->signal_generated().connect(sigc::mem_fun(this, &ImpBase::canvas_update_from_pp));

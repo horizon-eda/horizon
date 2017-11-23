@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include <memory>
 #include "editor_interface.hpp"
+#include "util/window_state_store.hpp"
 
 namespace horizon {
 	class EditorWindowStore {
@@ -29,6 +30,8 @@ namespace horizon {
 			class Pool *pool;
 			void save();
 			bool need_update = false;
+
+			WindowStateStore state_store;
 
 	};
 }

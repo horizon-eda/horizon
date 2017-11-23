@@ -5,6 +5,7 @@
 #include <zmq.hpp>
 #include "json.hpp"
 #include "util/editor_process.hpp"
+#include "util/window_state_store.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;
@@ -49,6 +50,8 @@ namespace horizon {
 			json handle_req(const json &j);
 
 			bool on_delete_event(GdkEventAny *ev) override;
+
+			WindowStateStore state_store;
 
 		public:
 			zmq::context_t &zctx;

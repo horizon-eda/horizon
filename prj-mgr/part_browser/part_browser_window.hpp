@@ -6,6 +6,7 @@
 #include "uuid.hpp"
 #include "pool.hpp"
 #include "part.hpp"
+#include "util/window_state_store.hpp"
 
 namespace horizon {
 
@@ -41,6 +42,8 @@ namespace horizon {
 			std::deque<UUID> recents;
 
 			type_signal_place_part s_signal_place_part;
+
+			WindowStateStore state_store;
 
 	};
 }
