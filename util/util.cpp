@@ -42,6 +42,7 @@ namespace horizon {
 	}
 
 	#else
+	# if defined(__linux__)
 	std::string get_exe_dir() {
 
 		char buf[PATH_MAX];
@@ -55,6 +56,23 @@ namespace horizon {
 			return "";
         }
 	}
+	# elif defined(__FreeBSD__)
+	std::string get_exe_dir() {
+
+		char buf[PATH_MAX];
+		ssize_t len;
+        if((len = readlink("/proc/curproc/file", buf, sizeof(buf)-1)) != -1) {
+			buf[len] = '\0';
+			return Glib::path_get_dirname(buf);
+        }
+        else {
+			throw std::runtime_error("can't find executable");
+			return "";
+        }
+	}
+	# else
+	#  error Dont know how to find path to executable on your OS.
+	# endif
 	#endif
 
 	std::string coord_to_string(const Coordf &pos, bool delta) {
