@@ -132,7 +132,7 @@ namespace PNS {
 			//fixme: handle multiple layers for non-edge thing
 			auto layer = layers.Start();
 
-			auto clearance = m_rules->get_clearance_copper_non_copper(net, PNS_HORIZON_IFACE::layer_from_router(layer));
+			auto clearance = m_rules->get_clearance_copper_other(net, PNS_HORIZON_IFACE::layer_from_router(layer));
 			return clearance->get_clearance(pt, horizon::PatchType::BOARD_EDGE)+clearance->routing_offset;
 		}
 
@@ -150,7 +150,7 @@ namespace PNS {
 			//fixme: handle multiple layers for non-npth thing
 			auto layer = layers.Start();
 
-			auto clearance = m_rules->get_clearance_copper_non_copper(net, PNS_HORIZON_IFACE::layer_from_router(layer));
+			auto clearance = m_rules->get_clearance_copper_other(net, PNS_HORIZON_IFACE::layer_from_router(layer));
 			return clearance->get_clearance(pt, horizon::PatchType::HOLE_NPTH)+clearance->routing_offset;
 		}
 

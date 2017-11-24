@@ -1,5 +1,5 @@
-#include "rule_editor_clearance_copper_non_copper.hpp"
-#include "board/rule_clearance_copper_non_copper.hpp"
+#include "rule_editor_clearance_copper_other.hpp"
+#include "board/rule_clearance_copper_other.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "rule_match_editor.hpp"
 #include "core/core.hpp"
@@ -18,8 +18,8 @@ namespace horizon {
 		PatchType::HOLE_NPTH, PatchType::BOARD_EDGE, PatchType::OTHER
 	};
 
-	void RuleEditorClearanceCopperNonCopper::populate() {
-		rule2 = dynamic_cast<RuleClearanceCopperNonCopper*>(rule);
+	void RuleEditorClearanceCopperOther::populate() {
+		rule2 = dynamic_cast<RuleClearanceCopperOther*>(rule);
 
 		auto editor = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 20));
 		editor->set_margin_start(20);
@@ -160,7 +160,7 @@ namespace horizon {
 		editor->show();
 	}
 
-	void RuleEditorClearanceCopperNonCopper::set_some(int row, int col) {
+	void RuleEditorClearanceCopperOther::set_some(int row, int col) {
 		Dialogs dias;
 		dias.set_parent(dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW)));
 		auto res = dias.ask_datum("Enter clearance", 0.1_mm);

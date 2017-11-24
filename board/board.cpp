@@ -155,7 +155,7 @@ namespace horizon {
 
 	Board::Board(const UUID &uu, Block &bl): uuid(uu), block(&bl) {
 		rules.add_rule(RuleID::CLEARANCE_COPPER);
-		rules.add_rule(RuleID::CLEARANCE_COPPER_NON_COPPER);
+		rules.add_rule(RuleID::CLEARANCE_COPPER_OTHER);
 		rules.add_rule(RuleID::TRACK_WIDTH);
 		rules.add_rule(RuleID::PLANE);
 		auto r = dynamic_cast<RuleTrackWidth*>(rules.get_rules(RuleID::TRACK_WIDTH).begin()->second);

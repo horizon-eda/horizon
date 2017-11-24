@@ -217,7 +217,7 @@ namespace horizon {
 			if(brd->get_layers().count(it.first.layer) && brd->get_layers().at(it.first.layer).copper) { //need to check copper layer
 				Net *net = it.first.net?&brd->block->nets.at(it.first.net):nullptr;
 
-				auto clearance = get_clearance_copper_non_copper(net, it.first.layer)->get_clearance(it.first.type, PatchType::HOLE_NPTH);
+				auto clearance = get_clearance_copper_other(net, it.first.layer)->get_clearance(it.first.type, PatchType::HOLE_NPTH);
 
 				//expand npth patch by clearance
 				ClipperLib::ClipperOffset ofs;
@@ -289,7 +289,7 @@ namespace horizon {
 
 				//figure out the clearance between this patch pair
 				uint64_t clearance = 0;
-				auto rule_clearance = get_clearance_copper_non_copper(net, p_non_other.layer);
+				auto rule_clearance = get_clearance_copper_other(net, p_non_other.layer);
 				if(rule_clearance) {
 					clearance = rule_clearance->get_clearance(p_non_other.type, p_other.type);
 				}
@@ -349,7 +349,7 @@ namespace horizon {
 			if(brd->get_layers().count(it.first.layer) && brd->get_layers().at(it.first.layer).copper) { //need to check copper layer
 				Net *net = it.first.net?&brd->block->nets.at(it.first.net):nullptr;
 
-				auto clearance = get_clearance_copper_non_copper(net, it.first.layer)->get_clearance(it.first.type, PatchType::BOARD_EDGE);
+				auto clearance = get_clearance_copper_other(net, it.first.layer)->get_clearance(it.first.type, PatchType::BOARD_EDGE);
 
 				//contract board outline patch by clearance
 				ClipperLib::ClipperOffset ofs;
@@ -399,7 +399,7 @@ namespace horizon {
 			case RuleID::CLEARANCE_COPPER :
 				return BoardRules::check_clearance_copper(brd, cache);
 
-			case RuleID::CLEARANCE_COPPER_NON_COPPER :
+			case RuleID::CLEARANCE_COPPER_OTHER :
 				return BoardRules::check_clearance_copper_non_copper(brd, cache);
 
 			default:

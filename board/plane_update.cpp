@@ -103,7 +103,7 @@ namespace horizon {
 					}
 				}
 				else { //npth
-					clearance = rules.get_clearance_copper_non_copper(plane->net, poly.layer)->get_clearance(PatchType::PLANE, PatchType::HOLE_NPTH);
+					clearance = rules.get_clearance_copper_other(plane->net, poly.layer)->get_clearance(PatchType::PLANE, PatchType::HOLE_NPTH);
 				}
 				double expand = clearance+plane->settings.min_width/2+twiddle;
 
@@ -112,7 +112,7 @@ namespace horizon {
 			}
 		}
 
-		auto text_clearance = rules.get_clearance_copper_non_copper(plane->net, poly.layer)->get_clearance(PatchType::PLANE, PatchType::TEXT);
+		auto text_clearance = rules.get_clearance_copper_other(plane->net, poly.layer)->get_clearance(PatchType::PLANE, PatchType::TEXT);
 
 		//add text cutouts
 		if(plane->settings.text_style == PlaneSettings::TextStyle::EXPAND) {
@@ -193,7 +193,7 @@ namespace horizon {
 				ClipperLib::ClipperOffset ofs;
 				ofs.ArcTolerance = 10e3;
 				ofs.AddPaths(board_outline, jt, ClipperLib::etClosedPolygon);
-				auto clearance = rules.get_clearance_copper_non_copper(plane->net, poly.layer)->get_clearance(PatchType::PLANE, PatchType::BOARD_EDGE);
+				auto clearance = rules.get_clearance_copper_other(plane->net, poly.layer)->get_clearance(PatchType::PLANE, PatchType::BOARD_EDGE);
 				ofs.Execute(paths_ofs, -1.0*(clearance+plane->settings.min_width/2+twiddle*2));
 			}
 

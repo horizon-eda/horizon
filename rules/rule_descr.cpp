@@ -10,7 +10,7 @@ namespace horizon {
 		{RuleID::PARAMETERS, {"Parameters", false}},
 		{RuleID::SINGLE_PIN_NET, {"Single pin nets", false}},
 		{RuleID::VIA, {"Vias", true}},
-		{RuleID::CLEARANCE_COPPER_NON_COPPER, {"Clearance Copper - Other", true}},
+		{RuleID::CLEARANCE_COPPER_OTHER, {"Clearance Copper - Other", true}},
 		{RuleID::PLANE, {"Planes", true}},
 		{RuleID::DIFFPAIR, {"Diffpair", true}},
 	};

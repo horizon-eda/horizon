@@ -1,4 +1,4 @@
-#include "rule_clearance_copper_non_copper.hpp"
+#include "rule_clearance_copper_other.hpp"
 #include "util.hpp"
 #include "lut.hpp"
 #include <sstream>
@@ -6,13 +6,13 @@
 namespace horizon {
 
 
-	RuleClearanceCopperNonCopper::RuleClearanceCopperNonCopper(const UUID &uu): Rule(uu) {
-		id = RuleID::CLEARANCE_COPPER_NON_COPPER;
+	RuleClearanceCopperOther::RuleClearanceCopperOther(const UUID &uu): Rule(uu) {
+		id = RuleID::CLEARANCE_COPPER_OTHER;
 	}
 
-	RuleClearanceCopperNonCopper::RuleClearanceCopperNonCopper(const UUID &uu, const json &j): Rule(uu, j),
+	RuleClearanceCopperOther::RuleClearanceCopperOther(const UUID &uu, const json &j): Rule(uu, j),
 			match(j.at("match")), layer(j.at("layer")), routing_offset(j.value("routing_offset", 0.05_mm)){
-		id = RuleID::CLEARANCE_COPPER_NON_COPPER;
+		id = RuleID::CLEARANCE_COPPER_OTHER;
 		{
 			const json &o = j["clearances"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -24,7 +24,7 @@ namespace horizon {
 		}
 	}
 
-	uint64_t RuleClearanceCopperNonCopper::get_clearance(PatchType pt_cu, PatchType pt_ncu) const {
+	uint64_t RuleClearanceCopperOther::get_clearance(PatchType pt_cu, PatchType pt_ncu) const {
 		if(pt_ncu == PatchType::TEXT) //text is same as other (lines, arcs, etc.)
 			pt_ncu = PatchType::OTHER;
 
@@ -35,7 +35,7 @@ namespace horizon {
 		return .1_mm;
 	}
 
-	uint64_t RuleClearanceCopperNonCopper::get_max_clearance() const {
+	uint64_t RuleClearanceCopperOther::get_max_clearance() const {
 		uint64_t max_clearance = 0;
 		for(auto &it: clearances) {
 			max_clearance = std::max(max_clearance, it.second);
@@ -43,12 +43,12 @@ namespace horizon {
 		return max_clearance;
 	}
 
-	void RuleClearanceCopperNonCopper::set_clearance(PatchType pt_cu, PatchType pt_ncu, uint64_t c) {
+	void RuleClearanceCopperOther::set_clearance(PatchType pt_cu, PatchType pt_ncu, uint64_t c) {
 		std::pair<PatchType, PatchType> key(pt_cu, pt_ncu);
 		clearances[key] = c;
 	}
 
-	json RuleClearanceCopperNonCopper::serialize() const {
+	json RuleClearanceCopperOther::serialize() const {
 		json j = Rule::serialize();
 		j["match"] = match.serialize();
 		j["layer"] = layer;
@@ -64,7 +64,7 @@ namespace horizon {
 	}
 
 
-	std::string RuleClearanceCopperNonCopper::get_brief(const class Block *block) const {
+	std::string RuleClearanceCopperOther::get_brief(const class Block *block) const {
 		std::stringstream ss;
 		ss<<"Match " << match.get_brief(block) << "\n";
 		ss<<"Layer " << layer;

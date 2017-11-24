@@ -4,10 +4,10 @@
 #include "rules/rule_match.hpp"
 
 namespace horizon {
-	class RuleClearanceCopperNonCopper: public Rule {
+	class RuleClearanceCopperOther: public Rule {
 		public:
-			RuleClearanceCopperNonCopper(const UUID &uu);
-			RuleClearanceCopperNonCopper(const UUID &uu, const json &j);
+			RuleClearanceCopperOther(const UUID &uu);
+			RuleClearanceCopperOther(const UUID &uu, const json &j);
 			json serialize() const override;
 
 			std::string get_brief(const class Block *block = nullptr) const;

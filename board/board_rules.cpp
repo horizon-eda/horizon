@@ -44,9 +44,17 @@ namespace horizon {
 			const json &o = j["clearance_copper_non_copper"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto u = UUID(it.key());
-				rule_clearance_copper_non_copper.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
+				rule_clearance_copper_other.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
 			}
-			fix_order(RuleID::CLEARANCE_COPPER_NON_COPPER);
+			fix_order(RuleID::CLEARANCE_COPPER_OTHER);
+		}
+		if(j.count("clearance_copper_other")) {
+			const json &o = j["clearance_copper_other"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID(it.key());
+				rule_clearance_copper_other.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
+			}
+			fix_order(RuleID::CLEARANCE_COPPER_OTHER);
 		}
 		if(j.count("plane")) {
 			const json &o = j["plane"];
@@ -88,7 +96,7 @@ namespace horizon {
 		for(auto &it: rule_via) {
 			it.second.match.cleanup(block);
 		}
-		for(auto &it: rule_clearance_copper_non_copper) {
+		for(auto &it: rule_clearance_copper_other) {
 			it.second.match.cleanup(block);
 		}
 		for(auto &it: rule_plane) {
@@ -161,9 +169,9 @@ namespace horizon {
 		for(const auto &it: rule_diffpair) {
 			j["diffpair"][(std::string)it.first] = it.second.serialize();
 		}
-		j["clearance_copper_non_copper"] = json::object();
-		for(const auto &it: rule_clearance_copper_non_copper) {
-			j["clearance_copper_non_copper"][(std::string)it.first] = it.second.serialize();
+		j["clearance_copper_other"] = json::object();
+		for(const auto &it: rule_clearance_copper_other) {
+			j["clearance_copper_other"][(std::string)it.first] = it.second.serialize();
 		}
 		j["clearance_silkscreen_exposed_copper"] = rule_clearance_silkscreen_exposed_copper.serialize();
 		j["parameters"] = rule_parameters.serialize();
@@ -171,7 +179,7 @@ namespace horizon {
 	}
 
 	std::set<RuleID> BoardRules::get_rule_ids() const {
-		return {RuleID::HOLE_SIZE, RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, RuleID::TRACK_WIDTH, RuleID::CLEARANCE_COPPER, RuleID::PARAMETERS, RuleID::VIA, RuleID::CLEARANCE_COPPER_NON_COPPER, RuleID::PLANE, RuleID::DIFFPAIR};
+		return {RuleID::HOLE_SIZE, RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER, RuleID::TRACK_WIDTH, RuleID::CLEARANCE_COPPER, RuleID::PARAMETERS, RuleID::VIA, RuleID::CLEARANCE_COPPER_OTHER, RuleID::PLANE, RuleID::DIFFPAIR};
 	}
 
 	Rule *BoardRules::get_rule(RuleID id) {
@@ -194,8 +202,8 @@ namespace horizon {
 				return &rule_clearance_copper.at(uu);
 			case RuleID::VIA :
 				return &rule_via.at(uu);
-			case RuleID::CLEARANCE_COPPER_NON_COPPER :
-				return &rule_clearance_copper_non_copper.at(uu);
+			case RuleID::CLEARANCE_COPPER_OTHER :
+				return &rule_clearance_copper_other.at(uu);
 			case RuleID::PLANE :
 				return &rule_plane.at(uu);
 			case RuleID::DIFFPAIR:
@@ -230,8 +238,8 @@ namespace horizon {
 				}
 			break;
 
-			case RuleID::CLEARANCE_COPPER_NON_COPPER:
-				for(auto &it: rule_clearance_copper_non_copper) {
+			case RuleID::CLEARANCE_COPPER_OTHER:
+				for(auto &it: rule_clearance_copper_other) {
 					r[it.first] = &it.second;
 				}
 			break;
@@ -271,8 +279,8 @@ namespace horizon {
 				rule_via.erase(uu);
 			break;
 
-			case RuleID::CLEARANCE_COPPER_NON_COPPER :
-				rule_clearance_copper_non_copper.erase(uu);
+			case RuleID::CLEARANCE_COPPER_OTHER :
+				rule_clearance_copper_other.erase(uu);
 			break;
 
 			case RuleID::PLANE :
@@ -312,8 +320,8 @@ namespace horizon {
 				r->order = -1;
 			break;
 
-			case RuleID::CLEARANCE_COPPER_NON_COPPER :
-				r = &rule_clearance_copper_non_copper.emplace(uu, uu).first->second;
+			case RuleID::CLEARANCE_COPPER_OTHER :
+				r = &rule_clearance_copper_other.emplace(uu, uu).first->second;
 				r->order = -1;
 			break;
 
@@ -361,10 +369,10 @@ namespace horizon {
 		return &fallback_clearance_copper;
 	}
 
-	static const RuleClearanceCopperNonCopper fallback_clearance_copper_non_copper = UUID();
+	static const RuleClearanceCopperOther fallback_clearance_copper_non_copper = UUID();
 
-	const RuleClearanceCopperNonCopper *BoardRules::get_clearance_copper_non_copper(Net *net, int layer) {
-		auto rules = dynamic_cast_vector<RuleClearanceCopperNonCopper*>(get_rules_sorted(RuleID::CLEARANCE_COPPER_NON_COPPER));
+	const RuleClearanceCopperOther *BoardRules::get_clearance_copper_other(Net *net, int layer) {
+		auto rules = dynamic_cast_vector<RuleClearanceCopperOther*>(get_rules_sorted(RuleID::CLEARANCE_COPPER_OTHER));
 		for(auto ru: rules) {
 			if(ru->enabled && (ru->match.match(net) && (ru->layer == layer || ru->layer == 10000))) {
 				return ru;
@@ -396,7 +404,7 @@ namespace horizon {
 			}
 		}
 		{
-			auto rules = dynamic_cast_vector<RuleClearanceCopperNonCopper*>(get_rules_sorted(RuleID::CLEARANCE_COPPER_NON_COPPER));
+			auto rules = dynamic_cast_vector<RuleClearanceCopperOther*>(get_rules_sorted(RuleID::CLEARANCE_COPPER_OTHER));
 			for(auto ru: rules) {
 				if(ru->enabled) {
 					max_clearance = std::max(max_clearance, ru->get_max_clearance());

@@ -10,7 +10,7 @@
 #include "rule_editor_clearance_copper.hpp"
 #include "rule_editor_single_pin_net.hpp"
 #include "rule_editor_via.hpp"
-#include "rule_editor_clearance_copper_non_copper.hpp"
+#include "rule_editor_clearance_copper_other.hpp"
 #include "rule_editor_plane.hpp"
 #include "rule_editor_diffpair.hpp"
 #include "widgets/cell_renderer_layer_display.hpp"
@@ -317,8 +317,8 @@ namespace horizon {
 				e = new RuleEditorVia(r, core);
 			break;
 
-			case RuleID::CLEARANCE_COPPER_NON_COPPER :
-				e = new RuleEditorClearanceCopperNonCopper(r, core);
+			case RuleID::CLEARANCE_COPPER_OTHER :
+				e = new RuleEditorClearanceCopperOther(r, core);
 			break;
 
 			case RuleID::PLANE :
