@@ -119,12 +119,12 @@ namespace horizon {
 		if(settings->drill_mode == FabOutputSettings::DrillMode::INDIVIDUAL) {
 			npth_filename_entry->set_visible(true);
 			npth_filename_label->set_visible(true);
-			pth_filename_label->set_text("PTH filename");
+			pth_filename_label->set_text("PTH suffix");
 		}
 		else {
 			npth_filename_entry->set_visible(false);
 			npth_filename_label->set_visible(false);
-			pth_filename_label->set_text("Drill filename");
+			pth_filename_label->set_text("Drill suffix");
 		}
 	}
 
