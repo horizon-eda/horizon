@@ -107,6 +107,10 @@ namespace horizon {
 					nets.insert(it_pad.second.net);
 			}
 		}
+		std::set<UUID> uuids_old;
+		for(const auto &it: airwires) {
+			uuids_old.insert(it.first);
+		}
 		airwires.clear();
 		for(auto net: nets) {
 			std::vector<delaunay::Vector2<double>> points;
@@ -258,7 +262,14 @@ namespace horizon {
 			auto edges_from_mst = kruskalMST(edges_for_mst, points);
 
 			for(const auto &e: edges_from_mst) {
-				auto uu = UUID::random();
+				UUID uu;
+				if(uuids_old.size()) {
+					uu = *uuids_old.begin();
+					uuids_old.erase(uu);
+				}
+				else {
+					uu = UUID::random();
+				}
 				auto &aw = airwires.emplace(uu, uu).first->second;
 				aw.from = points_ref.at(e.p1.id);
 				aw.to = points_ref.at(e.p2.id);

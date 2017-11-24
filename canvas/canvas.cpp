@@ -45,7 +45,10 @@ namespace horizon {
 
 	void Canvas::clear() {
 		selectables.clear();
-		map_erase_if(triangles, [](auto &x){return x.first<20000 || x.first >= 30000;});
+		for(auto &it: triangles) {
+			if(it.first<20000 || it.first >= 30000)
+				it.second.clear();
+		}
 		targets.clear();
 		sheet_current_uuid = UUID();
 		object_refs.clear();

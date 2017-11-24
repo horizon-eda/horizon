@@ -30,6 +30,7 @@ smooth out vec2 round_pos_to_fragment;
 flat out float line_length_to_fragment;
 flat out float line_height_px_to_fragment;
 flat out int force_outline;
+flat out int flags_to_fragment;
 
 layout (std140) uniform layer_setup
 { 
@@ -74,6 +75,7 @@ void main() {
 		return;
 	}
 	int type = type_to_geom[0];
+	flags_to_fragment = flags;
 	
 	if((types_visible & uint(1<<type)) == uint(0))
 		return;

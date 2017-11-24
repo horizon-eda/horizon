@@ -629,22 +629,19 @@ namespace horizon {
 			transform_restore();
 		}
 		else if(shape.form == Shape::Form::RECTANGLE) {
-			if(!layer_display.count(shape.layer))
-				return;
-			std::array<Coordi, 4> pts;
 			transform_save();
 			transform.accumulate(shape.placement);
-			auto w = shape.params.at(0)/2;
-			auto h = shape.params.at(1)/2;
-			pts[0] = transform.transform(Coordi(w, h));
-			pts[1] = transform.transform(Coordi(w, -h));
-			pts[2] = transform.transform(Coordi(-w, -h));
-			pts[3] = transform.transform(Coordi(-w, h));
-			for(size_t i = 1; i<pts.size()+1; i++) {
-				draw_line(pts[(i-1)%pts.size()], pts[i%pts.size()], ColorP::FROM_LAYER, shape.layer, false);
-			}
-			add_triangle(shape.layer, pts[0], pts[1], pts[2], ColorP::FROM_LAYER);
-			add_triangle(shape.layer, pts[0], pts[3], pts[2], ColorP::FROM_LAYER);
+			auto w = shape.params.at(0);
+			auto h = shape.params.at(1);
+			add_triangle(shape.layer, transform.transform(Coordf(-w/2, 0)), transform.transform(Coordf(w/2, 0)), Coordf(h, NAN), ColorP::FROM_LAYER, Triangle::FLAG_BUTT);
+			transform_restore();
+		}
+		else if(shape.form == Shape::Form::OBROUND) {
+			transform_save();
+			transform.accumulate(shape.placement);
+			auto w = shape.params.at(0);
+			auto h = shape.params.at(1);
+			draw_line(Coordf(-w/2+h/2,0), Coordf(w/2-h/2, 0), ColorP::FROM_LAYER, shape.layer, true, h);
 			transform_restore();
 		}
 		else {

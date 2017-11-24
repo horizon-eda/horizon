@@ -55,6 +55,7 @@ namespace horizon {
 
 			static const int FLAG_HIDDEN = 1<<0;
 			static const int FLAG_HIGHLIGHT = 1<<1;
+			static const int FLAG_BUTT = 1<<2;
 
 			Triangle(const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, Type ty, uint8_t flg=0, uint8_t ilod=0):
 				x0(p0.x),
