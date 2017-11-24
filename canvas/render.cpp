@@ -143,7 +143,9 @@ namespace horizon {
 		img_line(line.from->position, line.to->position, line.width, line.layer);
 		if(img_mode)
 			return;
+		triangle_type_current = Triangle::Type::GRAPHICS;
 		draw_line(line.from->position, line.to->position, ColorP::FROM_LAYER, line.layer, true, line.width);
+		triangle_type_current = Triangle::Type::NONE;
 		if(interactive) {
 			auto center = (line.from->position + line.to->position)/2;
 			auto bb = get_line_bb(line.from->position, line.to->position, line.width);
@@ -391,7 +393,9 @@ namespace horizon {
 
 		img_text_layer(text.layer);
 		img_patch_type(PatchType::TEXT);
+		triangle_type_current = Triangle::Type::TEXT;
 		auto extents = draw_text0(transform.shift, text.size, text.overridden?text.text_override:text.text, angle, rev, text.origin, ColorP::FROM_LAYER, text.layer, text.width);
+		triangle_type_current = Triangle::Type::NONE;
 		img_text(text, extents);
 		img_patch_type(PatchType::OTHER);
 		img_text_layer(10000);
@@ -493,14 +497,8 @@ namespace horizon {
 
 		if(!layer_display.count(poly.layer))
 			return;
-		auto display_mode = layer_display.at(poly.layer).mode;
-
-
-		bool draw_tris = display_mode!=LayerDisplay::Mode::OUTLINE;
-		bool draw_outline = display_mode != LayerDisplay::Mode::FILL_ONLY;
-
-
 		if(auto plane = dynamic_cast<Plane*>(poly.usage.ptr)) {
+			triangle_type_current = Triangle::Type::PLANE;
 			for(const auto &frag: plane->fragments) {
 				std::vector<p2t::Point> point_store;
 				size_t pts_total = 0;
@@ -530,54 +528,57 @@ namespace horizon {
 				ColorP co = ColorP::FROM_LAYER;
 				if(frag.orphan == true)
 					co = ColorP::YELLOW;
-				if(draw_tris) {
-					for(const auto tri: tris) {
-						auto p0 = coordf_from_pt(tri->GetPoint(0));
-						auto p1 = coordf_from_pt(tri->GetPoint(1));
-						auto p2 = coordf_from_pt(tri->GetPoint(2));
-						add_triangle(poly.layer, p0, p1, p2, co);
+
+
+				for(const auto tri: tris) {
+					auto p0 = coordf_from_pt(tri->GetPoint(0));
+					auto p1 = coordf_from_pt(tri->GetPoint(1));
+					auto p2 = coordf_from_pt(tri->GetPoint(2));
+					add_triangle(poly.layer, p0, p1, p2, co);
+				}
+				for(const auto &path: frag.paths) {
+					for(size_t i = 0; i<path.size(); i++) {
+						auto &c0 = path[i];
+						auto &c1 = path[(i+1)%path.size()];
+						draw_line(Coordf(c0.X, c0.Y), Coordf(c1.X, c1.Y), co, poly.layer);
 					}
 				}
-				if(draw_outline) {
-					for(const auto &path: frag.paths) {
-						for(size_t i = 0; i<path.size(); i++) {
-							auto &c0 = path[i];
-							auto &c1 = path[(i+1)%path.size()];
-							draw_line(Coordf(c0.X, c0.Y), Coordf(c1.X, c1.Y), co, poly.layer);
-						}
-					}
+
+			}
+			if(plane->fragments.size() == 0) { //empty, draw poly outline
+				for(size_t i = 0; i<poly.vertices.size(); i++) {
+					draw_line(poly.vertices[i].position, poly.vertices[(i+1)%poly.vertices.size()].position, ColorP::FROM_LAYER, poly.layer);
 				}
 			}
+			triangle_type_current = Triangle::Type::NONE;
 
 		}
 		else { //normal polygon
-			if(draw_tris) {
-				TPPLPoly po;
-				po.Init(poly.vertices.size());
-				po.SetHole(false);
-				size_t i = 0;
-				for(auto &it: poly.vertices) {
-					po[i].x  = it.position.x;
-					po[i].y  = it.position.y;
-					i++;
-				}
-				std::list<TPPLPoly> outpolys;
-				TPPLPartition part;
-				po.SetOrientation(TPPL_CCW);
-				part.Triangulate_EC(&po, &outpolys);
-				for(auto &tri: outpolys) {
-					assert(tri.GetNumPoints() ==3);
-					Coordf p0 = transform.transform(coordf_from_pt(tri[0]));
-					Coordf p1 = transform.transform(coordf_from_pt(tri[1]));
-					Coordf p2 = transform.transform(coordf_from_pt(tri[2]));
-					add_triangle(poly.layer, p0, p1, p2, ColorP::FROM_LAYER);
-				}
+			triangle_type_current = Triangle::Type::POLYGON;
+			TPPLPoly po;
+			po.Init(poly.vertices.size());
+			po.SetHole(false);
+			size_t i = 0;
+			for(auto &it: poly.vertices) {
+				po[i].x  = it.position.x;
+				po[i].y  = it.position.y;
+				i++;
 			}
-		}
-		if(draw_outline) {
+			std::list<TPPLPoly> outpolys;
+			TPPLPartition part;
+			po.SetOrientation(TPPL_CCW);
+			part.Triangulate_EC(&po, &outpolys);
+			for(auto &tri: outpolys) {
+				assert(tri.GetNumPoints() ==3);
+				Coordf p0 = transform.transform(coordf_from_pt(tri[0]));
+				Coordf p1 = transform.transform(coordf_from_pt(tri[1]));
+				Coordf p2 = transform.transform(coordf_from_pt(tri[2]));
+				add_triangle(poly.layer, p0, p1, p2, ColorP::FROM_LAYER);
+			}
 			for(size_t i = 0; i<poly.vertices.size(); i++) {
 				draw_line(poly.vertices[i].position, poly.vertices[(i+1)%poly.vertices.size()].position, ColorP::FROM_LAYER, poly.layer);
 			}
+			triangle_type_current = Triangle::Type::NONE;
 		}
 
 		if(interactive && !ipoly.temp) {
@@ -630,7 +631,6 @@ namespace horizon {
 		else if(shape.form == Shape::Form::RECTANGLE) {
 			if(!layer_display.count(shape.layer))
 				return;
-			auto display_mode = layer_display.at(shape.layer).mode;
 			std::array<Coordi, 4> pts;
 			transform_save();
 			transform.accumulate(shape.placement);
@@ -640,15 +640,11 @@ namespace horizon {
 			pts[1] = transform.transform(Coordi(w, -h));
 			pts[2] = transform.transform(Coordi(-w, -h));
 			pts[3] = transform.transform(Coordi(-w, h));
-			if(display_mode != LayerDisplay::Mode::FILL_ONLY) {
-				for(size_t i = 1; i<pts.size()+1; i++) {
-					draw_line(pts[(i-1)%pts.size()], pts[i%pts.size()], ColorP::FROM_LAYER, shape.layer, false);
-				}
+			for(size_t i = 1; i<pts.size()+1; i++) {
+				draw_line(pts[(i-1)%pts.size()], pts[i%pts.size()], ColorP::FROM_LAYER, shape.layer, false);
 			}
-			if(display_mode!=LayerDisplay::Mode::OUTLINE) {
-				add_triangle(shape.layer, pts[0], pts[1], pts[2], ColorP::FROM_LAYER);
-				add_triangle(shape.layer, pts[0], pts[3], pts[2], ColorP::FROM_LAYER);
-			}
+			add_triangle(shape.layer, pts[0], pts[1], pts[2], ColorP::FROM_LAYER);
+			add_triangle(shape.layer, pts[0], pts[3], pts[2], ColorP::FROM_LAYER);
 			transform_restore();
 		}
 		else {

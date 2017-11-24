@@ -30,7 +30,7 @@ namespace horizon {
 	}
 
 	void ImpPadstack::construct() {
-		ImpLayer::construct();
+		ImpLayer::construct_layer_box();
 
 		main_window->set_title("Padstack - Interactive Manipulator");
 		state_store = std::make_unique<WindowStateStore>(main_window, "imp-padstack");

@@ -111,6 +111,7 @@ namespace horizon {
 		GET_LOC(this, layer_color);
 		GET_LOC(this, layer_flags);
 		GET_LOC(this, types_visible);
+		GET_LOC(this, types_force_outline);
 		GET_LOC(this, highlight_mode);
 		GET_LOC(this, highlight_dim);
 		GET_LOC(this, highlight_shadow);
@@ -122,6 +123,8 @@ namespace horizon {
 		const auto &ld = ca->layer_display.at(layer);
 		glUniform3f(layer_color_loc, ld.color.r, ld.color.g, ld.color.b);
 		glUniform1i(layer_flags_loc, static_cast<int>(ld.mode));
+		glUniform1ui(types_visible_loc, ld.types_visible);
+		glUniform1ui(types_force_outline_loc, ld.types_force_outline);
 		if(ld.mode == LayerDisplay::Mode::FILL_ONLY)
 			glStencilFunc(GL_GREATER, stencil, 0xff);
 		else
@@ -144,7 +147,6 @@ namespace horizon {
 		glUniform1f(scale_loc, ca->scale);
 		glUniform1f(alpha_loc, ca->property_layer_opacity()/100);
 		glUniform2f(offset_loc, ca->offset.x, ca->offset.y);
-		glUniform1ui(types_visible_loc, types_visible);
 		glUniform1i(highlight_mode_loc, ca->highlight_enabled?static_cast<int>(ca->highlight_mode):0);
 		glUniform1f(highlight_dim_loc, ca->highlight_dim);
 		glUniform1f(highlight_shadow_loc, ca->highlight_shadow);

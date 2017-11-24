@@ -50,6 +50,7 @@ namespace horizon {
 			virtual void update_markers() {}
 
 
+			const LayerDisplay &get_layer_display(int index);
 			void set_layer_display(int index, const LayerDisplay &ld);
 			class SelectionFilter selection_filter;
 			
@@ -216,7 +217,6 @@ namespace horizon {
 			Glib::PropertyProxy<float> property_layer_opacity() { return p_property_layer_opacity.get_proxy(); }
 			Markers markers;
 			void update_markers() override;
-			void set_type_visible(Triangle::Type ty, bool v);
 
 			std::set<SelectableRef> get_selection_at(const Coordi &c);
 			Coordf screen2canvas(const Coordf &p) const;

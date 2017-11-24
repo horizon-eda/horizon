@@ -3,6 +3,8 @@
 #include "rules/rules_window.hpp"
 #include "canvas/canvas_pads.hpp"
 #include "fab_output_window.hpp"
+#include "widgets/layer_box.hpp"
+#include "widgets/board_display_options.hpp"
 #include "3d_view.hpp"
 
 namespace horizon {
@@ -188,7 +190,7 @@ namespace horizon {
 
 
 	void ImpBoard::construct() {
-		ImpLayer::construct();
+		ImpLayer::construct_layer_box(false);
 
 		main_window->set_title("Board - Interactive Manipulator");
 		state_store = std::make_unique<WindowStateStore>(main_window, "imp-board");
@@ -259,6 +261,36 @@ namespace horizon {
 		rules_window->signal_goto().connect([this] (Coordi location, UUID sheet) {
 			canvas->center_and_zoom(location);
 		});
+
+		auto *display_control_notebook = Gtk::manage(new Gtk::Notebook);
+		display_control_notebook->append_page(*layer_box, "Layers");
+		layer_box->show();
+		layer_box->get_style_context()->add_class("background");
+
+		auto board_display_options = Gtk::manage(new BoardDisplayOptionsBox(core.b->get_layer_provider()));
+		{
+			auto fbox = Gtk::manage(new Gtk::Box());
+			fbox->pack_start(*board_display_options, true, true, 0);
+			fbox->get_style_context()->add_class("background");
+			fbox->show();
+			display_control_notebook->append_page(*fbox, "Options");
+			board_display_options->show();
+		}
+
+		board_display_options->signal_set_layer_display().connect([this](int index, const LayerDisplay &lda){
+			LayerDisplay ld = canvas->get_layer_display(index);
+			ld.types_force_outline = lda.types_force_outline;
+			ld.types_visible = lda.types_visible;
+			canvas->set_layer_display(index, ld);
+			canvas->queue_draw();
+		});
+		core.r->signal_rebuilt().connect([board_display_options] {
+			board_display_options->update();
+		});
+
+		main_window->left_panel->pack_start(*display_control_notebook, false, false);
+		display_control_notebook->show();
+
 	}
 
 	ToolID ImpBoard::handle_key(guint k) {

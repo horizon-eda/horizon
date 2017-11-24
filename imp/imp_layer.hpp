@@ -7,7 +7,7 @@ namespace horizon {
 			using ImpBase::ImpBase;
 
 		protected:
-			void construct() override;
+			void construct_layer_box(bool pack=true);
 			class LayerBox *layer_box;
 			Glib::RefPtr<Glib::Binding> work_layer_binding;
 			Glib::RefPtr<Glib::Binding> layer_opacity_binding;

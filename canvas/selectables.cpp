@@ -54,6 +54,7 @@ namespace horizon {
 		Placement tr = ca->transform;
 		if(tr.mirror)
 			tr.invert_angle();
+		tr.mirror = false;
 		auto box_center = tr.transform((b+a)/2);
 		auto box_dim = b-a;
 		append_angled(uu, ot, center, box_center, box_dim, (tr.get_angle()*M_PI)/32768.0, vertex, layer, always);

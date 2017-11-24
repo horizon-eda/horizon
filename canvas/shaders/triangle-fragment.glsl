@@ -9,11 +9,12 @@ smooth in float alpha_to_fragment;
 smooth in vec2 round_pos_to_fragment;
 flat in float line_length_to_fragment;
 flat in float line_height_px_to_fragment;
+flat in int force_outline;
 
 void main() {
   float alpha = alpha_to_fragment;
   bool disc = false;
-  if(mod(striper_to_fragment,20)>2 || layer_flags==0) { //HATCH or OUTLINE
+  if(mod(striper_to_fragment,20)>2 || layer_flags==0 || force_outline!=0) { //HATCH or OUTLINE
     disc = true;
   }
   if(abs(round_pos_to_fragment.x)>(line_length_to_fragment/2)) {

@@ -7,7 +7,7 @@
 #include <iostream>
 
 namespace horizon {
-	LayerBox::LayerBox(LayerProvider *lpr):
+	LayerBox::LayerBox(LayerProvider *lpr, bool show_title):
 		Glib::ObjectBase(typeid(LayerBox)),
 		Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 2),
 		lp(lpr),
@@ -16,16 +16,21 @@ namespace horizon {
 		p_property_layer_opacity(*this, "layer-opacity"),
 		p_property_highlight_mode(*this, "highlight-mode")
 	{
-		auto *la = Gtk::manage(new Gtk::Label());
-		la->set_markup("<b>Layers</b>");
-		la->show();
-		pack_start(*la, false, false, 0);
+		if(show_title) {
+			auto *la = Gtk::manage(new Gtk::Label());
+			la->set_markup("<b>Layers</b>");
+			la->show();
+			pack_start(*la, false, false, 0);
+		}
 
 		store = Gtk::ListStore::create(list_columns);
 		store->set_sort_column(list_columns.index, Gtk::SORT_DESCENDING);
 
 		auto fr = Gtk::manage(new Gtk::Frame());
-		fr->set_shadow_type(Gtk::SHADOW_IN);
+		if(show_title)
+			fr->set_shadow_type(Gtk::SHADOW_IN);
+		else
+			fr->set_shadow_type(Gtk::SHADOW_NONE);
 		auto frb = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
 		fr->add(*frb);
 

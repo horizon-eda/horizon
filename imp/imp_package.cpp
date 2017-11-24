@@ -38,7 +38,7 @@ namespace horizon {
 	}
 
 	void ImpPackage::construct() {
-		ImpLayer::construct();
+		ImpLayer::construct_layer_box();
 
 		main_window->set_title("Package - Interactive Manipulator");
 		state_store = std::make_unique<WindowStateStore>(main_window, "imp-package");

@@ -278,7 +278,8 @@ SRC_IMP = \
 	imp/preferences_window.cpp\
 	pool/pool_cached.cpp\
 	canvas/canvas_pads.cpp\
-	util/window_state_store.cpp
+	util/window_state_store.cpp\
+	widgets/board_display_options.cpp
 
 SRC_ROUTER = \
 	router/router/pns_router.cpp \

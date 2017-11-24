@@ -30,6 +30,15 @@ namespace horizon {
 		layer_display[index] = ld;
 	}
 
+	static const LayerDisplay ld_default;
+
+	const LayerDisplay &Canvas::get_layer_display(int index) {
+		if(layer_display.count(index))
+			return layer_display.at(index);
+		else
+			return ld_default;
+	}
+
 	bool Canvas::layer_is_visible(int layer) const {
 		return layer == work_layer || layer_display.at(layer).visible;
 	}

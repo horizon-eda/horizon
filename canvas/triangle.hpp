@@ -46,7 +46,7 @@ namespace horizon {
 			float y1;
 			float x2;
 			float y2;
-			enum class Type {NONE, TRACK, TRACK_PREVIEW, VIA, PAD, POUR, ERROR};
+			enum class Type {NONE, TRACK_PREVIEW, TEXT, GRAPHICS, PLANE, POLYGON};
 
 			uint8_t type;
 			uint8_t color;
@@ -84,7 +84,6 @@ namespace horizon {
 			std::unordered_map<int, std::vector<Triangle>> &triangles;
 			std::unordered_map<int, size_t> layer_offsets;
 			size_t n_tris = 0;
-			uint32_t types_visible=0xffffffff;
 
 			GLuint program;
 			GLuint vao;
@@ -98,6 +97,7 @@ namespace horizon {
 			GLuint layer_color_loc;
 			GLuint layer_flags_loc;
 			GLuint types_visible_loc;
+			GLuint types_force_outline_loc;
 			GLuint highlight_mode_loc;
 			GLuint highlight_dim_loc;
 			GLuint highlight_shadow_loc;

@@ -10,10 +10,12 @@ namespace horizon {
 		return json::parse((const char*)json_bytes->get_data(size));
 	}
 
-	void ImpLayer::construct() {
-		layer_box = Gtk::manage(new LayerBox(core.r->get_layer_provider()));
+	void ImpLayer::construct_layer_box(bool pack) {
+		layer_box = Gtk::manage(new LayerBox(core.r->get_layer_provider(), pack));
 		layer_box->show_all();
-		main_window->left_panel->pack_start(*layer_box, false, false, 0);
+		if(pack)
+			main_window->left_panel->pack_start(*layer_box, false, false, 0);
+
 		work_layer_binding = Glib::Binding::bind_property(layer_box->property_work_layer(), canvas->property_work_layer(), Glib::BINDING_BIDIRECTIONAL);
 		layer_opacity_binding = Glib::Binding::bind_property(layer_box->property_layer_opacity(), canvas->property_layer_opacity(), Glib::BINDING_BIDIRECTIONAL);
 		layer_box->property_highlight_mode().signal_changed().connect([this] {
@@ -21,7 +23,14 @@ namespace horizon {
 		});
 		canvas->set_highlight_mode(CanvasGL::HighlightMode::DIM);
 
-		layer_box->signal_set_layer_display().connect([this](int index, const LayerDisplay &ld){canvas->set_layer_display(index, ld); canvas_update();});
+		layer_box->signal_set_layer_display().connect([this](int index, const LayerDisplay &lda){
+			LayerDisplay ld = canvas->get_layer_display(index);
+			ld.color = lda.color;
+			ld.visible = lda.visible;
+			ld.mode = lda.mode;
+			canvas->set_layer_display(index, ld);
+			canvas->queue_draw();
+		});
 		layer_box->property_select_work_layer_only().signal_changed().connect([this]{canvas->selection_filter.work_layer_only=layer_box->property_select_work_layer_only();});
 		core.r->signal_request_save_meta().connect([this] {
 			json j;

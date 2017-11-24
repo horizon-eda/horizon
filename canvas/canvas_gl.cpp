@@ -330,15 +330,6 @@ namespace horizon {
 		request_push();
 	}
 
-	void CanvasGL::set_type_visible(Triangle::Type ty, bool v) {
-		auto mask = 1<<static_cast<int>(ty);
-		if(v)
-			triangle_renderer.types_visible |= mask;
-		else
-			triangle_renderer.types_visible &= ~mask;
-		queue_draw();
-	}
-
 	Coordf CanvasGL::screen2canvas(const Coordf &p) const {
 		Coordf o=p-offset;
 		o.x /= scale;

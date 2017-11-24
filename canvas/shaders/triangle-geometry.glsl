@@ -6,6 +6,7 @@ uniform float scale;
 uniform vec2 offset;
 uniform float alpha;
 uniform uint types_visible;
+uniform uint types_force_outline;
 
 uniform vec3 layer_color;
 uniform int layer_flags;
@@ -28,6 +29,7 @@ smooth out float alpha_to_fragment;
 smooth out vec2 round_pos_to_fragment;
 flat out float line_length_to_fragment;
 flat out float line_height_px_to_fragment;
+flat out int force_outline;
 
 layout (std140) uniform layer_setup
 { 
@@ -65,6 +67,7 @@ void main() {
 	vec2 p1 = p1_to_geom[0];
 	vec2 p2 = p2_to_geom[0];
 	color_to_fragment = vec3(1,0,0);
+	force_outline = 0;
 	
 	int flags = flags_to_geom[0];
 	if((flags & (1<<0)) != 0) { //hidden
@@ -75,6 +78,9 @@ void main() {
 	if((types_visible & uint(1<<type)) == uint(0))
 		return;
 	
+	if((types_force_outline & uint(1<<type)) != uint(0))
+		force_outline = 1;
+	
 	vec3 color;
 	if(color_to_geom[0] == 0) {
 		color = layer_color;
@@ -83,7 +89,7 @@ void main() {
 		color = colors[color_to_geom[0]];
 	}
 	
-	bool highlight = (type == 2 || ((flags & (1<<1)) != 0));
+	bool highlight = (type == 1 || ((flags & (1<<1)) != 0));
 	
 	if(highlight_mode == 0) {
 		if(highlight)
@@ -92,13 +98,13 @@ void main() {
 	else if(highlight_mode == 1) { //dim
 		if(!highlight)
 			color *= highlight_dim; //ugly darken
-		else if(type == 2)
+		else if(type == 1)
 			color += highlight_lighten; //ugly lighten
 	}
 	else if(highlight_mode == 2) { //shadow
 		if(!highlight)
 			color = vec3(1, 1, 1)*highlight_shadow;
-		else if(type == 2)
+		else if(type == 1)
 			color += highlight_lighten; //ugly lighten
 	}
 	
