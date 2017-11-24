@@ -396,10 +396,8 @@ namespace horizon {
 			if(m_startItem) {
 				auto netcode = m_startItem->Net();
 				auto net = tool->iface->get_net_for_code(netcode);
-				if(net) {
-					track_width = tool->rules->get_default_track_width(net, PNS::PNS_HORIZON_IFACE::layer_from_router(routingLayer));
-					sizes.SetWidthFromRules(true);
-				}
+				track_width = tool->rules->get_default_track_width(net, PNS::PNS_HORIZON_IFACE::layer_from_router(routingLayer));
+				sizes.SetWidthFromRules(true);
 			}
 		}
 

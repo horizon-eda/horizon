@@ -64,9 +64,7 @@ namespace horizon {
 					temp_track->to.connect(temp_junc);
 					temp_track->net = j->net;
 					temp_track->net_segment = j->net_segment;
-					if(j->net) {
-						temp_track->width = rules->get_default_track_width(j->net, 0);
-					}
+					temp_track->width = rules->get_default_track_width(j->net, 0);
 
 
 				}
