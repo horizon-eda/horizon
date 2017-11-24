@@ -33,7 +33,7 @@ namespace horizon {
 			static const LutEnumStr<DrillMode> mode_lut;
 
 			std::string drill_pth_filename = ".txt";
-			std::string drill_npth_filename;
+			std::string drill_npth_filename = "-npth.txt";
 			uint64_t outline_width = 0.01_mm;
 
 			std::string prefix;
