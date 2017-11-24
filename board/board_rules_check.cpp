@@ -131,7 +131,7 @@ namespace horizon {
 			std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey>> patch_pairs;
 			for(const auto &it: patches) {
 				for(const auto &it_other: patches) {
-					if(layer == it.first.layer && it.first.layer == it_other.first.layer && it.first.net != it_other.first.net) {//see if it needs to be checked against it_other
+					if(layer == it.first.layer && it.first.layer == it_other.first.layer && it.first.net != it_other.first.net && it.first.type != PatchType::OTHER  && it.first.type != PatchType::TEXT && it_other.first.type != PatchType::OTHER && it_other.first.type != PatchType::TEXT) {//see if it needs to be checked against it_other
 						std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey> k = {it.first, it_other.first};
 						auto k2 = k;
 						std::swap(k2.first, k2.second);
@@ -203,7 +203,6 @@ namespace horizon {
 		RulesCheckResult r;
 		r.level = RulesCheckErrorLevel::PASS;
 		auto c = dynamic_cast<RulesCheckCacheBoardImage*>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
-		std::set<int> layers;
 		const auto &patches = c->get_canvas()->patches;
 		CanvasPatch::PatchKey npth_key;
 		npth_key.layer = 10000;
@@ -249,6 +248,82 @@ namespace horizon {
 						e.error_polygons = {ite};
 					}
 				}
+			}
+		}
+		r.update();
+
+
+		//other cu
+		std::set<int> layers;
+		for(const auto &it: patches) { //collect copper layers
+			if(brd->get_layers().count(it.first.layer) && brd->get_layers().at(it.first.layer).copper) {
+				layers.emplace(it.first.layer);
+			}
+		}
+
+		auto is_other = [](PatchType pt) {return pt==PatchType::OTHER || pt==PatchType::TEXT;};
+
+		for(const auto layer: layers) { //check each layer individually
+			//assemble a list of patch pairs we'll need to check
+			std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey>> patch_pairs;
+			for(const auto &it: patches) {
+				for(const auto &it_other: patches) {
+					if(layer == it.first.layer && it.first.layer == it_other.first.layer && ((is_other(it.first.type) ^ is_other(it_other.first.type)))) {//check non-other against other
+						std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey> k = {it.first, it_other.first};
+						auto k2 = k;
+						std::swap(k2.first, k2.second);
+						if(patch_pairs.count(k) == 0 && patch_pairs.count(k2) == 0) {
+							patch_pairs.emplace(k);
+						}
+					}
+				}
+			}
+
+
+			for(const auto &it: patch_pairs) {
+				auto p_other = it.first;
+				auto p_non_other = it.second;
+				if(!is_other(p_other.type))
+					std::swap(p_other, p_non_other);
+				Net *net = p_non_other.net?&brd->block->nets.at(p_non_other.net):nullptr;
+
+				//figure out the clearance between this patch pair
+				uint64_t clearance = 0;
+				auto rule_clearance = get_clearance_copper_non_copper(net, p_non_other.layer);
+				if(rule_clearance) {
+					clearance = rule_clearance->get_clearance(p_non_other.type, p_other.type);
+				}
+
+				//expand one of them by the clearance
+				ClipperLib::ClipperOffset ofs;
+				ofs.ArcTolerance = 10e3;
+				ofs.AddPaths(patches.at(p_non_other), ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+				ClipperLib::Paths paths_ofs;
+				ofs.Execute(paths_ofs, clearance);
+
+				//intersect expanded and other patches
+				ClipperLib::Clipper clipper;
+				clipper.AddPaths(paths_ofs, ClipperLib::ptClip, true);
+				clipper.AddPaths(patches.at(p_other), ClipperLib::ptSubject, true);
+				ClipperLib::Paths errors;
+				clipper.Execute(ClipperLib::ctIntersection, errors, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+
+				//no intersection: no clearance violation
+				if(errors.size() > 0) {
+					for(const auto &ite: errors) {
+						r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+						auto &e = r.errors.back();
+						e.has_location = true;
+						Accumulator<Coordi> acc;
+						for(const auto &ite2: ite) {
+							acc.accumulate({ite2.X, ite2.Y});
+						}
+						e.location = acc.get();
+						e.comment = patch_type_names.at(p_non_other.type) + "(" + (net?net->name:"") + ") near " + patch_type_names.at(p_other.type);
+						e.error_polygons = {ite};
+					}
+				}
+
 			}
 		}
 		r.update();

@@ -19,7 +19,7 @@ namespace horizon {
 		HOLE, PAD, BOARD_PACKAGE, TRACK, VIA, SHAPE, BOARD, SCHEMATIC,
 		UNIT, ENTITY, SYMBOL, PACKAGE, PADSTACK, PART, PLANE, DIMENSION
 	};
-	enum class PatchType {OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH, BOARD_EDGE};
+	enum class PatchType {OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH, BOARD_EDGE, TEXT};
 
 	static const LutEnumStr<PatchType> patch_type_lut = {
 		{"other",      PatchType::OTHER},
@@ -31,6 +31,7 @@ namespace horizon {
 		{"hole_pth",   PatchType::HOLE_PTH},
 		{"hole_npth",  PatchType::HOLE_NPTH},
 		{"board_edge", PatchType::BOARD_EDGE},
+		{"text",       PatchType::TEXT},
 	};
 
 	/**

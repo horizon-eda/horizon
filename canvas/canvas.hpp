@@ -118,6 +118,7 @@ namespace horizon {
 			virtual void img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer=10000, bool tr=true);
 			virtual void img_hole(const Hole &hole) {}
 			virtual void img_patch_type(PatchType type) {}
+			virtual void img_text(const Text &txt, std::pair<Coordf, Coordf> &extents) {}
 			bool img_mode = false;
 
 

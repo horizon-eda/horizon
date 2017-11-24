@@ -22,6 +22,9 @@ namespace horizon {
 			uint64_t thermal_gap_width = 0.2_mm;
 			uint64_t thermal_spoke_width = 0.2_mm;
 
+			enum class TextStyle {EXPAND, BBOX};
+			TextStyle text_style = TextStyle::EXPAND;
+
 			json serialize() const;
 	};
 

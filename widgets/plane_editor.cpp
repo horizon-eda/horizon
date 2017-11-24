@@ -66,6 +66,29 @@ namespace horizon {
 		{
 			auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
 			box->get_style_context()->add_class("linked");
+			auto b1 = Gtk::manage(new Gtk::RadioButton("Expand"));
+			b1->set_mode(false);
+			box->pack_start(*b1, true, true, 0);
+
+			auto b2 = Gtk::manage(new Gtk::RadioButton("Bounding box"));
+			b2->set_mode(false);
+			b2->join_group(*b1);
+			box->pack_start(*b2, true, true, 0);
+
+			std::map<PlaneSettings::TextStyle, Gtk::RadioButton*> style_widgets = {
+				{PlaneSettings::TextStyle::EXPAND, b1},
+				{PlaneSettings::TextStyle::BBOX, b2},
+			};
+
+			bind_widget(style_widgets, settings->text_style);
+
+			auto la = grid_attach_label_and_widget(this, "Text style", box, top);
+			widgets_from_rules_disable.insert(la);
+			widgets_from_rules_disable.insert(box);
+		}
+		{
+			auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
+			box->get_style_context()->add_class("linked");
 			auto b1 = Gtk::manage(new Gtk::RadioButton("Solid"));
 			b1->set_mode(false);
 			box->pack_start(*b1, true, true, 0);

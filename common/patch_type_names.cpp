@@ -10,5 +10,6 @@ namespace horizon {
 		{PatchType::OTHER, "Other"},
 		{PatchType::HOLE_NPTH, "NPTH hole"},
 		{PatchType::BOARD_EDGE, "Board edge"},
+		{PatchType::TEXT, "Text"},
 	};
 }

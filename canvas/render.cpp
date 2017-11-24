@@ -390,7 +390,10 @@ namespace horizon {
 		}
 
 		img_text_layer(text.layer);
+		img_patch_type(PatchType::TEXT);
 		auto extents = draw_text0(transform.shift, text.size, text.overridden?text.text_override:text.text, angle, rev, text.origin, ColorP::FROM_LAYER, text.layer, text.width);
+		img_text(text, extents);
+		img_patch_type(PatchType::OTHER);
 		img_text_layer(10000);
 		transform_restore();
 		if(interactive) {
@@ -1026,7 +1029,7 @@ namespace horizon {
 			draw_line({0,0}, Coordf(-arrow_mul*dim.label_size, (int64_t)dim.label_size/-2), ColorP::WHITE, 10000, true, 0);
 			transform_restore();
 
-			auto real_text_bb = draw_text0(text_pos, dim.label_size, s, angle_i, false, TextOrigin::CENTER, ColorP::WHITE, 10000, 0, true);
+			auto real_text_bb = draw_text0(Coordi(text_pos.x, text_pos.y), dim.label_size, s, angle_i, false, TextOrigin::CENTER, ColorP::WHITE, 10000, 0, true);
 
 			selectables.append(dim.uuid, ObjectType::DIMENSION, q0, real_text_bb.first, real_text_bb.second, 2);
 			targets.emplace(dim.uuid, ObjectType::DIMENSION, Coordi(q0.x, q0.y), 2);

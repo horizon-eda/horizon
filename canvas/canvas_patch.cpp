@@ -86,4 +86,9 @@ namespace horizon {
 			}
 		}
 	}
+
+	void CanvasPatch::img_text(const Text &txt, std::pair<Coordf, Coordf> &extents) {
+		std::pair<Coordi, Coordi> ext(Coordi(extents.first.x, extents.first.y), Coordi(extents.second.x, extents.second.y));
+		text_extents.emplace(txt.layer, ext.first, ext.second);
+	}
 }

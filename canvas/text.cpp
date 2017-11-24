@@ -355,6 +355,7 @@ enum HersheyFonts {
 			}
 			i++;
 		}
-		return {a,b};
+		Coordf e(width/2, width/2);
+		return {a-e,b+e};
 	}
 }

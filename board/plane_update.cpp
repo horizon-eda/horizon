@@ -87,7 +87,7 @@ namespace horizon {
 		double twiddle = .005_mm;
 
 		for(const auto &patch: ca->patches) { // add cutouts
-			if((patch.first.layer == poly.layer && patch.first.net != plane->net->uuid && patch.first.type != PatchType::OTHER) ||
+			if((patch.first.layer == poly.layer && patch.first.net != plane->net->uuid && patch.first.type != PatchType::OTHER && patch.first.type != PatchType::TEXT) ||
 			   (patch.first.layer == 10000 && patch.first.type == PatchType::HOLE_NPTH)) {
 				ClipperLib::ClipperOffset ofs; //expand patch for cutout
 				ofs.ArcTolerance = 2e3;
@@ -111,6 +111,46 @@ namespace horizon {
 				cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
 			}
 		}
+
+		auto text_clearance = rules.get_clearance_copper_non_copper(plane->net, poly.layer)->get_clearance(PatchType::PLANE, PatchType::TEXT);
+
+		//add text cutouts
+		if(plane->settings.text_style == PlaneSettings::TextStyle::EXPAND) {
+			for(const auto &patch: ca->patches) { // add cutouts
+				if(patch.first.layer == poly.layer && patch.first.type == PatchType::TEXT) {
+					ClipperLib::ClipperOffset ofs; //expand patch for cutout
+					ofs.ArcTolerance = 2e3;
+					ofs.AddPaths(patch.second, jt, ClipperLib::etClosedPolygon);
+					ClipperLib::Paths patch_exp;
+
+					double expand = text_clearance+plane->settings.min_width/2+twiddle;
+
+					ofs.Execute(patch_exp, expand);
+					cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
+				}
+			}
+		}
+		else {
+			for(const auto &ext: ca->text_extents) { // add cutouts
+				Coordi a,b;
+				int text_layer;
+				std::tie(text_layer, a, b) = ext;
+				if(text_layer == poly.layer) {
+					ClipperLib::Path p = {{a.x, a.y}, {b.x, a.y}, {b.x, b.y}, {a.x, b.y}};
+
+					ClipperLib::ClipperOffset ofs; //expand patch for cutout
+					ofs.ArcTolerance = 2e3;
+					ofs.AddPath(p, jt, ClipperLib::etClosedPolygon);
+					ClipperLib::Paths patch_exp;
+
+					double expand = text_clearance+plane->settings.min_width/2+twiddle;
+
+					ofs.Execute(patch_exp, expand);
+					cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
+				}
+			}
+		}
+
 		//add thermal coutouts
 		if(plane->settings.connect_style == PlaneSettings::ConnectStyle::THERMAL) {
 			for(const auto &patch: ca->patches) {
@@ -259,6 +299,7 @@ namespace horizon {
 		for(auto plane: planes_sorted) {
 			update_plane(plane, &ca, &cp);
 			ca.patches.clear();
+			ca.text_extents.clear();
 			ca.update(*this); //update so that new plane sees other planes
 		}
 	}

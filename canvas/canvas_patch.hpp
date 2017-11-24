@@ -26,6 +26,7 @@ namespace horizon {
 			}
 		};
 		std::map<PatchKey, ClipperLib::Paths> patches;
+		std::set<std::tuple<int, Coordi, Coordi>> text_extents;
 
 		CanvasPatch();
 		void push() override {}
@@ -39,6 +40,7 @@ namespace horizon {
 			virtual void img_polygon(const Polygon &poly, bool tr) override;
 			virtual void img_hole(const class Hole &hole) override;
 			virtual void img_patch_type(PatchType type) override;
+			virtual void img_text(const Text &txt, std::pair<Coordf, Coordf> &extents) override;
 
 	};
 }

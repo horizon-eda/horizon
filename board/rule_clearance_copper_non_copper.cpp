@@ -25,6 +25,9 @@ namespace horizon {
 	}
 
 	uint64_t RuleClearanceCopperNonCopper::get_clearance(PatchType pt_cu, PatchType pt_ncu) const {
+		if(pt_ncu == PatchType::TEXT) //text is same as other (lines, arcs, etc.)
+			pt_ncu = PatchType::OTHER;
+
 		std::pair<PatchType, PatchType> key(pt_cu, pt_ncu);
 		if(clearances.count(key)) {
 			return clearances.at(key);

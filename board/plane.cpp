@@ -16,6 +16,11 @@ namespace horizon {
 		{"thermal",	PlaneSettings::ConnectStyle::THERMAL},
 	};
 
+	static const LutEnumStr<PlaneSettings::TextStyle> text_style_lut = {
+		{"expand",	PlaneSettings::TextStyle::EXPAND},
+		{"bbox",	PlaneSettings::TextStyle::BBOX},
+	};
+
 
 	PlaneSettings::PlaneSettings(const json &j): min_width(j.at("min_width")),
 		keep_orphans(j.at("keep_orphans")),
@@ -28,6 +33,9 @@ namespace horizon {
 		if(j.count("connect_style")) {
 			connect_style = connect_style_lut.lookup(j.at("connect_style"));
 		}
+		if(j.count("text_style")) {
+			text_style = text_style_lut.lookup(j.at("text_style"));
+		}
 	}
 
 	json PlaneSettings::serialize() const {
@@ -38,6 +46,7 @@ namespace horizon {
 		j["connect_style"] = connect_style_lut.lookup_reverse(connect_style);
 		j["thermal_gap_width"] = thermal_gap_width;
 		j["thermal_spoke_width"] = thermal_spoke_width;
+		j["text_style"] = text_style_lut.lookup_reverse(text_style);
 		return j;
 	}
 
