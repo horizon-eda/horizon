@@ -29,6 +29,7 @@ namespace horizon {
 		apply_all_button = Gtk::manage(new Gtk::Button());
 		apply_all_button->set_image_from_icon_name("object-select-symbolic");
 		apply_all_button->signal_clicked().connect(sigc::mem_fun(this, &PropertyEditor::handle_apply_all));
+		apply_all_button->set_tooltip_text("Apply to all");
 		hbox->pack_start(*apply_all_button, false, false, 0);
 
 		pack_start(*hbox, false, false, 0);
