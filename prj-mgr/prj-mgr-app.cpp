@@ -82,7 +82,7 @@ namespace horizon {
 	}
 
 	std::string ProjectManagerApplication::get_config_filename() {
-		return Glib::build_filename(Glib::get_user_config_dir(), "horizon", "project-manager.json");
+		return Glib::build_filename(get_config_dir(), "project-manager.json");
 	}
 
 	void ProjectManagerApplication::on_startup() {
@@ -138,9 +138,6 @@ namespace horizon {
 
 	void ProjectManagerApplication::on_shutdown() {
 		auto config_filename = get_config_filename();
-		auto config_dir = Glib::path_get_dirname(config_filename);
-		if(!Glib::file_test(config_dir, Glib::FILE_TEST_EXISTS))
-			Gio::File::create_for_path(config_dir)->make_directory_with_parents();
 
 		json j;
 		{

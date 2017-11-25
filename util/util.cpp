@@ -2,6 +2,7 @@
 #include <fstream>
 #include <unistd.h>
 #include <glibmm/miscutils.h>
+#include <giomm.h>
 #ifdef G_OS_WIN32
 	#include <windows.h>
 #endif
@@ -154,5 +155,15 @@ namespace horizon {
 		g_free(ca);
 		g_free(cb);
 		return r;
+	}
+
+	std::string get_config_dir() {
+		return Glib::build_filename(Glib::get_user_config_dir(), "horizon");
+	}
+
+	void create_config_dir() {
+		auto config_dir = get_config_dir();
+		if(!Glib::file_test(config_dir, Glib::FILE_TEST_EXISTS))
+			Gio::File::create_for_path(config_dir)->make_directory_with_parents();
 	}
 }

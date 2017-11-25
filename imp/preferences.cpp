@@ -34,11 +34,11 @@ namespace horizon {
 	}
 
 	std::string ImpPreferences::get_preferences_filename() {
-		return Glib::build_filename(Glib::get_user_config_dir(), "horizon", "imp-prefs.json");
+		return Glib::build_filename(get_config_dir(), "imp-prefs.json");
 	}
 
 	static std::string get_preferences_lock_filename() {
-		return Glib::build_filename(Glib::get_user_config_dir(), "horizon", "imp-prefs.json.lock");
+		return Glib::build_filename(get_config_dir(), "imp-prefs.json.lock");
 	}
 
 	json CanvasPreferences::serialize() const {
@@ -72,9 +72,6 @@ namespace horizon {
 
 	void ImpPreferences::save() {
 		std::string prefs_filename = get_preferences_filename();
-		auto prefs_dir = Glib::path_get_dirname(prefs_filename);
-		if(!Glib::file_test(prefs_dir, Glib::FILE_TEST_EXISTS))
-			Gio::File::create_for_path(prefs_dir)->make_directory_with_parents();
 
 		json j = serialize();
 		save_json_to_file(prefs_filename, j);

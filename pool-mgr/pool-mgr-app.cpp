@@ -60,7 +60,7 @@ namespace horizon {
 	}
 
 	std::string PoolManagerApplication::get_config_filename() {
-		return Glib::build_filename(Glib::get_user_config_dir(), "horizon", "pool-manager.json");
+		return Glib::build_filename(get_config_dir(), "pool-manager.json");
 	}
 
 	void PoolManagerApplication::on_startup() {
@@ -101,9 +101,6 @@ namespace horizon {
 
 	void PoolManagerApplication::on_shutdown() {
 		auto config_filename = get_config_filename();
-		auto config_dir = Glib::path_get_dirname(config_filename);
-		if(!Glib::file_test(config_dir, Glib::FILE_TEST_EXISTS))
-			Gio::File::create_for_path(config_dir)->make_directory_with_parents();
 
 		json j;
 		save_json_to_file(config_filename, j);

@@ -17,6 +17,7 @@
 #include "imp_package.hpp"
 #include "imp_board.hpp"
 #include "part.hpp"
+#include "util.hpp"
 
 using std::cout;
 using horizon::UUID;
@@ -102,6 +103,7 @@ int main(int argc, char *argv[]) {
 	}
 	#endif
 
+	horizon::create_config_dir();
 
 	std::unique_ptr<horizon::ImpBase> imp = nullptr;
 	if(mode_sch) {

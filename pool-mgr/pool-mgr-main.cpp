@@ -1,7 +1,9 @@
 #include "pool-mgr-app.hpp"
+#include "util.hpp"
 
 int main(int argc, char* argv[]) {
 	auto application = horizon::PoolManagerApplication::create();
+	horizon::create_config_dir();
 
 	// Start the application, showing the initial window,
 	// and opening extra views for any files that it is asked to open,

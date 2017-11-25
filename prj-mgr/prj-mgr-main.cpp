@@ -1,8 +1,10 @@
 
 #include "prj-mgr-app.hpp"
+#include "util.hpp"
 
 int main(int argc, char* argv[]) {
 	auto application = horizon::ProjectManagerApplication::create();
+	horizon::create_config_dir();
 
 	// Start the application, showing the initial window,
 	// and opening extra views for any files that it is asked to open,
