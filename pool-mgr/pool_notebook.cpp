@@ -6,6 +6,7 @@
 #include "widgets/pool_browser_padstack.hpp"
 #include "widgets/pool_browser_package.hpp"
 #include "widgets/pool_browser_part.hpp"
+#include "dialogs/pool_browser_dialog.hpp"
 #include "util/util.hpp"
 #include "pool-update/pool-update.hpp"
 #include <zmq.hpp>
@@ -345,6 +346,42 @@ namespace horizon {
 					spawn(PoolManagerProcess::Type::IMP_SYMBOL, {path});
 				});
 			}
+			auto bu = Gtk::manage(new Gtk::Button("Create Symbol"));
+			bbox->pack_start(*bu, false, false,0);
+			bu->signal_clicked().connect([this, br]{
+				auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
+				UUID unit_uuid;
+
+				{
+					PoolBrowserDialog dia(top, ObjectType::UNIT, &pool);
+					if(dia.run() == Gtk::RESPONSE_OK) {
+						unit_uuid = dia.get_browser()->get_selected();
+					}
+				}
+				if(unit_uuid) {
+					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Symbol",
+						top->gobj(),
+						GTK_FILE_CHOOSER_ACTION_SAVE,
+						"_Save",
+						"_Cancel");
+					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+					chooser->set_do_overwrite_confirmation(true);
+					auto unit_filename = pool.get_filename(ObjectType::UNIT, unit_uuid);
+					auto basename = Gio::File::create_for_path(unit_filename)->get_basename();
+					chooser->set_current_folder(Glib::build_filename(base_path, "symbols"));
+					chooser->set_current_name(basename);
+
+					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
+						Symbol sym(horizon::UUID::random());
+						auto unit = pool.get_unit(unit_uuid);
+						sym.name = unit->name;
+						sym.unit = unit;
+						save_json_to_file(fn, sym.serialize());
+						spawn(PoolManagerProcess::Type::IMP_SYMBOL, {fn});
+					}
+				}
+			});
 
 			bbox->show_all();
 

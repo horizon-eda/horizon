@@ -12,7 +12,7 @@ namespace horizon {
 		pool(ipool)
 		{
 		if(parent) {
-			set_parent(*parent);
+			set_transient_for(*parent);
 		}
 		Gtk::Button *button_ok = add_button("OK", Gtk::ResponseType::RESPONSE_OK);
 		add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
