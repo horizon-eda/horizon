@@ -43,7 +43,7 @@ namespace horizon {
 
 		std::string name_search = name_entry->get_text();
 
-		std::string query  = "SELECT symbols.uuid, symbols.name, units.name, units.manufacturer, units.filename FROM symbols,units WHERE symbols.unit = units.uuid AND (units.uuid=? OR ?) AND symbols.name LIKE ?"+sort_controller->get_order_by();
+		std::string query  = "SELECT symbols.uuid, symbols.name, units.name, units.manufacturer, symbols.filename FROM symbols,units WHERE symbols.unit = units.uuid AND (units.uuid=? OR ?) AND symbols.name LIKE ?"+sort_controller->get_order_by();
 		SQLite::Query q(pool->db, query);
 		q.bind(1, unit_uuid);
 		q.bind(2, unit_uuid==UUID());
