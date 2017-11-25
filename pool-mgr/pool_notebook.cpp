@@ -77,6 +77,17 @@ namespace horizon {
 		}
 	}
 
+	static std::string insert_filename(const std::string &fn, const std::string &ins) {
+		if(endswith(fn, ".json")) {
+			std::string s(fn);
+			s.resize(s.size()-5);
+			return s + ins + ".json";
+		}
+		else {
+			return fn;
+		}
+	}
+
 	void PoolNotebook::spawn(PoolManagerProcess::Type type, const std::vector<std::string> &args) {
 		if(processes.count(args.at(0)) == 0) { //need to launch imp
 			std::vector<std::string> env = {"HORIZON_POOL="+base_path};
@@ -346,19 +357,53 @@ namespace horizon {
 					spawn(PoolManagerProcess::Type::IMP_SYMBOL, {path});
 				});
 			}
-			auto bu = Gtk::manage(new Gtk::Button("Create Symbol"));
-			bbox->pack_start(*bu, false, false,0);
-			bu->signal_clicked().connect([this, br]{
-				auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-				UUID unit_uuid;
+			{
+				auto bu = Gtk::manage(new Gtk::Button("Create Symbol"));
+				bbox->pack_start(*bu, false, false,0);
+				bu->signal_clicked().connect([this, br]{
+					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
+					UUID unit_uuid;
 
-				{
-					PoolBrowserDialog dia(top, ObjectType::UNIT, &pool);
-					if(dia.run() == Gtk::RESPONSE_OK) {
-						unit_uuid = dia.get_browser()->get_selected();
+					{
+						PoolBrowserDialog dia(top, ObjectType::UNIT, &pool);
+						if(dia.run() == Gtk::RESPONSE_OK) {
+							unit_uuid = dia.get_browser()->get_selected();
+						}
 					}
-				}
-				if(unit_uuid) {
+					if(unit_uuid) {
+						GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Symbol",
+							top->gobj(),
+							GTK_FILE_CHOOSER_ACTION_SAVE,
+							"_Save",
+							"_Cancel");
+						auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+						chooser->set_do_overwrite_confirmation(true);
+						auto unit_filename = pool.get_filename(ObjectType::UNIT, unit_uuid);
+						auto basename = Gio::File::create_for_path(unit_filename)->get_basename();
+						chooser->set_current_folder(Glib::build_filename(base_path, "symbols"));
+						chooser->set_current_name(basename);
+
+						if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+							std::string fn = EditorWindow::fix_filename(chooser->get_filename());
+							Symbol sym(horizon::UUID::random());
+							auto unit = pool.get_unit(unit_uuid);
+							sym.name = unit->name;
+							sym.unit = unit;
+							save_json_to_file(fn, sym.serialize());
+							spawn(PoolManagerProcess::Type::IMP_SYMBOL, {fn});
+						}
+					}
+				});
+			}
+			{
+				auto bu = Gtk::manage(new Gtk::Button("Duplicate Symbol"));
+				bbox->pack_start(*bu, false, false,0);
+				bu->signal_clicked().connect([this, br]{
+					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
+					auto sym_uuid = br->get_selected();
+					if(!sym_uuid)
+						return;
+
 					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Symbol",
 						top->gobj(),
 						GTK_FILE_CHOOSER_ACTION_SAVE,
@@ -366,23 +411,23 @@ namespace horizon {
 						"_Cancel");
 					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
 					chooser->set_do_overwrite_confirmation(true);
-					auto unit_filename = pool.get_filename(ObjectType::UNIT, unit_uuid);
-					auto basename = Gio::File::create_for_path(unit_filename)->get_basename();
-					chooser->set_current_folder(Glib::build_filename(base_path, "symbols"));
-					chooser->set_current_name(basename);
+					auto sym_filename = pool.get_filename(ObjectType::SYMBOL, sym_uuid);
+					auto sym_basename = Glib::path_get_basename(sym_filename);
+					auto sym_dirname = Glib::path_get_dirname(sym_filename);
+					chooser->set_current_folder(sym_dirname);
+					chooser->set_current_name(insert_filename(sym_basename, "-copy"));
 
 					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
 						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
-						Symbol sym(horizon::UUID::random());
-						auto unit = pool.get_unit(unit_uuid);
-						sym.name = unit->name;
-						sym.unit = unit;
+						Symbol sym(*pool.get_symbol(sym_uuid));
+						sym.name += " (Copy)";
+						sym.uuid = UUID::random();
 						save_json_to_file(fn, sym.serialize());
 						spawn(PoolManagerProcess::Type::IMP_SYMBOL, {fn});
 					}
-				}
-			});
 
+				});
+			}
 			bbox->show_all();
 
 			box->pack_start(*bbox, false, false, 0);
