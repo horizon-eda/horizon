@@ -35,7 +35,7 @@ namespace horizon {
 			void populate();
 			void spawn(PoolManagerProcess::Type type, const std::vector<std::string> &args);
 			bool can_close();
-			void pool_update();
+			void pool_update(std::function<void()> cb = nullptr);
 			~PoolNotebook();
 
 		private:
@@ -45,6 +45,7 @@ namespace horizon {
 			std::map<std::string, PoolManagerProcess> processes;
 			std::set<class PoolBrowser*> browsers;
 			class PartWizard *part_wizard = nullptr;
+			class DuplicateWindow *duplicate_window = nullptr;
 
 			zmq::context_t &zctx;
 			zmq::socket_t sock_pool_update;
@@ -55,5 +56,40 @@ namespace horizon {
 			std::string pool_update_last_file;
 			unsigned int pool_update_n_files = 0;
 			unsigned int pool_update_n_files_last = 0;
+			std::function<void()> pool_update_done_cb = nullptr;
+
+			void show_duplicate_window(ObjectType ty, const UUID &uu);
+
+			void handle_create_unit();
+			void handle_edit_unit(const UUID &uu);
+			void handle_create_symbol_for_unit(const UUID &uu);
+			void handle_create_entity_for_unit(const UUID &uu);
+			void handle_duplicate_unit(const UUID &uu);
+
+			void handle_edit_symbol(const UUID &uu);
+			void handle_create_symbol();
+			void handle_duplicate_symbol(const UUID &uu);
+
+			void handle_edit_entity(const UUID &uu);
+			void handle_create_entity();
+			void handle_duplicate_entity(const UUID &uu);
+
+			void handle_edit_padstack(const UUID &uu);
+			void handle_create_padstack();
+			void handle_duplicate_padstack(const UUID &uu);
+
+			void handle_edit_package(const UUID &uu);
+			void handle_create_package();
+			void handle_create_padstack_for_package(const UUID &uu);
+			void handle_duplicate_package(const UUID &uu);
+			void handle_part_wizard(const UUID &uu);
+
+			void handle_edit_part(const UUID &uu);
+			void handle_create_part();
+			void handle_create_part_from_part(const UUID &uu);
+			void handle_duplicate_part(const UUID &uu);
+
+			Gtk::Button *add_action_button(const std::string &label, Gtk::Box *bbox, sigc::slot0<void>);
+			Gtk::Button *add_action_button(const std::string &label, Gtk::Box *bbox, class PoolBrowser *br, sigc::slot1<void, UUID>);
 	};
 }

@@ -11,9 +11,10 @@
 #include "pool-update/pool-update.hpp"
 #include <zmq.hpp>
 #include "editor_window.hpp"
-#include "create_part_dialog.hpp"
-#include "part_wizard/part_wizard.hpp"
 #include "pool-mgr-app_win.hpp"
+#include "duplicate/duplicate_window.hpp"
+#include "duplicate/duplicate_unit.hpp"
+#include "duplicate/duplicate_part.hpp"
 #include <thread>
 
 namespace horizon {
@@ -77,17 +78,6 @@ namespace horizon {
 		}
 	}
 
-	static std::string insert_filename(const std::string &fn, const std::string &ins) {
-		if(endswith(fn, ".json")) {
-			std::string s(fn);
-			s.resize(s.size()-5);
-			return s + ins + ".json";
-		}
-		else {
-			return fn;
-		}
-	}
-
 	void PoolNotebook::spawn(PoolManagerProcess::Type type, const std::vector<std::string> &args) {
 		if(processes.count(args.at(0)) == 0) { //need to launch imp
 			std::vector<std::string> env = {"HORIZON_POOL="+base_path};
@@ -128,6 +118,10 @@ namespace horizon {
 		for(auto &it: processes) {
 			it.second.reload();
 		}
+		if(success && pool_update_done_cb) {
+			pool_update_done_cb();
+			pool_update_done_cb = nullptr;
+		}
 	}
 
 	PoolNotebook::~PoolNotebook() {
@@ -138,6 +132,26 @@ namespace horizon {
 		PoolUpdateStatus status;
 		char msg[1];
 	} pool_update_msg_t;
+
+	Gtk::Button *PoolNotebook::add_action_button(const std::string &label, Gtk::Box *bbox, sigc::slot0<void> cb) {
+		auto bu = Gtk::manage(new Gtk::Button(label));
+		bbox->pack_start(*bu, false, false,0);
+		bu->signal_clicked().connect(cb);
+		return bu;
+	}
+
+	Gtk::Button *PoolNotebook::add_action_button(const std::string &label, Gtk::Box *bbox, class PoolBrowser *br, sigc::slot1<void, UUID> cb) {
+		auto bu = Gtk::manage(new Gtk::Button(label));
+		bbox->pack_start(*bu, false, false,0);
+		bu->signal_clicked().connect([br, cb] {
+			cb(br->get_selected());
+		});
+		br->signal_selected().connect([bu, br] {
+			bu->set_sensitive(br->get_selected());
+		});
+		bu->set_sensitive(br->get_selected());
+		return bu;
+	}
 
 	PoolNotebook::PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw): Gtk::Notebook(), base_path(bp), pool(bp), appwin(aw), zctx(aw->zctx), sock_pool_update(zctx, ZMQ_SUB) {
 		sock_pool_update_ep = "inproc://pool-update";
@@ -203,90 +217,12 @@ namespace horizon {
 			bbox->set_margin_start(8);
 			bbox->set_margin_end(8);
 
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Create Unit"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this]{
-					spawn(PoolManagerProcess::Type::UNIT, {""});
-				});
-			}
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Edit Unit"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this, br]{
-					auto uu = br->get_selected();
-					if(!uu)
-						return;
-					auto path = pool.get_filename(ObjectType::UNIT, uu);
-					spawn(PoolManagerProcess::Type::UNIT, {path});
-				});
-			}
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Create Symbol for Unit"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this, br]{
-					if(!br->get_selected())
-						return;
-					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
+			add_action_button("Create Unit", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_unit));
+			add_action_button("Edit Unit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_unit));
+			add_action_button("Duplicate Unit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_unit));
+			add_action_button("Create Symbol for Unit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_symbol_for_unit));
+			add_action_button("Create Entity for Unit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_entity_for_unit));
 
-					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Symbol",
-						top->gobj(),
-						GTK_FILE_CHOOSER_ACTION_SAVE,
-						"_Save",
-						"_Cancel");
-					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-					chooser->set_do_overwrite_confirmation(true);
-					auto unit_filename = pool.get_filename(ObjectType::UNIT, br->get_selected());
-					auto basename = Gio::File::create_for_path(unit_filename)->get_basename();
-					chooser->set_current_folder(Glib::build_filename(base_path, "symbols"));
-					chooser->set_current_name(basename);
-
-					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
-						Symbol sym(horizon::UUID::random());
-						auto unit = pool.get_unit(br->get_selected());
-						sym.name = unit->name;
-						sym.unit = unit;
-						save_json_to_file(fn, sym.serialize());
-						spawn(PoolManagerProcess::Type::IMP_SYMBOL, {fn});
-					}
-				});
-			}
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Create Entity for Unit"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this, br]{
-					if(!br->get_selected())
-						return;
-					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-
-					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Entity",
-						top->gobj(),
-						GTK_FILE_CHOOSER_ACTION_SAVE,
-						"_Save",
-						"_Cancel");
-					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-					chooser->set_do_overwrite_confirmation(true);
-					auto unit_filename = pool.get_filename(ObjectType::UNIT, br->get_selected());
-					auto basename = Gio::File::create_for_path(unit_filename)->get_basename();
-					chooser->set_current_folder(Glib::build_filename(base_path, "entities"));
-					chooser->set_current_name(basename);
-
-					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
-						Entity entity(horizon::UUID::random());
-						auto unit = pool.get_unit(br->get_selected());
-						entity.name = unit->name;
-						auto uu = UUID::random();
-						auto gate = &entity.gates.emplace(uu, uu).first->second;
-						gate->unit = unit;
-						gate->name = "Main";
-
-						save_json_to_file(fn, entity.serialize());
-						spawn(PoolManagerProcess::Type::ENTITY, {fn});
-					}
-				});
-			}
 
 			bbox->show_all();
 
@@ -346,88 +282,9 @@ namespace horizon {
 			bbox->set_margin_start(8);
 			bbox->set_margin_end(8);
 
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Edit Symbol"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this, br]{
-					auto uu = br->get_selected();
-					if(!uu)
-						return;
-					auto path = pool.get_filename(ObjectType::SYMBOL, uu);
-					spawn(PoolManagerProcess::Type::IMP_SYMBOL, {path});
-				});
-			}
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Create Symbol"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this, br]{
-					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-					UUID unit_uuid;
-
-					{
-						PoolBrowserDialog dia(top, ObjectType::UNIT, &pool);
-						if(dia.run() == Gtk::RESPONSE_OK) {
-							unit_uuid = dia.get_browser()->get_selected();
-						}
-					}
-					if(unit_uuid) {
-						GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Symbol",
-							top->gobj(),
-							GTK_FILE_CHOOSER_ACTION_SAVE,
-							"_Save",
-							"_Cancel");
-						auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-						chooser->set_do_overwrite_confirmation(true);
-						auto unit_filename = pool.get_filename(ObjectType::UNIT, unit_uuid);
-						auto basename = Gio::File::create_for_path(unit_filename)->get_basename();
-						chooser->set_current_folder(Glib::build_filename(base_path, "symbols"));
-						chooser->set_current_name(basename);
-
-						if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-							std::string fn = EditorWindow::fix_filename(chooser->get_filename());
-							Symbol sym(horizon::UUID::random());
-							auto unit = pool.get_unit(unit_uuid);
-							sym.name = unit->name;
-							sym.unit = unit;
-							save_json_to_file(fn, sym.serialize());
-							spawn(PoolManagerProcess::Type::IMP_SYMBOL, {fn});
-						}
-					}
-				});
-			}
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Duplicate Symbol"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this, br]{
-					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-					auto sym_uuid = br->get_selected();
-					if(!sym_uuid)
-						return;
-
-					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Symbol",
-						top->gobj(),
-						GTK_FILE_CHOOSER_ACTION_SAVE,
-						"_Save",
-						"_Cancel");
-					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-					chooser->set_do_overwrite_confirmation(true);
-					auto sym_filename = pool.get_filename(ObjectType::SYMBOL, sym_uuid);
-					auto sym_basename = Glib::path_get_basename(sym_filename);
-					auto sym_dirname = Glib::path_get_dirname(sym_filename);
-					chooser->set_current_folder(sym_dirname);
-					chooser->set_current_name(insert_filename(sym_basename, "-copy"));
-
-					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
-						Symbol sym(*pool.get_symbol(sym_uuid));
-						sym.name += " (Copy)";
-						sym.uuid = UUID::random();
-						save_json_to_file(fn, sym.serialize());
-						spawn(PoolManagerProcess::Type::IMP_SYMBOL, {fn});
-					}
-
-				});
-			}
+			add_action_button("Create Symbol", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_symbol));
+			add_action_button("Edit Symbol", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_symbol));
+			add_action_button("Duplicate Symbol", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_symbol));
 			bbox->show_all();
 
 			box->pack_start(*bbox, false, false, 0);
@@ -463,24 +320,9 @@ namespace horizon {
 			bbox->set_margin_start(8);
 			bbox->set_margin_end(8);
 
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Create Entity"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this]{
-					spawn(PoolManagerProcess::Type::ENTITY, {""});
-				});
-			}
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Edit Entity"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this, br]{
-					auto uu = br->get_selected();
-					if(!uu)
-						return;
-					auto path = pool.get_filename(ObjectType::ENTITY, uu);
-					spawn(PoolManagerProcess::Type::ENTITY, {path});
-				});
-			}
+			add_action_button("Create Entity", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_entity));
+			add_action_button("Edit Entity", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_entity));
+			add_action_button("Duplicate Entity", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_entity));
 
 			bbox->show_all();
 
@@ -546,41 +388,9 @@ namespace horizon {
 			bbox->set_margin_start(8);
 			bbox->set_margin_end(8);
 
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Create Padstack"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this]{
-					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-
-					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Padstack",
-						top->gobj(),
-						GTK_FILE_CHOOSER_ACTION_SAVE,
-						"_Save",
-						"_Cancel");
-					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-					chooser->set_do_overwrite_confirmation(true);
-					chooser->set_current_name("padstack.json");
-					chooser->set_current_folder(Glib::build_filename(base_path, "padstacks"));
-
-					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
-						Padstack ps(horizon::UUID::random());
-						save_json_to_file(fn, ps.serialize());
-						spawn(PoolManagerProcess::Type::IMP_PADSTACK, {fn});
-					}
-				});
-			}
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Edit Padstack"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this, br]{
-					auto uu = br->get_selected();
-					if(!uu)
-						return;
-					auto path = pool.get_filename(ObjectType::PADSTACK, uu);
-					spawn(PoolManagerProcess::Type::IMP_PADSTACK, {path});
-				});
-			}
+			add_action_button("Create Padstack", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_padstack));
+			add_action_button("Edit Padstack", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_padstack));
+			add_action_button("Duplicate Padstack", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_padstack));
 
 			bbox->show_all();
 
@@ -649,117 +459,11 @@ namespace horizon {
 			bbox->set_margin_start(8);
 			bbox->set_margin_end(8);
 
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Create Package"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this]{
-					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-
-					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Package",
-						top->gobj(),
-						GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER,
-						"_Save",
-						"_Cancel");
-					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-					chooser->set_do_overwrite_confirmation(true);
-					chooser->set_current_name("package");
-					chooser->set_current_folder(Glib::build_filename(base_path, "packages"));
-
-					while(true) {
-						chooser->set_current_folder(Glib::build_filename(base_path, "packages"));
-						if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-							std::string fn = chooser->get_filename();
-							std::cout << "pkg " << fn << std::endl;
-
-							Glib::Dir dir(fn);
-							int n = 0;
-							for(const auto &it: dir) {
-								(void)it;
-								n++;
-							}
-							if(n>0) {
-								Gtk::MessageDialog md(*top,  "Folder must be empty", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
-								md.run();
-								continue;
-							}
-							else {
-								auto fi = Gio::File::create_for_path(Glib::build_filename(fn, "padstacks"));
-								fi->make_directory_with_parents();
-								Package pkg(horizon::UUID::random());
-								auto pkg_filename = Glib::build_filename(fn, "package.json");
-								save_json_to_file(pkg_filename, pkg.serialize());
-								spawn(PoolManagerProcess::Type::IMP_PACKAGE, {pkg_filename});
-							}
-						}
-						break;
-					}
-				});
-			}
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Edit Package"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this, br]{
-					auto uu = br->get_selected();
-					if(!uu)
-						return;
-					auto path = pool.get_filename(ObjectType::PACKAGE, uu);
-					spawn(PoolManagerProcess::Type::IMP_PACKAGE, {path});
-				});
-			}
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Create Padstack for Package"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this, br]{
-					if(!br->get_selected())
-						return;
-					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-
-					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Padstack",
-						top->gobj(),
-						GTK_FILE_CHOOSER_ACTION_SAVE,
-						"_Save",
-						"_Cancel");
-					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-					chooser->set_do_overwrite_confirmation(true);
-					chooser->set_current_name("pad.json");
-					auto pkg_filename = pool.get_filename(ObjectType::PACKAGE, br->get_selected());
-					auto pkg_dir = Glib::path_get_dirname(pkg_filename);
-					chooser->set_current_folder(Glib::build_filename(pkg_dir, "padstacks"));
-
-					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
-						Padstack ps(horizon::UUID::random());
-						ps.name = "Pad";
-						save_json_to_file(fn, ps.serialize());
-						spawn(PoolManagerProcess::Type::IMP_PADSTACK, {fn});
-					}
-				});
-			}
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Part wizard..."));
-				bu->get_style_context()->add_class("suggested-action");
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this, br]{
-					if(!br->get_selected())
-						return;
-					if(!part_wizard) {
-						auto pkg = pool.get_package(br->get_selected());
-						part_wizard = PartWizard::create(pkg, base_path, &pool);
-						part_wizard->present();
-						part_wizard->signal_hide().connect([this]{
-							if(part_wizard->get_has_finished()) {
-								pool_update();
-							}
-							delete part_wizard;
-							part_wizard = nullptr;
-						});
-					}
-					else {
-						part_wizard->present();
-					}
-
-				});
-			}
+			add_action_button("Create Package", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_package));
+			add_action_button("Edit Package", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_package));
+			add_action_button("Duplicate Package", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_package));
+			add_action_button("Create Padstack for Package", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_padstack_for_package));
+			add_action_button("Part Wizard...", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_package))->get_style_context()->add_class("suggested-action");
 
 			bbox->show_all();
 
@@ -795,90 +499,11 @@ namespace horizon {
 			bbox->set_margin_start(8);
 			bbox->set_margin_end(8);
 
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Create Part"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this]{
-					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-					auto entity_uuid = UUID();
-					auto package_uuid = UUID();
-					{
-						CreatePartDialog dia(top, &pool);
-						if(dia.run() == Gtk::RESPONSE_OK) {
-							entity_uuid = dia.get_entity();
-							package_uuid = dia.get_package();
-						}
-					}
-					if(!(entity_uuid && package_uuid))
-						return;
+			add_action_button("Create Part", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_part));
+			add_action_button("Edit Part", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_part));
+			add_action_button("Duplicate Part", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_part));
+			add_action_button("Create Part from Part", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_part_from_part));
 
-					auto entity = pool.get_entity(entity_uuid);
-					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Part",
-						top->gobj(),
-						GTK_FILE_CHOOSER_ACTION_SAVE,
-						"_Save",
-						"_Cancel");
-					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-					chooser->set_do_overwrite_confirmation(true);
-					chooser->set_current_name(entity->name+".json");
-					chooser->set_current_folder(Glib::build_filename(base_path, "parts"));
-
-					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
-						Part part(horizon::UUID::random());
-						auto package = pool.get_package(package_uuid);
-						part.attributes[Part::Attribute::MPN] = {false, entity->name};
-						part.attributes[Part::Attribute::MANUFACTURER] = {false, entity->manufacturer};
-						part.package = package;
-						part.entity = entity;
-						save_json_to_file(fn, part.serialize());
-						spawn(PoolManagerProcess::Type::PART, {fn});
-					}
-				});
-			}
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Edit Part"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this, br]{
-					auto uu = br->get_selected();
-					if(!uu)
-						return;
-					auto path = pool.get_filename(ObjectType::PART, uu);
-					spawn(PoolManagerProcess::Type::PART, {path});
-				});
-			}
-			{
-				auto bu = Gtk::manage(new Gtk::Button("Create Part from Part"));
-				bbox->pack_start(*bu, false, false,0);
-				bu->signal_clicked().connect([this, br]{
-					auto uu = br->get_selected();
-					if(!uu)
-						return;
-					auto base_part = pool.get_part(uu);
-					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-
-					GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Part",
-						top->gobj(),
-						GTK_FILE_CHOOSER_ACTION_SAVE,
-						"_Save",
-						"_Cancel");
-					auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-					chooser->set_do_overwrite_confirmation(true);
-					chooser->set_current_name(base_part->get_MPN()+".json");
-					chooser->set_current_folder(Glib::path_get_dirname(pool.get_filename(ObjectType::PART, uu)));
-
-					if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-						std::string fn = EditorWindow::fix_filename(chooser->get_filename());
-						Part part(horizon::UUID::random());
-						part.base = base_part;
-						part.attributes[Part::Attribute::MPN] = {true, base_part->get_MPN()};
-						part.attributes[Part::Attribute::MANUFACTURER] = {true, base_part->get_manufacturer()};
-						part.attributes[Part::Attribute::VALUE] = {true, base_part->get_value()};
-						save_json_to_file(fn, part.serialize());
-						spawn(PoolManagerProcess::Type::PART, {fn});
-					}
-				});
-			}
 
 			bbox->show_all();
 
@@ -896,8 +521,27 @@ namespace horizon {
 
 	}
 
+	void PoolNotebook::show_duplicate_window(ObjectType ty, const UUID &uu) {
+		if(!uu)
+			return;
+		if(!duplicate_window) {
+			duplicate_window = new DuplicateWindow(&pool, ty, uu);
+			duplicate_window->present();
+			duplicate_window->signal_hide().connect([this]{
+				if(duplicate_window->get_duplicated()) {
+					pool_update();
+				}
+				delete duplicate_window;
+				duplicate_window = nullptr;
+			});
+		}
+		else {
+			duplicate_window->present();
+		}
+	}
+
 	bool PoolNotebook::can_close() {
-		return processes.size() == 0 && part_wizard==nullptr && !pool_updating;
+		return processes.size() == 0 && part_wizard==nullptr && !pool_updating && duplicate_window == nullptr;
 	}
 
 	static void send_msg(zmq::socket_t &sock, PoolUpdateStatus st, const std::string &s) {
@@ -931,10 +575,11 @@ namespace horizon {
 		}
 	}
 
-	void PoolNotebook::pool_update() {
+	void PoolNotebook::pool_update(std::function<void()> cb) {
 		appwin->set_pool_updating(true, true);
 		pool_update_n_files = 0;
 		pool_updating = true;
+		pool_update_done_cb = cb;
 		std::thread thr(pool_update_thread, std::ref(base_path), std::ref(zctx), std::ref(sock_pool_update_ep));
 		thr.detach();
 	}

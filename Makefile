@@ -350,6 +350,12 @@ SRC_POOL_MGR = \
 	pool-mgr/pool-mgr-app.cpp\
 	pool-mgr/pool-mgr-app_win.cpp\
 	pool-mgr/pool_notebook.cpp\
+	pool-mgr/pool_notebook_units.cpp\
+	pool-mgr/pool_notebook_symbols.cpp\
+	pool-mgr/pool_notebook_entities.cpp\
+	pool-mgr/pool_notebook_padstacks.cpp\
+	pool-mgr/pool_notebook_packages.cpp\
+	pool-mgr/pool_notebook_parts.cpp\
 	pool-mgr/unit_editor.cpp\
 	pool-mgr/part_editor.cpp\
 	pool-mgr/entity_editor.cpp\
@@ -359,6 +365,10 @@ SRC_POOL_MGR = \
 	pool-mgr/part_wizard/pad_editor.cpp\
 	pool-mgr/part_wizard/gate_editor.cpp\
 	pool-mgr/part_wizard/location_entry.cpp\
+	pool-mgr/duplicate/duplicate_unit.cpp\
+	pool-mgr/duplicate/duplicate_entity.cpp\
+	pool-mgr/duplicate/duplicate_part.cpp\
+	pool-mgr/duplicate/duplicate_window.cpp\
 	widgets/pool_browser.cpp\
 	widgets/pool_browser_unit.cpp\
 	widgets/pool_browser_symbol.cpp\
