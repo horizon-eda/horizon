@@ -91,5 +91,9 @@ namespace horizon {
 
 			Gtk::Button *add_action_button(const std::string &label, Gtk::Box *bbox, sigc::slot0<void>);
 			Gtk::Button *add_action_button(const std::string &label, Gtk::Box *bbox, class PoolBrowser *br, sigc::slot1<void, UUID>);
+
+			void handle_delete(ObjectType ty, const UUID &uu);
+			void handle_copy_path(ObjectType ty, const UUID &uu);
+			void add_context_menu(class PoolBrowser *br);
 	};
 }

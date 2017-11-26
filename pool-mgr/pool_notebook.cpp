@@ -15,6 +15,7 @@
 #include "duplicate/duplicate_window.hpp"
 #include "duplicate/duplicate_unit.hpp"
 #include "duplicate/duplicate_part.hpp"
+#include "object_descr.hpp"
 #include <thread>
 
 namespace horizon {
@@ -190,7 +191,7 @@ namespace horizon {
 						}
 					}
 					else if(msg->status == PoolUpdateStatus::ERROR) {
-						appwin->set_pool_update_status_text(std::string(msg->msg) + " Last file:"+pool_update_last_file);
+						appwin->set_pool_update_status_text(std::string(msg->msg) + " Last file: "+pool_update_last_file);
 						pool_updated(false);
 					}
 				}
@@ -517,8 +518,38 @@ namespace horizon {
 
 			append_page(*box, "Parts");
 		}
+		for(auto br: browsers) {
+			add_context_menu(br);
+		}
 
+	}
 
+	void PoolNotebook::add_context_menu(PoolBrowser *br) {
+		ObjectType ty = br->get_type();
+		br->add_context_menu_item("Delete", [this, ty](const UUID &uu) {
+			handle_delete(ty, uu);
+		});
+		br->add_context_menu_item("Copy path", [this, ty](const UUID &uu) {
+			handle_copy_path(ty, uu);
+		});
+	}
+
+	void PoolNotebook::handle_delete(ObjectType ty, const UUID &uu) {
+		auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
+		Gtk::MessageDialog md(*top,  "Permanently delete "+object_descriptions.at(ty).name + "?", false /* use_markup */, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
+		md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+		md.add_button("Delete", Gtk::RESPONSE_OK)->get_style_context()->add_class("destructive-action");
+		if(md.run() == Gtk::RESPONSE_OK) {
+			auto filename = pool.get_filename(ty, uu);
+			Gio::File::create_for_path(filename)->remove();
+			pool_update();
+		}
+	}
+
+	void PoolNotebook::handle_copy_path(ObjectType ty, const UUID &uu) {
+		auto filename = pool.get_filename(ty, uu);
+		auto clip = Gtk::Clipboard::get();
+		clip->set_text(filename);
 	}
 
 	void PoolNotebook::show_duplicate_window(ObjectType ty, const UUID &uu) {

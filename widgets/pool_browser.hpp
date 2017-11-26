@@ -4,6 +4,7 @@
 #include "uuid.hpp"
 #include "sort_controller.hpp"
 #include "selection_provider.hpp"
+#include "common.hpp"
 
 namespace horizon {
 	class PoolBrowser: public Gtk::Box, public SelectionProvider {
@@ -12,7 +13,9 @@ namespace horizon {
 			UUID get_selected() override;
 			void set_show_none(bool v);
 			void set_show_path(bool v);
+			void add_context_menu_item(const std::string &label, sigc::slot1<void, UUID> cb);
 			virtual void search() = 0;
+			virtual ObjectType get_type() const {return ObjectType::INVALID;};
 
 		protected:
 			void construct();
@@ -42,6 +45,9 @@ namespace horizon {
 
 			void select_uuid(const UUID &uu);
 			void scroll_to_selection();
+
+			Gtk::Menu context_menu;
+
 		private :
 			Gtk::Grid *grid = nullptr;
 			int grid_top = 0;

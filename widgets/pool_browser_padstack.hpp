@@ -9,6 +9,7 @@ namespace horizon {
 			void search() override;
 			void set_package_uuid(const UUID &uu);
 			void set_include_padstack_type(Padstack::Type ty, bool v);
+			ObjectType get_type() const override {return ObjectType::PADSTACK;}
 
 		protected:
 			Glib::RefPtr<Gtk::ListStore> create_list_store() override;

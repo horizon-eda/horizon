@@ -7,6 +7,7 @@ namespace horizon {
 		public:
 			PoolBrowserEntity(class Pool *p);
 			void search() override;
+			ObjectType get_type() const override {return ObjectType::ENTITY;}
 
 		protected:
 			Glib::RefPtr<Gtk::ListStore> create_list_store() override;

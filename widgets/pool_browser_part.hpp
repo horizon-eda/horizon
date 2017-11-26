@@ -8,6 +8,7 @@ namespace horizon {
 			void search() override;
 			void set_MPN(const std::string &s);
 			void set_entity_uuid(const UUID &uu);
+			ObjectType get_type() const override {return ObjectType::PART;}
 
 		protected:
 			Glib::RefPtr<Gtk::ListStore> create_list_store() override;

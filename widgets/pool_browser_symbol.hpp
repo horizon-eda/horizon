@@ -8,6 +8,7 @@ namespace horizon {
 			PoolBrowserSymbol(class Pool *p, const UUID &unit_uuid = UUID());
 			void search() override;
 			void set_unit_uuid(const UUID &uu);
+			ObjectType get_type() const override {return ObjectType::SYMBOL;}
 
 		protected:
 			Glib::RefPtr<Gtk::ListStore> create_list_store() override;

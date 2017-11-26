@@ -74,6 +74,16 @@ namespace horizon {
 		if(path_column > 0) {
 			treeview->get_column(path_column)->set_visible(false);
 		}
+		treeview->signal_button_press_event().connect_notify([this] (GdkEventButton *ev) {
+			Gtk::TreeModel::Path path;
+			if(ev->button == 3 && context_menu.get_children().size()) {
+				#if GTK_CHECK_VERSION(3,22,0)
+					context_menu.popup_at_pointer((GdkEvent*)ev);
+				#else
+					context_menu.popup(ev->button, gtk_get_current_event_time());
+				#endif
+			}
+		});
 	}
 
 	void PoolBrowser::row_activated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column) {
@@ -121,5 +131,15 @@ namespace horizon {
 				break;
 			}
 		}
+	}
+
+	void PoolBrowser::add_context_menu_item(const std::string &label, sigc::slot1<void, UUID> cb) {
+		auto la =  Gtk::manage(new Gtk::MenuItem(label));
+		la->show();
+		context_menu.append(*la);
+		la->signal_activate().connect([this, cb] {
+			cb(get_selected());
+		});
+
 	}
 }
