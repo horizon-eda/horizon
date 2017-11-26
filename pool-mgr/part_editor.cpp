@@ -1,4 +1,6 @@
 #include "part_editor.hpp"
+#include "dialogs/pool_browser_dialog.hpp"
+#include "widgets/pool_browser_package.hpp"
 #include <iostream>
 #include "part.hpp"
 #include "util.hpp"
@@ -106,6 +108,7 @@ namespace horizon {
 
 		x->get_widget("entity_label", w_entity_label);
 		x->get_widget("package_label", w_package_label);
+		x->get_widget("change_package_button", w_change_package_button);
 		x->get_widget("base_label", w_base_label);
 		x->get_widget("tags", w_tags);
 		x->get_widget("tags_inherit", w_tags_inherit);
@@ -140,6 +143,8 @@ namespace horizon {
 		}
 
 		update_entries();
+
+		w_change_package_button->signal_clicked().connect(sigc::mem_fun(this, &PartEditor::change_package));
 
 		w_tags_inherit->set_active(part->inherit_tags);
 		w_tags_inherit->signal_toggled().connect([this]{needs_save = true;});
@@ -198,6 +203,7 @@ namespace horizon {
 
 		w_button_map->set_sensitive(!part->base);
 		w_button_unmap->set_sensitive(!part->base);
+		w_change_package_button->set_sensitive(!part->base);
 
 		w_button_unmap->signal_clicked().connect([this] {
 			auto sel = w_tv_pads->get_selection();
@@ -284,6 +290,46 @@ namespace horizon {
 		w_tags_inherit->set_sensitive(part->base);
 	}
 
+	void PartEditor::change_package() {
+		auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
+		PoolBrowserDialog dia(top, ObjectType::PACKAGE, pool);
+		if(dia.run() == Gtk::RESPONSE_OK) {
+			needs_save = true;
+			part->package = pool->get_package(dia.get_browser()->get_selected());
+			auto ch = pad_store->children();
+			std::set<UUID> pads_exisiting;
+			for(auto it = ch.begin(); it!=ch.end();) {
+				Gtk::TreeModel::Row row = *it;
+				auto pad_name = row[pad_list_columns.pad_name];
+				UUID pad_uuid;
+				for(const auto &it_pad: part->package->pads) {
+					if(it_pad.second.name == pad_name) {
+						pad_uuid = it_pad.second.uuid;
+						break;
+					}
+				}
+				if(pad_uuid) {
+					row[pad_list_columns.pad_uuid] = pad_uuid;
+					pads_exisiting.insert(pad_uuid);
+					it++;
+				}
+				else {
+					pad_store->erase(it++);
+				}
+			}
+			for(const auto &it: part->package->pads) {
+				if(pads_exisiting.count(it.first) == 0) {
+					Gtk::TreeModel::Row row = *(pad_store->append());
+					row[pad_list_columns.pad_uuid] = it.first;
+					row[pad_list_columns.pad_name] = it.second.name;
+				}
+			}
+
+			update_entries();
+			update_mapped();
+		}
+	}
+
 	void PartEditor::reload() {
 		part->update_refs(*pool);
 		update_entries();
@@ -311,7 +357,7 @@ namespace horizon {
 
 		part->pad_map.clear();
 		for(const auto &it: pad_store->children()) {
-			if(it[pad_list_columns.gate_uuid] != UUID()) {
+			if(it[pad_list_columns.gate_uuid] != UUID() && part->package->pads.count(it[pad_list_columns.pad_uuid])) {
 				const horizon::Gate *gate = &part->entity->gates.at(it[pad_list_columns.gate_uuid]);
 				const horizon::Pin *pin = &gate->unit->pins.at(it[pad_list_columns.pin_uuid]);
 				part->pad_map.emplace(it[pad_list_columns.pad_uuid], horizon::Part::PadMapItem(gate, pin));
