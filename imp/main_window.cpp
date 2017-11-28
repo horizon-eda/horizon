@@ -21,6 +21,7 @@ namespace horizon {
 		x->get_widget("tool_bar_flash", tool_bar_flash_label);
 		x->get_widget("header", header);
 		x->get_widget("property_scrolled_window", property_scrolled_window);
+		x->get_widget("property_throttled_revealer", property_throttled_revealer);
 
 		set_icon(Gdk::Pixbuf::create_from_resource("/net/carrotIndustries/horizon/icon.svg"));
 

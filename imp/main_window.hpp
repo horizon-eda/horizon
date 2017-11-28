@@ -17,6 +17,7 @@ namespace horizon {
 			Gtk::Label *grid_mul_label = nullptr;
 			Gtk::Viewport *property_viewport = nullptr;
 			Gtk::ScrolledWindow *property_scrolled_window = nullptr;
+			Gtk::Revealer *property_throttled_revealer = nullptr;
 			Gtk::HeaderBar *header = nullptr;
 
 			void tool_bar_set_visible(bool v);

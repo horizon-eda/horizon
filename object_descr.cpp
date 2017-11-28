@@ -106,6 +106,9 @@ namespace horizon {
 			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING, "Name"}},
 			{ObjectProperty::ID::VALUE, {ObjectProperty::Type::STRING_RO, "Padstack"}},
 			{ObjectProperty::ID::PAD_TYPE, {ObjectProperty::Type::STRING_RO, "Pad type"}},
+			{ObjectProperty::ID::ANGLE, {ObjectProperty::Type::ANGLE, "Angle"}},
+			{ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X"}},
+			{ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y"}},
 		}}},
 		{ObjectType::BOARD_PACKAGE, {"Package", "Packages", {
 			{ObjectProperty::ID::FLIPPED, {ObjectProperty::Type::BOOL, "Flipped"}},
@@ -113,6 +116,9 @@ namespace horizon {
 			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Package"}},
 			{ObjectProperty::ID::VALUE, {ObjectProperty::Type::STRING_RO, "Value"}},
 			{ObjectProperty::ID::MPN, {ObjectProperty::Type::STRING_RO, "MPN"}},
+			{ObjectProperty::ID::ANGLE, {ObjectProperty::Type::ANGLE, "Angle"}},
+			{ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X"}},
+			{ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y"}},
 		}}},
 		{ObjectType::TRACK, {"Track", "Tracks", {
 			{ObjectProperty::ID::WIDTH, {ObjectProperty::Type::LENGTH, "Width"}},

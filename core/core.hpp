@@ -198,6 +198,7 @@ namespace horizon {
 
 			void set_property_begin();
 			void set_property_commit();
+			bool get_property_transaction() const;
 
 			virtual class LayerProvider *get_layer_provider() {return nullptr;};
 

@@ -88,6 +88,18 @@ namespace horizon {
 						dynamic_cast<PropertyValueString&>(value).value = pad->pool_padstack->name;
 						return true;
 
+					case ObjectProperty::ID::POSITION_X :
+						dynamic_cast<PropertyValueInt&>(value).value = pad->placement.shift.x;
+						return true;
+
+					case ObjectProperty::ID::POSITION_Y :
+						dynamic_cast<PropertyValueInt&>(value).value = pad->placement.shift.y;
+						return true;
+
+					case ObjectProperty::ID::ANGLE :
+						dynamic_cast<PropertyValueInt&>(value).value = pad->placement.get_angle();
+						return true;
+
 					case ObjectProperty::ID::PAD_TYPE : {
 						const auto ps = package.pads.at(uu).pool_padstack;
 						std::string pad_type;
@@ -121,6 +133,18 @@ namespace horizon {
 				switch(property) {
 					case ObjectProperty::ID::NAME :
 						pad->name = dynamic_cast<const PropertyValueString&>(value).value;
+					break;
+
+					case ObjectProperty::ID::POSITION_X :
+						pad->placement.shift.x = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::POSITION_Y :
+						pad->placement.shift.y = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::ANGLE :
+						pad->placement.set_angle(dynamic_cast<const PropertyValueInt&>(value).value);
 					break;
 
 					default:

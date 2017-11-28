@@ -58,12 +58,16 @@ namespace horizon {
 					e = pe;
 				} break;
 
+				case ObjectProperty::Type::ANGLE:
+					e = new PropertyEditorAngle(type, property, this);
+				break;
+
 				default :
 					e = new PropertyEditor(type, property, this);
 			}
 
 			e->signal_changed().connect([this, property, e] {
-				handle_changed(property, e->get_value());
+				handle_changed(property, e);
 			});
 			e->signal_apply_all().connect([this, property, e] {
 				handle_apply_all(property, e->get_value());
@@ -78,18 +82,47 @@ namespace horizon {
 		button_prev->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(this, &PropertyPanel::go), -1));
 	}
 
-	void PropertyPanel::handle_changed(ObjectProperty::ID property, const PropertyValue &value) {
-		assert(core->set_property(type, objects.at(object_current), property, value));
-		parent->signal_update().emit();
+	void PropertyPanel::handle_changed(ObjectProperty::ID property, PropertyEditor *ed) {
+		parent->set_property(type, objects.at(object_current), property, ed->get_value());
+		/*auto prop_time = g_get_monotonic_time();
+		std::cout << prop_time - last_property_time << std::endl;
+		if(property == last_property && (prop_time - last_property_time) < .5e6) {
+			std::cout << "throttle" << std::endl;
+			ed->set_throttled(true);
+			throttle_connection.disconnect();
+			throttle_connection = Glib::signal_timeout().connect([this, property, ed]{
+				std::cout << "throttled set" << std::endl;
+				ed->set_throttled(false);
+				assert(core->set_property(type, objects.at(object_current), property, ed->get_value()));
+				parent->signal_update().emit();
+				return false;
+			}, 510);
+		}
+		else {
+			ed->set_throttled(false);
+			assert(core->set_property(type, objects.at(object_current), property, ed->get_value()));
+			throttle_connection.disconnect();
+			parent->signal_update().emit();
+		}
+		last_property = property;
+		last_property_time = prop_time;*/
 	}
 
 	void PropertyPanel::handle_apply_all(ObjectProperty::ID property, const PropertyValue &value) {
-		core->set_property_begin();
-		for(const auto &uu: objects) {
-			core->set_property(type, uu, property, value);
+		if(core->get_property_transaction()) {
+			for(const auto &uu: objects) {
+				parent->set_property(type, uu, property, value);
+			}
+			parent->force_commit();
 		}
-		core->set_property_commit();
-		parent->signal_update().emit();
+		else {
+			core->set_property_begin();
+			for(const auto &uu: objects) {
+				core->set_property(type, uu, property, value);
+			}
+			core->set_property_commit();
+			parent->signal_update().emit();
+		}
 	}
 
 	PropertyPanel* PropertyPanel::create(ObjectType t, Core *c, PropertyPanels *parent) {

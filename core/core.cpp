@@ -487,6 +487,11 @@ namespace horizon {
 		property_transaction = false;
 	}
 
+	bool Core::get_property_transaction() const {
+		return property_transaction;
+	}
+
+
 	json Core::get_meta() {
 		json j;
 		return j;

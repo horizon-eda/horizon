@@ -5,7 +5,6 @@
 #include "core/core_schematic.hpp"
 #include "core/core_padstack.hpp"
 #include "core/core_package.hpp"
-#include "property_panels/property_panels.hpp"
 #include "widgets/warnings_box.hpp"
 #include "core/cores.hpp"
 #include "core/clipboard.hpp"
@@ -50,7 +49,7 @@ namespace horizon {
 		protected :
 			MainWindow *main_window;
 			CanvasGL *canvas;
-			PropertyPanels *panels;
+			class PropertyPanels *panels;
 			WarningsBox *warnings_box;
 			ToolPopover *tool_popover;
 			Gtk::Menu *context_menu;

@@ -149,5 +149,21 @@ namespace horizon {
 			PropertyMetaLayers my_meta;
 	};
 
+	class PropertyEditorAngle : public PropertyEditor {
+		using PropertyEditor::PropertyEditor;
+		public:
+			void reload() override;
+			PropertyValue &get_value() override;
+
+		protected:
+			virtual Gtk::Widget *create_editor();
+		private :
+			Gtk::SpinButton *sp = nullptr;
+			PropertyValueInt value;
+			bool sp_output();
+			void changed();
+			int sp_input(double *v);
+	};
+
 
 }

@@ -10,6 +10,7 @@
 #include "rules/rules_window.hpp"
 #include "util.hpp"
 #include "preferences_window.hpp"
+#include "property_panels/property_panels.hpp"
 #include <iomanip>
 #include <glibmm/main.h>
 
@@ -159,6 +160,9 @@ namespace horizon {
 		panels->signal_update().connect([this] {
 			canvas_update();
 			canvas->set_selection(panels->get_selection(), false);
+		});
+		panels->signal_throttled().connect([this] (bool thr) {
+			main_window->property_throttled_revealer->set_reveal_child(thr);
 		});
 
 		warnings_box = Gtk::manage(new WarningsBox());
@@ -746,7 +750,9 @@ namespace horizon {
 
 			sel.insert(sel_extra.begin(), sel_extra.end());
 			panels->update_objects(sel);
-			main_window->property_scrolled_window->set_visible(sel.size()>0);
+			bool show_properties = panels->get_selection().size()>0;
+			main_window->property_scrolled_window->set_visible(show_properties);
+			main_window->property_throttled_revealer->set_visible(show_properties);
 		}
 	}
 
