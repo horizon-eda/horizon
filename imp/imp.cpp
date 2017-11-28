@@ -346,11 +346,7 @@ namespace horizon {
 
 	void ImpBase::canvas_update_from_pp() {
 		auto sel = canvas->get_selection();
-		for(const auto &it: sel) {
-			std::cout << "pp sel" << (std::string)it.uuid << std::endl;
-		}
 		canvas_update();
-
 		canvas->set_selection(sel);
 	}
 
