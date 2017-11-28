@@ -1,4 +1,5 @@
 #include "core_symbol.hpp"
+#include "core_properties.hpp"
 #include <algorithm>
 #include <fstream>
 
@@ -108,120 +109,76 @@ namespace horizon {
 		return r;
 	}
 
-	std::string CoreSymbol::get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		bool h = false;
-		std::string r= Core::get_property_string(uu, type, property, &h);
-		if(h)
-			return r;
+	bool CoreSymbol::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyValue &value) {
+		if(Core::get_property(type, uu, property, value))
+			return true;
 		switch(type) {
-			case ObjectType::SYMBOL_PIN :
+			case ObjectType::SYMBOL_PIN : {
+				auto pin = &sym.pins.at(uu);
 				switch(property) {
 					case ObjectProperty::ID::NAME :
-						return sym.unit->pins.at(uu).primary_name;
-					default :
-						return "<invalid prop>";
-				}
-			break;
+						dynamic_cast<PropertyValueString&>(value).value = sym.unit->pins.at(uu).primary_name;
+						return true;
 
-			default :
-				return "<invalid type>";
-		}
-		return "<meh>";
-	}
-
-	bool CoreSymbol::get_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		bool h = false;
-		bool r= Core::get_property_bool(uu, type, property, &h);
-		if(h)
-			return r;
-
-		switch(type) {
-			case ObjectType::SYMBOL_PIN :
-				switch(property) {
 					case ObjectProperty::ID::NAME_VISIBLE :
-						return sym.pins.at(uu).name_visible;
+						dynamic_cast<PropertyValueBool&>(value).value = pin->name_visible;
+						return true;
+
 					case ObjectProperty::ID::PAD_VISIBLE :
-						return sym.pins.at(uu).pad_visible;
+						dynamic_cast<PropertyValueBool&>(value).value = pin->pad_visible;
+						return true;
+
+					case ObjectProperty::ID::LENGTH:
+						dynamic_cast<PropertyValueInt&>(value).value = pin->length;
+						return true;
+
 					default :
 						return false;
 				}
-			break;
+			} break;
+
 
 			default :
 				return false;
 		}
 	}
 
-
-	void CoreSymbol::set_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool value, bool *handled) {
-		if(tool_is_active())
-			return;
-		bool h = false;
-		Core::set_property_bool(uu, type, property, value, &h);
-		if(h)
-			return;
+	bool CoreSymbol::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, const PropertyValue &value) {
+		if(Core::set_property(type, uu, property, value))
+			return true;
 		switch(type) {
-			case ObjectType::SYMBOL_PIN :
+			case ObjectType::SYMBOL_PIN : {
+				auto pin = &sym.pins.at(uu);
 				switch(property) {
 					case ObjectProperty::ID::NAME_VISIBLE :
-						sym.pins.at(uu).name_visible = value;
+						pin->name_visible = dynamic_cast<const PropertyValueBool&>(value).value;
 					break;
+
 					case ObjectProperty::ID::PAD_VISIBLE :
-						sym.pins.at(uu).pad_visible = value;
+						pin->pad_visible = dynamic_cast<const PropertyValueBool&>(value).value;
 					break;
-					default :
-						;
-				}
-			break;
 
-			default :
-				;
-		}
-		rebuild();
-		set_needs_save(true);
-	}
-	int64_t CoreSymbol::get_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		bool h = false;
-		int64_t r= Core::get_property_int(uu, type, property, &h);
-		if(h)
-			return r;
-		switch(type) {
-			case ObjectType::SYMBOL_PIN :
-				switch(property) {
-					case ObjectProperty::ID::LENGTH:
-						return sym.pins.at(uu).length;
-					default :
-						return 0;
-				}
-			break;
-
-			default :
-				return 0;
-		}
-	}
-	void CoreSymbol::set_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, int64_t value, bool *handled) {
-		if(tool_is_active())
-			return;
-		bool h = false;
-		Core::set_property_int(uu, type, property, value, &h);
-		if(h)
-			return;
-		switch(type) {
-			case ObjectType::SYMBOL_PIN :
-				switch(property) {
-					case ObjectProperty::ID::LENGTH:
-						sym.pins.at(uu).length = std::max(value, (int64_t)0);
+					case ObjectProperty::ID::LENGTH :
+						pin->length = dynamic_cast<const PropertyValueInt&>(value).value;
 					break;
-					default :
-						;
+
+					default:
+						return false;
 				}
-			break;
+			} break;
 
 			default :
-				;
+				return false;
 		}
-		rebuild();
-		set_needs_save(true);
+		if(!property_transaction) {
+			rebuild(false);
+			set_needs_save(true);
+		}
+		return true;
+	}
+
+	bool CoreSymbol::get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyMeta &meta) {
+		return Core::get_property_meta(type, uu, property, meta);
 	}
 
 	void CoreSymbol::rebuild(bool from_undo) {

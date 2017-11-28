@@ -156,7 +156,10 @@ namespace horizon {
 		panels = Gtk::manage(new PropertyPanels(core.r));
 		panels->show_all();
 		main_window->property_viewport->add(*panels);
-		panels->signal_update().connect(sigc::mem_fun(this, &ImpBase::canvas_update_from_pp));
+		panels->signal_update().connect([this] {
+			canvas_update();
+			canvas->set_selection(panels->get_selection(), false);
+		});
 
 		warnings_box = Gtk::manage(new WarningsBox());
 		warnings_box->signal_selected().connect(sigc::mem_fun(this, &ImpBase::handle_warning_selected));
@@ -343,7 +346,11 @@ namespace horizon {
 
 	void ImpBase::canvas_update_from_pp() {
 		auto sel = canvas->get_selection();
+		for(const auto &it: sel) {
+			std::cout << "pp sel" << (std::string)it.uuid << std::endl;
+		}
 		canvas_update();
+
 		canvas->set_selection(sel);
 	}
 

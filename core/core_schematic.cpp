@@ -1,4 +1,5 @@
 #include "core_schematic.hpp"
+#include "core_properties.hpp"
 #include <algorithm>
 #include "part.hpp"
 #include "util.hpp"
@@ -157,279 +158,231 @@ namespace horizon {
 		return &rules;
 	}
 
-
-	std::string CoreSchematic::get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		bool h = false;
-		std::string r= Core::get_property_string(uu, type, property, &h);
-		if(h)
-			return r;
+	bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyValue &value) {
+		if(Core::get_property(type, uu, property, value))
+			return true;
 		auto &sheet = sch.sheets.at(sheet_uuid);
 		switch(type) {
-			case ObjectType::NET :
+			case ObjectType::NET : {
+				auto net = &block.nets.at(uu);
 				switch(property) {
 					case ObjectProperty::ID::NAME :
-						return block.nets.at(uu).name;
+						dynamic_cast<PropertyValueString&>(value).value = net->name;
+						return true;
+
 					case ObjectProperty::ID::NET_CLASS :
-						return block.nets.at(uu).net_class->uuid;
+						dynamic_cast<PropertyValueUUID&>(value).value = net->net_class->uuid;
+						return true;
+
 					case ObjectProperty::ID::DIFFPAIR : {
-						auto &net = block.nets.at(uu);
-						if(net.diffpair) {
-							return (net.diffpair_master?"Master: ":"Slave: ")+net.diffpair->name ;
+						std::string s;
+						if(net->diffpair) {
+							s = (net->diffpair_master?"Master: ":"Slave: ")+net->diffpair->name ;
 						}
 						else {
-							return "None";
+							s = "None";
 						}
+						dynamic_cast<PropertyValueString&>(value).value = s;
+						return true;
 					}
+
+					case ObjectProperty::ID::IS_POWER :
+						dynamic_cast<PropertyValueBool&>(value).value = net->is_power;
+						return true;
+
+
+
 					default :
-						return "<invalid prop>";
+						return false;
 				}
-			break;
-			case ObjectType::NET_LABEL :
+			} break;
+
+			case ObjectType::NET_LABEL : {
+				auto label = &sheet.net_labels.at(uu);
 				switch(property) {
 					case ObjectProperty::ID::NAME :
-						if(sheet.net_labels.at(uu).junction->net)
-							return sheet.net_labels.at(uu).junction->net->name;
+						if(label->junction->net)
+							dynamic_cast<PropertyValueString&>(value).value = label->junction->net->name;
 						else
-							return "<no net>";
+							dynamic_cast<PropertyValueString&>(value).value = "<no net>";
+						return true;
+
+					case ObjectProperty::ID::OFFSHEET_REFS :
+						dynamic_cast<PropertyValueBool&>(value).value = label->offsheet_refs;
+						return true;
+
+					case ObjectProperty::ID::SIZE :
+						dynamic_cast<PropertyValueInt&>(value).value = label->size;
+						return true;
+
 					default :
-						return "<invalid prop>";
+						return false;
 				}
-			break;
-			case ObjectType::COMPONENT :
+			} break;
+
+			case ObjectType::COMPONENT : {
+				auto comp = &block.components.at(uu);
 				switch(property) {
 					case ObjectProperty::ID::REFDES :
-						return block.components.at(uu).refdes;
+						dynamic_cast<PropertyValueString&>(value).value = comp->refdes;
+						return true;
+
 					case ObjectProperty::ID::VALUE :
 						if(block.components.at(uu).part)
-							return block.components.at(uu).part->get_value();
+							dynamic_cast<PropertyValueString&>(value).value =  comp->part->get_value();
 						else
-							return block.components.at(uu).value;
+							dynamic_cast<PropertyValueString&>(value).value =  comp->value;
+						return true;
+
 					case ObjectProperty::ID::MPN :
 						if(block.components.at(uu).part)
-							return block.components.at(uu).part->get_MPN();
+							dynamic_cast<PropertyValueString&>(value).value =  comp->part->get_MPN();
 						else
-							return "<no part>";
+							dynamic_cast<PropertyValueString&>(value).value = "<no part>";
+						return true;
+
 					default :
-						return "<invalid prop>";
+						return false;
 				}
-			break;
+			} break;
+
+			case ObjectType::SCHEMATIC_SYMBOL : {
+				auto sym = &sheet.symbols.at(uu);
+				switch(property) {
+					case ObjectProperty::ID::DISPLAY_DIRECTIONS :
+						dynamic_cast<PropertyValueBool&>(value).value = sym->display_directions;
+						return true;
+
+					default:
+						return false;
+				}
+			} break;
 
 			default :
-				return "<invalid type>";
+				return false;
 		}
-		return "<meh>";
 	}
-	void CoreSchematic::set_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, const std::string &value, bool *handled) {
-		if(tool_is_active())
-			return;
-		bool h = false;
-		Core::set_property_string(uu, type, property, value, &h);
-		if(h)
-			return;
+
+	bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, const PropertyValue &value) {
+		if(Core::set_property(type, uu, property, value))
+			return true;
+		auto &sheet = sch.sheets.at(sheet_uuid);
 		switch(type) {
-			case ObjectType::COMPONENT :
+			case ObjectType::COMPONENT : {
+				auto comp = &block.components.at(uu);
 				switch(property) {
 					case ObjectProperty::ID::REFDES :
-						block.components.at(uu).refdes = value;
+						comp->refdes = dynamic_cast<const PropertyValueString&>(value).value;
 					break;
+
 					case ObjectProperty::ID::VALUE :
-						if((block.components.at(uu).part))
-							return;
-						block.components.at(uu).value = value;
+						if(!comp->part)
+							comp->value = dynamic_cast<const PropertyValueString&>(value).value;
 					break;
+
 					default :
-						;
+						return false;
 				}
-			break;
-			case ObjectType::NET :
+			} break;
+
+			case ObjectType::NET : {
+				auto net = &block.nets.at(uu);
 				switch(property) {
 					case ObjectProperty::ID::NAME :
-						block.nets.at(uu).name = value;
+						net->name = dynamic_cast<const PropertyValueString&>(value).value;
 					break;
+
 					case ObjectProperty::ID::NET_CLASS : {
-						UUID nc = value;
-						block.nets.at(uu).net_class = &block.net_classes.at(nc);
-					}break;
-					default :
-						;
-				}
-			break;
+						net->net_class = &block.net_classes.at(dynamic_cast<const PropertyValueUUID&>(value).value);
+					} break;
 
-			default :
-				;
-		}
-		rebuild();
-		set_needs_save(true);
-	}
-
-	void CoreSchematic::set_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool value, bool *handled) {
-		if(tool_is_active())
-			return;
-		bool h = false;
-		Core::set_property_bool(uu, type, property, value, &h);
-		if(h)
-			return;
-		auto &sheet = sch.sheets.at(sheet_uuid);
-		switch(type) {
-			case ObjectType::NET :
-				switch(property) {
 					case ObjectProperty::ID::IS_POWER :
-						if(block.nets.at(uu).is_power_forced)
-							return;
-						if(block.nets.at(uu).is_power == value)
-							return;
-						block.nets.at(uu).is_power = value;
+						if(!block.nets.at(uu).is_power_forced)
+							block.nets.at(uu).is_power = dynamic_cast<const PropertyValueBool&>(value).value;
 					break;
+
 					default :
-						;
+						return false;
 				}
-			break;
-			case ObjectType::NET_LABEL :
-				switch(property) {
-					case ObjectProperty::ID::OFFSHEET_REFS :
-						if(sheet.net_labels.at(uu).offsheet_refs == value)
-							return;
-						sheet.net_labels.at(uu).offsheet_refs = value;
-					break;
-					default :
-						;
-				}
-			break;
-			case ObjectType::SCHEMATIC_SYMBOL :
+			} break;
+
+			case ObjectType::SCHEMATIC_SYMBOL : {
+				auto sym = &sheet.symbols.at(uu);
 				switch(property) {
 					case ObjectProperty::ID::DISPLAY_DIRECTIONS :
-						if(sheet.symbols.at(uu).display_directions == value)
-							return;
-						sheet.symbols.at(uu).display_directions = value;
+						sym->display_directions = dynamic_cast<const PropertyValueBool&>(value).value;
 					break;
-					default :
-						;
-				}
-			break;
 
-			default:
-				;
-		}
-		rebuild();
-		set_needs_save(true);
-	}
-
-	bool CoreSchematic::get_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		bool h = false;
-		bool r= Core::get_property_bool(uu, type, property, &h);
-		if(h)
-			return r;
-		auto &sheet = sch.sheets.at(sheet_uuid);
-		switch(type) {
-			case ObjectType::NET :
-				switch(property) {
-					case ObjectProperty::ID::IS_POWER :
-						return block.nets.at(uu).is_power;
-					default :
-						;
+					default:
+						return false;
 				}
-			break;
-			case ObjectType::NET_LABEL :
+			} break;
+
+			case ObjectType::NET_LABEL : {
+				auto label = &sheet.net_labels.at(uu);
 				switch(property) {
 					case ObjectProperty::ID::OFFSHEET_REFS :
-						return sheet.net_labels.at(uu).offsheet_refs;
-					default :
-						;
-				}
-			break;
-			case ObjectType::SCHEMATIC_SYMBOL :
-				switch(property) {
-					case ObjectProperty::ID::DISPLAY_DIRECTIONS :
-						return sheet.symbols.at(uu).display_directions;
-					default :
-						;
-				}
-			break;
-
-			default :
-				;
-		}
-		return false;
-	}
-	int64_t CoreSchematic::get_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		bool h = false;
-		int64_t r= Core::get_property_int(uu, type, property, &h);
-		if(h)
-			return r;
-		auto &sheet = sch.sheets.at(sheet_uuid);
-		switch(type) {
-			case ObjectType::NET_LABEL :
-				switch(property) {
-					case ObjectProperty::ID::SIZE:
-						return sheet.net_labels.at(uu).size;
-					default :
-						return 0;
-				}
-			break;
-
-			default :
-				return 0;
-		}
-	}
-	void CoreSchematic::set_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, int64_t value, bool *handled) {
-		if(tool_is_active())
-			return;
-		bool h = false;
-		Core::set_property_int(uu, type, property, value, &h);
-		if(h)
-			return;
-		auto &sheet = sch.sheets.at(sheet_uuid);
-		int64_t newv;
-		switch(type) {
-			case ObjectType::NET_LABEL :
-				switch(property) {
-					case ObjectProperty::ID::SIZE:
-						newv = std::max(value, (int64_t)500000);
-						if(newv == (int64_t)sheet.net_labels.at(uu).size)
-							return;
-						sheet.net_labels.at(uu).size = newv;
+						label->offsheet_refs = dynamic_cast<const PropertyValueBool&>(value).value;
 					break;
+
+					case ObjectProperty::ID::SIZE :
+						label->size = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
 					default :
-						;
+						return false;
 				}
-			break;
+			} break;
 
 			default :
-				;
+				return false;
 		}
-		rebuild();
-		set_needs_save(true);
+		if(!property_transaction) {
+			rebuild(false);
+			set_needs_save(true);
+		}
+		return true;
 	}
 
-	bool CoreSchematic::property_is_settable(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		bool h = false;
-		bool r= Core::property_is_settable(uu, type, property, &h);
-		if(h)
-			return r;
+	bool CoreSchematic::get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyMeta &meta) {
+		if(Core::get_property_meta(type, uu, property, meta))
+			return true;
 		switch(type) {
 			case ObjectType::NET :
 				switch(property) {
 					case ObjectProperty::ID::IS_POWER:
-						return !block.nets.at(uu).is_power_forced;
-					break;
+						meta.is_settable = !block.nets.at(uu).is_power_forced;
+						return true;
+
+					case ObjectProperty::ID::NET_CLASS: {
+						PropertyMetaNetClasses &m = dynamic_cast<PropertyMetaNetClasses&>(meta);
+						m.net_classes.clear();
+						for(const auto &it: block.net_classes) {
+							m.net_classes.emplace(it.first, it.second.name);
+						}
+						return true;
+					}
+
 					default :
-						;
+						return false;
 				}
 			break;
+
 			case ObjectType::COMPONENT :
 				switch(property) {
 					case ObjectProperty::ID::VALUE:
-						return block.components.at(uu).part==nullptr;
-					break;
+						meta.is_settable = block.components.at(uu).part==nullptr;
+						return true;
+
 					default :
-						;
+						return false;
 				}
 			break;
 
 			default :
-				;
+				return false;
 		}
-		return true;
+		return false;
 	}
 
 	void CoreSchematic::add_sheet() {

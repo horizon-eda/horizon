@@ -1,4 +1,5 @@
 #include "core_board.hpp"
+#include "core_properties.hpp"
 #include <algorithm>
 #include "util.hpp"
 #include "part.hpp"
@@ -106,280 +107,245 @@ namespace horizon {
 		return &brd.dimensions;
 	}
 
-	bool CoreBoard::get_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		bool h = false;
-		bool r= Core::get_property_bool(uu, type, property, &h);
-		if(h)
-			return r;
+	bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyValue &value) {
+		if(Core::get_property(type, uu, property, value))
+			return true;
 		switch(type) {
-			case ObjectType::BOARD_PACKAGE :
+			case ObjectType::BOARD_PACKAGE : {
+				auto pkg = &brd.packages.at(uu);
 				switch(property) {
 					case ObjectProperty::ID::FLIPPED :
-						return brd.packages.at(uu).flip;
-					default :
-						return false;
-				}
-			break;
-			case ObjectType::TRACK :
-				switch(property) {
-					case ObjectProperty::ID::WIDTH_FROM_RULES :
-						return brd.tracks.at(uu).width_from_rules;
-					case ObjectProperty::ID::LOCKED :
-						return brd.tracks.at(uu).locked;
-					default :
-						return false;
-				}
-			break;
-			case ObjectType::VIA :
-				switch(property) {
-					case ObjectProperty::ID::FROM_RULES :
-						return brd.vias.at(uu).from_rules;
-					case ObjectProperty::ID::LOCKED :
-						return brd.vias.at(uu).locked;
-					default :
-						return false;
-				}
-			break;
-			case ObjectType::PLANE :
-				switch(property) {
-					case ObjectProperty::ID::FROM_RULES :
-						return brd.planes.at(uu).from_rules;
-					default :
-						return false;
-				}
-			break;
-			default :
-				return false;
-		}
-		return false;
-	}
-	void CoreBoard::set_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool value, bool *handled) {
-		if(tool_is_active())
-			return;
-		bool h = false;
-		Core::set_property_bool(uu, type, property, value, &h);
-		if(h)
-			return;
-		switch(type) {
-			case ObjectType::BOARD_PACKAGE :
-				switch(property) {
-					case ObjectProperty::ID::FLIPPED :
-						brd.packages.at(uu).flip = value;
-					break;
-					default :
-						;
-				}
-			break;
-			case ObjectType::TRACK :
-				switch(property) {
-					case ObjectProperty::ID::WIDTH_FROM_RULES :
-						brd.tracks.at(uu).width_from_rules = value;
-					break;
-					case ObjectProperty::ID::LOCKED :
-						brd.tracks.at(uu).locked = value;
-					break;
-					default :
-						;
-				}
-			break;
-			case ObjectType::VIA :
-				switch(property) {
-					case ObjectProperty::ID::FROM_RULES :
-						brd.vias.at(uu).from_rules = value;
-					break;
-					case ObjectProperty::ID::LOCKED :
-						brd.vias.at(uu).locked = value;
-					break;
-					default :
-						;
-				}
-			break;
-			case ObjectType::PLANE :
-				switch(property) {
-					case ObjectProperty::ID::FROM_RULES :
-						brd.planes.at(uu).from_rules = value;
-					break;
-					default :
-						;
-				}
-			break;
-			default :
-				;
-		}
-		rebuild();
-		set_needs_save(true);
-	}
-	int64_t CoreBoard::get_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		bool h = false;
-		int64_t r= Core::get_property_int(uu, type, property, &h);
-		if(h)
-			return r;
-		switch(type) {
-			case ObjectType::TRACK :
-				switch(property) {
-					case ObjectProperty::ID::WIDTH : {
-						return brd.tracks.at(uu).width;
-					} break;
-					case ObjectProperty::ID::LAYER :
-						return brd.tracks.at(uu).layer;
-					default :
-						return false;
-				}
-			break;
-			case ObjectType::PLANE :
-				switch(property) {
-					case ObjectProperty::ID::WIDTH : {
-						return brd.planes.at(uu).settings.min_width;
-					} break;
-					default :
-						return false;
-				}
-			break;
-			default :
-				return false;
-		}
-		return false;
-	}
-	void CoreBoard::set_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, int64_t value, bool *handled) {
-		if(tool_is_active())
-			return;
-		bool h = false;
-		Core::set_property_int(uu, type, property, value, &h);
-		if(h)
-			return;
-		switch(type) {
-			case ObjectType::TRACK:
-				switch(property) {
-					case ObjectProperty::ID::WIDTH : {
-						auto &tr = brd.tracks.at(uu);
-						if(tr.width_from_rules)
-							return;
-						value = std::max((int64_t)0, value);
-						tr.width = value;
-					} break;
-					case ObjectProperty::ID::LAYER :
-						brd.tracks.at(uu).layer = value;
-					break;
-					default :
-						;
-				}
-			break;
-			case ObjectType::PLANE:
-				switch(property) {
-					case ObjectProperty::ID::WIDTH : {
-						auto &pl = brd.planes.at(uu);
-						if(pl.from_rules)
-							return;
-						value = std::max((int64_t)0, value);
-						pl.settings.min_width = value;
-					} break;
-					default :
-						;
-				}
-			break;
-			default :
-				;
-		}
-		rebuild();
-		set_needs_save(true);
-	}
+						dynamic_cast<PropertyValueBool&>(value).value = pkg->flip;
+						return true;
 
-	std::string CoreBoard::get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		bool h = false;
-		std::string r = Core::get_property_string(uu, type, property, &h);
-		if(h)
-			return r;
-		switch(type) {
-			case ObjectType::TRACK :
-				switch(property) {
-					case ObjectProperty::ID::NAME :
-						if(brd.tracks.at(uu).net) {
-							return brd.tracks.at(uu).net->name;
-						}
-						return "<no net>";
-					case ObjectProperty::ID::NET_CLASS :
-						if(brd.tracks.at(uu).net) {
-							return brd.tracks.at(uu).net->net_class->name;
-						}
-						return "<no net>";
-					default :
-						return "meh";
-				}
-			break;
-			case ObjectType::VIA :
-				switch(property) {
-					case ObjectProperty::ID::NAME :
-						if(brd.vias.at(uu).junction->net) {
-							std::string nn = brd.vias.at(uu).junction->net->name;
-							if(brd.vias.at(uu).net_set)
-								nn += " (set)";
-							return nn;
-						}
-						return "<no net>";
-					default :
-						return "meh";
-				}
-			break;
-			case ObjectType::BOARD_PACKAGE :
-				switch(property) {
 					case ObjectProperty::ID::REFDES :
-						return brd.packages.at(uu).component->refdes;
+						dynamic_cast<PropertyValueString&>(value).value = pkg->component->refdes;
+						return true;
+
 					case ObjectProperty::ID::NAME :
-						return brd.packages.at(uu).component->part->package->name;
+						dynamic_cast<PropertyValueString&>(value).value = pkg->package.name;
+						return true;
+
 					case ObjectProperty::ID::VALUE :
-						return brd.packages.at(uu).component->part->get_value();
+						dynamic_cast<PropertyValueString&>(value).value = pkg->component->part->get_value();
+						return true;
+
 					case ObjectProperty::ID::MPN :
-						return brd.packages.at(uu).component->part->get_MPN();
+						dynamic_cast<PropertyValueString&>(value).value = pkg->component->part->get_MPN();
+						return true;
+
 					default :
-						return "meh";
+						return false;
 				}
-			break;
-			case ObjectType::PLANE :
+
+			} break;
+
+			case ObjectType::TRACK : {
+				auto track = &brd.tracks.at(uu);
 				switch(property) {
+					case ObjectProperty::ID::WIDTH_FROM_RULES :
+						dynamic_cast<PropertyValueBool&>(value).value = track->width_from_rules;
+						return true;
+
+					case ObjectProperty::ID::LOCKED :
+						dynamic_cast<PropertyValueBool&>(value).value = track->locked;
+						return true;
+
+					case ObjectProperty::ID::WIDTH :
+						dynamic_cast<PropertyValueInt&>(value).value = track->width;
+						return true;
+
+					case ObjectProperty::ID::LAYER :
+						dynamic_cast<PropertyValueInt&>(value).value = track->layer;
+						return true;
+
 					case ObjectProperty::ID::NAME :
-						if(brd.planes.at(uu).net) {
-							return brd.planes.at(uu).net->name;
-						}
-						return "<no net>";
-					default:
-						return "meh";
+						dynamic_cast<PropertyValueString&>(value).value = track->net?(track->net->name):"<no net>";
+						return true;
+
+					case ObjectProperty::ID::NET_CLASS :
+						dynamic_cast<PropertyValueString&>(value).value = track->net?(track->net->net_class->name):"<no net>";
+						return true;
+
+					default :
+						return false;
 				}
-			break;
+			}break;
+
+			case ObjectType::VIA : {
+				auto via = &brd.vias.at(uu);
+				switch(property) {
+					case ObjectProperty::ID::FROM_RULES :
+						dynamic_cast<PropertyValueBool&>(value).value = via->from_rules;
+						return true;
+
+					case ObjectProperty::ID::LOCKED :
+						dynamic_cast<PropertyValueBool&>(value).value = via->locked;
+						return true;
+
+					case ObjectProperty::ID::NAME : {
+						std::string s;
+						if(via->junction->net) {
+							s = via->junction->net->name;
+							if(via->net_set)
+								s += " (set)";
+						}
+						else {
+							s = "<no net>";
+						}
+						dynamic_cast<PropertyValueString&>(value).value = s;
+						return true;
+					}
+
+
+					default :
+						return false;
+				}
+			} break;
+
+			case ObjectType::PLANE : {
+				auto plane = &brd.planes.at(uu);
+				switch(property) {
+					case ObjectProperty::ID::FROM_RULES :
+						dynamic_cast<PropertyValueBool&>(value).value = plane->from_rules;
+						return true;
+
+					case ObjectProperty::ID::WIDTH :
+						dynamic_cast<PropertyValueInt&>(value).value = plane->settings.min_width;
+						return true;
+
+					case ObjectProperty::ID::NAME :
+						dynamic_cast<PropertyValueString&>(value).value = plane->net?(plane->net->name):"<no net>";
+						return true;
+
+					default :
+						return false;
+				}
+			} break;
 
 			default :
-				return "meh";
+				return false;
 		}
-		return "meh";
 	}
 
-	bool CoreBoard::property_is_settable(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		bool h = false;
-		bool r= Core::property_is_settable(uu, type, property, &h);
-		if(h)
-			return r;
+	bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, const PropertyValue &value) {
+		if(Core::set_property(type, uu, property, value))
+			return true;
 		switch(type) {
-			case ObjectType::TRACK :
+			case ObjectType::BOARD_PACKAGE : {
+				auto pkg = &brd.packages.at(uu);
 				switch(property) {
-					case ObjectProperty::ID::WIDTH:
-						return !brd.tracks.at(uu).width_from_rules;
+					case ObjectProperty::ID::FLIPPED :
+						pkg->flip = dynamic_cast<const PropertyValueBool&>(value).value;
 					break;
+
 					default :
-						;
+						return false;
 				}
-			break;
-			case ObjectType::PLANE :
+			} break;
+
+			case ObjectType::TRACK : {
+				auto track = &brd.tracks.at(uu);
 				switch(property) {
-					case ObjectProperty::ID::WIDTH:
-						return !brd.planes.at(uu).from_rules;
+					case ObjectProperty::ID::WIDTH_FROM_RULES :
+						track->width_from_rules = dynamic_cast<const PropertyValueBool&>(value).value;
 					break;
+
+					case ObjectProperty::ID::LOCKED :
+						track->locked = dynamic_cast<const PropertyValueBool&>(value).value;
+					break;
+
+					case ObjectProperty::ID::WIDTH :
+						track->width = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::LAYER :
+						track->layer = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
 					default :
-						;
+						return false;
 				}
-			break;
+			}break;
+
+			case ObjectType::VIA : {
+				auto via = &brd.vias.at(uu);
+				switch(property) {
+					case ObjectProperty::ID::FROM_RULES :
+						via->from_rules = dynamic_cast<const PropertyValueBool&>(value).value;
+					break;
+
+					case ObjectProperty::ID::LOCKED :
+						via->locked = dynamic_cast<const PropertyValueBool&>(value).value;
+					break;
+
+					default :
+						return false;
+				}
+			} break;
+
+			case ObjectType::PLANE : {
+				auto plane = &brd.planes.at(uu);
+				switch(property) {
+					case ObjectProperty::ID::FROM_RULES :
+						plane->from_rules = dynamic_cast<const PropertyValueBool&>(value).value;
+					break;
+
+					case ObjectProperty::ID::WIDTH :
+						if(!plane->from_rules)
+							plane->settings.min_width = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					default :
+						return false;
+				}
+			} break;
+
 			default :
-				;
+				return false;
+		}
+		if(!property_transaction) {
+			rebuild(false);
+			set_needs_save(true);
 		}
 		return true;
+	}
+
+	bool CoreBoard::get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyMeta &meta) {
+		if(Core::get_property_meta(type, uu, property, meta))
+			return true;
+		switch(type) {
+			case ObjectType::TRACK : {
+				auto track = &brd.tracks.at(uu);
+				switch(property) {
+					case ObjectProperty::ID::WIDTH :
+						meta.is_settable = !track->width_from_rules;
+						return true;
+
+					case ObjectProperty::ID::LAYER :
+						layers_to_meta(meta);
+						return true;
+
+					default :
+						return false;
+				}
+			}break;
+
+			case ObjectType::PLANE : {
+				auto plane = &brd.planes.at(uu);
+				switch(property) {
+					case ObjectProperty::ID::WIDTH :
+						meta.is_settable = !plane->from_rules;
+						return true;
+
+					default :
+						return false;
+				}
+			}break;
+
+			default:
+				return false;
+		}
 	}
 
 	std::vector<Track*> CoreBoard::get_tracks(bool work) {

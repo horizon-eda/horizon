@@ -207,7 +207,6 @@ SRC_IMP = \
 	core/core_board.cpp\
 	property_panels/property_panels.cpp\
 	property_panels/property_panel.cpp\
-	property_panels/property_editors.cpp\
 	property_panels/property_editor.cpp\
 	widgets/warnings_box.cpp\
 	widgets/net_selector.cpp\

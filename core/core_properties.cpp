@@ -2,353 +2,327 @@
 #include "hole.hpp"
 #include "polygon.hpp"
 #include "dimension.hpp"
+#include "core_properties.hpp"
+#include "layer_provider.hpp"
 
 namespace horizon {
 	#define HANDLED if(handled){*handled=true;}
 	#define NOT_HANDLED if(handled){*handled=false;}
 
-	bool Core::get_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
+	bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyValue &value) {
 		switch(type) {
-			case ObjectType::HOLE :
+			case ObjectType::HOLE : {
+				auto hole = get_hole(uu);
 				switch(property) {
 					case ObjectProperty::ID::PLATED :
-						HANDLED
-						return get_hole(uu)->plated;
-					default :
-						;
-				}
-			break;
-			default :
-				;
-		}
-		NOT_HANDLED
-		return false;
-	}
-	void Core::set_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool value, bool *handled) {
-		switch(type) {
-			case ObjectType::HOLE :
-				switch(property) {
-					case ObjectProperty::ID::PLATED :
-						HANDLED
-						if(get_hole(uu, false)->plated == value)
-							return;
-						get_hole(uu, false)->plated = value;
-					break;
-					default :
-						NOT_HANDLED
-				}
-			break;
-
-
-			default:
-				NOT_HANDLED
-				return;
-		}
-		rebuild();
-		set_needs_save(true);
-	}
-
-	int64_t Core::get_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		switch(type) {
-			case ObjectType::LINE :
-				switch(property) {
-					case ObjectProperty::ID::WIDTH:
-						HANDLED
-						return get_line(uu, false)->width;
-					case ObjectProperty::ID::LAYER:
-						HANDLED
-						return get_line(uu, false)->layer;
-					default :
-						NOT_HANDLED
-						return 0;
-				}
-			break;
-			case ObjectType::ARC :
-				switch(property) {
-					case ObjectProperty::ID::WIDTH:
-						HANDLED
-						return get_arc(uu, false)->width;
-					case ObjectProperty::ID::LAYER:
-						HANDLED
-						return get_arc(uu, false)->layer;
-					default :
-						NOT_HANDLED
-						return 0;
-				}
-			break;
-			case ObjectType::TEXT :
-				switch(property) {
-					case ObjectProperty::ID::WIDTH:
-						HANDLED
-						return get_text(uu, false)->width;
-					case ObjectProperty::ID::SIZE:
-						HANDLED
-						return get_text(uu, false)->size;
-					case ObjectProperty::ID::LAYER:
-						HANDLED
-						return get_text(uu, false)->layer;
-					default :
-						NOT_HANDLED
-						return 0;
-				}
-			break;
-			case ObjectType::DIMENSION :
-				switch(property) {
-					case ObjectProperty::ID::SIZE:
-						HANDLED
-						return get_dimension(uu)->label_size;
-					case ObjectProperty::ID::MODE:
-						HANDLED
-						return static_cast<int>(get_dimension(uu)->mode);
-					default :
-						NOT_HANDLED
-						return 0;
-				}
-			break;
-			case ObjectType::POLYGON :
-				switch(property) {
-					case ObjectProperty::ID::LAYER:
-						HANDLED
-						return get_polygon(uu, false)->layer;
-					default :
-						NOT_HANDLED
-						return 0;
-				}
-			break;
-			case ObjectType::HOLE :
-				switch(property) {
+						dynamic_cast<PropertyValueBool&>(value).value = hole->plated;
+						return true;
 					case ObjectProperty::ID::DIAMETER:
-						HANDLED
-						return get_hole(uu, false)->diameter;
+						dynamic_cast<PropertyValueInt&>(value).value = hole->diameter;
+						return true;
 					case ObjectProperty::ID::LENGTH:
-						HANDLED
-						return get_hole(uu, false)->length;
+						dynamic_cast<PropertyValueInt&>(value).value = hole->length;
+						return true;
 					case ObjectProperty::ID::SHAPE:
-						HANDLED
-						return static_cast<int>(get_hole(uu, false)->shape);
+						dynamic_cast<PropertyValueInt&>(value).value = static_cast<int>(hole->shape);
+						return true;
+					case ObjectProperty::ID::PARAMETER_CLASS:
+						dynamic_cast<PropertyValueString&>(value).value = hole->parameter_class;
+						return true;
 					default :
-						NOT_HANDLED
-						return 0;
+						return false;
 				}
-			break;
+			} break;
 
-			default :
-				NOT_HANDLED
-				return 0;
-		}
-	}
-	void Core::set_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, int64_t value, bool *handled) {
-		if(tool_is_active())
-			return;
-		int64_t newv;
-		switch(type) {
-			case ObjectType::LINE :
+			case ObjectType::LINE : {
+				auto line = get_line(uu);
 				switch(property) {
 					case ObjectProperty::ID::WIDTH:
-						HANDLED
-						get_line(uu, false)->width = std::max(value, (int64_t)0);
-					break;
+						dynamic_cast<PropertyValueInt&>(value).value = line->width;
+						return true;
 					case ObjectProperty::ID::LAYER:
-						HANDLED
-						get_line(uu, false)->layer = value;
-					break;
+						dynamic_cast<PropertyValueInt&>(value).value = line->layer;
+						return true;
 					default :
-						NOT_HANDLED
-						return;
+						return false;
 				}
-			break;
-			case ObjectType::ARC :
+			} break;
+
+			case ObjectType::ARC : {
+				auto arc = get_arc(uu);
 				switch(property) {
 					case ObjectProperty::ID::WIDTH:
-						HANDLED
-						get_arc(uu, false)->width = std::max(value, (int64_t)0);
-					break;
+						dynamic_cast<PropertyValueInt&>(value).value = arc->width;
+						return true;
 					case ObjectProperty::ID::LAYER:
-						HANDLED
-						get_arc(uu, false)->layer = value;
-					break;
+						dynamic_cast<PropertyValueInt&>(value).value = arc->layer;
+						return true;
 					default :
-						NOT_HANDLED
-						return;
+						return false;
 				}
-			break;
-			case ObjectType::TEXT :
+			} break;
+
+			case ObjectType::TEXT : {
+				auto text = get_text(uu);
+				switch(property) {
+					case ObjectProperty::ID::WIDTH:
+						dynamic_cast<PropertyValueInt&>(value).value = text->width;
+						return true;
+					case ObjectProperty::ID::SIZE:
+						dynamic_cast<PropertyValueInt&>(value).value = text->size;
+						return true;
+					case ObjectProperty::ID::LAYER:
+						dynamic_cast<PropertyValueInt&>(value).value = text->layer;
+						return true;
+					case ObjectProperty::ID::TEXT:
+						dynamic_cast<PropertyValueString&>(value).value = text->text;
+						return true;
+					default :
+						return false;
+				}
+			} break;
+
+			case ObjectType::DIMENSION : {
+				auto dim = get_dimension(uu);
 				switch(property) {
 					case ObjectProperty::ID::SIZE:
-						HANDLED
-						get_text(uu, false)->size = std::max(value, (int64_t)100000);
-					break;
-					case ObjectProperty::ID::WIDTH:
-						HANDLED
-						get_text(uu, false)->width = std::max(value, (int64_t)0);
-					break;
-					case ObjectProperty::ID::LAYER:
-						HANDLED
-						get_text(uu, false)->layer = value;
-					break;
-					default :
-						NOT_HANDLED
-						return;
-				}
-			break;
-			case ObjectType::DIMENSION :
-				switch(property) {
-					case ObjectProperty::ID::SIZE:
-						HANDLED
-						get_dimension(uu)->label_size = std::max(value, (int64_t)100000);
-					break;
+						dynamic_cast<PropertyValueInt&>(value).value = dim->label_size;
+						return true;
 					case ObjectProperty::ID::MODE:
-						HANDLED
-						get_dimension(uu)->mode= static_cast<Dimension::Mode>(value);
-					break;
-
+						dynamic_cast<PropertyValueInt&>(value).value = static_cast<int>(dim->mode);
+						return true;
 					default :
-						NOT_HANDLED
-						return;
+						return false;
 				}
-			break;
-			case ObjectType::POLYGON :
+			} break;
+
+			case ObjectType::POLYGON : {
+				auto poly = get_polygon(uu);
 				switch(property) {
 					case ObjectProperty::ID::LAYER:
-						HANDLED
-						newv = value;
-						if(get_layer_provider()->get_layers().count(newv) == 0)
-							return;
-						if(newv == (int64_t)get_polygon(uu, false)->layer)
-							return;
-						get_polygon(uu, false)->layer = newv;
-					break;
-					default :
-						NOT_HANDLED
-				}
-			break;
-			case ObjectType::HOLE :
-				switch(property) {
-					case ObjectProperty::ID::DIAMETER:
-						HANDLED
-						newv = std::max(value, 0.01_mm);
-						if(newv == (int64_t)get_hole(uu, false)->diameter)
-							return;
-						get_hole(uu, false)->diameter = newv;
-					break;
-					case ObjectProperty::ID::LENGTH:
-						HANDLED
-						newv = std::max(value, 0_mm);
-						if(newv == (int64_t)get_hole(uu, false)->length)
-							return;
-						get_hole(uu, false)->length = newv;
-					break;
-					case ObjectProperty::ID::SHAPE:
-						HANDLED
-						get_hole(uu, false)->shape = static_cast<Hole::Shape>(value);
-					break;
-
-					default :
-						NOT_HANDLED
-				}
-			break;
-
-			default :
-				NOT_HANDLED
-				return;
-		}
-		rebuild();
-		set_needs_save(true);
-	}
-
-	std::string Core::get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		switch(type) {
-			case ObjectType::TEXT :
-				switch(property) {
-					case ObjectProperty::ID::TEXT :
-						HANDLED
-						return get_text(uu, false)->text;
-					break;
-					default :
-						NOT_HANDLED
-				}
-			break;
-			case ObjectType::POLYGON :
-				switch(property) {
+						dynamic_cast<PropertyValueInt&>(value).value = poly->layer;
+						return true;
 					case ObjectProperty::ID::PARAMETER_CLASS :
-						HANDLED
-						return get_polygon(uu, false)->parameter_class;
-					break;
+						dynamic_cast<PropertyValueString&>(value).value = poly->parameter_class;
+						return true;
 					case ObjectProperty::ID::USAGE : {
-						HANDLED
-						auto poly = get_polygon(uu, false);
+						std::string usage;
 						if(poly->usage) {
 							if(poly->usage->get_type() == PolygonUsage::Type::PLANE) {
-								return "Plane";
+								usage = "Plane";
 							}
 							else {
-								return "Invalid";
+								usage = "Invalid";
 							}
 						}
 						else {
-							return "None";
+							usage = "None";
 						}
-					}break;
-
+						dynamic_cast<PropertyValueString&>(value).value  = usage;
+						return true;
+					} break;
 					default :
-						NOT_HANDLED
+						return false;
 				}
-			break;
+			} break;
 
 			default:
-				NOT_HANDLED
+				return false;
+
 		}
-		return "<not handled>";
+		return false;
 	}
 
-	void Core::set_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, const std::string &value, bool *handled) {
+	bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, const PropertyValue &value) {
 		switch(type) {
-			case ObjectType::TEXT :
+			case ObjectType::HOLE : {
+				auto hole = get_hole(uu);
 				switch(property) {
-					case ObjectProperty::ID::TEXT :
-						HANDLED
-						get_text(uu, false)->text = value;
+					case ObjectProperty::ID::PLATED :
+						hole->plated = dynamic_cast<const PropertyValueBool&>(value).value;
 					break;
+
+					case ObjectProperty::ID::DIAMETER:
+						hole->diameter = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::LENGTH:
+						if(hole->shape == Hole::Shape::SLOT)
+							hole->length = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::SHAPE:
+						hole->shape = static_cast<Hole::Shape>(dynamic_cast<const PropertyValueInt&>(value).value);
+					break;
+
+					case ObjectProperty::ID::PARAMETER_CLASS:
+						hole->parameter_class = dynamic_cast<const PropertyValueString&>(value).value;
+					break;
+
 					default :
-						NOT_HANDLED
-						return;
+						return false;
 				}
-			break;
-			case ObjectType::POLYGON :
+			} break;
+
+			case ObjectType::LINE : {
+				auto line = get_line(uu);
 				switch(property) {
+					case ObjectProperty::ID::WIDTH:
+						line->width = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::LAYER:
+						line->layer = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					default :
+						return false;
+				}
+			} break;
+
+			case ObjectType::ARC : {
+				auto arc = get_arc(uu);
+				switch(property) {
+					case ObjectProperty::ID::WIDTH:
+						arc->width = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::LAYER:
+						arc->layer = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					default :
+						return false;
+				}
+			} break;
+
+			case ObjectType::TEXT : {
+				auto text = get_text(uu);
+				switch(property) {
+					case ObjectProperty::ID::WIDTH:
+						text->width = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::SIZE:
+						text->size = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::LAYER:
+						text->layer = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::TEXT:
+						text->text = dynamic_cast<const PropertyValueString&>(value).value;
+					break;
+
+					default :
+						return false;
+				}
+			} break;
+
+			case ObjectType::DIMENSION : {
+				auto dim = get_dimension(uu);
+				switch(property) {
+					case ObjectProperty::ID::SIZE:
+						dim->label_size = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::MODE:
+						dim->mode = static_cast<Dimension::Mode>(dynamic_cast<const PropertyValueInt&>(value).value);
+					break;
+
+					default :
+						return false;
+				}
+			} break;
+
+			case ObjectType::POLYGON : {
+				auto poly = get_polygon(uu);
+				switch(property) {
+					case ObjectProperty::ID::LAYER:
+						poly->layer = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
 					case ObjectProperty::ID::PARAMETER_CLASS :
-						HANDLED
-						get_polygon(uu, false)->parameter_class = value;
+						poly->parameter_class = dynamic_cast<const PropertyValueString&>(value).value;
 					break;
+
 					default :
-						NOT_HANDLED
-						return;
+						return false;
 				}
-			break;
+			} break;
+
 			default:
-				NOT_HANDLED
-				return;
+				return false;
+
 		}
-		rebuild();
-		set_needs_save(true);
+		if(!property_transaction) {
+			rebuild(false);
+			set_needs_save(true);
+		}
+		return true;
 	}
 
-	bool Core::property_is_settable(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
+	bool Core::get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property, class PropertyMeta &meta) {
+		meta.is_settable = true;
 		switch(type) {
 			case ObjectType::HOLE :
 				switch(property) {
 					case ObjectProperty::ID::LENGTH :
-						HANDLED
-						return get_hole(uu, false)->shape == Hole::Shape::SLOT;
-					break;
+						meta.is_settable = get_hole(uu, false)->shape == Hole::Shape::SLOT;
+						return true;
 					default :
-						NOT_HANDLED
+						return false;
+				}
+			break;
+			case ObjectType::TEXT :
+				switch(property) {
+					case ObjectProperty::ID::LAYER :
+						layers_to_meta(meta);
+						return true;
+					default :
+						return false;
+				}
+			break;
+			case ObjectType::LINE :
+				switch(property) {
+					case ObjectProperty::ID::LAYER :
+						layers_to_meta(meta);
+						return true;
+					default :
+						return false;
+				}
+			break;
+			case ObjectType::ARC :
+				switch(property) {
+					case ObjectProperty::ID::LAYER :
+						layers_to_meta(meta);
+						return true;
+					default :
+						return false;
+				}
+			break;
+			case ObjectType::POLYGON :
+				switch(property) {
+					case ObjectProperty::ID::LAYER :
+						layers_to_meta(meta);
+						return true;
+					default :
+						return false;
 				}
 			break;
 			default:
-				NOT_HANDLED
+				return false;
 		}
-		return true;
+		return false;
+	}
+
+	void Core::layers_to_meta(PropertyMeta &meta) {
+		PropertyMetaLayers &m = dynamic_cast<PropertyMetaLayers&>(meta);
+		m.layers.clear();
+		for(const auto &it: get_layer_provider()->get_layers()) {
+			m.layers.emplace(it.first, it.second);
+		}
 	}
 
 }

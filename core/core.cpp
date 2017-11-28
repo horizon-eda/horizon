@@ -473,6 +473,20 @@ namespace horizon {
 		signal_rebuilt().emit();
 	}
 
+	void Core::set_property_begin() {
+		if(property_transaction)
+			throw std::runtime_error("transaction already in progress");
+		property_transaction = true;
+	}
+
+	void Core::set_property_commit() {
+		if(!property_transaction)
+			throw std::runtime_error("no transaction in progress");
+		rebuild();
+		set_needs_save(true);
+		property_transaction = false;
+	}
+
 	json Core::get_meta() {
 		json j;
 		return j;

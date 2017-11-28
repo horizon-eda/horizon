@@ -1,29 +1,103 @@
 #include "property_panel.hpp"
 #include <iostream>
 #include "object_descr.hpp"
-#include "property_editors.hpp"
+#include "property_editor.hpp"
+#include "property_panels.hpp"
+#include "core/core.hpp"
 
 namespace horizon {
 
-	PropertyPanel::PropertyPanel(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x) :
-		Gtk::Expander(cobject) {
-		x->get_widget("stack", stack);
+	PropertyPanel::PropertyPanel(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x, ObjectType ty, Core *c) :
+		Gtk::Expander(cobject), type(ty), core(c) {
+		x->get_widget("editors_box", editors_box);
 		x->get_widget("selector_label", selector_label);
 		x->get_widget("button_prev", button_prev);
 		x->get_widget("button_next", button_next);
 
+		for(const auto &it: object_descriptions.at(type).properties) {
+			PropertyEditor *e;
+			ObjectProperty::ID property = it.first;
+			switch(it.second.type) {
+				case ObjectProperty::Type::BOOL :
+					e = new PropertyEditorBool(type, property, this);
+				break;
+
+				case ObjectProperty::Type::STRING:
+					e = new PropertyEditorString(type, property, this);
+				break;
+
+				case ObjectProperty::Type::LENGTH: {
+					auto pe = new PropertyEditorDim(type, property, this);
+					pe->set_range(0, 1e9);
+					e = pe;
+				}break;
+
+				case ObjectProperty::Type::DIM:
+					e = new PropertyEditorDim(type, property, this);
+				break;
+
+				case ObjectProperty::Type::ENUM:
+					e = new PropertyEditorEnum(type, property, this);
+				break;
+
+				case ObjectProperty::Type::STRING_RO:
+					e = new PropertyEditorStringRO(type, property, this);
+				break;
+
+				case ObjectProperty::Type::NET_CLASS:
+					e = new PropertyEditorNetClass(type, property, this);
+				break;
+
+				case ObjectProperty::Type::LAYER:
+					e = new PropertyEditorLayer(type, property, this);
+				break;
+
+				case ObjectProperty::Type::LAYER_COPPER: {
+					auto pe = new PropertyEditorLayer(type, property, this);
+					pe->copper_only = true;
+					e = pe;
+				} break;
+
+				default :
+					e = new PropertyEditor(type, property, this);
+			}
+
+			e->signal_changed().connect([this, property, e] {
+				handle_changed(property, e->get_value());
+			});
+			e->signal_apply_all().connect([this, property, e] {
+				handle_apply_all(property, e->get_value());
+			});
+			auto em = Gtk::manage(e);
+			em->construct();
+			editors_box->pack_start(*em, false, false, 0);
+			em->show_all();
+		}
+		reload();
 		button_next->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(this, &PropertyPanel::go), 1));
 		button_prev->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(this, &PropertyPanel::go), -1));
+	}
+
+	void PropertyPanel::handle_changed(ObjectProperty::ID property, const PropertyValue &value) {
+		assert(core->set_property(type, objects.at(object_current), property, value));
+		parent->signal_update().emit();
+	}
+
+	void PropertyPanel::handle_apply_all(ObjectProperty::ID property, const PropertyValue &value) {
+		core->set_property_begin();
+		for(const auto &uu: objects) {
+			core->set_property(type, uu, property, value);
+		}
+		core->set_property_commit();
+		parent->signal_update().emit();
 	}
 
 	PropertyPanel* PropertyPanel::create(ObjectType t, Core *c, PropertyPanels *parent) {
 		PropertyPanel* w;
 		Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
 		x->add_from_resource("/net/carrotIndustries/horizon/property_panels/property_panel.ui");
-		x->get_widget_derived("PropertyPanel", w);
+		x->get_widget_derived("PropertyPanel", w, t, c);
 		w->reference();
-		w->type = t;
-		w->core = c;
 		w->parent = parent;
 
 		w->set_use_markup(true);
@@ -32,58 +106,46 @@ namespace horizon {
 	}
 
 	void PropertyPanel::update_selector() {
-		auto *cur = stack->get_visible_child();
-		auto children = stack->get_children();
-		auto f = std::find(children.begin(), children.end(), cur);
-		unsigned int i = f-children.begin();
-
-		std::string l = std::to_string(i+1)+"/"+std::to_string(children.size());
+		std::string l = std::to_string(object_current+1)+"/"+std::to_string(objects.size());
 		selector_label->set_text(l);
 	}
 
 	void PropertyPanel::go(int dir) {
-		auto *cur = stack->get_visible_child();
-		auto children = stack->get_children();
-		auto f = std::find(children.begin(), children.end(), cur);
-		int i = f-children.begin();
-		i+=dir;
-		if(i<0) {
-			i+=children.size();
+		object_current+=dir;
+		if(object_current<0) {
+			object_current+=objects.size();
 		}
-		i %= children.size();
-		stack->set_visible_child(*children.at(i));
+		object_current %= objects.size();
 		update_selector();
+		reload();
 	}
 
 	void PropertyPanel::update_objects(const std::set<SelectableRef> &selection) {
-		std::map<UUID, PropertyEditors*> editors;
-		std::set<UUID> editors_present;
-		for(const auto &it: stack->get_children()) {
-			auto ed = dynamic_cast<PropertyEditors*>(it);
-			editors.emplace(ed->uuid, ed);
-			editors_present.emplace(ed->uuid);
-		}
-		std::set<UUID> editors_from_selection;
+		UUID uuid_current;
+		if(objects.size())
+			uuid_current = objects.at(object_current);
+		std::set<UUID> uuids_from_sel;
 		for(const auto &it: selection) {
-			editors_from_selection.emplace(it.uuid);
+			uuids_from_sel.insert(it.uuid);
 		}
-		std::set<UUID> editor_create;
-		std::set_difference(editors_from_selection.begin(), editors_from_selection.end(), editors_present.begin(), editors_present.end(),
-							std::inserter(editor_create, editor_create.begin()));
-		std::set<UUID> editor_delete;
-		std::set_difference(editors_present.begin(), editors_present.end(), editors_from_selection.begin(), editors_from_selection.end(),
-							std::inserter(editor_delete, editor_delete.begin()));
-		for(const auto it: editor_create) {
-			std::cout << "create editor " << (std::string)it << std::endl;
+		//delete objects not in selection
+		objects.erase(std::remove_if(objects.begin(), objects.end(), [&uuids_from_sel](auto &a) {return uuids_from_sel.count(a)==0;}), objects.end());
 
-			auto *ed = Gtk::manage(new PropertyEditors(it, type, core, this));
-			ed->show_all();
-			stack->add(*ed);
+		//add new objects from selection
+		for(const auto &it: selection) {
+			if(std::find(objects.begin(), objects.end(), it.uuid) == objects.end()) {
+				objects.push_back(it.uuid);
+			}
 		}
-		for(const auto it: editor_delete) {
-			std::cout << "delete editor " << (std::string)it << std::endl;
-			delete editors.at(it);
+
+		object_current = 0;
+		for(size_t i = 0; i<objects.size(); i++) {
+			if(objects[i] == uuid_current) {
+				object_current = i;
+				break;
+			}
 		}
+		reload();
 		update_selector();
 	}
 
@@ -92,9 +154,20 @@ namespace horizon {
 	}
 
 	void PropertyPanel::reload() {
-		for(const auto &it: stack->get_children()) {
-			auto ed = dynamic_cast<PropertyEditors*>(it);
-			ed->reload();
+		if(!objects.size())
+			return;
+		for(const auto ch: editors_box->get_children()) {
+			if(auto ed = dynamic_cast<PropertyEditor*>(ch)) {
+				auto uu = objects.at(object_current);
+				PropertyValue &value = ed->get_value();
+				PropertyMeta &meta = ed->get_meta();
+				if(value.get_type() != PropertyValue::Type::INVALID) {
+					assert(core->get_property(type, uu, ed->property_id, value));
+					core->get_property_meta(type, uu, ed->property_id, meta);
+					ed->reload();
+					ed->set_sensitive(meta.is_settable);
+				}
+			}
 		}
 	}
 }

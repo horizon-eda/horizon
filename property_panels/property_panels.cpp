@@ -47,14 +47,15 @@ namespace horizon {
 			delete children.at(it);
 		}
 
+		selection_stored.clear();
 		for(const auto &it: get_children()) {
 			auto pp = dynamic_cast<PropertyPanel*>(it);
 			auto ty = pp->get_type();
 			std::set<SelectableRef> sel_this;
 			std::copy_if(selection.begin(), selection.end(), std::inserter(sel_this, sel_this.begin()), [ty](const auto &x){return x.type==ty;});
 			pp->update_objects(sel_this);
+			selection_stored.insert(sel_this.begin(), sel_this.end());
 		}
-		reload();
 	}
 
 	void PropertyPanels::reload() {

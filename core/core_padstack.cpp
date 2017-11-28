@@ -1,4 +1,5 @@
 #include "core_padstack.hpp"
+#include "core_properties.hpp"
 #include <algorithm>
 #include <fstream>
 
@@ -30,120 +31,98 @@ namespace horizon {
 		return false;
 	}
 
-	int64_t CorePadstack::get_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		bool h = false;
-		int64_t r= Core::get_property_int(uu, type, property, &h);
-		if(h)
-			return r;
+	bool CorePadstack::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyValue &value) {
+		if(Core::get_property(type, uu, property, value))
+			return true;
 		switch(type) {
-			case ObjectType::SHAPE :
+			case ObjectType::SHAPE : {
+				auto shape = &padstack.shapes.at(uu);
 				switch(property) {
 					case ObjectProperty::ID::LAYER:
-						return padstack.shapes.at(uu).layer;
+						dynamic_cast<PropertyValueInt&>(value).value = shape->layer;
+						return true;
+
 					case ObjectProperty::ID::POSITION_X:
-						return padstack.shapes.at(uu).placement.shift.x;
+						dynamic_cast<PropertyValueInt&>(value).value = shape->placement.shift.x;
+						return true;
+
 					case ObjectProperty::ID::POSITION_Y:
-						return padstack.shapes.at(uu).placement.shift.y;
+						dynamic_cast<PropertyValueInt&>(value).value = shape->placement.shift.y;
+						return true;
+
+					case ObjectProperty::ID::PARAMETER_CLASS:
+						dynamic_cast<PropertyValueString&>(value).value = shape->parameter_class;
+						return true;
+
 					default :
-						return 0;
+						return false;
 				}
-			break;
+			} break;
 
 			default :
-				return 0;
+				return false;
 		}
 	}
-	void CorePadstack::set_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, int64_t value, bool *handled) {
-		if(tool_is_active())
-			return;
-		bool h = false;
-		Core::set_property_int(uu, type, property, value, &h);
-		if(h)
-			return;
+
+	bool CorePadstack::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, const PropertyValue &value) {
+		if(Core::set_property(type, uu, property, value))
+			return true;
 		switch(type) {
-			case ObjectType::SHAPE :
+			case ObjectType::SHAPE : {
+				auto shape = &padstack.shapes.at(uu);
+				switch(property) {
+					case ObjectProperty::ID::LAYER:
+						shape->layer = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::POSITION_X:
+						shape->placement.shift.x = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::POSITION_Y:
+						shape->placement.shift.y = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::PARAMETER_CLASS:
+						shape->parameter_class = dynamic_cast<const PropertyValueString&>(value).value;
+					break;
+
+					default :
+						return false;
+				}
+			} break;
+
+			default :
+				return false;
+		}
+		if(!property_transaction) {
+			rebuild(false);
+			set_needs_save(true);
+		}
+		return true;
+	}
+
+	bool CorePadstack::get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyMeta &meta) {
+		if(Core::get_property_meta(type, uu, property, meta))
+			return true;
+		switch(type) {
+			case ObjectType::SHAPE : {
+				auto shape = &padstack.shapes.at(uu);
 				switch(property) {
 					case ObjectProperty::ID::LAYER: {
-						auto &t = padstack.shapes.at(uu).layer;
-						if(value == t)
-							return;
-						t = value;
-					} break;
+						layers_to_meta(meta);
+						return true;
+					}
 
-					case ObjectProperty::ID::POSITION_X: {
-						auto &t = padstack.shapes.at(uu).placement.shift.x;
-						if(value == t)
-							return;
-						t = value;
-					} break;
-
-					case ObjectProperty::ID::POSITION_Y: {
-						auto &t = padstack.shapes.at(uu).placement.shift.y;
-						if(value == t)
-							return;
-						t = value;
-					} break;
-
-					default :
-						;
+					default:
+						return false;
 				}
-			break;
+			} break;
 
 			default :
-				;
+				return false;
 		}
-		rebuild();
-		set_needs_save(true);
-	}
-
-	std::string CorePadstack::get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		switch(type) {
-			case ObjectType::SHAPE :
-				switch(property) {
-					case ObjectProperty::ID::PARAMETER_CLASS :
-						return get_padstack(false)->shapes.at(uu).parameter_class;
-					break;
-					default :;
-				}
-			break;
-			case ObjectType::HOLE :
-				switch(property) {
-					case ObjectProperty::ID::PARAMETER_CLASS :
-						return get_padstack(false)->holes.at(uu).parameter_class;
-					break;
-					default :;
-				}
-			break;
-			default:;
-		}
-		return "<not handled>";
-	}
-
-	void CorePadstack::set_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, const std::string &value, bool *handled) {
-		switch(type) {
-			case ObjectType::SHAPE :
-				switch(property) {
-					case ObjectProperty::ID::PARAMETER_CLASS :
-						get_padstack(false)->shapes.at(uu).parameter_class = value;
-					break;
-					default :
-						return;
-				}
-			break;
-			case ObjectType::HOLE :
-				switch(property) {
-					case ObjectProperty::ID::PARAMETER_CLASS :
-						get_padstack(false)->holes.at(uu).parameter_class = value;
-					break;
-					default :
-						return;
-				}
-			break;
-			default:
-				return;
-		}
-		rebuild();
-		set_needs_save(true);
+		return false;
 	}
 
 	LayerProvider *CorePadstack::get_layer_provider() {

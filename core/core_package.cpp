@@ -1,4 +1,5 @@
 #include "core_package.hpp"
+#include "core_properties.hpp"
 #include <algorithm>
 #include <fstream>
 
@@ -72,59 +73,73 @@ namespace horizon {
 		return bb;
 	}
 
-	std::string CorePackage::get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled) {
-		bool h = false;
-		std::string r= Core::get_property_string(uu, type, property, &h);
-		if(h)
-			return r;
+	bool CorePackage::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyValue &value) {
+		if(Core::get_property(type, uu, property, value))
+			return true;
 		switch(type) {
-			case ObjectType::PAD :
+			case ObjectType::PAD : {
+				auto pad = &package.pads.at(uu);
 				switch(property) {
 					case ObjectProperty::ID::NAME :
-						return package.pads.at(uu).name;
+						dynamic_cast<PropertyValueString&>(value).value = pad->name;
+						return true;
+
 					case ObjectProperty::ID::VALUE :
-						return package.pads.at(uu).pool_padstack->name;
+						dynamic_cast<PropertyValueString&>(value).value = pad->pool_padstack->name;
+						return true;
+
 					case ObjectProperty::ID::PAD_TYPE : {
 						const auto ps = package.pads.at(uu).pool_padstack;
+						std::string pad_type;
 						switch(ps->type) {
-							case Padstack::Type::MECHANICAL:	return "Mechanical";
-							case Padstack::Type::BOTTOM:		return "Bottom";
-							case Padstack::Type::TOP:			return "Top";
-							case Padstack::Type::THROUGH:		return "Through";
-							default:							return "Invalid";
+							case Padstack::Type::MECHANICAL:	pad_type = "Mechanical"; break;
+							case Padstack::Type::BOTTOM:		pad_type = "Bottom"; break;
+							case Padstack::Type::TOP:			pad_type = "Top"; break;
+							case Padstack::Type::THROUGH:		pad_type = "Through"; break;
+							default:							pad_type = "Invalid";
 						}
+						dynamic_cast<PropertyValueString&>(value).value = pad_type;
+						return true;
 					} break;
+
 					default :
-						return "<invalid prop>";
+						return false;
 				}
-			break;
+			} break;
+
 			default :
-				return "<invalid type>";
+				return false;
 		}
-		return "<meh>";
 	}
-	void CorePackage::set_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, const std::string &value, bool *handled) {
-		if(tool_is_active())
-			return;
-		bool h = false;
-		Core::set_property_string(uu, type, property, value, &h);
-		if(h)
-			return;
+
+	bool CorePackage::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, const PropertyValue &value) {
+		if(Core::set_property(type, uu, property, value))
+			return true;
 		switch(type) {
-			case ObjectType::PAD :
+			case ObjectType::PAD : {
+				auto pad = &package.pads.at(uu);
 				switch(property) {
 					case ObjectProperty::ID::NAME :
-						package.pads.at(uu).name = value;
+						pad->name = dynamic_cast<const PropertyValueString&>(value).value;
 					break;
-					default :
-						;
+
+					default:
+						return false;
 				}
-			break;
+			} break;
+
 			default :
-				;
+				return false;
 		}
-		rebuild();
-		set_needs_save(true);
+		if(!property_transaction) {
+			rebuild(false);
+			set_needs_save(true);
+		}
+		return true;
+	}
+
+	bool CorePackage::get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyMeta &meta) {
+		return Core::get_property_meta(type, uu, property, meta);
 	}
 
 	void CorePackage::rebuild(bool from_undo) {

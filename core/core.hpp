@@ -190,23 +190,14 @@ namespace horizon {
 			void undo();
 			void redo();
 			
-			
 			inline bool tool_is_active() {return tool!=nullptr;}
 			
-			virtual bool property_is_settable(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr);
+			virtual bool set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, const class PropertyValue &value);
+			virtual bool get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, class PropertyValue &value);
+			virtual bool get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property, class PropertyMeta &meta);
 
-			virtual std::string get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr);
-			virtual void set_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, const std::string &value, bool *handled=nullptr);
-
-			virtual bool get_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr);
-			virtual void set_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool value, bool *handled=nullptr);
-
-			virtual int64_t get_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool *handled=nullptr);
-			virtual void set_property_int(const UUID &uu, ObjectType type, ObjectProperty::ID property, int64_t value, bool *handled=nullptr);
-
-			//std::string get_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property);
-			//void set_property_string(const UUID &uu, ObjectType type, ObjectProperty::ID property, bool value);
-			//virtual bool *get_set_property_bool(const UUID &uu, ObjectType type, ObjectProperty::ID property) {return nullptr;}
+			void set_property_begin();
+			void set_property_commit();
 
 			virtual class LayerProvider *get_layer_provider() {return nullptr;};
 
@@ -277,6 +268,9 @@ namespace horizon {
 			int history_current = -1;
 			virtual void history_push() = 0;
 			virtual void history_load(unsigned int i) = 0;
+			bool property_transaction = false;
+
+			void layers_to_meta(class PropertyMeta &meta);
 
 		private:
 			std::unique_ptr<ToolBase> create_tool(ToolID tool_id);
