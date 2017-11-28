@@ -68,6 +68,10 @@ namespace horizon {
 		const Gate *gate = &comp->entity->gates.at(selected_gate.at(1));
 
 		sym_current = map_symbol(comp, gate);
+		if(!sym_current) {
+			core.r->revert();
+			return ToolResponse::end();
+		}
 		sym_current->placement.shift = args.coords;
 
 		core.c->selection.clear();
@@ -113,6 +117,10 @@ namespace horizon {
 				const Gate *gate = &comp->entity->gates.at(selected_gate.at(1));
 
 				sym_current = map_symbol(comp, gate);
+				if(!sym_current) {
+					core.r->revert();
+					return ToolResponse::end();
+				}
 				sym_current->placement.shift = args.coords;
 
 				core.c->selection.clear();

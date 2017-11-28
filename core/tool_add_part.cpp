@@ -53,6 +53,10 @@ namespace horizon {
 		std::sort(gates.begin(), gates.end(), [](auto &a, auto &b){return a->suffix<b->suffix;});
 
 		sym_current = map_symbol(comp, gates.front());
+		if(!sym_current) {
+			core.r->revert();
+			return ToolResponse::end();
+		}
 		sym_current->placement.shift = args.coords;
 		core.c->selection.clear();
 		core.c->selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
@@ -80,12 +84,15 @@ namespace horizon {
 					return ToolResponse::end();
 				}
 				else { //place next gate
-					current_gate++;
-					sym_current = map_symbol(comp, gates.at(current_gate));
-					sym_current->placement.shift = args.coords;
-					core.c->selection.clear();
-					core.c->selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
-					return ToolResponse();
+					auto sym = map_symbol(comp, gates.at(current_gate));
+					if(sym) {
+						sym_current = sym;
+						current_gate++;
+						sym_current->placement.shift = args.coords;
+						core.c->selection.clear();
+						core.c->selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
+						return ToolResponse();
+					}
 				}
 			}
 			else {
