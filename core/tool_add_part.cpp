@@ -84,7 +84,7 @@ namespace horizon {
 					return ToolResponse::end();
 				}
 				else { //place next gate
-					auto sym = map_symbol(comp, gates.at(current_gate));
+					auto sym = map_symbol(comp, gates.at(current_gate+1));
 					if(sym) {
 						sym_current = sym;
 						current_gate++;
