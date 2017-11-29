@@ -64,6 +64,7 @@ namespace horizon {
 						auto poly = core.r->get_polygon(s.uuid);
 						if(!poly->has_arcs()) {
 							std::stringstream ss;
+							ss.imbue(std::locale("C"));
 							ss << "expand-polygon [ " << poly->parameter_class << " ";
 							for(const auto &it: poly->vertices) {
 								ss << it.position.x << " " << it.position.y << " ";
@@ -73,6 +74,40 @@ namespace horizon {
 						}
 
 					}
+				}
+			});
+		}
+		{
+			auto button = Gtk::manage(new Gtk::Button("Insert courtyard program"));
+			parameter_window->add_button(button);
+			button->signal_clicked().connect([this, parameter_window] {
+				const Polygon *poly = nullptr;
+				for(const auto &it: core_package.get_package()->polygons) {
+					if(it.second.vertices.size() == 4 && !it.second.has_arcs() && it.second.parameter_class == "courtyard") {
+						poly = &it.second;
+						break;
+					}
+				}
+				if(poly) {
+					parameter_window->set_error_message("");
+					Coordi a = poly->vertices.at(0).position;
+					Coordi b = a;
+					for(const auto &v: poly->vertices) {
+						a = Coordi::min(a, v.position);
+						b = Coordi::max(b, v.position);
+					}
+					auto c = (a+b)/2;
+					auto d = b-a;
+					std::stringstream ss;
+					ss.imbue(std::locale("C"));
+					ss << std::fixed << std::setprecision(3);
+					ss << d.x/1e6 << "mm " << d.y/1e6 << "mm\n";
+					ss << "get-parameter [ courtyard_expansion ]\n2 * +xy\nset-polygon [ courtyard rectangle ";
+					ss << c.x/1e6 << "mm " << c.y/1e6 << "mm ]";
+					parameter_window->insert_text(ss.str());
+				}
+				else {
+					parameter_window->set_error_message("no courtyard polygon found: needs to have 4 vertices and the parameter class 'courtyard'");
 				}
 			});
 		}

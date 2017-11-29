@@ -23,7 +23,7 @@ namespace horizon {
 		auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL,0));
 
 		auto tbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
-		extra_button_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL,0));
+		extra_button_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10));
 		extra_button_box->set_margin_start(10);
 		extra_button_box->set_margin_end(10);
 		extra_button_box->set_margin_top(10);
