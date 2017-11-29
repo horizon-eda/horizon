@@ -464,7 +464,7 @@ namespace horizon {
 			add_action_button("Edit Package", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_package));
 			add_action_button("Duplicate Package", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_package));
 			add_action_button("Create Padstack for Package", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_padstack_for_package));
-			add_action_button("Part Wizard...", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_package))->get_style_context()->add_class("suggested-action");
+			add_action_button("Part Wizard...", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_part_wizard))->get_style_context()->add_class("suggested-action");
 
 			bbox->show_all();
 
