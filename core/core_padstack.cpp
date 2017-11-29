@@ -121,6 +121,30 @@ namespace horizon {
 		return false;
 	}
 
+	std::string CorePadstack::get_display_name(ObjectType type, const UUID &uu) {
+		switch(type) {
+			case ObjectType::SHAPE : {
+				auto form = padstack.shapes.at(uu).form;
+				switch(form) {
+					case Shape::Form::CIRCLE :
+						return "Circle";
+
+					case Shape::Form::OBROUND :
+						return "Obround";
+
+					case Shape::Form::RECTANGLE :
+						return "Rectangle";
+
+					default :
+						return "unknown";
+				}
+			} break;
+
+			default :
+				return Core::get_display_name(type, uu);
+		}
+	}
+
 	LayerProvider *CorePadstack::get_layer_provider() {
 		return &padstack;
 	}

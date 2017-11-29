@@ -385,6 +385,38 @@ namespace horizon {
 		return false;
 	}
 
+	std::string CoreSchematic::get_display_name(ObjectType type, const UUID &uu) {
+		auto &sheet = sch.sheets.at(sheet_uuid);
+		switch(type) {
+			case ObjectType::NET :
+				return block.nets.at(uu).name;
+
+			case ObjectType::LINE_NET : {
+				const auto &li = sheet.net_lines.at(uu);
+				return li.net?li.net->name:"";
+			}
+
+			case ObjectType::JUNCTION : {
+				const auto &ju = sheet.junctions.at(uu);
+				return ju.net?ju.net->name:"";
+			}
+
+			case ObjectType::NET_LABEL : {
+				const auto &la = sheet.net_labels.at(uu);
+				return la.junction->net?la.junction->net->name:"";
+			}
+
+			case ObjectType::SCHEMATIC_SYMBOL :
+				return sheet.symbols.at(uu).component->refdes;
+
+			case ObjectType::COMPONENT :
+				return block.components.at(uu).refdes;
+
+			default :
+				return Core::get_display_name(type, uu);
+		}
+	}
+
 	void CoreSchematic::add_sheet() {
 		auto uu = UUID::random();
 		auto sheet_max = std::max_element(sch.sheets.begin(), sch.sheets.end(),

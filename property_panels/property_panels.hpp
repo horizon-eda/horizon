@@ -25,7 +25,6 @@ namespace horizon {
 			std::set<SelectableRef> selection_stored;
 
 			void set_property(ObjectType ty, const UUID &uu, ObjectProperty::ID property, const class PropertyValue &value);
-			gint64 last_set_time=0;
 			sigc::connection throttle_connection;
 			void force_commit();
 	};

@@ -384,4 +384,17 @@ namespace horizon {
 		}
 	}
 
+	std::string Core::get_display_name(ObjectType type, const UUID &uu) {
+		switch(type) {
+			case ObjectType::HOLE :
+				return get_hole(uu)->shape==Hole::Shape::ROUND?"Round":"Slot";
+
+			case ObjectType::TEXT :
+				return get_text(uu)->text;
+
+			default :
+				return "";
+		}
+	}
+
 }

@@ -66,27 +66,20 @@ namespace horizon {
 	}
 
 	void PropertyPanels::set_property(ObjectType ty, const UUID &uu, ObjectProperty::ID property, const class PropertyValue &value) {
-		auto ti = g_get_monotonic_time ();
-		if(ti-last_set_time < .4e6) { //need to throttle
-			if(!core->get_property_transaction())
-				core->set_property_begin();
+		if(!core->get_property_transaction()) {
+			core->set_property_begin();
 			s_signal_throttled.emit(true);
-			core->set_property(ty, uu, property, value);
-			throttle_connection.disconnect(); //stop old timer
-			throttle_connection = Glib::signal_timeout().connect([this]{
-				core->set_property_commit();
-				s_signal_update.emit();
-				s_signal_throttled.emit(false);
-				return false;
-			}, 500);
 		}
-
-		else if(!core->get_property_transaction()) {
-			throttle_connection.disconnect();
-			core->set_property(ty, uu, property, value);
+		core->set_property(ty, uu, property, value);
+		s_signal_update.emit();
+		throttle_connection.disconnect(); //stop old timer
+		throttle_connection = Glib::signal_timeout().connect([this]{
+			core->set_property_commit();
 			s_signal_update.emit();
-		}
-		last_set_time = ti;
+			s_signal_throttled.emit(false);
+			reload();
+			return false;
+		}, 700);
 	}
 
 	void PropertyPanels::force_commit() {
@@ -95,5 +88,6 @@ namespace horizon {
 		core->set_property_commit();
 		s_signal_update.emit();
 		s_signal_throttled.emit(false);
+		reload();
 	}
 }

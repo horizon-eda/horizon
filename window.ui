@@ -288,7 +288,7 @@
                     <property name="can_focus">False</property>
                     <property name="margin_top">2</property>
                     <property name="margin_bottom">2</property>
-                    <property name="label" translatable="yes">Throttled</property>
+                    <property name="label" translatable="yes">Commit pending</property>
                     <attributes>
                       <attribute name="style" value="italic"/>
                     </attributes>

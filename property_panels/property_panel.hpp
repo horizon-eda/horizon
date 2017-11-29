@@ -21,9 +21,11 @@ namespace horizon {
 		private :
 			ObjectType type;
 			class Core *core;
-			Gtk::Label *selector_label;
+			Gtk::MenuButton *button_sel;
 			Gtk::Button *button_prev;
 			Gtk::Button *button_next;
+
+			Gtk::Menu sel_menu;
 
 			void update_selector();
 			void go(int dir);

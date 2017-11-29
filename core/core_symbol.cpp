@@ -181,6 +181,16 @@ namespace horizon {
 		return Core::get_property_meta(type, uu, property, meta);
 	}
 
+	std::string CoreSymbol::get_display_name(ObjectType type, const UUID &uu) {
+		switch(type) {
+			case ObjectType::SYMBOL_PIN :
+				return get_symbol_pin(uu)->name;
+
+			default :
+				return Core::get_display_name(type, uu);
+		}
+	}
+
 	void CoreSymbol::rebuild(bool from_undo) {
 		sym.expand();
 		Core::rebuild(from_undo);

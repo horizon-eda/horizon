@@ -42,10 +42,15 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="selector_label">
+              <object class="GtkMenuButton" id="button_sel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">m/n</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="relief">none</property>
+                <property name="use_popover">False</property>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>

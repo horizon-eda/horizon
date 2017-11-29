@@ -10,9 +10,12 @@ namespace horizon {
 	PropertyPanel::PropertyPanel(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x, ObjectType ty, Core *c) :
 		Gtk::Expander(cobject), type(ty), core(c) {
 		x->get_widget("editors_box", editors_box);
-		x->get_widget("selector_label", selector_label);
+		x->get_widget("button_sel", button_sel);
 		x->get_widget("button_prev", button_prev);
 		x->get_widget("button_next", button_next);
+
+		sel_menu.set_halign(Gtk::ALIGN_CENTER);
+		button_sel->set_menu(sel_menu);
 
 		std::vector<std::pair<ObjectProperty::ID, const ObjectProperty*>> properties_sorted;
 		properties_sorted.reserve(object_descriptions.at(type).properties.size());
@@ -107,6 +110,7 @@ namespace horizon {
 			}
 			core->set_property_commit();
 			parent->signal_update().emit();
+			parent->reload();
 		}
 	}
 
@@ -123,9 +127,23 @@ namespace horizon {
 		return w;
 	}
 
+	class MyMenuItem: public Gtk::CheckMenuItem {
+		public:
+			MyMenuItem(const std::string &la, const UUID &uu): Gtk::CheckMenuItem(la), uuid(uu) {
+				set_draw_as_radio(true);
+			}
+			UUID uuid;
+	};
+
 	void PropertyPanel::update_selector() {
 		std::string l = std::to_string(object_current+1)+"/"+std::to_string(objects.size());
-		selector_label->set_text(l);
+		button_sel->set_label(l);
+		auto chs = sel_menu.get_children();
+		for(auto it: chs) {
+			if(auto mit = dynamic_cast<MyMenuItem*>(it)) {
+				mit->set_active(mit->uuid == objects.at(object_current));
+			}
+		}
 	}
 
 	void PropertyPanel::go(int dir) {
@@ -156,6 +174,8 @@ namespace horizon {
 			}
 		}
 
+		std::sort(objects.begin(), objects.end(), [this] (const auto &a, const auto &b) {return core->get_display_name(type, a) < core->get_display_name(type, b);});
+
 		object_current = 0;
 		for(size_t i = 0; i<objects.size(); i++) {
 			if(objects[i] == uuid_current) {
@@ -164,6 +184,31 @@ namespace horizon {
 			}
 		}
 		reload();
+
+
+		{
+			auto chs = sel_menu.get_children();
+			for(auto it: chs) {
+				delete it;
+			}
+		}
+		int i = 0;
+		for(const auto &it: objects) {
+			auto name = core->get_display_name(type, it);
+			if(name.size()) {
+				auto la =  Gtk::manage(new MyMenuItem(name, it));
+				la->show();
+				la->signal_toggled().connect([this, i, la] {
+					if(la->get_active()) {
+						object_current = i;
+						update_selector();
+						reload();
+					}
+				});
+				sel_menu.append(*la);
+			}
+			i++;
+		}
 		update_selector();
 	}
 

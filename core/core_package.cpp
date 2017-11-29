@@ -150,6 +150,16 @@ namespace horizon {
 		return true;
 	}
 
+	std::string CorePackage::get_display_name(ObjectType type, const UUID &uu) {
+		switch(type) {
+			case ObjectType::PAD :
+				return package.pads.at(uu).name;
+
+			default :
+				return Core::get_display_name(type, uu);
+		}
+	}
+
 	bool CorePackage::get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyMeta &meta) {
 		return Core::get_property_meta(type, uu, property, meta);
 	}

@@ -43,6 +43,8 @@ namespace horizon {
 			bool get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, class PropertyValue &value) override;
 			bool get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property, class PropertyMeta &meta) override;
 
+			std::string get_display_name(ObjectType type, const UUID &uu) override;
+
 			const Symbol *get_canvas_data();
 			std::pair<Coordi,Coordi> get_bbox() override;
 

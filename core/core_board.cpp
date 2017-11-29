@@ -360,6 +360,26 @@ namespace horizon {
 		}
 	}
 
+	std::string CoreBoard::get_display_name(ObjectType type, const UUID &uu) {
+		switch(type) {
+			case ObjectType::BOARD_PACKAGE :
+				return brd.packages.at(uu).component->refdes;
+
+			case ObjectType::TRACK : {
+				const auto &tr = brd.tracks.at(uu);
+				return tr.net?tr.net->name:"";
+			}
+
+			case ObjectType::VIA : {
+				const auto ju= brd.vias.at(uu).junction;
+				return ju->net?ju->net->name:"";
+			}
+
+			default :
+				return Core::get_display_name(type, uu);
+		}
+	}
+
 	std::vector<Track*> CoreBoard::get_tracks(bool work) {
 		std::vector<Track*> r;
 		for(auto &it: brd.tracks) {

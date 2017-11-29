@@ -28,6 +28,8 @@ namespace horizon {
 			bool get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, class PropertyValue &value) override;
 			bool get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property, class PropertyMeta &meta) override;
 
+			std::string get_display_name(ObjectType type, const UUID &uu) override;
+
 			void rebuild(bool from_undo=false) override;
 			void commit() override;
 			void revert() override;
