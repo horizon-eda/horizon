@@ -14,10 +14,17 @@ namespace horizon {
 		x->get_widget("button_prev", button_prev);
 		x->get_widget("button_next", button_next);
 
+		std::vector<std::pair<ObjectProperty::ID, const ObjectProperty*>> properties_sorted;
+		properties_sorted.reserve(object_descriptions.at(type).properties.size());
 		for(const auto &it: object_descriptions.at(type).properties) {
+			properties_sorted.emplace_back(it.first, &it.second);
+		}
+		std::sort(properties_sorted.begin(), properties_sorted.end(), [](const auto a, const auto b) {return a.second->order < b.second->order;});
+
+		for(const auto &it: properties_sorted) {
 			PropertyEditor *e;
 			ObjectProperty::ID property = it.first;
-			switch(it.second.type) {
+			switch(it.second->type) {
 				case ObjectProperty::Type::BOOL :
 					e = new PropertyEditorBool(type, property, this);
 				break;
@@ -67,7 +74,7 @@ namespace horizon {
 			}
 
 			e->signal_changed().connect([this, property, e] {
-				handle_changed(property, e);
+				handle_changed(property, e->get_value());
 			});
 			e->signal_apply_all().connect([this, property, e] {
 				handle_apply_all(property, e->get_value());
@@ -82,30 +89,8 @@ namespace horizon {
 		button_prev->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(this, &PropertyPanel::go), -1));
 	}
 
-	void PropertyPanel::handle_changed(ObjectProperty::ID property, PropertyEditor *ed) {
-		parent->set_property(type, objects.at(object_current), property, ed->get_value());
-		/*auto prop_time = g_get_monotonic_time();
-		std::cout << prop_time - last_property_time << std::endl;
-		if(property == last_property && (prop_time - last_property_time) < .5e6) {
-			std::cout << "throttle" << std::endl;
-			ed->set_throttled(true);
-			throttle_connection.disconnect();
-			throttle_connection = Glib::signal_timeout().connect([this, property, ed]{
-				std::cout << "throttled set" << std::endl;
-				ed->set_throttled(false);
-				assert(core->set_property(type, objects.at(object_current), property, ed->get_value()));
-				parent->signal_update().emit();
-				return false;
-			}, 510);
-		}
-		else {
-			ed->set_throttled(false);
-			assert(core->set_property(type, objects.at(object_current), property, ed->get_value()));
-			throttle_connection.disconnect();
-			parent->signal_update().emit();
-		}
-		last_property = property;
-		last_property_time = prop_time;*/
+	void PropertyPanel::handle_changed(ObjectProperty::ID property, const PropertyValue &value) {
+		parent->set_property(type, objects.at(object_current), property, value);
 	}
 
 	void PropertyPanel::handle_apply_all(ObjectProperty::ID property, const PropertyValue &value) {

@@ -32,7 +32,7 @@ namespace horizon {
 			std::deque<UUID> objects;
 			int object_current = 0;
 
-			void handle_changed(ObjectProperty::ID property, class PropertyEditor *ed);
+			void handle_changed(ObjectProperty::ID property, const class PropertyValue &value);
 			void handle_apply_all(ObjectProperty::ID property, const class PropertyValue &value);
 
 			ObjectProperty::ID last_property;

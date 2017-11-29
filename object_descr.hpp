@@ -10,11 +10,12 @@ namespace horizon {
 			DIAMETER, PLATED, FLIPPED, NET_CLASS, WIDTH_FROM_RULES, MPN, SHAPE, PARAMETER_CLASS, POSITION_X, POSITION_Y, ANGLE, MIRROR,
 			PAD_TYPE, FROM_RULES, DISPLAY_DIRECTIONS, USAGE, MODE, DIFFPAIR, LOCKED
 		};
-		ObjectProperty(Type t, const std::string &l, const std::vector<std::pair<int, std::string>> &its = {}): type(t), label(l), enum_items(its) {}
+		ObjectProperty(Type t, const std::string &l, int o = 0, const std::vector<std::pair<int, std::string>> &its = {}): type(t), label(l), enum_items(its), order(o) {}
 
 		Type type;
 		std::string label;
 		std::vector<std::pair<int, std::string>> enum_items;
+		int order = 0;
 	};
 
 	class ObjectDescription {
