@@ -5,6 +5,7 @@
 #include "unit.hpp"
 #include "entity.hpp"
 #include "symbol.hpp"
+#include "object_descr.hpp"
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
@@ -63,7 +64,7 @@ namespace horizon {
 			if(tf.size() && Glib::file_test(tf, Glib::FILE_TEST_IS_REGULAR))
 				return tf;
 			else
-				throw std::runtime_error("not found");
+				throw std::runtime_error(object_descriptions.at(type).name + " " + (std::string)uu +  " not found");
 		}
 		auto filename = q.get<std::string>(0);
 		switch(type) {
