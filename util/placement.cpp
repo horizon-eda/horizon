@@ -6,6 +6,7 @@ namespace horizon {
 		mirror(j.at("mirror").get<bool>()),
 		angle(j.at("angle").get<int>())
 		{
+			set_angle(angle);
 		}
 	json Placement::serialize() const {
 		json j;

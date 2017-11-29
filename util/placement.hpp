@@ -7,7 +7,7 @@ namespace horizon {
 
 	class Placement {
 		public :
-			Placement(const Coordi &sh={0,0}, int a=0, bool m = false):shift(sh), mirror(m), angle(a){}
+			Placement(const Coordi &sh={0,0}, int a=0, bool m = false):shift(sh), mirror(m), angle(a){set_angle(angle);}
 			Placement(const json &j);
 			template<typename T>Coord<T> transform(const Coord<T> &c) const {
 				Coord<T> r = c;
