@@ -147,6 +147,10 @@ namespace horizon {
 							const auto sr = ca->selectables.items_ref[i];
 
 							std::string text = object_descriptions.at(sr.type).name;
+							auto display_name = ca->s_signal_request_display_name.emit(sr.type, sr.uuid);
+							if(display_name.size()) {
+								text += " "+display_name;
+							}
 							auto layers = ca->layer_provider->get_layers();
 							if(layers.count(sr.layer)) {
 								text += " ("+layers.at(sr.layer).name+")";

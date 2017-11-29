@@ -150,6 +150,9 @@ namespace horizon {
 		canvas->signal_key_press_event().connect(sigc::mem_fun(this, &ImpBase::handle_key_press));
 		canvas->signal_cursor_moved().connect(sigc::mem_fun(this, &ImpBase::handle_cursor_move));
 		canvas->signal_button_press_event().connect(sigc::mem_fun(this, &ImpBase::handle_click));
+		canvas->signal_request_display_name().connect([this](ObjectType ty, UUID uu){
+			return core.r->get_display_name(ty, uu);
+		});
 		/*main_window->save_button->signal_clicked().connect(sigc::mem_fun(this, &ImpBase::handle_save));
 		main_window->print_button->signal_clicked().connect(sigc::mem_fun(this, &ImpBase::handle_print));
 		main_window->test_button->signal_clicked().connect(sigc::mem_fun(this, &ImpBase::handle_test));*/
@@ -609,6 +612,10 @@ namespace horizon {
 					canvas->set_selection({}, false);
 					for(const auto &sr: sel) {
 						std::string text = object_descriptions.at(sr.type).name;
+						auto display_name = core.r->get_display_name(sr.type, sr.uuid);
+						if(display_name.size()) {
+							text += " "+display_name;
+						}
 						auto layers = core.r->get_layer_provider()->get_layers();
 						if(layers.count(sr.layer)) {
 							text += " ("+layers.at(sr.layer).name+")";

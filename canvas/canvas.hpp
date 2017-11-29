@@ -209,6 +209,9 @@ namespace horizon {
 			type_signal_grid_mul_changed signal_grid_mul_changed() {return s_signal_grid_mul_changed;}
 			unsigned int get_grid_mul() const {return grid.mul;}
 
+			typedef sigc::signal<std::string, ObjectType, UUID> type_signal_request_display_name;
+			type_signal_request_display_name signal_request_display_name() {return s_signal_request_display_name;}
+
 			void center_and_zoom(const Coordi &center);
 			void zoom_to_bbox(const Coordi &a, const Coordi &b);
 
@@ -298,6 +301,7 @@ namespace horizon {
 			type_signal_selection_changed s_signal_selection_changed;
 			type_signal_cursor_moved s_signal_cursor_moved;
 			type_signal_grid_mul_changed s_signal_grid_mul_changed;
+			type_signal_request_display_name s_signal_request_display_name;
 	};
 	
 	
