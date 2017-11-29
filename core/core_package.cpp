@@ -89,15 +89,9 @@ namespace horizon {
 						return true;
 
 					case ObjectProperty::ID::POSITION_X :
-						dynamic_cast<PropertyValueInt&>(value).value = pad->placement.shift.x;
-						return true;
-
 					case ObjectProperty::ID::POSITION_Y :
-						dynamic_cast<PropertyValueInt&>(value).value = pad->placement.shift.y;
-						return true;
-
 					case ObjectProperty::ID::ANGLE :
-						dynamic_cast<PropertyValueInt&>(value).value = pad->placement.get_angle();
+						get_placement(pad->placement, value, property);
 						return true;
 
 					case ObjectProperty::ID::PAD_TYPE : {
@@ -136,15 +130,9 @@ namespace horizon {
 					break;
 
 					case ObjectProperty::ID::POSITION_X :
-						pad->placement.shift.x = dynamic_cast<const PropertyValueInt&>(value).value;
-					break;
-
 					case ObjectProperty::ID::POSITION_Y :
-						pad->placement.shift.y = dynamic_cast<const PropertyValueInt&>(value).value;
-					break;
-
 					case ObjectProperty::ID::ANGLE :
-						pad->placement.set_angle(dynamic_cast<const PropertyValueInt&>(value).value);
+						set_placement(pad->placement, value, property);
 					break;
 
 					default:

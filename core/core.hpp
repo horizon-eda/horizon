@@ -272,6 +272,8 @@ namespace horizon {
 			bool property_transaction = false;
 
 			void layers_to_meta(class PropertyMeta &meta);
+			void get_placement(const Placement &placement, class PropertyValue &value, ObjectProperty::ID property);
+			void set_placement(Placement &placement, const class PropertyValue &value, ObjectProperty::ID property);
 
 		private:
 			std::unique_ptr<ToolBase> create_tool(ToolID tool_id);

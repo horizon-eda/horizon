@@ -42,12 +42,10 @@ namespace horizon {
 						dynamic_cast<PropertyValueInt&>(value).value = shape->layer;
 						return true;
 
-					case ObjectProperty::ID::POSITION_X:
-						dynamic_cast<PropertyValueInt&>(value).value = shape->placement.shift.x;
-						return true;
-
-					case ObjectProperty::ID::POSITION_Y:
-						dynamic_cast<PropertyValueInt&>(value).value = shape->placement.shift.y;
+					case ObjectProperty::ID::POSITION_X :
+					case ObjectProperty::ID::POSITION_Y :
+					case ObjectProperty::ID::ANGLE :
+						get_placement(shape->placement, value, property);
 						return true;
 
 					case ObjectProperty::ID::PARAMETER_CLASS:
@@ -75,12 +73,10 @@ namespace horizon {
 						shape->layer = dynamic_cast<const PropertyValueInt&>(value).value;
 					break;
 
-					case ObjectProperty::ID::POSITION_X:
-						shape->placement.shift.x = dynamic_cast<const PropertyValueInt&>(value).value;
-					break;
-
-					case ObjectProperty::ID::POSITION_Y:
-						shape->placement.shift.y = dynamic_cast<const PropertyValueInt&>(value).value;
+					case ObjectProperty::ID::POSITION_X :
+					case ObjectProperty::ID::POSITION_Y :
+					case ObjectProperty::ID::ANGLE :
+						set_placement(shape->placement, value, property);
 					break;
 
 					case ObjectProperty::ID::PARAMETER_CLASS:

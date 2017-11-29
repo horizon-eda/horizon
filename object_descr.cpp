@@ -53,6 +53,7 @@ namespace horizon {
 			{ObjectProperty::ID::PARAMETER_CLASS, {ObjectProperty::Type::STRING, "Parameter class", 1}},
 			{ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X", 2}},
 			{ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y", 3}},
+			{ObjectProperty::ID::ANGLE, {ObjectProperty::Type::ANGLE, "Angle", 4}},
 		}}},
 		{ObjectType::LINE, {"Line", "Lines", {
 			{ObjectProperty::ID::WIDTH, {ObjectProperty::Type::LENGTH, "Width", 0}},
@@ -67,6 +68,9 @@ namespace horizon {
 			{ObjectProperty::ID::WIDTH, {ObjectProperty::Type::LENGTH, "Width", 2}},
 			{ObjectProperty::ID::TEXT, {ObjectProperty::Type::STRING, "Text", 0}},
 			{ObjectProperty::ID::LAYER, {ObjectProperty::Type::LAYER, "Layer", 3}},
+			{ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X", 4}},
+			{ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y", 5}},
+			{ObjectProperty::ID::ANGLE, {ObjectProperty::Type::ANGLE, "Angle", 6}},
 
 		}}},
 		{ObjectType::COMPONENT, {"Component", "Components", {

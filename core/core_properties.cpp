@@ -17,18 +17,23 @@ namespace horizon {
 					case ObjectProperty::ID::PLATED :
 						dynamic_cast<PropertyValueBool&>(value).value = hole->plated;
 						return true;
+
 					case ObjectProperty::ID::DIAMETER:
 						dynamic_cast<PropertyValueInt&>(value).value = hole->diameter;
 						return true;
+
 					case ObjectProperty::ID::LENGTH:
 						dynamic_cast<PropertyValueInt&>(value).value = hole->length;
 						return true;
+
 					case ObjectProperty::ID::SHAPE:
 						dynamic_cast<PropertyValueInt&>(value).value = static_cast<int>(hole->shape);
 						return true;
+
 					case ObjectProperty::ID::PARAMETER_CLASS:
 						dynamic_cast<PropertyValueString&>(value).value = hole->parameter_class;
 						return true;
+
 					default :
 						return false;
 				}
@@ -40,9 +45,11 @@ namespace horizon {
 					case ObjectProperty::ID::WIDTH:
 						dynamic_cast<PropertyValueInt&>(value).value = line->width;
 						return true;
+
 					case ObjectProperty::ID::LAYER:
 						dynamic_cast<PropertyValueInt&>(value).value = line->layer;
 						return true;
+
 					default :
 						return false;
 				}
@@ -54,9 +61,11 @@ namespace horizon {
 					case ObjectProperty::ID::WIDTH:
 						dynamic_cast<PropertyValueInt&>(value).value = arc->width;
 						return true;
+
 					case ObjectProperty::ID::LAYER:
 						dynamic_cast<PropertyValueInt&>(value).value = arc->layer;
 						return true;
+
 					default :
 						return false;
 				}
@@ -68,15 +77,25 @@ namespace horizon {
 					case ObjectProperty::ID::WIDTH:
 						dynamic_cast<PropertyValueInt&>(value).value = text->width;
 						return true;
+
 					case ObjectProperty::ID::SIZE:
 						dynamic_cast<PropertyValueInt&>(value).value = text->size;
 						return true;
+
 					case ObjectProperty::ID::LAYER:
 						dynamic_cast<PropertyValueInt&>(value).value = text->layer;
 						return true;
+
 					case ObjectProperty::ID::TEXT:
 						dynamic_cast<PropertyValueString&>(value).value = text->text;
 						return true;
+
+					case ObjectProperty::ID::POSITION_X :
+					case ObjectProperty::ID::POSITION_Y :
+					case ObjectProperty::ID::ANGLE :
+						get_placement(text->placement, value, property);
+						return true;
+
 					default :
 						return false;
 				}
@@ -88,9 +107,11 @@ namespace horizon {
 					case ObjectProperty::ID::SIZE:
 						dynamic_cast<PropertyValueInt&>(value).value = dim->label_size;
 						return true;
+
 					case ObjectProperty::ID::MODE:
 						dynamic_cast<PropertyValueInt&>(value).value = static_cast<int>(dim->mode);
 						return true;
+
 					default :
 						return false;
 				}
@@ -102,9 +123,11 @@ namespace horizon {
 					case ObjectProperty::ID::LAYER:
 						dynamic_cast<PropertyValueInt&>(value).value = poly->layer;
 						return true;
+
 					case ObjectProperty::ID::PARAMETER_CLASS :
 						dynamic_cast<PropertyValueString&>(value).value = poly->parameter_class;
 						return true;
+
 					case ObjectProperty::ID::USAGE : {
 						std::string usage;
 						if(poly->usage) {
@@ -121,6 +144,7 @@ namespace horizon {
 						dynamic_cast<PropertyValueString&>(value).value  = usage;
 						return true;
 					} break;
+
 					default :
 						return false;
 				}
@@ -214,6 +238,13 @@ namespace horizon {
 					case ObjectProperty::ID::TEXT:
 						text->text = dynamic_cast<const PropertyValueString&>(value).value;
 					break;
+
+					case ObjectProperty::ID::POSITION_X :
+					case ObjectProperty::ID::POSITION_Y :
+					case ObjectProperty::ID::ANGLE :
+						set_placement(text->placement, value, property);
+					break;
+
 
 					default :
 						return false;
@@ -322,6 +353,34 @@ namespace horizon {
 		m.layers.clear();
 		for(const auto &it: get_layer_provider()->get_layers()) {
 			m.layers.emplace(it.first, it.second);
+		}
+	}
+
+	void  Core::get_placement(const Placement &placement, class PropertyValue &value, ObjectProperty::ID property) {
+		switch(property) {
+			case ObjectProperty::ID::POSITION_X :
+				dynamic_cast<PropertyValueInt&>(value).value = placement.shift.x;
+			break;
+			case ObjectProperty::ID::POSITION_Y :
+				dynamic_cast<PropertyValueInt&>(value).value = placement.shift.y;
+			break;
+			case ObjectProperty::ID::ANGLE :
+				dynamic_cast<PropertyValueInt&>(value).value = placement.get_angle();
+			break;
+		}
+	}
+
+	void Core::set_placement(Placement &placement, const class PropertyValue &value, ObjectProperty::ID property) {
+		switch(property) {
+			case ObjectProperty::ID::POSITION_X :
+				placement.shift.x = dynamic_cast<const PropertyValueInt&>(value).value;
+			break;
+			case ObjectProperty::ID::POSITION_Y :
+				placement.shift.y = dynamic_cast<const PropertyValueInt&>(value).value;
+			break;
+			case ObjectProperty::ID::ANGLE :
+				placement.set_angle(dynamic_cast<const PropertyValueInt&>(value).value);
+			break;
 		}
 	}
 
