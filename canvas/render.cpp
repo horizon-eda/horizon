@@ -228,39 +228,66 @@ namespace horizon {
 		Orientation name_orientation = Orientation::LEFT;
 		Orientation pad_orientation = Orientation::LEFT;
 		int64_t text_shift = 0.5_mm;
+		int64_t text_shift_name = text_shift;
+		int64_t schmitt_shift = 1.125_mm;
+		int64_t driver_shift = .75_mm;
+		int64_t length = pin.length;
+		auto dot_size = .75_mm;
+		if(pin.decoration.dot) {
+			length -= dot_size;
+		}
+		if(pin.decoration.clock) {
+			text_shift_name += .75_mm;
+			schmitt_shift += .75_mm;
+			driver_shift+= .75_mm;
+		}
+		if(pin.decoration.schmitt) {
+			text_shift_name += 2_mm;
+			driver_shift += 2_mm;
+		}
+		if(pin.decoration.driver != SymbolPin::Decoration::Driver::DEFAULT) {
+			text_shift_name += 1_mm;
+		}
+
+
+		Coordi v_deco;
 		switch(pin_orientation) {
 			case Orientation::LEFT :
-				p1.x += pin.length;
-				p_name.x += pin.length+text_shift;
+				p1.x += length;
+				p_name.x += pin.length+text_shift_name;
 				p_pad.x    += pin.length-text_shift;
 				p_pad.y += text_shift;
+				v_deco.x = 1;
 				name_orientation = Orientation::RIGHT;
 				pad_orientation  = Orientation::LEFT;
 			break;
 			
 			case Orientation::RIGHT :
-				p1.x -= pin.length;
-				p_name.x -= pin.length+text_shift;
+				p1.x -= length;
+				p_name.x -= pin.length+text_shift_name;
 				p_pad.x    -= pin.length-text_shift;
 				p_pad.y += text_shift;
+				v_deco.x = -1;
 				name_orientation = Orientation::LEFT;
 				pad_orientation  = Orientation::RIGHT;
 			break;
 			
 			case Orientation::UP :
-				p1.y -= pin.length;
-				p_name.y -= pin.length+text_shift;
+				p1.y -= length;
+				p_name.y -= pin.length+text_shift_name;
 				p_pad.y -= pin.length-text_shift;
 				p_pad.x -= text_shift;
+				v_deco.y = -1;
 				name_orientation = Orientation::DOWN;
 				pad_orientation = Orientation::UP;
 			break;
 
 			case Orientation::DOWN :
-				p1.y += pin.length;
-				p_name.y += pin.length+text_shift;
+				p1.y += length;
+				p_name.y += pin.length+text_shift_name;
 				p_pad.y += pin.length-text_shift;
 				p_pad.x -= text_shift;
+				v_deco.y = 1;
 				name_orientation = Orientation::UP;
 				pad_orientation = Orientation::DOWN;
 			break;
@@ -299,40 +326,107 @@ namespace horizon {
 				transform.mirror = true;
 			break;
 		}
-		auto dl = [this](float ax, float ay, float bx, float by) {
-			draw_line(Coordf(ax*1_mm, ay*1_mm), Coordf(bx*1_mm, by*1_mm), ColorP::PIN, 0, true, 0);
-		};
-		switch(pin.direction) {
-			case Pin::Direction::OUTPUT :
-				dl(0, -.6, -1, -.2);
-				dl(0, -.6, -1, -1);
-			break;
-			case Pin::Direction::INPUT :
-				dl(-1, -.6, 0, -.2);
-				dl(-1, -.6, 0, -1);
-			break;
-			case Pin::Direction::POWER_INPUT :
-				dl(-1, -.6, 0, -.2);
-				dl(-1, -.6, 0, -1);
-				dl(-1.4, -.6, -.4, -.2);
-				dl(-1.4, -.6, -.4, -1);
-			break;
-			case Pin::Direction::POWER_OUTPUT :
-				dl(0, -.6, -1, -.2);
-				dl(0, -.6, -1, -1);
-				dl(-.4, -.6, -1.4, -.2);
-				dl(-.4, -.6, -1.4, -1);
-			break;
-			case Pin::Direction::BIDIRECTIONAL :
-				dl(0, -.6, -1, -.2);
-				dl(0, -.6, -1, -1);
-				dl(-2, -.6, -1, -.2);
-				dl(-2, -.6, -1, -1);
-			break;
-			default:;
+
+		if(pin.decoration.dot) {
+			draw_arc(Coordf(-((int64_t)pin.length)+dot_size/2, 0), dot_size/2, 0, 2*M_PI, ColorP::FROM_LAYER, 0, true, 0);
 		}
-		//draw_line(Coordf(0, -.5_mm), Coordf(-1_mm, -.5_mm), ColorP::PIN, 0, true, 0);
+		if(pin.decoration.clock) {
+			draw_line(Coordf(-(int64_t)pin.length, .375_mm), Coordf(-(int64_t)pin.length-.75_mm, 0), ColorP::FROM_LAYER, 0, true, 0);
+			draw_line(Coordf(-(int64_t)pin.length, -.375_mm), Coordf(-(int64_t)pin.length-.75_mm, 0), ColorP::FROM_LAYER, 0, true, 0);
+		}
+		{
+			auto dl = [this](float ax, float ay, float bx, float by) {
+				draw_line(Coordf(ax*1_mm, ay*1_mm), Coordf(bx*1_mm, by*1_mm), ColorP::PIN, 0, true, 0);
+			};
+			switch(pin.direction) {
+				case Pin::Direction::OUTPUT :
+					dl(0, -.6, -1, -.2);
+					dl(0, -.6, -1, -1);
+				break;
+				case Pin::Direction::INPUT :
+					dl(-1, -.6, 0, -.2);
+					dl(-1, -.6, 0, -1);
+				break;
+				case Pin::Direction::POWER_INPUT :
+					dl(-1, -.6, 0, -.2);
+					dl(-1, -.6, 0, -1);
+					dl(-1.4, -.6, -.4, -.2);
+					dl(-1.4, -.6, -.4, -1);
+				break;
+				case Pin::Direction::POWER_OUTPUT :
+					dl(0, -.6, -1, -.2);
+					dl(0, -.6, -1, -1);
+					dl(-.4, -.6, -1.4, -.2);
+					dl(-.4, -.6, -1.4, -1);
+				break;
+				case Pin::Direction::BIDIRECTIONAL :
+					dl(0, -.6, -1, -.2);
+					dl(0, -.6, -1, -1);
+					dl(-2, -.6, -1, -.2);
+					dl(-2, -.6, -1, -1);
+				break;
+				default:;
+			}
+		}
 		transform_restore();
+
+		if(pin.decoration.schmitt) {
+			auto dl = [this](float ax, float ay, float bx, float by) {
+				auto sc = .025_mm;
+				draw_line(Coordf(ax*sc, ay*sc), Coordf(bx*sc, by*sc), ColorP::PIN, 0, true, 0);
+			};
+			transform_save();
+			transform.accumulate(pin.position+v_deco*(pin.length+schmitt_shift));
+			dl(-34, -20, -2, -20);
+			dl(34, 20, 2, 20);
+			dl(-20, -20, 2, 20);
+			dl(-2, -20, 20, 20);
+
+			transform_restore();
+		}
+		if(pin.decoration.driver != SymbolPin::Decoration::Driver::DEFAULT) {
+			auto dl = [this](float ax, float ay, float bx, float by) {
+				auto sc = .5_mm;
+				draw_line(Coordf(ax*sc, ay*sc), Coordf(bx*sc, by*sc), ColorP::PIN, 0, true, 0);
+			};
+			transform_save();
+			transform.accumulate(pin.position+v_deco*(pin.length+driver_shift));
+
+			if(pin.decoration.driver != SymbolPin::Decoration::Driver::TRISTATE) {
+				dl(0, -1, 1, 0);
+				dl(1, 0, 0, 1);
+				dl(-1, 0, 0, 1);
+				dl(-1, 0, 0, -1);
+			}
+
+			switch(pin.decoration.driver) {
+				case SymbolPin::Decoration::Driver::OPEN_COLLECTOR_PULLUP :
+				case SymbolPin::Decoration::Driver::OPEN_EMITTER_PULLDOWN :
+					dl(-1, 0, 1, 0);
+				break;
+				default:;
+			}
+			switch(pin.decoration.driver) {
+				case SymbolPin::Decoration::Driver::OPEN_COLLECTOR :
+				case SymbolPin::Decoration::Driver::OPEN_COLLECTOR_PULLUP :
+					dl(-1, -1, 1, -1);
+				break;
+				case SymbolPin::Decoration::Driver::OPEN_EMITTER :
+				case SymbolPin::Decoration::Driver::OPEN_EMITTER_PULLDOWN :
+					dl(-1, 1, 1, 1);
+				break;
+				case SymbolPin::Decoration::Driver::TRISTATE:
+					dl(1, 1, -1, 1);
+					dl(1, 1, 0, -1);
+					dl(-1, 1, 0, -1);
+				break;
+				default: ;
+			}
+
+			transform_restore();
+		}
+
+
 
 		switch(pin.connector_style) {
 			case SymbolPin::ConnectorStyle::BOX :

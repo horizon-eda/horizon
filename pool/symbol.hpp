@@ -35,6 +35,20 @@ namespace horizon {
 			Orientation orientation;
 			Orientation get_orientation_for_placement(const Placement &p) const;
 			
+			class Decoration {
+				public:
+					Decoration();
+					Decoration(const json &j);
+					bool dot = false;
+					bool clock = false;
+					bool schmitt = false;
+					enum class Driver {DEFAULT, OPEN_COLLECTOR, OPEN_COLLECTOR_PULLUP, OPEN_EMITTER, OPEN_EMITTER_PULLDOWN, TRISTATE};
+					Driver driver = Driver::DEFAULT;
+
+					json serialize() const;
+			};
+			Decoration decoration;
+
 			//not stored
 			std::string name;
 			std::string pad;

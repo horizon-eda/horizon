@@ -132,6 +132,22 @@ namespace horizon {
 						dynamic_cast<PropertyValueInt&>(value).value = pin->length;
 						return true;
 
+					case ObjectProperty::ID::DOT :
+						dynamic_cast<PropertyValueBool&>(value).value = pin->decoration.dot;
+						return true;
+
+					case ObjectProperty::ID::CLOCK :
+						dynamic_cast<PropertyValueBool&>(value).value = pin->decoration.clock;
+						return true;
+
+					case ObjectProperty::ID::SCHMITT :
+						dynamic_cast<PropertyValueBool&>(value).value = pin->decoration.schmitt;
+						return true;
+
+					case ObjectProperty::ID::DRIVER :
+						dynamic_cast<PropertyValueInt&>(value).value = static_cast<int>(pin->decoration.driver);
+						return true;
+
 					default :
 						return false;
 				}
@@ -160,6 +176,22 @@ namespace horizon {
 
 					case ObjectProperty::ID::LENGTH :
 						pin->length = dynamic_cast<const PropertyValueInt&>(value).value;
+					break;
+
+					case ObjectProperty::ID::DOT :
+						pin->decoration.dot = dynamic_cast<const PropertyValueBool&>(value).value;
+					break;
+
+					case ObjectProperty::ID::CLOCK :
+						pin->decoration.clock = dynamic_cast<const PropertyValueBool&>(value).value;
+					break;
+
+					case ObjectProperty::ID::SCHMITT :
+						pin->decoration.schmitt = dynamic_cast<const PropertyValueBool&>(value).value;
+					break;
+
+					case ObjectProperty::ID::DRIVER :
+						pin->decoration.driver = static_cast<SymbolPin::Decoration::Driver>(dynamic_cast<const PropertyValueInt&>(value).value);
 					break;
 
 					default:

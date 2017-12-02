@@ -1,6 +1,7 @@
 #include "object_descr.hpp"
 #include "hole.hpp"
 #include "dimension.hpp"
+#include "symbol.hpp"
 
 namespace horizon {
 	const std::map<ObjectType, ObjectDescription> object_descriptions = {
@@ -9,6 +10,19 @@ namespace horizon {
 			{ObjectProperty::ID::NAME_VISIBLE, {ObjectProperty::Type::BOOL, "Name visible", 1}},
 			{ObjectProperty::ID::PAD_VISIBLE, {ObjectProperty::Type::BOOL, "Pad visible", 2}},
 			{ObjectProperty::ID::LENGTH, {ObjectProperty::Type::LENGTH, "Length", 3}},
+			{ObjectProperty::ID::DOT, {ObjectProperty::Type::BOOL, "Dot", 4}},
+			{ObjectProperty::ID::CLOCK, {ObjectProperty::Type::BOOL, "Clock", 5}},
+			{ObjectProperty::ID::SCHMITT, {ObjectProperty::Type::BOOL, "Schmitt", 5}},
+			{ObjectProperty::ID::DRIVER, {ObjectProperty::Type::ENUM, "Driver", 5,
+				{
+					{static_cast<int>(SymbolPin::Decoration::Driver::DEFAULT), "Default"},
+					{static_cast<int>(SymbolPin::Decoration::Driver::OPEN_COLLECTOR), "Open Collector"},
+					{static_cast<int>(SymbolPin::Decoration::Driver::OPEN_COLLECTOR_PULLUP), "O.C. w/  pullup"},
+					{static_cast<int>(SymbolPin::Decoration::Driver::OPEN_EMITTER), "Open Emitter"},
+					{static_cast<int>(SymbolPin::Decoration::Driver::OPEN_EMITTER_PULLDOWN), "O.E. w/  pulldown"},
+					{static_cast<int>(SymbolPin::Decoration::Driver::TRISTATE), "Tristate"},
+				}
+			}},
 		}}},
 		{ObjectType::JUNCTION, {"Junction", "Junctions", {
 		}}},

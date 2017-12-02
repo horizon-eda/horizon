@@ -14,6 +14,33 @@ namespace horizon {
 		{"left", 	Orientation::LEFT},
 		{"right",	Orientation::RIGHT},
 	};
+
+	static const LutEnumStr<SymbolPin::Decoration::Driver> decoration_driver_lut = {
+		{"default",	 				SymbolPin::Decoration::Driver::DEFAULT},
+		{"open_collector",			SymbolPin::Decoration::Driver::OPEN_COLLECTOR},
+		{"open_collector_pullup",	SymbolPin::Decoration::Driver::OPEN_COLLECTOR_PULLUP},
+		{"open_emitter",			SymbolPin::Decoration::Driver::OPEN_EMITTER},
+		{"open_emitter_pulldown",	SymbolPin::Decoration::Driver::OPEN_EMITTER_PULLDOWN},
+		{"tristate",				SymbolPin::Decoration::Driver::TRISTATE},
+	};
+
+	SymbolPin::Decoration::Decoration() {}
+	SymbolPin::Decoration::Decoration(const json &j):
+		dot(j.at("dot")),
+		clock(j.at("clock")),
+		schmitt(j.at("schmitt")),
+		driver(decoration_driver_lut.lookup(j.at("driver")))
+	{}
+
+	json SymbolPin::Decoration::serialize() const {
+		json j;
+		j["dot"] = dot;
+		j["clock"] = clock;
+		j["schmitt"] = schmitt;
+		j["driver"] = decoration_driver_lut.lookup_reverse(driver);
+		return j;
+	}
+
 	
 	SymbolPin::SymbolPin(const UUID &uu, const json &j):
 		uuid(uu),
@@ -23,6 +50,9 @@ namespace horizon {
 		pad_visible(j.value("pad_visible", true)),
 		orientation(orientation_lut.lookup(j["orientation"]))
 	{
+		if(j.count("decoration")) {
+			decoration = Decoration(j.at("decoration"));
+		}
 	}
 	
 	SymbolPin::SymbolPin(UUID uu): uuid(uu), name_visible(true), pad_visible(true) {}
@@ -77,6 +107,7 @@ namespace horizon {
 		j["orientation"] = orientation_lut.lookup_reverse(orientation);
 		j["name_visible"] = name_visible;
 		j["pad_visible"] = pad_visible;
+		j["decoration"] = decoration.serialize();
 		return j;
 	}
 
