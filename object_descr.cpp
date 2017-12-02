@@ -10,7 +10,7 @@ namespace horizon {
 			{ObjectProperty::ID::NAME_VISIBLE, {ObjectProperty::Type::BOOL, "Name visible", 1}},
 			{ObjectProperty::ID::PAD_VISIBLE, {ObjectProperty::Type::BOOL, "Pad visible", 2}},
 			{ObjectProperty::ID::LENGTH, {ObjectProperty::Type::LENGTH, "Length", 3}},
-			{ObjectProperty::ID::DOT, {ObjectProperty::Type::BOOL, "Dot", 4}},
+			{ObjectProperty::ID::DOT, {ObjectProperty::Type::BOOL, "Inverted", 4}},
 			{ObjectProperty::ID::CLOCK, {ObjectProperty::Type::BOOL, "Clock", 5}},
 			{ObjectProperty::ID::SCHMITT, {ObjectProperty::Type::BOOL, "Schmitt", 5}},
 			{ObjectProperty::ID::DRIVER, {ObjectProperty::Type::ENUM, "Driver", 5,
