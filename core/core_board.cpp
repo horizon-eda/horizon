@@ -134,6 +134,10 @@ namespace horizon {
 						dynamic_cast<PropertyValueString&>(value).value = pkg->component->part->get_MPN();
 						return true;
 
+					case ObjectProperty::ID::ALTERNATE_PACKAGE :
+						dynamic_cast<PropertyValueUUID&>(value).value = pkg->alternate_package?pkg->alternate_package->uuid:UUID();
+						return true;
+
 					case ObjectProperty::ID::POSITION_X :
 					case ObjectProperty::ID::POSITION_Y :
 					case ObjectProperty::ID::ANGLE :
@@ -245,6 +249,16 @@ namespace horizon {
 						pkg->flip = dynamic_cast<const PropertyValueBool&>(value).value;
 					break;
 
+					case ObjectProperty::ID::ALTERNATE_PACKAGE : {
+						const auto alt_uuid = dynamic_cast<const PropertyValueUUID&>(value).value;
+						if(!alt_uuid) {
+							pkg->alternate_package = nullptr;
+						}
+						else if(m_pool->get_alternate_packages(pkg->pool_package->uuid).count(alt_uuid) != 0) { //see if really an alt package for pkg
+							pkg->alternate_package = m_pool->get_package(alt_uuid);
+						}
+					} break;
+
 					case ObjectProperty::ID::POSITION_X :
 					case ObjectProperty::ID::POSITION_Y :
 					case ObjectProperty::ID::ANGLE :
@@ -327,6 +341,24 @@ namespace horizon {
 		if(Core::get_property_meta(type, uu, property, meta))
 			return true;
 		switch(type) {
+			case ObjectType::BOARD_PACKAGE : {
+				auto pkg = &brd.packages.at(uu);
+				switch(property) {
+					case ObjectProperty::ID::ALTERNATE_PACKAGE : {
+						PropertyMetaNetClasses &m = dynamic_cast<PropertyMetaNetClasses&>(meta);
+						m.net_classes.clear();
+						m.net_classes.emplace(UUID(), pkg->pool_package->name + " (default)");
+						for(const auto &it: m_pool->get_alternate_packages(pkg->pool_package->uuid)) {
+							m.net_classes.emplace(it, m_pool->get_package(it)->name);
+						}
+						return true;
+					}
+
+					default :
+						return false;
+				}
+			}break;
+
 			case ObjectType::TRACK : {
 				auto track = &brd.tracks.at(uu);
 				switch(property) {

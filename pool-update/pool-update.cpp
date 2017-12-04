@@ -179,11 +179,12 @@ namespace horizon {
 				std::string filename = Glib::build_filename(pkgpath, "package.json");
 				status_cb(PoolUpdateStatus::FILE, filename);
 				auto package = Package::new_from_file(filename, pool);
-				SQLite::Query q(db, "INSERT INTO packages (uuid, name, manufacturer, filename, n_pads) VALUES ($uuid, $name, $manufacturer, $filename, $n_pads)");
+				SQLite::Query q(db, "INSERT INTO packages (uuid, name, manufacturer, filename, n_pads, alternate_for) VALUES ($uuid, $name, $manufacturer, $filename, $n_pads, $alt_for)");
 				q.bind("$uuid", package.uuid);
 				q.bind("$name", package.name);
 				q.bind("$manufacturer", package.manufacturer);
 				q.bind("$n_pads", std::count_if(package.pads.begin(), package.pads.end(), [](const auto &x){return x.second.padstack.type != Padstack::Type::MECHANICAL;}));
+				q.bind("$alt_for", package.alternate_for?package.alternate_for->uuid:UUID());
 				q.bind("$filename", Glib::build_filename(prefix, it, "package.json"));
 				q.step();
 				for(const auto &it_tag: package.tags) {
@@ -268,24 +269,33 @@ namespace horizon {
 
 	void status_cb_nop(PoolUpdateStatus st, const std::string msg) {}
 
+	static const int min_user_version = 1; //keep in sync with schema
+
 	void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb) {
 		auto pool_db_path = Glib::build_filename(pool_base_path, "pool.db");
 		if(!status_cb)
 			status_cb = &status_cb_nop;
 
 		status_cb(PoolUpdateStatus::INFO, "start");
+
 		SQLite::Database db(pool_db_path, SQLITE_OPEN_CREATE|SQLITE_OPEN_READWRITE);
 		{
-			SQLite::Query q(db, "SELECT name FROM sqlite_master WHERE type='table' AND name='units'");
-			if(!q.step()) { //db is likely empty
+			int user_version = 0;
+			{
+				SQLite::Query q(db, "PRAGMA user_version");
+				if(q.step()) {
+					user_version = q.get<int>(0);
+				}
+			}
+			if(user_version < min_user_version) {
+				//update schema
 				auto bytes = Gio::Resource::lookup_data_global("/net/carrotIndustries/horizon/pool-update/schema.sql");
 				gsize size {bytes->get_size()+1};//null byte
 				auto data = (const char*)bytes->get_data(size);
 				db.execute(data);
-				std::cout << "created db from schema" << std::endl;
+				status_cb(PoolUpdateStatus::INFO, "created db from schema");
 			}
 		}
-
 
 		Pool pool(pool_base_path);
 

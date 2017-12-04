@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include <set>
 
 #include "sqlite.hpp"
 
@@ -27,6 +28,8 @@ namespace horizon {
 			const class Padstack *get_padstack(const UUID &uu);
 			const class Package *get_package(const UUID &uu);
 			const class Part *get_part(const UUID &uu);
+			std::set<UUID> get_alternate_packages(const UUID &uu);
+
 			virtual std::string get_filename(ObjectType type, const UUID &uu);
 			const std::string &get_base_path() const;
 			/**

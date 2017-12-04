@@ -66,6 +66,14 @@ namespace horizon {
 		}
 		if(tags.size())
 			q.bind("$ntags", tags.size());
+
+		if(show_none) {
+			row = *(store->append());
+			row[list_columns.uuid] = UUID();
+			row[list_columns.name] = "none";
+			row[list_columns.manufacturer] = "none";
+		}
+
 		while(q.step()) {
 			row = *(store->append());
 			row[list_columns.uuid] = q.get<std::string>(0);

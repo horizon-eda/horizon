@@ -2,6 +2,7 @@
 #include "dialogs/dialogs.hpp"
 #include "board/via_padstack_provider.hpp"
 #include "padstack.hpp"
+#include "package.hpp"
 #include "pool.hpp"
 #include "widgets/pool_browser.hpp"
 
@@ -39,6 +40,9 @@ namespace horizon {
 		switch(type) {
 			case ObjectType::PADSTACK :
 				set_label(pool->get_padstack(selected_uuid)->name);
+			break;
+			case ObjectType::PACKAGE :
+				set_label(pool->get_package(selected_uuid)->name);
 			break;
 			default:
 				set_label("fixme");

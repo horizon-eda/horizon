@@ -131,7 +131,7 @@ namespace horizon {
 		{ObjectType::BOARD_PACKAGE, {"Package", "Packages", {
 			{ObjectProperty::ID::FLIPPED, {ObjectProperty::Type::BOOL, "Flipped", 4}},
 			{ObjectProperty::ID::REFDES, {ObjectProperty::Type::STRING_RO, "Ref. Desig.", 0}},
-			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Package", 1}},
+			{ObjectProperty::ID::ALTERNATE_PACKAGE, {ObjectProperty::Type::NET_CLASS, "Package", 1}},
 			{ObjectProperty::ID::VALUE, {ObjectProperty::Type::STRING_RO, "Value", 3}},
 			{ObjectProperty::ID::MPN, {ObjectProperty::Type::STRING_RO, "MPN", 2}},
 			{ObjectProperty::ID::ANGLE, {ObjectProperty::Type::ANGLE, "Angle", 7}},

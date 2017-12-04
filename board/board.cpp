@@ -537,7 +537,38 @@ namespace horizon {
 
 		for(auto &it: packages) {
 			it.second.pool_package = it.second.component->part->package;
-			it.second.package = *it.second.pool_package;
+			if(it.second.alternate_package) {
+				std::set<std::string> pads_from_primary, pads_from_alt;
+				for(const auto &it_pad: it.second.pool_package->pads) {
+					pads_from_primary.insert(it_pad.second.name);
+				}
+				bool alt_valid = true;
+				for(const auto &it_pad: it.second.alternate_package->pads) {
+					if(!pads_from_alt.insert(it_pad.second.name).second) { //duplicate pad name
+						alt_valid = false;
+					}
+				}
+				if(!alt_valid || pads_from_alt != pads_from_primary) { //alt pkg isn't pad-equal
+					it.second.package = *it.second.pool_package;
+					warnings.emplace_back(it.second.placement.shift, "Incompatible alt pkg");
+				}
+				else {
+					it.second.package = *it.second.alternate_package;
+					it.second.package.pads.clear(); //need to adjust pad uuids to primary package
+					std::map<std::string, UUID> pad_uuids;
+					for(const auto &it_pad: it.second.pool_package->pads) {
+						assert(pad_uuids.emplace(it_pad.second.name, it_pad.first).second); //no duplicates
+					}
+					for(const auto &it_pad: it.second.alternate_package->pads) {
+						auto uu = pad_uuids.at(it_pad.second.name);
+						auto &pad = it.second.package.pads.emplace(uu, it_pad.second).first->second;
+						pad.uuid = uu;
+					}
+				}
+			}
+			else {
+				it.second.package = *it.second.pool_package;
+			}
 			auto r = it.second.package.apply_parameter_set(pset);
 			it.second.placement.mirror = it.second.flip;
 			for(auto &it2: it.second.package.pads) {

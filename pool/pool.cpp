@@ -181,5 +181,15 @@ namespace horizon {
 		return &parts.at(uu);
 	}
 
+	std::set<UUID> Pool::get_alternate_packages(const UUID &uu) {
+		std::set<UUID> r;
+		SQLite::Query q(db, "SELECT uuid FROM packages WHERE alternate_for = ?");
+		q.bind(1, uu);
+		while(q.step()) {
+			r.insert(q.get<std::string>(0));
+		}
+		return r;
+	}
+
 
 }

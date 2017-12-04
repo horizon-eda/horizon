@@ -168,7 +168,10 @@ namespace horizon {
 		if(j.count("parameter_set")) {
 			parameter_set = parameter_set_from_json(j.at("parameter_set"));
 		}
+		if(j.count("alternate_for")) {
+			alternate_for = pool.get_package(UUID(j.at("alternate_for").get<std::string>()));
 		}
+	}
 
 	Package Package::new_from_file(const std::string &filename, Pool &pool) {
 		json j;
@@ -200,6 +203,7 @@ namespace horizon {
 		polygons(pkg.polygons),
 		parameter_set(pkg.parameter_set),
 		parameter_program(pkg.parameter_program),
+		alternate_for(pkg.alternate_for),
 		warnings(pkg.warnings)
 	{
 		update_refs();
@@ -218,6 +222,7 @@ namespace horizon {
 		polygons = pkg.polygons;
 		parameter_set = pkg.parameter_set;
 		parameter_program = pkg.parameter_program;
+		alternate_for = pkg.alternate_for;
 		warnings = pkg.warnings;
 		update_refs();
 	}
@@ -309,6 +314,8 @@ namespace horizon {
 		j["tags"] = tags;
 		j["parameter_program"] = parameter_program.get_code();
 		j["parameter_set"] = parameter_set_serialize(parameter_set);
+		if(alternate_for && alternate_for->uuid != uuid)
+			j["alternate_for"] = (std::string)alternate_for->uuid;
 
 		j["junctions"] = json::object();
 		for(const auto &it: junctions) {

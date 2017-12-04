@@ -69,6 +69,8 @@ namespace horizon {
 			ParameterSet parameter_set;
 			MyParameterProgram parameter_program;
 
+			const class Package *alternate_for = nullptr;
+
 			std::vector<Warning> warnings;
 
 		private :

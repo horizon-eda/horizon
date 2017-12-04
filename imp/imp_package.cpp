@@ -3,6 +3,8 @@
 #include "footprint_generator/footprint_generator_window.hpp"
 #include "imp/parameter_window.hpp"
 #include "header_button.hpp"
+#include "widgets/chooser_buttons.hpp"
+#include "widgets/pool_browser.hpp"
 
 namespace horizon {
 	ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path):
@@ -145,6 +147,10 @@ namespace horizon {
 		auto entry_manufacturer = header_button->add_entry("Manufacturer");
 		auto entry_tags = header_button->add_entry("Tags");
 
+		auto browser_alt_button = Gtk::manage(new PoolBrowserButton(ObjectType::PACKAGE, pool.get()));
+		browser_alt_button->get_browser()->set_show_none(true);
+		header_button->add_widget("Alternate for", browser_alt_button);
+
 		entry_name->signal_changed().connect([entry_name, header_button] {header_button->set_label(entry_name->get_text());});
 
 		{
@@ -154,6 +160,8 @@ namespace horizon {
 			std::stringstream s;
 			std::copy(pkg->tags.begin(), pkg->tags.end(), std::ostream_iterator<std::string>(s, " "));
 			entry_tags->set_text(s.str());
+			if(pkg->alternate_for)
+				browser_alt_button->property_selected_uuid() = pkg->alternate_for->uuid;
 		}
 
 		auto hamburger_menu = add_hamburger_menu();
@@ -172,7 +180,7 @@ namespace horizon {
 			main_window->header->pack_end(*button);
 		}
 
-		core_package.signal_save().connect([this, entry_name, entry_manufacturer, entry_tags, header_button]{
+		core_package.signal_save().connect([this, entry_name, entry_manufacturer, entry_tags, header_button, browser_alt_button]{
 			auto pkg = core_package.get_package(false);
 			std::stringstream ss(entry_tags->get_text());
 			std::istream_iterator<std::string> begin(ss);
@@ -182,6 +190,13 @@ namespace horizon {
 			pkg->tags.insert(tags.begin(), tags.end());
 			pkg->name = entry_name->get_text();
 			pkg->manufacturer = entry_manufacturer->get_text();
+			UUID alt_uuid = browser_alt_button->property_selected_uuid();
+			if(alt_uuid) {
+				pkg->alternate_for = pool->get_package(alt_uuid);
+			}
+			else {
+				pkg->alternate_for = nullptr;
+			}
 			header_button->set_label(pkg->name);
 		});
 
