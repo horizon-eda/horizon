@@ -167,37 +167,73 @@ namespace horizon {
 		}
 	}
 
-	static void update_packages(SQLite::Database &db, Pool &pool, const std::string &directory, pool_update_cb_t status_cb, const std::string &prefix="") {
-		if(prefix.size()==0) {
+	static bool update_packages(SQLite::Database &db, Pool &pool, const std::string &directory, pool_update_cb_t status_cb, const std::string &prefix="") {
+		if(prefix.size()==0)
 			db.execute("DELETE from packages");
-		}
+
 		Glib::Dir dir(directory);
-		for(const auto &it: dir) {
-			auto pkgpath = Glib::build_filename(directory, it);
-			auto pkgfilename = Glib::build_filename(pkgpath, "package.json");
-			if(Glib::file_test(pkgfilename, Glib::FileTest::FILE_TEST_IS_REGULAR)) {
-				std::string filename = Glib::build_filename(pkgpath, "package.json");
-				status_cb(PoolUpdateStatus::FILE, filename);
-				auto package = Package::new_from_file(filename, pool);
-				SQLite::Query q(db, "INSERT INTO packages (uuid, name, manufacturer, filename, n_pads, alternate_for) VALUES ($uuid, $name, $manufacturer, $filename, $n_pads, $alt_for)");
-				q.bind("$uuid", package.uuid);
-				q.bind("$name", package.name);
-				q.bind("$manufacturer", package.manufacturer);
-				q.bind("$n_pads", std::count_if(package.pads.begin(), package.pads.end(), [](const auto &x){return x.second.padstack.type != Padstack::Type::MECHANICAL;}));
-				q.bind("$alt_for", package.alternate_for?package.alternate_for->uuid:UUID());
-				q.bind("$filename", Glib::build_filename(prefix, it, "package.json"));
-				q.step();
-				for(const auto &it_tag: package.tags) {
-					SQLite::Query q2(db, "INSERT into tags (tag, uuid, type) VALUES ($tag, $uuid, 'package')");
-					q2.bind("$uuid", package.uuid);
-					q2.bind("$tag", it_tag);
-					q2.step();
+		bool skipped = true;
+		while(skipped) {
+			skipped = false;
+			if(prefix.size() == 0)
+				db.execute("BEGIN TRANSACTION");
+			for(const auto &it: dir) {
+				auto pkgpath = Glib::build_filename(directory, it);
+				auto pkgfilename = Glib::build_filename(pkgpath, "package.json");
+				if(Glib::file_test(pkgfilename, Glib::FileTest::FILE_TEST_IS_REGULAR)) {
+					std::string filename = Glib::build_filename(pkgpath, "package.json");
+					status_cb(PoolUpdateStatus::FILE, filename);
+					bool skipthis = false;
+					{
+						status_cb(PoolUpdateStatus::FILE, filename);
+						std::ifstream ifs(filename);
+						json j;
+						if(!ifs.is_open()) {
+							throw std::runtime_error("packages not opened");
+						}
+						ifs>>j;
+						ifs.close();
+						if(j.count("alternate_for")) {
+							UUID alt_uuid = j.at("alternate_for").get<std::string>();
+							SQLite::Query q(pool.db, "SELECT uuid from packages WHERE uuid = $uuid");
+							q.bind("$uuid", alt_uuid);
+							if(!q.step()) { //not found
+								skipthis = true;
+								skipped = true;
+							}
+						}
+					}
+					if(!skipthis) {
+						status_cb(PoolUpdateStatus::FILE, filename);
+						auto package = Package::new_from_file(filename, pool);
+						SQLite::Query q(db, "INSERT INTO packages (uuid, name, manufacturer, filename, n_pads, alternate_for) VALUES ($uuid, $name, $manufacturer, $filename, $n_pads, $alt_for)");
+						q.bind("$uuid", package.uuid);
+						q.bind("$name", package.name);
+						q.bind("$manufacturer", package.manufacturer);
+						q.bind("$n_pads", std::count_if(package.pads.begin(), package.pads.end(), [](const auto &x){return x.second.padstack.type != Padstack::Type::MECHANICAL;}));
+						q.bind("$alt_for", package.alternate_for?package.alternate_for->uuid:UUID());
+						q.bind("$filename", Glib::build_filename(prefix, it, "package.json"));
+						q.step();
+						for(const auto &it_tag: package.tags) {
+							SQLite::Query q2(db, "INSERT into tags (tag, uuid, type) VALUES ($tag, $uuid, 'package')");
+							q2.bind("$uuid", package.uuid);
+							q2.bind("$tag", it_tag);
+							q2.step();
+						}
+					}
+				}
+				else if(Glib::file_test(pkgpath, Glib::FILE_TEST_IS_DIR)) {
+					if(update_packages(db, pool, pkgpath, status_cb, Glib::build_filename(prefix,it)))
+						skipped = true;
 				}
 			}
-			else if(Glib::file_test(pkgpath, Glib::FILE_TEST_IS_DIR)) {
-				update_packages(db, pool, pkgpath, status_cb, Glib::build_filename(prefix,it));
-			}
+			if(prefix.size() == 0)
+				db.execute("COMMIT");
+			if(prefix.size()>0)
+				break;
 		}
+		return skipped;
+
 	}
 
 	static bool update_parts(SQLite::Database &db, Pool &pool, const std::string &directory, pool_update_cb_t status_cb, const std::string &prefix="") {
@@ -322,9 +358,7 @@ namespace horizon {
 		db.execute("COMMIT");
 
 		status_cb(PoolUpdateStatus::INFO, "packages");
-		db.execute("BEGIN TRANSACTION");
 		update_packages(db, pool, Glib::build_filename(pool_base_path, "packages"), status_cb);
-		db.execute("COMMIT");
 
 		status_cb(PoolUpdateStatus::INFO, "parts");
 		update_parts(db, pool, Glib::build_filename(pool_base_path, "parts"), status_cb);
