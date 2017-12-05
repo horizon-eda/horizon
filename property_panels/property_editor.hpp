@@ -9,6 +9,8 @@ namespace horizon {
 		public:
 			PropertyEditor(ObjectType t, ObjectProperty::ID prop, class PropertyPanel *p);
 			void construct();
+			void set_can_apply_all(bool v);
+
 			virtual void reload() {};
 			virtual PropertyValue &get_value() {return dummy;}
 			virtual PropertyMeta &get_meta() {return meta;}
@@ -26,7 +28,7 @@ namespace horizon {
 			const ObjectType type;
 
 			const ObjectProperty &property;
-			Gtk::Button *apply_all_button;
+			Gtk::Button *apply_all_button = nullptr;
 
 			virtual Gtk::Widget *create_editor();
 
@@ -34,6 +36,8 @@ namespace horizon {
 			type_signal_changed s_signal_apply_all;
 			PropertyValue dummy;
 			PropertyMeta meta;
+
+			bool readonly = false;
 
 			std::deque<sigc::connection> connections;
 

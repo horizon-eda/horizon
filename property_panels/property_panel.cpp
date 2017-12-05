@@ -185,6 +185,12 @@ namespace horizon {
 		}
 		reload();
 
+		for(const auto ch: editors_box->get_children()) {
+			if(auto ed = dynamic_cast<PropertyEditor*>(ch)) {
+				ed->set_can_apply_all(objects.size()>1);
+			}
+		}
+
 
 		{
 			auto chs = sel_menu.get_children();

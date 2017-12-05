@@ -46,7 +46,6 @@ namespace horizon {
 		apply_all_button = Gtk::manage(new Gtk::Button());
 		apply_all_button->set_image_from_icon_name("object-select-symbolic");
 		apply_all_button->signal_clicked().connect([this]{s_signal_apply_all.emit();});
-		apply_all_button->set_tooltip_text("Apply to all");
 		hbox->pack_start(*apply_all_button, false, false, 0);
 
 		pack_start(*hbox, false, false, 0);
@@ -61,6 +60,17 @@ namespace horizon {
 	Gtk::Widget *PropertyEditor::create_editor() {
 		Gtk::Label *la = Gtk::manage(new Gtk::Label("fixme"));
 		return la;
+	}
+
+	void PropertyEditor::set_can_apply_all(bool v) {
+		if(v) {
+			apply_all_button->set_tooltip_text("Apply to all selected "+object_descriptions.at(type).name_pl);
+			apply_all_button->set_sensitive(!readonly);
+		}
+		else {
+			apply_all_button->set_tooltip_text("Disabled since only one " + object_descriptions.at(type).name + " is selected");
+			apply_all_button->set_sensitive(false);
+		}
 	}
 
 	Gtk::Widget *PropertyEditorBool::create_editor() {
@@ -108,7 +118,6 @@ namespace horizon {
 		ScopedBlock block(connections);
 		en->set_text(value.value);
 		en->unset_icon(Gtk::ENTRY_ICON_PRIMARY);
-		en->set_sensitive(meta.is_settable);
 		modified = false;
 	}
 
@@ -172,6 +181,7 @@ namespace horizon {
 
 	Gtk::Widget *PropertyEditorStringRO::create_editor() {
 		apply_all_button->set_sensitive(false);
+		readonly = true;
 		la = Gtk::manage(new Gtk::Label(""));
 		return la;
 	}
