@@ -19,7 +19,7 @@ namespace horizon {
 			Gtk::Widget *create_extra_widget(ParameterID id) override {
 				auto w = Gtk::manage(new Gtk::Button());
 				w->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
-				w->set_tooltip_text("Apply to all pads (Shift+Enter)");
+				w->set_tooltip_text("Apply to all selected pads (Shift+Enter)");
 				w->signal_clicked().connect([this, id] {
 					s_signal_apply_all.emit(id);
 				});
