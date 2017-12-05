@@ -1,9 +1,7 @@
 #include "tool_helper_map_symbol.hpp"
-#include "schematic.hpp"
-#include "entity.hpp"
-#include "part.hpp"
 #include "sqlite.hpp"
-#include "imp.hpp"
+#include "core_schematic.hpp"
+#include "imp_interface.hpp"
 
 namespace horizon {
 	SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *gate) {
