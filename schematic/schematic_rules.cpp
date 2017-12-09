@@ -54,7 +54,6 @@ namespace horizon {
 	}
 
 	Rule *SchematicRules::add_rule(RuleID id) {
-		auto uu = UUID::random();
 		Rule *r = nullptr;
 		switch(id) {
 			default:
