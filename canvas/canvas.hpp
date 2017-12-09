@@ -234,6 +234,8 @@ namespace horizon {
 			void set_highlight_shadow(float a);
 			void set_highlight_lighten(float a);
 
+			void inhibit_drag_selection();
+
 			Gdk::ModifierType grid_fine_modifier = Gdk::MOD1_MASK;
 
 		protected:
@@ -287,6 +289,8 @@ namespace horizon {
 			float highlight_dim = .5;
 			float highlight_shadow = .3;
 			float highlight_lighten = .3;
+
+			bool drag_selection_inhibited = false;
 
 		protected :
 			void on_size_allocate(Gtk::Allocation &alloc) override;

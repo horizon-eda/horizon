@@ -586,6 +586,9 @@ namespace horizon {
 			ToolResponse r = core.r->tool_update(args);
 			tool_process(r);
 		}
+		else if(!core.r->tool_is_active() && button_event->button == 1) {
+			handle_maybe_drag();
+		}
 		else if(!core.r->tool_is_active() && button_event->button == 3) {
 			for(const auto it: context_menu->get_children()) {
 				delete it;

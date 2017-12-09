@@ -377,6 +377,10 @@ namespace horizon {
 		return in_selection;
 	}
 
+	void CanvasGL::inhibit_drag_selection() {
+		drag_selection_inhibited = true;
+	}
+
 	void CanvasGL::set_highlight_mode(CanvasGL::HighlightMode mode) {
 		highlight_mode = mode;
 		queue_draw();

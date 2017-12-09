@@ -82,6 +82,11 @@ namespace horizon {
 	void BoxSelection::drag_move(GdkEventMotion *motion_event) {
 		gdouble x,y;
 		gdk_event_get_coords((GdkEvent*)motion_event, &x, &y);
+		if(ca->drag_selection_inhibited) {
+			active = 0;
+			return;
+		}
+
 		if(active==1) {
 			if(ABS(sel_o.x - x) > 10 &&ABS(sel_o.y - y) > 10) {
 				active = 2;
@@ -189,6 +194,7 @@ namespace horizon {
 			}
 			active = 0;
 			ca->queue_draw();
+			ca->drag_selection_inhibited = false;
 		}
 	}
 	

@@ -311,6 +311,19 @@ namespace horizon {
 				canvas->center_and_zoom(location);
 			}
 		});
+
+		canvas->signal_motion_notify_event().connect([this] (GdkEventMotion *ev){
+			if(target_drag_begin.type != ObjectType::INVALID) {
+				handle_drag();
+			}
+			return false;
+		});
+
+		canvas->signal_button_release_event().connect([this] (GdkEventButton *ev){
+			target_drag_begin = Target();
+			return false;
+		});
+
 	}
 
 	void ImpSchematic::handle_export_pdf() {
@@ -346,5 +359,71 @@ namespace horizon {
 
 	ToolID ImpSchematic::handle_key(guint k) {
 		return key_seq.handle_key(k);
+	}
+
+	void ImpSchematic::handle_maybe_drag() {
+		auto target = canvas->get_current_target();
+		if(target.type == ObjectType::SYMBOL_PIN || target.type == ObjectType::JUNCTION) {
+			std::cout << "click pin" << std::endl;
+			canvas->inhibit_drag_selection();
+			target_drag_begin = target;
+			cursor_pos_drag_begin = canvas->get_cursor_pos_win();
+		}
+	}
+
+	static bool drag_does_start(const Coordf &delta, Orientation orientation) {
+		float thr = 50;
+		switch(orientation) {
+			case Orientation::DOWN :
+				return delta.y > thr;
+
+			case Orientation::UP :
+				return -delta.y > thr;
+
+			case Orientation::RIGHT :
+				return delta.x > thr;
+
+			case Orientation::LEFT :
+				return -delta.x > thr;
+
+			default :
+				return false;
+		}
+	}
+
+	void ImpSchematic::handle_drag() {
+		auto pos = canvas->get_cursor_pos_win();
+		auto delta = pos-cursor_pos_drag_begin;
+		bool start = false;
+
+		if(target_drag_begin.type == ObjectType::SYMBOL_PIN) {
+			const auto sym = core_schematic.get_schematic_symbol(target_drag_begin.path.at(0));
+			const auto &pin = sym->symbol.pins.at(target_drag_begin.path.at(1));
+			auto orientation = pin.get_orientation_for_placement(sym->placement);
+			start = drag_does_start(delta, orientation);
+		}
+		else if(target_drag_begin.type == ObjectType::JUNCTION) {
+			start = delta.mag_sq()>(50*50);
+		}
+
+		if(start) {
+			{
+				ToolArgs args;
+				args.coords = target_drag_begin.p;
+				ToolResponse r= core.r->tool_begin(ToolID::DRAW_NET, args, imp_interface.get());
+				tool_process(r);
+			}
+			{
+				ToolArgs args;
+				args.type = ToolEventType::CLICK;
+				args.coords = target_drag_begin.p;
+				args.button = 1;
+				args.target = target_drag_begin;
+				args.work_layer = canvas->property_work_layer();
+				ToolResponse r = core.r->tool_update(args);
+				tool_process(r);
+			}
+			target_drag_begin = Target();
+		}
 	}
 }

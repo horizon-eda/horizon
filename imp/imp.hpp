@@ -99,6 +99,8 @@ namespace horizon {
 
 			std::unique_ptr<WindowStateStore> state_store=nullptr;
 
+			virtual void handle_maybe_drag() {}
+
 		private:
 			void fix_cursor_pos();
 			void apply_settings();

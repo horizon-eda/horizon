@@ -13,6 +13,7 @@ namespace horizon {
 			void construct() override;
 			ToolID handle_key(guint k) override;
 			bool handle_broadcast(const json &j);
+			void handle_maybe_drag();
 		private:
 			void canvas_update() override;
 			CoreSchematic core_schematic;
@@ -30,5 +31,10 @@ namespace horizon {
 			class SheetBox *sheet_box;
 			void handle_selection_cross_probe();
 			bool cross_probing_enabled = false;
+
+			Coordf cursor_pos_drag_begin;
+			Target target_drag_begin;
+
+			void handle_drag();
 	};
 }
