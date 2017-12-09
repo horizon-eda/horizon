@@ -3,7 +3,9 @@
 namespace horizon {
 	template <typename T>class Accumulator {
 		public:
-			Accumulator(){};
+			Accumulator():
+				value()
+			{}
 			void accumulate(const T &v) {
 				value = (value*n+v)/(n+1);
 				n++;
