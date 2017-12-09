@@ -12,6 +12,7 @@ namespace horizon {
 			static PinEditor* create(class Pin *p, UnitEditor *pa);
 			class Pin *pin;
 			UnitEditor *parent;
+			void focus();
 
 		private :
 			Gtk::Entry *name_entry = nullptr;
@@ -41,6 +42,18 @@ namespace horizon {
 		name_entry->signal_changed().connect([this]{
 			pin->primary_name = name_entry->get_text();
 			parent->needs_save = true;
+		});
+		name_entry->signal_activate().connect([this] {
+			parent->handle_activate(this);
+		});
+		name_entry->signal_focus_in_event().connect([this] (GdkEventFocus *ev) {
+			auto this_row = dynamic_cast<Gtk::ListBoxRow*>(get_ancestor(GTK_TYPE_LIST_BOX_ROW));
+			if(!this_row->is_selected()) {
+				auto lb = dynamic_cast<Gtk::ListBox*>(get_ancestor(GTK_TYPE_LIST_BOX));
+				lb->unselect_all();
+				lb->select_row(*this_row);
+			}
+			return false;
 		});
 
 		{
@@ -93,6 +106,20 @@ namespace horizon {
 		return w;
 	}
 
+	void PinEditor::focus() {
+		name_entry->grab_focus();
+	}
+
+	void UnitEditor::sort() {
+		pins_listbox->set_sort_func([](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b){
+			auto na = dynamic_cast<PinEditor*>(a->get_child())->pin->primary_name;
+			auto nb = dynamic_cast<PinEditor*>(b->get_child())->pin->primary_name;
+			return strcmp_natural(na, nb);
+		});
+		pins_listbox->invalidate_sort();
+		pins_listbox->unset_sort_func();
+	}
+
 	UnitEditor::UnitEditor(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x, Unit *u) :
 		Gtk::Box(cobject), unit(u) {
 		x->get_widget("unit_name", name_entry);
@@ -113,23 +140,15 @@ namespace horizon {
 			needs_save = true;
 		});
 
-
-		pins_listbox->set_sort_func([](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b){
-			auto na = dynamic_cast<PinEditor*>(a->get_child())->pin->primary_name;
-			auto nb = dynamic_cast<PinEditor*>(b->get_child())->pin->primary_name;
-			return strcmp_natural(na, nb);
-		});
-
 		for(auto &it: unit->pins) {
 			auto ed = PinEditor::create(&it.second, this);
 			ed->show_all();
 			pins_listbox->append(*ed);
 			ed->unreference();
 		}
-		pins_listbox->invalidate_sort();
 
 		refresh_button->signal_clicked().connect([this]{
-			pins_listbox->invalidate_sort();
+			sort();
 		});
 
 		delete_button->signal_clicked().connect(sigc::mem_fun(this, &UnitEditor::handle_delete));
@@ -142,6 +161,8 @@ namespace horizon {
 			}
 			return false;
 		});
+
+		sort();
 	}
 
 	void UnitEditor::handle_delete() {
@@ -205,10 +226,25 @@ namespace horizon {
 			pin->names = pin_selected->names;
 		}
 
+		int index = 0;
+		{
+			auto children = pins_listbox->get_children();
+			int i = 0;
+			for(auto &ch: children) {
+				auto row = dynamic_cast<Gtk::ListBoxRow*>(ch);
+				auto ed_row = dynamic_cast<PinEditor*>(row->get_child());
+				if(ed_row->pin == pin_selected) {
+					index = i;
+					break;
+				}
+				i++;
+			}
+		}
+
 
 		auto ed = PinEditor::create(pin, this);
 		ed->show_all();
-		pins_listbox->append(*ed);
+		pins_listbox->insert(*ed, index+1);
 		ed->unreference();
 
 		auto children = pins_listbox->get_children();
@@ -218,11 +254,37 @@ namespace horizon {
 			if(ed_row->pin->uuid == uu) {
 				pins_listbox->unselect_all();
 				pins_listbox->select_row(*row);
+				ed_row->focus();
 				break;
 			}
 		}
 		needs_save = true;
-		pins_listbox->invalidate_sort();
+	}
+
+	void UnitEditor::handle_activate(PinEditor *ed) {
+		auto children = pins_listbox->get_children();
+		size_t i = 0;
+		for(auto &ch: children) {
+			auto row = dynamic_cast<Gtk::ListBoxRow*>(ch);
+			auto ed_row = dynamic_cast<PinEditor*>(row->get_child());
+			if(ed_row == ed) {
+				if(i == children.size()-1) {
+					pins_listbox->unselect_all();
+					pins_listbox->select_row(*row);
+					handle_add();
+				}
+				else {
+					auto row_next = dynamic_cast<Gtk::ListBoxRow*>(children.at(i+1));
+					auto ed_next = dynamic_cast<PinEditor*>(row_next->get_child());
+					pins_listbox->unselect_all();
+					pins_listbox->select_row(*row_next);
+					ed_next->focus();
+				}
+				return;
+			}
+			i++;
+		}
+
 	}
 
 	UnitEditor* UnitEditor::create(Unit *u) {

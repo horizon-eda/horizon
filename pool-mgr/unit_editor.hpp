@@ -28,5 +28,7 @@ namespace horizon {
 
 			void handle_add();
 			void handle_delete();
+			void sort();
+			void handle_activate(class PinEditor *ed);
 	};
 }
