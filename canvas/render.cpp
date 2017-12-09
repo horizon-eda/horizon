@@ -63,7 +63,8 @@ namespace horizon {
 		object_refs_current.emplace_back(ObjectType::JUNCTION, junc.uuid);
 		if(draw) {
 			if(junc.connection_count == 2) {
-				draw_plus(junc.position, 250000, c);
+				if(show_all_junctions_in_schematic)
+					draw_plus(junc.position, 250000, c);
 			}
 			else if(junc.connection_count >= 3  && mode == ObjectType::SCHEMATIC) {
 				draw_line(junc.position, junc.position+Coordi(0, 1000), c, 0, true, 0.75_mm);

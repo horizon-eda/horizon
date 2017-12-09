@@ -63,10 +63,23 @@ namespace horizon {
 		grid_fine_modifier = grid_fine_mod_lut.lookup(j.value("grid_fine_modifier", "alt"));
 	}
 
+	json SchematicPreferences::serialize() const {
+		json j;
+		j["show_all_junctions"] = show_all_junctions;
+		j["drag_start_net_line"] = drag_start_net_line;
+		return j;
+	}
+
+	void SchematicPreferences::load_from_json(const json &j) {
+		show_all_junctions = j.value("show_all_junctions", false);
+		drag_start_net_line = j.value("drag_start_net_line", true);
+	}
+
 	json ImpPreferences::serialize() const {
 		json j;
 		j["canvas_layer"] = canvas_layer.serialize();
 		j["canvas_non_layer"] = canvas_non_layer.serialize();
+		j["schematic"] = schematic.serialize();
 		return j;
 	}
 
@@ -93,6 +106,8 @@ namespace horizon {
 
 			canvas_layer.load_from_json(j.at("canvas_layer"));
 			canvas_non_layer.load_from_json(j.at("canvas_non_layer"));
+			if(j.count("schematic"))
+				schematic.load_from_json(j.at("schematic"));
 		}
 		s_signal_changed.emit();
 	}

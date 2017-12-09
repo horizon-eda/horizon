@@ -56,6 +56,8 @@ namespace horizon {
 			
 			bool layer_is_visible(int layer) const;
 			
+			bool show_all_junctions_in_schematic = false;
+
 		protected:
 			std::unordered_map<int, std::vector<Triangle>> triangles;
 			void add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t flg=0);

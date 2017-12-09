@@ -25,6 +25,15 @@ namespace horizon {
 			json serialize() const;
 	};
 
+	class SchematicPreferences {
+		public:
+			bool show_all_junctions = false;
+			bool drag_start_net_line = true;
+
+			void load_from_json(const json &j);
+			json serialize() const;
+	};
+
 	class ImpPreferences: public sigc::trackable {
 		public:
 			ImpPreferences();
@@ -38,6 +47,7 @@ namespace horizon {
 
 			CanvasPreferences canvas_non_layer;
 			CanvasPreferences canvas_layer;
+			SchematicPreferences schematic;
 
 			typedef sigc::signal<void> type_signal_changed;
 			type_signal_changed signal_changed() {return s_signal_changed;}

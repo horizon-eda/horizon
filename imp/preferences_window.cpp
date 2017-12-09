@@ -92,6 +92,33 @@ namespace horizon {
 		return w;
 	}
 
+	class SchematicPreferencesEditor: public Gtk::Grid {
+		public:
+			SchematicPreferencesEditor(ImpPreferences *prefs, SchematicPreferences *sch_prefs);
+			ImpPreferences *preferences;
+			SchematicPreferences *schematic_preferences;
+	};
+
+	SchematicPreferencesEditor::SchematicPreferencesEditor(ImpPreferences *prefs, SchematicPreferences *sch_prefs): Gtk::Grid(),
+		preferences(prefs), schematic_preferences(sch_prefs) {
+		property_margin() = 20;
+		set_column_spacing(10);
+		set_row_spacing(10);
+		int top = 0;
+		{
+			auto sw = Gtk::manage(new Gtk::Switch);
+			grid_attach_label_and_widget(this, "Show all junctions", sw, top);
+			bind_widget(sw, schematic_preferences->show_all_junctions);
+			sw->property_active().signal_changed().connect([this]{preferences->signal_changed().emit();});
+		}
+		{
+			auto sw = Gtk::manage(new Gtk::Switch);
+			grid_attach_label_and_widget(this, "Drag to start net lines", sw, top);
+			bind_widget(sw, schematic_preferences->drag_start_net_line);
+			sw->property_active().signal_changed().connect([this]{preferences->signal_changed().emit();});
+		}
+	}
+
 	ImpPreferencesWindow::ImpPreferencesWindow(ImpPreferences *prefs): Gtk::Window(), preferences(prefs) {
 		set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 		auto header = Gtk::manage(new Gtk::HeaderBar());
@@ -121,6 +148,11 @@ namespace horizon {
 			stack->add(*ed, "non-layer", "Non-layer canvas");
 			ed->show();
 			ed->unreference();
+		}
+		{
+			auto ed = Gtk::manage(new SchematicPreferencesEditor(preferences, &preferences->schematic));
+			stack->add(*ed, "schematic", "Schematic");
+			ed->show();
 		}
 
 		box->show();

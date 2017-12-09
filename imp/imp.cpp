@@ -349,6 +349,7 @@ namespace horizon {
 				canvas->grid_fine_modifier = Gdk::CONTROL_MASK;
 			break;
 		}
+		canvas->show_all_junctions_in_schematic = preferences.schematic.show_all_junctions;
 	}
 
 	void ImpBase::canvas_update_from_pp() {

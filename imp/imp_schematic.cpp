@@ -362,6 +362,8 @@ namespace horizon {
 	}
 
 	void ImpSchematic::handle_maybe_drag() {
+		if(!preferences.schematic.drag_start_net_line)
+			return;
 		auto target = canvas->get_current_target();
 		if(target.type == ObjectType::SYMBOL_PIN || target.type == ObjectType::JUNCTION) {
 			std::cout << "click pin" << std::endl;
