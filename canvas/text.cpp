@@ -270,8 +270,6 @@ enum HersheyFonts {
 		}
 		float x0 = 0;
 		float y0 = 0;
-		int fontFace = FONT_HERSHEY_SIMPLEX;
-		const int* ascii = getFontData(fontFace);
 		float sc = size / 21;
 		float yshift = (origin==TextOrigin::CENTER)?-size/2:(origin==TextOrigin::BOTTOM?size/2:0);
 

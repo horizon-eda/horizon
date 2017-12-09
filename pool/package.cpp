@@ -61,7 +61,7 @@ namespace horizon {
 			return {true, "number of coordinates must be even"};
 		}
 		ClipperLib::Path path;
-		for(int i = 0; i<cmd->arguments.size()-1; i+=2) {
+		for(size_t i = 0; i<cmd->arguments.size()-1; i+=2) {
 			if(cmd->arguments.at(i+1)->type != ParameterProgram::Token::Type::INT || cmd->arguments.at(i+2)->type != ParameterProgram::Token::Type::INT) {
 				return {true, "coordinates must be int"};
 			}
