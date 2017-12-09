@@ -1,5 +1,7 @@
 #include "block.hpp"
 #include <set>
+#include "logger/logger.hpp"
+#include "logger/log_util.hpp"
 
 namespace horizon {
 
@@ -7,21 +9,28 @@ namespace horizon {
 			uuid(uu),
 			name(j.at("name").get<std::string>())
 		{
+			Logger::log_info("loading block "+(std::string)uuid, Logger::Domain::BLOCK);
 			if(j.count("net_classes")) {
 				const json &o = j["net_classes"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					net_classes.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
+					load_and_log(net_classes, ObjectType::NET_CLASS, std::forward_as_tuple(u, it.value()), Logger::Domain::BLOCK);
 				}
 			}
-			net_class_default = &net_classes.at(j.at("net_class_default").get<std::string>());
+			UUID nc_default_uuid = j.at("net_class_default").get<std::string>();
+			if(net_classes.count(nc_default_uuid))
+				net_class_default = &net_classes.at(nc_default_uuid);
+			else
+				Logger::log_critical("default net class " + (std::string)nc_default_uuid + " not found", Logger::Domain::BLOCK);
+
 			{
 				const json &o = j["nets"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					nets.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
+					load_and_log(nets, ObjectType::NET, std::forward_as_tuple(u, it.value(), *this), Logger::Domain::BLOCK);
 				}
 			}
+
 			for(auto &it: nets) {
 				it.second.diffpair.update(nets);
 			}
@@ -31,14 +40,14 @@ namespace horizon {
 				const json &o = j["buses"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					buses.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
+					load_and_log(buses, ObjectType::BUS, std::forward_as_tuple(u, it.value(), *this), Logger::Domain::BLOCK);
 				}
 			}
 			{
 				const json &o = j["components"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					components.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), pool, this));
+					load_and_log(components, ObjectType::COMPONENT, std::forward_as_tuple(u, it.value(), pool, this), Logger::Domain::BLOCK);
 				}
 			}
 		}

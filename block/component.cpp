@@ -1,6 +1,7 @@
 #include "component.hpp"
 #include "part.hpp"
 #include "block.hpp"
+#include "logger/logger.hpp"
 
 namespace horizon {
 
@@ -11,8 +12,13 @@ namespace horizon {
 	}
 
 	Connection::Connection(const json &j, Block *block){
-		if(block)
-			net = block->get_net(j.at("net").get<std::string>());
+		if(block) {
+			UUID net_uu = j.at("net").get<std::string>();
+			net = block->get_net(net_uu);
+			if(net == nullptr) {
+				throw std::runtime_error("net " +(std::string) net_uu + " not found");
+			}
+		}
 		else
 			net.uuid = j.at("net").get<std::string>();
 	}
@@ -36,8 +42,19 @@ namespace horizon {
 					if(entity->gates.count(u.at(0)) > 0) {
 						const auto &g = entity->gates.at(u.at(0));
 						if(g.unit->pins.count(u.at(1)) > 0) {
-							connections.emplace(std::make_pair(u, Connection(it.value(), block)));
+							try {
+								connections.emplace(std::make_pair(u, Connection(it.value(), block)));
+							}
+							catch(const std::exception &e) {
+								Logger::log_critical("error loading connection to "+refdes + "." + g.name + "." +g.unit->pins.at(u.at(1)).primary_name, Logger::Domain::BLOCK, e.what());
+							}
 						}
+						else {
+							Logger::log_critical("connection to nonexistent pin at "+refdes+"."+g.name, Logger::Domain::BLOCK);
+						}
+					}
+					else {
+						Logger::log_critical("connection to nonexistent gate at "+refdes, Logger::Domain::BLOCK);
 					}
 				}
 			}

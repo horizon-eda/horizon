@@ -30,6 +30,8 @@ namespace horizon {
 		}}},
 		{ObjectType::SYMBOL, {"Symbol", "Symbols", {
 		}}},
+		{ObjectType::NET_CLASS, {"Net class", "Net classes", {
+		}}},
 		{ObjectType::UNIT, {"Unit", "Units", {
 		}}},
 		{ObjectType::ENTITY, {"Entity", "Entities", {

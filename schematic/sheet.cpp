@@ -2,6 +2,9 @@
 #include "part.hpp"
 #include "pool.hpp"
 #include "util.hpp"
+#include "logger/logger.hpp"
+#include "logger/log_util.hpp"
+#include "object_descr.hpp"
 
 namespace horizon {
 
@@ -10,6 +13,7 @@ namespace horizon {
 			name(j.at("name").get<std::string>()),
 			index(j.at("index").get<unsigned int>())
 		{
+			Logger::log_info("loading sheet "+name, Logger::Domain::SCHEMATIC);
 			if(j.count("frame")) {
 				frame = Frame(j.at("frame"));
 			}
@@ -17,57 +21,49 @@ namespace horizon {
 				const json &o = j["junctions"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					junctions.emplace(std::make_pair(u, Junction(u, it.value())));
+					load_and_log(junctions, ObjectType::JUNCTION, std::forward_as_tuple(u, it.value()), Logger::Domain::SCHEMATIC);
 				}
 			}
 			{
 				const json &o = j["symbols"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					symbols.emplace(std::make_pair(u, SchematicSymbol(u, it.value(), pool, &block)));
+					load_and_log(symbols, ObjectType::SCHEMATIC_SYMBOL, std::forward_as_tuple(u, it.value(), pool, &block), Logger::Domain::SCHEMATIC);
 				}
 			}
-			/*{
-				const json &o = j["junction_pins"];
-				for (auto it = o.cbegin(); it != o.cend(); ++it) {
-					auto u = UUID(it.key());
-					junction_pins.emplace(std::make_pair(u, JunctionPin(u, it.value(), *this)));
-				}
-			}*/
-
 			{
 				const json &o = j["texts"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					texts.emplace(std::make_pair(u, Text(u, it.value())));
+					load_and_log(texts, ObjectType::TEXT, std::forward_as_tuple(u, it.value()), Logger::Domain::SCHEMATIC);
 				}
 			}
 			{
 				const json &o = j["net_labels"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					net_labels.emplace(std::make_pair(u, NetLabel(u, it.value(), this)));
+					load_and_log(net_labels, ObjectType::NET_LABEL, std::forward_as_tuple(u, it.value(), this), Logger::Domain::SCHEMATIC);
 				}
 			}
 			{
 				const json &o = j["power_symbols"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					power_symbols.emplace(std::make_pair(u, PowerSymbol(u, it.value(), this, &block)));
+					load_and_log(power_symbols, ObjectType::POWER_SYMBOL, std::forward_as_tuple(u, it.value(), this, &block), Logger::Domain::SCHEMATIC);
 				}
 			}
 			{
 				const json &o = j["bus_rippers"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					bus_rippers.emplace(std::make_pair(u, BusRipper(u, it.value(), *this, block)));
+					load_and_log(bus_rippers, ObjectType::BUS_RIPPER, std::forward_as_tuple(u, it.value(), *this, block), Logger::Domain::SCHEMATIC);
 				}
 			}
 			{
 				const json &o = j["net_lines"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					auto u = UUID(it.key());
-					net_lines.emplace(std::make_pair(u, LineNet(u, it.value(), this)));
+					load_and_log(net_lines, ObjectType::LINE_NET, std::forward_as_tuple(u, it.value(), this), Logger::Domain::SCHEMATIC);
 				}
 			}
 			{

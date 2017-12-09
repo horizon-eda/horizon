@@ -107,6 +107,8 @@ namespace horizon {
 			Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
 			void show_preferences_window();
 
+			class LogWindow *log_window = nullptr;
+
 	};
 }
 

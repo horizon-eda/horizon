@@ -72,7 +72,8 @@ SRC_COMMON = \
 	parameter/program.cpp\
 	parameter/set.cpp\
 	clipper/clipper.cpp\
-	common/dimension.cpp
+	common/dimension.cpp\
+	logger/logger.cpp\
 	
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += util/uuid_win32.cpp
@@ -278,7 +279,9 @@ SRC_IMP = \
 	pool/pool_cached.cpp\
 	canvas/canvas_pads.cpp\
 	util/window_state_store.cpp\
-	widgets/board_display_options.cpp
+	widgets/board_display_options.cpp\
+	widgets/log_window.cpp\
+	widgets/log_view.cpp\
 
 SRC_ROUTER = \
 	router/router/pns_router.cpp \

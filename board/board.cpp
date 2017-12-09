@@ -3,6 +3,8 @@
 #include <list>
 #include "util.hpp"
 #include "board_layers.hpp"
+#include "logger/logger.hpp"
+#include "logger/log_util.hpp"
 
 namespace horizon {
 
@@ -23,6 +25,7 @@ namespace horizon {
 			name(j.at("name").get<std::string>()),
 			n_inner_layers(j.value("n_inner_layers", 0))
 		{
+		Logger::log_info("loading board "+(std::string)uuid, Logger::Domain::BOARD);
 		if(j.count("stackup")) {
 			const json &o = j["stackup"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -35,23 +38,26 @@ namespace horizon {
 			const json &o = j["polygons"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto u = UUID(it.key());
-				polygons.emplace(std::make_pair(u, Polygon(u, it.value())));
+				load_and_log(polygons, ObjectType::POLYGON, std::forward_as_tuple(u, it.value()), Logger::Domain::BOARD);
 			}
 		}
 		if(j.count("holes")) {
 			const json &o = j["holes"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto u = UUID(it.key());
-				holes.emplace(std::make_pair(u, Hole(u, it.value())));
+				load_and_log(holes, ObjectType::HOLE, std::forward_as_tuple(u, it.value()), Logger::Domain::BOARD);
 			}
 		}
 		if(j.count("packages")) {
 			const json &o = j["packages"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				UUID comp_uuid (it.value().at("component").get<std::string>());
+				auto u = UUID(it.key());
 				if(block->components.count(comp_uuid) && block->components.at(comp_uuid).part != nullptr) {
-					auto u = UUID(it.key());
-					packages.emplace(std::make_pair(u, BoardPackage(u, it.value(), *block, pool)));
+					load_and_log(packages, ObjectType::BOARD_PACKAGE, std::forward_as_tuple(u, it.value(), *block, pool), Logger::Domain::BOARD);
+				}
+				else {
+					Logger::log_warning("not loading package " + (std::string)u + " since component is gone");
 				}
 			}
 		}
@@ -59,12 +65,13 @@ namespace horizon {
 			const json &o = j["junctions"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto u = UUID(it.key());
-				junctions.emplace(std::make_pair(u, Junction(u, it.value())));
+				load_and_log(junctions, ObjectType::JUNCTION, std::forward_as_tuple(u, it.value()), Logger::Domain::BOARD);
 			}
 		}
 		if(j.count("tracks")) {
 			const json &o = j["tracks"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID(it.key());
 				bool valid = true;
 				for(const auto &it_ft: {it.value().at("from"), it.value().at("to")}) {
 					if(it_ft.at("pad") != nullptr) {
@@ -83,8 +90,10 @@ namespace horizon {
 					}
 				}
 				if(valid) {
-					auto u = UUID(it.key());
-					tracks.emplace(std::make_pair(u, Track(u, it.value(), *this)));
+					load_and_log(tracks, ObjectType::TRACK, std::forward_as_tuple(u, it.value(), *this), Logger::Domain::BOARD);
+				}
+				else {
+					Logger::log_warning("not loading track " + (std::string)u + " since at least one pad is gone");
 				}
 			}
 		}
@@ -92,50 +101,60 @@ namespace horizon {
 			const json &o = j["vias"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto u = UUID(it.key());
-				vias.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this, vpp));
+				load_and_log(vias, ObjectType::VIA, std::forward_as_tuple(u, it.value(), *this, vpp), Logger::Domain::BOARD);
 			}
 		}
 		if(j.count("texts")) {
 			const json &o = j["texts"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto u = UUID(it.key());
-				texts.emplace(std::make_pair(u, Text(u, it.value())));
+				load_and_log(texts, ObjectType::TEXT, std::forward_as_tuple(u, it.value()), Logger::Domain::BOARD);
 			}
 		}
 		if(j.count("lines")) {
 			const json &o = j["lines"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto u = UUID(it.key());
-				lines.emplace(std::make_pair(u, Line(u, it.value(), *this)));
+				load_and_log(lines, ObjectType::LINE, std::forward_as_tuple(u, it.value(), *this), Logger::Domain::BOARD);
 			}
 		}
 		if(j.count("planes")) {
 			const json &o = j["planes"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto u = UUID(it.key());
-				planes.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
+				load_and_log(planes, ObjectType::PLANE, std::forward_as_tuple(u, it.value(), *this), Logger::Domain::BOARD);
 			}
 		}
 		if(j.count("dimensions")) {
 			const json &o = j["dimensions"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto u = UUID(it.key());
-				dimensions.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
+				load_and_log(dimensions, ObjectType::DIMENSION, std::forward_as_tuple(u, it.value()), Logger::Domain::BOARD);
 			}
 		}
 		if(j.count("arcs")) {
 			const json &o = j["arcs"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto u = UUID(it.key());
-				arcs.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
+				load_and_log(arcs, ObjectType::ARC, std::forward_as_tuple(u, it.value(), *this), Logger::Domain::BOARD);
 			}
 		}
 		if(j.count("rules")) {
-			rules.load_from_json(j.at("rules"));
-			rules.cleanup(block);
+			try {
+				rules.load_from_json(j.at("rules"));
+				rules.cleanup(block);
+			}
+			catch (const std::exception &e) {
+				Logger::log_warning("couldn't load rules", Logger::Domain::BOARD, e.what());
+			}
 		}
 		if(j.count("fab_output_settings")) {
-			fab_output_settings = FabOutputSettings(j.at("fab_output_settings"));
+			try {
+				fab_output_settings = FabOutputSettings(j.at("fab_output_settings"));
+			}
+			catch (const std::exception &e) {
+				Logger::log_warning("couldn't load fab output settings", Logger::Domain::BOARD, e.what());
+			}
 		}
 		fab_output_settings.update_for_board(this);
 		update_refs(); //fill in smashed texts

@@ -11,6 +11,9 @@
 #include "util.hpp"
 #include "preferences_window.hpp"
 #include "property_panels/property_panels.hpp"
+#include "widgets/log_window.hpp"
+#include "widgets/log_view.hpp"
+#include "logger/logger.hpp"
 #include <iomanip>
 #include <glibmm/main.h>
 
@@ -250,6 +253,15 @@ namespace horizon {
 					show_preferences_window();
 				}
 			}
+		});
+
+		log_window = new LogWindow(main_window);
+		Logger::get().set_log_handler([this](const Logger::Item &it) {
+			log_window->get_view()->push_log(it);
+		});
+
+		main_window->add_action("view_log", [this] {
+			log_window->present();
 		});
 
 
