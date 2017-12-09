@@ -112,7 +112,7 @@ namespace horizon {
 			}
 
 			int64_t spacing_v = sp_spacing_v->get_value_as_int();
-			int64_t x0 = -1L*(pad_count_h-1)*(pitch/2);
+			int64_t x0 = (pad_count_h-1)*(pitch/2)*-1;
 			for(auto it: {-1, 1}) {
 				for(unsigned int i = 0; i<pad_count_h; i++) {
 					auto uu = UUID::random();
