@@ -51,6 +51,8 @@
 #include "tool_add_vertex.hpp"
 
 #include "dimension.hpp"
+#include "logger/logger.hpp"
+#include "tool_catalog.hpp"
 #include <memory>
 
 namespace horizon {
@@ -256,11 +258,26 @@ namespace horizon {
 			selection = args.selection;
 		}
 		update_rules(); //write rules to board, so tool has the current rules
-		tool = create_tool(tool_id);
-		tool->set_imp_interface(imp);
+		try {
+			tool = create_tool(tool_id);
+			tool->set_imp_interface(imp);
+		}
+		catch(const std::exception &e) {
+			Logger::log_critical("exception thrown in tool constructor of "+tool_catalog.at(tool_id).name, Logger::Domain::CORE, e.what());
+			return ToolResponse::end();
+		}
 		if(tool) {
 			s_signal_tool_changed.emit(tool_id);
-			auto r = tool->begin(args);
+			ToolResponse r;
+			try {
+				r = tool->begin(args);
+			}
+			catch(const std::exception &e) {
+				s_signal_tool_changed.emit(ToolID::NONE);
+				tool.reset();
+				Logger::log_critical("exception thrown in tool_begin of "+tool_catalog.at(tool_id).name, Logger::Domain::CORE, e.what());
+				return ToolResponse::end();
+			}
 			if(r.end_tool) {
 				s_signal_tool_changed.emit(ToolID::NONE);
 				tool.reset();
@@ -286,7 +303,16 @@ namespace horizon {
 
 	ToolResponse Core::tool_update(const ToolArgs &args) {
 		if(tool) {
-			auto r = tool->update(args);
+			ToolResponse r;
+			try {
+				r = tool->update(args);
+			}
+			catch(const std::exception &e) {
+				s_signal_tool_changed.emit(ToolID::NONE);
+				tool.reset();
+				Logger::log_critical("exception thrown in tool_update", Logger::Domain::CORE, e.what());
+				return ToolResponse::end();
+			}
 			if(r.end_tool) {
 				s_signal_tool_changed.emit(ToolID::NONE);
 				tool.reset();
