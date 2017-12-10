@@ -60,9 +60,11 @@ namespace horizon {
 				}
 			}
 			for(const auto it: junctions) {
-				for(const auto &it_track: junction_connections.at(it)) {
-					if(tracks.insert(it_track).second)
-						inserted = true;
+				if(junction_connections.count(it)) {
+					for(const auto &it_track: junction_connections.at(it)) {
+						if(tracks.insert(it_track).second)
+							inserted = true;
+					}
 				}
 			}
 		}
