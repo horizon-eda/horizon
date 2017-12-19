@@ -18,6 +18,7 @@
 #include "imp_board.hpp"
 #include "part.hpp"
 #include "util.hpp"
+#include <curl/curl.h>
 
 using std::cout;
 using horizon::UUID;

@@ -358,6 +358,7 @@ SRC_POOL_MGR = \
 	pool-mgr/pool_notebook_padstacks.cpp\
 	pool-mgr/pool_notebook_packages.cpp\
 	pool-mgr/pool_notebook_parts.cpp\
+	pool-mgr/pool_notebook_remote.cpp\
 	pool-mgr/unit_editor.cpp\
 	pool-mgr/part_editor.cpp\
 	pool-mgr/entity_editor.cpp\
@@ -371,6 +372,8 @@ SRC_POOL_MGR = \
 	pool-mgr/duplicate/duplicate_entity.cpp\
 	pool-mgr/duplicate/duplicate_part.cpp\
 	pool-mgr/duplicate/duplicate_window.cpp\
+	pool-mgr/pool_remote_box.cpp\
+	pool-mgr/pool_merge_dialog.cpp\
 	widgets/pool_browser.cpp\
 	widgets/pool_browser_unit.cpp\
 	widgets/pool_browser_symbol.cpp\
@@ -379,12 +382,15 @@ SRC_POOL_MGR = \
 	widgets/pool_browser_part.cpp\
 	widgets/pool_browser_package.cpp\
 	dialogs/pool_browser_dialog.cpp\
+	widgets/cell_renderer_layer_display.cpp\
 	util/sort_controller.cpp\
 	util/editor_process.cpp\
 	$(SRC_CANVAS)\
 	pool-update/pool-update.cpp\
 	util/gtk_util.cpp\
-	util/window_state_store.cpp
+	util/window_state_store.cpp\
+	util/rest_client.cpp\
+	util/github_client.cpp\
 
 SRC_PGM_TEST = \
 	pgm-test.cpp
@@ -400,7 +406,7 @@ LIBS_COMMON = sqlite3 yaml-cpp
 ifneq ($(OS),Windows_NT)
 	LIBS_COMMON += uuid
 endif
-LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq
+LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libgit2 libcurl
 
 OPTIMIZE=-fdata-sections -ffunction-sections
 DEBUG   =-g3
@@ -445,7 +451,7 @@ horizon-prj-mgr: $(OBJ_COMMON) $(SRC_PRJ_MGR:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 libzmq) -o $@
 
 horizon-pool-mgr: $(OBJ_COMMON) $(SRC_POOL_MGR:.cpp=.o)
-	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy libzmq) -o $@
+	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy libzmq libcurl libgit2) -o $@
 
 horizon-pgm-test: $(OBJ_COMMON) $(SRC_PGM_TEST:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@

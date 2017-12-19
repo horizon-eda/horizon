@@ -305,7 +305,7 @@ namespace horizon {
 
 	void status_cb_nop(PoolUpdateStatus st, const std::string msg) {}
 
-	static const int min_user_version = 1; //keep in sync with schema
+	static const int min_user_version = 2; //keep in sync with schema
 
 	void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb) {
 		auto pool_db_path = Glib::build_filename(pool_base_path, "pool.db");

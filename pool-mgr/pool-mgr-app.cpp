@@ -3,6 +3,8 @@
 #include <glibmm/miscutils.h>
 #include <fstream>
 #include "util/util.hpp"
+#include <git2.h>
+#include <curl/curl.h>
 
 namespace horizon {
 
@@ -66,6 +68,9 @@ namespace horizon {
 	void PoolManagerApplication::on_startup() {
 		// Call the base class's implementation.
 		Gtk::Application::on_startup();
+
+		git_libgit2_init();
+		curl_global_init(CURL_GLOBAL_ALL);
 
 		// Add actions and keyboard accelerators for the application menu.
 		//add_action("preferences", sigc::mem_fun(*this, &ProjectManagerApplication::on_action_preferences));

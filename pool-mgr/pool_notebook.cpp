@@ -16,6 +16,8 @@
 #include "duplicate/duplicate_unit.hpp"
 #include "duplicate/duplicate_part.hpp"
 #include "object_descr.hpp"
+#include "pool_remote_box.hpp"
+#include "pool_merge_dialog.hpp"
 #include <thread>
 
 namespace horizon {
@@ -518,6 +520,33 @@ namespace horizon {
 
 			append_page(*box, "Parts");
 		}
+
+		if(Glib::file_test(Glib::build_filename(base_path, ".remote"), Glib::FILE_TEST_IS_DIR)) {
+			auto box = PoolRemoteBox::create();
+
+			box->upgrade_button->signal_clicked().connect(sigc::mem_fun(this, &PoolNotebook::handle_remote_upgrade));
+
+			remote_upgrade_dispatcher.connect([this, box]{
+				std::lock_guard<std::mutex> lock(remote_upgrade_mutex);
+				box->upgrade_revealer->set_reveal_child(remote_upgrading || remote_upgrade_error);
+				box->upgrade_label->set_text(remote_upgrade_status);
+				if(!remote_upgrading) {
+					pool_updating = false;
+				}
+				if(!remote_upgrading && !remote_upgrade_error) {
+					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
+					PoolMergeDialog dia(top, base_path, Glib::build_filename(base_path, ".remote"));
+					dia.run();
+					if(dia.get_merged())
+						pool_update();
+				}
+			});
+
+			box->show();
+			append_page(*box, "Remote");
+			box->unreference();
+		}
+
 		for(auto br: browsers) {
 			add_context_menu(br);
 		}
@@ -607,6 +636,8 @@ namespace horizon {
 	}
 
 	void PoolNotebook::pool_update(std::function<void()> cb) {
+		if(pool_updating)
+			return;
 		appwin->set_pool_updating(true, true);
 		pool_update_n_files = 0;
 		pool_updating = true;
