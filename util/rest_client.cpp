@@ -1,6 +1,8 @@
 #include "rest_client.hpp"
 #include <curl/curl.h>
 #include <stdexcept>
+#include <glibmm/miscutils.h>
+#include "util.hpp"
 
 namespace REST {
 
@@ -45,6 +47,13 @@ namespace REST {
 		curl_easy_setopt(curl, CURLOPT_READDATA, &post_buffer);
 
 		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+		
+		#ifdef G_OS_WIN32
+		{
+			std::string cert_file = Glib::build_filename(horizon::get_exe_dir(), "ca-bundle.crt");
+			curl_easy_setopt(curl, CURLOPT_CAINFO, cert_file.c_str());
+		}
+		#endif
 	}
 
 	void Client::set_auth(const std::string &user, const std::string &passwd) {

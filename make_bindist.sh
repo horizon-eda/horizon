@@ -53,6 +53,14 @@ LIBS=(
 	libtiff-5.dll\
 	libzmq.dll\
 	libsodium-18.dll\
+	libcurl-4.dll\
+	libgit2.dll\
+	libidn2-0.dll\
+	ssleay32.dll\
+	libeay32.dll\
+	libnghttp2-14.dll\
+	libssh2-1.dll\
+	libunistring-2.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
@@ -72,6 +80,8 @@ rm $DISTDIR/lib/gdk-pixbuf-*/*/loaders/*.a
 
 mkdir -p $DISTDIR/share/glib-2.0/schemas
 cp /mingw64/share/glib-2.0/schemas/gschemas.compiled $DISTDIR/share/glib-2.0/schemas
+
+cp /mingw64/ssl/certs/ca-bundle.crt $DISTDIR/ca-bundle.crt
 
 git log -10 | unix2dos > dist/log.txt
 cd dist

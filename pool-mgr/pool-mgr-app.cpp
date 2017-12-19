@@ -70,6 +70,12 @@ namespace horizon {
 		Gtk::Application::on_startup();
 
 		git_libgit2_init();
+		#ifdef G_OS_WIN32
+		{
+			std::string cert_file = Glib::build_filename(horizon::get_exe_dir(), "ca-bundle.crt");
+			git_libgit2_opts(GIT_OPT_SET_SSL_CERT_LOCATIONS, cert_file.c_str(), NULL);
+		}
+		#endif
 		curl_global_init(CURL_GLOBAL_ALL);
 
 		// Add actions and keyboard accelerators for the application menu.
