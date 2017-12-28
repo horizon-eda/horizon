@@ -472,7 +472,9 @@ namespace PNS {
 
 		ClipperLib::Paths poly_union;
 		clipper.Execute(ClipperLib::ctUnion, poly_union, ClipperLib::pftNonZero);
-		assert(poly_union.size()==1);
+		if(poly_union.size() != 1) {
+			throw std::runtime_error("invalid pad polygons: "+ std::to_string(poly_union.size()));
+		}
 
 		std::unique_ptr< PNS::SOLID > solid( new PNS::SOLID );
 
