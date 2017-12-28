@@ -619,6 +619,11 @@ namespace horizon {
 		return processes.size() == 0 && part_wizard==nullptr && !pool_updating && duplicate_window == nullptr;
 	}
 
+	void PoolNotebook::prepare_close() {
+		if(remote_box)
+			remote_box->prs_refreshed_once = true;
+	}
+
 	static void send_msg(zmq::socket_t &sock, PoolUpdateStatus st, const std::string &s) {
 		size_t sz = sizeof(pool_update_msg_t)+s.size()+1;
 		auto msg = reinterpret_cast<pool_update_msg_t *>(alloca(sz));

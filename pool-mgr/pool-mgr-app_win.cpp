@@ -262,7 +262,6 @@ namespace horizon {
 			GitHubClient client;
 			json repo = client.get_repo(gh_username, gh_repo);
 			std::string clone_url = repo.at("clone_url");
-			std::cout << clone_url << std::endl;
 
 			git_repository *cloned_repo = NULL;
 			git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
@@ -359,6 +358,8 @@ namespace horizon {
 			md.run();
 			return false;
 		}
+		if(pool_notebook)
+			pool_notebook->prepare_close();
 		delete pool_notebook;
 		pool_notebook = nullptr;
 		set_view_mode(ViewMode::OPEN);

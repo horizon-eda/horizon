@@ -107,7 +107,6 @@ namespace horizon {
 				const json &o = j["recent"];
 				for (auto it = o.cbegin(); it != o.cend(); ++it) {
 					std::string filename = it.key();
-					std::cout << filename << std::endl;
 					if(Glib::file_test(filename, Glib::FILE_TEST_IS_REGULAR))
 						recent_items.emplace(filename, Glib::DateTime::create_now_local(it.value().get<int64_t>()));
 				}

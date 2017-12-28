@@ -36,6 +36,7 @@ namespace horizon {
 			void populate();
 			void spawn(PoolManagerProcess::Type type, const std::vector<std::string> &args);
 			bool can_close();
+			void prepare_close();
 			void pool_update(std::function<void()> cb = nullptr);
 			~PoolNotebook();
 
