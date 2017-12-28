@@ -87,6 +87,15 @@ namespace horizon {
 		if(processes.count(args.at(0)) == 0) { //need to launch imp
 			std::vector<std::string> env = {"HORIZON_POOL="+base_path};
 			std::string filename = args.at(0);
+			if(filename.size()) {
+				if(!Glib::file_test(filename, Glib::FILE_TEST_IS_REGULAR)) {
+					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
+					Gtk::MessageDialog md(*top,  "File not found", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+					md.set_secondary_text("Try updating the pool");
+					md.run();
+					return;
+				}
+			}
 			auto &proc = processes.emplace(std::piecewise_construct, std::forward_as_tuple(filename),
 					std::forward_as_tuple(type, args, env, &pool)).first->second;
 
