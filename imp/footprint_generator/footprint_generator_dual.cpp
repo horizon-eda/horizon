@@ -1,5 +1,6 @@
 #include "footprint_generator_dual.hpp"
 #include "widgets/chooser_buttons.hpp"
+#include "util.hpp"
 
 namespace horizon {
 	FootprintGeneratorDual::FootprintGeneratorDual(CorePackage *c): Glib::ObjectBase (typeid(FootprintGeneratorDual)), FootprintGeneratorBase("/net/carrotIndustries/horizon/imp/footprint_generator/dual.svg", c) {
@@ -13,6 +14,18 @@ namespace horizon {
 				sp_count = Gtk::manage(new Gtk::SpinButton());
 				sp_count->set_range(2, 512);
 				sp_count->set_increments(2, 2);
+				sp_count->signal_input().connect([this] (double *v) {
+					auto txt = sp_count->get_text();
+					int64_t va = 0;
+					try {
+						va = MAX(round_multiple(std::stoi(txt), 2), 1);
+						*v = va;
+					}
+					catch (const std::exception& e) {
+						return false;
+					}
+					return true;
+				});
 				tbox->pack_start(*sp_count, false, false, 0);
 
 				box_top->pack_start(*tbox, false, false, 0);
