@@ -645,6 +645,32 @@ namespace horizon {
 						});
 						auto submenu = Gtk::manage(new Gtk::Menu);
 
+						{
+							auto la2 =  Gtk::manage(new Gtk::MenuItem("Copy"));
+							la2->signal_activate().connect([this, sr] {
+								canvas->set_selection({sr}, false);
+								clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos());
+							});
+							la2->show();
+							submenu->append(*la2);
+						}
+						{
+							auto la2 =  Gtk::manage(new Gtk::MenuItem("Duplicate"));
+							la2->signal_activate().connect([this, sr] {
+								canvas->set_selection({sr}, false);
+								clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos());
+								tool_begin(ToolID::PASTE);
+							});
+							la2->show();
+							submenu->append(*la2);
+						}
+
+						{
+							auto sep = Gtk::manage(new Gtk::SeparatorMenuItem);
+							sep->show();
+							submenu->append(*sep);
+						}
+
 						for(const auto &it: tool_catalog) {
 							auto r = core.r->tool_can_begin(it.first, {sr});
 							if(r.first && r.second) {
@@ -672,6 +698,31 @@ namespace horizon {
 				}
 			}
 			if(sel_for_menu.size()) {
+
+				{
+					auto la =  Gtk::manage(new Gtk::MenuItem("Copy"));
+					la->signal_activate().connect([this] {
+						clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos());
+					});
+					la->show();
+					context_menu->append(*la);
+				}
+				{
+					auto la =  Gtk::manage(new Gtk::MenuItem("Duplicate"));
+					la->signal_activate().connect([this] {
+						clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos());
+						tool_begin(ToolID::PASTE);
+					});
+					la->show();
+					context_menu->append(*la);
+				}
+
+				{
+					auto sep = Gtk::manage(new Gtk::SeparatorMenuItem);
+					sep->show();
+					context_menu->append(*sep);
+				}
+
 				for(const auto &it: tool_catalog) {
 					auto r = core.r->tool_can_begin(it.first, sel_for_menu);
 					if(r.first && r.second) {

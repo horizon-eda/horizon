@@ -52,7 +52,7 @@ namespace horizon {
 			class PropertyPanels *panels;
 			WarningsBox *warnings_box;
 			ToolPopover *tool_popover;
-			Gtk::Menu *context_menu;
+			Gtk::Menu *context_menu = nullptr;
 			SpinButtonDim *grid_spin_button;
 			std::unique_ptr<SelectionFilterDialog> selection_filter_dialog;
 
