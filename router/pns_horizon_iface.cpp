@@ -436,22 +436,34 @@ namespace PNS {
 		ClipperLib::Clipper clipper;
 
 		if(pad->padstack.type != horizon::Padstack::Type::MECHANICAL) { //normal pad
+			horizon::Polygon poly = horizon::UUID();
 			for(auto &it: pad->padstack.shapes) {
 				if(horizon::BoardLayers::is_copper(it.second.layer)) { //on copper layer
 					layer_min = std::min(layer_min, it.second.layer);
 					layer_max = std::max(layer_max, it.second.layer);
-					auto poly = it.second.to_polygon().remove_arcs();
-					ClipperLib::Path path;
-					for(auto &v: poly.vertices) {
-						auto p = tr.transform(v.position);
-						path.emplace_back(p.x, p.y);
-					}
-					if(ClipperLib::Orientation(path)) {
-						std::reverse(path.begin(), path.end());
-					}
-					clipper.AddPath(path, ClipperLib::ptSubject, true);
+					poly = it.second.to_polygon().remove_arcs();
+
 				}
 			}
+			for(auto &it: pad->padstack.polygons) {
+				if(horizon::BoardLayers::is_copper(it.second.layer)) { //on copper layer
+					layer_min = std::min(layer_min, it.second.layer);
+					layer_max = std::max(layer_max, it.second.layer);
+					poly = it.second.remove_arcs();
+				}
+			}
+			if(poly.vertices.size() == 0) {
+				throw std::runtime_error("polygon without vertices");
+			}
+			ClipperLib::Path path;
+			for(auto &v: poly.vertices) {
+				auto p = tr.transform(v.position);
+				path.emplace_back(p.x, p.y);
+			}
+			if(ClipperLib::Orientation(path)) {
+				std::reverse(path.begin(), path.end());
+			}
+			clipper.AddPath(path, ClipperLib::ptSubject, true);
 		}
 		else { //npth pad
 			layer_min = horizon::BoardLayers::BOTTOM_COPPER;
