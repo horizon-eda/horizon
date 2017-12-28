@@ -29,6 +29,7 @@ namespace horizon {
 				{{GDK_KEY_t},				ToolID::PLACE_TEXT},
 				{{GDK_KEY_p, GDK_KEY_p},	ToolID::PLACE_PAD},
 				{{GDK_KEY_P},				ToolID::PLACE_PAD},
+				{{GDK_KEY_i},				ToolID::EDIT_PAD_PARAMETER_SET},
 		});
 		key_seq.signal_update_hint().connect([this] (const std::string &s) {main_window->tool_hint_label->set_text(s);});
 
