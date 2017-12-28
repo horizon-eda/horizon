@@ -18,6 +18,8 @@
 #include "object_descr.hpp"
 #include "pool_remote_box.hpp"
 #include "pool_merge_dialog.hpp"
+#include <git2.h>
+#include "util/autofree_ptr.hpp"
 #include <thread>
 
 namespace horizon {
@@ -200,6 +202,10 @@ namespace horizon {
 				return true;
 			}, chan, Glib::IO_IN | Glib::IO_HUP);
 		}
+		remote_repo = Glib::build_filename(base_path, ".remote");
+		if(!Glib::file_test(remote_repo, Glib::FILE_TEST_IS_DIR)) {
+			remote_repo = "";
+		}
 
 		{
 			auto br = Gtk::manage(new PoolBrowserUnit(&pool));
@@ -225,7 +231,8 @@ namespace horizon {
 			add_action_button("Duplicate Unit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_unit));
 			add_action_button("Create Symbol for Unit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_symbol_for_unit));
 			add_action_button("Create Entity for Unit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_entity_for_unit));
-
+			if(remote_repo.size())
+				add_action_button("Merge Unit", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::UNIT, uu);});
 
 			bbox->show_all();
 
@@ -288,6 +295,8 @@ namespace horizon {
 			add_action_button("Create Symbol", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_symbol));
 			add_action_button("Edit Symbol", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_symbol));
 			add_action_button("Duplicate Symbol", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_symbol));
+			if(remote_repo.size())
+				add_action_button("Merge Symbol", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::SYMBOL, uu);});
 			bbox->show_all();
 
 			box->pack_start(*bbox, false, false, 0);
@@ -326,6 +335,8 @@ namespace horizon {
 			add_action_button("Create Entity", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_entity));
 			add_action_button("Edit Entity", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_entity));
 			add_action_button("Duplicate Entity", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_entity));
+			if(remote_repo.size())
+				add_action_button("Merge Entity", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::ENTITY, uu);});
 
 			bbox->show_all();
 
@@ -394,6 +405,8 @@ namespace horizon {
 			add_action_button("Create Padstack", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_padstack));
 			add_action_button("Edit Padstack", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_padstack));
 			add_action_button("Duplicate Padstack", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_padstack));
+			if(remote_repo.size())
+				add_action_button("Merge Padstack", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::PADSTACK, uu);});
 
 			bbox->show_all();
 
@@ -466,6 +479,8 @@ namespace horizon {
 			add_action_button("Edit Package", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_package));
 			add_action_button("Duplicate Package", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_package));
 			add_action_button("Create Padstack for Package", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_padstack_for_package));
+			if(remote_repo.size())
+				add_action_button("Merge Package", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::PACKAGE, uu);});
 			add_action_button("Part Wizard...", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_part_wizard))->get_style_context()->add_class("suggested-action");
 
 			bbox->show_all();
@@ -506,6 +521,8 @@ namespace horizon {
 			add_action_button("Edit Part", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_part));
 			add_action_button("Duplicate Part", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_part));
 			add_action_button("Create Part from Part", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_part_from_part));
+			if(remote_repo.size())
+				add_action_button("Merge Part", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::PART, uu);});
 
 
 			bbox->show_all();
@@ -521,30 +538,19 @@ namespace horizon {
 			append_page(*box, "Parts");
 		}
 
-		if(Glib::file_test(Glib::build_filename(base_path, ".remote"), Glib::FILE_TEST_IS_DIR)) {
-			auto box = PoolRemoteBox::create();
+		if(remote_repo.size()) {
+			remote_box = PoolRemoteBox::create(this);
 
-			box->upgrade_button->signal_clicked().connect(sigc::mem_fun(this, &PoolNotebook::handle_remote_upgrade));
+			remote_box->show();
+			append_page(*remote_box, "Remote");
+			remote_box->unreference();
 
-			remote_upgrade_dispatcher.connect([this, box]{
-				std::lock_guard<std::mutex> lock(remote_upgrade_mutex);
-				box->upgrade_revealer->set_reveal_child(remote_upgrading || remote_upgrade_error);
-				box->upgrade_label->set_text(remote_upgrade_status);
-				if(!remote_upgrading) {
-					pool_updating = false;
-				}
-				if(!remote_upgrading && !remote_upgrade_error) {
-					auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
-					PoolMergeDialog dia(top, base_path, Glib::build_filename(base_path, ".remote"));
-					dia.run();
-					if(dia.get_merged())
-						pool_update();
+			signal_switch_page().connect([this] (Gtk::Widget *page, int page_num) {
+				if(page == remote_box && !remote_box->prs_refreshed_once) {
+					remote_box->handle_refresh_prs();
+					remote_box->prs_refreshed_once = true;
 				}
 			});
-
-			box->show();
-			append_page(*box, "Remote");
-			box->unreference();
 		}
 
 		for(auto br: browsers) {

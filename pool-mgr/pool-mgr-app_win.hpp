@@ -38,7 +38,7 @@ namespace horizon {
 			Gtk::FileChooserButton *download_dest_dir_button = nullptr;
 
 			Gtk::HeaderBar *header = nullptr;
-			Gtk::RecentChooserWidget *recent_chooser = nullptr;
+			Gtk::ListBox *recent_listbox = nullptr;
 			Gtk::Label *label_gitversion = nullptr;
 			Gtk::Box *pool_box = nullptr;
 			class PoolNotebook *pool_notebook = nullptr;
@@ -52,6 +52,8 @@ namespace horizon {
 
 			enum class ViewMode {OPEN, POOL, DOWNLOAD};
 			void set_view_mode(ViewMode mode);
+
+			void update_recent_items();
 
 			void handle_open();
 			void handle_close();

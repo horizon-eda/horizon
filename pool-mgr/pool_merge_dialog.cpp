@@ -299,15 +299,6 @@ namespace horizon {
 		merged = true;
 	}
 
-	LutEnumStr<ObjectType> object_type_lut = {
-		{"unit", ObjectType::UNIT},
-		{"symbol", ObjectType::SYMBOL},
-		{"entity", ObjectType::ENTITY},
-		{"padstack", ObjectType::PADSTACK},
-		{"package", ObjectType::PACKAGE},
-		{"part", ObjectType::PART},
-	};
-
 	void PoolMergeDialog::populate_store() {
 		Pool pool_local(local_path);
 		{

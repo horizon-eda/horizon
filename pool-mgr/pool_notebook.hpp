@@ -30,6 +30,7 @@ namespace horizon {
 	};
 
 	class PoolNotebook: public Gtk::Notebook {
+		friend class PoolRemoteBox;
 		public:
 			PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw);
 			void populate();
@@ -96,14 +97,7 @@ namespace horizon {
 			void handle_copy_path(ObjectType ty, const UUID &uu);
 			void add_context_menu(class PoolBrowser *br);
 
-			void handle_remote_upgrade();
-			void remote_upgrade_thread();
-
-			Glib::Dispatcher remote_upgrade_dispatcher;
-
-			bool remote_upgrading = false;
-			std::string remote_upgrade_status;
-			bool remote_upgrade_error = false;
-			std::mutex remote_upgrade_mutex;
+			std::string remote_repo;
+			class PoolRemoteBox *remote_box = nullptr;
 	};
 }

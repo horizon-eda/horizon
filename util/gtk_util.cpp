@@ -76,4 +76,11 @@ namespace horizon {
 			e->unset_icon(Gtk::ENTRY_ICON_SECONDARY);
 		}
 	}
+
+	void header_func_separator(Gtk::ListBoxRow *row, Gtk::ListBoxRow *before) {
+		if (before && !row->get_header())	{
+			auto ret = Gtk::manage(new Gtk::Separator);
+			row->set_header(*ret);
+		}
+	}
 }

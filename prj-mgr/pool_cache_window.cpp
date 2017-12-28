@@ -65,25 +65,7 @@ namespace horizon {
 				else {
 					row[tree_columns.name] = j_cache.at("name").get<std::string>();
 				}
-				ObjectType type = ObjectType::INVALID;
-				if(type_str == "unit") {
-					type = ObjectType::UNIT;
-				}
-				else if(type_str == "entity") {
-					type = ObjectType::ENTITY;
-				}
-				else if(type_str == "symbol") {
-					type = ObjectType::SYMBOL;
-				}
-				else if(type_str == "padstack") {
-					type = ObjectType::PADSTACK;
-				}
-				else if(type_str == "package") {
-					type = ObjectType::PACKAGE;
-				}
-				else if(type_str == "part") {
-					type = ObjectType::PART;
-				}
+				ObjectType type = object_type_lut.lookup(type_str);
 				row[tree_columns.type] = type;
 
 				UUID uuid(j_cache.at("uuid").get<std::string>());

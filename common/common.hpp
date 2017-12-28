@@ -21,18 +21,8 @@ namespace horizon {
 	};
 	enum class PatchType {OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH, BOARD_EDGE, TEXT};
 
-	static const LutEnumStr<PatchType> patch_type_lut = {
-		{"other",      PatchType::OTHER},
-		{"pad",        PatchType::PAD},
-		{"pad_th",     PatchType::PAD_TH},
-		{"plane",      PatchType::PLANE},
-		{"track",      PatchType::TRACK},
-		{"via",        PatchType::VIA},
-		{"hole_pth",   PatchType::HOLE_PTH},
-		{"hole_npth",  PatchType::HOLE_NPTH},
-		{"board_edge", PatchType::BOARD_EDGE},
-		{"text",       PatchType::TEXT},
-	};
+	extern const LutEnumStr<PatchType> patch_type_lut;
+	extern const LutEnumStr<ObjectType> object_type_lut;
 
 	/**
 	 * Your typical coordinate class.

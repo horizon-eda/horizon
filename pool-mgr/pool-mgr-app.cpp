@@ -93,15 +93,24 @@ namespace horizon {
 			set_app_menu(app_menu);
 
 		auto config_filename = get_config_filename();
-		if(Glib::file_test(config_filename, Glib::FILE_TEST_EXISTS)) {
+		if(Glib::file_test(config_filename, Glib::FILE_TEST_IS_REGULAR)) {
 			json j;
 			{
-			std::ifstream ifs(config_filename);
-			if(!ifs.is_open()) {
-				throw std::runtime_error("file "  +config_filename+ " not opened");
+				std::ifstream ifs(config_filename);
+				if(!ifs.is_open()) {
+					throw std::runtime_error("file "  +config_filename+ " not opened");
+				}
+				ifs>>j;
+				ifs.close();
 			}
-			ifs>>j;
-			ifs.close();
+			if(j.count("recent")) {
+				const json &o = j["recent"];
+				for (auto it = o.cbegin(); it != o.cend(); ++it) {
+					std::string filename = it.key();
+					std::cout << filename << std::endl;
+					if(Glib::file_test(filename, Glib::FILE_TEST_IS_REGULAR))
+						recent_items.emplace(filename, Glib::DateTime::create_now_local(it.value().get<int64_t>()));
+				}
 			}
 		}
 
@@ -114,6 +123,10 @@ namespace horizon {
 		auto config_filename = get_config_filename();
 
 		json j;
+		//j["recent"] = json::object();
+		for(const auto &it: recent_items) {
+			j["recent"][it.first] = it.second.to_unix();
+		}
 		save_json_to_file(config_filename, j);
 	}
 

@@ -13,41 +13,21 @@ namespace REST {
 	  return realsize;
 	}
 
-	 size_t read_callback(void *dest, size_t size, size_t nmemb, void *userp) {
-		size_t buffer_size = size*nmemb;
-		Client::PostBuffer *buf = reinterpret_cast<Client::PostBuffer*>(userp);
-
-		if(buf->sizeleft) {
-			/* copy as much as possible from the source to the destination */
-			size_t copy_this_much = buf->sizeleft;
-			if(copy_this_much > buffer_size)
-				copy_this_much = buffer_size;
-			memcpy(dest, buf->readptr, copy_this_much);
-
-			buf->readptr += copy_this_much;
-			buf->sizeleft -= copy_this_much;
-			return copy_this_much; /* we copied this many bytes */
-		}
-		return 0;
-	}
-
-
 	Client::Client(const std::string &base): base_url(base) {
 		curl = curl_easy_init();
 		if(!curl)
 			throw std::runtime_error("curl_easy_init failed");
 		header_list = curl_slist_append(header_list, "Accept: application/vnd.github.v3+json");
+		header_list = curl_slist_append(header_list, "Content-Type: application/json");
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_list);
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, "carrotIndustries/horizon");
 
 		curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-		curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
-		curl_easy_setopt(curl, CURLOPT_READDATA, &post_buffer);
 
 		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-		
+
 		#ifdef G_OS_WIN32
 		{
 			std::string cert_file = Glib::build_filename(horizon::get_exe_dir(), "ca-bundle.crt");
@@ -85,8 +65,8 @@ namespace REST {
 		curl_easy_setopt(curl, CURLOPT_POST, 1);
 		curl_easy_setopt(curl, CURLOPT_URL, full_url.c_str());
 		postdata = postdata_j.dump();
-		post_buffer.readptr = postdata.c_str();
-		post_buffer.sizeleft = postdata.size();
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS,  postdata.c_str());
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE,  postdata.size());
 		response.clear();
 		auto res = curl_easy_perform(curl);
 		if(res != CURLE_OK) {
@@ -97,7 +77,7 @@ namespace REST {
 		long code = 0;
 		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
 		if(code < 200 || code > 299) {
-			throw std::runtime_error("unexpected HTTP response code " + std::to_string(code) + " when accessing "+full_url);
+			throw std::runtime_error("unexpected HTTP response code " + std::to_string(code) + " when accessing "+full_url + " response: " + response);
 		}
 		return json::parse(response);
 	}

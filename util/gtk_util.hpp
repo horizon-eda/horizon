@@ -26,4 +26,6 @@ namespace horizon {
 
 	void tree_view_scroll_to_selection(Gtk::TreeView *view);
 	void entry_set_warning(Gtk::Entry *e, const std::string &text);
+
+	void header_func_separator(Gtk::ListBoxRow *row, Gtk::ListBoxRow *before);
 }

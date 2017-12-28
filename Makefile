@@ -10,6 +10,7 @@ SRC_COMMON = \
 	pool/unit.cpp \
 	pool/symbol.cpp \
 	pool/part.cpp\
+	common/common.cpp \
 	common/junction.cpp \
 	common/line.cpp \
 	common/arc.cpp \
@@ -358,7 +359,6 @@ SRC_POOL_MGR = \
 	pool-mgr/pool_notebook_padstacks.cpp\
 	pool-mgr/pool_notebook_packages.cpp\
 	pool-mgr/pool_notebook_parts.cpp\
-	pool-mgr/pool_notebook_remote.cpp\
 	pool-mgr/unit_editor.cpp\
 	pool-mgr/part_editor.cpp\
 	pool-mgr/entity_editor.cpp\
