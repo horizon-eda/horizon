@@ -73,6 +73,7 @@ namespace horizon {
 
 
 		auto sc = Gtk::manage(new Gtk::ScrolledWindow());
+		sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 		sc->add(*listbox);
 		add(*sc);
 		sc->show_all();

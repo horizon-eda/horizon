@@ -8,6 +8,7 @@ horizon-prj-mgr
 horizon-pgm-test
 horizon-pool-mgr
 horizon-rest-test
+rest-test.cpp
 *.o
 *.d
 *~
