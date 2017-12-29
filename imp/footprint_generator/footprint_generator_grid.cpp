@@ -18,6 +18,7 @@ namespace horizon {
 			sp_pitch_v->set_valign(Gtk::ALIGN_CENTER);
 			sp_pitch_v->set_halign(Gtk::ALIGN_START);
 			sp_pitch_v->set_value(3_mm);
+			sp_pitch_v->signal_value_changed().connect(sigc::mem_fun(this, &FootprintGeneratorGrid::update_xy_lock));
 			overlay->add_at_sub(*sp_pitch_v, "#pitch_v");
 			sp_pitch_v->show();
 
@@ -26,6 +27,7 @@ namespace horizon {
 			sp_pad_height->set_valign(Gtk::ALIGN_CENTER);
 			sp_pad_height->set_halign(Gtk::ALIGN_START);
 			sp_pad_height->set_value(.5_mm);
+			sp_pad_height->signal_value_changed().connect(sigc::mem_fun(this, &FootprintGeneratorGrid::update_xy_lock));
 			overlay->add_at_sub(*sp_pad_height, "#pad_height");
 			sp_pad_height->show();
 
@@ -61,6 +63,12 @@ namespace horizon {
 
 				box_top->pack_start(*tbox, false, false, 0);
 			}
+			{
+				cb_xy_lock = Gtk::manage(new Gtk::CheckButton("XY Lock"));
+				cb_xy_lock->signal_toggled().connect(sigc::mem_fun(this, &FootprintGeneratorGrid::update_xy_lock));
+				cb_xy_lock->set_active(true);
+				box_top->pack_start(*cb_xy_lock, false, false, 0);
+			}
 
 			sp_count_h->signal_value_changed().connect([this]{pad_count_h = sp_count_h->get_value_as_int(); update_preview();});
 			sp_count_v->signal_value_changed().connect([this]{pad_count_v = sp_count_v->get_value_as_int(); update_preview();});
@@ -68,6 +76,16 @@ namespace horizon {
 			sp_count_h->set_value(4);
 			sp_count_v->set_value(4);
 
+		}
+
+		void FootprintGeneratorGrid::update_xy_lock() {
+			auto locked = cb_xy_lock->get_active();
+			sp_pad_width->set_sensitive(!locked);
+			sp_pitch_h->set_sensitive(!locked);
+			if(locked) {
+				sp_pitch_h->set_value(sp_pitch_v->get_value());
+				sp_pad_width->set_value(sp_pad_height->get_value());
+			}
 		}
 
 		static const std::string bga_letters = "ABCDEFGHJKLMNPRTUVWY";

@@ -14,8 +14,11 @@ namespace horizon {
 			SpinButtonDim *sp_pitch_v = nullptr;
 			SpinButtonDim *sp_pad_width = nullptr;
 			SpinButtonDim *sp_pad_height = nullptr;
+			Gtk::CheckButton *cb_xy_lock = nullptr;
+
 			unsigned int pad_count_h = 4;
 			unsigned int pad_count_v = 4;
 			void update_preview();
+			void update_xy_lock();
 	};
 }
