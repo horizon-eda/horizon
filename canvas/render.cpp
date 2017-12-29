@@ -87,21 +87,67 @@ namespace horizon {
 		auto c = ColorP::FROM_LAYER;
 		transform.shift = sym.junction->position;
 		object_refs_current.emplace_back(ObjectType::POWER_SYMBOL, sym.uuid);
-		draw_line({0,0}, {0, -1.25_mm}, c, 0);
-		draw_line({-1.25_mm, -1.25_mm}, {1.25_mm, -1.25_mm}, c, 0);
-		draw_line({-1.25_mm, -1.25_mm}, {0, -2.5_mm}, c, 0);
-		draw_line({1.25_mm, -1.25_mm}, {0, -2.5_mm}, c, 0);
-		selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0,0}, {-1.25_mm, -2.5_mm}, {1.25_mm, 0_mm});
-		transform.reset();
 
-		int text_angle = 0;
-		Coordi text_offset(1.25_mm, -1.875_mm);
-		if(sym.mirror) {
-			text_offset.x *= -1;
-			text_angle = 32768;
+		auto style = sym.net->power_symbol_style;
+		switch(style) {
+			case Net::PowerSymbolStyle::GND: {
+				draw_line({0,0}, {0, -1.25_mm}, c, 0);
+				draw_line({-1.25_mm, -1.25_mm}, {1.25_mm, -1.25_mm}, c, 0);
+				draw_line({-1.25_mm, -1.25_mm}, {0, -2.5_mm}, c, 0);
+				draw_line({1.25_mm, -1.25_mm}, {0, -2.5_mm}, c, 0);
+
+				if(sym.orientation != Orientation::DOWN) {
+					draw_error({0,0}, 2e5, "Unsupported orientation", true);
+				}
+
+				selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0,0}, {-1.25_mm, -2.5_mm}, {1.25_mm, 0_mm});
+				transform.reset();
+
+				int text_angle = 0;
+				Coordi text_offset(1.25_mm, -1.875_mm);
+				if(sym.mirror) {
+					text_offset.x *= -1;
+					text_angle = 32768;
+				}
+
+				draw_text0(sym.junction->position+text_offset, 1.5_mm, sym.junction->net->name, text_angle, false, TextOrigin::CENTER, c, 0);
+			} break;
+
+			case Net::PowerSymbolStyle::DOT :
+			case Net::PowerSymbolStyle::ANTENNA : {
+				float dir = sym.orientation==Orientation::DOWN?-1:1;
+				if(sym.orientation == Orientation::LEFT || sym.orientation == Orientation::RIGHT) {
+					draw_error({0,0}, 2e5, "Unsupported orientation", true);
+				}
+
+				if(style == Net::PowerSymbolStyle::ANTENNA) {
+					draw_line({0,0}, {0, dir*2.5_mm}, c, 0);
+					draw_line({-1_mm, dir*1_mm}, {0, dir*2.5_mm}, c, 0);
+					draw_line({1_mm, dir*1_mm}, {0, dir*2.5_mm}, c, 0);
+					selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0,0}, {-1_mm, dir*2.5_mm}, {1_mm, 0_mm});
+				}
+				else {
+					draw_line({0,0}, {0, dir*1_mm}, c, 0);
+					draw_arc({0, dir*1.75_mm}, 0.75_mm, 0, 2*M_PI, ColorP::FROM_LAYER, 0, true, 0);
+					selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0,0}, {-.75_mm, dir*2.5_mm}, {.75_mm, 0_mm});
+				}
+
+				transform.reset();
+
+				int text_angle = 0;
+				Coordi text_offset(1.25_mm, dir*1.875_mm);
+				if(sym.mirror ^ (dir > 0)) {
+					text_offset.x *= -1;
+					text_angle = 32768;
+				}
+
+				draw_text0(sym.junction->position+text_offset, 1.5_mm, sym.junction->net->name, text_angle, false, TextOrigin::CENTER, c, 0);
+			}
 		}
 
-		draw_text0(sym.junction->position+text_offset, 1.5_mm, sym.junction->net->name, text_angle, false, TextOrigin::CENTER, c, 0);
+		transform.reset();
+
+
 		object_refs_current.pop_back();
 	}
 	

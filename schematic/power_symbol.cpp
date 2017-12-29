@@ -19,6 +19,9 @@ namespace horizon {
 			net = &block->nets.at(j.at("net").get<std::string>());
 		else
 			net.uuid = j.at("net").get<std::string>();
+
+		if(j.count("orientation"))
+			orientation = orientation_lut.lookup(j.at("orientation"));
 	}
 
 	UUID PowerSymbol::get_uuid() const {
@@ -37,6 +40,7 @@ namespace horizon {
 		j["junction"] = (std::string)junction->uuid;
 		j["net"] = (std::string)net->uuid;
 		j["mirror"] = mirror;
+		j["orientation"] = orientation_lut.lookup_reverse(orientation);
 		return j;
 	}
 }

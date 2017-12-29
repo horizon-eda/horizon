@@ -2,13 +2,6 @@
 #include "lut.hpp"
 
 namespace horizon {
-
-	static const LutEnumStr<Orientation> orientation_lut = {
-		{"up", 		Orientation::UP},
-		{"down", 	Orientation::DOWN},
-		{"left", 	Orientation::LEFT},
-		{"right",	Orientation::RIGHT},
-	};
 	static const LutEnumStr<TextOrigin> origin_lut = {
 		{"baseline",	TextOrigin::BASELINE},
 		{"center", 		TextOrigin::CENTER},

@@ -33,6 +33,7 @@ namespace horizon {
 			bool ask_delete_component(Component *comp);
 			bool manage_buses(class Block *b);
 			bool manage_net_classes(class Block *b);
+			bool manage_power_nets(class Block *b);
 			bool manage_via_templates(class Board *b, class ViaPadstackProvider *vpp);
 			bool edit_parameter_program(class ParameterProgram *program);
 			bool edit_parameter_set(ParameterSet *pset);

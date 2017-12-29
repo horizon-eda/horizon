@@ -22,4 +22,11 @@ namespace horizon {
 		{"package", ObjectType::PACKAGE},
 		{"part", ObjectType::PART},
 	};
+
+	const LutEnumStr<Orientation> orientation_lut = {
+		{"up", 		Orientation::UP},
+		{"down", 	Orientation::DOWN},
+		{"left", 	Orientation::LEFT},
+		{"right",	Orientation::RIGHT},
+	};
 }

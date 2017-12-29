@@ -72,5 +72,6 @@ namespace horizon {
 		{ToolID::UNLOCK, {"Unlock"}},
 		{ToolID::UNLOCK_ALL, {"Unlock all"}},
 		{ToolID::ADD_VERTEX, {"Add vertex"}},
+		{ToolID::MANAGE_POWER_NETS, {"Manage power nets"}},
 	};
 }

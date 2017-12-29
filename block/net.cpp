@@ -1,11 +1,20 @@
 #include "net.hpp"
 #include "block.hpp"
+#include "lut.hpp"
 
 namespace horizon {
+
+	static const LutEnumStr<Net::PowerSymbolStyle> power_symbol_style_lut = {
+		{"gnd",     Net::PowerSymbolStyle::GND},
+		{"dot",     Net::PowerSymbolStyle::DOT},
+		{"antenna",	Net::PowerSymbolStyle::ANTENNA},
+	};
 
 	Net::Net(const UUID &uu, const json &j, Block &block): Net(uu ,j)
 		{
 		net_class = &block.net_classes.at(j.at("net_class").get<std::string>());
+		if(j.count("power_symbol_style"))
+			power_symbol_style = power_symbol_style_lut.lookup(j.at("power_symbol_style"));
 	}
 	Net::Net(const UUID &uu, const json &j):
 			uuid(uu),
@@ -33,6 +42,7 @@ namespace horizon {
 		j["name"] = name;
 		j["is_power"] = is_power;
 		j["net_class"] = net_class->uuid;
+		j["power_symbol_style"] = power_symbol_style_lut.lookup_reverse(power_symbol_style);
 		if(diffpair_master)
 			j["diffpair"] = diffpair->uuid;
 		return j;

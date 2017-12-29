@@ -112,7 +112,10 @@ namespace horizon {
 		draw_line({x,      y+3*sc}, {x+1*sc,   y+6*sc}, c, 10000, tr);
 		draw_line({x,      y+3*sc}, {x-1*sc,   y+6*sc}, c, 10000, tr);
 		draw_line({x-1*sc, y+6*sc}, {x+1*sc,   y+6*sc}, c, 10000, tr);
-		draw_text0({x-5*sc, y-1.5f*sc}, 0.25_mm, text, 0, false, TextOrigin::BASELINE, c);
+		Coordf text_pos {x-5*sc, y-1.5f*sc};
+		if(tr)
+			text_pos = transform.transform(text_pos);
+		draw_text0(text_pos, 0.25_mm, text, 0, false, TextOrigin::BASELINE, c);
 	}
 
 	std::tuple<Coordf, Coordf, Coordi> Canvas::draw_flag(const Coordf &position, const std::string &txt, int64_t size, Orientation orientation, ColorP c) {

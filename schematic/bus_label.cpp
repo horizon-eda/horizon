@@ -4,14 +4,6 @@
 #include "block.hpp"
 
 namespace horizon {
-
-	static const LutEnumStr<Orientation> orientation_lut = {
-		{"up", 		Orientation::UP},
-		{"down", 	Orientation::DOWN},
-		{"left", 	Orientation::LEFT},
-		{"right",	Orientation::RIGHT},
-	};
-
 	BusLabel::BusLabel(const UUID &uu, const json &j, Sheet &sheet, Block &block):
 		uuid(uu),
 		junction(&sheet.junctions.at(j.at("junction").get<std::string>())),

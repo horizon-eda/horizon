@@ -22,6 +22,18 @@ namespace horizon {
 		}
 	}
 
+	template <typename T> void bind_widget(Gtk::ComboBoxText *combo, const std::map<T, std::string> &lut, T &v) {
+		for(const auto &it: lut) {
+			combo->append(std::to_string(static_cast<int>(it.first)), it.second);
+		}
+		combo->set_active_id(std::to_string(static_cast<int>(v)));
+		combo->signal_changed().connect([combo, &v] {
+			v = static_cast<T>(std::stoi(combo->get_active_id()));
+		});
+	}
+
+
+
 	Gtk::Label *grid_attach_label_and_widget(Gtk::Grid *gr, const std::string &label, Gtk::Widget *w, int &top);
 
 	void tree_view_scroll_to_selection(Gtk::TreeView *view);

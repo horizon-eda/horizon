@@ -23,6 +23,7 @@ namespace horizon {
 
 	extern const LutEnumStr<PatchType> patch_type_lut;
 	extern const LutEnumStr<ObjectType> object_type_lut;
+	extern const LutEnumStr<Orientation> orientation_lut;
 
 	/**
 	 * Your typical coordinate class.

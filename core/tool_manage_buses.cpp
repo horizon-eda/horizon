@@ -15,6 +15,7 @@ namespace horizon {
 			case ToolID::ANNOTATE:
 			case ToolID::MANAGE_NET_CLASSES:
 			case ToolID::EDIT_SCHEMATIC_PROPERTIES:
+			case ToolID::MANAGE_POWER_NETS:
 				return core.c;
 
 			case ToolID::EDIT_STACKUP :
@@ -45,6 +46,9 @@ namespace horizon {
 		}
 		else if(tool_id == ToolID::EDIT_STACKUP) {
 			r = imp->dialogs.edit_stackup(core.b->get_board());
+		}
+		else if(tool_id == ToolID::MANAGE_POWER_NETS) {
+			r = imp->dialogs.manage_power_nets(core.c->get_block());
 		}
 		if(r) {
 			core.r->commit();

@@ -119,9 +119,11 @@ namespace horizon {
 				return std::make_unique<ToolPlaceBusRipper>(this, tool_id);
 
 			case ToolID::MANAGE_BUSES:
-				return std::make_unique<ToolManageBuses>(this, tool_id);
-
+			case ToolID::MANAGE_NET_CLASSES:
+			case ToolID::EDIT_STACKUP:
 			case ToolID::ANNOTATE:
+			case ToolID::EDIT_SCHEMATIC_PROPERTIES:
+			case ToolID::MANAGE_POWER_NETS:
 				return std::make_unique<ToolManageBuses>(this, tool_id);
 
 			case ToolID::DRAW_POLYGON:
@@ -175,9 +177,6 @@ namespace horizon {
 			case ToolID::IMPORT_DXF:
 				return std::make_unique<ToolImportDXF>(this, tool_id);
 
-			case ToolID::MANAGE_NET_CLASSES:
-				return std::make_unique<ToolManageBuses>(this, tool_id);
-
 			case ToolID::EDIT_PARAMETER_PROGRAM:
 				return std::make_unique<ToolEditParameterProgram>(this, tool_id);
 
@@ -195,9 +194,6 @@ namespace horizon {
 
 			case ToolID::EDIT_LINE_RECTANGLE:
 				return std::make_unique<ToolEditLineRectangle>(this, tool_id);
-
-			case ToolID::EDIT_SCHEMATIC_PROPERTIES:
-				return std::make_unique<ToolManageBuses>(this, tool_id);
 
 			case ToolID::ROUTE_TRACK_INTERACTIVE :
 			case ToolID::ROUTE_DIFFPAIR_INTERACTIVE :
@@ -221,9 +217,6 @@ namespace horizon {
 			case ToolID::CLEAR_ALL_PLANES:
 			case ToolID::UPDATE_ALL_PLANES :
 				return std::make_unique<ToolUpdateAllPlanes>(this, tool_id);
-
-			case ToolID::EDIT_STACKUP:
-				return std::make_unique<ToolManageBuses>(this, tool_id);
 
 			case ToolID::DRAW_DIMENSION:
 				return std::make_unique<ToolDrawDimension>(this, tool_id);

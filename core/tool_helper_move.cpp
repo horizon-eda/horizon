@@ -190,6 +190,10 @@ namespace horizon {
 						auto &x = core.c->get_sheet()->power_symbols.at(it.uuid).mirror;
 						x = !x;
 					}
+					else {
+						auto &x = core.c->get_sheet()->power_symbols.at(it.uuid).orientation;
+						x = transform_orienation(x, true, false);
+					}
 				break;
 
 				case ObjectType::SCHEMATIC_SYMBOL : {

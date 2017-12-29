@@ -3,14 +3,6 @@
 #include "sheet.hpp"
 
 namespace horizon {
-
-	static const LutEnumStr<Orientation> orientation_lut = {
-		{"up", 		Orientation::UP},
-		{"down", 	Orientation::DOWN},
-		{"left", 	Orientation::LEFT},
-		{"right",	Orientation::RIGHT},
-	};
-
 	NetLabel::NetLabel(const UUID &uu, const json &j, Sheet *sheet):
 		uuid(uu),
 		orientation(orientation_lut.lookup(j["orientation"])),

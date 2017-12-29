@@ -193,6 +193,7 @@ SRC_IMP = \
 	dialogs/annotate.cpp\
 	dialogs/edit_shape.cpp\
 	dialogs/manage_net_classes.cpp\
+	dialogs/manage_power_nets.cpp\
 	dialogs/edit_parameter_program.cpp\
 	dialogs/edit_parameter_set.cpp\
 	dialogs/edit_pad_parameter_set.cpp\

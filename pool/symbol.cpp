@@ -7,13 +7,6 @@
 #include <algorithm>
 
 namespace horizon {
-	
-	static const LutEnumStr<Orientation> orientation_lut = {
-		{"up", 		Orientation::UP},
-		{"down", 	Orientation::DOWN},
-		{"left", 	Orientation::LEFT},
-		{"right",	Orientation::RIGHT},
-	};
 
 	static const LutEnumStr<SymbolPin::Decoration::Driver> decoration_driver_lut = {
 		{"default",	 				SymbolPin::Decoration::Driver::DEFAULT},

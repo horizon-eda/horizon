@@ -22,6 +22,10 @@ namespace horizon {
 			UUID uuid;
 			std::string name;
 			bool is_power = false;
+
+			enum class PowerSymbolStyle {GND, DOT, ANTENNA};
+			PowerSymbolStyle power_symbol_style = PowerSymbolStyle::GND;
+
 			uuid_ptr<NetClass> net_class;
 			uuid_ptr<Net> diffpair;
 			bool diffpair_master = false;

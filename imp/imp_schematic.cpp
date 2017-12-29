@@ -237,6 +237,9 @@ namespace horizon {
 		hamburger_menu->append("Net classes...", "win.manage_nc");
 		add_tool_action(ToolID::MANAGE_NET_CLASSES, "manage_nc");
 
+		hamburger_menu->append("Power Nets...", "win.manage_pn");
+		add_tool_action(ToolID::MANAGE_POWER_NETS, "manage_pn");
+
 		hamburger_menu->append("Schematic properties", "win.sch_properties");
 		add_tool_action(ToolID::EDIT_SCHEMATIC_PROPERTIES, "sch_properties");
 
