@@ -33,6 +33,7 @@
     <file>imp/footprint_generator/dual.svg</file>
     <file>imp/footprint_generator/single.svg</file>
     <file>imp/footprint_generator/quad.svg</file>
+    <file>imp/footprint_generator/grid.svg</file>
     
     <file>imp/rules/rules_window.ui</file>
     <file>imp/rules/rule_editor_hole_size.ui</file>

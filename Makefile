@@ -236,6 +236,7 @@ SRC_IMP = \
 	imp/footprint_generator/footprint_generator_dual.cpp\
 	imp/footprint_generator/footprint_generator_single.cpp\
 	imp/footprint_generator/footprint_generator_quad.cpp\
+	imp/footprint_generator/footprint_generator_grid.cpp\
 	imp/footprint_generator/svg_overlay.cpp\
 	imp/imp_interface.cpp\
 	imp/parameter_window.cpp\

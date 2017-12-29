@@ -5,6 +5,7 @@
 #include "footprint_generator_dual.hpp"
 #include "footprint_generator_single.hpp"
 #include "footprint_generator_quad.hpp"
+#include "footprint_generator_grid.hpp"
 
 namespace horizon {
 
@@ -49,6 +50,12 @@ namespace horizon {
 			gen->show();
 			gen->property_can_generate().signal_changed().connect(sigc::mem_fun(w, &FootprintGeneratorWindow::update_can_generate));
 			w->stack->add(*gen, "quad", "Quad");
+		}
+		{
+			auto gen = Gtk::manage(new FootprintGeneratorGrid(c));
+			gen->show();
+			gen->property_can_generate().signal_changed().connect(sigc::mem_fun(w, &FootprintGeneratorWindow::update_can_generate));
+			w->stack->add(*gen, "grid", "Grid");
 		}
 		w->stack->property_visible_child().signal_changed().connect(sigc::mem_fun(w, &FootprintGeneratorWindow::update_can_generate));
 		w->generate_button->signal_clicked().connect([w]{
