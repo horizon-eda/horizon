@@ -168,7 +168,7 @@ namespace horizon {
 	}
 
 	PoolNotebook::PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw): Gtk::Notebook(), base_path(bp), pool(bp), appwin(aw), zctx(aw->zctx), sock_pool_update(zctx, ZMQ_SUB) {
-		sock_pool_update_ep = "inproc://pool-update";
+		sock_pool_update_ep = "inproc://pool-update-"+((std::string)UUID::random());
 		sock_pool_update.bind(sock_pool_update_ep);
 		{
 			int dummy = 0;
