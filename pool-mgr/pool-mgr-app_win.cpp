@@ -9,55 +9,12 @@
 #include <git2.h>
 #include <git2/clone.h>
 #include "util/gtk_util.hpp"
+#include "util/recent_util.hpp"
+#include "widgets/recent_item_box.hpp"
 
 extern const char *gitversion;
 
 namespace horizon {
-	class PoolRecentItemBox : public Gtk::Box {
-		public:
-			PoolRecentItemBox(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x, const std::string &filename, const Glib::DateTime &last_opened);
-			static PoolRecentItemBox* create(const std::string &filename, const Glib::DateTime &last_opened);
-			const std::string filename;
-
-		private :
-			Gtk::Label *name_label = nullptr;
-			Gtk::Label *path_label = nullptr;
-			Gtk::Label *last_opened_label = nullptr;
-	};
-
-	PoolRecentItemBox::PoolRecentItemBox(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x, const std::string &fn, const Glib::DateTime &last_opened) :
-		Gtk::Box(cobject), filename(fn) {
-		x->get_widget("recent_item_name_label", name_label);
-		x->get_widget("recent_item_path_label", path_label);
-		x->get_widget("recent_item_last_opened_label", last_opened_label);
-
-		path_label->set_text(filename);
-		try {
-			std::ifstream ifs(filename);
-			if(ifs.is_open()) {
-				json k;
-				ifs>>k;
-				name_label->set_text(k.at("name").get<std::string>());
-			}
-			ifs.close();
-		}
-		catch (...) {
-			name_label->set_text("error opening!");
-		}
-
-		last_opened_label->set_text(last_opened.format("%c"));
-
-	}
-
-	PoolRecentItemBox* PoolRecentItemBox::create(const std::string &filename, const Glib::DateTime &last_opened) {
-		PoolRecentItemBox* w;
-		Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-		x->add_from_resource("/net/carrotIndustries/horizon/pool-mgr/window.ui", "recent_item");
-		x->get_widget_derived("recent_item", w, filename, last_opened);
-		w->reference();
-		return w;
-	}
-
 	PoolManagerAppWindow::PoolManagerAppWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refBuilder, PoolManagerApplication *app):
 			Gtk::ApplicationWindow(cobject), builder(refBuilder), state_store(this, "pool-mgr"), zctx(app->zctx) {
 		builder->get_widget("stack", stack);
@@ -115,8 +72,8 @@ namespace horizon {
 
 		recent_listbox->set_header_func(sigc::ptr_fun(header_func_separator));
 		recent_listbox->signal_row_activated().connect([this](Gtk::ListBoxRow *row) {
-			auto ch = dynamic_cast<PoolRecentItemBox*>(row->get_child());
-			open_file_view(Gio::File::create_for_path(ch->filename));
+			auto ch = dynamic_cast<RecentItemBox*>(row->get_child());
+			open_file_view(Gio::File::create_for_path(ch->path));
 		});
 	}
 
@@ -208,19 +165,25 @@ namespace horizon {
 				delete it;
 			}
 		}
-		std::vector<std::pair<std::string, Glib::DateTime>> recent_items_sorted;
-
-		recent_items_sorted.reserve(app->recent_items.size());
-		for(const auto &it: app->recent_items) {
-			recent_items_sorted.emplace_back(it.first, it.second);
-		}
-		std::sort(recent_items_sorted.begin(), recent_items_sorted.end(), [](const auto &a, const auto &b){return a.second.to_unix() > b.second.to_unix();});
-
+		std::vector<std::pair<std::string, Glib::DateTime>> recent_items_sorted = recent_sort(app->recent_items);
 		for(const auto &it: recent_items_sorted) {
-			auto box = PoolRecentItemBox::create(it.first, it.second);
+			const std::string &path = it.first;
+			std::string name;
+			try {
+				std::ifstream ifs(path);
+				if(ifs.is_open()) {
+					json k;
+					ifs>>k;
+					name = k.at("name");;
+				}
+				ifs.close();
+			}
+			catch (...) {
+				name = "error opening!";
+			}
+			auto box = Gtk::manage(new RecentItemBox(name, it.first, it.second));
 			recent_listbox->append(*box);
 			box->show();
-			box->unreference();
 		}
 
 	}

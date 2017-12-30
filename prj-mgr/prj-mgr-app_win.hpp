@@ -83,7 +83,7 @@ namespace horizon {
 			Gtk::Button *button_create = nullptr;
 			Gtk::Button *button_save = nullptr;
 			Gtk::HeaderBar *header = nullptr;
-			Gtk::RecentChooserWidget *recent_chooser = nullptr;
+			Gtk::ListBox *recent_listbox = nullptr;
 			Gtk::Label *label_gitversion = nullptr;
 
 			std::unique_ptr<Project> project= nullptr;
@@ -102,7 +102,6 @@ namespace horizon {
 			void handle_create();
 			void handle_close();
 			void handle_save();
-			void handle_recent();
 			void handle_place_part(const UUID &uu);
 			json handle_req(const json &j);
 			ProjectManagerViewCreate view_create;
@@ -110,6 +109,7 @@ namespace horizon {
 
 			bool on_delete_event(GdkEventAny *ev) override;
 			bool check_pools();
+			void update_recent_items();
 
 			zmq::socket_t sock_project;
 			std::string sock_project_ep;

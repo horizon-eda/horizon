@@ -3,9 +3,12 @@
 #include <iostream>
 #include "project/project.hpp"
 #include "util.hpp"
+#include "util/gtk_util.hpp"
+#include "util/recent_util.hpp"
 #include "part_browser/part_browser_window.hpp"
 #include "pool-update/pool-update.hpp"
 #include "pool_cache_window.hpp"
+#include "widgets/recent_item_box.hpp"
 extern const char *gitversion;
 
 namespace horizon {
@@ -213,7 +216,7 @@ namespace horizon {
 		builder->get_widget("button_cancel", button_cancel);
 		builder->get_widget("button_save", button_save);
 		builder->get_widget("header", header);
-		builder->get_widget("recent_chooser", recent_chooser);
+		builder->get_widget("recent_listbox", recent_listbox);
 		builder->get_widget("label_gitversion", label_gitversion);
 		set_view_mode(ViewMode::OPEN);
 
@@ -223,7 +226,6 @@ namespace horizon {
 		button_create->signal_clicked().connect(sigc::mem_fun(this, &ProjectManagerAppWindow::handle_create));
 		button_close->signal_clicked().connect(sigc::mem_fun(this, &ProjectManagerAppWindow::handle_close));
 		button_save->signal_clicked().connect(sigc::mem_fun(this, &ProjectManagerAppWindow::handle_save));
-		recent_chooser->signal_item_activated().connect(sigc::mem_fun(this, &ProjectManagerAppWindow::handle_recent));
 
 		view_create.signal_valid_change().connect([this] (bool v) {button_create->set_sensitive(v);});
 		label_gitversion->set_label(gitversion);
@@ -263,7 +265,14 @@ namespace horizon {
 			return true;
 		}, chan, Glib::IO_IN | Glib::IO_HUP);
 
-		Glib::signal_idle().connect_once([this]{check_pools();});
+		recent_listbox->set_header_func(sigc::ptr_fun(header_func_separator));
+		recent_listbox->signal_row_activated().connect([this](Gtk::ListBoxRow *row) {
+			auto ch = dynamic_cast<RecentItemBox*>(row->get_child());
+			open_file_view(Gio::File::create_for_path(ch->path));
+		});
+
+		Glib::signal_idle().connect_once([this]{check_pools(); update_recent_items();});
+
 	}
 
 	json ProjectManagerAppWindow::handle_req(const json &j) {
@@ -336,11 +345,6 @@ namespace horizon {
 		}
 	}
 
-	void ProjectManagerAppWindow::handle_recent() {
-		auto file = Gio::File::create_for_uri(recent_chooser->get_current_uri());
-		open_file_view(file);
-	}
-
 	void ProjectManagerAppWindow::handle_open() {
 		GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open Project",
 			GTK_WINDOW(gobj()),
@@ -400,6 +404,39 @@ namespace horizon {
 		return true;
 	}
 
+	void ProjectManagerAppWindow::update_recent_items() {
+		auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
+		if(!app)
+			return;
+		{
+			auto chs = recent_listbox->get_children();
+			for(auto it: chs) {
+				delete it;
+			}
+		}
+		std::vector<std::pair<std::string, Glib::DateTime>> recent_items_sorted = recent_sort(app->recent_items);
+		for(const auto &it: recent_items_sorted) {
+			const std::string &path = it.first;
+			std::string name;
+			try {
+				std::ifstream ifs(path);
+				if(ifs.is_open()) {
+					json k;
+					ifs>>k;
+					name = k.at("title");
+				}
+				ifs.close();
+			}
+			catch (...) {
+				name = "error opening!";
+			}
+			auto box = Gtk::manage(new RecentItemBox(name, it.first, it.second));
+			recent_listbox->append(*box);
+			box->show();
+		}
+
+	}
+
 	void ProjectManagerAppWindow::set_view_mode(ViewMode mode) {
 		button_open->hide();
 		button_close->hide();
@@ -415,6 +452,7 @@ namespace horizon {
 				stack->set_visible_child("open");
 				button_open->show();
 				button_new->show();
+				update_recent_items();
 			break;
 
 			case ViewMode::PROJECT:
@@ -471,6 +509,7 @@ namespace horizon {
 			part_browser_window->signal_place_part().connect(sigc::mem_fun(this, &ProjectManagerAppWindow::handle_place_part));
 
 			pool_cache_window = PoolCacheWindow::create(this, project->pool_cache_directory, app->pools.at(project->pool_uuid).path);
+			app->recent_items[path] = Glib::DateTime::create_now_local();
 		}
 		catch (const std::exception& e) {
 			Gtk::MessageDialog md(*this,  "Error opening project", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);

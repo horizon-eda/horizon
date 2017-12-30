@@ -349,6 +349,8 @@ SRC_PRJ_MGR = \
 	pool/pool_cached.cpp\
 	util/gtk_util.cpp\
 	util/window_state_store.cpp\
+	widgets/recent_item_box.cpp\
+	util/recent_util.cpp
 
 SRC_POOL_MGR = \
 	pool-mgr/pool-mgr-main.cpp\
@@ -393,6 +395,8 @@ SRC_POOL_MGR = \
 	util/window_state_store.cpp\
 	util/rest_client.cpp\
 	util/github_client.cpp\
+	widgets/recent_item_box.cpp\
+	util/recent_util.cpp
 
 SRC_PGM_TEST = \
 	pgm-test.cpp

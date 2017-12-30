@@ -3,6 +3,7 @@
 #include <glibmm/miscutils.h>
 #include <fstream>
 #include "util/util.hpp"
+#include "util/recent_util.hpp"
 #include <git2.h>
 #include <curl/curl.h>
 
@@ -103,14 +104,7 @@ namespace horizon {
 				ifs>>j;
 				ifs.close();
 			}
-			if(j.count("recent")) {
-				const json &o = j["recent"];
-				for (auto it = o.cbegin(); it != o.cend(); ++it) {
-					std::string filename = it.key();
-					if(Glib::file_test(filename, Glib::FILE_TEST_IS_REGULAR))
-						recent_items.emplace(filename, Glib::DateTime::create_now_local(it.value().get<int64_t>()));
-				}
-			}
+			recent_from_json(recent_items, j);
 		}
 
 		Gtk::IconTheme::get_default()->add_resource_path("/net/carrotIndustries/horizon/icons");

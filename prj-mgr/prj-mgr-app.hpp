@@ -4,6 +4,7 @@
 #include "json.hpp"
 #include <map>
 #include <zmq.hpp>
+#include <glibmm/datetime.h>
 
 namespace horizon {
 	using json = nlohmann::json;
@@ -31,6 +32,8 @@ namespace horizon {
 			const std::string &get_ep_broadcast() const;
 			void send_json(int pid, const json &j);
 			zmq::context_t zctx;
+
+			std::map<std::string, Glib::DateTime> recent_items;
 
 		protected:
 			// Override default signal handlers:

@@ -4,6 +4,7 @@
 #include <glibmm/miscutils.h>
 #include <fstream>
 #include "util/util.hpp"
+#include "util/recent_util.hpp"
 
 namespace horizon {
 
@@ -128,6 +129,7 @@ namespace horizon {
 					part_favorites.push_back(it.value().get<std::string>());
 				}
 			}
+			recent_from_json(recent_items, j);
 
 		}
 
@@ -153,6 +155,10 @@ namespace horizon {
 				k.push_back((std::string)it);
 			}
 			j["part_favorites"] = k;
+		}
+
+		for(const auto &it: recent_items) {
+			j["recent"][it.first] = it.second.to_unix();
 		}
 
 
