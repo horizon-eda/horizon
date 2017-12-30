@@ -106,6 +106,8 @@ namespace horizon {
 		button_back->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::handle_back));
 		button_finish->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::handle_finish));
 
+		set_mode(Mode::ASSIGN);
+
 		signal_delete_event().connect([this](GdkEventAny *ev) {
 			if(processes.size()){
 				Gtk::MessageDialog md(*this,  "Can't close right now", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
@@ -113,12 +115,9 @@ namespace horizon {
 				md.run();
 				return true; //keep open
 			}
-			return false;
-		});
+			if(has_finished)
+				return false;
 
-		set_mode(Mode::ASSIGN);
-
-		signal_delete_event().connect([this](GdkEventAny *ev) {
 			Gtk::MessageDialog md(*this,  "Really close?", false /* use_markup */, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
 			md.set_secondary_text("By closing the part wizard, all changes to the new part will be lost");
 			md.add_button("Close and discard changes", 1);

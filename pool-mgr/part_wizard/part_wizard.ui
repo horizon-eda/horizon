@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.1 -->
+<!-- Generated with glade 3.20.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkBox" id="gate_editor">
@@ -212,6 +212,8 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">label</property>
+        <property name="justify">right</property>
+        <property name="wrap">True</property>
         <property name="xalign">1</property>
       </object>
       <packing>
@@ -224,6 +226,7 @@
       <object class="GtkEntry" id="pin_name">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
+        <property name="valign">center</property>
         <property name="secondary_icon_activatable">False</property>
         <property name="secondary_icon_tooltip_text" translatable="yes">Duplicate pin name</property>
       </object>
@@ -237,6 +240,7 @@
       <object class="GtkComboBoxText" id="pin_direction">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="valign">center</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -268,6 +272,7 @@
           <object class="GtkEntry" id="pin_names">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="valign">center</property>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -306,6 +311,7 @@
           <object class="GtkComboBox" id="combo_gate">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="valign">center</property>
             <property name="has_entry">True</property>
             <child internal-child="entry">
               <object class="GtkEntry">
@@ -466,6 +472,15 @@
                     <property name="can_focus">False</property>
                     <property name="row_spacing">5</property>
                     <property name="column_spacing">2</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
                     <child>
                       <placeholder/>
                     </child>
