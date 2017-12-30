@@ -20,6 +20,7 @@
 #include "pool_merge_dialog.hpp"
 #include <git2.h>
 #include "util/autofree_ptr.hpp"
+#include "pool-mgr-app.hpp"
 #include <thread>
 
 namespace horizon {
@@ -85,7 +86,8 @@ namespace horizon {
 
 	void PoolNotebook::spawn(PoolManagerProcess::Type type, const std::vector<std::string> &args) {
 		if(processes.count(args.at(0)) == 0) { //need to launch imp
-			std::vector<std::string> env = {"HORIZON_POOL="+base_path};
+			auto app = Glib::RefPtr<PoolManagerApplication>::cast_dynamic(appwin->get_application());
+			std::vector<std::string> env = {"HORIZON_POOL="+base_path, "HORIZON_EP_BROADCAST="+app->get_ep_broadcast()};
 			std::string filename = args.at(0);
 			if(filename.size()) {
 				if(!Glib::file_test(filename, Glib::FILE_TEST_IS_REGULAR)) {
@@ -116,9 +118,14 @@ namespace horizon {
 			});
 		}
 		else { //present imp
-			//auto &proc = processes.at(args.at(0));
-			//auto pid = proc.proc->get_pid();
-			//app->send_json(pid, {{"op", "present"}});
+			auto &proc = processes.at(args.at(0));
+			if(proc.proc) {
+				auto pid = proc.proc->get_pid();
+				Glib::RefPtr<PoolManagerApplication>::cast_dynamic(appwin->get_application())->send_json(pid, {{"op", "present"}});
+			}
+			else {
+				proc.win->present();
+			}
 		}
 	}
 
