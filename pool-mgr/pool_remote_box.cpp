@@ -742,7 +742,7 @@ namespace horizon {
 							git_thread_status = "Waiting for fork...";
 						}
 						git_thread_dispatcher.emit();
-						sleep(1);
+						Glib::usleep(1e6);
 					}
 				}
 				if(retries == 0) {
