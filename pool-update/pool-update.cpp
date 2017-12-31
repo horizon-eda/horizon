@@ -272,12 +272,13 @@ namespace horizon {
 					if(!skipthis) {
 						status_cb(PoolUpdateStatus::FILE, filename);
 						auto part = Part::new_from_file(filename, pool);
-						SQLite::Query q(db, "INSERT INTO parts (uuid, MPN, manufacturer, entity, package, filename) VALUES ($uuid, $MPN, $manufacturer, $entity, $package, $filename)");
+						SQLite::Query q(db, "INSERT INTO parts (uuid, MPN, manufacturer, entity, package, description, filename) VALUES ($uuid, $MPN, $manufacturer, $entity, $package, $description, $filename)");
 						q.bind("$uuid", part.uuid);
 						q.bind("$MPN", part.get_MPN());
 						q.bind("$manufacturer", part.get_manufacturer());
 						q.bind("$package", part.package->uuid);
 						q.bind("$entity", part.entity->uuid);
+						q.bind("$description", part.get_description());
 						q.bind("$filename", Glib::build_filename(prefix, it));
 						q.step();
 
@@ -305,7 +306,7 @@ namespace horizon {
 
 	void status_cb_nop(PoolUpdateStatus st, const std::string msg) {}
 
-	static const int min_user_version = 2; //keep in sync with schema
+	static const int min_user_version = 3; //keep in sync with schema
 
 	void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb) {
 		auto pool_db_path = Glib::build_filename(pool_base_path, "pool.db");

@@ -21,6 +21,8 @@ namespace horizon {
 			class EntryWithInheritance *w_mpn = nullptr;
 			class EntryWithInheritance *w_value = nullptr;
 			class EntryWithInheritance *w_manufacturer = nullptr;
+			class EntryWithInheritance *w_description = nullptr;
+			class EntryWithInheritance *w_datasheet = nullptr;
 			std::map<Part::Attribute, class EntryWithInheritance*> attr_editors;
 
 

@@ -125,10 +125,14 @@ namespace horizon {
 		w_mpn = add_entry("part_mpn_box");
 		w_value =add_entry("part_value_box");
 		w_manufacturer =add_entry("part_manufacturer_box");
+		w_datasheet =add_entry("part_datasheet_box");
+		w_description =add_entry("part_description_box");
 
 		attr_editors.emplace(horizon::Part::Attribute::MPN, w_mpn);
 		attr_editors.emplace(horizon::Part::Attribute::VALUE, w_value);
 		attr_editors.emplace(horizon::Part::Attribute::MANUFACTURER, w_manufacturer);
+		attr_editors.emplace(horizon::Part::Attribute::DESCRIPTION, w_description);
+		attr_editors.emplace(horizon::Part::Attribute::DATASHEET, w_datasheet);
 
 
 		for(auto &it: attr_editors) {

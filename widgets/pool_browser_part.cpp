@@ -28,6 +28,14 @@ namespace horizon {
 	void PoolBrowserPart::create_columns() {
 		treeview->append_column("MPN", list_columns.MPN);
 		treeview->append_column("Manufacturer", list_columns.manufacturer);
+		{
+			auto cr = Gtk::manage(new Gtk::CellRendererText());
+			auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Description", *cr));
+			tvc->set_resizable(true);
+			tvc->add_attribute(cr->property_text(), list_columns.description);
+			cr->property_ellipsize() = Pango::ELLIPSIZE_END;
+			treeview->append_column(*tvc);
+		}
 		treeview->append_column("Package", list_columns.package);
 		treeview->append_column("Tags", list_columns.tags);
 		{
@@ -57,10 +65,10 @@ namespace horizon {
 		std::set<std::string> tags{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
 		std::stringstream query;
 		if(tags.size() == 0) {
-			query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, packages.name, GROUP_CONCAT(tags.tag, ' '), parts.filename FROM parts LEFT JOIN tags ON tags.uuid = parts.uuid LEFT JOIN packages ON packages.uuid = parts.package WHERE parts.MPN LIKE ? AND parts.manufacturer LIKE ? AND (parts.entity=? or ?) GROUP BY parts.uuid ";
+			query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, packages.name, GROUP_CONCAT(tags.tag, ' '), parts.filename, parts.description FROM parts LEFT JOIN tags ON tags.uuid = parts.uuid LEFT JOIN packages ON packages.uuid = parts.package WHERE parts.MPN LIKE ? AND parts.manufacturer LIKE ? AND (parts.entity=? or ?) GROUP BY parts.uuid ";
 		}
 		else {
-			query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, packages.name, (SELECT GROUP_CONCAT(tags.tag, ' ') FROM tags WHERE tags.uuid = parts.uuid), parts.filename FROM parts LEFT JOIN tags ON tags.uuid = parts.uuid LEFT JOIN packages ON packages.uuid = parts.package WHERE parts.MPN LIKE ? AND parts.manufacturer LIKE ? AND (parts.entity=? or ?) ";
+			query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, packages.name, (SELECT GROUP_CONCAT(tags.tag, ' ') FROM tags WHERE tags.uuid = parts.uuid), parts.filename, parts.description FROM parts LEFT JOIN tags ON tags.uuid = parts.uuid LEFT JOIN packages ON packages.uuid = parts.package WHERE parts.MPN LIKE ? AND parts.manufacturer LIKE ? AND (parts.entity=? or ?) ";
 			query << "AND (";
 			for(const auto &it: tags) {
 				query << "tags.tag LIKE ? OR ";
@@ -98,6 +106,7 @@ namespace horizon {
 			row[list_columns.package] = q.get<std::string>(3);
 			row[list_columns.tags] = q.get<std::string>(4);
 			row[list_columns.path] = q.get<std::string>(5);
+			row[list_columns.description] = q.get<std::string>(6);
 		}
 		treeview->set_model(store);
 		select_uuid(selected_uuid);

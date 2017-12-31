@@ -28,7 +28,7 @@ namespace horizon {
 			UUID uuid;
 
 
-			enum class Attribute {MPN, VALUE, MANUFACTURER};
+			enum class Attribute {MPN, VALUE, MANUFACTURER, DATASHEET, DESCRIPTION};
 			std::map<Attribute, std::pair<bool, std::string>> attributes;
 			const std::string &get_attribute(Attribute a) const;
 			const std::pair<bool, std::string> &get_attribute_pair(Attribute a) const;
@@ -36,6 +36,8 @@ namespace horizon {
 			const std::string &get_MPN() const;
 			const std::string &get_value() const;
 			const std::string &get_manufacturer() const;
+			const std::string &get_datasheet() const;
+			const std::string &get_description() const;
 			std::set<std::string> get_tags() const;
 
 			std::set<std::string> tags;

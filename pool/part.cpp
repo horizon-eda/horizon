@@ -9,6 +9,16 @@ namespace horizon {
 		attributes[Attribute::MPN] = {j.at("MPN").at(0).get<bool>(), j.at("MPN").at(1).get<std::string>()};
 		attributes[Attribute::VALUE] = {j.at("value").at(0).get<bool>(), j.at("value").at(1).get<std::string>()};
 		attributes[Attribute::MANUFACTURER] = {j.at("manufacturer").at(0).get<bool>(), j.at("manufacturer").at(1).get<std::string>()};
+		if(j.count("datasheet"))
+			attributes[Attribute::DATASHEET] = {j.at("datasheet").at(0).get<bool>(), j.at("datasheet").at(1).get<std::string>()};
+		else
+			attributes[Attribute::DATASHEET] = {false, ""};
+
+		if(j.count("description"))
+			attributes[Attribute::DESCRIPTION] = {j.at("description").at(0).get<bool>(), j.at("description").at(1).get<std::string>()};
+		else
+			attributes[Attribute::DESCRIPTION] = {false, ""};
+
 		if(j.count("base")) {
 			base = pool.get_part(j.at("base").get<std::string>());
 			entity = base->entity;
@@ -90,6 +100,14 @@ namespace horizon {
 		return get_attribute(Attribute::MANUFACTURER);
 	}
 
+	const std::string &Part::get_description() const {
+		return get_attribute(Attribute::DESCRIPTION);
+	}
+
+	const std::string &Part::get_datasheet() const {
+		return get_attribute(Attribute::DATASHEET);
+	}
+
 	std::set<std::string> Part::get_tags() const {
 		auto r = tags;
 		if(inherit_tags && base) {
@@ -103,6 +121,8 @@ namespace horizon {
 		attributes[Attribute::MPN] = {false, ""};
 		attributes[Attribute::MANUFACTURER] = {false, ""};
 		attributes[Attribute::VALUE] = {false, ""};
+		attributes[Attribute::DATASHEET] = {false, ""};
+		attributes[Attribute::DESCRIPTION] = {false, ""};
 	}
 
 	Part Part::new_from_file(const std::string &filename, Pool &pool) {
@@ -132,6 +152,14 @@ namespace horizon {
 		{
 			const auto &a = attributes.at(Attribute::MANUFACTURER);
 			j["manufacturer"] = {a.first, a.second};
+		}
+		{
+			const auto &a = attributes.at(Attribute::DATASHEET);
+			j["datasheet"] = {a.first, a.second};
+		}
+		{
+			const auto &a = attributes.at(Attribute::DESCRIPTION);
+			j["description"] = {a.first, a.second};
 		}
 		j["tags"] = tags;
 		j["inherit_tags"] = inherit_tags;

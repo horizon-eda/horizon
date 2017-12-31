@@ -1,4 +1,4 @@
-PRAGMA user_version=2;
+PRAGMA user_version=3;
 
 DROP TABLE IF EXISTS "units";
 CREATE TABLE "units" (
@@ -47,6 +47,7 @@ CREATE TABLE "parts" (
 	`manufacturer`	TEXT,
 	`entity`	TEXT NOT NULL,
 	`package`	TEXT NOT NULL,
+	`description`	TEXT NOT NULL,
 	`filename`	TEXT,
 	PRIMARY KEY(`uuid`)
 );
