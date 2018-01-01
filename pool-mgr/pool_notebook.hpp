@@ -45,7 +45,7 @@ namespace horizon {
 			Pool pool;
 			class PoolManagerAppWindow *appwin;
 			std::map<std::string, PoolManagerProcess> processes;
-			std::set<class PoolBrowser*> browsers;
+			std::map<ObjectType, class PoolBrowser*> browsers;
 			class PartWizard *part_wizard = nullptr;
 			class DuplicateWindow *duplicate_window = nullptr;
 
@@ -100,5 +100,7 @@ namespace horizon {
 
 			std::string remote_repo;
 			class PoolRemoteBox *remote_box = nullptr;
+
+			void go_to(ObjectType type, const UUID &uu);
 	};
 }

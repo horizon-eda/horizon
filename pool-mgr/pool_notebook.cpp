@@ -21,6 +21,9 @@
 #include <git2.h>
 #include "util/autofree_ptr.hpp"
 #include "pool-mgr-app.hpp"
+#include "widgets/part_preview.hpp"
+#include "widgets/entity_preview.hpp"
+#include "widgets/preview_canvas.hpp"
 #include <thread>
 
 namespace horizon {
@@ -134,7 +137,7 @@ namespace horizon {
 		appwin->set_pool_updating(false, success);
 		pool.clear();
 		for(auto &br: browsers) {
-			br->search();
+			br.second->search();
 		}
 		for(auto &it: processes) {
 			it.second.reload();
@@ -233,7 +236,7 @@ namespace horizon {
 			});
 
 			br->show();
-			browsers.insert(br);
+			browsers.emplace(ObjectType::UNIT, br);
 
 			auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
 			auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
@@ -265,41 +268,9 @@ namespace horizon {
 		{
 			auto br = Gtk::manage(new PoolBrowserSymbol(&pool));
 			br->set_show_path(true);
-			browsers.insert(br);
+			browsers.emplace(ObjectType::SYMBOL, br);
 			br->show();
 			auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
-			paned->add1(*br);
-			auto canvas = Gtk::manage(new CanvasGL());
-			canvas->set_selection_allowed(false);
-			paned->add2(*canvas);
-			paned->show_all();
-			br->signal_selected().connect([this, br, canvas]{
-				auto sel = br->get_selected();
-				std::cout << "sym sel " << (std::string) sel << std::endl;
-				if(!sel) {
-					canvas->clear();
-					return;
-				}
-				Symbol sym = *pool.get_symbol(sel);
-				for(const auto &la: sym.get_layers()) {
-					canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL, la.second.color));
-				}
-				sym.expand();
-				canvas->update(sym);
-				auto bb = sym.get_bbox();
-				int64_t pad = 1_mm;
-				bb.first.x -= pad;
-				bb.first.y -= pad;
-
-				bb.second.x += pad;
-				bb.second.y += pad;
-				canvas->zoom_to_bbox(bb.first, bb.second);
-			});
-			br->signal_activated().connect([this, br] {
-				auto uu = br->get_selected();
-				auto path = pool.get_filename(ObjectType::SYMBOL, uu);
-				spawn(PoolManagerProcess::Type::IMP_SYMBOL, {path});
-			});
 
 			auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
 			auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
@@ -320,10 +291,29 @@ namespace horizon {
 			auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
 			sep->show();
 			box->pack_start(*sep, false, false, 0);
-			box->pack_start(*paned, true, true, 0);
+			box->pack_start(*br, true, true, 0);
 			box->show();
 
-			append_page(*box, "Symbols");
+			paned->add1(*box);
+			auto canvas = Gtk::manage(new PreviewCanvas(pool));
+			canvas->set_selection_allowed(false);
+			paned->add2(*canvas);
+			paned->show_all();
+			br->signal_selected().connect([this, br, canvas]{
+				auto sel = br->get_selected();
+				if(!sel) {
+					canvas->clear();
+					return;
+				}
+				canvas->load(ObjectType::SYMBOL, sel);
+			});
+			br->signal_activated().connect([this, br] {
+				auto uu = br->get_selected();
+				auto path = pool.get_filename(ObjectType::SYMBOL, uu);
+				spawn(PoolManagerProcess::Type::IMP_SYMBOL, {path});
+			});
+
+			append_page(*paned, "Symbols");
 		}
 
 
@@ -339,7 +329,7 @@ namespace horizon {
 			});
 
 			br->show();
-			browsers.insert(br);
+			browsers.emplace(ObjectType::ENTITY, br);
 
 			auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
 			auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
@@ -362,9 +352,28 @@ namespace horizon {
 			sep->show();
 			box->pack_start(*sep, false, false, 0);
 			box->pack_start(*br, true, true, 0);
-			box->show();
 
-			append_page(*box, "Entities");
+			auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
+			paned->add1(*box);
+
+			auto preview = Gtk::manage(new EntityPreview(pool));
+			preview->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
+			br->signal_selected().connect([this, br, preview]{
+				auto sel = br->get_selected();
+				if(!sel) {
+					preview->load(nullptr);
+					return;
+				}
+				auto part = pool.get_entity(sel);
+				preview->load(part);
+			});
+
+			paned->add2(*preview);
+			paned->show_all();
+
+			paned->show_all();
+
+			append_page(*paned, "Entities");
 		}
 
 		{
@@ -379,10 +388,34 @@ namespace horizon {
 			});
 
 			br->show();
-			browsers.insert(br);
+			browsers.emplace(ObjectType::PADSTACK, br);
 
 			auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
-			paned->add1(*br);
+
+			auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
+			auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
+			bbox->set_margin_bottom(8);
+			bbox->set_margin_top(8);
+			bbox->set_margin_start(8);
+			bbox->set_margin_end(8);
+
+			add_action_button("Create Padstack", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_padstack));
+			add_action_button("Edit Padstack", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_padstack));
+			add_action_button("Duplicate Padstack", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_padstack));
+			if(remote_repo.size())
+				add_action_button("Merge Padstack", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::PADSTACK, uu);});
+
+			bbox->show_all();
+
+			box->pack_start(*bbox, false, false, 0);
+
+			auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+			sep->show();
+			box->pack_start(*sep, false, false, 0);
+			box->pack_start(*br, true, true, 0);
+			box->show();
+
+			paned->add1(*box);
 			auto canvas = Gtk::manage(new CanvasGL());
 			canvas->set_selection_allowed(false);
 			paned->add2(*canvas);
@@ -410,31 +443,7 @@ namespace horizon {
 				canvas->zoom_to_bbox(bb.first, bb.second);
 			});
 
-
-			auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
-			auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
-			bbox->set_margin_bottom(8);
-			bbox->set_margin_top(8);
-			bbox->set_margin_start(8);
-			bbox->set_margin_end(8);
-
-			add_action_button("Create Padstack", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_padstack));
-			add_action_button("Edit Padstack", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_padstack));
-			add_action_button("Duplicate Padstack", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_padstack));
-			if(remote_repo.size())
-				add_action_button("Merge Padstack", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::PADSTACK, uu);});
-
-			bbox->show_all();
-
-			box->pack_start(*bbox, false, false, 0);
-
-			auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
-			sep->show();
-			box->pack_start(*sep, false, false, 0);
-			box->pack_start(*paned, true, true, 0);
-			box->show();
-
-			append_page(*box, "Padstacks");
+			append_page(*paned, "Padstacks");
 		}
 
 		{
@@ -447,41 +456,9 @@ namespace horizon {
 			});
 
 			br->show();
-			browsers.insert(br);
+			browsers.emplace(ObjectType::PACKAGE, br);
 
 			auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
-			paned->add1(*br);
-			auto canvas = Gtk::manage(new CanvasGL());
-			canvas->set_selection_allowed(false);
-			paned->add2(*canvas);
-			paned->show_all();
-
-			br->signal_selected().connect([this, br, canvas]{
-				auto sel = br->get_selected();
-				if(!sel) {
-					canvas->clear();
-					return;
-				}
-				Package pkg = *pool.get_package(sel);
-				for(const auto &la: pkg.get_layers()) {
-					auto ld = LayerDisplay::Mode::OUTLINE;
-					if(la.second.copper)
-						ld = LayerDisplay::Mode::FILL_ONLY;
-
-					canvas->set_layer_display(la.first, LayerDisplay(true, ld, la.second.color));
-				}
-				pkg.apply_parameter_set({});
-				canvas->property_layer_opacity() = 75;
-				canvas->update(pkg);
-				auto bb = pkg.get_bbox();
-				int64_t pad = 1_mm;
-				bb.first.x -= pad;
-				bb.first.y -= pad;
-
-				bb.second.x += pad;
-				bb.second.y += pad;
-				canvas->zoom_to_bbox(bb.first, bb.second);
-			});
 
 
 			auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
@@ -506,10 +483,25 @@ namespace horizon {
 			auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
 			sep->show();
 			box->pack_start(*sep, false, false, 0);
-			box->pack_start(*paned, true, true, 0);
+			box->pack_start(*br, true, true, 0);
 			box->show();
 
-			append_page(*box, "Packages");
+
+			paned->add1(*box);
+
+			auto canvas = Gtk::manage(new PreviewCanvas(pool));
+			paned->add2(*canvas);
+			paned->show_all();
+
+			br->signal_selected().connect([this, br, canvas]{
+				auto sel = br->get_selected();
+				if(!sel) {
+					canvas->clear();
+					return;
+				}
+				canvas->load(ObjectType::PACKAGE, sel);
+			});
+			append_page(*paned, "Packages");
 		}
 
 		{
@@ -524,7 +516,9 @@ namespace horizon {
 			});
 
 			br->show();
-			browsers.insert(br);
+			browsers.emplace(ObjectType::PART, br);
+
+			auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
 
 			auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
 			auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
@@ -551,7 +545,23 @@ namespace horizon {
 			box->pack_start(*br, true, true, 0);
 			box->show();
 
-			append_page(*box, "Parts");
+			paned->add1(*box);
+			auto preview = Gtk::manage(new PartPreview(pool));
+			preview->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
+			paned->add2(*preview);
+			paned->show_all();
+
+			br->signal_selected().connect([this, br, preview]{
+				auto sel = br->get_selected();
+				if(!sel) {
+					preview->load(nullptr);
+					return;
+				}
+				auto part = pool.get_part(sel);
+				preview->load(part);
+			});
+
+			append_page(*paned, "Parts");
 		}
 
 		if(remote_repo.size()) {
@@ -570,7 +580,7 @@ namespace horizon {
 		}
 
 		for(auto br: browsers) {
-			add_context_menu(br);
+			add_context_menu(br.second);
 		}
 
 	}
@@ -601,6 +611,19 @@ namespace horizon {
 		auto filename = pool.get_filename(ty, uu);
 		auto clip = Gtk::Clipboard::get();
 		clip->set_text(filename);
+	}
+
+	void PoolNotebook::go_to(ObjectType type, const UUID &uu) {
+		browsers.at(type)->go_to(uu);
+		static const std::map<ObjectType, int> pages = {
+			{ObjectType::UNIT, 0},
+			{ObjectType::SYMBOL, 1},
+			{ObjectType::ENTITY, 2},
+			{ObjectType::PADSTACK, 3},
+			{ObjectType::PACKAGE, 4},
+			{ObjectType::PART, 5},
+		};
+		set_current_page(pages.at(type));
 	}
 
 	void PoolNotebook::show_duplicate_window(ObjectType ty, const UUID &uu) {

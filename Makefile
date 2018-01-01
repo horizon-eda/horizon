@@ -396,7 +396,11 @@ SRC_POOL_MGR = \
 	util/rest_client.cpp\
 	util/github_client.cpp\
 	widgets/recent_item_box.cpp\
-	util/recent_util.cpp
+	util/recent_util.cpp\
+	widgets/part_preview.cpp\
+	widgets/entity_preview.cpp\
+	widgets/preview_canvas.cpp\
+	widgets/preview_base.cpp\
 
 SRC_PGM_TEST = \
 	pgm-test.cpp

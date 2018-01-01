@@ -13,6 +13,7 @@ namespace horizon {
 		auto entry = Gtk::manage(new Gtk::Entry());
 		add_search_widget(label, *entry);
 		entry->signal_changed().connect(sigc::mem_fun(this, &PoolBrowser::search));
+		search_entries.insert(entry);
 		return entry;
 	}
 
@@ -131,6 +132,18 @@ namespace horizon {
 				break;
 			}
 		}
+	}
+
+	void PoolBrowser::clear_search() {
+		for(auto it: search_entries) {
+			it->set_text("");
+		}
+	}
+
+	void PoolBrowser::go_to(const UUID &uu) {
+		clear_search();
+		select_uuid(uu);
+		scroll_to_selection();
 	}
 
 	void PoolBrowser::add_context_menu_item(const std::string &label, sigc::slot1<void, UUID> cb) {

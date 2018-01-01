@@ -1,6 +1,7 @@
 #pragma once
 #include <gtkmm.h>
 #include <memory>
+#include <set>
 #include "uuid.hpp"
 #include "sort_controller.hpp"
 #include "selection_provider.hpp"
@@ -16,6 +17,8 @@ namespace horizon {
 			void add_context_menu_item(const std::string &label, sigc::slot1<void, UUID> cb);
 			virtual void search() = 0;
 			virtual ObjectType get_type() const {return ObjectType::INVALID;};
+			void go_to(const UUID &uu);
+			void clear_search();
 
 		protected:
 			void construct();
@@ -47,6 +50,7 @@ namespace horizon {
 			void scroll_to_selection();
 
 			Gtk::Menu context_menu;
+			std::set<Gtk::Entry*> search_entries;
 
 		private :
 			Gtk::Grid *grid = nullptr;
