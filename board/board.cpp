@@ -41,6 +41,7 @@ namespace horizon {
 				load_and_log(polygons, ObjectType::POLYGON, std::forward_as_tuple(u, it.value()), Logger::Domain::BOARD);
 			}
 		}
+		map_erase_if(polygons, [](const auto &a){return a.second.vertices.size()==0;});
 		if(j.count("holes")) {
 			const json &o = j["holes"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {

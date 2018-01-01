@@ -1,5 +1,6 @@
 #include "package.hpp"
 #include "pool.hpp"
+#include "util.hpp"
 #include "clipper/clipper.hpp"
 
 namespace horizon {
@@ -162,6 +163,7 @@ namespace horizon {
 				polygons.emplace(std::make_pair(u, Polygon(u, it.value())));
 			}
 		}
+		map_erase_if(polygons, [](const auto &a){return a.second.vertices.size()==0;});
 		if(j.count("tags")) {
 			tags = j.at("tags").get<std::set<std::string>>();
 		}

@@ -1,6 +1,7 @@
 #include "padstack.hpp"
 #include "lut.hpp"
 #include "board_layers.hpp"
+#include "util.hpp"
 
 namespace horizon {
 
@@ -176,6 +177,7 @@ namespace horizon {
 				polygons.emplace(std::make_pair(u, Polygon(u, it.value())));
 			}
 		}
+		map_erase_if(polygons, [](const auto &a){return a.second.vertices.size()==0;});
 		{
 			const json &o = j["holes"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
