@@ -306,8 +306,6 @@ namespace horizon {
 
 	void status_cb_nop(PoolUpdateStatus st, const std::string msg) {}
 
-	static const int min_user_version = 3; //keep in sync with schema
-
 	void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb) {
 		auto pool_db_path = Glib::build_filename(pool_base_path, "pool.db");
 		if(!status_cb)
@@ -317,14 +315,8 @@ namespace horizon {
 
 		SQLite::Database db(pool_db_path, SQLITE_OPEN_CREATE|SQLITE_OPEN_READWRITE);
 		{
-			int user_version = 0;
-			{
-				SQLite::Query q(db, "PRAGMA user_version");
-				if(q.step()) {
-					user_version = q.get<int>(0);
-				}
-			}
-			if(user_version < min_user_version) {
+			int user_version = db.get_user_version();
+			if(user_version < Pool::get_required_schema_version()) {
 				//update schema
 				auto bytes = Gio::Resource::lookup_data_global("/net/carrotIndustries/horizon/pool-update/schema.sql");
 				gsize size {bytes->get_size()+1};//null byte

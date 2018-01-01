@@ -95,6 +95,10 @@ namespace horizon {
 		return base_path;
 	}
 
+	int Pool::get_required_schema_version() { //keep in sync with schema definition
+		return 3;
+	}
+
 	std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) const {
 		auto suffix = static_cast<std::string>(uu)+".json";
 		auto base = Glib::build_filename(base_path, "tmp");

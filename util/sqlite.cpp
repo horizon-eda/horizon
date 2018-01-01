@@ -38,6 +38,17 @@ namespace SQLite {
 		}
 	}
 
+	int Database::get_user_version() {
+		int user_version = 0;
+		{
+			SQLite::Query q(*this, "PRAGMA user_version");
+			if(q.step()) {
+				user_version = q.get<int>(0);
+			}
+		}
+		return user_version;
+	}
+
 	Query::Query(Database &dab, const std::string &sql) : db(dab) {
 		if(sqlite3_prepare_v2(db.db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
 			throw std::runtime_error(sqlite3_errmsg(db.db));

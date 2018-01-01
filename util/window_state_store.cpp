@@ -9,16 +9,13 @@ namespace horizon {
 
 	WindowStateStore::WindowStateStore(Gtk::Window *w,const std::string &wn): db(Glib::build_filename(get_config_dir(), "window_state.db"), SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE), window_name(wn), win(w) {
 		{
-			SQLite::Query q(db, "PRAGMA user_version");
-			if(q.step()) {
-				int user_version = q.get<int>(0);
-				if(user_version < min_user_version) {
-					//update schema
-					auto bytes = Gio::Resource::lookup_data_global("/net/carrotIndustries/horizon/util/window_state_schema.sql");
-					gsize size {bytes->get_size()+1};//null byte
-					auto data = (const char*)bytes->get_data(size);
-					db.execute(data);
-				}
+			int user_version = db.get_user_version();
+			if(user_version < min_user_version) {
+				//update schema
+				auto bytes = Gio::Resource::lookup_data_global("/net/carrotIndustries/horizon/util/window_state_schema.sql");
+				gsize size {bytes->get_size()+1};//null byte
+				auto data = (const char*)bytes->get_data(size);
+				db.execute(data);
 			}
 		}
 		{

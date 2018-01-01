@@ -43,6 +43,7 @@ namespace horizon {
 			 */
 			void clear();
 			std::string get_tmp_filename(ObjectType type, const UUID &uu) const;
+			static int get_required_schema_version();
 			virtual ~Pool();
 
 		

@@ -61,6 +61,7 @@ namespace SQLite {
 			~Database();
 			void execute(const std::string &query);
 			void execute(const char *query);
+			int get_user_version();
 
 
 		private:

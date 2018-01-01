@@ -500,8 +500,21 @@ namespace horizon {
 			if(!app->pools.count(project->pool_uuid)) {
 				throw std::runtime_error("pool not found");
 			}
-			if(!Glib::file_test(Glib::build_filename(app->pools.at(project->pool_uuid).path, "pool.db"), Glib::FILE_TEST_IS_REGULAR)) {
-				pool_update(app->pools.at(project->pool_uuid).path);
+			std::string pool_path = app->pools.at(project->pool_uuid).path;
+			if(!Glib::file_test(Glib::build_filename(pool_path, "pool.db"), Glib::FILE_TEST_IS_REGULAR)) {
+				pool_update(pool_path);
+			}
+			{
+				Pool pool(app->pools.at(project->pool_uuid).path);
+				int user_version = pool.db.get_user_version();
+				int required_version = pool.get_required_schema_version();
+				if(user_version < required_version) {
+					Gtk::MessageDialog md(*this,  "Schema update required", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+					md.set_secondary_text("Open the pool in the pool manager to fix this.");
+					md.run();
+					close_project();
+					return;
+				}
 			}
 			view_project.label_pool_name->set_text(app->pools.at(project->pool_uuid).name);
 

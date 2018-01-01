@@ -180,6 +180,17 @@ namespace horizon {
 	PoolNotebook::PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw): Gtk::Notebook(), base_path(bp), pool(bp), appwin(aw), zctx(aw->zctx), sock_pool_update(zctx, ZMQ_SUB) {
 		sock_pool_update_ep = "inproc://pool-update-"+((std::string)UUID::random());
 		sock_pool_update.bind(sock_pool_update_ep);
+
+		{
+			int user_version = pool.db.get_user_version();
+			int required_version = pool.get_required_schema_version();
+			if(user_version < required_version) {
+				Gtk::MessageDialog md("Schema update required", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+				md.run();
+				horizon::pool_update(base_path);
+			}
+		}
+
 		{
 			int dummy = 0;
 			sock_pool_update.setsockopt(ZMQ_SUBSCRIBE, &dummy, 0);
@@ -582,7 +593,6 @@ namespace horizon {
 		for(auto br: browsers) {
 			add_context_menu(br.second);
 		}
-
 	}
 
 	void PoolNotebook::add_context_menu(PoolBrowser *br) {
