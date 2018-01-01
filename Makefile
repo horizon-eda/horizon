@@ -401,6 +401,7 @@ SRC_POOL_MGR = \
 	widgets/entity_preview.cpp\
 	widgets/preview_canvas.cpp\
 	widgets/preview_base.cpp\
+	widgets/unit_preview.cpp\
 
 SRC_PGM_TEST = \
 	pgm-test.cpp

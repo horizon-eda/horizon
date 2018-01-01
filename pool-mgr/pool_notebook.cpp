@@ -23,6 +23,7 @@
 #include "pool-mgr-app.hpp"
 #include "widgets/part_preview.hpp"
 #include "widgets/entity_preview.hpp"
+#include "widgets/unit_preview.hpp"
 #include "widgets/preview_canvas.hpp"
 #include <thread>
 
@@ -272,9 +273,25 @@ namespace horizon {
 			sep->show();
 			box->pack_start(*sep, false, false, 0);
 			box->pack_start(*br, true, true, 0);
-			box->show();
 
-			append_page(*box, "Units");
+			auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
+			paned->add1(*box);
+
+			auto preview = Gtk::manage(new UnitPreview(pool));
+			preview->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
+			br->signal_selected().connect([this, br, preview]{
+				auto sel = br->get_selected();
+				if(!sel) {
+					preview->load(nullptr);
+					return;
+				}
+				auto unit = pool.get_unit(sel);
+				preview->load(unit);
+			});
+			paned->add2(*preview);
+			paned->show_all();
+
+			append_page(*paned, "Units");
 		}
 		{
 			auto br = Gtk::manage(new PoolBrowserSymbol(&pool));
