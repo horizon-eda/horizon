@@ -442,7 +442,6 @@ namespace PNS {
 					layer_min = std::min(layer_min, it.second.layer);
 					layer_max = std::max(layer_max, it.second.layer);
 					poly = it.second.to_polygon().remove_arcs();
-
 				}
 			}
 			for(auto &it: pad->padstack.polygons) {
@@ -453,7 +452,7 @@ namespace PNS {
 				}
 			}
 			if(poly.vertices.size() == 0) {
-				throw std::runtime_error("polygon without vertices");
+				throw std::runtime_error("polygon without vertices in " + pkg->component->refdes + "." + pad->name);
 			}
 			ClipperLib::Path path;
 			for(auto &v: poly.vertices) {
