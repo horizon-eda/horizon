@@ -8,7 +8,7 @@
 namespace horizon {
 	class PartPreview: public Gtk::Box, public PreviewBase {
 		public:
-			PartPreview(class Pool &pool);
+			PartPreview(class Pool &pool, bool show_goto=true);
 
 			void load(const class Part *part);
 

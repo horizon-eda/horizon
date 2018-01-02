@@ -8,7 +8,7 @@
 #include "preview_canvas.hpp"
 
 namespace horizon {
-	EntityPreview::EntityPreview(class Pool &p): Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p) {
+	EntityPreview::EntityPreview(class Pool &p, bool show_goto): Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p) {
 
 		auto symbol_sel_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
 		symbol_sel_box->property_margin() = 8;
@@ -21,11 +21,10 @@ namespace horizon {
 		combo_gate->signal_changed().connect(sigc::mem_fun(this, &EntityPreview::handle_gate_sel));
 		symbol_sel_box->pack_start(*combo_gate, true, true, 0);
 
-		{
+		if(show_goto) {
 			auto bu = create_goto_button(ObjectType::UNIT, [this] {
 				return entity->gates.at(UUID(combo_gate->get_active_id())).unit->uuid;
 			});
-			bu->set_margin_end(4);
 			symbol_sel_box->pack_start(*bu, false, false, 0);
 		}
 
@@ -33,12 +32,13 @@ namespace horizon {
 			auto la = Gtk::manage(new Gtk::Label("Symbol"));
 			la->get_style_context()->add_class("dim-label");
 			symbol_sel_box->pack_start(*la, false, false, 0);
+			la->set_margin_start(4);
 		}
 		combo_symbol = Gtk::manage(new Gtk::ComboBoxText);
 		combo_symbol->signal_changed().connect(sigc::mem_fun(this, &EntityPreview::handle_symbol_sel));
 		symbol_sel_box->pack_start(*combo_symbol, true, true, 0);
 
-		{
+		if(show_goto) {
 			auto bu = create_goto_button(ObjectType::SYMBOL, [this] {
 				return UUID(combo_symbol->get_active_id());
 			});
@@ -71,6 +71,7 @@ namespace horizon {
 			it->set_sensitive(entity);
 		}
 		if(!entity) {
+			canvas_symbol->clear();
 			return;
 		}
 

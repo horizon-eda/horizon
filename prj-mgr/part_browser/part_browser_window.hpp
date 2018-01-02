@@ -25,6 +25,8 @@ namespace horizon {
 			Gtk::ToggleButton *fav_button = nullptr;
 			Gtk::ListBox *lb_favorites = nullptr;
 			Gtk::ListBox *lb_recent = nullptr;
+			Gtk::Paned *paned = nullptr;
+			class PartPreview *preview = nullptr;
 			void handle_add_search();
 			void handle_switch_page(Gtk::Widget *w, guint index);
 			void handle_fav_toggled();

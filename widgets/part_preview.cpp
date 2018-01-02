@@ -8,7 +8,7 @@
 #include "entity_preview.hpp"
 
 namespace horizon {
-	PartPreview::PartPreview(class Pool &p): Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p) {
+	PartPreview::PartPreview(class Pool &p, bool show_goto): Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p) {
 		auto infogrid = Gtk::manage(new Gtk::Grid());
 		infogrid->property_margin() = 8;
 		infogrid->set_row_spacing(4);
@@ -105,7 +105,7 @@ namespace horizon {
 		auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
 
 
-		entity_preview = Gtk::manage(new EntityPreview(pool));
+		entity_preview = Gtk::manage(new EntityPreview(pool, show_goto));
 
 		paned->add1(*entity_preview);
 		paned->child_property_shrink(*entity_preview) = false;
@@ -123,7 +123,7 @@ namespace horizon {
 		combo_package->signal_changed().connect(sigc::mem_fun(this, &PartPreview::handle_package_sel));
 		package_sel_box->pack_start(*combo_package, true, true, 0);
 
-		{
+		if(show_goto) {
 			auto bu = create_goto_button(ObjectType::PACKAGE, [this] {
 				return UUID(combo_package->get_active_id());
 			});
@@ -165,6 +165,7 @@ namespace horizon {
 			label_description->set_text("");
 			label_datasheet->set_text("");
 			label_entity->set_text("");
+			canvas_package->clear();
 			entity_preview->load(nullptr);
 			return;
 		}

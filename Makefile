@@ -350,7 +350,12 @@ SRC_PRJ_MGR = \
 	util/gtk_util.cpp\
 	util/window_state_store.cpp\
 	widgets/recent_item_box.cpp\
-	util/recent_util.cpp
+	util/recent_util.cpp\
+	widgets/part_preview.cpp\
+	widgets/entity_preview.cpp\
+	widgets/preview_canvas.cpp\
+	widgets/preview_base.cpp\
+	$(SRC_CANVAS)\
 
 SRC_POOL_MGR = \
 	pool-mgr/pool-mgr-main.cpp\
@@ -459,7 +464,7 @@ horizon-prj: $(OBJ_COMMON) $(SRC_PRJ_UTIL:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
 horizon-prj-mgr: $(OBJ_COMMON) $(SRC_PRJ_MGR:.cpp=.o)
-	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 libzmq) -o $@
+	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 libzmq epoxy) -o $@
 
 horizon-pool-mgr: $(OBJ_COMMON) $(SRC_POOL_MGR:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy libzmq libcurl libgit2) -o $@

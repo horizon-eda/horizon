@@ -1,6 +1,7 @@
 #include "part_browser_window.hpp"
 #include "util.hpp"
 #include "widgets/pool_browser_part.hpp"
+#include "widgets/part_preview.hpp"
 
 namespace horizon {
 
@@ -28,6 +29,7 @@ namespace horizon {
 		x->get_widget("fav_button", fav_button);
 		x->get_widget("lb_favorites", lb_favorites);
 		x->get_widget("lb_recent", lb_recent);
+		x->get_widget("paned", paned);
 
 		lb_favorites->set_header_func(sigc::ptr_fun(header_fun));
 		lb_recent->set_header_func(sigc::ptr_fun(header_fun));
@@ -40,6 +42,10 @@ namespace horizon {
 		notebook->signal_switch_page().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_switch_page));
 		fav_toggled_conn = fav_button->signal_toggled().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_fav_toggled));
 		place_part_button->signal_clicked().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_place_part));
+
+		preview = Gtk::manage(new PartPreview(pool, false));
+		paned->add2(*preview);
+		preview->show();
 
 		update_part_current();
 		update_favorites();
@@ -193,6 +199,12 @@ namespace horizon {
 
 		place_part_button->set_sensitive(part_current);
 		fav_button->set_sensitive(part_current);
+		if(part_current) {
+			preview->load(pool.get_part(part_current));
+		}
+		else {
+			preview->load(nullptr);
+		}
 	}
 
 	void PartBrowserWindow::handle_add_search() {

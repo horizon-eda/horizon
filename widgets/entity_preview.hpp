@@ -8,7 +8,7 @@
 namespace horizon {
 	class EntityPreview: public Gtk::Box, public PreviewBase {
 		public:
-			EntityPreview(class Pool &pool);
+			EntityPreview(class Pool &pool, bool show_goto = true);
 
 			void load(const class Entity *entity);
 
