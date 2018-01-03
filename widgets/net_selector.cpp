@@ -1,6 +1,7 @@
 #include "net_selector.hpp"
 #include <algorithm>
 #include <iostream>
+#include "block.hpp"
 
 namespace horizon {
 	NetSelector::NetSelector(Block *b):

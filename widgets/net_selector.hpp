@@ -1,12 +1,11 @@
 #pragma once
 #include <gtkmm.h>
-#include "core/core.hpp"
-#include "sheet.hpp"
+#include "uuid.hpp"
 
 namespace horizon {
 	class NetSelector: public Gtk::Box {
 		public:
-			NetSelector(Block *b);
+			NetSelector(class Block *b);
 			void set_power_only(bool p);
 			void set_bus_mode(bool b);
 			void set_bus_member_mode(const UUID &bus_uuid);
@@ -35,7 +34,7 @@ namespace horizon {
 			bool power_only = false;
 			bool bus_mode = false;
 			bool bus_member_mode = false;
-			Bus *bus = nullptr;
+			class Bus *bus = nullptr;
 
 
 			Gtk::TreeView *view;
