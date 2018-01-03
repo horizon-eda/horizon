@@ -9,6 +9,7 @@ namespace horizon {
 		public:
 			NetButton(Block *b);
 			void set_net(const UUID &uu);
+			UUID get_net();
 			typedef sigc::signal<void, UUID> type_signal_changed;
 			type_signal_changed signal_changed() {return s_signal_changed;}
 			void update();

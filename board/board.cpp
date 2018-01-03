@@ -46,7 +46,7 @@ namespace horizon {
 			const json &o = j["holes"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto u = UUID(it.key());
-				load_and_log(holes, ObjectType::HOLE, std::forward_as_tuple(u, it.value()), Logger::Domain::BOARD);
+				load_and_log(holes, ObjectType::BOARD_HOLE, std::forward_as_tuple(u, it.value(), *block, pool), Logger::Domain::BOARD);
 			}
 		}
 		if(j.count("packages")) {
@@ -266,6 +266,9 @@ namespace horizon {
 		for(auto &it: vias) {
 			it.second.junction.update(junctions);
 			it.second.net_set.update(block->nets);
+		}
+		for(auto &it: holes) {
+			it.second.net.update(block->nets);
 		}
 		for(auto &it: junctions) {
 			it.second.net.update(block->nets);
@@ -495,6 +498,19 @@ namespace horizon {
 			ps_via[ParameterID::VIA_SOLDER_MASK_EXPANSION] = params->via_solder_mask_expansion;
 			it.second.padstack.apply_parameter_set(ps_via);
 			it.second.padstack.expand_inner(n_inner_layers);
+		}
+		for(auto &it: holes) {
+			it.second.padstack = *it.second.pool_padstack;
+			ParameterSet ps_hole = it.second.parameter_set;
+			ps_hole[ParameterID::HOLE_SOLDER_MASK_EXPANSION] = params->hole_solder_mask_expansion;
+			it.second.padstack.apply_parameter_set(ps_hole);
+			it.second.padstack.expand_inner(n_inner_layers);
+			if(it.second.padstack.type == Padstack::Type::HOLE && it.second.net == nullptr) {
+				warnings.emplace_back(it.second.placement.shift, "PTH hole without net");
+			}
+			if(it.second.padstack.type != Padstack::Type::HOLE && it.second.padstack.type != Padstack::Type::MECHANICAL) {
+				warnings.emplace_back(it.second.placement.shift, "Illegal padstack type");
+			}
 		}
 
 		for(const auto &it: junctions) {

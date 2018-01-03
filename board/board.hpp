@@ -20,6 +20,7 @@
 #include <fstream>
 #include "common/layer_provider.hpp"
 #include "fab_output_settings.hpp"
+#include "board_hole.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;
@@ -62,7 +63,7 @@ namespace horizon {
 			Block *block;
 			std::string name;
 			std::map<UUID, Polygon> polygons;
-			std::map<UUID, Hole> holes;
+			std::map<UUID, BoardHole> holes;
 			std::map<UUID, BoardPackage> packages;
 			std::map<UUID, Junction> junctions;
 			std::map<UUID, Track> tracks;

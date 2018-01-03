@@ -49,6 +49,8 @@
 #include "tool_set_via_net.hpp"
 #include "tool_lock.hpp"
 #include "tool_add_vertex.hpp"
+#include "tool_place_board_hole.hpp"
+#include "tool_edit_board_hole.hpp"
 
 #include "dimension.hpp"
 #include "logger/logger.hpp"
@@ -239,6 +241,12 @@ namespace horizon {
 
 			case ToolID::ADD_VERTEX:
 				return std::make_unique<ToolAddVertex>(this, tool_id);
+
+			case ToolID::PLACE_BOARD_HOLE:
+				return std::make_unique<ToolPlaceBoardHole>(this, tool_id);
+
+			case ToolID::EDIT_BOARD_HOLE:
+				return std::make_unique<ToolEditBoardHole>(this, tool_id);
 
 			default:
 				return nullptr;

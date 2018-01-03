@@ -1097,6 +1097,23 @@ namespace horizon {
 		transform_restore();
 	}
 
+	void Canvas::render(const BoardHole &hole) {
+		transform_save();
+		transform = hole.placement;
+		auto bb = hole.padstack.get_bbox();
+		selectables.append(hole.uuid, ObjectType::BOARD_HOLE, {0,0}, bb.first, bb.second);
+		img_net(hole.net);
+		if(hole.padstack.type == Padstack::Type::HOLE)
+			img_patch_type(PatchType::HOLE_PTH);
+		else
+			img_patch_type(PatchType::HOLE_NPTH);
+		object_refs_current.emplace_back(ObjectType::BOARD_HOLE, hole.uuid);
+		render(hole.padstack, false);
+		object_refs_current.pop_back();
+		img_net(nullptr);
+		img_patch_type(PatchType::OTHER);
+		transform_restore();
+	}
 
 	void Canvas::render(const class Dimension &dim) {
 		typedef Coord<double> Coordd;

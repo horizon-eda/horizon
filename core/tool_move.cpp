@@ -112,6 +112,9 @@ namespace horizon {
 				case ObjectType::HOLE :
 					accu.accumulate(core.r->get_hole(it.uuid)->placement.shift);
 				break;
+				case ObjectType::BOARD_HOLE :
+					accu.accumulate(core.b->get_board()->holes.at(it.uuid).placement.shift);
+				break;
 				case ObjectType::SYMBOL_PIN :
 					accu.accumulate(core.y->get_symbol_pin(it.uuid)->position);
 				break;

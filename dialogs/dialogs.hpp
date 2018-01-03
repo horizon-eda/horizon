@@ -24,6 +24,7 @@ namespace horizon {
 			std::pair<bool, UUID> select_part(class Pool *p, const UUID &entity_uuid, const UUID &part_uuid, bool show_none=false);
 			std::pair<bool, UUID> select_entity(class Pool *pool);
 			std::pair<bool, UUID> select_padstack(class Pool *pool, const UUID &package_uuid);
+			std::pair<bool, UUID> select_hole_padstack(class Pool *pool);
 			std::pair<bool, UUID> select_via_padstack(class ViaPadstackProvider *vpp);
 			std::pair<bool, UUID> select_net(class Block *block, bool power_only);
 			std::pair<bool, UUID> select_bus(class Block *block);
@@ -38,6 +39,7 @@ namespace horizon {
 			bool edit_parameter_program(class ParameterProgram *program);
 			bool edit_parameter_set(ParameterSet *pset);
 			bool edit_pad_parameter_set(std::set<class Pad*> &pads, class Pool *pool, class Package *pkg);
+			bool edit_board_hole(std::set<class BoardHole*> &holes, class Pool *pool, class Block *block);
 			bool annotate(class Schematic *s);
 			bool edit_plane(class Plane *plane, class Board *brd, class Block *block);
 			bool edit_stackup(class Board *brd);

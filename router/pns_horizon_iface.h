@@ -7,6 +7,9 @@
 namespace horizon {
 	class Board;
 	class BoardPackage;
+	class BoardHole;
+	class Padstack;
+	class Placement;
 	class Pad;
 	class Track;
 	class Via;
@@ -26,12 +29,14 @@ namespace PNS {
 			PNS_HORIZON_PARENT_ITEM() {}
 			PNS_HORIZON_PARENT_ITEM(const horizon::Track *tr): track(tr) {}
 			PNS_HORIZON_PARENT_ITEM(const horizon::Via *v): via(v) {}
+			PNS_HORIZON_PARENT_ITEM(const horizon::BoardHole *h): hole(h) {}
 			PNS_HORIZON_PARENT_ITEM(const horizon::BoardPackage *pkg, const horizon::Pad *p): package(pkg), pad(p) {}
 
 			const horizon::Track *track = nullptr;
 			const horizon::Via *via = nullptr;
 			const horizon::BoardPackage *package = nullptr;
 			const horizon::Pad *pad = nullptr;
+			const horizon::BoardHole *hole = nullptr;
 
 			bool operator< (const PNS_HORIZON_PARENT_ITEM &other) const {
 				if(track < other.track)
@@ -49,7 +54,12 @@ namespace PNS {
 				else if(package > other.package)
 					return false;
 
-				return pad < other.pad;
+				if(pad < other.pad)
+					return true;
+				else if(pad > other.pad)
+					return false;
+
+				return hole < other.hole;
 			}
 	};
 
@@ -86,6 +96,7 @@ namespace PNS {
 
 			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::Track *track);
 			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::Via *via);
+			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::BoardHole *hole);
 			const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::BoardPackage *pkg, const horizon::Pad *pad);
 
 		private:
@@ -101,6 +112,8 @@ namespace PNS {
 			PNS::ROUTER* m_router;
 
 			std::unique_ptr<PNS::SOLID>   syncPad(const horizon::BoardPackage *pkg, const horizon::Pad *pad);
+			std::unique_ptr<PNS::SOLID>   syncPadstack(const horizon::Padstack *padstack, const horizon::Placement &tr);
+			std::unique_ptr<PNS::SOLID>   syncHole(const horizon::BoardHole *hole);
 			std::unique_ptr<PNS::SEGMENT> syncTrack(const horizon::Track *track);
 			std::unique_ptr<PNS::VIA>     syncVia(const horizon::Via *via);
 			void syncOutline(const horizon::Polygon *poly, PNS::NODE *aWorld);

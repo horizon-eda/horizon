@@ -65,7 +65,7 @@ namespace horizon {
 		switch(ty) {
 			case ObjectType::JUNCTION:
 			case ObjectType::POLYGON:
-			case ObjectType::HOLE:
+			case ObjectType::BOARD_HOLE:
 			case ObjectType::TRACK:
 			case ObjectType::POLYGON_EDGE:
 			case ObjectType::POLYGON_VERTEX:
@@ -87,9 +87,6 @@ namespace horizon {
 
 	std::map<UUID, Polygon> *CoreBoard::get_polygon_map(bool work) {
 		return &brd.polygons;
-	}
-	std::map<UUID, Hole> *CoreBoard::get_hole_map(bool work) {
-		return &brd.holes;
 	}
 	std::map<UUID, Junction> *CoreBoard::get_junction_map(bool work) {
 		return &brd.junctions;
@@ -233,6 +230,44 @@ namespace horizon {
 				}
 			} break;
 
+			case ObjectType::BOARD_HOLE : {
+				auto hole = &brd.holes.at(uu);
+				switch(property) {
+					case ObjectProperty::ID::NAME :
+						dynamic_cast<PropertyValueString&>(value).value = hole->pool_padstack->name;
+						return true;
+
+					case ObjectProperty::ID::VALUE : {
+						std::string net = "<no net>";
+						if(hole->net)
+							net = hole->net->name;
+						dynamic_cast<PropertyValueString&>(value).value = net;
+						return true;
+					}
+
+					case ObjectProperty::ID::POSITION_X :
+					case ObjectProperty::ID::POSITION_Y :
+					case ObjectProperty::ID::ANGLE :
+						get_placement(hole->placement, value, property);
+						return true;
+
+					case ObjectProperty::ID::PAD_TYPE : {
+						const auto ps = brd.holes.at(uu).pool_padstack;
+						std::string pad_type;
+						switch(ps->type) {
+							case Padstack::Type::MECHANICAL:	pad_type = "Mechanical (NPTH)"; break;
+							case Padstack::Type::HOLE:			pad_type = "Hole (PTH)"; break;
+							default:							pad_type = "Invalid";
+						}
+						dynamic_cast<PropertyValueString&>(value).value = pad_type;
+						return true;
+					} break;
+
+					default :
+						return false;
+				}
+			} break;
+
 			default :
 				return false;
 		}
@@ -323,6 +358,20 @@ namespace horizon {
 					break;
 
 					default :
+						return false;
+				}
+			} break;
+
+			case ObjectType::BOARD_HOLE : {
+				auto hole = &brd.holes.at(uu);
+				switch(property) {
+					case ObjectProperty::ID::POSITION_X :
+					case ObjectProperty::ID::POSITION_Y :
+					case ObjectProperty::ID::ANGLE :
+						set_placement(hole->placement, value, property);
+					break;
+
+					default:
 						return false;
 				}
 			} break;

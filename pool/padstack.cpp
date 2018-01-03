@@ -10,6 +10,7 @@ namespace horizon {
 		{"bottom",  	Padstack::Type::BOTTOM},
 		{"through",		Padstack::Type::THROUGH},
 		{"via",			Padstack::Type::VIA},
+		{"hole",		Padstack::Type::HOLE},
 		{"mechanical",	Padstack::Type::MECHANICAL}
 	};
 
@@ -294,7 +295,8 @@ namespace horizon {
 		copy_param(ps_this, ps, {ParameterID::PAD_HEIGHT, ParameterID::PAD_WIDTH, ParameterID::PAD_DIAMETER,
 		                         ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION,
 								 ParameterID::HOLE_DIAMETER, ParameterID::HOLE_LENGTH, ParameterID::VIA_DIAMETER,
-								 ParameterID::HOLE_SOLDER_MASK_EXPANSION, ParameterID::VIA_SOLDER_MASK_EXPANSION
+								 ParameterID::HOLE_SOLDER_MASK_EXPANSION, ParameterID::VIA_SOLDER_MASK_EXPANSION,
+								 ParameterID::HOLE_ANNULAR_RING
 		});
 		return parameter_program.run(ps_this);
 	}

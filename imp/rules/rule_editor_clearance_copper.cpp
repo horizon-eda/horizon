@@ -10,7 +10,7 @@
 namespace horizon {
 
 	static const std::vector<PatchType> patch_types = {
-		PatchType::TRACK, PatchType::PAD, PatchType::PAD_TH, PatchType::PLANE, PatchType::VIA
+		PatchType::TRACK, PatchType::PAD, PatchType::PAD_TH, PatchType::PLANE, PatchType::VIA, PatchType::HOLE_PTH,
 	};
 
 	void RuleEditorClearanceCopper::populate() {

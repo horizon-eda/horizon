@@ -130,6 +130,14 @@ namespace horizon {
 			{ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X", 3}},
 			{ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y", 4}},
 		}}},
+		{ObjectType::BOARD_HOLE, {"Hole", "Holes", {
+			{ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Padstack", 0}},
+			{ObjectProperty::ID::VALUE, {ObjectProperty::Type::STRING_RO, "Net", 1}},
+			{ObjectProperty::ID::PAD_TYPE, {ObjectProperty::Type::STRING_RO, "Type", 2}},
+			{ObjectProperty::ID::ANGLE, {ObjectProperty::Type::ANGLE, "Angle", 5}},
+			{ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X", 3}},
+			{ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y", 4}},
+		}}},
 		{ObjectType::BOARD_PACKAGE, {"Package", "Packages", {
 			{ObjectProperty::ID::FLIPPED, {ObjectProperty::Type::BOOL, "Flipped", 4}},
 			{ObjectProperty::ID::REFDES, {ObjectProperty::Type::STRING_RO, "Ref. Desig.", 0}},

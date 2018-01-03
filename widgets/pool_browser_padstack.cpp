@@ -52,7 +52,7 @@ namespace horizon {
 
 		std::string name_search = name_entry->get_text();
 
-		SQLite::Query q(pool->db, "SELECT padstacks.uuid, padstacks.name, padstacks.type, packages.name, padstacks.filename FROM padstacks LEFT JOIN packages ON padstacks.package = packages.uuid WHERE (packages.uuid=? OR ? OR padstacks.package = '00000000-0000-0000-0000-000000000000')  AND padstacks.name LIKE ? AND padstacks.type IN (?, ?, ?, ?, ?) "+sort_controller->get_order_by());
+		SQLite::Query q(pool->db, "SELECT padstacks.uuid, padstacks.name, padstacks.type, packages.name, padstacks.filename FROM padstacks LEFT JOIN packages ON padstacks.package = packages.uuid WHERE (packages.uuid=? OR ? OR padstacks.package = '00000000-0000-0000-0000-000000000000')  AND padstacks.name LIKE ? AND padstacks.type IN (?, ?, ?, ?, ?, ?) "+sort_controller->get_order_by());
 		q.bind(1, package_uuid);
 		q.bind(2, package_uuid==UUID());
 		q.bind(3, "%"+name_search+"%");
@@ -80,6 +80,11 @@ namespace horizon {
 			q.bind(8, std::string("via"));
 		else
 			q.bind(8, std::string(""));
+
+		if(padstacks_included.count(Padstack::Type::HOLE))
+			q.bind(9, std::string("hole"));
+		else
+			q.bind(9, std::string(""));
 
 
 		Gtk::TreeModel::Row row;

@@ -88,6 +88,7 @@ namespace horizon {
 			void render(const class Buffer &buf);
 			void render(const class Board &brd);
 			void render(const class BoardPackage &pkg);
+			void render(const class BoardHole &hole);
 			void render(const class Track &track);
 			void render(const class Via &via);
 			void render(const class Dimension &dim);

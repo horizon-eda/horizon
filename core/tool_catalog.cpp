@@ -73,5 +73,7 @@ namespace horizon {
 		{ToolID::UNLOCK_ALL, {"Unlock all"}},
 		{ToolID::ADD_VERTEX, {"Add vertex"}},
 		{ToolID::MANAGE_POWER_NETS, {"Manage power nets"}},
+		{ToolID::PLACE_BOARD_HOLE, {"Place hole"}},
+		{ToolID::EDIT_BOARD_HOLE, {"Edit hole"}},
 	};
 }

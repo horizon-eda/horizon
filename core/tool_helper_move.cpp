@@ -46,6 +46,9 @@ namespace horizon {
 				case ObjectType::PAD :
 					core.k->get_package()->pads.at(it.uuid).placement.shift += delta;
 				break;
+				case ObjectType::BOARD_HOLE :
+					core.b->get_board()->holes.at(it.uuid).placement.shift += delta;
+				break;
 				case ObjectType::TEXT :
 					core.r->get_text(it.uuid)->placement.shift += delta;
 				break;
@@ -240,6 +243,14 @@ namespace horizon {
 					transform(pad->placement.shift, center, rotate);
 					if(rotate) {
 						pad->placement.inc_angle_deg(-90);
+					}
+				}break;
+
+				case ObjectType::BOARD_HOLE : {
+					BoardHole *hole = &core.b->get_board()->holes.at(it.uuid);
+					transform(hole->placement.shift, center, rotate);
+					if(rotate) {
+						hole->placement.inc_angle_deg(-90);
 					}
 				}break;
 

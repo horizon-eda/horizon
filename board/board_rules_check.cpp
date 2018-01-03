@@ -64,13 +64,16 @@ namespace horizon {
 		r.level = RulesCheckErrorLevel::PASS;
 		auto rules = dynamic_cast_vector<RuleHoleSize*>(get_rules_sorted(RuleID::HOLE_SIZE));
 		for(const auto &it: brd->holes) {
-			auto dia = it.second.diameter;
-			for(auto ru: rules) {
-				if(ru->enabled && ru->match.match(nullptr)) {
-					if(auto e = check_hole(r, dia, ru, "Hole")) {
-						e->location = it.second.placement.shift;
+			Net *net = it.second.net;
+			for(const auto &it_hole: it.second.padstack.holes) {
+				auto dia = it_hole.second.diameter;
+				for(auto ru: rules) {
+					if(ru->enabled && ru->match.match(net)) {
+						if(auto e = check_hole(r, dia, ru, "Hole")) {
+							e->location = it.second.placement.shift;
+						}
+						break;
 					}
-					break;
 				}
 			}
 		}

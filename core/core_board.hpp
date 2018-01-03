@@ -43,7 +43,6 @@ namespace horizon {
 
 		private:
 			std::map<UUID, Polygon> *get_polygon_map(bool work=true) override;
-			std::map<UUID, Hole> *get_hole_map(bool work=true) override;
 			std::map<UUID, Junction> *get_junction_map(bool work=true) override;
 			std::map<UUID, Text> *get_text_map(bool work=true) override;
 			std::map<UUID, Line> *get_line_map(bool work=true) override;

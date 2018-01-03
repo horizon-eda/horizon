@@ -58,6 +58,7 @@ SRC_COMMON = \
 	board/rule_diffpair.cpp\
 	board/airwires.cpp\
 	board/fab_output_settings.cpp\
+	board/board_hole.cpp\
 	pool/pool.cpp \
 	util/placement.cpp\
 	util/util.cpp\
@@ -175,6 +176,8 @@ SRC_IMP = \
 	core/tool_set_via_net.cpp\
 	core/tool_lock.cpp\
 	core/tool_add_vertex.cpp\
+	core/tool_place_board_hole.cpp\
+	core/tool_edit_board_hole.cpp\
 	core/cores.cpp\
 	core/clipboard.cpp\
 	core/buffer.cpp\
@@ -202,6 +205,7 @@ SRC_IMP = \
 	dialogs/schematic_properties.cpp\
 	dialogs/edit_plane.cpp\
 	dialogs/edit_stackup.cpp\
+	dialogs/edit_board_hole.cpp\
 	util/sort_controller.cpp\
 	core/core_symbol.cpp\
 	core/core_schematic.cpp\

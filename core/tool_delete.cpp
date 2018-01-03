@@ -243,6 +243,9 @@ namespace horizon {
 				case ObjectType::PAD :
 					core.k->get_package()->pads.erase(it.uuid);
 				break;
+				case ObjectType::BOARD_HOLE :
+					core.b->get_board()->holes.erase(it.uuid);
+				break;
 				case ObjectType::ARC :
 					core.r->delete_arc(it.uuid);
 				break;

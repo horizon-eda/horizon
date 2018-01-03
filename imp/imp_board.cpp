@@ -44,6 +44,8 @@ namespace horizon {
 				{{GDK_KEY_O},				ToolID::SELECT_NET_SEGMENT},
 				{{GDK_KEY_c},				ToolID::LOCK},
 				{{GDK_KEY_C},				ToolID::UNLOCK_ALL},
+				{{GDK_KEY_h},				ToolID::PLACE_BOARD_HOLE},
+				{{GDK_KEY_p, GDK_KEY_h},	ToolID::PLACE_BOARD_HOLE},
 		});
 		key_seq.signal_update_hint().connect([this] (const std::string &s) {main_window->tool_hint_label->set_text(s);});
 

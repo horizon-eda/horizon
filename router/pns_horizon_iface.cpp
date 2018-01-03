@@ -9,6 +9,7 @@
 #include "geometry/shape_convex.h"
 #include "board_layers.hpp"
 #include "board/via_padstack_provider.hpp"
+#include "util/util.hpp"
 
 namespace PNS {
 
@@ -117,9 +118,19 @@ namespace PNS {
 
 		if(parent_a && parent_a->pad && parent_a->pad->padstack.type == horizon::Padstack::Type::THROUGH)
 			pt_a = horizon::PatchType::PAD_TH;
+		else if(parent_a && parent_a->hole && parent_a->hole->padstack.type == horizon::Padstack::Type::HOLE)
+			pt_a = horizon::PatchType::HOLE_PTH;
+		else if(parent_a && parent_a->hole && parent_a->hole->padstack.type == horizon::Padstack::Type::MECHANICAL)
+			pt_a = horizon::PatchType::HOLE_NPTH;
 
 		if(parent_b && parent_b->pad && parent_b->pad->padstack.type == horizon::Padstack::Type::THROUGH)
 			pt_b = horizon::PatchType::PAD_TH;
+		else if(parent_b && parent_b->hole && parent_b->hole->padstack.type == horizon::Padstack::Type::HOLE)
+			pt_b = horizon::PatchType::HOLE_PTH;
+		else if(parent_b && parent_b->hole && parent_b->hole->padstack.type == horizon::Padstack::Type::MECHANICAL)
+			pt_b = horizon::PatchType::HOLE_NPTH;
+
+		std::cout << "pt " << static_cast<int>(pt_a) << " " << static_cast<int>(pt_b) << std::endl;
 
 		if(parent_a == &parent_dummy_outline || parent_b == &parent_dummy_outline) { //one is the board edge
 			auto a_is_edge = parent_a == &parent_dummy_outline;
@@ -137,11 +148,16 @@ namespace PNS {
 		}
 
 		if((parent_a && parent_a->pad && parent_a->pad->padstack.type == horizon::Padstack::Type::MECHANICAL) ||
-			(parent_b && parent_b->pad && parent_b->pad->padstack.type == horizon::Padstack::Type::MECHANICAL))
+		   (parent_b && parent_b->pad && parent_b->pad->padstack.type == horizon::Padstack::Type::MECHANICAL) ||
+		   (parent_a && parent_a->hole && parent_a->hole->padstack.type == horizon::Padstack::Type::MECHANICAL) ||
+		   (parent_b && parent_b->hole && parent_b->hole->padstack.type == horizon::Padstack::Type::MECHANICAL)
+		  )
 		{
+			std::cout << "npth" << std::endl;
 			 //any is mechanical (NPTH)
 			auto net = net_a?net_a:net_b; //only one has net
-			auto a_is_npth = parent_a && parent_a->pad && parent_a->pad->padstack.type == horizon::Padstack::Type::MECHANICAL;
+			auto a_is_npth = (parent_a && parent_a->pad && parent_a->pad->padstack.type == horizon::Padstack::Type::MECHANICAL) ||
+					         (parent_a && parent_a->hole && parent_a->hole->padstack.type == horizon::Padstack::Type::MECHANICAL);
 
 			//use layers of non-npth ting
 			auto layers = a_is_npth?layers_b:layers_a;
@@ -369,6 +385,11 @@ namespace PNS {
 		return &*parents.insert(it).first;
 	}
 
+	const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::BoardHole *hole) {
+		PNS_HORIZON_PARENT_ITEM it(hole);
+		return &*parents.insert(it).first;
+	}
+
 	const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::Via *via) {
 		PNS_HORIZON_PARENT_ITEM it(via);
 		return &*parents.insert(it).first;
@@ -430,16 +451,36 @@ namespace PNS {
 			tr.invert_angle();
 		}
 		tr.accumulate(pad->placement);
+		auto solid = syncPadstack(&pad->padstack, tr);
+
+		if(pad->net)
+			solid->SetNet( get_net_code(pad->net->uuid) );
+		solid->SetParent( get_parent(pkg, pad) );
+
+		return solid;
+	}
+
+	std::unique_ptr<PNS::SOLID>   PNS_HORIZON_IFACE::syncHole(const horizon::BoardHole *hole) {
+		auto solid = syncPadstack(&hole->padstack, hole->placement);
+
+		if(hole->net)
+			solid->SetNet( get_net_code(hole->net->uuid) );
+		solid->SetParent( get_parent(hole) );
+
+		return solid;
+	}
+
+	std::unique_ptr<PNS::SOLID>   PNS_HORIZON_IFACE::syncPadstack(const horizon::Padstack *padstack, const horizon::Placement &tr) {
 		int layer_min = 10000;
 		int layer_max = -10000;
 
 		ClipperLib::Clipper clipper;
 
-		if(pad->padstack.type != horizon::Padstack::Type::MECHANICAL) { //normal pad
-			auto add_polygon = [&clipper, &tr, pkg, pad](const auto &poly) {
+		if(padstack->type != horizon::Padstack::Type::MECHANICAL) { //normal pad
+			auto add_polygon = [&clipper, &tr, padstack](const auto &poly) {
 				ClipperLib::Path path;
 				if(poly.vertices.size() == 0) {
-					throw std::runtime_error("polygon without vertices in " + pkg->component->refdes + "." + pad->name);
+					throw std::runtime_error("polygon without vertices in padstack at" + horizon::coord_to_string(tr.shift));
 				}
 				for(auto &v: poly.vertices) {
 					auto p = tr.transform(v.position);
@@ -450,14 +491,14 @@ namespace PNS {
 				}
 				clipper.AddPath(path, ClipperLib::ptSubject, true);
 			};
-			for(auto &it: pad->padstack.shapes) {
+			for(auto &it: padstack->shapes) {
 				if(horizon::BoardLayers::is_copper(it.second.layer)) { //on copper layer
 					layer_min = std::min(layer_min, it.second.layer);
 					layer_max = std::max(layer_max, it.second.layer);
 					add_polygon(it.second.to_polygon().remove_arcs());
 				}
 			}
-			for(auto &it: pad->padstack.polygons) {
+			for(auto &it: padstack->polygons) {
 				if(horizon::BoardLayers::is_copper(it.second.layer)) { //on copper layer
 					layer_min = std::min(layer_min, it.second.layer);
 					layer_max = std::max(layer_max, it.second.layer);
@@ -470,7 +511,7 @@ namespace PNS {
 		else { //npth pad
 			layer_min = horizon::BoardLayers::BOTTOM_COPPER;
 			layer_max = horizon::BoardLayers::TOP_COPPER;
-			for(auto &it: pad->padstack.holes) {
+			for(auto &it: padstack->holes) {
 				auto poly = it.second.to_polygon().remove_arcs();
 				ClipperLib::Path path;
 				for(auto &v: poly.vertices) {
@@ -493,9 +534,6 @@ namespace PNS {
 		std::unique_ptr< PNS::SOLID > solid( new PNS::SOLID );
 
 		solid->SetLayers( LAYER_RANGE( layer_to_router(layer_max), layer_to_router(layer_min) ));
-		if(pad->net)
-			solid->SetNet( get_net_code(pad->net->uuid) );
-		solid->SetParent( get_parent(pkg, pad) );
 
 		solid->SetOffset( VECTOR2I( 0,0 ) );
 		solid->SetPos ( VECTOR2I( tr.shift.x, tr.shift.y) );
@@ -552,6 +590,13 @@ namespace PNS {
 			auto via = syncVia( &it.second );
             if( via ) {
                 aWorld->Add( std::move( via ) );
+            }
+		}
+
+		for(const auto &it: board->holes) {
+			auto hole = syncHole( &it.second );
+            if( hole ) {
+                aWorld->Add( std::move( hole ) );
             }
 		}
 

@@ -29,6 +29,7 @@
 #include "edit_via.hpp"
 #include "edit_plane.hpp"
 #include "edit_stackup.hpp"
+#include "edit_board_hole.hpp"
 #include "widgets/spin_button_dim.hpp"
 
 namespace horizon {
@@ -76,6 +77,24 @@ namespace horizon {
 		auto br = dynamic_cast<PoolBrowserPadstack*>(dia.get_browser());
 		br->set_package_uuid(package_uuid);
 		br->set_include_padstack_type(Padstack::Type::MECHANICAL, true);
+		auto r = dia.run();
+		if(r == Gtk::RESPONSE_OK) {
+			auto uu = br->get_selected();
+			return {uu, uu};
+		}
+		else {
+			return {false, UUID()};
+		}
+	}
+
+	std::pair<bool, UUID> Dialogs::select_hole_padstack(Pool *pool) {
+		PoolBrowserDialog dia(parent, ObjectType::PADSTACK, pool);
+		auto br = dynamic_cast<PoolBrowserPadstack*>(dia.get_browser());
+		br->set_include_padstack_type(Padstack::Type::MECHANICAL, true);
+		br->set_include_padstack_type(Padstack::Type::HOLE, true);
+		br->set_include_padstack_type(Padstack::Type::TOP, false);
+		br->set_include_padstack_type(Padstack::Type::THROUGH, false);
+		br->set_include_padstack_type(Padstack::Type::BOTTOM, false);
 		auto r = dia.run();
 		if(r == Gtk::RESPONSE_OK) {
 			auto uu = br->get_selected();
@@ -197,6 +216,11 @@ namespace horizon {
 
 	bool Dialogs::edit_pad_parameter_set(std::set<class Pad*> &pads, Pool *pool, class Package *pkg) {
 		PadParameterSetDialog dia(parent, pads, pool, pkg);
+		return dia.run()==Gtk::RESPONSE_OK;
+	}
+
+	bool Dialogs::edit_board_hole(std::set<class BoardHole*> &holes, Pool *pool, Block *block) {
+		BoardHoleDialog dia(parent, holes, pool, block);
 		return dia.run()==Gtk::RESPONSE_OK;
 	}
 

@@ -55,7 +55,8 @@ namespace horizon {
 		type_combo->append("top", "Top");
 		type_combo->append("bottom", "Bottom");
 		type_combo->append("through", "Through");
-		type_combo->append("via", "Via / Hole");
+		type_combo->append("via", "Via");
+		type_combo->append("hole", "Hole");
 		type_combo->append("mechanical", "Mechanical");
 		type_combo->show();
 		header_button->add_widget("Type", type_combo);

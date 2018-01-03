@@ -409,6 +409,7 @@ namespace horizon {
 			br->set_show_path(true);
 			br->set_include_padstack_type(Padstack::Type::VIA, true);
 			br->set_include_padstack_type(Padstack::Type::MECHANICAL, true);
+			br->set_include_padstack_type(Padstack::Type::HOLE, true);
 			br->signal_activated().connect([this, br] {
 				auto uu = br->get_selected();
 				auto path = pool.get_filename(ObjectType::PADSTACK, uu);

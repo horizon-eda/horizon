@@ -36,6 +36,10 @@ namespace horizon {
 		update_label();
 	}
 
+	UUID NetButton::get_net() {
+		return net_current;
+	}
+
 	void NetButton::update_label() {
 		if(net_current) {
 			set_label(block->nets.at(net_current).name);
