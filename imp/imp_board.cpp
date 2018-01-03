@@ -6,6 +6,7 @@
 #include "widgets/layer_box.hpp"
 #include "widgets/board_display_options.hpp"
 #include "3d_view.hpp"
+#include "canvas/canvas_gl.hpp"
 
 namespace horizon {
 	ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,  const PoolParams &pool_params):

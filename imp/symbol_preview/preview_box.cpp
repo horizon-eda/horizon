@@ -1,5 +1,5 @@
 #include "preview_box.hpp"
-#include "canvas/canvas.hpp"
+#include "canvas/canvas_gl.hpp"
 #include "symbol.hpp"
 #include <sstream>
 

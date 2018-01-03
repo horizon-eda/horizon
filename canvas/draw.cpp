@@ -4,7 +4,8 @@
 #include <math.h>
 #include <placement.hpp>
 #include <sys/types.h>
-#include <text.hpp>
+#include <glib.h>
+#include "text.hpp"
 #include <cstdint>
 #include <string>
 #include <tuple>

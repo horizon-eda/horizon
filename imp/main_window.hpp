@@ -1,6 +1,6 @@
 #pragma once
 #include <gtkmm.h>
-#include "canvas/canvas.hpp"
+#include "common.hpp"
 
 namespace horizon {
 
@@ -8,7 +8,7 @@ namespace horizon {
 		public:
 			MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x);
 			static MainWindow* create();
-			CanvasGL *canvas = nullptr;
+			class CanvasGL *canvas = nullptr;
 			Gtk::Label *active_tool_label = nullptr;
 			Gtk::Label *tool_hint_label = nullptr;
 			Gtk::Label *cursor_label = nullptr;

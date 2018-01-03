@@ -14,6 +14,7 @@
 #include "widgets/log_window.hpp"
 #include "widgets/log_view.hpp"
 #include "logger/logger.hpp"
+#include "canvas/canvas_gl.hpp"
 #include <iomanip>
 #include <glibmm/main.h>
 

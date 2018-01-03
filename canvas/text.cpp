@@ -1,5 +1,6 @@
 #include "canvas.hpp"
 #include <algorithm>
+#include <glibmm.h>
 
 
 namespace horizon {

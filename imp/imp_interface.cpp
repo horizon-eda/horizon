@@ -2,6 +2,7 @@
 #include "imp_schematic.hpp"
 #include "imp.hpp"
 #include "part.hpp"
+#include "canvas/canvas_gl.hpp"
 
 namespace horizon {
 	ImpInterface::ImpInterface(ImpBase *i): imp(i){

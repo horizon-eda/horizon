@@ -1,6 +1,6 @@
 #include "marker.hpp"
 #include "gl_util.hpp"
-#include "canvas.hpp"
+#include "canvas_gl.hpp"
 #include <algorithm>
 
 namespace horizon {

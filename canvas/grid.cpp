@@ -1,6 +1,6 @@
 #include "grid.hpp"
 #include "gl_util.hpp"
-#include "canvas.hpp"
+#include "canvas_gl.hpp"
 
 namespace horizon {
 	Grid::Grid(class CanvasGL *c): ca(c), spacing(1.25_mm), mark_size(5), color(Color::new_from_int(0, 51, 136)), alpha(1) {

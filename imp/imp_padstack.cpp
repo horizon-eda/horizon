@@ -2,6 +2,7 @@
 #include "part.hpp"
 #include "parameter_window.hpp"
 #include "header_button.hpp"
+#include "canvas/canvas_gl.hpp"
 
 namespace horizon {
 	ImpPadstack::ImpPadstack(const std::string &padstack_filename, const std::string &pool_path):

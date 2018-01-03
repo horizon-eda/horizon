@@ -2,7 +2,7 @@
 #include <gtkmm.h>
 #include "sheet.hpp"
 #include "canvas/layer_display.hpp"
-#include "canvas/canvas.hpp"
+#include "canvas/canvas_gl.hpp"
 
 namespace horizon {
 	class LayerBox: public Gtk::Box {

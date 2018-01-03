@@ -1,4 +1,4 @@
-#include "canvas/canvas.hpp"
+#include "canvas/canvas_gl.hpp"
 #include "util.hpp"
 #include "rules_window.hpp"
 #include "rules/rules.hpp"

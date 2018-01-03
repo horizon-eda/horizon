@@ -1,6 +1,6 @@
 #include "triangle.hpp"
 #include "gl_util.hpp"
-#include "canvas.hpp"
+#include "canvas_gl.hpp"
 
 namespace horizon {
 

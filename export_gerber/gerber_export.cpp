@@ -2,6 +2,7 @@
 #include "canvas_gerber.hpp"
 #include "board.hpp"
 #include "fab_output_settings.hpp"
+#include <glibmm/miscutils.h>
 
 namespace horizon {
 	GerberExporter::GerberExporter(const Board *b, const FabOutputSettings *s): brd(b), settings(s) {

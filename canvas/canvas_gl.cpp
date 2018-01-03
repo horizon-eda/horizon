@@ -1,4 +1,4 @@
-#include "canvas.hpp"
+#include "canvas_gl.hpp"
 #include <iostream>
 #include <algorithm>
 #include <epoxy/gl.h>

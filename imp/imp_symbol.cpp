@@ -2,6 +2,7 @@
 #include "part.hpp"
 #include "symbol_preview/symbol_preview_window.hpp"
 #include "header_button.hpp"
+#include "canvas/canvas_gl.hpp"
 
 namespace horizon {
 	ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool_path):

@@ -3,6 +3,7 @@
 #include "part.hpp"
 #include "rules/rules_window.hpp"
 #include "widgets/sheet_box.hpp"
+#include "canvas/canvas_gl.hpp"
 
 namespace horizon {
 	ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,  const PoolParams &pool_params) :ImpBase(pool_params),

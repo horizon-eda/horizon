@@ -1,5 +1,5 @@
 #pragma once
-#include "canvas/canvas.hpp"
+#include "canvas/canvas_gl.hpp"
 
 namespace horizon {
 	class PreviewCanvas: public CanvasGL {

@@ -1,4 +1,5 @@
 #include "main_window.hpp"
+#include "canvas/canvas_gl.hpp"
 #include <iostream>
 
 namespace horizon {

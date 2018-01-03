@@ -5,6 +5,7 @@
 #include "header_button.hpp"
 #include "widgets/chooser_buttons.hpp"
 #include "widgets/pool_browser.hpp"
+#include "canvas/canvas_gl.hpp"
 
 namespace horizon {
 	ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path):

@@ -1,6 +1,6 @@
 #include "box_selection.hpp"
 #include "gl_util.hpp"
-#include "canvas.hpp"
+#include "canvas_gl.hpp"
 #include "object_descr.hpp"
 #include "layer_provider.hpp"
 

@@ -2,7 +2,7 @@
 #include "board.hpp"
 #include "router/pns_topology.h"
 #include "router/pns_via.h"
-#include "canvas/canvas.hpp"
+#include "canvas/canvas_gl.hpp"
 #include "clipper/clipper.hpp"
 #include "router/pns_solid.h"
 #include "router/pns_debug_decorator.h"

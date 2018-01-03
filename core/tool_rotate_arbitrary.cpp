@@ -7,7 +7,7 @@
 #include "accumulator.hpp"
 #include "imp_interface.hpp"
 #include "util.hpp"
-#include "canvas/canvas.hpp"
+#include "canvas/canvas_gl.hpp"
 #include <iostream>
 
 namespace horizon {
