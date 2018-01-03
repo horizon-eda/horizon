@@ -13,7 +13,6 @@
 namespace horizon {
 
 	ToolRotateArbitrary::ToolRotateArbitrary(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Move";
 	}
 
 	void ToolRotateArbitrary::expand_selection() {

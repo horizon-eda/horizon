@@ -9,7 +9,6 @@
 namespace horizon {
 
 	ToolMapPin::ToolMapPin(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Map Pin";
 	}
 
 	bool ToolMapPin::can_begin() {

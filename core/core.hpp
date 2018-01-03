@@ -111,7 +111,6 @@ namespace horizon {
 			virtual bool is_specific() {return false;}
 
 			virtual ~ToolBase() {}
-			std::string name;
 
 		protected :
 			Cores core;
@@ -140,7 +139,6 @@ namespace horizon {
 	 */
 	class Core :public sigc::trackable {
 		public :
-			const std::string get_tool_name();
 			virtual bool has_object_type(ObjectType ty) {return false;}
 
 			virtual class Junction *insert_junction(const UUID &uu, bool work = true);

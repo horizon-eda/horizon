@@ -5,7 +5,6 @@
 namespace horizon {
 
 	ToolLock::ToolLock(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Lock";
 	}
 
 	std::set<Via*> ToolLock::get_vias(bool locked) {

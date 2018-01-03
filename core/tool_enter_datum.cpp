@@ -11,7 +11,6 @@
 namespace horizon {
 
 	ToolEnterDatum::ToolEnterDatum(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Enter Datum";
 	}
 
 

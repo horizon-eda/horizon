@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolAddVertex::ToolAddVertex(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Add vertex";
 	}
 
 	bool ToolAddVertex::can_begin() {

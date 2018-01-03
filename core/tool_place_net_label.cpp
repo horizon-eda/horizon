@@ -7,7 +7,6 @@
 namespace horizon {
 
 	ToolPlaceNetLabel::ToolPlaceNetLabel(Core *c, ToolID tid):ToolPlaceJunction(c, tid) {
-		name = "Place Net label";
 	}
 
 	bool ToolPlaceNetLabel::can_begin() {

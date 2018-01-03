@@ -7,7 +7,6 @@
 namespace horizon {
 
 	ToolPlaceBusLabel::ToolPlaceBusLabel(Core *c, ToolID tid):ToolPlaceJunction(c, tid) {
-		name = "Place bus label";
 	}
 
 	bool ToolPlaceBusLabel::can_begin() {

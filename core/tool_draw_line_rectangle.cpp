@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolDrawLineRectangle::ToolDrawLineRectangle(Core *c, ToolID tid):ToolBase(c, tid) {
-		name = "Draw Line rect";
 	}
 
 	bool ToolDrawLineRectangle::can_begin() {

@@ -287,7 +287,6 @@ namespace horizon {
 			args.selection = canvas->get_selection();
 			args.work_layer = canvas->property_work_layer();
 			ToolResponse r= core.r->tool_begin(tool_id, args, imp_interface.get());
-			main_window->active_tool_label->set_text("Active tool: "+core.r->get_tool_name());
 			tool_process(r);
 		});
 
@@ -377,7 +376,6 @@ namespace horizon {
 		args.selection = canvas->get_selection();
 		args.work_layer = canvas->property_work_layer();
 		ToolResponse r= core.r->tool_begin(id, args, imp_interface.get());
-		main_window->active_tool_label->set_text("Active tool: "+core.r->get_tool_name());
 		tool_process(r);
 	}
 
@@ -769,7 +767,6 @@ namespace horizon {
 			args.coords = canvas->get_cursor_pos();
 			args.keep_selection = true;
 			ToolResponse r = core.r->tool_begin(resp.next_tool, args, imp_interface.get());
-			main_window->active_tool_label->set_text("Active tool: "+core.r->get_tool_name());
 			tool_process(r);
 		}
 	}

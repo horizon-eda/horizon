@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolEditSymbolPinNames::ToolEditSymbolPinNames(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Edit symbol pin names";
 	}
 
 	SchematicSymbol *ToolEditSymbolPinNames::get_symbol() {

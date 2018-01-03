@@ -5,7 +5,6 @@
 
 namespace horizon {
 	ToolMapPackage::ToolMapPackage(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Map Pkg";
 	}
 
 	bool ToolMapPackage::can_begin() {

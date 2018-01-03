@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolManageBuses::ToolManageBuses(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Bus Manager";
 	}
 
 	bool ToolManageBuses::can_begin() {

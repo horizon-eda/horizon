@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolDrawPolygon::ToolDrawPolygon(Core *c, ToolID tid):ToolBase(c, tid) {
-		name = "Draw Polygon";
 	}
 
 	bool ToolDrawPolygon::can_begin() {

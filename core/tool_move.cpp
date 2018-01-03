@@ -12,7 +12,6 @@
 namespace horizon {
 	
 	ToolMove::ToolMove(Core *c, ToolID tid): ToolBase(c, tid), ToolHelperMove(c, tid), ToolHelperMerge(c, tid) {
-		name = "Move";
 	}
 	
 	void ToolMove::expand_selection() {

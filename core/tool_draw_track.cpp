@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolDrawTrack::ToolDrawTrack(Core *c, ToolID tid):ToolBase(c, tid) {
-		name = "Draw Track";
 	}
 
 	bool ToolDrawTrack::can_begin() {

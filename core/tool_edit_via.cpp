@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolEditVia::ToolEditVia(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Edit via";
 	}
 
 	bool ToolEditVia::can_begin() {

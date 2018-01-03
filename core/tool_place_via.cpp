@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolPlaceVia::ToolPlaceVia(Core *c, ToolID tid): ToolPlaceJunction(c, tid) {
-		name = "Place Via";
 	}
 
 	bool ToolPlaceVia::can_begin() {

@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolSetDiffpair::ToolSetDiffpair(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Set diffpair";
 	}
 
 	std::pair<Net*, Net*> ToolSetDiffpair::get_net() {

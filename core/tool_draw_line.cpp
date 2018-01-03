@@ -6,7 +6,6 @@
 namespace horizon {
 	
 	ToolDrawLine::ToolDrawLine(Core *c, ToolID tid):ToolBase(c, tid) {
-		name = "Draw Line";
 	}
 	
 	bool ToolDrawLine::can_begin() {

@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolEditShape::ToolEditShape(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Edit shape";
 	}
 
 	bool ToolEditShape::can_begin() {

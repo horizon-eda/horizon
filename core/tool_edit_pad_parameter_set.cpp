@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolEditPadParameterSet::ToolEditPadParameterSet(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Edit pad parameter set";
 	}
 
 	bool ToolEditPadParameterSet::can_begin() {

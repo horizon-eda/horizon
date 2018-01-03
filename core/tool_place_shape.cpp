@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolPlaceShape::ToolPlaceShape(Core *c, ToolID tid):ToolBase(c, tid) {
-		name = "Place Shape";
 	}
 
 	bool ToolPlaceShape::can_begin() {

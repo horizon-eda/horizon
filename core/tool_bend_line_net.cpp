@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolBendLineNet::ToolBendLineNet(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Bend net line";
 	}
 
 	bool ToolBendLineNet::can_begin() {

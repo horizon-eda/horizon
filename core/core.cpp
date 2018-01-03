@@ -323,16 +323,6 @@ namespace horizon {
 		}
 		return ToolResponse();
 	}
-	
-	const std::string Core::get_tool_name() {
-		if(tool) {
-			return tool->name;
-		}
-		return "None";
-	}
-
-
-
 
 	Junction *Core::insert_junction(const UUID &uu, bool work) {
 		auto map = get_junction_map(work);

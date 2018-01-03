@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolPlaceBoardHole::ToolPlaceBoardHole(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Place board hole";
 	}
 
 	bool ToolPlaceBoardHole::can_begin() {

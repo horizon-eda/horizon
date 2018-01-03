@@ -5,7 +5,6 @@
 namespace horizon {
 	
 	ToolPlaceText::ToolPlaceText(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Place Text";
 	}
 	
 	bool ToolPlaceText::can_begin() {

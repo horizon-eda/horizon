@@ -7,7 +7,6 @@
 namespace horizon {
 	
 	ToolDrawLineNet::ToolDrawLineNet(Core *c, ToolID tid):ToolBase(c, tid), ToolHelperMerge(c, tid) {
-		name = "Draw Net Line";
 	}
 	
 	bool ToolDrawLineNet::can_begin() {

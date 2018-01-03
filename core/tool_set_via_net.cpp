@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolSetViaNet::ToolSetViaNet(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Set via net";
 	}
 
 	std::set<Via*> ToolSetViaNet::get_vias() {

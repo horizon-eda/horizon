@@ -5,7 +5,6 @@
 namespace horizon {
 
 	ToolEditParameterProgram::ToolEditParameterProgram(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Edit param program";
 	}
 
 	bool ToolEditParameterProgram::can_begin() {

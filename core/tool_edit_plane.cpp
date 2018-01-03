@@ -8,7 +8,6 @@
 namespace horizon {
 
 	ToolEditPlane::ToolEditPlane(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Edit plane";
 	}
 
 	Polygon *ToolEditPlane::get_poly() {

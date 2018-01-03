@@ -5,7 +5,6 @@
 namespace horizon {
 	
 	ToolDrawArc::ToolDrawArc(Core *c, ToolID tid):ToolBase(c, tid) {
-		name = "Draw Arc";
 	}
 	
 	bool ToolDrawArc::can_begin() {

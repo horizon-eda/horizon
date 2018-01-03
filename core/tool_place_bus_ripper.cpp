@@ -7,7 +7,6 @@
 namespace horizon {
 
 	ToolPlaceBusRipper::ToolPlaceBusRipper(Core *c, ToolID tid): ToolPlaceJunction(c, tid) {
-		name = "Place Bus Ripper";
 	}
 
 	bool ToolPlaceBusRipper::can_begin() {

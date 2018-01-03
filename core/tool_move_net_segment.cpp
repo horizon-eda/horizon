@@ -7,7 +7,6 @@
 namespace horizon {
 
 	ToolMoveNetSegment::ToolMoveNetSegment(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Move net segment";
 	}
 
 	bool ToolMoveNetSegment::can_begin() {

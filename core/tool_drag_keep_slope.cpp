@@ -5,7 +5,6 @@
 namespace horizon {
 
 	ToolDragKeepSlope::ToolDragKeepSlope(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Drag keeping slope";
 	}
 
 	bool ToolDragKeepSlope::can_begin() {

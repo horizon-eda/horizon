@@ -7,7 +7,6 @@
 namespace horizon {
 
 	ToolAssignPart::ToolAssignPart(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Assign part";
 	}
 
 	bool ToolAssignPart::can_begin() {

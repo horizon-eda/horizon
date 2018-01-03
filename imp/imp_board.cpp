@@ -127,7 +127,6 @@ namespace horizon {
 				args.selection = components;
 				args.work_layer = canvas->property_work_layer();
 				ToolResponse r= core.r->tool_begin(ToolID::MAP_PACKAGE, args, imp_interface.get());
-				main_window->active_tool_label->set_text("Active tool: "+core.r->get_tool_name());
 				tool_process(r);
 			}
 		}

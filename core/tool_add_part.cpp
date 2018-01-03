@@ -7,7 +7,6 @@
 namespace horizon {
 
 	ToolAddPart::ToolAddPart(Core *c, ToolID tid): ToolBase(c, tid), ToolHelperMapSymbol(c, tid), ToolHelperMove(c, tid) {
-		name = "Add Part";
 	}
 
 	bool ToolAddPart::can_begin() {

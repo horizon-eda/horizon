@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolEditLineRectangle::ToolEditLineRectangle(Core *c, ToolID tid):ToolBase(c, tid) {
-		name = "Edit Line rect";
 	}
 
 	bool ToolEditLineRectangle::can_begin() {

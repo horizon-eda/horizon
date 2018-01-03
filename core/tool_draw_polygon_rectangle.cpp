@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolDrawPolygonRectangle::ToolDrawPolygonRectangle(Core *c, ToolID tid):ToolBase(c, tid) {
-		name = "Draw Polygon rect";
 	}
 
 	bool ToolDrawPolygonRectangle::can_begin() {

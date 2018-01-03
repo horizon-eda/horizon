@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolSelectMore::ToolSelectMore(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Select more";
 	}
 
 	bool ToolSelectMore::can_begin() {

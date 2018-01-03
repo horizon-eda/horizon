@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolPlacePowerSymbol::ToolPlacePowerSymbol(Core *c, ToolID tid): ToolPlaceJunction(c, tid) {
-		name = "Place Power Symbol";
 	}
 
 	bool ToolPlacePowerSymbol::can_begin() {

@@ -6,7 +6,6 @@
 
 namespace horizon {
 	ToolDrawDimension::ToolDrawDimension(Core *c, ToolID tid):ToolBase(c, tid) {
-		name = "Draw Dim";
 	}
 
 	bool ToolDrawDimension::can_begin() {

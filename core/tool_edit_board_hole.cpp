@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolEditBoardHole::ToolEditBoardHole(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Edit pad brd hole";
 	}
 
 	bool ToolEditBoardHole::can_begin() {

@@ -33,7 +33,6 @@ namespace horizon {
 	};
 
 	ToolRouteTrackInteractive::ToolRouteTrackInteractive(Core *c, ToolID tid):ToolBase(c, tid) {
-		name = "Route Track interactive";
 	}
 
 	bool ToolRouteTrackInteractive::can_begin() {

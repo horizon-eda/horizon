@@ -6,7 +6,6 @@
 namespace horizon {
 
 	ToolPlacePad::ToolPlacePad(Core *c, ToolID tid): ToolBase(c, tid) {
-		name = "Place pad";
 	}
 
 	bool ToolPlacePad::can_begin() {

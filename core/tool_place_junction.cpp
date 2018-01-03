@@ -6,7 +6,6 @@
 namespace horizon {
 	
 	ToolPlaceJunction::ToolPlaceJunction(Core *c, ToolID tid):ToolBase(c, tid) {
-		name = "Place Junction";
 	}
 	
 	bool ToolPlaceJunction::can_begin() {

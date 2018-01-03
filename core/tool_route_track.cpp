@@ -8,7 +8,6 @@
 namespace horizon {
 
 	ToolRouteTrack::ToolRouteTrack(Core *c, ToolID tid):ToolBase(c, tid) {
-		name = "Route Track";
 	}
 
 	bool ToolRouteTrack::can_begin() {
