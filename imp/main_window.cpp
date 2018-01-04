@@ -5,10 +5,9 @@
 namespace horizon {
 
 	MainWindow::MainWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& x) :
-		Gtk::ApplicationWindow(cobject) {
+		Gtk::ApplicationWindow(cobject), builder(x) {
 
 		x->get_widget("gl_container", gl_container);
-		x->get_widget("active_tool_label", active_tool_label);
 		x->get_widget("tool_hint_label", tool_hint_label);
 		x->get_widget("left_panel", left_panel);
 		x->get_widget("grid_box", grid_box);

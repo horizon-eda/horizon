@@ -9,6 +9,7 @@
 #include "part.hpp"
 #include "rules/rules_window.hpp"
 #include "util.hpp"
+#include "gtk_util.hpp"
 #include "preferences_window.hpp"
 #include "property_panels/property_panels.hpp"
 #include "widgets/log_window.hpp"
@@ -143,6 +144,8 @@ namespace horizon {
 		preferences_window->present();
 	}
 
+	#define GET_WIDGET(name) do {main_window->builder->get_widget(#name, name); } while(0)
+
 	void ImpBase::run(int argc, char *argv[]) {
 		auto app = Gtk::Application::create(argc, argv, "net.carrotIndustries.horizon.Imp", Gio::APPLICATION_NON_UNIQUE);
 
@@ -157,9 +160,44 @@ namespace horizon {
 		canvas->signal_request_display_name().connect([this](ObjectType ty, UUID uu){
 			return core.r->get_display_name(ty, uu);
 		});
-		/*main_window->save_button->signal_clicked().connect(sigc::mem_fun(this, &ImpBase::handle_save));
-		main_window->print_button->signal_clicked().connect(sigc::mem_fun(this, &ImpBase::handle_print));
-		main_window->test_button->signal_clicked().connect(sigc::mem_fun(this, &ImpBase::handle_test));*/
+
+		{
+			Gtk::RadioButton *selection_tool_box_button, *selection_tool_lasso_button, *selection_tool_paint_button;
+			Gtk::RadioButton *selection_qualifier_include_origin_button, *selection_qualifier_touch_box_button, *selection_qualifier_include_box_button;
+			GET_WIDGET(selection_tool_box_button);
+			GET_WIDGET(selection_tool_lasso_button);
+			GET_WIDGET(selection_tool_paint_button);
+			GET_WIDGET(selection_qualifier_include_origin_button);
+			GET_WIDGET(selection_qualifier_touch_box_button);
+			GET_WIDGET(selection_qualifier_include_box_button);
+
+			Gtk::Box *selection_qualifier_box;
+			GET_WIDGET(selection_qualifier_box);
+
+			std::map<CanvasGL::SelectionQualifier, Gtk::RadioButton*> qual_map = {
+				{CanvasGL::SelectionQualifier::INCLUDE_BOX, selection_qualifier_include_box_button},
+				{CanvasGL::SelectionQualifier::TOUCH_BOX, selection_qualifier_touch_box_button},
+				{CanvasGL::SelectionQualifier::INCLUDE_ORIGIN, selection_qualifier_include_origin_button}
+			};
+			bind_widget(qual_map, canvas->selection_qualifier);
+
+			std::map<CanvasGL::SelectionTool, Gtk::RadioButton*> tool_map = {
+				{CanvasGL::SelectionTool::BOX, selection_tool_box_button},
+				{CanvasGL::SelectionTool::LASSO, selection_tool_lasso_button},
+				{CanvasGL::SelectionTool::PAINT, selection_tool_paint_button},
+			};
+			bind_widget(tool_map, canvas->selection_tool);
+
+			selection_tool_paint_button->signal_toggled().connect([this, selection_tool_paint_button, selection_qualifier_box, selection_qualifier_touch_box_button] {
+				auto is_paint = selection_tool_paint_button->get_active();
+				if(is_paint) {
+					selection_qualifier_touch_box_button->set_active(true);
+				}
+				selection_qualifier_box->set_sensitive(!is_paint);
+			});
+
+		}
+
 
 		panels = Gtk::manage(new PropertyPanels(core.r));
 		panels->show_all();
@@ -331,6 +369,17 @@ namespace horizon {
 				main_window->close();
 			});
 		});
+
+
+		auto cssp = Gtk::CssProvider::create();
+		cssp->load_from_data(".imp-status-menu-button {"
+			"padding: 1px 8px 2px 4px;\n"
+			"border: 0;\n"
+			"outline-width: 0;\n"
+		"}\n"
+		".imp-statusbar {border-top: 1px solid @borders; padding-left:10px;}");
+		Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 700);
+
 
 		sc();
 
@@ -748,7 +797,6 @@ namespace horizon {
 
 	void ImpBase::tool_process(const ToolResponse &resp) {
 		if(!core.r->tool_is_active()) {
-			main_window->active_tool_label->set_text("Active tool: None");
 			main_window->tool_hint_label->set_text(">");
 			canvas->set_cursor_external(false);
 			no_update = false;

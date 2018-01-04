@@ -60,6 +60,10 @@
     <file>canvas/shaders/marker-vertex.glsl</file>
     <file>canvas/shaders/marker-fragment.glsl</file>
     <file>canvas/shaders/marker-geometry.glsl</file>
+    
+    <file>canvas/shaders/selection-line-vertex.glsl</file>
+    <file>canvas/shaders/selection-line-fragment.glsl</file>
+    <file>canvas/shaders/selection-line-geometry.glsl</file>
 
     <file>canvas3d/shaders/cover-vertex.glsl</file>
     <file>canvas3d/shaders/cover-fragment.glsl</file>

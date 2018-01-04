@@ -93,7 +93,7 @@ SRC_CANVAS = \
 	canvas/draw.cpp \
 	canvas/text.cpp \
 	canvas/hershey_fonts.cpp \
-	canvas/box_selection.cpp \
+	canvas/drag_selection.cpp \
 	canvas/selectables.cpp \
 	canvas/hover_prelight.cpp\
 	canvas/triangle.cpp\

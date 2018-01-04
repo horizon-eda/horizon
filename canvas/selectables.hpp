@@ -22,6 +22,7 @@ namespace horizon {
 		Selectable(const Coordf &center, const Coordf &box_center, const Coordf &box_dim, float angle=0, bool always=false);
 		bool inside(const Coordf &c, float expand=0) const;
 		float area() const;
+		std::array<Coordf, 4> get_corners() const;
 	} __attribute__((packed));
 	
 	class SelectableRef {
@@ -52,7 +53,7 @@ namespace horizon {
 	class Selectables {
 		friend class Canvas;
 		friend class CanvasGL;
-		friend class BoxSelection;
+		friend class DragSelection;
 		friend class SelectablesRenderer;
 		public:
 			Selectables(class Canvas *ca);

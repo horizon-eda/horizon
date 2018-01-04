@@ -1,7 +1,7 @@
 #pragma once
 #include <gtkmm.h>
 #include "grid.hpp"
-#include "box_selection.hpp"
+#include "drag_selection.hpp"
 #include "canvas.hpp"
 #include "triangle.hpp"
 #include "marker.hpp"
@@ -10,7 +10,7 @@
 namespace horizon {
 	class CanvasGL: public Canvas, public Gtk::GLArea {
 		friend Grid;
-		friend BoxSelection;
+		friend DragSelection;
 		friend SelectablesRenderer;
 		friend TriangleRenderer;
 		friend MarkerRenderer;
@@ -18,8 +18,14 @@ namespace horizon {
 		public:
 			CanvasGL();
 
-			enum class SelectionMode {HOVER, NORMAL, CLARIFY};
+			enum class SelectionMode {HOVER, NORMAL};
 			SelectionMode selection_mode = SelectionMode::HOVER;
+
+			enum class SelectionTool {BOX, LASSO, PAINT};
+			SelectionTool selection_tool = SelectionTool::BOX;
+
+			enum class SelectionQualifier {INCLUDE_ORIGIN, INCLUDE_BOX, TOUCH_BOX};
+			SelectionQualifier selection_qualifier = SelectionQualifier::INCLUDE_ORIGIN;
 
 			enum class HighlightMode {HIGHLIGHT, DIM, SHADOW};
 			void set_highlight_mode(HighlightMode mode);
@@ -99,7 +105,7 @@ namespace horizon {
 
 			Color background_color = Color::new_from_int(0, 24, 64);
 			Grid grid;
-			BoxSelection box_selection;
+			DragSelection drag_selection;
 			SelectablesRenderer selectables_renderer;
 			TriangleRenderer triangle_renderer;
 

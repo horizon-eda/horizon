@@ -1,4 +1,3 @@
-#include "box_selection.hpp"
 #include "gl_util.hpp"
 #include "canvas_gl.hpp"
 #include <iostream>
@@ -26,8 +25,31 @@ namespace horizon {
 
 		return (dx >= -w-expand) && (dx <= w+expand) && (dy >= -h-expand) && (dy <= h+expand);
 	}
+
 	float Selectable::area() const {
 		return width*height;
+	}
+
+	static void rotate(float &x, float &y, float a)  {
+		float ix = x;
+		float iy = y;
+		x = ix*cos(a)-iy*sin(a);
+		y = ix*sin(a)+iy*cos(a);
+	}
+
+	std::array<Coordf, 4> Selectable::get_corners() const {
+		std::array<Coordf, 4> r;
+		auto w = width+100;
+		auto h = height+100;
+		r[0] = Coordf(-w, -h)/2;
+		r[1] = Coordf(-w,  h)/2;
+		r[2] = Coordf( w,  h)/2;
+		r[3] = Coordf( w, -h)/2;
+		for(auto &it: r) {
+			rotate(it.x, it.y, angle);
+			it += Coordf(c_x, c_y);
+		}
+		return r;
 	}
 
 	void Selectable::set_flag(Selectable::Flag f, bool v) {

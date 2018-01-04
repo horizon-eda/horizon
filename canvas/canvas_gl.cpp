@@ -15,7 +15,7 @@ namespace horizon {
 		offset = ofs;
 	}
 
-	CanvasGL::CanvasGL() : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), markers(this), grid(this), box_selection(this), selectables_renderer(this, &selectables),
+	CanvasGL::CanvasGL() : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), markers(this), grid(this), drag_selection(this), selectables_renderer(this, &selectables),
 			triangle_renderer(this, triangles),
 			marker_renderer(this, markers),
 			p_property_work_layer(*this, "work-layer"),
@@ -96,7 +96,7 @@ namespace horizon {
 		GL_CHECK_ERROR
 		grid.realize();
 		GL_CHECK_ERROR
-		box_selection.realize();
+		drag_selection.realize();
 		GL_CHECK_ERROR
 		selectables_renderer.realize();
 		GL_CHECK_ERROR
@@ -125,7 +125,7 @@ namespace horizon {
 
 		selectables_renderer.render();
 		GL_CHECK_ERROR
-		box_selection.render();
+		drag_selection.render();
 		GL_CHECK_ERROR
 		grid.render_cursor(cursor_pos_grid);
 		marker_renderer.render();
@@ -138,7 +138,7 @@ namespace horizon {
 	bool CanvasGL::on_button_press_event(GdkEventButton* button_event) {
 		grab_focus();
 		pan_drag_begin(button_event);
-		box_selection.drag_begin(button_event);
+		drag_selection.drag_begin(button_event);
 		cursor_move((GdkEvent*)button_event);
 		return Gtk::GLArea::on_button_press_event(button_event);
 	}
@@ -147,7 +147,7 @@ namespace horizon {
 		grab_focus();
 		pan_drag_move(motion_event);
 		cursor_move((GdkEvent*)motion_event);
-		box_selection.drag_move(motion_event);
+		drag_selection.drag_move(motion_event);
 		hover_prelight_update((GdkEvent*)motion_event);
 		return Gtk::GLArea::on_motion_notify_event(motion_event);
 	}
@@ -162,7 +162,7 @@ namespace horizon {
 
 	bool CanvasGL::on_button_release_event(GdkEventButton *button_event) {
 		pan_drag_end(button_event);
-		box_selection.drag_end(button_event);
+		drag_selection.drag_end(button_event);
 		return Gtk::GLArea::on_button_release_event(button_event);
 	}
 
@@ -322,6 +322,7 @@ namespace horizon {
 		GL_CHECK_ERROR
 		triangle_renderer.push();
 		marker_renderer.push();
+		drag_selection.push();
 		GL_CHECK_ERROR
 	}
 

@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <sstream>
 #include <ctime>
-#include "box_selection.hpp"
 #include "selectables.hpp"
 #include "symbol.hpp"
 #include "sheet.hpp"
