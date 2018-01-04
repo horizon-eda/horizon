@@ -106,6 +106,10 @@ namespace horizon {
 				stack.push_back(a);
 				stack.push_back(b);
 			}
+			else if(cmd->command == "swap") {
+				stack.push_back(b);
+				stack.push_back(a);
+			}
 			return {false, ""};
 		}
 
@@ -118,6 +122,7 @@ namespace horizon {
 				{"/", 		&math2},
 				{"dup",		&math1},
 				{"dupc",	&math2},
+				{"swap",	&math2},
 				{"+xy",		&math3},
 				{"-xy",		&math3},
 			};
@@ -180,7 +185,7 @@ namespace horizon {
 
 		const auto regex_int = Glib::Regex::create("^([+-]?\\d+)$");
 		const auto regex_dim = Glib::Regex::create("^([+-]?(?:\\d*\\.)?\\d+)mm$");
-		const auto regex_str = Glib::Regex::create("^([a-z][a-z-_]*)$");
+		const auto regex_str = Glib::Regex::create("^([a-z][a-z-_0-9]*)$");
 		const auto regex_math = Glib::Regex::create("^([+-/\x2A][a-z]*)$");
 		const auto regex_uuid = Glib::Regex::create("^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$");
 		tokens.clear();

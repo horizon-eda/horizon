@@ -296,7 +296,7 @@ namespace horizon {
 		                         ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION,
 								 ParameterID::HOLE_DIAMETER, ParameterID::HOLE_LENGTH, ParameterID::VIA_DIAMETER,
 								 ParameterID::HOLE_SOLDER_MASK_EXPANSION, ParameterID::VIA_SOLDER_MASK_EXPANSION,
-								 ParameterID::HOLE_ANNULAR_RING
+								 ParameterID::HOLE_ANNULAR_RING, ParameterID::CORNER_RADIUS
 		});
 		return parameter_program.run(ps_this);
 	}

@@ -15,6 +15,7 @@ namespace horizon {
 		{"hole_solder_mask_expansion",	ParameterID::HOLE_SOLDER_MASK_EXPANSION},
 		{"via_solder_mask_expansion",	ParameterID::VIA_SOLDER_MASK_EXPANSION},
 		{"hole_annular_ring",			ParameterID::HOLE_ANNULAR_RING},
+		{"corner_radius",				ParameterID::CORNER_RADIUS},
 	};
 
 	ParameterID parameter_id_from_string(const std::string &s) {
@@ -38,6 +39,7 @@ namespace horizon {
 		{ParameterID::HOLE_SOLDER_MASK_EXPANSION, "Hole solder mask expansion"},
 		{ParameterID::VIA_SOLDER_MASK_EXPANSION, "Via solder mask expansion"},
 		{ParameterID::HOLE_ANNULAR_RING, "Hole annular ring"},
+		{ParameterID::CORNER_RADIUS, "Corner radius"},
 	};
 
 	const std::string &parameter_id_to_name(ParameterID id) {
