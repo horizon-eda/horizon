@@ -16,9 +16,6 @@ namespace horizon {
 
 	ToolResponse ToolEditVia::begin(const ToolArgs &args) {
 		std::cout << "tool edit via\n";
-		if(!can_begin())
-			return ToolResponse::end();
-
 		auto board = core.b->get_board();
 
 		auto uu = std::find_if(core.r->selection.begin(), core.r->selection.end(), [](const auto &x){return x.type == ObjectType::VIA;})->uuid;

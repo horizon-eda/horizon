@@ -262,6 +262,10 @@ namespace horizon {
 		try {
 			tool = create_tool(tool_id);
 			tool->set_imp_interface(imp);
+			if(!tool->can_begin()) { //check if we can actually use this tool
+				tool.reset();
+				return ToolResponse();
+			}
 		}
 		catch(const std::exception &e) {
 			Logger::log_critical("exception thrown in tool constructor of "+tool_catalog.at(tool_id).name, Logger::Domain::CORE, e.what());

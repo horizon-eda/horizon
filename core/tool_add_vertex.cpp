@@ -15,9 +15,6 @@ namespace horizon {
 	ToolResponse ToolAddVertex::begin(const ToolArgs &args) {
 		std::cout << "tool bend net line\n";
 
-		if(!can_begin())
-			return ToolResponse::end();
-
 		int v = 0;
 		for(const auto &it: args.selection) {
 			if(it.type == ObjectType::POLYGON_EDGE) {

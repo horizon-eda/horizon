@@ -35,9 +35,6 @@ namespace horizon {
 	}
 
 	ToolResponse ToolSetViaNet::begin(const ToolArgs &args) {
-		if(!can_begin())
-			return ToolResponse::end();
-
 		auto vias = get_vias();
 
 		if(tool_id == ToolID::CLEAR_VIA_NET) {

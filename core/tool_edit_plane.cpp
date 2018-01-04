@@ -53,8 +53,6 @@ namespace horizon {
 
 	ToolResponse ToolEditPlane::begin(const ToolArgs &args) {
 		std::cout << "tool edit plane\n";
-		if(!can_begin())
-			return ToolResponse::end();
 
 		auto poly = get_poly();
 		Plane *plane = nullptr;

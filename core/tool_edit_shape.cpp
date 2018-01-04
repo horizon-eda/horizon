@@ -16,8 +16,6 @@ namespace horizon {
 
 	ToolResponse ToolEditShape::begin(const ToolArgs &args) {
 		std::cout << "tool edit shape\n";
-		if(!can_begin())
-			return ToolResponse::end();
 
 		auto padstack = core.a->get_padstack();
 

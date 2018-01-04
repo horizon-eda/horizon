@@ -159,9 +159,6 @@ namespace horizon {
 		last = args.coords;
 		origin = args.coords;
 
-		if(!can_begin()) {
-			return ToolResponse::end();
-		}
 		update_selection_center();
 
 

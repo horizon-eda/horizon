@@ -63,9 +63,6 @@ namespace horizon {
 
 	ToolResponse ToolSetDiffpair::begin(const ToolArgs &args) {
 		std::cout << "tool set dp\n";
-		if(!can_begin())
-			return ToolResponse::end();
-
 		auto nets = get_net();
 
 		if(tool_id == ToolID::CLEAR_DIFFPAIR) {

@@ -64,9 +64,6 @@ namespace horizon {
 		ref = args.coords;
 		origin = args.coords;
 
-		if(!can_begin()) {
-			return ToolResponse::end();
-		}
 		save_placements();
 		annotation = imp->get_canvas()->create_annotation();
 		annotation->set_visible(true);
