@@ -28,6 +28,7 @@ namespace horizon {
 
 					std::pair<bool, std::string> set_shape(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack);
 					std::pair<bool, std::string> set_hole(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack);
+					std::pair<bool, std::string> set_polygon(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack);
 
 				public:
 					MyParameterProgram(class Padstack *p, const std::string &code);
