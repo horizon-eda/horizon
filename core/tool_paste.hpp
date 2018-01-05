@@ -9,8 +9,9 @@ namespace horizon {
 	class ToolPaste : public ToolHelperMove, public ToolHelperMerge {
 		public :
 		ToolPaste(Core *c, ToolID tid);
-			virtual ToolResponse begin(const ToolArgs &args);
-			virtual ToolResponse update(const ToolArgs &args);
+			ToolResponse begin(const ToolArgs &args) override;
+			ToolResponse update(const ToolArgs &args) override;
+			bool can_begin() override {return true;}
 
 		private:
 			void fix_layer(int &la);
