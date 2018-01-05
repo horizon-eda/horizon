@@ -106,6 +106,7 @@ namespace horizon {
 
 
 		entity_preview = Gtk::manage(new EntityPreview(pool, show_goto));
+		entity_preview->signal_goto().connect([this](ObjectType type, const UUID &uu){s_signal_goto.emit(type, uu);});
 
 		paned->add1(*entity_preview);
 		paned->child_property_shrink(*entity_preview) = false;
