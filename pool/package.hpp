@@ -17,6 +17,7 @@
 #include <fstream>
 #include <set>
 #include "object_provider.hpp"
+#include "package/package_rules.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;
@@ -68,6 +69,7 @@ namespace horizon {
 
 			ParameterSet parameter_set;
 			MyParameterProgram parameter_program;
+			PackageRules rules;
 
 			const class Package *alternate_for = nullptr;
 

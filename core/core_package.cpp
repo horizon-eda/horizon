@@ -7,6 +7,7 @@ namespace horizon {
 	CorePackage::CorePackage(const std::string &filename, Pool &pool):
 		package(Package::new_from_file(filename, pool)),
 		m_filename(filename),
+		rules(package.rules),
 		parameter_program_code(package.parameter_program.get_code()),
 		parameter_set(package.parameter_set)
 	{
@@ -41,6 +42,10 @@ namespace horizon {
 
 	Package *CorePackage::get_package(bool work) {
 		return &package;
+	}
+
+	Rules *CorePackage::get_rules() {
+		return &rules;
 	}
 
 	std::map<UUID, Junction> *CorePackage::get_junction_map(bool work) {

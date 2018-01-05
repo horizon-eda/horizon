@@ -1,6 +1,7 @@
 #include "rules_with_core.hpp"
 #include "core/core_board.hpp"
 #include "core/core_schematic.hpp"
+#include "core/core_package.hpp"
 #include "board/board_rules.hpp"
 #include "schematic/schematic_rules.hpp"
 
@@ -13,6 +14,10 @@ namespace horizon {
 		if(auto rules = dynamic_cast<SchematicRules*>(r)) {
 			auto core = dynamic_cast<CoreSchematic*>(c);
 			return rules->check(id, core->get_schematic(), cache);
+		}
+		if(auto rules = dynamic_cast<PackageRules*>(r)) {
+			auto core = dynamic_cast<CorePackage*>(c);
+			return rules->check(id, core->get_package(), cache);
 		}
 		return RulesCheckResult();
 	}

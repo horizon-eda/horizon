@@ -13,5 +13,6 @@ namespace horizon {
 		{RuleID::CLEARANCE_COPPER_OTHER, {"Clearance Copper - Other", true}},
 		{RuleID::PLANE, {"Planes", true}},
 		{RuleID::DIFFPAIR, {"Diffpair", true}},
+		{RuleID::PACKAGE_CHECKS, {"Package checks", false}},
 	};
 }

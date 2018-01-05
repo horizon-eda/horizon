@@ -29,6 +29,7 @@ namespace horizon {
 			bool get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property, class PropertyMeta &meta) override;
 
 			std::string get_display_name(ObjectType type, const UUID &uu) override;
+			class Rules *get_rules() override;
 
 			void rebuild(bool from_undo=false) override;
 			void commit() override;
@@ -52,6 +53,8 @@ namespace horizon {
 
 			Package package;
 			std::string m_filename;
+
+			PackageRules rules;
 
 			class HistoryItem: public Core::HistoryItem {
 				public:

@@ -40,6 +40,8 @@ SRC_COMMON = \
 	common/patch_type_names.cpp\
 	pool/package.cpp\
 	package/pad.cpp\
+	package/package_rules.cpp\
+	package/rule_package_checks.cpp\
 	board/board.cpp\
 	board/board_package.cpp\
 	board/track.cpp\
@@ -267,10 +269,12 @@ SRC_IMP = \
 	imp/rules/rule_editor_clearance_copper_other.cpp\
 	imp/rules/rule_editor_plane.cpp\
 	imp/rules/rule_editor_diffpair.cpp\
+	imp/rules/rule_editor_package_checks.cpp\
 	rules/rules_with_core.cpp\
 	rules/cache.cpp\
 	board/board_rules_check.cpp\
 	schematic/schematic_rules_check.cpp\
+	package/package_rules_check.cpp\
 	board/plane_update.cpp\
 	imp/symbol_preview/symbol_preview_window.cpp\
 	imp/symbol_preview/preview_box.cpp\

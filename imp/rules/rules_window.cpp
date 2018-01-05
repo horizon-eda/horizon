@@ -13,6 +13,7 @@
 #include "rule_editor_clearance_copper_other.hpp"
 #include "rule_editor_plane.hpp"
 #include "rule_editor_diffpair.hpp"
+#include "rule_editor_package_checks.hpp"
 #include "widgets/cell_renderer_layer_display.hpp"
 #include "rules/rules_with_core.hpp"
 #include "rules/cache.hpp"
@@ -327,6 +328,10 @@ namespace horizon {
 
 			case RuleID::DIFFPAIR :
 				e = new RuleEditorDiffpair(r, core);
+			break;
+
+			case RuleID::PACKAGE_CHECKS :
+				e = new RuleEditorPackageChecks(r, core);
 			break;
 
 			default:
