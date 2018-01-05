@@ -85,6 +85,38 @@ namespace horizon {
 		return {false, ""};
 	}
 
+	std::pair<bool, std::string> Padstack::MyParameterProgram::set_polygon(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack) {
+		if(cmd->arguments.size()<2 || cmd->arguments.at(0)->type != ParameterProgram::Token::Type::STR || cmd->arguments.at(1)->type != ParameterProgram::Token::Type::INT)
+			return {true, "not enough arguments"};
+
+		auto pclass = dynamic_cast<ParameterProgram::TokenString*>(cmd->arguments.at(0).get())->string;
+		std::size_t n_vertices = dynamic_cast<ParameterProgram::TokenInt*>(cmd->arguments.at(1).get())->value;
+
+		if(stack.size() < 2 * n_vertices) {
+			return {true, "not enough coordinates on stack"};
+		}
+
+		for(auto &it: ps->polygons) {
+			if(it.second.parameter_class == pclass) {
+				it.second.vertices.clear();
+			}
+		}
+
+		for(std::size_t i = 0; i < n_vertices; i++) {
+			Coordi c;
+			if(stack_pop(stack, c.y) || stack_pop(stack, c.x)) {
+				return {true, "empty stack"};
+			}
+			for(auto &it: ps->polygons) {
+				if(it.second.parameter_class == pclass) {
+					it.second.vertices.emplace_front(c);
+				}
+			}
+		}
+
+		return {false, ""};
+	}
+
 	std::pair<bool, std::string> Padstack::MyParameterProgram::set_hole(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack) {
 		if(cmd->arguments.size()<2 || cmd->arguments.at(0)->type != ParameterProgram::Token::Type::STR || cmd->arguments.at(1)->type != ParameterProgram::Token::Type::STR)
 			return {true, "not enough arguments"};
@@ -133,6 +165,9 @@ namespace horizon {
 		}
 		else if(cmd == "set-hole") {
 			return std::bind(std::mem_fn(&Padstack::MyParameterProgram::set_hole), this, _1, _2);
+		}
+		else if(cmd == "set-polygon") {
+			return std::bind(std::mem_fn(&Padstack::MyParameterProgram::set_polygon), this, _1, _2);
 		}
 		return nullptr;
 	}
