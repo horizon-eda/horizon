@@ -623,6 +623,22 @@ namespace horizon {
 		});
 	}
 
+	void rmdir_recursive(const std::string &dirname) {
+		Glib::Dir dir(dirname);
+		std::list<std::string> entries (dir.begin(), dir.end());
+		for(const auto &it: entries) {
+			auto filename = Glib::build_filename(dirname, it);
+			if(Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
+				rmdir_recursive(filename);
+			}
+			else {
+				Gio::File::create_for_path(filename)->remove();
+			}
+		}
+		Gio::File::create_for_path(dirname)->remove();
+
+	}
+
 	void PoolNotebook::handle_delete(ObjectType ty, const UUID &uu) {
 		auto top = dynamic_cast<Gtk::Window*>(get_ancestor(GTK_TYPE_WINDOW));
 		Gtk::MessageDialog md(*top,  "Permanently delete "+object_descriptions.at(ty).name + "?", false /* use_markup */, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
@@ -630,7 +646,13 @@ namespace horizon {
 		md.add_button("Delete", Gtk::RESPONSE_OK)->get_style_context()->add_class("destructive-action");
 		if(md.run() == Gtk::RESPONSE_OK) {
 			auto filename = pool.get_filename(ty, uu);
-			Gio::File::create_for_path(filename)->remove();
+			if(ty == ObjectType::PACKAGE) {
+				auto dir = Glib::path_get_dirname(filename);
+				rmdir_recursive(dir);
+			}
+			else {
+				Gio::File::create_for_path(filename)->remove();
+			}
 			pool_update();
 		}
 	}
