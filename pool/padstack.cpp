@@ -90,25 +90,22 @@ namespace horizon {
 			return {true, "not enough arguments"};
 
 		auto pclass = dynamic_cast<ParameterProgram::TokenString*>(cmd->arguments.at(0).get())->string;
-		std::size_t n_vertices = dynamic_cast<ParameterProgram::TokenInt*>(cmd->arguments.at(1).get())->value;
-
-		Coordi positions[n_vertices];
-		for(int i = n_vertices - 1; i >= 0; --i) {
-			if(stack_pop(stack, positions[i].y) || stack_pop(stack, positions[i].x))
-				return {true, "empty stack"};
-		}
+		int n_vertices = dynamic_cast<ParameterProgram::TokenInt*>(cmd->arguments.at(1).get())->value;
 
 		for(auto &it: ps->polygons) {
 			if(it.second.parameter_class == pclass) {
-				if(it.second.vertices.size() != n_vertices) {
-					return {true, "polygon has wrong count of vertices"};
-				}
-				for(std::size_t i = 0, e = it.second.vertices.size(); i != e; ++i) {
-					if(it.second.vertices[i].type == Polygon::Vertex::Type::ARC) {
-						return {true, "polygon contains arc"};
-					}
-					it.second.vertices[i].position.x = positions[i].x;
-					it.second.vertices[i].position.y = positions[i].y;
+				it.second.vertices.clear();
+			}
+		}
+
+		for(int i = 0; i < n_vertices; i++) {
+			Coordi c;
+			if(stack_pop(stack, c.y) || stack_pop(stack, c.x)) {
+				return {true, "empty stack"};
+			}
+			for(auto &it: ps->polygons) {
+				if(it.second.parameter_class == pclass) {
+					it.second.vertices.push_front(Polygon::Vertex(c));
 				}
 			}
 		}
