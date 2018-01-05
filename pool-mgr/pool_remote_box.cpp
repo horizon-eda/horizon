@@ -645,6 +645,10 @@ namespace horizon {
 
 	}
 
+	static void replace_backslash(std::string &path) {
+		std::replace(path.begin(), path.end(), '\\', '/');
+	}
+
 	void PoolRemoteBox::checkout_master(class git_repository *repo) {
 		autofree_ptr<git_object> treeish(git_object_free);
 		git_revparse_single(&treeish.ptr, repo, "master");
@@ -802,6 +806,10 @@ namespace horizon {
 						if(!Glib::file_test(dirname_dest, Glib::FILE_TEST_IS_DIR))
 							Gio::File::create_for_path(dirname_dest)->make_directory_with_parents();
 						Gio::File::create_for_path(filename_src)->copy(Gio::File::create_for_path(filename_dest), Gio::FILE_COPY_OVERWRITE);
+
+						#ifdef G_OS_WIN32
+							replace_backslash(filename);
+						#endif
 
 						if(git_index_add_bypath(index, filename.c_str()) != 0) {
 							auto last_error = giterr_last();
