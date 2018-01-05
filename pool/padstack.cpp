@@ -90,7 +90,11 @@ namespace horizon {
 			return {true, "not enough arguments"};
 
 		auto pclass = dynamic_cast<ParameterProgram::TokenString*>(cmd->arguments.at(0).get())->string;
-		int n_vertices = dynamic_cast<ParameterProgram::TokenInt*>(cmd->arguments.at(1).get())->value;
+		std::size_t n_vertices = dynamic_cast<ParameterProgram::TokenInt*>(cmd->arguments.at(1).get())->value;
+
+		if(stack.size() < 2 * n_vertices) {
+			return {true, "not enough coordinates on stack"};
+		}
 
 		for(auto &it: ps->polygons) {
 			if(it.second.parameter_class == pclass) {
@@ -98,7 +102,7 @@ namespace horizon {
 			}
 		}
 
-		for(int i = 0; i < n_vertices; i++) {
+		for(std::size_t i = 0; i < n_vertices; i++) {
 			Coordi c;
 			if(stack_pop(stack, c.y) || stack_pop(stack, c.x)) {
 				return {true, "empty stack"};
