@@ -19,7 +19,7 @@ namespace horizon {
 		}
 
 		int silk_refdes_count = 0;
-		int pkg_refdes_count = 0;
+		int assy_refdes_count = 0;
 		const Text *silkscreen_refdes = nullptr;
 		for(const auto &it: pkg->texts) {
 			const auto &txt = it.second;
@@ -28,7 +28,7 @@ namespace horizon {
 				silkscreen_refdes = &txt;
 			}
 			if(txt.text == "$RD" && (txt.layer == BoardLayers::TOP_ASSEMBLY || txt.layer == BoardLayers::BOTTOM_ASSEMBLY)) {
-				pkg_refdes_count++;
+				assy_refdes_count++;
 			}
 		}
 		if(silk_refdes_count != 1) {
@@ -37,10 +37,10 @@ namespace horizon {
 			x.comment = "Package has " + std::to_string(silk_refdes_count) + " silkscreen reference designators, need 1";
 			x.has_location = false;
 		}
-		if(pkg_refdes_count != 1) {
+		if(assy_refdes_count != 1) {
 			r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
 			auto &x = r.errors.back();
-			x.comment = "Package has " + std::to_string(pkg_refdes_count) + " package reference designators, need 1";
+			x.comment = "Package has " + std::to_string(assy_refdes_count) + " assembly reference designators, need 1";
 			x.has_location = false;
 		}
 		if(silkscreen_refdes) {
