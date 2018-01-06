@@ -362,6 +362,11 @@ namespace horizon {
 									added = true;
 							}
 						}
+						const Package *alt_pkg = package->alternate_for;
+						if(!exists_in_pool(pool_remote, ObjectType::PACKAGE, alt_pkg->uuid)) {
+							if(items.emplace(ObjectType::PACKAGE, alt_pkg->uuid).second)
+								added = true;
+						}
 					} break;
 
 					default:
