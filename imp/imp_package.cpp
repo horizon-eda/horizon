@@ -126,6 +126,10 @@ namespace horizon {
 						entry_3d_filename->set_text(rel);
 						view_3d_window->update(true);
 					}
+					else {
+						Gtk::MessageDialog md(*view_3d_window,  "Model has to be in the pool directory", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+						md.run();
+					}
 				}
 
 			});
