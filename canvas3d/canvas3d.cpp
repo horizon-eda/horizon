@@ -12,6 +12,7 @@
 #include "board_layers.hpp"
 #include "board.hpp"
 #include "util/step_importer.hpp"
+#include "logger/logger.hpp"
 #include <thread>
 
 namespace horizon {
@@ -138,30 +139,38 @@ namespace horizon {
 			pts_total += child->Contour.size();
 		point_store.reserve(pts_total); //important so that iterators won't get invalidated
 
-		std::vector<p2t::Point*> contour;
-		contour.reserve(node->Contour.size());
-		for(const auto &p: node->Contour) {
-			point_store.emplace_back(p.X, p.Y);
-			contour.push_back(&point_store.back());
-		}
-		p2t::CDT cdt(contour);
-		for(const auto child: node->Childs) {
-			std::vector<p2t::Point*> hole;
-			hole.reserve(child->Contour.size());
-			for(const auto &p: child->Contour) {
+		try {
+			std::vector<p2t::Point*> contour;
+			contour.reserve(node->Contour.size());
+			for(const auto &p: node->Contour) {
 				point_store.emplace_back(p.X, p.Y);
-				hole.push_back(&point_store.back());
+				contour.push_back(&point_store.back());
 			}
-			cdt.AddHole(hole);
-		}
-		cdt.Triangulate();
-		auto tris = cdt.GetTriangles();
+			p2t::CDT cdt(contour);
+			for(const auto child: node->Childs) {
+				std::vector<p2t::Point*> hole;
+				hole.reserve(child->Contour.size());
+				for(const auto &p: child->Contour) {
+					point_store.emplace_back(p.X, p.Y);
+					hole.push_back(&point_store.back());
+				}
+				cdt.AddHole(hole);
+			}
+			cdt.Triangulate();
+			auto tris = cdt.GetTriangles();
 
-		for(const auto &tri: tris) {
-			for(int i = 0; i<3; i++) {
-				auto p = tri->GetPoint(i);
-				layers[layer].tris.emplace_back(p->x, p->y);
+			for(const auto &tri: tris) {
+				for(int i = 0; i<3; i++) {
+					auto p = tri->GetPoint(i);
+					layers[layer].tris.emplace_back(p->x, p->y);
+				}
 			}
+		}
+		catch (const std::runtime_error &e) {
+			Logger::log_critical("error triangulating", Logger::Domain::BOARD, e.what());
+		}
+		catch (...) {
+			Logger::log_critical("error triangulating", Logger::Domain::BOARD, "unspecified error");
 		}
 
 		layers[layer].walls.reserve(pts_total);
