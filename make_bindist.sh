@@ -61,6 +61,31 @@ LIBS=(
 	libnghttp2-14.dll\
 	libssh2-1.dll\
 	libunistring-2.dll\
+	libTKBO.dll\
+	libTKBRep.dll\
+	libTKCAF.dll\
+	libTKCDF.dll\
+	libTKernel.dll\
+	libTKG2d.dll\
+	libTKG3d.dll\
+	libTKGeomAlgo.dll\
+	libTKGeomBase.dll\
+	libTKHLR.dll\
+	libTKLCAF.dll\
+	libTKMath.dll\
+	libTKMesh.dll\
+	libTKPrim.dll\
+	libTKService.dll\
+	libTKShHealing.dll\
+	libTKSTEP.dll\
+	libTKSTEP209.dll\
+	libTKSTEPAttr.dll\
+	libTKSTEPBase.dll\
+	libTKTopAlgo.dll\
+	libTKV3d.dll\
+	libTKXCAF.dll\
+	libTKXDESTEP.dll\
+	libTKXSBase.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )

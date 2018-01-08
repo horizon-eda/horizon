@@ -1,5 +1,7 @@
 #pragma once
 #include "imp_layer.hpp"
+#include "board.hpp"
+#include "block.hpp"
 
 namespace horizon {
 	class ImpPackage : public ImpLayer {
@@ -14,6 +16,11 @@ namespace horizon {
 			void canvas_update() override;
 			CorePackage core_package;
 
+			Block fake_block;
+			Board fake_board;
+
+
 			class FootprintGeneratorWindow *footprint_generator_window;
+			class View3DWindow *view_3d_window = nullptr;
 	};
 }

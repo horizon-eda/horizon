@@ -21,6 +21,8 @@ namespace horizon {
 		}
 	BoardPackage::BoardPackage(const UUID &uu, Component *comp): uuid(uu), component(comp), pool_package(component->part->package), package(*pool_package) {}
 
+	BoardPackage::BoardPackage(const UUID &uu): uuid(uu), component(nullptr), pool_package(nullptr), package(UUID()) {}
+
 	json BoardPackage::serialize() const {
 			json j;
 			j["component"] = (std::string)component.uuid;

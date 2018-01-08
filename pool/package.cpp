@@ -118,7 +118,8 @@ namespace horizon {
 			uuid(uu),
 			name(j.at("name").get<std::string>()),
 			manufacturer(j.value("manufacturer", "")),
-			parameter_program(this, j.value("parameter_program", ""))
+			parameter_program(this, j.value("parameter_program", "")),
+			model_filename(j.value("model_filename", ""))
 		{
 		{
 			const json &o = j["junctions"];
@@ -205,6 +206,7 @@ namespace horizon {
 		polygons(pkg.polygons),
 		parameter_set(pkg.parameter_set),
 		parameter_program(pkg.parameter_program),
+		model_filename(pkg.model_filename),
 		alternate_for(pkg.alternate_for),
 		warnings(pkg.warnings)
 	{
@@ -224,6 +226,7 @@ namespace horizon {
 		polygons = pkg.polygons;
 		parameter_set = pkg.parameter_set;
 		parameter_program = pkg.parameter_program;
+		model_filename = pkg.model_filename;
 		alternate_for = pkg.alternate_for;
 		warnings = pkg.warnings;
 		update_refs();
@@ -318,7 +321,7 @@ namespace horizon {
 		j["parameter_set"] = parameter_set_serialize(parameter_set);
 		if(alternate_for && alternate_for->uuid != uuid)
 			j["alternate_for"] = (std::string)alternate_for->uuid;
-
+		j["model_filename"] = model_filename;
 		j["junctions"] = json::object();
 		for(const auto &it: junctions) {
 			j["junctions"][(std::string)it.first] = it.second.serialize();

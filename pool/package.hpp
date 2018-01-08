@@ -71,6 +71,7 @@ namespace horizon {
 			MyParameterProgram parameter_program;
 			PackageRules rules;
 
+			std::string model_filename;
 			const class Package *alternate_for = nullptr;
 
 			std::vector<Warning> warnings;

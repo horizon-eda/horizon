@@ -6,11 +6,14 @@
 #include "widgets/chooser_buttons.hpp"
 #include "widgets/pool_browser.hpp"
 #include "canvas/canvas_gl.hpp"
+#include "3d_view.hpp"
+#include "board_layers.hpp"
+#include "gtk_util.hpp"
 
 namespace horizon {
 	ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path):
 			ImpLayer(pool_path),
-			core_package(package_filename, *pool) {
+			core_package(package_filename, *pool), fake_block(UUID::random()), fake_board(UUID::random(), fake_block) {
 		core = &core_package;
 		core_package.signal_tool_changed().connect(sigc::mem_fun(this, &ImpBase::handle_tool_change));
 
@@ -46,6 +49,111 @@ namespace horizon {
 
 		main_window->set_title("Package - Interactive Manipulator");
 		state_store = std::make_unique<WindowStateStore>(main_window, "imp-package");
+
+		auto view_3d_button = Gtk::manage(new Gtk::Button("3D"));
+		main_window->header->pack_start(*view_3d_button);
+		view_3d_button->show();
+		view_3d_button->signal_clicked().connect([this]{
+			view_3d_window->update(); view_3d_window->present();
+		});
+
+		fake_board.set_n_inner_layers(0);
+		fake_board.stackup.at(0).substrate_thickness = 1.6_mm;
+
+		view_3d_window = View3DWindow::create(&fake_board, pool.get());
+		view_3d_window->from_pool = false;
+		view_3d_window->signal_request_update().connect([this] {
+			fake_board.polygons.clear();
+			{
+				auto uu = UUID::random();
+				auto &poly = fake_board.polygons.emplace(uu, uu).first->second;
+				poly.layer = BoardLayers::L_OUTLINE;
+
+				auto bb = core_package.get_package()->get_bbox();
+				bb.first -= Coordi(5_mm, 5_mm);
+				bb.second += Coordi(5_mm, 5_mm);
+
+				poly.vertices.emplace_back(bb.first);
+				poly.vertices.emplace_back(Coordi(bb.first.x, bb.second.y));
+				poly.vertices.emplace_back(bb.second);
+				poly.vertices.emplace_back(Coordi(bb.second.x, bb.first.y));
+			}
+
+			fake_board.packages.clear();
+			{
+				auto uu = UUID::random();
+				auto &fake_package = fake_board.packages.emplace(uu, uu).first->second;
+				fake_package.package = *core_package.get_package();
+				fake_package.pool_package = core_package.get_package();
+			}
+		});
+
+
+
+		auto box_3d_filename = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
+		box_3d_filename->get_style_context()->add_class("linked");
+		auto entry_3d_filename = Gtk::manage(new Gtk::Entry);
+		entry_3d_filename->set_width_chars(40);
+		bind_widget(entry_3d_filename, core_package.get_package()->model_filename);
+		box_3d_filename->pack_start(*entry_3d_filename, true, true, 0);
+
+		{
+			auto button = Gtk::manage(new Gtk::Button("Browse..."));
+			button->signal_clicked().connect([this, entry_3d_filename] {
+				GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open",
+					GTK_WINDOW(view_3d_window->gobj()),
+					GTK_FILE_CHOOSER_ACTION_OPEN,
+					"_Open",
+					"_Cancel");
+				auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+				auto filter= Gtk::FileFilter::create();
+				filter->set_name("STEP models");
+				filter->add_pattern("*.step");
+				filter->add_pattern("*.stp");
+				chooser->add_filter(filter);
+				std::string entrytext = entry_3d_filename->get_text();
+				if(entrytext.size()) {
+					chooser->set_filename(Glib::build_filename(pool->get_base_path(), entrytext));
+				}
+				else {
+					chooser->set_current_folder(pool->get_base_path());
+				}
+
+				if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+					auto base_path = Gio::File::create_for_path(pool->get_base_path());
+					auto rel = base_path->get_relative_path(chooser->get_file());
+					if(rel.size()) {
+						entry_3d_filename->set_text(rel);
+						view_3d_window->update(true);
+					}
+				}
+
+			});
+			box_3d_filename->pack_start(*button, false, false, 0);
+		}
+
+		{
+			auto box_model_settings = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
+			view_3d_window->add_widget(box_model_settings);
+			box_model_settings->property_margin() = 10;
+			{
+				auto la = Gtk::manage(new Gtk::Label("3D Model:"));
+				box_model_settings->pack_start(*la, false, false, 0);
+			}
+			box_model_settings->pack_start(*box_3d_filename, false, false, 0);
+
+			auto button_reload = Gtk::manage(new Gtk::Button);
+			button_reload->set_image_from_icon_name("view-refresh-symbolic", Gtk::ICON_SIZE_BUTTON);
+			button_reload->signal_clicked().connect([this] {});
+			button_reload->set_tooltip_text("Reload Model");
+			button_reload->signal_clicked().connect([this]{
+				view_3d_window->update(true);
+			});
+			box_model_settings->pack_start(*button_reload, false, false, 0);
+
+
+			box_model_settings->show_all();
+		}
 
 		footprint_generator_window = FootprintGeneratorWindow::create(main_window, &core_package);
 		footprint_generator_window->signal_generated().connect(sigc::mem_fun(this, &ImpBase::canvas_update_from_pp));
@@ -149,6 +257,9 @@ namespace horizon {
 		auto entry_manufacturer = header_button->add_entry("Manufacturer");
 		auto entry_tags = header_button->add_entry("Tags");
 
+
+
+
 		auto browser_alt_button = Gtk::manage(new PoolBrowserButton(ObjectType::PACKAGE, pool.get()));
 		browser_alt_button->get_browser()->set_show_none(true);
 		header_button->add_widget("Alternate for", browser_alt_button);
@@ -182,7 +293,7 @@ namespace horizon {
 			main_window->header->pack_end(*button);
 		}
 
-		core_package.signal_save().connect([this, entry_name, entry_manufacturer, entry_tags, header_button, browser_alt_button]{
+		core_package.signal_save().connect([this, entry_name, entry_manufacturer, entry_tags, header_button, browser_alt_button, entry_3d_filename]{
 			auto pkg = core_package.get_package(false);
 			std::stringstream ss(entry_tags->get_text());
 			std::istream_iterator<std::string> begin(ss);

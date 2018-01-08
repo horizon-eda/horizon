@@ -11,10 +11,12 @@
 #include "canvas/poly2tri/poly2tri.h"
 #include "board_layers.hpp"
 #include "board.hpp"
+#include "util/step_importer.hpp"
+#include <thread>
 
 namespace horizon {
 
-	Canvas3D::Canvas3D(): Gtk::GLArea(), CanvasPatch::CanvasPatch(), cover_renderer(this), wall_renderer(this) {
+	Canvas3D::Canvas3D(): Gtk::GLArea(), CanvasPatch::CanvasPatch(), cover_renderer(this), wall_renderer(this), face_renderer(this), background_renderer(this) {
 		add_events(
 		           Gdk::BUTTON_PRESS_MASK|
 		           Gdk::BUTTON_RELEASE_MASK|
@@ -22,6 +24,15 @@ namespace horizon {
 				   Gdk::SCROLL_MASK|
 				   Gdk::SMOOTH_SCROLL_MASK
 		);
+
+		models_loading_dispatcher.connect([this] {
+			package_height_max = 0;
+			for(const auto &it: face_vertex_buffer) {
+				package_height_max = std::max(it.z, package_height_max);
+			}
+			request_push();
+			s_signal_models_loading.emit(false);
+		});
 	}
 	void Canvas3D::on_size_allocate(Gtk::Allocation &alloc) {
 		width = alloc.get_width();
@@ -35,16 +46,16 @@ namespace horizon {
 
 
 	bool Canvas3D::on_button_press_event(GdkEventButton* button_event) {
-		if(button_event->button==1) {
+		if(button_event->button == 2 || (button_event->button==1 && (button_event->state & Gdk::SHIFT_MASK))) {
+			pan_mode = PanMode::MOVE;
+			pointer_pos_orig = {button_event->x, button_event->y};
+			center_orig = center;
+		}
+		else if(button_event->button==1) {
 			pan_mode = PanMode::ROTATE;
 			pointer_pos_orig = {button_event->x, button_event->y};
 			cam_elevation_orig = cam_elevation;
 			cam_azimuth_orig = cam_azimuth;
-		}
-		else if(button_event->button == 2) {
-			pan_mode = PanMode::MOVE;
-			pointer_pos_orig = {button_event->x, button_event->y};
-			center_orig = center;
 		}
 		return Gtk::GLArea::on_button_press_event(button_event);
 	}
@@ -94,6 +105,7 @@ namespace horizon {
 	void Canvas3D::push() {
 		cover_renderer.push();
 		wall_renderer.push();
+		face_renderer.push();
 	}
 
 	void Canvas3D::on_realize() {
@@ -102,6 +114,8 @@ namespace horizon {
 		set_has_depth_buffer(true);
 		cover_renderer.realize();
 		wall_renderer.realize();
+		face_renderer.realize();
+		background_renderer.realize();
 		glEnable(GL_DEPTH_TEST);
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -167,6 +181,7 @@ namespace horizon {
 	void Canvas3D::update2(const Board &b) {
 		brd = &b;
 		update(*brd);
+		prepare_packages();
 		prepare();
 	}
 
@@ -280,8 +295,6 @@ namespace horizon {
 			}
 		}
 
-
-
 		bbox.first = glm::vec3();
 		bbox.second = glm::vec3();
 		for(const auto &it: patches) {
@@ -349,6 +362,85 @@ namespace horizon {
 		return layers[layer].offset+layers[layer].explode_mul*explode;
 	}
 
+	void Canvas3D::load_3d_model(const UUID &uu, const std::string &filename) {
+		if(models.count(uu))
+			return;
+
+		auto faces = STEPImporter::import(filename);
+		//canvas->face_vertex_buffer.reserve(faces.size());
+		size_t vertex_offset = face_vertex_buffer.size();
+		size_t first_index = face_index_buffer.size();
+		for(const auto &face: faces) {
+			for(const auto &v: face.vertices) {
+				face_vertex_buffer.emplace_back(v.x, v.y, v.z, face.color.r*255, face.color.g*255, face.color.b*255);
+			}
+			for(const auto &tri: face.triangle_indices) {
+				size_t a,b,c;
+				std::tie(a,b,c) = tri;
+				face_index_buffer.push_back(a+vertex_offset);
+				face_index_buffer.push_back(b+vertex_offset);
+				face_index_buffer.push_back(c+vertex_offset);
+			}
+			vertex_offset += face.vertices.size();
+		}
+		size_t last_index = face_index_buffer.size();
+		models.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(first_index, last_index-first_index));
+	}
+
+	void Canvas3D::load_models_thread(std::map<UUID, std::string> model_filenames) {
+		std::lock_guard<std::mutex> lock(models_loading_mutex);
+		for(const auto &it: model_filenames) {
+			load_3d_model(it.first, it.second);
+		}
+		models_loading_dispatcher.emit();
+	}
+
+	void Canvas3D::load_models_async(Pool *pool, bool from_pool) {
+		std::map<UUID, std::string> model_filenames;
+		for(const auto &it: brd->packages) {
+			std::string mfn;
+			auto uu = it.second.pool_package->uuid;
+			if(from_pool) {
+				mfn = pool->get_3d_model_filename(uu);
+			}
+			else {
+				if(it.second.package.model_filename.size())
+					mfn = Glib::build_filename(pool->get_base_path(), it.second.package.model_filename);
+			}
+			if(mfn.size())
+				model_filenames[uu] = mfn;
+		}
+		s_signal_models_loading.emit(true);
+		std::thread thr(&Canvas3D::load_models_thread, this, model_filenames);
+
+		thr.detach();
+	}
+
+	void Canvas3D::clear_3d_models() {
+		face_vertex_buffer.clear();
+		face_index_buffer.clear();
+		models.clear();
+	}
+
+	void Canvas3D::prepare_packages() {
+		package_transform_idxs.clear();
+		package_transforms.clear();
+		std::map<UUID, std::set<const BoardPackage*>> pkg_map;
+		for(const auto &it: brd->packages) {
+			pkg_map[it.second.pool_package->uuid].insert(&it.second);
+		}
+
+		for(const auto &it_pkg: pkg_map) {
+			size_t size_before = package_transforms.size();
+			for(const auto &it_brd_pkg: it_pkg.second) {
+				const auto &pl = it_brd_pkg->placement;
+				package_transforms.emplace_back(pl.shift.x/1e6, pl.shift.y/1e6, pl.get_angle(), it_brd_pkg->flip);
+			}
+			size_t size_after = package_transforms.size();
+			package_transform_idxs[it_pkg.first] = {size_before, size_after-size_before};
+		}
+	}
+
 
 	bool Canvas3D::on_render(const Glib::RefPtr<Gdk::GLContext> &context) {
 		if(needs_push) {
@@ -360,6 +452,11 @@ namespace horizon {
 		glClearDepth(10);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		GL_CHECK_ERROR
+
+		glDisable(GL_DEPTH_TEST);
+		background_renderer.render();
+		glEnable(GL_DEPTH_TEST);
+
 
 		layers[20000].offset = get_layer_offset(BoardLayers::TOP_COPPER);
 		layers[20000].thickness = -(get_layer_offset(BoardLayers::TOP_COPPER)-get_layer_offset(BoardLayers::BOTTOM_COPPER));
@@ -385,8 +482,8 @@ namespace horizon {
 		float cam_dist_min = std::max(std::abs(cam_pos.z)-(10+explode*(brd->get_n_inner_layers()*2+3)), 1.0f);
 		float cam_dist_max = 0;
 
-		float zmin = -10-explode*(brd->get_n_inner_layers()*2+3);
-		float zmax = 10+explode*2;
+		float zmin = -10-explode*(brd->get_n_inner_layers()*2+3+package_height_max);
+		float zmax = 10+explode*2+package_height_max;
 		std::array<glm::vec3, 8> bbs = {
 			glm::vec3(bbox.first.x, bbox.first.y, zmin),
 			glm::vec3(bbox.first.x, bbox.second.y, zmin),
@@ -408,6 +505,10 @@ namespace horizon {
 
 		cam_normal = glm::normalize(cam_offset);
 		wall_renderer.render();
+
+		if(show_models)
+			face_renderer.render();
+
 		cover_renderer.render();
 		glFlush();
 

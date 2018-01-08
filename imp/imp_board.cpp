@@ -254,7 +254,7 @@ namespace horizon {
 
 
 		fab_output_window = FabOutputWindow::create(main_window, core.b->get_board(), core.b->get_fab_output_settings());
-		view_3d_window = View3DWindow::create(core_board.get_board());
+		view_3d_window = View3DWindow::create(core_board.get_board(), pool.get());
 
 		core.r->signal_tool_changed().connect([this](ToolID t){
 			fab_output_window->set_can_generate(t==ToolID::NONE);

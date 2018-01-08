@@ -284,6 +284,8 @@ SRC_IMP = \
 	canvas3d/canvas3d.cpp\
 	canvas3d/cover.cpp\
 	canvas3d/wall.cpp\
+	canvas3d/face.cpp\
+	canvas3d/background.cpp\
 	imp/header_button.cpp\
 	imp/preferences.cpp\
 	imp/preferences_window.cpp\
@@ -418,6 +420,9 @@ SRC_POOL_MGR = \
 
 SRC_PGM_TEST = \
 	pgm-test.cpp
+	
+SRC_OCE = \
+	util/step_importer.cpp
 
 
 SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PRJ_MGR) $(SRC_PGM_TEST) $(SRC_POOL_MGR))
@@ -450,8 +455,14 @@ endif
 OBJ_ALL = $(SRC_ALL:.cpp=.o)
 OBJ_ROUTER = $(SRC_ROUTER:.cpp=.o)
 OBJ_COMMON = $(SRC_COMMON:.cpp=.o)
+OBJ_OCE = $(SRC_OCE:.cpp=.o)
 
 INC_ROUTER = -Irouter/include/ -Irouter
+INC_OCE = -I/opt/opencascade/inc/ -I/mingw64/include/oce/ -I/usr/include/oce
+LDFLAGS_OCE = -L /opt/opencascade/lib/ -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh
+ifeq ($(OS),Windows_NT)
+	LDFLAGS_OCE += -lTKV3d
+endif
 
 resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=. --generate-dependencies imp.gresource.xml)
 	$(GLIB_COMPILE_RESOURCES) imp.gresource.xml --target=$@ --sourcedir=. --generate-source
@@ -459,8 +470,8 @@ resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=.
 gitversion.cpp: .git/HEAD .git/index
 	echo "const char *gitversion = \"$(shell git log -1 --pretty="format:%h %ci %s")\";" > $@
 
-horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(SRC_IMP:.cpp=.o)
-	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq) -o $@
+horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(OBJ_OCE) $(SRC_IMP:.cpp=.o)
+	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq) -o $@
 
 horizon-pool: $(OBJ_COMMON) $(SRC_POOL_UTIL:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0) -o $@
@@ -485,6 +496,9 @@ $(OBJ_ALL): %.o: %.cpp
 
 $(OBJ_ROUTER): %.o: %.cpp
 	$(CXX) -c $(INC) $(INC_ROUTER) $(CXXFLAGS) $< -o $@
+
+$(OBJ_OCE): %.o: %.cpp
+	$(CXX) -c $(INC) $(INC_OCE) $(CXXFLAGS) $< -o $@
 
 clean: clean_router
 	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test $(OBJ_ALL:.o=.d) resources.cpp gitversion.cpp
