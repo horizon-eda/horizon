@@ -5,7 +5,7 @@
 #include "board/board_rules.hpp"
 #include "util.hpp"
 #include "router/router/pns_router.h"
-#include "router/pns_horizon_iface.h"
+#include "router/pns_horizon_iface.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "router/pns_solid.h"
 #include "board_layers.hpp"

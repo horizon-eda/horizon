@@ -1,4 +1,4 @@
-#include "pns_horizon_iface.h"
+#include "pns_horizon_iface.hpp"
 #include "board.hpp"
 #include "router/pns_topology.h"
 #include "router/pns_via.h"

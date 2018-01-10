@@ -75,7 +75,7 @@ SRC_COMMON = \
 	src/rules/rule_match.cpp\
 	src/parameter/program.cpp\
 	src/parameter/set.cpp\
-	3part/clipper/clipper.cpp\
+	3rd_party/clipper/clipper.cpp\
 	src/common/dimension.cpp\
 	src/logger/logger.cpp\
 	
@@ -101,14 +101,14 @@ SRC_CANVAS = \
 	src/canvas/triangle.cpp\
 	src/canvas/image.cpp\
 	src/canvas/selection_filter.cpp\
-	3part/polypartition/polypartition.cpp\
+	3rd_party/polypartition/polypartition.cpp\
 	src/canvas/marker.cpp\
 	src/canvas/annotation.cpp \
-	3part/poly2tri/common/shapes.cpp\
-	3part/poly2tri/sweep/cdt.cpp\
-	3part/poly2tri/sweep/sweep.cpp\
-	3part/poly2tri/sweep/sweep_context.cpp\
-	3part/poly2tri/sweep/advancing_front.cpp\
+	3rd_party/poly2tri/common/shapes.cpp\
+	3rd_party/poly2tri/sweep/cdt.cpp\
+	3rd_party/poly2tri/sweep/sweep.cpp\
+	3rd_party/poly2tri/sweep/sweep_context.cpp\
+	3rd_party/poly2tri/sweep/advancing_front.cpp\
 
 SRC_IMP = \
 	src/imp/imp_main.cpp \
@@ -254,8 +254,8 @@ SRC_IMP = \
 	src/widgets/pool_browser_unit.cpp\
 	src/widgets/pool_browser_symbol.cpp\
 	src/widgets/plane_editor.cpp\
-	3part/dxflib/dl_dxf.cpp\
-	3part/dxflib/dl_writer_ascii.cpp\
+	3rd_party/dxflib/dl_dxf.cpp\
+	3rd_party/dxflib/dl_writer_ascii.cpp\
 	src/import_dxf/dxf_importer.cpp\
 	src/imp/rules/rules_window.cpp\
 	src/imp/rules/rule_editor.cpp\
@@ -297,39 +297,39 @@ SRC_IMP = \
 	src/widgets/log_view.cpp\
 
 SRC_ROUTER = \
-	3part/router/router/pns_router.cpp \
-	3part/router/router/pns_item.cpp \
-	3part/router/router/pns_node.cpp \
-	3part/router/router/pns_solid.cpp \
-	3part/router/router/pns_optimizer.cpp \
-	3part/router/router/pns_topology.cpp \
-	3part/router/router/pns_walkaround.cpp \
-	3part/router/router/pns_utils.cpp \
-	3part/router/router/pns_algo_base.cpp \
-	3part/router/router/pns_diff_pair_placer.cpp \
-	3part/router/router/pns_diff_pair.cpp \
-	3part/router/router/pns_dp_meander_placer.cpp\
-	3part/router/router/pns_dragger.cpp\
-	3part/router/router/pns_itemset.cpp \
-	3part/router/router/pns_line_placer.cpp \
-	3part/router/router/pns_line.cpp \
-	3part/router/router/pns_via.cpp \
-	3part/router/router/pns_logger.cpp \
-	3part/router/router/pns_meander_placer_base.cpp\
-	3part/router/router/pns_meander_placer.cpp\
-	3part/router/router/pns_meander_skew_placer.cpp\
-	3part/router/router/pns_meander.cpp\
-	3part/router/router/pns_shove.cpp \
-	3part/router/router/time_limit.cpp \
-	3part/router/router/pns_routing_settings.cpp \
-	3part/router/router/pns_sizes_settings.cpp \
-	3part/router/common/geometry/shape_line_chain.cpp\
-	3part/router/common/geometry/shape.cpp \
-	3part/router/common/geometry/shape_collisions.cpp\
-	3part/router/common/geometry/seg.cpp\
-	3part/router/common/math/math_util.cpp\
-	3part/router/wx_compat.cpp\
-	3part/router/pns_horizon_iface.cpp\
+	3rd_party/router/router/pns_router.cpp \
+	3rd_party/router/router/pns_item.cpp \
+	3rd_party/router/router/pns_node.cpp \
+	3rd_party/router/router/pns_solid.cpp \
+	3rd_party/router/router/pns_optimizer.cpp \
+	3rd_party/router/router/pns_topology.cpp \
+	3rd_party/router/router/pns_walkaround.cpp \
+	3rd_party/router/router/pns_utils.cpp \
+	3rd_party/router/router/pns_algo_base.cpp \
+	3rd_party/router/router/pns_diff_pair_placer.cpp \
+	3rd_party/router/router/pns_diff_pair.cpp \
+	3rd_party/router/router/pns_dp_meander_placer.cpp\
+	3rd_party/router/router/pns_dragger.cpp\
+	3rd_party/router/router/pns_itemset.cpp \
+	3rd_party/router/router/pns_line_placer.cpp \
+	3rd_party/router/router/pns_line.cpp \
+	3rd_party/router/router/pns_via.cpp \
+	3rd_party/router/router/pns_logger.cpp \
+	3rd_party/router/router/pns_meander_placer_base.cpp\
+	3rd_party/router/router/pns_meander_placer.cpp\
+	3rd_party/router/router/pns_meander_skew_placer.cpp\
+	3rd_party/router/router/pns_meander.cpp\
+	3rd_party/router/router/pns_shove.cpp \
+	3rd_party/router/router/time_limit.cpp \
+	3rd_party/router/router/pns_routing_settings.cpp \
+	3rd_party/router/router/pns_sizes_settings.cpp \
+	3rd_party/router/common/geometry/shape_line_chain.cpp\
+	3rd_party/router/common/geometry/shape.cpp \
+	3rd_party/router/common/geometry/shape_collisions.cpp\
+	3rd_party/router/common/geometry/seg.cpp\
+	3rd_party/router/common/math/math_util.cpp\
+	3rd_party/router/wx_compat.cpp\
+	src/router/pns_horizon_iface.cpp\
 	src/core/tool_route_track_interactive.cpp\
 
 
@@ -427,7 +427,7 @@ SRC_OCE = \
 
 SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PRJ_MGR) $(SRC_PGM_TEST) $(SRC_POOL_MGR))
 
-INC = -Isrc -Isrc/block -Isrc/board -Isrc/common -Isrc/imp -Isrc/package -Isrc/pool -Isrc/schematic -Isrc/util -Isrc/constraints -I3part
+INC = -Isrc -Isrc/block -Isrc/board -Isrc/common -Isrc/imp -Isrc/package -Isrc/pool -Isrc/schematic -Isrc/router -Isrc/util -Isrc/constraints -I3rd_party
 
 DEFINES = -D_USE_MATH_DEFINES
 
@@ -457,7 +457,7 @@ OBJ_ROUTER = $(SRC_ROUTER:.cpp=.o)
 OBJ_COMMON = $(SRC_COMMON:.cpp=.o)
 OBJ_OCE = $(SRC_OCE:.cpp=.o)
 
-INC_ROUTER = -I3part/router/include/ -I3part/router
+INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router
 INC_OCE = -I/opt/opencascade/inc/ -I/mingw64/include/oce/ -I/usr/include/oce
 LDFLAGS_OCE = -L /opt/opencascade/lib/ -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh
 ifeq ($(OS),Windows_NT)
