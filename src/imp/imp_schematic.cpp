@@ -1,5 +1,5 @@
 #include "imp_schematic.hpp"
-#include "export_pdf.hpp"
+#include "export_pdf/export_pdf.hpp"
 #include "part.hpp"
 #include "rules/rules_window.hpp"
 #include "widgets/sheet_box.hpp"
