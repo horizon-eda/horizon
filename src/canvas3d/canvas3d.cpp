@@ -8,7 +8,7 @@
 #include <cmath>
 #include "polygon.hpp"
 #include "hole.hpp"
-#include "canvas/poly2tri/poly2tri.h"
+#include "poly2tri/poly2tri.h"
 #include "board_layers.hpp"
 #include "board.hpp"
 #include "util/step_importer.hpp"

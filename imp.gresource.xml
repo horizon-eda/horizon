@@ -9,12 +9,12 @@
     <file>property_panels/property_panel.ui</file>
     <file>pool-update/schema.sql</file>
     <file>pool-update-parametric/schema.sql</file>
-    
+
     <file>prj-mgr/window.ui</file>
     <file>prj-mgr/app_menu.ui</file>
     <file>prj-mgr/prefs.ui</file>
     <file>prj-mgr/pool_cache_window.ui</file>
-    
+
     <file>pool-mgr/window.ui</file>
     <file>pool-mgr/app_menu.ui</file>
     <file>pool-mgr/unit_editor.ui</file>
@@ -28,13 +28,13 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-link-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-unlink-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icon.svg</file>
-    
+
     <file>imp/footprint_generator/footprint_generator.ui</file>
     <file>imp/footprint_generator/dual.svg</file>
     <file>imp/footprint_generator/single.svg</file>
     <file>imp/footprint_generator/quad.svg</file>
     <file>imp/footprint_generator/grid.svg</file>
-    
+
     <file>imp/rules/rules_window.ui</file>
     <file>imp/rules/rule_editor_hole_size.ui</file>
     <file>imp/rules/rule_editor_track_width.ui</file>
@@ -42,25 +42,25 @@
     <file>imp/fab_output.ui</file>
     <file>imp/3d_view.ui</file>
     <file>prj-mgr/part_browser/part_browser.ui</file>
-    
+
     <file>canvas/shaders/grid-vertex.glsl</file>
     <file>canvas/shaders/grid-fragment.glsl</file>
-    
+
     <file>canvas/shaders/selectable-vertex.glsl</file>
     <file>canvas/shaders/selectable-fragment.glsl</file>
     <file>canvas/shaders/selectable-geometry.glsl</file>
-    
+
     <file>canvas/shaders/selection-vertex.glsl</file>
     <file>canvas/shaders/selection-fragment.glsl</file>
-    
+
     <file>canvas/shaders/triangle-vertex.glsl</file>
     <file>canvas/shaders/triangle-fragment.glsl</file>
     <file>canvas/shaders/triangle-geometry.glsl</file>
-    
+
     <file>canvas/shaders/marker-vertex.glsl</file>
     <file>canvas/shaders/marker-fragment.glsl</file>
     <file>canvas/shaders/marker-geometry.glsl</file>
-    
+
     <file>canvas/shaders/selection-line-vertex.glsl</file>
     <file>canvas/shaders/selection-line-fragment.glsl</file>
     <file>canvas/shaders/selection-line-geometry.glsl</file>
@@ -72,11 +72,11 @@
     <file>canvas3d/shaders/wall-vertex.glsl</file>
     <file>canvas3d/shaders/wall-fragment.glsl</file>
     <file>canvas3d/shaders/wall-geometry.glsl</file>
-    
+
     <file>canvas3d/shaders/face-vertex.glsl</file>
     <file>canvas3d/shaders/face-fragment.glsl</file>
     <file>canvas3d/shaders/face-geometry.glsl</file>
-    
+
     <file>canvas3d/shaders/background-vertex.glsl</file>
     <file>canvas3d/shaders/background-fragment.glsl</file>
   </gresource>
