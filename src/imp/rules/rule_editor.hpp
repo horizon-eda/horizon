@@ -2,8 +2,8 @@
 #include <gtkmm.h>
 #include <array>
 #include <set>
-#include "common.hpp"
-#include "uuid.hpp"
+#include "common/common.hpp"
+#include "util/uuid.hpp"
 #include "rules/rule.hpp"
 namespace horizon {
 	class RuleEditor: public Gtk::Box {

@@ -1,8 +1,8 @@
 #pragma once
 #include <gtkmm.h>
-#include "common.hpp"
+#include "common/common.hpp"
 #include "canvas/selectables.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 #include <set>
 
 namespace horizon {

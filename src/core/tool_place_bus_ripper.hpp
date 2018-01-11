@@ -1,7 +1,7 @@
 #pragma once
 #include "core.hpp"
 #include "tool_place_junction.hpp"
-#include "bus.hpp"
+#include "block/bus.hpp"
 
 namespace horizon {
 

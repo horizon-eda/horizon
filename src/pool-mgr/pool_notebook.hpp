@@ -1,15 +1,15 @@
 #pragma once
 #include <gtkmm.h>
 #include <memory>
-#include "uuid.hpp"
-#include "part.hpp"
-#include "unit.hpp"
-#include "entity.hpp"
-#include "symbol.hpp"
-#include "package.hpp"
-#include "padstack.hpp"
+#include "util/uuid.hpp"
+#include "pool/part.hpp"
+#include "pool/unit.hpp"
+#include "pool/entity.hpp"
+#include "pool/symbol.hpp"
+#include "pool/package.hpp"
+#include "pool/padstack.hpp"
 
-#include "pool.hpp"
+#include "pool/pool.hpp"
 #include "util/editor_process.hpp"
 #include <zmq.hpp>
 

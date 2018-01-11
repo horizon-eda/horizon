@@ -6,11 +6,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <cmath>
-#include "polygon.hpp"
-#include "hole.hpp"
+#include "common/polygon.hpp"
+#include "common/hole.hpp"
 #include "poly2tri/poly2tri.h"
-#include "board_layers.hpp"
-#include "board.hpp"
+#include "board/board_layers.hpp"
+#include "board/board.hpp"
 #include "util/step_importer.hpp"
 #include "logger/logger.hpp"
 #include <thread>

@@ -1,7 +1,7 @@
 #pragma once
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
-#include "pool.hpp"
+#include "pool/pool.hpp"
 #include "net.hpp"
 #include "component.hpp"
 #include "bus.hpp"

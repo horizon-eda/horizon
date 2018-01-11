@@ -1,5 +1,5 @@
 #include "track.hpp"
-#include "lut.hpp"
+#include "common/lut.hpp"
 #include "board_package.hpp"
 #include "board.hpp"
 #include "board_layers.hpp"

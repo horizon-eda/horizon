@@ -1,6 +1,6 @@
 #include "net_class_button.hpp"
 #include "core/core.hpp"
-#include "block.hpp"
+#include "block/block.hpp"
 
 namespace horizon {
 	NetClassButton::NetClassButton(Core *c): Gtk::ComboBoxText(), core(c) {

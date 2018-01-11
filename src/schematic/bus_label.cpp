@@ -1,7 +1,7 @@
 #include "bus_label.hpp"
-#include "lut.hpp"
+#include "common/lut.hpp"
 #include "sheet.hpp"
-#include "block.hpp"
+#include "block/block.hpp"
 
 namespace horizon {
 	BusLabel::BusLabel(const UUID &uu, const json &j, Sheet &sheet, Block &block):

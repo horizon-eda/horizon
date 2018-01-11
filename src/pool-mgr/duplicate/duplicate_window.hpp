@@ -1,7 +1,7 @@
 #pragma once
 #include <gtkmm.h>
-#include "common.hpp"
-#include "uuid.hpp"
+#include "common/common.hpp"
+#include "util/uuid.hpp"
 
 namespace horizon {
 	class DuplicateWindow: public Gtk::Window {

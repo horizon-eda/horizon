@@ -8,7 +8,7 @@
 #include "pool_merge_dialog.hpp"
 #include <thread>
 #include "pool-update/pool-update.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 #include "util/github_client.hpp"
 #include "util/str_util.hpp"
 

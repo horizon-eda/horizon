@@ -1,10 +1,10 @@
 #pragma once
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
 #include "rule.hpp"
 #include <set>
 #include <deque>
-#include "common.hpp"
+#include "common/common.hpp"
 #include "clipper/clipper.hpp"
 
 namespace horizon {

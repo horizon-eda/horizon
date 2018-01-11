@@ -1,6 +1,6 @@
 #include "property_panels.hpp"
 #include "property_panel.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 #include <algorithm>
 #include <iostream>
 

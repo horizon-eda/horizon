@@ -1,6 +1,6 @@
 #include "tool_edit_symbol_pin_names.hpp"
 #include "core_schematic.hpp"
-#include "imp_interface.hpp"
+#include "imp/imp_interface.hpp"
 #include <iostream>
 
 namespace horizon {

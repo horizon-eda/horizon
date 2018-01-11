@@ -1,6 +1,6 @@
 #pragma once
 #include "main_window.hpp"
-#include "pool.hpp"
+#include "pool/pool.hpp"
 #include "core/core_symbol.hpp"
 #include "core/core_schematic.hpp"
 #include "core/core_padstack.hpp"

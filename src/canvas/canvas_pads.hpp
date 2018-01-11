@@ -1,7 +1,7 @@
 #pragma once
-#include "canvas/canvas.hpp"
+#include "canvas.hpp"
 #include "clipper/clipper.hpp"
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 
 
 namespace horizon {

@@ -1,5 +1,5 @@
 #include "schematic_properties.hpp"
-#include "schematic.hpp"
+#include "schematic/schematic.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>

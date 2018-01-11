@@ -2,7 +2,7 @@
 #include <iostream>
 #include "core.hpp"
 #include "import_dxf/dxf_importer.hpp"
-#include "imp_interface.hpp"
+#include "imp/imp_interface.hpp"
 
 namespace horizon {
 

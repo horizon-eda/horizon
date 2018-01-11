@@ -20,7 +20,7 @@
 #include "core/core.hpp"
 #include "core/core_schematic.hpp"
 #include "core/cores.hpp"
-#include "part.hpp"
+#include "pool/part.hpp"
 #include "edit_shape.hpp"
 #include "edit_parameter_program.hpp"
 #include "edit_parameter_set.hpp"

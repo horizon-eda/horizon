@@ -1,5 +1,5 @@
 #include "schematic.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 #include "rules/cache.hpp"
 #include "util/accumulator.hpp"
 

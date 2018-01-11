@@ -1,5 +1,5 @@
 #include "rule_track_width.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 #include <sstream>
 
 namespace horizon {

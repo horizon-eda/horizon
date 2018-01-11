@@ -1,7 +1,7 @@
 #pragma once
 #include "core.hpp"
 #include "tool_place_junction.hpp"
-#include "net_label.hpp"
+#include "schematic/net_label.hpp"
 #include <forward_list>
 
 namespace horizon {

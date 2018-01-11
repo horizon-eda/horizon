@@ -1,7 +1,7 @@
 #include "canvas.hpp"
 #include <iostream>
 #include <algorithm>
-#include "polygon.hpp"
+#include "common/polygon.hpp"
 
 namespace horizon {
 	void Canvas::img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer, bool tr) {

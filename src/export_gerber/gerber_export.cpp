@@ -1,7 +1,7 @@
 #include "gerber_export.hpp"
 #include "canvas_gerber.hpp"
-#include "board.hpp"
-#include "fab_output_settings.hpp"
+#include "board/board.hpp"
+#include "board/fab_output_settings.hpp"
 #include <glibmm/miscutils.h>
 
 namespace horizon {

@@ -1,5 +1,5 @@
 #include "preview_base.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 
 namespace horizon {
 	Gtk::Button *PreviewBase::create_goto_button(ObjectType type, std::function<UUID(void)> fn) {

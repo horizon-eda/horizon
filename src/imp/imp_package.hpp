@@ -1,7 +1,7 @@
 #pragma once
 #include "imp_layer.hpp"
-#include "board.hpp"
-#include "block.hpp"
+#include "board/board.hpp"
+#include "block/block.hpp"
 
 namespace horizon {
 	class ImpPackage : public ImpLayer {

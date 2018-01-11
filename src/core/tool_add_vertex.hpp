@@ -1,6 +1,6 @@
 #pragma once
 #include "core.hpp"
-#include "polygon.hpp"
+#include "common/polygon.hpp"
 #include <forward_list>
 
 namespace horizon {

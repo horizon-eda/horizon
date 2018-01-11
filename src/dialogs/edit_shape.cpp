@@ -1,5 +1,5 @@
 #include "edit_shape.hpp"
-#include "shape.hpp"
+#include "common/shape.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>

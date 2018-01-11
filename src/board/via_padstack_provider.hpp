@@ -1,8 +1,8 @@
 #pragma once
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
-#include "common.hpp"
-#include "padstack.hpp"
+#include "common/common.hpp"
+#include "pool/padstack.hpp"
 #include <vector>
 #include <map>
 #include <fstream>

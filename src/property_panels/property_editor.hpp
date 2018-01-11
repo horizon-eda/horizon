@@ -1,7 +1,7 @@
 #pragma once
 #include <gtkmm.h>
 #include "core/core.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 #include "core/core_properties.hpp"
 
 namespace horizon {

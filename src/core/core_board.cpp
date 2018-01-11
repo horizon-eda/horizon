@@ -1,9 +1,9 @@
 #include "core_board.hpp"
 #include "core_properties.hpp"
 #include <algorithm>
-#include "util.hpp"
-#include "part.hpp"
-#include "board_layers.hpp"
+#include "util/util.hpp"
+#include "pool/part.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 	CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir, Pool &pool) :

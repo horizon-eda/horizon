@@ -3,7 +3,7 @@
 #include "widgets/spin_button_dim.hpp"
 #include "rule_match_editor.hpp"
 #include "core/core.hpp"
-#include "lut.hpp"
+#include "common/lut.hpp"
 #include "dialogs/dialogs.hpp"
 #include "common/patch_type_names.hpp"
 

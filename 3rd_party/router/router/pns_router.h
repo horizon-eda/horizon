@@ -35,7 +35,7 @@
 #include "pns_item.h"
 #include "pns_itemset.h"
 #include "pns_node.h"
-#include "wx_compat.h"
+#include "../wx_compat.h"
 
 namespace KIGFX
 {

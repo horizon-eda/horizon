@@ -1,5 +1,5 @@
 #include "rule_package_checks.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 #include <sstream>
 
 namespace horizon {

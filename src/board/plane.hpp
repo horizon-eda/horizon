@@ -1,6 +1,6 @@
 #pragma once
 #include "common/polygon.hpp"
-#include "net.hpp"
+#include "block/net.hpp"
 #include "clipper/clipper.hpp"
 
 namespace horizon {

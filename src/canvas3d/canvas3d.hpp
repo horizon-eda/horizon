@@ -7,7 +7,7 @@
 #include "background.hpp"
 #include "canvas/canvas_patch.hpp"
 #include "clipper/clipper.hpp"
-#include "common.hpp"
+#include "common/common.hpp"
 #include <unordered_map>
 #include <glm/glm.hpp>
 

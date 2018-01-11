@@ -1,8 +1,8 @@
 #pragma once
-#include "pool.hpp"
+#include "pool/pool.hpp"
 #include "core.hpp"
-#include "board.hpp"
-#include "block.hpp"
+#include "board/board.hpp"
+#include "block/block.hpp"
 #include <memory>
 #include <iostream>
 

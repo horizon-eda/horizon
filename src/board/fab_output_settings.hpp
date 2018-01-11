@@ -1,8 +1,8 @@
 #pragma once
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
-#include "common.hpp"
-#include "lut.hpp"
+#include "common/common.hpp"
+#include "common/lut.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;

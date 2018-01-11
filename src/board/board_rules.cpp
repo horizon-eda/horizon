@@ -1,7 +1,7 @@
 #include "board_rules.hpp"
 #include "board.hpp"
-#include "block.hpp"
-#include "util.hpp"
+#include "block/block.hpp"
+#include "util/util.hpp"
 #include "rules/cache.hpp"
 
 namespace horizon {

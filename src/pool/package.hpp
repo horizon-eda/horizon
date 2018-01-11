@@ -1,22 +1,22 @@
 #pragma once
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
-#include "common.hpp"
-#include "uuid_provider.hpp"
-#include "junction.hpp"
-#include "line.hpp"
-#include "polygon.hpp"
-#include "hole.hpp"
-#include "arc.hpp"
-#include "text.hpp"
-#include "pad.hpp"
-#include "warning.hpp"
-#include "layer_provider.hpp"
+#include "common/common.hpp"
+#include "util/uuid_provider.hpp"
+#include "common/junction.hpp"
+#include "common/line.hpp"
+#include "common/polygon.hpp"
+#include "common/hole.hpp"
+#include "common/arc.hpp"
+#include "common/text.hpp"
+#include "package/pad.hpp"
+#include "util/warning.hpp"
+#include "common/layer_provider.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
 #include <set>
-#include "object_provider.hpp"
+#include "common/object_provider.hpp"
 #include "package/package_rules.hpp"
 
 namespace horizon {

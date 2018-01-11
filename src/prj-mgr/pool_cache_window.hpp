@@ -2,11 +2,11 @@
 #include <gtkmm.h>
 #include <array>
 #include <set>
-#include "common.hpp"
-#include "uuid.hpp"
+#include "common/common.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
-#include "pool_cached.hpp"
-#include "pool.hpp"
+#include "pool/pool_cached.hpp"
+#include "pool/pool.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;

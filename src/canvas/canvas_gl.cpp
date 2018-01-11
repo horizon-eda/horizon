@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <epoxy/gl.h>
 #include "gl_util.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 	std::pair<float, Coordf> CanvasGL::get_scale_and_offset() {

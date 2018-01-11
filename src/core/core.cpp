@@ -52,7 +52,7 @@
 #include "tool_place_board_hole.hpp"
 #include "tool_edit_board_hole.hpp"
 
-#include "dimension.hpp"
+#include "common/dimension.hpp"
 #include "logger/logger.hpp"
 #include "tool_catalog.hpp"
 #include <memory>

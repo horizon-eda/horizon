@@ -1,10 +1,10 @@
 #pragma once
-#include "hole.hpp"
+#include "common/hole.hpp"
 #include "core.hpp"
 #include "clipper/clipper.hpp"
 #include <deque>
-#include "track.hpp"
-#include "via.hpp"
+#include "board/track.hpp"
+#include "board/via.hpp"
 #include "canvas/canvas_patch.hpp"
 
 namespace horizon {

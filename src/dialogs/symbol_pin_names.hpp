@@ -2,7 +2,7 @@
 #include <gtkmm.h>
 #include <array>
 #include <set>
-#include "common.hpp"
+#include "common/common.hpp"
 namespace horizon {
 	class SymbolPinNamesDialog: public Gtk::Dialog {
 		public:

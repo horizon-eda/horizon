@@ -1,6 +1,6 @@
 #pragma once
 #include <gtkmm.h>
-#include "common.hpp"
+#include "common/common.hpp"
 #include <memory>
 #include "editor_interface.hpp"
 #include "util/window_state_store.hpp"

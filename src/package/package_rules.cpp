@@ -1,6 +1,6 @@
 #include "package_rules.hpp"
-#include "package.hpp"
-#include "util.hpp"
+#include "pool/package.hpp"
+#include "util/util.hpp"
 #include "rules/cache.hpp"
 
 namespace horizon {

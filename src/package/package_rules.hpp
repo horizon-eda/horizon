@@ -1,5 +1,5 @@
 #pragma once
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
 #include "rules/rules.hpp"
 #include "rule_package_checks.hpp"

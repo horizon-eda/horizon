@@ -1,6 +1,6 @@
 #include "plane.hpp"
 #include "board.hpp"
-#include "lut.hpp"
+#include "common/lut.hpp"
 
 
 namespace horizon {

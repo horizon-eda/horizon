@@ -1,10 +1,10 @@
 #include "sheet.hpp"
-#include "part.hpp"
-#include "pool.hpp"
-#include "util.hpp"
+#include "pool/part.hpp"
+#include "pool/pool.hpp"
+#include "util/util.hpp"
 #include "logger/logger.hpp"
 #include "logger/log_util.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 
 namespace horizon {
 

@@ -5,9 +5,9 @@
 #include <iostream>
 #include <deque>
 #include <algorithm>
-#include "plane.hpp"
-#include "block.hpp"
-#include "board.hpp"
+#include "board/plane.hpp"
+#include "block/block.hpp"
+#include "board/board.hpp"
 #include "util/gtk_util.hpp"
 
 namespace horizon {

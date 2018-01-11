@@ -1,5 +1,5 @@
 #pragma once
-#include "canvas/canvas.hpp"
+#include "canvas.hpp"
 #include "clipper/clipper.hpp"
 
 

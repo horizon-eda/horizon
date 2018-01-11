@@ -1,5 +1,5 @@
 #include "pool-mgr-app.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 
 int main(int argc, char* argv[]) {
 	auto application = horizon::PoolManagerApplication::create();

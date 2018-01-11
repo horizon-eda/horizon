@@ -1,7 +1,7 @@
 #pragma once
 #include <gtkmm.h>
-#include "common.hpp"
-#include "uuid.hpp"
+#include "common/common.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
 
 namespace horizon {

@@ -2,7 +2,7 @@
 #include "duplicate_unit.hpp"
 #include "duplicate_entity.hpp"
 #include "duplicate_part.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 
 namespace horizon {
 	DuplicateWindow::DuplicateWindow(class Pool *p, ObjectType ty, const UUID &uu): Gtk::Window(), pool(p) {

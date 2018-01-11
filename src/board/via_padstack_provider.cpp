@@ -1,8 +1,8 @@
 #include "via_padstack_provider.hpp"
-#include "pool.hpp"
+#include "pool/pool.hpp"
 #include <glibmm/fileutils.h>
 #include <glibmm.h>
-#include "util.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 	ViaPadstackProvider::ViaPadstackProvider(const std::string &bp, Pool &po):base_path(bp), pool(po) {

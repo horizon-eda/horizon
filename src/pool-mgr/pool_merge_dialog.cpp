@@ -1,9 +1,9 @@
 #include "pool_merge_dialog.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 #include "widgets/cell_renderer_layer_display.hpp"
-#include "pool.hpp"
-#include "part.hpp"
-#include "lut.hpp"
+#include "pool/pool.hpp"
+#include "pool/part.hpp"
+#include "common/lut.hpp"
 #include <iostream>
 
 namespace horizon {

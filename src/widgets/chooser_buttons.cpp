@@ -1,10 +1,10 @@
 #include "chooser_buttons.hpp"
 #include "dialogs/dialogs.hpp"
 #include "board/via_padstack_provider.hpp"
-#include "padstack.hpp"
-#include "package.hpp"
-#include "pool.hpp"
-#include "widgets/pool_browser.hpp"
+#include "pool/padstack.hpp"
+#include "pool/package.hpp"
+#include "pool/pool.hpp"
+#include "pool_browser.hpp"
 
 namespace horizon {
 	PoolBrowserButton::PoolBrowserButton(ObjectType ty, Pool *ipool): Glib::ObjectBase (typeid(PoolBrowserButton)), Gtk::Button("fixme"), p_property_selected_uuid(*this, "selected-uuid"), pool(ipool), type(ty),

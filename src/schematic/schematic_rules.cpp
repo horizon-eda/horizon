@@ -1,6 +1,6 @@
 #include "schematic_rules.hpp"
 #include "schematic.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 #include "rules/cache.hpp"
 
 namespace horizon {

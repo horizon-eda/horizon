@@ -2,9 +2,9 @@
 #include <gtkmm.h>
 #include <array>
 #include <set>
-#include "common.hpp"
-#include "uuid.hpp"
-#include "uuid_path.hpp"
+#include "common/common.hpp"
+#include "util/uuid.hpp"
+#include "util/uuid_path.hpp"
 namespace horizon {
 
 

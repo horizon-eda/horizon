@@ -1,6 +1,6 @@
 #pragma once
 #include <gtkmm.h>
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
 #include <map>
 #include <zmq.hpp>

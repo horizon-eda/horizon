@@ -1,11 +1,11 @@
 #pragma once
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
-#include "common.hpp"
-#include "uuid_ptr.hpp"
-#include "uuid_provider.hpp"
-#include "junction.hpp"
-#include "bus.hpp"
+#include "common/common.hpp"
+#include "util/uuid_ptr.hpp"
+#include "util/uuid_provider.hpp"
+#include "common/junction.hpp"
+#include "block/bus.hpp"
 #include <vector>
 #include <map>
 #include <set>

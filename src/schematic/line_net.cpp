@@ -1,5 +1,5 @@
 #include "line_net.hpp"
-#include "lut.hpp"
+#include "common/lut.hpp"
 #include "schematic_symbol.hpp"
 #include "sheet.hpp"
 

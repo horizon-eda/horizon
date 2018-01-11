@@ -1,7 +1,7 @@
 #include "tool_draw_line.hpp"
-#include "imp_interface.hpp"
+#include "imp/imp_interface.hpp"
 #include <algorithm>
-#include "part.hpp"
+#include "pool/part.hpp"
 
 namespace horizon {
 	

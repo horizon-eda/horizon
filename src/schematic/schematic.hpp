@@ -1,8 +1,8 @@
 #pragma once
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
-#include "unit.hpp"
-#include "block.hpp"
+#include "pool/unit.hpp"
+#include "block/block.hpp"
 #include "sheet.hpp"
 #include "schematic_rules.hpp"
 #include <vector>

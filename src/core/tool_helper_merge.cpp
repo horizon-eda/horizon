@@ -1,7 +1,7 @@
 #include "tool_helper_merge.hpp"
-#include "net.hpp"
-#include "bus.hpp"
-#include "imp_interface.hpp"
+#include "block/net.hpp"
+#include "block/bus.hpp"
+#include "imp/imp_interface.hpp"
 #include "core_schematic.hpp"
 
 namespace horizon {

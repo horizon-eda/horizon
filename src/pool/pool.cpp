@@ -5,7 +5,7 @@
 #include "unit.hpp"
 #include "entity.hpp"
 #include "symbol.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 

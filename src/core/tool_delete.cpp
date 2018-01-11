@@ -4,8 +4,8 @@
 #include "core_padstack.hpp"
 #include "core_package.hpp"
 #include "core_board.hpp"
-#include "imp_interface.hpp"
-#include "entity.hpp"
+#include "imp/imp_interface.hpp"
+#include "pool/entity.hpp"
 #include <iostream>
 
 namespace horizon {

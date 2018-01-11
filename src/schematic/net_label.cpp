@@ -1,5 +1,5 @@
 #include "net_label.hpp"
-#include "lut.hpp"
+#include "common/lut.hpp"
 #include "sheet.hpp"
 
 namespace horizon {

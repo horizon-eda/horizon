@@ -1,6 +1,6 @@
 #include "selection_filter.hpp"
 #include "canvas.hpp"
-#include "board_layers.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 	bool SelectionFilter::can_select(const SelectableRef &sel) {

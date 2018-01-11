@@ -25,7 +25,7 @@
 #include "pns_line.h"
 #include "pns_segment.h"
 #include "pns_solid.h"
-#include "wx_compat.h"
+#include "../wx_compat.h"
 
 #include <geometry/shape.h>
 #include <geometry/shape_line_chain.h>

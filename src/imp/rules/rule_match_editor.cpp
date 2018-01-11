@@ -2,7 +2,7 @@
 #include "rules/rule_match.hpp"
 #include "widgets/net_button.hpp"
 #include "widgets/net_class_button.hpp"
-#include "block.hpp"
+#include "block/block.hpp"
 #include "core/core_board.hpp"
 
 namespace horizon {

@@ -1,6 +1,6 @@
 #include "parameter_set_editor.hpp"
 #include "spin_button_dim.hpp"
-#include "common.hpp"
+#include "common/common.hpp"
 
 namespace horizon {
 

@@ -1,6 +1,6 @@
 #include "pad_editor.hpp"
 #include "part_wizard.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 	void PadEditor::update_names() {

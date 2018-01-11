@@ -1,7 +1,7 @@
 #include "symbol_pin_names.hpp"
-#include "gate.hpp"
-#include "entity.hpp"
-#include "schematic_symbol.hpp"
+#include "pool/gate.hpp"
+#include "pool/entity.hpp"
+#include "schematic/schematic_symbol.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>

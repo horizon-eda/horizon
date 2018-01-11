@@ -1,6 +1,6 @@
 #pragma once
 #include <gtkmm.h>
-#include "block.hpp"
+#include "block/block.hpp"
 #include "net_selector.hpp"
 
 namespace horizon {

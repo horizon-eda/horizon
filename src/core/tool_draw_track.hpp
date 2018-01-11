@@ -1,6 +1,6 @@
 #pragma once
 #include "core.hpp"
-#include "track.hpp"
+#include "board/track.hpp"
 
 namespace horizon {
 

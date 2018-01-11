@@ -2,7 +2,7 @@
 #include "widgets/parameter_set_editor.hpp"
 #include "widgets/chooser_buttons.hpp"
 #include "board/via.hpp"
-#include "via_padstack_provider.hpp"
+#include "board/via_padstack_provider.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>

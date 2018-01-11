@@ -1,14 +1,14 @@
 #include "tool_route_track_interactive.hpp"
 #include <iostream>
 #include "core_board.hpp"
-#include "imp_interface.hpp"
+#include "imp/imp_interface.hpp"
 #include "board/board_rules.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 #include "router/router/pns_router.h"
 #include "router/pns_horizon_iface.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "router/pns_solid.h"
-#include "board_layers.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 

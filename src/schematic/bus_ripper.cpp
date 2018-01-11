@@ -1,6 +1,6 @@
 #include "bus_ripper.hpp"
 #include "sheet.hpp"
-#include "block.hpp"
+#include "block/block.hpp"
 
 namespace horizon {
 

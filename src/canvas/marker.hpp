@@ -1,7 +1,7 @@
 #pragma once
-#include "common.hpp"
+#include "common/common.hpp"
 #include <epoxy/gl.h>
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include <deque>
 
 namespace horizon {

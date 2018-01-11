@@ -1,5 +1,5 @@
 #include "pns_horizon_iface.hpp"
-#include "board.hpp"
+#include "board/board.hpp"
 #include "router/pns_topology.h"
 #include "router/pns_via.h"
 #include "canvas/canvas_gl.hpp"
@@ -7,7 +7,7 @@
 #include "router/pns_solid.h"
 #include "router/pns_debug_decorator.h"
 #include "geometry/shape_convex.h"
-#include "board_layers.hpp"
+#include "board/board_layers.hpp"
 #include "board/via_padstack_provider.hpp"
 #include "util/util.hpp"
 

@@ -1,6 +1,6 @@
 #include "rule_clearance_copper.hpp"
-#include "util.hpp"
-#include "lut.hpp"
+#include "util/util.hpp"
+#include "common/lut.hpp"
 #include <sstream>
 
 namespace horizon {

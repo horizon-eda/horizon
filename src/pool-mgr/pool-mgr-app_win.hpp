@@ -1,7 +1,7 @@
 #pragma once
 #include <gtkmm.h>
 #include <memory>
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include <zmq.hpp>
 #include "json.hpp"
 #include "util/editor_process.hpp"

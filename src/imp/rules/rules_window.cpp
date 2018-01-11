@@ -1,5 +1,5 @@
 #include "canvas/canvas_gl.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 #include "rules_window.hpp"
 #include "rules/rules.hpp"
 #include "rules/rule_descr.hpp"

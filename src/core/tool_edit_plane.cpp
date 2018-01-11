@@ -1,9 +1,9 @@
 #include "tool_edit_plane.hpp"
 #include "core_board.hpp"
 #include <iostream>
-#include "board_layers.hpp"
-#include "imp_interface.hpp"
-#include "part.hpp"
+#include "board/board_layers.hpp"
+#include "imp/imp_interface.hpp"
+#include "pool/part.hpp"
 
 namespace horizon {
 

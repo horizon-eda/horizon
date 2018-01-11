@@ -1,9 +1,9 @@
 #pragma once
 #include <gtkmm.h>
-#include "common.hpp"
-#include "unit.hpp"
-#include "part.hpp"
-#include "entity.hpp"
+#include "common/common.hpp"
+#include "pool/unit.hpp"
+#include "pool/part.hpp"
+#include "pool/entity.hpp"
 #include "../pool_notebook.hpp" //for processes
 #include "util/window_state_store.hpp"
 

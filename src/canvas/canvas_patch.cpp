@@ -1,6 +1,6 @@
 #include "canvas_patch.hpp"
-#include "hole.hpp"
-#include "plane.hpp"
+#include "common/hole.hpp"
+#include "board/plane.hpp"
 
 namespace horizon {
 	CanvasPatch::CanvasPatch() : Canvas::Canvas() {

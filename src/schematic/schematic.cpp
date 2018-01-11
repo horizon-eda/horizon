@@ -1,6 +1,6 @@
 #include "schematic.hpp"
-#include "lut.hpp"
-#include "entity.hpp"
+#include "common/lut.hpp"
+#include "pool/entity.hpp"
 #include <set>
 #include <forward_list>
 

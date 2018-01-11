@@ -3,7 +3,7 @@
 #include "canvas/canvas.hpp"
 #include "util/util.hpp"
 #include "util/sqlite.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 #include "preview_canvas.hpp"
 #include "entity_preview.hpp"
 

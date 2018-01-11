@@ -2,7 +2,7 @@
 #include <iostream>
 #include <deque>
 #include <algorithm>
-#include "gtk_util.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 

@@ -1,5 +1,5 @@
 #include "plane_editor.hpp"
-#include "plane.hpp"
+#include "board/plane.hpp"
 #include "util/gtk_util.hpp"
 #include "spin_button_dim.hpp"
 

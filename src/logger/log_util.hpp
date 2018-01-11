@@ -1,7 +1,7 @@
 #pragma once
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "logger.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 #include <map>
 #include <tuple>
 #include <string>

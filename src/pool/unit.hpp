@@ -1,7 +1,7 @@
 #pragma once
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
-#include "uuid_provider.hpp"
+#include "util/uuid_provider.hpp"
 #include <yaml-cpp/yaml.h>
 #include <vector>
 #include <map>

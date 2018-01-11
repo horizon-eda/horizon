@@ -2,8 +2,8 @@
 #include <gtkmm.h>
 #include <set>
 #include <mutex>
-#include "uuid.hpp"
-#include "common.hpp"
+#include "util/uuid.hpp"
+#include "common/common.hpp"
 #include "json.hpp"
 
 class git_repository;

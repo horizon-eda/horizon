@@ -1,9 +1,9 @@
 #pragma once
-#include "symbol.hpp"
-#include "pool.hpp"
+#include "pool/symbol.hpp"
+#include "pool/pool.hpp"
 #include "core.hpp"
-#include "schematic.hpp"
-#include "block.hpp"
+#include "schematic/schematic.hpp"
+#include "block/block.hpp"
 #include <memory>
 #include <iostream>
 

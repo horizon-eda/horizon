@@ -1,5 +1,5 @@
 #include "pool_browser_padstack.hpp"
-#include "pool.hpp"
+#include "pool/pool.hpp"
 #include <set>
 
 namespace horizon {

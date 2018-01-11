@@ -1,5 +1,5 @@
 #include "set.hpp"
-#include "lut.hpp"
+#include "common/lut.hpp"
 
 namespace horizon {
 	static const LutEnumStr<ParameterID> parameter_id_lut = {

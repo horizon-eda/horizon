@@ -1,9 +1,9 @@
 #include "core.hpp"
-#include "hole.hpp"
-#include "polygon.hpp"
-#include "dimension.hpp"
+#include "common/hole.hpp"
+#include "common/polygon.hpp"
+#include "common/dimension.hpp"
 #include "core_properties.hpp"
-#include "layer_provider.hpp"
+#include "common/layer_provider.hpp"
 
 namespace horizon {
 	#define HANDLED if(handled){*handled=true;}

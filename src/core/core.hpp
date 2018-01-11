@@ -1,15 +1,15 @@
 #pragma once
-#include "symbol.hpp"
-#include "pool.hpp"
+#include "pool/symbol.hpp"
+#include "pool/pool.hpp"
 #include "canvas/selectables.hpp"
 #include "canvas/target.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 #include <memory>
 #include <iostream>
 #include <sigc++/sigc++.h>
 #include "cores.hpp"
 #include "dialogs/dialogs.hpp"
-#include "layer.hpp"
+#include "common/layer.hpp"
 #include "json.hpp"
 #include <gdk/gdkkeysyms.h>
 

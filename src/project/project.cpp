@@ -3,10 +3,10 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 #include <giomm/file.h>
-#include "util.hpp"
-#include "block.hpp"
-#include "schematic.hpp"
-#include "board.hpp"
+#include "util/util.hpp"
+#include "block/block.hpp"
+#include "schematic/schematic.hpp"
+#include "board/board.hpp"
 
 namespace horizon {
 	Project::Project(const UUID &uu, const json &j, const std::string &base):

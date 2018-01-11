@@ -1,7 +1,7 @@
 #pragma once
 #include <gtkmm.h>
-#include "uuid.hpp"
-#include "placement.hpp"
+#include "util/uuid.hpp"
+#include "util/placement.hpp"
 
 namespace horizon {
 	class SymbolPreviewWindow: public Gtk::Window {

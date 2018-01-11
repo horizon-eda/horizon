@@ -1,17 +1,17 @@
-#include <canvas/canvas.hpp>
-#include <canvas/triangle.hpp>
-#include <common.hpp>
+#include "canvas.hpp"
+#include "triangle.hpp"
+#include "common/common.hpp"
 #include <math.h>
-#include <placement.hpp>
+#include "util/placement.hpp"
 #include <sys/types.h>
 #include <glib.h>
-#include "text.hpp"
+#include "common/text.hpp"
 #include <cstdint>
 #include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
-#include "util.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 

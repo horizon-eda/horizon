@@ -1,6 +1,6 @@
 #include "footprint_generator_dual.hpp"
 #include "widgets/chooser_buttons.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 	FootprintGeneratorDual::FootprintGeneratorDual(CorePackage *c): Glib::ObjectBase (typeid(FootprintGeneratorDual)), FootprintGeneratorBase("/net/carrotIndustries/horizon/imp/footprint_generator/dual.svg", c) {

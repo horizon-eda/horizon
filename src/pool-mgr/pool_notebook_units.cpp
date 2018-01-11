@@ -1,6 +1,6 @@
 #include "pool_notebook.hpp"
 #include "editor_window.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 	void PoolNotebook::handle_create_unit() {

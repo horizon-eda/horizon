@@ -4,9 +4,9 @@
 #include "core_padstack.hpp"
 #include "core_package.hpp"
 #include "core_board.hpp"
-#include "accumulator.hpp"
-#include "imp_interface.hpp"
-#include "util.hpp"
+#include "util/accumulator.hpp"
+#include "imp/imp_interface.hpp"
+#include "util/util.hpp"
 #include "canvas/canvas_gl.hpp"
 #include <iostream>
 

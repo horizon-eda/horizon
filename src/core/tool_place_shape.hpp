@@ -1,5 +1,5 @@
 #pragma once
-#include "shape.hpp"
+#include "common/shape.hpp"
 #include "core.hpp"
 #include <forward_list>
 

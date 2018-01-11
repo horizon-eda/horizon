@@ -1,9 +1,9 @@
 #pragma once
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
 #include "unit.hpp"
-#include "uuid_provider.hpp"
-#include "uuid_ptr.hpp"
+#include "util/uuid_provider.hpp"
+#include "util/uuid_ptr.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
