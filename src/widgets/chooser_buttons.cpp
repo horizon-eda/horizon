@@ -1,9 +1,9 @@
 #include "chooser_buttons.hpp"
 #include "dialogs/dialogs.hpp"
 #include "board/via_padstack_provider.hpp"
-#include "padstack.hpp"
-#include "package.hpp"
-#include "pool.hpp"
+#include "pool/padstack.hpp"
+#include "pool/package.hpp"
+#include "pool/pool.hpp"
 #include "widgets/pool_browser.hpp"
 
 namespace horizon {

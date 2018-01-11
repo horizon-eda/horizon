@@ -1,7 +1,7 @@
 #include "unit_editor.hpp"
 #include <iostream>
-#include "unit.hpp"
-#include "util.hpp"
+#include "pool/unit.hpp"
+#include "util/util.hpp"
 #include <glibmm.h>
 
 namespace horizon {

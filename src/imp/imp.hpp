@@ -1,6 +1,6 @@
 #pragma once
 #include "main_window.hpp"
-#include "pool.hpp"
+#include "pool/pool.hpp"
 #include "core/core_symbol.hpp"
 #include "core/core_schematic.hpp"
 #include "core/core_padstack.hpp"
@@ -13,7 +13,7 @@
 #include "selection_filter_dialog.hpp"
 #include "keyseq_dialog.hpp"
 #include "widgets/spin_button_dim.hpp"
-#include "imp_interface.hpp"
+#include "imp/imp_interface.hpp"
 #include "preferences.hpp"
 #include "util/window_state_store.hpp"
 #include <zmq.hpp>

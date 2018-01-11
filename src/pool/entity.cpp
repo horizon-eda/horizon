@@ -1,5 +1,5 @@
-#include "entity.hpp"
-#include "pool.hpp"
+#include "pool/entity.hpp"
+#include "pool/pool.hpp"
 
 namespace horizon {
 

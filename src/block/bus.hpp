@@ -1,13 +1,13 @@
 #pragma once
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
-#include "unit.hpp"
-#include "uuid_provider.hpp"
-#include "uuid_ptr.hpp"
+#include "pool/unit.hpp"
+#include "util/uuid_provider.hpp"
+#include "util/uuid_ptr.hpp"
 #include <deque>
 #include <map>
 #include <fstream>
-#include "net.hpp"
+#include "block/net.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;

@@ -1,6 +1,6 @@
 #pragma once
 #include "core.hpp"
-#include "pad.hpp"
+#include "package/pad.hpp"
 
 namespace horizon {
 	class ToolPlacePad : public ToolBase {

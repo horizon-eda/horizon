@@ -1,6 +1,6 @@
 #include "entity_editor.hpp"
 #include <iostream>
-#include "entity.hpp"
+#include "pool/entity.hpp"
 #include <glibmm.h>
 #include "dialogs/pool_browser_dialog.hpp"
 #include "widgets/pool_browser.hpp"

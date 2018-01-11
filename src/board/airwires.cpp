@@ -1,4 +1,4 @@
-#include "board.hpp"
+#include "board/board.hpp"
 #include <unordered_map>
 #include "delaunay-triangulation/delaunay.h"
 

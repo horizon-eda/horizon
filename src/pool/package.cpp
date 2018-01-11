@@ -1,6 +1,6 @@
-#include "package.hpp"
-#include "pool.hpp"
-#include "util.hpp"
+#include "pool/package.hpp"
+#include "pool/pool.hpp"
+#include "util/util.hpp"
 #include "clipper/clipper.hpp"
 
 namespace horizon {

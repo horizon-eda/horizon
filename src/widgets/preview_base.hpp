@@ -1,8 +1,8 @@
 #pragma once
 #include <gtkmm.h>
 #include <set>
-#include "uuid.hpp"
-#include "common.hpp"
+#include "util/uuid.hpp"
+#include "common/common.hpp"
 
 namespace horizon {
 	class PreviewBase {

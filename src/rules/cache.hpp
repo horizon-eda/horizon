@@ -2,10 +2,10 @@
 #include <map>
 #include <memory>
 #include <deque>
-#include "uuid.hpp"
-#include "common.hpp"
+#include "util/uuid.hpp"
+#include "common/common.hpp"
 #include "canvas/canvas_patch.hpp"
-#include "entity.hpp"
+#include "pool/entity.hpp"
 
 namespace horizon {
 	enum class RulesCheckCacheID {NONE, BOARD_IMAGE, NET_PINS};

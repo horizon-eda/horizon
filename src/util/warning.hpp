@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "common.hpp"
+#include "common/common.hpp"
 
 namespace horizon {
 	class Warning {

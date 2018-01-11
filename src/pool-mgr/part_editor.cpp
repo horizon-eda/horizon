@@ -2,8 +2,8 @@
 #include "dialogs/pool_browser_dialog.hpp"
 #include "widgets/pool_browser_package.hpp"
 #include <iostream>
-#include "part.hpp"
-#include "util.hpp"
+#include "pool/part.hpp"
+#include "util/util.hpp"
 #include <glibmm.h>
 
 namespace horizon {

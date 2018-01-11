@@ -1,8 +1,8 @@
 #include "preview_canvas.hpp"
-#include "pool.hpp"
-#include "symbol.hpp"
-#include "package.hpp"
-#include "board_layers.hpp"
+#include "pool/pool.hpp"
+#include "pool/symbol.hpp"
+#include "pool/package.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 	PreviewCanvas::PreviewCanvas(Pool &p): Glib::ObjectBase(typeid(PreviewCanvas)), CanvasGL(), pool(p) {

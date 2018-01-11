@@ -1,6 +1,6 @@
 #pragma once
 #include <gtkmm.h>
-#include "sheet.hpp"
+#include "schematic/sheet.hpp"
 #include "canvas/layer_display.hpp"
 #include "canvas/canvas_gl.hpp"
 

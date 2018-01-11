@@ -1,7 +1,7 @@
 #include "pool-mgr-app_win.hpp"
 #include "pool-mgr-app.hpp"
 #include <iostream>
-#include "util.hpp"
+#include "util/util.hpp"
 #include "pool_notebook.hpp"
 #include "pool-update/pool-update.hpp"
 #include "util/github_client.hpp"

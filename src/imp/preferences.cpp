@@ -2,8 +2,8 @@
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 #include <giomm/file.h>
-#include "util.hpp"
-#include "lut.hpp"
+#include "util/util.hpp"
+#include "common/lut.hpp"
 #include <fstream>
 
 namespace horizon {

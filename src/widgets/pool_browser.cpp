@@ -1,7 +1,7 @@
 #include "pool_browser.hpp"
-#include "pool.hpp"
+#include "pool/pool.hpp"
 #include <set>
-#include "gtk_util.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 	PoolBrowser::PoolBrowser(Pool *p) :

@@ -2,12 +2,12 @@
 #include "unit_editor.hpp"
 #include "entity_editor.hpp"
 #include "part_editor.hpp"
-#include "unit.hpp"
-#include "entity.hpp"
-#include "part.hpp"
-#include "util.hpp"
+#include "pool/unit.hpp"
+#include "pool/entity.hpp"
+#include "pool/part.hpp"
+#include "util/util.hpp"
 #include "util/str_util.hpp"
-#include "pool.hpp"
+#include "pool/pool.hpp"
 
 namespace horizon {
 

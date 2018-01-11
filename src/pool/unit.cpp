@@ -1,5 +1,5 @@
-#include "unit.hpp"
-#include "lut.hpp"
+#include "pool/unit.hpp"
+#include "common/lut.hpp"
 
 namespace horizon {
 	static const LutEnumStr<Pin::Direction> pin_direction_lut = {

@@ -1,7 +1,7 @@
 #pragma once
 #include <gtkmm.h>
-#include "common.hpp"
-#include "part.hpp"
+#include "common/common.hpp"
+#include "pool/part.hpp"
 #include "editor_interface.hpp"
 
 namespace horizon {

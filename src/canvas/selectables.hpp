@@ -1,6 +1,6 @@
 #pragma once
-#include "common.hpp"
-#include "uuid.hpp"
+#include "common/common.hpp"
+#include "util/uuid.hpp"
 #include <epoxy/gl.h>
 #include <map>
 

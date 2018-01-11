@@ -1,5 +1,5 @@
 #pragma once
-#include "common.hpp"
+#include "common/common.hpp"
 #include "clipper/clipper.hpp"
 #include <epoxy/gl.h>
 #include <gtkmm.h>

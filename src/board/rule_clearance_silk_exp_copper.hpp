@@ -1,6 +1,6 @@
 #pragma once
 #include "rules/rule.hpp"
-#include "common.hpp"
+#include "common/common.hpp"
 
 namespace horizon {
 	class RuleClearanceSilkscreenExposedCopper: public Rule {

@@ -1,7 +1,7 @@
 #include "rule_match.hpp"
-#include "lut.hpp"
-#include "net.hpp"
-#include "block.hpp"
+#include "common/lut.hpp"
+#include "block/net.hpp"
+#include "block/block.hpp"
 #include <glibmm.h>
 
 namespace horizon {

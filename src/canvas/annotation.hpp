@@ -1,6 +1,6 @@
 #pragma once
 #include <deque>
-#include "common.hpp"
+#include "common/common.hpp"
 #include "triangle.hpp"
 
 namespace horizon{

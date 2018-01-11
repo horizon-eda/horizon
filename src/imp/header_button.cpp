@@ -1,5 +1,5 @@
 #include "header_button.hpp"
-#include "gtk_util.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 	HeaderButton::HeaderButton(): Gtk::MenuButton() {

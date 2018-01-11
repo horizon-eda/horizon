@@ -2,7 +2,7 @@
 #include <sqlite3.h>
 #include <string>
 #include <tuple>
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 
 namespace SQLite {
 	class noncopyable{

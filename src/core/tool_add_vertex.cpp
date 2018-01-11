@@ -1,7 +1,7 @@
 #include "tool_add_vertex.hpp"
 #include <iostream>
-#include "imp_interface.hpp"
-#include "polygon.hpp"
+#include "imp/imp_interface.hpp"
+#include "common/polygon.hpp"
 
 namespace horizon {
 

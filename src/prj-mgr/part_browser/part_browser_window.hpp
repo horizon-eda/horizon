@@ -2,10 +2,10 @@
 #include <gtkmm.h>
 #include <array>
 #include <set>
-#include "common.hpp"
-#include "uuid.hpp"
-#include "pool.hpp"
-#include "part.hpp"
+#include "common/common.hpp"
+#include "util/uuid.hpp"
+#include "pool/pool.hpp"
+#include "pool/part.hpp"
 #include "util/window_state_store.hpp"
 
 namespace horizon {

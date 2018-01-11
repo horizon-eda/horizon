@@ -1,6 +1,6 @@
-#include "power_symbol.hpp"
-#include "lut.hpp"
-#include "sheet.hpp"
+#include "schematic/power_symbol.hpp"
+#include "common/lut.hpp"
+#include "schematic/sheet.hpp"
 
 namespace horizon {
 

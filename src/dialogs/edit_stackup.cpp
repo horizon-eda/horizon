@@ -2,8 +2,8 @@
 #include <iostream>
 #include <deque>
 #include <algorithm>
-#include "board.hpp"
-#include "board_layers.hpp"
+#include "board/board.hpp"
+#include "board/board_layers.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "util/util.hpp"
 

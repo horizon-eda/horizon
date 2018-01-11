@@ -15,7 +15,7 @@
 #include "duplicate/duplicate_window.hpp"
 #include "duplicate/duplicate_unit.hpp"
 #include "duplicate/duplicate_part.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 #include "pool_remote_box.hpp"
 #include "pool_merge_dialog.hpp"
 #include <git2.h>

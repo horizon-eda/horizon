@@ -1,11 +1,11 @@
 #pragma once
-#include "common.hpp"
+#include "common/common.hpp"
 #include <iostream>
 #include <fstream>
 #include <map>
 #include <deque>
-#include "padstack.hpp"
-#include "placement.hpp"
+#include "pool/padstack.hpp"
+#include "util/placement.hpp"
 
 namespace horizon {
 

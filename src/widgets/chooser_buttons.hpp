@@ -1,7 +1,7 @@
 #pragma once
 #include <gtkmm.h>
-#include "uuid.hpp"
-#include "common.hpp"
+#include "util/uuid.hpp"
+#include "common/common.hpp"
 #include "dialogs/pool_browser_dialog.hpp"
 
 namespace horizon {

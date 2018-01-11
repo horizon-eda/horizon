@@ -1,11 +1,11 @@
 #include "pool_cache_window.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 #include "widgets/cell_renderer_layer_display.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 #include <fstream>
-#include "part.hpp"
-#include "pool_cached.hpp"
-#include "gtk_util.hpp"
+#include "pool/part.hpp"
+#include "pool/pool_cached.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 	PoolCacheWindow* PoolCacheWindow::create(Gtk::Window *p, const std::string &cache_path, const std::string &pool_path) {

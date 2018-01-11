@@ -1,5 +1,5 @@
-#include "text.hpp"
-#include "lut.hpp"
+#include "common/text.hpp"
+#include "common/lut.hpp"
 
 namespace horizon {
 	static const LutEnumStr<TextOrigin> origin_lut = {

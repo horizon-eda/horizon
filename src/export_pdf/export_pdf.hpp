@@ -1,5 +1,5 @@
 #pragma once
-#include "schematic.hpp"
+#include "schematic/schematic.hpp"
 #include "core/core.hpp"
 
 namespace horizon {

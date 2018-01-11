@@ -1,6 +1,6 @@
 
 #include "prj-mgr-app.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 
 int main(int argc, char* argv[]) {
 	auto application = horizon::ProjectManagerApplication::create();

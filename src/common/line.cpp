@@ -1,6 +1,6 @@
-#include "object_provider.hpp"
-#include "line.hpp"
-#include "lut.hpp"
+#include "common/object_provider.hpp"
+#include "common/line.hpp"
+#include "common/lut.hpp"
 
 namespace horizon {
 	

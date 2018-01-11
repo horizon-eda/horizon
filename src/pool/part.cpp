@@ -1,5 +1,5 @@
-#include "part.hpp"
-#include "lut.hpp"
+#include "pool/part.hpp"
+#include "common/lut.hpp"
 
 namespace horizon {
 	Part::Part(const UUID &uu, const json &j, Pool &pool):

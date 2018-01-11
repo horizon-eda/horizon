@@ -1,6 +1,6 @@
 #include "board_display_options.hpp"
-#include "layer_provider.hpp"
-#include "board_layers.hpp"
+#include "common/layer_provider.hpp"
+#include "board/board_layers.hpp"
 #include <set>
 #include <iostream>
 

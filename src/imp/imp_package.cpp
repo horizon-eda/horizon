@@ -1,5 +1,5 @@
 #include "imp_package.hpp"
-#include "part.hpp"
+#include "pool/part.hpp"
 #include "footprint_generator/footprint_generator_window.hpp"
 #include "imp/parameter_window.hpp"
 #include "header_button.hpp"
@@ -7,8 +7,8 @@
 #include "widgets/pool_browser.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "3d_view.hpp"
-#include "board_layers.hpp"
-#include "gtk_util.hpp"
+#include "board/board_layers.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 	ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path):

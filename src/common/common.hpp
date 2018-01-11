@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <math.h>
 #include <array>
-#include "lut.hpp"
+#include "common/lut.hpp"
 
 namespace horizon {
 	enum class Orientation {LEFT, RIGHT, UP, DOWN};

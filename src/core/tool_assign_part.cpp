@@ -1,8 +1,8 @@
 #include "tool_assign_part.hpp"
 #include "core_schematic.hpp"
-#include "part.hpp"
+#include "pool/part.hpp"
 #include <iostream>
-#include "imp_interface.hpp"
+#include "imp/imp_interface.hpp"
 
 namespace horizon {
 

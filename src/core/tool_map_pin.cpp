@@ -2,9 +2,9 @@
 #include <iostream>
 #include <algorithm>
 #include "core_symbol.hpp"
-#include "imp_interface.hpp"
+#include "imp/imp_interface.hpp"
 #include "tool_helper_move.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 

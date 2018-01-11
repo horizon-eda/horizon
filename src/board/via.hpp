@@ -1,10 +1,10 @@
 #pragma once
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
-#include "common.hpp"
-#include "uuid_ptr.hpp"
-#include "junction.hpp"
-#include "padstack.hpp"
+#include "common/common.hpp"
+#include "util/uuid_ptr.hpp"
+#include "common/junction.hpp"
+#include "pool/padstack.hpp"
 #include <vector>
 #include <map>
 #include <set>

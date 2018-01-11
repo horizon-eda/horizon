@@ -1,6 +1,6 @@
 #pragma once
-#include "symbol.hpp"
-#include "pool.hpp"
+#include "pool/symbol.hpp"
+#include "pool/pool.hpp"
 #include "core.hpp"
 #include <memory>
 #include <iostream>

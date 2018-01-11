@@ -1,10 +1,10 @@
-#include "pool_cached.hpp"
-#include "padstack.hpp"
-#include "package.hpp"
-#include "part.hpp"
-#include "unit.hpp"
-#include "entity.hpp"
-#include "symbol.hpp"
+#include "pool/pool_cached.hpp"
+#include "pool/padstack.hpp"
+#include "pool/package.hpp"
+#include "pool/part.hpp"
+#include "pool/unit.hpp"
+#include "pool/entity.hpp"
+#include "pool/symbol.hpp"
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 #include <giomm/file.h>

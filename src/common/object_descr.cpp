@@ -1,7 +1,7 @@
-#include "object_descr.hpp"
-#include "hole.hpp"
-#include "dimension.hpp"
-#include "symbol.hpp"
+#include "common/object_descr.hpp"
+#include "common/hole.hpp"
+#include "common/dimension.hpp"
+#include "pool/symbol.hpp"
 
 namespace horizon {
 	const std::map<ObjectType, ObjectDescription> object_descriptions = {

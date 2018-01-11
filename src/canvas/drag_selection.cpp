@@ -1,8 +1,8 @@
 #include "drag_selection.hpp"
 #include "gl_util.hpp"
 #include "canvas_gl.hpp"
-#include "object_descr.hpp"
-#include "layer_provider.hpp"
+#include "common/object_descr.hpp"
+#include "common/layer_provider.hpp"
 #include "clipper/clipper.hpp"
 
 namespace horizon {

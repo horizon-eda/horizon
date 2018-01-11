@@ -1,5 +1,5 @@
 #include "part_browser_window.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 #include "widgets/pool_browser_part.hpp"
 #include "widgets/part_preview.hpp"
 

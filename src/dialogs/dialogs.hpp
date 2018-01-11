@@ -1,9 +1,9 @@
 #pragma once
 #include <memory>
-#include "uuid.hpp"
-#include "common.hpp"
-#include "uuid_path.hpp"
-#include "component.hpp"
+#include "util/uuid.hpp"
+#include "common/common.hpp"
+#include "util/uuid_path.hpp"
+#include "block/component.hpp"
 #include "parameter/set.hpp"
 #include <map>
 

@@ -1,7 +1,7 @@
-#include "padstack.hpp"
-#include "lut.hpp"
-#include "board_layers.hpp"
-#include "util.hpp"
+#include "pool/padstack.hpp"
+#include "common/lut.hpp"
+#include "board/board_layers.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 

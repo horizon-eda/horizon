@@ -1,11 +1,11 @@
 #include "part_wizard.hpp"
-#include "package.hpp"
-#include "util.hpp"
+#include "pool/package.hpp"
+#include "util/util.hpp"
 #include "pad_editor.hpp"
 #include "gate_editor.hpp"
 #include "location_entry.hpp"
-#include "str_util.hpp"
-#include "gtk_util.hpp"
+#include "util/str_util.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 	LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder>& x, const std::string &w, Gtk::Button **button_other) {

@@ -1,7 +1,7 @@
 #include "tool_map_package.hpp"
 #include <iostream>
 #include "core_board.hpp"
-#include "imp_interface.hpp"
+#include "imp/imp_interface.hpp"
 
 namespace horizon {
 	ToolMapPackage::ToolMapPackage(Core *c, ToolID tid): ToolBase(c, tid) {

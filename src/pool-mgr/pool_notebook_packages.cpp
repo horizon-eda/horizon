@@ -3,7 +3,7 @@
 #include "duplicate/duplicate_unit.hpp"
 #include "duplicate/duplicate_part.hpp"
 #include "part_wizard/part_wizard.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 	void PoolNotebook::handle_edit_package(const UUID &uu) {

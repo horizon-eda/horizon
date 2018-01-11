@@ -2,10 +2,10 @@
 #include <gtkmm.h>
 #include <memory>
 #include <set>
-#include "uuid.hpp"
-#include "sort_controller.hpp"
-#include "selection_provider.hpp"
-#include "common.hpp"
+#include "util/uuid.hpp"
+#include "util/sort_controller.hpp"
+#include "util/selection_provider.hpp"
+#include "common/common.hpp"
 
 namespace horizon {
 	class PoolBrowser: public Gtk::Box, public SelectionProvider {

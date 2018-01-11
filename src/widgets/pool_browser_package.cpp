@@ -1,5 +1,5 @@
 #include "pool_browser_package.hpp"
-#include "pool.hpp"
+#include "pool/pool.hpp"
 #include <set>
 
 namespace horizon {

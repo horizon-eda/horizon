@@ -5,7 +5,7 @@
 #include "widgets/net_class_button.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "core/core_board.hpp"
-#include "gtk_util.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 	void RuleEditorDiffpair::populate() {

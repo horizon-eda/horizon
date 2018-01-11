@@ -1,9 +1,9 @@
-#include "uuid.hpp"
-#include "unit.hpp"
-#include "symbol.hpp"
-#include "lut.hpp"
-#include "common.hpp"
-#include "pool.hpp"
+#include "util/uuid.hpp"
+#include "pool/unit.hpp"
+#include "pool/symbol.hpp"
+#include "common/lut.hpp"
+#include "common/common.hpp"
+#include "pool/pool.hpp"
 #include <iostream>
 #include <fstream>
 #include <memory>
@@ -16,8 +16,8 @@
 #include "imp_padstack.hpp"
 #include "imp_package.hpp"
 #include "imp_board.hpp"
-#include "part.hpp"
-#include "util.hpp"
+#include "pool/part.hpp"
+#include "util/util.hpp"
 #include <curl/curl.h>
 
 using std::cout;

@@ -1,9 +1,9 @@
-#include "uuid.hpp"
-#include "unit.hpp"
-#include "symbol.hpp"
-#include "lut.hpp"
-#include "common.hpp"
-#include "pool.hpp"
+#include "util/uuid.hpp"
+#include "pool/unit.hpp"
+#include "pool/symbol.hpp"
+#include "common/lut.hpp"
+#include "common/common.hpp"
+#include "pool/pool.hpp"
 #include <iostream>
 #include <fstream>
 #include <memory>
@@ -14,9 +14,9 @@
 #include <glibmm/datetime.h>
 #include <giomm/file.h>
 #include <giomm/init.h>
-#include "package.hpp"
-#include "part.hpp"
-#include "util.hpp"
+#include "pool/package.hpp"
+#include "pool/part.hpp"
+#include "util/util.hpp"
 #include "pool-update/pool-update.hpp"
 
 

@@ -1,8 +1,8 @@
 #include "layer_box.hpp"
 #include "cell_renderer_layer_display.hpp"
-#include "layer_provider.hpp"
-#include "lut.hpp"
-#include "gtk_util.hpp"
+#include "common/layer_provider.hpp"
+#include "common/lut.hpp"
+#include "util/gtk_util.hpp"
 #include <algorithm>
 #include <iostream>
 

@@ -6,7 +6,7 @@
 #include "widgets/chooser_buttons.hpp"
 #include "widgets/parameter_set_editor.hpp"
 #include "core/core_board.hpp"
-#include "patch_type_names.hpp"
+#include "common/patch_type_names.hpp"
 
 namespace horizon {
 

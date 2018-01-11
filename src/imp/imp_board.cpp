@@ -1,5 +1,5 @@
 #include "imp_board.hpp"
-#include "part.hpp"
+#include "pool/part.hpp"
 #include "rules/rules_window.hpp"
 #include "canvas/canvas_pads.hpp"
 #include "fab_output_window.hpp"

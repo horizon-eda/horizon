@@ -1,8 +1,8 @@
-#include "package.hpp"
-#include "util.hpp"
+#include "pool/package.hpp"
+#include "util/util.hpp"
 #include "rules/cache.hpp"
 #include "util/accumulator.hpp"
-#include "board_layers.hpp"
+#include "board/board_layers.hpp"
 #include <ctype.h>
 
 namespace horizon {

@@ -3,8 +3,8 @@
 #include "core_package.hpp"
 #include "core_schematic.hpp"
 #include "core_padstack.hpp"
-#include "imp_interface.hpp"
-#include "entity.hpp"
+#include "imp/imp_interface.hpp"
+#include "pool/entity.hpp"
 
 namespace horizon {
 

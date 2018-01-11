@@ -1,6 +1,6 @@
 #pragma once
 #include "json.hpp"
-#include "common.hpp"
+#include "common/common.hpp"
 #include <string>
 #include <vector>
 

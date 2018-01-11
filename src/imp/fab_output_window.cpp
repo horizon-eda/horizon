@@ -1,6 +1,6 @@
 #include "fab_output_window.hpp"
-#include "board.hpp"
-#include "gtk_util.hpp"
+#include "board/board.hpp"
+#include "util/gtk_util.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "export_gerber/gerber_export.hpp"
 

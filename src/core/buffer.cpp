@@ -3,8 +3,8 @@
 #include "core_schematic.hpp"
 #include "core_symbol.hpp"
 #include "core_padstack.hpp"
-#include "entity.hpp"
-#include "util.hpp"
+#include "pool/entity.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 	Buffer::Buffer(Core *co):core(co),net_class_dummy(UUID::random()) {}

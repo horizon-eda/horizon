@@ -6,12 +6,12 @@
 #include <giomm/resource.h>
 #include <iostream>
 #include <sstream>
-#include "unit.hpp"
-#include "sqlite.hpp"
-#include "pool.hpp"
-#include "package.hpp"
-#include "part.hpp"
-#include "util.hpp"
+#include "pool/unit.hpp"
+#include "util/sqlite.hpp"
+#include "pool/pool.hpp"
+#include "pool/package.hpp"
+#include "pool/part.hpp"
+#include "util/util.hpp"
 #include "pool-update.hpp"
 
 namespace horizon {

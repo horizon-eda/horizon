@@ -1,5 +1,5 @@
 #include "imp_symbol.hpp"
-#include "part.hpp"
+#include "pool/part.hpp"
 #include "symbol_preview/symbol_preview_window.hpp"
 #include "header_button.hpp"
 #include "canvas/canvas_gl.hpp"

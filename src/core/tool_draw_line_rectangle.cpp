@@ -1,6 +1,6 @@
 #include "tool_draw_line_rectangle.hpp"
-#include "imp_interface.hpp"
-#include "polygon.hpp"
+#include "imp/imp_interface.hpp"
+#include "common/polygon.hpp"
 #include <iostream>
 
 namespace horizon {

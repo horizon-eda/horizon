@@ -2,7 +2,7 @@
 #include "prj-mgr-app.hpp"
 #include <iostream>
 #include "project/project.hpp"
-#include "util.hpp"
+#include "util/util.hpp"
 #include "util/gtk_util.hpp"
 #include "util/recent_util.hpp"
 #include "part_browser/part_browser_window.hpp"

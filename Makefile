@@ -427,7 +427,7 @@ SRC_OCE = \
 
 SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PRJ_MGR) $(SRC_PGM_TEST) $(SRC_POOL_MGR))
 
-INC = -Isrc -Isrc/block -Isrc/board -Isrc/common -Isrc/imp -Isrc/package -Isrc/pool -Isrc/schematic -Isrc/router -Isrc/util -Isrc/constraints -I3rd_party
+INC = -Isrc -I3rd_party
 
 DEFINES = -D_USE_MATH_DEFINES
 
@@ -457,7 +457,7 @@ OBJ_ROUTER = $(SRC_ROUTER:.cpp=.o)
 OBJ_COMMON = $(SRC_COMMON:.cpp=.o)
 OBJ_OCE = $(SRC_OCE:.cpp=.o)
 
-INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router
+INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router -I3rd_party
 INC_OCE = -I/opt/opencascade/inc/ -I/mingw64/include/oce/ -I/usr/include/oce
 LDFLAGS_OCE = -L /opt/opencascade/lib/ -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh
 ifeq ($(OS),Windows_NT)

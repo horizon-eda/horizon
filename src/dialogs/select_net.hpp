@@ -2,9 +2,9 @@
 #include <gtkmm.h>
 #include <array>
 #include <set>
-#include "common.hpp"
-#include "uuid.hpp"
-#include "net.hpp"
+#include "common/common.hpp"
+#include "util/uuid.hpp"
+#include "block/net.hpp"
 #include "widgets/net_selector.hpp"
 namespace horizon {
 

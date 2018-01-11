@@ -1,5 +1,5 @@
 #include "net_class.hpp"
-#include "common.hpp"
+#include "common/common.hpp"
 
 namespace horizon {
 	NetClass::NetClass(const UUID &uu, const json &j):

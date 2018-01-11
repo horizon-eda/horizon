@@ -1,7 +1,7 @@
-#include "board.hpp"
+#include "board/board.hpp"
 #include "canvas/canvas_patch.hpp"
 #include "canvas/canvas_pads.hpp"
-#include "board_layers.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 

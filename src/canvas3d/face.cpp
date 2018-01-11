@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "board_layers.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 	FaceRenderer::FaceRenderer(Canvas3D *c): ca(c) {

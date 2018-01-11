@@ -1,6 +1,6 @@
 #include "imp_schematic.hpp"
 #include "export_pdf/export_pdf.hpp"
-#include "part.hpp"
+#include "pool/part.hpp"
 #include "rules/rules_window.hpp"
 #include "widgets/sheet_box.hpp"
 #include "canvas/canvas_gl.hpp"

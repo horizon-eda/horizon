@@ -1,5 +1,5 @@
 #include "pool_browser_unit.hpp"
-#include "pool.hpp"
+#include "pool/pool.hpp"
 
 namespace horizon {
 	PoolBrowserUnit::PoolBrowserUnit(Pool *p): PoolBrowser(p) {

@@ -1,4 +1,4 @@
-#include "gtk_util.hpp"
+#include "util/gtk_util.hpp"
 #include "widgets/spin_button_dim.hpp"
 
 namespace horizon {

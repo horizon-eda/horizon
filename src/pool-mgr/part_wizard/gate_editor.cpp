@@ -1,8 +1,8 @@
 #include "gate_editor.hpp"
 #include "part_wizard.hpp"
 #include "location_entry.hpp"
-#include "util.hpp"
-#include "str_util.hpp"
+#include "util/util.hpp"
+#include "util/str_util.hpp"
 
 namespace horizon {
 

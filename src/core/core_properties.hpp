@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
-#include "uuid.hpp"
-#include "layer.hpp"
+#include "util/uuid.hpp"
+#include "common/layer.hpp"
 
 namespace horizon {
 	class PropertyValue {

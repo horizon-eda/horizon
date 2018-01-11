@@ -1,7 +1,7 @@
-#include "imp_interface.hpp"
+#include "imp/imp_interface.hpp"
 #include "imp_schematic.hpp"
 #include "imp.hpp"
-#include "part.hpp"
+#include "pool/part.hpp"
 #include "canvas/canvas_gl.hpp"
 
 namespace horizon {

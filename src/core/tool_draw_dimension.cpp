@@ -1,8 +1,8 @@
 #include "tool_draw_dimension.hpp"
-#include "imp_interface.hpp"
+#include "imp/imp_interface.hpp"
 #include <algorithm>
-#include "dimension.hpp"
-#include "part.hpp"
+#include "common/dimension.hpp"
+#include "pool/part.hpp"
 
 namespace horizon {
 	ToolDrawDimension::ToolDrawDimension(Core *c, ToolID tid):ToolBase(c, tid) {

@@ -1,5 +1,5 @@
-#include "junction.hpp"
-#include "lut.hpp"
+#include "common/junction.hpp"
+#include "common/lut.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;

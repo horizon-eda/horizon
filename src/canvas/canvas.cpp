@@ -3,8 +3,8 @@
 #include <algorithm>
 #include "board/board.hpp"
 #include "common/layer_provider.hpp"
-#include "util.hpp"
-#include "sheet.hpp"
+#include "util/util.hpp"
+#include "schematic/sheet.hpp"
 
 namespace horizon {
 

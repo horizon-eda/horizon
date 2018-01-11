@@ -1,8 +1,8 @@
 #include "tool_map_symbol.hpp"
 #include <iostream>
 #include "core_schematic.hpp"
-#include "imp_interface.hpp"
-#include "entity.hpp"
+#include "imp/imp_interface.hpp"
+#include "pool/entity.hpp"
 
 namespace horizon {
 

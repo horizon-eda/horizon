@@ -1,8 +1,8 @@
 #include "core_schematic.hpp"
 #include "core_properties.hpp"
 #include <algorithm>
-#include "part.hpp"
-#include "util.hpp"
+#include "pool/part.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 	CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, Pool &pool) :

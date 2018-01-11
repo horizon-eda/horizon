@@ -1,5 +1,5 @@
-#include "dimension.hpp"
-#include "lut.hpp"
+#include "common/dimension.hpp"
+#include "common/lut.hpp"
 
 namespace horizon {
 

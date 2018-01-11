@@ -1,6 +1,6 @@
-#include "schematic_symbol.hpp"
-#include "part.hpp"
-#include "lut.hpp"
+#include "schematic/schematic_symbol.hpp"
+#include "pool/part.hpp"
+#include "common/lut.hpp"
 
 namespace horizon {
 

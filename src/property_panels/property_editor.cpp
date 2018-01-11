@@ -1,5 +1,5 @@
 #include "property_editor.hpp"
-#include "object_descr.hpp"
+#include "common/object_descr.hpp"
 #include "property_panel.hpp"
 #include "property_panels.hpp"
 #include "block/block.hpp"

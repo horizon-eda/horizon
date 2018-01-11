@@ -1,9 +1,9 @@
 #pragma once
 #include <gtkmm.h>
-#include "common.hpp"
+#include "common/common.hpp"
 #include <set>
-#include "uuid_ptr.hpp"
-#include "gate.hpp"
+#include "util/uuid_ptr.hpp"
+#include "pool/gate.hpp"
 
 
 namespace horizon {

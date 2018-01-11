@@ -1,7 +1,7 @@
 #include "canvas_pads.hpp"
-#include "hole.hpp"
-#include "plane.hpp"
-#include "board_layers.hpp"
+#include "common/hole.hpp"
+#include "board/plane.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 	CanvasPads::CanvasPads() : Canvas::Canvas() {

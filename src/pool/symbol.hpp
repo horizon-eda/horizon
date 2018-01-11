@@ -1,20 +1,20 @@
 #pragma once
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 #include "json.hpp"
-#include "common.hpp"
-#include "layer_provider.hpp"
-#include "unit.hpp"
-#include "junction.hpp"
-#include "line.hpp"
-#include "arc.hpp"
-#include "text.hpp"
-#include "uuid_provider.hpp"
-#include "polygon.hpp"
+#include "common/common.hpp"
+#include "common/layer_provider.hpp"
+#include "pool/unit.hpp"
+#include "common/junction.hpp"
+#include "common/line.hpp"
+#include "common/arc.hpp"
+#include "common/text.hpp"
+#include "util/uuid_provider.hpp"
+#include "common/polygon.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
 #include <set>
-#include "object_provider.hpp"
+#include "common/object_provider.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;

@@ -1,4 +1,4 @@
-#include "uuid.hpp"
+#include "util/uuid.hpp"
 
 namespace horizon {
 	UUID::UUID() {

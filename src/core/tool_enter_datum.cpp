@@ -2,9 +2,9 @@
 #include "core_padstack.hpp"
 #include "core_package.hpp"
 #include "core_schematic.hpp"
-#include "polygon.hpp"
-#include "accumulator.hpp"
-#include "imp_interface.hpp"
+#include "common/polygon.hpp"
+#include "util/accumulator.hpp"
+#include "imp/imp_interface.hpp"
 #include <iostream>
 #include <cmath>
 

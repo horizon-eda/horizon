@@ -1,6 +1,6 @@
 #pragma once
-#include "uuid_path.hpp"
-#include "common.hpp"
+#include "util/uuid_path.hpp"
+#include "common/common.hpp"
 
 namespace horizon {
 		class Target {

@@ -1,7 +1,7 @@
 #pragma once
 #include <gtkmm.h>
 #include <utility>
-#include "symbol.hpp"
+#include "pool/symbol.hpp"
 
 namespace horizon {
 	class SymbolPreviewBox: public Gtk::Box  {

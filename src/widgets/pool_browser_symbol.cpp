@@ -1,5 +1,5 @@
 #include "pool_browser_symbol.hpp"
-#include "pool.hpp"
+#include "pool/pool.hpp"
 
 namespace horizon {
 	PoolBrowserSymbol::PoolBrowserSymbol(Pool *p, const UUID &uu): PoolBrowser(p), unit_uuid(uu) {

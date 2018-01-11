@@ -1,5 +1,5 @@
 #include "hash.hpp"
-#include "padstack.hpp"
+#include "pool/padstack.hpp"
 
 namespace horizon {
 	GerberHash::GerberHash(): checksum(Glib::Checksum::CHECKSUM_SHA256) {}

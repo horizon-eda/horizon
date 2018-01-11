@@ -1,7 +1,7 @@
 #pragma once
 #include "core.hpp"
 #include "tool_place_junction.hpp"
-#include "power_symbol.hpp"
+#include "schematic/power_symbol.hpp"
 #include <forward_list>
 
 namespace horizon {

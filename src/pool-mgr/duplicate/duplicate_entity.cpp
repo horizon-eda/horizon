@@ -1,12 +1,12 @@
 #include "duplicate_entity.hpp"
 #include "duplicate_unit.hpp"
 #include "duplicate_window.hpp"
-#include "pool.hpp"
-#include "part.hpp"
-#include "unit.hpp"
-#include "symbol.hpp"
-#include "gtk_util.hpp"
-#include "util.hpp"
+#include "pool/pool.hpp"
+#include "pool/part.hpp"
+#include "pool/unit.hpp"
+#include "pool/symbol.hpp"
+#include "util/gtk_util.hpp"
+#include "util/util.hpp"
 #include "../part_wizard/location_entry.hpp"
 
 namespace horizon {

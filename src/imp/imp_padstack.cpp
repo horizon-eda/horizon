@@ -1,5 +1,5 @@
 #include "imp_padstack.hpp"
-#include "part.hpp"
+#include "pool/part.hpp"
 #include "parameter_window.hpp"
 #include "header_button.hpp"
 #include "canvas/canvas_gl.hpp"

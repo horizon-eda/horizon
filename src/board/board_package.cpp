@@ -1,5 +1,5 @@
 #include "board_package.hpp"
-#include "part.hpp"
+#include "pool/part.hpp"
 
 namespace horizon {
 

@@ -1,8 +1,8 @@
 #pragma once
-#include "padstack.hpp"
-#include "pool.hpp"
+#include "pool/padstack.hpp"
+#include "pool/pool.hpp"
 #include "core.hpp"
-#include "layer.hpp"
+#include "common/layer.hpp"
 #include <memory>
 #include <iostream>
 #include <deque>

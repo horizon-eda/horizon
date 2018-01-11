@@ -1,6 +1,6 @@
 #include "preview_box.hpp"
 #include "canvas/canvas_gl.hpp"
-#include "symbol.hpp"
+#include "pool/symbol.hpp"
 #include <sstream>
 
 namespace horizon {

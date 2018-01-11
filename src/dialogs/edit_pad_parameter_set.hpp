@@ -2,7 +2,7 @@
 #include <gtkmm.h>
 #include <array>
 #include <set>
-#include "common.hpp"
+#include "common/common.hpp"
 #include "parameter/set.hpp"
 
 namespace horizon {

@@ -1,6 +1,6 @@
 #include "board_rules.hpp"
-#include "util.hpp"
-#include "board.hpp"
+#include "util/util.hpp"
+#include "board/board.hpp"
 #include "rules/cache.hpp"
 #include "util/accumulator.hpp"
 #include "common/patch_type_names.hpp"

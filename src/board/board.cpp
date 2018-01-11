@@ -1,8 +1,8 @@
-#include "board.hpp"
-#include "part.hpp"
+#include "board/board.hpp"
+#include "pool/part.hpp"
 #include <list>
-#include "util.hpp"
-#include "board_layers.hpp"
+#include "util/util.hpp"
+#include "board/board_layers.hpp"
 #include "logger/logger.hpp"
 #include "logger/log_util.hpp"
 

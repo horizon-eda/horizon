@@ -1,6 +1,6 @@
-#include "net.hpp"
-#include "block.hpp"
-#include "lut.hpp"
+#include "block/net.hpp"
+#include "block/block.hpp"
+#include "common/lut.hpp"
 
 namespace horizon {
 

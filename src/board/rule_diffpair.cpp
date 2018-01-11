@@ -1,6 +1,6 @@
 #include "rule_diffpair.hpp"
-#include "util.hpp"
-#include "block.hpp"
+#include "util/util.hpp"
+#include "block/block.hpp"
 #include <sstream>
 
 namespace horizon {

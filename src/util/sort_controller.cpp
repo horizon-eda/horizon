@@ -1,4 +1,4 @@
-#include "sort_controller.hpp"
+#include "util/sort_controller.hpp"
 #include <sstream>
 
 namespace horizon {

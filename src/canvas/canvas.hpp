@@ -3,15 +3,15 @@
 #include <set>
 #include <unordered_map>
 #include <sigc++/sigc++.h>
-#include "common.hpp"
+#include "common/common.hpp"
 #include "selectables.hpp"
-#include "placement.hpp"
+#include "util/placement.hpp"
 #include "target.hpp"
 #include "triangle.hpp"
 #include "layer_display.hpp"
 #include "selection_filter.hpp"
 #include "annotation.hpp"
-#include "text.hpp"
+#include "common/text.hpp"
 
 
 namespace horizon {

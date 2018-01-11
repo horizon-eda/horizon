@@ -1,8 +1,8 @@
 #pragma once
 #include "rules/rule.hpp"
-#include "common.hpp"
+#include "common/common.hpp"
 #include "rules/rule_match.hpp"
-#include "plane.hpp"
+#include "board/plane.hpp"
 
 namespace horizon {
 	class RulePlane: public Rule {

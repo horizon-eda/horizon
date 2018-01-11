@@ -3,8 +3,8 @@
 #include "widgets/chooser_buttons.hpp"
 #include "package/pad.hpp"
 #include "widgets/pool_browser_padstack.hpp"
-#include "package.hpp"
-#include "util.hpp"
+#include "pool/package.hpp"
+#include "util/util.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>

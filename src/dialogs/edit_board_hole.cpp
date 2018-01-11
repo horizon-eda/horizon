@@ -4,8 +4,8 @@
 #include "widgets/net_button.hpp"
 #include "package/pad.hpp"
 #include "widgets/pool_browser_padstack.hpp"
-#include "board_hole.hpp"
-#include "util.hpp"
+#include "board/board_hole.hpp"
+#include "util/util.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>
