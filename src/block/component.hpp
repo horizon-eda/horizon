@@ -4,7 +4,7 @@
 #include "common/common.hpp"
 #include "util/uuid_path.hpp"
 #include "util/uuid_ptr.hpp"
-#include "block/net.hpp"
+#include "net.hpp"
 #include <vector>
 #include <map>
 #include <fstream>

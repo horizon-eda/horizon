@@ -2,7 +2,7 @@
 #include "rules/rule.hpp"
 #include "common/common.hpp"
 #include "rules/rule_match.hpp"
-#include "board/plane.hpp"
+#include "plane.hpp"
 
 namespace horizon {
 	class RulePlane: public Rule {

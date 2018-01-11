@@ -1,10 +1,10 @@
-#include "pool/pool.hpp"
-#include "pool/padstack.hpp"
-#include "pool/package.hpp"
-#include "pool/part.hpp"
-#include "pool/unit.hpp"
-#include "pool/entity.hpp"
-#include "pool/symbol.hpp"
+#include "pool.hpp"
+#include "padstack.hpp"
+#include "package.hpp"
+#include "part.hpp"
+#include "unit.hpp"
+#include "entity.hpp"
+#include "symbol.hpp"
 #include "common/object_descr.hpp"
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>

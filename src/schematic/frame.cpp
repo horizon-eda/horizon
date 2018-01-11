@@ -1,4 +1,4 @@
-#include "schematic/frame.hpp"
+#include "frame.hpp"
 #include "common/lut.hpp"
 
 namespace horizon {

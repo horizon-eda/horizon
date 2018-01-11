@@ -1,7 +1,7 @@
-#include "schematic/line_net.hpp"
+#include "line_net.hpp"
 #include "common/lut.hpp"
-#include "schematic/schematic_symbol.hpp"
-#include "schematic/sheet.hpp"
+#include "schematic_symbol.hpp"
+#include "sheet.hpp"
 
 namespace horizon {
 

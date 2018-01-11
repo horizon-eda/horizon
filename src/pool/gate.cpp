@@ -1,5 +1,5 @@
-#include "pool/gate.hpp"
-#include "pool/pool.hpp"
+#include "gate.hpp"
+#include "pool.hpp"
 
 namespace horizon {
 

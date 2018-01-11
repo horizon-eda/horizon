@@ -1,5 +1,5 @@
-#include "pool/package.hpp"
-#include "pool/pool.hpp"
+#include "package.hpp"
+#include "pool.hpp"
 #include "util/util.hpp"
 #include "clipper/clipper.hpp"
 

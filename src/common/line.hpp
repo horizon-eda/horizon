@@ -1,8 +1,8 @@
 #pragma once
 #include "util/uuid.hpp"
 #include "json.hpp"
-#include "common/common.hpp"
-#include "common/junction.hpp"
+#include "common.hpp"
+#include "junction.hpp"
 #include "util/uuid_ptr.hpp"
 #include <vector>
 #include <map>

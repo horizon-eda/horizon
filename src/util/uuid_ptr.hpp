@@ -1,6 +1,6 @@
 #pragma once
-#include "util/uuid.hpp"
-#include "util/uuid_provider.hpp"
+#include "uuid.hpp"
+#include "uuid_provider.hpp"
 #include <map>
 #include <type_traits>
 #include <assert.h>

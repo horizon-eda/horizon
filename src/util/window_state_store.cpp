@@ -1,7 +1,7 @@
 #include "window_state_store.hpp"
 #include <glibmm/miscutils.h>
 #include <gtkmm.h>
-#include "util/util.hpp"
+#include "util.hpp"
 
 namespace horizon {
 

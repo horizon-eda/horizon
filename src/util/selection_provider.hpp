@@ -1,5 +1,5 @@
 #pragma once
-#include "util/uuid.hpp"
+#include "uuid.hpp"
 #include <sigc++/sigc++.h>
 
 namespace horizon {

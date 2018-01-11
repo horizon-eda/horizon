@@ -1,4 +1,4 @@
-#include "util/uuid_path.hpp"
+#include "uuid_path.hpp"
 
 namespace horizon {
 

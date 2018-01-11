@@ -1,6 +1,6 @@
-#include "schematic/bus_label.hpp"
+#include "bus_label.hpp"
 #include "common/lut.hpp"
-#include "schematic/sheet.hpp"
+#include "sheet.hpp"
 #include "block/block.hpp"
 
 namespace horizon {

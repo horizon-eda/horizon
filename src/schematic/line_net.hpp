@@ -5,11 +5,11 @@
 #include "common/junction.hpp"
 #include "util/uuid_provider.hpp"
 #include "util/uuid_ptr.hpp"
-#include "schematic/schematic_symbol.hpp"
+#include "schematic_symbol.hpp"
 #include "block/net.hpp"
 #include "block/bus.hpp"
-#include "schematic/power_symbol.hpp"
-#include "schematic/bus_ripper.hpp"
+#include "power_symbol.hpp"
+#include "bus_ripper.hpp"
 #include <vector>
 #include <map>
 #include <fstream>

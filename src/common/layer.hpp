@@ -1,5 +1,5 @@
 #pragma once
-#include "common/common.hpp"
+#include "common.hpp"
 
 namespace horizon {
 	class Layer {

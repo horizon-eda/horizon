@@ -3,7 +3,7 @@
 #include "json.hpp"
 #include "pool/unit.hpp"
 #include "block/block.hpp"
-#include "schematic/sheet.hpp"
+#include "sheet.hpp"
 #include "schematic_rules.hpp"
 #include <vector>
 #include <map>

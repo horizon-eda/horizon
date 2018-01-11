@@ -1,4 +1,4 @@
-#include "util/sqlite.hpp"
+#include "sqlite.hpp"
 #include <glib.h>
 #include <string.h>
 

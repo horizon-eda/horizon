@@ -1,4 +1,4 @@
-#include "schematic/schematic.hpp"
+#include "schematic.hpp"
 #include "common/lut.hpp"
 #include "pool/entity.hpp"
 #include <set>

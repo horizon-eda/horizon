@@ -1,5 +1,5 @@
-#include "board/via.hpp"
-#include "board/board.hpp"
+#include "via.hpp"
+#include "board.hpp"
 #include "parameter/set.hpp"
 
 namespace horizon {

@@ -2,7 +2,7 @@
 #include <curl/curl.h>
 #include <stdexcept>
 #include <glibmm/miscutils.h>
-#include "util/util.hpp"
+#include "util.hpp"
 
 namespace REST {
 

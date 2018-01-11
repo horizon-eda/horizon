@@ -1,5 +1,5 @@
-#include "common/hole.hpp"
-#include "common/lut.hpp"
+#include "hole.hpp"
+#include "lut.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;

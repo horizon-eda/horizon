@@ -1,10 +1,10 @@
 #pragma once
 #include "util/uuid.hpp"
-#include "common/common.hpp"
+#include "common.hpp"
 #include "util/uuid_provider.hpp"
 #include "json.hpp"
 #include "util/placement.hpp"
-#include "common/polygon.hpp"
+#include "polygon.hpp"
 #include <vector>
 #include <map>
 #include <fstream>

@@ -1,5 +1,5 @@
-#include "board/plane.hpp"
-#include "board/board.hpp"
+#include "plane.hpp"
+#include "board.hpp"
 #include "common/lut.hpp"
 
 

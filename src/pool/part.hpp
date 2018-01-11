@@ -1,8 +1,8 @@
 #pragma once
 #include "util/uuid.hpp"
 #include "util/uuid_provider.hpp"
-#include "pool/package.hpp"
-#include "pool/entity.hpp"
+#include "package.hpp"
+#include "entity.hpp"
 #include <vector>
 #include <map>
 #include <fstream>

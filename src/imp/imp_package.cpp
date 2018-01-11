@@ -1,7 +1,7 @@
 #include "imp_package.hpp"
 #include "pool/part.hpp"
 #include "footprint_generator/footprint_generator_window.hpp"
-#include "imp/parameter_window.hpp"
+#include "parameter_window.hpp"
 #include "header_button.hpp"
 #include "widgets/chooser_buttons.hpp"
 #include "widgets/pool_browser.hpp"

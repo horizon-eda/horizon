@@ -1,10 +1,10 @@
 #include "board_rules.hpp"
 #include "util/util.hpp"
-#include "board/board.hpp"
+#include "board.hpp"
 #include "rules/cache.hpp"
 #include "util/accumulator.hpp"
 #include "common/patch_type_names.hpp"
-#include "board/board_layers.hpp"
+#include "board_layers.hpp"
 
 namespace horizon {
 	RulesCheckResult BoardRules::check_track_width(const Board *brd) {

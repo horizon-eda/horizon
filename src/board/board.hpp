@@ -7,10 +7,10 @@
 #include "common/hole.hpp"
 #include "board_package.hpp"
 #include "common/junction.hpp"
-#include "board/track.hpp"
-#include "board/via_padstack_provider.hpp"
-#include "board/via.hpp"
-#include "board/plane.hpp"
+#include "track.hpp"
+#include "via_padstack_provider.hpp"
+#include "via.hpp"
+#include "plane.hpp"
 #include "clipper/clipper.hpp"
 #include "util/warning.hpp"
 #include "board_rules.hpp"
@@ -19,8 +19,8 @@
 #include <map>
 #include <fstream>
 #include "common/layer_provider.hpp"
-#include "board/fab_output_settings.hpp"
-#include "board/board_hole.hpp"
+#include "fab_output_settings.hpp"
+#include "board_hole.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;

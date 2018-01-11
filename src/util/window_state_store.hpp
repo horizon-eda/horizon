@@ -1,5 +1,5 @@
 #pragma once
-#include "util/sqlite.hpp"
+#include "sqlite.hpp"
 
 namespace Gtk {
 	class Window;

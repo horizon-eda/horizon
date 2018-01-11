@@ -1,5 +1,5 @@
-#include "canvas/canvas.hpp"
-#include "canvas/triangle.hpp"
+#include "canvas.hpp"
+#include "triangle.hpp"
 #include "common/common.hpp"
 #include <math.h>
 #include "util/placement.hpp"

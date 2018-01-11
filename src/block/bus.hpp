@@ -7,7 +7,7 @@
 #include <deque>
 #include <map>
 #include <fstream>
-#include "block/net.hpp"
+#include "net.hpp"
 
 namespace horizon {
 	using json = nlohmann::json;

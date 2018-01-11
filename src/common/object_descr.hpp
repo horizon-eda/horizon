@@ -1,5 +1,5 @@
 #pragma once
-#include "common/common.hpp"
+#include "common.hpp"
 #include <map>
 
 namespace horizon {

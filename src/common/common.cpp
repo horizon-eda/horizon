@@ -1,4 +1,4 @@
-#include "common/common.hpp"
+#include "common.hpp"
 
 namespace horizon {
 	const LutEnumStr<PatchType> patch_type_lut = {

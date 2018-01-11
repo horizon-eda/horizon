@@ -1,6 +1,6 @@
 #pragma once
 #include "util/uuid.hpp"
-#include "common/common.hpp"
+#include "common.hpp"
 #include "util/uuid_provider.hpp"
 #include "block/net.hpp"
 #include "util/uuid_ptr.hpp"

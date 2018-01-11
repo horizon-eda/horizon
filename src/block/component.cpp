@@ -1,6 +1,6 @@
-#include "block/component.hpp"
+#include "component.hpp"
 #include "pool/part.hpp"
-#include "block/block.hpp"
+#include "block.hpp"
 #include "logger/logger.hpp"
 
 namespace horizon {

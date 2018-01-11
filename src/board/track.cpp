@@ -1,8 +1,8 @@
-#include "board/track.hpp"
+#include "track.hpp"
 #include "common/lut.hpp"
 #include "board_package.hpp"
-#include "board/board.hpp"
-#include "board/board_layers.hpp"
+#include "board.hpp"
+#include "board_layers.hpp"
 
 namespace horizon {
 

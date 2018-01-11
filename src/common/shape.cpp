@@ -1,5 +1,5 @@
-#include "common/shape.hpp"
-#include "common/lut.hpp"
+#include "shape.hpp"
+#include "lut.hpp"
 
 namespace horizon {
 	static const LutEnumStr<Shape::Form> form_lut = {

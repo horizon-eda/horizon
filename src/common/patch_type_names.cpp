@@ -1,4 +1,4 @@
-#include "common/patch_type_names.hpp"
+#include "patch_type_names.hpp"
 
 namespace horizon {
 	std::map<PatchType, std::string> patch_type_names = {

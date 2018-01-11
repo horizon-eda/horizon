@@ -1,7 +1,7 @@
-#include "board/fab_output_settings.hpp"
-#include "board/board.hpp"
+#include "fab_output_settings.hpp"
+#include "board.hpp"
 #include "util/util.hpp"
-#include "board/board_layers.hpp"
+#include "board_layers.hpp"
 
 namespace horizon {
 

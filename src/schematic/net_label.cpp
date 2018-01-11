@@ -1,6 +1,6 @@
-#include "schematic/net_label.hpp"
+#include "net_label.hpp"
 #include "common/lut.hpp"
-#include "schematic/sheet.hpp"
+#include "sheet.hpp"
 
 namespace horizon {
 	NetLabel::NetLabel(const UUID &uu, const json &j, Sheet *sheet):

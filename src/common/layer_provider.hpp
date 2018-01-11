@@ -1,5 +1,5 @@
 #pragma once
-#include "common/layer.hpp"
+#include "layer.hpp"
 #include <vector>
 #include <map>
 

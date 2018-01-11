@@ -13,7 +13,7 @@
 #include "selection_filter_dialog.hpp"
 #include "keyseq_dialog.hpp"
 #include "widgets/spin_button_dim.hpp"
-#include "imp/imp_interface.hpp"
+#include "imp_interface.hpp"
 #include "preferences.hpp"
 #include "util/window_state_store.hpp"
 #include <zmq.hpp>

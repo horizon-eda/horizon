@@ -1,7 +1,7 @@
 #pragma once
 #include "util/uuid.hpp"
 #include "json.hpp"
-#include "common/common.hpp"
+#include "common.hpp"
 #include <vector>
 #include <map>
 #include <fstream>

@@ -1,8 +1,8 @@
-#include "pool/symbol.hpp"
+#include "symbol.hpp"
 #include "common/junction.hpp"
 #include "common/line.hpp"
 #include "common/lut.hpp"
-#include "pool/pool.hpp"
+#include "pool.hpp"
 #include "util/util.hpp"
 #include <iostream>
 #include <algorithm>

@@ -1,5 +1,5 @@
-#include "common/polygon.hpp"
-#include "common/lut.hpp"
+#include "polygon.hpp"
+#include "lut.hpp"
 
 namespace horizon {
 

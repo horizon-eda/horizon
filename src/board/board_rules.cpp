@@ -1,5 +1,5 @@
 #include "board_rules.hpp"
-#include "board/board.hpp"
+#include "board.hpp"
 #include "block/block.hpp"
 #include "util/util.hpp"
 #include "rules/cache.hpp"

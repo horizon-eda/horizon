@@ -1,6 +1,6 @@
-#include "common/object_descr.hpp"
-#include "common/hole.hpp"
-#include "common/dimension.hpp"
+#include "object_descr.hpp"
+#include "hole.hpp"
+#include "dimension.hpp"
 #include "pool/symbol.hpp"
 
 namespace horizon {

@@ -1,4 +1,4 @@
-#include "common/layer_provider.hpp"
+#include "layer_provider.hpp"
 
 namespace horizon {
 	const std::map<int, Layer> &LayerProvider::get_layers() const {

@@ -1,4 +1,4 @@
-#include "util/util.hpp"
+#include "util.hpp"
 #include <fstream>
 #include <unistd.h>
 #include <glibmm/miscutils.h>

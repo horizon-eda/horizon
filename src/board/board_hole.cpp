@@ -1,4 +1,4 @@
-#include "board/board_hole.hpp"
+#include "board_hole.hpp"
 #include "pool/pool.hpp"
 #include "pool/part.hpp"
 

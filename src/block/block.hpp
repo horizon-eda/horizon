@@ -2,9 +2,9 @@
 #include "util/uuid.hpp"
 #include "json.hpp"
 #include "pool/pool.hpp"
-#include "block/net.hpp"
-#include "block/component.hpp"
-#include "block/bus.hpp"
+#include "net.hpp"
+#include "component.hpp"
+#include "bus.hpp"
 #include "net_class.hpp"
 #include <vector>
 #include <map>
