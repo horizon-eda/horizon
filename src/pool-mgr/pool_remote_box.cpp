@@ -363,7 +363,7 @@ namespace horizon {
 							}
 						}
 						const Package *alt_pkg = package->alternate_for;
-						if(!exists_in_pool(pool_remote, ObjectType::PACKAGE, alt_pkg->uuid)) {
+						if(alt_pkg && !exists_in_pool(pool_remote, ObjectType::PACKAGE, alt_pkg->uuid)) {
 							if(items.emplace(ObjectType::PACKAGE, alt_pkg->uuid).second)
 								added = true;
 						}
