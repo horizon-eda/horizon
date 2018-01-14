@@ -1,4 +1,4 @@
-PRAGMA user_version=3;
+PRAGMA user_version=4;
 
 DROP TABLE IF EXISTS "units";
 CREATE TABLE "units" (
@@ -38,6 +38,13 @@ CREATE TABLE "packages" (
 	`alternate_for`	TEXT NOT NULL,
 	`filename`	TEXT NOT NULL,
 	PRIMARY KEY(`uuid`)
+);
+
+DROP TABLE IF EXISTS "models";
+CREATE TABLE "models" (
+	`package_uuid`		TEXT NOT NULL,
+	`model_uuid`		TEXT NOT NULL,
+	`model_filename`	TEXT NOT NULL
 );
 
 DROP TABLE IF EXISTS "parts";

@@ -220,6 +220,13 @@ namespace horizon {
 							q2.bind("$tag", it_tag);
 							q2.step();
 						}
+						for(const auto &it_model: package.model_filenames) {
+							SQLite::Query q2(db, "INSERT INTO models (package_uuid, model_uuid, model_filename) VALUES (?, ?, ?)");
+							q2.bind(1, package.uuid);
+							q2.bind(2, it_model.first);
+							q2.bind(3, it_model.second);
+							q2.step();
+						}
 					}
 				}
 				else if(Glib::file_test(pkgpath, Glib::FILE_TEST_IS_DIR)) {
@@ -351,6 +358,7 @@ namespace horizon {
 		db.execute("COMMIT");
 
 		status_cb(PoolUpdateStatus::INFO, "packages");
+		db.execute("DELETE FROM models");
 		update_packages(db, pool, Glib::build_filename(pool_base_path, "packages"), status_cb);
 
 		status_cb(PoolUpdateStatus::INFO, "parts");

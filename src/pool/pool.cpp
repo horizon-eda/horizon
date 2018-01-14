@@ -96,7 +96,7 @@ namespace horizon {
 	}
 
 	int Pool::get_required_schema_version() { //keep in sync with schema definition
-		return 3;
+		return 4;
 	}
 
 	std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) const {

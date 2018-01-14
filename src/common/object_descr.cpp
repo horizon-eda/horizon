@@ -26,6 +26,8 @@ namespace horizon {
 		}}},
 		{ObjectType::JUNCTION, {"Junction", "Junctions", {
 		}}},
+		{ObjectType::MODEL_3D, {"3D Model", "3D Models", {
+		}}},
 		{ObjectType::INVALID, {"Invalid", "Invalid", {
 		}}},
 		{ObjectType::SYMBOL, {"Symbol", "Symbols", {

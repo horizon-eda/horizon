@@ -4,6 +4,7 @@
 #include "pool/pool.hpp"
 #include "pool/part.hpp"
 #include "common/lut.hpp"
+#include "util/sqlite.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -42,6 +43,7 @@ namespace horizon {
 		if(rows.size() == 1) {
 			Gtk::TreeModel::Row row = *item_store->get_iter(rows.at(0));
 			ItemState state = row[list_columns.state];
+			ObjectType type = row[list_columns.type];
 			if(state == ItemState::CURRENT) {
 				box->stack->set_visible_child("up_to_date");
 			}
@@ -53,6 +55,9 @@ namespace horizon {
 			}
 			else if(state == ItemState::MOVED) {
 				box->stack->set_visible_child("moved");
+			}
+			else if(state == ItemState::CHANGED && type == ObjectType::MODEL_3D) {
+				box->stack->set_visible_child("3d_changed");
 			}
 			else if(state == ItemState::CHANGED || state == ItemState::MOVED_CHANGED) {
 				box->stack->set_visible_child("delta");
@@ -299,6 +304,28 @@ namespace horizon {
 		merged = true;
 	}
 
+	static bool compare_files(const std::string &filename_a, const std::string &filename_b) {
+		auto mapped_a = g_mapped_file_new(filename_a.c_str(), false, NULL);
+		if(!mapped_a) {
+			return false;
+		}
+		auto mapped_b = g_mapped_file_new(filename_b.c_str(), false, NULL);
+		if(!mapped_b) {
+			g_mapped_file_unref(mapped_a);
+			return false;
+		}
+		if(g_mapped_file_get_length(mapped_a) != g_mapped_file_get_length(mapped_b)) {
+			g_mapped_file_unref(mapped_a);
+			g_mapped_file_unref(mapped_b);
+			return false;
+		}
+		auto size  = g_mapped_file_get_length(mapped_a);
+		auto r = memcmp(g_mapped_file_get_contents(mapped_a), g_mapped_file_get_contents(mapped_b), size);
+		g_mapped_file_unref(mapped_a);
+		g_mapped_file_unref(mapped_b);
+		return r == 0;
+	}
+
 	void PoolMergeDialog::populate_store() {
 		Pool pool_local(local_path);
 		{
@@ -390,8 +417,38 @@ namespace horizon {
 						row[list_columns.state] = ItemState::CURRENT;
 					}
 				}
-
 			}
+
+		}
+		{
+			SQLite::Query q(pool_local.db, "SELECT DISTINCT model_filename FROM remote.models");
+			while(q.step()) {
+				std::string filename = q.get<std::string>(0);
+				std::string remote_filename = Glib::build_filename(remote_path, filename);
+				std::string local_filename = Glib::build_filename(local_path, filename);
+
+				if(Glib::file_test(remote_filename, Glib::FILE_TEST_IS_REGULAR)) { //remote is there
+					Gtk::TreeModel::Row row;
+					row = *item_store->append();
+					row[list_columns.type] = ObjectType::MODEL_3D;
+					row[list_columns.name] = Glib::path_get_basename(filename);
+					row[list_columns.filename_local] = filename;
+					row[list_columns.filename_remote] = filename;
+					row[list_columns.merge] = true;
+					if(Glib::file_test(local_filename, Glib::FILE_TEST_IS_REGULAR)) {
+						if(compare_files(remote_filename, local_filename)) {
+							row[list_columns.state] = ItemState::CURRENT;
+						}
+						else {
+							row[list_columns.state] = ItemState::CHANGED;
+						}
+					}
+					else {
+						row[list_columns.state] = ItemState::REMOTE_ONLY;
+					}
+				}
+			}
+
 		}
 	}
 }

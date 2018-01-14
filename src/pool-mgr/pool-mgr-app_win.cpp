@@ -263,15 +263,32 @@ namespace horizon {
 			}
 			download_dispatcher.emit();
 
-			SQLite::Query q(pool.db, "SELECT filename FROM all_items_view");
-			while(q.step()) {
-				std::string filename = q.get<std::string>(0);
-				auto dirname = Glib::build_filename(dest_dir, Glib::path_get_dirname(filename));
-				if(!Glib::file_test(dirname, Glib::FILE_TEST_IS_DIR)) {
-					Gio::File::create_for_path(dirname)->make_directory_with_parents();
+			{
+				SQLite::Query q(pool.db, "SELECT filename FROM all_items_view");
+				while(q.step()) {
+					std::string filename = q.get<std::string>(0);
+					auto dirname = Glib::build_filename(dest_dir, Glib::path_get_dirname(filename));
+					if(!Glib::file_test(dirname, Glib::FILE_TEST_IS_DIR)) {
+						Gio::File::create_for_path(dirname)->make_directory_with_parents();
+					}
+					Gio::File::create_for_path(Glib::build_filename(remote_dir, filename))->copy(Gio::File::create_for_path(Glib::build_filename(dest_dir, filename)));
 				}
-				Gio::File::create_for_path(Glib::build_filename(remote_dir, filename))->copy(Gio::File::create_for_path(Glib::build_filename(dest_dir, filename)));
 			}
+			{
+				SQLite::Query q(pool.db, "SELECT DISTINCT model_filename FROM models");
+				while(q.step()) {
+					std::string filename = q.get<std::string>(0);
+					auto remote_filename = Glib::build_filename(remote_dir, filename);
+					if(Glib::file_test(remote_filename, Glib::FILE_TEST_IS_REGULAR)) {
+						auto dirname = Glib::build_filename(dest_dir, Glib::path_get_dirname(filename));
+						if(!Glib::file_test(dirname, Glib::FILE_TEST_IS_DIR)) {
+							Gio::File::create_for_path(dirname)->make_directory_with_parents();
+						}
+						Gio::File::create_for_path(remote_filename)->copy(Gio::File::create_for_path(Glib::build_filename(dest_dir, filename)));
+					}
+				}
+			}
+
 			Gio::File::create_for_path(Glib::build_filename(remote_dir, "pool.json"))->copy(Gio::File::create_for_path(Glib::build_filename(dest_dir, "pool.json")));
 			Gio::File::create_for_path(Glib::build_filename(dest_dir, "tmp"))->make_directory();
 
