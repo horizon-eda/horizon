@@ -174,9 +174,12 @@ namespace horizon {
 			alternate_for = pool.get_package(UUID(j.at("alternate_for").get<std::string>()));
 		}
 		if(j.count("model_filename")) {
-			auto m_uu = UUID::random();
-			model_filenames.emplace(m_uu, j.at("model_filename"));
-			default_model = m_uu;
+			std::string mfn = j.at("model_filename");
+			if(mfn.size()) {
+				auto m_uu = UUID::random();
+				model_filenames.emplace(m_uu, j.at("model_filename"));
+				default_model = m_uu;
+			}
 		}
 		if(j.count("model_filenames")) {
 			const json &o = j["model_filenames"];
