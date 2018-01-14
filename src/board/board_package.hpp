@@ -22,6 +22,7 @@ namespace horizon {
 			UUID uuid;
 			uuid_ptr<Component> component;
 			const Package *alternate_package = nullptr;
+			UUID model;
 
 			const Package *pool_package;
 			Package package;

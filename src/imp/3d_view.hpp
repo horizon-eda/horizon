@@ -13,8 +13,6 @@ namespace horizon {
 			typedef sigc::signal<void> type_signal_request_update;
 			type_signal_request_update signal_request_update() {return s_signal_request_update;}
 
-			bool from_pool = true;
-
 		private:
 			class Canvas3D *canvas = nullptr;
 			const class Board *board;

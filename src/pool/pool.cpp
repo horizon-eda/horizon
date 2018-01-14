@@ -195,8 +195,8 @@ namespace horizon {
 		return r;
 	}
 
-	std::string Pool::get_3d_model_filename(const UUID &package_uuid) {
-		auto mfn = get_package(package_uuid)->model_filename;
+	std::string Pool::get_3d_model_filename(const UUID &package_uuid, const UUID &model_uuid) {
+		auto mfn = get_package(package_uuid)->get_model_filename(model_uuid);
 		if(mfn.size())
 			return Glib::build_filename(base_path, mfn);
 		else

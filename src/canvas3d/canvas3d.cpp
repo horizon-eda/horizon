@@ -371,11 +371,11 @@ namespace horizon {
 		return layers[layer].offset+layers[layer].explode_mul*explode;
 	}
 
-	void Canvas3D::load_3d_model(const UUID &uu, const std::string &filename) {
-		if(models.count(uu))
+	void Canvas3D::load_3d_model(const std::string &filename, const std::string &base_path) {
+		if(models.count(filename))
 			return;
 
-		auto faces = STEPImporter::import(filename);
+		auto faces = STEPImporter::import(Glib::build_filename(base_path, filename));
 		//canvas->face_vertex_buffer.reserve(faces.size());
 		size_t vertex_offset = face_vertex_buffer.size();
 		size_t first_index = face_index_buffer.size();
@@ -393,34 +393,26 @@ namespace horizon {
 			vertex_offset += face.vertices.size();
 		}
 		size_t last_index = face_index_buffer.size();
-		models.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(first_index, last_index-first_index));
+		models.emplace(std::piecewise_construct, std::forward_as_tuple(filename), std::forward_as_tuple(first_index, last_index-first_index));
 	}
 
-	void Canvas3D::load_models_thread(std::map<UUID, std::string> model_filenames) {
+	void Canvas3D::load_models_thread(std::set<std::string> model_filenames, std::string base_path) {
 		std::lock_guard<std::mutex> lock(models_loading_mutex);
 		for(const auto &it: model_filenames) {
-			load_3d_model(it.first, it.second);
+			load_3d_model(it, base_path);
 		}
 		models_loading_dispatcher.emit();
 	}
 
-	void Canvas3D::load_models_async(Pool *pool, bool from_pool) {
-		std::map<UUID, std::string> model_filenames;
+	void Canvas3D::load_models_async(Pool *pool) {
+		std::set<std::string> model_filenames;
 		for(const auto &it: brd->packages) {
-			std::string mfn;
-			auto uu = it.second.pool_package->uuid;
-			if(from_pool) {
-				mfn = pool->get_3d_model_filename(uu);
-			}
-			else {
-				if(it.second.package.model_filename.size())
-					mfn = Glib::build_filename(pool->get_base_path(), it.second.package.model_filename);
-			}
+			std::string mfn = it.second.package.get_model_filename(it.second.model);
 			if(mfn.size())
-				model_filenames[uu] = mfn;
+				model_filenames.insert(mfn);
 		}
 		s_signal_models_loading.emit(true);
-		std::thread thr(&Canvas3D::load_models_thread, this, model_filenames);
+		std::thread thr(&Canvas3D::load_models_thread, this, model_filenames, pool->get_base_path());
 
 		thr.detach();
 	}
@@ -434,9 +426,10 @@ namespace horizon {
 	void Canvas3D::prepare_packages() {
 		package_transform_idxs.clear();
 		package_transforms.clear();
-		std::map<UUID, std::set<const BoardPackage*>> pkg_map;
+		std::map<std::string, std::set<const BoardPackage*>> pkg_map;
 		for(const auto &it: brd->packages) {
-			pkg_map[it.second.pool_package->uuid].insert(&it.second);
+			std::string mfn = it.second.package.get_model_filename(it.second.model);
+			pkg_map[mfn].insert(&it.second);
 		}
 
 		for(const auto &it_pkg: pkg_map) {

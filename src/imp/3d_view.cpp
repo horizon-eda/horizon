@@ -108,7 +108,8 @@ namespace horizon {
 		//gradients from https://uigradients.com/
 		static const std::vector<std::pair<std::string, std::pair<Gdk::Color, Gdk::Color>>> background_color_presets = {
 			{"Default", {Gdk::Color("#333365"), Gdk::Color("#9797aa")}},
-			{"Sunset", {Gdk::Color("#333365"), Gdk::Color("#B3A26B")}},
+			{"Sunset 1", {Gdk::Color("#333365"), Gdk::Color("#B3A26B")}},
+			{"Sunset 2", {Gdk::Color("#35FFEE"), Gdk::Color("#FFC674")}},
 			{"White", {Gdk::Color("#ffffff"), Gdk::Color("#ffffff")}},
 			{"Black", {Gdk::Color("#000000"), Gdk::Color("#000000")}},
 			{"Grey", {Gdk::Color("#808080"), Gdk::Color("#808080")}},
@@ -155,7 +156,7 @@ namespace horizon {
 		canvas->update2(*board);
 		if(clear)
 			canvas->clear_3d_models();
-		canvas->load_models_async(pool, from_pool);
+		canvas->load_models_async(pool);
 	}
 
 }

@@ -118,8 +118,7 @@ namespace horizon {
 			uuid(uu),
 			name(j.at("name").get<std::string>()),
 			manufacturer(j.value("manufacturer", "")),
-			parameter_program(this, j.value("parameter_program", "")),
-			model_filename(j.value("model_filename", ""))
+			parameter_program(this, j.value("parameter_program", ""))
 		{
 		{
 			const json &o = j["junctions"];
@@ -174,6 +173,19 @@ namespace horizon {
 		if(j.count("alternate_for")) {
 			alternate_for = pool.get_package(UUID(j.at("alternate_for").get<std::string>()));
 		}
+		if(j.count("model_filename")) {
+			auto m_uu = UUID::random();
+			model_filenames.emplace(m_uu, j.at("model_filename"));
+			default_model = m_uu;
+		}
+		if(j.count("model_filenames")) {
+			const json &o = j["model_filenames"];
+			for (auto it = o.cbegin(); it != o.cend(); ++it) {
+				auto u = UUID(it.key());
+				model_filenames.emplace(u, it.value());
+			}
+			default_model = j.at("default_model").get<std::string>();
+		}
 	}
 
 	Package Package::new_from_file(const std::string &filename, Pool &pool) {
@@ -206,7 +218,8 @@ namespace horizon {
 		polygons(pkg.polygons),
 		parameter_set(pkg.parameter_set),
 		parameter_program(pkg.parameter_program),
-		model_filename(pkg.model_filename),
+		model_filenames(pkg.model_filenames),
+		default_model(pkg.default_model),
 		alternate_for(pkg.alternate_for),
 		warnings(pkg.warnings)
 	{
@@ -226,7 +239,8 @@ namespace horizon {
 		polygons = pkg.polygons;
 		parameter_set = pkg.parameter_set;
 		parameter_program = pkg.parameter_program;
-		model_filename = pkg.model_filename;
+		model_filenames = pkg.model_filenames;
+		default_model = pkg.default_model;
 		alternate_for = pkg.alternate_for;
 		warnings = pkg.warnings;
 		update_refs();
@@ -321,7 +335,11 @@ namespace horizon {
 		j["parameter_set"] = parameter_set_serialize(parameter_set);
 		if(alternate_for && alternate_for->uuid != uuid)
 			j["alternate_for"] = (std::string)alternate_for->uuid;
-		j["model_filename"] = model_filename;
+		j["model_filenames"] = json::object();
+		for(const auto &it: model_filenames) {
+			j["model_filenames"][(std::string)it.first] = it.second;
+		}
+		j["default_model"] = (std::string) default_model;
 		j["junctions"] = json::object();
 		for(const auto &it: junctions) {
 			j["junctions"][(std::string)it.first] = it.second.serialize();
@@ -351,6 +369,20 @@ namespace horizon {
 
 	UUID Package::get_uuid() const {
 		return uuid;
+	}
+
+	static const std::string empty;
+	const std::string &Package::get_model_filename(const UUID &uu) const {
+		UUID uu2 = uu;
+		if(uu2 == UUID()) {
+			uu2 = default_model;
+		}
+		if(model_filenames.count(uu2)) {
+			return model_filenames.at(uu2);
+		}
+		else {
+			return empty;
+		}
 	}
 
 }

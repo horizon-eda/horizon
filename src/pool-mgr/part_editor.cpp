@@ -109,6 +109,7 @@ namespace horizon {
 		x->get_widget("entity_label", w_entity_label);
 		x->get_widget("package_label", w_package_label);
 		x->get_widget("change_package_button", w_change_package_button);
+		x->get_widget("model_combo", w_model_combo);
 		x->get_widget("base_label", w_base_label);
 		x->get_widget("tags", w_tags);
 		x->get_widget("tags_inherit", w_tags_inherit);
@@ -254,6 +255,10 @@ namespace horizon {
 		});
 
 		update_mapped();
+		populate_models();
+		w_model_combo->set_active_id((std::string)part->model);
+		w_model_combo->set_sensitive(!part->base);
+		w_model_combo->signal_changed().connect([this] {needs_save=true;});
 
 		w_parametric_from_base->set_sensitive(part->base);
 		w_parametric->get_buffer()->set_text(serialize_parametric(part->parametric));
@@ -331,6 +336,8 @@ namespace horizon {
 
 			update_entries();
 			update_mapped();
+			populate_models();
+			w_model_combo->set_active_id((std::string)part->package->default_model);
 		}
 	}
 
@@ -343,6 +350,7 @@ namespace horizon {
 		for(auto &it: attr_editors) {
 			part->attributes[it.first] = it.second->get_as_pair();
 		}
+		part->model = UUID(w_model_combo->get_active_id());
 		{
 			std::stringstream ss(w_tags->get_text());
 			std::istream_iterator<std::string> begin(ss);
@@ -428,6 +436,13 @@ namespace horizon {
 		}
 		w_pin_stat->set_text(std::to_string(pin_store->children().size()-pins_mapped.size()) + " pins not mapped");
 		w_pad_stat->set_text(std::to_string(n_pads_not_mapped) + " pads not mapped");
+	}
+
+	void PartEditor::populate_models() {
+		w_model_combo->remove_all();
+		for(const auto &it: part->package->model_filenames) {
+			w_model_combo->append((std::string)it.first, Glib::path_get_basename(it.second));
+		}
 	}
 
 	PartEditor* PartEditor::create(Part *p, Pool *po) {

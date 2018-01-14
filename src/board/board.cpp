@@ -573,6 +573,7 @@ namespace horizon {
 
 		for(auto &it: packages) {
 			it.second.pool_package = it.second.component->part->package;
+			it.second.model = it.second.component->part->model;
 			if(it.second.alternate_package) {
 				std::set<std::string> pads_from_primary, pads_from_alt;
 				for(const auto &it_pad: it.second.pool_package->pads) {

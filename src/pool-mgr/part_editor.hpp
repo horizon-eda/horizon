@@ -30,6 +30,7 @@ namespace horizon {
 			Gtk::Label *w_package_label = nullptr;
 			Gtk::Label *w_base_label = nullptr;
 			Gtk::Button *w_change_package_button = nullptr;
+			Gtk::ComboBoxText *w_model_combo = nullptr;
 
 			Gtk::Entry *w_tags = nullptr;
 			Gtk::Entry *w_tags_inherited = nullptr;
@@ -89,6 +90,7 @@ namespace horizon {
 			void update_mapped();
 			void update_entries();
 			void change_package();
+			void populate_models();
 
 
 	};

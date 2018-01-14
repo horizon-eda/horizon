@@ -71,7 +71,10 @@ namespace horizon {
 			MyParameterProgram parameter_program;
 			PackageRules rules;
 
-			std::string model_filename;
+			std::map<UUID, std::string> model_filenames;
+			UUID default_model;
+			const std::string &get_model_filename(const UUID &uu=UUID()) const;
+
 			const class Package *alternate_for = nullptr;
 
 			std::vector<Warning> warnings;

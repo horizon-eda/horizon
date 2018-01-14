@@ -44,6 +44,7 @@ namespace horizon {
 			bool inherit_tags = false;
 			uuid_ptr<const Entity> entity;
 			uuid_ptr<const Package> package;
+			UUID model;
 			uuid_ptr<const Part> base;
 
 			void update_refs(Pool &pool);

@@ -42,9 +42,9 @@ namespace horizon {
 			void update2(const class Board &brd);
 			void prepare();
 
-			void load_models_async(class Pool *pool, bool from_pool=true);
+			void load_models_async(class Pool *pool);
 
-			void load_3d_model(const UUID &uu, const std::string &filename);
+			void load_3d_model(const std::string &filename, const std::string &base_path);
 			void clear_3d_models();
 
 			typedef sigc::signal<void, bool> type_signal_models_loading;
@@ -135,7 +135,7 @@ namespace horizon {
 			const class Board *brd = nullptr;
 			void add_path(int layer, const ClipperLib::Path &path);
 
-			void load_models_thread(std::map<UUID, std::string> model_filenames);
+			void load_models_thread(std::set<std::string> model_filenames, std::string base_path);
 
 
 			std::unordered_map<int, Layer3D> layers;
@@ -143,11 +143,11 @@ namespace horizon {
 			std::mutex models_loading_mutex;
 			std::vector<FaceVertex> face_vertex_buffer; //vertices of all models, sequentially
 			std::vector<unsigned int> face_index_buffer; //indexes face_vertex_buffer to form triangles
-			std::map<UUID, std::pair<size_t, size_t>> models; //key: package value: first: offset in face_index_buffer second: no of indexes
+			std::map<std::string, std::pair<size_t, size_t>> models; //key: filename value: first: offset in face_index_buffer second: no of indexes
 			Glib::Dispatcher models_loading_dispatcher;
 
 			std::vector<ModelTransform> package_transforms; //position and rotation of all board packages, grouped by package
-			std::map<UUID, std::pair<size_t, size_t>> package_transform_idxs; //key: board package: value: first: offset in package_transforms second: no of items
+			std::map<std::string, std::pair<size_t, size_t>> package_transform_idxs; //key: model filename: value: first: offset in package_transforms second: no of items
 
 			type_signal_models_loading s_signal_models_loading;
 

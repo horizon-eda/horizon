@@ -44,6 +44,139 @@ namespace horizon {
 
 	}
 
+
+	class ModelEditor: public Gtk::Box {
+		public:
+			ModelEditor(ImpPackage *iimp, const UUID &iuu);
+			const UUID uu;
+			void update_all();
+
+		private:
+			ImpPackage *imp;
+			Package *pkg = nullptr;
+			Gtk::CheckButton *default_cb = nullptr;
+			Gtk::Label *current_label = nullptr;
+	};
+
+	ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu): Gtk::Box(Gtk::ORIENTATION_VERTICAL, 5), uu(iuu), imp(iimp) {
+		pkg = imp->core_package.get_package();
+		property_margin() = 10;
+		auto entry = Gtk::manage(new Gtk::Entry);
+		pack_start(*entry, false, false, 0);
+		entry->show();
+		entry->set_width_chars(45);
+		entry->signal_focus_in_event().connect([this](GdkEventFocus *ev) {
+			imp->current_model = uu;
+			imp->view_3d_window->update();
+			update_all();
+			return false;
+		});
+		bind_widget(entry, pkg->model_filenames.at(uu));
+
+		auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
+		auto delete_button = Gtk::manage(new Gtk::Button);
+		delete_button->set_image_from_icon_name("list-remove-symbolic", Gtk::ICON_SIZE_BUTTON);
+		delete_button->signal_clicked().connect([this] {
+			pkg->model_filenames.erase(uu);
+			if(pkg->default_model == uu) {
+				if(pkg->model_filenames.size()) {
+					pkg->default_model = pkg->model_filenames.begin()->first;
+				}
+				else {
+					pkg->default_model = UUID();
+				}
+			}
+			update_all();
+			delete this->get_parent();
+		});
+		box->pack_end(*delete_button, false, false, 0);
+
+		auto browse_button = Gtk::manage(new Gtk::Button("Browse..."));
+		browse_button->signal_clicked().connect([this, entry] {
+			auto mfn = imp->ask_3d_model_filename(pkg->get_model_filename(uu));
+			if(mfn.size()) {
+				entry->set_text(mfn);
+				imp->view_3d_window->update(true);
+			}
+
+		});
+		box->pack_end(*browse_button, false, false, 0);
+
+		default_cb = Gtk::manage(new Gtk::CheckButton("Default"));
+		if(pkg->default_model == uu) {
+			default_cb->set_active(true);
+		}
+		default_cb->signal_toggled().connect([this] {
+			if(default_cb->get_active()) {
+				pkg->default_model = uu;
+				imp->current_model = uu;
+			}
+			imp->view_3d_window->update();
+			update_all();
+		});
+		box->pack_start(*default_cb, false, false, 0);
+
+		current_label = Gtk::manage(new Gtk::Label("Current"));
+		current_label->get_style_context()->add_class("dim-label");
+		current_label->set_no_show_all(true);
+		box->pack_start(*current_label, false, false, 0);
+
+		box->show_all();
+		pack_start(*box, false, false, 0);
+
+		update_all();
+	}
+
+	void ModelEditor::update_all() {
+		if(pkg->model_filenames.count(imp->current_model) == 0) {
+			imp->current_model = pkg->default_model;
+		}
+		auto children = imp->models_listbox->get_children();
+		for(auto ch: children) {
+			auto ed = dynamic_cast<ModelEditor*>(dynamic_cast<Gtk::ListBoxRow*>(ch)->get_child());
+			ed->default_cb->set_active(pkg->default_model == ed->uu);
+			ed->current_label->set_visible(imp->current_model == ed->uu);
+		}
+	}
+
+	std::string ImpPackage::ask_3d_model_filename(const std::string &current_filename) {
+		GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open",
+			GTK_WINDOW(view_3d_window->gobj()),
+			GTK_FILE_CHOOSER_ACTION_OPEN,
+			"_Open",
+			"_Cancel");
+		auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+		auto filter= Gtk::FileFilter::create();
+		filter->set_name("STEP models");
+		filter->add_pattern("*.step");
+		filter->add_pattern("*.stp");
+		chooser->add_filter(filter);
+		if(current_filename.size()) {
+			chooser->set_filename(Glib::build_filename(pool->get_base_path(), current_filename));
+		}
+		else {
+			chooser->set_current_folder(pool->get_base_path());
+		}
+
+		while (1) {
+			if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
+				auto base_path = Gio::File::create_for_path(pool->get_base_path());
+				auto rel = base_path->get_relative_path(chooser->get_file());
+				if(rel.size()) {
+					return rel;
+				}
+				else {
+					Gtk::MessageDialog md(*view_3d_window,  "Model has to be in the pool directory", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+					md.run();
+				}
+			}
+			else {
+				return "";
+			}
+		}
+		return "";
+	}
+
 	void ImpPackage::construct() {
 		ImpLayer::construct_layer_box();
 
@@ -61,7 +194,6 @@ namespace horizon {
 		fake_board.stackup.at(0).substrate_thickness = 1.6_mm;
 
 		view_3d_window = View3DWindow::create(&fake_board, pool.get());
-		view_3d_window->from_pool = false;
 		view_3d_window->signal_request_update().connect([this] {
 			fake_board.polygons.clear();
 			{
@@ -85,79 +217,79 @@ namespace horizon {
 				auto &fake_package = fake_board.packages.emplace(uu, uu).first->second;
 				fake_package.package = *core_package.get_package();
 				fake_package.pool_package = core_package.get_package();
+				fake_package.model = current_model;
 			}
 		});
 
-
-
-		auto box_3d_filename = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
-		box_3d_filename->get_style_context()->add_class("linked");
-		auto entry_3d_filename = Gtk::manage(new Gtk::Entry);
-		entry_3d_filename->set_width_chars(40);
-		bind_widget(entry_3d_filename, core_package.get_package()->model_filename);
-		box_3d_filename->pack_start(*entry_3d_filename, true, true, 0);
-
+		auto models_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
 		{
-			auto button = Gtk::manage(new Gtk::Button("Browse..."));
-			button->signal_clicked().connect([this, entry_3d_filename] {
-				GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open",
-					GTK_WINDOW(view_3d_window->gobj()),
-					GTK_FILE_CHOOSER_ACTION_OPEN,
-					"_Open",
-					"_Cancel");
-				auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-				auto filter= Gtk::FileFilter::create();
-				filter->set_name("STEP models");
-				filter->add_pattern("*.step");
-				filter->add_pattern("*.stp");
-				chooser->add_filter(filter);
-				std::string entrytext = entry_3d_filename->get_text();
-				if(entrytext.size()) {
-					chooser->set_filename(Glib::build_filename(pool->get_base_path(), entrytext));
-				}
-				else {
-					chooser->set_current_folder(pool->get_base_path());
-				}
+			auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
+			box->property_margin()=10;
+			auto la = Gtk::manage(new Gtk::Label);
+			la->set_markup("<b>3D Models</b>");
+			la->set_xalign(0);
+			box->pack_start(*la, false, false, 0);
 
-				if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
-					auto base_path = Gio::File::create_for_path(pool->get_base_path());
-					auto rel = base_path->get_relative_path(chooser->get_file());
-					if(rel.size()) {
-						entry_3d_filename->set_text(rel);
-						view_3d_window->update(true);
-					}
-					else {
-						Gtk::MessageDialog md(*view_3d_window,  "Model has to be in the pool directory", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
-						md.run();
-					}
-				}
-
-			});
-			box_3d_filename->pack_start(*button, false, false, 0);
-		}
-
-		{
-			auto box_model_settings = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
-			view_3d_window->add_widget(box_model_settings);
-			box_model_settings->property_margin() = 10;
-			{
-				auto la = Gtk::manage(new Gtk::Label("3D Model:"));
-				box_model_settings->pack_start(*la, false, false, 0);
-			}
-			box_model_settings->pack_start(*box_3d_filename, false, false, 0);
-
-			auto button_reload = Gtk::manage(new Gtk::Button);
-			button_reload->set_image_from_icon_name("view-refresh-symbolic", Gtk::ICON_SIZE_BUTTON);
-			button_reload->signal_clicked().connect([this] {});
-			button_reload->set_tooltip_text("Reload Model");
+			auto button_reload = Gtk::manage(new Gtk::Button("Reload models"));
 			button_reload->signal_clicked().connect([this]{
 				view_3d_window->update(true);
 			});
-			box_model_settings->pack_start(*button_reload, false, false, 0);
+			box->pack_end(*button_reload, false, false, 0);
 
+			auto button_add = Gtk::manage(new Gtk::Button("Add model"));
+			button_add->signal_clicked().connect([this] {
+				auto mfn = ask_3d_model_filename();
+				if(mfn.size()) {
+					auto uu = UUID::random();
+					auto pkg = core_package.get_package();
+					if(pkg->model_filenames.size() == 0) { //first
+						pkg->default_model = uu;
+					}
+					pkg->model_filenames[uu] = mfn;
+					auto ed = Gtk::manage(new ModelEditor(this, uu));
+					models_listbox->append(*ed);
+					ed->show();
+				}
+			});
+			box->pack_end(*button_add, false, false, 0);
 
-			box_model_settings->show_all();
+			models_box->pack_start(*box, false, false, 0);
 		}
+		{
+			auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+			models_box->pack_start(*sep, false, false, 0);
+		}
+		{
+			auto sc = Gtk::manage(new Gtk::ScrolledWindow);
+			sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+
+			models_listbox = Gtk::manage(new Gtk::ListBox);
+			models_listbox->set_selection_mode(Gtk::SELECTION_NONE);
+			models_listbox->set_header_func(sigc::ptr_fun(header_func_separator));
+			models_listbox->set_activate_on_single_click(true);
+			models_listbox->signal_row_activated().connect([this](Gtk::ListBoxRow *row) {
+				auto ed = dynamic_cast<ModelEditor*>(row->get_child());
+				current_model = ed->uu;
+				view_3d_window->update();
+				ed->update_all();
+			});
+			sc->add(*models_listbox);
+
+
+
+			auto pkg = core_package.get_package();
+			current_model = pkg->default_model;
+			for(auto &it: pkg->model_filenames)  {
+				auto ed = Gtk::manage(new ModelEditor(this, it.first));
+				models_listbox->append(*ed);
+				ed->show();
+			}
+
+			models_box->pack_start(*sc, true, true, 0);
+		}
+
+		models_box->show_all();
+		view_3d_window->add_widget(models_box);
 
 		footprint_generator_window = FootprintGeneratorWindow::create(main_window, &core_package);
 		footprint_generator_window->signal_generated().connect(sigc::mem_fun(this, &ImpBase::canvas_update_from_pp));
@@ -297,7 +429,7 @@ namespace horizon {
 			main_window->header->pack_end(*button);
 		}
 
-		core_package.signal_save().connect([this, entry_name, entry_manufacturer, entry_tags, header_button, browser_alt_button, entry_3d_filename]{
+		core_package.signal_save().connect([this, entry_name, entry_manufacturer, entry_tags, header_button, browser_alt_button]{
 			auto pkg = core_package.get_package(false);
 			std::stringstream ss(entry_tags->get_text());
 			std::istream_iterator<std::string> begin(ss);

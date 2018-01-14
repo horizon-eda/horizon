@@ -139,8 +139,10 @@ namespace horizon {
 			glUniform1f(z_bottom_loc, ca->get_layer_offset(BoardLayers::BOTTOM_COPPER));
 
 			for(const auto &it: ca->models) {
-				auto idxs = ca->package_transform_idxs.at(it.first);
-				glDrawElementsInstancedBaseInstance (GL_TRIANGLES, it.second.second, GL_UNSIGNED_INT, (void*)(it.second.first*sizeof(int)), idxs.second, idxs.first);
+				if(ca->package_transform_idxs.count(it.first)) {
+					auto idxs = ca->package_transform_idxs.at(it.first);
+					glDrawElementsInstancedBaseInstance (GL_TRIANGLES, it.second.second, GL_UNSIGNED_INT, (void*)(it.second.first*sizeof(int)), idxs.second, idxs.first);
+				}
 			}
 			ca->models_loading_mutex.unlock();
 		}

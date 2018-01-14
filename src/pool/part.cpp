@@ -23,6 +23,7 @@ namespace horizon {
 			base = pool.get_part(j.at("base").get<std::string>());
 			entity = base->entity;
 			package = base->package;
+			model = base->model;
 			pad_map = base->pad_map;
 			/*if(MPN_raw == "$") {
 				MPN = base->MPN;
@@ -37,6 +38,8 @@ namespace horizon {
 		else {
 			entity = pool.get_entity(j.at("entity").get<std::string>());
 			package = pool.get_package(j.at("package").get<std::string>());
+			if(j.count("model"))
+				model = j.at("model").get<std::string>();
 			const json &o = j["pad_map"];
 			for (auto it = o.cbegin(); it != o.cend(); ++it) {
 				auto pad_uuid = UUID(it.key());
@@ -65,6 +68,8 @@ namespace horizon {
 				parametric.emplace(it.key(), it->get<std::string>());
 			}
 		}
+		if(package->model_filenames.count(model) == 0)
+			model = package->default_model;
 		//if(value.size() == 0) {
 		//	value = MPN;
 		//}
@@ -170,6 +175,7 @@ namespace horizon {
 		else {
 			j["entity"] = (std::string)entity->uuid;
 			j["package"] = (std::string)package->uuid;
+			j["model"] = (std::string)model;
 			j["pad_map"] = json::object();
 			for(const auto &it: pad_map) {
 				json k;
