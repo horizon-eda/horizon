@@ -830,7 +830,7 @@ namespace horizon {
 				}
 				files_merge.insert(models_merge.begin(), models_merge.end());
 
-				for(const auto &filename: files_merge) {
+				for(std::string filename: files_merge) {
 					std::cout << "merge " << filename << std::endl;
 					std::string filename_src = Glib::build_filename(notebook->base_path, filename);
 					std::string filename_dest = Glib::build_filename(notebook->remote_repo, filename);
