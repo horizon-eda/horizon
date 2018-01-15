@@ -411,6 +411,7 @@ namespace horizon {
 			break;
 		}
 		canvas->show_all_junctions_in_schematic = preferences.schematic.show_all_junctions;
+		canvas->set_msaa(canvas_prefs->msaa);
 	}
 
 	void ImpBase::canvas_update_from_pp() {

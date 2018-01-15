@@ -79,6 +79,8 @@ namespace horizon {
 			void set_highlight_shadow(float a);
 			void set_highlight_lighten(float a);
 
+			void set_msaa(unsigned int samples);
+
 			void inhibit_drag_selection();
 
 			Gdk::ModifierType grid_fine_modifier = Gdk::MOD1_MASK;
@@ -101,6 +103,14 @@ namespace horizon {
 			Coord<int64_t> cursor_pos_grid;
 			bool cursor_external=false;
 			bool warped = false;
+
+			GLuint renderbuffer;
+			GLuint stencilrenderbuffer;
+			GLuint fbo;
+			unsigned int num_samples=4;
+			bool needs_resize = false;
+
+			void resize_buffers();
 
 
 			Color background_color = Color::new_from_int(0, 24, 64);

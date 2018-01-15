@@ -80,6 +80,20 @@ namespace horizon {
 		canvas_highlight_dim->signal_value_changed().connect([this]{preferences->signal_changed().emit();});
 		canvas_highlight_shadow->signal_value_changed().connect([this]{preferences->signal_changed().emit();});
 		canvas_highlight_lighten->signal_value_changed().connect([this]{preferences->signal_changed().emit();});
+
+
+		Gtk::ComboBoxText *msaa_combo;
+		GET_WIDGET(msaa_combo);
+		msaa_combo->append("0", "Off");
+		for(int i = 1; i < 5; i*=2) {
+			msaa_combo->append(std::to_string(i), std::to_string(i)+"× MSAA");
+		}
+		msaa_combo->set_active_id(std::to_string(canvas_preferences->msaa));
+		msaa_combo->signal_changed().connect([this, msaa_combo] {
+			int msaa = std::stoi(msaa_combo->get_active_id());
+			canvas_preferences->msaa = msaa;
+			preferences->signal_changed().emit();
+		});
 	}
 
 	CanvasPreferencesEditor* CanvasPreferencesEditor::create(ImpPreferences *prefs, CanvasPreferences *canvas_prefs) {

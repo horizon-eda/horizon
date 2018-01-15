@@ -50,6 +50,7 @@ namespace horizon {
 		j["highlight_dim"] = highlight_dim;
 		j["highlight_lighten"] = highlight_lighten;
 		j["grid_fine_modifier"] = grid_fine_mod_lut.lookup_reverse(grid_fine_modifier);
+		j["msaa"] = msaa;
 		return j;
 	}
 
@@ -61,6 +62,7 @@ namespace horizon {
 		highlight_shadow = j.value("highlight_shadow", .3);
 		highlight_lighten = j.value("highlight_lighten", .3);
 		grid_fine_modifier = grid_fine_mod_lut.lookup(j.value("grid_fine_modifier", "alt"));
+		msaa = j.value("msaa", 0);
 	}
 
 	json SchematicPreferences::serialize() const {

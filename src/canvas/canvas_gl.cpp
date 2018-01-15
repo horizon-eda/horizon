@@ -83,16 +83,34 @@ namespace horizon {
 		screenmat[MAT3_Y0] = 1;
 		screenmat[8] = 1;
 
+		needs_resize = true;
+
 
 		//chain up
 		Gtk::GLArea::on_size_allocate(alloc);
 
 	}
 
+	void CanvasGL::resize_buffers() {
+		GLint rb;
+		glGetIntegerv(GL_RENDERBUFFER_BINDING, &rb); //save rb
+		glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, num_samples, GL_RGBA8, width, height);
+		glBindRenderbuffer(GL_RENDERBUFFER, stencilrenderbuffer);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, num_samples,  GL_DEPTH24_STENCIL8, width, height);
+		glBindRenderbuffer(GL_RENDERBUFFER, rb);
+	}
+
+
+	void CanvasGL::set_msaa(unsigned int samples) {
+		num_samples = samples;
+		needs_resize = true;
+		queue_draw();
+	}
+
 	void CanvasGL::on_realize() {
 		Gtk::GLArea::on_realize();
 		make_current();
-		set_has_stencil_buffer(true);
 		GL_CHECK_ERROR
 		grid.realize();
 		GL_CHECK_ERROR
@@ -104,6 +122,33 @@ namespace horizon {
 		GL_CHECK_ERROR
 		marker_renderer.realize();
 		GL_CHECK_ERROR
+
+		GLint fb;
+		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fb); //save fb
+
+		glGenRenderbuffers(1, &renderbuffer);
+		glGenRenderbuffers(1, &stencilrenderbuffer);
+
+		resize_buffers();
+
+		GL_CHECK_ERROR
+
+		glGenFramebuffers(1, &fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, stencilrenderbuffer);
+
+		GL_CHECK_ERROR
+
+		if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			Gtk::MessageDialog md("Error setting up framebuffer, will now exit", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+			md.run();
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, fb);
+
+		GL_CHECK_ERROR
+
 	}
 
 
@@ -112,6 +157,16 @@ namespace horizon {
 			push();
 			needs_push = false;
 		}
+		if(needs_resize) {
+			resize_buffers();
+			needs_resize = false;
+		}
+
+		GLint fb;
+		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fb); //save fb
+
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
 		GL_CHECK_ERROR
 		glClearColor(background_color.r, background_color.g ,background_color.b, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -130,6 +185,16 @@ namespace horizon {
 		grid.render_cursor(cursor_pos_grid);
 		marker_renderer.render();
 		glDisable(GL_BLEND);
+
+
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, fb);
+
+		GL_CHECK_ERROR
+
 		glFlush();
 		GL_CHECK_ERROR
 		return Gtk::GLArea::on_render(context);

@@ -17,6 +17,7 @@ namespace horizon {
 			float highlight_dim = .3;
 			float highlight_shadow = .3;
 			float highlight_lighten = .3;
+			unsigned int msaa = 0;
 
 			enum class GridFineModifier {CTRL, ALT};
 			GridFineModifier grid_fine_modifier = GridFineModifier::ALT;
