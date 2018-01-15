@@ -175,6 +175,7 @@ namespace horizon {
 			}
 			if(git_thread_mode == GitThreadMode::PULL_REQUEST && !git_thread_busy && !git_thread_error) {
 				items_merge.clear();
+				models_merge.clear();
 				update_items_merge();
 				pr_title_entry->set_text("");
 				pr_body_textview->get_buffer()->set_text("");
@@ -210,8 +211,14 @@ namespace horizon {
 			auto it = merge_items_view->get_selection()->get_selected();
 			if(it) {
 				Gtk::TreeModel::Row row = *it;
-				std::pair<ObjectType, UUID> key(row[list_columns.type], row[list_columns.uuid]);
-				items_merge.erase(key);
+				ObjectType type = row[list_columns.type];
+				if(type == ObjectType::MODEL_3D) {
+					models_merge.erase(row[list_columns.filename]);
+				}
+				else {
+					std::pair<ObjectType, UUID> key(type, row[list_columns.uuid]);
+					items_merge.erase(key);
+				}
 			}
 			update_items_merge();
 		});
@@ -297,6 +304,11 @@ namespace horizon {
 		items_merge.emplace(ty, uu);
 		auto other_items = get_referenced(ty, uu);
 		items_merge.insert(other_items.begin(), other_items.end());
+		update_items_merge();
+	}
+
+	void PoolRemoteBox::merge_3d_model(const std::string &filename) {
+		models_merge.emplace(filename);
 		update_items_merge();
 	}
 
@@ -484,7 +496,7 @@ namespace horizon {
 
 	void PoolRemoteBox::update_items_merge() {
 		item_store->clear();
-		merge_items_placeholder_label->set_visible(items_merge.size()==0);
+		merge_items_placeholder_label->set_visible(items_merge.size()==0 && models_merge.size() == 0);
 		for(const auto &it: items_merge) {
 			SQLite::Query q(notebook->pool.db, "SELECT name FROM all_items_view WHERE uuid = ? AND type = ?");
 			q.bind(1, it.second);
@@ -495,7 +507,13 @@ namespace horizon {
 				row[list_columns.type] = it.first;
 				row[list_columns.uuid] = it.second;
 			}
+		}
 
+		for(const auto &it: models_merge) {
+			Gtk::TreeModel::Row row = *item_store->append();
+			row[list_columns.name] = Glib::path_get_basename(it);
+			row[list_columns.type] = ObjectType::MODEL_3D;
+			row[list_columns.filename] = it;
 		}
 	}
 
@@ -689,7 +707,7 @@ namespace horizon {
 				throw std::runtime_error("can't sign in");
 			}
 
-			if(items_merge.size() == 0) {
+			if(items_merge.size() == 0 && models_merge.size() == 0) {
 				throw std::runtime_error("no items to merge");
 			}
 
@@ -799,28 +817,36 @@ namespace horizon {
 					throw std::runtime_error("index error");
 				}
 
+				std::set<std::string> files_merge;
+
 				for(const auto &it: items_merge) {
 					SQLite::Query q(notebook->pool.db, "SELECT filename FROM all_items_view WHERE uuid = ? AND type = ?");
 					q.bind(1, it.second);
 					q.bind(2, object_type_lut.lookup_reverse(it.first));
 					if(q.step()) {
 						std::string filename = q.get<std::string>(0);
-						std::string filename_src = Glib::build_filename(notebook->base_path, filename);
-						std::string filename_dest = Glib::build_filename(notebook->remote_repo, filename);
-						std::string dirname_dest = Glib::path_get_dirname(filename_dest);
-						if(!Glib::file_test(dirname_dest, Glib::FILE_TEST_IS_DIR))
-							Gio::File::create_for_path(dirname_dest)->make_directory_with_parents();
-						Gio::File::create_for_path(filename_src)->copy(Gio::File::create_for_path(filename_dest), Gio::FILE_COPY_OVERWRITE);
+						files_merge.insert(filename);
+					}
+				}
+				files_merge.insert(models_merge.begin(), models_merge.end());
 
-						#ifdef G_OS_WIN32
-							replace_backslash(filename);
-						#endif
+				for(const auto &filename: files_merge) {
+					std::cout << "merge " << filename << std::endl;
+					std::string filename_src = Glib::build_filename(notebook->base_path, filename);
+					std::string filename_dest = Glib::build_filename(notebook->remote_repo, filename);
+					std::string dirname_dest = Glib::path_get_dirname(filename_dest);
+					if(!Glib::file_test(dirname_dest, Glib::FILE_TEST_IS_DIR))
+						Gio::File::create_for_path(dirname_dest)->make_directory_with_parents();
+					Gio::File::create_for_path(filename_src)->copy(Gio::File::create_for_path(filename_dest), Gio::FILE_COPY_OVERWRITE);
 
-						if(git_index_add_bypath(index, filename.c_str()) != 0) {
-							auto last_error = giterr_last();
-							std::string err_str = last_error->message;
-							throw std::runtime_error("add error: "+err_str);
-						}
+					#ifdef G_OS_WIN32
+						replace_backslash(filename);
+					#endif
+
+					if(git_index_add_bypath(index, filename.c_str()) != 0) {
+						auto last_error = giterr_last();
+						std::string err_str = last_error->message;
+						throw std::runtime_error("add error: "+err_str);
 					}
 				}
 

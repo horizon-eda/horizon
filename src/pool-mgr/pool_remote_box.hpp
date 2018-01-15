@@ -17,6 +17,7 @@ namespace horizon {
 			static PoolRemoteBox* create(class PoolNotebook *nb);
 
 			void merge_item(ObjectType ty, const UUID &uu);
+			void merge_3d_model(const std::string &filename);
 			void handle_refresh_prs();
 			bool prs_refreshed_once = false;
 
@@ -30,10 +31,12 @@ namespace horizon {
 						Gtk::TreeModelColumnRecord::add( name ) ;
 						Gtk::TreeModelColumnRecord::add( type ) ;
 						Gtk::TreeModelColumnRecord::add( uuid ) ;
+						Gtk::TreeModelColumnRecord::add( filename ) ;
 					}
 					Gtk::TreeModelColumn<Glib::ustring> name;
 					Gtk::TreeModelColumn<ObjectType> type;
 					Gtk::TreeModelColumn<UUID> uuid;
+					Gtk::TreeModelColumn<std::string> filename;
 			} ;
 			ListColumns list_columns;
 
@@ -79,6 +82,7 @@ namespace horizon {
 			std::string gh_repo;
 
 			std::set<std::pair<ObjectType, UUID>> items_merge;
+			std::set<std::string> models_merge;
 			void update_items_merge();
 			std::set<std::pair<ObjectType, UUID>> get_referenced(ObjectType ty, const UUID &uu);
 			bool exists_in_pool(class Pool &pool, ObjectType ty, const UUID &uu);

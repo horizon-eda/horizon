@@ -257,13 +257,13 @@ namespace horizon {
 			bbox->set_margin_start(8);
 			bbox->set_margin_end(8);
 
-			add_action_button("Create Unit", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_unit));
-			add_action_button("Edit Unit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_unit));
-			add_action_button("Duplicate Unit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_unit));
-			add_action_button("Create Symbol for Unit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_symbol_for_unit));
-			add_action_button("Create Entity for Unit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_entity_for_unit));
+			add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_unit));
+			add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_unit));
+			add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_unit));
+			add_action_button("Create Symbol", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_symbol_for_unit));
+			add_action_button("Create Entity", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_entity_for_unit));
 			if(remote_repo.size())
-				add_action_button("Merge Unit", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::UNIT, uu);});
+				add_action_button("Merge", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::UNIT, uu);});
 
 			bbox->show_all();
 
@@ -307,11 +307,11 @@ namespace horizon {
 			bbox->set_margin_start(8);
 			bbox->set_margin_end(8);
 
-			add_action_button("Create Symbol", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_symbol));
-			add_action_button("Edit Symbol", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_symbol));
-			add_action_button("Duplicate Symbol", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_symbol));
+			add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_symbol));
+			add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_symbol));
+			add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_symbol));
 			if(remote_repo.size())
-				add_action_button("Merge Symbol", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::SYMBOL, uu);});
+				add_action_button("Merge", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::SYMBOL, uu);});
 			bbox->show_all();
 
 			box->pack_start(*bbox, false, false, 0);
@@ -366,11 +366,11 @@ namespace horizon {
 			bbox->set_margin_start(8);
 			bbox->set_margin_end(8);
 
-			add_action_button("Create Entity", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_entity));
-			add_action_button("Edit Entity", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_entity));
-			add_action_button("Duplicate Entity", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_entity));
+			add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_entity));
+			add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_entity));
+			add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_entity));
 			if(remote_repo.size())
-				add_action_button("Merge Entity", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::ENTITY, uu);});
+				add_action_button("Merge", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::ENTITY, uu);});
 
 			bbox->show_all();
 
@@ -428,11 +428,11 @@ namespace horizon {
 			bbox->set_margin_start(8);
 			bbox->set_margin_end(8);
 
-			add_action_button("Create Padstack", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_padstack));
-			add_action_button("Edit Padstack", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_padstack));
-			add_action_button("Duplicate Padstack", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_padstack));
+			add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_padstack));
+			add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_padstack));
+			add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_padstack));
 			if(remote_repo.size())
-				add_action_button("Merge Padstack", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::PADSTACK, uu);});
+				add_action_button("Merge", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::PADSTACK, uu);});
 
 			bbox->show_all();
 
@@ -497,12 +497,19 @@ namespace horizon {
 			bbox->set_margin_start(8);
 			bbox->set_margin_end(8);
 
-			add_action_button("Create Package", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_package));
-			add_action_button("Edit Package", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_package));
-			add_action_button("Duplicate Package", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_package));
-			add_action_button("Create Padstack for Package", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_padstack_for_package));
-			if(remote_repo.size())
-				add_action_button("Merge Package", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::PACKAGE, uu);});
+			add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_package));
+			add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_package));
+			add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_package));
+			add_action_button("Create Padstack", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_padstack_for_package));
+			if(remote_repo.size()) {
+				add_action_button("Merge", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::PACKAGE, uu);});
+				add_action_button("Merge 3D", bbox, br, [this](const UUID &uu){
+					auto pkg = pool.get_package(uu);
+					for(const auto &it: pkg->model_filenames) {
+						remote_box->merge_3d_model(it.second);
+					}
+				});
+			}
 			add_action_button("Part Wizard...", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_part_wizard))->get_style_context()->add_class("suggested-action");
 
 			bbox->show_all();
@@ -556,12 +563,12 @@ namespace horizon {
 			bbox->set_margin_start(8);
 			bbox->set_margin_end(8);
 
-			add_action_button("Create Part", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_part));
-			add_action_button("Edit Part", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_part));
-			add_action_button("Duplicate Part", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_part));
+			add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_part));
+			add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_part));
+			add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_part));
 			add_action_button("Create Part from Part", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_part_from_part));
 			if(remote_repo.size())
-				add_action_button("Merge Part", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::PART, uu);});
+				add_action_button("Merge", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::PART, uu);});
 
 
 			bbox->show_all();
