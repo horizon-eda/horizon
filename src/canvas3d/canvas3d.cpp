@@ -38,11 +38,10 @@ namespace horizon {
 	void Canvas3D::on_size_allocate(Gtk::Allocation &alloc) {
 		width = alloc.get_width();
 		height = alloc.get_height();
-
+		needs_resize = true;
 
 		//chain up
 		Gtk::GLArea::on_size_allocate(alloc);
-
 	}
 
 
@@ -109,16 +108,50 @@ namespace horizon {
 		face_renderer.push();
 	}
 
+	void Canvas3D::resize_buffers() {
+		GLint rb;
+		glGetIntegerv(GL_RENDERBUFFER_BINDING, &rb); //save rb
+		glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, num_samples, GL_RGBA8, width, height);
+		glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, num_samples, GL_DEPTH_COMPONENT, width, height);
+		glBindRenderbuffer(GL_RENDERBUFFER, rb);
+	}
+
 	void Canvas3D::on_realize() {
 		Gtk::GLArea::on_realize();
 		make_current();
-		set_has_depth_buffer(true);
 		cover_renderer.realize();
 		wall_renderer.realize();
 		face_renderer.realize();
 		background_renderer.realize();
 		glEnable(GL_DEPTH_TEST);
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		GLint fb;
+		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fb); //save fb
+
+		glGenRenderbuffers(1, &renderbuffer);
+		glGenRenderbuffers(1, &depthrenderbuffer);
+
+		resize_buffers();
+
+		GL_CHECK_ERROR
+
+		glGenFramebuffers(1, &fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
+
+		GL_CHECK_ERROR
+
+		if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			Gtk::MessageDialog md("Error setting up framebuffer, will now exit", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+			md.run();
+			abort();
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, fb);
 
 		GL_CHECK_ERROR
 	}
@@ -444,11 +477,26 @@ namespace horizon {
 	}
 
 
+	void Canvas3D::set_msaa(unsigned int samples) {
+		num_samples = samples;
+		needs_resize = true;
+		queue_draw();
+	}
+
 	bool Canvas3D::on_render(const Glib::RefPtr<Gdk::GLContext> &context) {
 		if(needs_push) {
 			push();
 			needs_push = false;
 		}
+		if(needs_resize) {
+			resize_buffers();
+			needs_resize = false;
+		}
+
+		GLint fb;
+		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fb); //save fb
+
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
 		glClearColor(.5, .5, .5, 1.0);
 		glClearDepth(10);
@@ -512,6 +560,15 @@ namespace horizon {
 			face_renderer.render();
 
 		cover_renderer.render();
+
+		GL_CHECK_ERROR
+
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, fb);
+		GL_CHECK_ERROR
 		glFlush();
 
 		return Gtk::GLArea::on_render(context);

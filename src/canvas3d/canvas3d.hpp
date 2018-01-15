@@ -42,6 +42,8 @@ namespace horizon {
 			void update2(const class Board &brd);
 			void prepare();
 
+			void set_msaa(unsigned int samples);
+
 			void load_models_async(class Pool *pool);
 
 			void load_3d_model(const std::string &filename, const std::string &base_path);
@@ -124,6 +126,14 @@ namespace horizon {
 
 			glm::mat4 viewmat;
 			glm::mat4 projmat;
+
+			GLuint renderbuffer;
+			GLuint fbo;
+			GLuint depthrenderbuffer;
+			unsigned int num_samples=1;
+			bool needs_resize = false;
+
+			void resize_buffers();
 
 
 			void polynode_to_tris(const ClipperLib::PolyNode *node, int layer);

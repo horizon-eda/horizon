@@ -143,6 +143,18 @@ namespace horizon {
 			model_loading_revealer->set_reveal_child(v);
 		});
 
+		Gtk::ComboBoxText *msaa_combo;
+		x->get_widget("msaa_combo", msaa_combo);
+		msaa_combo->append("0", "Off");
+		for(int i = 1; i < 5; i*=2) {
+			msaa_combo->append(std::to_string(i), std::to_string(i)+"× MSAA");
+		}
+		msaa_combo->signal_changed().connect([this, msaa_combo] {
+			int msaa = std::stoi(msaa_combo->get_active_id());
+			canvas->set_msaa(msaa);
+		});
+		msaa_combo->set_active_id("4");
+
 		x->get_widget("main_box", main_box);
 	}
 
