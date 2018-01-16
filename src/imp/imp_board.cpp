@@ -221,6 +221,9 @@ namespace horizon {
 		hamburger_menu->append("Clear all planes", "win.clear_all_planes");
 		add_tool_action(ToolID::CLEAR_ALL_PLANES, "clear_all_planes");
 
+		hamburger_menu->append("Import DXF", "win.import_dxf");
+		add_tool_action(ToolID::IMPORT_DXF, "import_dxf");
+
 		if(sockets_connected) {
 			hamburger_menu->append("Cross probing", "win.cross_probing");
 			auto cp_action = main_window->add_action_bool("cross_probing", true);
