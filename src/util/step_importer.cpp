@@ -40,6 +40,11 @@
 #define USER_PREC (0.14)
 #define USER_ANGLE (0.52359878)
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/transform.hpp>
 
 
 namespace STEPImporter {
@@ -47,11 +52,9 @@ namespace STEPImporter {
 	//adapted from https://github.com/KiCad/kicad-source-mirror/blob/master/plugins/3d/oce/loadmodel.cpp
 	struct DATA;
 
-	bool processNode( const TopoDS_Shape& shape, DATA& data );
+	static bool processNode( const TopoDS_Shape& shape, DATA& data );
 
-	bool processComp( const TopoDS_Shape& shape, DATA& data);
-
-	bool processFace( const TopoDS_Face& face, DATA& data);
+	static bool processComp( const TopoDS_Shape& shape, DATA& data);
 
 	struct DATA
 	{
@@ -65,7 +68,7 @@ namespace STEPImporter {
 	};
 
 
-	bool readSTEP( Handle(TDocStd_Document)& m_doc, const char* fname )
+	static bool readSTEP( Handle(TDocStd_Document)& m_doc, const char* fname )
 	{
 		STEPCAFControl_Reader reader;
 		IFSelect_ReturnStatus stat  = reader.ReadFile( fname );
@@ -100,11 +103,7 @@ namespace STEPImporter {
 	}
 
 
-
-
-
-
-	bool getColor( DATA& data, TDF_Label label, Quantity_Color& color )
+	static bool getColor( DATA& data, TDF_Label label, Quantity_Color& color )
 	{
 		while( true )
 		{
@@ -125,7 +124,7 @@ namespace STEPImporter {
 	}
 
 
-	bool processFace( const TopoDS_Face& face, DATA& data, Quantity_Color* color )
+	static bool processFace( const TopoDS_Face& face, DATA& data, Quantity_Color* color, const glm::mat4 &mat = glm::mat4())
 	{
 		if( Standard_True == face.IsNull() )
 			return false;
@@ -181,9 +180,9 @@ namespace STEPImporter {
 		for(int i = 1; i <= triangulation->NbNodes(); i++)
 		{
 			gp_XYZ v( arrPolyNodes(i).Coord() );
-			face_out.vertices.emplace_back(v.X(), v.Y(), v.Z());
-		   // std::cout <<  v.X() << " " <<  v.Y() << " " << v.Z() << std::endl;
-		  //  vertices.push_back( SGPOINT( v.X(), v.Y(), v.Z() ) );
+			glm::vec4 vg(v.X(), v.Y(), v.Z(), 1);
+			auto vt = mat * vg;
+			face_out.vertices.emplace_back(vt.x, vt.y, vt.z);
 		}
 
 		face_out.triangle_indices.reserve(triangulation->NbTriangles());
@@ -199,7 +198,7 @@ namespace STEPImporter {
 	}
 
 
-	bool processShell( const TopoDS_Shape& shape, DATA& data, Quantity_Color* color )
+	static bool processShell( const TopoDS_Shape& shape, DATA& data, Quantity_Color* color, const glm::mat4 &mat=glm::mat4())
 	{
 		TopoDS_Iterator it;
 		bool ret = false;
@@ -208,14 +207,14 @@ namespace STEPImporter {
 		{
 			const TopoDS_Face& face = TopoDS::Face( it.Value() );
 
-		   if( processFace( face, data, color ) )
+		   if( processFace( face, data, color, mat ) )
 				ret = true;
 		}
 
 		return ret;
 	}
 
-	bool processSolid( const TopoDS_Shape& shape, DATA& data)
+	static bool processSolid( const TopoDS_Shape& shape, DATA& data)
 	{
 		TDF_Label label = data.m_assy->FindShape( shape, Standard_False );
 		   bool ret = false;
@@ -237,14 +236,28 @@ namespace STEPImporter {
 				lcolor = &col;
 		}
 
-		TopoDS_Iterator it;
-		TopLoc_Location loc = shape.Location();
 
+		TopLoc_Location loc = shape.Location();
+		gp_Trsf T = loc.Transformation();
+        gp_XYZ coord = T.TranslationPart();
+
+        auto mat  = glm::translate(glm::vec3(coord.X(), coord.Y(), coord.Z()));
+
+        gp_XYZ axis;
+        Standard_Real angle;
+
+        if(T.GetRotation( axis, angle )) {
+			glm::vec3 gaxis(axis.X(), axis.Y(), axis.Z());
+			float angle_f = angle;
+			mat = glm::rotate(mat, angle_f, gaxis);
+        }
+
+        TopoDS_Iterator it;
 		for( it.Initialize( shape, false, false ); it.More(); it.Next() )
 		{
-			const TopoDS_Shape& subShape = it.Value();
+		   const TopoDS_Shape& subShape = it.Value();
 
-		   if( processShell( subShape, data, lcolor ) )
+		   if( processShell( subShape, data, lcolor, mat) )
 			 ret = true;
 		}
 
@@ -252,17 +265,21 @@ namespace STEPImporter {
 	}
 
 
-	bool processComp( const TopoDS_Shape& shape, DATA& data)
+	static bool processComp( const TopoDS_Shape& shape, DATA& data)
 	{
 		TopoDS_Iterator it;
-		TopLoc_Location loc = shape.Location();
+		TopLoc_Location loc2 = shape.Location();
 		bool ret = false;
+
+
+
 
 
 		for( it.Initialize( shape, false, false ); it.More(); it.Next() )
 		{
 			const TopoDS_Shape& subShape = it.Value();
 			TopAbs_ShapeEnum stype = subShape.ShapeType();
+
 			data.hasSolid = false;
 
 			switch( stype )
@@ -296,12 +313,10 @@ namespace STEPImporter {
 		return ret;
 	}
 
-	bool processNode( const TopoDS_Shape& shape, DATA& data)
+	static bool processNode( const TopoDS_Shape& shape, DATA& data)
 	{
 		TopAbs_ShapeEnum stype = shape.ShapeType();
 		bool ret = true;
-		std::cout << "stye " << stype << std::endl;
-
 		switch( stype )
 		{
 			case TopAbs_COMPOUND:
