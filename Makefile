@@ -500,13 +500,17 @@ $(OBJ_ROUTER): %.o: %.cpp
 $(OBJ_OCE): %.o: %.cpp
 	$(CXX) -c $(INC) $(INC_OCE) $(CXXFLAGS) $< -o $@
 
-clean: clean_router
-	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test $(OBJ_ALL:.o=.d) resources.cpp gitversion.cpp
+clean: clean_router clean_oce
+	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test $(OBJ_ALL:.o=.d) src/resources.cpp src/gitversion.cpp
 
 clean_router:
 	rm -f $(OBJ_ROUTER) $(OBJ_ROUTER:.o=.d)
 
+clean_oce:
+	rm -f $(OBJ_OCE) $(OBJ_OCE:.o=.d)
+
 -include  $(OBJ_ALL:.o=.d)
 -include  $(OBJ_ROUTER:.o=.d)
+-include  $(OBJ_OCE:.o=.d)
 
-.PHONY: clean clean_router
+.PHONY: clean clean_router clean_oce
