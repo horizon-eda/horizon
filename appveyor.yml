@@ -1,0 +1,22 @@
+version: 1.0.{build}
+
+environment:
+  matrix:
+    - compiler: msvc_msys2
+      ARCH: x64
+      MSYS2_ARCH: x86_64
+      MSYS2_DIR: msys64
+      MSYSTEM: MINGW64
+
+before_build:
+    - set PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%
+    - bash -lc "for i in {1..3}; do pacman --noconfirm --needed -Su mingw-w64-%MSYS2_ARCH%-{gcc,gtkmm3,boost,yaml-cpp,sqlite3,toolchain,zeromq,glm,libgit2,oce} zip make && break || sleep 15; done"
+
+build_script:
+    - cd %APPVEYOR_BUILD_FOLDER%
+    - echo %cd%
+    - dir
+    - bash -c "cd $APPVEYOR_BUILD_FOLDER && make -j2 && ./make_bindist.sh"
+
+artifacts:
+    - path: dist/horizon-*.zip
