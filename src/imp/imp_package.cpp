@@ -164,7 +164,7 @@ namespace horizon {
 				std::string rel = base_path->get_relative_path(chooser->get_file());
 				if(rel.size()) {
 					#ifdef G_OS_WIN32
-						replace_backslash(filename);
+						replace_backslash(rel);
 					#endif
 					return rel;
 				}
