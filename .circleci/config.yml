@@ -1,8 +1,8 @@
-version: 2
+version: 3
 jobs:
   build:
     docker:
-      - image: ubuntu:zesty
+      - image: ubuntu:artful
     steps:
       - checkout
       - run:
