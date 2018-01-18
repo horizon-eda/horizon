@@ -668,10 +668,6 @@ namespace horizon {
 
 	}
 
-	static void replace_backslash(std::string &path) {
-		std::replace(path.begin(), path.end(), '\\', '/');
-	}
-
 	void PoolRemoteBox::checkout_master(class git_repository *repo) {
 		autofree_ptr<git_object> treeish(git_object_free);
 		git_revparse_single(&treeish.ptr, repo, "master");

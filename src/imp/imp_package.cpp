@@ -161,8 +161,11 @@ namespace horizon {
 		while (1) {
 			if(gtk_native_dialog_run (GTK_NATIVE_DIALOG (native))==GTK_RESPONSE_ACCEPT) {
 				auto base_path = Gio::File::create_for_path(pool->get_base_path());
-				auto rel = base_path->get_relative_path(chooser->get_file());
+				std::string rel = base_path->get_relative_path(chooser->get_file());
 				if(rel.size()) {
+					#ifdef G_OS_WIN32
+						replace_backslash(filename);
+					#endif
 					return rel;
 				}
 				else {

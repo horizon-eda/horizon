@@ -166,4 +166,8 @@ namespace horizon {
 		if(!Glib::file_test(config_dir, Glib::FILE_TEST_EXISTS))
 			Gio::File::create_for_path(config_dir)->make_directory_with_parents();
 	}
+
+	void replace_backslash(std::string &path) {
+		std::replace(path.begin(), path.end(), '\\', '/');
+	}
 }

@@ -38,4 +38,6 @@ namespace horizon {
 	int strcmp_natural(const std::string &a, const std::string &b);
 	void create_config_dir();
 	std::string get_config_dir();
+
+	void replace_backslash(std::string &path);
 }
