@@ -11,6 +11,7 @@
 #include "common/object_descr.hpp"
 #include "util/github_client.hpp"
 #include "util/str_util.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
