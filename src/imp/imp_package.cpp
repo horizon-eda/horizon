@@ -9,6 +9,7 @@
 #include "3d_view.hpp"
 #include "board/board_layers.hpp"
 #include "util/gtk_util.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 	ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path):
