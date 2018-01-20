@@ -531,6 +531,7 @@ namespace horizon {
 					}
 				}
 				else if(args.type == ToolEventType::CLICK) {
+					wrapper->updateStartItem(args);
 					if(args.button == 1) {
 						state = State::ROUTING;
 						if(!wrapper->prepareInteractive()) {

@@ -293,6 +293,18 @@ namespace horizon {
 			board_display_options->update();
 		});
 
+		canvas->signal_motion_notify_event().connect([this] (GdkEventMotion *ev){
+			if(target_drag_begin.type != ObjectType::INVALID) {
+				handle_drag();
+			}
+			return false;
+		});
+
+		canvas->signal_button_release_event().connect([this] (GdkEventButton *ev){
+			target_drag_begin = Target();
+			return false;
+		});
+
 		main_window->left_panel->pack_start(*display_control_notebook, false, false);
 		display_control_notebook->show();
 
@@ -300,5 +312,53 @@ namespace horizon {
 
 	ToolID ImpBoard::handle_key(guint k) {
 		return key_seq.handle_key(k);
+	}
+
+	void ImpBoard::handle_maybe_drag() {
+		if(!preferences.board.drag_start_track)
+			return;
+		auto target = canvas->get_current_target();
+		auto brd = core_board.get_board();
+		if(target.type == ObjectType::PAD) {
+			auto pkg = brd->packages.at(target.path.at(0));
+			auto pad = pkg.package.pads.at(target.path.at(1));
+			if(pad.net == nullptr)
+				return;
+		}
+		else if(target.type == ObjectType::JUNCTION) {
+			auto ju = brd->junctions.at(target.path.at(0));
+			if(ju.net == nullptr)
+				return;
+		}
+		else {
+			return;
+		}
+		canvas->inhibit_drag_selection();
+		target_drag_begin = target;
+		cursor_pos_drag_begin = canvas->get_cursor_pos_win();
+	}
+
+	void ImpBoard::handle_drag() {
+		auto pos = canvas->get_cursor_pos_win();
+		auto delta = pos-cursor_pos_drag_begin;
+		if(delta.mag_sq()>(50*50)) {
+			{
+				ToolArgs args;
+				args.coords = target_drag_begin.p;
+				ToolResponse r= core.r->tool_begin(ToolID::ROUTE_TRACK_INTERACTIVE, args, imp_interface.get());
+				tool_process(r);
+			}
+			{
+				ToolArgs args;
+				args.type = ToolEventType::CLICK;
+				args.coords = target_drag_begin.p;
+				args.button = 1;
+				args.target = target_drag_begin;
+				args.work_layer = canvas->property_work_layer();
+				ToolResponse r = core.r->tool_update(args);
+				tool_process(r);
+			}
+			target_drag_begin = Target();
+		}
 	}
 }

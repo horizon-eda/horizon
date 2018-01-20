@@ -15,6 +15,8 @@ namespace horizon {
 			void construct() override;
 			ToolID handle_key(guint k) override;
 			bool handle_broadcast(const json &j) override;
+			void handle_maybe_drag() override;
+
 		private:
 			void canvas_update() override;
 			void handle_selection_cross_probe();
@@ -25,5 +27,9 @@ namespace horizon {
 			class View3DWindow *view_3d_window = nullptr;
 			bool cross_probing_enabled = false;
 
+			Coordf cursor_pos_drag_begin;
+			Target target_drag_begin;
+
+			void handle_drag();
 	};
 }

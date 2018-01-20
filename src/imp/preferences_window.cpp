@@ -133,6 +133,27 @@ namespace horizon {
 		}
 	}
 
+	class BoardPreferencesEditor: public Gtk::Grid {
+		public:
+			BoardPreferencesEditor(ImpPreferences *prefs, BoardPreferences *board_prefs);
+			ImpPreferences *preferences;
+			BoardPreferences *board_preferences;
+	};
+
+	BoardPreferencesEditor::BoardPreferencesEditor(ImpPreferences *prefs, BoardPreferences *board_prefs): Gtk::Grid(),
+		preferences(prefs), board_preferences(board_prefs) {
+		property_margin() = 20;
+		set_column_spacing(10);
+		set_row_spacing(10);
+		int top = 0;
+		{
+			auto sw = Gtk::manage(new Gtk::Switch);
+			grid_attach_label_and_widget(this, "Drag to start tracks", sw, top);
+			bind_widget(sw, board_preferences->drag_start_track);
+			sw->property_active().signal_changed().connect([this]{preferences->signal_changed().emit();});
+		}
+	}
+
 	ImpPreferencesWindow::ImpPreferencesWindow(ImpPreferences *prefs): Gtk::Window(), preferences(prefs) {
 		set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 		auto header = Gtk::manage(new Gtk::HeaderBar());
@@ -166,6 +187,11 @@ namespace horizon {
 		{
 			auto ed = Gtk::manage(new SchematicPreferencesEditor(preferences, &preferences->schematic));
 			stack->add(*ed, "schematic", "Schematic");
+			ed->show();
+		}
+		{
+			auto ed = Gtk::manage(new BoardPreferencesEditor(preferences, &preferences->board));
+			stack->add(*ed, "board", "Board");
 			ed->show();
 		}
 

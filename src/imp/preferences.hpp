@@ -35,6 +35,14 @@ namespace horizon {
 			json serialize() const;
 	};
 
+	class BoardPreferences {
+		public:
+			bool drag_start_track = true;
+
+			void load_from_json(const json &j);
+			json serialize() const;
+	};
+
 	class ImpPreferences: public sigc::trackable {
 		public:
 			ImpPreferences();
@@ -49,6 +57,7 @@ namespace horizon {
 			CanvasPreferences canvas_non_layer;
 			CanvasPreferences canvas_layer;
 			SchematicPreferences schematic;
+			BoardPreferences board;
 
 			typedef sigc::signal<void> type_signal_changed;
 			type_signal_changed signal_changed() {return s_signal_changed;}

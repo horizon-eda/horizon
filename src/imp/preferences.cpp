@@ -77,6 +77,16 @@ namespace horizon {
 		drag_start_net_line = j.value("drag_start_net_line", true);
 	}
 
+	json BoardPreferences::serialize() const {
+		json j;
+		j["drag_start_track"] = drag_start_track;
+		return j;
+	}
+
+	void BoardPreferences::load_from_json(const json &j) {
+		drag_start_track = j.value("drag_start_track", true);
+	}
+
 	json ImpPreferences::serialize() const {
 		json j;
 		j["canvas_layer"] = canvas_layer.serialize();
@@ -110,6 +120,8 @@ namespace horizon {
 			canvas_non_layer.load_from_json(j.at("canvas_non_layer"));
 			if(j.count("schematic"))
 				schematic.load_from_json(j.at("schematic"));
+			if(j.count("board"))
+				board.load_from_json(j.at("board"));
 		}
 		s_signal_changed.emit();
 	}
