@@ -440,9 +440,9 @@ namespace horizon {
 	void Canvas3D::load_models_async(Pool *pool) {
 		std::set<std::string> model_filenames;
 		for(const auto &it: brd->packages) {
-			std::string mfn = it.second.package.get_model_filename(it.second.model);
-			if(mfn.size())
-				model_filenames.insert(mfn);
+			auto model = it.second.package.get_model(it.second.model);
+			if(model)
+				model_filenames.insert(model->filename);
 		}
 		s_signal_models_loading.emit(true);
 		std::thread thr(&Canvas3D::load_models_thread, this, model_filenames, pool->get_base_path());
@@ -461,15 +461,27 @@ namespace horizon {
 		package_transforms.clear();
 		std::map<std::string, std::set<const BoardPackage*>> pkg_map;
 		for(const auto &it: brd->packages) {
-			std::string mfn = it.second.package.get_model_filename(it.second.model);
-			pkg_map[mfn].insert(&it.second);
+			auto model = it.second.package.get_model(it.second.model);
+			if(model)
+				pkg_map[model->filename].insert(&it.second);
 		}
 
 		for(const auto &it_pkg: pkg_map) {
 			size_t size_before = package_transforms.size();
 			for(const auto &it_brd_pkg: it_pkg.second) {
 				const auto &pl = it_brd_pkg->placement;
+				const auto &pkg = it_brd_pkg->package;
 				package_transforms.emplace_back(pl.shift.x/1e6, pl.shift.y/1e6, pl.get_angle(), it_brd_pkg->flip);
+				auto &tr = package_transforms.back();
+				const auto model = pkg.get_model(it_brd_pkg->model);
+				if(model) {
+					tr.model_x = model->x/1e6;
+					tr.model_y = model->y/1e6;
+					tr.model_z = model->z/1e6;
+					tr.model_roll = model->roll;
+					tr.model_pitch = model->pitch;
+					tr.model_yaw = model->yaw;
+				}
 			}
 			size_t size_after = package_transforms.size();
 			package_transform_idxs[it_pkg.first] = {size_before, size_after-size_before};

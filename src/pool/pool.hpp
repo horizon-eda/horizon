@@ -29,7 +29,6 @@ namespace horizon {
 			const class Package *get_package(const UUID &uu);
 			const class Part *get_part(const UUID &uu);
 			std::set<UUID> get_alternate_packages(const UUID &uu);
-			std::string get_3d_model_filename(const UUID &package_uuid, const UUID &model_uuid=UUID());
 
 			virtual std::string get_filename(ObjectType type, const UUID &uu);
 			const std::string &get_base_path() const;

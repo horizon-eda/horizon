@@ -220,11 +220,11 @@ namespace horizon {
 							q2.bind("$tag", it_tag);
 							q2.step();
 						}
-						for(const auto &it_model: package.model_filenames) {
+						for(const auto &it_model: package.models) {
 							SQLite::Query q2(db, "INSERT INTO models (package_uuid, model_uuid, model_filename) VALUES (?, ?, ?)");
 							q2.bind(1, package.uuid);
 							q2.bind(2, it_model.first);
-							q2.bind(3, it_model.second);
+							q2.bind(3, it_model.second.filename);
 							q2.step();
 						}
 					}

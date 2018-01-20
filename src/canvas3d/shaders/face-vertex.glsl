@@ -5,6 +5,10 @@ in vec3 color;
 in vec2 offset;
 in int flip;
 in float angle;
+
+in vec3 model_offset;
+in vec3 model_rotation;
+
 out vec3 position_to_geom;
 out vec3 color_to_geom;
 
@@ -24,15 +28,27 @@ mat4 rotationMatrix(vec3 axis, float angle)
                 0.0,                                0.0,                                0.0,                                1.0);
 }
 
+float t(float x) {
+  return x*2*3.14159;
+}
+
 void main() {
   //gl_Position = proj*view*vec4(position, 1, 1);
   color_to_geom = color;
   vec4 p4 = vec4(position, 1);
+
+  mat4 rot = rotationMatrix(vec3(1,0,0), t(model_rotation.x));
+  rot = rot*rotationMatrix(vec3(0,1,0), t(model_rotation.y));
+  rot = rot*rotationMatrix(vec3(0,0,1), t(model_rotation.z));
+  p4 = rot*p4;
+
+  p4.xyz += model_offset;
+
   float angle_inv = 1;
   if(flip==0) {
     angle_inv = -1;
   }
-  p4 = rotationMatrix(vec3(0,0,1), angle_inv*angle*2*3.14159)*p4;
+  p4 = rotationMatrix(vec3(0,0,1), angle_inv*t(angle))*p4;
   float z = 0;
   if(flip==0) {
     z = z_top;
@@ -41,5 +57,5 @@ void main() {
     z = z_bottom;
     p4 = rotationMatrix(vec3(0,1,0), 3.14159)*p4;
    }
-  position_to_geom = p4.xyz+vec3(offset, angle/1e6)+vec3(0,0,z);
+  position_to_geom = p4.xyz+vec3(offset, z);
 }

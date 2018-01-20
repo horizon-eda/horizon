@@ -68,7 +68,7 @@ namespace horizon {
 				parametric.emplace(it.key(), it->get<std::string>());
 			}
 		}
-		if(package->model_filenames.count(model) == 0)
+		if(package->models.count(model) == 0)
 			model = package->default_model;
 		//if(value.size() == 0) {
 		//	value = MPN;

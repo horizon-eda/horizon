@@ -505,8 +505,8 @@ namespace horizon {
 				add_action_button("Merge", bbox, br, [this](const UUID &uu){remote_box->merge_item(ObjectType::PACKAGE, uu);});
 				add_action_button("Merge 3D", bbox, br, [this](const UUID &uu){
 					auto pkg = pool.get_package(uu);
-					for(const auto &it: pkg->model_filenames) {
-						remote_box->merge_3d_model(it.second);
+					for(const auto &it: pkg->models) {
+						remote_box->merge_3d_model(it.second.filename);
 					}
 				});
 			}

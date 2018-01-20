@@ -18,6 +18,10 @@ namespace horizon {
 		GLuint offset_index = glGetAttribLocation (program, "offset");
 		GLuint angle_index = glGetAttribLocation (program, "angle");
 		GLuint flip_index = glGetAttribLocation (program, "flip");
+
+		GLuint model_offset_index = glGetAttribLocation (program, "model_offset");
+		GLuint model_rotation_index = glGetAttribLocation (program, "model_rotation");
+
 		GLuint vao, buffer, ebuffer, ibuffer;
 
 		/* we need to create a VAO to store the other buffers */
@@ -83,6 +87,18 @@ namespace horizon {
 							 sizeof(Canvas3D::ModelTransform),
 							 (void*)offsetof(Canvas3D::ModelTransform, flip));
 		glVertexAttribDivisor(flip_index, 1);
+
+		glEnableVertexAttribArray (model_offset_index);
+		glVertexAttribPointer (model_offset_index, 3, GL_FLOAT, GL_FALSE,
+							 sizeof(Canvas3D::ModelTransform),
+							 (void*)offsetof(Canvas3D::ModelTransform, model_x));
+		glVertexAttribDivisor(model_offset_index, 1);
+
+		glEnableVertexAttribArray (model_rotation_index);
+		glVertexAttribPointer (model_rotation_index, 3, GL_UNSIGNED_SHORT, GL_TRUE,
+							 sizeof(Canvas3D::ModelTransform),
+							 (void*)offsetof(Canvas3D::ModelTransform, model_roll));
+		glVertexAttribDivisor(model_rotation_index, 1);
 
 
 		/* enable and set the color attribute */

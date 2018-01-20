@@ -89,6 +89,13 @@ namespace horizon {
 					float y;
 					uint16_t angle;
 					int16_t flip;
+
+					float model_x = 0;
+					float model_y = 0;
+					float model_z = 0;
+					uint16_t model_roll = 0;
+					uint16_t model_pitch = 0;
+					uint16_t model_yaw = 0;
 			} __attribute__((packed));
 
 		private:

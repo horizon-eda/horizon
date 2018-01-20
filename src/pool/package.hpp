@@ -40,6 +40,26 @@ namespace horizon {
 
 			};
 
+			class Model {
+				public:
+					Model(const UUID &uu, const std::string &filename);
+					Model(const UUID &uu, const json &j);
+
+					UUID uuid;
+					std::string filename;
+
+					int64_t x = 0;
+					int64_t y = 0;
+					int64_t z = 0;
+
+					int roll = 0;
+					int pitch = 0;
+					int yaw = 0;
+
+					json serialize() const;
+			};
+
+
 			Package(const UUID &uu, const json &j, class Pool &pool);
 			Package(const UUID &uu);
 			static Package new_from_file(const std::string &filename, class Pool &pool);
@@ -71,9 +91,9 @@ namespace horizon {
 			MyParameterProgram parameter_program;
 			PackageRules rules;
 
-			std::map<UUID, std::string> model_filenames;
+			std::map<UUID, Model> models;
 			UUID default_model;
-			const std::string &get_model_filename(const UUID &uu=UUID()) const;
+			const Model *get_model(const UUID &uu=UUID()) const;
 
 			const class Package *alternate_for = nullptr;
 
