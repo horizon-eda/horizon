@@ -295,8 +295,12 @@ namespace horizon {
 				else if(row[list_columns.state] == ItemState::CHANGED || row[list_columns.state] == ItemState::MOVED_CHANGED) {
 					std::string filename_local = Glib::build_filename(local_path, row[list_columns.filename_local]);
 					std::string filename_local_new = Glib::build_filename(local_path, row[list_columns.filename_remote]);
+					std::string dirname_local_new = Glib::path_get_dirname(filename_local_new);
 					std::string filename_remote = Glib::build_filename(remote_path, row[list_columns.filename_remote]);
 					Gio::File::create_for_path(filename_local)->remove(); //remove local file (needed if moved_changed)
+					if(!Glib::file_test(dirname_local_new, Glib::FILE_TEST_IS_DIR)) {
+						Gio::File::create_for_path(dirname_local_new)->make_directory_with_parents();
+					}
 					Gio::File::create_for_path(filename_remote)->copy(Gio::File::create_for_path(filename_local_new));
 				}
 			}
