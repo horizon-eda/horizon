@@ -11,6 +11,7 @@
 
 #include "pool/pool.hpp"
 #include "util/editor_process.hpp"
+#include "pool-update/pool-update.hpp"
 #include <zmq.hpp>
 
 namespace horizon {
@@ -49,16 +50,18 @@ namespace horizon {
 			class PartWizard *part_wizard = nullptr;
 			class DuplicateWindow *duplicate_window = nullptr;
 
-			zmq::context_t &zctx;
-			zmq::socket_t sock_pool_update;
-			std::string sock_pool_update_ep;
-			sigc::connection sock_pool_update_conn;
+			Glib::Dispatcher pool_update_dispatcher;
+			std::mutex pool_update_status_queue_mutex;
+			std::deque<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_status_queue;
+			std::deque<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_error_queue;
 			bool pool_updating = false;
 			void pool_updated(bool success);
 			std::string pool_update_last_file;
 			unsigned int pool_update_n_files = 0;
 			unsigned int pool_update_n_files_last = 0;
 			std::function<void()> pool_update_done_cb = nullptr;
+
+			void pool_update_thread();
 
 			void show_duplicate_window(ObjectType ty, const UUID &uu);
 

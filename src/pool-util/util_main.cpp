@@ -61,7 +61,7 @@ YAML::Node edit_yaml(const YAML::Emitter &em) {
 }
 
 
-static void status_cb(horizon::PoolUpdateStatus st, const std::string msg) {
+static void status_cb(horizon::PoolUpdateStatus st, const std::string filename, const std::string msg) {
 	switch(st) {
 		case horizon::PoolUpdateStatus::DONE :
 			std::cout << "done: ";
@@ -72,11 +72,14 @@ static void status_cb(horizon::PoolUpdateStatus st, const std::string msg) {
 		case horizon::PoolUpdateStatus::FILE :
 			std::cout << "file: ";
 		break;
+		case horizon::PoolUpdateStatus::FILE_ERROR :
+			std::cout << "file error: ";
+		break;
 		case horizon::PoolUpdateStatus::INFO :
 			std::cout << "info: ";
 		break;
 	}
-	std::cout << msg << std::endl;
+	std::cout << msg <<  " file: " << filename <<std::endl;
 }
 
 int main(int c_argc, char *c_argv[]) {

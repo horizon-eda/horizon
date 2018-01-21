@@ -335,7 +335,8 @@ SRC_ROUTER = \
 
 SRC_POOL_UTIL = \
 	src/pool-util/util_main.cpp\
-	src/pool-update/pool-update.cpp
+	src/pool-update/pool-update.cpp\
+	src/pool-update/graph.cpp
 
 SRC_POOL_UPDATE_PARA = \
 	src/pool-update-parametric/pool-update-parametric.cpp\
@@ -355,6 +356,7 @@ SRC_PRJ_MGR = \
 	src/util/sort_controller.cpp\
 	src/widgets/pool_browser.cpp\
 	src/pool-update/pool-update.cpp\
+	src/pool-update/graph.cpp\
 	src/widgets/cell_renderer_layer_display.cpp\
 	src/pool/pool_cached.cpp\
 	src/util/gtk_util.cpp\
@@ -393,6 +395,7 @@ SRC_POOL_MGR = \
 	src/pool-mgr/duplicate/duplicate_window.cpp\
 	src/pool-mgr/pool_remote_box.cpp\
 	src/pool-mgr/pool_merge_dialog.cpp\
+	src/pool-mgr/pool_update_error_dialog.cpp\
 	src/widgets/pool_browser.cpp\
 	src/widgets/pool_browser_unit.cpp\
 	src/widgets/pool_browser_symbol.cpp\
@@ -406,6 +409,7 @@ SRC_POOL_MGR = \
 	src/util/editor_process.cpp\
 	$(SRC_CANVAS)\
 	src/pool-update/pool-update.cpp\
+	src/pool-update/graph.cpp\
 	src/util/gtk_util.cpp\
 	src/util/window_state_store.cpp\
 	src/util/rest_client.cpp\

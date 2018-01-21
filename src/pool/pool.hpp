@@ -21,7 +21,7 @@ namespace horizon {
 			 * Constructs a Pool
 			 * @param base_path Path to the pool containing the pool.db
 			 */
-			Pool(const std::string &base_path);
+			Pool(const std::string &base_path, bool read_only=true);
 			const class Unit *get_unit(const UUID &uu);
 			const class Entity *get_entity(const UUID &uu);
 			const class Symbol *get_symbol(const UUID &uu);
