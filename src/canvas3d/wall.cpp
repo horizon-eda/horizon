@@ -90,7 +90,7 @@ namespace horizon {
 		glUniform4f(layer_color_loc, co.r, co.g, co.b, ca->layers[layer].alpha);
 		glUniform1f(layer_offset_loc, ca->get_layer_offset(layer));
 		glUniform1f(layer_thickness_loc, ca->layers[layer].thickness);
-		glDrawArrays (GL_LINES, layer_offsets[layer], ca->layers[layer].walls.size());
+		glDrawArrays (GL_LINE_STRIP_ADJACENCY, layer_offsets[layer], ca->layers[layer].walls.size());
 	}
 
 	void WallRenderer::render() {

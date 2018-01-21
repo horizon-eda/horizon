@@ -6,5 +6,7 @@ in vec3 normal_to_fragment;
 uniform vec3 cam_normal;
 
 void main() {
+  if(isnan(normal_to_fragment).x)
+    discard;
   outputColor = color_to_fragment*abs(dot(cam_normal, normal_to_fragment));
 }

@@ -157,9 +157,14 @@ namespace horizon {
 	}
 
 	void Canvas3D::add_path(int layer, const ClipperLib::Path &path) {
-		for(size_t i = 0; i<path.size(); i++) {
-			layers[layer].walls.emplace_back(path[i].X, path[i].Y);
-			layers[layer].walls.emplace_back(path[(i+1)%path.size()].X, path[(i+1)%path.size()].Y);
+		if(path.size() >= 3) {
+			layers[layer].walls.emplace_back(path.back().X, path.back().Y);
+			for(size_t i = 0; i<path.size(); i++) {
+				layers[layer].walls.emplace_back(path[i].X, path[i].Y);
+			}
+			layers[layer].walls.emplace_back(path[0].X, path[0].Y);
+			layers[layer].walls.emplace_back(path[1].X, path[1].Y);
+			layers[layer].walls.emplace_back(NAN, NAN);
 		}
 	}
 
