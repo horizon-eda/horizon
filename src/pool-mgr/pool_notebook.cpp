@@ -27,6 +27,10 @@
 #include "pool_update_error_dialog.hpp"
 #include <thread>
 
+#ifdef G_OS_WIN32
+	#undef ERROR
+#endif
+
 namespace horizon {
 
 	PoolManagerProcess::PoolManagerProcess(PoolManagerProcess::Type ty,  const std::vector<std::string>& args, const std::vector<std::string>& ienv, Pool *pool): type(ty) {
