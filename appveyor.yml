@@ -10,7 +10,9 @@ environment:
 
 before_build:
     - set PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%
-    - bash -lc "for i in {1..3}; do pacman --noconfirm --needed -Su mingw-w64-%MSYS2_ARCH%-{gcc,gtkmm3,boost,yaml-cpp,sqlite3,toolchain,zeromq,glm,libgit2,oce} zip make && break || sleep 15; done"
+    - bash -c "pacman -Syu --noconfirm"
+    - bash -c "pacman -Syu --noconfirm"
+    - bash -c "pacman -S --noconfirm --needed mingw-w64-%MSYS2_ARCH%-{gcc,gtkmm3,boost,yaml-cpp,sqlite3,toolchain,zeromq,glm,libgit2,oce} zip make"
 
 build_script:
     - cd %APPVEYOR_BUILD_FOLDER%
