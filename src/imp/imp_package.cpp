@@ -466,6 +466,9 @@ namespace horizon {
 					auto ed = Gtk::manage(new ModelEditor(this, uu));
 					models_listbox->append(*ed);
 					ed->show();
+					current_model = uu;
+					view_3d_window->update();
+					ed->update_all();
 				}
 			});
 			box->pack_end(*button_add, false, false, 0);
