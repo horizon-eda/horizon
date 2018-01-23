@@ -1,69 +1,99 @@
 #pragma once
-#include <stdint.h>
-#include "util/uuid.hpp"
 #include "common/layer.hpp"
+#include "util/uuid.hpp"
+#include <stdint.h>
 
 namespace horizon {
-	class PropertyValue {
-		public :
-			enum class Type {INVALID, INT, BOOL, STRING, UUID};
-			PropertyValue() {}
+class PropertyValue {
+public:
+    enum class Type { INVALID, INT, BOOL, STRING, UUID };
+    PropertyValue()
+    {
+    }
 
-			virtual Type get_type() const {return Type::INVALID;};
-			virtual ~PropertyValue() {}
+    virtual Type get_type() const
+    {
+        return Type::INVALID;
+    };
+    virtual ~PropertyValue()
+    {
+    }
 
-		protected:
+protected:
+};
 
-	};
+class PropertyValueInt : public PropertyValue {
+public:
+    PropertyValueInt(const int64_t &v = 0) : value(v)
+    {
+    }
+    Type get_type() const override
+    {
+        return Type::INT;
+    };
 
-	class PropertyValueInt: public PropertyValue {
-		public:
-			PropertyValueInt(const int64_t &v=0): value(v) {}
-			Type get_type() const override {return Type::INT;};
+    int64_t value;
+};
 
-			int64_t value;
-	};
+class PropertyValueBool : public PropertyValue {
+public:
+    PropertyValueBool(bool v = false) : value(v)
+    {
+    }
+    Type get_type() const override
+    {
+        return Type::BOOL;
+    };
 
-	class PropertyValueBool: public PropertyValue {
-		public:
-			PropertyValueBool(bool v=false): value(v) {}
-			Type get_type() const override {return Type::BOOL;};
+    bool value;
+};
 
-			bool value;
-	};
+class PropertyValueString : public PropertyValue {
+public:
+    PropertyValueString(const std::string &v = "") : value(v)
+    {
+    }
+    Type get_type() const override
+    {
+        return Type::STRING;
+    };
 
-	class PropertyValueString: public PropertyValue {
-		public:
-			PropertyValueString(const std::string &v=""): value(v) {}
-			Type get_type() const override {return Type::STRING;};
+    std::string value;
+};
 
-			std::string value;
-	};
+class PropertyValueUUID : public PropertyValue {
+public:
+    PropertyValueUUID(const UUID &v = UUID()) : value(v)
+    {
+    }
+    Type get_type() const override
+    {
+        return Type::UUID;
+    };
 
-	class PropertyValueUUID: public PropertyValue {
-		public:
-			PropertyValueUUID(const UUID &v=UUID()): value(v) {}
-			Type get_type() const override {return Type::UUID;};
+    UUID value;
+};
 
-			UUID value;
-	};
+class PropertyMeta {
+public:
+    PropertyMeta()
+    {
+    }
+    bool is_settable = true;
+    virtual ~PropertyMeta()
+    {
+    }
+};
 
-	class PropertyMeta {
-		public:
-			PropertyMeta() {}
-			bool is_settable = true;
-			virtual ~PropertyMeta() {}
-	};
+class PropertyMetaNetClasses : public PropertyMeta {
+public:
+    using PropertyMeta::PropertyMeta;
+    std::map<UUID, std::string> net_classes;
+};
 
-	class PropertyMetaNetClasses: public PropertyMeta {
-		public:
-			using PropertyMeta::PropertyMeta;
-			std::map<UUID, std::string> net_classes;
-	};
-
-	class PropertyMetaLayers: public PropertyMeta {
-		public:
-			using PropertyMeta::PropertyMeta;
-			std::map<int, Layer> layers;
-	};
-}
+class PropertyMetaLayers : public PropertyMeta {
+public:
+    using PropertyMeta::PropertyMeta;
+    std::map<int, Layer> layers;
+};
+} // namespace horizon

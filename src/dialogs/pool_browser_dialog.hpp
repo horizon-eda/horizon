@@ -9,13 +9,13 @@
 namespace horizon {
 
 
-	class PoolBrowserDialog: public Gtk::Dialog {
-		public:
-		PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool *ipool);
-			class PoolBrowser *get_browser();
+class PoolBrowserDialog : public Gtk::Dialog {
+public:
+    PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool *ipool);
+    class PoolBrowser *get_browser();
 
-		private :
-			Pool *pool;
-			class PoolBrowser *browser = nullptr;
-	};
-}
+private:
+    Pool *pool;
+    class PoolBrowser *browser = nullptr;
+};
+} // namespace horizon

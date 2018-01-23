@@ -2,31 +2,35 @@
 #include <functional>
 
 namespace horizon {
-	template <typename T> class autofree_ptr {
-	public:
-		autofree_ptr(T *p, std::function<void(T*)> ffn): ptr(p), free_fn(ffn) {
+template <typename T> class autofree_ptr {
+public:
+    autofree_ptr(T *p, std::function<void(T *)> ffn) : ptr(p), free_fn(ffn)
+    {
+    }
+    autofree_ptr(std::function<void(T *)> ffn) : free_fn(ffn)
+    {
+    }
+    T *ptr = nullptr;
+    std::function<void(T *)> free_fn;
 
-		}
-		autofree_ptr(std::function<void(T*)> ffn): free_fn(ffn) {
+    T &operator*()
+    {
+        return *ptr;
+    }
 
-		}
-		T *ptr = nullptr;
-		std::function<void(T*)> free_fn;
+    T *operator->() const
+    {
+        return ptr;
+    }
 
-		T& operator* () {
-			return *ptr;
-		}
+    operator T *() const
+    {
+        return ptr;
+    }
 
-		T* operator-> () const {
-			return ptr;
-		}
-
-		operator T*() const {
-			return ptr;
-		}
-
-		~autofree_ptr() {
-			free_fn(ptr);
-		}
-	};
-}
+    ~autofree_ptr()
+    {
+        free_fn(ptr);
+    }
+};
+} // namespace horizon

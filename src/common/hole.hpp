@@ -11,37 +11,37 @@
 
 
 namespace horizon {
-	using json = nlohmann::json;
+using json = nlohmann::json;
 
-	/**
-	 * A hole with diameter and position, that's it.
-	 */
-	class Hole: public UUIDProvider {
-		public :
-			Hole(const UUID &uu, const json &j);
-			Hole(const UUID &uu);
+/**
+ * A hole with diameter and position, that's it.
+ */
+class Hole : public UUIDProvider {
+public:
+    Hole(const UUID &uu, const json &j);
+    Hole(const UUID &uu);
 
-			UUID uuid;
-			Placement placement;
-			uint64_t diameter = 0.5_mm;
-			uint64_t length = 0.5_mm;
-			std::string parameter_class;
+    UUID uuid;
+    Placement placement;
+    uint64_t diameter = 0.5_mm;
+    uint64_t length = 0.5_mm;
+    std::string parameter_class;
 
-			/**
-			 * true if this hole is PTH, false if NPTH.
-			 * Used by the gerber exporter.
-			 */
-			bool plated = false;
+    /**
+     * true if this hole is PTH, false if NPTH.
+     * Used by the gerber exporter.
+     */
+    bool plated = false;
 
-			enum class Shape {ROUND, SLOT};
-			Shape shape = Shape::ROUND;
+    enum class Shape { ROUND, SLOT };
+    Shape shape = Shape::ROUND;
 
-			Polygon to_polygon() const;
+    Polygon to_polygon() const;
 
 
-			virtual UUID get_uuid() const ;
+    virtual UUID get_uuid() const;
 
-			//not stored
-			json serialize() const;
-	};
-}
+    // not stored
+    json serialize() const;
+};
+} // namespace horizon

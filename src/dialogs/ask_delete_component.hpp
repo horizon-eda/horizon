@@ -8,14 +8,11 @@
 namespace horizon {
 
 
-	class AskDeleteComponentDialog: public Gtk::Dialog {
-		public:
-		AskDeleteComponentDialog(Gtk::Window *parent, Component *comp);
+class AskDeleteComponentDialog : public Gtk::Dialog {
+public:
+    AskDeleteComponentDialog(Gtk::Window *parent, Component *comp);
 
-			//virtual ~MainWindow();
-		private :
-
-
-
-	};
-}
+    // virtual ~MainWindow();
+private:
+};
+} // namespace horizon

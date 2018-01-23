@@ -2,11 +2,13 @@
 #include "rule_editor.hpp"
 
 namespace horizon {
-	class RuleEditorSinglePinNet: public RuleEditor {
-		using RuleEditor::RuleEditor;
-		public:
-			void populate() override;
-		private:
-			class RuleSinglePinNet *rule2;
-	};
-}
+class RuleEditorSinglePinNet : public RuleEditor {
+    using RuleEditor::RuleEditor;
+
+public:
+    void populate() override;
+
+private:
+    class RuleSinglePinNet *rule2;
+};
+} // namespace horizon

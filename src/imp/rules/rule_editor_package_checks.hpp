@@ -2,11 +2,13 @@
 #include "rule_editor.hpp"
 
 namespace horizon {
-	class RuleEditorPackageChecks: public RuleEditor {
-		using RuleEditor::RuleEditor;
-		public:
-			void populate() override;
-		private:
-			class RulePackageChecks *rule2;
-	};
-}
+class RuleEditorPackageChecks : public RuleEditor {
+    using RuleEditor::RuleEditor;
+
+public:
+    void populate() override;
+
+private:
+    class RulePackageChecks *rule2;
+};
+} // namespace horizon
