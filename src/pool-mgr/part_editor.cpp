@@ -350,7 +350,12 @@ namespace horizon {
 		for(auto &it: attr_editors) {
 			part->attributes[it.first] = it.second->get_as_pair();
 		}
-		part->model = UUID(w_model_combo->get_active_id());
+
+		if(w_model_combo->get_active_row_number() != -1)
+			part->model = UUID(w_model_combo->get_active_id());
+		else
+			part->model = UUID();
+
 		{
 			std::stringstream ss(w_tags->get_text());
 			std::istream_iterator<std::string> begin(ss);
