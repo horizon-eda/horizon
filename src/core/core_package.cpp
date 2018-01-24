@@ -7,8 +7,7 @@ namespace horizon {
 CorePackage::CorePackage(const std::string &filename, Pool &pool)
     : package(Package::new_from_file(filename, pool)), m_filename(filename), rules(package.rules),
       parameter_program_code(package.parameter_program.get_code()), parameter_set(package.parameter_set),
-	  models(package.models),
-	  default_model(package.default_model)
+      models(package.models), default_model(package.default_model)
 {
     rebuild();
     m_pool = &pool;

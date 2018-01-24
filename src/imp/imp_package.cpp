@@ -207,10 +207,10 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
 
         auto browse_button = Gtk::manage(new Gtk::Button("Browse..."));
         browse_button->signal_clicked().connect([this, entry] {
-        	Package::Model *model2 = nullptr;
-        	if(imp->core_package.models.count(uu)) {
-        		model2 = &imp->core_package.models.at(uu);
-        	}
+            Package::Model *model2 = nullptr;
+            if (imp->core_package.models.count(uu)) {
+                model2 = &imp->core_package.models.at(uu);
+            }
             auto mfn = imp->ask_3d_model_filename(model2 ? model2->filename : "");
             if (mfn.size()) {
                 entry->set_text(mfn);
@@ -258,7 +258,7 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
 
         auto place_at_pad_button = Gtk::manage(new Gtk::Button("Place at pad"));
         place_at_pad_button->signal_clicked().connect([this] {
-        	auto pkg = imp->core_package.get_package();
+            auto pkg = imp->core_package.get_package();
             PlaceAtPadDialog dia(pkg);
             dia.set_transient_for(*imp->view_3d_window);
             if (dia.run() == Gtk::RESPONSE_OK) {
@@ -466,7 +466,7 @@ void ImpPackage::construct()
                     core_package.default_model = uu;
                 }
                 core_package.models.emplace(std::piecewise_construct, std::forward_as_tuple(uu),
-                                    std::forward_as_tuple(uu, mfn));
+                                            std::forward_as_tuple(uu, mfn));
                 auto ed = Gtk::manage(new ModelEditor(this, uu));
                 models_listbox->append(*ed);
                 ed->show();
