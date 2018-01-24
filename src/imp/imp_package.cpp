@@ -53,7 +53,6 @@ public:
 
 private:
     ImpPackage *imp;
-    Package *pkg = nullptr;
     Gtk::CheckButton *default_cb = nullptr;
     Gtk::Label *current_label = nullptr;
 
@@ -173,8 +172,7 @@ PlaceAtPadDialog::PlaceAtPadDialog(Package *p)
 
 ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 5), uu(iuu), imp(iimp)
 {
-    pkg = imp->core_package.get_package();
-    auto &model = pkg->models.at(uu);
+    auto &model = imp->core_package.models.at(uu);
     property_margin() = 10;
     auto entry = Gtk::manage(new Gtk::Entry);
     pack_start(*entry, false, false, 0);
@@ -193,13 +191,13 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
         auto delete_button = Gtk::manage(new Gtk::Button);
         delete_button->set_image_from_icon_name("list-remove-symbolic", Gtk::ICON_SIZE_BUTTON);
         delete_button->signal_clicked().connect([this] {
-            pkg->models.erase(uu);
-            if (pkg->default_model == uu) {
-                if (pkg->models.size()) {
-                    pkg->default_model = pkg->models.begin()->first;
+            imp->core_package.models.erase(uu);
+            if (imp->core_package.default_model == uu) {
+                if (imp->core_package.models.size()) {
+                    imp->core_package.default_model = imp->core_package.models.begin()->first;
                 }
                 else {
-                    pkg->default_model = UUID();
+                    imp->core_package.default_model = UUID();
                 }
             }
             update_all();
@@ -209,7 +207,10 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
 
         auto browse_button = Gtk::manage(new Gtk::Button("Browse..."));
         browse_button->signal_clicked().connect([this, entry] {
-            auto model2 = pkg->get_model(uu);
+        	Package::Model *model2 = nullptr;
+        	if(imp->core_package.models.count(uu)) {
+        		model2 = &imp->core_package.models.at(uu);
+        	}
             auto mfn = imp->ask_3d_model_filename(model2 ? model2->filename : "");
             if (mfn.size()) {
                 entry->set_text(mfn);
@@ -220,12 +221,12 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
         box->pack_end(*browse_button, false, false, 0);
 
         default_cb = Gtk::manage(new Gtk::CheckButton("Default"));
-        if (pkg->default_model == uu) {
+        if (imp->core_package.default_model == uu) {
             default_cb->set_active(true);
         }
         default_cb->signal_toggled().connect([this] {
             if (default_cb->get_active()) {
-                pkg->default_model = uu;
+                imp->core_package.default_model = uu;
                 imp->current_model = uu;
             }
             imp->view_3d_window->update();
@@ -257,6 +258,7 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
 
         auto place_at_pad_button = Gtk::manage(new Gtk::Button("Place at pad"));
         place_at_pad_button->signal_clicked().connect([this] {
+        	auto pkg = imp->core_package.get_package();
             PlaceAtPadDialog dia(pkg);
             dia.set_transient_for(*imp->view_3d_window);
             if (dia.run() == Gtk::RESPONSE_OK) {
@@ -344,13 +346,13 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
 
 void ModelEditor::update_all()
 {
-    if (pkg->models.count(imp->current_model) == 0) {
-        imp->current_model = pkg->default_model;
+    if (imp->core_package.models.count(imp->current_model) == 0) {
+        imp->current_model = imp->core_package.default_model;
     }
     auto children = imp->models_listbox->get_children();
     for (auto ch : children) {
         auto ed = dynamic_cast<ModelEditor *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
-        ed->default_cb->set_active(pkg->default_model == ed->uu);
+        ed->default_cb->set_active(imp->core_package.default_model == ed->uu);
         ed->current_label->set_visible(imp->current_model == ed->uu);
     }
 }
@@ -436,6 +438,7 @@ void ImpPackage::construct()
             auto uu = UUID::random();
             auto &fake_package = fake_board.packages.emplace(uu, uu).first->second;
             fake_package.package = *core_package.get_package();
+            fake_package.package.models = core_package.models;
             fake_package.pool_package = core_package.get_package();
             fake_package.model = current_model;
         }
@@ -459,11 +462,10 @@ void ImpPackage::construct()
             auto mfn = ask_3d_model_filename();
             if (mfn.size()) {
                 auto uu = UUID::random();
-                auto pkg = core_package.get_package();
-                if (pkg->models.size() == 0) { // first
-                    pkg->default_model = uu;
+                if (core_package.models.size() == 0) { // first
+                    core_package.default_model = uu;
                 }
-                pkg->models.emplace(std::piecewise_construct, std::forward_as_tuple(uu),
+                core_package.models.emplace(std::piecewise_construct, std::forward_as_tuple(uu),
                                     std::forward_as_tuple(uu, mfn));
                 auto ed = Gtk::manage(new ModelEditor(this, uu));
                 models_listbox->append(*ed);
@@ -497,9 +499,8 @@ void ImpPackage::construct()
         });
         sc->add(*models_listbox);
 
-        auto pkg = core_package.get_package();
-        current_model = pkg->default_model;
-        for (auto &it : pkg->models) {
+        current_model = core_package.default_model;
+        for (auto &it : core_package.models) {
             auto ed = Gtk::manage(new ModelEditor(this, it.first));
             models_listbox->append(*ed);
             ed->show();

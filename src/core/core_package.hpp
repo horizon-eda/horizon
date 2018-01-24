@@ -69,5 +69,8 @@ private:
 public:
     std::string parameter_program_code;
     ParameterSet parameter_set;
+
+    std::map<UUID, Package::Model> models;
+    UUID default_model;
 };
 } // namespace horizon
