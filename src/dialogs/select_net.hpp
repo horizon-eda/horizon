@@ -9,19 +9,19 @@
 namespace horizon {
 
 
-	class SelectNetDialog: public Gtk::Dialog {
-		public:
-			SelectNetDialog(Gtk::Window *parent, Block *b, const std::string &ti);
-			bool valid = false;
-			UUID net;
-			NetSelector *net_selector;
+class SelectNetDialog : public Gtk::Dialog {
+public:
+    SelectNetDialog(Gtk::Window *parent, Block *b, const std::string &ti);
+    bool valid = false;
+    UUID net;
+    NetSelector *net_selector;
 
 
-		private :
-			Block *block = nullptr;
+private:
+    Block *block = nullptr;
 
 
-			void ok_clicked();
-			void net_selected(const UUID &uu);
-	};
-}
+    void ok_clicked();
+    void net_selected(const UUID &uu);
+};
+} // namespace horizon

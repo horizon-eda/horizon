@@ -1,19 +1,18 @@
 #pragma once
-#include "core.hpp"
 #include "block/component.hpp"
-#include <forward_list>
+#include "core.hpp"
 #include "imp/imp_interface.hpp"
+#include <forward_list>
 
 namespace horizon {
 
-	class ToolEditParameterProgram : public ToolBase {
-		public :
-		ToolEditParameterProgram(Core *c, ToolID tid);
-			ToolResponse begin(const ToolArgs &args) override;
-			ToolResponse update(const ToolArgs &args) override;
-			bool can_begin() override;
+class ToolEditParameterProgram : public ToolBase {
+public:
+    ToolEditParameterProgram(Core *c, ToolID tid);
+    ToolResponse begin(const ToolArgs &args) override;
+    ToolResponse update(const ToolArgs &args) override;
+    bool can_begin() override;
 
-		private:
-
-	};
-}
+private:
+};
+} // namespace horizon

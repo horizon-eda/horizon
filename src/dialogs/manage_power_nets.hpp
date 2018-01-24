@@ -8,13 +8,13 @@
 namespace horizon {
 
 
-	class ManagePowerNetsDialog: public Gtk::Dialog {
-		public:
-			ManagePowerNetsDialog(Gtk::Window *parent, Block *b);
+class ManagePowerNetsDialog : public Gtk::Dialog {
+public:
+    ManagePowerNetsDialog(Gtk::Window *parent, Block *b);
 
-		private :
-			Block *block = nullptr;
-			Gtk::ListBox *listbox = nullptr;
-			void handle_add_power_net();
-	};
-}
+private:
+    Block *block = nullptr;
+    Gtk::ListBox *listbox = nullptr;
+    void handle_add_power_net();
+};
+} // namespace horizon

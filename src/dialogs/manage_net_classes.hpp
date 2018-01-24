@@ -8,16 +8,16 @@
 namespace horizon {
 
 
-	class ManageNetClassesDialog: public Gtk::Dialog {
-		public:
-			ManageNetClassesDialog(Gtk::Window *parent, Block *b);
-			bool valid = false;
+class ManageNetClassesDialog : public Gtk::Dialog {
+public:
+    ManageNetClassesDialog(Gtk::Window *parent, Block *b);
+    bool valid = false;
 
-		private :
-			Block *block = nullptr;
-			Gtk::ListBox *listbox = nullptr;
-			void handle_add_net_class();
+private:
+    Block *block = nullptr;
+    Gtk::ListBox *listbox = nullptr;
+    void handle_add_net_class();
 
-			void ok_clicked();
-	};
-}
+    void ok_clicked();
+};
+} // namespace horizon

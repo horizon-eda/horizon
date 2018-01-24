@@ -9,18 +9,18 @@
 namespace horizon {
 
 
-	class CreatePartDialog: public Gtk::Dialog {
-		public:
-		CreatePartDialog(Gtk::Window *parent, Pool *ipool);
-			UUID get_entity();
-			UUID get_package();
+class CreatePartDialog : public Gtk::Dialog {
+public:
+    CreatePartDialog(Gtk::Window *parent, Pool *ipool);
+    UUID get_entity();
+    UUID get_package();
 
-		private :
-			Pool *pool;
-			class PoolBrowserEntity *browser_entity = nullptr;
-			class PoolBrowserPackage *browser_package = nullptr;
-			Gtk::Button *button_ok;
-			void check_select();
-			void check_activate();
-	};
-}
+private:
+    Pool *pool;
+    class PoolBrowserEntity *browser_entity = nullptr;
+    class PoolBrowserPackage *browser_package = nullptr;
+    Gtk::Button *button_ok;
+    void check_select();
+    void check_activate();
+};
+} // namespace horizon

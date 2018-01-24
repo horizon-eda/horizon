@@ -5,15 +5,13 @@
 namespace horizon {
 
 
-	class AskDatumStringDialog: public Gtk::Dialog {
-		public:
-			AskDatumStringDialog(Gtk::Window *parent, const std::string &label);
-			Gtk::Entry *entry = nullptr;;
+class AskDatumStringDialog : public Gtk::Dialog {
+public:
+    AskDatumStringDialog(Gtk::Window *parent, const std::string &label);
+    Gtk::Entry *entry = nullptr;
+    ;
 
-			//virtual ~MainWindow();
-		private :
-
-
-
-	};
-}
+    // virtual ~MainWindow();
+private:
+};
+} // namespace horizon

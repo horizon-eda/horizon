@@ -5,40 +5,40 @@
 #include <set>
 
 namespace PNS {
- class ROUTER;
- class PNS_HORIZON_IFACE;
- class ITEM;
-}
+class ROUTER;
+class PNS_HORIZON_IFACE;
+class ITEM;
+} // namespace PNS
 
 namespace horizon {
-	class ToolWrapper;
-	class Board;
-	class ToolRouteTrackInteractive: public ToolBase {
-		friend ToolWrapper;
-		public :
-			ToolRouteTrackInteractive (Core *c, ToolID tid);
-			ToolResponse begin(const ToolArgs &args) override ;
-			ToolResponse update(const ToolArgs &args) override;
-			bool can_begin() override;
-			bool is_specific() override;
+class ToolWrapper;
+class Board;
+class ToolRouteTrackInteractive : public ToolBase {
+    friend ToolWrapper;
 
-			~ToolRouteTrackInteractive();
+public:
+    ToolRouteTrackInteractive(Core *c, ToolID tid);
+    ToolResponse begin(const ToolArgs &args) override;
+    ToolResponse update(const ToolArgs &args) override;
+    bool can_begin() override;
+    bool is_specific() override;
 
-		private:
-			PNS::ROUTER *router = nullptr;
-			PNS::PNS_HORIZON_IFACE *iface = nullptr;
-			class CanvasGL *canvas = nullptr;
-			ToolWrapper *wrapper = nullptr;
+    ~ToolRouteTrackInteractive();
 
-			enum class State {START, ROUTING};
-			State state = State::START;
+private:
+    PNS::ROUTER *router = nullptr;
+    PNS::PNS_HORIZON_IFACE *iface = nullptr;
+    class CanvasGL *canvas = nullptr;
+    ToolWrapper *wrapper = nullptr;
 
-			Board *board = nullptr;
-			class BoardRules *rules = nullptr;
-			bool shove = false;
+    enum class State { START, ROUTING };
+    State state = State::START;
 
-			void update_tip();
-			class Track *get_track(const std::set<SelectableRef> &sel);
-	};
+    Board *board = nullptr;
+    class BoardRules *rules = nullptr;
+    bool shove = false;
 
-}
+    void update_tip();
+    class Track *get_track(const std::set<SelectableRef> &sel);
+};
+} // namespace horizon

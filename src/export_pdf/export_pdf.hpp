@@ -3,5 +3,5 @@
 #include "core/core.hpp"
 
 namespace horizon {
-	void export_pdf(const std::string &filename, const Schematic &sch, Core *c);
+void export_pdf(const std::string &filename, const Schematic &sch, Core *c);
 }

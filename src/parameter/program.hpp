@@ -1,73 +1,86 @@
 #pragma once
-#include <memory>
-#include <deque>
-#include <string>
-#include <functional>
 #include "set.hpp"
+#include <deque>
+#include <functional>
+#include <memory>
+#include <string>
 
 namespace horizon {
-	//using json = nlohmann::json;
+// using json = nlohmann::json;
 
-	class ParameterProgram {
-		friend class ParameterCommands;
-		public:
-			ParameterProgram(const std::string &s);
-			ParameterProgram(const ParameterProgram &other);
-			ParameterProgram &operator= (const ParameterProgram &other);
-			std::pair<bool, std::string> get_init_error();
-			const std::string &get_code() const;
-			std::pair<bool, std::string> set_code(const std::string &s);
+class ParameterProgram {
+    friend class ParameterCommands;
 
-			std::pair<bool, std::string> run(const ParameterSet &pset={});
+public:
+    ParameterProgram(const std::string &s);
+    ParameterProgram(const ParameterProgram &other);
+    ParameterProgram &operator=(const ParameterProgram &other);
+    std::pair<bool, std::string> get_init_error();
+    const std::string &get_code() const;
+    std::pair<bool, std::string> set_code(const std::string &s);
 
-		protected:
-			class Token {
-				public :
-					enum class Type {INT, CMD, STR, UUID};
-					Token(Type ty): type(ty) {}
+    std::pair<bool, std::string> run(const ParameterSet &pset = {});
 
-					const Type type;
+protected:
+    class Token {
+    public:
+        enum class Type { INT, CMD, STR, UUID };
+        Token(Type ty) : type(ty)
+        {
+        }
 
-					virtual ~Token() {}
-			};
+        const Type type;
 
-			class TokenInt: public Token {
-				public:
-					TokenInt(int64_t v): Token(Token::Type::INT), value(v) {}
+        virtual ~Token()
+        {
+        }
+    };
 
-					const int64_t value;
-			};
+    class TokenInt : public Token {
+    public:
+        TokenInt(int64_t v) : Token(Token::Type::INT), value(v)
+        {
+        }
 
-			class TokenCommand: public Token {
-				public:
-					TokenCommand(const std::string &cmd): Token(Token::Type::CMD), command(cmd) {}
+        const int64_t value;
+    };
 
-					const std::string command;
-					std::deque<std::unique_ptr<Token>> arguments;
-			};
+    class TokenCommand : public Token {
+    public:
+        TokenCommand(const std::string &cmd) : Token(Token::Type::CMD), command(cmd)
+        {
+        }
 
-			class TokenString: public Token {
-				public:
-					TokenString(const std::string &str): Token(Token::Type::STR), string(str) {}
+        const std::string command;
+        std::deque<std::unique_ptr<Token>> arguments;
+    };
 
-					const std::string string;
-			};
+    class TokenString : public Token {
+    public:
+        TokenString(const std::string &str) : Token(Token::Type::STR), string(str)
+        {
+        }
 
-			class TokenUUID: public Token {
-				public:
-					TokenUUID(const std::string &str): Token(Token::Type::UUID), string(str) {}
+        const std::string string;
+    };
 
-					const std::string string;
-			};
-			using CommandHandler = std::function<std::pair<bool, std::string>(const TokenCommand *cmd, std::deque<int64_t> &stack)>;
-			virtual CommandHandler get_command(const std::string &cmd);
+    class TokenUUID : public Token {
+    public:
+        TokenUUID(const std::string &str) : Token(Token::Type::UUID), string(str)
+        {
+        }
 
-		private:
-			std::string code;
-			std::pair<bool, std::string> compile();
-			std::pair<bool, std::string> init_error = {false, ""};
+        const std::string string;
+    };
+    using CommandHandler =
+            std::function<std::pair<bool, std::string>(const TokenCommand *cmd, std::deque<int64_t> &stack)>;
+    virtual CommandHandler get_command(const std::string &cmd);
 
+private:
+    std::string code;
+    std::pair<bool, std::string> compile();
+    std::pair<bool, std::string> init_error = {false, ""};
 
-			std::deque<std::unique_ptr<Token>> tokens;
-	};
-}
+    std::deque<std::unique_ptr<Token>> tokens;
+};
+} // namespace horizon

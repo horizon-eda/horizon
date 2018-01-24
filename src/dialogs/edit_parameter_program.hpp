@@ -6,18 +6,18 @@
 #include "util/uuid.hpp"
 namespace horizon {
 
-	class ParameterProgramDialog: public Gtk::Dialog {
-		public:
-			ParameterProgramDialog(Gtk::Window *parent, class ParameterProgram *pgm);
-			bool valid = false;
+class ParameterProgramDialog : public Gtk::Dialog {
+public:
+    ParameterProgramDialog(Gtk::Window *parent, class ParameterProgram *pgm);
+    bool valid = false;
 
 
-		private :
-			ParameterProgram *program = nullptr;
-			Gtk::TextView *tv = nullptr;
-			Gtk::InfoBar *bar = nullptr;
-			Gtk::Label *bar_label = nullptr;
+private:
+    ParameterProgram *program = nullptr;
+    Gtk::TextView *tv = nullptr;
+    Gtk::InfoBar *bar = nullptr;
+    Gtk::Label *bar_label = nullptr;
 
-			void ok_clicked();
-	};
-}
+    void ok_clicked();
+};
+} // namespace horizon

@@ -4,8 +4,8 @@
 #include <map>
 
 namespace horizon {
-	class LayerProvider {
-		public:
-			virtual const std::map<int, Layer> &get_layers() const;
-	};
-}
+class LayerProvider {
+public:
+    virtual const std::map<int, Layer> &get_layers() const;
+};
+} // namespace horizon

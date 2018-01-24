@@ -5,22 +5,25 @@
 #include <set>
 #include "util/uuid.hpp"
 namespace horizon {
-	class PoolUpdateErrorDialog: public Gtk::Dialog {
-		public:
-			PoolUpdateErrorDialog(Gtk::Window *parent, const std::deque<std::tuple<PoolUpdateStatus, std::string, std::string>> &errors);
-		private :
-			class ListColumns : public Gtk::TreeModelColumnRecord {
-				public:
-					ListColumns() {
-						Gtk::TreeModelColumnRecord::add( filename ) ;
-						Gtk::TreeModelColumnRecord::add( error ) ;
-					}
-					Gtk::TreeModelColumn<Glib::ustring> filename;
-					Gtk::TreeModelColumn<Glib::ustring> error;
-			} ;
-			ListColumns list_columns;
+class PoolUpdateErrorDialog : public Gtk::Dialog {
+public:
+    PoolUpdateErrorDialog(Gtk::Window *parent,
+                          const std::deque<std::tuple<PoolUpdateStatus, std::string, std::string>> &errors);
 
-			Gtk::TreeView *view;
-			Glib::RefPtr<Gtk::ListStore> store;
-	};
-}
+private:
+    class ListColumns : public Gtk::TreeModelColumnRecord {
+    public:
+        ListColumns()
+        {
+            Gtk::TreeModelColumnRecord::add(filename);
+            Gtk::TreeModelColumnRecord::add(error);
+        }
+        Gtk::TreeModelColumn<Glib::ustring> filename;
+        Gtk::TreeModelColumn<Glib::ustring> error;
+    };
+    ListColumns list_columns;
+
+    Gtk::TreeView *view;
+    Glib::RefPtr<Gtk::ListStore> store;
+};
+} // namespace horizon

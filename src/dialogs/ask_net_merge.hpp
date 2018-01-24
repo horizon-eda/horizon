@@ -8,16 +8,15 @@
 namespace horizon {
 
 
-	class AskNetMergeDialog: public Gtk::Dialog {
-		public:
-			AskNetMergeDialog(Gtk::Window *parent, Net *a, Net *b);
+class AskNetMergeDialog : public Gtk::Dialog {
+public:
+    AskNetMergeDialog(Gtk::Window *parent, Net *a, Net *b);
 
-			//virtual ~MainWindow();
-		private :
-			Net *net = nullptr;
-			Net *into = nullptr;
+    // virtual ~MainWindow();
+private:
+    Net *net = nullptr;
+    Net *into = nullptr;
 
-			void ok_clicked();
-
-	};
-}
+    void ok_clicked();
+};
+} // namespace horizon
