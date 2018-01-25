@@ -281,6 +281,7 @@ SRC_IMP = \
 	src/util/gtk_util.cpp\
 	src/imp/fab_output_window.cpp\
 	src/imp/3d_view.cpp\
+	src/imp/step_export_window.cpp\
 	src/canvas3d/canvas3d.cpp\
 	src/canvas3d/cover.cpp\
 	src/canvas3d/wall.cpp\
@@ -426,7 +427,8 @@ SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp
 	
 SRC_OCE = \
-	src/util/step_importer.cpp
+	src/util/step_importer.cpp\
+	src/export_step/export_step.cpp\
 
 
 SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PRJ_MGR) $(SRC_PGM_TEST) $(SRC_POOL_MGR))
@@ -463,7 +465,7 @@ OBJ_OCE = $(SRC_OCE:.cpp=.o)
 
 INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router -I3rd_party
 INC_OCE = -I/opt/opencascade/inc/ -I/mingw64/include/oce/ -I/usr/include/oce
-LDFLAGS_OCE = -L /opt/opencascade/lib/ -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh
+LDFLAGS_OCE = -L /opt/opencascade/lib/ -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -lTKTopAlgo -lTKPrim -lTKBO
 ifeq ($(OS),Windows_NT)
 	LDFLAGS_OCE += -lTKV3d
 endif

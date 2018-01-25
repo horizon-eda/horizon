@@ -3,6 +3,7 @@
 #include "canvas/canvas_gl.hpp"
 #include "canvas/canvas_pads.hpp"
 #include "fab_output_window.hpp"
+#include "step_export_window.hpp"
 #include "pool/part.hpp"
 #include "rules/rules_window.hpp"
 #include "widgets/board_display_options.hpp"
@@ -226,6 +227,10 @@ void ImpBoard::construct()
     hamburger_menu->append("Import DXF", "win.import_dxf");
     add_tool_action(ToolID::IMPORT_DXF, "import_dxf");
 
+    hamburger_menu->append("Export STEP", "win.export_step");
+    main_window->add_action("export_step", [this] { step_export_window->present(); });
+
+
     if (sockets_connected) {
         hamburger_menu->append("Cross probing", "win.cross_probing");
         auto cp_action = main_window->add_action_bool("cross_probing", true);
@@ -259,6 +264,7 @@ void ImpBoard::construct()
 
     fab_output_window = FabOutputWindow::create(main_window, core.b->get_board(), core.b->get_fab_output_settings());
     view_3d_window = View3DWindow::create(core_board.get_board(), pool.get());
+    step_export_window = StepExportWindow::create(main_window, core.b->get_board(), pool.get());
 
     core.r->signal_tool_changed().connect([this](ToolID t) { fab_output_window->set_can_generate(t == ToolID::NONE); });
 

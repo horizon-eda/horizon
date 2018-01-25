@@ -25,6 +25,7 @@ private:
 
     class FabOutputWindow *fab_output_window = nullptr;
     class View3DWindow *view_3d_window = nullptr;
+    class StepExportWindow *step_export_window = nullptr;
     bool cross_probing_enabled = false;
 
     Coordf cursor_pos_drag_begin;
