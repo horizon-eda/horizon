@@ -162,8 +162,8 @@ struct TRIPLET {
 
 #define BOARD_OFFSET (0.05)
 
-bool getModelLocation(bool aBottom, DOUBLET aPosition, double aRotation, TRIPLET aOffset, TRIPLET aOrientation,
-                      TopLoc_Location &aLocation, double board_thickness)
+static bool getModelLocation(bool aBottom, DOUBLET aPosition, double aRotation, TRIPLET aOffset, TRIPLET aOrientation,
+                             TopLoc_Location &aLocation, double board_thickness)
 {
     // Order of operations:
     // a. aOrientation is applied -Z*-Y*-X
@@ -214,7 +214,7 @@ bool getModelLocation(bool aBottom, DOUBLET aPosition, double aRotation, TRIPLET
 
 #define USER_PREC (1e-4)
 
-bool readSTEP(Handle(TDocStd_Document) & doc, const char *fname)
+static bool readSTEP(Handle(TDocStd_Document) & doc, const char *fname)
 {
     STEPCAFControl_Reader reader;
     IFSelect_ReturnStatus stat = reader.ReadFile(fname);
@@ -249,7 +249,7 @@ bool readSTEP(Handle(TDocStd_Document) & doc, const char *fname)
     return true;
 }
 
-TDF_Label transferModel(Handle(TDocStd_Document) & source, Handle(TDocStd_Document) & dest)
+static TDF_Label transferModel(Handle(TDocStd_Document) & source, Handle(TDocStd_Document) & dest)
 {
     // transfer data from Source into a top level component of Dest
 
@@ -341,8 +341,8 @@ TDF_Label transferModel(Handle(TDocStd_Document) & source, Handle(TDocStd_Docume
     return component;
 }
 
-bool getModelLabel(const std::string &aFileName, TDF_Label &aLabel, Handle(XCAFApp_Application) app,
-                   Handle(TDocStd_Document) doc)
+static bool getModelLabel(const std::string &aFileName, TDF_Label &aLabel, Handle(XCAFApp_Application) app,
+                          Handle(TDocStd_Document) doc)
 {
     Handle(TDocStd_Document) my_doc;
     app->NewDocument("MDTV-XCAF", my_doc);
@@ -425,27 +425,33 @@ void export_step(const std::string &filename, const class Board &brd, class Pool
         auto n_pkg = brd.packages.size();
         size_t i = 1;
         for (const auto &it : brd.packages) {
-            auto model = it.second.package.get_model(it.second.model);
-            if (model) {
-                progress_cb("Package " + it.second.component->refdes + " (" + std::to_string(i) + "/"
-                            + std::to_string(n_pkg) + ")");
-                TDF_Label lmodel;
+            try {
+                auto model = it.second.package.get_model(it.second.model);
+                if (model) {
+                    progress_cb("Package " + it.second.component->refdes + " (" + std::to_string(i) + "/"
+                                + std::to_string(n_pkg) + ")");
+                    TDF_Label lmodel;
 
-                if (!getModelLabel(Glib::build_filename(pool.get_base_path(), model->filename), lmodel, app, doc)) {
-                    throw std::runtime_error("get model label");
+                    if (!getModelLabel(Glib::build_filename(pool.get_base_path(), model->filename), lmodel, app, doc)) {
+                        throw std::runtime_error("get model label");
+                    }
+
+                    TopLoc_Location toploc;
+                    DOUBLET pos(it.second.placement.shift.x / 1e6, it.second.placement.shift.y / -1e6);
+                    double rot = angle_to_rad(it.second.placement.get_angle());
+                    TRIPLET offset(model->x / 1e6, model->y / 1e6, model->z / 1e6);
+                    TRIPLET orientation(angle_to_rad(model->roll), angle_to_rad(model->pitch),
+                                        angle_to_rad(model->yaw));
+                    getModelLocation(it.second.flip, pos, rot, offset, orientation, toploc, total_thickness / 1e6);
+
+                    TDF_Label llabel = assy->AddComponent(assy_label, lmodel, toploc);
+
+                    TCollection_ExtendedString refdes(it.second.component->refdes.c_str());
+                    TDataStd_Name::Set(llabel, refdes);
                 }
-
-                TopLoc_Location toploc;
-                DOUBLET pos(it.second.placement.shift.x / 1e6, it.second.placement.shift.y / -1e6);
-                double rot = angle_to_rad(it.second.placement.get_angle());
-                TRIPLET offset(model->x / 1e6, model->y / 1e6, model->z / 1e6);
-                TRIPLET orientation(angle_to_rad(model->roll), angle_to_rad(model->pitch), angle_to_rad(model->yaw));
-                getModelLocation(it.second.flip, pos, rot, offset, orientation, toploc, total_thickness / 1e6);
-
-                TDF_Label llabel = assy->AddComponent(assy_label, lmodel, toploc);
-
-                TCollection_ExtendedString refdes(it.second.component->refdes.c_str());
-                TDataStd_Name::Set(llabel, refdes);
+            }
+            catch (const std::exception &e) {
+                progress_cb("Error processing package " + it.second.component->refdes + ": " + e.what());
             }
             i++;
         }
@@ -468,5 +474,7 @@ void export_step(const std::string &filename, const class Board &brd, class Pool
 
     if (Standard_False == writer.Write(filename.c_str()))
         throw std::runtime_error("write error");
+
+    progress_cb("Done");
 }
 } // namespace horizon

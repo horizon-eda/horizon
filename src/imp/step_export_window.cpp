@@ -1,5 +1,6 @@
 #include "step_export_window.hpp"
 #include "export_step/export_step.hpp"
+#include "util/util.hpp"
 #include <thread>
 
 namespace horizon {
@@ -41,7 +42,11 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
         chooser->set_filename(filename_entry->get_text());
 
         if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-            filename_entry->set_text(chooser->get_filename());
+            std::string filename = chooser->get_filename();
+            if (!endswith(filename, ".step") && !endswith(filename, ".stp")) {
+                filename += ".step";
+            }
+            filename_entry->set_text(filename);
         }
     });
 
@@ -100,10 +105,6 @@ void StepExportWindow::export_thread(std::string filename, bool include_models)
             msg_queue.push_back("Error: unknown error");
         }
         export_dispatcher.emit();
-    }
-    {
-        std::lock_guard<std::mutex> guard(msg_queue_mutex);
-        msg_queue.push_back("Done");
     }
 
     export_running = false;
