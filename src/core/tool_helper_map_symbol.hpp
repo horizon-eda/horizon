@@ -10,5 +10,8 @@ public:
 
 protected:
     class SchematicSymbol *map_symbol(class Component *c, const class Gate *g);
+
+private:
+    std::map<UUID, UUID> placed_symbols; // unit to symbol
 };
 } // namespace horizon

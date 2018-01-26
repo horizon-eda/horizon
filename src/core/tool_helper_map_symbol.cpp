@@ -19,9 +19,15 @@ SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *ga
 
     bool r = false;
     if (n != 1) {
-        std::tie(r, selected_symbol) = imp->dialogs.select_symbol(core.r->m_pool, gate->unit->uuid);
-        if (!r) {
-            return nullptr;
+        if (placed_symbols.count(gate->unit->uuid) == 0) {
+            std::tie(r, selected_symbol) = imp->dialogs.select_symbol(core.r->m_pool, gate->unit->uuid);
+            placed_symbols.emplace(gate->unit->uuid, selected_symbol);
+            if (!r) {
+                return nullptr;
+            }
+        }
+        else {
+            selected_symbol = placed_symbols.at(gate->unit->uuid);
         }
     }
 

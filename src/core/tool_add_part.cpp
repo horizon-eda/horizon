@@ -85,8 +85,27 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
             if (current_gate + 1 == gates.size()) { // last gate
-                core.r->commit();
-                return ToolResponse::end();
+                current_gate = 0;
+                // add next component
+                auto last_comp = comp;
+                auto uu = UUID::random();
+                Schematic *sch = core.c->get_schematic();
+                comp = &sch->block->components.emplace(uu, uu).first->second;
+                comp->entity = last_comp->entity;
+                comp->part = last_comp->part;
+                comp->refdes = comp->entity->prefix + "?";
+
+                sym_current = map_symbol(comp, gates.front());
+                if (!sym_current) {
+                    core.c->get_block()->components.erase(comp->uuid);
+                    core.r->commit();
+                    return ToolResponse::end();
+                }
+                sym_current->placement.shift = args.coords;
+                core.c->selection.clear();
+                core.c->selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
+
+                return ToolResponse();
             }
             else { // place next gate
                 auto sym = map_symbol(comp, gates.at(current_gate + 1));
@@ -101,16 +120,13 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
             }
         }
         else {
-            if (current_gate == 0) {
-                core.r->revert();
-                return ToolResponse::end();
+            if (current_gate == 0) { // also delete the component
+                core.c->get_block()->components.erase(comp->uuid);
             }
-            else {
-                core.c->delete_schematic_symbol(sym_current->uuid);
-                sym_current = nullptr;
-                core.r->commit();
-                return ToolResponse::end();
-            }
+            core.c->delete_schematic_symbol(sym_current->uuid);
+            sym_current = nullptr;
+            core.r->commit();
+            return ToolResponse::end();
         }
     }
     else if (args.type == ToolEventType::KEY) {
