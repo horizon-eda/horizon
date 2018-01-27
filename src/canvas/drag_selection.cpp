@@ -237,14 +237,17 @@ void DragSelection::drag_move(GdkEventMotion *motion_event)
 void DragSelection::drag_end(GdkEventButton *button_event)
 {
     if (button_event->button == 1) { // inside of grid and middle mouse button {
-        bool add = button_event->state & Gdk::CONTROL_MASK;
+        bool toggle = button_event->state & Gdk::CONTROL_MASK;
         if (active == 2) {
             for (auto &it : ca->selectables.items) {
                 if (it.get_flag(Selectable::Flag::PRELIGHT)) {
-                    it.set_flag(Selectable::Flag::SELECTED, true);
+                    if (toggle)
+                        it.set_flag(Selectable::Flag::SELECTED, !it.get_flag(Selectable::Flag::SELECTED));
+                    else
+                        it.set_flag(Selectable::Flag::SELECTED, true);
                 }
                 else {
-                    if (!add)
+                    if (!toggle)
                         it.set_flag(Selectable::Flag::SELECTED, false);
                 }
                 it.set_flag(Selectable::Flag::PRELIGHT, false);
@@ -261,9 +264,7 @@ void DragSelection::drag_end(GdkEventButton *button_event)
             }
             else {
                 std::set<SelectableRef> selection;
-                if (add) {
-                    selection = ca->get_selection();
-                }
+                selection = ca->get_selection();
                 gdouble x, y;
                 gdk_event_get_coords((GdkEvent *)button_event, &x, &y);
                 auto c = ca->screen2canvas({(float)x, (float)y});
@@ -298,16 +299,43 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                             text += " (" + layers.at(sr.layer).name + ")";
                         }
                         auto la = Gtk::manage(new Gtk::MenuItem(text));
-                        la->signal_select().connect([this, sr, selection] {
+                        la->signal_select().connect([this, selection, sr, toggle] {
                             auto sel = selection;
-                            sel.emplace(sr);
-                            ca->set_selection(sel, false);
+                            if (toggle) {
+                                if (sel.count(sr)) {
+                                    sel.erase(sr);
+                                }
+                                else {
+                                    sel.insert(sr);
+                                }
+                                ca->set_selection(sel);
+                            }
+                            else {
+                                ca->set_selection({sr}, false);
+                            }
                         });
-                        la->signal_deselect().connect([this, selection] { ca->set_selection(selection, false); });
-                        la->signal_activate().connect([this, sr, selection] {
+                        la->signal_deselect().connect([this, selection, toggle] {
+                            if (toggle) {
+                                ca->set_selection(selection, false);
+                            }
+                            else {
+                                ca->set_selection({}, false);
+                            }
+                        });
+                        la->signal_activate().connect([this, sr, selection, toggle] {
                             auto sel = selection;
-                            sel.emplace(sr);
-                            ca->set_selection(sel, true);
+                            if (toggle) {
+                                if (sel.count(sr)) {
+                                    sel.erase(sr);
+                                }
+                                else {
+                                    sel.insert(sr);
+                                }
+                                ca->set_selection(sel);
+                            }
+                            else {
+                                ca->set_selection({sr}, true);
+                            }
                         });
                         la->show();
                         ca->clarify_menu->append(*la);
@@ -319,11 +347,25 @@ void DragSelection::drag_end(GdkEventButton *button_event)
 #endif
                 }
                 else if (in_selection.size() == 1) {
-                    selection.emplace(ca->selectables.items_ref[in_selection.front()]);
-                    ca->set_selection(selection);
+                    auto sel = ca->selectables.items_ref[in_selection.front()];
+                    if (toggle) {
+                        if (selection.count(sel)) {
+                            selection.erase(sel);
+                        }
+                        else {
+                            selection.insert(sel);
+                        }
+                        ca->set_selection(selection);
+                    }
+                    else {
+                        ca->set_selection({sel});
+                    }
                 }
                 else if (in_selection.size() == 0) {
-                    ca->set_selection(selection);
+                    if (toggle)
+                        ca->set_selection(selection);
+                    else
+                        ca->set_selection({});
                 }
             }
         }
