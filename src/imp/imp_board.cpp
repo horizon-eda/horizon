@@ -333,6 +333,7 @@ void ImpBoard::handle_maybe_drag()
             return;
     }
     else {
+        ImpBase::handle_maybe_drag();
         return;
     }
     canvas->inhibit_drag_selection();

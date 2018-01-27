@@ -254,7 +254,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     }
 }
 
-ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInterface *imp)
+ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInterface *imp, bool transient)
 {
     if (!args.keep_selection) {
         selection.clear();
@@ -264,6 +264,8 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
     try {
         tool = create_tool(tool_id);
         tool->set_imp_interface(imp);
+        if (transient)
+            tool->set_transient();
         if (!tool->can_begin()) { // check if we can actually use this tool
             tool.reset();
             return ToolResponse();
@@ -566,10 +568,16 @@ bool Core::get_needs_save() const
 ToolBase::ToolBase(Core *c, ToolID tid) : core(c), tool_id(tid)
 {
 }
+
 void ToolBase::set_imp_interface(ImpInterface *i)
 {
     if (imp == nullptr) {
         imp = i;
     }
+}
+
+void ToolBase::set_transient()
+{
+    is_transient = true;
 }
 } // namespace horizon

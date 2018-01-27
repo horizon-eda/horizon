@@ -377,14 +377,20 @@ ToolID ImpSchematic::handle_key(guint k)
 
 void ImpSchematic::handle_maybe_drag()
 {
-    if (!preferences.schematic.drag_start_net_line)
+    if (!preferences.schematic.drag_start_net_line) {
+        ImpBase::handle_maybe_drag();
         return;
+    }
+
     auto target = canvas->get_current_target();
     if (target.type == ObjectType::SYMBOL_PIN || target.type == ObjectType::JUNCTION) {
         std::cout << "click pin" << std::endl;
         canvas->inhibit_drag_selection();
         target_drag_begin = target;
         cursor_pos_drag_begin = canvas->get_cursor_pos_win();
+    }
+    else {
+        ImpBase::handle_maybe_drag();
     }
 }
 

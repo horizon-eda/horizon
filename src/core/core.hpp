@@ -14,7 +14,7 @@
 #include <sigc++/sigc++.h>
 
 namespace horizon {
-enum class ToolEventType { MOVE, CLICK, KEY, LAYER_CHANGE };
+enum class ToolEventType { MOVE, CLICK, CLICK_RELEASE, KEY, LAYER_CHANGE };
 
 /**
  * Add new tools here.
@@ -169,6 +169,7 @@ class ToolBase {
 public:
     ToolBase(class Core *c, ToolID tid);
     void set_imp_interface(class ImpInterface *i);
+    void set_transient();
 
     /**
      * Gets called right after the constructor has finished.
@@ -207,6 +208,7 @@ protected:
     Cores core;
     class ImpInterface *imp = nullptr;
     ToolID tool_id = ToolID::NONE;
+    bool is_transient = false;
 };
 
 /**
@@ -282,7 +284,7 @@ public:
      * And copies the non-working document to the working document.
      */
     virtual void rebuild(bool from_undo = false);
-    ToolResponse tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInterface *imp);
+    ToolResponse tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInterface *imp, bool transient = false);
     ToolResponse tool_update(const ToolArgs &args);
     std::pair<bool, bool> tool_can_begin(ToolID tool_id, const std::set<SelectableRef> &selection);
     virtual void commit() = 0;

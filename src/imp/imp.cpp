@@ -164,6 +164,7 @@ void ImpBase::run(int argc, char *argv[])
     canvas->signal_key_press_event().connect(sigc::mem_fun(this, &ImpBase::handle_key_press));
     canvas->signal_cursor_moved().connect(sigc::mem_fun(this, &ImpBase::handle_cursor_move));
     canvas->signal_button_press_event().connect(sigc::mem_fun(this, &ImpBase::handle_click));
+    canvas->signal_button_release_event().connect(sigc::mem_fun(this, &ImpBase::handle_click_release));
     canvas->signal_request_display_name().connect(
             [this](ObjectType ty, UUID uu) { return core.r->get_display_name(ty, uu); });
 
@@ -383,9 +384,37 @@ void ImpBase::run(int argc, char *argv[])
             "padding-left:10px;}");
     Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 700);
 
+    canvas->signal_motion_notify_event().connect([this](GdkEventMotion *ev) {
+        if (selection_for_drag_move.size()) {
+            handle_drag();
+        }
+        return false;
+    });
+
+    canvas->signal_button_release_event().connect([this](GdkEventButton *ev) {
+        selection_for_drag_move.clear();
+        return false;
+    });
+
     sc();
 
     app->run(*main_window);
+}
+
+void ImpBase::handle_drag()
+{
+    auto pos = canvas->get_cursor_pos_win();
+    auto delta = pos - cursor_pos_drag_begin;
+    if (delta.mag_sq() > (50 * 50)) {
+        {
+            ToolArgs args;
+            args.coords = cursor_pos_grid_drag_begin;
+            args.selection = selection_for_drag_move;
+            ToolResponse r = core.r->tool_begin(ToolID::MOVE, args, imp_interface.get(), true);
+            tool_process(r);
+        }
+        selection_for_drag_move.clear();
+    }
 }
 
 void ImpBase::apply_settings()
@@ -645,6 +674,21 @@ void ImpBase::fix_cursor_pos()
     canvas->update_cursor_pos(x, y);
 }
 
+bool ImpBase::handle_click_release(GdkEventButton *button_event)
+{
+    if (core.r->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)) {
+        ToolArgs args;
+        args.type = ToolEventType::CLICK_RELEASE;
+        args.coords = canvas->get_cursor_pos();
+        args.button = button_event->button;
+        args.target = canvas->get_current_target();
+        args.work_layer = canvas->property_work_layer();
+        ToolResponse r = core.r->tool_update(args);
+        tool_process(r);
+    }
+    return false;
+}
+
 bool ImpBase::handle_click(GdkEventButton *button_event)
 {
     if (core.r->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)) {
@@ -797,6 +841,22 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
         }
     }
     return false;
+}
+
+void ImpBase::handle_maybe_drag()
+{
+    auto c = canvas->screen2canvas(canvas->get_cursor_pos_win());
+    auto sel_at_cursor = canvas->get_selection_at(Coordi(c.x, c.y));
+    auto sel_from_canvas = canvas->get_selection();
+    std::set<SelectableRef> isect;
+    std::set_intersection(sel_from_canvas.begin(), sel_from_canvas.end(), sel_at_cursor.begin(), sel_at_cursor.end(),
+                          std::inserter(isect, isect.begin()));
+    if (isect.size()) {
+        canvas->inhibit_drag_selection();
+        cursor_pos_drag_begin = canvas->get_cursor_pos_win();
+        cursor_pos_grid_drag_begin = canvas->get_cursor_pos();
+        selection_for_drag_move = sel_from_canvas;
+    }
 }
 
 void ImpBase::tool_process(const ToolResponse &resp)

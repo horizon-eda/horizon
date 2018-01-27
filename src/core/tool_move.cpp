@@ -241,7 +241,7 @@ ToolResponse ToolMove::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         do_move(args.coords);
     }
-    else if (args.type == ToolEventType::CLICK) {
+    else if (args.type == ToolEventType::CLICK || (is_transient && args.type == ToolEventType::CLICK_RELEASE)) {
         if (args.button == 1) {
             for (const auto &it : core.r->selection) {
                 if (it.type == ObjectType::SCHEMATIC_SYMBOL) {

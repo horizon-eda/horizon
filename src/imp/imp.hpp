@@ -83,6 +83,7 @@ protected:
     bool handle_key_press(GdkEventKey *key_event);
     void handle_cursor_move(const Coordi &pos);
     bool handle_click(GdkEventButton *button_event);
+    bool handle_click_release(GdkEventButton *button_event);
     bool handle_context_menu(GdkEventButton *button_event);
     void tool_process(const ToolResponse &resp);
     void tool_begin(ToolID id);
@@ -106,16 +107,18 @@ protected:
 
     std::unique_ptr<WindowStateStore> state_store = nullptr;
 
-    virtual void handle_maybe_drag()
-    {
-    }
+    virtual void handle_maybe_drag();
 
 private:
     void fix_cursor_pos();
     void apply_settings();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
     void show_preferences_window();
+    void handle_drag();
 
     class LogWindow *log_window = nullptr;
+    std::set<SelectableRef> selection_for_drag_move;
+    Coordf cursor_pos_drag_begin;
+    Coordi cursor_pos_grid_drag_begin;
 };
 } // namespace horizon
