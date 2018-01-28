@@ -56,7 +56,7 @@ PoolManagerAppWindow::PoolManagerAppWindow(BaseObjectType *cobject, const Glib::
 
     label_gitversion->set_text(gitversion);
 
-    set_icon(Gdk::Pixbuf::create_from_resource("/net/carrotIndustries/horizon/icon.svg"));
+    set_icon(Gdk::Pixbuf::create_from_resource("/net/carrotIndustries/horizon/src/icon.svg"));
 
     download_dispatcher.connect([this] {
         std::lock_guard<std::mutex> lock(download_mutex);
@@ -407,7 +407,7 @@ PoolManagerAppWindow *PoolManagerAppWindow::create(PoolManagerApplication *app)
 {
     // Load the Builder file and instantiate its widgets.
     std::vector<Glib::ustring> widgets = {"app_window", "sg_dest", "sg_repo"};
-    auto refBuilder = Gtk::Builder::create_from_resource("/net/carrotIndustries/horizon/pool-mgr/window.ui", widgets);
+    auto refBuilder = Gtk::Builder::create_from_resource("/net/carrotIndustries/horizon/src/pool-mgr/window.ui", widgets);
 
     PoolManagerAppWindow *window = nullptr;
     refBuilder->get_widget_derived("app_window", window, app);

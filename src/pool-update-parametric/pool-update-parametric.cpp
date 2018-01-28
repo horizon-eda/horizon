@@ -55,7 +55,7 @@ int main(int c_argc, char *c_argv[])
                         "name='resistors'");
         if (!q.step()) { // db is likely empty
             auto bytes = Gio::Resource::lookup_data_global(
-                    "/net/carrotIndustries/horizon/pool-update-parametric/"
+                    "/net/carrotIndustries/horizon/src/pool-update-parametric/"
                     "schema.sql");
             gsize size{bytes->get_size() + 1}; // null byte
             auto data = (const char *)bytes->get_data(size);

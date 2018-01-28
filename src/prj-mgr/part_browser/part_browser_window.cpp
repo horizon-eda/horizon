@@ -243,7 +243,7 @@ PartBrowserWindow *PartBrowserWindow::create(Gtk::Window *p, const std::string &
     PartBrowserWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource(
-            "/net/carrotIndustries/horizon/prj-mgr/part_browser/"
+            "/net/carrotIndustries/horizon/src/prj-mgr/part_browser/"
             "part_browser.ui");
     x->get_widget_derived("window", w, pool_path, favs);
 

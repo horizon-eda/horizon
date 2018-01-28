@@ -99,7 +99,7 @@ PinEditor *PinEditor::create(Pin *p, UnitEditor *pa)
 {
     PinEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-mgr/unit_editor.ui");
+    x->add_from_resource("/net/carrotIndustries/horizon/src/pool-mgr/unit_editor.ui");
     x->get_widget_derived("pin_editor", w, p, pa);
     w->reference();
     return w;
@@ -294,7 +294,7 @@ UnitEditor *UnitEditor::create(Unit *u)
 {
     UnitEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-mgr/unit_editor.ui");
+    x->add_from_resource("/net/carrotIndustries/horizon/src/pool-mgr/unit_editor.ui");
     x->get_widget_derived("unit_editor", w, u);
     w->reference();
     return w;

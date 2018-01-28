@@ -95,7 +95,7 @@ void PoolManagerApplication::on_startup()
     set_accel_for_action("app.quit", "<Ctrl>Q");
 
     auto refBuilder = Gtk::Builder::create();
-    refBuilder->add_from_resource("/net/carrotIndustries/horizon/pool-mgr/app_menu.ui");
+    refBuilder->add_from_resource("/net/carrotIndustries/horizon/src/pool-mgr/app_menu.ui");
 
 
     auto object = refBuilder->get_object("appmenu");

@@ -60,7 +60,7 @@ GateEditor *GateEditor::create(Gate *g, EntityEditor *pa)
 {
     GateEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-mgr/entity_editor.ui");
+    x->add_from_resource("/net/carrotIndustries/horizon/src/pool-mgr/entity_editor.ui");
     x->get_widget_derived("gate_editor", w, g, pa);
     w->reference();
     return w;
@@ -211,7 +211,7 @@ EntityEditor *EntityEditor::create(Entity *e, class Pool *p)
 {
     EntityEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-mgr/entity_editor.ui");
+    x->add_from_resource("/net/carrotIndustries/horizon/src/pool-mgr/entity_editor.ui");
     x->get_widget_derived("entity_editor", w, e, p);
     w->reference();
     return w;

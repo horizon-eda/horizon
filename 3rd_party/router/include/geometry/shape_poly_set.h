@@ -31,7 +31,7 @@
 #include <geometry/shape.h>
 #include <geometry/shape_line_chain.h>
 
-#include "clipper.hpp"
+#include "clipper/clipper.hpp"
 
 
 /**
