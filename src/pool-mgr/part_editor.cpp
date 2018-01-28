@@ -474,7 +474,7 @@ PartEditor *PartEditor::create(Part *p, Pool *po)
 {
     PartEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-mgr/part_editor.ui");
+    x->add_from_resource("/net/carrotIndustries/horizon/src/pool-mgr/part_editor.ui");
     x->get_widget_derived("part_editor", w, p, po);
     w->reference();
     return w;

@@ -18,7 +18,7 @@ public:
         ProjectManagerPrefsPoolItem *w;
         Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
         std::vector<Glib::ustring> objs = {"pool_item_box", "image1"};
-        x->add_from_resource("/net/carrotIndustries/horizon/prj-mgr/prefs.ui", objs);
+        x->add_from_resource("/net/carrotIndustries/horizon/src/prj-mgr/prefs.ui", objs);
         x->get_widget_derived("pool_item_box", w);
 
         w->reference();
@@ -60,7 +60,7 @@ ProjectManagerPrefsBox *ProjectManagerPrefsBox::create()
 {
     ProjectManagerPrefsBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/prj-mgr/prefs.ui", "box");
+    x->add_from_resource("/net/carrotIndustries/horizon/src/prj-mgr/prefs.ui", "box");
     x->get_widget_derived("box", w);
 
     w->reference();

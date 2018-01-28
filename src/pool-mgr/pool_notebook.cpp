@@ -26,6 +26,7 @@
 #include "widgets/preview_canvas.hpp"
 #include "pool_update_error_dialog.hpp"
 #include <thread>
+#include <iostream>
 
 #ifdef G_OS_WIN32
 #undef ERROR
@@ -101,6 +102,7 @@ void PoolNotebook::spawn(PoolManagerProcess::Type type, const std::vector<std::s
 {
     if (processes.count(args.at(0)) == 0) { // need to launch imp
         auto app = Glib::RefPtr<PoolManagerApplication>::cast_dynamic(appwin->get_application());
+		std::cout << "HORIZON_POOL=" << base_path << std::endl;
         std::vector<std::string> env = {"HORIZON_POOL=" + base_path, "HORIZON_EP_BROADCAST=" + app->get_ep_broadcast()};
         std::string filename = args.at(0);
         if (filename.size()) {
