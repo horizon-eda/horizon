@@ -474,19 +474,19 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-	    <property name="tooltip-text" translatable="yes">Return to pool list</property>
+            <property name="tooltip-text" translatable="yes">Return to pool list</property>
 
-	    <child>
-	      <object class="GtkImage" id="navigation_previous_icon">
-		<property name="visible">True</property>
-		<property name="icon-name">go-previous-symbolic</property>
-		<property name="icon-size">1</property>
+            <child>
+              <object class="GtkImage" id="navigation_previous_icon">
+                <property name="visible">True</property>
+                <property name="icon-name">go-previous-symbolic</property>
+                <property name="icon-size">1</property>
               </object>
-	    </child>
+            </child>
           </object>
           <packing>
             <property name="position">3</property>
-	    <property name="pack-type">start</property>
+            <property name="pack-type">start</property>
           </packing>
         </child>
         <child>
@@ -498,7 +498,7 @@
           </object>
           <packing>
             <property name="position">2</property>
-	    <property name="pack-type">start</property>
+            <property name="pack-type">start</property>
           </packing>
         </child>
         <child>
@@ -510,7 +510,7 @@
           </object>
           <packing>
             <property name="position">4</property>
-	    <property name="pack-type">end</property>
+            <property name="pack-type">end</property>
           </packing>
         </child>
         <child>
@@ -522,7 +522,7 @@
           </object>
           <packing>
             <property name="position">4</property>
-	    <property name="pack-type">start</property>
+            <property name="pack-type">start</property>
           </packing>
         </child>
         <child>
@@ -532,7 +532,7 @@
           </object>
           <packing>
             <property name="position">5</property>
-	    <property name="pack-type">end</property>
+            <property name="pack-type">end</property>
           </packing>
         </child>
         <child>
