@@ -474,7 +474,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-	    <property name="tooltip-text" translatable="yes">Return to pull list</property>
+	    <property name="tooltip-text" translatable="yes">Return to pool list</property>
 
 	    <child>
 	      <object class="GtkImage" id="navigation_previous_icon">
