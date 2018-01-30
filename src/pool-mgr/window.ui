@@ -510,7 +510,7 @@
           </object>
           <packing>
             <property name="position">4</property>
-            <property name="pack-type">end</property>
+            <property name="pack-type">start</property>
           </packing>
         </child>
         <child>
@@ -532,7 +532,7 @@
           </object>
           <packing>
             <property name="position">5</property>
-            <property name="pack-type">end</property>
+            <property name="pack-type">start</property>
           </packing>
         </child>
         <child>
