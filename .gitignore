@@ -4,4 +4,5 @@ example/pool/*.db
 build
 bin
 /lib
+*.bak
 
