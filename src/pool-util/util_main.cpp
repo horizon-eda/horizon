@@ -91,7 +91,7 @@ int main(int c_argc, char *c_argv[])
     }
     auto pool_base_path = Glib::getenv("HORIZON_POOL");
 
-    if (argv.at(1) == "create-unit" || argv.at(1) == "edit-unit") {
+    if (argv.size() >= 2 && argv.at(1) == "create-unit" || argv.at(1) == "edit-unit") {
         const auto &filename = argv.at(2);
         horizon::Unit unit(horizon::UUID::random());
         if (argv.at(1) == "edit-unit") {
@@ -104,7 +104,7 @@ int main(int c_argc, char *c_argv[])
         auto j = unit_new.serialize();
         horizon::save_json_to_file(filename, j);
     }
-    else if (argv.at(1) == "create-symbol") {
+    else if (argv.size() >= 4 && argv.at(1) == "create-symbol") {
         const auto &filename_sym = argv.at(2);
         const auto &filename_unit = argv.at(3);
 
@@ -114,7 +114,7 @@ int main(int c_argc, char *c_argv[])
         horizon::save_json_to_file(filename_sym, sym.serialize());
     }
 
-    else if (argv.at(1) == "create-entity" || argv.at(1) == "edit-entity") {
+    else if (argv.size() >= 3 && argv.at(1) == "create-entity" || argv.at(1) == "edit-entity") {
         const auto &filename = argv.at(2);
         horizon::Entity entity(horizon::UUID::random());
         horizon::Pool pool(pool_base_path);
@@ -140,7 +140,7 @@ int main(int c_argc, char *c_argv[])
         horizon::save_json_to_file(filename, j);
     }
 
-    else if (argv.at(1) == "create-package") {
+    else if (argv.size() >= 3 && argv.at(1) == "create-package") {
         auto &base_path = argv.at(2);
         {
             auto fi = Gio::File::create_for_path(Glib::build_filename(base_path, "padstacks"));
@@ -152,13 +152,13 @@ int main(int c_argc, char *c_argv[])
         horizon::save_json_to_file(pkg_filename, j);
     }
 
-    else if (argv.at(1) == "create-padstack") {
+    else if (argv.size() >= 3 && argv.at(1) == "create-padstack") {
         horizon::Padstack ps(horizon::UUID::random());
         auto j = ps.serialize();
         horizon::save_json_to_file(argv.at(2), j);
     }
 
-    else if (argv.at(1) == "update") {
+    else if (argv.size() >= 2 && argv.at(1) == "update") {
         horizon::pool_update(pool_base_path, status_cb);
     }
 
