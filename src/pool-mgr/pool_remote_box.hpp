@@ -50,7 +50,7 @@ private:
     Gtk::Revealer *upgrade_revealer = nullptr;
     Gtk::Label *upgrade_label = nullptr;
     Gtk::Spinner *upgrade_spinner = nullptr;
-    Gtk::LinkButton *gh_repo_link = nullptr;
+    Gtk::Label *gh_repo_link_label = nullptr;
     Gtk::Label *gh_signed_in_label = nullptr;
     Gtk::Button *merge_items_clear_button = nullptr;
     Gtk::Button *merge_items_remove_button = nullptr;

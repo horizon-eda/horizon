@@ -121,7 +121,7 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     x->get_widget("upgrade_revealer", upgrade_revealer);
     x->get_widget("upgrade_spinner", upgrade_spinner);
     x->get_widget("upgrade_label", upgrade_label);
-    x->get_widget("remote_gh_repo_link", gh_repo_link);
+    x->get_widget("remote_gh_repo_link_label", gh_repo_link_label);
     x->get_widget("merge_items_view", merge_items_view);
     x->get_widget("pull_requests_listbox", pull_requests_listbox);
     x->get_widget("merge_items_placeholder_label", merge_items_placeholder_label);
@@ -151,11 +151,12 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     if (regex_url->match(remote_url, ma)) {
         gh_owner = ma.fetch(1);
         gh_repo = ma.fetch(2);
-        gh_repo_link->set_label(gh_owner + " / " + gh_repo);
-        gh_repo_link->set_uri("https://github.com/" + gh_owner + "/" + gh_repo);
+        std::string markup = "<a href=\"https://github.com/" + gh_owner + "/" + gh_repo + "\">" + gh_owner + " / "
+                             + gh_repo + "</a>";
+        gh_repo_link_label->set_markup(markup);
     }
     else {
-        gh_repo_link->set_label("couldn't find github repo!");
+        gh_repo_link_label->set_text("couldn't find github repo!");
     }
 
     upgrade_button->signal_clicked().connect(sigc::mem_fun(this, &PoolRemoteBox::handle_remote_upgrade));
