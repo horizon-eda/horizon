@@ -168,10 +168,10 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
         upgrade_spinner->set_visible(!git_thread_error);
         upgrade_label->set_text(git_thread_status);
         if (gh_username.size()) {
-            gh_signed_in_label->set_text(gh_username);
+            gh_signed_in_label->set_text("GitHub repository, logged as "+gh_username);
         }
         else {
-            gh_signed_in_label->set_text("not signed in");
+            gh_signed_in_label->set_text("GitHub respository, not signed in");
         }
         if (!git_thread_busy) {
             notebook->pool_updating = false;
