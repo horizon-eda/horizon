@@ -42,20 +42,20 @@ int main(int c_argc, char *c_argv[])
     }
     auto pool_base_path = Glib::getenv("HORIZON_POOL");
 
-    if (argv.at(1) == "create-block") {
+    if (argv.size() >= 3 && argv.at(1) == "create-block") {
         horizon::Block block(horizon::UUID::random());
         if (argv.size() >= 4) {
             block.name = argv.at(3);
         }
         save_json_to_file(argv.at(2), block.serialize());
     }
-    else if (argv.at(1) == "create-schematic") {
+    else if (argv.size() >= 4 && argv.at(1) == "create-schematic") {
         horizon::Pool pool(pool_base_path);
         auto block = horizon::Block::new_from_file(argv.at(3), pool);
         horizon::Schematic sch(horizon::UUID::random(), block);
         save_json_to_file(argv.at(2), sch.serialize());
     }
-    else if (argv.at(1) == "create-board") {
+    else if (argv.size() >= 4 && argv.at(1) == "create-board") {
         horizon::Pool pool(pool_base_path);
         auto block = horizon::Block::new_from_file(argv.at(3), pool);
         horizon::Board brd(horizon::UUID::random(), block);
