@@ -3,7 +3,7 @@ It's far from finished, but the overall
 architecture is there. See [the wiki](https://github.com/carrotIndustries/horizon/wiki/Feature-overview) for an overview
 of horizon's top features.
 
-Wanna chat about the project? Join the [IRC channel on freenode](irc://irc.freenode.net/horizon-eda).
+Wanna chat about the project? Join #horizon-eda on freenode
 
 ![collage](https://raw.githubusercontent.com/wiki/carrotIndustries/horizon/images/collage.png)
 
