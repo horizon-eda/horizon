@@ -289,7 +289,7 @@ PullRequestItemBox *PullRequestItemBox::create(const json &j)
 {
     PullRequestItemBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-mgr/window.ui", "pull_request_item");
+    x->add_from_resource("/net/carrotIndustries/horizon/src/pool-mgr/window.ui", "pull_request_item");
     x->get_widget_derived("pull_request_item", w, j);
     w->reference();
     return w;
@@ -411,7 +411,7 @@ PoolRemoteBox *PoolRemoteBox::create(PoolNotebook *nb)
     PoolRemoteBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     std::vector<Glib::ustring> widgets = {"box_remote", "sg_remote"};
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-mgr/window.ui", widgets);
+    x->add_from_resource("/net/carrotIndustries/horizon/src/pool-mgr/window.ui", widgets);
     x->get_widget_derived("box_remote", w, nb);
     w->reference();
     return w;
