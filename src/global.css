@@ -1,0 +1,29 @@
+.imp-status-menu-button {
+  padding: 1px 8px 2px 4px;
+  border: 0;
+  outline-width: 0;
+}
+
+.imp-statusbar {
+  border-top: 1px solid @borders;
+  padding-left: 10px;
+}
+
+.imp-settings-overlay {
+  border-radius: 0px;
+}
+
+.imp-rule-editor-tiny-button-row {
+  min-width: 0px;
+  padding: 0px;
+}
+
+.imp-rule-editor-tiny-button-column {
+  min-height: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+}
+
+.bus-toolbar {
+  border-right: 1px solid @borders;
+}

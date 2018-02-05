@@ -89,11 +89,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     sg_order = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
     auto cssp = Gtk::CssProvider::create();
-    cssp->load_from_data(
-            " \
-				.imp-rule-editor-tiny-button-row {min-width:0px; padding:0px;}\
-				.imp-rule-editor-tiny-button-column {min-height:0px; padding-bottom:0px; padding-top:0px;}\
-		");
+    cssp->load_from_resource("/net/carrotIndustries/horizon/global.css");
     Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 700);
 
     lb_rules->signal_row_selected().connect(

@@ -38,7 +38,7 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     canvas->show();
 
     auto cssp = Gtk::CssProvider::create();
-    cssp->load_from_data(".imp-settings-overlay {border-radius:0px;}");
+    cssp->load_from_resource("/net/carrotIndustries/horizon/global.css");
     Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 700);
 
     Gtk::Revealer *rev;

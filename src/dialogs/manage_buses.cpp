@@ -189,7 +189,7 @@ ManageBusesDialog::ManageBusesDialog(Gtk::Window *parent, Block *bl)
     box2->pack_start(*sidebar, true, true, 0);
 
     auto cssp = Gtk::CssProvider::create();
-    cssp->load_from_data(".bus-toolbar { border-right: 1px solid @borders;}");
+    cssp->load_from_resource("/net/carrotIndustries/horizon/global.css");
     Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 0);
 
     auto tb = Gtk::manage(new Gtk::Toolbar());
