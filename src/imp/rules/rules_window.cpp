@@ -88,10 +88,6 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     x->get_widget("stack", stack);
     sg_order = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
-    auto cssp = Gtk::CssProvider::create();
-    cssp->load_from_resource("/net/carrotIndustries/horizon/global.css");
-    Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 700);
-
     lb_rules->signal_row_selected().connect(
             [this](Gtk::ListBoxRow *row) { rule_selected(dynamic_cast<RuleLabel *>(row->get_child())->id); });
     for (const auto id : rules->get_rule_ids()) {
