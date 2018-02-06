@@ -45,7 +45,7 @@ GerberLayerEditor *GerberLayerEditor::create(FabOutputWindow *pa, FabOutputSetti
 
 FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Board *bo,
                                  FabOutputSettings *s)
-    : Gtk::Window(cobject), brd(bo), settings(s)
+    : Gtk::Window(cobject), brd(bo), settings(s), state_store(this, "imp-fab-output")
 {
     x->get_widget("gerber_layers_box", gerber_layers_box);
     x->get_widget("prefix_entry", prefix_entry);

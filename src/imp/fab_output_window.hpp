@@ -2,6 +2,8 @@
 #include <array>
 #include <gtkmm.h>
 #include <set>
+#include "util/window_state_store.hpp"
+
 namespace horizon {
 
 class FabOutputWindow : public Gtk::Window {
@@ -31,6 +33,8 @@ private:
     Gtk::TextView *log_textview = nullptr;
 
     Glib::RefPtr<Gtk::SizeGroup> sg_layer_name;
+
+    WindowStateStore state_store;
 
     void generate();
     void update_drill_visibility();
