@@ -44,6 +44,8 @@
     <file>imp/step_export.ui</file>
     <file>prj-mgr/part_browser/part_browser.ui</file>
 
+    <file>global.css</file>
+
     <file>canvas/shaders/grid-vertex.glsl</file>
     <file>canvas/shaders/grid-fragment.glsl</file>
 

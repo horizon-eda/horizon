@@ -374,14 +374,7 @@ void ImpBase::run(int argc, char *argv[])
     });
 
     auto cssp = Gtk::CssProvider::create();
-    cssp->load_from_data(
-            ".imp-status-menu-button {"
-            "padding: 1px 8px 2px 4px;\n"
-            "border: 0;\n"
-            "outline-width: 0;\n"
-            "}\n"
-            ".imp-statusbar {border-top: 1px solid @borders; "
-            "padding-left:10px;}");
+    cssp->load_from_resource("/net/carrotIndustries/horizon/global.css");
     Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 700);
 
     canvas->signal_motion_notify_event().connect([this](GdkEventMotion *ev) {
