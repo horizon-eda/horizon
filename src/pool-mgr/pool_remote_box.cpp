@@ -776,6 +776,15 @@ void PoolRemoteBox::create_pr_thread()
                     forked_repo = client.get_repo(gh_username, gh_repo);
                     break;
                 }
+                catch (const std::exception &e) {
+                    retries--;
+                    {
+                        std::lock_guard<std::mutex> lock(git_thread_mutex);
+                        git_thread_status = "Waiting for fork... (" + std::string(e.what()) + ")";
+                    }
+                    git_thread_dispatcher.emit();
+                    Glib::usleep(1e6);
+                }
                 catch (...) {
                     retries--;
                     {
