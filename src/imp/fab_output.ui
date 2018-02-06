@@ -66,8 +66,6 @@
   </object>
   <object class="GtkWindow" id="window">
     <property name="can_focus">False</property>
-    <property name="default_width">440</property>
-    <property name="default_height">700</property>
     <property name="type_hint">dialog</property>
     <child>
       <object class="GtkBox">
@@ -466,6 +464,7 @@
                     <property name="can_focus">True</property>
                     <property name="hscrollbar_policy">never</property>
                     <property name="shadow_type">in</property>
+                    <property name="propagate-natural-height">True</property>
                     <child>
                       <object class="GtkViewport">
                         <property name="visible">True</property>
