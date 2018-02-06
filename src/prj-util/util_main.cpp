@@ -58,7 +58,8 @@ int main(int c_argc, char *c_argv[])
                 block.name = argv.at(3);
             }
             save_json_to_file(argv.at(2), block.serialize());
-        } else {
+        }
+        else {
             std::cout << "Usage: " << argv.at(0) << " create-block <block file> [block name]" << std::endl;
         }
     }
@@ -68,7 +69,8 @@ int main(int c_argc, char *c_argv[])
             auto block = horizon::Block::new_from_file(argv.at(3), pool);
             horizon::Schematic sch(horizon::UUID::random(), block);
             save_json_to_file(argv.at(2), sch.serialize());
-        } else {
+        }
+        else {
             std::cout << "Usage: " << argv.at(0) << " create-schematic <block file> <schematic file>" << std::endl;
         }
     }
@@ -78,7 +80,8 @@ int main(int c_argc, char *c_argv[])
             auto block = horizon::Block::new_from_file(argv.at(3), pool);
             horizon::Board brd(horizon::UUID::random(), block);
             save_json_to_file(argv.at(2), brd.serialize());
-        } else {
+        }
+        else {
             std::cout << "Usage: " << argv.at(0) << " create-board <block file> <board file>" << std::endl;
         }
     }

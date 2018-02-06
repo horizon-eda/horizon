@@ -118,10 +118,12 @@ int main(int c_argc, char *c_argv[])
             horizon::Unit unit_new(node["uuid"].as<std::string>(), node);
             auto j = unit_new.serialize();
             horizon::save_json_to_file(filename, j);
-        } else {
+        }
+        else {
             if (argv.at(1) == "create-unit") {
                 std::cout << "Usage: " << argv.at(0) << " create-unit <unit file>" << std::endl;
-            } else {
+            }
+            else {
                 std::cout << "Usage: " << argv.at(0) << " edit-unit <unit file>" << std::endl;
             }
         }
@@ -136,7 +138,8 @@ int main(int c_argc, char *c_argv[])
             auto unit = horizon::Unit::new_from_file(filename_unit);
             sym.unit = &unit;
             horizon::save_json_to_file(filename_sym, sym.serialize());
-        } else {
+        }
+        else {
             std::cout << "Usage: " << argv.at(0) << " create-symbol <symbol file> <unit file>" << std::endl;
         }
     }
@@ -148,7 +151,8 @@ int main(int c_argc, char *c_argv[])
             horizon::Pool pool(pool_base_path);
             if (argv.at(1) == "edit-entity") {
                 entity = horizon::Entity::new_from_file(filename, pool);
-            } else if (argv.size() > 3) {
+            }
+            else if (argv.size() > 3) {
                 for (auto it = argv.cbegin() + 3; it < argv.cend(); it++) {
                     auto unit = horizon::Unit::new_from_file(*it);
                     auto uu = horizon::UUID::random();
@@ -163,10 +167,12 @@ int main(int c_argc, char *c_argv[])
             horizon::Entity entity_new(node["uuid"].as<std::string>(), node, pool);
             auto j = entity_new.serialize();
             horizon::save_json_to_file(filename, j);
-        } else {
+        }
+        else {
             if (argv.at(1) == "create-entity") {
                 std::cout << "Usage: " << argv.at(0) << " create-entity <entity file> [unit file 1] ..." << std::endl;
-            } else {
+            }
+            else {
                 std::cout << "Usage: " << argv.at(0) << " edit-entity <entity file>" << std::endl;
             }
         }
@@ -183,7 +189,8 @@ int main(int c_argc, char *c_argv[])
             horizon::Package pkg(horizon::UUID::random());
             auto j = pkg.serialize();
             horizon::save_json_to_file(pkg_filename, j);
-        } else {
+        }
+        else {
             std::cout << "Usage: " << argv.at(0) << " create-package <package folder>" << std::endl;
         }
     }
@@ -193,7 +200,8 @@ int main(int c_argc, char *c_argv[])
             horizon::Padstack ps(horizon::UUID::random());
             auto j = ps.serialize();
             horizon::save_json_to_file(argv.at(2), j);
-        } else {
+        }
+        else {
             std::cout << "Usage: " << argv.at(0) << " create-padstack <padstack file>" << std::endl;
         }
     }
