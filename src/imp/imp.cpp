@@ -248,6 +248,7 @@ void ImpBase::run(int argc, char *argv[])
     save_button->signal_clicked().connect([this] { core.r->save(); });
     save_button->show();
     main_window->header->pack_start(*save_button);
+    core.r->signal_needs_save().connect([save_button](bool save_available) { save_button->set_sensitive(save_available); });
 
     auto selection_filter_button = Gtk::manage(new Gtk::Button("Selection filter"));
     selection_filter_button->signal_clicked().connect([this] { selection_filter_dialog->show(); });
