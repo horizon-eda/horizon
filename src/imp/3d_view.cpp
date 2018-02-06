@@ -29,17 +29,12 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
                            class Pool *p)
     : Gtk::Window(cobject), board(bo), pool(p), state_store(this, "imp-board-3d")
 {
-
     Gtk::Box *gl_box;
     x->get_widget("gl_box", gl_box);
 
     canvas = Gtk::manage(new Canvas3D);
     gl_box->pack_start(*canvas, true, true, 0);
     canvas->show();
-
-    auto cssp = Gtk::CssProvider::create();
-    cssp->load_from_resource("/net/carrotIndustries/horizon/global.css");
-    Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 700);
 
     Gtk::Revealer *rev;
     x->get_widget("revealer", rev);
