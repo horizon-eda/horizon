@@ -188,10 +188,6 @@ ManageBusesDialog::ManageBusesDialog(Gtk::Window *parent, Block *bl)
     auto box2 = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
     box2->pack_start(*sidebar, true, true, 0);
 
-    auto cssp = Gtk::CssProvider::create();
-    cssp->load_from_resource("/net/carrotIndustries/horizon/global.css");
-    Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 0);
-
     auto tb = Gtk::manage(new Gtk::Toolbar());
     tb->set_icon_size(Gtk::ICON_SIZE_MENU);
     tb->set_toolbar_style(Gtk::TOOLBAR_ICONS);
