@@ -42,10 +42,8 @@ std::pair<bool, std::string> Package::MyParameterProgram::set_polygon(const Para
         for (auto &it : pkg->polygons) {
             if (it.second.parameter_class == pclass) {
                 it.second.vertices = {
-                        Coordi(x0 - width / 2, y0 - height / 2),
-                        Coordi(x0 - width / 2, y0 + height / 2),
-                        Coordi(x0 + width / 2, y0 + height / 2),
-                        Coordi(x0 + width / 2, y0 - height / 2),
+                        Coordi(x0 - width / 2, y0 - height / 2), Coordi(x0 - width / 2, y0 + height / 2),
+                        Coordi(x0 + width / 2, y0 + height / 2), Coordi(x0 + width / 2, y0 - height / 2),
                 };
             }
         }
@@ -312,9 +310,8 @@ std::pair<bool, std::string> Package::apply_parameter_set(const ParameterSet &ps
 
     for (auto &it : pads) {
         auto ps_pad = it.second.parameter_set;
-        copy_param(ps_pad, ps,
-                   {ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION,
-                    ParameterID::HOLE_SOLDER_MASK_EXPANSION});
+        copy_param(ps_pad, ps, {ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION,
+                                ParameterID::HOLE_SOLDER_MASK_EXPANSION});
         auto r = it.second.padstack.apply_parameter_set(ps_pad);
         if (r.first) {
             return r;

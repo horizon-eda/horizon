@@ -28,7 +28,7 @@ Client::Client(const std::string &base) : base_url(base)
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
-    // curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+// curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
 #ifdef G_OS_WIN32
     {

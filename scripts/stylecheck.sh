@@ -1,5 +1,7 @@
 #!/bin/bash
+
 bash ./scripts/run_clangformat.sh
+
 if [[ -n $(git diff --name-status) ]]; then
   echo "Run clang-format before submitting..."
   echo ""

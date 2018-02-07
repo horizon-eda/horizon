@@ -24,9 +24,9 @@ ToolResponse ToolEditShape::begin(const ToolArgs &args)
 
     auto padstack = core.a->get_padstack();
 
-    auto uu = std::find_if(core.r->selection.begin(), core.r->selection.end(),
-                           [](const auto &x) { return x.type == ObjectType::SHAPE; })
-                      ->uuid;
+    auto uu = std::find_if(core.r->selection.begin(), core.r->selection.end(), [](const auto &x) {
+                  return x.type == ObjectType::SHAPE;
+              })->uuid;
     auto shape = &padstack->shapes.at(uu);
 
     bool r = imp->dialogs.edit_shape(shape);

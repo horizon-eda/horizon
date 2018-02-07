@@ -77,8 +77,7 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         box->pack_start(*b2, true, true, 0);
 
         std::map<PlaneSettings::TextStyle, Gtk::RadioButton *> style_widgets = {
-                {PlaneSettings::TextStyle::EXPAND, b1},
-                {PlaneSettings::TextStyle::BBOX, b2},
+                {PlaneSettings::TextStyle::EXPAND, b1}, {PlaneSettings::TextStyle::BBOX, b2},
         };
 
         bind_widget(style_widgets, settings->text_style);
@@ -100,8 +99,7 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         box->pack_start(*b2, true, true, 0);
 
         std::map<PlaneSettings::ConnectStyle, Gtk::RadioButton *> style_widgets = {
-                {PlaneSettings::ConnectStyle::SOLID, b1},
-                {PlaneSettings::ConnectStyle::THERMAL, b2},
+                {PlaneSettings::ConnectStyle::SOLID, b1}, {PlaneSettings::ConnectStyle::THERMAL, b2},
         };
 
         bind_widget(style_widgets, settings->connect_style);
