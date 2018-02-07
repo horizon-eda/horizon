@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 # Find clang-format v5
 CLANG_FORMAT=$(command -v clang-format)
 CLANG_FORMAT5=$(command -v clang-format-5.0)

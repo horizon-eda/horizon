@@ -81,19 +81,19 @@ void Buffer::load_from_symbol(std::set<SelectableRef> selection)
             new_sel.emplace(ps.junction->uuid, ObjectType::JUNCTION);
         } break;
 
-            /*
-            case ObjectType::BUS_LABEL : {
-                    auto &la = core.c->get_sheet()->bus_labels.at(it.uuid);
-                    new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
-            } break;
+        /*
+        case ObjectType::BUS_LABEL : {
+                auto &la = core.c->get_sheet()->bus_labels.at(it.uuid);
+                new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
+        } break;
 
-            case ObjectType::BUS_RIPPER : {
-                    auto &rip = core.c->get_sheet()->bus_rippers.at(it.uuid);
-                    new_sel.emplace(rip.junction->uuid, ObjectType::JUNCTION);
-            } break;
+        case ObjectType::BUS_RIPPER : {
+                auto &rip = core.c->get_sheet()->bus_rippers.at(it.uuid);
+                new_sel.emplace(rip.junction->uuid, ObjectType::JUNCTION);
+        } break;
 
 
-            */
+        */
 
         default:;
         }

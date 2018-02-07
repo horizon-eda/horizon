@@ -23,9 +23,9 @@ ToolResponse ToolEditVia::begin(const ToolArgs &args)
     std::cout << "tool edit via\n";
     auto board = core.b->get_board();
 
-    auto uu = std::find_if(core.r->selection.begin(), core.r->selection.end(),
-                           [](const auto &x) { return x.type == ObjectType::VIA; })
-                      ->uuid;
+    auto uu = std::find_if(core.r->selection.begin(), core.r->selection.end(), [](const auto &x) {
+                  return x.type == ObjectType::VIA;
+              })->uuid;
     auto via = &board->vias.at(uu);
 
     bool r = imp->dialogs.edit_via(via, *core.b->get_via_padstack_provider());

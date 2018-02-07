@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 bash ./scripts/run_clangformat.sh
 
 if [[ -n $(git diff --name-status) ]]; then
