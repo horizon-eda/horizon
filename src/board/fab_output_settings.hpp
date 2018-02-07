@@ -1,7 +1,7 @@
 #pragma once
 #include "common/common.hpp"
 #include "common/lut.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
 
 namespace horizon {

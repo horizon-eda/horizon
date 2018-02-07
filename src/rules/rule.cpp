@@ -1,4 +1,5 @@
 #include "rule.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 Rule::Rule()

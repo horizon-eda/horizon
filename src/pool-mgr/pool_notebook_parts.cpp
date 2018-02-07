@@ -3,6 +3,7 @@
 #include "duplicate/duplicate_unit.hpp"
 #include "util/util.hpp"
 #include "create_part_dialog.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_part(const UUID &uu)

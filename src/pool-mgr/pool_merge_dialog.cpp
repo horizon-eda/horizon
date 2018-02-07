@@ -6,6 +6,7 @@
 #include "common/lut.hpp"
 #include "util/sqlite.hpp"
 #include <iostream>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

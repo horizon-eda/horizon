@@ -1,6 +1,7 @@
 #include "power_symbol.hpp"
 #include "common/lut.hpp"
 #include "sheet.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

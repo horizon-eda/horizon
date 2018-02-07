@@ -56,6 +56,7 @@
 #include "logger/logger.hpp"
 #include "tool_catalog.hpp"
 #include <memory>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

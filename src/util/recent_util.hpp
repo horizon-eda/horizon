@@ -1,5 +1,5 @@
 #pragma once
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include <glibmm/datetime.h>
 #include <map>
 

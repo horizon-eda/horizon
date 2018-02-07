@@ -6,6 +6,7 @@
 #include "util/recent_util.hpp"
 #include <git2.h>
 #include <curl/curl.h>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

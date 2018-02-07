@@ -2,7 +2,7 @@
 #include "util/uuid.hpp"
 #include "common.hpp"
 #include "util/uuid_provider.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "util/placement.hpp"
 #include "polygon.hpp"
 #include <vector>

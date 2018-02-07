@@ -5,7 +5,7 @@
 #include "common/lut.hpp"
 #include "common/polygon.hpp"
 #include "common/shape.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "parameter/program.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_provider.hpp"

@@ -3,6 +3,7 @@
 #include "util/util.hpp"
 #include <glibmm.h>
 #include <glibmm/fileutils.h>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 ViaPadstackProvider::ViaPadstackProvider(const std::string &bp, Pool &po) : base_path(bp), pool(po)

@@ -2,6 +2,7 @@
 #include "pool/package.hpp"
 #include "rules/cache.hpp"
 #include "util/util.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 PackageRules::PackageRules()

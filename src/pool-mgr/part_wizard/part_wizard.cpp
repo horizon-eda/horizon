@@ -6,6 +6,7 @@
 #include "location_entry.hpp"
 #include "util/str_util.hpp"
 #include "util/gtk_util.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder> &x, const std::string &w,

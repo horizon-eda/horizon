@@ -1,4 +1,5 @@
 #include "placement.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 Placement::Placement(const json &j)

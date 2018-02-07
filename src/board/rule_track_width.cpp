@@ -1,6 +1,7 @@
 #include "rule_track_width.hpp"
 #include "util/util.hpp"
 #include <sstream>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 RuleTrackWidth::Widths::Widths()

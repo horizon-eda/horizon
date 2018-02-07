@@ -5,6 +5,7 @@
 #include "pool/part.hpp"
 #include "util/util.hpp"
 #include <list>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

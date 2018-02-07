@@ -8,7 +8,7 @@
 #include "common/object_provider.hpp"
 #include "common/polygon.hpp"
 #include "common/text.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "package/package_rules.hpp"
 #include "package/pad.hpp"
 #include "util/uuid.hpp"

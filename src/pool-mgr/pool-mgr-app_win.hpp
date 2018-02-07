@@ -3,7 +3,7 @@
 #include <memory>
 #include "util/uuid.hpp"
 #include <zmq.hpp>
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "util/editor_process.hpp"
 #include "util/window_state_store.hpp"
 

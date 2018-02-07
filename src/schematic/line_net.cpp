@@ -2,6 +2,7 @@
 #include "common/lut.hpp"
 #include "schematic_symbol.hpp"
 #include "sheet.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

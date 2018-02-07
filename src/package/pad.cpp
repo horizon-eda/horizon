@@ -1,4 +1,5 @@
 #include "pad.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

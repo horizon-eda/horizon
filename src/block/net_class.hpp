@@ -1,5 +1,5 @@
 #pragma once
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_provider.hpp"
 #include <stdint.h>

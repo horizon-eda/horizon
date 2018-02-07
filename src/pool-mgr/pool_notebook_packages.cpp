@@ -4,6 +4,7 @@
 #include "duplicate/duplicate_part.hpp"
 #include "part_wizard/part_wizard.hpp"
 #include "util/util.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_package(const UUID &uu)

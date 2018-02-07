@@ -26,6 +26,7 @@
 #include "widgets/preview_canvas.hpp"
 #include "pool_update_error_dialog.hpp"
 #include <thread>
+#include "nlohmann/json.hpp"
 
 #ifdef G_OS_WIN32
 #undef ERROR

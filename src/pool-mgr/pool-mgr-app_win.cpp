@@ -11,6 +11,7 @@
 #include "util/gtk_util.hpp"
 #include "util/recent_util.hpp"
 #include "widgets/recent_item_box.hpp"
+#include "nlohmann/json.hpp"
 
 extern const char *gitversion;
 

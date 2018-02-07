@@ -3,6 +3,7 @@
 #include "pool/unit.hpp"
 #include "util/util.hpp"
 #include <glibmm.h>
+#include <iomanip>
 
 namespace horizon {
 

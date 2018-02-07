@@ -3,6 +3,7 @@
 #include "pool/part.hpp"
 #include "util/util.hpp"
 #include <algorithm>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, Pool &pool)

@@ -4,6 +4,7 @@
 #include "util/util.hpp"
 #include "dialogs/pool_browser_dialog.hpp"
 #include "widgets/pool_browser_unit.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_symbol(const UUID &uu)

@@ -6,6 +6,8 @@
 #ifdef G_OS_WIN32
 #include <windows.h>
 #endif
+#include <iomanip>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 void save_json_to_file(const std::string &filename, const json &j)

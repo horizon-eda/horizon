@@ -4,7 +4,7 @@
 #include "util/uuid_provider.hpp"
 #include "block/net.hpp"
 #include "util/uuid_ptr.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "block/bus.hpp"
 #include <vector>
 #include <map>

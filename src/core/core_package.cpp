@@ -2,6 +2,7 @@
 #include "core_properties.hpp"
 #include <algorithm>
 #include <fstream>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 CorePackage::CorePackage(const std::string &filename, Pool &pool)

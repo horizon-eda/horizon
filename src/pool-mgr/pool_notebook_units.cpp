@@ -1,6 +1,7 @@
 #include "pool_notebook.hpp"
 #include "editor_window.hpp"
 #include "util/util.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_create_unit()

@@ -4,6 +4,7 @@
 #include "common/lut.hpp"
 #include "pool.hpp"
 #include "util/util.hpp"
+#include "nlohmann/json.hpp"
 #include <algorithm>
 #include <iostream>
 

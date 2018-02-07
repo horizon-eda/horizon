@@ -10,7 +10,7 @@
 #include "common/layer_provider.hpp"
 #include "common/polygon.hpp"
 #include "fab_output_settings.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "plane.hpp"
 #include "pool/pool.hpp"
 #include "track.hpp"

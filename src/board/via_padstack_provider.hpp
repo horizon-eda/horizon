@@ -1,6 +1,6 @@
 #pragma once
 #include "common/common.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "pool/padstack.hpp"
 #include "util/uuid.hpp"
 #include <fstream>

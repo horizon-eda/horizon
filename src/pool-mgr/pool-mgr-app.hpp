@@ -1,7 +1,7 @@
 #pragma once
 #include <gtkmm.h>
 #include "util/uuid.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include <map>
 #include <zmq.hpp>
 #include <glibmm/datetime.h>

@@ -2,6 +2,7 @@
 #include "logger/log_util.hpp"
 #include "logger/logger.hpp"
 #include <set>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

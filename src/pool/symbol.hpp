@@ -7,7 +7,7 @@
 #include "common/object_provider.hpp"
 #include "common/polygon.hpp"
 #include "common/text.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "unit.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_provider.hpp"

@@ -18,6 +18,7 @@
 #include <memory>
 #include <stdlib.h>
 #include <yaml-cpp/yaml.h>
+#include "nlohmann/json.hpp"
 
 YAML::Node edit_yaml(const YAML::Emitter &em)
 {

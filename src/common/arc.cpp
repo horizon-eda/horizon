@@ -1,6 +1,7 @@
 #include "object_provider.hpp"
 #include "arc.hpp"
 #include "lut.hpp"
+#include "nlohmann/json.hpp"
 #include <algorithm>
 
 namespace horizon {

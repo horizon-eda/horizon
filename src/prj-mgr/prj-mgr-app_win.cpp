@@ -9,6 +9,7 @@
 #include "util/util.hpp"
 #include "widgets/recent_item_box.hpp"
 #include <iostream>
+#include "nlohmann/json.hpp"
 extern const char *gitversion;
 
 namespace horizon {

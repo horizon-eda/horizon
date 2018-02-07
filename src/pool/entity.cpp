@@ -1,5 +1,6 @@
 #include "entity.hpp"
 #include "pool.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

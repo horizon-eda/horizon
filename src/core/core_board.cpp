@@ -4,6 +4,7 @@
 #include "pool/part.hpp"
 #include "util/util.hpp"
 #include <algorithm>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,

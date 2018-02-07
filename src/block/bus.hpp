@@ -1,5 +1,5 @@
 #pragma once
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "net.hpp"
 #include "pool/unit.hpp"
 #include "util/uuid.hpp"

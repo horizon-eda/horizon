@@ -1,6 +1,7 @@
 #include "rule_package_checks.hpp"
 #include "util/util.hpp"
 #include <sstream>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 RulePackageChecks::RulePackageChecks() : Rule()

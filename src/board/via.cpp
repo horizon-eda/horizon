@@ -1,6 +1,7 @@
 #include "via.hpp"
 #include "board.hpp"
 #include "parameter/set.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

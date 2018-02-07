@@ -1,5 +1,5 @@
 #pragma once
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "rule_clearance_copper.hpp"
 #include "rule_clearance_copper_other.hpp"
 #include "rule_clearance_silk_exp_copper.hpp"

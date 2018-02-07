@@ -1,6 +1,6 @@
 #pragma once
 #include "gate.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "unit.hpp"
 #include "util/uuid.hpp"
 #include <fstream>

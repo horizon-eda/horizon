@@ -1,5 +1,5 @@
 #pragma once
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "parameter/set.hpp"
 #include "pool/padstack.hpp"
 #include "util/placement.hpp"

@@ -3,6 +3,7 @@
 #include "board.hpp"
 #include "rules/cache.hpp"
 #include "util/util.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 BoardRules::BoardRules()

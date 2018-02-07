@@ -1,6 +1,6 @@
 #pragma once
 #include "canvas/grid.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include <sigc++/sigc++.h>
 #include <string>
 

@@ -2,7 +2,7 @@
 #include <gtkmm.h>
 #include "common/common.hpp"
 #include "util/uuid.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 
 namespace horizon {
 using json = nlohmann::json;

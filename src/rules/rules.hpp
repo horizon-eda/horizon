@@ -1,7 +1,7 @@
 #pragma once
 #include "clipper/clipper.hpp"
 #include "common/common.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "rule.hpp"
 #include "util/uuid.hpp"
 #include <deque>

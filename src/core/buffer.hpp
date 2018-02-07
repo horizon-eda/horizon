@@ -10,7 +10,7 @@
 #include "common/shape.hpp"
 #include "common/text.hpp"
 #include "cores.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "package/pad.hpp"
 #include "pool/symbol.hpp"
 #include "schematic/net_label.hpp"

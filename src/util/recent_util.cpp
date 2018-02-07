@@ -1,5 +1,6 @@
 #include "recent_util.hpp"
 #include <glibmm/fileutils.h>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 void recent_from_json(std::map<std::string, Glib::DateTime> &recent_items, const json &j)

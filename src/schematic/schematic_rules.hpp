@@ -1,6 +1,6 @@
 #pragma once
 #include "util/uuid.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "rules/rules.hpp"
 #include "rule_single_pin_net.hpp"
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "json.hpp"
+#include "nlohmann/json.hpp"
 #include <curl/curl.h>
 #include <string>
 
@@ -14,7 +14,7 @@ public:
     void set_auth(const std::string &user, const std::string &passwd);
 
     json get(const std::string &url);
-    json post(const std::string &url, const json &postdata = nullptr);
+    json post(const std::string &url, const json &postdata = json());
 
     ~Client();
 

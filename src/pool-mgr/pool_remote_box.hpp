@@ -4,7 +4,7 @@
 #include <mutex>
 #include "util/uuid.hpp"
 #include "common/common.hpp"
-#include "json.hpp"
+#include "nlohmann/json.hpp"
 
 class git_repository;
 

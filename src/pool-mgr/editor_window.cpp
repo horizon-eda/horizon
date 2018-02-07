@@ -8,6 +8,7 @@
 #include "util/util.hpp"
 #include "util/str_util.hpp"
 #include "pool/pool.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

@@ -1,6 +1,7 @@
 #include "rule_single_pin_net.hpp"
 #include "util/util.hpp"
 #include <sstream>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 RuleSinglePinNet::RuleSinglePinNet() : Rule()

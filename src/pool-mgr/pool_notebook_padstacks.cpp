@@ -2,6 +2,7 @@
 #include "editor_window.hpp"
 #include "duplicate/duplicate_unit.hpp"
 #include "util/util.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_padstack(const UUID &uu)

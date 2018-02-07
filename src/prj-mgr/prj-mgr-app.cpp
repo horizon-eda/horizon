@@ -5,6 +5,7 @@
 #include "util/util.hpp"
 #include <fstream>
 #include <glibmm/miscutils.h>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

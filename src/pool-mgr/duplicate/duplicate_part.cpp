@@ -9,6 +9,7 @@
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
 #include "../part_wizard/location_entry.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 class DuplicatePackageWidget : public Gtk::Box {

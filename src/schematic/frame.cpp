@@ -1,5 +1,6 @@
 #include "frame.hpp"
 #include "common/lut.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

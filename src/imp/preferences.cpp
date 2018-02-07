@@ -5,6 +5,7 @@
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

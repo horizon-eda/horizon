@@ -2,6 +2,7 @@
 #include "clipper/clipper.hpp"
 #include "pool.hpp"
 #include "util/util.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

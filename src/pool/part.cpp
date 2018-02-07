@@ -1,5 +1,6 @@
 #include "part.hpp"
 #include "common/lut.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 Part::Part(const UUID &uu, const json &j, Pool &pool) : uuid(uu), inherit_tags(j.value("inherit_tags", false))

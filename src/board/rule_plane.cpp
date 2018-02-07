@@ -1,6 +1,7 @@
 #include "rule_plane.hpp"
 #include "util/util.hpp"
 #include <sstream>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 RulePlane::RulePlane(const UUID &uu) : Rule(uu)

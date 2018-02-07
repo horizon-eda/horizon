@@ -1,4 +1,5 @@
 #include "rules.hpp"
+#include <assert.h>
 
 namespace horizon {
 

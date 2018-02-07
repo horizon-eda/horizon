@@ -1,6 +1,6 @@
 #pragma once
 #include "common/common.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "pool/pool.hpp"
 #include "pool/pool_cached.hpp"
 #include "util/uuid.hpp"

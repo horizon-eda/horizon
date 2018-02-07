@@ -5,7 +5,7 @@
 #include "common/object_descr.hpp"
 #include "cores.hpp"
 #include "dialogs/dialogs.hpp"
-#include "json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "pool/pool.hpp"
 #include "pool/symbol.hpp"
 #include <gdk/gdkkeysyms.h>

@@ -3,6 +3,7 @@
 #include "pool/entity.hpp"
 #include <set>
 #include <forward_list>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

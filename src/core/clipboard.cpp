@@ -1,5 +1,6 @@
 #include "clipboard.hpp"
 #include "canvas/canvas_cairo.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 ClipboardManager::ClipboardManager(Core *co) : buffer(co), core(co)

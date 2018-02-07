@@ -6,6 +6,7 @@
 #include "util/util.hpp"
 #include "widgets/cell_renderer_layer_display.hpp"
 #include <fstream>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 PoolCacheWindow *PoolCacheWindow::create(Gtk::Window *p, const std::string &cache_path, const std::string &pool_path)
