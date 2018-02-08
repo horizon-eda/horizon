@@ -12,7 +12,6 @@ public:
     bool can_begin() override;
 
 private:
-    std::string text = "";
     Text *temp = 0;
     std::forward_list<Text *> texts_placed;
 };
