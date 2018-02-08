@@ -27,8 +27,3 @@
 .bus-toolbar {
   border-right: 1px solid @borders;
 }
-
-button.imp-selection-filter {
-  font-size: 11px;
-  padding: 3px;
-}

@@ -33,29 +33,28 @@ SelectionFilterDialog::SelectionFilterDialog(BaseObjectType *cobject, const Glib
             auto row = Gtk::manage(new Gtk::ListBoxRow());
             auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 2));
 
-            auto cb = Gtk::manage(new Gtk::CheckButton(it.second.name_pl));
+            auto cb = Gtk::manage(new Gtk::CheckButton());
             cb->set_active(true);
             cb->signal_toggled().connect([this, ot, cb] { selection_filter->object_filter[ot] = cb->get_active(); });
             checkbuttons.push_back(cb);
+            bbox->pack_start(*cb, false, false, 0);
 
-            /*auto only_button = Gtk::manage(new Gtk::Button());
-            only_button->set_margin_start(5);
-            // only_button->set_margin_top(2);
-            // only_button->set_margin_bottom(1);
-            only_button->set_image_from_icon_name("pan-end-symbolic", Gtk::ICON_SIZE_BUTTON);
-            only_button->set_relief(Gtk::RELIEF_NONE);
-            only_button->signal_clicked().connect([this, ot, cb] {
-                for (auto cb_other : checkbuttons) {
-                    cb_other->set_active(cb_other == cb);
-                }
-                }); */
-
-            bbox->pack_start(*cb, true, true, 0);
+            auto label = Gtk::manage(new Gtk::Label(it.second.name_pl));
+            bbox->pack_start(*label, false, false, 0);
 
             row->add(*bbox);
             listbox->add(*row);
             row->show_all();
         }
     }
+
+    listbox->signal_row_activated().connect([this](Gtk::ListBoxRow *row) {
+        auto box = dynamic_cast<Gtk::Box *>(row->get_child());
+        auto current_cb = dynamic_cast<Gtk::CheckButton *>(box->get_children()[0]);
+
+        for (auto cb_other : checkbuttons) {
+            cb_other->set_active(cb_other == current_cb);
+        }
+    });
 }
 } // namespace horizon
