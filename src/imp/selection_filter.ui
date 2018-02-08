@@ -4,7 +4,6 @@
   <object class="GtkWindow" id="window">
     <property name="type_hint">dialog</property>
     <property name="title">Selection filter</property>
-    <property name="default-width">200</property>
 
     <child type="titlebar">
       <object class="GtkHeaderBar">
@@ -23,15 +22,23 @@
     </child>
 
     <child>
-      <object class="GtkScrolledWindow" id="scrolled_window">
+      <object class="GtkFrame">
         <property name="visible">True</property>
-        <property name="hscrollbar_policy">never</property>
-        <property name="propagate-natural-height">True</property>
+        <property name="shadow-type">in</property>
+        <property name="margin">10</property>
         
         <child>
-          <object class="GtkListBox" id="listbox">
+          <object class="GtkScrolledWindow" id="scrolled_window">
             <property name="visible">True</property>
-            <property name="selection_mode">none</property>
+            <property name="hscrollbar_policy">never</property>
+            <property name="propagate-natural-height">True</property>
+            
+            <child>
+              <object class="GtkListBox" id="listbox">
+                <property name="visible">True</property>
+                <property name="selection_mode">none</property>
+              </object>
+            </child>
           </object>
         </child>
       </object>
