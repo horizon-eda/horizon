@@ -2,58 +2,43 @@
 
 namespace horizon {
 
-static void header_fun(Gtk::ListBoxRow *row, Gtk::ListBoxRow *before)
+SelectionFilterDialog *SelectionFilterDialog::create(Gtk::Window *parent, SelectionFilter *sf, Core *c)
 {
-    if (before && !row->get_header()) {
-        auto ret = Gtk::manage(new Gtk::Separator);
-        row->set_header(*ret);
-    }
+    SelectionFilterDialog *dialog;
+    Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create();
+    builder->add_from_resource("/net/carrotIndustries/horizon/imp/selection_filter.ui");
+    builder->get_widget_derived("window", dialog, sf, c);
+    dialog->set_transient_for(*parent);
+    return dialog;
 }
 
-SelectionFilterDialog::SelectionFilterDialog(Gtk::Window *parent, SelectionFilter *sf, Core *c)
-    : Gtk::Window(), selection_filter(sf), core(c)
+SelectionFilterDialog::SelectionFilterDialog(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &builder,
+                                             SelectionFilter *sf, Core *c)
+    : Gtk::Window(cobject), selection_filter(sf), core(c)
 {
-    set_default_size(200, 300);
-    set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
-    set_transient_for(*parent);
-    auto hb = Gtk::manage(new Gtk::HeaderBar());
-    hb->set_show_close_button(true);
-    set_titlebar(*hb);
-    hb->show();
-    set_title("Selection filter");
+    builder->get_widget("listbox", listbox);
+    builder->get_widget("select_all", select_all);
 
-    auto reset_button = Gtk::manage(new Gtk::Button());
-    reset_button->set_image_from_icon_name("edit-select-all-symbolic", Gtk::ICON_SIZE_BUTTON);
-    reset_button->show_all();
-    reset_button->signal_clicked().connect([this] {
+    select_all->signal_clicked().connect([this] {
         for (auto cb : checkbuttons) {
             cb->set_active(true);
         }
     });
-    hb->pack_start(*reset_button);
-    reset_button->show();
 
-    /*auto cssp = Gtk::CssProvider::create();
-    cssp->load_from_data(".imp-tiny-button {min-width:0px; min-height:0px;
-    padding:0px;}");
-    Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp,
-    700);*/
-
-    listbox = Gtk::manage(new Gtk::ListBox());
-    listbox->set_selection_mode(Gtk::SELECTION_NONE);
-    listbox->set_header_func(sigc::ptr_fun(&header_fun));
     for (const auto &it : object_descriptions) {
         auto ot = it.first;
         if (ot == ObjectType::POLYGON)
             continue;
         if (core->has_object_type(ot)) {
+            auto row = Gtk::manage(new Gtk::ListBoxRow());
+            auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 2));
+
             auto cb = Gtk::manage(new Gtk::CheckButton(it.second.name_pl));
             cb->set_active(true);
             cb->signal_toggled().connect([this, ot, cb] { selection_filter->object_filter[ot] = cb->get_active(); });
             checkbuttons.push_back(cb);
-            auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 2));
 
-            auto only_button = Gtk::manage(new Gtk::Button());
+            /*auto only_button = Gtk::manage(new Gtk::Button());
             only_button->set_margin_start(5);
             // only_button->set_margin_top(2);
             // only_button->set_margin_bottom(1);
@@ -63,19 +48,14 @@ SelectionFilterDialog::SelectionFilterDialog(Gtk::Window *parent, SelectionFilte
                 for (auto cb_other : checkbuttons) {
                     cb_other->set_active(cb_other == cb);
                 }
-            });
+                }); */
 
-            bbox->pack_start(*only_button, false, false, 0);
             bbox->pack_start(*cb, true, true, 0);
 
-            listbox->append(*bbox);
+            row->add(*bbox);
+            listbox->add(*row);
+            row->show_all();
         }
     }
-
-    auto sc = Gtk::manage(new Gtk::ScrolledWindow());
-    sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-    sc->add(*listbox);
-    add(*sc);
-    sc->show_all();
 }
 } // namespace horizon

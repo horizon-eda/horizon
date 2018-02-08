@@ -42,6 +42,7 @@
     <file>imp/fab_output.ui</file>
     <file>imp/3d_view.ui</file>
     <file>imp/step_export.ui</file>
+    <file>imp/selection_filter.ui</file>
     <file>prj-mgr/part_browser/part_browser.ui</file>
 
     <file>global.css</file>
