@@ -18,12 +18,23 @@ ToolResponse ToolPlaceText::begin(const ToolArgs &args)
     std::cout << "tool place text\n";
 
     temp = core.r->insert_text(UUID::random());
-    temp->text = "TEXT";
     temp->layer = args.work_layer;
     temp->placement.shift = args.coords;
     imp->tool_bar_set_tip(
-            "<b>LMB:</b>place text <b>RMB:</b>delete current text and finish "
-            "<b>space:</b>enter text");
+            "<b>LMB:</b>place text <b>RMB:</b>finish "
+            "<b>space:</b>change text");
+
+    auto r = imp->dialogs.ask_datum_string("Enter text", temp->text);
+    if (r.first) {
+        text = r.second;
+        temp->text = r.second;
+    }
+    else {
+        core.r->delete_text(temp->uuid);
+        core.r->selection.clear();
+        return ToolResponse::end();
+    }
+
     return ToolResponse();
 }
 ToolResponse ToolPlaceText::update(const ToolArgs &args)
@@ -35,7 +46,7 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
         if (args.button == 1) {
             texts_placed.push_front(temp);
             temp = core.r->insert_text(UUID::random());
-            temp->text = "TEXT";
+            temp->text = text;
             temp->layer = args.work_layer;
             temp->placement.shift = args.coords;
         }
@@ -55,8 +66,10 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_space) {
             auto r = imp->dialogs.ask_datum_string("Enter text", temp->text);
-            if (r.first)
+            if (r.first) {
+                text = r.second;
                 temp->text = r.second;
+            }
         }
         else if (args.key == GDK_KEY_Escape) {
             core.r->revert();
