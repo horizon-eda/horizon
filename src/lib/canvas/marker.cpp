@@ -82,9 +82,9 @@ MarkerRenderer::MarkerRenderer(CanvasGL *c, Markers &ma) : ca(c), markers_ref(ma
 
 void MarkerRenderer::realize()
 {
-    program = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/marker-vertex.glsl",
-                                              "/net/carrotIndustries/horizon/canvas/shaders/marker-fragment.glsl",
-                                              "/net/carrotIndustries/horizon/canvas/shaders/"
+    program = gl_create_program_from_resource("/net/carrotIndustries/horizon/lib/canvas/shaders/marker-vertex.glsl",
+                                              "/net/carrotIndustries/horizon/lib/canvas/shaders/marker-fragment.glsl",
+                                              "/net/carrotIndustries/horizon/lib/canvas/shaders/"
                                               "marker-geometry.glsl");
     vao = create_vao(program, vbo);
     GET_LOC(this, screenmat);

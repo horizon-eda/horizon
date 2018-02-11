@@ -74,10 +74,10 @@ TriangleRenderer::TriangleRenderer(CanvasGL *c, std::unordered_map<int, std::vec
 
 void TriangleRenderer::realize()
 {
-    program = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl",
-                                              "/net/carrotIndustries/horizon/canvas/shaders/"
+    program = gl_create_program_from_resource("/net/carrotIndustries/horizon/lib/canvas/shaders/triangle-vertex.glsl",
+                                              "/net/carrotIndustries/horizon/lib/canvas/shaders/"
                                               "triangle-fragment.glsl",
-                                              "/net/carrotIndustries/horizon/canvas/shaders/"
+                                              "/net/carrotIndustries/horizon/lib/canvas/shaders/"
                                               "triangle-geometry.glsl");
     GL_CHECK_ERROR;
     glGenBuffers(1, &ubo);

@@ -38,9 +38,9 @@ static GLuint create_vao_box(GLuint program)
 void DragSelection::Box::realize()
 {
     program = gl_create_program_from_resource(
-            "/net/carrotIndustries/horizon/canvas/shaders/"
+            "/net/carrotIndustries/horizon/lib/canvas/shaders/"
             "selection-vertex.glsl",
-            "/net/carrotIndustries/horizon/canvas/shaders/"
+            "/net/carrotIndustries/horizon/lib/canvas/shaders/"
             "selection-fragment.glsl",
             nullptr);
     vao = create_vao_box(program);
@@ -80,11 +80,11 @@ void DragSelection::Line::create_vao()
 void DragSelection::Line::realize()
 {
     program = gl_create_program_from_resource(
-            "/net/carrotIndustries/horizon/canvas/shaders/"
+            "/net/carrotIndustries/horizon/lib/canvas/shaders/"
             "selection-line-vertex.glsl",
-            "/net/carrotIndustries/horizon/canvas/shaders/"
+            "/net/carrotIndustries/horizon/lib/canvas/shaders/"
             "selection-line-fragment.glsl",
-            "/net/carrotIndustries/horizon/canvas/shaders/"
+            "/net/carrotIndustries/horizon/lib/canvas/shaders/"
             "selection-line-geometry.glsl");
     create_vao();
 

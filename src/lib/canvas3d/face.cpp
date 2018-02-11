@@ -102,9 +102,9 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out, GLuin
 
 void FaceRenderer::realize()
 {
-    program = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas3d/shaders/face-vertex.glsl",
-                                              "/net/carrotIndustries/horizon/canvas3d/shaders/face-fragment.glsl",
-                                              "/net/carrotIndustries/horizon/canvas3d/shaders/"
+    program = gl_create_program_from_resource("/net/carrotIndustries/horizon/lib/canvas3d/shaders/face-vertex.glsl",
+                                              "/net/carrotIndustries/horizon/lib/canvas3d/shaders/face-fragment.glsl",
+                                              "/net/carrotIndustries/horizon/lib/canvas3d/shaders/"
                                               "face-geometry.glsl");
     vao = create_vao(program, vbo, ebo, vbo_instance);
 

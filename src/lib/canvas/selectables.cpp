@@ -154,11 +154,11 @@ SelectablesRenderer::SelectablesRenderer(CanvasGL *c, Selectables *s) : ca(c), s
 void SelectablesRenderer::realize()
 {
     program = gl_create_program_from_resource(
-            "/net/carrotIndustries/horizon/canvas/shaders/"
+            "/net/carrotIndustries/horizon/lib/canvas/shaders/"
             "selectable-vertex.glsl",
-            "/net/carrotIndustries/horizon/canvas/shaders/"
+            "/net/carrotIndustries/horizon/lib/canvas/shaders/"
             "selectable-fragment.glsl",
-            "/net/carrotIndustries/horizon/canvas/shaders/"
+            "/net/carrotIndustries/horizon/lib/canvas/shaders/"
             "selectable-geometry.glsl");
     GL_CHECK_ERROR
     vao = create_vao(program, vbo);
