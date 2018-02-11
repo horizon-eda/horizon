@@ -19,7 +19,7 @@ build_script:
     - cd %APPVEYOR_BUILD_FOLDER%
     - echo %cd%
     - dir
-    - bash -c "cd $APPVEYOR_BUILD_FOLDER && mkdir build && cd build && cmake .. && make -j2 && ./make_bindist.sh"
+    - bash -c "cd $APPVEYOR_BUILD_FOLDER && mkdir build && cd build && cmake .. -G "Unix Makefiles" && make -j2 && ./make_bindist.sh"
 
 artifacts:
     - path: dist/horizon-*.zip
