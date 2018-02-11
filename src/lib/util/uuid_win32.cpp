@@ -1,3 +1,4 @@
+#ifdef _WIN32
 #include <rpc.h>
 #include <stdio.h>
 
@@ -78,3 +79,4 @@ int uuid_is_null(const wuuid_t uu)
             return 0;
     return 1;
 }
+#endif
