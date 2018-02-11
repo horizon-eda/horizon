@@ -27,7 +27,11 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-board-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-link-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-unlink-symbolic.svg</file>
-    <file preprocess="xml-stripblanks">icon.svg</file>
+    <file>icons/scalable/apps/horizon-eda.svg</file>
+    <file>icons/16x16/apps/horizon-eda.png</file>
+    <file>icons/32x32/apps/horizon-eda.png</file>
+    <file>icons/64x64/apps/horizon-eda.png</file>
+    <file>icons/256x256/apps/horizon-eda.png</file>
 
     <file>imp/footprint_generator/footprint_generator.ui</file>
     <file>imp/footprint_generator/dual.svg</file>

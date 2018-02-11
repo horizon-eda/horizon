@@ -57,8 +57,6 @@ PoolManagerAppWindow::PoolManagerAppWindow(BaseObjectType *cobject, const Glib::
 
     label_gitversion->set_text(gitversion);
 
-    set_icon(Gdk::Pixbuf::create_from_resource("/net/carrotIndustries/horizon/icon.svg"));
-
     download_dispatcher.connect([this] {
         std::lock_guard<std::mutex> lock(download_mutex);
         download_revealer->set_reveal_child(downloading || download_error);

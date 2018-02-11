@@ -24,13 +24,10 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("property_scrolled_window", property_scrolled_window);
     x->get_widget("property_throttled_revealer", property_throttled_revealer);
 
-    set_icon(Gdk::Pixbuf::create_from_resource("/net/carrotIndustries/horizon/icon.svg"));
-
     canvas = Gtk::manage(new CanvasGL());
     gl_container->pack_start(*canvas, true, true, 0);
     canvas->show();
     tool_bar_set_visible(false);
-    // show_all();
 }
 
 void MainWindow::tool_bar_set_visible(bool v)

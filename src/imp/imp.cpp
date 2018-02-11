@@ -362,6 +362,8 @@ void ImpBase::run(int argc, char *argv[])
 
     Gtk::IconTheme::get_default()->add_resource_path("/net/carrotIndustries/horizon/icons");
 
+    Gtk::Window::set_default_icon_name("horizon-eda");
+
     app->signal_startup().connect([this, app] {
         auto refBuilder = Gtk::Builder::create();
         refBuilder->add_from_resource("/net/carrotIndustries/horizon/imp/app_menu.ui");

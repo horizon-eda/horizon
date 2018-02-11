@@ -142,6 +142,8 @@ void ProjectManagerApplication::on_startup()
 
     Gtk::IconTheme::get_default()->add_resource_path("/net/carrotIndustries/horizon/icons");
 
+    Gtk::Window::set_default_icon_name("horizon-eda");
+
     signal_shutdown().connect(sigc::mem_fun(this, &ProjectManagerApplication::on_shutdown));
 }
 

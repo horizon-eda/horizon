@@ -270,8 +270,6 @@ ProjectManagerAppWindow::ProjectManagerAppWindow(BaseObjectType *cobject, const 
     view_create.signal_valid_change().connect([this](bool v) { button_create->set_sensitive(v); });
     label_gitversion->set_label(gitversion);
 
-    set_icon(Gdk::Pixbuf::create_from_resource("/net/carrotIndustries/horizon/icon.svg"));
-
     sock_project.bind("tcp://127.0.0.1:*");
     char ep[1024];
     size_t sz = sizeof(ep);
