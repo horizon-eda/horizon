@@ -1,0 +1,8 @@
+
+ADD_SUBDIRECTORY(clipper)
+#ADD_SUBDIRECTORY(delaunay-triangulation)
+ADD_SUBDIRECTORY(dxflib)
+ADD_SUBDIRECTORY(poly2tri)
+ADD_SUBDIRECTORY(polypartition)
+ADD_SUBDIRECTORY(router)
+
