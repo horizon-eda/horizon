@@ -5,7 +5,7 @@
 #include "fab_output_window.hpp"
 #include "step_export_window.hpp"
 #include "pool/part.hpp"
-#include "rules/rules_window.hpp"
+#include "imp/rules/rules_window.hpp"
 #include "widgets/board_display_options.hpp"
 #include "widgets/layer_box.hpp"
 

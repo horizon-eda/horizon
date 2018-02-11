@@ -1,5 +1,5 @@
 #pragma once
-#include "imp.hpp"
+#include "imp/imp.hpp"
 
 namespace horizon {
 class ImpLayer : public ImpBase {
