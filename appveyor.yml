@@ -13,13 +13,13 @@ before_build:
     - bash -c "pacman -R catgets libcatgets --noconfirm || true"
     - bash -c "pacman -Syu --noconfirm"
     - bash -c "pacman -Syu --noconfirm"
-    - bash -c "pacman -S --noconfirm --needed mingw-w64-%MSYS2_ARCH%-{gcc,gtkmm3,boost,yaml-cpp,sqlite3,toolchain,zeromq,glm,libgit2,oce} zip make"
+    - bash -c "pacman -S --noconfirm --needed mingw-w64-%MSYS2_ARCH%-{gcc,gtkmm3,boost,yaml-cpp,sqlite3,toolchain,zeromq,glm,libgit2,oce,cmake} zip make"
 
 build_script:
     - cd %APPVEYOR_BUILD_FOLDER%
     - echo %cd%
     - dir
-    - bash -c "cd $APPVEYOR_BUILD_FOLDER && make -j2 && ./make_bindist.sh"
+    - bash -c "cd $APPVEYOR_BUILD_FOLDER && mkdir build && cd build && cmake .. && make -j2 && ./make_bindist.sh"
 
 artifacts:
     - path: dist/horizon-*.zip

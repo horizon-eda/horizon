@@ -6,8 +6,10 @@ cache:
 
 before_script:
     - mkdir -p vendor/apt
-    - apt-get update -y && apt-get -o dir::cache::archives="vendor/apt" install libyaml-cpp-dev libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev -y 
+    - apt-get update -y && apt-get -o dir::cache::archives="vendor/apt" install libyaml-cpp-dev libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev cmake -y 
     
 BUILD_horizon:
     script:
+        - mkdir build && cd build
+        - cmake ..
         - make -j2
