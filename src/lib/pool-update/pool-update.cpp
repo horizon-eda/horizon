@@ -465,7 +465,8 @@ void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb)
             int user_version = db.get_user_version();
             if (user_version < Pool::get_required_schema_version()) {
                 // update schema
-                auto bytes = Gio::Resource::lookup_data_global("/net/carrotIndustries/horizon/lib/pool-update/schema.sql");
+                auto bytes =
+                        Gio::Resource::lookup_data_global("/net/carrotIndustries/horizon/lib/pool-update/schema.sql");
                 gsize size{bytes->get_size() + 1}; // null byte
                 auto data = (const char *)bytes->get_data(size);
                 db.execute(data);
