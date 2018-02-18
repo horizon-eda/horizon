@@ -19,25 +19,6 @@ ImpPackage::ImpPackage(const std::string &package_filename, const std::string &p
 {
     core = &core_package;
     core_package.signal_tool_changed().connect(sigc::mem_fun(this, &ImpBase::handle_tool_change));
-
-    key_seq_append_default(key_seq);
-    key_seq.append_sequence({
-            {{GDK_KEY_p, GDK_KEY_j}, ToolID::PLACE_JUNCTION},
-            {{GDK_KEY_j}, ToolID::PLACE_JUNCTION},
-            {{GDK_KEY_d, GDK_KEY_l}, ToolID::DRAW_LINE},
-            {{GDK_KEY_l}, ToolID::DRAW_LINE},
-            {{GDK_KEY_d, GDK_KEY_a}, ToolID::DRAW_ARC},
-            {{GDK_KEY_a}, ToolID::DRAW_ARC},
-            {{GDK_KEY_d, GDK_KEY_y}, ToolID::DRAW_POLYGON},
-            {{GDK_KEY_y}, ToolID::DRAW_POLYGON},
-            {{GDK_KEY_d, GDK_KEY_r}, ToolID::DRAW_POLYGON_RECTANGLE},
-            {{GDK_KEY_p, GDK_KEY_t}, ToolID::PLACE_TEXT},
-            {{GDK_KEY_t}, ToolID::PLACE_TEXT},
-            {{GDK_KEY_p, GDK_KEY_p}, ToolID::PLACE_PAD},
-            {{GDK_KEY_P}, ToolID::PLACE_PAD},
-            {{GDK_KEY_i}, ToolID::EDIT_PAD_PARAMETER_SET},
-    });
-    key_seq.signal_update_hint().connect([this](const std::string &s) { main_window->tool_hint_label->set_text(s); });
 }
 
 void ImpPackage::canvas_update()
@@ -407,10 +388,7 @@ void ImpPackage::construct()
     auto view_3d_button = Gtk::manage(new Gtk::Button("3D"));
     main_window->header->pack_start(*view_3d_button);
     view_3d_button->show();
-    view_3d_button->signal_clicked().connect([this] {
-        view_3d_window->update();
-        view_3d_window->present();
-    });
+    view_3d_button->signal_clicked().connect([this] { trigger_action(ActionID::VIEW_3D); });
 
     fake_board.set_n_inner_layers(0);
     fake_board.stackup.at(0).substrate_thickness = 1.6_mm;
@@ -511,6 +489,11 @@ void ImpPackage::construct()
 
     models_box->show_all();
     view_3d_window->add_widget(models_box);
+
+    connect_action(ActionID::VIEW_3D, [this](const auto &a) {
+        view_3d_window->update();
+        view_3d_window->present();
+    });
 
     footprint_generator_window = FootprintGeneratorWindow::create(main_window, &core_package);
     footprint_generator_window->signal_generated().connect(sigc::mem_fun(this, &ImpBase::canvas_update_from_pp));
@@ -674,8 +657,4 @@ void ImpPackage::construct()
             });
 }
 
-ToolID ImpPackage::handle_key(guint k)
-{
-    return key_seq.handle_key(k);
-}
 } // namespace horizon

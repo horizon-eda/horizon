@@ -1,0 +1,72 @@
+#pragma once
+#include <string>
+#include <vector>
+#include <gdk/gdk.h>
+#include "core/core.hpp"
+
+namespace horizon {
+
+enum class ActionID {
+    NONE,
+    TOOL,
+    UNDO,
+    REDO,
+    COPY,
+    DUPLICATE,
+    PLACE_PART,
+    LAYER_UP,
+    LAYER_DOWN,
+    LAYER_TOP,
+    LAYER_BOTTOM,
+    LAYER_INNER1,
+    LAYER_INNER2,
+    LAYER_INNER3,
+    LAYER_INNER4,
+    LAYER_INNER5,
+    LAYER_INNER6,
+    LAYER_INNER7,
+    LAYER_INNER8,
+    SELECTION_FILTER,
+    SAVE,
+    VIEW_3D,
+    RULES,
+    RULES_RUN_CHECKS,
+    RULES_APPLY,
+    PREFERENCES,
+    POPOVER,
+    HELP,
+    VIEW_ALL
+};
+
+enum class ActionGroup {
+    UNKNOWN,
+    CLIPBOARD,
+    UNDO,
+    MOVE,
+    GRAPHICS,
+    SCHEMATIC,
+    SYMBOL,
+    PACKAGE,
+    PADSTACK,
+    BOARD,
+    LAYER,
+};
+
+typedef std::vector<std::pair<int, GdkModifierType>> KeySequence2;
+
+std::string key_sequence_to_string(const KeySequence2 &keys);
+
+class ActionConnection {
+public:
+    ActionConnection(ActionID aid, ToolID tid, std::function<void(const ActionConnection &)> c)
+        : action_id(aid), tool_id(tid), cb(c)
+    {
+    }
+
+    const ActionID action_id;
+    const ToolID tool_id;
+    std::vector<KeySequence2> key_sequences;
+    std::function<void(const ActionConnection &)> cb;
+};
+
+} // namespace horizon

@@ -13,44 +13,6 @@ ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::str
     core = &core_schematic;
     core_schematic.signal_tool_changed().connect(sigc::mem_fun(this, &ImpSchematic::handle_tool_change));
     core_schematic.signal_rebuilt().connect(sigc::mem_fun(this, &ImpSchematic::handle_core_rebuilt));
-
-    key_seq_append_default(key_seq);
-    key_seq.append_sequence({
-            {{GDK_KEY_p, GDK_KEY_j}, ToolID::PLACE_JUNCTION},
-            {{GDK_KEY_j}, ToolID::PLACE_JUNCTION},
-            //{{GDK_KEY_d, GDK_KEY_l}, 	ToolID::DRAW_LINE},
-            //{{GDK_KEY_l},				ToolID::DRAW_LINE},
-            //{{GDK_KEY_d, GDK_KEY_a}, 	ToolID::DRAW_ARC},
-            //{{GDK_KEY_a},				ToolID::DRAW_ARC},
-            {{GDK_KEY_p, GDK_KEY_s}, ToolID::MAP_SYMBOL},
-            {{GDK_KEY_s}, ToolID::MAP_SYMBOL},
-            {{GDK_KEY_d, GDK_KEY_n}, ToolID::DRAW_NET},
-            {{GDK_KEY_n}, ToolID::DRAW_NET},
-            {{GDK_KEY_p, GDK_KEY_c}, ToolID::ADD_COMPONENT},
-            {{GDK_KEY_c}, ToolID::ADD_COMPONENT},
-            {{GDK_KEY_p, GDK_KEY_p}, ToolID::ADD_PART},
-            {{GDK_KEY_P}, ToolID::ADD_PART},
-            {{GDK_KEY_p, GDK_KEY_t}, ToolID::PLACE_TEXT},
-            {{GDK_KEY_t}, ToolID::PLACE_TEXT},
-            {{GDK_KEY_p, GDK_KEY_b}, ToolID::PLACE_NET_LABEL},
-            {{GDK_KEY_b}, ToolID::PLACE_NET_LABEL},
-            {{GDK_KEY_D}, ToolID::DISCONNECT},
-            {{GDK_KEY_k}, ToolID::BEND_LINE_NET},
-            {{GDK_KEY_g}, ToolID::SELECT_NET_SEGMENT},
-            {{GDK_KEY_p, GDK_KEY_o}, ToolID::PLACE_POWER_SYMBOL},
-            {{GDK_KEY_o}, ToolID::PLACE_POWER_SYMBOL},
-            {{GDK_KEY_v}, ToolID::MOVE_NET_SEGMENT},
-            {{GDK_KEY_V}, ToolID::MOVE_NET_SEGMENT_NEW},
-            {{GDK_KEY_i}, ToolID::EDIT_SYMBOL_PIN_NAMES},
-            {{GDK_KEY_p, GDK_KEY_u}, ToolID::PLACE_BUS_LABEL},
-            {{GDK_KEY_u}, ToolID::PLACE_BUS_LABEL},
-            {{GDK_KEY_p, GDK_KEY_r}, ToolID::PLACE_BUS_RIPPER},
-            {{GDK_KEY_slash}, ToolID::PLACE_BUS_RIPPER},
-            {{GDK_KEY_B}, ToolID::MANAGE_BUSES},
-            {{GDK_KEY_h}, ToolID::SMASH},
-            {{GDK_KEY_H}, ToolID::UNSMASH},
-    });
-    key_seq.signal_update_hint().connect([this](const std::string &s) { main_window->tool_hint_label->set_text(s); });
 }
 
 void ImpSchematic::canvas_update()
@@ -277,20 +239,24 @@ void ImpSchematic::construct()
 
     canvas->set_highlight_mode(CanvasGL::HighlightMode::DIM);
 
-    if (!sockets_connected) {
-        add_tool_button(ToolID::ADD_PART, "Place part", false);
-    }
-    else {
+    {
         auto button = Gtk::manage(new Gtk::Button("Place part"));
-        button->signal_clicked().connect([this] {
-            json j;
-            j["op"] = "show-browser";
-            send_json(j);
-        });
+        button->signal_clicked().connect([this] { trigger_action(ActionID::PLACE_PART); });
         button->show();
         core.r->signal_tool_changed().connect([button](ToolID t) { button->set_sensitive(t == ToolID::NONE); });
         main_window->header->pack_end(*button);
     }
+
+    connect_action(ActionID::PLACE_PART, [this](const auto &conn) {
+        if (!sockets_connected) {
+            tool_begin(ToolID::ADD_PART);
+        }
+        else {
+            json j;
+            j["op"] = "show-browser";
+            send_json(j);
+        }
+    });
 
     if (sockets_connected) {
         auto button = Gtk::manage(new Gtk::Button("To board"));
@@ -368,11 +334,6 @@ void ImpSchematic::handle_tool_change(ToolID id)
 {
     ImpBase::handle_tool_change(id);
     sheet_box->set_sensitive(id == ToolID::NONE);
-}
-
-ToolID ImpSchematic::handle_key(guint k)
-{
-    return key_seq.handle_key(k);
 }
 
 void ImpSchematic::handle_maybe_drag()

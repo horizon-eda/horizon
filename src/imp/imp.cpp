@@ -2,7 +2,6 @@
 #include "block/block.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "core/core_board.hpp"
-#include "core/tool_catalog.hpp"
 #include "export_gerber/gerber_export.hpp"
 #include "logger/logger.hpp"
 #include "pool/part.hpp"
@@ -15,9 +14,11 @@
 #include "widgets/log_view.hpp"
 #include "widgets/log_window.hpp"
 #include "widgets/spin_button_dim.hpp"
+#include "action_catalog.hpp"
 #include <glibmm/main.h>
 #include <gtkmm.h>
 #include <iomanip>
+#include <functional>
 
 namespace horizon {
 
@@ -223,18 +224,81 @@ void ImpBase::run(int argc, char *argv[])
             std::make_unique<SelectionFilterDialog>(this->main_window, &canvas->selection_filter, core.r);
 
     key_sequence_dialog = std::make_unique<KeySequenceDialog>(this->main_window);
-    key_sequence_dialog->add_sequence(std::vector<unsigned int>{GDK_KEY_Page_Up}, "Layer up");
-    key_sequence_dialog->add_sequence(std::vector<unsigned int>{GDK_KEY_Page_Down}, "Layer down");
-    key_sequence_dialog->add_sequence(std::vector<unsigned int>{GDK_KEY_space}, "Begin tool");
-    key_sequence_dialog->add_sequence(std::vector<unsigned int>{GDK_KEY_Home}, "Zoom all");
-    key_sequence_dialog->add_sequence("Ctrl+Z", "Undo");
-    key_sequence_dialog->add_sequence("Ctrl+Y", "Redo");
-    key_sequence_dialog->add_sequence("Ctrl+C", "Copy");
-    key_sequence_dialog->add_sequence("Ctrl+V", "Paste");
-    key_sequence_dialog->add_sequence("Ctrl+D", "Duplicate");
-    key_sequence_dialog->add_sequence("Ctrl+I", "Selection filter");
-    key_sequence_dialog->add_sequence("Esc", "Hover select");
-    key_sequence_dialog->add_sequence("Alt (hold)", "Fine grid");
+
+    connect_action(ActionID::SELECTION_FILTER, [this](const auto &a) { selection_filter_dialog->present(); });
+    connect_action(ActionID::SAVE, [this](const auto &a) { core.r->save(); });
+    connect_action(ActionID::UNDO, [this](const auto &a) {
+        core.r->undo();
+        canvas_update_from_pp();
+    });
+    connect_action(ActionID::REDO, [this](const auto &a) {
+        core.r->redo();
+        canvas_update_from_pp();
+    });
+
+    connect_action(ActionID::COPY,
+                   [this](const auto &a) { clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos()); });
+
+    connect_action(ActionID::DUPLICATE, [this](const auto &a) {
+        clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos());
+        tool_begin(ToolID::PASTE);
+    });
+
+    connect_action(ActionID::HELP, [this](const auto &a) { key_sequence_dialog->show(); });
+
+    connect_action(ActionID::VIEW_ALL, [this](const auto &a) {
+        auto bbox = core.r->get_bbox();
+        canvas->zoom_to_bbox(bbox.first, bbox.second);
+    });
+
+    connect_action(ActionID::POPOVER, [this](const auto &a) {
+        Gdk::Rectangle rect;
+        auto c = canvas->get_cursor_pos_win();
+        rect.set_x(c.x);
+        rect.set_y(c.y);
+        tool_popover->set_pointing_to(rect);
+
+        std::map<ToolID, bool> can_begin;
+        auto sel = canvas->get_selection();
+        for (const auto &it : action_catalog) {
+            if (it.first.first == ActionID::TOOL) {
+                bool r = core.r->tool_can_begin(it.first.second, sel).first;
+                can_begin[it.first.second] = r;
+            }
+        }
+        tool_popover->set_can_begin(can_begin);
+
+#if GTK_CHECK_VERSION(3, 22, 0)
+        tool_popover->popup();
+#else
+        tool_popover->show();
+#endif
+    });
+
+    connect_action(ActionID::PREFERENCES, [this](const auto &a) {
+        if (preferences.lock()) {
+            show_preferences_window();
+        }
+        else {
+            Gtk::MessageDialog md(*main_window, "Can't lock preferences", false /* use_markup */, Gtk::MESSAGE_ERROR,
+                                  Gtk::BUTTONS_NONE);
+            md.add_button("OK", Gtk::RESPONSE_OK);
+            md.add_button("Force unlock", 1);
+            md.set_secondary_text("Close all other preferences dialogs first");
+            if (md.run() == 1) {
+                preferences.unlock();
+                preferences.lock();
+                show_preferences_window();
+            }
+        }
+    });
+
+    for (const auto &it : action_catalog) {
+        if ((it.first.first == ActionID::TOOL) && (it.second.availability & get_editor_type_for_action())) {
+            connect_action(it.first.second);
+        }
+    }
+
 
     grid_spin_button = Gtk::manage(new SpinButtonDim());
     grid_spin_button->set_range(0.1_mm, 10_mm);
@@ -255,7 +319,7 @@ void ImpBase::run(int argc, char *argv[])
     main_window->header->pack_start(*selection_filter_button);
 
     auto help_button = Gtk::manage(new Gtk::Button("Help"));
-    help_button->signal_clicked().connect([this] { key_sequence_dialog->show(); });
+    help_button->signal_clicked().connect([this] { trigger_action(ActionID::HELP); });
     help_button->show();
     main_window->header->pack_end(*help_button);
 
@@ -272,6 +336,18 @@ void ImpBase::run(int argc, char *argv[])
         }
     }
 
+    tool_popover = Gtk::manage(new ToolPopover(canvas));
+    tool_popover->set_position(Gtk::POS_BOTTOM);
+    tool_popover->signal_tool_activated().connect([this](ToolID tool_id) {
+        ToolArgs args;
+        args.coords = canvas->get_cursor_pos();
+        args.selection = canvas->get_selection();
+        args.work_layer = canvas->property_work_layer();
+        ToolResponse r = core.r->tool_begin(tool_id, args, imp_interface.get());
+        tool_process(r);
+    });
+
+
     preferences.signal_changed().connect(sigc::mem_fun(this, &ImpBase::apply_settings));
 
     preferences.load();
@@ -285,23 +361,7 @@ void ImpBase::run(int argc, char *argv[])
             preferences.load();
     });
 
-    main_window->add_action("preferences", [this] {
-        if (preferences.lock()) {
-            show_preferences_window();
-        }
-        else {
-            Gtk::MessageDialog md(*main_window, "Can't lock preferences", false /* use_markup */, Gtk::MESSAGE_ERROR,
-                                  Gtk::BUTTONS_NONE);
-            md.add_button("OK", Gtk::RESPONSE_OK);
-            md.add_button("Force unlock", 1);
-            md.set_secondary_text("Close all other preferences dialogs first");
-            if (md.run() == 1) {
-                preferences.unlock();
-                preferences.lock();
-                show_preferences_window();
-            }
-        }
-    });
+    main_window->add_action("preferences", [this] { trigger_action(ActionID::PREFERENCES); });
 
     log_window = new LogWindow(main_window);
     Logger::get().set_log_handler([this](const Logger::Item &it) { log_window->get_view()->push_log(it); });
@@ -320,20 +380,8 @@ void ImpBase::run(int argc, char *argv[])
     }
 
     construct();
-    for (const auto &it : key_seq.get_sequences()) {
-        key_sequence_dialog->add_sequence(it.keys, tool_catalog.at(it.tool_id).name);
-    }
 
-    tool_popover = Gtk::manage(new ToolPopover(canvas, &key_seq));
-    tool_popover->set_position(Gtk::POS_BOTTOM);
-    tool_popover->signal_tool_activated().connect([this](ToolID tool_id) {
-        ToolArgs args;
-        args.coords = canvas->get_cursor_pos();
-        args.selection = canvas->get_selection();
-        args.work_layer = canvas->property_work_layer();
-        ToolResponse r = core.r->tool_begin(tool_id, args, imp_interface.get());
-        tool_process(r);
-    });
+    apply_settings();
 
     canvas->property_work_layer().signal_changed().connect([this] {
         if (core.r->tool_is_active()) {
@@ -396,6 +444,32 @@ void ImpBase::run(int argc, char *argv[])
     app->run(*main_window);
 }
 
+bool ImpBase::trigger_action(const std::pair<ActionID, ToolID> &action)
+{
+    if (core.r->tool_is_active() && !action_catalog.at(action).in_tool) {
+        return false;
+    }
+    auto conn = action_connections.at(action);
+    conn.cb(conn);
+    return true;
+}
+
+bool ImpBase::trigger_action(ActionID aid)
+{
+    return trigger_action({aid, ToolID::NONE});
+}
+
+bool ImpBase::trigger_action(ToolID tid)
+{
+    return trigger_action({ActionID::TOOL, tid});
+}
+
+void ImpBase::handle_tool_action(const ActionConnection &conn)
+{
+    assert(conn.action_id == ActionID::TOOL);
+    tool_begin(conn.tool_id);
+}
+
 void ImpBase::handle_drag()
 {
     auto pos = canvas->get_cursor_pos_win();
@@ -438,6 +512,35 @@ void ImpBase::apply_settings()
     }
     canvas->show_all_junctions_in_schematic = preferences.schematic.show_all_junctions;
     canvas->set_msaa(canvas_prefs->msaa);
+
+    auto av = get_editor_type_for_action();
+    for (auto &it : action_connections) {
+        if (preferences.key_sequences.keys.count(it.first)) {
+            auto pref = preferences.key_sequences.keys.at(it.first);
+            std::vector<KeySequence2> *seqs = nullptr;
+            if (pref.count(av) && pref.at(av).size()) {
+                seqs = &pref.at(av);
+            }
+            else if (pref.count(ActionCatalogItem::AVAILABLE_EVERYWHERE)
+                     && pref.at(ActionCatalogItem::AVAILABLE_EVERYWHERE).size()) {
+                seqs = &pref.at(ActionCatalogItem::AVAILABLE_EVERYWHERE);
+            }
+            if (seqs) {
+                it.second.key_sequences = *seqs;
+            }
+            else {
+                it.second.key_sequences.clear();
+            }
+        }
+    }
+    key_sequence_dialog->clear();
+    for (const auto &it : action_connections) {
+        if (it.second.key_sequences.size()) {
+            key_sequence_dialog->add_sequence(it.second.key_sequences, action_catalog.at(it.first).name);
+            if (it.first.first == ActionID::TOOL)
+                tool_popover->set_key_sequences(it.first.second, it.second.key_sequences);
+        }
+    }
 }
 
 void ImpBase::canvas_update_from_pp()
@@ -445,6 +548,39 @@ void ImpBase::canvas_update_from_pp()
     auto sel = canvas->get_selection();
     canvas_update();
     canvas->set_selection(sel);
+}
+
+ActionConnection &ImpBase::connect_action(ActionID action_id, std::function<void(const ActionConnection &)> cb)
+{
+    return connect_action(action_id, ToolID::NONE, cb);
+}
+
+ActionConnection &ImpBase::connect_action(ToolID tool_id, std::function<void(const ActionConnection &)> cb)
+{
+    return connect_action(ActionID::TOOL, tool_id, cb);
+}
+
+ActionConnection &ImpBase::connect_action(ToolID tool_id)
+{
+    return connect_action(tool_id, sigc::mem_fun(this, &ImpBase::handle_tool_action));
+}
+
+ActionConnection &ImpBase::connect_action(ActionID action_id, ToolID tool_id,
+                                          std::function<void(const ActionConnection &)> cb)
+{
+    const auto key = std::make_pair(action_id, tool_id);
+    if (action_connections.count(key)) {
+        throw std::runtime_error("duplicate action");
+    }
+    if (action_catalog.count(key) == 0) {
+        throw std::runtime_error("invalid action");
+    }
+    auto &act = action_connections
+                        .emplace(std::piecewise_construct, std::forward_as_tuple(key),
+                                 std::forward_as_tuple(action_id, tool_id, cb))
+                        .first->second;
+
+    return act;
 }
 
 void ImpBase::tool_begin(ToolID id)
@@ -489,139 +625,40 @@ Glib::RefPtr<Gio::Menu> ImpBase::add_hamburger_menu()
     return hamburger_menu;
 }
 
-bool ImpBase::handle_key_press(GdkEventKey *key_event)
+void ImpBase::layer_up_down(bool up)
 {
-    bool is_layer_change = (key_event->keyval == GDK_KEY_Page_Up) || (key_event->keyval == GDK_KEY_Page_Down)
-                           || (key_event->keyval >= GDK_KEY_0 && key_event->keyval <= GDK_KEY_9);
-    if (is_layer_change) {
-        if ((key_event->keyval == GDK_KEY_Page_Up) || (key_event->keyval == GDK_KEY_Page_Down)) {
-            int wl = canvas->property_work_layer();
-            auto layers = core.r->get_layer_provider()->get_layers();
-            std::vector<int> layer_indexes;
-            layer_indexes.reserve(layers.size());
-            std::transform(layers.begin(), layers.end(), std::back_inserter(layer_indexes),
-                           [](const auto &x) { return x.first; });
+    int wl = canvas->property_work_layer();
+    auto layers = core.r->get_layer_provider()->get_layers();
+    std::vector<int> layer_indexes;
+    layer_indexes.reserve(layers.size());
+    std::transform(layers.begin(), layers.end(), std::back_inserter(layer_indexes),
+                   [](const auto &x) { return x.first; });
 
-            int idx = std::find(layer_indexes.begin(), layer_indexes.end(), wl) - layer_indexes.begin();
-            if (key_event->keyval == GDK_KEY_Page_Up) {
-                idx++;
-            }
-            else {
-                idx--;
-            }
-            if (idx >= 0 && idx < (int)layers.size()) {
-                canvas->property_work_layer() = layer_indexes.at(idx);
-            }
-        }
-        else if (key_event->keyval >= GDK_KEY_0 && key_event->keyval <= GDK_KEY_9) {
-            int n = key_event->keyval - GDK_KEY_0;
-            int layer = 0;
-            if (n == 1) {
-                layer = 0;
-            }
-            else if (n == 2) {
-                layer = -100;
-            }
-            else {
-                layer = -(n - 2);
-            }
-            if (core.r->get_layer_provider()->get_layers().count(layer)) {
-                canvas->property_work_layer() = layer;
-            }
-        }
-        if (core.r->tool_is_active()) { // inform tool about layer change
-            ToolArgs args;
-            args.type = ToolEventType::LAYER_CHANGE;
-            args.coords = canvas->get_cursor_pos();
-            args.work_layer = canvas->property_work_layer();
-            ToolResponse r = core.r->tool_update(args);
-            tool_process(r);
-        }
-        return true;
-    }
-
-    if (!core.r->tool_is_active()) {
-        if (key_event->keyval == GDK_KEY_Escape) {
-            canvas->selection_mode = CanvasGL::SelectionMode::HOVER;
-            canvas->set_selection({});
-            return true;
-        }
-        ToolID t = ToolID::NONE;
-        if (!(key_event->state & Gdk::ModifierType::CONTROL_MASK)) {
-            t = handle_key(key_event->keyval);
-        }
-
-        if (t != ToolID::NONE) {
-            tool_begin(t);
-            return true;
-        }
-        else {
-            if ((key_event->keyval == GDK_KEY_space)) {
-                Gdk::Rectangle rect;
-                auto c = canvas->get_cursor_pos_win();
-                rect.set_x(c.x);
-                rect.set_y(c.y);
-                tool_popover->set_pointing_to(rect);
-
-                std::map<ToolID, bool> can_begin;
-                auto sel = canvas->get_selection();
-                for (const auto &it : tool_catalog) {
-                    bool r = core.r->tool_can_begin(it.first, sel).first;
-                    can_begin[it.first] = r;
-                }
-                tool_popover->set_can_begin(can_begin);
-
-#if GTK_CHECK_VERSION(3, 22, 0)
-                tool_popover->popup();
-#else
-                tool_popover->show();
-#endif
-                return true;
-            }
-            else if ((key_event->keyval == GDK_KEY_Home)) {
-                auto bbox = core.r->get_bbox();
-                canvas->zoom_to_bbox(bbox.first, bbox.second);
-                return true;
-            }
-            else if (key_event->keyval == GDK_KEY_question) {
-                key_sequence_dialog->show();
-                return true;
-            }
-
-            if (key_event->state & Gdk::ModifierType::CONTROL_MASK) {
-                if (key_event->keyval == GDK_KEY_z) {
-                    std::cout << "undo" << std::endl;
-                    core.r->undo();
-                    canvas_update_from_pp();
-                    return true;
-                }
-                else if (key_event->keyval == GDK_KEY_y) {
-                    std::cout << "redo" << std::endl;
-                    core.r->redo();
-                    canvas_update_from_pp();
-                    return true;
-                }
-                else if (key_event->keyval == GDK_KEY_c) {
-                    clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos());
-                    return true;
-                }
-                else if (key_event->keyval == GDK_KEY_v) {
-                    tool_begin(ToolID::PASTE);
-                    return true;
-                }
-                else if (key_event->keyval == GDK_KEY_d) {
-                    clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos());
-                    tool_begin(ToolID::PASTE);
-                    return true;
-                }
-                else if (key_event->keyval == GDK_KEY_i) {
-                    selection_filter_dialog->show();
-                    return true;
-                }
-            }
-        }
+    int idx = std::find(layer_indexes.begin(), layer_indexes.end(), wl) - layer_indexes.begin();
+    if (up) {
+        idx++;
     }
     else {
+        idx--;
+    }
+    if (idx >= 0 && idx < (int)layers.size()) {
+        canvas->property_work_layer() = layer_indexes.at(idx);
+    }
+}
+
+void ImpBase::goto_layer(int layer)
+{
+    if (core.r->get_layer_provider()->get_layers().count(layer)) {
+        canvas->property_work_layer() = layer;
+    }
+}
+
+bool ImpBase::handle_key_press(GdkEventKey *key_event)
+{
+    if (core.r->tool_is_active()) {
+        if (handle_action_key(key_event))
+            return true;
+
         ToolArgs args;
         args.coords = canvas->get_cursor_pos();
         args.work_layer = canvas->property_work_layer();
@@ -637,6 +674,75 @@ bool ImpBase::handle_key_press(GdkEventKey *key_event)
         ToolResponse r = core.r->tool_update(args);
         tool_process(r);
         return true;
+    }
+    else {
+        return handle_action_key(key_event);
+    }
+    return false;
+}
+
+bool ImpBase::handle_action_key(GdkEventKey *ev)
+{
+    if (ev->is_modifier)
+        return false;
+    if (ev->keyval == GDK_KEY_Escape) {
+        if (!core.r->tool_is_active()) {
+            canvas->selection_mode = CanvasGL::SelectionMode::HOVER;
+            canvas->set_selection({});
+        }
+        if (keys_current.size() == 0) {
+            return false;
+        }
+        else {
+            keys_current.clear();
+            main_window->tool_hint_label->set_text(key_sequence_to_string(keys_current));
+            return true;
+        }
+    }
+    else {
+        auto display = main_window->get_display()->gobj();
+        auto hw_keycode = ev->hardware_keycode;
+        auto state = static_cast<GdkModifierType>(ev->state);
+        auto group = ev->group;
+        guint keyval;
+        GdkModifierType consumed_modifiers;
+        if (gdk_keymap_translate_keyboard_state(gdk_keymap_get_for_display(display), hw_keycode, state, group, &keyval,
+                                                NULL, NULL, &consumed_modifiers)) {
+            auto mod = static_cast<GdkModifierType>((state & (~consumed_modifiers))
+                                                    & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK));
+            keys_current.emplace_back(keyval, mod);
+        }
+        std::set<ActionConnection *> connections_matched;
+        for (auto &it : action_connections) {
+            for (const auto &it2 : it.second.key_sequences) {
+                auto minl = std::min(keys_current.size(), it2.size());
+                if (minl && std::equal(keys_current.begin(), keys_current.begin() + minl, it2.begin())) {
+                    connections_matched.insert(&it.second);
+                }
+            }
+        }
+        if (connections_matched.size() == 0) {
+            main_window->tool_hint_label->set_text("Unknown key sequence");
+            keys_current.clear();
+            return false;
+        }
+        else if (connections_matched.size() > 1) { // still ambigous
+            main_window->tool_hint_label->set_text(key_sequence_to_string(keys_current) + "?");
+            return true;
+        }
+        else if (connections_matched.size() == 1) {
+            main_window->tool_hint_label->set_text(key_sequence_to_string(keys_current));
+            keys_current.clear();
+            auto conn = *connections_matched.begin();
+            if (!trigger_action({conn->action_id, conn->tool_id})) {
+                main_window->tool_hint_label->set_text(">");
+                return false;
+            }
+            return true;
+        }
+        else {
+            assert(false); // don't go here
+        }
     }
     return false;
 }
@@ -764,18 +870,20 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
                         submenu->append(*sep);
                     }
 
-                    for (const auto &it : tool_catalog) {
-                        auto r = core.r->tool_can_begin(it.first, {sr});
-                        if (r.first && r.second) {
-                            auto la_sub = Gtk::manage(new Gtk::MenuItem(it.second.name));
-                            ToolID tool_id = it.first;
-                            la_sub->signal_activate().connect([this, tool_id, sr] {
-                                canvas->set_selection({sr}, false);
-                                fix_cursor_pos();
-                                tool_begin(tool_id);
-                            });
-                            la_sub->show();
-                            submenu->append(*la_sub);
+                    for (const auto &it : action_catalog) {
+                        if (it.first.first == ActionID::TOOL) {
+                            auto r = core.r->tool_can_begin(it.first.second, {sr});
+                            if (r.first && r.second) {
+                                auto la_sub = Gtk::manage(new Gtk::MenuItem(it.second.name));
+                                ToolID tool_id = it.first.second;
+                                la_sub->signal_activate().connect([this, tool_id, sr] {
+                                    canvas->set_selection({sr}, false);
+                                    fix_cursor_pos();
+                                    tool_begin(tool_id);
+                                });
+                                la_sub->show();
+                                submenu->append(*la_sub);
+                            }
                         }
                     }
                     la->set_submenu(*submenu);
@@ -815,17 +923,19 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
                 context_menu->append(*sep);
             }
 
-            for (const auto &it : tool_catalog) {
-                auto r = core.r->tool_can_begin(it.first, sel_for_menu);
-                if (r.first && r.second) {
-                    auto la = Gtk::manage(new Gtk::MenuItem(it.second.name));
-                    ToolID tool_id = it.first;
-                    la->signal_activate().connect([this, tool_id] {
-                        fix_cursor_pos();
-                        tool_begin(tool_id);
-                    });
-                    la->show();
-                    context_menu->append(*la);
+            for (const auto &it : action_catalog) {
+                if (it.first.first == ActionID::TOOL) {
+                    auto r = core.r->tool_can_begin(it.first.second, sel_for_menu);
+                    if (r.first && r.second) {
+                        auto la = Gtk::manage(new Gtk::MenuItem(it.second.name));
+                        ToolID tool_id = it.first.second;
+                        la->signal_activate().connect([this, tool_id] {
+                            fix_cursor_pos();
+                            tool_begin(tool_id);
+                        });
+                        la->show();
+                        context_menu->append(*la);
+                    }
                 }
             }
 #if GTK_CHECK_VERSION(3, 22, 0)
@@ -942,7 +1052,7 @@ void ImpBase::handle_tool_change(ToolID id)
     panels->set_sensitive(id == ToolID::NONE);
     canvas->set_selection_allowed(id == ToolID::NONE);
     if (id != ToolID::NONE) {
-        main_window->tool_bar_set_tool_name(tool_catalog.at(id).name);
+        main_window->tool_bar_set_tool_name(action_catalog.at({ActionID::TOOL, id}).name);
         main_window->tool_bar_set_tool_tip("");
     }
     main_window->tool_bar_set_visible(id != ToolID::NONE);
@@ -965,18 +1075,5 @@ bool ImpBase::handle_broadcast(const json &j)
         return true;
     }
     return false;
-}
-
-void ImpBase::key_seq_append_default(KeySequence &ks)
-{
-    ks.append_sequence({
-            {{GDK_KEY_m}, ToolID::MOVE},
-            {{GDK_KEY_M}, ToolID::MOVE_EXACTLY},
-            {{GDK_KEY_Delete}, ToolID::DELETE},
-            {{GDK_KEY_Return}, ToolID::ENTER_DATUM},
-            {{GDK_KEY_r}, ToolID::ROTATE},
-            {{GDK_KEY_e}, ToolID::MIRROR},
-            {{GDK_KEY_Insert}, ToolID::PASTE},
-    });
 }
 } // namespace horizon

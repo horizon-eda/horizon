@@ -1,5 +1,6 @@
 #include "keyseq_dialog.hpp"
 #include <sstream>
+#include "util/str_util.hpp"
 
 namespace horizon {
 
@@ -30,6 +31,14 @@ KeySequenceDialog::KeySequenceDialog(Gtk::Window *parent)
     set_default_size(-1, 500);
 }
 
+void KeySequenceDialog::clear()
+{
+    auto children = lb->get_children();
+    for (auto it : children) {
+        delete it;
+    }
+}
+
 void KeySequenceDialog::add_sequence(const std::string &seq, const std::string &label)
 {
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 20));
@@ -49,13 +58,13 @@ void KeySequenceDialog::add_sequence(const std::string &seq, const std::string &
     lb->append(*box);
 }
 
-void KeySequenceDialog::add_sequence(const std::vector<unsigned int> &seq, const std::string &label)
+void KeySequenceDialog::add_sequence(const std::vector<KeySequence2> &seqs, const std::string &label)
 {
     std::stringstream s;
-    std::transform(seq.begin(), seq.end(), std::ostream_iterator<std::string>(s),
-                   [](const auto &x) { return gdk_keyval_name(x); });
-    // std::copy(part.begin(), part.tags.end(),
-    // std::ostream_iterator<std::string>(s, " "));
-    add_sequence(s.str(), label);
+    std::transform(seqs.begin(), seqs.end(), std::ostream_iterator<std::string>(s, "\n"),
+                   [](const auto &x) { return key_sequence_to_string(x); });
+    auto str = s.str();
+    rtrim(str);
+    add_sequence(str, label);
 }
 } // namespace horizon

@@ -1,16 +1,9 @@
 #include "imp_layer.hpp"
 #include "pool/part.hpp"
 #include "widgets/layer_box.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
-
-static json json_from_resource(const std::string &rsrc)
-{
-    auto json_bytes = Gio::Resource::lookup_data_global(rsrc);
-    gsize size = json_bytes->get_size();
-    return json::parse((const char *)json_bytes->get_data(size));
-}
-
 void ImpLayer::construct_layer_box(bool pack)
 {
     layer_box = Gtk::manage(new LayerBox(core.r->get_layer_provider(), pack));
@@ -44,9 +37,19 @@ void ImpLayer::construct_layer_box(bool pack)
     });
     core.r->signal_rebuilt().connect([this] { layer_box->update(); });
 
-    key_sequence_dialog->add_sequence("1", "Top layer");
-    key_sequence_dialog->add_sequence("2", "Bottom layer");
-    key_sequence_dialog->add_sequence("3...9", "inner layers");
+    connect_action(ActionID::LAYER_DOWN, [this](const auto &a) { layer_up_down(false); });
+    connect_action(ActionID::LAYER_UP, [this](const auto &a) { layer_up_down(true); });
+
+    connect_action(ActionID::LAYER_TOP, [this](const auto &a) { goto_layer(0); });
+    connect_action(ActionID::LAYER_BOTTOM, [this](const auto &a) { goto_layer(-100); });
+    connect_action(ActionID::LAYER_INNER1, [this](const auto &a) { goto_layer(-1); });
+    connect_action(ActionID::LAYER_INNER2, [this](const auto &a) { goto_layer(-2); });
+    connect_action(ActionID::LAYER_INNER3, [this](const auto &a) { goto_layer(-3); });
+    connect_action(ActionID::LAYER_INNER4, [this](const auto &a) { goto_layer(-4); });
+    connect_action(ActionID::LAYER_INNER5, [this](const auto &a) { goto_layer(-5); });
+    connect_action(ActionID::LAYER_INNER6, [this](const auto &a) { goto_layer(-6); });
+    connect_action(ActionID::LAYER_INNER7, [this](const auto &a) { goto_layer(-7); });
+    connect_action(ActionID::LAYER_INNER8, [this](const auto &a) { goto_layer(-8); });
 
     json j = core.r->get_meta();
     bool layers_loaded = false;

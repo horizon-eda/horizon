@@ -1,0 +1,400 @@
+#include "action_catalog.hpp"
+#include "core/core.hpp"
+
+namespace horizon {
+const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = {
+        {{ActionID::SELECTION_FILTER, ToolID::NONE},
+         {"Selection filter", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::PREFERENCES, ToolID::NONE},
+         {"Preferences", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::HELP, ToolID::NONE}, {"Help", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, true}},
+
+        {{ActionID::VIEW_ALL, ToolID::NONE},
+         {"View all", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, true}},
+
+        {{ActionID::LAYER_DOWN, ToolID::NONE},
+         {"Layer down", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, true}},
+
+        {{ActionID::LAYER_UP, ToolID::NONE},
+         {"Layer up", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, true}},
+
+        {{ActionID::LAYER_TOP, ToolID::NONE},
+         {"Layer top", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, true}},
+
+        {{ActionID::LAYER_BOTTOM, ToolID::NONE},
+         {"Layer bottom", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, true}},
+
+        {{ActionID::LAYER_INNER1, ToolID::NONE},
+         {"Layer inner 1", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, true}},
+
+        {{ActionID::LAYER_INNER2, ToolID::NONE},
+         {"Layer inner 2", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, true}},
+
+        {{ActionID::LAYER_INNER3, ToolID::NONE},
+         {"Layer inner 3", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, true}},
+
+        {{ActionID::LAYER_INNER4, ToolID::NONE},
+         {"Layer inner 4", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, true}},
+
+        {{ActionID::LAYER_INNER5, ToolID::NONE},
+         {"Layer inner 5", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, true}},
+
+        {{ActionID::LAYER_INNER6, ToolID::NONE},
+         {"Layer inner 6", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, true}},
+
+        {{ActionID::LAYER_INNER7, ToolID::NONE},
+         {"Layer inner 7", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, true}},
+
+        {{ActionID::LAYER_INNER8, ToolID::NONE},
+         {"Layer inner 8", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, true}},
+
+        {{ActionID::POPOVER, ToolID::NONE},
+         {"Popover", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::PASTE},
+         {"Paste", ActionGroup::CLIPBOARD, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::COPY, ToolID::NONE},
+         {"Copy", ActionGroup::CLIPBOARD, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::DUPLICATE, ToolID::NONE},
+         {"Duplicate", ActionGroup::CLIPBOARD, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::SAVE, ToolID::NONE},
+         {"Save", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::UNDO, ToolID::NONE}, {"Undo", ActionGroup::UNDO, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::REDO, ToolID::NONE}, {"Redo", ActionGroup::UNDO, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::VIEW_3D, ToolID::NONE},
+         {"3D View", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::MOVE}, {"Move", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::MOVE_EXACTLY},
+         {"Move exactly", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::ROTATE},
+         {"Rotate", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::ROTATE_ARBITRARY},
+         {"Rotate arbitrary", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::ENTER_DATUM},
+         {"Enter datum", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::DELETE},
+         {"Delete", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::ADD_COMPONENT},
+         {"Place component", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::PLACE_PART, ToolID::NONE},
+         {"Place part", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::ADD_PART},
+         {"Place part", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::BEND_LINE_NET},
+         {"Bend net line", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::DISCONNECT},
+         {"Disconnect", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::DRAW_ARC},
+         {"Draw arc", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::DRAW_LINE},
+         {"Draw line", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::DRAW_NET},
+         {"Draw net line", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::EDIT_SYMBOL_PIN_NAMES},
+         {"Edit symbol pin names", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::MANAGE_BUSES},
+         {"Manage buses", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::MANAGE_BUSES},
+         {"Manage buses", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::MANAGE_NET_CLASSES},
+         {"Manage net classes", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::MANAGE_POWER_NETS},
+         {"Manage power nets", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::MAP_PIN},
+         {"Place pin", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL, false}},
+
+        {{ActionID::TOOL, ToolID::SELECT_NET_SEGMENT},
+         {"Select net segment", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::MOVE_NET_SEGMENT},
+         {"Move net segment to other net", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::MOVE_NET_SEGMENT_NEW},
+         {"Move net segment to new net", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::PLACE_BUS_LABEL},
+         {"Place bus label", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::PLACE_BUS_RIPPER},
+         {"Place bus ripper", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::PLACE_NET_LABEL},
+         {"Place net label", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::ANNOTATE},
+         {"Annotate", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::SMASH},
+         {"Smash", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::UNSMASH},
+         {"Unmash", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::PLACE_HOLE},
+         {"Place hole", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_PADSTACK, false}},
+
+        {{ActionID::TOOL, ToolID::PLACE_SHAPE},
+         {"Place shape", ActionGroup::PADSTACK, ActionCatalogItem::AVAILABLE_IN_PADSTACK, false}},
+
+        {{ActionID::TOOL, ToolID::EDIT_SHAPE},
+         {"Edit shape", ActionGroup::PADSTACK, ActionCatalogItem::AVAILABLE_IN_PADSTACK, false}},
+
+        {{ActionID::TOOL, ToolID::IMPORT_DXF},
+         {"Import dxf", ActionGroup::UNKNOWN,
+          static_cast<ActionCatalogItem::Availability>(ActionCatalogItem::AVAILABLE_IN_BOARD
+                                                       | ActionCatalogItem::AVAILABLE_IN_PACKAGE),
+          false}},
+
+        {{ActionID::TOOL, ToolID::PLACE_JUNCTION},
+         {"Place junction", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::DRAW_POLYGON},
+         {"Draw polygon", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::DRAW_POLYGON_RECTANGLE},
+         {"Draw polygon rectangle", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::DRAW_LINE_RECTANGLE},
+         {"Draw line rectangle", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::EDIT_LINE_RECTANGLE},
+         {"Edit line rectangle", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::PLACE_PAD},
+         {"Place pad", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE, false}},
+
+        {{ActionID::TOOL, ToolID::EDIT_PAD_PARAMETER_SET},
+         {"Edit pad", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE, false}},
+
+        {{ActionID::TOOL, ToolID::PLACE_POWER_SYMBOL},
+         {"Place power symbol", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::PLACE_TEXT},
+         {"Place text", ActionGroup::GRAPHICS,
+          static_cast<ActionCatalogItem::Availability>(
+                  ActionCatalogItem::AVAILABLE_IN_SCHEMATIC | ActionCatalogItem::AVAILABLE_IN_PACKAGE
+                  | ActionCatalogItem::AVAILABLE_IN_BOARD | ActionCatalogItem::AVAILABLE_IN_SYMBOL),
+          false}},
+
+        {{ActionID::TOOL, ToolID::ASSIGN_PART},
+         {"Assign part", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::EDIT_SCHEMATIC_PROPERTIES},
+         {"Edit schematic properties", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::SET_DIFFPAIR},
+         {"Set diff. pair", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::CLEAR_DIFFPAIR},
+         {"Clear diff. pair", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC, false}},
+
+        {{ActionID::TOOL, ToolID::MAP_PACKAGE},
+         {"Place package", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::PLACE_VIA},
+         {"Place via", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::EDIT_VIA},
+         {"Edit via", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::ROUTE_TRACK},
+         {"Route track (old)", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::ROUTE_TRACK_INTERACTIVE},
+         {"Route track", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::ROUTE_DIFFPAIR_INTERACTIVE},
+         {"Route diff. pair", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::DRAG_KEEP_SLOPE},
+         {"Drag and keep slope", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::DRAG_TRACK_INTERACTIVE},
+         {"Drag track", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::ADD_PLANE},
+         {"Add plane", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::EDIT_PLANE},
+         {"Edit plane", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::CLEAR_PLANE},
+         {"Clear plane", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::CLEAR_ALL_PLANES},
+         {"Clear all planes", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::UPDATE_PLANE},
+         {"Update plane", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::UPDATE_ALL_PLANES},
+         {"Update all planes", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::EDIT_STACKUP},
+         {"Edit stackup", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::DRAW_DIMENSION},
+         {"Draw dimension", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::SELECT_MORE},
+         {"Select more", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::SET_VIA_NET},
+         {"Set via net", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::CLEAR_VIA_NET},
+         {"Clear via net", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::CLEAR_VIA_NET},
+         {"Clear via net", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::LOCK}, {"Lock", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::UNLOCK},
+         {"Unlock", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::UNLOCK_ALL},
+         {"Unlock all", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::ADD_VERTEX},
+         {"Add vertex", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::TOOL, ToolID::PLACE_BOARD_HOLE},
+         {"Place hole", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::EDIT_BOARD_HOLE},
+         {"Edit hole", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+};
+
+#define ACTION_LUT_ITEM(x)                                                                                             \
+    {                                                                                                                  \
+        #x, ActionID::x                                                                                                \
+    }
+
+const LutEnumStr<ActionID> action_lut = {
+        ACTION_LUT_ITEM(TOOL),         ACTION_LUT_ITEM(SELECTION_FILTER),
+        ACTION_LUT_ITEM(SAVE),         ACTION_LUT_ITEM(VIEW_3D),
+        ACTION_LUT_ITEM(UNDO),         ACTION_LUT_ITEM(REDO),
+        ACTION_LUT_ITEM(COPY),         ACTION_LUT_ITEM(DUPLICATE),
+        ACTION_LUT_ITEM(PREFERENCES),  ACTION_LUT_ITEM(PLACE_PART),
+        ACTION_LUT_ITEM(HELP),         ACTION_LUT_ITEM(LAYER_UP),
+        ACTION_LUT_ITEM(LAYER_DOWN),   ACTION_LUT_ITEM(LAYER_INNER1),
+        ACTION_LUT_ITEM(LAYER_INNER2), ACTION_LUT_ITEM(LAYER_INNER3),
+        ACTION_LUT_ITEM(LAYER_INNER4), ACTION_LUT_ITEM(LAYER_INNER5),
+        ACTION_LUT_ITEM(LAYER_INNER6), ACTION_LUT_ITEM(LAYER_INNER7),
+        ACTION_LUT_ITEM(LAYER_INNER8), ACTION_LUT_ITEM(LAYER_TOP),
+        ACTION_LUT_ITEM(LAYER_BOTTOM), ACTION_LUT_ITEM(POPOVER),
+        ACTION_LUT_ITEM(VIEW_ALL),
+};
+
+#define TOOL_LUT_ITEM(x)                                                                                               \
+    {                                                                                                                  \
+        #x, ToolID::x                                                                                                  \
+    }
+
+const LutEnumStr<ToolID> tool_lut = {TOOL_LUT_ITEM(EDIT_SCHEMATIC_PROPERTIES),
+                                     TOOL_LUT_ITEM(NONE),
+                                     TOOL_LUT_ITEM(MOVE),
+                                     TOOL_LUT_ITEM(PLACE_JUNCTION),
+                                     TOOL_LUT_ITEM(DRAW_LINE),
+                                     TOOL_LUT_ITEM(DELETE),
+                                     TOOL_LUT_ITEM(DRAW_ARC),
+                                     TOOL_LUT_ITEM(ROTATE),
+                                     TOOL_LUT_ITEM(MIRROR),
+                                     TOOL_LUT_ITEM(MAP_PIN),
+                                     TOOL_LUT_ITEM(MAP_SYMBOL),
+                                     TOOL_LUT_ITEM(DRAW_NET),
+                                     TOOL_LUT_ITEM(ADD_COMPONENT),
+                                     TOOL_LUT_ITEM(PLACE_TEXT),
+                                     TOOL_LUT_ITEM(PLACE_NET_LABEL),
+                                     TOOL_LUT_ITEM(DISCONNECT),
+                                     TOOL_LUT_ITEM(BEND_LINE_NET),
+                                     TOOL_LUT_ITEM(SELECT_NET_SEGMENT),
+                                     TOOL_LUT_ITEM(SELECT_NET),
+                                     TOOL_LUT_ITEM(PLACE_POWER_SYMBOL),
+                                     TOOL_LUT_ITEM(MOVE_NET_SEGMENT),
+                                     TOOL_LUT_ITEM(MOVE_NET_SEGMENT_NEW),
+                                     TOOL_LUT_ITEM(EDIT_SYMBOL_PIN_NAMES),
+                                     TOOL_LUT_ITEM(PLACE_BUS_LABEL),
+                                     TOOL_LUT_ITEM(PLACE_BUS_RIPPER),
+                                     TOOL_LUT_ITEM(MANAGE_BUSES),
+                                     TOOL_LUT_ITEM(DRAW_POLYGON),
+                                     TOOL_LUT_ITEM(ENTER_DATUM),
+                                     TOOL_LUT_ITEM(MOVE_EXACTLY),
+                                     TOOL_LUT_ITEM(PLACE_HOLE),
+                                     TOOL_LUT_ITEM(PLACE_PAD),
+                                     TOOL_LUT_ITEM(PASTE),
+                                     TOOL_LUT_ITEM(ASSIGN_PART),
+                                     TOOL_LUT_ITEM(MAP_PACKAGE),
+                                     TOOL_LUT_ITEM(DRAW_TRACK),
+                                     TOOL_LUT_ITEM(PLACE_VIA),
+                                     TOOL_LUT_ITEM(ROUTE_TRACK),
+                                     TOOL_LUT_ITEM(DRAG_KEEP_SLOPE),
+                                     TOOL_LUT_ITEM(ADD_PART),
+                                     TOOL_LUT_ITEM(ANNOTATE),
+                                     TOOL_LUT_ITEM(SMASH),
+                                     TOOL_LUT_ITEM(UNSMASH),
+                                     TOOL_LUT_ITEM(PLACE_SHAPE),
+                                     TOOL_LUT_ITEM(EDIT_SHAPE),
+                                     TOOL_LUT_ITEM(IMPORT_DXF),
+                                     TOOL_LUT_ITEM(MANAGE_NET_CLASSES),
+                                     TOOL_LUT_ITEM(EDIT_PARAMETER_SET),
+                                     TOOL_LUT_ITEM(EDIT_PARAMETER_PROGRAM),
+                                     TOOL_LUT_ITEM(EDIT_PAD_PARAMETER_SET),
+                                     TOOL_LUT_ITEM(DRAW_POLYGON_RECTANGLE),
+                                     TOOL_LUT_ITEM(DRAW_LINE_RECTANGLE),
+                                     TOOL_LUT_ITEM(EDIT_LINE_RECTANGLE),
+                                     TOOL_LUT_ITEM(ROUTE_TRACK_INTERACTIVE),
+                                     TOOL_LUT_ITEM(EDIT_VIA),
+                                     TOOL_LUT_ITEM(ROTATE_ARBITRARY),
+                                     TOOL_LUT_ITEM(ADD_PLANE),
+                                     TOOL_LUT_ITEM(EDIT_PLANE),
+                                     TOOL_LUT_ITEM(UPDATE_PLANE),
+                                     TOOL_LUT_ITEM(UPDATE_ALL_PLANES),
+                                     TOOL_LUT_ITEM(CLEAR_PLANE),
+                                     TOOL_LUT_ITEM(CLEAR_ALL_PLANES),
+                                     TOOL_LUT_ITEM(EDIT_STACKUP),
+                                     TOOL_LUT_ITEM(DRAW_DIMENSION),
+                                     TOOL_LUT_ITEM(SET_DIFFPAIR),
+                                     TOOL_LUT_ITEM(CLEAR_DIFFPAIR),
+                                     TOOL_LUT_ITEM(ROUTE_DIFFPAIR_INTERACTIVE),
+                                     TOOL_LUT_ITEM(SELECT_MORE),
+                                     TOOL_LUT_ITEM(SET_VIA_NET),
+                                     TOOL_LUT_ITEM(CLEAR_VIA_NET),
+                                     TOOL_LUT_ITEM(DRAG_TRACK_INTERACTIVE),
+                                     TOOL_LUT_ITEM(LOCK),
+                                     TOOL_LUT_ITEM(UNLOCK),
+                                     TOOL_LUT_ITEM(UNLOCK_ALL),
+                                     TOOL_LUT_ITEM(ADD_VERTEX),
+                                     TOOL_LUT_ITEM(MANAGE_POWER_NETS),
+                                     TOOL_LUT_ITEM(PLACE_BOARD_HOLE),
+                                     TOOL_LUT_ITEM(EDIT_BOARD_HOLE)};
+} // namespace horizon

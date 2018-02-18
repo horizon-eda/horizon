@@ -10,25 +10,6 @@ ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool
 {
     core = &core_symbol;
     core_symbol.signal_tool_changed().connect(sigc::mem_fun(this, &ImpBase::handle_tool_change));
-
-    key_seq_append_default(key_seq);
-    key_seq.append_sequence({
-            {{GDK_KEY_p, GDK_KEY_j}, ToolID::PLACE_JUNCTION},
-            {{GDK_KEY_j}, ToolID::PLACE_JUNCTION},
-            {{GDK_KEY_d, GDK_KEY_l}, ToolID::DRAW_LINE},
-            {{GDK_KEY_l}, ToolID::DRAW_LINE},
-            {{GDK_KEY_d, GDK_KEY_a}, ToolID::DRAW_ARC},
-            {{GDK_KEY_a}, ToolID::DRAW_ARC},
-            {{GDK_KEY_d, GDK_KEY_r}, ToolID::DRAW_LINE_RECTANGLE},
-            {{GDK_KEY_i}, ToolID::EDIT_LINE_RECTANGLE},
-            {{GDK_KEY_p, GDK_KEY_p}, ToolID::MAP_PIN},
-            {{GDK_KEY_p, GDK_KEY_t}, ToolID::PLACE_TEXT},
-            {{GDK_KEY_t}, ToolID::PLACE_TEXT},
-            {{GDK_KEY_d, GDK_KEY_y}, ToolID::DRAW_POLYGON},
-            {{GDK_KEY_y}, ToolID::DRAW_POLYGON},
-            {{GDK_KEY_d, GDK_KEY_c}, ToolID::DRAW_POLYGON_RECTANGLE},
-    });
-    key_seq.signal_update_hint().connect([this](const std::string &s) { main_window->tool_hint_label->set_text(s); });
 }
 
 void ImpSymbol::canvas_update()
@@ -72,8 +53,4 @@ void ImpSymbol::construct()
     grid_spin_button->set_sensitive(false);
 }
 
-ToolID ImpSymbol::handle_key(guint k)
-{
-    return key_seq.handle_key(k);
-}
 } // namespace horizon

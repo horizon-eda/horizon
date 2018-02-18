@@ -12,7 +12,11 @@ public:
 
 protected:
     void construct() override;
-    ToolID handle_key(guint k) override;
+
+    ActionCatalogItem::Availability get_editor_type_for_action() const
+    {
+        return ActionCatalogItem::AVAILABLE_IN_PACKAGE;
+    };
 
 private:
     void canvas_update() override;

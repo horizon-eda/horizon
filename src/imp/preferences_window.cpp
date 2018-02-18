@@ -1,6 +1,9 @@
 #include "preferences_window.hpp"
 #include "preferences.hpp"
 #include "util/gtk_util.hpp"
+#include "core/core.hpp"
+#include "action_catalog.hpp"
+#include "preferences_window_keys.hpp"
 
 namespace horizon {
 
@@ -162,6 +165,7 @@ BoardPreferencesEditor::BoardPreferencesEditor(ImpPreferences *prefs, BoardPrefe
     }
 }
 
+
 ImpPreferencesWindow::ImpPreferencesWindow(ImpPreferences *prefs) : Gtk::Window(), preferences(prefs)
 {
     set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
@@ -202,6 +206,12 @@ ImpPreferencesWindow::ImpPreferencesWindow(ImpPreferences *prefs) : Gtk::Window(
         auto ed = Gtk::manage(new BoardPreferencesEditor(preferences, &preferences->board));
         stack->add(*ed, "board", "Board");
         ed->show();
+    }
+    {
+        auto ed = KeySequencesPreferencesEditor::create(preferences, &preferences->key_sequences);
+        stack->add(*ed, "keys", "Keys");
+        ed->show();
+        ed->unreference();
     }
 
     box->show();

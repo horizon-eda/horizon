@@ -33,6 +33,7 @@ void ImpPreferences::load_default()
 {
     canvas_layer = CanvasPreferences();
     canvas_non_layer = CanvasPreferences();
+    key_sequences.load_from_json(json_from_resource("/net/carrotIndustries/horizon/imp/keys_default.json"));
 }
 
 std::string ImpPreferences::get_preferences_filename()
@@ -97,12 +98,67 @@ void BoardPreferences::load_from_json(const json &j)
     drag_start_track = j.value("drag_start_track", true);
 }
 
+json KeySequencesPreferences::serialize() const
+{
+    json j;
+    for (const auto &it : keys) {
+        json k;
+        auto a_str = action_lut.lookup_reverse(it.first.first);
+        auto t_str = tool_lut.lookup_reverse(it.first.second);
+        k["action"] = a_str;
+        k["tool"] = t_str;
+        k["keys"] = json::object();
+        for (const auto &it2 : it.second) {
+            k["keys"][std::to_string(static_cast<int>(it2.first))] = json::array();
+            for (const auto &it3 : it2.second) {
+                json seq;
+                for (const auto &it4 : it3) {
+                    json o;
+                    o["key"] = gdk_keyval_name(it4.first);
+                    o["mod"] = static_cast<int>(it4.second);
+                    seq.push_back(o);
+                }
+                if (seq.size())
+                    k["keys"][std::to_string(static_cast<int>(it2.first))].push_back(seq);
+            }
+        }
+        j.push_back(k);
+    }
+    return j;
+}
+
+void KeySequencesPreferences::load_from_json(const json &j)
+{
+    keys.clear();
+    for (const auto &it : j) {
+        auto action = action_lut.lookup(it.at("action"));
+        auto tool = tool_lut.lookup(it.at("tool"));
+        auto k = std::make_pair(action, tool);
+        keys[k];
+        auto &j2 = it.at("keys");
+        for (auto it2 = j2.cbegin(); it2 != j2.cend(); ++it2) {
+            auto av = static_cast<ActionCatalogItem::Availability>(std::stoi(it2.key()));
+            keys[k][av];
+            for (const auto &it3 : it2.value()) {
+                keys[k][av].emplace_back();
+                for (const auto &it4 : it3) {
+                    std::string keyname = it4.at("key");
+                    auto key = gdk_keyval_from_name(keyname.c_str());
+                    auto mod = static_cast<GdkModifierType>(it4.at("mod").get<int>());
+                    keys[k][av].back().emplace_back(key, mod);
+                }
+            }
+        }
+    }
+}
+
 json ImpPreferences::serialize() const
 {
     json j;
     j["canvas_layer"] = canvas_layer.serialize();
     j["canvas_non_layer"] = canvas_non_layer.serialize();
     j["schematic"] = schematic.serialize();
+    j["key_sequences"] = key_sequences.serialize();
     return j;
 }
 
@@ -135,6 +191,10 @@ void ImpPreferences::load()
             schematic.load_from_json(j.at("schematic"));
         if (j.count("board"))
             board.load_from_json(j.at("board"));
+        if (j.count("key_sequences"))
+            key_sequences.load_from_json(j.at("key_sequences"));
+        else
+            key_sequences.load_from_json(json_from_resource("/net/carrotIndustries/horizon/imp/keys_default.json"));
     }
     s_signal_changed.emit();
 }

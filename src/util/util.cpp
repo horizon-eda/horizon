@@ -21,6 +21,13 @@ void save_json_to_file(const std::string &filename, const json &j)
     ofs.close();
 }
 
+json json_from_resource(const std::string &rsrc)
+{
+    auto json_bytes = Gio::Resource::lookup_data_global(rsrc);
+    gsize size = json_bytes->get_size();
+    return json::parse((const char *)json_bytes->get_data(size));
+}
+
 int orientation_to_angle(Orientation o)
 {
     int angle = 0;

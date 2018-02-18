@@ -16,40 +16,6 @@ ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_f
 {
     core = &core_board;
     core_board.signal_tool_changed().connect(sigc::mem_fun(this, &ImpBase::handle_tool_change));
-
-    key_seq_append_default(key_seq);
-    key_seq.append_sequence({
-            {{GDK_KEY_p, GDK_KEY_j}, ToolID::PLACE_JUNCTION},
-            {{GDK_KEY_j}, ToolID::PLACE_JUNCTION},
-            {{GDK_KEY_d, GDK_KEY_l}, ToolID::DRAW_LINE},
-            {{GDK_KEY_l}, ToolID::DRAW_LINE},
-            {{GDK_KEY_d, GDK_KEY_a}, ToolID::DRAW_ARC},
-            {{GDK_KEY_a}, ToolID::DRAW_ARC},
-            {{GDK_KEY_d, GDK_KEY_y}, ToolID::DRAW_POLYGON},
-            {{GDK_KEY_y}, ToolID::DRAW_POLYGON},
-            {{GDK_KEY_d, GDK_KEY_r}, ToolID::DRAW_POLYGON_RECTANGLE},
-            {{GDK_KEY_p, GDK_KEY_t}, ToolID::PLACE_TEXT},
-            {{GDK_KEY_t}, ToolID::PLACE_TEXT},
-            {{GDK_KEY_p, GDK_KEY_p}, ToolID::MAP_PACKAGE},
-            {{GDK_KEY_P}, ToolID::MAP_PACKAGE},
-            {{GDK_KEY_d, GDK_KEY_t}, ToolID::DRAW_TRACK},
-            {{GDK_KEY_p, GDK_KEY_v}, ToolID::PLACE_VIA},
-            {{GDK_KEY_v}, ToolID::PLACE_VIA},
-            {{GDK_KEY_d, GDK_KEY_d}, ToolID::DRAW_DIMENSION},
-            {{GDK_KEY_X}, ToolID::ROUTE_DIFFPAIR_INTERACTIVE},
-            {{GDK_KEY_x}, ToolID::ROUTE_TRACK_INTERACTIVE},
-            {{GDK_KEY_G}, ToolID::DRAG_KEEP_SLOPE},
-            {{GDK_KEY_g}, ToolID::DRAG_TRACK_INTERACTIVE},
-            {{GDK_KEY_q}, ToolID::UPDATE_ALL_PLANES},
-            {{GDK_KEY_Q}, ToolID::CLEAR_ALL_PLANES},
-            {{GDK_KEY_o}, ToolID::SELECT_MORE},
-            {{GDK_KEY_O}, ToolID::SELECT_NET_SEGMENT},
-            {{GDK_KEY_c}, ToolID::LOCK},
-            {{GDK_KEY_C}, ToolID::UNLOCK_ALL},
-            {{GDK_KEY_h}, ToolID::PLACE_BOARD_HOLE},
-            {{GDK_KEY_p, GDK_KEY_h}, ToolID::PLACE_BOARD_HOLE},
-    });
-    key_seq.signal_update_hint().connect([this](const std::string &s) { main_window->tool_hint_label->set_text(s); });
 }
 
 void ImpBoard::canvas_update()
@@ -270,6 +236,11 @@ void ImpBoard::construct()
 
     rules_window->signal_goto().connect([this](Coordi location, UUID sheet) { canvas->center_and_zoom(location); });
 
+    connect_action(ActionID::VIEW_3D, [this](const auto &a) {
+        view_3d_window->update();
+        view_3d_window->present();
+    });
+
     auto *display_control_notebook = Gtk::manage(new Gtk::Notebook);
     display_control_notebook->append_page(*layer_box, "Layers");
     layer_box->show();
@@ -308,11 +279,6 @@ void ImpBoard::construct()
 
     main_window->left_panel->pack_start(*display_control_notebook, false, false);
     display_control_notebook->show();
-}
-
-ToolID ImpBoard::handle_key(guint k)
-{
-    return key_seq.handle_key(k);
 }
 
 void ImpBoard::handle_maybe_drag()

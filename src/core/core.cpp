@@ -54,9 +54,9 @@
 
 #include "common/dimension.hpp"
 #include "logger/logger.hpp"
-#include "tool_catalog.hpp"
 #include <memory>
 #include "nlohmann/json.hpp"
+#include "imp/action_catalog.hpp"
 
 namespace horizon {
 
@@ -273,7 +273,8 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
         }
     }
     catch (const std::exception &e) {
-        Logger::log_critical("exception thrown in tool constructor of " + tool_catalog.at(tool_id).name,
+        Logger::log_critical("exception thrown in tool constructor of "
+                                     + action_catalog.at({ActionID::TOOL, tool_id}).name,
                              Logger::Domain::CORE, e.what());
         return ToolResponse::end();
     }
@@ -286,7 +287,8 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
         catch (const std::exception &e) {
             s_signal_tool_changed.emit(ToolID::NONE);
             tool.reset();
-            Logger::log_critical("exception thrown in tool_begin of " + tool_catalog.at(tool_id).name,
+            Logger::log_critical("exception thrown in tool_begin of "
+                                         + action_catalog.at({ActionID::TOOL, tool_id}).name,
                                  Logger::Domain::CORE, e.what());
             return ToolResponse::end();
         }

@@ -122,10 +122,11 @@ SRC_IMP = \
 	src/imp/imp_board.cpp\
 	src/imp/tool_popover.cpp\
 	src/imp/selection_filter_dialog.cpp\
+	src/imp/action.cpp\
+	src/imp/action_catalog.cpp\
 	$(SRC_CANVAS) \
 	src/core/core.cpp \
 	src/core/core_properties.cpp\
-	src/core/tool_catalog.cpp\
 	src/core/tool_move.cpp\
 	src/core/tool_place_junction.cpp\
 	src/core/tool_draw_line.cpp\
@@ -229,7 +230,6 @@ SRC_IMP = \
 	src/widgets/parameter_set_editor.cpp\
 	src/widgets/pool_browser.cpp\
 	src/export_pdf/export_pdf.cpp\
-	src/imp/key_sequence.cpp\
 	src/imp/keyseq_dialog.cpp\
 	src/canvas/canvas_patch.cpp\
 	src/export_gerber/gerber_writer.cpp\
@@ -290,6 +290,7 @@ SRC_IMP = \
 	src/imp/header_button.cpp\
 	src/imp/preferences.cpp\
 	src/imp/preferences_window.cpp\
+	src/imp/preferences_window_keys.cpp\
 	src/pool/pool_cached.cpp\
 	src/canvas/canvas_pads.cpp\
 	src/util/window_state_store.cpp\

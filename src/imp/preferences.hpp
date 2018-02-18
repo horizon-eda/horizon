@@ -3,6 +3,9 @@
 #include "nlohmann/json_fwd.hpp"
 #include <sigc++/sigc++.h>
 #include <string>
+#include "action_catalog.hpp"
+#include "action.hpp"
+#include "core/core.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -43,6 +46,14 @@ public:
     json serialize() const;
 };
 
+class KeySequencesPreferences {
+public:
+    std::map<std::pair<ActionID, ToolID>, std::map<ActionCatalogItem::Availability, std::vector<KeySequence2>>> keys;
+
+    void load_from_json(const json &j);
+    json serialize() const;
+};
+
 class ImpPreferences : public sigc::trackable {
 public:
     ImpPreferences();
@@ -58,6 +69,7 @@ public:
     CanvasPreferences canvas_layer;
     SchematicPreferences schematic;
     BoardPreferences board;
+    KeySequencesPreferences key_sequences;
 
     typedef sigc::signal<void> type_signal_changed;
     type_signal_changed signal_changed()

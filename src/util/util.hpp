@@ -41,4 +41,5 @@ void create_config_dir();
 std::string get_config_dir();
 
 void replace_backslash(std::string &path);
+json json_from_resource(const std::string &rsrc);
 } // namespace horizon

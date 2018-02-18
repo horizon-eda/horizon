@@ -11,9 +11,13 @@ public:
 
 protected:
     void construct() override;
-    ToolID handle_key(guint k) override;
     bool handle_broadcast(const json &j);
     void handle_maybe_drag();
+
+    ActionCatalogItem::Availability get_editor_type_for_action() const
+    {
+        return ActionCatalogItem::AVAILABLE_IN_SCHEMATIC;
+    };
 
 private:
     void canvas_update() override;

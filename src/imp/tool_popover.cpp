@@ -1,9 +1,9 @@
 #include "tool_popover.hpp"
-#include "core/tool_catalog.hpp"
-#include "key_sequence.hpp"
+#include "action_catalog.hpp"
+#include "util/str_util.hpp"
 
 namespace horizon {
-ToolPopover::ToolPopover(Gtk::Widget *parent, const KeySequence *key_seq) : Gtk::Popover(*parent)
+ToolPopover::ToolPopover(Gtk::Widget *parent) : Gtk::Popover(*parent)
 {
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4));
     search_entry = Gtk::manage(new Gtk::SearchEntry());
@@ -47,8 +47,6 @@ ToolPopover::ToolPopover(Gtk::Widget *parent, const KeySequence *key_seq) : Gtk:
     });
 
     search_entry->signal_activate().connect(sigc::mem_fun(this, &ToolPopover::emit_tool_activated));
-    /// search_entry->signal_activate().connect([this]{std::cout << "entry
-    /// activate" << std::endl;});
     view->signal_row_activated().connect([this](auto a, auto b) { this->emit_tool_activated(); });
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
@@ -59,19 +57,14 @@ ToolPopover::ToolPopover(Gtk::Widget *parent, const KeySequence *key_seq) : Gtk:
     box->pack_start(*sc, true, true, 0);
 
     Gtk::TreeModel::Row row;
-    for (const auto &it : tool_catalog) {
-        row = *(store->append());
-        row[list_columns.name] = it.second.name;
-        row[list_columns.tool_id] = it.first;
-        row[list_columns.can_begin] = true;
-        auto keys = key_seq->get_sequences_for_tool(it.first);
-        std::stringstream ss;
-        for (const auto &itk : keys) {
-            std::transform(itk.begin(), itk.end(), std::ostream_iterator<std::string>(ss),
-                           [](const auto &x) { return gdk_keyval_name(x); });
-            ss << " ";
+    for (const auto &it : action_catalog) {
+        if (it.first.first == ActionID::TOOL) {
+            row = *(store->append());
+            row[list_columns.name] = it.second.name;
+            row[list_columns.tool_id] = it.first.second;
+            row[list_columns.can_begin] = true;
+            row[list_columns.keys] = "";
         }
-        row[list_columns.keys] = ss.str();
     }
 
     add(*box);
@@ -100,6 +93,21 @@ void ToolPopover::set_can_begin(const std::map<ToolID, bool> &can_begin)
         }
         else {
             it[list_columns.can_begin] = true;
+        }
+    }
+}
+
+void ToolPopover::set_key_sequences(ToolID tool_id, const std::vector<KeySequence2> &seqs)
+{
+    std::stringstream s;
+    std::transform(seqs.begin(), seqs.end(), std::ostream_iterator<std::string>(s, ","),
+                   [](const auto &x) { return key_sequence_to_string(x); });
+    auto str = s.str();
+    if (str.size())
+        str.pop_back();
+    for (auto &it : store->children()) {
+        if (it[list_columns.tool_id] == tool_id) {
+            it[list_columns.keys] = str;
         }
     }
 }

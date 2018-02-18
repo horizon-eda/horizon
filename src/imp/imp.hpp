@@ -6,7 +6,6 @@
 #include "core/core_symbol.hpp"
 #include "core/cores.hpp"
 #include "imp_interface.hpp"
-#include "key_sequence.hpp"
 #include "keyseq_dialog.hpp"
 #include "main_window.hpp"
 #include "pool/pool.hpp"
@@ -16,6 +15,7 @@
 #include "util/window_state_store.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/warnings_box.hpp"
+#include "action.hpp"
 #include <zmq.hpp>
 
 #ifdef G_OS_WIN32
@@ -67,7 +67,11 @@ protected:
     std::unique_ptr<KeySequenceDialog> key_sequence_dialog = nullptr;
     std::unique_ptr<ImpInterface> imp_interface = nullptr;
     Glib::RefPtr<Glib::Binding> grid_spacing_binding;
-    KeySequence key_seq;
+
+    std::map<std::pair<ActionID, ToolID>, ActionConnection> action_connections;
+    ActionConnection &connect_action(ToolID tool_id, std::function<void(const ActionConnection &)> cb);
+    ActionConnection &connect_action(ToolID tool_id);
+    ActionConnection &connect_action(ActionID action_id, std::function<void(const ActionConnection &)> cb);
 
     class RulesWindow *rules_window = nullptr;
 
@@ -78,7 +82,6 @@ protected:
     bool no_update = false;
 
     virtual void canvas_update() = 0;
-    virtual ToolID handle_key(guint k) = 0;
     void sc(void);
     bool handle_key_press(GdkEventKey *key_event);
     void handle_cursor_move(const Coordi &pos);
@@ -93,7 +96,10 @@ protected:
     bool handle_close(GdkEventAny *ev);
     json send_json(const json &j);
 
-    void key_seq_append_default(KeySequence &ks);
+    bool trigger_action(const std::pair<ActionID, ToolID> &action);
+    bool trigger_action(ActionID aid);
+    bool trigger_action(ToolID tid);
+
     void add_tool_action(ToolID tid, const std::string &action);
     Glib::RefPtr<Gio::Menu> add_hamburger_menu();
 
@@ -109,12 +115,24 @@ protected:
 
     virtual void handle_maybe_drag();
 
+    virtual ActionCatalogItem::Availability get_editor_type_for_action() const = 0;
+
+    void layer_up_down(bool up);
+    void goto_layer(int layer);
+
 private:
     void fix_cursor_pos();
     void apply_settings();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
     void show_preferences_window();
     void handle_drag();
+
+
+    ActionConnection &connect_action(ActionID action_id, ToolID tool_id,
+                                     std::function<void(const ActionConnection &)> cb);
+    KeySequence2 keys_current;
+    bool handle_action_key(GdkEventKey *ev);
+    void handle_tool_action(const ActionConnection &conn);
 
     class LogWindow *log_window = nullptr;
     std::set<SelectableRef> selection_for_drag_move;

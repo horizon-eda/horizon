@@ -1,12 +1,13 @@
 #pragma once
 #include "core/core.hpp"
+#include "action.hpp"
 #include <gtkmm.h>
 
 namespace horizon {
 
 class ToolPopover : public Gtk::Popover {
 public:
-    ToolPopover(Gtk::Widget *parent, const class KeySequence *key_seq);
+    ToolPopover(Gtk::Widget *parent);
     typedef sigc::signal<void, ToolID> type_signal_tool_activated;
     // type_signal_selected signal_selected() {return s_signal_selected;}
     type_signal_tool_activated signal_tool_activated()
@@ -14,6 +15,7 @@ public:
         return s_signal_tool_activated;
     }
     void set_can_begin(const std::map<ToolID, bool> &can_begin);
+    void set_key_sequences(ToolID tool_id, const std::vector<KeySequence2> &seqs);
 
 private:
     Gtk::SearchEntry *search_entry;
