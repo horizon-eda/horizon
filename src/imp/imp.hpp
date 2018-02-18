@@ -20,6 +20,7 @@
 
 #ifdef G_OS_WIN32
 #undef DELETE
+#undef DUPLICATE
 #endif
 
 namespace horizon {
