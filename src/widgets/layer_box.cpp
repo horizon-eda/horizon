@@ -7,6 +7,184 @@
 #include <iostream>
 
 namespace horizon {
+
+class LayerDisplayButton : public Gtk::DrawingArea {
+public:
+    LayerDisplayButton();
+
+    typedef Glib::Property<Gdk::RGBA> type_property_color;
+    Glib::PropertyProxy<Gdk::RGBA> property_color()
+    {
+        return p_property_color.get_proxy();
+    }
+    typedef Glib::Property<LayerDisplay::Mode> type_property_display_mode;
+    Glib::PropertyProxy<LayerDisplay::Mode> property_display_mode()
+    {
+        return p_property_display_mode.get_proxy();
+    }
+
+    Gdk::RGBA default_color;
+
+private:
+    bool on_draw(const Cairo::RefPtr<::Cairo::Context> &cr) override;
+    bool on_button_press_event(GdkEventButton *ev) override;
+    type_property_color p_property_color;
+    type_property_display_mode p_property_display_mode;
+
+    Gtk::Menu menu;
+};
+
+LayerDisplayButton::LayerDisplayButton()
+    : Glib::ObjectBase(typeid(LayerDisplayButton)), Gtk::DrawingArea(),
+      p_property_color(*this, "color", Gdk::RGBA("#ff0000")), p_property_display_mode(*this, "display-mode")
+{
+    set_size_request(18, 18);
+    add_events(Gdk::BUTTON_PRESS_MASK);
+    property_display_mode().signal_changed().connect([this] { queue_draw(); });
+    property_color().signal_changed().connect([this] { queue_draw(); });
+
+
+    {
+        auto item = Gtk::manage(new Gtk::MenuItem("Reset color"));
+        item->signal_activate().connect([this] { property_color() = default_color; });
+        item->show();
+        menu.append(*item);
+    }
+    {
+        auto item = Gtk::manage(new Gtk::MenuItem("Select color"));
+
+        item->signal_activate().connect([this] {
+            Gtk::ColorChooserDialog dia("Layer color");
+            dia.set_transient_for(*dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW)));
+            dia.set_rgba(property_color());
+            dia.property_show_editor() = true;
+            dia.set_use_alpha(false);
+
+            if (dia.run() == Gtk::RESPONSE_OK) {
+                property_color() = dia.get_rgba();
+            }
+        });
+        item->show();
+        menu.append(*item);
+    }
+}
+
+bool LayerDisplayButton::on_draw(const Cairo::RefPtr<::Cairo::Context> &cr)
+{
+
+    const auto c = p_property_color.get_value();
+    cr->save();
+    cr->translate(1, 1);
+    cr->rectangle(0, 0, 16, 16);
+    cr->set_source_rgb(0, 0, 0);
+    cr->fill_preserve();
+    cr->set_source_rgb(c.get_red(), c.get_green(), c.get_blue());
+    cr->set_line_width(2);
+    LayerDisplay::Mode dm = p_property_display_mode.get_value();
+    if (dm == LayerDisplay::Mode::FILL || dm == LayerDisplay::Mode::FILL_ONLY) {
+        cr->fill_preserve();
+    }
+
+    cr->save();
+    if (dm == LayerDisplay::Mode::FILL_ONLY) {
+        cr->set_source_rgb(0, 0, 0);
+    }
+    cr->stroke();
+    cr->restore();
+    cr->set_line_width(2);
+    if (dm == LayerDisplay::Mode::HATCH) {
+        cr->move_to(0, 16);
+        cr->line_to(16, 0);
+        cr->stroke();
+        cr->move_to(0, 9);
+        cr->line_to(9, 0);
+        cr->stroke();
+        cr->move_to(7, 16);
+        cr->line_to(16, 7);
+        cr->stroke();
+    }
+
+    cr->restore();
+    Gtk::DrawingArea::on_draw(cr);
+    return true;
+}
+
+bool LayerDisplayButton::on_button_press_event(GdkEventButton *ev)
+{
+    if (gdk_event_triggers_context_menu((GdkEvent *)ev)) {
+        menu.popup_at_pointer((GdkEvent *)ev);
+        return true;
+    }
+    if (ev->button != 1)
+        return false;
+    auto old_mode = static_cast<int>(static_cast<LayerDisplay::Mode>(property_display_mode()));
+    auto new_mode = static_cast<LayerDisplay::Mode>((old_mode + 1) % static_cast<int>(LayerDisplay::Mode::N_MODES));
+    p_property_display_mode = new_mode;
+    return true;
+}
+
+
+class LayerBoxRow : public Gtk::Box {
+public:
+    LayerBoxRow(int l, const std::string &name);
+    const int layer;
+    LayerDisplayButton *ld_button;
+
+    Glib::PropertyProxy<bool> property_layer_visible()
+    {
+        return p_property_layer_visible.get_proxy();
+    }
+
+private:
+    Gtk::Label *name_label = nullptr;
+    Gtk::Image *layer_visible_image = nullptr;
+
+    Glib::Property<bool> p_property_layer_visible;
+};
+
+LayerBoxRow::LayerBoxRow(int l, const std::string &name)
+    : Glib::ObjectBase(typeid(LayerBoxRow)), Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8), layer(l),
+      p_property_layer_visible(*this, "layer-visible")
+{
+    set_margin_start(4);
+
+    auto im_ev = Gtk::manage(new Gtk::EventBox);
+    im_ev->add_events(Gdk::BUTTON_PRESS_MASK);
+    im_ev->signal_button_press_event().connect([this](GdkEventButton *ev) {
+        if (ev->button != 1)
+            return false;
+        p_property_layer_visible = !p_property_layer_visible;
+        return true;
+    });
+    im_ev->set_focus_on_click(false);
+    layer_visible_image = Gtk::manage(new Gtk::Image);
+    layer_visible_image->set_from_icon_name("layer-visible-symbolic", Gtk::ICON_SIZE_BUTTON);
+    im_ev->add(*layer_visible_image);
+    pack_start(*im_ev, false, false, 0);
+    im_ev->show_all();
+
+    property_layer_visible().signal_changed().connect([this] {
+        if (p_property_layer_visible) {
+            layer_visible_image->set_from_icon_name("layer-visible-symbolic", Gtk::ICON_SIZE_BUTTON);
+            layer_visible_image->set_opacity(1);
+        }
+        else {
+            layer_visible_image->set_from_icon_name("layer-invisible-symbolic", Gtk::ICON_SIZE_BUTTON);
+            layer_visible_image->set_opacity(.3);
+        }
+    });
+
+    ld_button = Gtk::manage(new LayerDisplayButton);
+    pack_start(*ld_button, false, false, 0);
+    ld_button->show();
+
+    name_label = Gtk::manage(new Gtk::Label(name));
+    name_label->set_xalign(0);
+
+    pack_start(*name_label, true, true, 0);
+    name_label->show();
+}
+
 LayerBox::LayerBox(LayerProvider *lpr, bool show_title)
     : Glib::ObjectBase(typeid(LayerBox)), Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 2), lp(lpr),
       p_property_work_layer(*this, "work-layer"), p_property_select_work_layer_only(*this, "select-work-layer-only"),
@@ -19,9 +197,6 @@ LayerBox::LayerBox(LayerProvider *lpr, bool show_title)
         pack_start(*la, false, false, 0);
     }
 
-    store = Gtk::ListStore::create(list_columns);
-    store->set_sort_column(list_columns.index, Gtk::SORT_DESCENDING);
-
     auto fr = Gtk::manage(new Gtk::Frame());
     if (show_title)
         fr->set_shadow_type(Gtk::SHADOW_IN);
@@ -30,57 +205,26 @@ LayerBox::LayerBox(LayerProvider *lpr, bool show_title)
     auto frb = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
     fr->add(*frb);
 
-    view = Gtk::manage(new Gtk::TreeView(store));
-    view->get_selection()->set_mode(Gtk::SELECTION_NONE);
+    lb = Gtk::manage(new Gtk::ListBox);
+    lb->set_selection_mode(Gtk::SELECTION_BROWSE);
+    lb->set_sort_func([](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b) {
+        auto ra = dynamic_cast<LayerBoxRow *>(a->get_child());
+        auto rb = dynamic_cast<LayerBoxRow *>(b->get_child());
+        return rb->layer - ra->layer;
+    });
+    lb->signal_row_selected().connect([this](Gtk::ListBoxRow *lrow) {
+        if (lrow) {
+            auto row = dynamic_cast<LayerBoxRow *>(lrow->get_child());
+            p_property_work_layer = row->layer;
+        }
+    });
+
     property_work_layer().signal_changed().connect(sigc::mem_fun(this, &LayerBox::update_work_layer));
-    p_property_work_layer.set_value(0);
 
-
-    {
-        auto cr = Gtk::manage(new Gtk::CellRendererToggle());
-        cr->signal_toggled().connect(sigc::mem_fun(this, &LayerBox::work_toggled));
-        cr->set_radio(true);
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("W", *cr));
-        tvc->add_attribute(cr->property_active(), list_columns.is_work);
-        cr->property_xalign().set_value(1);
-        view->append_column(*tvc);
-    }
-    {
-        auto cr = Gtk::manage(new Gtk::CellRendererToggle());
-        cr->signal_toggled().connect(sigc::mem_fun(this, &LayerBox::toggled));
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("V", *cr));
-        // tvc->add_attribute(cr->property_active(), list_columns.visible);
-        tvc->set_cell_data_func(*cr, sigc::mem_fun(this, &LayerBox::visible_cell_data_func));
-        cr->property_xalign().set_value(1);
-        view->append_column(*tvc);
-    }
-    {
-        auto cr = Gtk::manage(new CellRendererLayerDisplay());
-        cr->signal_activate().connect(sigc::mem_fun(this, &LayerBox::activated));
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("D", *cr));
-        tvc->add_attribute(cr->property_color(), list_columns.color);
-        tvc->add_attribute(cr->property_display_mode(), list_columns.display_mode);
-        // tvc->add_attribute(*cr, "active", list_columns.visible);
-        // cr->property_xalign().set_value(1);
-        view->append_column(*tvc);
-    }
-    {
-        auto cr = Gtk::manage(new Gtk::CellRendererText());
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("I", *cr));
-        tvc->add_attribute(cr->property_text(), list_columns.index);
-        cr->property_xalign().set_value(1);
-        view->append_column(*tvc);
-    }
-    // view->append_column("", list_columns.index);
-    view->append_column("Name", list_columns.name);
-    view->signal_button_press_event().connect_notify(sigc::mem_fun(this, &LayerBox::handle_button));
-
-    view->show();
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
     sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-    // sc->set_shadow_type(Gtk::SHADOW_IN);
-    sc->set_min_content_height(400);
-    sc->add(*view);
+    sc->set_propagate_natural_height(true);
+    sc->add(*lb);
     sc->show_all();
     frb->pack_start(*sc, true, true, 0);
 
@@ -134,171 +278,49 @@ LayerBox::LayerBox(LayerProvider *lpr, bool show_title)
     frb->pack_start(*ab, false, false, 0);
     pack_start(*fr, true, true, 0);
 
-    {
-        auto item = Gtk::manage(new Gtk::MenuItem("Reset color"));
-        item->signal_activate().connect([this] {
-            auto layers = lp->get_layers();
-            int idx = row_for_menu[list_columns.index];
-            const auto &co = layers.at(idx).color;
-            auto c = Gdk::RGBA();
-            c.set_rgba(co.r, co.g, co.b);
-            row_for_menu[list_columns.color] = c;
-            emit_layer_display(row_for_menu);
-        });
-        item->show();
-        menu.append(*item);
-    }
-    {
-        auto item = Gtk::manage(new Gtk::MenuItem("Select color"));
-
-        item->signal_activate().connect([this] {
-            Gtk::ColorChooserDialog dia("Layer color");
-            dia.set_transient_for(*dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW)));
-            dia.set_rgba(row_for_menu[list_columns.color]);
-            dia.property_show_editor() = true;
-            dia.set_use_alpha(false);
-
-            if (dia.run() == Gtk::RESPONSE_OK) {
-                row_for_menu[list_columns.color] = dia.get_rgba();
-                emit_layer_display(row_for_menu);
-            }
-        });
-        item->show();
-        menu.append(*item);
-    }
-
 
     update();
-}
-
-
-void LayerBox::visible_cell_data_func(Gtk::CellRenderer *cr, const Gtk::TreeModel::iterator &it)
-{
-    auto crt = dynamic_cast<Gtk::CellRendererToggle *>(cr);
-    Gtk::TreeModel::Row row = *it;
-    if (row[list_columns.is_work]) {
-        crt->property_active() = true;
-        crt->property_sensitive() = false;
-    }
-    else {
-        crt->property_sensitive() = true;
-        crt->property_active() = row[list_columns.visible];
-    }
-}
-
-void LayerBox::emit_layer_display(const Gtk::TreeModel::Row &row)
-{
-    const Gdk::RGBA &co = row[list_columns.color];
-    Color c(co.get_red(), co.get_green(), co.get_blue());
-    s_signal_set_layer_display.emit(row[list_columns.index],
-                                    LayerDisplay(row[list_columns.visible], row[list_columns.display_mode], c));
-}
-
-
-void LayerBox::toggled(const Glib::ustring &path)
-{
-    auto it = store->get_iter(path);
-    if (it) {
-        Gtk::TreeModel::Row row = *it;
-        row[list_columns.visible] = !row[list_columns.visible];
-        emit_layer_display(row);
-    }
-}
-void LayerBox::work_toggled(const Glib::ustring &path)
-{
-    for (auto &it : store->children()) {
-        it[list_columns.is_work] = false;
-    }
-
-    auto it = store->get_iter(path);
-    if (it) {
-        Gtk::TreeModel::Row row = *it;
-        row[list_columns.is_work] = true;
-        property_work_layer().set_value(row[list_columns.index]);
-    }
-}
-
-void LayerBox::activated(const Glib::ustring &path)
-{
-    auto it = store->get_iter(path);
-    if (it) {
-        Gtk::TreeModel::Row row = *it;
-        LayerDisplay::Mode mode = row[list_columns.display_mode];
-        auto new_mode = static_cast<LayerDisplay::Mode>((static_cast<int>(mode) + 1)
-                                                        % static_cast<int>(LayerDisplay::Mode::N_MODES));
-        row[list_columns.display_mode] = new_mode;
-        emit_layer_display(row);
-    }
 }
 
 
 void LayerBox::update()
 {
     auto layers = lp->get_layers();
-    Gtk::TreeModel::Row row;
     std::set<int> layers_from_lp;
-    std::set<int> layers_from_store;
+    std::set<int> layers_from_lb;
     for (const auto &it : layers) {
         layers_from_lp.emplace(it.first);
     }
 
-    store->freeze_notify();
-    auto ch = store->children();
-    for (auto it = ch.begin(); it != ch.end();) {
-        row = *it;
-        if (layers_from_lp.count(row[list_columns.index]) == 0) {
-            store->erase(it++);
-        }
-        else {
-            layers_from_store.insert(row[list_columns.index]);
-            it++;
+
+    {
+        auto existing_layers = lb->get_children();
+        for (auto ch : existing_layers) {
+            auto lrow = dynamic_cast<Gtk::ListBoxRow *>(ch);
+            auto row = dynamic_cast<LayerBoxRow *>(lrow->get_child());
+            if (layers_from_lp.count(row->layer) == 0)
+                delete ch;
+            else
+                layers_from_lb.insert(row->layer);
         }
     }
 
-    for (const auto &it : layers) {
-        if (layers_from_store.count(it.first) == 0) {
-            row = *(store->append());
-
-            row[list_columns.name] = it.second.name;
-            row[list_columns.index] = it.first;
-            row[list_columns.is_work] = (it.first == p_property_work_layer);
-            row[list_columns.visible] = true;
-            const auto &co = it.second.color;
-            auto c = Gdk::RGBA();
-            c.set_rgba(co.r, co.g, co.b);
-            row[list_columns.color] = c;
-            row[list_columns.display_mode] = LayerDisplay::Mode::FILL;
-            emit_layer_display(row);
+    for (const auto &la : layers) {
+        if (layers_from_lb.count(la.first) == 0) {
+            auto lr = Gtk::manage(new LayerBoxRow(la.first, la.second.name));
+            lr->property_layer_visible().signal_changed().connect([this, lr] { emit_layer_display(lr); });
+            lr->ld_button->property_color().signal_changed().connect([this, lr] { emit_layer_display(lr); });
+            lr->ld_button->property_display_mode().signal_changed().connect([this, lr] { emit_layer_display(lr); });
+            lr->ld_button->default_color.set_red(la.second.color.r);
+            lr->ld_button->default_color.set_green(la.second.color.g);
+            lr->ld_button->default_color.set_blue(la.second.color.b);
+            lr->ld_button->property_color() = lr->ld_button->default_color;
+            lr->ld_button->property_display_mode() = LayerDisplay::Mode::FILL;
+            lb->append(*lr);
+            lr->show();
         }
     }
-    store->thaw_notify();
-}
-
-void LayerBox::handle_button(GdkEventButton *button_event)
-{
-    if (button_event->window == view->get_bin_window()->gobj() && button_event->button == 3) {
-        Gtk::TreeModel::Path path;
-        if (view->get_path_at_pos(button_event->x, button_event->y, path)) {
-            auto it = store->get_iter(path);
-            row_for_menu = *it;
-#if GTK_CHECK_VERSION(3, 22, 0)
-            menu.popup_at_pointer((GdkEvent *)button_event);
-#else
-            menu.popup(button_event->button, button_event->time);
-#endif
-        }
-    }
-}
-
-void LayerBox::update_work_layer()
-{
-    auto layers = lp->get_layers();
-    Gtk::TreeModel::Row row;
-    store->freeze_notify();
-    for (auto &it : store->children()) {
-        it[list_columns.is_work] = (it[list_columns.index] == p_property_work_layer);
-    }
-    store->thaw_notify();
+    update_work_layer();
 }
 
 static const LutEnumStr<LayerDisplay::Mode> dm_lut = {
@@ -326,17 +348,40 @@ static Gdk::RGBA rgba_from_json(const json &j)
     return r;
 }
 
+void LayerBox::update_work_layer()
+{
+    auto rows = lb->get_children();
+    for (auto ch : rows) {
+        auto lrow = dynamic_cast<Gtk::ListBoxRow *>(ch);
+        auto row = dynamic_cast<LayerBoxRow *>(lrow->get_child());
+        if (row->layer == p_property_work_layer) {
+            lb->select_row(*lrow);
+            break;
+        }
+    }
+}
+
+void LayerBox::emit_layer_display(LayerBoxRow *row)
+{
+    Gdk::RGBA co(row->ld_button->property_color().get_value());
+    Color c(co.get_red(), co.get_green(), co.get_blue());
+    s_signal_set_layer_display.emit(
+            row->layer, LayerDisplay(row->property_layer_visible(), row->ld_button->property_display_mode(), c));
+}
+
 json LayerBox::serialize()
 {
     json j;
     j["layer_opacity"] = property_layer_opacity().get_value();
-    for (auto &it : store->children()) {
+    auto children = lb->get_children();
+    for (auto ch : children) {
+        auto lrow = dynamic_cast<Gtk::ListBoxRow *>(ch);
+        auto row = dynamic_cast<LayerBoxRow *>(lrow->get_child());
         json k;
-        k["visible"] = static_cast<bool>(it[list_columns.visible]);
-        k["display_mode"] = dm_lut.lookup_reverse(it[list_columns.display_mode]);
-        k["color"] = rgba_to_json(it[list_columns.color]);
-        int index = it[list_columns.index];
-        j["layers"][std::to_string(index)] = k;
+        k["visible"] = static_cast<bool>(row->property_layer_visible());
+        k["display_mode"] = dm_lut.lookup_reverse(row->ld_button->property_display_mode());
+        k["color"] = rgba_to_json(row->ld_button->property_color());
+        j["layers"][std::to_string(row->layer)] = k;
     }
     return j;
 }
@@ -346,21 +391,23 @@ void LayerBox::load_from_json(const json &j)
     if (j.count("layers")) {
         property_layer_opacity() = j.value("layer_opacity", 90);
         const auto &j2 = j.at("layers");
-        for (auto &it : store->children()) {
-            std::string index_str = std::to_string(it[list_columns.index]);
+        for (auto ch : lb->get_children()) {
+            auto lrow = dynamic_cast<Gtk::ListBoxRow *>(ch);
+            auto row = dynamic_cast<LayerBoxRow *>(lrow->get_child());
+            std::string index_str = std::to_string(row->layer);
             if (j2.count(index_str)) {
                 auto &k = j2.at(index_str);
-                it[list_columns.visible] = static_cast<bool>(k["visible"]);
+                row->property_layer_visible() = static_cast<bool>(k["visible"]);
                 try {
-                    it[list_columns.display_mode] = dm_lut.lookup(k["display_mode"]);
+                    row->ld_button->property_display_mode() = dm_lut.lookup(k["display_mode"]);
                 }
                 catch (...) {
-                    it[list_columns.display_mode] = LayerDisplay::Mode::FILL;
+                    row->ld_button->property_display_mode() = LayerDisplay::Mode::FILL;
                 }
                 if (k.count("color")) {
-                    it[list_columns.color] = rgba_from_json(k.at("color"));
+                    row->ld_button->property_color() = rgba_from_json(k.at("color"));
                 }
-                emit_layer_display(it);
+                emit_layer_display(row);
             }
         }
     }

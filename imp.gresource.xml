@@ -28,6 +28,8 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-board-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-link-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-unlink-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/layer-visible-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/layer-invisible-symbolic.svg</file>
     <file>icons/scalable/apps/horizon-eda.svg</file>
     <file>icons/16x16/apps/horizon-eda.png</file>
     <file>icons/32x32/apps/horizon-eda.png</file>
