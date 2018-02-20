@@ -135,11 +135,15 @@ public:
         return p_property_layer_visible.get_proxy();
     }
 
+    void set_force_visible(bool v);
+
 private:
     Gtk::Label *name_label = nullptr;
     Gtk::Image *layer_visible_image = nullptr;
 
     Glib::Property<bool> p_property_layer_visible;
+    bool visible_forced = false;
+    void update_image();
 };
 
 LayerBoxRow::LayerBoxRow(int l, const std::string &name)
@@ -151,7 +155,7 @@ LayerBoxRow::LayerBoxRow(int l, const std::string &name)
     auto im_ev = Gtk::manage(new Gtk::EventBox);
     im_ev->add_events(Gdk::BUTTON_PRESS_MASK);
     im_ev->signal_button_press_event().connect([this](GdkEventButton *ev) {
-        if (ev->button != 1)
+        if (ev->button != 1 || visible_forced)
             return false;
         p_property_layer_visible = !p_property_layer_visible;
         return true;
@@ -163,16 +167,7 @@ LayerBoxRow::LayerBoxRow(int l, const std::string &name)
     pack_start(*im_ev, false, false, 0);
     im_ev->show_all();
 
-    property_layer_visible().signal_changed().connect([this] {
-        if (p_property_layer_visible) {
-            layer_visible_image->set_from_icon_name("layer-visible-symbolic", Gtk::ICON_SIZE_BUTTON);
-            layer_visible_image->set_opacity(1);
-        }
-        else {
-            layer_visible_image->set_from_icon_name("layer-invisible-symbolic", Gtk::ICON_SIZE_BUTTON);
-            layer_visible_image->set_opacity(.3);
-        }
-    });
+    property_layer_visible().signal_changed().connect(sigc::mem_fun(*this, &LayerBoxRow::update_image));
 
     ld_button = Gtk::manage(new LayerDisplayButton);
     pack_start(*ld_button, false, false, 0);
@@ -183,6 +178,24 @@ LayerBoxRow::LayerBoxRow(int l, const std::string &name)
 
     pack_start(*name_label, true, true, 0);
     name_label->show();
+}
+
+void LayerBoxRow::update_image()
+{
+    if (p_property_layer_visible || visible_forced) {
+        layer_visible_image->set_from_icon_name("layer-visible-symbolic", Gtk::ICON_SIZE_BUTTON);
+        layer_visible_image->set_opacity(1);
+    }
+    else {
+        layer_visible_image->set_from_icon_name("layer-invisible-symbolic", Gtk::ICON_SIZE_BUTTON);
+        layer_visible_image->set_opacity(.3);
+    }
+}
+
+void LayerBoxRow::set_force_visible(bool v)
+{
+    visible_forced = v;
+    update_image();
 }
 
 LayerBox::LayerBox(LayerProvider *lpr, bool show_title)
@@ -354,9 +367,9 @@ void LayerBox::update_work_layer()
     for (auto ch : rows) {
         auto lrow = dynamic_cast<Gtk::ListBoxRow *>(ch);
         auto row = dynamic_cast<LayerBoxRow *>(lrow->get_child());
+        row->set_force_visible(row->layer == p_property_work_layer);
         if (row->layer == p_property_work_layer) {
             lb->select_row(*lrow);
-            break;
         }
     }
 }
