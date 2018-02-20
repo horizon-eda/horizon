@@ -73,6 +73,16 @@ RulesCheckResult PackageRules::check_package(const class Package *pkg)
         }
     }
 
+    for (const auto &it : pkg->polygons) {
+        if (it.second.layer == BoardLayers::TOP_COURTYARD || it.second.layer == BoardLayers::BOTTOM_COURTYARD) {
+            if (it.second.parameter_class != "courtyard") {
+                r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+                auto &x = r.errors.back();
+                x.comment = "Polygon on courtyard layer must have 'courtyard' parameter class";
+                x.has_location = false;
+            }
+        }
+    }
     if (courtyard_top_count > 1 || courtyard_bottom_count > 1) {
         r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
         auto &x = r.errors.back();
