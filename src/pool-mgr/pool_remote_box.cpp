@@ -716,6 +716,7 @@ void PoolRemoteBox::create_pr_thread()
         json user_info;
         try {
             user_info = client.login(gh_username, gh_password);
+            gh_username = user_info.at("login");
             git_thread_dispatcher.emit();
         }
         catch (const std::runtime_error &e) {
