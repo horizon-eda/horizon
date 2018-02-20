@@ -253,6 +253,7 @@ void RulesWindow::run_checks()
     check_result_store->thaw_notify();
     canvas->update_markers();
     stack->set_visible_child("checks");
+    check_result_treeview->expand_all();
 }
 
 void RulesWindow::rule_selected(RuleID id)
