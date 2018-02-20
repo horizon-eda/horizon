@@ -11,6 +11,7 @@ public:
     void populate();
     void focus_first();
     void set_button_margin_left(int margin);
+    void add_or_set_parameter(ParameterID param, int64_t value);
 
     typedef sigc::signal<void> type_signal_activate_last;
     type_signal_activate_last signal_activate_last()

@@ -20,7 +20,7 @@ Gtk::Widget *ParameterSetEditor::create_extra_widget(ParameterID id)
 class ParameterEditor : public Gtk::Box {
 public:
     ParameterEditor(ParameterID id, ParameterSetEditor *pse)
-        : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8), parent(pse), parameter_id(id)
+        : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8), parameter_id(id), parent(pse)
     {
         auto la = Gtk::manage(new Gtk::Label(parameter_id_to_name(id)));
         la->get_style_context()->add_class("dim-label");
@@ -77,9 +77,10 @@ public:
     }
     SpinButtonDim *sp = nullptr;
 
+    const ParameterID parameter_id;
+
 private:
     ParameterSetEditor *parent;
-    ParameterID parameter_id;
 };
 
 ParameterSetEditor::ParameterSetEditor(ParameterSet *ps, bool populate_init)
@@ -137,6 +138,23 @@ void ParameterSetEditor::focus_first()
     if (widgets.size()) {
         auto w = dynamic_cast<ParameterEditor *>(dynamic_cast<Gtk::ListBoxRow *>(widgets.front())->get_child());
         w->sp->grab_focus();
+    }
+}
+
+void ParameterSetEditor::add_or_set_parameter(ParameterID param, int64_t value)
+{
+    if (parameter_set->count(param)) {
+        auto rows = listbox->get_children();
+        for (auto row : rows) {
+            auto w = dynamic_cast<ParameterEditor *>(dynamic_cast<Gtk::ListBoxRow *>(row)->get_child());
+            if (w->parameter_id == param)
+                w->sp->set_value(value);
+        }
+    }
+    else {
+        (*parameter_set)[param] = value;
+        auto pe = Gtk::manage(new ParameterEditor(param, this));
+        listbox->add(*pe);
     }
 }
 

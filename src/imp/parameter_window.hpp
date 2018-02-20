@@ -21,6 +21,11 @@ public:
         return s_signal_apply;
     }
 
+    class ParameterSetEditor *get_parameter_set_editor()
+    {
+        return parameter_set_editor;
+    }
+
 private:
     type_signal_apply s_signal_apply;
     Gtk::Button *apply_button = nullptr;
@@ -28,5 +33,7 @@ private:
     Gtk::Label *bar_label = nullptr;
     Gtk::Box *extra_button_box = nullptr;
     Gtk::TextView *tv = nullptr;
+
+    class ParameterSetEditor *parameter_set_editor = nullptr;
 };
 } // namespace horizon

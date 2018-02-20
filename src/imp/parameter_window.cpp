@@ -42,8 +42,8 @@ ParameterWindow::ParameterWindow(Gtk::Window *p, std::string *ppc, ParameterSet 
     auto sep = Gtk::manage(new Gtk::Separator());
     box->pack_start(*sep, false, false, 0);
 
-    auto editor = Gtk::manage(new ParameterSetEditor(ps));
-    box->pack_start(*editor, false, false, 0);
+    parameter_set_editor = Gtk::manage(new ParameterSetEditor(ps));
+    box->pack_start(*parameter_set_editor, false, false, 0);
 
     box2->pack_start(*box, true, true, 0);
 

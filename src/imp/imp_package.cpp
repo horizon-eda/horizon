@@ -11,6 +11,7 @@
 #include "widgets/chooser_buttons.hpp"
 #include "widgets/pool_browser.hpp"
 #include "widgets/spin_button_dim.hpp"
+#include "widgets/parameter_set_editor.hpp"
 
 namespace horizon {
 ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path)
@@ -559,6 +560,8 @@ void ImpPackage::construct()
                       "+xy\nset-polygon [ courtyard rectangle ";
                 ss << c.x / 1e6 << "mm " << c.y / 1e6 << "mm ]";
                 parameter_window->insert_text(ss.str());
+                parameter_window->get_parameter_set_editor()->add_or_set_parameter(ParameterID::COURTYARD_EXPANSION,
+                                                                                   0.25_mm);
             }
             else {
                 parameter_window->set_error_message(
