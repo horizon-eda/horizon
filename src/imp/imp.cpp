@@ -220,8 +220,8 @@ void ImpBase::run(int argc, char *argv[])
     warnings_box->signal_selected().connect(sigc::mem_fun(this, &ImpBase::handle_warning_selected));
     main_window->left_panel->pack_end(*warnings_box, false, false, 0);
 
-    selection_filter_dialog =
-            std::make_unique<SelectionFilterDialog>(this->main_window, &canvas->selection_filter, core.r);
+    selection_filter_dialog = std::unique_ptr<SelectionFilterDialog>(
+            SelectionFilterDialog::create(this->main_window, &canvas->selection_filter, core.r));
 
     key_sequence_dialog = std::make_unique<KeySequenceDialog>(this->main_window);
 

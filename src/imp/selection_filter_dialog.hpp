@@ -10,12 +10,15 @@ namespace horizon {
 
 class SelectionFilterDialog : public Gtk::Window {
 public:
-    SelectionFilterDialog(Gtk::Window *parent, SelectionFilter *sf, Core *c);
+    SelectionFilterDialog(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &builder, SelectionFilter *sf,
+                          Core *c);
+    static SelectionFilterDialog *create(Gtk::Window *parent, SelectionFilter *sf, Core *c);
 
 private:
     SelectionFilter *selection_filter;
     Core *core;
     Gtk::ListBox *listbox = nullptr;
+    Gtk::Button *select_all = nullptr;
     std::vector<Gtk::CheckButton *> checkbuttons;
 };
 } // namespace horizon
