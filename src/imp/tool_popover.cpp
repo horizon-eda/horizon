@@ -25,7 +25,7 @@ ToolPopover::ToolPopover(Gtk::Widget *parent) : Gtk::Popover(*parent)
         return r != tool_name.end();
 
     });
-    search_entry->signal_search_changed().connect([this] {
+    search_entry->signal_changed().connect([this] {
         store_filtered->refilter();
         if (store_filtered->children().size())
             view->get_selection()->select(store_filtered->children().begin());
