@@ -111,7 +111,6 @@ void PropertyEditorString::activate()
         return;
     modified = false;
     std::string txt = en->get_text();
-    en->unset_icon(Gtk::ENTRY_ICON_PRIMARY);
     s_signal_changed.emit();
 }
 
@@ -125,7 +124,6 @@ void PropertyEditorString::reload()
 {
     ScopedBlock block(connections);
     en->set_text(value.value);
-    en->unset_icon(Gtk::ENTRY_ICON_PRIMARY);
     modified = false;
 }
 
@@ -137,7 +135,6 @@ PropertyValue &PropertyEditorString::get_value()
 
 void PropertyEditorString::changed()
 {
-    en->set_icon_from_icon_name("content-loading-symbolic", Gtk::ENTRY_ICON_PRIMARY);
     modified = true;
 }
 
