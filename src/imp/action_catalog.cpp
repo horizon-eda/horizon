@@ -314,6 +314,9 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
 
         {{ActionID::TOOL, ToolID::EDIT_BOARD_HOLE},
          {"Edit hole", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, false}},
+
+        {{ActionID::TOOL, ToolID::GENERATE_COURTYARD},
+         {"Generate courtyard", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE, false}},
 };
 
 #define ACTION_LUT_ITEM(x)                                                                                             \
@@ -435,5 +438,6 @@ const LutEnumStr<ToolID> tool_lut = {TOOL_LUT_ITEM(EDIT_SCHEMATIC_PROPERTIES),
                                      TOOL_LUT_ITEM(ADD_VERTEX),
                                      TOOL_LUT_ITEM(MANAGE_POWER_NETS),
                                      TOOL_LUT_ITEM(PLACE_BOARD_HOLE),
-                                     TOOL_LUT_ITEM(EDIT_BOARD_HOLE)};
+                                     TOOL_LUT_ITEM(EDIT_BOARD_HOLE),
+                                     TOOL_LUT_ITEM(GENERATE_COURTYARD)};
 } // namespace horizon

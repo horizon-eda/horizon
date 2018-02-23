@@ -181,6 +181,7 @@ SRC_IMP = \
 	src/core/tool_add_vertex.cpp\
 	src/core/tool_place_board_hole.cpp\
 	src/core/tool_edit_board_hole.cpp\
+	src/core/tool_generate_courtyard.cpp\
 	src/core/cores.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\

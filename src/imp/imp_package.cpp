@@ -562,6 +562,7 @@ void ImpPackage::construct()
                 parameter_window->insert_text(ss.str());
                 parameter_window->get_parameter_set_editor()->add_or_set_parameter(ParameterID::COURTYARD_EXPANSION,
                                                                                    0.25_mm);
+                parameter_window->signal_apply().emit();
             }
             else {
                 parameter_window->set_error_message(

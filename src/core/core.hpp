@@ -96,7 +96,8 @@ enum class ToolID {
     ADD_VERTEX,
     MANAGE_POWER_NETS,
     PLACE_BOARD_HOLE,
-    EDIT_BOARD_HOLE
+    EDIT_BOARD_HOLE,
+    GENERATE_COURTYARD
 };
 
 /**

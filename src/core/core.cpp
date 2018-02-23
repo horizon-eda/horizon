@@ -51,6 +51,7 @@
 #include "tool_set_via_net.hpp"
 #include "tool_smash.hpp"
 #include "tool_update_all_planes.hpp"
+#include "tool_generate_courtyard.hpp"
 
 #include "common/dimension.hpp"
 #include "logger/logger.hpp"
@@ -249,6 +250,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::EDIT_BOARD_HOLE:
         return std::make_unique<ToolEditBoardHole>(this, tool_id);
+
+    case ToolID::GENERATE_COURTYARD:
+        return std::make_unique<ToolGenerateCourtyard>(this, tool_id);
 
     default:
         return nullptr;
