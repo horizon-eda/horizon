@@ -20,6 +20,7 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("tool_bar_stack", tool_bar_stack);
     x->get_widget("tool_bar_tip", tool_bar_tip_label);
     x->get_widget("tool_bar_flash", tool_bar_flash_label);
+    x->get_widget("selection_label", selection_label);
     x->get_widget("header", header);
     x->get_widget("property_scrolled_window", property_scrolled_window);
     x->get_widget("property_throttled_revealer", property_throttled_revealer);

@@ -14,6 +14,7 @@ public:
     Gtk::Box *left_panel = nullptr;
     Gtk::Box *grid_box = nullptr;
     Gtk::Label *grid_mul_label = nullptr;
+    Gtk::Label *selection_label = nullptr;
     Gtk::Viewport *property_viewport = nullptr;
     Gtk::ScrolledWindow *property_scrolled_window = nullptr;
     Gtk::Revealer *property_throttled_revealer = nullptr;

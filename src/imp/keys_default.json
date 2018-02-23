@@ -1360,5 +1360,166 @@
                 "8": []
             },
             "tool": "NONE"
+        },
+        {
+            "action": "SELECTION_TOOL_BOX",
+            "keys": {
+                "1": [],
+                "16": [],
+                "2": [],
+                "255": [
+                    [
+                        {
+                            "key": "S",
+                            "mod": 0
+                        },
+                        {
+                            "key": "b",
+                            "mod": 0
+                        }
+                    ]
+                ],
+                "4": [],
+                "8": []
+            },
+            "tool": "NONE"
+        },
+        {
+            "action": "SELECTION_TOOL_LASSO",
+            "keys": {
+                "1": [],
+                "16": [],
+                "2": [],
+                "255": [
+                    [
+                        {
+                            "key": "S",
+                            "mod": 0
+                        },
+                        {
+                            "key": "l",
+                            "mod": 0
+                        }
+                    ]
+                ],
+                "4": [],
+                "8": []
+            },
+            "tool": "NONE"
+        },
+        {
+            "action": "SELECTION_TOOL_PAINT",
+            "keys": {
+                "1": [],
+                "16": [],
+                "2": [],
+                "255": [
+                    [
+                        {
+                            "key": "S",
+                            "mod": 0
+                        },
+                        {
+                            "key": "p",
+                            "mod": 0
+                        }
+                    ]
+                ],
+                "4": [],
+                "8": []
+            },
+            "tool": "NONE"
+        },
+        {
+            "action": "SELECTION_QUALIFIER_AUTO",
+            "keys": {
+                "1": [],
+                "16": [],
+                "2": [],
+                "255": [
+                    [
+                        {
+                            "key": "S",
+                            "mod": 0
+                        },
+                        {
+                            "key": "a",
+                            "mod": 0
+                        }
+                    ]
+                ],
+                "4": [],
+                "8": []
+            },
+            "tool": "NONE"
+        },
+        {
+            "action": "SELECTION_QUALIFIER_INCLUDE_ORIGIN",
+            "keys": {
+                "1": [],
+                "16": [],
+                "2": [],
+                "255": [
+                    [
+                        {
+                            "key": "S",
+                            "mod": 0
+                        },
+                        {
+                            "key": "o",
+                            "mod": 0
+                        }
+                    ]
+                ],
+                "4": [],
+                "8": []
+            },
+            "tool": "NONE"
+        },
+        {
+            "action": "SELECTION_QUALIFIER_TOUCH_BOX",
+            "keys": {
+                "1": [],
+                "16": [],
+                "2": [],
+                "255": [
+                    [
+                        {
+                            "key": "S",
+                            "mod": 0
+                        },
+                        {
+                            "key": "t",
+                            "mod": 0
+                        }
+                    ]
+                ],
+                "4": [],
+                "8": []
+            },
+            "tool": "NONE"
+        },
+        {
+            "action": "SELECTION_QUALIFIER_INCLUDE_BOX",
+            "keys": {
+                "1": [],
+                "16": [],
+                "2": [],
+                "255": [
+                    [
+                        {
+                            "key": "S",
+                            "mod": 0
+                        },
+                        {
+                            "key": "i",
+                            "mod": 0
+                        }
+                    ]
+                ],
+                "4": [],
+                "8": []
+            },
+            "tool": "NONE"
         }
     ]

@@ -153,6 +153,41 @@ void ImpBase::show_preferences_window()
         main_window->builder->get_widget(#name, name);                                                                 \
     } while (0)
 
+void ImpBase::update_selection_label()
+{
+    std::string la = "Selection (";
+    switch (canvas->selection_tool) {
+    case CanvasGL::SelectionTool::BOX:
+        la += "Box";
+        break;
+
+    case CanvasGL::SelectionTool::LASSO:
+        la += "Lasso";
+        break;
+
+    case CanvasGL::SelectionTool::PAINT:
+        la += "Paint";
+        break;
+    }
+    la += ", ";
+    switch (canvas->selection_qualifier) {
+    case CanvasGL::SelectionQualifier::INCLUDE_BOX:
+        la += "include box";
+        break;
+    case CanvasGL::SelectionQualifier::INCLUDE_ORIGIN:
+        la += "include origin";
+        break;
+    case CanvasGL::SelectionQualifier::TOUCH_BOX:
+        la += "touch box";
+        break;
+    case CanvasGL::SelectionQualifier::AUTO:
+        la += "auto";
+        break;
+    }
+    la += ")";
+    main_window->selection_label->set_text(la);
+}
+
 void ImpBase::run(int argc, char *argv[])
 {
     auto app = Gtk::Application::create(argc, argv, "net.carrotIndustries.horizon.Imp", Gio::APPLICATION_NON_UNIQUE);
@@ -172,13 +207,14 @@ void ImpBase::run(int argc, char *argv[])
     {
         Gtk::RadioButton *selection_tool_box_button, *selection_tool_lasso_button, *selection_tool_paint_button;
         Gtk::RadioButton *selection_qualifier_include_origin_button, *selection_qualifier_touch_box_button,
-                *selection_qualifier_include_box_button;
+                *selection_qualifier_include_box_button, *selection_qualifier_auto_button;
         GET_WIDGET(selection_tool_box_button);
         GET_WIDGET(selection_tool_lasso_button);
         GET_WIDGET(selection_tool_paint_button);
         GET_WIDGET(selection_qualifier_include_origin_button);
         GET_WIDGET(selection_qualifier_touch_box_button);
         GET_WIDGET(selection_qualifier_include_box_button);
+        GET_WIDGET(selection_qualifier_auto_button);
 
         Gtk::Box *selection_qualifier_box;
         GET_WIDGET(selection_qualifier_box);
@@ -186,24 +222,73 @@ void ImpBase::run(int argc, char *argv[])
         std::map<CanvasGL::SelectionQualifier, Gtk::RadioButton *> qual_map = {
                 {CanvasGL::SelectionQualifier::INCLUDE_BOX, selection_qualifier_include_box_button},
                 {CanvasGL::SelectionQualifier::TOUCH_BOX, selection_qualifier_touch_box_button},
-                {CanvasGL::SelectionQualifier::INCLUDE_ORIGIN, selection_qualifier_include_origin_button}};
-        bind_widget(qual_map, canvas->selection_qualifier);
+                {CanvasGL::SelectionQualifier::INCLUDE_ORIGIN, selection_qualifier_include_origin_button},
+                {CanvasGL::SelectionQualifier::AUTO, selection_qualifier_auto_button}};
+        bind_widget<CanvasGL::SelectionQualifier>(qual_map, canvas->selection_qualifier,
+                                                  [this](auto v) { update_selection_label(); });
 
         std::map<CanvasGL::SelectionTool, Gtk::RadioButton *> tool_map = {
                 {CanvasGL::SelectionTool::BOX, selection_tool_box_button},
                 {CanvasGL::SelectionTool::LASSO, selection_tool_lasso_button},
                 {CanvasGL::SelectionTool::PAINT, selection_tool_paint_button},
         };
-        bind_widget(tool_map, canvas->selection_tool);
+        bind_widget<CanvasGL::SelectionTool>(tool_map, canvas->selection_tool,
+                                             [this, selection_qualifier_touch_box_button, selection_qualifier_box,
+                                              selection_qualifier_auto_button,
+                                              selection_qualifier_include_origin_button](auto v) {
+                                                 update_selection_label();
+                                                 auto is_paint = (v == CanvasGL::SelectionTool::PAINT);
+                                                 if (is_paint) {
+                                                     selection_qualifier_touch_box_button->set_active(true);
+                                                 }
+                                                 selection_qualifier_box->set_sensitive(!is_paint);
 
-        selection_tool_paint_button->signal_toggled().connect(
-                [this, selection_tool_paint_button, selection_qualifier_box, selection_qualifier_touch_box_button] {
-                    auto is_paint = selection_tool_paint_button->get_active();
-                    if (is_paint) {
-                        selection_qualifier_touch_box_button->set_active(true);
-                    }
-                    selection_qualifier_box->set_sensitive(!is_paint);
-                });
+                                                 auto is_box = (v == CanvasGL::SelectionTool::BOX);
+                                                 selection_qualifier_auto_button->set_sensitive(is_box);
+                                                 if (is_box)
+                                                     selection_qualifier_auto_button->set_active(true);
+
+                                                 if (v == CanvasGL::SelectionTool::LASSO) {
+                                                     selection_qualifier_include_origin_button->set_active(true);
+                                                 }
+                                             });
+
+        connect_action(ActionID::SELECTION_TOOL_BOX, [this, selection_tool_box_button](const auto &a) {
+            selection_tool_box_button->set_active(true);
+        });
+
+        connect_action(ActionID::SELECTION_TOOL_LASSO, [this, selection_tool_lasso_button](const auto &a) {
+            selection_tool_lasso_button->set_active(true);
+        });
+
+        connect_action(ActionID::SELECTION_TOOL_PAINT, [this, selection_tool_paint_button](const auto &a) {
+            selection_tool_paint_button->set_active(true);
+        });
+
+        connect_action(ActionID::SELECTION_QUALIFIER_AUTO, [this, selection_qualifier_auto_button](const auto &a) {
+            if (canvas->selection_tool == CanvasGL::SelectionTool::BOX)
+                selection_qualifier_auto_button->set_active(true);
+        });
+
+        connect_action(ActionID::SELECTION_QUALIFIER_INCLUDE_BOX,
+                       [this, selection_qualifier_include_box_button](const auto &a) {
+                           if (canvas->selection_tool != CanvasGL::SelectionTool::PAINT)
+                               selection_qualifier_include_box_button->set_active(true);
+                       });
+
+        connect_action(ActionID::SELECTION_QUALIFIER_INCLUDE_ORIGIN,
+                       [this, selection_qualifier_include_origin_button](const auto &a) {
+                           if (canvas->selection_tool != CanvasGL::SelectionTool::PAINT)
+                               selection_qualifier_include_origin_button->set_active(true);
+                       });
+
+        connect_action(ActionID::SELECTION_QUALIFIER_TOUCH_BOX,
+                       [this, selection_qualifier_touch_box_button](const auto &a) {
+                           selection_qualifier_touch_box_button->set_active(true);
+                       });
+
+
+        update_selection_label();
     }
 
     panels = Gtk::manage(new PropertyPanels(core.r));

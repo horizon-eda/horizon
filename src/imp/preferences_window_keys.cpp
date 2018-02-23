@@ -27,7 +27,7 @@ static const std::vector<std::pair<ActionGroup, std::string>> action_groups = {
         {ActionGroup::CLIPBOARD, "Clipboard"}, {ActionGroup::GRAPHICS, "Graphics"}, {ActionGroup::BOARD, "Board"},
         {ActionGroup::SCHEMATIC, "Schematic"}, {ActionGroup::SYMBOL, "Symbol"},     {ActionGroup::PADSTACK, "Padstack"},
         {ActionGroup::PACKAGE, "Package"},     {ActionGroup::UNDO, "Undo"},         {ActionGroup::LAYER, "Layer"},
-        {ActionGroup::UNKNOWN, "Misc"},
+        {ActionGroup::SELECTION, "Selection"}, {ActionGroup::UNKNOWN, "Misc"},
 
 };
 
@@ -190,7 +190,6 @@ CaptureDialog::CaptureDialog(Gtk::Window *parent)
     });
 
     capture_box->signal_key_press_event().connect([this, capture_box](GdkEventKey *ev) {
-        std::cout << "key " << ev->keyval << std::endl;
         if (!ev->is_modifier) {
             auto display = get_display()->gobj();
             auto hw_keycode = ev->hardware_keycode;

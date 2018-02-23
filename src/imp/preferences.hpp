@@ -51,6 +51,7 @@ public:
     std::map<std::pair<ActionID, ToolID>, std::map<ActionCatalogItem::Availability, std::vector<KeySequence2>>> keys;
 
     void load_from_json(const json &j);
+    void append_from_json(const json &j);
     json serialize() const;
 };
 

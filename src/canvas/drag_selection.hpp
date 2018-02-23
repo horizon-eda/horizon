@@ -43,9 +43,11 @@ private:
         GLuint offset_loc;
         GLuint a_loc;
         GLuint b_loc;
+        GLuint fill_loc;
 
         Coordf sel_a;
         Coordf sel_b;
+        bool fill = true;
 
         void update();
     };

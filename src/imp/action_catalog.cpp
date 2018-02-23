@@ -72,6 +72,28 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::VIEW_3D, ToolID::NONE},
          {"3D View", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD, false}},
 
+        {{ActionID::SELECTION_TOOL_BOX, ToolID::NONE},
+         {"Selection tool box", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::SELECTION_TOOL_LASSO, ToolID::NONE},
+         {"Selection tool lasso", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::SELECTION_TOOL_PAINT, ToolID::NONE},
+         {"Selection tool paint", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::SELECTION_QUALIFIER_AUTO, ToolID::NONE},
+         {"Selection qualifier auto", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::SELECTION_QUALIFIER_INCLUDE_BOX, ToolID::NONE},
+         {"Selection qualifier include box", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
+        {{ActionID::SELECTION_QUALIFIER_INCLUDE_ORIGIN, ToolID::NONE},
+         {"Selection qualifier include origin", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          false}},
+
+        {{ActionID::SELECTION_QUALIFIER_TOUCH_BOX, ToolID::NONE},
+         {"Selection qualifier touch box", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
+
         {{ActionID::TOOL, ToolID::MOVE}, {"Move", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, false}},
 
         {{ActionID::TOOL, ToolID::MOVE_EXACTLY},
@@ -299,21 +321,38 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         #x, ActionID::x                                                                                                \
     }
 
-const LutEnumStr<ActionID> action_lut = {
-        ACTION_LUT_ITEM(TOOL),         ACTION_LUT_ITEM(SELECTION_FILTER),
-        ACTION_LUT_ITEM(SAVE),         ACTION_LUT_ITEM(VIEW_3D),
-        ACTION_LUT_ITEM(UNDO),         ACTION_LUT_ITEM(REDO),
-        ACTION_LUT_ITEM(COPY),         ACTION_LUT_ITEM(DUPLICATE),
-        ACTION_LUT_ITEM(PREFERENCES),  ACTION_LUT_ITEM(PLACE_PART),
-        ACTION_LUT_ITEM(HELP),         ACTION_LUT_ITEM(LAYER_UP),
-        ACTION_LUT_ITEM(LAYER_DOWN),   ACTION_LUT_ITEM(LAYER_INNER1),
-        ACTION_LUT_ITEM(LAYER_INNER2), ACTION_LUT_ITEM(LAYER_INNER3),
-        ACTION_LUT_ITEM(LAYER_INNER4), ACTION_LUT_ITEM(LAYER_INNER5),
-        ACTION_LUT_ITEM(LAYER_INNER6), ACTION_LUT_ITEM(LAYER_INNER7),
-        ACTION_LUT_ITEM(LAYER_INNER8), ACTION_LUT_ITEM(LAYER_TOP),
-        ACTION_LUT_ITEM(LAYER_BOTTOM), ACTION_LUT_ITEM(POPOVER),
-        ACTION_LUT_ITEM(VIEW_ALL),
-};
+const LutEnumStr<ActionID> action_lut = {ACTION_LUT_ITEM(TOOL),
+                                         ACTION_LUT_ITEM(SELECTION_FILTER),
+                                         ACTION_LUT_ITEM(SAVE),
+                                         ACTION_LUT_ITEM(VIEW_3D),
+                                         ACTION_LUT_ITEM(UNDO),
+                                         ACTION_LUT_ITEM(REDO),
+                                         ACTION_LUT_ITEM(COPY),
+                                         ACTION_LUT_ITEM(DUPLICATE),
+                                         ACTION_LUT_ITEM(PREFERENCES),
+                                         ACTION_LUT_ITEM(PLACE_PART),
+                                         ACTION_LUT_ITEM(HELP),
+                                         ACTION_LUT_ITEM(LAYER_UP),
+                                         ACTION_LUT_ITEM(LAYER_DOWN),
+                                         ACTION_LUT_ITEM(LAYER_INNER1),
+                                         ACTION_LUT_ITEM(LAYER_INNER2),
+                                         ACTION_LUT_ITEM(LAYER_INNER3),
+                                         ACTION_LUT_ITEM(LAYER_INNER4),
+                                         ACTION_LUT_ITEM(LAYER_INNER5),
+                                         ACTION_LUT_ITEM(LAYER_INNER6),
+                                         ACTION_LUT_ITEM(LAYER_INNER7),
+                                         ACTION_LUT_ITEM(LAYER_INNER8),
+                                         ACTION_LUT_ITEM(LAYER_TOP),
+                                         ACTION_LUT_ITEM(LAYER_BOTTOM),
+                                         ACTION_LUT_ITEM(POPOVER),
+                                         ACTION_LUT_ITEM(VIEW_ALL),
+                                         ACTION_LUT_ITEM(SELECTION_TOOL_BOX),
+                                         ACTION_LUT_ITEM(SELECTION_TOOL_LASSO),
+                                         ACTION_LUT_ITEM(SELECTION_TOOL_PAINT),
+                                         ACTION_LUT_ITEM(SELECTION_QUALIFIER_AUTO),
+                                         ACTION_LUT_ITEM(SELECTION_QUALIFIER_INCLUDE_ORIGIN),
+                                         ACTION_LUT_ITEM(SELECTION_QUALIFIER_TOUCH_BOX),
+                                         ACTION_LUT_ITEM(SELECTION_QUALIFIER_INCLUDE_BOX)};
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
     {                                                                                                                  \

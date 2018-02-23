@@ -127,6 +127,7 @@ private:
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
     void show_preferences_window();
     void handle_drag();
+    void update_selection_label();
 
 
     ActionConnection &connect_action(ActionID action_id, ToolID tool_id,

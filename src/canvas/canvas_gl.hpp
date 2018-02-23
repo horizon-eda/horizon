@@ -24,7 +24,7 @@ public:
     enum class SelectionTool { BOX, LASSO, PAINT };
     SelectionTool selection_tool = SelectionTool::BOX;
 
-    enum class SelectionQualifier { INCLUDE_ORIGIN, INCLUDE_BOX, TOUCH_BOX };
+    enum class SelectionQualifier { INCLUDE_ORIGIN, INCLUDE_BOX, TOUCH_BOX, AUTO };
     SelectionQualifier selection_qualifier = SelectionQualifier::INCLUDE_ORIGIN;
 
     enum class HighlightMode { HIGHLIGHT, DIM, SHADOW };

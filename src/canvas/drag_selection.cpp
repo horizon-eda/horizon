@@ -50,6 +50,7 @@ void DragSelection::Box::realize()
     GET_LOC(this, offset);
     GET_LOC(this, a);
     GET_LOC(this, b);
+    GET_LOC(this, fill);
 }
 
 void DragSelection::Line::create_vao()
@@ -108,6 +109,7 @@ void DragSelection::Box::render()
     glUniform2f(offset_loc, parent->ca->offset.x, parent->ca->offset.y);
     glUniform2f(a_loc, sel_a.x, sel_a.y);
     glUniform2f(b_loc, sel_b.x, sel_b.y);
+    glUniform1i(fill_loc, fill);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
@@ -385,20 +387,31 @@ void DragSelection::Box::update()
     for (auto &it : ca->selectables.items) {
         it.set_flag(Selectable::Flag::PRELIGHT, false);
         if (ca->selection_filter.can_select(ca->selectables.items_ref[i])) {
-            if (ca->selection_qualifier == CanvasGL::SelectionQualifier::INCLUDE_ORIGIN) {
+            auto sq = ca->selection_qualifier;
+
+            if (sq == CanvasGL::SelectionQualifier::AUTO) {
+                if (sel_a.x < sel_b.x)
+                    sq = CanvasGL::SelectionQualifier::INCLUDE_BOX;
+                else
+                    sq = CanvasGL::SelectionQualifier::TOUCH_BOX;
+            }
+
+            if (sq == CanvasGL::SelectionQualifier::INCLUDE_ORIGIN) {
                 if (it.x > xmin && it.x < xmax && it.y > ymin && it.y < ymax) {
                     it.set_flag(Selectable::Flag::PRELIGHT, true);
                 }
+                fill = true;
             }
-            else if (ca->selection_qualifier == CanvasGL::SelectionQualifier::INCLUDE_BOX) {
+            else if (sq == CanvasGL::SelectionQualifier::INCLUDE_BOX) {
                 auto corners = it.get_corners();
                 if (std::all_of(corners.begin(), corners.end(), [xmin, xmax, ymin, ymax](const auto &a) {
                         return a.x > xmin && a.x < xmax && a.y > ymin && a.y < ymax;
                     })) {
                     it.set_flag(Selectable::Flag::PRELIGHT, true);
                 }
+                fill = false;
             }
-            else if (ca->selection_qualifier == CanvasGL::SelectionQualifier::TOUCH_BOX) {
+            else if (sq == CanvasGL::SelectionQualifier::TOUCH_BOX) {
                 // possible optimisation: don't use clipper
                 ClipperLib::Path box(4);
                 box.at(0) = ClipperLib::IntPoint(xmin, ymin);
@@ -422,6 +435,7 @@ void DragSelection::Box::update()
                 if (isect.size()) {
                     it.set_flag(Selectable::Flag::PRELIGHT, true);
                 }
+                fill = true;
             }
         }
         i++;

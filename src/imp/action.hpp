@@ -35,7 +35,14 @@ enum class ActionID {
     PREFERENCES,
     POPOVER,
     HELP,
-    VIEW_ALL
+    VIEW_ALL,
+    SELECTION_TOOL_BOX,
+    SELECTION_TOOL_LASSO,
+    SELECTION_TOOL_PAINT,
+    SELECTION_QUALIFIER_AUTO,
+    SELECTION_QUALIFIER_INCLUDE_ORIGIN,
+    SELECTION_QUALIFIER_TOUCH_BOX,
+    SELECTION_QUALIFIER_INCLUDE_BOX
 };
 
 enum class ActionGroup {
@@ -50,6 +57,7 @@ enum class ActionGroup {
     PADSTACK,
     BOARD,
     LAYER,
+    SELECTION
 };
 
 typedef std::vector<std::pair<int, GdkModifierType>> KeySequence2;
