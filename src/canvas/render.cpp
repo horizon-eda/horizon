@@ -1114,8 +1114,7 @@ void Canvas::render(const BoardPackage &pkg)
     }
     targets.emplace(pkg.uuid, ObjectType::BOARD_PACKAGE, pkg.placement.shift);
     auto bb = pkg.package.get_bbox();
-    selectables.append(pkg.uuid, ObjectType::BOARD_PACKAGE, {0, 0}, bb.first, bb.second, 0,
-                       pkg.flip ? BoardLayers::BOTTOM_PACKAGE : BoardLayers::TOP_PACKAGE);
+    selectables.append(pkg.uuid, ObjectType::BOARD_PACKAGE, {0, 0}, bb.first, bb.second, 0, 10000);
     for (const auto &it : pkg.package.pads) {
         targets.emplace(UUIDPath<2>(pkg.uuid, it.first), ObjectType::PAD,
                         transform.transform(it.second.placement.shift));
