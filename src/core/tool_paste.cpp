@@ -270,7 +270,7 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
         if (args.button == 1) {
             merge_selected_junctions();
             core.r->commit();
-            return ToolResponse::end();
+            return ToolResponse::next(ToolID::PASTE);
         }
         else {
             core.r->revert();
