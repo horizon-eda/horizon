@@ -138,7 +138,7 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::TOOL, ToolID::MIRROR_X},
          {"Mirror X", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
 
-		 {{ActionID::TOOL, ToolID::MIRROR_Y},
+        {{ActionID::TOOL, ToolID::MIRROR_Y},
          {"Mirror Y", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::ROTATE_ARBITRARY},

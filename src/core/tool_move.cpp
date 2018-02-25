@@ -166,9 +166,9 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
 
     if (tool_id == ToolID::ROTATE || tool_id == ToolID::MIRROR_X || tool_id == ToolID::MIRROR_Y) {
         move_mirror_or_rotate(selection_center, tool_id == ToolID::ROTATE);
-        if(tool_id == ToolID::MIRROR_Y) {
-        	move_mirror_or_rotate(selection_center, true);
-        	move_mirror_or_rotate(selection_center, true);
+        if (tool_id == ToolID::MIRROR_Y) {
+            move_mirror_or_rotate(selection_center, true);
+            move_mirror_or_rotate(selection_center, true);
         }
         core.r->commit();
         return ToolResponse::end();
