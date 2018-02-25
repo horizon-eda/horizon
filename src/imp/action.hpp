@@ -46,6 +46,7 @@ enum class ActionID {
 };
 
 enum class ActionGroup {
+    ALL,
     UNKNOWN,
     CLIPBOARD,
     UNDO,

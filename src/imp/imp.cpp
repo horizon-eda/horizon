@@ -15,6 +15,7 @@
 #include "widgets/log_window.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "action_catalog.hpp"
+#include "tool_popover.hpp"
 #include <glibmm/main.h>
 #include <gtkmm.h>
 #include <iomanip>
@@ -421,16 +422,10 @@ void ImpBase::run(int argc, char *argv[])
         }
     }
 
-    tool_popover = Gtk::manage(new ToolPopover(canvas));
+    tool_popover = Gtk::manage(new ToolPopover(canvas, get_editor_type_for_action()));
     tool_popover->set_position(Gtk::POS_BOTTOM);
-    tool_popover->signal_tool_activated().connect([this](ToolID tool_id) {
-        ToolArgs args;
-        args.coords = canvas->get_cursor_pos();
-        args.selection = canvas->get_selection();
-        args.work_layer = canvas->property_work_layer();
-        ToolResponse r = core.r->tool_begin(tool_id, args, imp_interface.get());
-        tool_process(r);
-    });
+    tool_popover->signal_action_activated().connect(
+            [this](ActionID action_id, ToolID tool_id) { trigger_action(std::make_pair(action_id, tool_id)); });
 
 
     preferences.signal_changed().connect(sigc::mem_fun(this, &ImpBase::apply_settings));
@@ -531,7 +526,7 @@ void ImpBase::run(int argc, char *argv[])
 
 bool ImpBase::trigger_action(const std::pair<ActionID, ToolID> &action)
 {
-    if (core.r->tool_is_active() && !action_catalog.at(action).in_tool) {
+    if (core.r->tool_is_active() && !(action_catalog.at(action).flags & ActionCatalogItem::FLAGS_IN_TOOL)) {
         return false;
     }
     auto conn = action_connections.at(action);
@@ -622,8 +617,7 @@ void ImpBase::apply_settings()
     for (const auto &it : action_connections) {
         if (it.second.key_sequences.size()) {
             key_sequence_dialog->add_sequence(it.second.key_sequences, action_catalog.at(it.first).name);
-            if (it.first.first == ActionID::TOOL)
-                tool_popover->set_key_sequences(it.first.second, it.second.key_sequences);
+            tool_popover->set_key_sequences(it.first, it.second.key_sequences);
         }
     }
 }

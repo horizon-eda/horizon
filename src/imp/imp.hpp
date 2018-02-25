@@ -11,7 +11,6 @@
 #include "pool/pool.hpp"
 #include "preferences.hpp"
 #include "selection_filter_dialog.hpp"
-#include "tool_popover.hpp"
 #include "util/window_state_store.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/warnings_box.hpp"
@@ -57,7 +56,7 @@ protected:
     CanvasGL *canvas;
     class PropertyPanels *panels;
     WarningsBox *warnings_box;
-    ToolPopover *tool_popover;
+    class ToolPopover *tool_popover;
     Gtk::Menu *context_menu = nullptr;
     SpinButtonDim *grid_spin_button;
     std::unique_ptr<SelectionFilterDialog> selection_filter_dialog;

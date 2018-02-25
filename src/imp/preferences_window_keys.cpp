@@ -23,14 +23,6 @@ private:
     void update();
 };
 
-static const std::vector<std::pair<ActionGroup, std::string>> action_groups = {
-        {ActionGroup::CLIPBOARD, "Clipboard"}, {ActionGroup::GRAPHICS, "Graphics"}, {ActionGroup::BOARD, "Board"},
-        {ActionGroup::SCHEMATIC, "Schematic"}, {ActionGroup::SYMBOL, "Symbol"},     {ActionGroup::PADSTACK, "Padstack"},
-        {ActionGroup::PACKAGE, "Package"},     {ActionGroup::UNDO, "Undo"},         {ActionGroup::LAYER, "Layer"},
-        {ActionGroup::SELECTION, "Selection"}, {ActionGroup::UNKNOWN, "Misc"},
-
-};
-
 #define GET_WIDGET(name)                                                                                               \
     do {                                                                                                               \
         x->get_widget(#name, name);                                                                                    \
@@ -46,7 +38,7 @@ KeySequencesPreferencesEditor::KeySequencesPreferencesEditor(BaseObjectType *cob
     key_sequences_store = Gtk::TreeStore::create(tree_columns);
     key_sequences_treeview->set_model(key_sequences_store);
 
-    for (const auto &it_gr : action_groups) {
+    for (const auto &it_gr : action_group_catalog) {
         Gtk::TreeModel::Row gr_row = *key_sequences_store->append();
         gr_row[tree_columns.name] = it_gr.second;
         gr_row[tree_columns.action] = std::make_pair(ActionID::NONE, ToolID::NONE);

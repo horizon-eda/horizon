@@ -19,16 +19,20 @@ public:
         AVAILABLE_IN_SCHEMATIC_AND_BOARD = AVAILABLE_IN_SCHEMATIC | AVAILABLE_IN_BOARD
     };
 
-    ActionCatalogItem(const std::string &n, ActionGroup gr, Availability av, bool i = false)
-        : name(n), group(gr), in_tool(i), availability(av){};
+    enum Flags { FLAGS_DEFAULT = 0, FLAGS_IN_TOOL = (1 << 1), FLAGS_NO_POPOVER = (1 << 2) };
+
+    ActionCatalogItem(const std::string &n, ActionGroup gr, Availability av, Flags fl = FLAGS_DEFAULT)
+        : name(n), group(gr), flags(fl), availability(av){};
 
     const std::string name;
     ActionGroup group;
-    const bool in_tool;
+    const Flags flags;
     const Availability availability;
 };
 
 extern const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog;
 extern const LutEnumStr<ActionID> action_lut;
 extern const LutEnumStr<ToolID> tool_lut;
+
+extern const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog;
 } // namespace horizon
