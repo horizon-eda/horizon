@@ -78,4 +78,7 @@ public:
     std::function<void(const ActionConnection &)> cb;
 };
 
+std::pair<ActionID, ToolID> make_action(ActionID id);
+std::pair<ActionID, ToolID> make_action(ToolID id);
+
 } // namespace horizon

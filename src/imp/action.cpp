@@ -24,4 +24,15 @@ std::string key_sequence_to_string(const KeySequence2 &keys)
     rtrim(txt);
     return txt;
 }
+
+std::pair<ActionID, ToolID> make_action(ActionID id)
+{
+    return {id, ToolID::NONE};
+}
+
+std::pair<ActionID, ToolID> make_action(ToolID id)
+{
+    return {ActionID::TOOL, id};
+}
+
 } // namespace horizon

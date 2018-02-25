@@ -35,7 +35,7 @@ public:
 
 std::unique_ptr<Pool> make_pool(const PoolParams &params);
 
-class ImpBase {
+class ImpBase : public sigc::trackable {
     friend class ImpInterface;
 
 public:
@@ -120,6 +120,17 @@ protected:
     void layer_up_down(bool up);
     void goto_layer(int layer);
 
+    Gtk::Button *create_action_button(std::pair<ActionID, ToolID> action);
+
+    void set_action_sensitive(std::pair<ActionID, ToolID>, bool v);
+    bool get_action_sensitive(std::pair<ActionID, ToolID>) const;
+
+    typedef sigc::signal<void> type_signal_action_sensitive;
+    type_signal_action_sensitive signal_action_sensitive()
+    {
+        return s_signal_action_sensitive;
+    }
+
 private:
     void fix_cursor_pos();
     void apply_settings();
@@ -139,5 +150,8 @@ private:
     std::set<SelectableRef> selection_for_drag_move;
     Coordf cursor_pos_drag_begin;
     Coordi cursor_pos_grid_drag_begin;
+
+    std::map<std::pair<ActionID, ToolID>, bool> action_sensitivity;
+    type_signal_action_sensitive s_signal_action_sensitive;
 };
 } // namespace horizon

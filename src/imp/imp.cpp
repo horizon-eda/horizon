@@ -394,18 +394,37 @@ void ImpBase::run(int argc, char *argv[])
     grid_spin_button->show_all();
     main_window->grid_box->pack_start(*grid_spin_button, true, true, 0);
 
-    auto save_button = Gtk::manage(new Gtk::Button("Save"));
-    save_button->signal_clicked().connect([this] { core.r->save(); });
+    auto save_button = create_action_button(make_action(ActionID::SAVE));
     save_button->show();
     main_window->header->pack_start(*save_button);
 
-    auto selection_filter_button = Gtk::manage(new Gtk::Button("Selection filter"));
-    selection_filter_button->signal_clicked().connect([this] { selection_filter_dialog->show(); });
-    selection_filter_button->show();
-    main_window->header->pack_start(*selection_filter_button);
+    {
+        auto undo_redo_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
+        undo_redo_box->get_style_context()->add_class("linked");
 
-    auto help_button = Gtk::manage(new Gtk::Button("Help"));
-    help_button->signal_clicked().connect([this] { trigger_action(ActionID::HELP); });
+        auto undo_button = create_action_button(make_action(ActionID::UNDO));
+        undo_button->set_label("");
+        undo_button->set_tooltip_text("Undo");
+        undo_button->set_image_from_icon_name("edit-undo-symbolic", Gtk::ICON_SIZE_BUTTON);
+        undo_redo_box->pack_start(*undo_button, false, false, 0);
+
+        auto redo_button = create_action_button(make_action(ActionID::REDO));
+        redo_button->set_label("");
+        redo_button->set_tooltip_text("Redo");
+        redo_button->set_image_from_icon_name("edit-redo-symbolic", Gtk::ICON_SIZE_BUTTON);
+        undo_redo_box->pack_start(*redo_button, false, false, 0);
+
+        undo_redo_box->show_all();
+        main_window->header->pack_start(*undo_redo_box);
+
+        core.r->signal_can_undo_redo().connect([this] {
+            set_action_sensitive(make_action(ActionID::UNDO), core.r->can_undo());
+            set_action_sensitive(make_action(ActionID::REDO), core.r->can_redo());
+        });
+        core.r->signal_can_undo_redo().emit();
+    }
+
+    auto help_button = create_action_button(make_action(ActionID::HELP));
     help_button->show();
     main_window->header->pack_end(*help_button);
 
@@ -448,11 +467,6 @@ void ImpBase::run(int argc, char *argv[])
 
     main_window->add_action("view_log", [this] { log_window->present(); });
 
-    core.r->signal_tool_changed().connect([save_button, selection_filter_button](ToolID t) {
-        save_button->set_sensitive(t == ToolID::NONE);
-        selection_filter_button->set_sensitive(t == ToolID::NONE);
-    });
-
     main_window->signal_delete_event().connect(sigc::mem_fun(this, &ImpBase::handle_close));
 
     for (const auto &la : core.r->get_layer_provider()->get_layers()) {
@@ -480,6 +494,8 @@ void ImpBase::run(int argc, char *argv[])
     context_menu = Gtk::manage(new Gtk::Menu());
 
     imp_interface = std::make_unique<ImpInterface>(this);
+
+    core.r->signal_tool_changed().connect([this](ToolID id) { s_signal_action_sensitive.emit(); });
 
     canvas_update();
 
@@ -522,6 +538,16 @@ void ImpBase::run(int argc, char *argv[])
     sc();
 
     app->run(*main_window);
+}
+
+Gtk::Button *ImpBase::create_action_button(std::pair<ActionID, ToolID> action)
+{
+    auto &catitem = action_catalog.at(action);
+    auto button = Gtk::manage(new Gtk::Button(catitem.name));
+    signal_action_sensitive().connect([this, button, action] { button->set_sensitive(get_action_sensitive(action)); });
+    button->signal_clicked().connect([this, action] { trigger_action(action); });
+    button->set_sensitive(get_action_sensitive(action));
+    return button;
 }
 
 bool ImpBase::trigger_action(const std::pair<ActionID, ToolID> &action)
@@ -687,6 +713,22 @@ void ImpBase::add_tool_button(ToolID id, const std::string &label, bool left)
 void ImpBase::add_tool_action(ToolID tid, const std::string &action)
 {
     auto tool_action = main_window->add_action(action, [this, tid] { tool_begin(tid); });
+}
+
+void ImpBase::set_action_sensitive(std::pair<ActionID, ToolID> action, bool v)
+{
+    action_sensitivity[action] = v;
+    s_signal_action_sensitive.emit();
+}
+
+bool ImpBase::get_action_sensitive(std::pair<ActionID, ToolID> action) const
+{
+    if (core.r->tool_is_active())
+        return action_catalog.at(action).flags & ActionCatalogItem::FLAGS_IN_TOOL;
+    if (action_sensitivity.count(action))
+        return action_sensitivity.at(action);
+    else
+        return true;
 }
 
 Glib::RefPtr<Gio::Menu> ImpBase::add_hamburger_menu()

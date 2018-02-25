@@ -289,16 +289,16 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
             r = tool->begin(args);
         }
         catch (const std::exception &e) {
-            s_signal_tool_changed.emit(ToolID::NONE);
             tool.reset();
+            s_signal_tool_changed.emit(ToolID::NONE);
             Logger::log_critical("exception thrown in tool_begin of "
                                          + action_catalog.at({ActionID::TOOL, tool_id}).name,
                                  Logger::Domain::CORE, e.what());
             return ToolResponse::end();
         }
         if (r.end_tool) {
-            s_signal_tool_changed.emit(ToolID::NONE);
             tool.reset();
+            s_signal_tool_changed.emit(ToolID::NONE);
             rebuild();
         }
 
@@ -327,14 +327,14 @@ ToolResponse Core::tool_update(const ToolArgs &args)
             r = tool->update(args);
         }
         catch (const std::exception &e) {
-            s_signal_tool_changed.emit(ToolID::NONE);
             tool.reset();
+            s_signal_tool_changed.emit(ToolID::NONE);
             Logger::log_critical("exception thrown in tool_update", Logger::Domain::CORE, e.what());
             return ToolResponse::end();
         }
         if (r.end_tool) {
-            s_signal_tool_changed.emit(ToolID::NONE);
             tool.reset();
+            s_signal_tool_changed.emit(ToolID::NONE);
             rebuild();
         }
         return r;
@@ -510,6 +510,7 @@ void Core::rebuild(bool from_undo)
         history_current++;
     }
     s_signal_rebuilt.emit();
+    signal_can_undo_redo().emit();
     reverted = false;
 }
 
@@ -519,6 +520,7 @@ void Core::undo()
         history_current--;
         history_load(history_current);
         signal_rebuilt().emit();
+        signal_can_undo_redo().emit();
     }
 }
 
@@ -530,6 +532,17 @@ void Core::redo()
     history_current++;
     history_load(history_current);
     signal_rebuilt().emit();
+    signal_can_undo_redo().emit();
+}
+
+bool Core::can_redo() const
+{
+    return history_current + 1 != (int)history.size();
+}
+
+bool Core::can_undo() const
+{
+    return history_current;
 }
 
 void Core::set_property_begin()

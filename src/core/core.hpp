@@ -294,6 +294,9 @@ public:
     void undo();
     void redo();
 
+    bool can_undo() const;
+    bool can_redo() const;
+
     inline bool tool_is_active()
     {
         return tool != nullptr;
@@ -360,6 +363,11 @@ public:
         return s_signal_save;
     }
 
+    type_signal_rebuilt signal_can_undo_redo()
+    {
+        return s_signal_can_undo_redo;
+    }
+
     typedef sigc::signal<json> type_signal_request_save_meta;
     /**
      * connect to this signal for providing meta information when the document
@@ -411,6 +419,7 @@ protected:
     type_signal_tool_changed s_signal_tool_changed;
     type_signal_rebuilt s_signal_rebuilt;
     type_signal_rebuilt s_signal_save;
+    type_signal_rebuilt s_signal_can_undo_redo;
     type_signal_request_save_meta s_signal_request_save_meta;
     type_signal_needs_save s_signal_needs_save;
     bool needs_save = false;
