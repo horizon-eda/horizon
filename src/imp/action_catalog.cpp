@@ -108,6 +108,23 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Selection qualifier touch box", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::RULES, ToolID::NONE},
+         {"Rules", ActionGroup::RULES,
+          static_cast<ActionCatalogItem::Availability>(ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD
+                                                       | ActionCatalogItem::AVAILABLE_IN_PACKAGE),
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::RULES_APPLY, ToolID::NONE},
+         {"Apply rules", ActionGroup::RULES,
+          static_cast<ActionCatalogItem::Availability>(ActionCatalogItem::AVAILABLE_IN_BOARD),
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::RULES_RUN_CHECKS, ToolID::NONE},
+         {"Run checks", ActionGroup::RULES,
+          static_cast<ActionCatalogItem::Availability>(ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD
+                                                       | ActionCatalogItem::AVAILABLE_IN_PACKAGE),
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::MOVE},
          {"Move", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
 
@@ -386,10 +403,11 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
-        {ActionGroup::CLIPBOARD, "Clipboard"}, {ActionGroup::GRAPHICS, "Graphics"}, {ActionGroup::BOARD, "Board"},
-        {ActionGroup::SCHEMATIC, "Schematic"}, {ActionGroup::SYMBOL, "Symbol"},     {ActionGroup::PADSTACK, "Padstack"},
-        {ActionGroup::PACKAGE, "Package"},     {ActionGroup::UNDO, "Undo"},         {ActionGroup::LAYER, "Layer"},
-        {ActionGroup::SELECTION, "Selection"}, {ActionGroup::UNKNOWN, "Misc"},
+        {ActionGroup::CLIPBOARD, "Clipboard"}, {ActionGroup::GRAPHICS, "Graphics"},   {ActionGroup::MOVE, "Move"},
+        {ActionGroup::BOARD, "Board"},         {ActionGroup::SCHEMATIC, "Schematic"}, {ActionGroup::SYMBOL, "Symbol"},
+        {ActionGroup::PADSTACK, "Padstack"},   {ActionGroup::PACKAGE, "Package"},     {ActionGroup::UNDO, "Undo"},
+        {ActionGroup::LAYER, "Layer"},         {ActionGroup::SELECTION, "Selection"}, {ActionGroup::RULES, "Rules"},
+        {ActionGroup::UNKNOWN, "Misc"},
 
 };
 
@@ -409,6 +427,9 @@ const LutEnumStr<ActionID> action_lut = {ACTION_LUT_ITEM(TOOL),
                                          ACTION_LUT_ITEM(PREFERENCES),
                                          ACTION_LUT_ITEM(PLACE_PART),
                                          ACTION_LUT_ITEM(HELP),
+                                         ACTION_LUT_ITEM(RULES),
+                                         ACTION_LUT_ITEM(RULES_APPLY),
+                                         ACTION_LUT_ITEM(RULES_RUN_CHECKS),
                                          ACTION_LUT_ITEM(LAYER_UP),
                                          ACTION_LUT_ITEM(LAYER_DOWN),
                                          ACTION_LUT_ITEM(LAYER_INNER1),

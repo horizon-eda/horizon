@@ -153,14 +153,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         }
     });
     run_button->signal_clicked().connect(sigc::mem_fun(this, &RulesWindow::run_checks));
-    apply_button->signal_clicked().connect([this] {
-        for (auto &rule : rules->get_rule_ids()) {
-            rules_apply(rules, rule, core);
-        }
-        core->rebuild();
-        s_signal_canvas_update.emit();
-        s_signal_changed.emit();
-    });
+    apply_button->signal_clicked().connect(sigc::mem_fun(this, &RulesWindow::apply_rules));
     update_rules_enabled();
 
     check_result_store = Gtk::TreeStore::create(tree_columns);
@@ -214,6 +207,16 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                     }
                 }
             });
+}
+
+void RulesWindow::apply_rules()
+{
+    for (auto &rule : rules->get_rule_ids()) {
+        rules_apply(rules, rule, core);
+    }
+    core->rebuild();
+    s_signal_canvas_update.emit();
+    s_signal_changed.emit();
 }
 
 void RulesWindow::run_checks()

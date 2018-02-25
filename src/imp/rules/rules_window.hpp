@@ -25,6 +25,9 @@ public:
         return s_signal_canvas_update;
     }
 
+    void run_checks();
+    void apply_rules();
+
 private:
     Gtk::ListBox *lb_rules = nullptr;
     Gtk::ListBox *lb_multi = nullptr;
@@ -44,7 +47,7 @@ private:
     void update_rule_instances(RuleID id);
     void update_rule_instance_labels();
     void update_rules_enabled();
-    void run_checks();
+
 
     CanvasGL *canvas = nullptr;
     Rules *rules = nullptr;

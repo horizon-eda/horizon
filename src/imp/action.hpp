@@ -58,7 +58,8 @@ enum class ActionGroup {
     PADSTACK,
     BOARD,
     LAYER,
-    SELECTION
+    SELECTION,
+    RULES
 };
 
 typedef std::vector<std::pair<int, GdkModifierType>> KeySequence2;

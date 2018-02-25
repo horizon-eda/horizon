@@ -435,12 +435,18 @@ void ImpBase::run(int argc, char *argv[])
         rules_window->signal_canvas_update().connect(sigc::mem_fun(this, &ImpBase::canvas_update_from_pp));
         rules_window->signal_changed().connect([this] { core.r->set_needs_save(); });
 
+        connect_action(ActionID::RULES, [this](const auto &conn) { rules_window->present(); });
+        connect_action(ActionID::RULES_RUN_CHECKS, [this](const auto &conn) {
+            rules_window->run_checks();
+            rules_window->present();
+        });
+        connect_action(ActionID::RULES_APPLY, [this](const auto &conn) { rules_window->apply_rules(); });
+
         {
-            auto button = Gtk::manage(new Gtk::Button("Rules..."));
+            auto button = create_action_button(make_action(ActionID::RULES));
+            button->set_label("Rules...");
             main_window->header->pack_start(*button);
             button->show();
-            button->signal_clicked().connect([this] { rules_window->present(); });
-            core.r->signal_tool_changed().connect([button](ToolID t) { button->set_sensitive(t == ToolID::NONE); });
         }
     }
 
