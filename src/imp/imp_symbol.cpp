@@ -26,6 +26,7 @@ void ImpSymbol::construct()
 
     symbol_preview_window = new SymbolPreviewWindow(main_window);
     symbol_preview_window->set_text_placements(core.y->get_symbol(false)->text_placements);
+    symbol_preview_window->signal_changed().connect([this] { core_symbol.set_needs_save(); });
 
     {
         auto button = Gtk::manage(new Gtk::Button("Preview..."));
@@ -42,7 +43,10 @@ void ImpSymbol::construct()
     name_entry = header_button->add_entry("Name");
     name_entry->set_text(core.y->get_symbol()->name);
     name_entry->set_width_chars(core.y->get_symbol()->name.size());
-    name_entry->signal_changed().connect([this, header_button] { header_button->set_label(name_entry->get_text()); });
+    name_entry->signal_changed().connect([this, header_button] {
+        header_button->set_label(name_entry->get_text());
+        core_symbol.set_needs_save();
+    });
 
     core.r->signal_save().connect([this, header_button] {
         auto sym = core.y->get_symbol(false);

@@ -34,7 +34,10 @@ ParameterWindow::ParameterWindow(Gtk::Window *p, std::string *ppc, ParameterSet 
     tv = Gtk::manage(new Gtk::TextView());
     tv->get_buffer()->set_text(*ppc);
     tv->set_monospace(true);
-    tv->get_buffer()->signal_changed().connect([ppc, this] { *ppc = tv->get_buffer()->get_text(); });
+    tv->get_buffer()->signal_changed().connect([ppc, this] {
+        *ppc = tv->get_buffer()->get_text();
+        s_signal_changed.emit();
+    });
     sc->add(*tv);
     tbox->pack_start(*sc, true, true, 0);
     box->pack_start(*tbox, true, true, 0);
@@ -43,6 +46,7 @@ ParameterWindow::ParameterWindow(Gtk::Window *p, std::string *ppc, ParameterSet 
     box->pack_start(*sep, false, false, 0);
 
     parameter_set_editor = Gtk::manage(new ParameterSetEditor(ps));
+    parameter_set_editor->signal_changed().connect([this] { s_signal_changed.emit(); });
     box->pack_start(*parameter_set_editor, false, false, 0);
 
     box2->pack_start(*box, true, true, 0);

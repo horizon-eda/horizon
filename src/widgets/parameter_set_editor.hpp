@@ -1,9 +1,10 @@
 #pragma once
 #include <gtkmm.h>
 #include "parameter/set.hpp"
+#include "util/changeable.hpp"
 
 namespace horizon {
-class ParameterSetEditor : public Gtk::Box {
+class ParameterSetEditor : public Gtk::Box, public Changeable {
     friend class ParameterEditor;
 
 public:

@@ -113,6 +113,7 @@ void RuleEditorClearanceCopper::populate()
                     sp->set_value(rule2->get_clearance(it_col, it_row));
                     sp->signal_value_changed().connect([this, sp, it_row, it_col] {
                         rule2->set_clearance(it_col, it_row, sp->get_value_as_int());
+                        s_signal_updated.emit();
                     });
                     clearance_grid->attach(*sp, left, top, 1, 1);
                     spin_buttons.emplace(std::piecewise_construct, std::forward_as_tuple(top, left),

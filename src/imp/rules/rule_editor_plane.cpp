@@ -55,6 +55,7 @@ void RuleEditorPlane::populate()
     editor->pack_start(*grid, false, false, 0);
 
     auto plane_editor = Gtk::manage(new PlaneEditor(&rule2->settings));
+    plane_editor->signal_changed().connect([this] { s_signal_updated.emit(); });
     plane_editor->show_all();
 
     editor->pack_start(*plane_editor, false, false, 0);

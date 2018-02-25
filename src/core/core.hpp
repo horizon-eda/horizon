@@ -342,6 +342,7 @@ public:
     Pool *m_pool;
 
     bool get_needs_save() const;
+    void set_needs_save();
 
     typedef sigc::signal<void, ToolID> type_signal_tool_changed;
     type_signal_tool_changed signal_tool_changed()

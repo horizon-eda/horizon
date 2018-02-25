@@ -80,11 +80,13 @@ void SymbolPreviewBox::set_placements()
     for (const auto &it : symbol.texts) {
         text_placements[it.second.uuid] = it.second.placement;
     }
+    s_signal_changed.emit();
 }
 
 void SymbolPreviewBox::clear_placements()
 {
     text_placements.clear();
+    s_signal_changed.emit();
 }
 
 std::map<std::tuple<int, bool, UUID>, Placement> SymbolPreviewBox::get_text_placements() const

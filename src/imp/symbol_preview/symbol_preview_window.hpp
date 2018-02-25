@@ -1,10 +1,11 @@
 #pragma once
 #include "util/placement.hpp"
 #include "util/uuid.hpp"
+#include "util/changeable.hpp"
 #include <gtkmm.h>
 
 namespace horizon {
-class SymbolPreviewWindow : public Gtk::Window {
+class SymbolPreviewWindow : public Gtk::Window, public Changeable {
 public:
     SymbolPreviewWindow(Gtk::Window *parent);
     void update(const class Symbol &sym);

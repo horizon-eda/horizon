@@ -2,9 +2,10 @@
 #include "pool/symbol.hpp"
 #include <gtkmm.h>
 #include <utility>
+#include "util/changeable.hpp"
 
 namespace horizon {
-class SymbolPreviewBox : public Gtk::Box {
+class SymbolPreviewBox : public Gtk::Box, public Changeable {
 public:
     SymbolPreviewBox(const std::pair<int, bool> &view);
     void update(const Symbol &sym);

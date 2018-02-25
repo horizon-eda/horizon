@@ -2,12 +2,13 @@
 #include "common/common.hpp"
 #include "rules/rules.hpp"
 #include "util/uuid.hpp"
+#include "util/changeable.hpp"
 #include <array>
 #include <gtkmm.h>
 #include <set>
 namespace horizon {
 
-class RulesWindow : public Gtk::Window {
+class RulesWindow : public Gtk::Window, public Changeable {
 public:
     RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class CanvasGL *ca, class Rules *ru,
                 class Core *c);

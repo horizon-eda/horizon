@@ -31,11 +31,15 @@ public:
         sp = Gtk::manage(new SpinButtonDim());
         sp->set_range(-1e9, 1e9);
         sp->set_value(parent->parameter_set->at(id));
-        sp->signal_value_changed().connect([this] { (*parent->parameter_set)[parameter_id] = sp->get_value_as_int(); });
+        sp->signal_value_changed().connect([this] {
+            (*parent->parameter_set)[parameter_id] = sp->get_value_as_int();
+            parent->s_signal_changed.emit();
+        });
         sp->signal_key_press_event().connect([this](GdkEventKey *ev) {
             if (ev->keyval == GDK_KEY_Return && (ev->state & GDK_SHIFT_MASK)) {
                 sp->activate();
                 parent->s_signal_apply_all.emit(parameter_id);
+                parent->s_signal_changed.emit();
                 return true;
             }
             return false;
@@ -51,8 +55,6 @@ public:
             else {
                 parent->s_signal_activate_last.emit();
             }
-
-
         });
         pack_start(*sp, true, true, 0);
 
@@ -61,6 +63,7 @@ public:
         pack_start(*delete_button, false, false, 0);
         delete_button->signal_clicked().connect([this] {
             parent->parameter_set->erase(parameter_id);
+            parent->s_signal_changed.emit();
             delete this->get_parent();
         });
 
@@ -156,6 +159,7 @@ void ParameterSetEditor::add_or_set_parameter(ParameterID param, int64_t value)
         auto pe = Gtk::manage(new ParameterEditor(param, this));
         listbox->add(*pe);
     }
+    s_signal_changed.emit();
 }
 
 void ParameterSetEditor::update_popover_box()
@@ -177,6 +181,7 @@ void ParameterSetEditor::update_popover_box()
                 (*parameter_set)[id] = 0.5_mm;
                 auto pe = Gtk::manage(new ParameterEditor(id, this));
                 listbox->add(*pe);
+                s_signal_changed.emit();
             });
             popover_box->pack_start(*bu, false, false, 0);
         }

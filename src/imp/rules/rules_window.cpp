@@ -123,6 +123,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             auto la = dynamic_cast<RuleLabel *>(row->get_child());
             rules->remove_rule(la->id, la->uuid);
             update_rule_instances(la->id);
+            s_signal_changed.emit();
         }
     });
 
@@ -130,6 +131,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         rules->add_rule(rule_current);
         update_rule_instances(rule_current);
         lb_multi->select_row(*lb_multi->get_row_at_index(0));
+        s_signal_changed.emit();
     });
 
     button_rule_instance_move_up->signal_clicked().connect([this] {
@@ -138,6 +140,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             auto la = dynamic_cast<RuleLabel *>(row->get_child());
             rules->move_rule(la->id, la->uuid, -1);
             update_rule_instance_labels();
+            s_signal_changed.emit();
         }
     });
     button_rule_instance_move_down->signal_clicked().connect([this] {
@@ -146,6 +149,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             auto la = dynamic_cast<RuleLabel *>(row->get_child());
             rules->move_rule(la->id, la->uuid, 1);
             update_rule_instance_labels();
+            s_signal_changed.emit();
         }
     });
     run_button->signal_clicked().connect(sigc::mem_fun(this, &RulesWindow::run_checks));
@@ -155,6 +159,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         }
         core->rebuild();
         s_signal_canvas_update.emit();
+        s_signal_changed.emit();
     });
     update_rules_enabled();
 
@@ -293,6 +298,7 @@ void RulesWindow::show_editor(RuleEditor *e)
     editor->signal_updated().connect([this] {
         update_rule_instance_labels();
         update_rules_enabled();
+        s_signal_changed.emit();
     });
 }
 

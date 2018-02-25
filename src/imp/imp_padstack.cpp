@@ -32,8 +32,10 @@ void ImpPadstack::construct()
     auto name_entry = header_button->add_entry("Name");
     name_entry->set_text(core_padstack.get_padstack(false)->name);
     name_entry->set_width_chars(core_padstack.get_padstack(false)->name.size());
-    name_entry->signal_changed().connect(
-            [name_entry, header_button] { header_button->set_label(name_entry->get_text()); });
+    name_entry->signal_changed().connect([this, name_entry, header_button] {
+        header_button->set_label(name_entry->get_text());
+        core_padstack.set_needs_save();
+    });
 
     core_padstack.signal_save().connect([this, name_entry, header_button] {
         core_padstack.get_padstack(false)->name = name_entry->get_text();
@@ -50,15 +52,19 @@ void ImpPadstack::construct()
     type_combo->show();
     header_button->add_widget("Type", type_combo);
     type_combo->set_active_id(Padstack::type_lut.lookup_reverse(core_padstack.get_padstack(false)->type));
+    type_combo->signal_changed().connect([this] { core_padstack.set_needs_save(); });
 
     auto parameter_window =
             new ParameterWindow(main_window, &core_padstack.parameter_program_code, &core_padstack.parameter_set);
+    parameter_window->signal_changed().connect([this] { core_padstack.set_needs_save(); });
     {
         auto button = Gtk::manage(new Gtk::Button("Parameters..."));
         main_window->header->pack_start(*button);
         button->show();
         button->signal_clicked().connect([this, parameter_window] { parameter_window->present(); });
     }
+
+
     parameter_window->signal_apply().connect([this, parameter_window] {
         if (core.r->tool_is_active())
             return;

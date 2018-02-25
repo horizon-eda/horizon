@@ -1,9 +1,10 @@
 #pragma once
 #include <gtkmm.h>
 #include <set>
+#include "util/changeable.hpp"
 
 namespace horizon {
-class PlaneEditor : public Gtk::Grid {
+class PlaneEditor : public Gtk::Grid, public Changeable {
 public:
     PlaneEditor(class PlaneSettings *settings, int *priority = nullptr);
     void set_from_rules(bool v);

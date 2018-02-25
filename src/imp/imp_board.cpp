@@ -217,6 +217,7 @@ void ImpBoard::construct()
         auto button = Gtk::manage(new Gtk::Button("Reload netlist"));
         button->signal_clicked().connect([this] {
             core_board.reload_netlist();
+            core_board.set_needs_save();
             canvas_update();
         });
         button->show();

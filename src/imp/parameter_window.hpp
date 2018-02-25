@@ -2,12 +2,13 @@
 #include "common/common.hpp"
 #include "parameter/set.hpp"
 #include "util/uuid.hpp"
+#include "util/changeable.hpp"
 #include <array>
 #include <gtkmm.h>
 #include <set>
 namespace horizon {
 
-class ParameterWindow : public Gtk::Window {
+class ParameterWindow : public Gtk::Window, public Changeable {
 public:
     ParameterWindow(Gtk::Window *p, std::string *ppc, ParameterSet *ps);
     void set_can_apply(bool v);

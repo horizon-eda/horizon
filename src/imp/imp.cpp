@@ -397,6 +397,8 @@ void ImpBase::run(int argc, char *argv[])
     auto save_button = create_action_button(make_action(ActionID::SAVE));
     save_button->show();
     main_window->header->pack_start(*save_button);
+    core.r->signal_needs_save().connect([this](bool v) { set_action_sensitive(make_action(ActionID::SAVE), v); });
+    set_action_sensitive(make_action(ActionID::SAVE), false);
 
     {
         auto undo_redo_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
@@ -431,6 +433,7 @@ void ImpBase::run(int argc, char *argv[])
     if (core.r->get_rules()) {
         rules_window = RulesWindow::create(main_window, canvas, core.r->get_rules(), core.r);
         rules_window->signal_canvas_update().connect(sigc::mem_fun(this, &ImpBase::canvas_update_from_pp));
+        rules_window->signal_changed().connect([this] { core.r->set_needs_save(); });
 
         {
             auto button = Gtk::manage(new Gtk::Button("Rules..."));

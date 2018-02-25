@@ -8,6 +8,7 @@
 #include "pool/part.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
+#include "util/changeable.hpp"
 #include "widgets/chooser_buttons.hpp"
 #include "widgets/pool_browser.hpp"
 #include "widgets/spin_button_dim.hpp"
@@ -27,7 +28,7 @@ void ImpPackage::canvas_update()
     canvas->update(*core_package.get_canvas_data());
 }
 
-class ModelEditor : public Gtk::Box {
+class ModelEditor : public Gtk::Box, public Changeable {
 public:
     ModelEditor(ImpPackage *iimp, const UUID &iuu);
     const UUID uu;
@@ -167,6 +168,7 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
         return false;
     });
     bind_widget(entry, model.filename);
+    entry->signal_changed().connect([this] { s_signal_changed.emit(); });
 
     {
         auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
@@ -182,6 +184,7 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
                     imp->core_package.default_model = UUID();
                 }
             }
+            s_signal_changed.emit();
             update_all();
             delete this->get_parent();
         });
@@ -212,6 +215,7 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
                 imp->current_model = uu;
             }
             imp->view_3d_window->update();
+            s_signal_changed.emit();
             update_all();
         });
         box->pack_start(*default_cb, false, false, 0);
@@ -317,7 +321,10 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
         sp_yaw = sp;
     }
     for (auto sp : placement_spin_buttons) {
-        sp->signal_value_changed().connect([this] { imp->view_3d_window->update(); });
+        sp->signal_value_changed().connect([this] {
+            imp->view_3d_window->update();
+            s_signal_changed.emit();
+        });
     }
 
     placement_grid->show_all();
@@ -447,6 +454,7 @@ void ImpPackage::construct()
                 core_package.models.emplace(std::piecewise_construct, std::forward_as_tuple(uu),
                                             std::forward_as_tuple(uu, mfn));
                 auto ed = Gtk::manage(new ModelEditor(this, uu));
+                ed->signal_changed().connect([this] { core_package.set_needs_save(); });
                 models_listbox->append(*ed);
                 ed->show();
                 current_model = uu;
@@ -481,6 +489,7 @@ void ImpPackage::construct()
         current_model = core_package.default_model;
         for (auto &it : core_package.models) {
             auto ed = Gtk::manage(new ModelEditor(this, it.first));
+            ed->signal_changed().connect([this] { core_package.set_needs_save(); });
             models_listbox->append(*ed);
             ed->show();
         }
@@ -501,6 +510,7 @@ void ImpPackage::construct()
 
     auto parameter_window =
             new ParameterWindow(main_window, &core_package.parameter_program_code, &core_package.parameter_set);
+    parameter_window->signal_changed().connect([this] { core_package.set_needs_save(); });
     {
         auto button = Gtk::manage(new Gtk::Button("Parameters..."));
         main_window->header->pack_start(*button);
@@ -609,9 +619,6 @@ void ImpPackage::construct()
     browser_alt_button->get_browser()->set_show_none(true);
     header_button->add_widget("Alternate for", browser_alt_button);
 
-    entry_name->signal_changed().connect(
-            [entry_name, header_button] { header_button->set_label(entry_name->get_text()); });
-
     {
         auto pkg = core_package.get_package(false);
         entry_name->set_text(pkg->name);
@@ -622,6 +629,15 @@ void ImpPackage::construct()
         if (pkg->alternate_for)
             browser_alt_button->property_selected_uuid() = pkg->alternate_for->uuid;
     }
+
+    entry_name->signal_changed().connect([this, entry_name, header_button] {
+        header_button->set_label(entry_name->get_text());
+        core_package.set_needs_save();
+    });
+    entry_manufacturer->signal_changed().connect([this] { core_package.set_needs_save(); });
+    entry_tags->signal_changed().connect([this] { core_package.set_needs_save(); });
+
+    browser_alt_button->property_selected_uuid().signal_changed().connect([this] { core_package.set_needs_save(); });
 
     auto hamburger_menu = add_hamburger_menu();
     hamburger_menu->append("Import DXF", "win.import_dxf");

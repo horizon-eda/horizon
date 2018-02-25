@@ -35,6 +35,7 @@ SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window()
         for (int top = 0; top < 2; top++) {
             std::pair<int, bool> view(left * 90, top);
             auto pv = Gtk::manage(new SymbolPreviewBox(view));
+            pv->signal_changed().connect([this] { s_signal_changed.emit(); });
             previews[view] = pv;
             grid->attach(*pv, left, top, 1, 1);
             pv->show();

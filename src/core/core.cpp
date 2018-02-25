@@ -521,6 +521,7 @@ void Core::undo()
         history_load(history_current);
         signal_rebuilt().emit();
         signal_can_undo_redo().emit();
+        set_needs_save();
     }
 }
 
@@ -533,6 +534,7 @@ void Core::redo()
     history_load(history_current);
     signal_rebuilt().emit();
     signal_can_undo_redo().emit();
+    set_needs_save();
 }
 
 bool Core::can_redo() const
@@ -578,6 +580,11 @@ void Core::set_needs_save(bool v)
         needs_save = v;
         s_signal_needs_save.emit(v);
     }
+}
+
+void Core::set_needs_save()
+{
+    set_needs_save(true);
 }
 
 bool Core::get_needs_save() const

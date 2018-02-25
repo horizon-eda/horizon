@@ -15,6 +15,7 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         sp->set_range(0, 100);
         sp->set_increments(1, 1);
         bind_widget(sp, *priority);
+        sp->signal_changed().connect([this] { s_signal_changed.emit(); });
         grid_attach_label_and_widget(this, "Priority", sp, top);
     }
 
@@ -23,6 +24,7 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         auto sp = Gtk::manage(new SpinButtonDim());
         sp->set_range(0, 10_mm);
         bind_widget(sp, settings->min_width);
+        sp->signal_changed().connect([this] { s_signal_changed.emit(); });
         auto la = grid_attach_label_and_widget(this, "Minimum width", sp, top);
         widgets_from_rules_disable.insert(la);
         widgets_from_rules_disable.insert(sp);
@@ -31,6 +33,7 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         auto sw = Gtk::manage(new Gtk::Switch());
         sw->set_halign(Gtk::ALIGN_START);
         bind_widget(sw, settings->keep_orphans);
+        sw->property_active().signal_changed().connect([this] { s_signal_changed.emit(); });
         auto la = grid_attach_label_and_widget(this, "Keep orphans", sw, top);
         widgets_from_rules_disable.insert(la);
         widgets_from_rules_disable.insert(sw);
@@ -58,7 +61,7 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
                 {PlaneSettings::Style::MITER, b3},
         };
 
-        bind_widget(style_widgets, settings->style);
+        bind_widget<PlaneSettings::Style>(style_widgets, settings->style, [this](auto v) { s_signal_changed.emit(); });
 
         auto la = grid_attach_label_and_widget(this, "Style", box, top);
         widgets_from_rules_disable.insert(la);
@@ -81,7 +84,8 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
                 {PlaneSettings::TextStyle::BBOX, b2},
         };
 
-        bind_widget(style_widgets, settings->text_style);
+        bind_widget<PlaneSettings::TextStyle>(style_widgets, settings->text_style,
+                                              [this](auto v) { s_signal_changed.emit(); });
 
         auto la = grid_attach_label_and_widget(this, "Text style", box, top);
         widgets_from_rules_disable.insert(la);
@@ -104,7 +108,8 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
                 {PlaneSettings::ConnectStyle::THERMAL, b2},
         };
 
-        bind_widget(style_widgets, settings->connect_style);
+        bind_widget<PlaneSettings::ConnectStyle>(style_widgets, settings->connect_style,
+                                                 [this](auto v) { s_signal_changed.emit(); });
 
         b1->signal_toggled().connect(sigc::mem_fun(this, &PlaneEditor::update_thermal));
         b2->signal_toggled().connect(sigc::mem_fun(this, &PlaneEditor::update_thermal));
@@ -117,6 +122,7 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         auto sp = Gtk::manage(new SpinButtonDim());
         sp->set_range(0, 10_mm);
         bind_widget(sp, settings->thermal_gap_width);
+        sp->signal_changed().connect([this] { s_signal_changed.emit(); });
         auto la = grid_attach_label_and_widget(this, "Th. gap", sp, top);
         widgets_from_rules_disable.insert(la);
         widgets_from_rules_disable.insert(sp);
@@ -127,6 +133,7 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         auto sp = Gtk::manage(new SpinButtonDim());
         sp->set_range(0, 10_mm);
         bind_widget(sp, settings->thermal_spoke_width);
+        sp->signal_changed().connect([this] { s_signal_changed.emit(); });
         auto la = grid_attach_label_and_widget(this, "Th. spoke width", sp, top);
         widgets_from_rules_disable.insert(la);
         widgets_from_rules_disable.insert(sp);
