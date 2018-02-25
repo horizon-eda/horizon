@@ -135,6 +135,12 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::TOOL, ToolID::ROTATE},
          {"Rotate", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::MIRROR_X},
+         {"Mirror X", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
+
+		 {{ActionID::TOOL, ToolID::MIRROR_Y},
+         {"Mirror Y", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::ROTATE_ARBITRARY},
          {"Rotate arbitrary", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -465,7 +471,8 @@ const LutEnumStr<ToolID> tool_lut = {TOOL_LUT_ITEM(EDIT_SCHEMATIC_PROPERTIES),
                                      TOOL_LUT_ITEM(DELETE),
                                      TOOL_LUT_ITEM(DRAW_ARC),
                                      TOOL_LUT_ITEM(ROTATE),
-                                     TOOL_LUT_ITEM(MIRROR),
+                                     {"MIRROR", ToolID::MIRROR_X},
+                                     TOOL_LUT_ITEM(MIRROR_Y),
                                      TOOL_LUT_ITEM(MAP_PIN),
                                      TOOL_LUT_ITEM(MAP_SYMBOL),
                                      TOOL_LUT_ITEM(DRAW_NET),

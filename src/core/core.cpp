@@ -66,7 +66,8 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     switch (tool_id) {
     case ToolID::MOVE:
     case ToolID::MOVE_EXACTLY:
-    case ToolID::MIRROR:
+    case ToolID::MIRROR_X:
+    case ToolID::MIRROR_Y:
     case ToolID::ROTATE:
         return std::make_unique<ToolMove>(this, tool_id);
 
