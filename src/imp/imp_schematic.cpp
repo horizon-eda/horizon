@@ -259,9 +259,7 @@ void ImpSchematic::construct()
     });
 
     if (sockets_connected) {
-        auto button = Gtk::manage(new Gtk::Button("To board"));
-        button->set_tooltip_text("Place selected components on board");
-        button->signal_clicked().connect([this] {
+        connect_action(ActionID::TO_BOARD, [this](const auto &conn) {
             json j;
             j["op"] = "to-board";
             j["selection"] = nullptr;
@@ -277,8 +275,24 @@ void ImpSchematic::construct()
             }
             send_json(j);
         });
+        canvas->signal_selection_changed().connect([this] {
+            json req;
+            req["op"] = "has-board";
+            bool has_board = send_json(req);
+            if (!has_board) {
+                set_action_sensitive(make_action(ActionID::TO_BOARD), false);
+                return;
+            }
+
+            auto sel = canvas->get_selection();
+            auto has_sym = std::any_of(sel.begin(), sel.end(),
+                                       [](const auto &x) { return x.type == ObjectType::SCHEMATIC_SYMBOL; });
+            set_action_sensitive(make_action(ActionID::TO_BOARD), has_sym);
+        });
+        set_action_sensitive(make_action(ActionID::TO_BOARD), false);
+        auto button = create_action_button(make_action(ActionID::TO_BOARD));
+        button->set_tooltip_text("Place selected components on board");
         button->show();
-        core.r->signal_tool_changed().connect([button](ToolID t) { button->set_sensitive(t == ToolID::NONE); });
         main_window->header->pack_end(*button);
     }
 
@@ -303,7 +317,7 @@ void ImpSchematic::construct()
         target_drag_begin = Target();
         return false;
     });
-}
+} // namespace horizon
 
 void ImpSchematic::handle_export_pdf()
 {

@@ -358,6 +358,10 @@ json ProjectManagerAppWindow::handle_req(const json &j)
             app->send_json(pid, tx);
         }
     }
+    else if (op == "has-board") {
+        auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
+        return processes.count(project->board_filename) > 0;
+    }
     return nullptr;
 }
 
