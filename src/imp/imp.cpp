@@ -344,12 +344,16 @@ void ImpBase::run(int argc, char *argv[])
         rect.set_y(c.y);
         tool_popover->set_pointing_to(rect);
 
-        std::map<ToolID, bool> can_begin;
+        update_action_sensitivity();
+        std::map<std::pair<ActionID, ToolID>, bool> can_begin;
         auto sel = canvas->get_selection();
         for (const auto &it : action_catalog) {
             if (it.first.first == ActionID::TOOL) {
                 bool r = core.r->tool_can_begin(it.first.second, sel).first;
-                can_begin[it.first.second] = r;
+                can_begin[it.first] = r;
+            }
+            else {
+                can_begin[it.first] = get_action_sensitive(it.first);
             }
         }
         tool_popover->set_can_begin(can_begin);
@@ -397,7 +401,7 @@ void ImpBase::run(int argc, char *argv[])
     auto save_button = create_action_button(make_action(ActionID::SAVE));
     save_button->show();
     main_window->header->pack_start(*save_button);
-    core.r->signal_needs_save().connect([this](bool v) { set_action_sensitive(make_action(ActionID::SAVE), v); });
+    core.r->signal_needs_save().connect([this](bool v) { update_action_sensitivity(); });
     set_action_sensitive(make_action(ActionID::SAVE), false);
 
     {
@@ -418,13 +422,11 @@ void ImpBase::run(int argc, char *argv[])
 
         undo_redo_box->show_all();
         main_window->header->pack_start(*undo_redo_box);
-
-        core.r->signal_can_undo_redo().connect([this] {
-            set_action_sensitive(make_action(ActionID::UNDO), core.r->can_undo());
-            set_action_sensitive(make_action(ActionID::REDO), core.r->can_redo());
-        });
-        core.r->signal_can_undo_redo().emit();
     }
+
+    core.r->signal_can_undo_redo().connect([this] { update_action_sensitivity(); });
+    canvas->signal_selection_changed().connect([this] { update_action_sensitivity(); });
+    core.r->signal_can_undo_redo().emit();
 
     auto help_button = create_action_button(make_action(ActionID::HELP));
     help_button->show();
@@ -738,6 +740,16 @@ bool ImpBase::get_action_sensitive(std::pair<ActionID, ToolID> action) const
         return action_sensitivity.at(action);
     else
         return true;
+}
+
+void ImpBase::update_action_sensitivity()
+{
+    set_action_sensitive(make_action(ActionID::SAVE), core.r->get_needs_save());
+    set_action_sensitive(make_action(ActionID::UNDO), core.r->can_undo());
+    set_action_sensitive(make_action(ActionID::REDO), core.r->can_redo());
+    auto sel = canvas->get_selection();
+    set_action_sensitive(make_action(ActionID::COPY), sel.size() > 0);
+    set_action_sensitive(make_action(ActionID::DUPLICATE), sel.size() > 0);
 }
 
 Glib::RefPtr<Gio::Menu> ImpBase::add_hamburger_menu()

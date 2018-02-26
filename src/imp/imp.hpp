@@ -124,6 +124,7 @@ protected:
 
     void set_action_sensitive(std::pair<ActionID, ToolID>, bool v);
     bool get_action_sensitive(std::pair<ActionID, ToolID>) const;
+    virtual void update_action_sensitivity();
 
     typedef sigc::signal<void> type_signal_action_sensitive;
     type_signal_action_sensitive signal_action_sensitive()

@@ -174,11 +174,12 @@ void ToolPopover::emit_tool_activated()
     }
 }
 
-void ToolPopover::set_can_begin(const std::map<ToolID, bool> &can_begin)
+void ToolPopover::set_can_begin(const std::map<std::pair<ActionID, ToolID>, bool> &can_begin)
 {
     for (auto &it : store->children()) {
-        if (can_begin.count(it[list_columns.tool_id])) {
-            it[list_columns.can_begin] = can_begin.at(it[list_columns.tool_id]);
+        auto k = std::make_pair(it[list_columns.action_id], it[list_columns.tool_id]);
+        if (can_begin.count(k)) {
+            it[list_columns.can_begin] = can_begin.at(k);
         }
         else {
             it[list_columns.can_begin] = true;

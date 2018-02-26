@@ -13,6 +13,7 @@ protected:
     void construct() override;
     bool handle_broadcast(const json &j);
     void handle_maybe_drag();
+    void update_action_sensitivity() override;
 
     ActionCatalogItem::Availability get_editor_type_for_action() const
     {

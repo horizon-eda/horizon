@@ -275,20 +275,6 @@ void ImpSchematic::construct()
             }
             send_json(j);
         });
-        canvas->signal_selection_changed().connect([this] {
-            json req;
-            req["op"] = "has-board";
-            bool has_board = send_json(req);
-            if (!has_board) {
-                set_action_sensitive(make_action(ActionID::TO_BOARD), false);
-                return;
-            }
-
-            auto sel = canvas->get_selection();
-            auto has_sym = std::any_of(sel.begin(), sel.end(),
-                                       [](const auto &x) { return x.type == ObjectType::SCHEMATIC_SYMBOL; });
-            set_action_sensitive(make_action(ActionID::TO_BOARD), has_sym);
-        });
         set_action_sensitive(make_action(ActionID::TO_BOARD), false);
         auto button = create_action_button(make_action(ActionID::TO_BOARD));
         button->set_tooltip_text("Place selected components on board");
@@ -318,6 +304,25 @@ void ImpSchematic::construct()
         return false;
     });
 } // namespace horizon
+
+void ImpSchematic::update_action_sensitivity()
+{
+    if (sockets_connected) {
+        json req;
+        req["op"] = "has-board";
+        bool has_board = send_json(req);
+        if (!has_board) {
+            set_action_sensitive(make_action(ActionID::TO_BOARD), false);
+            return;
+        }
+
+        auto sel = canvas->get_selection();
+        auto has_sym = std::any_of(sel.begin(), sel.end(),
+                                   [](const auto &x) { return x.type == ObjectType::SCHEMATIC_SYMBOL; });
+        set_action_sensitive(make_action(ActionID::TO_BOARD), has_sym);
+    }
+    ImpBase::update_action_sensitivity();
+}
 
 void ImpSchematic::handle_export_pdf()
 {
