@@ -7,6 +7,13 @@
 namespace horizon {
 PropertyPanels::PropertyPanels(Core *c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 16), core(c)
 {
+    signal_key_press_event().connect([this](GdkEventKey *ev) {
+        if (ev->keyval == GDK_KEY_Escape) {
+            reload();
+            return true;
+        }
+        return false;
+    });
 }
 
 void PropertyPanels::update_objects(const std::set<SelectableRef> &selection)
