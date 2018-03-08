@@ -202,6 +202,14 @@ public:
         return false;
     }
 
+    /**
+     * @returns true if this Tool can handle esc by itself
+     */
+    virtual bool handles_esc()
+    {
+        return false;
+    }
+
     virtual ~ToolBase()
     {
     }
@@ -289,6 +297,7 @@ public:
     ToolResponse tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInterface *imp, bool transient = false);
     ToolResponse tool_update(const ToolArgs &args);
     std::pair<bool, bool> tool_can_begin(ToolID tool_id, const std::set<SelectableRef> &selection);
+    bool tool_handles_esc();
     virtual void commit() = 0;
     virtual void revert() = 0;
     virtual void save() = 0;

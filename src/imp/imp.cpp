@@ -804,7 +804,7 @@ bool ImpBase::handle_key_press(GdkEventKey *key_event)
         ToolArgs args;
         args.coords = canvas->get_cursor_pos();
         args.work_layer = canvas->property_work_layer();
-        if (key_event->keyval == GDK_KEY_Escape) {
+        if (!core.r->tool_handles_esc() && key_event->keyval == GDK_KEY_Escape) {
             args.type = ToolEventType::CLICK;
             args.button = 3;
         }

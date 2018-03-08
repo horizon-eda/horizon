@@ -330,18 +330,29 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                 core.c->delete_line_net(temp_line_head->uuid);
                 core.c->delete_line_net(temp_line_mid->uuid);
                 core.r->delete_junction(temp_junc_mid->uuid);
+                if (component_floating)
+                    component_floating->connections.erase(connpath_floating);
+                restart(args.coords);
+                return ToolResponse();
             }
-            core.r->delete_junction(temp_junc_head->uuid);
-            if (component_floating)
-                component_floating->connections.erase(connpath_floating);
-
-            core.c->commit();
-            return ToolResponse::end();
+            else {
+                core.r->delete_junction(temp_junc_head->uuid);
+                core.c->commit();
+                return ToolResponse::end();
+            }
         }
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
-            core.c->revert();
+            if (temp_line_head) {
+                core.c->delete_line_net(temp_line_head->uuid);
+                core.c->delete_line_net(temp_line_mid->uuid);
+                core.r->delete_junction(temp_junc_mid->uuid);
+                if (component_floating)
+                    component_floating->connections.erase(connpath_floating);
+            }
+            core.r->delete_junction(temp_junc_head->uuid);
+            core.c->commit();
             return ToolResponse::end();
         }
         else if (args.key == GDK_KEY_space) {

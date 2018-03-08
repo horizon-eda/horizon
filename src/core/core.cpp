@@ -320,6 +320,14 @@ std::pair<bool, bool> Core::tool_can_begin(ToolID tool_id, const std::set<Select
     return {r, s};
 }
 
+bool Core::tool_handles_esc()
+{
+    if (tool) {
+        return tool->handles_esc();
+    }
+    return false;
+}
+
 ToolResponse Core::tool_update(const ToolArgs &args)
 {
     if (tool) {

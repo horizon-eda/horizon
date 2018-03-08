@@ -523,6 +523,10 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                 if (args.key == GDK_KEY_s) {
                     shove ^= true;
                 }
+                else if (args.key == GDK_KEY_Escape) {
+                    core.r->commit();
+                    return ToolResponse::end();
+                }
             }
             else if (args.type == ToolEventType::CLICK) {
                 wrapper->updateStartItem(args);
@@ -552,6 +556,8 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                         router->StopRouting();
                         imp->canvas_update();
                         state = State::START;
+                        imp->get_highlights().clear();
+                        imp->update_highlights();
                         update_tip();
                         return ToolResponse();
                     }
@@ -567,8 +573,13 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     wrapper->m_startItem = NULL;
                 }
                 else if (args.button == 3) {
-                    core.r->commit();
-                    return ToolResponse::end();
+                    router->StopRouting();
+                    imp->canvas_update();
+                    state = State::START;
+                    imp->get_highlights().clear();
+                    imp->update_highlights();
+                    update_tip();
+                    return ToolResponse();
                 }
             }
             else if (args.type == ToolEventType::LAYER_CHANGE) {
@@ -588,6 +599,11 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     router->ToggleViaPlacement();
                     wrapper->updateEndItem(args);
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
+                }
+                else if (args.key == GDK_KEY_Escape) {
+                    router->StopRouting();
+                    core.r->commit();
+                    return ToolResponse::end();
                 }
             }
         }
@@ -616,13 +632,6 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     router->UpdateSizes(sz);
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
                 }
-            }
-
-            else if (args.key == GDK_KEY_Escape) {
-                core.b->revert();
-                core.b->get_board()->obstacles.clear();
-                core.b->get_board()->track_path.clear();
-                return ToolResponse::end();
             }
         }
     }

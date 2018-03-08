@@ -321,6 +321,9 @@ void ImpSchematic::update_action_sensitivity()
                                    [](const auto &x) { return x.type == ObjectType::SCHEMATIC_SYMBOL; });
         set_action_sensitive(make_action(ActionID::TO_BOARD), has_sym);
     }
+    else {
+        set_action_sensitive(make_action(ActionID::TO_BOARD), false);
+    }
     ImpBase::update_action_sensitivity();
 }
 
