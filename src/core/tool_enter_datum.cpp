@@ -24,6 +24,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
     bool line_mode = false;
     bool pad_mode = false;
     bool net_mode = false;
+    bool text_mode = false;
 
     Accumulator<int64_t> ai;
     Accumulator<Coordi> ac;
@@ -59,7 +60,6 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         }
         if (it.type == ObjectType::PAD) {
             pad_mode = true;
-            ac.accumulate(core.k->get_package()->pads.at(it.uuid).placement.shift);
         }
         if (it.type == ObjectType::NET_LABEL) {
             net_mode = true;
@@ -67,8 +67,11 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         if (it.type == ObjectType::LINE_NET) {
             net_mode = true;
         }
+        if (it.type == ObjectType::TEXT) {
+            text_mode = true;
+        }
     }
-    int m_total = edge_mode + arc_mode + hole_mode + junction_mode + line_mode + pad_mode + net_mode;
+    int m_total = edge_mode + arc_mode + hole_mode + junction_mode + line_mode + pad_mode + net_mode + text_mode;
     if (m_total != 1) {
         return ToolResponse::end();
     }
@@ -234,21 +237,28 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         }
     }
     if (pad_mode) {
-        bool r;
-        Coordi c;
-        std::pair<bool, bool> rc;
-        std::tie(r, c, rc) = imp->dialogs.ask_datum_coord2("Pad position", ac.get());
-
-        if (!r) {
-            return ToolResponse::end();
-        }
+        Pad *pad = nullptr;
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::PAD) {
-                if (rc.first)
-                    core.k->get_package()->pads.at(it.uuid).placement.shift.x = c.x;
-                if (rc.second)
-                    core.k->get_package()->pads.at(it.uuid).placement.shift.y = c.y;
+                pad = &core.k->get_package()->pads.at(it.uuid);
+                break;
             }
+        }
+        if (!pad)
+            return ToolResponse::end();
+        std::string new_text;
+        bool r;
+        std::tie(r, new_text) = imp->dialogs.ask_datum_string("Enter pad name", pad->name);
+        if (r) {
+            for (const auto &it : args.selection) {
+                if (it.type == ObjectType::PAD) {
+                    core.k->get_package()->pads.at(it.uuid).name = new_text;
+                }
+            }
+        }
+        else {
+            core.r->revert();
+            return ToolResponse::end();
         }
     }
     if (net_mode) {
@@ -282,6 +292,31 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         std::tie(r, net_name) = imp->dialogs.ask_datum_string("Enter net name", net->name);
         if (r) {
             net->name = net_name;
+        }
+    }
+    if (text_mode) {
+        Text *text = nullptr;
+        for (const auto &it : args.selection) {
+            if (it.type == ObjectType::TEXT) {
+                text = core.r->get_text(it.uuid);
+                break;
+            }
+        }
+        if (!text)
+            return ToolResponse::end();
+        std::string new_text;
+        bool r;
+        std::tie(r, new_text) = imp->dialogs.ask_datum_string("Enter text", text->text);
+        if (r) {
+            for (const auto &it : args.selection) {
+                if (it.type == ObjectType::TEXT) {
+                    core.r->get_text(it.uuid)->text = new_text;
+                }
+            }
+        }
+        else {
+            core.r->revert();
+            return ToolResponse::end();
         }
     }
 
