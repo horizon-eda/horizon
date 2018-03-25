@@ -53,7 +53,7 @@ public:
 
 protected:
     MainWindow *main_window;
-    CanvasGL *canvas;
+    class CanvasGL *canvas;
     class PropertyPanels *panels;
     WarningsBox *warnings_box;
     class ToolPopover *tool_popover;
