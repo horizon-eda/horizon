@@ -73,7 +73,7 @@ std::deque<MarkerRef> &Markers::get_domain(MarkerDomain dom)
 void Markers::update()
 {
     ca->update_markers();
-    ca->request_push();
+    ca->request_push(CanvasGL::PF_MARKER);
 }
 
 MarkerRenderer::MarkerRenderer(CanvasGL *c, Markers &ma) : ca(c), markers_ref(ma)

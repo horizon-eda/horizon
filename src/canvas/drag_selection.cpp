@@ -230,7 +230,8 @@ void DragSelection::drag_move(GdkEventMotion *motion_event)
             line.vertices.emplace_back(c.x, c.y);
             line.path.emplace_back(c.x, c.y);
             line.update();
-            ca->request_push();
+            ca->request_push(CanvasGL::PF_DRAG_SELECTION);
+            ca->request_push(CanvasGL::PF_SELECTABLES);
         }
         ca->queue_draw();
     }
@@ -254,7 +255,8 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                 }
                 it.set_flag(Selectable::Flag::PRELIGHT, false);
             }
-            ca->request_push();
+            ca->request_push(CanvasGL::PF_DRAG_SELECTION);
+            ca->request_push(CanvasGL::PF_SELECTABLES);
             ca->s_signal_selection_changed.emit();
         }
         else if (active == 1) {
@@ -440,7 +442,8 @@ void DragSelection::Box::update()
         }
         i++;
     }
-    parent->ca->request_push();
+    ca->request_push(CanvasGL::PF_DRAG_SELECTION);
+    ca->request_push(CanvasGL::PF_SELECTABLES);
 }
 
 void DragSelection::Line::update()
@@ -507,6 +510,7 @@ void DragSelection::Line::update()
         }
         i++;
     }
-    parent->ca->request_push();
+    ca->request_push(CanvasGL::PF_DRAG_SELECTION);
+    ca->request_push(CanvasGL::PF_SELECTABLES);
 }
 } // namespace horizon

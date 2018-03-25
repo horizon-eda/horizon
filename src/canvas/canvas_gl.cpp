@@ -381,6 +381,14 @@ void CanvasGL::cursor_move(GdkEvent *motion_event)
 void CanvasGL::request_push()
 {
     needs_push = true;
+    push_filter = PF_ALL;
+    queue_draw();
+}
+
+void CanvasGL::request_push(PushFilter filter)
+{
+    needs_push = true;
+    push_filter = static_cast<PushFilter>(push_filter | filter);
     queue_draw();
 }
 
@@ -407,18 +415,23 @@ void CanvasGL::zoom_to_bbox(const Coordi &a, const Coordi &b)
 void CanvasGL::push()
 {
     GL_CHECK_ERROR
-    selectables_renderer.push();
+    if (push_filter & PF_SELECTABLES)
+        selectables_renderer.push();
     GL_CHECK_ERROR
-    triangle_renderer.push();
-    marker_renderer.push();
-    drag_selection.push();
+    if (push_filter & PF_TRIANGLES)
+        triangle_renderer.push();
+    if (push_filter & PF_MARKER)
+        marker_renderer.push();
+    if (push_filter & PF_DRAG_SELECTION)
+        drag_selection.push();
+    push_filter = PF_NONE;
     GL_CHECK_ERROR
 }
 
 void CanvasGL::update_markers()
 {
     marker_renderer.update();
-    request_push();
+    request_push(PF_MARKER);
 }
 
 Coordf CanvasGL::screen2canvas(const Coordf &p) const
@@ -456,7 +469,7 @@ void CanvasGL::set_selection(const std::set<SelectableRef> &sel, bool emit)
     }
     if (emit)
         s_signal_selection_changed.emit();
-    request_push();
+    request_push(PF_SELECTABLES);
 }
 
 std::set<SelectableRef> CanvasGL::get_selection_at(const Coordi &c)

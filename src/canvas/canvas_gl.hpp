@@ -133,6 +133,17 @@ private:
     GLuint fbo;
     unsigned int num_samples = 4;
     bool needs_resize = false;
+    enum PushFilter {
+        PF_NONE = 0,
+        PF_TRIANGLES = (1 << 0),
+        PF_CURSOR = (1 << 1),
+        PF_SELECTABLES = (1 << 2),
+        PF_MARKER = (1 << 3),
+        PF_DRAG_SELECTION = (1 << 4),
+        PF_ALL = 0xff
+    };
+    PushFilter push_filter = PF_ALL;
+    void request_push(PushFilter filter);
 
     void resize_buffers();
 
