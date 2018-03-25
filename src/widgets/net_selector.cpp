@@ -2,9 +2,10 @@
 #include <algorithm>
 #include <iostream>
 #include "block/block.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
-NetSelector::NetSelector(Block *b) : Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 16), block(b)
+NetSelector::NetSelector(Block *bl) : Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 16), block(bl)
 {
 
     store = Gtk::ListStore::create(list_columns);
@@ -15,6 +16,14 @@ NetSelector::NetSelector(Block *b) : Gtk::Box(Gtk::Orientation::ORIENTATION_VERT
     view->append_column("fixme", list_columns.name);
     view->get_column(0)->set_sort_column(list_columns.name);
     store->set_sort_column(list_columns.name, Gtk::SORT_ASCENDING);
+    store->set_sort_func(list_columns.name,
+                         [this](const Gtk::TreeModel::iterator &ia, const Gtk::TreeModel::iterator &ib) {
+                             Gtk::TreeModel::Row ra = *ia;
+                             Gtk::TreeModel::Row rb = *ib;
+                             Glib::ustring a = ra[list_columns.name];
+                             Glib::ustring b = rb[list_columns.name];
+                             return strcmp_natural(a, b);
+                         });
     update();
 
     view->signal_row_activated().connect(sigc::mem_fun(this, &NetSelector::row_activated));

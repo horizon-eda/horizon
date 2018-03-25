@@ -1,5 +1,6 @@
 #include "manage_buses.hpp"
 #include "widgets/net_button.hpp"
+#include "util/gtk_util.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>
@@ -72,32 +73,105 @@ private:
     Block *block;
 };
 
+class AddSequenceDialog : public Gtk::Dialog {
+public:
+    AddSequenceDialog(Gtk::Window *parent);
+
+    Gtk::SpinButton *w_start_index = nullptr;
+    Gtk::SpinButton *w_end_index = nullptr;
+    Gtk::Entry *w_text = nullptr;
+};
+
+AddSequenceDialog::AddSequenceDialog(Gtk::Window *parent)
+    : Gtk::Dialog("Add Sequence", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
+{
+    add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
+    add_button("Add", Gtk::ResponseType::RESPONSE_OK);
+    set_default_response(Gtk::ResponseType::RESPONSE_OK);
+    // set_default_size(400, 300);
+
+    auto grid = Gtk::manage(new Gtk::Grid());
+    grid->set_column_spacing(10);
+    grid->set_row_spacing(10);
+    grid->set_margin_bottom(20);
+    grid->set_margin_top(20);
+    grid->set_margin_end(20);
+    grid->set_margin_start(20);
+    grid->set_halign(Gtk::ALIGN_CENTER);
+
+    int top = 0;
+
+    w_start_index = Gtk::manage(new Gtk::SpinButton);
+    w_start_index->set_range(0, 128);
+    w_start_index->set_increments(1, 10);
+    grid_attach_label_and_widget(grid, "First index", w_start_index, top);
+
+    w_end_index = Gtk::manage(new Gtk::SpinButton);
+    w_end_index->set_range(0, 128);
+    w_end_index->set_increments(1, 10);
+    w_end_index->set_value(7);
+    grid_attach_label_and_widget(grid, "Last index", w_end_index, top);
+
+    w_text = Gtk::manage(new Gtk::Entry);
+    w_text->set_text("D$_P");
+    w_text->set_placeholder_text("$ will be replaced by the index");
+
+    auto textbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 5));
+    textbox->pack_start(*w_text, true, true, 0);
+    auto text_la = Gtk::manage(new Gtk::Label("Use $ for placeholder"));
+    text_la->set_xalign(0);
+    text_la->get_style_context()->add_class("dim-label");
+    Pango::AttrList alist;
+    auto attr_scale = Pango::Attribute::create_attr_scale(0.833);
+    alist.insert(attr_scale);
+    text_la->set_attributes(alist);
+    textbox->pack_start(*text_la, true, true, 0);
+
+    auto text_la2 = grid_attach_label_and_widget(grid, "Template", textbox, top);
+    text_la2->set_valign(Gtk::ALIGN_START);
+
+    auto sg = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_VERTICAL);
+    sg->add_widget(*text_la2);
+    sg->add_widget(*w_text);
+
+    get_content_area()->pack_start(*grid, true, true, 0);
+
+    show_all();
+}
 
 class BusEditor : public Gtk::Box {
 public:
     BusEditor(Bus *bu, Block *bl) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), bus(bu), block(bl)
     {
         auto labelbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
-        labelbox->set_margin_start(12);
-        labelbox->set_margin_end(4);
+        labelbox->set_margin_start(10);
+        labelbox->set_margin_end(10);
         labelbox->set_margin_top(4);
         labelbox->set_margin_bottom(4);
         auto la = Gtk::manage(new Gtk::Label("Bus Name"));
+        la->get_style_context()->add_class("dim-label");
         bus_name_entry = Gtk::manage(new Gtk::Entry());
         bus_name_entry->set_text(bus->name);
         bus_name_entry->signal_changed().connect(sigc::mem_fun(this, &BusEditor::bus_name_changed));
         labelbox->pack_start(*la, false, false, 0);
         labelbox->pack_start(*bus_name_entry, true, true, 0);
 
-
-        auto add_member_button = Gtk::manage(new Gtk::Button());
-        add_member_button->set_margin_end(6);
-        add_member_button->set_margin_start(16);
-        add_member_button->set_image_from_icon_name("list-add-symbolic", Gtk::ICON_SIZE_BUTTON);
-        add_member_button->signal_clicked().connect(sigc::mem_fun(this, &BusEditor::bus_add_member));
-        labelbox->pack_start(*add_member_button, false, false, 0);
-
         pack_start(*labelbox, false, false, 0);
+
+        auto buttonbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
+        buttonbox->set_margin_start(10);
+        buttonbox->set_margin_end(10);
+        buttonbox->set_margin_bottom(4);
+
+        auto add_member_button = Gtk::manage(new Gtk::Button("Add member"));
+        add_member_button->signal_clicked().connect(sigc::mem_fun(this, &BusEditor::bus_add_member));
+        buttonbox->pack_start(*add_member_button, false, false, 0);
+
+        auto add_seq_button = Gtk::manage(new Gtk::Button("Add sequence"));
+        add_seq_button->signal_clicked().connect(sigc::mem_fun(this, &BusEditor::bus_add_sequence));
+        buttonbox->pack_start(*add_seq_button, false, false, 0);
+
+        pack_start(*buttonbox, false, false, 0);
 
         auto sc = Gtk::manage(new Gtk::ScrolledWindow());
         listbox = Gtk::manage(new Gtk::ListBox());
@@ -162,6 +236,33 @@ private:
         newnet->is_bussed = true;
         newmember->net = newnet;
         add_row(newmember);
+    }
+    void bus_add_sequence()
+    {
+        auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+        AddSequenceDialog dia(top);
+        if (dia.run() == Gtk::RESPONSE_OK) {
+            int first_index = dia.w_start_index->get_value_as_int();
+            int last_index = dia.w_end_index->get_value_as_int();
+            const std::string templ = dia.w_text->get_text();
+            const auto dollar_pos = templ.find('$');
+            if (dollar_pos == std::string::npos)
+                return;
+            for (int i = first_index; i <= last_index; i++) {
+                std::string netname = templ;
+                netname.replace(dollar_pos, 1, std::to_string(i));
+
+                auto uu = UUID::random();
+                Bus::Member *newmember = &bus->members.emplace(uu, uu).first->second;
+                newmember->name = netname;
+                uu = UUID::random();
+                Net *newnet = block->insert_net();
+                newnet->name = bus->name + "_" + netname;
+                newnet->is_bussed = true;
+                newmember->net = newnet;
+                add_row(newmember);
+            }
+        }
     }
 };
 

@@ -2,6 +2,7 @@
 #include "core_schematic.hpp"
 #include "imp/imp_interface.hpp"
 #include "tool_helper_move.hpp"
+#include "util/util.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -32,7 +33,8 @@ bool ToolPlaceBusRipper::begin_attached()
     }
     if (bus_members.size() == 0)
         return false;
-    std::sort(bus_members.begin(), bus_members.end(), [](auto a, auto b) { return a->name < b->name; });
+    std::sort(bus_members.begin(), bus_members.end(),
+              [](auto a, auto b) { return strcmp_natural(a->name, b->name) < 0; });
     imp->tool_bar_set_tip(
             "<b>LMB:</b>place bus ripper <b>RMB:</b>delete current ripper and "
             "finish <b>e:</b>mirror");
