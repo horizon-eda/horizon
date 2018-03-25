@@ -145,12 +145,85 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         it->show();
     }
     update_thermal();
+
+    {
+        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
+        box->get_style_context()->add_class("linked");
+        auto b1 = Gtk::manage(new Gtk::RadioButton("Solid"));
+        b1->set_mode(false);
+        box->pack_start(*b1, true, true, 0);
+
+        auto b2 = Gtk::manage(new Gtk::RadioButton("Hatch"));
+        b2->set_mode(false);
+        b2->join_group(*b1);
+        box->pack_start(*b2, true, true, 0);
+
+        std::map<PlaneSettings::FillStyle, Gtk::RadioButton *> style_widgets = {
+                {PlaneSettings::FillStyle::SOLID, b1},
+                {PlaneSettings::FillStyle::HATCH, b2},
+        };
+
+        bind_widget<PlaneSettings::FillStyle>(style_widgets, settings->fill_style,
+                                              [this](auto v) { s_signal_changed.emit(); });
+
+        b1->signal_toggled().connect(sigc::mem_fun(this, &PlaneEditor::update_hatch));
+        b2->signal_toggled().connect(sigc::mem_fun(this, &PlaneEditor::update_hatch));
+
+        auto la = grid_attach_label_and_widget(this, "Fill style", box, top);
+        widgets_from_rules_disable.insert(la);
+        widgets_from_rules_disable.insert(box);
+    }
+    {
+        auto sp = Gtk::manage(new SpinButtonDim());
+        sp->set_range(0, 10_mm);
+        bind_widget(sp, settings->hatch_border_width);
+        sp->signal_changed().connect([this] { s_signal_changed.emit(); });
+        auto la = grid_attach_label_and_widget(this, "Hatch border", sp, top);
+        widgets_from_rules_disable.insert(la);
+        widgets_from_rules_disable.insert(sp);
+        widgets_hatch_only.insert(la);
+        widgets_hatch_only.insert(sp);
+    }
+    {
+        auto sp = Gtk::manage(new SpinButtonDim());
+        sp->set_range(0, 10_mm);
+        bind_widget(sp, settings->hatch_line_spacing);
+        sp->signal_changed().connect([this] { s_signal_changed.emit(); });
+        auto la = grid_attach_label_and_widget(this, "Line spacing", sp, top);
+        widgets_from_rules_disable.insert(la);
+        widgets_from_rules_disable.insert(sp);
+        widgets_hatch_only.insert(la);
+        widgets_hatch_only.insert(sp);
+    }
+    {
+        auto sp = Gtk::manage(new SpinButtonDim());
+        sp->set_range(0, 10_mm);
+        bind_widget(sp, settings->hatch_line_width);
+        sp->signal_changed().connect([this] { s_signal_changed.emit(); });
+        auto la = grid_attach_label_and_widget(this, "Line width", sp, top);
+        widgets_from_rules_disable.insert(la);
+        widgets_from_rules_disable.insert(sp);
+        widgets_hatch_only.insert(la);
+        widgets_hatch_only.insert(sp);
+    }
+    for (auto &it : widgets_hatch_only) {
+        it->set_no_show_all();
+        it->show();
+    }
+    update_hatch();
 }
 
 void PlaneEditor::update_thermal()
 {
     for (auto &it : widgets_thermal_only) {
         it->set_visible(settings->connect_style == PlaneSettings::ConnectStyle::THERMAL);
+    }
+}
+
+void PlaneEditor::update_hatch()
+{
+    for (auto &it : widgets_hatch_only) {
+        it->set_visible(settings->fill_style == PlaneSettings::FillStyle::HATCH);
     }
 }
 

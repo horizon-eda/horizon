@@ -27,6 +27,12 @@ public:
     enum class TextStyle { EXPAND, BBOX };
     TextStyle text_style = TextStyle::EXPAND;
 
+    enum class FillStyle { SOLID, HATCH };
+    FillStyle fill_style = FillStyle::SOLID;
+    uint64_t hatch_border_width = 0.5_mm;
+    uint64_t hatch_line_width = 0.2_mm;
+    uint64_t hatch_line_spacing = 0.5_mm;
+
     json serialize() const;
 };
 

@@ -12,7 +12,9 @@ public:
 private:
     class PlaneSettings *settings;
     void update_thermal();
+    void update_hatch();
     std::set<Gtk::Widget *> widgets_from_rules_disable;
     std::set<Gtk::Widget *> widgets_thermal_only;
+    std::set<Gtk::Widget *> widgets_hatch_only;
 };
 } // namespace horizon

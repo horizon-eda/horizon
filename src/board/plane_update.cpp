@@ -215,6 +215,7 @@ void Board::update_plane(Plane *plane, CanvasPatch *ca_ext, CanvasPads *ca_pads_
         out = temp;
     }
 
+    ClipperLib::Paths final;
     ClipperLib::PolyTree tree;
     ClipperLib::ClipperOffset ofs;
     ofs.ArcTolerance = 2e3;
@@ -237,10 +238,80 @@ void Board::update_plane(Plane *plane, CanvasPatch *ca_ext, CanvasPads *ca_pads_
             if (test_result.size())
                 cl_add_spokes.AddPath(spoke, ClipperLib::ptClip, true);
         }
-        cl_add_spokes.Execute(ClipperLib::ctUnion, tree, ClipperLib::pftNonZero);
+        if (plane->settings.fill_style == PlaneSettings::FillStyle::SOLID) {
+            cl_add_spokes.Execute(ClipperLib::ctUnion, tree, ClipperLib::pftNonZero);
+        }
+        else {
+            cl_add_spokes.Execute(ClipperLib::ctUnion, final, ClipperLib::pftNonZero);
+        }
     }
     else {
-        ofs.Execute(tree, plane->settings.min_width / 2);
+        if (plane->settings.fill_style == PlaneSettings::FillStyle::SOLID) {
+            ofs.Execute(tree, plane->settings.min_width / 2);
+        }
+        else {
+            ofs.Execute(final, plane->settings.min_width / 2);
+        }
+    }
+
+    if (plane->settings.fill_style == PlaneSettings::FillStyle::HATCH) {
+        ClipperLib::Paths contracted;
+        {
+            ClipperLib::ClipperOffset cl;
+            cl.ArcTolerance = 2e3;
+            cl.AddPaths(final, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+            cl.Execute(contracted, -1.0 * plane->settings.hatch_border_width);
+        }
+
+        ClipperLib::Paths border;
+        {
+            ClipperLib::Clipper cl;
+            cl.AddPaths(final, ClipperLib::ptSubject, true);
+            cl.AddPaths(contracted, ClipperLib::ptClip, true);
+            cl.Execute(ClipperLib::ctDifference, border, ClipperLib::pftNonZero);
+        }
+
+        std::pair<Coordi, Coordi> bb;
+        bb.first = poly.vertices.front().position;
+        bb.second = bb.first;
+        for (const auto &it : poly.vertices) {
+            bb.first = Coordi::min(bb.first, it.position);
+            bb.second = Coordi::max(bb.second, it.position);
+        }
+        ClipperLib::Paths grid;
+        const int64_t line_width = plane->settings.hatch_line_width;
+        const int64_t line_spacing = plane->settings.hatch_line_spacing;
+
+        for (int64_t x = bb.first.x; x < bb.second.x; x += line_spacing) {
+            ClipperLib::Path line(4);
+            line[0] = {x - line_width / 2, bb.first.y};
+            line[1] = {x + line_width / 2, bb.first.y};
+            line[2] = {x + line_width / 2, bb.second.y};
+            line[3] = {x - line_width / 2, bb.second.y};
+            grid.push_back(line);
+        }
+        for (int64_t y = bb.first.y; y < bb.second.y; y += line_spacing) {
+            ClipperLib::Path line(4);
+            line[0] = {bb.first.x, y + line_width / 2};
+            line[1] = {bb.first.x, y - line_width / 2};
+            line[2] = {bb.second.x, y - line_width / 2};
+            line[3] = {bb.second.x, y + line_width / 2};
+            grid.push_back(line);
+        }
+
+        ClipperLib::Paths grid_isect;
+        {
+            ClipperLib::Clipper cl;
+            cl.AddPaths(grid, ClipperLib::ptSubject, true);
+            cl.AddPaths(final, ClipperLib::ptClip, true);
+            cl.Execute(ClipperLib::ctIntersection, grid_isect, ClipperLib::pftNonZero);
+        }
+        {
+            ClipperLib::Clipper cl;
+            cl.AddPaths(grid_isect, ClipperLib::ptSubject, true);
+            cl.AddPaths(border, ClipperLib::ptClip, true);
+            cl.Execute(ClipperLib::ctUnion, tree, ClipperLib::pftNonZero);
+        }
     }
 
     for (const auto node : tree.Childs) {
