@@ -427,7 +427,7 @@ const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
 
 #define ACTION_LUT_ITEM(x)                                                                                             \
     {                                                                                                                  \
-#x, ActionID::x                                                                                                \
+        #x, ActionID::x                                                                                                \
     }
 
 const LutEnumStr<ActionID> action_lut = {
@@ -471,7 +471,7 @@ const LutEnumStr<ActionID> action_lut = {
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
     {                                                                                                                  \
-#x, ToolID::x                                                                                                  \
+        #x, ToolID::x                                                                                                  \
     }
 
 const LutEnumStr<ToolID> tool_lut = {TOOL_LUT_ITEM(EDIT_SCHEMATIC_PROPERTIES),
