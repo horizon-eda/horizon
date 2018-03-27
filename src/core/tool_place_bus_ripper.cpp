@@ -43,14 +43,18 @@ bool ToolPlaceBusRipper::begin_attached()
 
 void ToolPlaceBusRipper::create_attached()
 {
-    if (ri)
+    bool mirrored = false;
+    if (ri) {
         ri->temp = false;
+        mirrored = ri->mirror;
+    }
     auto uu = UUID::random();
     ri = &core.c->get_sheet()->bus_rippers.emplace(uu, uu).first->second;
     ri->bus = bus;
     ri->temp = true;
     ri->bus_member = bus_members.at(bus_member_current);
     ri->junction = temp;
+    ri->mirror = mirrored;
     bus_member_current++;
     bus_member_current %= bus_members.size();
 }
