@@ -239,6 +239,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Annotate", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::MAP_SYMBOL},
+         {"Place symbol", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::SMASH},
          {"Smash", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -423,7 +427,7 @@ const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
 
 #define ACTION_LUT_ITEM(x)                                                                                             \
     {                                                                                                                  \
-        #x, ActionID::x                                                                                                \
+#x, ActionID::x                                                                                                \
     }
 
 const LutEnumStr<ActionID> action_lut = {
@@ -467,7 +471,7 @@ const LutEnumStr<ActionID> action_lut = {
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
     {                                                                                                                  \
-        #x, ToolID::x                                                                                                  \
+#x, ToolID::x                                                                                                  \
     }
 
 const LutEnumStr<ToolID> tool_lut = {TOOL_LUT_ITEM(EDIT_SCHEMATIC_PROPERTIES),
