@@ -4,6 +4,7 @@
 #include <iostream>
 #include "pool/part.hpp"
 #include "util/util.hpp"
+#include "util/gtk_util.hpp"
 #include <glibmm.h>
 
 namespace horizon {
@@ -130,6 +131,8 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("tv_pads", w_tv_pads);
     x->get_widget("button_map", w_button_map);
     x->get_widget("button_unmap", w_button_unmap);
+    x->get_widget("button_select_pin", w_button_select_pin);
+    x->get_widget("button_select_pads", w_button_select_pads);
     x->get_widget("pin_stat", w_pin_stat);
     x->get_widget("pad_stat", w_pad_stat);
     x->get_widget("parametric", w_parametric);
@@ -266,6 +269,45 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             update_mapped();
             needs_save = true;
         }
+    });
+
+    w_button_select_pin->signal_clicked().connect([this] {
+        auto sel = w_tv_pads->get_selection();
+        auto rows = sel->get_selected_rows();
+        if (rows.size() != 1)
+            return;
+        auto it_pad = pad_store->get_iter(rows.front());
+        Gtk::TreeModel::Row row_pad = *it_pad;
+        auto gate_uuid = row_pad[pad_list_columns.gate_uuid];
+        auto pin_uuid = row_pad[pad_list_columns.pin_uuid];
+        for (auto &it : pin_store->children()) {
+            Gtk::TreeModel::Row row = *it;
+            if (row[pin_list_columns.gate_uuid] == gate_uuid && row[pin_list_columns.pin_uuid] == pin_uuid) {
+                w_tv_pins->get_selection()->select(it);
+                tree_view_scroll_to_selection(w_tv_pins);
+                break;
+            }
+        }
+    });
+
+    w_button_select_pads->signal_clicked().connect([this] {
+        auto sel = w_tv_pins->get_selection();
+        auto rows = sel->get_selected_rows();
+        if (rows.size() != 1)
+            return;
+        auto it_pin = pin_store->get_iter(rows.front());
+        Gtk::TreeModel::Row row_pin = *it_pin;
+        auto gate_uuid = row_pin[pin_list_columns.gate_uuid];
+        auto pin_uuid = row_pin[pin_list_columns.pin_uuid];
+
+        w_tv_pads->get_selection()->unselect_all();
+        for (auto &it : pad_store->children()) {
+            Gtk::TreeModel::Row row = *it;
+            if (row[pad_list_columns.gate_uuid] == gate_uuid && row[pad_list_columns.pin_uuid] == pin_uuid) {
+                w_tv_pads->get_selection()->select(it);
+            }
+        }
+        tree_view_scroll_to_selection(w_tv_pads);
     });
 
     update_mapped();

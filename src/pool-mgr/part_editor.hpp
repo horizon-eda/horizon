@@ -41,6 +41,8 @@ private:
     Gtk::TreeView *w_tv_pads = nullptr;
     Gtk::Button *w_button_map = nullptr;
     Gtk::Button *w_button_unmap = nullptr;
+    Gtk::Button *w_button_select_pin = nullptr;
+    Gtk::Button *w_button_select_pads = nullptr;
     Gtk::Label *w_pin_stat = nullptr;
     Gtk::Label *w_pad_stat = nullptr;
 
