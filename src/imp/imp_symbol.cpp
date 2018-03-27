@@ -42,11 +42,18 @@ void ImpSymbol::construct()
 
     name_entry = header_button->add_entry("Name");
     name_entry->set_text(core.y->get_symbol()->name);
-    name_entry->set_width_chars(core.y->get_symbol()->name.size());
+    name_entry->set_width_chars(std::min<int>(core.y->get_symbol()->name.size(), 20));
     name_entry->signal_changed().connect([this, header_button] {
         header_button->set_label(name_entry->get_text());
         core_symbol.set_needs_save();
     });
+
+    {
+        auto unit_label = Gtk::manage(new Gtk::Label(core.y->get_symbol()->unit->name));
+        unit_label->set_xalign(0);
+        unit_label->set_selectable(true);
+        header_button->add_widget("Unit", unit_label);
+    }
 
     core.r->signal_save().connect([this, header_button] {
         auto sym = core.y->get_symbol(false);
