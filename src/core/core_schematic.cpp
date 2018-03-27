@@ -276,6 +276,10 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
             dynamic_cast<PropertyValueBool &>(value).value = sym->display_directions;
             return true;
 
+        case ObjectProperty::ID::PIN_NAME_DISPLAY:
+            dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(sym->pin_display_mode);
+            return true;
+
         default:
             return false;
         }
@@ -336,6 +340,11 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
         switch (property) {
         case ObjectProperty::ID::DISPLAY_DIRECTIONS:
             sym->display_directions = dynamic_cast<const PropertyValueBool &>(value).value;
+            break;
+
+        case ObjectProperty::ID::PIN_NAME_DISPLAY:
+            sym->pin_display_mode =
+                    static_cast<SchematicSymbol::PinDisplayMode>(dynamic_cast<const PropertyValueInt &>(value).value);
             break;
 
         default:

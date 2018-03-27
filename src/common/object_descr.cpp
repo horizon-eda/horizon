@@ -1,6 +1,7 @@
 #include "object_descr.hpp"
 #include "hole.hpp"
 #include "dimension.hpp"
+#include "schematic/schematic_symbol.hpp"
 #include "pool/symbol.hpp"
 
 namespace horizon {
@@ -48,6 +49,15 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
           "Symbols",
           {
                   {ObjectProperty::ID::DISPLAY_DIRECTIONS, {ObjectProperty::Type::BOOL, "Pin directions", 0}},
+                  {ObjectProperty::ID::PIN_NAME_DISPLAY,
+                   {ObjectProperty::Type::ENUM,
+                    "Pin display",
+                    1,
+                    {
+                            {static_cast<int>(SchematicSymbol::PinDisplayMode::SELECTED_ONLY), "Sel. only"},
+                            {static_cast<int>(SchematicSymbol::PinDisplayMode::BOTH), "Both"},
+                            {static_cast<int>(SchematicSymbol::PinDisplayMode::ALL), "All"},
+                    }}},
           }}},
         {ObjectType::POWER_SYMBOL, {"Power symbol", "Power symbols", {}}},
         {ObjectType::POLYGON_EDGE, {"Polygon edge", "Polygon edges", {}}},
