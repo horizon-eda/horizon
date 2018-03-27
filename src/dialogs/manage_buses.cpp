@@ -1,6 +1,7 @@
 #include "manage_buses.hpp"
 #include "widgets/net_button.hpp"
 #include "util/gtk_util.hpp"
+#include "util/util.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>
@@ -185,7 +186,7 @@ public:
             members_sorted.push_back(&it.second);
         }
         std::sort(members_sorted.begin(), members_sorted.end(),
-                  [](const auto &a, const auto &b) { return a->name < b->name; });
+                  [](const auto &a, const auto &b) { return strcmp_natural(a->name, b->name) < 0; });
 
         sg_entry = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
         sg_button = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
