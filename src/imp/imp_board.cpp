@@ -91,6 +91,8 @@ bool ImpBoard::handle_broadcast(const json &j)
                     components.emplace(uu, type);
                 }
             }
+            highlights.clear();
+            update_highlights();
             ToolArgs args;
             args.coords = canvas->get_cursor_pos();
             args.selection = components;
