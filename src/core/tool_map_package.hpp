@@ -14,5 +14,6 @@ private:
     unsigned int component_index = 0;
     class BoardPackage *pkg = nullptr;
     void place_package(Component *comp, const Coordi &c);
+    void update_tooltip();
 };
 } // namespace horizon

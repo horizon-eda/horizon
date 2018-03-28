@@ -1,6 +1,7 @@
 #include "tool_map_package.hpp"
 #include "core_board.hpp"
 #include "imp/imp_interface.hpp"
+#include "pool/part.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -74,10 +75,7 @@ ToolResponse ToolMapPackage::begin(const ToolArgs &args)
     Component *comp = &brd->block->components.at(selected_component);
     place_package(comp, args.coords);
 
-    imp->tool_bar_set_tip(
-            "<b>LMB:</b>place package <b>RMB:</b>delete current package and "
-            "finish <b>r:</b>rotate <b>e:</b>mirror <b>Space</b>:select "
-            "package");
+    update_tooltip();
 
     return ToolResponse();
 }
@@ -92,6 +90,19 @@ void ToolMapPackage::place_package(Component *comp, const Coordi &c)
     brd->expand(true);
     core.r->selection.clear();
     core.r->selection.emplace(uu, ObjectType::BOARD_PACKAGE);
+    update_tooltip();
+}
+
+void ToolMapPackage::update_tooltip()
+{
+    std::string text =
+            "<b>LMB:</b>place package <b>RMB:</b>delete current package and "
+            "finish <b>r:</b>rotate <b>e:</b>mirror <b>Space</b>:select "
+            "package";
+    if (pkg) {
+        text += " <i>placing package " + pkg->component->refdes + " " + pkg->component->part->get_value() + "</i>";
+    }
+    imp->tool_bar_set_tip(text);
 }
 
 ToolResponse ToolMapPackage::update(const ToolArgs &args)
