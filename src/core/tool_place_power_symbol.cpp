@@ -25,16 +25,21 @@ bool ToolPlacePowerSymbol::begin_attached()
     net = &core.c->get_schematic()->block->nets.at(net_uuid);
     imp->tool_bar_set_tip(
             "<b>LMB:</b>place power symbol <b>RMB:</b>delete current power "
-            "symbol and finish <b>e:</b>mirror");
+            "symbol and finish <b>e:</b>mirror  <b>r:</b>rotate");
     return true;
 }
 
 void ToolPlacePowerSymbol::create_attached()
 {
+    auto old_sym = sym;
     auto uu = UUID::random();
     sym = &core.c->get_sheet()->power_symbols.emplace(uu, uu).first->second;
     sym->net = net;
     sym->junction = temp;
+    if (old_sym) {
+        sym->mirror = old_sym->mirror;
+        sym->orientation = old_sym->orientation;
+    }
     temp->net = net;
 }
 
@@ -121,6 +126,9 @@ bool ToolPlacePowerSymbol::update_attached(const ToolArgs &args)
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_e) {
             sym->mirror ^= true;
+        }
+        else if (args.key == GDK_KEY_r) {
+            sym->orientation = sym->orientation == Orientation::DOWN ? Orientation::UP : Orientation::DOWN;
         }
     }
 
