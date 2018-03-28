@@ -4,6 +4,7 @@
 #include "pool/part.hpp"
 #include "rules/rules_window.hpp"
 #include "widgets/sheet_box.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,
@@ -282,6 +283,8 @@ void ImpSchematic::construct()
         main_window->header->pack_end(*button);
     }
 
+    connect_action(ActionID::MOVE_TO_OTHER_SHEET,
+                   std::bind(&ImpSchematic::handle_move_to_other_sheet, this, std::placeholders::_1));
     grid_spin_button->set_sensitive(false);
 
     rules_window->signal_goto().connect([this](Coordi location, UUID sheet) {
@@ -324,6 +327,8 @@ void ImpSchematic::update_action_sensitivity()
     else {
         set_action_sensitive(make_action(ActionID::TO_BOARD), false);
     }
+    set_action_sensitive(make_action(ActionID::MOVE_TO_OTHER_SHEET), canvas->get_selection().size() > 0);
+
     ImpBase::update_action_sensitivity();
 }
 
@@ -434,4 +439,231 @@ void ImpSchematic::handle_drag()
         target_drag_begin = Target();
     }
 }
+
+class SelectSheetDialog : public Gtk::Dialog {
+public:
+    SelectSheetDialog(const Schematic *sch, const Sheet *skip);
+    UUID selected_sheet;
+
+private:
+    const Schematic *sch;
+};
+
+class MyLabel : public Gtk::Label {
+public:
+    MyLabel(const std::string &txt, const UUID &uu) : Gtk::Label(txt), uuid(uu)
+    {
+        set_xalign(0);
+        property_margin() = 5;
+    }
+
+    const UUID uuid;
+};
+
+SelectSheetDialog::SelectSheetDialog(const Schematic *s, const Sheet *skip)
+    : Gtk::Dialog("Select sheet", Gtk::DIALOG_MODAL | Gtk::DIALOG_USE_HEADER_BAR), sch(s)
+{
+    auto sc = Gtk::manage(new Gtk::ScrolledWindow);
+    sc->set_propagate_natural_height(true);
+    sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+
+    auto lb = Gtk::manage(new Gtk::ListBox);
+    lb->set_selection_mode(Gtk::SELECTION_NONE);
+    lb->set_activate_on_single_click(true);
+    lb->set_header_func(sigc::ptr_fun(header_func_separator));
+    sc->add(*lb);
+
+    std::vector<const Sheet *> sheets;
+    for (const auto &it : sch->sheets) {
+        sheets.push_back(&it.second);
+    }
+    std::sort(sheets.begin(), sheets.end(), [](auto a, auto b) { return a->index < b->index; });
+
+    for (const auto it : sheets) {
+        if (it != skip) {
+            auto la = Gtk::manage(new MyLabel(std::to_string(it->index) + " " + it->name, it->uuid));
+            lb->append(*la);
+        }
+    }
+    lb->signal_row_activated().connect([this](Gtk::ListBoxRow *row) {
+        auto la = dynamic_cast<MyLabel *>(row->get_child());
+        selected_sheet = la->uuid;
+        response(Gtk::RESPONSE_OK);
+    });
+
+    sc->show_all();
+    get_content_area()->set_border_width(0);
+    get_content_area()->pack_start(*sc, true, true, 0);
+}
+
+void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
+{
+    bool added = true;
+    auto selection = canvas->get_selection();
+    // try to find everything that's connected to the selection in some way
+    while (added) {
+        std::set<SelectableRef> new_sel;
+        for (const auto &it : selection) {
+            switch (it.type) {
+            case ObjectType::NET_LABEL: {
+                auto &la = core.c->get_sheet()->net_labels.at(it.uuid);
+                new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
+            } break;
+            case ObjectType::BUS_LABEL: {
+                auto &la = core.c->get_sheet()->bus_labels.at(it.uuid);
+                new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
+            } break;
+            case ObjectType::POWER_SYMBOL: {
+                auto &ps = core.c->get_sheet()->power_symbols.at(it.uuid);
+                new_sel.emplace(ps.junction->uuid, ObjectType::JUNCTION);
+            } break;
+            case ObjectType::BUS_RIPPER: {
+                auto &rip = core.c->get_sheet()->bus_rippers.at(it.uuid);
+                new_sel.emplace(rip.junction->uuid, ObjectType::JUNCTION);
+            } break;
+
+            case ObjectType::LINE_NET: {
+                auto line = &core.c->get_sheet()->net_lines.at(it.uuid);
+                for (auto &it_ft : {line->from, line->to}) {
+                    if (it_ft.is_junc()) {
+                        new_sel.emplace(it_ft.junc->uuid, ObjectType::JUNCTION);
+                    }
+                    else if (it_ft.is_bus_ripper()) {
+                        new_sel.emplace(it_ft.bus_ripper->uuid, ObjectType::BUS_RIPPER);
+                    }
+                    else if (it_ft.is_pin()) {
+                        new_sel.emplace(it_ft.symbol->uuid, ObjectType::SCHEMATIC_SYMBOL);
+                    }
+                }
+            } break;
+
+            case ObjectType::SCHEMATIC_SYMBOL: {
+                auto sym = core.c->get_schematic_symbol(it.uuid);
+                for (const auto &itt : sym->texts) {
+                    new_sel.emplace(itt->uuid, ObjectType::TEXT);
+                }
+            } break;
+
+            default:;
+            }
+        }
+
+        // other direction
+        for (const auto &it : core.c->get_sheet()->net_labels) {
+            if (selection.count(SelectableRef(it.second.junction->uuid, ObjectType::JUNCTION))) {
+                new_sel.emplace(it.first, ObjectType::NET_LABEL);
+            }
+        }
+        for (const auto &it : core.c->get_sheet()->bus_labels) {
+            if (selection.count(SelectableRef(it.second.junction->uuid, ObjectType::JUNCTION))) {
+                new_sel.emplace(it.first, ObjectType::BUS_LABEL);
+            }
+        }
+        for (const auto &it : core.c->get_sheet()->bus_rippers) {
+            if (selection.count(SelectableRef(it.second.junction->uuid, ObjectType::JUNCTION))) {
+                new_sel.emplace(it.first, ObjectType::BUS_RIPPER);
+            }
+        }
+        for (const auto &it : core.c->get_sheet()->power_symbols) {
+            if (selection.count(SelectableRef(it.second.junction->uuid, ObjectType::JUNCTION))) {
+                new_sel.emplace(it.first, ObjectType::POWER_SYMBOL);
+            }
+        }
+        for (const auto &it : core.c->get_sheet()->net_lines) {
+            const auto line = it.second;
+            bool add_line = false;
+            for (auto &it_ft : {line.from, line.to}) {
+                if (it_ft.is_junc()) {
+                    if (selection.count(SelectableRef(it_ft.junc->uuid, ObjectType::JUNCTION))) {
+                        add_line = true;
+                    }
+                }
+                else if (it_ft.is_bus_ripper()) {
+                    if (selection.count(SelectableRef(it_ft.bus_ripper->uuid, ObjectType::BUS_RIPPER))) {
+                        add_line = true;
+                    }
+                }
+                else if (it_ft.is_pin()) {
+                    if (selection.count(SelectableRef(it_ft.symbol->uuid, ObjectType::SCHEMATIC_SYMBOL))) {
+                        add_line = true;
+                    }
+                }
+            }
+            if (add_line) {
+                new_sel.emplace(it.first, ObjectType::LINE_NET);
+            }
+        }
+
+
+        added = false;
+        for (const auto &it : new_sel) {
+            if (selection.insert(it).second) {
+                added = true;
+            }
+        }
+    }
+    canvas->set_selection(selection);
+
+    auto old_sheet = core.c->get_sheet();
+    Sheet *new_sheet = nullptr;
+    {
+        SelectSheetDialog dia(core.c->get_schematic(), old_sheet);
+        dia.set_transient_for(*main_window);
+        if (dia.run() == Gtk::RESPONSE_OK) {
+            new_sheet = &core.c->get_schematic()->sheets.at(dia.selected_sheet);
+        }
+    }
+    if (!new_sheet)
+        return;
+    sheet_box->select_sheet(new_sheet->uuid);
+    assert(core.c->get_sheet() == new_sheet);
+
+    // actually move things to new sheet
+    for (const auto &it : selection) {
+        switch (it.type) {
+        case ObjectType::NET_LABEL: {
+            new_sheet->net_labels.insert(std::make_pair(it.uuid, std::move(old_sheet->net_labels.at(it.uuid))));
+            old_sheet->net_labels.erase(it.uuid);
+        } break;
+        case ObjectType::BUS_LABEL: {
+            new_sheet->bus_labels.insert(std::make_pair(it.uuid, std::move(old_sheet->bus_labels.at(it.uuid))));
+            old_sheet->bus_labels.erase(it.uuid);
+        } break;
+        case ObjectType::BUS_RIPPER: {
+            new_sheet->bus_rippers.insert(std::make_pair(it.uuid, std::move(old_sheet->bus_rippers.at(it.uuid))));
+            old_sheet->bus_rippers.erase(it.uuid);
+        } break;
+        case ObjectType::JUNCTION: {
+            new_sheet->junctions.insert(std::make_pair(it.uuid, std::move(old_sheet->junctions.at(it.uuid))));
+            old_sheet->junctions.erase(it.uuid);
+        } break;
+        case ObjectType::POWER_SYMBOL: {
+            new_sheet->power_symbols.insert(std::make_pair(it.uuid, std::move(old_sheet->power_symbols.at(it.uuid))));
+            old_sheet->power_symbols.erase(it.uuid);
+        } break;
+        case ObjectType::LINE_NET: {
+            new_sheet->net_lines.insert(std::make_pair(it.uuid, std::move(old_sheet->net_lines.at(it.uuid))));
+            old_sheet->net_lines.erase(it.uuid);
+        } break;
+        case ObjectType::SCHEMATIC_SYMBOL: {
+            new_sheet->symbols.insert(std::make_pair(it.uuid, std::move(old_sheet->symbols.at(it.uuid))));
+            old_sheet->symbols.erase(it.uuid);
+        } break;
+        case ObjectType::TEXT: {
+            new_sheet->texts.insert(std::make_pair(it.uuid, std::move(old_sheet->texts.at(it.uuid))));
+            old_sheet->texts.erase(it.uuid);
+        } break;
+
+        default:;
+        }
+    }
+    core.c->get_schematic()->update_refs();
+
+    core.c->commit();
+    core.c->rebuild();
+    canvas_update();
+    canvas->set_selection(selection);
+    tool_begin(ToolID::MOVE);
+}
+
 } // namespace horizon

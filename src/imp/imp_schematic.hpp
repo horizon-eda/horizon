@@ -30,6 +30,7 @@ private:
     void handle_core_rebuilt();
     void handle_tool_change(ToolID id) override;
     void handle_export_pdf();
+    void handle_move_to_other_sheet(const ActionConnection &conn);
     std::string last_pdf_filename;
     UUID part_from_project_manager;
 
