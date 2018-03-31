@@ -14,5 +14,8 @@ public:
     {
         return true;
     }
+
+private:
+    std::set<class Shape *> get_shapes();
 };
 } // namespace horizon

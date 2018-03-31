@@ -7,19 +7,15 @@
 namespace horizon {
 
 class ShapeDialog : public Gtk::Dialog {
+    friend class ShapeEditor;
+
 public:
-    ShapeDialog(Gtk::Window *parent, class Shape *sh);
+    ShapeDialog(Gtk::Window *parent, std::set<class Shape *> sh);
     bool valid = false;
 
 
 private:
-    class Shape *shape = nullptr;
-    Gtk::ComboBoxText *w_form = nullptr;
-    std::vector<std::pair<Gtk::Widget *, Gtk::Widget *>> widgets;
-    Gtk::Grid *grid;
-    void update();
-    class SpinButtonDim *add_dim(const std::string &text, int top);
-
-    void ok_clicked();
+    std::set<class Shape *> shapes;
+    class ShapeEditor *editor = nullptr;
 };
 } // namespace horizon

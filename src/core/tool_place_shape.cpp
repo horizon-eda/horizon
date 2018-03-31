@@ -69,7 +69,7 @@ ToolResponse ToolPlaceShape::update(const ToolArgs &args)
             return ToolResponse::end();
         }
         else if (args.key == GDK_KEY_i) {
-            imp->dialogs.edit_shape(temp);
+            imp->dialogs.edit_shapes({temp});
         }
         else if (args.key == GDK_KEY_r) {
             temp->placement.inc_angle_deg(90);

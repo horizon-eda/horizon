@@ -166,9 +166,9 @@ bool Dialogs::edit_symbol_pin_names(SchematicSymbol *sym)
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_shape(Shape *shape)
+bool Dialogs::edit_shapes(std::set<Shape *> shapes)
 {
-    ShapeDialog dia(parent, shape);
+    ShapeDialog dia(parent, shapes);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 

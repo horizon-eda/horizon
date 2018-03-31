@@ -13,23 +13,27 @@ bool ToolEditShape::can_begin()
 {
     if (!core.a)
         return false;
-    return std::count_if(core.r->selection.begin(), core.r->selection.end(),
-                         [](const auto &x) { return x.type == ObjectType::SHAPE; })
-           == 1;
+    return get_shapes().size() > 0;
+}
+
+std::set<Shape *> ToolEditShape::get_shapes()
+{
+    std::set<Shape *> shapes;
+    for (const auto &it : core.r->selection) {
+        if (it.type == ObjectType::SHAPE) {
+            shapes.emplace(&core.a->get_padstack()->shapes.at(it.uuid));
+        }
+    }
+    return shapes;
 }
 
 ToolResponse ToolEditShape::begin(const ToolArgs &args)
 {
     std::cout << "tool edit shape\n";
 
-    auto padstack = core.a->get_padstack();
+    auto shapes = get_shapes();
 
-    auto uu = std::find_if(core.r->selection.begin(), core.r->selection.end(),
-                           [](const auto &x) { return x.type == ObjectType::SHAPE; })
-                      ->uuid;
-    auto shape = &padstack->shapes.at(uu);
-
-    bool r = imp->dialogs.edit_shape(shape);
+    bool r = imp->dialogs.edit_shapes(shapes);
     if (r) {
         core.r->commit();
     }
