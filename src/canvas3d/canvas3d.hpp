@@ -34,6 +34,7 @@ public:
     bool show_silkscreen = true;
     bool show_substrate = true;
     bool show_models = true;
+    bool show_solder_paste = true;
 
     Color background_top_color;
     Color background_bottom_color;

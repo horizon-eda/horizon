@@ -311,7 +311,7 @@ void Canvas3D::prepare()
         layers[layer].thickness = 0.035;
         layers[layer].color = solder_mask_color;
         layers[layer].alpha = .8;
-        layers[layer].explode_mul = 2;
+        layers[layer].explode_mul = 3;
         prepare_soldermask(layer);
 
         layer = BoardLayers::BOTTOM_MASK;
@@ -319,7 +319,7 @@ void Canvas3D::prepare()
         layers[layer].thickness = 0.035;
         layers[layer].color = solder_mask_color;
         layers[layer].alpha = .8;
-        layers[layer].explode_mul = -2 * n_inner_layers - 2;
+        layers[layer].explode_mul = -2 * n_inner_layers - 3;
         prepare_soldermask(layer);
     }
 
@@ -328,14 +328,30 @@ void Canvas3D::prepare()
         layers[layer].offset = .07;
         layers[layer].thickness = 0.035;
         layers[layer].color = {1, 1, 1};
-        layers[layer].explode_mul = 3;
+        layers[layer].explode_mul = 4;
         prepare_layer(layer);
 
         layer = BoardLayers::BOTTOM_SILKSCREEN;
         layers[layer].offset = -board_thickness - .07;
         layers[layer].thickness = -0.035;
         layers[layer].color = {1, 1, 1};
-        layers[layer].explode_mul = -2 * n_inner_layers - 3;
+        layers[layer].explode_mul = -2 * n_inner_layers - 4;
+        prepare_layer(layer);
+    }
+
+    if (show_solder_paste) {
+        layer = BoardLayers::TOP_PASTE;
+        layers[layer].offset = .036;
+        layers[layer].thickness = 0.035;
+        layers[layer].color = {.7, .7, .7};
+        layers[layer].explode_mul = 2;
+        prepare_layer(layer);
+
+        layer = BoardLayers::BOTTOM_PASTE;
+        layers[layer].offset = -board_thickness;
+        layers[layer].thickness = -0.035;
+        layers[layer].color = {.7, .7, .7};
+        layers[layer].explode_mul = -2 * n_inner_layers - 2;
         prepare_layer(layer);
     }
 

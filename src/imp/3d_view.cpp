@@ -95,6 +95,13 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         canvas->prepare();
     });
 
+    Gtk::Switch *paste_switch;
+    x->get_widget("paste_switch", paste_switch);
+    paste_switch->property_active().signal_changed().connect([this, paste_switch] {
+        canvas->show_solder_paste = paste_switch->get_active();
+        canvas->prepare();
+    });
+
     Gtk::Switch *models_switch;
     x->get_widget("models_switch", models_switch);
     models_switch->property_active().signal_changed().connect([this, models_switch] {

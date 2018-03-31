@@ -145,10 +145,10 @@ void FaceRenderer::render()
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
         glUniformMatrix4fv(proj_loc, 1, GL_FALSE, glm::value_ptr(ca->projmat));
         glUniform3fv(cam_normal_loc, 1, glm::value_ptr(ca->cam_normal));
-        glUniform1f(z_top_loc, ca->layers[BoardLayers::TOP_COPPER].offset + 4 * ca->explode
+        glUniform1f(z_top_loc, ca->layers[BoardLayers::TOP_COPPER].offset + 5 * ca->explode
                                        + ca->layers.at(BoardLayers::TOP_COPPER).thickness);
         glUniform1f(z_bottom_loc, ca->layers[BoardLayers::BOTTOM_COPPER].offset
-                                          + (ca->layers[BoardLayers::BOTTOM_COPPER].explode_mul - 3) * ca->explode);
+                                          + (ca->layers[BoardLayers::BOTTOM_COPPER].explode_mul - 4) * ca->explode);
 
         for (const auto &it : ca->models) {
             if (ca->package_transform_idxs.count(it.first)) {
