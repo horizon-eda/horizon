@@ -51,6 +51,8 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("part_mpn", part_mpn_entry);
     x->get_widget("part_value", part_value_entry);
     x->get_widget("part_manufacturer", part_manufacturer_entry);
+    x->get_widget("part_description", part_description_entry);
+    x->get_widget("part_datasheet", part_datasheet_entry);
     x->get_widget("part_tags", part_tags_entry);
     x->get_widget("part_autofill", part_autofill_button);
     x->get_widget("steps_grid", steps_grid);
@@ -291,6 +293,8 @@ void PartWizard::finish()
     part.attributes[Part::Attribute::MPN] = {false, part_mpn_entry->get_text()};
     part.attributes[Part::Attribute::VALUE] = {false, part_value_entry->get_text()};
     part.attributes[Part::Attribute::MANUFACTURER] = {false, part_manufacturer_entry->get_text()};
+    part.attributes[Part::Attribute::DATASHEET] = {false, part_datasheet_entry->get_text()};
+    part.attributes[Part::Attribute::DESCRIPTION] = {false, part_description_entry->get_text()};
     part.tags = tags_from_string(part_tags_entry->get_text());
 
     entity.manufacturer = part.get_manufacturer();

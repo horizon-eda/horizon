@@ -49,6 +49,8 @@ private:
     Gtk::Entry *part_mpn_entry = nullptr;
     Gtk::Entry *part_value_entry = nullptr;
     Gtk::Entry *part_manufacturer_entry = nullptr;
+    Gtk::Entry *part_datasheet_entry = nullptr;
+    Gtk::Entry *part_description_entry = nullptr;
     Gtk::Entry *part_tags_entry = nullptr;
     Gtk::Button *part_autofill_button = nullptr;
 
