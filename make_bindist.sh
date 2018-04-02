@@ -86,6 +86,8 @@ LIBS=(
 	libTKXCAF.dll\
 	libTKXDESTEP.dll\
 	libTKXSBase.dll\
+	libbrotlicommon.dll\
+	libbrotlidec.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
