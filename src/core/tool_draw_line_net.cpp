@@ -37,6 +37,7 @@ void ToolDrawLineNet::restart(const Coordi &c)
     temp_line_head = nullptr;
     temp_line_mid = nullptr;
     component_floating = nullptr;
+    net_label = nullptr;
     update_tip();
 }
 
@@ -255,6 +256,10 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                 }
                 else { // unknown or no target
                     if (temp_line_mid->from.get_position() == args.coords) {
+                        restart(args.coords);
+                        return ToolResponse();
+                    }
+                    if (net_label) {
                         restart(args.coords);
                         return ToolResponse();
                     }
