@@ -78,7 +78,7 @@ SRC_COMMON = \
 	3rd_party/clipper/clipper.cpp\
 	src/common/dimension.cpp\
 	src/logger/logger.cpp\
-	
+
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += src/util/uuid_win32.cpp
 endif
@@ -343,7 +343,7 @@ SRC_POOL_UTIL = \
 
 SRC_POOL_UPDATE_PARA = \
 	src/pool-update-parametric/pool-update-parametric.cpp\
-	
+
 SRC_PRJ_UTIL = \
 	src/prj-util/util_main.cpp
 
@@ -427,7 +427,7 @@ SRC_POOL_MGR = \
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp
-	
+
 SRC_OCE = \
 	src/util/step_importer.cpp\
 	src/export_step/export_step.cpp\
