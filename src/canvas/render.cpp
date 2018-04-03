@@ -69,6 +69,9 @@ void Canvas::render(const Junction &junc, bool interactive, ObjectType mode)
         else if (junc.connection_count >= 3 && mode == ObjectType::SCHEMATIC) {
             draw_line(junc.position, junc.position + Coordi(0, 1000), c, 0, true, 0.75_mm);
         }
+        else if (junc.has_via && mode == ObjectType::SCHEMATIC) {
+            // nop
+        }
         else {
             draw_cross(junc.position, 0.25_mm, c);
         }
@@ -1008,19 +1011,34 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
         auto pad_width = abs(b.x - a.x);
         auto pad_height = abs(b.y - a.y);
 
-        auto overlay_layer = get_overlay_layer(
-                it.second.padstack.type == Padstack::Type::TOP ? BoardLayers::TOP_COPPER : BoardLayers::BOTTOM_COPPER);
+        std::set<int> text_layers;
+        switch (it.second.padstack.type) {
+        case Padstack::Type::TOP:
+            text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER));
+            break;
+
+        case Padstack::Type::BOTTOM:
+            text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER));
+            break;
+
+        default:
+            text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER));
+            text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER));
+        }
+
 
         set_lod_size(std::min(pad_height, pad_width));
-        if (it.second.net) {
-            draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, overlay_layer, 0,
-                          TextBoxMode::UPPER);
-            draw_text_box(transform, pad_width, pad_height, it.second.net->name, ColorP::WHITE, overlay_layer, 0,
-                          TextBoxMode::LOWER);
-        }
-        else {
-            draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, overlay_layer, 0,
-                          TextBoxMode::FULL);
+        for (const auto overlay_layer : text_layers) {
+            if (it.second.net) {
+                draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, overlay_layer, 0,
+                              TextBoxMode::UPPER);
+                draw_text_box(transform, pad_width, pad_height, it.second.net->name, ColorP::WHITE, overlay_layer, 0,
+                              TextBoxMode::LOWER);
+            }
+            else {
+                draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, overlay_layer, 0,
+                              TextBoxMode::FULL);
+            }
         }
         set_lod_size(-1);
         transform_restore();
