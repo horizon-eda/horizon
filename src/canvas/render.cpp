@@ -522,10 +522,10 @@ void Canvas::render(const Arc &arc, bool interactive)
     float radius1 = sqrt(sq(c.x - b.x) + sq(c.y - b.y));
     float a0 = atan2f(a.y - c.y, a.x - c.x);
     float a1 = atan2f(b.y - c.y, b.x - c.x);
-    draw_arc2(c, radius0, a0, radius1, a1, ColorP::FROM_LAYER, arc.layer, true, arc.width);
+    auto bb = draw_arc2(c, radius0, a0, radius1, a1, ColorP::FROM_LAYER, arc.layer, true, arc.width);
     Coordf t(radius0, radius0);
     if (interactive)
-        selectables.append(arc.uuid, ObjectType::ARC, c, c - t, c + t, 0, arc.layer);
+        selectables.append(arc.uuid, ObjectType::ARC, c, bb.first, bb.second, 0, arc.layer);
 }
 
 void Canvas::render(const SchematicSymbol &sym)
