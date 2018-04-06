@@ -472,6 +472,17 @@ ifeq ($(OS),Windows_NT)
 	LDFLAGS_OCE += -lTKV3d
 endif
 
+SRC_RES_POOL = 
+SRC_RES_PRJ = 
+SRC_RES =
+OBJ_RES = 
+ifeq ($(OS),Windows_NT)
+	SRC_RES_POOL = src/horizon-pool-mgr.rc
+	SRC_RES_PRJ = src/horizon-prj-mgr.rc
+	SRC_RES = $(SRC_RES_POOL) $(SRC_RES_PRJ)
+	OBJ_RES = $(SRC_RES:.rc=.res)
+endif
+
 src/resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=src --generate-dependencies imp.gresource.xml)
 	$(GLIB_COMPILE_RESOURCES) imp.gresource.xml --target=$@ --sourcedir=src --generate-source
 
@@ -490,10 +501,10 @@ horizon-pool-update-parametric: $(OBJ_COMMON) $(SRC_POOL_UPDATE_PARA:.cpp=.o)
 horizon-prj: $(OBJ_COMMON) $(SRC_PRJ_UTIL:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
-horizon-prj-mgr: $(OBJ_COMMON) $(SRC_PRJ_MGR:.cpp=.o)
+horizon-prj-mgr: $(OBJ_COMMON) $(SRC_PRJ_MGR:.cpp=.o) $(SRC_RES_PRJ:.rc=.res)
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 libzmq epoxy) -o $@
 
-horizon-pool-mgr: $(OBJ_COMMON) $(SRC_POOL_MGR:.cpp=.o)
+horizon-pool-mgr: $(OBJ_COMMON) $(SRC_POOL_MGR:.cpp=.o) $(SRC_RES_POOL:.rc=.res)
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy libzmq libcurl libgit2) -o $@
 
 horizon-pgm-test: $(OBJ_COMMON) $(SRC_PGM_TEST:.cpp=.o)
@@ -508,7 +519,10 @@ $(OBJ_ROUTER): %.o: %.cpp
 $(OBJ_OCE): %.o: %.cpp
 	$(CXX) -c $(INC) $(INC_OCE) $(CXXFLAGS) $< -o $@
 
-clean: clean_router clean_oce
+$(OBJ_RES): %.res: %.rc
+	windres $< -O coff -o $@
+
+clean: clean_router clean_oce clean_res
 	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test $(OBJ_ALL:.o=.d) src/resources.cpp src/gitversion.cpp
 
 clean_router:
@@ -517,8 +531,11 @@ clean_router:
 clean_oce:
 	rm -f $(OBJ_OCE) $(OBJ_OCE:.o=.d)
 
+clean_res:
+	rm -f $(OBJ_RES)
+
 -include  $(OBJ_ALL:.o=.d)
 -include  $(OBJ_ROUTER:.o=.d)
 -include  $(OBJ_OCE:.o=.d)
 
-.PHONY: clean clean_router clean_oce
+.PHONY: clean clean_router clean_oce clean_res
