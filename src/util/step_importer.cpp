@@ -161,9 +161,14 @@ static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *col
 
     data.faces->emplace_back();
     auto &face_out = data.faces->back();
-    face_out.color.r = color->Red();
-    face_out.color.g = color->Green();
-    face_out.color.b = color->Blue();
+    if (color) {
+        face_out.color.r = color->Red();
+        face_out.color.g = color->Green();
+        face_out.color.b = color->Blue();
+    }
+    else {
+        face_out.color = {0.5, 0.5, 0.5};
+    }
     face_out.vertices.reserve(triangulation->NbNodes());
 
     for (int i = 1; i <= triangulation->NbNodes(); i++) {
