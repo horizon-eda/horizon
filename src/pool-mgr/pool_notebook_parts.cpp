@@ -71,6 +71,8 @@ void PoolNotebook::handle_create_part_from_part(const UUID &uu)
         part.attributes[Part::Attribute::MPN] = {true, base_part->get_MPN()};
         part.attributes[Part::Attribute::MANUFACTURER] = {true, base_part->get_manufacturer()};
         part.attributes[Part::Attribute::VALUE] = {true, base_part->get_value()};
+        part.attributes[Part::Attribute::DESCRIPTION] = {true, base_part->get_description()};
+        part.attributes[Part::Attribute::DATASHEET] = {true, base_part->get_datasheet()};
         save_json_to_file(fn, part.serialize());
         spawn(PoolManagerProcess::Type::PART, {fn});
     }
