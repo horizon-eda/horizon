@@ -95,16 +95,20 @@ void Canvas::render(const PowerSymbol &sym)
     auto style = sym.net->power_symbol_style;
     switch (style) {
     case Net::PowerSymbolStyle::GND: {
+    	transform_save();
+    	transform.set_angle(orientation_to_angle(sym.orientation)-49152);
         draw_line({0, 0}, {0, -1.25_mm}, c, 0);
         draw_line({-1.25_mm, -1.25_mm}, {1.25_mm, -1.25_mm}, c, 0);
         draw_line({-1.25_mm, -1.25_mm}, {0, -2.5_mm}, c, 0);
         draw_line({1.25_mm, -1.25_mm}, {0, -2.5_mm}, c, 0);
+        selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0, 0}, {-1.25_mm, -2.5_mm}, {1.25_mm, 0_mm});
+        transform_restore();
 
         if (sym.orientation != Orientation::DOWN) {
             draw_error({0, 0}, 2e5, "Unsupported orientation", true);
         }
 
-        selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0, 0}, {-1.25_mm, -2.5_mm}, {1.25_mm, 0_mm});
+
         transform.reset();
 
         int text_angle = 0;
@@ -125,17 +129,20 @@ void Canvas::render(const PowerSymbol &sym)
             draw_error({0, 0}, 2e5, "Unsupported orientation", true);
         }
 
+        transform_save();
+    	transform.set_angle(orientation_to_angle(sym.orientation)-16384);
         if (style == Net::PowerSymbolStyle::ANTENNA) {
-            draw_line({0, 0}, {0, dir * 2.5_mm}, c, 0);
-            draw_line({-1_mm, dir * 1_mm}, {0, dir * 2.5_mm}, c, 0);
-            draw_line({1_mm, dir * 1_mm}, {0, dir * 2.5_mm}, c, 0);
-            selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0, 0}, {-1_mm, dir * 2.5_mm}, {1_mm, 0_mm});
+            draw_line({0, 0}, {0, 2.5_mm}, c, 0);
+            draw_line({-1_mm, 1_mm}, {0, 2.5_mm}, c, 0);
+            draw_line({1_mm, 1_mm}, {0, 2.5_mm}, c, 0);
+            selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0, 0}, {-1_mm, 2.5_mm}, {1_mm, 0_mm});
         }
         else {
-            draw_line({0, 0}, {0, dir * 1_mm}, c, 0);
-            draw_arc({0, dir * 1.75_mm}, 0.75_mm, 0, 2 * M_PI, ColorP::FROM_LAYER, 0, true, 0);
-            selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0, 0}, {-.75_mm, dir * 2.5_mm}, {.75_mm, 0_mm});
+            draw_line({0, 0}, {0, 1_mm}, c, 0);
+            draw_arc({0, 1.75_mm}, 0.75_mm, 0, 2 * M_PI, ColorP::FROM_LAYER, 0, true, 0);
+            selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0, 0}, {-.75_mm, 2.5_mm}, {.75_mm, 0_mm});
         }
+        transform_restore();
 
         transform.reset();
 
@@ -1029,7 +1036,7 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
 
         set_lod_size(std::min(pad_height, pad_width));
         for (const auto overlay_layer : text_layers) {
-            if (it.second.net) {
+            if (it.second.net && it.second.net->name.size() > 0) {
                 draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, overlay_layer, 0,
                               TextBoxMode::UPPER);
                 draw_text_box(transform, pad_width, pad_height, it.second.net->name, ColorP::WHITE, overlay_layer, 0,
