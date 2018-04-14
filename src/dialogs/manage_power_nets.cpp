@@ -3,6 +3,7 @@
 #include <deque>
 #include <algorithm>
 #include "util/gtk_util.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -14,6 +15,11 @@ public:
         entry->set_text(net->name);
         entry->signal_changed().connect([this, entry] { net->name = entry->get_text(); });
         pack_start(*entry, true, true, 0);
+
+        auto style_la = Gtk::manage(new Gtk::Label("Style"));
+        style_la->set_margin_start(4);
+        style_la->get_style_context()->add_class("dim-label");
+        pack_start(*style_la, false, false, 0);
 
         auto combo = Gtk::manage(new Gtk::ComboBoxText);
 
@@ -28,6 +34,7 @@ public:
 
 
         delete_button = Gtk::manage(new Gtk::Button());
+        delete_button->set_margin_start(4);
         delete_button->set_image_from_icon_name("list-remove-symbolic", Gtk::ICON_SIZE_BUTTON);
         delete_button->set_sensitive(net->n_pins_connected == 0 && net->is_power_forced == false);
         pack_start(*delete_button, false, false, 0);
@@ -36,8 +43,8 @@ public:
             delete this->get_parent();
         });
 
-        set_margin_start(4);
-        set_margin_end(4);
+        set_margin_start(8);
+        set_margin_end(8);
         set_margin_top(4);
         set_margin_bottom(4);
         show_all();
@@ -80,12 +87,19 @@ ManagePowerNetsDialog::ManagePowerNetsDialog(Gtk::Window *parent, Block *bl)
     sc->add(*listbox);
     box->pack_start(*sc, true, true, 0);
 
+    std::vector<Net *> nets_sorted;
 
     for (auto &it : block->nets) {
         if (it.second.is_power) {
-            auto ne = Gtk::manage(new PowerNetEditor(&it.second, block));
-            listbox->add(*ne);
+            nets_sorted.push_back(&it.second);
         }
+    }
+    std::sort(nets_sorted.begin(), nets_sorted.end(),
+              [](const auto a, const auto b) { return strcmp_natural(a->name, b->name) < 0; });
+
+    for (auto net : nets_sorted) {
+        auto ne = Gtk::manage(new PowerNetEditor(net, block));
+        listbox->add(*ne);
     }
 
     get_content_area()->pack_start(*box, true, true, 0);
