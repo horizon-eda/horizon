@@ -38,7 +38,7 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
     lb_recent->signal_row_selected().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_favorites_selected));
     lb_recent->signal_row_activated().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_favorites_activated));
 
-    add_search_button->signal_clicked().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_add_search));
+    add_search_button->signal_clicked().connect([this] { handle_add_search(); });
     notebook->signal_switch_page().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_switch_page));
     fav_toggled_conn =
             fav_button->signal_toggled().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_fav_toggled));
@@ -102,6 +102,16 @@ void PartBrowserWindow::placed_part(const UUID &uu)
     }
     recents.push_front(uu);
     update_recents();
+}
+
+void PartBrowserWindow::go_to_part(const UUID &uu)
+{
+    auto page = notebook->get_nth_page(notebook->get_current_page());
+    auto br = dynamic_cast<PoolBrowserPart *>(page);
+    if (br)
+        br->go_to(uu);
+    else
+        handle_add_search(uu);
 }
 
 void PartBrowserWindow::update_favorites()
@@ -216,7 +226,7 @@ void PartBrowserWindow::update_part_current()
     }
 }
 
-void PartBrowserWindow::handle_add_search()
+void PartBrowserWindow::handle_add_search(const UUID &part)
 {
     auto ch = Gtk::manage(new PoolBrowserPart(&pool));
     ch->get_style_context()->add_class("background");
@@ -236,6 +246,8 @@ void PartBrowserWindow::handle_add_search()
     search_views.insert(ch);
     ch->signal_selected().connect(sigc::mem_fun(this, &PartBrowserWindow::update_part_current));
     ch->signal_activated().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_place_part));
+    if (part)
+        ch->go_to(part);
 }
 
 PartBrowserWindow *PartBrowserWindow::create(Gtk::Window *p, const std::string &pool_path, std::deque<UUID> &favs)

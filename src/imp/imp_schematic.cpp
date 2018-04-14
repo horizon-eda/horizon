@@ -281,6 +281,23 @@ void ImpSchematic::construct()
         button->set_tooltip_text("Place selected components on board");
         button->show();
         main_window->header->pack_end(*button);
+
+        connect_action(ActionID::SHOW_IN_BROWSER, [this](const auto &conn) {
+            for (const auto &it : canvas->get_selection()) {
+                auto sheet = core_schematic.get_sheet();
+                if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
+                    auto &sym = sheet->symbols.at(it.uuid);
+                    if (sym.component->part) {
+                        json j;
+                        j["op"] = "show-in-browser";
+                        j["part"] = (std::string)sym.component->part->uuid;
+                        send_json(j);
+                        break;
+                    }
+                }
+            }
+
+        });
     }
 
     connect_action(ActionID::MOVE_TO_OTHER_SHEET,
@@ -322,10 +339,12 @@ void ImpSchematic::update_action_sensitivity()
             auto has_sym = std::any_of(sel.begin(), sel.end(),
                                        [](const auto &x) { return x.type == ObjectType::SCHEMATIC_SYMBOL; });
             set_action_sensitive(make_action(ActionID::TO_BOARD), has_sym);
+            set_action_sensitive(make_action(ActionID::SHOW_IN_BROWSER), has_sym);
         }
     }
     else {
         set_action_sensitive(make_action(ActionID::TO_BOARD), false);
+        set_action_sensitive(make_action(ActionID::SHOW_IN_BROWSER), false);
     }
     set_action_sensitive(make_action(ActionID::MOVE_TO_OTHER_SHEET), canvas->get_selection().size() > 0);
 

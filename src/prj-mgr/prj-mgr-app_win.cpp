@@ -358,6 +358,11 @@ json ProjectManagerAppWindow::handle_req(const json &j)
             app->send_json(pid, tx);
         }
     }
+    else if (op == "show-in-browser") {
+        auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
+        part_browser_window->go_to_part(UUID(j.at("part").get<std::string>()));
+        part_browser_window->present();
+    }
     else if (op == "has-board") {
         auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
         return processes.count(project->board_filename) > 0;

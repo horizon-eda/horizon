@@ -129,6 +129,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
                                                        | ActionCatalogItem::AVAILABLE_IN_PACKAGE),
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::SHOW_IN_BROWSER, ToolID::NONE},
+         {"Show in browser", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::MOVE},
          {"Move", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
 
@@ -470,7 +474,8 @@ const LutEnumStr<ActionID> action_lut = {ACTION_LUT_ITEM(TOOL),
                                          ACTION_LUT_ITEM(SELECTION_QUALIFIER_TOUCH_BOX),
                                          ACTION_LUT_ITEM(SELECTION_QUALIFIER_INCLUDE_BOX),
                                          ACTION_LUT_ITEM(TO_BOARD),
-                                         ACTION_LUT_ITEM(MOVE_TO_OTHER_SHEET)};
+                                         ACTION_LUT_ITEM(MOVE_TO_OTHER_SHEET),
+                                         ACTION_LUT_ITEM(SHOW_IN_BROWSER)};
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
     {                                                                                                                  \

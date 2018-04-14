@@ -21,6 +21,7 @@ public:
         return s_signal_place_part;
     }
     void placed_part(const UUID &uu);
+    void go_to_part(const UUID &uu);
 
 private:
     Gtk::Button *add_search_button = nullptr;
@@ -31,7 +32,7 @@ private:
     Gtk::ListBox *lb_recent = nullptr;
     Gtk::Paned *paned = nullptr;
     class PartPreview *preview = nullptr;
-    void handle_add_search();
+    void handle_add_search(const UUID &part = UUID());
     void handle_switch_page(Gtk::Widget *w, guint index);
     void handle_fav_toggled();
     void update_favorites();
