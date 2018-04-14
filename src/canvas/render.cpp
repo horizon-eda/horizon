@@ -95,8 +95,8 @@ void Canvas::render(const PowerSymbol &sym)
     auto style = sym.net->power_symbol_style;
     switch (style) {
     case Net::PowerSymbolStyle::GND: {
-    	transform_save();
-    	transform.set_angle(orientation_to_angle(sym.orientation)-49152);
+        transform_save();
+        transform.set_angle(orientation_to_angle(sym.orientation) - 49152);
         draw_line({0, 0}, {0, -1.25_mm}, c, 0);
         draw_line({-1.25_mm, -1.25_mm}, {1.25_mm, -1.25_mm}, c, 0);
         draw_line({-1.25_mm, -1.25_mm}, {0, -2.5_mm}, c, 0);
@@ -130,7 +130,7 @@ void Canvas::render(const PowerSymbol &sym)
         }
 
         transform_save();
-    	transform.set_angle(orientation_to_angle(sym.orientation)-16384);
+        transform.set_angle(orientation_to_angle(sym.orientation) - 16384);
         if (style == Net::PowerSymbolStyle::ANTENNA) {
             draw_line({0, 0}, {0, 2.5_mm}, c, 0);
             draw_line({-1_mm, 1_mm}, {0, 2.5_mm}, c, 0);
