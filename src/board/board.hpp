@@ -27,16 +27,15 @@ using json = nlohmann::json;
 
 class Board : public ObjectProvider, public LayerProvider {
 private:
-    Board(const UUID &uu, const json &, Block &block, Pool &pool, ViaPadstackProvider &vpp);
     // unsigned int update_nets();
-    bool propagate_net_segments();
-    std::map<UUID, uuid_ptr<Net>> net_segments;
+    void propagate_nets();
     std::map<int, Layer> layers;
 
     void delete_dependants();
     void vacuum_junctions();
 
 public:
+    Board(const UUID &uu, const json &, Block &block, Pool &pool, ViaPadstackProvider &vpp);
     static Board new_from_file(const std::string &filename, Block &block, Pool &pool, ViaPadstackProvider &vpp);
     Board(const UUID &uu, Block &block);
 
@@ -93,6 +92,16 @@ public:
 
     ClipperLib::Paths obstacles;
     ClipperLib::Path track_path;
+
+    enum ExpandFlags {
+        EXPAND_ALL = 0xff,
+        EXPAND_PROPAGATE_NETS = (1 << 0),
+        EXPAND_AIRWIRES = (1 << 1),
+        EXPAND_PACKAGES = (1 << 2)
+    };
+
+    ExpandFlags expand_flags = EXPAND_ALL;
+    std::set<UUID> packages_expand;
 
     json serialize() const;
 

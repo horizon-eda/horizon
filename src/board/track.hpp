@@ -27,7 +27,6 @@ public:
 
     UUID uuid;
     uuid_ptr<Net> net = nullptr;
-    UUID net_segment = UUID();
     int layer = 0;
     uint64_t width = 0;
     bool width_from_rules = true;

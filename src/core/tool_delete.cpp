@@ -329,6 +329,10 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
             core.r->delete_polygon(it->uuid);
         }
     }
+    if (core.b) {
+        auto brd = core.b->get_board();
+        brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES | Board::EXPAND_PROPAGATE_NETS);
+    }
 
     core.r->commit();
     return ToolResponse::end();

@@ -65,7 +65,6 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
                 temp_track->from.connect(j);
                 temp_track->to.connect(temp_junc);
                 temp_track->net = j->net;
-                temp_track->net_segment = j->net_segment;
                 temp_track->width = rules->get_default_track_width(j->net, 0);
             }
             else if (args.target.type == ObjectType::PAD) {
@@ -77,15 +76,12 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
                     }
                     temp_track->to.connect(pkg, pad);
                     temp_track->net = pad->net;
-                    temp_track->net_segment = pad->net_segment;
                 }
                 create_temp_track();
                 temp_track->from.connect(pkg, &pkg->package.pads.at(args.target.path.at(1)));
                 temp_track->to.connect(temp_junc);
                 temp_track->net = pad->net;
-                temp_track->net_segment = pad->net_segment;
                 temp_junc->net = pad->net;
-                temp_junc->net_segment = pad->net_segment;
                 if (pad->net) {
                     temp_track->width = rules->get_default_track_width(pad->net, 0);
                 }
@@ -144,11 +140,9 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
                 temp_junc->position = args.coords;
                 if (last && temp_track) {
                     temp_track->net = last->net;
-                    temp_track->net_segment = last->net_segment;
                 }
                 if (temp_track) {
                     temp_junc->net = temp_track->net;
-                    temp_junc->net_segment = temp_track->net_segment;
                 }
                 if (last) {
                     temp_junc->net = last->net;
@@ -159,7 +153,6 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
                 temp_track->from.connect(last);
                 temp_track->to.connect(temp_junc);
                 temp_track->net = last->net;
-                temp_track->net_segment = last->net_segment;
                 if (last->net) {
                     temp_track->width = rules->get_default_track_width(last->net, 0);
                 }

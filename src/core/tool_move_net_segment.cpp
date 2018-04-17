@@ -12,16 +12,10 @@ ToolMoveNetSegment::ToolMoveNetSegment(Core *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolMoveNetSegment::can_begin()
 {
-    if (tool_id == ToolID::SELECT_NET_SEGMENT) {
-        if (!core.c && !core.b) {
-            return false;
-        }
+    if (!core.c) {
+        return false;
     }
-    else {
-        if (!core.c) {
-            return false;
-        }
-    }
+
     return get_net_segment();
 }
 
@@ -40,9 +34,6 @@ UUID ToolMoveNetSegment::get_net_segment()
         }
         else if (it.type == ObjectType::NET_LABEL) {
             this_ns = core.c->get_sheet()->net_labels.at(it.uuid).junction->net_segment;
-        }
-        else if (it.type == ObjectType::TRACK) {
-            this_ns = core.b->get_board()->tracks.at(it.uuid).net_segment;
         }
         if (this_ns && !net_segment) {
             net_segment = this_ns;
@@ -64,14 +55,7 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
     if (!net_segment) {
         return ToolResponse::end();
     }
-    if (core.b) {
-        for (const auto &it : core.b->get_board()->tracks) {
-            if (it.second.net_segment == net_segment) {
-                core.r->selection.emplace(it.first, ObjectType::TRACK);
-            }
-        }
-        return ToolResponse::end();
-    }
+
 
     auto nsinfo = core.c->get_sheet()->analyze_net_segments().at(net_segment);
     if (nsinfo.bus)

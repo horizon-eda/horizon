@@ -257,9 +257,6 @@ void Board::update_refs()
     for (auto &it : airwires) {
         it.second.update_refs(*this);
     }
-    for (auto &it : net_segments) {
-        it.second.update(block->nets);
-    }
     for (auto &it : vias) {
         it.second.junction.update(junctions);
         it.second.net_set.update(block->nets);
@@ -330,102 +327,61 @@ static void flip_package_layer(int &layer)
     layer = -layer - 100;
 }
 
-bool Board::propagate_net_segments()
+void Board::propagate_nets()
 {
-    net_segments.clear();
-    net_segments.emplace(UUID(), nullptr);
+    // reset
+    for (auto &it : tracks) {
+        it.second.update_refs(*this);
+        it.second.net = nullptr;
+    }
+    for (auto &it : junctions) {
+        it.second.net = nullptr;
+    }
 
-    bool run = true;
-    while (run) {
-        run = false;
-        for (auto &it_pkg : packages) { // find one pad with net, but without net segment and
-                                        // assign it to a new net segment
-            for (auto &it_pad : it_pkg.second.package.pads) {
-                if (!it_pad.second.net_segment && it_pad.second.net) {
-                    it_pad.second.net_segment = UUID::random();
-                    net_segments.emplace(it_pad.second.net_segment, it_pad.second.net);
-                    run = true;
-                    break;
-                }
-            }
-            if (run)
-                break;
-        }
-        if (run == false) { // no pad needing assignment found, look at vias
-            for (auto &it_via : vias) {
-                auto ju = it_via.second.junction;
-                if (!ju->net_segment && it_via.second.net_set) {
-                    ju->net_segment = UUID::random();
-                    net_segments.emplace(ju->net_segment, it_via.second.net_set);
-                    run = true;
-                    break;
-                }
-            }
-        }
-        if (run == false) // done with pads and vias
-            break;
-
-        unsigned int n_assigned = 1;
-        while (n_assigned) {
-            n_assigned = 0;
-            for (auto &it : tracks) {
-                if (it.second.net_segment) { // track with net seg
-                    for (auto &it_ft : {it.second.from, it.second.to}) {
-                        if (it_ft.is_junc() && !it_ft.junc->net_segment) { // propgate to junction
-                            it_ft.junc->net_segment = it.second.net_segment;
-                            n_assigned++;
+    bool assigned = true;
+    std::set<const Track *> tracks_erase;
+    while (assigned) {
+        assigned = false;
+        for (auto &it : tracks) {
+            if (it.second.net) {
+                for (const auto &it_ft : {it.second.from, it.second.to}) {
+                    if (it_ft.is_pad()) {
+                        if (it_ft.pad->net != it.second.net) { // connected to wrong pad, delete
+                            tracks_erase.insert(&it.second);
                         }
-                        else if (it_ft.is_pad() && !it_ft.pad->net_segment) { // propagate to
-                                                                              // pad
-                            it_ft.pad->net_segment = it.second.net_segment;
-                            n_assigned++;
+                    }
+                    else if (it_ft.is_junc()) {
+                        if (it_ft.junc->net
+                            && (it_ft.junc->net != it.second.net)) { // connected to wrong junction, delete
+                            tracks_erase.insert(&it.second);
+                        }
+                        else if (it_ft.junc->net == nullptr) {
+                            it_ft.junc->net = it.second.net;
+                            assigned = true;
                         }
                     }
                 }
-                else { // track without net seg, so propagate net segment to
-                       // track
-                    for (auto &it_ft : {it.second.from, it.second.to}) {
-                        if (it_ft.is_junc() && it_ft.junc->net_segment) { // propagate from
-                                                                          // junction
-                            it.second.net_segment = it_ft.junc->net_segment;
-                            n_assigned++;
+            }
+            else { // no net, take net from pad/junc
+                for (const auto &it_ft : {it.second.from, it.second.to}) {
+                    if (it_ft.is_pad()) {
+                        if (it_ft.pad->net) {
+                            it.second.net = it_ft.pad->net;
+                            assigned = true;
                         }
-                        else if (it_ft.is_pad() && it_ft.pad->net_segment) {
-                            it.second.net_segment = it_ft.pad->net_segment; // propgate from pad
-                            // it_ft.pin->connected_net_lines.emplace(it.first,
-                            // &it.second);
-                            n_assigned++;
+                    }
+                    else if (it_ft.is_junc()) {
+                        if (it_ft.junc->net) {
+                            it.second.net = it_ft.junc->net;
+                            assigned = true;
                         }
                     }
                 }
             }
         }
     }
-    for (auto &it : junctions) { // assign net to junctions
-        it.second.net = net_segments.at(it.second.net_segment);
-    }
-
-    bool done = true;
-    for (auto it = tracks.begin(); it != tracks.end();) { // find tracks that connect different nets and
-                                                          // delete these
-        it->second.net = net_segments.at(it->second.net_segment);
-        bool erased = false;
-        for (auto &it_ft : {it->second.from, it->second.to}) {
-            if (it_ft.is_pad() && it_ft.pad->net) {
-                if (it->second.net != it_ft.pad->net) {
-                    done = false;
-                    tracks.erase(it++);
-                    erased = true;
-                    break;
-                }
-            }
-        }
-        if (!erased)
-            it++;
-    }
-    // if a track has been deleted, we'll have to re-run the net segment
-    // assignment again
-    return done;
+    if (tracks_erase.size())
+        map_erase_if(tracks, [&tracks_erase](const auto &it) { return tracks_erase.count(&it.second); });
 }
 
 void Board::vacuum_junctions()
@@ -535,23 +491,9 @@ void Board::expand(bool careful)
         it.second.polygon->usage = &it.second;
     }
 
-    do {
-        // clear net segments and nets assigned to tracks and junctions
-        for (auto &it : packages) {
-            for (auto &it_pad : it.second.package.pads) {
-                it_pad.second.net_segment = UUID();
-            }
-        }
-        for (auto &it : tracks) {
-            it.second.update_refs(*this);
-            it.second.net = nullptr;
-            it.second.net_segment = UUID();
-        }
-        for (auto &it : junctions) {
-            it.second.net = nullptr;
-            it.second.net_segment = UUID();
-        }
-    } while (propagate_net_segments() == false); // run as long as propagate net_segments deletes tracks
+    if (expand_flags & EXPAND_PROPAGATE_NETS) {
+        propagate_nets();
+    }
 
     for (auto &it : vias) {
         if (it.second.junction->net == nullptr && !it.second.net_set) {
@@ -562,7 +504,11 @@ void Board::expand(bool careful)
         }
     }
 
-    update_airwires();
+    if (expand_flags & EXPAND_AIRWIRES)
+        update_airwires();
+
+    expand_flags = EXPAND_ALL;
+    packages_expand.clear();
 }
 
 void Board::expand_packages()
@@ -579,72 +525,75 @@ void Board::expand_packages()
     for (auto &it : packages) {
         it.second.pool_package = it.second.component->part->package;
         it.second.model = it.second.component->part->model;
-        if (it.second.alternate_package) {
-            std::set<std::string> pads_from_primary, pads_from_alt;
-            for (const auto &it_pad : it.second.pool_package->pads) {
-                pads_from_primary.insert(it_pad.second.name);
-            }
-            bool alt_valid = true;
-            for (const auto &it_pad : it.second.alternate_package->pads) {
-                if (!pads_from_alt.insert(it_pad.second.name).second) { // duplicate pad name
-                    alt_valid = false;
+        if ((expand_flags & EXPAND_PACKAGES) && (packages_expand.size() == 0 || packages_expand.count(it.first))) {
+            if (it.second.alternate_package) {
+                std::set<std::string> pads_from_primary, pads_from_alt;
+                for (const auto &it_pad : it.second.pool_package->pads) {
+                    pads_from_primary.insert(it_pad.second.name);
                 }
-            }
-            if (!alt_valid || pads_from_alt != pads_from_primary) { // alt pkg isn't pad-equal
-                it.second.package = *it.second.pool_package;
-                warnings.emplace_back(it.second.placement.shift, "Incompatible alt pkg");
+                bool alt_valid = true;
+                for (const auto &it_pad : it.second.alternate_package->pads) {
+                    if (!pads_from_alt.insert(it_pad.second.name).second) { // duplicate pad name
+                        alt_valid = false;
+                    }
+                }
+                if (!alt_valid || pads_from_alt != pads_from_primary) { // alt pkg isn't pad-equal
+                    it.second.package = *it.second.pool_package;
+                    warnings.emplace_back(it.second.placement.shift, "Incompatible alt pkg");
+                }
+                else {
+                    it.second.package = *it.second.alternate_package;
+                    it.second.package.pads.clear(); // need to adjust pad uuids to primary package
+                    std::map<std::string, UUID> pad_uuids;
+                    for (const auto &it_pad : it.second.pool_package->pads) {
+                        assert(pad_uuids.emplace(it_pad.second.name, it_pad.first).second); // no duplicates
+                    }
+                    for (const auto &it_pad : it.second.alternate_package->pads) {
+                        auto uu = pad_uuids.at(it_pad.second.name);
+                        auto &pad = it.second.package.pads.emplace(uu, it_pad.second).first->second;
+                        pad.uuid = uu;
+                    }
+                }
             }
             else {
-                it.second.package = *it.second.alternate_package;
-                it.second.package.pads.clear(); // need to adjust pad uuids to primary package
-                std::map<std::string, UUID> pad_uuids;
-                for (const auto &it_pad : it.second.pool_package->pads) {
-                    assert(pad_uuids.emplace(it_pad.second.name, it_pad.first).second); // no duplicates
+                it.second.package = *it.second.pool_package;
+            }
+
+            it.second.placement.mirror = it.second.flip;
+            for (auto &it2 : it.second.package.pads) {
+                it2.second.padstack.expand_inner(n_inner_layers);
+            }
+
+            if (it.second.flip) {
+                for (auto &it2 : it.second.package.lines) {
+                    flip_package_layer(it2.second.layer);
                 }
-                for (const auto &it_pad : it.second.alternate_package->pads) {
-                    auto uu = pad_uuids.at(it_pad.second.name);
-                    auto &pad = it.second.package.pads.emplace(uu, it_pad.second).first->second;
-                    pad.uuid = uu;
+                for (auto &it2 : it.second.package.arcs) {
+                    flip_package_layer(it2.second.layer);
+                }
+                for (auto &it2 : it.second.package.texts) {
+                    flip_package_layer(it2.second.layer);
+                }
+                for (auto &it2 : it.second.package.polygons) {
+                    flip_package_layer(it2.second.layer);
+                }
+                for (auto &it2 : it.second.package.pads) {
+                    if (it2.second.padstack.type == Padstack::Type::TOP) {
+                        it2.second.padstack.type = Padstack::Type::BOTTOM;
+                    }
+                    else if (it2.second.padstack.type == Padstack::Type::BOTTOM) {
+                        it2.second.padstack.type = Padstack::Type::TOP;
+                    }
+                    for (auto &it3 : it2.second.padstack.polygons) {
+                        flip_package_layer(it3.second.layer);
+                    }
+                    for (auto &it3 : it2.second.padstack.shapes) {
+                        flip_package_layer(it3.second.layer);
+                    }
                 }
             }
-        }
-        else {
-            it.second.package = *it.second.pool_package;
         }
         auto r = it.second.package.apply_parameter_set(pset);
-        it.second.placement.mirror = it.second.flip;
-        for (auto &it2 : it.second.package.pads) {
-            it2.second.padstack.expand_inner(n_inner_layers);
-        }
-
-        if (it.second.flip) {
-            for (auto &it2 : it.second.package.lines) {
-                flip_package_layer(it2.second.layer);
-            }
-            for (auto &it2 : it.second.package.arcs) {
-                flip_package_layer(it2.second.layer);
-            }
-            for (auto &it2 : it.second.package.texts) {
-                flip_package_layer(it2.second.layer);
-            }
-            for (auto &it2 : it.second.package.polygons) {
-                flip_package_layer(it2.second.layer);
-            }
-            for (auto &it2 : it.second.package.pads) {
-                if (it2.second.padstack.type == Padstack::Type::TOP) {
-                    it2.second.padstack.type = Padstack::Type::BOTTOM;
-                }
-                else if (it2.second.padstack.type == Padstack::Type::BOTTOM) {
-                    it2.second.padstack.type = Padstack::Type::TOP;
-                }
-                for (auto &it3 : it2.second.padstack.polygons) {
-                    flip_package_layer(it3.second.layer);
-                }
-                for (auto &it3 : it2.second.padstack.shapes) {
-                    flip_package_layer(it3.second.layer);
-                }
-            }
-        }
 
         it.second.texts.erase(std::remove_if(it.second.texts.begin(), it.second.texts.end(),
                                              [this](const auto &a) { return texts.count(a.uuid) == 0; }),

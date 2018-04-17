@@ -18,7 +18,6 @@ public:
 
 private:
     Net *net = nullptr;
-    UUID net_segment;
     int routing_layer;
     uint64_t routing_width = 0;
     bool routing_width_use_default = true;

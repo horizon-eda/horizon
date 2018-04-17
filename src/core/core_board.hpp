@@ -5,6 +5,7 @@
 #include "pool/pool.hpp"
 #include <iostream>
 #include <memory>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 class CoreBoard : public Core {
@@ -70,11 +71,9 @@ private:
 
     class HistoryItem : public Core::HistoryItem {
     public:
-        HistoryItem(const Block &b, const Board &r) : block(b), brd(r)
-        {
-        }
+        HistoryItem(const Block &b, const Board &r);
         Block block;
-        Board brd;
+        json brd;
     };
     void history_push() override;
     void history_load(unsigned int i) override;

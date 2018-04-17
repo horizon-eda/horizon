@@ -29,7 +29,6 @@ public:
     ParameterSet parameter_set;
 
     uuid_ptr<Net> net = nullptr;
-    UUID net_segment;
 
     virtual UUID get_uuid() const;
     json serialize() const;

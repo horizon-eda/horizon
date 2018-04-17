@@ -182,7 +182,6 @@ void ToolRouteTrack::update_temp_track()
                 auto tuu = UUID::random();
                 auto tr = &brd->tracks.emplace(tuu, tuu).first->second;
                 tr->net = net;
-                tr->net_segment = net_segment;
                 tr->layer = routing_layer;
                 tr->width = routing_width;
                 tr->width_from_rules = routing_width_use_default;
@@ -192,7 +191,6 @@ void ToolRouteTrack::update_temp_track()
                 ju->temp = true;
                 ju->position = coordi_fron_intpt(*it);
                 ju->net = net;
-                ju->net_segment = net_segment;
                 temp_junctions.push_back(ju);
 
                 if (tj == nullptr) {
@@ -291,7 +289,6 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                 auto pkg = &core.b->get_board()->packages.at(args.target.path.at(0));
                 auto pad = &pkg->package.pads.at(args.target.path.at(1));
                 net = pad->net;
-                net_segment = pad->net_segment;
                 if (net) {
                     ToolArgs a(args);
                     if (!core.b->get_board()->get_layers().at(a.work_layer).copper) {
@@ -320,7 +317,6 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
             else if (args.target.type == ObjectType::JUNCTION) {
                 auto junc = core.r->get_junction(args.target.path.at(0));
                 net = junc->net;
-                net_segment = junc->net_segment;
                 if (net) {
                     ToolArgs a(args);
                     if (!core.b->get_board()->get_layers().at(a.work_layer).copper) {

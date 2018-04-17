@@ -170,6 +170,10 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
             move_mirror_or_rotate(selection_center, true);
             move_mirror_or_rotate(selection_center, true);
         }
+        if (core.b) {
+            auto brd = core.b->get_board();
+            brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
+        }
         core.r->commit();
         return ToolResponse::end();
     }
@@ -179,6 +183,10 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
             return ToolResponse::end();
         }
         move_do(r.second);
+        if (core.b) {
+            auto brd = core.b->get_board();
+            brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
+        }
         core.r->commit();
         return ToolResponse::end();
     }
@@ -282,6 +290,10 @@ ToolResponse ToolMove::update(const ToolArgs &args)
             }
             if (core.c) {
                 merge_selected_junctions();
+            }
+            if (core.b) {
+                auto brd = core.b->get_board();
+                brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
             }
             core.r->commit();
         }

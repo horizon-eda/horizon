@@ -498,10 +498,10 @@ void CoreBoard::rebuild(bool from_undo)
 {
     clock_t begin = clock();
     brd.expand();
+    Core::rebuild(from_undo);
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
     std::cout << "rebuild took " << elapsed_secs << std::endl;
-    Core::rebuild(from_undo);
 }
 
 LayerProvider *CoreBoard::get_layer_provider()
@@ -550,21 +550,25 @@ void CoreBoard::revert()
     reverted = true;
 }
 
+CoreBoard::HistoryItem::HistoryItem(const Block &b, const Board &r) : block(b), brd(r.serialize())
+{
+}
+
 void CoreBoard::history_push()
 {
     history.push_back(std::make_unique<CoreBoard::HistoryItem>(block, brd));
-    auto x = dynamic_cast<CoreBoard::HistoryItem *>(history.back().get());
-    x->brd.block = &x->block;
-    x->brd.update_refs();
 }
 
 void CoreBoard::history_load(unsigned int i)
 {
     auto x = dynamic_cast<CoreBoard::HistoryItem *>(history.at(history_current).get());
-    brd = x->brd;
+    UUID uu(x->brd.at("uuid").get<std::string>());
+    brd.~Board(); // reconstruct board from json
+    new (&brd) Board(uu, x->brd, x->block, *m_pool, via_padstack_provider);
+
     block = x->block;
-    brd.block = &block;
     brd.update_refs();
+    brd.expand();
 }
 
 json CoreBoard::get_meta()
