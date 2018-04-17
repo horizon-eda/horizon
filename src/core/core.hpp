@@ -139,6 +139,8 @@ public:
     ToolID next_tool = ToolID::NONE;
     bool end_tool = false;
     int layer = 10000;
+    bool fast_draw = false;
+
     ToolResponse()
     {
     }
@@ -150,6 +152,13 @@ public:
     {
         ToolResponse r;
         r.end_tool = true;
+        return r;
+    }
+
+    static ToolResponse fast()
+    {
+        ToolResponse r;
+        r.fast_draw = true;
         return r;
     }
 

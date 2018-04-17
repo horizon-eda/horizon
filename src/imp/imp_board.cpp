@@ -316,6 +316,8 @@ void ImpBoard::handle_drag()
     auto delta = pos - cursor_pos_drag_begin;
     if (delta.mag_sq() > (50 * 50)) {
         {
+            highlights.clear();
+            update_highlights();
             ToolArgs args;
             args.coords = target_drag_begin.p;
             ToolResponse r = core.r->tool_begin(ToolID::ROUTE_TRACK_INTERACTIVE, args, imp_interface.get());

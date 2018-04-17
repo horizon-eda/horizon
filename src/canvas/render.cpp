@@ -1343,5 +1343,6 @@ void Canvas::render(const Board &brd)
 
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    std::cout << "render took " << 1 / elapsed_secs << std::endl;
 }
 } // namespace horizon

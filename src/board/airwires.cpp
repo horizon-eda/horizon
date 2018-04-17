@@ -1,6 +1,7 @@
 #include "board.hpp"
 #include "delaunay-triangulation/delaunay.h"
 #include <unordered_map>
+#include "util/util.hpp"
 
 namespace horizon {
 // adapted from kicad's ratsnest_data.cpp
@@ -102,21 +103,26 @@ static const std::vector<delaunay::Edge<double>> kruskalMST(std::list<delaunay::
     return mst;
 }
 
-void Board::update_airwires(bool fast)
+void Board::update_airwires(bool fast, const std::set<UUID> &nets_only)
 {
+    bool partial = nets_only.size() > 0;
     std::set<Net *> nets;
     // collect nets on board
     for (auto &it_pkg : packages) {
         for (auto &it_pad : it_pkg.second.package.pads) {
             if (it_pad.second.net != nullptr)
-                nets.insert(it_pad.second.net);
+                if (!partial || nets_only.count(it_pad.second.net->uuid))
+                    nets.insert(it_pad.second.net);
         }
     }
     std::set<UUID> uuids_old;
     for (const auto &it : airwires) {
         uuids_old.insert(it.first);
     }
-    airwires.clear();
+    if (partial)
+        map_erase_if(airwires, [nets_only](const auto &it) { return nets_only.count(it.second.net->uuid); });
+    else
+        airwires.clear();
     for (auto net : nets) {
         std::vector<delaunay::Vector2<double>> points;
         std::vector<Track::Connection> points_ref;
@@ -276,7 +282,7 @@ void Board::update_airwires(bool fast)
 
         for (const auto &e : edges_from_mst) {
             UUID uu;
-            if (uuids_old.size()) {
+            if (uuids_old.size() && !partial) {
                 uu = *uuids_old.begin();
                 uuids_old.erase(uu);
             }

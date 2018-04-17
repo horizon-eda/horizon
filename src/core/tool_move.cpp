@@ -182,8 +182,34 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
         core.r->commit();
         return ToolResponse::end();
     }
+
+    collect_nets();
+
     update_tip();
     return ToolResponse();
+}
+
+void ToolMove::collect_nets()
+{
+    for (const auto &it : core.r->selection) {
+        switch (it.type) {
+
+        case ObjectType::BOARD_PACKAGE: {
+            BoardPackage *pkg = &core.b->get_board()->packages.at(it.uuid);
+            for (const auto &itt : pkg->package.pads) {
+                if (itt.second.net)
+                    nets.insert(itt.second.net->uuid);
+            }
+        } break;
+
+        case ObjectType::JUNCTION: {
+            auto ju = core.b->get_junction(it.uuid);
+            if (ju->net)
+                nets.insert(ju->net->uuid);
+        } break;
+        default:;
+        }
+    }
 }
 
 bool ToolMove::can_begin()
@@ -235,7 +261,7 @@ void ToolMove::do_move(const Coordi &d)
     move_do(delta);
     last = c;
     if (core.b) {
-        core.b->get_board()->update_airwires(true);
+        core.b->get_board()->update_airwires(true, nets);
     }
     update_tip();
 }
@@ -244,6 +270,7 @@ ToolResponse ToolMove::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
         do_move(args.coords);
+        return ToolResponse::fast();
     }
     else if (args.type == ToolEventType::CLICK || (is_transient && args.type == ToolEventType::CLICK_RELEASE)) {
         if (args.button == 1) {

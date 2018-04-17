@@ -13,6 +13,7 @@ private:
     std::vector<std::pair<Component *, bool>> components;
     unsigned int component_index = 0;
     class BoardPackage *pkg = nullptr;
+    std::set<UUID> nets;
     void place_package(Component *comp, const Coordi &c);
     void update_tooltip();
 };

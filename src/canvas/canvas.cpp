@@ -68,34 +68,14 @@ void Canvas::remove_obj(const ObjectRef &r)
     for (const auto &it : object_refs.at(r)) {
         auto layer = it.first;
         layers.insert(layer);
-        for (const auto &idxs : it.second) {
-            auto begin = triangles[layer].begin();
-            auto first = begin + idxs.first;
-            auto last = begin + idxs.second + 1;
-            triangles[layer].erase(first, last);
-        }
+        auto begin = triangles[layer].begin();
+        auto first = begin + it.second.first;
+        auto last = begin + it.second.second + 1;
+        triangles[layer].erase(first, last);
     }
 
-    // fix refs that changed due to triangles being deleted
-    for (auto &it : object_refs) {
-        if (it.first != r) {
-            for (auto layer : layers) {
-                if (it.second.count(layer)) {
-                    auto &idxs = it.second.at(layer);
-                    for (const auto &idx_removed : object_refs.at(r).at(layer)) {
-                        auto n_removed = (idx_removed.second - idx_removed.first) + 1;
-                        for (auto &idx : idxs) {
-                            if (idx.first > idx_removed.first) {
-                                idx.first -= n_removed;
-                                idx.second -= n_removed;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    object_refs.erase(r);
+    // missing: fix refs that changed due to triangles being deleted
+    // we don't need to this right now since only objects added after rendering are deleted
 
     request_push();
 }
@@ -106,11 +86,9 @@ void Canvas::set_flags(const ObjectRef &r, uint8_t mask_set, uint8_t mask_clear)
         return;
     for (const auto &it : object_refs.at(r)) {
         auto layer = it.first;
-        for (const auto &idxs : it.second) {
-            for (auto i = idxs.first; i <= idxs.second; i++) {
-                triangles[layer][i].flags |= mask_set;
-                triangles[layer][i].flags &= ~mask_clear;
-            }
+        for (auto i = it.second.first; i <= it.second.second; i++) {
+            triangles[layer][i].flags |= mask_set;
+            triangles[layer][i].flags &= ~mask_clear;
         }
     }
     request_push();
@@ -145,20 +123,21 @@ void Canvas::show_all_obj()
 void Canvas::add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP color, uint8_t flags)
 {
     triangles[layer].emplace_back(p0, p1, p2, color, triangle_type_current, flags, lod_current);
-    auto idx = triangles[layer].size() - 1;
-    for (auto &ref : object_refs_current) {
-        auto &idxs = object_refs[ref][layer];
-        if (idxs.size()) {
-            auto &last = idxs.back();
-            if (last.second == idx - 1) {
-                last.second = idx;
+    if (!fast_draw) {
+        auto idx = triangles[layer].size() - 1;
+        for (auto &ref : object_refs_current) {
+            auto &layers = object_refs[ref];
+
+            if (layers.count(layer)) {
+                auto &idxs = layers[layer];
+                assert(idxs.second == idx - 1);
+                idxs.second = idx;
             }
             else {
-                idxs.emplace_back(idx, idx);
+                auto &idxs = layers[layer];
+                idxs.first = idx;
+                idxs.second = idx;
             }
-        }
-        else {
-            idxs.emplace_back(idx, idx);
         }
     }
 }

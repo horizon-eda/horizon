@@ -55,12 +55,13 @@ public:
     bool layer_is_visible(int layer) const;
 
     bool show_all_junctions_in_schematic = false;
+    bool fast_draw = false;
 
 protected:
     std::unordered_map<int, std::vector<Triangle>> triangles;
     void add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t flg = 0);
 
-    std::map<ObjectRef, std::map<int, std::deque<std::pair<size_t, size_t>>>> object_refs;
+    std::map<ObjectRef, std::map<int, std::pair<size_t, size_t>>> object_refs;
     std::vector<ObjectRef> object_refs_current;
     void render(const class Symbol &sym, bool on_sheet = false, bool smashed = false);
     void render(const class Junction &junc, bool interactive = true, ObjectType mode = ObjectType::INVALID);

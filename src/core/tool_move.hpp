@@ -27,5 +27,8 @@ private:
     Mode mode = Mode::ARB;
     Coordi get_coord(const Coordi &c);
     void do_move(const Coordi &c);
+
+    void collect_nets();
+    std::set<UUID> nets;
 };
 } // namespace horizon

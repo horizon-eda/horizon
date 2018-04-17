@@ -440,6 +440,8 @@ void ImpSchematic::handle_drag()
 
     if (start) {
         {
+            highlights.clear();
+            update_highlights();
             ToolArgs args;
             args.coords = target_drag_begin.p;
             ToolResponse r = core.r->tool_begin(ToolID::DRAW_NET, args, imp_interface.get());

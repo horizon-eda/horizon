@@ -496,7 +496,11 @@ std::vector<Line *> CoreBoard::get_lines(bool work)
 
 void CoreBoard::rebuild(bool from_undo)
 {
+    clock_t begin = clock();
     brd.expand();
+    clock_t end = clock();
+    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    std::cout << "rebuild took " << elapsed_secs << std::endl;
     Core::rebuild(from_undo);
 }
 

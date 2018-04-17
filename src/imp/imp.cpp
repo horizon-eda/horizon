@@ -593,6 +593,8 @@ void ImpBase::handle_drag()
     auto delta = pos - cursor_pos_drag_begin;
     if (delta.mag_sq() > (50 * 50)) {
         {
+            highlights.clear();
+            update_highlights();
             ToolArgs args;
             args.coords = cursor_pos_grid_drag_begin;
             args.selection = selection_for_drag_move;
@@ -701,6 +703,8 @@ ActionConnection &ImpBase::connect_action(ActionID action_id, ToolID tool_id,
 
 void ImpBase::tool_begin(ToolID id)
 {
+    highlights.clear();
+    update_highlights();
     ToolArgs args;
     args.coords = canvas->get_cursor_pos();
     args.selection = canvas->get_selection();
@@ -1116,13 +1120,17 @@ void ImpBase::tool_process(const ToolResponse &resp)
         update_highlights();
     }
     if (!no_update) {
+        canvas->fast_draw = resp.fast_draw;
         canvas_update();
+        canvas->fast_draw = false;
         canvas->set_selection(core.r->selection);
     }
     if (resp.layer != 10000) {
         canvas->property_work_layer() = resp.layer;
     }
     if (resp.next_tool != ToolID::NONE) {
+        highlights.clear();
+        update_highlights();
         ToolArgs args;
         args.coords = canvas->get_cursor_pos();
         args.keep_selection = true;

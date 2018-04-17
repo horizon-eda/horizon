@@ -88,6 +88,11 @@ void ToolMapPackage::place_package(Component *comp, const Coordi &c)
                    .first->second;
     pkg->placement.shift = c;
     brd->expand(true);
+    nets.clear();
+    for (const auto &it : pkg->package.pads) {
+        if (it.second.net)
+            nets.insert(it.second.net->uuid);
+    }
     core.r->selection.clear();
     core.r->selection.emplace(uu, ObjectType::BOARD_PACKAGE);
     update_tooltip();
@@ -109,7 +114,8 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
         pkg->placement.shift = args.coords;
-        core.b->get_board()->update_airwires();
+        core.b->get_board()->update_airwires(true, nets);
+        return ToolResponse::fast();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
