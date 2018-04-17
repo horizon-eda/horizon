@@ -35,6 +35,10 @@ Component::Component(const UUID &uu, const json &j, Pool &pool, Block *block)
         if (part->entity->uuid != entity->uuid)
             part = nullptr;
     }
+    if (j.count("group"))
+        group = UUID(j.at("group").get<std::string>());
+    if (j.count("tag"))
+        tag = UUID(j.at("tag").get<std::string>());
 
     {
         const json &o = j["connections"];
@@ -123,6 +127,8 @@ json Component::serialize() const
     j["refdes"] = refdes;
     j["value"] = value;
     j["entity"] = (std::string)entity->uuid;
+    j["group"] = (std::string)group;
+    j["tag"] = (std::string)tag;
     j["connections"] = json::object();
     if (part != nullptr) {
         j["part"] = part->uuid;

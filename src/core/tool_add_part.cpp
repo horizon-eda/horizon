@@ -34,6 +34,7 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
 
         auto uu = UUID::random();
         comp = &sch->block->components.emplace(uu, uu).first->second;
+        comp->tag = UUID::random();
         comp->entity = part->entity;
         comp->part = part;
     }
@@ -46,6 +47,7 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
         auto uu = UUID::random();
         comp = &sch->block->components.emplace(uu, uu).first->second;
         comp->entity = core.c->m_pool->get_entity(entity_uuid);
+        comp->tag = UUID::random();
     }
     comp->refdes = comp->entity->prefix + "?";
 
@@ -94,6 +96,7 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
                 comp->entity = last_comp->entity;
                 comp->part = last_comp->part;
                 comp->refdes = comp->entity->prefix + "?";
+                comp->tag = UUID::random();
 
                 sym_current = map_symbol(comp, gates.front());
                 if (!sym_current) {

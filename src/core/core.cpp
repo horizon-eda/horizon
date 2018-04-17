@@ -52,6 +52,9 @@
 #include "tool_smash.hpp"
 #include "tool_update_all_planes.hpp"
 #include "tool_generate_courtyard.hpp"
+#include "tool_set_group.hpp"
+#include "tool_copy_placement.hpp"
+#include "tool_copy_tracks.hpp"
 
 #include "common/dimension.hpp"
 #include "logger/logger.hpp"
@@ -254,6 +257,18 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::GENERATE_COURTYARD:
         return std::make_unique<ToolGenerateCourtyard>(this, tool_id);
+
+    case ToolID::SET_GROUP:
+    case ToolID::CLEAR_GROUP:
+    case ToolID::SET_TAG:
+    case ToolID::CLEAR_TAG:
+        return std::make_unique<ToolSetGroup>(this, tool_id);
+
+    case ToolID::COPY_PLACEMENT:
+        return std::make_unique<ToolCopyPlacement>(this, tool_id);
+
+    case ToolID::COPY_TRACKS:
+        return std::make_unique<ToolCopyTracks>(this, tool_id);
 
     default:
         return nullptr;

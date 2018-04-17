@@ -48,6 +48,8 @@ public:
     const class Part *part = nullptr;
     std::string refdes;
     std::string value;
+    UUID group;
+    UUID tag;
 
     /**
      * which Nins are connected to which Net

@@ -182,6 +182,9 @@ SRC_IMP = \
 	src/core/tool_place_board_hole.cpp\
 	src/core/tool_edit_board_hole.cpp\
 	src/core/tool_generate_courtyard.cpp\
+	src/core/tool_set_group.cpp\
+	src/core/tool_copy_placement.cpp\
+	src/core/tool_copy_tracks.cpp\
 	src/core/cores.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\
