@@ -338,6 +338,13 @@ void Board::propagate_nets()
         it.second.net = nullptr;
     }
 
+    for (auto &it_via : vias) {
+        auto ju = it_via.second.junction;
+        if (it_via.second.net_set) {
+            ju->net = it_via.second.net_set;
+        }
+    }
+
     bool assigned = true;
     std::set<const Track *> tracks_erase;
     while (assigned) {
