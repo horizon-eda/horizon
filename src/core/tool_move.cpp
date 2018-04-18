@@ -211,7 +211,7 @@ void ToolMove::collect_nets()
         } break;
 
         case ObjectType::JUNCTION: {
-            auto ju = core.b->get_junction(it.uuid);
+            auto ju = core.r->get_junction(it.uuid);
             if (ju->net)
                 nets.insert(ju->net->uuid);
         } break;
@@ -268,7 +268,7 @@ void ToolMove::do_move(const Coordi &d)
     Coordi delta = c - last;
     move_do(delta);
     last = c;
-    if (core.b) {
+    if (core.b && update_airwires) {
         core.b->get_board()->update_airwires(true, nets);
     }
     update_tip();
@@ -325,6 +325,9 @@ ToolResponse ToolMove::update(const ToolArgs &args)
             bool rotate = args.key == GDK_KEY_r;
             update_selection_center();
             move_mirror_or_rotate(selection_center, rotate);
+        }
+        else if (args.key == GDK_KEY_a) {
+            update_airwires ^= true;
         }
     }
     return ToolResponse();

@@ -504,6 +504,8 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                 if (router->FixRoute(wrapper->m_endSnapPoint, wrapper->m_endItem)) {
                     router->StopRouting();
                     imp->canvas_update();
+                    board->expand_flags =
+                            static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
                     core.b->commit();
                     return ToolResponse::end();
                 }
@@ -524,6 +526,8 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     shove ^= true;
                 }
                 else if (args.key == GDK_KEY_Escape) {
+                    board->expand_flags =
+                            static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
                     core.r->commit();
                     return ToolResponse::end();
                 }
@@ -537,6 +541,8 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     }
                 }
                 else if (args.button == 3) {
+                    board->expand_flags =
+                            static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
                     core.r->commit();
                     return ToolResponse::end();
                 }
@@ -602,6 +608,8 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                 }
                 else if (args.key == GDK_KEY_Escape) {
                     router->StopRouting();
+                    board->expand_flags =
+                            static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
                     core.r->commit();
                     return ToolResponse::end();
                 }

@@ -30,5 +30,7 @@ private:
 
     void collect_nets();
     std::set<UUID> nets;
+
+    bool update_airwires = true;
 };
 } // namespace horizon
