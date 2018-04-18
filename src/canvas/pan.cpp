@@ -99,8 +99,14 @@ void CanvasGL::pan_zoom(GdkEventScroll *scroll_event, bool to_cursor)
     this->scale = scale_new;
     float xp = (x - offset.x) / sc;
     float yp = -(y - offset.y) / sc;
-    offset.x += xp * (sc - scale_new);
-    offset.y += yp * (scale_new - sc);
+    float xi = xp * (sc - scale_new);
+    float yi = yp * (scale_new - sc);
+    offset.x += xi;
+    offset.y += yi;
+    if (pan_dragging) {
+        pan_offset_orig.x += xi;
+        pan_offset_orig.y += yi;
+    }
     queue_draw();
 }
 } // namespace horizon
