@@ -16,7 +16,8 @@ Dimension::Dimension(const UUID &uu) : uuid(uu)
 
 Dimension::Dimension(const UUID &uu, const json &j)
     : uuid(uu), p0(j.at("p0").get<std::vector<int64_t>>()), p1(j.at("p1").get<std::vector<int64_t>>()),
-      label_distance(j.at("label_distance")), mode(mode_lut.lookup(j.at("mode")))
+      label_distance(j.at("label_distance")), label_size(j.value("label_size", 1.5_mm)),
+      mode(mode_lut.lookup(j.at("mode")))
 {
 }
 
@@ -26,6 +27,7 @@ json Dimension::serialize() const
     j["p0"] = p0.as_array();
     j["p1"] = p1.as_array();
     j["label_distance"] = label_distance;
+    j["label_size"] = label_size;
     j["mode"] = mode_lut.lookup_reverse(mode);
     return j;
 }
