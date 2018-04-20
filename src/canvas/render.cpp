@@ -851,9 +851,9 @@ void Canvas::render(const Hole &hole, bool interactive)
     int64_t d = hole.diameter / 2;
     int64_t l = std::max((int64_t)hole.length / 2 - d, (int64_t)0);
     if (hole.shape == Hole::Shape::ROUND) {
-        draw_arc(Coordi(), d, 0, 2 * M_PI, co);
+        draw_line(Coordf(), Coordf(100, 0), ColorP::WHITE, 10000, true, hole.diameter);
         if (hole.plated) {
-            draw_arc(Coordi(), 0.9 * d, 0, 2 * M_PI, co);
+            draw_line(Coordf(), Coordf(100, 0), ColorP::WHITE, 10000, true, hole.diameter * 0.9);
         }
         float x = hole.diameter / 2 / M_SQRT2;
         draw_line(Coordi(-x, -x), Coordi(x, x), co);

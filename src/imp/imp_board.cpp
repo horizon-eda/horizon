@@ -266,6 +266,7 @@ void ImpBoard::construct()
         canvas->set_layer_display(index, ld);
         canvas->queue_draw();
     });
+    canvas->set_layer_display(10000, LayerDisplay(true, LayerDisplay::Mode::OUTLINE, Color(1, 1, 1)));
     core.r->signal_rebuilt().connect([board_display_options] { board_display_options->update(); });
 
     canvas->signal_motion_notify_event().connect([this](GdkEventMotion *ev) {
