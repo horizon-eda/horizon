@@ -172,76 +172,26 @@ void Board::update_airwires(bool fast, const std::set<UUID> &nets_only)
         }
 
         if (!fast) {
-            std::vector<std::pair<int, int>> point_frags(points.size()); // keeps track of which fragment a point is
-                                                                         // connected to
-            // first: point id == index //second: frag id
-            for (size_t i = 0; i < points.size(); i++) {
-                point_frags[i] = {i, -1};
-            }
-
-            std::map<int, int> frag_map; // multiple fragments can be connected
-                                         // by via or th pad, making frags
-                                         // equivalent (aliasing)
-
-            auto fm_lookup = [&frag_map](int x) { // looks up aliased frag id
-                while (frag_map.count(x)) {
-                    auto x2 = frag_map.at(x);
-                    if (x2 == x)
-                        return x;
-                    x = x2;
-                }
-                return x;
-            };
-
-            int frag_id = 0;
-            // collect edges from planes
             for (const auto &it : planes) {
                 auto plane = &it.second;
                 if (plane->net == net) {
                     for (const auto &frag : plane->fragments) {
+                        int last_point_id = -1;
                         for (const auto &pt : points) {
                             Coordi x(pt.x, pt.y);
                             auto la = points_ref.at(pt.id).get_layer();
                             if ((plane->polygon->layer == la || la == 10002)
                                 && frag.contains(x)) { // point is th or on same layer
-                                int fid = fm_lookup(frag_id);
 
-                                if (point_frags.at(pt.id).second < 0) { // point isn't connected to any frag
-                                                                        // yet
-                                    point_frags[pt.id].second = fid;    // just connect it
+                                if (last_point_id >= 0) {
+                                    edges_from_board.emplace(last_point_id, pt.id);
                                 }
-                                else { // point is already connected to a frag
-                                    // keep the existing connection
-                                    // but create alias in frag map, so that
-                                    // this frag aliases the existing one
-                                    frag_map[fid] = point_frags[pt.id].second;
-                                }
+
+                                last_point_id = pt.id;
                             }
                         }
-                        frag_id++;
                     }
                 }
-            }
-
-            // sort by aliased frag id
-            std::sort(point_frags.begin(), point_frags.end(),
-                      [fm_lookup](const auto &a, const auto &b) { return fm_lookup(a.second) < fm_lookup(b.second); });
-
-            // make edges based on frag id
-            int last_frag_id = -1;
-            int last_point_id = -1;
-            for (const auto &it : point_frags) {
-                if (last_frag_id >= 0 && it.second == last_frag_id) { // same frag as the one before
-                    assert(last_point_id >= 0);
-                    auto i_from = last_point_id;
-                    auto i_to = it.first;
-                    if (i_from > i_to)
-                        std::swap(i_to, i_from);
-                    edges_from_board.emplace(i_to, i_from);
-                }
-
-                last_frag_id = fm_lookup(it.second);
-                last_point_id = it.first;
             }
         }
 
