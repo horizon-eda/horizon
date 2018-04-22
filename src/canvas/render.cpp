@@ -869,6 +869,8 @@ void Canvas::render(const Hole &hole, bool interactive)
         if (interactive)
             selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-l - d, -d), Coordi(l + d, +d));
     }
+    if (interactive)
+        targets.emplace(hole.uuid, ObjectType::HOLE, hole.placement.shift);
     transform_restore();
 }
 
