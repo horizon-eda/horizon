@@ -41,6 +41,12 @@ bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
             dynamic_cast<PropertyValueString &>(value).value = hole->parameter_class;
             return true;
 
+        case ObjectProperty::ID::POSITION_X:
+        case ObjectProperty::ID::POSITION_Y:
+        case ObjectProperty::ID::ANGLE:
+            get_placement(hole->placement, value, property);
+            return true;
+
         default:
             return false;
         }
@@ -188,6 +194,12 @@ bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
 
         case ObjectProperty::ID::PARAMETER_CLASS:
             hole->parameter_class = dynamic_cast<const PropertyValueString &>(value).value;
+            break;
+
+        case ObjectProperty::ID::POSITION_X:
+        case ObjectProperty::ID::POSITION_Y:
+        case ObjectProperty::ID::ANGLE:
+            set_placement(hole->placement, value, property);
             break;
 
         default:
@@ -375,6 +387,7 @@ void Core::get_placement(const Placement &placement, class PropertyValue &value,
     case ObjectProperty::ID::ANGLE:
         dynamic_cast<PropertyValueInt &>(value).value = placement.get_angle();
         break;
+    default:;
     }
 }
 
@@ -390,6 +403,7 @@ void Core::set_placement(Placement &placement, const class PropertyValue &value,
     case ObjectProperty::ID::ANGLE:
         placement.set_angle(dynamic_cast<const PropertyValueInt &>(value).value);
         break;
+    default:;
     }
 }
 
