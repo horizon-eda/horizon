@@ -5,14 +5,30 @@
 
 namespace horizon {
 
-Via::Via(const UUID &uu, const json &j, Board &brd, ViaPadstackProvider &vpp)
-    : uuid(uu), junction(&brd.junctions.at(j.at("junction").get<std::string>())),
-      vpp_padstack(vpp.get_padstack(j.at("padstack").get<std::string>())), padstack(*vpp_padstack),
-      parameter_set(parameter_set_from_json(j.at("parameter_set"))), from_rules(j.at("from_rules")),
-      locked(j.value("locked", false))
+Via::Via(const UUID &uu, const json &j, Board *brd, ViaPadstackProvider *vpp)
+    : uuid(uu), padstack(UUID()), parameter_set(parameter_set_from_json(j.at("parameter_set"))),
+      from_rules(j.at("from_rules")), locked(j.value("locked", false))
 {
-    if (j.count("net_set"))
-        net_set = &brd.block->nets.at(j.at("net_set").get<std::string>());
+    if (brd)
+        junction = &brd->junctions.at(j.at("junction").get<std::string>());
+    else
+        junction.uuid = j.at("junction").get<std::string>();
+
+    if (vpp) {
+        vpp_padstack = vpp->get_padstack(j.at("padstack").get<std::string>());
+        padstack = *vpp_padstack;
+    }
+    else {
+        vpp_padstack.uuid = j.at("padstack").get<std::string>();
+    }
+
+
+    if (j.count("net_set")) {
+        if (brd)
+            net_set = &brd->block->nets.at(j.at("net_set").get<std::string>());
+        else
+            net_set.uuid = j.at("net_set").get<std::string>();
+    }
 }
 
 Via::Via(const UUID &uu, const Padstack *ps) : uuid(uu), vpp_padstack(ps), padstack(*vpp_padstack)

@@ -2,6 +2,7 @@
 #include "core_package.hpp"
 #include "core_padstack.hpp"
 #include "core_schematic.hpp"
+#include "core_board.hpp"
 #include "imp/imp_interface.hpp"
 #include "pool/entity.hpp"
 #include <iostream>
@@ -249,6 +250,30 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
             auto x = &core.a->get_padstack()->shapes.emplace(u, Shape(u, it.value())).first->second;
             x->placement.shift += shift;
             core.r->selection.emplace(u, ObjectType::SHAPE);
+        }
+    }
+    if (j.count("vias")) {
+        const json &o = j["vias"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID::random();
+            auto brd = core.b->get_board();
+            auto x = &brd->vias
+                              .emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                                       std::forward_as_tuple(u, it.value()))
+                              .first->second;
+            if (auto ps = core.b->get_via_padstack_provider()->get_padstack(x->vpp_padstack.uuid)) {
+                x->vpp_padstack = ps;
+                x->padstack = *ps;
+                x->padstack.apply_parameter_set(x->parameter_set);
+            }
+            if (brd->block->nets.count(x->net_set.uuid)) {
+                x->net_set = &brd->block->nets.at(x->net_set.uuid);
+            }
+            else {
+                x->net_set = nullptr;
+            }
+            x->junction = &brd->junctions.at(junction_xlat.at(x->junction.uuid));
+            core.r->selection.emplace(u, ObjectType::VIA);
         }
     }
     move_init(args.coords);

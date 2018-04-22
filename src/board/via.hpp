@@ -15,7 +15,7 @@ using json = nlohmann::json;
 
 class Via {
 public:
-    Via(const UUID &uu, const json &j, class Board &brd, class ViaPadstackProvider &vpp);
+    Via(const UUID &uu, const json &j, class Board *brd = nullptr, class ViaPadstackProvider *vpp = nullptr);
     Via(const UUID &uu, const Padstack *ps);
 
     UUID uuid;

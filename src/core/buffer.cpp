@@ -3,6 +3,7 @@
 #include "core_padstack.hpp"
 #include "core_schematic.hpp"
 #include "core_symbol.hpp"
+#include "core_board.hpp"
 #include "pool/entity.hpp"
 #include "util/util.hpp"
 
@@ -27,6 +28,7 @@ void Buffer::clear()
     net_lines.clear();
     power_symbols.clear();
     net_labels.clear();
+    vias.clear();
 }
 
 void Buffer::load_from_symbol(std::set<SelectableRef> selection)
@@ -80,6 +82,12 @@ void Buffer::load_from_symbol(std::set<SelectableRef> selection)
             new_sel.emplace(ps.net->uuid, ObjectType::NET);
             new_sel.emplace(ps.junction->uuid, ObjectType::JUNCTION);
         } break;
+        case ObjectType::VIA: {
+            auto &via = core.b->get_board()->vias.at(it.uuid);
+            new_sel.emplace(via.junction->uuid, ObjectType::JUNCTION);
+            if (via.net_set)
+                new_sel.emplace(via.net_set->uuid, ObjectType::NET);
+        } break;
 
             /*
             case ObjectType::BUS_LABEL : {
@@ -128,7 +136,7 @@ void Buffer::load_from_symbol(std::set<SelectableRef> selection)
             pads.emplace(x->uuid, *x);
         }
         else if (it.type == ObjectType::NET) {
-            auto &x = core.c->get_schematic()->block->nets.at(it.uuid);
+            auto &x = core.r->get_block()->nets.at(it.uuid);
             auto net = &nets.emplace(x.uuid, x).first->second;
             net->net_class = &net_class_dummy;
         }
@@ -221,6 +229,12 @@ void Buffer::load_from_symbol(std::set<SelectableRef> selection)
             ps.junction.update(junctions);
             ps.net.update(nets);
         }
+        if (it.type == ObjectType::VIA) {
+            auto x = &core.b->get_board()->vias.at(it.uuid);
+            auto &via = vias.emplace(x->uuid, *x).first->second;
+            via.junction.update(junctions);
+            via.net_set.update(nets);
+        }
     }
     for (const auto &it : selection) {
         if (it.type == ObjectType::COMPONENT) {
@@ -308,6 +322,10 @@ json Buffer::serialize()
     j["power_symbols"] = json::object();
     for (const auto &it : power_symbols) {
         j["power_symbols"][(std::string)it.first] = it.second.serialize();
+    }
+    j["vias"] = json::object();
+    for (const auto &it : vias) {
+        j["vias"][(std::string)it.first] = it.second.serialize();
     }
     return j;
 }

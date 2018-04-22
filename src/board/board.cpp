@@ -108,7 +108,7 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
         const json &o = j["vias"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            load_and_log(vias, ObjectType::VIA, std::forward_as_tuple(u, it.value(), *this, vpp),
+            load_and_log(vias, ObjectType::VIA, std::forward_as_tuple(u, it.value(), this, &vpp),
                          Logger::Domain::BOARD);
         }
     }
