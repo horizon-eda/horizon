@@ -74,13 +74,10 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
     if (tool_id == ToolID::SELECT_NET_SEGMENT)
         return ToolResponse::end();
 
-    if (tool_id == ToolID::MOVE_NET_SEGMENT_NEW || tool_id == ToolID::MOVE_NET_SEGMENT) {
+    if (tool_id == ToolID::MOVE_NET_SEGMENT_NEW) {
         if (nsinfo.has_power_sym || nsinfo.net->is_bussed) {
             return ToolResponse::end();
         }
-    }
-
-    if (tool_id == ToolID::MOVE_NET_SEGMENT_NEW) {
         Net *net = core.c->get_schematic()->block->insert_net();
         auto pins = core.c->get_sheet()->get_pins_connected_to_net_segment(net_segment);
         core.c->get_schematic()->block->extract_pins(pins, net);
@@ -88,17 +85,31 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
 
         return ToolResponse::end();
     }
+    if (tool_id == ToolID::MOVE_NET_SEGMENT) {
+        if (nsinfo.net->is_bussed) {
+            return ToolResponse::end();
+        }
 
-    bool r;
-    UUID net_uuid;
-    std::tie(r, net_uuid) = imp->dialogs.select_net(core.c->get_schematic()->block, false);
-    if (!r) {
-        return ToolResponse::end();
+        bool r;
+        UUID net_uuid;
+        std::tie(r, net_uuid) = imp->dialogs.select_net(core.c->get_schematic()->block, nsinfo.net->is_power);
+        if (!r) {
+            return ToolResponse::end();
+        }
+        Net *net = &core.c->get_schematic()->block->nets.at(net_uuid);
+        auto pins = core.c->get_sheet()->get_pins_connected_to_net_segment(net_segment);
+        core.c->get_schematic()->block->extract_pins(pins, net);
+        if (nsinfo.net->is_power) {
+            for (auto &it : core.c->get_sheet()->power_symbols) {
+                if (it.second.junction->net_segment == net_segment) {
+                    assert(it.second.net.uuid == nsinfo.net->uuid);
+                    it.second.net = net;
+                }
+            }
+        }
+
+        core.c->commit();
     }
-    Net *net = &core.c->get_schematic()->block->nets.at(net_uuid);
-    auto pins = core.c->get_sheet()->get_pins_connected_to_net_segment(net_segment);
-    core.c->get_schematic()->block->extract_pins(pins, net);
-    core.c->commit();
     return ToolResponse::end();
 }
 ToolResponse ToolMoveNetSegment::update(const ToolArgs &args)
