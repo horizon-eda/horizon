@@ -45,5 +45,6 @@ void CanvasAnnotation::clear()
 void CanvasAnnotation::draw_line(const Coordi &from, const Coordi &to, ColorP color, uint64_t width)
 {
     ca->draw_line(from, to, color, layer, false, width);
+    ca->request_push();
 }
 } // namespace horizon
