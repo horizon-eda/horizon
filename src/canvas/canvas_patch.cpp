@@ -9,6 +9,9 @@ CanvasPatch::CanvasPatch() : Canvas::Canvas()
 }
 void CanvasPatch::request_push()
 {
+    for (auto &patch : patches) {
+        ClipperLib::SimplifyPolygons(patch.second, ClipperLib::pftNonZero);
+    }
 }
 
 void CanvasPatch::img_net(const Net *n)
@@ -38,6 +41,11 @@ void CanvasPatch::img_hole(const Hole &hole)
     img_polygon(poly, true);
     net = net_saved;
     patch_type = patch_type_saved;
+}
+
+void CanvasPatch::append_polygon(const Polygon &poly)
+{
+    img_polygon(poly, false);
 }
 
 void CanvasPatch::img_polygon(const Polygon &poly, bool tr)

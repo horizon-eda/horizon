@@ -27,6 +27,7 @@ public:
     };
     std::map<PatchKey, ClipperLib::Paths> patches;
     std::set<std::tuple<int, Coordi, Coordi>> text_extents;
+    void append_polygon(const Polygon &poly);
 
     CanvasPatch();
     void push() override

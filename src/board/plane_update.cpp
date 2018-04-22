@@ -383,9 +383,7 @@ void Board::update_planes()
     ca.update(*this);
     for (auto plane : planes_sorted) {
         update_plane(plane, &ca, &cp);
-        ca.patches.clear();
-        ca.text_extents.clear();
-        ca.update(*this); // update so that new plane sees other planes
+        ca.append_polygon(*(plane->polygon));
     }
 }
 
