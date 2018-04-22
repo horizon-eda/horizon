@@ -13,8 +13,15 @@ bool SpinButtonDim::on_output()
     auto adj = get_adjustment();
     double value = adj->get_value();
 
+    int prec = 3;
+    {
+        int64_t ivalue = value;
+        if (ivalue % 1000)
+            prec = 5;
+    }
+
     std::stringstream stream;
-    stream << std::fixed << std::setprecision(3) << value / 1e6 << " mm";
+    stream << std::fixed << std::setprecision(prec) << value / 1e6 << " mm";
 
     set_text(stream.str());
     return true;
@@ -53,7 +60,7 @@ static int64_t parse_str(const Glib::ustring &s)
     int64_t value = 0;
     int64_t mul = 1000000;
     int sign = 1;
-    enum class State { SIGN, INT, DECIMAL };
+    enum class State { SIGN, INT, DECIMAL, UNIT };
     auto state = State::SIGN;
     bool parsed_any = false;
     Operation operation = Operation::INVALID;
@@ -94,6 +101,10 @@ static int64_t parse_str(const Glib::ustring &s)
                 value = 0;
                 state = State::SIGN;
             }
+            else if (c == 'i' && operation == Operation::INVALID) {
+                value *= 25.4;
+                state = State::UNIT;
+            }
             break;
 
         case State::DECIMAL:
@@ -110,6 +121,22 @@ static int64_t parse_str(const Glib::ustring &s)
                 value = 0;
                 state = State::SIGN;
             }
+            else if (c == 'i' && operation == Operation::INVALID) {
+                value *= 25.4;
+                state = State::UNIT;
+            }
+            break;
+
+        case State::UNIT:
+            if (op_from_char(c) != Operation::INVALID && operation == Operation::INVALID) {
+                operation = op_from_char(c);
+                value1 = value * sign;
+                sign = 1;
+                mul = 1000000;
+                value = 0;
+                state = State::SIGN;
+            }
+
             break;
         }
     }
