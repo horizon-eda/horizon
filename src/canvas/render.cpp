@@ -1056,7 +1056,8 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
         render(it.second, interactive);
     }
     for (const auto &it : pkg.texts) {
-        if (!smashed || !(it.second.layer == 20 || it.second.layer == 120))
+        if (!smashed
+            || !(it.second.layer == BoardLayers::TOP_SILKSCREEN || it.second.layer == BoardLayers::BOTTOM_SILKSCREEN))
             render(it.second, interactive);
     }
     for (const auto &it : pkg.arcs) {
