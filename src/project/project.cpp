@@ -20,6 +20,18 @@ Project::Project(const UUID &uu, const json &j, const std::string &base)
         auto fi = Gio::File::create_for_path(pool_cache_directory);
         fi->make_directory();
     }
+
+    if (!Glib::file_test(vias_directory, Glib::FILE_TEST_IS_DIR)) {
+        {
+            auto fi = Gio::File::create_for_path(vias_directory);
+            fi->make_directory();
+        }
+        {
+            std::ofstream ofs(Glib::build_filename(vias_directory, ".keep"));
+            ofs.close();
+        }
+    }
+
     if (j.count("blocks")) {
         const json &o = j.at("blocks");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -92,6 +104,10 @@ std::string Project::create(const UUID &default_via)
     {
         auto fi = Gio::File::create_for_path(vias_directory);
         fi->make_directory();
+    }
+    {
+        std::ofstream ofs(Glib::build_filename(vias_directory, ".keep"));
+        ofs.close();
     }
     pool_cache_directory = Glib::build_filename(base_path, "cache");
     {
