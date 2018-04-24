@@ -5,7 +5,7 @@
 #include <iostream>
 
 namespace horizon {
-ToolMapPackage::ToolMapPackage(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolMapPackage::ToolMapPackage(Core *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid)
 {
 }
 
@@ -96,6 +96,7 @@ void ToolMapPackage::place_package(Component *comp, const Coordi &c)
     core.r->selection.clear();
     core.r->selection.emplace(uu, ObjectType::BOARD_PACKAGE);
     update_tooltip();
+    move_init(c);
 }
 
 void ToolMapPackage::update_tooltip()
@@ -113,7 +114,7 @@ void ToolMapPackage::update_tooltip()
 ToolResponse ToolMapPackage::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
-        pkg->placement.shift = args.coords;
+        move_do_cursor(args.coords);
         core.b->get_board()->update_airwires(true, nets);
         return ToolResponse::fast();
     }
@@ -159,8 +160,9 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
                 place_package(comp, args.coords);
             }
         }
-        else if (args.key == GDK_KEY_r) {
-            pkg->placement.inc_angle_deg(-90);
+        else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
+            bool rotate = args.key == GDK_KEY_r;
+            move_mirror_or_rotate(pkg->placement.shift, rotate);
         }
         else if (args.key == GDK_KEY_Escape) {
             core.r->revert();

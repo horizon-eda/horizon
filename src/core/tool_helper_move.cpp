@@ -4,6 +4,7 @@
 #include "core_padstack.hpp"
 #include "core_schematic.hpp"
 #include "core_symbol.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 void ToolHelperMove::move_init(const Coordi &c)
@@ -247,17 +248,29 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
 
         } break;
 
+        case ObjectType::TRACK: {
+            if (!rotate) {
+                auto &track = core.b->get_board()->tracks.at(it.uuid);
+
+                if (track.layer == BoardLayers::TOP_COPPER)
+                    track.layer = BoardLayers::BOTTOM_COPPER;
+                else if (track.layer == BoardLayers::BOTTOM_COPPER)
+                    track.layer = BoardLayers::TOP_COPPER;
+            }
+        } break;
+
         case ObjectType::BOARD_PACKAGE: {
-            BoardPackage *pkg = &core.b->get_board()->packages.at(it.uuid);
+            auto brd = core.b->get_board();
+            BoardPackage *pkg = &brd->packages.at(it.uuid);
+            transform(pkg->placement.shift, center, rotate);
             if (rotate) {
-                transform(pkg->placement.shift, center, rotate);
-                //	if(sym->placement.mirror) {
-                //		sym->placement.angle =
-                //(sym->placement.angle+16384)%65536;
-                //	}
-                // else {
                 pkg->placement.inc_angle_deg(-90);
-                //	}
+            }
+            else {
+                pkg->flip ^= true;
+                pkg->placement.invert_angle();
+                brd->expand_flags = Board::EXPAND_PACKAGES;
+                brd->packages_expand.insert(it.uuid);
             }
 
         } break;
@@ -306,6 +319,9 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
         default:;
         }
+    }
+    if (core.b && core.b->get_board()->packages_expand.size()) {
+        core.b->get_board()->expand();
     }
 }
 } // namespace horizon

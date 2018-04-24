@@ -1,8 +1,9 @@
 #pragma once
 #include "core.hpp"
+#include "tool_helper_move.hpp"
 
 namespace horizon {
-class ToolMapPackage : public ToolBase {
+class ToolMapPackage : public ToolHelperMove {
 public:
     ToolMapPackage(Core *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;

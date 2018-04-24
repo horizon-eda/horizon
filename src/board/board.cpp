@@ -529,10 +529,12 @@ void Board::expand_packages()
 
     };
 
+    bool expanded_package = false;
     for (auto &it : packages) {
         it.second.pool_package = it.second.component->part->package;
         it.second.model = it.second.component->part->model;
         if ((expand_flags & EXPAND_PACKAGES) && (packages_expand.size() == 0 || packages_expand.count(it.first))) {
+            expanded_package = true;
             if (it.second.alternate_package) {
                 std::set<std::string> pads_from_primary, pads_from_alt;
                 for (const auto &it_pad : it.second.pool_package->pads) {
@@ -613,6 +615,10 @@ void Board::expand_packages()
             it_text->text_override = it.second.replace_text(it_text->text, &it_text->overridden);
         }
     }
+
+    if (expanded_package)
+        update_refs();
+
     // assign nets to pads based on netlist
     for (auto &it : packages) {
         for (auto &it_pad : it.second.package.pads) {
