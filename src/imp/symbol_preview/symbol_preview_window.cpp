@@ -22,15 +22,26 @@ SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window()
     set_titlebar(*hb);
     hb->show_all();
 
+    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
+    box->property_margin() = 10;
+    {
+        auto la = Gtk::manage(new Gtk::Label());
+        la->set_markup(
+                "<i>A symbol can have orientation-specific text placements. First click \"Clear\" for all "
+                "orientations. Then for each orientation position the texts as desired in the main window and click "
+                "\"Set\" in this window.</i>");
+        la->set_line_wrap_mode(Pango::WRAP_WORD);
+        la->set_line_wrap(true);
+        box->pack_start(*la, false, false);
+    }
+
+
     auto grid = Gtk::manage(new Gtk::Grid());
     grid->set_row_spacing(10);
     grid->set_column_spacing(10);
     grid->set_row_homogeneous(true);
     grid->set_column_homogeneous(true);
-    grid->set_margin_start(10);
-    grid->set_margin_end(10);
-    grid->set_margin_top(10);
-    grid->set_margin_bottom(10);
+
     for (int left = 0; left < 4; left++) {
         for (int top = 0; top < 2; top++) {
             std::pair<int, bool> view(left * 90, top);
@@ -41,8 +52,11 @@ SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window()
             pv->show();
         }
     }
-    add(*grid);
-    grid->show();
+
+    box->pack_start(*grid, true, true, 0);
+
+    add(*box);
+    box->show_all();
 }
 
 void SymbolPreviewWindow::update(const class Symbol &sym)
