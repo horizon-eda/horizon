@@ -309,9 +309,14 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
 
         case ObjectProperty::ID::POSITION_X:
         case ObjectProperty::ID::POSITION_Y:
-        case ObjectProperty::ID::ANGLE:
+        case ObjectProperty::ID::ANGLE: {
+            const auto shift_before = pkg->placement.shift;
             set_placement(pkg->placement, value, property);
-            break;
+            auto delta = pkg->placement.shift - shift_before;
+            for (auto &text : pkg->texts) {
+                text->placement.shift += delta;
+            }
+        } break;
 
         default:
             return false;
