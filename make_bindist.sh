@@ -89,6 +89,7 @@ LIBS=(
 	libbrotlicommon.dll\
 	libbrotlidec.dll\
 	libfribidi-0.dll\
+	yaml-cpp.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
