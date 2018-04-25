@@ -72,7 +72,6 @@ public:
         float thickness = 0.035;
         float alpha = 1;
         float explode_mul = 0;
-        Color color;
     };
 
     class FaceVertex {
@@ -161,6 +160,8 @@ private:
     float get_layer_offset(int layer);
     const class Board *brd = nullptr;
     void add_path(int layer, const ClipperLib::Path &path);
+    bool layer_is_visible(int layer) const;
+    Color get_layer_color(int layer) const;
 
     void load_models_thread(std::set<std::string> model_filenames, std::string base_path);
 

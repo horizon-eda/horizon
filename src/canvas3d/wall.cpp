@@ -88,7 +88,7 @@ void WallRenderer::render(int layer)
 {
     if (ca->layers[layer].alpha != 1)
         return;
-    auto &co = ca->layers[layer].color;
+    auto co = ca->get_layer_color(layer);
     glUniform4f(layer_color_loc, co.r, co.g, co.b, ca->layers[layer].alpha);
     glUniform1f(layer_offset_loc, ca->get_layer_offset(layer));
     glUniform1f(layer_thickness_loc, ca->layers[layer].thickness);
@@ -105,9 +105,8 @@ void WallRenderer::render()
     glUniform3fv(cam_normal_loc, 1, glm::value_ptr(ca->cam_normal));
 
     for (const auto &it : layer_offsets) {
-        if (it.first != 10)
+        if (ca->layer_is_visible(it.first))
             render(it.first);
     }
-    render(10);
 }
 } // namespace horizon

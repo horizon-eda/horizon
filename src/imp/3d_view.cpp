@@ -78,28 +78,28 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     x->get_widget("solder_mask_switch", solder_mask_switch);
     solder_mask_switch->property_active().signal_changed().connect([this, solder_mask_switch] {
         canvas->show_solder_mask = solder_mask_switch->get_active();
-        canvas->prepare();
+        canvas->queue_draw();
     });
 
     Gtk::Switch *silkscreen_switch;
     x->get_widget("silkscreen_switch", silkscreen_switch);
     silkscreen_switch->property_active().signal_changed().connect([this, silkscreen_switch] {
         canvas->show_silkscreen = silkscreen_switch->get_active();
-        canvas->prepare();
+        canvas->queue_draw();
     });
 
     Gtk::Switch *substrate_switch;
     x->get_widget("substrate_switch", substrate_switch);
     substrate_switch->property_active().signal_changed().connect([this, substrate_switch] {
         canvas->show_substrate = substrate_switch->get_active();
-        canvas->prepare();
+        canvas->queue_draw();
     });
 
     Gtk::Switch *paste_switch;
     x->get_widget("paste_switch", paste_switch);
     paste_switch->property_active().signal_changed().connect([this, paste_switch] {
         canvas->show_solder_paste = paste_switch->get_active();
-        canvas->prepare();
+        canvas->queue_draw();
     });
 
     Gtk::Switch *models_switch;

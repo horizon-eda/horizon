@@ -90,7 +90,7 @@ void CoverRenderer::render(int layer)
 {
     if (ca->layers[layer].alpha != 1)
         glEnable(GL_BLEND);
-    auto &co = ca->layers[layer].color;
+    auto co = ca->get_layer_color(layer);
     glUniform4f(layer_color_loc, co.r, co.g, co.b, ca->layers[layer].alpha);
     glUniform1f(layer_offset_loc, ca->get_layer_offset(layer));
     glUniform1f(layer_thickness_loc, ca->layers[layer].thickness);
@@ -108,11 +108,11 @@ void CoverRenderer::render()
     glUniform3fv(cam_normal_loc, 1, glm::value_ptr(ca->cam_normal));
 
     for (const auto &it : layer_offsets) {
-        if (ca->layers[it.first].alpha == 1)
+        if (ca->layers[it.first].alpha == 1 && ca->layer_is_visible(it.first))
             render(it.first);
     }
     for (const auto &it : layer_offsets) {
-        if (ca->layers[it.first].alpha != 1)
+        if (ca->layers[it.first].alpha != 1 && ca->layer_is_visible(it.first))
             render(it.first);
     }
 }

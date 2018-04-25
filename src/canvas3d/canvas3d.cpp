@@ -260,14 +260,12 @@ void Canvas3D::prepare()
     int layer = BoardLayers::TOP_COPPER;
     layers[layer].offset = 0;
     layers[layer].thickness = brd->stackup.at(0).thickness / 1e6;
-    layers[layer].color = {1, .8, 0};
     layers[layer].explode_mul = 1;
     prepare_layer(layer);
 
     layer = BoardLayers::BOTTOM_COPPER;
     layers[layer].offset = -board_thickness;
     layers[layer].thickness = +(brd->stackup.at(layer).thickness / 1e6);
-    layers[layer].color = {1, .8, 0};
     layers[layer].explode_mul = -2 * n_inner_layers - 1;
     prepare_layer(layer);
 
@@ -277,88 +275,71 @@ void Canvas3D::prepare()
             layer = -i - 1;
             layers[layer].offset = offset;
             layers[layer].thickness = -(brd->stackup.at(layer).thickness / 1e6);
-            layers[layer].color = {1, .8, 0};
             layers[layer].explode_mul = -1 - 2 * i;
             offset -= brd->stackup.at(layer).thickness / 1e6 + brd->stackup.at(layer).substrate_thickness / 1e6;
             prepare_layer(layer);
         }
     }
 
-    if (show_substrate) {
-        layer = BoardLayers::L_OUTLINE;
-        layers[layer].offset = 0;
-        layers[layer].thickness = -(brd->stackup.at(0).substrate_thickness / 1e6);
-        layers[layer].explode_mul = 0;
-        layers[layer].color = {.2, .15, 0};
-        prepare_layer(layer);
+    layer = BoardLayers::L_OUTLINE;
+    layers[layer].offset = 0;
+    layers[layer].thickness = -(brd->stackup.at(0).substrate_thickness / 1e6);
+    layers[layer].explode_mul = 0;
+    prepare_layer(layer);
 
-        float offset = -(brd->stackup.at(0).substrate_thickness / 1e6);
-        for (int i = 0; i < n_inner_layers; i++) {
-            int l = 10000 + i;
-            offset -= brd->stackup.at(-i - 1).thickness / 1e6;
-            layers[l] = layers[layer];
-            layers[l].offset = offset;
-            layers[l].thickness = -(brd->stackup.at(-i - 1).substrate_thickness / 1e6);
-            layers[l].explode_mul = -2 - 2 * i;
+    float offset = -(brd->stackup.at(0).substrate_thickness / 1e6);
+    for (int i = 0; i < n_inner_layers; i++) {
+        int l = 10000 + i;
+        offset -= brd->stackup.at(-i - 1).thickness / 1e6;
+        layers[l] = layers[layer];
+        layers[l].offset = offset;
+        layers[l].thickness = -(brd->stackup.at(-i - 1).substrate_thickness / 1e6);
+        layers[l].explode_mul = -2 - 2 * i;
 
-            offset -= brd->stackup.at(-i - 1).substrate_thickness / 1e6;
-        }
+        offset -= brd->stackup.at(-i - 1).substrate_thickness / 1e6;
     }
 
-    if (show_solder_mask) {
-        layer = BoardLayers::TOP_MASK;
-        layers[layer].offset = .036;
-        layers[layer].thickness = 0.035;
-        layers[layer].color = solder_mask_color;
-        layers[layer].alpha = .8;
-        layers[layer].explode_mul = 3;
-        prepare_soldermask(layer);
+    layer = BoardLayers::TOP_MASK;
+    layers[layer].offset = .036;
+    layers[layer].thickness = 0.035;
+    layers[layer].alpha = .8;
+    layers[layer].explode_mul = 3;
+    prepare_soldermask(layer);
 
-        layer = BoardLayers::BOTTOM_MASK;
-        layers[layer].offset = -board_thickness - .036;
-        layers[layer].thickness = 0.035;
-        layers[layer].color = solder_mask_color;
-        layers[layer].alpha = .8;
-        layers[layer].explode_mul = -2 * n_inner_layers - 3;
-        prepare_soldermask(layer);
-    }
+    layer = BoardLayers::BOTTOM_MASK;
+    layers[layer].offset = -board_thickness - .036;
+    layers[layer].thickness = 0.035;
+    layers[layer].alpha = .8;
+    layers[layer].explode_mul = -2 * n_inner_layers - 3;
+    prepare_soldermask(layer);
 
-    if (show_silkscreen) {
-        layer = BoardLayers::TOP_SILKSCREEN;
-        layers[layer].offset = .07;
-        layers[layer].thickness = 0.035;
-        layers[layer].color = {1, 1, 1};
-        layers[layer].explode_mul = 4;
-        prepare_layer(layer);
+    layer = BoardLayers::TOP_SILKSCREEN;
+    layers[layer].offset = .07;
+    layers[layer].thickness = 0.035;
+    layers[layer].explode_mul = 4;
+    prepare_layer(layer);
 
-        layer = BoardLayers::BOTTOM_SILKSCREEN;
-        layers[layer].offset = -board_thickness - .07;
-        layers[layer].thickness = -0.035;
-        layers[layer].color = {1, 1, 1};
-        layers[layer].explode_mul = -2 * n_inner_layers - 4;
-        prepare_layer(layer);
-    }
+    layer = BoardLayers::BOTTOM_SILKSCREEN;
+    layers[layer].offset = -board_thickness - .07;
+    layers[layer].thickness = -0.035;
+    layers[layer].explode_mul = -2 * n_inner_layers - 4;
+    prepare_layer(layer);
 
-    if (show_solder_paste) {
-        layer = BoardLayers::TOP_PASTE;
-        layers[layer].offset = .036;
-        layers[layer].thickness = 0.035;
-        layers[layer].color = {.7, .7, .7};
-        layers[layer].explode_mul = 2;
-        prepare_layer(layer);
+    layer = BoardLayers::TOP_PASTE;
+    layers[layer].offset = .036;
+    layers[layer].thickness = 0.035;
+    layers[layer].explode_mul = 2;
+    prepare_layer(layer);
 
-        layer = BoardLayers::BOTTOM_PASTE;
-        layers[layer].offset = -board_thickness;
-        layers[layer].thickness = -0.035;
-        layers[layer].color = {.7, .7, .7};
-        layers[layer].explode_mul = -2 * n_inner_layers - 2;
-        prepare_layer(layer);
-    }
+    layer = BoardLayers::BOTTOM_PASTE;
+    layers[layer].offset = -board_thickness;
+    layers[layer].thickness = -0.035;
+    layers[layer].explode_mul = -2 * n_inner_layers - 2;
+    prepare_layer(layer);
 
     layer = 20000; // pth holes
     layers[layer].offset = 0;
     layers[layer].thickness = -board_thickness;
-    layers[layer].color = {1, .8, 0};
     for (const auto &it : patches) {
         if (it.first.layer == 10000 && it.first.type == PatchType::HOLE_PTH) {
             ClipperLib::ClipperOffset ofs;
@@ -536,6 +517,44 @@ void Canvas3D::set_msaa(unsigned int samples)
     num_samples = samples;
     needs_resize = true;
     queue_draw();
+}
+
+bool Canvas3D::layer_is_visible(int layer) const
+{
+    if (layer == 20000) // pth holes
+        return true;
+
+    if (layer == BoardLayers::TOP_MASK || layer == BoardLayers::BOTTOM_MASK)
+        return show_solder_mask;
+
+    if (layer == BoardLayers::TOP_PASTE || layer == BoardLayers::BOTTOM_PASTE)
+        return show_solder_paste;
+
+    if (layer == BoardLayers::TOP_SILKSCREEN || layer == BoardLayers::BOTTOM_SILKSCREEN)
+        return show_silkscreen;
+
+    if (layer == BoardLayers::L_OUTLINE || layer >= 10000)
+        return show_substrate;
+    return true;
+}
+
+Color Canvas3D::get_layer_color(int layer) const
+{
+    if (layer == 20000 || BoardLayers::is_copper(layer)) // pth or cu
+        return {1, .8, 0};
+
+    if (layer == BoardLayers::TOP_MASK || layer == BoardLayers::BOTTOM_MASK)
+        return solder_mask_color;
+
+    if (layer == BoardLayers::TOP_PASTE || layer == BoardLayers::BOTTOM_PASTE)
+        return {.7, .7, .7};
+
+    if (layer == BoardLayers::TOP_SILKSCREEN || layer == BoardLayers::BOTTOM_SILKSCREEN)
+        return {1, 1, 1};
+
+    if (layer == BoardLayers::L_OUTLINE || layer >= 10000)
+        return {.2, .15, 0};
+    return {1, 0, 0};
 }
 
 bool Canvas3D::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
