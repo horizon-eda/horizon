@@ -44,6 +44,7 @@ SheetBox::SheetBox(CoreSchematic *c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VE
     sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     sc->set_shadow_type(Gtk::SHADOW_IN);
     sc->set_min_content_height(150);
+    sc->set_propagate_natural_height(true);
     sc->add(*view);
     sc->show_all();
 

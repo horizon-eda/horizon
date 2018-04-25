@@ -29,6 +29,7 @@ NetSelector::NetSelector(Block *bl) : Gtk::Box(Gtk::Orientation::ORIENTATION_VER
     view->signal_row_activated().connect(sigc::mem_fun(this, &NetSelector::row_activated));
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
+    sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     sc->add(*view);
     sc->show_all();
 
