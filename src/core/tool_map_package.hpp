@@ -17,5 +17,7 @@ private:
     std::set<UUID> nets;
     void place_package(Component *comp, const Coordi &c);
     void update_tooltip();
+    bool flipped = false;
+    int angle = 0;
 };
 } // namespace horizon

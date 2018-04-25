@@ -87,6 +87,10 @@ void ToolMapPackage::place_package(Component *comp, const Coordi &c)
     pkg = &brd->packages.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, comp))
                    .first->second;
     pkg->placement.shift = c;
+    pkg->flip = flipped;
+    pkg->placement.set_angle(angle);
+    brd->packages_expand = {uu};
+    brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_PACKAGES);
     brd->expand(true);
     nets.clear();
     for (const auto &it : pkg->package.pads) {
@@ -163,6 +167,8 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
         else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
             bool rotate = args.key == GDK_KEY_r;
             move_mirror_or_rotate(pkg->placement.shift, rotate);
+            flipped = pkg->flip;
+            angle = pkg->placement.get_angle();
         }
         else if (args.key == GDK_KEY_Escape) {
             core.r->revert();
