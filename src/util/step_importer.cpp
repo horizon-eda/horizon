@@ -1,5 +1,4 @@
 #include "step_importer.hpp"
-#include <Handle_XCAFApp_Application.hxx>
 #include <Quantity_Color.hxx>
 #include <TDocStd_Document.hxx>
 #include <TopoDS.hxx>
@@ -15,7 +14,6 @@
 #include <STEPCAFControl_Reader.hxx>
 #include <STEPControl_Reader.hxx>
 
-#include <Handle_XCAFDoc_ColorTool.hxx>
 #include <XCAFDoc_ColorTool.hxx>
 #include <XCAFDoc_DocumentTool.hxx>
 #include <XCAFDoc_ShapeTool.hxx>
