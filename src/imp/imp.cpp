@@ -226,7 +226,7 @@ void ImpBase::run(int argc, char *argv[])
                 {CanvasGL::SelectionQualifier::INCLUDE_ORIGIN, selection_qualifier_include_origin_button},
                 {CanvasGL::SelectionQualifier::AUTO, selection_qualifier_auto_button}};
         bind_widget<CanvasGL::SelectionQualifier>(qual_map, canvas->selection_qualifier,
-                                                  [this](auto v) { update_selection_label(); });
+                                                  [this](auto v) { this->update_selection_label(); });
 
         std::map<CanvasGL::SelectionTool, Gtk::RadioButton *> tool_map = {
                 {CanvasGL::SelectionTool::BOX, selection_tool_box_button},
@@ -237,7 +237,7 @@ void ImpBase::run(int argc, char *argv[])
                                              [this, selection_qualifier_touch_box_button, selection_qualifier_box,
                                               selection_qualifier_auto_button,
                                               selection_qualifier_include_origin_button](auto v) {
-                                                 update_selection_label();
+                                                 this->update_selection_label();
                                                  auto is_paint = (v == CanvasGL::SelectionTool::PAINT);
                                                  if (is_paint) {
                                                      selection_qualifier_touch_box_button->set_active(true);
@@ -315,11 +315,11 @@ void ImpBase::run(int argc, char *argv[])
     connect_action(ActionID::SAVE, [this](const auto &a) { core.r->save(); });
     connect_action(ActionID::UNDO, [this](const auto &a) {
         core.r->undo();
-        canvas_update_from_pp();
+        this->canvas_update_from_pp();
     });
     connect_action(ActionID::REDO, [this](const auto &a) {
         core.r->redo();
-        canvas_update_from_pp();
+        this->canvas_update_from_pp();
     });
 
     connect_action(ActionID::COPY,
@@ -327,7 +327,7 @@ void ImpBase::run(int argc, char *argv[])
 
     connect_action(ActionID::DUPLICATE, [this](const auto &a) {
         clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos());
-        tool_begin(ToolID::PASTE);
+        this->tool_begin(ToolID::PASTE);
     });
 
     connect_action(ActionID::HELP, [this](const auto &a) { key_sequence_dialog->show(); });
@@ -344,7 +344,7 @@ void ImpBase::run(int argc, char *argv[])
         rect.set_y(c.y);
         tool_popover->set_pointing_to(rect);
 
-        update_action_sensitivity();
+        this->update_action_sensitivity();
         std::map<std::pair<ActionID, ToolID>, bool> can_begin;
         auto sel = canvas->get_selection();
         for (const auto &it : action_catalog) {
@@ -353,7 +353,7 @@ void ImpBase::run(int argc, char *argv[])
                 can_begin[it.first] = r;
             }
             else {
-                can_begin[it.first] = get_action_sensitive(it.first);
+                can_begin[it.first] = this->get_action_sensitive(it.first);
             }
         }
         tool_popover->set_can_begin(can_begin);
@@ -367,7 +367,7 @@ void ImpBase::run(int argc, char *argv[])
 
     connect_action(ActionID::PREFERENCES, [this](const auto &a) {
         if (preferences.lock()) {
-            show_preferences_window();
+            this->show_preferences_window();
         }
         else {
             Gtk::MessageDialog md(*main_window, "Can't lock preferences", false /* use_markup */, Gtk::MESSAGE_ERROR,
@@ -378,7 +378,7 @@ void ImpBase::run(int argc, char *argv[])
             if (md.run() == 1) {
                 preferences.unlock();
                 preferences.lock();
-                show_preferences_window();
+                this->show_preferences_window();
             }
         }
     });

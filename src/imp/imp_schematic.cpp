@@ -250,12 +250,12 @@ void ImpSchematic::construct()
 
     connect_action(ActionID::PLACE_PART, [this](const auto &conn) {
         if (!sockets_connected) {
-            tool_begin(ToolID::ADD_PART);
+            this->tool_begin(ToolID::ADD_PART);
         }
         else {
             json j;
             j["op"] = "show-browser";
-            send_json(j);
+            this->send_json(j);
         }
     });
 
@@ -274,7 +274,7 @@ void ImpSchematic::construct()
                     j["selection"].push_back(k);
                 }
             }
-            send_json(j);
+            this->send_json(j);
         });
         set_action_sensitive(make_action(ActionID::TO_BOARD), false);
         auto button = create_action_button(make_action(ActionID::TO_BOARD));
@@ -291,7 +291,7 @@ void ImpSchematic::construct()
                         json j;
                         j["op"] = "show-in-browser";
                         j["part"] = (std::string)sym.component->part->uuid;
-                        send_json(j);
+                        this->send_json(j);
                         break;
                     }
                 }
