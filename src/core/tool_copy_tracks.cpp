@@ -43,6 +43,13 @@ ToolResponse ToolCopyTracks::update(const ToolArgs &args)
                     }
                 }
 
+                std::set<Via *> source_vias;
+                for (const auto &it : core.r->selection) {
+                    if (it.type == ObjectType::VIA) {
+                        source_vias.insert(&brd->vias.at(it.uuid));
+                    }
+                }
+
                 std::set<BoardPackage *> source_pkgs;
                 for (const auto &it : core.r->selection) {
                     if (it.type == ObjectType::BOARD_PACKAGE) {
@@ -124,7 +131,20 @@ ToolResponse ToolCopyTracks::update(const ToolArgs &args)
 
                     if (!success) {
                         brd->tracks.erase(uu);
-                        std::cout << "error" << std::endl;
+                    }
+                }
+
+                for (const auto via : source_vias) {
+                    if (junction_map.count(via->junction)) {
+                        auto uu = UUID::random();
+                        auto &new_via = brd->vias
+                                                .emplace(std::piecewise_construct, std::forward_as_tuple(uu),
+                                                         std::forward_as_tuple(uu, via->vpp_padstack.ptr))
+                                                .first->second;
+                        new_via.junction = junction_map.at(via->junction);
+                        new_via.from_rules = via->from_rules;
+                        new_via.net_set = via->net_set;
+                        new_via.parameter_set = via->parameter_set;
                     }
                 }
 
