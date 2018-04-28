@@ -409,13 +409,13 @@ void ImpBase::run(int argc, char *argv[])
         undo_redo_box->get_style_context()->add_class("linked");
 
         auto undo_button = create_action_button(make_action(ActionID::UNDO));
-        undo_button->set_label("");
+        gtk_button_set_label(undo_button->gobj(), NULL);
         undo_button->set_tooltip_text("Undo");
         undo_button->set_image_from_icon_name("edit-undo-symbolic", Gtk::ICON_SIZE_BUTTON);
         undo_redo_box->pack_start(*undo_button, false, false, 0);
 
         auto redo_button = create_action_button(make_action(ActionID::REDO));
-        redo_button->set_label("");
+        gtk_button_set_label(redo_button->gobj(), NULL);
         redo_button->set_tooltip_text("Redo");
         redo_button->set_image_from_icon_name("edit-redo-symbolic", Gtk::ICON_SIZE_BUTTON);
         undo_redo_box->pack_start(*redo_button, false, false, 0);
