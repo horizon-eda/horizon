@@ -109,7 +109,10 @@ enum class ToolID {
     SELECT_TAG,
     HIGHLIGHT_TAG,
     COPY_PLACEMENT,
-    COPY_TRACKS
+    COPY_TRACKS,
+    TUNE_TRACK,
+    TUNE_DIFFPAIR,
+    TUNE_DIFFPAIR_SKEW
 };
 
 /**

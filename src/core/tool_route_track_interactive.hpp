@@ -8,6 +8,7 @@ namespace PNS {
 class ROUTER;
 class PNS_HORIZON_IFACE;
 class ITEM;
+class MEANDER_PLACER_BASE;
 } // namespace PNS
 
 namespace horizon {
@@ -31,6 +32,7 @@ public:
 private:
     PNS::ROUTER *router = nullptr;
     PNS::PNS_HORIZON_IFACE *iface = nullptr;
+    PNS::MEANDER_PLACER_BASE *meander_placer = nullptr;
     class CanvasGL *canvas = nullptr;
     ToolWrapper *wrapper = nullptr;
 
@@ -43,5 +45,6 @@ private:
 
     void update_tip();
     class Track *get_track(const std::set<SelectableRef> &sel);
+    bool is_tune() const;
 };
 } // namespace horizon

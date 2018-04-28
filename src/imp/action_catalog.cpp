@@ -382,6 +382,17 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::TOOL, ToolID::DRAG_TRACK_INTERACTIVE},
          {"Drag track", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::TUNE_TRACK},
+         {"Tune track", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::TUNE_DIFFPAIR},
+         {"Tune diff. pair", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::TUNE_DIFFPAIR_SKEW},
+         {"Tune diff. pair skew", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::ADD_PLANE},
          {"Add plane", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 
@@ -583,5 +594,19 @@ const LutEnumStr<ToolID> tool_lut = {TOOL_LUT_ITEM(EDIT_SCHEMATIC_PROPERTIES),
                                      TOOL_LUT_ITEM(MANAGE_POWER_NETS),
                                      TOOL_LUT_ITEM(PLACE_BOARD_HOLE),
                                      TOOL_LUT_ITEM(EDIT_BOARD_HOLE),
-                                     TOOL_LUT_ITEM(GENERATE_COURTYARD)};
+                                     TOOL_LUT_ITEM(GENERATE_COURTYARD),
+                                     TOOL_LUT_ITEM(SET_GROUP),
+                                     TOOL_LUT_ITEM(CLEAR_GROUP),
+                                     TOOL_LUT_ITEM(SET_TAG),
+                                     TOOL_LUT_ITEM(CLEAR_TAG),
+                                     TOOL_LUT_ITEM(APPLY_TAG),
+                                     TOOL_LUT_ITEM(SELECT_GROUP),
+                                     TOOL_LUT_ITEM(HIGHLIGHT_GROUP),
+                                     TOOL_LUT_ITEM(SELECT_TAG),
+                                     TOOL_LUT_ITEM(HIGHLIGHT_TAG),
+                                     TOOL_LUT_ITEM(COPY_PLACEMENT),
+                                     TOOL_LUT_ITEM(COPY_TRACKS),
+                                     TOOL_LUT_ITEM(TUNE_TRACK),
+                                     TOOL_LUT_ITEM(TUNE_DIFFPAIR),
+                                     TOOL_LUT_ITEM(TUNE_DIFFPAIR_SKEW)};
 } // namespace horizon

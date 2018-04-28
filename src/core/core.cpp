@@ -207,6 +207,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::ROUTE_TRACK_INTERACTIVE:
     case ToolID::ROUTE_DIFFPAIR_INTERACTIVE:
     case ToolID::DRAG_TRACK_INTERACTIVE:
+    case ToolID::TUNE_TRACK:
+    case ToolID::TUNE_DIFFPAIR:
+    case ToolID::TUNE_DIFFPAIR_SKEW:
         return std::make_unique<ToolRouteTrackInteractive>(this, tool_id);
 
     case ToolID::EDIT_VIA:

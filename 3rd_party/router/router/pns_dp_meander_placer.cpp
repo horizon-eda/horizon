@@ -30,6 +30,7 @@
 #include "pns_diff_pair.h"
 #include "pns_router.h"
 #include "pns_utils.h"
+#include "util/util.hpp"
 
 namespace PNS {
 
@@ -379,15 +380,12 @@ const std::string DP_MEANDER_PLACER::TuningInfo() const
         return ( "?" );
     }
 
-    /*
-    status += LengthDoubleToString( (double) m_lastLength, false );
+    status += horizon::dim_to_string(m_lastLength, false);
     status += "/";
-    status += LengthDoubleToString( (double) m_settings.m_targetLength, false );
+    status += horizon::dim_to_string(m_settings.m_targetLength, false);
     status += " (gap: ";
-    status += LengthDoubleToString( (double) m_originPair.Gap(), false );
+    status += horizon::dim_to_string(m_originPair.Gap(), false);
     status += ")";
-    */
-    //fixme
 
     return status;
 }

@@ -7,6 +7,7 @@
 #include "router/pns_horizon_iface.hpp"
 #include "router/pns_solid.h"
 #include "router/router/pns_router.h"
+#include "router/router/pns_meander_placer_base.h"
 #include "util/util.hpp"
 #include <iostream>
 
@@ -37,13 +38,35 @@ ToolRouteTrackInteractive::ToolRouteTrackInteractive(Core *c, ToolID tid) : Tool
 {
 }
 
+bool ToolRouteTrackInteractive::is_tune() const
+{
+    switch (tool_id) {
+    case ToolID::TUNE_TRACK:
+    case ToolID::TUNE_DIFFPAIR:
+    case ToolID::TUNE_DIFFPAIR_SKEW:
+        return true;
+    default:
+        return false;
+    }
+}
+
 bool ToolRouteTrackInteractive::can_begin()
 {
-    if (tool_id == ToolID::DRAG_TRACK_INTERACTIVE) {
-        return core.b && get_track(core.r->selection);
+    if (!core.b)
+        return false;
+    switch (tool_id) {
+    case ToolID::DRAG_TRACK_INTERACTIVE:
+    case ToolID::TUNE_TRACK:
+        return get_track(core.r->selection);
+
+    case ToolID::TUNE_DIFFPAIR:
+    case ToolID::TUNE_DIFFPAIR_SKEW: {
+        auto track = get_track(core.r->selection);
+        return track && track->net && track->net->diffpair;
     }
-    else {
-        return core.b;
+
+    default:
+        return true;
     }
 }
 
@@ -56,7 +79,7 @@ ToolRouteTrackInteractive::~ToolRouteTrackInteractive()
 
 bool ToolRouteTrackInteractive::is_specific()
 {
-    return tool_id == ToolID::DRAG_TRACK_INTERACTIVE;
+    return tool_id == ToolID::DRAG_TRACK_INTERACTIVE || is_tune();
 }
 
 Track *ToolRouteTrackInteractive::get_track(const std::set<SelectableRef> &sel)
@@ -98,10 +121,27 @@ ToolResponse ToolRouteTrackInteractive::begin(const ToolArgs &args)
 
     router = new PNS::ROUTER;
     router->SetInterface(iface);
-    if (tool_id == ToolID::ROUTE_DIFFPAIR_INTERACTIVE)
+    switch (tool_id) {
+    case ToolID::ROUTE_DIFFPAIR_INTERACTIVE:
         router->SetMode(PNS::ROUTER_MODE::PNS_MODE_ROUTE_DIFF_PAIR);
-    else
+        break;
+
+    case ToolID::TUNE_TRACK:
+        router->SetMode(PNS::ROUTER_MODE::PNS_MODE_TUNE_SINGLE);
+        break;
+
+    case ToolID::TUNE_DIFFPAIR:
+        router->SetMode(PNS::ROUTER_MODE::PNS_MODE_TUNE_DIFF_PAIR);
+        break;
+
+    case ToolID::TUNE_DIFFPAIR_SKEW:
+        router->SetMode(PNS::ROUTER_MODE::PNS_MODE_TUNE_DIFF_PAIR_SKEW);
+        break;
+
+    default:
         router->SetMode(PNS::ROUTER_MODE::PNS_MODE_ROUTE_SINGLE);
+    }
+
     router->ClearWorld();
     router->SyncWorld();
 
@@ -128,7 +168,20 @@ ToolResponse ToolRouteTrackInteractive::begin(const ToolArgs &args)
         if (!router->StartDragging(p0, wrapper->m_startItem, PNS::DM_ANY))
             return ToolResponse::end();
     }
-
+    if (is_tune()) {
+        Track *track = get_track(args.selection);
+        if (!track) {
+            return ToolResponse::end();
+        }
+        auto parent = iface->get_parent(track);
+        wrapper->m_startItem = router->GetWorld()->FindItemByParent(parent, iface->get_net_code(track->net.uuid));
+        VECTOR2I p0(args.coords.x, args.coords.y);
+        if (!router->StartRouting(p0, wrapper->m_startItem, 0))
+            return ToolResponse::end();
+        router->Move(p0, NULL);
+        meander_placer = dynamic_cast<PNS::MEANDER_PLACER_BASE *>(router->Placer());
+    }
+    update_tip();
     return ToolResponse();
 }
 
@@ -515,8 +568,83 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                 return ToolResponse::end();
             }
         }
+        else if (args.type == ToolEventType::KEY) {
+            if (args.key == GDK_KEY_Escape) {
+                board->expand_flags =
+                        static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
+                core.r->commit();
+                return ToolResponse::end();
+            }
+        }
     }
-    else {
+    else if (is_tune()) {
+        if (args.type == ToolEventType::MOVE) {
+            canvas->set_cursor_pos(args.coords);
+            router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
+        }
+        else if (args.type == ToolEventType::CLICK) {
+            if (args.button == 1) {
+                if (router->FixRoute(VECTOR2I(args.coords.x, args.coords.y), NULL)) {
+                    router->StopRouting();
+                    board->expand_flags =
+                            static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
+                    core.r->commit();
+                    return ToolResponse::end();
+                }
+            }
+            else if (args.button == 3) {
+                board->expand_flags =
+                        static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
+                core.r->commit();
+                return ToolResponse::end();
+            }
+        }
+        else if (args.type == ToolEventType::KEY) {
+            PNS::MEANDER_SETTINGS settings = meander_placer->MeanderSettings();
+            if (args.key == GDK_KEY_l) {
+                auto r = imp->dialogs.ask_datum("Target length", settings.m_targetLength);
+                if (r.first) {
+                    settings.m_targetLength = r.second;
+                    meander_placer->UpdateSettings(settings);
+                    router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
+                }
+            }
+            else if (args.key == GDK_KEY_less || args.key == GDK_KEY_greater) {
+                int dir = 0;
+                if (args.key == GDK_KEY_less) {
+                    dir = -1;
+                }
+                else {
+                    dir = 1;
+                }
+                meander_placer->AmplitudeStep(dir);
+                imp->tool_bar_flash("Meander amplitude: "
+                                    + dim_to_string(meander_placer->MeanderSettings().m_maxAmplitude) + " <i>"
+                                    + meander_placer->TuningInfo() + "</i>");
+                router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
+            }
+            else if (args.key == GDK_KEY_comma || args.key == GDK_KEY_period) {
+                int dir = 0;
+                if (args.key == GDK_KEY_comma) {
+                    dir = -1;
+                }
+                else {
+                    dir = 1;
+                }
+                meander_placer->SpacingStep(dir);
+                imp->tool_bar_flash("Meander spacing: " + dim_to_string(meander_placer->MeanderSettings().m_spacing)
+                                    + " <i>" + meander_placer->TuningInfo() + "</i>");
+                router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
+            }
+            else if (args.key == GDK_KEY_Escape) {
+                board->expand_flags =
+                        static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
+                core.r->commit();
+                return ToolResponse::end();
+            }
+        }
+    }
+    else if (tool_id == ToolID::ROUTE_TRACK_INTERACTIVE || tool_id == ToolID::ROUTE_DIFFPAIR_INTERACTIVE) {
         if (state == State::START) {
             if (args.type == ToolEventType::MOVE) {
                 wrapper->updateStartItem(args);
@@ -652,6 +780,17 @@ void ToolRouteTrackInteractive::update_tip()
     std::stringstream ss;
     if (tool_id == ToolID::DRAG_TRACK_INTERACTIVE) {
         imp->tool_bar_set_tip("<b>LMB:</b>place <b>RMB:</b>cancel");
+        return;
+    }
+    if (is_tune()) {
+        if (meander_placer) {
+            ss << "<b>LMB:</b>place <b>RMB:</b>cancel <b>l:</b>set length <b>&lt;&gt;:</b>+/- amplitude <b>,.:</b>+/- "
+                  "spacing";
+            ss << " <i>";
+            ss << meander_placer->TuningInfo();
+            ss << "</i>";
+            imp->tool_bar_set_tip(ss.str());
+        }
         return;
     }
     if (state == State::ROUTING) {
