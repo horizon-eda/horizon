@@ -45,7 +45,10 @@ enum class ActionID {
     SELECTION_QUALIFIER_INCLUDE_BOX,
     TO_BOARD,
     MOVE_TO_OTHER_SHEET,
-    SHOW_IN_BROWSER
+    SHOW_IN_BROWSER,
+    TUNING,
+    TUNING_ADD_TRACKS,
+    TUNING_ADD_TRACKS_ALL
 };
 
 enum class ActionGroup {

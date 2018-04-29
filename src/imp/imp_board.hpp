@@ -15,6 +15,7 @@ protected:
     void construct() override;
     bool handle_broadcast(const json &j) override;
     void handle_maybe_drag() override;
+    void update_action_sensitivity() override;
 
     ActionCatalogItem::Availability get_editor_type_for_action() const
     {
@@ -30,11 +31,13 @@ private:
     class FabOutputWindow *fab_output_window = nullptr;
     class View3DWindow *view_3d_window = nullptr;
     class StepExportWindow *step_export_window = nullptr;
+    class TuningWindow *tuning_window = nullptr;
     bool cross_probing_enabled = false;
 
     Coordf cursor_pos_drag_begin;
     Target target_drag_begin;
 
     void handle_drag();
+    void handle_measure_tracks(const ActionConnection &a);
 };
 } // namespace horizon

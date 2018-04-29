@@ -286,6 +286,7 @@ SRC_IMP = \
 	src/imp/fab_output_window.cpp\
 	src/imp/3d_view.cpp\
 	src/imp/step_export_window.cpp\
+	src/imp/tuning_window.cpp\
 	src/canvas3d/canvas3d.cpp\
 	src/canvas3d/cover.cpp\
 	src/canvas3d/wall.cpp\

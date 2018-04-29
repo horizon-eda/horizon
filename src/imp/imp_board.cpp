@@ -8,6 +8,7 @@
 #include "rules/rules_window.hpp"
 #include "widgets/board_display_options.hpp"
 #include "widgets/layer_box.hpp"
+#include "tuning_window.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
@@ -23,6 +24,7 @@ void ImpBoard::canvas_update()
     canvas->update(*core_board.get_canvas_data());
     warnings_box->update(core_board.get_board()->warnings);
     update_highlights();
+    tuning_window->update();
 }
 
 void ImpBoard::update_highlights()
@@ -163,6 +165,16 @@ void transform_path(ClipperLib::Path &path, const Placement &tr)
     }
 }
 
+void ImpBoard::update_action_sensitivity()
+{
+    auto sel = canvas->get_selection();
+    set_action_sensitive(
+            make_action(ActionID::TUNING_ADD_TRACKS),
+            std::any_of(sel.begin(), sel.end(), [](const auto &x) { return x.type == ObjectType::TRACK; }));
+
+    ImpBase::update_action_sensitivity();
+}
+
 void ImpBoard::construct()
 {
     ImpLayer::construct_layer_box(false);
@@ -197,6 +209,9 @@ void ImpBoard::construct()
 
     hamburger_menu->append("Export STEP", "win.export_step");
     main_window->add_action("export_step", [this] { step_export_window->present(); });
+
+    hamburger_menu->append("Length tuning", "win.tuning");
+    main_window->add_action("tuning", [this] { trigger_action(ActionID::TUNING); });
 
 
     if (sockets_connected) {
@@ -234,6 +249,8 @@ void ImpBoard::construct()
     fab_output_window = FabOutputWindow::create(main_window, core.b->get_board(), core.b->get_fab_output_settings());
     view_3d_window = View3DWindow::create(core_board.get_board(), pool.get());
     step_export_window = StepExportWindow::create(main_window, core.b->get_board(), pool.get());
+    tuning_window = new TuningWindow(core.b->get_board());
+    tuning_window->set_transient_for(*main_window);
 
     core.r->signal_tool_changed().connect([this](ToolID t) { fab_output_window->set_can_generate(t == ToolID::NONE); });
 
@@ -243,6 +260,10 @@ void ImpBoard::construct()
         view_3d_window->update();
         view_3d_window->present();
     });
+
+    connect_action(ActionID::TUNING, [this](const auto &a) { tuning_window->present(); });
+    connect_action(ActionID::TUNING_ADD_TRACKS, sigc::mem_fun(this, &ImpBoard::handle_measure_tracks));
+    connect_action(ActionID::TUNING_ADD_TRACKS_ALL, sigc::mem_fun(this, &ImpBoard::handle_measure_tracks));
 
     auto *display_control_notebook = Gtk::manage(new Gtk::Notebook);
     display_control_notebook->append_page(*layer_box, "Layers");
@@ -283,6 +304,19 @@ void ImpBoard::construct()
 
     main_window->left_panel->pack_start(*display_control_notebook, false, false);
     display_control_notebook->show();
+}
+
+void ImpBoard::handle_measure_tracks(const ActionConnection &a)
+{
+    auto sel = canvas->get_selection();
+    std::set<UUID> tracks;
+    for (const auto &it : sel) {
+        if (it.type == ObjectType::TRACK) {
+            tracks.insert(it.uuid);
+        }
+    }
+    tuning_window->add_tracks(tracks, a.action_id == ActionID::TUNING_ADD_TRACKS_ALL);
+    tuning_window->present();
 }
 
 void ImpBoard::handle_maybe_drag()
