@@ -96,7 +96,7 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
                 }
             }
             if (valid) {
-                load_and_log(tracks, ObjectType::TRACK, std::forward_as_tuple(u, it.value(), *this),
+                load_and_log(tracks, ObjectType::TRACK, std::forward_as_tuple(u, it.value(), this),
                              Logger::Domain::BOARD);
             }
             else {

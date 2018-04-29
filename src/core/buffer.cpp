@@ -29,6 +29,7 @@ void Buffer::clear()
     power_symbols.clear();
     net_labels.clear();
     vias.clear();
+    tracks.clear();
 }
 
 void Buffer::load_from_symbol(std::set<SelectableRef> selection)
@@ -87,6 +88,13 @@ void Buffer::load_from_symbol(std::set<SelectableRef> selection)
             new_sel.emplace(via.junction->uuid, ObjectType::JUNCTION);
             if (via.net_set)
                 new_sel.emplace(via.net_set->uuid, ObjectType::NET);
+        } break;
+        case ObjectType::TRACK: {
+            const auto &track = core.b->get_board()->tracks.at(it.uuid);
+            if (track.from.is_junc() && track.to.is_junc()) {
+                new_sel.emplace(track.from.junc->uuid, ObjectType::JUNCTION);
+                new_sel.emplace(track.to.junc->uuid, ObjectType::JUNCTION);
+            }
         } break;
 
             /*
@@ -164,6 +172,15 @@ void Buffer::load_from_symbol(std::set<SelectableRef> selection)
             li.from = &junctions.at(li.from.uuid);
             li.to = &junctions.at(li.to.uuid);
         }
+        else if (it.type == ObjectType::TRACK) {
+            const auto &x = core.b->get_board()->tracks.at(it.uuid);
+            if (x.from.is_junc() && x.to.is_junc()) {
+                auto &track = tracks.emplace(x.uuid, x).first->second;
+                track.from.junc.update(junctions);
+                track.to.junc.update(junctions);
+            }
+        }
+
         else if (it.type == ObjectType::ARC) {
             auto x = core.r->get_arc(it.uuid);
             auto &arc = arcs.emplace(x->uuid, *x).first->second;
@@ -326,6 +343,10 @@ json Buffer::serialize()
     j["vias"] = json::object();
     for (const auto &it : vias) {
         j["vias"][(std::string)it.first] = it.second.serialize();
+    }
+    j["tracks"] = json::object();
+    for (const auto &it : tracks) {
+        j["tracks"][(std::string)it.first] = it.second.serialize();
     }
     return j;
 }

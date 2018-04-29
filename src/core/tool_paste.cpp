@@ -276,6 +276,20 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
             core.r->selection.emplace(u, ObjectType::VIA);
         }
     }
+    if (j.count("tracks")) {
+        const json &o = j["tracks"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID::random();
+            auto brd = core.b->get_board();
+            auto x = &brd->tracks
+                              .emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                                       std::forward_as_tuple(u, it.value()))
+                              .first->second;
+            x->to.junc = &brd->junctions.at(junction_xlat.at(x->to.junc.uuid));
+            x->from.junc = &brd->junctions.at(junction_xlat.at(x->from.junc.uuid));
+            core.r->selection.emplace(u, ObjectType::TRACK);
+        }
+    }
     move_init(args.coords);
     imp->tool_bar_set_tip(
             "<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate "

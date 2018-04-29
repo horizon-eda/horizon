@@ -7,15 +7,24 @@
 
 namespace horizon {
 
-Track::Connection::Connection(const json &j, Board &brd)
+Track::Connection::Connection(const json &j, Board *brd)
 {
     if (!j.at("junc").is_null()) {
-        junc = &brd.junctions.at(j.at("junc").get<std::string>());
+        if (brd)
+            junc = &brd->junctions.at(j.at("junc").get<std::string>());
+        else
+            junc.uuid = j.at("junc").get<std::string>();
     }
     else if (!j.at("pad").is_null()) {
         UUIDPath<2> pad_path(j.at("pad").get<std::string>());
-        package = &brd.packages.at(pad_path.at(0));
-        pad = &package->package.pads.at(pad_path.at(1));
+        if (brd) {
+            package = &brd->packages.at(pad_path.at(0));
+            pad = &package->package.pads.at(pad_path.at(1));
+        }
+        else {
+            package.uuid = pad_path.at(0);
+            pad.uuid = pad_path.at(1);
+        }
     }
     else {
         assert(false);
@@ -156,7 +165,7 @@ bool Track::Connection::operator<(const Track::Connection &other) const
     return pad < other.pad;
 }
 
-Track::Track(const UUID &uu, const json &j, Board &brd)
+Track::Track(const UUID &uu, const json &j, Board *brd)
     : uuid(uu), layer(j.value("layer", 0)), width(j.value("width", 0)),
       width_from_rules(j.value("width_from_net_class", true)), locked(j.value("locked", false)), from(j["from"], brd),
       to(j["to"], brd)

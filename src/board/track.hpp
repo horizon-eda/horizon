@@ -18,7 +18,7 @@ class Track : public UUIDProvider {
 public:
     enum class End { TO, FROM };
 
-    Track(const UUID &uu, const json &j, class Board &brd);
+    Track(const UUID &uu, const json &j, class Board *brd = nullptr);
     Track(const UUID &uu);
 
     void update_refs(class Board &brd);
@@ -39,7 +39,7 @@ public:
         Connection()
         {
         }
-        Connection(const json &j, Board &brd);
+        Connection(const json &j, Board *brd = nullptr);
         Connection(Junction *j);
         Connection(BoardPackage *pkg, Pad *pad);
         uuid_ptr<Junction> junc = nullptr;

@@ -17,6 +17,7 @@
 #include "schematic/power_symbol.hpp"
 #include "schematic/schematic_symbol.hpp"
 #include "board/via.hpp"
+#include "board/track.hpp"
 #include "util/uuid.hpp"
 #include <map>
 #include <set>
@@ -44,6 +45,7 @@ public:
     std::map<UUID, PowerSymbol> power_symbols;
     std::map<UUID, NetLabel> net_labels;
     std::map<UUID, Via> vias;
+    std::map<UUID, Track> tracks;
 
     json serialize();
 
