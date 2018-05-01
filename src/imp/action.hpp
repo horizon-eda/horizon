@@ -48,7 +48,8 @@ enum class ActionID {
     SHOW_IN_BROWSER,
     TUNING,
     TUNING_ADD_TRACKS,
-    TUNING_ADD_TRACKS_ALL
+    TUNING_ADD_TRACKS_ALL,
+	HIGHLIGHT_NET
 };
 
 enum class ActionGroup {

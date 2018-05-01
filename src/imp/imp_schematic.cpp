@@ -302,6 +302,44 @@ void ImpSchematic::construct()
 
     connect_action(ActionID::MOVE_TO_OTHER_SHEET,
                    std::bind(&ImpSchematic::handle_move_to_other_sheet, this, std::placeholders::_1));
+
+
+    connect_action(ActionID::HIGHLIGHT_NET, [this](const auto &a) {
+        highlights.clear();
+        auto sheet = core_schematic.get_sheet();
+        for (const auto &it : canvas->get_selection()) {
+            switch (it.type) {
+            case ObjectType::LINE_NET: {
+                auto &li = sheet->net_lines.at(it.uuid);
+                if (li.net) {
+                    highlights.emplace(ObjectType::NET, li.net->uuid);
+                }
+            } break;
+            case ObjectType::NET_LABEL: {
+                auto &la = sheet->net_labels.at(it.uuid);
+                if (la.junction->net) {
+                    highlights.emplace(ObjectType::NET, la.junction->net->uuid);
+                }
+            } break;
+            case ObjectType::POWER_SYMBOL: {
+                auto &sym = sheet->power_symbols.at(it.uuid);
+                if (sym.junction->net) {
+                    highlights.emplace(ObjectType::NET, sym.junction->net->uuid);
+                }
+            } break;
+            case ObjectType::JUNCTION: {
+                auto &ju = sheet->junctions.at(it.uuid);
+                if (ju.net) {
+                    highlights.emplace(ObjectType::NET, ju.net->uuid);
+                }
+            } break;
+            default:;
+            }
+        }
+        update_highlights();
+    });
+
+
     grid_spin_button->set_sensitive(false);
 
     rules_window->signal_goto().connect([this](Coordi location, UUID sheet) {
@@ -327,6 +365,7 @@ void ImpSchematic::construct()
 
 void ImpSchematic::update_action_sensitivity()
 {
+    auto sel = canvas->get_selection();
     if (sockets_connected) {
         json req;
         req["op"] = "has-board";
@@ -335,7 +374,7 @@ void ImpSchematic::update_action_sensitivity()
             set_action_sensitive(make_action(ActionID::TO_BOARD), false);
         }
         else {
-            auto sel = canvas->get_selection();
+
             auto has_sym = std::any_of(sel.begin(), sel.end(),
                                        [](const auto &x) { return x.type == ObjectType::SCHEMATIC_SYMBOL; });
             set_action_sensitive(make_action(ActionID::TO_BOARD), has_sym);
@@ -346,7 +385,20 @@ void ImpSchematic::update_action_sensitivity()
         set_action_sensitive(make_action(ActionID::TO_BOARD), false);
         set_action_sensitive(make_action(ActionID::SHOW_IN_BROWSER), false);
     }
-    set_action_sensitive(make_action(ActionID::MOVE_TO_OTHER_SHEET), canvas->get_selection().size() > 0);
+    set_action_sensitive(make_action(ActionID::MOVE_TO_OTHER_SHEET), sel.size() > 0);
+
+    set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET), std::any_of(sel.begin(), sel.end(), [](const auto &x) {
+                             switch (x.type) {
+                             case ObjectType::LINE_NET:
+                             case ObjectType::NET_LABEL:
+                             case ObjectType::JUNCTION:
+                             case ObjectType::POWER_SYMBOL:
+                                 return true;
+
+                             default:
+                                 return false;
+                             }
+                         }));
 
     ImpBase::update_action_sensitivity();
 }

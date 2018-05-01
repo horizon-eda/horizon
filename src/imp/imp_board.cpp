@@ -172,6 +172,18 @@ void ImpBoard::update_action_sensitivity()
             make_action(ActionID::TUNING_ADD_TRACKS),
             std::any_of(sel.begin(), sel.end(), [](const auto &x) { return x.type == ObjectType::TRACK; }));
 
+    set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET), std::any_of(sel.begin(), sel.end(), [](const auto &x) {
+                             switch (x.type) {
+                             case ObjectType::TRACK:
+                             case ObjectType::JUNCTION:
+                             case ObjectType::VIA:
+                                 return true;
+
+                             default:
+                                 return false;
+                             }
+                         }));
+
     ImpBase::update_action_sensitivity();
 }
 
@@ -264,6 +276,35 @@ void ImpBoard::construct()
     connect_action(ActionID::TUNING, [this](const auto &a) { tuning_window->present(); });
     connect_action(ActionID::TUNING_ADD_TRACKS, sigc::mem_fun(this, &ImpBoard::handle_measure_tracks));
     connect_action(ActionID::TUNING_ADD_TRACKS_ALL, sigc::mem_fun(this, &ImpBoard::handle_measure_tracks));
+
+    connect_action(ActionID::HIGHLIGHT_NET, [this](const auto &a) {
+        highlights.clear();
+        for (const auto &it : canvas->get_selection()) {
+            auto board = core_board.get_board();
+            switch (it.type) {
+            case ObjectType::TRACK: {
+                auto &track = board->tracks.at(it.uuid);
+                if (track.net) {
+                    highlights.emplace(ObjectType::NET, track.net->uuid);
+                }
+            } break;
+            case ObjectType::VIA: {
+                auto &via = board->vias.at(it.uuid);
+                if (via.junction->net) {
+                    highlights.emplace(ObjectType::NET, via.junction->net->uuid);
+                }
+            } break;
+            case ObjectType::JUNCTION: {
+                auto &ju = board->junctions.at(it.uuid);
+                if (ju.net) {
+                    highlights.emplace(ObjectType::NET, ju.net->uuid);
+                }
+            } break;
+            default:;
+            }
+        }
+        update_highlights();
+    });
 
     auto *display_control_notebook = Gtk::manage(new Gtk::Notebook);
     display_control_notebook->append_page(*layer_box, "Layers");

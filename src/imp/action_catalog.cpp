@@ -145,6 +145,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Measure all tracks", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::HIGHLIGHT_NET, ToolID::NONE},
+         {"Highlight net", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::MOVE},
          {"Move", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
 
@@ -533,6 +537,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(TUNING),
         ACTION_LUT_ITEM(TUNING_ADD_TRACKS),
         ACTION_LUT_ITEM(TUNING_ADD_TRACKS_ALL),
+        ACTION_LUT_ITEM(HIGHLIGHT_NET),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
