@@ -438,6 +438,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::TOOL, ToolID::SELECT_MORE},
          {"Select more", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::SELECT_MORE_NO_VIA},
+         {"Select more (stop at vias)", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::SET_VIA_NET},
          {"Set via net", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 
@@ -604,6 +608,7 @@ const LutEnumStr<ToolID> tool_lut = {TOOL_LUT_ITEM(EDIT_SCHEMATIC_PROPERTIES),
                                      TOOL_LUT_ITEM(CLEAR_DIFFPAIR),
                                      TOOL_LUT_ITEM(ROUTE_DIFFPAIR_INTERACTIVE),
                                      TOOL_LUT_ITEM(SELECT_MORE),
+                                     TOOL_LUT_ITEM(SELECT_MORE_NO_VIA),
                                      TOOL_LUT_ITEM(SET_VIA_NET),
                                      TOOL_LUT_ITEM(CLEAR_VIA_NET),
                                      TOOL_LUT_ITEM(DRAG_TRACK_INTERACTIVE),

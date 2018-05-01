@@ -56,8 +56,10 @@ ToolResponse ToolSelectMore::begin(const ToolArgs &args)
         for (const auto it : tracks) {
             for (const auto &it_ft : {it->from, it->to}) {
                 if (it_ft.is_junc()) {
-                    if (junctions.insert(it_ft.junc).second)
-                        inserted = true;
+                    if (tool_id == ToolID::SELECT_MORE
+                        || (tool_id == ToolID::SELECT_MORE_NO_VIA && !it_ft.junc->has_via))
+                        if (junctions.insert(it_ft.junc).second)
+                            inserted = true;
                 }
             }
         }
