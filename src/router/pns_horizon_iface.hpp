@@ -109,6 +109,16 @@ public:
     const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::BoardHole *hole);
     const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::BoardPackage *pkg, const horizon::Pad *pad);
 
+    int64_t get_override_routing_offset() const
+    {
+        return override_routing_offset;
+    }
+
+    void set_override_routing_offset(int64_t o)
+    {
+        override_routing_offset = o;
+    }
+
 private:
     class PNS_HORIZON_RULE_RESOLVER *m_ruleResolver = nullptr;
     class PNS_HORIZON_DEBUG_DECORATOR *m_debugDecorator = nullptr;
@@ -130,6 +140,8 @@ private:
     std::map<horizon::UUID, int> net_code_map;
     std::map<int, horizon::UUID> net_code_map_r;
     int net_code_max = 0;
+
+    int64_t override_routing_offset = -1;
 
     std::set<PNS_HORIZON_PARENT_ITEM> parents;
 

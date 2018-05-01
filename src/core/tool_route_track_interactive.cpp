@@ -754,7 +754,7 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
                 }
             }
-            if (args.key == GDK_KEY_W) {
+            else if (args.key == GDK_KEY_W) {
                 auto nets = router->GetCurrentNets();
                 Net *net = nullptr;
                 for (auto x : nets) {
@@ -768,6 +768,17 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     router->UpdateSizes(sz);
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
                 }
+            }
+            else if (args.key == GDK_KEY_o) {
+                auto r = imp->dialogs.ask_datum("Routing offset", .1_mm);
+                if (r.first) {
+                    iface->set_override_routing_offset(r.second);
+                    router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
+                }
+            }
+            else if (args.key == GDK_KEY_O) {
+                iface->set_override_routing_offset(-1);
+                router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
             }
         }
     }
@@ -796,7 +807,9 @@ void ToolRouteTrackInteractive::update_tip()
     if (state == State::ROUTING) {
         ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete "
               "last segment <b>/:</b>track posture <b>v:</b>toggle via "
-              "<b>w:</b>track width <b>W:</b>default track width <i> ";
+              "<b>w:</b>track width <b>W:</b>default track width "
+              "<b>o:</b>clearance offset <b>O:</b>default cl. offset"
+              "<i> ";
         auto nets = router->GetCurrentNets();
         Net *net = nullptr;
         for (auto x : nets) {

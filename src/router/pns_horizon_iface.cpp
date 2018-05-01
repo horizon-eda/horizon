@@ -202,7 +202,12 @@ int PNS_HORIZON_RULE_RESOLVER::Clearance(const PNS::ITEM *aA, const PNS::ITEM *a
     assert(layer != UNDEFINED_LAYER);
 
     auto clearance = m_rules->get_clearance_copper(net_a, net_b, PNS_HORIZON_IFACE::layer_from_router(layer));
-    return clearance->get_clearance(pt_a, pt_b) + clearance->routing_offset;
+
+    int64_t routing_offset = clearance->routing_offset;
+    if (m_iface->get_override_routing_offset() >= 0)
+        routing_offset = m_iface->get_override_routing_offset();
+
+    return clearance->get_clearance(pt_a, pt_b) + routing_offset;
 }
 
 int PNS_HORIZON_RULE_RESOLVER::Clearance(int aNetCode) const
