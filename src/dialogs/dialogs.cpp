@@ -123,10 +123,11 @@ std::pair<bool, UUID> Dialogs::select_entity(Pool *pool)
         return {false, UUID()};
     }
 }
-std::pair<bool, UUID> Dialogs::select_net(class Block *block, bool power_only)
+std::pair<bool, UUID> Dialogs::select_net(class Block *block, bool power_only, const UUID &net_default)
 {
     SelectNetDialog dia(parent, block, "Select net");
     dia.net_selector->set_power_only(power_only);
+    dia.net_selector->select_net(net_default);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
         return {dia.valid, dia.net};

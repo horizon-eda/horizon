@@ -3,6 +3,7 @@
 #include <iostream>
 #include "block/block.hpp"
 #include "util/util.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 NetSelector::NetSelector(Block *bl) : Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 16), block(bl)
@@ -118,5 +119,6 @@ void NetSelector::select_net(const UUID &uu)
             break;
         }
     }
+    tree_view_scroll_to_selection(view);
 }
 } // namespace horizon

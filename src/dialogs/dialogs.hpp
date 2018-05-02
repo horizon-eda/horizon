@@ -27,7 +27,7 @@ public:
     std::pair<bool, UUID> select_padstack(class Pool *pool, const UUID &package_uuid);
     std::pair<bool, UUID> select_hole_padstack(class Pool *pool);
     std::pair<bool, UUID> select_via_padstack(class ViaPadstackProvider *vpp);
-    std::pair<bool, UUID> select_net(class Block *block, bool power_only);
+    std::pair<bool, UUID> select_net(class Block *block, bool power_only, const UUID &net_default = UUID());
     std::pair<bool, UUID> select_bus(class Block *block);
     std::pair<bool, UUID> select_bus_member(class Block *block, const UUID &bus_uuid);
     bool edit_symbol_pin_names(class SchematicSymbol *symbol);

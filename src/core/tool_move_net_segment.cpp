@@ -92,7 +92,8 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
 
         bool r;
         UUID net_uuid;
-        std::tie(r, net_uuid) = imp->dialogs.select_net(core.c->get_schematic()->block, nsinfo.net->is_power);
+        std::tie(r, net_uuid) =
+                imp->dialogs.select_net(core.c->get_schematic()->block, nsinfo.net->is_power, nsinfo.net->uuid);
         if (!r) {
             return ToolResponse::end();
         }
