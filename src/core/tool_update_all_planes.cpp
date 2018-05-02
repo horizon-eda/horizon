@@ -20,6 +20,7 @@ ToolResponse ToolUpdateAllPlanes::begin(const ToolArgs &args)
     else if (tool_id == ToolID::CLEAR_ALL_PLANES) {
         for (auto &it : core.b->get_board()->planes) {
             it.second.fragments.clear();
+            it.second.revision++;
         }
     }
     core.r->commit();

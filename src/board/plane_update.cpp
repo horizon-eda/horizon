@@ -54,6 +54,7 @@ void Board::update_plane(Plane *plane, CanvasPatch *ca_ext, CanvasPads *ca_pads_
     }
 
     plane->fragments.clear();
+    plane->revision++;
 
     ClipperLib::Clipper cl_plane;
     ClipperLib::Path poly_path; // path from polygon contour

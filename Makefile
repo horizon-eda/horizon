@@ -104,6 +104,7 @@ SRC_CANVAS = \
 	3rd_party/polypartition/polypartition.cpp\
 	src/canvas/marker.cpp\
 	src/canvas/annotation.cpp \
+	src/canvas/fragment_cache.cpp \
 	3rd_party/poly2tri/common/shapes.cpp\
 	3rd_party/poly2tri/sweep/cdt.cpp\
 	3rd_party/poly2tri/sweep/sweep.cpp\

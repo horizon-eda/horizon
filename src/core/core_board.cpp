@@ -574,6 +574,10 @@ void CoreBoard::history_load(unsigned int i)
 {
     auto x = dynamic_cast<CoreBoard::HistoryItem *>(history.at(history_current).get());
     UUID uu(x->brd.at("uuid").get<std::string>());
+    std::map<UUID, unsigned int> plane_revs;
+    for (const auto &it : brd.planes) {
+        plane_revs[it.first] = it.second.revision;
+    }
     brd.~Board(); // reconstruct board from json
     new (&brd) Board(uu, x->brd, x->block, *m_pool, via_padstack_provider);
 
@@ -582,6 +586,8 @@ void CoreBoard::history_load(unsigned int i)
     for (const auto &it : x->fragments) {
         if (brd.planes.count(it.first)) {
             std::copy(it.second.begin(), it.second.end(), std::back_inserter(brd.planes.at(it.first).fragments));
+            if (plane_revs.count(it.first))
+                brd.planes.at(it.first).revision = plane_revs.at(it.first) + 1;
         }
     }
     brd.expand();

@@ -684,43 +684,15 @@ void Canvas::render(const Polygon &ipoly, bool interactive)
         return;
     if (auto plane = dynamic_cast<Plane *>(poly.usage.ptr)) {
         triangle_type_current = Triangle::Type::PLANE;
+        auto tris = fragment_cache.get_triangles(*plane);
+        for (const auto &tri : tris) {
+            add_triangle(poly.layer, tri[0], tri[1], tri[2], ColorP::FROM_LAYER);
+        }
         for (const auto &frag : plane->fragments) {
-            std::vector<p2t::Point> point_store;
-            size_t pts_total = 0;
-            for (const auto &it : frag.paths)
-                pts_total += it.size();
-            point_store.reserve(pts_total); // important so that iterators won't
-                                            // get invalidated
-
-            std::vector<p2t::Point *> contour;
-            contour.reserve(frag.paths.front().size());
-            for (const auto &p : frag.paths.front()) {
-                point_store.emplace_back(p.X, p.Y);
-                contour.push_back(&point_store.back());
-            }
-            p2t::CDT cdt(contour);
-            for (size_t i = 1; i < frag.paths.size(); i++) {
-                auto &path = frag.paths.at(i);
-                std::vector<p2t::Point *> hole;
-                hole.reserve(path.size());
-                for (const auto &p : path) {
-                    point_store.emplace_back(p.X, p.Y);
-                    hole.push_back(&point_store.back());
-                }
-                cdt.AddHole(hole);
-            }
-            cdt.Triangulate();
-            auto tris = cdt.GetTriangles();
             ColorP co = ColorP::FROM_LAYER;
             if (frag.orphan == true)
                 co = ColorP::YELLOW;
 
-            for (const auto tri : tris) {
-                auto p0 = coordf_from_pt(tri->GetPoint(0));
-                auto p1 = coordf_from_pt(tri->GetPoint(1));
-                auto p2 = coordf_from_pt(tri->GetPoint(2));
-                add_triangle(poly.layer, p0, p1, p2, co);
-            }
             for (const auto &path : frag.paths) {
                 for (size_t i = 0; i < path.size(); i++) {
                     auto &c0 = path[i];

@@ -70,6 +70,7 @@ ToolResponse ToolEditPlane::begin(const ToolArgs &args)
         }
         else if (tool_id == ToolID::CLEAR_PLANE) {
             plane->fragments.clear();
+            plane->revision++;
             core.r->commit();
             return ToolResponse::end();
         }

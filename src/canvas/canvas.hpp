@@ -7,6 +7,7 @@
 #include "selection_filter.hpp"
 #include "target.hpp"
 #include "triangle.hpp"
+#include "fragment_cache.hpp"
 #include "util/placement.hpp"
 #include <array>
 #include <set>
@@ -180,6 +181,8 @@ protected:
     std::map<int, int> overlay_layers;
     int overlay_layer_current = 30000;
     int get_overlay_layer(int layer);
+
+    FragmentCache fragment_cache;
 
 private:
     void img_text_layer(int l);

@@ -55,6 +55,7 @@ public:
     PlaneSettings settings;
 
     std::deque<Fragment> fragments;
+    unsigned int revision = 0;
 
     Type get_type() const;
     UUID get_uuid() const;
