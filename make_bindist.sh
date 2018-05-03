@@ -52,7 +52,7 @@ LIBS=(
 	libcroco-0.6-3.dll\
 	libtiff-5.dll\
 	libzmq.dll\
-	libsodium-18.dll\
+	libsodium-23.dll\
 	libcurl-4.dll\
 	libgit2.dll\
 	libidn2-0.dll\
