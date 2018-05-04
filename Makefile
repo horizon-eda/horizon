@@ -433,12 +433,15 @@ SRC_POOL_MGR = \
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp
 
+SRC_GEN_PKG = \
+	src/gen-pkg/gen-pkg.cpp
+
 SRC_OCE = \
 	src/util/step_importer.cpp\
 	src/export_step/export_step.cpp\
 
 
-SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PRJ_MGR) $(SRC_PGM_TEST) $(SRC_POOL_MGR))
+SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PRJ_MGR) $(SRC_PGM_TEST) $(SRC_POOL_MGR) $(SRC_GEN_PKG))
 
 INC = -Isrc -I3rd_party
 
@@ -515,6 +518,9 @@ horizon-pool-mgr: $(OBJ_COMMON) $(SRC_POOL_MGR:.cpp=.o) $(SRC_RES_POOL:.rc=.res)
 horizon-pgm-test: $(OBJ_COMMON) $(SRC_PGM_TEST:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
+horizon-gen-pkg: $(OBJ_COMMON) $(SRC_GEN_PKG:.cpp=.o)
+	$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
+
 $(OBJ_ALL): %.o: %.cpp
 	$(CXX) -c $(INC) $(CXXFLAGS) $< -o $@
 
@@ -528,7 +534,7 @@ $(OBJ_RES): %.res: %.rc
 	windres $< -O coff -o $@
 
 clean: clean_router clean_oce clean_res
-	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test $(OBJ_ALL:.o=.d) src/resources.cpp src/gitversion.cpp
+	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test horizon-gen-pkg $(OBJ_ALL:.o=.d) src/resources.cpp src/gitversion.cpp
 
 clean_router:
 	rm -f $(OBJ_ROUTER) $(OBJ_ROUTER:.o=.d)
