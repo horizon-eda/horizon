@@ -51,6 +51,30 @@ const std::vector<horizon::UUID> pin_header_1x_uuids = {
         "5518fd66-bdd9-46ad-850a-2022defebb13", "4b2d2d4f-f0dd-4935-8962-175cebaa133f",
 };
 
+std::vector<horizon::UUID> pin_header_2x_uuids = {
+        "e31561fa-5541-4506-a799-b10e49fda203", "057b00d1-e8ce-4678-b0d7-1b887408d78b",
+        "051a9d1b-fe19-4962-b768-0db2a4dc1225", "830a5502-5557-48d7-9890-0aa9a9f12e5d",
+        "ea03f360-520c-4a27-8e0d-911ece6a72f4", "938e7f4a-5113-47bd-9ebb-f0feb2e32e80",
+        "e8d30996-377f-4099-a498-1569afc9e8a3", "35f00590-59eb-4f34-905b-57d67d1e93ed",
+        "c2861e7b-961c-4c8f-8f46-6f8c0724c2a0", "2b40f054-0420-42e8-9576-36d0ccdd8086",
+        "43e434cf-a8dc-439a-b674-bf5d770bff2f", "a12e0152-877d-49a3-b421-93e83c115056",
+        "9417b923-aa3e-48a8-a6f8-27666d1344f4", "0b6e5467-5692-4a9a-90e5-f76542af3d56",
+        "93e96bb1-4562-4b03-8f69-7523fc0f81f3", "9c3932ce-e8f5-49da-930c-20159cb41984",
+        "0f4497e1-a025-47fc-81c9-5e7d681af47e", "4923d3b6-5205-4393-b0eb-5f753a9eb478",
+        "76af8db1-ff40-494d-ad1e-c18a221fcfb0", "cf7728ad-f36e-4396-bbe9-7c05d19160eb",
+        "0fcfdf79-d156-47cf-a08f-a1a44dd8d8fb", "0ca88198-a871-4ea9-baf0-401690a7d90c",
+        "3887635b-815a-4aba-920e-00ce302ad211", "00ea9d0b-6110-43f0-98f4-235e9d3ddf87",
+        "5872220a-f152-4a25-8975-8d21e43fbb77", "72b714cd-4ef5-41bd-a4db-0561b0f00fef",
+        "e9b5454c-0445-41d5-a1d4-c94b917656d4", "f054bbc2-e185-4fb3-9eb6-c4a43b7f6c15",
+        "1875f489-ce48-4876-be89-1c725133941c", "ec26be3d-18e5-4926-a279-3a1d02063dc9",
+        "aa65b874-5d0a-43d8-9a0f-d6503cfc873a", "f589cf66-1a91-4f52-94ed-d8293e13fc51",
+        "747b2098-de7d-4238-bb2f-9aa2dd227a2f", "a12bdd1c-0e02-4b9f-ab8b-4eb324e0cbbe",
+        "2dc717ed-863b-46c2-87f5-f1b1778ac1e2", "782c8ae2-e30d-4516-932e-0b4580fcf84c",
+        "d3cf8831-7708-4bd7-b30b-862c87c98692", "cde0c619-3e36-4e33-a8d2-e9eada735498",
+        "3da11355-bdeb-4fce-b7f7-94874f46b59d", "27f4e2fc-1661-4a53-b2ac-f5d8c8871864",
+};
+
+
 const std::vector<horizon::UUID> pin_pads_uuids = {
         "7bc2147a-0234-41f6-ab65-444e57a43ce5", "7de8ad61-d839-4bad-85e8-5b3d093d4d6c",
         "f4f2991b-d46c-492e-b2b6-beacc3120e00", "37ad2e38-76ac-4a0b-adf3-2500e30336a0",
@@ -155,6 +179,29 @@ std::vector<horizon::UUID> other_uuids = {
         "f099654f-3498-4c35-a2de-7e60c28b5646", "50ff4d64-9b00-427e-911b-07da3116617d",
         "0d8800cf-1109-410f-b894-e2f8c0f3e33f", "ed2468bf-df0d-4c75-a769-53b1960969d2",
         "414a3f56-3e4b-4cd5-a8fd-8b8768fcb53b", "2b17f991-344a-405f-b3ab-c8043fadabac",
+};
+
+std::vector<horizon::UUID> idc_254_shrouded_vertical_uuids = {
+        "8c27d992-0752-419e-bcf9-619376d321e3", "4ab3fd18-0f3a-4cfb-a8bc-ded6ed236009",
+        "0fd9e465-d79e-4588-abd5-65ec1c504445", "a24e95c2-63f3-42bf-a320-da624ff3fcaf",
+        "7f89bb34-a4f1-4d53-8c1f-25891334f70e", "c44c849f-7dae-485c-9b13-b9a06957158e",
+        "fc95e331-f5f4-4d78-acda-7172c1ddc151", "ffeb8a8b-7123-44f5-9a2d-1f9bbf5c25a9",
+        "6afccb94-a21d-47cf-8d10-4270cf189e9b", "a302c3c1-d4a2-49c7-a514-78ed38f1535c",
+        "ff70c709-931b-4e91-ba09-3fd8dda26a04", "66a07580-9f9d-4f8f-b45b-7379fc49ef43",
+        "80abe2fc-a2b4-4819-902f-396a9b7a63aa", "178cf700-58bd-4c72-b235-1acceaf92367",
+        "f1b853b0-c556-4633-855f-ac6541820aba", "7ec74ad0-0090-4305-bcae-1a2dc3ee8f8c",
+        "591e512c-a260-4ad4-ab44-5e19bbc2823d", "705c639e-535d-47ed-9686-ee022e93cd87",
+        "6d649554-c34a-4b26-9c3d-e08a0d95d10d", "d3c4d176-345b-44bf-8bee-2a564aa10253",
+        "bedb9c7b-b264-4d36-b8bf-fd5039b4a159", "086e697a-1e1a-4c89-82d6-e5795e2314e7",
+        "9449e8b5-cfeb-4ffd-8f35-da6df8a38853", "0f7b144b-3848-4945-a1d6-4ce692691e40",
+        "c57f3a07-c628-4d48-be08-88fb1d5847ab", "a0904ffc-1ff2-405a-b9b7-d1589e38ec2b",
+        "7a9ee6b5-d545-4be0-9722-915235b2eb1d", "f49b3ffd-c02d-4bee-ad9c-af6add61238a",
+        "9576a0d6-9c9a-45e9-a3bb-9f54cb81baac", "a3ba36b9-368e-4e79-90b5-6304c94f3d22",
+        "6f87254f-6bfa-4a66-a853-0f5e9be4458c", "adcd8b37-f443-4c55-9cbb-65349516afdf",
+        "d8b4138a-f0e7-4cb7-b01e-20e8bde78ff8", "1b35814e-0923-4082-be4c-90ce887efabb",
+        "aa60f1c4-3cab-4a3a-aa01-e7307f2f93d4", "eed604f0-2299-4620-bdaf-f36616839c0c",
+        "38f65187-71f3-4666-8fa8-98b492207f1f", "9576d4e5-f7c7-43e8-a548-ea0517432fe4",
+        "99575f64-0c55-4d72-9efb-17cd7a0c34ee", "14910837-48d2-4591-9ab8-4441e442d294",
 };
 
 
