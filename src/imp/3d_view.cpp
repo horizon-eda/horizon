@@ -55,7 +55,7 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
 
     Gtk::ColorButton *solder_mask_color_button;
     x->get_widget("solder_mask_color_button", solder_mask_color_button);
-    bind_color_button(solder_mask_color_button, canvas->solder_mask_color, [this] { canvas->prepare(); });
+    bind_color_button(solder_mask_color_button, canvas->solder_mask_color, [this] { canvas->queue_draw(); });
     solder_mask_color_button->set_color(Gdk::Color("#008000"));
 
     x->get_widget("background_top_color_button", background_top_color_button);
