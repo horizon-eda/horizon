@@ -168,6 +168,8 @@ void GerberWriter::write_pads()
 void GerberWriter::write_regions()
 {
     write_line("G01*");
+    std::stable_sort(regions.begin(), regions.end(),
+                     [](const auto &a, const auto &b) { return a.priority > b.priority; });
     for (const auto &it : regions) {
         if (it.dark) {
             write_line("%LPD*%");
@@ -193,9 +195,9 @@ void GerberWriter::draw_line(const Coordi &from, const Coordi &to, uint64_t widt
     lines.emplace_back(from, to, ap);
 }
 
-void GerberWriter::draw_region(const ClipperLib::Path &path, bool dark)
+void GerberWriter::draw_region(const ClipperLib::Path &path, bool dark, int prio)
 {
-    regions.emplace_back(path, dark);
+    regions.emplace_back(path, dark, prio);
 }
 
 void GerberWriter::draw_padstack(const Padstack &ps, int layer, const Placement &transform)

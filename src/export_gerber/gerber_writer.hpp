@@ -26,7 +26,7 @@ public:
     // int layer, )
     void draw_line(const Coordi &from, const Coordi &to, uint64_t width);
     void draw_padstack(const Padstack &ps, int layer, const Placement &transform);
-    void draw_region(const ClipperLib::Path &path, bool dark = true);
+    void draw_region(const ClipperLib::Path &path, bool dark = true, int prio = 0);
     const std::string &get_filename();
 
 private:
@@ -42,9 +42,10 @@ private:
 
     class Region {
     public:
-        Region(const ClipperLib::Path &p, bool d = true) : path(p), dark(d){};
+        Region(const ClipperLib::Path &p, bool d = true, int prio = 0) : path(p), dark(d), priority(prio){};
         ClipperLib::Path path;
         bool dark;
+        int priority;
     };
 
     class ApertureMacro {

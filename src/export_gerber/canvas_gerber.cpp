@@ -35,7 +35,7 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
             for (const auto &frag : plane->fragments) {
                 bool dark = true; // first path ist outline, the rest are holes
                 for (const auto &path : frag.paths) {
-                    wr->draw_region(path, dark);
+                    wr->draw_region(path, dark, plane->priority);
                     dark = false;
                 }
             }
