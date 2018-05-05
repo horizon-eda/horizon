@@ -3,6 +3,7 @@
 #include "nlohmann/json.hpp"
 #include "pool/pool.hpp"
 #include "board/board_layers.hpp"
+#include "pool/part.hpp"
 #include <glibmm/miscutils.h>
 #include <giomm.h>
 
@@ -278,7 +279,7 @@ static Package make_package_idc_254_vertical(unsigned int n_pads)
     make_silkscreen_refdes(pkg, uuid_idx, -w / 2, h / 2 + 1.27_mm, 0);
     {
         std::array<Junction *, 8> junctions;
-        for (int i = 0; i < junctions.size(); i++) {
+        for (unsigned int i = 0; i < junctions.size(); i++) {
             auto uu = get_other_uuid(uuid_idx);
             junctions[i] = &pkg.junctions.emplace(uu, uu).first->second;
         }
@@ -291,7 +292,7 @@ static Package make_package_idc_254_vertical(unsigned int n_pads)
         junctions[6]->position = Coordi(-w / 2 + notch_w, notch_h / 2);
         junctions[7]->position = Coordi(-w / 2, notch_h / 2);
 
-        for (int i = 0; i < junctions.size(); i++) {
+        for (unsigned int i = 0; i < junctions.size(); i++) {
             auto j = (i + 1) % junctions.size();
             auto uu = get_other_uuid(uuid_idx);
             auto &line = pkg.lines.emplace(uu, uu).first->second;
@@ -313,13 +314,55 @@ static Package make_package_idc_254_vertical(unsigned int n_pads)
         model.x = -pitch / 2;
     }
     {
-        pkg.tags = {"generic", "header"};
+        pkg.tags = {"generic", "header", "idc"};
         pkg.name = "IDC header 2×" + std::to_string(n_pads) + ", 2.54mm pitch, vertical";
     }
 
     return pkg;
 }
 
+Part make_part(const Package &pkg)
+{
+    auto n_pads = pkg.pads.size();
+    const Entity *entity = nullptr;
+    {
+        SQLite::Query q(pool->db, "SELECT uuid FROM entities WHERE name =?");
+        q.bind(1, "Generic " + std::to_string(n_pads) + " pin connector");
+        if (q.step()) {
+            entity = pool->get_entity(q.get<std::string>(0));
+        }
+    }
+    Part part(pkg.uuid);
+    part.entity = entity;
+    part.package = &pkg;
+
+    auto &gate = entity->gates.begin()->second;
+    auto unit = gate.unit;
+    for (const auto &it_pad : pkg.pads) {
+        auto &n = it_pad.second.name;
+        auto pin = std::find_if(unit->pins.begin(), unit->pins.end(),
+                                [n](const auto &a) { return a.second.primary_name == n; });
+        assert(pin != unit->pins.end());
+        part.pad_map.emplace(std::piecewise_construct, std::forward_as_tuple(it_pad.first),
+                             std::forward_as_tuple(&gate, &(pin->second)));
+    }
+
+    return part;
+}
+
+std::pair<std::string, std::string> get_pkg_part_filename(const std::string &base_path, const std::string &prefix,
+                                                          const std::string &name)
+{
+    auto pkg_dir = Glib::build_filename(base_path, "packages", prefix, name);
+    if (!Glib::file_test(pkg_dir, Glib::FILE_TEST_IS_DIR))
+        Gio::File::create_for_path(pkg_dir)->make_directory_with_parents();
+
+    auto part_dir = Glib::build_filename(base_path, "parts", prefix);
+    if (!Glib::file_test(part_dir, Glib::FILE_TEST_IS_DIR))
+        Gio::File::create_for_path(part_dir)->make_directory_with_parents();
+
+    return {Glib::build_filename(pkg_dir, "package.json"), Glib::build_filename(part_dir, name + ".json")};
+}
 
 int main(int c_argc, char *c_argv[])
 {
@@ -336,20 +379,34 @@ int main(int c_argc, char *c_argv[])
 
     // 1x 2.54mm
     for (int i = 1; i <= 40; i++) {
-        auto dir = Glib::build_filename(pool->get_base_path(), "packages", "connectors", "header", "pin", "2.54",
-                                        "1x" + std::to_string(i) + "-vertical");
-        if (!Glib::file_test(dir, Glib::FILE_TEST_IS_DIR))
-            Gio::File::create_for_path(dir)->make_directory_with_parents();
-        save_json_to_file(Glib::build_filename(dir, "package.json"), make_package_pinhd_1x(i).serialize());
+        std::string pkg_filename, part_filename;
+        std::tie(pkg_filename, part_filename) = get_pkg_part_filename(
+                pool->get_base_path(), Glib::build_filename("connectors", "header", "pin", "2.54"),
+                "1x" + std::to_string(i) + "-vertical");
+
+        auto pkg = make_package_pinhd_1x(i);
+        save_json_to_file(pkg_filename, pkg.serialize());
+
+        auto part = make_part(pkg);
+        part.attributes[Part::Attribute::MPN] = {false, "Generic " + pkg.name};
+        part.tags = pkg.tags;
+        save_json_to_file(part_filename, part.serialize());
     }
 
     // 2x 2.54mm
     for (int i = 1; i <= 40; i++) {
-        auto dir = Glib::build_filename(pool->get_base_path(), "packages", "connectors", "header", "pin", "2.54",
-                                        "2x" + std::to_string(i) + "-vertical");
-        if (!Glib::file_test(dir, Glib::FILE_TEST_IS_DIR))
-            Gio::File::create_for_path(dir)->make_directory_with_parents();
-        save_json_to_file(Glib::build_filename(dir, "package.json"), make_package_pinhd_2x(i).serialize());
+        std::string pkg_filename, part_filename;
+        std::tie(pkg_filename, part_filename) = get_pkg_part_filename(
+                pool->get_base_path(), Glib::build_filename("connectors", "header", "pin", "2.54"),
+                "2x" + std::to_string(i) + "-vertical");
+
+        auto pkg = make_package_pinhd_2x(i);
+        save_json_to_file(pkg_filename, pkg.serialize());
+
+        auto part = make_part(pkg);
+        part.attributes[Part::Attribute::MPN] = {false, "Generic " + pkg.name};
+        part.tags = pkg.tags;
+        save_json_to_file(part_filename, part.serialize());
     }
 
     // 2.54mm idc shrouded vertical
@@ -357,11 +414,18 @@ int main(int c_argc, char *c_argv[])
         const std::vector<int> pin_counts = {3, 4, 5, 6, 7, 8, 10, 13, 15, 17, 20, 25, 30};
 
         for (int i : pin_counts) {
-            auto dir = Glib::build_filename(pool->get_base_path(), "packages", "connectors", "header", "idc", "2.54",
-                                            "2x" + std::to_string(i) + "-vertical");
-            if (!Glib::file_test(dir, Glib::FILE_TEST_IS_DIR))
-                Gio::File::create_for_path(dir)->make_directory_with_parents();
-            save_json_to_file(Glib::build_filename(dir, "package.json"), make_package_idc_254_vertical(i).serialize());
+            std::string pkg_filename, part_filename;
+            std::tie(pkg_filename, part_filename) = get_pkg_part_filename(
+                    pool->get_base_path(), Glib::build_filename("connectors", "header", "idc", "2.54"),
+                    "2x" + std::to_string(i) + "-vertical");
+
+            auto pkg = make_package_idc_254_vertical(i);
+            save_json_to_file(pkg_filename, pkg.serialize());
+
+            auto part = make_part(pkg);
+            part.attributes[Part::Attribute::MPN] = {false, "Generic " + pkg.name};
+            part.tags = pkg.tags;
+            save_json_to_file(part_filename, part.serialize());
         }
     }
 
