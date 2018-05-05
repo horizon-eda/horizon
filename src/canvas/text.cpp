@@ -1357,6 +1357,8 @@ static unsigned int codepoint_to_hershey(gunichar c)
             return 550;
         case 0x3a9:
             return 550;
+        case 0xd7:
+            return 1235;
         case 0xa0:
             return codepoint_to_hershey(' ');
 
