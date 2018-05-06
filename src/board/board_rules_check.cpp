@@ -5,6 +5,8 @@
 #include "rules/cache.hpp"
 #include "util/accumulator.hpp"
 #include "util/util.hpp"
+#include <thread>
+#include <future>
 
 namespace horizon {
 RulesCheckResult BoardRules::check_track_width(const Board *brd)
@@ -121,10 +123,112 @@ RulesCheckResult BoardRules::check_hole_size(const Board *brd)
     return r;
 }
 
-RulesCheckResult BoardRules::check_clearance_copper(const Board *brd, RulesCheckCache &cache)
+static std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint> get_patch_bb(const ClipperLib::Paths &patch)
+{
+    std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint> bb;
+    bb.first = patch.front().front();
+    bb.second = bb.first;
+    for (const auto &path : patch) {
+        for (const auto &pt : path) {
+            bb.first.X = std::min(bb.first.X, pt.X);
+            bb.first.Y = std::min(bb.first.Y, pt.Y);
+            bb.second.X = std::max(bb.second.X, pt.X);
+            bb.second.Y = std::max(bb.second.Y, pt.Y);
+        }
+    }
+    return bb;
+}
+
+
+static std::deque<RulesCheckError>
+clearance_cu_worker(std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey>> &patch_pairs,
+                    std::mutex &patch_pair_mutex, const std::map<CanvasPatch::PatchKey, ClipperLib::Paths> &patches,
+                    const Board *brd, BoardRules *rules, int n_patch_pairs, check_status_cb_t status_cb)
+{
+    std::deque<RulesCheckError> r_errors;
+    while (true) {
+        std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey> patch_pair;
+        {
+            std::lock_guard<std::mutex> guard(patch_pair_mutex);
+            if (patch_pairs.size() == 0)
+                break;
+            auto it = patch_pairs.begin();
+            patch_pair = *it;
+            patch_pairs.erase(it);
+
+            {
+                std::stringstream ss;
+                ss << " Patch pair " << (n_patch_pairs - patch_pairs.size()) << "/" << n_patch_pairs;
+                status_cb(ss.str());
+            }
+        }
+
+        auto p1 = patch_pair.first;
+        auto p2 = patch_pair.second;
+
+        Net *net1 = p1.net ? &brd->block->nets.at(p1.net) : nullptr;
+        Net *net2 = p2.net ? &brd->block->nets.at(p2.net) : nullptr;
+
+        // figure out the clearance between this patch pair
+        uint64_t clearance = 0;
+        auto rule_clearance = rules->get_clearance_copper(net1, net2, p1.layer);
+        if (rule_clearance) {
+            clearance = rule_clearance->get_clearance(p1.type, p2.type);
+        }
+
+        if (patches.at(p1).size() && patches.at(p2).size()) {
+            auto bb1 = get_patch_bb(patches.at(p1));
+            bb1.first.X -= 2 * clearance; // just to be safe
+            bb1.first.Y -= 2 * clearance;
+            bb1.second.X += 2 * clearance;
+            bb1.second.Y += 2 * clearance;
+
+            auto bb2 = get_patch_bb(patches.at(p2));
+
+            if ((bb1.second.X >= bb2.first.X && bb2.second.X >= bb1.first.X)
+                && (bb1.second.Y >= bb2.first.Y && bb2.second.Y >= bb1.first.Y)) { // bbs overlap
+                // expand one of them by the clearance
+                ClipperLib::ClipperOffset ofs;
+                ofs.ArcTolerance = 10e3;
+                ofs.AddPaths(patches.at(p1), ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+                ClipperLib::Paths paths_ofs;
+                ofs.Execute(paths_ofs, clearance);
+
+                // intersect expanded and other patches
+                ClipperLib::Clipper clipper;
+                clipper.AddPaths(paths_ofs, ClipperLib::ptClip, true);
+                clipper.AddPaths(patches.at(p2), ClipperLib::ptSubject, true);
+                ClipperLib::Paths errors;
+                clipper.Execute(ClipperLib::ctIntersection, errors, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+
+                // no intersection: no clearance violation
+                if (errors.size() > 0) {
+                    for (const auto &ite : errors) {
+                        r_errors.emplace_back(RulesCheckErrorLevel::FAIL);
+                        auto &e = r_errors.back();
+                        e.has_location = true;
+                        Accumulator<Coordi> acc;
+                        for (const auto &ite2 : ite) {
+                            acc.accumulate({ite2.X, ite2.Y});
+                        }
+                        e.location = acc.get();
+                        e.comment = patch_type_names.at(p1.type) + "(" + (net1 ? net1->name : "") + ") near "
+                                    + patch_type_names.at(p2.type) + "(" + (net2 ? net2->name : "") + ")";
+                        e.error_polygons = {ite};
+                    }
+                }
+            }
+        }
+    }
+    return r_errors;
+}
+
+RulesCheckResult BoardRules::check_clearance_copper(const Board *brd, RulesCheckCache &cache,
+                                                    check_status_cb_t status_cb)
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
+    status_cb("Getting patches");
     auto c = dynamic_cast<RulesCheckCacheBoardImage *>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
     std::set<int> layers;
     const auto &patches = c->get_canvas()->patches;
@@ -134,9 +238,11 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board *brd, RulesCheck
         }
     }
 
+    // assemble a list of patch pairs we'll need to check
+    std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey>> patch_pairs;
+
+    status_cb("Building patch pairs");
     for (const auto layer : layers) { // check each layer individually
-        // assemble a list of patch pairs we'll need to check
-        std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey>> patch_pairs;
         for (const auto &it : patches) {
             for (const auto &it_other : patches) {
                 if (layer == it.first.layer && it.first.layer == it_other.first.layer
@@ -153,62 +259,28 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board *brd, RulesCheck
                 }
             }
         }
-
-        for (const auto &it : patch_pairs) {
-            auto p1 = it.first;
-            auto p2 = it.second;
-            std::cout << "patch pair:" << p1.layer << " " << static_cast<int>(p1.type) << " " << (std::string)p1.net;
-            std::cout << " - " << p2.layer << " " << static_cast<int>(p2.type) << " " << (std::string)p2.net << "\n";
-            Net *net1 = p1.net ? &brd->block->nets.at(p1.net) : nullptr;
-            Net *net2 = p2.net ? &brd->block->nets.at(p2.net) : nullptr;
-
-            // figure out the clearance between this patch pair
-            uint64_t clearance = 0;
-            auto rule_clearance = get_clearance_copper(net1, net2, p1.layer);
-            if (rule_clearance) {
-                clearance = rule_clearance->get_clearance(p1.type, p2.type);
-            }
-            std::cout << "clearance: " << clearance << "\n";
-
-            // expand one of them by the clearance
-            ClipperLib::ClipperOffset ofs;
-            ofs.ArcTolerance = 10e3;
-            ofs.AddPaths(patches.at(p1), ClipperLib::jtRound, ClipperLib::etClosedPolygon);
-            ClipperLib::Paths paths_ofs;
-            ofs.Execute(paths_ofs, clearance);
-
-            // intersect expanded and other patches
-            ClipperLib::Clipper clipper;
-            clipper.AddPaths(paths_ofs, ClipperLib::ptClip, true);
-            clipper.AddPaths(patches.at(p2), ClipperLib::ptSubject, true);
-            ClipperLib::Paths errors;
-            clipper.Execute(ClipperLib::ctIntersection, errors, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
-
-            // no intersection: no clearance violation
-            if (errors.size() > 0) {
-                for (const auto &ite : errors) {
-                    r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
-                    auto &e = r.errors.back();
-                    e.has_location = true;
-                    Accumulator<Coordi> acc;
-                    for (const auto &ite2 : ite) {
-                        acc.accumulate({ite2.X, ite2.Y});
-                    }
-                    e.location = acc.get();
-                    e.comment = patch_type_names.at(p1.type) + "(" + (net1 ? net1->name : "") + ") near "
-                                + patch_type_names.at(p2.type) + "(" + (net2 ? net2->name : "") + ")";
-                    e.error_polygons = {ite};
-                }
-            }
-
-            std::cout << "\n" << std::endl;
-        }
     }
+
+    auto n_patch_pairs = patch_pairs.size();
+
+    std::vector<std::future<std::deque<RulesCheckError>>> results;
+    std::mutex patch_pair_mutex;
+    for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
+        results.push_back(std::async(std::launch::async, clearance_cu_worker, std::ref(patch_pairs),
+                                     std::ref(patch_pair_mutex), std::ref(patches), brd, this, n_patch_pairs,
+                                     status_cb));
+    }
+    for (auto &it : results) {
+        auto res = it.get();
+        std::copy(res.begin(), res.end(), std::back_inserter(r.errors));
+    }
+
     r.update();
     return r;
 }
 
-RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board *brd, RulesCheckCache &cache)
+RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board *brd, RulesCheckCache &cache,
+                                                               check_status_cb_t status_cb)
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
@@ -401,7 +473,7 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board *brd,
     return r;
 }
 
-RulesCheckResult BoardRules::check(RuleID id, const Board *brd, RulesCheckCache &cache)
+RulesCheckResult BoardRules::check(RuleID id, const Board *brd, RulesCheckCache &cache, check_status_cb_t status_cb)
 {
     switch (id) {
     case RuleID::TRACK_WIDTH:
@@ -411,10 +483,10 @@ RulesCheckResult BoardRules::check(RuleID id, const Board *brd, RulesCheckCache 
         return BoardRules::check_hole_size(brd);
 
     case RuleID::CLEARANCE_COPPER:
-        return BoardRules::check_clearance_copper(brd, cache);
+        return BoardRules::check_clearance_copper(brd, cache, status_cb);
 
     case RuleID::CLEARANCE_COPPER_OTHER:
-        return BoardRules::check_clearance_copper_non_copper(brd, cache);
+        return BoardRules::check_clearance_copper_non_copper(brd, cache, status_cb);
 
     default:
         return RulesCheckResult();

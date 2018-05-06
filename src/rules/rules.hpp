@@ -6,6 +6,7 @@
 #include "util/uuid.hpp"
 #include <deque>
 #include <set>
+#include <functional>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -37,6 +38,8 @@ public:
 
     std::deque<RulesCheckError> errors;
 };
+
+typedef std::function<void(const std::string &)> check_status_cb_t;
 
 class Rules {
 public:

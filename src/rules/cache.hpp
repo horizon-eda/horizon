@@ -6,6 +6,7 @@
 #include <deque>
 #include <map>
 #include <memory>
+#include <mutex>
 
 namespace horizon {
 enum class RulesCheckCacheID { NONE, BOARD_IMAGE, NET_PINS };
@@ -48,5 +49,6 @@ public:
 private:
     std::map<RulesCheckCacheID, std::unique_ptr<RulesCheckCacheBase>> cache;
     class Core *core;
+    std::mutex mutex;
 };
 } // namespace horizon

@@ -21,6 +21,8 @@
 #include "core/core_board.hpp"
 #include "core/core_schematic.hpp"
 
+#include <thread>
+
 namespace horizon {
 
 class RuleLabel : public Gtk::Box {
@@ -86,6 +88,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     x->get_widget("run_button", run_button);
     x->get_widget("apply_button", apply_button);
     x->get_widget("stack", stack);
+    x->get_widget("stack_switcher", stack_switcher);
     sg_order = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
     lb_rules->signal_row_selected().connect(
@@ -162,15 +165,38 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     check_result_treeview->append_column("Rule", tree_columns.name);
     {
         auto cr = Gtk::manage(new CellRendererLayerDisplay());
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Result", *cr));
+        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Result"));
+        tvc->pack_start(*cr, false);
         auto cr2 = Gtk::manage(new Gtk::CellRendererText());
-        cr2->property_text() = "hallo";
+        tvc->pack_start(*cr2, false);
+        auto cr3 = Gtk::manage(new Gtk::CellRendererSpinner());
+        tvc->pack_start(*cr3, false);
+        tvc->add_attribute(cr3->property_pulse(), tree_columns.pulse);
+        cr3->property_xalign() = 0;
+        auto cr4 = Gtk::manage(new Gtk::CellRendererText());
+        tvc->pack_start(*cr4, false);
 
         tvc->set_cell_data_func(*cr2, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
             Gtk::TreeModel::Row row = *it;
             auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
-            mcr->property_text() = rules_check_error_level_to_string(row[tree_columns.result]);
+            if (row[tree_columns.running]) {
+                mcr->property_text() = "Running";
+            }
+            else {
+                mcr->property_text() = rules_check_error_level_to_string(row[tree_columns.result]);
+            }
         });
+        tvc->set_cell_data_func(*cr4, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
+            Gtk::TreeModel::Row row = *it;
+            auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
+            if (row[tree_columns.running]) {
+                mcr->property_text() = static_cast<std::string>(row[tree_columns.status]);
+            }
+            else {
+                mcr->property_text() = "";
+            }
+        });
+
         tvc->set_cell_data_func(*cr, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
             Gtk::TreeModel::Row row = *it;
             auto mcr = dynamic_cast<CellRendererLayerDisplay *>(tcr);
@@ -181,10 +207,14 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             va.set_blue(co.b);
             mcr->property_color() = va;
         });
-        tvc->pack_start(*cr2, false);
+        tvc->set_cell_data_func(*cr3, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
+            Gtk::TreeModel::Row row = *it;
+            auto mcr = dynamic_cast<Gtk::CellRendererSpinner *>(tcr);
+            mcr->property_active() = row[tree_columns.running];
+        });
+
         check_result_treeview->append_column(*tvc);
     }
-    check_result_treeview->append_column("Comment", tree_columns.comment);
 
     annotation = canvas->create_annotation();
 
@@ -207,6 +237,55 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                     }
                 }
             });
+
+    dispatcher.connect([this] {
+        std::lock_guard<std::mutex> guard(run_store_mutex);
+        auto &dom = canvas->markers.get_domain(MarkerDomain::CHECK);
+        for (const auto &it : run_store) {
+            if (it.second.result.level != RulesCheckErrorLevel::NOT_RUN) { // has completed
+                it.second.row[tree_columns.result] = it.second.result.level;
+                it.second.row[tree_columns.running] = false;
+                for (const auto &it_err : it.second.result.errors) {
+                    auto iter = check_result_store->append(it.second.row.children());
+                    Gtk::TreeModel::Row row_err = *iter;
+                    row_err[tree_columns.result] = it_err.level;
+                    row_err[tree_columns.name] = it_err.comment;
+                    row_err[tree_columns.has_location] = it_err.has_location;
+                    row_err[tree_columns.location] = it_err.location;
+                    row_err[tree_columns.sheet] = it_err.sheet;
+                    row_err[tree_columns.running] = false;
+
+                    if (it_err.has_location) {
+                        dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level), it_err.sheet);
+                    }
+
+                    for (const auto &path : it_err.error_polygons) {
+                        ClipperLib::IntPoint last = path.back();
+                        for (const auto &pt : path) {
+                            annotation->draw_line({last.X, last.Y}, {pt.X, pt.Y}, ColorP::FROM_LAYER, .01_mm);
+                            last = pt;
+                        }
+                    }
+                }
+            }
+            else { // still running
+                it.second.row[tree_columns.status] = it.second.status;
+            }
+        }
+        canvas->update_markers();
+        check_result_treeview->expand_all();
+        map_erase_if(run_store, [](auto &a) { return a.second.result.level != RulesCheckErrorLevel::NOT_RUN; });
+        if (run_store.size() == 0) {
+            run_button->set_sensitive(true);
+            apply_button->set_sensitive(true);
+            set_modal(false);
+            pulse_connection.disconnect();
+            stack_switcher->set_sensitive(true);
+            dynamic_cast<Gtk::HeaderBar *>(get_titlebar())->set_show_close_button(true);
+        }
+    });
+
+    signal_delete_event().connect([this](GdkEventAny *ev) { return !run_button->get_sensitive(); });
 }
 
 void RulesWindow::apply_rules()
@@ -219,49 +298,56 @@ void RulesWindow::apply_rules()
     s_signal_changed.emit();
 }
 
+void RulesWindow::check_thread(RuleID id)
+{
+    auto result = rules_check(rules, id, core, *cache.get(), [this, id](const std::string &status) {
+        std::lock_guard<std::mutex> guard(run_store_mutex);
+        run_store.at(id).status = status;
+        dispatcher.emit();
+    });
+    {
+        std::lock_guard<std::mutex> guard(run_store_mutex);
+        run_store.at(id).result = result;
+        dispatcher.emit();
+    }
+}
+
 void RulesWindow::run_checks()
 {
-    check_result_store->freeze_notify();
     check_result_store->clear();
     auto &dom = canvas->markers.get_domain(MarkerDomain::CHECK);
     dom.clear();
-    RulesCheckCache cache(core);
+    cache.reset(new RulesCheckCache(core));
     annotation->clear();
+    run_store.clear();
+    pulse_connection = Glib::signal_timeout().connect(
+            [this] {
+                for (auto &ch : check_result_store->children()) {
+                    ch[tree_columns.pulse] = ch[tree_columns.pulse] + 1;
+                }
+                return true;
+            },
+            750 / 12);
     for (auto rule_id : rules->get_rule_ids()) {
-        auto result = rules_check(rules, rule_id, core, cache);
-        if (result.level != RulesCheckErrorLevel::NOT_RUN) {
+        if (rule_descriptions.at(rule_id).can_check) {
             Gtk::TreeModel::iterator iter = check_result_store->append();
             Gtk::TreeModel::Row row = *iter;
             row[tree_columns.name] = rule_descriptions.at(rule_id).name;
-            row[tree_columns.result] = result.level;
+            row[tree_columns.running] = true;
             row[tree_columns.has_location] = false;
-            for (const auto &it_err : result.errors) {
-                iter = check_result_store->append(row.children());
-                Gtk::TreeModel::Row row_err = *iter;
-                row_err[tree_columns.result] = it_err.level;
-                row_err[tree_columns.comment] = it_err.comment;
-                row_err[tree_columns.has_location] = it_err.has_location;
-                row_err[tree_columns.location] = it_err.location;
-                row_err[tree_columns.sheet] = it_err.sheet;
+            run_store.emplace(rule_id, row);
 
-                if (it_err.has_location) {
-                    dom.emplace_back(it_err.location, rules_check_error_level_to_color(it_err.level), it_err.sheet);
-                }
-
-                for (const auto &path : it_err.error_polygons) {
-                    ClipperLib::IntPoint last = path.back();
-                    for (const auto &pt : path) {
-                        annotation->draw_line({last.X, last.Y}, {pt.X, pt.Y}, ColorP::FROM_LAYER, .01_mm);
-                        last = pt;
-                    }
-                }
-            }
+            std::thread thr(&RulesWindow::check_thread, this, rule_id);
+            thr.detach();
         }
     }
-    check_result_store->thaw_notify();
-    canvas->update_markers();
+    run_button->set_sensitive(false);
+    apply_button->set_sensitive(false);
+    set_modal(true);
     stack->set_visible_child("checks");
-    check_result_treeview->expand_all();
+    stack_switcher->set_sensitive(false);
+
+    dynamic_cast<Gtk::HeaderBar *>(get_titlebar())->set_show_close_button(false);
 }
 
 void RulesWindow::rule_selected(RuleID id)

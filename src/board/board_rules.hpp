@@ -20,7 +20,7 @@ public:
     BoardRules();
 
     void load_from_json(const json &j);
-    RulesCheckResult check(RuleID id, const class Board *b, class RulesCheckCache &cache);
+    RulesCheckResult check(RuleID id, const class Board *b, class RulesCheckCache &cache, check_status_cb_t status_cb);
     void apply(RuleID id, class Board *b, class ViaPadstackProvider &vpp);
     json serialize() const;
     std::set<RuleID> get_rule_ids() const;
@@ -58,7 +58,9 @@ private:
 
     RulesCheckResult check_track_width(const class Board *b);
     RulesCheckResult check_hole_size(const class Board *b);
-    RulesCheckResult check_clearance_copper(const class Board *b, class RulesCheckCache &cache);
-    RulesCheckResult check_clearance_copper_non_copper(const class Board *b, class RulesCheckCache &cache);
+    RulesCheckResult check_clearance_copper(const class Board *b, class RulesCheckCache &cache,
+                                            check_status_cb_t status_cb);
+    RulesCheckResult check_clearance_copper_non_copper(const class Board *b, class RulesCheckCache &cache,
+                                                       check_status_cb_t status_cb);
 };
 } // namespace horizon

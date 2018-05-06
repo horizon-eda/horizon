@@ -6,11 +6,11 @@
 #include "schematic/schematic_rules.hpp"
 
 namespace horizon {
-RulesCheckResult rules_check(Rules *r, RuleID id, class Core *c, RulesCheckCache &cache)
+RulesCheckResult rules_check(Rules *r, RuleID id, class Core *c, RulesCheckCache &cache, check_status_cb_t status_cb)
 {
     if (auto rules = dynamic_cast<BoardRules *>(r)) {
         auto core = dynamic_cast<CoreBoard *>(c);
-        return rules->check(id, core->get_board(), cache);
+        return rules->check(id, core->get_board(), cache, status_cb);
     }
     if (auto rules = dynamic_cast<SchematicRules *>(r)) {
         auto core = dynamic_cast<CoreSchematic *>(c);

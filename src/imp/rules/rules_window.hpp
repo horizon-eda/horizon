@@ -1,6 +1,7 @@
 #pragma once
 #include "common/common.hpp"
 #include "rules/rules.hpp"
+#include "rules/cache.hpp"
 #include "util/uuid.hpp"
 #include "util/changeable.hpp"
 #include <array>
@@ -40,6 +41,7 @@ private:
     Gtk::Button *run_button = nullptr;
     Gtk::Button *apply_button = nullptr;
     Gtk::Stack *stack = nullptr;
+    Gtk::StackSwitcher *stack_switcher = nullptr;
     Glib::RefPtr<Gtk::SizeGroup> sg_order;
 
     void rule_selected(RuleID id);
@@ -69,21 +71,45 @@ private:
         {
             Gtk::TreeModelColumnRecord::add(name);
             Gtk::TreeModelColumnRecord::add(result);
-            Gtk::TreeModelColumnRecord::add(comment);
             Gtk::TreeModelColumnRecord::add(has_location);
             Gtk::TreeModelColumnRecord::add(location);
             Gtk::TreeModelColumnRecord::add(sheet);
+            Gtk::TreeModelColumnRecord::add(running);
+            Gtk::TreeModelColumnRecord::add(status);
+            Gtk::TreeModelColumnRecord::add(pulse);
         }
         Gtk::TreeModelColumn<Glib::ustring> name;
         Gtk::TreeModelColumn<RulesCheckErrorLevel> result;
-        Gtk::TreeModelColumn<Glib::ustring> comment;
         Gtk::TreeModelColumn<bool> has_location;
         Gtk::TreeModelColumn<Coordi> location;
         Gtk::TreeModelColumn<UUID> sheet;
+        Gtk::TreeModelColumn<bool> running;
+        Gtk::TreeModelColumn<std::string> status;
+        Gtk::TreeModelColumn<int> pulse;
     };
     TreeColumns tree_columns;
 
     Glib::RefPtr<Gtk::TreeStore> check_result_store;
     Gtk::TreeView *check_result_treeview = nullptr;
+
+    Glib::Dispatcher dispatcher;
+
+    class RuleRunInfo {
+    public:
+        RuleRunInfo(Gtk::TreeModel::Row &r) : row(r)
+        {
+        }
+        RulesCheckResult result;
+        std::string status;
+        Gtk::TreeModel::Row row;
+    };
+
+    std::map<RuleID, RuleRunInfo> run_store;
+    std::mutex run_store_mutex;
+
+    std::unique_ptr<RulesCheckCache> cache;
+
+    void check_thread(RuleID id);
+    sigc::connection pulse_connection;
 };
 } // namespace horizon
