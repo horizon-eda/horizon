@@ -303,7 +303,7 @@ void ImpBoard::construct()
             default:;
             }
         }
-        update_highlights();
+        this->update_highlights();
     });
 
     auto *display_control_notebook = Gtk::manage(new Gtk::Notebook);
