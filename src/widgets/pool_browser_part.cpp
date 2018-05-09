@@ -41,8 +41,22 @@ void PoolBrowserPart::create_columns()
         cr->property_ellipsize() = Pango::ELLIPSIZE_END;
         treeview->append_column(*tvc);
     }
-    treeview->append_column("Package", list_columns.package);
-    treeview->append_column("Tags", list_columns.tags);
+    {
+        auto cr = Gtk::manage(new Gtk::CellRendererText());
+        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Package", *cr));
+        tvc->set_resizable(true);
+        tvc->add_attribute(cr->property_text(), list_columns.package);
+        cr->property_ellipsize() = Pango::ELLIPSIZE_END;
+        treeview->append_column(*tvc);
+    }
+    {
+        auto cr = Gtk::manage(new Gtk::CellRendererText());
+        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Tags", *cr));
+        tvc->set_resizable(true);
+        tvc->add_attribute(cr->property_text(), list_columns.tags);
+        cr->property_ellipsize() = Pango::ELLIPSIZE_END;
+        treeview->append_column(*tvc);
+    }
     {
         auto cr = Gtk::manage(new Gtk::CellRendererText());
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Path", *cr));
