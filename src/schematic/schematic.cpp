@@ -209,7 +209,7 @@ void Schematic::smash_symbol(Sheet *sheet, SchematicSymbol *sym)
     if (sym->smashed)
         return;
     sym->smashed = true;
-    for (const auto &it : sym->symbol.texts) {
+    for (const auto &it : sym->pool_symbol->texts) {
         auto uu = UUID::random();
         auto &x = sheet->texts.emplace(uu, uu).first->second;
         x.from_smash = true;
