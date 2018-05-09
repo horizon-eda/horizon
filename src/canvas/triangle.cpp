@@ -152,6 +152,9 @@ void TriangleRenderer::render()
             layers.push_back(it.first);
     }
     std::sort(layers.begin(), layers.end());
+    if (ca->work_layer < 0) {
+        std::reverse(layers.begin(), layers.end());
+    }
 
     glClear(GL_STENCIL_BUFFER_BIT);
     glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
