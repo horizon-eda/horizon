@@ -982,48 +982,51 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
         }
     }
 
-    for (const auto &it : pkg.pads) {
-        transform_save();
-        transform.accumulate(it.second.placement);
-        auto bb = it.second.padstack.get_bbox(true); // only copper
-        auto a = bb.first;
-        auto b = bb.second;
+    if (!img_mode) {
+        for (const auto &it : pkg.pads) {
+            transform_save();
+            transform.accumulate(it.second.placement);
+            auto bb = it.second.padstack.get_bbox(true); // only copper
+            auto a = bb.first;
+            auto b = bb.second;
 
-        auto pad_width = abs(b.x - a.x);
-        auto pad_height = abs(b.y - a.y);
+            auto pad_width = abs(b.x - a.x);
+            auto pad_height = abs(b.y - a.y);
 
-        std::set<int> text_layers;
-        switch (it.second.padstack.type) {
-        case Padstack::Type::TOP:
-            text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER));
-            break;
+            std::set<int> text_layers;
+            switch (it.second.padstack.type) {
+            case Padstack::Type::TOP:
+                text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER));
+                break;
 
-        case Padstack::Type::BOTTOM:
-            text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER));
-            break;
+            case Padstack::Type::BOTTOM:
+                text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER));
+                break;
 
-        default:
-            text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER));
-            text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER));
-        }
-
-
-        set_lod_size(std::min(pad_height, pad_width));
-        for (const auto overlay_layer : text_layers) {
-            if (it.second.net && it.second.net->name.size() > 0) {
-                draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, overlay_layer, 0,
-                              TextBoxMode::UPPER);
-                draw_text_box(transform, pad_width, pad_height, it.second.net->name, ColorP::WHITE, overlay_layer, 0,
-                              TextBoxMode::LOWER);
+            default:
+                text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER));
+                text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER));
             }
-            else {
-                draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, overlay_layer, 0,
-                              TextBoxMode::FULL);
+
+
+            set_lod_size(std::min(pad_height, pad_width));
+            for (const auto overlay_layer : text_layers) {
+                if (it.second.net && it.second.net->name.size() > 0) {
+                    draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, overlay_layer, 0,
+                                  TextBoxMode::UPPER);
+                    draw_text_box(transform, pad_width, pad_height, it.second.net->name, ColorP::WHITE, overlay_layer,
+                                  0, TextBoxMode::LOWER);
+                }
+                else {
+                    draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, overlay_layer, 0,
+                                  TextBoxMode::FULL);
+                }
             }
+            set_lod_size(-1);
+            transform_restore();
         }
-        set_lod_size(-1);
-        transform_restore();
     }
+
     for (const auto &it : pkg.lines) {
         render(it.second, interactive);
     }
