@@ -19,5 +19,6 @@ private:
     Line *temp_line = 0;
     void update_tip();
     bool first_line = true;
+    std::set<const Junction *> junctions_created;
 };
 } // namespace horizon

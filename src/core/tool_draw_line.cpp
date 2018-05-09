@@ -19,6 +19,7 @@ ToolResponse ToolDrawLine::begin(const ToolArgs &args)
     std::cout << "tool draw line junction\n";
 
     temp_junc = core.r->insert_junction(UUID::random());
+    junctions_created.insert(temp_junc);
     temp_junc->temp = true;
     temp_junc->position = args.coords;
     temp_line = nullptr;
@@ -63,6 +64,7 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
                 Junction *last = temp_junc;
                 temp_junc->temp = false;
                 temp_junc = core.r->insert_junction(UUID::random());
+                junctions_created.insert(temp_junc);
                 temp_junc->temp = true;
                 temp_junc->position = args.coords;
 
@@ -77,7 +79,7 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
         }
         else if (args.button == 3) {
             if (temp_line) {
-                if (first_line)
+                if (first_line && junctions_created.count(temp_line->from))
                     core.r->delete_junction(temp_line->from->uuid);
                 core.r->delete_line(temp_line->uuid);
                 temp_line = nullptr;
@@ -106,7 +108,7 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
         }
         else if (args.key == GDK_KEY_Escape) {
             if (temp_line) {
-                if (first_line)
+                if (first_line && junctions_created.count(temp_line->from))
                     core.r->delete_junction(temp_line->from->uuid);
                 core.r->delete_line(temp_line->uuid);
                 temp_line = nullptr;
