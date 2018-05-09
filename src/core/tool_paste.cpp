@@ -304,6 +304,7 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
         move_do_cursor(args.coords);
+        return ToolResponse::fast();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
