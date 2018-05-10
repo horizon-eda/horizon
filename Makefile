@@ -475,6 +475,7 @@ OBJ_OCE = $(SRC_OCE:.cpp=.o)
 
 INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router -I3rd_party
 INC_OCE = -I/opt/opencascade/inc/ -I/mingw64/include/oce/ -I/usr/include/oce -I/usr/include/opencascade
+INC_OCE+= -I/usr/local/include/OpenCASCADE
 LDFLAGS_OCE = -L /opt/opencascade/lib/ -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -lTKTopAlgo -lTKPrim -lTKBO -lTKG3d
 ifeq ($(OS),Windows_NT)
 	LDFLAGS_OCE += -lTKV3d
