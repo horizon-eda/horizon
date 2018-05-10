@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Find clang-format v5
 CLANG_FORMAT=$(command -v clang-format)

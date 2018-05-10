@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 DISTDIR=dist/horizon
 rm -rf dist
 mkdir -p $DISTDIR
