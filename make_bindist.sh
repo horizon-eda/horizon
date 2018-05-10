@@ -90,6 +90,7 @@ LIBS=(
 	libbrotlidec.dll\
 	libfribidi-0.dll\
 	yaml-cpp.dll\
+	libhttp_parser-2.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
