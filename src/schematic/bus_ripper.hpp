@@ -23,7 +23,7 @@ public:
     BusRipper(const UUID &uu, const json &j, class Sheet &sheet, class Block &block);
     BusRipper(const UUID &uu);
     virtual UUID get_uuid() const;
-    const UUID uuid;
+    UUID uuid;
     bool temp = false;
 
     uuid_ptr<Junction> junction;

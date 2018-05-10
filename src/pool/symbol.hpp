@@ -26,7 +26,7 @@ public:
     SymbolPin(const UUID &uu, const json &j);
     SymbolPin(UUID uu);
 
-    const UUID uuid;
+    UUID uuid;
     Coord<int64_t> position;
     uint64_t length;
     bool name_visible;

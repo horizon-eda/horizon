@@ -25,7 +25,7 @@ public:
     PowerSymbol(const UUID &uu, const json &j, class Sheet *sheet = nullptr, class Block *block = nullptr);
     PowerSymbol(const UUID &uu);
 
-    const UUID uuid;
+    UUID uuid;
     uuid_ptr<Junction> junction;
     uuid_ptr<Net> net;
     bool mirror = false;
