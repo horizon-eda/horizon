@@ -78,6 +78,21 @@ Sheet::Sheet(const UUID &uu, const json &j, Block &block, Pool &pool)
             bus_labels.emplace(std::make_pair(u, BusLabel(u, it.value(), *this, block)));
         }
     }
+    if (j.count("lines")) {
+        const json &o = j["lines"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(lines, ObjectType::LINE, std::forward_as_tuple(u, it.value(), *this),
+                         Logger::Domain::SCHEMATIC);
+        }
+    }
+    if (j.count("arcs")) {
+        const json &o = j["arcs"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(arcs, ObjectType::ARC, std::forward_as_tuple(u, it.value(), *this), Logger::Domain::SCHEMATIC);
+        }
+    }
 }
 
 Sheet::Sheet(const UUID &uu) : uuid(uu), name("First sheet"), index(1)
@@ -247,6 +262,18 @@ void Sheet::simplify_net_lines(bool simplify)
         for (const auto &it : power_symbols) {
             junctions_with_label.emplace(it.second.junction->uuid);
             it.second.junction->connection_count++;
+        }
+        for (const auto &it : lines) {
+            for (auto &it_ft : {it.second.from, it.second.to}) {
+                junctions_with_label.emplace(it_ft->uuid);
+                it_ft->has_via = true;
+            }
+        }
+        for (const auto &it : arcs) {
+            for (auto &it_ft : {it.second.from, it.second.to, it.second.center}) {
+                junctions_with_label.emplace(it_ft->uuid);
+                it_ft->has_via = true;
+            }
         }
 
         std::map<UUID, std::set<UUID>> junction_connections;
@@ -598,6 +625,11 @@ Junction *Sheet::replace_bus_ripper(BusRipper *rip)
     return j;
 }
 
+Junction *Sheet::get_junction(const UUID &uu)
+{
+    return &junctions.at(uu);
+}
+
 /*void Sheet::connect(SchematicSymbol *sym, SymbolPin *pin, PowerSymbol
 *power_sym) {
         auto uu = UUID::random();
@@ -652,6 +684,14 @@ json Sheet::serialize() const
     j["bus_rippers"] = json::object();
     for (const auto &it : bus_rippers) {
         j["bus_rippers"][(std::string)it.first] = it.second.serialize();
+    }
+    j["lines"] = json::object();
+    for (const auto &it : lines) {
+        j["lines"][(std::string)it.first] = it.second.serialize();
+    }
+    j["arcs"] = json::object();
+    for (const auto &it : lines) {
+        j["arcs"][(std::string)it.first] = it.second.serialize();
     }
 
     return j;

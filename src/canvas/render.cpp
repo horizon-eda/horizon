@@ -932,6 +932,12 @@ void Canvas::render(const Sheet &sheet)
     for (const auto &it : sheet.bus_rippers) {
         render(it.second);
     }
+    for (const auto &it : sheet.lines) {
+        render(it.second);
+    }
+    for (const auto &it : sheet.arcs) {
+        render(it.second);
+    }
     render(sheet.frame);
 }
 

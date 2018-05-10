@@ -53,11 +53,13 @@ Sheet *CoreSchematic::get_sheet(bool work)
 }
 Line *CoreSchematic::get_line(const UUID &uu, bool work)
 {
-    return nullptr;
+    auto &sheet = sch.sheets.at(sheet_uuid);
+    return &sheet.lines.at(uu);
 }
 Arc *CoreSchematic::get_arc(const UUID &uu, bool work)
 {
-    return nullptr;
+    auto &sheet = sch.sheets.at(sheet_uuid);
+    return &sheet.arcs.at(uu);
 }
 
 Junction *CoreSchematic::insert_junction(const UUID &uu, bool work)
@@ -99,20 +101,26 @@ SchematicSymbol *CoreSchematic::insert_schematic_symbol(const UUID &uu, const Sy
 
 Line *CoreSchematic::insert_line(const UUID &uu, bool work)
 {
-    return nullptr;
+    auto &sheet = sch.sheets.at(sheet_uuid);
+    auto x = sheet.lines.emplace(std::make_pair(uu, uu));
+    return &(x.first->second);
 }
 void CoreSchematic::delete_line(const UUID &uu, bool work)
 {
-    return;
+    auto &sheet = sch.sheets.at(sheet_uuid);
+    sheet.lines.erase(uu);
 }
 
 Arc *CoreSchematic::insert_arc(const UUID &uu, bool work)
 {
-    return nullptr;
+    auto &sheet = sch.sheets.at(sheet_uuid);
+    auto x = sheet.arcs.emplace(std::make_pair(uu, uu));
+    return &(x.first->second);
 }
 void CoreSchematic::delete_arc(const UUID &uu, bool work)
 {
-    return;
+    auto &sheet = sch.sheets.at(sheet_uuid);
+    sheet.arcs.erase(uu);
 }
 
 std::vector<LineNet *> CoreSchematic::get_net_lines(bool work)
@@ -136,13 +144,21 @@ std::vector<NetLabel *> CoreSchematic::get_net_labels(bool work)
 
 std::vector<Line *> CoreSchematic::get_lines(bool work)
 {
+    auto &sheet = sch.sheets.at(sheet_uuid);
     std::vector<Line *> r;
+    for (auto &it : sheet.lines) {
+        r.push_back(&it.second);
+    }
     return r;
 }
 
 std::vector<Arc *> CoreSchematic::get_arcs(bool work)
 {
+    auto &sheet = sch.sheets.at(sheet_uuid);
     std::vector<Arc *> r;
+    for (auto &it : sheet.arcs) {
+        r.push_back(&it.second);
+    }
     return r;
 }
 
@@ -169,6 +185,8 @@ bool CoreSchematic::has_object_type(ObjectType ty)
     case ObjectType::LINE_NET:
     case ObjectType::POWER_SYMBOL:
     case ObjectType::TEXT:
+    case ObjectType::LINE:
+    case ObjectType::ARC:
         return true;
         break;
     default:;

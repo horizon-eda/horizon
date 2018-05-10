@@ -685,6 +685,17 @@ void Schematic::update_refs()
             line.net.update(block->nets);
             line.bus.update(block->buses);
         }
+        for (auto &it_line : sheet.lines) {
+            Line &line = it_line.second;
+            line.from.update(sheet.junctions);
+            line.to.update(sheet.junctions);
+        }
+        for (auto &it_arc : sheet.arcs) {
+            Arc &arc = it_arc.second;
+            arc.from.update(sheet.junctions);
+            arc.to.update(sheet.junctions);
+            arc.center.update(sheet.junctions);
+        }
         for (auto &it_junc : sheet.junctions) {
             it_junc.second.net.update(block->nets);
             it_junc.second.bus.update(block->buses);

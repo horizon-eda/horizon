@@ -10,6 +10,8 @@
 #include "bus_label.hpp"
 #include "bus_ripper.hpp"
 #include "power_symbol.hpp"
+#include "common/line.hpp"
+#include "common/arc.hpp"
 #include "frame.hpp"
 #include "util/warning.hpp"
 #include "common/layer_provider.hpp"
@@ -32,7 +34,7 @@ public:
     bool is_bus() const;
 };
 
-class Sheet : public LayerProvider {
+class Sheet : public ObjectProvider, public LayerProvider {
 public:
     Sheet(const UUID &uu, const json &, Block &Block, class Pool &pool);
     Sheet(const UUID &uu);
@@ -49,6 +51,8 @@ public:
     std::map<UUID, PowerSymbol> power_symbols;
     std::map<UUID, BusLabel> bus_labels;
     std::map<UUID, BusRipper> bus_rippers;
+    std::map<UUID, Line> lines;
+    std::map<UUID, Arc> arcs;
     std::vector<Warning> warnings;
 
     LineNet *split_line_net(LineNet *it, Junction *ju);
@@ -72,6 +76,8 @@ public:
     // void replace_power_symbol(PowerSymbol *sym, Junction *j);
     // void connect(SchematicSymbol *sym, SymbolPin *pin, PowerSymbol
     // *power_sym);
+
+    Junction *get_junction(const UUID &uu) override;
 
     Frame frame;
 
