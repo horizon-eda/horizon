@@ -1,30 +1,35 @@
 #!/usr/bin/env bash
+#
+# This script tries to detect a suitable clang-format program by searching for
+# common names. The user can override the detection by specifying the
+# clang-format binary in the environment variable CLANG_FORMAT.
+#
+# When clang-format has been found, the source tree is processed. Any
+# corrections are inserted in-place.
 
-# Find clang-format v5
-CLANG_FORMAT=$(command -v clang-format)
-CLANG_FORMAT5=$(command -v clang-format-5.0)
+# Find clang-format, in priority order, unless overridden by user.
+CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format-5.0)}
+CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format50)}
+CLANG_FORMAT=${CLANG_FORMAT:-$(command -v clang-format)}
 
-if [ ! -z $CLANG_FORMAT5 ]; then
-    # clang-format-5.0 exists
-    CLANG_BIN=$CLANG_FORMAT5
-    echo "Using clang-format-5.0 command, version 5 detected"
-elif [ ! -z $CLANG_FORMAT ]; then
-    CLANG_FORMAT_VERSION="$(clang-format -version | cut -d " " -f 3 | cut -d "." -f 1)"
+if [ ! -z $CLANG_FORMAT ]; then
+    CLANG_FORMAT_VERSION="$(${CLANG_FORMAT} -version | cut -d " " -f 3 | cut -d "." -f 1)"
 
     # Check version
     if [ "$CLANG_FORMAT_VERSION" = "5" ]; then
-	# clang-format is 5.0
+    # clang-format major version is 5.0
 	CLANG_BIN=$CLANG_FORMAT
-        echo "Using clang-format command, version 5 detected"
     else
-        echo "clang-format-5.0 was not found, and clang-format was not the correct version"
-	echo "Version was $CLANG_FORMAT_VERSION"
+        echo "clang-format version 5 required. The following was found:"
+        $CLANG_FORMAT -version
+        exit -1
     fi
 else
     # error messages
-    echo "clang-format was not found"
+    echo "$0: could not find a suitable clang-format"
     exit -1
 fi
+echo "Using clang-format command: ${CLANG_BIN}"
 
 # Search using the binary found
 find ./src -iname *.h -o -iname *.cpp -o -iname *.hpp -o -iname *.cc -o -iname *.c | xargs $CLANG_BIN -style=file -i
