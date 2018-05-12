@@ -70,6 +70,14 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::SAVE, ToolID::NONE},
          {"Save", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::RELOAD_NETLIST, ToolID::NONE},
+         {"Reload netlist", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::SAVE_RELOAD_NETLIST, ToolID::NONE},
+         {"Save and reload netlist", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::UNDO, ToolID::NONE},
          {"Undo", ActionGroup::UNDO, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
 
@@ -538,6 +546,8 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(TUNING_ADD_TRACKS),
         ACTION_LUT_ITEM(TUNING_ADD_TRACKS_ALL),
         ACTION_LUT_ITEM(HIGHLIGHT_NET),
+        ACTION_LUT_ITEM(RELOAD_NETLIST),
+        ACTION_LUT_ITEM(SAVE_RELOAD_NETLIST),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

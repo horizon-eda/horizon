@@ -102,6 +102,10 @@ bool ImpBoard::handle_broadcast(const json &j)
             ToolResponse r = core.r->tool_begin(ToolID::MAP_PACKAGE, args, imp_interface.get());
             tool_process(r);
         }
+        else if (op == "reload-netlist" && !core_board.tool_is_active()) {
+            main_window->present();
+            trigger_action(ActionID::RELOAD_NETLIST);
+        }
     }
     return true;
 }
@@ -242,15 +246,15 @@ void ImpBoard::construct()
 
     add_tool_button(ToolID::MAP_PACKAGE, "Place package", false);
 
+    connect_action(ActionID::RELOAD_NETLIST, [this](const ActionConnection &c) {
+        core_board.reload_netlist();
+        core_board.set_needs_save();
+        canvas_update();
+    });
+
     {
-        auto button = Gtk::manage(new Gtk::Button("Reload netlist"));
-        button->signal_clicked().connect([this] {
-            core_board.reload_netlist();
-            core_board.set_needs_save();
-            canvas_update();
-        });
+        auto button = create_action_button(make_action(ActionID::RELOAD_NETLIST));
         button->show();
-        core.r->signal_tool_changed().connect([button](ToolID t) { button->set_sensitive(t == ToolID::NONE); });
         main_window->header->pack_end(*button);
     }
 

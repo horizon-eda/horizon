@@ -367,6 +367,15 @@ json ProjectManagerAppWindow::handle_req(const json &j)
         auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
         return processes.count(project->board_filename) > 0;
     }
+    else if (op == "reload-netlist") {
+        auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
+        if (processes.count(project->board_filename)) {
+            auto pid = processes.at(project->board_filename).proc->get_pid();
+            json tx;
+            tx["op"] = "reload-netlist";
+            app->send_json(pid, tx);
+        }
+    }
     return nullptr;
 }
 
