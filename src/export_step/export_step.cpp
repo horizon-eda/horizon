@@ -201,11 +201,11 @@ static bool getModelLocation(bool aBottom, DOUBLET aPosition, double aRotation, 
     lPos.Multiply(lOff);
 
     gp_Trsf lOrient;
-    lOrient.SetRotation(gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 0.0, 1.0)), -aOrientation.z);
+    lOrient.SetRotation(gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(1.0, 0.0, 0.0)), -aOrientation.x);
     lPos.Multiply(lOrient);
     lOrient.SetRotation(gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 1.0, 0.0)), -aOrientation.y);
     lPos.Multiply(lOrient);
-    lOrient.SetRotation(gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(1.0, 0.0, 0.0)), -aOrientation.x);
+    lOrient.SetRotation(gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 0.0, 1.0)), -aOrientation.z);
     lPos.Multiply(lOrient);
 
     aLocation = TopLoc_Location(lPos);
