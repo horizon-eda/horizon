@@ -24,7 +24,7 @@ public:
     BusLabel(const UUID &uu, const json &j, class Sheet &sheet, class Block &block);
     BusLabel(const UUID &uu);
 
-    const UUID uuid;
+    UUID uuid;
 
     enum class Style { PLAIN, FLAG };
     Style style = Style::FLAG;

@@ -336,7 +336,7 @@ void ImpSchematic::construct()
             default:;
             }
         }
-        update_highlights();
+        this->update_highlights();
     });
 
 

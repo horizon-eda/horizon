@@ -38,7 +38,7 @@ public:
     UUID net_segment = UUID();
 
 
-    const UUID uuid;
+    UUID uuid;
 
     class Connection {
     public:

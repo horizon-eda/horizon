@@ -28,10 +28,10 @@ public:
 
 class SelectableRef {
 public:
-    const UUID uuid;
-    const ObjectType type;
-    const unsigned int vertex;
-    const int layer;
+    UUID uuid;
+    ObjectType type;
+    unsigned int vertex;
+    int layer;
     SelectableRef(const UUID &uu, ObjectType ty, unsigned int v = 0, int la = 10000)
         : uuid(uu), type(ty), vertex(v), layer(la)
     {
