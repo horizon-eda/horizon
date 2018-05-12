@@ -2,6 +2,8 @@
 #include "board_layers.hpp"
 #include "canvas/canvas_pads.hpp"
 #include "canvas/canvas_patch.hpp"
+#include <mutex>
+#include <thread>
 
 namespace horizon {
 
@@ -37,17 +39,54 @@ static void transform_path(ClipperLib::Path &path, const Placement &tr)
     }
 }
 
-void Board::update_plane(Plane *plane, CanvasPatch *ca_ext, CanvasPads *ca_pads_ext)
+static std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint> get_path_bb(const ClipperLib::Path &path)
+{
+    std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint> bb;
+    bb.first = path.front();
+    bb.second = bb.first;
+    for (const auto &pt : path) {
+        bb.first.X = std::min(bb.first.X, pt.X);
+        bb.first.Y = std::min(bb.first.Y, pt.Y);
+        bb.second.X = std::max(bb.second.X, pt.X);
+        bb.second.Y = std::max(bb.second.Y, pt.Y);
+    }
+    return bb;
+}
+
+static std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint> get_paths_bb(const ClipperLib::Paths &paths)
+{
+    std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint> bb;
+    bb.first = paths.front().front();
+    bb.second = bb.first;
+    for (const auto &path : paths) {
+        for (const auto &pt : path) {
+            bb.first.X = std::min(bb.first.X, pt.X);
+            bb.first.Y = std::min(bb.first.Y, pt.Y);
+            bb.second.X = std::max(bb.second.X, pt.X);
+            bb.second.Y = std::max(bb.second.Y, pt.Y);
+        }
+    }
+    return bb;
+}
+
+static bool bb_isect(const std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint> &bb1,
+                     const std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint> &bb2)
+{
+    return (bb1.second.X >= bb2.first.X && bb2.second.X >= bb1.first.X)
+           && (bb1.second.Y >= bb2.first.Y && bb2.second.Y >= bb1.first.Y);
+}
+
+void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPads *ca_pads_ext)
 {
     CanvasPatch ca_my;
-    CanvasPatch *ca = ca_ext;
+    const CanvasPatch *ca = ca_ext;
     if (!ca_ext) {
         ca_my.update(*this);
         ca = &ca_my;
     }
 
     CanvasPads ca_pads_my;
-    CanvasPads *ca_pads = ca_pads_ext;
+    const CanvasPads *ca_pads = ca_pads_ext;
     if (!ca_pads_ext) {
         ca_pads_my.update(*this);
         ca_pads = &ca_pads_my;
@@ -63,6 +102,9 @@ void Board::update_plane(Plane *plane, CanvasPatch *ca_ext, CanvasPads *ca_pads_
     for (const auto &pt : poly.vertices) {
         poly_path.emplace_back(ClipperLib::IntPoint(pt.position.x, pt.position.y));
     }
+
+    auto poly_bb = get_path_bb(poly_path);
+
     ClipperLib::JoinType jt = ClipperLib::jtRound;
     switch (plane->settings.style) {
     case PlaneSettings::Style::ROUND:
@@ -90,13 +132,9 @@ void Board::update_plane(Plane *plane, CanvasPatch *ca_ext, CanvasPads *ca_pads_
     double twiddle = .005_mm;
 
     for (const auto &patch : ca->patches) { // add cutouts
-        if ((patch.first.layer == poly.layer && patch.first.net != plane->net->uuid
+        if ((patch.first.layer == poly.layer && patch.first.net != plane->net->uuid && patch.second.size()
              && patch.first.type != PatchType::OTHER && patch.first.type != PatchType::TEXT)
             || (patch.first.layer == 10000 && patch.first.type == PatchType::HOLE_NPTH)) {
-            ClipperLib::ClipperOffset ofs; // expand patch for cutout
-            ofs.ArcTolerance = 2e3;
-            ofs.AddPaths(patch.second, jt, ClipperLib::etClosedPolygon);
-            ClipperLib::Paths patch_exp;
 
             int64_t clearance = 0;
             if (patch.first.type != PatchType::HOLE_NPTH) { // copper
@@ -110,10 +148,24 @@ void Board::update_plane(Plane *plane, CanvasPatch *ca_ext, CanvasPads *ca_pads_
                 clearance = rules.get_clearance_copper_other(plane->net, poly.layer)
                                     ->get_clearance(PatchType::PLANE, PatchType::HOLE_NPTH);
             }
-            double expand = clearance + plane->settings.min_width / 2 + twiddle;
 
-            ofs.Execute(patch_exp, expand);
-            cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
+            auto patch_bb = get_paths_bb(patch.second);
+            patch_bb.first.X -= 2 * clearance;
+            patch_bb.first.Y -= 2 * clearance;
+            patch_bb.second.X += 2 * clearance;
+            patch_bb.second.Y += 2 * clearance;
+
+            if (bb_isect(poly_bb, patch_bb)) {
+                ClipperLib::ClipperOffset ofs; // expand patch for cutout
+                ofs.ArcTolerance = 2e3;
+                ofs.AddPaths(patch.second, jt, ClipperLib::etClosedPolygon);
+                ClipperLib::Paths patch_exp;
+
+                double expand = clearance + plane->settings.min_width / 2 + twiddle;
+
+                ofs.Execute(patch_exp, expand);
+                cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
+            }
         }
     }
 
@@ -366,29 +418,68 @@ void Board::update_plane(Plane *plane, CanvasPatch *ca_ext, CanvasPads *ca_pads_
     }
 }
 
+static void plane_update_worker(std::mutex &mutex, std::set<Plane *> &planes, Board *brd, const CanvasPatch *ca_patch,
+                                const CanvasPads *ca_pads)
+{
+    while (true) {
+        Plane *plane = nullptr;
+        {
+            std::lock_guard<std::mutex> guard(mutex);
+            if (planes.size() == 0)
+                break;
+            auto it = planes.begin();
+            plane = *it;
+            planes.erase(it);
+        }
+        assert(plane);
+        brd->update_plane(plane, ca_patch, ca_pads);
+    }
+}
+
 void Board::update_planes()
 {
-    std::vector<Plane *> planes_sorted;
-    planes_sorted.reserve(planes.size());
+    std::map<int, std::set<Plane *>> planes_by_priority;
     for (auto &it : planes) {
         it.second.fragments.clear();
-        planes_sorted.push_back(&it.second);
+        planes_by_priority[it.second.priority].insert(&it.second);
     }
-    std::sort(planes_sorted.begin(), planes_sorted.end(),
-              [](const auto a, const auto b) { return a->priority < b->priority; });
+    std::vector<int> plane_priorities;
+    std::transform(planes_by_priority.begin(), planes_by_priority.end(), std::back_inserter(plane_priorities),
+                   [](const auto &a) { return a.first; });
+    std::sort(plane_priorities.begin(), plane_priorities.end());
 
     CanvasPads cp;
     cp.update(*this);
 
     CanvasPatch ca;
     ca.update(*this);
-    for (auto plane : planes_sorted) {
-        update_plane(plane, &ca, &cp);
-        ca.append_polygon(*(plane->polygon));
+
+    for (auto priority : plane_priorities) {
+        std::mutex plane_update_mutex;
+        std::set<Plane *> planes_for_workers = planes_by_priority.at(priority);
+
+        if (planes_for_workers.size() >= std::thread::hardware_concurrency()) {
+            std::vector<std::thread> threads;
+            for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
+                threads.emplace_back(plane_update_worker, std::ref(plane_update_mutex), std::ref(planes_for_workers),
+                                     this, &ca, &cp);
+            }
+            for (auto &thr : threads) {
+                thr.join();
+            }
+        }
+        else {
+            for (auto plane : planes_by_priority.at(priority)) {
+                update_plane(plane, &ca, &cp);
+            }
+        }
+        for (auto plane : planes_by_priority.at(priority)) {
+            ca.append_polygon(*(plane->polygon));
+        }
     }
 }
 
-ClipperLib::Paths Board::get_thermals(Plane *plane, CanvasPads *cp) const
+ClipperLib::Paths Board::get_thermals(Plane *plane, const CanvasPads *cp) const
 {
     ClipperLib::Paths ret;
     for (const auto &it : cp->pads) {
