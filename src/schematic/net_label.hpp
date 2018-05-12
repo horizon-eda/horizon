@@ -23,7 +23,7 @@ public:
     NetLabel(const UUID &uu, const json &j, class Sheet *sheet = nullptr);
     NetLabel(const UUID &uu);
 
-    const UUID uuid;
+    UUID uuid;
 
     enum class Style { PLAIN, FLAG };
     Style style = Style::FLAG;
