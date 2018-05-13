@@ -6,6 +6,7 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 #include "nlohmann/json.hpp"
+#include "logger/logger.hpp"
 
 namespace horizon {
 
@@ -136,30 +137,38 @@ void KeySequencesPreferences::load_from_json(const json &j)
 void KeySequencesPreferences::append_from_json(const json &j)
 {
     for (const auto &it : j) {
-        auto action = action_lut.lookup(it.at("action"), ActionID::NONE);
-        if (action != ActionID::NONE) {
-            auto tool = tool_lut.lookup(it.at("tool"));
-            auto k = std::make_pair(action, tool);
-            if (keys.count(k) == 0) {
-                keys[k];
-                auto &j2 = it.at("keys");
-                for (auto it2 = j2.cbegin(); it2 != j2.cend(); ++it2) {
-                    auto av = static_cast<ActionCatalogItem::Availability>(std::stoi(it2.key()));
-                    keys[k][av];
-                    for (const auto &it3 : it2.value()) {
-                        keys[k][av].emplace_back();
-                        for (const auto &it4 : it3) {
-                            std::string keyname = it4.at("key");
-                            auto key = gdk_keyval_from_name(keyname.c_str());
-                            auto mod = static_cast<GdkModifierType>(it4.at("mod").get<int>());
-                            keys[k][av].back().emplace_back(key, mod);
+        try {
+            auto action = action_lut.lookup(it.at("action"), ActionID::NONE);
+            if (action != ActionID::NONE) {
+                auto tool = tool_lut.lookup(it.at("tool"));
+                auto k = std::make_pair(action, tool);
+                if (keys.count(k) == 0) {
+                    keys[k];
+                    auto &j2 = it.at("keys");
+                    for (auto it2 = j2.cbegin(); it2 != j2.cend(); ++it2) {
+                        auto av = static_cast<ActionCatalogItem::Availability>(std::stoi(it2.key()));
+                        keys[k][av];
+                        for (const auto &it3 : it2.value()) {
+                            keys[k][av].emplace_back();
+                            for (const auto &it4 : it3) {
+                                std::string keyname = it4.at("key");
+                                auto key = gdk_keyval_from_name(keyname.c_str());
+                                auto mod = static_cast<GdkModifierType>(it4.at("mod").get<int>());
+                                keys[k][av].back().emplace_back(key, mod);
+                            }
                         }
                     }
                 }
             }
         }
+        catch (const std::exception &e) {
+            Logger::log_warning("error loading key sequence", Logger::Domain::UNSPECIFIED, e.what());
+        }
+        catch (...) {
+            Logger::log_warning("error loading key sequence", Logger::Domain::UNSPECIFIED, "unknown error");
+        }
     }
-}
+} // namespace horizon
 
 json ImpPreferences::serialize() const
 {
