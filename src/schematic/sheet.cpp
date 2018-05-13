@@ -690,7 +690,7 @@ json Sheet::serialize() const
         j["lines"][(std::string)it.first] = it.second.serialize();
     }
     j["arcs"] = json::object();
-    for (const auto &it : lines) {
+    for (const auto &it : arcs) {
         j["arcs"][(std::string)it.first] = it.second.serialize();
     }
 
