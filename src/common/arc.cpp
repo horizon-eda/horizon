@@ -7,8 +7,10 @@
 namespace horizon {
 
 Arc::Arc(const UUID &uu, const json &j, ObjectProvider &obj)
-    : uuid(uu), to(obj.get_junction(j["to"].get<std::string>())), from(obj.get_junction(j["from"].get<std::string>())),
-      center(obj.get_junction(j["center"].get<std::string>())), width(j.value("width", 0)), layer(j.value("layer", 0))
+    : uuid(uu), to(obj.get_junction(j.at("to").get<std::string>())),
+      from(obj.get_junction(j.at("from").get<std::string>())),
+      center(obj.get_junction(j.at("center").get<std::string>())), width(j.value("width", 0)),
+      layer(j.value("layer", 0))
 {
 }
 
