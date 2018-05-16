@@ -9,6 +9,7 @@ using json = nlohmann::json;
 void save_json_to_file(const std::string &filename, const json &j);
 int orientation_to_angle(Orientation o);
 std::string get_exe_dir();
+void allow_set_foreground_window(int pid);
 std::string coord_to_string(const Coordf &c, bool delta = false);
 std::string dim_to_string(int64_t x, bool with_sign = true);
 std::string angle_to_string(int angle, bool pos_only = true);

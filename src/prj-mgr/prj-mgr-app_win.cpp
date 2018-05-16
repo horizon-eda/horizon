@@ -200,7 +200,8 @@ void ProjectManagerAppWindow::spawn_imp(ProjectManagerProcess::Type type, const 
         auto ep_broadcast = app->get_ep_broadcast();
         std::vector<std::string> env = {"HORIZON_POOL=" + pool_path, "HORIZON_EP_BROADCAST=" + ep_broadcast,
                                         "HORIZON_EP_PROJECT=" + sock_project_ep,
-                                        "HORIZON_POOL_CACHE=" + project->pool_cache_directory};
+                                        "HORIZON_POOL_CACHE=" + project->pool_cache_directory,
+                                        "HORIZON_PRJ_MGR_PID=" + std::to_string(getpid())};
         std::string filename = args.at(0);
         auto &proc = processes
                              .emplace(std::piecewise_construct, std::forward_as_tuple(filename),
@@ -225,6 +226,7 @@ void ProjectManagerAppWindow::spawn_imp(ProjectManagerProcess::Type type, const 
     else { // present imp
         auto &proc = processes.at(args.at(0));
         auto pid = proc.proc->get_pid();
+        allow_set_foreground_window(pid);
         app->send_json(pid, {{"op", "present"}});
     }
 }
@@ -366,6 +368,13 @@ json ProjectManagerAppWindow::handle_req(const json &j)
     else if (op == "has-board") {
         auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
         return processes.count(project->board_filename) > 0;
+    }
+    else if (op == "get-board-pid") {
+        auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
+        if (processes.count(project->board_filename))
+            return processes.at(project->board_filename).proc->get_pid();
+        else
+            return -1;
     }
     else if (op == "reload-netlist") {
         auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());

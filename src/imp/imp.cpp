@@ -54,6 +54,12 @@ ImpBase::ImpBase(const PoolParams &params)
         chan = Glib::IOChannel::create_from_fd(fd);
 #endif
 
+        {
+            auto pid_p = Glib::getenv("HORIZON_PRJ_MGR_PID");
+            if (pid_p.size())
+                prj_mgr_pid = std::stoi(pid_p);
+        }
+
         Glib::signal_io().connect(
                 [this](Glib::IOCondition cond) {
                     while (sock_broadcast_rx.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {

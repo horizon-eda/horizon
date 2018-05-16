@@ -5,6 +5,7 @@
 #include "rules/rules_window.hpp"
 #include "widgets/sheet_box.hpp"
 #include "util/gtk_util.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,
@@ -187,6 +188,13 @@ void ImpSchematic::handle_selection_cross_probe()
     send_json(j);
 }
 
+int ImpSchematic::get_board_pid()
+{
+    json j;
+    j["op"] = "get-board-pid";
+    return this->send_json(j);
+}
+
 void ImpSchematic::construct()
 {
 
@@ -255,6 +263,7 @@ void ImpSchematic::construct()
         else {
             json j;
             j["op"] = "show-browser";
+            allow_set_foreground_window(prj_mgr_pid);
             this->send_json(j);
         }
     });
@@ -274,6 +283,7 @@ void ImpSchematic::construct()
                     j["selection"].push_back(k);
                 }
             }
+            allow_set_foreground_window(get_board_pid());
             this->send_json(j);
         });
         set_action_sensitive(make_action(ActionID::TO_BOARD), false);

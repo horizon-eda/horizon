@@ -43,5 +43,7 @@ private:
     Target target_drag_begin;
 
     void handle_drag();
+
+    int get_board_pid();
 };
 } // namespace horizon

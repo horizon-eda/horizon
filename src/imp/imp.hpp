@@ -79,6 +79,7 @@ protected:
     zmq::socket_t sock_broadcast_rx;
     zmq::socket_t sock_project;
     bool sockets_connected = false;
+    int prj_mgr_pid = -1;
     bool no_update = false;
 
     virtual void canvas_update() = 0;

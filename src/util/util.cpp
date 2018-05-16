@@ -97,6 +97,15 @@ std::string get_exe_dir()
 #endif
 #endif
 
+
+void allow_set_foreground_window(int pid)
+{
+#ifdef G_OS_WIN32
+    AllowSetForegroundWindow(pid);
+#endif
+}
+
+
 std::string coord_to_string(const Coordf &pos, bool delta)
 {
     std::ostringstream ss;
