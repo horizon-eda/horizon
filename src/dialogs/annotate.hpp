@@ -18,6 +18,7 @@ private:
     Schematic *sch = nullptr;
     Gtk::Switch *w_fill_gaps = nullptr;
     Gtk::Switch *w_keep = nullptr;
+    Gtk::Switch *w_ignore_unknown = nullptr;
     Gtk::ComboBoxText *w_order = nullptr;
     Gtk::ComboBoxText *w_mode = nullptr;
 

@@ -94,6 +94,7 @@ public:
 
         bool fill_gaps = true;
         bool keep = true;
+        bool ignore_unknown = false;
         json serialize() const;
     };
 

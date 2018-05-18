@@ -88,6 +88,17 @@ AnnotateDialog::AnnotateDialog(Gtk::Window *parent, Schematic *s)
         top++;
     }
     {
+        auto la = Gtk::manage(new Gtk::Label("Ignore unknown"));
+        la->set_halign(Gtk::ALIGN_END);
+        la->get_style_context()->add_class("dim-label");
+        w_ignore_unknown = Gtk::manage(new Gtk::Switch());
+        w_ignore_unknown->set_halign(Gtk::ALIGN_START);
+        w_ignore_unknown->set_active(sch->annotation.ignore_unknown);
+        grid->attach(*la, 0, top, 1, 1);
+        grid->attach(*w_ignore_unknown, 1, top, 1, 1);
+        top++;
+    }
+    {
         auto la = Gtk::manage(new Gtk::Label("Fill gaps"));
         la->set_halign(Gtk::ALIGN_END);
         la->get_style_context()->add_class("dim-label");
@@ -111,6 +122,7 @@ void AnnotateDialog::ok_clicked()
     sch->annotation.mode = static_cast<Schematic::Annotation::Mode>(std::stoi(w_mode->get_active_id()));
     sch->annotation.fill_gaps = w_fill_gaps->get_active();
     sch->annotation.keep = w_keep->get_active();
+    sch->annotation.ignore_unknown = w_ignore_unknown->get_active();
     sch->annotate();
 }
 } // namespace horizon

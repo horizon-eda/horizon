@@ -28,6 +28,7 @@ Schematic::Annotation::Annotation(const json &j)
         mode = annotation_mode_lut.lookup(j.at("mode"));
         fill_gaps = j.at("fill_gaps");
         keep = j.at("keep");
+        ignore_unknown = j.value("ignore_unknown", false);
     }
 }
 
@@ -38,6 +39,7 @@ json Schematic::Annotation::serialize() const
     j["mode"] = annotation_mode_lut.lookup_reverse(mode);
     j["fill_gaps"] = fill_gaps;
     j["keep"] = keep;
+    j["ignore_unknown"] = ignore_unknown;
     return j;
 }
 
@@ -599,7 +601,8 @@ void Schematic::annotate()
                     si = std::stoi(ss);
                 }
                 catch (const std::invalid_argument &e) {
-                    sym->component->refdes = "?";
+                    if (!annotation.ignore_unknown)
+                        sym->component->refdes = "?";
                 }
                 if (si > 0) {
                     v.push_back(si);
