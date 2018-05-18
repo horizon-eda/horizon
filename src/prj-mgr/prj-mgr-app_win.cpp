@@ -453,9 +453,12 @@ void ProjectManagerAppWindow::handle_close()
 
 void ProjectManagerAppWindow::handle_place_part(const UUID &uu)
 {
-    std::cout << "place part " << (std::string)uu << std::endl;
     auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
-    app->send_json(0, {{"op", "place-part"}, {"part", (std::string)uu}});
+    if (processes.count(project->get_top_block().schematic_filename)) {
+        auto pid = processes.at(project->get_top_block().schematic_filename).proc->get_pid();
+        allow_set_foreground_window(pid);
+        app->send_json(pid, {{"op", "place-part"}, {"part", (std::string)uu}});
+    }
 }
 
 bool ProjectManagerAppWindow::close_project()
