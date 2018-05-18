@@ -194,6 +194,34 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
     collect_nets();
 
     update_tip();
+
+    int key = 0;
+    switch (tool_id) {
+    case ToolID::MOVE_KEY_UP:
+        key = GDK_KEY_Up;
+        break;
+    case ToolID::MOVE_KEY_DOWN:
+        key = GDK_KEY_Down;
+        break;
+    case ToolID::MOVE_KEY_LEFT:
+        key = GDK_KEY_Left;
+        break;
+    case ToolID::MOVE_KEY_RIGHT:
+        key = GDK_KEY_Right;
+        break;
+    default:;
+    }
+    if (key) {
+        is_key = true;
+        ToolArgs args2;
+        args2.type = ToolEventType::KEY;
+        args2.key = key;
+        update(args2);
+    }
+
+    imp->tool_bar_set_tool_name("Move");
+
+
     return ToolResponse();
 }
 
@@ -231,18 +259,24 @@ void ToolMove::update_tip()
     auto delta = last - origin;
     std::string s =
             "<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate "
-            "<b>e:</b>mirror <b>/:</b>restrict <i>"
-            + coord_to_string(delta, true) + " ";
-    switch (mode) {
-    case Mode::ARB:
-        s += "any direction";
-        break;
-    case Mode::X:
-        s += "X only";
-        break;
-    case Mode::Y:
-        s += "Y only";
-        break;
+            "<b>e:</b>mirror ";
+    if (is_key)
+        s += "<b>Enter:</b>place";
+    else
+        s += "<b>/:</b>restrict";
+    s += " <i>" + coord_to_string(delta + key_delta, true) + " ";
+    if (!is_key) {
+        switch (mode) {
+        case Mode::ARB:
+            s += "any direction";
+            break;
+        case Mode::X:
+            s += "X only";
+            break;
+        case Mode::Y:
+            s += "Y only";
+            break;
+        }
     }
 
     s += "</i>";
@@ -274,28 +308,49 @@ void ToolMove::do_move(const Coordi &d)
     update_tip();
 }
 
+static Coordi dir_from_arrow_key(unsigned int key)
+{
+    switch (key) {
+    case GDK_KEY_Up:
+        return {0, 1};
+    case GDK_KEY_Down:
+        return {0, -1};
+    case GDK_KEY_Left:
+        return {-1, 0};
+    case GDK_KEY_Right:
+        return {1, 0};
+    default:
+        return {0, 0};
+    }
+}
+
+void ToolMove::finish()
+{
+    for (const auto &it : core.r->selection) {
+        if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
+            core.c->get_schematic()->autoconnect_symbol(core.c->get_sheet(), core.c->get_schematic_symbol(it.uuid));
+        }
+    }
+    if (core.c) {
+        merge_selected_junctions();
+    }
+    if (core.b) {
+        auto brd = core.b->get_board();
+        brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
+    }
+    core.r->commit();
+}
+
 ToolResponse ToolMove::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
-        do_move(args.coords);
+        if (!is_key)
+            do_move(args.coords);
         return ToolResponse::fast();
     }
     else if (args.type == ToolEventType::CLICK || (is_transient && args.type == ToolEventType::CLICK_RELEASE)) {
         if (args.button == 1) {
-            for (const auto &it : core.r->selection) {
-                if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-                    core.c->get_schematic()->autoconnect_symbol(core.c->get_sheet(),
-                                                                core.c->get_schematic_symbol(it.uuid));
-                }
-            }
-            if (core.c) {
-                merge_selected_junctions();
-            }
-            if (core.b) {
-                auto brd = core.b->get_board();
-                brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
-            }
-            core.r->commit();
+            finish();
         }
         else {
             core.r->revert();
@@ -328,6 +383,19 @@ ToolResponse ToolMove::update(const ToolArgs &args)
         }
         else if (args.key == GDK_KEY_a) {
             update_airwires ^= true;
+        }
+        else if (args.key == GDK_KEY_Return) {
+            finish();
+            return ToolResponse::end();
+        }
+        else {
+            auto dir = dir_from_arrow_key(args.key) * imp->get_grid_spacing();
+            if (dir.x || dir.y) {
+                key_delta += dir;
+                move_do(dir);
+                update_tip();
+                return ToolResponse::fast();
+            }
         }
     }
     return ToolResponse();

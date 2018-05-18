@@ -8,6 +8,7 @@ public:
     ImpInterface(class ImpBase *i);
     Dialogs dialogs;
     void tool_bar_set_tip(const std::string &s);
+    void tool_bar_set_tool_name(const std::string &s);
     void tool_bar_flash(const std::string &s);
     UUID take_part();
     void part_placed(const UUID &uu);
@@ -16,6 +17,7 @@ public:
     void set_no_update(bool v);
     void canvas_update();
     class CanvasGL *get_canvas();
+    uint64_t get_grid_spacing();
 
     void update_highlights();
     std::set<ObjectRef> &get_highlights();

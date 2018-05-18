@@ -15,6 +15,10 @@ public:
     {
         return true;
     }
+    bool handles_esc() override
+    {
+        return true;
+    }
 
 private:
     Coordi last;
@@ -32,5 +36,8 @@ private:
     std::set<UUID> nets;
 
     bool update_airwires = true;
+    void finish();
+    bool is_key = false;
+    Coordi key_delta;
 };
 } // namespace horizon

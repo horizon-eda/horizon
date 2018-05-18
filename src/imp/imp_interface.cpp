@@ -15,6 +15,11 @@ void ImpInterface::tool_bar_set_tip(const std::string &s)
     imp->main_window->tool_bar_set_tool_tip(s);
 }
 
+void ImpInterface::tool_bar_set_tool_name(const std::string &s)
+{
+    imp->main_window->tool_bar_set_tool_name(s);
+}
+
 void ImpInterface::tool_bar_flash(const std::string &s)
 {
     imp->main_window->tool_bar_flash(s);
@@ -50,6 +55,11 @@ int ImpInterface::get_work_layer()
 class CanvasGL *ImpInterface::get_canvas()
 {
     return imp->canvas;
+}
+
+uint64_t ImpInterface::get_grid_spacing()
+{
+    return imp->canvas->property_grid_spacing();
 }
 
 void ImpInterface::set_no_update(bool v)

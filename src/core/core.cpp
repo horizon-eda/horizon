@@ -72,6 +72,11 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::MIRROR_X:
     case ToolID::MIRROR_Y:
     case ToolID::ROTATE:
+    case ToolID::MOVE_KEY:
+    case ToolID::MOVE_KEY_UP:
+    case ToolID::MOVE_KEY_DOWN:
+    case ToolID::MOVE_KEY_LEFT:
+    case ToolID::MOVE_KEY_RIGHT:
         return std::make_unique<ToolMove>(this, tool_id);
 
     case ToolID::PLACE_JUNCTION:
