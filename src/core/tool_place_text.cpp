@@ -4,7 +4,7 @@
 
 namespace horizon {
 
-ToolPlaceText::ToolPlaceText(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolPlaceText::ToolPlaceText(Core *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid)
 {
 }
 
@@ -33,6 +33,7 @@ ToolResponse ToolPlaceText::begin(const ToolArgs &args)
         core.r->selection.clear();
         return ToolResponse::end();
     }
+    core.r->selection.emplace(temp->uuid, ObjectType::TEXT);
 
     return ToolResponse();
 }
@@ -47,10 +48,14 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
         if (args.button == 1) {
             text = &temp->text;
             texts_placed.push_front(temp);
+            auto old_text = temp;
             temp = core.r->insert_text(UUID::random());
             temp->text = *text;
             temp->layer = args.work_layer;
+            temp->placement = old_text->placement;
             temp->placement.shift = args.coords;
+            core.r->selection.clear();
+            core.r->selection.emplace(temp->uuid, ObjectType::TEXT);
         }
         else if (args.button == 3) {
             core.r->delete_text(temp->uuid);
@@ -71,6 +76,10 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
             if (r.first) {
                 temp->text = r.second;
             }
+        }
+        else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
+            bool rotate = args.key == GDK_KEY_r;
+            move_mirror_or_rotate(temp->placement.shift, rotate);
         }
         else if (args.key == GDK_KEY_Escape) {
             core.r->revert();

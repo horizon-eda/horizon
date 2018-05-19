@@ -1,10 +1,11 @@
 #pragma once
 #include "core.hpp"
+#include "tool_helper_move.hpp"
 #include <forward_list>
 
 namespace horizon {
 
-class ToolPlaceText : public ToolBase {
+class ToolPlaceText : public ToolHelperMove {
 public:
     ToolPlaceText(Core *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
