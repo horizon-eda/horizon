@@ -3,7 +3,8 @@
 #include "nlohmann/json.hpp"
 
 namespace horizon {
-Part::Part(const UUID &uu, const json &j, Pool &pool) : uuid(uu), inherit_tags(j.value("inherit_tags", false))
+Part::Part(const UUID &uu, const json &j, Pool &pool)
+    : uuid(uu), inherit_tags(j.value("inherit_tags", false)), inherit_model(j.value("inherit_model", true))
 {
     attributes[Attribute::MPN] = {j.at("MPN").at(0).get<bool>(), j.at("MPN").at(1).get<std::string>()};
     attributes[Attribute::VALUE] = {j.at("value").at(0).get<bool>(), j.at("value").at(1).get<std::string>()};
@@ -21,11 +22,13 @@ Part::Part(const UUID &uu, const json &j, Pool &pool) : uuid(uu), inherit_tags(j
     else
         attributes[Attribute::DESCRIPTION] = {false, ""};
 
+    if (j.count("model"))
+        model = j.at("model").get<std::string>();
+
     if (j.count("base")) {
         base = pool.get_part(j.at("base").get<std::string>());
         entity = base->entity;
         package = base->package;
-        model = base->model;
         pad_map = base->pad_map;
         /*if(MPN_raw == "$") {
                 MPN = base->MPN;
@@ -40,8 +43,6 @@ Part::Part(const UUID &uu, const json &j, Pool &pool) : uuid(uu), inherit_tags(j
     else {
         entity = pool.get_entity(j.at("entity").get<std::string>());
         package = pool.get_package(j.at("package").get<std::string>());
-        if (j.count("model"))
-            model = j.at("model").get<std::string>();
         const json &o = j["pad_map"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto pad_uuid = UUID(it.key());
@@ -130,6 +131,14 @@ std::set<std::string> Part::get_tags() const
     return r;
 }
 
+UUID Part::get_model() const
+{
+    if (inherit_model && base)
+        return base->model;
+    else
+        return model;
+}
+
 Part::Part(const UUID &uu) : uuid(uu)
 {
     attributes[Attribute::MPN] = {false, ""};
@@ -180,13 +189,14 @@ json Part::serialize() const
     j["tags"] = tags;
     j["inherit_tags"] = inherit_tags;
     j["parametric"] = parametric;
+    j["model"] = (std::string)model;
+    j["inherit_model"] = inherit_model;
     if (base) {
         j["base"] = (std::string)base->uuid;
     }
     else {
         j["entity"] = (std::string)entity->uuid;
         j["package"] = (std::string)package->uuid;
-        j["model"] = (std::string)model;
         j["pad_map"] = json::object();
         for (const auto &it : pad_map) {
             json k;

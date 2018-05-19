@@ -40,12 +40,14 @@ public:
     const std::string &get_datasheet() const;
     const std::string &get_description() const;
     std::set<std::string> get_tags() const;
+    UUID get_model() const;
 
     std::set<std::string> tags;
     bool inherit_tags = false;
     uuid_ptr<const Entity> entity;
     uuid_ptr<const Package> package;
     UUID model;
+    bool inherit_model = true;
     uuid_ptr<const Part> base;
 
     void update_refs(Pool &pool);

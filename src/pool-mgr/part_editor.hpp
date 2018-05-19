@@ -32,6 +32,7 @@ private:
     Gtk::Label *w_base_label = nullptr;
     Gtk::Button *w_change_package_button = nullptr;
     Gtk::ComboBoxText *w_model_combo = nullptr;
+    Gtk::ToggleButton *w_model_inherit = nullptr;
 
     Gtk::Entry *w_tags = nullptr;
     Gtk::Entry *w_tags_inherited = nullptr;
@@ -96,5 +97,6 @@ private:
     void update_entries();
     void change_package();
     void populate_models();
+    void update_model_inherit();
 };
 } // namespace horizon

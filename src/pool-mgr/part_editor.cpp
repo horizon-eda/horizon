@@ -123,6 +123,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("package_label", w_package_label);
     x->get_widget("change_package_button", w_change_package_button);
     x->get_widget("model_combo", w_model_combo);
+    x->get_widget("model_inherit", w_model_inherit);
     x->get_widget("base_label", w_base_label);
     x->get_widget("tags", w_tags);
     x->get_widget("tags_inherit", w_tags_inherit);
@@ -313,7 +314,19 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     update_mapped();
     populate_models();
     w_model_combo->set_active_id((std::string)part->model);
-    w_model_combo->set_sensitive(!part->base);
+
+    if (part->base) {
+        w_model_inherit->set_active(part->inherit_model);
+        w_model_inherit->signal_toggled().connect([this] {
+            needs_save = true;
+            update_model_inherit();
+        });
+        update_model_inherit();
+    }
+    else {
+        w_model_inherit->set_sensitive(false);
+    }
+
     w_model_combo->signal_changed().connect([this] { needs_save = true; });
 
     w_parametric_from_base->set_sensitive(part->base);
@@ -326,6 +339,15 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             needs_save = true;
         }
     });
+}
+
+void PartEditor::update_model_inherit()
+{
+    auto active = w_model_inherit->get_active();
+    if (active) {
+        w_model_combo->set_active_id((std::string)part->base->model);
+    }
+    w_model_combo->set_sensitive(!active);
 }
 
 void PartEditor::update_entries()
@@ -409,6 +431,8 @@ void PartEditor::save()
     for (auto &it : attr_editors) {
         part->attributes[it.first] = it.second->get_as_pair();
     }
+
+    part->inherit_model = w_model_inherit->get_active();
 
     if (w_model_combo->get_active_row_number() != -1)
         part->model = UUID(w_model_combo->get_active_id());
