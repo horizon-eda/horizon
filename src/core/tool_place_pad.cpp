@@ -37,6 +37,24 @@ void ToolPlacePad::create_pad(const Coordi &pos)
     auto uu = UUID::random();
     temp = &pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
     temp->placement.shift = pos;
+    if (pkg->pads.size() == 1) { // first pad
+        temp->name = "1";
+    }
+    else {
+        std::vector<int> pad_nrs;
+        for (const auto &it : pkg->pads) {
+            try {
+                int n = std::stoi(it.second.name);
+                pad_nrs.push_back(n);
+            }
+            catch (...) {
+            }
+        }
+        if (pad_nrs.size()) {
+            int maxpad = *std::max_element(pad_nrs.begin(), pad_nrs.end());
+            temp->name = std::to_string(maxpad + 1);
+        }
+    }
 }
 
 ToolResponse ToolPlacePad::update(const ToolArgs &args)
