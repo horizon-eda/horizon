@@ -40,7 +40,13 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
         temp_junc->position = args.coords;
-        core.b->get_board()->update_airwires(true);
+
+        if (temp_junc->net) {
+            std::set<UUID> nets;
+            nets.insert(temp_junc->net->uuid);
+            core.b->get_board()->update_airwires(true, nets);
+        }
+        return ToolResponse::fast();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
