@@ -354,7 +354,9 @@ std::string ImpPackage::ask_3d_model_filename(const std::string &current_filenam
     auto filter = Gtk::FileFilter::create();
     filter->set_name("STEP models");
     filter->add_pattern("*.step");
+    filter->add_pattern("*.STEP");
     filter->add_pattern("*.stp");
+    filter->add_pattern("*.STP");
     chooser->add_filter(filter);
     if (current_filename.size()) {
         chooser->set_filename(Glib::build_filename(pool->get_base_path(), current_filename));
