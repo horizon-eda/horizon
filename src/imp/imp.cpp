@@ -613,12 +613,16 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
                 s += std::to_string(n) + " " + it.second.get_name_for_n(n) + "\n";
             }
         }
+        sel.clear();
     }
     return s;
 }
 
 std::string ImpBase::get_hud_text_for_net(const Net *net)
 {
+    if (!net)
+        return "No net";
+
     std::string s = "Net: " + net->name + "\n";
     s += "Net class " + net->net_class->name + "\n";
     if (net->is_power)

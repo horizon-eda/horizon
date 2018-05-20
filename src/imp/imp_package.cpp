@@ -9,10 +9,12 @@
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
 #include "util/changeable.hpp"
+#include "util/str_util.hpp"
 #include "widgets/chooser_buttons.hpp"
 #include "widgets/pool_browser.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/parameter_set_editor.hpp"
+#include "hud_util.hpp"
 
 namespace horizon {
 ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path)
@@ -331,6 +333,21 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
     pack_start(*placement_grid, false, false, 0);
 
     update_all();
+}
+
+std::string ImpPackage::get_hud_text(std::set<SelectableRef> &sel)
+{
+    std::string s;
+    if (sel_count_type(sel, ObjectType::PAD) == 1) {
+        const auto &pad = core_package.get_package()->pads.at(sel_find_one(sel, ObjectType::PAD));
+        s += "<b>Pad " + pad.name + "</b>\n";
+        for (const auto &it : pad.parameter_set) {
+            s += parameter_id_to_name(it.first) + ": " + dim_to_string(it.second, true) + "\n";
+        }
+        sel_erase_type(sel, ObjectType::PAD);
+    }
+    trim(s);
+    return s;
 }
 
 void ModelEditor::update_all()

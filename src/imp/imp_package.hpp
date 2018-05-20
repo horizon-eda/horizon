@@ -18,6 +18,8 @@ protected:
         return ActionCatalogItem::AVAILABLE_IN_PACKAGE;
     };
 
+    std::string get_hud_text(std::set<SelectableRef> &sel) override;
+
 private:
     void canvas_update() override;
     CorePackage core_package;
