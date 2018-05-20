@@ -304,6 +304,7 @@ SRC_IMP = \
 	src/widgets/log_window.cpp\
 	src/widgets/log_view.cpp\
 	src/imp/hud_util.cpp\
+	src/util/pool_completion.cpp\
 
 SRC_ROUTER = \
 	3rd_party/router/router/pns_router.cpp \
@@ -430,6 +431,7 @@ SRC_POOL_MGR = \
 	src/widgets/preview_canvas.cpp\
 	src/widgets/preview_base.cpp\
 	src/widgets/unit_preview.cpp\
+	src/util/pool_completion.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

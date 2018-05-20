@@ -8,6 +8,7 @@
 #include "pool/part.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
+#include "util/pool_completion.hpp"
 #include "util/changeable.hpp"
 #include "util/str_util.hpp"
 #include "widgets/chooser_buttons.hpp"
@@ -632,6 +633,8 @@ void ImpPackage::construct()
 
     auto entry_name = header_button->add_entry("Name");
     auto entry_manufacturer = header_button->add_entry("Manufacturer");
+    entry_manufacturer->set_completion(create_pool_manufacturer_completion(pool.get()));
+
     auto entry_tags = header_button->add_entry("Tags");
 
     auto browser_alt_button = Gtk::manage(new PoolBrowserButton(ObjectType::PACKAGE, pool.get()));

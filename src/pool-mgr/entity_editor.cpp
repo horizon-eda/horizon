@@ -4,6 +4,7 @@
 #include <glibmm.h>
 #include "dialogs/pool_browser_dialog.hpp"
 #include "widgets/pool_browser.hpp"
+#include "util/pool_completion.hpp"
 
 namespace horizon {
 
@@ -89,6 +90,7 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
 
     bind_entry(name_entry, entity->name, needs_save);
     bind_entry(manufacturer_entry, entity->manufacturer, needs_save);
+    manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
     bind_entry(prefix_entry, entity->prefix, needs_save);
 
     {

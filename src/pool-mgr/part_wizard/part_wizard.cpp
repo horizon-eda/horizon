@@ -6,6 +6,7 @@
 #include "location_entry.hpp"
 #include "util/str_util.hpp"
 #include "util/gtk_util.hpp"
+#include "util/pool_completion.hpp"
 #include "nlohmann/json.hpp"
 
 namespace horizon {
@@ -56,6 +57,8 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("part_tags", part_tags_entry);
     x->get_widget("part_autofill", part_autofill_button);
     x->get_widget("steps_grid", steps_grid);
+
+    part_manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
 
     part_mpn_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));
     entity_name_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));

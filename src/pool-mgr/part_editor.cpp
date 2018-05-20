@@ -6,6 +6,7 @@
 #include "util/util.hpp"
 #include "util/gtk_util.hpp"
 #include <glibmm.h>
+#include "util/pool_completion.hpp"
 
 namespace horizon {
 class EntryWithInheritance : public Gtk::Box {
@@ -142,6 +143,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     w_mpn = add_entry("part_mpn_box");
     w_value = add_entry("part_value_box");
     w_manufacturer = add_entry("part_manufacturer_box");
+    w_manufacturer->entry->set_completion(create_pool_manufacturer_completion(pool));
     w_datasheet = add_entry("part_datasheet_box");
     w_description = add_entry("part_description_box");
 
