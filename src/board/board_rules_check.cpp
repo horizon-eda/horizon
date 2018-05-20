@@ -473,6 +473,32 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board *brd,
     return r;
 }
 
+RulesCheckResult BoardRules::check_preflight(const Board *brd)
+{
+    RulesCheckResult r;
+    r.level = RulesCheckErrorLevel::PASS;
+
+    for (const auto &it : brd->airwires) {
+        r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+        auto &e = r.errors.back();
+        e.has_location = true;
+        e.location = (it.second.from.get_position() + it.second.to.get_position()) / 2;
+        e.comment = "Airwire of net " + (it.second.net ? it.second.net->name : "No net");
+    }
+    for (const auto &it : brd->planes) {
+        if (it.second.fragments.size() == 0) {
+            r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+            auto &e = r.errors.back();
+            e.has_location = true;
+            e.location = it.second.polygon->vertices.front().position;
+            e.comment = "Plane of net " + (it.second.net ? it.second.net->name : "No net") + " has no fragments";
+        }
+    }
+
+    r.update();
+    return r;
+}
+
 RulesCheckResult BoardRules::check(RuleID id, const Board *brd, RulesCheckCache &cache, check_status_cb_t status_cb)
 {
     switch (id) {
@@ -487,6 +513,9 @@ RulesCheckResult BoardRules::check(RuleID id, const Board *brd, RulesCheckCache 
 
     case RuleID::CLEARANCE_COPPER_OTHER:
         return BoardRules::check_clearance_copper_non_copper(brd, cache, status_cb);
+
+    case RuleID::PREFLIGHT_CHECKS:
+        return BoardRules::check_preflight(brd);
 
     default:
         return RulesCheckResult();

@@ -9,6 +9,7 @@
 #include "rule_plane.hpp"
 #include "rule_track_width.hpp"
 #include "rule_via.hpp"
+#include "rule_preflight_checks.hpp"
 #include "rules/rules.hpp"
 #include "util/uuid.hpp"
 
@@ -55,6 +56,7 @@ private:
 
     RuleClearanceSilkscreenExposedCopper rule_clearance_silkscreen_exposed_copper;
     RuleParameters rule_parameters;
+    RulePreflightChecks rule_preflight_checks;
 
     RulesCheckResult check_track_width(const class Board *b);
     RulesCheckResult check_hole_size(const class Board *b);
@@ -62,5 +64,6 @@ private:
                                             check_status_cb_t status_cb);
     RulesCheckResult check_clearance_copper_non_copper(const class Board *b, class RulesCheckCache &cache,
                                                        check_status_cb_t status_cb);
+    RulesCheckResult check_preflight(const class Board *b);
 };
 } // namespace horizon

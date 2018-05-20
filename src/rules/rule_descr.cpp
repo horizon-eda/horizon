@@ -13,5 +13,6 @@ const std::map<RuleID, RuleDescription> rule_descriptions = {
         {RuleID::PLANE, {"Planes", true, false}},
         {RuleID::DIFFPAIR, {"Diffpair", true, false}},
         {RuleID::PACKAGE_CHECKS, {"Package checks", false, true}},
+        {RuleID::PREFLIGHT_CHECKS, {"Preflight checks", false, true}},
 };
 }

@@ -58,6 +58,7 @@ SRC_COMMON = \
 	src/board/rule_clearance_copper_other.cpp\
 	src/board/rule_plane.cpp\
 	src/board/rule_diffpair.cpp\
+	src/board/rule_preflight_checks.cpp\
 	src/board/airwires.cpp\
 	src/board/fab_output_settings.cpp\
 	src/board/board_hole.cpp\

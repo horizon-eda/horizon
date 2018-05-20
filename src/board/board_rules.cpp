@@ -200,7 +200,8 @@ std::set<RuleID> BoardRules::get_rule_ids() const
             RuleID::VIA,
             RuleID::CLEARANCE_COPPER_OTHER,
             RuleID::PLANE,
-            RuleID::DIFFPAIR};
+            RuleID::DIFFPAIR,
+            RuleID::PREFLIGHT_CHECKS};
 }
 
 Rule *BoardRules::get_rule(RuleID id)
@@ -210,6 +211,9 @@ Rule *BoardRules::get_rule(RuleID id)
     }
     else if (id == RuleID::PARAMETERS) {
         return &rule_parameters;
+    }
+    else if (id == RuleID::PREFLIGHT_CHECKS) {
+        return &rule_preflight_checks;
     }
     return nullptr;
 }

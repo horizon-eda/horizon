@@ -3,7 +3,7 @@
 
 namespace horizon {
 
-static const char *text =
+static const char *text_pkg =
         "This rule checks if the package contains all required objects:\n"
         "• Refdes text on silkscreen\n"
         "• Refdes text on package\n"
@@ -12,12 +12,20 @@ static const char *text =
         "• Pad naming convention\n"
         "• No polygons on silkscreen\n";
 
+static const char *text_preflight =
+        "This rule checks if the board is ready for fabrication output:\n"
+        "• No airwires\n"
+        "• No empty planes\n";
+
 void RuleEditorPackageChecks::populate()
 {
-    rule2 = dynamic_cast<RulePackageChecks *>(rule);
-
     Gtk::Label *editor = Gtk::manage(new Gtk::Label);
-    editor->set_text(text);
+    if (dynamic_cast<RulePackageChecks *>(rule)) {
+        editor->set_text(text_pkg);
+    }
+    else {
+        editor->set_text(text_preflight);
+    }
     editor->set_xalign(0);
     editor->set_valign(Gtk::ALIGN_START);
     editor->set_margin_start(20);

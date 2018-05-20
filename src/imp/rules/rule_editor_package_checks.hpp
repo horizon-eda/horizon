@@ -9,6 +9,5 @@ public:
     void populate() override;
 
 private:
-    class RulePackageChecks *rule2;
 };
 } // namespace horizon

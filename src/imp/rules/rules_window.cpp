@@ -400,9 +400,6 @@ RuleEditor *RulesWindow::create_editor(Rule *r)
         break;
 
     case RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER:
-        e = new RuleEditorClearanceSilkscreenExposedCopper(r, core);
-        break;
-
     case RuleID::PARAMETERS:
         e = new RuleEditorClearanceSilkscreenExposedCopper(r, core);
         break;
@@ -436,6 +433,7 @@ RuleEditor *RulesWindow::create_editor(Rule *r)
         break;
 
     case RuleID::PACKAGE_CHECKS:
+    case RuleID::PREFLIGHT_CHECKS:
         e = new RuleEditorPackageChecks(r, core);
         break;
 
