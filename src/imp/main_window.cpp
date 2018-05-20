@@ -24,11 +24,14 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("header", header);
     x->get_widget("property_scrolled_window", property_scrolled_window);
     x->get_widget("property_throttled_revealer", property_throttled_revealer);
+    x->get_widget("hud", hud);
+    x->get_widget("hud_label", hud_label);
 
     canvas = Gtk::manage(new CanvasGL());
     gl_container->pack_start(*canvas, true, true, 0);
     canvas->show();
     tool_bar_set_visible(false);
+    hud->set_reveal_child(false);
 }
 
 void MainWindow::tool_bar_set_visible(bool v)
@@ -68,6 +71,28 @@ void MainWindow::tool_bar_flash(const std::string &s)
                 return false;
             },
             1000);
+}
+
+void MainWindow::hud_update(const std::string &s)
+{
+    hud_timeout_connection.disconnect();
+    if (s.size()) {
+        hud_label->set_markup(s);
+        hud->set_reveal_child(true);
+    }
+    else {
+        hud_timeout_connection = Glib::signal_timeout().connect(
+                [this] {
+                    hud->set_reveal_child(false);
+                    return false;
+                },
+                250);
+    }
+}
+
+void MainWindow::hud_hide()
+{
+    hud->set_reveal_child(false);
 }
 
 MainWindow *MainWindow::create()

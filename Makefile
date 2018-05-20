@@ -303,6 +303,7 @@ SRC_IMP = \
 	src/widgets/board_display_options.cpp\
 	src/widgets/log_window.cpp\
 	src/widgets/log_view.cpp\
+	src/imp/hud_util.cpp\
 
 SRC_ROUTER = \
 	3rd_party/router/router/pns_router.cpp \

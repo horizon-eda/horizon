@@ -22,6 +22,8 @@ protected:
         return ActionCatalogItem::AVAILABLE_IN_BOARD;
     };
 
+    std::string get_hud_text(std::set<SelectableRef> &sel) override;
+
 private:
     void canvas_update() override;
     void handle_selection_cross_probe();

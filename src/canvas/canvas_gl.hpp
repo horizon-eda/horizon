@@ -50,6 +50,11 @@ public:
         return s_signal_selection_changed;
     }
 
+    type_signal_selection_changed signal_hover_selection_changed()
+    {
+        return s_signal_hover_selection_changed;
+    }
+
     typedef sigc::signal<void, const Coordi &> type_signal_cursor_moved;
     type_signal_cursor_moved signal_cursor_moved()
     {
@@ -192,6 +197,7 @@ protected:
     Glib::RefPtr<Gdk::GLContext> on_create_context() override;
 
     type_signal_selection_changed s_signal_selection_changed;
+    type_signal_selection_changed s_signal_hover_selection_changed;
     type_signal_cursor_moved s_signal_cursor_moved;
     type_signal_grid_mul_changed s_signal_grid_mul_changed;
     type_signal_request_display_name s_signal_request_display_name;

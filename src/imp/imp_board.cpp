@@ -9,6 +9,9 @@
 #include "widgets/board_display_options.hpp"
 #include "widgets/layer_box.hpp"
 #include "tuning_window.hpp"
+#include "hud_util.hpp"
+#include "util/util.hpp"
+#include "util/str_util.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
@@ -349,6 +352,59 @@ void ImpBoard::construct()
 
     main_window->left_panel->pack_start(*display_control_notebook, false, false);
     display_control_notebook->show();
+}
+
+std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
+{
+    std::string s;
+    if (sel_count_type(sel, ObjectType::TRACK)) {
+        auto n = sel_count_type(sel, ObjectType::TRACK);
+        s += "\n\n<b>" + std::to_string(n) + " " + object_descriptions.at(ObjectType::TRACK).get_name_for_n(n)
+             + "</b>\n";
+        std::set<int> layers;
+        int64_t length = 0;
+        const Track *the_track = nullptr;
+        for (const auto &it : sel) {
+            if (it.type == ObjectType::TRACK) {
+                const auto &tr = core_board.get_board()->tracks.at(it.uuid);
+                the_track = &tr;
+                layers.insert(tr.layer);
+                length += sqrt((tr.from.get_position() - tr.to.get_position()).mag_sq());
+            }
+        }
+        s += "Layers: ";
+        for (auto layer : layers) {
+            s += core.r->get_layer_provider()->get_layers().at(layer).name + " ";
+        }
+        s += "\nTotal length: " + dim_to_string(length, false);
+        if (sel_count_type(sel, ObjectType::TRACK) == 1) {
+            s += "\n" + get_hud_text_for_net(the_track->net);
+        }
+        sel_erase_type(sel, ObjectType::TRACK);
+    }
+    trim(s);
+    if (sel_count_type(sel, ObjectType::BOARD_PACKAGE) == 1) {
+        const auto &pkg = core_board.get_board()->packages.at(sel_find_one(sel, ObjectType::BOARD_PACKAGE));
+        s += "\n\n<b>Package " + pkg.component->refdes + "</b>\n";
+        s += get_hud_text_for_part(pkg.component->part);
+        sel_erase_type(sel, ObjectType::BOARD_PACKAGE);
+    }
+    else if (sel_count_type(sel, ObjectType::BOARD_PACKAGE) > 1) {
+        auto n = sel_count_type(sel, ObjectType::BOARD_PACKAGE);
+        s += "\n\n<b>" + std::to_string(n) + " " + object_descriptions.at(ObjectType::BOARD_PACKAGE).get_name_for_n(n)
+             + "</b>\n";
+        size_t n_pads = 0;
+        for (const auto &it : sel) {
+            if (it.type == ObjectType::BOARD_PACKAGE) {
+                const auto &pkg = core_board.get_board()->packages.at(it.uuid);
+                n_pads += pkg.package.pads.size();
+            }
+        }
+        s += "Total pads: " + std::to_string(n_pads);
+        sel_erase_type(sel, ObjectType::BOARD_PACKAGE);
+    }
+    trim(s);
+    return s;
 }
 
 void ImpBoard::handle_measure_tracks(const ActionConnection &a)

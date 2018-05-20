@@ -26,6 +26,9 @@ public:
     void tool_bar_set_tool_tip(const std::string &s);
     void tool_bar_flash(const std::string &s);
 
+    void hud_update(const std::string &s);
+    void hud_hide();
+
     // virtual ~MainWindow();
 private:
     Gtk::Box *gl_container = nullptr;
@@ -36,6 +39,12 @@ private:
     Gtk::Stack *tool_bar_stack = nullptr;
     sigc::connection tip_timeout_connection;
     bool tool_bar_queue_close = false;
+
+    Gtk::Revealer *hud = nullptr;
+    Gtk::Label *hud_label = nullptr;
+
+    sigc::connection hud_timeout_connection;
+    bool hud_queue_close = false;
 
     void sc(void);
     void cm(const horizon::Coordi &cursor_pos);

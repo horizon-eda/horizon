@@ -16,6 +16,8 @@
 #include "widgets/spin_button_dim.hpp"
 #include "action_catalog.hpp"
 #include "tool_popover.hpp"
+#include "hud_util.hpp"
+#include "util/str_util.hpp"
 #include <glibmm/main.h>
 #include <gtkmm.h>
 #include <iomanip>
@@ -514,6 +516,9 @@ void ImpBase::run(int argc, char *argv[])
 
     core.r->signal_tool_changed().connect([this](ToolID id) { s_signal_action_sensitive.emit(); });
 
+    canvas->signal_hover_selection_changed().connect(sigc::mem_fun(this, &ImpBase::hud_update));
+    canvas->signal_selection_changed().connect(sigc::mem_fun(this, &ImpBase::hud_update));
+
     canvas_update();
 
     auto bbox = core.r->get_bbox();
@@ -555,6 +560,88 @@ void ImpBase::run(int argc, char *argv[])
     sc();
 
     app->run(*main_window);
+}
+
+void ImpBase::hud_update()
+{
+    if (core.r->tool_is_active())
+        return;
+
+    auto sel = canvas->get_selection();
+    if (sel.size()) {
+        std::string hud_text = get_hud_text(sel);
+        trim(hud_text);
+        hud_text += ImpBase::get_hud_text(sel);
+        trim(hud_text);
+        main_window->hud_update(hud_text);
+    }
+    else {
+        main_window->hud_update("");
+    }
+}
+
+std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
+{
+    std::string s;
+    if (sel_count_type(sel, ObjectType::LINE)) {
+        auto n = sel_count_type(sel, ObjectType::LINE);
+        s += "\n\n<b>" + std::to_string(n) + " " + object_descriptions.at(ObjectType::LINE).get_name_for_n(n)
+             + "</b>\n";
+        std::set<int> layers;
+        int64_t length = 0;
+        for (const auto &it : sel) {
+            if (it.type == ObjectType::LINE) {
+                const auto li = core.r->get_line(it.uuid);
+                layers.insert(li->layer);
+                length += sqrt((li->from->position - li->to->position).mag_sq());
+            }
+        }
+        s += "Layers: ";
+        for (auto layer : layers) {
+            s += core.r->get_layer_provider()->get_layers().at(layer).name + " ";
+        }
+        s += "\nTotal length: " + dim_to_string(length, false);
+        sel_erase_type(sel, ObjectType::LINE);
+        return s;
+    }
+    trim(s);
+    if (sel.size()) {
+        s += "\n\n<b>Others:</b>\n";
+        for (const auto &it : object_descriptions) {
+            auto n = std::count_if(sel.begin(), sel.end(), [&it](const auto &a) { return a.type == it.first; });
+            if (n) {
+                s += std::to_string(n) + " " + it.second.get_name_for_n(n) + "\n";
+            }
+        }
+    }
+    return s;
+}
+
+std::string ImpBase::get_hud_text_for_net(const Net *net)
+{
+    std::string s = "Net: " + net->name + "\n";
+    s += "Net class " + net->net_class->name + "\n";
+    if (net->is_power)
+        s += "is power net";
+
+    trim(s);
+    return s;
+}
+
+std::string ImpBase::get_hud_text_for_part(const Part *part)
+{
+    if (!part)
+        return "No part";
+
+    std::string s = "MPN: " + part->get_MPN() + "\n";
+    s += "Manufacturer: " + part->get_manufacturer() + "\n";
+    if (part->get_description().size())
+        s += part->get_description() + "\n";
+    if (part->get_datasheet().size())
+        s += "<a href=\"" + part->get_datasheet() + "\" title=\"" + part->get_datasheet() + "\">Datasheet</a>\n";
+
+    trim(s);
+    return s;
 }
 
 Gtk::Button *ImpBase::create_action_button(std::pair<ActionID, ToolID> action)
@@ -1210,6 +1297,7 @@ void ImpBase::handle_tool_change(ToolID id)
     if (id != ToolID::NONE) {
         main_window->tool_bar_set_tool_name(action_catalog.at({ActionID::TOOL, id}).name);
         main_window->tool_bar_set_tool_tip("");
+        main_window->hud_hide();
     }
     main_window->tool_bar_set_visible(id != ToolID::NONE);
 }

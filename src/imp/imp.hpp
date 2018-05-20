@@ -133,6 +133,10 @@ protected:
         return s_signal_action_sensitive;
     }
 
+    virtual std::string get_hud_text(std::set<SelectableRef> &sel);
+    std::string get_hud_text_for_part(const Part *part);
+    std::string get_hud_text_for_net(const Net *net);
+
 private:
     void fix_cursor_pos();
     void apply_settings();
@@ -140,6 +144,8 @@ private:
     void show_preferences_window();
     void handle_drag();
     void update_selection_label();
+
+    void hud_update();
 
 
     ActionConnection &connect_action(ActionID action_id, ToolID tool_id,

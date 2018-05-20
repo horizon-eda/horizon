@@ -5,6 +5,15 @@
 #include "pool/symbol.hpp"
 
 namespace horizon {
+
+const std::string &ObjectDescription::get_name_for_n(size_t n) const
+{
+    if (n == 1)
+        return name;
+    else
+        return name_pl;
+}
+
 const std::map<ObjectType, ObjectDescription> object_descriptions = {
         {ObjectType::SYMBOL_PIN,
          {"Symbol Pin",
@@ -230,4 +239,4 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                             {static_cast<int>(Dimension::Mode::VERTICAL), "Vertical"},
                     }}},
           }}}};
-}
+} // namespace horizon

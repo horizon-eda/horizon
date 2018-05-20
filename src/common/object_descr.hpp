@@ -68,6 +68,8 @@ public:
     std::string name;
     std::string name_pl;
     const std::map<ObjectProperty::ID, ObjectProperty> properties;
+
+    const std::string &get_name_for_n(size_t n) const;
 };
 
 extern const std::map<ObjectType, ObjectDescription> object_descriptions;

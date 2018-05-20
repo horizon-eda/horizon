@@ -6,6 +6,8 @@
 #include "widgets/sheet_box.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
+#include "util/str_util.hpp"
+#include "hud_util.hpp"
 
 namespace horizon {
 ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,
@@ -421,6 +423,19 @@ void ImpSchematic::update_action_sensitivity()
                          }));
 
     ImpBase::update_action_sensitivity();
+}
+
+std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)
+{
+    std::string s;
+    if (sel_count_type(sel, ObjectType::SCHEMATIC_SYMBOL) == 1) {
+        const auto &sym = core_schematic.get_sheet()->symbols.at(sel_find_one(sel, ObjectType::SCHEMATIC_SYMBOL));
+        s += "<b>Symbol " + sym.component->refdes + "</b>\n";
+        s += get_hud_text_for_part(sym.component->part);
+        sel_erase_type(sel, ObjectType::SCHEMATIC_SYMBOL);
+    }
+    trim(s);
+    return s;
 }
 
 void ImpSchematic::handle_export_pdf()

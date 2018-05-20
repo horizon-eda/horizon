@@ -31,5 +31,6 @@ void CanvasGL::hover_prelight_update(GdkEvent *motion_event)
         selectables.items[area_min_i].set_flag(horizon::Selectable::Flag::SELECTED, true);
     }
     request_push(PF_SELECTABLES);
+    s_signal_hover_selection_changed.emit();
 }
 } // namespace horizon
