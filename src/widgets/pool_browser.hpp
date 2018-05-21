@@ -28,10 +28,13 @@ protected:
     class Pool *pool = nullptr;
     bool show_none = false;
     bool show_path = false;
-    int path_column = -1;
+    Gtk::TreeViewColumn *path_column = nullptr;
 
 
     Gtk::TreeView *treeview = nullptr;
+
+    Gtk::TreeViewColumn *append_column(const std::string &name, const Gtk::TreeModelColumnBase &column,
+                                       Pango::EllipsizeMode ellipsize = Pango::ELLIPSIZE_NONE);
 
     Gtk::Entry *create_search_entry(const std::string &label);
     void add_search_widget(const std::string &label, Gtk::Widget &w);

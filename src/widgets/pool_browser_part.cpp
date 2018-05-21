@@ -31,39 +31,33 @@ Glib::RefPtr<Gtk::ListStore> PoolBrowserPart::create_list_store()
 
 void PoolBrowserPart::create_columns()
 {
-    treeview->append_column("MPN", list_columns.MPN);
-    treeview->append_column("Manufacturer", list_columns.manufacturer);
     {
-        auto cr = Gtk::manage(new Gtk::CellRendererText());
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Description", *cr));
-        tvc->set_resizable(true);
-        tvc->add_attribute(cr->property_text(), list_columns.description);
-        cr->property_ellipsize() = Pango::ELLIPSIZE_END;
-        treeview->append_column(*tvc);
+        auto col = append_column("MPN", list_columns.MPN, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_expand(true);
+        col->set_min_width(200);
     }
     {
-        auto cr = Gtk::manage(new Gtk::CellRendererText());
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Package", *cr));
-        tvc->set_resizable(true);
-        tvc->add_attribute(cr->property_text(), list_columns.package);
-        cr->property_ellipsize() = Pango::ELLIPSIZE_END;
-        treeview->append_column(*tvc);
+        auto col = append_column("Manufacturer", list_columns.manufacturer, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_min_width(200);
     }
     {
-        auto cr = Gtk::manage(new Gtk::CellRendererText());
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Tags", *cr));
-        tvc->set_resizable(true);
-        tvc->add_attribute(cr->property_text(), list_columns.tags);
-        cr->property_ellipsize() = Pango::ELLIPSIZE_END;
-        treeview->append_column(*tvc);
+        auto col = append_column("Description", list_columns.description, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_min_width(100);
     }
     {
-        auto cr = Gtk::manage(new Gtk::CellRendererText());
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Path", *cr));
-        tvc->add_attribute(cr->property_text(), list_columns.path);
-        cr->property_ellipsize() = Pango::ELLIPSIZE_START;
-        path_column = treeview->append_column(*tvc) - 1;
+        auto col = append_column("Package", list_columns.package, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_min_width(100);
     }
+    {
+        auto col = append_column("Tags", list_columns.tags, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_min_width(100);
+    }
+    path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);
 }
 
 void PoolBrowserPart::add_sort_controller_columns()

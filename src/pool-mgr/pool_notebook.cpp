@@ -292,6 +292,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw
 
         auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
         paned->add1(*box);
+        paned->child_property_shrink(*box) = false;
 
         auto preview = Gtk::manage(new UnitPreview(pool));
         preview->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
@@ -340,6 +341,8 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw
         box->show();
 
         paned->add1(*box);
+        paned->child_property_shrink(*box) = false;
+
         auto canvas = Gtk::manage(new PreviewCanvas(pool));
         canvas->set_selection_allowed(false);
         paned->add2(*canvas);
@@ -401,6 +404,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw
 
         auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
         paned->add1(*box);
+        paned->child_property_shrink(*box) = false;
 
         auto preview = Gtk::manage(new EntityPreview(pool));
         preview->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
@@ -464,6 +468,8 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw
         box->show();
 
         paned->add1(*box);
+        paned->child_property_shrink(*box) = false;
+
         auto canvas = Gtk::manage(new CanvasGL());
         canvas->set_selection_allowed(false);
         paned->add2(*canvas);
@@ -545,8 +551,8 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw
         box->pack_start(*br, true, true, 0);
         box->show();
 
-
         paned->add1(*box);
+        paned->child_property_shrink(*box) = false;
 
         auto canvas = Gtk::manage(new PreviewCanvas(pool));
         paned->add2(*canvas);
@@ -607,6 +613,8 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw
         box->show();
 
         paned->add1(*box);
+        paned->child_property_shrink(*box) = false;
+
         auto preview = Gtk::manage(new PartPreview(pool));
         preview->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
         paned->add2(*preview);

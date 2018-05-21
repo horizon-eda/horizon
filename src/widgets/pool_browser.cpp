@@ -30,6 +30,18 @@ void PoolBrowser::add_search_widget(const std::string &label, Gtk::Widget &w)
     w.show();
 }
 
+Gtk::TreeViewColumn *PoolBrowser::append_column(const std::string &name, const Gtk::TreeModelColumnBase &column,
+                                                Pango::EllipsizeMode ellipsize)
+
+{
+    auto cr = Gtk::manage(new Gtk::CellRendererText());
+    auto tvc = Gtk::manage(new Gtk::TreeViewColumn(name, *cr));
+    tvc->add_attribute(cr->property_text(), column);
+    cr->property_ellipsize() = ellipsize;
+    treeview->append_column(*tvc);
+    return tvc;
+}
+
 void PoolBrowser::construct()
 {
 
@@ -75,8 +87,8 @@ void PoolBrowser::construct()
     treeview->get_selection()->set_mode(Gtk::SelectionMode::SELECTION_BROWSE);
     treeview->signal_row_activated().connect(sigc::mem_fun(this, &PoolBrowser::row_activated));
     treeview->get_selection()->signal_changed().connect(sigc::mem_fun(this, &PoolBrowser::selection_changed));
-    if (path_column > 0) {
-        treeview->get_column(path_column)->set_visible(false);
+    if (path_column) {
+        path_column->set_visible(false);
     }
     treeview->signal_button_press_event().connect_notify([this](GdkEventButton *ev) {
         Gtk::TreeModel::Path path;
@@ -122,9 +134,8 @@ void PoolBrowser::set_show_none(bool v)
 void PoolBrowser::set_show_path(bool v)
 {
     show_path = v;
-    if (path_column > 0) {
-        if (auto col = treeview->get_column(path_column))
-            col->set_visible(v);
+    if (path_column) {
+        path_column->set_visible(v);
     }
     search();
 }

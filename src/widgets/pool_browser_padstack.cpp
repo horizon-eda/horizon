@@ -20,13 +20,7 @@ void PoolBrowserPadstack::create_columns()
     treeview->append_column("Padstack", list_columns.padstack_name);
     treeview->append_column("Type", list_columns.padstack_type);
     treeview->append_column("Package", list_columns.package_name);
-    {
-        auto cr = Gtk::manage(new Gtk::CellRendererText());
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Path", *cr));
-        tvc->add_attribute(cr->property_text(), list_columns.path);
-        cr->property_ellipsize() = Pango::ELLIPSIZE_START;
-        path_column = treeview->append_column(*tvc) - 1;
-    }
+    path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);
 }
 
 void PoolBrowserPadstack::add_sort_controller_columns()
