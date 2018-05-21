@@ -494,6 +494,14 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd)
             e.comment = "Plane of net " + (it.second.net ? it.second.net->name : "No net") + " has no fragments";
         }
     }
+    for (const auto &it : brd->block->components) {
+        if (!it.second.part) {
+            r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+            auto &e = r.errors.back();
+            e.has_location = false;
+            e.comment = "Component " + it.second.refdes + " has no part";
+        }
+    }
 
     r.update();
     return r;
