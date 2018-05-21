@@ -2,6 +2,9 @@
 #include <giomm/resource.h>
 #include <gtkmm.h>
 #include <iostream>
+#ifdef G_OS_WIN32
+#include <windows.h>
+#endif
 
 namespace horizon {
 /* Create and compile a shader */
@@ -103,4 +106,14 @@ out:
 
     return program;
 }
+
+void gl_show_error(const std::string &s)
+{
+#ifdef G_OS_WIN32
+    MessageBox(NULL, (s + "\nProgram will abort").c_str(), "OpenGL Error", MB_ICONERROR);
+#else
+    std::cout << s << std::endl;
+#endif
+}
+
 } // namespace horizon

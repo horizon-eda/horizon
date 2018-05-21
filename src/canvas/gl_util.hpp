@@ -1,9 +1,13 @@
 #include <epoxy/gl.h>
+#include <string>
 
 namespace horizon {
 // GLuint gl_create_shader (int type, char *src);
 GLuint gl_create_program_from_resource(const char *vertex_resource, const char *fragment_resource,
                                        const char *geometry_resource);
+
+void gl_show_error(const std::string &s);
+
 #define GET_LOC(d, loc)                                                                                                \
     do {                                                                                                               \
         d->loc##_loc = glGetUniformLocation(d->program, #loc);                                                         \
@@ -16,7 +20,9 @@ GLuint gl_create_program_from_resource(const char *vertex_resource, const char *
 
 #define GL_CHECK_ERROR                                                                                                 \
     if (int e = glGetError()) {                                                                                        \
-        std::cout << "gl error " << e << " in " << __FILE__ << ":" << __LINE__ << std::endl;                           \
+        std::stringstream ss;                                                                                          \
+        ss << "gl error " << e << " in " << __FILE__ << ":" << __LINE__;                                               \
+        gl_show_error(ss.str());                                                                                       \
         abort();                                                                                                       \
     }
 } // namespace horizon
