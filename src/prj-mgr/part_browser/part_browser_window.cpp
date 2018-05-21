@@ -122,7 +122,13 @@ void PartBrowserWindow::update_favorites()
     }
 
     for (const auto &it : favorites) {
-        auto part = pool.get_part(it);
+        const Part *part = nullptr;
+        try {
+            part = pool.get_part(it);
+        }
+        catch (const std::runtime_error &e) {
+            part = nullptr;
+        }
         if (part) {
             auto box = Gtk::manage(new UUIDBox(Gtk::ORIENTATION_VERTICAL, 4));
             box->uuid = it;
