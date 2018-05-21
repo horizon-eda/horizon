@@ -362,6 +362,7 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
         s += "\n\n<b>" + std::to_string(n) + " " + object_descriptions.at(ObjectType::TRACK).get_name_for_n(n)
              + "</b>\n";
         std::set<int> layers;
+        std::set<const Net *> nets;
         int64_t length = 0;
         const Track *the_track = nullptr;
         for (const auto &it : sel) {
@@ -370,6 +371,8 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
                 the_track = &tr;
                 layers.insert(tr.layer);
                 length += sqrt((tr.from.get_position() - tr.to.get_position()).mag_sq());
+                if (tr.net)
+                    nets.insert(tr.net);
             }
         }
         s += "Layers: ";
@@ -379,6 +382,10 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
         s += "\nTotal length: " + dim_to_string(length, false);
         if (sel_count_type(sel, ObjectType::TRACK) == 1) {
             s += "\n" + get_hud_text_for_net(the_track->net);
+        }
+        else {
+            s += "\n" + std::to_string(nets.size()) + " "
+                 + object_descriptions.at(ObjectType::NET).get_name_for_n(nets.size());
         }
         sel_erase_type(sel, ObjectType::TRACK);
     }
