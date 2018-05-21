@@ -301,13 +301,17 @@ void RulesWindow::apply_rules()
 void RulesWindow::check_thread(RuleID id)
 {
     auto result = rules_check(rules, id, core, *cache.get(), [this, id](const std::string &status) {
-        std::lock_guard<std::mutex> guard(run_store_mutex);
-        run_store.at(id).status = status;
+        {
+            std::lock_guard<std::mutex> guard(run_store_mutex);
+            run_store.at(id).status = status;
+        }
         dispatcher.emit();
     });
     {
-        std::lock_guard<std::mutex> guard(run_store_mutex);
-        run_store.at(id).result = result;
+        {
+            std::lock_guard<std::mutex> guard(run_store_mutex);
+            run_store.at(id).result = result;
+        }
         dispatcher.emit();
     }
 }
