@@ -1,4 +1,4 @@
-PRAGMA user_version=4;
+PRAGMA user_version=5;
 
 DROP TABLE IF EXISTS "units";
 CREATE TABLE "units" (
@@ -59,6 +59,12 @@ CREATE TABLE "parts" (
 	PRIMARY KEY(`uuid`)
 );
 
+DROP INDEX IF EXISTS part_mpn;
+CREATE INDEX part_mpn ON parts (MPN COLLATE naturalCompare ASC);
+
+DROP INDEX IF EXISTS part_manufacturer;
+CREATE INDEX part_manufacturer ON parts (manufacturer COLLATE naturalCompare ASC);
+
 DROP TABLE IF EXISTS "tags";
 CREATE TABLE `tags` (
 	`tag`	TEXT NOT NULL,
@@ -85,3 +91,7 @@ CREATE VIEW "all_items_view" AS
 	SELECT 'padstack' AS 'type', uuid AS uuid, filename AS filename, name AS name FROM padstacks UNION
 	SELECT 'package' AS 'type', uuid AS uuid, 'packages/'||filename AS filename, name AS name FROM packages UNION
 	SELECT 'part' AS 'type', uuid AS uuid, 'parts/'||filename AS filename, MPN AS name FROM parts;
+
+DROP VIEW IF EXISTS "tags_view";
+CREATE VIEW "tags_view" AS
+	SELECT type as type, uuid as uuid, GROUP_CONCAT(tag, ' ') as tags from tags group by tags.uuid, tags.type;

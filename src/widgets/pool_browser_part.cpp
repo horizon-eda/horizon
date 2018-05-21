@@ -87,25 +87,25 @@ void PoolBrowserPart::search()
     std::stringstream query;
     if (tags.size() == 0) {
         query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, "
-                 "packages.name, GROUP_CONCAT(tags.tag, ' '), parts.filename, "
-                 "parts.description FROM parts LEFT JOIN tags ON tags.uuid = "
-                 "parts.uuid LEFT JOIN packages ON packages.uuid = "
-                 "parts.package WHERE parts.MPN LIKE ? AND parts.manufacturer "
-                 "LIKE ? AND (parts.entity=? or ?) GROUP BY parts.uuid ";
-    }
-    else {
-        query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, "
-                 "packages.name, (SELECT GROUP_CONCAT(tags.tag, ' ') FROM tags "
-                 "WHERE tags.uuid = parts.uuid), parts.filename, "
-                 "parts.description FROM parts LEFT JOIN tags ON tags.uuid = "
+                 "packages.name, tags_view.tags, parts.filename, "
+                 "parts.description FROM parts LEFT JOIN tags_view ON tags_view.uuid = "
                  "parts.uuid LEFT JOIN packages ON packages.uuid = "
                  "parts.package WHERE parts.MPN LIKE ? AND parts.manufacturer "
                  "LIKE ? AND (parts.entity=? or ?) ";
-        query << "AND (";
+    }
+    else {
+        query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, "
+                 "packages.name, tags_view.tags, parts.filename, "
+                 "parts.description FROM parts "
+                 "LEFT JOIN tags_view ON tags_view.uuid = parts.uuid "
+                 "LEFT JOIN packages ON packages.uuid = parts.package "
+                 "WHERE parts.MPN LIKE ? AND parts.manufacturer "
+                 "LIKE ? AND (parts.entity=? or ?) ";
+        query << "AND parts.uuid IN (SELECT uuid FROM tags WHERE (";
         for (const auto &it : tags) {
             query << "tags.tag LIKE ? OR ";
         }
-        query << "0) GROUP by parts.uuid HAVING count(*) >= $ntags ";
+        query << "0) GROUP by tags.uuid HAVING count(*) >= $ntags) ";
     }
     query << sort_controller->get_order_by();
     std::cout << query.str() << std::endl;
@@ -140,6 +140,14 @@ void PoolBrowserPart::search()
         row[list_columns.path] = q.get<std::string>(5);
         row[list_columns.description] = q.get<std::string>(6);
     }
+    /*
+    SQLite::Query q2(pool->db, "EXPLAIN QUERY PLAN " + query.str());
+    while (q2.step()) {
+        std::cout << q2.get<int>(0) << "|" << q2.get<int>(1) << "|" << q2.get<int>(2) << "|" << q2.get<std::string>(3)
+                  << std::endl;
+    }
+    */
+
     treeview->set_model(store);
     select_uuid(selected_uuid);
     scroll_to_selection();

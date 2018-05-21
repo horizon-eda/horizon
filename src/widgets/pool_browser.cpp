@@ -10,9 +10,9 @@ PoolBrowser::PoolBrowser(Pool *p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool
 
 Gtk::Entry *PoolBrowser::create_search_entry(const std::string &label)
 {
-    auto entry = Gtk::manage(new Gtk::Entry());
+    auto entry = Gtk::manage(new Gtk::SearchEntry());
     add_search_widget(label, *entry);
-    entry->signal_changed().connect(sigc::mem_fun(this, &PoolBrowser::search));
+    entry->signal_search_changed().connect(sigc::mem_fun(this, &PoolBrowser::search));
     search_entries.insert(entry);
     return entry;
 }
