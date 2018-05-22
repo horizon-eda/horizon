@@ -7,6 +7,7 @@ PoolBrowserPackage::PoolBrowserPackage(Pool *p) : PoolBrowser(p)
 {
     construct();
     name_entry = create_search_entry("Name");
+    manufacturer_entry = create_search_entry("Manufacturer");
     tags_entry = create_search_entry("Tags");
     search();
 }
@@ -51,24 +52,27 @@ void PoolBrowserPackage::search()
     store->clear();
     Gtk::TreeModel::Row row;
     std::string name_search = name_entry->get_text();
+    std::string manufacturer_search = manufacturer_entry->get_text();
 
     std::istringstream iss(tags_entry->get_text());
     std::set<std::string> tags{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
     std::string query;
     if (tags.size() == 0) {
         query = "SELECT packages.uuid, packages.name, packages.manufacturer,  "
-                "packages.n_pads, GROUP_CONCAT(tags.tag, ' '), "
-                "packages.filename FROM packages LEFT JOIN tags ON tags.uuid = "
-                "packages.uuid WHERE packages.name LIKE ? GROUP by "
-                "packages.uuid ORDER BY name";
+                "packages.n_pads, tags_view.tags, packages.filename FROM packages "
+                "LEFT JOIN tags_view ON tags_view.uuid = packages.uuid "
+                "WHERE packages.name LIKE ? AND packages.manufacturer LIKE ? "
+                "GROUP BY packages.uuid "
+                + sort_controller->get_order_by();
     }
     else {
         std::ostringstream qs;
         qs << "SELECT packages.uuid, packages.name, packages.manufacturer, "
-              "packages.n_pads, (SELECT GROUP_CONCAT(tags.tag, ' ') FROM tags "
-              "WHERE tags.uuid = packages.uuid), packages.filename FROM "
-              "packages LEFT JOIN tags ON tags.uuid = packages.uuid WHERE "
-              "packages.name LIKE ? ";
+              "packages.n_pads, tags_view.tags, packages.filename FROM packages "
+              "LEFT JOIN tags ON tags.uuid = packages.uuid "
+              "LEFT JOIN tags_view ON tags_view.uuid = packages.uuid "
+              "WHERE packages.name LIKE ? "
+              "AND packages.manufacturer LIKE ? ";
         qs << "AND (";
         for (const auto &it : tags) {
             qs << "tags.tag LIKE ? OR ";
@@ -79,9 +83,10 @@ void PoolBrowserPackage::search()
     }
     SQLite::Query q(pool->db, query);
     q.bind(1, "%" + name_search + "%");
+    q.bind(2, "%" + manufacturer_search + "%");
     int i = 0;
     for (const auto &it : tags) {
-        q.bind(i + 2, it + "%");
+        q.bind(i + 3, it + "%");
         i++;
     }
     if (tags.size())
