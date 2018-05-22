@@ -13,13 +13,16 @@ ParameterProgram::ParameterProgram(const std::string &s) : code(s)
 
 ParameterProgram::ParameterProgram(const ParameterProgram &other) : code(other.code)
 {
-    init_error = compile();
+    std::transform(other.tokens.begin(), other.tokens.end(), std::back_inserter(tokens),
+                   [](auto &x) { return x->clone(); });
 }
 
 ParameterProgram &ParameterProgram::operator=(const ParameterProgram &other)
 {
     code = other.code;
-    init_error = compile();
+    tokens.clear();
+    std::transform(other.tokens.begin(), other.tokens.end(), std::back_inserter(tokens),
+                   [](auto &x) { return x->clone(); });
     return *this;
 }
 

@@ -4,6 +4,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <algorithm>
 
 namespace horizon {
 // using json = nlohmann::json;
@@ -34,6 +35,8 @@ protected:
         virtual ~Token()
         {
         }
+
+        virtual std::unique_ptr<Token> clone() const = 0;
     };
 
     class TokenInt : public Token {
@@ -43,6 +46,11 @@ protected:
         }
 
         const int64_t value;
+
+        std::unique_ptr<Token> clone() const override
+        {
+            return std::make_unique<TokenInt>(*this);
+        }
     };
 
     class TokenCommand : public Token {
@@ -51,8 +59,19 @@ protected:
         {
         }
 
+        TokenCommand(const TokenCommand &other) : Token(Token::Type::CMD), command(other.command)
+        {
+            std::transform(other.arguments.begin(), other.arguments.end(), std::back_inserter(arguments),
+                           [](auto &x) { return x->clone(); });
+        }
+
         const std::string command;
         std::deque<std::unique_ptr<Token>> arguments;
+
+        std::unique_ptr<Token> clone() const override
+        {
+            return std::make_unique<TokenCommand>(*this);
+        }
     };
 
     class TokenString : public Token {
@@ -62,6 +81,11 @@ protected:
         }
 
         const std::string string;
+
+        std::unique_ptr<Token> clone() const override
+        {
+            return std::make_unique<TokenString>(*this);
+        }
     };
 
     class TokenUUID : public Token {
@@ -71,6 +95,11 @@ protected:
         }
 
         const std::string string;
+
+        std::unique_ptr<Token> clone() const override
+        {
+            return std::make_unique<TokenUUID>(*this);
+        }
     };
     using CommandHandler =
             std::function<std::pair<bool, std::string>(const TokenCommand *cmd, std::deque<int64_t> &stack)>;
