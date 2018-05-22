@@ -15,7 +15,10 @@ static const char *text_pkg =
 static const char *text_preflight =
         "This rule checks if the board is ready for fabrication output:\n"
         "• No airwires\n"
-        "• No empty planes\n";
+        "• No empty planes\n"
+        "• No components without part\n"
+        "• No unplaced components\n"
+        "• No tracks without net\n";
 
 void RuleEditorPackageChecks::populate()
 {

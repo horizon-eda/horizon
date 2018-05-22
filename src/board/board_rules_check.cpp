@@ -502,6 +502,35 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd)
             e.comment = "Component " + it.second.refdes + " has no part";
         }
     }
+    std::set<const Component *> unplaced_components;
+    std::transform(brd->block->components.begin(), brd->block->components.end(),
+                   std::inserter(unplaced_components, unplaced_components.begin()),
+                   [](const auto &it) { return &it.second; });
+
+    for (const auto &it : brd->packages) {
+        unplaced_components.erase(it.second.component);
+    }
+
+    for (const auto &it : unplaced_components) {
+        r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+        auto &e = r.errors.back();
+        e.has_location = false;
+        e.comment = "Component " + it->refdes + " is not placed";
+    }
+
+    for (const auto &it : brd->tracks) {
+        auto width = it.second.width;
+        Net *net = it.second.net;
+        auto layer = it.second.layer;
+        auto &track = it.second;
+        if (!track.net) {
+            r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+            auto &e = r.errors.back();
+            e.has_location = true;
+            e.location = (track.from.get_position() + track.to.get_position()) / 2;
+            e.comment = "Track has no net";
+        }
+    }
 
     r.update();
     return r;
