@@ -440,21 +440,46 @@ std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)
 
 void ImpSchematic::handle_export_pdf()
 {
-    GtkFileChooserNative *native = gtk_file_chooser_native_new("Save PDF", GTK_WINDOW(main_window->gobj()),
-                                                               GTK_FILE_CHOOSER_ACTION_SAVE, "_Open", "_Cancel");
-    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-    chooser->set_do_overwrite_confirmation(true);
-    if (last_pdf_filename.size()) {
-        chooser->set_filename(last_pdf_filename);
-    }
-    else {
-        chooser->set_current_name("schematic.pdf");
-    }
+    std::string filename;
+    {
+        GtkFileChooserNative *native = gtk_file_chooser_native_new("Save PDF", GTK_WINDOW(main_window->gobj()),
+                                                                   GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+        auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+        chooser->set_do_overwrite_confirmation(true);
+        if (last_pdf_filename.size()) {
+            chooser->set_filename(last_pdf_filename);
+        }
+        else {
+            chooser->set_current_name("schematic.pdf");
+        }
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        std::string fn = chooser->get_filename();
-        last_pdf_filename = fn;
-        export_pdf(fn, *core.c->get_schematic(), core.r);
+        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+            filename = chooser->get_filename();
+            last_pdf_filename = filename;
+        }
+    }
+    if (filename.size()) {
+        while (1) {
+            std::string error_str;
+            try {
+                export_pdf(filename, *core.c->get_schematic(), core.r);
+                break;
+            }
+            catch (const std::exception &e) {
+                error_str = e.what();
+            }
+            catch (...) {
+                error_str = "unknown error";
+            }
+            if (error_str.size()) {
+                Gtk::MessageDialog dia(*main_window, "PDF export error", false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_NONE);
+                dia.set_secondary_text(error_str);
+                dia.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+                dia.add_button("Retry", 1);
+                if (dia.run() != 1)
+                    break;
+            }
+        }
     }
 }
 
