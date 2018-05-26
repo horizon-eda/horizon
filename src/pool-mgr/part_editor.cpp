@@ -369,7 +369,8 @@ void PartEditor::update_entries()
 
     if (part->base) {
         std::stringstream s;
-        std::copy(part->base->tags.begin(), part->base->tags.end(), std::ostream_iterator<std::string>(s, " "));
+        auto tags_from_base = part->base->get_tags();
+        std::copy(tags_from_base.begin(), tags_from_base.end(), std::ostream_iterator<std::string>(s, " "));
         w_tags_inherited->set_text(s.str());
     }
     else {

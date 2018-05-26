@@ -126,7 +126,8 @@ std::set<std::string> Part::get_tags() const
 {
     auto r = tags;
     if (inherit_tags && base) {
-        r.insert(base->tags.begin(), base->tags.end());
+        auto tags_from_base = base->get_tags();
+        r.insert(tags_from_base.begin(), tags_from_base.end());
     }
     return r;
 }
