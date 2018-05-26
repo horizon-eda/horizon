@@ -20,13 +20,19 @@ public:
     {
         return s_signal_place_part;
     }
+    type_signal_place_part signal_assign_part()
+    {
+        return s_signal_assign_part;
+    }
     void placed_part(const UUID &uu);
     void go_to_part(const UUID &uu);
+    void set_can_assign(bool v);
 
 private:
     Gtk::Button *add_search_button = nullptr;
     Gtk::Notebook *notebook = nullptr;
     Gtk::Button *place_part_button = nullptr;
+    Gtk::Button *assign_part_button = nullptr;
     Gtk::ToggleButton *fav_button = nullptr;
     Gtk::ListBox *lb_favorites = nullptr;
     Gtk::ListBox *lb_recent = nullptr;
@@ -40,6 +46,7 @@ private:
     void handle_favorites_selected(Gtk::ListBoxRow *row);
     void handle_favorites_activated(Gtk::ListBoxRow *row);
     void handle_place_part();
+    void handle_assign_part();
     sigc::connection fav_toggled_conn;
     std::set<Gtk::Widget *> search_views;
     Pool pool;
@@ -49,6 +56,8 @@ private:
     std::deque<UUID> recents;
 
     type_signal_place_part s_signal_place_part;
+    type_signal_place_part s_signal_assign_part;
+    bool can_assign = false;
 
     WindowStateStore state_store;
 };

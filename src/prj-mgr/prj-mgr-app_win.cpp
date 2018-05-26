@@ -338,6 +338,14 @@ json ProjectManagerAppWindow::handle_req(const json &j)
             tx["objects"] = j.at("selection");
             app->send_json(pid, tx);
         }
+        const json &o = j.at("selection");
+        bool can_assign = false;
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto type = static_cast<ObjectType>(it.value().at("type").get<int>());
+            if (type == ObjectType::COMPONENT)
+                can_assign = true;
+        }
+        part_browser_window->set_can_assign(can_assign);
     }
     else if (op == "board-select") {
         auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
@@ -460,6 +468,17 @@ void ProjectManagerAppWindow::handle_place_part(const UUID &uu)
         app->send_json(pid, {{"op", "place-part"}, {"part", (std::string)uu}});
     }
 }
+
+void ProjectManagerAppWindow::handle_assign_part(const UUID &uu)
+{
+    auto app = Glib::RefPtr<ProjectManagerApplication>::cast_dynamic(get_application());
+    if (processes.count(project->get_top_block().schematic_filename)) {
+        auto pid = processes.at(project->get_top_block().schematic_filename).proc->get_pid();
+        allow_set_foreground_window(pid);
+        app->send_json(pid, {{"op", "assign-part"}, {"part", (std::string)uu}});
+    }
+}
+
 
 bool ProjectManagerAppWindow::close_project()
 {
@@ -604,6 +623,8 @@ void ProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &file
                 PartBrowserWindow::create(this, app->pools.at(project->pool_uuid).path, app->part_favorites);
         part_browser_window->signal_place_part().connect(
                 sigc::mem_fun(this, &ProjectManagerAppWindow::handle_place_part));
+        part_browser_window->signal_assign_part().connect(
+                sigc::mem_fun(this, &ProjectManagerAppWindow::handle_assign_part));
 
         pool_cache_window =
                 PoolCacheWindow::create(this, project->pool_cache_directory, app->pools.at(project->pool_uuid).path);

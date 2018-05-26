@@ -26,6 +26,7 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
     x->get_widget("notebook", notebook);
     x->get_widget("add_search_button", add_search_button);
     x->get_widget("place_part_button", place_part_button);
+    x->get_widget("assign_part_button", assign_part_button);
     x->get_widget("fav_button", fav_button);
     x->get_widget("lb_favorites", lb_favorites);
     x->get_widget("lb_recent", lb_recent);
@@ -43,6 +44,7 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
     fav_toggled_conn =
             fav_button->signal_toggled().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_fav_toggled));
     place_part_button->signal_clicked().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_place_part));
+    assign_part_button->signal_clicked().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_assign_part));
 
     preview = Gtk::manage(new PartPreview(pool, false));
     paned->add2(*preview);
@@ -68,6 +70,12 @@ void PartBrowserWindow::handle_place_part()
 {
     if (part_current)
         s_signal_place_part.emit(part_current);
+}
+
+void PartBrowserWindow::handle_assign_part()
+{
+    if (part_current)
+        s_signal_assign_part.emit(part_current);
 }
 
 void PartBrowserWindow::handle_fav_toggled()
@@ -223,6 +231,7 @@ void PartBrowserWindow::update_part_current()
     fav_toggled_conn.unblock();
 
     place_part_button->set_sensitive(part_current);
+    assign_part_button->set_sensitive(part_current && can_assign);
     fav_button->set_sensitive(part_current);
     if (part_current) {
         preview->load(pool.get_part(part_current));
@@ -230,6 +239,12 @@ void PartBrowserWindow::update_part_current()
     else {
         preview->load(nullptr);
     }
+}
+
+void PartBrowserWindow::set_can_assign(bool v)
+{
+    can_assign = v;
+    assign_part_button->set_sensitive(part_current && can_assign);
 }
 
 void PartBrowserWindow::handle_add_search(const UUID &part)

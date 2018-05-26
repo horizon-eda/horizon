@@ -118,6 +118,11 @@ bool ImpSchematic::handle_broadcast(const json &j)
             part_from_project_manager = j.at("part").get<std::string>();
             tool_begin(ToolID::ADD_PART);
         }
+        if (op == "assign-part") {
+            main_window->present();
+            part_from_project_manager = j.at("part").get<std::string>();
+            tool_begin(ToolID::ASSIGN_PART);
+        }
         else if (op == "highlight" && cross_probing_enabled) {
             if (!core_schematic.tool_is_active()) {
                 highlights.clear();

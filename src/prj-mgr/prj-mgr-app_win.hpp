@@ -105,6 +105,7 @@ protected:
     void handle_close();
     void handle_save();
     void handle_place_part(const UUID &uu);
+    void handle_assign_part(const UUID &uu);
     json handle_req(const json &j);
     ProjectManagerViewCreate view_create;
     ProjectManagerViewProject view_project;
