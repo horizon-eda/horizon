@@ -197,6 +197,7 @@ Gtk::Widget *PropertyEditorStringRO::create_editor()
     apply_all_button->set_sensitive(false);
     readonly = true;
     la = Gtk::manage(new Gtk::Label(""));
+    la->set_selectable(true);
     return la;
 }
 
