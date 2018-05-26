@@ -959,7 +959,10 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
         for (auto &it : action_connections) {
             for (const auto &it2 : it.second.key_sequences) {
                 auto minl = std::min(keys_current.size(), it2.size());
-                if (minl && std::equal(keys_current.begin(), keys_current.begin() + minl, it2.begin())) {
+                if (minl && std::equal(keys_current.begin(), keys_current.begin() + minl, it2.begin())
+                    && !(core.r->tool_is_active()
+                         && !(action_catalog.at(std::make_pair(it.second.action_id, it.second.tool_id)).flags
+                              & ActionCatalogItem::FLAGS_IN_TOOL))) {
                     connections_matched.insert(&it.second);
                 }
             }
