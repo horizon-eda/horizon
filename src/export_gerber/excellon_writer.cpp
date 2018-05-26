@@ -3,7 +3,8 @@
 
 namespace horizon {
 
-ExcellonWriter::ExcellonWriter(const std::string &filename) : ofs(filename), out_filename(filename)
+ExcellonWriter::ExcellonWriter(const std::string &filename)
+    : ofs(filename, std::ios_base::out | std::ios_base::binary), out_filename(filename)
 {
     ofs.imbue(std::locale("C"));
     check_open();
