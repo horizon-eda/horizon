@@ -55,6 +55,7 @@
 #include "tool_set_group.hpp"
 #include "tool_copy_placement.hpp"
 #include "tool_copy_tracks.hpp"
+#include "tool_swap_nets.hpp"
 
 #include "common/dimension.hpp"
 #include "logger/logger.hpp"
@@ -278,6 +279,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::COPY_TRACKS:
         return std::make_unique<ToolCopyTracks>(this, tool_id);
+
+    case ToolID::SWAP_NETS:
+        return std::make_unique<ToolSwapNets>(this, tool_id);
 
     default:
         return nullptr;

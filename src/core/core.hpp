@@ -119,6 +119,7 @@ enum class ToolID {
     MOVE_KEY_DOWN,
     MOVE_KEY_LEFT,
     MOVE_KEY_RIGHT,
+    SWAP_NETS,
 };
 
 /**
