@@ -302,7 +302,7 @@ void ToolMove::do_move(const Coordi &d)
     Coordi delta = c - last;
     move_do(delta);
     last = c;
-    if (core.b && update_airwires) {
+    if (core.b && update_airwires && nets.size()) {
         core.b->get_board()->update_airwires(true, nets);
     }
     update_tip();
