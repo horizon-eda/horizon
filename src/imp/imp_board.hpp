@@ -41,5 +41,10 @@ private:
 
     void handle_drag();
     void handle_measure_tracks(const ActionConnection &a);
+
+    class CanvasAnnotation *text_owner_annotation = nullptr;
+    std::map<UUID, UUID> text_owners;
+    void update_text_owners();
+    void update_text_owner_annotation();
 };
 } // namespace horizon

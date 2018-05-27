@@ -12,6 +12,7 @@
 #include "hud_util.hpp"
 #include "util/util.hpp"
 #include "util/str_util.hpp"
+#include "canvas/annotation.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
@@ -28,6 +29,7 @@ void ImpBoard::canvas_update()
     warnings_box->update(core_board.get_board()->warnings);
     update_highlights();
     tuning_window->update();
+    update_text_owner_annotation();
 }
 
 void ImpBoard::update_highlights()
@@ -350,8 +352,46 @@ void ImpBoard::construct()
         return false;
     });
 
+    text_owner_annotation = canvas->create_annotation();
+    text_owner_annotation->set_visible(true);
+    text_owner_annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE, Color(1, 1, 0)));
+
+    core_board.signal_rebuilt().connect(sigc::mem_fun(this, &ImpBoard::update_text_owners));
+    canvas->signal_hover_selection_changed().connect(sigc::mem_fun(this, &ImpBoard::update_text_owner_annotation));
+    canvas->signal_selection_changed().connect(sigc::mem_fun(this, &ImpBoard::update_text_owner_annotation));
+    update_text_owners();
+
     main_window->left_panel->pack_start(*display_control_notebook, false, false);
     display_control_notebook->show();
+}
+
+void ImpBoard::update_text_owners()
+{
+    auto brd = core_board.get_board();
+    for (const auto &it_pkg : brd->packages) {
+        for (const auto &itt : it_pkg.second.texts) {
+            text_owners[itt->uuid] = it_pkg.first;
+        }
+    }
+    update_text_owner_annotation();
+}
+
+void ImpBoard::update_text_owner_annotation()
+{
+    text_owner_annotation->clear();
+    auto sel = canvas->get_selection();
+    auto brd = core_board.get_board();
+    for (const auto &it : sel) {
+        if (it.type == ObjectType::TEXT) {
+            if (brd->texts.count(it.uuid)) {
+                const auto &text = brd->texts.at(it.uuid);
+                if (text_owners.count(text.uuid))
+                    text_owner_annotation->draw_line(text.placement.shift,
+                                                     brd->packages.at(text_owners.at(text.uuid)).placement.shift,
+                                                     ColorP::FROM_LAYER, 0);
+            }
+        }
+    }
 }
 
 std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
