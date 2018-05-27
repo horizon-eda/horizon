@@ -47,6 +47,7 @@
     <file>imp/rules/rule_editor_track_width.ui</file>
     <file>imp/rules/rule_editor_clearance_copper.ui</file>
     <file>imp/fab_output.ui</file>
+    <file>imp/bom_export.ui</file>
     <file>imp/3d_view.ui</file>
     <file>imp/step_export.ui</file>
     <file>prj-mgr/part_browser/part_browser.ui</file>

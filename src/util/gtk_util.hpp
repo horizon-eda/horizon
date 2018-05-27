@@ -9,7 +9,7 @@ void bind_widget(Gtk::Switch *sw, bool &v);
 void bind_widget(Gtk::CheckButton *sw, bool &v);
 void bind_widget(Gtk::SpinButton *sp, int &v);
 void bind_widget(Gtk::Scale *sc, float &v);
-void bind_widget(Gtk::Entry *en, std::string &v);
+void bind_widget(Gtk::Entry *en, std::string &v, std::function<void(std::string &v)> extra_cb = nullptr);
 template <typename T>
 void bind_widget(std::map<T, Gtk::RadioButton *> &widgets, T &v, std::function<void(T)> extra_cb = nullptr)
 {

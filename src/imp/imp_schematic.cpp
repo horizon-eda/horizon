@@ -8,6 +8,7 @@
 #include "util/util.hpp"
 #include "util/str_util.hpp"
 #include "hud_util.hpp"
+#include "bom_export_window.hpp"
 
 namespace horizon {
 ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,
@@ -234,6 +235,9 @@ void ImpSchematic::construct()
     hamburger_menu->append("Schematic properties", "win.sch_properties");
     add_tool_action(ToolID::EDIT_SCHEMATIC_PROPERTIES, "sch_properties");
 
+    hamburger_menu->append("BOM Export", "win.bom_export");
+    main_window->add_action("bom_export", [this] { trigger_action(ActionID::BOM_EXPORT_WINDOW); });
+
     hamburger_menu->append("Export PDF", "win.export_pdf");
 
     main_window->add_action("export_pdf", [this] { handle_export_pdf(); });
@@ -363,6 +367,19 @@ void ImpSchematic::construct()
         }
         this->update_highlights();
     });
+
+    bom_export_window =
+            BOMExportWindow::create(main_window, core_schematic.get_block(), core_schematic.get_bom_export_settings());
+
+    connect_action(ActionID::BOM_EXPORT_WINDOW, [this](const auto &c) { bom_export_window->present(); });
+    connect_action(ActionID::EXPORT_BOM, [this](const auto &c) {
+        bom_export_window->present();
+        bom_export_window->generate();
+    });
+
+    bom_export_window->signal_changed().connect([this] { core_schematic.set_needs_save(); });
+    core.r->signal_tool_changed().connect([this](ToolID t) { bom_export_window->set_can_export(t == ToolID::NONE); });
+    core.r->signal_rebuilt().connect([this] { bom_export_window->update_preview(); });
 
 
     grid_spin_button->set_sensitive(false);

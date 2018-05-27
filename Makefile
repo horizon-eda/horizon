@@ -21,6 +21,8 @@ SRC_COMMON = \
 	src/block/block.cpp\
 	src/pool/entity.cpp\
 	src/block/component.cpp\
+	src/block/bom.cpp\
+	src/block/bom_export_settings.cpp\
 	src/schematic/schematic.cpp\
 	src/schematic/sheet.cpp\
 	src/common/text.cpp\
@@ -286,6 +288,7 @@ SRC_IMP = \
 	src/imp/symbol_preview/preview_box.cpp\
 	src/util/gtk_util.cpp\
 	src/imp/fab_output_window.cpp\
+	src/imp/bom_export_window.cpp\
 	src/imp/3d_view.cpp\
 	src/imp/step_export_window.cpp\
 	src/imp/tuning_window.cpp\
@@ -306,6 +309,7 @@ SRC_IMP = \
 	src/widgets/log_view.cpp\
 	src/imp/hud_util.cpp\
 	src/util/pool_completion.cpp\
+	src/export_bom/export_bom.cpp\
 
 SRC_ROUTER = \
 	3rd_party/router/router/pns_router.cpp \

@@ -55,6 +55,11 @@ public:
 
     class Rules *get_rules() override;
 
+    BOMExportSettings *get_bom_export_settings()
+    {
+        return &bom_export_settings;
+    }
+
     void rebuild(bool from_undo = false) override;
     void commit() override;
     void revert() override;
@@ -73,6 +78,8 @@ private:
     Schematic sch;
 
     SchematicRules rules;
+
+    BOMExportSettings bom_export_settings;
 
     UUID sheet_uuid;
     std::string m_schematic_filename;

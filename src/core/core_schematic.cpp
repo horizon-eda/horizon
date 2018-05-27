@@ -8,7 +8,8 @@
 namespace horizon {
 CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, Pool &pool)
     : block(Block::new_from_file(block_filename, pool)), sch(Schematic::new_from_file(schematic_filename, block, pool)),
-      rules(sch.rules), m_schematic_filename(schematic_filename), m_block_filename(block_filename)
+      rules(sch.rules), bom_export_settings(block.bom_export_settings), m_schematic_filename(schematic_filename),
+      m_block_filename(block_filename)
 {
     auto x = std::find_if(sch.sheets.cbegin(), sch.sheets.cend(), [](const auto &a) { return a.second.index == 1; });
     assert(x != sch.sheets.cend());
@@ -559,6 +560,7 @@ std::pair<Coordi, Coordi> CoreSchematic::get_bbox()
 void CoreSchematic::save()
 {
     sch.rules = rules;
+    block.bom_export_settings = bom_export_settings;
     save_json_to_file(m_schematic_filename, sch.serialize());
     save_json_to_file(m_block_filename, block.serialize());
     set_needs_save(false);

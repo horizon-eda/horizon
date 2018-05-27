@@ -503,6 +503,14 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
 
         {{ActionID::TOOL, ToolID::MOVE_KEY_RIGHT},
          {"Move right", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::BOM_EXPORT_WINDOW, ToolID::NONE},
+         {"BOM export window", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::EXPORT_BOM, ToolID::NONE},
+         {"Export BOM", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -564,6 +572,8 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(HIGHLIGHT_NET),
         ACTION_LUT_ITEM(RELOAD_NETLIST),
         ACTION_LUT_ITEM(SAVE_RELOAD_NETLIST),
+        ACTION_LUT_ITEM(BOM_EXPORT_WINDOW),
+        ACTION_LUT_ITEM(EXPORT_BOM),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

@@ -51,7 +51,9 @@ enum class ActionID {
     TUNING_ADD_TRACKS_ALL,
     HIGHLIGHT_NET,
     RELOAD_NETLIST,
-    SAVE_RELOAD_NETLIST
+    SAVE_RELOAD_NETLIST,
+    BOM_EXPORT_WINDOW,
+    EXPORT_BOM
 };
 
 enum class ActionGroup {

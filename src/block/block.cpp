@@ -3,6 +3,8 @@
 #include "logger/logger.hpp"
 #include <set>
 #include "nlohmann/json.hpp"
+#include "pool/part.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -49,6 +51,14 @@ Block::Block(const UUID &uu, const json &j, Pool &pool) : uuid(uu), name(j.at("n
             auto u = UUID(it.key());
             load_and_log(components, ObjectType::COMPONENT, std::forward_as_tuple(u, it.value(), pool, this),
                          Logger::Domain::BLOCK);
+        }
+    }
+    if (j.count("bom_export_settings")) {
+        try {
+            bom_export_settings = BOMExportSettings(j.at("bom_export_settings"));
+        }
+        catch (const std::exception &e) {
+            Logger::log_warning("couldn't load bom export settings", Logger::Domain::BLOCK, e.what());
         }
     }
 }
@@ -172,7 +182,8 @@ void Block::update_connection_count()
 
 Block::Block(const Block &block)
     : uuid(block.uuid), name(block.name), nets(block.nets), buses(block.buses), components(block.components),
-      net_classes(block.net_classes), net_class_default(block.net_class_default)
+      net_classes(block.net_classes), net_class_default(block.net_class_default),
+      bom_export_settings(block.bom_export_settings)
 {
     update_refs();
 }
@@ -186,6 +197,7 @@ void Block::operator=(const Block &block)
     components = block.components;
     net_classes = block.net_classes;
     net_class_default = block.net_class_default;
+    bom_export_settings = block.bom_export_settings;
     update_refs();
 }
 
@@ -211,6 +223,7 @@ json Block::serialize()
     for (const auto &it : net_classes) {
         j["net_classes"][(std::string)it.first] = it.second.serialize();
     }
+    j["bom_export_settings"] = bom_export_settings.serialize();
 
     return j;
 }
@@ -234,4 +247,27 @@ Net *Block::extract_pins(const std::set<UUIDPath<3>> &pins, Net *net)
 
     return net;
 }
+
+std::map<const Part *, BOMRow> Block::get_BOM(const BOMExportSettings &settings) const
+{
+    std::map<const Part *, BOMRow> rows;
+    for (const auto &it : components) {
+        if (it.second.part) {
+            rows[it.second.part];
+            rows[it.second.part].refdes.push_back(it.second.refdes);
+        }
+    }
+    for (auto &it : rows) {
+        it.second.MPN = it.first->get_MPN();
+        it.second.datasheet = it.first->get_datasheet();
+        it.second.description = it.first->get_description();
+        it.second.manufacturer = it.first->get_manufacturer();
+        it.second.package = it.first->package->name;
+        it.second.value = it.first->get_value();
+        std::sort(it.second.refdes.begin(), it.second.refdes.end(),
+                  [](const auto &a, const auto &b) { return strcmp_natural(a, b) < 0; });
+    }
+    return rows;
+}
+
 } // namespace horizon

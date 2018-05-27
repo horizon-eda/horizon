@@ -44,6 +44,8 @@ private:
     Coordf cursor_pos_drag_begin;
     Target target_drag_begin;
 
+    class BOMExportWindow *bom_export_window;
+
     void handle_drag();
 
     int get_board_pid();

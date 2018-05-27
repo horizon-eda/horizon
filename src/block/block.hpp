@@ -6,6 +6,7 @@
 #include "net_class.hpp"
 #include "pool/pool.hpp"
 #include "util/uuid.hpp"
+#include "bom_export_settings.hpp"
 #include <fstream>
 #include <map>
 #include <set>
@@ -35,6 +36,9 @@ public:
     std::map<UUID, Component> components;
     std::map<UUID, NetClass> net_classes;
     uuid_ptr<NetClass> net_class_default = nullptr;
+
+    BOMExportSettings bom_export_settings;
+    std::map<const class Part *, BOMRow> get_BOM(const BOMExportSettings &settings) const;
 
     Block(const Block &block);
     void operator=(const Block &block);

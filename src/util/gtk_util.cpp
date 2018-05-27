@@ -35,10 +35,15 @@ void bind_widget(Gtk::Scale *sc, float &v)
     sc->signal_value_changed().connect([sc, &v] { v = sc->get_value(); });
 }
 
-void bind_widget(Gtk::Entry *en, std::string &v)
+void bind_widget(Gtk::Entry *en, std::string &v, std::function<void(std::string &v)> extra_cb)
 {
     en->set_text(v);
-    en->signal_changed().connect([en, &v] { v = en->get_text(); });
+    en->signal_changed().connect([en, &v, extra_cb] {
+        v = en->get_text();
+        if (extra_cb) {
+            extra_cb(v);
+        }
+    });
 }
 
 Gtk::Label *grid_attach_label_and_widget(Gtk::Grid *gr, const std::string &label, Gtk::Widget *w, int &top)
