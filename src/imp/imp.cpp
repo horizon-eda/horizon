@@ -19,6 +19,7 @@
 #include "hud_util.hpp"
 #include "util/str_util.hpp"
 #include <glibmm/main.h>
+#include <glibmm/markup.h>
 #include <gtkmm.h>
 #include <iomanip>
 #include <functional>
@@ -642,7 +643,8 @@ std::string ImpBase::get_hud_text_for_part(const Part *part)
     if (part->get_description().size())
         s += part->get_description() + "\n";
     if (part->get_datasheet().size())
-        s += "<a href=\"" + part->get_datasheet() + "\" title=\"" + part->get_datasheet() + "\">Datasheet</a>\n";
+        s += "<a href=\"" + Glib::Markup::escape_text(part->get_datasheet()) + "\" title=\""
+             + Glib::Markup::escape_text(Glib::Markup::escape_text(part->get_datasheet())) + "\">Datasheet</a>\n";
 
     trim(s);
     return s;
