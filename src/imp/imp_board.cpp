@@ -380,7 +380,7 @@ void ImpBoard::update_text_owner_annotation()
 {
     text_owner_annotation->clear();
     auto sel = canvas->get_selection();
-    auto brd = core_board.get_board();
+    const auto brd = core_board.get_board();
     for (const auto &it : sel) {
         if (it.type == ObjectType::TEXT) {
             if (brd->texts.count(it.uuid)) {
@@ -389,6 +389,16 @@ void ImpBoard::update_text_owner_annotation()
                     text_owner_annotation->draw_line(text.placement.shift,
                                                      brd->packages.at(text_owners.at(text.uuid)).placement.shift,
                                                      ColorP::FROM_LAYER, 0);
+            }
+        }
+        else if (it.type == ObjectType::BOARD_PACKAGE) {
+            if (brd->packages.count(it.uuid)) {
+                const auto &pkg = brd->packages.at(it.uuid);
+                for (const auto &text : pkg.texts) {
+                    if (canvas->layer_is_visible(text->layer))
+                        text_owner_annotation->draw_line(text->placement.shift, pkg.placement.shift, ColorP::FROM_LAYER,
+                                                         0);
+                }
             }
         }
     }
