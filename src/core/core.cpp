@@ -56,6 +56,7 @@
 #include "tool_copy_placement.hpp"
 #include "tool_copy_tracks.hpp"
 #include "tool_swap_nets.hpp"
+#include "tool_line_loop_to_polygon.hpp"
 
 #include "common/dimension.hpp"
 #include "logger/logger.hpp"
@@ -282,6 +283,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::SWAP_NETS:
         return std::make_unique<ToolSwapNets>(this, tool_id);
+
+    case ToolID::LINE_LOOP_TO_POLYGON:
+        return std::make_unique<ToolLineLoopToPolygon>(this, tool_id);
 
     default:
         return nullptr;

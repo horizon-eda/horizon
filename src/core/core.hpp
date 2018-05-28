@@ -120,6 +120,7 @@ enum class ToolID {
     MOVE_KEY_LEFT,
     MOVE_KEY_RIGHT,
     SWAP_NETS,
+    LINE_LOOP_TO_POLYGON
 };
 
 /**

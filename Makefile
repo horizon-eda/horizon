@@ -190,6 +190,7 @@ SRC_IMP = \
 	src/core/tool_copy_placement.cpp\
 	src/core/tool_copy_tracks.cpp\
 	src/core/tool_swap_nets.cpp\
+	src/core/tool_line_loop_to_polygon.cpp\
 	src/core/cores.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\

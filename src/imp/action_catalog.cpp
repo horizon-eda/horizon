@@ -515,6 +515,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::TOOL, ToolID::SWAP_NETS},
          {"Swap nets", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::LINE_LOOP_TO_POLYGON},
+         {"Line loop to polygon", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -686,5 +690,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(MOVE_KEY_LEFT),
         TOOL_LUT_ITEM(MOVE_KEY_RIGHT),
         TOOL_LUT_ITEM(SWAP_NETS),
+        TOOL_LUT_ITEM(LINE_LOOP_TO_POLYGON),
 };
 } // namespace horizon
