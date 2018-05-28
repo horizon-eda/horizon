@@ -75,7 +75,7 @@ void export_BOM(const std::string &filename, const class Block &block, const cla
             ofs << escape_csv(col);
             if (needs_quote(col))
                 ofs << "\"";
-            if (col != row.back())
+            if (&col != &row.back())
                 ofs << ",";
         }
         ofs << "\r\n";
