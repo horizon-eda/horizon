@@ -41,6 +41,23 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
             }
         }
     }
+    else {
+        if (GerberWriter *wr = exporter->get_writer_for_layer(ipoly.layer)) {
+            ClipperLib::Path path;
+            std::transform(poly.vertices.begin(), poly.vertices.end(), std::back_inserter(path),
+                           [&tr, this](const Polygon::Vertex &v) {
+                               Coordi p;
+                               if (tr) {
+                                   p = transform.transform(v.position);
+                               }
+                               else {
+                                   p = v.position;
+                               }
+                               return ClipperLib::IntPoint(p.x, p.y);
+                           });
+            wr->draw_region(path, true, -1);
+        }
+    }
 }
 
 void CanvasGerber::img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer, bool tr)
