@@ -89,8 +89,7 @@ void GerberWriter::write_apertures()
                 ofs << "1,"; // exposure
                 write_decimal(prim->diameter);
                 write_decimal(prim->center.x);
-                write_decimal(prim->center.y);
-                ofs << "0"; // angle
+                write_decimal(prim->center.y, false);
             } break;
             case ApertureMacro::Primitive::Code::CENTER_LINE: {
                 auto prim = dynamic_cast<ApertureMacro::PrimitiveCenterLine *>(itp.get());
