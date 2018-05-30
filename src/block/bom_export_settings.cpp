@@ -13,6 +13,10 @@ BOMExportSettings::BOMExportSettings(const json &j)
 {
 }
 
+BOMExportSettings::BOMExportSettings()
+{
+}
+
 json BOMExportSettings::serialize() const
 {
     json j;
@@ -27,6 +31,11 @@ BOMExportSettings::CSVSettings::CSVSettings(const json &j)
     for (const auto &it : j.at("columns")) {
         columns.push_back(bom_column_lut.lookup(it));
     }
+}
+
+BOMExportSettings::CSVSettings::CSVSettings()
+    : columns({BOMColumn::QTY, BOMColumn::MPN, BOMColumn::VALUE, BOMColumn::MANUFACTURER, BOMColumn::REFDES})
+{
 }
 
 json BOMExportSettings::CSVSettings::serialize() const

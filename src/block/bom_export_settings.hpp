@@ -10,9 +10,7 @@ using json = nlohmann::json;
 class BOMExportSettings {
 public:
     BOMExportSettings(const json &);
-    BOMExportSettings()
-    {
-    }
+    BOMExportSettings();
     json serialize() const;
 
     enum class Format { CSV };
@@ -21,9 +19,7 @@ public:
     class CSVSettings {
     public:
         CSVSettings(const json &j);
-        CSVSettings()
-        {
-        }
+        CSVSettings();
 
         std::vector<BOMColumn> columns;
         BOMColumn sort_column = BOMColumn::REFDES;
