@@ -195,6 +195,20 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
 
     update_tip();
 
+    for (const auto &it : core.r->selection) {
+        if (it.type == ObjectType::POLYGON_VERTEX || it.type == ObjectType::POLYGON_EDGE) {
+            auto poly = core.r->get_polygon(it.uuid);
+            if (auto plane = dynamic_cast<Plane *>(poly->usage.ptr)) {
+                planes.insert(plane);
+            }
+        }
+    }
+
+    for (auto plane : planes) {
+        plane->fragments.clear();
+        plane->revision++;
+    }
+
     int key = 0;
     switch (tool_id) {
     case ToolID::MOVE_KEY_UP:
@@ -337,7 +351,11 @@ void ToolMove::finish()
     if (core.b) {
         auto brd = core.b->get_board();
         brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
+        for (auto plane : planes) {
+            brd->update_plane(plane);
+        }
     }
+
     core.r->commit();
 }
 

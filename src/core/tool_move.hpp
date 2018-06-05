@@ -39,5 +39,7 @@ private:
     void finish();
     bool is_key = false;
     Coordi key_delta;
+
+    std::set<class Plane*> planes;
 };
 } // namespace horizon
