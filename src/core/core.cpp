@@ -223,6 +223,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
         return std::make_unique<ToolEditVia>(this, tool_id);
 
     case ToolID::ROTATE_ARBITRARY:
+    case ToolID::SCALE:
         return std::make_unique<ToolRotateArbitrary>(this, tool_id);
 
     case ToolID::ADD_PLANE:

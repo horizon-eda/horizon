@@ -177,6 +177,9 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Rotate arbitrary", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::SCALE},
+         {"Scale", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::ENTER_DATUM},
          {"Enter datum", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -691,5 +694,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(MOVE_KEY_RIGHT),
         TOOL_LUT_ITEM(SWAP_NETS),
         TOOL_LUT_ITEM(LINE_LOOP_TO_POLYGON),
+        TOOL_LUT_ITEM(SCALE),
 };
 } // namespace horizon

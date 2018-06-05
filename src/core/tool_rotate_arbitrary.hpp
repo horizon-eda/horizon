@@ -20,11 +20,13 @@ private:
     Coordi ref;
     int iangle = 0;
     bool snap = true;
+    double scale = 1;
     void expand_selection();
     void update_tip();
     void save_placements();
-    void apply_placements(int angle);
-    enum class State { ORIGIN, ROTATE };
+    void apply_placements_rotation(int angle);
+    void apply_placements_scale(double sc);
+    enum class State { ORIGIN, ROTATE, REF, SCALE };
     State state = State::ORIGIN;
     std::map<SelectableRef, Placement> placements;
     class CanvasAnnotation *annotation = nullptr;

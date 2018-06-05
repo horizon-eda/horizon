@@ -97,12 +97,22 @@ void ToolRotateArbitrary::update_tip()
     if (state == State::ORIGIN) {
         imp->tool_bar_set_tip("<b>LMB:</b>set origin <b>RMB:</b>cancel");
     }
-    else {
+    else if (state == State::REF) {
+        imp->tool_bar_set_tip("<b>LMB:</b>set ref <b>RMB:</b>cancel");
+    }
+    else if (state == State::ROTATE) {
         std::stringstream ss;
         ss << "<b>LMB:</b>finish <b>RMB:</b>cancel <b>s:</b>toggle snap <i>";
         ss << "Angle: " << angle_to_string(iangle, false);
         if (snap)
             ss << " (snapped)";
+        ss << "</i>";
+        imp->tool_bar_set_tip(ss.str());
+    }
+    else if (state == State::SCALE) {
+        std::stringstream ss;
+        ss << "<b>LMB:</b>finish <b>RMB:</b>cancel <i>";
+        ss << "Scale: " << scale;
         ss << "</i>";
         imp->tool_bar_set_tip(ss.str());
     }
@@ -145,7 +155,7 @@ static Placement rotate_placement(const Placement &p, const Coordi &origin, int 
     return t;
 }
 
-void ToolRotateArbitrary::apply_placements(int angle)
+void ToolRotateArbitrary::apply_placements_rotation(int angle)
 {
     for (const auto &it : placements) {
         switch (it.first.type) {
@@ -171,38 +181,100 @@ void ToolRotateArbitrary::apply_placements(int angle)
     }
 }
 
+static Placement scale_placement(const Placement &p, const Coordi &origin, double scale)
+{
+    Placement q = p;
+    q.shift -= origin;
+    q.shift.x *= scale;
+    q.shift.y *= scale;
+    q.shift += origin;
+    return q;
+}
+
+void ToolRotateArbitrary::apply_placements_scale(double sc)
+{
+    for (const auto &it : placements) {
+        switch (it.first.type) {
+        case ObjectType::JUNCTION:
+            core.r->get_junction(it.first.uuid)->position = scale_placement(it.second, origin, sc).shift;
+            break;
+        case ObjectType::POLYGON_VERTEX:
+            core.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).position =
+                    scale_placement(it.second, origin, sc).shift;
+            break;
+        case ObjectType::POLYGON_ARC_CENTER:
+            core.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).arc_center =
+                    scale_placement(it.second, origin, sc).shift;
+            break;
+        case ObjectType::TEXT:
+            core.r->get_text(it.first.uuid)->placement = scale_placement(it.second, origin, sc);
+            break;
+        case ObjectType::BOARD_PACKAGE:
+            core.b->get_board()->packages.at(it.first.uuid).placement = scale_placement(it.second, origin, sc);
+            break;
+        default:;
+        }
+    }
+}
+
 ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
         if (state == State::ORIGIN) {
             origin = args.coords;
         }
-        else {
+        else if (state == State::REF) {
             ref = args.coords;
+        }
+        else if (state == State::SCALE) {
+            double vr = sqrt((ref - origin).mag_sq());
+            double v = sqrt((args.coords - origin).mag_sq());
+            scale = v / vr;
+            apply_placements_scale(scale);
+        }
+        else if (state == State::ROTATE) {
+            auto rref = args.coords;
             annotation->clear();
-            annotation->draw_line(origin, ref, ColorP::FROM_LAYER, 2);
+            annotation->draw_line(origin, rref, ColorP::FROM_LAYER, 2);
 
-            auto v = ref - origin;
+            auto v = rref - origin;
             double angle = atan2(v.y, v.x);
             iangle = ((angle / (2 * M_PI)) * 65536);
             iangle += 65536 * 2;
             iangle %= 65536;
             if (snap)
                 iangle = round_multiple(iangle, 8192);
-            apply_placements(iangle);
+            apply_placements_rotation(iangle);
         }
         update_tip();
+        return ToolResponse::fast();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
-            if (state == State::ORIGIN) {
-                state = State::ROTATE;
-                ref = args.coords;
-                update_tip();
+            if (tool_id == ToolID::ROTATE_ARBITRARY) {
+                if (state == State::ORIGIN) {
+                    state = State::ROTATE;
+                    update_tip();
+                }
+                else {
+                    core.r->commit();
+                    return ToolResponse::end();
+                }
             }
-            else {
-                core.r->commit();
-                return ToolResponse::end();
+            else { // scale
+                if (state == State::ORIGIN) {
+                    state = State::REF;
+                    ref = args.coords;
+                    update_tip();
+                }
+                else if (state == State::REF) {
+                    state = State::SCALE;
+                    update_tip();
+                }
+                else {
+                    core.r->commit();
+                    return ToolResponse::end();
+                }
             }
         }
         else {
