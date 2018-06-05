@@ -59,7 +59,7 @@ void main() {
 	if(lod_to_geom[0] != 0) {
 		float lod_size = lod_to_geom[0]*.02e6;
 		float lod_size_px = lod_size*scale;
-		if(lod_size_px<5)
+		if(lod_size_px<10)
 			return;
 	}
 
