@@ -197,6 +197,22 @@ Gtk::Button *PoolNotebook::add_action_button(const std::string &label, Gtk::Box 
     return bu;
 }
 
+class SetReset {
+public:
+    SetReset(bool &v) : value(v)
+    {
+        value = true;
+    }
+
+    ~SetReset()
+    {
+        value = false;
+    }
+
+private:
+    bool &value;
+};
+
 PoolNotebook::PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw)
     : Gtk::Notebook(), base_path(bp), pool(bp), appwin(aw)
 {
@@ -214,6 +230,9 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolManagerAppWindow *aw
     {
 
         pool_update_dispatcher.connect([this] {
+            if (in_pool_update_handler)
+                return;
+            SetReset rst(in_pool_update_handler);
             std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
             while (pool_update_status_queue.size()) {
                 std::string last_filename;

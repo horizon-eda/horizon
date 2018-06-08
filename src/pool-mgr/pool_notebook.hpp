@@ -57,6 +57,7 @@ private:
     class DuplicateWindow *duplicate_window = nullptr;
 
     Glib::Dispatcher pool_update_dispatcher;
+    bool in_pool_update_handler = false;
     std::mutex pool_update_status_queue_mutex;
     std::deque<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_status_queue;
     std::deque<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_error_queue;
