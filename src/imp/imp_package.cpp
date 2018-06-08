@@ -347,6 +347,20 @@ std::string ImpPackage::get_hud_text(std::set<SelectableRef> &sel)
         }
         sel_erase_type(sel, ObjectType::PAD);
     }
+    else if (sel_count_type(sel, ObjectType::PAD) == 2) {
+        const auto &pkg = core_package.get_package();
+        std::vector<const Pad *> pads;
+        for (const auto &it : sel) {
+            if (it.type == ObjectType::PAD) {
+                pads.push_back(&pkg->pads.at(it.uuid));
+            }
+        }
+        assert(pads.size() == 2);
+        s += "<b>2 Pads</b>\n";
+        s += "ΔX:" + dim_to_string(std::abs(pads.at(0)->placement.shift.x - pads.at(1)->placement.shift.x)) + "\n";
+        s += "ΔY:" + dim_to_string(std::abs(pads.at(0)->placement.shift.y - pads.at(1)->placement.shift.y));
+        sel_erase_type(sel, ObjectType::PAD);
+    }
     trim(s);
     return s;
 }
