@@ -97,6 +97,8 @@ public:
 
     std::vector<Warning> warnings;
 
+    void update_refs(class Pool &pool);
+
 private:
     void update_refs();
 };

@@ -427,6 +427,10 @@ public:
         return s_signal_needs_save;
     }
 
+    virtual void reload_pool()
+    {
+    }
+
 protected:
     virtual std::map<UUID, Junction> *get_junction_map(bool work = true)
     {
@@ -481,6 +485,8 @@ protected:
     int history_current = -1;
     virtual void history_push() = 0;
     virtual void history_load(unsigned int i) = 0;
+    void history_clear();
+
     bool property_transaction = false;
 
     void layers_to_meta(class PropertyMeta &meta);

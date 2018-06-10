@@ -522,6 +522,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::TOOL, ToolID::LINE_LOOP_TO_POLYGON},
          {"Line loop to polygon", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::RELOAD_POOL, ToolID::NONE},
+         {"Reload pool", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -585,6 +589,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(SAVE_RELOAD_NETLIST),
         ACTION_LUT_ITEM(BOM_EXPORT_WINDOW),
         ACTION_LUT_ITEM(EXPORT_BOM),
+        ACTION_LUT_ITEM(RELOAD_POOL),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

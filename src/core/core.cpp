@@ -579,6 +579,13 @@ void Core::redo()
     set_needs_save();
 }
 
+void Core::history_clear()
+{
+    history.clear();
+    history_current = -1;
+    signal_can_undo_redo().emit();
+}
+
 bool Core::can_redo() const
 {
     return history_current + 1 != (int)history.size();

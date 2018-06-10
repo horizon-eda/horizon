@@ -21,6 +21,8 @@ public:
     Gtk::HeaderBar *header = nullptr;
     Glib::RefPtr<Gtk::Builder> builder;
 
+    Gtk::Button *pool_reload_button = nullptr;
+
     void tool_bar_set_visible(bool v);
     void tool_bar_set_tool_name(const std::string &s);
     void tool_bar_set_tool_tip(const std::string &s);
@@ -28,6 +30,9 @@ public:
 
     void hud_update(const std::string &s);
     void hud_hide();
+
+    void show_nonmodal(const std::string &la, const std::string &button, std::function<void(void)> fn,
+                       const std::string &la2 = "");
 
     // virtual ~MainWindow();
 private:
@@ -45,6 +50,13 @@ private:
 
     sigc::connection hud_timeout_connection;
     bool hud_queue_close = false;
+
+    Gtk::Button *nonmodal_close_button = nullptr;
+    Gtk::Button *nonmodal_button = nullptr;
+    Gtk::Revealer *nonmodal_rev = nullptr;
+    Gtk::Label *nonmodal_label = nullptr;
+    Gtk::Label *nonmodal_label2 = nullptr;
+    std::function<void(void)> nonmodal_fn;
 
     void sc(void);
     void cm(const horizon::Coordi &cursor_pos);

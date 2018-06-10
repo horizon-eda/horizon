@@ -331,6 +331,11 @@ void ImpBase::run(int argc, char *argv[])
         this->canvas_update_from_pp();
     });
 
+    connect_action(ActionID::RELOAD_POOL, [this](const auto &a) {
+        core.r->reload_pool();
+        this->canvas_update_from_pp();
+    });
+
     connect_action(ActionID::COPY,
                    [this](const auto &a) { clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos()); });
 
@@ -1318,7 +1323,7 @@ void ImpBase::handle_warning_selected(const Coordi &pos)
 
 bool ImpBase::handle_broadcast(const json &j)
 {
-    std::string op = j.at("op");
+    const std::string op = j.at("op");
     if (op == "present") {
         main_window->present();
         return true;
@@ -1326,6 +1331,10 @@ bool ImpBase::handle_broadcast(const json &j)
     else if (op == "save") {
         core.r->save();
         return true;
+    }
+    else if (op == "pool-changed") {
+        main_window->show_nonmodal("Pool has changed", "Reload pool", [this] { trigger_action(ActionID::RELOAD_POOL); },
+                                   "This will clear the undo/redo history");
     }
     return false;
 }

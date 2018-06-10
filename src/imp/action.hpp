@@ -53,7 +53,8 @@ enum class ActionID {
     RELOAD_NETLIST,
     SAVE_RELOAD_NETLIST,
     BOM_EXPORT_WINDOW,
-    EXPORT_BOM
+    EXPORT_BOM,
+    RELOAD_POOL,
 };
 
 enum class ActionGroup {

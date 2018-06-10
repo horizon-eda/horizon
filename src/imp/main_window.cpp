@@ -26,6 +26,19 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("property_throttled_revealer", property_throttled_revealer);
     x->get_widget("hud", hud);
     x->get_widget("hud_label", hud_label);
+    x->get_widget("nonmodal_rev", nonmodal_rev);
+    x->get_widget("nonmodal_button", nonmodal_button);
+    x->get_widget("nonmodal_close_button", nonmodal_close_button);
+    x->get_widget("nonmodal_label", nonmodal_label);
+    x->get_widget("nonmodal_label2", nonmodal_label2);
+
+    nonmodal_close_button->signal_clicked().connect([this] { nonmodal_rev->set_reveal_child(false); });
+    nonmodal_button->signal_clicked().connect([this] {
+        nonmodal_rev->set_reveal_child(false);
+        if (nonmodal_fn) {
+            nonmodal_fn();
+        }
+    });
 
     canvas = Gtk::manage(new CanvasGL());
     gl_container->pack_start(*canvas, true, true, 0);
@@ -93,6 +106,17 @@ void MainWindow::hud_update(const std::string &s)
 void MainWindow::hud_hide()
 {
     hud->set_reveal_child(false);
+}
+
+void MainWindow::show_nonmodal(const std::string &la, const std::string &button, std::function<void(void)> fn,
+                               const std::string &la2)
+{
+    nonmodal_label->set_markup(la);
+    nonmodal_label2->set_markup(la2);
+    nonmodal_label2->set_visible(la2.size());
+    nonmodal_button->set_label(button);
+    nonmodal_fn = fn;
+    nonmodal_rev->set_reveal_child(true);
 }
 
 MainWindow *MainWindow::create()

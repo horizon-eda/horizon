@@ -43,6 +43,8 @@ public:
     std::pair<Coordi, Coordi> get_bbox() override;
     json get_meta() override;
 
+    void reload_pool() override;
+
 private:
     std::map<UUID, Junction> *get_junction_map(bool work = true) override;
     std::map<UUID, Line> *get_line_map(bool work = true) override;

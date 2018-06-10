@@ -22,7 +22,7 @@ public:
     Pad(const UUID &uu, const json &, Pool &pool);
     Pad(const UUID &uu, const Padstack *ps);
     UUID uuid;
-    const Padstack *pool_padstack;
+    uuid_ptr<const Padstack> pool_padstack;
     Padstack padstack;
     Placement placement;
     std::string name;

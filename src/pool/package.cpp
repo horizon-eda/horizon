@@ -273,6 +273,15 @@ void Package::operator=(Package const &pkg)
     update_refs();
 }
 
+void Package::update_refs(Pool &pool)
+{
+    for (auto &it : pads) {
+        it.second.pool_padstack = pool.get_padstack(it.second.pool_padstack.uuid);
+        it.second.padstack = *it.second.pool_padstack;
+    }
+    update_refs();
+}
+
 void Package::update_refs()
 {
     for (auto &it : lines) {

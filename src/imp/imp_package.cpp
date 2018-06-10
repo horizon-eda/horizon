@@ -677,8 +677,10 @@ void ImpPackage::construct()
 
     auto hamburger_menu = add_hamburger_menu();
     hamburger_menu->append("Import DXF", "win.import_dxf");
-
     add_tool_action(ToolID::IMPORT_DXF, "import_dxf");
+
+    hamburger_menu->append("Reload pool", "win.reload_pool");
+    main_window->add_action("reload_pool", [this] { trigger_action(ActionID::RELOAD_POOL); });
 
     {
         auto button = Gtk::manage(new Gtk::Button("Footprint gen."));

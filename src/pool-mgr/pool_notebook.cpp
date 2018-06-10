@@ -168,6 +168,8 @@ void PoolNotebook::pool_updated(bool success)
     for (auto &it : processes) {
         it.second.reload();
     }
+    Glib::RefPtr<PoolManagerApplication>::cast_dynamic(appwin->get_application())
+            ->send_json(0, {{"op", "pool-changed"}});
     if (success && pool_update_done_cb) {
         pool_update_done_cb();
         pool_update_done_cb = nullptr;

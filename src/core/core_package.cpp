@@ -213,6 +213,14 @@ const Package *CorePackage::get_canvas_data()
     return &package;
 }
 
+void CorePackage::reload_pool()
+{
+    m_pool->clear();
+    package.update_refs(*m_pool);
+    history_clear();
+    rebuild();
+}
+
 void CorePackage::commit()
 {
     set_needs_save(true);
