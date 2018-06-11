@@ -494,6 +494,7 @@ void ImpPackage::construct()
                 current_model = uu;
                 view_3d_window->update();
                 ed->update_all();
+                core_package.set_needs_save();
             }
         });
         box->pack_end(*button_add, false, false, 0);
