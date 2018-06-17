@@ -1,6 +1,7 @@
 #include "canvas_patch.hpp"
 #include "board/plane.hpp"
 #include "common/hole.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 CanvasPatch::CanvasPatch() : Canvas::Canvas()
@@ -10,7 +11,8 @@ CanvasPatch::CanvasPatch() : Canvas::Canvas()
 void CanvasPatch::request_push()
 {
     for (auto &patch : patches) {
-        ClipperLib::SimplifyPolygons(patch.second, ClipperLib::pftNonZero);
+        if (patch.first.layer != BoardLayers::L_OUTLINE)
+            ClipperLib::SimplifyPolygons(patch.second, ClipperLib::pftNonZero);
     }
 }
 
