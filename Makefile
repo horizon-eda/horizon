@@ -474,10 +474,8 @@ ifeq ($(OS),Windows_NT)
 endif
 
 SRC_RES =
-OBJ_RES = 
 ifeq ($(OS),Windows_NT)
 	SRC_RES = src/horizon-pool-prj-mgr.rc
-	OBJ_RES = $(SRC_RES:.rc=.res)
 endif
 
 src/resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=src --generate-dependencies imp.gresource.xml)
@@ -498,7 +496,7 @@ horizon-pool-update-parametric: $(OBJ_COMMON) $(SRC_POOL_UPDATE_PARA:.cpp=.o)
 horizon-prj: $(OBJ_COMMON) $(SRC_PRJ_UTIL:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
-horizon-eda: $(OBJ_COMMON) $(SRC_POOL_PRJ_MGR:.cpp=.o) $(SRC_RES_POOL_PRJ:.rc=.res)
+horizon-eda: $(OBJ_COMMON) $(SRC_POOL_PRJ_MGR:.cpp=.o) $(SRC_RES:.rc=.res)
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy libzmq libcurl libgit2) -o $@
 
 horizon-pgm-test: $(OBJ_COMMON) $(SRC_PGM_TEST:.cpp=.o)
