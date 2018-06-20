@@ -76,7 +76,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
 
     info_bar->signal_response().connect([this](int resp) {
         if (resp == Gtk::RESPONSE_CLOSE) {
-#if GTK_CHECK_VERSION(3, 22, 0)
+#if GTK_CHECK_VERSION(3, 22, 29)
             gtk_info_bar_set_revealed(info_bar->gobj(), false);
 #endif
             info_bar->hide();
@@ -727,7 +727,7 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
             if (status != 0) {
                 info_bar_label->set_text("Editor for '" + filename + "' exited with status " + std::to_string(status));
                 info_bar->show();
-#if GTK_CHECK_VERSION(3, 22, 0)
+#if GTK_CHECK_VERSION(3, 22, 29)
                 gtk_info_bar_set_revealed(info_bar->gobj(), true);
 #endif
             }
