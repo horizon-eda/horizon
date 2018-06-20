@@ -9,6 +9,7 @@ horizon-pgm-test
 horizon-pool-mgr
 horizon-rest-test
 horizon-gen-pkg
+horizon-eda
 rest-test.cpp
 *.o
 *.d

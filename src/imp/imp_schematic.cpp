@@ -274,7 +274,7 @@ void ImpSchematic::construct()
         else {
             json j;
             j["op"] = "show-browser";
-            allow_set_foreground_window(prj_mgr_pid);
+            allow_set_foreground_window(mgr_pid);
             this->send_json(j);
         }
     });

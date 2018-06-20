@@ -11,18 +11,16 @@
     <file>pool-update/schema.sql</file>
     <file>pool-update-parametric/schema.sql</file>
 
-    <file>prj-mgr/window.ui</file>
-    <file>prj-mgr/app_menu.ui</file>
-    <file>prj-mgr/prefs.ui</file>
-    <file>prj-mgr/pool_cache_window.ui</file>
-
-    <file>pool-mgr/window.ui</file>
-    <file>pool-mgr/app_menu.ui</file>
-    <file>pool-mgr/unit_editor.ui</file>
-    <file>pool-mgr/entity_editor.ui</file>
-    <file>pool-mgr/part_editor.ui</file>
-    <file>pool-mgr/part_wizard/part_wizard.ui</file>
-    <file>pool-mgr/pool_merge.ui</file>
+    <file>pool-prj-mgr/window.ui</file>
+    <file>pool-prj-mgr/app_menu.ui</file>
+    <file>pool-prj-mgr/pool-mgr/editors/unit_editor.ui</file>
+    <file>pool-prj-mgr/pool-mgr/editors/entity_editor.ui</file>
+    <file>pool-prj-mgr/pool-mgr/editors/part_editor.ui</file>
+    <file>pool-prj-mgr/pool-mgr/part_wizard/part_wizard.ui</file>
+    <file>pool-prj-mgr/pool-mgr/pool_merge.ui</file>
+    <file>pool-prj-mgr/prj-mgr/part_browser/part_browser.ui</file>
+    <file>pool-prj-mgr/prj-mgr/pool_cache_window.ui</file>
+    <file>pool-prj-mgr/prj-mgr/prefs.ui</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-schematic-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-board-symbolic.svg</file>
@@ -50,7 +48,6 @@
     <file>imp/bom_export.ui</file>
     <file>imp/3d_view.ui</file>
     <file>imp/step_export.ui</file>
-    <file>prj-mgr/part_browser/part_browser.ui</file>
 
     <file>global.css</file>
 

@@ -6,7 +6,6 @@ namespace horizon {
 void recent_from_json(std::map<std::string, Glib::DateTime> &recent_items, const json &j)
 {
     if (j.count("recent")) {
-        recent_items.clear();
         const json &o = j["recent"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             std::string filename = it.key();

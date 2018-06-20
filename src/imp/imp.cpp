@@ -58,9 +58,9 @@ ImpBase::ImpBase(const PoolParams &params)
 #endif
 
         {
-            auto pid_p = Glib::getenv("HORIZON_PRJ_MGR_PID");
+            auto pid_p = Glib::getenv("HORIZON_MGR_PID");
             if (pid_p.size())
-                prj_mgr_pid = std::stoi(pid_p);
+                mgr_pid = std::stoi(pid_p);
         }
 
         Glib::signal_io().connect(
@@ -80,7 +80,7 @@ ImpBase::ImpBase(const PoolParams &params)
                 },
                 chan, Glib::IO_IN | Glib::IO_HUP);
     }
-    auto ep_project = Glib::getenv("HORIZON_EP_PROJECT");
+    auto ep_project = Glib::getenv("HORIZON_EP_MGR");
     if (ep_project.size()) {
         sock_project.connect(ep_project);
     }

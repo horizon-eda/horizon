@@ -1,6 +1,6 @@
 PKGCONFIG=pkg-config
 
-all: horizon-imp horizon-pool horizon-prj horizon-pool-update-parametric horizon-prj-mgr horizon-pool-mgr
+all: horizon-imp horizon-pool horizon-prj horizon-pool-update-parametric horizon-eda
 
 SRC_COMMON = \
 	src/util/uuid.cpp \
@@ -361,58 +361,35 @@ SRC_POOL_UPDATE_PARA = \
 SRC_PRJ_UTIL = \
 	src/prj-util/util_main.cpp
 
-SRC_PRJ_MGR = \
-	src/prj-mgr/prj-mgr-main.cpp\
-	src/prj-mgr/prj-mgr-app.cpp\
-	src/prj-mgr/prj-mgr-app_win.cpp\
-	src/prj-mgr/prj-mgr-prefs.cpp\
-	src/prj-mgr/pool_cache_window.cpp\
-	src/util/editor_process.cpp\
-	src/prj-mgr/part_browser/part_browser_window.cpp\
-	src/widgets/pool_browser_part.cpp\
-	src/util/sort_controller.cpp\
-	src/widgets/pool_browser.cpp\
-	src/pool-update/pool-update.cpp\
-	src/pool-update/graph.cpp\
-	src/widgets/cell_renderer_layer_display.cpp\
-	src/pool/pool_cached.cpp\
-	src/util/gtk_util.cpp\
-	src/util/window_state_store.cpp\
-	src/widgets/recent_item_box.cpp\
-	src/util/recent_util.cpp\
-	src/widgets/part_preview.cpp\
-	src/widgets/entity_preview.cpp\
-	src/widgets/preview_canvas.cpp\
-	src/widgets/preview_base.cpp\
-	$(SRC_CANVAS)\
-
-SRC_POOL_MGR = \
-	src/pool-mgr/pool-mgr-main.cpp\
-	src/pool-mgr/pool-mgr-app.cpp\
-	src/pool-mgr/pool-mgr-app_win.cpp\
-	src/pool-mgr/pool_notebook.cpp\
-	src/pool-mgr/pool_notebook_units.cpp\
-	src/pool-mgr/pool_notebook_symbols.cpp\
-	src/pool-mgr/pool_notebook_entities.cpp\
-	src/pool-mgr/pool_notebook_padstacks.cpp\
-	src/pool-mgr/pool_notebook_packages.cpp\
-	src/pool-mgr/pool_notebook_parts.cpp\
-	src/pool-mgr/unit_editor.cpp\
-	src/pool-mgr/part_editor.cpp\
-	src/pool-mgr/entity_editor.cpp\
-	src/pool-mgr/editor_window.cpp\
-	src/pool-mgr/create_part_dialog.cpp\
-	src/pool-mgr/part_wizard/part_wizard.cpp\
-	src/pool-mgr/part_wizard/pad_editor.cpp\
-	src/pool-mgr/part_wizard/gate_editor.cpp\
-	src/pool-mgr/part_wizard/location_entry.cpp\
-	src/pool-mgr/duplicate/duplicate_unit.cpp\
-	src/pool-mgr/duplicate/duplicate_entity.cpp\
-	src/pool-mgr/duplicate/duplicate_part.cpp\
-	src/pool-mgr/duplicate/duplicate_window.cpp\
-	src/pool-mgr/pool_remote_box.cpp\
-	src/pool-mgr/pool_merge_dialog.cpp\
-	src/pool-mgr/pool_update_error_dialog.cpp\
+SRC_POOL_PRJ_MGR = \
+	src/pool-prj-mgr/pool-prj-mgr-main.cpp\
+	src/pool-prj-mgr/pool-prj-mgr-app.cpp\
+	src/pool-prj-mgr/pool-prj-mgr-app_win.cpp\
+	src/pool-prj-mgr/pool-prj-mgr-app_win_download.cpp\
+	src/pool-prj-mgr/pool-prj-mgr-process.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_notebook.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_notebook_units.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_notebook_symbols.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_notebook_entities.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_notebook_padstacks.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_notebook_packages.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_notebook_parts.cpp\
+	src/pool-prj-mgr/pool-mgr/editors/unit_editor.cpp\
+	src/pool-prj-mgr/pool-mgr/editors/part_editor.cpp\
+	src/pool-prj-mgr/pool-mgr/editors/entity_editor.cpp\
+	src/pool-prj-mgr/pool-mgr/editors/editor_window.cpp\
+	src/pool-prj-mgr/pool-mgr/create_part_dialog.cpp\
+	src/pool-prj-mgr/pool-mgr/part_wizard/part_wizard.cpp\
+	src/pool-prj-mgr/pool-mgr/part_wizard/pad_editor.cpp\
+	src/pool-prj-mgr/pool-mgr/part_wizard/gate_editor.cpp\
+	src/pool-prj-mgr/pool-mgr/part_wizard/location_entry.cpp\
+	src/pool-prj-mgr/pool-mgr/duplicate/duplicate_unit.cpp\
+	src/pool-prj-mgr/pool-mgr/duplicate/duplicate_entity.cpp\
+	src/pool-prj-mgr/pool-mgr/duplicate/duplicate_part.cpp\
+	src/pool-prj-mgr/pool-mgr/duplicate/duplicate_window.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_remote_box.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_merge_dialog.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_update_error_dialog.cpp\
 	src/widgets/pool_browser.cpp\
 	src/widgets/pool_browser_unit.cpp\
 	src/widgets/pool_browser_symbol.cpp\
@@ -439,6 +416,12 @@ SRC_POOL_MGR = \
 	src/widgets/preview_base.cpp\
 	src/widgets/unit_preview.cpp\
 	src/util/pool_completion.cpp\
+	src/pool/pool_cached.cpp\
+	src/pool-prj-mgr/prj-mgr/prj-mgr_views.cpp\
+	src/pool-prj-mgr/prj-mgr/pool_cache_window.cpp\
+	src/pool-prj-mgr/prj-mgr/part_browser/part_browser_window.cpp\
+	src/pool-prj-mgr/prj-mgr/pool_cache_window.cpp\
+	src/pool-prj-mgr/prj-mgr/prj-mgr-prefs.cpp
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp
@@ -451,7 +434,7 @@ SRC_OCE = \
 	src/export_step/export_step.cpp\
 
 
-SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PRJ_MGR) $(SRC_PGM_TEST) $(SRC_POOL_MGR) $(SRC_GEN_PKG))
+SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PGM_TEST) $(SRC_POOL_PRJ_MGR) $(SRC_GEN_PKG))
 
 INC = -Isrc -I3rd_party
 
@@ -490,14 +473,10 @@ ifeq ($(OS),Windows_NT)
 	LDFLAGS_OCE += -lTKV3d
 endif
 
-SRC_RES_POOL = 
-SRC_RES_PRJ = 
 SRC_RES =
 OBJ_RES = 
 ifeq ($(OS),Windows_NT)
-	SRC_RES_POOL = src/horizon-pool-mgr.rc
-	SRC_RES_PRJ = src/horizon-prj-mgr.rc
-	SRC_RES = $(SRC_RES_POOL) $(SRC_RES_PRJ)
+	SRC_RES = src/horizon-pool-prj-mgr.rc
 	OBJ_RES = $(SRC_RES:.rc=.res)
 endif
 
@@ -519,10 +498,7 @@ horizon-pool-update-parametric: $(OBJ_COMMON) $(SRC_POOL_UPDATE_PARA:.cpp=.o)
 horizon-prj: $(OBJ_COMMON) $(SRC_PRJ_UTIL:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
-horizon-prj-mgr: $(OBJ_COMMON) $(SRC_PRJ_MGR:.cpp=.o) $(SRC_RES_PRJ:.rc=.res)
-	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 libzmq epoxy) -o $@
-
-horizon-pool-mgr: $(OBJ_COMMON) $(SRC_POOL_MGR:.cpp=.o) $(SRC_RES_POOL:.rc=.res)
+horizon-eda: $(OBJ_COMMON) $(SRC_POOL_PRJ_MGR:.cpp=.o) $(SRC_RES_POOL_PRJ:.rc=.res)
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy libzmq libcurl libgit2) -o $@
 
 horizon-pgm-test: $(OBJ_COMMON) $(SRC_PGM_TEST:.cpp=.o)
@@ -544,7 +520,7 @@ $(OBJ_RES): %.res: %.rc
 	windres $< -O coff -o $@
 
 clean: clean_router clean_oce clean_res
-	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test horizon-gen-pkg $(OBJ_ALL:.o=.d) src/resources.cpp src/gitversion.cpp
+	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test horizon-gen-pkg horizon-eda $(OBJ_ALL:.o=.d) src/resources.cpp src/gitversion.cpp
 
 clean_router:
 	rm -f $(OBJ_ROUTER) $(OBJ_ROUTER:.o=.d)
