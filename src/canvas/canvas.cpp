@@ -71,11 +71,30 @@ void Canvas::remove_obj(const ObjectRef &r)
         auto begin = triangles[layer].begin();
         auto first = begin + it.second.first;
         auto last = begin + it.second.second + 1;
+        assert(it.second.first < triangles[layer].size());
+        assert(it.second.second < triangles[layer].size());
+
         triangles[layer].erase(first, last);
     }
 
-    // missing: fix refs that changed due to triangles being deleted
-    // we don't need to this right now since only objects added after rendering are deleted
+    // fix refs that changed due to triangles being deleted
+    for (auto &it : object_refs) {
+        if (it.first != r) {
+            for (auto layer : layers) {
+                if (it.second.count(layer)) {
+                    auto &idx = it.second.at(layer);
+                    auto idx_removed = object_refs.at(r).at(layer);
+                    auto n_removed = (idx_removed.second - idx_removed.first) + 1;
+                    if (idx.first > idx_removed.first) {
+                        idx.first -= n_removed;
+                        idx.second -= n_removed;
+                    }
+                }
+            }
+        }
+    }
+
+    object_refs.erase(r);
 
     request_push();
 }
