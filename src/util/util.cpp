@@ -78,13 +78,15 @@ std::string get_exe_dir()
     }
 }
 #elif defined(__FreeBSD__)
+#include <sys/sysctl.h>
 std::string get_exe_dir()
 {
-
     char buf[PATH_MAX];
-    ssize_t len;
-    if ((len = readlink("/proc/curproc/file", buf, sizeof(buf) - 1)) != -1) {
-        buf[len] = '\0';
+    size_t len = sizeof(buf);
+    int mib[] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
+    int ret;
+    ret = sysctl(mib, 4, buf, &len, NULL, 0);
+    if (ret == 0) {
         return Glib::path_get_dirname(buf);
     }
     else {
