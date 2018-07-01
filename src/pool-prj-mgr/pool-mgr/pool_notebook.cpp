@@ -643,16 +643,16 @@ void PoolNotebook::show_duplicate_window(ObjectType ty, const UUID &uu)
     }
 }
 
-bool PoolNotebook::can_close()
+bool PoolNotebook::get_close_prohibited() const
 {
-    return appwin->get_processes().size() == 0 && part_wizard == nullptr && !pool_updating
-           && duplicate_window == nullptr;
+    return part_wizard || pool_updating || duplicate_window;
 }
 
 void PoolNotebook::prepare_close()
 {
     if (remote_box)
         remote_box->prs_refreshed_once = true;
+    closing = true;
 }
 
 void PoolNotebook::pool_update_thread()
@@ -695,8 +695,12 @@ void PoolNotebook::pool_update_thread()
 
 void PoolNotebook::pool_update(std::function<void()> cb)
 {
+    if (closing)
+        return;
+
     if (pool_updating)
         return;
+
     appwin->set_pool_updating(true, true);
     pool_update_n_files = 0;
     pool_updating = true;

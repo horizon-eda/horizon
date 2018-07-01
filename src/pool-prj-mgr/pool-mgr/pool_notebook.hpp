@@ -21,7 +21,7 @@ class PoolNotebook : public Gtk::Notebook {
 public:
     PoolNotebook(const std::string &bp, class PoolProjectManagerAppWindow *aw);
     void populate();
-    bool can_close();
+    bool get_close_prohibited() const;
     void prepare_close();
     void pool_update(std::function<void()> cb = nullptr);
     ~PoolNotebook();
@@ -33,6 +33,7 @@ private:
     std::map<ObjectType, class PoolBrowser *> browsers;
     class PartWizard *part_wizard = nullptr;
     class DuplicateWindow *duplicate_window = nullptr;
+    bool closing = false;
 
     Glib::Dispatcher pool_update_dispatcher;
     bool in_pool_update_handler = false;

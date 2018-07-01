@@ -421,7 +421,8 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/prj-mgr/pool_cache_window.cpp\
 	src/pool-prj-mgr/prj-mgr/part_browser/part_browser_window.cpp\
 	src/pool-prj-mgr/prj-mgr/pool_cache_window.cpp\
-	src/pool-prj-mgr/prj-mgr/prj-mgr-prefs.cpp
+	src/pool-prj-mgr/prj-mgr/prj-mgr-prefs.cpp\
+	src/pool-prj-mgr/close_utils.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

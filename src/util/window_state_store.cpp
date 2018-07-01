@@ -8,7 +8,7 @@ namespace horizon {
 static const int min_user_version = 1; // keep in sync with schema
 
 WindowStateStore::WindowStateStore(Gtk::Window *w, const std::string &wn)
-    : db(Glib::build_filename(get_config_dir(), "window_state.db"), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE),
+    : db(Glib::build_filename(get_config_dir(), "window_state.db"), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, 1000),
       window_name(wn), win(w)
 {
     {

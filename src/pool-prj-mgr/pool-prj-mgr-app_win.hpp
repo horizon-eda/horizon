@@ -25,7 +25,11 @@ public:
     static PoolProjectManagerAppWindow *create(class PoolProjectManagerApplication *app);
 
     void open_file_view(const Glib::RefPtr<Gio::File> &file);
+    void prepare_close();
     bool close_pool_or_project();
+    bool really_close_pool_or_project();
+    void wait_for_all_processes();
+    std::string get_filename() const;
 
     PoolProjectManagerProcess *spawn(PoolProjectManagerProcess::Type type, const std::vector<std::string> &args,
                                      const std::vector<std::string> &env = {});
@@ -42,6 +46,18 @@ public:
         return s_signal_process_exited;
     }
     void reload();
+
+    class ClosePolicy {
+    public:
+        bool can_close = true;
+        std::string reason;
+        std::vector<std::string> files_need_save;
+    };
+
+    ClosePolicy get_close_policy();
+
+    void process_save(const std::string &file);
+    void process_close(const std::string &file);
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;
@@ -118,6 +134,7 @@ private:
     WindowStateStore state_store;
 
     std::map<std::string, PoolProjectManagerProcess> processes;
+    std::map<int, bool> pids_need_save;
 
     type_signal_process_exited s_signal_process_exited;
 

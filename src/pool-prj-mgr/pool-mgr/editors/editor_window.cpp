@@ -148,6 +148,16 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p)
     save_button->signal_clicked().connect(sigc::mem_fun(this, &EditorWindow::save));
 }
 
+void EditorWindow::force_close()
+{
+    hide();
+}
+
+bool EditorWindow::get_needs_save()
+{
+    return iface->get_needs_save();
+}
+
 void EditorWindow::save()
 {
     if (iface)

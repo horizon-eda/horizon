@@ -415,7 +415,14 @@ void ImpBase::run(int argc, char *argv[])
     auto save_button = create_action_button(make_action(ActionID::SAVE));
     save_button->show();
     main_window->header->pack_start(*save_button);
-    core.r->signal_needs_save().connect([this](bool v) { update_action_sensitivity(); });
+    core.r->signal_needs_save().connect([this](bool v) {
+        update_action_sensitivity();
+        json j;
+        j["op"] = "needs-save";
+        j["pid"] = getpid();
+        j["needs_save"] = core.r->get_needs_save();
+        send_json(j);
+    });
     set_action_sensitive(make_action(ActionID::SAVE), false);
 
     {
@@ -1330,6 +1337,10 @@ bool ImpBase::handle_broadcast(const json &j)
     }
     else if (op == "save") {
         core.r->save();
+        return true;
+    }
+    else if (op == "close") {
+        delete main_window;
         return true;
     }
     else if (op == "pool-changed") {

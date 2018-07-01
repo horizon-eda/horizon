@@ -12,6 +12,7 @@
 #include "pool-mgr/editors/editor_window.hpp"
 #include "prj-mgr/part_browser/part_browser_window.hpp"
 #include "prj-mgr/pool_cache_window.hpp"
+#include "close_utils.hpp"
 
 extern const char *gitversion;
 
@@ -237,6 +238,12 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             app->send_json(pid, tx);
         }
     }
+    else if (op == "needs-save") {
+        int pid = j.at("pid");
+        bool needs_save = j.at("needs_save");
+        std::cout << "needs save " << pid << " " << needs_save << std::endl;
+        pids_need_save[pid] = needs_save;
+    }
     return nullptr;
 }
 
@@ -400,11 +407,86 @@ void PoolProjectManagerAppWindow::update_recent_items()
     }
 }
 
+void PoolProjectManagerAppWindow::prepare_close()
+{
+    if (pool_notebook)
+        pool_notebook->prepare_close();
+}
+
 bool PoolProjectManagerAppWindow::close_pool_or_project()
 {
     auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
+    auto pol = get_close_policy();
+
+    if (!pol.can_close) {
+        Gtk::MessageDialog md(*this, "Can't close right now", false /* use_markup */, Gtk::MESSAGE_ERROR,
+                              Gtk::BUTTONS_OK);
+        md.set_secondary_text(pol.reason);
+        md.run();
+        return false;
+    }
+    else if (pol.files_need_save.size()) {
+        ConfirmCloseDialog dia(this);
+        std::map<std::string, std::map<std::string, bool>> files;
+        auto &this_files = files[get_filename()];
+        for (const auto &it : pol.files_need_save) {
+            this_files[it] = true;
+        }
+        dia.set_files(files);
+        auto r = dia.run();
+        if (r == ConfirmCloseDialog::RESPONSE_NO_SAVE || r == ConfirmCloseDialog::RESPONSE_SAVE) { // save
+            prepare_close();
+            auto files_from_dia = dia.get_files();
+            auto &this_files_from_dia = files_from_dia[""];
+            for (auto &it : this_files_from_dia) {
+                if (it.second && r == ConfirmCloseDialog::RESPONSE_SAVE)
+                    process_save(it.first);
+            }
+            std::set<std::string> procs;
+            for (auto &it : processes) {
+                procs.emplace(it.first);
+            }
+            for (auto &it : procs) {
+                process_close(it);
+            }
+            wait_for_all_processes();
+            return really_close_pool_or_project();
+        }
+        else {
+            return false;
+        }
+    }
+    else {
+        prepare_close();
+        std::set<std::string> procs;
+        for (auto &it : processes) {
+            procs.emplace(it.first);
+        }
+        for (auto &it : procs) {
+            process_close(it);
+        }
+        wait_for_all_processes();
+        return really_close_pool_or_project();
+    }
+
+    return really_close_pool_or_project();
+}
+
+
+void PoolProjectManagerAppWindow::wait_for_all_processes()
+{
+    if (!processes.size())
+        return;
+    ProcWaitDialog dia(this);
+    while (dia.run() != 1) {
+    }
+}
+
+bool PoolProjectManagerAppWindow::really_close_pool_or_project()
+{
+    auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
     if (pool_notebook) {
-        if (!pool_notebook->can_close()) {
+        if (processes.size() || pool_notebook->get_close_prohibited()) {
             Gtk::MessageDialog md(*this, "Can't close right now", false /* use_markup */, Gtk::MESSAGE_ERROR,
                                   Gtk::BUTTONS_OK);
             md.set_secondary_text("Close all running editors first");
@@ -615,6 +697,15 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
     auto path = file->get_path();
     auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
     app->recent_items[path] = Glib::DateTime::create_now_local();
+
+    auto windows = dynamic_cast_vector<PoolProjectManagerAppWindow *>(app->get_windows());
+    for (auto &win : windows) {
+        if (win->get_filename() == path) {
+            win->present();
+            return;
+        }
+    }
+
     auto basename = file->get_basename();
     if (basename == "pool.json") {
         try {
@@ -752,6 +843,69 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn_for_project(PoolPr
                                                                           const std::vector<std::string> &args)
 {
     return spawn(type, args, {"HORIZON_POOL_CACHE=" + project->pool_cache_directory});
+}
+
+void PoolProjectManagerAppWindow::process_save(const std::string &file)
+{
+    auto &proc = processes.at(file);
+    if (proc.win) {
+        proc.win->save();
+    }
+    else if (proc.proc) {
+        auto pid = proc.proc->get_pid();
+        auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
+        app->send_json(pid, {{"op", "save"}});
+    }
+}
+
+void PoolProjectManagerAppWindow::process_close(const std::string &file)
+{
+    auto &proc = processes.at(file);
+    if (proc.win) {
+        proc.win->force_close();
+    }
+    else if (proc.proc) {
+        auto pid = proc.proc->get_pid();
+        auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
+        app->send_json(pid, {{"op", "close"}});
+    }
+}
+
+std::string PoolProjectManagerAppWindow::get_filename() const
+{
+    if (pool_notebook)
+        return Glib::build_filename(pool->get_base_path(), "pool.json");
+    else if (project)
+        return project_filename;
+    else
+        return "No open pool or project";
+}
+
+PoolProjectManagerAppWindow::ClosePolicy PoolProjectManagerAppWindow::get_close_policy()
+{
+    PoolProjectManagerAppWindow::ClosePolicy r;
+    if (pool_notebook) {
+        auto close_prohibited = pool_notebook->get_close_prohibited();
+        r.can_close = !close_prohibited;
+        r.reason = "Pool is updating or dialog is open";
+    }
+    for (auto &proc : processes) {
+        bool needs_save = true;
+        if (proc.second.win) {
+            needs_save = proc.second.win->get_needs_save();
+        }
+        else {
+            auto pid = proc.second.proc->get_pid();
+            if (pids_need_save.count(pid))
+                needs_save = pids_need_save.at(pid);
+            else
+                needs_save = false;
+        }
+        if (needs_save) {
+            r.files_need_save.push_back(proc.first);
+        }
+    }
+    return r;
 }
 
 std::map<std::string, PoolProjectManagerProcess *> PoolProjectManagerAppWindow::get_processes()

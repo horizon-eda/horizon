@@ -3,6 +3,7 @@
 #include "util/uuid.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include <map>
+#include <set>
 #include <zmq.hpp>
 #include <glibmm/datetime.h>
 
@@ -34,6 +35,8 @@ public:
     std::map<UUID, PoolProjectManagerPool> pools;
     void add_pool(const std::string &p);
     std::deque<UUID> part_favorites;
+
+    void close_appwindows(std::set<Gtk::Window *> wins);
 
 protected:
     // Override default signal handlers:

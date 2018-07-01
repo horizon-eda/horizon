@@ -23,6 +23,9 @@ public:
     void reload();
     bool get_need_update();
     static std::string fix_filename(std::string s);
+    void save();
+    void force_close();
+    bool get_needs_save();
 
 private:
     ObjectType type;
@@ -30,7 +33,6 @@ private:
     PoolEditorInterface *iface = nullptr;
     Gtk::Button *save_button = nullptr;
     class Pool *pool;
-    void save();
     bool need_update = false;
 
     WindowStateStore state_store;

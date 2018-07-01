@@ -8,6 +8,7 @@
 #include <curl/curl.h>
 #include "nlohmann/json.hpp"
 #include "prj-mgr/prj-mgr-prefs.hpp"
+#include "close_utils.hpp"
 
 namespace horizon {
 
@@ -238,23 +239,81 @@ void PoolProjectManagerApplication::on_action_quit()
     // counts in both of them. If we want the destructors to be called, we
     // must remove the window from the application. One way of doing this
     // is to hide the window. See comment in create_appwindow().
-    bool close_failed = false;
-    auto windows = get_windows();
-    for (auto window : windows) {
-        auto win = dynamic_cast<PoolProjectManagerAppWindow *>(window);
-        if (!win->close_pool_or_project()) {
-            close_failed = true;
+    auto windows = dynamic_cast_vector<PoolProjectManagerAppWindow *>(get_windows());
+    std::map<std::string, std::map<std::string, bool>> files;
+    std::map<std::string, PoolProjectManagerAppWindow *> files_windows;
+    for (auto win : windows) {
+        files_windows[win->get_filename()] = win;
+    }
+
+    bool need_dialog = false;
+    for (auto it : files_windows) {
+        auto win = it.second;
+        auto filename = it.first;
+        auto pol = win->get_close_policy();
+        if (!pol.can_close) {
+            Gtk::MessageDialog md(*get_active_window(), "Can't close right now", false /* use_markup */,
+                                  Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+            md.set_secondary_text(pol.reason);
+            md.run();
+            return;
         }
-        else {
-            win->hide();
+        auto &fis = files[filename];
+        for (const auto &fi : pol.files_need_save) {
+            need_dialog = true;
+            fis[fi] = true;
         }
     }
 
-    // Not really necessary, when Gtk::Widget::hide() is called, unless
-    // Gio::Application::hold() has been called without a corresponding call
-    // to Gio::Application::release().
-    if (!close_failed)
+    if (need_dialog) {
+        ConfirmCloseDialog dia(get_active_window());
+        dia.set_files(files);
+        auto r = dia.run();
+        if (r == ConfirmCloseDialog::RESPONSE_NO_SAVE || r == ConfirmCloseDialog::RESPONSE_SAVE) {
+            auto files_from_dia = dia.get_files();
+            for (const auto &it : files_from_dia) {
+                auto win = files_windows.at(it.first);
+                win->prepare_close();
+                for (const auto &it2 : it.second) {
+                    if (it2.second && r == ConfirmCloseDialog::RESPONSE_SAVE)
+                        win->process_save(it2.first);
+                }
+                auto procs = win->get_processes();
+                for (auto proc : procs) {
+                    win->process_close(proc.first);
+                }
+                win->wait_for_all_processes();
+                if (!win->really_close_pool_or_project()) {
+                    Gtk::MessageDialog md(*get_active_window(), "Couldn't close", false /* use_markup */,
+                                          Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+                    md.run();
+                }
+                win->hide();
+            }
+
+            quit();
+        }
+        else {
+            return;
+        }
+    }
+    else {
+        for (auto win : windows) {
+            win->prepare_close();
+            auto procs = win->get_processes();
+            for (auto &it : procs) {
+                win->process_close(it.first);
+            }
+            win->wait_for_all_processes();
+            if (!win->really_close_pool_or_project()) {
+                Gtk::MessageDialog md(*get_active_window(), "Couldn't close", false /* use_markup */,
+                                      Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+                md.run();
+            }
+            win->hide();
+        }
         quit();
+    }
 }
 void PoolProjectManagerApplication::on_action_new_window()
 {
