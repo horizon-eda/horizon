@@ -679,6 +679,15 @@ std::string ImpBase::get_hud_text_for_part(const Part *part)
     return s;
 }
 
+void ImpBase::edit_pool_item(ObjectType type, const UUID &uu)
+{
+    json j;
+    j["op"] = "edit";
+    j["type"] = object_type_lut.lookup_reverse(type);
+    j["uuid"] = static_cast<std::string>(uu);
+    send_json(j);
+}
+
 Gtk::Button *ImpBase::create_action_button(std::pair<ActionID, ToolID> action)
 {
     auto &catitem = action_catalog.at(action);

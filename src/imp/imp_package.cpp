@@ -564,11 +564,7 @@ void ImpPackage::construct()
     connect_action(ActionID::EDIT_PADSTACK, [this](const auto &a) {
         auto sel = canvas->get_selection();
         if (auto uu = sel_find_one(sel, ObjectType::PAD)) {
-            json j;
-            j["op"] = "edit";
-            j["type"] = object_type_lut.lookup_reverse(ObjectType::PADSTACK);
-            j["uuid"] = static_cast<std::string>(core_package.get_package()->pads.at(uu).pool_padstack->uuid);
-            send_json(j);
+            edit_pool_item(ObjectType::PADSTACK, core_package.get_package()->pads.at(uu).pool_padstack->uuid);
         }
     });
 

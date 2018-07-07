@@ -14,6 +14,8 @@ protected:
         return ActionCatalogItem::AVAILABLE_IN_SYMBOL;
     };
 
+    void update_monitor() override;
+
 private:
     void canvas_update() override;
     CoreSymbol core_symbol;

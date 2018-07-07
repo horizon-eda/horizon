@@ -58,7 +58,8 @@ enum class ActionID {
     FLIP_VIEW,
     VIEW_TOP,
     VIEW_BOTTOM,
-    EDIT_PADSTACK
+    EDIT_PADSTACK,
+    EDIT_UNIT
 };
 
 enum class ActionGroup {

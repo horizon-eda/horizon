@@ -536,12 +536,17 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::RELOAD_POOL, ToolID::NONE},
-         {"Reload pool", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
+         {"Reload pool", ActionGroup::UNKNOWN,
+          static_cast<ActionCatalogItem::Availability>(ActionCatalogItem::AVAILABLE_IN_PACKAGE
+                                                       | ActionCatalogItem::AVAILABLE_IN_SYMBOL),
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::EDIT_PADSTACK, ToolID::NONE},
          {"Edit padstack", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::EDIT_UNIT, ToolID::NONE},
+         {"Edit unit", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL, ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -610,6 +615,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(VIEW_TOP),
         ACTION_LUT_ITEM(VIEW_BOTTOM),
         ACTION_LUT_ITEM(EDIT_PADSTACK),
+        ACTION_LUT_ITEM(EDIT_UNIT),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

@@ -142,6 +142,7 @@ protected:
     virtual void update_monitor()
     {
     }
+    void edit_pool_item(ObjectType type, const UUID &uu);
 
 private:
     void fix_cursor_pos();

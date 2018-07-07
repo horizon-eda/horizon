@@ -51,6 +51,8 @@ public:
     const Symbol *get_canvas_data();
     std::pair<Coordi, Coordi> get_bbox() override;
 
+    void reload_pool() override;
+
 private:
     std::map<UUID, Text> *get_text_map(bool work = true) override;
     std::map<UUID, Polygon> *get_polygon_map(bool work = true) override;

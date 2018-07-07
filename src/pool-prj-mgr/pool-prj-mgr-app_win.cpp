@@ -254,6 +254,9 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             case ObjectType::PADSTACK:
                 ptype = PoolProjectManagerProcess::Type::IMP_PADSTACK;
                 break;
+            case ObjectType::UNIT:
+                ptype = PoolProjectManagerProcess::Type::UNIT;
+                break;
             default:
                 return nullptr;
             }

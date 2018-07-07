@@ -18,6 +18,11 @@ void ImpSymbol::canvas_update()
     symbol_preview_window->update(*core_symbol.get_canvas_data());
 }
 
+void ImpSymbol::update_monitor()
+{
+    set_monitor_items({{ObjectType::UNIT, core_symbol.get_symbol()->unit->uuid}});
+}
+
 void ImpSymbol::construct()
 {
 
@@ -62,6 +67,17 @@ void ImpSymbol::construct()
         sym->text_placements = symbol_preview_window->get_text_placements();
     });
     grid_spin_button->set_sensitive(false);
+    update_monitor();
+
+    connect_action(ActionID::EDIT_UNIT,
+                   [this](const auto &a) { edit_pool_item(ObjectType::UNIT, core_symbol.get_symbol()->unit->uuid); });
+    set_action_sensitive(make_action(ActionID::EDIT_UNIT), sockets_connected);
+    if (sockets_connected) {
+        auto hamburger_menu = add_hamburger_menu();
+
+        hamburger_menu->append("Edit unit", "win.edit_unit");
+        main_window->add_action("edit_unit", [this] { trigger_action(ActionID::EDIT_UNIT); });
+    }
 }
 
 } // namespace horizon

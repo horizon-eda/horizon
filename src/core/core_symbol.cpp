@@ -288,6 +288,14 @@ Symbol *CoreSymbol::get_symbol(bool work)
     return &sym;
 }
 
+void CoreSymbol::reload_pool()
+{
+    m_pool->clear();
+    sym.unit = m_pool->get_unit(sym.unit.uuid);
+    history_clear();
+    rebuild();
+}
+
 void CoreSymbol::commit()
 {
     set_needs_save(true);
