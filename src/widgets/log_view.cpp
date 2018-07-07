@@ -52,8 +52,10 @@ LogView::LogView() : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0)
         follow = follow_cb->get_active();
         if (follow) {
             auto it = store->children().end();
-            it--;
-            tree_view->scroll_to_row(store->get_path(it));
+            if (it) {
+                it--;
+                tree_view->scroll_to_row(store->get_path(it));
+            }
         }
     });
     bbox->pack_start(*follow_cb, false, false, 0);
