@@ -19,7 +19,7 @@ namespace horizon {
 
 Canvas3D::Canvas3D()
     : Gtk::GLArea(), CanvasPatch::CanvasPatch(), cover_renderer(this), wall_renderer(this), face_renderer(this),
-      background_renderer(this)
+      background_renderer(this), center(0)
 {
     add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_MOTION_MASK | Gdk::SCROLL_MASK
                | Gdk::SMOOTH_SCROLL_MASK);
