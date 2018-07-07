@@ -5,6 +5,7 @@
 #include "marker.hpp"
 #include "triangle.hpp"
 #include <gtkmm.h>
+#include <glm/glm.hpp>
 
 namespace horizon {
 class CanvasGL : public Canvas, public Gtk::GLArea {
@@ -43,6 +44,9 @@ public:
     std::pair<float, Coordf> get_scale_and_offset();
     void set_scale_and_offset(float sc, Coordf ofs);
     Coordi snap_to_grid(const Coordi &c);
+
+    void set_flip_view(bool fl);
+    bool get_flip_view() const override;
 
     typedef sigc::signal<void> type_signal_selection_changed;
     type_signal_selection_changed signal_selection_changed()
@@ -125,9 +129,13 @@ private:
     static const int MAT3_Y0 = 5;
 
     float width, height;
-    std::array<float, 9> screenmat;
+    glm::mat3 screenmat;
     float scale = 1e-5;
     Coord<float> offset;
+    glm::mat3 viewmat;
+    bool flip_view = false;
+    void update_viewmat();
+
     Coord<float> cursor_pos;
     Coord<int64_t> cursor_pos_grid;
     bool cursor_external = false;

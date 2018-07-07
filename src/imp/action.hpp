@@ -55,6 +55,9 @@ enum class ActionID {
     BOM_EXPORT_WINDOW,
     EXPORT_BOM,
     RELOAD_POOL,
+    FLIP_VIEW,
+    VIEW_TOP,
+    VIEW_BOTTOM
 };
 
 enum class ActionGroup {
@@ -71,7 +74,8 @@ enum class ActionGroup {
     BOARD,
     LAYER,
     SELECTION,
-    RULES
+    RULES,
+    VIEW
 };
 
 typedef std::vector<std::pair<int, GdkModifierType>> KeySequence2;

@@ -5,11 +5,11 @@ layout(triangle_strip, max_vertices = 6) out;
 
 in vec2 position_to_geom[2];
 uniform mat3 screenmat;
+uniform mat3 viewmat;
 uniform float scale;
-uniform vec2 offset;
 
 vec4 t(vec2 p) {
-    return vec4((screenmat*vec3(scale*p.x+offset.x , -scale*p.y+offset.y, 1)), 1);
+    return vec4((screenmat*viewmat*vec3(p, 1)), 1);
 }
 
 void main() {

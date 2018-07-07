@@ -1654,5 +1654,21 @@
                 "8": []
             },
             "tool": "MOVE_KEY_RIGHT"
+        },
+        {
+            "action": "FLIP_VIEW",
+            "keys": {
+                "16": [],
+                "255": [
+                    [
+                        {
+                            "key": "F",
+                            "mod": 4
+                        }
+                    ]
+                ],
+                "8": []
+            },
+            "tool": "NONE"
         }
     ]

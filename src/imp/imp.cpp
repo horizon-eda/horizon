@@ -403,6 +403,21 @@ void ImpBase::run(int argc, char *argv[])
         }
     }
 
+    connect_action(ActionID::VIEW_TOP, [this](const auto &a) {
+        canvas->set_flip_view(false);
+        canvas_update_from_pp();
+    });
+
+    connect_action(ActionID::VIEW_BOTTOM, [this](const auto &a) {
+        canvas->set_flip_view(true);
+        canvas_update_from_pp();
+    });
+
+    connect_action(ActionID::FLIP_VIEW, [this](const auto &a) {
+        canvas->set_flip_view(!canvas->get_flip_view());
+        canvas_update_from_pp();
+    });
+
 
     grid_spin_button = Gtk::manage(new SpinButtonDim());
     grid_spin_button->set_range(0.1_mm, 10_mm);

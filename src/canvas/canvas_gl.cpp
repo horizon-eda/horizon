@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <epoxy/gl.h>
 #include <iostream>
+#include <glm/gtx/matrix_transform_2d.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace horizon {
 std::pair<float, Coordf> CanvasGL::get_scale_and_offset()
@@ -15,6 +17,7 @@ void CanvasGL::set_scale_and_offset(float sc, Coordf ofs)
 {
     scale = sc;
     offset = ofs;
+    update_viewmat();
 }
 
 CanvasGL::CanvasGL()
@@ -80,12 +83,7 @@ void CanvasGL::on_size_allocate(Gtk::Allocation &alloc)
     width = alloc.get_width();
     height = alloc.get_height();
 
-    screenmat.fill(0);
-    screenmat[MAT3_XX] = 2.0 / (width);
-    screenmat[MAT3_X0] = -1;
-    screenmat[MAT3_YY] = -2.0 / (height);
-    screenmat[MAT3_Y0] = 1;
-    screenmat[8] = 1;
+    screenmat = glm::scale(glm::translate(glm::mat3(1), glm::vec2(-1, 1)), glm::vec2(2.0 / width, -2.0 / height));
 
     needs_resize = true;
 
@@ -274,8 +272,7 @@ void CanvasGL::cursor_move(GdkEvent *motion_event)
 {
     gdouble x, y;
     gdk_event_get_coords(motion_event, &x, &y);
-    cursor_pos.x = (x - offset.x) / scale;
-    cursor_pos.y = (y - offset.y) / -scale;
+    cursor_pos = screen2canvas(Coordf(x, y));
 
     if (cursor_external) {
         Coordi c(cursor_pos.x, cursor_pos.y);
@@ -396,8 +393,9 @@ void CanvasGL::center_and_zoom(const Coordi &center)
 {
     // we want center to be at width, height/2
     scale = 7.6e-5;
-    offset.x = -((center.x * scale) - width / 2);
+    offset.x = -((center.x * (flip_view ? -1 : 1) * scale) - width / 2);
     offset.y = -((center.y * -scale) - height / 2);
+    update_viewmat();
     queue_draw();
 }
 
@@ -407,9 +405,18 @@ void CanvasGL::zoom_to_bbox(const Coordi &a, const Coordi &b)
     auto sc_y = height / abs(a.y - b.y);
     scale = std::min(sc_x, sc_y);
     auto center = (a + b) / 2;
-    offset.x = -((center.x * scale) - width / 2);
+    offset.x = -((center.x * (flip_view ? -1 : 1) * scale) - width / 2);
     offset.y = -((center.y * -scale) - height / 2);
+    update_viewmat();
     queue_draw();
+}
+
+void CanvasGL::update_viewmat()
+{
+    auto scale_x = scale;
+    if (flip_view)
+        scale_x = -scale;
+    viewmat = glm::scale(glm::translate(glm::mat3(1), glm::vec2(offset.x, offset.y)), glm::vec2(scale_x, -scale));
 }
 
 void CanvasGL::push()
@@ -434,12 +441,25 @@ void CanvasGL::update_markers()
     request_push(PF_MARKER);
 }
 
+void CanvasGL::set_flip_view(bool fl)
+{
+    auto toggled = fl != flip_view;
+    flip_view = fl;
+    if (toggled) {
+        offset.x = width - offset.x;
+    }
+    update_viewmat();
+}
+
+bool CanvasGL::get_flip_view() const
+{
+    return flip_view;
+}
+
 Coordf CanvasGL::screen2canvas(const Coordf &p) const
 {
-    Coordf o = p - offset;
-    o.x /= scale;
-    o.y /= -scale;
-    return o;
+    auto cp = glm::inverse(viewmat) * glm::vec3(p.x, p.y, 1);
+    return {cp.x, cp.y};
 }
 
 std::set<SelectableRef> CanvasGL::get_selection()
@@ -548,10 +568,8 @@ Coordi CanvasGL::get_cursor_pos()
 
 Coordf CanvasGL::get_cursor_pos_win()
 {
-    Coordf r;
-    r.x = cursor_pos.x * scale + offset.x;
-    r.y = cursor_pos.y * -scale + offset.y;
-    return r;
+    auto cp = viewmat * glm::vec3(cursor_pos.x, cursor_pos.y, 1);
+    return {cp.x, cp.y};
 }
 
 Target CanvasGL::get_current_target()

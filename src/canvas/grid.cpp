@@ -1,6 +1,7 @@
 #include "grid.hpp"
 #include "canvas_gl.hpp"
 #include "gl_util.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 namespace horizon {
 Grid::Grid(class CanvasGL *c) : ca(c), spacing(1.25_mm), mark_size(5), color(Color::new_from_int(0, 51, 136)), alpha(1)
@@ -47,8 +48,7 @@ void Grid::realize()
     vao = create_vao(program);
 
     GET_LOC(this, screenmat);
-    GET_LOC(this, scale);
-    GET_LOC(this, offset);
+    GET_LOC(this, viewmat);
     GET_LOC(this, grid_size);
     GET_LOC(this, grid_0);
     GET_LOC(this, grid_mod);
@@ -60,9 +60,8 @@ void Grid::render()
 {
     glUseProgram(program);
     glBindVertexArray(vao);
-    glUniformMatrix3fv(screenmat_loc, 1, GL_TRUE, ca->screenmat.data());
-    glUniform1f(scale_loc, ca->scale);
-    glUniform2f(offset_loc, ca->offset.x, ca->offset.y);
+    glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca->screenmat));
+    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
     glUniform1f(mark_size_loc, mark_size);
     glUniform4f(color_loc, color.r, color.g, color.b, alpha);
 
@@ -76,7 +75,9 @@ void Grid::render()
     }
 
     Coord<float> grid_0;
-    grid_0.x = (round((-ca->offset.x / ca->scale) / sp) - 1) * sp;
+    grid_0.x =
+            (round((ca->flip_view ? -1 : 1) * (-(ca->offset.x - (ca->flip_view ? ca->width : 0)) / ca->scale) / sp) - 1)
+            * sp;
     grid_0.y = (round((-(ca->height - ca->offset.y) / ca->scale) / sp) - 1) * sp;
 
     if (mul != newmul) {
@@ -127,9 +128,8 @@ void Grid::render_cursor(Coord<int64_t> &coord)
 {
     glUseProgram(program);
     glBindVertexArray(vao);
-    glUniformMatrix3fv(screenmat_loc, 1, GL_TRUE, ca->screenmat.data());
-    glUniform1f(scale_loc, ca->scale);
-    glUniform2f(offset_loc, ca->offset.x, ca->offset.y);
+    glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca->screenmat));
+    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
     glUniform1f(mark_size_loc, 20);
 
     glUniform1f(grid_size_loc, 0);

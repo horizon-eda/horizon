@@ -1,7 +1,6 @@
 #version 330
 uniform mat3 screenmat;
-uniform float scale;
-uniform vec2 offset;
+uniform mat3 viewmat;
 out vec2 x;
 out vec2 dim;
 uniform vec2 a,b;
@@ -26,8 +25,5 @@ void main() {
 	dim = abs(tr - bl);
 	x=t-bl;
 	
-	vec2 pos;
-	pos.x =  scale*t.x+offset.x;
-	pos.y = -scale*t.y+offset.y;
-	gl_Position = vec4((screenmat*vec3(pos, 1)), 1);
+	gl_Position = vec4((screenmat*viewmat*vec3(t, 1)), 1);
 }

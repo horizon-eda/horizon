@@ -4,6 +4,7 @@
 #include "common/layer_provider.hpp"
 #include "common/object_descr.hpp"
 #include "gl_util.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 namespace horizon {
 DragSelection::DragSelection(class CanvasGL *c) : ca(c), active(0), box(this), line(this)
@@ -46,8 +47,8 @@ void DragSelection::Box::realize()
     vao = create_vao_box(program);
 
     GET_LOC(this, screenmat);
+    GET_LOC(this, viewmat);
     GET_LOC(this, scale);
-    GET_LOC(this, offset);
     GET_LOC(this, a);
     GET_LOC(this, b);
     GET_LOC(this, fill);
@@ -90,8 +91,8 @@ void DragSelection::Line::realize()
     create_vao();
 
     GET_LOC(this, screenmat);
+    GET_LOC(this, viewmat);
     GET_LOC(this, scale);
-    GET_LOC(this, offset);
 }
 
 void DragSelection::realize()
@@ -104,9 +105,9 @@ void DragSelection::Box::render()
 {
     glUseProgram(program);
     glBindVertexArray(vao);
-    glUniformMatrix3fv(screenmat_loc, 1, GL_TRUE, parent->ca->screenmat.data());
+    glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(parent->ca->screenmat));
+    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(parent->ca->viewmat));
     glUniform1f(scale_loc, parent->ca->scale);
-    glUniform2f(offset_loc, parent->ca->offset.x, parent->ca->offset.y);
     glUniform2f(a_loc, sel_a.x, sel_a.y);
     glUniform2f(b_loc, sel_b.x, sel_b.y);
     glUniform1i(fill_loc, fill);
@@ -121,9 +122,10 @@ void DragSelection::Line::render()
 {
     glUseProgram(program);
     glBindVertexArray(vao);
-    glUniformMatrix3fv(screenmat_loc, 1, GL_TRUE, parent->ca->screenmat.data());
+    glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(parent->ca->screenmat));
+    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(parent->ca->viewmat));
     glUniform1f(scale_loc, parent->ca->scale);
-    glUniform2f(offset_loc, parent->ca->offset.x, parent->ca->offset.y);
+
 
     glDrawArrays(GL_LINE_STRIP, 0, vertices.size());
 

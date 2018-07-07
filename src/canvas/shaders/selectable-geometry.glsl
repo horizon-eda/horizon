@@ -2,8 +2,8 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 32) out;
 uniform mat3 screenmat;
+uniform mat3 viewmat;
 uniform float scale;
-uniform vec2 offset;
 in vec2 origin_to_geom[1];
 in vec2 box_center_to_geom[1];
 in vec2 box_dim_to_geom[1];
@@ -14,7 +14,7 @@ out vec2 dot_to_fragment;
 out vec2 size_to_fragment;
 
 vec4 t(vec2 p) {
-    return vec4((screenmat*vec3(scale*p.x+offset.x , -scale*p.y+offset.y, 1)), 1);
+    return vec4((screenmat*viewmat*vec3(p, 1)), 1);
 }
 
 mat2 rotate2d(float _angle){

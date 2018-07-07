@@ -2,6 +2,7 @@
 #include "canvas_gl.hpp"
 #include "gl_util.hpp"
 #include <algorithm>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace horizon {
 
@@ -88,8 +89,7 @@ void MarkerRenderer::realize()
                                               "marker-geometry.glsl");
     vao = create_vao(program, vbo);
     GET_LOC(this, screenmat);
-    GET_LOC(this, scale);
-    GET_LOC(this, offset);
+    GET_LOC(this, viewmat);
     GET_LOC(this, alpha);
 }
 
@@ -97,10 +97,9 @@ void MarkerRenderer::render()
 {
     glUseProgram(program);
     glBindVertexArray(vao);
-    glUniformMatrix3fv(screenmat_loc, 1, GL_TRUE, ca->screenmat.data());
-    glUniform1f(scale_loc, ca->scale);
+    glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca->screenmat));
+    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
     glUniform1f(alpha_loc, ca->property_layer_opacity() / 100);
-    glUniform2f(offset_loc, ca->offset.x, ca->offset.y);
 
     glDrawArrays(GL_POINTS, 0, markers.size());
 

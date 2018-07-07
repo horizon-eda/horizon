@@ -1,6 +1,7 @@
 #include "canvas_gl.hpp"
 #include "gl_util.hpp"
 #include <iostream>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace horizon {
 
@@ -164,10 +165,9 @@ void SelectablesRenderer::realize()
     vao = create_vao(program, vbo);
     GL_CHECK_ERROR
     GET_LOC(this, screenmat);
+    GET_LOC(this, viewmat);
     GL_CHECK_ERROR
     GET_LOC(this, scale);
-    GL_CHECK_ERROR
-    GET_LOC(this, offset);
     GL_CHECK_ERROR
 }
 
@@ -175,9 +175,9 @@ void SelectablesRenderer::render()
 {
     glUseProgram(program);
     glBindVertexArray(vao);
-    glUniformMatrix3fv(screenmat_loc, 1, GL_TRUE, ca->screenmat.data());
+    glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca->screenmat));
+    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
     glUniform1f(scale_loc, ca->scale);
-    glUniform2f(offset_loc, ca->offset.x, ca->offset.y);
 
     glDrawArrays(GL_POINTS, 0, sel->items.size());
 

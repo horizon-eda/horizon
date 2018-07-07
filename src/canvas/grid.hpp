@@ -26,8 +26,8 @@ private:
     GLuint vbo;
 
     GLuint screenmat_loc;
+    GLuint viewmat_loc;
     GLuint scale_loc;
-    GLuint offset_loc;
     GLuint grid_size_loc;
     GLuint grid_0_loc;
     GLuint grid_mod_loc;

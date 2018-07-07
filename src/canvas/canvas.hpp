@@ -58,6 +58,11 @@ public:
     bool show_all_junctions_in_schematic = false;
     bool fast_draw = false;
 
+    virtual bool get_flip_view() const
+    {
+        return false;
+    };
+
 protected:
     std::unordered_map<int, std::vector<Triangle>> triangles;
     void add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t flg = 0);

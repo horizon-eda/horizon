@@ -109,8 +109,8 @@ private:
     GLuint ubo;
 
     GLuint screenmat_loc;
+    GLuint viewmat_loc;
     GLuint scale_loc;
-    GLuint offset_loc;
     GLuint alpha_loc;
     GLuint layer_color_loc;
     GLuint layer_flags_loc;

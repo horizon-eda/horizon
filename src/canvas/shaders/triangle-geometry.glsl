@@ -2,8 +2,8 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 64) out;
 uniform mat3 screenmat;
+uniform mat3 viewmat;
 uniform float scale;
-uniform vec2 offset;
 uniform float alpha;
 uniform uint types_visible;
 uniform uint types_force_outline;
@@ -42,7 +42,7 @@ int mode = layer_flags;
 #define PI 3.1415926535897932384626433832795
 
 vec4 t(vec2 p) {
-    return vec4((screenmat*vec3(scale*p.x+offset.x , -scale*p.y+offset.y, 1)), 1);
+    return vec4((screenmat*viewmat*vec3(p, 1)), 1);
 }
 
 float t2(vec2 p) {

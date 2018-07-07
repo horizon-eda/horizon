@@ -1,6 +1,7 @@
 #include "triangle.hpp"
 #include "canvas_gl.hpp"
 #include "gl_util.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 namespace horizon {
 
@@ -93,8 +94,8 @@ void TriangleRenderer::realize()
     GL_CHECK_ERROR;
     vao = create_vao(program, vbo);
     GET_LOC(this, screenmat);
+    GET_LOC(this, viewmat);
     GET_LOC(this, scale);
-    GET_LOC(this, offset);
     GET_LOC(this, alpha);
     GET_LOC(this, layer_color);
     GET_LOC(this, layer_flags);
@@ -134,10 +135,10 @@ void TriangleRenderer::render()
     GL_CHECK_ERROR
     glUseProgram(program);
     glBindVertexArray(vao);
-    glUniformMatrix3fv(screenmat_loc, 1, GL_TRUE, ca->screenmat.data());
+    glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca->screenmat));
+    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
     glUniform1f(scale_loc, ca->scale);
     glUniform1f(alpha_loc, ca->property_layer_opacity() / 100);
-    glUniform2f(offset_loc, ca->offset.x, ca->offset.y);
     glUniform1i(highlight_mode_loc, ca->highlight_enabled ? static_cast<int>(ca->highlight_mode) : 0);
     glUniform1f(highlight_dim_loc, ca->highlight_dim);
     glUniform1f(highlight_shadow_loc, ca->highlight_shadow);

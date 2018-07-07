@@ -2,8 +2,7 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 uniform mat3 screenmat;
-uniform float scale;
-uniform vec2 offset;
+uniform mat3 viewmat;
 uniform float alpha;
 in vec2 position_to_geom[1];
 in vec3 color_to_geom[1];
@@ -12,7 +11,7 @@ flat out vec3 color_to_fragment;
 smooth out vec2 draw_pos_to_fragment;
 
 vec4 t(vec2 p, vec2 q) {
-    return vec4((screenmat*vec3(scale*p.x+offset.x+q.x , -scale*p.y+offset.y+q.y, 1)), 1);
+    return vec4(screenmat*(viewmat*vec3(p, 1)+vec3(q,0)), 1);
 }
 
 void main() {

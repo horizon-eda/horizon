@@ -98,7 +98,7 @@ private:
     GLuint vbo;
 
     GLuint screenmat_loc;
+    GLuint viewmat_loc;
     GLuint scale_loc;
-    GLuint offset_loc;
 };
 } // namespace horizon

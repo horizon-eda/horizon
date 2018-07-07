@@ -1247,7 +1247,8 @@ void Canvas::render(const class Dimension &dim)
                   0);
         transform_restore();
 
-        auto real_text_bb = draw_text0(Coordi(text_pos.x, text_pos.y), dim.label_size, s, angle_i, false,
+        auto real_text_bb = draw_text0(Coordi(text_pos.x, text_pos.y), dim.label_size, s,
+                                       get_flip_view() ? (32768 - angle_i) : angle_i, get_flip_view(),
                                        TextOrigin::CENTER, ColorP::WHITE, 10000, 0, true);
 
         selectables.append(dim.uuid, ObjectType::DIMENSION, q0, real_text_bb.first, real_text_bb.second, 2);

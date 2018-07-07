@@ -15,7 +15,19 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Help", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::VIEW_ALL, ToolID::NONE},
-         {"View all", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_IN_TOOL}},
+         {"View all", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_IN_TOOL}},
+
+        {{ActionID::FLIP_VIEW, ToolID::NONE},
+         {"Flip view", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::VIEW_TOP, ToolID::NONE},
+         {"View top", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::VIEW_BOTTOM, ToolID::NONE},
+         {"View bottom", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::LAYER_DOWN, ToolID::NONE},
          {"Layer down", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, ActionCatalogItem::FLAGS_IN_TOOL}},
@@ -533,7 +545,7 @@ const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
         {ActionGroup::BOARD, "Board"},         {ActionGroup::SCHEMATIC, "Schematic"}, {ActionGroup::SYMBOL, "Symbol"},
         {ActionGroup::PADSTACK, "Padstack"},   {ActionGroup::PACKAGE, "Package"},     {ActionGroup::UNDO, "Undo"},
         {ActionGroup::LAYER, "Layer"},         {ActionGroup::SELECTION, "Selection"}, {ActionGroup::RULES, "Rules"},
-        {ActionGroup::UNKNOWN, "Misc"},
+        {ActionGroup::UNKNOWN, "Misc"},        {ActionGroup::VIEW, "View"},
 
 };
 
@@ -590,6 +602,9 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(BOM_EXPORT_WINDOW),
         ACTION_LUT_ITEM(EXPORT_BOM),
         ACTION_LUT_ITEM(RELOAD_POOL),
+        ACTION_LUT_ITEM(FLIP_VIEW),
+        ACTION_LUT_ITEM(VIEW_TOP),
+        ACTION_LUT_ITEM(VIEW_BOTTOM),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

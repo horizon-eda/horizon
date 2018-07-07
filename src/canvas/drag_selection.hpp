@@ -39,8 +39,8 @@ private:
         GLuint vbo;
 
         GLuint screenmat_loc;
+        GLuint viewmat_loc;
         GLuint scale_loc;
-        GLuint offset_loc;
         GLuint a_loc;
         GLuint b_loc;
         GLuint fill_loc;
@@ -70,8 +70,8 @@ private:
         GLuint vbo;
 
         GLuint screenmat_loc;
+        GLuint viewmat_loc;
         GLuint scale_loc;
-        GLuint offset_loc;
 
         class Vertex {
         public:

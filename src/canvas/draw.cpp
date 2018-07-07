@@ -132,7 +132,7 @@ void Canvas::draw_error(const Coordf &center, float sc, const std::string &text,
     Coordf text_pos{x - 5 * sc, y - 1.5f * sc};
     if (tr)
         text_pos = transform.transform(text_pos);
-    draw_text0(text_pos, 0.25_mm, text, 0, false, TextOrigin::BASELINE, c);
+    draw_text0(text_pos, 0.25_mm, text, get_flip_view() ? 32768 : 0, get_flip_view(), TextOrigin::BASELINE, c);
 }
 
 std::tuple<Coordf, Coordf, Coordi> Canvas::draw_flag(const Coordf &position, const std::string &txt, int64_t size,
@@ -259,6 +259,7 @@ void Canvas::draw_text_box(const Placement &q, float width, float height, const 
         scale_y *= 2;
     float sc = std::max(scale_x, scale_y) * 1.25;
     text_pos.x += (width) / 2 - (text_bb.second.x - text_bb.first.x) / (2 * sc);
-    draw_text0(p.transform(text_pos), 1_mm / sc, s, p.get_angle(), false, TextOrigin::CENTER, color, layer, text_width);
+    draw_text0(p.transform(text_pos), 1_mm / sc, s, get_flip_view() ? (32768 - p.get_angle()) : p.get_angle(),
+               get_flip_view(), TextOrigin::CENTER, color, layer, text_width);
 };
 } // namespace horizon

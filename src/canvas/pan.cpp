@@ -51,6 +51,7 @@ void CanvasGL::pan_drag_move(GdkEventMotion *motion_event)
             warped = true;
         }
         offset = pan_offset_orig + Coordf(x, y) - pan_pointer_pos_orig;
+        update_viewmat();
         queue_draw();
     }
 }
@@ -62,6 +63,7 @@ void CanvasGL::pan_drag_move(GdkEventScroll *scroll_event)
 
     offset.x += dx * 50;
     offset.y += dy * 50;
+    update_viewmat();
     queue_draw();
 }
 
@@ -107,6 +109,7 @@ void CanvasGL::pan_zoom(GdkEventScroll *scroll_event, bool to_cursor)
         pan_offset_orig.x += xi;
         pan_offset_orig.y += yi;
     }
+    update_viewmat();
     queue_draw();
 }
 } // namespace horizon
