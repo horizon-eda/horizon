@@ -67,17 +67,17 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
 
         {{ActionID::POPOVER, ToolID::NONE},
          {"Popover", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE,
-          ActionCatalogItem::FLAGS_NO_POPOVER}},
+          ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_NO_MENU}},
 
         {{ActionID::TOOL, ToolID::PASTE},
          {"Paste", ActionGroup::CLIPBOARD, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::COPY, ToolID::NONE},
-         {"Copy", ActionGroup::CLIPBOARD, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
+         {"Copy", ActionGroup::CLIPBOARD, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::DUPLICATE, ToolID::NONE},
          {"Duplicate", ActionGroup::CLIPBOARD, ActionCatalogItem::AVAILABLE_EVERYWHERE,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::SAVE, ToolID::NONE},
          {"Save", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
@@ -130,28 +130,24 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
 
         {{ActionID::TO_BOARD, ToolID::NONE},
          {"Place on board", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::RULES, ToolID::NONE},
          {"Rules", ActionGroup::RULES,
-          static_cast<ActionCatalogItem::Availability>(ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD
-                                                       | ActionCatalogItem::AVAILABLE_IN_PACKAGE),
+          ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD | ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::RULES_APPLY, ToolID::NONE},
-         {"Apply rules", ActionGroup::RULES,
-          static_cast<ActionCatalogItem::Availability>(ActionCatalogItem::AVAILABLE_IN_BOARD),
-          ActionCatalogItem::FLAGS_DEFAULT}},
+         {"Apply rules", ActionGroup::RULES, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::RULES_RUN_CHECKS, ToolID::NONE},
          {"Run checks", ActionGroup::RULES,
-          static_cast<ActionCatalogItem::Availability>(ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD
-                                                       | ActionCatalogItem::AVAILABLE_IN_PACKAGE),
+          ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD | ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::SHOW_IN_BROWSER, ToolID::NONE},
          {"Show in browser", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::TUNING, ToolID::NONE},
          {"Length tuning", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
@@ -159,15 +155,15 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
 
         {{ActionID::TUNING_ADD_TRACKS, ToolID::NONE},
          {"Measure track", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::TUNING_ADD_TRACKS_ALL, ToolID::NONE},
          {"Measure all tracks", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::HIGHLIGHT_NET, ToolID::NONE},
          {"Highlight net", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::TOOL, ToolID::MOVE},
          {"Move", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
@@ -288,7 +284,7 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
 
         {{ActionID::MOVE_TO_OTHER_SHEET, ToolID::NONE},
          {"Move to other sheet", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::TOOL, ToolID::SET_GROUP},
          {"Set group", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
@@ -335,8 +331,7 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
 
         {{ActionID::TOOL, ToolID::IMPORT_DXF},
          {"Import dxf", ActionGroup::UNKNOWN,
-          static_cast<ActionCatalogItem::Availability>(ActionCatalogItem::AVAILABLE_IN_BOARD
-                                                       | ActionCatalogItem::AVAILABLE_IN_PACKAGE),
+          ActionCatalogItem::AVAILABLE_IN_BOARD | ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::PLACE_JUNCTION},
@@ -372,9 +367,8 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
 
         {{ActionID::TOOL, ToolID::PLACE_TEXT},
          {"Place text", ActionGroup::GRAPHICS,
-          static_cast<ActionCatalogItem::Availability>(
-                  ActionCatalogItem::AVAILABLE_IN_SCHEMATIC | ActionCatalogItem::AVAILABLE_IN_PACKAGE
-                  | ActionCatalogItem::AVAILABLE_IN_BOARD | ActionCatalogItem::AVAILABLE_IN_SYMBOL),
+          ActionCatalogItem::AVAILABLE_IN_SCHEMATIC | ActionCatalogItem::AVAILABLE_IN_PACKAGE
+                  | ActionCatalogItem::AVAILABLE_IN_BOARD | ActionCatalogItem::AVAILABLE_IN_SYMBOL,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::ASSIGN_PART},
@@ -508,16 +502,20 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::MOVE_KEY_UP},
-         {"Move up", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
+         {"Move up", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER}},
 
         {{ActionID::TOOL, ToolID::MOVE_KEY_DOWN},
-         {"Move down", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
+         {"Move down", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER}},
 
         {{ActionID::TOOL, ToolID::MOVE_KEY_LEFT},
-         {"Move left", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
+         {"Move left", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER}},
 
         {{ActionID::TOOL, ToolID::MOVE_KEY_RIGHT},
-         {"Move right", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
+         {"Move right", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER}},
 
         {{ActionID::BOM_EXPORT_WINDOW, ToolID::NONE},
          {"BOM export window", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
@@ -537,13 +535,12 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
 
         {{ActionID::RELOAD_POOL, ToolID::NONE},
          {"Reload pool", ActionGroup::UNKNOWN,
-          static_cast<ActionCatalogItem::Availability>(ActionCatalogItem::AVAILABLE_IN_PACKAGE
-                                                       | ActionCatalogItem::AVAILABLE_IN_SYMBOL),
+          ActionCatalogItem::AVAILABLE_IN_PACKAGE | ActionCatalogItem::AVAILABLE_IN_SYMBOL,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::EDIT_PADSTACK, ToolID::NONE},
          {"Edit padstack", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::EDIT_UNIT, ToolID::NONE},
          {"Edit unit", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL, ActionCatalogItem::FLAGS_DEFAULT}},

@@ -177,9 +177,9 @@ void transform_path(ClipperLib::Path &path, const Placement &tr)
 void ImpBoard::update_action_sensitivity()
 {
     auto sel = canvas->get_selection();
-    set_action_sensitive(
-            make_action(ActionID::TUNING_ADD_TRACKS),
-            std::any_of(sel.begin(), sel.end(), [](const auto &x) { return x.type == ObjectType::TRACK; }));
+    bool have_tracks = std::any_of(sel.begin(), sel.end(), [](const auto &x) { return x.type == ObjectType::TRACK; });
+    set_action_sensitive(make_action(ActionID::TUNING_ADD_TRACKS), have_tracks);
+    set_action_sensitive(make_action(ActionID::TUNING_ADD_TRACKS_ALL), have_tracks);
 
     set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET), std::any_of(sel.begin(), sel.end(), [](const auto &x) {
                              switch (x.type) {

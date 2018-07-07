@@ -161,6 +161,9 @@ private:
 
     ActionConnection &connect_action(ActionID action_id, ToolID tool_id,
                                      std::function<void(const ActionConnection &)> cb);
+
+    void create_context_menu(Gtk::Menu *parent, const std::set<SelectableRef> &sel);
+
     KeySequence2 keys_current;
     bool handle_action_key(GdkEventKey *ev);
     void handle_tool_action(const ActionConnection &conn);

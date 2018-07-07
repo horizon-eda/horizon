@@ -232,6 +232,8 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
         args2.key = key;
         update(args2);
     }
+    if (tool_id == ToolID::MOVE_KEY)
+        is_key = true;
 
     imp->tool_bar_set_tool_name("Move");
 

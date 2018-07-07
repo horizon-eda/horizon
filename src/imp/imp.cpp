@@ -1076,8 +1076,61 @@ bool ImpBase::handle_click_release(GdkEventButton *button_event)
     return false;
 }
 
+void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRef> &sel)
+{
+    update_action_sensitivity();
+    Gtk::SeparatorMenuItem *sep = nullptr;
+    for (const auto &it_gr : action_group_catalog) {
+        bool have_item = false;
+        for (const auto &it : action_catalog) {
+            if (it.second.group == it_gr.first && (it.second.availability & get_editor_type_for_action())
+                && !(it.second.flags & ActionCatalogItem::FLAGS_NO_MENU)) {
+                if (it.first.first == ActionID::TOOL) {
+                    auto r = core.r->tool_can_begin(it.first.second, {sel});
+                    if (r.first && r.second) {
+                        auto la_sub = Gtk::manage(new Gtk::MenuItem(it.second.name));
+                        ToolID tool_id = it.first.second;
+                        std::set<SelectableRef> sr(sel);
+                        la_sub->signal_activate().connect([this, tool_id, sr] {
+                            canvas->set_selection(sr, false);
+                            fix_cursor_pos();
+                            tool_begin(tool_id);
+                        });
+                        la_sub->show();
+                        parent->append(*la_sub);
+                        have_item = true;
+                    }
+                }
+                else {
+                    if (get_action_sensitive(it.first) && (it.second.flags & ActionCatalogItem::FLAGS_SPECIFIC)) {
+                        auto la_sub = Gtk::manage(new Gtk::MenuItem(it.second.name));
+                        ActionID action_id = it.first.first;
+                        std::set<SelectableRef> sr(sel);
+                        la_sub->signal_activate().connect([this, action_id, sr] {
+                            canvas->set_selection(sr, false);
+                            fix_cursor_pos();
+                            trigger_action(make_action(action_id));
+                        });
+                        la_sub->show();
+                        parent->append(*la_sub);
+                        have_item = true;
+                    }
+                }
+            }
+        }
+        if (have_item) {
+            sep = Gtk::manage(new Gtk::SeparatorMenuItem);
+            sep->show();
+            parent->append(*sep);
+        }
+    }
+    if (sep)
+        delete sep;
+}
+
 bool ImpBase::handle_click(GdkEventButton *button_event)
 {
+    bool need_menu = false;
     if (core.r->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)) {
         ToolArgs args;
         args.type = ToolEventType::CLICK;
@@ -1130,106 +1183,28 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
                     la->signal_deselect().connect([this] { canvas->set_selection({}, false); });
                     auto submenu = Gtk::manage(new Gtk::Menu);
 
-                    {
-                        auto la2 = Gtk::manage(new Gtk::MenuItem("Copy"));
-                        la2->signal_activate().connect([this, sr] {
-                            canvas->set_selection({sr}, false);
-                            clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos());
-                        });
-                        la2->show();
-                        submenu->append(*la2);
-                    }
-                    {
-                        auto la2 = Gtk::manage(new Gtk::MenuItem("Duplicate"));
-                        la2->signal_activate().connect([this, sr] {
-                            canvas->set_selection({sr}, false);
-                            clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos());
-                            tool_begin(ToolID::PASTE);
-                        });
-                        la2->show();
-                        submenu->append(*la2);
-                    }
-
-                    {
-                        auto sep = Gtk::manage(new Gtk::SeparatorMenuItem);
-                        sep->show();
-                        submenu->append(*sep);
-                    }
-
-                    for (const auto &it : action_catalog) {
-                        if (it.first.first == ActionID::TOOL) {
-                            auto r = core.r->tool_can_begin(it.first.second, {sr});
-                            if (r.first && r.second) {
-                                auto la_sub = Gtk::manage(new Gtk::MenuItem(it.second.name));
-                                ToolID tool_id = it.first.second;
-                                la_sub->signal_activate().connect([this, tool_id, sr] {
-                                    canvas->set_selection({sr}, false);
-                                    fix_cursor_pos();
-                                    tool_begin(tool_id);
-                                });
-                                la_sub->show();
-                                submenu->append(*la_sub);
-                            }
-                        }
-                    }
+                    create_context_menu(submenu, {sr});
                     la->set_submenu(*submenu);
                     la->show();
                     context_menu->append(*la);
                 }
-#if GTK_CHECK_VERSION(3, 22, 0)
-                context_menu->popup_at_pointer((GdkEvent *)button_event);
-#else
-                context_menu->popup(0, gtk_get_current_event_time());
-#endif
+                need_menu = true;
                 sel_for_menu.clear();
             }
         }
+
         if (sel_for_menu.size()) {
-
-            {
-                auto la = Gtk::manage(new Gtk::MenuItem("Copy"));
-                la->signal_activate().connect(
-                        [this] { clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos()); });
-                la->show();
-                context_menu->append(*la);
-            }
-            {
-                auto la = Gtk::manage(new Gtk::MenuItem("Duplicate"));
-                la->signal_activate().connect([this] {
-                    clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos());
-                    tool_begin(ToolID::PASTE);
-                });
-                la->show();
-                context_menu->append(*la);
-            }
-
-            {
-                auto sep = Gtk::manage(new Gtk::SeparatorMenuItem);
-                sep->show();
-                context_menu->append(*sep);
-            }
-
-            for (const auto &it : action_catalog) {
-                if (it.first.first == ActionID::TOOL) {
-                    auto r = core.r->tool_can_begin(it.first.second, sel_for_menu);
-                    if (r.first && r.second) {
-                        auto la = Gtk::manage(new Gtk::MenuItem(it.second.name));
-                        ToolID tool_id = it.first.second;
-                        la->signal_activate().connect([this, tool_id] {
-                            fix_cursor_pos();
-                            tool_begin(tool_id);
-                        });
-                        la->show();
-                        context_menu->append(*la);
-                    }
-                }
-            }
-#if GTK_CHECK_VERSION(3, 22, 0)
-            context_menu->popup_at_pointer((GdkEvent *)button_event);
-#else
-            context_menu->popup(0, gtk_get_current_event_time());
-#endif
+            create_context_menu(context_menu, sel_for_menu);
+            need_menu = true;
         }
+    }
+
+    if (need_menu) {
+#if GTK_CHECK_VERSION(3, 22, 0)
+        context_menu->popup_at_pointer((GdkEvent *)button_event);
+#else
+        context_menu->popup(0, gtk_get_current_event_time());
+#endif
     }
     return false;
 }

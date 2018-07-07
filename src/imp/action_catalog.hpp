@@ -19,10 +19,16 @@ public:
         AVAILABLE_IN_SCHEMATIC_AND_BOARD = AVAILABLE_IN_SCHEMATIC | AVAILABLE_IN_BOARD
     };
 
-    enum Flags { FLAGS_DEFAULT = 0, FLAGS_IN_TOOL = (1 << 1), FLAGS_NO_POPOVER = (1 << 2) };
+    enum Flags {
+        FLAGS_DEFAULT = 0,
+        FLAGS_IN_TOOL = (1 << 1),
+        FLAGS_NO_POPOVER = (1 << 2),
+        FLAGS_NO_MENU = (1 << 3),
+        FLAGS_SPECIFIC = (1 << 4)
+    };
 
-    ActionCatalogItem(const std::string &n, ActionGroup gr, Availability av, Flags fl = FLAGS_DEFAULT)
-        : name(n), group(gr), flags(fl), availability(av){};
+    ActionCatalogItem(const std::string &n, ActionGroup gr, int av, int fl = FLAGS_DEFAULT)
+        : name(n), group(gr), flags(static_cast<Flags>(fl)), availability(static_cast<Availability>(av)){};
 
     const std::string name;
     ActionGroup group;
