@@ -538,6 +538,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::RELOAD_POOL, ToolID::NONE},
          {"Reload pool", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::EDIT_PADSTACK, ToolID::NONE},
+         {"Edit padstack", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -605,6 +609,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(FLIP_VIEW),
         ACTION_LUT_ITEM(VIEW_TOP),
         ACTION_LUT_ITEM(VIEW_BOTTOM),
+        ACTION_LUT_ITEM(EDIT_PADSTACK),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

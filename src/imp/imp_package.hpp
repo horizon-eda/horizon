@@ -19,6 +19,8 @@ protected:
     };
 
     std::string get_hud_text(std::set<SelectableRef> &sel) override;
+    void update_action_sensitivity() override;
+    void update_monitor() override;
 
 private:
     void canvas_update() override;

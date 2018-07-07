@@ -420,6 +420,27 @@ std::string ImpPackage::ask_3d_model_filename(const std::string &current_filenam
     return "";
 }
 
+void ImpPackage::update_action_sensitivity()
+{
+    auto sel = canvas->get_selection();
+    set_action_sensitive(make_action(ActionID::EDIT_PADSTACK),
+                         sockets_connected && std::any_of(sel.begin(), sel.end(), [](const auto &x) {
+                             return x.type == ObjectType::PAD;
+                         }));
+
+    ImpBase::update_action_sensitivity();
+}
+
+void ImpPackage::update_monitor()
+{
+    std::set<std::pair<ObjectType, UUID>> items;
+    const auto pkg = core_package.get_package();
+    for (const auto &it : pkg->pads) {
+        items.emplace(ObjectType::PADSTACK, it.second.pool_padstack->uuid);
+    }
+    set_monitor_items(items);
+}
+
 void ImpPackage::construct()
 {
     ImpLayer::construct_layer_box();
@@ -538,6 +559,17 @@ void ImpPackage::construct()
     connect_action(ActionID::VIEW_3D, [this](const auto &a) {
         view_3d_window->update();
         view_3d_window->present();
+    });
+
+    connect_action(ActionID::EDIT_PADSTACK, [this](const auto &a) {
+        auto sel = canvas->get_selection();
+        if (auto uu = sel_find_one(sel, ObjectType::PAD)) {
+            json j;
+            j["op"] = "edit";
+            j["type"] = object_type_lut.lookup_reverse(ObjectType::PADSTACK);
+            j["uuid"] = static_cast<std::string>(core_package.get_package()->pads.at(uu).pool_padstack->uuid);
+            send_json(j);
+        }
     });
 
     footprint_generator_window = FootprintGeneratorWindow::create(main_window, &core_package);
@@ -693,6 +725,8 @@ void ImpPackage::construct()
         core.r->signal_tool_changed().connect([button](ToolID t) { button->set_sensitive(t == ToolID::NONE); });
         main_window->header->pack_end(*button);
     }
+
+    update_monitor();
 
     core_package.signal_save().connect(
             [this, entry_name, entry_manufacturer, entry_tags, header_button, browser_alt_button] {

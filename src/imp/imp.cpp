@@ -587,6 +587,8 @@ void ImpBase::run(int argc, char *argv[])
 
     sc();
 
+    core.r->signal_rebuilt().connect([this] { update_monitor(); });
+
     app->run(*main_window);
 }
 
@@ -1358,10 +1360,34 @@ bool ImpBase::handle_broadcast(const json &j)
         delete main_window;
         return true;
     }
-    else if (op == "pool-changed") {
-        main_window->show_nonmodal("Pool has changed", "Reload pool", [this] { trigger_action(ActionID::RELOAD_POOL); },
-                                   "This will clear the undo/redo history");
-    }
     return false;
 }
+
+void ImpBase::set_monitor_files(const std::set<std::string> &files)
+{
+    for (const auto &filename : files) {
+        if (file_monitors.count(filename) == 0) {
+            auto mon = Gio::File::create_for_path(filename)->monitor_file();
+            mon->signal_changed().connect(sigc::mem_fun(this, &ImpBase::handle_file_changed));
+            file_monitors[filename] = mon;
+        }
+    }
+    map_erase_if(file_monitors, [this, files](auto &it) { return files.count(it.first) == 0; });
+}
+
+void ImpBase::set_monitor_items(const std::set<std::pair<ObjectType, UUID>> &items)
+{
+    std::set<std::string> filenames;
+    std::transform(items.begin(), items.end(), std::inserter(filenames, filenames.begin()),
+                   [this](const auto &it) { return pool->get_filename(it.first, it.second); });
+    set_monitor_files(filenames);
+}
+
+void ImpBase::handle_file_changed(const Glib::RefPtr<Gio::File> &file1, const Glib::RefPtr<Gio::File> &file2,
+                                  Gio::FileMonitorEvent ev)
+{
+    main_window->show_nonmodal("Pool has changed", "Reload pool", [this] { trigger_action(ActionID::RELOAD_POOL); },
+                               "This will clear the undo/redo history");
+}
+
 } // namespace horizon

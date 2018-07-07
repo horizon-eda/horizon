@@ -57,7 +57,8 @@ enum class ActionID {
     RELOAD_POOL,
     FLIP_VIEW,
     VIEW_TOP,
-    VIEW_BOTTOM
+    VIEW_BOTTOM,
+    EDIT_PADSTACK
 };
 
 enum class ActionGroup {

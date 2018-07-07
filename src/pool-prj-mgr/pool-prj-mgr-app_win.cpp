@@ -244,6 +244,28 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         std::cout << "needs save " << pid << " " << needs_save << std::endl;
         pids_need_save[pid] = needs_save;
     }
+    else if (op == "edit") {
+        auto type = object_type_lut.lookup(j.at("type"));
+        UUID uu(j.at("uuid").get<std::string>());
+        try {
+            auto path = pool->get_filename(type, uu);
+            PoolProjectManagerProcess::Type ptype;
+            switch (type) {
+            case ObjectType::PADSTACK:
+                ptype = PoolProjectManagerProcess::Type::IMP_PADSTACK;
+                break;
+            default:
+                return nullptr;
+            }
+            spawn(ptype, {path});
+        }
+        catch (const std::exception &e) {
+            Gtk::MessageDialog md(*this, "Can't open editor", false /* use_markup */, Gtk::MESSAGE_ERROR,
+                                  Gtk::BUTTONS_OK);
+            md.set_secondary_text(e.what());
+            md.run();
+        }
+    }
     return nullptr;
 }
 

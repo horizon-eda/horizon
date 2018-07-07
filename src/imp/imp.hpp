@@ -137,6 +137,12 @@ protected:
     std::string get_hud_text_for_part(const Part *part);
     std::string get_hud_text_for_net(const Net *net);
 
+    void set_monitor_files(const std::set<std::string> &files);
+    void set_monitor_items(const std::set<std::pair<ObjectType, UUID>> &items);
+    virtual void update_monitor()
+    {
+    }
+
 private:
     void fix_cursor_pos();
     void apply_settings();
@@ -147,6 +153,10 @@ private:
 
     void hud_update();
 
+    std::map<std::string, Glib::RefPtr<Gio::FileMonitor>> file_monitors;
+
+    void handle_file_changed(const Glib::RefPtr<Gio::File> &file1, const Glib::RefPtr<Gio::File> &file2,
+                             Gio::FileMonitorEvent ev);
 
     ActionConnection &connect_action(ActionID action_id, ToolID tool_id,
                                      std::function<void(const ActionConnection &)> cb);
