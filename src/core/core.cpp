@@ -57,6 +57,7 @@
 #include "tool_copy_tracks.hpp"
 #include "tool_swap_nets.hpp"
 #include "tool_line_loop_to_polygon.hpp"
+#include "tool_change_unit.hpp"
 
 #include "common/dimension.hpp"
 #include "logger/logger.hpp"
@@ -287,6 +288,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::LINE_LOOP_TO_POLYGON:
         return std::make_unique<ToolLineLoopToPolygon>(this, tool_id);
+
+    case ToolID::CHANGE_UNIT:
+        return std::make_unique<ToolChangeUnit>(this, tool_id);
 
     default:
         return nullptr;

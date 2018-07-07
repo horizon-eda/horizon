@@ -24,6 +24,7 @@ public:
     std::pair<bool, UUID> select_part(class Pool *p, const UUID &entity_uuid, const UUID &part_uuid,
                                       bool show_none = false);
     std::pair<bool, UUID> select_entity(class Pool *pool);
+    std::pair<bool, UUID> select_unit(class Pool *pool);
     std::pair<bool, UUID> select_padstack(class Pool *pool, const UUID &package_uuid);
     std::pair<bool, UUID> select_hole_padstack(class Pool *pool);
     std::pair<bool, UUID> select_via_padstack(class ViaPadstackProvider *vpp);

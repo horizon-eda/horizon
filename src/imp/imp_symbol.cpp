@@ -54,11 +54,13 @@ void ImpSymbol::construct()
     });
 
     {
-        auto unit_label = Gtk::manage(new Gtk::Label(core.y->get_symbol()->unit->name));
+        unit_label = Gtk::manage(new Gtk::Label(core.y->get_symbol()->unit->name));
         unit_label->set_xalign(0);
         unit_label->set_selectable(true);
         header_button->add_widget("Unit", unit_label);
     }
+
+    core.r->signal_rebuilt().connect([this] { unit_label->set_text(core.y->get_symbol()->unit->name); });
 
     core.r->signal_save().connect([this, header_button] {
         auto sym = core.y->get_symbol(false);
@@ -72,9 +74,12 @@ void ImpSymbol::construct()
     connect_action(ActionID::EDIT_UNIT,
                    [this](const auto &a) { edit_pool_item(ObjectType::UNIT, core_symbol.get_symbol()->unit->uuid); });
     set_action_sensitive(make_action(ActionID::EDIT_UNIT), sockets_connected);
-    if (sockets_connected) {
-        auto hamburger_menu = add_hamburger_menu();
 
+    auto hamburger_menu = add_hamburger_menu();
+    hamburger_menu->append("Change unit", "win.change_unit");
+    add_tool_action(ToolID::CHANGE_UNIT, "change_unit");
+
+    if (sockets_connected) {
         hamburger_menu->append("Edit unit", "win.edit_unit");
         main_window->add_action("edit_unit", [this] { trigger_action(ActionID::EDIT_UNIT); });
     }

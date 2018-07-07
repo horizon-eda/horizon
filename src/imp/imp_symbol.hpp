@@ -21,6 +21,7 @@ private:
     CoreSymbol core_symbol;
 
     Gtk::Entry *name_entry = nullptr;
+    Gtk::Label *unit_label = nullptr;
     class SymbolPreviewWindow *symbol_preview_window = nullptr;
 };
 } // namespace horizon

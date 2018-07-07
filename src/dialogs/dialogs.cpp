@@ -123,6 +123,20 @@ std::pair<bool, UUID> Dialogs::select_entity(Pool *pool)
         return {false, UUID()};
     }
 }
+
+std::pair<bool, UUID> Dialogs::select_unit(Pool *pool)
+{
+    PoolBrowserDialog dia(parent, ObjectType::UNIT, pool);
+    auto r = dia.run();
+    if (r == Gtk::RESPONSE_OK) {
+        auto uu = dia.get_browser()->get_selected();
+        return {uu, uu};
+    }
+    else {
+        return {false, UUID()};
+    }
+}
+
 std::pair<bool, UUID> Dialogs::select_net(class Block *block, bool power_only, const UUID &net_default)
 {
     SelectNetDialog dia(parent, block, "Select net");
