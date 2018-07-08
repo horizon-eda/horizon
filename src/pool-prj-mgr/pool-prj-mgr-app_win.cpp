@@ -1002,6 +1002,9 @@ void PoolProjectManagerAppWindow::cleanup_pool_cache()
     for (const auto &it_via : board.vias) {
         items_needed.emplace(ObjectType::PADSTACK, it_via.second.vpp_padstack->uuid);
     }
+    for (const auto &it_hole : board.holes) {
+        items_needed.emplace(ObjectType::PADSTACK, it_hole.second.pool_padstack->uuid);
+    }
 
     std::map<std::pair<ObjectType, UUID>, std::string> items_cached;
     Glib::Dir dir(project->pool_cache_directory);
