@@ -15,6 +15,9 @@ BoardPackage::BoardPackage(const UUID &uu, const json &j, Block &block, Pool &po
             texts.emplace_back(UUID(it.value().get<std::string>()));
         }
     }
+    if (j.count("alternate_package")) {
+        alternate_package = pool.get_package(j.at("alternate_package").get<std::string>());
+    }
 }
 BoardPackage::BoardPackage(const UUID &uu, Component *comp)
     : uuid(uu), component(comp), pool_package(component->part->package), package(*pool_package)
@@ -36,6 +39,8 @@ json BoardPackage::serialize() const
     for (const auto &it : texts) {
         j["texts"].push_back((std::string)it->uuid);
     }
+    if (alternate_package)
+        j["alternate_package"] = (std::string)alternate_package->uuid;
 
     return j;
 }
