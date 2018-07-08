@@ -18,7 +18,7 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out, GLuin
     GLuint color_index = glGetAttribLocation(program, "color");
     GLuint offset_index = glGetAttribLocation(program, "offset");
     GLuint angle_index = glGetAttribLocation(program, "angle");
-    GLuint flip_index = glGetAttribLocation(program, "flip");
+    GLuint flags_index = glGetAttribLocation(program, "flags");
 
     GLuint model_offset_index = glGetAttribLocation(program, "model_offset");
     GLuint model_rotation_index = glGetAttribLocation(program, "model_rotation");
@@ -59,8 +59,8 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out, GLuin
     glBindBuffer(GL_ARRAY_BUFFER, ibuffer);
 
     Canvas3D::ModelTransform ivertices[] = {//   Position
-                                            {0, 0, 0, 0},
-                                            {20, 20, 32768, 0}};
+                                            {0, 0, 0, 0, 0},
+                                            {20, 20, 32768, 0, 0}};
     glBufferData(GL_ARRAY_BUFFER, sizeof(ivertices), ivertices, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(offset_index);
@@ -72,10 +72,10 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out, GLuin
                           (void *)offsetof(Canvas3D::ModelTransform, angle));
     glVertexAttribDivisor(angle_index, 1);
 
-    glEnableVertexAttribArray(flip_index);
-    glVertexAttribIPointer(flip_index, 1, GL_UNSIGNED_SHORT, sizeof(Canvas3D::ModelTransform),
-                           (void *)offsetof(Canvas3D::ModelTransform, flip));
-    glVertexAttribDivisor(flip_index, 1);
+    glEnableVertexAttribArray(flags_index);
+    glVertexAttribIPointer(flags_index, 1, GL_UNSIGNED_SHORT, sizeof(Canvas3D::ModelTransform),
+                           (void *)offsetof(Canvas3D::ModelTransform, flags));
+    glVertexAttribDivisor(flags_index, 1);
 
     glEnableVertexAttribArray(model_offset_index);
     glVertexAttribPointer(model_offset_index, 3, GL_FLOAT, GL_FALSE, sizeof(Canvas3D::ModelTransform),
@@ -113,6 +113,7 @@ void FaceRenderer::realize()
     GET_LOC(this, cam_normal);
     GET_LOC(this, z_top);
     GET_LOC(this, z_bottom);
+    GET_LOC(this, highlight_intensity);
 }
 
 void FaceRenderer::push()
@@ -149,6 +150,7 @@ void FaceRenderer::render()
                                        + ca->layers.at(BoardLayers::TOP_COPPER).thickness);
         glUniform1f(z_bottom_loc, ca->layers[BoardLayers::BOTTOM_COPPER].offset
                                           + (ca->layers[BoardLayers::BOTTOM_COPPER].explode_mul - 4) * ca->explode);
+        glUniform1f(highlight_intensity_loc, ca->highlight_intensity);
 
         for (const auto &it : ca->models) {
             if (ca->package_transform_idxs.count(it.first)) {

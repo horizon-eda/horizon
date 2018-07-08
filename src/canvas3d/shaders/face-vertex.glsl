@@ -3,7 +3,7 @@
 in vec3 position;
 in vec3 color;
 in vec2 offset;
-in int flip;
+in uint flags;
 in float angle;
 
 in vec3 model_offset;
@@ -14,6 +14,7 @@ out vec3 color_to_geom;
 
 uniform float z_top;
 uniform float z_bottom;
+uniform float highlight_intensity;
 
 mat4 rotationMatrix(vec3 axis, float angle)
 {
@@ -34,7 +35,12 @@ float t(float x) {
 
 void main() {
   //gl_Position = proj*view*vec4(position, 1, 1);
-  color_to_geom = color;
+  bool flip = (flags&1u)!=0u;
+  bool highlight = (flags&2u)!=0u;
+  if(highlight)
+    color_to_geom = mix(color, vec3(1,0,0), highlight_intensity);
+  else
+    color_to_geom = color;
   vec4 p4 = vec4(position, 1);
 
   mat4 rot = rotationMatrix(vec3(1,0,0), t(model_rotation.x));
@@ -45,12 +51,12 @@ void main() {
   p4.xyz += model_offset;
 
   float angle_inv = 1;
-  if(flip==0) {
+  if(!flip) {
     angle_inv = -1;
   }
   p4 = rotationMatrix(vec3(0,0,1), angle_inv*t(angle))*p4;
   float z = 0;
-  if(flip==0) {
+  if(!flip) {
     z = z_top;
   }
   else {

@@ -176,4 +176,9 @@ void View3DWindow::update(bool clear)
         canvas->clear_3d_models();
     canvas->load_models_async(pool);
 }
+
+void View3DWindow::set_highlights(const std::set<UUID> &pkgs)
+{
+    canvas->set_highlights(pkgs);
+}
 } // namespace horizon

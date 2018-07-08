@@ -1,6 +1,7 @@
 #pragma once
 #include "util/window_state_store.hpp"
 #include <gtkmm.h>
+#include <set>
 
 namespace horizon {
 class View3DWindow : public Gtk::Window {
@@ -8,6 +9,7 @@ public:
     View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Board *b, class Pool *p);
     static View3DWindow *create(const class Board *b, class Pool *p);
     void update(bool clear = false);
+    void set_highlights(const std::set<UUID> &pkgs);
     void add_widget(Gtk::Widget *w);
 
     typedef sigc::signal<void> type_signal_request_update;

@@ -120,6 +120,7 @@ void ImpBoard::handle_selection_cross_probe()
     json j;
     j["op"] = "board-select";
     j["selection"] = nullptr;
+    std::set<UUID> pkgs;
     for (const auto &it : canvas->get_selection()) {
         json k;
         ObjectType type = ObjectType::INVALID;
@@ -151,6 +152,7 @@ void ImpBoard::handle_selection_cross_probe()
             auto &pkg = board->packages.at(it.uuid);
             type = ObjectType::COMPONENT;
             uu = pkg.component->uuid;
+            pkgs.insert(pkg.uuid);
         } break;
         default:;
         }
@@ -161,6 +163,7 @@ void ImpBoard::handle_selection_cross_probe()
             j["selection"].push_back(k);
         }
     }
+    view_3d_window->set_highlights(pkgs);
     send_json(j);
 }
 

@@ -485,6 +485,18 @@ void Canvas3D::clear_3d_models()
     models.clear();
 }
 
+void Canvas3D::update_packages()
+{
+    prepare_packages();
+    request_push();
+}
+
+void Canvas3D::set_highlights(const std::set<UUID> &pkgs)
+{
+    packages_highlight = pkgs;
+    update_packages();
+}
+
 void Canvas3D::prepare_packages()
 {
     package_transform_idxs.clear();
@@ -501,7 +513,8 @@ void Canvas3D::prepare_packages()
         for (const auto &it_brd_pkg : it_pkg.second) {
             const auto &pl = it_brd_pkg->placement;
             const auto &pkg = it_brd_pkg->package;
-            package_transforms.emplace_back(pl.shift.x / 1e6, pl.shift.y / 1e6, pl.get_angle(), it_brd_pkg->flip);
+            package_transforms.emplace_back(pl.shift.x / 1e6, pl.shift.y / 1e6, pl.get_angle(), it_brd_pkg->flip,
+                                            packages_highlight.count(it_brd_pkg->uuid));
             auto &tr = package_transforms.back();
             const auto model = pkg.get_model(it_brd_pkg->model);
             if (model) {

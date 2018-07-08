@@ -35,6 +35,7 @@ public:
     bool show_substrate = true;
     bool show_models = true;
     bool show_solder_paste = true;
+    float highlight_intensity = .5;
 
     Color background_top_color;
     Color background_bottom_color;
@@ -42,6 +43,8 @@ public:
     void request_push();
     void update2(const class Board &brd);
     void prepare();
+    void update_packages();
+    void set_highlights(const std::set<UUID> &pkgs);
 
     void set_msaa(unsigned int samples);
 
@@ -92,13 +95,14 @@ public:
 
     class ModelTransform {
     public:
-        ModelTransform(float ix, float iy, float a, bool f) : x(ix), y(iy), angle(a), flip(f)
+        ModelTransform(float ix, float iy, float a, bool flip, bool highlight)
+            : x(ix), y(iy), angle(a), flags(flip | (highlight << 1))
         {
         }
         float x;
         float y;
         uint16_t angle;
-        int16_t flip;
+        uint16_t flags;
 
         float model_x = 0;
         float model_y = 0;
@@ -164,6 +168,8 @@ private:
     Color get_layer_color(int layer) const;
 
     void load_models_thread(std::set<std::string> model_filenames, std::string base_path);
+
+    std::set<UUID> packages_highlight;
 
     std::unordered_map<int, Layer3D> layers;
 
