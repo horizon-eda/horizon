@@ -7,14 +7,16 @@
 #include "widgets/cell_renderer_layer_display.hpp"
 #include <fstream>
 #include "nlohmann/json.hpp"
+#include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 
 namespace horizon {
-PoolCacheWindow *PoolCacheWindow::create(Gtk::Window *p, const std::string &cache_path, const std::string &pool_path)
+PoolCacheWindow *PoolCacheWindow::create(Gtk::Window *p, const std::string &cache_path, const std::string &pool_path,
+                                         PoolProjectManagerAppWindow *aw)
 {
     PoolCacheWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/prj-mgr/pool_cache_window.ui");
-    x->get_widget_derived("window", w, cache_path, pool_path);
+    x->get_widget_derived("window", w, cache_path, pool_path, aw);
 
     w->set_transient_for(*p);
 
@@ -176,8 +178,8 @@ void PoolCacheWindow::selection_changed()
 }
 
 PoolCacheWindow::PoolCacheWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const std::string &cp,
-                                 const std::string &bp)
-    : Gtk::Window(cobject), cache_path(cp), base_path(bp), pool_cached(bp, cp), pool(bp)
+                                 const std::string &bp, PoolProjectManagerAppWindow *aw)
+    : Gtk::Window(cobject), cache_path(cp), base_path(bp), pool_cached(bp, cp), pool(bp), appwin(aw)
 {
     x->get_widget("pool_item_view", pool_item_view);
     x->get_widget("stack", stack);
@@ -190,6 +192,14 @@ PoolCacheWindow::PoolCacheWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     x->get_widget("refresh_list_button", refresh_list_button);
     refresh_list_button->signal_clicked().connect(sigc::mem_fun(this, &PoolCacheWindow::refresh_list));
     update_from_pool_button->signal_clicked().connect(sigc::mem_fun(this, &PoolCacheWindow::update_from_pool));
+
+    Gtk::Button *cleanup_button;
+    x->get_widget("cleanup_button", cleanup_button);
+    cleanup_button->signal_clicked().connect([this] {
+        appwin->cleanup_pool_cache();
+        refresh_list();
+    });
+
 
     item_store = Gtk::ListStore::create(tree_columns);
     pool_item_view->set_model(item_store);

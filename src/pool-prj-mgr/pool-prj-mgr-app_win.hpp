@@ -58,6 +58,7 @@ public:
 
     void process_save(const std::string &file);
     void process_close(const std::string &file);
+    void cleanup_pool_cache();
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;

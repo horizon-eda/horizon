@@ -12,7 +12,10 @@
 #include "pool-mgr/editors/editor_window.hpp"
 #include "prj-mgr/part_browser/part_browser_window.hpp"
 #include "prj-mgr/pool_cache_window.hpp"
+#include "prj-mgr/pool_cache_cleanup_dialog.hpp"
 #include "close_utils.hpp"
+#include "schematic/schematic.hpp"
+#include "board/board.hpp"
 
 extern const char *gitversion;
 
@@ -771,8 +774,8 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
                 sigc::mem_fun(this, &PoolProjectManagerAppWindow::handle_place_part));
         part_browser_window->signal_assign_part().connect(
                 sigc::mem_fun(this, &PoolProjectManagerAppWindow::handle_assign_part));
-        pool_cache_window =
-                PoolCacheWindow::create(this, project->pool_cache_directory, app->pools.at(project->pool_uuid).path);
+        pool_cache_window = PoolCacheWindow::create(this, project->pool_cache_directory,
+                                                    app->pools.at(project->pool_uuid).path, this);
         set_view_mode(ViewMode::PROJECT);
     }
 }
@@ -942,5 +945,99 @@ std::map<std::string, PoolProjectManagerProcess *> PoolProjectManagerAppWindow::
     return r;
 }
 
+void PoolProjectManagerAppWindow::cleanup_pool_cache()
+{
+    if (project == nullptr)
+        return;
+    auto pol = get_close_policy();
+    if (pol.files_need_save.size()) {
+        Gtk::MessageDialog md(*pool_cache_window, "Close or save all open files first", false, Gtk::MESSAGE_INFO,
+                              Gtk::BUTTONS_OK);
+        md.run();
+        return;
+    }
+    auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
+    std::set<std::pair<ObjectType, UUID>> items_needed;
+
+    PoolCached pool_cached(app->pools.at(project->pool_uuid).path, project->pool_cache_directory);
+    auto block = Block::new_from_file(project->get_top_block().block_filename, pool_cached);
+    auto sch = Schematic::new_from_file(project->get_top_block().schematic_filename, block, pool_cached);
+    sch.expand();
+    ViaPadstackProvider vpp(project->vias_directory, pool_cached);
+    auto board = Board::new_from_file(project->board_filename, block, pool_cached, vpp);
+    board.expand();
+
+    for (const auto &it : block.components) {
+        items_needed.emplace(ObjectType::ENTITY, it.second.entity->uuid);
+        for (const auto &it_gate : it.second.entity->gates) {
+            items_needed.emplace(ObjectType::UNIT, it_gate.second.unit->uuid);
+        }
+        if (it.second.part) {
+            const Part *part = it.second.part;
+            while (part) {
+                items_needed.emplace(ObjectType::PART, part->uuid);
+                items_needed.emplace(ObjectType::PACKAGE, part->package.uuid);
+                for (const auto &it_pad : part->package->pads) {
+                    items_needed.emplace(ObjectType::PADSTACK, it_pad.second.pool_padstack->uuid);
+                }
+                if (part->base)
+                    part = part->base;
+                else
+                    part = nullptr;
+            }
+        }
+    }
+    for (const auto &it_sheet : sch.sheets) {
+        for (const auto &it_sym : it_sheet.second.symbols) {
+            items_needed.emplace(ObjectType::SYMBOL, it_sym.second.pool_symbol->uuid);
+        }
+    }
+    for (const auto &it_pkg : board.packages) {
+        // don't use pool_package because of alternate pkg
+        items_needed.emplace(ObjectType::PACKAGE, it_pkg.second.package.uuid);
+        for (const auto &it_pad : it_pkg.second.package.pads) {
+            items_needed.emplace(ObjectType::PADSTACK, it_pad.second.pool_padstack->uuid);
+        }
+    }
+    for (const auto &it_via : board.vias) {
+        items_needed.emplace(ObjectType::PADSTACK, it_via.second.vpp_padstack->uuid);
+    }
+
+    std::map<std::pair<ObjectType, UUID>, std::string> items_cached;
+    Glib::Dir dir(project->pool_cache_directory);
+    for (const auto &it : dir) {
+        if (endswith(it, ".json")) {
+            auto itempath = Glib::build_filename(project->pool_cache_directory, it);
+            json j_cache;
+            {
+                std::ifstream ifs(itempath);
+                if (!ifs.is_open()) {
+                    throw std::runtime_error("file " + itempath + " not opened");
+                }
+                ifs >> j_cache;
+                if (j_cache.count("_imp"))
+                    j_cache.erase("_imp");
+
+                ifs.close();
+            }
+            std::string type_str = j_cache.at("type");
+            ObjectType type = object_type_lut.lookup(type_str);
+
+            UUID uuid(j_cache.at("uuid").get<std::string>());
+            items_cached.emplace(std::piecewise_construct, std::forward_as_tuple(type, uuid),
+                                 std::forward_as_tuple(itempath));
+        }
+    }
+
+    std::set<std::string> files_to_delete;
+    for (const auto &it : items_cached) {
+        if (items_needed.count(it.first) == 0) {
+            files_to_delete.insert(it.second);
+        }
+    }
+
+    PoolCacheCleanupDialog dia(pool_cache_window, files_to_delete, &pool_cached);
+    dia.run();
+}
 
 } // namespace horizon

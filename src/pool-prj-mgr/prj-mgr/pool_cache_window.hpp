@@ -14,20 +14,23 @@ using json = nlohmann::json;
 class PoolCacheWindow : public Gtk::Window {
 public:
     PoolCacheWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const std::string &cache_path,
-                    const std::string &pool_path);
-    static PoolCacheWindow *create(Gtk::Window *p, const std::string &cache_path, const std::string &pool_path);
+                    const std::string &pool_path, class PoolProjectManagerAppWindow *aw);
+    static PoolCacheWindow *create(Gtk::Window *p, const std::string &cache_path, const std::string &pool_path,
+                                   class PoolProjectManagerAppWindow *aw);
 
     void refresh_list();
 
 private:
     void selection_changed();
     void update_from_pool();
+    void cleanup();
 
     std::string cache_path;
     std::string base_path;
 
     PoolCached pool_cached;
     Pool pool;
+    class PoolProjectManagerAppWindow *appwin;
 
     Gtk::TreeView *pool_item_view = nullptr;
     Gtk::Stack *stack = nullptr;
