@@ -499,6 +499,8 @@ void Canvas3D::set_highlights(const std::set<UUID> &pkgs)
 
 void Canvas3D::prepare_packages()
 {
+    if (!brd)
+        return;
     package_transform_idxs.clear();
     package_transforms.clear();
     std::map<std::string, std::set<const BoardPackage *>> pkg_map;
