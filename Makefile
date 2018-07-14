@@ -416,6 +416,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/preview_canvas.cpp\
 	src/widgets/preview_base.cpp\
 	src/widgets/unit_preview.cpp\
+	src/widgets/symbol_preview.cpp\
 	src/util/pool_completion.cpp\
 	src/pool/pool_cached.cpp\
 	src/pool-prj-mgr/prj-mgr/prj-mgr_views.cpp\

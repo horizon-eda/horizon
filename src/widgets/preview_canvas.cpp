@@ -10,7 +10,7 @@ PreviewCanvas::PreviewCanvas(Pool &p) : Glib::ObjectBase(typeid(PreviewCanvas)),
     set_selection_allowed(false);
 }
 
-void PreviewCanvas::load(ObjectType type, const UUID &uu)
+void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, bool fit)
 {
     std::pair<Coordi, Coordi> bb;
     int64_t pad = 0;
@@ -21,7 +21,8 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu)
             set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL, la.second.color));
         }
         sym.expand();
-        update(sym);
+        sym.apply_placement(pl);
+        update(sym, pl);
         bb = sym.get_bbox();
         pad = 1_mm;
     } break;
@@ -50,6 +51,7 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu)
 
     bb.second.x += pad;
     bb.second.y += pad;
-    zoom_to_bbox(bb.first, bb.second);
+    if (fit)
+        zoom_to_bbox(bb.first, bb.second);
 }
 } // namespace horizon

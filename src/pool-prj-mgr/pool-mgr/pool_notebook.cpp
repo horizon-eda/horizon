@@ -23,6 +23,7 @@
 #include "widgets/part_preview.hpp"
 #include "widgets/entity_preview.hpp"
 #include "widgets/unit_preview.hpp"
+#include "widgets/symbol_preview.hpp"
 #include "widgets/preview_canvas.hpp"
 #include "pool_update_error_dialog.hpp"
 #include <thread>
@@ -251,18 +252,15 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         paned->add1(*box);
         paned->child_property_shrink(*box) = false;
 
-        auto canvas = Gtk::manage(new PreviewCanvas(pool));
-        canvas->set_selection_allowed(false);
-        paned->add2(*canvas);
-        paned->show_all();
-        br->signal_selected().connect([this, br, canvas] {
+
+        auto preview = Gtk::manage(new SymbolPreview(pool));
+        br->signal_selected().connect([this, br, preview] {
             auto sel = br->get_selected();
-            if (!sel) {
-                canvas->clear();
-                return;
-            }
-            canvas->load(ObjectType::SYMBOL, sel);
+            preview->load(sel);
         });
+        paned->add2(*preview);
+        paned->show_all();
+
         br->signal_activated().connect([this, br] {
             auto uu = br->get_selected();
             auto path = pool.get_filename(ObjectType::SYMBOL, uu);
