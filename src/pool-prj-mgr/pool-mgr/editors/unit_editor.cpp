@@ -4,6 +4,7 @@
 #include "util/util.hpp"
 #include <glibmm.h>
 #include <iomanip>
+#include "util/pool_completion.hpp"
 
 namespace horizon {
 
@@ -122,8 +123,8 @@ void UnitEditor::sort()
     pins_listbox->unset_sort_func();
 }
 
-UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Unit *u)
-    : Gtk::Box(cobject), unit(u)
+UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Unit *u, class Pool *p)
+    : Gtk::Box(cobject), unit(u), pool(p)
 {
     x->get_widget("unit_name", name_entry);
     x->get_widget("unit_manufacturer", manufacturer_entry);
@@ -138,6 +139,7 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         needs_save = true;
     });
     manufacturer_entry->set_text(unit->manufacturer);
+    manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
     manufacturer_entry->signal_changed().connect([this] {
         unit->manufacturer = manufacturer_entry->get_text();
         needs_save = true;
@@ -291,12 +293,12 @@ void UnitEditor::handle_activate(PinEditor *ed)
     }
 }
 
-UnitEditor *UnitEditor::create(Unit *u)
+UnitEditor *UnitEditor::create(Unit *u, class Pool *p)
 {
     UnitEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/pool-mgr/editors/unit_editor.ui");
-    x->get_widget_derived("unit_editor", w, u);
+    x->get_widget_derived("unit_editor", w, u, p);
     w->reference();
     return w;
 }

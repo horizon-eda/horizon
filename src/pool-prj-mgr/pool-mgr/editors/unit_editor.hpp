@@ -10,8 +10,8 @@ class UnitEditor : public Gtk::Box, public PoolEditorInterface {
     friend class PinEditor;
 
 public:
-    UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Unit *u);
-    static UnitEditor *create(class Unit *u);
+    UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Unit *u, class Pool *p);
+    static UnitEditor *create(class Unit *u, class Pool *p);
 
     virtual ~UnitEditor(){};
 
@@ -32,5 +32,7 @@ private:
     void handle_delete();
     void sort();
     void handle_activate(class PinEditor *ed);
+
+    Pool *pool;
 };
 } // namespace horizon

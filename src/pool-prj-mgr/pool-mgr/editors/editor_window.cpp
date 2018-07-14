@@ -90,7 +90,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p)
     case ObjectType::UNIT: {
         auto st = new UnitStore(filename);
         store.reset(st);
-        auto ed = UnitEditor::create(&st->unit);
+        auto ed = UnitEditor::create(&st->unit, pool);
         editor = ed;
         iface = ed;
         hb->set_title("Unit Editor");
