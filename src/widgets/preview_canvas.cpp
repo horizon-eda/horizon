@@ -24,7 +24,6 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
         sym.apply_placement(pl);
         update(sym, pl);
         bb = sym.get_bbox();
-        pad = 1_mm;
     } break;
 
     case ObjectType::PACKAGE: {
@@ -40,11 +39,12 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
         property_layer_opacity() = 75;
         update(pkg);
         bb = pkg.get_bbox();
-        pad = 1_mm;
-        bb.first.x -= pad;
     } break;
     default:;
     }
+
+    pad = std::max(bb.second.x, bb.second.y);
+    pad /= 1.61803;
 
     bb.first.x -= pad;
     bb.first.y -= pad;
