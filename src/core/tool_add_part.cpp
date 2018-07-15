@@ -98,13 +98,16 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
                 comp->refdes = comp->entity->prefix + "?";
                 comp->tag = UUID::random();
 
+                auto old_symbol = sym_current;
                 sym_current = map_symbol(comp, gates.front());
                 if (!sym_current) {
                     core.c->get_block()->components.erase(comp->uuid);
                     core.r->commit();
                     return ToolResponse::end();
                 }
+                sym_current->placement = old_symbol->placement;
                 sym_current->placement.shift = args.coords;
+
                 core.c->selection.clear();
                 core.c->selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
 
@@ -113,6 +116,7 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
             else { // place next gate
                 auto sym = map_symbol(comp, gates.at(current_gate + 1));
                 if (sym) {
+                    sym->placement = sym_current->placement;
                     sym_current = sym;
                     current_gate++;
                     sym_current->placement.shift = args.coords;
