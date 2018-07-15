@@ -342,6 +342,11 @@ std::pair<Coordi, Coordi> Package::get_bbox() const
         a = Coordi::min(a, bb_pad.first);
         b = Coordi::max(b, bb_pad.second);
     }
+    for (const auto &it : junctions) {
+        auto pos = it.second.position;
+        a = Coordi::min(a, pos);
+        b = Coordi::max(b, pos);
+    }
     return std::make_pair(a, b);
 }
 
