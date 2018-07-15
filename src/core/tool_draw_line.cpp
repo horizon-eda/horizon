@@ -6,19 +6,7 @@
 
 namespace horizon {
 
-void ToolDrawLine::Settings::load_from_json(const json &j)
-{
-    width = j.value("width", 0);
-}
-
-json ToolDrawLine::Settings::serialize() const
-{
-    json j;
-    j["width"] = width;
-    return j;
-}
-
-ToolDrawLine::ToolDrawLine(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolDrawLine::ToolDrawLine(Core *c, ToolID tid) : ToolHelperLineWidthSetting(c, tid)
 {
 }
 
@@ -117,11 +105,7 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_w) {
-            auto r = imp->dialogs.ask_datum("Enter width", settings.width);
-            if (r.first) {
-                settings.width = std::max(r.second, (int64_t)0);
-                apply_settings();
-            }
+            ask_line_width();
         }
         else if (args.key == GDK_KEY_Escape) {
             if (temp_line) {

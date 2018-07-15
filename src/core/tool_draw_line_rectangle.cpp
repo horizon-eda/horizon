@@ -5,8 +5,15 @@
 
 namespace horizon {
 
-ToolDrawLineRectangle::ToolDrawLineRectangle(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolDrawLineRectangle::ToolDrawLineRectangle(Core *c, ToolID tid) : ToolHelperLineWidthSetting(c, tid)
 {
+}
+
+void ToolDrawLineRectangle::apply_settings()
+{
+    for (auto &li : lines) {
+        li->width = settings.width;
+    }
 }
 
 bool ToolDrawLineRectangle::can_begin()
@@ -54,7 +61,7 @@ ToolResponse ToolDrawLineRectangle::begin(const ToolArgs &args)
         line->to = junctions[(i + 1) % 4];
     }
     first_pos = args.coords;
-
+    apply_settings();
     update_tip();
     return ToolResponse();
 }
@@ -81,6 +88,7 @@ void ToolDrawLineRectangle::update_tip()
     }
     ss << " <b>RMB:</b>cancel";
     ss << " <b>c:</b>switch mode";
+    ss << "  <b>w:</b>line width";
 
     ss << " <i>";
     if (mode == Mode::CENTER) {
@@ -127,6 +135,9 @@ ToolResponse ToolDrawLineRectangle::update(const ToolArgs &args)
         if (args.key == GDK_KEY_c) {
             mode = mode == Mode::CENTER ? Mode::CORNER : Mode::CENTER;
             update_junctions();
+        }
+        else if (args.key == GDK_KEY_w) {
+            ask_line_width();
         }
         else if (args.key == GDK_KEY_Escape) {
             core.r->revert();

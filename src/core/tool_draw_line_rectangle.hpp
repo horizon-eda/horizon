@@ -1,14 +1,16 @@
 #pragma once
 #include "core.hpp"
+#include "tool_helper_line_width_setting.hpp"
 
 namespace horizon {
 
-class ToolDrawLineRectangle : public ToolBase {
+class ToolDrawLineRectangle : public ToolHelperLineWidthSetting {
 public:
     ToolDrawLineRectangle(Core *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;
+    void apply_settings() override;
 
 private:
     std::set<class Line *> lines;

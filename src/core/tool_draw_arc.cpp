@@ -4,8 +4,14 @@
 
 namespace horizon {
 
-ToolDrawArc::ToolDrawArc(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolDrawArc::ToolDrawArc(Core *c, ToolID tid) : ToolHelperLineWidthSetting(c, tid)
 {
+}
+
+void ToolDrawArc::apply_settings()
+{
+    if (temp_arc)
+        temp_arc->width = settings.width;
 }
 
 bool ToolDrawArc::can_begin()
@@ -48,7 +54,7 @@ void ToolDrawArc::update_tip()
     else if (state == DrawArcState::CENTER) {
         ss << "place center junction";
     }
-    ss << " <b>RMB:</b>cancel <b>e:</b>reverse arc direction";
+    ss << " <b>RMB:</b>cancel <b>e:</b>reverse arc direction <b>w:</b>line width";
     imp->tool_bar_set_tip(ss.str());
 }
 
@@ -80,6 +86,7 @@ ToolResponse ToolDrawArc::update(const ToolArgs &args)
                     temp_junc = make_junction(args.coords);
                 }
                 temp_arc = core.r->insert_arc(UUID::random());
+                apply_settings();
                 temp_arc->from = from_junc;
                 temp_arc->to = to_junc;
                 temp_arc->center = temp_junc;
@@ -110,7 +117,10 @@ ToolResponse ToolDrawArc::update(const ToolArgs &args)
             temp_arc->layer = args.work_layer;
     }
     else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
+        if (args.key == GDK_KEY_w) {
+            ask_line_width();
+        }
+        else if (args.key == GDK_KEY_Escape) {
             core.r->revert();
             return ToolResponse::end();
         }
