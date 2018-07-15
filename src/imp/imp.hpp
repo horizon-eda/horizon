@@ -117,6 +117,7 @@ protected:
     virtual void handle_maybe_drag();
 
     virtual ActionCatalogItem::Availability get_editor_type_for_action() const = 0;
+    virtual ObjectType get_editor_type() const = 0;
 
     void layer_up_down(bool up);
     void goto_layer(int layer);
@@ -151,6 +152,7 @@ private:
     void show_preferences_window();
     void handle_drag();
     void update_selection_label();
+    std::string get_tool_settings_filename(ToolID id);
 
     void hud_update();
 

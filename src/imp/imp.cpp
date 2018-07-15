@@ -198,6 +198,15 @@ void ImpBase::update_selection_label()
     main_window->selection_label->set_text(la);
 }
 
+std::string ImpBase::get_tool_settings_filename(ToolID id)
+{
+    auto type_str = object_type_lut.lookup_reverse(get_editor_type());
+    auto settings_dir = Glib::build_filename(get_config_dir(), "tool_settings", type_str);
+    if (!Glib::file_test(settings_dir, Glib::FILE_TEST_IS_DIR))
+        Gio::File::create_for_path(settings_dir)->make_directory_with_parents();
+    return Glib::build_filename(settings_dir, tool_lut.lookup_reverse(id) + ".json");
+}
+
 void ImpBase::run(int argc, char *argv[])
 {
     auto app = Gtk::Application::create(argc, argv, "net.carrotIndustries.horizon.Imp", Gio::APPLICATION_NON_UNIQUE);
@@ -463,6 +472,24 @@ void ImpBase::run(int argc, char *argv[])
     core.r->signal_can_undo_redo().connect([this] { update_action_sensitivity(); });
     canvas->signal_selection_changed().connect([this] { update_action_sensitivity(); });
     core.r->signal_can_undo_redo().emit();
+
+    core.r->signal_load_tool_settings().connect([this](ToolID id) {
+        json j;
+        auto fn = get_tool_settings_filename(id);
+        if (Glib::file_test(fn, Glib::FILE_TEST_IS_REGULAR)) {
+            std::ifstream ifs(fn);
+            if (!ifs.is_open()) {
+                return j;
+            }
+            ifs >> j;
+            ifs.close();
+        }
+        return j;
+    });
+    core.r->signal_save_tool_settings().connect([this](ToolID id, json j) {
+        save_json_to_file(get_tool_settings_filename(id), j);
+
+    });
 
     auto help_button = create_action_button(make_action(ActionID::HELP));
     help_button->show();

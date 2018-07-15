@@ -197,6 +197,40 @@ public:
     };
 };
 
+class ToolSettings {
+public:
+    virtual void load_from_json(const json &j) = 0;
+    virtual json serialize() const = 0;
+    virtual ~ToolSettings()
+    {
+    }
+};
+
+class ToolSettingsProxy {
+public:
+    ToolSettingsProxy(class ToolBase *t, ToolSettings *s) : tool(t), settings(s)
+    {
+    }
+    ToolSettings &operator*()
+    {
+        return *settings;
+    }
+    operator ToolSettings *()
+    {
+        return settings;
+    }
+    ToolSettings *operator->()
+    {
+        return settings;
+    }
+    ~ToolSettingsProxy();
+
+private:
+    ToolBase *tool;
+    ToolSettings *settings;
+};
+
+
 /**
  * Common interface for all Tools
  */
@@ -205,6 +239,22 @@ public:
     ToolBase(class Core *c, ToolID tid);
     void set_imp_interface(class ImpInterface *i);
     void set_transient();
+    virtual ToolID get_tool_id_for_settings() const
+    {
+        return tool_id;
+    }
+    virtual const ToolSettings *get_settings_const() const
+    {
+        return nullptr;
+    }
+    ToolSettingsProxy get_settings_proxy()
+    {
+        return ToolSettingsProxy(this, get_settings());
+    }
+    virtual void apply_settings()
+    {
+    }
+
 
     /**
      * Gets called right after the constructor has finished.
@@ -252,6 +302,10 @@ protected:
     class ImpInterface *imp = nullptr;
     ToolID tool_id = ToolID::NONE;
     bool is_transient = false;
+    virtual ToolSettings *get_settings()
+    {
+        return nullptr;
+    }
 };
 
 /**
@@ -428,6 +482,18 @@ public:
         return s_signal_needs_save;
     }
 
+    typedef sigc::signal<json, ToolID> type_signal_load_tool_settings;
+    type_signal_load_tool_settings signal_load_tool_settings()
+    {
+        return s_signal_load_tool_settings;
+    }
+
+    typedef sigc::signal<void, ToolID, json> type_signal_save_tool_settings;
+    type_signal_save_tool_settings signal_save_tool_settings()
+    {
+        return s_signal_save_tool_settings;
+    }
+
     virtual void reload_pool()
     {
     }
@@ -470,6 +536,8 @@ protected:
     type_signal_rebuilt s_signal_can_undo_redo;
     type_signal_request_save_meta s_signal_request_save_meta;
     type_signal_needs_save s_signal_needs_save;
+    type_signal_load_tool_settings s_signal_load_tool_settings;
+    type_signal_save_tool_settings s_signal_save_tool_settings;
     bool needs_save = false;
     void set_needs_save(bool v);
 

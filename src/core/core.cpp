@@ -306,6 +306,15 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
     update_rules(); // write rules to board, so tool has the current rules
     try {
         tool = create_tool(tool_id);
+        {
+            auto sp = tool->get_settings_proxy();
+            if (sp != nullptr) {
+                auto tid = tool->get_tool_id_for_settings();
+                auto j = s_signal_load_tool_settings.emit(tid);
+                if (j != nullptr)
+                    sp->load_from_json(j);
+            }
+        }
         tool->set_imp_interface(imp);
         if (transient)
             tool->set_transient();
@@ -335,6 +344,10 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
             return ToolResponse::end();
         }
         if (r.end_tool) {
+            auto tid = tool->get_tool_id_for_settings();
+            auto settings = tool->get_settings_const();
+            if (settings)
+                s_signal_save_tool_settings.emit(tid, settings->serialize());
             tool.reset();
             s_signal_tool_changed.emit(ToolID::NONE);
             rebuild();
@@ -379,6 +392,10 @@ ToolResponse Core::tool_update(const ToolArgs &args)
             return ToolResponse::end();
         }
         if (r.end_tool) {
+            auto tid = tool->get_tool_id_for_settings();
+            auto settings = tool->get_settings_const();
+            if (settings)
+                s_signal_save_tool_settings.emit(tid, settings->serialize());
             tool.reset();
             s_signal_tool_changed.emit(ToolID::NONE);
             rebuild();
@@ -659,5 +676,10 @@ void ToolBase::set_imp_interface(ImpInterface *i)
 void ToolBase::set_transient()
 {
     is_transient = true;
+}
+
+ToolSettingsProxy::~ToolSettingsProxy()
+{
+    tool->apply_settings();
 }
 } // namespace horizon

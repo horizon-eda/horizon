@@ -21,6 +21,10 @@ protected:
     {
         return ActionCatalogItem::AVAILABLE_IN_BOARD;
     };
+    ObjectType get_editor_type() const override
+    {
+        return ObjectType::BOARD;
+    }
 
     std::string get_hud_text(std::set<SelectableRef> &sel) override;
 

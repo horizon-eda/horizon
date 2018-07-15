@@ -2,8 +2,21 @@
 #include "imp/imp_interface.hpp"
 #include "pool/part.hpp"
 #include <algorithm>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
+
+void ToolDrawLine::Settings::load_from_json(const json &j)
+{
+    width = j.value("width", 0);
+}
+
+json ToolDrawLine::Settings::serialize() const
+{
+    json j;
+    j["width"] = width;
+    return j;
+}
 
 ToolDrawLine::ToolDrawLine(Core *c, ToolID tid) : ToolBase(c, tid)
 {
@@ -12,6 +25,12 @@ ToolDrawLine::ToolDrawLine(Core *c, ToolID tid) : ToolBase(c, tid)
 bool ToolDrawLine::can_begin()
 {
     return core.r->has_object_type(ObjectType::LINE);
+}
+
+void ToolDrawLine::apply_settings()
+{
+    if (temp_line)
+        temp_line->width = settings.width;
 }
 
 ToolResponse ToolDrawLine::begin(const ToolArgs &args)
@@ -50,9 +69,6 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
-            int64_t last_width = 0;
-            if (temp_line)
-                last_width = temp_line->width;
             if (args.target.type == ObjectType::JUNCTION) {
                 if (temp_line != nullptr) {
                     temp_line->to = core.r->get_junction(args.target.path.at(0));
@@ -76,7 +92,7 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
                 temp_line->from = last;
             }
             temp_line->layer = args.work_layer;
-            temp_line->width = last_width;
+            temp_line->width = settings.width;
             temp_line->to = temp_junc;
         }
         else if (args.button == 3) {
@@ -101,11 +117,10 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_w) {
-            if (temp_line) {
-                auto r = imp->dialogs.ask_datum("Enter width", temp_line->width);
-                if (r.first) {
-                    temp_line->width = std::max(r.second, (int64_t)0);
-                }
+            auto r = imp->dialogs.ask_datum("Enter width", settings.width);
+            if (r.first) {
+                settings.width = std::max(r.second, (int64_t)0);
+                apply_settings();
             }
         }
         else if (args.key == GDK_KEY_Escape) {
