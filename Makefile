@@ -81,6 +81,7 @@ SRC_COMMON = \
 	3rd_party/clipper/clipper.cpp\
 	src/common/dimension.cpp\
 	src/logger/logger.cpp\
+	src/parameter/program_polygon.cpp
 
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += src/util/uuid_win32.cpp

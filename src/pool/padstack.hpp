@@ -7,6 +7,7 @@
 #include "common/shape.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "parameter/program.hpp"
+#include "parameter/program_polygon.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_provider.hpp"
 #include <fstream>
@@ -19,8 +20,11 @@ using json = nlohmann::json;
 
 class Padstack : public UUIDProvider, public LayerProvider {
 public:
-    class MyParameterProgram : public ParameterProgram {
+    class MyParameterProgram : public ParameterProgramPolygon {
         friend Padstack;
+
+    protected:
+        std::map<UUID, Polygon> &get_polygons() override;
 
     private:
         ParameterProgram::CommandHandler get_command(const std::string &cmd) override;
@@ -28,7 +32,6 @@ public:
 
         std::pair<bool, std::string> set_shape(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack);
         std::pair<bool, std::string> set_hole(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack);
-        std::pair<bool, std::string> set_polygon(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack);
 
     public:
         MyParameterProgram(class Padstack *p, const std::string &code);

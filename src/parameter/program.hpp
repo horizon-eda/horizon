@@ -22,6 +22,8 @@ public:
 
     std::pair<bool, std::string> run(const ParameterSet &pset = {});
 
+    static bool stack_pop(std::deque<int64_t> &stack, int64_t &va);
+
 protected:
     class Token {
     public:

@@ -14,6 +14,7 @@
 #include "util/uuid.hpp"
 #include "util/uuid_provider.hpp"
 #include "util/warning.hpp"
+#include "parameter/program_polygon.hpp"
 #include <fstream>
 #include <map>
 #include <set>
@@ -24,16 +25,15 @@ using json = nlohmann::json;
 
 class Package : public ObjectProvider, public LayerProvider, public UUIDProvider {
 public:
-    class MyParameterProgram : public ParameterProgram {
+    class MyParameterProgram : public ParameterProgramPolygon {
         friend Package;
+
+    protected:
+        std::map<UUID, Polygon> &get_polygons() override;
 
     private:
         ParameterProgram::CommandHandler get_command(const std::string &cmd) override;
         class Package *pkg = nullptr;
-
-        std::pair<bool, std::string> set_polygon(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack);
-        std::pair<bool, std::string> expand_polygon(const ParameterProgram::TokenCommand *cmd,
-                                                    std::deque<int64_t> &stack);
 
     public:
         MyParameterProgram(class Package *p, const std::string &code);

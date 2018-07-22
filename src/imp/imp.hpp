@@ -145,6 +145,8 @@ protected:
     }
     void edit_pool_item(ObjectType type, const UUID &uu);
 
+    void parameter_window_add_polygon_expand(class ParameterWindow *parameter_window);
+
 private:
     void fix_cursor_pos();
     void apply_settings();

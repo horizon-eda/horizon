@@ -42,7 +42,7 @@ std::pair<bool, std::string> ParameterProgram::set_code(const std::string &s)
     return compile();
 }
 
-static bool stack_pop(std::deque<int64_t> &stack, int64_t &va)
+bool ParameterProgram::stack_pop(std::deque<int64_t> &stack, int64_t &va)
 {
     if (stack.size()) {
         va = stack.back();
@@ -70,7 +70,7 @@ public:
     static std::pair<bool, std::string> math1(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack)
     {
         int64_t a;
-        if (stack_pop(stack, a))
+        if (ParameterProgram::stack_pop(stack, a))
             return {true, "empty stack"};
         if (cmd->command == "dup") {
             stack.push_back(a);
@@ -82,7 +82,8 @@ public:
     static std::pair<bool, std::string> math3(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack)
     {
         int64_t a, b, c;
-        if (stack_pop(stack, c) || stack_pop(stack, b) || stack_pop(stack, a))
+        if (ParameterProgram::stack_pop(stack, c) || ParameterProgram::stack_pop(stack, b)
+            || ParameterProgram::stack_pop(stack, a))
             return {true, "empty stack"};
         if (cmd->command == "+xy") {
             stack.push_back(a + c);
@@ -98,7 +99,7 @@ public:
     static std::pair<bool, std::string> math2(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack)
     {
         int64_t a, b;
-        if (stack_pop(stack, b) || stack_pop(stack, a))
+        if (ParameterProgram::stack_pop(stack, b) || ParameterProgram::stack_pop(stack, a))
             return {true, "empty stack"};
         if (cmd->command[0] == '+') {
             stack.push_back(a + b);
@@ -190,6 +191,7 @@ std::pair<bool, std::string> ParameterProgram::run(const ParameterSet &pset)
 
     return {false, ""};
 }
+
 
 std::pair<bool, std::string> ParameterProgram::compile()
 {

@@ -580,29 +580,7 @@ void ImpPackage::construct()
         button->show();
         button->signal_clicked().connect([this, parameter_window] { parameter_window->present(); });
     }
-    {
-        auto button = Gtk::manage(new Gtk::Button("Polygon expand"));
-        parameter_window->add_button(button);
-        button->signal_clicked().connect([this, parameter_window] {
-            auto sel = canvas->get_selection();
-            if (sel.size() == 1) {
-                auto &s = *sel.begin();
-                if (s.type == ObjectType::POLYGON_EDGE || s.type == ObjectType::POLYGON_VERTEX) {
-                    auto poly = core.r->get_polygon(s.uuid);
-                    if (!poly->has_arcs()) {
-                        std::stringstream ss;
-                        ss.imbue(std::locale("C"));
-                        ss << "expand-polygon [ " << poly->parameter_class << " ";
-                        for (const auto &it : poly->vertices) {
-                            ss << it.position.x << " " << it.position.y << " ";
-                        }
-                        ss << "]\n";
-                        parameter_window->insert_text(ss.str());
-                    }
-                }
-            }
-        });
-    }
+    parameter_window_add_polygon_expand(parameter_window);
     {
         auto button = Gtk::manage(new Gtk::Button("Insert courtyard program"));
         parameter_window->add_button(button);

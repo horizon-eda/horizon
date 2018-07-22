@@ -18,6 +18,7 @@
 #include "tool_popover.hpp"
 #include "hud_util.hpp"
 #include "util/str_util.hpp"
+#include "parameter_window.hpp"
 #include <glibmm/main.h>
 #include <glibmm/markup.h>
 #include <gtkmm.h>
@@ -617,6 +618,31 @@ void ImpBase::run(int argc, char *argv[])
     core.r->signal_rebuilt().connect([this] { update_monitor(); });
 
     app->run(*main_window);
+}
+
+void ImpBase::parameter_window_add_polygon_expand(ParameterWindow *parameter_window)
+{
+    auto button = Gtk::manage(new Gtk::Button("Polygon expand"));
+    parameter_window->add_button(button);
+    button->signal_clicked().connect([this, parameter_window] {
+        auto sel = canvas->get_selection();
+        if (sel.size() == 1) {
+            auto &s = *sel.begin();
+            if (s.type == ObjectType::POLYGON_EDGE || s.type == ObjectType::POLYGON_VERTEX) {
+                auto poly = core.r->get_polygon(s.uuid);
+                if (!poly->has_arcs()) {
+                    std::stringstream ss;
+                    ss.imbue(std::locale("C"));
+                    ss << "expand-polygon [ " << poly->parameter_class << " ";
+                    for (const auto &it : poly->vertices) {
+                        ss << it.position.x << " " << it.position.y << " ";
+                    }
+                    ss << "]\n";
+                    parameter_window->insert_text(ss.str());
+                }
+            }
+        }
+    });
 }
 
 void ImpBase::hud_update()
