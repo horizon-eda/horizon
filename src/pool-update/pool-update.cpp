@@ -227,7 +227,7 @@ static void update_padstacks_global(SQLite::Database &db, const std::string &dir
             }
         }
         else if (Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
-            update_padstacks(db, filename, status_cb, Glib::build_filename(prefix, it));
+            update_padstacks_global(db, filename, status_cb, Glib::build_filename(prefix, it));
         }
     }
 }
