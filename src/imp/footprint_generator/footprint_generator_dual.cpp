@@ -39,8 +39,28 @@ FootprintGeneratorDual::FootprintGeneratorDual(CorePackage *c)
     sp_spacing->set_valign(Gtk::ALIGN_CENTER);
     sp_spacing->set_halign(Gtk::ALIGN_START);
     sp_spacing->set_value(3_mm);
+    sp_spacing_connections.push_back(
+            sp_spacing->signal_value_changed().connect([this] { update_spacing(Mode::SPACING); }));
     overlay->add_at_sub(*sp_spacing, "#spacing");
     sp_spacing->show();
+
+    sp_spacing_inner = Gtk::manage(new SpinButtonDim());
+    sp_spacing_inner->set_range(0, 100_mm);
+    sp_spacing_inner->set_valign(Gtk::ALIGN_CENTER);
+    sp_spacing_inner->set_halign(Gtk::ALIGN_START);
+    sp_spacing_connections.push_back(
+            sp_spacing_inner->signal_value_changed().connect([this] { update_spacing(Mode::SPACING_INNER); }));
+    overlay->add_at_sub(*sp_spacing_inner, "#spacing_inner");
+    sp_spacing_inner->show();
+
+    sp_spacing_outer = Gtk::manage(new SpinButtonDim());
+    sp_spacing_outer->set_range(0, 100_mm);
+    sp_spacing_outer->set_valign(Gtk::ALIGN_CENTER);
+    sp_spacing_outer->set_halign(Gtk::ALIGN_START);
+    sp_spacing_connections.push_back(
+            sp_spacing_outer->signal_value_changed().connect([this] { update_spacing(Mode::SPACING_OUTER); }));
+    overlay->add_at_sub(*sp_spacing_outer, "#spacing_outer");
+    sp_spacing_outer->show();
 
     sp_pitch = Gtk::manage(new SpinButtonDim());
     sp_pitch->set_range(0, 50_mm);
@@ -55,6 +75,8 @@ FootprintGeneratorDual::FootprintGeneratorDual(CorePackage *c)
     sp_pad_height->set_valign(Gtk::ALIGN_CENTER);
     sp_pad_height->set_halign(Gtk::ALIGN_START);
     sp_pad_height->set_value(.5_mm);
+    sp_spacing_connections.push_back(
+            sp_pad_height->signal_value_changed().connect([this] { update_spacing(Mode::PAD_HEIGHT); }));
     overlay->add_at_sub(*sp_pad_height, "#pad_height");
     sp_pad_height->show();
 
@@ -65,6 +87,8 @@ FootprintGeneratorDual::FootprintGeneratorDual(CorePackage *c)
     sp_pad_width->set_value(.5_mm);
     overlay->add_at_sub(*sp_pad_width, "#pad_width");
     sp_pad_width->show();
+
+    update_spacing(Mode::PAD_HEIGHT);
 
     sp_count->signal_value_changed().connect([this] {
         pad_count = sp_count->get_value_as_int();
@@ -242,4 +266,34 @@ void FootprintGeneratorDual::update_preview()
     }
     overlay->queue_draw();
 }
+
+void FootprintGeneratorDual::update_spacing(Mode mode)
+{
+    for (auto &it : sp_spacing_connections) {
+        it.block();
+    }
+    int64_t spacing = sp_spacing->get_value_as_int();
+    int64_t spacing_inner = sp_spacing_inner->get_value_as_int();
+    int64_t spacing_outer = sp_spacing_outer->get_value_as_int();
+    int64_t pad_height = sp_pad_height->get_value_as_int();
+
+    switch (mode) {
+    case Mode::SPACING:
+    case Mode::PAD_HEIGHT:
+        sp_spacing_inner->set_value(spacing - pad_height / 2);
+        sp_spacing_outer->set_value(spacing + pad_height / 2);
+        break;
+
+    case Mode::SPACING_INNER:
+    case Mode::SPACING_OUTER:
+        sp_pad_height->set_value(spacing_outer - spacing_inner);
+        sp_spacing->set_value((spacing_outer + spacing_inner) / 2);
+        break;
+    }
+
+    for (auto &it : sp_spacing_connections) {
+        it.unblock();
+    }
+}
+
 } // namespace horizon
