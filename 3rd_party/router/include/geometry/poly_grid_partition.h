@@ -72,11 +72,7 @@ private:
     {
         std::size_t operator()(  const SEG& a ) const
         {
-            std::size_t seed = 0;
-
             return a.A.x + a.B.x + a.A.y + a.B.y;
-
-            return seed;
         }
     };
 
@@ -285,6 +281,7 @@ private:
     {
         SCAN_STATE()
         {
+            dist_prev   = INT_MAX;
             dist_max    = INT_MAX;
             nearest     = -1;
             nearest_prev = -1;

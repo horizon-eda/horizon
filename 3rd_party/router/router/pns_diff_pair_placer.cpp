@@ -164,9 +164,6 @@ bool DIFF_PAIR_PLACER::attemptWalk( NODE* aNode, DIFF_PAIR* aCurrent,
     WALKAROUND walkaround( aNode, Router() );
     WALKAROUND::WALKAROUND_STATUS wf1;
 
-    Router()->GetRuleResolver()->OverrideClearance( true,
-            aCurrent->NetP(), aCurrent->NetN(), aCurrent->Gap() );
-
     walkaround.SetSolidsOnly( aSolidsOnly );
     walkaround.SetIterationLimit( Settings().WalkaroundIterationLimit() );
 
@@ -233,7 +230,6 @@ bool DIFF_PAIR_PLACER::attemptWalk( NODE* aNode, DIFF_PAIR* aCurrent,
         return false;
 
     aWalk.SetShape( cur.CP(), cur.CN() );
-    Router()->GetRuleResolver()->OverrideClearance( false );
 
     return true;
 }
@@ -388,11 +384,12 @@ bool DIFF_PAIR_PLACER::SetLayer( int aLayer )
     {
         m_currentLayer = aLayer;
         return true;
-    } else if( m_chainedPlacement )
+    }
+    else if( m_chainedPlacement || !m_prevPair )
+    {
         return false;
-    else if( !m_prevPair )
-        return false;
-    else if( m_prevPair->PrimP() || ( m_prevPair->PrimP()->OfKind( ITEM::VIA_T ) &&
+    }
+    else if( !m_prevPair->PrimP() || ( m_prevPair->PrimP()->OfKind( ITEM::VIA_T ) &&
                 m_prevPair->PrimP()->Layers().Overlaps( aLayer ) ) )
     {
         m_currentLayer = aLayer;
@@ -437,7 +434,8 @@ OPT_VECTOR2I DIFF_PAIR_PLACER::getDanglingAnchor( NODE* aNode, ITEM* aItem )
 
 
 
-bool DIFF_PAIR_PLACER::findDpPrimitivePair( const VECTOR2I& aP, ITEM* aItem, DP_PRIMITIVE_PAIR& aPair )
+bool DIFF_PAIR_PLACER::findDpPrimitivePair( const VECTOR2I& aP, ITEM* aItem,
+                                            DP_PRIMITIVE_PAIR& aPair, std::string* aErrorMsg )
 {
     int netP, netN;
 
@@ -714,7 +712,7 @@ void DIFF_PAIR_PLACER::UpdateSizes( const SIZES_SETTINGS& aSizes )
 }
 
 
-bool DIFF_PAIR_PLACER::FixRoute( const VECTOR2I& aP, ITEM* aEndItem )
+bool DIFF_PAIR_PLACER::FixRoute( const VECTOR2I& aP, ITEM* aEndItem, bool aForceFinish )
 {
     if( !m_fitOk )
         return false;
@@ -728,7 +726,7 @@ bool DIFF_PAIR_PLACER::FixRoute( const VECTOR2I& aP, ITEM* aEndItem )
 
     TOPOLOGY topo( m_lastNode );
 
-    if( !m_snapOnTarget && !m_currentTrace.EndsWithVias() )
+    if( !m_snapOnTarget && !m_currentTrace.EndsWithVias() && !aForceFinish )
     {
         SHAPE_LINE_CHAIN newP( m_currentTrace.CP() );
         SHAPE_LINE_CHAIN newN( m_currentTrace.CN() );
@@ -750,7 +748,7 @@ bool DIFF_PAIR_PLACER::FixRoute( const VECTOR2I& aP, ITEM* aEndItem )
     }
     else
     {
-        m_chainedPlacement = !m_snapOnTarget;
+        m_chainedPlacement = !m_snapOnTarget && !aForceFinish;
     }
 
     LINE lineP( m_currentTrace.PLine() );
@@ -769,7 +767,7 @@ bool DIFF_PAIR_PLACER::FixRoute( const VECTOR2I& aP, ITEM* aEndItem )
     m_lastNode = NULL;
     m_placingVia = false;
 
-    if( m_snapOnTarget )
+    if( m_snapOnTarget || aForceFinish )
     {
         m_idle = true;
         return true;

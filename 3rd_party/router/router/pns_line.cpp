@@ -19,7 +19,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <boost/optional.hpp>
+#include <core/optional.h>
 
 #include <math/vector2d.h>
 
@@ -30,8 +30,6 @@
 #include "pns_router.h"
 
 #include <geometry/shape_rect.h>
-
-using boost::optional;
 
 namespace PNS {
 
@@ -161,8 +159,6 @@ bool LINE::Walkaround( SHAPE_LINE_CHAIN aObstacle, SHAPE_LINE_CHAIN& aPre,
                            SHAPE_LINE_CHAIN& aWalk, SHAPE_LINE_CHAIN& aPost, bool aCw ) const
 {
     const SHAPE_LINE_CHAIN& line( CLine() );
-    VECTOR2I ip_start;
-    VECTOR2I ip_end;
 
     if( line.SegmentCount() < 1 )
         return false;
@@ -170,7 +166,7 @@ bool LINE::Walkaround( SHAPE_LINE_CHAIN aObstacle, SHAPE_LINE_CHAIN& aPre,
     if( aObstacle.PointInside( line.CPoint( 0 ) ) || aObstacle.PointInside( line.CPoint( -1 ) ) )
         return false;
 
-    SHAPE_LINE_CHAIN::INTERSECTIONS ips, ips2;
+    SHAPE_LINE_CHAIN::INTERSECTIONS ips;
 
     line.Intersect( aObstacle, ips );
 
@@ -230,6 +226,9 @@ bool LINE::Walkaround( SHAPE_LINE_CHAIN aObstacle, SHAPE_LINE_CHAIN& aPre,
 
     int i = i_first;
 
+    if( i_first < 0 || i_last < 0 )
+        return false;
+
     while( i != i_last )
     {
         aWalk.Append( aObstacle.CPoint( i ) );
@@ -253,14 +252,18 @@ bool LINE::Walkaround( SHAPE_LINE_CHAIN aObstacle, SHAPE_LINE_CHAIN& aPre,
 }
 
 
-void LINE::Walkaround( const SHAPE_LINE_CHAIN& aObstacle, SHAPE_LINE_CHAIN& aPath, bool aCw ) const
+bool LINE::Walkaround( const SHAPE_LINE_CHAIN& aObstacle, SHAPE_LINE_CHAIN& aPath, bool aCw ) const
 {
     SHAPE_LINE_CHAIN walk, post;
 
-    Walkaround( aObstacle, aPath, walk, post, aCw );
+    if( ! Walkaround( aObstacle, aPath, walk, post, aCw ) )
+        return false;
+
     aPath.Append( walk );
     aPath.Append( post );
     aPath.Simplify();
+
+    return true;
 }
 
 
@@ -338,7 +341,7 @@ void LINE::ShowLinks() const
 
 SHAPE_LINE_CHAIN dragCornerInternal( const SHAPE_LINE_CHAIN& aOrigin, const VECTOR2I& aP )
 {
-    optional<SHAPE_LINE_CHAIN> picked;
+    OPT<SHAPE_LINE_CHAIN> picked;
     int i;
     int d = 2;
 
@@ -801,9 +804,9 @@ bool LINE::HasLoops() const
 {
     for( int i = 0; i < PointCount(); i++ )
     {
-        for( int j = 0; j < PointCount(); j++ )
+        for( int j = i + 2; j < PointCount(); j++ )
         {
-            if( ( std::abs( i - j ) > 1 ) && CPoint( i ) == CPoint( j ) )
+            if( CPoint( i ) == CPoint( j ) )
                 return true;
         }
     }
@@ -866,7 +869,9 @@ OPT_BOX2I LINE::ChangedArea( const LINE* aOther ) const
                     i_start = i;
                     break;
                 }
-            } else {
+            }
+            else
+            {
                 i_start = i;
                 break;
             }

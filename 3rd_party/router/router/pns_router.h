@@ -25,7 +25,7 @@
 #include <list>
 
 #include <memory>
-#include <boost/optional.hpp>
+#include <core/optional.h>
 #include <boost/unordered_set.hpp>
 
 #include <geometry/shape_line_chain.h>
@@ -43,7 +43,7 @@ namespace KIGFX
 class VIEW;
 class VIEW_GROUP;
 
-};
+}
 
 namespace PNS {
 
@@ -134,7 +134,7 @@ public:
     bool RoutingInProgress() const;
     bool StartRouting( const VECTOR2I& aP, ITEM* aItem, int aLayer );
     void Move( const VECTOR2I& aP, ITEM* aItem );
-    bool FixRoute( const VECTOR2I& aP, ITEM* aItem );
+    bool FixRoute( const VECTOR2I& aP, ITEM* aItem, bool aForceFinish = false );
     void BreakSegment( ITEM *aItem, const VECTOR2I& aP );
 
     void StopRouting();
@@ -244,6 +244,7 @@ private:
     void highlightCurrent( bool enabled );
 
     void markViolations( NODE* aNode, ITEM_SET& aCurrent, NODE::ITEM_VECTOR& aRemoved );
+    bool isStartingPointRoutable( const VECTOR2I& aWhere, int aLayer );
 
     VECTOR2I m_currentEnd;
     RouterState m_state;

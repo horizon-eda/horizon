@@ -21,8 +21,6 @@
 
 #include <geometry/shape_line_chain.h>
 #include <geometry/shape_rect.h>
-#include <geometry/shape_convex.h>
-
 #include <cmath>
 
 #include "pns_line.h"
@@ -30,6 +28,8 @@
 #include "pns_node.h"
 #include "pns_solid.h"
 #include "pns_optimizer.h"
+
+#include "geometry/shape_simple.h"
 #include "pns_utils.h"
 #include "pns_router.h"
 
@@ -665,14 +665,14 @@ OPTIMIZER::BREAKOUT_LIST OPTIMIZER::circleBreakouts( int aWidth,
 }
 
 
-OPTIMIZER::BREAKOUT_LIST OPTIMIZER::convexBreakouts( int aWidth,
-        const SHAPE* aShape, bool aPermitDiagonal ) const
+OPTIMIZER::BREAKOUT_LIST OPTIMIZER::customBreakouts( int aWidth,
+        const ITEM* aItem, bool aPermitDiagonal ) const
 {
     BREAKOUT_LIST breakouts;
-    const SHAPE_CONVEX* convex = static_cast<const SHAPE_CONVEX*>( aShape );
+    const SHAPE_SIMPLE* convex = static_cast<const SHAPE_SIMPLE*>( aItem->Shape() );
 
     BOX2I bbox = convex->BBox( 0 );
-    VECTOR2I p0 = bbox.Centre();
+    VECTOR2I p0 = static_cast<const SOLID*>( aItem )->Pos();
     // must be large enough to guarantee intersecting the convex polygon
     int length = bbox.GetSize().EuclideanNorm() / 2 + 5;
 
@@ -791,12 +791,14 @@ OPTIMIZER::BREAKOUT_LIST OPTIMIZER::computeBreakouts( int aWidth,
         case SH_CIRCLE:
             return circleBreakouts( aWidth, shape, aPermitDiagonal );
 
-        case SH_CONVEX:
-            return convexBreakouts( aWidth, shape, aPermitDiagonal );
+        case SH_SIMPLE:
+            return customBreakouts( aWidth, aItem, aPermitDiagonal );
 
         default:
             break;
         }
+
+        break;
     }
 
     default:
@@ -838,7 +840,7 @@ int OPTIMIZER::smartPadsSingle( LINE* aLine, ITEM* aPad, bool aEnd, int aEndVert
 
     SOLID* solid = dynamic_cast<SOLID*>( aPad );
 
-    // don't do auto-neckdown for offset pads
+    // don't do optimized connections for offset pads
     if( solid && solid->Offset() != VECTOR2I( 0, 0 ) )
         return -1;
 

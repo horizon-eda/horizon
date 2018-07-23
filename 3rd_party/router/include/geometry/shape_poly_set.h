@@ -28,10 +28,13 @@
 
 #include <vector>
 #include <cstdio>
+#include <memory>
 #include <geometry/shape.h>
 #include <geometry/shape_line_chain.h>
 
 #include "clipper.hpp"
+
+#include <md5_hash.h>
 
 
 /**
@@ -56,6 +59,64 @@ class SHAPE_POLY_SET : public SHAPE
         ///> represents a single polygon outline with holes. The first entry is the outline,
         ///> the remaining (if any), are the holes
         typedef std::vector<SHAPE_LINE_CHAIN> POLYGON;
+
+        class TRIANGULATION_CONTEXT;
+
+        class TRIANGULATED_POLYGON
+        {
+        public:
+            struct TRI
+            {
+                TRI() : a(0), b(0), c(0)
+                {
+                }
+
+                int a, b, c;
+            };
+
+            ~TRIANGULATED_POLYGON();
+
+            void Clear();
+
+            void AllocateVertices( int aSize );
+            void AllocateTriangles ( int aSize );
+
+            void GetTriangle( int index, VECTOR2I& a, VECTOR2I& b, VECTOR2I& c ) const
+            {
+                auto tri = &m_triangles[ index ];
+                a = m_vertices[ tri->a ];
+                b = m_vertices[ tri->b ];
+                c = m_vertices[ tri->c ];
+            }
+
+            void SetTriangle( int aIndex, const TRI& aTri )
+            {
+                m_triangles[aIndex] = aTri;
+            }
+
+            int AddVertex( const VECTOR2I& aP )
+            {
+                m_vertices[ m_vertexCount ] = aP;
+                return (m_vertexCount++);
+            }
+
+            int GetTriangleCount() const
+            {
+                return m_triangleCount;
+            }
+
+            int GetVertexCount() const
+            {
+                return m_vertexCount;
+            }
+
+        private:
+
+            TRI* m_triangles = nullptr;
+            VECTOR2I* m_vertices = nullptr;
+            int m_vertexCount = 0;
+            int m_triangleCount = 0;
+        };
 
         /**
          * Struct VERTEX_INDEX
@@ -487,6 +548,9 @@ class SHAPE_POLY_SET : public SHAPE
          */
         bool IsSelfIntersecting();
 
+        ///> Returns the number of triangulated polygons
+        unsigned int TriangulatedPolyCount() const { return m_triangulatedPolys.size(); }
+
         ///> Returns the number of outlines in the set
         int OutlineCount() const { return m_polys.size(); }
 
@@ -496,8 +560,11 @@ class SHAPE_POLY_SET : public SHAPE
         ///> Returns the number of holes in a given outline
         int HoleCount( int aOutline ) const
         {
-            if( (aOutline > (int)m_polys.size()) || (m_polys[aOutline].size() < 2) )
+            if( ( aOutline < 0 ) || (aOutline >= (int)m_polys.size()) || (m_polys[aOutline].size() < 2) )
                 return 0;
+
+            // the first polygon in m_polys[aOutline] is the main contour,
+            // only others are holes:
             return m_polys[aOutline].size() - 1;
         }
 
@@ -533,6 +600,16 @@ class SHAPE_POLY_SET : public SHAPE
         POLYGON& Polygon( int aIndex )
         {
             return m_polys[aIndex];
+        }
+
+        const POLYGON& Polygon( int aIndex ) const
+        {
+            return m_polys[aIndex];
+        }
+
+        const TRIANGULATED_POLYGON* TriangulatedPolygon( int aIndex ) const
+        {
+            return m_triangulatedPolys[aIndex].get();
         }
 
         const SHAPE_LINE_CHAIN& COutline( int aIndex ) const
@@ -758,8 +835,16 @@ class SHAPE_POLY_SET : public SHAPE
         ///> For aFastMode meaning, see function booleanOp
         void Fracture( POLYGON_MODE aFastMode );
 
+        ///> Converts a single outline slitted ("fractured") polygon into a set ouf outlines
+        ///> with holes.
+        void Unfracture( POLYGON_MODE aFastMode );
+
         ///> Returns true if the polygon set has any holes.
         bool HasHoles() const;
+
+        ///> Returns true if the polygon set has any holes tha share a vertex.
+        bool HasTouchingHoles() const;
+
 
         ///> Simplifies the polyset (merges overlapping polys, eliminates degeneracy/self-intersections)
         ///> For aFastMode meaning, see function booleanOp
@@ -782,6 +867,14 @@ class SHAPE_POLY_SET : public SHAPE
 
         /// @copydoc SHAPE::Move()
         void Move( const VECTOR2I& aVector ) override;
+
+        /**
+         * Function Rotate
+         * rotates all vertices by a given angle
+         * @param aCenter is the rotation center
+         * @param aAngle rotation angle in radians
+         */
+        void Rotate( double aAngle, const VECTOR2I& aCenter );
 
         /// @copydoc SHAPE::IsSolid()
         bool IsSolid() const override
@@ -813,8 +906,19 @@ class SHAPE_POLY_SET : public SHAPE
          */
         bool Collide( const VECTOR2I& aP, int aClearance = 0 ) const override;
 
-        // fixme: add collision support
-        bool Collide( const SEG& aSeg, int aClearance = 0 ) const override { return false; }
+        /**
+         * Function Collide
+         * Checks whether the segment aSeg collides with the inside of the polygon set;  if the
+         * segment touches an edge or a corner of any of the polygons, there is no collision:
+         * the edges do not belong to the polygon itself.
+         * @param  aSeg       is the SEG segment whose collision with respect to the poly set
+         *                    will be tested.
+         * @param  aClearance is the security distance; if the segment passes closer to the polygon
+         *                    than aClearance distance, then there is a collision.
+         * @return bool - true if the segment aSeg collides with the polygon;
+         *                    false in any other case.
+         */
+        bool Collide( const SEG& aSeg, int aClearance = 0 ) const override;
 
         /**
          * Function CollideVertex
@@ -842,9 +946,15 @@ class SHAPE_POLY_SET : public SHAPE
         bool CollideEdge( const VECTOR2I& aPoint, VERTEX_INDEX& aClosestVertex,
                 int aClearance = 0 );
 
-        ///> Returns true if a given subpolygon contains the point aP. If aSubpolyIndex < 0
-        ///> (default value), checks all polygons in the set
-        bool Contains( const VECTOR2I& aP, int aSubpolyIndex = -1 ) const;
+        /**
+         * Returns true if a given subpolygon contains the point aP
+         *
+         * @param aP is the point to check
+         * @param aSubpolyIndex is the subpolygon to check, or -1 to check all
+         * @param aIgnoreHoles controls whether or not internal holes are considered
+         * @return true if the polygon contains the point
+         */
+        bool Contains( const VECTOR2I& aP, int aSubpolyIndex = -1, bool aIgnoreHoles = false ) const;
 
         ///> Returns true if the set is empty (no polygons at all)
         bool IsEmpty() const
@@ -905,11 +1015,11 @@ class SHAPE_POLY_SET : public SHAPE
          * Function Fillet
          * returns a filleted version of the aIndex-th polygon.
          * @param aRadius is the fillet radius.
-         * @param aSegments is the number of segments / fillet.
+         * @param aErrorMax is the maximum allowable deviation of the polygon from the circle
          * @param aIndex is the index of the polygon to be filleted
          * @return POLYGON - A polygon containing the filleted version of the aIndex-th polygon.
          */
-        POLYGON FilletPolygon( unsigned int aRadius, unsigned int aSegments, int aIndex = 0 );
+        POLYGON FilletPolygon( unsigned int aRadius, int aErrorMax, int aIndex = 0 );
 
         /**
          * Function Chamfer
@@ -923,10 +1033,10 @@ class SHAPE_POLY_SET : public SHAPE
          * Function Fillet
          * returns a filleted version of the polygon set.
          * @param aRadius is the fillet radius.
-         * @param aSegments is the number of segments / fillet.
+         * @param aErrorMax is the maximum allowable deviation of the polygon from the circle
          * @return SHAPE_POLY_SET - A set containing the filleted version of this set.
          */
-        SHAPE_POLY_SET Fillet(  int aRadius, int aSegments );
+        SHAPE_POLY_SET Fillet(  int aRadius, int aErrorMax );
 
         /**
          * Function DistanceToPolygon
@@ -969,7 +1079,7 @@ class SHAPE_POLY_SET : public SHAPE
          * @return int -    The minimum distance between aSegment and all the polygons in the set.
          *                  If the point is contained in the polygon, the distance is zero.
          */
-        int Distance( SEG aSegment, int aSegmentWidth = 0 );
+        int Distance( const SEG& aSegment, int aSegmentWidth = 0 );
 
         /**
          * Function IsVertexInHole.
@@ -987,6 +1097,7 @@ class SHAPE_POLY_SET : public SHAPE
 
 
         void fractureSingle( POLYGON& paths );
+        void unfractureSingle ( POLYGON& path );
         void importTree( ClipperLib::PolyTree* tree );
 
         /** Function booleanOp
@@ -1020,10 +1131,11 @@ class SHAPE_POLY_SET : public SHAPE
          *                       the aSubpolyIndex-th polygon will be tested.
          * @param  aSubpolyIndex is an integer specifying which polygon in the set has to be
          *                       checked.
+         * @param  aIgnoreHoles  can be set to true to ignore internal holes in the polygon
          * @return bool - true if aP is inside aSubpolyIndex-th polygon; false in any other
          *         case.
          */
-        bool containsSingle( const VECTOR2I& aP, int aSubpolyIndex ) const;
+        bool containsSingle( const VECTOR2I& aP, int aSubpolyIndex, bool aIgnoreHoles = false ) const;
 
         /**
          * Operations ChamferPolygon and FilletPolygon are computed under the private chamferFillet
@@ -1036,6 +1148,8 @@ class SHAPE_POLY_SET : public SHAPE
             FILLETED
         };
 
+
+
         /**
          * Function chamferFilletPolygon
          * Returns the camfered or filleted version of the aIndex-th polygon in the set, depending
@@ -1046,16 +1160,38 @@ class SHAPE_POLY_SET : public SHAPE
          * @param  aDistance is the chamfering distance if aMode = CHAMFERED; if aMode = FILLETED,
          *                   is the filleting radius.
          * @param  aIndex    is the index of the polygon that will be chamfered/filleted.
-         * @param  aSegments is the number of filleting segments if aMode = FILLETED. If aMode =
-         *                   CHAMFERED, it is unused.
+         * @param  aErrorMax is the maximum allowable deviation of the polygon from the circle
+         *                   if aMode = FILLETED. If aMode = CHAMFERED, it is unused.
          * @return POLYGON - the chamfered/filleted version of the polygon.
          */
         POLYGON chamferFilletPolygon( CORNER_MODE aMode, unsigned int aDistance,
-                                      int aIndex, int aSegments = -1 );
+                                      int aIndex, int aErrorMax = -1 );
 
-        typedef std::vector<POLYGON> Polyset;
+        ///> Returns true if the polygon set has any holes that touch share a vertex.
+        bool hasTouchingHoles( const POLYGON& aPoly ) const;
 
-        Polyset m_polys;
+        typedef std::vector<POLYGON> POLYSET;
+
+        POLYSET m_polys;
+
+    public:
+
+        SHAPE_POLY_SET& operator=( const SHAPE_POLY_SET& );
+
+        void CacheTriangulation();
+        bool IsTriangulationUpToDate() const;
+
+        MD5_HASH GetHash() const;
+
+    private:
+        void triangulateSingle( const POLYGON& aPoly, SHAPE_POLY_SET::TRIANGULATED_POLYGON& aResult );
+
+        MD5_HASH checksum() const;
+
+        std::vector<std::unique_ptr<TRIANGULATED_POLYGON>> m_triangulatedPolys;
+        bool m_triangulationValid = false;
+        MD5_HASH m_hash;
+
 };
 
 #endif

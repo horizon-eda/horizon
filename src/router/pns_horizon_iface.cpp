@@ -4,7 +4,7 @@
 #include "board/via_padstack_provider.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "clipper/clipper.hpp"
-#include "geometry/shape_convex.h"
+#include "geometry/shape_simple.h"
 #include "router/pns_debug_decorator.h"
 #include "router/pns_solid.h"
 #include "router/pns_topology.h"
@@ -71,11 +71,6 @@ public:
 
     virtual int Clearance(const PNS::ITEM *aA, const PNS::ITEM *aB) const override;
     virtual int Clearance(int aNetCode) const override;
-    virtual void OverrideClearance(bool aEnable, int aNetA = 0, int aNetB = 0, int aClearance = 0) override;
-    virtual void UseDpGap(bool aUseDpGap) override
-    {
-        m_useDpGap = aUseDpGap;
-    }
     virtual int DpCoupledNet(int aNet) override;
     virtual int DpNetPolarity(int aNet) override;
     virtual bool DpNetPair(PNS::ITEM *aItem, int &aNetP, int &aNetN) override;
@@ -214,16 +209,6 @@ int PNS_HORIZON_RULE_RESOLVER::Clearance(int aNetCode) const
 {
     // only used for display purposes, can return dummy value
     return .1e6;
-}
-
-// fixme: ugly hack to make the optimizer respect gap width for currently routed
-// differential pair.
-void PNS_HORIZON_RULE_RESOLVER::OverrideClearance(bool aEnable, int aNetA, int aNetB, int aClearance)
-{
-    /*m_overrideEnabled = aEnable;
-    m_overrideNetA = aNetA;
-    m_overrideNetB = aNetB;
-    m_overrideClearance = aClearance;*/
 }
 
 int PNS_HORIZON_RULE_RESOLVER::DpCoupledNet(int aNet)
@@ -561,7 +546,7 @@ std::unique_ptr<PNS::SOLID> PNS_HORIZON_IFACE::syncPadstack(const horizon::Padst
     solid->SetOffset(VECTOR2I(0, 0));
     solid->SetPos(VECTOR2I(tr.shift.x, tr.shift.y));
 
-    SHAPE_CONVEX *shape = new SHAPE_CONVEX();
+    SHAPE_SIMPLE *shape = new SHAPE_SIMPLE();
 
     for (auto &pt : poly_union.front()) {
         shape->Append(pt.X, pt.Y);

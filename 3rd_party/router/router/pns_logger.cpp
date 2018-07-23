@@ -31,7 +31,7 @@
 #include <geometry/shape_line_chain.h>
 #include <geometry/shape_rect.h>
 #include <geometry/shape_circle.h>
-#include <geometry/shape_convex.h>
+#include "geometry/shape_simple.h"
 
 namespace PNS {
 
@@ -73,7 +73,7 @@ void LOGGER::EndGroup()
 }
 
 
-void LOGGER::Log ( const ITEM* aItem, int aKind, const std::string aName )
+void LOGGER::Log ( const ITEM* aItem, int aKind, const std::string& aName )
 {
     m_theLog << "item " << aKind << " " << aName << " ";
     m_theLog << aItem->Net() << " " << aItem->Layers().Start() << " " <<
@@ -123,7 +123,7 @@ void LOGGER::Log ( const ITEM* aItem, int aKind, const std::string aName )
 }
 
 
-void LOGGER::Log( const SHAPE_LINE_CHAIN *aL, int aKind, const std::string aName )
+void LOGGER::Log( const SHAPE_LINE_CHAIN *aL, int aKind, const std::string& aName )
 {
     m_theLog << "item " << aKind << " " << aName << " ";
     m_theLog << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0;
@@ -135,7 +135,7 @@ void LOGGER::Log( const SHAPE_LINE_CHAIN *aL, int aKind, const std::string aName
 
 
 void LOGGER::Log( const VECTOR2I& aStart, const VECTOR2I& aEnd,
-                      int aKind, const std::string aName)
+                      int aKind, const std::string& aName)
 {
 }
 
@@ -178,9 +178,9 @@ void LOGGER::dumpShape( const SHAPE* aSh )
         break;
     }
 
-    case SH_CONVEX:
+    case SH_SIMPLE:
     {
-        const SHAPE_CONVEX* c = (const SHAPE_CONVEX*) aSh;
+        const SHAPE_SIMPLE* c = (const SHAPE_SIMPLE*) aSh;
         m_theLog << "convex " << c->PointCount() << " ";
 
         for( int i = 0; i < c->PointCount(); i++ )

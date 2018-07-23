@@ -29,7 +29,7 @@
 #include <vector>
 #include <sstream>
 
-#include <boost/optional.hpp>
+#include <core/optional.h>
 
 #include <math/vector2d.h>
 #include <geometry/shape.h>
@@ -260,6 +260,22 @@ public:
         return m_points[aIndex];
     }
 
+    /**
+     * Returns the last point in the line chain.
+     */
+    VECTOR2I& LastPoint()
+    {
+        return m_points[PointCount() - 1];
+    }
+
+    /**
+     * Returns the last point in the line chain.
+     */
+    const VECTOR2I& CLastPoint() const
+    {
+        return m_points[PointCount() - 1];
+    }
+
     /// @copydoc SHAPE::BBox()
     const BOX2I BBox( int aClearance = 0 ) const override
     {
@@ -299,7 +315,7 @@ public:
      * @param aP the point
      * @return minimum distance.
      */
-    int Distance( const VECTOR2I& aP ) const;
+    int Distance( const VECTOR2I& aP, bool aOutlineOnly = false ) const;
 
     /**
      * Function Reverse()
@@ -516,7 +532,7 @@ public:
     /**
      * Function PointInside()
      *
-     * Checks if point aP lies inside a convex polygon defined by the line chain. For closed
+     * Checks if point aP lies inside a polygon (any type) defined by the line chain. For closed
      * shapes only.
      * @param aP point to check
      * @return true if the point is inside the shape (edge is not treated as being inside).
@@ -533,12 +549,22 @@ public:
     bool PointOnEdge( const VECTOR2I& aP ) const;
 
     /**
+     * Function CheckClearance()
+     *
+     * Checks if point aP is closer to (or on) an edge or vertex of the line chain.
+     * @param aP point to check
+     * @param aDist distance in internal units
+     * @return true if the point is equal to or closer than aDist to the line chain.
+     */
+    bool CheckClearance( const VECTOR2I& aP, const int aDist) const;
+
+    /**
      * Function SelfIntersecting()
      *
      * Checks if the line chain is self-intersecting.
      * @return (optional) first found self-intersection point.
      */
-    const boost::optional<INTERSECTION> SelfIntersecting() const;
+    const OPT<INTERSECTION> SelfIntersecting() const;
 
     /**
      * Function Simplify()
@@ -595,12 +621,22 @@ public:
             (*i) += aVector;
     }
 
+    /**
+     * Function Rotate
+     * rotates all vertices by a given angle
+     * @param aCenter is the rotation center
+     * @param aAngle rotation angle in radians
+     */
+    void Rotate( double aAngle, const VECTOR2I& aCenter );
+
     bool IsSolid() const override
     {
         return false;
     }
 
     const VECTOR2I PointAlong( int aPathLength ) const;
+
+    double Area() const;
 
 private:
     /// array of vertices

@@ -134,8 +134,11 @@ SHOVE::SHOVE_STATUS SHOVE::walkaroundLoneVia( LINE& aCurrent, LINE& aObstacle,
     const SHAPE_LINE_CHAIN hull = aCurrent.Via().Hull( clearance, aObstacle.Width() );
     SHAPE_LINE_CHAIN path_cw, path_ccw;
 
-    aObstacle.Walkaround( hull, path_cw, true );
-    aObstacle.Walkaround( hull, path_ccw, false );
+    if( ! aObstacle.Walkaround( hull, path_cw, true ) )
+        return SH_INCOMPLETE;
+
+    if( ! aObstacle.Walkaround( hull, path_ccw, false ) )
+        return SH_INCOMPLETE;
 
     const SHAPE_LINE_CHAIN& shortest = path_ccw.Length() < path_cw.Length() ? path_ccw : path_cw;
 
@@ -177,7 +180,9 @@ SHOVE::SHOVE_STATUS SHOVE::processHullSet( LINE& aCurrent, LINE& aObstacle,
         {
             const SHAPE_LINE_CHAIN& hull = aHulls[invertTraversal ? aHulls.size() - 1 - i : i];
 
-            l.Walkaround( hull, path, clockwise );
+            if( ! l.Walkaround( hull, path, clockwise ) )
+                return SH_INCOMPLETE;
+
             path.Simplify();
             l.SetShape( path );
         }
@@ -607,6 +612,10 @@ SHOVE::SHOVE_STATUS SHOVE::pushVia( VIA* aVia, const VECTOR2I& aForce, int aCurr
     if( jt->IsLocked() )
         return SH_INCOMPLETE;
 
+    // nothing to push...
+    if ( aForce.x == 0 && aForce.y == 0 )
+        return SH_OK;
+
     while( aForce.x != 0 || aForce.y != 0 )
     {
         JOINT* jt_next = m_currentNode->FindJoint( p0_pushed, aVia );
@@ -877,7 +886,7 @@ void SHOVE::unwindStack( ITEM* aItem )
 
 bool SHOVE::pushLine( const LINE& aL, bool aKeepCurrentOnTop )
 {
-    if( !aL.IsLinkedChecked() )
+    if( !aL.IsLinkedChecked() && aL.SegmentCount() != 0 )
         return false;
 
     if( aKeepCurrentOnTop && m_lineStack.size() > 0)

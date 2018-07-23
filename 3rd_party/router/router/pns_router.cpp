@@ -118,7 +118,7 @@ bool ROUTER::RoutingInProgress() const
 
 const ITEM_SET ROUTER::QueryHoverItems( const VECTOR2I& aP )
 {
-    if( m_state == IDLE )
+    if( m_state == IDLE || m_placer == nullptr )
         return m_world->HitTest( aP );
     else
         return m_placer->CurrentNode()->HitTest( aP );
@@ -153,9 +153,30 @@ bool ROUTER::StartDragging( const VECTOR2I& aP, ITEM* aStartItem, int aDragMode 
     return true;
 }
 
+bool ROUTER::isStartingPointRoutable( const VECTOR2I& aWhere, int aLayer )
+{
+    auto candidates = QueryHoverItems( aWhere );
+
+    for( ITEM* item : candidates.Items() )
+    {
+        if( ! item->IsRoutable() && item->Layers().Overlaps( aLayer ) )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 bool ROUTER::StartRouting( const VECTOR2I& aP, ITEM* aStartItem, int aLayer )
 {
+
+    if( ! isStartingPointRoutable( aP, aLayer ) )
+    {
+        SetFailureReason( "Cannot start routing inside a keepout area or board outline." );
+        return false;
+    }
+
     m_forceMarkObstaclesMode = false;
 
     switch( m_mode )
@@ -341,14 +362,14 @@ void ROUTER::CommitRouting( NODE* aNode )
 }
 
 
-bool ROUTER::FixRoute( const VECTOR2I& aP, ITEM* aEndItem )
+bool ROUTER::FixRoute( const VECTOR2I& aP, ITEM* aEndItem, bool aForceFinish )
 {
     bool rv = false;
 
     switch( m_state )
     {
     case ROUTE_TRACK:
-        rv = m_placer->FixRoute( aP, aEndItem );
+        rv = m_placer->FixRoute( aP, aEndItem, aForceFinish );
         break;
 
     case DRAG_SEGMENT:

@@ -344,9 +344,11 @@ SRC_ROUTER = \
 	3rd_party/router/router/pns_routing_settings.cpp \
 	3rd_party/router/router/pns_sizes_settings.cpp \
 	3rd_party/router/common/geometry/shape_line_chain.cpp\
+	3rd_party/router/common/geometry/shape_arc.cpp\
 	3rd_party/router/common/geometry/shape.cpp \
 	3rd_party/router/common/geometry/shape_collisions.cpp\
 	3rd_party/router/common/geometry/seg.cpp\
+	3rd_party/router/common/geometry/geometry_utils.cpp\
 	3rd_party/router/common/math/math_util.cpp\
 	3rd_party/router/wx_compat.cpp\
 	src/router/pns_horizon_iface.cpp\

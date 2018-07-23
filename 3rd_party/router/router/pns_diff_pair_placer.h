@@ -84,7 +84,7 @@ public:
      * result is violating design rules - in such case, the track is only committed
      * if Settings.CanViolateDRC() is on.
      */
-    bool FixRoute( const VECTOR2I& aP, ITEM* aEndItem ) override;
+    bool FixRoute( const VECTOR2I& aP, ITEM* aEndItem, bool aForceFinish ) override;
 
     /**
      * Function ToggleVia()
@@ -226,7 +226,7 @@ private:
 
     const VIA makeVia ( const VECTOR2I& aP, int aNet );
 
-    bool findDpPrimitivePair( const VECTOR2I& aP, ITEM* aItem, DP_PRIMITIVE_PAIR& aPair );
+    bool findDpPrimitivePair( const VECTOR2I& aP, ITEM* aItem, DP_PRIMITIVE_PAIR& aPair, std::string* aErrorMsg = nullptr );
     OPT_VECTOR2I getDanglingAnchor( NODE* aNode, ITEM* aItem );
     bool attemptWalk( NODE* aNode, DIFF_PAIR* aCurrent, DIFF_PAIR& aWalk, bool aPFirst, bool aWindCw, bool aSolidsOnly );
     bool propagateDpHeadForces ( const VECTOR2I& aP, VECTOR2I& aNewP );
@@ -247,7 +247,7 @@ private:
     int m_netP, m_netN;
 
     DP_PRIMITIVE_PAIR m_start;
-    boost::optional<DP_PRIMITIVE_PAIR> m_prevPair;
+    OPT<DP_PRIMITIVE_PAIR> m_prevPair;
 
     ///> current algorithm iteration
     int m_iteration;

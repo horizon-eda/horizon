@@ -29,10 +29,9 @@
 #include <climits>
 
 #include <math/vector2d.h>
+#include <core/optional.h>
 
-#include <boost/optional/optional.hpp>
-
-typedef boost::optional<VECTOR2I> OPT_VECTOR2I;
+typedef OPT<VECTOR2I> OPT_VECTOR2I;
 
 class SEG
 {
@@ -101,6 +100,16 @@ public:
         m_index = aSeg.m_index;
 
         return *this;
+    }
+
+    bool operator==( const SEG& aSeg ) const
+    {
+        return (A == aSeg.A && B == aSeg.B) ;
+    }
+
+    bool operator!=( const SEG& aSeg ) const
+    {
+        return (A != aSeg.A || B != aSeg.B);
     }
 
     /**
@@ -310,6 +319,12 @@ public:
     void Reverse()
     {
         std::swap( A, B );
+    }
+
+    ///> Returns the center point of the line
+    VECTOR2I Center() const
+    {
+        return A + ( B - A ) / 2;
     }
 
 private:

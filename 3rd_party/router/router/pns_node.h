@@ -28,7 +28,7 @@
 #include <set>
 #include <unordered_map>
 
-#include <boost/optional.hpp>
+#include <core/optional.h>
 
 #include <geometry/shape.h>
 #include <geometry/shape_line_chain.h>
@@ -61,8 +61,6 @@ public:
 
     virtual int Clearance( const ITEM* aA, const ITEM* aB ) const = 0;
     virtual int Clearance( int aNetCode ) const = 0;
-    virtual void OverrideClearance( bool aEnable, int aNetA = 0, int aNetB = 0, int aClearance = 0 ) = 0;
-    virtual void UseDpGap( bool aUseDpGap ) = 0;
     virtual int DpCoupledNet( int aNet ) = 0;
     virtual int DpNetPolarity( int aNet ) = 0;
     virtual bool DpNetPair( ITEM* aItem, int& aNetP, int& aNetN ) = 0;
@@ -138,7 +136,7 @@ protected:
 class NODE
 {
 public:
-    typedef boost::optional<OBSTACLE>   OPT_OBSTACLE;
+    typedef OPT<OBSTACLE>   OPT_OBSTACLE;
     typedef std::vector<ITEM*>          ITEM_VECTOR;
     typedef std::vector<OBSTACLE>       OBSTACLES;
 
@@ -273,9 +271,10 @@ public:
      * Adds an item to the current node.
      * @param aSegment item to add
      * @param aAllowRedundant if true, duplicate items are allowed (e.g. a segment or via
+     * @return true if added
      * at the same coordinates as an existing one)
      */
-    void Add( std::unique_ptr< SEGMENT > aSegment, bool aAllowRedundant = false );
+    bool Add( std::unique_ptr< SEGMENT > aSegment, bool aAllowRedundant = false );
     void Add( std::unique_ptr< SOLID >   aSolid );
     void Add( std::unique_ptr< VIA >     aVia );
 

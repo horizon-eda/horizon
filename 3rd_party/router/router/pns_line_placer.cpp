@@ -19,7 +19,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <boost/optional.hpp>
+#include <core/optional.h>
 
 #include "pns_node.h"
 #include "pns_line_placer.h"
@@ -31,8 +31,6 @@
 #include "pns_debug_decorator.h"
 
 //#include <class_board_item.h>
-
-using boost::optional;
 
 namespace PNS {
 
@@ -438,7 +436,7 @@ bool LINE_PLACER::rhMarkObstacles( const VECTOR2I& aP, LINE& aNewHead )
 
 const LINE LINE_PLACER::reduceToNearestObstacle( const LINE& aOriginalLine )
 {
-    auto l0  = aOriginalLine.CLine();
+    const auto& l0 = aOriginalLine.CLine();
 
     if ( !l0.PointCount() )
         return aOriginalLine;
@@ -856,19 +854,9 @@ bool LINE_PLACER::SetLayer( int aLayer )
 
 bool LINE_PLACER::Start( const VECTOR2I& aP, ITEM* aStartItem )
 {
-    VECTOR2I p( aP );
-
-    static int unknowNetIdx = 0;    // -10000;
-    int net = -1;
-
-    if( !aStartItem || aStartItem->Net() < 0 )
-        net = unknowNetIdx--;
-    else
-        net = aStartItem->Net();
-
-    m_currentStart = p;
-    m_currentEnd = p;
-    m_currentNet = net;
+    m_currentStart = VECTOR2I( aP );
+    m_currentEnd = VECTOR2I( aP );
+    m_currentNet = std::max( 0, aStartItem ? aStartItem->Net() : 0 );
     m_startItem = aStartItem;
     m_placingVia = false;
     m_chainedPlacement = false;
@@ -963,17 +951,35 @@ bool LINE_PLACER::Move( const VECTOR2I& aP, ITEM* aEndItem )
 }
 
 
-bool LINE_PLACER::FixRoute( const VECTOR2I& aP, ITEM* aEndItem )
+bool LINE_PLACER::FixRoute( const VECTOR2I& aP, ITEM* aEndItem, bool aForceFinish )
 {
     bool realEnd = false;
     int lastV;
 
     LINE pl = Trace();
 
-    if( m_currentMode == RM_MarkObstacles &&
-        !Settings().CanViolateDRC() &&
-        m_world->CheckColliding( &pl ) )
+    if( m_currentMode == RM_MarkObstacles )
+    {
+        // Mark Obstacles is sort of a half-manual, half-automated mode in which the
+        // user has more responsibility and authority.
+
+        if( aEndItem )
+        {
+            // The user has indicated a connection should be made.  If either the
+            // trace or endItem is netless, then allow the connection by adopting the net of the other.
+            if( m_currentNet <= 0 )
+            {
+                m_currentNet = aEndItem->Net();
+                pl.SetNet( m_currentNet );
+            }
+            else if (aEndItem->Net() <= 0 )
+                aEndItem->SetNet( m_currentNet );
+        }
+
+        // Collisions still prevent fixing unless "Allow DRC violations" is checked
+        if( !Settings().CanViolateDRC() && m_world->CheckColliding( &pl ) )
             return false;
+    }
 
     const SHAPE_LINE_CHAIN& l = pl.CLine();
 
@@ -1003,27 +1009,33 @@ bool LINE_PLACER::FixRoute( const VECTOR2I& aP, ITEM* aEndItem )
     if( aEndItem && m_currentNet >= 0 && m_currentNet == aEndItem->Net() )
         realEnd = true;
 
+    if( aForceFinish )
+        realEnd = true;
+
     if( realEnd || m_placingVia )
         lastV = l.SegmentCount();
     else
         lastV = std::max( 1, l.SegmentCount() - 1 );
 
-    SEGMENT* lastSeg = NULL;
+    SEGMENT* lastSeg = nullptr;
 
     for( int i = 0; i < lastV; i++ )
     {
         const SEG& s = pl.CSegment( i );
-        std::unique_ptr< SEGMENT > seg( new SEGMENT( s, m_currentNet ) );
+        lastSeg = new SEGMENT( s, m_currentNet );
+        std::unique_ptr< SEGMENT > seg( lastSeg );
         seg->SetWidth( pl.Width() );
         seg->SetLayer( m_currentLayer );
-        lastSeg = seg.get();
-        m_lastNode->Add( std::move( seg ) );
+        if( ! m_lastNode->Add( std::move( seg ) ) )
+        {
+            lastSeg = nullptr;
+        }
     }
 
     if( pl.EndsWithVia() )
         m_lastNode->Add( Clone( pl.Via() ) );
 
-    if( realEnd )
+    if( realEnd && lastSeg )
         simplifyNewLine( m_lastNode, lastSeg );
 
     Router()->CommitRouting( m_lastNode );
