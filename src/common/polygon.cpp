@@ -75,10 +75,8 @@ Polygon Polygon::remove_arcs(unsigned int precision) const
             Coord<double> a(it->position);
             Coord<double> b(it_next->position);
             Coord<double> c(it->arc_center);
-            if ((sq(c.x - a.x) + sq(c.y - a.y)) != (sq(c.x - b.x) + sq(c.y - b.y))) {
-                continue;
-            }
-            double radius = sqrt(sq(c.x - a.x) + sq(c.y - a.y));
+            double radius0 = sqrt(sq(c.x - a.x) + sq(c.y - a.y));
+            double radius1 = sqrt(sq(c.x - b.x) + sq(c.y - b.y));
             Color co(1, 1, 0);
             double a0 = atan2(a.y - c.y, a.x - c.x);
             double a1 = atan2(b.y - c.y, b.x - c.x);
@@ -98,12 +96,16 @@ Polygon Polygon::remove_arcs(unsigned int precision) const
                 dphi -= 2 * M_PI;
             }
             dphi /= segments;
+
+            float dr = radius1 - radius0;
+            dr /= segments;
             segments--;
             while (segments--) {
                 a0 += dphi;
-                auto p1f = c + Coord<double>::euler(radius, a0);
+                auto p1f = c + Coord<double>::euler(radius0, a0);
                 Coordi p1(p1f.x, p1f.y);
                 out.append_vertex(p1);
+                radius0 += dr;
             }
         }
     }
