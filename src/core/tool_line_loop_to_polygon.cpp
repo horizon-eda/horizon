@@ -16,34 +16,60 @@ bool ToolLineLoopToPolygon::can_begin()
     if (!(core.r->has_object_type(ObjectType::LINE) && core.r->has_object_type(ObjectType::POLYGON)))
         return false;
     for (const auto &it : core.r->selection) {
-        if (it.type == ObjectType::JUNCTION || it.type == ObjectType::LINE) {
+        if (it.type == ObjectType::JUNCTION || it.type == ObjectType::LINE || it.type == ObjectType::ARC) {
             return true;
         }
     }
     return false;
 }
 
-static std::vector<Junction *> visit(Junction *node, Junction *from,
-                                     const std::map<Junction *, std::set<Line *>> &junction_connections,
-                                     std::vector<Junction *> path)
+
+class Connector {
+public:
+    Connector(Line *l) : li(l), arc(nullptr)
+    {
+    }
+    Connector(Arc *a) : li(nullptr), arc(a)
+    {
+    }
+    Line *li;
+    Arc *arc;
+    Junction *get_from()
+    {
+        if (li)
+            return li->from;
+        else
+            return arc->from;
+    };
+    Junction *get_to()
+    {
+        if (li)
+            return li->to;
+        else
+            return arc->to;
+    };
+};
+
+static std::vector<std::pair<Junction *, Connector *>>
+visit(Junction *node, Junction *from, const std::map<Junction *, std::set<Connector *>> &junction_connections,
+      std::vector<std::pair<Junction *, Connector *>> path)
 {
-    for (auto li : junction_connections.at(node)) {
+    for (auto con : junction_connections.at(node)) {
         Junction *next = nullptr;
-        std::cout << li << std::endl;
-        if (li->from == node)
-            next = li->to;
-        else if (li->to == node)
-            next = li->from;
+        if (con->get_from() == node)
+            next = con->get_to();
+        else if (con->get_to() == node)
+            next = con->get_from();
         else
             throw std::runtime_error("oops");
         if (next != from) {
-            if (std::count(path.begin(), path.end(), next)) {
+            if (std::count_if(path.begin(), path.end(), [next](const auto &a) { return a.first == next; })) {
                 // found cycle
-                path.push_back(node);
+                path.emplace_back(node, con);
                 return path;
             }
             else {
-                path.push_back(node);
+                path.emplace_back(node, con);
                 auto r = visit(next, node, junction_connections, path);
                 if (r.size())
                     return r;
@@ -66,34 +92,56 @@ ToolResponse ToolLineLoopToPolygon::begin(const ToolArgs &args)
             start_junction = core.r->get_line(it.uuid)->from;
             break;
         }
+        else if (it.type == ObjectType::ARC) {
+            start_junction = core.r->get_arc(it.uuid)->from;
+            break;
+        }
     }
     if (start_junction == nullptr)
         return ToolResponse::end();
 
-    auto all_lines = core.r->get_lines();
-    std::map<Junction *, std::set<Line *>> junction_connections;
-    for (auto li : all_lines) {
-        for (auto &it_ft : {li->from, li->to}) {
+    std::vector<Connector> all_connectors;
+    {
+        auto all_lines = core.r->get_lines();
+        for (auto li : all_lines) {
+            all_connectors.emplace_back(li);
+        }
+        auto all_arcs = core.r->get_arcs();
+        for (auto ar : all_arcs) {
+            all_connectors.emplace_back(ar);
+        }
+    }
+    std::map<Junction *, std::set<Connector *>> junction_connections;
+    for (auto &con : all_connectors) {
+        for (auto &it_ft : {con.get_from(), con.get_to()}) {
             junction_connections[it_ft];
-            junction_connections[it_ft].insert(li);
+            junction_connections[it_ft].insert(&con);
         }
     }
 
     auto path = visit(start_junction, nullptr, junction_connections, {});
-    std::set<Line *> lines;
+    std::set<Connector *> connectors;
     auto poly = core.r->insert_polygon(UUID::random());
-    for (const auto ju : path) {
-        poly->append_vertex(ju->position);
-        for (const auto li : junction_connections.at(ju))
-            lines.insert(li);
+    for (const auto &it : path) {
+        auto v = poly->append_vertex(it.first->position);
+        if (it.second->arc) {
+            v->type = Polygon::Vertex::Type::ARC;
+            v->arc_center = it.second->arc->center->position;
+            v->arc_reverse = it.first == it.second->arc->to;
+        }
+        for (const auto con : junction_connections.at(it.first))
+            connectors.insert(con);
     }
     poly->layer = start_junction->layer;
 
-    for (auto li : lines) {
-        core.r->delete_line(li->uuid);
+    for (auto con : connectors) {
+        if (con->li)
+            core.r->delete_line(con->li->uuid);
+        else if (con->arc)
+            core.r->delete_arc(con->arc->uuid);
     }
-    for (auto ju : path) {
-        core.r->delete_junction(ju->uuid);
+    for (auto &it : path) {
+        core.r->delete_junction(it.first->uuid);
     }
     core.r->commit();
     return ToolResponse::end();
