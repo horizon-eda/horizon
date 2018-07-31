@@ -2,9 +2,11 @@
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app.hpp"
 #include "project/project.hpp"
+#include "pool/pool_manager.hpp"
 #include "nlohmann/json.hpp"
 #include "pool_cache_window.hpp"
 #include "part_browser/part_browser_window.hpp"
+#include "widgets/pool_chooser.hpp"
 
 namespace horizon {
 
@@ -37,8 +39,9 @@ void PoolProjectManagerViewCreateProject::populate_pool_combo(const Glib::RefPtr
 {
     auto mapp = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(app);
     project_pool_combo->remove_all();
-    for (const auto &it : mapp->pools) {
-        project_pool_combo->append((std::string)it.first, it.second.name);
+    for (const auto &it : PoolManager::get().get_pools()) {
+        if (it.second.enabled)
+            project_pool_combo->append((std::string)it.second.uuid, it.second.name);
     }
     project_pool_combo->set_active(0);
 }
@@ -55,7 +58,7 @@ std::pair<bool, std::string> PoolProjectManagerViewCreateProject::create()
         prj.pool_uuid = static_cast<std::string>(project_pool_combo->get_active_id());
 
         auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(win->get_application());
-        s = prj.create(app->pools.at(prj.pool_uuid).default_via);
+        s = prj.create(PoolManager::get().get_by_uuid(prj.pool_uuid)->default_via);
         r = true;
     }
     catch (const std::exception &e) {
@@ -109,14 +112,22 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
     builder->get_widget("button_pool_cache", button_pool_cache);
     builder->get_widget("entry_project_title", entry_project_title);
     builder->get_widget("label_pool_name", label_pool_name);
-    builder->get_widget("info_bar", info_bar);
-    builder->get_widget("info_bar_label", info_bar_label);
+    builder->get_widget("label_pool_path", label_pool_path);
+    builder->get_widget("prj_pool_change_button", button_change_pool);
+    builder->get_widget("prj_pool_info_bar", pool_info_bar);
 
-    info_bar->hide();
-    info_bar->signal_response().connect([this](int resp) {
-        if (resp == Gtk::RESPONSE_CLOSE)
-            info_bar->hide();
+    pool_info_bar->hide();
+    auto reopen_button = pool_info_bar->add_button("Reopen project", 1);
+    reopen_button->signal_clicked().connect([this] {
+        Glib::signal_idle().connect_once([this] {
+            std::string prj_filename = win->project_filename;
+            if (win->close_pool_or_project()) {
+                win->open_file_view(Gio::File::create_for_path(prj_filename));
+            }
+        });
     });
+
+    entry_project_title->signal_changed().connect([this] { win->project_needs_save = true; });
 
     button_top_schematic->signal_clicked().connect(
             sigc::mem_fun(this, &PoolProjectManagerViewProject::handle_button_top_schematic));
@@ -125,6 +136,20 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
             sigc::mem_fun(this, &PoolProjectManagerViewProject::handle_button_part_browser));
     button_pool_cache->signal_clicked().connect(
             sigc::mem_fun(this, &PoolProjectManagerViewProject::handle_button_pool_cache));
+    button_change_pool->signal_clicked().connect(
+            sigc::mem_fun(this, &PoolProjectManagerViewProject::handle_button_change_pool));
+}
+
+
+void PoolProjectManagerViewProject::handle_button_change_pool()
+{
+    PoolChooserDialog dia(win);
+    dia.select_pool(win->project->pool_uuid);
+    if (dia.run() == Gtk::RESPONSE_OK) {
+        win->project->pool_uuid = dia.get_selected_pool();
+        pool_info_bar->show();
+        win->project_needs_save = true;
+    }
 }
 
 void PoolProjectManagerViewProject::handle_button_top_schematic()

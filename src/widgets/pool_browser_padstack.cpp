@@ -7,6 +7,7 @@ PoolBrowserPadstack::PoolBrowserPadstack(Pool *p) : PoolBrowser(p)
 {
     construct();
     name_entry = create_search_entry("Name");
+    install_pool_item_source_tooltip();
     search();
 }
 
@@ -17,7 +18,7 @@ Glib::RefPtr<Gtk::ListStore> PoolBrowserPadstack::create_list_store()
 
 void PoolBrowserPadstack::create_columns()
 {
-    treeview->append_column("Padstack", list_columns.padstack_name);
+    append_column_with_item_source_cr("Padstack", list_columns.padstack_name);
     treeview->append_column("Type", list_columns.padstack_type);
     treeview->append_column("Package", list_columns.package_name);
     path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);
@@ -55,7 +56,7 @@ void PoolBrowserPadstack::search()
 
     SQLite::Query q(pool->db,
                     "SELECT padstacks.uuid, padstacks.name, padstacks.type, "
-                    "packages.name, padstacks.filename FROM padstacks LEFT "
+                    "packages.name, padstacks.filename, padstacks.pool_uuid, padstacks.overridden FROM padstacks LEFT "
                     "JOIN packages ON padstacks.package = packages.uuid WHERE "
                     "(packages.uuid=? OR ? OR padstacks.package = "
                     "'00000000-0000-0000-0000-000000000000')  AND "
@@ -109,6 +110,7 @@ void PoolBrowserPadstack::search()
         row[list_columns.padstack_type] = q.get<std::string>(2);
         row[list_columns.package_name] = q.get<std::string>(3);
         row[list_columns.path] = q.get<std::string>(4);
+        row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(5), q.get<int>(6));
     }
     treeview->set_model(store);
     select_uuid(selected_uuid);
@@ -118,5 +120,9 @@ void PoolBrowserPadstack::search()
 UUID PoolBrowserPadstack::uuid_from_row(const Gtk::TreeModel::Row &row)
 {
     return row[list_columns.uuid];
+}
+PoolBrowser::PoolItemSource PoolBrowserPadstack::pool_item_source_from_row(const Gtk::TreeModel::Row &row)
+{
+    return row[list_columns.source];
 }
 } // namespace horizon

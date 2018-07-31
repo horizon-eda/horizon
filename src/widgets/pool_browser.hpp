@@ -23,9 +23,12 @@ public:
     void go_to(const UUID &uu);
     void clear_search();
 
+    enum class PoolItemSource { LOCAL, INCLUDED, OVERRIDING };
+
 protected:
     void construct();
     class Pool *pool = nullptr;
+    UUID pool_uuid;
     bool show_none = false;
     bool show_path = false;
     Gtk::TreeViewColumn *path_column = nullptr;
@@ -35,6 +38,10 @@ protected:
 
     Gtk::TreeViewColumn *append_column(const std::string &name, const Gtk::TreeModelColumnBase &column,
                                        Pango::EllipsizeMode ellipsize = Pango::ELLIPSIZE_NONE);
+    Gtk::TreeViewColumn *append_column_with_item_source_cr(const std::string &name,
+                                                           const Gtk::TreeModelColumnBase &column,
+                                                           Pango::EllipsizeMode ellipsize = Pango::ELLIPSIZE_NONE);
+    class CellRendererColorBox *create_pool_item_source_cr(Gtk::TreeViewColumn *tvc);
 
     Gtk::Entry *create_search_entry(const std::string &label);
     void add_search_widget(const std::string &label, Gtk::Widget &w);
@@ -56,6 +63,11 @@ protected:
 
     Gtk::Menu context_menu;
     std::set<Gtk::Entry *> search_entries;
+
+    PoolItemSource pool_item_source_from_db(const UUID &uu, bool overridden);
+
+    void install_pool_item_source_tooltip();
+    virtual PoolItemSource pool_item_source_from_row(const Gtk::TreeModel::Row &row);
 
 private:
     Gtk::Grid *grid = nullptr;

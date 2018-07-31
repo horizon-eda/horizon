@@ -10,15 +10,6 @@
 namespace horizon {
 using json = nlohmann::json;
 
-class PoolProjectManagerPool {
-public:
-    PoolProjectManagerPool(const json &j, const std::string &p);
-    std::string path;
-    std::string name;
-    UUID uuid;
-    UUID default_via;
-};
-
 class PoolProjectManagerApplication : public Gtk::Application {
 protected:
     PoolProjectManagerApplication();
@@ -32,8 +23,6 @@ public:
 
     std::map<std::string, Glib::DateTime> recent_items;
 
-    std::map<UUID, PoolProjectManagerPool> pools;
-    void add_pool(const std::string &p);
     std::deque<UUID> part_favorites;
 
     void close_appwindows(std::set<Gtk::Window *> wins);

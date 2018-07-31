@@ -1,10 +1,10 @@
+#include <widgets/cell_renderer_color_box.hpp>
 #include "pool_cache_window.hpp"
 #include "common/object_descr.hpp"
 #include "pool/part.hpp"
 #include "pool/pool_cached.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
-#include "widgets/cell_renderer_layer_display.hpp"
 #include <fstream>
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
@@ -240,7 +240,7 @@ PoolCacheWindow::PoolCacheWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     }
 
     {
-        auto cr = Gtk::manage(new CellRendererLayerDisplay());
+        auto cr = Gtk::manage(new CellRendererColorBox());
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn("State", *cr));
         auto cr2 = Gtk::manage(new Gtk::CellRendererText());
         cr2->property_text() = "hallo";
@@ -264,7 +264,7 @@ PoolCacheWindow::PoolCacheWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
         });
         tvc->set_cell_data_func(*cr, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
             Gtk::TreeModel::Row row = *it;
-            auto mcr = dynamic_cast<CellRendererLayerDisplay *>(tcr);
+            auto mcr = dynamic_cast<CellRendererColorBox *>(tcr);
             Color co(1, 0, 1);
             switch (row[tree_columns.state]) {
             case ItemState::CURRENT:

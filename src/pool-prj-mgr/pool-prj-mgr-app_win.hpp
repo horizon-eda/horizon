@@ -9,6 +9,7 @@
 #include "pool-prj-mgr-process.hpp"
 #include "project/project.hpp"
 #include "prj-mgr/prj-mgr_views.hpp"
+#include "pool-mgr/view_create_pool.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -32,7 +33,7 @@ public:
     std::string get_filename() const;
 
     PoolProjectManagerProcess *spawn(PoolProjectManagerProcess::Type type, const std::vector<std::string> &args,
-                                     const std::vector<std::string> &env = {});
+                                     const std::vector<std::string> &env = {}, bool read_only = false);
     PoolProjectManagerProcess *spawn_for_project(PoolProjectManagerProcess::Type type,
                                                  const std::vector<std::string> &args);
 
@@ -101,10 +102,13 @@ private:
 
     std::unique_ptr<Project> project = nullptr;
     std::string project_filename;
+    bool project_needs_save = false;
+    void save_project();
     class PartBrowserWindow *part_browser_window = nullptr;
     class PoolCacheWindow *pool_cache_window = nullptr;
 
-    enum class ViewMode { OPEN, POOL, DOWNLOAD, PROJECT, CREATE_PROJECT };
+    enum class ViewMode { OPEN, POOL, DOWNLOAD, PROJECT, CREATE_PROJECT, CREATE_POOL };
+    ViewMode view_mode = ViewMode::OPEN;
     void set_view_mode(ViewMode mode);
 
     void update_recent_items();
@@ -116,6 +120,7 @@ private:
     void handle_download();
     void handle_do_download();
     void handle_new_project();
+    void handle_new_pool();
     void handle_create();
     void handle_cancel();
     void handle_save();
@@ -141,6 +146,7 @@ private:
 
     PoolProjectManagerViewCreateProject view_create_project;
     PoolProjectManagerViewProject view_project;
+    PoolProjectManagerViewCreatePool view_create_pool;
 
     void handle_place_part(const UUID &uu);
     void handle_assign_part(const UUID &uu);

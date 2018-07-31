@@ -7,6 +7,7 @@ SRC_COMMON = \
 	src/util/uuid_path.cpp\
 	src/util/sqlite.cpp\
 	src/util/str_util.cpp\
+	src/pool/pool_manager.cpp \
 	src/pool/unit.cpp \
 	src/pool/symbol.cpp \
 	src/pool/part.cpp\
@@ -238,7 +239,7 @@ SRC_IMP = \
 	src/widgets/layer_box.cpp\
 	src/widgets/spin_button_dim.cpp\
 	src/widgets/chooser_buttons.cpp\
-	src/widgets/cell_renderer_layer_display.cpp\
+	src/widgets/cell_renderer_color_box.cpp\
 	src/widgets/net_class_button.cpp\
 	src/widgets/parameter_set_editor.cpp\
 	src/widgets/pool_browser.cpp\
@@ -393,6 +394,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-mgr/duplicate/duplicate_part.cpp\
 	src/pool-prj-mgr/pool-mgr/duplicate/duplicate_window.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_remote_box.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_settings_box.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_merge_dialog.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_update_error_dialog.cpp\
 	src/widgets/pool_browser.cpp\
@@ -403,7 +405,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/pool_browser_part.cpp\
 	src/widgets/pool_browser_package.cpp\
 	src/dialogs/pool_browser_dialog.cpp\
-	src/widgets/cell_renderer_layer_display.cpp\
+	src/widgets/cell_renderer_color_box.cpp\
 	src/util/sort_controller.cpp\
 	src/util/editor_process.cpp\
 	$(SRC_CANVAS)\
@@ -430,6 +432,8 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/prj-mgr/prj-mgr-prefs.cpp\
 	src/pool-prj-mgr/close_utils.cpp\
 	src/pool-prj-mgr/prj-mgr/pool_cache_cleanup_dialog.cpp\
+	src/pool-prj-mgr/pool-mgr/view_create_pool.cpp\
+	src/widgets/pool_chooser.cpp
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

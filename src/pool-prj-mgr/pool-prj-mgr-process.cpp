@@ -12,7 +12,7 @@ template <typename T> constexpr bool any_of(T value, std::initializer_list<T> ch
 
 PoolProjectManagerProcess::PoolProjectManagerProcess(PoolProjectManagerProcess::Type ty,
                                                      const std::vector<std::string> &args,
-                                                     const std::vector<std::string> &ienv, Pool *pool)
+                                                     const std::vector<std::string> &ienv, Pool *pool, bool read_only)
     : type(ty)
 {
     std::string filename;
@@ -59,6 +59,8 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(PoolProjectManagerProcess::
             break;
         default:;
         }
+        if (read_only)
+            argv.push_back("-r");
         proc = std::make_unique<EditorProcess>(argv, env);
         proc->signal_exited().connect([this, filename](auto rc) {
             bool modified = false;
@@ -73,13 +75,13 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(PoolProjectManagerProcess::
     else {
         switch (type) {
         case PoolProjectManagerProcess::Type::UNIT:
-            win = new EditorWindow(ObjectType::UNIT, args.at(0), pool);
+            win = new EditorWindow(ObjectType::UNIT, args.at(0), pool, read_only);
             break;
         case PoolProjectManagerProcess::Type::ENTITY:
-            win = new EditorWindow(ObjectType::ENTITY, args.at(0), pool);
+            win = new EditorWindow(ObjectType::ENTITY, args.at(0), pool, read_only);
             break;
         case PoolProjectManagerProcess::Type::PART:
-            win = new EditorWindow(ObjectType::PART, args.at(0), pool);
+            win = new EditorWindow(ObjectType::PART, args.at(0), pool, read_only);
             break;
         default:;
         }

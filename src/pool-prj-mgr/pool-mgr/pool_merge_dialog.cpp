@@ -1,6 +1,6 @@
+#include <widgets/cell_renderer_color_box.hpp>
 #include "pool_merge_dialog.hpp"
 #include "common/object_descr.hpp"
-#include "widgets/cell_renderer_layer_display.hpp"
 #include "pool/pool.hpp"
 #include "pool/part.hpp"
 #include "common/lut.hpp"
@@ -170,7 +170,7 @@ PoolMergeDialog::PoolMergeDialog(Gtk::Window *parent, const std::string &lp, con
     }
 
     {
-        auto cr = Gtk::manage(new CellRendererLayerDisplay());
+        auto cr = Gtk::manage(new CellRendererColorBox());
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn("State", *cr));
         auto cr2 = Gtk::manage(new Gtk::CellRendererText());
         cr2->property_text() = "hallo";
@@ -209,7 +209,7 @@ PoolMergeDialog::PoolMergeDialog(Gtk::Window *parent, const std::string &lp, con
         });
         tvc->set_cell_data_func(*cr, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
             Gtk::TreeModel::Row row = *it;
-            auto mcr = dynamic_cast<CellRendererLayerDisplay *>(tcr);
+            auto mcr = dynamic_cast<CellRendererColorBox *>(tcr);
             Color co(1, 0, 1);
             switch (row[list_columns.state]) {
             case ItemState::CURRENT:

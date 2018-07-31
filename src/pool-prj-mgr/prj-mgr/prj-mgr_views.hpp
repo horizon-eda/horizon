@@ -18,6 +18,7 @@ public:
         return s_signal_valid_change;
     }
     void populate_pool_combo(const Glib::RefPtr<Gtk::Application> &app);
+    void update();
 
 private:
     PoolProjectManagerAppWindow *win = nullptr;
@@ -26,7 +27,7 @@ private:
     Gtk::FileChooserButton *project_path_chooser = nullptr;
     Gtk::Label *project_dir_label = nullptr;
     Gtk::ComboBoxText *project_pool_combo = nullptr;
-    void update();
+
 
     type_signal_valid_change s_signal_valid_change;
 };
@@ -36,8 +37,9 @@ public:
     PoolProjectManagerViewProject(const Glib::RefPtr<Gtk::Builder> &refBuilder, class PoolProjectManagerAppWindow *w);
     Gtk::Entry *entry_project_title = nullptr;
     Gtk::Label *label_pool_name = nullptr;
-    Gtk::InfoBar *info_bar = nullptr;
-    Gtk::Label *info_bar_label = nullptr;
+    Gtk::Label *label_pool_path = nullptr;
+    Gtk::InfoBar *pool_info_bar = nullptr;
+    Gtk::Label *pool_info_bar_label = nullptr;
 
 private:
     PoolProjectManagerAppWindow *win = nullptr;
@@ -45,10 +47,12 @@ private:
     Gtk::Button *button_board = nullptr;
     Gtk::Button *button_part_browser = nullptr;
     Gtk::Button *button_pool_cache = nullptr;
+    Gtk::Button *button_change_pool = nullptr;
 
     void handle_button_top_schematic();
     void handle_button_board();
     void handle_button_part_browser();
     void handle_button_pool_cache();
+    void handle_button_change_pool();
 };
 } // namespace horizon

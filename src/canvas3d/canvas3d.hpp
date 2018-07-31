@@ -50,7 +50,7 @@ public:
 
     void load_models_async(class Pool *pool);
 
-    void load_3d_model(const std::string &filename, const std::string &base_path);
+
     void clear_3d_models();
 
     typedef sigc::signal<void, bool> type_signal_models_loading;
@@ -167,7 +167,9 @@ private:
     bool layer_is_visible(int layer) const;
     Color get_layer_color(int layer) const;
 
-    void load_models_thread(std::set<std::string> model_filenames, std::string base_path);
+    void load_3d_model(const std::string &filename, const std::string &filename_abs);
+    void load_models_thread(std::map<std::string, std::string> model_filenames);
+    std::string get_model_filename(const Package &pkg, Pool *pool, const UUID &model_uuid);
 
     std::set<UUID> packages_highlight;
 

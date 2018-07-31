@@ -26,6 +26,8 @@
 #include "widgets/symbol_preview.hpp"
 #include "widgets/preview_canvas.hpp"
 #include "pool_update_error_dialog.hpp"
+#include "pool_settings_box.hpp"
+#include "pool/pool_manager.hpp"
 #include <thread>
 #include "nlohmann/json.hpp"
 
@@ -165,11 +167,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     {
         auto br = Gtk::manage(new PoolBrowserUnit(&pool));
         br->set_show_path(true);
-        br->signal_activated().connect([this, br] {
-            auto uu = br->get_selected();
-            auto path = pool.get_filename(ObjectType::UNIT, uu);
-            appwin->spawn(PoolProjectManagerProcess::Type::UNIT, {path});
-        });
+        br->signal_activated().connect([this, br] { handle_edit_unit(br->get_selected()); });
 
         br->show();
         browsers.emplace(ObjectType::UNIT, br);
@@ -261,11 +259,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         paned->add2(*preview);
         paned->show_all();
 
-        br->signal_activated().connect([this, br] {
-            auto uu = br->get_selected();
-            auto path = pool.get_filename(ObjectType::SYMBOL, uu);
-            appwin->spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {path});
-        });
+        br->signal_activated().connect([this, br] { handle_edit_symbol(br->get_selected()); });
 
         append_page(*paned, "Symbols");
     }
@@ -274,13 +268,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     {
         auto br = Gtk::manage(new PoolBrowserEntity(&pool));
         br->set_show_path(true);
-        br->signal_activated().connect([this, br] {
-            auto uu = br->get_selected();
-            if (!uu)
-                return;
-            auto path = pool.get_filename(ObjectType::ENTITY, uu);
-            appwin->spawn(PoolProjectManagerProcess::Type::ENTITY, {path});
-        });
+        br->signal_activated().connect([this, br] { handle_edit_entity(br->get_selected()); });
 
         br->show();
         browsers.emplace(ObjectType::ENTITY, br);
@@ -338,11 +326,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         br->set_include_padstack_type(Padstack::Type::VIA, true);
         br->set_include_padstack_type(Padstack::Type::MECHANICAL, true);
         br->set_include_padstack_type(Padstack::Type::HOLE, true);
-        br->signal_activated().connect([this, br] {
-            auto uu = br->get_selected();
-            auto path = pool.get_filename(ObjectType::PADSTACK, uu);
-            appwin->spawn(PoolProjectManagerProcess::Type::IMP_PADSTACK, {path});
-        });
+        br->signal_activated().connect([this, br] { handle_edit_padstack(br->get_selected()); });
 
         br->show();
         browsers.emplace(ObjectType::PADSTACK, br);
@@ -409,11 +393,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     {
         auto br = Gtk::manage(new PoolBrowserPackage(&pool));
         br->set_show_path(true);
-        br->signal_activated().connect([this, br] {
-            auto uu = br->get_selected();
-            auto path = pool.get_filename(ObjectType::PACKAGE, uu);
-            appwin->spawn(PoolProjectManagerProcess::Type::IMP_PACKAGE, {path});
-        });
+        br->signal_activated().connect([this, br] { handle_edit_package(br->get_selected()); });
 
         br->show();
         browsers.emplace(ObjectType::PACKAGE, br);
@@ -478,13 +458,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     {
         auto br = Gtk::manage(new PoolBrowserPart(&pool));
         br->set_show_path(true);
-        br->signal_activated().connect([this, br] {
-            auto uu = br->get_selected();
-            if (!uu)
-                return;
-            auto path = pool.get_filename(ObjectType::PART, uu);
-            appwin->spawn(PoolProjectManagerProcess::Type::PART, {path});
-        });
+        br->signal_activated().connect([this, br] { handle_edit_part(br->get_selected()); });
 
         br->show();
         browsers.emplace(ObjectType::PART, br);
@@ -537,6 +511,17 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         });
 
         append_page(*paned, "Parts");
+    }
+
+    {
+        if (PoolManager::get().get_pools().count(pool.get_base_path())) {
+            settings_box = PoolSettingsBox::create(this, pool.get_base_path());
+            pool_uuid = PoolManager::get().get_pools().at(pool.get_base_path()).uuid;
+
+            settings_box->show();
+            append_page(*settings_box, "Settings");
+            settings_box->unreference();
+        }
     }
 
     if (remote_repo.size()) {
@@ -651,6 +636,20 @@ void PoolNotebook::prepare_close()
     closing = true;
 }
 
+bool PoolNotebook::get_needs_save() const
+{
+    if (settings_box)
+        return settings_box->get_needs_save();
+    else
+        return false;
+}
+
+void PoolNotebook::save()
+{
+    if (settings_box)
+        settings_box->save();
+}
+
 void PoolNotebook::pool_update_thread()
 {
     std::cout << "hello from thread" << std::endl;
@@ -677,6 +676,14 @@ void PoolNotebook::pool_update_thread()
             std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
             pool_update_status_queue.emplace_back(PoolUpdateStatus::ERROR, "",
                                                   std::string("generic exception: ") + e.what());
+        }
+        pool_update_dispatcher.emit();
+    }
+    catch (const Glib::FileError &e) {
+        {
+            std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
+            pool_update_status_queue.emplace_back(PoolUpdateStatus::ERROR, "",
+                                                  std::string("file exception: ") + e.what());
         }
         pool_update_dispatcher.emit();
     }

@@ -47,6 +47,7 @@ public:
     virtual ~ImpBase()
     {
     }
+    void set_read_only(bool v);
 
     std::set<ObjectRef> highlights;
     virtual void update_highlights(){};
@@ -146,6 +147,8 @@ protected:
     void edit_pool_item(ObjectType type, const UUID &uu);
 
     void parameter_window_add_polygon_expand(class ParameterWindow *parameter_window);
+
+    bool read_only = false;
 
 private:
     void fix_cursor_pos();

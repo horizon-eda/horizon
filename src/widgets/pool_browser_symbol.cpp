@@ -7,6 +7,7 @@ PoolBrowserSymbol::PoolBrowserSymbol(Pool *p, const UUID &uu) : PoolBrowser(p), 
     construct();
     name_entry = create_search_entry("Name");
     search();
+    install_pool_item_source_tooltip();
 }
 
 Glib::RefPtr<Gtk::ListStore> PoolBrowserSymbol::create_list_store()
@@ -16,7 +17,7 @@ Glib::RefPtr<Gtk::ListStore> PoolBrowserSymbol::create_list_store()
 
 void PoolBrowserSymbol::create_columns()
 {
-    treeview->append_column("Symbol", list_columns.name);
+    append_column_with_item_source_cr("Symbol", list_columns.name);
     treeview->append_column("Unit", list_columns.unit_name);
     treeview->append_column("Manufacturer", list_columns.unit_manufacturer);
 }
@@ -45,7 +46,7 @@ void PoolBrowserSymbol::search()
 
     std::string query =
             "SELECT symbols.uuid, symbols.name, units.name, "
-            "units.manufacturer, symbols.filename FROM symbols,units WHERE "
+            "units.manufacturer, symbols.filename, symbols.pool_uuid, symbols.overridden FROM symbols,units WHERE "
             "symbols.unit = units.uuid AND (units.uuid=? OR ?) AND "
             "symbols.name LIKE ?"
             + sort_controller->get_order_by();
@@ -69,6 +70,7 @@ void PoolBrowserSymbol::search()
         row[list_columns.unit_name] = q.get<std::string>(2);
         row[list_columns.unit_manufacturer] = q.get<std::string>(3);
         row[list_columns.path] = q.get<std::string>(4);
+        row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(5), q.get<int>(6));
     }
     treeview->set_model(store);
     select_uuid(selected_uuid);
@@ -78,5 +80,9 @@ void PoolBrowserSymbol::search()
 UUID PoolBrowserSymbol::uuid_from_row(const Gtk::TreeModel::Row &row)
 {
     return row[list_columns.uuid];
+}
+PoolBrowser::PoolItemSource PoolBrowserSymbol::pool_item_source_from_row(const Gtk::TreeModel::Row &row)
+{
+    return row[list_columns.source];
 }
 } // namespace horizon

@@ -11,5 +11,6 @@ private:
     Glib::RefPtr<class Gtk::Application> app;
     void update();
     class ProjectManagerPrefsBox *box;
+    class PoolManager &mgr;
 };
 } // namespace horizon

@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <yaml-cpp/yaml.h>
 #include "nlohmann/json.hpp"
+#include "pool/pool_manager.hpp"
 
 YAML::Node edit_yaml(const YAML::Emitter &em)
 {
@@ -85,12 +86,13 @@ static void status_cb(horizon::PoolUpdateStatus st, const std::string filename, 
 int main(int c_argc, char *c_argv[])
 {
     Gio::init();
+    horizon::PoolManager::init();
 
     std::vector<std::string> argv;
     for (int i = 0; i < c_argc; i++) {
         argv.emplace_back(c_argv[i]);
     }
-    auto pool_base_path = Glib::getenv("HORIZON_POOL");
+    auto pool_base_path = Gio::File::create_for_path(Glib::getenv("HORIZON_POOL"))->get_path();
 
     if (argv.size() <= 1) {
         std::cout << "Usage: " << argv.at(0) << " <command> args" << std::endl << std::endl;

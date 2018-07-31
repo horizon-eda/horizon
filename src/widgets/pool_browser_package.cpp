@@ -9,6 +9,7 @@ PoolBrowserPackage::PoolBrowserPackage(Pool *p) : PoolBrowser(p)
     name_entry = create_search_entry("Name");
     manufacturer_entry = create_search_entry("Manufacturer");
     tags_entry = create_search_entry("Tags");
+    install_pool_item_source_tooltip();
     search();
 }
 
@@ -20,7 +21,7 @@ Glib::RefPtr<Gtk::ListStore> PoolBrowserPackage::create_list_store()
 void PoolBrowserPackage::create_columns()
 {
     {
-        auto col = append_column("Package", list_columns.name, Pango::ELLIPSIZE_END);
+        auto col = append_column_with_item_source_cr("Package", list_columns.name, Pango::ELLIPSIZE_END);
         col->set_resizable(true);
         col->set_expand(true);
         col->set_min_width(200);
@@ -59,7 +60,8 @@ void PoolBrowserPackage::search()
     std::string query;
     if (tags.size() == 0) {
         query = "SELECT packages.uuid, packages.name, packages.manufacturer,  "
-                "packages.n_pads, tags_view.tags, packages.filename FROM packages "
+                "packages.n_pads, tags_view.tags, packages.filename, packages.pool_uuid, packages.overridden FROM "
+                "packages "
                 "LEFT JOIN tags_view ON tags_view.uuid = packages.uuid "
                 "WHERE packages.name LIKE ? AND packages.manufacturer LIKE ? "
                 "GROUP BY packages.uuid "
@@ -68,7 +70,8 @@ void PoolBrowserPackage::search()
     else {
         std::ostringstream qs;
         qs << "SELECT packages.uuid, packages.name, packages.manufacturer, "
-              "packages.n_pads, tags_view.tags, packages.filename FROM packages "
+              "packages.n_pads, tags_view.tags, packages.filename, packages.pool_uuid, packages.overridden FROM "
+              "packages "
               "LEFT JOIN tags ON tags.uuid = packages.uuid "
               "LEFT JOIN tags_view ON tags_view.uuid = packages.uuid "
               "WHERE packages.name LIKE ? "
@@ -107,6 +110,7 @@ void PoolBrowserPackage::search()
         row[list_columns.n_pads] = q.get<int>(3);
         row[list_columns.tags] = q.get<std::string>(4);
         row[list_columns.path] = q.get<std::string>(5);
+        row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(6), q.get<int>(7));
     }
     treeview->set_model(store);
     select_uuid(selected_uuid);
@@ -116,5 +120,9 @@ void PoolBrowserPackage::search()
 UUID PoolBrowserPackage::uuid_from_row(const Gtk::TreeModel::Row &row)
 {
     return row[list_columns.uuid];
+}
+PoolBrowser::PoolItemSource PoolBrowserPackage::pool_item_source_from_row(const Gtk::TreeModel::Row &row)
+{
+    return row[list_columns.source];
 }
 } // namespace horizon

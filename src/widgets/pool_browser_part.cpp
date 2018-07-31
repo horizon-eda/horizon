@@ -9,6 +9,7 @@ PoolBrowserPart::PoolBrowserPart(Pool *p, const UUID &uu) : PoolBrowser(p), enti
     MPN_entry = create_search_entry("MPN");
     manufacturer_entry = create_search_entry("Manufacturer");
     tags_entry = create_search_entry("Tags");
+    install_pool_item_source_tooltip();
     search();
 }
 
@@ -32,7 +33,7 @@ Glib::RefPtr<Gtk::ListStore> PoolBrowserPart::create_list_store()
 void PoolBrowserPart::create_columns()
 {
     {
-        auto col = append_column("MPN", list_columns.MPN, Pango::ELLIPSIZE_END);
+        auto col = append_column_with_item_source_cr("MPN", list_columns.MPN, Pango::ELLIPSIZE_END);
         col->set_resizable(true);
         col->set_expand(true);
         col->set_min_width(200);
@@ -82,7 +83,8 @@ void PoolBrowserPart::search()
     if (tags.size() == 0) {
         query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, "
                  "packages.name, tags_view.tags, parts.filename, "
-                 "parts.description FROM parts LEFT JOIN tags_view ON tags_view.uuid = "
+                 "parts.description, parts.pool_uuid, parts.overridden FROM parts LEFT JOIN tags_view ON "
+                 "tags_view.uuid = "
                  "parts.uuid LEFT JOIN packages ON packages.uuid = "
                  "parts.package WHERE parts.MPN LIKE ? AND parts.manufacturer "
                  "LIKE ? AND (parts.entity=? or ?) ";
@@ -90,7 +92,7 @@ void PoolBrowserPart::search()
     else {
         query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, "
                  "packages.name, tags_view.tags, parts.filename, "
-                 "parts.description FROM parts "
+                 "parts.description, parts.pool_uuid, parts.overridden FROM parts "
                  "LEFT JOIN tags_view ON tags_view.uuid = parts.uuid "
                  "LEFT JOIN packages ON packages.uuid = parts.package "
                  "WHERE parts.MPN LIKE ? AND parts.manufacturer "
@@ -133,6 +135,7 @@ void PoolBrowserPart::search()
         row[list_columns.tags] = q.get<std::string>(4);
         row[list_columns.path] = q.get<std::string>(5);
         row[list_columns.description] = q.get<std::string>(6);
+        row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(7), q.get<int>(8));
     }
     /*
     SQLite::Query q2(pool->db, "EXPLAIN QUERY PLAN " + query.str());
@@ -150,5 +153,9 @@ void PoolBrowserPart::search()
 UUID PoolBrowserPart::uuid_from_row(const Gtk::TreeModel::Row &row)
 {
     return row[list_columns.uuid];
+}
+PoolBrowser::PoolItemSource PoolBrowserPart::pool_item_source_from_row(const Gtk::TreeModel::Row &row)
+{
+    return row[list_columns.source];
 }
 } // namespace horizon

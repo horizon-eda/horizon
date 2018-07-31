@@ -7,6 +7,7 @@
 #include "logger/logger.hpp"
 #include "poly2tri/poly2tri.h"
 #include "util/step_importer.hpp"
+#include "pool/pool_manager.hpp"
 #include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -428,12 +429,12 @@ float Canvas3D::get_layer_offset(int layer)
     return layers[layer].offset + layers[layer].explode_mul * explode;
 }
 
-void Canvas3D::load_3d_model(const std::string &filename, const std::string &base_path)
+void Canvas3D::load_3d_model(const std::string &filename, const std::string &filename_abs)
 {
     if (models.count(filename))
         return;
 
-    auto faces = STEPImporter::import(Glib::build_filename(base_path, filename));
+    auto faces = STEPImporter::import(filename_abs);
     // canvas->face_vertex_buffer.reserve(faces.size());
     size_t vertex_offset = face_vertex_buffer.size();
     size_t first_index = face_index_buffer.size();
@@ -455,27 +456,42 @@ void Canvas3D::load_3d_model(const std::string &filename, const std::string &bas
                    std::forward_as_tuple(first_index, last_index - first_index));
 }
 
-void Canvas3D::load_models_thread(std::set<std::string> model_filenames, std::string base_path)
+void Canvas3D::load_models_thread(std::map<std::string, std::string> model_filenames)
 {
     std::lock_guard<std::mutex> lock(models_loading_mutex);
     for (const auto &it : model_filenames) {
-        load_3d_model(it, base_path);
+        load_3d_model(it.first, it.second);
     }
     models_loading_dispatcher.emit();
 }
 
 void Canvas3D::load_models_async(Pool *pool)
 {
-    std::set<std::string> model_filenames;
+    std::map<std::string, std::string> model_filenames; // first: relative, second: absolute
     for (const auto &it : brd->packages) {
         auto model = it.second.package.get_model(it.second.model);
-        if (model)
-            model_filenames.insert(model->filename);
+        UUID pool_uuid;
+        pool->get_filename(ObjectType::PACKAGE, it.second.package.uuid, &pool_uuid);
+        auto pool_info = PoolManager::get().get_by_uuid(pool_uuid);
+        if (model && pool_info)
+            model_filenames[model->filename] = Glib::build_filename(pool_info->base_path, model->filename);
     }
     s_signal_models_loading.emit(true);
-    std::thread thr(&Canvas3D::load_models_thread, this, model_filenames, pool->get_base_path());
+    std::thread thr(&Canvas3D::load_models_thread, this, model_filenames);
 
     thr.detach();
+}
+
+std::string Canvas3D::get_model_filename(const Package &pkg, Pool *pool, const UUID &model_uuid)
+{
+    auto model = pkg.get_model(model_uuid);
+    UUID pool_uuid;
+    pool->get_filename(ObjectType::PACKAGE, pkg.uuid, &pool_uuid);
+    auto pool_info = PoolManager::get().get_by_uuid(pool_uuid);
+    if (model && pool_info)
+        return Glib::build_filename(pool_info->base_path, model->filename);
+    else
+        return "";
 }
 
 void Canvas3D::clear_3d_models()

@@ -11,8 +11,9 @@ void PoolNotebook::handle_edit_part(const UUID &uu)
 {
     if (!uu)
         return;
-    auto path = pool.get_filename(ObjectType::PART, uu);
-    appwin->spawn(PoolProjectManagerProcess::Type::PART, {path});
+    UUID item_pool_uuid;
+    auto path = pool.get_filename(ObjectType::PART, uu, &item_pool_uuid);
+    appwin->spawn(PoolProjectManagerProcess::Type::PART, {path}, {}, pool_uuid && (item_pool_uuid != pool_uuid));
 }
 
 void PoolNotebook::handle_create_part()

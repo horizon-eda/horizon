@@ -64,7 +64,7 @@ public:
     Part part;
 };
 
-EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p)
+EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p, bool read_only)
     : Gtk::Window(), type(ty), pool(p), state_store(this, "pool-editor-win-" + std::to_string(static_cast<int>(type)))
 {
     set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
@@ -79,6 +79,8 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p)
         save_label = "Save as..";
     }
     save_button = Gtk::manage(new Gtk::Button(save_label));
+    if (read_only)
+        save_button->set_sensitive(false);
     hb->pack_start(*save_button);
 
     hb->show_all();
@@ -119,28 +121,45 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p)
     if (!state_store.get_default_set())
         set_default_size(-1, 600);
 
-    signal_delete_event().connect([this](GdkEventAny *ev) {
+    signal_delete_event().connect([this, read_only](GdkEventAny *ev) {
         if (iface && iface->get_needs_save()) {
-            Gtk::MessageDialog md(*this, "Save changes before closing?", false /* use_markup */, Gtk::MESSAGE_QUESTION,
-                                  Gtk::BUTTONS_NONE);
-            md.set_secondary_text(
-                    "If you don't save, all your changes will be permanently "
-                    "lost.");
-            md.add_button("Close without Saving", 1);
-            md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
-            md.add_button("Save", 2);
-            switch (md.run()) {
-            case 1:
-                return false; // close
+            if (!read_only) { // not read only
+                Gtk::MessageDialog md(*this, "Save changes before closing?", false /* use_markup */,
+                                      Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
+                md.set_secondary_text(
+                        "If you don't save, all your changes will be permanently "
+                        "lost.");
+                md.add_button("Close without Saving", 1);
+                md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+                md.add_button("Save", 2);
+                switch (md.run()) {
+                case 1:
+                    return false; // close
 
-            case 2:
-                save();
-                return false; // close
+                case 2:
+                    save();
+                    return false; // close
 
-            default:
-                return true; // keep window open
+                default:
+                    return true; // keep window open
+                }
+                return false;
             }
-            return false;
+            else {
+                Gtk::MessageDialog md(*this, "Document is read only", false /* use_markup */, Gtk::MESSAGE_QUESTION,
+                                      Gtk::BUTTONS_NONE);
+                md.set_secondary_text("You won't be able to save your changes");
+                md.add_button("Close without Saving", 1);
+                md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+                switch (md.run()) {
+                case 1:
+                    return false; // close
+
+                default:
+                    return true; // keep window open
+                }
+                return false;
+            }
         }
         return false;
     });

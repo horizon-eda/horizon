@@ -8,6 +8,7 @@ PoolBrowserEntity::PoolBrowserEntity(Pool *p) : PoolBrowser(p)
     construct();
     name_entry = create_search_entry("Name");
     tags_entry = create_search_entry("Tags");
+    install_pool_item_source_tooltip();
     search();
 }
 
@@ -18,7 +19,7 @@ Glib::RefPtr<Gtk::ListStore> PoolBrowserEntity::create_list_store()
 
 void PoolBrowserEntity::create_columns()
 {
-    treeview->append_column("Entity", list_columns.entity_name);
+    append_column_with_item_source_cr("Entity", list_columns.entity_name);
     treeview->append_column("Manufacturer", list_columns.entity_manufacturer);
     treeview->append_column("Prefix", list_columns.prefix);
     treeview->append_column("Gates", list_columns.n_gates);
@@ -46,7 +47,7 @@ void PoolBrowserEntity::search()
     if (tags.size() == 0) {
         query = "SELECT entities.uuid, entities.name, entities.prefix, "
                 "entities.n_gates, GROUP_CONCAT(tags.tag, ' '), "
-                "entities.manufacturer, entities.filename FROM entities LEFT "
+                "entities.manufacturer, entities.filename, entities.pool_uuid, entities.overridden FROM entities LEFT "
                 "JOIN tags ON tags.uuid = entities.uuid WHERE entities.name "
                 "LIKE ? GROUP by entities.uuid"
                 + sort_controller->get_order_by();
@@ -56,7 +57,7 @@ void PoolBrowserEntity::search()
         qs << "SELECT entities.uuid, entities.name, entities.prefix, "
               "entities.n_gates, (SELECT GROUP_CONCAT(tags.tag, ' ') FROM tags "
               "WHERE tags.uuid = entities.uuid), entities.manufacturer, "
-              "entities.filename FROM entities LEFT JOIN tags ON tags.uuid = "
+              "entities.filename, entities.pool_uuid, entities.overridden FROM entities LEFT JOIN tags ON tags.uuid = "
               "entities.uuid WHERE entities.name LIKE ? ";
         qs << "AND (";
         for (const auto &it : tags) {
@@ -92,6 +93,7 @@ void PoolBrowserEntity::search()
         row[list_columns.tags] = q.get<std::string>(4);
         row[list_columns.entity_manufacturer] = q.get<std::string>(5);
         row[list_columns.path] = q.get<std::string>(6);
+        row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(7), q.get<int>(8));
     }
     treeview->set_model(store);
     select_uuid(selected_uuid);
@@ -101,5 +103,9 @@ void PoolBrowserEntity::search()
 UUID PoolBrowserEntity::uuid_from_row(const Gtk::TreeModel::Row &row)
 {
     return row[list_columns.uuid];
+}
+PoolBrowser::PoolItemSource PoolBrowserEntity::pool_item_source_from_row(const Gtk::TreeModel::Row &row)
+{
+    return row[list_columns.source];
 }
 } // namespace horizon

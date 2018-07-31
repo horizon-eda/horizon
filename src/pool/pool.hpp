@@ -29,8 +29,9 @@ public:
     const class Package *get_package(const UUID &uu);
     const class Part *get_part(const UUID &uu);
     std::set<UUID> get_alternate_packages(const UUID &uu);
+    std::string get_model_filename(const UUID &pkg_uuid, const UUID &model_uuid);
 
-    virtual std::string get_filename(ObjectType type, const UUID &uu);
+    virtual std::string get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_out = nullptr);
     const std::string &get_base_path() const;
     /**
      * The database connection.

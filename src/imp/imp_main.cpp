@@ -14,6 +14,7 @@
 #include "pool/unit.hpp"
 #include "util/util.hpp"
 #include "util/uuid.hpp"
+#include "pool/pool_manager.hpp"
 #include <curl/curl.h>
 #include <fstream>
 #include <gtkmm.h>
@@ -30,6 +31,7 @@ using json = nlohmann::json;
 int main(int argc, char *argv[])
 {
     Gio::init();
+    horizon::PoolManager::init();
 
     Glib::OptionContext options;
     options.set_summary("horizon interactive manipulator");
@@ -71,6 +73,13 @@ int main(int argc, char *argv[])
     entry5.set_short_name('b');
     entry5.set_description("Board mode");
     group.add_entry(entry5, mode_board);
+
+    bool read_only = false;
+    Glib::OptionEntry entry6;
+    entry6.set_long_name("read-only");
+    entry6.set_short_name('r');
+    entry6.set_description("Read only");
+    group.add_entry(entry6, read_only);
 
     std::vector<std::string> filenames;
     Glib::OptionEntry entry_f;
@@ -131,6 +140,7 @@ int main(int argc, char *argv[])
         std::cout << "wrong invocation" << std::endl;
         return 1;
     }
+    imp->set_read_only(read_only);
 
     imp->run(argc, argv);
 

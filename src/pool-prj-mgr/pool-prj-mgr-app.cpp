@@ -9,16 +9,9 @@
 #include "nlohmann/json.hpp"
 #include "prj-mgr/prj-mgr-prefs.hpp"
 #include "close_utils.hpp"
+#include "pool/pool_manager.hpp"
 
 namespace horizon {
-
-PoolProjectManagerPool::PoolProjectManagerPool(const json &j, const std::string &p)
-    : path(p), name(j.at("name").get<std::string>()), uuid(j.at("uuid").get<std::string>())
-{
-    if (j.count("default_via")) {
-        default_via = UUID(j.at("default_via").get<std::string>());
-    }
-}
 
 PoolProjectManagerApplication::PoolProjectManagerApplication()
     : Gtk::Application("net.carrotIndustries.horizon.pool-prj-mgr", Gio::APPLICATION_HANDLES_OPEN),
@@ -96,13 +89,6 @@ void PoolProjectManagerApplication::load_from_config(const std::string &config_f
         ifs >> j;
         ifs.close();
     }
-    if (j.count("pools")) {
-        const json &o = j.at("pools");
-        for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            auto pool_filename = it.value().get<std::string>();
-            add_pool(pool_filename);
-        }
-    }
     if (j.count("part_favorites")) {
         const json &o = j.at("part_favorites");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -167,31 +153,11 @@ void PoolProjectManagerApplication::on_action_preferences()
     prefs_dialog->signal_hide().connect([prefs_dialog] { delete prefs_dialog; });
 }
 
-void PoolProjectManagerApplication::add_pool(const std::string &p)
-{
-    std::ifstream ifs(p);
-    if (ifs.is_open()) {
-        json k;
-        ifs >> k;
-        UUID uu(k.at("uuid").get<std::string>());
-        pools.emplace(std::piecewise_construct, std::forward_as_tuple(uu),
-                      std::forward_as_tuple(k, Glib::path_get_dirname(p)));
-    }
-    ifs.close();
-}
-
 void PoolProjectManagerApplication::on_shutdown()
 {
     auto config_filename = get_config_filename();
 
     json j;
-    {
-        json k;
-        for (const auto &it : pools) {
-            k.push_back(Glib::build_filename(it.second.path, "pool.json"));
-        }
-        j["pools"] = k;
-    }
     {
         json k;
         for (const auto &it : part_favorites) {

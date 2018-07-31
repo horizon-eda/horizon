@@ -119,25 +119,42 @@ bool ImpBase::handle_close(GdkEventAny *ev)
             preferences_window->hide();
         return false;
     }
+    if (!read_only) {
+        Gtk::MessageDialog md(*main_window, "Save changes before closing?", false /* use_markup */,
+                              Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
+        md.set_secondary_text("If you don't save, all your changes will be permanently lost.");
+        md.add_button("Close without Saving", 1);
+        md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+        md.add_button("Save", 2);
+        switch (md.run()) {
+        case 1:
+            if (preferences_window)
+                preferences_window->hide();
+            return false; // close
 
-    Gtk::MessageDialog md(*main_window, "Save changes before closing?", false /* use_markup */, Gtk::MESSAGE_QUESTION,
-                          Gtk::BUTTONS_NONE);
-    md.set_secondary_text("If you don't save, all your changes will be permanently lost.");
-    md.add_button("Close without Saving", 1);
-    md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
-    md.add_button("Save", 2);
-    switch (md.run()) {
-    case 1:
-        if (preferences_window)
-            preferences_window->hide();
-        return false; // close
+        case 2:
+            core.r->save();
+            return false; // close
 
-    case 2:
-        core.r->save();
-        return false; // close
+        default:
+            return true; // keep window open
+        }
+    }
+    else {
+        Gtk::MessageDialog md(*main_window, "Document is read only", false /* use_markup */, Gtk::MESSAGE_QUESTION,
+                              Gtk::BUTTONS_NONE);
+        md.set_secondary_text("You won't be able to save your changes");
+        md.add_button("Close without Saving", 1);
+        md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+        switch (md.run()) {
+        case 1:
+            if (preferences_window)
+                preferences_window->hide();
+            return false; // close
 
-    default:
-        return true; // keep window open
+        default:
+            return true; // keep window open
+        }
     }
     return false;
 }
@@ -331,7 +348,10 @@ void ImpBase::run(int argc, char *argv[])
     key_sequence_dialog = std::make_unique<KeySequenceDialog>(this->main_window);
 
     connect_action(ActionID::SELECTION_FILTER, [this](const auto &a) { selection_filter_dialog->present(); });
-    connect_action(ActionID::SAVE, [this](const auto &a) { core.r->save(); });
+    connect_action(ActionID::SAVE, [this](const auto &a) {
+        if (!read_only)
+            core.r->save();
+    });
     connect_action(ActionID::UNDO, [this](const auto &a) {
         core.r->undo();
         this->canvas_update_from_pp();
@@ -487,10 +507,8 @@ void ImpBase::run(int argc, char *argv[])
         }
         return j;
     });
-    core.r->signal_save_tool_settings().connect([this](ToolID id, json j) {
-        save_json_to_file(get_tool_settings_filename(id), j);
-
-    });
+    core.r->signal_save_tool_settings().connect(
+            [this](ToolID id, json j) { save_json_to_file(get_tool_settings_filename(id), j); });
 
     auto help_button = create_action_button(make_action(ActionID::HELP));
     help_button->show();
@@ -938,7 +956,7 @@ bool ImpBase::get_action_sensitive(std::pair<ActionID, ToolID> action) const
 
 void ImpBase::update_action_sensitivity()
 {
-    set_action_sensitive(make_action(ActionID::SAVE), core.r->get_needs_save());
+    set_action_sensitive(make_action(ActionID::SAVE), !read_only && core.r->get_needs_save());
     set_action_sensitive(make_action(ActionID::UNDO), core.r->can_undo());
     set_action_sensitive(make_action(ActionID::REDO), core.r->can_redo());
     auto sel = canvas->get_selection();
@@ -1390,7 +1408,8 @@ bool ImpBase::handle_broadcast(const json &j)
         return true;
     }
     else if (op == "save") {
-        core.r->save();
+        if (!read_only)
+            core.r->save();
         return true;
     }
     else if (op == "close") {
@@ -1425,6 +1444,11 @@ void ImpBase::handle_file_changed(const Glib::RefPtr<Gio::File> &file1, const Gl
 {
     main_window->show_nonmodal("Pool has changed", "Reload pool", [this] { trigger_action(ActionID::RELOAD_POOL); },
                                "This will clear the undo/redo history");
+}
+
+void ImpBase::set_read_only(bool v)
+{
+    read_only = v;
 }
 
 } // namespace horizon

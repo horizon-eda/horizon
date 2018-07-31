@@ -21,6 +21,18 @@ void save_json_to_file(const std::string &filename, const json &j)
     ofs.close();
 }
 
+json load_json_from_file(const std::string &filename)
+{
+    json j;
+    std::ifstream ifs(filename);
+    if (!ifs.is_open()) {
+        throw std::runtime_error("file " + filename + " not opened");
+    }
+    ifs >> j;
+    ifs.close();
+    return j;
+}
+
 json json_from_resource(const std::string &rsrc)
 {
     auto json_bytes = Gio::Resource::lookup_data_global(rsrc);

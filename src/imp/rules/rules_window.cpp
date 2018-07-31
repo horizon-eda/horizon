@@ -1,3 +1,4 @@
+#include <widgets/cell_renderer_color_box.hpp>
 #include "rules_window.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "rule_editor.hpp"
@@ -16,8 +17,6 @@
 #include "rules/rules.hpp"
 #include "rules/rules_with_core.hpp"
 #include "util/util.hpp"
-#include "widgets/cell_renderer_layer_display.hpp"
-
 #include "core/core_board.hpp"
 #include "core/core_schematic.hpp"
 
@@ -164,7 +163,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
 
     check_result_treeview->append_column("Rule", tree_columns.name);
     {
-        auto cr = Gtk::manage(new CellRendererLayerDisplay());
+        auto cr = Gtk::manage(new CellRendererColorBox());
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Result"));
         tvc->pack_start(*cr, false);
         auto cr2 = Gtk::manage(new Gtk::CellRendererText());
@@ -199,7 +198,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
 
         tvc->set_cell_data_func(*cr, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
             Gtk::TreeModel::Row row = *it;
-            auto mcr = dynamic_cast<CellRendererLayerDisplay *>(tcr);
+            auto mcr = dynamic_cast<CellRendererColorBox *>(tcr);
             auto co = rules_check_error_level_to_color(row[tree_columns.result]);
             Gdk::RGBA va;
             va.set_red(co.r);

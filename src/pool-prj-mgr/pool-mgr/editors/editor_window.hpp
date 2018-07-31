@@ -19,7 +19,7 @@ public:
 
 class EditorWindow : public Gtk::Window {
 public:
-    EditorWindow(ObjectType type, const std::string &filename, class Pool *p);
+    EditorWindow(ObjectType type, const std::string &filename, class Pool *p, bool read_only);
     void reload();
     bool get_need_update();
     static std::string fix_filename(std::string s);

@@ -6,10 +6,12 @@
 #include "part.hpp"
 #include "symbol.hpp"
 #include "unit.hpp"
+#include "pool_manager.hpp"
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
 namespace horizon {
+
 Pool::Pool(const std::string &bp, bool read_only)
     : db(bp + "/pool.db", read_only ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE, 1000), base_path(bp)
 {
@@ -29,32 +31,32 @@ void Pool::clear()
     parts.clear();
 }
 
-std::string Pool::get_filename(ObjectType type, const UUID &uu)
+std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_out)
 {
     std::string query;
     switch (type) {
     case ObjectType::UNIT:
-        query = "SELECT filename FROM units WHERE uuid = ?";
+        query = "SELECT filename, pool_uuid FROM units WHERE uuid = ?";
         break;
 
     case ObjectType::ENTITY:
-        query = "SELECT filename FROM entities WHERE uuid = ?";
+        query = "SELECT filename, pool_uuid FROM entities WHERE uuid = ?";
         break;
 
     case ObjectType::SYMBOL:
-        query = "SELECT filename FROM symbols WHERE uuid = ?";
+        query = "SELECT filename, pool_uuid FROM symbols WHERE uuid = ?";
         break;
 
     case ObjectType::PACKAGE:
-        query = "SELECT filename FROM packages WHERE uuid = ?";
+        query = "SELECT filename, pool_uuid FROM packages WHERE uuid = ?";
         break;
 
     case ObjectType::PADSTACK:
-        query = "SELECT filename FROM padstacks WHERE uuid = ?";
+        query = "SELECT filename, pool_uuid FROM padstacks WHERE uuid = ?";
         break;
 
     case ObjectType::PART:
-        query = "SELECT filename FROM parts WHERE uuid = ?";
+        query = "SELECT filename, pool_uuid FROM parts WHERE uuid = ?";
         break;
 
     default:
@@ -71,24 +73,39 @@ std::string Pool::get_filename(ObjectType type, const UUID &uu)
             throw std::runtime_error(object_descriptions.at(type).name + " " + (std::string)uu + " not found");
     }
     auto filename = q.get<std::string>(0);
+    std::string bp = base_path;
+
+    UUID other_pool_uuid(q.get<std::string>(1));
+    if (pool_uuid_out)
+        *pool_uuid_out = other_pool_uuid;
+    const auto other_pool_info = PoolManager::get().get_by_uuid(other_pool_uuid);
+    UUID this_pool_uuid;
+    const auto &pools = PoolManager::get().get_pools();
+    if (pools.count(base_path))
+        this_pool_uuid = pools.at(base_path).uuid;
+
+    if (other_pool_info && this_pool_uuid
+        && this_pool_uuid != other_pool_info->uuid) // don't override if item is in local pool
+        bp = other_pool_info->base_path;
+
     switch (type) {
     case ObjectType::UNIT:
-        return Glib::build_filename(base_path, "units", filename);
+        return Glib::build_filename(bp, "units", filename);
 
     case ObjectType::ENTITY:
-        return Glib::build_filename(base_path, "entities", filename);
+        return Glib::build_filename(bp, "entities", filename);
 
     case ObjectType::SYMBOL:
-        return Glib::build_filename(base_path, "symbols", filename);
+        return Glib::build_filename(bp, "symbols", filename);
 
     case ObjectType::PACKAGE:
-        return Glib::build_filename(base_path, "packages", filename);
+        return Glib::build_filename(bp, "packages", filename);
 
     case ObjectType::PADSTACK:
-        return Glib::build_filename(base_path, filename);
+        return Glib::build_filename(bp, filename);
 
     case ObjectType::PART:
-        return Glib::build_filename(base_path, "parts", filename);
+        return Glib::build_filename(bp, "parts", filename);
 
     default:
         return "";
@@ -102,7 +119,7 @@ const std::string &Pool::get_base_path() const
 
 int Pool::get_required_schema_version()
 { // keep in sync with schema definition
-    return 5;
+    return 6;
 }
 
 std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) const
@@ -208,5 +225,20 @@ std::set<UUID> Pool::get_alternate_packages(const UUID &uu)
         r.insert(q.get<std::string>(0));
     }
     return r;
+}
+
+std::string Pool::get_model_filename(const UUID &pkg_uuid, const UUID &model_uuid)
+{
+    UUID pool_uuid;
+    auto pkg = get_package(pkg_uuid);
+    get_filename(ObjectType::PACKAGE, pkg_uuid, &pool_uuid);
+    auto model = pkg->get_model(model_uuid);
+    auto pool = PoolManager::get().get_by_uuid(pool_uuid);
+    if (model && pool) {
+        return Glib::build_filename(pool->base_path, model->filename);
+    }
+    else {
+        return "";
+    }
 }
 } // namespace horizon

@@ -1,36 +1,39 @@
 #include "prj-mgr-prefs.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app.hpp"
+#include "pool/pool_manager.hpp"
 
 namespace horizon {
 
 class ProjectManagerPrefsPoolItem : public Gtk::Box {
 public:
-    ProjectManagerPrefsPoolItem(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x) : Gtk::Box(cobject)
+    ProjectManagerPrefsPoolItem(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
+                                const PoolManagerPool &pool)
+        : Gtk::Box(cobject)
     {
         x->get_widget("pool_item_name", label_name);
         x->get_widget("pool_item_path", label_path);
         x->get_widget("pool_item_uuid", label_uuid);
         x->get_widget("pool_item_delete", button_delete);
+        x->get_widget("pool_item_enabled", switch_enabled);
+        label_name->set_text(pool.name);
+        label_path->set_text(pool.base_path);
+        label_uuid->set_text((std::string)pool.uuid);
+        switch_enabled->set_active(pool.enabled);
         show_all();
     }
-    static ProjectManagerPrefsPoolItem *create()
+    static ProjectManagerPrefsPoolItem *create(const PoolManagerPool &pool)
     {
         ProjectManagerPrefsPoolItem *w;
         Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
         std::vector<Glib::ustring> objs = {"pool_item_box", "image1"};
         x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/prj-mgr/prefs.ui", objs);
-        x->get_widget_derived("pool_item_box", w);
+        x->get_widget_derived("pool_item_box", w, pool);
 
         w->reference();
         return w;
     }
-    void load(const PoolProjectManagerPool &pool)
-    {
-        label_name->set_text(pool.name);
-        label_path->set_text(pool.path);
-        label_uuid->set_text((std::string)pool.uuid);
-    }
     Gtk::Button *button_delete;
+    Gtk::Switch *switch_enabled;
 
 private:
     Gtk::Label *label_name;
@@ -69,19 +72,22 @@ ProjectManagerPrefsBox *ProjectManagerPrefsBox::create()
 
 void ProjectManagerPrefs::update()
 {
-    auto mapp = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(app);
     auto children = box->listbox->get_children();
     for (auto it : children) {
         delete it;
     }
-    for (const auto &it : mapp->pools) {
-        auto x = ProjectManagerPrefsPoolItem::create();
-        x->load(it.second);
+    auto pools = mgr.get_pools();
+    for (const auto &it : pools) {
+        auto x = ProjectManagerPrefsPoolItem::create(it.second);
         box->listbox->add(*x);
         x->unreference();
-        auto uu = it.first;
-        x->button_delete->signal_clicked().connect([uu, this, mapp] {
-            mapp->pools.erase(uu);
+        std::string bp = it.first;
+        x->button_delete->signal_clicked().connect([bp, this] {
+            mgr.remove_pool(bp);
+            update();
+        });
+        x->switch_enabled->property_active().signal_changed().connect([bp, this, x] {
+            mgr.set_pool_enabled(bp, x->switch_enabled->get_active());
             update();
         });
     }
@@ -89,7 +95,7 @@ void ProjectManagerPrefs::update()
 
 ProjectManagerPrefs::ProjectManagerPrefs(Gtk::ApplicationWindow *parent)
     : Gtk::Dialog("Preferences", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
-      app(parent->get_application())
+      app(parent->get_application()), mgr(PoolManager::get())
 {
 
     /*Gtk::Button *button_ok = add_button("OK", Gtk::ResponseType::RESPONSE_OK);
@@ -116,9 +122,8 @@ ProjectManagerPrefs::ProjectManagerPrefs(Gtk::ApplicationWindow *parent)
         chooser->add_filter(filter);
 
         if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-            auto path = chooser->get_filename();
-            auto mapp = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(app);
-            mapp->add_pool(path);
+            auto path = chooser->get_file()->get_parent()->get_path();
+            mgr.add_pool(path);
             update();
         }
     });

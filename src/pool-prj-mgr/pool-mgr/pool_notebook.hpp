@@ -24,6 +24,8 @@ public:
     bool get_close_prohibited() const;
     void prepare_close();
     void pool_update(std::function<void()> cb = nullptr);
+    bool get_needs_save() const;
+    void save();
     ~PoolNotebook();
 
 private:
@@ -90,6 +92,9 @@ private:
 
     std::string remote_repo;
     class PoolRemoteBox *remote_box = nullptr;
+    class PoolSettingsBox *settings_box = nullptr;
+
+    UUID pool_uuid;
 
     void go_to(ObjectType type, const UUID &uu);
 };
