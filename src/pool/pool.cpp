@@ -125,7 +125,7 @@ int Pool::get_required_schema_version()
 std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) const
 {
     auto suffix = static_cast<std::string>(uu) + ".json";
-    auto base = Glib::build_filename(base_path, "tmp");
+    auto base = Glib::get_tmp_dir();
     return Glib::build_filename(base, get_flat_filename(type, uu));
 }
 
