@@ -117,7 +117,6 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
 
         Gio::File::create_for_path(Glib::build_filename(remote_dir, "pool.json"))
                 ->copy(Gio::File::create_for_path(Glib::build_filename(dest_dir, "pool.json")));
-        Gio::File::create_for_path(Glib::build_filename(dest_dir, "tmp"))->make_directory();
 
         {
             std::lock_guard<std::mutex> lock(download_mutex);

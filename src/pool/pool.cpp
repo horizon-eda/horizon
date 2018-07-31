@@ -9,6 +9,7 @@
 #include "pool_manager.hpp"
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
+#include <giomm.h>
 
 namespace horizon {
 
@@ -125,7 +126,10 @@ int Pool::get_required_schema_version()
 std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) const
 {
     auto suffix = static_cast<std::string>(uu) + ".json";
-    auto base = Glib::build_filename(base_path, "tmp");
+    auto base = Glib::build_filename(Glib::get_tmp_dir(), "horizon-tmp");
+    if (!Glib::file_test(base, Glib::FILE_TEST_IS_DIR)) {
+        Gio::File::create_for_path(base)->make_directory();
+    }
     return Glib::build_filename(base, get_flat_filename(type, uu));
 }
 
