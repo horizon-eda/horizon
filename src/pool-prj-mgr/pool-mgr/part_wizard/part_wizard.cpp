@@ -430,7 +430,7 @@ void PartWizard::handle_unlink()
 void PartWizard::handle_import()
 {
     GtkFileChooserNative *native =
-            gtk_file_chooser_native_new("Open", gobj(), GTK_FILE_CHOOSER_ACTION_OPEN, "_Save", "_Cancel");
+            gtk_file_chooser_native_new("Open", gobj(), GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
     auto filter = Gtk::FileFilter::create();
     filter->set_name("json documents");
