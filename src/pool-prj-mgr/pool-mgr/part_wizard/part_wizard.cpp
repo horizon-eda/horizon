@@ -479,10 +479,13 @@ void PartWizard::import_pads(const json &j)
             auto &k = j.at(pad_name);
             std::string pin_name = k.value("pin", "");
             std::string gate_name = k.value("gate", "Main");
+            std::string pin_dir = k.value("dir", "Input");
             trim(pin_name);
             trim(gate_name);
+            trim(pin_dir);
             ed->pin_name_entry->set_text(pin_name);
             ed->combo_gate_entry->set_text(gate_name);
+            ed->dir_combo->set_active_text(pin_dir);
             if (k.count("alt")) {
                 std::stringstream ss;
                 for (auto &it : k.at("alt")) {
