@@ -56,6 +56,24 @@ Coordi BusRipper::get_connector_pos() const
     return junction->position + offset * 1.25_mm;
 }
 
+void BusRipper::mirror()
+{
+    switch (orientation) {
+    case Orientation::UP:
+        orientation = Orientation::LEFT;
+        break;
+    case Orientation::RIGHT:
+        orientation = Orientation::DOWN;
+        break;
+    case Orientation::DOWN:
+        orientation = Orientation::RIGHT;
+        break;
+    case Orientation::LEFT:
+        orientation = Orientation::UP;
+        break;
+    }
+}
+
 UUID BusRipper::get_uuid() const
 {
     return uuid;
