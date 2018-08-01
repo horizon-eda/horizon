@@ -894,6 +894,9 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
                              .emplace(std::piecewise_construct, std::forward_as_tuple(filename),
                                       std::forward_as_tuple(type, args, env, pool, read_only))
                              .first->second;
+        if (proc.win && pool_notebook) {
+            proc.win->signal_goto().connect(sigc::mem_fun(pool_notebook, &PoolNotebook::go_to));
+        }
         proc.signal_exited().connect([filename, this](int status, bool need_update) {
             processes.erase(filename);
             s_signal_process_exited.emit(filename, status, need_update);

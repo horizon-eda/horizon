@@ -30,6 +30,13 @@ GateEditor::GateEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("gate_suffix", suffix_entry);
     x->get_widget("gate_swap_group", swap_group_spin_button);
     x->get_widget("gate_unit", unit_label);
+    unit_label->set_track_visited_links(false);
+    unit_label->signal_activate_link().connect(
+            [this](const std::string &url) {
+                parent->s_signal_goto.emit(ObjectType::UNIT, UUID(url));
+                return true;
+            },
+            false);
 
     name_entry->set_text(gate->name);
     name_entry->signal_changed().connect([this] {
@@ -49,12 +56,13 @@ GateEditor::GateEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         parent->needs_save = true;
     });
 
-    unit_label->set_text(gate->unit->name);
+    reload();
 }
 
 void GateEditor::reload()
 {
-    unit_label->set_text(gate->unit->name);
+    unit_label->set_markup("<a href=\"" + (std::string)gate->unit->uuid + "\">"
+                           + Glib::Markup::escape_text(gate->unit->name) + "</a>");
 }
 
 GateEditor *GateEditor::create(Gate *g, EntityEditor *pa)

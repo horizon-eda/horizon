@@ -1,7 +1,8 @@
 #pragma once
+#include "util/pool_goto_provider.hpp"
 
 namespace horizon {
-class PoolEditorInterface {
+class PoolEditorInterface : public PoolGotoProvider {
 public:
     virtual void reload()
     {

@@ -118,6 +118,11 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p, 
     editor->show();
     add(*editor);
     editor->unreference();
+
+    if (iface) {
+        iface->signal_goto().connect([this](ObjectType t, UUID uu) { s_signal_goto.emit(t, uu); });
+    }
+
     if (!state_store.get_default_set())
         set_default_size(-1, 600);
 

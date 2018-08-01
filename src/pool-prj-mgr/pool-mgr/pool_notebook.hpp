@@ -26,6 +26,7 @@ public:
     void pool_update(std::function<void()> cb = nullptr);
     bool get_needs_save() const;
     void save();
+    void go_to(ObjectType type, const UUID &uu);
     ~PoolNotebook();
 
 private:
@@ -95,7 +96,5 @@ private:
     class PoolSettingsBox *settings_box = nullptr;
 
     UUID pool_uuid;
-
-    void go_to(ObjectType type, const UUID &uu);
 };
 } // namespace horizon

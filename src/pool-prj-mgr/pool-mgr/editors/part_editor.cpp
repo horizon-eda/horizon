@@ -140,6 +140,28 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("parametric", w_parametric);
     x->get_widget("copy_parametric_from_base", w_parametric_from_base);
 
+    w_entity_label->set_track_visited_links(false);
+    w_entity_label->signal_activate_link().connect(
+            [this](const std::string &url) {
+                s_signal_goto.emit(ObjectType::ENTITY, UUID(url));
+                return true;
+            },
+            false);
+    w_base_label->set_track_visited_links(false);
+    w_base_label->signal_activate_link().connect(
+            [this](const std::string &url) {
+                s_signal_goto.emit(ObjectType::PART, UUID(url));
+                return true;
+            },
+            false);
+    w_package_label->set_track_visited_links(false);
+    w_package_label->signal_activate_link().connect(
+            [this](const std::string &url) {
+                s_signal_goto.emit(ObjectType::PACKAGE, UUID(url));
+                return true;
+            },
+            false);
+
     w_mpn = add_entry("part_mpn_box");
     w_value = add_entry("part_value_box");
     w_manufacturer = add_entry("part_manufacturer_box");
@@ -357,14 +379,26 @@ void PartEditor::update_entries()
 
 
     if (part->base) {
-        w_base_label->set_text(part->base->get_MPN() + " / " + part->base->get_manufacturer());
-        w_entity_label->set_text(part->base->entity->name + " / " + part->base->entity->manufacturer);
-        w_package_label->set_text(part->base->package->name + " / " + part->base->package->manufacturer);
+        w_base_label->set_markup(
+                "<a href=\"" + (std::string)part->base->uuid + "\">"
+                + Glib::Markup::escape_text(part->base->get_MPN() + " / " + part->base->get_manufacturer()) + "</a>");
+        w_entity_label->set_markup(
+                "<a href=\"" + (std::string)part->base->entity->uuid + "\">"
+                + Glib::Markup::escape_text(part->base->entity->name + " / " + part->base->entity->manufacturer)
+                + "</a>");
+        w_package_label->set_markup(
+                "<a href=\"" + (std::string)part->base->package->uuid + "\">"
+                + Glib::Markup::escape_text(part->base->package->name + " / " + part->base->package->manufacturer)
+                + "</a>");
     }
     else {
         w_base_label->set_text("none");
-        w_entity_label->set_text(part->entity->name + " / " + part->entity->manufacturer);
-        w_package_label->set_text(part->package->name + " / " + part->package->manufacturer);
+        w_entity_label->set_markup("<a href=\"" + (std::string)part->entity->uuid + "\">"
+                                   + Glib::Markup::escape_text(part->entity->name + " / " + part->entity->manufacturer)
+                                   + "</a>");
+        w_package_label->set_markup(
+                "<a href=\"" + (std::string)part->package->uuid + "\">"
+                + Glib::Markup::escape_text(part->package->name + " / " + part->package->manufacturer) + "</a>");
     }
 
     if (part->base) {

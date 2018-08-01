@@ -4,6 +4,7 @@
 #include <memory>
 #include "editor_interface.hpp"
 #include "util/window_state_store.hpp"
+#include "util/pool_goto_provider.hpp"
 
 namespace horizon {
 class EditorWindowStore {
@@ -17,7 +18,7 @@ public:
     }
 };
 
-class EditorWindow : public Gtk::Window {
+class EditorWindow : public Gtk::Window, public PoolGotoProvider {
 public:
     EditorWindow(ObjectType type, const std::string &filename, class Pool *p, bool read_only);
     void reload();
