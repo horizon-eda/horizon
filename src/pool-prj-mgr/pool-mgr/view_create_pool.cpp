@@ -62,7 +62,6 @@ std::pair<bool, std::string> PoolProjectManagerViewCreatePool::create()
         mkdir_pool(base_path, "packages");
         mkdir_pool(base_path, "parts");
         mkdir_pool(base_path, "3d_models");
-        mkdir_pool(base_path, "tmp");
 
         save_json_to_file(pool_json, j);
 
