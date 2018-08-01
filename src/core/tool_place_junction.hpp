@@ -4,7 +4,7 @@
 
 namespace horizon {
 
-class ToolPlaceJunction : public ToolBase {
+class ToolPlaceJunction : public virtual ToolBase {
 public:
     ToolPlaceJunction(Core *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;

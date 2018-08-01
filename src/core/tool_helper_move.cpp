@@ -191,9 +191,25 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
 
         case ObjectType::BUS_RIPPER: {
-            if (!rotate) {
-                auto &x = core.c->get_sheet()->bus_rippers.at(it.uuid).mirror;
-                x = !x;
+            auto &ri = core.c->get_sheet()->bus_rippers.at(it.uuid);
+            if (rotate) {
+                ri.orientation = transform_orienation(ri.orientation, true);
+            }
+            else {
+                switch (ri.orientation) {
+                case Orientation::UP:
+                    ri.orientation = Orientation::LEFT;
+                    break;
+                case Orientation::RIGHT:
+                    ri.orientation = Orientation::DOWN;
+                    break;
+                case Orientation::DOWN:
+                    ri.orientation = Orientation::RIGHT;
+                    break;
+                case Orientation::LEFT:
+                    ri.orientation = Orientation::UP;
+                    break;
+                }
             }
         } break;
 

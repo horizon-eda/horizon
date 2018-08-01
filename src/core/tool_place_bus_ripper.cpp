@@ -7,7 +7,8 @@
 
 namespace horizon {
 
-ToolPlaceBusRipper::ToolPlaceBusRipper(Core *c, ToolID tid) : ToolPlaceJunction(c, tid)
+ToolPlaceBusRipper::ToolPlaceBusRipper(Core *c, ToolID tid)
+    : ToolBase(c, tid), ToolPlaceJunction(c, tid), ToolHelperMove(c, tid)
 {
 }
 
@@ -37,16 +38,16 @@ bool ToolPlaceBusRipper::begin_attached()
               [](auto a, auto b) { return strcmp_natural(a->name, b->name) < 0; });
     imp->tool_bar_set_tip(
             "<b>LMB:</b>place bus ripper <b>RMB:</b>delete current ripper and "
-            "finish <b>e:</b>mirror");
+            "finish <b>r:</b>rotate <b>e:</b>mirror");
     return true;
 }
 
 void ToolPlaceBusRipper::create_attached()
 {
-    bool mirrored = false;
+    Orientation orientation = Orientation::UP;
     if (ri) {
         ri->temp = false;
-        mirrored = ri->mirror;
+        orientation = ri->orientation;
     }
     auto uu = UUID::random();
     ri = &core.c->get_sheet()->bus_rippers.emplace(uu, uu).first->second;
@@ -54,7 +55,7 @@ void ToolPlaceBusRipper::create_attached()
     ri->temp = true;
     ri->bus_member = bus_members.at(bus_member_current);
     ri->junction = temp;
-    ri->mirror = mirrored;
+    ri->orientation = orientation;
     bus_member_current++;
     bus_member_current %= bus_members.size();
 }
@@ -128,8 +129,24 @@ bool ToolPlaceBusRipper::update_attached(const ToolArgs &args)
 
             return true;
         }
-        if (args.key == GDK_KEY_e) {
-            ri->mirror ^= true;
+        else if (args.key == GDK_KEY_e) {
+            switch (ri->orientation) {
+            case Orientation::UP:
+                ri->orientation = Orientation::LEFT;
+                break;
+            case Orientation::RIGHT:
+                ri->orientation = Orientation::DOWN;
+                break;
+            case Orientation::DOWN:
+                ri->orientation = Orientation::RIGHT;
+                break;
+            case Orientation::LEFT:
+                ri->orientation = Orientation::UP;
+                break;
+            }
+        }
+        else if (args.key == GDK_KEY_r) {
+            ri->orientation = transform_orienation(ri->orientation, true);
         }
     }
 

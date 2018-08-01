@@ -27,7 +27,8 @@ public:
     bool temp = false;
 
     uuid_ptr<Junction> junction;
-    bool mirror = false;
+    Orientation orientation = Orientation::UP;
+    void mirror();
     uuid_ptr<Bus> bus = nullptr;
     uuid_ptr<Bus::Member> bus_member = nullptr;
     unsigned int connection_count = 0;

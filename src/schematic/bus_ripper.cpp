@@ -6,12 +6,22 @@
 namespace horizon {
 
 BusRipper::BusRipper(const UUID &uu, const json &j, Sheet &sheet, Block &block)
-    : uuid(uu), junction(&sheet.junctions.at(j.at("junction").get<std::string>())), mirror(j.value("mirror", false)),
+    : uuid(uu), junction(&sheet.junctions.at(j.at("junction").get<std::string>())),
       bus(&block.buses.at(j.at("bus").get<std::string>())),
       bus_member(&bus->members.at(j.at("bus_member").get<std::string>()))
 {
-}
 
+    if (j.count("orientation")) {
+        orientation = orientation_lut.lookup(j.at("orientation"));
+    }
+    else if (j.count("mirror")) {
+        bool m = j.at("mirror");
+        if (m)
+            orientation = Orientation::LEFT;
+        else
+            orientation = Orientation::UP;
+    }
+}
 BusRipper::BusRipper(const UUID &uu) : uuid(uu)
 {
 }
@@ -20,7 +30,7 @@ json BusRipper::serialize() const
 {
     json j;
     j["junction"] = (std::string)junction->uuid;
-    j["mirror"] = mirror;
+    j["orientation"] = orientation_lut.lookup_reverse(orientation);
     j["bus"] = (std::string)bus->uuid;
     j["bus_member"] = (std::string)bus_member->uuid;
     return j;
@@ -28,17 +38,28 @@ json BusRipper::serialize() const
 
 Coordi BusRipper::get_connector_pos() const
 {
-    if (!mirror)
-        return junction->position + Coordi(1.25_mm, 1.25_mm);
-    else
-        return junction->position + Coordi(-1.25_mm, 1.25_mm);
+    Coordi offset;
+    switch (orientation) {
+    case Orientation::UP:
+        offset = {1, 1};
+        break;
+    case Orientation::RIGHT:
+        offset = {1, -1};
+        break;
+    case Orientation::DOWN:
+        offset = {-1, -1};
+        break;
+    case Orientation::LEFT:
+        offset = {-1, 1};
+        break;
+    }
+    return junction->position + offset * 1.25_mm;
 }
 
 UUID BusRipper::get_uuid() const
 {
     return uuid;
 }
-
 
 void BusRipper::update_refs(Sheet &sheet, Block &block)
 {

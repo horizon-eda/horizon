@@ -108,7 +108,6 @@ void Canvas::render(const PowerSymbol &sym)
             draw_error({0, 0}, 2e5, "Unsupported orientation", true);
         }
 
-
         transform.reset();
 
         int text_angle = 0;
@@ -649,8 +648,18 @@ void Canvas::render(const BusRipper &ripper)
     if (ripper.connection_count < 1) {
         draw_box(connector_pos, 0.25_mm, c);
     }
-    auto extents = draw_text0(connector_pos + Coordi(0, 0.5_mm), 1.5_mm, ripper.bus_member->name,
-                              ripper.mirror ? 32768 : 0, false, TextOrigin::BASELINE, c);
+    int angle = 0;
+    switch (ripper.orientation) {
+    case Orientation::LEFT:
+    case Orientation::DOWN:
+        angle = 32768;
+        break;
+
+    default:
+        angle = 0;
+    }
+    auto extents = draw_text0(connector_pos + Coordi(0, 0.5_mm), 1.5_mm, ripper.bus_member->name, angle, false,
+                              TextOrigin::BASELINE, c);
     if (!ripper.temp)
         targets.emplace(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos);
     selectables.append(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos, extents.first, extents.second);
@@ -1013,7 +1022,6 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
                 text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER));
                 text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER));
             }
-
 
             set_lod_size(std::min(pad_height, pad_width));
             for (const auto overlay_layer : text_layers) {

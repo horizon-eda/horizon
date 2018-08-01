@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-ToolPlaceNetLabel::ToolPlaceNetLabel(Core *c, ToolID tid) : ToolPlaceJunction(c, tid)
+ToolPlaceNetLabel::ToolPlaceNetLabel(Core *c, ToolID tid) : ToolBase(c, tid), ToolPlaceJunction(c, tid)
 {
 }
 

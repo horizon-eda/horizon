@@ -2,10 +2,11 @@
 #include "block/bus.hpp"
 #include "core.hpp"
 #include "tool_place_junction.hpp"
+#include "tool_helper_move.hpp"
 
 namespace horizon {
 
-class ToolPlaceBusRipper : public ToolPlaceJunction {
+class ToolPlaceBusRipper : public ToolPlaceJunction, public ToolHelperMove {
 public:
     ToolPlaceBusRipper(Core *c, ToolID tid);
     bool can_begin() override;
