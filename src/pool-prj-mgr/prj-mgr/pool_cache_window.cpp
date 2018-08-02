@@ -64,8 +64,13 @@ void PoolCacheWindow::refresh_list()
             std::string type_str = j_cache.at("type");
             row[tree_columns.filename_cached] = itempath;
             if (type_str == "part") {
-                auto part = Part::new_from_file(itempath, pool_cached);
-                row[tree_columns.name] = part.get_MPN() + " / " + part.get_manufacturer();
+                try {
+                    auto part = Part::new_from_file(itempath, pool_cached);
+                    row[tree_columns.name] = part.get_MPN() + " / " + part.get_manufacturer();
+                }
+                catch (...) {
+                    row[tree_columns.name] = "Part not found";
+                }
             }
             else {
                 row[tree_columns.name] = j_cache.at("name").get<std::string>();
