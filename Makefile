@@ -68,6 +68,7 @@ SRC_COMMON = \
 	src/pool/pool.cpp \
 	src/util/placement.cpp\
 	src/util/util.cpp\
+	src/util/csv.cpp\
 	src/common/object_descr.cpp\
 	src/block/net_class.cpp\
 	src/project/project.cpp\
