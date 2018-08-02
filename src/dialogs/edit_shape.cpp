@@ -17,7 +17,7 @@ private:
     Shape *shape;
     ShapeDialog *parent;
     Gtk::ComboBoxText *w_form = nullptr;
-    std::vector<std::pair<Gtk::Widget *, Gtk::Widget *>> widgets;
+    std::vector<Gtk::Widget *> widgets;
     void update(Shape::Form form);
     class SpinButtonDim *add_dim(const std::string &text, int top);
 };
@@ -80,7 +80,8 @@ SpinButtonDim *ShapeEditor::add_dim(const std::string &text, int top)
     auto adj = Gtk::manage(new SpinButtonDim());
     attach(*la, 0, top, 1, 1);
     attach(*adj, 1, top, 1, 1);
-    widgets.push_back({la, adj});
+    widgets.push_back(la);
+    widgets.push_back(adj);
     return adj;
 }
 
@@ -88,28 +89,22 @@ SpinButtonDim *ShapeEditor::add_dim(const std::string &text, int top)
 void ShapeEditor::update(Shape::Form form)
 {
     for (auto &it : widgets) {
-        remove(*it.first);
-        remove(*it.second);
+        delete it;
     }
     widgets.clear();
     int top = 1;
     int n_params = 0;
     if (form == Shape::Form::RECTANGLE || form == Shape::Form::OBROUND) {
+        shape->params.resize(2);
         auto w = add_dim("Width", top++);
         w->set_range(0, 1000_mm);
         w->set_value(get_or_0(shape->params, 0));
-        w->signal_value_changed().connect([this, w] {
-            shape->params.resize(2);
-            shape->params[0] = w->get_value_as_int();
-        });
+        w->signal_value_changed().connect([this, w] { shape->params[0] = w->get_value_as_int(); });
 
         auto w2 = add_dim("Height", top++);
         w2->set_range(0, 1000_mm);
         w2->set_value(get_or_0(shape->params, 1));
-        w2->signal_value_changed().connect([this, w2] {
-            shape->params.resize(2);
-            shape->params[1] = w2->get_value_as_int();
-        });
+        w2->signal_value_changed().connect([this, w2] { shape->params[1] = w2->get_value_as_int(); });
 
         w->signal_activate().connect([w2] { w2->grab_focus(); });
         w2->signal_activate().connect([this] { parent->response(Gtk::RESPONSE_OK); });
@@ -117,13 +112,11 @@ void ShapeEditor::update(Shape::Form form)
         n_params = 2;
     }
     else if (form == Shape::Form::CIRCLE) {
+        shape->params.resize(1);
         auto w = add_dim("Diameter", top++);
         w->set_range(0, 1000_mm);
         w->set_value(get_or_0(shape->params, 0));
-        w->signal_value_changed().connect([this, w] {
-            shape->params.resize(1);
-            shape->params[0] = w->get_value_as_int();
-        });
+        w->signal_value_changed().connect([this, w] { shape->params[0] = w->get_value_as_int(); });
         w->signal_activate().connect([this] { parent->response(Gtk::RESPONSE_OK); });
         w->grab_focus();
         n_params = 1;
@@ -134,6 +127,7 @@ void ShapeEditor::update(Shape::Form form)
         button->set_tooltip_text("Apply parameter to other selected shapes of the same form");
         attach(*button, 2, i + 1, 1, 1);
         button->show();
+        widgets.push_back(button);
         button->signal_clicked().connect([this, i] {
             for (auto s : parent->shapes) {
                 if (s != shape) {

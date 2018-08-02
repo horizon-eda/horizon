@@ -23,7 +23,7 @@ ToolResponse ToolPlaceShape::begin(const ToolArgs &args)
 
     imp->tool_bar_set_tip(
             "<b>LMB:</b>place shape <b>RMB:</b>delete current shape and "
-            "finish");
+            "finish <b>i:</b>edit shape <b>r:</b>rotate");
     return ToolResponse();
 }
 
@@ -69,7 +69,12 @@ ToolResponse ToolPlaceShape::update(const ToolArgs &args)
             return ToolResponse::end();
         }
         else if (args.key == GDK_KEY_i) {
-            imp->dialogs.edit_shapes({temp});
+            auto form = temp->form;
+            auto params = temp->params;
+            if (imp->dialogs.edit_shapes({temp}) == false) { // rollback
+                temp->form = form;
+                temp->params = params;
+            }
         }
         else if (args.key == GDK_KEY_r) {
             temp->placement.inc_angle_deg(90);

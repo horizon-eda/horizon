@@ -27,7 +27,8 @@ ToolResponse ToolPlacePad::begin(const ToolArgs &args)
     padstack = core.r->m_pool->get_padstack(padstack_uuid);
     create_pad(args.coords);
 
-    imp->tool_bar_set_tip("<b>LMB:</b>place pad <b>RMB:</b>delete current pad and finish");
+    imp->tool_bar_set_tip(
+            "<b>LMB:</b>place pad <b>RMB:</b>delete current pad and finish <b>i:</b>edit pad <b>r:</b>rotate");
     return ToolResponse();
 }
 
@@ -65,8 +66,11 @@ ToolResponse ToolPlacePad::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
-
+            auto old_pad = temp;
             create_pad(args.coords);
+            temp->placement.set_angle(old_pad->placement.get_angle());
+            temp->parameter_set = old_pad->parameter_set;
+            core.k->get_package()->apply_parameter_set({});
         }
         else if (args.button == 3) {
             core.k->get_package()->pads.erase(temp->uuid);
@@ -80,6 +84,17 @@ ToolResponse ToolPlacePad::update(const ToolArgs &args)
         if (args.key == GDK_KEY_Escape) {
             core.r->revert();
             return ToolResponse::end();
+        }
+        else if (args.key == GDK_KEY_r) {
+            temp->placement.inc_angle_deg(90);
+        }
+        else if (args.key == GDK_KEY_i) {
+            std::set<Pad *> pads{temp};
+            auto params = temp->parameter_set;
+            if (imp->dialogs.edit_pad_parameter_set(pads, core.r->m_pool, core.k->get_package()) == false) { // rollback
+                temp->parameter_set = params;
+            }
+            core.k->get_package()->apply_parameter_set({});
         }
     }
     return ToolResponse();
