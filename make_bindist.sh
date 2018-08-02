@@ -91,6 +91,7 @@ LIBS=(
 	libfribidi-0.dll\
 	yaml-cpp.dll\
 	libhttp_parser-2.dll\
+	libpsl-5.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
