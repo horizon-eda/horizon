@@ -466,6 +466,25 @@ void PartWizard::handle_import()
 
 void PartWizard::import_pads(const json &j)
 {
+    std::map<std::string, PadImportItem> items;
+    for (auto it = j.cbegin(); it != j.cend(); ++it) {
+        std::string pad_name = it.key();
+        const json &v = it.value();
+        auto &item = items[pad_name];
+        item.pin = v.value("pin", "");
+        item.gate = v.value("gate", "Main");
+        item.direction = Pin::direction_lut.lookup(v.value("direction", ""), Pin::Direction::INPUT);
+        if (v.count("alt")) {
+            for (const auto &a : v.at("alt")) {
+                item.alt.push_back(a.get<std::string>());
+            }
+        }
+    }
+    import_pads(items);
+}
+
+void PartWizard::import_pads(const std::map<std::string, PadImportItem> &items)
+{
     auto chs = pads_lb->get_children();
     for (auto ch : chs) {
         delete ch;
@@ -475,18 +494,19 @@ void PartWizard::import_pads(const json &j)
     for (auto &ch : pads_lb->get_children()) {
         auto ed = dynamic_cast<PadEditor *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
         auto pad_name = (*ed->pads.begin())->name;
-        if (j.count(pad_name)) {
-            auto &k = j.at(pad_name);
-            std::string pin_name = k.value("pin", "");
-            std::string gate_name = k.value("gate", "Main");
+        if (items.count(pad_name)) {
+            const auto &it = items.at(pad_name);
+            std::string pin_name = it.pin;
+            std::string gate_name = it.gate;
             trim(pin_name);
             trim(gate_name);
             ed->pin_name_entry->set_text(pin_name);
+            ed->dir_combo->set_active_id(std::to_string(static_cast<int>(it.direction)));
             ed->combo_gate_entry->set_text(gate_name);
-            if (k.count("alt")) {
+            {
                 std::stringstream ss;
-                for (auto &it : k.at("alt")) {
-                    ss << it.get<std::string>() << " ";
+                for (auto &it2 : it.alt) {
+                    ss << it2 << " ";
                 }
                 ed->pin_names_entry->set_text(ss.str());
             }

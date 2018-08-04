@@ -2,6 +2,7 @@
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_provider.hpp"
+#include "common/lut.hpp"
 #include <fstream>
 #include <map>
 #include <set>
@@ -29,6 +30,7 @@ public:
      */
     std::string primary_name;
     Direction direction = Direction::INPUT;
+    static const LutEnumStr<Pin::Direction> direction_lut;
     /**
      * Pins of the same swap_group can be pinswapped.
      * The swap group 0 is for unswappable pins.
