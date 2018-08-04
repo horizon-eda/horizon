@@ -9,6 +9,7 @@
 #include "util/pool_completion.hpp"
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
+#include "util/csv.hpp"
 
 namespace horizon {
 LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder> &x, const std::string &w,
@@ -430,9 +431,13 @@ void PartWizard::handle_unlink()
 void PartWizard::handle_import()
 {
     GtkFileChooserNative *native =
-            gtk_file_chooser_native_new("Open", gobj(), GTK_FILE_CHOOSER_ACTION_OPEN, "_Save", "_Cancel");
+            gtk_file_chooser_native_new("Open", gobj(), GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
     auto filter = Gtk::FileFilter::create();
+    filter->set_name("CSV documents");
+    filter->add_pattern("*.csv");
+    chooser->add_filter(filter);
+    filter = Gtk::FileFilter::create();
     filter->set_name("json documents");
     filter->add_pattern("*.json");
     chooser->add_filter(filter);
@@ -440,14 +445,22 @@ void PartWizard::handle_import()
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         auto filename = chooser->get_filename();
         try {
-            json j;
             std::ifstream ifs(filename);
             if (!ifs.is_open()) {
                 throw std::runtime_error("file " + filename + " not opened");
             }
-            ifs >> j;
-            ifs.close();
-            import_pads(j);
+            if (endswith(filename, ".json")) {
+                json j;
+                ifs >> j;
+                ifs.close();
+                import_pads(j);
+            }
+            else {
+                CSV::Csv csv;
+                ifs >> csv;
+                ifs.close();
+                import_pads(csv);
+            }
         }
         catch (const std::exception &e) {
             Gtk::MessageDialog md(*this, "Error importing", false /* use_markup */, Gtk::MESSAGE_ERROR,
@@ -464,7 +477,57 @@ void PartWizard::handle_import()
     }
 }
 
+void PartWizard::import_pads(CSV::Csv &csv)
+{
+    std::map<std::string, PadImportItem> items;
+    /* Expand number of fields for safe and easy access. */
+    csv.expand(4);
+    for (auto &line : csv) {
+        std::string pad_name = line[0];
+        std::string pin_name = line[1];
+        std::string dir = line[2];
+        std::string gate_name = line[3];
+        trim(pad_name);
+        if (pad_name.empty()) {
+            continue;
+        }
+        auto &item = items[pad_name];
+        item.pin = pin_name;
+        trim(dir);
+        for (auto &c : dir) {
+            c = tolower(c);
+            if (c == ' ') {
+                c = '_';
+            }
+        }
+        item.direction = Pin::direction_lut.lookup(dir, item.direction);
+        if (!gate_name.empty()) {
+            item.gate = gate_name;
+        }
+    }
+    import_pads(items);
+}
+
 void PartWizard::import_pads(const json &j)
+{
+    std::map<std::string, PadImportItem> items;
+    for (auto it = j.cbegin(); it != j.cend(); ++it) {
+        std::string pad_name = it.key();
+        const json &v = it.value();
+        auto &item = items[pad_name];
+        item.pin = v.value("pin", "");
+        item.gate = v.value("gate", "Main");
+        item.direction = Pin::direction_lut.lookup(v.value("direction", ""), Pin::Direction::INPUT);
+        if (v.count("alt")) {
+            for (const auto &a : v.at("alt")) {
+                item.alt.push_back(a.get<std::string>());
+            }
+        }
+    }
+    import_pads(items);
+}
+
+void PartWizard::import_pads(const std::map<std::string, PadImportItem> &items)
 {
     auto chs = pads_lb->get_children();
     for (auto ch : chs) {
@@ -475,18 +538,19 @@ void PartWizard::import_pads(const json &j)
     for (auto &ch : pads_lb->get_children()) {
         auto ed = dynamic_cast<PadEditor *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
         auto pad_name = (*ed->pads.begin())->name;
-        if (j.count(pad_name)) {
-            auto &k = j.at(pad_name);
-            std::string pin_name = k.value("pin", "");
-            std::string gate_name = k.value("gate", "Main");
+        if (items.count(pad_name)) {
+            const auto &it = items.at(pad_name);
+            std::string pin_name = it.pin;
+            std::string gate_name = it.gate;
             trim(pin_name);
             trim(gate_name);
             ed->pin_name_entry->set_text(pin_name);
+            ed->dir_combo->set_active_id(std::to_string(static_cast<int>(it.direction)));
             ed->combo_gate_entry->set_text(gate_name);
-            if (k.count("alt")) {
+            {
                 std::stringstream ss;
-                for (auto &it : k.at("alt")) {
-                    ss << it.get<std::string>() << " ";
+                for (auto &it2 : it.alt) {
+                    ss << it2 << " ";
                 }
                 ed->pin_names_entry->set_text(ss.str());
             }

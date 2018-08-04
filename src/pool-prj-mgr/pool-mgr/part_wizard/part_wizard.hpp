@@ -7,6 +7,10 @@
 #include "../pool_notebook.hpp" //for processes
 #include "util/window_state_store.hpp"
 
+namespace CSV {
+class Csv;
+}
+
 namespace horizon {
 
 class PartWizard : public Gtk::Window {
@@ -81,7 +85,18 @@ private:
     void handle_unlink();
     void handle_import();
     void update_part();
+
+    class PadImportItem {
+    public:
+        std::string pin;
+        std::string gate = "Main";
+        std::vector<std::string> alt;
+        Pin::Direction direction = Pin::Direction::INPUT;
+    };
     void import_pads(const json &j);
+    void import_pads(CSV::Csv &csv);
+    void import_pads(const std::map<std::string, PadImportItem> &items);
+
     void create_pad_editors();
     void autolink_pads();
     void link_pads(const std::deque<class PadEditor *> &eds);

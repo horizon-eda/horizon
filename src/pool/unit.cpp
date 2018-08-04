@@ -1,9 +1,8 @@
 #include "unit.hpp"
-#include "common/lut.hpp"
 #include "nlohmann/json.hpp"
 
 namespace horizon {
-static const LutEnumStr<Pin::Direction> pin_direction_lut = {
+const LutEnumStr<Pin::Direction> Pin::direction_lut = {
         {"output", Pin::Direction::OUTPUT},
         {"input", Pin::Direction::INPUT},
         {"bidirectional", Pin::Direction::BIDIRECTIONAL},
@@ -15,15 +14,15 @@ static const LutEnumStr<Pin::Direction> pin_direction_lut = {
 
 Pin::Pin(const UUID &uu, const json &j)
     : uuid(uu), primary_name(j.at("primary_name").get<std::string>()),
-      direction(pin_direction_lut.lookup(j.at("direction"))), swap_group(j.value("swap_group", 0)),
+      direction(direction_lut.lookup(j.at("direction"))), swap_group(j.value("swap_group", 0)),
       names(j.value("names", std::vector<std::string>()))
 {
 }
 
 Pin::Pin(const UUID &uu, const YAML::Node &n)
     : uuid(uu), primary_name(n["primary_name"].as<std::string>()),
-      direction(pin_direction_lut.lookup(n["direction"].as<std::string>("input"))),
-      swap_group(n["swap_group"].as<int>(0)), names(n["names"].as<std::vector<std::string>>(std::vector<std::string>()))
+      direction(direction_lut.lookup(n["direction"].as<std::string>("input"))), swap_group(n["swap_group"].as<int>(0)),
+      names(n["names"].as<std::vector<std::string>>(std::vector<std::string>()))
 {
 }
 
@@ -35,7 +34,7 @@ json Pin::serialize() const
 {
     json j;
     j["primary_name"] = primary_name;
-    j["direction"] = pin_direction_lut.lookup_reverse(direction);
+    j["direction"] = direction_lut.lookup_reverse(direction);
     j["swap_group"] = swap_group;
     j["names"] = names;
     return j;
@@ -48,7 +47,7 @@ void Pin::serialize_yaml(YAML::Emitter &em) const
     em << Key << "primary_name" << Value << primary_name;
     em << Key << "uuid" << Value << (std::string)uuid;
     em << Key << "names" << Value << names;
-    em << Key << "direction" << Value << pin_direction_lut.lookup_reverse(direction);
+    em << Key << "direction" << Value << direction_lut.lookup_reverse(direction);
     em << Key << "swap_group" << Value << swap_group;
     em << EndMap;
     /*YAML::Node n;
