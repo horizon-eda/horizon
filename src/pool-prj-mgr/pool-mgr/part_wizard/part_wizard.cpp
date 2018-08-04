@@ -9,6 +9,7 @@
 #include "util/pool_completion.hpp"
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
+#include "util/csv.hpp"
 
 namespace horizon {
 LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder> &x, const std::string &w,

@@ -6,7 +6,10 @@
 #include "pool/entity.hpp"
 #include "../pool_notebook.hpp" //for processes
 #include "util/window_state_store.hpp"
-#include "util/csv.hpp"
+
+namespace CSV {
+class Csv;
+}
 
 namespace horizon {
 
