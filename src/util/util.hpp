@@ -44,4 +44,6 @@ std::string get_config_dir();
 
 void replace_backslash(std::string &path);
 json json_from_resource(const std::string &rsrc);
+/* Create string objects from name template. Empty fields and names are ignored. */
+json json_from_fields(const std::vector<std::string> &field, const std::vector<std::string> &name);
 } // namespace horizon

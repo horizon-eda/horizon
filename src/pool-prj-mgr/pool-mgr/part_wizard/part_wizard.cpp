@@ -7,6 +7,7 @@
 #include "util/str_util.hpp"
 #include "util/gtk_util.hpp"
 #include "util/pool_completion.hpp"
+#include "util/csv.hpp"
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 
@@ -427,12 +428,32 @@ void PartWizard::handle_unlink()
     pads_lb->invalidate_sort();
 }
 
+void pads_from_csv(CSV::csv &csv, json &j)
+{
+    for (auto &line : csv) {
+        /* We need at least a non-zero pad name. */
+        if (line.size() < 1) {
+            continue;
+        }
+        std::string name = line[0];
+        trim(name);
+        if (name.empty()) {
+            continue;
+        }
+        j[name] = json_from_fields(line, {"", "pin", "", "gate"});
+    }
+}
+
 void PartWizard::handle_import()
 {
     GtkFileChooserNative *native =
-            gtk_file_chooser_native_new("Open", gobj(), GTK_FILE_CHOOSER_ACTION_OPEN, "_Save", "_Cancel");
+            gtk_file_chooser_native_new("Open", gobj(), GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
     auto filter = Gtk::FileFilter::create();
+    filter->set_name("CSV documents");
+    filter->add_pattern("*.csv");
+    chooser->add_filter(filter);
+    filter = Gtk::FileFilter::create();
     filter->set_name("json documents");
     filter->add_pattern("*.json");
     chooser->add_filter(filter);
@@ -445,8 +466,15 @@ void PartWizard::handle_import()
             if (!ifs.is_open()) {
                 throw std::runtime_error("file " + filename + " not opened");
             }
-            ifs >> j;
-            ifs.close();
+            if (endswith(filename, ".json")) {
+                ifs >> j;
+                ifs.close();
+            } else {
+                CSV::csv csv;
+                ifs >> csv;
+                ifs.close();
+                pads_from_csv(csv, j);
+            }
             import_pads(j);
         }
         catch (const std::exception &e) {

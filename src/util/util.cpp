@@ -40,6 +40,18 @@ json json_from_resource(const std::string &rsrc)
     return json::parse((const char *)json_bytes->get_data(size));
 }
 
+json json_from_fields(const std::vector<std::string> &field, const std::vector<std::string> &name)
+{
+    json j;
+    for (size_t i = 0; i < field.size() && name.size(); i++) {
+        if (field[i].empty() || name[i].empty()) {
+            continue;
+        }
+        j[name[i]] = (std::string) field[i];
+    }
+    return j;
+}
+
 int orientation_to_angle(Orientation o)
 {
     int angle = 0;
