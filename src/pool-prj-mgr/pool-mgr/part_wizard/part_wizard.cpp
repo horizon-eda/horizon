@@ -430,9 +430,13 @@ void PartWizard::handle_unlink()
 void PartWizard::handle_import()
 {
     GtkFileChooserNative *native =
-            gtk_file_chooser_native_new("Open", gobj(), GTK_FILE_CHOOSER_ACTION_OPEN, "_Save", "_Cancel");
+            gtk_file_chooser_native_new("Open", gobj(), GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
     auto filter = Gtk::FileFilter::create();
+    filter->set_name("CSV documents");
+    filter->add_pattern("*.csv");
+    chooser->add_filter(filter);
+    filter = Gtk::FileFilter::create();
     filter->set_name("json documents");
     filter->add_pattern("*.json");
     chooser->add_filter(filter);
@@ -440,14 +444,22 @@ void PartWizard::handle_import()
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         auto filename = chooser->get_filename();
         try {
-            json j;
             std::ifstream ifs(filename);
             if (!ifs.is_open()) {
                 throw std::runtime_error("file " + filename + " not opened");
             }
-            ifs >> j;
-            ifs.close();
-            import_pads(j);
+            if (endswith(filename, ".json")) {
+                json j;
+                ifs >> j;
+                ifs.close();
+                import_pads(j);
+            }
+            else {
+                CSV::Csv csv;
+                ifs >> csv;
+                ifs.close();
+                import_pads(csv);
+            }
         }
         catch (const std::exception &e) {
             Gtk::MessageDialog md(*this, "Error importing", false /* use_markup */, Gtk::MESSAGE_ERROR,
@@ -462,6 +474,37 @@ void PartWizard::handle_import()
             md.run();
         }
     }
+}
+
+void PartWizard::import_pads(CSV::Csv &csv)
+{
+    std::map<std::string, PadImportItem> items;
+    /* Expand number of fields for safe and easy access. */
+    csv.expand(4);
+    for (auto &line : csv) {
+        std::string pad_name = line[0];
+        std::string pin_name = line[1];
+        std::string dir = line[2];
+        std::string gate_name = line[3];
+        trim(pad_name);
+        if (pad_name.empty()) {
+            continue;
+        }
+        auto &item = items[pad_name];
+        item.pin = pin_name;
+        trim(dir);
+        for (auto &c : dir) {
+            c = tolower(c);
+            if (c == ' ') {
+                c = '_';
+            }
+        }
+        item.direction = Pin::direction_lut.lookup(dir, item.direction);
+        if (!gate_name.empty()) {
+            item.gate = gate_name;
+        }
+    }
+    import_pads(items);
 }
 
 void PartWizard::import_pads(const json &j)
