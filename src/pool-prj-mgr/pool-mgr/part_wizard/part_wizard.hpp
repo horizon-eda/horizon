@@ -6,6 +6,7 @@
 #include "pool/entity.hpp"
 #include "../pool_notebook.hpp" //for processes
 #include "util/window_state_store.hpp"
+#include "util/csv.hpp"
 
 namespace horizon {
 
@@ -90,6 +91,7 @@ private:
         Pin::Direction direction = Pin::Direction::INPUT;
     };
     void import_pads(const json &j);
+    void import_pads(CSV::Csv &csv);
     void import_pads(const std::map<std::string, PadImportItem> &items);
 
     void create_pad_editors();
