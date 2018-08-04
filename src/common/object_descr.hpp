@@ -46,7 +46,8 @@ public:
         DRIVER,
         ALTERNATE_PACKAGE,
         POWER_SYMBOL_STYLE,
-        PIN_NAME_DISPLAY
+        PIN_NAME_DISPLAY,
+        PIN_KEEP_HORIZONTAL
     };
     ObjectProperty(Type t, const std::string &l, int o = 0, const std::vector<std::pair<int, std::string>> &its = {})
         : type(t), label(l), enum_items(its), order(o)

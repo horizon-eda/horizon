@@ -41,14 +41,14 @@ json SymbolPin::Decoration::serialize() const
 SymbolPin::SymbolPin(const UUID &uu, const json &j)
     : uuid(uu), position(j["position"].get<std::vector<int64_t>>()), length(j["length"]),
       name_visible(j.value("name_visible", true)), pad_visible(j.value("pad_visible", true)),
-      orientation(orientation_lut.lookup(j["orientation"]))
+      keep_horizontal(j.value("keep_horizontal", false)), orientation(orientation_lut.lookup(j["orientation"]))
 {
     if (j.count("decoration")) {
         decoration = Decoration(j.at("decoration"));
     }
 }
 
-SymbolPin::SymbolPin(UUID uu) : uuid(uu), name_visible(true), pad_visible(true)
+SymbolPin::SymbolPin(UUID uu) : uuid(uu)
 {
 }
 
@@ -104,6 +104,7 @@ json SymbolPin::serialize() const
     j["orientation"] = orientation_lut.lookup_reverse(orientation);
     j["name_visible"] = name_visible;
     j["pad_visible"] = pad_visible;
+    j["keep_horizontal"] = keep_horizontal;
     j["decoration"] = decoration.serialize();
     return j;
 }

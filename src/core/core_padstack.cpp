@@ -107,14 +107,14 @@ bool CorePadstack::set_property(ObjectType type, const UUID &uu, ObjectProperty:
         case ObjectProperty::ID::FORM:
             shape->form = static_cast<Shape::Form>(dynamic_cast<const PropertyValueInt &>(value).value);
             shape->params.resize(shape->form == Shape::Form::CIRCLE ? 1 : 2);
-            return true;
+            break;
 
         case ObjectProperty::ID::DIAMETER:
             if (shape->form == Shape::Form::CIRCLE) {
                 shape->params.resize(1);
                 shape->params.at(0) = dynamic_cast<const PropertyValueInt &>(value).value;
             }
-            return true;
+            break;
 
         case ObjectProperty::ID::WIDTH:
         case ObjectProperty::ID::HEIGHT:
@@ -123,7 +123,7 @@ bool CorePadstack::set_property(ObjectType type, const UUID &uu, ObjectProperty:
                 size_t idx = property == ObjectProperty::ID::WIDTH ? 0 : 1;
                 shape->params.at(idx) = dynamic_cast<const PropertyValueInt &>(value).value;
             }
-            return true;
+            break;
 
         default:
             return false;

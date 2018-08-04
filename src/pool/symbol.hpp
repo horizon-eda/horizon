@@ -28,10 +28,11 @@ public:
 
     UUID uuid;
     Coord<int64_t> position;
-    uint64_t length;
-    bool name_visible;
-    bool pad_visible;
-    Orientation orientation;
+    uint64_t length = 2.5_mm;
+    bool name_visible = true;
+    bool pad_visible = true;
+    bool keep_horizontal = false;
+    Orientation orientation = Orientation::RIGHT;
     Orientation get_orientation_for_placement(const Placement &p) const;
 
     class Decoration {
