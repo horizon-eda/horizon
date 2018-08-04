@@ -52,6 +52,25 @@ bool CorePadstack::get_property(ObjectType type, const UUID &uu, ObjectProperty:
             dynamic_cast<PropertyValueString &>(value).value = shape->parameter_class;
             return true;
 
+        case ObjectProperty::ID::FORM:
+            dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(shape->form);
+            return true;
+
+        case ObjectProperty::ID::DIAMETER:
+            if (shape->params.size())
+                dynamic_cast<PropertyValueInt &>(value).value = shape->params.at(0);
+            return true;
+
+        case ObjectProperty::ID::WIDTH:
+            if (shape->params.size())
+                dynamic_cast<PropertyValueInt &>(value).value = shape->params.at(0);
+            return true;
+
+        case ObjectProperty::ID::HEIGHT:
+            if (shape->params.size() > 1)
+                dynamic_cast<PropertyValueInt &>(value).value = shape->params.at(1);
+            return true;
+
         default:
             return false;
         }
@@ -85,6 +104,27 @@ bool CorePadstack::set_property(ObjectType type, const UUID &uu, ObjectProperty:
             shape->parameter_class = dynamic_cast<const PropertyValueString &>(value).value;
             break;
 
+        case ObjectProperty::ID::FORM:
+            shape->form = static_cast<Shape::Form>(dynamic_cast<const PropertyValueInt &>(value).value);
+            shape->params.resize(shape->form == Shape::Form::CIRCLE ? 1 : 2);
+            return true;
+
+        case ObjectProperty::ID::DIAMETER:
+            if (shape->form == Shape::Form::CIRCLE) {
+                shape->params.resize(1);
+                shape->params.at(0) = dynamic_cast<const PropertyValueInt &>(value).value;
+            }
+            return true;
+
+        case ObjectProperty::ID::WIDTH:
+        case ObjectProperty::ID::HEIGHT:
+            if (shape->form == Shape::Form::OBROUND || shape->form == Shape::Form::RECTANGLE) {
+                shape->params.resize(2);
+                size_t idx = property == ObjectProperty::ID::WIDTH ? 0 : 1;
+                shape->params.at(idx) = dynamic_cast<const PropertyValueInt &>(value).value;
+            }
+            return true;
+
         default:
             return false;
         }
@@ -108,10 +148,18 @@ bool CorePadstack::get_property_meta(ObjectType type, const UUID &uu, ObjectProp
     case ObjectType::SHAPE: {
         auto shape = &padstack.shapes.at(uu);
         switch (property) {
-        case ObjectProperty::ID::LAYER: {
+        case ObjectProperty::ID::LAYER:
             layers_to_meta(meta);
             return true;
-        }
+
+        case ObjectProperty::ID::DIAMETER:
+            meta.is_visible = shape->form == Shape::Form::CIRCLE;
+            return true;
+
+        case ObjectProperty::ID::WIDTH:
+        case ObjectProperty::ID::HEIGHT:
+            meta.is_visible = shape->form == Shape::Form::OBROUND || shape->form == Shape::Form::RECTANGLE;
+            return true;
 
         default:
             return false;

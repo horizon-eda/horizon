@@ -18,6 +18,8 @@ public:
         IS_POWER,
         OFFSHEET_REFS,
         WIDTH,
+        HEIGHT,
+        FORM,
         LAYER,
         DIAMETER,
         PLATED,

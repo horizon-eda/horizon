@@ -2,6 +2,7 @@
 #include "hole.hpp"
 #include "dimension.hpp"
 #include "schematic/schematic_symbol.hpp"
+#include "shape.hpp"
 #include "pool/symbol.hpp"
 
 namespace horizon {
@@ -89,6 +90,18 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X", 2}},
                   {ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y", 3}},
                   {ObjectProperty::ID::ANGLE, {ObjectProperty::Type::ANGLE, "Angle", 4}},
+                  {ObjectProperty::ID::FORM,
+                   {ObjectProperty::Type::ENUM,
+                    "Form",
+                    5,
+                    {
+                            {static_cast<int>(Shape::Form::RECTANGLE), "Rectangle"},
+                            {static_cast<int>(Shape::Form::OBROUND), "Obround"},
+                            {static_cast<int>(Shape::Form::CIRCLE), "Circle"},
+                    }}},
+                  {ObjectProperty::ID::WIDTH, {ObjectProperty::Type::DIM, "Width", 6}},
+                  {ObjectProperty::ID::HEIGHT, {ObjectProperty::Type::DIM, "Height", 7}},
+                  {ObjectProperty::ID::DIAMETER, {ObjectProperty::Type::DIM, "Diamter", 8}},
           }}},
         {ObjectType::LINE,
          {"Line",

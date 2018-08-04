@@ -80,6 +80,7 @@ public:
     {
     }
     bool is_settable = true;
+    bool is_visible = true;
     virtual ~PropertyMeta()
     {
     }

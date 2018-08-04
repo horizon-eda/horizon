@@ -246,6 +246,7 @@ void PropertyPanel::reload()
                 core->get_property_meta(type, uu, ed->property_id, meta);
                 ed->reload();
                 ed->set_sensitive(meta.is_settable);
+                ed->set_visible(meta.is_visible);
             }
         }
     }
