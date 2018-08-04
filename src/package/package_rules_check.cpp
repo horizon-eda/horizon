@@ -73,6 +73,29 @@ RulesCheckResult PackageRules::check_package(const class Package *pkg)
         }
     }
 
+    int lines_assy = 0;
+    int lines_pkg = 0;
+    for (const auto &it : pkg->lines) {
+        if (it.second.layer == BoardLayers::TOP_ASSEMBLY || it.second.layer == BoardLayers::BOTTOM_ASSEMBLY) {
+            lines_assy++;
+        }
+        if (it.second.layer == BoardLayers::TOP_PACKAGE || it.second.layer == BoardLayers::BOTTOM_PACKAGE) {
+            lines_pkg++;
+        }
+    }
+    if (lines_assy) {
+        r.errors.emplace_back(RulesCheckErrorLevel::WARN);
+        auto &x = r.errors.back();
+        x.comment = "Use polygons to draw outlines on assembly layers";
+        x.has_location = false;
+    }
+    if (lines_pkg) {
+        r.errors.emplace_back(RulesCheckErrorLevel::WARN);
+        auto &x = r.errors.back();
+        x.comment = "Use polygons to draw outlines on package layers";
+        x.has_location = false;
+    }
+
     for (const auto &it : pkg->polygons) {
         if (it.second.layer == BoardLayers::TOP_COURTYARD || it.second.layer == BoardLayers::BOTTOM_COURTYARD) {
             if (it.second.parameter_class != "courtyard") {

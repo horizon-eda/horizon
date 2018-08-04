@@ -240,6 +240,36 @@ std::pair<bool, std::string> Package::apply_parameter_set(const ParameterSet &ps
     return {false, ""};
 }
 
+void Package::expand()
+{
+    for (auto &it : junctions) {
+        it.second.temp = false;
+        it.second.layer = 10000;
+        it.second.has_via = false;
+        it.second.needs_via = false;
+        it.second.connection_count = 0;
+    }
+
+    for (const auto &it : lines) {
+        it.second.from->connection_count++;
+        it.second.to->connection_count++;
+        for (auto &ju : {it.second.from, it.second.to}) {
+            if (ju->layer == 10000) { // none assigned
+                ju->layer = it.second.layer;
+            }
+        }
+    }
+    for (const auto &it : arcs) {
+        it.second.from->connection_count++;
+        it.second.to->connection_count++;
+        for (auto &ju : {it.second.from, it.second.to}) {
+            if (ju->layer == 10000) { // none assigned
+                ju->layer = it.second.layer;
+            }
+        }
+    }
+}
+
 std::pair<Coordi, Coordi> Package::get_bbox() const
 {
     Coordi a;

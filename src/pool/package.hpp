@@ -67,6 +67,7 @@ public:
     std::pair<Coordi, Coordi> get_bbox() const;
     const std::map<int, Layer> &get_layers() const override;
     std::pair<bool, std::string> apply_parameter_set(const ParameterSet &ps);
+    void expand();
 
     UUID get_uuid() const;
 

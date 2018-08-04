@@ -194,6 +194,7 @@ bool CorePackage::get_property_meta(ObjectType type, const UUID &uu, ObjectPrope
 void CorePackage::rebuild(bool from_undo)
 {
     package.apply_parameter_set({});
+    package.expand();
     Core::rebuild(from_undo);
 }
 
