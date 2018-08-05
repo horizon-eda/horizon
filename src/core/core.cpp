@@ -141,6 +141,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::ANNOTATE:
     case ToolID::EDIT_SCHEMATIC_PROPERTIES:
     case ToolID::MANAGE_POWER_NETS:
+    case ToolID::EDIT_FRAME_PROPERTIES:
         return std::make_unique<ToolManageBuses>(this, tool_id);
 
     case ToolID::DRAW_POLYGON:

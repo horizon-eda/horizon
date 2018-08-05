@@ -2,6 +2,7 @@
 #include "board/board.hpp"
 #include "common/layer_provider.hpp"
 #include "schematic/sheet.hpp"
+#include "frame/frame.hpp"
 #include "util/util.hpp"
 #include <algorithm>
 #include <iostream>
@@ -208,6 +209,13 @@ void Canvas::update(const Board &brd)
     clear();
     layer_provider = &brd;
     render(brd);
+    request_push();
+}
+void Canvas::update(const class Frame &fr)
+{
+    clear();
+    layer_provider = &fr;
+    render(fr);
     request_push();
 }
 

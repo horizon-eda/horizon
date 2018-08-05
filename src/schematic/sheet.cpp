@@ -10,11 +10,15 @@
 namespace horizon {
 
 Sheet::Sheet(const UUID &uu, const json &j, Block &block, Pool &pool)
-    : uuid(uu), name(j.at("name").get<std::string>()), index(j.at("index").get<unsigned int>())
+    : uuid(uu), name(j.at("name").get<std::string>()), index(j.at("index").get<unsigned int>()), frame(UUID())
 {
     Logger::log_info("loading sheet " + name, Logger::Domain::SCHEMATIC);
     if (j.count("frame")) {
-        frame = Frame(j.at("frame"));
+        const auto &v = j.at("frame");
+        if (v.is_string()) {
+            pool_frame = pool.get_frame(UUID(v.get<std::string>()));
+            frame = *pool_frame;
+        }
     }
     {
         const json &o = j["junctions"];
@@ -93,9 +97,15 @@ Sheet::Sheet(const UUID &uu, const json &j, Block &block, Pool &pool)
             load_and_log(arcs, ObjectType::ARC, std::forward_as_tuple(u, it.value(), *this), Logger::Domain::SCHEMATIC);
         }
     }
+    if (j.count("title_block_values")) {
+        const json &o = j["title_block_values"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            title_block_values[it.key()] = it.value();
+        }
+    }
 }
 
-Sheet::Sheet(const UUID &uu) : uuid(uu), name("First sheet"), index(1)
+Sheet::Sheet(const UUID &uu) : uuid(uu), name("First sheet"), index(1), frame(UUID())
 {
 }
 
@@ -650,8 +660,10 @@ json Sheet::serialize() const
     json j;
     j["name"] = name;
     j["index"] = index;
-    j["frame"] = frame.serialize();
+    if (frame.uuid)
+        j["frame"] = (std::string)frame.uuid;
     j["symbols"] = json::object();
+    j["title_block_values"] = title_block_values;
 
     for (const auto &it : symbols) {
         j["symbols"][(std::string)it.first] = it.second.serialize();

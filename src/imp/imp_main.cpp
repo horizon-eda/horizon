@@ -8,6 +8,7 @@
 #include "imp_padstack.hpp"
 #include "imp_schematic.hpp"
 #include "imp_symbol.hpp"
+#include "imp_frame.hpp"
 #include "pool/part.hpp"
 #include "pool/pool.hpp"
 #include "pool/symbol.hpp"
@@ -74,6 +75,13 @@ int main(int argc, char *argv[])
     entry5.set_description("Board mode");
     group.add_entry(entry5, mode_board);
 
+    bool mode_frame = false;
+    Glib::OptionEntry entry7;
+    entry7.set_long_name("frame");
+    entry7.set_short_name('f');
+    entry7.set_description("Frame mode");
+    group.add_entry(entry7, mode_frame);
+
     bool read_only = false;
     Glib::OptionEntry entry6;
     entry6.set_long_name("read-only");
@@ -135,6 +143,9 @@ int main(int argc, char *argv[])
     else if (mode_board) {
         imp.reset(new horizon::ImpBoard(filenames.at(0), filenames.at(1), filenames.at(2),
                                         {pool_base_path, pool_cache_path}));
+    }
+    else if (mode_frame) {
+        imp.reset(new horizon::ImpFrame(filenames.at(0), pool_base_path));
     }
     else {
         std::cout << "wrong invocation" << std::endl;

@@ -5,6 +5,7 @@
 #include "widgets/pool_browser_symbol.hpp"
 #include "widgets/pool_browser_package.hpp"
 #include "widgets/pool_browser_padstack.hpp"
+#include "widgets/pool_browser_frame.hpp"
 
 namespace horizon {
 PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool *ipool)
@@ -43,6 +44,10 @@ PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool 
         break;
     case ObjectType::PADSTACK:
         browser = Gtk::manage(new PoolBrowserPadstack(pool));
+        set_title("Select Padstack");
+        break;
+    case ObjectType::FRAME:
+        browser = Gtk::manage(new PoolBrowserFrame(pool));
         set_title("Select Padstack");
         break;
     default:;

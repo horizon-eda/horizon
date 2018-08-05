@@ -12,9 +12,9 @@
 #include "power_symbol.hpp"
 #include "common/line.hpp"
 #include "common/arc.hpp"
-#include "frame.hpp"
 #include "util/warning.hpp"
 #include "common/layer_provider.hpp"
+#include "frame/frame.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -53,6 +53,7 @@ public:
     std::map<UUID, BusRipper> bus_rippers;
     std::map<UUID, Line> lines;
     std::map<UUID, Arc> arcs;
+    std::map<std::string, std::string> title_block_values;
     std::vector<Warning> warnings;
 
     LineNet *split_line_net(LineNet *it, Junction *ju);
@@ -79,6 +80,7 @@ public:
 
     Junction *get_junction(const UUID &uu) override;
 
+    uuid_ptr<const Frame> pool_frame;
     Frame frame;
 
     json serialize() const;

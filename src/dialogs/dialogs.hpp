@@ -45,7 +45,8 @@ public:
     bool annotate(class Schematic *s);
     bool edit_plane(class Plane *plane, class Board *brd, class Block *block);
     bool edit_stackup(class Board *brd);
-    bool edit_schematic_properties(class Schematic *s);
+    bool edit_schematic_properties(class Schematic *s, class Pool *pool);
+    bool edit_frame_properties(class Frame *fr);
     std::pair<bool, int64_t> ask_datum(const std::string &label, int64_t def = 0);
     std::pair<bool, Coordi> ask_datum_coord(const std::string &label, Coordi def = Coordi());
     std::tuple<bool, Coordi, std::pair<bool, bool>> ask_datum_coord2(const std::string &label, Coordi def = Coordi());

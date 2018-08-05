@@ -30,6 +30,7 @@
 #include "edit_plane.hpp"
 #include "edit_stackup.hpp"
 #include "edit_board_hole.hpp"
+#include "edit_frame.hpp"
 #include "widgets/spin_button_dim.hpp"
 
 namespace horizon {
@@ -262,9 +263,15 @@ bool Dialogs::edit_board_hole(std::set<class BoardHole *> &holes, Pool *pool, Bl
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_schematic_properties(class Schematic *sch)
+bool Dialogs::edit_schematic_properties(class Schematic *sch, class Pool *pool)
 {
-    SchematicPropertiesDialog dia(parent, sch);
+    SchematicPropertiesDialog dia(parent, sch, pool);
+    return dia.run() == Gtk::RESPONSE_OK;
+}
+
+bool Dialogs::edit_frame_properties(class Frame *fr)
+{
+    EditFrameDialog dia(parent, fr);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 

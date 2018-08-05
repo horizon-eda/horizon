@@ -650,7 +650,7 @@ bool Canvas3D::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
         cam_dist_min = std::min(dist, cam_dist_min);
     }
 
-    projmat = glm::perspective(glm::radians(cam_fov), width / height, cam_dist_min, cam_dist_max);
+    projmat = glm::perspective(glm::radians(cam_fov), width / height, cam_dist_min/2, cam_dist_max*2);
 
     cam_normal = glm::normalize(cam_offset);
     wall_renderer.render();

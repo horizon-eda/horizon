@@ -56,6 +56,12 @@ Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, Pool &pool)
     if (j.count("rules")) {
         rules.load_from_json(j.at("rules"));
     }
+    if (j.count("title_block_values")) {
+        const json &o = j["title_block_values"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            title_block_values[it.key()] = it.value();
+        }
+    }
     update_refs();
 }
 
@@ -223,6 +229,14 @@ void Schematic::smash_symbol(Sheet *sheet, SchematicSymbol *sym)
         x.size = it.second.size;
         x.width = it.second.width;
         sym->texts.push_back(&x);
+    }
+}
+
+static void replace_substr(std::string &str, const std::string &needle, const std::string &rep)
+{
+    auto pos = str.find(needle);
+    if (pos != std::string::npos) {
+        str.replace(pos, needle.size(), rep);
     }
 }
 
@@ -531,6 +545,25 @@ void Schematic::expand(bool careful)
             }
         }
     }
+    for (auto &it_sheet : sheets) {
+        Sheet &sheet = it_sheet.second;
+        if (sheet.pool_frame) {
+            std::map<std::string, std::string> values = title_block_values;
+            for (const auto &it_v : sheet.title_block_values) {
+                values[it_v.first] = it_v.second;
+            }
+            sheet.frame = *sheet.pool_frame;
+            for (auto &it_text : sheet.frame.texts) {
+                auto &txt = it_text.second.text;
+                replace_substr(txt, "$sheet_idx", std::to_string(sheet.index));
+                replace_substr(txt, "$sheet_total", std::to_string(sheets.size()));
+                replace_substr(txt, "$sheet_title", sheet.name);
+                for (const auto &it_v : values) {
+                    replace_substr(txt, "$" + it_v.first, it_v.second);
+                }
+            }
+        }
+    }
 }
 
 void Schematic::annotate()
@@ -649,7 +682,8 @@ void Schematic::annotate()
 }
 
 Schematic::Schematic(const Schematic &sch)
-    : uuid(sch.uuid), block(sch.block), name(sch.name), sheets(sch.sheets), rules(sch.rules), annotation(sch.annotation)
+    : uuid(sch.uuid), block(sch.block), name(sch.name), sheets(sch.sheets), rules(sch.rules),
+      title_block_values(sch.title_block_values), annotation(sch.annotation)
 {
     update_refs();
 }
@@ -661,6 +695,7 @@ void Schematic::operator=(const Schematic &sch)
     name = sch.name;
     sheets = sch.sheets;
     rules = sch.rules;
+    title_block_values = sch.title_block_values;
     annotation = sch.annotation;
     update_refs();
 }
@@ -728,7 +763,7 @@ json Schematic::serialize() const
     j["name"] = name;
     j["annotation"] = annotation.serialize();
     j["rules"] = rules.serialize();
-
+    j["title_block_values"] = title_block_values;
 
     j["sheets"] = json::object();
     for (const auto &it : sheets) {

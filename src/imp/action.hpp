@@ -77,7 +77,8 @@ enum class ActionGroup {
     LAYER,
     SELECTION,
     RULES,
-    VIEW
+    VIEW,
+    FRAME
 };
 
 typedef std::vector<std::pair<int, GdkModifierType>> KeySequence2;

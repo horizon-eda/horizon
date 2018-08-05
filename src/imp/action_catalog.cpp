@@ -331,7 +331,8 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
 
         {{ActionID::TOOL, ToolID::IMPORT_DXF},
          {"Import dxf", ActionGroup::UNKNOWN,
-          ActionCatalogItem::AVAILABLE_IN_BOARD | ActionCatalogItem::AVAILABLE_IN_PACKAGE,
+          ActionCatalogItem::AVAILABLE_IN_BOARD | ActionCatalogItem::AVAILABLE_IN_PACKAGE
+                  | ActionCatalogItem::AVAILABLE_IN_FRAME,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::PLACE_JUNCTION},
@@ -366,9 +367,7 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::PLACE_TEXT},
-         {"Place text", ActionGroup::GRAPHICS,
-          ActionCatalogItem::AVAILABLE_IN_SCHEMATIC | ActionCatalogItem::AVAILABLE_IN_PACKAGE
-                  | ActionCatalogItem::AVAILABLE_IN_BOARD | ActionCatalogItem::AVAILABLE_IN_SYMBOL,
+         {"Place text", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::ASSIGN_PART},
@@ -548,14 +547,21 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::TOOL, ToolID::CHANGE_UNIT},
          {"Change unit", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::EDIT_FRAME_PROPERTIES},
+         {"Edit frame properties", ActionGroup::FRAME, ActionCatalogItem::AVAILABLE_IN_FRAME,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
-        {ActionGroup::CLIPBOARD, "Clipboard"}, {ActionGroup::GRAPHICS, "Graphics"},   {ActionGroup::MOVE, "Move"},
-        {ActionGroup::BOARD, "Board"},         {ActionGroup::SCHEMATIC, "Schematic"}, {ActionGroup::SYMBOL, "Symbol"},
-        {ActionGroup::PADSTACK, "Padstack"},   {ActionGroup::PACKAGE, "Package"},     {ActionGroup::UNDO, "Undo"},
-        {ActionGroup::LAYER, "Layer"},         {ActionGroup::SELECTION, "Selection"}, {ActionGroup::RULES, "Rules"},
-        {ActionGroup::UNKNOWN, "Misc"},        {ActionGroup::VIEW, "View"},
+        {ActionGroup::CLIPBOARD, "Clipboard"}, {ActionGroup::GRAPHICS, "Graphics"},
+        {ActionGroup::MOVE, "Move"},           {ActionGroup::BOARD, "Board"},
+        {ActionGroup::SCHEMATIC, "Schematic"}, {ActionGroup::SYMBOL, "Symbol"},
+        {ActionGroup::PADSTACK, "Padstack"},   {ActionGroup::PACKAGE, "Package"},
+        {ActionGroup::FRAME, "Fame"},          {ActionGroup::UNDO, "Undo"},
+        {ActionGroup::LAYER, "Layer"},         {ActionGroup::SELECTION, "Selection"},
+        {ActionGroup::RULES, "Rules"},         {ActionGroup::UNKNOWN, "Misc"},
+        {ActionGroup::VIEW, "View"},
 
 };
 
@@ -728,5 +734,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(LINE_LOOP_TO_POLYGON),
         TOOL_LUT_ITEM(SCALE),
         TOOL_LUT_ITEM(CHANGE_UNIT),
+        TOOL_LUT_ITEM(EDIT_FRAME_PROPERTIES),
 };
 } // namespace horizon

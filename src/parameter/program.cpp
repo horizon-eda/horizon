@@ -76,6 +76,9 @@ public:
             stack.push_back(a);
             stack.push_back(a);
         }
+        else if (cmd->command == "chs") {
+            stack.push_back(-a);
+        }
         return {false, ""};
     }
 
@@ -133,10 +136,9 @@ public:
         static const std::map<std::string,
                               std::function<std::pair<bool, std::string>(const ParameterProgram::TokenCommand *cmd,
                                                                          std::deque<int64_t> &stack)>>
-                commands = {
-                        {"dump", &dump}, {"+", &math2},    {"-", &math2},    {"*", &math2},   {"/", &math2},
-                        {"dup", &math1}, {"dupc", &math2}, {"swap", &math2}, {"+xy", &math3}, {"-xy", &math3},
-                };
+                commands = {{"dump", &dump}, {"+", &math2},   {"-", &math2},    {"*", &math2},
+                            {"/", &math2},   {"dup", &math1}, {"dupc", &math2}, {"swap", &math2},
+                            {"+xy", &math3}, {"-xy", &math3}, {"chs", &math1}};
 
         if (commands.count(cmd))
             return commands.at(cmd);

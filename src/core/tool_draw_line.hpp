@@ -23,5 +23,8 @@ private:
     void update_tip();
     bool first_line = true;
     std::set<const Junction *> junctions_created;
+    enum class Mode { X, Y, ARB };
+    Mode mode = Mode::ARB;
+    void do_move(const Coordi &c);
 };
 } // namespace horizon

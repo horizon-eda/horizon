@@ -44,20 +44,47 @@ void ToolDrawLine::update_tip()
     else {
         s += "end tool";
     }
-    s += " <b>w:</b>line width";
+    s += " <b>w:</b>line width ";
+    s += "<b>/:</b>restrict ";
+    switch (mode) {
+    case Mode::ARB:
+        s += "any direction";
+        break;
+    case Mode::X:
+        s += "X only";
+        break;
+    case Mode::Y:
+        s += "Y only";
+        break;
+    }
     imp->tool_bar_set_tip(s);
+}
+
+void ToolDrawLine::do_move(const Coordi &c)
+{
+    if (mode == Mode::ARB || temp_line == nullptr) {
+        temp_junc->position = c;
+    }
+    else if (mode == Mode::X) {
+        temp_junc->position.x = c.x;
+        temp_junc->position.y = temp_line->from->position.y;
+    }
+    else if (mode == Mode::Y) {
+        temp_junc->position.y = c.y;
+        temp_junc->position.x = temp_line->from->position.x;
+    }
 }
 
 ToolResponse ToolDrawLine::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
-        temp_junc->position = args.coords;
+        do_move(args.coords);
         update_tip();
         return ToolResponse::fast();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
-            if (args.target.type == ObjectType::JUNCTION) {
+            if (args.target.type == ObjectType::JUNCTION && mode == Mode::ARB) {
                 if (temp_line != nullptr) {
                     temp_line->to = core.r->get_junction(args.target.path.at(0));
                 }
@@ -106,6 +133,20 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_w) {
             ask_line_width();
+        }
+        else if (args.key == GDK_KEY_slash) {
+            switch (mode) {
+            case Mode::ARB:
+                mode = Mode::X;
+                break;
+            case Mode::X:
+                mode = Mode::Y;
+                break;
+            case Mode::Y:
+                mode = Mode::ARB;
+                break;
+            }
+            do_move(args.coords);
         }
         else if (args.key == GDK_KEY_Escape) {
             if (temp_line) {

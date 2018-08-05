@@ -5,11 +5,12 @@
 #include "core_padstack.hpp"
 #include "core_schematic.hpp"
 #include "core_symbol.hpp"
+#include "core_frame.hpp"
 
 namespace horizon {
 Cores::Cores(Core *co)
     : r(co), c(dynamic_cast<CoreSchematic *>(r)), y(dynamic_cast<CoreSymbol *>(r)), a(dynamic_cast<CorePadstack *>(r)),
-      k(dynamic_cast<CorePackage *>(r)), b(dynamic_cast<CoreBoard *>(r))
+      k(dynamic_cast<CorePackage *>(r)), b(dynamic_cast<CoreBoard *>(r)), f(dynamic_cast<CoreFrame *>(r))
 {
 }
 } // namespace horizon

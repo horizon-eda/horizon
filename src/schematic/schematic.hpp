@@ -80,6 +80,7 @@ public:
     std::string name;
     std::map<UUID, Sheet> sheets;
     SchematicRules rules;
+    std::map<std::string, std::string> title_block_values;
 
 
     class Annotation {

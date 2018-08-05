@@ -106,6 +106,7 @@ private:
     std::unique_ptr<Pool> pool;
     std::string base_path;
     pool_update_cb_t status_cb;
+    void update_frames(const std::string &directory, const std::string &prefix = "");
     void update_units(const std::string &directory, const std::string &prefix = "");
     void update_entities(const std::string &directory, const std::string &prefix = "");
     void update_symbols(const std::string &directory, const std::string &prefix = "");
@@ -197,6 +198,18 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
         update_parts(Glib::build_filename(bp, "parts"));
     }
     pool->db.execute("COMMIT");
+
+    status_cb(PoolUpdateStatus::INFO, "", "frames");
+    pool->db.execute("BEGIN TRANSACTION");
+    pool->db.execute("DELETE FROM frames");
+    for (const auto &bp : base_paths) {
+        if (Glib::file_test(Glib::build_filename(bp, "frames"), Glib::FILE_TEST_IS_DIR)) {
+            set_pool_info(bp);
+            update_frames(Glib::build_filename(bp, "frames"));
+        }
+    }
+    pool->db.execute("COMMIT");
+
     status_cb(PoolUpdateStatus::DONE, "done", "");
 }
 
@@ -220,6 +233,47 @@ PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb
     pool = std::make_unique<Pool>(bp, false);
 }
 
+void PoolUpdater::update_frames(const std::string &directory, const std::string &prefix)
+{
+    Glib::Dir dir(directory);
+    for (const auto &it : dir) {
+        std::string filename = Glib::build_filename(directory, it);
+        if (endswith(it, ".json")) {
+            try {
+                status_cb(PoolUpdateStatus::FILE, filename, "");
+                auto frame = Frame::new_from_file(filename);
+                bool overridden = false;
+                if (exists(ObjectType::UNIT, frame.uuid)) {
+                    overridden = true;
+                    SQLite::Query q(pool->db, "DELETE FROM frames WHERE uuid = ?");
+                    q.bind(1, frame.uuid);
+                    q.step();
+                }
+
+                SQLite::Query q(pool->db,
+                                "INSERT INTO frames "
+                                "(uuid, name, filename, pool_uuid, overridden) "
+                                "VALUES "
+                                "($uuid, $name, $filename, $pool_uuid, $overridden)");
+                q.bind("$uuid", frame.uuid);
+                q.bind("$name", frame.name);
+                q.bind("$filename", Glib::build_filename(prefix, it));
+                q.bind("$pool_uuid", pool_uuid);
+                q.bind("$overridden", overridden);
+                q.step();
+            }
+            catch (const std::exception &e) {
+                status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
+            }
+            catch (...) {
+                status_cb(PoolUpdateStatus::FILE_ERROR, filename, "unknown exception");
+            }
+        }
+        else if (Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
+            update_units(filename, Glib::build_filename(prefix, it));
+        }
+    }
+}
 void PoolUpdater::update_units(const std::string &directory, const std::string &prefix)
 {
     Glib::Dir dir(directory);

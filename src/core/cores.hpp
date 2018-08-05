@@ -19,5 +19,6 @@ public:
     class CorePadstack *a;
     class CorePackage *k;
     class CoreBoard *b;
+    class CoreFrame *f;
 };
 } // namespace horizon

@@ -25,7 +25,7 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(PoolProjectManagerProcess::
     bool is_imp =
             any_of(type, {PoolProjectManagerProcess::Type::IMP_SYMBOL, PoolProjectManagerProcess::Type::IMP_PACKAGE,
                           PoolProjectManagerProcess::Type::IMP_PADSTACK, PoolProjectManagerProcess::Type::IMP_BOARD,
-                          PoolProjectManagerProcess::Type::IMP_SCHEMATIC});
+                          PoolProjectManagerProcess::Type::IMP_SCHEMATIC, PoolProjectManagerProcess::Type::IMP_FRAME});
     if (is_imp) { // imp
         std::vector<std::string> argv;
         std::vector<std::string> env = ienv;
@@ -55,6 +55,10 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(PoolProjectManagerProcess::
             break;
         case PoolProjectManagerProcess::Type::IMP_BOARD:
             argv.push_back("-b");
+            argv.insert(argv.end(), args.begin(), args.end());
+            break;
+        case PoolProjectManagerProcess::Type::IMP_FRAME:
+            argv.push_back("-f");
             argv.insert(argv.end(), args.begin(), args.end());
             break;
         default:;

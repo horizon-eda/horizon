@@ -32,6 +32,7 @@ public:
     void update(const class Package &pkg);
     void update(const class Buffer &buf, class LayerProvider *lp);
     void update(const class Board &brd);
+    void update(const class Frame &fr);
 
     ObjectRef add_line(const std::deque<Coordi> &pts, int64_t width, ColorP color, int layer);
     void remove_obj(const ObjectRef &r);
@@ -82,7 +83,6 @@ protected:
     void render(const class Warning &warn);
     void render(const class PowerSymbol &sym);
     void render(const class BusRipper &ripper);
-    void render(const class Frame &frame);
     void render(const class Text &text, bool interactive = true, bool reorient = true);
     void render(const class Padstack &padstack, bool interactive = true);
     void render(const class Polygon &polygon, bool interactive = true);
@@ -97,6 +97,7 @@ protected:
     void render(const class Track &track);
     void render(const class Via &via);
     void render(const class Dimension &dim);
+    void render(const class Frame &frame, bool on_sheet = false);
 
     bool needs_push = true;
     virtual void request_push() = 0;

@@ -252,5 +252,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                             {static_cast<int>(Dimension::Mode::HORIZONTAL), "Horizontal"},
                             {static_cast<int>(Dimension::Mode::VERTICAL), "Vertical"},
                     }}},
-          }}}};
+          }}},
+        {ObjectType::FRAME, {"Frame", "Frames", {}}},
+};
 } // namespace horizon

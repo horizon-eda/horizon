@@ -49,6 +49,9 @@ void PoolBrowserButton::update_label()
     case ObjectType::PACKAGE:
         set_label(pool->get_package(selected_uuid)->name);
         break;
+    case ObjectType::FRAME:
+        set_label(pool->get_frame(selected_uuid)->name);
+        break;
     default:
         set_label("fixme");
     }

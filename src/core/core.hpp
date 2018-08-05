@@ -122,7 +122,8 @@ enum class ToolID {
     SWAP_NETS,
     LINE_LOOP_TO_POLYGON,
     SCALE,
-    CHANGE_UNIT
+    CHANGE_UNIT,
+    EDIT_FRAME_PROPERTIES
 };
 
 /**

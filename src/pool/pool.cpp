@@ -30,6 +30,7 @@ void Pool::clear()
     padstacks.clear();
     packages.clear();
     parts.clear();
+    frames.clear();
 }
 
 std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_out)
@@ -58,6 +59,10 @@ std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_
 
     case ObjectType::PART:
         query = "SELECT filename, pool_uuid FROM parts WHERE uuid = ?";
+        break;
+
+    case ObjectType::FRAME:
+        query = "SELECT filename, pool_uuid FROM frames WHERE uuid = ?";
         break;
 
     default:
@@ -108,6 +113,9 @@ std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_
     case ObjectType::PART:
         return Glib::build_filename(bp, "parts", filename);
 
+    case ObjectType::FRAME:
+        return Glib::build_filename(bp, "frames", filename);
+
     default:
         return "";
     }
@@ -120,7 +128,7 @@ const std::string &Pool::get_base_path() const
 
 int Pool::get_required_schema_version()
 { // keep in sync with schema definition
-    return 6;
+    return 7;
 }
 
 std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) const
@@ -154,6 +162,9 @@ std::string Pool::get_flat_filename(ObjectType type, const UUID &uu) const
 
     case ObjectType::PART:
         return "part_" + suffix;
+
+    case ObjectType::FRAME:
+        return "frame_" + suffix;
 
     default:
         return "";
@@ -218,6 +229,16 @@ const Part *Pool::get_part(const UUID &uu)
         parts.insert(std::make_pair(uu, p));
     }
     return &parts.at(uu);
+}
+
+const Frame *Pool::get_frame(const UUID &uu)
+{
+    if (parts.count(uu) == 0) {
+        std::string path = get_filename(ObjectType::FRAME, uu);
+        Frame f = Frame::new_from_file(path);
+        frames.insert(std::make_pair(uu, f));
+    }
+    return &frames.at(uu);
 }
 
 std::set<UUID> Pool::get_alternate_packages(const UUID &uu)

@@ -2,6 +2,7 @@
 #include "common/common.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
+#include "frame/frame.hpp"
 #include <fstream>
 #include <map>
 #include <set>
@@ -28,6 +29,7 @@ public:
     const class Padstack *get_padstack(const UUID &uu);
     const class Package *get_package(const UUID &uu);
     const class Part *get_part(const UUID &uu);
+    const class Frame *get_frame(const UUID &uu);
     std::set<UUID> get_alternate_packages(const UUID &uu);
     std::string get_model_filename(const UUID &pkg_uuid, const UUID &model_uuid);
 
@@ -58,5 +60,6 @@ protected:
     std::map<UUID, Padstack> padstacks;
     std::map<UUID, Package> packages;
     std::map<UUID, Part> parts;
+    std::map<UUID, Frame> frames;
 };
 } // namespace horizon

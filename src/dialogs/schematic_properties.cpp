@@ -1,16 +1,20 @@
 #include "schematic_properties.hpp"
 #include "schematic/schematic.hpp"
+#include "widgets/chooser_buttons.hpp"
+#include "widgets/title_block_values_editor.hpp"
+#include "pool/pool.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>
 
 namespace horizon {
 
-class SheetEditor : public Gtk::Grid {
+class SheetEditor : public Gtk::Box {
 public:
-    SheetEditor(Sheet *s, Schematic *c);
+    SheetEditor(Sheet *s, Schematic *c, Pool *pool);
 
 private:
+    Gtk::Grid *grid = nullptr;
     Sheet *sheet;
     Schematic *sch;
     int top = 0;
@@ -22,22 +26,23 @@ void SheetEditor::append_widget(const std::string &label, Gtk::Widget *w)
     auto la = Gtk::manage(new Gtk::Label(label));
     la->get_style_context()->add_class("dim-label");
     la->show();
-    attach(*la, 0, top, 1, 1);
+    grid->attach(*la, 0, top, 1, 1);
 
     w->show();
     w->set_hexpand(true);
-    attach(*w, 1, top, 1, 1);
+    grid->attach(*w, 1, top, 1, 1);
     top++;
 }
 
-SheetEditor::SheetEditor(Sheet *s, Schematic *c) : Gtk::Grid(), sheet(s), sch(c)
+SheetEditor::SheetEditor(Sheet *s, Schematic *c, Pool *pool) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), sheet(s), sch(c)
 {
-    set_column_spacing(10);
-    set_row_spacing(10);
-    set_margin_bottom(20);
-    set_margin_top(20);
-    set_margin_end(20);
-    set_margin_start(20);
+    grid = Gtk::manage(new Gtk::Grid);
+    grid->set_column_spacing(10);
+    grid->set_row_spacing(10);
+    grid->set_margin_bottom(20);
+    grid->set_margin_top(20);
+    grid->set_margin_end(20);
+    grid->set_margin_start(20);
 
     auto title_entry = Gtk::manage(new Gtk::Entry());
     title_entry->set_text(s->name);
@@ -50,18 +55,24 @@ SheetEditor::SheetEditor(Sheet *s, Schematic *c) : Gtk::Grid(), sheet(s), sch(c)
 
     append_widget("Title", title_entry);
 
-
-    auto format_combo = Gtk::manage(new Gtk::ComboBoxText());
-    format_combo->append(std::to_string(static_cast<int>(Frame::Format::A3_LANDSCAPE)), "A3 Landscape");
-    format_combo->append(std::to_string(static_cast<int>(Frame::Format::A4_LANDSCAPE)), "A4 Landscape");
-    format_combo->set_active_id(std::to_string(static_cast<int>(sheet->frame.format)));
-    format_combo->signal_changed().connect([this, format_combo] {
-        sheet->frame.format = static_cast<Frame::Format>(std::stoi(format_combo->get_active_id()));
+    auto frame_button = Gtk::manage(new PoolBrowserButton(ObjectType::FRAME, pool));
+    if (sheet->pool_frame)
+        frame_button->property_selected_uuid() = sheet->pool_frame->uuid;
+    frame_button->property_selected_uuid().signal_changed().connect([this, frame_button, pool] {
+        sheet->pool_frame = pool->get_frame(frame_button->property_selected_uuid());
     });
-    append_widget("Format", format_combo);
+    append_widget("Frame", frame_button);
+
+    pack_start(*grid, false, false, 0);
+    grid->show();
+
+
+    auto ed = Gtk::manage(new TitleBlockValuesEditor(sheet->title_block_values));
+    pack_start(*ed, true, true, 0);
+    ed->show();
 }
 
-SchematicPropertiesDialog::SchematicPropertiesDialog(Gtk::Window *parent, Schematic *c)
+SchematicPropertiesDialog::SchematicPropertiesDialog(Gtk::Window *parent, Schematic *c, Pool *pool)
     : Gtk::Dialog("Schematic properties", *parent,
                   Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       sch(c)
@@ -82,9 +93,19 @@ SchematicPropertiesDialog::SchematicPropertiesDialog(Gtk::Window *parent, Schema
     box->pack_start(*sidebar, false, false, 0);
     box->pack_start(*stack, true, true, 0);
 
+    {
+        auto ed = Gtk::manage(new TitleBlockValuesEditor(sch->title_block_values));
+        stack->add(*ed, "global", "Global");
+    }
+
+    std::vector<Sheet *> sheets;
     for (auto &it : sch->sheets) {
-        auto ed = Gtk::manage(new SheetEditor(&it.second, sch));
-        stack->add(*ed, (std::string)it.second.uuid, "Sheet " + it.second.name);
+        sheets.push_back(&it.second);
+    }
+    std::sort(sheets.begin(), sheets.end(), [](auto a, auto b) { return a->index < b->index; });
+    for (auto &it : sheets) {
+        auto ed = Gtk::manage(new SheetEditor(it, sch, pool));
+        stack->add(*ed, (std::string)it->uuid, "Sheet " + it->name);
     }
 
     get_content_area()->pack_start(*box, true, true, 0);

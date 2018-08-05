@@ -6,6 +6,7 @@
 #include "widgets/pool_browser_padstack.hpp"
 #include "widgets/pool_browser_package.hpp"
 #include "widgets/pool_browser_part.hpp"
+#include "widgets/pool_browser_frame.hpp"
 #include "dialogs/pool_browser_dialog.hpp"
 #include "util/util.hpp"
 #include "pool-update/pool-update.hpp"
@@ -511,6 +512,66 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         });
 
         append_page(*paned, "Parts");
+    }
+
+
+    {
+        auto br = Gtk::manage(new PoolBrowserFrame(&pool));
+        br->set_show_path(true);
+        browsers.emplace(ObjectType::FRAME, br);
+        br->show();
+        auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
+
+        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
+        auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
+        bbox->set_margin_bottom(8);
+        bbox->set_margin_top(8);
+        bbox->set_margin_start(8);
+        bbox->set_margin_end(8);
+
+        add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_frame));
+        add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_frame));
+        add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_frame));
+        /*if (remote_repo.size())
+            add_action_button("Merge", bbox, br,
+                              [this](const UUID &uu) { remote_box->merge_item(ObjectType::SYMBOL, uu); });*/
+        bbox->show_all();
+
+        box->pack_start(*bbox, false, false, 0);
+
+        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+        sep->show();
+        box->pack_start(*sep, false, false, 0);
+        box->pack_start(*br, true, true, 0);
+        box->show();
+
+        paned->add1(*box);
+        paned->child_property_shrink(*box) = false;
+
+
+        auto canvas = Gtk::manage(new CanvasGL());
+        canvas->set_selection_allowed(false);
+        paned->add2(*canvas);
+        paned->show_all();
+
+        br->signal_selected().connect([this, br, canvas] {
+            auto sel = br->get_selected();
+            if (!sel) {
+                canvas->clear();
+                return;
+            }
+            Frame fr = *pool.get_frame(sel);
+            for (const auto &la : fr.get_layers()) {
+                canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL_ONLY, la.second.color));
+            }
+            canvas->property_layer_opacity() = 75;
+            canvas->update(fr);
+            canvas->zoom_to_bbox(Coordi(), {fr.width, fr.height});
+        });
+
+        br->signal_activated().connect([this, br] { handle_edit_frame(br->get_selected()); });
+
+        append_page(*paned, "Frames");
     }
 
     {

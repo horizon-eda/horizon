@@ -33,7 +33,6 @@ SRC_COMMON = \
 	src/schematic/bus_ripper.cpp\
 	src/schematic/schematic_symbol.cpp\
 	src/schematic/power_symbol.cpp\
-	src/schematic/frame.cpp\
 	src/schematic/schematic_rules.cpp\
 	src/schematic/rule_single_pin_net.cpp\
 	src/pool/padstack.cpp\
@@ -83,7 +82,8 @@ SRC_COMMON = \
 	3rd_party/clipper/clipper.cpp\
 	src/common/dimension.cpp\
 	src/logger/logger.cpp\
-	src/parameter/program_polygon.cpp
+	src/parameter/program_polygon.cpp\
+	src/frame/frame.cpp
 
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += src/util/uuid_win32.cpp
@@ -127,6 +127,7 @@ SRC_IMP = \
 	src/imp/imp_padstack.cpp\
 	src/imp/imp_package.cpp\
 	src/imp/imp_board.cpp\
+	src/imp/imp_frame.cpp\
 	src/imp/tool_popover.cpp\
 	src/imp/selection_filter_dialog.cpp\
 	src/imp/action.cpp\
@@ -224,12 +225,14 @@ SRC_IMP = \
 	src/dialogs/edit_plane.cpp\
 	src/dialogs/edit_stackup.cpp\
 	src/dialogs/edit_board_hole.cpp\
+	src/dialogs/edit_frame.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\
 	src/core/core_schematic.cpp\
 	src/core/core_padstack.cpp\
 	src/core/core_package.cpp\
 	src/core/core_board.cpp\
+	src/core/core_frame.cpp\
 	src/property_panels/property_panels.cpp\
 	src/property_panels/property_panel.cpp\
 	src/property_panels/property_editor.cpp\
@@ -268,7 +271,9 @@ SRC_IMP = \
 	src/widgets/pool_browser_padstack.cpp\
 	src/widgets/pool_browser_unit.cpp\
 	src/widgets/pool_browser_symbol.cpp\
+	src/widgets/pool_browser_frame.cpp\
 	src/widgets/plane_editor.cpp\
+	src/widgets/title_block_values_editor.cpp\
 	3rd_party/dxflib/dl_dxf.cpp\
 	3rd_party/dxflib/dl_writer_ascii.cpp\
 	src/import_dxf/dxf_importer.cpp\
@@ -381,6 +386,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-mgr/pool_notebook_padstacks.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_notebook_packages.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_notebook_parts.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_notebook_frames.cpp\
 	src/pool-prj-mgr/pool-mgr/editors/unit_editor.cpp\
 	src/pool-prj-mgr/pool-mgr/editors/part_editor.cpp\
 	src/pool-prj-mgr/pool-mgr/editors/entity_editor.cpp\
@@ -405,6 +411,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/pool_browser_padstack.cpp\
 	src/widgets/pool_browser_part.cpp\
 	src/widgets/pool_browser_package.cpp\
+	src/widgets/pool_browser_frame.cpp\
 	src/dialogs/pool_browser_dialog.cpp\
 	src/widgets/cell_renderer_color_box.cpp\
 	src/util/sort_controller.cpp\

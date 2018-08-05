@@ -27,12 +27,12 @@ void export_pdf(const std::string &filename, const Schematic &sch, Core *c)
     std::sort(sheets.begin(), sheets.end(), [](auto a, auto b) { return a->index < b->index; });
 
     for (const auto sheet : sheets) {
-        width = sheet->frame.get_width() / nm_to_pt;
-        height = sheet->frame.get_height() / nm_to_pt;
+        width = sheet->frame.width / nm_to_pt;
+        height = sheet->frame.height / nm_to_pt;
         surface->set_size(width, height);
 
         cr->save();
-        double shift = sheet->frame.get_height() / 1e6;
+        double shift = sheet->frame.height / 1e6;
         cr->translate(0, -shift);
         ca.update(*sheet);
 

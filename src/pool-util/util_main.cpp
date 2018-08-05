@@ -8,6 +8,7 @@
 #include "pool/unit.hpp"
 #include "util/util.hpp"
 #include "util/uuid.hpp"
+#include "frame/frame.hpp"
 #include <fstream>
 #include <giomm/file.h>
 #include <giomm/init.h>
@@ -104,6 +105,7 @@ int main(int c_argc, char *c_argv[])
         std::cout << "\tedit-entity <entity file>" << std::endl;
         std::cout << "\tcreate-package <package folder>" << std::endl;
         std::cout << "\tcreate-padstack <padstack file>" << std::endl;
+        std::cout << "\tcreate-frame <frame file>" << std::endl;
         std::cout << "\tupdate" << std::endl;
         return 0;
     }
@@ -206,6 +208,17 @@ int main(int c_argc, char *c_argv[])
         }
         else {
             std::cout << "Usage: " << argv.at(0) << " create-padstack <padstack file>" << std::endl;
+        }
+    }
+
+    else if (argv.at(1) == "create-frame") {
+        if (argv.size() >= 3) {
+            horizon::Frame fr(horizon::UUID::random());
+            auto j = fr.serialize();
+            horizon::save_json_to_file(argv.at(2), j);
+        }
+        else {
+            std::cout << "Usage: " << argv.at(0) << " create-frame <frame file>" << std::endl;
         }
     }
 

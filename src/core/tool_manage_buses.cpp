@@ -1,6 +1,7 @@
 #include "tool_manage_buses.hpp"
 #include "core_board.hpp"
 #include "core_schematic.hpp"
+#include "core_frame.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -21,6 +22,9 @@ bool ToolManageBuses::can_begin()
 
     case ToolID::EDIT_STACKUP:
         return core.b;
+
+    case ToolID::EDIT_FRAME_PROPERTIES:
+        return core.f;
 
     default:
         return false;
@@ -44,13 +48,16 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
         r = imp->dialogs.manage_net_classes(sch->block);
     }
     else if (tool_id == ToolID::EDIT_SCHEMATIC_PROPERTIES) {
-        r = imp->dialogs.edit_schematic_properties(core.c->get_schematic());
+        r = imp->dialogs.edit_schematic_properties(core.c->get_schematic(), core.c->m_pool);
     }
     else if (tool_id == ToolID::EDIT_STACKUP) {
         r = imp->dialogs.edit_stackup(core.b->get_board());
     }
     else if (tool_id == ToolID::MANAGE_POWER_NETS) {
         r = imp->dialogs.manage_power_nets(core.c->get_block());
+    }
+    else if (tool_id == ToolID::EDIT_FRAME_PROPERTIES) {
+        r = imp->dialogs.edit_frame_properties(core.f->get_frame());
     }
     if (r) {
         core.r->commit();

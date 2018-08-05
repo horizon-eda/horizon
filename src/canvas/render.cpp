@@ -15,11 +15,11 @@
 #include "pool/symbol.hpp"
 #include "schematic/bus_label.hpp"
 #include "schematic/bus_ripper.hpp"
-#include "schematic/frame.hpp"
 #include "schematic/line_net.hpp"
 #include "schematic/net_label.hpp"
 #include "schematic/power_symbol.hpp"
 #include "schematic/sheet.hpp"
+#include "frame/frame.hpp"
 #include "selectables.hpp"
 #include "selection_filter.hpp"
 #include "target.hpp"
@@ -927,6 +927,9 @@ void Canvas::render(const Symbol &sym, bool on_sheet, bool smashed)
 
 void Canvas::render(const Sheet &sheet)
 {
+    if (sheet.frame.uuid) {
+        render(sheet.frame, true);
+    }
     for (const auto &it : sheet.junctions) {
         render(it.second, true, ObjectType::SCHEMATIC);
     }
@@ -960,26 +963,6 @@ void Canvas::render(const Sheet &sheet)
     for (const auto &it : sheet.arcs) {
         render(it.second);
     }
-    render(sheet.frame);
-}
-
-void Canvas::render(const Frame &frame)
-{
-    if (frame.format == Frame::Format::NONE)
-        return;
-    int64_t width = frame.get_width();
-    int64_t height = frame.get_height();
-    int64_t border = frame.border;
-    Coordf bl(border, border);
-    Coordf br(width - border, border);
-    Coordf tr(width - border, height - border);
-    Coordf tl(border, height - border);
-
-    auto c = ColorP::FRAME;
-    draw_line(bl, br, c);
-    draw_line(br, tr, c);
-    draw_line(tr, tl, c);
-    draw_line(tl, bl, c);
 }
 
 void Canvas::render(const Padstack &padstack, bool interactive)
@@ -1351,4 +1334,37 @@ void Canvas::render(const Board &brd)
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
     std::cout << "render took " << 1 / elapsed_secs << std::endl;
 }
+
+void Canvas::render(const Frame &fr, bool on_sheet)
+{
+    if (!on_sheet) {
+        for (const auto &it : fr.junctions) {
+            auto &junc = it.second;
+            selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, 10000, true);
+            if (!junc.temp) {
+                targets.emplace(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
+            }
+        }
+    }
+    for (const auto &it : fr.lines) {
+        render(it.second, !on_sheet);
+    }
+
+
+    for (const auto &it : fr.arcs) {
+        render(it.second, !on_sheet);
+    }
+    for (const auto &it : fr.polygons) {
+        render(it.second, !on_sheet);
+    }
+    for (const auto &it : fr.texts) {
+        render(it.second, !on_sheet);
+    }
+    auto c = ColorP::FRAME;
+    draw_line(Coordf(), Coordf(fr.width, 0), c);
+    draw_line(Coordf(fr.width, 0), Coordf(fr.width, fr.height), c);
+    draw_line(Coordf(fr.width, fr.height), Coordf(0, fr.height), c);
+    draw_line(Coordf(0, fr.height), Coordf(), c);
+}
+
 } // namespace horizon
