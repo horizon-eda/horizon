@@ -29,7 +29,6 @@ ToolPopover::ToolPopover(Gtk::Widget *parent, ActionCatalogItem::Availability av
         std::string tool_name(tool_name_u);
         std::transform(tool_name.begin(), tool_name.end(), tool_name.begin(), tolower);
         return pattern->match(tool_name);
-
     });
     search_entry->signal_changed().connect([this] {
         std::string search = search_entry->get_text();
@@ -141,6 +140,7 @@ ToolPopover::ToolPopover(Gtk::Widget *parent, ActionCatalogItem::Availability av
             {ActionGroup::PADSTACK, ActionCatalogItem::AVAILABLE_IN_PADSTACK},
             {ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE},
             {ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED},
+            {ActionGroup::FRAME, ActionCatalogItem::AVAILABLE_IN_FRAME},
     };
 
     for (const auto &it : action_group_catalog) {
