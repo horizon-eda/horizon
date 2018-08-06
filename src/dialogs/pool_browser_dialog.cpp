@@ -48,7 +48,7 @@ PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool 
         break;
     case ObjectType::FRAME:
         browser = Gtk::manage(new PoolBrowserFrame(pool));
-        set_title("Select Padstack");
+        set_title("Select Frame");
         break;
     default:;
     }
