@@ -558,7 +558,7 @@ const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
         {ActionGroup::MOVE, "Move"},           {ActionGroup::BOARD, "Board"},
         {ActionGroup::SCHEMATIC, "Schematic"}, {ActionGroup::SYMBOL, "Symbol"},
         {ActionGroup::PADSTACK, "Padstack"},   {ActionGroup::PACKAGE, "Package"},
-        {ActionGroup::FRAME, "Fame"},          {ActionGroup::UNDO, "Undo"},
+        {ActionGroup::FRAME, "Frame"},         {ActionGroup::UNDO, "Undo"},
         {ActionGroup::LAYER, "Layer"},         {ActionGroup::SELECTION, "Selection"},
         {ActionGroup::RULES, "Rules"},         {ActionGroup::UNKNOWN, "Misc"},
         {ActionGroup::VIEW, "View"},
