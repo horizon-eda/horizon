@@ -94,13 +94,21 @@ void Canvas::render(const PowerSymbol &sym)
 
     auto style = sym.net->power_symbol_style;
     switch (style) {
-    case Net::PowerSymbolStyle::GND: {
+    case Net::PowerSymbolStyle::GND:
+    case Net::PowerSymbolStyle::EARTH: {
         transform_save();
         transform.set_angle(orientation_to_angle(sym.orientation) - 49152);
         draw_line({0, 0}, {0, -1.25_mm}, c, 0);
-        draw_line({-1.25_mm, -1.25_mm}, {1.25_mm, -1.25_mm}, c, 0);
-        draw_line({-1.25_mm, -1.25_mm}, {0, -2.5_mm}, c, 0);
-        draw_line({1.25_mm, -1.25_mm}, {0, -2.5_mm}, c, 0);
+        if (style == Net::PowerSymbolStyle::GND) {
+            draw_line({-1.25_mm, -1.25_mm}, {1.25_mm, -1.25_mm}, c, 0);
+            draw_line({-1.25_mm, -1.25_mm}, {0, -2.5_mm}, c, 0);
+            draw_line({1.25_mm, -1.25_mm}, {0, -2.5_mm}, c, 0);
+        }
+        else {
+            for (float i = 0.0_mm; i < 1.25_mm; i += 1.50_mm / 3) {
+                draw_line({-1.25_mm + i, -1.25_mm - i}, {1.25_mm - i, -1.25_mm - i}, c, 0);
+            }
+        }
         selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0, 0}, {-1.25_mm, -2.5_mm}, {1.25_mm, 0_mm});
         transform_restore();
 

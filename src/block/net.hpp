@@ -23,7 +23,7 @@ public:
     std::string name;
     bool is_power = false;
 
-    enum class PowerSymbolStyle { GND, DOT, ANTENNA };
+    enum class PowerSymbolStyle { GND, EARTH, DOT, ANTENNA };
     PowerSymbolStyle power_symbol_style = PowerSymbolStyle::GND;
 
     uuid_ptr<NetClass> net_class;
