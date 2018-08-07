@@ -7,7 +7,7 @@ public:
     ToolHelperMove(class Core *c, ToolID tid) : ToolBase(c, tid)
     {
     }
-    static Orientation transform_orienation(Orientation orientation, bool rotate, bool reverse = false);
+    static Orientation transform_orientation(Orientation orientation, bool rotate, bool reverse = false);
 
 protected:
     void move_init(const Coordi &c);

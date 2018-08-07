@@ -149,7 +149,7 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
             }
         }
         else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
-            pin->orientation = ToolHelperMove::transform_orienation(pin->orientation, args.key == GDK_KEY_r);
+            pin->orientation = ToolHelperMove::transform_orientation(pin->orientation, args.key == GDK_KEY_r);
         }
         else if (args.key == GDK_KEY_Escape) {
             core.r->revert();

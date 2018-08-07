@@ -77,7 +77,7 @@ bool ToolPlaceBusLabel::update_attached(const ToolArgs &args)
         }
     }
     if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
-        la->orientation = ToolHelperMove::transform_orienation(la->orientation, args.key == GDK_KEY_r);
+        la->orientation = ToolHelperMove::transform_orientation(la->orientation, args.key == GDK_KEY_r);
         last_orientation = la->orientation;
         return true;
     }

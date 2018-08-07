@@ -133,7 +133,7 @@ bool ToolPlaceBusRipper::update_attached(const ToolArgs &args)
             ri->mirror();
         }
         else if (args.key == GDK_KEY_r) {
-            ri->orientation = transform_orienation(ri->orientation, true);
+            ri->orientation = transform_orientation(ri->orientation, true);
         }
     }
 

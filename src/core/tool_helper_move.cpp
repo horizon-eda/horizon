@@ -101,7 +101,7 @@ static void transform(Coordi &a, const Coordi &center, bool rotate)
     }
 }
 
-Orientation ToolHelperMove::transform_orienation(Orientation orientation, bool rotate, bool reverse)
+Orientation ToolHelperMove::transform_orientation(Orientation orientation, bool rotate, bool reverse)
 {
     Orientation new_orientation = orientation;
     if (rotate) {
@@ -187,13 +187,13 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         case ObjectType::SYMBOL_PIN: {
             SymbolPin *pin = core.y->get_symbol_pin(it.uuid);
             transform(pin->position, center, rotate);
-            pin->orientation = transform_orienation(pin->orientation, rotate);
+            pin->orientation = transform_orientation(pin->orientation, rotate);
         } break;
 
         case ObjectType::BUS_RIPPER: {
             auto &ri = core.c->get_sheet()->bus_rippers.at(it.uuid);
             if (rotate) {
-                ri.orientation = transform_orienation(ri.orientation, true);
+                ri.orientation = transform_orientation(ri.orientation, true);
             }
             else {
                 ri.mirror();
@@ -230,7 +230,7 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
             }
             else {
                 auto &x = core.c->get_sheet()->power_symbols.at(it.uuid).orientation;
-                x = transform_orienation(x, true, false);
+                x = transform_orientation(x, true, false);
             }
             break;
 
@@ -313,12 +313,12 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         case ObjectType::NET_LABEL: {
             auto sheet = core.c->get_sheet();
             auto *label = &sheet->net_labels.at(it.uuid);
-            label->orientation = transform_orienation(label->orientation, rotate);
+            label->orientation = transform_orientation(label->orientation, rotate);
         } break;
         case ObjectType::BUS_LABEL: {
             auto sheet = core.c->get_sheet();
             auto *label = &sheet->bus_labels.at(it.uuid);
-            label->orientation = transform_orienation(label->orientation, rotate);
+            label->orientation = transform_orientation(label->orientation, rotate);
         } break;
         default:;
         }
