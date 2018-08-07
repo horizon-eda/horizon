@@ -123,11 +123,6 @@ void Canvas::render(const PowerSymbol &sym)
 
     case Net::PowerSymbolStyle::DOT:
     case Net::PowerSymbolStyle::ANTENNA: {
-        float dir = sym.orientation == Orientation::DOWN ? -1 : 1;
-        if (sym.orientation == Orientation::LEFT || sym.orientation == Orientation::RIGHT) {
-            draw_error({0, 0}, 2e5, "Unsupported orientation", true);
-        }
-
         transform_save();
         transform.set_angle(orientation_to_angle(sym.orientation) - 16384);
         if (style == Net::PowerSymbolStyle::ANTENNA) {
@@ -145,9 +140,30 @@ void Canvas::render(const PowerSymbol &sym)
 
         transform.reset();
 
+        Coordi text_offset;
+        bool mirror = false;
+        const int64_t center_offset = 1.25_mm;
+        const int64_t radius = 1.875_mm;
+        switch (sym.orientation) {
+        case Orientation::UP:
+            text_offset = {center_offset, radius};
+            mirror = not sym.mirror;
+            break;
+        case Orientation::RIGHT:
+            text_offset = {center_offset + radius, 0.0_mm};
+            break;
+        case Orientation::DOWN:
+            text_offset = {center_offset, -radius};
+            mirror = sym.mirror;
+            break;
+        case Orientation::LEFT:
+            text_offset = {center_offset + radius, 0.0_mm};
+            mirror = true;
+            break;
+        }
+
         int text_angle = 0;
-        Coordi text_offset(1.25_mm, dir * 1.875_mm);
-        if (sym.mirror ^ (dir > 0)) {
+        if (mirror) {
             text_offset.x *= -1;
             text_angle = 32768;
         }

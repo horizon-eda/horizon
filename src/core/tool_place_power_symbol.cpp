@@ -1,6 +1,7 @@
 #include "tool_place_power_symbol.hpp"
 #include "core_schematic.hpp"
 #include "imp/imp_interface.hpp"
+#include "tool_helper_move.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -128,7 +129,7 @@ bool ToolPlacePowerSymbol::update_attached(const ToolArgs &args)
             sym->mirror ^= true;
         }
         else if (args.key == GDK_KEY_r) {
-            sym->orientation = sym->orientation == Orientation::DOWN ? Orientation::UP : Orientation::DOWN;
+            sym->orientation = ToolHelperMove::transform_orientation(sym->orientation, true, false);
         }
     }
 
