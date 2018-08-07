@@ -142,6 +142,10 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
 
                     if (sym->component->connections.count(connpath)) { // pin is connected
                         Connection &conn = sym->component->connections.at(connpath);
+                        if (conn.net == nullptr) {
+                            imp->tool_bar_flash("can't connect to NC pin");
+                            return ToolResponse();
+                        }
                         net = conn.net;
                     }
                     else { // pin needs net
@@ -214,6 +218,10 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     }
                     if (sym->component->connections.count(connpath)) { // pin is connected
                         Connection &conn = sym->component->connections.at(connpath);
+                        if (conn.net == nullptr) {
+                            imp->tool_bar_flash("can't connect to NC pin");
+                            return ToolResponse();
+                        }
                         if (temp_line_head->net && (temp_line_head->net->uuid != conn.net->uuid)) { // has net
                             if (merge_nets(conn.net, temp_line_head->net)) {
                                 return ToolResponse();

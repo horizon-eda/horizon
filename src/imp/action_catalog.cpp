@@ -551,6 +551,18 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::TOOL, ToolID::EDIT_FRAME_PROPERTIES},
          {"Edit frame properties", ActionGroup::FRAME, ActionCatalogItem::AVAILABLE_IN_FRAME,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::SET_ALL_NC},
+         {"Set all unconnected pins NC", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::CLEAR_ALL_NC},
+         {"Clear all NC pins", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::SET_NC},
+         {"Set pins NC", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -735,5 +747,9 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(SCALE),
         TOOL_LUT_ITEM(CHANGE_UNIT),
         TOOL_LUT_ITEM(EDIT_FRAME_PROPERTIES),
+        TOOL_LUT_ITEM(SET_ALL_NC),
+        TOOL_LUT_ITEM(CLEAR_ALL_NC),
+        TOOL_LUT_ITEM(SET_NC),
+        TOOL_LUT_ITEM(CLEAR_NC),
 };
 } // namespace horizon

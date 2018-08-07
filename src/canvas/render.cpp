@@ -289,15 +289,18 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
 
     Coordi p_name = p0;
     Coordi p_pad = p0;
+    Coordi p_nc = p0;
 
     Orientation pin_orientation = pin.get_orientation_for_placement(transform);
 
     Orientation name_orientation = Orientation::LEFT;
     Orientation pad_orientation = Orientation::LEFT;
+    Orientation nc_orientation = Orientation::LEFT;
     int64_t text_shift = 0.5_mm;
     int64_t text_shift_name = text_shift;
     int64_t schmitt_shift = 1.125_mm;
     int64_t driver_shift = .75_mm;
+    int64_t nc_shift = 0.25_mm;
     int64_t length = pin.length;
     auto dot_size = .75_mm;
     if (pin.decoration.dot) {
@@ -324,6 +327,8 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
         p_pad.x += pin.length - text_shift;
         p_pad.y += text_shift;
         v_deco.x = 1;
+        p_nc.x -= nc_shift;
+        nc_orientation = Orientation::LEFT;
         name_orientation = Orientation::RIGHT;
         pad_orientation = Orientation::LEFT;
         break;
@@ -334,6 +339,8 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
         p_pad.x -= pin.length - text_shift;
         p_pad.y += text_shift;
         v_deco.x = -1;
+        p_nc.x += nc_shift;
+        nc_orientation = Orientation::RIGHT;
         name_orientation = Orientation::LEFT;
         pad_orientation = Orientation::RIGHT;
         break;
@@ -344,6 +351,8 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
         p_pad.y -= pin.length - text_shift;
         p_pad.x -= text_shift;
         v_deco.y = -1;
+        p_nc.y += nc_shift;
+        nc_orientation = Orientation::UP;
         name_orientation = Orientation::DOWN;
         pad_orientation = Orientation::UP;
         break;
@@ -354,6 +363,8 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
         p_pad.y += pin.length - text_shift;
         p_pad.x -= text_shift;
         v_deco.y = 1;
+        p_nc.y -= nc_shift;
+        nc_orientation = Orientation::DOWN;
         name_orientation = Orientation::UP;
         pad_orientation = Orientation::DOWN;
         break;
@@ -513,6 +524,11 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
     switch (pin.connector_style) {
     case SymbolPin::ConnectorStyle::BOX:
         draw_box(p0, 0.25_mm, ColorP::FROM_LAYER, 0, false);
+        break;
+
+    case SymbolPin::ConnectorStyle::NC:
+        draw_cross(p0, 0.25_mm, ColorP::FROM_LAYER, 0, false);
+        draw_text0(p_nc, 1.5_mm, "NC", orientation_to_angle(nc_orientation), false, TextOrigin::CENTER, ColorP::PIN, 0);
         break;
 
     case SymbolPin::ConnectorStyle::NONE:

@@ -417,20 +417,25 @@ void Schematic::expand(bool careful)
             for (const auto &it_conn : comp->connections) {
                 const Gate &gate_conn = comp->entity->gates.at(it_conn.first.at(0));
                 const Pin &pin = gate_conn.unit->pins.at(it_conn.first.at(1));
-                if ((gate_conn.uuid == schsym.gate->uuid) && it_conn.second.net) { // connection with net
+                if ((gate_conn.uuid == schsym.gate->uuid)) { // connection with net
                     SymbolPin &sympin = schsym.symbol.pins.at(pin.uuid);
-                    sympin.connector_style = SymbolPin::ConnectorStyle::NONE;
-                    if (sympin.net_segment) {
-                        auto &ns = net_segments.at(sympin.net_segment);
-                        if (ns.is_bus()) {
-                            throw std::runtime_error("illegal bus-pin connection");
+                    if (it_conn.second.net) {
+                        sympin.connector_style = SymbolPin::ConnectorStyle::NONE;
+                        if (sympin.net_segment) {
+                            auto &ns = net_segments.at(sympin.net_segment);
+                            if (ns.is_bus()) {
+                                throw std::runtime_error("illegal bus-pin connection");
+                            }
+                            if (ns.net == nullptr) {
+                                ns.net = it_conn.second.net;
+                            }
+                            if (ns.net != it_conn.second.net) {
+                                throw std::runtime_error("illegal connection");
+                            }
                         }
-                        if (ns.net == nullptr) {
-                            ns.net = it_conn.second.net;
-                        }
-                        if (ns.net != it_conn.second.net) {
-                            throw std::runtime_error("illegal connection");
-                        }
+                    }
+                    else {
+                        sympin.connector_style = SymbolPin::ConnectorStyle::NC;
                     }
                 }
             }

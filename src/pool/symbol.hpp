@@ -21,7 +21,7 @@ using json = nlohmann::json;
 
 class SymbolPin : public UUIDProvider {
 public:
-    enum class ConnectorStyle { BOX, NONE };
+    enum class ConnectorStyle { BOX, NONE, NC };
 
     SymbolPin(const UUID &uu, const json &j);
     SymbolPin(UUID uu);

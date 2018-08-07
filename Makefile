@@ -197,6 +197,8 @@ SRC_IMP = \
 	src/core/tool_line_loop_to_polygon.cpp\
 	src/core/tool_change_unit.cpp\
 	src/core/tool_helper_line_width_setting.cpp\
+	src/core/tool_set_nc_all.cpp\
+	src/core/tool_set_nc.cpp\
 	src/core/cores.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\

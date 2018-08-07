@@ -33,26 +33,28 @@ RulesCheckCacheNetPins::RulesCheckCacheNetPins(Core *c)
     }
     for (auto &it : block->components) {
         for (auto &it_conn : it.second.connections) {
-            const auto &connpath = it_conn.first;
-            auto gate = &it.second.entity->gates.at(connpath.at(0));
-            auto pin = &gate->unit->pins.at(connpath.at(1));
-            UUID sheet_uuid;
-            Coordi location;
-            for (const auto &it_sheet : core->get_schematic()->sheets) {
-                bool found = false;
-                for (const auto &it_sym : it_sheet.second.symbols) {
-                    if (it_sym.second.component == &it.second && it_sym.second.gate == gate) {
-                        found = true;
-                        sheet_uuid = it_sheet.first;
-                        location = it_sym.second.placement.transform(
-                                it_sym.second.pool_symbol->pins.at(pin->uuid).position);
-                        break;
+            if (it_conn.second.net) {
+                const auto &connpath = it_conn.first;
+                auto gate = &it.second.entity->gates.at(connpath.at(0));
+                auto pin = &gate->unit->pins.at(connpath.at(1));
+                UUID sheet_uuid;
+                Coordi location;
+                for (const auto &it_sheet : core->get_schematic()->sheets) {
+                    bool found = false;
+                    for (const auto &it_sym : it_sheet.second.symbols) {
+                        if (it_sym.second.component == &it.second && it_sym.second.gate == gate) {
+                            found = true;
+                            sheet_uuid = it_sheet.first;
+                            location = it_sym.second.placement.transform(
+                                    it_sym.second.pool_symbol->pins.at(pin->uuid).position);
+                            break;
+                        }
                     }
+                    if (found)
+                        break;
                 }
-                if (found)
-                    break;
+                net_pins.at(it_conn.second.net.ptr).emplace_back(&it.second, gate, pin, sheet_uuid, location);
             }
-            net_pins.at(it_conn.second.net.ptr).emplace_back(&it.second, gate, pin, sheet_uuid, location);
         }
     }
 }

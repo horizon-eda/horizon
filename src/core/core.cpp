@@ -58,6 +58,8 @@
 #include "tool_swap_nets.hpp"
 #include "tool_line_loop_to_polygon.hpp"
 #include "tool_change_unit.hpp"
+#include "tool_set_nc_all.hpp"
+#include "tool_set_nc.hpp"
 
 #include "common/dimension.hpp"
 #include "logger/logger.hpp"
@@ -292,6 +294,14 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::CHANGE_UNIT:
         return std::make_unique<ToolChangeUnit>(this, tool_id);
+
+    case ToolID::SET_ALL_NC:
+    case ToolID::CLEAR_ALL_NC:
+        return std::make_unique<ToolSetNotConnectedAll>(this, tool_id);
+
+    case ToolID::SET_NC:
+    case ToolID::CLEAR_NC:
+        return std::make_unique<ToolSetNotConnected>(this, tool_id);
 
     default:
         return nullptr;

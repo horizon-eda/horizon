@@ -123,7 +123,11 @@ enum class ToolID {
     LINE_LOOP_TO_POLYGON,
     SCALE,
     CHANGE_UNIT,
-    EDIT_FRAME_PROPERTIES
+    EDIT_FRAME_PROPERTIES,
+    SET_ALL_NC,
+    CLEAR_ALL_NC,
+    SET_NC,
+    CLEAR_NC
 };
 
 /**

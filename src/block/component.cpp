@@ -9,12 +9,19 @@ namespace horizon {
 json Connection::serialize() const
 {
     json j;
-    j["net"] = net->uuid;
+    if (net)
+        j["net"] = net->uuid;
+    else
+        j["net"] = nullptr;
     return j;
 }
 
 Connection::Connection(const json &j, Block *block)
 {
+    if (j.at("net").is_null()) {
+        net = nullptr;
+        return;
+    }
     if (block) {
         UUID net_uu = j.at("net").get<std::string>();
         net = block->get_net(net_uu);
