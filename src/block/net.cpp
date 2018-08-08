@@ -8,6 +8,7 @@ namespace horizon {
 
 static const LutEnumStr<Net::PowerSymbolStyle> power_symbol_style_lut = {
         {"gnd", Net::PowerSymbolStyle::GND},
+        {"earth", Net::PowerSymbolStyle::EARTH},
         {"dot", Net::PowerSymbolStyle::DOT},
         {"antenna", Net::PowerSymbolStyle::ANTENNA},
 };

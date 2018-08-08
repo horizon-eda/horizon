@@ -423,7 +423,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
         else if (args.key == GDK_KEY_r) {
             if (net_label)
                 net_label->orientation =
-                        ToolHelperMove::transform_orienation(net_label->orientation, args.key == GDK_KEY_r);
+                        ToolHelperMove::transform_orientation(net_label->orientation, args.key == GDK_KEY_r);
         }
         else if (args.key == GDK_KEY_a) {
             bend_mode = BendMode::ARB;

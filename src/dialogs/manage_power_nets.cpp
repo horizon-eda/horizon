@@ -24,7 +24,8 @@ public:
         auto combo = Gtk::manage(new Gtk::ComboBoxText);
 
         static const std::map<Net::PowerSymbolStyle, std::string> lut = {
-                {Net::PowerSymbolStyle::GND, "Ground"},
+                {Net::PowerSymbolStyle::GND, "Signal Ground"},
+                {Net::PowerSymbolStyle::EARTH, "Earth Ground"},
                 {Net::PowerSymbolStyle::DOT, "Dot"},
                 {Net::PowerSymbolStyle::ANTENNA, "Antenna"},
         };

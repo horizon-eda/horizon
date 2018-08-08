@@ -30,6 +30,7 @@ public:
     uuid_ptr<Net> net;
     bool mirror = false;
     Orientation orientation = Orientation::DOWN;
+    void mirrorx();
 
     virtual UUID get_uuid() const;
     void update_refs(Sheet &sheet, Block &block);

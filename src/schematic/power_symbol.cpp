@@ -23,6 +23,24 @@ PowerSymbol::PowerSymbol(const UUID &uu, const json &j, Sheet *sheet, Block *blo
         orientation = orientation_lut.lookup(j.at("orientation"));
 }
 
+void PowerSymbol::mirrorx()
+{
+    switch (orientation) {
+    case Orientation::UP:
+        mirror ^= true;
+        break;
+    case Orientation::RIGHT:
+        orientation = Orientation::LEFT;
+        break;
+    case Orientation::DOWN:
+        mirror ^= true;
+        break;
+    case Orientation::LEFT:
+        orientation = Orientation::RIGHT;
+        break;
+    }
+}
+
 UUID PowerSymbol::get_uuid() const
 {
     return uuid;
