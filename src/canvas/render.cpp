@@ -612,7 +612,6 @@ void Canvas::render(const Text &text, bool interactive, bool reorient)
         angle = 32768 - angle;
     }
 
-    img_text_layer(text.layer);
     img_patch_type(PatchType::TEXT);
     triangle_type_current = Triangle::Type::TEXT;
     auto extents = draw_text0(transform.shift, text.size, text.overridden ? text.text_override : text.text, angle, rev,
@@ -620,7 +619,6 @@ void Canvas::render(const Text &text, bool interactive, bool reorient)
     triangle_type_current = Triangle::Type::NONE;
     img_text(text, extents);
     img_patch_type(PatchType::OTHER);
-    img_text_layer(10000);
     transform_restore();
     if (interactive) {
         selectables.append(text.uuid, ObjectType::TEXT, text.placement.shift, extents.first, extents.second, 0,

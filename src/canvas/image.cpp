@@ -40,14 +40,4 @@ void Canvas::img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, 
     img_polygon(polyr, tr);
 }
 
-void Canvas::img_text_layer(int l)
-{
-    img_text_last_layer = l;
-}
-
-void Canvas::img_text_line(const Coordi &p0, const Coordi &p1, uint64_t width, bool tr)
-{
-    if (img_text_last_layer != 10000)
-        img_line(p0, p1, width, img_text_last_layer, tr);
-}
 } // namespace horizon

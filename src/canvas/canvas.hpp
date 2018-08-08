@@ -191,10 +191,6 @@ protected:
     FragmentCache fragment_cache;
 
 private:
-    void img_text_layer(int l);
-    int img_text_last_layer = 10000;
-    void img_text_line(const Coordi &p0, const Coordi &p1, const uint64_t width, bool tr = true);
-
     int annotation_layer_current = 20000;
     std::map<int, CanvasAnnotation> annotations;
 
