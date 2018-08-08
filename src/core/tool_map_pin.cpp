@@ -35,9 +35,19 @@ void ToolMapPin::create_pin(const UUID &uu)
 ToolResponse ToolMapPin::begin(const ToolArgs &args)
 {
     std::cout << "tool map pin\n";
-
-    for (const auto &it : core.y->get_pins()) {
-        pins.push_back({it, false});
+    bool from_sidebar = false;
+    for (const auto &it : args.selection) {
+        if (it.type == ObjectType::SYMBOL_PIN) {
+            if (core.y->get_symbol()->pins.count(it.uuid) == 0) { // unplaced pin
+                pins.emplace_back(&core.y->get_symbol()->unit->pins.at(it.uuid), false);
+                from_sidebar = true;
+            }
+        }
+    }
+    if (pins.size() == 0) {
+        for (const auto &it : core.y->get_pins()) {
+            pins.emplace_back(it, false);
+        }
     }
     std::sort(pins.begin(), pins.end(), [](const auto &a, const auto &b) {
         return strcmp_natural(a.first->primary_name, b.first->primary_name) < 0;
@@ -48,17 +58,25 @@ ToolResponse ToolMapPin::begin(const ToolArgs &args)
             it.second = true;
         }
     }
-    if (std::all_of(pins.begin(), pins.end(), [](const auto &a) { return a.second; })) {
+    auto pins_unplaced = std::count_if(pins.begin(), pins.end(), [](const auto &a) { return a.second == false; });
+    if (pins_unplaced == 0) {
         imp->tool_bar_flash("No pins left to place");
         return ToolResponse::end();
     }
 
     bool r;
     UUID selected_pin;
-    std::tie(r, selected_pin) = imp->dialogs.map_pin(pins);
-    if (!r) {
-        return ToolResponse::end();
+    if (pins_unplaced > 1 && from_sidebar == false) {
+        std::tie(r, selected_pin) = imp->dialogs.map_pin(pins);
+        if (!r) {
+            return ToolResponse::end();
+        }
     }
+    else {
+        selected_pin =
+                std::find_if(pins.begin(), pins.end(), [](const auto &a) { return a.second == false; })->first->uuid;
+    }
+
 
     auto x = std::find_if(pins.begin(), pins.end(),
                           [selected_pin](const auto &a) { return a.first->uuid == selected_pin; });

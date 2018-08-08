@@ -909,13 +909,18 @@ ActionConnection &ImpBase::connect_action(ActionID action_id, ToolID tool_id,
     return act;
 }
 
-void ImpBase::tool_begin(ToolID id)
+void ImpBase::tool_begin(ToolID id, bool override_selection, const std::set<SelectableRef> &sel)
 {
     highlights.clear();
     update_highlights();
     ToolArgs args;
     args.coords = canvas->get_cursor_pos();
-    args.selection = canvas->get_selection();
+
+    if (override_selection)
+        args.selection = sel;
+    else
+        args.selection = canvas->get_selection();
+
     args.work_layer = canvas->property_work_layer();
     ToolResponse r = core.r->tool_begin(id, args, imp_interface.get());
     tool_process(r);

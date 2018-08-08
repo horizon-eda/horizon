@@ -324,6 +324,7 @@ SRC_IMP = \
 	src/imp/hud_util.cpp\
 	src/util/pool_completion.cpp\
 	src/export_bom/export_bom.cpp\
+	src/widgets/unplaced_box.cpp\
 
 SRC_ROUTER = \
 	3rd_party/router/router/pns_router.cpp \

@@ -3,6 +3,7 @@
 #include "header_button.hpp"
 #include "pool/part.hpp"
 #include "symbol_preview/symbol_preview_window.hpp"
+#include "widgets/unplaced_box.hpp"
 
 namespace horizon {
 ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool_path)
@@ -39,6 +40,31 @@ void ImpSymbol::construct()
         button->show();
         button->signal_clicked().connect([this] { symbol_preview_window->present(); });
     }
+
+    unplaced_box = Gtk::manage(new UnplacedBox("Pin"));
+    unplaced_box->show();
+    main_window->left_panel->pack_end(*unplaced_box, true, true, 0);
+    unplaced_box->signal_place().connect([this](const auto &items) {
+        std::set<SelectableRef> sel;
+        for (const auto &it : items) {
+            sel.emplace(it, ObjectType::SYMBOL_PIN);
+        }
+        tool_begin(ToolID::MAP_PIN, true, sel);
+    });
+
+    core_symbol.signal_rebuilt().connect([this] {
+        const auto &pins_from_symbol = core_symbol.get_symbol()->pins;
+        std::map<UUID, std::string> unplaced;
+        for (const auto &it : core_symbol.get_symbol()->unit->pins) {
+            if (pins_from_symbol.count(it.first) == 0) {
+                unplaced.emplace(it.first, it.second.primary_name);
+            }
+        }
+        unplaced_box->update(unplaced);
+    });
+    unplaced_box->update({});
+    core_symbol.signal_tool_changed().connect(
+            [this](ToolID tool_id) { unplaced_box->set_sensitive(tool_id == ToolID::NONE); });
 
     auto header_button = Gtk::manage(new HeaderButton);
     header_button->set_label(core.y->get_symbol()->name);
