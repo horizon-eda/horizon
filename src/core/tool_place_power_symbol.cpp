@@ -126,7 +126,7 @@ bool ToolPlacePowerSymbol::update_attached(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_e) {
-            sym->mirror ^= true;
+            sym->mirrorx();
         }
         else if (args.key == GDK_KEY_r) {
             sym->orientation = ToolHelperMove::transform_orientation(sym->orientation, true, false);

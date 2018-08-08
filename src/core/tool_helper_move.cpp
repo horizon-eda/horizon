@@ -223,16 +223,15 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
                 core.r->get_arc(it.uuid)->reverse();
             }
             break;
-        case ObjectType::POWER_SYMBOL:
-            if (!rotate) {
-                auto &x = core.c->get_sheet()->power_symbols.at(it.uuid).mirror;
-                x = !x;
+        case ObjectType::POWER_SYMBOL: {
+            auto &ps = core.c->get_sheet()->power_symbols.at(it.uuid);
+            if (rotate) {
+                ps.orientation = transform_orientation(ps.orientation, true);
             }
             else {
-                auto &x = core.c->get_sheet()->power_symbols.at(it.uuid).orientation;
-                x = transform_orientation(x, true, false);
+                ps.mirrorx();
             }
-            break;
+        } break;
 
         case ObjectType::SCHEMATIC_SYMBOL: {
             SchematicSymbol *sym = core.c->get_schematic_symbol(it.uuid);
