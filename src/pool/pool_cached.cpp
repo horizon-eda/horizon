@@ -18,8 +18,14 @@ std::string PoolCached::get_filename(ObjectType ty, const UUID &uu, UUID *pool_u
 {
     auto filename_cached = Glib::build_filename(cache_path, get_flat_filename(ty, uu));
     if (Glib::file_test(filename_cached, Glib::FILE_TEST_IS_REGULAR)) {
-        if (pool_uuid_out)
-            Pool::get_filename(ty, uu, pool_uuid_out); // for pool uuid
+        if (pool_uuid_out) {
+            try {                                          // may throw if item is not found
+                Pool::get_filename(ty, uu, pool_uuid_out); // for pool uuid
+            }
+            catch (const std::runtime_error &e) {
+                *pool_uuid_out = UUID();
+            }
+        }
         return filename_cached;
     }
     else {
