@@ -63,9 +63,11 @@ PoolManager::PoolManager()
             for (auto it = o.cbegin(); it != o.cend(); ++it) {
                 std::string pool_base_path = it.key();
                 bool enabled = it.value();
-                pools.emplace(std::piecewise_construct, std::forward_as_tuple(pool_base_path),
-                              std::forward_as_tuple(pool_base_path));
-                set_pool_enabled_no_write(pool_base_path, enabled);
+                if (Glib::file_test(pool_base_path, Glib::FILE_TEST_IS_DIR)) {
+                    pools.emplace(std::piecewise_construct, std::forward_as_tuple(pool_base_path),
+                                  std::forward_as_tuple(pool_base_path));
+                    set_pool_enabled_no_write(pool_base_path, enabled);
+                }
             }
         }
     }
@@ -75,8 +77,10 @@ PoolManager::PoolManager()
             auto o = j.at("pools");
             for (auto it = o.cbegin(); it != o.cend(); ++it) {
                 std::string pool_base_path = Glib::path_get_dirname(it.value());
-                pools.emplace(std::piecewise_construct, std::forward_as_tuple(pool_base_path),
-                              std::forward_as_tuple(pool_base_path));
+                if (Glib::file_test(pool_base_path, Glib::FILE_TEST_IS_DIR)) {
+                    pools.emplace(std::piecewise_construct, std::forward_as_tuple(pool_base_path),
+                                  std::forward_as_tuple(pool_base_path));
+                }
             }
             for (auto &it : pools) {
                 set_pool_enabled_no_write(it.first, true);
