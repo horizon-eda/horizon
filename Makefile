@@ -111,6 +111,7 @@ SRC_CANVAS = \
 	src/canvas/marker.cpp\
 	src/canvas/annotation.cpp \
 	src/canvas/fragment_cache.cpp \
+	src/util/text_data.cpp \
 	3rd_party/poly2tri/common/shapes.cpp\
 	3rd_party/poly2tri/sweep/cdt.cpp\
 	3rd_party/poly2tri/sweep/sweep.cpp\

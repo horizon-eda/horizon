@@ -4,6 +4,7 @@
 #include "common.hpp"
 #include "util/uuid_provider.hpp"
 #include "util/placement.hpp"
+#include "util/text_data.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -23,6 +24,7 @@ public:
     UUID uuid;
 
     TextOrigin origin = TextOrigin::CENTER;
+    TextData::Font font = TextData::Font::SIMPLEX;
     Placement placement;
     std::string text;
     uint64_t size = 1.5_mm;

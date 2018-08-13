@@ -109,6 +109,10 @@ bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
             get_placement(text->placement, value, property);
             return true;
 
+        case ObjectProperty::ID::FONT:
+            dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(text->font);
+            return true;
+
         default:
             return false;
         }
@@ -262,6 +266,10 @@ bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
         case ObjectProperty::ID::POSITION_Y:
         case ObjectProperty::ID::ANGLE:
             set_placement(text->placement, value, property);
+            break;
+
+        case ObjectProperty::ID::FONT:
+            text->font = static_cast<TextData::Font>(dynamic_cast<const PropertyValueInt &>(value).value);
             break;
 
         default:
@@ -420,4 +428,4 @@ std::string Core::get_display_name(ObjectType type, const UUID &uu)
         return "";
     }
 }
-}
+} // namespace horizon

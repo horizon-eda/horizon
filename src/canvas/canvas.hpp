@@ -9,6 +9,7 @@
 #include "triangle.hpp"
 #include "fragment_cache.hpp"
 #include "util/placement.hpp"
+#include "util/text_data.hpp"
 #include <array>
 #include <set>
 #include <sigc++/sigc++.h>
@@ -120,7 +121,7 @@ protected:
                                         uint64_t width = 0);
     std::pair<Coordf, Coordf> draw_text0(const Coordf &p, float size, const std::string &rtext, int angle, bool flip,
                                          TextOrigin origin, ColorP color, int layer = 10000, uint64_t width = 0,
-                                         bool draw = true);
+                                         bool draw = true, TextData::Font font = TextData::Font::SIMPLEX);
 
     enum class TextBoxMode { FULL, LOWER, UPPER };
     void draw_text_box(const Placement &q, float width, float height, const std::string &s, ColorP color, int layer,
