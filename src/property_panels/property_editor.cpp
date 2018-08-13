@@ -167,7 +167,7 @@ Gtk::Widget *PropertyEditorEnum::create_editor()
 {
     combo = Gtk::manage(new Gtk::ComboBoxText());
     for (const auto &it : property.enum_items) {
-        combo->insert(0, std::to_string(it.first), it.second);
+        combo->insert(-1, std::to_string(it.first), it.second);
     }
     connections.push_back(combo->signal_changed().connect(sigc::mem_fun(this, &PropertyEditorEnum::changed)));
     return combo;
