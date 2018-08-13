@@ -88,7 +88,7 @@ void PoolCacheWindow::refresh_list()
             catch (...) {
                 pool_filename = "";
             }
-            if (pool_filename.size()) {
+            if (pool_filename.size() && Glib::file_test(pool_filename, Glib::FILE_TEST_IS_REGULAR)) {
                 json j_pool;
                 {
                     std::ifstream ifs(pool_filename);
