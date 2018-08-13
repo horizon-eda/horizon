@@ -1,4 +1,4 @@
-PRAGMA user_version=7;
+PRAGMA user_version=8;
 
 DROP TABLE IF EXISTS "units";
 CREATE TABLE "units" (
@@ -107,13 +107,13 @@ CREATE TABLE "frames" (
 
 DROP VIEW IF EXISTS "all_items_view";
 CREATE VIEW "all_items_view" AS
-	SELECT 'unit' AS 'type', uuid AS uuid, 'units/'||filename AS filename, name AS name, pool_uuid AS pool_uuid FROM units UNION
-	SELECT 'symbol' AS 'type', uuid AS uuid, 'symbols/'||filename AS filename, name AS name, pool_uuid AS pool_uuid FROM symbols UNION
-	SELECT 'entity' AS 'type', uuid AS uuid, 'entities/'||filename AS filename, name AS name, pool_uuid AS pool_uuid FROM entities UNION
+	SELECT 'unit' AS 'type', uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid FROM units UNION
+	SELECT 'symbol' AS 'type', uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid FROM symbols UNION
+	SELECT 'entity' AS 'type', uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid FROM entities UNION
 	SELECT 'padstack' AS 'type', uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid FROM padstacks UNION
-	SELECT 'package' AS 'type', uuid AS uuid, 'packages/'||filename AS filename, name AS name, pool_uuid AS pool_uuid FROM packages UNION
-	SELECT 'frame' AS 'type', uuid AS uuid, 'frames/'||filename AS filename, name AS name, pool_uuid AS pool_uuid FROM frames UNION
-	SELECT 'part' AS 'type', uuid AS uuid, 'parts/'||filename AS filename, MPN AS name, pool_uuid AS pool_uuid FROM parts;
+	SELECT 'package' AS 'type', uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid FROM packages UNION
+	SELECT 'frame' AS 'type', uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid FROM frames UNION
+	SELECT 'part' AS 'type', uuid AS uuid, filename AS filename, MPN AS name, pool_uuid AS pool_uuid FROM parts;
 
 DROP VIEW IF EXISTS "tags_view";
 CREATE VIEW "tags_view" AS

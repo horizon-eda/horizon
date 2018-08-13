@@ -96,25 +96,25 @@ std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_
 
     switch (type) {
     case ObjectType::UNIT:
-        return Glib::build_filename(bp, "units", filename);
+        return Glib::build_filename(bp, filename);
 
     case ObjectType::ENTITY:
-        return Glib::build_filename(bp, "entities", filename);
+        return Glib::build_filename(bp, filename);
 
     case ObjectType::SYMBOL:
-        return Glib::build_filename(bp, "symbols", filename);
+        return Glib::build_filename(bp, filename);
 
     case ObjectType::PACKAGE:
-        return Glib::build_filename(bp, "packages", filename);
+        return Glib::build_filename(bp, filename);
 
     case ObjectType::PADSTACK:
         return Glib::build_filename(bp, filename);
 
     case ObjectType::PART:
-        return Glib::build_filename(bp, "parts", filename);
+        return Glib::build_filename(bp, filename);
 
     case ObjectType::FRAME:
-        return Glib::build_filename(bp, "frames", filename);
+        return Glib::build_filename(bp, filename);
 
     default:
         return "";
@@ -128,7 +128,7 @@ const std::string &Pool::get_base_path() const
 
 int Pool::get_required_schema_version()
 { // keep in sync with schema definition
-    return 7;
+    return 8;
 }
 
 std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) const

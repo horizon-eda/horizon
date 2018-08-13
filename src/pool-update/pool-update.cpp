@@ -257,7 +257,7 @@ void PoolUpdater::update_frames(const std::string &directory, const std::string 
                                 "($uuid, $name, $filename, $pool_uuid, $overridden)");
                 q.bind("$uuid", frame.uuid);
                 q.bind("$name", frame.name);
-                q.bind("$filename", Glib::build_filename(prefix, it));
+                q.bind("$filename", Glib::build_filename("frames", prefix, it));
                 q.bind("$pool_uuid", pool_uuid);
                 q.bind("$overridden", overridden);
                 q.step();
@@ -299,7 +299,7 @@ void PoolUpdater::update_units(const std::string &directory, const std::string &
                 q.bind("$uuid", unit.uuid);
                 q.bind("$name", unit.name);
                 q.bind("$manufacturer", unit.manufacturer);
-                q.bind("$filename", Glib::build_filename(prefix, it));
+                q.bind("$filename", Glib::build_filename("units", prefix, it));
                 q.bind("$pool_uuid", pool_uuid);
                 q.bind("$overridden", overridden);
                 q.step();
@@ -352,7 +352,7 @@ void PoolUpdater::update_entities(const std::string &directory, const std::strin
                 q.bind("$prefix", entity.prefix);
                 q.bind("$pool_uuid", pool_uuid);
                 q.bind("$overridden", overridden);
-                q.bind("$filename", Glib::build_filename(prefix, it));
+                q.bind("$filename", Glib::build_filename("entities", prefix, it));
                 q.step();
                 for (const auto &it_tag : entity.tags) {
                     SQLite::Query q2(pool->db,
@@ -402,7 +402,7 @@ void PoolUpdater::update_symbols(const std::string &directory, const std::string
                 q.bind("$unit", symbol.unit->uuid);
                 q.bind("$pool_uuid", pool_uuid);
                 q.bind("$overridden", overridden);
-                q.bind("$filename", Glib::build_filename(prefix, it));
+                q.bind("$filename", Glib::build_filename("symbols", prefix, it));
                 q.step();
             }
             catch (const std::exception &e) {
@@ -590,7 +590,7 @@ void PoolUpdater::update_package_node(const PoolUpdateNode &node, std::set<UUID>
                    }));
             q.bind("$alt_for", package.alternate_for ? package.alternate_for->uuid : UUID());
 
-            auto bp = Gio::File::create_for_path(Glib::build_filename(base_path, "packages"));
+            auto bp = Gio::File::create_for_path(base_path);
             auto rel = bp->get_relative_path(Gio::File::create_for_path(filename));
             q.bind("$filename", rel);
             q.bind("$pool_uuid", pool_uuid);
@@ -670,7 +670,7 @@ void PoolUpdater::update_part_node(const PoolUpdateNode &node, std::set<UUID> &v
             q.bind("$description", part.get_description());
             q.bind("$pool_uuid", pool_uuid);
             q.bind("$overridden", overridden);
-            auto bp = Gio::File::create_for_path(Glib::build_filename(base_path, "parts"));
+            auto bp = Gio::File::create_for_path(base_path);
             auto rel = bp->get_relative_path(Gio::File::create_for_path(filename));
             q.bind("$filename", rel);
             q.step();
