@@ -74,6 +74,9 @@ void ToolDrawLineNet::update_tip()
     ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete last "
           "segment <b>space:</b>place junction <b>⏎:</b>finish <b>/:</b>line "
           "posture <b>a:</b>arbitrary angle ";
+    if (net_label) {
+        ss << "<b>+-:</b>change label size ";
+    }
     if (temp_line_head) {
         if (temp_line_head->net) {
             ss << "<b>b:</b>toggle label <b>r:</b>rotate label";
@@ -417,6 +420,17 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                 else {
                     core.c->get_sheet()->net_labels.erase(net_label->uuid);
                     net_label = nullptr;
+                }
+            }
+        }
+        else if (args.key == GDK_KEY_plus || args.key == GDK_KEY_equal) {
+            if (net_label)
+                net_label->size += 0.5_mm;
+        }
+        else if (args.key == GDK_KEY_minus) {
+            if (net_label) {
+                if (net_label->size > 0.5_mm) {
+                    net_label->size -= 0.5_mm;
                 }
             }
         }
