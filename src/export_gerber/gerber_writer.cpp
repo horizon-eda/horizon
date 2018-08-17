@@ -214,6 +214,8 @@ void GerberWriter::draw_padstack(const Padstack &ps, int layer, const Placement 
         auto n = aperture_n++;
         am = &apertures_macro.emplace(key, n).first->second;
         auto tr = transform;
+        if (tr.mirror)
+            tr.invert_angle();
         tr.shift = Coordi();
         for (const auto &it : ps.shapes) {
             if (it.second.layer == layer) {
