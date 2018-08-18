@@ -51,6 +51,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("pool_update_progress", pool_update_progress);
     builder->get_widget("download_revealer", download_revealer);
     builder->get_widget("download_label", download_label);
+    builder->get_widget("download_spinner", download_spinner);
     builder->get_widget("download_gh_repo_entry", download_gh_repo_entry);
     builder->get_widget("download_gh_username_entry", download_gh_username_entry);
     builder->get_widget("download_dest_dir_button", download_dest_dir_button);
@@ -103,6 +104,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
         if (!downloading) {
             button_cancel->set_sensitive(true);
             button_do_download->set_sensitive(true);
+            download_spinner->stop();
         }
         if (!downloading && !download_error) {
             open_file_view(Gio::File::create_for_path(

@@ -1623,10 +1623,9 @@ In case of modifying an existing part, provide rationale for the modification.</
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkSpinner">
+                          <object class="GtkSpinner" id="download_spinner">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="active">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>

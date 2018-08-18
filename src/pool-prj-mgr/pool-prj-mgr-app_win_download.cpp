@@ -17,6 +17,7 @@ void PoolProjectManagerAppWindow::handle_do_download()
         button_do_download->set_sensitive(false);
         download_error = false;
         download_revealer->set_reveal_child(true);
+        download_spinner->start();
         downloading = true;
         std::thread dl_thread(&PoolProjectManagerAppWindow::download_thread, this,
                               download_gh_username_entry->get_text(), download_gh_repo_entry->get_text(), dest_dir);
