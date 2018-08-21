@@ -270,6 +270,23 @@ void Package::expand()
     }
 }
 
+void Package::update_warnings()
+{
+    warnings.clear();
+    std::set<std::string> pad_names;
+    for (const auto &it : pads) {
+        auto x = pad_names.insert(it.second.name);
+        if (!x.second) {
+            warnings.emplace_back(it.second.placement.shift, "duplicate pad name");
+        }
+        for (auto p : it.second.pool_padstack->parameters_required) {
+            if (it.second.parameter_set.count(p) == 0) {
+                warnings.emplace_back(it.second.placement.shift, "missing parameter " + parameter_id_to_name(p));
+            }
+        }
+    }
+}
+
 std::pair<Coordi, Coordi> Package::get_bbox() const
 {
     Coordi a;

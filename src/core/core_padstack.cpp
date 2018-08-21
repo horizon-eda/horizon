@@ -7,7 +7,8 @@
 namespace horizon {
 CorePadstack::CorePadstack(const std::string &filename, Pool &pool)
     : padstack(Padstack::new_from_file(filename)), m_filename(filename),
-      parameter_program_code(padstack.parameter_program.get_code()), parameter_set(padstack.parameter_set)
+      parameter_program_code(padstack.parameter_program.get_code()), parameter_set(padstack.parameter_set),
+      parameters_required(padstack.parameters_required)
 {
     rebuild();
     m_pool = &pool;
@@ -265,6 +266,7 @@ void CorePadstack::save()
 {
     padstack.parameter_program.set_code(parameter_program_code);
     padstack.parameter_set = parameter_set;
+    padstack.parameters_required = parameters_required;
 
     s_signal_save.emit();
 

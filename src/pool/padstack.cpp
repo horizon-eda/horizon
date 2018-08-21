@@ -145,7 +145,8 @@ ParameterProgram::CommandHandler Padstack::MyParameterProgram::get_command(const
 
 Padstack::Padstack(const Padstack &ps)
     : uuid(ps.uuid), name(ps.name), type(ps.type), polygons(ps.polygons), holes(ps.holes), shapes(ps.shapes),
-      parameter_set(ps.parameter_set), parameter_program(ps.parameter_program)
+      parameter_set(ps.parameter_set), parameters_required(ps.parameters_required),
+      parameter_program(ps.parameter_program)
 {
     update_refs();
 }
@@ -159,6 +160,7 @@ void Padstack::operator=(Padstack const &ps)
     holes = ps.holes;
     shapes = ps.shapes;
     parameter_set = ps.parameter_set;
+    parameters_required = ps.parameters_required;
     parameter_program = ps.parameter_program;
     update_refs();
 }
@@ -199,7 +201,13 @@ Padstack::Padstack(const UUID &uu, const json &j)
     if (j.count("parameter_set")) {
         parameter_set = parameter_set_from_json(j.at("parameter_set"));
     }
-}
+    if (j.count("parameters_required")) {
+        const json &o = j["parameters_required"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            parameters_required.insert(parameter_id_from_string(it.value()));
+        }
+    }
+} // namespace horizon
 
 Padstack Padstack::new_from_file(const std::string &filename)
 {
@@ -237,6 +245,10 @@ json Padstack::serialize() const
     j["shapes"] = json::object();
     for (const auto &it : shapes) {
         j["shapes"][(std::string)it.first] = it.second.serialize();
+    }
+    j["parameters_required"] = json::array();
+    for (const auto &it : parameters_required) {
+        j["parameters_required"].push_back(parameter_id_to_string(it));
     }
     return j;
 }

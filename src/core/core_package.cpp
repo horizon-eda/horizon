@@ -195,6 +195,7 @@ void CorePackage::rebuild(bool from_undo)
 {
     package.apply_parameter_set({});
     package.expand();
+    package.update_warnings();
     Core::rebuild(from_undo);
 }
 

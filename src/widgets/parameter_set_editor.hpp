@@ -28,6 +28,9 @@ public:
 
 protected:
     virtual Gtk::Widget *create_extra_widget(ParameterID id);
+    virtual void erase_cb(ParameterID id)
+    {
+    }
 
 private:
     Gtk::MenuButton *add_button = nullptr;

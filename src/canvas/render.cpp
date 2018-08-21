@@ -1104,18 +1104,16 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
     }
 
     if (interactive) {
-        std::set<std::string> pad_names;
         for (const auto &it : pkg.pads) {
-            auto x = pad_names.insert(it.second.name);
-            if (!x.second) {
-                draw_error(it.second.placement.shift, 2e5, "duplicate pad name");
-            }
             transform_save();
             transform.accumulate(it.second.placement);
             auto bb = it.second.padstack.get_bbox();
             selectables.append(it.second.uuid, ObjectType::PAD, {0, 0}, bb.first, bb.second);
             transform_restore();
             targets.emplace(it.second.uuid, ObjectType::PAD, it.second.placement.shift);
+        }
+        for (const auto &it : pkg.warnings) {
+            render(it);
         }
     }
 }

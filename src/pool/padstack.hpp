@@ -57,6 +57,7 @@ public:
     std::map<UUID, Shape> shapes;
 
     ParameterSet parameter_set;
+    std::set<ParameterID> parameters_required;
     MyParameterProgram parameter_program;
     std::pair<bool, std::string> apply_parameter_set(const ParameterSet &ps);
 

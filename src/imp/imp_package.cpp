@@ -29,6 +29,7 @@ ImpPackage::ImpPackage(const std::string &package_filename, const std::string &p
 void ImpPackage::canvas_update()
 {
     canvas->update(*core_package.get_canvas_data());
+    warnings_box->update(core_package.get_package()->warnings);
 }
 
 class ModelEditor : public Gtk::Box, public Changeable {
@@ -204,7 +205,6 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
                 entry->set_text(mfn);
                 imp->view_3d_window->update(true);
             }
-
         });
         box->pack_end(*browse_button, false, false, 0);
 

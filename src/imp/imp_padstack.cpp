@@ -3,6 +3,7 @@
 #include "header_button.hpp"
 #include "parameter_window.hpp"
 #include "pool/part.hpp"
+#include "widgets/parameter_set_editor.hpp"
 
 namespace horizon {
 ImpPadstack::ImpPadstack(const std::string &padstack_filename, const std::string &pool_path)
@@ -16,6 +17,39 @@ void ImpPadstack::canvas_update()
 {
     canvas->update(*core_padstack.get_canvas_data());
 }
+
+class ImpPadstackParameterSetEditor : public ParameterSetEditor {
+public:
+    ImpPadstackParameterSetEditor(ParameterSet *ps, std::set<ParameterID> *ps_reqd)
+        : ParameterSetEditor(ps, false), parameters_required(ps_reqd)
+    {
+    }
+
+private:
+    Gtk::Widget *create_extra_widget(ParameterID id) override
+    {
+        auto w = Gtk::manage(new Gtk::CheckButton("Required"));
+        w->set_tooltip_text("Parameter has to be set in pad");
+        w->set_active(parameters_required->count(id));
+        w->signal_toggled().connect([this, id, w] {
+            s_signal_changed.emit();
+            if (w->get_active()) {
+                parameters_required->insert(id);
+            }
+            else {
+                parameters_required->erase(id);
+            }
+        });
+        return w;
+    }
+
+    void erase_cb(ParameterID id) override
+    {
+        parameters_required->erase(id);
+    }
+
+    std::set<ParameterID> *parameters_required;
+};
 
 void ImpPadstack::construct()
 {
@@ -54,8 +88,10 @@ void ImpPadstack::construct()
     type_combo->set_active_id(Padstack::type_lut.lookup_reverse(core_padstack.get_padstack(false)->type));
     type_combo->signal_changed().connect([this] { core_padstack.set_needs_save(); });
 
-    auto parameter_window =
-            new ParameterWindow(main_window, &core_padstack.parameter_program_code, &core_padstack.parameter_set);
+    auto editor = new ImpPadstackParameterSetEditor(&core_padstack.parameter_set, &core_padstack.parameters_required);
+    editor->populate();
+    auto parameter_window = new ParameterWindow(main_window, &core_padstack.parameter_program_code,
+                                                &core_padstack.parameter_set, editor);
     parameter_window->signal_changed().connect([this] { core_padstack.set_needs_save(); });
     parameter_window_add_polygon_expand(parameter_window);
     {

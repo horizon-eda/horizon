@@ -62,6 +62,7 @@ public:
         delete_button->set_image_from_icon_name("list-remove-symbolic", Gtk::ICON_SIZE_BUTTON);
         pack_start(*delete_button, false, false, 0);
         delete_button->signal_clicked().connect([this] {
+            parent->erase_cb(parameter_id);
             parent->parameter_set->erase(parameter_id);
             parent->s_signal_changed.emit();
             delete this->get_parent();

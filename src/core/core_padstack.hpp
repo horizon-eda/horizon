@@ -54,5 +54,6 @@ private:
 public:
     std::string parameter_program_code;
     ParameterSet parameter_set;
+    std::set<ParameterID> parameters_required;
 };
 } // namespace horizon

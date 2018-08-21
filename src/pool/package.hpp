@@ -68,6 +68,7 @@ public:
     const std::map<int, Layer> &get_layers() const override;
     std::pair<bool, std::string> apply_parameter_set(const ParameterSet &ps);
     void expand();
+    void update_warnings();
 
     UUID get_uuid() const;
 
