@@ -76,7 +76,8 @@ bool Canvas3D::on_motion_notify_event(GdkEventMotion *motion_event)
     }
     else if (pan_mode == PanMode::MOVE) {
         center = center_orig
-                 + glm::rotate(glm::mat2(1, 0, 0, sin(glm::radians(cam_elevation))) * delta * 0.1f,
+                 + glm::rotate(glm::mat2(1, 0, 0, sin(glm::radians(cam_elevation))) * delta * 0.1f * cam_distance
+                                       / 105.f,
                                glm::radians(cam_azimuth - 90));
         queue_draw();
     }

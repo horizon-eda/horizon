@@ -16,8 +16,7 @@ uniform vec4 layer_color;
 
 void main() {
 	color_to_fragment = layer_color;
-	
-	
+
 	for(int i = 0; i<3; i++) {
 		gl_Position = proj*view*vec4(position_to_geom[i], layer_offset, 1);
 		normal_to_fragment = vec3(0,0,-1);
@@ -30,7 +29,6 @@ void main() {
 			normal_to_fragment = vec3(0,0,1);
 			EmitVertex();
 		}
+		EndPrimitive();
 	}
-	EndPrimitive();
-	
 }
