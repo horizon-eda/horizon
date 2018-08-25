@@ -1,12 +1,12 @@
 #version 330
-in vec2 p0;
-in vec2 p1;
-in vec2 p2;
-in int oid;
-in int type;
-in int color;
-in int flags;
-in int lod;
+layout(location=0) in vec2 p0;
+layout(location=1) in vec2 p1;
+layout(location=2) in vec2 p2;
+layout(location=3) in int oid;
+layout(location=4) in int type;
+layout(location=5) in int color;
+layout(location=6) in int flags;
+layout(location=7) in int lod;
 
 out vec2 p0_to_geom;
 out vec2 p1_to_geom;

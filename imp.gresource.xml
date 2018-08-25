@@ -62,8 +62,14 @@
     <file>canvas/shaders/selection-fragment.glsl</file>
 
     <file>canvas/shaders/triangle-vertex.glsl</file>
-    <file>canvas/shaders/triangle-fragment.glsl</file>
-    <file>canvas/shaders/triangle-geometry.glsl</file>
+    <file>canvas/shaders/triangle-triangle-fragment.glsl</file>
+    <file>canvas/shaders/triangle-triangle-geometry.glsl</file>
+    <file>canvas/shaders/triangle-line0-fragment.glsl</file>
+    <file>canvas/shaders/triangle-line0-geometry.glsl</file>
+    <file>canvas/shaders/triangle-line-butt-fragment.glsl</file>
+    <file>canvas/shaders/triangle-line-butt-geometry.glsl</file>
+    <file>canvas/shaders/triangle-line-fragment.glsl</file>
+    <file>canvas/shaders/triangle-line-geometry.glsl</file>
 
     <file>canvas/shaders/marker-vertex.glsl</file>
     <file>canvas/shaders/marker-fragment.glsl</file>

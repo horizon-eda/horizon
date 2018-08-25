@@ -1,19 +1,7 @@
 #version 330
 layout(points) in;
-layout(triangle_strip, max_vertices = 64) out;
-uniform mat3 screenmat;
-uniform mat3 viewmat;
-uniform float scale;
-uniform float alpha;
-uniform uint types_visible;
-uniform uint types_force_outline;
+layout(triangle_strip, max_vertices = 8) out;
 
-uniform vec3 layer_color;
-uniform int layer_flags;
-uniform int highlight_mode;
-uniform float highlight_dim;
-uniform float highlight_shadow;
-uniform float highlight_lighten;
 
 in vec2 p0_to_geom[1];
 in vec2 p1_to_geom[1];
@@ -25,16 +13,27 @@ in int flags_to_geom[1];
 in int lod_to_geom[1];
 smooth out vec3 color_to_fragment;
 smooth out float striper_to_fragment;
-smooth out float alpha_to_fragment;
 smooth out vec2 round_pos_to_fragment;
-flat out float line_length_to_fragment;
-flat out float line_height_px_to_fragment;
 flat out int force_outline;
 flat out int flags_to_fragment;
+flat out float discard_threshold;
+
 
 layout (std140) uniform layer_setup
 { 
 	vec3 colors[14];
+	mat3 screenmat;
+	mat3 viewmat;
+	vec3 layer_color;
+	float alpha;
+	float scale;
+	uint types_visible;
+	uint types_force_outline;
+	int layer_flags;
+	int highlight_mode;
+	float highlight_dim;
+	float highlight_shadow;
+	float highlight_lighten;
 };
 
 int mode = layer_flags;
@@ -112,64 +111,65 @@ void main() {
 	
 	color_to_fragment = color;
 	
-	if(!isnan(p2.y)) {
-		round_pos_to_fragment = vec2(0,0);
-		line_height_px_to_fragment = 10;
-		line_length_to_fragment = 10;
-		
-		gl_Position = t(p0);
-		striper_to_fragment = t2(p0);
-		alpha_to_fragment = alpha;
-		EmitVertex();
-		
-		gl_Position = t(p1);
-		striper_to_fragment = t2(p1);
-		alpha_to_fragment = alpha;
-		EmitVertex();
-		
-		gl_Position = t(p2);
-		striper_to_fragment = t2(p2);
-		alpha_to_fragment = alpha;
-		EmitVertex();
-	}
-	else {
-		float width = p2.x/2;
-		
-		width = max(width, .5/scale);
-		vec2 v = p1-p0;
-		vec2 o = vec2(-v.y, v.x);
-		o /= length(o);
-		o *= width;
-		vec2 vw = (v/length(v))*width;
-		vec2 p0x = p0-vw;
-		vec2 p1x = p1+vw;
-		
-		alpha_to_fragment = alpha;
-		float l = length(v)/width+2;
-		line_height_px_to_fragment = width*scale;
-		line_length_to_fragment = length(v)/width;
-		
-		striper_to_fragment = t2(p0x-o);
-		gl_Position = t(p0x-o);
-		round_pos_to_fragment = vec2(-l/2,-1);
-		EmitVertex();
-		
-		striper_to_fragment = t2(p0x+o);
-		gl_Position = t(p0x+o);
-		round_pos_to_fragment = vec2(-l/2,1);
-		EmitVertex();
 
-		striper_to_fragment = t2(p1x-o);
-		gl_Position = t(p1x-o);
-		round_pos_to_fragment = vec2(l/2,-1);
-		EmitVertex();
+	float width = p2.x/2;
+	float real_width = width;
+	width = max(width, .5/scale);
+	vec2 v = p1-p0;
+	vec2 o = vec2(-v.y, v.x);
+	o /= length(o);
+	o *= width;
+	vec2 vw = (v/length(v))*width;
+	vec2 p0x = p0-vw;
+	vec2 p1x = p1+vw;
 		
-		striper_to_fragment = t2(p1x+o);
-		gl_Position = t(p1x+o);
-		round_pos_to_fragment = vec2(l/2,1);
-		EmitVertex();
-	
+	const float border_width = 1;
+	float ym = 1/(1-border_width/(width*scale));
+	discard_threshold = ym;
+	if(real_width < .5/scale) {
+		discard_threshold = -1;
 	}
+	
+	
+	striper_to_fragment = t2(p0x+o);
+	gl_Position = t(p0x+o);
+	round_pos_to_fragment = vec2(-ym,ym);
+	EmitVertex();
+	
+	striper_to_fragment = t2(p0x-o);
+	gl_Position = t(p0x-o);
+	round_pos_to_fragment = vec2(-ym,-ym);
+	EmitVertex();
+	
+	striper_to_fragment = t2(p0+o);
+	gl_Position = t(p0+o);
+	round_pos_to_fragment = vec2(0,ym);
+	EmitVertex();
+	
+	striper_to_fragment = t2(p0-o);
+	gl_Position = t(p0-o);
+	round_pos_to_fragment = vec2(0,-ym);
+	EmitVertex();
+	
+	striper_to_fragment = t2(p1+o);
+	gl_Position = t(p1+o);
+	round_pos_to_fragment = vec2(0,ym);
+	EmitVertex();
+	
+	striper_to_fragment = t2(p1-o);
+	gl_Position = t(p1-o);
+	round_pos_to_fragment = vec2(0,-ym);
+	EmitVertex();
+	
+	striper_to_fragment = t2(p1x+o);
+	gl_Position = t(p1x+o);
+	round_pos_to_fragment = vec2(ym,ym);
+	EmitVertex();
+	
+	striper_to_fragment = t2(p1x-o);
+	gl_Position = t(p1x-o);
+	round_pos_to_fragment = vec2(ym,-ym);
+	EmitVertex();
 	
 	EndPrimitive();
 	

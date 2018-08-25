@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-static GLuint create_vao(GLuint program, GLuint &vbo_out)
+static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out)
 {
     auto err = glGetError();
     if (err != GL_NO_ERROR) {
@@ -19,7 +19,10 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out)
     GLuint lod_index = glGetAttribLocation(program, "lod");
     GLuint flags_index = glGetAttribLocation(program, "flags");
     GL_CHECK_ERROR;
-    GLuint vao, buffer;
+    GLuint vao, buffer, ebuffer;
+
+    glGenBuffers(1, &ebuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebuffer);
 
     /* we need to create a VAO to store the other buffers */
     glGenVertexArrays(1, &vao);
@@ -64,6 +67,7 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out)
 
     // glDeleteBuffers (1, &buffer);
     vbo_out = buffer;
+    ebo_out = ebuffer;
 
     return vao;
 }
@@ -75,11 +79,28 @@ TriangleRenderer::TriangleRenderer(CanvasGL *c, std::unordered_map<int, std::vec
 
 void TriangleRenderer::realize()
 {
-    program = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl",
-                                              "/net/carrotIndustries/horizon/canvas/shaders/"
-                                              "triangle-fragment.glsl",
-                                              "/net/carrotIndustries/horizon/canvas/shaders/"
-                                              "triangle-geometry.glsl");
+    program_triangle =
+            gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl",
+                                            "/net/carrotIndustries/horizon/canvas/shaders/"
+                                            "triangle-triangle-fragment.glsl",
+                                            "/net/carrotIndustries/horizon/canvas/shaders/"
+                                            "triangle-triangle-geometry.glsl");
+    program_line0 = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl",
+                                                    "/net/carrotIndustries/horizon/canvas/shaders/"
+                                                    "triangle-line0-fragment.glsl",
+                                                    "/net/carrotIndustries/horizon/canvas/shaders/"
+                                                    "triangle-line0-geometry.glsl");
+    program_line_butt =
+            gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl",
+                                            "/net/carrotIndustries/horizon/canvas/shaders/"
+                                            "triangle-line-butt-fragment.glsl",
+                                            "/net/carrotIndustries/horizon/canvas/shaders/"
+                                            "triangle-line-butt-geometry.glsl");
+    program_line = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl",
+                                                   "/net/carrotIndustries/horizon/canvas/shaders/"
+                                                   "triangle-line-fragment.glsl",
+                                                   "/net/carrotIndustries/horizon/canvas/shaders/"
+                                                   "triangle-line-geometry.glsl");
     GL_CHECK_ERROR;
     glGenBuffers(1, &ubo);
     glBindBuffer(GL_UNIFORM_BUFFER, ubo);
@@ -87,39 +108,107 @@ void TriangleRenderer::realize()
     glBufferData(GL_UNIFORM_BUFFER, sizeof(testd), &testd, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     GL_CHECK_ERROR;
-    unsigned int block_index = glGetUniformBlockIndex(program, "layer_setup");
+    unsigned int block_index = glGetUniformBlockIndex(program_line, "layer_setup");
     GLuint binding_point_index = 0;
     glBindBufferBase(GL_UNIFORM_BUFFER, binding_point_index, ubo);
-    glUniformBlockBinding(program, block_index, binding_point_index);
+    glUniformBlockBinding(program_triangle, block_index, binding_point_index);
+    glUniformBlockBinding(program_line0, block_index, binding_point_index);
+    glUniformBlockBinding(program_line_butt, block_index, binding_point_index);
+    glUniformBlockBinding(program_line, block_index, binding_point_index);
     GL_CHECK_ERROR;
-    vao = create_vao(program, vbo);
-    GET_LOC(this, screenmat);
-    GET_LOC(this, viewmat);
-    GET_LOC(this, scale);
-    GET_LOC(this, alpha);
-    GET_LOC(this, layer_color);
-    GET_LOC(this, layer_flags);
-    GET_LOC(this, types_visible);
-    GET_LOC(this, types_force_outline);
-    GET_LOC(this, highlight_mode);
-    GET_LOC(this, highlight_dim);
-    GET_LOC(this, highlight_shadow);
-    GET_LOC(this, highlight_lighten);
+    vao = create_vao(program_line, vbo, ebo);
     GL_CHECK_ERROR;
+}
+
+
+class UBOBuffer {
+public:
+    std::array<std::array<float, 4>, 14> colors; // 14==ColorP::N_COLORS
+    std::array<float, 12> screenmat;
+    std::array<float, 12> viewmat;
+    std::array<float, 3> layer_color;
+    float alpha;
+    float scale;
+    unsigned int types_visible;
+    unsigned int types_force_outline;
+    int layer_flags;
+    int highlight_mode;
+    float highlight_dim;
+    float highlight_shadow;
+    float highlight_lighten;
+};
+
+static void mat3_to_array(std::array<float, 12> &dest, const glm::mat3 &src)
+{
+    for (int r = 0; r < 3; r++) {
+        for (int c = 0; c < 3; c++) {
+            dest[r * 4 + c] = src[r][c];
+        }
+    }
 }
 
 void TriangleRenderer::render_layer(int layer)
 {
     const auto &ld = ca->layer_display.at(layer);
-    glUniform3f(layer_color_loc, ld.color.r, ld.color.g, ld.color.b);
-    glUniform1i(layer_flags_loc, static_cast<int>(ld.mode));
-    glUniform1ui(types_visible_loc, ld.types_visible);
-    glUniform1ui(types_force_outline_loc, ld.types_force_outline);
+
+    GL_CHECK_ERROR
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+    UBOBuffer buf;
+    buf.colors = ca->layer_setup.colors;
+    buf.alpha = ca->property_layer_opacity() / 100;
+    mat3_to_array(buf.screenmat, ca->screenmat);
+    mat3_to_array(buf.viewmat, ca->viewmat);
+    buf.layer_color[0] = ld.color.r;
+    buf.layer_color[1] = ld.color.g;
+    buf.layer_color[2] = ld.color.b;
+    buf.layer_flags = static_cast<int>(ld.mode);
+    buf.types_visible = ld.types_visible;
+    buf.types_force_outline = ld.types_force_outline;
+    buf.scale = ca->scale;
+    buf.highlight_mode = ca->highlight_enabled ? static_cast<int>(ca->highlight_mode) : 0;
+    buf.highlight_dim = ca->highlight_dim;
+    buf.highlight_shadow = ca->highlight_shadow;
+    buf.highlight_lighten = ca->highlight_lighten;
+
+
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(buf), &buf, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    GL_CHECK_ERROR
+
     if (ld.mode == LayerDisplay::Mode::FILL_ONLY)
         glStencilFunc(GL_GREATER, stencil, 0xff);
     else
         glStencilFunc(GL_ALWAYS, stencil, 0xff);
-    glDrawArrays(GL_POINTS, layer_offsets[layer], triangles[layer].size());
+
+    for (const auto &it : layer_offsets[layer]) {
+        bool skip = false;
+        switch (it.first) {
+        case Type::TRIANGLE:
+            glUseProgram(program_triangle);
+            if (ld.mode == LayerDisplay::Mode::OUTLINE)
+                skip = true;
+            break;
+
+        case Type::LINE0:
+            glUseProgram(program_line0);
+            break;
+
+        case Type::LINE_BUTT:
+            glUseProgram(program_line_butt);
+            break;
+
+        case Type::LINE:
+            glUseProgram(program_line);
+            break;
+
+        case Type::GLYPH:
+            break;
+        }
+        if (!skip)
+            glDrawElements(GL_POINTS, it.second.second, GL_UNSIGNED_INT,
+                           (void *)(it.second.first * sizeof(unsigned int)));
+    }
+    // glDrawArrays(GL_POINTS, layer_offsets[layer], triangles[layer].size());
     stencil++;
 }
 
@@ -130,19 +219,11 @@ void TriangleRenderer::render_layer_with_overlay(int layer)
         render_layer(ca->overlay_layers.at(layer));
 }
 
+
 void TriangleRenderer::render()
 {
-    GL_CHECK_ERROR
-    glUseProgram(program);
     glBindVertexArray(vao);
-    glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca->screenmat));
-    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
-    glUniform1f(scale_loc, ca->scale);
-    glUniform1f(alpha_loc, ca->property_layer_opacity() / 100);
-    glUniform1i(highlight_mode_loc, ca->highlight_enabled ? static_cast<int>(ca->highlight_mode) : 0);
-    glUniform1f(highlight_dim_loc, ca->highlight_dim);
-    glUniform1f(highlight_shadow_loc, ca->highlight_shadow);
-    glUniform1f(highlight_lighten_loc, ca->highlight_lighten);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
     GL_CHECK_ERROR
 
@@ -184,12 +265,9 @@ void TriangleRenderer::render()
     GL_CHECK_ERROR
 }
 
+
 void TriangleRenderer::push()
 {
-    GL_CHECK_ERROR
-    glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(ca->layer_setup), &ca->layer_setup, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
     GL_CHECK_ERROR
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     n_tris = 0;
@@ -200,12 +278,44 @@ void TriangleRenderer::push()
     GL_CHECK_ERROR
     size_t ofs = 0;
     layer_offsets.clear();
+    std::vector<unsigned int> elements;
     for (const auto &it : triangles) {
-        glBufferSubData(GL_ARRAY_BUFFER, ofs * sizeof(Triangle), it.second.size() * sizeof(Triangle), it.second.data());
-        layer_offsets[it.first] = ofs;
-        ofs += it.second.size();
+        const auto &tris = it.second;
+        glBufferSubData(GL_ARRAY_BUFFER, ofs * sizeof(Triangle), tris.size() * sizeof(Triangle), tris.data());
+        std::map<Type, std::vector<unsigned int>> type_indices;
+        unsigned int i = 0;
+        for (const auto &tri : tris) {
+            auto ty = Type::LINE;
+            if (!isnan(tri.y2)) {
+                ty = Type::TRIANGLE;
+            }
+            else if (isnan(tri.y2) && tri.x2 == 0) {
+                ty = Type::LINE0;
+            }
+            else if (isnan(tri.y2) && (tri.flags & Triangle::FLAG_BUTT)) {
+                ty = Type::LINE_BUTT;
+            }
+            else if (isnan(tri.y2)) {
+                ty = Type::LINE;
+            }
+            else {
+                throw std::runtime_error("unknown triangle type");
+            }
+            type_indices[ty].push_back(i + ofs);
+            i++;
+        }
+        for (const auto &it2 : type_indices) {
+            auto el_offset = elements.size();
+            elements.insert(elements.end(), it2.second.begin(), it2.second.end());
+            layer_offsets[it.first][it2.first] = std::make_pair(el_offset, it2.second.size());
+        }
+        ofs += tris.size();
     }
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    GL_CHECK_ERROR
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * elements.size(), elements.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     GL_CHECK_ERROR
 }

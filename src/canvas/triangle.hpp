@@ -99,27 +99,19 @@ public:
 
 private:
     CanvasGL *ca;
+    enum class Type { TRIANGLE, LINE, LINE0, LINE_BUTT, GLYPH };
     std::unordered_map<int, std::vector<Triangle>> &triangles;
-    std::unordered_map<int, size_t> layer_offsets;
+    std::unordered_map<int, std::unordered_map<Type, std::pair<size_t, size_t>>> layer_offsets;
     size_t n_tris = 0;
 
-    GLuint program;
+    GLuint program_line0;
+    GLuint program_line;
+    GLuint program_line_butt;
+    GLuint program_triangle;
     GLuint vao;
     GLuint vbo;
     GLuint ubo;
-
-    GLuint screenmat_loc;
-    GLuint viewmat_loc;
-    GLuint scale_loc;
-    GLuint alpha_loc;
-    GLuint layer_color_loc;
-    GLuint layer_flags_loc;
-    GLuint types_visible_loc;
-    GLuint types_force_outline_loc;
-    GLuint highlight_mode_loc;
-    GLuint highlight_dim_loc;
-    GLuint highlight_shadow_loc;
-    GLuint highlight_lighten_loc;
+    GLuint ebo;
 
     void render_layer(int layer);
     void render_layer_with_overlay(int layer);
