@@ -45,6 +45,8 @@ public:
     void prepare();
     void update_packages();
     void set_highlights(const std::set<UUID> &pkgs);
+    enum class Projection { PERSP, ORTHO };
+    Projection projection = Projection::PERSP;
 
     void set_msaa(unsigned int samples);
 

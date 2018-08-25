@@ -109,6 +109,13 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         canvas->queue_draw();
     });
 
+    Gtk::RadioButton *proj_persp_rb;
+    x->get_widget("proj_persp_rb", proj_persp_rb);
+    proj_persp_rb->signal_toggled().connect([this, proj_persp_rb] {
+        canvas->projection = proj_persp_rb->get_active() ? Canvas3D::Projection::PERSP : Canvas3D::Projection::ORTHO;
+        canvas->queue_draw();
+    });
+
     x->get_widget("background_color_preset_combo", background_color_preset_combo);
 
     // gradients from https://uigradients.com/

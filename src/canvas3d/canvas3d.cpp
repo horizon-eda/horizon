@@ -649,8 +649,14 @@ bool Canvas3D::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
         cam_dist_max = std::max(dist, cam_dist_max);
         cam_dist_min = std::min(dist, cam_dist_min);
     }
-
-    projmat = glm::perspective(glm::radians(cam_fov), width / height, cam_dist_min / 2, cam_dist_max * 2);
+    float m = 0.000475 * cam_distance;
+    float d = cam_dist_max * 2;
+    if (projection == Projection::PERSP) {
+        projmat = glm::perspective(glm::radians(cam_fov), width / height, cam_dist_min / 2, cam_dist_max * 2);
+    }
+    else {
+        projmat = glm::ortho(-width * m, width * m, -height * m, height * m, -d, d);
+    }
 
     cam_normal = glm::normalize(cam_offset);
     wall_renderer.render();
