@@ -23,3 +23,7 @@ build_script:
 
 artifacts:
     - path: dist/horizon-*.zip
+
+test_script:
+    - set PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%
+    - bash -c "cd $APPVEYOR_BUILD_FOLDER && ./check_dll.sh"
