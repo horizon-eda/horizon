@@ -109,6 +109,17 @@ bool Canvas3D::on_scroll_event(GdkEventScroll *scroll_event)
     return Gtk::GLArea::on_scroll_event(scroll_event);
 }
 
+void Canvas3D::inc_cam_azimuth(float v)
+{
+    cam_azimuth += v;
+    while (cam_azimuth < 0)
+        cam_azimuth += 360;
+
+    while (cam_azimuth > 360)
+        cam_azimuth -= 360;
+    queue_draw();
+}
+
 void Canvas3D::request_push()
 {
     needs_push = true;

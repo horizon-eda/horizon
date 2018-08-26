@@ -7,8 +7,8 @@ include REXML
 
 INKSCAPE = '/usr/bin/inkscape'
 #INKSCAPE = '/usr/bin/inkscape' # like this works for me, while using `which` inkscape hangs
-SRC = "icons.svg"
-PREFIX = "icons/scalable"
+SRC = "src/icons.svg"
+PREFIX = "src/icons/scalable"
 
 def chopSVG(icon)
 	FileUtils.mkdir_p(icon[:dir]) unless File.exists?(icon[:dir])

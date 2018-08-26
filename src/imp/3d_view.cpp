@@ -25,6 +25,18 @@ static void bind_color_button(Gtk::ColorButton *color_button, Color &color, std:
     });
 }
 
+class ViewInfo {
+public:
+    ViewInfo(const std::string &i, const std::string &t, double a, double e)
+        : icon(i), tooltip(t), azimuth(a), elevation(e)
+    {
+    }
+    const std::string icon;
+    const std::string tooltip;
+    const float azimuth;
+    const float elevation;
+};
+
 View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Board *bo,
                            class Pool *p)
     : Gtk::Window(cobject), board(bo), pool(p), state_store(this, "imp-board-3d")
@@ -46,6 +58,35 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     Gtk::Button *update_button;
     x->get_widget("update_button", update_button);
     update_button->signal_clicked().connect([this] { update(); });
+
+    {
+        Gtk::Box *view_buttons_box;
+        x->get_widget("view_buttons_box", view_buttons_box);
+        std::vector<ViewInfo> views = {{"front", "Front", 270., 0.}, {"back", "Back", 90., 0.},
+                                       {"top", "Top", 270., 89.99},  {"bottom", "Bottom", 270., -89.99},
+                                       {"right", "Right", 0., 0.},   {"left", "Left", 180., 0.}};
+        for (const auto &it : views) {
+            auto b = Gtk::manage(new Gtk::Button);
+            b->set_image_from_icon_name("view-3d-" + it.icon + "-symbolic", Gtk::ICON_SIZE_BUTTON);
+            b->set_tooltip_text(it.tooltip);
+            b->show();
+            float az = it.azimuth;
+            float el = it.elevation;
+            b->signal_clicked().connect([this, az, el] {
+                canvas->cam_azimuth = az;
+                canvas->cam_elevation = el;
+                canvas->queue_draw();
+            });
+            view_buttons_box->pack_start(*b, false, false, 0);
+        }
+    }
+
+    Gtk::Button *rotate_left_button;
+    Gtk::Button *rotate_right_button;
+    x->get_widget("rotate_left_button", rotate_left_button);
+    x->get_widget("rotate_right_button", rotate_right_button);
+    rotate_left_button->signal_clicked().connect([this] { canvas->inc_cam_azimuth(-90); });
+    rotate_right_button->signal_clicked().connect([this] { canvas->inc_cam_azimuth(90); });
 
     auto explode_adj = Glib::RefPtr<Gtk::Adjustment>::cast_dynamic(x->get_object("explode_adj"));
     explode_adj->signal_value_changed().connect([explode_adj, this] {
@@ -167,7 +208,7 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     msaa_combo->set_active_id("4");
 
     x->get_widget("main_box", main_box);
-}
+} // namespace horizon
 
 void View3DWindow::add_widget(Gtk::Widget *w)
 {

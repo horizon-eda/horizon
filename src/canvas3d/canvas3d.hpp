@@ -47,6 +47,7 @@ public:
     void set_highlights(const std::set<UUID> &pkgs);
     enum class Projection { PERSP, ORTHO };
     Projection projection = Projection::PERSP;
+    void inc_cam_azimuth(float v);
 
     void set_msaa(unsigned int samples);
 
