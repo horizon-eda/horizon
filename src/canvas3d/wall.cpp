@@ -91,7 +91,7 @@ void WallRenderer::render(int layer)
     auto co = ca->get_layer_color(layer);
     glUniform4f(layer_color_loc, co.r, co.g, co.b, ca->layers[layer].alpha);
     glUniform1f(layer_offset_loc, ca->get_layer_offset(layer));
-    glUniform1f(layer_thickness_loc, ca->layers[layer].thickness);
+    glUniform1f(layer_thickness_loc, ca->get_layer_thickness(layer));
     glDrawArrays(GL_LINE_STRIP_ADJACENCY, layer_offsets[layer], ca->layers[layer].walls.size());
 }
 

@@ -169,6 +169,7 @@ private:
     void add_path(int layer, const ClipperLib::Path &path);
     bool layer_is_visible(int layer) const;
     Color get_layer_color(int layer) const;
+    float get_layer_thickness(int layer) const;
 
     void load_3d_model(const std::string &filename, const std::string &filename_abs);
     void load_models_thread(std::map<std::string, std::string> model_filenames);

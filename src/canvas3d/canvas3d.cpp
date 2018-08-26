@@ -441,6 +441,16 @@ float Canvas3D::get_layer_offset(int layer)
     return layers[layer].offset + layers[layer].explode_mul * explode;
 }
 
+float Canvas3D::get_layer_thickness(int layer) const
+{
+    if (layer == BoardLayers::L_OUTLINE && explode == 0) {
+        return layers.at(BoardLayers::BOTTOM_COPPER).offset + layers.at(BoardLayers::BOTTOM_COPPER).thickness;
+    }
+    else {
+        return layers.at(layer).thickness;
+    }
+}
+
 void Canvas3D::load_3d_model(const std::string &filename, const std::string &filename_abs)
 {
     if (models.count(filename))
@@ -582,8 +592,21 @@ bool Canvas3D::layer_is_visible(int layer) const
     if (layer == BoardLayers::TOP_SILKSCREEN || layer == BoardLayers::BOTTOM_SILKSCREEN)
         return show_silkscreen;
 
-    if (layer == BoardLayers::L_OUTLINE || layer >= 10000)
-        return show_substrate;
+    if (layer == BoardLayers::L_OUTLINE || layer >= 10000) {
+        if (show_substrate) {
+            if (layer == BoardLayers::L_OUTLINE)
+                return true;
+            else {
+                return explode > 0;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+    if (layer < BoardLayers::TOP_COPPER && layer > BoardLayers::BOTTOM_COPPER)
+        return show_substrate == false || explode > 0;
+
     return true;
 }
 
