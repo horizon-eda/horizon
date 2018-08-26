@@ -92,6 +92,8 @@ LIBS=(
 	yaml-cpp.dll\
 	libhttp_parser-2.dll\
 	libpsl-5.dll\
+	libthai-0.dll\
+	libdatrie-1.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
