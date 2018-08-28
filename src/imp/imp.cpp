@@ -540,7 +540,7 @@ void ImpBase::run(int argc, char *argv[])
             [this](ActionID action_id, ToolID tool_id) { trigger_action(std::make_pair(action_id, tool_id)); });
 
 
-    preferences.signal_changed().connect(sigc::mem_fun(this, &ImpBase::apply_settings));
+    preferences.signal_changed().connect(sigc::mem_fun(this, &ImpBase::apply_preferences));
 
     preferences.load();
 
@@ -568,7 +568,7 @@ void ImpBase::run(int argc, char *argv[])
 
     construct();
 
-    apply_settings();
+    apply_preferences();
 
     canvas->property_work_layer().signal_changed().connect([this] {
         if (core.r->tool_is_active()) {
@@ -813,7 +813,7 @@ void ImpBase::handle_drag()
     }
 }
 
-void ImpBase::apply_settings()
+void ImpBase::apply_preferences()
 {
     auto canvas_prefs = get_canvas_preferences();
     if (canvas_prefs->background_color == CanvasPreferences::BackgroundColor::BLUE) {

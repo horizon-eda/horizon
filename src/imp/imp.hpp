@@ -112,7 +112,7 @@ protected:
     {
         return &preferences.canvas_non_layer;
     }
-    virtual void apply_settings();
+    virtual void apply_preferences();
 
     std::unique_ptr<WindowStateStore> state_store = nullptr;
 
