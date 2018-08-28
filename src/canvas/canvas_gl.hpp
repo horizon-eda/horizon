@@ -4,6 +4,7 @@
 #include "grid.hpp"
 #include "marker.hpp"
 #include "triangle.hpp"
+#include "util/msd_animator.hpp"
 #include <gtkmm.h>
 #include <glm/glm.hpp>
 
@@ -114,9 +115,13 @@ public:
 
     void set_msaa(unsigned int samples);
 
+    bool smooth_zoom = true;
+
     void inhibit_drag_selection();
 
     Gdk::ModifierType grid_fine_modifier = Gdk::MOD1_MASK;
+
+    int _animate_step(GdkFrameClock *frame_clock);
 
 protected:
     void push() override;
@@ -179,6 +184,8 @@ private:
     Coord<float> pan_pointer_pos_orig;
     Coord<float> pan_offset_orig;
 
+    void set_scale(float x, float y, float new_scale);
+
     bool selection_allowed = true;
     Glib::Property<int> p_property_work_layer;
     Glib::Property<uint64_t> p_property_grid_spacing;
@@ -193,6 +200,10 @@ private:
     float highlight_lighten = .3;
 
     bool drag_selection_inhibited = false;
+
+    MSDAnimator zoom_animator;
+    float zoom_animation_scale_orig = 1;
+    Coordf zoom_animation_pos;
 
 protected:
     void on_size_allocate(Gtk::Allocation &alloc) override;

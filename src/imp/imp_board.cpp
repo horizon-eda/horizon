@@ -199,6 +199,13 @@ void ImpBoard::update_action_sensitivity()
     ImpBase::update_action_sensitivity();
 }
 
+void ImpBoard::apply_settings()
+{
+    if (view_3d_window)
+        view_3d_window->set_smooth_zoom(preferences.zoom.smooth_zoom_3d);
+    ImpBase::apply_settings();
+}
+
 void ImpBoard::construct()
 {
     ImpLayer::construct_layer_box(false);

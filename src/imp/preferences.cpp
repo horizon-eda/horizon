@@ -99,6 +99,20 @@ void BoardPreferences::load_from_json(const json &j)
     drag_start_track = j.value("drag_start_track", true);
 }
 
+json ZoomPreferences::serialize() const
+{
+    json j;
+    j["smooth_zoom_2d"] = smooth_zoom_2d;
+    j["smooth_zoom_3d"] = smooth_zoom_3d;
+    return j;
+}
+
+void ZoomPreferences::load_from_json(const json &j)
+{
+    smooth_zoom_2d = j.value("smooth_zoom_2d", true);
+    smooth_zoom_3d = j.value("smooth_zoom_3d", false);
+}
+
 json KeySequencesPreferences::serialize() const
 {
     json j;
@@ -177,6 +191,8 @@ json ImpPreferences::serialize() const
     j["canvas_non_layer"] = canvas_non_layer.serialize();
     j["schematic"] = schematic.serialize();
     j["key_sequences"] = key_sequences.serialize();
+    j["board"] = board.serialize();
+    j["zoom"] = zoom.serialize();
     return j;
 }
 
@@ -209,6 +225,8 @@ void ImpPreferences::load()
             schematic.load_from_json(j.at("schematic"));
         if (j.count("board"))
             board.load_from_json(j.at("board"));
+        if (j.count("zoom"))
+            zoom.load_from_json(j.at("zoom"));
         if (j.count("key_sequences"))
             key_sequences.load_from_json(j.at("key_sequences"));
         key_sequences.append_from_json(json_from_resource("/net/carrotIndustries/horizon/imp/keys_default.json"));

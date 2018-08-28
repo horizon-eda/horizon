@@ -3,6 +3,7 @@
 #include "canvas/canvas_patch.hpp"
 #include "clipper/clipper.hpp"
 #include "common/common.hpp"
+#include "util/msd_animator.hpp"
 #include "cover.hpp"
 #include "face.hpp"
 #include "wall.hpp"
@@ -35,6 +36,7 @@ public:
     bool show_substrate = true;
     bool show_models = true;
     bool show_solder_paste = true;
+    bool smooth_zoom = false;
     float highlight_intensity = .5;
 
     Color background_top_color;
@@ -115,6 +117,8 @@ public:
         uint16_t model_yaw = 0;
     } __attribute__((packed));
 
+    int _animate_step(GdkFrameClock *frame_clock);
+
 private:
     float width;
     float height;
@@ -150,6 +154,9 @@ private:
 
     glm::mat4 viewmat;
     glm::mat4 projmat;
+
+    MSDAnimator zoom_animator;
+    float zoom_animation_cam_dist_orig = 1;
 
     GLuint renderbuffer;
     GLuint fbo;

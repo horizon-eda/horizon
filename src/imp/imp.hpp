@@ -112,6 +112,7 @@ protected:
     {
         return &preferences.canvas_non_layer;
     }
+    virtual void apply_settings();
 
     std::unique_ptr<WindowStateStore> state_store = nullptr;
 
@@ -152,7 +153,6 @@ protected:
 
 private:
     void fix_cursor_pos();
-    void apply_settings();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
     void show_preferences_window();
     void handle_drag();

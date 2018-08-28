@@ -867,6 +867,7 @@ void ImpBase::apply_settings()
             tool_popover->set_key_sequences(it.first, it.second.key_sequences);
         }
     }
+    canvas->smooth_zoom = preferences.zoom.smooth_zoom_2d;
 }
 
 void ImpBase::canvas_update_from_pp()

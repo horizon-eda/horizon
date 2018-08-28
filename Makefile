@@ -117,6 +117,8 @@ SRC_CANVAS = \
 	3rd_party/poly2tri/sweep/sweep.cpp\
 	3rd_party/poly2tri/sweep/sweep_context.cpp\
 	3rd_party/poly2tri/sweep/advancing_front.cpp\
+	src/util/msd.cpp\
+	src/util/msd_animator.cpp\
 
 SRC_IMP = \
 	src/imp/imp_main.cpp \

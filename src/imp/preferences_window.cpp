@@ -165,6 +165,34 @@ BoardPreferencesEditor::BoardPreferencesEditor(ImpPreferences *prefs, BoardPrefe
     }
 }
 
+class ZoomPreferencesEditor : public Gtk::Grid {
+public:
+    ZoomPreferencesEditor(ImpPreferences *prefs, ZoomPreferences *board_prefs);
+    ImpPreferences *preferences;
+    ZoomPreferences *zoom_preferences;
+};
+
+ZoomPreferencesEditor::ZoomPreferencesEditor(ImpPreferences *prefs, ZoomPreferences *zoom_prefs)
+    : Gtk::Grid(), preferences(prefs), zoom_preferences(zoom_prefs)
+{
+    property_margin() = 20;
+    set_column_spacing(10);
+    set_row_spacing(10);
+    int top = 0;
+    {
+        auto sw = Gtk::manage(new Gtk::Switch);
+        grid_attach_label_and_widget(this, "Smooth zoom 2D views", sw, top);
+        bind_widget(sw, zoom_preferences->smooth_zoom_2d);
+        sw->property_active().signal_changed().connect([this] { preferences->signal_changed().emit(); });
+    }
+    {
+        auto sw = Gtk::manage(new Gtk::Switch);
+        grid_attach_label_and_widget(this, "Smooth zoom 3D views", sw, top);
+        bind_widget(sw, zoom_preferences->smooth_zoom_3d);
+        sw->property_active().signal_changed().connect([this] { preferences->signal_changed().emit(); });
+    }
+}
+
 
 ImpPreferencesWindow::ImpPreferencesWindow(ImpPreferences *prefs) : Gtk::Window(), preferences(prefs)
 {
@@ -205,6 +233,11 @@ ImpPreferencesWindow::ImpPreferencesWindow(ImpPreferences *prefs) : Gtk::Window(
     {
         auto ed = Gtk::manage(new BoardPreferencesEditor(preferences, &preferences->board));
         stack->add(*ed, "board", "Board");
+        ed->show();
+    }
+    {
+        auto ed = Gtk::manage(new ZoomPreferencesEditor(preferences, &preferences->zoom));
+        stack->add(*ed, "zoom", "Zoom");
         ed->show();
     }
     {

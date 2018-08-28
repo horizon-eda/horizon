@@ -90,22 +90,70 @@ bool Canvas3D::on_button_release_event(GdkEventButton *button_event)
     return Gtk::GLArea::on_button_release_event(button_event);
 }
 
+int Canvas3D::_animate_step(GdkFrameClock *frame_clock)
+{
+    auto r = zoom_animator.step(gdk_frame_clock_get_frame_time(frame_clock) / 1e6);
+    if (!r) { // should stop
+        return G_SOURCE_REMOVE;
+    }
+    auto s = zoom_animator.get_s();
+
+    cam_distance = zoom_animation_cam_dist_orig * pow(1.5, s);
+    queue_draw();
+
+    if (std::abs((s - zoom_animator.target) / std::max(std::abs(zoom_animator.target), 1.f)) < .005) {
+        cam_distance = zoom_animation_cam_dist_orig * pow(1.5, zoom_animator.target);
+        queue_draw();
+        zoom_animator.stop();
+        return G_SOURCE_REMOVE;
+    }
+
+    return G_SOURCE_CONTINUE;
+}
+
+static int tick_cb(GtkWidget *cwidget, GdkFrameClock *frame_clock, gpointer user_data)
+{
+    Gtk::Widget *widget = Glib::wrap(cwidget);
+    auto canvas = dynamic_cast<Canvas3D *>(widget);
+    return canvas->_animate_step(frame_clock);
+}
+
+
 bool Canvas3D::on_scroll_event(GdkEventScroll *scroll_event)
 {
-    float dist_new = cam_distance;
+
+    float inc = 0;
+    float factor = 1;
+    if (scroll_event->state & Gdk::SHIFT_MASK)
+        factor = .5;
     if (scroll_event->direction == GDK_SCROLL_UP) {
-        dist_new = cam_distance / 1.5;
+        inc = -1;
     }
     else if (scroll_event->direction == GDK_SCROLL_DOWN) {
-        dist_new = cam_distance * 1.5;
+        inc = 1;
     }
     else if (scroll_event->direction == GDK_SCROLL_SMOOTH) {
         gdouble sx, sy;
         gdk_event_get_scroll_deltas((GdkEvent *)scroll_event, &sx, &sy);
-        dist_new = cam_distance * powf(1.5, sy);
+        inc = sy;
     }
-    cam_distance = std::max(0.f, dist_new);
-    queue_draw();
+    inc *= factor;
+    if (smooth_zoom) {
+        if (inc == 0)
+            return Gtk::GLArea::on_scroll_event(scroll_event);
+        if (!zoom_animator.is_running()) {
+            zoom_animator.start();
+            zoom_animation_cam_dist_orig = cam_distance;
+            gtk_widget_add_tick_callback(GTK_WIDGET(gobj()), &tick_cb, nullptr, nullptr);
+        }
+        zoom_animator.target += inc;
+    }
+    else {
+        cam_distance *= pow(1.5, inc);
+        queue_draw();
+    }
+
+
     return Gtk::GLArea::on_scroll_event(scroll_event);
 }
 

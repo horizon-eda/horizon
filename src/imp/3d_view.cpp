@@ -215,6 +215,11 @@ void View3DWindow::add_widget(Gtk::Widget *w)
     main_box->pack_start(*w, false, false, 0);
 }
 
+void View3DWindow::set_smooth_zoom(bool smooth)
+{
+    canvas->smooth_zoom = smooth;
+}
+
 void View3DWindow::update(bool clear)
 {
     s_signal_request_update.emit();

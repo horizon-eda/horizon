@@ -12,6 +12,7 @@ public:
 
 protected:
     void construct() override;
+    void apply_settings() override;
 
     ActionCatalogItem::Availability get_editor_type_for_action() const
     {

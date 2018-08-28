@@ -32,6 +32,13 @@ void ImpPackage::canvas_update()
     warnings_box->update(core_package.get_package()->warnings);
 }
 
+void ImpPackage::apply_settings()
+{
+    if (view_3d_window)
+        view_3d_window->set_smooth_zoom(preferences.zoom.smooth_zoom_3d);
+    ImpBase::apply_settings();
+}
+
 class ModelEditor : public Gtk::Box, public Changeable {
 public:
     ModelEditor(ImpPackage *iimp, const UUID &iuu);

@@ -11,6 +11,7 @@ public:
     void update(bool clear = false);
     void set_highlights(const std::set<UUID> &pkgs);
     void add_widget(Gtk::Widget *w);
+    void set_smooth_zoom(bool smooth);
 
     typedef sigc::signal<void> type_signal_request_update;
     type_signal_request_update signal_request_update()

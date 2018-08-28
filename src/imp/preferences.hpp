@@ -55,6 +55,15 @@ public:
     json serialize() const;
 };
 
+class ZoomPreferences {
+public:
+    bool smooth_zoom_2d = true;
+    bool smooth_zoom_3d = false;
+
+    void load_from_json(const json &j);
+    json serialize() const;
+};
+
 class ImpPreferences : public sigc::trackable {
 public:
     ImpPreferences();
@@ -71,6 +80,7 @@ public:
     SchematicPreferences schematic;
     BoardPreferences board;
     KeySequencesPreferences key_sequences;
+    ZoomPreferences zoom;
 
     typedef sigc::signal<void> type_signal_changed;
     type_signal_changed signal_changed()
