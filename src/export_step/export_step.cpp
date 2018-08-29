@@ -9,6 +9,7 @@
 #include <XCAFDoc_ShapeTool.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Edge.hxx>
+#include <Standard_Version.hxx>
 
 
 #include <IGESCAFControl_Reader.hxx>
@@ -458,8 +459,9 @@ void export_step(const std::string &filename, const class Board &brd, class Pool
         }
     }
     progress_cb("Writing output file");
-
+#if OCC_VERSION_MAJOR >= 7 && OCC_VERSION_MINOR >= 2
     assy->UpdateAssemblies();
+#endif
     STEPCAFControl_Writer writer;
     writer.SetColorMode(Standard_True);
     writer.SetNameMode(Standard_True);
