@@ -697,11 +697,6 @@ void Canvas::render(const Warning &warn)
     draw_error(warn.position, 2e5, warn.text);
 }
 
-static const Coordf coordf_from_pt(const p2t::Point *pt)
-{
-    return Coordf(pt->x, pt->y);
-}
-
 static const Coordf coordf_from_pt(const TPPLPoint &p)
 {
     return Coordf(p.x, p.y);
@@ -750,11 +745,13 @@ void Canvas::render(const Polygon &ipoly, bool interactive)
         TPPLPoly po;
         po.Init(poly.vertices.size());
         po.SetHole(false);
-        size_t i = 0;
-        for (auto &it : poly.vertices) {
-            po[i].x = it.position.x;
-            po[i].y = it.position.y;
-            i++;
+        {
+            size_t i = 0;
+            for (auto &it : poly.vertices) {
+                po[i].x = it.position.x;
+                po[i].y = it.position.y;
+                i++;
+            }
         }
         std::list<TPPLPoly> outpolys;
         TPPLPartition part;
