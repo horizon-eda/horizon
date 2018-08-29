@@ -309,7 +309,9 @@ void Board::set_n_inner_layers(unsigned int n)
               {-140, {-140, "Bottom Package", {.5, .5, .5}}},
               {-150, {-150, "Bottom Assembly", {.5, .5, .5}, true}},
               {-160, {-160, "Bottom Courtyard", {.5, .5, .5}}}};
-    stackup.emplace(0, 0);
+    if (stackup.emplace(0, 0).second) { // if created
+        stackup.at(0).substrate_thickness = 1.6_mm;
+    }
     stackup.emplace(-100, -100);
     stackup.at(-100).substrate_thickness = 0;
     for (unsigned int i = 0; i < n_inner_layers; i++) {
