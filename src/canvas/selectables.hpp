@@ -74,6 +74,8 @@ public:
     void append_angled(const UUID &uu, ObjectType ot, const Coordf &center, const Coordf &box_center,
                        const Coordf &box_dim, float angle, unsigned int vertex = 0, int layer = 10000,
                        bool always = false);
+    void append_line(const UUID &uu, ObjectType ot, const Coordf &p0, const Coordf &p1, float width,
+                     unsigned int vertex = 0, int layer = 10000, bool always = false);
 
 private:
     Canvas *ca;

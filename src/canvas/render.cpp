@@ -186,21 +186,6 @@ void Canvas::render(const PowerSymbol &sym)
     object_refs_current.pop_back();
 }
 
-static auto get_line_bb(const Coordf &from, const Coordf &to, float width)
-{
-    auto center = (from + to) / 2;
-    auto v = to - from;
-    float length = sqrt(v.mag_sq());
-    auto phi = atan2f(v.y, v.x);
-    auto bb = std::make_pair(Coordf(-length / 2 - width / 2, -width / 2), Coordf(length / 2 + width / 2, width / 2));
-    Placement tr;
-    tr.set_angle(phi / (2 * M_PI) * 65536);
-    auto bbt = tr.transform_bb(bb);
-    bbt.first += center;
-    bbt.second += center;
-    return bbt;
-}
-
 ObjectRef Canvas::add_line(const std::deque<Coordi> &pts, int64_t width, ColorP color, int layer)
 {
     auto uu = UUID::random();
@@ -232,10 +217,8 @@ void Canvas::render(const Line &line, bool interactive)
     draw_line(line.from->position, line.to->position, ColorP::FROM_LAYER, line.layer, true, line.width);
     triangle_type_current = Triangle::Type::NONE;
     if (interactive) {
-        auto center = (line.from->position + line.to->position) / 2;
-        auto bb = get_line_bb(line.from->position, line.to->position, line.width);
-
-        selectables.append(line.uuid, ObjectType::LINE, center, bb.first, bb.second, 0, line.layer);
+        selectables.append_line(line.uuid, ObjectType::LINE, line.from->position, line.to->position, line.width, 0,
+                                line.layer);
     }
 }
 
@@ -259,9 +242,7 @@ void Canvas::render(const LineNet &line)
     object_refs_current.emplace_back(ObjectType::LINE_NET, line.uuid);
     draw_line(line.from.get_position(), line.to.get_position(), c, 0, true, width);
     object_refs_current.pop_back();
-    selectables.append(line.uuid, ObjectType::LINE_NET, (line.from.get_position() + line.to.get_position()) / 2,
-                       Coordf::min(line.from.get_position(), line.to.get_position()),
-                       Coordf::max(line.from.get_position(), line.to.get_position()));
+    selectables.append_line(line.uuid, ObjectType::LINE_NET, line.from.get_position(), line.to.get_position(), width);
 }
 
 void Canvas::render(const Track &track)
@@ -296,13 +277,8 @@ void Canvas::render(const Track &track)
     }
     object_refs_current.pop_back();
     if (!track.is_air) {
-
-        float box_height = track.width;
-        Coordf delta = track.to.get_position() - track.from.get_position();
-        float box_width = track.width + sqrt(delta.mag_sq());
-        float angle = atan2(delta.y, delta.x);
-        selectables.append_angled(track.uuid, ObjectType::TRACK, center, center, Coordf(box_width, box_height), angle,
-                                  0, track.layer);
+        selectables.append_line(track.uuid, ObjectType::TRACK, track.from.get_position(), track.to.get_position(),
+                                track.width, 0, track.layer);
     }
 }
 
@@ -805,8 +781,8 @@ void Canvas::render(const Polygon &ipoly, bool interactive)
             if (v_last) {
                 auto center = (v_last->position + it.position) / 2;
                 if (v_last->type != Polygon::Vertex::Type::ARC) {
-                    selectables.append(poly.uuid, ObjectType::POLYGON_EDGE, center, v_last->position, it.position,
-                                       i - 1, poly.layer);
+                    selectables.append_line(poly.uuid, ObjectType::POLYGON_EDGE, v_last->position, it.position, 0,
+                                            i - 1, poly.layer);
 
                     targets.emplace(poly.uuid, ObjectType::POLYGON_EDGE, center, i - 1, poly.layer);
                 }
@@ -823,8 +799,8 @@ void Canvas::render(const Polygon &ipoly, bool interactive)
         if (ipoly.vertices.back().type != Polygon::Vertex::Type::ARC) {
             auto center = (ipoly.vertices.front().position + ipoly.vertices.back().position) / 2;
             targets.emplace(poly.uuid, ObjectType::POLYGON_EDGE, center, i - 1, poly.layer);
-            selectables.append(poly.uuid, ObjectType::POLYGON_EDGE, center, ipoly.vertices.front().position,
-                               ipoly.vertices.back().position, i - 1, poly.layer);
+            selectables.append_line(poly.uuid, ObjectType::POLYGON_EDGE, poly.vertices.front().position,
+                                    ipoly.vertices.back().position, 0, i - 1, poly.layer);
         }
     }
 }

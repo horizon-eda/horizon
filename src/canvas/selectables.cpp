@@ -100,6 +100,17 @@ void Selectables::append_angled(const UUID &uu, ObjectType ot, const Coordf &cen
     items_ref.emplace_back(uu, ot, vertex, layer);
 }
 
+void Selectables::append_line(const UUID &uu, ObjectType ot, const Coordf &p0, const Coordf &p1, float width,
+                              unsigned int vertex, int layer, bool always)
+{
+    float box_height = width;
+    Coordf delta = p1 - p0;
+    float box_width = width + sqrt(delta.mag_sq());
+    float angle = atan2(delta.y, delta.x);
+    auto center = (p0 + p1) / 2;
+    append_angled(uu, ot, center, center, Coordf(box_width, box_height), angle, vertex, layer, always);
+}
+
 static GLuint create_vao(GLuint program, GLuint &vbo_out)
 {
     GLuint origin_index = glGetAttribLocation(program, "origin");
