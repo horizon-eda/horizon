@@ -413,6 +413,7 @@ void export_step(const std::string &filename, const class Board &brd, class Pool
         canvas_hole.update(brd);
     }
 
+    progress_cb("Creating board...");
     TopoDS_Shape board = prism_from_countour(outline, total_thickness);
     for (const auto &it : cutouts) {
         board = BRepAlgoAPI_Cut(board, it);
@@ -456,8 +457,9 @@ void export_step(const std::string &filename, const class Board &brd, class Pool
             i++;
         }
     }
-
     progress_cb("Writing output file");
+
+    assy->UpdateAssemblies();
     STEPCAFControl_Writer writer;
     writer.SetColorMode(Standard_True);
     writer.SetNameMode(Standard_True);
