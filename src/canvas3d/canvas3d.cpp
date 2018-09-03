@@ -673,7 +673,7 @@ Color Canvas3D::get_layer_color(int layer) const
         return {1, 1, 1};
 
     if (layer == BoardLayers::L_OUTLINE || layer >= 10000)
-        return {.2, .15, 0};
+        return substrate_color;
     return {1, 0, 0};
 }
 

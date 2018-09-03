@@ -94,9 +94,11 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         canvas->queue_draw();
     });
 
-    Gtk::ColorButton *solder_mask_color_button;
     x->get_widget("solder_mask_color_button", solder_mask_color_button);
-    bind_color_button(solder_mask_color_button, canvas->solder_mask_color, [this] { canvas->queue_draw(); });
+    bind_color_button(solder_mask_color_button, canvas->solder_mask_color, [this] {
+        canvas->queue_draw();
+        s_signal_changed.emit();
+    });
     solder_mask_color_button->set_color(Gdk::Color("#008000"));
 
     x->get_widget("background_top_color_button", background_top_color_button);
@@ -135,6 +137,13 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         canvas->show_substrate = substrate_switch->get_active();
         canvas->queue_draw();
     });
+
+    x->get_widget("substrate_color_button", substrate_color_button);
+    bind_color_button(substrate_color_button, canvas->substrate_color, [this] {
+        canvas->queue_draw();
+        s_signal_changed.emit();
+    });
+    substrate_color_button->set_color(Gdk::Color("#332600"));
 
     Gtk::Switch *paste_switch;
     x->get_widget("paste_switch", paste_switch);
@@ -233,5 +242,25 @@ void View3DWindow::update(bool clear)
 void View3DWindow::set_highlights(const std::set<UUID> &pkgs)
 {
     canvas->set_highlights(pkgs);
+}
+
+void View3DWindow::set_solder_mask_color(const Gdk::RGBA &c)
+{
+    solder_mask_color_button->set_rgba(c);
+}
+
+Gdk::RGBA View3DWindow::get_solder_mask_color()
+{
+    return solder_mask_color_button->get_rgba();
+}
+
+void View3DWindow::set_substrate_color(const Gdk::RGBA &c)
+{
+    substrate_color_button->set_rgba(c);
+}
+
+Gdk::RGBA View3DWindow::get_substrate_color()
+{
+    return substrate_color_button->get_rgba();
 }
 } // namespace horizon

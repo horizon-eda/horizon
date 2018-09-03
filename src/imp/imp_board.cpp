@@ -206,6 +206,18 @@ void ImpBoard::apply_preferences()
     ImpBase::apply_preferences();
 }
 
+static Gdk::RGBA rgba_from_color(const Color &c)
+{
+    Gdk::RGBA r;
+    r.set_rgba(c.r, c.g, c.b);
+    return r;
+}
+
+static Color color_from_rgba(const Gdk::RGBA &r)
+{
+    return {r.get_red(), r.get_green(), r.get_blue()};
+}
+
 void ImpBoard::construct()
 {
     ImpLayer::construct_layer_box(false);
@@ -279,6 +291,14 @@ void ImpBoard::construct()
 
     fab_output_window = FabOutputWindow::create(main_window, core.b->get_board(), core.b->get_fab_output_settings());
     view_3d_window = View3DWindow::create(core_board.get_board(), pool.get());
+    view_3d_window->set_solder_mask_color(rgba_from_color(core_board.get_colors()->solder_mask));
+    view_3d_window->set_substrate_color(rgba_from_color(core_board.get_colors()->substrate));
+    view_3d_window->signal_changed().connect([this] {
+        core_board.get_colors()->solder_mask = color_from_rgba(view_3d_window->get_solder_mask_color());
+        core_board.get_colors()->substrate = color_from_rgba(view_3d_window->get_substrate_color());
+        core_board.set_needs_save();
+    });
+
     step_export_window = StepExportWindow::create(main_window, core.b->get_board(), pool.get());
     tuning_window = new TuningWindow(core.b->get_board());
     tuning_window->set_transient_for(*main_window);

@@ -90,6 +90,13 @@ public:
     };
     std::map<int, StackupLayer> stackup;
 
+    class Colors {
+    public:
+        Color solder_mask;
+        Color substrate;
+    };
+    Colors colors;
+
     ClipperLib::Paths obstacles;
     ClipperLib::Path track_path;
 

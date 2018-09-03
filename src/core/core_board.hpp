@@ -43,6 +43,11 @@ public:
     {
         return &fab_output_settings;
     }
+
+    Board::Colors *get_colors()
+    {
+        return &colors;
+    }
     void update_rules() override;
 
     std::pair<Coordi, Coordi> get_bbox() override;
@@ -64,6 +69,7 @@ private:
 
     BoardRules rules;
     FabOutputSettings fab_output_settings;
+    Board::Colors colors;
 
     std::string m_board_filename;
     std::string m_block_filename;

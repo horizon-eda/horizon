@@ -30,7 +30,8 @@ public:
     float near;
 
     float explode = 0;
-    Color solder_mask_color;
+    Color solder_mask_color = {0, .5, 0};
+    Color substrate_color = {.2, .15, 0};
     bool show_solder_mask = true;
     bool show_silkscreen = true;
     bool show_substrate = true;

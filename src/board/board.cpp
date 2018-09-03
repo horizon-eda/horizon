@@ -25,6 +25,15 @@ json Board::StackupLayer::serialize() const
     return j;
 }
 
+Color color_from_json(const json &j)
+{
+    Color c;
+    c.r = j.at("r");
+    c.g = j.at("g");
+    c.b = j.at("b");
+    return c;
+}
+
 Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadstackProvider &vpp)
     : uuid(uu), block(&iblock), name(j.at("name").get<std::string>()), n_inner_layers(j.value("n_inner_layers", 0))
 {
@@ -165,6 +174,18 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
             Logger::log_warning("couldn't load fab output settings", Logger::Domain::BOARD, e.what());
         }
     }
+    colors.solder_mask = {0, .5, 0};
+    colors.substrate = {.2, .15, 0};
+    if (j.count("colors")) {
+        try {
+            const auto &o = j.at("colors");
+            colors.solder_mask = color_from_json(o.at("solder_mask"));
+            colors.substrate = color_from_json(o.at("substrate"));
+        }
+        catch (const std::exception &e) {
+            Logger::log_warning("couldn't colors", Logger::Domain::BOARD, e.what());
+        }
+    }
     fab_output_settings.update_for_board(this);
     update_refs(); // fill in smashed texts
 }
@@ -208,7 +229,7 @@ Board::Board(const Board &brd)
       packages(brd.packages), junctions(brd.junctions), tracks(brd.tracks), airwires(brd.airwires), vias(brd.vias),
       texts(brd.texts), lines(brd.lines), arcs(brd.arcs), planes(brd.planes), dimensions(brd.dimensions),
       warnings(brd.warnings), rules(brd.rules), fab_output_settings(brd.fab_output_settings), stackup(brd.stackup),
-      n_inner_layers(brd.n_inner_layers)
+      colors(brd.colors), n_inner_layers(brd.n_inner_layers)
 {
     update_refs();
 }
@@ -237,6 +258,7 @@ void Board::operator=(const Board &brd)
     rules = brd.rules;
     fab_output_settings = brd.fab_output_settings;
     stackup = brd.stackup;
+    colors = brd.colors;
     update_refs();
 }
 
@@ -711,6 +733,15 @@ void Board::delete_dependants()
     map_erase_if(planes, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
 }
 
+json color_to_json(const Color &c)
+{
+    json j;
+    j["r"] = c.r;
+    j["g"] = c.g;
+    j["b"] = c.b;
+    return j;
+}
+
 json Board::serialize() const
 {
     json j;
@@ -721,7 +752,12 @@ json Board::serialize() const
     j["n_inner_layers"] = n_inner_layers;
     j["rules"] = rules.serialize();
     j["fab_output_settings"] = fab_output_settings.serialize();
-
+    {
+        json o;
+        o["solder_mask"] = color_to_json(colors.solder_mask);
+        o["substrate"] = color_to_json(colors.substrate);
+        j["colors"] = o;
+    }
     j["polygons"] = json::object();
     for (const auto &it : polygons) {
         j["polygons"][(std::string)it.first] = it.second.serialize();

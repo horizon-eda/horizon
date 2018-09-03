@@ -1,10 +1,12 @@
 #pragma once
 #include "util/window_state_store.hpp"
+#include "common/common.hpp"
+#include "util/changeable.hpp"
 #include <gtkmm.h>
 #include <set>
 
 namespace horizon {
-class View3DWindow : public Gtk::Window {
+class View3DWindow : public Gtk::Window, public Changeable {
 public:
     View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Board *b, class Pool *p);
     static View3DWindow *create(const class Board *b, class Pool *p);
@@ -12,6 +14,10 @@ public:
     void set_highlights(const std::set<UUID> &pkgs);
     void add_widget(Gtk::Widget *w);
     void set_smooth_zoom(bool smooth);
+    void set_solder_mask_color(const Gdk::RGBA &c);
+    Gdk::RGBA get_solder_mask_color();
+    void set_substrate_color(const Gdk::RGBA &c);
+    Gdk::RGBA get_substrate_color();
 
     typedef sigc::signal<void> type_signal_request_update;
     type_signal_request_update signal_request_update()
@@ -27,6 +33,8 @@ private:
 
     Gtk::ColorButton *background_top_color_button = nullptr;
     Gtk::ColorButton *background_bottom_color_button = nullptr;
+    Gtk::ColorButton *solder_mask_color_button = nullptr;
+    Gtk::ColorButton *substrate_color_button = nullptr;
     Gtk::ComboBoxText *background_color_preset_combo = nullptr;
     bool setting_background_color_from_preset = false;
 
