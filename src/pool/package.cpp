@@ -24,6 +24,9 @@ ParameterProgram::CommandHandler Package::MyParameterProgram::get_command(const 
     else if (cmd == "set-polygon") {
         return std::bind(std::mem_fn(&Package::MyParameterProgram::set_polygon), this, _1, _2);
     }
+    else if (cmd == "set-polygon-vertices") {
+        return std::bind(std::mem_fn(&Package::MyParameterProgram::set_polygon_vertices), this, _1, _2);
+    }
     else if (cmd == "expand-polygon") {
         return std::bind(std::mem_fn(&Package::MyParameterProgram::expand_polygon), this, _1, _2);
     }

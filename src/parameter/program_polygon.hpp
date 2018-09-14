@@ -8,6 +8,8 @@ namespace horizon {
 class ParameterProgramPolygon : public virtual ParameterProgram {
 protected:
     std::pair<bool, std::string> set_polygon(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack);
+    std::pair<bool, std::string> set_polygon_vertices(const ParameterProgram::TokenCommand *cmd,
+                                                      std::deque<int64_t> &stack);
     std::pair<bool, std::string> expand_polygon(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack);
     virtual std::map<UUID, Polygon> &get_polygons() = 0;
 

@@ -137,6 +137,9 @@ ParameterProgram::CommandHandler Padstack::MyParameterProgram::get_command(const
     else if (cmd == "set-polygon") {
         return std::bind(std::mem_fn(&Padstack::MyParameterProgram::set_polygon), this, _1, _2);
     }
+    else if (cmd == "set-polygon-vertices") {
+        return std::bind(std::mem_fn(&Padstack::MyParameterProgram::set_polygon_vertices), this, _1, _2);
+    }
     else if (cmd == "expand-polygon") {
         return std::bind(std::mem_fn(&Padstack::MyParameterProgram::expand_polygon), this, _1, _2);
     }
