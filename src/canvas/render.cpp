@@ -378,8 +378,8 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
         c_pad = ColorP::PIN_HIDDEN;
     }
     if (interactive || pin.name_visible) {
-        if (pin.keep_horizontal == false || pin.orientation == Orientation::LEFT
-            || pin.orientation == Orientation::RIGHT) {
+        if (pin.keep_horizontal == false || pin_orientation == Orientation::LEFT
+            || pin_orientation == Orientation::RIGHT) {
             draw_text0(p_name, 1.5_mm, pin.name, orientation_to_angle(name_orientation), false, TextOrigin::CENTER,
                        c_name, 0);
         }
@@ -387,7 +387,7 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
             auto ex = draw_text0({0, 0}, 1.5_mm, pin.name, 0, false, TextOrigin::BASELINE, c_name, 0, 0, false);
             auto w = ex.second.x - ex.first.x;
             int64_t yshift = 0;
-            if (pin.orientation == Orientation::UP) {
+            if (pin_orientation == Orientation::UP) {
                 yshift = 1.5_mm;
             }
             draw_text0(p_name - Coordi(w / 2, yshift), 1.5_mm, pin.name, 0, false, TextOrigin::BASELINE, c_name, 0,
