@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <fstream>
 #include "nlohmann/json.hpp"
+#include "logger/logger.hpp"
 
 namespace horizon {
 CorePackage::CorePackage(const std::string &filename, Pool &pool)
@@ -193,7 +194,10 @@ bool CorePackage::get_property_meta(ObjectType type, const UUID &uu, ObjectPrope
 
 void CorePackage::rebuild(bool from_undo)
 {
-    package.apply_parameter_set({});
+    auto r = package.apply_parameter_set({});
+    if (r.first) {
+        Logger::get().log_critical("Parameter program failed", Logger::Domain::CORE, r.second);
+    }
     package.expand();
     package.update_warnings();
     Core::rebuild(from_undo);

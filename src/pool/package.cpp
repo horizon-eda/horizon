@@ -222,9 +222,11 @@ std::pair<bool, std::string> Package::apply_parameter_set(const ParameterSet &ps
 {
     auto ps_this = parameter_set;
     copy_param(ps_this, ps, ParameterID::COURTYARD_EXPANSION);
-    auto r = parameter_program.run(ps_this);
-    if (r.first) {
-        return r;
+    {
+        auto r = parameter_program.run(ps_this);
+        if (r.first) {
+            return r;
+        }
     }
 
     for (auto &it : pads) {
@@ -234,7 +236,7 @@ std::pair<bool, std::string> Package::apply_parameter_set(const ParameterSet &ps
                     ParameterID::HOLE_SOLDER_MASK_EXPANSION});
         auto r = it.second.padstack.apply_parameter_set(ps_pad);
         if (r.first) {
-            return r;
+            return {r.first, "Pad " + it.second.name + ": " + r.second};
         }
     }
     return {false, ""};

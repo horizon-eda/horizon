@@ -6,11 +6,16 @@ namespace horizon {
 std::pair<bool, std::string> ParameterProgramPolygon::set_polygon(const ParameterProgram::TokenCommand *cmd,
                                                                   std::deque<int64_t> &stack)
 {
-    if (cmd->arguments.size() < 4 || cmd->arguments.at(0)->type != ParameterProgram::Token::Type::STR
-        || cmd->arguments.at(1)->type != ParameterProgram::Token::Type::STR
-        || cmd->arguments.at(2)->type != ParameterProgram::Token::Type::INT
-        || cmd->arguments.at(3)->type != ParameterProgram::Token::Type::INT)
-        return {true, "not enough arguments"};
+    if (cmd->arguments.size() < 4)
+        return {true, "not enough arguments for set-polygon"};
+    if (cmd->arguments.at(0)->type != ParameterProgram::Token::Type::STR)
+        return {true, "1st argument of set-polygon must be string"};
+    if (cmd->arguments.at(1)->type != ParameterProgram::Token::Type::STR)
+        return {true, "2nd argument of set-polygon must be string"};
+    if (cmd->arguments.at(2)->type != ParameterProgram::Token::Type::INT)
+        return {true, "3rd argument of set-polygon must be int"};
+    if (cmd->arguments.at(3)->type != ParameterProgram::Token::Type::INT)
+        return {true, "4th argument of set-polygon must be int"};
 
     auto pclass = dynamic_cast<ParameterProgram::TokenString *>(cmd->arguments.at(0).get())->string;
     auto shape = dynamic_cast<ParameterProgram::TokenString *>(cmd->arguments.at(1).get())->string;
