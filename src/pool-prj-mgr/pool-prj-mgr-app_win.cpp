@@ -1066,6 +1066,8 @@ void PoolProjectManagerAppWindow::cleanup_pool_cache()
         for (const auto &it_sym : it_sheet.second.symbols) {
             items_needed.emplace(ObjectType::SYMBOL, it_sym.second.pool_symbol->uuid);
         }
+        if (it_sheet.second.pool_frame)
+            items_needed.emplace(ObjectType::FRAME, it_sheet.second.pool_frame->uuid);
     }
     for (const auto &it_pkg : board.packages) {
         // don't use pool_package because of alternate pkg
