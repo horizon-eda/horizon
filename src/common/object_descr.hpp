@@ -47,7 +47,7 @@ public:
         ALTERNATE_PACKAGE,
         POWER_SYMBOL_STYLE,
         PIN_NAME_DISPLAY,
-        PIN_KEEP_HORIZONTAL,
+        PIN_NAME_ORIENTATION,
         FONT
     };
     ObjectProperty(Type t, const std::string &l, int o = 0, const std::vector<std::pair<int, std::string>> &its = {})

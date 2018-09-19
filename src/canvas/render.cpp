@@ -378,20 +378,21 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
         c_pad = ColorP::PIN_HIDDEN;
     }
     if (interactive || pin.name_visible) {
-        if (pin.keep_horizontal == false || pin_orientation == Orientation::LEFT
-            || pin_orientation == Orientation::RIGHT) {
+        bool draw_in_line = pin.name_orientation == SymbolPin::NameOrientation::IN_LINE
+                            || (pin.name_orientation == SymbolPin::NameOrientation::HORIZONTAL
+                                && (pin_orientation == Orientation::LEFT || pin_orientation == Orientation::RIGHT));
+
+        if (draw_in_line) {
             draw_text0(p_name, 1.5_mm, pin.name, orientation_to_angle(name_orientation), false, TextOrigin::CENTER,
                        c_name, 0);
         }
-        else {
-            auto ex = draw_text0({0, 0}, 1.5_mm, pin.name, 0, false, TextOrigin::BASELINE, c_name, 0, 0, false);
-            auto w = ex.second.x - ex.first.x;
+        else { // draw perp
             int64_t yshift = 0;
-            if (pin_orientation == Orientation::UP) {
-                yshift = 1.5_mm;
-            }
-            draw_text0(p_name - Coordi(w / 2, yshift), 1.5_mm, pin.name, 0, false, TextOrigin::BASELINE, c_name, 0,
-                       true);
+            Placement tr;
+            tr.set_angle(orientation_to_angle(pin_orientation));
+            auto shift = tr.transform(Coordi(-1_mm, 0));
+            draw_text0(p_name + shift, 1.5_mm, pin.name, orientation_to_angle(name_orientation) + 16384, false,
+                       TextOrigin::CENTER, c_name, 0, 0, true, TextData::Font::SIMPLEX, true);
         }
     }
     std::pair<Coordf, Coordf> pad_extents;

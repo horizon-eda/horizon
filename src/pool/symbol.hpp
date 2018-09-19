@@ -31,7 +31,10 @@ public:
     uint64_t length = 2.5_mm;
     bool name_visible = true;
     bool pad_visible = true;
-    bool keep_horizontal = false;
+
+    enum class NameOrientation { IN_LINE, PERPENDICULAR, HORIZONTAL };
+    NameOrientation name_orientation = NameOrientation::IN_LINE;
+
     Orientation orientation = Orientation::RIGHT;
     Orientation get_orientation_for_placement(const Placement &p) const;
 

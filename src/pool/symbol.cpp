@@ -19,6 +19,12 @@ static const LutEnumStr<SymbolPin::Decoration::Driver> decoration_driver_lut = {
         {"tristate", SymbolPin::Decoration::Driver::TRISTATE},
 };
 
+static const LutEnumStr<SymbolPin::NameOrientation> name_orientation_lut = {
+        {"in_line", SymbolPin::NameOrientation::IN_LINE},
+        {"perpendicular", SymbolPin::NameOrientation::PERPENDICULAR},
+        {"horizontal", SymbolPin::NameOrientation::HORIZONTAL},
+};
+
 SymbolPin::Decoration::Decoration()
 {
 }
@@ -41,10 +47,18 @@ json SymbolPin::Decoration::serialize() const
 SymbolPin::SymbolPin(const UUID &uu, const json &j)
     : uuid(uu), position(j["position"].get<std::vector<int64_t>>()), length(j["length"]),
       name_visible(j.value("name_visible", true)), pad_visible(j.value("pad_visible", true)),
-      keep_horizontal(j.value("keep_horizontal", false)), orientation(orientation_lut.lookup(j["orientation"]))
+      orientation(orientation_lut.lookup(j["orientation"]))
 {
     if (j.count("decoration")) {
         decoration = Decoration(j.at("decoration"));
+    }
+    if (j.count("keep_horizontal")) {
+        if (j.at("keep_horizontal").get<bool>()) {
+            name_orientation = NameOrientation::HORIZONTAL;
+        }
+    }
+    else if (j.count("name_orientation")) {
+        name_orientation = name_orientation_lut.lookup(j.at("name_orientation"));
     }
 }
 
@@ -104,7 +118,7 @@ json SymbolPin::serialize() const
     j["orientation"] = orientation_lut.lookup_reverse(orientation);
     j["name_visible"] = name_visible;
     j["pad_visible"] = pad_visible;
-    j["keep_horizontal"] = keep_horizontal;
+    j["name_orientation"] = name_orientation_lut.lookup_reverse(name_orientation);
     j["decoration"] = decoration.serialize();
     return j;
 }

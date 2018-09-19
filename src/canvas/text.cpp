@@ -7,7 +7,7 @@ namespace horizon {
 
 std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const std::string &rtext, int angle,
                                              bool flip, TextOrigin origin, ColorP color, int layer, uint64_t width,
-                                             bool draw, TextData::Font font)
+                                             bool draw, TextData::Font font, bool center)
 {
     TextData td(rtext, font);
     float sc = size / 21;
@@ -40,6 +40,14 @@ std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const 
         tf.set_angle(angle);
     }
     tf.mirror = flip;
+    if (center) {
+        if (backwards) {
+            xshift += td.xright / 2;
+        }
+        else {
+            xshift -= td.xright / 2;
+        }
+    }
 
     Coordf a = p;
     Coordf b = p;

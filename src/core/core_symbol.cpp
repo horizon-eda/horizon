@@ -153,8 +153,8 @@ bool CoreSymbol::get_property(ObjectType type, const UUID &uu, ObjectProperty::I
             dynamic_cast<PropertyValueBool &>(value).value = pin->decoration.dot;
             return true;
 
-        case ObjectProperty::ID::PIN_KEEP_HORIZONTAL:
-            dynamic_cast<PropertyValueBool &>(value).value = pin->keep_horizontal;
+        case ObjectProperty::ID::PIN_NAME_ORIENTATION:
+            dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(pin->name_orientation);
             return true;
 
         case ObjectProperty::ID::CLOCK:
@@ -203,8 +203,9 @@ bool CoreSymbol::set_property(ObjectType type, const UUID &uu, ObjectProperty::I
             pin->decoration.dot = dynamic_cast<const PropertyValueBool &>(value).value;
             break;
 
-        case ObjectProperty::ID::PIN_KEEP_HORIZONTAL:
-            pin->keep_horizontal = dynamic_cast<const PropertyValueBool &>(value).value;
+        case ObjectProperty::ID::PIN_NAME_ORIENTATION:
+            pin->name_orientation =
+                    static_cast<SymbolPin::NameOrientation>(dynamic_cast<const PropertyValueInt &>(value).value);
             break;
 
         case ObjectProperty::ID::CLOCK:
