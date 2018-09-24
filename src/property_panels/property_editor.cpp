@@ -254,7 +254,7 @@ void PropertyEditorLayer::reload()
     combo->remove_all();
     for (const auto &it : my_meta.layers) {
         if (!copper_only || it.second.copper)
-            combo->append(std::to_string(it.first), it.second.name);
+            combo->insert(0, std::to_string(it.first), it.second.name);
     }
     combo->set_active_id(std::to_string(value.value));
 }
