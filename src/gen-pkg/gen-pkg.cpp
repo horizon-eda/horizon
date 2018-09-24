@@ -4,6 +4,7 @@
 #include "pool/pool.hpp"
 #include "board/board_layers.hpp"
 #include "pool/part.hpp"
+#include "pool/pool_manager.hpp"
 #include <glibmm/miscutils.h>
 #include <giomm.h>
 
@@ -367,6 +368,7 @@ std::pair<std::string, std::string> get_pkg_part_filename(const std::string &bas
 int main(int c_argc, char *c_argv[])
 {
     Gio::init();
+    PoolManager::init();
 
     auto pool_base_path = getenv("HORIZON_POOL");
     if (pool_base_path) {
