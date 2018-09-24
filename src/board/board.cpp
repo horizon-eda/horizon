@@ -316,7 +316,8 @@ void Board::set_n_inner_layers(unsigned int n)
 {
     n_inner_layers = n;
     layers.clear();
-    layers = {{100, {100, "Outline", {.6, .6, 0}}},
+    layers = {{200, {200, "Top Notes", {1, 1, 1}}},
+              {100, {100, "Outline", {.6, .6, 0}}},
               {60, {60, "Top Courtyard", {.5, .5, .5}}},
               {50, {50, "Top Assembly", {.5, .5, .5}}},
               {40, {40, "Top Package", {.5, .5, .5}}},
@@ -330,7 +331,8 @@ void Board::set_n_inner_layers(unsigned int n)
               {-130, {-130, "Bottom Paste", {.8, .8, .8}}},
               {-140, {-140, "Bottom Package", {.5, .5, .5}}},
               {-150, {-150, "Bottom Assembly", {.5, .5, .5}, true}},
-              {-160, {-160, "Bottom Courtyard", {.5, .5, .5}}}};
+              {-160, {-160, "Bottom Courtyard", {.5, .5, .5}}},
+              {-200, {-200, "Bottom Notes", {1, 1, 1}, true}}};
     if (stackup.emplace(0, 0).second) { // if created
         stackup.at(0).substrate_thickness = 1.6_mm;
     }
