@@ -19,7 +19,9 @@ bool SVGOverlay::draw(const Cairo::RefPtr<Cairo::Context> &cr)
     cr->set_source_rgb(.95, .95, .95);
     cr->paint();
 
+    cr->save();
     rsvg_handle_render_cairo(handle, cr->cobj());
+    cr->restore();
 
     Pango::FontDescription font = get_style_context()->get_font();
     font.set_weight(Pango::WEIGHT_BOLD);
