@@ -73,7 +73,7 @@ private:
 
 RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, CanvasGL *ca, Rules *ru,
                          class Core *c)
-    : Gtk::Window(cobject), canvas(ca), rules(ru), core(c)
+    : Gtk::Window(cobject), canvas(ca), rules(ru), core(c), state_store(this, "imp-rules")
 {
     x->get_widget("lb_rules", lb_rules);
     x->get_widget("lb_multi", lb_multi);

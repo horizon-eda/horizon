@@ -4,6 +4,7 @@
 #include "rules/cache.hpp"
 #include "util/uuid.hpp"
 #include "util/changeable.hpp"
+#include "util/window_state_store.hpp"
 #include <array>
 #include <gtkmm.h>
 #include <set>
@@ -111,5 +112,7 @@ private:
 
     void check_thread(RuleID id);
     sigc::connection pulse_connection;
+
+    WindowStateStore state_store;
 };
 } // namespace horizon
