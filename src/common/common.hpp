@@ -51,7 +51,8 @@ enum class ObjectType {
     NET_CLASS,
     BOARD_HOLE,
     MODEL_3D,
-    FRAME
+    FRAME,
+    KEEPOUT
 };
 enum class PatchType { OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH, BOARD_EDGE, TEXT };
 

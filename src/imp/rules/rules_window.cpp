@@ -12,6 +12,7 @@
 #include "rule_editor_single_pin_net.hpp"
 #include "rule_editor_track_width.hpp"
 #include "rule_editor_via.hpp"
+#include "rule_editor_clearance_copper_keepout.hpp"
 #include "rules/cache.hpp"
 #include "rules/rule_descr.hpp"
 #include "rules/rules.hpp"
@@ -438,6 +439,10 @@ RuleEditor *RulesWindow::create_editor(Rule *r)
     case RuleID::PACKAGE_CHECKS:
     case RuleID::PREFLIGHT_CHECKS:
         e = new RuleEditorPackageChecks(r, core);
+        break;
+
+    case RuleID::CLEARANCE_COPPER_KEEPOUT:
+        e = new RuleEditorClearanceCopperKeepout(r, core);
         break;
 
     default:

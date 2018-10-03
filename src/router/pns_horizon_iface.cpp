@@ -80,6 +80,7 @@ private:
     const horizon::Board *m_board;
     horizon::BoardRules *m_rules;
     PNS_HORIZON_IFACE *m_iface = nullptr;
+    std::vector<horizon::RuleClearanceCopperKeepout *> m_rules_keepout;
 
     bool m_useDpGap = false;
 };
@@ -93,6 +94,8 @@ PNS_HORIZON_RULE_RESOLVER::PNS_HORIZON_RULE_RESOLVER(const horizon::Board *aBoar
     PNS::TOPOLOGY topo(world);
 
     m_iface = static_cast<PNS_HORIZON_IFACE *>(m_router->GetInterface());
+    m_rules_keepout = horizon::dynamic_cast_vector<horizon::RuleClearanceCopperKeepout *>(
+            m_rules->get_rules_sorted(horizon::RuleID::CLEARANCE_COPPER_KEEPOUT));
 }
 
 PNS_HORIZON_RULE_RESOLVER::~PNS_HORIZON_RULE_RESOLVER()
@@ -182,6 +185,22 @@ int PNS_HORIZON_RULE_RESOLVER::Clearance(const PNS::ITEM *aA, const PNS::ITEM *a
 
         auto clearance = m_rules->get_clearance_copper_other(net, PNS_HORIZON_IFACE::layer_from_router(layer));
         return clearance->get_clearance(pt, horizon::PatchType::HOLE_NPTH) + clearance->routing_offset;
+    }
+
+    if ((parent_a && parent_a->keepout) || (parent_b && parent_b->keepout)) { // one is keepout
+        bool a_is_keepout = parent_a && parent_a->keepout;
+        auto net = net_a ? net_a : net_b; // only one has net
+        horizon::KeepoutContour keepout_contour;
+        keepout_contour.keepout = a_is_keepout ? parent_a->keepout : parent_b->keepout;
+        ;
+        keepout_contour.pkg = a_is_keepout ? parent_a->package : parent_b->package;
+        for (const auto &rule : m_rules_keepout) {
+            if (rule->enabled && rule->match.match(net) && rule->match_keepout.match(&keepout_contour)) {
+                auto cl = rule->get_clearance(a_is_keepout ? pt_b : pt_a);
+                return rule->routing_offset + cl;
+            }
+        }
+        return 0;
     }
 
     int layer = UNDEFINED_LAYER;
@@ -386,26 +405,33 @@ horizon::Net *PNS_HORIZON_IFACE::get_net_for_code(int code)
 
 const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::Track *track)
 {
-    PNS_HORIZON_PARENT_ITEM it(track);
-    return &*parents.insert(it).first;
+    parents.emplace_back(track);
+    return &parents.back();
 }
 
 const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::BoardHole *hole)
 {
-    PNS_HORIZON_PARENT_ITEM it(hole);
-    return &*parents.insert(it).first;
+    parents.emplace_back(hole);
+    return &parents.back();
 }
 
 const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::Via *via)
 {
-    PNS_HORIZON_PARENT_ITEM it(via);
-    return &*parents.insert(it).first;
+    parents.emplace_back(via);
+    return &parents.back();
 }
 
 const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::BoardPackage *pkg, const horizon::Pad *pad)
 {
-    PNS_HORIZON_PARENT_ITEM it(pkg, pad);
-    return &*parents.insert(it).first;
+    parents.emplace_back(pkg, pad);
+    return &parents.back();
+}
+
+const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::Keepout *k,
+                                                             const horizon::BoardPackage *pkg)
+{
+    parents.emplace_back(k, pkg);
+    return &parents.back();
 }
 
 std::unique_ptr<PNS::SEGMENT> PNS_HORIZON_IFACE::syncTrack(const horizon::Track *track)
@@ -444,6 +470,42 @@ void PNS_HORIZON_IFACE::syncOutline(const horizon::Polygon *ipoly, PNS::NODE *aW
             segment->SetWidth(10); // very small
             segment->SetLayers(layer_to_router(layer));
             segment->SetParent(&parent_dummy_outline);
+            segment->Mark(PNS::MK_LOCKED);
+            aWorld->Add(std::move(segment));
+        }
+    }
+}
+
+void PNS_HORIZON_IFACE::syncKeepout(const horizon::KeepoutContour *keepout_contour, PNS::NODE *aWorld)
+{
+    auto keepout = keepout_contour->keepout;
+    if (!horizon::BoardLayers::is_copper(keepout->polygon->layer))
+        return;
+    if (!(keepout->patch_types_cu.count(horizon::PatchType::TRACK)))
+        return;
+
+    std::set<int> layers;
+    if (keepout->all_cu_layers) {
+        for (unsigned int j = 0; j < board->get_n_inner_layers(); j++) {
+            layers.insert(-j - 1);
+        }
+        layers.insert(horizon::BoardLayers::TOP_COPPER);
+        layers.insert(horizon::BoardLayers::BOTTOM_COPPER);
+    }
+    else {
+        layers.insert(keepout->polygon->layer);
+    }
+    const auto &contour = keepout_contour->contour;
+    for (auto layer : layers) {
+        for (size_t i = 0; i < contour.size(); i++) {
+            auto from = contour[i];
+            auto to = contour[(i + 1) % contour.size()];
+
+            std::unique_ptr<PNS::SEGMENT> segment(
+                    new PNS::SEGMENT(SEG(from.X, from.Y, to.X, to.Y), PNS::ITEM::UnusedNet));
+            segment->SetWidth(10); // very small
+            segment->SetLayers(layer_to_router(layer));
+            segment->SetParent(get_parent(keepout_contour->keepout, keepout_contour->pkg));
             segment->Mark(PNS::MK_LOCKED);
             aWorld->Add(std::move(segment));
         }
@@ -621,6 +683,13 @@ void PNS_HORIZON_IFACE::SyncWorld(PNS::NODE *aWorld)
             syncOutline(&it.second, aWorld);
         }
     }
+
+    auto keepout_contours = board->get_keepout_contours();
+    for (const auto &it : keepout_contours) {
+        if (horizon::BoardLayers::is_copper(it.keepout->polygon->layer))
+            syncKeepout(&it, aWorld);
+    }
+
     int worstClearance = rules->get_max_clearance();
 
     delete m_ruleResolver;
@@ -786,7 +855,6 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
                     conn.connect(ju);
                 }
             }
-
         };
         connect(track->from, from);
         connect(track->to, to);

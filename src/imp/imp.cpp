@@ -1376,6 +1376,9 @@ void ImpBase::sc(void)
                 if (poly->usage && poly->usage->get_type() == PolygonUsage::Type::PLANE) {
                     sel_extra.emplace(poly->usage->get_uuid(), ObjectType::PLANE);
                 }
+                if (poly->usage && poly->usage->get_type() == PolygonUsage::Type::KEEPOUT) {
+                    sel_extra.emplace(poly->usage->get_uuid(), ObjectType::KEEPOUT);
+                }
             } break;
             default:;
             }

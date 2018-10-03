@@ -108,6 +108,10 @@ std::map<UUID, Dimension> *CoreBoard::get_dimension_map()
 {
     return &brd.dimensions;
 }
+std::map<UUID, Keepout> *CoreBoard::get_keepout_map()
+{
+    return &brd.keepouts;
+}
 
 bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyValue &value)
 {

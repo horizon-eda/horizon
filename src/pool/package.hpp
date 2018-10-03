@@ -8,6 +8,7 @@
 #include "common/object_provider.hpp"
 #include "common/polygon.hpp"
 #include "common/text.hpp"
+#include "common/keepout.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "package/package_rules.hpp"
 #include "package/pad.hpp"
@@ -86,6 +87,7 @@ public:
     std::map<UUID, Text> texts;
     std::map<UUID, Pad> pads;
     std::map<UUID, Polygon> polygons;
+    std::map<UUID, Keepout> keepouts;
 
     ParameterSet parameter_set;
     MyParameterProgram parameter_program;

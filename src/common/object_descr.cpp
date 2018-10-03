@@ -276,5 +276,11 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                     }}},
           }}},
         {ObjectType::FRAME, {"Frame", "Frames", {}}},
+        {ObjectType::KEEPOUT,
+         {"Keepout",
+          "Keepouts",
+          {
+                  {ObjectProperty::ID::KEEPOUT_CLASS, {ObjectProperty::Type::STRING, "Keepout class", 0}},
+          }}},
 };
 } // namespace horizon

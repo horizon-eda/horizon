@@ -24,7 +24,7 @@ public:
     PNS::ITEM *pickSingleItem(const VECTOR2I &aWhere, int aNet = -1, int aLayer = -1);
     const VECTOR2I snapToItem(bool aEnabled, PNS::ITEM *aItem, VECTOR2I aP);
     bool prepareInteractive();
-    int getStartLayer(const PNS::ITEM *aItem);
+    int getStartLayer();
     PNS::ITEM *m_startItem = nullptr;
     PNS::ITEM *m_endItem = nullptr;
     VECTOR2I m_startSnapPoint;
@@ -348,7 +348,7 @@ void ToolWrapper::updateStartItem(const ToolArgs &args)
     tool->canvas->set_cursor_pos(Coordi(m_startSnapPoint.x, m_startSnapPoint.y));
 }
 
-int ToolWrapper::getStartLayer(const PNS::ITEM *aItem)
+int ToolWrapper::getStartLayer()
 {
     int wl = tool->imp->get_canvas()->property_work_layer();
     int tl = PNS::PNS_HORIZON_IFACE::layer_to_router(wl);
@@ -413,7 +413,7 @@ const PNS::PNS_HORIZON_PARENT_ITEM *inheritTrackWidth(PNS::ITEM *aItem)
 
 bool ToolWrapper::prepareInteractive()
 {
-    int routingLayer = getStartLayer(m_startItem);
+    int routingLayer = getStartLayer();
 
     if (!IsCopperLayer(routingLayer)) {
         tool->imp->tool_bar_flash("Tracks on Copper layers only");
@@ -544,6 +544,24 @@ void ToolWrapper::updateEndItem(const ToolArgs &args)
     }
 }
 
+static bool keepout_hit(const Keepout &keepout, Coordi p, int layer)
+{
+    if (!keepout.all_cu_layers && keepout.polygon->layer != layer) // other layer
+        return false;
+    if (keepout.patch_types_cu.count(PatchType::TRACK) == 0)
+        return false;
+    ClipperLib::Path keepout_contour;
+    {
+        auto poly2 = keepout.polygon->remove_arcs();
+        keepout_contour.reserve(poly2.vertices.size());
+        for (const auto &it : poly2.vertices) {
+            keepout_contour.push_back({it.position.x, it.position.y});
+        }
+    }
+    // returns 0 if false, +1 if true, -1 if pt ON polygon boundary
+    return ClipperLib::PointInPolygon({p.x, p.y}, keepout_contour) != 0;
+}
+
 ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
 {
     if (tool_id == ToolID::DRAG_TRACK_INTERACTIVE) {
@@ -663,6 +681,13 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
             else if (args.type == ToolEventType::CLICK) {
                 wrapper->updateStartItem(args);
                 if (args.button == 1) {
+                    for (const auto &it : board->keepouts) {
+                        if (keepout_hit(it.second, {wrapper->m_startSnapPoint.x, wrapper->m_startSnapPoint.y},
+                                        PNS::PNS_HORIZON_IFACE::layer_from_router(wrapper->getStartLayer()))) {
+                            imp->tool_bar_flash("Can't start routing in keepout");
+                            return ToolResponse::end();
+                        }
+                    }
                     state = State::ROUTING;
                     if (!wrapper->prepareInteractive()) {
                         return ToolResponse::end();

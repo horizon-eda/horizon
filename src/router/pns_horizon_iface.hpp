@@ -19,6 +19,8 @@ class Net;
 class BoardRules;
 class Polygon;
 class ViaPadstackProvider;
+class Keepout;
+class KeepoutContour;
 template <typename T> class Coord;
 } // namespace horizon
 
@@ -40,37 +42,19 @@ public:
     PNS_HORIZON_PARENT_ITEM(const horizon::BoardPackage *pkg, const horizon::Pad *p) : package(pkg), pad(p)
     {
     }
+    PNS_HORIZON_PARENT_ITEM(const horizon::Keepout *k) : keepout(k)
+    {
+    }
+    PNS_HORIZON_PARENT_ITEM(const horizon::Keepout *k, const horizon::BoardPackage *pkg) : package(pkg), keepout(k)
+    {
+    }
 
     const horizon::Track *track = nullptr;
     const horizon::Via *via = nullptr;
     const horizon::BoardPackage *package = nullptr;
     const horizon::Pad *pad = nullptr;
     const horizon::BoardHole *hole = nullptr;
-
-    bool operator<(const PNS_HORIZON_PARENT_ITEM &other) const
-    {
-        if (track < other.track)
-            return true;
-        else if (track > other.track)
-            return false;
-
-        if (via < other.via)
-            return true;
-        else if (via > other.via)
-            return false;
-
-        if (package < other.package)
-            return true;
-        else if (package > other.package)
-            return false;
-
-        if (pad < other.pad)
-            return true;
-        else if (pad > other.pad)
-            return false;
-
-        return hole < other.hole;
-    }
+    const horizon::Keepout *keepout = nullptr;
 };
 
 class PNS_HORIZON_IFACE : public PNS::ROUTER_IFACE {
@@ -108,6 +92,8 @@ public:
     const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::Via *via);
     const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::BoardHole *hole);
     const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::BoardPackage *pkg, const horizon::Pad *pad);
+    const PNS_HORIZON_PARENT_ITEM *get_parent(const horizon::Keepout *keepout,
+                                              const horizon::BoardPackage *pkg = nullptr);
 
     int64_t get_override_routing_offset() const
     {
@@ -137,13 +123,14 @@ private:
     std::unique_ptr<PNS::SEGMENT> syncTrack(const horizon::Track *track);
     std::unique_ptr<PNS::VIA> syncVia(const horizon::Via *via);
     void syncOutline(const horizon::Polygon *poly, PNS::NODE *aWorld);
+    void syncKeepout(const horizon::KeepoutContour *keepout_contour, PNS::NODE *aWorld);
     std::map<horizon::UUID, int> net_code_map;
     std::map<int, horizon::UUID> net_code_map_r;
     int net_code_max = 0;
 
     int64_t override_routing_offset = -1;
 
-    std::set<PNS_HORIZON_PARENT_ITEM> parents;
+    std::list<PNS_HORIZON_PARENT_ITEM> parents;
 
     std::pair<horizon::BoardPackage *, horizon::Pad *> find_pad(int layer, const horizon::Coord<int64_t> &c);
     horizon::Junction *find_junction(int layer, const horizon::Coord<int64_t> &c);

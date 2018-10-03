@@ -13,5 +13,12 @@ public:
     {
         return nullptr;
     }
+    virtual class Polygon *get_polygon(const UUID &uu)
+    {
+        return nullptr;
+    }
+    virtual ~ObjectProvider()
+    {
+    }
 };
 } // namespace horizon

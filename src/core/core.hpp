@@ -3,6 +3,7 @@
 #include "canvas/target.hpp"
 #include "common/layer.hpp"
 #include "common/object_descr.hpp"
+#include "common/keepout.hpp"
 #include "cores.hpp"
 #include "dialogs/dialogs.hpp"
 #include "nlohmann/json_fwd.hpp"
@@ -127,7 +128,10 @@ enum class ToolID {
     SET_ALL_NC,
     CLEAR_ALL_NC,
     SET_NC,
-    CLEAR_NC
+    CLEAR_NC,
+    ADD_KEEPOUT,
+    DELETE_KEEPOUT,
+    EDIT_KEEPOUT
 };
 
 /**
@@ -373,6 +377,10 @@ public:
     virtual class Dimension *get_dimension(const UUID &uu);
     virtual void delete_dimension(const UUID &uu);
 
+    virtual class Keepout *insert_keepout(const UUID &uu);
+    virtual class Keepout *get_keepout(const UUID &uu);
+    virtual void delete_keepout(const UUID &uu);
+
     virtual std::vector<Line *> get_lines(bool work = true);
     virtual std::vector<Arc *> get_arcs(bool work = true);
 
@@ -529,6 +537,10 @@ protected:
         return nullptr;
     }
     virtual std::map<UUID, Dimension> *get_dimension_map()
+    {
+        return nullptr;
+    }
+    virtual std::map<UUID, Keepout> *get_keepout_map()
     {
         return nullptr;
     }

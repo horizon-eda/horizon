@@ -10,6 +10,7 @@
 #include "rule_track_width.hpp"
 #include "rule_via.hpp"
 #include "rule_preflight_checks.hpp"
+#include "rule_clearance_copper_keepout.hpp"
 #include "rules/rules.hpp"
 #include "util/uuid.hpp"
 
@@ -36,6 +37,7 @@ public:
     const RuleClearanceCopper *get_clearance_copper(Net *net_a, Net *net_b, int layer);
     const RuleClearanceCopperOther *get_clearance_copper_other(Net *net, int layer);
     const RuleDiffpair *get_diffpair(NetClass *net_class, int layer);
+    const RuleClearanceCopperKeepout *get_clearance_copper_keepout(Net *net, const KeepoutContour *contour);
     uint64_t get_max_clearance();
 
     const RuleParameters *get_parameters();
@@ -53,6 +55,7 @@ private:
     std::map<UUID, RuleClearanceCopperOther> rule_clearance_copper_other;
     std::map<UUID, RulePlane> rule_plane;
     std::map<UUID, RuleDiffpair> rule_diffpair;
+    std::map<UUID, RuleClearanceCopperKeepout> rule_clearance_copper_keepout;
 
     RuleClearanceSilkscreenExposedCopper rule_clearance_silkscreen_exposed_copper;
     RuleParameters rule_parameters;
@@ -65,5 +68,7 @@ private:
     RulesCheckResult check_clearance_copper_non_copper(const class Board *b, class RulesCheckCache &cache,
                                                        check_status_cb_t status_cb);
     RulesCheckResult check_preflight(const class Board *b);
+    RulesCheckResult check_clearance_copper_keepout(const class Board *b, class RulesCheckCache &cache,
+                                                    check_status_cb_t status_cb);
 };
 } // namespace horizon

@@ -142,6 +142,14 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
             load_and_log(planes, ObjectType::PLANE, std::forward_as_tuple(u, it.value(), *this), Logger::Domain::BOARD);
         }
     }
+    if (j.count("keepouts")) {
+        const json &o = j["keepouts"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(keepouts, ObjectType::KEEPOUT, std::forward_as_tuple(u, it.value(), *this),
+                         Logger::Domain::BOARD);
+        }
+    }
     if (j.count("dimensions")) {
         const json &o = j["dimensions"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -219,6 +227,11 @@ Junction *Board::get_junction(const UUID &uu)
     return &junctions.at(uu);
 }
 
+Polygon *Board::get_polygon(const UUID &uu)
+{
+    return &polygons.at(uu);
+}
+
 const std::map<int, Layer> &Board::get_layers() const
 {
     return layers;
@@ -227,9 +240,10 @@ const std::map<int, Layer> &Board::get_layers() const
 Board::Board(const Board &brd)
     : layers(brd.layers), uuid(brd.uuid), block(brd.block), name(brd.name), polygons(brd.polygons), holes(brd.holes),
       packages(brd.packages), junctions(brd.junctions), tracks(brd.tracks), airwires(brd.airwires), vias(brd.vias),
-      texts(brd.texts), lines(brd.lines), arcs(brd.arcs), planes(brd.planes), dimensions(brd.dimensions),
-      warnings(brd.warnings), rules(brd.rules), fab_output_settings(brd.fab_output_settings), stackup(brd.stackup),
-      colors(brd.colors), n_inner_layers(brd.n_inner_layers)
+      texts(brd.texts), lines(brd.lines), arcs(brd.arcs), planes(brd.planes), keepouts(brd.keepouts),
+      dimensions(brd.dimensions), warnings(brd.warnings), rules(brd.rules),
+      fab_output_settings(brd.fab_output_settings), stackup(brd.stackup), colors(brd.colors),
+      n_inner_layers(brd.n_inner_layers)
 {
     update_refs();
 }
@@ -253,6 +267,7 @@ void Board::operator=(const Board &brd)
     lines = brd.lines;
     arcs = brd.arcs;
     planes = brd.planes;
+    keepouts = brd.keepouts;
     dimensions = brd.dimensions;
     warnings = brd.warnings;
     rules = brd.rules;
@@ -302,6 +317,10 @@ void Board::update_refs()
     }
     for (auto &it : planes) {
         it.second.net.update(block->nets);
+        it.second.polygon.update(polygons);
+        it.second.polygon->usage = &it.second;
+    }
+    for (auto &it : keepouts) {
         it.second.polygon.update(polygons);
         it.second.polygon->usage = &it.second;
     }
@@ -523,6 +542,9 @@ void Board::expand(bool careful)
     for (auto &it : planes) {
         it.second.polygon->usage = &it.second;
     }
+    for (auto &it : keepouts) {
+        it.second.polygon->usage = &it.second;
+    }
 
     if (expand_flags & EXPAND_PROPAGATE_NETS) {
         propagate_nets();
@@ -733,6 +755,23 @@ void Board::delete_dependants()
 {
     map_erase_if(vias, [this](auto &it) { return junctions.count(it.second.junction.uuid) == 0; });
     map_erase_if(planes, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
+    map_erase_if(keepouts, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
+}
+
+std::vector<KeepoutContour> Board::get_keepout_contours() const
+{
+    std::vector<KeepoutContour> r;
+    for (const auto &it : keepouts) {
+        r.emplace_back();
+        ClipperLib::Path &contour = r.back().contour;
+        r.back().keepout = &it.second;
+        auto poly2 = it.second.polygon->remove_arcs();
+        contour.reserve(poly2.vertices.size());
+        for (const auto &itv : poly2.vertices) {
+            contour.push_back({itv.position.x, itv.position.y});
+        }
+    }
+    return r;
 }
 
 json color_to_json(const Color &c)
@@ -807,6 +846,10 @@ json Board::serialize() const
     j["dimensions"] = json::object();
     for (const auto &it : dimensions) {
         j["dimensions"][(std::string)it.first] = it.second.serialize();
+    }
+    j["keepouts"] = json::object();
+    for (const auto &it : keepouts) {
+        j["keepouts"][(std::string)it.first] = it.second.serialize();
     }
     return j;
 }

@@ -60,6 +60,7 @@
 #include "tool_change_unit.hpp"
 #include "tool_set_nc_all.hpp"
 #include "tool_set_nc.hpp"
+#include "tool_add_keepout.hpp"
 
 #include "common/dimension.hpp"
 #include "logger/logger.hpp"
@@ -302,6 +303,10 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::SET_NC:
     case ToolID::CLEAR_NC:
         return std::make_unique<ToolSetNotConnected>(this, tool_id);
+
+    case ToolID::ADD_KEEPOUT:
+    case ToolID::EDIT_KEEPOUT:
+        return std::make_unique<ToolAddKeepout>(this, tool_id);
 
     default:
         return nullptr;
@@ -570,6 +575,25 @@ Dimension *Core::get_dimension(const UUID &uu)
 void Core::delete_dimension(const UUID &uu)
 {
     auto map = get_dimension_map();
+    map->erase(uu);
+}
+
+Keepout *Core::insert_keepout(const UUID &uu)
+{
+    auto map = get_keepout_map();
+    auto x = map->emplace(std::make_pair(uu, uu));
+    return &(x.first->second);
+}
+
+Keepout *Core::get_keepout(const UUID &uu)
+{
+    auto map = get_keepout_map();
+    return &map->at(uu);
+}
+
+void Core::delete_keepout(const UUID &uu)
+{
+    auto map = get_keepout_map();
     map->erase(uu);
 }
 

@@ -9,6 +9,7 @@
 #include "common/junction.hpp"
 #include "common/layer_provider.hpp"
 #include "common/polygon.hpp"
+#include "common/keepout.hpp"
 #include "fab_output_settings.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "plane.hpp"
@@ -51,12 +52,14 @@ public:
     void smash_package(BoardPackage *pkg);
     void unsmash_package(BoardPackage *pkg);
     Junction *get_junction(const UUID &uu) override;
+    Polygon *get_polygon(const UUID &uu) override;
     const std::map<int, Layer> &get_layers() const override;
     void set_n_inner_layers(unsigned int n);
     unsigned int get_n_inner_layers() const;
     void update_plane(Plane *plane, const class CanvasPatch *ca = nullptr,
                       const class CanvasPads *ca_pads = nullptr); // when ca is given, patches will be read from it
     void update_planes();
+    std::vector<KeepoutContour> get_keepout_contours() const;
 
     UUID uuid;
     Block *block;
@@ -72,6 +75,7 @@ public:
     std::map<UUID, Line> lines;
     std::map<UUID, Arc> arcs;
     std::map<UUID, Plane> planes;
+    std::map<UUID, Keepout> keepouts;
     std::map<UUID, Dimension> dimensions;
 
     std::vector<Warning> warnings;

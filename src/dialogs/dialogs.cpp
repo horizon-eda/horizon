@@ -31,6 +31,7 @@
 #include "edit_stackup.hpp"
 #include "edit_board_hole.hpp"
 #include "edit_frame.hpp"
+#include "edit_keepout.hpp"
 #include "widgets/spin_button_dim.hpp"
 
 namespace horizon {
@@ -384,6 +385,12 @@ std::pair<bool, UUID> Dialogs::select_via_padstack(class ViaPadstackProvider *vp
 bool Dialogs::edit_plane(class Plane *plane, class Board *brd, class Block *block)
 {
     EditPlaneDialog dia(parent, plane, brd, block);
+    return dia.run() == Gtk::RESPONSE_OK;
+}
+
+bool Dialogs::edit_keepout(class Keepout *keepout, class Board *brd)
+{
+    EditKeepoutDialog dia(parent, keepout, brd);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 

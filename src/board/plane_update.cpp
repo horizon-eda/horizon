@@ -2,6 +2,7 @@
 #include "board_layers.hpp"
 #include "canvas/canvas_pads.hpp"
 #include "canvas/canvas_patch.hpp"
+#include "util/util.hpp"
 #include <mutex>
 #include <thread>
 
@@ -205,6 +206,28 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
 
                 ofs.Execute(patch_exp, expand);
                 cl_plane.AddPaths(patch_exp, ClipperLib::ptClip, true);
+            }
+        }
+    }
+
+    // add keepouts
+    {
+        auto keepout_rules = dynamic_cast_vector<RuleClearanceCopperKeepout *>(
+                rules.get_rules_sorted(RuleID::CLEARANCE_COPPER_KEEPOUT));
+        auto keepout_contours = get_keepout_contours();
+        for (const auto &it_keepout : keepout_contours) {
+            const auto keepout = it_keepout.keepout;
+            if ((plane->polygon->layer == keepout->polygon->layer || keepout->all_cu_layers)
+                && keepout->patch_types_cu.count(PatchType::PLANE)) {
+                auto clearance =
+                        rules.get_clearance_copper_keepout(plane->net, &it_keepout)->get_clearance(PatchType::PLANE);
+
+                ClipperLib::Paths keepout_contour_expanded;
+                ClipperLib::ClipperOffset ofs;
+                ofs.ArcTolerance = 10e3;
+                ofs.AddPath(it_keepout.contour, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+                ofs.Execute(keepout_contour_expanded, clearance + plane->settings.min_width / 2 + .05_mm);
+                cl_plane.AddPaths(keepout_contour_expanded, ClipperLib::ptClip, true);
             }
         }
     }

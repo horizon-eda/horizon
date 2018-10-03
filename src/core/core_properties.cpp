@@ -148,8 +148,12 @@ bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
         case ObjectProperty::ID::USAGE: {
             std::string usage;
             if (poly->usage) {
-                if (poly->usage->get_type() == PolygonUsage::Type::PLANE) {
+                auto ty = poly->usage->get_type();
+                if (ty == PolygonUsage::Type::PLANE) {
                     usage = "Plane";
+                }
+                else if (ty == PolygonUsage::Type::KEEPOUT) {
+                    usage = "Keepout";
                 }
                 else {
                     usage = "Invalid";
@@ -161,6 +165,18 @@ bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
             dynamic_cast<PropertyValueString &>(value).value = usage;
             return true;
         } break;
+
+        default:
+            return false;
+        }
+    } break;
+
+    case ObjectType::KEEPOUT: {
+        auto keepout = get_keepout(uu);
+        switch (property) {
+        case ObjectProperty::ID::KEEPOUT_CLASS:
+            dynamic_cast<PropertyValueString &>(value).value = keepout->keepout_class;
+            return true;
 
         default:
             return false;
@@ -302,6 +318,18 @@ bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
 
         case ObjectProperty::ID::PARAMETER_CLASS:
             poly->parameter_class = dynamic_cast<const PropertyValueString &>(value).value;
+            break;
+
+        default:
+            return false;
+        }
+    } break;
+
+    case ObjectType::KEEPOUT: {
+        auto keepout = get_keepout(uu);
+        switch (property) {
+        case ObjectProperty::ID::KEEPOUT_CLASS:
+            keepout->keepout_class = dynamic_cast<const PropertyValueString &>(value).value;
             break;
 
         default:

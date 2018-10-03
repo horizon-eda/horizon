@@ -19,7 +19,8 @@ enum class RuleID {
     PLANE,
     DIFFPAIR,
     PACKAGE_CHECKS,
-    PREFLIGHT_CHECKS
+    PREFLIGHT_CHECKS,
+    CLEARANCE_COPPER_KEEPOUT
 };
 
 class Rule {

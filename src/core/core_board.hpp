@@ -61,6 +61,7 @@ private:
     std::map<UUID, Line> *get_line_map(bool work = true) override;
     std::map<UUID, Dimension> *get_dimension_map() override;
     std::map<UUID, Arc> *get_arc_map(bool work = true) override;
+    std::map<UUID, Keepout> *get_keepout_map() override;
 
     ViaPadstackProvider via_padstack_provider;
 

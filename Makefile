@@ -61,6 +61,7 @@ SRC_COMMON = \
 	src/board/rule_plane.cpp\
 	src/board/rule_diffpair.cpp\
 	src/board/rule_preflight_checks.cpp\
+	src/board/rule_clearance_copper_keepout.cpp\
 	src/board/airwires.cpp\
 	src/board/fab_output_settings.cpp\
 	src/board/board_hole.cpp\
@@ -77,13 +78,15 @@ SRC_COMMON = \
 	src/rules/rule.cpp\
 	src/rules/rule_descr.cpp\
 	src/rules/rule_match.cpp\
+	src/rules/rule_match_keepout.cpp\
 	src/parameter/program.cpp\
 	src/parameter/set.cpp\
 	3rd_party/clipper/clipper.cpp\
 	src/common/dimension.cpp\
 	src/logger/logger.cpp\
 	src/parameter/program_polygon.cpp\
-	src/frame/frame.cpp
+	src/frame/frame.cpp\
+	src/common/keepout.cpp\
 
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += src/util/uuid_win32.cpp
@@ -202,6 +205,7 @@ SRC_IMP = \
 	src/core/tool_helper_line_width_setting.cpp\
 	src/core/tool_set_nc_all.cpp\
 	src/core/tool_set_nc.cpp\
+	src/core/tool_add_keepout.cpp\
 	src/core/cores.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\
@@ -231,6 +235,7 @@ SRC_IMP = \
 	src/dialogs/edit_stackup.cpp\
 	src/dialogs/edit_board_hole.cpp\
 	src/dialogs/edit_frame.cpp\
+	src/dialogs/edit_keepout.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\
 	src/core/core_schematic.cpp\
@@ -285,6 +290,7 @@ SRC_IMP = \
 	src/imp/rules/rules_window.cpp\
 	src/imp/rules/rule_editor.cpp\
 	src/imp/rules/rule_match_editor.cpp\
+	src/imp/rules/rule_match_keepout_editor.cpp\
 	src/imp/rules/rule_editor_hole_size.cpp\
 	src/imp/rules/rule_editor_clearance_silk_exp_copper.cpp\
 	src/imp/rules/rule_editor_track_width.cpp\
@@ -295,6 +301,7 @@ SRC_IMP = \
 	src/imp/rules/rule_editor_plane.cpp\
 	src/imp/rules/rule_editor_diffpair.cpp\
 	src/imp/rules/rule_editor_package_checks.cpp\
+	src/imp/rules/rule_editor_clearance_copper_keepout.cpp\
 	src/rules/rules_with_core.cpp\
 	src/rules/cache.cpp\
 	src/board/board_rules_check.cpp\

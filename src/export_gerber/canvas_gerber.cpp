@@ -41,6 +41,9 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
             }
         }
     }
+    else if (dynamic_cast<const Keepout *>(ipoly.usage.ptr)) {
+        // nop
+    }
     else {
         if (GerberWriter *wr = exporter->get_writer_for_layer(ipoly.layer)) {
             ClipperLib::Path path;

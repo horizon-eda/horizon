@@ -536,6 +536,95 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd)
     return r;
 }
 
+
+RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board *brd, RulesCheckCache &cache,
+                                                            check_status_cb_t status_cb)
+{
+    RulesCheckResult r;
+    r.level = RulesCheckErrorLevel::PASS;
+    status_cb("Getting patches");
+    auto rules = dynamic_cast_vector<RuleClearanceCopperKeepout *>(get_rules_sorted(RuleID::CLEARANCE_COPPER_KEEPOUT));
+    auto c = dynamic_cast<RulesCheckCacheBoardImage *>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
+    std::set<int> layers;
+    const auto &patches = c->get_canvas()->patches;
+    for (const auto &it : patches) { // collect copper layers
+        if (brd->get_layers().count(it.first.layer) && brd->get_layers().at(it.first.layer).copper) {
+            layers.emplace(it.first.layer);
+        }
+    }
+    auto keepout_contours = brd->get_keepout_contours();
+    auto n_patches = patches.size();
+    auto n_keepouts = keepout_contours.size();
+    int i_keepout = 0;
+    status_cb("Intersecting");
+    for (const auto &it_keepout : keepout_contours) {
+        i_keepout++;
+        const auto keepout = it_keepout.keepout;
+
+        int i_patch = 0;
+        for (const auto &it : patches) {
+            i_patch++;
+            {
+                std::stringstream ss;
+                ss << "Keepout " << i_keepout << "/" << n_keepouts << ", patch " << i_patch << "/" << n_patches;
+                status_cb(ss.str());
+            }
+            if (BoardLayers::is_copper(it.first.layer)
+                && (it.first.layer == keepout->polygon->layer || keepout->all_cu_layers)
+                && keepout->patch_types_cu.count(it.first.type)) {
+
+                const Net *net = it.first.net ? &brd->block->nets.at(it.first.net) : nullptr;
+                int64_t clearance = 0;
+                for (const auto &rule : rules) {
+                    if (rule->match.match(net)
+                        && (rule->match_keepout.mode == RuleMatchKeepout::Mode::ALL
+                            || (rule->match_keepout.mode == RuleMatchKeepout::Mode::KEEPOUT_CLASS
+                                && rule->match_keepout.keepout_class == keepout->keepout_class))) {
+                        clearance = rule->get_clearance(it.first.type);
+                        break;
+                    }
+                }
+
+
+                ClipperLib::Clipper clipper;
+                if (clearance == 0) {
+                    clipper.AddPath(it_keepout.contour, ClipperLib::ptClip, true);
+                }
+                else {
+                    ClipperLib::Paths keepout_contour_expanded;
+                    ClipperLib::ClipperOffset ofs;
+                    ofs.ArcTolerance = 10e3;
+                    ofs.AddPath(it_keepout.contour, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+                    ofs.Execute(keepout_contour_expanded, clearance);
+                    clipper.AddPaths(keepout_contour_expanded, ClipperLib::ptClip, true);
+                }
+                clipper.AddPaths(it.second, ClipperLib::ptSubject, true);
+                ClipperLib::Paths errors;
+                clipper.Execute(ClipperLib::ctIntersection, errors, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+
+                // no intersection: no clearance violation
+                if (errors.size() > 0) {
+                    for (const auto &ite : errors) {
+                        r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+                        auto &e = r.errors.back();
+                        e.has_location = true;
+                        Accumulator<Coordi> acc;
+                        for (const auto &ite2 : ite) {
+                            acc.accumulate({ite2.X, ite2.Y});
+                        }
+                        e.location = acc.get();
+                        e.comment =
+                                patch_type_names.at(it.first.type) + "(" + (net ? net->name : "") + ") near keepout";
+                        e.error_polygons = {ite};
+                    }
+                }
+            }
+        }
+    }
+
+    return r;
+}
+
 RulesCheckResult BoardRules::check(RuleID id, const Board *brd, RulesCheckCache &cache, check_status_cb_t status_cb)
 {
     switch (id) {
@@ -550,6 +639,9 @@ RulesCheckResult BoardRules::check(RuleID id, const Board *brd, RulesCheckCache 
 
     case RuleID::CLEARANCE_COPPER_OTHER:
         return BoardRules::check_clearance_copper_non_copper(brd, cache, status_cb);
+
+    case RuleID::CLEARANCE_COPPER_KEEPOUT:
+        return BoardRules::check_clearance_copper_keepout(brd, cache, status_cb);
 
     case RuleID::PREFLIGHT_CHECKS:
         return BoardRules::check_preflight(brd);

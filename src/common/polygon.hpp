@@ -14,7 +14,7 @@ using json = nlohmann::json;
 
 class PolygonUsage : public UUIDProvider {
 public:
-    enum class Type { INVALID, PLANE };
+    enum class Type { INVALID, PLANE, KEEPOUT };
     virtual Type get_type() const = 0;
     virtual UUID get_uuid() const = 0;
     virtual ~PolygonUsage(){};

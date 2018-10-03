@@ -56,6 +56,7 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
         else {
             vertex->position = args.coords;
         }
+        return ToolResponse::fast();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {

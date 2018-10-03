@@ -83,6 +83,15 @@ void BoardRules::load_from_json(const json &j)
         }
         fix_order(RuleID::DIFFPAIR);
     }
+    if (j.count("clearance_copper_keepout")) {
+        const json &o = j["clearance_copper_keepout"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            rule_clearance_copper_keepout.emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                                                  std::forward_as_tuple(u, it.value()));
+        }
+        fix_order(RuleID::CLEARANCE_COPPER_KEEPOUT);
+    }
     if (j.count("clearance_silkscreen_exposed_copper")) {
         const json &o = j["clearance_silkscreen_exposed_copper"];
         rule_clearance_silkscreen_exposed_copper = RuleClearanceSilkscreenExposedCopper(o);
@@ -113,6 +122,10 @@ void BoardRules::cleanup(const Block *block)
     }
     for (auto &it : rule_plane) {
         it.second.match.cleanup(block);
+    }
+    for (auto &it : rule_clearance_copper_keepout) {
+        it.second.match.cleanup(block);
+        it.second.match_keepout.cleanup(block);
     }
     for (auto &it : rule_diffpair) {
         if (!block->net_classes.count(it.second.net_class))
@@ -185,6 +198,10 @@ json BoardRules::serialize() const
     for (const auto &it : rule_clearance_copper_other) {
         j["clearance_copper_other"][(std::string)it.first] = it.second.serialize();
     }
+    j["clearance_copper_keepout"] = json::object();
+    for (const auto &it : rule_clearance_copper_keepout) {
+        j["clearance_copper_keepout"][(std::string)it.first] = it.second.serialize();
+    }
     j["clearance_silkscreen_exposed_copper"] = rule_clearance_silkscreen_exposed_copper.serialize();
     j["parameters"] = rule_parameters.serialize();
     return j;
@@ -201,7 +218,8 @@ std::set<RuleID> BoardRules::get_rule_ids() const
             RuleID::CLEARANCE_COPPER_OTHER,
             RuleID::PLANE,
             RuleID::DIFFPAIR,
-            RuleID::PREFLIGHT_CHECKS};
+            RuleID::PREFLIGHT_CHECKS,
+            RuleID::CLEARANCE_COPPER_KEEPOUT};
 }
 
 Rule *BoardRules::get_rule(RuleID id)
@@ -235,6 +253,8 @@ Rule *BoardRules::get_rule(RuleID id, const UUID &uu)
         return &rule_plane.at(uu);
     case RuleID::DIFFPAIR:
         return &rule_diffpair.at(uu);
+    case RuleID::CLEARANCE_COPPER_KEEPOUT:
+        return &rule_clearance_copper_keepout.at(uu);
     default:
         return nullptr;
     }
@@ -284,6 +304,12 @@ std::map<UUID, Rule *> BoardRules::get_rules(RuleID id)
         }
         break;
 
+    case RuleID::CLEARANCE_COPPER_KEEPOUT:
+        for (auto &it : rule_clearance_copper_keepout) {
+            r[it.first] = &it.second;
+        }
+        break;
+
     default:;
     }
     return r;
@@ -318,6 +344,10 @@ void BoardRules::remove_rule(RuleID id, const UUID &uu)
 
     case RuleID::DIFFPAIR:
         rule_diffpair.erase(uu);
+        break;
+
+    case RuleID::CLEARANCE_COPPER_KEEPOUT:
+        rule_clearance_copper_keepout.erase(uu);
         break;
 
     default:;
@@ -362,6 +392,11 @@ Rule *BoardRules::add_rule(RuleID id)
 
     case RuleID::DIFFPAIR:
         r = &rule_diffpair.emplace(uu, uu).first->second;
+        r->order = -1;
+        break;
+
+    case RuleID::CLEARANCE_COPPER_KEEPOUT:
+        r = &rule_clearance_copper_keepout.emplace(uu, uu).first->second;
         r->order = -1;
         break;
 
@@ -427,6 +462,19 @@ const RuleDiffpair *BoardRules::get_diffpair(NetClass *net_class, int layer)
     return &diffpair_fallback;
 }
 
+static const RuleClearanceCopperKeepout keepout_fallback = UUID();
+
+const RuleClearanceCopperKeepout *BoardRules::get_clearance_copper_keepout(Net *net, const KeepoutContour *contour)
+{
+    auto rules = dynamic_cast_vector<RuleClearanceCopperKeepout *>(get_rules_sorted(RuleID::CLEARANCE_COPPER_KEEPOUT));
+    for (auto ru : rules) {
+        if (ru->enabled && ru->match.match(net) && ru->match_keepout.match(contour)) {
+            return ru;
+        }
+    }
+    return &keepout_fallback;
+}
+
 uint64_t BoardRules::get_max_clearance()
 {
     uint64_t max_clearance = 0;
@@ -440,6 +488,15 @@ uint64_t BoardRules::get_max_clearance()
     }
     {
         auto rules = dynamic_cast_vector<RuleClearanceCopperOther *>(get_rules_sorted(RuleID::CLEARANCE_COPPER_OTHER));
+        for (auto ru : rules) {
+            if (ru->enabled) {
+                max_clearance = std::max(max_clearance, ru->get_max_clearance());
+            }
+        }
+    }
+    {
+        auto rules =
+                dynamic_cast_vector<RuleClearanceCopperKeepout *>(get_rules_sorted(RuleID::CLEARANCE_COPPER_KEEPOUT));
         for (auto ru : rules) {
             if (ru->enabled) {
                 max_clearance = std::max(max_clearance, ru->get_max_clearance());
