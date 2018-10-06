@@ -2,8 +2,7 @@
 #include "block/block.hpp"
 #include "core/core_board.hpp"
 #include "rules/rule_match_keepout.hpp"
-#include "widgets/net_button.hpp"
-#include "widgets/net_class_button.hpp"
+#include "widgets/component_button.hpp"
 
 namespace horizon {
 RuleMatchKeepoutEditor::RuleMatchKeepoutEditor(RuleMatchKeepout *ma, class Core *c)
@@ -12,6 +11,7 @@ RuleMatchKeepoutEditor::RuleMatchKeepoutEditor(RuleMatchKeepout *ma, class Core 
     combo_mode = Gtk::manage(new Gtk::ComboBoxText());
     combo_mode->append(std::to_string(static_cast<int>(RuleMatchKeepout::Mode::ALL)), "All");
     combo_mode->append(std::to_string(static_cast<int>(RuleMatchKeepout::Mode::KEEPOUT_CLASS)), "Keepout class");
+    combo_mode->append(std::to_string(static_cast<int>(RuleMatchKeepout::Mode::COMPONENT)), "Component");
     combo_mode->set_active_id(std::to_string(static_cast<int>(match->mode)));
     combo_mode->signal_changed().connect([this] {
         match->mode = static_cast<RuleMatchKeepout::Mode>(std::stoi(combo_mode->get_active_id()));
@@ -37,6 +37,14 @@ RuleMatchKeepoutEditor::RuleMatchKeepoutEditor(RuleMatchKeepout *ma, class Core 
         s_signal_updated.emit();
     });
     sel_stack->add(*keepout_class_entry, std::to_string(static_cast<int>(RuleMatchKeepout::Mode::KEEPOUT_CLASS)));
+
+    component_button = Gtk::manage(new ComponentButton(block));
+    component_button->signal_changed().connect([this](const UUID &uu) {
+        match->component = uu;
+        s_signal_updated.emit();
+    });
+    sel_stack->add(*component_button, std::to_string(static_cast<int>(RuleMatchKeepout::Mode::COMPONENT)));
+
 
     auto *dummy_label = Gtk::manage(new Gtk::Label("matches all keepouts"));
     sel_stack->add(*dummy_label, std::to_string(static_cast<int>(RuleMatchKeepout::Mode::ALL)));

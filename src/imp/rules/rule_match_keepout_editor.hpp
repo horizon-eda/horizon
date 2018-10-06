@@ -18,5 +18,6 @@ private:
     RuleMatchKeepout *match;
     class Core *core;
     type_signal_updated s_signal_updated;
+    class ComponentButton *component_button = nullptr;
 };
 } // namespace horizon

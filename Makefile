@@ -257,6 +257,8 @@ SRC_IMP = \
 	src/widgets/net_class_button.cpp\
 	src/widgets/parameter_set_editor.cpp\
 	src/widgets/pool_browser.cpp\
+	src/widgets/component_selector.cpp\
+	src/widgets/component_button.cpp\
 	src/export_pdf/export_pdf.cpp\
 	src/imp/keyseq_dialog.cpp\
 	src/canvas/canvas_patch.cpp\

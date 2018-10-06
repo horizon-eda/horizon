@@ -52,6 +52,7 @@ private:
     std::map<UUID, Text> *get_text_map(bool work = true) override;
     std::map<UUID, Polygon> *get_polygon_map(bool work = true) override;
     std::map<UUID, Hole> *get_hole_map(bool work = true) override;
+    std::map<UUID, Keepout> *get_keepout_map() override;
 
     Package package;
     std::string m_filename;

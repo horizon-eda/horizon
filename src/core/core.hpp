@@ -383,6 +383,7 @@ public:
 
     virtual std::vector<Line *> get_lines(bool work = true);
     virtual std::vector<Arc *> get_arcs(bool work = true);
+    virtual std::vector<Keepout *> get_keepouts();
 
     virtual class Block *get_block(bool work = true)
     {

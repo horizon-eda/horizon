@@ -4,7 +4,8 @@
 #include <iostream>
 #include <deque>
 #include <algorithm>
-#include "board/board.hpp"
+#include "core/core.hpp"
+#include "common/keepout.hpp"
 #include "board/board_layers.hpp"
 #include "util/gtk_util.hpp"
 #include "common/patch_type_names.hpp"
@@ -15,7 +16,7 @@ namespace horizon {
 static const std::vector<PatchType> patch_types_cu = {PatchType::TRACK, PatchType::PAD, PatchType::PAD_TH,
                                                       PatchType::PLANE, PatchType::VIA, PatchType::HOLE_PTH};
 
-EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout *k, Board *brd)
+EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout *k, Core *core)
     : Gtk::Dialog("Edit Keepout", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       keepout(k)
 {
@@ -93,8 +94,8 @@ EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout *k, Board *brd
     sc->set_sensitive(is_cu);
 
     auto delete_button = Gtk::manage(new Gtk::Button("Delete Keepout"));
-    delete_button->signal_clicked().connect([this, brd] {
-        brd->keepouts.erase(keepout->uuid);
+    delete_button->signal_clicked().connect([this, core] {
+        core->delete_keepout(keepout->uuid);
         response(Gtk::RESPONSE_OK);
     });
     box->pack_start(*delete_button, false, false, 0);

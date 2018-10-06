@@ -27,7 +27,7 @@ bool CorePackage::has_object_type(ObjectType ty)
     case ObjectType::TEXT:
     case ObjectType::LINE:
     case ObjectType::ARC:
-
+    case ObjectType::KEEPOUT:
         return true;
         break;
     default:;
@@ -70,6 +70,10 @@ std::map<UUID, Text> *CorePackage::get_text_map(bool work)
 std::map<UUID, Polygon> *CorePackage::get_polygon_map(bool work)
 {
     return &package.polygons;
+}
+std::map<UUID, Keepout> *CorePackage::get_keepout_map()
+{
+    return &package.keepouts;
 }
 std::map<UUID, Hole> *CorePackage::get_hole_map(bool work)
 {

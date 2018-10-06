@@ -64,7 +64,8 @@ public:
     static Package new_from_file(const std::string &filename, class Pool &pool);
 
     json serialize() const;
-    virtual Junction *get_junction(const UUID &uu);
+    Junction *get_junction(const UUID &uu) override;
+    Polygon *get_polygon(const UUID &uu) override;
     std::pair<Coordi, Coordi> get_bbox() const;
     const std::map<int, Layer> &get_layers() const override;
     std::pair<bool, std::string> apply_parameter_set(const ParameterSet &ps);

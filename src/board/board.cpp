@@ -771,6 +771,20 @@ std::vector<KeepoutContour> Board::get_keepout_contours() const
             contour.push_back({itv.position.x, itv.position.y});
         }
     }
+    for (const auto &it_pkg : packages) {
+        for (const auto &it : it_pkg.second.package.keepouts) {
+            r.emplace_back();
+            ClipperLib::Path &contour = r.back().contour;
+            r.back().keepout = &it.second;
+            r.back().pkg = &it_pkg.second;
+            auto poly2 = it.second.polygon->remove_arcs();
+            contour.reserve(poly2.vertices.size());
+            for (const auto &itv : poly2.vertices) {
+                auto p = it_pkg.second.placement.transform(itv.position);
+                contour.push_back({p.x, p.y});
+            }
+        }
+    }
     return r;
 }
 

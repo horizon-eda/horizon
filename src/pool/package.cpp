@@ -103,6 +103,18 @@ Package::Package(const UUID &uu, const json &j, Pool &pool)
             polygons.emplace(std::make_pair(u, Polygon(u, it.value())));
         }
     }
+    if (j.count("keepouts")) {
+        const json &o = j["keepouts"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            keepouts.emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                             std::forward_as_tuple(u, it.value(), *this));
+        }
+    }
+    for (auto &it : keepouts) {
+        it.second.polygon.update(polygons);
+        it.second.polygon->usage = &it.second;
+    }
     map_erase_if(polygons, [](const auto &a) { return a.second.vertices.size() == 0; });
     if (j.count("tags")) {
         tags = j.at("tags").get<std::set<std::string>>();
@@ -153,11 +165,16 @@ Junction *Package::get_junction(const UUID &uu)
     return &junctions.at(uu);
 }
 
+Polygon *Package::get_polygon(const UUID &uu)
+{
+    return &polygons.at(uu);
+}
+
 Package::Package(const Package &pkg)
     : uuid(pkg.uuid), name(pkg.name), manufacturer(pkg.manufacturer), tags(pkg.tags), junctions(pkg.junctions),
       lines(pkg.lines), arcs(pkg.arcs), texts(pkg.texts), pads(pkg.pads), polygons(pkg.polygons),
-      parameter_set(pkg.parameter_set), parameter_program(pkg.parameter_program), models(pkg.models),
-      default_model(pkg.default_model), alternate_for(pkg.alternate_for), warnings(pkg.warnings)
+      keepouts(pkg.keepouts), parameter_set(pkg.parameter_set), parameter_program(pkg.parameter_program),
+      models(pkg.models), default_model(pkg.default_model), alternate_for(pkg.alternate_for), warnings(pkg.warnings)
 {
     update_refs();
 }
@@ -174,6 +191,7 @@ void Package::operator=(Package const &pkg)
     texts = pkg.texts;
     pads = pkg.pads;
     polygons = pkg.polygons;
+    keepouts = pkg.keepouts;
     parameter_set = pkg.parameter_set;
     parameter_program = pkg.parameter_program;
     models = pkg.models;
@@ -204,6 +222,10 @@ void Package::update_refs()
         arc.to = &junctions.at(arc.to.uuid);
         arc.from = &junctions.at(arc.from.uuid);
         arc.center = &junctions.at(arc.center.uuid);
+    }
+    for (auto &it : keepouts) {
+        it.second.polygon.update(polygons);
+        it.second.polygon->usage = &it.second;
     }
     parameter_program.pkg = this;
 }
@@ -247,6 +269,7 @@ std::pair<bool, std::string> Package::apply_parameter_set(const ParameterSet &ps
 
 void Package::expand()
 {
+    map_erase_if(keepouts, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
     for (auto &it : junctions) {
         it.second.temp = false;
         it.second.layer = 10000;
@@ -364,6 +387,10 @@ json Package::serialize() const
     j["polygons"] = json::object();
     for (const auto &it : polygons) {
         j["polygons"][(std::string)it.first] = it.second.serialize();
+    }
+    j["keepouts"] = json::object();
+    for (const auto &it : keepouts) {
+        j["keepouts"][(std::string)it.first] = it.second.serialize();
     }
     return j;
 }

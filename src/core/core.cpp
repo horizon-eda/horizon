@@ -597,6 +597,19 @@ void Core::delete_keepout(const UUID &uu)
     map->erase(uu);
 }
 
+std::vector<Keepout *> Core::get_keepouts()
+{
+    auto *map = get_keepout_map();
+    std::vector<Keepout *> r;
+    if (!map)
+        return r;
+    for (auto &it : *map) {
+        r.push_back(&it.second);
+    }
+    return r;
+}
+
+
 void Core::rebuild(bool from_undo)
 {
     if (!from_undo && !reverted) {

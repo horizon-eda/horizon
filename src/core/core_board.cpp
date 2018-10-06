@@ -76,6 +76,7 @@ bool CoreBoard::has_object_type(ObjectType ty)
     case ObjectType::BOARD_PACKAGE:
     case ObjectType::VIA:
     case ObjectType::DIMENSION:
+    case ObjectType::KEEPOUT:
         return true;
         break;
     default:;

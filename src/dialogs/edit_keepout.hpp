@@ -7,7 +7,7 @@
 namespace horizon {
 class EditKeepoutDialog : public Gtk::Dialog {
 public:
-    EditKeepoutDialog(Gtk::Window *parent, class Keepout *k, class Board *brd);
+    EditKeepoutDialog(Gtk::Window *parent, class Keepout *k, class Core *c);
 
 private:
     class Keepout *keepout = nullptr;

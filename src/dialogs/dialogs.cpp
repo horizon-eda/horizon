@@ -388,9 +388,9 @@ bool Dialogs::edit_plane(class Plane *plane, class Board *brd, class Block *bloc
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_keepout(class Keepout *keepout, class Board *brd)
+bool Dialogs::edit_keepout(class Keepout *keepout, class Core *c)
 {
-    EditKeepoutDialog dia(parent, keepout, brd);
+    EditKeepoutDialog dia(parent, keepout, c);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
