@@ -94,6 +94,8 @@ LIBS=(
 	libpsl-5.dll\
 	libthai-0.dll\
 	libdatrie-1.dll\
+	libssl-1_1-x64.dll\
+	libcrypto-1_1-x64.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
