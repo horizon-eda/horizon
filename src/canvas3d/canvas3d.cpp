@@ -367,33 +367,33 @@ void Canvas3D::prepare()
     }
 
     layer = BoardLayers::TOP_MASK;
-    layers[layer].offset = .036;
-    layers[layer].thickness = 0.035;
+    layers[layer].offset = brd->stackup.at(0).thickness / 1e6 + 1e-3;
+    layers[layer].thickness = 0.01;
     layers[layer].alpha = .8;
     layers[layer].explode_mul = 3;
     prepare_soldermask(layer);
 
     layer = BoardLayers::BOTTOM_MASK;
-    layers[layer].offset = -board_thickness - .036;
+    layers[layer].offset = -board_thickness - 1e-3;
     layers[layer].thickness = 0.035;
     layers[layer].alpha = .8;
     layers[layer].explode_mul = -2 * n_inner_layers - 3;
     prepare_soldermask(layer);
 
     layer = BoardLayers::TOP_SILKSCREEN;
-    layers[layer].offset = .07;
+    layers[layer].offset = brd->stackup.at(0).thickness / 1e6 + 1e-3;
     layers[layer].thickness = 0.035;
     layers[layer].explode_mul = 4;
     prepare_layer(layer);
 
     layer = BoardLayers::BOTTOM_SILKSCREEN;
-    layers[layer].offset = -board_thickness - .07;
+    layers[layer].offset = -board_thickness - .1e-3;
     layers[layer].thickness = -0.035;
     layers[layer].explode_mul = -2 * n_inner_layers - 4;
     prepare_layer(layer);
 
     layer = BoardLayers::TOP_PASTE;
-    layers[layer].offset = .036;
+    layers[layer].offset = brd->stackup.at(0).thickness / 1e6 + 1e-3;
     layers[layer].thickness = 0.035;
     layers[layer].explode_mul = 2;
     prepare_layer(layer);
