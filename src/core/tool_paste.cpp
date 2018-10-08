@@ -160,6 +160,7 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
                 net_new = block->insert_net();
                 net_new->is_power = net_from_json.is_power;
                 net_new->name = net_name;
+                net_new->power_symbol_style = net_from_json.power_symbol_style;
             }
             net_xlat.emplace(it.key(), net_new->uuid);
         }
