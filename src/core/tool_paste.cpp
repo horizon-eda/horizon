@@ -44,20 +44,18 @@ void ToolPaste::apply_shift(Coordi &c, const Coordi &cursor_pos)
     c += shift;
 }
 
-ToolResponse ToolPaste::begin(const ToolArgs &args)
+class ToolDataPaste : public ToolData {
+public:
+    std::string clipboard_text;
+};
+
+ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi &cursor_pos_canvas)
 {
-    auto ref_clipboard = Gtk::Clipboard::get();
-    auto seld = ref_clipboard->wait_for_contents("imp-buffer");
-    if (seld.gobj())
-        std::cout << "len " << seld.get_length() << std::endl;
-    else
-        return ToolResponse::end();
-    auto clipboard_data = seld.get_data_as_string();
-    auto j = json::parse(clipboard_data);
-    std::cout << j << std::endl;
+    auto j = json::parse(paste_data);
     Coordi cursor_pos = j.at("cursor_pos").get<std::vector<int64_t>>();
+    printf("Core %p\n", core.r);
     core.r->selection.clear();
-    shift = args.coords - cursor_pos;
+    shift = cursor_pos_canvas - cursor_pos;
 
     std::map<UUID, const UUID> text_xlat;
     if (j.count("texts")) {
@@ -68,7 +66,7 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
             auto x = core.r->insert_text(u);
             *x = Text(u, it.value());
             fix_layer(x->layer);
-            apply_shift(x->placement.shift, args.coords);
+            apply_shift(x->placement.shift, cursor_pos_canvas);
             core.r->selection.emplace(u, ObjectType::TEXT);
         }
     }
@@ -80,7 +78,7 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
             junction_xlat.emplace(it.key(), u);
             auto x = core.r->insert_junction(u);
             *x = Junction(u, it.value());
-            apply_shift(x->position, args.coords);
+            apply_shift(x->position, cursor_pos_canvas);
             core.r->selection.emplace(u, ObjectType::JUNCTION);
         }
     }
@@ -111,7 +109,7 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             auto &x = core.k->get_package()->pads.emplace(u, Pad(u, it.value(), *core.r->m_pool)).first->second;
-            apply_shift(x.placement.shift, args.coords);
+            apply_shift(x.placement.shift, cursor_pos_canvas);
             core.r->selection.emplace(u, ObjectType::PAD);
         }
     }
@@ -121,7 +119,7 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
             auto u = UUID::random();
             auto x = core.r->insert_hole(u);
             *x = Hole(u, it.value());
-            apply_shift(x->placement.shift, args.coords);
+            apply_shift(x->placement.shift, cursor_pos_canvas);
             core.r->selection.emplace(u, ObjectType::HOLE);
         }
     }
@@ -186,7 +184,6 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
         auto sheet = core.c->get_sheet();
         auto block = core.c->get_schematic()->block;
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            std::cout << "paste sym" << std::endl;
             auto u = UUID::random();
             symbol_xlat.emplace(it.key(), u);
             SchematicSymbol sym(u, it.value(), *core.r->m_pool);
@@ -204,7 +201,6 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
         const json &o = j["net_lines"];
         auto sheet = core.c->get_sheet();
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            std::cout << "paste net line" << std::endl;
             auto u = UUID::random();
             LineNet line(u, it.value());
             auto update_net_line_conn = [this, &junction_xlat, &symbol_xlat, sheet](LineNet::Connection &c) {
@@ -291,7 +287,12 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
             core.r->selection.emplace(u, ObjectType::TRACK);
         }
     }
-    move_init(args.coords);
+    if (core.r->selection.size() == 0) {
+        imp->tool_bar_flash("Empty buffer");
+        core.r->revert();
+        return ToolResponse::end();
+    }
+    move_init(cursor_pos_canvas);
     imp->tool_bar_set_tip(
             "<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate "
             "<b>e:</b>mirror");
@@ -301,31 +302,57 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
     return ToolResponse();
 }
 
+ToolResponse ToolPaste::begin(const ToolArgs &args)
+{
+    imp->tool_bar_set_tip("waiting for paste data");
+    auto ref_clipboard = Gtk::Clipboard::get();
+    ref_clipboard->request_contents("imp-buffer", [this](const Gtk::SelectionData &sel_data) {
+        auto td = std::make_unique<ToolDataPaste>();
+        if (sel_data.gobj())
+            td->clipboard_text = sel_data.get_data_as_string();
+        imp->tool_update_data(std::move(td));
+    });
+    return ToolResponse();
+}
+
 ToolResponse ToolPaste::update(const ToolArgs &args)
 {
-    if (args.type == ToolEventType::MOVE) {
-        move_do_cursor(args.coords);
-        return ToolResponse::fast();
-    }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
-            merge_selected_junctions();
-            core.r->commit();
-            return ToolResponse::next(ToolID::PASTE);
-        }
-        else {
-            core.r->revert();
-            return ToolResponse::end();
+    if (!data_received) { // wait for data
+        if (args.type == ToolEventType::DATA) {
+            auto data = dynamic_cast<ToolDataPaste *>(args.data.get());
+            if (data->clipboard_text.size() == 0) {
+                imp->tool_bar_flash("Empty Buffer");
+                return ToolResponse::end();
+            }
+            data_received = true;
+            return begin_paste(data->clipboard_text, args.coords);
         }
     }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+    else {
+        if (args.type == ToolEventType::MOVE) {
+            move_do_cursor(args.coords);
+            return ToolResponse::fast();
         }
-        else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
-            bool rotate = args.key == GDK_KEY_r;
-            move_mirror_or_rotate(args.coords, rotate);
+        else if (args.type == ToolEventType::CLICK) {
+            if (args.button == 1) {
+                merge_selected_junctions();
+                core.r->commit();
+                return ToolResponse::next(ToolID::PASTE);
+            }
+            else {
+                core.r->revert();
+                return ToolResponse::end();
+            }
+        }
+        else if (args.type == ToolEventType::KEY) {
+            if (args.key == GDK_KEY_Escape) {
+                core.r->revert();
+                return ToolResponse::end();
+            }
+            else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
+                bool rotate = args.key == GDK_KEY_r;
+                move_mirror_or_rotate(args.coords, rotate);
+            }
         }
     }
     return ToolResponse();

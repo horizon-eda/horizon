@@ -290,7 +290,11 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                 auto pad = &pkg->package.pads.at(args.target.path.at(1));
                 net = pad->net;
                 if (net) {
-                    ToolArgs a(args);
+                    ToolArgs a;
+                    a.type = args.type;
+                    a.target = args.target;
+                    a.coords = args.coords;
+                    a.work_layer = args.work_layer;
                     if (!core.b->get_board()->get_layers().at(a.work_layer).copper) {
                         a.work_layer = 0;
                     }
@@ -318,7 +322,11 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                 auto junc = core.r->get_junction(args.target.path.at(0));
                 net = junc->net;
                 if (net) {
-                    ToolArgs a(args);
+                    ToolArgs a;
+                    a.type = args.type;
+                    a.target = args.target;
+                    a.coords = args.coords;
+                    a.work_layer = args.work_layer;
                     if (!core.b->get_board()->get_layers().at(a.work_layer).copper) {
                         a.work_layer = 0;
                     }

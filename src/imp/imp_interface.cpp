@@ -81,4 +81,9 @@ std::set<ObjectRef> &ImpInterface::get_highlights()
 {
     return imp->highlights;
 }
+
+void ImpInterface::tool_update_data(std::unique_ptr<ToolData> data)
+{
+    imp->tool_update_data(data);
+}
 } // namespace horizon

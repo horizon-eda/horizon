@@ -1460,4 +1460,17 @@ void ImpBase::set_read_only(bool v)
     read_only = v;
 }
 
+void ImpBase::tool_update_data(std::unique_ptr<ToolData> &data)
+{
+
+    if (core.r->tool_is_active()) {
+        ToolArgs args;
+        args.type = ToolEventType::DATA;
+        args.data = std::move(data);
+        args.coords = canvas->get_cursor_pos();
+        ToolResponse r = core.r->tool_update(args);
+        tool_process(r);
+    }
+}
+
 } // namespace horizon

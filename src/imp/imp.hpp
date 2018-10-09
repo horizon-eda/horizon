@@ -151,6 +151,8 @@ protected:
 
     bool read_only = false;
 
+    void tool_update_data(std::unique_ptr<ToolData> &data);
+
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;

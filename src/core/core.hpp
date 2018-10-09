@@ -5,6 +5,7 @@
 #include "common/object_descr.hpp"
 #include "common/keepout.hpp"
 #include "cores.hpp"
+#include "tool_data.hpp"
 #include "dialogs/dialogs.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "pool/pool.hpp"
@@ -15,7 +16,7 @@
 #include <sigc++/sigc++.h>
 
 namespace horizon {
-enum class ToolEventType { MOVE, CLICK, CLICK_RELEASE, KEY, LAYER_CHANGE };
+enum class ToolEventType { MOVE, CLICK, CLICK_RELEASE, KEY, LAYER_CHANGE, DATA };
 
 /**
  * Add new tools here.
@@ -148,6 +149,7 @@ public:
     unsigned int key;
     Target target;
     int work_layer;
+    std::unique_ptr<ToolData> data = nullptr;
     ToolArgs()
     {
     }

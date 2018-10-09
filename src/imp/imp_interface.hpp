@@ -1,6 +1,7 @@
 #pragma once
 #include "canvas/triangle.hpp"
 #include "dialogs/dialogs.hpp"
+#include "core/tool_data.hpp"
 
 namespace horizon {
 class ImpInterface {
@@ -18,6 +19,7 @@ public:
     void canvas_update();
     class CanvasGL *get_canvas();
     uint64_t get_grid_spacing();
+    void tool_update_data(std::unique_ptr<ToolData> data);
 
     void update_highlights();
     std::set<ObjectRef> &get_highlights();
