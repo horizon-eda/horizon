@@ -74,7 +74,7 @@ FootprintGeneratorDual::FootprintGeneratorDual(CorePackage *c)
     sp_pad_height->set_range(0, 50_mm);
     sp_pad_height->set_valign(Gtk::ALIGN_CENTER);
     sp_pad_height->set_halign(Gtk::ALIGN_START);
-    sp_pad_height->set_value(.5_mm);
+    sp_pad_height->set_value(2_mm);
     sp_spacing_connections.push_back(
             sp_pad_height->signal_value_changed().connect([this] { update_spacing(Mode::PAD_HEIGHT); }));
     overlay->add_at_sub(*sp_pad_height, "#pad_height");
@@ -280,14 +280,14 @@ void FootprintGeneratorDual::update_spacing(Mode mode)
     switch (mode) {
     case Mode::SPACING:
     case Mode::PAD_HEIGHT:
-        sp_spacing_inner->set_value(spacing - pad_height / 2);
-        sp_spacing_outer->set_value(spacing + pad_height / 2);
+        sp_spacing_inner->set_value(spacing * 2 - pad_height / 2);
+        sp_spacing_outer->set_value(spacing * 2 + pad_height / 2);
         break;
 
     case Mode::SPACING_INNER:
     case Mode::SPACING_OUTER:
         sp_pad_height->set_value(spacing_outer - spacing_inner);
-        sp_spacing->set_value((spacing_outer + spacing_inner) / 2);
+        sp_spacing->set_value((spacing_outer + spacing_inner) / 4);
         break;
     }
 
