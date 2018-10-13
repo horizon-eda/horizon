@@ -210,8 +210,13 @@ void Sheet::expand_symbols(void)
             for (auto &it_pin : pads) {
                 std::sort(it_pin.second.begin(), it_pin.second.end(),
                           [](const auto &a, const auto &b) { return strcmp_natural(a, b) < 0; });
-                for (const auto &pad : it_pin.second) {
-                    it_pin.first->pad += pad + " ";
+                if (it_pin.second.size() <= 3 || schsym.display_all_pads) {
+                    for (const auto &pad : it_pin.second) {
+                        it_pin.first->pad += pad + " ";
+                    }
+                }
+                else {
+                    it_pin.first->pad = it_pin.second.front() + " ... " + it_pin.second.back();
                 }
             }
         }
