@@ -38,6 +38,7 @@ public:
     Gtk::Entry *entry_project_title = nullptr;
     Gtk::Label *label_pool_name = nullptr;
     Gtk::Label *label_pool_path = nullptr;
+    Gtk::Label *label_project_directory = nullptr;
     Gtk::InfoBar *pool_info_bar = nullptr;
     Gtk::Label *pool_info_bar_label = nullptr;
 

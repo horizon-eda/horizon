@@ -818,7 +818,9 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         check_schema_update(pool_path);
 
         header->set_subtitle(project->title);
+        view_project.label_project_directory->set_text(Glib::path_get_dirname(project_filename));
         view_project.entry_project_title->set_text(project->title);
+        view_project.entry_project_title->grab_focus_without_selecting();
 
 
         view_project.pool_info_bar->hide();

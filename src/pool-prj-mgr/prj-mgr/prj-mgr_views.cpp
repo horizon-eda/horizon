@@ -113,6 +113,7 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
     builder->get_widget("entry_project_title", entry_project_title);
     builder->get_widget("label_pool_name", label_pool_name);
     builder->get_widget("label_pool_path", label_pool_path);
+    builder->get_widget("label_project_directory", label_project_directory);
     builder->get_widget("prj_pool_change_button", button_change_pool);
     builder->get_widget("prj_pool_info_bar", pool_info_bar);
 
