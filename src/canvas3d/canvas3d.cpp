@@ -541,28 +541,16 @@ void Canvas3D::load_models_async(Pool *pool)
     std::map<std::string, std::string> model_filenames; // first: relative, second: absolute
     for (const auto &it : brd->packages) {
         auto model = it.second.package.get_model(it.second.model);
-        UUID pool_uuid;
-        pool->get_filename(ObjectType::PACKAGE, it.second.package.uuid, &pool_uuid);
-        auto pool_info = PoolManager::get().get_by_uuid(pool_uuid);
-        if (model && pool_info)
-            model_filenames[model->filename] = Glib::build_filename(pool_info->base_path, model->filename);
+        if (model) {
+            auto model_filename = pool->get_model_filename(it.second.pool_package->uuid, model->uuid);
+            if (model_filename.size())
+                model_filenames[model->filename] = model_filename;
+        }
     }
     s_signal_models_loading.emit(true);
     std::thread thr(&Canvas3D::load_models_thread, this, model_filenames);
 
     thr.detach();
-}
-
-std::string Canvas3D::get_model_filename(const Package &pkg, Pool *pool, const UUID &model_uuid)
-{
-    auto model = pkg.get_model(model_uuid);
-    UUID pool_uuid;
-    pool->get_filename(ObjectType::PACKAGE, pkg.uuid, &pool_uuid);
-    auto pool_info = PoolManager::get().get_by_uuid(pool_uuid);
-    if (model && pool_info)
-        return Glib::build_filename(pool_info->base_path, model->filename);
-    else
-        return "";
 }
 
 void Canvas3D::clear_3d_models()

@@ -1111,14 +1111,34 @@ void PoolProjectManagerAppWindow::cleanup_pool_cache()
         }
     }
 
+    std::set<std::string> models_needed;
+    for (const auto &it_pkg : board.packages) {
+        // don't use pool_package because of alternate pkg
+        auto model = it_pkg.second.package.get_model(it_pkg.second.model);
+        if (model) {
+            models_needed.emplace(model->filename);
+        }
+    }
+    std::set<std::string> models_cached;
+    find_files_recursive(Glib::build_filename(project->pool_cache_directory, "3d_models"),
+                         [this, &models_cached](const std::string &model_filename) {
+                             models_cached.emplace(Glib::build_filename("3d_models", model_filename));
+                         });
+
     std::set<std::string> files_to_delete;
     for (const auto &it : items_cached) {
         if (items_needed.count(it.first) == 0) {
             files_to_delete.insert(it.second);
         }
     }
+    std::set<std::string> models_to_delete;
+    for (const auto &it : models_cached) {
+        if (models_needed.count(it) == 0) {
+            models_to_delete.insert(Glib::build_filename(project->pool_cache_directory, it));
+        }
+    }
 
-    PoolCacheCleanupDialog dia(pool_cache_window, files_to_delete, &pool_cached);
+    PoolCacheCleanupDialog dia(pool_cache_window, files_to_delete, models_to_delete, &pool_cached);
     dia.run();
 }
 

@@ -8,6 +8,7 @@
 #include <fstream>
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
+#include <giomm/file.h>
 
 namespace horizon {
 PoolCacheWindow *PoolCacheWindow::create(Gtk::Window *p, const std::string &cache_path, const std::string &pool_path,
@@ -21,6 +22,22 @@ PoolCacheWindow *PoolCacheWindow::create(Gtk::Window *p, const std::string &cach
     w->set_transient_for(*p);
 
     return w;
+}
+
+static void find_files(const std::string &base_path, std::function<void(const std::string &)> cb,
+                       const std::string &path = "")
+{
+    auto this_path = Glib::build_filename(base_path, path);
+    Glib::Dir dir(this_path);
+    for (const auto &it : dir) {
+        auto itempath = Glib::build_filename(this_path, it);
+        if (Glib::file_test(itempath, Glib::FILE_TEST_IS_DIR)) {
+            find_files(base_path, cb, Glib::build_filename(path, it));
+        }
+        else if (Glib::file_test(itempath, Glib::FILE_TEST_IS_REGULAR)) {
+            cb(Glib::build_filename(path, it));
+        }
+    }
 }
 
 void PoolCacheWindow::refresh_list()
@@ -117,6 +134,37 @@ void PoolCacheWindow::refresh_list()
             }
         }
     }
+    {
+        auto models_path = Glib::build_filename(cache_path, "3d_models");
+        if (Glib::file_test(models_path, Glib::FILE_TEST_IS_DIR)) {
+            find_files(models_path,
+                       [this, &models_path, &n_total, &n_missing, &n_current, &n_out_of_date](const std::string &path) {
+                           Gtk::TreeModel::Row row;
+                           row = *item_store->append();
+                           n_total++;
+                           auto filename_cached = Glib::build_filename(models_path, path);
+                           auto filename_pool = Glib::build_filename(pool.get_base_path(), "3d_models", path);
+                           row[tree_columns.filename_cached] = path;
+                           row[tree_columns.name] = Glib::path_get_basename(path);
+                           row[tree_columns.type] = ObjectType::MODEL_3D;
+                           row[tree_columns.uuid] = UUID::random();
+                           if (Glib::file_test(filename_pool, Glib::FILE_TEST_IS_REGULAR)) {
+                               if (compare_files(filename_cached, filename_pool)) {
+                                   row[tree_columns.state] = ItemState::CURRENT;
+                                   n_current++;
+                               }
+                               else {
+                                   row[tree_columns.state] = ItemState::OUT_OF_DATE;
+                                   n_out_of_date++;
+                               }
+                           }
+                           else {
+                               row[tree_columns.state] = ItemState::MISSING_IN_POOL;
+                               n_missing++;
+                           }
+                       });
+        }
+    }
     item_store->thaw_notify();
     for (const auto &it : item_store->children()) {
         Gtk::TreeModel::Row row = *it;
@@ -142,7 +190,14 @@ void PoolCacheWindow::update_from_pool()
     for (const auto &path : rows) {
         Gtk::TreeModel::Row row = *item_store->get_iter(path);
         ItemState state = row[tree_columns.state];
-        if (state == ItemState::OUT_OF_DATE) {
+        ObjectType type = row[tree_columns.type];
+        if (state == ItemState::OUT_OF_DATE && type == ObjectType::MODEL_3D) {
+            std::string model_path = Glib::build_filename("3d_models", row[tree_columns.filename_cached]);
+            auto dst = Gio::File::create_for_path(Glib::build_filename(cache_path, model_path));
+            auto src = Gio::File::create_for_path(Glib::build_filename(pool.get_base_path(), model_path));
+            src->copy(dst, Gio::FILE_COPY_OVERWRITE);
+        }
+        else if (state == ItemState::OUT_OF_DATE) {
             auto dst = Gio::File::create_for_path(row[tree_columns.filename_cached]);
             auto src = Gio::File::create_for_path(pool.get_filename(row[tree_columns.type], row[tree_columns.uuid]));
             src->copy(dst, Gio::FILE_COPY_OVERWRITE);
@@ -165,12 +220,16 @@ void PoolCacheWindow::selection_changed()
     if (rows.size() == 1) {
         Gtk::TreeModel::Row row = *item_store->get_iter(rows.at(0));
         ItemState state = row[tree_columns.state];
+        ObjectType type = row[tree_columns.type];
         update_from_pool_button->set_sensitive(state == ItemState::OUT_OF_DATE);
         if (state == ItemState::CURRENT) {
             stack->set_visible_child("up_to_date");
         }
         else if (state == ItemState::MISSING_IN_POOL) {
             stack->set_visible_child("missing_in_pool");
+        }
+        else if (state == ItemState::OUT_OF_DATE && type == ObjectType::MODEL_3D) {
+            stack->set_visible_child("3d_changed");
         }
         else if (state == ItemState::OUT_OF_DATE) {
             stack->set_visible_child("delta");

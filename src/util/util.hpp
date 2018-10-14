@@ -3,6 +3,7 @@
 #include "nlohmann/json_fwd.hpp"
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -44,4 +45,7 @@ std::string get_config_dir();
 
 void replace_backslash(std::string &path);
 json json_from_resource(const std::string &rsrc);
+bool compare_files(const std::string &filename_a, const std::string &filename_b);
+void find_files_recursive(const std::string &base_path, std::function<void(const std::string &)> cb,
+                          const std::string &path = "");
 } // namespace horizon

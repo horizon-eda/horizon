@@ -21,7 +21,7 @@ void PoolCacheCleanupDialog::action_toggled(const Glib::ustring &path)
 
 
 PoolCacheCleanupDialog::PoolCacheCleanupDialog(Gtk::Window *parent, const std::set<std::string> &filenames,
-                                               class Pool *pool)
+                                               const std::set<std::string> &models_delete, class Pool *pool)
     : Gtk::Dialog("Clean up Pool Cache", *parent,
                   Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
 
@@ -84,13 +84,33 @@ PoolCacheCleanupDialog::PoolCacheCleanupDialog(Gtk::Window *parent, const std::s
         row[list_columns.type] = type;
         row[list_columns.remove] = true;
     }
-
+    for (const auto &fi : models_delete) {
+        Gtk::TreeModel::Row row;
+        row = *item_store->append();
+        row[list_columns.filename] = fi;
+        row[list_columns.name] = Glib::path_get_basename(fi);
+        row[list_columns.type] = ObjectType::MODEL_3D;
+        row[list_columns.remove] = true;
+    }
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow);
     sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     sc->add(*tv);
+
+    auto ol = Gtk::manage(new Gtk::Overlay);
+    ol->add(*sc);
+
+    if (filenames.size() == 0 && models_delete.size() == 0) {
+        ok_button->set_sensitive(false);
+        auto la = Gtk::manage(new Gtk::Label);
+        la->set_markup("<i>There are no unused pool items in the cache.</i>");
+        la->get_style_context()->add_class("dim-label");
+        ol->add_overlay(*la);
+        la->show();
+    }
+
     get_content_area()->set_border_width(0);
-    get_content_area()->pack_start(*sc, true, true, 0);
+    get_content_area()->pack_start(*ol, true, true, 0);
     get_content_area()->show_all();
 }
 

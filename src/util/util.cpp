@@ -226,4 +226,44 @@ void replace_backslash(std::string &path)
 {
     std::replace(path.begin(), path.end(), '\\', '/');
 }
+
+bool compare_files(const std::string &filename_a, const std::string &filename_b)
+{
+    auto mapped_a = g_mapped_file_new(filename_a.c_str(), false, NULL);
+    if (!mapped_a) {
+        return false;
+    }
+    auto mapped_b = g_mapped_file_new(filename_b.c_str(), false, NULL);
+    if (!mapped_b) {
+        g_mapped_file_unref(mapped_a);
+        return false;
+    }
+    if (g_mapped_file_get_length(mapped_a) != g_mapped_file_get_length(mapped_b)) {
+        g_mapped_file_unref(mapped_a);
+        g_mapped_file_unref(mapped_b);
+        return false;
+    }
+    auto size = g_mapped_file_get_length(mapped_a);
+    auto r = memcmp(g_mapped_file_get_contents(mapped_a), g_mapped_file_get_contents(mapped_b), size);
+    g_mapped_file_unref(mapped_a);
+    g_mapped_file_unref(mapped_b);
+    return r == 0;
+}
+
+void find_files_recursive(const std::string &base_path, std::function<void(const std::string &)> cb,
+                          const std::string &path)
+{
+    auto this_path = Glib::build_filename(base_path, path);
+    Glib::Dir dir(this_path);
+    for (const auto &it : dir) {
+        auto itempath = Glib::build_filename(this_path, it);
+        if (Glib::file_test(itempath, Glib::FILE_TEST_IS_DIR)) {
+            find_files_recursive(base_path, cb, Glib::build_filename(path, it));
+        }
+        else if (Glib::file_test(itempath, Glib::FILE_TEST_IS_REGULAR)) {
+            cb(Glib::build_filename(path, it));
+        }
+    }
+}
+
 } // namespace horizon

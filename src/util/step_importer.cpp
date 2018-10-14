@@ -330,7 +330,7 @@ std::deque<Face> import(const std::string &filename)
 
     m_app->NewDocument("MDTV-XCAF", data.m_doc);
     if (!readSTEP(data.m_doc, filename.c_str())) {
-        std::cout << "error" << std::endl;
+        std::cout << "error loading " << filename << std::endl;
         return faces;
     }
     std::cout << "loaded" << std::endl;

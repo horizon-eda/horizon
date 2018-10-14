@@ -181,7 +181,6 @@ private:
 
     void load_3d_model(const std::string &filename, const std::string &filename_abs);
     void load_models_thread(std::map<std::string, std::string> model_filenames);
-    std::string get_model_filename(const Package &pkg, Pool *pool, const UUID &model_uuid);
 
     std::set<UUID> packages_highlight;
 

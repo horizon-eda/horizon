@@ -5,6 +5,7 @@
 #include "pool/part.hpp"
 #include "common/lut.hpp"
 #include "util/sqlite.hpp"
+#include "util/util.hpp"
 #include <iostream>
 #include "nlohmann/json.hpp"
 
@@ -318,29 +319,6 @@ void PoolMergeDialog::do_merge()
         }
     }
     merged = true;
-}
-
-static bool compare_files(const std::string &filename_a, const std::string &filename_b)
-{
-    auto mapped_a = g_mapped_file_new(filename_a.c_str(), false, NULL);
-    if (!mapped_a) {
-        return false;
-    }
-    auto mapped_b = g_mapped_file_new(filename_b.c_str(), false, NULL);
-    if (!mapped_b) {
-        g_mapped_file_unref(mapped_a);
-        return false;
-    }
-    if (g_mapped_file_get_length(mapped_a) != g_mapped_file_get_length(mapped_b)) {
-        g_mapped_file_unref(mapped_a);
-        g_mapped_file_unref(mapped_b);
-        return false;
-    }
-    auto size = g_mapped_file_get_length(mapped_a);
-    auto r = memcmp(g_mapped_file_get_contents(mapped_a), g_mapped_file_get_contents(mapped_b), size);
-    g_mapped_file_unref(mapped_a);
-    g_mapped_file_unref(mapped_b);
-    return r == 0;
 }
 
 void PoolMergeDialog::populate_store()

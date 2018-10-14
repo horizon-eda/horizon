@@ -10,7 +10,7 @@ using json = nlohmann::json;
 
 class PoolCacheCleanupDialog : public Gtk::Dialog {
 public:
-    PoolCacheCleanupDialog(Gtk::Window *parent, const std::set<std::string> &filenames_delete, class Pool *pool);
+    PoolCacheCleanupDialog(Gtk::Window *parent, const std::set<std::string> &filenames_delete, const std::set<std::string> &models_delete, class Pool *pool);
 
 private:
     void do_cleanup();
