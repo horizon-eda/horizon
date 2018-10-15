@@ -44,21 +44,25 @@ std::string PoolCached::get_model_filename(const UUID &pkg_uuid, const UUID &mod
     if (!model)
         return "";
     auto model_filename = model->filename;
+    auto model_filename_complete = Glib::build_filename(get_base_path(), model_filename);
     auto filename_cached = Glib::build_filename(cache_path, model_filename);
     if (Glib::file_test(filename_cached, Glib::FILE_TEST_IS_REGULAR)) {
         return filename_cached;
     }
-    else {
+    else if (Glib::file_test(model_filename_complete, Glib::FILE_TEST_IS_REGULAR)) {
         auto model_basename = Glib::path_get_basename(model_filename);
         auto model_dirname = Glib::path_get_dirname(model_filename);
         auto dest_dir = Glib::build_filename(cache_path, model_dirname);
         if (!Glib::file_test(dest_dir, Glib::FILE_TEST_IS_DIR)) {
             Gio::File::create_for_path(dest_dir)->make_directory_with_parents();
         }
-        auto src = Gio::File::create_for_path(Glib::build_filename(get_base_path(), model_filename));
+        auto src = Gio::File::create_for_path(model_filename_complete);
         auto dst = Gio::File::create_for_path(filename_cached);
         src->copy(dst);
         return src->get_path();
+    }
+    else {
+        return "";
     }
 }
 
