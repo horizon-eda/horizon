@@ -542,7 +542,15 @@ void Canvas3D::load_models_async(Pool *pool)
     for (const auto &it : brd->packages) {
         auto model = it.second.package.get_model(it.second.model);
         if (model) {
-            auto model_filename = pool->get_model_filename(it.second.pool_package->uuid, model->uuid);
+            std::string model_filename;
+            if (it.second.pool_package == pool->get_package(it.second.pool_package->uuid)) {
+                // package is from pool, ask pool for model filename (might come from cache)
+                model_filename = pool->get_model_filename(it.second.pool_package->uuid, model->uuid);
+            }
+            else {
+                // package is not from pool (from package editor, use filename relative to current pool)
+                model_filename = Glib::build_filename(pool->get_base_path(), model->filename);
+            }
             if (model_filename.size())
                 model_filenames[model->filename] = model_filename;
         }
