@@ -504,6 +504,15 @@ void PartWizard::import_pads(CSV::Csv &csv)
         if (!gate_name.empty()) {
             item.gate = gate_name;
         }
+        if (line.size() >= 5) {
+            for (size_t i = 4; i < line.size(); i++) {
+                std::string alt = line[i];
+                trim(alt);
+                if (alt.size()) {
+                    item.alt.push_back(alt);
+                }
+            }
+        }
     }
     import_pads(items);
 }
