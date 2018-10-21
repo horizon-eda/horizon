@@ -6,14 +6,15 @@ namespace horizon {
 
 class DestroyData {
 public:
-	sigc::connection conn;
+    sigc::connection conn;
 };
 
-static void *canvas_destroy(void *p) {
-	auto d = reinterpret_cast<DestroyData*>(p);
-	d->conn.disconnect();
-	delete d;
-	return nullptr;
+static void *canvas_destroy(void *p)
+{
+    auto d = reinterpret_cast<DestroyData *>(p);
+    d->conn.disconnect();
+    delete d;
+    return nullptr;
 }
 
 void preferences_provider_attach_canvas(CanvasGL *ca, bool layer)

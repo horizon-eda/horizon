@@ -144,10 +144,10 @@ void PoolProjectManagerApplication::on_startup()
     preferences.load();
     PreferencesProvider::get().set_prefs(preferences);
     preferences.signal_changed().connect([this] {
-    	json j;
-    	j["op"] = "preferences";
-    	j["preferences"] = preferences.serialize();
-    	send_json(0, j);
+        json j;
+        j["op"] = "preferences";
+        j["preferences"] = preferences.serialize();
+        send_json(0, j);
     });
 
     Gtk::IconTheme::get_default()->add_resource_path("/net/carrotIndustries/horizon/icons");

@@ -147,7 +147,6 @@ BoardHoleDialog::BoardHoleDialog(Gtk::Window *parent, std::set<BoardHole *> &hol
         net_button->signal_changed().connect([this, hole](const UUID &net_uu) { hole->net = block->get_net(net_uu); });
         grid->attach(*net_button, 1, 1, 1, 1);
         net_button->show();
-
     });
 
     combo->set_active(0);

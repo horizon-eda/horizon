@@ -12,7 +12,7 @@ using json = nlohmann::json;
 
 class CanvasPreferences {
 public:
-	Appearance appearance;
+    Appearance appearance;
     void load_from_json(const json &j);
     json serialize() const;
 };

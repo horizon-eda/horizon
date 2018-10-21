@@ -2,7 +2,7 @@
 #include <sigc++/sigc++.h>
 
 namespace horizon {
-class PreferencesProvider: public sigc::trackable {
+class PreferencesProvider : public sigc::trackable {
 public:
     PreferencesProvider();
     static PreferencesProvider &get();

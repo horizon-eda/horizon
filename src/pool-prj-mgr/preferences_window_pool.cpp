@@ -4,8 +4,7 @@
 namespace horizon {
 class PoolItemEditor : public Gtk::Box {
 public:
-    PoolItemEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
-                                const PoolManagerPool &pool)
+    PoolItemEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const PoolManagerPool &pool)
         : Gtk::Box(cobject)
     {
         x->get_widget("pool_item_name", label_name);
@@ -102,4 +101,4 @@ void PoolPreferencesEditor::update()
         });
     }
 }
-}
+} // namespace horizon

@@ -32,7 +32,6 @@ SymbolPreviewBox::SymbolPreviewBox(const std::pair<int, bool> &v)
             set_button->set_label("Clear");
             set_placements();
         }
-
     });
 
     pack_start(*tbox, false, false, 0);

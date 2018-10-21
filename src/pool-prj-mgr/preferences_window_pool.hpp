@@ -16,4 +16,4 @@ private:
     void update();
 };
 
-}
+} // namespace horizon

@@ -20,7 +20,6 @@ namespace horizon {
 enum class ToolEventType { MOVE, CLICK, CLICK_RELEASE, KEY, LAYER_CHANGE, DATA };
 
 
-
 /**
  * This is what a Tool receives when the user did something.
  * i.e. moved the cursor or pressed key

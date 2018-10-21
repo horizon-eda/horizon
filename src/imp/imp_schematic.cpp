@@ -317,7 +317,6 @@ void ImpSchematic::construct()
                     }
                 }
             }
-
         });
 
         connect_action(ActionID::SAVE_RELOAD_NETLIST, [this](const auto &conn) {

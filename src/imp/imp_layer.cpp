@@ -69,8 +69,8 @@ void ImpLayer::construct_layer_box(bool pack)
 void ImpLayer::apply_preferences()
 {
     auto canvas_prefs = get_canvas_preferences();
-    for(const auto &it: canvas_prefs->appearance.layer_colors) {
-    	layer_box->set_layer_color(it.first, it.second);
+    for (const auto &it : canvas_prefs->appearance.layer_colors) {
+        layer_box->set_layer_color(it.first, it.second);
     }
     ImpBase::apply_preferences();
 }

@@ -1372,8 +1372,8 @@ bool ImpBase::handle_broadcast(const json &j)
         return true;
     }
     else if (op == "preferences") {
-    	const auto &prefs = j.at("preferences");
-    	preferences.load_from_json(prefs);
+        const auto &prefs = j.at("preferences");
+        preferences.load_from_json(prefs);
         return true;
     }
     return false;
