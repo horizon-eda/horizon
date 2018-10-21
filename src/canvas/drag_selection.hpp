@@ -44,6 +44,7 @@ private:
         GLuint a_loc;
         GLuint b_loc;
         GLuint fill_loc;
+        GLuint color_loc;
 
         Coordf sel_a;
         Coordf sel_b;
@@ -72,6 +73,7 @@ private:
         GLuint screenmat_loc;
         GLuint viewmat_loc;
         GLuint scale_loc;
+        GLuint color_loc;
 
         class Vertex {
         public:

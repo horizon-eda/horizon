@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace horizon {
-Grid::Grid(class CanvasGL *c) : ca(c), spacing(1.25_mm), mark_size(5), color(Color::new_from_int(0, 51, 136)), alpha(1)
+Grid::Grid(class CanvasGL *c) : ca(c), spacing(1.25_mm), mark_size(5)
 {
 }
 
@@ -63,7 +63,8 @@ void Grid::render()
     glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca->screenmat));
     glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
     glUniform1f(mark_size_loc, mark_size);
-    glUniform4f(color_loc, color.r, color.g, color.b, alpha);
+    auto color = ca->get_color(ColorP::GRID);
+    glUniform4f(color_loc, color.r, color.g, color.b, ca->appearance.grid_opacity);
 
     float sp = spacing;
     float sp_px = sp * ca->scale;
@@ -115,7 +116,8 @@ void Grid::render()
     glUniform2f(grid_0_loc, grid_0.x, grid_0.y);
     glUniform1i(grid_mod_loc, 1);
     glUniform1f(mark_size_loc, 15);
-    glUniform4f(color_loc, 0, 1, 0, 1);
+    auto origin_color = ca->get_color(ColorP::ORIGIN);
+    gl_color_to_uniform_4f(color_loc, origin_color);
 
     glLineWidth(1 * ca->get_scale_factor());
     glDrawArraysInstanced(GL_LINES, 0, 4, 1);
@@ -136,16 +138,19 @@ void Grid::render_cursor(Coord<int64_t> &coord)
     glUniform2f(grid_0_loc, coord.x, coord.y);
     glUniform1i(grid_mod_loc, 1);
 
-    glUniform4f(color_loc, ca->background_color.r, ca->background_color.g, ca->background_color.b, 1);
+    auto bgcolor = ca->get_color(ColorP::BACKGROUND);
+    glUniform4f(color_loc, bgcolor.r, bgcolor.g, bgcolor.b, 1);
     glLineWidth(4 * ca->get_scale_factor());
     glDrawArraysInstanced(GL_LINES, 0, 12, 1);
 
+    Color cursor_color;
     if (ca->target_current.is_valid()) {
-        glUniform4f(color_loc, 1, 0, 0, 1);
+        cursor_color = ca->get_color(ColorP::CURSOR_TARGET);
     }
     else {
-        glUniform4f(color_loc, 0, 1, 0, 1);
+        cursor_color = ca->get_color(ColorP::CURSOR_NORMAL);
     }
+    glUniform4f(color_loc, cursor_color.r, cursor_color.g, cursor_color.b, 1);
     glLineWidth(1 * ca->get_scale_factor());
     glDrawArraysInstanced(GL_LINES, 0, 12, 1);
 

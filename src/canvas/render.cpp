@@ -32,15 +32,9 @@
 
 namespace horizon {
 
-Color Canvas::get_layer_color(int layer)
-{
-    Color c = layer_provider->get_layers().at(layer).color;
-    return c;
-}
-
 void Canvas::render(const Junction &junc, bool interactive, ObjectType mode)
 {
-    ColorP c = ColorP::YELLOW;
+    ColorP c = ColorP::JUNCTION;
     if (junc.net) {
         if (junc.net->diffpair)
             c = ColorP::DIFFPAIR;
@@ -273,7 +267,7 @@ void Canvas::render(const Track &track)
     draw_line(track.from.get_position(), track.to.get_position(), c, layer, true, width);
     if (track.locked && !track.is_air) {
         auto ol = get_overlay_layer(layer);
-        draw_lock(center, 0.7 * track.width, ColorP::WHITE, ol, true);
+        draw_lock(center, 0.7 * track.width, ColorP::TEXT_OVERLAY, ol, true);
     }
     object_refs_current.pop_back();
     if (!track.is_air) {
@@ -723,7 +717,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive)
         for (const auto &frag : plane->fragments) {
             ColorP co = ColorP::FROM_LAYER;
             if (frag.orphan == true)
-                co = ColorP::YELLOW;
+                co = ColorP::FRAG_ORPHAN;
 
             for (const auto &path : frag.paths) {
                 for (size_t i = 0; i < path.size(); i++) {
@@ -847,7 +841,7 @@ void Canvas::render(const Shape &shape, bool interactive)
 
 void Canvas::render(const Hole &hole, bool interactive)
 {
-    auto co = ColorP::WHITE;
+    auto co = ColorP::HOLE;
     img_hole(hole);
     if (img_mode)
         return;
@@ -857,9 +851,9 @@ void Canvas::render(const Hole &hole, bool interactive)
     int64_t d = hole.diameter / 2;
     int64_t l = std::max((int64_t)hole.length / 2 - d, (int64_t)0);
     if (hole.shape == Hole::Shape::ROUND) {
-        draw_line(Coordf(), Coordf(100, 0), ColorP::WHITE, 10000, true, hole.diameter);
+        draw_line(Coordf(), Coordf(100, 0), co, 10000, true, hole.diameter);
         if (hole.plated) {
-            draw_line(Coordf(), Coordf(100, 0), ColorP::WHITE, 10000, true, hole.diameter * 0.9);
+            draw_line(Coordf(), Coordf(100, 0), co, 10000, true, hole.diameter * 0.9);
         }
         float x = hole.diameter / 2 / M_SQRT2;
         draw_line(Coordi(-x, -x), Coordi(x, x), co);
@@ -1034,14 +1028,14 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
             set_lod_size(std::min(pad_height, pad_width));
             for (const auto overlay_layer : text_layers) {
                 if (it.second.net && it.second.net->name.size() > 0) {
-                    draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, overlay_layer, 0,
-                                  TextBoxMode::UPPER);
-                    draw_text_box(transform, pad_width, pad_height, it.second.net->name, ColorP::WHITE, overlay_layer,
-                                  0, TextBoxMode::LOWER);
+                    draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::TEXT_OVERLAY, overlay_layer,
+                                  0, TextBoxMode::UPPER);
+                    draw_text_box(transform, pad_width, pad_height, it.second.net->name, ColorP::TEXT_OVERLAY,
+                                  overlay_layer, 0, TextBoxMode::LOWER);
                 }
                 else {
-                    draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::WHITE, overlay_layer, 0,
-                                  TextBoxMode::FULL);
+                    draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::TEXT_OVERLAY, overlay_layer,
+                                  0, TextBoxMode::FULL);
                 }
             }
             set_lod_size(-1);
@@ -1163,7 +1157,7 @@ void Canvas::render(const Via &via)
     if (via.locked) {
         auto ol = get_overlay_layer(BoardLayers::TOP_COPPER);
         draw_lock({0, 0}, 0.7 * std::min(std::abs(bb.second.x - bb.first.x), std::abs(bb.second.y - bb.first.y)),
-                  ColorP::WHITE, ol, true);
+                  ColorP::TEXT_OVERLAY, ol, true);
     }
     object_refs_current.pop_back();
     img_net(nullptr);
@@ -1209,21 +1203,22 @@ void Canvas::render(const class Dimension &dim)
     Coordd w = Coordd(-v.y, v.x);
     auto wn = w / sqrt(w.mag_sq());
 
+    ColorP co = ColorP::DIMENSION;
+
     if (v.mag_sq()) {
 
         auto q0 = p0 + wn * dim.label_distance;
         auto q1 = p1 + wn * dim.label_distance;
 
-        draw_line(dim.p0, p0 + wn * (dim.label_distance + sgn(dim.label_distance) * (int64_t)dim.label_size / 2),
-                  ColorP::WHITE, 10000, true, 0);
-        draw_line(dim.p1, p1 + wn * (dim.label_distance + sgn(dim.label_distance) * (int64_t)dim.label_size / 2),
-                  ColorP::WHITE, 10000, true, 0);
+        draw_line(dim.p0, p0 + wn * (dim.label_distance + sgn(dim.label_distance) * (int64_t)dim.label_size / 2), co,
+                  10000, true, 0);
+        draw_line(dim.p1, p1 + wn * (dim.label_distance + sgn(dim.label_distance) * (int64_t)dim.label_size / 2), co,
+                  10000, true, 0);
 
         auto length = sqrt(v.mag_sq());
         auto s = dim_to_string(length, false);
 
-        auto text_bb =
-                draw_text0({0, 0}, dim.label_size, s, 0, false, TextOrigin::CENTER, ColorP::WHITE, 10000, 0, false);
+        auto text_bb = draw_text0({0, 0}, dim.label_size, s, 0, false, TextOrigin::CENTER, co, 10000, 0, false);
         auto text_width = std::abs(text_bb.second.x - text_bb.first.x);
 
         Coordf text_pos = (q0 + v / 2) - (vn * text_width / 2);
@@ -1232,11 +1227,11 @@ void Canvas::render(const class Dimension &dim)
 
         if ((text_width + 2 * dim.label_size) > length) {
             text_pos = q1;
-            draw_line(q0, q1, ColorP::WHITE, 10000, true, 0);
+            draw_line(q0, q1, co, 10000, true, 0);
         }
         else {
-            draw_line(q0, (q0 + v / 2) - (vn * (text_width / 2 + .5 * dim.label_size)), ColorP::WHITE, 10000, true, 0);
-            draw_line(q1, (q0 + v / 2) + (vn * (text_width / 2 + .5 * dim.label_size)), ColorP::WHITE, 10000, true, 0);
+            draw_line(q0, (q0 + v / 2) - (vn * (text_width / 2 + .5 * dim.label_size)), co, 10000, true, 0);
+            draw_line(q1, (q0 + v / 2) + (vn * (text_width / 2 + .5 * dim.label_size)), co, 10000, true, 0);
         }
 
         float arrow_mul;
@@ -1251,19 +1246,17 @@ void Canvas::render(const class Dimension &dim)
         transform.reset();
         transform.shift = Coordi(q0.x, q0.y);
         transform.set_angle(angle_i);
-        draw_line({0, 0}, Coordf(arrow_mul * dim.label_size, dim.label_size / 2), ColorP::WHITE, 10000, true, 0);
-        draw_line({0, 0}, Coordf(arrow_mul * dim.label_size, (int64_t)dim.label_size / -2), ColorP::WHITE, 10000, true,
-                  0);
+        draw_line({0, 0}, Coordf(arrow_mul * dim.label_size, dim.label_size / 2), co, 10000, true, 0);
+        draw_line({0, 0}, Coordf(arrow_mul * dim.label_size, (int64_t)dim.label_size / -2), co, 10000, true, 0);
 
         transform.shift = Coordi(q1.x, q1.y);
-        draw_line({0, 0}, Coordf(-arrow_mul * dim.label_size, dim.label_size / 2), ColorP::WHITE, 10000, true, 0);
-        draw_line({0, 0}, Coordf(-arrow_mul * dim.label_size, (int64_t)dim.label_size / -2), ColorP::WHITE, 10000, true,
-                  0);
+        draw_line({0, 0}, Coordf(-arrow_mul * dim.label_size, dim.label_size / 2), co, 10000, true, 0);
+        draw_line({0, 0}, Coordf(-arrow_mul * dim.label_size, (int64_t)dim.label_size / -2), co, 10000, true, 0);
         transform_restore();
 
         auto real_text_bb = draw_text0(Coordi(text_pos.x, text_pos.y), dim.label_size, s,
                                        get_flip_view() ? (32768 - angle_i) : angle_i, get_flip_view(),
-                                       TextOrigin::CENTER, ColorP::WHITE, 10000, 0, true);
+                                       TextOrigin::CENTER, co, 10000, 0, true);
 
         selectables.append(dim.uuid, ObjectType::DIMENSION, q0, real_text_bb.first, real_text_bb.second, 2);
         targets.emplace(dim.uuid, ObjectType::DIMENSION, Coordi(q0.x, q0.y), 2);

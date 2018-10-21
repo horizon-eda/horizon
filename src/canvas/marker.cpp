@@ -91,6 +91,7 @@ void MarkerRenderer::realize()
     GET_LOC(this, screenmat);
     GET_LOC(this, viewmat);
     GET_LOC(this, alpha);
+    GET_LOC(this, border_color);
 }
 
 void MarkerRenderer::render()
@@ -100,7 +101,7 @@ void MarkerRenderer::render()
     glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca->screenmat));
     glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
     glUniform1f(alpha_loc, ca->property_layer_opacity() / 100);
-
+    gl_color_to_uniform_3f(border_color_loc, ca->get_color(ColorP::MARKER_BORDER));
     glDrawArrays(GL_POINTS, 0, markers.size());
 
     glBindVertexArray(0);

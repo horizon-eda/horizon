@@ -7,9 +7,10 @@
 #include <git2.h>
 #include <curl/curl.h>
 #include "nlohmann/json.hpp"
-#include "prj-mgr/prj-mgr-prefs.hpp"
 #include "close_utils.hpp"
 #include "pool/pool_manager.hpp"
+#include "preferences_window.hpp"
+#include "preferences/preferences_provider.hpp"
 
 namespace horizon {
 
@@ -140,6 +141,15 @@ void PoolProjectManagerApplication::on_startup()
         }
     }
 
+    preferences.load();
+    PreferencesProvider::get().set_prefs(preferences);
+    preferences.signal_changed().connect([this] {
+    	json j;
+    	j["op"] = "preferences";
+    	j["preferences"] = preferences.serialize();
+    	send_json(0, j);
+    });
+
     Gtk::IconTheme::get_default()->add_resource_path("/net/carrotIndustries/horizon/icons");
     Gtk::Window::set_default_icon_name("horizon-eda");
 
@@ -148,9 +158,20 @@ void PoolProjectManagerApplication::on_startup()
 
 void PoolProjectManagerApplication::on_action_preferences()
 {
-    auto prefs_dialog = new ProjectManagerPrefs(dynamic_cast<Gtk::ApplicationWindow *>(get_active_window()));
+    /*auto prefs_dialog = new ProjectManagerPrefs(dynamic_cast<Gtk::ApplicationWindow *>(get_active_window()));
     prefs_dialog->present();
-    prefs_dialog->signal_hide().connect([prefs_dialog] { delete prefs_dialog; });
+    prefs_dialog->signal_hide().connect([prefs_dialog] { delete prefs_dialog; });*/
+    if (!preferences_window) {
+        preferences_window = new PreferencesWindow(&preferences);
+        preferences_window->set_transient_for(*get_active_window());
+
+        preferences_window->signal_hide().connect([this] {
+            delete preferences_window;
+            preferences_window = nullptr;
+            preferences.save();
+        });
+    }
+    preferences_window->present();
 }
 
 void PoolProjectManagerApplication::on_shutdown()
@@ -285,5 +306,10 @@ void PoolProjectManagerApplication::on_action_new_window()
 {
     auto appwin = create_appwindow();
     appwin->present();
+}
+
+Preferences &PoolProjectManagerApplication::get_preferences()
+{
+    return preferences;
 }
 } // namespace horizon

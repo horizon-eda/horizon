@@ -9,7 +9,7 @@
 #include "keyseq_dialog.hpp"
 #include "main_window.hpp"
 #include "pool/pool.hpp"
-#include "preferences.hpp"
+#include "preferences/preferences.hpp"
 #include "selection_filter_dialog.hpp"
 #include "util/window_state_store.hpp"
 #include "widgets/spin_button_dim.hpp"
@@ -105,8 +105,7 @@ protected:
     void add_tool_action(ToolID tid, const std::string &action);
     Glib::RefPtr<Gio::Menu> add_hamburger_menu();
 
-    ImpPreferences preferences;
-    class ImpPreferencesWindow *preferences_window = nullptr;
+    Preferences preferences;
 
     virtual CanvasPreferences *get_canvas_preferences()
     {
@@ -156,7 +155,6 @@ protected:
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
-    void show_preferences_window();
     void handle_drag();
     void update_selection_label();
     std::string get_tool_settings_filename(ToolID id);

@@ -1,5 +1,4 @@
 #pragma once
-#include "core/core.hpp"
 #include "action.hpp"
 #include "common/lut.hpp"
 #include <map>

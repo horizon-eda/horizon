@@ -47,7 +47,7 @@ SymbolPreviewBox::SymbolPreviewBox(const std::pair<int, bool> &v)
 void SymbolPreviewBox::update(const Symbol &sym)
 {
     for (const auto &la : sym.get_layers()) {
-        canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL, la.second.color));
+        canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL));
     }
     Placement p;
     p.set_angle_deg(view.first);

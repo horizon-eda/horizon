@@ -177,8 +177,11 @@ void SelectablesRenderer::realize()
     GL_CHECK_ERROR
     GET_LOC(this, screenmat);
     GET_LOC(this, viewmat);
-    GL_CHECK_ERROR
     GET_LOC(this, scale);
+    GET_LOC(this, color_always);
+    GET_LOC(this, color_inner);
+    GET_LOC(this, color_outer);
+    GET_LOC(this, color_prelight);
     GL_CHECK_ERROR
 }
 
@@ -189,6 +192,10 @@ void SelectablesRenderer::render()
     glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca->screenmat));
     glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
     glUniform1f(scale_loc, ca->scale);
+    gl_color_to_uniform_3f(color_always_loc, ca->get_color(ColorP::SELECTABLE_ALWAYS));
+    gl_color_to_uniform_3f(color_inner_loc, ca->get_color(ColorP::SELECTABLE_INNER));
+    gl_color_to_uniform_3f(color_outer_loc, ca->get_color(ColorP::SELECTABLE_OUTER));
+    gl_color_to_uniform_3f(color_prelight_loc, ca->get_color(ColorP::SELECTABLE_PRELIGHT));
 
     glDrawArrays(GL_POINTS, 0, sel->items.size());
 

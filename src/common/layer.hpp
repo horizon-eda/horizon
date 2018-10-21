@@ -4,13 +4,11 @@
 namespace horizon {
 class Layer {
 public:
-    Layer(int i, const std::string &n, const Color &c, bool r = false, bool cop = false)
-        : index(i), name(n), color(c), reverse(r), copper(cop)
+    Layer(int i, const std::string &n, bool r = false, bool cop = false) : index(i), name(n), reverse(r), copper(cop)
     {
     }
     int index;
     std::string name;
-    Color color;
     bool reverse;
     bool copper;
 };

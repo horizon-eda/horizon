@@ -35,7 +35,7 @@ UnitPreview::UnitPreview(class Pool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0)
         pack_start(*sep, false, false, 0);
     }
 
-    canvas_symbol = Gtk::manage(new PreviewCanvas(pool));
+    canvas_symbol = Gtk::manage(new PreviewCanvas(pool, false));
     canvas_symbol->show();
     pack_start(*canvas_symbol, true, true, 0);
 

@@ -3,11 +3,13 @@
 #include "pool/symbol.hpp"
 #include "pool/package.hpp"
 #include "board/board_layers.hpp"
+#include "preferences/preferences_util.hpp"
 
 namespace horizon {
-PreviewCanvas::PreviewCanvas(Pool &p) : Glib::ObjectBase(typeid(PreviewCanvas)), CanvasGL(), pool(p)
+PreviewCanvas::PreviewCanvas(Pool &p, bool layered) : Glib::ObjectBase(typeid(PreviewCanvas)), CanvasGL(), pool(p)
 {
     set_selection_allowed(false);
+    preferences_provider_attach_canvas(this, layered);
 }
 
 void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, bool fit)
@@ -17,9 +19,6 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
     switch (type) {
     case ObjectType::SYMBOL: {
         Symbol sym = *pool.get_symbol(uu);
-        for (const auto &la : sym.get_layers()) {
-            set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL, la.second.color));
-        }
         sym.expand();
         sym.apply_placement(pl);
         update(sym, pl);
@@ -34,14 +33,38 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
             if (la.second.copper || la.first == BoardLayers::TOP_SILKSCREEN
                 || la.first == BoardLayers::BOTTOM_SILKSCREEN)
                 ld = LayerDisplay::Mode::FILL_ONLY;
-            set_layer_display(la.first, LayerDisplay(true, ld, la.second.color));
+            set_layer_display(la.first, LayerDisplay(true, ld));
         }
         pkg.apply_parameter_set({});
         property_layer_opacity() = 75;
         update(pkg);
         bb = pkg.get_bbox();
         pad = 1_mm;
+    } break;
+
+    case ObjectType::PADSTACK: {
+        Padstack ps = *pool.get_padstack(uu);
+        for (const auto &la : ps.get_layers()) {
+            auto ld = LayerDisplay::Mode::OUTLINE;
+            if (la.second.copper || la.first == BoardLayers::TOP_SILKSCREEN
+                || la.first == BoardLayers::BOTTOM_SILKSCREEN)
+                ld = LayerDisplay::Mode::FILL_ONLY;
+            set_layer_display(la.first, LayerDisplay(true, ld));
+        }
+        ps.apply_parameter_set({});
+        property_layer_opacity() = 75;
+        update(ps);
+        bb = ps.get_bbox();
+        pad = .1_mm;
         bb.first.x -= pad;
+    } break;
+
+    case ObjectType::FRAME: {
+        Frame fr = *pool.get_frame(uu);
+        property_layer_opacity() = 100;
+        update(fr);
+        bb = fr.get_bbox();
+        pad = 1_mm;
     } break;
     default:;
     }

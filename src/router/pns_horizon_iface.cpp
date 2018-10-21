@@ -340,7 +340,7 @@ public:
             auto pt = aLine.CPoint(i);
             pts.emplace_back(pt.x, pt.y);
         }
-        lines.insert(m_canvas->add_line(pts, aWidth, horizon::ColorP::YELLOW, 10000));
+        lines.insert(m_canvas->add_line(pts, aWidth, horizon::ColorP::AIRWIRE_ROUTER, 10000));
     }
 
     void Clear() override

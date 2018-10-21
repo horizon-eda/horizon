@@ -1,20 +1,20 @@
 #include "preferences_window_keys.hpp"
-#include "preferences.hpp"
+#include "preferences/preferences.hpp"
 #include "util/gtk_util.hpp"
 
 namespace horizon {
 
 class ActionEditor : public Gtk::Box {
 public:
-    ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, ImpPreferences *prefs,
+    ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
                  KeySequencesPreferences *keyseq_prefs, std::vector<KeySequence2> *keys, const std::string &title,
                  KeySequencesPreferencesEditor *parent);
-    static ActionEditor *create(ImpPreferences *prefs, KeySequencesPreferences *keyseq_prefs,
+    static ActionEditor *create(Preferences *prefs, KeySequencesPreferences *keyseq_prefs,
                                 std::vector<KeySequence2> *keys, const std::string &title,
                                 KeySequencesPreferencesEditor *parent);
 
 private:
-    ImpPreferences *preferences;
+    Preferences *preferences;
     KeySequencesPreferences *keyseq_preferences;
     std::vector<KeySequence2> *keys;
     KeySequencesPreferencesEditor *parent;
@@ -29,7 +29,7 @@ private:
     } while (0)
 
 KeySequencesPreferencesEditor::KeySequencesPreferencesEditor(BaseObjectType *cobject,
-                                                             const Glib::RefPtr<Gtk::Builder> &x, ImpPreferences *prefs,
+                                                             const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
                                                              KeySequencesPreferences *keyseq_prefs)
     : Gtk::Grid(cobject), preferences(prefs), keyseq_preferences(keyseq_prefs)
 {
@@ -106,7 +106,7 @@ void KeySequencesPreferencesEditor::update_action_editors()
                 }
             }
             for (auto ed : eds) {
-                action_editors->pack_start(*ed, true, true, 0);
+                action_editors->add(*ed);
                 ed->show();
                 ed->unreference();
             }
@@ -139,12 +139,12 @@ void KeySequencesPreferencesEditor::update_keys()
     }
 }
 
-KeySequencesPreferencesEditor *KeySequencesPreferencesEditor::create(ImpPreferences *prefs,
+KeySequencesPreferencesEditor *KeySequencesPreferencesEditor::create(Preferences *prefs,
                                                                      KeySequencesPreferences *keyseq_prefs)
 {
     KeySequencesPreferencesEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/imp/preferences.ui", "key_sequences_box");
+    x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/preferences.ui", "key_sequences_box");
     x->get_widget_derived("key_sequences_box", w, prefs, keyseq_prefs);
     w->reference();
     return w;
@@ -245,7 +245,7 @@ public:
 };
 
 
-ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, ImpPreferences *prefs,
+ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
                            KeySequencesPreferences *keyseq_prefs, std::vector<KeySequence2> *k,
                            const std::string &title, KeySequencesPreferencesEditor *p)
     : Gtk::Box(cobject), preferences(prefs), keyseq_preferences(keyseq_prefs), keys(k), parent(p)
@@ -329,13 +329,13 @@ void ActionEditor::update()
 }
 
 
-ActionEditor *ActionEditor::create(ImpPreferences *prefs, KeySequencesPreferences *keyseq_prefs,
+ActionEditor *ActionEditor::create(Preferences *prefs, KeySequencesPreferences *keyseq_prefs,
                                    std::vector<KeySequence2> *keys, const std::string &title,
                                    KeySequencesPreferencesEditor *parent)
 {
     ActionEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/imp/preferences.ui", "action_editor");
+    x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/preferences.ui", "action_editor");
     x->get_widget_derived("action_editor", w, prefs, keyseq_prefs, keys, title, parent);
     w->reference();
     return w;

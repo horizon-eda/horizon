@@ -11,21 +11,8 @@ namespace horizon {
 
 Canvas::Canvas() : selection_filter(this), selectables(this)
 {
-    layer_setup.colors.at(static_cast<int>(ColorP::RED)) = {1, 0, 0};
-    layer_setup.colors.at(static_cast<int>(ColorP::GREEN)) = {0, 1, 0};
-    layer_setup.colors.at(static_cast<int>(ColorP::YELLOW)) = {1, 1, 0};
-    layer_setup.colors.at(static_cast<int>(ColorP::WHITE)) = {1, 1, 1};
-    layer_setup.colors.at(static_cast<int>(ColorP::ERROR)) = {1, 0, 0};
-    layer_setup.colors.at(static_cast<int>(ColorP::NET)) = {0, 1, 0};
-    layer_setup.colors.at(static_cast<int>(ColorP::BUS)) = {1, .4, 0};
-    layer_setup.colors.at(static_cast<int>(ColorP::SYMBOL)) = {1, 1, 1};
-    layer_setup.colors.at(static_cast<int>(ColorP::FRAME)) = {0, .5, 0};
-    layer_setup.colors.at(static_cast<int>(ColorP::AIRWIRE)) = {0, 1, 1};
-    layer_setup.colors.at(static_cast<int>(ColorP::PIN)) = {1, 1, 1};
-    layer_setup.colors.at(static_cast<int>(ColorP::PIN_HIDDEN)) = {.5, .5, .5};
-    layer_setup.colors.at(static_cast<int>(ColorP::DIFFPAIR)) = {.5, 1, 0};
-
-    layer_display[10000] = LayerDisplay(true, LayerDisplay::Mode::FILL, {1, 1, 1});
+    layer_display[10000] = LayerDisplay(true, LayerDisplay::Mode::FILL);
+    layer_display[0] = LayerDisplay(true, LayerDisplay::Mode::FILL);
 }
 
 void Canvas::set_layer_display(int index, const LayerDisplay &ld)
@@ -35,7 +22,7 @@ void Canvas::set_layer_display(int index, const LayerDisplay &ld)
 
 static const LayerDisplay ld_default;
 
-const LayerDisplay &Canvas::get_layer_display(int index)
+const LayerDisplay &Canvas::get_layer_display(int index) const
 {
     if (layer_display.count(index))
         return layer_display.at(index);
@@ -45,7 +32,7 @@ const LayerDisplay &Canvas::get_layer_display(int index)
 
 bool Canvas::layer_is_visible(int layer) const
 {
-    return layer == work_layer || layer_display.at(layer).visible;
+    return layer == work_layer || get_layer_display(layer).visible;
 }
 
 void Canvas::clear()
@@ -237,11 +224,19 @@ int Canvas::get_overlay_layer(int layer)
     if (overlay_layers.count(layer) == 0) {
         auto ol = overlay_layer_current++;
         overlay_layers[layer] = ol;
-        layer_display[ol].color = Color(1, 1, 1);
         layer_display[ol].visible = true;
         layer_display[ol].mode = LayerDisplay::Mode::OUTLINE;
     }
 
     return overlay_layers.at(layer);
+}
+
+
+Color Canvas::get_layer_color(int layer) const
+{
+    if (layer_colors.count(layer))
+        return layer_colors.at(layer);
+    else
+        return {1, 1, 0};
 }
 } // namespace horizon

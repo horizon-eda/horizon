@@ -70,7 +70,7 @@ ToolResponse ToolRotateArbitrary::begin(const ToolArgs &args)
     save_placements();
     annotation = imp->get_canvas()->create_annotation();
     annotation->set_visible(true);
-    annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE, Color(1, 1, 0)));
+    annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
 
     update_tip();
     return ToolResponse();

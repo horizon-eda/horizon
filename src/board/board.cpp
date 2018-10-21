@@ -25,14 +25,6 @@ json Board::StackupLayer::serialize() const
     return j;
 }
 
-Color color_from_json(const json &j)
-{
-    Color c;
-    c.r = j.at("r");
-    c.g = j.at("g");
-    c.b = j.at("b");
-    return c;
-}
 
 Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadstackProvider &vpp)
     : uuid(uu), block(&iblock), name(j.at("name").get<std::string>()), n_inner_layers(j.value("n_inner_layers", 0))
@@ -335,23 +327,23 @@ void Board::set_n_inner_layers(unsigned int n)
 {
     n_inner_layers = n;
     layers.clear();
-    layers = {{200, {200, "Top Notes", {1, 1, 1}}},
-              {100, {100, "Outline", {.6, .6, 0}}},
-              {60, {60, "Top Courtyard", {.5, .5, .5}}},
-              {50, {50, "Top Assembly", {.5, .5, .5}}},
-              {40, {40, "Top Package", {.5, .5, .5}}},
-              {30, {30, "Top Paste", {.8, .8, .8}}},
-              {20, {20, "Top Silkscreen", {.9, .9, .9}}},
-              {10, {10, "Top Mask", {1, .5, .5}}},
-              {0, {0, "Top Copper", {1, 0, 0}, false, true}},
-              {-100, {-100, "Bottom Copper", {0, .5, 0}, true, true}},
-              {-110, {-110, "Bottom Mask", {.25, .5, .25}, true}},
-              {-120, {-120, "Bottom Silkscreen", {.9, .9, .9}, true}},
-              {-130, {-130, "Bottom Paste", {.8, .8, .8}}},
-              {-140, {-140, "Bottom Package", {.5, .5, .5}}},
-              {-150, {-150, "Bottom Assembly", {.5, .5, .5}, true}},
-              {-160, {-160, "Bottom Courtyard", {.5, .5, .5}}},
-              {-200, {-200, "Bottom Notes", {1, 1, 1}, true}}};
+    layers = {{200, {200, "Top Notes"}},
+              {100, {100, "Outline"}},
+              {60, {60, "Top Courtyard"}},
+              {50, {50, "Top Assembly"}},
+              {40, {40, "Top Package"}},
+              {30, {30, "Top Paste"}},
+              {20, {20, "Top Silkscreen"}},
+              {10, {10, "Top Mask"}},
+              {0, {0, "Top Copper", false, true}},
+              {-100, {-100, "Bottom Copper", true, true}},
+              {-110, {-110, "Bottom Mask", true}},
+              {-120, {-120, "Bottom Silkscreen", true}},
+              {-130, {-130, "Bottom Paste"}},
+              {-140, {-140, "Bottom Package"}},
+              {-150, {-150, "Bottom Assembly", true}},
+              {-160, {-160, "Bottom Courtyard"}},
+              {-200, {-200, "Bottom Notes", true}}};
     if (stackup.emplace(0, 0).second) { // if created
         stackup.at(0).substrate_thickness = 1.6_mm;
     }
@@ -359,7 +351,7 @@ void Board::set_n_inner_layers(unsigned int n)
     stackup.at(-100).substrate_thickness = 0;
     for (unsigned int i = 0; i < n_inner_layers; i++) {
         auto j = i + 1;
-        layers.emplace(std::make_pair(-j, Layer(-j, "Inner " + std::to_string(j), {1, 1, 0}, false, true)));
+        layers.emplace(std::make_pair(-j, Layer(-j, "Inner " + std::to_string(j), false, true)));
         stackup.emplace(-j, -j);
     }
     map_erase_if(stackup, [this](const auto &x) { return layers.count(x.first) == 0; });
@@ -786,15 +778,6 @@ std::vector<KeepoutContour> Board::get_keepout_contours() const
         }
     }
     return r;
-}
-
-json color_to_json(const Color &c)
-{
-    json j;
-    j["r"] = c.r;
-    j["g"] = c.g;
-    j["b"] = c.b;
-    return j;
 }
 
 json Board::serialize() const

@@ -1,30 +1,18 @@
 #pragma once
-#include "canvas/grid.hpp"
+#include "canvas/appearance.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include <sigc++/sigc++.h>
 #include <string>
-#include "action_catalog.hpp"
-#include "action.hpp"
-#include "core/core.hpp"
+#include "imp/action_catalog.hpp"
+#include "imp/action.hpp"
+#include "core/tool_id.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
 
 class CanvasPreferences {
 public:
-    enum class BackgroundColor { BLUE, BLACK };
-    BackgroundColor background_color = BackgroundColor::BLUE;
-
-    Grid::Style grid_style = Grid::Style::CROSS;
-    float grid_opacity = .5;
-    float highlight_dim = .3;
-    float highlight_shadow = .3;
-    float highlight_lighten = .3;
-    unsigned int msaa = 0;
-
-    enum class GridFineModifier { CTRL, ALT };
-    GridFineModifier grid_fine_modifier = GridFineModifier::ALT;
-
+	Appearance appearance;
     void load_from_json(const json &j);
     json serialize() const;
 };
@@ -64,16 +52,16 @@ public:
     json serialize() const;
 };
 
-class ImpPreferences : public sigc::trackable {
+class Preferences : public sigc::trackable {
 public:
-    ImpPreferences();
+    Preferences();
     void set_filename(const std::string &filename);
     void load();
     void load_default();
+    void load_from_json(const json &j);
     void save();
-    bool lock();
-    void unlock();
     static std::string get_preferences_filename();
+    json serialize() const;
 
     CanvasPreferences canvas_non_layer;
     CanvasPreferences canvas_layer;
@@ -91,6 +79,5 @@ public:
 private:
     std::string filename;
     type_signal_changed s_signal_changed;
-    json serialize() const;
 };
 } // namespace horizon

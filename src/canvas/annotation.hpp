@@ -1,7 +1,7 @@
 #pragma once
 #include <deque>
 #include "common/common.hpp"
-#include "triangle.hpp"
+#include "color_palette.hpp"
 
 namespace horizon {
 class CanvasAnnotation {

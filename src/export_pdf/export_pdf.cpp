@@ -15,7 +15,7 @@ void export_pdf(const std::string &filename, const Schematic &sch, Core *c)
     {
         auto &sheet = sch.sheets.begin()->second;
         for (const auto &la : sheet.get_layers()) {
-            ca.set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL, la.second.color));
+            ca.set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL));
         }
     }
     double nm_to_pt = 352778;

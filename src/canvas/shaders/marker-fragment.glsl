@@ -1,14 +1,16 @@
 #version 330
 uniform float scale;
+uniform vec3 border_color;
 out vec4 outputColor;
 
 flat in vec3 color_to_fragment;
 smooth in vec2 draw_pos_to_fragment;
 
+
 void main() {
   bool disc = false;
   vec2 p = draw_pos_to_fragment;
-  vec4 c = vec4(1,1,1,1);
+  vec4 c = vec4(border_color,1);
   float k1 = 6;
   float k2 = 2;
   float k3 = 14;

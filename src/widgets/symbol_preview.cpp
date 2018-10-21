@@ -11,7 +11,7 @@ namespace horizon {
 SymbolPreview::SymbolPreview(class Pool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
 {
 
-    canvas_symbol = Gtk::manage(new PreviewCanvas(pool));
+    canvas_symbol = Gtk::manage(new PreviewCanvas(pool, false));
 
     auto top_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
     top_box->property_margin() = 8;

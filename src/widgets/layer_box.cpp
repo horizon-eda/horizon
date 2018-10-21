@@ -23,15 +23,11 @@ public:
         return p_property_display_mode.get_proxy();
     }
 
-    Gdk::RGBA default_color;
-
 private:
     bool on_draw(const Cairo::RefPtr<::Cairo::Context> &cr) override;
     bool on_button_press_event(GdkEventButton *ev) override;
     type_property_color p_property_color;
     type_property_display_mode p_property_display_mode;
-
-    Gtk::Menu menu;
 };
 
 LayerDisplayButton::LayerDisplayButton()
@@ -42,31 +38,6 @@ LayerDisplayButton::LayerDisplayButton()
     add_events(Gdk::BUTTON_PRESS_MASK);
     property_display_mode().signal_changed().connect([this] { queue_draw(); });
     property_color().signal_changed().connect([this] { queue_draw(); });
-
-
-    {
-        auto item = Gtk::manage(new Gtk::MenuItem("Reset color"));
-        item->signal_activate().connect([this] { property_color() = default_color; });
-        item->show();
-        menu.append(*item);
-    }
-    {
-        auto item = Gtk::manage(new Gtk::MenuItem("Select color"));
-
-        item->signal_activate().connect([this] {
-            Gtk::ColorChooserDialog dia("Layer color");
-            dia.set_transient_for(*dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW)));
-            dia.set_rgba(property_color());
-            dia.property_show_editor() = true;
-            dia.set_use_alpha(false);
-
-            if (dia.run() == Gtk::RESPONSE_OK) {
-                property_color() = dia.get_rgba();
-            }
-        });
-        item->show();
-        menu.append(*item);
-    }
 }
 
 bool LayerDisplayButton::on_draw(const Cairo::RefPtr<::Cairo::Context> &cr)
@@ -111,10 +82,6 @@ bool LayerDisplayButton::on_draw(const Cairo::RefPtr<::Cairo::Context> &cr)
 
 bool LayerDisplayButton::on_button_press_event(GdkEventButton *ev)
 {
-    if (gdk_event_triggers_context_menu((GdkEvent *)ev)) {
-        menu.popup_at_pointer((GdkEvent *)ev);
-        return true;
-    }
     if (ev->button != 1)
         return false;
     auto old_mode = static_cast<int>(static_cast<LayerDisplay::Mode>(property_display_mode()));
@@ -324,10 +291,6 @@ void LayerBox::update()
             lr->property_layer_visible().signal_changed().connect([this, lr] { emit_layer_display(lr); });
             lr->ld_button->property_color().signal_changed().connect([this, lr] { emit_layer_display(lr); });
             lr->ld_button->property_display_mode().signal_changed().connect([this, lr] { emit_layer_display(lr); });
-            lr->ld_button->default_color.set_red(la.second.color.r);
-            lr->ld_button->default_color.set_green(la.second.color.g);
-            lr->ld_button->default_color.set_blue(la.second.color.b);
-            lr->ld_button->property_color() = lr->ld_button->default_color;
             lr->ld_button->property_display_mode() = LayerDisplay::Mode::FILL;
             lb->append(*lr);
             lr->show();
@@ -343,23 +306,6 @@ static const LutEnumStr<LayerDisplay::Mode> dm_lut = {
         {"fill_only", LayerDisplay::Mode::FILL_ONLY},
 };
 
-static json rgba_to_json(const Gdk::RGBA &c)
-{
-    json j;
-    j["r"] = c.get_red();
-    j["g"] = c.get_green();
-    j["b"] = c.get_blue();
-    return j;
-}
-
-static Gdk::RGBA rgba_from_json(const json &j)
-{
-    Gdk::RGBA r;
-    r.set_red(j.value("r", 0.0));
-    r.set_green(j.value("g", 0.0));
-    r.set_blue(j.value("b", 0.0));
-    return r;
-}
 
 void LayerBox::update_work_layer()
 {
@@ -376,10 +322,8 @@ void LayerBox::update_work_layer()
 
 void LayerBox::emit_layer_display(LayerBoxRow *row)
 {
-    Gdk::RGBA co(row->ld_button->property_color().get_value());
-    Color c(co.get_red(), co.get_green(), co.get_blue());
     s_signal_set_layer_display.emit(
-            row->layer, LayerDisplay(row->property_layer_visible(), row->ld_button->property_display_mode(), c));
+            row->layer, LayerDisplay(row->property_layer_visible(), row->ld_button->property_display_mode()));
 }
 
 json LayerBox::serialize()
@@ -393,7 +337,6 @@ json LayerBox::serialize()
         json k;
         k["visible"] = static_cast<bool>(row->property_layer_visible());
         k["display_mode"] = dm_lut.lookup_reverse(row->ld_button->property_display_mode());
-        k["color"] = rgba_to_json(row->ld_button->property_color());
         j["layers"][std::to_string(row->layer)] = k;
     }
     return j;
@@ -417,11 +360,24 @@ void LayerBox::load_from_json(const json &j)
                 catch (...) {
                     row->ld_button->property_display_mode() = LayerDisplay::Mode::FILL;
                 }
-                if (k.count("color")) {
-                    row->ld_button->property_color() = rgba_from_json(k.at("color"));
-                }
                 emit_layer_display(row);
             }
+        }
+    }
+}
+
+void LayerBox::set_layer_color(int layer, const Color &c)
+{
+    auto layers = lb->get_children();
+    for (auto ch : layers) {
+        auto lrow = dynamic_cast<Gtk::ListBoxRow *>(ch);
+        auto row = dynamic_cast<LayerBoxRow *>(lrow->get_child());
+        if (row->layer == layer) {
+            Gdk::RGBA rgba;
+            rgba.set_red(c.r);
+            rgba.set_green(c.g);
+            rgba.set_blue(c.b);
+            row->ld_button->property_color() = rgba;
         }
     }
 }

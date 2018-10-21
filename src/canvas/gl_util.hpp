@@ -7,6 +7,8 @@ GLuint gl_create_program_from_resource(const char *vertex_resource, const char *
                                        const char *geometry_resource);
 
 void gl_show_error(const std::string &s);
+void gl_color_to_uniform_3f(GLuint loc, const class Color &c);
+void gl_color_to_uniform_4f(GLuint loc, const class Color &c, float alpha = 1);
 
 #define GET_LOC(d, loc)                                                                                                \
     do {                                                                                                               \

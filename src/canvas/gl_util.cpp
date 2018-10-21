@@ -2,6 +2,7 @@
 #include <giomm/resource.h>
 #include <gtkmm.h>
 #include <iostream>
+#include "common/common.hpp"
 #ifdef G_OS_WIN32
 #include <windows.h>
 #endif
@@ -114,6 +115,15 @@ void gl_show_error(const std::string &s)
 #else
     std::cout << s << std::endl;
 #endif
+}
+
+void gl_color_to_uniform_3f(GLuint loc, const Color &c)
+{
+    glUniform3f(loc, c.r, c.g, c.b);
+}
+void gl_color_to_uniform_4f(GLuint loc, const Color &c, float alpha)
+{
+    glUniform4f(loc, c.r, c.g, c.b, alpha);
 }
 
 } // namespace horizon

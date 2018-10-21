@@ -1,29 +1,11 @@
 #pragma once
 #include "common/common.hpp"
 #include "util/uuid.hpp"
+#include "color_palette.hpp"
 #include <epoxy/gl.h>
 #include <unordered_map>
 
 namespace horizon {
-
-enum class ColorP {
-    FROM_LAYER,
-    RED,
-    GREEN,
-    YELLOW,
-    WHITE,
-    ERROR,
-    NET,
-    BUS,
-    SYMBOL,
-    FRAME,
-    AIRWIRE,
-    PIN,
-    PIN_HIDDEN,
-    DIFFPAIR,
-    N_COLORS
-};
-
 class ObjectRef {
 public:
     ObjectRef(ObjectType ty, const UUID &uu, const UUID &uu2 = UUID()) : type(ty), uuid(uu), uuid2(uu2)

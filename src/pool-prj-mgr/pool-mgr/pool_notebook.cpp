@@ -361,8 +361,8 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         paned->add1(*box);
         paned->child_property_shrink(*box) = false;
 
-        auto canvas = Gtk::manage(new CanvasGL());
-        canvas->set_selection_allowed(false);
+
+        auto canvas = Gtk::manage(new PreviewCanvas(pool, true));
         paned->add2(*canvas);
         paned->show_all();
 
@@ -370,22 +370,10 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
             auto sel = br->get_selected();
             if (!sel) {
                 canvas->clear();
-                return;
             }
-            Padstack ps = *pool.get_padstack(sel);
-            for (const auto &la : ps.get_layers()) {
-                canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL_ONLY, la.second.color));
+            else {
+                canvas->load(ObjectType::PADSTACK, sel);
             }
-            canvas->property_layer_opacity() = 75;
-            canvas->update(ps);
-            auto bb = ps.get_bbox();
-            int64_t pad = .1_mm;
-            bb.first.x -= pad;
-            bb.first.y -= pad;
-
-            bb.second.x += pad;
-            bb.second.y += pad;
-            canvas->zoom_to_bbox(bb.first, bb.second);
         });
 
         append_page(*paned, "Padstacks");
@@ -441,7 +429,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         paned->add1(*box);
         paned->child_property_shrink(*box) = false;
 
-        auto canvas = Gtk::manage(new PreviewCanvas(pool));
+        auto canvas = Gtk::manage(new PreviewCanvas(pool, true));
         paned->add2(*canvas);
         paned->show_all();
 
@@ -549,8 +537,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         paned->child_property_shrink(*box) = false;
 
 
-        auto canvas = Gtk::manage(new CanvasGL());
-        canvas->set_selection_allowed(false);
+        auto canvas = Gtk::manage(new PreviewCanvas(pool, false));
         paned->add2(*canvas);
         paned->show_all();
 
@@ -558,15 +545,10 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
             auto sel = br->get_selected();
             if (!sel) {
                 canvas->clear();
-                return;
             }
-            Frame fr = *pool.get_frame(sel);
-            for (const auto &la : fr.get_layers()) {
-                canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL_ONLY, la.second.color));
+            else {
+                canvas->load(ObjectType::FRAME, sel);
             }
-            canvas->property_layer_opacity() = 75;
-            canvas->update(fr);
-            canvas->zoom_to_bbox(Coordi(), {fr.width, fr.height});
         });
 
         br->signal_activated().connect([this, br] { handle_edit_frame(br->get_selected()); });

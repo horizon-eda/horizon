@@ -6,6 +6,7 @@
 #include <set>
 #include <zmq.hpp>
 #include <glibmm/datetime.h>
+#include "preferences/preferences.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -26,6 +27,7 @@ public:
     std::deque<UUID> part_favorites;
 
     void close_appwindows(std::set<Gtk::Window *> wins);
+    Preferences &get_preferences();
 
 protected:
     // Override default signal handlers:
@@ -44,6 +46,8 @@ private:
     void on_action_new_window();
     void on_action_preferences();
     void load_from_config(const std::string &config_filename);
+    Preferences preferences;
+    class PreferencesWindow *preferences_window = nullptr;
 
 
 public:

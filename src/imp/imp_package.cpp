@@ -36,7 +36,7 @@ void ImpPackage::apply_preferences()
 {
     if (view_3d_window)
         view_3d_window->set_smooth_zoom(preferences.zoom.smooth_zoom_3d);
-    ImpBase::apply_preferences();
+    ImpLayer::apply_preferences();
 }
 
 class ModelEditor : public Gtk::Box, public Changeable {

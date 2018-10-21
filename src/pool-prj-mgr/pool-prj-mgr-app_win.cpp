@@ -279,6 +279,9 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             md.run();
         }
     }
+    else if (op == "preferences") {
+        app->activate_action("preferences");
+    }
     return nullptr;
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 #include <gtkmm.h>
-#include "action.hpp"
+#include "imp/action.hpp"
 
 namespace horizon {
 
@@ -9,11 +9,11 @@ class KeySequencesPreferencesEditor : public Gtk::Grid {
 
 public:
     KeySequencesPreferencesEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
-                                  class ImpPreferences *prefs, class KeySequencesPreferences *keyseq_prefs);
-    static KeySequencesPreferencesEditor *create(ImpPreferences *prefs, KeySequencesPreferences *keyseq_prefs);
+                                  class Preferences *prefs, class KeySequencesPreferences *keyseq_prefs);
+    static KeySequencesPreferencesEditor *create(Preferences *prefs, KeySequencesPreferences *keyseq_prefs);
 
 private:
-    ImpPreferences *preferences;
+    Preferences *preferences;
     KeySequencesPreferences *keyseq_preferences;
 
     class TreeColumns : public Gtk::TreeModelColumnRecord {
@@ -33,7 +33,7 @@ private:
     Glib::RefPtr<Gtk::TreeStore> key_sequences_store;
     Gtk::TreeView *key_sequences_treeview = nullptr;
 
-    Gtk::Box *action_editors = nullptr;
+    Gtk::FlowBox *action_editors = nullptr;
 
     void update_action_editors();
     void update_keys();

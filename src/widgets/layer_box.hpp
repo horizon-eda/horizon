@@ -8,7 +8,7 @@ namespace horizon {
 class LayerBox : public Gtk::Box {
 public:
     LayerBox(class LayerProvider *lp, bool show_title = true);
-
+    void set_layer_color(int layer, const Color &c);
     void update();
     Glib::PropertyProxy<int> property_work_layer()
     {

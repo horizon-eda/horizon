@@ -17,8 +17,6 @@ private:
     CanvasGL *ca;
     int64_t spacing;
     float mark_size;
-    Color color;
-    float alpha;
     unsigned int mul = 0;
 
     GLuint program;

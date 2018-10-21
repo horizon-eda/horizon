@@ -7,6 +7,7 @@
 #include "util/msd_animator.hpp"
 #include <gtkmm.h>
 #include <glm/glm.hpp>
+#include "appearance.hpp"
 
 namespace horizon {
 class CanvasGL : public Canvas, public Gtk::GLArea {
@@ -104,22 +105,13 @@ public:
     Coordf screen2canvas(const Coordf &p) const;
     void update_cursor_pos(double x, double y);
 
-    void set_background_color(const Color &c);
-    void set_grid_color(const Color &c);
-    void set_grid_style(Grid::Style st);
-    void set_grid_alpha(float a);
-
-    void set_highlight_dim(float a);
-    void set_highlight_shadow(float a);
-    void set_highlight_lighten(float a);
-
-    void set_msaa(unsigned int samples);
+    const Appearance &get_appearance() const;
+    void set_appearance(const Appearance &a);
+    const Color &get_color(ColorP colorp) const;
 
     bool smooth_zoom = true;
 
     void inhibit_drag_selection();
-
-    Gdk::ModifierType grid_fine_modifier = Gdk::MOD1_MASK;
 
     int _animate_step(GdkFrameClock *frame_clock);
 
@@ -149,7 +141,6 @@ private:
     GLuint renderbuffer;
     GLuint stencilrenderbuffer;
     GLuint fbo;
-    unsigned int num_samples = 4;
     bool needs_resize = false;
     enum PushFilter {
         PF_NONE = 0,
@@ -165,7 +156,6 @@ private:
 
     void resize_buffers();
 
-    Color background_color = Color::new_from_int(0, 24, 64);
     Grid grid;
     DragSelection drag_selection;
     SelectablesRenderer selectables_renderer;
@@ -195,15 +185,18 @@ private:
 
     HighlightMode highlight_mode = HighlightMode::HIGHLIGHT;
     bool highlight_enabled = false;
-    float highlight_dim = .5;
-    float highlight_shadow = .3;
-    float highlight_lighten = .3;
+    Appearance appearance;
+
+    void update_palette_colors();
+    std::array<std::array<float, 4>, static_cast<size_t>(ColorP::N_COLORS)> palette_colors;
 
     bool drag_selection_inhibited = false;
 
     MSDAnimator zoom_animator;
     float zoom_animation_scale_orig = 1;
     Coordf zoom_animation_pos;
+
+    Gdk::ModifierType grid_fine_modifier = Gdk::MOD1_MASK;
 
 protected:
     void on_size_allocate(Gtk::Allocation &alloc) override;

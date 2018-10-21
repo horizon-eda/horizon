@@ -2,7 +2,8 @@
 #include <string>
 #include <vector>
 #include <gdk/gdk.h>
-#include "core/core.hpp"
+#include "core/tool_id.hpp"
+#include <functional>
 
 namespace horizon {
 

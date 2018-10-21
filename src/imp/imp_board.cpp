@@ -203,7 +203,7 @@ void ImpBoard::apply_preferences()
 {
     if (view_3d_window)
         view_3d_window->set_smooth_zoom(preferences.zoom.smooth_zoom_3d);
-    ImpBase::apply_preferences();
+    ImpLayer::apply_preferences();
 }
 
 static Gdk::RGBA rgba_from_color(const Color &c)
@@ -367,7 +367,7 @@ void ImpBoard::construct()
         canvas->set_layer_display(index, ld);
         canvas->queue_draw();
     });
-    canvas->set_layer_display(10000, LayerDisplay(true, LayerDisplay::Mode::OUTLINE, Color(1, 1, 1)));
+    canvas->set_layer_display(10000, LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
     core.r->signal_rebuilt().connect([board_display_options] { board_display_options->update(); });
 
     canvas->signal_motion_notify_event().connect([this](GdkEventMotion *ev) {
@@ -384,7 +384,7 @@ void ImpBoard::construct()
 
     text_owner_annotation = canvas->create_annotation();
     text_owner_annotation->set_visible(true);
-    text_owner_annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE, Color(1, 1, 0)));
+    text_owner_annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
 
     core_board.signal_rebuilt().connect(sigc::mem_fun(this, &ImpBoard::update_text_owners));
     canvas->signal_hover_selection_changed().connect(sigc::mem_fun(this, &ImpBoard::update_text_owner_annotation));

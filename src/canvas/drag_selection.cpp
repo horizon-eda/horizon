@@ -52,6 +52,7 @@ void DragSelection::Box::realize()
     GET_LOC(this, a);
     GET_LOC(this, b);
     GET_LOC(this, fill);
+    GET_LOC(this, color);
 }
 
 void DragSelection::Line::create_vao()
@@ -93,6 +94,7 @@ void DragSelection::Line::realize()
     GET_LOC(this, screenmat);
     GET_LOC(this, viewmat);
     GET_LOC(this, scale);
+    GET_LOC(this, color);
 }
 
 void DragSelection::realize()
@@ -111,6 +113,8 @@ void DragSelection::Box::render()
     glUniform2f(a_loc, sel_a.x, sel_a.y);
     glUniform2f(b_loc, sel_b.x, sel_b.y);
     glUniform1i(fill_loc, fill);
+    auto co = ca->get_color(ColorP::SELECTION_BOX);
+    gl_color_to_uniform_3f(color_loc, co);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
@@ -125,6 +129,8 @@ void DragSelection::Line::render()
     glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(parent->ca->screenmat));
     glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(parent->ca->viewmat));
     glUniform1f(scale_loc, parent->ca->scale);
+    auto co = ca->get_color(ColorP::SELECTION_LINE);
+    gl_color_to_uniform_3f(color_loc, co);
 
 
     glDrawArrays(GL_LINE_STRIP, 0, vertices.size());

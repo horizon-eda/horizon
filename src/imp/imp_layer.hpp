@@ -11,6 +11,7 @@ protected:
     class LayerBox *layer_box;
     Glib::RefPtr<Glib::Binding> work_layer_binding;
     Glib::RefPtr<Glib::Binding> layer_opacity_binding;
+    void apply_preferences() override;
 
     CanvasPreferences *get_canvas_preferences() override
     {

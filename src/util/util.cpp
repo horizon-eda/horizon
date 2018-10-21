@@ -266,4 +266,23 @@ void find_files_recursive(const std::string &base_path, std::function<void(const
     }
 }
 
+json color_to_json(const Color &c)
+{
+    json j;
+    j["r"] = c.r;
+    j["g"] = c.g;
+    j["b"] = c.b;
+    return j;
+}
+
+
+Color color_from_json(const json &j)
+{
+    Color c;
+    c.r = j.at("r");
+    c.g = j.at("g");
+    c.b = j.at("b");
+    return c;
+}
+
 } // namespace horizon

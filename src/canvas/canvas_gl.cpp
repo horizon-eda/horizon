@@ -6,6 +6,7 @@
 #include <iostream>
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "board/board_layers.hpp"
 
 namespace horizon {
 std::pair<float, Coordf> CanvasGL::get_scale_and_offset()
@@ -46,39 +47,9 @@ CanvasGL::CanvasGL()
     property_layer_opacity() = 100;
     property_layer_opacity().signal_changed().connect([this] { queue_draw(); });
     clarify_menu = Gtk::manage(new Gtk::Menu);
-}
 
-void CanvasGL::set_background_color(const Color &c)
-{
-    background_color = c;
-    queue_draw();
-}
-
-void CanvasGL::set_grid_color(const Color &c)
-{
-    grid.color = c;
-    queue_draw();
-}
-
-void CanvasGL::set_grid_alpha(float a)
-{
-    grid.alpha = a;
-    queue_draw();
-}
-
-void CanvasGL::set_grid_style(horizon::Grid::Style st)
-{
-    switch (st) {
-    case Grid::Style::CROSS:
-        grid.mark_size = 5;
-        break;
-    case Grid::Style::DOT:
-        grid.mark_size = 1;
-        break;
-    case Grid::Style::GRID:
-        grid.mark_size = 2000;
-        break;
-    }
+    update_palette_colors();
+    layer_colors = appearance.layer_colors;
 }
 
 void CanvasGL::on_size_allocate(Gtk::Allocation &alloc)
@@ -99,17 +70,10 @@ void CanvasGL::resize_buffers()
     GLint rb;
     glGetIntegerv(GL_RENDERBUFFER_BINDING, &rb); // save rb
     glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, num_samples, GL_RGBA8, width, height);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, appearance.msaa, GL_RGBA8, width, height);
     glBindRenderbuffer(GL_RENDERBUFFER, stencilrenderbuffer);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, num_samples, GL_DEPTH24_STENCIL8, width, height);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, appearance.msaa, GL_DEPTH24_STENCIL8, width, height);
     glBindRenderbuffer(GL_RENDERBUFFER, rb);
-}
-
-void CanvasGL::set_msaa(unsigned int samples)
-{
-    num_samples = samples;
-    needs_resize = true;
-    queue_draw();
 }
 
 void CanvasGL::on_realize()
@@ -173,7 +137,10 @@ bool CanvasGL::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     GL_CHECK_ERROR
-    glClearColor(background_color.r, background_color.g, background_color.b, 1.0);
+    {
+        auto bgcolor = get_color(ColorP::BACKGROUND);
+        glClearColor(bgcolor.r, bgcolor.g, bgcolor.b, 1.0);
+    }
     glClear(GL_COLOR_BUFFER_BIT);
     GL_CHECK_ERROR
     glEnable(GL_BLEND);
@@ -345,7 +312,6 @@ void CanvasGL::cursor_move(GdkEvent *motion_event)
             return true;
         }
         return false;
-
     };
 
     auto dfn = [this, target_in_selection](const Target &ta) -> float {
@@ -525,22 +491,52 @@ void CanvasGL::set_highlight_enabled(bool v)
     queue_draw();
 }
 
-void CanvasGL::set_highlight_dim(float a)
+void CanvasGL::set_appearance(const Appearance &a)
 {
-    highlight_dim = a;
+    appearance = a;
+    update_palette_colors();
+    layer_colors = appearance.layer_colors;
+    switch (a.grid_fine_modifier) {
+    case Appearance::GridFineModifier::ALT:
+        grid_fine_modifier = Gdk::MOD1_MASK;
+        break;
+    case Appearance::GridFineModifier::CTRL:
+        grid_fine_modifier = Gdk::CONTROL_MASK;
+        break;
+    }
+    switch (a.grid_style) {
+    case Appearance::GridStyle::CROSS:
+        grid.mark_size = 5;
+        break;
+    case Appearance::GridStyle::DOT:
+        grid.mark_size = 1;
+        break;
+    case Appearance::GridStyle::GRID:
+        grid.mark_size = 2000;
+        break;
+    }
+    needs_resize = true;
     queue_draw();
 }
 
-void CanvasGL::set_highlight_shadow(float a)
+void CanvasGL::update_palette_colors()
 {
-    highlight_shadow = a;
-    queue_draw();
+    for (unsigned int i = 0; i < palette_colors.size(); i++) {
+        auto c = get_color(static_cast<ColorP>(i));
+        palette_colors[i][0] = c.r;
+        palette_colors[i][1] = c.g;
+        palette_colors[i][2] = c.b;
+    }
 }
 
-void CanvasGL::set_highlight_lighten(float a)
+const Color default_color(1, 0, 1);
+
+const Color &CanvasGL::get_color(ColorP colorp) const
 {
-    highlight_lighten = a;
-    queue_draw();
+    if (appearance.colors.count(colorp))
+        return appearance.colors.at(colorp);
+    else
+        return default_color;
 }
 
 void CanvasGL::set_selection_allowed(bool a)

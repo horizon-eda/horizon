@@ -22,7 +22,7 @@ void Canvas::remove_annotation(CanvasAnnotation *a)
 
 CanvasAnnotation::CanvasAnnotation(Canvas *c, int l) : ca(c), layer(l)
 {
-    LayerDisplay ld(false, LayerDisplay::Mode::FILL_ONLY, {1, 1, 0});
+    LayerDisplay ld(false, LayerDisplay::Mode::FILL_ONLY);
     ca->set_layer_display(layer, ld);
 }
 

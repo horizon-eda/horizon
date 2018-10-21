@@ -10,6 +10,7 @@
 #include "fragment_cache.hpp"
 #include "util/placement.hpp"
 #include "util/text_data.hpp"
+#include "color_palette.hpp"
 #include <array>
 #include <set>
 #include <sigc++/sigc++.h>
@@ -51,7 +52,7 @@ public:
     {
     }
 
-    const LayerDisplay &get_layer_display(int index);
+    const LayerDisplay &get_layer_display(int index) const;
     void set_layer_display(int index, const LayerDisplay &ld);
     class SelectionFilter selection_filter;
 
@@ -168,7 +169,8 @@ protected:
     Target target_current;
 
     const class LayerProvider *layer_provider = nullptr;
-    Color get_layer_color(int layer);
+    std::map<int, Color> layer_colors;
+    Color get_layer_color(int layer) const;
     int work_layer = 0;
     std::map<int, LayerDisplay> layer_display;
     class LayerSetup {

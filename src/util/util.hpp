@@ -48,4 +48,8 @@ json json_from_resource(const std::string &rsrc);
 bool compare_files(const std::string &filename_a, const std::string &filename_b);
 void find_files_recursive(const std::string &base_path, std::function<void(const std::string &)> cb,
                           const std::string &path = "");
+
+Color color_from_json(const json &j);
+json color_to_json(const Color &c);
+
 } // namespace horizon

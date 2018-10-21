@@ -4,6 +4,10 @@ layout(triangle_strip, max_vertices = 32) out;
 uniform mat3 screenmat;
 uniform mat3 viewmat;
 uniform float scale;
+uniform vec3 color_inner;
+uniform vec3 color_outer;
+uniform vec3 color_always;
+uniform vec3 color_prelight;
 in vec2 origin_to_geom[1];
 in vec2 box_center_to_geom[1];
 in vec2 box_dim_to_geom[1];
@@ -59,14 +63,14 @@ void main() {
 	color_to_fragment = vec3(1,0,1);
 	
 	if((flags & uint(4))!=uint(0)) { //always
-		color_to_fragment = vec3(1,1,0);
+		color_to_fragment = color_always;
 	}
 	if((flags & uint(1))!=uint(0)) { //selected
-		color_to_fragment = vec3(1,0,1);
+		color_to_fragment = color_outer;
 		origin_size = 10/scale;
 	}
 	if((flags & uint(2))!=uint(0)) { //prelight
-		color_to_fragment = vec3(.5,0,.5);
+		color_to_fragment = color_prelight;
 	}
 	dot_to_fragment = vec2(0,0);
 	
@@ -89,7 +93,7 @@ void main() {
 	EndPrimitive();
 	
 	os*=.5;
-	color_to_fragment = vec3(0,0,0);
+	color_to_fragment = color_inner;
 	
 	gl_Position = t(p+vec2(0, os));
 	EmitVertex();

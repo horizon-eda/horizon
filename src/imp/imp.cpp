@@ -6,7 +6,6 @@
 #include "logger/logger.hpp"
 #include "pool/part.hpp"
 #include "pool/pool_cached.hpp"
-#include "preferences_window.hpp"
 #include "property_panels/property_panels.hpp"
 #include "rules/rules_window.hpp"
 #include "util/gtk_util.hpp"
@@ -77,6 +76,7 @@ ImpBase::ImpBase(const PoolParams &params)
                             handle_broadcast(j);
                         }
                     }
+                    preferences.signal_changed().emit();
                     return true;
                 },
                 chan, Glib::IO_IN | Glib::IO_HUP);
@@ -115,8 +115,6 @@ bool ImpBase::handle_close(GdkEventAny *ev)
         return false;
 
     if (!core.r->get_needs_save()) {
-        if (preferences_window)
-            preferences_window->hide();
         return false;
     }
     if (!read_only) {
@@ -128,8 +126,6 @@ bool ImpBase::handle_close(GdkEventAny *ev)
         md.add_button("Save", 2);
         switch (md.run()) {
         case 1:
-            if (preferences_window)
-                preferences_window->hide();
             return false; // close
 
         case 2:
@@ -148,8 +144,6 @@ bool ImpBase::handle_close(GdkEventAny *ev)
         md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
         switch (md.run()) {
         case 1:
-            if (preferences_window)
-                preferences_window->hide();
             return false; // close
 
         default:
@@ -157,23 +151,6 @@ bool ImpBase::handle_close(GdkEventAny *ev)
         }
     }
     return false;
-}
-
-void ImpBase::show_preferences_window()
-{
-    if (!preferences_window) {
-        preferences.load();
-        preferences_window = new ImpPreferencesWindow(&preferences);
-        preferences_window->set_transient_for(*main_window);
-
-        preferences_window->signal_hide().connect([this] {
-            delete preferences_window;
-            preferences_window = nullptr;
-            preferences.save();
-            preferences.unlock();
-        });
-    }
-    preferences_window->present();
 }
 
 #define GET_WIDGET(name)                                                                                               \
@@ -410,21 +387,10 @@ void ImpBase::run(int argc, char *argv[])
     });
 
     connect_action(ActionID::PREFERENCES, [this](const auto &a) {
-        if (preferences.lock()) {
-            this->show_preferences_window();
-        }
-        else {
-            Gtk::MessageDialog md(*main_window, "Can't lock preferences", false /* use_markup */, Gtk::MESSAGE_ERROR,
-                                  Gtk::BUTTONS_NONE);
-            md.add_button("OK", Gtk::RESPONSE_OK);
-            md.add_button("Force unlock", 1);
-            md.set_secondary_text("Close all other preferences dialogs first");
-            if (md.run() == 1) {
-                preferences.unlock();
-                preferences.lock();
-                this->show_preferences_window();
-            }
-        }
+        json j;
+        j["op"] = "preferences";
+        allow_set_foreground_window(mgr_pid);
+        send_json(j);
     });
 
     for (const auto &it : action_catalog) {
@@ -540,21 +506,6 @@ void ImpBase::run(int argc, char *argv[])
             [this](ActionID action_id, ToolID tool_id) { trigger_action(std::make_pair(action_id, tool_id)); });
 
 
-    preferences.signal_changed().connect(sigc::mem_fun(this, &ImpBase::apply_preferences));
-
-    preferences.load();
-
-    preferences_monitor = Gio::File::create_for_path(ImpPreferences::get_preferences_filename())->monitor();
-
-    preferences_monitor->signal_changed().connect([this](const Glib::RefPtr<Gio::File> &file,
-                                                         const Glib::RefPtr<Gio::File> &file_other,
-                                                         Gio::FileMonitorEvent ev) {
-        if (ev == Gio::FILE_MONITOR_EVENT_CHANGES_DONE_HINT)
-            preferences.load();
-    });
-
-    main_window->add_action("preferences", [this] { trigger_action(ActionID::PREFERENCES); });
-
     log_window = new LogWindow(main_window);
     Logger::get().set_log_handler([this](const Logger::Item &it) { log_window->get_view()->push_log(it); });
 
@@ -563,10 +514,26 @@ void ImpBase::run(int argc, char *argv[])
     main_window->signal_delete_event().connect(sigc::mem_fun(this, &ImpBase::handle_close));
 
     for (const auto &la : core.r->get_layer_provider()->get_layers()) {
-        canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL, la.second.color));
+        canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL));
     }
 
     construct();
+
+    preferences.signal_changed().connect(sigc::mem_fun(this, &ImpBase::apply_preferences));
+
+    preferences.load();
+
+    preferences_monitor = Gio::File::create_for_path(Preferences::get_preferences_filename())->monitor();
+
+    preferences_monitor->signal_changed().connect([this](const Glib::RefPtr<Gio::File> &file,
+                                                         const Glib::RefPtr<Gio::File> &file_other,
+                                                         Gio::FileMonitorEvent ev) {
+        if (ev == Gio::FILE_MONITOR_EVENT_CHANGES_DONE_HINT)
+            preferences.load();
+    });
+
+    if (sockets_connected)
+        main_window->add_action("preferences", [this] { trigger_action(ActionID::PREFERENCES); });
 
     apply_preferences();
 
@@ -816,29 +783,8 @@ void ImpBase::handle_drag()
 void ImpBase::apply_preferences()
 {
     auto canvas_prefs = get_canvas_preferences();
-    if (canvas_prefs->background_color == CanvasPreferences::BackgroundColor::BLUE) {
-        canvas->set_background_color(Color::new_from_int(0, 24, 64));
-        canvas->set_grid_color(Color::new_from_int(0, 78, 208));
-    }
-    else {
-        canvas->set_grid_color({1, 1, 1});
-        canvas->set_background_color({0, 0, 0});
-    }
-    canvas->set_grid_style(canvas_prefs->grid_style);
-    canvas->set_grid_alpha(canvas_prefs->grid_opacity);
-    canvas->set_highlight_dim(canvas_prefs->highlight_dim);
-    canvas->set_highlight_shadow(canvas_prefs->highlight_shadow);
-    canvas->set_highlight_lighten(canvas_prefs->highlight_lighten);
-    switch (canvas_prefs->grid_fine_modifier) {
-    case CanvasPreferences::GridFineModifier::ALT:
-        canvas->grid_fine_modifier = Gdk::MOD1_MASK;
-        break;
-    case CanvasPreferences::GridFineModifier::CTRL:
-        canvas->grid_fine_modifier = Gdk::CONTROL_MASK;
-        break;
-    }
+    canvas->set_appearance(canvas_prefs->appearance);
     canvas->show_all_junctions_in_schematic = preferences.schematic.show_all_junctions;
-    canvas->set_msaa(canvas_prefs->msaa);
 
     auto av = get_editor_type_for_action();
     for (auto &it : action_connections) {
@@ -1423,6 +1369,11 @@ bool ImpBase::handle_broadcast(const json &j)
     }
     else if (op == "close") {
         delete main_window;
+        return true;
+    }
+    else if (op == "preferences") {
+    	const auto &prefs = j.at("preferences");
+    	preferences.load_from_json(prefs);
         return true;
     }
     return false;

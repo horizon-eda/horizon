@@ -288,13 +288,13 @@ std::pair<Coordi, Coordi> Padstack::get_bbox(bool copper_only) const
 
 const std::map<int, Layer> &Padstack::get_layers() const
 {
-    static const std::map<int, Layer> layers = {{30, {30, "Top Paste", {.8, .8, .8}}},
-                                                {10, {10, "Top Mask", {1, .5, .5}}},
-                                                {0, {0, "Top Copper", {1, 0, 0}, false, true}},
-                                                {-1, {-1, "Inner", {1, 1, 0}, false, true}},
-                                                {-100, {-100, "Bottom Copper", {0, .5, 0}, true, true}},
-                                                {-110, {-110, "Bottom Mask", {.25, .5, .25}, true}},
-                                                {-130, {-130, "Bottom Paste", {.8, .8, .8}}}};
+    static const std::map<int, Layer> layers = {{30, {30, "Top Paste"}},
+                                                {10, {10, "Top Mask"}},
+                                                {0, {0, "Top Copper", false, true}},
+                                                {-1, {-1, "Inner", false, true}},
+                                                {-100, {-100, "Bottom Copper", true, true}},
+                                                {-110, {-110, "Bottom Mask", true}},
+                                                {-130, {-130, "Bottom Paste"}}};
     return layers;
 }
 

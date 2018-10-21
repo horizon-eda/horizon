@@ -87,6 +87,7 @@ SRC_COMMON = \
 	src/parameter/program_polygon.cpp\
 	src/frame/frame.cpp\
 	src/common/keepout.cpp\
+	src/board/board_layers.cpp\
 
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += src/util/uuid_win32.cpp
@@ -122,6 +123,7 @@ SRC_CANVAS = \
 	3rd_party/poly2tri/sweep/advancing_front.cpp\
 	src/util/msd.cpp\
 	src/util/msd_animator.cpp\
+	src/canvas/appearance.cpp\
 
 SRC_IMP = \
 	src/imp/imp_main.cpp \
@@ -324,9 +326,7 @@ SRC_IMP = \
 	src/canvas3d/face.cpp\
 	src/canvas3d/background.cpp\
 	src/imp/header_button.cpp\
-	src/imp/preferences.cpp\
-	src/imp/preferences_window.cpp\
-	src/imp/preferences_window_keys.cpp\
+	src/preferences/preferences.cpp\
 	src/pool/pool_cached.cpp\
 	src/canvas/canvas_pads.cpp\
 	src/util/window_state_store.cpp\
@@ -452,11 +452,19 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/prj-mgr/pool_cache_window.cpp\
 	src/pool-prj-mgr/prj-mgr/part_browser/part_browser_window.cpp\
 	src/pool-prj-mgr/prj-mgr/pool_cache_window.cpp\
-	src/pool-prj-mgr/prj-mgr/prj-mgr-prefs.cpp\
 	src/pool-prj-mgr/close_utils.cpp\
 	src/pool-prj-mgr/prj-mgr/pool_cache_cleanup_dialog.cpp\
 	src/pool-prj-mgr/pool-mgr/view_create_pool.cpp\
-	src/widgets/pool_chooser.cpp
+	src/widgets/pool_chooser.cpp\
+	src/preferences/preferences.cpp\
+	src/preferences/preferences_provider.cpp\
+	src/preferences/preferences_util.cpp\
+	src/pool-prj-mgr/preferences_window.cpp\
+	src/pool-prj-mgr/preferences_window_keys.cpp\
+	src/pool-prj-mgr/preferences_window_canvas.cpp\
+	src/pool-prj-mgr/preferences_window_pool.cpp\
+	src/imp/action.cpp\
+	src/imp/action_catalog.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

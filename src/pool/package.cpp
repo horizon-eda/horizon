@@ -329,21 +329,21 @@ std::pair<Coordi, Coordi> Package::get_bbox() const
 
 const std::map<int, Layer> &Package::get_layers() const
 {
-    static const std::map<int, Layer> layers = {{60, {60, "Top Courtyard", {.5, .5, .5}}},
-                                                {50, {50, "Top Assembly", {.5, .5, .5}}},
-                                                {40, {40, "Top Package", {.5, .5, .5}}},
-                                                {30, {30, "Top Paste", {.8, .8, .8}}},
-                                                {20, {20, "Top Silkscreen", {.9, .9, .9}}},
-                                                {10, {10, "Top Mask", {1, .5, .5}}},
-                                                {0, {0, "Top Copper", {1, 0, 0}, false, true}},
-                                                {-1, {-1, "Inner", {1, 1, 0}, false, true}},
-                                                {-100, {-100, "Bottom Copper", {0, .5, 0}, true, true}},
-                                                {-110, {-110, "Bottom Mask", {.25, .5, .25}, true}},
-                                                {-120, {-120, "Bottom Silkscreen", {.9, .9, .9}, true}},
-                                                {-130, {-130, "Bottom Paste", {.8, .8, .8}}},
-                                                {-140, {-140, "Bottom Package", {.5, .5, .5}}},
-                                                {-150, {-150, "Bottom Assembly", {.5, .5, .5}, true}},
-                                                {-160, {-160, "Bottom Courtyard", {.5, .5, .5}}}};
+    static const std::map<int, Layer> layers = {{60, {60, "Top Courtyard"}},
+                                                {50, {50, "Top Assembly"}},
+                                                {40, {40, "Top Package"}},
+                                                {30, {30, "Top Paste"}},
+                                                {20, {20, "Top Silkscreen"}},
+                                                {10, {10, "Top Mask"}},
+                                                {0, {0, "Top Copper", false, true}},
+                                                {-1, {-1, "Inner", false, true}},
+                                                {-100, {-100, "Bottom Copper", true, true}},
+                                                {-110, {-110, "Bottom Mask", true}},
+                                                {-120, {-120, "Bottom Silkscreen", true}},
+                                                {-130, {-130, "Bottom Paste"}},
+                                                {-140, {-140, "Bottom Package"}},
+                                                {-150, {-150, "Bottom Assembly", true}},
+                                                {-160, {-160, "Bottom Courtyard"}}};
     return layers;
 }
 

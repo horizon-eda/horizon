@@ -71,5 +71,6 @@ private:
     GLuint viewmat_loc;
     GLuint scale_loc;
     GLuint alpha_loc;
+    GLuint border_color_loc;
 };
 } // namespace horizon

@@ -4,13 +4,13 @@
 #include <set>
 namespace horizon {
 
-class ImpPreferencesWindow : public Gtk::Window {
+class PreferencesWindow : public Gtk::Window {
     friend class CanvasPreferencesEditor;
 
 public:
-    ImpPreferencesWindow(class ImpPreferences *pr);
+    PreferencesWindow(class Preferences *pr);
 
 private:
-    class ImpPreferences *preferences;
+    class Preferences *preferences;
 };
 } // namespace horizon

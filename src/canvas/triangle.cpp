@@ -123,7 +123,7 @@ void TriangleRenderer::realize()
 
 class UBOBuffer {
 public:
-    std::array<std::array<float, 4>, 14> colors; // 14==ColorP::N_COLORS
+    std::array<std::array<float, 4>, 15> colors; // 15==ColorP::N_COLORS, keep in sync with shaders
     std::array<float, 12> screenmat;
     std::array<float, 12> viewmat;
     std::array<float, 3> layer_color;
@@ -149,26 +149,27 @@ static void mat3_to_array(std::array<float, 12> &dest, const glm::mat3 &src)
 
 void TriangleRenderer::render_layer(int layer)
 {
-    const auto &ld = ca->layer_display.at(layer);
+    const auto &ld = ca->get_layer_display(layer);
 
     GL_CHECK_ERROR
     glBindBuffer(GL_UNIFORM_BUFFER, ubo);
     UBOBuffer buf;
-    buf.colors = ca->layer_setup.colors;
+    buf.colors = ca->palette_colors;
     buf.alpha = ca->property_layer_opacity() / 100;
     mat3_to_array(buf.screenmat, ca->screenmat);
     mat3_to_array(buf.viewmat, ca->viewmat);
-    buf.layer_color[0] = ld.color.r;
-    buf.layer_color[1] = ld.color.g;
-    buf.layer_color[2] = ld.color.b;
+    auto lc = ca->get_layer_color(layer);
+    buf.layer_color[0] = lc.r;
+    buf.layer_color[1] = lc.g;
+    buf.layer_color[2] = lc.b;
     buf.layer_flags = static_cast<int>(ld.mode);
     buf.types_visible = ld.types_visible;
     buf.types_force_outline = ld.types_force_outline;
     buf.scale = ca->scale;
     buf.highlight_mode = ca->highlight_enabled ? static_cast<int>(ca->highlight_mode) : 0;
-    buf.highlight_dim = ca->highlight_dim;
-    buf.highlight_shadow = ca->highlight_shadow;
-    buf.highlight_lighten = ca->highlight_lighten;
+    buf.highlight_dim = ca->appearance.highlight_dim;
+    buf.highlight_shadow = ca->appearance.highlight_shadow;
+    buf.highlight_lighten = ca->appearance.highlight_lighten;
 
 
     glBufferData(GL_UNIFORM_BUFFER, sizeof(buf), &buf, GL_DYNAMIC_DRAW);
@@ -230,7 +231,7 @@ void TriangleRenderer::render()
     std::vector<int> layers;
     layers.reserve(layer_offsets.size());
     for (const auto &it : layer_offsets) {
-        if (ca->layer_display.count(it.first))
+        if (ca->get_layer_display(it.first).visible)
             layers.push_back(it.first);
     }
     std::sort(layers.begin(), layers.end());
@@ -243,15 +244,14 @@ void TriangleRenderer::render()
     glEnable(GL_STENCIL_TEST);
     stencil = 1;
     for (auto layer : layers) {
-        const auto &ld = ca->layer_display.at(layer);
+        const auto &ld = ca->get_layer_display(layer);
         if (layer != ca->work_layer && layer < 10000 && ld.visible) {
             render_layer_with_overlay(layer);
         }
     }
-    if (ca->layer_display.count(ca->work_layer))
-        render_layer_with_overlay(ca->work_layer);
+    render_layer_with_overlay(ca->work_layer);
     for (auto layer : layers) {
-        const auto &ld = ca->layer_display.at(layer);
+        const auto &ld = ca->get_layer_display(layer);
         if (layer >= 10000 && layer < 30000 && ld.visible) {
             render_layer(layer);
         }

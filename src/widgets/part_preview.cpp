@@ -141,7 +141,7 @@ PartPreview::PartPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIENTAT
         package_box->pack_start(*sep, false, false, 0);
     }
 
-    canvas_package = Gtk::manage(new PreviewCanvas(pool));
+    canvas_package = Gtk::manage(new PreviewCanvas(pool, true));
     package_box->pack_start(*canvas_package, true, true, 0);
 
     paned->add2(*package_box);

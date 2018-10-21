@@ -102,5 +102,10 @@ private:
     GLuint screenmat_loc;
     GLuint viewmat_loc;
     GLuint scale_loc;
+
+    GLuint color_always_loc;
+    GLuint color_inner_loc;
+    GLuint color_outer_loc;
+    GLuint color_prelight_loc;
 };
 } // namespace horizon

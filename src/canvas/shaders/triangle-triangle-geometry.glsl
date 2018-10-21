@@ -16,7 +16,7 @@ smooth out float striper_to_fragment;
 
 layout (std140) uniform layer_setup
 { 
-	vec3 colors[14];
+	vec3 colors[15];
 	mat3 screenmat;
 	mat3 viewmat;
 	vec3 layer_color;

@@ -252,7 +252,7 @@ void Canvas::draw_text_box(const Placement &q, float width, float height, const 
     else if (mode == TextBoxMode::LOWER)
         text_pos.y = -height / 4;
 
-    auto text_bb = draw_text0(text_pos, 1_mm, s, 0, false, TextOrigin::CENTER, ColorP::WHITE, 10000, text_width, false);
+    auto text_bb = draw_text0(text_pos, 1_mm, s, 0, false, TextOrigin::CENTER, ColorP::FROM_LAYER, 10000, text_width, false);
     float scale_x = (text_bb.second.x - text_bb.first.x) / (float)(width);
     float scale_y = ((text_bb.second.y - text_bb.first.y)) / (float)(height);
     if (mode != TextBoxMode::FULL)

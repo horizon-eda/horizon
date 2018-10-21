@@ -4,6 +4,7 @@ in vec2 x;
 in vec2 dim;
 uniform float scale;
 uniform int fill;
+uniform vec3 color;
 
 void main() {
 	float border = 3/scale;
@@ -17,5 +18,5 @@ void main() {
 	if((x.y < border) || (x.y > dim.y-border)) {
 		alpha = 1;
 	}
-	outputColor = vec4(1,0,0,alpha);
+	outputColor = vec4(color,alpha); //fixme
 }
