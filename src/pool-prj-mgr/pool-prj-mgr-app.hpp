@@ -6,6 +6,11 @@
 #include <set>
 #include <zmq.hpp>
 #include <glibmm/datetime.h>
+#ifdef G_OS_WIN32
+#undef ERROR
+#undef DELETE
+#undef DUPLICATE
+#endif
 #include "preferences/preferences.hpp"
 
 namespace horizon {
