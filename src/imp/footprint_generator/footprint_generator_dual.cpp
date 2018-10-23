@@ -286,7 +286,7 @@ void FootprintGeneratorDual::update_spacing(Mode mode)
 
     case Mode::SPACING_INNER:
     case Mode::SPACING_OUTER:
-        sp_pad_height->set_value(spacing_outer - spacing_inner);
+        sp_pad_height->set_value((spacing_outer - spacing_inner) / 2);
         sp_spacing->set_value((spacing_outer + spacing_inner) / 4);
         break;
     }
