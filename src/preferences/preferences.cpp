@@ -30,6 +30,7 @@ void Preferences::load_default()
 {
     canvas_layer = CanvasPreferences();
     canvas_non_layer = CanvasPreferences();
+    canvas_non_layer.appearance.layer_colors[0] = {1, 1, 0};
     key_sequences.load_from_json(json_from_resource("/net/carrotIndustries/horizon/imp/keys_default.json"));
 }
 
