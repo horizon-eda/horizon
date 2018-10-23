@@ -19,6 +19,8 @@
   </object>
   <object class="GtkWindow" id="window">
     <property name="can_focus">False</property>
+    <property name="default_width">1000</property>
+    <property name="default_height">600</property>
     <child type="titlebar">
       <object class="GtkHeaderBar">
         <property name="visible">True</property>
