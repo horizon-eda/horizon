@@ -107,6 +107,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
             download_spinner->stop();
         }
         if (!downloading && !download_error) {
+            PoolManager::get().add_pool(download_dest_dir_button->get_filename());
             open_file_view(Gio::File::create_for_path(
                     Glib::build_filename(download_dest_dir_button->get_filename(), "pool.json")));
         }
