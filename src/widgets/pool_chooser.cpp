@@ -40,7 +40,7 @@ PoolChooserDialog::PoolChooserDialog(Gtk::Window *parent, const std::string &msg
     : Gtk::Dialog("Choose pool", *parent, Gtk::DIALOG_MODAL | Gtk::DIALOG_USE_HEADER_BAR)
 {
     add_button("Cancel", Gtk::RESPONSE_CANCEL);
-    add_button("OK", Gtk::RESPONSE_OK);
+    auto ok_button = add_button("OK", Gtk::RESPONSE_OK);
     set_default_response(Gtk::RESPONSE_OK);
     auto sc = Gtk::manage(new Gtk::ScrolledWindow);
     sc->set_propagate_natural_height(true);
@@ -51,7 +51,21 @@ PoolChooserDialog::PoolChooserDialog(Gtk::Window *parent, const std::string &msg
     lb->signal_row_activated().connect([this](Gtk::ListBoxRow *row) { response(Gtk::RESPONSE_OK); });
     sc->add(*lb);
 
+    {
+        auto la = Gtk::manage(new Gtk::Label("You haven't set up any pools, add some in the preferences dialog"));
+        la->get_style_context()->add_class("dim-label");
+        la->set_hexpand(false);
+        la->set_hexpand_set(true);
+        la->set_max_width_chars(10);
+        la->property_margin() = 5;
+        la->set_line_wrap(true);
+        lb->set_placeholder(*la);
+        la->show();
+    }
+
     const auto &pools = PoolManager::get().get_pools();
+    ok_button->set_sensitive(
+            std::count_if(pools.begin(), pools.end(), [](const auto &it) { return it.second.enabled; }));
     for (const auto &it : pools) {
         if (it.second.enabled) {
             auto w = Gtk::manage(new PoolChooserDialogRow(it.second));
