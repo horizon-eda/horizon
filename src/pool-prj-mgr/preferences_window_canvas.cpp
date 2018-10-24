@@ -6,7 +6,11 @@
 #include "preferences/preferences.hpp"
 #include "board/board_layers.hpp"
 #include "util/gtk_util.hpp"
+#include "util/util.hpp"
+#include "nlohmann/json.hpp"
 #include <set>
+#include <iostream>
+
 
 namespace horizon {
 
@@ -190,11 +194,28 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
     Gtk::Label *canvas_label;
     GET_WIDGET(canvas_label);
 
-    Gtk::FlowBox *canvas_colors_fb;
     GET_WIDGET(canvas_colors_fb);
 
+    Gtk::Menu *color_preset_menu;
+    GET_WIDGET(color_preset_menu);
+
+    {
+        {
+            auto it = Gtk::manage(new Gtk::MenuItem("Export..."));
+            it->signal_activate().connect(sigc::mem_fun(this, &CanvasPreferencesEditor::handle_export));
+            it->show();
+            color_preset_menu->append(*it);
+        }
+        {
+            auto it = Gtk::manage(new Gtk::MenuItem("Import..."));
+            it->signal_activate().connect(sigc::mem_fun(this, &CanvasPreferencesEditor::handle_import));
+            it->show();
+            color_preset_menu->append(*it);
+        }
+    }
+
     color_chooser = Glib::wrap(GTK_COLOR_CHOOSER(gtk_builder_get_object(x->gobj(), "canvas_color_chooser")), true);
-    color_chooser_conn = color_chooser->property_rgba().signal_changed().connect([this, canvas_colors_fb] {
+    color_chooser_conn = color_chooser->property_rgba().signal_changed().connect([this] {
         auto sel = canvas_colors_fb->get_selected_children();
         if (sel.size() != 1)
             return;
@@ -207,20 +228,8 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
         it->set_color(c);
     });
 
-    canvas_colors_fb->signal_selected_children_changed().connect([this, canvas_colors_fb] {
-        auto sel = canvas_colors_fb->get_selected_children();
-        if (sel.size() != 1)
-            return;
-        auto it = dynamic_cast<ColorEditor *>(sel.front()->get_child());
-        color_chooser_conn.block();
-        Gdk::RGBA rgba;
-        auto c = it->get_color();
-        rgba.set_red(c.r);
-        rgba.set_green(c.g);
-        rgba.set_blue(c.b);
-        color_chooser->set_rgba(rgba);
-        color_chooser_conn.unblock();
-    });
+    canvas_colors_fb->signal_selected_children_changed().connect(
+            sigc::mem_fun(this, &CanvasPreferencesEditor::update_color_chooser));
 
     if (canvas_preferences == &preferences->canvas_layer) {
         canvas_label->set_text("Affects Padstack, Package and Board");
@@ -303,12 +312,109 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
     canvas_colors_fb->select_child(*canvas_colors_fb->get_child_at_index(0));
 }
 
+void CanvasPreferencesEditor::handle_export()
+{
+    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+    std::string filename;
+    {
+
+        GtkFileChooserNative *native = gtk_file_chooser_native_new("Save color scheme", GTK_WINDOW(top->gobj()),
+                                                                   GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+        auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+        chooser->set_do_overwrite_confirmation(true);
+        chooser->set_current_name("colors.json");
+
+        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+            filename = chooser->get_filename();
+        }
+    }
+    if (filename.size()) {
+        while (1) {
+            std::string error_str;
+            try {
+                auto j = canvas_preferences->serialize_colors();
+                save_json_to_file(filename, j);
+                break;
+            }
+            catch (const std::exception &e) {
+                error_str = e.what();
+            }
+            catch (...) {
+                error_str = "unknown error";
+            }
+            if (error_str.size()) {
+                Gtk::MessageDialog dia(*top, "Export error", false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_NONE);
+                dia.set_secondary_text(error_str);
+                dia.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+                dia.add_button("Retry", 1);
+                if (dia.run() != 1)
+                    break;
+            }
+        }
+    }
+}
+
+void CanvasPreferencesEditor::handle_import()
+{
+    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+    GtkFileChooserNative *native = gtk_file_chooser_native_new("Open color scheme", GTK_WINDOW(top->gobj()),
+                                                               GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    auto filter = Gtk::FileFilter::create();
+    filter->set_name("Horizon color schemes");
+    filter->add_pattern("*.json");
+    chooser->add_filter(filter);
+
+    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        auto filename = chooser->get_filename();
+        std::string error_str;
+        try {
+            auto j = load_json_from_file(filename);
+            load_colors(j);
+        }
+        catch (const std::exception &e) {
+            error_str = e.what();
+        }
+        catch (...) {
+            error_str = "unknown error";
+        }
+        if (error_str.size()) {
+            Gtk::MessageDialog dia(*top, "Import error", false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+            dia.set_secondary_text(error_str);
+            dia.run();
+        }
+    }
+}
+
+void CanvasPreferencesEditor::load_colors(const json &j)
+{
+    canvas_preferences->load_colors_from_json(j);
+    preferences->signal_changed().emit();
+    update_color_chooser();
+}
+
+void CanvasPreferencesEditor::update_color_chooser()
+{
+    auto sel = canvas_colors_fb->get_selected_children();
+    if (sel.size() != 1)
+        return;
+    auto it = dynamic_cast<ColorEditor *>(sel.front()->get_child());
+    color_chooser_conn.block();
+    Gdk::RGBA rgba;
+    color_chooser->set_rgba(rgba); // fixes things...
+    auto c = it->get_color();
+    rgba.set_rgba(c.r, c.g, c.b, 1);
+    color_chooser->set_rgba(rgba);
+    color_chooser_conn.unblock();
+}
+
 CanvasPreferencesEditor *CanvasPreferencesEditor::create(Preferences *prefs, CanvasPreferences *canvas_prefs,
                                                          bool layered)
 {
     CanvasPreferencesEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    std::vector<Glib::ustring> widgets = {"canvas_box", "adjustment1", "adjustment2", "adjustment3", "adjustment4"};
+    std::vector<Glib::ustring> widgets = {"canvas_box",  "adjustment1", "adjustment2",
+                                          "adjustment3", "adjustment4", "color_preset_menu"};
     x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/preferences.ui", widgets);
     x->get_widget_derived("canvas_box", w, prefs, canvas_prefs, layered);
     w->reference();

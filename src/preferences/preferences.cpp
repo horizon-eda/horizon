@@ -77,7 +77,7 @@ static const LutEnumStr<ColorP> colorp_lut = {COLORP_LUT_ITEM(FROM_LAYER),
 
 json CanvasPreferences::serialize() const
 {
-    json j;
+    json j = serialize_colors();
     j["grid_style"] = grid_style_lut.lookup_reverse(appearance.grid_style);
     j["grid_opacity"] = appearance.grid_opacity;
     j["highlight_shadow"] = appearance.highlight_shadow;
@@ -85,7 +85,12 @@ json CanvasPreferences::serialize() const
     j["highlight_lighten"] = appearance.highlight_lighten;
     j["grid_fine_modifier"] = grid_fine_mod_lut.lookup_reverse(appearance.grid_fine_modifier);
     j["msaa"] = appearance.msaa;
+    return j;
+}
 
+json CanvasPreferences::serialize_colors() const
+{
+    json j;
     json j_layer_colors = json::object();
     for (const auto &it : appearance.layer_colors) {
         j_layer_colors[std::to_string(it.first)] = color_to_json(it.second);
@@ -100,15 +105,8 @@ json CanvasPreferences::serialize() const
     return j;
 }
 
-void CanvasPreferences::load_from_json(const json &j)
+void CanvasPreferences::load_colors_from_json(const json &j)
 {
-    appearance.grid_style = grid_style_lut.lookup(j.at("grid_style"));
-    appearance.grid_opacity = j.value("grid_opacity", .4);
-    appearance.highlight_dim = j.value("highlight_dim", .3);
-    appearance.highlight_shadow = j.value("highlight_shadow", .3);
-    appearance.highlight_lighten = j.value("highlight_lighten", .3);
-    appearance.grid_fine_modifier = grid_fine_mod_lut.lookup(j.value("grid_fine_modifier", "alt"));
-    appearance.msaa = j.value("msaa", 0);
     if (j.count("layer_colors")) {
         const auto &o = j.at("layer_colors");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -124,6 +122,18 @@ void CanvasPreferences::load_from_json(const json &j)
                 appearance.colors[c] = color_from_json(it.value());
         }
     }
+}
+
+void CanvasPreferences::load_from_json(const json &j)
+{
+    appearance.grid_style = grid_style_lut.lookup(j.at("grid_style"));
+    appearance.grid_opacity = j.value("grid_opacity", .4);
+    appearance.highlight_dim = j.value("highlight_dim", .3);
+    appearance.highlight_shadow = j.value("highlight_shadow", .3);
+    appearance.highlight_lighten = j.value("highlight_lighten", .3);
+    appearance.grid_fine_modifier = grid_fine_mod_lut.lookup(j.value("grid_fine_modifier", "alt"));
+    appearance.msaa = j.value("msaa", 0);
+    load_colors_from_json(j);
 }
 
 json SchematicPreferences::serialize() const

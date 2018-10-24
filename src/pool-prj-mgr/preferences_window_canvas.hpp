@@ -1,5 +1,6 @@
 #pragma once
 #include <gtkmm.h>
+#include "preferences/preferences.hpp"
 
 namespace horizon {
 
@@ -12,8 +13,13 @@ public:
     CanvasPreferences *canvas_preferences;
 
 private:
+    Gtk::FlowBox *canvas_colors_fb = nullptr;
     Glib::RefPtr<Gtk::ColorChooser> color_chooser;
     sigc::connection color_chooser_conn;
+    void handle_export();
+    void handle_import();
+    void load_colors(const json &j);
+    void update_color_chooser();
 };
 
 

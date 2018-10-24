@@ -14,7 +14,9 @@ class CanvasPreferences {
 public:
     Appearance appearance;
     void load_from_json(const json &j);
+    void load_colors_from_json(const json &j);
     json serialize() const;
+    json serialize_colors() const;
 };
 
 class SchematicPreferences {
