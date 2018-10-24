@@ -28,7 +28,7 @@ DuplicateWindow::DuplicateWindow(class Pool *p, ObjectType ty, const UUID &uu) :
         auto w = Gtk::manage(new DuplicateUnitWidget(pool, uu, false, this));
         box->pack_start(*w, true, true, 0);
         w->show();
-        duplicate_button->signal_clicked().connect([w] { w->duplicate(); });
+        duplicate_widget = w;
     }
     else if (ty == ObjectType::ENTITY) {
         auto ubox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
@@ -37,7 +37,7 @@ DuplicateWindow::DuplicateWindow(class Pool *p, ObjectType ty, const UUID &uu) :
         box->pack_start(*ubox, true, true, 0);
         w->show();
         ubox->show();
-        duplicate_button->signal_clicked().connect([w] { w->duplicate(); });
+        duplicate_widget = w;
     }
     else if (ty == ObjectType::PART) {
         auto ubox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
@@ -46,12 +46,37 @@ DuplicateWindow::DuplicateWindow(class Pool *p, ObjectType ty, const UUID &uu) :
         box->pack_start(*ubox, true, true, 0);
         w->show();
         ubox->show();
-        duplicate_button->signal_clicked().connect([w] { w->duplicate(); });
+        duplicate_widget = w;
     }
+    duplicate_button->signal_clicked().connect(sigc::mem_fun(this, &DuplicateWindow::handle_duplicate));
 }
 
 bool DuplicateWindow::get_duplicated() const
 {
     return duplicated;
+}
+
+void DuplicateWindow::handle_duplicate()
+{
+    if (!duplicate_widget)
+        return;
+    std::string error_str;
+    try {
+        duplicate_widget->duplicate();
+    }
+    catch (const std::exception &e) {
+        error_str = e.what();
+    }
+    catch (const Gio::Error &e) {
+        error_str = "io error: " + e.what();
+    }
+    catch (...) {
+        error_str = "unknown exception";
+    }
+    if (error_str.size()) {
+        Gtk::MessageDialog md(*this, "Error duplicating", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+        md.set_secondary_text(error_str);
+        md.run();
+    }
 }
 } // namespace horizon

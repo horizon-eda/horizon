@@ -131,7 +131,7 @@ DuplicatePartWidget::DuplicatePartWidget(Pool *p, const UUID &part_uuid, Gtk::Bo
     dew->show();
 }
 
-void DuplicatePartWidget::duplicate()
+UUID DuplicatePartWidget::duplicate()
 {
     Part new_part(*part);
     new_part.uuid = UUID::random();
@@ -149,6 +149,7 @@ void DuplicatePartWidget::duplicate()
 
     win->duplicated = true;
     win->close();
+    return new_part.uuid;
 }
 
 UUID DuplicatePartWidget::duplicate_package(Pool *pool, const UUID &uu, const std::string &new_dir,

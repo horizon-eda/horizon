@@ -1,13 +1,14 @@
 #pragma once
 #include <gtkmm.h>
 #include "util/uuid.hpp"
+#include "duplicate_base.hpp"
 
 namespace horizon {
-class DuplicateUnitWidget : public Gtk::Box {
+class DuplicateUnitWidget : public Gtk::Box, public DuplicateBase {
 public:
     DuplicateUnitWidget(class Pool *p, const UUID &unit_uuid, bool optional = false,
                         class DuplicateWindow *w = nullptr);
-    UUID duplicate();
+    UUID duplicate() override;
     UUID get_uuid() const;
 
     static std::string insert_filename(const std::string &fn, const std::string &ins);

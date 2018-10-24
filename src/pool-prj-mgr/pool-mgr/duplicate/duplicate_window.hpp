@@ -14,6 +14,8 @@ public:
 
 private:
     class Pool *pool = nullptr;
+    class DuplicateBase *duplicate_widget = nullptr;
     bool duplicated = false;
+    void handle_duplicate();
 };
 } // namespace horizon

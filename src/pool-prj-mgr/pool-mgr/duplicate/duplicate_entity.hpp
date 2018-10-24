@@ -1,14 +1,15 @@
 #pragma once
 #include <gtkmm.h>
 #include "util/uuid.hpp"
+#include "duplicate_base.hpp"
 
 namespace horizon {
-class DuplicateEntityWidget : public Gtk::Box {
+class DuplicateEntityWidget : public Gtk::Box, public DuplicateBase {
 public:
     DuplicateEntityWidget(class Pool *p, const UUID &entity_uuid, Gtk::Box *ubox, bool optional = false,
                           class DuplicateWindow *w = nullptr);
 
-    UUID duplicate();
+    UUID duplicate() override;
     UUID get_uuid() const;
 
 private:
