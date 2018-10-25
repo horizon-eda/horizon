@@ -405,34 +405,39 @@ horizon::Net *PNS_HORIZON_IFACE::get_net_for_code(int code)
 
 const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::Track *track)
 {
-    parents.emplace_back(track);
-    return &parents.back();
+    return get_or_create_parent(PNS_HORIZON_PARENT_ITEM(track));
 }
 
 const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::BoardHole *hole)
 {
-    parents.emplace_back(hole);
-    return &parents.back();
+    return get_or_create_parent(PNS_HORIZON_PARENT_ITEM(hole));
 }
 
 const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::Via *via)
 {
-    parents.emplace_back(via);
-    return &parents.back();
+    return get_or_create_parent(PNS_HORIZON_PARENT_ITEM(via));
 }
 
 const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::BoardPackage *pkg, const horizon::Pad *pad)
 {
-    parents.emplace_back(pkg, pad);
-    return &parents.back();
+    return get_or_create_parent(PNS_HORIZON_PARENT_ITEM(pkg, pad));
 }
 
 const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::Keepout *k,
                                                              const horizon::BoardPackage *pkg)
 {
-    parents.emplace_back(k, pkg);
+    return get_or_create_parent(PNS_HORIZON_PARENT_ITEM(k, pkg));
+}
+
+const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_or_create_parent(const PNS_HORIZON_PARENT_ITEM &it)
+{
+    auto r = std::find(parents.begin(), parents.end(), it);
+    if (r != parents.end())
+        return &(*r);
+    parents.emplace_back(it);
     return &parents.back();
 }
+
 
 std::unique_ptr<PNS::SEGMENT> PNS_HORIZON_IFACE::syncTrack(const horizon::Track *track)
 {
@@ -759,7 +764,6 @@ void PNS_HORIZON_IFACE::DisplayItem(const PNS::ITEM *aItem, int aColor, int aCle
 
 void PNS_HORIZON_IFACE::HideItem(PNS::ITEM *aItem)
 {
-    std::cout << "iface hide item" << std::endl;
     auto parent = aItem->Parent();
     if (parent) {
         if (parent->track) {

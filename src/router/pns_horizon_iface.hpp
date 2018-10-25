@@ -48,6 +48,11 @@ public:
     PNS_HORIZON_PARENT_ITEM(const horizon::Keepout *k, const horizon::BoardPackage *pkg) : package(pkg), keepout(k)
     {
     }
+    bool operator==(const PNS_HORIZON_PARENT_ITEM &other) const
+    {
+        return track == other.track && via == other.via && package == other.package && pad == other.pad
+               && hole == other.hole && keepout == other.keepout;
+    }
 
     const horizon::Track *track = nullptr;
     const horizon::Via *via = nullptr;
@@ -106,6 +111,8 @@ public:
     }
 
 private:
+    const PNS_HORIZON_PARENT_ITEM *get_or_create_parent(const PNS_HORIZON_PARENT_ITEM &it);
+
     class PNS_HORIZON_RULE_RESOLVER *m_ruleResolver = nullptr;
     class PNS_HORIZON_DEBUG_DECORATOR *m_debugDecorator = nullptr;
     std::set<horizon::ObjectRef> m_preview_items;
