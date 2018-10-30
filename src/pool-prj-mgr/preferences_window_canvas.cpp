@@ -173,7 +173,7 @@ std::string ColorEditorLayer::get_color_name()
 
 CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
                                                  Preferences *prefs, CanvasPreferences *canvas_prefs, bool layered)
-    : Gtk::Box(cobject), preferences(prefs), canvas_preferences(canvas_prefs)
+    : Gtk::Box(cobject), preferences(prefs), canvas_preferences(canvas_prefs), is_layered(layered)
 {
 
     Gtk::RadioButton *canvas_grid_style_cross, *canvas_grid_style_dot, *canvas_grid_style_grid,
@@ -209,6 +209,12 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
         {
             auto it = Gtk::manage(new Gtk::MenuItem("Import..."));
             it->signal_activate().connect(sigc::mem_fun(this, &CanvasPreferencesEditor::handle_import));
+            it->show();
+            color_preset_menu->append(*it);
+        }
+        {
+            auto it = Gtk::manage(new Gtk::MenuItem("Default"));
+            it->signal_activate().connect(sigc::mem_fun(this, &CanvasPreferencesEditor::handle_default));
             it->show();
             color_preset_menu->append(*it);
         }
@@ -333,6 +339,7 @@ void CanvasPreferencesEditor::handle_export()
             std::string error_str;
             try {
                 auto j = canvas_preferences->serialize_colors();
+                j["layered"] = is_layered;
                 save_json_to_file(filename, j);
                 break;
             }
@@ -370,6 +377,12 @@ void CanvasPreferencesEditor::handle_import()
         std::string error_str;
         try {
             auto j = load_json_from_file(filename);
+            if (j.value("layered", false) != is_layered) {
+                if (is_layered)
+                    throw std::runtime_error("Can't load non-layer file into layer settings");
+                else
+                    throw std::runtime_error("Can't load layer file into non-layer settings");
+            }
             load_colors(j);
         }
         catch (const std::exception &e) {
@@ -384,6 +397,17 @@ void CanvasPreferencesEditor::handle_import()
             dia.run();
         }
     }
+}
+
+void CanvasPreferencesEditor::handle_default()
+{
+    CanvasPreferences def;
+    if (!is_layered)
+        def.appearance.layer_colors[0] = {1, 1, 0};
+    canvas_preferences->appearance.colors = def.appearance.colors;
+    canvas_preferences->appearance.layer_colors = def.appearance.layer_colors;
+    preferences->signal_changed().emit();
+    update_color_chooser();
 }
 
 void CanvasPreferencesEditor::load_colors(const json &j)

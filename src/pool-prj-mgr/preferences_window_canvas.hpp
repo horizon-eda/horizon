@@ -13,11 +13,13 @@ public:
     CanvasPreferences *canvas_preferences;
 
 private:
+    const bool is_layered;
     Gtk::FlowBox *canvas_colors_fb = nullptr;
     Glib::RefPtr<Gtk::ColorChooser> color_chooser;
     sigc::connection color_chooser_conn;
     void handle_export();
     void handle_import();
+    void handle_default();
     void load_colors(const json &j);
     void update_color_chooser();
 };
