@@ -59,6 +59,8 @@ void PoolNotebook::pool_updated(bool success)
         pool_update_done_cb();
         pool_update_done_cb = nullptr;
     }
+    if (settings_box)
+        settings_box->pool_updated();
 }
 
 PoolNotebook::~PoolNotebook()

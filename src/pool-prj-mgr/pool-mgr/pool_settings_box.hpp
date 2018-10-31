@@ -18,6 +18,7 @@ public:
     static PoolSettingsBox *create(class PoolNotebook *nb, const std::string &bp);
     bool get_needs_save() const;
     void save();
+    void pool_updated();
 
 private:
     class PoolNotebook *notebook = nullptr;
@@ -30,6 +31,7 @@ private:
     Gtk::Button *pool_excl_button = nullptr;
     Gtk::Button *pool_up_button = nullptr;
     Gtk::Button *pool_down_button = nullptr;
+    Gtk::Label *hint_label = nullptr;
 
     std::vector<UUID> pools_included;
 

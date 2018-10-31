@@ -16,6 +16,8 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     x->get_widget("pool_excl_button", pool_excl_button);
     x->get_widget("pool_up_button", pool_up_button);
     x->get_widget("pool_down_button", pool_down_button);
+    x->get_widget("pool_settings_hint_label", hint_label);
+    hint_label->hide();
     entry_name->set_text(PoolManager::get().get_pools().at(bp).name);
     entry_name->signal_changed().connect(sigc::mem_fun(this, &PoolSettingsBox::set_needs_save));
     save_button->signal_clicked().connect(sigc::mem_fun(this, &PoolSettingsBox::save));
@@ -49,6 +51,7 @@ void PoolSettingsBox::save()
     p.pools_included = pools_included;
     PoolManager::get().update_pool(pool_base_path, p);
     save_button->set_sensitive(false);
+    hint_label->set_markup("Almost there! For the items of the included pool to show up, click <i>Update pool</i>.");
     needs_save = false;
 }
 
@@ -56,11 +59,19 @@ void PoolSettingsBox::set_needs_save()
 {
     needs_save = true;
     save_button->set_sensitive(true);
+    hint_label->set_markup("For the items of the included pool to show up, click <i>Save</i> and <i>Update pool</i>.");
+    hint_label->show();
 }
 
 bool PoolSettingsBox::get_needs_save() const
 {
     return needs_save;
+}
+
+void PoolSettingsBox::pool_updated()
+{
+    if (!needs_save)
+        hint_label->hide();
 }
 
 class PoolListItem : public Gtk::Box {
