@@ -117,13 +117,13 @@ PreferencesWindow::PreferencesWindow(Preferences *prefs) : Gtk::Window(), prefer
 
     {
         auto ed = CanvasPreferencesEditor::create(preferences, &preferences->canvas_layer, true);
-        stack->add(*ed, "layer", "Layer canvas");
+        stack->add(*ed, "layer", "Board appearance");
         ed->show();
         ed->unreference();
     }
     {
         auto ed = CanvasPreferencesEditor::create(preferences, &preferences->canvas_non_layer, false);
-        stack->add(*ed, "non-layer", "Non-layer canvas");
+        stack->add(*ed, "non-layer", "Schematic appearance");
         ed->show();
         ed->unreference();
     }
