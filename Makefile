@@ -523,7 +523,10 @@ ifeq ($(OS),Windows_NT)
 	OBJ_RES = $(SRC_RES:.rc=.res)
 endif
 
-src/resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=src --generate-dependencies imp.gresource.xml)
+src/preferences/color_presets.json: $(wildcard src/preferences/color_presets/*)
+	python scripts/make_color_presets.py $^ > $@
+
+src/resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies imp.gresource.xml |  while read line; do echo "src/$$line"; done)
 	$(GLIB_COMPILE_RESOURCES) imp.gresource.xml --target=$@ --sourcedir=src --generate-source
 
 src/gitversion.cpp: .git/HEAD .git/index

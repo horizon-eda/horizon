@@ -29,3 +29,4 @@ dist
 *.res
 docs
 */__pycache__
+src/preferences/color_presets.json

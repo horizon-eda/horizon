@@ -199,7 +199,10 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
     Gtk::Menu *color_preset_menu;
     GET_WIDGET(color_preset_menu);
 
+    color_presets = json_from_resource("/net/carrotIndustries/horizon/preferences/color_presets.json");
+
     {
+
         {
             auto it = Gtk::manage(new Gtk::MenuItem("Export..."));
             it->signal_activate().connect(sigc::mem_fun(this, &CanvasPreferencesEditor::handle_export));
@@ -217,6 +220,17 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
             it->signal_activate().connect(sigc::mem_fun(this, &CanvasPreferencesEditor::handle_default));
             it->show();
             color_preset_menu->append(*it);
+        }
+        unsigned int idx = 0;
+        for (auto it = color_presets.cbegin(); it != color_presets.cend(); ++it) {
+            const auto &v = it.value();
+            if (v.value("layered", false) == is_layered) {
+                auto item = Gtk::manage(new Gtk::MenuItem(v.at("name").get<std::string>()));
+                item->signal_activate().connect([this, idx] { handle_load_preset(idx); });
+                item->show();
+                color_preset_menu->append(*item);
+            }
+            idx++;
         }
     }
 
@@ -399,6 +413,11 @@ void CanvasPreferencesEditor::handle_import()
     }
 }
 
+void CanvasPreferencesEditor::handle_load_preset(unsigned int idx)
+{
+    load_colors(color_presets.at(idx));
+}
+
 void CanvasPreferencesEditor::handle_default()
 {
     CanvasPreferences def;
@@ -408,6 +427,7 @@ void CanvasPreferencesEditor::handle_default()
     canvas_preferences->appearance.layer_colors = def.appearance.layer_colors;
     preferences->signal_changed().emit();
     update_color_chooser();
+    queue_draw();
 }
 
 void CanvasPreferencesEditor::load_colors(const json &j)
@@ -415,6 +435,7 @@ void CanvasPreferencesEditor::load_colors(const json &j)
     canvas_preferences->load_colors_from_json(j);
     preferences->signal_changed().emit();
     update_color_chooser();
+    queue_draw();
 }
 
 void CanvasPreferencesEditor::update_color_chooser()
