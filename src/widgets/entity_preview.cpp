@@ -1,6 +1,7 @@
 #include "entity_preview.hpp"
 #include "pool/entity.hpp"
 #include "pool/pool.hpp"
+#include "pool/part.hpp"
 #include "canvas/canvas.hpp"
 #include "util/util.hpp"
 #include "util/sqlite.hpp"
@@ -61,7 +62,23 @@ EntityPreview::EntityPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIE
 
 void EntityPreview::load(const Entity *e)
 {
+    load(e, nullptr);
+}
+
+void EntityPreview::load(const Part *p)
+{
+    load(p->entity, p);
+}
+
+void EntityPreview::load(nullptr_t n)
+{
+    load(nullptr, nullptr);
+}
+
+void EntityPreview::load(const Entity *e, const Part *p)
+{
     entity = e;
+    part = p;
     combo_gate->remove_all();
 
     for (auto it : goto_buttons) {
@@ -118,6 +135,7 @@ void EntityPreview::handle_symbol_sel()
     if (combo_symbol->get_active_row_number() == -1)
         return;
 
-    canvas_symbol->load(ObjectType::SYMBOL, UUID(combo_symbol->get_active_id()));
+    canvas_symbol->load_symbol(UUID(combo_symbol->get_active_id()), Placement(), true, part ? part->uuid : UUID(),
+                               UUID(combo_gate->get_active_id()));
 }
 } // namespace horizon

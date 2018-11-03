@@ -2,6 +2,7 @@
 #include "pool/pool.hpp"
 #include "pool/symbol.hpp"
 #include "pool/package.hpp"
+#include "pool/part.hpp"
 #include "board/board_layers.hpp"
 #include "preferences/preferences_util.hpp"
 
@@ -10,6 +11,35 @@ PreviewCanvas::PreviewCanvas(Pool &p, bool layered) : Glib::ObjectBase(typeid(Pr
 {
     set_selection_allowed(false);
     preferences_provider_attach_canvas(this, layered);
+}
+
+void PreviewCanvas::load_symbol(const UUID &uu, const Placement &pl, bool fit, const UUID &uu_part, const UUID &uu_gate)
+{
+    std::pair<Coordi, Coordi> bb;
+    int64_t pad = 0;
+    Symbol sym = *pool.get_symbol(uu);
+    auto part = pool.get_part(uu_part);
+    const auto &pad_map = part->pad_map;
+    sym.expand();
+    for (const auto &it : pad_map) {
+        if (it.second.gate->uuid == uu_gate) {
+            if (sym.pins.count(it.second.pin->uuid)) {
+                sym.pins.at(it.second.pin->uuid).pad = part->package->pads.at(it.first).name;
+            }
+        }
+    }
+    sym.apply_placement(pl);
+    update(sym, pl);
+    bb = sym.get_bbox();
+    pad = 1_mm;
+
+    bb.first.x -= pad;
+    bb.first.y -= pad;
+
+    bb.second.x += pad;
+    bb.second.y += pad;
+    if (fit)
+        zoom_to_bbox(bb.first, bb.second);
 }
 
 void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, bool fit)

@@ -196,7 +196,7 @@ void PartPreview::load(const Part *p)
     std::sort(gates.begin(), gates.end(),
               [](const auto *a, const auto *b) { return strcmp_natural(a->suffix, b->suffix) < 0; });
 
-    entity_preview->load(part->entity);
+    entity_preview->load(part);
 
     const class Package *pkg = part->package;
     combo_package->append((std::string)pkg->uuid, pkg->name + " (Primary)");
