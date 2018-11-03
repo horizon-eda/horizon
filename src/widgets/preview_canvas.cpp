@@ -18,13 +18,15 @@ void PreviewCanvas::load_symbol(const UUID &uu, const Placement &pl, bool fit, c
     std::pair<Coordi, Coordi> bb;
     int64_t pad = 0;
     Symbol sym = *pool.get_symbol(uu);
-    auto part = pool.get_part(uu_part);
-    const auto &pad_map = part->pad_map;
-    sym.expand();
-    for (const auto &it : pad_map) {
-        if (it.second.gate->uuid == uu_gate) {
-            if (sym.pins.count(it.second.pin->uuid)) {
-                sym.pins.at(it.second.pin->uuid).pad = part->package->pads.at(it.first).name;
+    if (uu_part) {
+        auto part = pool.get_part(uu_part);
+        const auto &pad_map = part->pad_map;
+        sym.expand();
+        for (const auto &it : pad_map) {
+            if (it.second.gate->uuid == uu_gate) {
+                if (sym.pins.count(it.second.pin->uuid)) {
+                    sym.pins.at(it.second.pin->uuid).pad = part->package->pads.at(it.first).name;
+                }
             }
         }
     }
