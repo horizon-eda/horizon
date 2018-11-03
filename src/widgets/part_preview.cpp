@@ -168,7 +168,7 @@ void PartPreview::load(const Part *p)
         label_datasheet->set_text("");
         label_entity->set_text("");
         canvas_package->clear();
-        entity_preview->load(nullptr);
+        entity_preview->clear();
         return;
     }
 

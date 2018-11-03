@@ -57,7 +57,7 @@ EntityPreview::EntityPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIE
     pack_start(*canvas_symbol, true, true, 0);
 
 
-    load(nullptr);
+    clear();
 }
 
 void EntityPreview::load(const Entity *e)
@@ -70,7 +70,7 @@ void EntityPreview::load(const Part *p)
     load(p->entity, p);
 }
 
-void EntityPreview::load(nullptr_t n)
+void EntityPreview::clear()
 {
     load(nullptr, nullptr);
 }

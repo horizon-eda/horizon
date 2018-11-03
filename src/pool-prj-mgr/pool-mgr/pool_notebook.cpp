@@ -308,7 +308,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         br->signal_selected().connect([this, br, preview] {
             auto sel = br->get_selected();
             if (!sel) {
-                preview->load(nullptr);
+                preview->clear();
                 return;
             }
             auto part = pool.get_entity(sel);

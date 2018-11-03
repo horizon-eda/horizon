@@ -12,7 +12,7 @@ public:
 
     void load(const class Entity *entity);
     void load(const class Part *part);
-    void load(nullptr_t n);
+    void clear();
 
 private:
     void load(const class Entity *entity, const class Part *part);
