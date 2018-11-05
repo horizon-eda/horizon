@@ -2,7 +2,7 @@ version: 3
 jobs:
   teststyle:
     docker:
-      - image: ubuntu:artful
+      - image: debian:stretch
     steps:
       - checkout
       - run:
@@ -13,7 +13,7 @@ jobs:
           command: bash scripts/stylecheck.sh
   build:
     docker:
-      - image: ubuntu:artful
+      - image: debian:stretch
     steps:
       - checkout
       - run:
