@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-Package::MyParameterProgram::MyParameterProgram(Package *p, const std::string &c) : ParameterProgram(c), pkg(p)
+Package::MyParameterProgram::MyParameterProgram(Package *p, const std::string &c) : ParameterProgramPolygon(c), pkg(p)
 {
 }
 

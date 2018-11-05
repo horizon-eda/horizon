@@ -49,7 +49,7 @@ void ImpSymbol::construct()
         for (const auto &it : items) {
             sel.emplace(it, ObjectType::SYMBOL_PIN);
         }
-        tool_begin(ToolID::MAP_PIN, true, sel);
+        this->tool_begin(ToolID::MAP_PIN, true, sel);
     });
 
     core_symbol.signal_rebuilt().connect([this] {
@@ -97,8 +97,9 @@ void ImpSymbol::construct()
     grid_spin_button->set_sensitive(false);
     update_monitor();
 
-    connect_action(ActionID::EDIT_UNIT,
-                   [this](const auto &a) { edit_pool_item(ObjectType::UNIT, core_symbol.get_symbol()->unit->uuid); });
+    connect_action(ActionID::EDIT_UNIT, [this](const auto &a) {
+        this->edit_pool_item(ObjectType::UNIT, core_symbol.get_symbol()->unit->uuid);
+    });
     set_action_sensitive(make_action(ActionID::EDIT_UNIT), sockets_connected);
 
     auto hamburger_menu = add_hamburger_menu();

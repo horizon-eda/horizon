@@ -10,7 +10,7 @@ const LutEnumStr<Padstack::Type> Padstack::type_lut = {
         {"top", Padstack::Type::TOP}, {"bottom", Padstack::Type::BOTTOM}, {"through", Padstack::Type::THROUGH},
         {"via", Padstack::Type::VIA}, {"hole", Padstack::Type::HOLE},     {"mechanical", Padstack::Type::MECHANICAL}};
 
-Padstack::MyParameterProgram::MyParameterProgram(Padstack *p, const std::string &c) : ParameterProgram(c), ps(p)
+Padstack::MyParameterProgram::MyParameterProgram(Padstack *p, const std::string &c) : ParameterProgramPolygon(c), ps(p)
 {
 }
 

@@ -571,7 +571,7 @@ void ImpPackage::construct()
     connect_action(ActionID::EDIT_PADSTACK, [this](const auto &a) {
         auto sel = canvas->get_selection();
         if (auto uu = sel_find_one(sel, ObjectType::PAD)) {
-            edit_pool_item(ObjectType::PADSTACK, core_package.get_package()->pads.at(uu).pool_padstack->uuid);
+            this->edit_pool_item(ObjectType::PADSTACK, core_package.get_package()->pads.at(uu).pool_padstack->uuid);
         }
     });
 

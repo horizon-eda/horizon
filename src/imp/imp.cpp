@@ -390,7 +390,7 @@ void ImpBase::run(int argc, char *argv[])
         json j;
         j["op"] = "preferences";
         allow_set_foreground_window(mgr_pid);
-        send_json(j);
+        this->send_json(j);
     });
 
     for (const auto &it : action_catalog) {
@@ -401,17 +401,17 @@ void ImpBase::run(int argc, char *argv[])
 
     connect_action(ActionID::VIEW_TOP, [this](const auto &a) {
         canvas->set_flip_view(false);
-        canvas_update_from_pp();
+        this->canvas_update_from_pp();
     });
 
     connect_action(ActionID::VIEW_BOTTOM, [this](const auto &a) {
         canvas->set_flip_view(true);
-        canvas_update_from_pp();
+        this->canvas_update_from_pp();
     });
 
     connect_action(ActionID::FLIP_VIEW, [this](const auto &a) {
         canvas->set_flip_view(!canvas->get_flip_view());
-        canvas_update_from_pp();
+        this->canvas_update_from_pp();
     });
 
 

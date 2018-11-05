@@ -294,7 +294,7 @@ void ImpSchematic::construct()
                     j["selection"].push_back(k);
                 }
             }
-            allow_set_foreground_window(get_board_pid());
+            allow_set_foreground_window(this->get_board_pid());
             this->send_json(j);
         });
         set_action_sensitive(make_action(ActionID::TO_BOARD), false);
@@ -320,7 +320,7 @@ void ImpSchematic::construct()
         });
 
         connect_action(ActionID::SAVE_RELOAD_NETLIST, [this](const auto &conn) {
-            trigger_action(ActionID::SAVE);
+            this->trigger_action(ActionID::SAVE);
             json j;
             j["op"] = "reload-netlist";
             this->send_json(j);
