@@ -2,7 +2,7 @@ version: 3
 jobs:
   teststyle:
     docker:
-      - image: debian:stretch
+      - image: debian:stretch-backports
     steps:
       - checkout
       - run:
@@ -13,7 +13,7 @@ jobs:
           command: bash scripts/stylecheck.sh
   build:
     docker:
-      - image: debian:stretch
+      - image: debian:stretch-backports
     steps:
       - checkout
       - run:
