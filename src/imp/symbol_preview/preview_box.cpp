@@ -112,4 +112,10 @@ void SymbolPreviewBox::set_text_placements(const std::map<std::tuple<int, bool, 
         }
     }
 }
+
+void SymbolPreviewBox::set_canvas_appearance(const Appearance &a)
+{
+    canvas->set_appearance(a);
+}
+
 } // namespace horizon

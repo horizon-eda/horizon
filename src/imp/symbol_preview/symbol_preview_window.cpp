@@ -82,4 +82,11 @@ void SymbolPreviewWindow::set_text_placements(const std::map<std::tuple<int, boo
         it.second->set_text_placements(p);
     }
 }
+
+void SymbolPreviewWindow::set_canvas_appearance(const Appearance &a)
+{
+    for (auto &it : previews) {
+        it.second->set_canvas_appearance(a);
+    }
+}
 } // namespace horizon

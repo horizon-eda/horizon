@@ -24,6 +24,12 @@ void ImpSymbol::update_monitor()
     set_monitor_items({{ObjectType::UNIT, core_symbol.get_symbol()->unit->uuid}});
 }
 
+void ImpSymbol::apply_preferences()
+{
+    symbol_preview_window->set_canvas_appearance(preferences.canvas_non_layer.appearance);
+    ImpBase::apply_preferences();
+}
+
 void ImpSymbol::construct()
 {
 

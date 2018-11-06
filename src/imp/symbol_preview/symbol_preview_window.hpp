@@ -11,6 +11,7 @@ public:
     void update(const class Symbol &sym);
     std::map<std::tuple<int, bool, UUID>, Placement> get_text_placements() const;
     void set_text_placements(const std::map<std::tuple<int, bool, UUID>, Placement> &p);
+    void set_canvas_appearance(const class Appearance &a);
 
 private:
     std::map<std::pair<int, bool>, class SymbolPreviewBox *> previews;

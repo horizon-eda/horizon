@@ -22,6 +22,7 @@ protected:
 
 private:
     void canvas_update() override;
+    void apply_preferences() override;
     CoreSymbol core_symbol;
 
     Gtk::Entry *name_entry = nullptr;

@@ -12,6 +12,7 @@ public:
     void zoom_to_fit();
     std::map<std::tuple<int, bool, UUID>, Placement> get_text_placements() const;
     void set_text_placements(const std::map<std::tuple<int, bool, UUID>, Placement> &p);
+    void set_canvas_appearance(const class Appearance &a);
 
 private:
     class CanvasGL *canvas = nullptr;
