@@ -5,6 +5,7 @@
 #include "core_board.hpp"
 #include "imp/imp_interface.hpp"
 #include "pool/entity.hpp"
+#include "util/util.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -106,11 +107,23 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
     }
     if (j.count("pads") && core.k) {
         const json &o = j["pads"];
+        std::vector<Pad *> pads;
+        int max_name = core.k->get_package()->get_max_pad_name();
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             auto &x = core.k->get_package()->pads.emplace(u, Pad(u, it.value(), *core.r->m_pool)).first->second;
             apply_shift(x.placement.shift, cursor_pos_canvas);
+            pads.push_back(&x);
             core.r->selection.emplace(u, ObjectType::PAD);
+        }
+        core.k->get_package()->apply_parameter_set({});
+        if (max_name > 0) {
+            std::sort(pads.begin(), pads.end(),
+                      [](const Pad *a, const Pad *b) { return strcmp_natural(a->name, b->name) < 0; });
+            for (auto pad : pads) {
+                max_name++;
+                pad->name = std::to_string(max_name);
+            }
         }
     }
     if (j.count("holes")) {

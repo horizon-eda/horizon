@@ -71,6 +71,7 @@ public:
     std::pair<bool, std::string> apply_parameter_set(const ParameterSet &ps);
     void expand();
     void update_warnings();
+    int get_max_pad_name() const;
 
     UUID get_uuid() const;
 

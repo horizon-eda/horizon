@@ -413,4 +413,22 @@ const Package::Model *Package::get_model(const UUID &uu) const
         return nullptr;
     }
 }
+
+int Package::get_max_pad_name() const
+{
+    std::vector<int> pad_nrs;
+    for (const auto &it : pads) {
+        try {
+            int n = std::stoi(it.second.name);
+            pad_nrs.push_back(n);
+        }
+        catch (...) {
+        }
+    }
+    if (pad_nrs.size()) {
+        int maxpad = *std::max_element(pad_nrs.begin(), pad_nrs.end());
+        return maxpad;
+    }
+    return -1;
+}
 } // namespace horizon
