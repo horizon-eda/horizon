@@ -808,6 +808,11 @@ void PartWizard::autofill()
     }
 }
 
+void PartWizard::reload()
+{
+    part.package = pool->get_package(part.package.uuid);
+}
+
 void PartWizard::update_can_finish()
 {
     bool editors_open = processes.size() > 0;

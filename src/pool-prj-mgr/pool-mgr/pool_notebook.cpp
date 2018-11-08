@@ -29,6 +29,7 @@
 #include "pool_update_error_dialog.hpp"
 #include "pool_settings_box.hpp"
 #include "pool/pool_manager.hpp"
+#include "part_wizard/part_wizard.hpp"
 #include <thread>
 #include "nlohmann/json.hpp"
 
@@ -61,6 +62,8 @@ void PoolNotebook::pool_updated(bool success)
     }
     if (settings_box)
         settings_box->pool_updated();
+    if (part_wizard)
+        part_wizard->reload();
 }
 
 PoolNotebook::~PoolNotebook()

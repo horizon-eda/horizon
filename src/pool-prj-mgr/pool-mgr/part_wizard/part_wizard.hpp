@@ -23,6 +23,7 @@ public:
     static PartWizard *create(const class Package *p, const std::string &pool_base_path, class Pool *po,
                               class PoolProjectManagerAppWindow *aw);
     bool get_has_finished() const;
+    void reload();
 
     ~PartWizard();
 
