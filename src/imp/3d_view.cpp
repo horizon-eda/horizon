@@ -88,6 +88,10 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     rotate_left_button->signal_clicked().connect([this] { canvas->inc_cam_azimuth(-90); });
     rotate_right_button->signal_clicked().connect([this] { canvas->inc_cam_azimuth(90); });
 
+    Gtk::Button *view_all_button;
+    x->get_widget("view_all_button", view_all_button);
+    view_all_button->signal_clicked().connect([this] { canvas->view_all(); });
+
     auto explode_adj = Glib::RefPtr<Gtk::Adjustment>::cast_dynamic(x->get_object("explode_adj"));
     explode_adj->signal_value_changed().connect([explode_adj, this] {
         canvas->explode = explode_adj->get_value();

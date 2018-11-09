@@ -56,6 +56,7 @@ public:
 
     void load_models_async(class Pool *pool);
 
+    void view_all();
 
     void clear_3d_models();
 
@@ -125,6 +126,7 @@ private:
     float height;
     void push();
     bool needs_push = false;
+    bool needs_view_all = false;
 
     CoverRenderer cover_renderer;
     WallRenderer wall_renderer;

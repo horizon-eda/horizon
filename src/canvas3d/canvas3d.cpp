@@ -8,6 +8,7 @@
 #include "poly2tri/poly2tri.h"
 #include "util/step_importer.hpp"
 #include "pool/pool_manager.hpp"
+#include "util/min_max_accumulator.hpp"
 #include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -40,6 +41,10 @@ void Canvas3D::on_size_allocate(Gtk::Allocation &alloc)
     width = alloc.get_width();
     height = alloc.get_height();
     needs_resize = true;
+    if (needs_view_all) {
+        view_all();
+        needs_view_all = false;
+    }
 
     // chain up
     Gtk::GLArea::on_size_allocate(alloc);
@@ -166,6 +171,41 @@ void Canvas3D::inc_cam_azimuth(float v)
 
     while (cam_azimuth > 360)
         cam_azimuth -= 360;
+    queue_draw();
+}
+
+static const float magic_number = 0.4143;
+
+void Canvas3D::view_all()
+{
+    if (!brd)
+        return;
+
+    const auto &vertices = layers[BoardLayers::L_OUTLINE].walls;
+    MinMaxAccumulator<float> acc_x, acc_y;
+
+    for (const auto &it : vertices) {
+        acc_x.accumulate(it.x);
+        acc_y.accumulate(it.y);
+    }
+
+    float xmin = acc_x.get_min();
+    float xmax = acc_x.get_max();
+    float ymin = acc_y.get_min();
+    float ymax = acc_y.get_max();
+
+    float board_width = (xmax - xmin) / 1e6;
+    float board_height = (ymax - ymin) / 1e6;
+
+    if (board_height < 1 || board_width < 1)
+        return;
+
+    center = {(xmin + xmax) / 2e6, (ymin + ymax) / 2e6};
+
+
+    cam_distance = std::max(board_width / width, board_height / height) / (2 * magic_number / height) * 1.1;
+    cam_azimuth = 270;
+    cam_elevation = 89.99;
     queue_draw();
 }
 
@@ -306,6 +346,7 @@ void Canvas3D::polynode_to_tris(const ClipperLib::PolyNode *node, int layer)
 
 void Canvas3D::update2(const Board &b)
 {
+    needs_view_all = brd == nullptr;
     brd = &b;
     update(*brd);
     prepare_packages();
@@ -729,7 +770,7 @@ bool Canvas3D::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
         cam_dist_max = std::max(dist, cam_dist_max);
         cam_dist_min = std::min(dist, cam_dist_min);
     }
-    float m = 0.000475 * cam_distance;
+    float m = magic_number / height * cam_distance;
     float d = cam_dist_max * 2;
     if (projection == Projection::PERSP) {
         projmat = glm::perspective(glm::radians(cam_fov), width / height, cam_dist_min / 2, cam_dist_max * 2);
