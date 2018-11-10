@@ -76,7 +76,6 @@ ImpBase::ImpBase(const PoolParams &params)
                             handle_broadcast(j);
                         }
                     }
-                    preferences.signal_changed().emit();
                     return true;
                 },
                 chan, Glib::IO_IN | Glib::IO_HUP);
@@ -1374,6 +1373,7 @@ bool ImpBase::handle_broadcast(const json &j)
     else if (op == "preferences") {
         const auto &prefs = j.at("preferences");
         preferences.load_from_json(prefs);
+        preferences.signal_changed().emit();
         return true;
     }
     return false;
