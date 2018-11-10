@@ -29,7 +29,7 @@ void PoolBrowserPackage::create_columns()
     {
         auto col = append_column("Manufacturer", list_columns.manufacturer, Pango::ELLIPSIZE_END);
         col->set_resizable(true);
-        col->set_min_width(200);
+        col->set_min_width(30);
     }
     treeview->append_column("Pads", list_columns.n_pads);
     {
