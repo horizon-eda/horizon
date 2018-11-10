@@ -204,8 +204,9 @@ bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
             break;
 
         case ObjectProperty::ID::LENGTH:
-            if (hole->shape == Hole::Shape::SLOT)
-                hole->length = dynamic_cast<const PropertyValueInt &>(value).value;
+            if (hole->shape != Hole::Shape::SLOT)
+                return false;
+            hole->length = dynamic_cast<const PropertyValueInt &>(value).value;
             break;
 
         case ObjectProperty::ID::SHAPE:

@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include "core/core.hpp"
 #include "canvas/selectables.hpp"
+#include <deque>
 
 namespace horizon {
 class PropertyPanels : public Gtk::Box {
@@ -34,7 +35,8 @@ private:
     type_signal_throttled s_signal_throttled;
     std::set<SelectableRef> selection_stored;
 
-    void set_property(ObjectType ty, const UUID &uu, ObjectProperty::ID property, const class PropertyValue &value);
+    void set_property(ObjectType ty, const std::deque<UUID> &uus, ObjectProperty::ID property,
+                      const class PropertyValue &value);
     sigc::connection throttle_connection;
     void force_commit();
 };

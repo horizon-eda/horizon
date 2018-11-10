@@ -32,6 +32,8 @@ public:
         return s_signal_apply_all;
     }
 
+    bool get_apply_all();
+
     virtual ~PropertyEditor()
     {
     }
@@ -43,7 +45,7 @@ protected:
     const ObjectType type;
 
     const ObjectProperty &property;
-    Gtk::Button *apply_all_button = nullptr;
+    Gtk::ToggleButton *apply_all_button = nullptr;
 
     virtual Gtk::Widget *create_editor();
 

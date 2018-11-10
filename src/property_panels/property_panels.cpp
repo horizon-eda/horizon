@@ -72,14 +72,16 @@ void PropertyPanels::reload()
     }
 }
 
-void PropertyPanels::set_property(ObjectType ty, const UUID &uu, ObjectProperty::ID property,
+void PropertyPanels::set_property(ObjectType ty, const std::deque<UUID> &uus, ObjectProperty::ID property,
                                   const class PropertyValue &value)
 {
     if (!core->get_property_transaction()) {
         core->set_property_begin();
         s_signal_throttled.emit(true);
     }
-    core->set_property(ty, uu, property, value);
+    for (const auto &uu : uus) {
+        core->set_property(ty, uu, property, value);
+    }
     s_signal_update.emit();
     throttle_connection.disconnect(); // stop old timer
     throttle_connection = Glib::signal_timeout().connect(

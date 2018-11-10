@@ -340,6 +340,8 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             break;
 
         case ObjectProperty::ID::WIDTH:
+            if (track->width_from_rules)
+                return false;
             track->width = dynamic_cast<const PropertyValueInt &>(value).value;
             break;
 
@@ -376,8 +378,9 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             break;
 
         case ObjectProperty::ID::WIDTH:
-            if (!plane->from_rules)
-                plane->settings.min_width = dynamic_cast<const PropertyValueInt &>(value).value;
+            if (plane->from_rules)
+                return false;
+            plane->settings.min_width = dynamic_cast<const PropertyValueInt &>(value).value;
             break;
 
         default:

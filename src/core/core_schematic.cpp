@@ -328,8 +328,9 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
             break;
 
         case ObjectProperty::ID::VALUE:
-            if (!comp->part)
-                comp->value = dynamic_cast<const PropertyValueString &>(value).value;
+            if (comp->part)
+                return false;
+            comp->value = dynamic_cast<const PropertyValueString &>(value).value;
             break;
 
         default:
@@ -349,8 +350,9 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
         } break;
 
         case ObjectProperty::ID::IS_POWER:
-            if (!block.nets.at(uu).is_power_forced)
-                block.nets.at(uu).is_power = dynamic_cast<const PropertyValueBool &>(value).value;
+            if (block.nets.at(uu).is_power_forced)
+                return false;
+            block.nets.at(uu).is_power = dynamic_cast<const PropertyValueBool &>(value).value;
             break;
 
         default:

@@ -78,8 +78,13 @@ PropertyPanel::PropertyPanel(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
             e = new PropertyEditor(type, property, this);
         }
 
-        e->signal_changed().connect([this, property, e] { handle_changed(property, e->get_value()); });
-        e->signal_apply_all().connect([this, property, e] { handle_apply_all(property, e->get_value()); });
+        e->signal_changed().connect(
+                [this, property, e] { handle_changed(property, e->get_value(), e->get_apply_all()); });
+        e->signal_apply_all().connect([this, property, e] {
+            if (e->get_apply_all()) {
+                handle_apply_all(property, e->get_value());
+            }
+        });
         auto em = Gtk::manage(e);
         em->construct();
         editors_box->pack_start(*em, false, false, 0);
@@ -90,16 +95,21 @@ PropertyPanel::PropertyPanel(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     button_prev->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(this, &PropertyPanel::go), -1));
 }
 
-void PropertyPanel::handle_changed(ObjectProperty::ID property, const PropertyValue &value)
+void PropertyPanel::handle_changed(ObjectProperty::ID property, const PropertyValue &value, bool all)
 {
-    parent->set_property(type, objects.at(object_current), property, value);
+    if (all) {
+        parent->set_property(type, objects, property, value);
+    }
+    else {
+        parent->set_property(type, {objects.at(object_current)}, property, value);
+    }
 }
 
 void PropertyPanel::handle_apply_all(ObjectProperty::ID property, const PropertyValue &value)
 {
     if (core->get_property_transaction()) {
         for (const auto &uu : objects) {
-            parent->set_property(type, uu, property, value);
+            core->set_property(type, uu, property, value);
         }
         parent->force_commit();
     }

@@ -42,12 +42,17 @@ PropertyEditor::PropertyEditor(ObjectType t, ObjectProperty::ID prop, class Prop
     header->set_halign(Gtk::ALIGN_START);
     hbox->pack_start(*header, true, true, 0);
 
-    apply_all_button = Gtk::manage(new Gtk::Button());
-    apply_all_button->set_image_from_icon_name("object-select-symbolic");
-    apply_all_button->signal_clicked().connect([this] { s_signal_apply_all.emit(); });
+    apply_all_button = Gtk::manage(new Gtk::ToggleButton());
+    apply_all_button->set_label("All");
+    apply_all_button->signal_toggled().connect([this] { s_signal_apply_all.emit(); });
     hbox->pack_start(*apply_all_button, false, false, 0);
 
     pack_start(*hbox, false, false, 0);
+}
+
+bool PropertyEditor::get_apply_all()
+{
+    return apply_all_button->get_active();
 }
 
 void PropertyEditor::construct()
@@ -66,7 +71,7 @@ Gtk::Widget *PropertyEditor::create_editor()
 void PropertyEditor::set_can_apply_all(bool v)
 {
     if (v) {
-        apply_all_button->set_tooltip_text("Apply to all selected " + object_descriptions.at(type).name_pl);
+        apply_all_button->set_tooltip_text("Apply changes to all selected " + object_descriptions.at(type).name_pl);
         apply_all_button->set_sensitive(!readonly);
     }
     else {
