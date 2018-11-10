@@ -7,6 +7,7 @@
 #include "logger/logger.hpp"
 #include "poly2tri/poly2tri.h"
 #include "util/step_importer.hpp"
+#include "util/util.hpp"
 #include "pool/pool_manager.hpp"
 #include "util/min_max_accumulator.hpp"
 #include <cmath>
@@ -286,6 +287,32 @@ void Canvas3D::add_path(int layer, const ClipperLib::Path &path)
     }
 }
 
+static void append_path(std::vector<p2t::Point> &store, std::vector<p2t::Point *> &out,
+                        std::set<std::pair<ClipperLib::cInt, ClipperLib::cInt>> &point_set,
+                        const ClipperLib::Path &path)
+{
+    for (const auto &it : path) {
+        auto p = std::make_pair(it.X, it.Y);
+        bool a = false;
+        bool fixed = false;
+        while (point_set.count(p)) {
+            fixed = true;
+            if (a)
+                p.first++;
+            else
+                p.second++;
+            a = !a;
+        }
+        if (fixed) {
+            Logger::log_warning("fixed duplicate point", Logger::Domain::BOARD,
+                                "at " + coord_to_string(Coordf(it.X, it.Y)));
+        }
+        point_set.insert(p);
+        store.emplace_back(p.first, p.second);
+        out.push_back(&store.back());
+    }
+}
+
 void Canvas3D::polynode_to_tris(const ClipperLib::PolyNode *node, int layer)
 {
     assert(node->IsHole() == false);
@@ -295,22 +322,17 @@ void Canvas3D::polynode_to_tris(const ClipperLib::PolyNode *node, int layer)
     for (const auto child : node->Childs)
         pts_total += child->Contour.size();
     point_store.reserve(pts_total); // important so that iterators won't get invalidated
+    std::set<std::pair<ClipperLib::cInt, ClipperLib::cInt>> point_set;
 
     try {
         std::vector<p2t::Point *> contour;
         contour.reserve(node->Contour.size());
-        for (const auto &p : node->Contour) {
-            point_store.emplace_back(p.X, p.Y);
-            contour.push_back(&point_store.back());
-        }
+        append_path(point_store, contour, point_set, node->Contour);
         p2t::CDT cdt(contour);
         for (const auto child : node->Childs) {
             std::vector<p2t::Point *> hole;
             hole.reserve(child->Contour.size());
-            for (const auto &p : child->Contour) {
-                point_store.emplace_back(p.X, p.Y);
-                hole.push_back(&point_store.back());
-            }
+            append_path(point_store, hole, point_set, child->Contour);
             cdt.AddHole(hole);
         }
         cdt.Triangulate();
