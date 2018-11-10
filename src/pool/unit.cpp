@@ -10,6 +10,18 @@ const LutEnumStr<Pin::Direction> Pin::direction_lut = {
         {"power_input", Pin::Direction::POWER_INPUT},
         {"power_output", Pin::Direction::POWER_OUTPUT},
         {"passive", Pin::Direction::PASSIVE},
+        {"not_connected", Pin::Direction::NOT_CONNECTED},
+};
+
+const std::vector<std::pair<Pin::Direction, std::string>> Pin::direction_names = {
+        {Pin::Direction::INPUT, "Input"},
+        {Pin::Direction::OUTPUT, "Output"},
+        {Pin::Direction::BIDIRECTIONAL, "Bidirectional"},
+        {Pin::Direction::PASSIVE, "Passive"},
+        {Pin::Direction::POWER_INPUT, "Power Input"},
+        {Pin::Direction::POWER_OUTPUT, "Power Output"},
+        {Pin::Direction::OPEN_COLLECTOR, "Open Collector"},
+        {Pin::Direction::NOT_CONNECTED, "Not Connected"},
 };
 
 Pin::Pin(const UUID &uu, const json &j)

@@ -18,7 +18,16 @@ using json = nlohmann::json;
 
 class Pin : public UUIDProvider {
 public:
-    enum class Direction { INPUT, OUTPUT, BIDIRECTIONAL, OPEN_COLLECTOR, POWER_INPUT, POWER_OUTPUT, PASSIVE };
+    enum class Direction {
+        INPUT,
+        OUTPUT,
+        BIDIRECTIONAL,
+        OPEN_COLLECTOR,
+        POWER_INPUT,
+        POWER_OUTPUT,
+        PASSIVE,
+        NOT_CONNECTED
+    };
 
     Pin(const UUID &uu, const json &j);
     Pin(const UUID &uu, const YAML::Node &n);
@@ -31,6 +40,7 @@ public:
     std::string primary_name;
     Direction direction = Direction::INPUT;
     static const LutEnumStr<Pin::Direction> direction_lut;
+    static const std::vector<std::pair<Pin::Direction, std::string>> direction_names;
     /**
      * Pins of the same swap_group can be pinswapped.
      * The swap group 0 is for unswappable pins.

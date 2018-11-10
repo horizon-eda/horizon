@@ -49,13 +49,9 @@ PadEditor::PadEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
 
     parent->sg_name->add_widget(*pad_names_label);
 
-    dir_combo->append(std::to_string(static_cast<int>(Pin::Direction::INPUT)), "Input");
-    dir_combo->append(std::to_string(static_cast<int>(Pin::Direction::OUTPUT)), "Output");
-    dir_combo->append(std::to_string(static_cast<int>(Pin::Direction::BIDIRECTIONAL)), "Bidirectional");
-    dir_combo->append(std::to_string(static_cast<int>(Pin::Direction::PASSIVE)), "Passive");
-    dir_combo->append(std::to_string(static_cast<int>(Pin::Direction::POWER_INPUT)), "Power Input");
-    dir_combo->append(std::to_string(static_cast<int>(Pin::Direction::POWER_OUTPUT)), "Power Output");
-    dir_combo->append(std::to_string(static_cast<int>(Pin::Direction::OPEN_COLLECTOR)), "Open Collector");
+    for (const auto &it : Pin::direction_names) {
+        dir_combo->append(std::to_string(static_cast<int>(it.first)), it.second);
+    }
     dir_combo->set_active(0);
 
     dir_combo->signal_changed().connect([this, propagate] {

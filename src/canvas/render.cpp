@@ -455,6 +455,10 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
             dl(-2, -.6, -1, -.2);
             dl(-2, -.6, -1, -1);
             break;
+        case Pin::Direction::NOT_CONNECTED:
+            dl(-.4, -1, -1, -.2);
+            dl(-.4, -.2, -1, -1);
+            break;
         default:;
         }
     }

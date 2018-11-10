@@ -31,14 +31,9 @@ PinEditor::PinEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
     x->get_widget("pin_direction", dir_combo);
     x->get_widget("pin_swap_group", swap_group_spin_button);
 
-    dir_combo->append(std::to_string(static_cast<int>(Pin::Direction::INPUT)), "Input");
-    dir_combo->append(std::to_string(static_cast<int>(Pin::Direction::OUTPUT)), "Output");
-    dir_combo->append(std::to_string(static_cast<int>(Pin::Direction::BIDIRECTIONAL)), "Bidirectional");
-    dir_combo->append(std::to_string(static_cast<int>(Pin::Direction::PASSIVE)), "Passive");
-    dir_combo->append(std::to_string(static_cast<int>(Pin::Direction::POWER_INPUT)), "Power Input");
-    dir_combo->append(std::to_string(static_cast<int>(Pin::Direction::POWER_OUTPUT)), "Power Output");
-    dir_combo->append(std::to_string(static_cast<int>(Pin::Direction::OPEN_COLLECTOR)), "Open Collector");
-
+    for (const auto &it : Pin::direction_names) {
+        dir_combo->append(std::to_string(static_cast<int>(it.first)), it.second);
+    }
 
     name_entry->set_text(pin->primary_name);
     name_entry->signal_changed().connect([this] {
