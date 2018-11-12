@@ -1068,7 +1068,6 @@ In case of modifying an existing part, provide rationale for the modification.</
             <property name="can_focus">False</property>
             <property name="message_type">error</property>
             <property name="show_close_button">True</property>
-            <property name="revealed">False</property>
             <child internal-child="action_area">
               <object class="GtkButtonBox">
                 <property name="can_focus">False</property>
