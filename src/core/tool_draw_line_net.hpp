@@ -1,10 +1,11 @@
 #pragma once
 #include "core.hpp"
 #include "tool_helper_merge.hpp"
+#include "tool_helper_draw_net_setting.hpp"
 
 namespace horizon {
 
-class ToolDrawLineNet : public ToolHelperMerge {
+class ToolDrawLineNet : public ToolHelperMerge, public ToolHelperDrawNetSetting {
 public:
     ToolDrawLineNet(Core *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
@@ -32,5 +33,6 @@ private:
     class SymbolPin *pin_start = nullptr;
 
     Junction *make_temp_junc(const Coordi &c);
+    void apply_settings() override;
 };
 } // namespace horizon

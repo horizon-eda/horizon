@@ -2,11 +2,12 @@
 #include "core.hpp"
 #include "schematic/net_label.hpp"
 #include "tool_place_junction.hpp"
+#include "tool_helper_draw_net_setting.hpp"
 #include <forward_list>
 
 namespace horizon {
 
-class ToolPlaceNetLabel : public ToolPlaceJunction {
+class ToolPlaceNetLabel : public ToolPlaceJunction, public ToolHelperDrawNetSetting {
 public:
     ToolPlaceNetLabel(Core *c, ToolID tid);
     bool can_begin() override;
@@ -20,5 +21,6 @@ protected:
     bool check_line(LineNet *li) override;
     NetLabel *la = nullptr;
     Orientation last_orientation = Orientation::RIGHT;
+    void apply_settings() override;
 };
 } // namespace horizon

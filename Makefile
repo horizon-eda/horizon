@@ -208,6 +208,7 @@ SRC_IMP = \
 	src/core/tool_set_nc_all.cpp\
 	src/core/tool_set_nc.cpp\
 	src/core/tool_add_keepout.cpp\
+	src/core/tool_helper_draw_net_setting.cpp\
 	src/core/cores.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\

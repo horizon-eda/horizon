@@ -6,7 +6,8 @@
 
 namespace horizon {
 
-ToolDrawLineNet::ToolDrawLineNet(Core *c, ToolID tid) : ToolBase(c, tid), ToolHelperMerge(c, tid)
+ToolDrawLineNet::ToolDrawLineNet(Core *c, ToolID tid)
+    : ToolBase(c, tid), ToolHelperMerge(c, tid), ToolHelperDrawNetSetting(c, tid)
 {
 }
 
@@ -75,7 +76,7 @@ void ToolDrawLineNet::update_tip()
           "segment <b>space:</b>place junction <b>⏎:</b>finish <b>/:</b>line "
           "posture <b>a:</b>arbitrary angle ";
     if (net_label) {
-        ss << "<b>+-:</b>change label size ";
+        ss << "<b>+-:</b>change label size <b>s:</b>set label size ";
     }
     if (temp_line_head) {
         if (temp_line_head->net) {
@@ -103,6 +104,13 @@ void ToolDrawLineNet::update_tip()
     }
     ss << "</i>";
     imp->tool_bar_set_tip(ss.str());
+}
+
+void ToolDrawLineNet::apply_settings()
+{
+    if (net_label) {
+        net_label->size = settings.net_label_size;
+    }
 }
 
 ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
@@ -416,6 +424,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     auto uu = UUID::random();
                     net_label = &core.c->get_sheet()->net_labels.emplace(uu, uu).first->second;
                     net_label->junction = temp_junc_head;
+                    net_label->size = settings.net_label_size;
                 }
                 else {
                     core.c->get_sheet()->net_labels.erase(net_label->uuid);
@@ -425,14 +434,15 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
         }
         else if (args.key == GDK_KEY_plus || args.key == GDK_KEY_equal) {
             if (net_label)
-                net_label->size += 0.5_mm;
+                step_net_label_size(true);
         }
         else if (args.key == GDK_KEY_minus) {
-            if (net_label) {
-                if (net_label->size > 0.5_mm) {
-                    net_label->size -= 0.5_mm;
-                }
-            }
+            if (net_label)
+                step_net_label_size(false);
+        }
+        else if (args.key == GDK_KEY_s) {
+            if (net_label)
+                ask_net_label_size();
         }
         else if (args.key == GDK_KEY_r) {
             if (net_label)

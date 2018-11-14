@@ -6,7 +6,8 @@
 
 namespace horizon {
 
-ToolPlaceNetLabel::ToolPlaceNetLabel(Core *c, ToolID tid) : ToolBase(c, tid), ToolPlaceJunction(c, tid)
+ToolPlaceNetLabel::ToolPlaceNetLabel(Core *c, ToolID tid)
+    : ToolBase(c, tid), ToolPlaceJunction(c, tid), ToolHelperDrawNetSetting(c, tid)
 {
 }
 
@@ -20,6 +21,7 @@ void ToolPlaceNetLabel::create_attached()
     auto uu = UUID::random();
     la = &core.c->get_sheet()->net_labels.emplace(uu, uu).first->second;
     la->orientation = last_orientation;
+    la->size = settings.net_label_size;
     la->junction = temp;
 }
 
@@ -42,8 +44,14 @@ bool ToolPlaceNetLabel::begin_attached()
 {
     imp->tool_bar_set_tip(
             "<b>LMB:</b>place label <b>RMB:</b>delete current label and finish "
-            "<b>r:</b>rotate <b>e:</b>mirror <b>+-:</b>change label size");
+            "<b>r:</b>rotate <b>e:</b>mirror <b>+-:</b>change label size <b>s:</b>set label size");
     return true;
+}
+
+void ToolPlaceNetLabel::apply_settings()
+{
+    if (la)
+        la->size = settings.net_label_size;
 }
 
 bool ToolPlaceNetLabel::update_attached(const ToolArgs &args)
@@ -104,13 +112,15 @@ bool ToolPlaceNetLabel::update_attached(const ToolArgs &args)
                 return true;
             }
             else if (args.key == GDK_KEY_plus || args.key == GDK_KEY_equal) {
-                la->size += 0.5_mm;
+                step_net_label_size(true);
                 return true;
             }
             else if (args.key == GDK_KEY_minus) {
-                if (la->size > 0.5_mm) {
-                    la->size -= 0.5_mm;
-                }
+                step_net_label_size(false);
+                return true;
+            }
+            else if (args.key == GDK_KEY_s) {
+                ask_net_label_size();
                 return true;
             }
         }
