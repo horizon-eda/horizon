@@ -27,7 +27,8 @@ ToolResponse ToolGenerateCourtyard::begin(const ToolArgs &args)
     }
     for (const auto &it_poly : pkg->polygons) {
         if (it_poly.second.layer == BoardLayers::TOP_PACKAGE) {
-            for (const auto &it : it_poly.second.vertices) {
+            auto poly = it_poly.second.remove_arcs();
+            for (const auto &it : poly.vertices) {
                 a = Coordi::min(a, it.position);
                 b = Coordi::max(b, it.position);
             }
