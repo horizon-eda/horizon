@@ -114,7 +114,8 @@ std::string get_exe_dir()
     uint32_t len = sizeof(buf);
     if (_NSGetExecutablePath(buf, &len) == 0) {
         return Glib::path_get_dirname(buf);
-    } else {
+    }
+    else {
         throw std::runtime_error("can't find executable");
         return "";
     }
