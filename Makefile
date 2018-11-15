@@ -484,9 +484,14 @@ INC = -Isrc -I3rd_party
 
 DEFINES = -D_USE_MATH_DEFINES -DGLM_ENABLE_EXPERIMENTAL
 
+OS_NAME = $(shell uname -s)
+
 LIBS_COMMON = sqlite3 yaml-cpp
-ifneq ($(OS),Windows_NT)
-	LIBS_COMMON += uuid
+ifeq ($(OS),Windows_NT)
+else
+    ifneq ($(OS_NAME),Darwin)
+        LIBS_COMMON += uuid
+    endif
 endif
 LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libgit2 libcurl
 
@@ -501,7 +506,9 @@ ifeq ($(OS),Windows_NT)
     DEFINES += -DWIN32_UUID
     LDFLAGS_GUI = -Wl,-subsystem,windows
 else
-    LDFLAGS += -fuse-ld=gold
+    ifneq ($(OS_NAME),Darwin)
+        LDFLAGS += -fuse-ld=gold
+    endif
 endif
 
 # Object files
@@ -511,10 +518,18 @@ OBJ_COMMON = $(SRC_COMMON:.cpp=.o)
 OBJ_OCE = $(SRC_OCE:.cpp=.o)
 
 INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router -I3rd_party
-INC_OCE = -I/opt/opencascade/inc/ -I/mingw64/include/oce/ -I/usr/include/oce -I/usr/include/opencascade -I${CASROOT}/include/opencascade -I/usr/local/include/OpenCASCADE
-LDFLAGS_OCE = -L /opt/opencascade/lib/ -L${CASROOT}/lib -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -lTKTopAlgo -lTKPrim -lTKBO -lTKG3d
+INC_OCE = -I/opt/opencascade/inc/ -I/mingw64/include/oce/ -I/usr/include/oce -I/usr/local/include/oce -I/usr/include/opencascade -I${CASROOT}/include/opencascade -I/usr/local/include/OpenCASCADE
+LDFLAGS_OCE = -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -lTKTopAlgo -lTKPrim -lTKBO -lTKG3d
+
 ifeq ($(OS),Windows_NT)
-	LDFLAGS_OCE += -lTKV3d
+    LDFLAGS_OCE += -lTKV3d
+    LDFLAGS_OCE += -L/opt/opencascade/lib/
+else
+    ifeq ($(OS_NAME),Darwin)
+        LDFLAGS_OCE += -L/usr/local/lib/oce
+    else
+        LDFLAGS_OCE += -L/opt/opencascade/lib/
+    endif
 endif
 
 SRC_RES =
