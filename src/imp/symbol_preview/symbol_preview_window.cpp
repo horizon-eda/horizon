@@ -47,6 +47,7 @@ SymbolPreviewWindow::SymbolPreviewWindow(Gtk::Window *parent) : Gtk::Window()
             std::pair<int, bool> view(left * 90, top);
             auto pv = Gtk::manage(new SymbolPreviewBox(view));
             pv->signal_changed().connect([this] { s_signal_changed.emit(); });
+            pv->signal_load().connect([this](auto a, auto b) { s_signal_load.emit(a, b); });
             previews[view] = pv;
             grid->attach(*pv, left, top, 1, 1);
             pv->show();
@@ -87,6 +88,13 @@ void SymbolPreviewWindow::set_canvas_appearance(const Appearance &a)
 {
     for (auto &it : previews) {
         it.second->set_canvas_appearance(a);
+    }
+}
+
+void SymbolPreviewWindow::set_can_load(bool v)
+{
+    for (auto &it : previews) {
+        it.second->set_can_load(v);
     }
 }
 } // namespace horizon

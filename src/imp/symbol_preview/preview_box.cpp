@@ -21,6 +21,10 @@ SymbolPreviewBox::SymbolPreviewBox(const std::pair<int, bool> &v)
     la->set_xalign(0);
     tbox->pack_start(*la, true, true, 0);
 
+    load_button = Gtk::manage(new Gtk::Button("Load"));
+    tbox->pack_start(*load_button, false, false, 0);
+    load_button->signal_clicked().connect([this] { s_signal_load.emit(view.first, view.second); });
+
     set_button = Gtk::manage(new Gtk::Button("Set"));
     tbox->pack_start(*set_button, false, false, 0);
     set_button->signal_clicked().connect([this] {
@@ -116,6 +120,11 @@ void SymbolPreviewBox::set_text_placements(const std::map<std::tuple<int, bool, 
 void SymbolPreviewBox::set_canvas_appearance(const Appearance &a)
 {
     canvas->set_appearance(a);
+}
+
+void SymbolPreviewBox::set_can_load(bool v)
+{
+    load_button->set_sensitive(v);
 }
 
 } // namespace horizon

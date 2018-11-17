@@ -39,6 +39,23 @@ void ImpSymbol::construct()
     symbol_preview_window = new SymbolPreviewWindow(main_window);
     symbol_preview_window->set_text_placements(core.y->get_symbol(false)->text_placements);
     symbol_preview_window->signal_changed().connect([this] { core_symbol.set_needs_save(); });
+    core_symbol.signal_tool_changed().connect(
+            [this](ToolID tool_id) { symbol_preview_window->set_can_load(tool_id == ToolID::NONE); });
+    symbol_preview_window->signal_load().connect([this](int angle, bool mirror) {
+        if (core_symbol.tool_is_active())
+            return;
+        auto pl = symbol_preview_window->get_text_placements();
+        for (auto &it : core_symbol.get_symbol()->texts) {
+            auto key = std::make_tuple(angle, mirror, it.first);
+            if (pl.count(key))
+                it.second.placement = pl.at(key);
+        }
+        core_symbol.commit();
+        core_symbol.rebuild();
+        auto sel = canvas->get_selection();
+        canvas_update();
+        canvas->set_selection(sel);
+    });
 
     {
         auto button = Gtk::manage(new Gtk::Button("Preview..."));
