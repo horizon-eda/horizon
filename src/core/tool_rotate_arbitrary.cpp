@@ -170,9 +170,12 @@ void ToolRotateArbitrary::apply_placements_rotation(int angle)
             core.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).arc_center =
                     rotate_placement(it.second, origin, angle).shift;
             break;
-        case ObjectType::TEXT:
-            core.r->get_text(it.first.uuid)->placement = rotate_placement(it.second, origin, angle);
-            break;
+        case ObjectType::TEXT: {
+            auto &pl = core.r->get_text(it.first.uuid)->placement;
+            pl = rotate_placement(it.second, origin, angle);
+            if (pl.mirror)
+                pl.inc_angle(-2 * angle);
+        } break;
         case ObjectType::BOARD_PACKAGE:
             core.b->get_board()->packages.at(it.first.uuid).placement = rotate_placement(it.second, origin, angle);
             break;

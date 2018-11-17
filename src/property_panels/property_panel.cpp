@@ -74,6 +74,10 @@ PropertyPanel::PropertyPanel(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
             e = new PropertyEditorAngle(type, property, this);
             break;
 
+        case ObjectProperty::Type::STRING_MULTILINE:
+            e = new PropertyEditorStringMultiline(type, property, this);
+            break;
+
         default:
             e = new PropertyEditor(type, property, this);
         }

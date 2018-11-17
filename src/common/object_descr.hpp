@@ -5,7 +5,21 @@
 namespace horizon {
 class ObjectProperty {
 public:
-    enum class Type { BOOL, INT, STRING, STRING_RO, LENGTH, LAYER, LAYER_COPPER, NET_CLASS, ENUM, DIM, ANGLE, ANGLE90 };
+    enum class Type {
+        BOOL,
+        INT,
+        STRING,
+        STRING_RO,
+        STRING_MULTILINE,
+        LENGTH,
+        LAYER,
+        LAYER_COPPER,
+        NET_CLASS,
+        ENUM,
+        DIM,
+        ANGLE,
+        ANGLE90
+    };
     enum class ID {
         NAME,
         NAME_VISIBLE,

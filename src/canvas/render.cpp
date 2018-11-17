@@ -577,7 +577,7 @@ void Canvas::render(const SchematicSymbol &sym)
     transform.reset();
 }
 
-void Canvas::render(const Text &text, bool interactive, bool reorient)
+void Canvas::render(const Text &text, bool interactive)
 {
     bool rev = layer_provider->get_layers().at(text.layer).reverse;
     transform_save();
@@ -590,7 +590,8 @@ void Canvas::render(const Text &text, bool interactive, bool reorient)
     img_patch_type(PatchType::TEXT);
     triangle_type_current = Triangle::Type::TEXT;
     auto extents = draw_text0(transform.shift, text.size, text.overridden ? text.text_override : text.text, angle, rev,
-                              text.origin, ColorP::FROM_LAYER, text.layer, text.width, true, text.font);
+                              text.origin, ColorP::FROM_LAYER, text.layer, text.width, true, text.font, false,
+                              transform.mirror);
     triangle_type_current = Triangle::Type::NONE;
     img_text(text, extents);
     img_patch_type(PatchType::OTHER);

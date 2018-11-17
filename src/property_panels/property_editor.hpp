@@ -8,7 +8,7 @@ namespace horizon {
 class PropertyEditor : public Gtk::Box {
 public:
     PropertyEditor(ObjectType t, ObjectProperty::ID prop, class PropertyPanel *p);
-    void construct();
+    virtual void construct();
     void set_can_apply_all(bool v);
 
     virtual void reload(){};
@@ -203,5 +203,26 @@ private:
     bool sp_output();
     void changed();
     int sp_input(double *v);
+};
+
+class PropertyEditorStringMultiline : public PropertyEditor {
+    using PropertyEditor::PropertyEditor;
+
+public:
+    void reload() override;
+    PropertyValue &get_value() override;
+    void construct() override;
+
+protected:
+    virtual Gtk::Widget *create_editor();
+
+private:
+    Gtk::TextView *en = nullptr;
+    void changed();
+    void activate();
+    bool focus_out_event(GdkEventFocus *e);
+    bool modified = false;
+
+    PropertyValueString value;
 };
 } // namespace horizon

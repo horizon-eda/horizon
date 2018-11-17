@@ -133,15 +133,16 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
           {
                   {ObjectProperty::ID::SIZE, {ObjectProperty::Type::LENGTH, "Size", 1}},
                   {ObjectProperty::ID::WIDTH, {ObjectProperty::Type::LENGTH, "Width", 2}},
-                  {ObjectProperty::ID::TEXT, {ObjectProperty::Type::STRING, "Text", 0}},
+                  {ObjectProperty::ID::TEXT, {ObjectProperty::Type::STRING_MULTILINE, "Text", 0}},
                   {ObjectProperty::ID::LAYER, {ObjectProperty::Type::LAYER, "Layer", 3}},
                   {ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X", 4}},
                   {ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y", 5}},
                   {ObjectProperty::ID::ANGLE, {ObjectProperty::Type::ANGLE, "Angle", 6}},
+                  {ObjectProperty::ID::MIRROR, {ObjectProperty::Type::BOOL, "Mirror", 7}},
                   {ObjectProperty::ID::FONT,
                    {ObjectProperty::Type::ENUM,
                     "Font",
-                    7,
+                    8,
                     {
                             {static_cast<int>(TextData::Font::SIMPLEX), "Simplex"},
                             {static_cast<int>(TextData::Font::DUPLEX), "Duplex"},

@@ -334,4 +334,62 @@ PropertyValue &PropertyEditorAngle::get_value()
     value.value = sp->get_value_as_int();
     return value;
 }
+
+
+Gtk::Widget *PropertyEditorStringMultiline::create_editor()
+{
+    en = Gtk::manage(new Gtk::TextView());
+    en->set_left_margin(3);
+    en->set_right_margin(3);
+    en->set_top_margin(3);
+    en->set_bottom_margin(3);
+    connections.push_back(
+            en->get_buffer()->signal_changed().connect(sigc::mem_fun(this, &PropertyEditorStringMultiline::changed)));
+    en->signal_focus_out_event().connect(sigc::mem_fun(this, &PropertyEditorStringMultiline::focus_out_event));
+    auto sc = Gtk::manage(new Gtk::ScrolledWindow());
+    sc->set_shadow_type(Gtk::SHADOW_IN);
+    sc->add(*en);
+    en->show();
+    return sc;
+}
+
+void PropertyEditorStringMultiline::activate()
+{
+    if (!modified)
+        return;
+    modified = false;
+    s_signal_changed.emit();
+}
+
+bool PropertyEditorStringMultiline::focus_out_event(GdkEventFocus *e)
+{
+    activate();
+    return false;
+}
+
+void PropertyEditorStringMultiline::reload()
+{
+    ScopedBlock block(connections);
+    en->get_buffer()->set_text(value.value);
+    modified = false;
+}
+
+PropertyValue &PropertyEditorStringMultiline::get_value()
+{
+    value.value = en->get_buffer()->get_text();
+    return value;
+}
+
+void PropertyEditorStringMultiline::changed()
+{
+    modified = true;
+    s_signal_changed.emit();
+}
+
+void PropertyEditorStringMultiline::construct()
+{
+    auto *ed = create_editor();
+    pack_start(*ed, false, false, 0);
+}
+
 } // namespace horizon

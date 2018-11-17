@@ -105,8 +105,20 @@ bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
 
         case ObjectProperty::ID::POSITION_X:
         case ObjectProperty::ID::POSITION_Y:
-        case ObjectProperty::ID::ANGLE:
+        case ObjectProperty::ID::MIRROR:
             get_placement(text->placement, value, property);
+            return true;
+
+        case ObjectProperty::ID::ANGLE:
+            if (text->placement.mirror) {
+                Placement pl = text->placement;
+                pl.invert_angle();
+                pl.inc_angle_deg(180);
+                dynamic_cast<PropertyValueInt &>(value).value = pl.get_angle();
+            }
+            else {
+                dynamic_cast<PropertyValueInt &>(value).value = text->placement.get_angle();
+            }
             return true;
 
         case ObjectProperty::ID::FONT:
@@ -281,8 +293,16 @@ bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
 
         case ObjectProperty::ID::POSITION_X:
         case ObjectProperty::ID::POSITION_Y:
-        case ObjectProperty::ID::ANGLE:
+        case ObjectProperty::ID::MIRROR:
             set_placement(text->placement, value, property);
+            break;
+
+        case ObjectProperty::ID::ANGLE:
+            text->placement.set_angle(dynamic_cast<const PropertyValueInt &>(value).value);
+            if (text->placement.mirror) {
+                text->placement.invert_angle();
+                text->placement.inc_angle_deg(180);
+            }
             break;
 
         case ObjectProperty::ID::FONT:
@@ -424,6 +444,9 @@ void Core::get_placement(const Placement &placement, class PropertyValue &value,
     case ObjectProperty::ID::ANGLE:
         dynamic_cast<PropertyValueInt &>(value).value = placement.get_angle();
         break;
+    case ObjectProperty::ID::MIRROR:
+        dynamic_cast<PropertyValueBool &>(value).value = placement.mirror;
+        break;
     default:;
     }
 }
@@ -439,6 +462,9 @@ void Core::set_placement(Placement &placement, const class PropertyValue &value,
         break;
     case ObjectProperty::ID::ANGLE:
         placement.set_angle(dynamic_cast<const PropertyValueInt &>(value).value);
+        break;
+    case ObjectProperty::ID::MIRROR:
+        placement.mirror = dynamic_cast<const PropertyValueBool &>(value).value;
         break;
     default:;
     }

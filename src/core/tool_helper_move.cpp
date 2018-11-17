@@ -212,9 +212,7 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
                 }
             }
             else {
-                txt->placement.inc_angle_deg(90);
-                txt->placement.invert_angle();
-                txt->placement.inc_angle_deg(-90);
+                txt->placement.mirror = !txt->placement.mirror;
             }
         } break;
 

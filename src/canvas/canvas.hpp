@@ -85,7 +85,7 @@ protected:
     void render(const class Warning &warn);
     void render(const class PowerSymbol &sym);
     void render(const class BusRipper &ripper);
-    void render(const class Text &text, bool interactive = true, bool reorient = true);
+    void render(const class Text &text, bool interactive = true);
     void render(const class Padstack &padstack, bool interactive = true);
     void render(const class Polygon &polygon, bool interactive = true);
     void render(const class Shape &shape, bool interactive = true);
@@ -123,7 +123,7 @@ protected:
     std::pair<Coordf, Coordf> draw_text0(const Coordf &p, float size, const std::string &rtext, int angle, bool flip,
                                          TextOrigin origin, ColorP color, int layer = 10000, uint64_t width = 0,
                                          bool draw = true, TextData::Font font = TextData::Font::SIMPLEX,
-                                         bool center = false);
+                                         bool center = false, bool mirror = false);
 
     enum class TextBoxMode { FULL, LOWER, UPPER };
     void draw_text_box(const Placement &q, float width, float height, const std::string &s, ColorP color, int layer,
