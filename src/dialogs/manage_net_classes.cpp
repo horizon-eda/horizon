@@ -9,9 +9,9 @@ class NetClassEditor : public Gtk::Box {
 public:
     NetClassEditor(NetClass *nc, Block *bl) : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4), net_class(nc), block(bl)
     {
-        auto entry = Gtk::manage(new Gtk::Entry());
+        entry = Gtk::manage(new Gtk::Entry());
         entry->set_text(nc->name);
-        entry->signal_changed().connect([this, entry] { net_class->name = entry->get_text(); });
+        entry->signal_changed().connect([this] { net_class->name = entry->get_text(); });
         pack_start(*entry, true, true, 0);
 
         delete_button = Gtk::manage(new Gtk::Button());
@@ -37,9 +37,15 @@ public:
     }
     Gtk::Button *delete_button = nullptr;
 
+    void focus()
+    {
+        entry->grab_focus();
+    }
+
 private:
     NetClass *net_class;
     Block *block;
+    Gtk::Entry *entry = nullptr;
 };
 
 static void header_fun(Gtk::ListBoxRow *row, Gtk::ListBoxRow *before)
@@ -99,7 +105,7 @@ void ManageNetClassesDialog::handle_add_net_class()
     x->name = "fixme";
 
     auto nce = Gtk::manage(new NetClassEditor(x, block));
-    listbox->add(*nce);
-    ;
+    listbox->prepend(*nce);
+    nce->focus();
 }
 } // namespace horizon
