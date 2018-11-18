@@ -1,8 +1,18 @@
 #include "main_window.hpp"
 #include "canvas/canvas_gl.hpp"
+#include "util/gtk_util.hpp"
 #include <iostream>
 
 namespace horizon {
+
+static void label_set_tnum(Gtk::Label *la)
+{
+    auto attributes_list = pango_attr_list_new();
+    auto attribute_font_features = pango_attr_font_features_new("tnum 1");
+    pango_attr_list_insert(attributes_list, attribute_font_features);
+    gtk_label_set_attributes(la->gobj(), attributes_list);
+    pango_attr_list_unref(attributes_list);
+}
 
 MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x)
     : Gtk::ApplicationWindow(cobject), builder(x)
@@ -39,6 +49,10 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             nonmodal_fn();
         }
     });
+
+    label_set_tnum(cursor_label);
+    label_set_tnum(tool_bar_tip_label);
+
 
     canvas = Gtk::manage(new CanvasGL());
     gl_container->pack_start(*canvas, true, true, 0);
