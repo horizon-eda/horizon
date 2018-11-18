@@ -23,5 +23,6 @@ private:
     bool shift_set = false;
     bool data_received = false;
     ToolResponse begin_paste(const std::string &paste_data, const Coordi &cursor_pos);
+    void update_tip();
 };
 } // namespace horizon

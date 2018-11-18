@@ -10,6 +10,7 @@ namespace horizon {
 void ToolHelperMove::move_init(const Coordi &c)
 {
     last = c;
+    origin = c;
 }
 
 static Coordi *get_dim_coord(Dimension *dim, int vertex)
@@ -20,6 +21,19 @@ static Coordi *get_dim_coord(Dimension *dim, int vertex)
         return &dim->p1;
     else
         return nullptr;
+}
+
+Coordi ToolHelperMove::get_coord(const Coordi &c)
+{
+    switch (mode) {
+    case Mode::ARB:
+        return c;
+    case Mode::X:
+        return {c.x, origin.y};
+    case Mode::Y:
+        return {origin.x, c.y};
+    }
+    return c;
 }
 
 void ToolHelperMove::move_do(const Coordi &delta)
@@ -80,11 +94,48 @@ void ToolHelperMove::move_do(const Coordi &delta)
     }
 }
 
-void ToolHelperMove::move_do_cursor(const Coordi &c)
+void ToolHelperMove::move_do_cursor(const Coordi &cc)
 {
+    auto c = get_coord(cc);
     auto delta = c - last;
     move_do(delta);
     last = c;
+}
+
+void ToolHelperMove::cycle_mode()
+{
+    switch (mode) {
+    case Mode::ARB:
+        mode = Mode::X;
+        break;
+    case Mode::X:
+        mode = Mode::Y;
+        break;
+    case Mode::Y:
+        mode = Mode::ARB;
+        break;
+    }
+}
+
+Coordi ToolHelperMove::get_delta() const
+{
+    return last - origin;
+}
+
+std::string ToolHelperMove::mode_to_string()
+{
+    switch (mode) {
+    case Mode::ARB:
+        return "any direction";
+        break;
+    case Mode::X:
+        return "X only";
+        break;
+    case Mode::Y:
+        return "Y only";
+        break;
+    }
+    return "";
 }
 
 static void transform(Coordi &a, const Coordi &center, bool rotate)

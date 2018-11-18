@@ -159,8 +159,7 @@ void ToolMove::update_selection_center()
 ToolResponse ToolMove::begin(const ToolArgs &args)
 {
     std::cout << "tool move\n";
-    last = args.coords;
-    origin = args.coords;
+    move_init(args.coords);
 
     update_selection_center();
 
@@ -272,7 +271,7 @@ bool ToolMove::can_begin()
 
 void ToolMove::update_tip()
 {
-    auto delta = last - origin;
+    auto delta = get_delta();
     std::string s =
             "<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate "
             "<b>e:</b>mirror ";
@@ -282,42 +281,17 @@ void ToolMove::update_tip()
         s += "<b>/:</b>restrict";
     s += " <i>" + coord_to_string(delta + key_delta, true) + " ";
     if (!is_key) {
-        switch (mode) {
-        case Mode::ARB:
-            s += "any direction";
-            break;
-        case Mode::X:
-            s += "X only";
-            break;
-        case Mode::Y:
-            s += "Y only";
-            break;
-        }
+        s += mode_to_string();
     }
 
     s += "</i>";
     imp->tool_bar_set_tip(s);
 }
 
-Coordi ToolMove::get_coord(const Coordi &c)
-{
-    switch (mode) {
-    case Mode::ARB:
-        return c;
-    case Mode::X:
-        return {c.x, origin.y};
-    case Mode::Y:
-        return {origin.x, c.y};
-    }
-    return c;
-}
 
 void ToolMove::do_move(const Coordi &d)
 {
-    auto c = get_coord(d);
-    Coordi delta = c - last;
-    move_do(delta);
-    last = c;
+    move_do_cursor(d);
     if (core.b && update_airwires && nets.size()) {
         core.b->get_board()->update_airwires(true, nets);
     }
@@ -383,17 +357,7 @@ ToolResponse ToolMove::update(const ToolArgs &args)
             return ToolResponse::end();
         }
         else if (args.key == GDK_KEY_slash) {
-            switch (mode) {
-            case Mode::ARB:
-                mode = Mode::X;
-                break;
-            case Mode::X:
-                mode = Mode::Y;
-                break;
-            case Mode::Y:
-                mode = Mode::ARB;
-                break;
-            }
+            cycle_mode();
             do_move(args.coords);
         }
         else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {

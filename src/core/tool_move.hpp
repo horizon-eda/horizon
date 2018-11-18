@@ -21,15 +21,10 @@ public:
     }
 
 private:
-    Coordi last;
-    Coordi origin;
     Coordi selection_center;
     void update_selection_center();
     void expand_selection();
     void update_tip();
-    enum class Mode { X, Y, ARB };
-    Mode mode = Mode::ARB;
-    Coordi get_coord(const Coordi &c);
     void do_move(const Coordi &c);
 
     void collect_nets();

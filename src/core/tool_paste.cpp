@@ -306,9 +306,7 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
         return ToolResponse::end();
     }
     move_init(cursor_pos_canvas);
-    imp->tool_bar_set_tip(
-            "<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate "
-            "<b>e:</b>mirror");
+    update_tip();
     if (core.c) {
         core.c->get_schematic()->expand(true);
     }
@@ -317,7 +315,7 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
 
 ToolResponse ToolPaste::begin(const ToolArgs &args)
 {
-    imp->tool_bar_set_tip("waiting for paste data");
+    update_tip();
     auto ref_clipboard = Gtk::Clipboard::get();
     ref_clipboard->request_contents("imp-buffer", [this](const Gtk::SelectionData &sel_data) {
         auto td = std::make_unique<ToolDataPaste>();
@@ -326,6 +324,21 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
         imp->tool_update_data(std::move(td));
     });
     return ToolResponse();
+}
+
+void ToolPaste::update_tip()
+{
+    if (!data_received) { // wait for data
+        imp->tool_bar_set_tip("waiting for paste data");
+        return;
+    }
+    auto delta = get_delta();
+
+    std::string s =
+            "<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate "
+            "<b>e:</b>mirror <b>/:</b>restrict <i>"
+            + coord_to_string(delta, true) + " " + mode_to_string() + "</i> ";
+    imp->tool_bar_set_tip(s);
 }
 
 ToolResponse ToolPaste::update(const ToolArgs &args)
@@ -344,6 +357,7 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
     else {
         if (args.type == ToolEventType::MOVE) {
             move_do_cursor(args.coords);
+            update_tip();
             return ToolResponse::fast();
         }
         else if (args.type == ToolEventType::CLICK) {
@@ -362,12 +376,17 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
                 core.r->revert();
                 return ToolResponse::end();
             }
+            else if (args.key == GDK_KEY_slash) {
+                cycle_mode();
+                move_do_cursor(args.coords);
+            }
             else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
                 bool rotate = args.key == GDK_KEY_r;
                 move_mirror_or_rotate(args.coords, rotate);
             }
         }
     }
+    update_tip();
     return ToolResponse();
 }
 } // namespace horizon
