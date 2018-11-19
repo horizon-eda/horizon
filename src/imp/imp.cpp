@@ -1103,7 +1103,7 @@ void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRe
     update_action_sensitivity();
     Gtk::SeparatorMenuItem *sep = nullptr;
     for (const auto &it_gr : action_group_catalog) {
-        bool have_item = false;
+        std::vector<Gtk::MenuItem *> menu_items;
         for (const auto &it : action_catalog) {
             if (it.second.group == it_gr.first && (it.second.availability & get_editor_type_for_action())
                 && !(it.second.flags & ActionCatalogItem::FLAGS_NO_MENU)) {
@@ -1119,8 +1119,7 @@ void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRe
                             tool_begin(tool_id);
                         });
                         la_sub->show();
-                        parent->append(*la_sub);
-                        have_item = true;
+                        menu_items.push_back(la_sub);
                     }
                 }
                 else {
@@ -1134,13 +1133,28 @@ void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRe
                             trigger_action(make_action(action_id));
                         });
                         la_sub->show();
-                        parent->append(*la_sub);
-                        have_item = true;
+                        menu_items.push_back(la_sub);
                     }
                 }
             }
         }
-        if (have_item) {
+        if (menu_items.size() > 6) {
+            auto submenu = Gtk::manage(new Gtk::Menu);
+            submenu->show();
+            for (auto it : menu_items) {
+                submenu->append(*it);
+            }
+            auto la_sub = Gtk::manage(new Gtk::MenuItem(it_gr.second));
+            la_sub->show();
+            la_sub->set_submenu(*submenu);
+            parent->append(*la_sub);
+        }
+        else {
+            for (auto it : menu_items) {
+                parent->append(*it);
+            }
+        }
+        if (menu_items.size()) {
             sep = Gtk::manage(new Gtk::SeparatorMenuItem);
             sep->show();
             parent->append(*sep);
