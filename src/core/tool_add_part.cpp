@@ -34,7 +34,6 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
 
         auto uu = UUID::random();
         comp = &sch->block->components.emplace(uu, uu).first->second;
-        comp->tag = UUID::random();
         comp->entity = part->entity;
         comp->part = part;
     }
@@ -47,9 +46,10 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
         auto uu = UUID::random();
         comp = &sch->block->components.emplace(uu, uu).first->second;
         comp->entity = core.c->m_pool->get_entity(entity_uuid);
-        comp->tag = UUID::random();
     }
     comp->refdes = comp->entity->prefix + "?";
+    comp->tag = UUID::random();
+    sch->block->tag_names[comp->tag] = std::to_string(sch->block->tag_names.size());
 
     for (auto &it : comp->entity->gates) {
         gates.push_back(&it.second);
