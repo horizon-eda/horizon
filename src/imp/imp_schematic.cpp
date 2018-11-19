@@ -449,9 +449,12 @@ void ImpSchematic::update_action_sensitivity()
     bool can_higlight_group = false;
     bool can_higlight_tag = false;
     if (sel.size() == 1 && (*sel.begin()).type == ObjectType::SCHEMATIC_SYMBOL) {
-        auto comp = core_schematic.get_schematic_symbol((*sel.begin()).uuid)->component;
-        can_higlight_group = comp->group;
-        can_higlight_tag = comp->tag;
+        auto uu = (*sel.begin()).uuid;
+        if (core_schematic.get_sheet()->symbols.count(uu)) {
+            auto comp = core_schematic.get_schematic_symbol(uu)->component;
+            can_higlight_group = comp->group;
+            can_higlight_tag = comp->tag;
+        }
     }
 
     set_action_sensitive(make_action(ActionID::HIGHLIGHT_GROUP), can_higlight_group);
