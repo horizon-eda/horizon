@@ -79,10 +79,10 @@ std::string SchematicSymbol::replace_text(const std::string &t, bool *replaced, 
         r = component->replace_text(t, replaced);
     }
     if (is_value && sch.group_tag_visible) {
-        if (component->group)
+        if (component->group) {
             r += "\nG:" + sch.block->get_group_name(component->group);
-        if (component->tag)
             r += "\nT:" + sch.block->get_tag_name(component->tag);
+        }
     }
     return r;
 }
