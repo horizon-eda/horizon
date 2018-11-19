@@ -33,7 +33,7 @@ public:
     bool display_directions = false;
     bool display_all_pads = true;
 
-    std::string replace_text(const std::string &t, bool *replaced = nullptr) const;
+    std::string replace_text(const std::string &t, bool *replaced, const class Schematic &sch) const;
 
     UUID get_uuid() const override;
     json serialize() const;

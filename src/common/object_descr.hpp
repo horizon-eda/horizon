@@ -18,7 +18,9 @@ public:
         ENUM,
         DIM,
         ANGLE,
-        ANGLE90
+        ANGLE90,
+        GROUP,
+        TAG
     };
     enum class ID {
         NAME,
@@ -64,7 +66,9 @@ public:
         PIN_NAME_ORIENTATION,
         FONT,
         KEEPOUT_CLASS,
-        DISPLAY_ALL_PADS
+        DISPLAY_ALL_PADS,
+        GROUP,
+        TAG
     };
     ObjectProperty(Type t, const std::string &l, int o = 0, const std::vector<std::pair<int, std::string>> &its = {})
         : type(t), label(l), enum_items(its), order(o)

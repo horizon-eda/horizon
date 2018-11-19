@@ -32,6 +32,7 @@
 #include "edit_board_hole.hpp"
 #include "edit_frame.hpp"
 #include "edit_keepout.hpp"
+#include "select_group_tag.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include <glibmm.h>
 
@@ -172,6 +173,18 @@ std::pair<bool, UUID> Dialogs::select_bus_member(class Block *block, const UUID 
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
         return {dia.valid, dia.net};
+    }
+    else {
+        return {false, UUID()};
+    }
+}
+
+std::pair<bool, UUID> Dialogs::select_group_tag(const class Block *block, bool tag_mode, const UUID &current)
+{
+    SelectGroupTagDialog dia(parent, block, tag_mode);
+    auto r = dia.run();
+    if (r == Gtk::RESPONSE_OK) {
+        return {dia.selection_valid, dia.selected_uuid};
     }
     else {
         return {false, UUID()};

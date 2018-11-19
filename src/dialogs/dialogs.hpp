@@ -31,6 +31,7 @@ public:
     std::pair<bool, UUID> select_net(class Block *block, bool power_only, const UUID &net_default = UUID());
     std::pair<bool, UUID> select_bus(class Block *block);
     std::pair<bool, UUID> select_bus_member(class Block *block, const UUID &bus_uuid);
+    std::pair<bool, UUID> select_group_tag(const class Block *block, bool tag_mode, const UUID &current);
     bool edit_symbol_pin_names(class SchematicSymbol *symbol);
     unsigned int ask_net_merge(class Net *net, class Net *into);
     bool ask_delete_component(Component *comp);

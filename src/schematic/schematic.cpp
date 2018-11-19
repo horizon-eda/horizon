@@ -44,7 +44,8 @@ json Schematic::Annotation::serialize() const
 }
 
 Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, Pool &pool)
-    : uuid(uu), block(&iblock), name(j.at("name").get<std::string>()), annotation(j.value("annotation", json()))
+    : uuid(uu), block(&iblock), name(j.at("name").get<std::string>()),
+      group_tag_visible(j.value("group_tag_visible", false)), annotation(j.value("annotation", json()))
 {
     {
         const json &o = j["sheets"];
@@ -275,8 +276,10 @@ void Schematic::expand(bool careful)
         }
     }
 
-    if (!careful)
+    if (!careful) {
         block->vacuum_nets();
+        block->vacuum_group_tag_names();
+    }
 
     block->update_diffpairs();
 
@@ -336,7 +339,7 @@ void Schematic::expand(bool careful)
                                        [&sheet](const auto &a) { return sheet.texts.count(a.uuid) == 0; }),
                         texts.end());
         }
-        sheet.expand_symbols();
+        sheet.expand_symbols(*this);
     }
 
 
@@ -688,7 +691,7 @@ void Schematic::annotate()
 
 Schematic::Schematic(const Schematic &sch)
     : uuid(sch.uuid), block(sch.block), name(sch.name), sheets(sch.sheets), rules(sch.rules),
-      title_block_values(sch.title_block_values), annotation(sch.annotation)
+      title_block_values(sch.title_block_values), group_tag_visible(sch.group_tag_visible), annotation(sch.annotation)
 {
     update_refs();
 }
@@ -701,6 +704,7 @@ void Schematic::operator=(const Schematic &sch)
     sheets = sch.sheets;
     rules = sch.rules;
     title_block_values = sch.title_block_values;
+    group_tag_visible = sch.group_tag_visible;
     annotation = sch.annotation;
     update_refs();
 }
@@ -769,6 +773,7 @@ json Schematic::serialize() const
     j["annotation"] = annotation.serialize();
     j["rules"] = rules.serialize();
     j["title_block_values"] = title_block_values;
+    j["group_tag_visible"] = group_tag_visible;
 
     j["sheets"] = json::object();
     for (const auto &it : sheets) {

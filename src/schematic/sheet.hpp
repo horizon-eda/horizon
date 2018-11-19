@@ -58,7 +58,7 @@ public:
 
     LineNet *split_line_net(LineNet *it, Junction *ju);
     void merge_net_lines(LineNet *a, LineNet *b, Junction *ju);
-    void expand_symbols();
+    void expand_symbols(const class Schematic &sch);
     void simplify_net_lines(bool simplify);
     void fix_junctions();
     void delete_duplicate_net_lines();

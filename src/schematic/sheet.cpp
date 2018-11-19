@@ -152,7 +152,7 @@ void Sheet::merge_net_lines(LineNet *a, LineNet *b, Junction *ju)
     }
 }
 
-void Sheet::expand_symbols(void)
+void Sheet::expand_symbols(const class Schematic &sch)
 {
     for (auto &it_sym : symbols) {
         SchematicSymbol &schsym = it_sym.second;
@@ -221,11 +221,11 @@ void Sheet::expand_symbols(void)
             }
         }
         for (auto &it_text : schsym.symbol.texts) {
-            it_text.second.text = schsym.replace_text(it_text.second.text);
+            it_text.second.text = schsym.replace_text(it_text.second.text, nullptr, sch);
         }
 
         for (auto &it_text : schsym.texts) {
-            it_text->text_override = schsym.replace_text(it_text->text, &it_text->overridden);
+            it_text->text_override = schsym.replace_text(it_text->text, &it_text->overridden, sch);
         }
     }
     for (auto &it_line : net_lines) {

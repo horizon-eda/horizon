@@ -239,6 +239,7 @@ SRC_IMP = \
 	src/dialogs/edit_board_hole.cpp\
 	src/dialogs/edit_frame.cpp\
 	src/dialogs/edit_keepout.cpp\
+	src/dialogs/select_group_tag.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\
 	src/core/core_schematic.cpp\

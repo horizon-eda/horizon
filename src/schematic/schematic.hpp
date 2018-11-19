@@ -81,6 +81,7 @@ public:
     std::map<UUID, Sheet> sheets;
     SchematicRules rules;
     std::map<std::string, std::string> title_block_values;
+    bool group_tag_visible = false;
 
 
     class Annotation {

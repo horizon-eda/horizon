@@ -2,6 +2,7 @@
 #include "pool/part.hpp"
 #include "common/lut.hpp"
 #include "nlohmann/json.hpp"
+#include "schematic.hpp"
 
 namespace horizon {
 
@@ -63,17 +64,26 @@ UUID SchematicSymbol::get_uuid() const
     return uuid;
 }
 
-std::string SchematicSymbol::replace_text(const std::string &t, bool *replaced) const
+std::string SchematicSymbol::replace_text(const std::string &t, bool *replaced, const Schematic &sch) const
 {
     if (replaced)
         *replaced = false;
+    bool is_value = t == "$VALUE";
+    std::string r;
     if (t == "$REFDES" || t == "$RD") {
         if (replaced)
             *replaced = true;
-        return component->refdes + gate->suffix;
+        r = component->refdes + gate->suffix;
     }
     else {
-        return component->replace_text(t, replaced);
+        r = component->replace_text(t, replaced);
     }
+    if (is_value && sch.group_tag_visible) {
+        if (component->group)
+            r += "\nG:" + sch.block->get_group_name(component->group);
+        if (component->tag)
+            r += "\nT:" + sch.block->get_tag_name(component->tag);
+    }
+    return r;
 }
 } // namespace horizon

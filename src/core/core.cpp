@@ -145,6 +145,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::EDIT_SCHEMATIC_PROPERTIES:
     case ToolID::MANAGE_POWER_NETS:
     case ToolID::EDIT_FRAME_PROPERTIES:
+    case ToolID::TOGGLE_GROUP_TAG_VISIBLE:
         return std::make_unique<ToolManageBuses>(this, tool_id);
 
     case ToolID::DRAW_POLYGON:
@@ -276,9 +277,13 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
         return std::make_unique<ToolGenerateCourtyard>(this, tool_id);
 
     case ToolID::SET_GROUP:
+    case ToolID::SET_NEW_GROUP:
     case ToolID::CLEAR_GROUP:
     case ToolID::SET_TAG:
+    case ToolID::SET_NEW_TAG:
     case ToolID::CLEAR_TAG:
+    case ToolID::RENAME_GROUP:
+    case ToolID::RENAME_TAG:
         return std::make_unique<ToolSetGroup>(this, tool_id);
 
     case ToolID::COPY_PLACEMENT:

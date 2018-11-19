@@ -53,6 +53,28 @@ Block::Block(const UUID &uu, const json &j, Pool &pool) : uuid(uu), name(j.at("n
                          Logger::Domain::BLOCK);
         }
     }
+    if (j.count("group_names")) {
+        const json &o = j["group_names"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            group_names[u] = it.value();
+        }
+    }
+    if (j.count("tag_names")) {
+        const json &o = j["tag_names"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            tag_names[u] = it.value();
+        }
+    }
+    for (const auto &it : components) {
+        if (it.second.tag && !tag_names.count(it.second.tag)) {
+            tag_names[it.second.tag] = std::to_string(tag_names.size());
+        }
+        if (it.second.group && !group_names.count(it.second.group)) {
+            group_names[it.second.group] = std::to_string(group_names.size());
+        }
+    }
     if (j.count("bom_export_settings")) {
         try {
             bom_export_settings = BOMExportSettings(j.at("bom_export_settings"));
@@ -166,6 +188,22 @@ void Block::vacuum_nets()
     }
 }
 
+void Block::vacuum_group_tag_names()
+{
+    std::set<UUID> groups;
+    std::set<UUID> tags;
+    for (const auto &it : components) {
+        if (it.second.group) {
+            groups.insert(it.second.group);
+        }
+        if (it.second.tag) {
+            tags.insert(it.second.tag);
+        }
+    }
+    map_erase_if(group_names, [&groups](const auto &a) { return groups.count(a.first) == 0; });
+    map_erase_if(tag_names, [&tags](const auto &a) { return tags.count(a.first) == 0; });
+}
+
 void Block::update_connection_count()
 {
     for (auto &it : nets) {
@@ -182,8 +220,8 @@ void Block::update_connection_count()
 
 Block::Block(const Block &block)
     : uuid(block.uuid), name(block.name), nets(block.nets), buses(block.buses), components(block.components),
-      net_classes(block.net_classes), net_class_default(block.net_class_default),
-      bom_export_settings(block.bom_export_settings)
+      net_classes(block.net_classes), net_class_default(block.net_class_default), group_names(block.group_names),
+      tag_names(block.tag_names), bom_export_settings(block.bom_export_settings)
 {
     update_refs();
 }
@@ -197,6 +235,8 @@ void Block::operator=(const Block &block)
     components = block.components;
     net_classes = block.net_classes;
     net_class_default = block.net_class_default;
+    group_names = block.group_names;
+    tag_names = block.tag_names;
     bom_export_settings = block.bom_export_settings;
     update_refs();
 }
@@ -222,6 +262,14 @@ json Block::serialize()
     j["net_classes"] = json::object();
     for (const auto &it : net_classes) {
         j["net_classes"][(std::string)it.first] = it.second.serialize();
+    }
+    j["group_names"] = json::object();
+    for (const auto &it : group_names) {
+        j["group_names"][(std::string)it.first] = it.second;
+    }
+    j["tag_names"] = json::object();
+    for (const auto &it : tag_names) {
+        j["tag_names"][(std::string)it.first] = it.second;
     }
     j["bom_export_settings"] = bom_export_settings.serialize();
 
@@ -268,6 +316,26 @@ std::map<const Part *, BOMRow> Block::get_BOM(const BOMExportSettings &settings)
                   [](const auto &a, const auto &b) { return strcmp_natural(a, b) < 0; });
     }
     return rows;
+}
+
+std::string Block::get_group_name(const UUID &uu) const
+{
+    if (!uu)
+        return "None";
+    else if (group_names.count(uu))
+        return group_names.at(uu);
+    else
+        return (std::string)uu;
+}
+
+std::string Block::get_tag_name(const UUID &uu) const
+{
+    if (!uu)
+        return "None";
+    else if (tag_names.count(uu))
+        return tag_names.at(uu);
+    else
+        return (std::string)uu;
 }
 
 } // namespace horizon

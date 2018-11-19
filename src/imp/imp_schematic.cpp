@@ -367,6 +367,10 @@ void ImpSchematic::construct()
         this->update_highlights();
     });
 
+    connect_action(ActionID::HIGHLIGHT_GROUP, sigc::mem_fun(this, &ImpSchematic::handle_highlight_group_tag));
+    connect_action(ActionID::HIGHLIGHT_TAG, sigc::mem_fun(this, &ImpSchematic::handle_highlight_group_tag));
+
+
     bom_export_window =
             BOMExportWindow::create(main_window, core_schematic.get_block(), core_schematic.get_bom_export_settings());
 
@@ -442,6 +446,17 @@ void ImpSchematic::update_action_sensitivity()
                                  return false;
                              }
                          }));
+    bool can_higlight_group = false;
+    bool can_higlight_tag = false;
+    if (sel.size() == 1 && (*sel.begin()).type == ObjectType::SCHEMATIC_SYMBOL) {
+        auto comp = core_schematic.get_schematic_symbol((*sel.begin()).uuid)->component;
+        can_higlight_group = comp->group;
+        can_higlight_tag = comp->tag;
+    }
+
+    set_action_sensitive(make_action(ActionID::HIGHLIGHT_GROUP), can_higlight_group);
+    set_action_sensitive(make_action(ActionID::HIGHLIGHT_TAG), can_higlight_tag);
+
 
     ImpBase::update_action_sensitivity();
 }
@@ -513,6 +528,28 @@ void ImpSchematic::handle_tool_change(ToolID id)
 {
     ImpBase::handle_tool_change(id);
     sheet_box->set_sensitive(id == ToolID::NONE);
+}
+
+void ImpSchematic::handle_highlight_group_tag(const ActionConnection &a)
+{
+    bool tag_mode = a.action_id == ActionID::HIGHLIGHT_TAG;
+    auto sel = canvas->get_selection();
+    if (sel.size() == 1 && (*sel.begin()).type == ObjectType::SCHEMATIC_SYMBOL) {
+        auto comp = core_schematic.get_schematic_symbol((*sel.begin()).uuid)->component;
+        UUID uu = tag_mode ? comp->tag : comp->group;
+        if (!uu)
+            return;
+        highlights.clear();
+        for (const auto &it_sheet : core_schematic.get_schematic()->sheets) {
+            for (const auto &it_sym : it_sheet.second.symbols) {
+                if ((tag_mode && (it_sym.second.component->tag == uu))
+                    || (!tag_mode && (it_sym.second.component->group == uu))) {
+                    highlights.emplace(ObjectType::COMPONENT, it_sym.second.component->uuid);
+                }
+            }
+        }
+        this->update_highlights();
+    }
 }
 
 void ImpSchematic::handle_maybe_drag()

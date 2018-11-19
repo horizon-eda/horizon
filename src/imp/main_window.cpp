@@ -76,7 +76,7 @@ void MainWindow::tool_bar_set_visible(bool v)
 
 void MainWindow::tool_bar_set_tool_name(const std::string &s)
 {
-    tool_bar_name_label->set_markup(s);
+    tool_bar_name_label->set_text(s);
 }
 
 void MainWindow::tool_bar_set_tool_tip(const std::string &s)

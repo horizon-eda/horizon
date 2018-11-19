@@ -18,6 +18,7 @@ bool ToolManageBuses::can_begin()
     case ToolID::MANAGE_NET_CLASSES:
     case ToolID::EDIT_SCHEMATIC_PROPERTIES:
     case ToolID::MANAGE_POWER_NETS:
+    case ToolID::TOGGLE_GROUP_TAG_VISIBLE:
         return core.c;
 
     case ToolID::EDIT_STACKUP:
@@ -58,6 +59,11 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
     }
     else if (tool_id == ToolID::EDIT_FRAME_PROPERTIES) {
         r = imp->dialogs.edit_frame_properties(core.f->get_frame());
+    }
+    else if (tool_id == ToolID::TOGGLE_GROUP_TAG_VISIBLE) {
+        auto sch = core.c->get_schematic();
+        sch->group_tag_visible = !sch->group_tag_visible;
+        r = true;
     }
     if (r) {
         core.r->commit();

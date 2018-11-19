@@ -35,7 +35,7 @@ SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *ga
     SchematicSymbol *schsym = core.c->insert_schematic_symbol(UUID::random(), sym);
     schsym->component = comp;
     schsym->gate = gate;
-    core.c->get_sheet()->expand_symbols();
+    core.c->get_sheet()->expand_symbols(*core.c->get_schematic());
 
     return schsym;
 }

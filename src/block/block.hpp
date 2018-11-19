@@ -37,6 +37,11 @@ public:
     std::map<UUID, NetClass> net_classes;
     uuid_ptr<NetClass> net_class_default = nullptr;
 
+    std::map<UUID, std::string> group_names;
+    std::map<UUID, std::string> tag_names;
+    std::string get_group_name(const UUID &uu) const;
+    std::string get_tag_name(const UUID &uu) const;
+
     BOMExportSettings bom_export_settings;
     std::map<const class Part *, BOMRow> get_BOM(const BOMExportSettings &settings) const;
 
@@ -49,6 +54,7 @@ public:
      * deletes unreferenced nets
      */
     void vacuum_nets();
+    void vacuum_group_tag_names();
 
     /**
      * Takes pins specified by pins and moves them over to net

@@ -60,7 +60,11 @@ enum class ActionID {
     VIEW_TOP,
     VIEW_BOTTOM,
     EDIT_PADSTACK,
-    EDIT_UNIT
+    EDIT_UNIT,
+    HIGHLIGHT_GROUP,
+    HIGHLIGHT_TAG,
+    SELECT_GROUP,
+    SELECT_TAG,
 };
 
 enum class ActionGroup {
@@ -79,7 +83,8 @@ enum class ActionGroup {
     SELECTION,
     RULES,
     VIEW,
-    FRAME
+    FRAME,
+    GROUP_TAG
 };
 
 typedef std::vector<std::pair<int, GdkModifierType>> KeySequence2;

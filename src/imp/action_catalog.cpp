@@ -287,20 +287,48 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
           ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::TOOL, ToolID::SET_GROUP},
-         {"Set group", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+         {"Set group", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::SET_NEW_GROUP},
+         {"Set new group", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::CLEAR_GROUP},
-         {"Clear group", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+         {"Clear group", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::SET_TAG},
-         {"Set tag", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+         {"Set tag", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::SET_NEW_TAG},
+         {"Set new tag", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::CLEAR_TAG},
-         {"Clear tag", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+         {"Clear tag", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::RENAME_TAG},
+         {"Rename tag", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::RENAME_GROUP},
+         {"Rename group", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::TOGGLE_GROUP_TAG_VISIBLE},
+         {"Toggle group&tag visibility", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::HIGHLIGHT_GROUP, ToolID::NONE},
+         {"Highlight group", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_SPECIFIC}},
+
+        {{ActionID::HIGHLIGHT_TAG, ToolID::NONE},
+         {"Highlight tag", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::TOOL, ToolID::COPY_PLACEMENT},
          {"Copy placement", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
@@ -576,12 +604,12 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
         {ActionGroup::CLIPBOARD, "Clipboard"}, {ActionGroup::GRAPHICS, "Graphics"},
         {ActionGroup::MOVE, "Move"},           {ActionGroup::BOARD, "Board"},
-        {ActionGroup::SCHEMATIC, "Schematic"}, {ActionGroup::SYMBOL, "Symbol"},
-        {ActionGroup::PADSTACK, "Padstack"},   {ActionGroup::PACKAGE, "Package"},
-        {ActionGroup::FRAME, "Frame"},         {ActionGroup::UNDO, "Undo"},
-        {ActionGroup::LAYER, "Layer"},         {ActionGroup::SELECTION, "Selection"},
-        {ActionGroup::RULES, "Rules"},         {ActionGroup::UNKNOWN, "Misc"},
-        {ActionGroup::VIEW, "View"},
+        {ActionGroup::SCHEMATIC, "Schematic"}, {ActionGroup::GROUP_TAG, "Group & Tag"},
+        {ActionGroup::SYMBOL, "Symbol"},       {ActionGroup::PADSTACK, "Padstack"},
+        {ActionGroup::PACKAGE, "Package"},     {ActionGroup::FRAME, "Frame"},
+        {ActionGroup::UNDO, "Undo"},           {ActionGroup::LAYER, "Layer"},
+        {ActionGroup::SELECTION, "Selection"}, {ActionGroup::RULES, "Rules"},
+        {ActionGroup::UNKNOWN, "Misc"},        {ActionGroup::VIEW, "View"},
 
 };
 
@@ -643,6 +671,10 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(VIEW_BOTTOM),
         ACTION_LUT_ITEM(EDIT_PADSTACK),
         ACTION_LUT_ITEM(EDIT_UNIT),
+        ACTION_LUT_ITEM(HIGHLIGHT_GROUP),
+        ACTION_LUT_ITEM(HIGHLIGHT_TAG),
+        ACTION_LUT_ITEM(SELECT_GROUP),
+        ACTION_LUT_ITEM(SELECT_TAG),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
@@ -732,14 +764,14 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(EDIT_BOARD_HOLE),
         TOOL_LUT_ITEM(GENERATE_COURTYARD),
         TOOL_LUT_ITEM(SET_GROUP),
+        TOOL_LUT_ITEM(SET_NEW_GROUP),
         TOOL_LUT_ITEM(CLEAR_GROUP),
+        TOOL_LUT_ITEM(RENAME_GROUP),
         TOOL_LUT_ITEM(SET_TAG),
+        TOOL_LUT_ITEM(SET_NEW_TAG),
         TOOL_LUT_ITEM(CLEAR_TAG),
-        TOOL_LUT_ITEM(APPLY_TAG),
-        TOOL_LUT_ITEM(SELECT_GROUP),
-        TOOL_LUT_ITEM(HIGHLIGHT_GROUP),
-        TOOL_LUT_ITEM(SELECT_TAG),
-        TOOL_LUT_ITEM(HIGHLIGHT_TAG),
+        TOOL_LUT_ITEM(RENAME_TAG),
+        TOOL_LUT_ITEM(TOGGLE_GROUP_TAG_VISIBLE),
         TOOL_LUT_ITEM(COPY_PLACEMENT),
         TOOL_LUT_ITEM(COPY_TRACKS),
         TOOL_LUT_ITEM(TUNE_TRACK),
