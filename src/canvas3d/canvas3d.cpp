@@ -606,7 +606,14 @@ void Canvas3D::load_models_async(Pool *pool)
         auto model = it.second.package.get_model(it.second.model);
         if (model) {
             std::string model_filename;
-            if (it.second.pool_package == pool->get_package(it.second.pool_package->uuid)) {
+            const Package *pool_package = nullptr;
+            try {
+                pool_package = pool->get_package(it.second.pool_package->uuid);
+            }
+            catch (const std::runtime_error &e) {
+                // it's okay
+            }
+            if (it.second.pool_package == pool_package) {
                 // package is from pool, ask pool for model filename (might come from cache)
                 model_filename = pool->get_model_filename(it.second.pool_package->uuid, model->uuid);
             }
