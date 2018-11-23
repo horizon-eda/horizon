@@ -17,5 +17,6 @@ private:
     std::vector<const class Gate *> gates;
     class Component *comp = nullptr;
     void update_tip();
+    UUID create_tag();
 };
 } // namespace horizon

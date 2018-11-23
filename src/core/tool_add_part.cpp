@@ -15,6 +15,14 @@ bool ToolAddPart::can_begin()
     return core.c;
 }
 
+UUID ToolAddPart::create_tag()
+{
+    auto uu = UUID::random();
+    auto block = core.c->get_block();
+    block->tag_names[uu] = std::to_string(block->tag_names.size());
+    return uu;
+}
+
 ToolResponse ToolAddPart::begin(const ToolArgs &args)
 {
     std::cout << "tool add part\n";
@@ -48,8 +56,7 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
         comp->entity = core.c->m_pool->get_entity(entity_uuid);
     }
     comp->refdes = comp->entity->prefix + "?";
-    comp->tag = UUID::random();
-    sch->block->tag_names[comp->tag] = std::to_string(sch->block->tag_names.size());
+    comp->tag = create_tag();
 
     for (auto &it : comp->entity->gates) {
         gates.push_back(&it.second);
@@ -96,7 +103,7 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
                 comp->entity = last_comp->entity;
                 comp->part = last_comp->part;
                 comp->refdes = comp->entity->prefix + "?";
-                comp->tag = UUID::random();
+                comp->tag = create_tag();
 
                 auto old_symbol = sym_current;
                 sym_current = map_symbol(comp, gates.front());
