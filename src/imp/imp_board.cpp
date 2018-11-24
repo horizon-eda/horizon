@@ -201,8 +201,10 @@ void ImpBoard::update_action_sensitivity()
 
 void ImpBoard::apply_preferences()
 {
-    if (view_3d_window)
+    if (view_3d_window) {
         view_3d_window->set_smooth_zoom(preferences.zoom.smooth_zoom_3d);
+        view_3d_window->set_appearance(preferences.canvas_layer.appearance);
+    }
     ImpLayer::apply_preferences();
 }
 

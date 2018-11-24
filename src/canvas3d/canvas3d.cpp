@@ -37,6 +37,13 @@ Canvas3D::Canvas3D()
         s_signal_models_loading.emit(false);
     });
 }
+
+void Canvas3D::set_appearance(const Appearance &a)
+{
+    appearance = a;
+    queue_draw();
+}
+
 void Canvas3D::on_size_allocate(Gtk::Allocation &alloc)
 {
     width = alloc.get_width();
@@ -727,8 +734,12 @@ bool Canvas3D::layer_is_visible(int layer) const
 
 Color Canvas3D::get_layer_color(int layer) const
 {
-    if (layer == 20000 || BoardLayers::is_copper(layer)) // pth or cu
+    if (layer == 20000 || BoardLayers::is_copper(layer)) { // pth or cu
+        if (use_layer_colors && appearance.layer_colors.count(layer)) {
+            return appearance.layer_colors.at(layer);
+        }
         return {1, .8, 0};
+    }
 
     if (layer == BoardLayers::TOP_MASK || layer == BoardLayers::BOTTOM_MASK)
         return solder_mask_color;

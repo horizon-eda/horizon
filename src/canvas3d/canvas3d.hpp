@@ -1,6 +1,7 @@
 #pragma once
 #include "background.hpp"
 #include "canvas/canvas_patch.hpp"
+#include "canvas/appearance.hpp"
 #include "clipper/clipper.hpp"
 #include "common/common.hpp"
 #include "util/msd_animator.hpp"
@@ -37,6 +38,7 @@ public:
     bool show_substrate = true;
     bool show_models = true;
     bool show_solder_paste = true;
+    bool use_layer_colors = false;
     bool smooth_zoom = false;
     float highlight_intensity = .5;
 
@@ -51,6 +53,7 @@ public:
     enum class Projection { PERSP, ORTHO };
     Projection projection = Projection::PERSP;
     void inc_cam_azimuth(float v);
+    void set_appearance(const Appearance &a);
 
     void set_msaa(unsigned int samples);
 
@@ -132,6 +135,8 @@ private:
     WallRenderer wall_renderer;
     FaceRenderer face_renderer;
     BackgroundRenderer background_renderer;
+
+    Appearance appearance;
 
     void on_size_allocate(Gtk::Allocation &alloc) override;
     void on_realize() override;

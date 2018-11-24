@@ -18,6 +18,7 @@ public:
     Gdk::RGBA get_solder_mask_color();
     void set_substrate_color(const Gdk::RGBA &c);
     Gdk::RGBA get_substrate_color();
+    void set_appearance(const class Appearance &a);
 
     typedef sigc::signal<void> type_signal_request_update;
     type_signal_request_update signal_request_update()

@@ -163,6 +163,13 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         canvas->queue_draw();
     });
 
+    Gtk::Switch *layer_colors_switch;
+    x->get_widget("layer_colors_switch", layer_colors_switch);
+    layer_colors_switch->property_active().signal_changed().connect([this, layer_colors_switch] {
+        canvas->use_layer_colors = layer_colors_switch->get_active();
+        canvas->queue_draw();
+    });
+
     Gtk::RadioButton *proj_persp_rb;
     x->get_widget("proj_persp_rb", proj_persp_rb);
     proj_persp_rb->signal_toggled().connect([this, proj_persp_rb] {
@@ -267,4 +274,11 @@ Gdk::RGBA View3DWindow::get_substrate_color()
 {
     return substrate_color_button->get_rgba();
 }
+
+void View3DWindow::set_appearance(const class Appearance &a)
+{
+    canvas->set_appearance(a);
+}
+
+
 } // namespace horizon

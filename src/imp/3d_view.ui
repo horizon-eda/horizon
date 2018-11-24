@@ -73,18 +73,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="view_all_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">View entire Board</property>
-            <property name="image">image3</property>
-          </object>
-          <packing>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -117,6 +105,18 @@
             <style>
               <class name="linked"/>
             </style>
+          </object>
+          <packing>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="view_all_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">View entire Board</property>
+            <property name="image">image3</property>
           </object>
           <packing>
             <property name="position">3</property>
@@ -276,7 +276,7 @@
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
-                            <property name="top_attach">6</property>
+                            <property name="top_attach">7</property>
                           </packing>
                         </child>
                         <child>
@@ -298,7 +298,7 @@
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
-                            <property name="top_attach">8</property>
+                            <property name="top_attach">9</property>
                           </packing>
                         </child>
                         <child>
@@ -354,7 +354,7 @@
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
-                            <property name="top_attach">7</property>
+                            <property name="top_attach">8</property>
                           </packing>
                         </child>
                         <child>
@@ -414,7 +414,7 @@
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
-                            <property name="top_attach">6</property>
+                            <property name="top_attach">7</property>
                           </packing>
                         </child>
                         <child>
@@ -438,7 +438,7 @@
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
-                            <property name="top_attach">8</property>
+                            <property name="top_attach">9</property>
                           </packing>
                         </child>
                         <child>
@@ -462,7 +462,7 @@
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
-                            <property name="top_attach">7</property>
+                            <property name="top_attach">8</property>
                           </packing>
                         </child>
                         <child>
@@ -503,6 +503,29 @@
                           <packing>
                             <property name="left_attach">1</property>
                             <property name="top_attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="halign">end</property>
+                            <property name="label" translatable="yes">Layer colors</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">6</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSwitch" id="layer_colors_switch">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="halign">start</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="top_attach">6</property>
                           </packing>
                         </child>
                       </object>
