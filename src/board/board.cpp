@@ -25,6 +25,9 @@ json Board::StackupLayer::serialize() const
     return j;
 }
 
+Board::Colors::Colors() : solder_mask({0, .5, 0}), substrate({.2, .15, 0})
+{
+}
 
 Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadstackProvider &vpp)
     : uuid(uu), block(&iblock), name(j.at("name").get<std::string>()), n_inner_layers(j.value("n_inner_layers", 0))
@@ -174,8 +177,6 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
             Logger::log_warning("couldn't load fab output settings", Logger::Domain::BOARD, e.what());
         }
     }
-    colors.solder_mask = {0, .5, 0};
-    colors.substrate = {.2, .15, 0};
     if (j.count("colors")) {
         try {
             const auto &o = j.at("colors");

@@ -96,6 +96,7 @@ public:
 
     class Colors {
     public:
+        Colors();
         Color solder_mask;
         Color substrate;
     };
