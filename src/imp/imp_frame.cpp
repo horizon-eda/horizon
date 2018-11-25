@@ -33,7 +33,7 @@ void ImpFrame::construct()
         header_button->set_label(name_entry->get_text());
         core_frame.set_needs_save();
     });
-    core.r->signal_save().connect([this, header_button] {
+    core.r->signal_save().connect([this] {
         auto frame = core_frame.get_frame();
         frame->name = name_entry->get_text();
     });

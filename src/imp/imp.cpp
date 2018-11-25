@@ -266,17 +266,14 @@ void ImpBase::run(int argc, char *argv[])
                                                  }
                                              });
 
-        connect_action(ActionID::SELECTION_TOOL_BOX, [this, selection_tool_box_button](const auto &a) {
-            selection_tool_box_button->set_active(true);
-        });
+        connect_action(ActionID::SELECTION_TOOL_BOX,
+                       [selection_tool_box_button](const auto &a) { selection_tool_box_button->set_active(true); });
 
-        connect_action(ActionID::SELECTION_TOOL_LASSO, [this, selection_tool_lasso_button](const auto &a) {
-            selection_tool_lasso_button->set_active(true);
-        });
+        connect_action(ActionID::SELECTION_TOOL_LASSO,
+                       [selection_tool_lasso_button](const auto &a) { selection_tool_lasso_button->set_active(true); });
 
-        connect_action(ActionID::SELECTION_TOOL_PAINT, [this, selection_tool_paint_button](const auto &a) {
-            selection_tool_paint_button->set_active(true);
-        });
+        connect_action(ActionID::SELECTION_TOOL_PAINT,
+                       [selection_tool_paint_button](const auto &a) { selection_tool_paint_button->set_active(true); });
 
         connect_action(ActionID::SELECTION_QUALIFIER_AUTO, [this, selection_qualifier_auto_button](const auto &a) {
             if (canvas->selection_tool == CanvasGL::SelectionTool::BOX)
@@ -295,10 +292,9 @@ void ImpBase::run(int argc, char *argv[])
                                selection_qualifier_include_origin_button->set_active(true);
                        });
 
-        connect_action(ActionID::SELECTION_QUALIFIER_TOUCH_BOX,
-                       [this, selection_qualifier_touch_box_button](const auto &a) {
-                           selection_qualifier_touch_box_button->set_active(true);
-                       });
+        connect_action(ActionID::SELECTION_QUALIFIER_TOUCH_BOX, [selection_qualifier_touch_box_button](const auto &a) {
+            selection_qualifier_touch_box_button->set_active(true);
+        });
 
 
         update_selection_label();
@@ -1402,7 +1398,7 @@ void ImpBase::set_monitor_files(const std::set<std::string> &files)
             file_monitors[filename] = mon;
         }
     }
-    map_erase_if(file_monitors, [this, files](auto &it) { return files.count(it.first) == 0; });
+    map_erase_if(file_monitors, [files](auto &it) { return files.count(it.first) == 0; });
 }
 
 void ImpBase::set_monitor_items(const std::set<std::pair<ObjectType, UUID>> &items)

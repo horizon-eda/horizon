@@ -83,7 +83,7 @@ PadParameterSetDialog::PadParameterSetDialog(Gtk::Window *parent, std::set<class
             delete editor;
         editor = Gtk::manage(new MyParameterSetEditor(&pad->parameter_set, false));
         editor->populate();
-        editor->signal_apply_all().connect([this, pads, pad](ParameterID id) {
+        editor->signal_apply_all().connect([pads, pad](ParameterID id) {
             for (auto it : pads) {
                 it->parameter_set[id] = pad->parameter_set.at(id);
             }

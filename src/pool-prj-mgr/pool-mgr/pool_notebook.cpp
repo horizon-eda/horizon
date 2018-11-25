@@ -258,7 +258,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
 
 
         auto preview = Gtk::manage(new SymbolPreview(pool));
-        br->signal_selected().connect([this, br, preview] {
+        br->signal_selected().connect([br, preview] {
             auto sel = br->get_selected();
             preview->load(sel);
         });
@@ -371,7 +371,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         paned->add2(*canvas);
         paned->show_all();
 
-        br->signal_selected().connect([this, br, canvas] {
+        br->signal_selected().connect([br, canvas] {
             auto sel = br->get_selected();
             if (!sel) {
                 canvas->clear();
@@ -438,7 +438,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         paned->add2(*canvas);
         paned->show_all();
 
-        br->signal_selected().connect([this, br, canvas] {
+        br->signal_selected().connect([br, canvas] {
             auto sel = br->get_selected();
             if (!sel) {
                 canvas->clear();
@@ -546,7 +546,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         paned->add2(*canvas);
         paned->show_all();
 
-        br->signal_selected().connect([this, br, canvas] {
+        br->signal_selected().connect([br, canvas] {
             auto sel = br->get_selected();
             if (!sel) {
                 canvas->clear();

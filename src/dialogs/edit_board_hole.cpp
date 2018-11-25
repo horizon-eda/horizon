@@ -101,7 +101,7 @@ BoardHoleDialog::BoardHoleDialog(Gtk::Window *parent, std::set<BoardHole *> &hol
             delete editor;
         editor = Gtk::manage(new MyParameterSetEditor(&hole->parameter_set, false));
         editor->populate();
-        editor->signal_apply_all().connect([this, holes, hole](ParameterID id) {
+        editor->signal_apply_all().connect([holes, hole](ParameterID id) {
             for (auto it : holes) {
                 it->parameter_set[id] = hole->parameter_set.at(id);
             }

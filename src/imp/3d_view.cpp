@@ -213,7 +213,7 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     Gtk::Revealer *model_loading_revealer;
     x->get_widget("model_loading_revealer", model_loading_revealer);
     canvas->signal_models_loading().connect(
-            [this, model_loading_revealer](bool v) { model_loading_revealer->set_reveal_child(v); });
+            [model_loading_revealer](bool v) { model_loading_revealer->set_reveal_child(v); });
 
     Gtk::ComboBoxText *msaa_combo;
     x->get_widget("msaa_combo", msaa_combo);
