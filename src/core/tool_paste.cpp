@@ -216,7 +216,7 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             LineNet line(u, it.value());
-            auto update_net_line_conn = [this, &junction_xlat, &symbol_xlat, sheet](LineNet::Connection &c) {
+            auto update_net_line_conn = [&junction_xlat, &symbol_xlat, sheet](LineNet::Connection &c) {
                 if (c.junc.uuid) {
                     c.junc = &sheet->junctions.at(junction_xlat.at(c.junc.uuid));
                 }

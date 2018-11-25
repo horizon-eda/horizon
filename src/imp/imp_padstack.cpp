@@ -98,7 +98,7 @@ void ImpPadstack::construct()
         auto button = Gtk::manage(new Gtk::Button("Parameters..."));
         main_window->header->pack_start(*button);
         button->show();
-        button->signal_clicked().connect([this, parameter_window] { parameter_window->present(); });
+        button->signal_clicked().connect([parameter_window] { parameter_window->present(); });
     }
 
 

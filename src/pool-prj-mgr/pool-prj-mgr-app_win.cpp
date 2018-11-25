@@ -1125,7 +1125,7 @@ void PoolProjectManagerAppWindow::cleanup_pool_cache()
     }
     std::set<std::string> models_cached;
     find_files_recursive(Glib::build_filename(project->pool_cache_directory, "3d_models"),
-                         [this, &models_cached](const std::string &model_filename) {
+                         [&models_cached](const std::string &model_filename) {
                              models_cached.emplace(Glib::build_filename("3d_models", model_filename));
                          });
 

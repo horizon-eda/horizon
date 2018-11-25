@@ -114,7 +114,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             show_editor(nullptr);
         }
     });
-    lb_multi->set_sort_func([this](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b) {
+    lb_multi->set_sort_func([](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b) {
         auto la = dynamic_cast<RuleLabel *>(a->get_child());
         auto lb = dynamic_cast<RuleLabel *>(b->get_child());
         return la->get_order() - lb->get_order();

@@ -553,7 +553,7 @@ std::unique_ptr<PNS::SOLID> PNS_HORIZON_IFACE::syncPadstack(const horizon::Padst
     ClipperLib::Clipper clipper;
 
     if (padstack->type != horizon::Padstack::Type::MECHANICAL) { // normal pad
-        auto add_polygon = [&clipper, &tr, padstack](const auto &poly) {
+        auto add_polygon = [&clipper, &tr](const auto &poly) {
             ClipperLib::Path path;
             if (poly.vertices.size() == 0) {
                 throw std::runtime_error("polygon without vertices in padstack at"

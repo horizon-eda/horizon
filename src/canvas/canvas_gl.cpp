@@ -327,7 +327,7 @@ void CanvasGL::cursor_move(GdkEvent *motion_event)
     };
 
     auto mi = std::min_element(targets.cbegin(), targets.cend(),
-                               [this, dfn](const auto &a, const auto &b) { return dfn(a) < dfn(b); });
+                               [dfn](const auto &a, const auto &b) { return dfn(a) < dfn(b); });
     if (mi != targets.cend()) {
         auto d = sqrt(dfn(*mi));
         if (d < 30 / scale) {
