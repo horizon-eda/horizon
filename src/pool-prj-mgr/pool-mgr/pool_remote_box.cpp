@@ -686,7 +686,7 @@ void PoolRemoteBox::remote_upgrade_thread()
     }
 }
 
-void PoolRemoteBox::checkout_master(class git_repository *repo)
+void PoolRemoteBox::checkout_master(git_repository *repo)
 {
     autofree_ptr<git_object> treeish(git_object_free);
     git_revparse_single(&treeish.ptr, repo, "master");
