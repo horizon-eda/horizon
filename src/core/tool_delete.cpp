@@ -319,6 +319,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
 
         case ObjectType::INVALID:
             break;
+        default:;
         }
     }
     for (auto it : polys_del) {

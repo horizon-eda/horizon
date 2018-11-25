@@ -188,6 +188,9 @@ std::pair<bool, std::string> ParameterProgram::run(const ParameterSet &pset)
             auto tok = dynamic_cast<TokenInt *>(token.get());
             stack.push_back(tok->value);
         } break;
+        case Token::Type::STR:
+        case Token::Type::UUID:
+            break;
         }
     }
 
