@@ -423,11 +423,11 @@ void DragSelection::Box::update()
             }
             else if (sq == CanvasGL::SelectionQualifier::TOUCH_BOX) {
                 // possible optimisation: don't use clipper
-                ClipperLib::Path box(4);
-                box.at(0) = ClipperLib::IntPoint(xmin, ymin);
-                box.at(1) = ClipperLib::IntPoint(xmin, ymax);
-                box.at(2) = ClipperLib::IntPoint(xmax, ymax);
-                box.at(3) = ClipperLib::IntPoint(xmax, ymin);
+                ClipperLib::Path clbox(4);
+                clbox.at(0) = ClipperLib::IntPoint(xmin, ymin);
+                clbox.at(1) = ClipperLib::IntPoint(xmin, ymax);
+                clbox.at(2) = ClipperLib::IntPoint(xmax, ymax);
+                clbox.at(3) = ClipperLib::IntPoint(xmax, ymin);
 
                 ClipperLib::Path sel(4);
                 auto corners = it.get_corners();
@@ -436,7 +436,7 @@ void DragSelection::Box::update()
                 }
 
                 ClipperLib::Clipper clipper;
-                clipper.AddPath(box, ClipperLib::ptSubject, true);
+                clipper.AddPath(clbox, ClipperLib::ptSubject, true);
                 clipper.AddPath(sel, ClipperLib::ptClip, true);
 
                 ClipperLib::Paths isect;
