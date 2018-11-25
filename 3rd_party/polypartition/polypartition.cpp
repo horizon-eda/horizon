@@ -53,10 +53,10 @@ void TPPLPoly::Clear() {
 	points = NULL;
 }
 
-void TPPLPoly::Init(long numpoints) {
+void TPPLPoly::Init(long numpoints_) {
 	Clear();
-	this->numpoints = numpoints;
-	points = new TPPLPoint[numpoints];
+	this->numpoints = numpoints_;
+	points = new TPPLPoint[numpoints_];
 }
 
 void TPPLPoly::Triangle(TPPLPoint &p1, TPPLPoint &p2, TPPLPoint &p3) {
@@ -1371,9 +1371,9 @@ bool TPPLPartition::VertexSorter::operator() (long index1, long index2) {
 	return false;
 }
 
-bool TPPLPartition::ScanLineEdge::IsConvex(const TPPLPoint& p1, const TPPLPoint& p2, const TPPLPoint& p3) const {
+bool TPPLPartition::ScanLineEdge::IsConvex(const TPPLPoint& p1_, const TPPLPoint& p2_, const TPPLPoint& p3) const {
 	tppl_float tmp;
-	tmp = (p3.y-p1.y)*(p2.x-p1.x)-(p3.x-p1.x)*(p2.y-p1.y);
+	tmp = (p3.y-p1_.y)*(p2_.x-p1_.x)-(p3.x-p1_.x)*(p2_.y-p1_.y);
 	if(tmp>0) return 1;
 	else return 0;
 }
