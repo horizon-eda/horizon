@@ -48,8 +48,7 @@ class DXFLIB_EXPORT DL_NullStrExc : public DL_Exception {}
  * Used for exception handling.
  */
 class DXFLIB_EXPORT DL_GroupCodeExc : public DL_Exception {
-    DL_GroupCodeExc(int gc=0) : groupCode(gc) {}
-    int groupCode;
+    DL_GroupCodeExc(int gc=0) {}
 };
 #endif
 
