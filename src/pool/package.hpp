@@ -73,7 +73,7 @@ public:
     void update_warnings();
     int get_max_pad_name() const;
 
-    UUID get_uuid() const;
+    UUID get_uuid() const override;
 
     Package(const Package &pkg);
     void operator=(Package const &pkg);

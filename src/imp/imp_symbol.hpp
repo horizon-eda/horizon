@@ -9,7 +9,7 @@ public:
 protected:
     void construct() override;
 
-    ActionCatalogItem::Availability get_editor_type_for_action() const
+    ActionCatalogItem::Availability get_editor_type_for_action() const override
     {
         return ActionCatalogItem::AVAILABLE_IN_SYMBOL;
     };
