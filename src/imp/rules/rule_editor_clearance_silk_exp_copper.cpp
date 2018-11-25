@@ -30,19 +30,19 @@ void RuleEditorClearanceSilkscreenExposedCopper::populate()
     grid->set_margin_bottom(20);
     pack_start(*grid, true, true, 0);
 
-    if (auto rule2 = dynamic_cast<RuleClearanceSilkscreenExposedCopper *>(rule)) {
+    if (auto rule1 = dynamic_cast<RuleClearanceSilkscreenExposedCopper *>(rule)) {
         auto sp_top = create_sp_dim("Top clearance");
         auto sp_bot = create_sp_dim("Bottom clearance");
         sp_top->set_range(0, 100_mm);
         sp_bot->set_range(0, 100_mm);
-        sp_top->set_value(rule2->clearance_top);
-        sp_bot->set_value(rule2->clearance_bottom);
-        sp_top->signal_value_changed().connect([this, sp_top, rule2] {
-            rule2->clearance_top = sp_top->get_value_as_int();
+        sp_top->set_value(rule1->clearance_top);
+        sp_bot->set_value(rule1->clearance_bottom);
+        sp_top->signal_value_changed().connect([this, sp_top, rule1] {
+            rule1->clearance_top = sp_top->get_value_as_int();
             s_signal_updated.emit();
         });
-        sp_bot->signal_value_changed().connect([this, sp_bot, rule2] {
-            rule2->clearance_bottom = sp_bot->get_value_as_int();
+        sp_bot->signal_value_changed().connect([this, sp_bot, rule1] {
+            rule1->clearance_bottom = sp_bot->get_value_as_int();
             s_signal_updated.emit();
         });
     }
