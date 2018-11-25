@@ -22,7 +22,7 @@ void SelectNetDialog::net_selected(const UUID &uu)
 
 
 SelectNetDialog::SelectNetDialog(Gtk::Window *parent, Block *b, const std::string &ti)
-    : Gtk::Dialog(ti, *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR), block(b)
+    : Gtk::Dialog(ti, *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
 {
     add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
     auto ok_button = add_button("OK", Gtk::ResponseType::RESPONSE_OK);

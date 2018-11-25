@@ -77,17 +77,14 @@ public:
 
 private:
     PNS::ROUTER *m_router;
-    const horizon::Board *m_board;
     horizon::BoardRules *m_rules;
     PNS_HORIZON_IFACE *m_iface = nullptr;
     std::vector<horizon::RuleClearanceCopperKeepout *> m_rules_keepout;
-
-    bool m_useDpGap = false;
 };
 
 PNS_HORIZON_RULE_RESOLVER::PNS_HORIZON_RULE_RESOLVER(const horizon::Board *aBoard, horizon::BoardRules *rules,
                                                      PNS::ROUTER *aRouter)
-    : m_router(aRouter), m_board(aBoard), m_rules(rules)
+    : m_router(aRouter), m_rules(rules)
 {
     PNS::NODE *world = m_router->GetWorld();
 
@@ -113,6 +110,7 @@ static horizon::PatchType patch_type_from_kind(PNS::ITEM::PnsKind kind)
         return horizon::PatchType::TRACK;
     case PNS::ITEM::SEGMENT_T:
         return horizon::PatchType::TRACK;
+    default:;
     }
     assert(false);
     return horizon::PatchType::OTHER;

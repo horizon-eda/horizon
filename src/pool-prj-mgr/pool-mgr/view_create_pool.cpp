@@ -9,7 +9,6 @@ namespace horizon {
 
 PoolProjectManagerViewCreatePool::PoolProjectManagerViewCreatePool(const Glib::RefPtr<Gtk::Builder> &builder,
                                                                    class PoolProjectManagerAppWindow *w)
-    : win(w)
 {
     builder->get_widget("create_pool_name_entry", pool_name_entry);
     builder->get_widget("create_pool_path_chooser", pool_path_chooser);

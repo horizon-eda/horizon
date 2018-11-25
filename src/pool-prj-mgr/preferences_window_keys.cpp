@@ -14,8 +14,6 @@ public:
                                 KeySequencesPreferencesEditor *parent);
 
 private:
-    Preferences *preferences;
-    KeySequencesPreferences *keyseq_preferences;
     std::vector<KeySequence2> *keys;
     KeySequencesPreferencesEditor *parent;
 
@@ -181,7 +179,7 @@ CaptureDialog::CaptureDialog(Gtk::Window *parent)
         return true;
     });
 
-    capture_box->signal_key_press_event().connect([this, capture_box](GdkEventKey *ev) {
+    capture_box->signal_key_press_event().connect([this](GdkEventKey *ev) {
         if (!ev->is_modifier) {
             auto display = get_display()->gobj();
             auto hw_keycode = ev->hardware_keycode;
@@ -248,7 +246,7 @@ public:
 ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
                            KeySequencesPreferences *keyseq_prefs, std::vector<KeySequence2> *k,
                            const std::string &title, KeySequencesPreferencesEditor *p)
-    : Gtk::Box(cobject), preferences(prefs), keyseq_preferences(keyseq_prefs), keys(k), parent(p)
+    : Gtk::Box(cobject), keys(k), parent(p)
 {
     Gtk::Label *la;
     x->get_widget("action_label", la);

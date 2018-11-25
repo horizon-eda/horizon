@@ -16,7 +16,6 @@ public:
 private:
     Gtk::Grid *grid = nullptr;
     Sheet *sheet;
-    Schematic *sch;
     int top = 0;
     void append_widget(const std::string &label, Gtk::Widget *w);
 };
@@ -34,7 +33,7 @@ void SheetEditor::append_widget(const std::string &label, Gtk::Widget *w)
     top++;
 }
 
-SheetEditor::SheetEditor(Sheet *s, Schematic *c, Pool *pool) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), sheet(s), sch(c)
+SheetEditor::SheetEditor(Sheet *s, Schematic *c, Pool *pool) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), sheet(s)
 {
     grid = Gtk::manage(new Gtk::Grid);
     grid->set_column_spacing(10);

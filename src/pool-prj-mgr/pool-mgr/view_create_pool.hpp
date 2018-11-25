@@ -19,7 +19,6 @@ public:
     void update();
 
 private:
-    PoolProjectManagerAppWindow *win = nullptr;
     Gtk::Entry *pool_name_entry = nullptr;
     Gtk::FileChooserButton *pool_path_chooser = nullptr;
 
