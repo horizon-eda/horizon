@@ -20,7 +20,6 @@ private:
     void fix_layer(int &la);
     void apply_shift(Coordi &c, const Coordi &cursor_pos);
     Coordi shift;
-    bool shift_set = false;
     bool data_received = false;
     ToolResponse begin_paste(const std::string &paste_data, const Coordi &cursor_pos);
     void update_tip();

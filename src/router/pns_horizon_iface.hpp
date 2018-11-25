@@ -121,7 +121,6 @@ private:
     class horizon::CanvasGL *canvas = nullptr;
     class horizon::BoardRules *rules = nullptr;
     class horizon::ViaPadstackProvider *vpp = nullptr;
-    PNS::NODE *m_world;
     PNS::ROUTER *m_router;
 
     std::unique_ptr<PNS::SOLID> syncPad(const horizon::BoardPackage *pkg, const horizon::Pad *pad);

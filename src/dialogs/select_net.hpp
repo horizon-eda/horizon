@@ -16,11 +16,7 @@ public:
     UUID net;
     NetSelector *net_selector;
 
-
 private:
-    Block *block = nullptr;
-
-
     void ok_clicked();
     void net_selected(const UUID &uu);
 };
