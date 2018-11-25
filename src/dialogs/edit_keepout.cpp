@@ -21,7 +21,7 @@ EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout *k, Core *core
       keepout(k)
 {
     add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
-    auto ok_button = add_button("OK", Gtk::ResponseType::RESPONSE_OK);
+    add_button("OK", Gtk::ResponseType::RESPONSE_OK);
     set_default_response(Gtk::ResponseType::RESPONSE_OK);
     // set_default_size(400, 300);
 

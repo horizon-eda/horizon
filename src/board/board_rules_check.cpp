@@ -519,9 +519,6 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd)
     }
 
     for (const auto &it : brd->tracks) {
-        auto width = it.second.width;
-        Net *net = it.second.net;
-        auto layer = it.second.layer;
         auto &track = it.second;
         if (!track.net) {
             r.errors.emplace_back(RulesCheckErrorLevel::FAIL);

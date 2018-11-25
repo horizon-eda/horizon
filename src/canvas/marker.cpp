@@ -14,7 +14,6 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out)
     }
     GLuint position_index = glGetAttribLocation(program, "position");
     GLuint color_index = glGetAttribLocation(program, "color");
-    GLuint flags_index = glGetAttribLocation(program, "flags");
 
     GLuint vao, buffer;
 
@@ -37,12 +36,6 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out)
 
     glEnableVertexAttribArray(color_index);
     glVertexAttribPointer(color_index, 3, GL_FLOAT, GL_FALSE, sizeof(Marker), (void *)offsetof(Marker, r));
-
-    /*glEnableVertexAttribArray (flags_index);
-    glVertexAttribIPointer (flags_index, 1,  GL_UNSIGNED_BYTE,
-                                                    sizeof(Marker),
-                                                    (void*)offsetof(Marker,
-    flags));*/
 
     /* enable and set the color attribute */
     /* reset the state; we will re-enable the VAO when needed */
