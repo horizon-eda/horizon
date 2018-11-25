@@ -381,7 +381,6 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
                        c_name, 0);
         }
         else { // draw perp
-            int64_t yshift = 0;
             Placement tr;
             tr.set_angle(orientation_to_angle(pin_orientation));
             auto shift = tr.transform(Coordi(-1_mm, 0));

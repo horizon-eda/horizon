@@ -65,7 +65,6 @@ void WallRenderer::realize()
 
 void WallRenderer::push()
 {
-    int layer = 0;
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     n_vertices = 0;
     for (const auto &it : ca->layers) {

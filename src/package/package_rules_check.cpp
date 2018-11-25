@@ -10,7 +10,6 @@ RulesCheckResult PackageRules::check_package(const class Package *pkg)
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
-    auto rule = dynamic_cast<RulePackageChecks *>(get_rule(RuleID::PACKAGE_CHECKS));
 
     if (pkg->name.size() == 0) {
         r.errors.emplace_back(RulesCheckErrorLevel::FAIL);

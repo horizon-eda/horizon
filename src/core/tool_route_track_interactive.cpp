@@ -709,7 +709,6 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
             else if (args.type == ToolEventType::CLICK) {
                 if (args.button == 1) {
                     wrapper->updateEndItem(args);
-                    bool needLayerSwitch = router->IsPlacingVia();
 
                     if (router->FixRoute(wrapper->m_endSnapPoint, wrapper->m_endItem)) {
                         router->StopRouting();
@@ -721,9 +720,6 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                         return ToolResponse();
                     }
                     imp->canvas_update();
-
-                    // if( needLayerSwitch )
-                    //	  switchLayerOnViaPlacement();
 
                     // Synchronize the indicated layer
                     imp->set_work_layer(PNS::PNS_HORIZON_IFACE::layer_from_router(router->GetCurrentLayer()));
