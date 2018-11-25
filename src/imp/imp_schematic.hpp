@@ -11,11 +11,11 @@ public:
 
 protected:
     void construct() override;
-    bool handle_broadcast(const json &j);
-    void handle_maybe_drag();
+    bool handle_broadcast(const json &j) override;
+    void handle_maybe_drag() override;
     void update_action_sensitivity() override;
 
-    ActionCatalogItem::Availability get_editor_type_for_action() const
+    ActionCatalogItem::Availability get_editor_type_for_action() const override
     {
         return ActionCatalogItem::AVAILABLE_IN_SCHEMATIC;
     };

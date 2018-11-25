@@ -45,7 +45,7 @@ public:
     Color background_top_color;
     Color background_bottom_color;
 
-    void request_push();
+    void request_push() override;
     void update2(const class Board &brd);
     void prepare();
     void update_packages();
@@ -127,7 +127,7 @@ public:
 private:
     float width;
     float height;
-    void push();
+    void push() override;
     bool needs_push = false;
     bool needs_view_all = false;
 

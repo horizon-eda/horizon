@@ -11,7 +11,7 @@ public:
     RuleVia(const UUID &uu, const json &j);
     json serialize() const override;
 
-    std::string get_brief(const class Block *block = nullptr) const;
+    std::string get_brief(const class Block *block = nullptr) const override;
 
     RuleMatch match;
     UUID padstack;

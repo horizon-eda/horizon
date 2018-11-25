@@ -69,7 +69,7 @@ public:
     PropertyValue &get_value() override;
 
 protected:
-    virtual Gtk::Widget *create_editor();
+    Gtk::Widget *create_editor() override;
 
 private:
     Gtk::Switch *sw = nullptr;
@@ -84,7 +84,7 @@ public:
     PropertyValue &get_value() override;
 
 protected:
-    virtual Gtk::Widget *create_editor();
+    Gtk::Widget *create_editor() override;
 
 private:
     Gtk::Entry *en = nullptr;
@@ -105,7 +105,7 @@ public:
     void set_range(int64_t min, int64_t max);
 
 protected:
-    virtual Gtk::Widget *create_editor();
+    Gtk::Widget *create_editor() override;
 
 private:
     class SpinButtonDim *sp = nullptr;
@@ -121,7 +121,7 @@ public:
     PropertyValue &get_value() override;
 
 protected:
-    virtual Gtk::Widget *create_editor();
+    Gtk::Widget *create_editor() override;
 
 private:
     Gtk::ComboBoxText *combo = nullptr;
@@ -137,7 +137,7 @@ public:
     PropertyValue &get_value() override;
 
 protected:
-    virtual Gtk::Widget *create_editor();
+    Gtk::Widget *create_editor() override;
 
 private:
     Gtk::Label *la = nullptr;
@@ -156,7 +156,7 @@ public:
     };
 
 protected:
-    virtual Gtk::Widget *create_editor();
+    Gtk::Widget *create_editor() override;
 
 private:
     Gtk::ComboBoxText *combo = nullptr;
@@ -178,7 +178,7 @@ public:
     bool copper_only = false;
 
 protected:
-    virtual Gtk::Widget *create_editor();
+    Gtk::Widget *create_editor() override;
 
 private:
     Gtk::ComboBoxText *combo = nullptr;
@@ -195,7 +195,7 @@ public:
     PropertyValue &get_value() override;
 
 protected:
-    virtual Gtk::Widget *create_editor();
+    Gtk::Widget *create_editor() override;
 
 private:
     Gtk::SpinButton *sp = nullptr;
@@ -214,7 +214,7 @@ public:
     void construct() override;
 
 protected:
-    virtual Gtk::Widget *create_editor();
+    Gtk::Widget *create_editor() override;
 
 private:
     Gtk::TextView *en = nullptr;

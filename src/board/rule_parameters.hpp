@@ -9,7 +9,7 @@ public:
     RuleParameters(const json &j);
     json serialize() const override;
 
-    std::string get_brief(const class Block *block = nullptr) const;
+    std::string get_brief(const class Block *block = nullptr) const override;
 
     uint64_t solder_mask_expansion = 0.1_mm;
     uint64_t paste_mask_contraction = 0;
