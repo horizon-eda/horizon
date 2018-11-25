@@ -298,10 +298,10 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                     if (!core.b->get_board()->get_layers().at(a.work_layer).copper) {
                         a.work_layer = 0;
                     }
-                    if ((pad->padstack.type == Padstack::Type::TOP)) {
+                    if (pad->padstack.type == Padstack::Type::TOP) {
                         a.work_layer = 0; // top
                     }
-                    else if ((pad->padstack.type == Padstack::Type::BOTTOM)) {
+                    else if (pad->padstack.type == Padstack::Type::BOTTOM) {
                         a.work_layer = -100;
                     }
                     else if (pad->padstack.type == Padstack::Type::THROUGH) {
@@ -412,8 +412,8 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                     update_temp_track();
                 }
 
-                core.b->get_board()->track_path.clear();
-                core.b->get_board()->obstacles.clear();
+                brd->track_path.clear();
+                brd->obstacles.clear();
                 core.b->commit();
                 return ToolResponse::end();
             }
