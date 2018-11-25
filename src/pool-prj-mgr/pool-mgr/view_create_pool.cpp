@@ -44,6 +44,7 @@ std::pair<bool, std::string> PoolProjectManagerViewCreatePool::create()
         {
             Glib::Dir dir(base_path);
             for (const auto &it : dir) {
+                (void)sizeof it;
                 throw std::runtime_error("base path is not empty");
             }
         }

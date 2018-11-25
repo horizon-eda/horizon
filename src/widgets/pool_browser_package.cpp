@@ -78,6 +78,7 @@ void PoolBrowserPackage::search()
               "AND packages.manufacturer LIKE ? ";
         qs << "AND (";
         for (const auto &it : tags) {
+            (void)sizeof it;
             qs << "tags.tag LIKE ? OR ";
         }
         qs << "0) GROUP by packages.uuid HAVING count(*) >= $ntags";

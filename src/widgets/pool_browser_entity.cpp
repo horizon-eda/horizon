@@ -61,6 +61,7 @@ void PoolBrowserEntity::search()
               "entities.uuid WHERE entities.name LIKE ? ";
         qs << "AND (";
         for (const auto &it : tags) {
+            (void)sizeof it;
             qs << "tags.tag LIKE ? OR ";
         }
         qs << "0) GROUP by entities.uuid HAVING count(*) >= $ntags" + sort_controller->get_order_by();
