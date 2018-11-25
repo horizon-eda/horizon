@@ -99,6 +99,7 @@ void PoolBrowserPart::search()
                  "LIKE ? AND (parts.entity=? or ?) ";
         query << "AND parts.uuid IN (SELECT uuid FROM tags WHERE (";
         for (const auto &it : tags) {
+            (void)sizeof it;
             query << "tags.tag LIKE ? OR ";
         }
         query << "0) GROUP by tags.uuid HAVING count(*) >= $ntags) ";

@@ -37,6 +37,7 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
         {
             Glib::Dir dd(dest_dir);
             for (const auto &it : dd) {
+                (void)sizeof it;
                 throw std::runtime_error("destination dir is not empty");
             }
         }

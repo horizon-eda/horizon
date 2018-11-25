@@ -36,6 +36,7 @@ void ToolRotateArbitrary::expand_selection()
             auto poly = core.r->get_polygon(it.uuid);
             int i = 0;
             for (const auto &itv : poly->vertices) {
+                (void)sizeof itv;
                 new_sel.emplace(poly->uuid, ObjectType::POLYGON_VERTEX, i);
                 i++;
             }
