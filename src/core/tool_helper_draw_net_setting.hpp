@@ -10,7 +10,7 @@ public:
     public:
         json serialize() const override;
         void load_from_json(const json &j) override;
-        uint64_t net_label_size = 1.5;
+        uint64_t net_label_size = 1.5_mm;
     };
 
     const ToolSettings *get_settings_const() const override
@@ -20,7 +20,7 @@ public:
 
     ToolID get_tool_id_for_settings() const override
     {
-        return ToolID::DRAW_LINE;
+        return ToolID::DRAW_NET;
     }
 
 protected:
