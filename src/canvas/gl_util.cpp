@@ -3,6 +3,7 @@
 #include <gtkmm.h>
 #include <iostream>
 #include "common/common.hpp"
+#include "logger/logger.hpp"
 #ifdef G_OS_WIN32
 #include <windows.h>
 #endif
@@ -125,5 +126,19 @@ void gl_color_to_uniform_4f(GLuint loc, const Color &c, float alpha)
 {
     glUniform4f(loc, c.r, c.g, c.b, alpha);
 }
+GLint gl_clamp_samples(GLint samples_req)
+{
+    GLint color_samples;
+    GLint depth_samples;
+    glGetIntegerv(GL_MAX_COLOR_TEXTURE_SAMPLES, &color_samples);
+    glGetIntegerv(GL_MAX_DEPTH_TEXTURE_SAMPLES, &depth_samples);
+    GLint samples = std::min(samples_req, std::min(color_samples, depth_samples));
+    if (samples != samples_req) {
+        Logger::log_warning("unsupported MSAA", Logger::Domain::CANVAS,
+                            "requested:" + std::to_string(samples_req) + " actual:" + std::to_string(samples));
+    }
+    return samples;
+}
+
 
 } // namespace horizon

@@ -65,6 +65,8 @@ std::string Logger::domain_to_string(Logger::Domain dom)
         return "Tool";
     case Logger::Domain::CORE:
         return "Core";
+    case Logger::Domain::CANVAS:
+        return "Canvas";
     default:
         return "Unspecified";
     }

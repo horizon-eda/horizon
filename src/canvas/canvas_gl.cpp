@@ -68,11 +68,12 @@ void CanvasGL::on_size_allocate(Gtk::Allocation &alloc)
 void CanvasGL::resize_buffers()
 {
     GLint rb;
+    GLint samples = gl_clamp_samples(appearance.msaa);
     glGetIntegerv(GL_RENDERBUFFER_BINDING, &rb); // save rb
     glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, appearance.msaa, GL_RGBA8, width, height);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_RGBA8, width, height);
     glBindRenderbuffer(GL_RENDERBUFFER, stencilrenderbuffer);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, appearance.msaa, GL_DEPTH24_STENCIL8, width, height);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH24_STENCIL8, width, height);
     glBindRenderbuffer(GL_RENDERBUFFER, rb);
 }
 
