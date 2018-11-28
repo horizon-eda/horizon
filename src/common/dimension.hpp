@@ -25,6 +25,7 @@ public:
     Mode mode = Mode::DISTANCE;
 
     int64_t project(const Coordi &c) const;
+    int64_t get_length() const;
 
     json serialize() const;
 };

@@ -41,14 +41,28 @@ int64_t Dimension::project(const Coordi &c) const
         break;
 
     case Mode::HORIZONTAL:
-        v = {p1.x - p0.x, 0};
+        v = {std::abs(p1.x - p0.x), 0};
         break;
 
     case Mode::VERTICAL:
-        v = {0, p1.y - p0.y};
+        v = {0, -std::abs(p1.y - p0.y)};
         break;
     }
     Coordi w = Coordi(-v.y, v.x);
     return w.dot(c) / sqrt(w.mag_sq());
+}
+
+int64_t Dimension::get_length() const
+{
+    switch (mode) {
+    case Mode::DISTANCE:
+        return sqrt((p0 - p1).mag_sq());
+    case Mode::HORIZONTAL:
+        return std::abs(p0.x - p1.x);
+    case Mode::VERTICAL:
+        return std::abs(p0.y - p1.y);
+    default:
+        return 0;
+    }
 }
 } // namespace horizon

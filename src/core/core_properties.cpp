@@ -4,6 +4,7 @@
 #include "common/layer_provider.hpp"
 #include "common/polygon.hpp"
 #include "core.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 #define HANDLED                                                                                                        \
@@ -478,6 +479,22 @@ std::string Core::get_display_name(ObjectType type, const UUID &uu)
 
     case ObjectType::TEXT:
         return get_text(uu)->text;
+
+    case ObjectType::DIMENSION: {
+        auto dim = get_dimension(uu);
+        auto s = dim_to_string(dim->get_length(), false);
+        switch (dim->mode) {
+        case Dimension::Mode::DISTANCE:
+            return s + " D";
+
+        case Dimension::Mode::HORIZONTAL:
+            return s + " H";
+
+        case Dimension::Mode::VERTICAL:
+            return s + " V";
+        }
+        return "";
+    }
 
     default:
         return "";

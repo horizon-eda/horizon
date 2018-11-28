@@ -1087,6 +1087,9 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
         for (const auto &it : pkg.warnings) {
             render(it);
         }
+        for (const auto &it : pkg.dimensions) {
+            render(it.second);
+        }
     }
 }
 
@@ -1205,6 +1208,12 @@ void Canvas::render(const class Dimension &dim)
     Coordd v = p1 - p0;
     auto vn = v / sqrt(v.mag_sq());
     Coordd w = Coordd(-v.y, v.x);
+    if (dim.mode == Dimension::Mode::HORIZONTAL) {
+        w.y = std::abs(w.y);
+    }
+    else if (dim.mode == Dimension::Mode::VERTICAL) {
+        w.x = std::abs(w.x);
+    }
     auto wn = w / sqrt(w.mag_sq());
 
     ColorP co = ColorP::DIMENSION;

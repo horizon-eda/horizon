@@ -14,6 +14,15 @@ ToolEnterDatum::ToolEnterDatum(Core *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 
+template <typename T> T sgn(T x)
+{
+    if (x < 0)
+        return -1;
+    else
+        return 1;
+}
+
+
 ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
 {
     std::cout << "tool enter datum\n";
@@ -25,6 +34,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
     bool pad_mode = false;
     bool net_mode = false;
     bool text_mode = false;
+    bool dim_mode = false;
 
     Accumulator<int64_t> ai;
     Accumulator<Coordi> ac;
@@ -70,8 +80,12 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         if (it.type == ObjectType::TEXT) {
             text_mode = true;
         }
+        if (it.type == ObjectType::DIMENSION) {
+            dim_mode = true;
+        }
     }
-    int m_total = edge_mode + arc_mode + hole_mode + junction_mode + line_mode + pad_mode + net_mode + text_mode;
+    int m_total =
+            edge_mode + arc_mode + hole_mode + junction_mode + line_mode + pad_mode + net_mode + text_mode + dim_mode;
     if (m_total != 1) {
         return ToolResponse::end();
     }
@@ -139,7 +153,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             }
         }
     }
-    if (line_mode) {
+    else if (line_mode) {
         auto r = imp->dialogs.ask_datum("Line length", ai.get());
         if (!r.first) {
             return ToolResponse::end();
@@ -185,7 +199,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             }
         }
     }
-    if (arc_mode) {
+    else if (arc_mode) {
         auto r = imp->dialogs.ask_datum("Arc radius");
         if (!r.first) {
             return ToolResponse::end();
@@ -207,7 +221,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             }
         }
     }
-    if (hole_mode) {
+    else if (hole_mode) {
         auto r = imp->dialogs.ask_datum_coord("Hole position", ac.get());
         if (!r.first) {
             return ToolResponse::end();
@@ -218,7 +232,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             }
         }
     }
-    if (junction_mode) {
+    else if (junction_mode) {
         bool r;
         Coordi c;
         std::pair<bool, bool> rc;
@@ -236,7 +250,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             }
         }
     }
-    if (pad_mode) {
+    else if (pad_mode) {
         Pad *pad = nullptr;
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::PAD) {
@@ -261,7 +275,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             return ToolResponse::end();
         }
     }
-    if (net_mode) {
+    else if (net_mode) {
         Net *net = nullptr;
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::NET_LABEL) {
@@ -294,7 +308,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             net->name = net_name;
         }
     }
-    if (text_mode) {
+    else if (text_mode) {
         Text *text = nullptr;
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::TEXT) {
@@ -319,6 +333,62 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             return ToolResponse::end();
         }
     }
+    else if (dim_mode) {
+        Dimension *dim = nullptr;
+        int vertex = 0;
+        for (const auto &it : args.selection) {
+            if (it.type == ObjectType::DIMENSION) {
+                vertex = it.vertex;
+                dim = core.r->get_dimension(it.uuid);
+                break;
+            }
+        }
+        if (!dim)
+            return ToolResponse::end();
+        Coordi *p_ref = nullptr;
+        Coordi *p_var = nullptr;
+        if (vertex == 0) {
+            p_var = &dim->p0;
+            p_ref = &dim->p1;
+        }
+        else if (vertex == 1) {
+            p_var = &dim->p1;
+            p_ref = &dim->p0;
+        }
+        else {
+            return ToolResponse::end();
+        }
+        int64_t def = 0;
+        switch (dim->mode) {
+        case Dimension::Mode::HORIZONTAL:
+            def = std::abs(p_ref->x - p_var->x);
+            break;
+        case Dimension::Mode::VERTICAL:
+            def = std::abs(p_ref->y - p_var->y);
+            break;
+        case Dimension::Mode::DISTANCE:
+            def = sqrt((*p_ref - *p_var).mag_sq());
+            break;
+        }
+        auto r = imp->dialogs.ask_datum("Dimension length", def);
+        if (!r.first) {
+            return ToolResponse::end();
+        }
+        switch (dim->mode) {
+        case Dimension::Mode::HORIZONTAL:
+            p_var->x = p_ref->x + (r.second * sgn(p_var->x - p_ref->x));
+            break;
+        case Dimension::Mode::VERTICAL:
+            p_var->y = p_ref->y + (r.second * sgn(p_var->y - p_ref->y));
+            break;
+        case Dimension::Mode::DISTANCE:
+            break;
+        }
+    }
+    else {
+        return ToolResponse::end();
+    }
+
 
     core.r->commit();
     return ToolResponse::end();

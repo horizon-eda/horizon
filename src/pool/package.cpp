@@ -111,6 +111,14 @@ Package::Package(const UUID &uu, const json &j, Pool &pool)
                              std::forward_as_tuple(u, it.value(), *this));
         }
     }
+    if (j.count("dimensions")) {
+        const json &o = j["dimensions"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            dimensions.emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                               std::forward_as_tuple(u, it.value()));
+        }
+    }
     for (auto &it : keepouts) {
         it.second.polygon.update(polygons);
         it.second.polygon->usage = &it.second;
@@ -173,8 +181,9 @@ Polygon *Package::get_polygon(const UUID &uu)
 Package::Package(const Package &pkg)
     : uuid(pkg.uuid), name(pkg.name), manufacturer(pkg.manufacturer), tags(pkg.tags), junctions(pkg.junctions),
       lines(pkg.lines), arcs(pkg.arcs), texts(pkg.texts), pads(pkg.pads), polygons(pkg.polygons),
-      keepouts(pkg.keepouts), parameter_set(pkg.parameter_set), parameter_program(pkg.parameter_program),
-      models(pkg.models), default_model(pkg.default_model), alternate_for(pkg.alternate_for), warnings(pkg.warnings)
+      keepouts(pkg.keepouts), dimensions(pkg.dimensions), parameter_set(pkg.parameter_set),
+      parameter_program(pkg.parameter_program), models(pkg.models), default_model(pkg.default_model),
+      alternate_for(pkg.alternate_for), warnings(pkg.warnings)
 {
     update_refs();
 }
@@ -192,6 +201,7 @@ void Package::operator=(Package const &pkg)
     pads = pkg.pads;
     polygons = pkg.polygons;
     keepouts = pkg.keepouts;
+    dimensions = pkg.dimensions;
     parameter_set = pkg.parameter_set;
     parameter_program = pkg.parameter_program;
     models = pkg.models;
@@ -391,6 +401,10 @@ json Package::serialize() const
     j["keepouts"] = json::object();
     for (const auto &it : keepouts) {
         j["keepouts"][(std::string)it.first] = it.second.serialize();
+    }
+    j["dimensions"] = json::object();
+    for (const auto &it : dimensions) {
+        j["dimensions"][(std::string)it.first] = it.second.serialize();
     }
     return j;
 }
