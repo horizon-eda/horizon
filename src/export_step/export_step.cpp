@@ -186,7 +186,7 @@ static bool getModelLocation(bool aBottom, DOUBLET aPosition, double aRotation, 
     gp_Trsf lRot;
 
     if (aBottom) {
-        lRot.SetRotation(gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 0.0, 1.0)), aRotation);
+        lRot.SetRotation(gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 0.0, 1.0)), -aRotation);
         lPos.Multiply(lRot);
         lRot.SetRotation(gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(1.0, 0.0, 0.0)), M_PI);
         lPos.Multiply(lRot);
