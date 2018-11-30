@@ -23,54 +23,41 @@ TuningWindow::TuningWindow(const Board *brd) : Gtk::Window(), board(brd), state_
             button_box->pack_start(*bu, false, false, 0);
         }
 
+        auto tbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
         {
-            auto tbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
-            auto la = Gtk::manage(new Gtk::Label("VF:"));
-            la->set_tooltip_text("Velocity factor");
+            auto la = Gtk::manage(new Gtk::Label("Velocity factor:"));
             tbox->pack_start(*la, false, false, 0);
-
-            sp_vf = Gtk::manage(new Gtk::SpinButton());
-            sp_vf->set_range(1, 100);
-            sp_vf->set_increments(1, 1);
-            sp_vf->set_value(100);
-            sp_vf->signal_value_changed().connect([this] { update(); });
-            tbox->pack_start(*sp_vf, false, false, 0);
-
-            {
-                auto er_button = Gtk::manage(new Gtk::MenuButton());
-                er_button->set_tooltip_markup("Enter ε<sub>r</sub>");
-                {
-                    auto la_button = Gtk::manage(new Gtk::Label);
-                    la_button->set_markup("ε<sub>r</sub>");
-                    er_button->add(*la_button);
-                }
-
-                auto er_popover = Gtk::manage(new Gtk::Popover);
-                auto sp_er = Gtk::manage(new Gtk::SpinButton);
-                sp_er->set_range(1, 20);
-                sp_er->set_increments(.1, 1);
-                sp_er->set_value(4);
-                sp_er->set_digits(2);
-                sp_er->signal_value_changed().connect(
-                        [this, sp_er] { sp_vf->set_value(100 / sqrt(sp_er->get_value())); });
-                sp_er->signal_activate().connect([this, sp_er, er_popover] {
-                    sp_vf->set_value(100 / sqrt(sp_er->get_value()));
-#if GTK_CHECK_VERSION(3, 22, 0)
-                    er_popover->popdown();
-#else
-                    er_popover->hide();
-#endif
-                });
-                er_popover->add(*sp_er);
-                sp_er->show();
-
-                er_button->set_popover(*er_popover);
-
-                tbox->pack_start(*er_button, false, false, 0);
-            }
-
-            button_box->pack_start(*tbox, false, false, 0);
         }
+
+        sp_vf = Gtk::manage(new Gtk::SpinButton());
+        sp_vf->set_range(22, 100);
+        sp_vf->set_increments(1, 1);
+        sp_vf->set_value(100);
+        sp_vf->signal_value_changed().connect([this] {
+            auto vf = sp_vf->get_value();
+            sp_er->set_value(10000 / (vf * vf));
+            update();
+        });
+        tbox->pack_start(*sp_vf, false, false, 0);
+
+        {
+            auto la = Gtk::manage(new Gtk::Label());
+            la->set_markup("ε<sub>r</sub>:");
+            la->set_margin_start(4);
+            la->set_tooltip_text("Dielectric constant");
+            tbox->pack_start(*la, false, false, 0);
+        }
+
+        sp_er = Gtk::manage(new Gtk::SpinButton());
+        sp_er->set_range(1, 20);
+        sp_er->set_increments(.1, 1);
+        sp_er->set_value(1);
+        sp_er->set_digits(2);
+        sp_er->signal_value_changed().connect([this] { sp_vf->set_value(100 / sqrt(sp_er->get_value())); });
+        tbox->pack_start(*sp_er, false, false, 0);
+
+
+        button_box->pack_start(*tbox, false, false, 0);
 
         box->pack_start(*button_box, false, false, 0);
     }

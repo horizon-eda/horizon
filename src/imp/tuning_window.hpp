@@ -45,6 +45,7 @@ private:
     Gtk::TreeView *tree_view = nullptr;
     Gtk::ScrolledWindow *sc = nullptr;
     Gtk::SpinButton *sp_vf = nullptr;
+    Gtk::SpinButton *sp_er = nullptr;
 
     WindowStateStore state_store;
 };
