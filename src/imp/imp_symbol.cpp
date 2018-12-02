@@ -75,17 +75,8 @@ void ImpSymbol::construct()
         this->tool_begin(ToolID::MAP_PIN, true, sel);
     });
 
-    core_symbol.signal_rebuilt().connect([this] {
-        const auto &pins_from_symbol = core_symbol.get_symbol()->pins;
-        std::map<UUID, std::string> unplaced;
-        for (const auto &it : core_symbol.get_symbol()->unit->pins) {
-            if (pins_from_symbol.count(it.first) == 0) {
-                unplaced.emplace(it.first, it.second.primary_name);
-            }
-        }
-        unplaced_box->update(unplaced);
-    });
-    unplaced_box->update({});
+    core_symbol.signal_rebuilt().connect(sigc::mem_fun(this, &ImpSymbol::update_unplaced));
+    update_unplaced();
     core_symbol.signal_tool_changed().connect(
             [this](ToolID tool_id) { unplaced_box->set_sensitive(tool_id == ToolID::NONE); });
 
@@ -133,6 +124,18 @@ void ImpSymbol::construct()
         hamburger_menu->append("Edit unit", "win.edit_unit");
         main_window->add_action("edit_unit", [this] { trigger_action(ActionID::EDIT_UNIT); });
     }
+}
+
+void ImpSymbol::update_unplaced()
+{
+    const auto &pins_from_symbol = core_symbol.get_symbol()->pins;
+    std::map<UUID, std::string> unplaced;
+    for (const auto &it : core_symbol.get_symbol()->unit->pins) {
+        if (pins_from_symbol.count(it.first) == 0) {
+            unplaced.emplace(it.first, it.second.primary_name);
+        }
+    }
+    unplaced_box->update(unplaced);
 }
 
 } // namespace horizon

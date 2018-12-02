@@ -29,5 +29,6 @@ private:
     Gtk::Label *unit_label = nullptr;
     class SymbolPreviewWindow *symbol_preview_window = nullptr;
     class UnplacedBox *unplaced_box = nullptr;
+    void update_unplaced();
 };
 } // namespace horizon
