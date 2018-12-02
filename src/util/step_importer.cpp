@@ -116,7 +116,7 @@ static bool getColor(DATA &data, TDF_Label label, Quantity_Color &color)
     return false;
 }
 
-static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *color, const glm::mat4 &mat = glm::mat4())
+static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *color, const glm::mat4 &mat = glm::mat4(1))
 {
     if (Standard_True == face.IsNull())
         return false;
@@ -202,7 +202,7 @@ static bool processShell(const TopoDS_Shape &shape, DATA &data, Quantity_Color *
     return ret;
 }
 
-static bool processSolid(const TopoDS_Shape &shape, DATA &data)
+static bool processSolid(const TopoDS_Shape &shape, DATA &data, const glm::mat4 &mat_in = glm::mat4(1))
 {
     TDF_Label label = data.m_assy->FindShape(shape, Standard_False);
     bool ret = false;
@@ -224,7 +224,7 @@ static bool processSolid(const TopoDS_Shape &shape, DATA &data)
     gp_Trsf T = loc.Transformation();
     gp_XYZ coord = T.TranslationPart();
 
-    auto mat = glm::translate(glm::vec3(coord.X(), coord.Y(), coord.Z()));
+    auto mat = mat_in * glm::translate(glm::vec3(coord.X(), coord.Y(), coord.Z()));
 
     gp_XYZ axis;
     Standard_Real angle;
@@ -249,7 +249,21 @@ static bool processSolid(const TopoDS_Shape &shape, DATA &data)
 static bool processComp(const TopoDS_Shape &shape, DATA &data)
 {
     TopoDS_Iterator it;
-    TopLoc_Location loc2 = shape.Location();
+    TopLoc_Location loc = shape.Location();
+    gp_Trsf T = loc.Transformation();
+    gp_XYZ coord = T.TranslationPart();
+
+    auto mat = glm::translate(glm::vec3(coord.X(), coord.Y(), coord.Z()));
+
+    gp_XYZ axis;
+    Standard_Real angle;
+
+    if (T.GetRotation(axis, angle)) {
+        glm::vec3 gaxis(axis.X(), axis.Y(), axis.Z());
+        float angle_f = angle;
+        mat = glm::rotate(mat, angle_f, gaxis);
+    }
+
     bool ret = false;
 
     for (it.Initialize(shape, false, false); it.More(); it.Next()) {
@@ -266,7 +280,7 @@ static bool processComp(const TopoDS_Shape &shape, DATA &data)
             break;
 
         case TopAbs_SOLID:
-            if (processSolid(subShape, data))
+            if (processSolid(subShape, data, mat))
                 ret = true;
             break;
 
