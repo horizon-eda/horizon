@@ -5,17 +5,48 @@
 
 namespace horizon {
 
+ToolPlaceText::Settings::LayerSettings::LayerSettings(const json &j)
+    : width(j.value("width", 0)), size(j.value("size", 1.5_mm))
+{
+}
+
+json ToolPlaceText::Settings::LayerSettings::serialize() const
+{
+    json j;
+    j["width"] = width;
+    j["size"] = size;
+    return j;
+}
+
 void ToolPlaceText::Settings::load_from_json(const json &j)
 {
-    width = j.value("width", 0);
-    size = j.value("size", 1.5_mm);
+    if (j.count("layers")) {
+        const json &o = j["layers"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            int k = std::stoi(it.key());
+            layers.emplace(std::piecewise_construct, std::forward_as_tuple(k), std::forward_as_tuple(it.value()));
+        }
+    }
+}
+
+static const ToolPlaceText::Settings::LayerSettings settings_default;
+
+
+const ToolPlaceText::Settings::LayerSettings &ToolPlaceText::Settings::get_layer(int l) const
+{
+    if (layers.count(l))
+        return layers.at(l);
+    else
+        return settings_default;
 }
 
 json ToolPlaceText::Settings::serialize() const
 {
     json j;
-    j["width"] = width;
-    j["size"] = size;
+    j["layers"] = json::object();
+    for (const auto &it : layers) {
+        j["layers"][std::to_string(it.first)] = it.second.serialize();
+    }
     return j;
 }
 
@@ -31,8 +62,9 @@ bool ToolPlaceText::can_begin()
 void ToolPlaceText::apply_settings()
 {
     if (temp) {
-        temp->width = settings.width;
-        temp->size = settings.size;
+        const auto &s = settings.get_layer(temp->layer);
+        temp->width = s.width;
+        temp->size = s.size;
     }
 }
 
@@ -94,6 +126,7 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::LAYER_CHANGE) {
         temp->layer = args.work_layer;
+        apply_settings();
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_space) {
@@ -103,16 +136,16 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
             }
         }
         else if (args.key == GDK_KEY_w) {
-            auto r = imp->dialogs.ask_datum("Enter width", settings.width);
+            auto r = imp->dialogs.ask_datum("Enter width", settings.get_layer(temp->layer).width);
             if (r.first) {
-                settings.width = std::max(r.second, (int64_t)0);
+                settings.layers[temp->layer].width = std::max(r.second, (int64_t)0);
                 apply_settings();
             }
         }
         else if (args.key == GDK_KEY_s) {
-            auto r = imp->dialogs.ask_datum("Enter size", settings.size);
+            auto r = imp->dialogs.ask_datum("Enter size", settings.get_layer(temp->layer).size);
             if (r.first) {
-                settings.size = std::max(r.second, (int64_t)0);
+                settings.layers[temp->layer].size = std::max(r.second, (int64_t)0);
                 apply_settings();
             }
         }

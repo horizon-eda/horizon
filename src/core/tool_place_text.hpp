@@ -2,6 +2,7 @@
 #include "core.hpp"
 #include "tool_helper_move.hpp"
 #include <forward_list>
+#include <map>
 
 namespace horizon {
 
@@ -16,8 +17,18 @@ public:
     public:
         json serialize() const override;
         void load_from_json(const json &j) override;
-        uint64_t width = 0;
-        uint64_t size = 1.5_mm;
+        class LayerSettings {
+        public:
+            LayerSettings()
+            {
+            }
+            LayerSettings(const json &j);
+            uint64_t width = 0;
+            uint64_t size = 1.5_mm;
+            json serialize() const;
+        };
+        const LayerSettings &get_layer(int l) const;
+        std::map<int, LayerSettings> layers;
     };
 
     const ToolSettings *get_settings_const() const override
