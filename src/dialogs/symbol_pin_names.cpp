@@ -2,6 +2,7 @@
 #include "pool/gate.hpp"
 #include "pool/entity.hpp"
 #include "schematic/schematic_symbol.hpp"
+#include "util/util.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>
@@ -21,7 +22,7 @@ public:
             pins_sorted.push_back(&it.second);
         }
         std::sort(pins_sorted.begin(), pins_sorted.end(),
-                  [](const auto &a, const auto &b) { return a->primary_name < b->primary_name; });
+                  [](const auto &a, const auto &b) { return strcmp_natural(a->primary_name, b->primary_name) < 0; });
         for (const auto it : pins_sorted) {
             auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 16));
             auto la = Gtk::manage(new Gtk::Label(it->primary_name));
