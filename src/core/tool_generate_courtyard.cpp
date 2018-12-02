@@ -60,6 +60,7 @@ ToolResponse ToolGenerateCourtyard::begin(const ToolArgs &args)
     courtyard_poly->vertices.emplace_back(b);
     courtyard_poly->vertices.emplace_back(Coordi(b.x, a.y));
 
+    core.r->commit();
     return ToolResponse::end();
 }
 
