@@ -133,6 +133,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("tv_pads", w_tv_pads);
     x->get_widget("button_map", w_button_map);
     x->get_widget("button_unmap", w_button_unmap);
+    x->get_widget("button_automap", w_button_automap);
     x->get_widget("button_select_pin", w_button_select_pin);
     x->get_widget("button_select_pads", w_button_select_pads);
     x->get_widget("pin_stat", w_pin_stat);
@@ -294,6 +295,28 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             update_mapped();
             needs_save = true;
         }
+    });
+
+    w_button_automap->signal_clicked().connect([this] {
+        auto sel = w_tv_pads->get_selection();
+        for (auto &path : sel->get_selected_rows()) {
+            auto it = pad_store->get_iter(path);
+            Gtk::TreeModel::Row row = *it;
+            Glib::ustring pad_name = row[pad_list_columns.pad_name];
+            for (const auto &it_pin : pin_store->children()) {
+                Gtk::TreeModel::Row row_pin = *it_pin;
+                Glib::ustring pin_name = row_pin[pin_list_columns.pin_name];
+                if (pin_name == pad_name) {
+                    row[pad_list_columns.gate_name] = row_pin.get_value(pin_list_columns.gate_name);
+                    row[pad_list_columns.pin_name] = row_pin.get_value(pin_list_columns.pin_name);
+                    row[pad_list_columns.pin_uuid] = row_pin.get_value(pin_list_columns.pin_uuid);
+                    row[pad_list_columns.gate_uuid] = row_pin.get_value(pin_list_columns.gate_uuid);
+                    break;
+                }
+            }
+        }
+        update_mapped();
+        needs_save = true;
     });
 
     w_button_select_pin->signal_clicked().connect([this] {
