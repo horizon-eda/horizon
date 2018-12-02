@@ -32,6 +32,10 @@ public:
         save_json_to_file(fn, unit.serialize());
         filename = fn;
     }
+    std::string get_name() const override
+    {
+        return unit.name;
+    }
     Unit unit;
 };
 
@@ -47,6 +51,10 @@ public:
         save_json_to_file(fn, entity.serialize());
         filename = fn;
     }
+    std::string get_name() const override
+    {
+        return entity.name;
+    }
     Entity entity;
 };
 
@@ -60,6 +68,10 @@ public:
     {
         save_json_to_file(fn, part.serialize());
         filename = fn;
+    }
+    std::string get_name() const override
+    {
+        return part.get_MPN();
     }
     Part part;
 };
@@ -195,7 +207,7 @@ void EditorWindow::save()
                                                                    GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
         auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
         chooser->set_do_overwrite_confirmation(true);
-        chooser->set_current_name("something.json");
+        chooser->set_current_name(store->get_name() + ".json");
         switch (type) {
         case ObjectType::UNIT:
             chooser->set_current_folder(Glib::build_filename(pool->get_base_path(), "units"));

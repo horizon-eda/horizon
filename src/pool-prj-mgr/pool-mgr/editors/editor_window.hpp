@@ -12,6 +12,7 @@ public:
     EditorWindowStore(const std::string &fn);
     void save();
     virtual void save_as(const std::string &fn) = 0;
+    virtual std::string get_name() const = 0;
     std::string filename;
     virtual ~EditorWindowStore()
     {
