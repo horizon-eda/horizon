@@ -38,6 +38,13 @@ TuningWindow::TuningWindow(const Board *brd) : Gtk::Window(), board(brd), state_
             sp_er->set_value(10000 / (vf * vf));
             update();
         });
+        sp_vf->signal_output().connect([this] {
+            int v = sp_vf->get_value_as_int();
+            sp_vf->set_text(std::to_string(v) + " %");
+            return true;
+        });
+        sp_vf->set_alignment(1);
+        sp_vf->set_width_chars(5);
         tbox->pack_start(*sp_vf, false, false, 0);
 
         {
