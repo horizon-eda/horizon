@@ -294,6 +294,7 @@ void ImpSchematic::construct()
                     j["selection"].push_back(k);
                 }
             }
+            canvas->set_selection({});
             allow_set_foreground_window(this->get_board_pid());
             this->send_json(j);
         });
