@@ -16,6 +16,7 @@ public:
           p_property_inherit(*this, "inherit"), p_property_can_inherit(*this, "can-inherit")
     {
         entry = Gtk::manage(new Gtk::Entry);
+        entry_add_sanitizer(entry);
         button = Gtk::manage(new Gtk::ToggleButton("Inherit"));
 
         pack_start(*entry, true, true, 0);

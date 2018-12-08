@@ -5,6 +5,7 @@
 #include <glibmm.h>
 #include <iomanip>
 #include "util/pool_completion.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 
@@ -30,6 +31,8 @@ PinEditor::PinEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
     x->get_widget("pin_names", names_entry);
     x->get_widget("pin_direction", dir_combo);
     x->get_widget("pin_swap_group", swap_group_spin_button);
+    entry_add_sanitizer(name_entry);
+    entry_add_sanitizer(names_entry);
 
     for (const auto &it : Pin::direction_names) {
         dir_combo->append(std::to_string(static_cast<int>(it.first)), it.second);
@@ -127,6 +130,8 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("unit_pins_refresh", refresh_button);
     x->get_widget("pin_add", add_button);
     x->get_widget("pin_delete", delete_button);
+    entry_add_sanitizer(name_entry);
+    entry_add_sanitizer(manufacturer_entry);
 
     name_entry->set_text(unit->name);
     name_entry->signal_changed().connect([this] {

@@ -1,5 +1,6 @@
 #include "gtk_util.hpp"
 #include "widgets/spin_button_dim.hpp"
+#include "str_util.hpp"
 
 namespace horizon {
 void bind_widget(Gtk::Switch *sw, bool &v)
@@ -85,4 +86,46 @@ void header_func_separator(Gtk::ListBoxRow *row, Gtk::ListBoxRow *before)
         row->set_header(*ret);
     }
 }
+
+static bool needs_trim(const std::string &s)
+{
+    return s.size() && (isspace(s.front()) || isspace(s.back()));
+}
+
+void entry_add_sanitizer(Gtk::Entry *entry)
+{
+    entry->signal_icon_press().connect([entry](Gtk::EntryIconPosition pos, const GdkEventButton *ev) {
+        if (pos == Gtk::ENTRY_ICON_SECONDARY) {
+            std::string txt = entry->get_text();
+            txt.erase(std::remove(txt.begin(), txt.end(), '\r'), txt.end());
+            for (auto &it : txt) {
+                if (it == '\n')
+                    it = ' ';
+            }
+            trim(txt);
+            entry->set_text(txt);
+        }
+    });
+    entry->signal_changed().connect([entry] {
+        auto txt = entry->get_text();
+        bool has_line_breaks = std::count(txt.begin(), txt.end(), '\n');
+        bool has_whitespace = needs_trim(txt);
+        if (has_line_breaks || has_whitespace) {
+            std::string warning;
+            if (has_line_breaks) {
+                warning += "Contains line breaks\n";
+            }
+            if (has_whitespace) {
+                warning += "Has trailing/leading whitespace\n";
+            }
+            warning += "Click to fix";
+            entry->set_icon_tooltip_text(warning, Gtk::ENTRY_ICON_SECONDARY);
+            entry->set_icon_from_icon_name("dialog-warning-symbolic", Gtk::ENTRY_ICON_SECONDARY);
+        }
+        else {
+            entry->unset_icon(Gtk::ENTRY_ICON_SECONDARY);
+        }
+    });
+}
+
 } // namespace horizon

@@ -60,6 +60,16 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("part_autofill", part_autofill_button);
     x->get_widget("steps_grid", steps_grid);
 
+    entry_add_sanitizer(entity_name_entry);
+    entry_add_sanitizer(entity_prefix_entry);
+    entry_add_sanitizer(entity_tags_entry);
+    entry_add_sanitizer(part_mpn_entry);
+    entry_add_sanitizer(part_value_entry);
+    entry_add_sanitizer(part_manufacturer_entry);
+    entry_add_sanitizer(part_description_entry);
+    entry_add_sanitizer(part_datasheet_entry);
+    entry_add_sanitizer(part_tags_entry);
+
     part_manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
 
     part_mpn_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));

@@ -5,6 +5,7 @@
 #include "dialogs/pool_browser_dialog.hpp"
 #include "widgets/pool_browser.hpp"
 #include "util/pool_completion.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 
@@ -30,6 +31,9 @@ GateEditor::GateEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("gate_suffix", suffix_entry);
     x->get_widget("gate_swap_group", swap_group_spin_button);
     x->get_widget("gate_unit", unit_label);
+    entry_add_sanitizer(name_entry);
+    entry_add_sanitizer(suffix_entry);
+
     unit_label->set_track_visited_links(false);
     unit_label->signal_activate_link().connect(
             [this](const std::string &url) {
@@ -95,6 +99,10 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     x->get_widget("entity_gates_refresh", refresh_button);
     x->get_widget("gate_add", add_button);
     x->get_widget("gate_delete", delete_button);
+    entry_add_sanitizer(name_entry);
+    entry_add_sanitizer(manufacturer_entry);
+    entry_add_sanitizer(tags_entry);
+    entry_add_sanitizer(prefix_entry);
 
     bind_entry(name_entry, entity->name, needs_save);
     bind_entry(manufacturer_entry, entity->manufacturer, needs_save);
