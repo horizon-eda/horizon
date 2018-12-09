@@ -203,9 +203,11 @@ PNS::ITEM *ToolWrapper::pickSingleItem(const VECTOR2I &aWhere, int aNet, int aLa
         // fixme: this causes flicker with live loop removal...
         // if( item->Parent() && !item->Parent()->ViewIsVisible() )
         //    continue;
-        auto la = PNS::PNS_HORIZON_IFACE::layer_from_router(item->Layers().Start());
-        if (!tool->canvas->layer_is_visible(la))
-            continue;
+        if (!item->Layers().IsMultilayer()) {
+            auto la = PNS::PNS_HORIZON_IFACE::layer_from_router(item->Layers().Start());
+            if (!tool->canvas->layer_is_visible(la))
+                continue;
+        }
 
         if (aNet < 0 || item->Net() == aNet) {
             if (item->OfKind(PNS::ITEM::VIA_T | PNS::ITEM::SOLID_T)) {
