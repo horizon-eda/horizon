@@ -615,8 +615,17 @@ void Canvas3D::load_models_async(Pool *pool)
         if (model) {
             std::string model_filename;
             const Package *pool_package = nullptr;
+
+            UUID this_pool_uuid;
+            UUID pkg_pool_uuid;
+            auto base_path = pool->get_base_path();
+            const auto &pools = PoolManager::get().get_pools();
+            if (pools.count(base_path))
+                this_pool_uuid = pools.at(base_path).uuid;
+
+
             try {
-                pool_package = pool->get_package(it.second.pool_package->uuid);
+                pool_package = pool->get_package(it.second.pool_package->uuid, &pkg_pool_uuid);
             }
             catch (const std::runtime_error &e) {
                 // it's okay
@@ -627,7 +636,12 @@ void Canvas3D::load_models_async(Pool *pool)
             }
             else {
                 // package is not from pool (from package editor, use filename relative to current pool)
-                model_filename = Glib::build_filename(pool->get_base_path(), model->filename);
+                if (pkg_pool_uuid && pkg_pool_uuid != this_pool_uuid) { // pkg is open in RO mode from included pool
+                    model_filename = pool->get_model_filename(it.second.pool_package->uuid, model->uuid);
+                }
+                else { // really editing package
+                    model_filename = Glib::build_filename(pool->get_base_path(), model->filename);
+                }
             }
             if (model_filename.size())
                 model_filenames[model->filename] = model_filename;

@@ -171,70 +171,70 @@ std::string Pool::get_flat_filename(ObjectType type, const UUID &uu) const
     }
 }
 
-const Unit *Pool::get_unit(const UUID &uu)
+const Unit *Pool::get_unit(const UUID &uu, UUID *pool_uuid_out)
 {
     if (units.count(uu) == 0) {
-        std::string path = get_filename(ObjectType::UNIT, uu);
+        std::string path = get_filename(ObjectType::UNIT, uu, pool_uuid_out);
         Unit u = Unit::new_from_file(path);
         units.insert(std::make_pair(uu, u));
     }
     return &units.at(uu);
 }
 
-const Entity *Pool::get_entity(const UUID &uu)
+const Entity *Pool::get_entity(const UUID &uu, UUID *pool_uuid_out)
 {
     if (entities.count(uu) == 0) {
-        std::string path = get_filename(ObjectType::ENTITY, uu);
+        std::string path = get_filename(ObjectType::ENTITY, uu, pool_uuid_out);
         Entity e = Entity::new_from_file(path, *this);
         entities.insert(std::make_pair(uu, e));
     }
     return &entities.at(uu);
 }
 
-const Symbol *Pool::get_symbol(const UUID &uu)
+const Symbol *Pool::get_symbol(const UUID &uu, UUID *pool_uuid_out)
 {
     if (symbols.count(uu) == 0) {
-        std::string path = get_filename(ObjectType::SYMBOL, uu);
+        std::string path = get_filename(ObjectType::SYMBOL, uu, pool_uuid_out);
         Symbol s = Symbol::new_from_file(path, *this);
         symbols.insert(std::make_pair(uu, s));
     }
     return &symbols.at(uu);
 }
 
-const Package *Pool::get_package(const UUID &uu)
+const Package *Pool::get_package(const UUID &uu, UUID *pool_uuid_out)
 {
     if (packages.count(uu) == 0) {
-        std::string path = get_filename(ObjectType::PACKAGE, uu);
+        std::string path = get_filename(ObjectType::PACKAGE, uu, pool_uuid_out);
         Package p = Package::new_from_file(path, *this);
         packages.emplace(uu, p);
     }
     return &packages.at(uu);
 }
 
-const Padstack *Pool::get_padstack(const UUID &uu)
+const Padstack *Pool::get_padstack(const UUID &uu, UUID *pool_uuid_out)
 {
     if (padstacks.count(uu) == 0) {
-        std::string path = get_filename(ObjectType::PADSTACK, uu);
+        std::string path = get_filename(ObjectType::PADSTACK, uu, pool_uuid_out);
         Padstack p = Padstack::new_from_file(path);
         padstacks.insert(std::make_pair(uu, p));
     }
     return &padstacks.at(uu);
 }
 
-const Part *Pool::get_part(const UUID &uu)
+const Part *Pool::get_part(const UUID &uu, UUID *pool_uuid_out)
 {
     if (parts.count(uu) == 0) {
-        std::string path = get_filename(ObjectType::PART, uu);
+        std::string path = get_filename(ObjectType::PART, uu, pool_uuid_out);
         Part p = Part::new_from_file(path, *this);
         parts.insert(std::make_pair(uu, p));
     }
     return &parts.at(uu);
 }
 
-const Frame *Pool::get_frame(const UUID &uu)
+const Frame *Pool::get_frame(const UUID &uu, UUID *pool_uuid_out)
 {
     if (parts.count(uu) == 0) {
-        std::string path = get_filename(ObjectType::FRAME, uu);
+        std::string path = get_filename(ObjectType::FRAME, uu, pool_uuid_out);
         Frame f = Frame::new_from_file(path);
         frames.insert(std::make_pair(uu, f));
     }

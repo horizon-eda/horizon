@@ -23,13 +23,13 @@ public:
      * @param base_path Path to the pool containing the pool.db
      */
     Pool(const std::string &base_path, bool read_only = true);
-    const class Unit *get_unit(const UUID &uu);
-    const class Entity *get_entity(const UUID &uu);
-    const class Symbol *get_symbol(const UUID &uu);
-    const class Padstack *get_padstack(const UUID &uu);
-    const class Package *get_package(const UUID &uu);
-    const class Part *get_part(const UUID &uu);
-    const class Frame *get_frame(const UUID &uu);
+    const class Unit *get_unit(const UUID &uu, UUID *pool_uuid_out = nullptr);
+    const class Entity *get_entity(const UUID &uu, UUID *pool_uuid_out = nullptr);
+    const class Symbol *get_symbol(const UUID &uu, UUID *pool_uuid_out = nullptr);
+    const class Padstack *get_padstack(const UUID &uu, UUID *pool_uuid_out = nullptr);
+    const class Package *get_package(const UUID &uu, UUID *pool_uuid_out = nullptr);
+    const class Part *get_part(const UUID &uu, UUID *pool_uuid_out = nullptr);
+    const class Frame *get_frame(const UUID &uu, UUID *pool_uuid_out = nullptr);
     std::set<UUID> get_alternate_packages(const UUID &uu);
     virtual std::string get_model_filename(const UUID &pkg_uuid, const UUID &model_uuid);
 

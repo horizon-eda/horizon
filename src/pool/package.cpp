@@ -136,7 +136,7 @@ Package::Package(const UUID &uu, const json &j, Pool &pool)
     if (j.count("model_filename")) {
         std::string mfn = j.at("model_filename");
         if (mfn.size()) {
-            auto m_uu = UUID::random();
+            auto m_uu = UUID("96c366ee-a963-41a0-9cc8-54c646979695");
             models.emplace(std::piecewise_construct, std::forward_as_tuple(m_uu),
                            std::forward_as_tuple(m_uu, j.at("model_filename").get<std::string>()));
             default_model = m_uu;
