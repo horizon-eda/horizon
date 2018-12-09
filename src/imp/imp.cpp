@@ -411,7 +411,7 @@ void ImpBase::run(int argc, char *argv[])
 
 
     grid_spin_button = Gtk::manage(new SpinButtonDim());
-    grid_spin_button->set_range(0.1_mm, 10_mm);
+    grid_spin_button->set_range(0.01_mm, 10_mm);
     grid_spacing_binding = Glib::Binding::bind_property(grid_spin_button->property_value(),
                                                         canvas->property_grid_spacing(), Glib::BINDING_BIDIRECTIONAL);
     grid_spin_button->set_value(1.25_mm);
