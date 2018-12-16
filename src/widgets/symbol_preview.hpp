@@ -3,9 +3,10 @@
 #include <set>
 #include "common/common.hpp"
 #include "util/uuid.hpp"
+#include "util/pool_goto_provider.hpp"
 
 namespace horizon {
-class SymbolPreview : public Gtk::Box {
+class SymbolPreview : public Gtk::Box, public PoolGotoProvider {
 public:
     SymbolPreview(class Pool &pool);
 
@@ -20,6 +21,8 @@ private:
     Gtk::RadioButton *rb_mirrored = nullptr;
 
     std::array<Gtk::RadioButton *, 4> rb_angles;
+
+    Gtk::Label *unit_label = nullptr;
 
     void update(bool fit = false);
 };

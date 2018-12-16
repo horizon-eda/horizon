@@ -1,4 +1,4 @@
-PRAGMA user_version=8;
+PRAGMA user_version=9; --keep in sync with pool.cpp
 
 DROP TABLE IF EXISTS "units";
 CREATE TABLE "units" (
@@ -103,6 +103,15 @@ CREATE TABLE "frames" (
 	'pool_uuid'	TEXT NOT NULL,
 	'overridden'	BOOL NOT NULL,
 	PRIMARY KEY('uuid')
+);
+
+DROP TABLE IF EXISTS "dependencies";
+CREATE TABLE "dependencies" (
+	'type'	TEXT NOT NULL,
+	'uuid'	TEXT NOT NULL,
+	'dep_type'	TEXT NOT NULL,
+	'dep_uuid'	TEXT NOT NULL,
+	UNIQUE('type', 'uuid', 'dep_type', 'dep_uuid') ON CONFLICT IGNORE
 );
 
 DROP VIEW IF EXISTS "all_items_view";

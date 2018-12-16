@@ -6,6 +6,10 @@
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
+#include "widgets/pool_browser_package.hpp"
+#include "pool_remote_box.hpp"
+#include "widgets/preview_canvas.hpp"
+#include "widgets/where_used_box.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_package(const UUID &uu)
@@ -147,4 +151,79 @@ void PoolNotebook::handle_part_wizard(const UUID &uu)
         part_wizard->present();
     }
 }
+
+void PoolNotebook::construct_packages()
+{
+    auto br = Gtk::manage(new PoolBrowserPackage(&pool));
+    br->set_show_path(true);
+    br->signal_activated().connect([this, br] { handle_edit_package(br->get_selected()); });
+
+    br->show();
+    browsers.emplace(ObjectType::PACKAGE, br);
+
+    auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
+
+
+    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
+    auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
+    bbox->set_margin_bottom(8);
+    bbox->set_margin_top(8);
+    bbox->set_margin_start(8);
+    bbox->set_margin_end(8);
+
+    add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_package));
+    add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_package));
+    add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_package));
+    add_action_button("Create Padstack", bbox, br,
+                      sigc::mem_fun(this, &PoolNotebook::handle_create_padstack_for_package));
+    if (remote_repo.size()) {
+        add_action_button("Merge", bbox, br,
+                          [this](const UUID &uu) { remote_box->merge_item(ObjectType::PACKAGE, uu); });
+        add_action_button("Merge 3D", bbox, br, [this](const UUID &uu) {
+            auto pkg = pool.get_package(uu);
+            for (const auto &it : pkg->models) {
+                remote_box->merge_3d_model(it.second.filename);
+            }
+        });
+    }
+    add_action_button("Part Wizard...", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_part_wizard))
+            ->get_style_context()
+            ->add_class("suggested-action");
+
+    auto stack = Gtk::manage(new Gtk::Stack);
+    add_preview_stack_switcher(bbox, stack);
+
+    bbox->show_all();
+
+    box->pack_start(*bbox, false, false, 0);
+
+    auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+    sep->show();
+    box->pack_start(*sep, false, false, 0);
+    box->pack_start(*br, true, true, 0);
+    box->show();
+
+    paned->add1(*box);
+    paned->child_property_shrink(*box) = false;
+
+    auto canvas = Gtk::manage(new PreviewCanvas(pool, true));
+
+    auto where_used = Gtk::manage(new WhereUsedBox(pool));
+    where_used->property_margin() = 10;
+    where_used->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
+
+    stack->add(*canvas, "preview");
+    stack->add(*where_used, "info");
+
+    paned->add2(*stack);
+    paned->show_all();
+
+    br->signal_selected().connect([br, canvas, where_used] {
+        auto sel = br->get_selected();
+        where_used->load(ObjectType::PACKAGE, sel);
+        canvas->load(ObjectType::PACKAGE, sel);
+    });
+    append_page(*paned, "Packages");
+}
+
 } // namespace horizon

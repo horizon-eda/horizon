@@ -13,7 +13,7 @@ SymbolPreview::SymbolPreview(class Pool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL
 
     canvas_symbol = Gtk::manage(new PreviewCanvas(pool, false));
 
-    auto top_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
+    auto top_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
     top_box->property_margin() = 8;
     {
         auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
@@ -47,7 +47,26 @@ SymbolPreview::SymbolPreview(class Pool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL
             }
             rb->signal_toggled().connect([this] { update(); });
         }
+        box->set_margin_start(4);
         top_box->pack_start(*box, false, false, 0);
+    }
+
+    {
+        auto la = Gtk::manage(new Gtk::Label("Unit"));
+        la->set_margin_start(4);
+        la->get_style_context()->add_class("dim-label");
+        top_box->pack_start(*la, false, false, 0);
+
+        unit_label = Gtk::manage(new Gtk::Label());
+        unit_label->set_use_markup(true);
+        unit_label->set_track_visited_links(false);
+        unit_label->signal_activate_link().connect(
+                [this](const std::string &url) {
+                    s_signal_goto.emit(ObjectType::UNIT, UUID(url));
+                    return true;
+                },
+                false);
+        top_box->pack_start(*unit_label, false, false, 0);
     }
 
 
@@ -70,6 +89,14 @@ SymbolPreview::SymbolPreview(class Pool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL
 void SymbolPreview::load(const UUID &uu)
 {
     symbol = uu;
+    if (uu) {
+        auto sym = pool.get_symbol(uu);
+        unit_label->set_markup("<a href=\"" + (std::string)sym->unit->uuid + "\">"
+                               + Glib::Markup::escape_text(sym->unit->name) + "</a>");
+    }
+    else {
+        unit_label->set_text("");
+    }
     update(true);
 }
 

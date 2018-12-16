@@ -431,6 +431,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/pool_browser_frame.cpp\
 	src/dialogs/pool_browser_dialog.cpp\
 	src/widgets/cell_renderer_color_box.cpp\
+	src/widgets/where_used_box.cpp\
 	src/util/sort_controller.cpp\
 	src/util/editor_process.cpp\
 	$(SRC_CANVAS)\
@@ -467,6 +468,9 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/preferences_window_pool.cpp\
 	src/imp/action.cpp\
 	src/imp/action_catalog.cpp\
+	src/widgets/unit_info_box.cpp\
+	src/widgets/entity_info_box.cpp\
+	src/widgets/padstack_preview.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

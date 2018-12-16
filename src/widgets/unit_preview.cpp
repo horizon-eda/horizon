@@ -1,16 +1,16 @@
 #include "unit_preview.hpp"
-#include "pool/unit.hpp"
 #include "pool/pool.hpp"
 #include "canvas/canvas.hpp"
 #include "util/util.hpp"
+#include "util/gtk_util.hpp"
 #include "util/sqlite.hpp"
 #include "common/object_descr.hpp"
 #include "preview_canvas.hpp"
 
 namespace horizon {
+
 UnitPreview::UnitPreview(class Pool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
 {
-
     auto symbol_sel_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
     symbol_sel_box->property_margin() = 8;
     {

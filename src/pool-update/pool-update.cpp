@@ -116,6 +116,7 @@ private:
     void update_package_node(const PoolUpdateNode &node, std::set<UUID> &visited);
     void update_parts(const std::string &directory);
     void update_part_node(const PoolUpdateNode &node, std::set<UUID> &visited);
+    void add_dependency(ObjectType type, const UUID &uu, ObjectType dep_type, const UUID &dep_uuid);
     bool exists(ObjectType type, const UUID &uu);
 
     UUID pool_uuid;
@@ -144,6 +145,7 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
 {
     status_cb(PoolUpdateStatus::INFO, "", "tags");
     pool->db.execute("DELETE FROM tags");
+    pool->db.execute("DELETE FROM dependencies");
     pool->db.execute("BEGIN TRANSACTION");
     pool->db.execute("DELETE FROM units");
     for (const auto &bp : base_paths) {
@@ -362,6 +364,9 @@ void PoolUpdater::update_entities(const std::string &directory, const std::strin
                     q2.bind("$tag", it_tag);
                     q2.step();
                 }
+                for (const auto &it_gate : entity.gates) {
+                    add_dependency(ObjectType::ENTITY, entity.uuid, ObjectType::UNIT, it_gate.second.unit->uuid);
+                }
             }
             catch (const std::exception &e) {
                 status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
@@ -404,6 +409,7 @@ void PoolUpdater::update_symbols(const std::string &directory, const std::string
                 q.bind("$overridden", overridden);
                 q.bind("$filename", Glib::build_filename("symbols", prefix, it));
                 q.step();
+                add_dependency(ObjectType::SYMBOL, symbol.uuid, ObjectType::UNIT, symbol.unit->uuid);
             }
             catch (const std::exception &e) {
                 status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
@@ -614,6 +620,13 @@ void PoolUpdater::update_package_node(const PoolUpdateNode &node, std::set<UUID>
                 q2.bind(3, it_model.second.filename);
                 q2.step();
             }
+            for (const auto &it_pad : package.pads) {
+                add_dependency(ObjectType::PACKAGE, package.uuid, ObjectType::PADSTACK,
+                               it_pad.second.pool_padstack->uuid);
+            }
+            if (package.alternate_for) {
+                add_dependency(ObjectType::PACKAGE, package.uuid, ObjectType::PACKAGE, package.alternate_for->uuid);
+            }
         }
 
         for (const auto dependant : node.dependants) {
@@ -683,6 +696,13 @@ void PoolUpdater::update_part_node(const PoolUpdateNode &node, std::set<UUID> &v
                 q2.bind("$tag", it_tag);
                 q2.step();
             }
+            if (part.base) {
+                add_dependency(ObjectType::PART, part.uuid, ObjectType::PART, part.base->uuid);
+            }
+            else {
+                add_dependency(ObjectType::PART, part.uuid, ObjectType::ENTITY, part.entity->uuid);
+                add_dependency(ObjectType::PART, part.uuid, ObjectType::PACKAGE, part.package->uuid);
+            }
         }
 
         for (const auto dependant : node.dependants) {
@@ -709,6 +729,16 @@ void PoolUpdater::update_parts(const std::string &directory)
     std::set<UUID> visited;
     auto root = graph.get_root();
     update_part_node(root, visited);
+}
+
+void PoolUpdater::add_dependency(ObjectType type, const UUID &uu, ObjectType dep_type, const UUID &dep_uuid)
+{
+    SQLite::Query q(pool->db, "INSERT INTO dependencies VALUES (?, ?, ?, ?)");
+    q.bind(1, object_type_lut.lookup_reverse(type));
+    q.bind(2, uu);
+    q.bind(3, object_type_lut.lookup_reverse(dep_type));
+    q.bind(4, dep_uuid);
+    q.step();
 }
 
 void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb)

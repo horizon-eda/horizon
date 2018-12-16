@@ -46,6 +46,10 @@ void PreviewCanvas::load_symbol(const UUID &uu, const Placement &pl, bool fit, c
 
 void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, bool fit)
 {
+	if(!uu) {
+		clear();
+		return;
+	}
     std::pair<Coordi, Coordi> bb;
     int64_t pad = 0;
     switch (type) {

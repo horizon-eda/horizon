@@ -1,31 +1,17 @@
 #include "canvas/canvas.hpp"
 #include "pool_notebook.hpp"
-#include "widgets/pool_browser_unit.hpp"
-#include "widgets/pool_browser_symbol.hpp"
-#include "widgets/pool_browser_entity.hpp"
-#include "widgets/pool_browser_padstack.hpp"
-#include "widgets/pool_browser_package.hpp"
-#include "widgets/pool_browser_part.hpp"
-#include "widgets/pool_browser_frame.hpp"
+#include "widgets/pool_browser.hpp"
 #include "dialogs/pool_browser_dialog.hpp"
 #include "util/util.hpp"
 #include "pool-update/pool-update.hpp"
-#include "editors/editor_window.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "duplicate/duplicate_window.hpp"
-#include "duplicate/duplicate_unit.hpp"
-#include "duplicate/duplicate_part.hpp"
 #include "common/object_descr.hpp"
 #include "pool_remote_box.hpp"
 #include "pool_merge_dialog.hpp"
 #include <git2.h>
 #include "util/autofree_ptr.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app.hpp"
-#include "widgets/part_preview.hpp"
-#include "widgets/entity_preview.hpp"
-#include "widgets/unit_preview.hpp"
-#include "widgets/symbol_preview.hpp"
-#include "widgets/preview_canvas.hpp"
 #include "pool_update_error_dialog.hpp"
 #include "pool_settings_box.hpp"
 #include "pool/pool_manager.hpp"
@@ -88,6 +74,31 @@ Gtk::Button *PoolNotebook::add_action_button(const std::string &label, Gtk::Box 
     br->signal_selected().connect([bu, br] { bu->set_sensitive(br->get_selected()); });
     bu->set_sensitive(br->get_selected());
     return bu;
+}
+
+void PoolNotebook::add_preview_stack_switcher(Gtk::Box *obox, Gtk::Stack *stack)
+{
+    auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
+    bbox->get_style_context()->add_class("linked");
+    auto rb_graphical = Gtk::manage(new Gtk::RadioButton("Preview"));
+    rb_graphical->set_mode(false);
+    auto rb_text = Gtk::manage(new Gtk::RadioButton("Info"));
+    rb_text->set_mode(false);
+    rb_text->join_group(*rb_graphical);
+    rb_graphical->set_active(true);
+    rb_graphical->signal_toggled().connect([this, rb_graphical, stack] {
+        if (rb_graphical->get_active()) {
+            stack->set_visible_child("preview");
+        }
+        else {
+            stack->set_visible_child("info");
+        }
+    });
+    bbox->pack_start(*rb_graphical, true, true, 0);
+    bbox->pack_start(*rb_text, true, true, 0);
+    bbox->set_margin_start(4);
+    bbox->show_all();
+    obox->pack_end(*bbox, false, false, 0);
 }
 
 class SetReset {
@@ -170,396 +181,13 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         remote_repo = "";
     }
 
-    {
-        auto br = Gtk::manage(new PoolBrowserUnit(&pool));
-        br->set_show_path(true);
-        br->signal_activated().connect([this, br] { handle_edit_unit(br->get_selected()); });
-
-        br->show();
-        browsers.emplace(ObjectType::UNIT, br);
-
-        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
-        auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
-        bbox->set_margin_bottom(8);
-        bbox->set_margin_top(8);
-        bbox->set_margin_start(8);
-        bbox->set_margin_end(8);
-
-        add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_unit));
-        add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_unit));
-        add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_unit));
-        add_action_button("Create Symbol", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_symbol_for_unit));
-        add_action_button("Create Entity", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_create_entity_for_unit));
-        if (remote_repo.size())
-            add_action_button("Merge", bbox, br,
-                              [this](const UUID &uu) { remote_box->merge_item(ObjectType::UNIT, uu); });
-
-        bbox->show_all();
-
-        box->pack_start(*bbox, false, false, 0);
-
-        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
-        sep->show();
-        box->pack_start(*sep, false, false, 0);
-        box->pack_start(*br, true, true, 0);
-
-        auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
-        paned->add1(*box);
-        paned->child_property_shrink(*box) = false;
-
-        auto preview = Gtk::manage(new UnitPreview(pool));
-        preview->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
-        br->signal_selected().connect([this, br, preview] {
-            auto sel = br->get_selected();
-            if (!sel) {
-                preview->load(nullptr);
-                return;
-            }
-            auto unit = pool.get_unit(sel);
-            preview->load(unit);
-        });
-        paned->add2(*preview);
-        paned->show_all();
-
-        append_page(*paned, "Units");
-    }
-    {
-        auto br = Gtk::manage(new PoolBrowserSymbol(&pool));
-        br->set_show_path(true);
-        browsers.emplace(ObjectType::SYMBOL, br);
-        br->show();
-        auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
-
-        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
-        auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
-        bbox->set_margin_bottom(8);
-        bbox->set_margin_top(8);
-        bbox->set_margin_start(8);
-        bbox->set_margin_end(8);
-
-        add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_symbol));
-        add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_symbol));
-        add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_symbol));
-        if (remote_repo.size())
-            add_action_button("Merge", bbox, br,
-                              [this](const UUID &uu) { remote_box->merge_item(ObjectType::SYMBOL, uu); });
-        bbox->show_all();
-
-        box->pack_start(*bbox, false, false, 0);
-
-        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
-        sep->show();
-        box->pack_start(*sep, false, false, 0);
-        box->pack_start(*br, true, true, 0);
-        box->show();
-
-        paned->add1(*box);
-        paned->child_property_shrink(*box) = false;
-
-
-        auto preview = Gtk::manage(new SymbolPreview(pool));
-        br->signal_selected().connect([br, preview] {
-            auto sel = br->get_selected();
-            preview->load(sel);
-        });
-        paned->add2(*preview);
-        paned->show_all();
-
-        br->signal_activated().connect([this, br] { handle_edit_symbol(br->get_selected()); });
-
-        append_page(*paned, "Symbols");
-    }
-
-
-    {
-        auto br = Gtk::manage(new PoolBrowserEntity(&pool));
-        br->set_show_path(true);
-        br->signal_activated().connect([this, br] { handle_edit_entity(br->get_selected()); });
-
-        br->show();
-        browsers.emplace(ObjectType::ENTITY, br);
-
-        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
-        auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
-        bbox->set_margin_bottom(8);
-        bbox->set_margin_top(8);
-        bbox->set_margin_start(8);
-        bbox->set_margin_end(8);
-
-        add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_entity));
-        add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_entity));
-        add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_entity));
-        if (remote_repo.size())
-            add_action_button("Merge", bbox, br,
-                              [this](const UUID &uu) { remote_box->merge_item(ObjectType::ENTITY, uu); });
-
-        bbox->show_all();
-
-        box->pack_start(*bbox, false, false, 0);
-
-        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
-        sep->show();
-        box->pack_start(*sep, false, false, 0);
-        box->pack_start(*br, true, true, 0);
-
-        auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
-        paned->add1(*box);
-        paned->child_property_shrink(*box) = false;
-
-        auto preview = Gtk::manage(new EntityPreview(pool));
-        preview->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
-        br->signal_selected().connect([this, br, preview] {
-            auto sel = br->get_selected();
-            if (!sel) {
-                preview->clear();
-                return;
-            }
-            auto part = pool.get_entity(sel);
-            preview->load(part);
-        });
-
-        paned->add2(*preview);
-        paned->show_all();
-
-        paned->show_all();
-
-        append_page(*paned, "Entities");
-    }
-
-    {
-        auto br = Gtk::manage(new PoolBrowserPadstack(&pool));
-        br->set_show_path(true);
-        br->set_include_padstack_type(Padstack::Type::VIA, true);
-        br->set_include_padstack_type(Padstack::Type::MECHANICAL, true);
-        br->set_include_padstack_type(Padstack::Type::HOLE, true);
-        br->signal_activated().connect([this, br] { handle_edit_padstack(br->get_selected()); });
-
-        br->show();
-        browsers.emplace(ObjectType::PADSTACK, br);
-
-        auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
-
-        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
-        auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
-        bbox->set_margin_bottom(8);
-        bbox->set_margin_top(8);
-        bbox->set_margin_start(8);
-        bbox->set_margin_end(8);
-
-        add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_padstack));
-        add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_padstack));
-        add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_padstack));
-        if (remote_repo.size())
-            add_action_button("Merge", bbox, br,
-                              [this](const UUID &uu) { remote_box->merge_item(ObjectType::PADSTACK, uu); });
-
-        bbox->show_all();
-
-        box->pack_start(*bbox, false, false, 0);
-
-        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
-        sep->show();
-        box->pack_start(*sep, false, false, 0);
-        box->pack_start(*br, true, true, 0);
-        box->show();
-
-        paned->add1(*box);
-        paned->child_property_shrink(*box) = false;
-
-
-        auto canvas = Gtk::manage(new PreviewCanvas(pool, true));
-        paned->add2(*canvas);
-        paned->show_all();
-
-        br->signal_selected().connect([br, canvas] {
-            auto sel = br->get_selected();
-            if (!sel) {
-                canvas->clear();
-            }
-            else {
-                canvas->load(ObjectType::PADSTACK, sel);
-            }
-        });
-
-        append_page(*paned, "Padstacks");
-    }
-
-    {
-        auto br = Gtk::manage(new PoolBrowserPackage(&pool));
-        br->set_show_path(true);
-        br->signal_activated().connect([this, br] { handle_edit_package(br->get_selected()); });
-
-        br->show();
-        browsers.emplace(ObjectType::PACKAGE, br);
-
-        auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
-
-
-        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
-        auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
-        bbox->set_margin_bottom(8);
-        bbox->set_margin_top(8);
-        bbox->set_margin_start(8);
-        bbox->set_margin_end(8);
-
-        add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_package));
-        add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_package));
-        add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_package));
-        add_action_button("Create Padstack", bbox, br,
-                          sigc::mem_fun(this, &PoolNotebook::handle_create_padstack_for_package));
-        if (remote_repo.size()) {
-            add_action_button("Merge", bbox, br,
-                              [this](const UUID &uu) { remote_box->merge_item(ObjectType::PACKAGE, uu); });
-            add_action_button("Merge 3D", bbox, br, [this](const UUID &uu) {
-                auto pkg = pool.get_package(uu);
-                for (const auto &it : pkg->models) {
-                    remote_box->merge_3d_model(it.second.filename);
-                }
-            });
-        }
-        add_action_button("Part Wizard...", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_part_wizard))
-                ->get_style_context()
-                ->add_class("suggested-action");
-
-        bbox->show_all();
-
-        box->pack_start(*bbox, false, false, 0);
-
-        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
-        sep->show();
-        box->pack_start(*sep, false, false, 0);
-        box->pack_start(*br, true, true, 0);
-        box->show();
-
-        paned->add1(*box);
-        paned->child_property_shrink(*box) = false;
-
-        auto canvas = Gtk::manage(new PreviewCanvas(pool, true));
-        paned->add2(*canvas);
-        paned->show_all();
-
-        br->signal_selected().connect([br, canvas] {
-            auto sel = br->get_selected();
-            if (!sel) {
-                canvas->clear();
-                return;
-            }
-            canvas->load(ObjectType::PACKAGE, sel);
-        });
-        append_page(*paned, "Packages");
-    }
-
-    {
-        auto br = Gtk::manage(new PoolBrowserPart(&pool));
-        br->set_show_path(true);
-        br->signal_activated().connect([this, br] { handle_edit_part(br->get_selected()); });
-
-        br->show();
-        browsers.emplace(ObjectType::PART, br);
-
-        auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
-
-        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
-        auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
-        bbox->set_margin_bottom(8);
-        bbox->set_margin_top(8);
-        bbox->set_margin_start(8);
-        bbox->set_margin_end(8);
-
-        add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_part));
-        add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_part));
-        add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_part));
-        add_action_button("Create Part from Part", bbox, br,
-                          sigc::mem_fun(this, &PoolNotebook::handle_create_part_from_part));
-        if (remote_repo.size())
-            add_action_button("Merge", bbox, br,
-                              [this](const UUID &uu) { remote_box->merge_item(ObjectType::PART, uu); });
-
-
-        bbox->show_all();
-
-        box->pack_start(*bbox, false, false, 0);
-
-        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
-        sep->show();
-        box->pack_start(*sep, false, false, 0);
-        box->pack_start(*br, true, true, 0);
-        box->show();
-
-        paned->add1(*box);
-        paned->child_property_shrink(*box) = false;
-
-        auto preview = Gtk::manage(new PartPreview(pool));
-        preview->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
-        paned->add2(*preview);
-        paned->show_all();
-
-        br->signal_selected().connect([this, br, preview] {
-            auto sel = br->get_selected();
-            if (!sel) {
-                preview->load(nullptr);
-                return;
-            }
-            auto part = pool.get_part(sel);
-            preview->load(part);
-        });
-
-        append_page(*paned, "Parts");
-    }
-
-
-    {
-        auto br = Gtk::manage(new PoolBrowserFrame(&pool));
-        br->set_show_path(true);
-        browsers.emplace(ObjectType::FRAME, br);
-        br->show();
-        auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
-
-        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
-        auto bbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
-        bbox->set_margin_bottom(8);
-        bbox->set_margin_top(8);
-        bbox->set_margin_start(8);
-        bbox->set_margin_end(8);
-
-        add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_frame));
-        add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_frame));
-        add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_frame));
-        /*if (remote_repo.size())
-            add_action_button("Merge", bbox, br,
-                              [this](const UUID &uu) { remote_box->merge_item(ObjectType::SYMBOL, uu); });*/
-        bbox->show_all();
-
-        box->pack_start(*bbox, false, false, 0);
-
-        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
-        sep->show();
-        box->pack_start(*sep, false, false, 0);
-        box->pack_start(*br, true, true, 0);
-        box->show();
-
-        paned->add1(*box);
-        paned->child_property_shrink(*box) = false;
-
-
-        auto canvas = Gtk::manage(new PreviewCanvas(pool, false));
-        paned->add2(*canvas);
-        paned->show_all();
-
-        br->signal_selected().connect([br, canvas] {
-            auto sel = br->get_selected();
-            if (!sel) {
-                canvas->clear();
-            }
-            else {
-                canvas->load(ObjectType::FRAME, sel);
-            }
-        });
-
-        br->signal_activated().connect([this, br] { handle_edit_frame(br->get_selected()); });
-
-        append_page(*paned, "Frames");
-    }
+    construct_units();
+    construct_symbols();
+    construct_entities();
+    construct_padstacks();
+    construct_packages();
+    construct_parts();
+    construct_frames();
 
     {
         if (PoolManager::get().get_pools().count(pool.get_base_path())) {
