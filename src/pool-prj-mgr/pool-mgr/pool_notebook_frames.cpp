@@ -7,6 +7,10 @@
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "widgets/pool_browser_frame.hpp"
+
+#ifdef G_OS_WIN32
+#undef ERROR
+#endif
 #include "widgets/preview_canvas.hpp"
 
 namespace horizon {

@@ -8,8 +8,12 @@
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "widgets/pool_browser_package.hpp"
 #include "pool_remote_box.hpp"
-#include "widgets/preview_canvas.hpp"
 #include "widgets/where_used_box.hpp"
+
+#ifdef G_OS_WIN32
+#undef ERROR
+#endif
+#include "widgets/preview_canvas.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_package(const UUID &uu)
