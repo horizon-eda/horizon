@@ -43,6 +43,6 @@ private:
     ListColumns list_columns;
     Gtk::Entry *name_entry = nullptr;
     Gtk::Entry *manufacturer_entry = nullptr;
-    Gtk::Entry *tags_entry = nullptr;
+    class TagEntry *tag_entry = nullptr;
 };
 } // namespace horizon

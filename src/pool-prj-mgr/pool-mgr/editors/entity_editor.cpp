@@ -4,6 +4,7 @@
 #include <glibmm.h>
 #include "dialogs/pool_browser_dialog.hpp"
 #include "widgets/pool_browser.hpp"
+#include "widgets/tag_entry.hpp"
 #include "util/pool_completion.hpp"
 #include "util/gtk_util.hpp"
 
@@ -93,7 +94,13 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
 {
     x->get_widget("entity_name", name_entry);
     x->get_widget("entity_manufacturer", manufacturer_entry);
-    x->get_widget("entity_tags", tags_entry);
+    {
+        Gtk::Box *tag_box;
+        x->get_widget("entity_tags", tag_box);
+        tag_entry = Gtk::manage(new TagEntry(*pool, ObjectType::ENTITY, true));
+        tag_entry->show();
+        tag_box->pack_start(*tag_entry, true, true, 0);
+    }
     x->get_widget("entity_prefix", prefix_entry);
     x->get_widget("entity_gates", gates_listbox);
     x->get_widget("entity_gates_refresh", refresh_button);
@@ -101,7 +108,6 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     x->get_widget("gate_delete", delete_button);
     entry_add_sanitizer(name_entry);
     entry_add_sanitizer(manufacturer_entry);
-    entry_add_sanitizer(tags_entry);
     entry_add_sanitizer(prefix_entry);
 
     bind_entry(name_entry, entity->name, needs_save);
@@ -109,19 +115,9 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
     bind_entry(prefix_entry, entity->prefix, needs_save);
 
-    {
-        std::stringstream s;
-        std::copy(entity->tags.begin(), entity->tags.end(), std::ostream_iterator<std::string>(s, " "));
-        tags_entry->set_text(s.str());
-    }
-
-    tags_entry->signal_changed().connect([this] {
-        std::stringstream ss(tags_entry->get_text());
-        std::istream_iterator<std::string> begin(ss);
-        std::istream_iterator<std::string> end;
-        std::vector<std::string> tags(begin, end);
-        entity->tags.clear();
-        entity->tags.insert(tags.begin(), tags.end());
+    tag_entry->set_tags(entity->tags);
+    tag_entry->signal_changed().connect([this] {
+        entity->tags = tag_entry->get_tags();
         needs_save = true;
     });
 

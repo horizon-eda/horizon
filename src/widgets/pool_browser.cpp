@@ -4,6 +4,7 @@
 #include "util/gtk_util.hpp"
 #include "cell_renderer_color_box.hpp"
 #include "pool/pool_manager.hpp"
+#include "tag_entry.hpp"
 
 namespace horizon {
 PoolBrowser::PoolBrowser(Pool *p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
@@ -19,6 +20,15 @@ Gtk::Entry *PoolBrowser::create_search_entry(const std::string &label)
     add_search_widget(label, *entry);
     entry->signal_search_changed().connect(sigc::mem_fun(this, &PoolBrowser::search));
     search_entries.insert(entry);
+    return entry;
+}
+
+TagEntry *PoolBrowser::create_tag_entry(const std::string &label)
+{
+    auto entry = Gtk::manage(new TagEntry(*pool, get_type()));
+    add_search_widget(label, *entry);
+    entry->signal_changed().connect(sigc::mem_fun(this, &PoolBrowser::search));
+    tag_entries.insert(entry);
     return entry;
 }
 
@@ -181,6 +191,9 @@ void PoolBrowser::clear_search()
 {
     for (auto it : search_entries) {
         it->set_text("");
+    }
+    for (auto it : tag_entries) {
+        it->clear();
     }
 }
 

@@ -153,6 +153,10 @@ void PoolProjectManagerApplication::on_startup()
     Gtk::IconTheme::get_default()->add_resource_path("/net/carrotIndustries/horizon/icons");
     Gtk::Window::set_default_icon_name("horizon-eda");
 
+    auto cssp = Gtk::CssProvider::create();
+    cssp->load_from_resource("/net/carrotIndustries/horizon/global.css");
+    Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 700);
+
     signal_shutdown().connect(sigc::mem_fun(this, &PoolProjectManagerApplication::on_shutdown));
 }
 

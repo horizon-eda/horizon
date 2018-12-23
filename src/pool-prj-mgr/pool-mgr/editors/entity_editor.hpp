@@ -21,7 +21,7 @@ private:
     Gtk::Entry *name_entry = nullptr;
     Gtk::Entry *manufacturer_entry = nullptr;
     Gtk::Entry *prefix_entry = nullptr;
-    Gtk::Entry *tags_entry = nullptr;
+    class TagEntry *tag_entry = nullptr;
 
     Gtk::ListBox *gates_listbox = nullptr;
     Gtk::ToolButton *refresh_button = nullptr;

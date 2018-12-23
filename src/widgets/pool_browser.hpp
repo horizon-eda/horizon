@@ -44,6 +44,7 @@ protected:
     class CellRendererColorBox *create_pool_item_source_cr(Gtk::TreeViewColumn *tvc);
 
     Gtk::Entry *create_search_entry(const std::string &label);
+    class TagEntry *create_tag_entry(const std::string &label);
     void add_search_widget(const std::string &label, Gtk::Widget &w);
 
 
@@ -63,6 +64,7 @@ protected:
 
     Gtk::Menu context_menu;
     std::set<Gtk::Entry *> search_entries;
+    std::set<TagEntry *> tag_entries;
 
     PoolItemSource pool_item_source_from_db(const UUID &uu, bool overridden);
 

@@ -10,6 +10,7 @@
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "util/csv.hpp"
+#include "widgets/tag_entry.hpp"
 
 namespace horizon {
 LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder> &x, const std::string &w,
@@ -49,26 +50,36 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("entity_name", entity_name_entry);
     x->get_widget("entity_name_from_mpn", entity_name_from_mpn_button);
     x->get_widget("entity_prefix", entity_prefix_entry);
-    x->get_widget("entity_tags", entity_tags_entry);
+    {
+        Gtk::Box *tag_box;
+        x->get_widget("entity_tags", tag_box);
+        entity_tags_entry = Gtk::manage(new TagEntry(*pool, ObjectType::ENTITY, true));
+        entity_tags_entry->show();
+        tag_box->pack_start(*entity_tags_entry, true, true, 0);
+    }
 
     x->get_widget("part_mpn", part_mpn_entry);
     x->get_widget("part_value", part_value_entry);
     x->get_widget("part_manufacturer", part_manufacturer_entry);
     x->get_widget("part_description", part_description_entry);
     x->get_widget("part_datasheet", part_datasheet_entry);
-    x->get_widget("part_tags", part_tags_entry);
+    {
+        Gtk::Box *tag_box;
+        x->get_widget("part_tags", tag_box);
+        part_tags_entry = Gtk::manage(new TagEntry(*pool, ObjectType::PART, true));
+        part_tags_entry->show();
+        tag_box->pack_start(*part_tags_entry, true, true, 0);
+    }
     x->get_widget("part_autofill", part_autofill_button);
     x->get_widget("steps_grid", steps_grid);
 
     entry_add_sanitizer(entity_name_entry);
     entry_add_sanitizer(entity_prefix_entry);
-    entry_add_sanitizer(entity_tags_entry);
     entry_add_sanitizer(part_mpn_entry);
     entry_add_sanitizer(part_value_entry);
     entry_add_sanitizer(part_manufacturer_entry);
     entry_add_sanitizer(part_description_entry);
     entry_add_sanitizer(part_datasheet_entry);
-    entry_add_sanitizer(part_tags_entry);
 
     part_manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
 
@@ -280,17 +291,6 @@ bool PartWizard::get_has_finished() const
     return has_finished;
 }
 
-std::set<std::string> tags_from_string(const std::string &s)
-{
-    std::stringstream ss(s);
-    std::istream_iterator<std::string> begin(ss);
-    std::istream_iterator<std::string> end;
-    std::vector<std::string> tags(begin, end);
-    std::set<std::string> tagss;
-    tagss.insert(tags.begin(), tags.end());
-    return tagss;
-}
-
 std::string PartWizard::get_rel_part_filename()
 {
     auto part_fn = Gio::File::create_for_path(part_location_entry->get_filename());
@@ -303,14 +303,14 @@ void PartWizard::finish()
 {
     entity.name = entity_name_entry->get_text();
     entity.prefix = entity_prefix_entry->get_text();
-    entity.tags = tags_from_string(entity_tags_entry->get_text());
+    entity.tags = entity_tags_entry->get_tags();
 
     part.attributes[Part::Attribute::MPN] = {false, part_mpn_entry->get_text()};
     part.attributes[Part::Attribute::VALUE] = {false, part_value_entry->get_text()};
     part.attributes[Part::Attribute::MANUFACTURER] = {false, part_manufacturer_entry->get_text()};
     part.attributes[Part::Attribute::DATASHEET] = {false, part_datasheet_entry->get_text()};
     part.attributes[Part::Attribute::DESCRIPTION] = {false, part_description_entry->get_text()};
-    part.tags = tags_from_string(part_tags_entry->get_text());
+    part.tags = part_tags_entry->get_tags();
 
     entity.manufacturer = part.get_manufacturer();
 

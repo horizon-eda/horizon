@@ -27,3 +27,8 @@
 .bus-toolbar {
   border-right: 1px solid @borders;
 }
+
+.tag-entry-tiny-button {
+  min-width: 0px;
+  padding: 0px;
+}

@@ -1,5 +1,6 @@
 #include "pool_browser_part.hpp"
 #include "pool/pool.hpp"
+#include "widgets/tag_entry.hpp"
 #include <set>
 
 namespace horizon {
@@ -8,7 +9,8 @@ PoolBrowserPart::PoolBrowserPart(Pool *p, const UUID &uu) : PoolBrowser(p), enti
     construct();
     MPN_entry = create_search_entry("MPN");
     manufacturer_entry = create_search_entry("Manufacturer");
-    tags_entry = create_search_entry("Tags");
+    tag_entry = create_tag_entry("Tags");
+
     install_pool_item_source_tooltip();
     search();
 }
@@ -77,8 +79,7 @@ void PoolBrowserPart::search()
     std::string MPN_search = MPN_entry->get_text();
     std::string manufacturer_search = manufacturer_entry->get_text();
 
-    std::istringstream iss(tags_entry->get_text());
-    std::set<std::string> tags{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
+    auto tags = tag_entry->get_tags();
     std::stringstream query;
     if (tags.size() == 0) {
         query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, "
@@ -97,12 +98,13 @@ void PoolBrowserPart::search()
                  "LEFT JOIN packages ON packages.uuid = parts.package "
                  "WHERE parts.MPN LIKE ? AND parts.manufacturer "
                  "LIKE ? AND (parts.entity=? or ?) ";
-        query << "AND parts.uuid IN (SELECT uuid FROM tags WHERE (";
+        query << "AND parts.uuid IN (SELECT uuid FROM tags WHERE tags.tag IN (";
         for (const auto &it : tags) {
             (void)sizeof it;
-            query << "tags.tag LIKE ? OR ";
+            query << "?, ";
         }
-        query << "0) GROUP by tags.uuid HAVING count(*) >= $ntags) ";
+        query << "'') AND tags.type = 'part' "
+                 "GROUP by tags.uuid HAVING count(*) >= $ntags) ";
     }
     query << sort_controller->get_order_by();
     std::cout << query.str() << std::endl;
@@ -113,7 +115,7 @@ void PoolBrowserPart::search()
     q.bind(4, entity_uuid == UUID());
     int i = 0;
     for (const auto &it : tags) {
-        q.bind(i + 5, it + "%");
+        q.bind(i + 5, it);
         i++;
     }
     if (tags.size())

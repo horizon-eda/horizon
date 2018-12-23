@@ -34,7 +34,7 @@ private:
     Gtk::ComboBoxText *w_model_combo = nullptr;
     Gtk::ToggleButton *w_model_inherit = nullptr;
 
-    Gtk::Entry *w_tags = nullptr;
+    class TagEntry *w_tags = nullptr;
     Gtk::Entry *w_tags_inherited = nullptr;
     Gtk::ToggleButton *w_tags_inherit = nullptr;
 

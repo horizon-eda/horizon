@@ -1,5 +1,6 @@
 #include "pool_browser_entity.hpp"
 #include "pool/pool.hpp"
+#include "tag_entry.hpp"
 #include <set>
 
 namespace horizon {
@@ -7,7 +8,7 @@ PoolBrowserEntity::PoolBrowserEntity(Pool *p) : PoolBrowser(p)
 {
     construct();
     name_entry = create_search_entry("Name");
-    tags_entry = create_search_entry("Tags");
+    tag_entry = create_tag_entry("Tags");
     install_pool_item_source_tooltip();
     search();
 }
@@ -41,8 +42,7 @@ void PoolBrowserEntity::search()
 
     std::string name_search = name_entry->get_text();
 
-    std::istringstream iss(tags_entry->get_text());
-    std::set<std::string> tags{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
+    auto tags = tag_entry->get_tags();
     std::string query;
     if (tags.size() == 0) {
         query = "SELECT entities.uuid, entities.name, entities.prefix, "
@@ -59,12 +59,14 @@ void PoolBrowserEntity::search()
               "WHERE tags.uuid = entities.uuid), entities.manufacturer, "
               "entities.filename, entities.pool_uuid, entities.overridden FROM entities LEFT JOIN tags ON tags.uuid = "
               "entities.uuid WHERE entities.name LIKE ? ";
-        qs << "AND (";
+        qs << "AND tags.tag IN (";
         for (const auto &it : tags) {
             (void)sizeof it;
-            qs << "tags.tag LIKE ? OR ";
+            qs << "?, ";
         }
-        qs << "0) GROUP by entities.uuid HAVING count(*) >= $ntags" + sort_controller->get_order_by();
+        qs << "'') AND tags.type = 'entity' "
+              "GROUP by entities.uuid HAVING count(*) >= $ntags";
+        qs << sort_controller->get_order_by();
         query = qs.str();
     }
 
@@ -72,7 +74,7 @@ void PoolBrowserEntity::search()
     q.bind(1, "%" + name_search + "%");
     int i = 0;
     for (const auto &it : tags) {
-        q.bind(i + 2, it + "%");
+        q.bind(i + 2, it);
         i++;
     }
     if (tags.size())

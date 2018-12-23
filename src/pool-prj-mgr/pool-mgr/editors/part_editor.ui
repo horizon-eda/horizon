@@ -114,16 +114,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="tags">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">5</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkBox" id="part_mpn_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -416,6 +406,20 @@
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">10</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="tags">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">5</property>
               </packing>
             </child>
             <child>

@@ -15,6 +15,7 @@
 #include "widgets/pool_browser.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/parameter_set_editor.hpp"
+#include "widgets/tag_entry.hpp"
 #include "hud_util.hpp"
 
 namespace horizon {
@@ -663,7 +664,9 @@ void ImpPackage::construct()
     auto entry_manufacturer = header_button->add_entry("Manufacturer");
     entry_manufacturer->set_completion(create_pool_manufacturer_completion(pool.get()));
 
-    auto entry_tags = header_button->add_entry("Tags");
+    auto entry_tags = Gtk::manage(new TagEntry(*pool.get(), ObjectType::PACKAGE, true));
+    entry_tags->show();
+    header_button->add_widget("Tags", entry_tags);
 
     auto browser_alt_button = Gtk::manage(new PoolBrowserButton(ObjectType::PACKAGE, pool.get()));
     browser_alt_button->get_browser()->set_show_none(true);
@@ -674,8 +677,7 @@ void ImpPackage::construct()
         entry_name->set_text(pkg->name);
         entry_manufacturer->set_text(pkg->manufacturer);
         std::stringstream s;
-        std::copy(pkg->tags.begin(), pkg->tags.end(), std::ostream_iterator<std::string>(s, " "));
-        entry_tags->set_text(s.str());
+        entry_tags->set_tags(pkg->tags);
         if (pkg->alternate_for)
             browser_alt_button->property_selected_uuid() = pkg->alternate_for->uuid;
     }
@@ -712,12 +714,7 @@ void ImpPackage::construct()
     core_package.signal_save().connect(
             [this, entry_name, entry_manufacturer, entry_tags, header_button, browser_alt_button] {
                 auto pkg = core_package.get_package(false);
-                std::stringstream ss(entry_tags->get_text());
-                std::istream_iterator<std::string> begin(ss);
-                std::istream_iterator<std::string> end;
-                std::vector<std::string> tags(begin, end);
-                pkg->tags.clear();
-                pkg->tags.insert(tags.begin(), tags.end());
+                pkg->tags = entry_tags->get_tags();
                 pkg->name = entry_name->get_text();
                 pkg->manufacturer = entry_manufacturer->get_text();
                 UUID alt_uuid = browser_alt_button->property_selected_uuid();

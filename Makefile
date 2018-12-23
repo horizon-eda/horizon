@@ -339,6 +339,7 @@ SRC_IMP = \
 	src/util/pool_completion.cpp\
 	src/export_bom/export_bom.cpp\
 	src/widgets/unplaced_box.cpp\
+	src/widgets/tag_entry.cpp\
 
 SRC_ROUTER = \
 	3rd_party/router/router/pns_router.cpp \
@@ -471,6 +472,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/unit_info_box.cpp\
 	src/widgets/entity_info_box.cpp\
 	src/widgets/padstack_preview.cpp\
+	src/widgets/tag_entry.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

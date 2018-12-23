@@ -1,5 +1,6 @@
 #include "pool_browser_package.hpp"
 #include "pool/pool.hpp"
+#include "tag_entry.hpp"
 #include <set>
 
 namespace horizon {
@@ -8,7 +9,7 @@ PoolBrowserPackage::PoolBrowserPackage(Pool *p) : PoolBrowser(p)
     construct();
     name_entry = create_search_entry("Name");
     manufacturer_entry = create_search_entry("Manufacturer");
-    tags_entry = create_search_entry("Tags");
+    tag_entry = create_tag_entry("Tags");
     install_pool_item_source_tooltip();
     search();
 }
@@ -55,8 +56,7 @@ void PoolBrowserPackage::search()
     std::string name_search = name_entry->get_text();
     std::string manufacturer_search = manufacturer_entry->get_text();
 
-    std::istringstream iss(tags_entry->get_text());
-    std::set<std::string> tags{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
+    auto tags = tag_entry->get_tags();
     std::string query;
     if (tags.size() == 0) {
         query = "SELECT packages.uuid, packages.name, packages.manufacturer,  "
@@ -72,16 +72,16 @@ void PoolBrowserPackage::search()
         qs << "SELECT packages.uuid, packages.name, packages.manufacturer, "
               "packages.n_pads, tags_view.tags, packages.filename, packages.pool_uuid, packages.overridden FROM "
               "packages "
-              "LEFT JOIN tags ON tags.uuid = packages.uuid "
               "LEFT JOIN tags_view ON tags_view.uuid = packages.uuid "
               "WHERE packages.name LIKE ? "
               "AND packages.manufacturer LIKE ? ";
-        qs << "AND (";
+        qs << "AND packages.uuid IN (SELECT uuid FROM tags WHERE tags.tag IN (";
         for (const auto &it : tags) {
             (void)sizeof it;
-            qs << "tags.tag LIKE ? OR ";
+            qs << "?, ";
         }
-        qs << "0) GROUP by packages.uuid HAVING count(*) >= $ntags";
+        qs << "'') AND tags.type = 'package' "
+              "GROUP by tags.uuid HAVING count(*) >= $ntags) ";
         qs << sort_controller->get_order_by();
         query = qs.str();
     }
@@ -90,7 +90,7 @@ void PoolBrowserPackage::search()
     q.bind(2, "%" + manufacturer_search + "%");
     int i = 0;
     for (const auto &it : tags) {
-        q.bind(i + 3, it + "%");
+        q.bind(i + 3, it);
         i++;
     }
     if (tags.size())

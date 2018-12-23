@@ -1,6 +1,7 @@
 #include "part_editor.hpp"
 #include "dialogs/pool_browser_dialog.hpp"
 #include "widgets/pool_browser_package.hpp"
+#include "widgets/tag_entry.hpp"
 #include <iostream>
 #include "pool/part.hpp"
 #include "util/util.hpp"
@@ -127,7 +128,13 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("model_combo", w_model_combo);
     x->get_widget("model_inherit", w_model_inherit);
     x->get_widget("base_label", w_base_label);
-    x->get_widget("tags", w_tags);
+    {
+        Gtk::Box *tag_box;
+        x->get_widget("tags", tag_box);
+        w_tags = Gtk::manage(new TagEntry(*pool, ObjectType::PART, true));
+        w_tags->show();
+        tag_box->pack_start(*w_tags, true, true, 0);
+    }
     x->get_widget("tags_inherit", w_tags_inherit);
     x->get_widget("tags_inherited", w_tags_inherited);
     x->get_widget("tv_pins", w_tv_pins);
@@ -196,12 +203,8 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     w_tags_inherit->set_active(part->inherit_tags);
     w_tags_inherit->signal_toggled().connect([this] { needs_save = true; });
 
-    {
-        std::stringstream s;
-        std::copy(part->tags.begin(), part->tags.end(), std::ostream_iterator<std::string>(s, " "));
-        w_tags->set_text(s.str());
-        w_tags->signal_changed().connect([this] { needs_save = true; });
-    }
+    w_tags->set_tags(part->tags);
+    w_tags->signal_changed().connect([this] { needs_save = true; });
 
     pin_store = Gtk::ListStore::create(pin_list_columns);
     pin_store->set_sort_func(pin_list_columns.pin_name,
@@ -500,14 +503,7 @@ void PartEditor::save()
     else
         part->model = UUID();
 
-    {
-        std::stringstream ss(w_tags->get_text());
-        std::istream_iterator<std::string> begin(ss);
-        std::istream_iterator<std::string> end;
-        std::vector<std::string> tags(begin, end);
-        part->tags.clear();
-        part->tags.insert(tags.begin(), tags.end());
-    }
+    part->tags = w_tags->get_tags();
     part->inherit_tags = w_tags_inherit->get_active();
 
     part->parametric.clear();
