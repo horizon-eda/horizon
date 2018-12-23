@@ -73,10 +73,11 @@ TagEntry::TagPopover::TagPopover(TagEntry *p) : Gtk::Popover(), parent(p)
         tvc->add_attribute(cr->property_text(), list_columns.count);
         cr->property_xalign() = 1;
         cr->property_sensitive() = false;
-        Pango::AttrList attributes_list;
-        auto font_features = Pango::Attribute::create_attr_font_features("tnum 1");
-        attributes_list.insert(font_features);
-        cr->property_attributes() = attributes_list;
+        auto attributes_list = pango_attr_list_new();
+        auto attribute_font_features = pango_attr_font_features_new("tnum 1");
+        pango_attr_list_insert(attributes_list, attribute_font_features);
+        g_object_set(G_OBJECT(cr->gobj()), "attributes", attributes_list, NULL);
+        pango_attr_list_unref(attributes_list);
         view->append_column(*tvc);
     }
     view->set_enable_search(false);
