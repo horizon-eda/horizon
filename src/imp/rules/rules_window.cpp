@@ -189,6 +189,11 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         tvc->set_cell_data_func(*cr4, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
             Gtk::TreeModel::Row row = *it;
             auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
+            auto attributes_list = pango_attr_list_new();
+            auto attribute_font_features = pango_attr_font_features_new("tnum 1");
+            pango_attr_list_insert(attributes_list, attribute_font_features);
+            g_object_set(G_OBJECT(mcr->gobj()), "attributes", attributes_list, NULL);
+            pango_attr_list_unref(attributes_list);
             if (row[tree_columns.running]) {
                 mcr->property_text() = static_cast<std::string>(row[tree_columns.status]);
             }
