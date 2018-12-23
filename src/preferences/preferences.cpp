@@ -289,7 +289,8 @@ void Preferences::load()
     std::string prefs_filename_old = Glib::build_filename(get_config_dir(), "imp-prefs.json");
     if (!Glib::file_test(prefs_filename, Glib::FILE_TEST_IS_REGULAR)) {
         if (Glib::file_test(prefs_filename_old, Glib::FILE_TEST_IS_REGULAR)) {
-            prefs_filename = prefs_filename_old;
+            json j = load_json_from_file(prefs_filename_old);
+            load_from_json(j);
         }
         else {
             load_default();
