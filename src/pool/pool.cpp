@@ -128,7 +128,7 @@ const std::string &Pool::get_base_path() const
 
 int Pool::get_required_schema_version()
 { // keep in sync with schema definition
-    return 9;
+    return 10;
 }
 
 std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) const
@@ -255,8 +255,7 @@ std::set<UUID> Pool::get_alternate_packages(const UUID &uu)
 std::string Pool::get_model_filename(const UUID &pkg_uuid, const UUID &model_uuid)
 {
     UUID pool_uuid;
-    auto pkg = get_package(pkg_uuid);
-    get_filename(ObjectType::PACKAGE, pkg_uuid, &pool_uuid);
+    auto pkg = get_package(pkg_uuid, &pool_uuid);
     auto model = pkg->get_model(model_uuid);
     auto pool = PoolManager::get().get_by_uuid(pool_uuid);
     if (model && pool) {

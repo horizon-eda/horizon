@@ -1,4 +1,4 @@
-PRAGMA user_version=9; --keep in sync with pool.cpp
+PRAGMA user_version=10; --keep in sync with pool.cpp
 
 DROP TABLE IF EXISTS "units";
 CREATE TABLE "units" (
@@ -82,6 +82,12 @@ CREATE TABLE 'tags' (
 	'type'	TEXT NOT NULL,
 	PRIMARY KEY('tag','uuid','type')
 );
+
+DROP INDEX IF EXISTS tag_tag;
+CREATE INDEX tag_tag ON tags (tag ASC);
+
+DROP INDEX IF EXISTS tag_uuid;
+CREATE INDEX tag_uuid ON tags (uuid ASC);
 
 DROP TABLE IF EXISTS "padstacks";
 CREATE TABLE "padstacks" (
