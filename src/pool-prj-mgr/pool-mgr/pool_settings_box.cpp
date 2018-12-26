@@ -87,7 +87,7 @@ PoolListItem::PoolListItem(const UUID &uu) : Gtk::Box(Gtk::ORIENTATION_VERTICAL,
     {
         auto la = Gtk::manage(new Gtk::Label);
         la->set_xalign(0);
-        la->set_markup("<b>" + pool->name + "</b>");
+        la->set_markup("<b>" + (pool ? pool->name : "Not found") + "</b>");
         pack_start(*la, true, true, 0);
         la->show();
     }
@@ -98,7 +98,7 @@ PoolListItem::PoolListItem(const UUID &uu) : Gtk::Box(Gtk::ORIENTATION_VERTICAL,
         la->show();
     }
     {
-        auto la = Gtk::manage(new Gtk::Label(pool->base_path));
+        auto la = Gtk::manage(new Gtk::Label(pool ? pool->base_path : "Not found"));
         la->set_xalign(0);
         pack_start(*la, true, true, 0);
         la->show();
