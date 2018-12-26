@@ -756,7 +756,7 @@ void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb)
                 paths.push_back(inc->base_path);
             }
             else {
-                status_cb(PoolUpdateStatus::ERROR, "", "pool " + (std::string)it + " not found");
+                status_cb(PoolUpdateStatus::FILE_ERROR, pool_base_path, "pool " + (std::string)it + " not found");
             }
         }
     }
