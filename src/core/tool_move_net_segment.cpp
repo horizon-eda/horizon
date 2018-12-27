@@ -55,10 +55,10 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
     if (!net_segment) {
         return ToolResponse::end();
     }
-
-
     auto nsinfo = core.c->get_sheet()->analyze_net_segments().at(net_segment);
     if (nsinfo.bus)
+        return ToolResponse::end();
+    if (!nsinfo.net)
         return ToolResponse::end();
 
     for (const auto &it : core.c->get_sheet()->junctions) {
