@@ -52,6 +52,7 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     label_set_tnum(cursor_label);
     label_set_tnum(tool_bar_tip_label);
+    label_set_tnum(grid_mul_label);
 
 
     canvas = Gtk::manage(new CanvasGL());

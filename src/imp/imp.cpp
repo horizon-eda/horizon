@@ -543,8 +543,14 @@ void ImpBase::run(int argc, char *argv[])
         }
     });
 
-    canvas->signal_grid_mul_changed().connect(
-            [this](unsigned int mul) { main_window->grid_mul_label->set_text("×" + std::to_string(mul)); });
+    canvas->signal_grid_mul_changed().connect([this](unsigned int mul) {
+        std::string s = "×";
+        std::string n = std::to_string(mul);
+        for (int i = 0; i < (3 - (int)n.size()); i++) {
+            s += " ";
+        }
+        main_window->grid_mul_label->set_text(s + n);
+    });
 
     context_menu = Gtk::manage(new Gtk::Menu());
 
