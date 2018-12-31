@@ -15,7 +15,7 @@ CorePackage::CorePackage(const std::string &filename, Pool &pool)
     m_pool = &pool;
 }
 
-bool CorePackage::has_object_type(ObjectType ty)
+bool CorePackage::has_object_type(ObjectType ty) const
 {
     switch (ty) {
     case ObjectType::JUNCTION:

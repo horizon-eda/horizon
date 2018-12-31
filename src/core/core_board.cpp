@@ -60,7 +60,7 @@ void CoreBoard::reload_netlist()
     rebuild();
 }
 
-bool CoreBoard::has_object_type(ObjectType ty)
+bool CoreBoard::has_object_type(ObjectType ty) const
 {
     switch (ty) {
     case ObjectType::JUNCTION:

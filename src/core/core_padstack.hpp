@@ -11,7 +11,7 @@ namespace horizon {
 class CorePadstack : public Core {
 public:
     CorePadstack(const std::string &filename, Pool &pool);
-    bool has_object_type(ObjectType ty) override;
+    bool has_object_type(ObjectType ty) const override;
 
     class LayerProvider *get_layer_provider() override;
 

@@ -175,7 +175,7 @@ Text *CoreSchematic::insert_text(const UUID &uu, bool work)
     return &(x.first->second);
 }
 
-bool CoreSchematic::has_object_type(ObjectType ty)
+bool CoreSchematic::has_object_type(ObjectType ty) const
 {
     switch (ty) {
     case ObjectType::JUNCTION:

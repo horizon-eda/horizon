@@ -12,7 +12,7 @@ CoreFrame::CoreFrame(const std::string &frame_filename)
 }
 
 
-bool CoreFrame::has_object_type(ObjectType ty)
+bool CoreFrame::has_object_type(ObjectType ty) const
 {
     switch (ty) {
     case ObjectType::JUNCTION:

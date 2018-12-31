@@ -12,7 +12,7 @@ class CoreBoard : public Core {
 public:
     CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
               Pool &pool);
-    bool has_object_type(ObjectType ty) override;
+    bool has_object_type(ObjectType ty) const override;
 
     class Block *get_block(bool work = true) override;
     class LayerProvider *get_layer_provider() override;

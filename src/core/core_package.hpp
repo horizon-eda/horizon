@@ -11,7 +11,7 @@ namespace horizon {
 class CorePackage : public Core {
 public:
     CorePackage(const std::string &filename, Pool &pool);
-    bool has_object_type(ObjectType ty) override;
+    bool has_object_type(ObjectType ty) const override;
 
     Package *get_package(bool work = true);
 

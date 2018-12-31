@@ -10,7 +10,7 @@ namespace horizon {
 class CoreSymbol : public Core {
 public:
     CoreSymbol(const std::string &filename, Pool &pool);
-    bool has_object_type(ObjectType ty) override;
+    bool has_object_type(ObjectType ty) const override;
     Symbol *get_symbol(bool work = true);
 
     Junction *get_junction(const UUID &uu, bool work = true) override;

@@ -11,7 +11,7 @@ namespace horizon {
 class CoreSchematic : public Core {
 public:
     CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, Pool &pool);
-    bool has_object_type(ObjectType ty) override;
+    bool has_object_type(ObjectType ty) const override;
 
     Junction *get_junction(const UUID &uu, bool work = true) override;
     Line *get_line(const UUID &uu, bool work = true) override;

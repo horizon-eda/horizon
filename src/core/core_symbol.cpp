@@ -12,7 +12,7 @@ CoreSymbol::CoreSymbol(const std::string &filename, Pool &pool)
     rebuild();
 }
 
-bool CoreSymbol::has_object_type(ObjectType ty)
+bool CoreSymbol::has_object_type(ObjectType ty) const
 {
     switch (ty) {
     case ObjectType::JUNCTION:

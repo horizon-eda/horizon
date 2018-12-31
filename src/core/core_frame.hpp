@@ -9,7 +9,7 @@ namespace horizon {
 class CoreFrame : public Core {
 public:
     CoreFrame(const std::string &frame_filename);
-    bool has_object_type(ObjectType ty) override;
+    bool has_object_type(ObjectType ty) const override;
 
     Frame *get_frame();
     const Frame *get_canvas_data() const;

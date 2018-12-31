@@ -231,7 +231,7 @@ protected:
  */
 class Core : public sigc::trackable {
 public:
-    virtual bool has_object_type(ObjectType ty)
+    virtual bool has_object_type(ObjectType ty) const
     {
         return false;
     }
