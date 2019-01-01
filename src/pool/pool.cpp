@@ -174,9 +174,10 @@ std::string Pool::get_flat_filename(ObjectType type, const UUID &uu) const
     }
 }
 
-void Pool::get_pool_uuid(ObjectType type, const UUID &uu, UUID *pool_uuid_out) {
-	if(pool_uuid_out)
-		*pool_uuid_out = pool_uuid_cache.at(std::make_pair(type, uu));
+void Pool::get_pool_uuid(ObjectType type, const UUID &uu, UUID *pool_uuid_out)
+{
+    if (pool_uuid_out)
+        *pool_uuid_out = pool_uuid_cache.at(std::make_pair(type, uu));
 }
 
 const Unit *Pool::get_unit(const UUID &uu, UUID *pool_uuid_out)
