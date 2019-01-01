@@ -31,6 +31,7 @@ void Pool::clear()
     packages.clear();
     parts.clear();
     frames.clear();
+    pool_uuid_cache.clear();
 }
 
 std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_out)
@@ -84,6 +85,8 @@ std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_
     UUID other_pool_uuid(q.get<std::string>(1));
     if (pool_uuid_out)
         *pool_uuid_out = other_pool_uuid;
+    pool_uuid_cache.emplace(std::piecewise_construct, std::forward_as_tuple(type, uu),
+                            std::forward_as_tuple(other_pool_uuid));
     const auto other_pool_info = PoolManager::get().get_by_uuid(other_pool_uuid);
     UUID this_pool_uuid;
     const auto &pools = PoolManager::get().get_pools();
@@ -171,12 +174,20 @@ std::string Pool::get_flat_filename(ObjectType type, const UUID &uu) const
     }
 }
 
+void Pool::get_pool_uuid(ObjectType type, const UUID &uu, UUID *pool_uuid_out) {
+	if(pool_uuid_out)
+		*pool_uuid_out = pool_uuid_cache.at(std::make_pair(type, uu));
+}
+
 const Unit *Pool::get_unit(const UUID &uu, UUID *pool_uuid_out)
 {
     if (units.count(uu) == 0) {
         std::string path = get_filename(ObjectType::UNIT, uu, pool_uuid_out);
         Unit u = Unit::new_from_file(path);
         units.insert(std::make_pair(uu, u));
+    }
+    else {
+        get_pool_uuid(ObjectType::UNIT, uu, pool_uuid_out);
     }
     return &units.at(uu);
 }
@@ -188,6 +199,9 @@ const Entity *Pool::get_entity(const UUID &uu, UUID *pool_uuid_out)
         Entity e = Entity::new_from_file(path, *this);
         entities.insert(std::make_pair(uu, e));
     }
+    else {
+        get_pool_uuid(ObjectType::ENTITY, uu, pool_uuid_out);
+    }
     return &entities.at(uu);
 }
 
@@ -197,6 +211,9 @@ const Symbol *Pool::get_symbol(const UUID &uu, UUID *pool_uuid_out)
         std::string path = get_filename(ObjectType::SYMBOL, uu, pool_uuid_out);
         Symbol s = Symbol::new_from_file(path, *this);
         symbols.insert(std::make_pair(uu, s));
+    }
+    else {
+        get_pool_uuid(ObjectType::SYMBOL, uu, pool_uuid_out);
     }
     return &symbols.at(uu);
 }
@@ -208,6 +225,9 @@ const Package *Pool::get_package(const UUID &uu, UUID *pool_uuid_out)
         Package p = Package::new_from_file(path, *this);
         packages.emplace(uu, p);
     }
+    else {
+        get_pool_uuid(ObjectType::PACKAGE, uu, pool_uuid_out);
+    }
     return &packages.at(uu);
 }
 
@@ -217,6 +237,9 @@ const Padstack *Pool::get_padstack(const UUID &uu, UUID *pool_uuid_out)
         std::string path = get_filename(ObjectType::PADSTACK, uu, pool_uuid_out);
         Padstack p = Padstack::new_from_file(path);
         padstacks.insert(std::make_pair(uu, p));
+    }
+    else {
+        get_pool_uuid(ObjectType::PADSTACK, uu, pool_uuid_out);
     }
     return &padstacks.at(uu);
 }
@@ -228,6 +251,9 @@ const Part *Pool::get_part(const UUID &uu, UUID *pool_uuid_out)
         Part p = Part::new_from_file(path, *this);
         parts.insert(std::make_pair(uu, p));
     }
+    else {
+        get_pool_uuid(ObjectType::PART, uu, pool_uuid_out);
+    }
     return &parts.at(uu);
 }
 
@@ -237,6 +263,9 @@ const Frame *Pool::get_frame(const UUID &uu, UUID *pool_uuid_out)
         std::string path = get_filename(ObjectType::FRAME, uu, pool_uuid_out);
         Frame f = Frame::new_from_file(path);
         frames.insert(std::make_pair(uu, f));
+    }
+    else {
+        get_pool_uuid(ObjectType::FRAME, uu, pool_uuid_out);
     }
     return &frames.at(uu);
 }

@@ -61,5 +61,7 @@ protected:
     std::map<UUID, Package> packages;
     std::map<UUID, Part> parts;
     std::map<UUID, Frame> frames;
+    std::map<std::pair<ObjectType, UUID>, UUID> pool_uuid_cache;
+    void get_pool_uuid(ObjectType type, const UUID &uu, UUID *pool_uuid_out);
 };
 } // namespace horizon

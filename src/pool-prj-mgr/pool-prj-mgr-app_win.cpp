@@ -1115,19 +1115,35 @@ void PoolProjectManagerAppWindow::cleanup_pool_cache()
         }
     }
 
-    std::set<std::string> models_needed;
+    std::set<std::pair<std::string, UUID>> models_needed, models_cached;
     for (const auto &it_pkg : board.packages) {
         // don't use pool_package because of alternate pkg
+        UUID pool_uuid;
+        pool_cached.get_package(it_pkg.second.package.uuid, &pool_uuid);
         auto model = it_pkg.second.package.get_model(it_pkg.second.model);
         if (model) {
-            models_needed.emplace(model->filename);
+            models_needed.emplace(model->filename, pool_uuid);
         }
     }
-    std::set<std::string> models_cached;
-    find_files_recursive(Glib::build_filename(project->pool_cache_directory, "3d_models"),
-                         [&models_cached](const std::string &model_filename) {
-                             models_cached.emplace(Glib::build_filename("3d_models", model_filename));
-                         });
+
+    auto models_path = Glib::build_filename(project->pool_cache_directory, "3d_models");
+    if (Glib::file_test(models_path, Glib::FILE_TEST_IS_DIR)) {
+        Glib::Dir dir_3d(models_path);
+        for (const auto &it : dir_3d) {
+            if (it.find("pool_") == 0 && it.size() == 41) {
+                UUID pool_uuid(it.substr(5));
+                auto it_pool = PoolManager::get().get_by_uuid(pool_uuid);
+                if (it_pool) {
+                    auto pool_cache_path = Glib::build_filename(models_path, it);
+                    find_files_recursive(pool_cache_path,
+                                         [&models_cached, &pool_uuid](const std::string &model_filename) {
+                                             models_cached.emplace(model_filename, pool_uuid);
+                                         });
+                }
+            }
+        }
+    }
+
 
     std::set<std::string> files_to_delete;
     for (const auto &it : items_cached) {
@@ -1138,7 +1154,8 @@ void PoolProjectManagerAppWindow::cleanup_pool_cache()
     std::set<std::string> models_to_delete;
     for (const auto &it : models_cached) {
         if (models_needed.count(it) == 0) {
-            models_to_delete.insert(Glib::build_filename(project->pool_cache_directory, it));
+            models_to_delete.insert(Glib::build_filename(project->pool_cache_directory, "3d_models",
+                                                         "pool_" + static_cast<std::string>(it.second), it.first));
         }
     }
 

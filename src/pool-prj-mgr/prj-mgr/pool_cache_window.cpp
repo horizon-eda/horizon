@@ -9,6 +9,7 @@
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include <giomm/file.h>
+#include "pool/pool_manager.hpp"
 
 namespace horizon {
 PoolCacheWindow *PoolCacheWindow::create(Gtk::Window *p, const std::string &cache_path, const std::string &pool_path,
@@ -137,32 +138,43 @@ void PoolCacheWindow::refresh_list()
     {
         auto models_path = Glib::build_filename(cache_path, "3d_models");
         if (Glib::file_test(models_path, Glib::FILE_TEST_IS_DIR)) {
-            find_files(models_path,
-                       [this, &models_path, &n_total, &n_missing, &n_current, &n_out_of_date](const std::string &path) {
-                           Gtk::TreeModel::Row row;
-                           row = *item_store->append();
-                           n_total++;
-                           auto filename_cached = Glib::build_filename(models_path, path);
-                           auto filename_pool = Glib::build_filename(pool.get_base_path(), "3d_models", path);
-                           row[tree_columns.filename_cached] = path;
-                           row[tree_columns.name] = Glib::path_get_basename(path);
-                           row[tree_columns.type] = ObjectType::MODEL_3D;
-                           row[tree_columns.uuid] = UUID::random();
-                           if (Glib::file_test(filename_pool, Glib::FILE_TEST_IS_REGULAR)) {
-                               if (compare_files(filename_cached, filename_pool)) {
-                                   row[tree_columns.state] = ItemState::CURRENT;
-                                   n_current++;
-                               }
-                               else {
-                                   row[tree_columns.state] = ItemState::OUT_OF_DATE;
-                                   n_out_of_date++;
-                               }
-                           }
-                           else {
-                               row[tree_columns.state] = ItemState::MISSING_IN_POOL;
-                               n_missing++;
-                           }
-                       });
+            Glib::Dir dir_3d(models_path);
+            for (const auto &it : dir_3d) {
+                if (it.find("pool_") == 0 && it.size() == 41) {
+                    UUID pool_uuid(it.substr(5));
+                    auto it_pool = PoolManager::get().get_by_uuid(pool_uuid);
+                    if (it_pool) {
+                        auto &pool_base_path = it_pool->base_path;
+                        auto pool_cache_path = Glib::build_filename(models_path, it);
+                        find_files(pool_cache_path, [this, &pool_cache_path, &n_total, &n_missing, &n_current,
+                                                     &n_out_of_date, &pool_base_path](const std::string &path) {
+                            Gtk::TreeModel::Row row;
+                            row = *item_store->append();
+                            n_total++;
+                            auto filename_cached = Glib::build_filename(pool_cache_path, path);
+                            auto filename_pool = Glib::build_filename(pool_base_path, path);
+                            row[tree_columns.filename_cached] = path;
+                            row[tree_columns.name] = Glib::path_get_basename(path);
+                            row[tree_columns.type] = ObjectType::MODEL_3D;
+                            row[tree_columns.uuid] = UUID::random();
+                            if (Glib::file_test(filename_pool, Glib::FILE_TEST_IS_REGULAR)) {
+                                if (compare_files(filename_cached, filename_pool)) {
+                                    row[tree_columns.state] = ItemState::CURRENT;
+                                    n_current++;
+                                }
+                                else {
+                                    row[tree_columns.state] = ItemState::OUT_OF_DATE;
+                                    n_out_of_date++;
+                                }
+                            }
+                            else {
+                                row[tree_columns.state] = ItemState::MISSING_IN_POOL;
+                                n_missing++;
+                            }
+                        });
+                    }
+                }
+            }
         }
     }
     item_store->thaw_notify();

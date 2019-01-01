@@ -113,6 +113,7 @@ std::string Project::create(const UUID &default_via)
     {
         auto fi = Gio::File::create_for_path(pool_cache_directory);
         fi->make_directory();
+        Gio::File::create_for_path(Glib::build_filename(base_path, "cache", "3d_models"))->make_directory();
     }
 
     Board board(UUID::random(), block);
