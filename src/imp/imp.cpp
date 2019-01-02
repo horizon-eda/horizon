@@ -412,19 +412,19 @@ void ImpBase::run(int argc, char *argv[])
 
     connect_action(ActionID::SEARCH, [this](const auto &a) { set_search_mode(true); });
     connect_action(ActionID::SEARCH_NEXT, [this](const auto &a) {
-        set_search_mode(true, false);
-        search_go(1);
+        this->set_search_mode(true, false);
+        this->search_go(1);
     });
     connect_action(ActionID::SEARCH_PREVIOUS, [this](const auto &a) {
-        set_search_mode(true, false);
-        search_go(-1);
+        this->set_search_mode(true, false);
+        this->search_go(-1);
     });
 
     main_window->search_entry->property_has_focus().signal_changed().connect(
             [this] { canvas->steal_focus = !main_window->search_entry->property_has_focus(); });
     main_window->search_entry->signal_changed().connect([this] {
-        handle_search();
-        search_go(0);
+        this->handle_search();
+        this->search_go(0);
     });
     main_window->search_entry->signal_key_press_event().connect(
             [this](GdkEventKey *ev) {
