@@ -1,9 +1,6 @@
 #pragma once
 #include "core/clipboard.hpp"
-#include "core/core_package.hpp"
-#include "core/core_padstack.hpp"
-#include "core/core_schematic.hpp"
-#include "core/core_symbol.hpp"
+#include "core/core.hpp"
 #include "core/cores.hpp"
 #include "imp_interface.hpp"
 #include "keyseq_dialog.hpp"
@@ -152,6 +149,8 @@ protected:
 
     void tool_update_data(std::unique_ptr<ToolData> &data);
 
+    virtual void search_center(const Core::SearchResult &res);
+
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
@@ -174,6 +173,15 @@ private:
     KeySequence2 keys_current;
     bool handle_action_key(GdkEventKey *ev);
     void handle_tool_action(const ActionConnection &conn);
+
+    void handle_search();
+    void search_go(int dir);
+    std::list<Core::SearchResult> search_results;
+    unsigned int search_result_current = 0;
+    void update_search_markers();
+    void update_search_types_label();
+    void set_search_mode(bool enabled, bool focus = true);
+    std::map<ObjectType, Gtk::CheckButton *> search_check_buttons;
 
     class LogWindow *log_window = nullptr;
     std::set<SelectableRef> selection_for_drag_move;

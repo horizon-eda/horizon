@@ -51,6 +51,9 @@ public:
     const Symbol *get_canvas_data();
     std::pair<Coordi, Coordi> get_bbox() override;
 
+    bool can_search_for_object_type(ObjectType type) const override;
+    std::list<SearchResult> search(const SearchQuery &q) override;
+
     void reload_pool() override;
 
 private:

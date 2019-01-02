@@ -65,6 +65,9 @@ enum class ActionID {
     HIGHLIGHT_TAG,
     SELECT_GROUP,
     SELECT_TAG,
+    SEARCH,
+    SEARCH_NEXT,
+    SEARCH_PREVIOUS,
 };
 
 enum class ActionGroup {
@@ -84,10 +87,11 @@ enum class ActionGroup {
     RULES,
     VIEW,
     FRAME,
-    GROUP_TAG
+    GROUP_TAG,
+    SEARCH
 };
 
-typedef std::vector<std::pair<int, GdkModifierType>> KeySequence2;
+typedef std::vector<std::pair<unsigned int, GdkModifierType>> KeySequence2;
 
 std::string key_sequence_to_string(const KeySequence2 &keys);
 

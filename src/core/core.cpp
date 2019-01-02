@@ -67,6 +67,7 @@
 #include <memory>
 #include "nlohmann/json.hpp"
 #include "imp/action_catalog.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -715,6 +716,38 @@ bool Core::get_needs_save() const
     return needs_save;
 }
 
+void Core::sort_search_results(std::list<Core::SearchResult> &results, const SearchQuery &q)
+{
+    results.sort([this, q](const auto &a, const auto &b) {
+        auto da = get_display_name(a.type, a.uuid, a.sheet);
+        auto db = get_display_name(b.type, b.uuid, b.sheet);
+        auto ina = !Coordf(a.location).in_range(q.area_visible.first, q.area_visible.second);
+        auto inb = !Coordf(b.location).in_range(q.area_visible.first, q.area_visible.second);
+
+        if (ina > inb)
+            return false;
+        else if (ina < inb)
+            return true;
+
+        if (a.type > b.type)
+            return false;
+        else if (a.type < b.type)
+            return true;
+
+        auto c = strcmp_natural(da, db);
+        if (c > 0)
+            return false;
+        else if (c < 0)
+            return true;
+
+        if (a.location.x > b.location.x)
+            return false;
+        else if (a.location.x < b.location.x)
+            return true;
+
+        return a.location.y > b.location.y;
+    });
+}
 ToolBase::ToolBase(Core *c, ToolID tid) : core(c), tool_id(tid)
 {
 }

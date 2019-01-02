@@ -330,6 +330,24 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Highlight tag", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_SPECIFIC}},
 
+        {{ActionID::SEARCH, ToolID::NONE},
+         {"Search", ActionGroup::SEARCH,
+          ActionCatalogItem::AVAILABLE_IN_PACKAGE | ActionCatalogItem::AVAILABLE_IN_SYMBOL
+                  | ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::SEARCH_NEXT, ToolID::NONE},
+         {"Search next", ActionGroup::SEARCH,
+          ActionCatalogItem::AVAILABLE_IN_PACKAGE | ActionCatalogItem::AVAILABLE_IN_SYMBOL
+                  | ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::SEARCH_PREVIOUS, ToolID::NONE},
+         {"Search previous", ActionGroup::SEARCH,
+          ActionCatalogItem::AVAILABLE_IN_PACKAGE | ActionCatalogItem::AVAILABLE_IN_SYMBOL
+                  | ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::COPY_PLACEMENT},
          {"Copy placement", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -610,6 +628,7 @@ const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
         {ActionGroup::UNDO, "Undo"},           {ActionGroup::LAYER, "Layer"},
         {ActionGroup::SELECTION, "Selection"}, {ActionGroup::RULES, "Rules"},
         {ActionGroup::UNKNOWN, "Misc"},        {ActionGroup::VIEW, "View"},
+        {ActionGroup::SEARCH, "Search"},
 
 };
 
@@ -675,6 +694,9 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(HIGHLIGHT_TAG),
         ACTION_LUT_ITEM(SELECT_GROUP),
         ACTION_LUT_ITEM(SELECT_TAG),
+        ACTION_LUT_ITEM(SEARCH),
+        ACTION_LUT_ITEM(SEARCH_NEXT),
+        ACTION_LUT_ITEM(SEARCH_PREVIOUS),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

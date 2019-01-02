@@ -1,5 +1,6 @@
 #pragma once
 #include "imp.hpp"
+#include "core/core_symbol.hpp"
 
 namespace horizon {
 class ImpSymbol : public ImpBase {

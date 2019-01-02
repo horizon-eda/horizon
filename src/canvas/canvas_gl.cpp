@@ -183,7 +183,8 @@ bool CanvasGL::on_button_press_event(GdkEventButton *button_event)
 
 bool CanvasGL::on_motion_notify_event(GdkEventMotion *motion_event)
 {
-    grab_focus();
+    if (steal_focus)
+        grab_focus();
     pan_drag_move(motion_event);
     cursor_move((GdkEvent *)motion_event);
     drag_selection.drag_move(motion_event);
@@ -359,10 +360,11 @@ void CanvasGL::request_push(PushFilter filter)
     queue_draw();
 }
 
-void CanvasGL::center_and_zoom(const Coordi &center)
+void CanvasGL::center_and_zoom(const Coordi &center, float sc)
 {
     // we want center to be at width, height/2
-    scale = 7.6e-5;
+    if (sc > 0)
+        scale = sc;
     offset.x = -((center.x * (flip_view ? -1 : 1) * scale) - width / 2);
     offset.y = -((center.y * -scale) - height / 2);
     update_viewmat();

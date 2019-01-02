@@ -23,6 +23,14 @@ public:
 
     Gtk::Button *pool_reload_button = nullptr;
 
+    Gtk::SearchEntry *search_entry = nullptr;
+    Gtk::Button *search_previous_button = nullptr;
+    Gtk::Button *search_next_button = nullptr;
+    Gtk::Label *search_status_label = nullptr;
+    Gtk::Revealer *search_revealer = nullptr;
+    Gtk::Expander *search_expander = nullptr;
+    Gtk::Box *search_types_box = nullptr;
+
     void tool_bar_set_visible(bool v);
     void tool_bar_set_tool_name(const std::string &s);
     void tool_bar_set_tool_tip(const std::string &s);

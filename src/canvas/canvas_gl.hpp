@@ -83,7 +83,7 @@ public:
         return s_signal_request_display_name;
     }
 
-    void center_and_zoom(const Coordi &center);
+    void center_and_zoom(const Coordi &center, float scale = -1);
     void zoom_to_bbox(const Coordi &a, const Coordi &b);
 
     Glib::PropertyProxy<int> property_work_layer()
@@ -113,7 +113,18 @@ public:
 
     void inhibit_drag_selection();
 
+    bool steal_focus = true;
+
     int _animate_step(GdkFrameClock *frame_clock);
+
+    float get_width() const
+    {
+        return width;
+    }
+    float get_height() const
+    {
+        return height;
+    }
 
 protected:
     void push() override;

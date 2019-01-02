@@ -451,7 +451,12 @@ bool CoreSchematic::get_property_meta(ObjectType type, const UUID &uu, ObjectPro
 
 std::string CoreSchematic::get_display_name(ObjectType type, const UUID &uu)
 {
-    auto &sheet = sch.sheets.at(sheet_uuid);
+    return get_display_name(type, uu, sheet_uuid);
+}
+
+std::string CoreSchematic::get_display_name(ObjectType type, const UUID &uu, const UUID &sh)
+{
+    auto &sheet = sch.sheets.at(sh);
     switch (type) {
     case ObjectType::NET:
         return block.nets.at(uu).name;
@@ -472,10 +477,16 @@ std::string CoreSchematic::get_display_name(ObjectType type, const UUID &uu)
     }
 
     case ObjectType::SCHEMATIC_SYMBOL:
-        return sheet.symbols.at(uu).component->refdes;
+        return sheet.symbols.at(uu).component->refdes + sheet.symbols.at(uu).gate->suffix;
 
     case ObjectType::COMPONENT:
         return block.components.at(uu).refdes;
+
+    case ObjectType::POWER_SYMBOL:
+        return sheet.power_symbols.at(uu).net->name;
+
+    case ObjectType::BUS_RIPPER:
+        return sheet.bus_rippers.at(uu).bus_member->net->name;
 
     default:
         return Core::get_display_name(type, uu);
@@ -542,6 +553,124 @@ void CoreSchematic::revert()
 {
     history_load(history_current);
     reverted = true;
+}
+
+bool CoreSchematic::can_search_for_object_type(ObjectType ty) const
+{
+    switch (ty) {
+    case ObjectType::SCHEMATIC_SYMBOL:
+    case ObjectType::NET_LABEL:
+    case ObjectType::POWER_SYMBOL:
+    case ObjectType::BUS_RIPPER:
+        return true;
+        break;
+    default:;
+    }
+
+    return false;
+}
+
+static void sort_search_results_schematic(std::list<Core::SearchResult> &results, const Core::SearchQuery &q,
+                                          CoreSchematic *core)
+{
+    results.sort([core, q](const auto &a, const auto &b) {
+        int index_a = core->get_schematic()->sheets.at(a.sheet).index;
+        int index_b = core->get_schematic()->sheets.at(b.sheet).index;
+
+        if (a.sheet == core->get_sheet()->uuid)
+            index_a = -1;
+        if (b.sheet == core->get_sheet()->uuid)
+            index_b = -1;
+
+        if (index_a > index_b)
+            return false;
+        if (index_a < index_b)
+            return true;
+
+        auto da = core->get_display_name(a.type, a.uuid, a.sheet);
+        auto db = core->get_display_name(b.type, b.uuid, b.sheet);
+        auto ina = !Coordf(a.location).in_range(q.area_visible.first, q.area_visible.second);
+        auto inb = !Coordf(b.location).in_range(q.area_visible.first, q.area_visible.second);
+        if (ina > inb)
+            return false;
+        else if (ina < inb)
+            return true;
+
+        if (a.type > b.type)
+            return false;
+        else if (a.type < b.type)
+            return true;
+
+        auto c = strcmp_natural(da, db);
+        if (c > 0)
+            return false;
+        else if (c < 0)
+            return true;
+
+        if (a.location.x > b.location.x)
+            return false;
+        else if (a.location.x < b.location.x)
+            return true;
+
+        return a.location.y > b.location.y;
+    });
+}
+
+std::list<Core::SearchResult> CoreSchematic::search(const SearchQuery &q)
+{
+    std::list<Core::SearchResult> results;
+    if (q.query.size() == 0)
+        return results;
+    for (const auto &it_sheet : sch.sheets) {
+        const auto &sheet = it_sheet.second;
+        if (q.types.count(ObjectType::SCHEMATIC_SYMBOL)) {
+            for (const auto &it : sheet.symbols) {
+                if (it.second.component->refdes.find(q.query) != std::string::npos) {
+                    results.emplace_back(ObjectType::SCHEMATIC_SYMBOL, it.first);
+                    auto &x = results.back();
+                    x.location = it.second.placement.shift;
+                    x.sheet = sheet.uuid;
+                    x.selectable = true;
+                }
+            }
+        }
+        if (q.types.count(ObjectType::NET_LABEL)) {
+            for (const auto &it : sheet.net_labels) {
+                if (it.second.junction->net && it.second.junction->net->name.find(q.query) != std::string::npos) {
+                    results.emplace_back(ObjectType::NET_LABEL, it.first);
+                    auto &x = results.back();
+                    x.location = it.second.junction->position;
+                    x.sheet = sheet.uuid;
+                    x.selectable = true;
+                }
+            }
+        }
+        if (q.types.count(ObjectType::BUS_RIPPER)) {
+            for (const auto &it : sheet.bus_rippers) {
+                if (it.second.bus_member->net && it.second.bus_member->net->name.find(q.query) != std::string::npos) {
+                    results.emplace_back(ObjectType::BUS_RIPPER, it.first);
+                    auto &x = results.back();
+                    x.location = it.second.get_connector_pos();
+                    x.sheet = sheet.uuid;
+                    x.selectable = true;
+                }
+            }
+        }
+        if (q.types.count(ObjectType::POWER_SYMBOL)) {
+            for (const auto &it : sheet.power_symbols) {
+                if (it.second.junction->net && it.second.junction->net->name.find(q.query) != std::string::npos) {
+                    results.emplace_back(ObjectType::POWER_SYMBOL, it.first);
+                    auto &x = results.back();
+                    x.location = it.second.junction->position;
+                    x.sheet = sheet.uuid;
+                    x.selectable = true;
+                }
+            }
+        }
+    }
+    sort_search_results_schematic(results, q, this);
+
+    return results;
 }
 
 void CoreSchematic::history_push()

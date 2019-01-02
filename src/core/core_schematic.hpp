@@ -52,6 +52,7 @@ public:
                            class PropertyMeta &meta) override;
 
     std::string get_display_name(ObjectType type, const UUID &uu) override;
+    std::string get_display_name(ObjectType type, const UUID &uu, const UUID &sheet) override;
 
     class Rules *get_rules() override;
 
@@ -71,6 +72,9 @@ public:
     void set_sheet(const UUID &uu);
     const Sheet *get_canvas_data();
     std::pair<Coordi, Coordi> get_bbox() override;
+
+    bool can_search_for_object_type(ObjectType type) const override;
+    std::list<SearchResult> search(const SearchQuery &q) override;
 
 private:
     Block block;

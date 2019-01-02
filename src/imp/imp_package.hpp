@@ -1,4 +1,5 @@
 #pragma once
+#include "core/core_package.hpp"
 #include "block/block.hpp"
 #include "board/board.hpp"
 #include "imp_layer.hpp"

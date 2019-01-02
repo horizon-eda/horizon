@@ -6,7 +6,7 @@ uniform mat3 viewmat;
 uniform float alpha;
 in vec2 position_to_geom[1];
 in vec3 color_to_geom[1];
-in int flags_to_geom[1];
+in uint flags_to_geom[1];
 flat out vec3 color_to_fragment;
 smooth out vec2 draw_pos_to_fragment;
 
@@ -18,6 +18,10 @@ void main() {
 	vec2 position = position_to_geom[0];
 	vec3 color = color_to_geom[0];
 	vec2 size = vec2(40, 40);
+	uint flags = flags_to_geom[0];
+	if((flags & uint(1))!=uint(0)) {
+		size = vec2(20,20);
+	}
 	color_to_fragment = color;
 	
 	draw_pos_to_fragment = vec2(0,0);

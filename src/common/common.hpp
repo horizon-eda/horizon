@@ -176,6 +176,11 @@ public:
         return x * x + y * y;
     }
 
+    bool in_range(const Coord<T> &a, const Coord<T> &b) const
+    {
+        return x > a.x && y > a.y && x < b.x && y < b.y;
+    }
+
     void operator+=(const Coord<T> a)
     {
         x += a.x;

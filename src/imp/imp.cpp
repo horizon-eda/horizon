@@ -2,6 +2,7 @@
 #include "block/block.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "core/core_board.hpp"
+#include "core/core_schematic.hpp"
 #include "export_gerber/gerber_export.hpp"
 #include "logger/logger.hpp"
 #include "pool/part.hpp"
@@ -408,6 +409,82 @@ void ImpBase::run(int argc, char *argv[])
         canvas->set_flip_view(!canvas->get_flip_view());
         this->canvas_update_from_pp();
     });
+
+    connect_action(ActionID::SEARCH, [this](const auto &a) { set_search_mode(true); });
+    connect_action(ActionID::SEARCH_NEXT, [this](const auto &a) {
+        set_search_mode(true, false);
+        search_go(1);
+    });
+    connect_action(ActionID::SEARCH_PREVIOUS, [this](const auto &a) {
+        set_search_mode(true, false);
+        search_go(-1);
+    });
+
+    main_window->search_entry->property_has_focus().signal_changed().connect(
+            [this] { canvas->steal_focus = !main_window->search_entry->property_has_focus(); });
+    main_window->search_entry->signal_changed().connect([this] {
+        handle_search();
+        search_go(0);
+    });
+    main_window->search_entry->signal_key_press_event().connect(
+            [this](GdkEventKey *ev) {
+                if (ev->keyval == GDK_KEY_Escape) {
+                    set_search_mode(false);
+                    return true;
+                }
+                else if (ev->keyval == GDK_KEY_Return && (ev->state & Gdk::SHIFT_MASK)) {
+                    search_go(-1);
+                    return true;
+                }
+                else {
+                    for (auto &it : action_connections) {
+                        for (const auto &it2 : it.second.key_sequences) {
+                            if (it2.size() == 1) {
+                                auto k = it2.front();
+                                if (ev->keyval == k.first && (ev->state & k.second)) {
+                                    handle_key_press(ev);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+                return false;
+            },
+            false);
+    main_window->search_next_button->signal_clicked().connect([this] { trigger_action(ActionID::SEARCH_NEXT); });
+    main_window->search_previous_button->signal_clicked().connect(
+            [this] { trigger_action(ActionID::SEARCH_PREVIOUS); });
+    main_window->search_entry->signal_activate().connect([this] { trigger_action(ActionID::SEARCH_NEXT); });
+
+    for (const auto &it : object_descriptions) {
+        if (core.r->can_search_for_object_type(it.first)) {
+            auto b = Gtk::manage(new Gtk::CheckButton(it.second.name_pl));
+            search_check_buttons.emplace(it.first, b);
+            main_window->search_types_box->pack_start(*b, false, false, 0);
+            b->set_active(true);
+            b->signal_toggled().connect([this] {
+                update_search_types_label();
+                handle_search();
+                search_go(0);
+            });
+            b->show();
+        }
+    }
+    if (search_check_buttons.size() < 2) {
+        main_window->search_expander->hide();
+    }
+    core.r->signal_tool_changed().connect([this](ToolID id) {
+        if (id != ToolID::NONE) {
+            set_search_mode(false);
+        }
+        else {
+            handle_search();
+        }
+    });
+
+    update_search_types_label();
+    search_go(0);
 
 
     grid_spin_button = Gtk::manage(new SpinButtonDim());
@@ -996,6 +1073,7 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
         if (!core.r->tool_is_active()) {
             canvas->selection_mode = CanvasGL::SelectionMode::HOVER;
             canvas->set_selection({});
+            set_search_mode(false);
         }
         if (keys_current.size() == 0) {
             return false;
@@ -1168,6 +1246,9 @@ void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRe
 
 bool ImpBase::handle_click(GdkEventButton *button_event)
 {
+    if (button_event->button != 2)
+        set_search_mode(false);
+
     bool need_menu = false;
     if (core.r->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)) {
         ToolArgs args;
@@ -1438,6 +1519,146 @@ void ImpBase::tool_update_data(std::unique_ptr<ToolData> &data)
         ToolResponse r = core.r->tool_update(args);
         tool_process(r);
     }
+}
+
+void ImpBase::handle_search()
+{
+    Core::SearchQuery q;
+    q.query = main_window->search_entry->get_text();
+    trim(q.query);
+    for (auto &it : search_check_buttons) {
+        if (it.second->get_active()) {
+            q.types.insert(it.first);
+        }
+    }
+    auto min_c = canvas->screen2canvas({0, canvas->get_height()});
+    auto max_c = canvas->screen2canvas({canvas->get_width(), 0});
+    q.area_visible = {min_c, max_c};
+    search_result_current = 0;
+    search_results = core.r->search(q);
+    update_search_markers();
+}
+
+static std::string get_padded_str(unsigned int n, unsigned int max)
+{
+    int digits_max = std::to_string(max).size();
+    std::string n_str = std::to_string(n);
+    std::string prefix;
+    for (int i = 0; i < (digits_max - (int)n_str.size()); i++) {
+        prefix += " ";
+    }
+    return prefix + n_str;
+}
+
+void ImpBase::search_go(int dir)
+{
+    if (search_results.size() == 0) {
+        main_window->search_status_label->set_text("No matches");
+        return;
+    }
+    auto &dom = canvas->markers.get_domain(MarkerDomain::SEARCH);
+    dom.at(search_result_current).size = MarkerRef::Size::SMALL;
+    dom.at(search_result_current).color = get_canvas_preferences()->appearance.colors.at(ColorP::SEARCH);
+    if (dir > 0) {
+        search_result_current = (search_result_current + 1) % search_results.size();
+    }
+    else if (dir < 0) {
+        if (search_result_current)
+            search_result_current--;
+        else
+            search_result_current = search_results.size() - 1;
+    }
+    dom.at(search_result_current).size = MarkerRef::Size::DEFAULT;
+    dom.at(search_result_current).color = get_canvas_preferences()->appearance.colors.at(ColorP::SEARCH_CURRENT);
+    auto n_results = search_results.size();
+    std::string status;
+    if (n_results == 1) {
+        status = "One match:";
+    }
+    else {
+        status = "Match " + get_padded_str(search_result_current + 1, search_results.size()) + "/"
+                 + std::to_string(search_results.size()) + ":";
+    }
+    auto &res = *std::next(search_results.begin(), search_result_current);
+    status +=
+            " " + object_descriptions.at(res.type).name + " " + core.r->get_display_name(res.type, res.uuid, res.sheet);
+    main_window->search_status_label->set_text(status);
+    canvas->update_markers();
+    search_center(res);
+}
+
+void ImpBase::search_center(const Core::SearchResult &res)
+{
+    auto c = res.location;
+    auto min_c = canvas->screen2canvas({0, canvas->get_height()});
+    auto max_c = canvas->screen2canvas({canvas->get_width(), 0});
+    if (c.x > max_c.x || c.y > max_c.y || c.x < min_c.x || c.y < min_c.y) {
+        canvas->center_and_zoom(c);
+    }
+}
+
+void ImpBase::update_search_markers()
+{
+    auto &dom = canvas->markers.get_domain(MarkerDomain::SEARCH);
+    dom.clear();
+    for (const auto &it : search_results) {
+        dom.emplace_back(it.location, get_canvas_preferences()->appearance.colors.at(ColorP::SEARCH), it.sheet);
+        dom.back().size = MarkerRef::Size::SMALL;
+    }
+    canvas->update_markers();
+}
+
+void ImpBase::set_search_mode(bool enabled, bool focus)
+{
+    main_window->search_revealer->set_reveal_child(enabled);
+
+    if (enabled) {
+        if (focus)
+            main_window->search_entry->grab_focus();
+    }
+    else {
+        canvas->grab_focus();
+    }
+
+    canvas->markers.set_domain_visible(MarkerDomain::SEARCH, enabled);
+}
+
+void ImpBase::update_search_types_label()
+{
+    size_t n_enabled = 0;
+    for (auto &it : search_check_buttons) {
+        if (it.second->get_active()) {
+            n_enabled++;
+        }
+    }
+    std::string la;
+    if (n_enabled == 0) {
+        la = "No object types enabled";
+    }
+    else if (n_enabled == search_check_buttons.size()) {
+        la = "All object types";
+    }
+    else if (n_enabled > (search_check_buttons.size() / 2)) {
+        la = "All but ";
+        for (auto &it : search_check_buttons) {
+            if (!it.second->get_active()) {
+                la += object_descriptions.at(it.first).name_pl + ", ";
+            }
+        }
+        la.pop_back();
+        la.pop_back();
+    }
+
+    else {
+        for (auto &it : search_check_buttons) {
+            if (it.second->get_active()) {
+                la += object_descriptions.at(it.first).name_pl + ", ";
+            }
+        }
+        la.pop_back();
+        la.pop_back();
+    }
+    main_window->search_expander->set_label(la);
 }
 
 } // namespace horizon

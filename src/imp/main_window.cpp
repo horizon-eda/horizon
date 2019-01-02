@@ -42,6 +42,15 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("nonmodal_label", nonmodal_label);
     x->get_widget("nonmodal_label2", nonmodal_label2);
 
+    x->get_widget("search_revealer", search_revealer);
+    x->get_widget("search_entry", search_entry);
+    x->get_widget("search_previous_button", search_previous_button);
+    x->get_widget("search_next_button", search_next_button);
+    x->get_widget("search_status_label", search_status_label);
+    x->get_widget("search_types_box", search_types_box);
+    x->get_widget("search_expander", search_expander);
+    search_revealer->set_reveal_child(false);
+
     nonmodal_close_button->signal_clicked().connect([this] { nonmodal_rev->set_reveal_child(false); });
     nonmodal_button->signal_clicked().connect([this] {
         nonmodal_rev->set_reveal_child(false);
@@ -53,6 +62,7 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     label_set_tnum(cursor_label);
     label_set_tnum(tool_bar_tip_label);
     label_set_tnum(grid_mul_label);
+    label_set_tnum(search_status_label);
 
 
     canvas = Gtk::manage(new CanvasGL());

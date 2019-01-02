@@ -635,6 +635,14 @@ void ImpSchematic::handle_drag()
     }
 }
 
+void ImpSchematic::search_center(const Core::SearchResult &res)
+{
+    if (res.sheet != core_schematic.get_sheet()->uuid) {
+        sheet_box->select_sheet(res.sheet);
+    }
+    ImpBase::search_center(res);
+}
+
 class SelectSheetDialog : public Gtk::Dialog {
 public:
     SelectSheetDialog(const Schematic *sch, const Sheet *skip);

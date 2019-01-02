@@ -14,6 +14,7 @@ public:
     float g;
     float b;
     uint8_t flags;
+    enum Flags { F_SMALL = (1 << 0) };
 
     Marker(const Coordf &p, const Color &co, uint8_t f = 0) : x(p.x), y(p.y), r(co.r), g(co.g), b(co.b), flags(f)
     {
@@ -27,6 +28,8 @@ public:
     Coordf position;
     UUID sheet;
     Color color;
+    enum class Size { DEFAULT, SMALL };
+    Size size = Size::DEFAULT;
     MarkerRef(const Coordf &pos, const Color &co, const UUID &s = UUID()) : position(pos), sheet(s), color(co)
     {
     }

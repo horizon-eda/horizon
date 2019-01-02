@@ -32,3 +32,11 @@
   min-width: 0px;
   padding: 0px;
 }
+
+.imp-search-slider {
+  background-color: @theme_base_color;
+  border-color: @borders;
+  border-radius: 0 0 3px 3px;
+  border-width: 0 1px 1px 1px;
+  border-style: solid;
+}

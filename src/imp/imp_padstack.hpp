@@ -1,5 +1,6 @@
 #pragma once
 #include "imp_layer.hpp"
+#include "core/core_padstack.hpp"
 
 namespace horizon {
 class ImpPadstack : public ImpLayer {

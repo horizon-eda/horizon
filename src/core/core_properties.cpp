@@ -471,6 +471,11 @@ void Core::set_placement(Placement &placement, const class PropertyValue &value,
     }
 }
 
+std::string Core::get_display_name(ObjectType type, const UUID &uu, const UUID &sheet)
+{
+    return get_display_name(type, uu);
+}
+
 std::string Core::get_display_name(ObjectType type, const UUID &uu)
 {
     switch (type) {

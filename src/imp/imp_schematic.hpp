@@ -1,5 +1,6 @@
 #pragma once
 #include "imp.hpp"
+#include "core/core_schematic.hpp"
 
 namespace horizon {
 class ImpSchematic : public ImpBase {
@@ -25,6 +26,7 @@ protected:
     }
 
     std::string get_hud_text(std::set<SelectableRef> &sel) override;
+    void search_center(const Core::SearchResult &res) override;
 
 private:
     void canvas_update() override;

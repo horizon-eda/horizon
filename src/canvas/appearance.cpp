@@ -31,6 +31,8 @@ Appearance::Appearance()
     colors[ColorP::SELECTABLE_INNER] = {0, 0, 0};
     colors[ColorP::SELECTABLE_ALWAYS] = {1, 1, 0};
     colors[ColorP::SELECTABLE_PRELIGHT] = {.5, 0, .5};
+    colors[ColorP::SEARCH] = {0, 0, 1};
+    colors[ColorP::SEARCH_CURRENT] = {1, 0, 1};
 
     layer_colors[BoardLayers::TOP_NOTES] = {1, 1, 1};
     layer_colors[BoardLayers::L_OUTLINE] = {.6, .6, 0};

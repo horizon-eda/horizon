@@ -307,6 +307,7 @@ public:
                                    class PropertyMeta &meta);
 
     virtual std::string get_display_name(ObjectType type, const UUID &uu);
+    virtual std::string get_display_name(ObjectType type, const UUID &uu, const UUID &sheet);
 
     void set_property_begin();
     void set_property_commit();
@@ -330,6 +331,35 @@ public:
     virtual void update_rules()
     {
     }
+
+    virtual bool can_search_for_object_type(ObjectType type) const
+    {
+        return false;
+    };
+
+    class SearchQuery {
+    public:
+        std::string query;
+        std::set<ObjectType> types;
+        std::pair<Coordf, Coordf> area_visible;
+    };
+
+    class SearchResult {
+    public:
+        SearchResult(ObjectType ty, const UUID &uu) : type(ty), uuid(uu)
+        {
+        }
+        ObjectType type;
+        UUID uuid;
+        Coordi location;
+        UUID sheet;
+        bool selectable = false;
+    };
+
+    virtual std::list<SearchResult> search(const SearchQuery &q)
+    {
+        return {};
+    };
 
     virtual std::pair<Coordi, Coordi> get_bbox() = 0;
 
@@ -466,6 +496,8 @@ protected:
     void layers_to_meta(class PropertyMeta &meta);
     void get_placement(const Placement &placement, class PropertyValue &value, ObjectProperty::ID property);
     void set_placement(Placement &placement, const class PropertyValue &value, ObjectProperty::ID property);
+
+    void sort_search_results(std::list<Core::SearchResult> &results, const SearchQuery &q);
 
 private:
     std::unique_ptr<ToolBase> create_tool(ToolID tool_id);
