@@ -410,7 +410,7 @@ void ImpBase::run(int argc, char *argv[])
         this->canvas_update_from_pp();
     });
 
-    connect_action(ActionID::SEARCH, [this](const auto &a) { set_search_mode(true); });
+    connect_action(ActionID::SEARCH, [this](const auto &a) { this->set_search_mode(true); });
     connect_action(ActionID::SEARCH_NEXT, [this](const auto &a) {
         this->set_search_mode(true, false);
         this->search_go(1);
