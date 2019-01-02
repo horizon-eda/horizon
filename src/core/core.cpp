@@ -719,8 +719,8 @@ bool Core::get_needs_save() const
 void Core::sort_search_results(std::list<Core::SearchResult> &results, const SearchQuery &q)
 {
     results.sort([this, q](const auto &a, const auto &b) {
-        auto da = get_display_name(a.type, a.uuid, a.sheet);
-        auto db = get_display_name(b.type, b.uuid, b.sheet);
+        auto da = this->get_display_name(a.type, a.uuid, a.sheet);
+        auto db = this->get_display_name(b.type, b.uuid, b.sheet);
         auto ina = !Coordf(a.location).in_range(q.area_visible.first, q.area_visible.second);
         auto inb = !Coordf(b.location).in_range(q.area_visible.first, q.area_visible.second);
 
