@@ -84,11 +84,10 @@ void PoolBrowserPart::search()
     if (tags.size() == 0) {
         query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, "
                  "packages.name, tags_view.tags, parts.filename, "
-                 "parts.description, parts.pool_uuid, parts.overridden FROM parts LEFT JOIN tags_view ON "
-                 "tags_view.uuid = "
-                 "parts.uuid LEFT JOIN packages ON packages.uuid = "
-                 "parts.package WHERE parts.MPN LIKE ? AND parts.manufacturer "
-                 "LIKE ? AND (parts.entity=? or ?) ";
+                 "parts.description, parts.pool_uuid, parts.overridden "
+                 "FROM parts LEFT JOIN tags_view ON "
+                 "tags_view.uuid = parts.uuid LEFT "
+                 "JOIN packages ON packages.uuid = parts.package ";
     }
     else {
         query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, "
@@ -96,26 +95,28 @@ void PoolBrowserPart::search()
                  "parts.description, parts.pool_uuid, parts.overridden FROM parts "
                  "LEFT JOIN tags_view ON tags_view.uuid = parts.uuid "
                  "LEFT JOIN packages ON packages.uuid = parts.package "
-                 "WHERE parts.MPN LIKE ? AND parts.manufacturer "
-                 "LIKE ? AND (parts.entity=? or ?) ";
-        query << "AND parts.uuid IN (SELECT uuid FROM tags WHERE tags.tag IN (";
+                 "INNER JOIN (SELECT uuid FROM tags WHERE tags.tag IN (";
+        int i = 0;
         for (const auto &it : tags) {
             (void)sizeof it;
-            query << "?, ";
+            query << "$tag" << i << ", ";
         }
         query << "'') AND tags.type = 'part' "
-                 "GROUP by tags.uuid HAVING count(*) >= $ntags) ";
+                 "GROUP by tags.uuid HAVING count(*) >= $ntags) as x ON x.uuid = parts.uuid ";
     }
+    query << "WHERE parts.MPN LIKE $mpn "
+             "AND parts.manufacturer LIKE $manufacturer "
+             "AND (parts.entity=$entity or $entity_all) ";
     query << sort_controller->get_order_by();
     std::cout << query.str() << std::endl;
     SQLite::Query q(pool->db, query.str());
-    q.bind(1, "%" + MPN_search + "%");
-    q.bind(2, "%" + manufacturer_search + "%");
-    q.bind(3, entity_uuid);
-    q.bind(4, entity_uuid == UUID());
+    q.bind("$mpn", "%" + MPN_search + "%");
+    q.bind("$manufacturer", "%" + manufacturer_search + "%");
+    q.bind("$entity", entity_uuid);
+    q.bind("$entity_all", entity_uuid == UUID());
     int i = 0;
     for (const auto &it : tags) {
-        q.bind(i + 5, it);
+        q.bind(("$tag" + std::to_string(i)).c_str(), it);
         i++;
     }
     if (tags.size())
