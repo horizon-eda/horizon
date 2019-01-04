@@ -100,6 +100,7 @@ void PoolBrowserPart::search()
         for (const auto &it : tags) {
             (void)sizeof it;
             query << "$tag" << i << ", ";
+            i++;
         }
         query << "'') AND tags.type = 'part' "
                  "GROUP by tags.uuid HAVING count(*) >= $ntags) as x ON x.uuid = parts.uuid ";
