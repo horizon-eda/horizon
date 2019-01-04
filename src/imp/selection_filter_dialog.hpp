@@ -1,16 +1,10 @@
 #pragma once
-#include "canvas/selection_filter.hpp"
-#include "common/common.hpp"
-#include "core/core.hpp"
-#include "util/uuid.hpp"
-#include <array>
 #include <gtkmm.h>
-#include <set>
 namespace horizon {
 
 class SelectionFilterDialog : public Gtk::Window {
 public:
-    SelectionFilterDialog(Gtk::Window *parent, SelectionFilter *sf, Core *c);
+    SelectionFilterDialog(Gtk::Window *parent, class SelectionFilter *sf, class Core *c);
 
 private:
     SelectionFilter *selection_filter;

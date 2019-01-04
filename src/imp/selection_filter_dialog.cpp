@@ -1,5 +1,9 @@
 #include "selection_filter_dialog.hpp"
 #include "util/gtk_util.hpp"
+#include "common/common.hpp"
+#include "common/object_descr.hpp"
+#include "core/core.hpp"
+#include "canvas/selection_filter.hpp"
 
 namespace horizon {
 
