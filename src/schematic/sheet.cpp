@@ -572,6 +572,8 @@ std::map<UUID, NetSegmentInfo> Sheet::analyze_net_segments(bool place_warnings)
 std::set<UUIDPath<3>> Sheet::get_pins_connected_to_net_segment(const UUID &uu_segment)
 {
     std::set<UUIDPath<3>> r;
+    if (!uu_segment)
+        return r;
     for (const auto &it_sym : symbols) {
         for (const auto &it_pin : it_sym.second.symbol.pins) {
             if (it_pin.second.net_segment == uu_segment) {
