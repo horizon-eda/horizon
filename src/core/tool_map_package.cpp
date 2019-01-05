@@ -22,7 +22,9 @@ ToolResponse ToolMapPackage::begin(const ToolArgs &args)
     for (const auto &it : args.selection) {
         if (it.type == ObjectType::COMPONENT) {
             if (brd->block->components.count(it.uuid)) {
-                components_from_selection.insert(&brd->block->components.at(it.uuid));
+                auto comp = brd->block->components.at(it.uuid);
+                if (comp.part)
+                    components_from_selection.insert(&comp);
             }
         }
     }
