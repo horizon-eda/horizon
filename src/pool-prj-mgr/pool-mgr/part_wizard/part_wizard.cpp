@@ -694,6 +694,7 @@ void PartWizard::update_part()
     std::cout << "upd part" << std::endl;
     std::set<UUID> pins_used;
     std::set<UUID> units_used;
+    part.pad_map.clear();
     for (auto &ch : pads_lb->get_children()) {
         auto ed = dynamic_cast<PadEditor *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
         std::string pin_name = ed->pin_name_entry->get_text();
