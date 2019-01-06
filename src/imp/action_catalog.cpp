@@ -610,6 +610,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Set pins NC", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::CLEAR_NC},
+         {"Clear pins NC", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::ADD_KEEPOUT},
          {"Add keepout", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},

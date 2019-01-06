@@ -16,6 +16,8 @@ bool ToolSetNotConnected::can_begin()
 
 ToolResponse ToolSetNotConnected::begin(const ToolArgs &args)
 {
+    if (tool_id == ToolID::CLEAR_NC)
+        mode = Mode::CLEAR;
     update_tip();
     return ToolResponse();
 }
