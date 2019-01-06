@@ -233,9 +233,15 @@ void GerberWriter::draw_padstack(const Padstack &ps, int layer, const Placement 
                     prim->width = it.second.params.at(0);
                     prim->height = it.second.params.at(1);
                     auto tr2 = tr;
+                    if (tr2.mirror) {
+                        tr2.invert_angle();
+                    }
                     tr2.accumulate(it.second.placement);
                     prim->center = tr2.shift;
-                    prim->angle = tr2.get_angle();
+                    if (tr2.mirror)
+                        prim->angle = 65536 - tr2.get_angle();
+                    else
+                        prim->angle = tr2.get_angle();
                 } break;
 
                 case Shape::Form::OBROUND: {
@@ -244,9 +250,15 @@ void GerberWriter::draw_padstack(const Padstack &ps, int layer, const Placement 
                     prim->height = it.second.params.at(1);
                     prim->width = it.second.params.at(0) - prim->height;
                     auto tr2 = tr;
+                    if (tr2.mirror) {
+                        tr2.invert_angle();
+                    }
                     tr2.accumulate(it.second.placement);
                     prim->center = tr2.shift;
-                    prim->angle = tr2.get_angle();
+                    if (tr2.mirror)
+                        prim->angle = 65536 - tr2.get_angle();
+                    else
+                        prim->angle = tr2.get_angle();
 
                     am->primitives.push_back(std::make_unique<ApertureMacro::PrimitiveCircle>());
                     auto prim_c1 = dynamic_cast<ApertureMacro::PrimitiveCircle *>(am->primitives.back().get());

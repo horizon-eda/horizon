@@ -102,6 +102,8 @@ void CanvasGerber::img_hole(const Hole &hole)
     else if (hole.shape == Hole::Shape::SLOT) {
         auto tr = transform;
         tr.accumulate(hole.placement);
+        if (tr.mirror)
+            tr.invert_angle();
         wr->draw_slot(tr.shift, hole.diameter, hole.length, tr.get_angle());
     }
 }
