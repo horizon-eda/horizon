@@ -37,6 +37,25 @@ std::pair<bool, std::string> ParameterProgramPolygon::set_polygon(const Paramete
             }
         }
     }
+    else if (shape == "circle") {
+        int64_t diameter;
+        if (ParameterProgram::stack_pop(stack, diameter))
+            return {true, "empty stack"};
+        for (auto &it : get_polygons()) {
+            if (it.second.parameter_class == pclass) {
+                it.second.vertices.clear();
+                it.second.vertices.emplace_back(Coordi(-diameter / 2 + x0, y0));
+                it.second.vertices.back().arc_center = {x0, y0};
+                it.second.vertices.back().type = Polygon::Vertex::Type::ARC;
+
+                it.second.vertices.emplace_back(Coordi(diameter / 2 + x0, y0));
+                it.second.vertices.back().arc_center = {x0, y0};
+                it.second.vertices.back().type = Polygon::Vertex::Type::ARC;
+
+                it.second.vertices.emplace_back(Coordi(-diameter / 2 + x0, y0));
+            }
+        }
+    }
 
     else {
         return {true, "unknown shape " + shape};
