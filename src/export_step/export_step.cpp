@@ -103,7 +103,10 @@ private:
                 gp_Trsf trsf;
                 trsf.SetTranslation(gp_Vec(tr.shift.x / 1e6, tr.shift.y / 1e6, -thickness / 2e6));
                 gp_Trsf rot;
-                rot.SetRotation(gp_Ax1(), (tr.get_angle() / 32768.) * M_PI);
+                if (tr.mirror)
+                    rot.SetRotation(gp_Ax1(), (-tr.get_angle() / 32768.) * M_PI);
+                else
+                    rot.SetRotation(gp_Ax1(), (tr.get_angle() / 32768.) * M_PI);
                 trsf.Multiply(rot);
                 BRepBuilderAPI_Transform s_shift(s, trsf);
                 cutouts.push_back(s_shift.Shape());
@@ -186,7 +189,7 @@ static bool getModelLocation(bool aBottom, DOUBLET aPosition, double aRotation, 
     gp_Trsf lRot;
 
     if (aBottom) {
-        lRot.SetRotation(gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 0.0, 1.0)), -aRotation);
+        lRot.SetRotation(gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 0.0, 1.0)), aRotation + M_PI);
         lPos.Multiply(lRot);
         lRot.SetRotation(gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(1.0, 0.0, 0.0)), M_PI);
         lPos.Multiply(lRot);
