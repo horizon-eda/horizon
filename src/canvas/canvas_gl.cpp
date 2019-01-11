@@ -28,10 +28,7 @@ CanvasGL::CanvasGL()
       p_property_layer_opacity(*this, "layer-opacity")
 {
     add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_MOTION_MASK | Gdk::POINTER_MOTION_MASK
-               | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK);
-#ifndef G_OS_WIN32
-    add_events(Gdk::SMOOTH_SCROLL_MASK);
-#endif
+               | Gdk::SCROLL_MASK | Gdk::SMOOTH_SCROLL_MASK | Gdk::KEY_PRESS_MASK);
     width = 1000;
     height = 500;
 
