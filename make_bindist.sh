@@ -96,6 +96,7 @@ LIBS=(
 	libdatrie-1.dll\
 	libssl-1_1-x64.dll\
 	libcrypto-1_1-x64.dll\
+	libidn2-4.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
