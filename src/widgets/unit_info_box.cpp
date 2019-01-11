@@ -4,13 +4,25 @@
 #include "util/gtk_util.hpp"
 
 namespace horizon {
-static const std::map<Pin::Direction, std::string> pin_direction_map = [] {
-    std::map<Pin::Direction, std::string> r;
-    for (const auto &it : Pin::direction_names) {
-        r.emplace(it.first, it.second);
+
+class PinDirectionMap {
+public:
+    const std::map<Pin::Direction, std::string> &get()
+    {
+        if (!m) {
+            m = new std::map<Pin::Direction, std::string>;
+            for (const auto &it : Pin::direction_names) {
+                m->emplace(it.first, it.second);
+            }
+        }
+        return *m;
     }
-    return r;
-}();
+
+private:
+    std::map<Pin::Direction, std::string> *m = nullptr;
+};
+
+static PinDirectionMap pin_direction_map;
 
 UnitInfoBox::UnitInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Pool &p)
     : Gtk::Box(cobject), pool(p)
@@ -68,7 +80,7 @@ UnitInfoBox::UnitInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         tvc->set_cell_data_func(*cr, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
             Gtk::TreeModel::Row row = *it;
             auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
-            mcr->property_text() = pin_direction_map.at(row[list_columns.direction]);
+            mcr->property_text() = pin_direction_map.get().at(row[list_columns.direction]);
         });
         view->append_column(*tvc);
     }
