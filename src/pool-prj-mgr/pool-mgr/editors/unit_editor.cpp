@@ -55,9 +55,12 @@ PinEditor::PinEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
     });
 
     {
-        std::stringstream s;
-        std::copy(pin->names.begin(), pin->names.end(), std::ostream_iterator<std::string>(s, " "));
-        names_entry->set_text(s.str());
+        std::stringstream ss;
+        std::copy(pin->names.begin(), pin->names.end(), std::ostream_iterator<std::string>(ss, " "));
+        std::string s(ss.str());
+        if (s.size())
+            s.pop_back();
+        names_entry->set_text(s);
     }
     names_entry->signal_changed().connect([this] {
         std::stringstream ss(names_entry->get_text());
