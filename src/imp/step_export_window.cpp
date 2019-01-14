@@ -1,23 +1,23 @@
 #include "step_export_window.hpp"
 #include "export_step/export_step.hpp"
 #include "util/util.hpp"
+#include "core/core_board.hpp"
 #include <thread>
 
 namespace horizon {
 
-StepExportWindow *StepExportWindow::create(Gtk::Window *p, const Board *b, class Pool *po)
+StepExportWindow *StepExportWindow::create(Gtk::Window *p, class CoreBoard *c)
 {
     StepExportWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/net/carrotIndustries/horizon/imp/step_export.ui");
-    x->get_widget_derived("window", w, b, po);
+    x->get_widget_derived("window", w, c);
     w->set_transient_for(*p);
     return w;
 }
 
-StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const Board *bo,
-                                   Pool *p)
-    : Gtk::Window(cobject), brd(bo), pool(p)
+StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, CoreBoard *c)
+    : Gtk::Window(cobject), core(c)
 {
     set_modal(true);
     x->get_widget("header", header);
@@ -84,13 +84,15 @@ void StepExportWindow::handle_export()
 void StepExportWindow::export_thread(std::string filename, bool include_models)
 {
     try {
-        export_step(filename, *brd, *pool, include_models, [this](std::string msg) {
-            {
-                std::lock_guard<std::mutex> guard(msg_queue_mutex);
-                msg_queue.push_back(msg);
-            }
-            export_dispatcher.emit();
-        });
+        export_step(filename, *core->get_board(), *core->m_pool, include_models,
+                    [this](std::string msg) {
+                        {
+                            std::lock_guard<std::mutex> guard(msg_queue_mutex);
+                            msg_queue.push_back(msg);
+                        }
+                        export_dispatcher.emit();
+                    },
+                    core->get_colors());
     }
     catch (const std::exception &e) {
         {

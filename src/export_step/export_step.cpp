@@ -364,8 +364,8 @@ static double angle_to_rad(int angle)
     return (angle / 32768.) * M_PI;
 }
 
-void export_step(const std::string &filename, const class Board &brd, class Pool &pool, bool include_models,
-                 std::function<void(std::string)> progress_cb)
+void export_step(const std::string &filename, const Board &brd, class Pool &pool, bool include_models,
+                 std::function<void(std::string)> progress_cb, const Board::Colors *colors)
 {
     auto app = XCAFApp_Application::GetApplication();
     Handle(TDocStd_Document) doc;
@@ -423,7 +423,27 @@ void export_step(const std::string &filename, const class Board &brd, class Pool
         board = BRepAlgoAPI_Cut(board, it);
     }
 
-    assy->AddComponent(assy_label, board);
+    auto board_label = assy->AddComponent(assy_label, board);
+
+    if (!board_label.IsNull()) {
+        Handle(XCAFDoc_ColorTool) color = XCAFDoc_DocumentTool::ColorTool(doc->Main());
+        Color c;
+        if (colors) {
+            c = colors->solder_mask;
+        }
+        else {
+            c = brd.colors.solder_mask;
+        }
+        Quantity_Color pcb_color(c.r, c.g, c.b, Quantity_TOC_RGB);
+        color->SetColor(board_label, pcb_color, XCAFDoc_ColorSurf);
+        TopExp_Explorer topex;
+        topex.Init(assy->GetShape(board_label), TopAbs_SOLID);
+
+        while (topex.More()) {
+            color->SetColor(topex.Current(), pcb_color, XCAFDoc_ColorSurf);
+            topex.Next();
+        }
+    }
 
     if (include_models) {
         progress_cb("Packages...");

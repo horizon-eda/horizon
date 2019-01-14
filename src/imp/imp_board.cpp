@@ -301,7 +301,7 @@ void ImpBoard::construct()
         core_board.set_needs_save();
     });
 
-    step_export_window = StepExportWindow::create(main_window, core.b->get_board(), pool.get());
+    step_export_window = StepExportWindow::create(main_window, &core_board);
     tuning_window = new TuningWindow(core.b->get_board());
     tuning_window->set_transient_for(*main_window);
 

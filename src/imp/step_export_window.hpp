@@ -8,14 +8,13 @@ class StepExportWindow : public Gtk::Window {
     friend class GerberLayerEditor;
 
 public:
-    StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Board *b, class Pool *p);
-    static StepExportWindow *create(Gtk::Window *p, const class Board *b, class Pool *po);
+    StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class CoreBoard *c);
+    static StepExportWindow *create(Gtk::Window *p, class CoreBoard *c);
 
     void set_can_export(bool v);
 
 private:
-    const class Board *brd;
-    class Pool *pool;
+    class CoreBoard *core;
     Gtk::HeaderBar *header = nullptr;
     Gtk::Entry *filename_entry = nullptr;
     Gtk::Button *filename_button = nullptr;
