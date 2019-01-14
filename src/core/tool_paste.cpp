@@ -250,7 +250,7 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
             auto x = &core.c->get_sheet()->power_symbols.emplace(u, PowerSymbol(u, it.value())).first->second;
             x->junction = &sheet->junctions.at(junction_xlat.at(x->junction.uuid));
             x->net = &block->nets.at(net_xlat.at(x->net.uuid));
-            core.r->selection.emplace(u, ObjectType::NET_LABEL);
+            core.r->selection.emplace(u, ObjectType::POWER_SYMBOL);
         }
     }
     if (j.count("shapes")) {
