@@ -12,5 +12,6 @@ public:
 
 private:
     std::string cache_path;
+    UUID main_pool_uuid;
 };
 } // namespace horizon

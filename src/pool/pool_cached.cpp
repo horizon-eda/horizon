@@ -25,8 +25,9 @@ PoolCached::PoolCached(const std::string &bp, const std::string &cp) : Pool(bp),
                 }
             }
         }
+        const auto &this_pool = PoolManager::get().get_pools().at(get_base_path());
+        main_pool_uuid = this_pool.uuid;
         if (old_3d_models) {
-            const auto &this_pool = PoolManager::get().get_pools().at(get_base_path());
             auto models_path = Glib::build_filename(cache_path, "3d_models");
             auto fn =
                     Glib::build_filename(models_path, "pool_" + static_cast<std::string>(this_pool.uuid), "3d_models");
@@ -56,7 +57,7 @@ std::string PoolCached::get_filename(ObjectType ty, const UUID &uu, UUID *pool_u
                 Pool::get_filename(ty, uu, &pool_uuid); // for pool uuid
             }
             catch (const std::runtime_error &e) {
-                pool_uuid = UUID();
+                pool_uuid = main_pool_uuid;
             }
             pool_uuid_cache[key] = pool_uuid;
         }
