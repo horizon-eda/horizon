@@ -4,34 +4,42 @@
 #include "util/sqlite.hpp"
 
 namespace horizon {
-SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *gate)
+const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool *auto_selected)
 {
     UUID selected_symbol;
 
     std::string query = "SELECT symbols.uuid FROM symbols WHERE symbols.unit = ?";
     SQLite::Query q(core.r->m_pool->db, query);
-    q.bind(1, gate->unit->uuid);
+    q.bind(1, unit_uu);
     int n = 0;
     while (q.step()) {
         selected_symbol = q.get<std::string>(0);
         n++;
     }
-
+    if (auto_selected)
+        *auto_selected = false;
     bool r = false;
     if (n != 1) {
-        if (placed_symbols.count(gate->unit->uuid) == 0) {
-            std::tie(r, selected_symbol) = imp->dialogs.select_symbol(core.r->m_pool, gate->unit->uuid);
-            placed_symbols.emplace(gate->unit->uuid, selected_symbol);
-            if (!r) {
-                return nullptr;
-            }
-        }
-        else {
-            selected_symbol = placed_symbols.at(gate->unit->uuid);
+        std::tie(r, selected_symbol) = imp->dialogs.select_symbol(core.r->m_pool, unit_uu);
+        if (!r) {
+            return nullptr;
         }
     }
+    else if (n == 1) {
+        if (auto_selected)
+            *auto_selected = true;
+    }
+    else if (n == 0) {
+        return nullptr;
+    }
 
-    const Symbol *sym = core.c->m_pool->get_symbol(selected_symbol);
+    return core.c->m_pool->get_symbol(selected_symbol);
+}
+
+
+SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *gate)
+{
+    const Symbol *sym = get_symbol_for_unit(gate->unit->uuid);
     SchematicSymbol *schsym = core.c->insert_schematic_symbol(UUID::random(), sym);
     schsym->component = comp;
     schsym->gate = gate;

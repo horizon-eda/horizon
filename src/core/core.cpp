@@ -61,6 +61,7 @@
 #include "tool_set_nc_all.hpp"
 #include "tool_set_nc.hpp"
 #include "tool_add_keepout.hpp"
+#include "tool_change_symbol.hpp"
 
 #include "common/dimension.hpp"
 #include "logger/logger.hpp"
@@ -313,6 +314,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::ADD_KEEPOUT:
     case ToolID::EDIT_KEEPOUT:
         return std::make_unique<ToolAddKeepout>(this, tool_id);
+
+    case ToolID::CHANGE_SYMBOL:
+        return std::make_unique<ToolChangeSymbol>(this, tool_id);
 
     default:
         return nullptr;

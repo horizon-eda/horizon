@@ -9,25 +9,6 @@ ToolEditSymbolPinNames::ToolEditSymbolPinNames(Core *c, ToolID tid) : ToolBase(c
 {
 }
 
-SchematicSymbol *ToolEditSymbolPinNames::get_symbol()
-{
-    SchematicSymbol *rsym = nullptr;
-    for (const auto &it : core.r->selection) {
-        if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            auto sym = core.c->get_schematic_symbol(it.uuid);
-            if (rsym) {
-                if (rsym != sym) {
-                    return nullptr;
-                }
-            }
-            else {
-                rsym = sym;
-            }
-        }
-    }
-    return rsym;
-}
-
 bool ToolEditSymbolPinNames::can_begin()
 {
     return get_symbol();

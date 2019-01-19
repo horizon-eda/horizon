@@ -16,6 +16,7 @@ enum class ToolID {
     MIRROR_Y,
     MAP_PIN,
     MAP_SYMBOL,
+    CHANGE_SYMBOL,
     DRAW_NET,
     ADD_COMPONENT,
     PLACE_TEXT,
