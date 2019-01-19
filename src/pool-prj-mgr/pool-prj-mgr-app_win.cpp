@@ -752,7 +752,7 @@ bool PoolProjectManagerAppWindow::check_schema_update(const std::string &base_pa
         Pool my_pool(base_path);
         int user_version = my_pool.db.get_user_version();
         int required_version = my_pool.get_required_schema_version();
-        update_required = user_version < required_version;
+        update_required = user_version != required_version;
     }
     catch (...) {
         update_required = true;

@@ -121,16 +121,6 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     : Gtk::Notebook(), base_path(bp), pool(bp), appwin(aw)
 {
     appwin->pool = &pool;
-    {
-        int user_version = pool.db.get_user_version();
-        int required_version = pool.get_required_schema_version();
-        if (user_version < required_version) {
-            Gtk::MessageDialog md("Schema update required", false /* use_markup */, Gtk::MESSAGE_ERROR,
-                                  Gtk::BUTTONS_OK);
-            md.run();
-            horizon::pool_update(base_path);
-        }
-    }
     appwin->signal_process_exited().connect([this](std::string filename, int status, bool modified) {
         if (modified)
             pool_update();
