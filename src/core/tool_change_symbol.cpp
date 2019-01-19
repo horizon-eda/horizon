@@ -5,7 +5,9 @@
 
 namespace horizon {
 
-ToolChangeSymbol::ToolChangeSymbol(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolChangeSymbol::ToolChangeSymbol(Core *c, ToolID tid)
+    : ToolBase(c, tid), ToolHelperGetSymbol(c, tid), ToolHelperMapSymbol(c, tid)
+
 {
 }
 

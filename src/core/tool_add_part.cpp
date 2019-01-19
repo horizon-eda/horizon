@@ -6,7 +6,8 @@
 
 namespace horizon {
 
-ToolAddPart::ToolAddPart(Core *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid)
+ToolAddPart::ToolAddPart(Core *c, ToolID tid) : ToolBase(c, tid), ToolHelperMapSymbol(c, tid), ToolHelperMove(c, tid)
+
 {
 }
 

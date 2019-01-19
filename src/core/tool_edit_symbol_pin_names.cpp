@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolEditSymbolPinNames::ToolEditSymbolPinNames(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolEditSymbolPinNames::ToolEditSymbolPinNames(Core *c, ToolID tid) : ToolBase(c, tid), ToolHelperGetSymbol(c, tid)
 {
 }
 
