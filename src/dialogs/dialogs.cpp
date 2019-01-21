@@ -421,7 +421,8 @@ std::tuple<bool, std::string, int, int64_t, double> Dialogs::ask_dxf_filename(Co
     fc.add_button("_Open", Gtk::RESPONSE_ACCEPT);
     auto filter = Gtk::FileFilter::create();
     filter->set_name("DXF drawing");
-    filter->add_mime_type("image/vnd.dxf");
+    filter->add_pattern("*.dxf");
+    filter->add_pattern("*.DXF");
     fc.add_filter(filter);
 
     auto extrabox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
