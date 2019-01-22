@@ -16,6 +16,8 @@
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/parameter_set_editor.hpp"
 #include "widgets/tag_entry.hpp"
+#include "widgets/layer_box.hpp"
+#include "widgets/layer_help_box.hpp"
 #include "hud_util.hpp"
 
 namespace horizon {
@@ -654,6 +656,15 @@ void ImpPackage::construct()
         core_package.rebuild();
         canvas_update();
     });
+
+    layer_help_box = Gtk::manage(new LayerHelpBox);
+    layer_help_box->show();
+    main_window->left_panel->pack_end(*layer_help_box, true, true, 0);
+    layer_box->property_work_layer().signal_changed().connect(
+            [this] { layer_help_box->set_layer(layer_box->property_work_layer()); });
+    layer_help_box->set_layer(layer_box->property_work_layer());
+    layer_help_box->signal_trigger_action().connect([this](auto a) { trigger_action(a); });
+
 
     auto header_button = Gtk::manage(new HeaderButton);
     header_button->set_label(core_package.get_package(false)->name);
