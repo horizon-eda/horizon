@@ -342,6 +342,7 @@ SRC_IMP = \
 	src/export_bom/export_bom.cpp\
 	src/widgets/unplaced_box.cpp\
 	src/widgets/tag_entry.cpp\
+	src/widgets/layer_help_box.cpp\
 
 SRC_ROUTER = \
 	3rd_party/router/router/pns_router.cpp \
@@ -535,6 +536,9 @@ endif
 
 src/preferences/color_presets.json: $(wildcard src/preferences/color_presets/*)
 	python3 scripts/make_color_presets.py $^ > $@
+
+src/imp/layer_help.json: $(wildcard src/imp/layer_help/*)
+	python3 scripts/make_layer_help.py $^ > $@
 
 src/resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies imp.gresource.xml |  while read line; do echo "src/$$line"; done)
 	$(GLIB_COMPILE_RESOURCES) imp.gresource.xml --target=$@ --sourcedir=src --generate-source
