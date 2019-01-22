@@ -663,7 +663,7 @@ void ImpPackage::construct()
     layer_box->property_work_layer().signal_changed().connect(
             [this] { layer_help_box->set_layer(layer_box->property_work_layer()); });
     layer_help_box->set_layer(layer_box->property_work_layer());
-    layer_help_box->signal_trigger_action().connect([this](auto a) { trigger_action(a); });
+    layer_help_box->signal_trigger_action().connect([this](auto a) { this->trigger_action(a); });
 
 
     auto header_button = Gtk::manage(new HeaderButton);
