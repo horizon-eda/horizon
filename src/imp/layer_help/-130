@@ -1,0 +1,2 @@
+<big>Bottom Paste</big>
+The paste mask layer defines the cutout areas of the stencil used in the SMD automatic assembly soldering process, which will be coated with solder paste. This is usually defined in the Padstacks placed with the <a href="t:PLACE_PAD">Place Pad Tool</a>

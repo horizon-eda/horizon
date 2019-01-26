@@ -1,0 +1,8 @@
+<big>Bottom Silkscreen</big>
+Should clarify a parts location and orientation during manual assembly and visual inspection. Most of the time you should use the Top Silkscreen layer, because this is where the part would be placed.
+
+Include some sort of pin 1 marker if the part is orientation-sensitive. Do not use a dot, but shorten/elongate the silkscreen graphics instead. 
+
+Also <a href="t:PLACE_TEXT">place a text "$RD"</a> on the silkscreen layer. Both the text and the graphics should use a line width of 0.15mm.
+
+The silksceen should leave a space of at least 0.2mm to the package outline.

@@ -1,0 +1,4 @@
+<big>Inner Copper</big>
+Elements placed on this layer describe which parts of the copper layer remain on the PCB after etching on the inner layer (relative to the part orientation).
+
+For pads use the <a href="t:PLACE_PAD">Place Pad Tool</a> or define your own padstack.

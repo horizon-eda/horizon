@@ -1,0 +1,2 @@
+<big>Bottom Mask</big>
+This layer describes areas on the PCB that are left unmasked by the solder stop mask (relative to the part orientation).

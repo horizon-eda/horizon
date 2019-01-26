@@ -1,0 +1,6 @@
+<big>Bottom Courtyard</big>
+Denotes the space which should be avoided by other packages in order to leave room for assembly. Because depends on the manufacturing requirements, it should be defined from the package outline and then be extended via a parameter program.
+
+Use the <a href="t:GENERATE_COURTYARD">Generate courtyard</a> tool to generate the initial courtyard at 0mm expansion. For more complex shapes, use the <a href="t:DRAW_POLYGON_RECTANGLE">Draw polygon rectangle</a> or the <a href="t:DRAW_POLYGON">Draw polygon</a> tool and set its parameter class to <i>"courtyard"</i> using the property editor on the right side of the window.
+
+Open the "Parameters" Window and click on "Insert courtyard program". If all goes well, this should add the courtyard program and as the parameter "Courtyard expansion" set to 0.25mm.

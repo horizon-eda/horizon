@@ -1,0 +1,4 @@
+<big>Bottom Package</big>
+Used for visualizing the package outline, so it should follow the packages nominal dimensions. You may use the <a href="t:IMPORT_DXF">import DXF</a> tool for importing a DXF drawing obtained from a STEP model or otherwise.
+
+Since the package outline's purpose is purely visual, you can use either lines or polygons. Only include pins if they significantly contribute to the packages appearance.

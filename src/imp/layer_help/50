@@ -1,0 +1,8 @@
+<big>Top Assembly</big>
+Intended to aid in assembly and inspection and ends up on the Assembly Drawing (not yet implemented). Opposed to the package outline, the assembly outline should just be a rough approximation of the packages shape.
+
+Contains following items: 
+
+<b>[+]</b> A polygon indicating the package outline. Use the <a href="t:DRAW_POLYGON_RECTANGLE">Draw Polygon Rectangle</a> tool and it's decoration options to indicate the orientation. If the pins significantly contribute to the packages appearance you may include them and use the <a href="t:DRAW_POLYGON">Draw Polygon</a> tool
+
+<b>[+]</b> A reference designator. Use the <a href="t:PLACE_TEXT">Place Text</a> tool to place a text containing "$RD". Adjust the size so it fits within the assembly outline even when being prefix + 4 digits long.

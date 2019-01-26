@@ -1,1 +1,6 @@
-bottom copper
+<big>Bottom Copper</big>
+Elements placed on this layer describe which parts of the copper layer remain on the PCB after etching (relative to the part orientation).
+
+Per default it will be covered by the solder mask. Use the Bottom Mask layer to expose bare copper.
+
+For pads use the <a href="t:PLACE_PAD">Place Pad Tool</a>
