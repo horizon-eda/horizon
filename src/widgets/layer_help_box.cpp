@@ -12,7 +12,7 @@ LayerHelpBox::LayerHelpBox() : Gtk::ScrolledWindow()
     label->set_text("fixme");
     label->show();
     label->set_xalign(0);
-    label->set_valign(Gtk::ALIGN_FILL);
+    label->set_valign(Gtk::ALIGN_START);
     label->set_line_wrap(true);
     label->set_line_wrap_mode(Pango::WRAP_WORD);
     add(*label);
