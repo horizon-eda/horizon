@@ -33,7 +33,7 @@ PoolParametric::PoolParametric(const std::string &bp, bool read_only)
         q.step();
     }
     std::vector<std::string> table_jsons;
-    table_jsons.push_back(Glib::build_filename(bp, "tables.json"));
+
     auto pools = PoolManager::get().get_pools();
     if (pools.count(base_path)) {
         auto &this_pool = pools.at(base_path);
@@ -47,8 +47,10 @@ PoolParametric::PoolParametric(const std::string &bp, bool read_only)
             }
         }
     }
+    table_jsons.push_back(Glib::build_filename(bp, "tables.json"));
 
-    for (const auto &fn : table_jsons) {
+    for (auto it = table_jsons.crbegin(); it != table_jsons.crend(); it++) {
+        const auto &fn = *it;
         if (Glib::file_test(fn, Glib::FILE_TEST_IS_REGULAR)) {
             auto j = load_json_from_file(fn);
             const json &o = j.at("tables");
