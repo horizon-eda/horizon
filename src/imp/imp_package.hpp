@@ -40,6 +40,7 @@ private:
     std::string ask_3d_model_filename(const std::string &current_filename = "");
 
     Gtk::ListBox *models_listbox = nullptr;
+    class LayerHelpBox *layer_help_box = nullptr;
     UUID current_model;
 };
 } // namespace horizon

@@ -343,6 +343,7 @@ SRC_IMP = \
 	src/export_bom/export_bom.cpp\
 	src/widgets/unplaced_box.cpp\
 	src/widgets/tag_entry.cpp\
+	src/widgets/layer_help_box.cpp\
 
 SRC_ROUTER = \
 	3rd_party/router/router/pns_router.cpp \
