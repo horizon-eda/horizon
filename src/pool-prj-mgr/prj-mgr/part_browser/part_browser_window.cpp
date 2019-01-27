@@ -2,6 +2,7 @@
 #include "util/util.hpp"
 #include "widgets/part_preview.hpp"
 #include "widgets/pool_browser_part.hpp"
+#include "widgets/pool_browser_parametric.hpp"
 
 namespace horizon {
 
@@ -21,10 +22,11 @@ public:
 
 PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
                                      const std::string &pool_path, std::deque<UUID> &favs)
-    : Gtk::Window(cobject), pool(pool_path), favorites(favs), state_store(this, "part-browser")
+    : Gtk::Window(cobject), pool(pool_path), pool_parametric(pool_path), favorites(favs),
+      state_store(this, "part-browser")
 {
     x->get_widget("notebook", notebook);
-    x->get_widget("add_search_button", add_search_button);
+    x->get_widget("menu1", add_search_menu);
     x->get_widget("place_part_button", place_part_button);
     x->get_widget("assign_part_button", assign_part_button);
     x->get_widget("fav_button", fav_button);
@@ -39,7 +41,19 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
     lb_recent->signal_row_selected().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_favorites_selected));
     lb_recent->signal_row_activated().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_favorites_activated));
 
-    add_search_button->signal_clicked().connect([this] { handle_add_search(); });
+    {
+        auto la = Gtk::manage(new Gtk::MenuItem("MPN Search"));
+        la->signal_activate().connect([this] { add_search(); });
+        la->show();
+        add_search_menu->append(*la);
+    }
+    for (const auto &it : pool_parametric.get_tables()) {
+        auto la = Gtk::manage(new Gtk::MenuItem(it.second.display_name));
+        std::string table_name = it.first;
+        la->signal_activate().connect([this, table_name] { add_search_parametric(table_name); });
+        la->show();
+        add_search_menu->append(*la);
+    }
     notebook->signal_switch_page().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_switch_page));
     fav_toggled_conn =
             fav_button->signal_toggled().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_fav_toggled));
@@ -53,7 +67,10 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
     update_part_current();
     update_favorites();
 
-    handle_add_search();
+    add_search();
+    for (const auto &it : pool_parametric.get_tables()) {
+        add_search_parametric(it.first);
+    }
 }
 
 void PartBrowserWindow::handle_favorites_selected(Gtk::ListBoxRow *row)
@@ -119,7 +136,7 @@ void PartBrowserWindow::go_to_part(const UUID &uu)
     if (br)
         br->go_to(uu);
     else
-        handle_add_search(uu);
+        add_search(uu);
 }
 
 void PartBrowserWindow::update_favorites()
@@ -198,7 +215,7 @@ void PartBrowserWindow::update_part_current()
         return;
     auto page = notebook->get_nth_page(notebook->get_current_page());
     SelectionProvider *prv = nullptr;
-    prv = dynamic_cast<PoolBrowserPart *>(page);
+    prv = dynamic_cast<SelectionProvider *>(page);
 
     if (prv) {
         part_current = prv->get_selected();
@@ -249,7 +266,7 @@ void PartBrowserWindow::set_can_assign(bool v)
     assign_part_button->set_sensitive(part_current && can_assign);
 }
 
-void PartBrowserWindow::handle_add_search(const UUID &part)
+void PartBrowserWindow::add_search(const UUID &part)
 {
     auto ch = Gtk::manage(new PoolBrowserPart(&pool));
     ch->get_style_context()->add_class("background");
@@ -271,6 +288,28 @@ void PartBrowserWindow::handle_add_search(const UUID &part)
     ch->signal_activated().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_place_part));
     if (part)
         ch->go_to(part);
+}
+
+void PartBrowserWindow::add_search_parametric(const std::string &table_name)
+{
+    auto ch = Gtk::manage(new PoolBrowserParametric(&pool, &pool_parametric, table_name));
+    ch->get_style_context()->add_class("background");
+    auto tab_label = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
+    auto la = Gtk::manage(new Gtk::Label(pool_parametric.get_tables().at(table_name).display_name));
+    auto close_button = Gtk::manage(new Gtk::Button());
+    close_button->set_relief(Gtk::RELIEF_NONE);
+    close_button->set_image_from_icon_name("window-close-symbolic");
+    close_button->signal_clicked().connect([this, ch] { notebook->remove(*ch); });
+    tab_label->pack_start(*close_button, false, false, 0);
+    tab_label->pack_start(*la, true, true, 0);
+    ch->show_all();
+    tab_label->show_all();
+    auto index = notebook->append_page(*ch, *tab_label);
+    notebook->set_current_page(index);
+
+    search_views.insert(ch);
+    ch->signal_selected().connect(sigc::mem_fun(this, &PartBrowserWindow::update_part_current));
+    ch->signal_activated().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_place_part));
 }
 
 PartBrowserWindow *PartBrowserWindow::create(Gtk::Window *p, const std::string &pool_path, std::deque<UUID> &favs)

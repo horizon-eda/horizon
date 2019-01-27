@@ -88,6 +88,7 @@ SRC_COMMON = \
 	src/frame/frame.cpp\
 	src/common/keepout.cpp\
 	src/board/board_layers.cpp\
+	src/pool/pool_parametric.cpp \
 
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += src/util/uuid_win32.cpp
@@ -385,7 +386,8 @@ SRC_ROUTER = \
 SRC_POOL_UTIL = \
 	src/pool-util/util_main.cpp\
 	src/pool-update/pool-update.cpp\
-	src/pool-update/graph.cpp
+	src/pool-update/graph.cpp\
+	src/pool-update/pool-update_parametric.cpp\
 
 SRC_POOL_UPDATE_PARA = \
 	src/pool-update-parametric/pool-update-parametric.cpp\
@@ -409,6 +411,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-mgr/pool_notebook_frames.cpp\
 	src/pool-prj-mgr/pool-mgr/editors/unit_editor.cpp\
 	src/pool-prj-mgr/pool-mgr/editors/part_editor.cpp\
+	src/pool-prj-mgr/pool-mgr/editors/parametric.cpp\
 	src/pool-prj-mgr/pool-mgr/editors/entity_editor.cpp\
 	src/pool-prj-mgr/pool-mgr/editors/editor_window.cpp\
 	src/pool-prj-mgr/pool-mgr/create_part_dialog.cpp\
@@ -432,6 +435,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/pool_browser_part.cpp\
 	src/widgets/pool_browser_package.cpp\
 	src/widgets/pool_browser_frame.cpp\
+	src/widgets/pool_browser_parametric.cpp\
 	src/dialogs/pool_browser_dialog.cpp\
 	src/widgets/cell_renderer_color_box.cpp\
 	src/widgets/where_used_box.cpp\
@@ -439,6 +443,7 @@ SRC_POOL_PRJ_MGR = \
 	src/util/editor_process.cpp\
 	$(SRC_CANVAS)\
 	src/pool-update/pool-update.cpp\
+	src/pool-update/pool-update_parametric.cpp\
 	src/pool-update/graph.cpp\
 	src/util/gtk_util.cpp\
 	src/util/window_state_store.cpp\

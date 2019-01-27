@@ -7,10 +7,9 @@
     <property name="can_focus">False</property>
     <property name="icon_name">emblem-favorite-symbolic</property>
   </object>
-  <object class="GtkImage" id="image2">
+  <object class="GtkMenu" id="menu1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">list-add-symbolic</property>
   </object>
   <object class="GtkWindow" id="window">
     <property name="can_focus">False</property>
@@ -150,12 +149,21 @@
               <placeholder/>
             </child>
             <child type="action-end">
-              <object class="GtkButton" id="add_search_button">
+              <object class="GtkMenuButton">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="image">image2</property>
                 <property name="relief">none</property>
+                <property name="popup">menu1</property>
+                <property name="direction">up</property>
+                <property name="use_popover">False</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">list-add-symbolic</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="tab_fill">False</property>

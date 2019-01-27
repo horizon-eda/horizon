@@ -4,10 +4,12 @@
 #include "widgets/tag_entry.hpp"
 #include <iostream>
 #include "pool/part.hpp"
+#include "pool/pool_parametric.hpp"
 #include "util/util.hpp"
 #include "util/gtk_util.hpp"
 #include <glibmm.h>
 #include "util/pool_completion.hpp"
+#include "parametric.hpp"
 
 namespace horizon {
 class EntryWithInheritance : public Gtk::Box {
@@ -93,24 +95,9 @@ private:
     std::string text_this;
 };
 
-static std::string serialize_parametric(const std::map<std::string, std::string> &p)
-{
-    using namespace YAML;
-    Emitter em;
-    em << BeginMap;
-    if (p.count("table")) {
-        em << Key << "table" << Value << p.at("table");
-    }
-    for (const auto &it : p) {
-        if (it.first != "table")
-            em << Key << it.first << Value << it.second;
-    }
-    em << EndMap;
-    return em.c_str();
-}
-
-PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Part *p, Pool *po)
-    : Gtk::Box(cobject), part(p), pool(po)
+PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Part *p, Pool *po,
+                       PoolParametric *pp)
+    : Gtk::Box(cobject), part(p), pool(po), pool_parametric(pp)
 {
 
     auto add_entry = [x](const char *name) {
@@ -146,8 +133,10 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("button_select_pads", w_button_select_pads);
     x->get_widget("pin_stat", w_pin_stat);
     x->get_widget("pad_stat", w_pad_stat);
-    x->get_widget("parametric", w_parametric);
+    x->get_widget("parametric_box", w_parametric_box);
+    x->get_widget("parametric_table_combo", w_parametric_table_combo);
     x->get_widget("copy_parametric_from_base", w_parametric_from_base);
+    w_parametric_from_base->hide();
 
     w_entity_label->set_track_visited_links(false);
     w_entity_label->signal_activate_link().connect(
@@ -380,13 +369,23 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     w_model_combo->signal_changed().connect([this] { needs_save = true; });
 
-    w_parametric_from_base->set_sensitive(part->base);
-    w_parametric->get_buffer()->set_text(serialize_parametric(part->parametric));
-    w_parametric->get_buffer()->signal_changed().connect([this] { needs_save = true; });
+    w_parametric_table_combo->append("", "None");
+    for (const auto &it : pool_parametric->get_tables()) {
+        w_parametric_table_combo->append(it.first, it.second.display_name);
+    }
+    w_parametric_table_combo->set_active_id("");
+    if (part->parametric.count("table")) {
+        std::string tab = part->parametric.at("table");
+        if (pool_parametric->get_tables().count(tab)) {
+            w_parametric_table_combo->set_active_id(tab);
+        }
+    }
+    update_parametric_editor();
+    w_parametric_table_combo->signal_changed().connect(sigc::mem_fun(this, &PartEditor::update_parametric_editor));
 
+    w_parametric_from_base->set_sensitive(part->base);
     w_parametric_from_base->signal_clicked().connect([this] {
         if (part->base) {
-            w_parametric->get_buffer()->set_text(serialize_parametric(part->base->parametric));
             needs_save = true;
         }
     });
@@ -506,12 +505,6 @@ void PartEditor::save()
     part->tags = w_tags->get_tags();
     part->inherit_tags = w_tags_inherit->get_active();
 
-    part->parametric.clear();
-    auto para = YAML::Load(w_parametric->get_buffer()->get_text());
-    for (const auto &it : para) {
-        part->parametric.emplace(it.first.as<std::string>(), it.second.as<std::string>());
-    }
-
     part->pad_map.clear();
     for (const auto &it : pad_store->children()) {
         if (it[pad_list_columns.gate_uuid] != UUID() && part->package->pads.count(it[pad_list_columns.pad_uuid])) {
@@ -520,6 +513,11 @@ void PartEditor::save()
             part->pad_map.emplace(it[pad_list_columns.pad_uuid], horizon::Part::PadMapItem(gate, pin));
         }
     }
+
+    if (parametric_editor) {
+        part->parametric = parametric_editor->get_values();
+    }
+
     needs_save = false;
 }
 
@@ -593,12 +591,32 @@ void PartEditor::populate_models()
     }
 }
 
-PartEditor *PartEditor::create(Part *p, Pool *po)
+void PartEditor::update_parametric_editor()
+{
+    auto chs = w_parametric_box->get_children();
+    if (chs.size() == 2) {
+        delete chs.back();
+    }
+    parametric_editor = nullptr;
+    auto tab = w_parametric_table_combo->get_active_id();
+    if (pool_parametric->get_tables().count(tab)) {
+        auto ed = Gtk::manage(new ParametricEditor(pool_parametric, tab));
+        ed->show();
+        w_parametric_box->pack_start(*ed, true, true, 0);
+        if (part->parametric.count("table") && part->parametric.at("table") == tab) {
+            ed->update(part->parametric);
+        }
+        parametric_editor = ed;
+        parametric_editor->signal_changed().connect([this] { needs_save = true; });
+    }
+}
+
+PartEditor *PartEditor::create(Part *p, Pool *po, PoolParametric *pp)
 {
     PartEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/pool-mgr/editors/part_editor.ui");
-    x->get_widget_derived("part_editor", w, p, po);
+    x->get_widget_derived("part_editor", w, p, po, pp);
     w->reference();
     return w;
 }

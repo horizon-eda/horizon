@@ -74,22 +74,28 @@ Gtk::TreeViewColumn *PoolBrowser::append_column_with_item_source_cr(const std::s
     return tvc;
 }
 
-void PoolBrowser::construct()
+void PoolBrowser::construct(Gtk::Widget *search_box)
 {
 
     store = create_list_store();
 
-    grid = Gtk::manage(new Gtk::Grid());
-    grid->set_column_spacing(10);
-    grid->set_row_spacing(10);
+    if (search_box) {
+        search_box->show();
+        pack_start(*search_box, false, false, 0);
+    }
+    else {
+        grid = Gtk::manage(new Gtk::Grid());
+        grid->set_column_spacing(10);
+        grid->set_row_spacing(10);
 
-    grid->set_margin_top(20);
-    grid->set_margin_start(20);
-    grid->set_margin_end(20);
-    grid->set_margin_bottom(20);
+        grid->set_margin_top(20);
+        grid->set_margin_start(20);
+        grid->set_margin_end(20);
+        grid->set_margin_bottom(20);
 
-    grid->show();
-    pack_start(*grid, false, false, 0);
+        grid->show();
+        pack_start(*grid, false, false, 0);
+    }
 
     auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
     sep->show();

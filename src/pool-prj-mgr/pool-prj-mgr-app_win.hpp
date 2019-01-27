@@ -40,6 +40,7 @@ public:
     std::map<std::string, PoolProjectManagerProcess *> get_processes();
 
     class Pool *pool = nullptr;
+    class PoolParametric *pool_parametric = nullptr;
 
     typedef sigc::signal<void, std::string, int, bool> type_signal_process_exited;
     type_signal_process_exited signal_process_exited()

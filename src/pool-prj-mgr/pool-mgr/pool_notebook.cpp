@@ -2,6 +2,7 @@
 #include "pool_notebook.hpp"
 #include "widgets/pool_browser.hpp"
 #include "dialogs/pool_browser_dialog.hpp"
+#include "widgets/pool_browser_parametric.hpp"
 #include "util/util.hpp"
 #include "pool-update/pool-update.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
@@ -15,6 +16,7 @@
 #include "pool_update_error_dialog.hpp"
 #include "pool_settings_box.hpp"
 #include "pool/pool_manager.hpp"
+#include "pool/pool_parametric.hpp"
 #include "part_wizard/part_wizard.hpp"
 #include <thread>
 #include "nlohmann/json.hpp"
@@ -38,6 +40,9 @@ void PoolNotebook::pool_updated(bool success)
     for (auto &br : browsers) {
         br.second->search();
     }
+    for (auto &br : browsers_parametric) {
+        br.second->search();
+    }
     auto procs = appwin->get_processes();
     for (auto &it : procs) {
         it.second->reload();
@@ -55,6 +60,7 @@ void PoolNotebook::pool_updated(bool success)
 PoolNotebook::~PoolNotebook()
 {
     appwin->pool = nullptr;
+    appwin->pool_parametric = nullptr;
 }
 
 Gtk::Button *PoolNotebook::add_action_button(const std::string &label, Gtk::Box *bbox, sigc::slot0<void> cb)
@@ -118,9 +124,10 @@ private:
 };
 
 PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWindow *aw)
-    : Gtk::Notebook(), base_path(bp), pool(bp), appwin(aw)
+    : Gtk::Notebook(), base_path(bp), pool(bp), pool_parametric(bp), appwin(aw)
 {
     appwin->pool = &pool;
+    appwin->pool_parametric = &pool_parametric;
     appwin->signal_process_exited().connect([this](std::string filename, int status, bool modified) {
         if (modified)
             pool_update();
@@ -204,6 +211,16 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
             }
         });
     }
+
+    for (const auto &it_tab : pool_parametric.get_tables()) {
+        auto br = Gtk::manage(new PoolBrowserParametric(&pool, &pool_parametric, it_tab.first));
+        br->show();
+        add_context_menu(br);
+        br->signal_activated().connect([this, br] { go_to(ObjectType::PART, br->get_selected()); });
+        append_page(*br, "Param: " + it_tab.second.display_name);
+        browsers_parametric.emplace(it_tab.first, br);
+    }
+
 
     for (auto br : browsers) {
         add_context_menu(br.second);
@@ -321,13 +338,15 @@ void PoolNotebook::pool_update_thread()
     std::cout << "hello from thread" << std::endl;
 
     try {
-        horizon::pool_update(pool.get_base_path(), [this](PoolUpdateStatus st, std::string filename, std::string msg) {
-            {
-                std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
-                pool_update_status_queue.emplace_back(st, filename, msg);
-            }
-            pool_update_dispatcher.emit();
-        });
+        horizon::pool_update(pool.get_base_path(),
+                             [this](PoolUpdateStatus st, std::string filename, std::string msg) {
+                                 {
+                                     std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
+                                     pool_update_status_queue.emplace_back(st, filename, msg);
+                                 }
+                                 pool_update_dispatcher.emit();
+                             },
+                             true);
     }
     catch (const std::runtime_error &e) {
         {

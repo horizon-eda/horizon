@@ -8,8 +8,9 @@ namespace horizon {
 
 class PartEditor : public Gtk::Box, public PoolEditorInterface {
 public:
-    PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Part *p, class Pool *po);
-    static PartEditor *create(class Part *p, class Pool *po);
+    PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Part *p, class Pool *po,
+               class PoolParametric *pp);
+    static PartEditor *create(class Part *p, class Pool *po, class PoolParametric *pp);
     void reload() override;
     void save() override;
 
@@ -18,6 +19,7 @@ public:
 private:
     class Part *part;
     class Pool *pool;
+    class PoolParametric *pool_parametric;
 
     class EntryWithInheritance *w_mpn = nullptr;
     class EntryWithInheritance *w_value = nullptr;
@@ -48,8 +50,9 @@ private:
     Gtk::Label *w_pin_stat = nullptr;
     Gtk::Label *w_pad_stat = nullptr;
 
-    Gtk::TextView *w_parametric;
-    Gtk::Button *w_parametric_from_base;
+    Gtk::ComboBoxText *w_parametric_table_combo = nullptr;
+    Gtk::Box *w_parametric_box = nullptr;
+    Gtk::Button *w_parametric_from_base = nullptr;
 
     class PinListColumns : public Gtk::TreeModelColumnRecord {
     public:
@@ -99,5 +102,8 @@ private:
     void change_package();
     void populate_models();
     void update_model_inherit();
+
+    class ParametricEditor *parametric_editor = nullptr;
+    void update_parametric_editor();
 };
 } // namespace horizon

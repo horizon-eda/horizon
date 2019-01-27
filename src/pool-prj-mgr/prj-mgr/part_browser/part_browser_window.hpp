@@ -2,6 +2,7 @@
 #include "common/common.hpp"
 #include "pool/part.hpp"
 #include "pool/pool.hpp"
+#include "pool/pool_parametric.hpp"
 #include "util/uuid.hpp"
 #include "util/window_state_store.hpp"
 #include <array>
@@ -29,7 +30,7 @@ public:
     void set_can_assign(bool v);
 
 private:
-    Gtk::Button *add_search_button = nullptr;
+    Gtk::Menu *add_search_menu = nullptr;
     Gtk::Notebook *notebook = nullptr;
     Gtk::Button *place_part_button = nullptr;
     Gtk::Button *assign_part_button = nullptr;
@@ -38,7 +39,8 @@ private:
     Gtk::ListBox *lb_recent = nullptr;
     Gtk::Paned *paned = nullptr;
     class PartPreview *preview = nullptr;
-    void handle_add_search(const UUID &part = UUID());
+    void add_search(const UUID &part = UUID());
+    void add_search_parametric(const std::string &table_name);
     void handle_switch_page(Gtk::Widget *w, guint index);
     void handle_fav_toggled();
     void update_favorites();
@@ -50,6 +52,7 @@ private:
     sigc::connection fav_toggled_conn;
     std::set<Gtk::Widget *> search_views;
     Pool pool;
+    PoolParametric pool_parametric;
     UUID part_current;
     void update_part_current();
     std::deque<UUID> &favorites;

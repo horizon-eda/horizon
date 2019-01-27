@@ -93,7 +93,7 @@ static void part_add_dir_to_graph(PoolUpdateGraph &graph, const std::string &dir
     }
 }
 
-void status_cb_nop(PoolUpdateStatus st, const std::string msg, const std::string filename)
+static void status_cb_nop(PoolUpdateStatus st, const std::string msg, const std::string filename)
 {
 }
 
@@ -211,8 +211,6 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
         }
     }
     pool->db.execute("COMMIT");
-
-    status_cb(PoolUpdateStatus::DONE, "done", "");
 }
 
 PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb(cb)
@@ -669,12 +667,16 @@ void PoolUpdater::update_part_node(const PoolUpdateNode &node, std::set<UUID> &v
                     q.step();
                 }
             }
+            std::string table;
+            if (part.parametric.count("table"))
+                table = part.parametric.at("table");
             SQLite::Query q(pool->db,
                             "INSERT INTO parts "
-                            "(uuid, MPN, manufacturer, entity, package, description, filename, pool_uuid, overridden) "
+                            "(uuid, MPN, manufacturer, entity, package, description, filename, pool_uuid, overridden, "
+                            "parametric_table) "
                             "VALUES "
                             "($uuid, $MPN, $manufacturer, $entity, $package, $description, $filename, $pool_uuid, "
-                            "$overridden)");
+                            "$overridden, $parametric_table)");
             q.bind("$uuid", part.uuid);
             q.bind("$MPN", part.get_MPN());
             q.bind("$manufacturer", part.get_manufacturer());
@@ -683,6 +685,7 @@ void PoolUpdater::update_part_node(const PoolUpdateNode &node, std::set<UUID> &v
             q.bind("$description", part.get_description());
             q.bind("$pool_uuid", pool_uuid);
             q.bind("$overridden", overridden);
+            q.bind("$parametric_table", table);
             auto bp = Gio::File::create_for_path(base_path);
             auto rel = bp->get_relative_path(Gio::File::create_for_path(filename));
             q.bind("$filename", rel);
@@ -741,7 +744,7 @@ void PoolUpdater::add_dependency(ObjectType type, const UUID &uu, ObjectType dep
     q.step();
 }
 
-void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb)
+void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb, bool parametric)
 {
     if (!status_cb)
         status_cb = &status_cb_nop;
@@ -762,5 +765,11 @@ void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb)
     }
     paths.push_back(pool_base_path);
     updater.update(paths);
+
+    if (parametric) {
+        pool_update_parametric(pool_base_path, status_cb);
+    }
+    status_cb(PoolUpdateStatus::DONE, "done", "");
 }
+
 } // namespace horizon

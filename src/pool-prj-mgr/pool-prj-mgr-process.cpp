@@ -12,7 +12,8 @@ template <typename T> constexpr bool any_of(T value, std::initializer_list<T> ch
 
 PoolProjectManagerProcess::PoolProjectManagerProcess(PoolProjectManagerProcess::Type ty,
                                                      const std::vector<std::string> &args,
-                                                     const std::vector<std::string> &ienv, Pool *pool, bool read_only)
+                                                     const std::vector<std::string> &ienv, Pool *pool,
+                                                     class PoolParametric *pool_parametric, bool read_only)
     : type(ty)
 {
     std::string filename;
@@ -79,13 +80,13 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(PoolProjectManagerProcess::
     else {
         switch (type) {
         case PoolProjectManagerProcess::Type::UNIT:
-            win = new EditorWindow(ObjectType::UNIT, args.at(0), pool, read_only);
+            win = new EditorWindow(ObjectType::UNIT, args.at(0), pool, pool_parametric, read_only);
             break;
         case PoolProjectManagerProcess::Type::ENTITY:
-            win = new EditorWindow(ObjectType::ENTITY, args.at(0), pool, read_only);
+            win = new EditorWindow(ObjectType::ENTITY, args.at(0), pool, pool_parametric, read_only);
             break;
         case PoolProjectManagerProcess::Type::PART:
-            win = new EditorWindow(ObjectType::PART, args.at(0), pool, read_only);
+            win = new EditorWindow(ObjectType::PART, args.at(0), pool, pool_parametric, read_only);
             break;
         default:;
         }

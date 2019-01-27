@@ -26,7 +26,7 @@ public:
     enum class PoolItemSource { LOCAL, INCLUDED, OVERRIDING };
 
 protected:
-    void construct();
+    void construct(Gtk::Widget *search_box = nullptr);
     class Pool *pool = nullptr;
     UUID pool_uuid;
     bool show_none = false;

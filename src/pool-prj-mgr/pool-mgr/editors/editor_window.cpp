@@ -76,8 +76,10 @@ public:
     Part part;
 };
 
-EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p, bool read_only)
-    : Gtk::Window(), type(ty), pool(p), state_store(this, "pool-editor-win-" + std::to_string(static_cast<int>(type)))
+EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p, class PoolParametric *pp,
+                           bool read_only)
+    : Gtk::Window(), type(ty), pool(p), pool_parametric(pp),
+      state_store(this, "pool-editor-win-" + std::to_string(static_cast<int>(type)))
 {
     set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
     auto hb = Gtk::manage(new Gtk::HeaderBar());
@@ -120,7 +122,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p, 
     case ObjectType::PART: {
         auto st = new PartStore(filename, pool);
         store.reset(st);
-        auto ed = PartEditor::create(&st->part, pool);
+        auto ed = PartEditor::create(&st->part, pool, pool_parametric);
         editor = ed;
         iface = ed;
         hb->set_title("Part Editor");

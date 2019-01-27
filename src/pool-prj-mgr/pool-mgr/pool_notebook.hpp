@@ -10,6 +10,7 @@
 #include "pool/padstack.hpp"
 
 #include "pool/pool.hpp"
+#include "pool/pool_parametric.hpp"
 #include "util/editor_process.hpp"
 #include "pool-update/pool-update.hpp"
 #include <zmq.hpp>
@@ -32,8 +33,10 @@ public:
 private:
     const std::string base_path;
     Pool pool;
+    PoolParametric pool_parametric;
     class PoolProjectManagerAppWindow *appwin;
     std::map<ObjectType, class PoolBrowser *> browsers;
+    std::map<std::string, class PoolBrowserParametric *> browsers_parametric;
     class PartWizard *part_wizard = nullptr;
     class DuplicateWindow *duplicate_window = nullptr;
     bool closing = false;

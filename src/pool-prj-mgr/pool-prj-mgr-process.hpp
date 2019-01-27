@@ -6,7 +6,7 @@ class PoolProjectManagerProcess : public sigc::trackable {
 public:
     enum class Type { IMP_SYMBOL, IMP_PADSTACK, IMP_PACKAGE, IMP_SCHEMATIC, IMP_BOARD, IMP_FRAME, UNIT, ENTITY, PART };
     PoolProjectManagerProcess(Type ty, const std::vector<std::string> &args, const std::vector<std::string> &env,
-                              class Pool *pool, bool read_only = false);
+                              class Pool *pool, class PoolParametric *pool_parametric, bool read_only);
     Type type;
     std::unique_ptr<EditorProcess> proc = nullptr;
     class EditorWindow *win = nullptr;
