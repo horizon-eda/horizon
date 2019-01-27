@@ -223,7 +223,7 @@ PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb
         SQLite::Database db(pool_db_path, SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE);
 
         int user_version = db.get_user_version();
-        if (user_version < Pool::get_required_schema_version()) {
+        if (user_version != Pool::get_required_schema_version()) {
             // update schema
             auto bytes = Gio::Resource::lookup_data_global("/net/carrotIndustries/horizon/pool-update/schema.sql");
             gsize size{bytes->get_size() + 1}; // null byte
