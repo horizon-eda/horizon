@@ -63,9 +63,9 @@ void LayerHelpBox::load(const std::string &pool_path)
         if (!ifs.is_open()) {
             continue;
         }
-        std::string text;
-        ifs >> text;
-        help_texts.emplace(std::stoi(l), text);
+        std::stringstream text;
+        text << ifs.rdbuf();
+        help_texts.emplace(std::stoi(l), text.str());
     }
 }
 
