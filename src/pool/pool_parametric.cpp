@@ -54,12 +54,12 @@ PoolParametric::PoolParametric(const std::string &bp, bool read_only)
         if (Glib::file_test(fn, Glib::FILE_TEST_IS_REGULAR)) {
             auto j = load_json_from_file(fn);
             const json &o = j.at("tables");
-            for (auto it = o.cbegin(); it != o.cend(); ++it) {
-                std::string table_name = it.key();
+            for (auto it2 = o.cbegin(); it2 != o.cend(); ++it2) {
+                std::string table_name = it2.key();
                 bool table_exists = has_table(table_name);
                 if (table_exists || !read_only)
                     tables.emplace(std::piecewise_construct, std::forward_as_tuple(table_name),
-                                   std::forward_as_tuple(table_name, it.value()));
+                                   std::forward_as_tuple(table_name, it2.value()));
             }
         }
     }

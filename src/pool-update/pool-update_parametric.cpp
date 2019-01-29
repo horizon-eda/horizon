@@ -54,6 +54,7 @@ void pool_update_parametric(const std::string &pool_base_path, pool_update_cb_t 
         auto part = Part::new_from_file(filename, pool);
         status_cb(PoolUpdateStatus::FILE, filename, "");
         auto tab = part.parametric.at("table");
+        bool skip = false;
         if (tables.count(tab)) {
             auto &table = tables.at(tab);
             std::string qs = "INSERT INTO " + table.name + " VALUES (?, ";
@@ -69,10 +70,33 @@ void pool_update_parametric(const std::string &pool_base_path, pool_update_cb_t 
                 std::string v;
                 if (part.parametric.count(col.name)) {
                     v = part.parametric.at(col.name);
+                    switch (col.type) {
+                    case PoolParametric::Column::Type::QUANTITY: {
+                        try {
+                            std::stod(v);
+                        }
+                        catch (const std::invalid_argument &e) {
+                            skip = true;
+                            status_cb(PoolUpdateStatus::FILE_ERROR, filename,
+                                      col.display_name + " '" + v + "' not convertible to double");
+                        }
+                    } break;
+
+                    case PoolParametric::Column::Type::ENUM: {
+                        if (std::find(col.enum_items.begin(), col.enum_items.end(), v) == col.enum_items.end()) {
+                            skip = true;
+                            status_cb(PoolUpdateStatus::FILE_ERROR, filename,
+                                      col.display_name + " value '" + v + "' not in enum");
+                        }
+
+                    } break;
+                    default:;
+                    }
                 }
                 q.bind(2 + i, v);
             }
-            q.step();
+            if (!skip)
+                q.step();
         }
     }
     pool_parametric.db.execute("COMMIT");
