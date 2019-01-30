@@ -15,6 +15,7 @@ void allow_set_foreground_window(int pid);
 std::string coord_to_string(const Coordf &c, bool delta = false);
 std::string dim_to_string(int64_t x, bool with_sign = true);
 std::string angle_to_string(int angle, bool pos_only = true);
+void setup_locale();
 
 int64_t round_multiple(int64_t x, int64_t mul);
 

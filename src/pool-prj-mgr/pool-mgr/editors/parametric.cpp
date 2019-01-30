@@ -45,14 +45,10 @@ public:
     }
     void set_value(const std::string &v) override
     {
-        try {
-            value = std::stod(v);
-            set_text(format_value(value));
-        }
-        catch (const std::invalid_argument &e) {
-            value = 0;
-            set_text(v);
-        }
+        std::istringstream istr(v);
+        istr.imbue(std::locale("C"));
+        istr >> value;
+        set_text(format_value(value));
     }
 
 private:

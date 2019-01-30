@@ -4,6 +4,7 @@
 
 int main(int argc, char *argv[])
 {
+    horizon::setup_locale();
     auto application = horizon::PoolProjectManagerApplication::create();
     horizon::create_config_dir();
     horizon::PoolManager::init();

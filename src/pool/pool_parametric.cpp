@@ -142,7 +142,11 @@ std::string PoolParametric::Column::format(double v) const
 std::string PoolParametric::Column::format(const std::string &v) const
 {
     if (type == Type::QUANTITY) {
-        return format(std::stod(v));
+        double d;
+        std::istringstream istr(v);
+        istr.imbue(std::locale("C"));
+        istr >> d;
+        return format(d);
     }
     else {
         return v;

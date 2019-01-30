@@ -101,29 +101,7 @@ int main(int argc, char *argv[])
 
     auto pool_base_path = Glib::getenv("HORIZON_POOL");
     auto pool_cache_path = Glib::getenv("HORIZON_POOL_CACHE");
-#ifdef G_OS_WIN32
-    struct comma : std::numpunct<char> {
-        char do_decimal_point() const
-        {
-            return ',';
-        } // comma
-    };
-    TCHAR szSep[8];
-    GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDECIMAL, szSep, 8);
-    if (szSep[0] == ',') {
-        std::locale::global(std::locale(std::cout.getloc(), new comma));
-    }
-#else
-    try {
-        // Try setting the "native locale", in order to retain
-        // things like decimal separator.  This might fail in
-        // case the user has no notion of a native locale.
-        std::locale::global(std::locale(""));
-    }
-    catch (...) {
-        // just proceed
-    }
-#endif
+    horizon::setup_locale();
 
     horizon::create_config_dir();
 

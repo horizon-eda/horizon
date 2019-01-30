@@ -43,6 +43,15 @@ static Gtk::TreeViewColumn *create_tvc(const PoolParametric::Column &col,
     }
 }
 
+static double string_to_double(const std::string &s)
+{
+    double d;
+    std::istringstream istr(s);
+    istr.imbue(std::locale("C"));
+    istr >> d;
+    return d;
+}
+
 class ParametricFilterBox : public Gtk::Box {
 public:
     ParametricFilterBox(PoolParametric *p, const PoolParametric::Column &col)
@@ -56,7 +65,7 @@ public:
                                      Gtk::TreeModel::Row rb = *ib;
                                      std::string a = ra[list_columns.value];
                                      std::string b = rb[list_columns.value];
-                                     auto d = std::stod(b) - std::stod(a);
+                                     auto d = string_to_double(b) - string_to_double(a);
                                      return sgn(d);
                                  });
         }

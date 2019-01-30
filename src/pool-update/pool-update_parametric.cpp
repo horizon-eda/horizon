@@ -72,10 +72,11 @@ void pool_update_parametric(const std::string &pool_base_path, pool_update_cb_t 
                     v = part.parametric.at(col.name);
                     switch (col.type) {
                     case PoolParametric::Column::Type::QUANTITY: {
-                        try {
-                            std::stod(v);
-                        }
-                        catch (const std::invalid_argument &e) {
+                        double d;
+                        std::istringstream istr(v);
+                        istr.imbue(std::locale("C"));
+                        istr >> d;
+                        if (!istr.eof() || istr.fail()) {
                             skip = true;
                             status_cb(PoolUpdateStatus::FILE_ERROR, filename,
                                       col.display_name + " '" + v + "' not convertible to double");

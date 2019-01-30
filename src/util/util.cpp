@@ -5,6 +5,7 @@
 #include <unistd.h>
 #ifdef G_OS_WIN32
 #include <windows.h>
+#include <iostream>
 #endif
 #include <iomanip>
 #include "nlohmann/json.hpp"
@@ -283,6 +284,33 @@ Color color_from_json(const json &j)
     c.g = j.at("g");
     c.b = j.at("b");
     return c;
+}
+
+void setup_locale()
+{
+#ifdef G_OS_WIN32
+    struct comma : std::numpunct<char> {
+        char do_decimal_point() const
+        {
+            return ',';
+        } // comma
+    };
+    TCHAR szSep[8];
+    GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDECIMAL, szSep, 8);
+    if (szSep[0] == ',') {
+        std::locale::global(std::locale(std::cout.getloc(), new comma));
+    }
+#else
+    try {
+        // Try setting the "native locale", in order to retain
+        // things like decimal separator.  This might fail in
+        // case the user has no notion of a native locale.
+        std::locale::global(std::locale(""));
+    }
+    catch (...) {
+        // just proceed
+    }
+#endif
 }
 
 } // namespace horizon
