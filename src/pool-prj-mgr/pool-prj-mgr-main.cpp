@@ -4,8 +4,10 @@
 
 int main(int argc, char *argv[])
 {
-    horizon::setup_locale();
     auto application = horizon::PoolProjectManagerApplication::create();
+    // FIXME: zmq_get_sockopt depends on the global locale and inserts commas into the port number if the locale
+    // specifies so. For now, don't set locale in pool/prj manager.
+    // horizon::setup_locale();
     horizon::create_config_dir();
     horizon::PoolManager::init();
 
