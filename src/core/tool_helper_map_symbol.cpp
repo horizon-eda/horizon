@@ -40,6 +40,8 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
 SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *gate)
 {
     const Symbol *sym = get_symbol_for_unit(gate->unit->uuid);
+    if (!sym)
+        return nullptr;
     SchematicSymbol *schsym = core.c->insert_schematic_symbol(UUID::random(), sym);
     schsym->component = comp;
     schsym->gate = gate;
