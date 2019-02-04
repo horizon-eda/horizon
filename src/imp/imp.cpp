@@ -1053,6 +1053,18 @@ bool ImpBase::handle_key_press(GdkEventKey *key_event)
         else {
             args.type = ToolEventType::KEY;
             args.key = key_event->keyval;
+
+            auto display = main_window->get_display()->gobj();
+            auto hw_keycode = key_event->hardware_keycode;
+            auto state = static_cast<GdkModifierType>(key_event->state);
+            auto group = key_event->group;
+            guint keyval;
+            GdkModifierType consumed_modifiers;
+            if (gdk_keymap_translate_keyboard_state(gdk_keymap_get_for_display(display), hw_keycode, state, group, &keyval,
+                                                    NULL, NULL, &consumed_modifiers)) {
+                args.mod = static_cast<GdkModifierType>((state & (~consumed_modifiers))
+                                                        & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK));
+            }
         }
 
         ToolResponse r = core.r->tool_update(args);

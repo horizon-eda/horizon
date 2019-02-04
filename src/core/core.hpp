@@ -32,6 +32,7 @@ public:
     bool keep_selection = false;
     unsigned int button;
     unsigned int key;
+    unsigned int mod = 0;
     Target target;
     int work_layer;
     std::unique_ptr<ToolData> data = nullptr;

@@ -212,15 +212,19 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
     int key = 0;
     switch (tool_id) {
     case ToolID::MOVE_KEY_UP:
+    case ToolID::MOVE_KEY_UP_FINE:
         key = GDK_KEY_Up;
         break;
     case ToolID::MOVE_KEY_DOWN:
+    case ToolID::MOVE_KEY_DOWN_FINE:
         key = GDK_KEY_Down;
         break;
     case ToolID::MOVE_KEY_LEFT:
+    case ToolID::MOVE_KEY_LEFT_FINE:
         key = GDK_KEY_Left;
         break;
     case ToolID::MOVE_KEY_RIGHT:
+    case ToolID::MOVE_KEY_RIGHT_FINE:
         key = GDK_KEY_Right;
         break;
     default:;
@@ -374,7 +378,13 @@ ToolResponse ToolMove::update(const ToolArgs &args)
             return ToolResponse::end();
         }
         else {
-            auto dir = dir_from_arrow_key(args.key) * imp->get_grid_spacing();
+            auto spacing = imp->get_grid_spacing();
+            if (args.mod) {
+                // TODO: Toggling between move and move fine via modifier
+                spacing /= 10;
+            }
+
+            auto dir = dir_from_arrow_key(args.key) * spacing;
             if (dir.x || dir.y) {
                 key_delta += dir;
                 move_do(dir);

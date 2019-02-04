@@ -546,6 +546,22 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Move by keyboard", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::MOVE_KEY_UP_FINE},
+         {"Move up fine", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER}},
+
+        {{ActionID::TOOL, ToolID::MOVE_KEY_DOWN_FINE},
+         {"Move down fine", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER}},
+
+        {{ActionID::TOOL, ToolID::MOVE_KEY_LEFT_FINE},
+         {"Move left fine", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER}},
+
+        {{ActionID::TOOL, ToolID::MOVE_KEY_RIGHT_FINE},
+         {"Move right fine", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER}},
+
         {{ActionID::TOOL, ToolID::MOVE_KEY_UP},
          {"Move up", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER}},
@@ -807,6 +823,10 @@ const LutEnumStr<ToolID> tool_lut = {TOOL_LUT_ITEM(EDIT_SCHEMATIC_PROPERTIES),
                                      TOOL_LUT_ITEM(TUNE_DIFFPAIR),
                                      TOOL_LUT_ITEM(TUNE_DIFFPAIR_SKEW),
                                      TOOL_LUT_ITEM(MOVE_KEY),
+                                     TOOL_LUT_ITEM(MOVE_KEY_UP_FINE),
+                                     TOOL_LUT_ITEM(MOVE_KEY_DOWN_FINE),
+                                     TOOL_LUT_ITEM(MOVE_KEY_LEFT_FINE),
+                                     TOOL_LUT_ITEM(MOVE_KEY_RIGHT_FINE),
                                      TOOL_LUT_ITEM(MOVE_KEY_UP),
                                      TOOL_LUT_ITEM(MOVE_KEY_DOWN),
                                      TOOL_LUT_ITEM(MOVE_KEY_LEFT),
