@@ -89,6 +89,10 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::MOVE_KEY_DOWN_FINE:
     case ToolID::MOVE_KEY_LEFT_FINE:
     case ToolID::MOVE_KEY_RIGHT_FINE:
+    case ToolID::MOVE_KEY_UP_COARSE:
+    case ToolID::MOVE_KEY_DOWN_COARSE:
+    case ToolID::MOVE_KEY_LEFT_COARSE:
+    case ToolID::MOVE_KEY_RIGHT_COARSE:
         return std::make_unique<ToolMove>(this, tool_id);
 
     case ToolID::PLACE_JUNCTION:

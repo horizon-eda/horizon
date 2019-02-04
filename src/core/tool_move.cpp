@@ -8,6 +8,7 @@
 #include "util/accumulator.hpp"
 #include "util/util.hpp"
 #include <iostream>
+#include <gtkmm.h>
 
 namespace horizon {
 
@@ -213,18 +214,22 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
     switch (tool_id) {
     case ToolID::MOVE_KEY_UP:
     case ToolID::MOVE_KEY_UP_FINE:
+    case ToolID::MOVE_KEY_UP_COARSE:
         key = GDK_KEY_Up;
         break;
     case ToolID::MOVE_KEY_DOWN:
     case ToolID::MOVE_KEY_DOWN_FINE:
+    case ToolID::MOVE_KEY_DOWN_COARSE:
         key = GDK_KEY_Down;
         break;
     case ToolID::MOVE_KEY_LEFT:
     case ToolID::MOVE_KEY_LEFT_FINE:
+    case ToolID::MOVE_KEY_LEFT_COARSE:
         key = GDK_KEY_Left;
         break;
     case ToolID::MOVE_KEY_RIGHT:
     case ToolID::MOVE_KEY_RIGHT_FINE:
+    case ToolID::MOVE_KEY_RIGHT_COARSE:
         key = GDK_KEY_Right;
         break;
     default:;
@@ -379,9 +384,16 @@ ToolResponse ToolMove::update(const ToolArgs &args)
         }
         else {
             auto spacing = imp->get_grid_spacing();
-            if (args.mod) {
-                // TODO: Toggling between move and move fine via modifier
-                spacing /= 10;
+
+            // TODO: Does not use actual key bindings
+            switch(args.mod){
+                case GDK_MOD1_MASK:
+                    spacing /= 10;
+                    break;
+                case GDK_CONTROL_MASK:
+                    spacing *= 10;
+                    break;
+                default:;
             }
 
             auto dir = dir_from_arrow_key(args.key) * spacing;

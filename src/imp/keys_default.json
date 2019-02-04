@@ -1598,7 +1598,7 @@
             },
             "tool": "MOVE_KEY_UP"
         },
-         {
+        {
             "action": "TOOL",
             "keys": {
                 "1": [],
@@ -1616,6 +1616,25 @@
                 "8": []
             },
             "tool": "MOVE_KEY_UP_FINE"
+        },
+        {
+            "action": "TOOL",
+            "keys": {
+                "1": [],
+                "16": [],
+                "2": [],
+                "255": [
+                    [
+                        {
+                            "key": "Up",
+                            "mod": 4
+                        }
+                    ]
+                ],
+                "4": [],
+                "8": []
+            },
+            "tool": "MOVE_KEY_UP_COARSE"
         },
         {
             "action": "TOOL",
@@ -1664,6 +1683,25 @@
                 "255": [
                     [
                         {
+                            "key": "Down",
+                            "mod": 4
+                        }
+                    ]
+                ],
+                "4": [],
+                "8": []
+            },
+            "tool": "MOVE_KEY_DOWN_COARSE"
+        },
+        {
+            "action": "TOOL",
+            "keys": {
+                "1": [],
+                "16": [],
+                "2": [],
+                "255": [
+                    [
+                        {
                             "key": "Left",
                             "mod": 0
                         }
@@ -1702,6 +1740,25 @@
                 "255": [
                     [
                         {
+                            "key": "Left",
+                            "mod": 4
+                        }
+                    ]
+                ],
+                "4": [],
+                "8": []
+            },
+            "tool": "MOVE_KEY_LEFT_COARSE"
+        },
+        {
+            "action": "TOOL",
+            "keys": {
+                "1": [],
+                "16": [],
+                "2": [],
+                "255": [
+                    [
+                        {
                             "key": "Right",
                             "mod": 0
                         }
@@ -1730,6 +1787,25 @@
                 "8": []
             },
             "tool": "MOVE_KEY_RIGHT_FINE"
+        },
+        {
+            "action": "TOOL",
+            "keys": {
+                "1": [],
+                "16": [],
+                "2": [],
+                "255": [
+                    [
+                        {
+                            "key": "Right",
+                            "mod": 4
+                        }
+                    ]
+                ],
+                "4": [],
+                "8": []
+            },
+            "tool": "MOVE_KEY_RIGHT_COARSE"
         },
         {
             "action": "FLIP_VIEW",
