@@ -353,10 +353,12 @@ void Canvas3D::polynode_to_tris(const ClipperLib::PolyNode *node, int layer)
         }
     }
     catch (const std::runtime_error &e) {
-        Logger::log_critical("error triangulating", Logger::Domain::BOARD, e.what());
+        Logger::log_critical("error triangulating layer " + brd->get_layers().at(layer).name, Logger::Domain::BOARD,
+                             e.what());
     }
     catch (...) {
-        Logger::log_critical("error triangulating", Logger::Domain::BOARD, "unspecified error");
+        Logger::log_critical("error triangulating layer" + brd->get_layers().at(layer).name, Logger::Domain::BOARD,
+                             "unspecified error");
     }
 
     layers[layer].walls.reserve(pts_total);
