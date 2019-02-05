@@ -2,7 +2,6 @@
 #include "core.hpp"
 #include "tool_helper_merge.hpp"
 #include "tool_helper_move.hpp"
-#include <gtkmm.h>
 
 namespace horizon {
 

@@ -7,6 +7,7 @@
 #include "pool/entity.hpp"
 #include "util/util.hpp"
 #include <iostream>
+#include <gtkmm.h>
 
 namespace horizon {
 
