@@ -34,8 +34,12 @@ static Gtk::TreeViewColumn *create_tvc(const PoolParametric::Column &col,
         pango_attr_list_insert(attributes_list, attribute_font_features);
         g_object_set(G_OBJECT(cr_val->gobj()), "attributes", attributes_list, NULL);
         pango_attr_list_unref(attributes_list);
-        tvc->pack_start(*cr_val);
+        tvc->pack_start(*cr_val, false);
         tvc->pack_start(*cr_unit, false);
+        {
+            auto cr_empty = Gtk::manage(new Gtk::CellRendererText());
+            tvc->pack_start(*cr_empty, true);
+        }
         return tvc;
     }
     else {
