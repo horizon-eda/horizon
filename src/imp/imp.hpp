@@ -190,5 +190,7 @@ private:
 
     std::map<std::pair<ActionID, ToolID>, bool> action_sensitivity;
     type_signal_action_sensitive s_signal_action_sensitive;
+
+    GdkModifierType grid_fine_modifier = GDK_MOD1_MASK;
 };
 } // namespace horizon

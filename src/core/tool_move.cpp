@@ -210,16 +210,28 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
     }
 
     int key = 0;
+    unsigned int mod = 0;
     switch (tool_id) {
+    case ToolID::MOVE_KEY_FINE_UP:
+        mod = ToolArgs::MOD_FINE;
     case ToolID::MOVE_KEY_UP:
         key = GDK_KEY_Up;
         break;
+
+    case ToolID::MOVE_KEY_FINE_DOWN:
+        mod = ToolArgs::MOD_FINE;
     case ToolID::MOVE_KEY_DOWN:
         key = GDK_KEY_Down;
         break;
+
+    case ToolID::MOVE_KEY_FINE_LEFT:
+        mod = ToolArgs::MOD_FINE;
     case ToolID::MOVE_KEY_LEFT:
         key = GDK_KEY_Left;
         break;
+
+    case ToolID::MOVE_KEY_FINE_RIGHT:
+        mod = ToolArgs::MOD_FINE;
     case ToolID::MOVE_KEY_RIGHT:
         key = GDK_KEY_Right;
         break;
@@ -230,6 +242,7 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
         ToolArgs args2;
         args2.type = ToolEventType::KEY;
         args2.key = key;
+        args2.mod = mod;
         update(args2);
     }
     if (tool_id == ToolID::MOVE_KEY)
@@ -374,7 +387,10 @@ ToolResponse ToolMove::update(const ToolArgs &args)
             return ToolResponse::end();
         }
         else {
-            auto dir = dir_from_arrow_key(args.key) * imp->get_grid_spacing();
+            auto sp = imp->get_grid_spacing();
+            if (args.mod & ToolArgs::MOD_FINE)
+                sp /= 10;
+            auto dir = dir_from_arrow_key(args.key) * sp;
             if (dir.x || dir.y) {
                 key_delta += dir;
                 move_do(dir);

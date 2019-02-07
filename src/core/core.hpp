@@ -17,7 +17,7 @@
 #include "tool_id.hpp"
 
 namespace horizon {
-enum class ToolEventType { MOVE, CLICK, CLICK_RELEASE, KEY, LAYER_CHANGE, DATA };
+enum class ToolEventType { NONE, MOVE, CLICK, CLICK_RELEASE, KEY, LAYER_CHANGE, DATA };
 
 
 /**
@@ -26,14 +26,21 @@ enum class ToolEventType { MOVE, CLICK, CLICK_RELEASE, KEY, LAYER_CHANGE, DATA }
  */
 class ToolArgs {
 public:
-    ToolEventType type;
+    ToolEventType type = ToolEventType::NONE;
     Coordi coords;
     std::set<SelectableRef> selection;
     bool keep_selection = false;
-    unsigned int button;
-    unsigned int key;
+    unsigned int button = 0;
+    unsigned int key = 0;
+    enum Modifieres {
+        MOD_FINE = (1 << 0),
+        MOD_ALT = (1 << 1),
+        MOD_CTRL = (1 << 2),
+    };
+    unsigned int mod = 0;
+
     Target target;
-    int work_layer;
+    int work_layer = 0;
     std::unique_ptr<ToolData> data = nullptr;
     ToolArgs()
     {

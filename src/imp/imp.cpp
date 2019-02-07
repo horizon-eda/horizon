@@ -866,7 +866,8 @@ void ImpBase::apply_preferences()
 
     auto av = get_editor_type_for_action();
     for (auto &it : action_connections) {
-        if (preferences.key_sequences.keys.count(it.first)) {
+        auto act = action_catalog.at(it.first);
+        if (!(act.flags & ActionCatalogItem::FLAGS_NO_PREFERENCES) && preferences.key_sequences.keys.count(it.first)) {
             auto pref = preferences.key_sequences.keys.at(it.first);
             std::vector<KeySequence2> *seqs = nullptr;
             if (pref.count(av) && pref.at(av).size()) {
@@ -884,6 +885,32 @@ void ImpBase::apply_preferences()
             }
         }
     }
+    {
+        const auto mod0 = static_cast<GdkModifierType>(0);
+        action_connections.at(make_action(ToolID::MOVE_KEY_LEFT)).key_sequences = {{{GDK_KEY_Left, mod0}}};
+        action_connections.at(make_action(ToolID::MOVE_KEY_RIGHT)).key_sequences = {{{GDK_KEY_Right, mod0}}};
+        action_connections.at(make_action(ToolID::MOVE_KEY_UP)).key_sequences = {{{GDK_KEY_Up, mod0}}};
+        action_connections.at(make_action(ToolID::MOVE_KEY_DOWN)).key_sequences = {{{GDK_KEY_Down, mod0}}};
+    }
+    {
+        switch (canvas_prefs->appearance.grid_fine_modifier) {
+        case Appearance::GridFineModifier::ALT:
+            grid_fine_modifier = GDK_MOD1_MASK;
+            break;
+        case Appearance::GridFineModifier::CTRL:
+            grid_fine_modifier = GDK_CONTROL_MASK;
+            break;
+        }
+        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_LEFT)).key_sequences = {
+                {{GDK_KEY_Left, grid_fine_modifier}}};
+        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_RIGHT)).key_sequences = {
+                {{GDK_KEY_Right, grid_fine_modifier}}};
+        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_UP)).key_sequences = {
+                {{GDK_KEY_Up, grid_fine_modifier}}};
+        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_DOWN)).key_sequences = {
+                {{GDK_KEY_Down, grid_fine_modifier}}};
+    }
+
     key_sequence_dialog->clear();
     for (const auto &it : action_connections) {
         if (it.second.key_sequences.size()) {
@@ -1053,6 +1080,8 @@ bool ImpBase::handle_key_press(GdkEventKey *key_event)
         else {
             args.type = ToolEventType::KEY;
             args.key = key_event->keyval;
+            if (key_event->state & grid_fine_modifier)
+                args.mod = ToolArgs::MOD_FINE;
         }
 
         ToolResponse r = core.r->tool_update(args);

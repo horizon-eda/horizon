@@ -41,7 +41,8 @@ KeySequencesPreferencesEditor::KeySequencesPreferencesEditor(BaseObjectType *cob
         gr_row[tree_columns.name] = it_gr.second;
         gr_row[tree_columns.action] = std::make_pair(ActionID::NONE, ToolID::NONE);
         for (const auto &it_act : action_catalog) {
-            if (it_act.second.group == it_gr.first) {
+            if (it_act.second.group == it_gr.first
+                && !(it_act.second.flags & ActionCatalogItem::FLAGS_NO_PREFERENCES)) {
                 Gtk::TreeModel::Row row = *key_sequences_store->append(gr_row.children());
                 row[tree_columns.name] = it_act.second.name;
                 row[tree_columns.action] = it_act.first;

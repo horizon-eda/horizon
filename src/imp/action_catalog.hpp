@@ -24,7 +24,8 @@ public:
         FLAGS_IN_TOOL = (1 << 1),
         FLAGS_NO_POPOVER = (1 << 2),
         FLAGS_NO_MENU = (1 << 3),
-        FLAGS_SPECIFIC = (1 << 4)
+        FLAGS_SPECIFIC = (1 << 4),
+        FLAGS_NO_PREFERENCES = (1 << 5),
     };
 
     ActionCatalogItem(const std::string &n, ActionGroup gr, int av, int fl = FLAGS_DEFAULT)

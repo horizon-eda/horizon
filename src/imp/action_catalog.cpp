@@ -548,19 +548,43 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
 
         {{ActionID::TOOL, ToolID::MOVE_KEY_UP},
          {"Move up", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
-          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER}},
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER
+                  | ActionCatalogItem::FLAGS_NO_PREFERENCES}},
 
         {{ActionID::TOOL, ToolID::MOVE_KEY_DOWN},
          {"Move down", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
-          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER}},
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER
+                  | ActionCatalogItem::FLAGS_NO_PREFERENCES}},
 
         {{ActionID::TOOL, ToolID::MOVE_KEY_LEFT},
          {"Move left", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
-          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER}},
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER
+                  | ActionCatalogItem::FLAGS_NO_PREFERENCES}},
 
         {{ActionID::TOOL, ToolID::MOVE_KEY_RIGHT},
          {"Move right", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
-          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER}},
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER
+                  | ActionCatalogItem::FLAGS_NO_PREFERENCES}},
+
+        {{ActionID::TOOL, ToolID::MOVE_KEY_FINE_UP},
+         {"Move up fine", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER
+                  | ActionCatalogItem::FLAGS_NO_PREFERENCES}},
+
+        {{ActionID::TOOL, ToolID::MOVE_KEY_FINE_DOWN},
+         {"Move down fine", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER
+                  | ActionCatalogItem::FLAGS_NO_PREFERENCES}},
+
+        {{ActionID::TOOL, ToolID::MOVE_KEY_FINE_LEFT},
+         {"Move left fine", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER
+                  | ActionCatalogItem::FLAGS_NO_PREFERENCES}},
+
+        {{ActionID::TOOL, ToolID::MOVE_KEY_FINE_RIGHT},
+         {"Move right fine", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER
+                  | ActionCatalogItem::FLAGS_NO_PREFERENCES}},
 
         {{ActionID::BOM_EXPORT_WINDOW, ToolID::NONE},
          {"BOM export window", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
@@ -811,6 +835,10 @@ const LutEnumStr<ToolID> tool_lut = {TOOL_LUT_ITEM(EDIT_SCHEMATIC_PROPERTIES),
                                      TOOL_LUT_ITEM(MOVE_KEY_DOWN),
                                      TOOL_LUT_ITEM(MOVE_KEY_LEFT),
                                      TOOL_LUT_ITEM(MOVE_KEY_RIGHT),
+                                     TOOL_LUT_ITEM(MOVE_KEY_FINE_UP),
+                                     TOOL_LUT_ITEM(MOVE_KEY_FINE_DOWN),
+                                     TOOL_LUT_ITEM(MOVE_KEY_FINE_LEFT),
+                                     TOOL_LUT_ITEM(MOVE_KEY_FINE_RIGHT),
                                      TOOL_LUT_ITEM(SWAP_NETS),
                                      TOOL_LUT_ITEM(LINE_LOOP_TO_POLYGON),
                                      TOOL_LUT_ITEM(SCALE),
