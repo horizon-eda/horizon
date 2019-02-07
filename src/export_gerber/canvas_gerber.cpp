@@ -1,6 +1,7 @@
 #include "canvas_gerber.hpp"
-#include "core/core_board.hpp"
 #include "gerber_export.hpp"
+#include "common/keepout.hpp"
+#include "board/plane.hpp"
 #include "board/board_layers.hpp"
 
 namespace horizon {

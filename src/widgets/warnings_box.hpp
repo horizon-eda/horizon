@@ -1,7 +1,7 @@
 #pragma once
 #include <gtkmm.h>
-#include "core/core.hpp"
-#include "schematic/sheet.hpp"
+#include "common/common.hpp"
+#include "util/warning.hpp"
 
 namespace horizon {
 class WarningsBox : public Gtk::Box {
