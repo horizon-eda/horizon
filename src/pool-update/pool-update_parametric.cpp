@@ -74,7 +74,7 @@ void pool_update_parametric(const std::string &pool_base_path, pool_update_cb_t 
                     case PoolParametric::Column::Type::QUANTITY: {
                         double d;
                         std::istringstream istr(v);
-                        istr.imbue(std::locale("C"));
+                        istr.imbue(std::locale::classic());
                         istr >> d;
                         if (!istr.eof() || istr.fail()) {
                             skip = true;

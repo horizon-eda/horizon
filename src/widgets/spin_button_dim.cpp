@@ -1,4 +1,5 @@
 #include "spin_button_dim.hpp"
+#include "util/util.hpp"
 #include <iomanip>
 
 namespace horizon {
@@ -26,6 +27,7 @@ bool SpinButtonDim::on_output()
     }
 
     std::stringstream stream;
+    stream.imbue(get_locale());
     stream << std::fixed << std::setprecision(prec) << value / 1e6 << " mm";
 
     set_text(stream.str());

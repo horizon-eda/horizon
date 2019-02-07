@@ -129,6 +129,7 @@ TuningWindow::TuningWindow(const Board *brd) : Gtk::Window(), board(brd), state_
             Gtk::TreeModel::Row row = *it;
             auto mcr = dynamic_cast<Gtk::CellRendererProgress *>(tcr);
             std::stringstream ss;
+            ss.imbue(get_locale());
             ss << " " << dim_to_string(row[list_columns.length], false);
             ss << " " << std::fixed << std::setprecision(3) << std::setw(7) << std::setfill('0') << std::internal
                << row[list_columns.length_ps] << " ps";

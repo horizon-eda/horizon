@@ -47,7 +47,7 @@ static double string_to_double(const std::string &s)
 {
     double d;
     std::istringstream istr(s);
-    istr.imbue(std::locale("C"));
+    istr.imbue(std::locale::classic());
     istr >> d;
     return d;
 }

@@ -228,7 +228,7 @@ std::pair<bool, std::string> ParameterProgram::compile()
         else if (regex_dim->match(token, ma)) {
             double f;
             std::istringstream istr(ma.fetch(1));
-            istr.imbue(std::locale("C"));
+            istr.imbue(std::locale::classic());
             istr >> f;
             ts.push_back(std::make_unique<TokenInt>(1e6 * f));
         }

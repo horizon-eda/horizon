@@ -6,6 +6,7 @@
 #include "core/core_schematic.hpp"
 #include "core/core_board.hpp"
 #include "widgets/spin_button_dim.hpp"
+#include "util/util.hpp"
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
@@ -302,6 +303,7 @@ bool PropertyEditorAngle::sp_output()
     double v = adj->get_value();
 
     std::stringstream stream;
+    stream.imbue(get_locale());
     stream << std::fixed << std::setprecision(2) << (v / 65536.0) * 360 << "°";
 
     sp->set_text(stream.str());

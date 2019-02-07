@@ -124,6 +124,7 @@ void allow_set_foreground_window(int pid)
 std::string coord_to_string(const Coordf &pos, bool delta)
 {
     std::ostringstream ss;
+    ss.imbue(get_locale());
     if (delta) {
         ss << "Δ";
     }
@@ -153,6 +154,7 @@ std::string coord_to_string(const Coordf &pos, bool delta)
 std::string dim_to_string(int64_t x, bool with_sign)
 {
     std::ostringstream ss;
+    ss.imbue(get_locale());
     if (with_sign) {
         if (x >= 0) {
             ss << "+";
@@ -176,6 +178,7 @@ std::string angle_to_string(int x, bool pos_only)
         x -= 65536;
 
     std::ostringstream ss;
+    ss.imbue(get_locale());
     if (x >= 0) {
         ss << "+";
     }
@@ -286,31 +289,51 @@ Color color_from_json(const json &j)
     return c;
 }
 
+static std::locale the_locale = std::locale::classic();
+
 void setup_locale()
 {
+    std::locale::global(std::locale::classic());
+    char decimal_sep = '.';
 #ifdef G_OS_WIN32
-    struct comma : std::numpunct<char> {
-        char do_decimal_point() const
-        {
-            return ',';
-        } // comma
-    };
     TCHAR szSep[8];
     GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDECIMAL, szSep, 8);
     if (szSep[0] == ',') {
-        std::locale::global(std::locale(std::cout.getloc(), new comma));
+        decimal_sep = ',';
     }
 #else
     try {
         // Try setting the "native locale", in order to retain
         // things like decimal separator.  This might fail in
         // case the user has no notion of a native locale.
-        std::locale::global(std::locale(""));
+        auto user_locale = std::locale("");
+        decimal_sep = std::use_facet<std::numpunct<char>>(user_locale).decimal_point();
     }
     catch (...) {
         // just proceed
     }
 #endif
+
+    class comma : public std::numpunct<char> {
+    public:
+        comma(char c) : dp(c)
+        {
+        }
+        char do_decimal_point() const override
+        {
+            return dp;
+        } // comma
+
+    private:
+        const char dp;
+    };
+
+    the_locale = std::locale(std::locale::classic(), new comma(decimal_sep));
+}
+
+const std::locale &get_locale()
+{
+    return the_locale;
 }
 
 } // namespace horizon

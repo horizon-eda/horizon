@@ -128,6 +128,7 @@ std::string PoolParametric::Column::format(double v) const
         }
         std::string prefix = prefixes.at(exp);
         std::stringstream stream;
+        stream.imbue(get_locale());
         stream << (negative ? "-" : "");
         if (use_si)
             stream << std::fixed;
@@ -144,7 +145,7 @@ std::string PoolParametric::Column::format(const std::string &v) const
     if (type == Type::QUANTITY) {
         double d;
         std::istringstream istr(v);
-        istr.imbue(std::locale("C"));
+        istr.imbue(std::locale::classic());
         istr >> d;
         return format(d);
     }

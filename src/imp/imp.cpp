@@ -695,7 +695,7 @@ void ImpBase::parameter_window_add_polygon_expand(ParameterWindow *parameter_win
                 auto poly = core.r->get_polygon(s.uuid);
                 if (!poly->has_arcs()) {
                     std::stringstream ss;
-                    ss.imbue(std::locale("C"));
+                    ss.imbue(std::locale::classic());
                     ss << "expand-polygon [ " << poly->parameter_class << " ";
                     for (const auto &it : poly->vertices) {
                         ss << it.position.x << " " << it.position.y << " ";

@@ -48,7 +48,7 @@ static void make_courtyard_poly(Package &pkg, int &uuid_idx, int64_t w, int64_t 
 
     pkg.parameter_set[ParameterID::COURTYARD_EXPANSION] = .25_mm;
     std::stringstream ss;
-    ss.imbue(std::locale("C"));
+    ss.imbue(std::locale::classic());
     ss << std::fixed << std::setprecision(3);
     ss << w / 1e6 << "mm " << h / 1e6 << "mm\n";
     ss << "get-parameter [ courtyard_expansion ]\n2 * "

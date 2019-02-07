@@ -93,6 +93,7 @@ bool SpinButtonAngle::on_output()
     double v = adj->get_value();
 
     std::stringstream stream;
+    stream.imbue(get_locale());
     stream << std::fixed << std::setprecision(2) << (v / 65536.0) * 360 << "°";
 
     set_text(stream.str());
@@ -614,7 +615,7 @@ void ImpPackage::construct()
                 auto c = (a + b) / 2;
                 auto d = b - a;
                 std::stringstream ss;
-                ss.imbue(std::locale("C"));
+                ss.imbue(std::locale::classic());
                 ss << std::fixed << std::setprecision(3);
                 ss << d.x / 1e6 << "mm " << d.y / 1e6 << "mm\n";
                 ss << "get-parameter [ courtyard_expansion ]\n2 * "
