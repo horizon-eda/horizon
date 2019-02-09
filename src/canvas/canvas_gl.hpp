@@ -8,6 +8,7 @@
 #include <gtkmm.h>
 #include <glm/glm.hpp>
 #include "appearance.hpp"
+#include "annotation.hpp"
 
 namespace horizon {
 class CanvasGL : public Canvas, public Gtk::GLArea {
@@ -17,6 +18,7 @@ class CanvasGL : public Canvas, public Gtk::GLArea {
     friend TriangleRenderer;
     friend MarkerRenderer;
     friend Markers;
+    friend CanvasAnnotation;
 
 public:
     CanvasGL();
@@ -129,6 +131,9 @@ public:
         return height;
     }
 
+    CanvasAnnotation *create_annotation();
+    void remove_annotation(CanvasAnnotation *a);
+
 protected:
     void push() override;
     void request_push() override;
@@ -212,6 +217,9 @@ private:
 
     Gdk::ModifierType grid_fine_modifier = Gdk::MOD1_MASK;
     float cursor_size = 20;
+
+    int annotation_layer_current = 20000;
+    std::map<int, CanvasAnnotation> annotations;
 
 protected:
     void on_size_allocate(Gtk::Allocation &alloc) override;

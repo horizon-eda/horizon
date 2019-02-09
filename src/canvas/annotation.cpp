@@ -1,9 +1,9 @@
 #include "annotation.hpp"
-#include "canvas.hpp"
+#include "canvas_gl.hpp"
 #include "layer_display.hpp"
 
 namespace horizon {
-CanvasAnnotation *Canvas::create_annotation()
+CanvasAnnotation *CanvasGL::create_annotation()
 {
     annotation_layer_current++;
     return &annotations
@@ -12,7 +12,7 @@ CanvasAnnotation *Canvas::create_annotation()
                     .first->second;
 }
 
-void Canvas::remove_annotation(CanvasAnnotation *a)
+void CanvasGL::remove_annotation(CanvasAnnotation *a)
 {
     auto layer = a->layer;
     annotations.erase(layer);
@@ -20,7 +20,7 @@ void Canvas::remove_annotation(CanvasAnnotation *a)
         triangles.erase(layer);
 }
 
-CanvasAnnotation::CanvasAnnotation(Canvas *c, int l) : ca(c), layer(l)
+CanvasAnnotation::CanvasAnnotation(CanvasGL *c, int l) : ca(c), layer(l)
 {
     LayerDisplay ld(false, LayerDisplay::Mode::FILL_ONLY);
     ca->set_layer_display(layer, ld);
@@ -40,6 +40,7 @@ void CanvasAnnotation::clear()
 {
     if (ca->triangles.count(layer))
         ca->triangles[layer].clear();
+    ca->request_push();
 }
 
 void CanvasAnnotation::draw_line(const Coordi &from, const Coordi &to, ColorP color, uint64_t width)

@@ -1,5 +1,4 @@
 #pragma once
-#include "annotation.hpp"
 #include "common/common.hpp"
 #include "common/text.hpp"
 #include "layer_display.hpp"
@@ -15,12 +14,13 @@
 #include <set>
 #include <sigc++/sigc++.h>
 #include <unordered_map>
+#include <deque>
 
 namespace horizon {
 class Canvas : public sigc::trackable {
     friend Selectables;
     friend class SelectionFilter;
-    friend CanvasAnnotation;
+    friend class CanvasAnnotation;
 
 public:
     Canvas();
@@ -44,9 +44,6 @@ public:
     void set_flags_all(uint8_t mask_set, uint8_t mask_clear);
 
     void show_all_obj();
-
-    CanvasAnnotation *create_annotation();
-    void remove_annotation(CanvasAnnotation *a);
 
     virtual void update_markers()
     {
@@ -195,9 +192,6 @@ protected:
     FragmentCache fragment_cache;
 
 private:
-    int annotation_layer_current = 20000;
-    std::map<int, CanvasAnnotation> annotations;
-
     uint8_t lod_current = 0;
 };
 } // namespace horizon
