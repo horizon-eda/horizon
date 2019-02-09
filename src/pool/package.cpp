@@ -334,6 +334,14 @@ std::pair<Coordi, Coordi> Package::get_bbox() const
         a = Coordi::min(a, bb_pad.first);
         b = Coordi::max(b, bb_pad.second);
     }
+    for (const auto &it : polygons) {
+        if (it.second.layer == BoardLayers::TOP_PACKAGE || it.second.layer == BoardLayers::BOTTOM_PACKAGE) {
+            for (const auto &v : it.second.vertices) {
+                a = Coordi::min(a, v.position);
+                b = Coordi::max(b, v.position);
+            }
+        }
+    }
     return std::make_pair(a, b);
 }
 
