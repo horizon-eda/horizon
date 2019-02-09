@@ -1,8 +1,8 @@
 #include "package.hpp"
-#include "clipper/clipper.hpp"
 #include "pool.hpp"
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 
@@ -337,24 +337,32 @@ std::pair<Coordi, Coordi> Package::get_bbox() const
     return std::make_pair(a, b);
 }
 
+static std::map<int, Layer> pkg_layers;
+
 const std::map<int, Layer> &Package::get_layers() const
 {
-    static const std::map<int, Layer> layers = {{60, {60, "Top Courtyard"}},
-                                                {50, {50, "Top Assembly"}},
-                                                {40, {40, "Top Package"}},
-                                                {30, {30, "Top Paste"}},
-                                                {20, {20, "Top Silkscreen"}},
-                                                {10, {10, "Top Mask"}},
-                                                {0, {0, "Top Copper", false, true}},
-                                                {-1, {-1, "Inner", false, true}},
-                                                {-100, {-100, "Bottom Copper", true, true}},
-                                                {-110, {-110, "Bottom Mask", true}},
-                                                {-120, {-120, "Bottom Silkscreen", true}},
-                                                {-130, {-130, "Bottom Paste"}},
-                                                {-140, {-140, "Bottom Package"}},
-                                                {-150, {-150, "Bottom Assembly", true}},
-                                                {-160, {-160, "Bottom Courtyard"}}};
-    return layers;
+    if (pkg_layers.size() == 0) {
+        auto add_layer = [](int n, bool r = false, bool c = false) {
+            pkg_layers.emplace(std::piecewise_construct, std::forward_as_tuple(n),
+                               std::forward_as_tuple(n, BoardLayers::get_layer_name(n), r, c));
+        };
+        add_layer(BoardLayers::TOP_COURTYARD);
+        add_layer(BoardLayers::TOP_ASSEMBLY);
+        add_layer(BoardLayers::TOP_PACKAGE);
+        add_layer(BoardLayers::TOP_PASTE);
+        add_layer(BoardLayers::TOP_SILKSCREEN);
+        add_layer(BoardLayers::TOP_MASK);
+        add_layer(BoardLayers::TOP_COPPER, false, true);
+        add_layer(BoardLayers::IN1_COPPER, false, true);
+        add_layer(BoardLayers::BOTTOM_COPPER, true, true);
+        add_layer(BoardLayers::BOTTOM_MASK, true);
+        add_layer(BoardLayers::BOTTOM_SILKSCREEN, true);
+        add_layer(BoardLayers::BOTTOM_PASTE);
+        add_layer(BoardLayers::BOTTOM_PACKAGE);
+        add_layer(BoardLayers::BOTTOM_ASSEMBLY, true);
+        add_layer(BoardLayers::BOTTOM_COURTYARD);
+    }
+    return pkg_layers;
 }
 
 json Package::serialize() const
