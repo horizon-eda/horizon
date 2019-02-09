@@ -9,7 +9,6 @@
     <file>pool-prj-mgr/preferences.ui</file>
     <file>property_panels/property_panel.ui</file>
     <file>pool-update/schema.sql</file>
-    <file>pool-update-parametric/schema.sql</file>
 
     <file>pool-prj-mgr/window.ui</file>
     <file>pool-prj-mgr/app_menu.ui</file>

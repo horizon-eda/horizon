@@ -1,6 +1,6 @@
 PKGCONFIG=pkg-config
 
-all: horizon-imp horizon-pool horizon-prj horizon-pool-update-parametric horizon-eda
+all: horizon-imp horizon-pool horizon-prj horizon-eda
 
 SRC_COMMON = \
 	src/util/uuid.cpp \
@@ -393,9 +393,6 @@ SRC_POOL_UTIL = \
 	src/pool-update/graph.cpp\
 	src/pool-update/pool-update_parametric.cpp\
 
-SRC_POOL_UPDATE_PARA = \
-	src/pool-update-parametric/pool-update-parametric.cpp\
-
 SRC_PRJ_UTIL = \
 	src/prj-util/util_main.cpp
 
@@ -557,9 +554,6 @@ horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(OBJ_OCE) $(SRC_IMP:.cpp=.o)
 horizon-pool: $(OBJ_COMMON) $(SRC_POOL_UTIL:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0) -o $@
 
-horizon-pool-update-parametric: $(OBJ_COMMON) $(SRC_POOL_UPDATE_PARA:.cpp=.o)
-	$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
-
 horizon-prj: $(OBJ_COMMON) $(SRC_PRJ_UTIL:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
@@ -585,7 +579,7 @@ $(OBJ_RES): %.res: %.rc
 	windres $< -O coff -o $@
 
 clean: clean_router clean_oce clean_res
-	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-pool-update-parametric horizon-prj-mgr horizon-pgm-test horizon-gen-pkg horizon-eda $(OBJ_ALL:.o=.d) src/resources.cpp src/gitversion.cpp
+	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-prj-mgr horizon-pgm-test horizon-gen-pkg horizon-eda $(OBJ_ALL:.o=.d) src/resources.cpp src/gitversion.cpp
 
 clean_router:
 	rm -f $(OBJ_ROUTER) $(OBJ_ROUTER:.o=.d)
