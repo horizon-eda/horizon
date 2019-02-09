@@ -50,6 +50,9 @@ public:
     void set_flip_view(bool fl);
     bool get_flip_view() const override;
 
+    void set_cursor_size(float size);
+    void set_cursor_size(Appearance::CursorSize);
+
     typedef sigc::signal<void> type_signal_selection_changed;
     type_signal_selection_changed signal_selection_changed()
     {
@@ -208,6 +211,7 @@ private:
     Coordf zoom_animation_pos;
 
     Gdk::ModifierType grid_fine_modifier = Gdk::MOD1_MASK;
+    float cursor_size = 20;
 
 protected:
     void on_size_allocate(Gtk::Allocation &alloc) override;

@@ -132,7 +132,10 @@ void Grid::render_cursor(Coord<int64_t> &coord)
     glBindVertexArray(vao);
     glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca->screenmat));
     glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
-    glUniform1f(mark_size_loc, 20);
+    if (ca->cursor_size > 0)
+        glUniform1f(mark_size_loc, ca->cursor_size);
+    else
+        glUniform1f(mark_size_loc, std::max(ca->width, ca->height));
 
     glUniform1f(grid_size_loc, 0);
     glUniform2f(grid_0_loc, coord.x, coord.y);
@@ -141,7 +144,7 @@ void Grid::render_cursor(Coord<int64_t> &coord)
     auto bgcolor = ca->get_color(ColorP::BACKGROUND);
     glUniform4f(color_loc, bgcolor.r, bgcolor.g, bgcolor.b, 1);
     glLineWidth(4 * ca->get_scale_factor());
-    glDrawArraysInstanced(GL_LINES, 0, 12, 1);
+    glDrawArrays(GL_LINES, 0, 12);
 
     Color cursor_color;
     if (ca->target_current.is_valid()) {
@@ -152,7 +155,7 @@ void Grid::render_cursor(Coord<int64_t> &coord)
     }
     glUniform4f(color_loc, cursor_color.r, cursor_color.g, cursor_color.b, 1);
     glLineWidth(1 * ca->get_scale_factor());
-    glDrawArraysInstanced(GL_LINES, 0, 12, 1);
+    glDrawArrays(GL_LINES, 0, 12);
 
     glBindVertexArray(0);
     glUseProgram(0);

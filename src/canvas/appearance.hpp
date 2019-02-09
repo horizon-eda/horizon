@@ -18,5 +18,8 @@ public:
     unsigned int msaa = 4;
     enum class GridFineModifier { CTRL, ALT };
     GridFineModifier grid_fine_modifier = GridFineModifier::ALT;
+    enum class CursorSize { DEFAULT, LARGE, FULL };
+    CursorSize cursor_size = CursorSize::DEFAULT;
+    CursorSize cursor_size_tool = CursorSize::LARGE;
 };
 } // namespace horizon

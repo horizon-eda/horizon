@@ -21,6 +21,12 @@ static const LutEnumStr<Appearance::GridFineModifier> grid_fine_mod_lut = {
         {"ctrl", Appearance::GridFineModifier::CTRL},
 };
 
+static const LutEnumStr<Appearance::CursorSize> cursor_size_lut = {
+        {"default", Appearance::CursorSize::DEFAULT},
+        {"large", Appearance::CursorSize::LARGE},
+        {"full", Appearance::CursorSize::FULL},
+};
+
 Preferences::Preferences()
 {
     canvas_non_layer.appearance.layer_colors[0] = {1, 1, 0};
@@ -85,6 +91,8 @@ json CanvasPreferences::serialize() const
     j["highlight_dim"] = appearance.highlight_dim;
     j["highlight_lighten"] = appearance.highlight_lighten;
     j["grid_fine_modifier"] = grid_fine_mod_lut.lookup_reverse(appearance.grid_fine_modifier);
+    j["cursor_size"] = cursor_size_lut.lookup_reverse(appearance.cursor_size);
+    j["cursor_size_tool"] = cursor_size_lut.lookup_reverse(appearance.cursor_size_tool);
     j["msaa"] = appearance.msaa;
     return j;
 }
@@ -133,6 +141,8 @@ void CanvasPreferences::load_from_json(const json &j)
     appearance.highlight_shadow = j.value("highlight_shadow", .3);
     appearance.highlight_lighten = j.value("highlight_lighten", .3);
     appearance.grid_fine_modifier = grid_fine_mod_lut.lookup(j.value("grid_fine_modifier", "alt"));
+    appearance.cursor_size = cursor_size_lut.lookup(j.value("cursor_size", "default"));
+    appearance.cursor_size_tool = cursor_size_lut.lookup(j.value("cursor_size_tool", "default"));
     appearance.msaa = j.value("msaa", 0);
     load_colors_from_json(j);
 }

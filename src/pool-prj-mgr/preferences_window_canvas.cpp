@@ -175,6 +175,31 @@ std::string ColorEditorLayer::get_color_name()
         return BoardLayers::get_layer_name(layer);
 }
 
+static const std::vector<std::pair<std::string, Appearance::CursorSize>> cursor_size_labels = {
+        {"Default", Appearance::CursorSize::DEFAULT},
+        {"Large", Appearance::CursorSize::LARGE},
+        {"Full", Appearance::CursorSize::FULL},
+};
+
+static void make_cursor_size_editor(Gtk::Box *box, Appearance::CursorSize &cursor_size, std::function<void(void)> cb)
+{
+    std::map<Appearance::CursorSize, Gtk::RadioButton *> widgets;
+
+    box->get_style_context()->add_class("linked");
+    Gtk::RadioButton *last_rb = nullptr;
+    for (const auto &it : cursor_size_labels) {
+        auto rb = Gtk::manage(new Gtk::RadioButton(it.first));
+        widgets.emplace(it.second, rb);
+        rb->set_mode(false);
+        rb->show();
+        if (last_rb)
+            rb->join_group(*last_rb);
+        box->pack_start(*rb, true, true, 0);
+        last_rb = rb;
+    }
+    bind_widget<Appearance::CursorSize>(widgets, cursor_size, [cb](auto _) { cb(); });
+}
+
 CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
                                                  Preferences *prefs, CanvasPreferences *canvas_prefs, bool layered)
     : Gtk::Box(cobject), preferences(prefs), canvas_preferences(canvas_prefs), is_layered(layered)
@@ -292,6 +317,13 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
     canvas_highlight_dim->signal_value_changed().connect([this] { preferences->signal_changed().emit(); });
     canvas_highlight_shadow->signal_value_changed().connect([this] { preferences->signal_changed().emit(); });
     canvas_highlight_lighten->signal_value_changed().connect([this] { preferences->signal_changed().emit(); });
+
+    Gtk::Box *cursor_size_tool_box, *cursor_size_box;
+    GET_WIDGET(cursor_size_box);
+    GET_WIDGET(cursor_size_tool_box);
+    make_cursor_size_editor(cursor_size_box, appearance.cursor_size, [this] { preferences->signal_changed().emit(); });
+    make_cursor_size_editor(cursor_size_tool_box, appearance.cursor_size_tool,
+                            [this] { preferences->signal_changed().emit(); });
 
     Gtk::ComboBoxText *msaa_combo;
     GET_WIDGET(msaa_combo);

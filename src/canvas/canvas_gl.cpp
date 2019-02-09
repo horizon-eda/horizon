@@ -515,8 +515,32 @@ void CanvasGL::set_appearance(const Appearance &a)
         grid.mark_size = 2000;
         break;
     }
+    set_cursor_size(a.cursor_size);
     needs_resize = true;
     queue_draw();
+}
+
+void CanvasGL::set_cursor_size(float size)
+{
+    cursor_size = size;
+    queue_draw();
+}
+
+void CanvasGL::set_cursor_size(Appearance::CursorSize csize)
+{
+    float size = 20;
+    switch (csize) {
+    case Appearance::CursorSize::DEFAULT:
+        size = 20;
+        break;
+    case Appearance::CursorSize::LARGE:
+        size = 40;
+        break;
+    case Appearance::CursorSize::FULL:
+        size = -1;
+        break;
+    }
+    set_cursor_size(size);
 }
 
 void CanvasGL::update_palette_colors()
