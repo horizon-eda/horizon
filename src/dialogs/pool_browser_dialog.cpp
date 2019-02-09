@@ -6,9 +6,10 @@
 #include "widgets/pool_browser_package.hpp"
 #include "widgets/pool_browser_padstack.hpp"
 #include "widgets/pool_browser_frame.hpp"
+#include "widgets/preview_canvas.hpp"
 
 namespace horizon {
-PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool *ipool)
+PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool *ipool, bool use_preview)
     : Gtk::Dialog("Select Something", Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       pool(ipool)
 {
@@ -21,18 +22,22 @@ PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool 
     set_default_size(300, 300);
     button_ok->set_sensitive(false);
 
+    bool layered = false;
     switch (type) {
     case ObjectType::UNIT:
         browser = Gtk::manage(new PoolBrowserUnit(pool));
         set_title("Select Unit");
+        use_preview = false;
         break;
     case ObjectType::PART:
         browser = Gtk::manage(new PoolBrowserPart(pool));
         set_title("Select Part");
+        use_preview = false;
         break;
     case ObjectType::ENTITY:
         browser = Gtk::manage(new PoolBrowserEntity(pool));
         set_title("Select Entity");
+        use_preview = false;
         break;
     case ObjectType::SYMBOL:
         browser = Gtk::manage(new PoolBrowserSymbol(pool));
@@ -41,10 +46,12 @@ PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool 
     case ObjectType::PACKAGE:
         browser = Gtk::manage(new PoolBrowserPackage(pool));
         set_title("Select Package");
+        layered = true;
         break;
     case ObjectType::PADSTACK:
         browser = Gtk::manage(new PoolBrowserPadstack(pool));
         set_title("Select Padstack");
+        layered = true;
         break;
     case ObjectType::FRAME:
         browser = Gtk::manage(new PoolBrowserFrame(pool));
@@ -52,8 +59,22 @@ PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool 
         break;
     default:;
     }
-    get_content_area()->pack_start(*browser, true, true, 0);
+
+    if (!use_preview) {
+        get_content_area()->pack_start(*browser, true, true, 0);
+    }
+    else {
+        set_default_size(1000, 500);
+        auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
+        paned->add1(*browser);
+
+        auto preview = Gtk::manage(new PreviewCanvas(*pool, layered));
+        browser->signal_selected().connect([this, preview, type] { preview->load(type, browser->get_selected()); });
+        paned->add2(*preview);
+        get_content_area()->pack_start(*paned, true, true, 0);
+    }
     get_content_area()->set_border_width(0);
+
 
     browser->signal_activated().connect([this] { response(Gtk::ResponseType::RESPONSE_OK); });
 

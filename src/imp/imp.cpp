@@ -18,6 +18,7 @@
 #include "tool_popover.hpp"
 #include "hud_util.hpp"
 #include "util/str_util.hpp"
+#include "preferences/preferences_provider.hpp"
 #include "parameter_window.hpp"
 #include <glibmm/main.h>
 #include <glibmm/markup.h>
@@ -589,9 +590,6 @@ void ImpBase::run(int argc, char *argv[])
         canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL));
     }
 
-    construct();
-
-    preferences.signal_changed().connect(sigc::mem_fun(this, &ImpBase::apply_preferences));
 
     preferences.load();
 
@@ -603,9 +601,14 @@ void ImpBase::run(int argc, char *argv[])
         if (ev == Gio::FILE_MONITOR_EVENT_CHANGES_DONE_HINT)
             preferences.load();
     });
+    PreferencesProvider::get().set_prefs(preferences);
+
+    construct();
 
     if (sockets_connected)
         main_window->add_action("preferences", [this] { trigger_action(ActionID::PREFERENCES); });
+
+    preferences.signal_changed().connect(sigc::mem_fun(this, &ImpBase::apply_preferences));
 
     apply_preferences();
 

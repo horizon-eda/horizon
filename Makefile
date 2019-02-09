@@ -266,6 +266,7 @@ SRC_IMP = \
 	src/widgets/pool_browser.cpp\
 	src/widgets/component_selector.cpp\
 	src/widgets/component_button.cpp\
+	src/widgets/preview_canvas.cpp\
 	src/export_pdf/export_pdf.cpp\
 	src/imp/keyseq_dialog.cpp\
 	src/canvas/canvas_patch.cpp\
@@ -344,6 +345,8 @@ SRC_IMP = \
 	src/widgets/unplaced_box.cpp\
 	src/widgets/tag_entry.cpp\
 	src/widgets/layer_help_box.cpp\
+	src/preferences/preferences_util.cpp\
+	src/preferences/preferences_provider.cpp\
 
 SRC_ROUTER = \
 	3rd_party/router/router/pns_router.cpp \
