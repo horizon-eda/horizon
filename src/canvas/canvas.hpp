@@ -63,6 +63,9 @@ public:
         return false;
     };
 
+    std::pair<Coordf, Coordf> get_bbox(bool visible_only = true) const;
+
+
 protected:
     std::unordered_map<int, std::vector<Triangle>> triangles;
     void add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t flg = 0);

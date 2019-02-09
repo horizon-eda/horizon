@@ -89,7 +89,7 @@ public:
     }
 
     void center_and_zoom(const Coordi &center, float scale = -1);
-    void zoom_to_bbox(const Coordi &a, const Coordi &b);
+    void zoom_to_bbox(const Coordf &a, const Coordf &b);
 
     Glib::PropertyProxy<int> property_work_layer()
     {

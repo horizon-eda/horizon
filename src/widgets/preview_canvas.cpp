@@ -15,7 +15,6 @@ PreviewCanvas::PreviewCanvas(Pool &p, bool layered) : Glib::ObjectBase(typeid(Pr
 
 void PreviewCanvas::load_symbol(const UUID &uu, const Placement &pl, bool fit, const UUID &uu_part, const UUID &uu_gate)
 {
-    std::pair<Coordi, Coordi> bb;
     int64_t pad = 0;
     Symbol sym = *pool.get_symbol(uu);
     sym.expand();
@@ -32,7 +31,7 @@ void PreviewCanvas::load_symbol(const UUID &uu, const Placement &pl, bool fit, c
     }
     sym.apply_placement(pl);
     update(sym, pl);
-    bb = sym.get_bbox();
+    auto bb = get_bbox();
     pad = 1_mm;
 
     bb.first.x -= pad;
@@ -50,7 +49,7 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
         clear();
         return;
     }
-    std::pair<Coordi, Coordi> bb;
+
     int64_t pad = 0;
     switch (type) {
     case ObjectType::SYMBOL: {
@@ -58,7 +57,6 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
         sym.expand();
         sym.apply_placement(pl);
         update(sym, pl);
-        bb = sym.get_bbox();
         pad = 1_mm;
     } break;
 
@@ -74,7 +72,6 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
         pkg.apply_parameter_set({});
         property_layer_opacity() = 75;
         update(pkg);
-        bb = pkg.get_bbox();
         pad = 1_mm;
     } break;
 
@@ -90,20 +87,19 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
         ps.apply_parameter_set({});
         property_layer_opacity() = 75;
         update(ps);
-        bb = ps.get_bbox();
         pad = .1_mm;
-        bb.first.x -= pad;
     } break;
 
     case ObjectType::FRAME: {
         Frame fr = *pool.get_frame(uu);
         property_layer_opacity() = 100;
         update(fr);
-        bb = fr.get_bbox();
         pad = 1_mm;
     } break;
     default:;
     }
+
+    auto bb = get_bbox(true);
 
     bb.first.x -= pad;
     bb.first.y -= pad;

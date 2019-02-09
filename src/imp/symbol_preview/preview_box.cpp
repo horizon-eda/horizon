@@ -71,7 +71,7 @@ void SymbolPreviewBox::update(const Symbol &sym)
 
 void SymbolPreviewBox::zoom_to_fit()
 {
-    auto bb = symbol.get_bbox();
+    auto bb = canvas->get_bbox();
     int64_t pad = 1_mm;
     bb.first.x -= pad;
     bb.first.y -= pad;

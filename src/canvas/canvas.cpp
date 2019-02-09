@@ -239,4 +239,31 @@ Color Canvas::get_layer_color(int layer) const
     else
         return {1, 1, 0};
 }
+
+std::pair<Coordf, Coordf> Canvas::get_bbox(bool visible_only) const
+{
+    Coordf a, b;
+    for (const auto &it : triangles) {
+        if (visible_only == false || layer_display.at(it.first).visible) {
+            for (const auto &it2 : it.second) {
+                std::vector<Coordf> points = {Coordf(it2.x0, it2.y0), Coordf(it2.x1, it2.y2), Coordf(it2.x1, it2.y2)};
+                if (std::isnan(it2.y2)) { // line
+                    float width = it2.x2;
+                    Coordf offset(width / 2, width / 2);
+                    a = Coordf::min(a, points.at(0) - offset);
+                    a = Coordf::min(a, points.at(1) - offset);
+                    b = Coordf::max(b, points.at(0) + offset);
+                    b = Coordf::max(b, points.at(1) + offset);
+                }
+                else { // triangle
+                    for (const auto &p : points) {
+                        a = Coordf::min(a, p);
+                        b = Coordf::max(b, p);
+                    }
+                }
+            }
+        }
+    }
+    return std::make_pair(a, b);
+}
 } // namespace horizon

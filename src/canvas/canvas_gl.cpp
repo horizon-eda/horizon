@@ -368,7 +368,7 @@ void CanvasGL::center_and_zoom(const Coordi &center, float sc)
     queue_draw();
 }
 
-void CanvasGL::zoom_to_bbox(const Coordi &a, const Coordi &b)
+void CanvasGL::zoom_to_bbox(const Coordf &a, const Coordf &b)
 {
     auto sc_x = width / abs(a.x - b.x);
     auto sc_y = height / abs(a.y - b.y);

@@ -351,7 +351,7 @@ void ImpBase::run(int argc, char *argv[])
     connect_action(ActionID::HELP, [this](const auto &a) { key_sequence_dialog->show(); });
 
     connect_action(ActionID::VIEW_ALL, [this](const auto &a) {
-        auto bbox = core.r->get_bbox();
+        auto bbox = canvas->get_bbox();
         canvas->zoom_to_bbox(bbox.first, bbox.second);
     });
 
@@ -643,8 +643,10 @@ void ImpBase::run(int argc, char *argv[])
 
     canvas_update();
 
-    auto bbox = core.r->get_bbox();
-    canvas->zoom_to_bbox(bbox.first, bbox.second);
+    {
+        auto bbox = canvas->get_bbox();
+        canvas->zoom_to_bbox(bbox.first, bbox.second);
+    }
 
     handle_cursor_move(Coordi()); // fixes label
 
