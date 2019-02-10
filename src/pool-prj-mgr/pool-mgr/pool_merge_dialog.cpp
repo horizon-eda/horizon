@@ -19,6 +19,8 @@ public:
     Gtk::TreeView *pool_item_view = nullptr;
     Gtk::Stack *stack = nullptr;
     Gtk::TextView *delta_text_view = nullptr;
+    Gtk::CheckButton *cb_update_layer_help = nullptr;
+    Gtk::CheckButton *cb_update_tables = nullptr;
 
 private:
 };
@@ -28,6 +30,8 @@ PoolMergeBox::PoolMergeBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     x->get_widget("pool_item_view", pool_item_view);
     x->get_widget("stack", stack);
     x->get_widget("delta_text_view", delta_text_view);
+    x->get_widget("cb_update_layer_help", cb_update_layer_help);
+    x->get_widget("cb_update_tables", cb_update_tables);
 }
 
 PoolMergeBox *PoolMergeBox::create()
@@ -269,6 +273,70 @@ PoolMergeDialog::PoolMergeDialog(Gtk::Window *parent, const std::string &lp, con
 
     item_store->set_sort_column(list_columns.state, Gtk::SORT_ASCENDING);
 
+    {
+        tables_remote = Glib::build_filename(remote_path, "tables.json");
+        tables_local = Glib::build_filename(local_path, "tables.json");
+        auto tables_remote_exist = Glib::file_test(tables_remote, Glib::FILE_TEST_IS_REGULAR);
+        auto tables_local_exist = Glib::file_test(tables_local, Glib::FILE_TEST_IS_REGULAR);
+
+        if (tables_remote_exist && !tables_local_exist) {
+            box->cb_update_tables->set_active(true);
+            box->cb_update_tables->set_sensitive(false);
+        }
+        else if (!tables_remote_exist) {
+            box->cb_update_tables->set_active(false);
+            box->cb_update_tables->set_sensitive(false);
+        }
+        else if (tables_remote_exist && tables_local_exist) {
+            auto j_tables_remote = load_json_from_file(tables_remote);
+            auto j_tables_local = load_json_from_file(tables_local);
+            auto diff = json::diff(j_tables_local, j_tables_remote);
+            if (diff.size() > 0) { // different
+                box->cb_update_tables->set_active(true);
+                box->cb_update_tables->set_sensitive(true);
+            }
+            else {
+                box->cb_update_tables->set_active(false);
+                box->cb_update_tables->set_sensitive(false);
+            }
+        }
+    }
+
+    {
+        layer_help_remote = Glib::build_filename(remote_path, "layer_help");
+        layer_help_local = Glib::build_filename(local_path, "layer_help");
+        bool layer_help_remote_exist = Glib::file_test(layer_help_remote, Glib::FILE_TEST_IS_DIR);
+        bool layer_help_local_exist = Glib::file_test(layer_help_local, Glib::FILE_TEST_IS_DIR);
+        if (layer_help_remote_exist && !layer_help_local_exist) {
+            box->cb_update_layer_help->set_active(true);
+            box->cb_update_layer_help->set_sensitive(false);
+        }
+        else if (!layer_help_remote_exist) {
+            box->cb_update_layer_help->set_active(false);
+            box->cb_update_layer_help->set_sensitive(false);
+        }
+        else if (layer_help_remote_exist && layer_help_local_exist) {
+            bool can_update = false;
+            Glib::Dir dir_remote(layer_help_remote);
+            for (const auto &it : dir_remote) {
+                auto it_remote = Glib::build_filename(layer_help_remote, it);
+                auto it_local = Glib::build_filename(layer_help_local, it);
+                if (Glib::file_test(it_local, Glib::FILE_TEST_IS_REGULAR)) {
+                    if (!compare_files(it_remote, it_local)) {
+                        can_update = true;
+                        break;
+                    }
+                }
+                else {
+                    can_update = true;
+                    break;
+                }
+            }
+            box->cb_update_layer_help->set_active(can_update);
+            box->cb_update_layer_help->set_sensitive(can_update);
+        }
+    }
+
 
     populate_store();
 }
@@ -292,6 +360,7 @@ void PoolMergeDialog::do_merge()
                 }
                 Gio::File::create_for_path(Glib::build_filename(remote_path, row[list_columns.filename_remote]))
                         ->copy(Gio::File::create_for_path(filename));
+                merged = true;
             }
             else if (row[list_columns.state] == ItemState::MOVED) { // moved, move local item to new
                                                                     // filename
@@ -302,6 +371,7 @@ void PoolMergeDialog::do_merge()
                     Gio::File::create_for_path(dirname_dest)->make_directory_with_parents();
                 }
                 Gio::File::create_for_path(filename_src)->move(Gio::File::create_for_path(filename_dest));
+                merged = true;
             }
             else if (row[list_columns.state] == ItemState::CHANGED
                      || row[list_columns.state] == ItemState::MOVED_CHANGED) {
@@ -315,10 +385,27 @@ void PoolMergeDialog::do_merge()
                     Gio::File::create_for_path(dirname_local_new)->make_directory_with_parents();
                 }
                 Gio::File::create_for_path(filename_remote)->copy(Gio::File::create_for_path(filename_local_new));
+                merged = true;
             }
         }
     }
-    merged = true;
+    if (box->cb_update_tables->get_active()) {
+        Gio::File::create_for_path(tables_remote)
+                ->copy(Gio::File::create_for_path(tables_local), Gio::FILE_COPY_OVERWRITE);
+        merged = true;
+    }
+    if (box->cb_update_layer_help->get_active()) {
+        if (!Glib::file_test(layer_help_local, Glib::FILE_TEST_IS_DIR)) {
+            Gio::File::create_for_path(layer_help_local)->make_directory_with_parents();
+        }
+        Glib::Dir dir_remote(layer_help_remote);
+        for (const auto &it : dir_remote) {
+            auto it_remote = Glib::build_filename(layer_help_remote, it);
+            auto it_local = Glib::build_filename(layer_help_local, it);
+            Gio::File::create_for_path(it_remote)->copy(Gio::File::create_for_path(it_local), Gio::FILE_COPY_OVERWRITE);
+        }
+        merged = true;
+    }
 }
 
 void PoolMergeDialog::populate_store()

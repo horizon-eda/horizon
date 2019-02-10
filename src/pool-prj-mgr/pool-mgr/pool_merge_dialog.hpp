@@ -57,5 +57,8 @@ private:
 
     Glib::RefPtr<Gtk::ListStore> item_store;
     bool merged = false;
+
+    std::string tables_remote, tables_local;
+    std::string layer_help_remote, layer_help_local;
 };
 } // namespace horizon

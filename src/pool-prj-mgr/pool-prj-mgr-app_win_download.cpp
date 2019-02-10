@@ -121,12 +121,24 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
                 ->copy(Gio::File::create_for_path(Glib::build_filename(dest_dir, "pool.json")));
 
         {
-            std::lock_guard<std::mutex> lock(download_mutex);
-            download_status = "Updating local pool...";
+            auto tables_json = Glib::build_filename(remote_dir, "tables.json");
+            if (Glib::file_test(tables_json, Glib::FILE_TEST_IS_REGULAR)) {
+                Gio::File::create_for_path(Glib::build_filename(remote_dir, "tables.json"))
+                        ->copy(Gio::File::create_for_path(Glib::build_filename(dest_dir, "tables.json")));
+            }
         }
-        download_dispatcher.emit();
-
-        pool_update(dest_dir);
+        {
+            auto help_src = Glib::build_filename(remote_dir, "layer_help");
+            if (Glib::file_test(help_src, Glib::FILE_TEST_IS_DIR)) {
+                auto help_dest = Glib::build_filename(dest_dir, "layer_help");
+                Gio::File::create_for_path(help_dest)->make_directory_with_parents();
+                Glib::Dir dir(help_src);
+                for (const auto &it : dir) {
+                    Gio::File::create_for_path(Glib::build_filename(help_src, it))
+                            ->copy(Gio::File::create_for_path(Glib::build_filename(help_dest, it)));
+                }
+            }
+        }
 
         git_repository_free(cloned_repo);
 
