@@ -1,6 +1,6 @@
 #pragma once
 #include "nlohmann/json_fwd.hpp"
-#include "rest_client.hpp"
+#include "http_client.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -14,7 +14,7 @@ public:
                              const std::string &branch, const std::string &base, const std::string &body);
     json get_pull_requests(const std::string &owner, const std::string &repo);
 
-    REST::Client client;
+    HTTP::RESTClient client;
 
 private:
     std::string login_user;

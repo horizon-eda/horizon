@@ -1,11 +1,11 @@
-#include "rest_client.hpp"
+#include "http_client.hpp"
 #include "util.hpp"
 #include <curl/curl.h>
 #include <glibmm/miscutils.h>
 #include <stdexcept>
 #include "nlohmann/json.hpp"
 
-namespace REST {
+namespace HTTP {
 
 static size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp)
 {
@@ -15,7 +15,7 @@ static size_t write_callback(void *contents, size_t size, size_t nmemb, void *us
     return realsize;
 }
 
-Client::Client(const std::string &base) : base_url(base)
+Client::Client()
 {
     curl = curl_easy_init();
     if (!curl)
@@ -45,9 +45,9 @@ void Client::set_auth(const std::string &user, const std::string &passwd)
     curl_easy_setopt(curl, CURLOPT_PASSWORD, passwd.c_str());
 }
 
-json Client::get(const std::string &url)
+std::string Client::get(const std::string &url)
 {
-    std::string full_url = base_url + url;
+    std::string full_url = url;
     curl_easy_setopt(curl, CURLOPT_POST, 0);
     curl_easy_setopt(curl, CURLOPT_URL, full_url.c_str());
     response.clear();
@@ -63,15 +63,15 @@ json Client::get(const std::string &url)
         throw std::runtime_error("unexpected HTTP response code " + std::to_string(code) + " when accessing "
                                  + full_url);
     }
-    return json::parse(response);
+    return response;
 }
 
-json Client::post(const std::string &url, const json &postdata_j)
+std::string Client::post(const std::string &url, const std::string &postdata_i)
 {
-    std::string full_url = base_url + url;
+    std::string full_url = url;
     curl_easy_setopt(curl, CURLOPT_POST, 1);
     curl_easy_setopt(curl, CURLOPT_URL, full_url.c_str());
-    postdata = postdata_j.dump();
+    postdata = postdata_i;
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postdata.c_str());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, postdata.size());
     response.clear();
@@ -87,7 +87,7 @@ json Client::post(const std::string &url, const json &postdata_j)
         throw std::runtime_error("unexpected HTTP response code " + std::to_string(code) + " when accessing " + full_url
                                  + " response: " + response);
     }
-    return json::parse(response);
+    return response;
 }
 
 Client::~Client()
@@ -95,4 +95,19 @@ Client::~Client()
     curl_slist_free_all(header_list);
     curl_easy_cleanup(curl);
 }
-} // namespace REST
+
+RESTClient::RESTClient(const std::string &base) : Client(), base_url(base)
+{
+}
+
+json RESTClient::get(const std::string &url)
+{
+    return json::parse(Client::get(base_url + url));
+}
+
+json RESTClient::post(const std::string &url, const json &postdata_j)
+{
+    return json::parse(Client::post(base_url + url, postdata_j.dump()));
+}
+
+} // namespace HTTP

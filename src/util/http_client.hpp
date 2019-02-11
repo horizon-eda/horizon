@@ -3,23 +3,20 @@
 #include <curl/curl.h>
 #include <string>
 
-namespace REST {
-using json = nlohmann::json;
-
+namespace HTTP {
 class Client {
     friend size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp);
 
 public:
-    Client(const std::string &base);
+    Client();
     void set_auth(const std::string &user, const std::string &passwd);
 
-    json get(const std::string &url);
-    json post(const std::string &url, const json &postdata = json());
+    std::string get(const std::string &url);
+    std::string post(const std::string &url, const std::string &postdata = "");
 
     ~Client();
 
 private:
-    const std::string base_url;
     CURL *curl = nullptr;
     curl_slist *header_list = nullptr;
     char errbuf[CURL_ERROR_SIZE];
@@ -34,4 +31,17 @@ private:
     };
     PostBuffer post_buffer;
 };
-}; // namespace REST
+
+using json = nlohmann::json;
+
+class RESTClient : public HTTP::Client {
+public:
+    RESTClient(const std::string &base);
+
+    json get(const std::string &url);
+    json post(const std::string &url, const json &postdata = json());
+
+private:
+    const std::string base_url;
+};
+} // namespace HTTP

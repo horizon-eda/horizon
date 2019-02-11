@@ -448,7 +448,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-update/graph.cpp\
 	src/util/gtk_util.cpp\
 	src/util/window_state_store.cpp\
-	src/util/rest_client.cpp\
+	src/util/http_client.cpp\
 	src/util/github_client.cpp\
 	src/widgets/recent_item_box.cpp\
 	src/util/recent_util.cpp\
