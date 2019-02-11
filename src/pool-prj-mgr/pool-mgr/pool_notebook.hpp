@@ -40,6 +40,7 @@ private:
     class PartWizard *part_wizard = nullptr;
     class DuplicateWindow *duplicate_window = nullptr;
     bool closing = false;
+    sigc::connection proc_exited_connection;
 
     Glib::Dispatcher pool_update_dispatcher;
     bool in_pool_update_handler = false;
