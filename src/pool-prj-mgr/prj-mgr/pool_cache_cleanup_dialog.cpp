@@ -28,7 +28,7 @@ PoolCacheCleanupDialog::PoolCacheCleanupDialog(Gtk::Window *parent, const std::s
 {
     add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
     auto ok_button = add_button("Clean up", Gtk::ResponseType::RESPONSE_OK);
-    ok_button->signal_clicked().connect(sigc::mem_fun(this, &PoolCacheCleanupDialog::do_cleanup));
+    ok_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolCacheCleanupDialog::do_cleanup));
     set_default_response(Gtk::ResponseType::RESPONSE_OK);
     set_default_size(-1, 500);
 
@@ -44,7 +44,7 @@ PoolCacheCleanupDialog::PoolCacheCleanupDialog(Gtk::Window *parent, const std::s
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Remove"));
         tvc->pack_start(*cr_toggle, false);
         tvc->add_attribute(cr_toggle->property_active(), list_columns.remove);
-        cr_toggle->signal_toggled().connect(sigc::mem_fun(this, &PoolCacheCleanupDialog::action_toggled));
+        cr_toggle->signal_toggled().connect(sigc::mem_fun(*this, &PoolCacheCleanupDialog::action_toggled));
         tv->append_column(*tvc);
     }
     {

@@ -17,7 +17,7 @@ void SortController::add_column(unsigned int index, const std::string &name)
 {
     columns.insert({index, {name, Sort::NONE}});
     treeview->get_column(index)->signal_clicked().connect(
-            sigc::bind<unsigned int>(sigc::mem_fun(this, &SortController::handle_click), index));
+            sigc::bind<unsigned int>(sigc::mem_fun(*this, &SortController::handle_click), index));
     update_treeview();
 }
 

@@ -10,7 +10,7 @@ ImpPadstack::ImpPadstack(const std::string &padstack_filename, const std::string
     : ImpLayer(pool_path), core_padstack(padstack_filename, *pool)
 {
     core = &core_padstack;
-    core_padstack.signal_tool_changed().connect(sigc::mem_fun(this, &ImpBase::handle_tool_change));
+    core_padstack.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
 }
 
 void ImpPadstack::canvas_update()

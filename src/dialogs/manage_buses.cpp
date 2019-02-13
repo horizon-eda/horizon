@@ -21,7 +21,7 @@ public:
         entry = Gtk::manage(new Gtk::Entry());
         entry->set_text(bus_member->name);
         entry->set_width_chars(0);
-        entry->signal_changed().connect(sigc::mem_fun(this, &BusMemberEditor::member_name_changed));
+        entry->signal_changed().connect(sigc::mem_fun(*this, &BusMemberEditor::member_name_changed));
         pack_start(*entry, true, true, 0);
 
         auto auto_name_button = Gtk::manage(new Gtk::Button());
@@ -34,7 +34,7 @@ public:
 
         net_button = Gtk::manage(new NetButton(block));
         net_button->set_net(bus_member->net->uuid);
-        net_button->signal_changed().connect(sigc::mem_fun(this, &BusMemberEditor::bus_net_changed));
+        net_button->signal_changed().connect(sigc::mem_fun(*this, &BusMemberEditor::bus_net_changed));
         net_button->set_sensitive(!bus_member->net->has_bus_rippers);
         pack_start(*net_button, false, false, 0);
 
@@ -44,7 +44,7 @@ public:
         delbutton->set_sensitive(!bus_member->net->has_bus_rippers);
         // delbutton->get_style_context()->add_class("destructive-action");
         delbutton->set_margin_start(16);
-        delbutton->signal_clicked().connect(sigc::mem_fun(this, &BusMemberEditor::bus_member_remove));
+        delbutton->signal_clicked().connect(sigc::mem_fun(*this, &BusMemberEditor::bus_member_remove));
         pack_start(*delbutton, false, false, 0);
     }
     Gtk::Entry *entry;
@@ -153,7 +153,7 @@ public:
         la->get_style_context()->add_class("dim-label");
         bus_name_entry = Gtk::manage(new Gtk::Entry());
         bus_name_entry->set_text(bus->name);
-        bus_name_entry->signal_changed().connect(sigc::mem_fun(this, &BusEditor::bus_name_changed));
+        bus_name_entry->signal_changed().connect(sigc::mem_fun(*this, &BusEditor::bus_name_changed));
         labelbox->pack_start(*la, false, false, 0);
         labelbox->pack_start(*bus_name_entry, true, true, 0);
 
@@ -165,18 +165,18 @@ public:
         buttonbox->set_margin_bottom(4);
 
         auto add_member_button = Gtk::manage(new Gtk::Button("Add member"));
-        add_member_button->signal_clicked().connect(sigc::mem_fun(this, &BusEditor::bus_add_member));
+        add_member_button->signal_clicked().connect(sigc::mem_fun(*this, &BusEditor::bus_add_member));
         buttonbox->pack_start(*add_member_button, false, false, 0);
 
         auto add_seq_button = Gtk::manage(new Gtk::Button("Add sequence"));
-        add_seq_button->signal_clicked().connect(sigc::mem_fun(this, &BusEditor::bus_add_sequence));
+        add_seq_button->signal_clicked().connect(sigc::mem_fun(*this, &BusEditor::bus_add_sequence));
         buttonbox->pack_start(*add_seq_button, false, false, 0);
 
         pack_start(*buttonbox, false, false, 0);
 
         auto sc = Gtk::manage(new Gtk::ScrolledWindow());
         listbox = Gtk::manage(new Gtk::ListBox());
-        listbox->set_header_func(sigc::mem_fun(this, &BusEditor::header_fun));
+        listbox->set_header_func(sigc::mem_fun(*this, &BusEditor::header_fun));
         listbox->set_selection_mode(Gtk::SELECTION_NONE);
         sc->add(*listbox);
         pack_start(*sc, true, true, 0);
@@ -283,7 +283,7 @@ ManageBusesDialog::ManageBusesDialog(Gtk::Window *parent, Block *bl)
     stack->set_transition_type(Gtk::STACK_TRANSITION_TYPE_SLIDE_RIGHT);
     stack->set_transition_duration(100);
     stack->property_visible_child_name().signal_changed().connect(
-            sigc::mem_fun(this, &ManageBusesDialog::update_bus_removable));
+            sigc::mem_fun(*this, &ManageBusesDialog::update_bus_removable));
     auto sidebar = Gtk::manage(new Gtk::StackSidebar());
     sidebar->set_stack(*stack);
 
@@ -297,14 +297,14 @@ ManageBusesDialog::ManageBusesDialog(Gtk::Window *parent, Block *bl)
     {
         auto tbo = Gtk::manage(new Gtk::ToolButton());
         tbo->set_icon_name("list-add-symbolic");
-        tbo->signal_clicked().connect(sigc::mem_fun(this, &ManageBusesDialog::add_bus));
+        tbo->signal_clicked().connect(sigc::mem_fun(*this, &ManageBusesDialog::add_bus));
         // tbo->signal_clicked().connect([this]{s_signal_add_sheet.emit();});
         tb->insert(*tbo, -1);
     }
     {
         auto tbo = Gtk::manage(new Gtk::ToolButton());
         tbo->set_icon_name("list-remove-symbolic");
-        tbo->signal_clicked().connect(sigc::mem_fun(this, &ManageBusesDialog::remove_bus));
+        tbo->signal_clicked().connect(sigc::mem_fun(*this, &ManageBusesDialog::remove_bus));
         tb->insert(*tbo, -1);
         delete_button = tbo;
     }

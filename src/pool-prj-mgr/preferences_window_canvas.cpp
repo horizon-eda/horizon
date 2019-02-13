@@ -234,19 +234,19 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
 
         {
             auto it = Gtk::manage(new Gtk::MenuItem("Export..."));
-            it->signal_activate().connect(sigc::mem_fun(this, &CanvasPreferencesEditor::handle_export));
+            it->signal_activate().connect(sigc::mem_fun(*this, &CanvasPreferencesEditor::handle_export));
             it->show();
             color_preset_menu->append(*it);
         }
         {
             auto it = Gtk::manage(new Gtk::MenuItem("Import..."));
-            it->signal_activate().connect(sigc::mem_fun(this, &CanvasPreferencesEditor::handle_import));
+            it->signal_activate().connect(sigc::mem_fun(*this, &CanvasPreferencesEditor::handle_import));
             it->show();
             color_preset_menu->append(*it);
         }
         {
             auto it = Gtk::manage(new Gtk::MenuItem("Default"));
-            it->signal_activate().connect(sigc::mem_fun(this, &CanvasPreferencesEditor::handle_default));
+            it->signal_activate().connect(sigc::mem_fun(*this, &CanvasPreferencesEditor::handle_default));
             it->show();
             color_preset_menu->append(*it);
         }
@@ -278,7 +278,7 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
     });
 
     canvas_colors_fb->signal_selected_children_changed().connect(
-            sigc::mem_fun(this, &CanvasPreferencesEditor::update_color_chooser));
+            sigc::mem_fun(*this, &CanvasPreferencesEditor::update_color_chooser));
 
     if (canvas_preferences == &preferences->canvas_layer) {
         canvas_label->set_text("Affects Padstack, Package and Board");

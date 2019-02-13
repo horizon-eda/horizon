@@ -159,9 +159,9 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
         gh_repo_link_label->set_text("couldn't find github repo!");
     }
 
-    upgrade_button->signal_clicked().connect(sigc::mem_fun(this, &PoolRemoteBox::handle_remote_upgrade));
-    create_pr_button->signal_clicked().connect(sigc::mem_fun(this, &PoolRemoteBox::handle_create_pr));
-    refresh_prs_button->signal_clicked().connect(sigc::mem_fun(this, &PoolRemoteBox::handle_refresh_prs));
+    upgrade_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolRemoteBox::handle_remote_upgrade));
+    create_pr_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolRemoteBox::handle_create_pr));
+    refresh_prs_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolRemoteBox::handle_refresh_prs));
 
     git_thread_dispatcher.connect([this] {
         std::lock_guard<std::mutex> lock(git_thread_mutex);

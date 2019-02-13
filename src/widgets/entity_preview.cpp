@@ -20,7 +20,7 @@ EntityPreview::EntityPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIE
         symbol_sel_box->pack_start(*la, false, false, 0);
     }
     combo_gate = Gtk::manage(new Gtk::ComboBoxText);
-    combo_gate->signal_changed().connect(sigc::mem_fun(this, &EntityPreview::handle_gate_sel));
+    combo_gate->signal_changed().connect(sigc::mem_fun(*this, &EntityPreview::handle_gate_sel));
     symbol_sel_box->pack_start(*combo_gate, true, true, 0);
 
     if (show_goto) {
@@ -36,7 +36,7 @@ EntityPreview::EntityPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIE
         la->set_margin_start(4);
     }
     combo_symbol = Gtk::manage(new Gtk::ComboBoxText);
-    combo_symbol->signal_changed().connect(sigc::mem_fun(this, &EntityPreview::handle_symbol_sel));
+    combo_symbol->signal_changed().connect(sigc::mem_fun(*this, &EntityPreview::handle_symbol_sel));
     symbol_sel_box->pack_start(*combo_symbol, true, true, 0);
 
     if (show_goto) {

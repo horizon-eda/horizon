@@ -71,7 +71,7 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     });
     update_drill_visibility();
 
-    generate_button->signal_clicked().connect(sigc::mem_fun(this, &FabOutputWindow::generate));
+    generate_button->signal_clicked().connect(sigc::mem_fun(*this, &FabOutputWindow::generate));
     directory_button->signal_clicked().connect([this] {
         GtkFileChooserNative *native =
                 gtk_file_chooser_native_new("Select output directory", GTK_WINDOW(gobj()),

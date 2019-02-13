@@ -46,9 +46,9 @@ void PoolNotebook::construct_entities()
     bbox->set_margin_start(8);
     bbox->set_margin_end(8);
 
-    add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_entity));
-    add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_entity));
-    add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_entity));
+    add_action_button("Create", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_create_entity));
+    add_action_button("Edit", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_edit_entity));
+    add_action_button("Duplicate", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_duplicate_entity));
     if (remote_repo.size())
         add_action_button("Merge", bbox, br,
                           [this](const UUID &uu) { remote_box->merge_item(ObjectType::ENTITY, uu); });
@@ -70,10 +70,10 @@ void PoolNotebook::construct_entities()
     paned->child_property_shrink(*box) = false;
 
     auto preview = Gtk::manage(new EntityPreview(pool));
-    preview->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
+    preview->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
 
     auto info_box = EntityInfoBox::create(pool);
-    info_box->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
+    info_box->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
 
     br->signal_selected().connect([this, br, preview, info_box] {
         auto sel = br->get_selected();

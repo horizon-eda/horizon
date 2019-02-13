@@ -22,7 +22,7 @@ SheetBox::SheetBox(CoreSchematic *c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VE
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Sheet", *cr));
         tvc->add_attribute(*cr, "text", list_columns.name);
         cr->property_editable().set_value(true);
-        cr->signal_edited().connect(sigc::mem_fun(this, &SheetBox::name_edited));
+        cr->signal_edited().connect(sigc::mem_fun(*this, &SheetBox::name_edited));
         view->append_column(*tvc);
     }
     {
@@ -48,7 +48,7 @@ SheetBox::SheetBox(CoreSchematic *c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VE
     sc->add(*view);
     sc->show_all();
 
-    view->get_selection()->signal_changed().connect(sigc::mem_fun(this, &SheetBox::selection_changed));
+    view->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SheetBox::selection_changed));
     pack_start(*sc, true, true, 0);
 
 
@@ -65,7 +65,7 @@ SheetBox::SheetBox(CoreSchematic *c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VE
     {
         auto tbo = Gtk::manage(new Gtk::ToolButton());
         tbo->set_icon_name("list-remove-symbolic");
-        tbo->signal_clicked().connect(sigc::mem_fun(this, &SheetBox::remove_clicked));
+        tbo->signal_clicked().connect(sigc::mem_fun(*this, &SheetBox::remove_clicked));
         tb->insert(*tbo, -1);
         remove_button = tbo;
     }

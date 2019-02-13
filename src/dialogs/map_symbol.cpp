@@ -34,7 +34,7 @@ MapSymbolDialog::MapSymbolDialog(Gtk::Window *parent, const std::map<UUIDPath<2>
     set_default_response(Gtk::ResponseType::RESPONSE_OK);
     set_default_size(300, 300);
 
-    button_ok->signal_clicked().connect(sigc::mem_fun(this, &MapSymbolDialog::ok_clicked));
+    button_ok->signal_clicked().connect(sigc::mem_fun(*this, &MapSymbolDialog::ok_clicked));
 
     store = Gtk::ListStore::create(list_columns);
     Gtk::TreeModel::Row row;
@@ -47,7 +47,7 @@ MapSymbolDialog::MapSymbolDialog(Gtk::Window *parent, const std::map<UUIDPath<2>
     view = Gtk::manage(new Gtk::TreeView(store));
     view->append_column("Gate", list_columns.name);
     view->get_selection()->set_mode(Gtk::SelectionMode::SELECTION_BROWSE);
-    view->signal_row_activated().connect(sigc::mem_fun(this, &MapSymbolDialog::row_activated));
+    view->signal_row_activated().connect(sigc::mem_fun(*this, &MapSymbolDialog::row_activated));
 
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());

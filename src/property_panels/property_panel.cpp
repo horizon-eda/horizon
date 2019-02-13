@@ -95,8 +95,8 @@ PropertyPanel::PropertyPanel(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
         em->show_all();
     }
     reload();
-    button_next->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(this, &PropertyPanel::go), 1));
-    button_prev->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(this, &PropertyPanel::go), -1));
+    button_next->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(*this, &PropertyPanel::go), 1));
+    button_prev->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(*this, &PropertyPanel::go), -1));
 }
 
 void PropertyPanel::handle_changed(ObjectProperty::ID property, const PropertyValue &value, bool all)

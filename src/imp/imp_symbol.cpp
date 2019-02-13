@@ -10,7 +10,7 @@ ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool
     : ImpBase(pool_path), core_symbol(symbol_filename, *pool)
 {
     core = &core_symbol;
-    core_symbol.signal_tool_changed().connect(sigc::mem_fun(this, &ImpBase::handle_tool_change));
+    core_symbol.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
 }
 
 void ImpSymbol::canvas_update()
@@ -75,7 +75,7 @@ void ImpSymbol::construct()
         this->tool_begin(ToolID::MAP_PIN, true, sel);
     });
 
-    core_symbol.signal_rebuilt().connect(sigc::mem_fun(this, &ImpSymbol::update_unplaced));
+    core_symbol.signal_rebuilt().connect(sigc::mem_fun(*this, &ImpSymbol::update_unplaced));
     update_unplaced();
     core_symbol.signal_tool_changed().connect(
             [this](ToolID tool_id) { unplaced_box->set_sensitive(tool_id == ToolID::NONE); });

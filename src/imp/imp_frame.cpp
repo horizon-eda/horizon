@@ -7,7 +7,7 @@ ImpFrame::ImpFrame(const std::string &frame_filename, const std::string &pool_pa
     : ImpBase(pool_path), core_frame(frame_filename)
 {
     core = &core_frame;
-    core_frame.signal_tool_changed().connect(sigc::mem_fun(this, &ImpBase::handle_tool_change));
+    core_frame.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
 }
 
 void ImpFrame::canvas_update()

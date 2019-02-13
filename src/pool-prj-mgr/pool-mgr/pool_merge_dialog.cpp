@@ -93,7 +93,7 @@ PoolMergeDialog::PoolMergeDialog(Gtk::Window *parent, const std::string &lp, con
 {
     add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
     auto ok_button = add_button("Merge", Gtk::ResponseType::RESPONSE_OK);
-    ok_button->signal_clicked().connect(sigc::mem_fun(this, &PoolMergeDialog::do_merge));
+    ok_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolMergeDialog::do_merge));
     set_default_response(Gtk::ResponseType::RESPONSE_OK);
     set_default_size(1024, 600);
 
@@ -114,7 +114,7 @@ PoolMergeDialog::PoolMergeDialog(Gtk::Window *parent, const std::string &lp, con
                               });
     box->pool_item_view->set_model(item_store);
     box->pool_item_view->get_selection()->signal_changed().connect(
-            sigc::mem_fun(this, &PoolMergeDialog::selection_changed));
+            sigc::mem_fun(*this, &PoolMergeDialog::selection_changed));
 
     {
         auto cr_text = Gtk::manage(new Gtk::CellRendererText());
@@ -170,7 +170,7 @@ PoolMergeDialog::PoolMergeDialog(Gtk::Window *parent, const std::string &lp, con
                 mcr->property_sensitive() = true;
             }
         });
-        cr_toggle->signal_toggled().connect(sigc::mem_fun(this, &PoolMergeDialog::action_toggled));
+        cr_toggle->signal_toggled().connect(sigc::mem_fun(*this, &PoolMergeDialog::action_toggled));
         box->pool_item_view->append_column(*tvc);
     }
 

@@ -124,7 +124,7 @@ PartPreview::PartPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIENTAT
         package_sel_box->pack_start(*la, false, false, 0);
     }
     combo_package = Gtk::manage(new Gtk::ComboBoxText);
-    combo_package->signal_changed().connect(sigc::mem_fun(this, &PartPreview::handle_package_sel));
+    combo_package->signal_changed().connect(sigc::mem_fun(*this, &PartPreview::handle_package_sel));
     package_sel_box->pack_start(*combo_package, true, true, 0);
 
     if (show_goto) {

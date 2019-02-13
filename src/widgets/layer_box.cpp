@@ -199,7 +199,7 @@ LayerBox::LayerBox(LayerProvider *lpr, bool show_title)
         }
     });
 
-    property_work_layer().signal_changed().connect(sigc::mem_fun(this, &LayerBox::update_work_layer));
+    property_work_layer().signal_changed().connect(sigc::mem_fun(*this, &LayerBox::update_work_layer));
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
     sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);

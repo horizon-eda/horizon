@@ -94,9 +94,9 @@ void PoolNotebook::construct_symbols()
     bbox->set_margin_start(8);
     bbox->set_margin_end(8);
 
-    add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_symbol));
-    add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_symbol));
-    add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_symbol));
+    add_action_button("Create", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_create_symbol));
+    add_action_button("Edit", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_edit_symbol));
+    add_action_button("Duplicate", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_duplicate_symbol));
     if (remote_repo.size())
         add_action_button("Merge", bbox, br,
                           [this](const UUID &uu) { remote_box->merge_item(ObjectType::SYMBOL, uu); });
@@ -115,7 +115,7 @@ void PoolNotebook::construct_symbols()
 
 
     auto preview = Gtk::manage(new SymbolPreview(pool));
-    preview->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
+    preview->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
     br->signal_selected().connect([br, preview] {
         auto sel = br->get_selected();
         preview->load(sel);

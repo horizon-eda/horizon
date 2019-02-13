@@ -68,7 +68,7 @@ EditStackupDialog::EditStackupDialog(Gtk::Window *parent, Board *brd)
 {
     add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
     auto ok_button = add_button("OK", Gtk::ResponseType::RESPONSE_OK);
-    ok_button->signal_clicked().connect(sigc::mem_fun(this, &EditStackupDialog::ok_clicked));
+    ok_button->signal_clicked().connect(sigc::mem_fun(*this, &EditStackupDialog::ok_clicked));
     set_default_response(Gtk::ResponseType::RESPONSE_OK);
     set_default_size(400, 300);
 
@@ -88,7 +88,7 @@ EditStackupDialog::EditStackupDialog(Gtk::Window *parent, Board *brd)
     sp_n_inner_layers->set_digits(0);
     sp_n_inner_layers->set_increments(1, 1);
     sp_n_inner_layers->set_value(board->get_n_inner_layers());
-    sp_n_inner_layers->signal_value_changed().connect(sigc::mem_fun(this, &EditStackupDialog::update_layers));
+    sp_n_inner_layers->signal_value_changed().connect(sigc::mem_fun(*this, &EditStackupDialog::update_layers));
     box2->pack_start(*sp_n_inner_layers, true, true, 0);
 
     box->pack_start(*box2, false, false, 0);

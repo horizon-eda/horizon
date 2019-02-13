@@ -266,8 +266,8 @@ PoolCacheWindow::PoolCacheWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
     Gtk::Button *refresh_list_button;
     x->get_widget("refresh_list_button", refresh_list_button);
-    refresh_list_button->signal_clicked().connect(sigc::mem_fun(this, &PoolCacheWindow::refresh_list));
-    update_from_pool_button->signal_clicked().connect(sigc::mem_fun(this, &PoolCacheWindow::update_from_pool));
+    refresh_list_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolCacheWindow::refresh_list));
+    update_from_pool_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolCacheWindow::update_from_pool));
 
     Gtk::Button *cleanup_button;
     x->get_widget("cleanup_button", cleanup_button);
@@ -279,7 +279,8 @@ PoolCacheWindow::PoolCacheWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
     item_store = Gtk::ListStore::create(tree_columns);
     pool_item_view->set_model(item_store);
-    pool_item_view->get_selection()->signal_changed().connect(sigc::mem_fun(this, &PoolCacheWindow::selection_changed));
+    pool_item_view->get_selection()->signal_changed().connect(
+            sigc::mem_fun(*this, &PoolCacheWindow::selection_changed));
     item_store->set_sort_func(tree_columns.type,
                               [this](const Gtk::TreeModel::iterator &a, const Gtk::TreeModel::iterator &b) {
                                   Gtk::TreeModel::Row ra = *a;

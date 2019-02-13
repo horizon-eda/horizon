@@ -39,7 +39,7 @@ ShapeEditor::ShapeEditor(Shape *sh, ShapeDialog *p) : Gtk::Grid(), shape(sh), pa
                 {Shape::Form::OBROUND, "Obround"},
                 {Shape::Form::RECTANGLE, "Rectangle"},
         };
-        bind_widget<Shape::Form>(w_form, items, shape->form, sigc::mem_fun(this, &ShapeEditor::update));
+        bind_widget<Shape::Form>(w_form, items, shape->form, sigc::mem_fun(*this, &ShapeEditor::update));
         auto la = grid_attach_label_and_widget(this, "Form", w_form, top);
         la->set_size_request(70, -1);
         la->set_xalign(1);
@@ -194,7 +194,7 @@ ShapeDialog::ShapeDialog(Gtk::Window *parent, std::set<Shape *> sh)
             w_form->append(std::to_string(static_cast<int>(Shape::Form::CIRCLE)), "Circle");
             w_form->append(std::to_string(static_cast<int>(Shape::Form::RECTANGLE)), "Rectangle");
             w_form->append(std::to_string(static_cast<int>(Shape::Form::OBROUND)), "Obround");
-            w_form->signal_changed().connect(sigc::mem_fun(this, &ShapeDialog::update));
+            w_form->signal_changed().connect(sigc::mem_fun(*this, &ShapeDialog::update));
             w_form->set_active_id(std::to_string(static_cast<int>(shape->form)));
             w_form->set_hexpand(true);
 

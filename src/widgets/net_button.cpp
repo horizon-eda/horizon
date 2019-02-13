@@ -6,7 +6,7 @@ NetButton::NetButton(Block *b) : Gtk::MenuButton(), block(b)
     popover = Gtk::manage(new Gtk::Popover(*this));
     ns = Gtk::manage(new NetSelector(block));
     ns->set_size_request(100, 200);
-    ns->signal_activated().connect(sigc::mem_fun(this, &NetButton::ns_activated));
+    ns->signal_activated().connect(sigc::mem_fun(*this, &NetButton::ns_activated));
     ns->show();
 
     popover->add(*ns);

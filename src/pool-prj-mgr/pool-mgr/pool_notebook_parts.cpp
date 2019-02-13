@@ -109,11 +109,11 @@ void PoolNotebook::construct_parts()
     bbox->set_margin_start(8);
     bbox->set_margin_end(8);
 
-    add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_part));
-    add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_part));
-    add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_part));
+    add_action_button("Create", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_create_part));
+    add_action_button("Edit", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_edit_part));
+    add_action_button("Duplicate", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_duplicate_part));
     add_action_button("Create Part from Part", bbox, br,
-                      sigc::mem_fun(this, &PoolNotebook::handle_create_part_from_part));
+                      sigc::mem_fun(*this, &PoolNotebook::handle_create_part_from_part));
     if (remote_repo.size())
         add_action_button("Merge", bbox, br, [this](const UUID &uu) { remote_box->merge_item(ObjectType::PART, uu); });
 
@@ -134,11 +134,11 @@ void PoolNotebook::construct_parts()
     paned->child_property_shrink(*box) = false;
 
     auto preview = Gtk::manage(new PartPreview(pool));
-    preview->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
+    preview->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
 
     auto where_used = Gtk::manage(new WhereUsedBox(pool));
     where_used->property_margin() = 10;
-    where_used->signal_goto().connect(sigc::mem_fun(this, &PoolNotebook::go_to));
+    where_used->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
 
     stack->add(*preview, "preview");
     stack->add(*where_used, "info");

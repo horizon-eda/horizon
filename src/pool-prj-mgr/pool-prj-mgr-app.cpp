@@ -157,7 +157,7 @@ void PoolProjectManagerApplication::on_startup()
     cssp->load_from_resource("/net/carrotIndustries/horizon/global.css");
     Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 700);
 
-    signal_shutdown().connect(sigc::mem_fun(this, &PoolProjectManagerApplication::on_shutdown));
+    signal_shutdown().connect(sigc::mem_fun(*this, &PoolProjectManagerApplication::on_shutdown));
 }
 
 void PoolProjectManagerApplication::on_action_preferences()

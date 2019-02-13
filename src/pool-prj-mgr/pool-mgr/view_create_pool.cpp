@@ -13,8 +13,8 @@ PoolProjectManagerViewCreatePool::PoolProjectManagerViewCreatePool(const Glib::R
     builder->get_widget("create_pool_name_entry", pool_name_entry);
     builder->get_widget("create_pool_path_chooser", pool_path_chooser);
 
-    pool_name_entry->signal_changed().connect(sigc::mem_fun(this, &PoolProjectManagerViewCreatePool::update));
-    pool_path_chooser->signal_file_set().connect(sigc::mem_fun(this, &PoolProjectManagerViewCreatePool::update));
+    pool_name_entry->signal_changed().connect(sigc::mem_fun(*this, &PoolProjectManagerViewCreatePool::update));
+    pool_path_chooser->signal_file_set().connect(sigc::mem_fun(*this, &PoolProjectManagerViewCreatePool::update));
 }
 
 

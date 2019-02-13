@@ -21,7 +21,7 @@ WarningsBox::WarningsBox() : Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 4)
     sc->add(*view);
     sc->show_all();
 
-    view->signal_row_activated().connect(sigc::mem_fun(this, &WarningsBox::row_activated));
+    view->signal_row_activated().connect(sigc::mem_fun(*this, &WarningsBox::row_activated));
     pack_start(*sc, true, true, 0);
     set_visible(false);
 }

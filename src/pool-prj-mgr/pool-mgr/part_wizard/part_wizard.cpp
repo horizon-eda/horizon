@@ -83,15 +83,15 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     part_manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
 
-    part_mpn_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));
-    entity_name_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));
-    entity_prefix_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));
+    part_mpn_entry->signal_changed().connect(sigc::mem_fun(*this, &PartWizard::update_can_finish));
+    entity_name_entry->signal_changed().connect(sigc::mem_fun(*this, &PartWizard::update_can_finish));
+    entity_prefix_entry->signal_changed().connect(sigc::mem_fun(*this, &PartWizard::update_can_finish));
 
-    part_autofill_button->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::autofill));
+    part_autofill_button->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::autofill));
 
     part_location_entry = pack_location_entry(x, "part_location_box");
     part_location_entry->set_filename(Glib::build_filename(pool_base_path, "parts"));
-    part_location_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));
+    part_location_entry->signal_changed().connect(sigc::mem_fun(*this, &PartWizard::update_can_finish));
     {
         Gtk::Button *from_part_button;
         entity_location_entry = pack_location_entry(x, "entity_location_box", &from_part_button);
@@ -101,7 +101,7 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             entity_location_entry->set_filename(Glib::build_filename(pool_base_path, "entities", rel));
         });
         entity_location_entry->set_filename(Glib::build_filename(pool_base_path, "entities"));
-        entity_location_entry->signal_changed().connect(sigc::mem_fun(this, &PartWizard::update_can_finish));
+        entity_location_entry->signal_changed().connect(sigc::mem_fun(*this, &PartWizard::update_can_finish));
     }
 
     entity_name_from_mpn_button->signal_clicked().connect(
@@ -132,12 +132,12 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     part.entity = &entity;
 
 
-    button_link_pads->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::handle_link));
-    button_unlink_pads->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::handle_unlink));
-    button_import_pads->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::handle_import));
-    button_next->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::handle_next));
-    button_back->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::handle_back));
-    button_finish->signal_clicked().connect(sigc::mem_fun(this, &PartWizard::handle_finish));
+    button_link_pads->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_link));
+    button_unlink_pads->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_unlink));
+    button_import_pads->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_import));
+    button_next->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_next));
+    button_back->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_back));
+    button_finish->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_finish));
 
     set_mode(Mode::ASSIGN);
 

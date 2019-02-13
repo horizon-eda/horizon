@@ -84,9 +84,9 @@ void PoolNotebook::construct_frames()
     bbox->set_margin_start(8);
     bbox->set_margin_end(8);
 
-    add_action_button("Create", bbox, sigc::mem_fun(this, &PoolNotebook::handle_create_frame));
-    add_action_button("Edit", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_edit_frame));
-    add_action_button("Duplicate", bbox, br, sigc::mem_fun(this, &PoolNotebook::handle_duplicate_frame));
+    add_action_button("Create", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_create_frame));
+    add_action_button("Edit", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_edit_frame));
+    add_action_button("Duplicate", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_duplicate_frame));
     /*if (remote_repo.size())
         add_action_button("Merge", bbox, br,
                           [this](const UUID &uu) { remote_box->merge_item(ObjectType::SYMBOL, uu); });*/

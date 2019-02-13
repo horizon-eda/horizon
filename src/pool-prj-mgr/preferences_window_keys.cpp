@@ -56,7 +56,7 @@ KeySequencesPreferencesEditor::KeySequencesPreferencesEditor(BaseObjectType *cob
     key_sequences_treeview->append_column("Keys", tree_columns.keys);
 
     key_sequences_treeview->get_selection()->signal_changed().connect(
-            sigc::mem_fun(this, &KeySequencesPreferencesEditor::update_action_editors));
+            sigc::mem_fun(*this, &KeySequencesPreferencesEditor::update_action_editors));
 
     key_sequences_treeview->expand_all();
 

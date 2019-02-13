@@ -24,8 +24,8 @@ AskNetMergeDialog::AskNetMergeDialog(Gtk::Window *parent, Net *a, Net *b)
     auto *bb = Gtk::manage(new Gtk::Button("Merge \"" + into->name + "\" into \"" + net->name + "\""));
     box->pack_start(*bb, true, true, 0);
 
-    ba->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(this, &Gtk::Dialog::response), 1));
-    bb->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(this, &Gtk::Dialog::response), 2));
+    ba->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(*this, &Gtk::Dialog::response), 1));
+    bb->signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(*this, &Gtk::Dialog::response), 2));
 
     get_content_area()->pack_start(*box, true, true, 0);
     get_content_area()->set_border_width(10);

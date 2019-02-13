@@ -211,11 +211,11 @@ void ImpBase::run(int argc, char *argv[])
     canvas = main_window->canvas;
     clipboard.reset(new ClipboardManager(core.r));
 
-    canvas->signal_selection_changed().connect(sigc::mem_fun(this, &ImpBase::sc));
-    canvas->signal_key_press_event().connect(sigc::mem_fun(this, &ImpBase::handle_key_press));
-    canvas->signal_cursor_moved().connect(sigc::mem_fun(this, &ImpBase::handle_cursor_move));
-    canvas->signal_button_press_event().connect(sigc::mem_fun(this, &ImpBase::handle_click));
-    canvas->signal_button_release_event().connect(sigc::mem_fun(this, &ImpBase::handle_click_release));
+    canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBase::sc));
+    canvas->signal_key_press_event().connect(sigc::mem_fun(*this, &ImpBase::handle_key_press));
+    canvas->signal_cursor_moved().connect(sigc::mem_fun(*this, &ImpBase::handle_cursor_move));
+    canvas->signal_button_press_event().connect(sigc::mem_fun(*this, &ImpBase::handle_click));
+    canvas->signal_button_release_event().connect(sigc::mem_fun(*this, &ImpBase::handle_click_release));
     canvas->signal_request_display_name().connect(
             [this](ObjectType ty, UUID uu) { return core.r->get_display_name(ty, uu); });
 
@@ -313,7 +313,7 @@ void ImpBase::run(int argc, char *argv[])
             [this](bool thr) { main_window->property_throttled_revealer->set_reveal_child(thr); });
 
     warnings_box = Gtk::manage(new WarningsBox());
-    warnings_box->signal_selected().connect(sigc::mem_fun(this, &ImpBase::handle_warning_selected));
+    warnings_box->signal_selected().connect(sigc::mem_fun(*this, &ImpBase::handle_warning_selected));
     main_window->left_panel->pack_end(*warnings_box, false, false, 0);
 
     selection_filter_dialog =
@@ -555,7 +555,7 @@ void ImpBase::run(int argc, char *argv[])
 
     if (core.r->get_rules()) {
         rules_window = RulesWindow::create(main_window, canvas, core.r->get_rules(), core.r);
-        rules_window->signal_canvas_update().connect(sigc::mem_fun(this, &ImpBase::canvas_update_from_pp));
+        rules_window->signal_canvas_update().connect(sigc::mem_fun(*this, &ImpBase::canvas_update_from_pp));
         rules_window->signal_changed().connect([this] { core.r->set_needs_save(); });
 
         connect_action(ActionID::RULES, [this](const auto &conn) { rules_window->present(); });
@@ -584,7 +584,7 @@ void ImpBase::run(int argc, char *argv[])
 
     main_window->add_action("view_log", [this] { log_window->present(); });
 
-    main_window->signal_delete_event().connect(sigc::mem_fun(this, &ImpBase::handle_close));
+    main_window->signal_delete_event().connect(sigc::mem_fun(*this, &ImpBase::handle_close));
 
     for (const auto &la : core.r->get_layer_provider()->get_layers()) {
         canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL));
@@ -608,7 +608,7 @@ void ImpBase::run(int argc, char *argv[])
     if (sockets_connected)
         main_window->add_action("preferences", [this] { trigger_action(ActionID::PREFERENCES); });
 
-    preferences.signal_changed().connect(sigc::mem_fun(this, &ImpBase::apply_preferences));
+    preferences.signal_changed().connect(sigc::mem_fun(*this, &ImpBase::apply_preferences));
 
     apply_preferences();
 
@@ -638,8 +638,8 @@ void ImpBase::run(int argc, char *argv[])
 
     core.r->signal_tool_changed().connect([this](ToolID id) { s_signal_action_sensitive.emit(); });
 
-    canvas->signal_hover_selection_changed().connect(sigc::mem_fun(this, &ImpBase::hud_update));
-    canvas->signal_selection_changed().connect(sigc::mem_fun(this, &ImpBase::hud_update));
+    canvas->signal_hover_selection_changed().connect(sigc::mem_fun(*this, &ImpBase::hud_update));
+    canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBase::hud_update));
 
     canvas_update();
 
@@ -948,7 +948,7 @@ ActionConnection &ImpBase::connect_action(ToolID tool_id, std::function<void(con
 
 ActionConnection &ImpBase::connect_action(ToolID tool_id)
 {
-    return connect_action(tool_id, sigc::mem_fun(this, &ImpBase::handle_tool_action));
+    return connect_action(tool_id, sigc::mem_fun(*this, &ImpBase::handle_tool_action));
 }
 
 ActionConnection &ImpBase::connect_action(ActionID action_id, ToolID tool_id,
@@ -1524,7 +1524,7 @@ void ImpBase::set_monitor_files(const std::set<std::string> &files)
     for (const auto &filename : files) {
         if (file_monitors.count(filename) == 0) {
             auto mon = Gio::File::create_for_path(filename)->monitor_file();
-            mon->signal_changed().connect(sigc::mem_fun(this, &ImpBase::handle_file_changed));
+            mon->signal_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_file_changed));
             file_monitors[filename] = mon;
         }
     }

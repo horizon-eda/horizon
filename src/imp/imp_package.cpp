@@ -26,7 +26,7 @@ ImpPackage::ImpPackage(const std::string &package_filename, const std::string &p
       fake_board(UUID::random(), fake_block)
 {
     core = &core_package;
-    core_package.signal_tool_changed().connect(sigc::mem_fun(this, &ImpBase::handle_tool_change));
+    core_package.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
 }
 
 void ImpPackage::canvas_update()
@@ -580,7 +580,7 @@ void ImpPackage::construct()
     });
 
     footprint_generator_window = FootprintGeneratorWindow::create(main_window, &core_package);
-    footprint_generator_window->signal_generated().connect(sigc::mem_fun(this, &ImpBase::canvas_update_from_pp));
+    footprint_generator_window->signal_generated().connect(sigc::mem_fun(*this, &ImpBase::canvas_update_from_pp));
 
     auto parameter_window =
             new ParameterWindow(main_window, &core_package.parameter_program_code, &core_package.parameter_set);

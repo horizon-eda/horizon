@@ -36,10 +36,10 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
 
     lb_favorites->set_header_func(sigc::ptr_fun(header_fun));
     lb_recent->set_header_func(sigc::ptr_fun(header_fun));
-    lb_favorites->signal_row_selected().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_favorites_selected));
-    lb_favorites->signal_row_activated().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_favorites_activated));
-    lb_recent->signal_row_selected().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_favorites_selected));
-    lb_recent->signal_row_activated().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_favorites_activated));
+    lb_favorites->signal_row_selected().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_favorites_selected));
+    lb_favorites->signal_row_activated().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_favorites_activated));
+    lb_recent->signal_row_selected().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_favorites_selected));
+    lb_recent->signal_row_activated().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_favorites_activated));
 
     {
         auto la = Gtk::manage(new Gtk::MenuItem("MPN Search"));
@@ -54,11 +54,11 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
         la->show();
         add_search_menu->append(*la);
     }
-    notebook->signal_switch_page().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_switch_page));
+    notebook->signal_switch_page().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_switch_page));
     fav_toggled_conn =
-            fav_button->signal_toggled().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_fav_toggled));
-    place_part_button->signal_clicked().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_place_part));
-    assign_part_button->signal_clicked().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_assign_part));
+            fav_button->signal_toggled().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_fav_toggled));
+    place_part_button->signal_clicked().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_place_part));
+    assign_part_button->signal_clicked().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_assign_part));
 
     preview = Gtk::manage(new PartPreview(pool, false));
     paned->add2(*preview);
@@ -284,8 +284,8 @@ void PartBrowserWindow::add_search(const UUID &part)
     notebook->set_current_page(index);
 
     search_views.insert(ch);
-    ch->signal_selected().connect(sigc::mem_fun(this, &PartBrowserWindow::update_part_current));
-    ch->signal_activated().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_place_part));
+    ch->signal_selected().connect(sigc::mem_fun(*this, &PartBrowserWindow::update_part_current));
+    ch->signal_activated().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_place_part));
     if (part)
         ch->go_to(part);
 }
@@ -308,8 +308,8 @@ void PartBrowserWindow::add_search_parametric(const std::string &table_name)
     notebook->set_current_page(index);
 
     search_views.insert(ch);
-    ch->signal_selected().connect(sigc::mem_fun(this, &PartBrowserWindow::update_part_current));
-    ch->signal_activated().connect(sigc::mem_fun(this, &PartBrowserWindow::handle_place_part));
+    ch->signal_selected().connect(sigc::mem_fun(*this, &PartBrowserWindow::update_part_current));
+    ch->signal_activated().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_place_part));
 }
 
 PartBrowserWindow *PartBrowserWindow::create(Gtk::Window *p, const std::string &pool_path, std::deque<UUID> &favs)

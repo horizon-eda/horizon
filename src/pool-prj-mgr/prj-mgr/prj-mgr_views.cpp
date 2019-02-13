@@ -20,11 +20,11 @@ PoolProjectManagerViewCreateProject::PoolProjectManagerViewCreateProject(const G
     builder->get_widget("create_project_dir_label", project_dir_label);
     builder->get_widget("create_project_pool_combo", project_pool_combo);
 
-    project_name_entry->signal_changed().connect(sigc::mem_fun(this, &PoolProjectManagerViewCreateProject::update));
+    project_name_entry->signal_changed().connect(sigc::mem_fun(*this, &PoolProjectManagerViewCreateProject::update));
     project_description_entry->signal_changed().connect(
-            sigc::mem_fun(this, &PoolProjectManagerViewCreateProject::update));
-    project_pool_combo->signal_changed().connect(sigc::mem_fun(this, &PoolProjectManagerViewCreateProject::update));
-    project_path_chooser->signal_file_set().connect(sigc::mem_fun(this, &PoolProjectManagerViewCreateProject::update));
+            sigc::mem_fun(*this, &PoolProjectManagerViewCreateProject::update));
+    project_pool_combo->signal_changed().connect(sigc::mem_fun(*this, &PoolProjectManagerViewCreateProject::update));
+    project_path_chooser->signal_file_set().connect(sigc::mem_fun(*this, &PoolProjectManagerViewCreateProject::update));
 }
 
 void PoolProjectManagerViewCreateProject::clear()
@@ -131,14 +131,14 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
     entry_project_title->signal_changed().connect([this] { win->project_needs_save = true; });
 
     button_top_schematic->signal_clicked().connect(
-            sigc::mem_fun(this, &PoolProjectManagerViewProject::handle_button_top_schematic));
-    button_board->signal_clicked().connect(sigc::mem_fun(this, &PoolProjectManagerViewProject::handle_button_board));
+            sigc::mem_fun(*this, &PoolProjectManagerViewProject::handle_button_top_schematic));
+    button_board->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerViewProject::handle_button_board));
     button_part_browser->signal_clicked().connect(
-            sigc::mem_fun(this, &PoolProjectManagerViewProject::handle_button_part_browser));
+            sigc::mem_fun(*this, &PoolProjectManagerViewProject::handle_button_part_browser));
     button_pool_cache->signal_clicked().connect(
-            sigc::mem_fun(this, &PoolProjectManagerViewProject::handle_button_pool_cache));
+            sigc::mem_fun(*this, &PoolProjectManagerViewProject::handle_button_pool_cache));
     button_change_pool->signal_clicked().connect(
-            sigc::mem_fun(this, &PoolProjectManagerViewProject::handle_button_change_pool));
+            sigc::mem_fun(*this, &PoolProjectManagerViewProject::handle_button_change_pool));
 }
 
 

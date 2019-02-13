@@ -35,7 +35,7 @@ SelectGroupTagDialog::SelectGroupTagDialog(Gtk::Window *parent, const Block *blo
     set_default_response(Gtk::ResponseType::RESPONSE_OK);
     set_default_size(300, 300);
 
-    button_ok->signal_clicked().connect(sigc::mem_fun(this, &SelectGroupTagDialog::ok_clicked));
+    button_ok->signal_clicked().connect(sigc::mem_fun(*this, &SelectGroupTagDialog::ok_clicked));
 
     const auto &names = tag_mode ? block->tag_names : block->group_names;
 
@@ -90,7 +90,7 @@ SelectGroupTagDialog::SelectGroupTagDialog(Gtk::Window *parent, const Block *blo
         view->append_column(*tvc);
     }
     view->get_selection()->set_mode(Gtk::SelectionMode::SELECTION_BROWSE);
-    view->signal_row_activated().connect(sigc::mem_fun(this, &SelectGroupTagDialog::row_activated));
+    view->signal_row_activated().connect(sigc::mem_fun(*this, &SelectGroupTagDialog::row_activated));
 
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());

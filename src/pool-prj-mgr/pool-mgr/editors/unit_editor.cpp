@@ -157,8 +157,8 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     refresh_button->signal_clicked().connect([this] { sort(); });
 
-    delete_button->signal_clicked().connect(sigc::mem_fun(this, &UnitEditor::handle_delete));
-    add_button->signal_clicked().connect(sigc::mem_fun(this, &UnitEditor::handle_add));
+    delete_button->signal_clicked().connect(sigc::mem_fun(*this, &UnitEditor::handle_delete));
+    add_button->signal_clicked().connect(sigc::mem_fun(*this, &UnitEditor::handle_add));
 
     pins_listbox->signal_key_press_event().connect([this](GdkEventKey *ev) {
         if (ev->keyval == GDK_KEY_Delete) {

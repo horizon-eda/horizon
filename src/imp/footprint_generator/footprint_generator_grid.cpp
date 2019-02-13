@@ -21,7 +21,7 @@ FootprintGeneratorGrid::FootprintGeneratorGrid(CorePackage *c)
     sp_pitch_v->set_valign(Gtk::ALIGN_CENTER);
     sp_pitch_v->set_halign(Gtk::ALIGN_START);
     sp_pitch_v->set_value(3_mm);
-    sp_pitch_v->signal_value_changed().connect(sigc::mem_fun(this, &FootprintGeneratorGrid::update_xy_lock));
+    sp_pitch_v->signal_value_changed().connect(sigc::mem_fun(*this, &FootprintGeneratorGrid::update_xy_lock));
     overlay->add_at_sub(*sp_pitch_v, "#pitch_v");
     sp_pitch_v->show();
 
@@ -30,7 +30,7 @@ FootprintGeneratorGrid::FootprintGeneratorGrid(CorePackage *c)
     sp_pad_height->set_valign(Gtk::ALIGN_CENTER);
     sp_pad_height->set_halign(Gtk::ALIGN_START);
     sp_pad_height->set_value(.5_mm);
-    sp_pad_height->signal_value_changed().connect(sigc::mem_fun(this, &FootprintGeneratorGrid::update_xy_lock));
+    sp_pad_height->signal_value_changed().connect(sigc::mem_fun(*this, &FootprintGeneratorGrid::update_xy_lock));
     overlay->add_at_sub(*sp_pad_height, "#pad_height");
     sp_pad_height->show();
 
@@ -68,7 +68,7 @@ FootprintGeneratorGrid::FootprintGeneratorGrid(CorePackage *c)
     }
     {
         cb_xy_lock = Gtk::manage(new Gtk::CheckButton("XY Lock"));
-        cb_xy_lock->signal_toggled().connect(sigc::mem_fun(this, &FootprintGeneratorGrid::update_xy_lock));
+        cb_xy_lock->signal_toggled().connect(sigc::mem_fun(*this, &FootprintGeneratorGrid::update_xy_lock));
         cb_xy_lock->set_active(true);
         box_top->pack_start(*cb_xy_lock, false, false, 0);
     }

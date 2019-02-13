@@ -16,7 +16,7 @@ EditorProcess::EditorProcess(const std::vector<std::string> &argv, const std::ve
     Glib::spawn_async("" /*cwd*/, argv, env, Glib::SPAWN_DO_NOT_REAP_CHILD | Glib::SPAWN_SEARCH_PATH,
                       Glib::SlotSpawnChildSetup(), &pid);
     is_running = true;
-    Glib::signal_child_watch().connect(sigc::mem_fun(this, &EditorProcess::child_watch_handler), pid);
+    Glib::signal_child_watch().connect(sigc::mem_fun(*this, &EditorProcess::child_watch_handler), pid);
 }
 
 void EditorProcess::child_watch_handler(Glib::Pid p, int child_status)

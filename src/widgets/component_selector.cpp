@@ -27,7 +27,7 @@ ComponentSelector::ComponentSelector(Block *bl) : Gtk::Box(Gtk::Orientation::ORI
                          });
     update();
 
-    view->signal_row_activated().connect(sigc::mem_fun(this, &ComponentSelector::row_activated));
+    view->signal_row_activated().connect(sigc::mem_fun(*this, &ComponentSelector::row_activated));
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
     sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);

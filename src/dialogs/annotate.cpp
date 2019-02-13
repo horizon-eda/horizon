@@ -36,7 +36,7 @@ AnnotateDialog::AnnotateDialog(Gtk::Window *parent, Schematic *s)
 {
     add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
     auto ok_button = add_button("Annotate", Gtk::ResponseType::RESPONSE_OK);
-    ok_button->signal_clicked().connect(sigc::mem_fun(this, &AnnotateDialog::ok_clicked));
+    ok_button->signal_clicked().connect(sigc::mem_fun(*this, &AnnotateDialog::ok_clicked));
     set_default_response(Gtk::ResponseType::RESPONSE_OK);
     // set_default_size(400, 300);
 

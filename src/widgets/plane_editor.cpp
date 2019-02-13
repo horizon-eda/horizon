@@ -111,8 +111,8 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         bind_widget<PlaneSettings::ConnectStyle>(style_widgets, settings->connect_style,
                                                  [this](auto v) { s_signal_changed.emit(); });
 
-        b1->signal_toggled().connect(sigc::mem_fun(this, &PlaneEditor::update_thermal));
-        b2->signal_toggled().connect(sigc::mem_fun(this, &PlaneEditor::update_thermal));
+        b1->signal_toggled().connect(sigc::mem_fun(*this, &PlaneEditor::update_thermal));
+        b2->signal_toggled().connect(sigc::mem_fun(*this, &PlaneEditor::update_thermal));
 
         auto la = grid_attach_label_and_widget(this, "Connect style", box, top);
         widgets_from_rules_disable.insert(la);
@@ -166,8 +166,8 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         bind_widget<PlaneSettings::FillStyle>(style_widgets, settings->fill_style,
                                               [this](auto v) { s_signal_changed.emit(); });
 
-        b1->signal_toggled().connect(sigc::mem_fun(this, &PlaneEditor::update_hatch));
-        b2->signal_toggled().connect(sigc::mem_fun(this, &PlaneEditor::update_hatch));
+        b1->signal_toggled().connect(sigc::mem_fun(*this, &PlaneEditor::update_hatch));
+        b2->signal_toggled().connect(sigc::mem_fun(*this, &PlaneEditor::update_hatch));
 
         auto la = grid_attach_label_and_widget(this, "Fill style", box, top);
         widgets_from_rules_disable.insert(la);

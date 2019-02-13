@@ -16,8 +16,8 @@ ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::str
     : ImpBase(pool_params), core_schematic(schematic_filename, block_filename, *pool)
 {
     core = &core_schematic;
-    core_schematic.signal_tool_changed().connect(sigc::mem_fun(this, &ImpSchematic::handle_tool_change));
-    core_schematic.signal_rebuilt().connect(sigc::mem_fun(this, &ImpSchematic::handle_core_rebuilt));
+    core_schematic.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpSchematic::handle_tool_change));
+    core_schematic.signal_rebuilt().connect(sigc::mem_fun(*this, &ImpSchematic::handle_core_rebuilt));
 }
 
 void ImpSchematic::canvas_update()
@@ -215,8 +215,8 @@ void ImpSchematic::construct()
         core_schematic.add_sheet();
         std::cout << "add sheet" << std::endl;
     });
-    sheet_box->signal_remove_sheet().connect(sigc::mem_fun(this, &ImpSchematic::handle_remove_sheet));
-    sheet_box->signal_select_sheet().connect(sigc::mem_fun(this, &ImpSchematic::handle_select_sheet));
+    sheet_box->signal_remove_sheet().connect(sigc::mem_fun(*this, &ImpSchematic::handle_remove_sheet));
+    sheet_box->signal_select_sheet().connect(sigc::mem_fun(*this, &ImpSchematic::handle_select_sheet));
     main_window->left_panel->pack_start(*sheet_box, false, false, 0);
 
     auto hamburger_menu = add_hamburger_menu();
@@ -243,7 +243,7 @@ void ImpSchematic::construct()
     main_window->add_action("export_pdf", [this] { handle_export_pdf(); });
 
     if (sockets_connected) {
-        canvas->signal_selection_changed().connect(sigc::mem_fun(this, &ImpSchematic::handle_selection_cross_probe));
+        canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpSchematic::handle_selection_cross_probe));
         hamburger_menu->append("Cross probing", "win.cross_probing");
         auto cp_action = main_window->add_action_bool("cross_probing", true);
         cross_probing_enabled = true;
@@ -368,8 +368,8 @@ void ImpSchematic::construct()
         this->update_highlights();
     });
 
-    connect_action(ActionID::HIGHLIGHT_GROUP, sigc::mem_fun(this, &ImpSchematic::handle_highlight_group_tag));
-    connect_action(ActionID::HIGHLIGHT_TAG, sigc::mem_fun(this, &ImpSchematic::handle_highlight_group_tag));
+    connect_action(ActionID::HIGHLIGHT_GROUP, sigc::mem_fun(*this, &ImpSchematic::handle_highlight_group_tag));
+    connect_action(ActionID::HIGHLIGHT_TAG, sigc::mem_fun(*this, &ImpSchematic::handle_highlight_group_tag));
 
 
     bom_export_window =

@@ -28,7 +28,7 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
     x->get_widget("log_textview", log_textview);
     x->get_widget("include_3d_models_switch", include_3d_models_switch);
 
-    export_button->signal_clicked().connect(sigc::mem_fun(this, &StepExportWindow::handle_export));
+    export_button->signal_clicked().connect(sigc::mem_fun(*this, &StepExportWindow::handle_export));
 
     filename_button->signal_clicked().connect([this] {
         GtkFileChooserNative *native = gtk_file_chooser_native_new("Select output directory", GTK_WINDOW(gobj()),

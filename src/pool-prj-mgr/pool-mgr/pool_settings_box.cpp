@@ -19,11 +19,11 @@ PoolSettingsBox::PoolSettingsBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     x->get_widget("pool_settings_hint_label", hint_label);
     hint_label->hide();
     entry_name->set_text(PoolManager::get().get_pools().at(bp).name);
-    entry_name->signal_changed().connect(sigc::mem_fun(this, &PoolSettingsBox::set_needs_save));
-    save_button->signal_clicked().connect(sigc::mem_fun(this, &PoolSettingsBox::save));
+    entry_name->signal_changed().connect(sigc::mem_fun(*this, &PoolSettingsBox::set_needs_save));
+    save_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolSettingsBox::save));
     save_button->set_sensitive(false);
 
-    PoolManager::get().signal_changed().connect(sigc::mem_fun(this, &PoolSettingsBox::update_pools));
+    PoolManager::get().signal_changed().connect(sigc::mem_fun(*this, &PoolSettingsBox::update_pools));
 
     pool_inc_button->signal_clicked().connect([this] { inc_excl_pool(true); });
     pool_excl_button->signal_clicked().connect([this] { inc_excl_pool(false); });

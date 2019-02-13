@@ -15,7 +15,7 @@ public:
     GatePinEditor(Component *c, const Gate *g) : Gtk::ListBox(), comp(c), gate(g)
     {
         sg = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
-        set_header_func(sigc::mem_fun(this, &GatePinEditor::header_fun));
+        set_header_func(sigc::mem_fun(*this, &GatePinEditor::header_fun));
         set_selection_mode(Gtk::SELECTION_NONE);
         std::deque<const Pin *> pins_sorted;
         for (const auto &it : gate->unit->pins) {
@@ -44,7 +44,7 @@ public:
             }
 
             combo->signal_changed().connect(sigc::bind<Gtk::ComboBoxText *, UUIDPath<2>>(
-                    sigc::mem_fun(this, &GatePinEditor::changed), combo, path));
+                    sigc::mem_fun(*this, &GatePinEditor::changed), combo, path));
             box->pack_start(*combo, true, true, 0);
 
             box->set_margin_start(16);

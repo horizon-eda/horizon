@@ -20,7 +20,7 @@ ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_f
     : ImpLayer(pool_params), core_board(board_filename, block_filename, via_dir, *pool)
 {
     core = &core_board;
-    core_board.signal_tool_changed().connect(sigc::mem_fun(this, &ImpBase::handle_tool_change));
+    core_board.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
 }
 
 void ImpBoard::canvas_update()
@@ -288,7 +288,7 @@ void ImpBoard::construct()
     }
 
     if (sockets_connected) {
-        canvas->signal_selection_changed().connect(sigc::mem_fun(this, &ImpBoard::handle_selection_cross_probe));
+        canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBoard::handle_selection_cross_probe));
     }
 
     fab_output_window = FabOutputWindow::create(main_window, core.b->get_board(), core.b->get_fab_output_settings());
@@ -315,8 +315,8 @@ void ImpBoard::construct()
     });
 
     connect_action(ActionID::TUNING, [this](const auto &a) { tuning_window->present(); });
-    connect_action(ActionID::TUNING_ADD_TRACKS, sigc::mem_fun(this, &ImpBoard::handle_measure_tracks));
-    connect_action(ActionID::TUNING_ADD_TRACKS_ALL, sigc::mem_fun(this, &ImpBoard::handle_measure_tracks));
+    connect_action(ActionID::TUNING_ADD_TRACKS, sigc::mem_fun(*this, &ImpBoard::handle_measure_tracks));
+    connect_action(ActionID::TUNING_ADD_TRACKS_ALL, sigc::mem_fun(*this, &ImpBoard::handle_measure_tracks));
 
     connect_action(ActionID::HIGHLIGHT_NET, [this](const auto &a) {
         highlights.clear();
@@ -388,9 +388,9 @@ void ImpBoard::construct()
     text_owner_annotation->set_visible(true);
     text_owner_annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
 
-    core_board.signal_rebuilt().connect(sigc::mem_fun(this, &ImpBoard::update_text_owners));
-    canvas->signal_hover_selection_changed().connect(sigc::mem_fun(this, &ImpBoard::update_text_owner_annotation));
-    canvas->signal_selection_changed().connect(sigc::mem_fun(this, &ImpBoard::update_text_owner_annotation));
+    core_board.signal_rebuilt().connect(sigc::mem_fun(*this, &ImpBoard::update_text_owners));
+    canvas->signal_hover_selection_changed().connect(sigc::mem_fun(*this, &ImpBoard::update_text_owner_annotation));
+    canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBoard::update_text_owner_annotation));
     update_text_owners();
 
     main_window->left_panel->pack_start(*display_control_notebook, false, false);

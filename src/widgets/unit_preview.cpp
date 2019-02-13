@@ -19,7 +19,7 @@ UnitPreview::UnitPreview(class Pool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0)
         symbol_sel_box->pack_start(*la, false, false, 0);
     }
     combo_symbol = Gtk::manage(new Gtk::ComboBoxText);
-    combo_symbol->signal_changed().connect(sigc::mem_fun(this, &UnitPreview::handle_symbol_sel));
+    combo_symbol->signal_changed().connect(sigc::mem_fun(*this, &UnitPreview::handle_symbol_sel));
     symbol_sel_box->pack_start(*combo_symbol, true, true, 0);
 
     {

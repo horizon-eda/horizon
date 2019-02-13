@@ -105,9 +105,9 @@ Gtk::Widget *PropertyEditorString::create_editor()
 {
     en = Gtk::manage(new Gtk::Entry());
     en->set_alignment(1);
-    connections.push_back(en->signal_changed().connect(sigc::mem_fun(this, &PropertyEditorString::changed)));
-    connections.push_back(en->signal_activate().connect(sigc::mem_fun(this, &PropertyEditorString::activate)));
-    en->signal_focus_out_event().connect(sigc::mem_fun(this, &PropertyEditorString::focus_out_event));
+    connections.push_back(en->signal_changed().connect(sigc::mem_fun(*this, &PropertyEditorString::changed)));
+    connections.push_back(en->signal_activate().connect(sigc::mem_fun(*this, &PropertyEditorString::activate)));
+    en->signal_focus_out_event().connect(sigc::mem_fun(*this, &PropertyEditorString::focus_out_event));
     return en;
 }
 
@@ -175,7 +175,7 @@ Gtk::Widget *PropertyEditorEnum::create_editor()
     for (const auto &it : property.enum_items) {
         combo->insert(-1, std::to_string(it.first), it.second);
     }
-    connections.push_back(combo->signal_changed().connect(sigc::mem_fun(this, &PropertyEditorEnum::changed)));
+    connections.push_back(combo->signal_changed().connect(sigc::mem_fun(*this, &PropertyEditorEnum::changed)));
     return combo;
 }
 
@@ -220,7 +220,7 @@ PropertyValue &PropertyEditorStringRO::get_value()
 Gtk::Widget *PropertyEditorNetClass::create_editor()
 {
     combo = Gtk::manage(new Gtk::ComboBoxText());
-    connections.push_back(combo->signal_changed().connect(sigc::mem_fun(this, &PropertyEditorNetClass::changed)));
+    connections.push_back(combo->signal_changed().connect(sigc::mem_fun(*this, &PropertyEditorNetClass::changed)));
     return combo;
 }
 
@@ -250,7 +250,7 @@ PropertyValue &PropertyEditorNetClass::get_value()
 Gtk::Widget *PropertyEditorLayer::create_editor()
 {
     combo = Gtk::manage(new Gtk::ComboBoxText());
-    connections.push_back(combo->signal_changed().connect(sigc::mem_fun(this, &PropertyEditorLayer::changed)));
+    connections.push_back(combo->signal_changed().connect(sigc::mem_fun(*this, &PropertyEditorLayer::changed)));
     return combo;
 }
 
@@ -285,9 +285,9 @@ Gtk::Widget *PropertyEditorAngle::create_editor()
     sp->set_wrap(true);
     sp->set_width_chars(7);
     sp->set_increments(4096, 4096);
-    sp->signal_output().connect(sigc::mem_fun(this, &PropertyEditorAngle::sp_output));
-    sp->signal_input().connect(sigc::mem_fun(this, &PropertyEditorAngle::sp_input));
-    connections.push_back(sp->signal_value_changed().connect(sigc::mem_fun(this, &PropertyEditorAngle::changed)));
+    sp->signal_output().connect(sigc::mem_fun(*this, &PropertyEditorAngle::sp_output));
+    sp->signal_input().connect(sigc::mem_fun(*this, &PropertyEditorAngle::sp_input));
+    connections.push_back(sp->signal_value_changed().connect(sigc::mem_fun(*this, &PropertyEditorAngle::changed)));
     return sp;
 }
 
@@ -346,8 +346,8 @@ Gtk::Widget *PropertyEditorStringMultiline::create_editor()
     en->set_top_margin(3);
     en->set_bottom_margin(3);
     connections.push_back(
-            en->get_buffer()->signal_changed().connect(sigc::mem_fun(this, &PropertyEditorStringMultiline::changed)));
-    en->signal_focus_out_event().connect(sigc::mem_fun(this, &PropertyEditorStringMultiline::focus_out_event));
+            en->get_buffer()->signal_changed().connect(sigc::mem_fun(*this, &PropertyEditorStringMultiline::changed)));
+    en->signal_focus_out_event().connect(sigc::mem_fun(*this, &PropertyEditorStringMultiline::focus_out_event));
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
     sc->set_shadow_type(Gtk::SHADOW_IN);
     sc->add(*en);

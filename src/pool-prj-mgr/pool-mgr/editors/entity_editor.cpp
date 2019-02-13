@@ -143,8 +143,8 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     }
     gates_listbox->invalidate_sort();
 
-    add_button->signal_clicked().connect(sigc::mem_fun(this, &EntityEditor::handle_add));
-    delete_button->signal_clicked().connect(sigc::mem_fun(this, &EntityEditor::handle_delete));
+    add_button->signal_clicked().connect(sigc::mem_fun(*this, &EntityEditor::handle_add));
+    delete_button->signal_clicked().connect(sigc::mem_fun(*this, &EntityEditor::handle_delete));
     refresh_button->signal_clicked().connect([this] { gates_listbox->invalidate_sort(); });
 }
 

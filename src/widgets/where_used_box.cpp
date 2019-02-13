@@ -32,7 +32,7 @@ WhereUsedBox::WhereUsedBox(Pool &p) : Gtk::Box(Gtk::Orientation::ORIENTATION_VER
     sc->add(*view);
     sc->show_all();
 
-    view->signal_row_activated().connect(sigc::mem_fun(this, &WhereUsedBox::row_activated));
+    view->signal_row_activated().connect(sigc::mem_fun(*this, &WhereUsedBox::row_activated));
     pack_start(*sc, true, true, 0);
     set_visible(false);
 }

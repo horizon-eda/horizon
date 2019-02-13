@@ -21,8 +21,8 @@ void ClipboardManager::copy(std::set<SelectableRef> selection, const Coordi &cp)
     // targets.push_back( Gtk::TargetEntry("image/png") );
     targets.push_back(Gtk::TargetEntry("image/svg+xml"));
 
-    refClipboard->set(targets, sigc::mem_fun(this, &ClipboardManager::on_clipboard_get),
-                      sigc::mem_fun(this, &ClipboardManager::on_clipboard_clear));
+    refClipboard->set(targets, sigc::mem_fun(*this, &ClipboardManager::on_clipboard_get),
+                      sigc::mem_fun(*this, &ClipboardManager::on_clipboard_clear));
 }
 
 void ClipboardManager::on_clipboard_get(Gtk::SelectionData &selection_data, guint /* info */)

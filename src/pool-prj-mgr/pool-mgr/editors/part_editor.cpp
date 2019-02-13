@@ -187,7 +187,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     update_entries();
 
-    w_change_package_button->signal_clicked().connect(sigc::mem_fun(this, &PartEditor::change_package));
+    w_change_package_button->signal_clicked().connect(sigc::mem_fun(*this, &PartEditor::change_package));
 
     w_tags_inherit->set_active(part->inherit_tags);
     w_tags_inherit->signal_toggled().connect([this] { needs_save = true; });
@@ -381,7 +381,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         }
     }
     update_parametric_editor();
-    w_parametric_table_combo->signal_changed().connect(sigc::mem_fun(this, &PartEditor::update_parametric_editor));
+    w_parametric_table_combo->signal_changed().connect(sigc::mem_fun(*this, &PartEditor::update_parametric_editor));
 
     w_parametric_from_base->set_sensitive(part->base);
     w_parametric_from_base->signal_clicked().connect([this] {

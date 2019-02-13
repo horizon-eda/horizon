@@ -42,11 +42,11 @@ CreatePartDialog::CreatePartDialog(Gtk::Window *parent, Pool *ipool)
     get_content_area()->pack_start(*box, true, true, 0);
     get_content_area()->set_border_width(0);
 
-    browser_entity->signal_activated().connect(sigc::mem_fun(this, &CreatePartDialog::check_activate));
-    browser_package->signal_activated().connect(sigc::mem_fun(this, &CreatePartDialog::check_activate));
+    browser_entity->signal_activated().connect(sigc::mem_fun(*this, &CreatePartDialog::check_activate));
+    browser_package->signal_activated().connect(sigc::mem_fun(*this, &CreatePartDialog::check_activate));
 
-    browser_entity->signal_selected().connect(sigc::mem_fun(this, &CreatePartDialog::check_select));
-    browser_package->signal_selected().connect(sigc::mem_fun(this, &CreatePartDialog::check_select));
+    browser_entity->signal_selected().connect(sigc::mem_fun(*this, &CreatePartDialog::check_select));
+    browser_package->signal_selected().connect(sigc::mem_fun(*this, &CreatePartDialog::check_select));
     show_all();
 }
 

@@ -105,7 +105,7 @@ ParameterSetEditor::ParameterSetEditor(ParameterSet *ps, bool populate_init)
     popover_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 8));
     popover->add(*popover_box);
     add_button->set_popover(*popover);
-    popover->signal_show().connect(sigc::mem_fun(this, &ParameterSetEditor::update_popover_box));
+    popover->signal_show().connect(sigc::mem_fun(*this, &ParameterSetEditor::update_popover_box));
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
     sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);

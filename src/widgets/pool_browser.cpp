@@ -18,7 +18,7 @@ Gtk::Entry *PoolBrowser::create_search_entry(const std::string &label)
 {
     auto entry = Gtk::manage(new Gtk::SearchEntry());
     add_search_widget(label, *entry);
-    entry->signal_search_changed().connect(sigc::mem_fun(this, &PoolBrowser::search));
+    entry->signal_search_changed().connect(sigc::mem_fun(*this, &PoolBrowser::search));
     search_entries.insert(entry);
     return entry;
 }
@@ -27,7 +27,7 @@ TagEntry *PoolBrowser::create_tag_entry(const std::string &label)
 {
     auto entry = Gtk::manage(new TagEntry(*pool, get_type()));
     add_search_widget(label, *entry);
-    entry->signal_changed().connect(sigc::mem_fun(this, &PoolBrowser::search));
+    entry->signal_changed().connect(sigc::mem_fun(*this, &PoolBrowser::search));
     tag_entries.insert(entry);
     return entry;
 }
@@ -118,13 +118,13 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
     sort_controller->set_simple(true);
     add_sort_controller_columns();
     sort_controller->set_sort(0, SortController::Sort::ASC);
-    sort_controller->signal_changed().connect(sigc::mem_fun(this, &PoolBrowser::search));
+    sort_controller->signal_changed().connect(sigc::mem_fun(*this, &PoolBrowser::search));
 
     // dynamic_cast<Gtk::CellRendererText*>(view->get_column_cell_renderer(3))->property_ellipsize()
     // = Pango::ELLIPSIZE_END;
     treeview->get_selection()->set_mode(Gtk::SelectionMode::SELECTION_BROWSE);
-    treeview->signal_row_activated().connect(sigc::mem_fun(this, &PoolBrowser::row_activated));
-    treeview->get_selection()->signal_changed().connect(sigc::mem_fun(this, &PoolBrowser::selection_changed));
+    treeview->signal_row_activated().connect(sigc::mem_fun(*this, &PoolBrowser::row_activated));
+    treeview->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &PoolBrowser::selection_changed));
     if (path_column) {
         path_column->set_visible(false);
     }

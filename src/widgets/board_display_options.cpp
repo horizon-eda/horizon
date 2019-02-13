@@ -51,8 +51,8 @@ public:
         cb_gfx = add_checkbutton("Graphics");
         cb_gfx->set_active(true);
 
-        cb_text->signal_toggled().connect(sigc::mem_fun(this, &LayerOptionsExpSilkscreen::emit));
-        cb_gfx->signal_toggled().connect(sigc::mem_fun(this, &LayerOptionsExpSilkscreen::emit));
+        cb_text->signal_toggled().connect(sigc::mem_fun(*this, &LayerOptionsExpSilkscreen::emit));
+        cb_gfx->signal_toggled().connect(sigc::mem_fun(*this, &LayerOptionsExpSilkscreen::emit));
     }
 
 private:
@@ -77,7 +77,7 @@ public:
     void construct()
     {
         cb_planes_outline = add_checkbutton("Don't fill planes");
-        cb_planes_outline->signal_toggled().connect(sigc::mem_fun(this, &LayerOptionsCopper::emit));
+        cb_planes_outline->signal_toggled().connect(sigc::mem_fun(*this, &LayerOptionsCopper::emit));
     }
 
 private:

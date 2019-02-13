@@ -35,7 +35,7 @@ MapPackageDialog::MapPackageDialog(Gtk::Window *parent, const std::vector<std::p
     set_default_response(Gtk::ResponseType::RESPONSE_OK);
     set_default_size(300, 300);
 
-    button_ok->signal_clicked().connect(sigc::mem_fun(this, &MapPackageDialog::ok_clicked));
+    button_ok->signal_clicked().connect(sigc::mem_fun(*this, &MapPackageDialog::ok_clicked));
 
     store = Gtk::ListStore::create(list_columns);
     Gtk::TreeModel::Row row;
@@ -52,7 +52,7 @@ MapPackageDialog::MapPackageDialog(Gtk::Window *parent, const std::vector<std::p
     view->append_column("Component", list_columns.name);
     view->append_column("Package", list_columns.package);
     view->get_selection()->set_mode(Gtk::SelectionMode::SELECTION_BROWSE);
-    view->signal_row_activated().connect(sigc::mem_fun(this, &MapPackageDialog::row_activated));
+    view->signal_row_activated().connect(sigc::mem_fun(*this, &MapPackageDialog::row_activated));
 
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());

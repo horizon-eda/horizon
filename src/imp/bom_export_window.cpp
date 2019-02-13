@@ -110,13 +110,13 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     col_down_button->signal_clicked().connect([this] { up_down_col(false); });
 
     cols_included_tv->get_selection()->signal_changed().connect(
-            sigc::mem_fun(this, &BOMExportWindow::update_incl_excl_sensitivity));
+            sigc::mem_fun(*this, &BOMExportWindow::update_incl_excl_sensitivity));
     cols_available_tv->get_selection()->signal_changed().connect(
-            sigc::mem_fun(this, &BOMExportWindow::update_incl_excl_sensitivity));
+            sigc::mem_fun(*this, &BOMExportWindow::update_incl_excl_sensitivity));
 
     update_incl_excl_sensitivity();
 
-    export_button->signal_clicked().connect(sigc::mem_fun(this, &BOMExportWindow::generate));
+    export_button->signal_clicked().connect(sigc::mem_fun(*this, &BOMExportWindow::generate));
 }
 
 void BOMExportWindow::update_incl_excl_sensitivity()

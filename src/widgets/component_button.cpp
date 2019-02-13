@@ -6,7 +6,7 @@ ComponentButton::ComponentButton(Block *b) : Gtk::MenuButton(), block(b)
     popover = Gtk::manage(new Gtk::Popover(*this));
     cs = Gtk::manage(new ComponentSelector(block));
     cs->set_size_request(100, 200);
-    cs->signal_activated().connect(sigc::mem_fun(this, &ComponentButton::cs_activated));
+    cs->signal_activated().connect(sigc::mem_fun(*this, &ComponentButton::cs_activated));
     cs->show();
 
     popover->add(*cs);

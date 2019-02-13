@@ -63,7 +63,7 @@ ToolPopover::ToolPopover(Gtk::Widget *parent, ActionCatalogItem::Availability av
         return search_entry->handle_event(ev);
     });
 
-    search_entry->signal_activate().connect(sigc::mem_fun(this, &ToolPopover::emit_tool_activated));
+    search_entry->signal_activate().connect(sigc::mem_fun(*this, &ToolPopover::emit_tool_activated));
     view->signal_row_activated().connect([this](auto a, auto b) { this->emit_tool_activated(); });
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());

@@ -39,7 +39,7 @@ UnplacedBox::UnplacedBox(const std::string &title) : Gtk::Box(Gtk::Orientation::
     sc->add(*view);
     sc->show_all();
 
-    view->signal_row_activated().connect(sigc::mem_fun(this, &UnplacedBox::row_activated));
+    view->signal_row_activated().connect(sigc::mem_fun(*this, &UnplacedBox::row_activated));
     pack_start(*sc, true, true, 0);
 
 

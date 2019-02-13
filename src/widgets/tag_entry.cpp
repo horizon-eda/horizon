@@ -59,7 +59,7 @@ TagEntry::TagPopover::TagPopover(TagEntry *p) : Gtk::Popover(), parent(p)
         });
     }
     else {
-        search_entry->signal_activate().connect(sigc::mem_fun(this, &TagPopover::activate));
+        search_entry->signal_activate().connect(sigc::mem_fun(*this, &TagPopover::activate));
     }
 
     view = Gtk::manage(new Gtk::TreeView(store));

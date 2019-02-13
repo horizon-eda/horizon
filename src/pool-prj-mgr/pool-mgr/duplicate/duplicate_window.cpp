@@ -48,7 +48,7 @@ DuplicateWindow::DuplicateWindow(class Pool *p, ObjectType ty, const UUID &uu) :
         ubox->show();
         duplicate_widget = w;
     }
-    duplicate_button->signal_clicked().connect(sigc::mem_fun(this, &DuplicateWindow::handle_duplicate));
+    duplicate_button->signal_clicked().connect(sigc::mem_fun(*this, &DuplicateWindow::handle_duplicate));
 }
 
 bool DuplicateWindow::get_duplicated() const

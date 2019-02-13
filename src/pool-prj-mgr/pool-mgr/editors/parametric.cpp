@@ -31,7 +31,7 @@ public:
         gtk_entry_set_attributes(GTK_ENTRY(gobj()), attributes_list);
         pango_attr_list_unref(attributes_list);
 
-        signal_activate().connect(sigc::mem_fun(this, &ParamQuantityEditor::parse));
+        signal_activate().connect(sigc::mem_fun(*this, &ParamQuantityEditor::parse));
         signal_focus_out_event().connect([this](GdkEventFocus *ev) {
             parse();
             return false;

@@ -183,7 +183,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p, 
         return false;
     });
 
-    save_button->signal_clicked().connect(sigc::mem_fun(this, &EditorWindow::save));
+    save_button->signal_clicked().connect(sigc::mem_fun(*this, &EditorWindow::save));
 }
 
 void EditorWindow::force_close()

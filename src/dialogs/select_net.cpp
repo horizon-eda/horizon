@@ -31,7 +31,7 @@ SelectNetDialog::SelectNetDialog(Gtk::Window *parent, Block *b, const std::strin
     set_default_size(300, 300);
 
     net_selector = Gtk::manage(new NetSelector(b));
-    net_selector->signal_activated().connect(sigc::mem_fun(this, &SelectNetDialog::net_selected));
+    net_selector->signal_activated().connect(sigc::mem_fun(*this, &SelectNetDialog::net_selected));
     ok_button->signal_clicked().connect([this] {
         net = net_selector->get_selected_net();
         valid = net != UUID();

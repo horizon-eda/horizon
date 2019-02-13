@@ -63,16 +63,17 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
 
     pool_update_progress->set_pulse_step(.001);
 
-    button_open->signal_clicked().connect(sigc::mem_fun(this, &PoolProjectManagerAppWindow::handle_open));
-    button_close->signal_clicked().connect(sigc::mem_fun(this, &PoolProjectManagerAppWindow::handle_close));
-    button_update->signal_clicked().connect(sigc::mem_fun(this, &PoolProjectManagerAppWindow::handle_update));
-    button_download->signal_clicked().connect(sigc::mem_fun(this, &PoolProjectManagerAppWindow::handle_download));
-    button_do_download->signal_clicked().connect(sigc::mem_fun(this, &PoolProjectManagerAppWindow::handle_do_download));
-    button_cancel->signal_clicked().connect(sigc::mem_fun(this, &PoolProjectManagerAppWindow::handle_cancel));
-    menu_new_project->signal_activate().connect(sigc::mem_fun(this, &PoolProjectManagerAppWindow::handle_new_project));
-    menu_new_pool->signal_activate().connect(sigc::mem_fun(this, &PoolProjectManagerAppWindow::handle_new_pool));
-    button_create->signal_clicked().connect(sigc::mem_fun(this, &PoolProjectManagerAppWindow::handle_create));
-    button_save->signal_clicked().connect(sigc::mem_fun(this, &PoolProjectManagerAppWindow::handle_save));
+    button_open->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_open));
+    button_close->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_close));
+    button_update->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_update));
+    button_download->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_download));
+    button_do_download->signal_clicked().connect(
+            sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_do_download));
+    button_cancel->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_cancel));
+    menu_new_project->signal_activate().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_new_project));
+    menu_new_pool->signal_activate().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_new_pool));
+    button_create->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_create));
+    button_save->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_save));
 
 
     recent_listboxes.push_back(recent_pools_listbox);
@@ -835,9 +836,9 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
 
         part_browser_window = PartBrowserWindow::create(this, prj_pool->base_path, app->part_favorites);
         part_browser_window->signal_place_part().connect(
-                sigc::mem_fun(this, &PoolProjectManagerAppWindow::handle_place_part));
+                sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_place_part));
         part_browser_window->signal_assign_part().connect(
-                sigc::mem_fun(this, &PoolProjectManagerAppWindow::handle_assign_part));
+                sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_assign_part));
         pool_cache_window = PoolCacheWindow::create(this, project->pool_cache_directory, prj_pool->base_path, this);
         project_needs_save = modified;
         set_view_mode(ViewMode::PROJECT);

@@ -69,7 +69,7 @@ ManageNetClassesDialog::ManageNetClassesDialog(Gtk::Window *parent, Block *bl)
 
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
     auto add_button = Gtk::manage(new Gtk::Button("Add net class"));
-    add_button->signal_clicked().connect(sigc::mem_fun(this, &ManageNetClassesDialog::handle_add_net_class));
+    add_button->signal_clicked().connect(sigc::mem_fun(*this, &ManageNetClassesDialog::handle_add_net_class));
     add_button->set_halign(Gtk::ALIGN_START);
     add_button->set_margin_bottom(8);
     add_button->set_margin_top(8);

@@ -23,7 +23,7 @@ LocationEntry::LocationEntry() : Gtk::Box()
 
     auto button = Gtk::manage(new Gtk::Button("Browse..."));
     pack_start(*button, false, false, 0);
-    button->signal_clicked().connect(sigc::mem_fun(this, &LocationEntry::handle_button));
+    button->signal_clicked().connect(sigc::mem_fun(*this, &LocationEntry::handle_button));
     button->show();
 }
 
