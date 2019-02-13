@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-class PoolProjectManagerViewCreatePool : public sigc::trackable {
+class PoolProjectManagerViewCreatePool {
 public:
     PoolProjectManagerViewCreatePool(const Glib::RefPtr<Gtk::Builder> &refBuilder,
                                      class PoolProjectManagerAppWindow *w);

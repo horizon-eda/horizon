@@ -130,25 +130,26 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     chan = Glib::IOChannel::create_from_fd(fd);
 #endif
 
-    sock_mgr_conn = Glib::signal_io().connect(
-            [this](Glib::IOCondition cond) {
-                while (sock_mgr.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
-                    zmq::message_t msg;
-                    sock_mgr.recv(&msg);
-                    char *data = (char *)msg.data();
-                    json jrx = json::parse(data);
-                    json jtx = handle_req(jrx);
+    Glib::signal_io().connect(sigc::track_obj(
+                                      [this](Glib::IOCondition cond) {
+                                          while (sock_mgr.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
+                                              zmq::message_t msg;
+                                              sock_mgr.recv(&msg);
+                                              char *data = (char *)msg.data();
+                                              json jrx = json::parse(data);
+                                              json jtx = handle_req(jrx);
 
-                    std::string stx = jtx.dump();
-                    zmq::message_t tx(stx.size() + 1);
-                    memcpy(((uint8_t *)tx.data()), stx.c_str(), stx.size());
-                    auto m = (char *)tx.data();
-                    m[tx.size() - 1] = 0;
-                    sock_mgr.send(tx);
-                }
-                return true;
-            },
-            chan, Glib::IO_IN | Glib::IO_HUP);
+                                              std::string stx = jtx.dump();
+                                              zmq::message_t tx(stx.size() + 1);
+                                              memcpy(((uint8_t *)tx.data()), stx.c_str(), stx.size());
+                                              auto m = (char *)tx.data();
+                                              m[tx.size() - 1] = 0;
+                                              sock_mgr.send(tx);
+                                          }
+                                          return true;
+                                      },
+                                      *this),
+                              chan, Glib::IO_IN | Glib::IO_HUP);
 
 
     Glib::signal_idle().connect_once([this] {
@@ -327,7 +328,6 @@ void PoolProjectManagerAppWindow::set_pool_update_progress(float progress)
 
 PoolProjectManagerAppWindow::~PoolProjectManagerAppWindow()
 {
-    sock_mgr_conn.disconnect();
     if (part_browser_window)
         delete part_browser_window;
     if (pool_cache_window)

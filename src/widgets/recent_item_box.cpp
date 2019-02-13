@@ -26,19 +26,10 @@ RecentItemBox::RecentItemBox(const std::string &name, const std::string &pa, con
         pack_start(*la, false, false, 0);
     }
 
-    timeout_connection = Glib::signal_timeout().connect_seconds(
-            [this] {
-                update_time();
-                return true;
-            },
-            1);
+    Glib::signal_timeout().connect_seconds(sigc::bind_return(sigc::mem_fun(this, &RecentItemBox::update_time), true),
+                                           1);
 
     show_all();
-}
-
-RecentItemBox::~RecentItemBox()
-{
-    timeout_connection.disconnect();
 }
 
 void RecentItemBox::update_time()

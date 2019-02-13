@@ -4,19 +4,6 @@
 
 namespace horizon {
 
-class DestroyData {
-public:
-    sigc::connection conn;
-};
-
-static void *canvas_destroy(void *p)
-{
-    auto d = reinterpret_cast<DestroyData *>(p);
-    d->conn.disconnect();
-    delete d;
-    return nullptr;
-}
-
 void preferences_provider_attach_canvas(CanvasGL *ca, bool layer)
 {
     const Appearance *a = nullptr;
@@ -27,9 +14,7 @@ void preferences_provider_attach_canvas(CanvasGL *ca, bool layer)
         a = &PreferencesProvider::get_prefs().canvas_non_layer.appearance;
     }
     ca->set_appearance(*a);
-    auto d = new DestroyData;
-    d->conn = PreferencesProvider::get().signal_changed().connect([ca, a] { ca->set_appearance(*a); });
-    ca->Gtk::GLArea::add_destroy_notify_callback(d, &canvas_destroy);
+    PreferencesProvider::get().signal_changed().connect(sigc::track_obj([ca, a] { ca->set_appearance(*a); }, *ca));
 }
 
 } // namespace horizon

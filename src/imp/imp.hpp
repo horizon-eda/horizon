@@ -32,7 +32,7 @@ public:
 
 std::unique_ptr<Pool> make_pool(const PoolParams &params);
 
-class ImpBase : public sigc::trackable {
+class ImpBase {
     friend class ImpInterface;
 
 public:

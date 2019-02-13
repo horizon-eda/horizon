@@ -236,7 +236,7 @@ protected:
  *
  * The Core also handles undo/redo by storing a full copy for each step.
  */
-class Core : public sigc::trackable {
+class Core {
 public:
     virtual bool has_object_type(ObjectType ty) const
     {

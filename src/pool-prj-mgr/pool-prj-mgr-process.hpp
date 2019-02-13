@@ -2,7 +2,7 @@
 #include "util/editor_process.hpp"
 
 namespace horizon {
-class PoolProjectManagerProcess : public sigc::trackable {
+class PoolProjectManagerProcess {
 public:
     enum class Type { IMP_SYMBOL, IMP_PADSTACK, IMP_PACKAGE, IMP_SCHEMATIC, IMP_BOARD, IMP_FRAME, UNIT, ENTITY, PART };
     PoolProjectManagerProcess(Type ty, const std::vector<std::string> &args, const std::vector<std::string> &env,

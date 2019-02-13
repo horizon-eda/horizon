@@ -2,7 +2,7 @@
 #include <glibmm.h>
 
 namespace horizon {
-class EditorProcess : public sigc::trackable {
+class EditorProcess {
 public:
     EditorProcess(const std::vector<std::string> &argv, const std::vector<std::string> &env);
     int get_pid() const;

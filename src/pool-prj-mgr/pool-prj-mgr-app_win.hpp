@@ -156,8 +156,6 @@ private:
     zmq::socket_t sock_mgr;
     std::string sock_mgr_ep;
 
-    sigc::connection sock_mgr_conn;
-
     bool check_pools();
     bool check_schema_update(const std::string &base_path);
 

@@ -144,15 +144,12 @@ ProcWaitDialog::ProcWaitDialog(PoolProjectManagerAppWindow *parent) : Gtk::Dialo
     box2->show_all();
     get_content_area()->pack_start(*box2, true, true, 0);
 
-    conn = parent->signal_process_exited().connect([parent, this](std::string filename, int status, bool needs_save) {
-        if (parent->get_processes().size() == 0)
-            response(1);
-    });
-}
-
-ProcWaitDialog::~ProcWaitDialog()
-{
-    conn.disconnect();
+    parent->signal_process_exited().connect(sigc::track_obj(
+            [parent, this](std::string filename, int status, bool needs_save) {
+                if (parent->get_processes().size() == 0)
+                    response(1);
+            },
+            *this));
 }
 
 } // namespace horizon

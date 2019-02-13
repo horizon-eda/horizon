@@ -54,7 +54,7 @@ public:
     json serialize() const;
 };
 
-class Preferences : public sigc::trackable {
+class Preferences {
 public:
     Preferences();
     void set_filename(const std::string &filename);

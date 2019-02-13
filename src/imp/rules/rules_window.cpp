@@ -329,14 +329,16 @@ void RulesWindow::run_checks()
     cache.reset(new RulesCheckCache(core));
     annotation->clear();
     run_store.clear();
-    pulse_connection = Glib::signal_timeout().connect(
-            [this] {
-                for (auto &ch : check_result_store->children()) {
-                    ch[tree_columns.pulse] = ch[tree_columns.pulse] + 1;
-                }
-                return true;
-            },
-            750 / 12);
+    pulse_connection = Glib::signal_timeout().connect(sigc::track_obj(
+                                                              [this] {
+                                                                  for (auto &ch : check_result_store->children()) {
+                                                                      ch[tree_columns.pulse] =
+                                                                              ch[tree_columns.pulse] + 1;
+                                                                  }
+                                                                  return true;
+                                                              },
+                                                              *this),
+                                                      750 / 12);
     for (auto rule_id : rules->get_rule_ids()) {
         if (rule_descriptions.at(rule_id).can_check) {
             Gtk::TreeModel::iterator iter = check_result_store->append();

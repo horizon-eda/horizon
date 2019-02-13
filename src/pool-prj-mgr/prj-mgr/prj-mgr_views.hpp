@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-class PoolProjectManagerViewCreateProject : public sigc::trackable {
+class PoolProjectManagerViewCreateProject {
 public:
     PoolProjectManagerViewCreateProject(const Glib::RefPtr<Gtk::Builder> &refBuilder,
                                         class PoolProjectManagerAppWindow *w);
@@ -32,7 +32,7 @@ private:
     type_signal_valid_change s_signal_valid_change;
 };
 
-class PoolProjectManagerViewProject : public sigc::trackable {
+class PoolProjectManagerViewProject {
 public:
     PoolProjectManagerViewProject(const Glib::RefPtr<Gtk::Builder> &refBuilder, class PoolProjectManagerAppWindow *w);
     Gtk::Entry *entry_project_title = nullptr;

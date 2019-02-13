@@ -38,9 +38,5 @@ private:
 class ProcWaitDialog : public Gtk::Dialog {
 public:
     ProcWaitDialog(class PoolProjectManagerAppWindow *parent);
-    ~ProcWaitDialog();
-
-private:
-    sigc::connection conn;
 };
 } // namespace horizon

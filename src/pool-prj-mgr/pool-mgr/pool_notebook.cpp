@@ -59,7 +59,6 @@ void PoolNotebook::pool_updated(bool success)
 
 PoolNotebook::~PoolNotebook()
 {
-    proc_exited_connection.disconnect();
     appwin->pool = nullptr;
     appwin->pool_parametric = nullptr;
 }
@@ -129,11 +128,12 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
 {
     appwin->pool = &pool;
     appwin->pool_parametric = &pool_parametric;
-    proc_exited_connection =
-            appwin->signal_process_exited().connect([this](std::string filename, int status, bool modified) {
+    appwin->signal_process_exited().connect(sigc::track_obj(
+            [this](std::string filename, int status, bool modified) {
                 if (modified)
                     pool_update();
-            });
+            },
+            *this));
 
     {
 

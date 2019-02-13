@@ -2,7 +2,7 @@
 #include <gtkmm.h>
 
 namespace horizon {
-class SortController : public sigc::trackable {
+class SortController {
 public:
     enum class Sort { ASC, DESC, NONE };
 

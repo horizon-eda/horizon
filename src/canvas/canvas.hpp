@@ -12,12 +12,12 @@
 #include "color_palette.hpp"
 #include <array>
 #include <set>
-#include <sigc++/sigc++.h>
 #include <unordered_map>
 #include <deque>
+#include <list>
 
 namespace horizon {
-class Canvas : public sigc::trackable {
+class Canvas {
     friend Selectables;
     friend class SelectionFilter;
     friend class CanvasAnnotation;

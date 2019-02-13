@@ -18,7 +18,7 @@ public:
     void save();
 };
 
-class PoolManager : public sigc::trackable {
+class PoolManager {
 public:
     PoolManager();
     static PoolManager &get();
