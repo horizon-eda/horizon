@@ -67,6 +67,8 @@ std::string Logger::domain_to_string(Logger::Domain dom)
         return "Core";
     case Logger::Domain::CANVAS:
         return "Canvas";
+    case Logger::Domain::IMP:
+        return "Interactive manipulator";
     default:
         return "Unspecified";
     }

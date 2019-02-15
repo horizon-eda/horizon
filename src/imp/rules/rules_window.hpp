@@ -30,6 +30,8 @@ public:
     void run_checks();
     void apply_rules();
 
+    void set_enabled(bool enable);
+
 private:
     Gtk::ListBox *lb_rules = nullptr;
     Gtk::ListBox *lb_multi = nullptr;
@@ -114,5 +116,6 @@ private:
     sigc::connection pulse_connection;
 
     WindowStateStore state_store;
+    bool enabled = true;
 };
 } // namespace horizon

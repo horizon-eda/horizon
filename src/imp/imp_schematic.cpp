@@ -113,6 +113,8 @@ void ImpSchematic::update_highlights()
 bool ImpSchematic::handle_broadcast(const json &j)
 {
     if (!ImpBase::handle_broadcast(j)) {
+        if (core_schematic.tool_is_active())
+            return true;
         std::string op = j.at("op");
         if (op == "place-part") {
             main_window->present();

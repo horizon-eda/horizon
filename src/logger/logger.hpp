@@ -8,7 +8,7 @@ namespace horizon {
 class Logger {
 public:
     enum class Level { DEBUG, INFO, WARNING, CRITICAL };
-    enum class Domain { UNSPECIFIED, BOARD, SCHEMATIC, BLOCK, TOOL, CORE, CANVAS };
+    enum class Domain { UNSPECIFIED, BOARD, SCHEMATIC, BLOCK, TOOL, CORE, CANVAS, IMP };
 
     Logger();
     static Logger &get();

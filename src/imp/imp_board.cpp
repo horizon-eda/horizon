@@ -76,8 +76,10 @@ void ImpBoard::update_highlights()
 bool ImpBoard::handle_broadcast(const json &j)
 {
     if (!ImpBase::handle_broadcast(j)) {
+        if (core_board.tool_is_active())
+            return true;
         std::string op = j.at("op");
-        if (op == "highlight" && cross_probing_enabled && !core_board.tool_is_active()) {
+        if (op == "highlight" && cross_probing_enabled) {
             highlights.clear();
             const json &o = j["objects"];
             for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -87,7 +89,7 @@ bool ImpBoard::handle_broadcast(const json &j)
             }
             update_highlights();
         }
-        else if (op == "place" && !core_board.tool_is_active()) {
+        else if (op == "place") {
             main_window->present();
             std::set<SelectableRef> components;
             const json &o = j["components"];
@@ -98,16 +100,9 @@ bool ImpBoard::handle_broadcast(const json &j)
                     components.emplace(uu, type);
                 }
             }
-            highlights.clear();
-            update_highlights();
-            ToolArgs args;
-            args.coords = canvas->get_cursor_pos();
-            args.selection = components;
-            args.work_layer = canvas->property_work_layer();
-            ToolResponse r = core.r->tool_begin(ToolID::MAP_PACKAGE, args, imp_interface.get());
-            tool_process(r);
+            tool_begin(ToolID::MAP_PACKAGE, true, components);
         }
-        else if (op == "reload-netlist" && !core_board.tool_is_active()) {
+        else if (op == "reload-netlist") {
             main_window->present();
             trigger_action(ActionID::RELOAD_NETLIST);
         }

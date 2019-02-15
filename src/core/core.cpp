@@ -329,6 +329,10 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
 ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInterface *imp, bool transient)
 {
+    if (tool_is_active()) {
+        throw std::runtime_error("can't begin tool while tool is active");
+        return ToolResponse::end();
+    }
     if (!args.keep_selection) {
         selection.clear();
         selection = args.selection;

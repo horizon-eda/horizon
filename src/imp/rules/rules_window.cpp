@@ -101,9 +101,9 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     }
     lb_multi->signal_selected_rows_changed().connect([this] {
         bool selected = lb_multi->get_selected_row() != nullptr;
-        button_rule_instance_remove->set_sensitive(selected);
-        button_rule_instance_move_up->set_sensitive(selected);
-        button_rule_instance_move_down->set_sensitive(selected);
+        button_rule_instance_remove->set_sensitive(selected && enabled);
+        button_rule_instance_move_up->set_sensitive(selected && enabled);
+        button_rule_instance_move_down->set_sensitive(selected && enabled);
     });
     lb_multi->signal_row_selected().connect([this](Gtk::ListBoxRow *row) {
         if (row) {
@@ -295,6 +295,8 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
 
 void RulesWindow::apply_rules()
 {
+    if (core->tool_is_active())
+        return;
     for (auto &rule : rules->get_rule_ids()) {
         rules_apply(rules, rule, core);
     }
@@ -393,6 +395,7 @@ void RulesWindow::show_editor(RuleEditor *e)
     if (e == nullptr)
         return;
     editor = Gtk::manage(e);
+    editor->set_sensitive(enabled);
     rule_editor_box->pack_start(*editor, true, true, 0);
     editor->show();
     editor->signal_updated().connect([this] {
@@ -514,6 +517,19 @@ void RulesWindow::update_rules_enabled()
             la->set_sensitive(r->enabled);
         }
     }
+}
+
+void RulesWindow::set_enabled(bool enable)
+{
+    apply_button->set_sensitive(enable);
+    run_button->set_sensitive(enable);
+    if (editor)
+        editor->set_sensitive(enable);
+    button_rule_instance_add->set_sensitive(enable);
+    button_rule_instance_remove->set_sensitive(enable);
+    button_rule_instance_move_down->set_sensitive(enable);
+    button_rule_instance_move_up->set_sensitive(enable);
+    enabled = enable;
 }
 
 RulesWindow *RulesWindow::create(Gtk::Window *p, CanvasGL *ca, Rules *ru, Core *c)

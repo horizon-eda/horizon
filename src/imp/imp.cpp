@@ -557,6 +557,7 @@ void ImpBase::run(int argc, char *argv[])
         rules_window = RulesWindow::create(main_window, canvas, core.r->get_rules(), core.r);
         rules_window->signal_canvas_update().connect(sigc::mem_fun(*this, &ImpBase::canvas_update_from_pp));
         rules_window->signal_changed().connect([this] { core.r->set_needs_save(); });
+        core.r->signal_tool_changed().connect([this](ToolID id) { rules_window->set_enabled(id == ToolID::NONE); });
 
         connect_action(ActionID::RULES, [this](const auto &conn) { rules_window->present(); });
         connect_action(ActionID::RULES_RUN_CHECKS, [this](const auto &conn) {
@@ -971,6 +972,10 @@ ActionConnection &ImpBase::connect_action(ActionID action_id, ToolID tool_id,
 
 void ImpBase::tool_begin(ToolID id, bool override_selection, const std::set<SelectableRef> &sel)
 {
+    if (core.r->tool_is_active()) {
+        Logger::log_critical("can't begin tool while tool is active", Logger::Domain::IMP);
+        return;
+    }
     highlights.clear();
     update_highlights();
     ToolArgs args;
