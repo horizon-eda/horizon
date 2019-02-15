@@ -461,13 +461,7 @@ RuleEditor *RulesWindow::create_editor(Rule *r)
 
 Block *RulesWindow::get_block()
 {
-    if (auto c = dynamic_cast<CoreBoard *>(core)) {
-        return c->get_board()->block;
-    }
-    if (auto c = dynamic_cast<CoreSchematic *>(core)) {
-        return c->get_schematic()->block;
-    }
-    return nullptr;
+    return core->get_block();
 }
 
 void RulesWindow::update_rule_instances(RuleID id)
