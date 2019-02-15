@@ -264,6 +264,9 @@ std::pair<Coordf, Coordf> Canvas::get_bbox(bool visible_only) const
             }
         }
     }
-    return std::make_pair(a, b);
+    if (sqrt((b - a).mag_sq()) < .1_mm)
+        return std::make_pair(Coordf(-5_mm, -5_mm), Coordf(5_mm, 5_mm));
+    else
+        return std::make_pair(a, b);
 }
 } // namespace horizon
