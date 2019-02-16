@@ -6,6 +6,7 @@
 #include "nlohmann/json_fwd.hpp"
 #include "util/editor_process.hpp"
 #include "util/window_state_store.hpp"
+#include "util/status_dispatcher.hpp"
 #include "pool-prj-mgr-process.hpp"
 #include "project/project.hpp"
 #include "prj-mgr/prj-mgr_views.hpp"
@@ -132,12 +133,7 @@ private:
 
     void download_thread(std::string gh_username, std::string gh_repo, std::string dest_dir);
 
-    Glib::Dispatcher download_dispatcher;
-
-    bool downloading = false;
-    bool download_error = false;
-    std::string download_status;
-    std::mutex download_mutex;
+    StatusDispatcher download_status_dispatcher;
 
     WindowStateStore state_store;
 

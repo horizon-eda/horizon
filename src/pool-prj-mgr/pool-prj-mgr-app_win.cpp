@@ -98,16 +98,15 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
 
     label_gitversion->set_text(gitversion);
 
-    download_dispatcher.connect([this] {
-        std::lock_guard<std::mutex> lock(download_mutex);
-        download_revealer->set_reveal_child(downloading || download_error);
-        download_label->set_text(download_status);
-        if (!downloading) {
-            button_cancel->set_sensitive(true);
-            button_do_download->set_sensitive(true);
-            download_spinner->stop();
-        }
-        if (!downloading && !download_error) {
+    download_status_dispatcher.attach(download_revealer);
+    download_status_dispatcher.attach(download_label);
+    download_status_dispatcher.attach(download_spinner);
+
+    download_status_dispatcher.signal_notified().connect([this](StatusDispatcher::Status status, std::string msg) {
+        auto is_busy = status == StatusDispatcher::Status::BUSY;
+        button_cancel->set_sensitive(!is_busy);
+        button_do_download->set_sensitive(!is_busy);
+        if (status == StatusDispatcher::Status::DONE) {
             PoolManager::get().add_pool(download_dest_dir_button->get_filename());
             open_file_view(Gio::File::create_for_path(
                     Glib::build_filename(download_dest_dir_button->get_filename(), "pool.json")));

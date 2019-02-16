@@ -127,7 +127,6 @@
                   <object class="GtkSpinner" id="upgrade_spinner">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="active">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -483,6 +482,18 @@ In case of modifying an existing part, provide rationale for the modification.</
                     <property name="fill">True</property>
                     <property name="pack_type">end</property>
                     <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSpinner" id="pr_spinner">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="pack_type">end</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -902,6 +913,21 @@ In case of modifying an existing part, provide rationale for the modification.</
             <property name="can_focus">False</property>
             <property name="row_spacing">10</property>
             <property name="column_spacing">10</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
             <child>
               <placeholder/>
             </child>
@@ -2691,21 +2717,7 @@ In case of modifying an existing part, provide rationale for the modification.</
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <child>
-          <object class="GtkLabel" id="pull_request_item_descr_label">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">opened by ... on...</property>
-            <style>
-              <class name="dim-label"/>
-            </style>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
+        <property name="spacing">10</property>
         <child>
           <object class="GtkLinkButton" id="pull_request_item_link">
             <property name="label" translatable="yes">button</property>
@@ -2718,6 +2730,21 @@ In case of modifying an existing part, provide rationale for the modification.</
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="pull_request_item_descr_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">opened by ... on...</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>

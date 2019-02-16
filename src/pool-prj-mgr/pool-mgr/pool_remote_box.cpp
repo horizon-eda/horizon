@@ -132,6 +132,7 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     x->get_widget("remote_gh_signed_in_label", gh_signed_in_label);
     x->get_widget("remote_pr_title_entry", pr_title_entry);
     x->get_widget("remote_pr_body_textview", pr_body_textview);
+    x->get_widget("pr_spinner", pr_spinner);
 
     pull_requests_listbox->set_header_func(sigc::ptr_fun(header_func_separator));
 
@@ -163,10 +164,21 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     create_pr_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolRemoteBox::handle_create_pr));
     refresh_prs_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolRemoteBox::handle_refresh_prs));
 
+    pr_status_dispatcher.attach(pr_spinner);
+    pr_status_dispatcher.signal_notified().connect([this](StatusDispatcher::Status status, std::string msg) {
+        auto is_busy = status == StatusDispatcher::Status::BUSY;
+        if (!is_busy) {
+            notebook->pool_updating = false;
+        }
+        if (status == StatusDispatcher::Status::DONE) {
+            update_prs();
+        }
+    });
+
     git_thread_dispatcher.connect([this] {
         std::lock_guard<std::mutex> lock(git_thread_mutex);
         upgrade_revealer->set_reveal_child(git_thread_busy || git_thread_error);
-        upgrade_spinner->set_visible(!git_thread_error);
+        upgrade_spinner->property_active() = !git_thread_error;
         upgrade_label->set_text(git_thread_status);
         if (gh_username.size()) {
             gh_signed_in_label->set_text(gh_username);
@@ -192,10 +204,8 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
             pr_body_textview->get_buffer()->set_text("");
             handle_refresh_prs();
         }
-        if (git_thread_mode == GitThreadMode::REFRESH_PRS && !git_thread_busy && !git_thread_error) {
-            update_prs();
-        }
     });
+
 
     item_store = Gtk::ListStore::create(list_columns);
     merge_items_view->set_model(item_store);
@@ -436,10 +446,8 @@ void PoolRemoteBox::handle_refresh_prs()
     if (notebook->pool_updating)
         return;
     notebook->pool_updating = true;
-    git_thread_busy = true;
-    git_thread_error = false;
-    git_thread_mode = GitThreadMode::REFRESH_PRS;
 
+    pr_status_dispatcher.reset("Starting...");
     std::thread thr(&PoolRemoteBox::refresh_prs_thread, this);
 
     thr.detach();
@@ -544,12 +552,7 @@ void PoolRemoteBox::update_body_placeholder_label()
 void PoolRemoteBox::refresh_prs_thread()
 {
     try {
-        {
-            std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Refreshing pull requests...";
-        }
-        git_thread_dispatcher.emit();
-
+        pr_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Refreshing");
         GitHubClient client;
         pull_requests = client.get_pull_requests(gh_owner, gh_repo);
         /*pull_requests = json::array();
@@ -561,21 +564,10 @@ void PoolRemoteBox::refresh_prs_thread()
                 pull_requests.push_back(j);
         }*/
 
-        {
-            std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_busy = false;
-            git_thread_status = "Done";
-        }
-        git_thread_dispatcher.emit();
+        pr_status_dispatcher.set_status(StatusDispatcher::Status::DONE, "Done");
     }
     catch (const std::exception &e) {
-        {
-            std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_busy = false;
-            git_thread_error = true;
-            git_thread_status = "Error: " + std::string(e.what());
-        }
-        git_thread_dispatcher.emit();
+        pr_status_dispatcher.set_status(StatusDispatcher::Status::ERROR, std::string("Error: ") + e.what());
     }
 }
 

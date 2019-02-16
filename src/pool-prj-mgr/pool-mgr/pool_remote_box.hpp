@@ -6,6 +6,7 @@
 #include "common/common.hpp"
 #include "nlohmann/json.hpp"
 #include <git2/sys/repository.h>
+#include "util/status_dispatcher.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -56,6 +57,10 @@ private:
     Gtk::Entry *pr_title_entry = nullptr;
     Gtk::TextView *pr_body_textview = nullptr;
     Gtk::ListBox *pull_requests_listbox = nullptr;
+    Gtk::Spinner *pr_spinner = nullptr;
+    StatusDispatcher pr_status_dispatcher;
+
+
 
     void handle_remote_upgrade();
     void handle_create_pr();
@@ -69,7 +74,7 @@ private:
 
     Glib::Dispatcher git_thread_dispatcher;
 
-    enum class GitThreadMode { UPGRADE, PULL_REQUEST, REFRESH_PRS };
+    enum class GitThreadMode { UPGRADE, PULL_REQUEST };
     GitThreadMode git_thread_mode = GitThreadMode::UPGRADE;
     bool git_thread_busy = false;
     std::string git_thread_status;

@@ -481,6 +481,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/entity_info_box.cpp\
 	src/widgets/padstack_preview.cpp\
 	src/widgets/tag_entry.cpp\
+	src/util/status_dispatcher.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

@@ -13,12 +13,7 @@ void PoolProjectManagerAppWindow::handle_do_download()
 
     std::string dest_dir = download_dest_dir_button->get_filename();
     if (dest_dir.size()) {
-        button_cancel->set_sensitive(false);
-        button_do_download->set_sensitive(false);
-        download_error = false;
-        download_revealer->set_reveal_child(true);
-        download_spinner->start();
-        downloading = true;
+        download_status_dispatcher.reset("Starting...");
         std::thread dl_thread(&PoolProjectManagerAppWindow::download_thread, this,
                               download_gh_username_entry->get_text(), download_gh_repo_entry->get_text(), dest_dir);
         dl_thread.detach();
@@ -42,11 +37,7 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
             }
         }
 
-        {
-            std::lock_guard<std::mutex> lock(download_mutex);
-            download_status = "Fetching clone URL...";
-        }
-        download_dispatcher.emit();
+        download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Fetching clone URL...");
 
         GitHubClient client;
         json repo = client.get_repo(gh_username, gh_repo);
@@ -59,11 +50,7 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
         checkout_opts.checkout_strategy = GIT_CHECKOUT_SAFE;
         clone_opts.checkout_opts = checkout_opts;
 
-        {
-            std::lock_guard<std::mutex> lock(download_mutex);
-            download_status = "Cloning repository...";
-        }
-        download_dispatcher.emit();
+        download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Cloning repository...");
 
         auto remote_dir = Glib::build_filename(dest_dir, ".remote");
         Gio::File::create_for_path(remote_dir)->make_directory_with_parents();
@@ -74,20 +61,13 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
             throw std::runtime_error("git error " + std::to_string(gerr->klass) + " " + std::string(gerr->message));
         }
 
-        {
-            std::lock_guard<std::mutex> lock(download_mutex);
-            download_status = "Updating remote pool...";
-        }
-        download_dispatcher.emit();
+
+        download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Updating remote pool...");
 
         pool_update(remote_dir);
         Pool pool_remote(remote_dir);
 
-        {
-            std::lock_guard<std::mutex> lock(download_mutex);
-            download_status = "Copying...";
-        }
-        download_dispatcher.emit();
+        download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Copying...");
 
         {
             SQLite::Query q(pool_remote.db, "SELECT filename FROM all_items_view");
@@ -143,30 +123,13 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
         git_repository_free(cloned_repo);
 
 
-        {
-            std::lock_guard<std::mutex> lock(download_mutex);
-            download_error = false;
-            downloading = false;
-        }
-        download_dispatcher.emit();
+        download_status_dispatcher.set_status(StatusDispatcher::Status::DONE, "Done");
     }
     catch (const std::exception &e) {
-        {
-            std::lock_guard<std::mutex> lock(download_mutex);
-            downloading = false;
-            download_error = true;
-            download_status = "Error: " + std::string(e.what());
-        }
-        download_dispatcher.emit();
+        download_status_dispatcher.set_status(StatusDispatcher::Status::ERROR, "Error: " + std::string(e.what()));
     }
     catch (const Gio::Error &e) {
-        {
-            std::lock_guard<std::mutex> lock(download_mutex);
-            downloading = false;
-            download_error = true;
-            download_status = "Error: " + std::string(e.what());
-        }
-        download_dispatcher.emit();
+        download_status_dispatcher.set_status(StatusDispatcher::Status::ERROR, "Error: " + std::string(e.what()));
     }
 }
 
