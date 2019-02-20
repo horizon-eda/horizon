@@ -14,6 +14,11 @@
 #include "util/editor_process.hpp"
 #include "pool-update/pool-update.hpp"
 #include <zmq.hpp>
+#ifdef G_OS_WIN32
+#undef ERROR
+#undef DELETE
+#undef DUPLICATE
+#endif
 
 namespace horizon {
 class PoolNotebook : public Gtk::Notebook {

@@ -61,7 +61,6 @@ private:
     StatusDispatcher pr_status_dispatcher;
 
 
-
     void handle_remote_upgrade();
     void handle_create_pr();
     void update_body_placeholder_label();
