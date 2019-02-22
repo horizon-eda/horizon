@@ -14,6 +14,7 @@ before_build:
     - bash -c "pacman -Syu --noconfirm"
     - bash -c "pacman -Syu --noconfirm"
     - bash -c "pacman -S --noconfirm --needed mingw-w64-%MSYS2_ARCH%-{gcc,gtkmm3,boost,yaml-cpp,sqlite3,toolchain,zeromq,glm,libgit2,oce} zip make"
+    - bash -c "pacman -U http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-libgit2-0.27.8-1-any.pkg.tar.xz --noconfirm"
 
 build_script:
     - cd %APPVEYOR_BUILD_FOLDER%
