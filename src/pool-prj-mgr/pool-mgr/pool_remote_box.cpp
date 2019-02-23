@@ -521,6 +521,9 @@ void PoolRemoteBox::handle_create_pr()
 void PoolRemoteBox::update_items_merge()
 {
     item_store->clear();
+    auto can_merge = items_merge.size() > 0 || models_merge.size() > 0;
+    create_pr_button->set_sensitive(can_merge);
+    merge_items_clear_button->set_sensitive(can_merge);
     merge_items_placeholder_label->set_visible(items_merge.size() == 0 && models_merge.size() == 0);
     for (const auto &it : items_merge) {
         SQLite::Query q(notebook->pool.db, "SELECT name FROM all_items_view WHERE uuid = ? AND type = ?");
