@@ -187,7 +187,7 @@ static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *col
 }
 
 static bool processShell(const TopoDS_Shape &shape, DATA &data, Quantity_Color *color,
-                         const glm::mat4 &mat = glm::mat4())
+                         const glm::mat4 &mat = glm::mat4(1))
 {
     TopoDS_Iterator it;
     bool ret = false;
