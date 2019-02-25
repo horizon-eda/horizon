@@ -1,0 +1,6 @@
+[submodule "3rd_party/q3d"]
+	path = 3rd_party/q3d
+	url = https://github.com/q3k/q3d
+[submodule "3rd_party/flatbuffers"]
+	path = 3rd_party/flatbuffers
+	url = https://github.com/google/flatbuffers

@@ -35,4 +35,11 @@ std::string rtrim_copy(std::string s)
     rtrim(s);
     return s;
 }
+
+bool has_suffix(std::string s, std::string suffix)
+{
+    if (suffix.size() > s.size())
+        return false;
+    return std::equal(suffix.rbegin(), suffix.rend(), s.rbegin());
+}
 } // namespace horizon

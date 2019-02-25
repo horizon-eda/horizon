@@ -6,6 +6,7 @@
 #include "common/polygon.hpp"
 #include "logger/logger.hpp"
 #include "poly2tri/poly2tri.h"
+#include "util/q3d_importer.hpp"
 #include "util/step_importer.hpp"
 #include "util/util.hpp"
 #include "pool/pool_manager.hpp"
@@ -585,6 +586,23 @@ void Canvas3D::load_3d_model(const std::string &filename, const std::string &fil
     if (models.count(filename))
         return;
 
+    std::string filename_lower = filename;
+    std::transform(filename_lower.begin(), filename_lower.end(), filename_lower.begin(), ::tolower);
+
+    if (has_suffix(filename_lower, ".stp") || has_suffix(filename_lower, ".step")) {
+        load_step(filename, filename_abs);
+        return;
+    } else if (has_suffix(filename_lower, ".q3do")) {
+        load_q3d(filename, filename_abs);
+        return;
+    } else {
+        std::cout << "unknown model format" << filename_abs << std::endl;
+    }
+
+}
+
+void Canvas3D::load_step(const std::string &filename, const std::string &filename_abs)
+{
     auto faces = STEPImporter::import(filename_abs);
     // canvas->face_vertex_buffer.reserve(faces.size());
     size_t vertex_offset = face_vertex_buffer.size();
@@ -601,6 +619,31 @@ void Canvas3D::load_3d_model(const std::string &filename, const std::string &fil
             face_index_buffer.push_back(c + vertex_offset);
         }
         vertex_offset += face.vertices.size();
+    }
+    size_t last_index = face_index_buffer.size();
+    models.emplace(std::piecewise_construct, std::forward_as_tuple(filename),
+                   std::forward_as_tuple(first_index, last_index - first_index));
+}
+
+void Canvas3D::load_q3d(const std::string &filename, const std::string &filename_abs)
+{
+    auto object = Q3DImporter::Object(filename_abs);
+    auto meshes = object.getRoot()->meshes();
+
+    size_t vertex_offset = face_vertex_buffer.size();
+    size_t first_index = face_index_buffer.size();
+    for (const auto &mesh : *meshes) {
+        std::cout << "Loading mesh..." << mesh->triangles()->size() << std::endl;
+        auto color = mesh->material()->color();
+        uint8_t r = color->r(), g = color->g(), b = color->b();
+        for (const auto &triangle : *mesh->triangles()) {
+            for (const auto &v : { triangle->vertex1(), triangle->vertex2(), triangle->vertex3() }) {
+                face_vertex_buffer.emplace_back(v->x(), v->y(), v->z(), r, g, b);
+            }
+            face_index_buffer.push_back(vertex_offset++);
+            face_index_buffer.push_back(vertex_offset++);
+            face_index_buffer.push_back(vertex_offset++);
+        }
     }
     size_t last_index = face_index_buffer.size();
     models.emplace(std::piecewise_construct, std::forward_as_tuple(filename),

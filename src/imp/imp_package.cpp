@@ -355,11 +355,13 @@ std::string ImpPackage::ask_3d_model_filename(const std::string &current_filenam
                                                                GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
     auto filter = Gtk::FileFilter::create();
-    filter->set_name("STEP models");
+    filter->set_name("3D model (STEP, Q3DO)");
     filter->add_pattern("*.step");
     filter->add_pattern("*.STEP");
     filter->add_pattern("*.stp");
     filter->add_pattern("*.STP");
+    filter->add_pattern("*.q3do");
+    filter->add_pattern("*.Q3DO");
     chooser->add_filter(filter);
     if (current_filename.size()) {
         chooser->set_filename(Glib::build_filename(pool->get_base_path(), current_filename));

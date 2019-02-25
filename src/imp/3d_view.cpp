@@ -1,6 +1,5 @@
 #include "3d_view.hpp"
 #include "canvas3d/canvas3d.hpp"
-#include "util/step_importer.hpp"
 
 namespace horizon {
 

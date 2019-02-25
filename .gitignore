@@ -10,6 +10,7 @@ horizon-pool-mgr
 horizon-rest-test
 horizon-gen-pkg
 horizon-eda
+flatc
 rest-test.cpp
 *.o
 *.oshared

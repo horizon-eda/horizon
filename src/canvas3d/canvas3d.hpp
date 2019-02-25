@@ -187,6 +187,8 @@ private:
     float get_layer_thickness(int layer) const;
 
     void load_3d_model(const std::string &filename, const std::string &filename_abs);
+    void load_step(const std::string &filename, const std::string &filename_abs);
+    void load_q3d(const std::string &filename, const std::string &filename_abs);
     void load_models_thread(std::map<std::string, std::string> model_filenames);
 
     std::set<UUID> packages_highlight;
