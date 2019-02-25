@@ -39,7 +39,8 @@ public:
     {
         return q3d::GetObject(buffer.get());
     }
+
 private:
     std::unique_ptr<char> buffer;
 };
-}
+} // namespace Q3DImporter

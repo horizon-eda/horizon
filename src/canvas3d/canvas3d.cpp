@@ -592,13 +592,14 @@ void Canvas3D::load_3d_model(const std::string &filename, const std::string &fil
     if (has_suffix(filename_lower, ".stp") || has_suffix(filename_lower, ".step")) {
         load_step(filename, filename_abs);
         return;
-    } else if (has_suffix(filename_lower, ".q3do")) {
+    }
+    else if (has_suffix(filename_lower, ".q3do")) {
         load_q3d(filename, filename_abs);
         return;
-    } else {
+    }
+    else {
         std::cout << "unknown model format" << filename_abs << std::endl;
     }
-
 }
 
 void Canvas3D::load_step(const std::string &filename, const std::string &filename_abs)
@@ -637,7 +638,7 @@ void Canvas3D::load_q3d(const std::string &filename, const std::string &filename
         auto color = mesh->material()->color();
         uint8_t r = color->r(), g = color->g(), b = color->b();
         for (const auto &triangle : *mesh->triangles()) {
-            for (const auto &v : { triangle->vertex1(), triangle->vertex2(), triangle->vertex3() }) {
+            for (const auto &v : {triangle->vertex1(), triangle->vertex2(), triangle->vertex3()}) {
                 face_vertex_buffer.emplace_back(v->x(), v->y(), v->z(), r, g, b);
             }
             face_index_buffer.push_back(vertex_offset++);
