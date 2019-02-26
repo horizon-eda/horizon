@@ -1,5 +1,6 @@
 #include "part_preview.hpp"
 #include "pool/part.hpp"
+#include "pool/pool.hpp"
 #include "canvas/canvas.hpp"
 #include "util/util.hpp"
 #include "util/sqlite.hpp"

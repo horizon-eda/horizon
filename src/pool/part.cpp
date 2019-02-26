@@ -1,4 +1,5 @@
 #include "part.hpp"
+#include "pool.hpp"
 #include "common/lut.hpp"
 #include "nlohmann/json.hpp"
 

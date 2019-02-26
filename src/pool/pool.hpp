@@ -3,6 +3,8 @@
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
 #include "frame/frame.hpp"
+#include "package.hpp"
+#include "package/pad.hpp"
 #include <fstream>
 #include <map>
 #include <set>

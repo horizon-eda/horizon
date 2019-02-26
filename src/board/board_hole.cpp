@@ -2,6 +2,7 @@
 #include "pool/part.hpp"
 #include "pool/pool.hpp"
 #include "nlohmann/json.hpp"
+#include "block/block.hpp"
 
 namespace horizon {
 

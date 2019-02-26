@@ -1,6 +1,7 @@
 #include "board_package.hpp"
 #include "pool/part.hpp"
 #include "nlohmann/json.hpp"
+#include "block/block.hpp"
 
 namespace horizon {
 

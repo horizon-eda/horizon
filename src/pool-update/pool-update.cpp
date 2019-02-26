@@ -4,6 +4,7 @@
 #include "pool/part.hpp"
 #include "pool/pool.hpp"
 #include "pool/unit.hpp"
+#include "pool/symbol.hpp"
 #include "util/sqlite.hpp"
 #include "util/util.hpp"
 #include <giomm/file.h>
