@@ -9,6 +9,7 @@
 #include "util/str_util.hpp"
 #include "hud_util.hpp"
 #include "bom_export_window.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,

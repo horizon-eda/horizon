@@ -2,6 +2,7 @@
 #include "pool/part.hpp"
 #include "widgets/layer_box.hpp"
 #include "util/util.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 void ImpLayer::construct_layer_box(bool pack)

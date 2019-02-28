@@ -7,6 +7,7 @@
 #include "block/block.hpp"
 #include "schematic/schematic.hpp"
 #include "board/board.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 Project::Project(const UUID &uu, const json &j, const std::string &base)

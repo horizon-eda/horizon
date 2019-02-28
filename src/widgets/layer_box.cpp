@@ -5,6 +5,7 @@
 #include "util/gtk_util.hpp"
 #include <algorithm>
 #include <iostream>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 

@@ -2,6 +2,7 @@
 #include "common/lut.hpp"
 #include "sheet.hpp"
 #include "block/block.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 BusLabel::BusLabel(const UUID &uu, const json &j, Sheet &sheet, Block &block)

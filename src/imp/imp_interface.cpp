@@ -3,6 +3,7 @@
 #include "imp.hpp"
 #include "imp_schematic.hpp"
 #include "pool/part.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 ImpInterface::ImpInterface(ImpBase *i) : imp(i)
