@@ -19,6 +19,7 @@
 #include "widgets/layer_box.hpp"
 #include "widgets/layer_help_box.hpp"
 #include "hud_util.hpp"
+#include <iomanip>
 
 namespace horizon {
 ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path)
