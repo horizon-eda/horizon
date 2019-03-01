@@ -48,13 +48,15 @@ static const std::map<ColorP, std::string> color_names = {
         {ColorP::SELECTABLE_ALWAYS, "Selectable always"},
         {ColorP::SEARCH, "Search markers"},
         {ColorP::SEARCH_CURRENT, "Current search marker"},
+        {ColorP::SHADOW, "Highlight shadow"},
 };
 
 static const std::set<ColorP> colors_non_layer = {ColorP::NET, ColorP::BUS,        ColorP::FRAME,
                                                   ColorP::PIN, ColorP::PIN_HIDDEN, ColorP::DIFFPAIR};
 
 static const std::set<ColorP> colors_layer = {ColorP::FRAG_ORPHAN, ColorP::AIRWIRE_ROUTER, ColorP::TEXT_OVERLAY,
-                                              ColorP::HOLE,        ColorP::DIMENSION,      ColorP::AIRWIRE};
+                                              ColorP::HOLE,        ColorP::DIMENSION,      ColorP::AIRWIRE,
+                                              ColorP::SHADOW};
 
 class ColorEditor : public Gtk::Box {
 public:
@@ -214,10 +216,9 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
     GET_WIDGET(canvas_grid_fine_mod_alt);
     GET_WIDGET(canvas_grid_fine_mod_ctrl);
 
-    Gtk::Scale *canvas_grid_opacity, *canvas_highlight_dim, *canvas_highlight_shadow, *canvas_highlight_lighten;
+    Gtk::Scale *canvas_grid_opacity, *canvas_highlight_dim, *canvas_highlight_lighten;
     GET_WIDGET(canvas_grid_opacity);
     GET_WIDGET(canvas_highlight_dim);
-    GET_WIDGET(canvas_highlight_shadow);
     GET_WIDGET(canvas_highlight_lighten);
 
     Gtk::Label *canvas_label;
@@ -304,7 +305,6 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
     bind_widget(grid_fine_mod_widgets, appearance.grid_fine_modifier);
     bind_widget(canvas_grid_opacity, appearance.grid_opacity);
     bind_widget(canvas_highlight_dim, appearance.highlight_dim);
-    bind_widget(canvas_highlight_shadow, appearance.highlight_shadow);
     bind_widget(canvas_highlight_lighten, appearance.highlight_lighten);
 
     for (auto &it : grid_style_widgets) {
@@ -315,7 +315,6 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
     }
     canvas_grid_opacity->signal_value_changed().connect([this] { preferences->signal_changed().emit(); });
     canvas_highlight_dim->signal_value_changed().connect([this] { preferences->signal_changed().emit(); });
-    canvas_highlight_shadow->signal_value_changed().connect([this] { preferences->signal_changed().emit(); });
     canvas_highlight_lighten->signal_value_changed().connect([this] { preferences->signal_changed().emit(); });
 
     Gtk::Box *cursor_size_tool_box, *cursor_size_box;

@@ -11,7 +11,6 @@ public:
     std::map<int, Color> layer_colors;
     float grid_opacity = 1;
     float highlight_dim = .5;
-    float highlight_shadow = .3;
     float highlight_lighten = .3;
     enum class GridStyle { CROSS, DOT, GRID };
     GridStyle grid_style = GridStyle::CROSS;

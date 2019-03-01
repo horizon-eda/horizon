@@ -14,22 +14,7 @@ in int lod_to_geom[1];
 smooth out vec3 color_to_fragment;
 smooth out float striper_to_fragment;
 
-layout (std140) uniform layer_setup
-{ 
-	vec3 colors[15];
-	mat3 screenmat;
-	mat3 viewmat;
-	vec3 layer_color;
-	float alpha;
-	float scale;
-	uint types_visible;
-	uint types_force_outline;
-	int layer_flags;
-	int highlight_mode;
-	float highlight_dim;
-	float highlight_shadow;
-	float highlight_lighten;
-};
+##ubo
 
 int mode = layer_flags;
 
@@ -77,25 +62,7 @@ void main() {
 	}
 	
 	bool highlight = (type == 1 || ((flags & (1<<1)) != 0));
-	
-	if(highlight_mode == 0) {
-		if(highlight)
-			color += highlight_lighten; //ugly lighten
-	}
-	else if(highlight_mode == 1) { //dim
-		if(!highlight)
-			color *= highlight_dim; //ugly darken
-		else if(type == 1)
-			color += highlight_lighten; //ugly lighten
-	}
-	else if(highlight_mode == 2) { //shadow
-		if(!highlight)
-			color = vec3(1, 1, 1)*highlight_shadow;
-		else if(type == 1)
-			color += highlight_lighten; //ugly lighten
-	}
-	
-	color_to_fragment = color;
+	color_to_fragment = apply_highlight(color, highlight, type);
 	
 
 	gl_Position = t(p0);

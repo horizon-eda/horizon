@@ -17,6 +17,7 @@ enum class ColorP {
     PIN,
     PIN_HIDDEN,
     DIFFPAIR,
+    SHADOW,
     N_COLORS,
     // colors after N_COLORS aren't part of the UBO
     BACKGROUND,

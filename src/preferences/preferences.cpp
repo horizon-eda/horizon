@@ -80,6 +80,7 @@ static const LutEnumStr<ColorP> colorp_lut = {
         COLORP_LUT_ITEM(SELECTABLE_ALWAYS),
         COLORP_LUT_ITEM(SEARCH),
         COLORP_LUT_ITEM(SEARCH_CURRENT),
+        COLORP_LUT_ITEM(SHADOW),
 };
 
 json CanvasPreferences::serialize() const
@@ -87,7 +88,6 @@ json CanvasPreferences::serialize() const
     json j = serialize_colors();
     j["grid_style"] = grid_style_lut.lookup_reverse(appearance.grid_style);
     j["grid_opacity"] = appearance.grid_opacity;
-    j["highlight_shadow"] = appearance.highlight_shadow;
     j["highlight_dim"] = appearance.highlight_dim;
     j["highlight_lighten"] = appearance.highlight_lighten;
     j["grid_fine_modifier"] = grid_fine_mod_lut.lookup_reverse(appearance.grid_fine_modifier);
@@ -138,7 +138,6 @@ void CanvasPreferences::load_from_json(const json &j)
     appearance.grid_style = grid_style_lut.lookup(j.at("grid_style"));
     appearance.grid_opacity = j.value("grid_opacity", .4);
     appearance.highlight_dim = j.value("highlight_dim", .3);
-    appearance.highlight_shadow = j.value("highlight_shadow", .3);
     appearance.highlight_lighten = j.value("highlight_lighten", .3);
     appearance.grid_fine_modifier = grid_fine_mod_lut.lookup(j.value("grid_fine_modifier", "alt"));
     appearance.cursor_size = cursor_size_lut.lookup(j.value("cursor_size", "default"));

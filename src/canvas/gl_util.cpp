@@ -25,8 +25,21 @@ static GLuint create_shader(int type, const char *src)
         std::string log_space(log_len + 1, ' ');
         glGetShaderInfoLog(shader, log_len, nullptr, (GLchar *)log_space.c_str());
 
-        std::cerr << "Compile failure in " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment")
-                  << " shader: " << log_space << std::endl;
+        std::cerr << "Compile failure in ";
+        switch (type) {
+        case GL_VERTEX_SHADER:
+            std::cerr << "vertex";
+            break;
+
+        case GL_FRAGMENT_SHADER:
+            std::cerr << "fragment";
+            break;
+
+        case GL_GEOMETRY_SHADER:
+            std::cerr << "geometry";
+            break;
+        }
+        std::cerr << " shader: " << log_space << std::endl;
 
         glDeleteShader(shader);
 
@@ -36,11 +49,27 @@ static GLuint create_shader(int type, const char *src)
     return shader;
 }
 
+static std::string string_from_resource(const char *resource)
+{
+    auto bytes = Gio::Resource::lookup_data_global(resource);
+    gsize size;
+    return (const char *)bytes->get_data(size);
+}
+
+static void include_shader(std::string &shader_string)
+{
+    auto index = shader_string.find("##ubo");
+    if (index == std::string::npos)
+        return;
+    std::string ubo_str = string_from_resource("/net/carrotIndustries/horizon/canvas/shaders/ubo.glsl");
+    shader_string.replace(index, 5, ubo_str);
+}
+
 static GLuint create_shader_from_resource(int type, const char *resource)
 {
-    auto shader_bytes = Gio::Resource::lookup_data_global(resource);
-    gsize shader_size{shader_bytes->get_size()};
-    return create_shader(type, (const char *)shader_bytes->get_data(shader_size));
+    std::string shader_string = string_from_resource(resource);
+    include_shader(shader_string);
+    return create_shader(type, shader_string.c_str());
 }
 
 GLuint gl_create_program_from_resource(const char *vertex_resource, const char *fragment_resource,

@@ -123,7 +123,7 @@ void TriangleRenderer::realize()
 
 class UBOBuffer {
 public:
-    std::array<std::array<float, 4>, 15> colors; // 15==ColorP::N_COLORS, keep in sync with shaders
+    std::array<std::array<float, 4>, 16> colors; // 16==ColorP::N_COLORS, keep in sync with shaders
     std::array<float, 12> screenmat;
     std::array<float, 12> viewmat;
     std::array<float, 3> layer_color;
@@ -134,7 +134,6 @@ public:
     int layer_flags;
     int highlight_mode;
     float highlight_dim;
-    float highlight_shadow;
     float highlight_lighten;
 };
 
@@ -168,7 +167,6 @@ void TriangleRenderer::render_layer(int layer)
     buf.scale = ca->scale;
     buf.highlight_mode = ca->highlight_enabled ? static_cast<int>(ca->highlight_mode) : 0;
     buf.highlight_dim = ca->appearance.highlight_dim;
-    buf.highlight_shadow = ca->appearance.highlight_shadow;
     buf.highlight_lighten = ca->appearance.highlight_lighten;
 
 
