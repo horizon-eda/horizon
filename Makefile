@@ -510,7 +510,7 @@ LIBS_COMMON = sqlite3 yaml-cpp
 ifneq ($(OS),Windows_NT)
 	LIBS_COMMON += uuid
 endif
-LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libgit2 libcurl
+LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libgit2 libcurl glm
 
 OPTIMIZE=-fdata-sections -ffunction-sections
 DEBUG   =-g3
