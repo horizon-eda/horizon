@@ -45,7 +45,7 @@ public:
     bool edit_board_hole(std::set<class BoardHole *> &holes, class Pool *pool, class Block *block);
     bool annotate(class Schematic *s);
     bool edit_plane(class Plane *plane, class Board *brd, class Block *block);
-    bool edit_keepout(class Keepout *keepout, class Core *c);
+    bool edit_keepout(class Keepout *keepout, class Core *c, bool add_mode);
     bool edit_stackup(class Board *brd);
     bool edit_schematic_properties(class Schematic *s, class Pool *pool);
     bool edit_frame_properties(class Frame *fr);

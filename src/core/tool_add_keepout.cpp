@@ -67,7 +67,7 @@ ToolResponse ToolAddKeepout::begin(const ToolArgs &args)
         poly->usage = keepout;
     }
     UUID keepout_uuid = keepout->uuid;
-    bool r = imp->dialogs.edit_keepout(keepout, core.r);
+    bool r = imp->dialogs.edit_keepout(keepout, core.r, tool_id == ToolID::ADD_KEEPOUT);
     auto keepouts = core.r->get_keepouts();
     if (r) {
         if (std::count_if(keepouts.begin(), keepouts.end(), [keepout_uuid](auto x) { return x->uuid == keepout_uuid; })

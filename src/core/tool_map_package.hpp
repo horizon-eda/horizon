@@ -11,7 +11,7 @@ public:
     bool can_begin() override;
 
 private:
-    std::vector<std::pair<Component *, bool>> components;
+    std::vector<std::pair<class Component *, bool>> components;
     unsigned int component_index = 0;
     class BoardPackage *pkg = nullptr;
     std::set<UUID> nets;

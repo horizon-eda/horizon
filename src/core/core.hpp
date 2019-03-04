@@ -6,7 +6,6 @@
 #include "common/keepout.hpp"
 #include "cores.hpp"
 #include "tool_data.hpp"
-#include "dialogs/dialogs.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "pool/pool.hpp"
 #include "pool/symbol.hpp"

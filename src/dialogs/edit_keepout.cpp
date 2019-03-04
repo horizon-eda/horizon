@@ -16,7 +16,7 @@ namespace horizon {
 static const std::vector<PatchType> patch_types_cu = {PatchType::TRACK, PatchType::PAD, PatchType::PAD_TH,
                                                       PatchType::PLANE, PatchType::VIA, PatchType::HOLE_PTH};
 
-EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout *k, Core *core)
+EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout *k, Core *core, bool add_mode)
     : Gtk::Dialog("Edit Keepout", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       keepout(k)
 {
@@ -93,12 +93,14 @@ EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout *k, Core *core
     box->pack_start(*sc, false, false, 0);
     sc->set_sensitive(is_cu);
 
-    auto delete_button = Gtk::manage(new Gtk::Button("Delete Keepout"));
-    delete_button->signal_clicked().connect([this, core] {
-        core->delete_keepout(keepout->uuid);
-        response(Gtk::RESPONSE_OK);
-    });
-    box->pack_start(*delete_button, false, false, 0);
+    if (!add_mode) {
+        auto delete_button = Gtk::manage(new Gtk::Button("Delete Keepout"));
+        delete_button->signal_clicked().connect([this, core] {
+            core->delete_keepout(keepout->uuid);
+            response(Gtk::RESPONSE_OK);
+        });
+        box->pack_start(*delete_button, false, false, 0);
+    }
 
 
     get_content_area()->pack_start(*box, true, true, 0);
