@@ -18,7 +18,8 @@ static const char *text_preflight =
         "• No empty planes\n"
         "• No components without part\n"
         "• No unplaced components\n"
-        "• No tracks without net\n";
+        "• No tracks without net\n"
+        "• No polygons without usage on copper layers\n";
 
 void RuleEditorPackageChecks::populate()
 {

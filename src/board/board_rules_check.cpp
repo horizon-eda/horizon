@@ -529,6 +529,20 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd)
         }
     }
 
+    for (const auto &it : brd->polygons) {
+        bool is_keepout = dynamic_cast<const Keepout *>(it.second.usage.ptr);
+        bool is_plane = dynamic_cast<Plane *>(it.second.usage.ptr);
+        if (BoardLayers::is_copper(it.second.layer) && !(is_plane || is_keepout)) {
+            r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+            auto &e = r.errors.back();
+            e.has_location = it.second.vertices.size();
+            if (e.has_location)
+                e.location = it.second.vertices.front().position;
+            e.comment =
+                    "Polygon on layer " + brd->get_layers().at(it.second.layer).name + " is not a keepout or a plane";
+        }
+    }
+
     r.update();
     return r;
 }
