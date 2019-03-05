@@ -15,6 +15,7 @@
 #include "manage_power_nets.hpp"
 #include "ask_datum.hpp"
 #include "ask_datum_string.hpp"
+#include "ask_datum_angle.hpp"
 #include "select_via_padstack.hpp"
 #include "annotate.hpp"
 #include "core/core.hpp"
@@ -34,6 +35,7 @@
 #include "edit_keepout.hpp"
 #include "select_group_tag.hpp"
 #include "widgets/spin_button_dim.hpp"
+#include "widgets/spin_button_angle.hpp"
 #include <glibmm.h>
 
 namespace horizon {
@@ -349,6 +351,20 @@ std::tuple<bool, Coordi, std::pair<bool, bool>> Dialogs::ask_datum_coord2(const 
     }
     else {
         return std::make_tuple<bool, Coordi, std::pair<bool, bool>>(false, Coordi(), {false, false});
+    }
+}
+
+std::pair<bool, int> Dialogs::ask_datum_angle(const std::string &label, int def)
+{
+    AskDatumAngleDialog dia(parent, label);
+    dia.sp->set_value(def);
+    dia.sp->select_region(0, -1);
+    auto r = dia.run();
+    if (r == Gtk::RESPONSE_OK) {
+        return {true, dia.sp->get_value()};
+    }
+    else {
+        return {false, 0};
     }
 }
 

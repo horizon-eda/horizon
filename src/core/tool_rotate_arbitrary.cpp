@@ -103,7 +103,7 @@ void ToolRotateArbitrary::update_tip()
     }
     else if (state == State::ROTATE) {
         std::stringstream ss;
-        ss << "<b>LMB:</b>finish <b>RMB:</b>cancel <b>s:</b>toggle snap <i>";
+        ss << "<b>LMB:</b>finish <b>RMB:</b>cancel <b>s:</b>toggle snap <b>Enter:</b>enter angle <i>";
         ss << "Angle: " << angle_to_string(iangle, false);
         if (snap)
             ss << " (snapped)";
@@ -289,6 +289,14 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_s) {
             snap ^= true;
+        }
+        else if (args.key == GDK_KEY_Return) {
+            auto r = imp->dialogs.ask_datum_angle("Enter angle", 0);
+            if (r.first) {
+                apply_placements_rotation(r.second);
+                core.r->commit();
+                return ToolResponse::end();
+            }
         }
         else if (args.key == GDK_KEY_Escape) {
             core.r->revert();

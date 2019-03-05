@@ -18,6 +18,7 @@
 #include "widgets/tag_entry.hpp"
 #include "widgets/layer_box.hpp"
 #include "widgets/layer_help_box.hpp"
+#include "widgets/spin_button_angle.hpp"
 #include "hud_util.hpp"
 #include <iomanip>
 
@@ -71,49 +72,6 @@ static Gtk::Label *make_label(const std::string &text)
     return la;
 }
 
-class SpinButtonAngle : public Gtk::SpinButton {
-public:
-    SpinButtonAngle();
-
-protected:
-    virtual int on_input(double *new_value);
-    virtual bool on_output();
-};
-
-SpinButtonAngle::SpinButtonAngle() : Gtk::SpinButton()
-{
-    set_range(0, 65536);
-    set_wrap(true);
-    set_width_chars(6);
-    set_increments(4096, 4096);
-}
-
-bool SpinButtonAngle::on_output()
-{
-    auto adj = get_adjustment();
-    double v = adj->get_value();
-
-    std::stringstream stream;
-    stream.imbue(get_locale());
-    stream << std::fixed << std::setprecision(2) << (v / 65536.0) * 360 << "°";
-
-    set_text(stream.str());
-    return true;
-}
-
-int SpinButtonAngle::on_input(double *v)
-{
-    auto txt = get_text();
-    int64_t va = 0;
-    try {
-        va = (std::stod(txt) / 360.0) * 65536;
-        *v = va;
-    }
-    catch (const std::exception &e) {
-        return false;
-    }
-    return true;
-}
 
 class PlaceAtPadDialog : public Gtk::Dialog {
 public:

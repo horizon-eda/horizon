@@ -243,6 +243,7 @@ SRC_IMP = \
 	src/dialogs/edit_frame.cpp\
 	src/dialogs/edit_keepout.cpp\
 	src/dialogs/select_group_tag.cpp\
+	src/dialogs/ask_datum_angle.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\
 	src/core/core_schematic.cpp\
@@ -347,6 +348,7 @@ SRC_IMP = \
 	src/widgets/layer_help_box.cpp\
 	src/preferences/preferences_util.cpp\
 	src/preferences/preferences_provider.cpp\
+	src/widgets/spin_button_angle.cpp\
 
 SRC_ROUTER = \
 	3rd_party/router/router/pns_router.cpp \
