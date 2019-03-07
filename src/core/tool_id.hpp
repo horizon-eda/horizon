@@ -120,6 +120,7 @@ enum class ToolID {
     CLEAR_NC,
     ADD_KEEPOUT,
     DELETE_KEEPOUT,
-    EDIT_KEEPOUT
+    EDIT_KEEPOUT,
+    PLACE_REFDES_AND_VALUE
 };
 } // namespace horizon

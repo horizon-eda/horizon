@@ -62,6 +62,7 @@
 #include "tool_set_nc.hpp"
 #include "tool_add_keepout.hpp"
 #include "tool_change_symbol.hpp"
+#include "tool_place_refdes_and_value.hpp"
 
 #include "common/dimension.hpp"
 #include "logger/logger.hpp"
@@ -321,6 +322,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::CHANGE_SYMBOL:
         return std::make_unique<ToolChangeSymbol>(this, tool_id);
+
+    case ToolID::PLACE_REFDES_AND_VALUE:
+        return std::make_unique<ToolPlaceRefdesAndValue>(this, tool_id);
 
     default:
         return nullptr;
