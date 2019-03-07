@@ -115,6 +115,7 @@ NODE* NODE::Branch()
     child->m_depth = m_depth + 1;
     child->m_parent = this;
     child->m_ruleResolver = m_ruleResolver;
+    child->m_maxClearance = m_maxClearance;
     child->m_root = isRoot() ? this : m_root;
 
     // immmediate offspring of the root branch needs not copy anything.
