@@ -10,6 +10,7 @@ static const LutEnumStr<SchematicSymbol::PinDisplayMode> pdm_lut = {
         {"selected_only", SchematicSymbol::PinDisplayMode::SELECTED_ONLY},
         {"both", SchematicSymbol::PinDisplayMode::BOTH},
         {"all", SchematicSymbol::PinDisplayMode::ALL},
+        {"custom_only", SchematicSymbol::PinDisplayMode::CUSTOM_ONLY},
 };
 
 SchematicSymbol::SchematicSymbol(const UUID &uu, const json &j, Pool &pool, Block *block)

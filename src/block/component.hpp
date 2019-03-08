@@ -60,7 +60,8 @@ public:
     /**
      * used to select alternate pin names
      */
-    std::map<UUIDPath<2>, int> pin_names;
+    std::map<UUIDPath<2>, std::set<int>> pin_names; //-2:custom -1:primary 0...:alt
+    std::map<UUIDPath<2>, std::string> custom_pin_names;
 
     std::string replace_text(const std::string &t, bool *replaced = nullptr) const;
 

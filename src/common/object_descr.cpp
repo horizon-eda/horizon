@@ -76,6 +76,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                             {static_cast<int>(SchematicSymbol::PinDisplayMode::SELECTED_ONLY), "Sel. only"},
                             {static_cast<int>(SchematicSymbol::PinDisplayMode::BOTH), "Both"},
                             {static_cast<int>(SchematicSymbol::PinDisplayMode::ALL), "All"},
+                            {static_cast<int>(SchematicSymbol::PinDisplayMode::CUSTOM_ONLY), "Custom only"},
                     }}},
                   {ObjectProperty::ID::DISPLAY_ALL_PADS, {ObjectProperty::Type::BOOL, "Show all pads", 2}},
           }}},

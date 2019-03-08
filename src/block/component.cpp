@@ -81,10 +81,31 @@ Component::Component(const UUID &uu, const json &j, Pool &pool, Block *block)
                 const auto &g = entity->gates.at(u.at(0));
                 if (g.unit->pins.count(u.at(1)) > 0) {
                     const auto &p = g.unit->pins.at(u.at(1));
-                    int index = it.value();
-                    if ((int)p.names.size() >= index + 1) {
-                        pin_names.emplace(std::make_pair(u, index));
+                    std::set<int> s;
+                    if (it.value().is_number_integer()) {
+                        int index = it.value();
+                        if ((int)p.names.size() >= index + 1) {
+                            s.insert(index);
+                        }
                     }
+                    else if (it.value().is_array()) {
+                        std::set<int> s2 = it.value();
+                        s = s2;
+                    }
+                    pin_names.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(s));
+                }
+            }
+        }
+    }
+    if (j.count("custom_pin_names")) {
+        const json &o = j["custom_pin_names"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            UUIDPath<2> u(it.key());
+            if (entity->gates.count(u.at(0)) > 0) {
+                const auto &g = entity->gates.at(u.at(0));
+                if (g.unit->pins.count(u.at(1)) > 0) {
+                    std::string name = it.value();
+                    custom_pin_names.emplace(u, name);
                 }
             }
         }
@@ -145,8 +166,12 @@ json Component::serialize() const
     }
     j["pin_names"] = json::object();
     for (const auto &it : pin_names) {
-        if (it.second != -1) {
-            j["pin_names"][(std::string)it.first] = it.second;
+        j["pin_names"][(std::string)it.first] = it.second;
+    }
+    j["custom_pin_names"] = json::object();
+    for (const auto &it : custom_pin_names) {
+        if (it.second.size()) {
+            j["custom_pin_names"][(std::string)it.first] = it.second;
         }
     }
     return j;

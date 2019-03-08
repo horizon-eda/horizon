@@ -28,7 +28,7 @@ public:
     Placement placement;
     std::vector<uuid_ptr<Text>> texts;
     bool smashed = false;
-    enum class PinDisplayMode { SELECTED_ONLY, BOTH, ALL };
+    enum class PinDisplayMode { SELECTED_ONLY, BOTH, ALL, CUSTOM_ONLY };
     PinDisplayMode pin_display_mode = PinDisplayMode::SELECTED_ONLY;
     bool display_directions = false;
     bool display_all_pads = true;

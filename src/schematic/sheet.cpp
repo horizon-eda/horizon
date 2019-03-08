@@ -152,10 +152,18 @@ void Sheet::merge_net_lines(LineNet *a, LineNet *b, Junction *ju)
     }
 }
 
+static void append_pin_name(std::string &name, const std::string &x)
+{
+    if (name.size())
+        name += " ";
+    name += x;
+}
+
 void Sheet::expand_symbols(const class Schematic &sch)
 {
     for (auto &it_sym : symbols) {
         SchematicSymbol &schsym = it_sym.second;
+        const Component *comp = schsym.component;
         if (schsym.symbol.unit->uuid != schsym.gate->unit->uuid) {
             throw std::logic_error("unit mismatch");
         }
@@ -175,25 +183,57 @@ void Sheet::expand_symbols(const class Schematic &sch)
                 for (auto &pin_name : schsym.gate->unit->pins.at(pin_uuid).names) {
                     it_pin.second.name += pin_name + " ";
                 }
+                UUIDPath<2> path(schsym.gate->uuid, pin_uuid);
+                if (comp->custom_pin_names.count(path)) {
+                    it_pin.second.name += comp->custom_pin_names.at(path) + " ";
+                }
                 it_pin.second.name += "(" + schsym.gate->unit->pins.at(pin_uuid).primary_name + ")";
             }
         }
-        else {
-            for (const auto &it_name_index : schsym.component->pin_names) {
-                if (it_name_index.first.at(0) == schsym.gate->uuid) {
-                    if (it_name_index.second != -1) {
-                        auto pin_uuid = it_name_index.first.at(1);
-                        if (schsym.pin_display_mode == SchematicSymbol::PinDisplayMode::SELECTED_ONLY)
-                            schsym.symbol.pins.at(pin_uuid).name =
-                                    schsym.gate->unit->pins.at(pin_uuid).names.at(it_name_index.second);
-                        else if (schsym.pin_display_mode == SchematicSymbol::PinDisplayMode::BOTH)
-                            schsym.symbol.pins.at(pin_uuid).name =
-                                    schsym.gate->unit->pins.at(pin_uuid).names.at(it_name_index.second) + " ("
-                                    + schsym.gate->unit->pins.at(pin_uuid).primary_name + ")";
-                    }
+        else if (schsym.pin_display_mode == SchematicSymbol::PinDisplayMode::CUSTOM_ONLY) {
+            for (auto &it_pin : schsym.symbol.pins) {
+                auto pin_uuid = it_pin.first;
+                UUIDPath<2> path(schsym.gate->uuid, pin_uuid);
+                if (comp->custom_pin_names.count(path) && comp->custom_pin_names.at(path).size()) {
+                    it_pin.second.name = comp->custom_pin_names.at(path);
+                }
+                else {
+                    it_pin.second.name = schsym.gate->unit->pins.at(pin_uuid).primary_name;
                 }
             }
         }
+        else {
+            for (auto &it_pin : schsym.symbol.pins) {
+                auto pin_uuid = it_pin.first;
+                UUIDPath<2> path(schsym.gate->uuid, pin_uuid);
+                const auto &pin = schsym.gate->unit->pins.at(pin_uuid);
+                if (comp->pin_names.count(path) && comp->pin_names.at(path).size()) {
+                    const auto &names = comp->pin_names.at(path);
+                    it_pin.second.name.clear();
+                    if (names.count(-1) || (schsym.pin_display_mode == SchematicSymbol::PinDisplayMode::BOTH))
+                        it_pin.second.name = schsym.gate->unit->pins.at(pin_uuid).primary_name;
+                    for (const auto &it : names) {
+                        if (it == -2) {
+                            // nop, see later
+                        }
+                        else if (it == -1) {
+                            append_pin_name(it_pin.second.name, pin.primary_name);
+                        }
+                        else {
+                            if (it >= 0 && it < ((int)pin.names.size()))
+                                append_pin_name(it_pin.second.name, pin.names.at(it));
+                        }
+                    }
+                    if (names.count(-2) && comp->custom_pin_names.count(path)) {
+                        append_pin_name(it_pin.second.name, comp->custom_pin_names.at(path));
+                    }
+                }
+                else {
+                    it_pin.second.name = schsym.gate->unit->pins.at(pin_uuid).primary_name;
+                }
+            }
+        }
+
         if (schsym.component->part) {
             for (auto &it_pin : schsym.symbol.pins) {
                 it_pin.second.pad = "";
