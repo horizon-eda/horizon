@@ -4,6 +4,7 @@
 #include "property_editor.hpp"
 #include "property_panels.hpp"
 #include "core/core.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -196,7 +197,7 @@ void PropertyPanel::update_objects(const std::set<SelectableRef> &selection)
     }
 
     std::sort(objects.begin(), objects.end(), [this](const auto &a, const auto &b) {
-        return core->get_display_name(type, a) < core->get_display_name(type, b);
+        return strcmp_natural(core->get_display_name(type, a), core->get_display_name(type, b)) < 0;
     });
 
     object_current = 0;
