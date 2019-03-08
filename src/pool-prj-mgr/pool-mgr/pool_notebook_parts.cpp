@@ -23,13 +23,17 @@ void PoolNotebook::handle_edit_part(const UUID &uu)
 void PoolNotebook::handle_create_part()
 {
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
-    auto entity_uuid = UUID();
-    auto package_uuid = UUID();
+    auto entity_uuid = browsers.at(ObjectType::ENTITY)->get_selected();
+    auto package_uuid = browsers.at(ObjectType::PACKAGE)->get_selected();
     {
-        CreatePartDialog dia(top, &pool);
+        CreatePartDialog dia(top, &pool, entity_uuid, package_uuid);
         if (dia.run() == Gtk::RESPONSE_OK) {
             entity_uuid = dia.get_entity();
             package_uuid = dia.get_package();
+        }
+        else {
+            entity_uuid = UUID();
+            package_uuid = UUID();
         }
     }
     if (!(entity_uuid && package_uuid))

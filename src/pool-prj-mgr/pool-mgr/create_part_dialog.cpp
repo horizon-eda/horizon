@@ -3,7 +3,7 @@
 #include "widgets/pool_browser_package.hpp"
 
 namespace horizon {
-CreatePartDialog::CreatePartDialog(Gtk::Window *parent, Pool *ipool)
+CreatePartDialog::CreatePartDialog(Gtk::Window *parent, Pool *ipool, const UUID &entity_uuid, const UUID &package_uuid)
     : Gtk::Dialog("Select Entity and Package", *parent,
                   Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       pool(ipool)
@@ -18,6 +18,8 @@ CreatePartDialog::CreatePartDialog(Gtk::Window *parent, Pool *ipool)
 
     browser_entity = Gtk::manage(new PoolBrowserEntity(pool));
     browser_package = Gtk::manage(new PoolBrowserPackage(pool));
+    browser_entity->go_to(entity_uuid);
+    browser_package->go_to(package_uuid);
 
     auto boxe = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4));
     auto lae = Gtk::manage(new Gtk::Label());
@@ -47,6 +49,7 @@ CreatePartDialog::CreatePartDialog(Gtk::Window *parent, Pool *ipool)
 
     browser_entity->signal_selected().connect(sigc::mem_fun(*this, &CreatePartDialog::check_select));
     browser_package->signal_selected().connect(sigc::mem_fun(*this, &CreatePartDialog::check_select));
+    check_select();
     show_all();
 }
 

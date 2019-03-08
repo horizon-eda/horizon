@@ -11,7 +11,7 @@ namespace horizon {
 
 class CreatePartDialog : public Gtk::Dialog {
 public:
-    CreatePartDialog(Gtk::Window *parent, Pool *ipool);
+    CreatePartDialog(Gtk::Window *parent, Pool *ipool, const UUID &entity_uuid, const UUID &package_uuid);
     UUID get_entity();
     UUID get_package();
 
