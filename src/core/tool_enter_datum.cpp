@@ -335,12 +335,15 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
     }
     else if (dim_mode) {
         Dimension *dim = nullptr;
-        int vertex = 0;
+        int vertex = -1;
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::DIMENSION) {
+                if (vertex != -1) { // two vertices
+                    imp->tool_bar_flash("select exactly one dimension point");
+                    return ToolResponse::end();
+                }
                 vertex = it.vertex;
                 dim = core.r->get_dimension(it.uuid);
-                break;
             }
         }
         if (!dim)
@@ -356,6 +359,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             p_ref = &dim->p0;
         }
         else {
+            imp->tool_bar_flash("select either start or end point");
             return ToolResponse::end();
         }
         int64_t def = 0;
@@ -378,11 +382,17 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         case Dimension::Mode::HORIZONTAL:
             p_var->x = p_ref->x + (r.second * sgn(p_var->x - p_ref->x));
             break;
+
         case Dimension::Mode::VERTICAL:
             p_var->y = p_ref->y + (r.second * sgn(p_var->y - p_ref->y));
             break;
-        case Dimension::Mode::DISTANCE:
-            break;
+
+        case Dimension::Mode::DISTANCE: {
+            Coord<double> v = *p_var - *p_ref;
+            v *= 1 / sqrt(v.mag_sq());
+            v *= r.second;
+            *p_var = *p_ref + Coordi(v.x, v.y);
+        } break;
         }
     }
     else {
