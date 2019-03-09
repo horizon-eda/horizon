@@ -183,6 +183,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
 {
     std::string op = j.at("op");
     auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
+    auto top_block = project->get_top_block();
     if (op == "part-placed") {
         UUID part = j.at("part").get<std::string>();
         part_browser_window->placed_part(part);
@@ -209,7 +210,6 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         part_browser_window->set_can_assign(can_assign);
     }
     else if (op == "board-select") {
-        auto top_block = project->get_top_block();
         if (processes.count(top_block.schematic_filename)) {
             auto pid = processes.at(top_block.schematic_filename).proc->get_pid();
             json tx;
@@ -234,9 +234,18 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
     else if (op == "has-board") {
         return processes.count(project->board_filename) > 0;
     }
+    else if (op == "has-schematic") {
+        return processes.count(top_block.schematic_filename) > 0;
+    }
     else if (op == "get-board-pid") {
         if (processes.count(project->board_filename))
             return processes.at(project->board_filename).proc->get_pid();
+        else
+            return -1;
+    }
+    else if (op == "get-schematic-pid") {
+        if (processes.count(top_block.schematic_filename))
+            return processes.at(top_block.schematic_filename).proc->get_pid();
         else
             return -1;
     }
@@ -245,6 +254,22 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             auto pid = processes.at(project->board_filename).proc->get_pid();
             json tx;
             tx["op"] = "reload-netlist";
+            app->send_json(pid, tx);
+        }
+    }
+    else if (op == "present-board") {
+        if (processes.count(project->board_filename)) {
+            auto pid = processes.at(project->board_filename).proc->get_pid();
+            json tx;
+            tx["op"] = "present";
+            app->send_json(pid, tx);
+        }
+    }
+    else if (op == "present-schematic") {
+        if (processes.count(top_block.schematic_filename)) {
+            auto pid = processes.at(top_block.schematic_filename).proc->get_pid();
+            json tx;
+            tx["op"] = "present";
             app->send_json(pid, tx);
         }
     }

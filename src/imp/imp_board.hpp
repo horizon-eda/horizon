@@ -51,5 +51,7 @@ private:
     std::map<UUID, UUID> text_owners;
     void update_text_owners();
     void update_text_owner_annotation();
+
+    int get_schematic_pid();
 };
 } // namespace horizon

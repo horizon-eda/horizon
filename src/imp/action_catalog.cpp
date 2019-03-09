@@ -653,6 +653,14 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::TOOL, ToolID::PLACE_REFDES_AND_VALUE},
          {"Place refdes and value", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::GO_TO_BOARD, ToolID::NONE},
+         {"Go to board", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::GO_TO_SCHEMATIC, ToolID::NONE},
+         {"Go to schematic", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -733,6 +741,8 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(SEARCH),
         ACTION_LUT_ITEM(SEARCH_NEXT),
         ACTION_LUT_ITEM(SEARCH_PREVIOUS),
+        ACTION_LUT_ITEM(GO_TO_BOARD),
+        ACTION_LUT_ITEM(GO_TO_SCHEMATIC),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

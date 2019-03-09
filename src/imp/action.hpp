@@ -68,6 +68,8 @@ enum class ActionID {
     SEARCH,
     SEARCH_NEXT,
     SEARCH_PREVIOUS,
+    GO_TO_BOARD,
+    GO_TO_SCHEMATIC
 };
 
 enum class ActionGroup {

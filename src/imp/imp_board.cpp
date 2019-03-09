@@ -191,6 +191,14 @@ void ImpBoard::update_action_sensitivity()
                              }
                          }));
 
+
+    if (sockets_connected) {
+        json req;
+        req["op"] = "has-schematic";
+        bool has_schematic = send_json(req);
+        set_action_sensitive(make_action(ActionID::GO_TO_SCHEMATIC), has_schematic);
+    }
+
     ImpBase::update_action_sensitivity();
 }
 
@@ -213,6 +221,14 @@ static Gdk::RGBA rgba_from_color(const Color &c)
 static Color color_from_rgba(const Gdk::RGBA &r)
 {
     return {r.get_red(), r.get_green(), r.get_blue()};
+}
+
+
+int ImpBoard::get_schematic_pid()
+{
+    json j;
+    j["op"] = "get-schematic-pid";
+    return this->send_json(j);
 }
 
 void ImpBoard::construct()
@@ -266,6 +282,16 @@ void ImpBoard::construct()
                 update_highlights();
             }
         });
+
+        canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBoard::handle_selection_cross_probe));
+
+        connect_action(ActionID::GO_TO_SCHEMATIC, [this](const auto &conn) {
+            json j;
+            j["op"] = "present-schematic";
+            allow_set_foreground_window(this->get_schematic_pid());
+            this->send_json(j);
+        });
+        set_action_sensitive(make_action(ActionID::GO_TO_BOARD), false);
     }
 
     add_tool_button(ToolID::MAP_PACKAGE, "Place package", false);
@@ -280,10 +306,6 @@ void ImpBoard::construct()
         auto button = create_action_button(make_action(ActionID::RELOAD_NETLIST));
         button->show();
         main_window->header->pack_end(*button);
-    }
-
-    if (sockets_connected) {
-        canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBoard::handle_selection_cross_probe));
     }
 
     fab_output_window = FabOutputWindow::create(main_window, core.b->get_board(), core.b->get_fab_output_settings());

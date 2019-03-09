@@ -330,6 +330,14 @@ void ImpSchematic::construct()
             this->send_json(j);
         });
         set_action_sensitive(make_action(ActionID::SAVE_RELOAD_NETLIST), false);
+
+        connect_action(ActionID::GO_TO_BOARD, [this](const auto &conn) {
+            json j;
+            j["op"] = "present-board";
+            allow_set_foreground_window(this->get_board_pid());
+            this->send_json(j);
+        });
+        set_action_sensitive(make_action(ActionID::GO_TO_BOARD), false);
     }
 
     connect_action(ActionID::MOVE_TO_OTHER_SHEET,
@@ -420,8 +428,8 @@ void ImpSchematic::update_action_sensitivity()
         req["op"] = "has-board";
         bool has_board = send_json(req);
         set_action_sensitive(make_action(ActionID::SAVE_RELOAD_NETLIST), has_board);
+        set_action_sensitive(make_action(ActionID::GO_TO_BOARD), has_board);
         if (!has_board) {
-
             set_action_sensitive(make_action(ActionID::TO_BOARD), false);
         }
         else {
