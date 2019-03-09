@@ -60,37 +60,41 @@ void PoolBrowserPackage::search()
     std::string query;
     if (tags.size() == 0) {
         query = "SELECT packages.uuid, packages.name, packages.manufacturer,  "
-                "packages.n_pads, tags_view.tags, packages.filename, packages.pool_uuid, packages.overridden FROM "
-                "packages "
+                "packages.n_pads, tags_view.tags, packages.filename, packages.pool_uuid, packages.overridden "
+                "FROM packages "
                 "LEFT JOIN tags_view ON tags_view.uuid = packages.uuid "
-                "WHERE packages.name LIKE ? AND packages.manufacturer LIKE ? "
-                "GROUP BY packages.uuid "
+                "WHERE packages.name LIKE $name AND packages.manufacturer LIKE $manufacturer "
+                "AND tags_view.type = 'package' "
                 + sort_controller->get_order_by();
     }
     else {
         std::ostringstream qs;
         qs << "SELECT packages.uuid, packages.name, packages.manufacturer, "
-              "packages.n_pads, tags_view.tags, packages.filename, packages.pool_uuid, packages.overridden FROM "
-              "packages "
+              "packages.n_pads, tags_view.tags, packages.filename, packages.pool_uuid, packages.overridden "
+              "FROM packages "
               "LEFT JOIN tags_view ON tags_view.uuid = packages.uuid "
-              "WHERE packages.name LIKE ? "
-              "AND packages.manufacturer LIKE ? ";
-        qs << "AND packages.uuid IN (SELECT uuid FROM tags WHERE tags.tag IN (";
+              "INNER JOIN (SELECT uuid FROM tags WHERE tags.tag IN (";
+
+        int i = 0;
         for (const auto &it : tags) {
             (void)sizeof it;
-            qs << "?, ";
+            qs << "$tag" << i << ", ";
+            i++;
         }
         qs << "'') AND tags.type = 'package' "
-              "GROUP by tags.uuid HAVING count(*) >= $ntags) ";
+              "GROUP by tags.uuid HAVING count(*) >= $ntags) as x ON x.uuid = packages.uuid "
+              "WHERE packages.name LIKE $name "
+              "AND packages.manufacturer LIKE $manufacturer "
+              "AND tags_view.type = 'package' ";
         qs << sort_controller->get_order_by();
         query = qs.str();
     }
     SQLite::Query q(pool->db, query);
-    q.bind(1, "%" + name_search + "%");
-    q.bind(2, "%" + manufacturer_search + "%");
+    q.bind("$name", "%" + name_search + "%");
+    q.bind("$manufacturer", "%" + manufacturer_search + "%");
     int i = 0;
     for (const auto &it : tags) {
-        q.bind(i + 3, it);
+        q.bind(("$tag" + std::to_string(i)).c_str(), it);
         i++;
     }
     if (tags.size())

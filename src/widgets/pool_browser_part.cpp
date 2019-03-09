@@ -107,7 +107,8 @@ void PoolBrowserPart::search()
     }
     query << "WHERE parts.MPN LIKE $mpn "
              "AND parts.manufacturer LIKE $manufacturer "
-             "AND (parts.entity=$entity or $entity_all) ";
+             "AND (parts.entity=$entity or $entity_all) "
+             "AND tags_view.type = 'part' ";
     query << sort_controller->get_order_by();
     std::cout << query.str() << std::endl;
     SQLite::Query q(pool->db, query.str());
