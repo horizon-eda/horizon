@@ -62,9 +62,8 @@ void PoolBrowserPackage::search()
         query = "SELECT packages.uuid, packages.name, packages.manufacturer,  "
                 "packages.n_pads, tags_view.tags, packages.filename, packages.pool_uuid, packages.overridden "
                 "FROM packages "
-                "LEFT JOIN tags_view ON tags_view.uuid = packages.uuid "
+                "LEFT JOIN tags_view ON tags_view.uuid = packages.uuid AND tags_view.type = 'package' "
                 "WHERE packages.name LIKE $name AND packages.manufacturer LIKE $manufacturer "
-                "AND tags_view.type = 'package' "
                 + sort_controller->get_order_by();
     }
     else {
@@ -72,7 +71,7 @@ void PoolBrowserPackage::search()
         qs << "SELECT packages.uuid, packages.name, packages.manufacturer, "
               "packages.n_pads, tags_view.tags, packages.filename, packages.pool_uuid, packages.overridden "
               "FROM packages "
-              "LEFT JOIN tags_view ON tags_view.uuid = packages.uuid "
+              "LEFT JOIN tags_view ON tags_view.uuid = packages.uuid AND tags_view.type = 'package' "
               "INNER JOIN (SELECT uuid FROM tags WHERE tags.tag IN (";
 
         int i = 0;
@@ -84,11 +83,11 @@ void PoolBrowserPackage::search()
         qs << "'') AND tags.type = 'package' "
               "GROUP by tags.uuid HAVING count(*) >= $ntags) as x ON x.uuid = packages.uuid "
               "WHERE packages.name LIKE $name "
-              "AND packages.manufacturer LIKE $manufacturer "
-              "AND tags_view.type = 'package' ";
+              "AND packages.manufacturer LIKE $manufacturer ";
         qs << sort_controller->get_order_by();
         query = qs.str();
     }
+    std::cout << query << std::endl;
     SQLite::Query q(pool->db, query);
     q.bind("$name", "%" + name_search + "%");
     q.bind("$manufacturer", "%" + manufacturer_search + "%");

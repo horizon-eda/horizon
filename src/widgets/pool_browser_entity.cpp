@@ -48,9 +48,8 @@ void PoolBrowserEntity::search()
         query = "SELECT entities.uuid, entities.name, entities.prefix, "
                 "entities.n_gates, tags_view.tags, "
                 "entities.manufacturer, entities.filename, entities.pool_uuid, entities.overridden FROM entities "
-                "LEFT JOIN tags_view ON tags_view.uuid = entities.uuid "
+                "LEFT JOIN tags_view ON tags_view.uuid = entities.uuid AND tags_view.type = 'entity' "
                 "WHERE entities.name LIKE $name "
-                "AND tags_view.type = 'entity' "
                 + sort_controller->get_order_by();
     }
     else {
@@ -58,7 +57,7 @@ void PoolBrowserEntity::search()
         qs << "SELECT entities.uuid, entities.name, entities.prefix, "
               "entities.n_gates, tags_view.tags, entities.manufacturer, "
               "entities.filename, entities.pool_uuid, entities.overridden FROM entities "
-              "LEFT JOIN tags_view ON tags_view.uuid = entities.uuid "
+              "LEFT JOIN tags_view ON tags_view.uuid = entities.uuid AND tags_view.type = 'entity' "
               "INNER JOIN (SELECT uuid FROM tags WHERE tags.tag IN (";
 
         int i = 0;
@@ -69,8 +68,7 @@ void PoolBrowserEntity::search()
         }
         qs << "'') AND tags.type = 'entity' "
               "GROUP by tags.uuid HAVING count(*) >= $ntags) as x ON x.uuid = entities.uuid "
-              "WHERE entities.name LIKE $name "
-              "AND tags_view.type = 'entity' ";
+              "WHERE entities.name LIKE $name ";
 
         qs << sort_controller->get_order_by();
         query = qs.str();

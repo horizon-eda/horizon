@@ -86,14 +86,14 @@ void PoolBrowserPart::search()
                  "packages.name, tags_view.tags, parts.filename, "
                  "parts.description, parts.pool_uuid, parts.overridden "
                  "FROM parts LEFT JOIN tags_view ON "
-                 "tags_view.uuid = parts.uuid LEFT "
-                 "JOIN packages ON packages.uuid = parts.package ";
+                 "tags_view.uuid = parts.uuid AND tags_view.type = 'part' "
+                 "LEFT JOIN packages ON packages.uuid = parts.package ";
     }
     else {
         query << "SELECT parts.uuid, parts.MPN, parts.manufacturer, "
                  "packages.name, tags_view.tags, parts.filename, "
                  "parts.description, parts.pool_uuid, parts.overridden FROM parts "
-                 "LEFT JOIN tags_view ON tags_view.uuid = parts.uuid "
+                 "LEFT JOIN tags_view ON tags_view.uuid = parts.uuid AND tags_view.type = 'part' "
                  "LEFT JOIN packages ON packages.uuid = parts.package "
                  "INNER JOIN (SELECT uuid FROM tags WHERE tags.tag IN (";
         int i = 0;
@@ -107,8 +107,7 @@ void PoolBrowserPart::search()
     }
     query << "WHERE parts.MPN LIKE $mpn "
              "AND parts.manufacturer LIKE $manufacturer "
-             "AND (parts.entity=$entity or $entity_all) "
-             "AND tags_view.type = 'part' ";
+             "AND (parts.entity=$entity or $entity_all) ";
     query << sort_controller->get_order_by();
     std::cout << query.str() << std::endl;
     SQLite::Query q(pool->db, query.str());
