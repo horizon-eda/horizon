@@ -24,12 +24,18 @@ public:
     }
 
     float x, y, z;
+
+    bool operator==(const Vertex &other) const
+    {
+        return x == other.x && y == other.y && z == other.z;
+    }
 };
 
 class Face {
 public:
     Color color;
     std::vector<Vertex> vertices;
+    std::vector<Vertex> normals;
     std::vector<std::tuple<size_t, size_t, size_t>> triangle_indices;
 };
 

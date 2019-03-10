@@ -101,6 +101,7 @@ void Canvas3DBase::a_realize()
     cover_renderer.realize();
     wall_renderer.realize();
     face_renderer.realize();
+
     background_renderer.realize();
     glEnable(GL_DEPTH_TEST);
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_DST_ALPHA);
@@ -339,10 +340,13 @@ void Canvas3DBase::load_3d_model(const std::string &filename, const std::string 
         size_t vertex_offset = face_vertex_buffer.size();
         size_t first_index = face_index_buffer.size();
         for (const auto &face : faces) {
-            for (const auto &v : face.vertices) {
-                face_vertex_buffer.emplace_back(v.x, v.y, v.z, face.color.r * 255, face.color.g * 255,
+            for (size_t i = 0; i < face.vertices.size(); i++) {
+                const auto &v = face.vertices.at(i);
+                const auto &n = face.normals.at(i);
+                face_vertex_buffer.emplace_back(v.x, v.y, v.z, n.x, n.y, n.z, face.color.r * 255, face.color.g * 255,
                                                 face.color.b * 255);
             }
+
             for (const auto &tri : face.triangle_indices) {
                 size_t a, b, c;
                 std::tie(a, b, c) = tri;

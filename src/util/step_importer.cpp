@@ -34,6 +34,7 @@
 
 #include <TDF_ChildIterator.hxx>
 #include <TDF_LabelSequence.hxx>
+#include <Poly.hxx>
 
 #define USER_PREC (0.14)
 #define USER_ANGLE (0.52359878)
@@ -154,8 +155,14 @@ static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *col
         }
     } while (0);
 
+    Poly::ComputeNormals(triangulation);
+
+    std::cout << "norm " << triangulation->NbNodes() << " " << triangulation->Normals().Size()
+              << " tess=" << isTessellate << std::endl;
+
     const TColgp_Array1OfPnt &arrPolyNodes = triangulation->Nodes();
     const Poly_Array1OfTriangle &arrTriangles = triangulation->Triangles();
+    const TShort_Array1OfShortReal &arrNormals = triangulation->Normals();
 
     data.faces->emplace_back();
     auto &face_out = data.faces->back();
@@ -175,6 +182,27 @@ static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *col
         auto vt = mat * vg;
         face_out.vertices.emplace_back(vt.x, vt.y, vt.z);
     }
+
+    face_out.normals.reserve(triangulation->NbNodes());
+    for (int i = 1; i <= triangulation->NbNodes(); i++) {
+        auto offset = (i - 1) * 3 + 1;
+        auto x = arrNormals(offset + 0);
+        auto y = arrNormals(offset + 1);
+        auto z = arrNormals(offset + 2);
+        glm::vec4 vg(x, y, z, 0);
+        auto vt = mat * vg;
+        vt /= vt.length();
+        face_out.normals.emplace_back(vt.x, vt.y, vt.z);
+    }
+
+    /*if (triangulation->NbNodes() == 50) {
+        for (size_t i = 0; i < face_out.vertices.size(); i++) {
+            const auto &it = face_out.vertices.at(i);
+            const auto &in = face_out.normals.at(i);
+            std::cout << it.x << " " << it.y << " " << it.z << std::endl;
+            std::cout << it.x + in.x << " " << it.y + in.y << " " << it.z + in.z << "\n\n" << std::endl;
+        }
+    }*/
 
     face_out.triangle_indices.reserve(triangulation->NbTriangles());
     for (int i = 1; i <= triangulation->NbTriangles(); i++) {
