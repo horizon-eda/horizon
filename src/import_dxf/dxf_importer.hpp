@@ -14,6 +14,8 @@ public:
     void set_scale(double sc);
 
     std::set<class Junction *> junctions;
+    std::set<class Line *> lines;
+    std::set<class Arc *> arcs;
 
 private:
     class Core *core = nullptr;

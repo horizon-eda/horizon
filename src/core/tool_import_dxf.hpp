@@ -1,9 +1,10 @@
 #pragma once
 #include "core.hpp"
+#include "tool_helper_move.hpp"
 
 namespace horizon {
 
-class ToolImportDXF : public ToolBase {
+class ToolImportDXF : public ToolHelperMove {
 public:
     ToolImportDXF(Core *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args);
@@ -11,5 +12,8 @@ public:
     bool can_begin();
 
 private:
+    std::set<class Line *> lines;
+    std::set<class Arc *> arcs;
+    int64_t width = 0;
 };
 } // namespace horizon

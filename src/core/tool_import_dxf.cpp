@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-ToolImportDXF::ToolImportDXF(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolImportDXF::ToolImportDXF(Core *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid)
 {
 }
 
@@ -19,36 +19,78 @@ ToolResponse ToolImportDXF::begin(const ToolArgs &args)
 {
     bool r;
     std::string filename;
-    int layer;
-    int64_t line_width;
-    double scale;
 
-    std::tie(r, filename, layer, line_width, scale) = imp->dialogs.ask_dxf_filename(core.r);
+    std::tie(r, filename) = imp->dialogs.ask_dxf_filename();
     if (!r) {
         return ToolResponse::end();
     }
 
     DXFImporter importer(core.r);
-    importer.set_layer(layer);
-    importer.set_scale(scale);
+    importer.set_layer(args.work_layer);
+    importer.set_scale(1);
     importer.set_shift(args.coords);
-    importer.set_width(line_width);
+    importer.set_width(0);
     if (importer.import(filename)) {
         core.r->selection.clear();
         for (const auto it : importer.junctions) {
             core.r->selection.emplace(it->uuid, ObjectType::JUNCTION);
         }
-        core.r->commit();
-        return ToolResponse::next(ToolID::MOVE);
+        lines = importer.lines;
+        arcs = importer.arcs;
+        move_init(args.coords);
+        imp->tool_bar_set_tip("<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate <b>e:</b>mirror <b>w:</b>line width");
+        return ToolResponse();
     }
     else {
         core.r->revert();
+        return ToolResponse::end();
     }
     return ToolResponse::end();
 }
 
 ToolResponse ToolImportDXF::update(const ToolArgs &args)
 {
+    if (args.type == ToolEventType::MOVE) {
+        move_do_cursor(args.coords);
+    }
+    else if (args.type == ToolEventType::CLICK) {
+        if (args.button == 1) {
+            core.r->commit();
+            return ToolResponse::end();
+        }
+        else if (args.button == 3) {
+            core.r->revert();
+            return ToolResponse::end();
+        }
+    }
+    else if (args.type == ToolEventType::KEY) {
+        if (args.key == GDK_KEY_r) {
+            move_mirror_or_rotate(args.coords, true);
+        }
+        else if (args.key == GDK_KEY_e) {
+            move_mirror_or_rotate(args.coords, false);
+        }
+        else if (args.key == GDK_KEY_w) {
+            auto r = imp->dialogs.ask_datum("Enter width", width);
+            if (r.first) {
+                width = r.second;
+                for (auto it : lines) {
+                    it->width = width;
+                }
+                for (auto it : arcs) {
+                    it->width = width;
+                }
+            }
+        }
+    }
+    else if (args.type == ToolEventType::LAYER_CHANGE) {
+        for (auto it : lines) {
+            it->layer = args.work_layer;
+        }
+        for (auto it : arcs) {
+            it->layer = args.work_layer;
+        }
+    }
     return ToolResponse();
 }
 } // namespace horizon

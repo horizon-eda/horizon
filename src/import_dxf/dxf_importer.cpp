@@ -25,6 +25,8 @@ public:
     {
     }
     std::set<Junction *> junctions;
+    std::set<Line *> lines_out;
+    std::set<Arc *> arcs_out;
     int layer = 0;
     uint64_t width = 0;
     Coordi shift;
@@ -66,6 +68,7 @@ private:
         auto to = get_or_create_junction(d.x2, d.y2);
         if (!check_line(from, to)) {
             auto li = core->insert_line(UUID::random());
+            lines_out.insert(li);
             li->layer = layer;
             li->width = width;
             lines.emplace(from, to);
@@ -84,6 +87,7 @@ private:
         auto j = get_or_create_junction(d.x, d.y);
         if (polyline_junctions.size() > 0) {
             auto li = core->insert_line(UUID::random());
+            lines_out.insert(li);
             li->layer = layer;
             li->width = width;
             li->from = polyline_junctions.back();
@@ -92,6 +96,7 @@ private:
         polyline_junctions.push_back(j);
         if (polyline_junctions.size() == polyline_n && polyline_closed) {
             auto li = core->insert_line(UUID::random());
+            lines_out.insert(li);
             li->layer = layer;
             li->width = width;
             li->to = polyline_junctions.front();
@@ -106,6 +111,7 @@ private:
         auto from = get_or_create_junction(d.cx + d.radius * cos(phi1), d.cy + d.radius * sin(phi1));
         auto to = get_or_create_junction(d.cx + d.radius * cos(phi2), d.cy + d.radius * sin(phi2));
         auto arc = core->insert_arc(UUID::random());
+        arcs_out.insert(arc);
         arc->layer = layer;
         arc->width = width;
         arc->center = center;
@@ -151,6 +157,8 @@ bool DXFImporter::import(const std::string &filename)
         return false;
     }
     junctions = adapter.junctions;
+    lines = adapter.lines_out;
+    arcs = adapter.arcs_out;
     return true;
 }
 } // namespace horizon
