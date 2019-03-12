@@ -213,6 +213,7 @@ SRC_IMP = \
 	src/core/tool_helper_get_symbol.cpp\
 	src/core/tool_change_symbol.cpp\
 	src/core/tool_place_refdes_and_value.cpp\
+	src/core/tool_helper_restrict.cpp\
 	src/core/cores.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\

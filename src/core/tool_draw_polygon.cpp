@@ -44,18 +44,33 @@ void ToolDrawPolygon::update_tip()
     if (last_vertex && (last_vertex->type == Polygon::Vertex::Type::ARC)) {
         ss << "<b>e:</b> reverse arc direction";
     }
+    else {
+        ss << "<b>/:</b>restrict <i>";
+        ss << restrict_mode_to_string();
+        ss << "</i>";
+    }
     imp->tool_bar_set_tip(ss.str());
+}
+
+void ToolDrawPolygon::update_vertex(const Coordi &c)
+{
+    if (arc_mode && last_vertex) {
+        last_vertex->arc_center = c;
+    }
+    else {
+        if (last_vertex == nullptr) {
+            vertex->position = c;
+        }
+        else {
+            vertex->position = get_coord_restrict(last_vertex->position, c);
+        }
+    }
 }
 
 ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
-        if (arc_mode && last_vertex) {
-            last_vertex->arc_center = args.coords;
-        }
-        else {
-            vertex->position = args.coords;
-        }
+        update_vertex(args.coords);
         return ToolResponse::fast();
     }
     else if (args.type == ToolEventType::CLICK) {
@@ -67,7 +82,8 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
             else {
                 last_vertex = vertex;
                 vertex = temp->append_vertex();
-                vertex->position = args.coords;
+                cycle_restrict_mode_xy();
+                vertex->position = get_coord_restrict(last_vertex->position, args.coords);
             }
         }
         else if (args.button == 3) {
@@ -92,10 +108,14 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
                 arc_mode = true;
             }
         }
-        if (args.key == GDK_KEY_e) {
+        else if (args.key == GDK_KEY_e) {
             if (last_vertex && (last_vertex->type == Polygon::Vertex::Type::ARC)) {
                 last_vertex->arc_reverse ^= 1;
             }
+        }
+        else if (args.key == GDK_KEY_slash) {
+            cycle_restrict_mode();
+            update_vertex(args.coords);
         }
         else if (args.key == GDK_KEY_Escape) {
             core.r->revert();

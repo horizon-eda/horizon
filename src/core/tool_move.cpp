@@ -295,7 +295,7 @@ void ToolMove::update_tip()
         s += "<b>/:</b>restrict";
     s += " <i>" + coord_to_string(delta + key_delta, true) + " ";
     if (!is_key) {
-        s += mode_to_string();
+        s += restrict_mode_to_string();
     }
 
     s += "</i>";
@@ -371,7 +371,7 @@ ToolResponse ToolMove::update(const ToolArgs &args)
             return ToolResponse::end();
         }
         else if (args.key == GDK_KEY_slash) {
-            cycle_mode();
+            cycle_restrict_mode();
             do_move(args.coords);
         }
         else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {

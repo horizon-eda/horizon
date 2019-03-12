@@ -7,7 +7,7 @@
 namespace horizon {
 
 ToolMapSymbol::ToolMapSymbol(Core *c, ToolID tid)
-    : ToolBase(c, tid), ToolHelperMove(c, tid), ToolHelperMapSymbol(c, tid)
+    : ToolBase(c, tid), ToolHelperMapSymbol(c, tid), ToolHelperMove(c, tid)
 {
 }
 

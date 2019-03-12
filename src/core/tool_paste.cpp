@@ -338,7 +338,7 @@ void ToolPaste::update_tip()
     std::string s =
             "<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate "
             "<b>e:</b>mirror <b>/:</b>restrict <i>"
-            + coord_to_string(delta, true) + " " + mode_to_string() + "</i> ";
+            + coord_to_string(delta, true) + " " + restrict_mode_to_string() + "</i> ";
     imp->tool_bar_set_tip(s);
 }
 
@@ -378,7 +378,7 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
                 return ToolResponse::end();
             }
             else if (args.key == GDK_KEY_slash) {
-                cycle_mode();
+                cycle_restrict_mode();
                 move_do_cursor(args.coords);
             }
             else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {

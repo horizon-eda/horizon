@@ -45,33 +45,19 @@ void ToolDrawLine::update_tip()
         s += "end tool";
     }
     s += " <b>w:</b>line width ";
-    s += "<b>/:</b>restrict ";
-    switch (mode) {
-    case Mode::ARB:
-        s += "any direction";
-        break;
-    case Mode::X:
-        s += "X only";
-        break;
-    case Mode::Y:
-        s += "Y only";
-        break;
-    }
+    s += "<b>/:</b>restrict <i>";
+    s += restrict_mode_to_string();
+    s += "</i>";
     imp->tool_bar_set_tip(s);
 }
 
 void ToolDrawLine::do_move(const Coordi &c)
 {
-    if (mode == Mode::ARB || temp_line == nullptr) {
+    if (temp_line == nullptr) {
         temp_junc->position = c;
     }
-    else if (mode == Mode::X) {
-        temp_junc->position.x = c.x;
-        temp_junc->position.y = temp_line->from->position.y;
-    }
-    else if (mode == Mode::Y) {
-        temp_junc->position.y = c.y;
-        temp_junc->position.x = temp_line->from->position.x;
+    else {
+        temp_junc->position = get_coord_restrict(temp_line->from->position, c);
     }
 }
 
@@ -84,7 +70,7 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
-            if (args.target.type == ObjectType::JUNCTION && mode == Mode::ARB) {
+            if (args.target.type == ObjectType::JUNCTION && restrict_mode == RestrictMode::ARB) {
                 if (temp_line != nullptr) {
                     temp_line->to = core.r->get_junction(args.target.path.at(0));
                 }
@@ -99,7 +85,8 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
                 temp_junc = core.r->insert_junction(UUID::random());
                 junctions_created.insert(temp_junc);
                 temp_junc->temp = true;
-                temp_junc->position = args.coords;
+                cycle_restrict_mode_xy();
+                temp_junc->position = get_coord_restrict(last->position, args.coords);
 
                 if (temp_line)
                     first_line = false;
@@ -135,17 +122,7 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
             ask_line_width();
         }
         else if (args.key == GDK_KEY_slash) {
-            switch (mode) {
-            case Mode::ARB:
-                mode = Mode::X;
-                break;
-            case Mode::X:
-                mode = Mode::Y;
-                break;
-            case Mode::Y:
-                mode = Mode::ARB;
-                break;
-            }
+            cycle_restrict_mode();
             do_move(args.coords);
         }
         else if (args.key == GDK_KEY_Escape) {
