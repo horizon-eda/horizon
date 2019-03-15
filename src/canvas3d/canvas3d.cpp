@@ -235,9 +235,11 @@ void Canvas3D::resize_buffers()
     GLint samples = gl_clamp_samples(num_samples);
     glGetIntegerv(GL_RENDERBUFFER_BINDING, &rb); // save rb
     glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_RGBA8, width, height);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_RGBA8, width * get_scale_factor(),
+                                     height * get_scale_factor());
     glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT, width, height);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT, width * get_scale_factor(),
+                                     height * get_scale_factor());
     glBindRenderbuffer(GL_RENDERBUFFER, rb);
 }
 
@@ -847,7 +849,8 @@ bool Canvas3D::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, width * get_scale_factor(), height * get_scale_factor(), 0, 0, width * get_scale_factor(),
+                      height * get_scale_factor(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fb);
     GL_CHECK_ERROR
