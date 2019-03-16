@@ -1,11 +1,12 @@
 #include "gerber_writer.hpp"
 #include "hash.hpp"
 #include <iomanip>
+#include "util/util.hpp"
 
 namespace horizon {
 
 GerberWriter::GerberWriter(const std::string &filename)
-    : ofs(filename, std::ios_base::out | std::ios_base::binary), out_filename(filename)
+    : ofs(make_ofstream(filename, std::ios_base::out | std::ios_base::binary)), out_filename(filename)
 {
     ofs.imbue(std::locale::classic());
     check_open();

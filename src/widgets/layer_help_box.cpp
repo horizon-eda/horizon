@@ -59,7 +59,7 @@ void LayerHelpBox::load(const std::string &pool_path)
     Glib::Dir dir(path);
     for (const auto &l : dir) {
         auto p = Glib::build_filename(path, l);
-        std::ifstream ifs(p);
+        auto ifs = make_ifstream(p);
         if (!ifs.is_open()) {
             continue;
         }

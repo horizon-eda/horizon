@@ -5,9 +5,14 @@
 #include <vector>
 #include <functional>
 #include <locale>
+#include <fstream>
 
 namespace horizon {
 using json = nlohmann::json;
+
+std::ifstream make_ifstream(const std::string &filename_utf8, std::ios_base::openmode mode = std::ios_base::in);
+std::ofstream make_ofstream(const std::string &filename_utf8, std::ios_base::openmode mode = std::ios_base::out);
+
 void save_json_to_file(const std::string &filename, const json &j);
 json load_json_from_file(const std::string &filename);
 int orientation_to_angle(Orientation o);

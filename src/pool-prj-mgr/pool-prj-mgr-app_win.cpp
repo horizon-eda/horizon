@@ -472,7 +472,7 @@ void PoolProjectManagerAppWindow::update_recent_items()
         const std::string &path = it.first;
         std::string name;
         try {
-            std::ifstream ifs(path);
+            auto ifs = make_ifstream(path);
             if (ifs.is_open()) {
                 json k;
                 ifs >> k;

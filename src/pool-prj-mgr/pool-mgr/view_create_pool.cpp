@@ -29,7 +29,7 @@ static void mkdir_pool(const std::string &bp, const std::string &p)
 {
     auto path = Glib::build_filename(bp, p);
     Gio::File::create_for_path(path)->make_directory();
-    std::ofstream ofs(Glib::build_filename(path, ".keep"));
+    auto ofs = make_ofstream(Glib::build_filename(path, ".keep"));
     ofs.close();
 }
 
@@ -66,7 +66,7 @@ std::pair<bool, std::string> PoolProjectManagerViewCreatePool::create()
         save_json_to_file(pool_json, j);
 
         {
-            std::ofstream ofs(Glib::build_filename(base_path, ".gitignore"));
+            auto ofs = make_ofstream(Glib::build_filename(base_path, ".gitignore"));
             ofs << "*.db\n\
 tmp/*.json\n\
 3d_models/local\n\

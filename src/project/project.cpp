@@ -10,6 +10,13 @@
 #include "nlohmann/json.hpp"
 
 namespace horizon {
+
+static void create_file(const std::string &filename)
+{
+    auto ofs = make_ofstream(filename);
+    ofs.close();
+}
+
 Project::Project(const UUID &uu, const json &j, const std::string &base)
     : base_path(base), uuid(uu), name(j.at("name").get<std::string>()), title(j.at("title").get<std::string>()),
       pool_uuid(j.at("pool_uuid").get<std::string>()),
@@ -28,8 +35,7 @@ Project::Project(const UUID &uu, const json &j, const std::string &base)
             fi->make_directory();
         }
         {
-            std::ofstream ofs(Glib::build_filename(vias_directory, ".keep"));
-            ofs.close();
+            create_file(Glib::build_filename(vias_directory, ".keep"));
         }
     }
 
@@ -94,10 +100,7 @@ std::string Project::create(const UUID &default_via)
         auto fi = Gio::File::create_for_path(vias_directory);
         fi->make_directory();
     }
-    {
-        std::ofstream ofs(Glib::build_filename(vias_directory, ".keep"));
-        ofs.close();
-    }
+    create_file(Glib::build_filename(vias_directory, ".keep"));
     pool_cache_directory = Glib::build_filename(base_path, "cache");
     {
         auto fi = Gio::File::create_for_path(pool_cache_directory);

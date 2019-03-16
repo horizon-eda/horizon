@@ -455,7 +455,7 @@ void PartWizard::handle_import()
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         auto filename = chooser->get_filename();
         try {
-            std::ifstream ifs(filename);
+            auto ifs = make_ifstream(filename);
             if (!ifs.is_open()) {
                 throw std::runtime_error("file " + filename + " not opened");
             }

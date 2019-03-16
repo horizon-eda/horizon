@@ -64,7 +64,7 @@ void export_BOM(const std::string &filename, const class Block &block, const cla
         }
     }
 
-    std::ofstream ofs(filename, std::ios_base::out | std::ios_base::binary);
+    auto ofs = make_ofstream(filename, std::ios_base::out | std::ios_base::binary);
     if (!ofs.is_open())
         throw std::runtime_error("output file not opened");
 

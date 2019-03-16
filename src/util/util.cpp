@@ -11,9 +11,34 @@
 #include "nlohmann/json.hpp"
 
 namespace horizon {
+
+std::ifstream make_ifstream(const std::string &filename_utf8, std::ios_base::openmode mode)
+{
+#ifdef G_OS_WIN32
+    auto wfilename = reinterpret_cast<wchar_t *>(g_utf8_to_utf16(filename_utf8.c_str(), -1, NULL, NULL, NULL));
+    std::ifstream ifs(wfilename, mode);
+    g_free(wfilename);
+#else
+    std::ifstream ifs(filename_utf8, mode);
+#endif
+    return ifs;
+}
+
+std::ofstream make_ofstream(const std::string &filename_utf8, std::ios_base::openmode mode)
+{
+#ifdef G_OS_WIN32
+    auto wfilename = reinterpret_cast<wchar_t *>(g_utf8_to_utf16(filename_utf8.c_str(), -1, NULL, NULL, NULL));
+    std::ofstream ofs(wfilename, mode);
+    g_free(wfilename);
+#else
+    std::ofstream ofs(filename_utf8, mode);
+#endif
+    return ofs;
+}
+
 void save_json_to_file(const std::string &filename, const json &j)
 {
-    std::ofstream ofs(filename);
+    auto ofs = make_ofstream(filename);
     if (!ofs.is_open()) {
         throw std::runtime_error("can't save json " + filename);
         return;
@@ -25,7 +50,7 @@ void save_json_to_file(const std::string &filename, const json &j)
 json load_json_from_file(const std::string &filename)
 {
     json j;
-    std::ifstream ifs(filename);
+    auto ifs = make_ifstream(filename);
     if (!ifs.is_open()) {
         throw std::runtime_error("file " + filename + " not opened");
     }

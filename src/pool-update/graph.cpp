@@ -1,6 +1,7 @@
 #include "graph.hpp"
 #include <algorithm>
 #include <fstream>
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -54,7 +55,7 @@ const PoolUpdateNode &PoolUpdateGraph::get_root() const
 
 void PoolUpdateGraph::dump(const std::string &filename)
 {
-    std::ofstream ofs(filename);
+    auto ofs = make_ofstream(filename);
     ofs << "digraph {\n";
     for (const auto &it : nodes) {
         ofs << "\"" << (std::string)it.first << "\" [label=\"" << it.second.filename << "\"]\n";
