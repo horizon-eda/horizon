@@ -1,6 +1,7 @@
 #include "entity.hpp"
 #include "pool.hpp"
 #include "nlohmann/json.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -39,13 +40,7 @@ Entity::Entity(const UUID &uu, const YAML::Node &n, Pool &pool)
 
 Entity Entity::new_from_file(const std::string &filename, Pool &pool)
 {
-    json j;
-    std::ifstream ifs(filename);
-    if (!ifs.is_open()) {
-        throw std::runtime_error("file " + filename + " not opened");
-    }
-    ifs >> j;
-    ifs.close();
+    auto j = load_json_from_file(filename);
     return Entity(UUID(j["uuid"].get<std::string>()), j, pool);
 }
 

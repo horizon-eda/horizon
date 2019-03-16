@@ -19,19 +19,9 @@
 #include <stdlib.h>
 #include <yaml-cpp/yaml.h>
 #include "nlohmann/json.hpp"
+#include "util/util.hpp"
 
 using json = nlohmann::json;
-
-static void save_json_to_file(const std::string &filename, const json &j)
-{
-    std::ofstream ofs(filename);
-    if (!ofs.is_open()) {
-        std::cout << "can't save json " << filename << std::endl;
-        return;
-    }
-    ofs << std::setw(4) << j;
-    ofs.close();
-}
 
 int main(int c_argc, char *c_argv[])
 {
@@ -58,7 +48,7 @@ int main(int c_argc, char *c_argv[])
             if (argv.size() >= 4) {
                 block.name = argv.at(3);
             }
-            save_json_to_file(argv.at(2), block.serialize());
+            horizon::save_json_to_file(argv.at(2), block.serialize());
         }
         else {
             std::cout << "Usage: " << argv.at(0) << " create-block <block file> [block name]" << std::endl;
@@ -69,7 +59,7 @@ int main(int c_argc, char *c_argv[])
             horizon::Pool pool(pool_base_path);
             auto block = horizon::Block::new_from_file(argv.at(3), pool);
             horizon::Schematic sch(horizon::UUID::random(), block);
-            save_json_to_file(argv.at(2), sch.serialize());
+            horizon::save_json_to_file(argv.at(2), sch.serialize());
         }
         else {
             std::cout << "Usage: " << argv.at(0) << " create-schematic <block file> <schematic file>" << std::endl;
@@ -80,7 +70,7 @@ int main(int c_argc, char *c_argv[])
             horizon::Pool pool(pool_base_path);
             auto block = horizon::Block::new_from_file(argv.at(3), pool);
             horizon::Board brd(horizon::UUID::random(), block);
-            save_json_to_file(argv.at(2), brd.serialize());
+            horizon::save_json_to_file(argv.at(2), brd.serialize());
         }
         else {
             std::cout << "Usage: " << argv.at(0) << " create-board <block file> <board file>" << std::endl;

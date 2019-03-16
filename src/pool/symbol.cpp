@@ -199,13 +199,7 @@ Symbol::Symbol(const UUID &uu) : uuid(uu)
 
 Symbol Symbol::new_from_file(const std::string &filename, Pool &pool)
 {
-    json j;
-    std::ifstream ifs(filename);
-    if (!ifs.is_open()) {
-        throw std::runtime_error("file " + filename + " not opened");
-    }
-    ifs >> j;
-    ifs.close();
+    auto j = load_json_from_file(filename);
     return Symbol(UUID(j["uuid"].get<std::string>()), j, pool);
 }
 

@@ -1126,15 +1126,9 @@ void PoolProjectManagerAppWindow::cleanup_pool_cache()
             auto itempath = Glib::build_filename(project->pool_cache_directory, it);
             json j_cache;
             {
-                std::ifstream ifs(itempath);
-                if (!ifs.is_open()) {
-                    throw std::runtime_error("file " + itempath + " not opened");
-                }
-                ifs >> j_cache;
+                j_cache = load_json_from_file(itempath);
                 if (j_cache.count("_imp"))
                     j_cache.erase("_imp");
-
-                ifs.close();
             }
             std::string type_str = j_cache.at("type");
             ObjectType type = object_type_lut.lookup(type_str);

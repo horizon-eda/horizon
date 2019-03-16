@@ -81,15 +81,7 @@ std::string PoolProjectManagerApplication::get_config_filename()
 
 void PoolProjectManagerApplication::load_from_config(const std::string &config_filename)
 {
-    json j;
-    {
-        std::ifstream ifs(config_filename);
-        if (!ifs.is_open()) {
-            throw std::runtime_error("file " + config_filename + " not opened");
-        }
-        ifs >> j;
-        ifs.close();
-    }
+    json j = load_json_from_file(config_filename);
     if (j.count("part_favorites")) {
         const json &o = j.at("part_favorites");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {

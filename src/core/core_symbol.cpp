@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <fstream>
 #include "nlohmann/json.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 CoreSymbol::CoreSymbol(const std::string &filename, Pool &pool)
@@ -351,14 +352,9 @@ void CoreSymbol::save()
 {
     s_signal_save.emit();
 
-    std::ofstream ofs(m_filename);
-    if (!ofs.is_open()) {
-        std::cout << "can't save symbol" << std::endl;
-        return;
-    }
     json j = sym.serialize();
-    ofs << std::setw(4) << j;
-    ofs.close();
+    save_json_to_file(m_filename, j);
+
     set_needs_save(false);
 }
 } // namespace horizon

@@ -537,12 +537,7 @@ void ImpBase::run(int argc, char *argv[])
         json j;
         auto fn = get_tool_settings_filename(id);
         if (Glib::file_test(fn, Glib::FILE_TEST_IS_REGULAR)) {
-            std::ifstream ifs(fn);
-            if (!ifs.is_open()) {
-                return j;
-            }
-            ifs >> j;
-            ifs.close();
+            j = load_json_from_file(fn);
         }
         return j;
     });

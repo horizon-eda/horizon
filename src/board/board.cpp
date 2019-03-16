@@ -193,13 +193,7 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
 
 Board Board::new_from_file(const std::string &filename, Block &block, Pool &pool, ViaPadstackProvider &vpp)
 {
-    json j;
-    std::ifstream ifs(filename);
-    if (!ifs.is_open()) {
-        throw std::runtime_error("file " + filename + " not opened");
-    }
-    ifs >> j;
-    ifs.close();
+    auto j = load_json_from_file(filename);
     return Board(UUID(j["uuid"].get<std::string>()), j, block, pool, vpp);
 }
 

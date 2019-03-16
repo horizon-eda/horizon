@@ -18,13 +18,7 @@ void ViaPadstackProvider::update_available()
     for (const auto &it : dir) {
         std::string filename = Glib::build_filename(base_path, it);
         if (endswith(filename, ".json")) {
-            json j;
-            std::ifstream ifs(filename);
-            if (!ifs.is_open()) {
-                throw std::runtime_error("file " + filename + " not opened");
-            }
-            ifs >> j;
-            ifs.close();
+            auto j = load_json_from_file(filename);
             padstacks_available.emplace(UUID(j.at("uuid").get<std::string>()),
                                         PadstackEntry(filename, j.at("name").get<std::string>() + " (local)"));
         }

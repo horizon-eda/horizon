@@ -31,13 +31,7 @@ static void pkg_add_dir_to_graph(PoolUpdateGraph &graph, const std::string &dire
         if (Glib::file_test(pkgfilename, Glib::FileTest::FILE_TEST_IS_REGULAR)) {
             std::string filename = Glib::build_filename(pkgpath, "package.json");
             try {
-                std::ifstream ifs(filename);
-                json j;
-                if (!ifs.is_open()) {
-                    throw std::runtime_error("package not opened");
-                }
-                ifs >> j;
-                ifs.close();
+                json j = load_json_from_file(filename);
 
                 std::set<UUID> dependencies;
                 UUID pkg_uuid = j.at("uuid").get<std::string>();
@@ -66,13 +60,7 @@ static void part_add_dir_to_graph(PoolUpdateGraph &graph, const std::string &dir
         std::string filename = Glib::build_filename(directory, it);
         if (endswith(it, ".json")) {
             try {
-                std::ifstream ifs(filename);
-                json j;
-                if (!ifs.is_open()) {
-                    throw std::runtime_error("part not opened");
-                }
-                ifs >> j;
-                ifs.close();
+                json j = load_json_from_file(filename);
 
                 std::set<UUID> dependencies;
                 UUID part_uuid = j.at("uuid").get<std::string>();

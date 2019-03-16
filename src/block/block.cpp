@@ -110,12 +110,7 @@ Block::Block(const UUID &uu) : uuid(uu)
 
 Block Block::new_from_file(const std::string &filename, Pool &obj)
 {
-    json j;
-    std::ifstream ifs(filename);
-    if (!ifs.is_open()) {
-        throw std::runtime_error("file " + filename + " not opened");
-    }
-    ifs >> j;
+    auto j = load_json_from_file(filename);
     return Block(UUID(j["uuid"].get<std::string>()), j, obj);
 }
 

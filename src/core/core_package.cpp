@@ -4,6 +4,7 @@
 #include <fstream>
 #include "nlohmann/json.hpp"
 #include "logger/logger.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 CorePackage::CorePackage(const std::string &filename, Pool &pool)
@@ -280,13 +281,7 @@ void CorePackage::revert()
 
 json CorePackage::get_meta()
 {
-    json j;
-    std::ifstream ifs(m_filename);
-    if (!ifs.is_open()) {
-        throw std::runtime_error("file " + m_filename + " not opened");
-    }
-    ifs >> j;
-    ifs.close();
+    auto j = load_json_from_file(m_filename);
     if (j.count("_imp")) {
         return j["_imp"];
     }
@@ -302,17 +297,10 @@ void CorePackage::save()
 
     s_signal_save.emit();
 
-    std::ofstream ofs(m_filename);
-    if (!ofs.is_open()) {
-        std::cout << "can't save symbol" << std::endl;
-        return;
-    }
     json j = package.serialize();
     auto save_meta = s_signal_request_save_meta.emit();
     j["_imp"] = save_meta;
-
-    ofs << std::setw(4) << j;
-    ofs.close();
+    save_json_to_file(m_filename, j);
 
     set_needs_save(false);
 }

@@ -41,13 +41,7 @@ Project::Project(const UUID &uu, const json &j, const std::string &base)
             std::string schematic_filename = Glib::build_filename(base, k.at("schematic_filename"));
             bool is_top = k.at("is_top");
 
-            json block_j;
-            std::ifstream ifs(block_filename);
-            if (!ifs.is_open()) {
-                throw std::runtime_error("file " + block_filename + " not opened");
-            }
-            ifs >> block_j;
-            ifs.close();
+            json block_j = load_json_from_file(block_filename);
 
             UUID block_uuid = block_j.at("uuid").get<std::string>();
             blocks.emplace(block_uuid, ProjectBlock(block_uuid, block_filename, schematic_filename, is_top));
@@ -57,13 +51,7 @@ Project::Project(const UUID &uu, const json &j, const std::string &base)
 
 Project Project::new_from_file(const std::string &filename)
 {
-    json j;
-    std::ifstream ifs(filename);
-    if (!ifs.is_open()) {
-        throw std::runtime_error("file " + filename + " not opened");
-    }
-    ifs >> j;
-    ifs.close();
+    auto j = load_json_from_file(filename);
     return Project(UUID(j["uuid"].get<std::string>()), j, Glib::path_get_dirname(filename));
 }
 

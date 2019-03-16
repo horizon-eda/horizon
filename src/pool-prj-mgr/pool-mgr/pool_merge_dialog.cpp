@@ -470,25 +470,15 @@ void PoolMergeDialog::populate_store()
             else if (filename_local.size() && filename_remote.size()) {
                 json j_local;
                 {
-                    std::ifstream ifs(Glib::build_filename(local_path, filename_local));
-                    if (!ifs.is_open()) {
-                        throw std::runtime_error("file " + filename_local + " not opened");
-                    }
-                    ifs >> j_local;
+                    j_local = load_json_from_file(Glib::build_filename(local_path, filename_local));
                     if (j_local.count("_imp"))
                         j_local.erase("_imp");
-                    ifs.close();
                 }
                 json j_remote;
                 {
-                    std::ifstream ifs(Glib::build_filename(remote_path, filename_remote));
-                    if (!ifs.is_open()) {
-                        throw std::runtime_error("file " + filename_remote + " not opened");
-                    }
-                    ifs >> j_remote;
+                    j_remote = load_json_from_file(Glib::build_filename(remote_path, filename_remote));
                     if (j_remote.count("_imp"))
                         j_remote.erase("_imp");
-                    ifs.close();
                 }
                 auto delta = json::diff(j_local, j_remote);
                 row[list_columns.delta] = delta;

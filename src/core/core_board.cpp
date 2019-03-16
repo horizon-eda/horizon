@@ -603,13 +603,7 @@ void CoreBoard::history_load(unsigned int i)
 
 json CoreBoard::get_meta()
 {
-    json j;
-    std::ifstream ifs(m_board_filename);
-    if (!ifs.is_open()) {
-        throw std::runtime_error("file " + m_board_filename + " not opened");
-    }
-    ifs >> j;
-    ifs.close();
+    auto j = load_json_from_file(m_board_filename);
     if (j.count("_imp")) {
         return j["_imp"];
     }

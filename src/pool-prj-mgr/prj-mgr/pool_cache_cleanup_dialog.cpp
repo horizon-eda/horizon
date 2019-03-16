@@ -6,6 +6,7 @@
 #include "util/sqlite.hpp"
 #include <iostream>
 #include "nlohmann/json.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -60,15 +61,7 @@ PoolCacheCleanupDialog::PoolCacheCleanupDialog(Gtk::Window *parent, const std::s
     tv->append_column("Name", list_columns.name);
 
     for (const auto &fi : filenames) {
-        json j_cache;
-        {
-            std::ifstream ifs(fi);
-            if (!ifs.is_open()) {
-                throw std::runtime_error("file " + fi + " not opened");
-            }
-            ifs >> j_cache;
-            ifs.close();
-        }
+        auto j_cache = load_json_from_file(fi);
         Gtk::TreeModel::Row row;
         row = *item_store->append();
         std::string type_str = j_cache.at("type");

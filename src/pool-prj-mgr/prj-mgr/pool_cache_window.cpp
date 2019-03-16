@@ -66,15 +66,9 @@ void PoolCacheWindow::refresh_list()
             auto itempath = Glib::build_filename(cache_path, it);
             json j_cache;
             {
-                std::ifstream ifs(itempath);
-                if (!ifs.is_open()) {
-                    throw std::runtime_error("file " + itempath + " not opened");
-                }
-                ifs >> j_cache;
+                j_cache = load_json_from_file(itempath);
                 if (j_cache.count("_imp"))
                     j_cache.erase("_imp");
-
-                ifs.close();
             }
             Gtk::TreeModel::Row row;
             row = *item_store->append();
@@ -109,14 +103,9 @@ void PoolCacheWindow::refresh_list()
             if (pool_filename.size() && Glib::file_test(pool_filename, Glib::FILE_TEST_IS_REGULAR)) {
                 json j_pool;
                 {
-                    std::ifstream ifs(pool_filename);
-                    if (!ifs.is_open()) {
-                        throw std::runtime_error("file " + pool_filename + " not opened");
-                    }
-                    ifs >> j_pool;
+                    j_pool = load_json_from_file(pool_filename);
                     if (j_pool.count("_imp"))
                         j_pool.erase("_imp");
-                    ifs.close();
                 }
                 auto delta = json::diff(j_cache, j_pool);
                 row[tree_columns.delta] = delta;
