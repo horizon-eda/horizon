@@ -2,6 +2,7 @@
 #include "board/board.hpp"
 #include "board/board_layers.hpp"
 #include "canvas/canvas_patch.hpp"
+#include "util/util.hpp"
 
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <TDocStd_Document.hxx>
@@ -346,7 +347,7 @@ static TDF_Label transferModel(Handle(TDocStd_Document) & source, Handle(TDocStd
 }
 
 static bool getModelLabel(const std::string &aFileName, TDF_Label &aLabel, Handle(XCAFApp_Application) app,
-                          Handle(TDocStd_Document) doc)
+                          Handle(TDocStd_Document) doc, const std::string &name)
 {
     Handle(TDocStd_Document) my_doc;
     app->NewDocument("MDTV-XCAF", my_doc);
@@ -355,6 +356,9 @@ static bool getModelLabel(const std::string &aFileName, TDF_Label &aLabel, Handl
     }
 
     aLabel = transferModel(my_doc, doc);
+
+    TCollection_ExtendedString partname(name.c_str());
+    TDataStd_Name::Set(aLabel, partname);
 
     return !aLabel.IsNull();
 }
@@ -449,34 +453,43 @@ void export_step(const std::string &filename, const Board &brd, class Pool &pool
         progress_cb("Packages...");
         auto n_pkg = brd.packages.size();
         size_t i = 1;
+        std::vector<const BoardPackage *> pkgs;
+        pkgs.reserve(brd.packages.size());
         for (const auto &it : brd.packages) {
+            pkgs.push_back(&it.second);
+        }
+        std::sort(pkgs.begin(), pkgs.end(),
+                  [](auto a, auto b) { return strcmp_natural(a->component->refdes, b->component->refdes) < 0; });
+
+        for (const auto it : pkgs) {
             try {
-                auto model = it.second.package.get_model(it.second.model);
+                auto model = it->package.get_model(it->model);
                 if (model) {
-                    progress_cb("Package " + it.second.component->refdes + " (" + std::to_string(i) + "/"
+                    progress_cb("Package " + it->component->refdes + " (" + std::to_string(i) + "/"
                                 + std::to_string(n_pkg) + ")");
                     TDF_Label lmodel;
 
-                    if (!getModelLabel(Glib::build_filename(pool.get_base_path(), model->filename), lmodel, app, doc)) {
+                    if (!getModelLabel(Glib::build_filename(pool.get_base_path(), model->filename), lmodel, app, doc,
+                                       it->component->refdes)) {
                         throw std::runtime_error("get model label");
                     }
 
                     TopLoc_Location toploc;
-                    DOUBLET pos(it.second.placement.shift.x / 1e6, it.second.placement.shift.y / -1e6);
-                    double rot = angle_to_rad(it.second.placement.get_angle());
+                    DOUBLET pos(it->placement.shift.x / 1e6, it->placement.shift.y / -1e6);
+                    double rot = angle_to_rad(it->placement.get_angle());
                     TRIPLET offset(model->x / 1e6, model->y / 1e6, model->z / 1e6);
                     TRIPLET orientation(angle_to_rad(model->roll), angle_to_rad(model->pitch),
                                         angle_to_rad(model->yaw));
-                    getModelLocation(it.second.flip, pos, rot, offset, orientation, toploc, total_thickness / 1e6);
+                    getModelLocation(it->flip, pos, rot, offset, orientation, toploc, total_thickness / 1e6);
 
                     TDF_Label llabel = assy->AddComponent(assy_label, lmodel, toploc);
 
-                    TCollection_ExtendedString refdes(it.second.component->refdes.c_str());
+                    TCollection_ExtendedString refdes(it->component->refdes.c_str());
                     TDataStd_Name::Set(llabel, refdes);
                 }
             }
             catch (const std::exception &e) {
-                progress_cb("Error processing package " + it.second.component->refdes + ": " + e.what());
+                progress_cb("Error processing package " + it->component->refdes + ": " + e.what());
             }
             i++;
         }
