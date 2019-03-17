@@ -16,6 +16,7 @@
 #include "util/util.hpp"
 #include "util/uuid.hpp"
 #include "pool/pool_manager.hpp"
+#include "util/exception_util.hpp"
 #include <curl/curl.h>
 #include <fstream>
 #include <gtkmm.h>
@@ -131,6 +132,7 @@ int main(int argc, char *argv[])
     }
     imp->set_read_only(read_only);
 
+    horizon::install_signal_exception_handler();
     imp->run(argc, argv);
 
     return 0;

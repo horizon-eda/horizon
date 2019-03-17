@@ -351,6 +351,7 @@ SRC_IMP = \
 	src/preferences/preferences_util.cpp\
 	src/preferences/preferences_provider.cpp\
 	src/widgets/spin_button_angle.cpp\
+	src/util/exception_util.cpp
 
 SRC_ROUTER = \
 	3rd_party/router/router/pns_router.cpp \
@@ -486,6 +487,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/padstack_preview.cpp\
 	src/widgets/tag_entry.cpp\
 	src/util/status_dispatcher.cpp\
+	src/util/exception_util.cpp
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp
