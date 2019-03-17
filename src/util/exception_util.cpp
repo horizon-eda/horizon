@@ -1,6 +1,7 @@
 #include "exception_util.hpp"
 #include <gtk/gtk.h>
 #include <glibmm.h>
+#include <string.h>
 
 namespace horizon {
 
