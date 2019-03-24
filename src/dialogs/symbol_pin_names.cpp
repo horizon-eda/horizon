@@ -6,6 +6,7 @@
 #include "util/str_util.hpp"
 #include "util/gtk_util.hpp"
 #include "common/object_descr.hpp"
+#include "util/csv.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>
@@ -55,25 +56,25 @@ public:
 
         {
             auto cbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
-            auto cb = Gtk::manage(new Gtk::CheckButton(""));
-            cbox->pack_start(*cb, false, false, 0);
-            auto entry = Gtk::manage(new Gtk::Entry);
+            custom_cb = Gtk::manage(new Gtk::CheckButton(""));
+            cbox->pack_start(*custom_cb, false, false, 0);
+            custom_entry = Gtk::manage(new Gtk::Entry);
             if (comp->custom_pin_names.count(path))
-                entry->set_text(comp->custom_pin_names.at(path));
-            cbox->pack_start(*entry, true, true, 0);
-            cb->signal_toggled().connect([this, cb, entry] {
-                entry->set_sensitive(cb->get_active());
-                add_remove_name(-2, cb->get_active());
+                custom_entry->set_text(comp->custom_pin_names.at(path));
+            cbox->pack_start(*custom_entry, true, true, 0);
+            custom_cb->signal_toggled().connect([this] {
+                custom_entry->set_sensitive(custom_cb->get_active());
+                add_remove_name(-2, custom_cb->get_active());
                 update_label();
             });
-            entry->set_sensitive(false);
-            entry->set_placeholder_text("Custom");
-            entry->signal_changed().connect([this, entry] {
-                comp->custom_pin_names[path] = entry->get_text();
+            custom_entry->set_sensitive(false);
+            custom_entry->set_placeholder_text("Custom");
+            custom_entry->signal_changed().connect([this] {
+                comp->custom_pin_names[path] = custom_entry->get_text();
                 update_label();
             });
             if (comp->pin_names.count(path))
-                cb->set_active(comp->pin_names.at(path).count(-2));
+                custom_cb->set_active(comp->pin_names.at(path).count(-2));
 
             pbox->pack_start(*cbox, false, false, 0);
         }
@@ -85,10 +86,25 @@ public:
         set_popover(*popover);
     }
 
+    void set_custom_name(const std::string &name)
+    {
+        if (!name.size())
+            return;
+        custom_entry->set_text(name);
+        custom_cb->set_active(true);
+    }
+
+    const Pin &get_pin() const
+    {
+        return pin;
+    }
+
 private:
     Component *comp;
     UUIDPath<2> path;
     const Pin &pin;
+    Gtk::Entry *custom_entry = nullptr;
+    Gtk::CheckButton *custom_cb = nullptr;
 
     void add_remove_name(int name, bool add)
     {
@@ -148,6 +164,7 @@ public:
         }
         std::sort(pins_sorted.begin(), pins_sorted.end(),
                   [](const auto &a, const auto &b) { return strcmp_natural(a->primary_name, b->primary_name) < 0; });
+        buttons.reserve(pins_sorted.size());
         for (const auto it : pins_sorted) {
             auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 16));
             auto la = Gtk::manage(new Gtk::Label(it->primary_name));
@@ -160,62 +177,78 @@ public:
             bu->show();
             box->pack_start(*bu, true, true, 0);
 
-            /*auto combo = Gtk::manage(new Gtk::ComboBoxText());
-            sg_combo->add_widget(*combo);
-
-            combo->append(std::to_string(-1), it->primary_name);
-            unsigned int i = 0;
-            for (const auto &it_pin_name : it->names) {
-                combo->append(std::to_string(i++), it_pin_name);
-            }
-            combo->set_active(0);
-            auto path = UUIDPath<2>(gate->uuid, it->uuid);
-            if (comp->pin_names.count(path)) {
-                combo->set_active(1 + comp->pin_names.at(path));
-            }
-
-            combo->signal_changed().connect(sigc::bind<Gtk::ComboBoxText *, UUIDPath<2>>(
-                    sigc::mem_fun(*this, &GatePinEditor::changed), combo, path));
-            box->pack_start(*combo, false, false, 0);
-
-
-            auto ed = Gtk::manage(new Gtk::Entry);
-            ed->set_placeholder_text("Custom pin name");
-            ed->show();
-            if (comp->custom_pin_names.count(path)) {
-                ed->set_text(comp->custom_pin_names.at(path));
-            }
-            ed->signal_changed().connect([this, ed, path] {
-                std::string v = ed->get_text();
-                trim(v);
-                comp->custom_pin_names[path] = v;
-            });
-
-            box->pack_start(*ed, true, true, 0);
-            */
-
             box->set_margin_start(16);
             box->set_margin_end(8);
             box->set_margin_top(4);
             box->set_margin_bottom(4);
 
-
+            buttons.push_back(bu);
             insert(*box, -1);
         }
     }
     Component *comp;
     const Gate *gate;
 
+    std::vector<PinNamesButton *> &get_buttons()
+    {
+        return buttons;
+    }
+
 private:
     Glib::RefPtr<Gtk::SizeGroup> sg;
     Glib::RefPtr<Gtk::SizeGroup> sg_combo;
-
-    void changed(Gtk::ComboBoxText *combo, UUIDPath<2> path)
-    {
-        // comp->pin_names[path] = combo->get_active_row_number() - 1;
-    }
+    std::vector<PinNamesButton *> buttons;
 };
 
+void SymbolPinNamesDialog::handle_import()
+{
+    GtkFileChooserNative *native =
+            gtk_file_chooser_native_new("Open", GTK_WINDOW(gobj()), GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    auto filter = Gtk::FileFilter::create();
+    filter->set_name("CSV documents");
+    filter->add_pattern("*.csv");
+    filter->add_pattern("*.CSV");
+    chooser->add_filter(filter);
+
+    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        auto filename = chooser->get_filename();
+        try {
+            auto ifs = make_ifstream(filename);
+            if (!ifs.is_open()) {
+                throw std::runtime_error("file " + filename + " not opened");
+            }
+            CSV::Csv csv;
+            ifs >> csv;
+            ifs.close();
+            csv.expand(2);
+            auto &buttons = editor->get_buttons();
+            for (const auto &it : csv) {
+                std::string primary_name = it.at(0);
+                std::string custom_name = it.at(1);
+                trim(primary_name);
+                trim(custom_name);
+                auto bu = std::find_if(buttons.begin(), buttons.end(),
+                                       [&primary_name](auto &x) { return x->get_pin().primary_name == primary_name; });
+                if (bu != buttons.end()) {
+                    (*bu)->set_custom_name(custom_name);
+                }
+            }
+        }
+        catch (const std::exception &e) {
+            Gtk::MessageDialog md(*this, "Error importing", false /* use_markup */, Gtk::MESSAGE_ERROR,
+                                  Gtk::BUTTONS_OK);
+            md.set_secondary_text(e.what());
+            md.run();
+        }
+        catch (...) {
+            Gtk::MessageDialog md(*this, "Error importing", false /* use_markup */, Gtk::MESSAGE_ERROR,
+                                  Gtk::BUTTONS_OK);
+            md.set_secondary_text("unknown error");
+            md.run();
+        }
+    }
+}
 
 SymbolPinNamesDialog::SymbolPinNamesDialog(Gtk::Window *parent, SchematicSymbol *s)
     : Gtk::Dialog("Symbol " + s->component->refdes + s->gate->suffix + " pin names", *parent,
@@ -228,11 +261,9 @@ SymbolPinNamesDialog::SymbolPinNamesDialog(Gtk::Window *parent, SchematicSymbol 
     set_default_size(300, 700);
 
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
+
     auto mode_combo = Gtk::manage(new Gtk::ComboBoxText());
-    mode_combo->set_margin_start(8);
-    mode_combo->set_margin_end(8);
-    mode_combo->set_margin_top(8);
-    mode_combo->set_margin_bottom(8);
+
     for (const auto &it : object_descriptions.at(ObjectType::SCHEMATIC_SYMBOL)
                                   .properties.at(ObjectProperty::ID::PIN_NAME_DISPLAY)
                                   .enum_items) {
@@ -243,12 +274,21 @@ SymbolPinNamesDialog::SymbolPinNamesDialog(Gtk::Window *parent, SchematicSymbol 
         sym->pin_display_mode = static_cast<SchematicSymbol::PinDisplayMode>(std::stoi(mode_combo->get_active_id()));
     });
 
+    auto box2 = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
+    box2->property_margin() = 8;
+    box->pack_start(*box2, false, false, 0);
+    box2->pack_start(*mode_combo, true, true, 0);
 
-    box->pack_start(*mode_combo, false, false, 0);
+    auto import_button = Gtk::manage(new Gtk::Button("Import custom pin names"));
+    import_button->signal_clicked().connect(sigc::mem_fun(*this, &SymbolPinNamesDialog::handle_import));
+    box2->pack_start(*import_button, false, false, 0);
 
-    auto ed = Gtk::manage(new GatePinEditor(sym->component, sym->gate));
+    auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+    box->pack_start(*sep, false, false, 0);
+
+    editor = Gtk::manage(new GatePinEditor(sym->component, sym->gate));
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
-    sc->add(*ed);
+    sc->add(*editor);
     box->pack_start(*sc, true, true, 0);
 
 

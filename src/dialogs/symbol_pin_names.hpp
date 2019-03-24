@@ -12,8 +12,7 @@ public:
 
 private:
     class SchematicSymbol *sym = nullptr;
-
-
-    void ok_clicked();
+    class GatePinEditor *editor = nullptr;
+    void handle_import();
 };
 } // namespace horizon
