@@ -32,6 +32,8 @@ public:
     PinDisplayMode pin_display_mode = PinDisplayMode::SELECTED_ONLY;
     bool display_directions = false;
     bool display_all_pads = true;
+    unsigned int expand = 0;
+    void apply_expand();
 
     std::string replace_text(const std::string &t, bool *replaced, const class Schematic &sch) const;
 

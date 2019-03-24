@@ -98,6 +98,7 @@ public:
     std::map<UUID, Arc> arcs;
     std::map<UUID, Text> texts;
     std::map<UUID, Polygon> polygons;
+    bool can_expand = false;
 
     std::map<std::tuple<int, bool, UUID>, Placement> text_placements;
     void apply_placement(const Placement &p);

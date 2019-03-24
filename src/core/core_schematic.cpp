@@ -303,6 +303,10 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
             dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(sym->pin_display_mode);
             return true;
 
+        case ObjectProperty::ID::EXPAND:
+            dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(sym->expand);
+            return true;
+
         default:
             return false;
         }
@@ -376,6 +380,11 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
                     static_cast<SchematicSymbol::PinDisplayMode>(dynamic_cast<const PropertyValueInt &>(value).value);
             break;
 
+        case ObjectProperty::ID::EXPAND:
+            sym->expand = dynamic_cast<const PropertyValueInt &>(value).value;
+            sym->apply_expand();
+            break;
+
         default:
             return false;
         }
@@ -411,6 +420,7 @@ bool CoreSchematic::get_property_meta(ObjectType type, const UUID &uu, ObjectPro
 {
     if (Core::get_property_meta(type, uu, property, meta))
         return true;
+    auto &sheet = sch.sheets.at(sheet_uuid);
     switch (type) {
     case ObjectType::NET:
         switch (property) {
@@ -436,6 +446,17 @@ bool CoreSchematic::get_property_meta(ObjectType type, const UUID &uu, ObjectPro
         switch (property) {
         case ObjectProperty::ID::VALUE:
             meta.is_settable = block.components.at(uu).part == nullptr;
+            return true;
+
+        default:
+            return false;
+        }
+        break;
+
+    case ObjectType::SCHEMATIC_SYMBOL:
+        switch (property) {
+        case ObjectProperty::ID::EXPAND:
+            meta.is_settable = sheet.symbols.at(uu).pool_symbol->can_expand;
             return true;
 
         default:

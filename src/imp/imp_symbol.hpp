@@ -28,6 +28,7 @@ private:
 
     Gtk::Entry *name_entry = nullptr;
     Gtk::Label *unit_label = nullptr;
+    Gtk::Switch *can_expand_switch = nullptr;
     class SymbolPreviewWindow *symbol_preview_window = nullptr;
     class UnplacedBox *unplaced_box = nullptr;
     void update_unplaced();

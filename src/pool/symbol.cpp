@@ -129,7 +129,8 @@ UUID SymbolPin::get_uuid() const
 }
 
 Symbol::Symbol(const UUID &uu, const json &j, Pool &pool)
-    : uuid(uu), unit(pool.get_unit(j.at("unit").get<std::string>())), name(j.value("name", ""))
+    : uuid(uu), unit(pool.get_unit(j.at("unit").get<std::string>())), name(j.value("name", "")),
+      can_expand(j.value("can_expand", false))
 {
     if (j.count("junctions")) {
         const json &o = j["junctions"];
@@ -229,7 +230,8 @@ void Symbol::update_refs()
 
 Symbol::Symbol(const Symbol &sym)
     : uuid(sym.uuid), unit(sym.unit), name(sym.name), pins(sym.pins), junctions(sym.junctions), lines(sym.lines),
-      arcs(sym.arcs), texts(sym.texts), polygons(sym.polygons), text_placements(sym.text_placements)
+      arcs(sym.arcs), texts(sym.texts), polygons(sym.polygons), can_expand(sym.can_expand),
+      text_placements(sym.text_placements)
 {
     update_refs();
 }
@@ -245,7 +247,9 @@ void Symbol::operator=(Symbol const &sym)
     arcs = sym.arcs;
     texts = sym.texts;
     polygons = sym.polygons;
+    can_expand = sym.can_expand;
     text_placements = sym.text_placements;
+
     update_refs();
 }
 
@@ -307,6 +311,7 @@ json Symbol::serialize() const
     j["name"] = name;
     j["uuid"] = (std::string)uuid;
     j["unit"] = (std::string)unit->uuid;
+    j["can_expand"] = can_expand;
     j["junctions"] = json::object();
     for (const auto &it : junctions) {
         j["junctions"][(std::string)it.first] = it.second.serialize();

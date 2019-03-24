@@ -225,4 +225,27 @@ private:
 
     PropertyValueString value;
 };
+
+class PropertyEditorInt : public PropertyEditor {
+    using PropertyEditor::PropertyEditor;
+
+public:
+    void reload() override;
+    PropertyValue &get_value() override;
+
+protected:
+    Gtk::Widget *create_editor() override;
+
+    Gtk::SpinButton *sp = nullptr;
+    PropertyValueInt value;
+    void changed();
+};
+
+class PropertyEditorExpand : public PropertyEditorInt {
+    using PropertyEditorInt::PropertyEditorInt;
+
+protected:
+    Gtk::Widget *create_editor() override;
+};
+
 } // namespace horizon

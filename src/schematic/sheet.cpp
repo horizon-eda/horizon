@@ -169,6 +169,7 @@ void Sheet::expand_symbols(const class Schematic &sch)
         }
         schsym.symbol = *schsym.pool_symbol;
         schsym.symbol.expand();
+        schsym.apply_expand();
         if (!schsym.display_directions) {
             for (auto &it_pin : schsym.symbol.pins) {
                 it_pin.second.direction = Pin::Direction::PASSIVE;
@@ -217,7 +218,7 @@ void Sheet::expand_symbols(const class Schematic &sch)
                             // nop, see later
                         }
                         else if (it == -1) {
-                            append_pin_name(it_pin.second.name, pin.primary_name);
+                            // nop see before
                         }
                         else {
                             if (it >= 0 && it < ((int)pin.names.size()))

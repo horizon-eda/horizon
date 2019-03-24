@@ -79,6 +79,10 @@ PropertyPanel::PropertyPanel(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
             e = new PropertyEditorStringMultiline(type, property, this);
             break;
 
+        case ObjectProperty::Type::EXPAND:
+            e = new PropertyEditorExpand(type, property, this);
+            break;
+
         default:
             e = new PropertyEditor(type, property, this);
         }

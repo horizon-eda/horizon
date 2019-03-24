@@ -79,6 +79,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                             {static_cast<int>(SchematicSymbol::PinDisplayMode::CUSTOM_ONLY), "Custom only"},
                     }}},
                   {ObjectProperty::ID::DISPLAY_ALL_PADS, {ObjectProperty::Type::BOOL, "Show all pads", 2}},
+                  {ObjectProperty::ID::EXPAND, {ObjectProperty::Type::EXPAND, "Expand", 3}},
           }}},
         {ObjectType::POWER_SYMBOL, {"Power symbol", "Power symbols", {}}},
         {ObjectType::POLYGON_EDGE, {"Polygon edge", "Polygon edges", {}}},

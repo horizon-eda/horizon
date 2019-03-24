@@ -93,12 +93,17 @@ void ImpSymbol::construct()
         core_symbol.set_needs_save();
     });
 
-    {
-        unit_label = Gtk::manage(new Gtk::Label(core.y->get_symbol()->unit->name));
-        unit_label->set_xalign(0);
-        unit_label->set_selectable(true);
-        header_button->add_widget("Unit", unit_label);
-    }
+    unit_label = Gtk::manage(new Gtk::Label(core.y->get_symbol()->unit->name));
+    unit_label->set_xalign(0);
+    unit_label->set_selectable(true);
+    header_button->add_widget("Unit", unit_label);
+
+    can_expand_switch = Gtk::manage(new Gtk::Switch);
+    can_expand_switch->set_active(core.y->get_symbol()->can_expand);
+    can_expand_switch->set_halign(Gtk::ALIGN_START);
+    can_expand_switch->property_active().signal_changed().connect([this] { core_symbol.set_needs_save(); });
+
+    header_button->add_widget("Can expand", can_expand_switch);
 
     core.r->signal_rebuilt().connect([this] { unit_label->set_text(core.y->get_symbol()->unit->name); });
 
@@ -107,6 +112,7 @@ void ImpSymbol::construct()
         sym->name = name_entry->get_text();
         header_button->set_label(sym->name);
         sym->text_placements = symbol_preview_window->get_text_placements();
+        sym->can_expand = can_expand_switch->get_active();
     });
     grid_spin_button->set_sensitive(false);
     update_monitor();
