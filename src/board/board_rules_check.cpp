@@ -543,6 +543,28 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd)
         }
     }
 
+    for (const auto &it : brd->lines) {
+        if (it.second.layer == BoardLayers::L_OUTLINE) {
+            r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+            auto &e = r.errors.back();
+            e.has_location = true;
+            if (e.has_location)
+                e.location = it.second.from->position;
+            e.comment = "Line on outline layer. Use polygons to define board outline.";
+        }
+    }
+
+    for (const auto &it : brd->arcs) {
+        if (it.second.layer == BoardLayers::L_OUTLINE) {
+            r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+            auto &e = r.errors.back();
+            e.has_location = true;
+            if (e.has_location)
+                e.location = it.second.from->position;
+            e.comment = "Arc on outline layer. Use polygons to define board outline.";
+        }
+    }
+
     r.update();
     return r;
 }
