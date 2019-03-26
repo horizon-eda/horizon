@@ -1289,7 +1289,8 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
         set_search_mode(false);
 
     bool need_menu = false;
-    if (core.r->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)) {
+    if (core.r->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)
+        && button_event->type != GDK_2BUTTON_PRESS && button_event->type != GDK_3BUTTON_PRESS) {
         ToolArgs args;
         args.type = ToolEventType::CLICK;
         args.coords = canvas->get_cursor_pos();
