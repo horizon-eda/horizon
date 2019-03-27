@@ -18,6 +18,7 @@ protected:
     {
         return ObjectType::PADSTACK;
     }
+    std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu) override;
 
 private:
     void canvas_update() override;

@@ -578,4 +578,44 @@ void ImpBoard::handle_drag()
         target_drag_begin = Target();
     }
 }
+
+std::pair<ActionID, ToolID> ImpBoard::get_doubleclick_action(ObjectType type, const UUID &uu)
+{
+    auto a = ImpBase::get_doubleclick_action(type, uu);
+    if (a.first != ActionID::NONE)
+        return a;
+    switch (type) {
+    case ObjectType::BOARD_HOLE:
+        return make_action(ToolID::EDIT_BOARD_HOLE);
+        break;
+    case ObjectType::VIA:
+        return make_action(ToolID::EDIT_VIA);
+        break;
+    case ObjectType::TRACK:
+        return make_action(ToolID::SELECT_MORE);
+        break;
+    case ObjectType::POLYGON:
+    case ObjectType::POLYGON_EDGE:
+    case ObjectType::POLYGON_VERTEX: {
+        auto poly = core_board.get_polygon(uu);
+        if (poly->usage) {
+            switch (poly->usage->get_type()) {
+            case PolygonUsage::Type::PLANE:
+                return make_action(ToolID::EDIT_PLANE);
+
+            case PolygonUsage::Type::KEEPOUT:
+                return make_action(ToolID::EDIT_KEEPOUT);
+
+            default:
+                return {ActionID::NONE, ToolID::NONE};
+            }
+        }
+        else {
+            return {ActionID::NONE, ToolID::NONE};
+        }
+    } break;
+    default:
+        return {ActionID::NONE, ToolID::NONE};
+    }
+}
 } // namespace horizon

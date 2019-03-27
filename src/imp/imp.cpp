@@ -1300,6 +1300,16 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
         ToolResponse r = core.r->tool_update(args);
         tool_process(r);
     }
+    else if (!core.r->tool_is_active() && button_event->type == GDK_2BUTTON_PRESS) {
+        auto sel = canvas->get_selection();
+        if (sel.size() == 1) {
+            auto a = get_doubleclick_action(sel.begin()->type, sel.begin()->uuid);
+            if (a.first != ActionID::NONE) {
+                selection_for_drag_move.clear();
+                trigger_action(a);
+            }
+        }
+    }
     else if (!core.r->tool_is_active() && button_event->button == 1) {
         handle_maybe_drag();
     }
@@ -1703,6 +1713,17 @@ void ImpBase::update_search_types_label()
         la.pop_back();
     }
     main_window->search_expander->set_label(la);
+}
+
+std::pair<ActionID, ToolID> ImpBase::get_doubleclick_action(ObjectType type, const UUID &uu)
+{
+    switch (type) {
+    case ObjectType::TEXT:
+        return make_action(ToolID::ENTER_DATUM);
+        break;
+    default:
+        return {ActionID::NONE, ToolID::NONE};
+    }
 }
 
 } // namespace horizon

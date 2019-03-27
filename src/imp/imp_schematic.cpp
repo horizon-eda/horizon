@@ -880,4 +880,19 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
     tool_begin(ToolID::MOVE);
 }
 
+std::pair<ActionID, ToolID> ImpSchematic::get_doubleclick_action(ObjectType type, const UUID &uu)
+{
+    auto a = ImpBase::get_doubleclick_action(type, uu);
+    if (a.first != ActionID::NONE)
+        return a;
+    switch (type) {
+    case ObjectType::NET_LABEL:
+    case ObjectType::LINE_NET:
+        return make_action(ToolID::ENTER_DATUM);
+        break;
+    default:
+        return {ActionID::NONE, ToolID::NONE};
+    }
+}
+
 } // namespace horizon

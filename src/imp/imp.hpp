@@ -150,6 +150,7 @@ protected:
     void tool_update_data(std::unique_ptr<ToolData> &data);
 
     virtual void search_center(const Core::SearchResult &res);
+    virtual std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu);
 
 private:
     void fix_cursor_pos();

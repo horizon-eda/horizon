@@ -221,6 +221,8 @@ private:
     int annotation_layer_current = 20000;
     std::map<int, CanvasAnnotation> annotations;
 
+    GdkEventType last_button_event = GDK_BUTTON_PRESS;
+
 protected:
     void on_size_allocate(Gtk::Allocation &alloc) override;
     void on_realize() override;

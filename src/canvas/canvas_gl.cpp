@@ -178,6 +178,7 @@ bool CanvasGL::on_button_press_event(GdkEventButton *button_event)
     pan_drag_begin(button_event);
     drag_selection.drag_begin(button_event);
     cursor_move((GdkEvent *)button_event);
+    last_button_event = button_event->type;
     return Gtk::GLArea::on_button_press_event(button_event);
 }
 
@@ -203,8 +204,10 @@ void CanvasGL::update_cursor_pos(double x, double y)
 
 bool CanvasGL::on_button_release_event(GdkEventButton *button_event)
 {
-    pan_drag_end(button_event);
-    drag_selection.drag_end(button_event);
+    if (last_button_event != GDK_2BUTTON_PRESS) {
+        pan_drag_end(button_event);
+        drag_selection.drag_end(button_event);
+    }
     return Gtk::GLArea::on_button_release_event(button_event);
 }
 

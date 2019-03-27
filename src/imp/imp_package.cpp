@@ -699,4 +699,18 @@ void ImpPackage::construct()
             });
 }
 
+std::pair<ActionID, ToolID> ImpPackage::get_doubleclick_action(ObjectType type, const UUID &uu)
+{
+    auto a = ImpBase::get_doubleclick_action(type, uu);
+    if (a.first != ActionID::NONE)
+        return a;
+    switch (type) {
+    case ObjectType::PAD:
+        return make_action(ToolID::EDIT_PAD_PARAMETER_SET);
+        break;
+    default:
+        return {ActionID::NONE, ToolID::NONE};
+    }
+}
+
 } // namespace horizon

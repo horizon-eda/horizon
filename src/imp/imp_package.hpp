@@ -27,6 +27,7 @@ protected:
     std::string get_hud_text(std::set<SelectableRef> &sel) override;
     void update_action_sensitivity() override;
     void update_monitor() override;
+    std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu) override;
 
 private:
     void canvas_update() override;
