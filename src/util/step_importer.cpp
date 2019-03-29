@@ -52,7 +52,7 @@ struct DATA;
 
 static bool processNode(const TopoDS_Shape &shape, DATA &data);
 
-static bool processComp(const TopoDS_Shape &shape, DATA &data);
+static bool processComp(const TopoDS_Shape &shape, DATA &data, const glm::mat4 &mat_in = glm::mat4(1));
 
 struct DATA {
     Handle(TDocStd_Document) m_doc;
@@ -246,14 +246,14 @@ static bool processSolid(const TopoDS_Shape &shape, DATA &data, const glm::mat4 
     return ret;
 }
 
-static bool processComp(const TopoDS_Shape &shape, DATA &data)
+static bool processComp(const TopoDS_Shape &shape, DATA &data, const glm::mat4 &mat_in)
 {
     TopoDS_Iterator it;
     TopLoc_Location loc = shape.Location();
     gp_Trsf T = loc.Transformation();
     gp_XYZ coord = T.TranslationPart();
 
-    auto mat = glm::translate(glm::vec3(coord.X(), coord.Y(), coord.Z()));
+    auto mat = mat_in * glm::translate(glm::vec3(coord.X(), coord.Y(), coord.Z()));
 
     gp_XYZ axis;
     Standard_Real angle;
@@ -275,7 +275,7 @@ static bool processComp(const TopoDS_Shape &shape, DATA &data)
         switch (stype) {
         case TopAbs_COMPOUND:
         case TopAbs_COMPSOLID:
-            if (processComp(subShape, data))
+            if (processComp(subShape, data, mat))
                 ret = true;
             break;
 
