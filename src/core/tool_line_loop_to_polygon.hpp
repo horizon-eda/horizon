@@ -13,5 +13,8 @@ public:
     {
         return true;
     }
+
+private:
+    void remove_from_selection(ObjectType type, const UUID &uu);
 };
 } // namespace horizon
