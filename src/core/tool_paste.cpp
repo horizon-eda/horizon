@@ -147,6 +147,8 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
             for (auto &itv : x->vertices) {
                 itv.arc_center += shift;
                 itv.position += shift;
+                if (itv.type == Polygon::Vertex::Type::ARC)
+                    core.r->selection.emplace(u, ObjectType::POLYGON_ARC_CENTER, vertex);
                 core.r->selection.emplace(u, ObjectType::POLYGON_VERTEX, vertex++);
             }
         }
