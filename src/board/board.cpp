@@ -53,7 +53,7 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
         const json &o = j["holes"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            load_and_log(holes, ObjectType::BOARD_HOLE, std::forward_as_tuple(u, it.value(), *block, pool),
+            load_and_log(holes, ObjectType::BOARD_HOLE, std::forward_as_tuple(u, it.value(), block, &pool),
                          Logger::Domain::BOARD);
         }
     }

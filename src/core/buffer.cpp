@@ -30,6 +30,7 @@ void Buffer::clear()
     net_labels.clear();
     vias.clear();
     tracks.clear();
+    board_holes.clear();
 }
 
 void Buffer::load_from_symbol(std::set<SelectableRef> selection)
@@ -88,6 +89,11 @@ void Buffer::load_from_symbol(std::set<SelectableRef> selection)
             new_sel.emplace(via.junction->uuid, ObjectType::JUNCTION);
             if (via.net_set)
                 new_sel.emplace(via.net_set->uuid, ObjectType::NET);
+        } break;
+        case ObjectType::BOARD_HOLE: {
+            auto &hole = core.b->get_board()->holes.at(it.uuid);
+            if (hole.net)
+                new_sel.emplace(hole.net->uuid, ObjectType::NET);
         } break;
         case ObjectType::TRACK: {
             const auto &track = core.b->get_board()->tracks.at(it.uuid);
@@ -252,6 +258,11 @@ void Buffer::load_from_symbol(std::set<SelectableRef> selection)
             via.junction.update(junctions);
             via.net_set.update(nets);
         }
+        if (it.type == ObjectType::BOARD_HOLE) {
+            auto x = &core.b->get_board()->holes.at(it.uuid);
+            auto &hole = board_holes.emplace(x->uuid, *x).first->second;
+            hole.net.update(nets);
+        }
     }
     for (const auto &it : selection) {
         if (it.type == ObjectType::COMPONENT) {
@@ -347,6 +358,10 @@ json Buffer::serialize()
     j["tracks"] = json::object();
     for (const auto &it : tracks) {
         j["tracks"][(std::string)it.first] = it.second.serialize();
+    }
+    j["board_holes"] = json::object();
+    for (const auto &it : board_holes) {
+        j["board_holes"][(std::string)it.first] = it.second.serialize();
     }
     return j;
 }

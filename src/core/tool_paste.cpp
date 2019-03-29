@@ -154,9 +154,9 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
         }
     }
     std::map<UUID, const UUID> net_xlat;
-    if (j.count("nets") && core.c) {
+    if (j.count("nets") && core.r->get_block()) {
         const json &o = j["nets"];
-        auto block = core.c->get_schematic()->block;
+        auto block = core.r->get_block();
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             Net net_from_json(it.key(), it.value());
             std::string net_name = net_from_json.name;
@@ -170,13 +170,14 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
                     }
                 }
             }
-            if (!net_new) {
+            if (!net_new && core.c) {
                 net_new = block->insert_net();
                 net_new->is_power = net_from_json.is_power;
                 net_new->name = net_name;
                 net_new->power_symbol_style = net_from_json.power_symbol_style;
             }
-            net_xlat.emplace(it.key(), net_new->uuid);
+            if (net_new)
+                net_xlat.emplace(it.key(), net_new->uuid);
         }
     }
 
@@ -256,7 +257,7 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
             core.r->selection.emplace(u, ObjectType::POWER_SYMBOL);
         }
     }
-    if (j.count("shapes")) {
+    if (j.count("shapes") && core.a) {
         const json &o = j["shapes"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
@@ -265,7 +266,7 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
             core.r->selection.emplace(u, ObjectType::SHAPE);
         }
     }
-    if (j.count("vias")) {
+    if (j.count("vias") && core.b) {
         const json &o = j["vias"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
@@ -289,7 +290,7 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
             core.r->selection.emplace(u, ObjectType::VIA);
         }
     }
-    if (j.count("tracks")) {
+    if (j.count("tracks") && core.b) {
         const json &o = j["tracks"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
@@ -301,6 +302,26 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
             x->to.junc = &brd->junctions.at(junction_xlat.at(x->to.junc.uuid));
             x->from.junc = &brd->junctions.at(junction_xlat.at(x->from.junc.uuid));
             core.r->selection.emplace(u, ObjectType::TRACK);
+        }
+    }
+    if (j.count("board_holes") && core.b) {
+        const json &o = j["board_holes"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID::random();
+            auto brd = core.b->get_board();
+            auto x = &brd->holes
+                              .emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                                       std::forward_as_tuple(u, it.value(), nullptr, core.r->m_pool))
+                              .first->second;
+            if (net_xlat.count(x->net.uuid)) {
+                x->net = &brd->block->nets.at(net_xlat.at(x->net.uuid));
+            }
+            else {
+                x->net = nullptr;
+            }
+            x->padstack.apply_parameter_set(x->parameter_set);
+            apply_shift(x->placement.shift, cursor_pos_canvas);
+            core.r->selection.emplace(u, ObjectType::BOARD_HOLE);
         }
     }
     if (core.r->selection.size() == 0) {

@@ -18,6 +18,7 @@
 #include "schematic/schematic_symbol.hpp"
 #include "board/via.hpp"
 #include "board/track.hpp"
+#include "board/board_hole.hpp"
 #include "util/uuid.hpp"
 #include <map>
 #include <set>
@@ -46,6 +47,7 @@ public:
     std::map<UUID, NetLabel> net_labels;
     std::map<UUID, Via> vias;
     std::map<UUID, Track> tracks;
+    std::map<UUID, BoardHole> board_holes;
 
     json serialize();
 
