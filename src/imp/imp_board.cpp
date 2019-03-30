@@ -176,6 +176,8 @@ void ImpBoard::update_action_sensitivity()
 {
     auto sel = canvas->get_selection();
     bool have_tracks = std::any_of(sel.begin(), sel.end(), [](const auto &x) { return x.type == ObjectType::TRACK; });
+    int n_pkgs =
+            std::count_if(sel.begin(), sel.end(), [](const auto &x) { return x.type == ObjectType::BOARD_PACKAGE; });
     set_action_sensitive(make_action(ActionID::TUNING_ADD_TRACKS), have_tracks);
     set_action_sensitive(make_action(ActionID::TUNING_ADD_TRACKS_ALL), have_tracks);
 
@@ -198,6 +200,7 @@ void ImpBoard::update_action_sensitivity()
         bool has_schematic = send_json(req);
         set_action_sensitive(make_action(ActionID::GO_TO_SCHEMATIC), has_schematic);
     }
+    set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), n_pkgs == 1 && sockets_connected);
 
     ImpBase::update_action_sensitivity();
 }
@@ -292,6 +295,27 @@ void ImpBoard::construct()
             this->send_json(j);
         });
         set_action_sensitive(make_action(ActionID::GO_TO_BOARD), false);
+
+        connect_action(ActionID::SHOW_IN_POOL_MANAGER, [this](const auto &conn) {
+            for (const auto &it : canvas->get_selection()) {
+                auto board = core_board.get_board();
+                if (it.type == ObjectType::BOARD_PACKAGE) {
+                    const auto &pkg = board->packages.at(it.uuid);
+                    if (pkg.component->part) {
+                        json j;
+                        j["op"] = "show-in-pool-mgr";
+                        j["type"] = "part";
+                        UUID pool_uuid;
+                        pool->get_filename(ObjectType::PART, pkg.component->part->uuid, &pool_uuid);
+                        j["pool_uuid"] = (std::string)pool_uuid;
+                        j["uuid"] = (std::string)pkg.component->part->uuid;
+                        this->send_json(j);
+                        break;
+                    }
+                }
+            }
+        });
+        set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), false);
     }
 
     add_tool_button(ToolID::MAP_PACKAGE, "Place package", false);

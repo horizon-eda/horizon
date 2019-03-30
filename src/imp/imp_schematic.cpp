@@ -338,6 +338,27 @@ void ImpSchematic::construct()
             this->send_json(j);
         });
         set_action_sensitive(make_action(ActionID::GO_TO_BOARD), false);
+
+        connect_action(ActionID::SHOW_IN_POOL_MANAGER, [this](const auto &conn) {
+            for (const auto &it : canvas->get_selection()) {
+                auto sheet = core_schematic.get_sheet();
+                if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
+                    auto &sym = sheet->symbols.at(it.uuid);
+                    if (sym.component->part) {
+                        json j;
+                        j["op"] = "show-in-pool-mgr";
+                        j["type"] = "part";
+                        UUID pool_uuid;
+                        pool->get_filename(ObjectType::PART, sym.component->part->uuid, &pool_uuid);
+                        j["pool_uuid"] = (std::string)pool_uuid;
+                        j["uuid"] = (std::string)sym.component->part->uuid;
+                        this->send_json(j);
+                        break;
+                    }
+                }
+            }
+        });
+        set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), false);
     }
 
     connect_action(ActionID::MOVE_TO_OTHER_SHEET,
@@ -429,20 +450,21 @@ void ImpSchematic::update_action_sensitivity()
         bool has_board = send_json(req);
         set_action_sensitive(make_action(ActionID::SAVE_RELOAD_NETLIST), has_board);
         set_action_sensitive(make_action(ActionID::GO_TO_BOARD), has_board);
+        auto n_sym = std::count_if(sel.begin(), sel.end(),
+                                   [](const auto &x) { return x.type == ObjectType::SCHEMATIC_SYMBOL; });
+        set_action_sensitive(make_action(ActionID::SHOW_IN_BROWSER), n_sym == 1);
+        set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), n_sym == 1);
         if (!has_board) {
             set_action_sensitive(make_action(ActionID::TO_BOARD), false);
         }
         else {
-
-            auto has_sym = std::any_of(sel.begin(), sel.end(),
-                                       [](const auto &x) { return x.type == ObjectType::SCHEMATIC_SYMBOL; });
-            set_action_sensitive(make_action(ActionID::TO_BOARD), has_sym);
-            set_action_sensitive(make_action(ActionID::SHOW_IN_BROWSER), has_sym);
+            set_action_sensitive(make_action(ActionID::TO_BOARD), n_sym);
         }
     }
     else {
         set_action_sensitive(make_action(ActionID::TO_BOARD), false);
         set_action_sensitive(make_action(ActionID::SHOW_IN_BROWSER), false);
+        set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), false);
     }
     set_action_sensitive(make_action(ActionID::MOVE_TO_OTHER_SHEET), sel.size() > 0);
 

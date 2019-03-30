@@ -289,6 +289,11 @@ void PoolNotebook::go_to(ObjectType type, const UUID &uu)
     set_current_page(pages.at(type));
 }
 
+const UUID &PoolNotebook::get_pool_uuid() const
+{
+    return pool_uuid;
+}
+
 void PoolNotebook::show_duplicate_window(ObjectType ty, const UUID &uu)
 {
     if (!uu)

@@ -208,6 +208,13 @@ void PoolProjectManagerApplication::on_open(const Gio::Application::type_vec_fil
     appwindow->present();
 }
 
+void PoolProjectManagerApplication::open_pool(const std::string &pool_json, ObjectType type, const UUID &uu)
+{
+    auto appwindow = create_appwindow();
+    appwindow->open_pool(pool_json, type, uu);
+    appwindow->present();
+}
+
 void PoolProjectManagerApplication::on_hide_window(Gtk::Window *window)
 {
     delete window;

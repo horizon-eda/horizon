@@ -661,6 +661,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::GO_TO_SCHEMATIC, ToolID::NONE},
          {"Go to schematic", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::SHOW_IN_POOL_MANAGER, ToolID::NONE},
+         {"Show in pool manager", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -743,6 +747,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(SEARCH_PREVIOUS),
         ACTION_LUT_ITEM(GO_TO_BOARD),
         ACTION_LUT_ITEM(GO_TO_SCHEMATIC),
+        ACTION_LUT_ITEM(SHOW_IN_POOL_MANAGER),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

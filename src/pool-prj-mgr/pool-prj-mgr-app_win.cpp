@@ -312,6 +312,29 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
     else if (op == "preferences") {
         app->activate_action("preferences");
     }
+    else if (op == "show-in-pool-mgr") {
+        UUID uu = j.at("uuid").get<std::string>();
+        UUID pool_uu = j.at("pool_uuid").get<std::string>();
+        ObjectType type = object_type_lut.lookup(j.at("type"));
+        bool shown = false;
+        for (auto win : app->get_windows()) {
+            auto w = dynamic_cast<PoolProjectManagerAppWindow *>(win);
+            if (w) {
+                if (w->get_view_mode() == ViewMode::POOL && (w->get_pool_uuid() == pool_uu)) {
+                    w->pool_notebook_go_to(type, uu);
+                    w->present();
+                    shown = true;
+                }
+            }
+        }
+        if (!shown) { // need to open
+            auto pool2 = PoolManager::get().get_by_uuid(pool_uu);
+            if (pool2) {
+                auto pool_json = Glib::build_filename(pool2->base_path, "pool.json");
+                app->open_pool(pool_json, type, uu);
+            }
+        }
+    }
     return nullptr;
 }
 
@@ -683,6 +706,25 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
     }
 }
 
+PoolProjectManagerAppWindow::ViewMode PoolProjectManagerAppWindow::get_view_mode() const
+{
+    return view_mode;
+}
+
+UUID PoolProjectManagerAppWindow::get_pool_uuid() const
+{
+    if (pool_notebook)
+        return pool_notebook->get_pool_uuid();
+    else
+        return UUID();
+}
+
+void PoolProjectManagerAppWindow::pool_notebook_go_to(ObjectType type, const UUID &uu)
+{
+    if (pool_notebook)
+        pool_notebook->go_to(type, uu);
+}
+
 PoolProjectManagerAppWindow *PoolProjectManagerAppWindow::create(PoolProjectManagerApplication *app)
 {
     // Load the Builder file and instantiate its widgets.
@@ -871,6 +913,13 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         set_view_mode(ViewMode::PROJECT);
     }
 }
+
+void PoolProjectManagerAppWindow::open_pool(const std::string &pool_json, ObjectType type, const UUID &uu)
+{
+    open_file_view(Gio::File::create_for_path(pool_json));
+    pool_notebook_go_to(type, uu);
+}
+
 
 void PoolProjectManagerAppWindow::handle_place_part(const UUID &uu)
 {

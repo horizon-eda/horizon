@@ -33,6 +33,7 @@ public:
     bool get_needs_save() const;
     void save();
     void go_to(ObjectType type, const UUID &uu);
+    const UUID &get_pool_uuid() const;
     ~PoolNotebook();
 
 private:

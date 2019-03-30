@@ -16,6 +16,7 @@
 #include "project/project.hpp"
 #include "prj-mgr/prj-mgr_views.hpp"
 #include "pool-mgr/view_create_pool.hpp"
+#include "common/common.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -68,6 +69,13 @@ public:
     void process_close(const std::string &file);
     void cleanup_pool_cache();
 
+    enum class ViewMode { OPEN, POOL, DOWNLOAD, PROJECT, CREATE_PROJECT, CREATE_POOL };
+    ViewMode get_view_mode() const;
+
+    UUID get_pool_uuid() const;
+    void pool_notebook_go_to(ObjectType type, const UUID &uu);
+    void open_pool(const std::string &pool_json, ObjectType type = ObjectType::INVALID, const UUID &uu = UUID());
+
 private:
     Glib::RefPtr<Gtk::Builder> builder;
     Gtk::Stack *stack = nullptr;
@@ -115,7 +123,6 @@ private:
     class PartBrowserWindow *part_browser_window = nullptr;
     class PoolCacheWindow *pool_cache_window = nullptr;
 
-    enum class ViewMode { OPEN, POOL, DOWNLOAD, PROJECT, CREATE_PROJECT, CREATE_POOL };
     ViewMode view_mode = ViewMode::OPEN;
     void set_view_mode(ViewMode mode);
 

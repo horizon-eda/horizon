@@ -34,6 +34,8 @@ public:
     void close_appwindows(std::set<Gtk::Window *> wins);
     Preferences &get_preferences();
 
+    void open_pool(const std::string &pool_json, ObjectType type = ObjectType::INVALID, const UUID &uu = UUID());
+
 protected:
     // Override default signal handlers:
     void on_activate() override;
