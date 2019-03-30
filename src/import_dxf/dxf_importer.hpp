@@ -17,11 +17,17 @@ public:
     std::set<class Line *> lines;
     std::set<class Arc *> arcs;
 
+    enum class UnsupportedType { CIRCLE, ELLIPSE, SPLINE };
+
+    const std::map<UnsupportedType, unsigned int> &get_items_unsupported() const;
+
 private:
     class Core *core = nullptr;
     int layer = 0;
     uint64_t width = 0;
     Coordi shift;
     double scale = 1;
+
+    std::map<UnsupportedType, unsigned int> items_unsupported;
 };
 } // namespace horizon

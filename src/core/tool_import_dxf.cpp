@@ -31,6 +31,7 @@ ToolResponse ToolImportDXF::begin(const ToolArgs &args)
     importer.set_shift(args.coords);
     importer.set_width(0);
     if (importer.import(filename)) {
+        auto unsupported = importer.get_items_unsupported();
         core.r->selection.clear();
         for (const auto it : importer.junctions) {
             core.r->selection.emplace(it->uuid, ObjectType::JUNCTION);
@@ -38,7 +39,31 @@ ToolResponse ToolImportDXF::begin(const ToolArgs &args)
         lines = importer.lines;
         arcs = importer.arcs;
         move_init(args.coords);
-        imp->tool_bar_set_tip("<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate <b>e:</b>mirror <b>w:</b>line width");
+        std::string s = "<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate <b>e:</b>mirror <b>w:</b>line width ";
+        if (unsupported.size()) {
+            s += "<span color='red' weight='bold'> Unsupported items: ";
+            for (const auto &it : unsupported) {
+                s += std::to_string(it.second) + " ";
+                switch (it.first) {
+                case DXFImporter::UnsupportedType::CIRCLE:
+                    s += "Circle";
+                    break;
+                case DXFImporter::UnsupportedType::ELLIPSE:
+                    s += "Ellipse";
+                    break;
+                case DXFImporter::UnsupportedType::SPLINE:
+                    s += "Spline";
+                    break;
+                }
+                if (it.second > 1)
+                    s += "s";
+                s += ", ";
+            }
+            s.pop_back();
+            s.pop_back();
+            s += "</span>";
+        }
+        imp->tool_bar_set_tip(s);
         return ToolResponse();
     }
     else {

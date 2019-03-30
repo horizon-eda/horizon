@@ -32,6 +32,8 @@ public:
     Coordi shift;
     double scale = 1;
 
+    std::map<DXFImporter::UnsupportedType, unsigned int> items_unsupported;
+
 private:
     Core *core = nullptr;
     std::deque<Junction *> polyline_junctions;
@@ -118,6 +120,29 @@ private:
         arc->from = from;
         arc->to = to;
     }
+
+    void add_unsupported(DXFImporter::UnsupportedType type)
+    {
+        if (items_unsupported.count(type))
+            items_unsupported.at(type)++;
+        else
+            items_unsupported.emplace(type, 0);
+    }
+
+    void addCircle(const DL_CircleData &) override
+    {
+        add_unsupported(DXFImporter::UnsupportedType::CIRCLE);
+    }
+
+    void addEllipse(const DL_EllipseData &) override
+    {
+        add_unsupported(DXFImporter::UnsupportedType::ELLIPSE);
+    }
+
+    void addSpline(const DL_SplineData &) override
+    {
+        add_unsupported(DXFImporter::UnsupportedType::SPLINE);
+    }
 };
 
 DXFImporter::DXFImporter(Core *c) : core(c)
@@ -144,6 +169,11 @@ void DXFImporter::set_width(uint64_t w)
     width = w;
 }
 
+const std::map<DXFImporter::UnsupportedType, unsigned int> &DXFImporter::get_items_unsupported() const
+{
+    return items_unsupported;
+}
+
 bool DXFImporter::import(const std::string &filename)
 {
     DXFAdapter adapter(core);
@@ -159,6 +189,7 @@ bool DXFImporter::import(const std::string &filename)
     junctions = adapter.junctions;
     lines = adapter.lines_out;
     arcs = adapter.arcs_out;
+    items_unsupported = adapter.items_unsupported;
     return true;
 }
 } // namespace horizon
