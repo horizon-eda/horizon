@@ -1,6 +1,6 @@
 # Horizon is a free EDA package
 It's far from finished, but the overall 
-architecture is there. See [the wiki](https://github.com/carrotIndustries/horizon/wiki/Feature-overview) for an overview
+architecture is there. See [the docs](https://horizon-eda.readthedocs.io/en/latest/feature_overview.html) for an overview
 of horizon's top features.
 
 Wanna chat about the project? Join #horizon on freenode
@@ -27,7 +27,7 @@ Wanna chat about the project? Join #horizon on freenode
 - Everything is referenced by UUIDs
 
 # Getting Started
-See the [wiki](https://github.com/carrotIndustries/horizon/wiki/Getting-started)
+See the [the docs](https://horizon-eda.readthedocs.io/en/latest/getting-started.html)
 
 # Included third-party software
 - https://github.com/nlohmann/json/
