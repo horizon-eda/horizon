@@ -530,7 +530,11 @@ void ImpBase::run(int argc, char *argv[])
     }
 
     core.r->signal_can_undo_redo().connect([this] { update_action_sensitivity(); });
-    canvas->signal_selection_changed().connect([this] { update_action_sensitivity(); });
+    canvas->signal_selection_changed().connect([this] {
+        if (!core.r->tool_is_active()) {
+            update_action_sensitivity();
+        }
+    });
     core.r->signal_can_undo_redo().emit();
 
     core.r->signal_load_tool_settings().connect([this](ToolID id) {
@@ -1553,8 +1557,9 @@ void ImpBase::set_monitor_items(const std::set<std::pair<ObjectType, UUID>> &ite
 void ImpBase::handle_file_changed(const Glib::RefPtr<Gio::File> &file1, const Glib::RefPtr<Gio::File> &file2,
                                   Gio::FileMonitorEvent ev)
 {
-    main_window->show_nonmodal("Pool has changed", "Reload pool", [this] { trigger_action(ActionID::RELOAD_POOL); },
-                               "This will clear the undo/redo history");
+    main_window->show_nonmodal(
+            "Pool has changed", "Reload pool", [this] { trigger_action(ActionID::RELOAD_POOL); },
+            "This will clear the undo/redo history");
 }
 
 void ImpBase::set_read_only(bool v)

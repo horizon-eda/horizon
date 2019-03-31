@@ -112,6 +112,8 @@ bool ImpBoard::handle_broadcast(const json &j)
 
 void ImpBoard::handle_selection_cross_probe()
 {
+    if (core_board.tool_is_active())
+        return;
     json j;
     j["op"] = "board-select";
     j["selection"] = nullptr;

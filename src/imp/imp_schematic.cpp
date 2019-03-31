@@ -145,6 +145,8 @@ bool ImpSchematic::handle_broadcast(const json &j)
 
 void ImpSchematic::handle_selection_cross_probe()
 {
+    if (core_schematic.tool_is_active())
+        return;
     json j;
     j["op"] = "schematic-select";
     j["selection"] = nullptr;
