@@ -420,6 +420,10 @@ void ImpBase::run(int argc, char *argv[])
         this->set_search_mode(true, false);
         this->search_go(-1);
     });
+    connect_action(ActionID::SELECT_ALL, [this](const auto &a) {
+        canvas->selection_mode = CanvasGL::SelectionMode::NORMAL;
+        canvas->select_all();
+    });
 
     main_window->search_entry->property_has_focus().signal_changed().connect(
             [this] { canvas->steal_focus = !main_window->search_entry->property_has_focus(); });

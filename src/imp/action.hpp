@@ -70,7 +70,8 @@ enum class ActionID {
     SEARCH_PREVIOUS,
     GO_TO_BOARD,
     GO_TO_SCHEMATIC,
-    SHOW_IN_POOL_MANAGER
+    SHOW_IN_POOL_MANAGER,
+    SELECT_ALL
 };
 
 enum class ActionGroup {

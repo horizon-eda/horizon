@@ -467,6 +467,19 @@ void CanvasGL::set_selection(const std::set<SelectableRef> &sel, bool emit)
     request_push(PF_SELECTABLES);
 }
 
+void CanvasGL::select_all()
+{
+    size_t i = 0;
+    for (auto &it : selectables.items) {
+        const auto &r = selectables.items_ref.at(i);
+        it.set_flag(horizon::Selectable::Flag::SELECTED, selection_filter.can_select(r));
+        it.set_flag(horizon::Selectable::Flag::PRELIGHT, false);
+        i++;
+    }
+    s_signal_selection_changed.emit();
+    request_push(PF_SELECTABLES);
+}
+
 std::set<SelectableRef> CanvasGL::get_selection_at(const Coordi &c)
 {
     std::set<SelectableRef> in_selection;

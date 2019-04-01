@@ -39,6 +39,7 @@ public:
 
     std::set<SelectableRef> get_selection();
     void set_selection(const std::set<SelectableRef> &sel, bool emit = true);
+    void select_all();
     void set_cursor_pos(const Coordi &c);
     void set_cursor_external(bool v);
     Coordi get_cursor_pos();
