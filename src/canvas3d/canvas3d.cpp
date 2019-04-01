@@ -510,18 +510,24 @@ void Canvas3D::prepare()
 
 void Canvas3D::prepare_soldermask(int layer)
 {
-    ClipperLib::Clipper cl;
-    for (const auto &it : patches) {
-        if (it.first.layer == BoardLayers::L_OUTLINE) { // add outline
-            cl.AddPaths(it.second, ClipperLib::ptSubject, true);
+    ClipperLib::Paths temp;
+    {
+        ClipperLib::Clipper cl;
+        for (const auto &it : patches) {
+            if (it.first.layer == BoardLayers::L_OUTLINE) { // add outline
+                cl.AddPaths(it.second, ClipperLib::ptSubject, true);
+            }
+            else if (it.first.layer == layer) {
+                cl.AddPaths(it.second, ClipperLib::ptClip, true);
+            }
         }
-        else if (it.first.layer == layer) {
-            cl.AddPaths(it.second, ClipperLib::ptClip, true);
-        }
-    }
 
+        cl.Execute(ClipperLib::ctDifference, temp, ClipperLib::pftEvenOdd, ClipperLib::pftNonZero);
+    }
     ClipperLib::PolyTree pt;
-    cl.Execute(ClipperLib::ctDifference, pt, ClipperLib::pftEvenOdd, ClipperLib::pftNonZero);
+    ClipperLib::ClipperOffset cl;
+    cl.AddPaths(temp, ClipperLib::jtSquare, ClipperLib::etClosedPolygon);
+    cl.Execute(pt, -.001_mm);
 
     for (const auto node : pt.Childs) {
         polynode_to_tris(node, layer);
