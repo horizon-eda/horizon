@@ -19,6 +19,7 @@
 #include "board/via.hpp"
 #include "board/track.hpp"
 #include "board/board_hole.hpp"
+#include "common/dimension.hpp"
 #include "util/uuid.hpp"
 #include <map>
 #include <set>
@@ -48,6 +49,7 @@ public:
     std::map<UUID, Via> vias;
     std::map<UUID, Track> tracks;
     std::map<UUID, BoardHole> board_holes;
+    std::map<UUID, Dimension> dimensions;
 
     json serialize();
 

@@ -31,6 +31,7 @@ void Buffer::clear()
     vias.clear();
     tracks.clear();
     board_holes.clear();
+    dimensions.clear();
 }
 
 void Buffer::load_from_symbol(std::set<SelectableRef> selection)
@@ -169,6 +170,10 @@ void Buffer::load_from_symbol(std::set<SelectableRef> selection)
         else if (it.type == ObjectType::SHAPE) {
             auto x = &core.a->get_padstack()->shapes.at(it.uuid);
             shapes.emplace(x->uuid, *x);
+        }
+        else if (it.type == ObjectType::DIMENSION) {
+            auto x = core.r->get_dimension(it.uuid);
+            dimensions.emplace(x->uuid, *x);
         }
     }
     for (const auto &it : selection) {
@@ -362,6 +367,10 @@ json Buffer::serialize()
     j["board_holes"] = json::object();
     for (const auto &it : board_holes) {
         j["board_holes"][(std::string)it.first] = it.second.serialize();
+    }
+    j["dimensions"] = json::object();
+    for (const auto &it : dimensions) {
+        j["dimensions"][(std::string)it.first] = it.second.serialize();
     }
     return j;
 }

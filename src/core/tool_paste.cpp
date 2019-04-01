@@ -60,7 +60,7 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
     shift = cursor_pos_canvas - cursor_pos;
 
     std::map<UUID, const UUID> text_xlat;
-    if (j.count("texts")) {
+    if (j.count("texts") && core.r->has_object_type(ObjectType::TEXT)) {
         const json &o = j["texts"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
@@ -70,6 +70,18 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
             fix_layer(x->layer);
             apply_shift(x->placement.shift, cursor_pos_canvas);
             core.r->selection.emplace(u, ObjectType::TEXT);
+        }
+    }
+    if (j.count("dimensions") && core.r->has_object_type(ObjectType::DIMENSION)) {
+        const json &o = j["dimensions"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID::random();
+            auto x = core.r->insert_dimension(u);
+            *x = Dimension(u, it.value());
+            apply_shift(x->p0, cursor_pos_canvas);
+            apply_shift(x->p1, cursor_pos_canvas);
+            core.r->selection.emplace(u, ObjectType::DIMENSION, 0);
+            core.r->selection.emplace(u, ObjectType::DIMENSION, 1);
         }
     }
     std::map<UUID, const UUID> junction_xlat;
