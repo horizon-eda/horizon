@@ -142,6 +142,9 @@ void ToolRotateArbitrary::save_placements()
         case ObjectType::BOARD_PACKAGE:
             placements[it] = core.b->get_board()->packages.at(it.uuid).placement;
             break;
+        case ObjectType::PAD:
+            placements[it] = core.k->get_package()->pads.at(it.uuid).placement;
+            break;
         default:;
         }
     }
@@ -179,6 +182,9 @@ void ToolRotateArbitrary::apply_placements_rotation(int angle)
         } break;
         case ObjectType::BOARD_PACKAGE:
             core.b->get_board()->packages.at(it.first.uuid).placement = rotate_placement(it.second, origin, angle);
+            break;
+        case ObjectType::PAD:
+            core.k->get_package()->pads.at(it.first.uuid).placement = rotate_placement(it.second, origin, angle);
             break;
         default:;
         }
