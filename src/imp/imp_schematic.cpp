@@ -224,7 +224,6 @@ void ImpSchematic::construct()
     sheet_box->signal_select_sheet().connect(sigc::mem_fun(*this, &ImpSchematic::handle_select_sheet));
     main_window->left_panel->pack_start(*sheet_box, false, false, 0);
 
-    auto hamburger_menu = add_hamburger_menu();
     hamburger_menu->append("Annotate", "win.annotate");
     add_tool_action(ToolID::ANNOTATE, "annotate");
 
