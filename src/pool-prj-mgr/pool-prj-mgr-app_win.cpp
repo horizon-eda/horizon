@@ -59,7 +59,18 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("info_bar_label", info_bar_label);
     builder->get_widget("menu_new_pool", menu_new_pool);
     builder->get_widget("menu_new_project", menu_new_project);
+    builder->get_widget("hamburger_menu_button", hamburger_menu_button);
     set_view_mode(ViewMode::OPEN);
+
+    {
+        auto rb = Gtk::Builder::create();
+        rb->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/app_menu.ui");
+
+        auto object = rb->get_object("appmenu");
+        auto app_menu = Glib::RefPtr<Gio::MenuModel>::cast_dynamic(object);
+
+        hamburger_menu_button->set_menu_model(app_menu);
+    }
 
     pool_update_progress->set_pulse_step(.001);
 
@@ -649,6 +660,7 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
     button_new->hide();
     header->set_subtitle("");
     header->set_show_close_button(true);
+    hamburger_menu_button->hide();
     view_mode = mode;
 
     switch (mode) {
@@ -657,6 +669,7 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
         button_open->show();
         button_download->show();
         button_new->show();
+        hamburger_menu_button->show();
         header->set_title("Horizon EDA");
         update_recent_items();
         break;
@@ -665,6 +678,7 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
         stack->set_visible_child("pool");
         button_close->show();
         button_update->show();
+        hamburger_menu_button->show();
         header->set_title("Pool manager");
         break;
 
@@ -682,6 +696,7 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
         stack->set_visible_child("project");
         button_close->show();
         button_save->show();
+        hamburger_menu_button->show();
         header->set_title("Project manager");
         break;
 

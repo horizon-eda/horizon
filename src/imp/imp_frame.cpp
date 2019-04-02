@@ -38,7 +38,6 @@ void ImpFrame::construct()
         frame->name = name_entry->get_text();
     });
 
-    auto hamburger_menu = add_hamburger_menu();
     hamburger_menu->append("Frame properties...", "win.edit_frame");
     add_tool_action(ToolID::EDIT_FRAME_PROPERTIES, "edit_frame");
 }

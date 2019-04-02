@@ -662,7 +662,6 @@ void ImpPackage::construct()
 
     browser_alt_button->property_selected_uuid().signal_changed().connect([this] { core_package.set_needs_save(); });
 
-    auto hamburger_menu = add_hamburger_menu();
     hamburger_menu->append("Import DXF", "win.import_dxf");
     add_tool_action(ToolID::IMPORT_DXF, "import_dxf");
 

@@ -8,6 +8,10 @@
         <attribute name="action">win.preferences</attribute>
       </item>
       <item>
+        <attribute name="label" translatable="yes">Help</attribute>
+        <attribute name="action">win.help</attribute>
+      </item>
+      <item>
         <attribute name="label" translatable="yes">View Log</attribute>
         <attribute name="action">win.view_log</attribute>
       </item>

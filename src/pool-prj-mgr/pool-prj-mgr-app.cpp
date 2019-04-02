@@ -110,15 +110,6 @@ void PoolProjectManagerApplication::on_startup()
     add_action("new_window", sigc::mem_fun(*this, &PoolProjectManagerApplication::on_action_new_window));
     set_accel_for_action("app.quit", "<Ctrl>Q");
 
-    auto refBuilder = Gtk::Builder::create();
-    refBuilder->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/app_menu.ui");
-
-
-    auto object = refBuilder->get_object("appmenu");
-    auto app_menu = Glib::RefPtr<Gio::MenuModel>::cast_dynamic(object);
-    if (app_menu)
-        set_app_menu(app_menu);
-
     recent_items.clear();
     if (Glib::file_test(get_config_filename(), Glib::FILE_TEST_IS_REGULAR)) {
         load_from_config(get_config_filename());

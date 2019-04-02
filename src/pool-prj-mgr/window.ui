@@ -1138,9 +1138,6 @@ In case of modifying an existing part, provide rationale for the modification.</
           <placeholder/>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
           <object class="GtkButton" id="button_do_download">
             <property name="label" translatable="yes">Download</property>
             <property name="visible">True</property>
@@ -1169,6 +1166,24 @@ In case of modifying an existing part, provide rationale for the modification.</
           <packing>
             <property name="pack_type">end</property>
             <property name="position">9</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="hamburger_menu_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">open-menu-symbolic</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">10</property>
           </packing>
         </child>
       </object>

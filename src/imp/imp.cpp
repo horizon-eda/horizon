@@ -552,10 +552,6 @@ void ImpBase::run(int argc, char *argv[])
     core.r->signal_save_tool_settings().connect(
             [this](ToolID id, json j) { save_json_to_file(get_tool_settings_filename(id), j); });
 
-    auto help_button = create_action_button(make_action(ActionID::HELP));
-    help_button->show();
-    main_window->header->pack_end(*help_button);
-
     if (core.r->get_rules()) {
         rules_window = RulesWindow::create(main_window, canvas, core.r->get_rules(), core.r);
         rules_window->signal_canvas_update().connect(sigc::mem_fun(*this, &ImpBase::canvas_update_from_pp));
@@ -607,10 +603,23 @@ void ImpBase::run(int argc, char *argv[])
     });
     PreferencesProvider::get().set_prefs(preferences);
 
+    add_hamburger_menu();
+
     construct();
+
+    {
+        auto refBuilder = Gtk::Builder::create();
+        refBuilder->add_from_resource("/net/carrotIndustries/horizon/imp/app_menu.ui");
+
+        auto object = refBuilder->get_object("appmenu");
+        auto app_menu = Glib::RefPtr<Gio::MenuModel>::cast_dynamic(object);
+        hamburger_menu->append_section(app_menu);
+    }
 
     if (sockets_connected)
         main_window->add_action("preferences", [this] { trigger_action(ActionID::PREFERENCES); });
+
+    main_window->add_action("help", [this] { trigger_action(ActionID::HELP); });
 
     preferences.signal_changed().connect(sigc::mem_fun(*this, &ImpBase::apply_preferences));
 
@@ -659,12 +668,6 @@ void ImpBase::run(int argc, char *argv[])
     Gtk::Window::set_default_icon_name("horizon-eda");
 
     app->signal_startup().connect([this, app] {
-        auto refBuilder = Gtk::Builder::create();
-        refBuilder->add_from_resource("/net/carrotIndustries/horizon/imp/app_menu.ui");
-
-        auto object = refBuilder->get_object("appmenu");
-        auto app_menu = Glib::RefPtr<Gio::MenuModel>::cast_dynamic(object);
-        app->set_app_menu(app_menu);
         app->add_window(*main_window);
         app->add_action("quit", [this] { main_window->close(); });
     });
@@ -1037,19 +1040,17 @@ void ImpBase::update_action_sensitivity()
     set_action_sensitive(make_action(ActionID::DUPLICATE), sel.size() > 0);
 }
 
-Glib::RefPtr<Gio::Menu> ImpBase::add_hamburger_menu()
+void ImpBase::add_hamburger_menu()
 {
     auto hamburger_button = Gtk::manage(new Gtk::MenuButton);
     hamburger_button->set_image_from_icon_name("open-menu-symbolic", Gtk::ICON_SIZE_BUTTON);
     core.r->signal_tool_changed().connect(
             [hamburger_button](ToolID t) { hamburger_button->set_sensitive(t == ToolID::NONE); });
 
-    auto hamburger_menu = Gio::Menu::create();
+    hamburger_menu = Gio::Menu::create();
     hamburger_button->set_menu_model(hamburger_menu);
     hamburger_button->show();
     main_window->header->pack_end(*hamburger_button);
-
-    return hamburger_menu;
 }
 
 void ImpBase::layer_up_down(bool up)

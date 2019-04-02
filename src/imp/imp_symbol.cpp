@@ -122,7 +122,6 @@ void ImpSymbol::construct()
     });
     set_action_sensitive(make_action(ActionID::EDIT_UNIT), sockets_connected);
 
-    auto hamburger_menu = add_hamburger_menu();
     hamburger_menu->append("Change unit", "win.change_unit");
     add_tool_action(ToolID::CHANGE_UNIT, "change_unit");
 

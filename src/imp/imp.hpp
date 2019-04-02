@@ -100,7 +100,7 @@ protected:
     bool trigger_action(ToolID tid);
 
     void add_tool_action(ToolID tid, const std::string &action);
-    Glib::RefPtr<Gio::Menu> add_hamburger_menu();
+    void add_hamburger_menu();
 
     Preferences preferences;
 
@@ -151,6 +151,8 @@ protected:
 
     virtual void search_center(const Core::SearchResult &res);
     virtual std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu);
+
+    Glib::RefPtr<Gio::Menu> hamburger_menu;
 
 private:
     void fix_cursor_pos();

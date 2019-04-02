@@ -92,6 +92,7 @@ private:
     Gtk::Revealer *download_revealer = nullptr;
     Gtk::Label *download_label = nullptr;
     Gtk::Spinner *download_spinner = nullptr;
+    Gtk::MenuButton *hamburger_menu_button = nullptr;
 
     Gtk::Entry *download_gh_username_entry = nullptr;
     Gtk::Entry *download_gh_repo_entry = nullptr;

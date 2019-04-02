@@ -251,8 +251,6 @@ void ImpBoard::construct()
         view_3d_window->present();
     });
 
-    auto hamburger_menu = add_hamburger_menu();
-
     hamburger_menu->append("Fabrication output", "win.fab_out");
     main_window->add_action("fab_out", [this] { fab_output_window->present(); });
 
