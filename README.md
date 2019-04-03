@@ -1,6 +1,6 @@
 # Horizon is a free EDA package
 It's far from finished, but the overall 
-architecture is there. See [the docs](https://horizon-eda.readthedocs.io/en/latest/feature_overview.html) for an overview
+architecture is there. See [the docs](https://horizon-eda.readthedocs.io/en/latest/feature-overview.html) for an overview
 of horizon's top features.
 
 Wanna chat about the project? Join #horizon on freenode
