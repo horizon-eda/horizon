@@ -34,7 +34,9 @@ public:
     void close_appwindows(std::set<Gtk::Window *> wins);
     Preferences &get_preferences();
 
-    void open_pool(const std::string &pool_json, ObjectType type = ObjectType::INVALID, const UUID &uu = UUID());
+    void open_pool(const std::string &pool_json, ObjectType type = ObjectType::INVALID, const UUID &uu = UUID(),
+                   guint32 timestamp = 0);
+    void show_preferences_window(guint32 timestamp = 0);
 
 protected:
     // Override default signal handlers:
@@ -51,7 +53,6 @@ private:
     void on_hide_window(Gtk::Window *window);
     void on_action_quit();
     void on_action_new_window();
-    void on_action_preferences();
     void load_from_config(const std::string &config_filename);
     Preferences preferences;
     class PreferencesWindow *preferences_window = nullptr;

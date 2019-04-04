@@ -105,7 +105,7 @@ void PoolProjectManagerApplication::on_startup()
 #endif
     curl_global_init(CURL_GLOBAL_ALL);
 
-    add_action("preferences", sigc::mem_fun(*this, &PoolProjectManagerApplication::on_action_preferences));
+    add_action("preferences", [this] { show_preferences_window(); });
     add_action("quit", sigc::mem_fun(*this, &PoolProjectManagerApplication::on_action_quit));
     add_action("new_window", sigc::mem_fun(*this, &PoolProjectManagerApplication::on_action_new_window));
     set_accel_for_action("app.quit", "<Ctrl>Q");
@@ -143,7 +143,7 @@ void PoolProjectManagerApplication::on_startup()
     signal_shutdown().connect(sigc::mem_fun(*this, &PoolProjectManagerApplication::on_shutdown));
 }
 
-void PoolProjectManagerApplication::on_action_preferences()
+void PoolProjectManagerApplication::show_preferences_window(guint32 timestamp)
 {
     /*auto prefs_dialog = new ProjectManagerPrefs(dynamic_cast<Gtk::ApplicationWindow *>(get_active_window()));
     prefs_dialog->present();
@@ -158,7 +158,7 @@ void PoolProjectManagerApplication::on_action_preferences()
             preferences.save();
         });
     }
-    preferences_window->present();
+    preferences_window->present(timestamp);
 }
 
 void PoolProjectManagerApplication::on_shutdown()
@@ -199,11 +199,12 @@ void PoolProjectManagerApplication::on_open(const Gio::Application::type_vec_fil
     appwindow->present();
 }
 
-void PoolProjectManagerApplication::open_pool(const std::string &pool_json, ObjectType type, const UUID &uu)
+void PoolProjectManagerApplication::open_pool(const std::string &pool_json, ObjectType type, const UUID &uu,
+                                              guint32 timestamp)
 {
     auto appwindow = create_appwindow();
     appwindow->open_pool(pool_json, type, uu);
-    appwindow->present();
+    appwindow->present(timestamp);
 }
 
 void PoolProjectManagerApplication::on_hide_window(Gtk::Window *window)

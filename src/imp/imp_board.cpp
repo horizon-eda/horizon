@@ -79,6 +79,7 @@ bool ImpBoard::handle_broadcast(const json &j)
         if (core_board.tool_is_active())
             return true;
         std::string op = j.at("op");
+        guint32 timestamp = j.value("time", 0);
         if (op == "highlight" && cross_probing_enabled) {
             highlights.clear();
             const json &o = j["objects"];
@@ -90,7 +91,7 @@ bool ImpBoard::handle_broadcast(const json &j)
             update_highlights();
         }
         else if (op == "place") {
-            main_window->present();
+            main_window->present(timestamp);
             std::set<SelectableRef> components;
             const json &o = j["components"];
             for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -103,7 +104,7 @@ bool ImpBoard::handle_broadcast(const json &j)
             tool_begin(ToolID::MAP_PACKAGE, true, components);
         }
         else if (op == "reload-netlist") {
-            main_window->present();
+            main_window->present(timestamp);
             trigger_action(ActionID::RELOAD_NETLIST);
         }
     }
@@ -289,7 +290,9 @@ void ImpBoard::construct()
         canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBoard::handle_selection_cross_probe));
 
         connect_action(ActionID::GO_TO_SCHEMATIC, [this](const auto &conn) {
+            auto ev = gtk_get_current_event();
             json j;
+            j["time"] = gdk_event_get_time(ev);
             j["op"] = "present-schematic";
             allow_set_foreground_window(this->get_schematic_pid());
             this->send_json(j);

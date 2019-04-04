@@ -194,12 +194,13 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
 {
     std::string op = j.at("op");
     auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
+    guint32 timestamp = j.value("time", 0);
     if (op == "part-placed") {
         UUID part = j.at("part").get<std::string>();
         part_browser_window->placed_part(part);
     }
     else if (op == "show-browser") {
-        part_browser_window->present();
+        part_browser_window->present(timestamp);
     }
     else if (op == "schematic-select") {
 
@@ -234,13 +235,14 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             auto pid = processes.at(project->board_filename).proc->get_pid();
             json tx;
             tx["op"] = "place";
+            tx["time"] = timestamp;
             tx["components"] = j.at("selection");
             app->send_json(pid, tx);
         }
     }
     else if (op == "show-in-browser") {
         part_browser_window->go_to_part(UUID(j.at("part").get<std::string>()));
-        part_browser_window->present();
+        part_browser_window->present(timestamp);
     }
     else if (op == "has-board") {
         return processes.count(project->board_filename) > 0;
@@ -275,6 +277,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             auto pid = processes.at(project->board_filename).proc->get_pid();
             json tx;
             tx["op"] = "present";
+            tx["time"] = timestamp;
             app->send_json(pid, tx);
         }
     }
@@ -284,6 +287,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             auto pid = processes.at(top_block.schematic_filename).proc->get_pid();
             json tx;
             tx["op"] = "present";
+            tx["time"] = timestamp;
             app->send_json(pid, tx);
         }
     }
@@ -321,7 +325,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         }
     }
     else if (op == "preferences") {
-        app->activate_action("preferences");
+        app->show_preferences_window(timestamp);
     }
     else if (op == "show-in-pool-mgr") {
         UUID uu = j.at("uuid").get<std::string>();
@@ -333,7 +337,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             if (w) {
                 if (w->get_view_mode() == ViewMode::POOL && (w->get_pool_uuid() == pool_uu)) {
                     w->pool_notebook_go_to(type, uu);
-                    w->present();
+                    w->present(timestamp);
                     shown = true;
                 }
             }
@@ -342,7 +346,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             auto pool2 = PoolManager::get().get_by_uuid(pool_uu);
             if (pool2) {
                 auto pool_json = Glib::build_filename(pool2->base_path, "pool.json");
-                app->open_pool(pool_json, type, uu);
+                app->open_pool(pool_json, type, uu, timestamp);
             }
         }
     }
@@ -821,15 +825,16 @@ ForcedPoolUpdateDialog::ForcedPoolUpdateDialog(const std::string &bp, Gtk::Windo
 
 void ForcedPoolUpdateDialog::pool_update_thread()
 {
-    pool_update(base_path,
-                [this](PoolUpdateStatus st, std::string filename, std::string msg) {
-                    {
-                        std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
-                        pool_update_status_queue.emplace_back(st, filename, msg);
-                    }
-                    dispatcher.emit();
-                },
-                true);
+    pool_update(
+            base_path,
+            [this](PoolUpdateStatus st, std::string filename, std::string msg) {
+                {
+                    std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
+                    pool_update_status_queue.emplace_back(st, filename, msg);
+                }
+                dispatcher.emit();
+            },
+            true);
 }
 
 bool PoolProjectManagerAppWindow::check_schema_update(const std::string &base_path)

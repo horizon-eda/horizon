@@ -117,13 +117,14 @@ bool ImpSchematic::handle_broadcast(const json &j)
         if (core_schematic.tool_is_active())
             return true;
         std::string op = j.at("op");
+        guint32 timestamp = j.value("time", 0);
         if (op == "place-part") {
-            main_window->present();
+            main_window->present(timestamp);
             part_from_project_manager = j.at("part").get<std::string>();
             tool_begin(ToolID::ADD_PART);
         }
         if (op == "assign-part") {
-            main_window->present();
+            main_window->present(timestamp);
             part_from_project_manager = j.at("part").get<std::string>();
             tool_begin(ToolID::ASSIGN_PART);
         }
@@ -276,8 +277,10 @@ void ImpSchematic::construct()
             this->tool_begin(ToolID::ADD_PART);
         }
         else {
+            auto ev = gtk_get_current_event();
             json j;
             j["op"] = "show-browser";
+            j["time"] = gdk_event_get_time(ev);
             allow_set_foreground_window(mgr_pid);
             this->send_json(j);
         }
@@ -285,8 +288,10 @@ void ImpSchematic::construct()
 
     if (sockets_connected) {
         connect_action(ActionID::TO_BOARD, [this](const auto &conn) {
+            auto ev = gtk_get_current_event();
             json j;
             j["op"] = "to-board";
+            j["time"] = gdk_event_get_time(ev);
             j["selection"] = nullptr;
             for (const auto &it : canvas->get_selection()) {
                 auto sheet = core_schematic.get_sheet();
@@ -314,9 +319,11 @@ void ImpSchematic::construct()
                 if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
                     auto &sym = sheet->symbols.at(it.uuid);
                     if (sym.component->part) {
+                        auto ev = gtk_get_current_event();
                         json j;
                         j["op"] = "show-in-browser";
                         j["part"] = (std::string)sym.component->part->uuid;
+                        j["time"] = gdk_event_get_time(ev);
                         this->send_json(j);
                         break;
                     }
@@ -326,14 +333,18 @@ void ImpSchematic::construct()
 
         connect_action(ActionID::SAVE_RELOAD_NETLIST, [this](const auto &conn) {
             this->trigger_action(ActionID::SAVE);
+            auto ev = gtk_get_current_event();
             json j;
+            j["time"] = gdk_event_get_time(ev);
             j["op"] = "reload-netlist";
             this->send_json(j);
         });
         set_action_sensitive(make_action(ActionID::SAVE_RELOAD_NETLIST), false);
 
         connect_action(ActionID::GO_TO_BOARD, [this](const auto &conn) {
+            auto ev = gtk_get_current_event();
             json j;
+            j["time"] = gdk_event_get_time(ev);
             j["op"] = "present-board";
             allow_set_foreground_window(this->get_board_pid());
             this->send_json(j);
