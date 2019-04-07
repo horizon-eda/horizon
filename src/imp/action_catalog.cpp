@@ -669,6 +669,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::SELECT_ALL, ToolID::NONE},
          {"Select all", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::DRAW_POLYGON_CIRCLE},
+         {"Draw polygon circle", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -877,5 +881,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(ADD_KEEPOUT),
         TOOL_LUT_ITEM(CHANGE_SYMBOL),
         TOOL_LUT_ITEM(PLACE_REFDES_AND_VALUE),
+        TOOL_LUT_ITEM(DRAW_POLYGON_CIRCLE),
 };
 } // namespace horizon

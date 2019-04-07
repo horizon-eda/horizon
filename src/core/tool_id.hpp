@@ -121,6 +121,8 @@ enum class ToolID {
     ADD_KEEPOUT,
     DELETE_KEEPOUT,
     EDIT_KEEPOUT,
-    PLACE_REFDES_AND_VALUE
+    PLACE_REFDES_AND_VALUE,
+    DRAW_LINE_CIRCLE,
+    DRAW_POLYGON_CIRCLE
 };
 } // namespace horizon
