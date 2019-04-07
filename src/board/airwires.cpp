@@ -103,6 +103,36 @@ static const std::vector<delaunay::Edge<double>> kruskalMST(std::list<delaunay::
     return mst;
 }
 
+typedef Coord<double> Coordd;
+
+static bool points_are_linear(const std::vector<delaunay::Vector2<double>> &points)
+{
+    if (points.size() < 3)
+        return true;
+    auto it = points.cbegin();
+    const auto &pp0 = *it++;
+    Coordd p0(pp0.x, pp0.y);
+    const auto &pp1 = *it++;
+    Coordd p1(pp1.x, pp1.y);
+    auto v = p1 - p0;
+    auto a0 = atan2(v.y, v.x);
+    if (a0 < 0)
+        a0 += M_PI;
+    for (; it != points.cend(); it++) {
+        Coordd p(it->x, it->y);
+        auto vp = p - p0;
+        if (vp.mag_sq() > 1e6) { //> 1µm
+            auto a = atan2(vp.y, vp.x);
+            if (a < 0)
+                a += M_PI;
+            if (std::abs(a - a0) > 1e-6) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 void Board::update_airwires(bool fast, const std::set<UUID> &nets_only)
 {
     bool partial = nets_only.size() > 0;
@@ -198,13 +228,30 @@ void Board::update_airwires(bool fast, const std::set<UUID> &nets_only)
         std::vector<delaunay::Edge<double>> edges_from_tri;
 
         // use delaunay triangulation to add ratsnest edges
-        if (points.size() >= 3) {
-            delaunay::Delaunay<double> del;
-            del.triangulate(points);
-            edges_from_tri = del.getEdges();
+        if (points.size() > 3) {
+            bool is_linear = points_are_linear(points);
+            // delaunay triangulation doesn't deal with points in a line
+            if (is_linear) {
+                std::vector<delaunay::Vector2<double>> points_sorted = points;
+                std::sort(points_sorted.begin(), points_sorted.end(),
+                          [](const auto &a, const auto &b) { return a.x < b.x; });
+                for (size_t i = 1; i < points_sorted.size(); i++) {
+                    edges_from_tri.emplace_back(points_sorted[i - 1], points_sorted[i]);
+                }
+            }
+            else {
+                delaunay::Delaunay<double> del;
+                del.triangulate(points);
+                edges_from_tri = del.getEdges();
+            }
+        }
+        else if (points.size() == 3) {
+            edges_from_tri.emplace_back(points[0], points[1]);
+            edges_from_tri.emplace_back(points[1], points[2]);
+            edges_from_tri.emplace_back(points[0], points[2]);
         }
         else if (points.size() == 2) {
-            edges_from_tri.emplace_back(points[0], points[1], -1);
+            edges_from_tri.emplace_back(points[0], points[1]);
         }
 
         // build list for MST algorithm, start with edges defined by board
