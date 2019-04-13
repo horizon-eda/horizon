@@ -17,6 +17,7 @@
 #ifdef G_OS_WIN32
 #undef DELETE
 #undef DUPLICATE
+#undef ERROR
 #endif
 
 namespace horizon {

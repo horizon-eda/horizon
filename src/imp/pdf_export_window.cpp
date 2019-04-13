@@ -5,6 +5,11 @@
 #include "util/gtk_util.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include <podofo/podofo.h>
+#ifdef G_OS_WIN32
+#undef DELETE
+#undef DUPLICATE
+#undef ERROR
+#endif
 #include <thread>
 
 namespace horizon {
