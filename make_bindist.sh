@@ -97,6 +97,9 @@ LIBS=(
 	libssl-1_1-x64.dll\
 	libcrypto-1_1-x64.dll\
 	libidn2-4.dll\
+	libpodofo.dll\
+	libidn-12.dll\
+	libzstd.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
