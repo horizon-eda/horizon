@@ -47,7 +47,7 @@ std::string Preferences::get_preferences_filename()
 
 #define COLORP_LUT_ITEM(x)                                                                                             \
     {                                                                                                                  \
-        #x, ColorP::x                                                                                                  \
+#x, ColorP::x                                                                                                  \
     }
 
 static const LutEnumStr<ColorP> colorp_lut = {

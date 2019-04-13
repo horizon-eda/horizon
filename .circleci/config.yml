@@ -6,8 +6,17 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install preliminary dependencies
+          command: apt-get update -y && apt-get install curl gnupg -y
+      - run:
+          name: Add clang 8.0 to apt sources
+          command: echo "deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch-8 main" >> /etc/apt/sources.list
+      - run:
+          name: Add LLVM apt key
+          command: curl https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+      - run:
           name: Install dependencies
-          command: apt-get update -y && apt-get install git clang-format-5.0 -y
+          command: apt-get update -y && apt-get install git clang-format-8 -y
       - run:
           name: Style checker
           command: bash scripts/stylecheck.sh

@@ -84,15 +84,16 @@ void StepExportWindow::handle_export()
 void StepExportWindow::export_thread(std::string filename, bool include_models)
 {
     try {
-        export_step(filename, *core->get_board(), *core->m_pool, include_models,
-                    [this](std::string msg) {
-                        {
-                            std::lock_guard<std::mutex> guard(msg_queue_mutex);
-                            msg_queue.push_back(msg);
-                        }
-                        export_dispatcher.emit();
-                    },
-                    core->get_colors());
+        export_step(
+                filename, *core->get_board(), *core->m_pool, include_models,
+                [this](std::string msg) {
+                    {
+                        std::lock_guard<std::mutex> guard(msg_queue_mutex);
+                        msg_queue.push_back(msg);
+                    }
+                    export_dispatcher.emit();
+                },
+                core->get_colors());
     }
     catch (const std::exception &e) {
         {

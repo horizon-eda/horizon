@@ -345,15 +345,16 @@ void PoolNotebook::pool_update_thread()
     std::cout << "hello from thread" << std::endl;
 
     try {
-        horizon::pool_update(pool.get_base_path(),
-                             [this](PoolUpdateStatus st, std::string filename, std::string msg) {
-                                 {
-                                     std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
-                                     pool_update_status_queue.emplace_back(st, filename, msg);
-                                 }
-                                 pool_update_dispatcher.emit();
-                             },
-                             true);
+        horizon::pool_update(
+                pool.get_base_path(),
+                [this](PoolUpdateStatus st, std::string filename, std::string msg) {
+                    {
+                        std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
+                        pool_update_status_queue.emplace_back(st, filename, msg);
+                    }
+                    pool_update_dispatcher.emit();
+                },
+                true);
     }
     catch (const std::runtime_error &e) {
         {
