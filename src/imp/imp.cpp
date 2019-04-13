@@ -1604,17 +1604,6 @@ void ImpBase::handle_search()
     update_search_markers();
 }
 
-static std::string get_padded_str(unsigned int n, unsigned int max)
-{
-    int digits_max = std::to_string(max).size();
-    std::string n_str = std::to_string(n);
-    std::string prefix;
-    for (int i = 0; i < (digits_max - (int)n_str.size()); i++) {
-        prefix += " ";
-    }
-    return prefix + n_str;
-}
-
 void ImpBase::search_go(int dir)
 {
     if (search_results.size() == 0) {
@@ -1641,8 +1630,7 @@ void ImpBase::search_go(int dir)
         status = "One match:";
     }
     else {
-        status = "Match " + get_padded_str(search_result_current + 1, search_results.size()) + "/"
-                 + std::to_string(search_results.size()) + ":";
+        status = "Match " + format_m_of_n(search_result_current + 1, search_results.size()) + ":";
     }
     auto &res = *std::next(search_results.begin(), search_result_current);
     status +=

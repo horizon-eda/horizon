@@ -165,12 +165,12 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     refresh_prs_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolRemoteBox::handle_refresh_prs));
 
     pr_status_dispatcher.attach(pr_spinner);
-    pr_status_dispatcher.signal_notified().connect([this](StatusDispatcher::Status status, std::string msg) {
-        auto is_busy = status == StatusDispatcher::Status::BUSY;
+    pr_status_dispatcher.signal_notified().connect([this](const StatusDispatcher::Notification &n) {
+        auto is_busy = n.status == StatusDispatcher::Status::BUSY;
         if (!is_busy) {
             notebook->pool_updating = false;
         }
-        if (status == StatusDispatcher::Status::DONE) {
+        if (n.status == StatusDispatcher::Status::DONE) {
             update_prs();
         }
     });

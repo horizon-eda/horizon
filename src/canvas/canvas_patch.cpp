@@ -102,9 +102,9 @@ void CanvasPatch::img_polygon(const Polygon &poly, bool tr)
     }
 }
 
-void CanvasPatch::img_text(const Text &txt, std::pair<Coordf, Coordf> &extents)
+/*void CanvasPatch::img_text_extents(const Text &txt, std::pair<Coordf, Coordf> &extents)
 {
     std::pair<Coordi, Coordi> ext(Coordi(extents.first.x, extents.first.y), Coordi(extents.second.x, extents.second.y));
     text_extents.emplace(txt.layer, ext.first, ext.second);
-}
+}*/
 } // namespace horizon

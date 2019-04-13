@@ -5,6 +5,7 @@
 #include <forward_list>
 #include "nlohmann/json.hpp"
 #include "util/util.hpp"
+#include "logger/logger.hpp"
 
 namespace horizon {
 
@@ -64,6 +65,15 @@ Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, Pool &pool)
             title_block_values[it.key()] = it.value();
         }
     }
+    if (j.count("pdf_export_settings")) {
+        try {
+            pdf_export_settings = PDFExportSettings(j.at("pdf_export_settings"));
+        }
+        catch (const std::exception &e) {
+            Logger::log_warning("couldn't load pdf export settings", Logger::Domain::SCHEMATIC, e.what());
+        }
+    }
+
     update_refs();
 }
 
@@ -686,7 +696,8 @@ void Schematic::annotate()
 
 Schematic::Schematic(const Schematic &sch)
     : uuid(sch.uuid), block(sch.block), name(sch.name), sheets(sch.sheets), rules(sch.rules),
-      title_block_values(sch.title_block_values), group_tag_visible(sch.group_tag_visible), annotation(sch.annotation)
+      title_block_values(sch.title_block_values), group_tag_visible(sch.group_tag_visible), annotation(sch.annotation),
+      pdf_export_settings(sch.pdf_export_settings)
 {
     update_refs();
 }
@@ -701,6 +712,7 @@ void Schematic::operator=(const Schematic &sch)
     title_block_values = sch.title_block_values;
     group_tag_visible = sch.group_tag_visible;
     annotation = sch.annotation;
+    pdf_export_settings = sch.pdf_export_settings;
     update_refs();
 }
 
@@ -766,6 +778,7 @@ json Schematic::serialize() const
     j["block"] = (std::string)block->uuid;
     j["name"] = name;
     j["annotation"] = annotation.serialize();
+    j["pdf_export_settings"] = pdf_export_settings.serialize();
     j["rules"] = rules.serialize();
     j["title_block_values"] = title_block_values;
     j["group_tag_visible"] = group_tag_visible;

@@ -62,6 +62,7 @@ void Canvas::render(const Junction &junc, bool interactive, ObjectType mode)
         }
         else if (junc.connection_count >= 3 && mode == ObjectType::SCHEMATIC) {
             draw_line(junc.position, junc.position + Coordi(0, 1000), c, 0, true, 0.75_mm);
+            img_line(junc.position, junc.position + Coordi(0, 1000), 0.75_mm, 0, true);
         }
         else if (junc.has_via && mode == ObjectType::SCHEMATIC) {
             // nop
@@ -87,6 +88,7 @@ void Canvas::render(const PowerSymbol &sym)
     object_refs_current.emplace_back(ObjectType::POWER_SYMBOL, sym.uuid);
 
     auto style = sym.net->power_symbol_style;
+    img_auto_line = img_mode;
     switch (style) {
     case Net::PowerSymbolStyle::GND:
     case Net::PowerSymbolStyle::EARTH: {
@@ -176,6 +178,7 @@ void Canvas::render(const PowerSymbol &sym)
     }
 
     transform.reset();
+    img_auto_line = false;
 
     object_refs_current.pop_back();
 }
@@ -233,6 +236,9 @@ void Canvas::render(const LineNet &line)
         c = ColorP::BUS;
         width = 0.2_mm;
     }
+    img_line(line.from.get_position(), line.to.get_position(), width, 0);
+    if (img_mode)
+        return;
     object_refs_current.emplace_back(ObjectType::LINE_NET, line.uuid);
     draw_line(line.from.get_position(), line.to.get_position(), c, 0, true, width);
     object_refs_current.pop_back();
@@ -371,6 +377,7 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
     if (!pin.pad_visible) {
         c_pad = ColorP::PIN_HIDDEN;
     }
+    img_auto_line = img_mode;
     if (interactive || pin.name_visible) {
         bool draw_in_line = pin.name_orientation == SymbolPin::NameOrientation::IN_LINE
                             || (pin.name_orientation == SymbolPin::NameOrientation::HORIZONTAL
@@ -539,6 +546,7 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
     if (interactive)
         selectables.append(pin.uuid, ObjectType::SYMBOL_PIN, p0, Coordf::min(pad_extents.first, Coordf::min(p0, p1)),
                            Coordf::max(pad_extents.second, Coordf::max(p0, p1)));
+    img_auto_line = false;
 }
 
 static int64_t sq(int64_t x)
@@ -592,7 +600,7 @@ void Canvas::render(const Text &text, bool interactive)
                               text.origin, ColorP::FROM_LAYER, text.layer, text.width, true, text.font, false,
                               transform.mirror);
     triangle_type_current = Triangle::Type::NONE;
-    img_text(text, extents);
+    // img_text_extents(text, extents);
     img_patch_type(PatchType::OTHER);
     transform_restore();
     if (interactive) {
@@ -670,10 +678,12 @@ void Canvas::render(const BusRipper &ripper)
 {
     auto c = ColorP::BUS;
     auto connector_pos = ripper.get_connector_pos();
+    img_auto_line = img_mode;
     draw_line(ripper.junction->position, connector_pos, c);
     if (ripper.connection_count < 1) {
         draw_box(connector_pos, 0.25_mm, c);
     }
+    img_auto_line = false;
     int angle = 0;
     switch (ripper.orientation) {
     case Orientation::LEFT:

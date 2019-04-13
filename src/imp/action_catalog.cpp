@@ -673,6 +673,15 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::TOOL, ToolID::DRAW_POLYGON_CIRCLE},
          {"Draw polygon circle", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::PDF_EXPORT_WINDOW, ToolID::NONE},
+         {"PDF export window", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::EXPORT_PDF, ToolID::NONE},
+         {"Export PDF", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -690,7 +699,7 @@ const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
 
 #define ACTION_LUT_ITEM(x)                                                                                             \
     {                                                                                                                  \
-        #x, ActionID::x                                                                                                \
+#x, ActionID::x                                                                                                \
     }
 
 const LutEnumStr<ActionID> action_lut = {
@@ -757,11 +766,13 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(GO_TO_SCHEMATIC),
         ACTION_LUT_ITEM(SHOW_IN_POOL_MANAGER),
         ACTION_LUT_ITEM(SELECT_ALL),
+        ACTION_LUT_ITEM(PDF_EXPORT_WINDOW),
+        ACTION_LUT_ITEM(EXPORT_PDF),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
     {                                                                                                                  \
-        #x, ToolID::x                                                                                                  \
+#x, ToolID::x                                                                                                  \
     }
 
 const LutEnumStr<ToolID> tool_lut = {

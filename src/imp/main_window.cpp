@@ -5,15 +5,6 @@
 
 namespace horizon {
 
-static void label_set_tnum(Gtk::Label *la)
-{
-    auto attributes_list = pango_attr_list_new();
-    auto attribute_font_features = pango_attr_font_features_new("tnum 1");
-    pango_attr_list_insert(attributes_list, attribute_font_features);
-    gtk_label_set_attributes(la->gobj(), attributes_list);
-    pango_attr_list_unref(attributes_list);
-}
-
 MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x)
     : Gtk::ApplicationWindow(cobject), builder(x)
 {

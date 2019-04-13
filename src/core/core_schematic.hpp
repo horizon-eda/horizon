@@ -61,6 +61,11 @@ public:
         return &bom_export_settings;
     }
 
+    PDFExportSettings *get_pdf_export_settings()
+    {
+        return &pdf_export_settings;
+    }
+
     void rebuild(bool from_undo = false) override;
     void commit() override;
     void revert() override;
@@ -84,6 +89,7 @@ private:
     SchematicRules rules;
 
     BOMExportSettings bom_export_settings;
+    PDFExportSettings pdf_export_settings;
 
     UUID sheet_uuid;
     std::string m_schematic_filename;

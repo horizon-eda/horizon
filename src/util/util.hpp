@@ -60,4 +60,6 @@ void find_files_recursive(const std::string &base_path, std::function<void(const
 Color color_from_json(const json &j);
 json color_to_json(const Color &c);
 
+std::string format_m_of_n(unsigned int m, unsigned int n);
+
 } // namespace horizon

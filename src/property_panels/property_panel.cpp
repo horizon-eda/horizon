@@ -5,6 +5,7 @@
 #include "property_panels.hpp"
 #include "core/core.hpp"
 #include "util/util.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 
@@ -18,6 +19,9 @@ PropertyPanel::PropertyPanel(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 
     sel_menu.set_halign(Gtk::ALIGN_CENTER);
     button_sel->set_menu(sel_menu);
+    button_sel_label = Gtk::manage(new Gtk::Label);
+    button_sel->add(*button_sel_label);
+    label_set_tnum(button_sel_label);
 
     std::vector<std::pair<ObjectProperty::ID, const ObjectProperty *>> properties_sorted;
     properties_sorted.reserve(object_descriptions.at(type).properties.size());
@@ -158,8 +162,7 @@ public:
 
 void PropertyPanel::update_selector()
 {
-    std::string l = std::to_string(object_current + 1) + "/" + std::to_string(objects.size());
-    button_sel->set_label(l);
+    button_sel_label->set_text(format_m_of_n(object_current + 1, objects.size()));
     auto chs = sel_menu.get_children();
     for (auto it : chs) {
         if (auto mit = dynamic_cast<MyMenuItem *>(it)) {

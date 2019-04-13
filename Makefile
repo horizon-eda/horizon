@@ -35,6 +35,7 @@ SRC_COMMON = \
 	src/schematic/power_symbol.cpp\
 	src/schematic/schematic_rules.cpp\
 	src/schematic/rule_single_pin_net.cpp\
+	src/schematic/pdf_export_settings.cpp\
 	src/pool/padstack.cpp\
 	src/common/polygon.cpp\
 	src/common/hole.cpp\
@@ -327,6 +328,7 @@ SRC_IMP = \
 	src/util/gtk_util.cpp\
 	src/imp/fab_output_window.cpp\
 	src/imp/bom_export_window.cpp\
+	src/imp/pdf_export_window.cpp\
 	src/imp/3d_view.cpp\
 	src/imp/step_export_window.cpp\
 	src/imp/tuning_window.cpp\
@@ -352,7 +354,8 @@ SRC_IMP = \
 	src/preferences/preferences_util.cpp\
 	src/preferences/preferences_provider.cpp\
 	src/widgets/spin_button_angle.cpp\
-	src/util/exception_util.cpp
+	src/util/exception_util.cpp\
+	src/util/status_dispatcher.cpp\
 
 SRC_ROUTER = \
 	3rd_party/router/router/pns_router.cpp \
@@ -557,7 +560,7 @@ src/gitversion.cpp: .git/HEAD .git/index
 	echo "const char *gitversion = \"$(shell git log -1 --pretty="format:%h %ci %s")\";" > $@
 
 horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(OBJ_OCE) $(SRC_IMP:.cpp=.o)
-	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq) -o $@
+	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq) -lpodofo -o $@
 
 horizon-pool: $(OBJ_COMMON) $(SRC_POOL_UTIL:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0) -o $@

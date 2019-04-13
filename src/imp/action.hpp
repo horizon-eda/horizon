@@ -71,7 +71,9 @@ enum class ActionID {
     GO_TO_BOARD,
     GO_TO_SCHEMATIC,
     SHOW_IN_POOL_MANAGER,
-    SELECT_ALL
+    SELECT_ALL,
+    PDF_EXPORT_WINDOW,
+    EXPORT_PDF,
 };
 
 enum class ActionGroup {

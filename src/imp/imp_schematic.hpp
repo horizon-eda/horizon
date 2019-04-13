@@ -53,6 +53,7 @@ private:
     Target target_drag_begin;
 
     class BOMExportWindow *bom_export_window;
+    class PDFExportWindow *pdf_export_window;
 
     void handle_drag();
 

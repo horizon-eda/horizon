@@ -113,11 +113,11 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     download_status_dispatcher.attach(download_label);
     download_status_dispatcher.attach(download_spinner);
 
-    download_status_dispatcher.signal_notified().connect([this](StatusDispatcher::Status status, std::string msg) {
-        auto is_busy = status == StatusDispatcher::Status::BUSY;
+    download_status_dispatcher.signal_notified().connect([this](const StatusDispatcher::Notification &n) {
+        auto is_busy = n.status == StatusDispatcher::Status::BUSY;
         button_cancel->set_sensitive(!is_busy);
         button_do_download->set_sensitive(!is_busy);
-        if (status == StatusDispatcher::Status::DONE) {
+        if (n.status == StatusDispatcher::Status::DONE) {
             PoolManager::get().add_pool(download_dest_dir_button->get_filename());
             open_file_view(Gio::File::create_for_path(
                     Glib::build_filename(download_dest_dir_button->get_filename(), "pool.json")));

@@ -10,6 +10,8 @@ std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const 
                                              bool flip, TextOrigin origin, ColorP color, int layer, uint64_t width,
                                              bool draw, TextData::Font font, bool center, bool mirror)
 {
+    if (img_mode)
+        img_draw_text(p, size, rtext, angle, flip, origin, layer, width, font, center, mirror);
     while (angle < 0)
         angle += 65536;
     angle %= 65536;
@@ -92,7 +94,8 @@ std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const 
             b = Coordf::max(b, Coordf::max(p0, p1));
             if (draw) {
                 img_line(Coordi(p0.x, p0.y), Coordi(p1.x, p1.y), width, layer, false);
-                draw_line(p0, p1, color, layer, false, width);
+                if (!img_auto_line)
+                    draw_line(p0, p1, color, layer, false, width);
             }
         }
         i_line++;

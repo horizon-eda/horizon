@@ -5,6 +5,7 @@
 #include "block/block.hpp"
 #include "sheet.hpp"
 #include "schematic_rules.hpp"
+#include "pdf_export_settings.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -102,6 +103,8 @@ public:
 
     Annotation annotation;
     void annotate();
+
+    PDFExportSettings pdf_export_settings;
 
     json serialize() const;
 };

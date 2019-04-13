@@ -10,19 +10,39 @@ void StatusDispatcher::notify()
 {
     std::string m;
     Status st;
+    double p;
     {
         std::lock_guard<std::mutex> lock(mutex);
         m = msg;
         st = status;
+        p = progress;
     }
 
-    if (revealer)
-        revealer->set_reveal_child(st == StatusDispatcher::Status::BUSY || st == StatusDispatcher::Status::ERROR);
+    if (revealer) {
+        if (st == StatusDispatcher::Status::BUSY || st == StatusDispatcher::Status::ERROR) {
+            timeout_conn.disconnect();
+            revealer->set_reveal_child(true);
+        }
+        else {
+            timeout_conn = Glib::signal_timeout().connect(
+                    [this] {
+                        revealer->set_reveal_child(false);
+                        return false;
+                    },
+                    750);
+        }
+    }
     if (label)
         label->set_text(m);
     if (spinner)
         spinner->property_active() = status == StatusDispatcher::Status::BUSY;
-    s_signal_notified.emit(st, m);
+    if (progress_bar)
+        progress_bar->set_fraction(progress);
+    Notification n;
+    n.status = st;
+    n.msg = m;
+    n.progress = p;
+    s_signal_notified.emit(n);
 }
 
 void StatusDispatcher::attach(Gtk::Label *w)
@@ -40,17 +60,23 @@ void StatusDispatcher::attach(Gtk::Revealer *w)
     revealer = w;
 }
 
+void StatusDispatcher::attach(Gtk::ProgressBar *w)
+{
+    progress_bar = w;
+}
+
 void StatusDispatcher::reset(const std::string &m)
 {
     {
         std::lock_guard<std::mutex> lock(mutex);
         status = Status::BUSY;
         msg = m;
+        progress = 0;
     }
     dispatcher.emit();
 }
 
-void StatusDispatcher::set_status(Status st, const std::string &m)
+void StatusDispatcher::set_status(Status st, const std::string &m, double p)
 {
     {
         std::lock_guard<std::mutex> lock(mutex);
@@ -64,6 +90,7 @@ void StatusDispatcher::set_status(Status st, const std::string &m)
         }
         status = st;
         msg = m;
+        progress = p;
     }
     dispatcher.emit();
 }

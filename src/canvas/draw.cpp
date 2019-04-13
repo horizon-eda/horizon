@@ -29,6 +29,12 @@ void Canvas::set_lod_size(float size)
 
 void Canvas::draw_line(const Coord<float> &a, const Coord<float> &b, ColorP color, int layer, bool tr, uint64_t width)
 {
+    if (img_auto_line) {
+        Coordi ai(a.x, a.y);
+        Coordi bi(b.x, b.y);
+        img_line(ai, bi, width, layer, tr);
+        return;
+    }
     auto pa = a;
     auto pb = b;
     if (tr) {
@@ -162,6 +168,7 @@ std::tuple<Coordf, Coordf, Coordi> Canvas::draw_flag(const Coordf &position, con
             draw_text0(position + shift, size, txt, orientation_to_angle(orientation), false, TextOrigin::CENTER, c);
     extents.first -= Coordf(enlarge, enlarge);
     extents.second += Coordf(enlarge, enlarge);
+    img_auto_line = img_mode;
     switch (orientation) {
     case Orientation::LEFT:
         draw_line(extents.first, {extents.first.x, extents.second.y}, c);
@@ -193,6 +200,7 @@ std::tuple<Coordf, Coordf, Coordi> Canvas::draw_flag(const Coordf &position, con
         draw_line(extents.first, {extents.second.x, extents.first.y}, c);
         break;
     }
+    img_auto_line = false;
     return std::make_tuple(extents.first, extents.second, shift);
 }
 

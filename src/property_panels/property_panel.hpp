@@ -24,6 +24,7 @@ private:
     ObjectType type;
     class Core *core;
     Gtk::MenuButton *button_sel;
+    Gtk::Label *button_sel_label;
     Gtk::Button *button_prev;
     Gtk::Button *button_next;
 
