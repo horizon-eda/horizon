@@ -253,7 +253,9 @@ void create_config_dir()
 
 void replace_backslash(std::string &path)
 {
+#ifdef G_OS_WIN32
     std::replace(path.begin(), path.end(), '\\', '/');
+#endif
 }
 
 bool compare_files(const std::string &filename_a, const std::string &filename_b)

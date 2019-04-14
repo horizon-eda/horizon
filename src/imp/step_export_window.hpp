@@ -5,8 +5,6 @@
 namespace horizon {
 
 class StepExportWindow : public Gtk::Window {
-    friend class GerberLayerEditor;
-
 public:
     StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class CoreBoard *c);
     static StepExportWindow *create(Gtk::Window *p, class CoreBoard *c);

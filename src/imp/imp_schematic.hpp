@@ -32,6 +32,8 @@ protected:
 private:
     void canvas_update() override;
     CoreSchematic core_schematic;
+    const std::string project_dir;
+
     int handle_ask_net_merge(class Net *net, class Net *into);
     int handle_ask_delete_component(class Component *comp);
     void handle_select_sheet(Sheet *sh);

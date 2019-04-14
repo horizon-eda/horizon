@@ -356,6 +356,7 @@ SRC_IMP = \
 	src/widgets/spin_button_angle.cpp\
 	src/util/exception_util.cpp\
 	src/util/status_dispatcher.cpp\
+	src/util/export_file_chooser.cpp\
 
 SRC_ROUTER = \
 	3rd_party/router/router/pns_router.cpp \

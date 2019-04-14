@@ -17,7 +17,8 @@
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
                    const PoolParams &pool_params)
-    : ImpLayer(pool_params), core_board(board_filename, block_filename, via_dir, *pool)
+    : ImpLayer(pool_params), core_board(board_filename, block_filename, via_dir, *pool),
+      project_dir(Glib::path_get_dirname(board_filename))
 {
     core = &core_board;
     core_board.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
@@ -335,7 +336,11 @@ void ImpBoard::construct()
         main_window->header->pack_end(*button);
     }
 
-    fab_output_window = FabOutputWindow::create(main_window, core.b->get_board(), core.b->get_fab_output_settings());
+    fab_output_window =
+            FabOutputWindow::create(main_window, core.b->get_board(), core.b->get_fab_output_settings(), project_dir);
+    core.r->signal_tool_changed().connect([this](ToolID t) { fab_output_window->set_can_generate(t == ToolID::NONE); });
+    fab_output_window->signal_changed().connect([this] { core_board.set_needs_save(); });
+
     view_3d_window = View3DWindow::create(core_board.get_board(), pool.get());
     view_3d_window->set_solder_mask_color(rgba_from_color(core_board.get_colors()->solder_mask));
     view_3d_window->set_substrate_color(rgba_from_color(core_board.get_colors()->substrate));
@@ -349,7 +354,6 @@ void ImpBoard::construct()
     tuning_window = new TuningWindow(core.b->get_board());
     tuning_window->set_transient_for(*main_window);
 
-    core.r->signal_tool_changed().connect([this](ToolID t) { fab_output_window->set_can_generate(t == ToolID::NONE); });
 
     rules_window->signal_goto().connect([this](Coordi location, UUID sheet) { canvas->center_and_zoom(location); });
 

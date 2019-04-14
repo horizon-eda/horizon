@@ -11,8 +11,24 @@ namespace horizon {
         x->get_widget(#name, name);                                                                                    \
     } while (0)
 
+void BOMExportWindow::MyExportFileChooser::prepare_chooser(Glib::RefPtr<Gtk::FileChooser> chooser)
+{
+    auto filter = Gtk::FileFilter::create();
+    filter->set_name("CSV files");
+    filter->add_pattern("*.csv");
+    filter->add_pattern("*.CSV");
+    chooser->add_filter(filter);
+}
+
+void BOMExportWindow::MyExportFileChooser::prepare_filename(std::string &filename)
+{
+    if (!endswith(filename, ".csv") && !endswith(filename, ".CSV")) {
+        filename += ".csv";
+    }
+}
+
 BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Block *blo,
-                                 BOMExportSettings *s)
+                                 BOMExportSettings *s, const std::string &project_dir)
     : Gtk::Window(cobject), block(blo), settings(s), state_store(this, "imp-bom-export")
 {
 
@@ -31,27 +47,10 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_WIDGET(done_revealer);
     GET_WIDGET(preview_tv);
 
-    filename_button->signal_clicked().connect([this] {
-        GtkFileChooserNative *native = gtk_file_chooser_native_new("Set output file", GTK_WINDOW(gobj()),
-                                                                   GTK_FILE_CHOOSER_ACTION_SAVE, "Set", "_Cancel");
-        auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-        auto filter = Gtk::FileFilter::create();
-        filter->set_name("CSV files");
-        filter->add_pattern("*.csv");
-        filter->add_pattern("*.CSV");
-        chooser->add_filter(filter);
-        chooser->set_filename(filename_entry->get_text());
-
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-            std::string filename = chooser->get_filename();
-            if (!endswith(filename, ".csv")) {
-                filename += ".csv";
-            }
-            filename_entry->set_text(filename);
-        }
-    });
-
-    bind_widget(filename_entry, settings->output_filename, [this](const std::string &v) { s_signal_changed.emit(); });
+    export_filechooser.attach(filename_entry, filename_button, this);
+    export_filechooser.set_project_dir(project_dir);
+    export_filechooser.bind_filename(settings->output_filename);
+    export_filechooser.signal_changed().connect([this] { s_signal_changed.emit(); });
 
     for (const auto &it : bom_column_names) {
         sort_column_combo->append(std::to_string(static_cast<int>(it.first)), it.second);
@@ -241,7 +240,7 @@ void BOMExportWindow::flash(const std::string &s)
 void BOMExportWindow::generate()
 {
     try {
-        export_BOM(settings->output_filename, *block, *settings);
+        export_BOM(export_filechooser.get_filename_abs(), *block, *settings);
         flash("BOM written to " + settings->output_filename);
     }
     catch (const std::exception &e) {
@@ -302,12 +301,12 @@ void BOMExportWindow::set_can_export(bool v)
     export_button->set_sensitive(v);
 }
 
-BOMExportWindow *BOMExportWindow::create(Gtk::Window *p, Block *b, BOMExportSettings *s)
+BOMExportWindow *BOMExportWindow::create(Gtk::Window *p, Block *b, BOMExportSettings *s, const std::string &project_dir)
 {
     BOMExportWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/net/carrotIndustries/horizon/imp/bom_export.ui");
-    x->get_widget_derived("window", w, b, s);
+    x->get_widget_derived("window", w, b, s, project_dir);
 
     w->set_transient_for(*p);
 

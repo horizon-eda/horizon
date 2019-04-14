@@ -36,12 +36,12 @@ CanvasPDF::CanvasPDF(PoDoFo::PdfPainterMM *p, PoDoFo::PdfFont *f, const PDFExpor
     img_mode = true;
 }
 
-template <typename T> T to_um(T x)
+template <typename T> static T to_um(T x)
 {
     return x / 1000;
 }
 
-template <typename T> T to_pt(T x)
+template <typename T> static T to_pt(T x)
 {
     return x * .000002834645669291339;
 }

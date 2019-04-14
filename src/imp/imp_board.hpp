@@ -35,6 +35,7 @@ private:
     void handle_selection_cross_probe();
 
     CoreBoard core_board;
+    const std::string project_dir;
 
     class FabOutputWindow *fab_output_window = nullptr;
     class View3DWindow *view_3d_window = nullptr;

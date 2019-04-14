@@ -372,9 +372,7 @@ std::string ImpPackage::ask_3d_model_filename(const std::string &current_filenam
             auto base_path = Gio::File::create_for_path(pool->get_base_path());
             std::string rel = base_path->get_relative_path(chooser->get_file());
             if (rel.size()) {
-#ifdef G_OS_WIN32
                 replace_backslash(rel);
-#endif
                 return rel;
             }
             else {

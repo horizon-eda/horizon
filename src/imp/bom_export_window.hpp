@@ -5,6 +5,7 @@
 #include "util/window_state_store.hpp"
 #include "block/bom.hpp"
 #include "util/changeable.hpp"
+#include "util/export_file_chooser.hpp"
 
 namespace horizon {
 
@@ -12,8 +13,9 @@ class BOMExportWindow : public Gtk::Window, public Changeable {
 
 public:
     BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Block *block,
-                    class BOMExportSettings *settings);
-    static BOMExportWindow *create(Gtk::Window *p, class Block *block, class BOMExportSettings *settings);
+                    class BOMExportSettings *settings, const std::string &project_dir);
+    static BOMExportWindow *create(Gtk::Window *p, class Block *block, class BOMExportSettings *settings,
+                                   const std::string &project_dir);
 
     void set_can_export(bool v);
     void generate();
@@ -22,6 +24,13 @@ public:
 private:
     class Block *block;
     class BOMExportSettings *settings;
+
+    class MyExportFileChooser : public ExportFileChooser {
+    protected:
+        void prepare_chooser(Glib::RefPtr<Gtk::FileChooser> chooser) override;
+        void prepare_filename(std::string &filename) override;
+    };
+    MyExportFileChooser export_filechooser;
 
     Gtk::Button *export_button = nullptr;
     Gtk::ComboBoxText *sort_column_combo = nullptr;

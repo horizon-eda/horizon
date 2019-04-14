@@ -41,8 +41,8 @@ public:
     std::map<UUID, Text> texts;
     std::map<UUID, Polygon> polygons;
 
-    int64_t width = 100_mm;
-    int64_t height = 100_mm;
+    int64_t width = 297_mm;
+    int64_t height = 210_mm;
 
 private:
     void update_refs();

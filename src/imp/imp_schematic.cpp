@@ -15,7 +15,8 @@
 namespace horizon {
 ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,
                            const PoolParams &pool_params)
-    : ImpBase(pool_params), core_schematic(schematic_filename, block_filename, *pool)
+    : ImpBase(pool_params), core_schematic(schematic_filename, block_filename, *pool),
+      project_dir(Glib::path_get_dirname(schematic_filename))
 {
     core = &core_schematic;
     core_schematic.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpSchematic::handle_tool_change));
@@ -417,8 +418,8 @@ void ImpSchematic::construct()
     connect_action(ActionID::HIGHLIGHT_TAG, sigc::mem_fun(*this, &ImpSchematic::handle_highlight_group_tag));
 
 
-    bom_export_window =
-            BOMExportWindow::create(main_window, core_schematic.get_block(), core_schematic.get_bom_export_settings());
+    bom_export_window = BOMExportWindow::create(main_window, core_schematic.get_block(),
+                                                core_schematic.get_bom_export_settings(), project_dir);
 
     connect_action(ActionID::BOM_EXPORT_WINDOW, [this](const auto &c) { bom_export_window->present(); });
     connect_action(ActionID::EXPORT_BOM, [this](const auto &c) {
@@ -430,8 +431,9 @@ void ImpSchematic::construct()
     core.r->signal_tool_changed().connect([this](ToolID t) { bom_export_window->set_can_export(t == ToolID::NONE); });
     core.r->signal_rebuilt().connect([this] { bom_export_window->update_preview(); });
 
+
     pdf_export_window = PDFExportWindow::create(main_window, *core_schematic.get_schematic(),
-                                                *core_schematic.get_pdf_export_settings());
+                                                *core_schematic.get_pdf_export_settings(), project_dir);
     pdf_export_window->signal_changed().connect([this] { core_schematic.set_needs_save(); });
     connect_action(ActionID::PDF_EXPORT_WINDOW, [this](const auto &c) { pdf_export_window->present(); });
     connect_action(ActionID::EXPORT_PDF, [this](const auto &c) {
@@ -536,46 +538,6 @@ std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)
 void ImpSchematic::handle_export_pdf()
 {
     pdf_export_window->present();
-    /*
-        std::string filename;
-        {
-            GtkFileChooserNative *native = gtk_file_chooser_native_new("Save PDF", GTK_WINDOW(main_window->gobj()),
-                                                                       GTK_FILE_CHOOSER_ACTION_SAVE, "_Save",
-       "_Cancel"); auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native)); chooser->set_do_overwrite_confirmation(true); if
-       (last_pdf_filename.size()) { chooser->set_filename(last_pdf_filename);
-            }
-            else {
-                chooser->set_current_name("schematic.pdf");
-            }
-
-            if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-                filename = chooser->get_filename();
-                last_pdf_filename = filename;
-            }
-        }
-        if (filename.size()) {
-            while (1) {
-                std::string error_str;
-                try {
-                    export_pdf(filename, *core.c->get_schematic());
-                    break;
-                }
-                catch (const std::exception &e) {
-                    error_str = e.what();
-                }
-                catch (...) {
-                    error_str = "unknown error";
-                }
-                if (error_str.size()) {
-                    Gtk::MessageDialog dia(*main_window, "PDF export error", false, Gtk::MESSAGE_ERROR,
-       Gtk::BUTTONS_NONE); dia.set_secondary_text(error_str); dia.add_button("Cancel", Gtk::RESPONSE_CANCEL);
-                    dia.add_button("Retry", 1);
-                    if (dia.run() != 1)
-                        break;
-                }
-            }
-        }
-        */
 }
 
 void ImpSchematic::handle_core_rebuilt()

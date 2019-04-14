@@ -3,16 +3,19 @@
 #include <gtkmm.h>
 #include <set>
 #include "util/window_state_store.hpp"
+#include "util/export_file_chooser.hpp"
+#include "util/changeable.hpp"
 
 namespace horizon {
 
-class FabOutputWindow : public Gtk::Window {
+class FabOutputWindow : public Gtk::Window, public Changeable {
     friend class GerberLayerEditor;
 
 public:
     FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Board *b,
-                    class FabOutputSettings *settings);
-    static FabOutputWindow *create(Gtk::Window *p, class Board *b, class FabOutputSettings *settings);
+                    class FabOutputSettings *settings, const std::string &project_dir);
+    static FabOutputWindow *create(Gtk::Window *p, class Board *b, class FabOutputSettings *settings,
+                                   const std::string &project_dir);
 
     void set_can_generate(bool v);
 
@@ -31,6 +34,8 @@ private:
     Gtk::Button *directory_button = nullptr;
     Gtk::ComboBoxText *drill_mode_combo = nullptr;
     Gtk::TextView *log_textview = nullptr;
+
+    ExportFileChooser export_filechooser;
 
     Glib::RefPtr<Gtk::SizeGroup> sg_layer_name;
 
