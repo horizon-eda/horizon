@@ -260,34 +260,15 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         needs_save = true;
     });
 
+    w_tv_pins->signal_row_activated().connect([this](const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *col) {
+        auto it_pin = pin_store->get_iter(path);
+        map_pin(it_pin);
+    });
+
     w_button_map->signal_clicked().connect([this] {
         auto pin_sel = w_tv_pins->get_selection();
         auto it_pin = pin_sel->get_selected();
-        if (it_pin) {
-            Gtk::TreeModel::Row row_pin = *it_pin;
-            std::cout << "map" << std::endl;
-            auto sel = w_tv_pads->get_selection();
-            for (auto &path : sel->get_selected_rows()) {
-                auto it = pad_store->get_iter(path);
-                Gtk::TreeModel::Row row = *it;
-                row[pad_list_columns.gate_name] = row_pin.get_value(pin_list_columns.gate_name);
-                row[pad_list_columns.pin_name] = row_pin.get_value(pin_list_columns.pin_name);
-                row[pad_list_columns.pin_uuid] = row_pin.get_value(pin_list_columns.pin_uuid);
-                row[pad_list_columns.gate_uuid] = row_pin.get_value(pin_list_columns.gate_uuid);
-            }
-            if (++it_pin) {
-                pin_sel->select(it_pin);
-            }
-            if (sel->count_selected_rows() == 1) {
-                auto it_pad = pad_store->get_iter(sel->get_selected_rows().at(0));
-                sel->unselect(it_pad);
-                if (++it_pad) {
-                    sel->select(it_pad);
-                }
-            }
-            update_mapped();
-            needs_save = true;
-        }
+        map_pin(it_pin);
     });
 
     w_button_automap->signal_clicked().connect([this] {
@@ -389,6 +370,35 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             needs_save = true;
         }
     });
+}
+
+void PartEditor::map_pin(Gtk::TreeModel::iterator it_pin)
+{
+    auto pin_sel = w_tv_pins->get_selection();
+    if (it_pin) {
+        Gtk::TreeModel::Row row_pin = *it_pin;
+        auto sel = w_tv_pads->get_selection();
+        for (auto &path : sel->get_selected_rows()) {
+            auto it = pad_store->get_iter(path);
+            Gtk::TreeModel::Row row = *it;
+            row[pad_list_columns.gate_name] = row_pin.get_value(pin_list_columns.gate_name);
+            row[pad_list_columns.pin_name] = row_pin.get_value(pin_list_columns.pin_name);
+            row[pad_list_columns.pin_uuid] = row_pin.get_value(pin_list_columns.pin_uuid);
+            row[pad_list_columns.gate_uuid] = row_pin.get_value(pin_list_columns.gate_uuid);
+        }
+        if (++it_pin) {
+            pin_sel->select(it_pin);
+        }
+        if (sel->count_selected_rows() == 1) {
+            auto it_pad = pad_store->get_iter(sel->get_selected_rows().at(0));
+            sel->unselect(it_pad);
+            if (++it_pad) {
+                sel->select(it_pad);
+            }
+        }
+        update_mapped();
+        needs_save = true;
+    }
 }
 
 void PartEditor::update_model_inherit()
