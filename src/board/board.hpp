@@ -19,6 +19,7 @@
 #include "util/warning.hpp"
 #include "via.hpp"
 #include "via_padstack_provider.hpp"
+#include "connection_line.hpp"
 #include <fstream>
 #include <map>
 #include <vector>
@@ -77,6 +78,7 @@ public:
     std::map<UUID, Plane> planes;
     std::map<UUID, Keepout> keepouts;
     std::map<UUID, Dimension> dimensions;
+    std::map<UUID, ConnectionLine> connection_lines;
 
     std::vector<Warning> warnings;
 

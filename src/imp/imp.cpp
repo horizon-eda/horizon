@@ -976,7 +976,8 @@ ActionConnection &ImpBase::connect_action(ActionID action_id, ToolID tool_id,
     return act;
 }
 
-void ImpBase::tool_begin(ToolID id, bool override_selection, const std::set<SelectableRef> &sel)
+void ImpBase::tool_begin(ToolID id, bool override_selection, const std::set<SelectableRef> &sel,
+                         std::unique_ptr<ToolData> data)
 {
     if (core.r->tool_is_active()) {
         Logger::log_critical("can't begin tool while tool is active", Logger::Domain::IMP);
@@ -985,6 +986,7 @@ void ImpBase::tool_begin(ToolID id, bool override_selection, const std::set<Sele
     highlights.clear();
     update_highlights();
     ToolArgs args;
+    args.data = std::move(data);
     args.coords = canvas->get_cursor_pos();
 
     if (override_selection)

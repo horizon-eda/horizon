@@ -160,6 +160,14 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
             load_and_log(arcs, ObjectType::ARC, std::forward_as_tuple(u, it.value(), *this), Logger::Domain::BOARD);
         }
     }
+    if (j.count("connection_lines")) {
+        const json &o = j["connection_lines"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(connection_lines, ObjectType::CONNECTION_LINE, std::forward_as_tuple(u, it.value(), this),
+                         Logger::Domain::BOARD);
+        }
+    }
     if (j.count("rules")) {
         try {
             rules.load_from_json(j.at("rules"));
@@ -228,7 +236,7 @@ Board::Board(const Board &brd)
     : layers(brd.layers), uuid(brd.uuid), block(brd.block), name(brd.name), polygons(brd.polygons), holes(brd.holes),
       packages(brd.packages), junctions(brd.junctions), tracks(brd.tracks), airwires(brd.airwires), vias(brd.vias),
       texts(brd.texts), lines(brd.lines), arcs(brd.arcs), planes(brd.planes), keepouts(brd.keepouts),
-      dimensions(brd.dimensions), warnings(brd.warnings), rules(brd.rules),
+      dimensions(brd.dimensions), connection_lines(brd.connection_lines), warnings(brd.warnings), rules(brd.rules),
       fab_output_settings(brd.fab_output_settings), stackup(brd.stackup), colors(brd.colors),
       n_inner_layers(brd.n_inner_layers)
 {
@@ -256,6 +264,7 @@ void Board::operator=(const Board &brd)
     planes = brd.planes;
     keepouts = brd.keepouts;
     dimensions = brd.dimensions;
+    connection_lines = brd.connection_lines;
     warnings = brd.warnings;
     rules = brd.rules;
     fab_output_settings = brd.fab_output_settings;
@@ -310,6 +319,9 @@ void Board::update_refs()
     for (auto &it : keepouts) {
         it.second.polygon.update(polygons);
         it.second.polygon->usage = &it.second;
+    }
+    for (auto &it : connection_lines) {
+        it.second.update_refs(*this);
     }
 }
 
@@ -421,6 +433,11 @@ void Board::propagate_nets()
     }
     if (tracks_erase.size())
         map_erase_if(tracks, [&tracks_erase](const auto &it) { return tracks_erase.count(&it.second); });
+
+    map_erase_if(connection_lines, [](auto &it) {
+        ConnectionLine &li = it.second;
+        return (li.from.get_net() && li.to.get_net());
+    });
 }
 
 void Board::vacuum_junctions()
@@ -521,6 +538,7 @@ void Board::expand(bool careful)
     }
 
     vacuum_junctions();
+    delete_dependants(); // deletes connection lines
 
     expand_packages();
 
@@ -742,6 +760,13 @@ void Board::unsmash_package(BoardPackage *pkg)
 void Board::delete_dependants()
 {
     map_erase_if(vias, [this](auto &it) { return junctions.count(it.second.junction.uuid) == 0; });
+    map_erase_if(connection_lines, [this](auto &it) {
+        for (const auto &it_ft : {it.second.from, it.second.to}) {
+            if (it_ft.is_junc() && junctions.count(it_ft.junc.uuid) == 0)
+                return true;
+        }
+        return false;
+    });
     map_erase_if(planes, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
     map_erase_if(keepouts, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
 }
@@ -843,6 +868,10 @@ json Board::serialize() const
     j["keepouts"] = json::object();
     for (const auto &it : keepouts) {
         j["keepouts"][(std::string)it.first] = it.second.serialize();
+    }
+    j["connection_lines"] = json::object();
+    for (const auto &it : connection_lines) {
+        j["connection_lines"][(std::string)it.first] = it.second.serialize();
     }
     return j;
 }

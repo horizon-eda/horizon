@@ -11,6 +11,7 @@
 #include "bom_export_window.hpp"
 #include "pdf_export_window.hpp"
 #include "nlohmann/json.hpp"
+#include "core/tool_backannotate_connection_lines.hpp"
 
 namespace horizon {
 ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,
@@ -125,7 +126,7 @@ bool ImpSchematic::handle_broadcast(const json &j)
             part_from_project_manager = j.at("part").get<std::string>();
             tool_begin(ToolID::ADD_PART);
         }
-        if (op == "assign-part") {
+        else if (op == "assign-part") {
             main_window->present(timestamp);
             part_from_project_manager = j.at("part").get<std::string>();
             tool_begin(ToolID::ASSIGN_PART);
@@ -140,6 +141,25 @@ bool ImpSchematic::handle_broadcast(const json &j)
                     highlights.emplace(type, uu);
                 }
                 update_highlights();
+            }
+        }
+        else if (op == "backannotate" && !core_schematic.tool_is_active()) {
+            auto data = std::make_unique<ToolBackannotateConnectionLines::ToolDataBackannotate>();
+            const json &o = j.at("connections");
+            for (auto it = o.cbegin(); it != o.cend(); ++it) {
+                auto &v = it.value();
+                std::pair<ToolBackannotateConnectionLines::ToolDataBackannotate::Item,
+                          ToolBackannotateConnectionLines::ToolDataBackannotate::Item>
+                        item;
+                auto &block = *core_schematic.get_block();
+                item.first.from_json(block, v.at("from"));
+                item.second.from_json(block, v.at("to"));
+                if (item.first.is_valid() && item.second.is_valid())
+                    data->connections.push_back(item);
+            }
+            if (data->connections.size()) {
+                main_window->present(timestamp);
+                tool_begin(ToolID::BACKANNOTATE_CONNECTION_LINES, true, {}, std::move(data));
             }
         }
     }

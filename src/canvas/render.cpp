@@ -282,6 +282,15 @@ void Canvas::render(const Track &track)
     }
 }
 
+void Canvas::render(const ConnectionLine &line)
+{
+    if (img_mode)
+        return;
+    draw_line(line.from.get_position(), line.to.get_position(), ColorP::CONNECTION_LINE);
+    selectables.append_line(line.uuid, ObjectType::CONNECTION_LINE, line.from.get_position(), line.to.get_position(),
+                            0);
+}
+
 void Canvas::render(const SymbolPin &pin, bool interactive)
 {
     Coordi p0 = transform.transform(pin.position);
@@ -1329,6 +1338,9 @@ void Canvas::render(const Board &brd)
         render(it.second);
     }
     for (const auto &it : brd.dimensions) {
+        render(it.second);
+    }
+    for (const auto &it : brd.connection_lines) {
         render(it.second);
     }
 

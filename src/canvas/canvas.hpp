@@ -100,6 +100,7 @@ protected:
     void render(const class Via &via);
     void render(const class Dimension &dim);
     void render(const class Frame &frame, bool on_sheet = false);
+    void render(const class ConnectionLine &line);
 
     bool needs_push = true;
     virtual void request_push() = 0;
@@ -179,16 +180,6 @@ protected:
     Color get_layer_color(int layer) const;
     int work_layer = 0;
     std::map<int, LayerDisplay> layer_display;
-    class LayerSetup {
-        // keep this in sync with shaders/triangle-geometry.glsl
-    public:
-        LayerSetup()
-        {
-        }
-        std::array<std::array<float, 4>, 14> colors; // 14==ColorP::N_COLORS
-    };
-
-    LayerSetup layer_setup;
 
     UUID sheet_current_uuid;
 

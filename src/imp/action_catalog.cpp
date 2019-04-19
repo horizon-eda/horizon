@@ -682,6 +682,19 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Export PDF", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::DRAW_CONNECTION_LINE},
+         {"Draw connection line", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::BACKANNOTATE_CONNECTION_LINES, ToolID::NONE},
+         {"Backannotate connection lines", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::BACKANNOTATE_CONNECTION_LINES},
+         {"Backannotate connection lines", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER
+                  | ActionCatalogItem::FLAGS_NO_PREFERENCES}},
+
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -768,6 +781,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(SELECT_ALL),
         ACTION_LUT_ITEM(PDF_EXPORT_WINDOW),
         ACTION_LUT_ITEM(EXPORT_PDF),
+        ACTION_LUT_ITEM(BACKANNOTATE_CONNECTION_LINES),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
@@ -893,5 +907,7 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(CHANGE_SYMBOL),
         TOOL_LUT_ITEM(PLACE_REFDES_AND_VALUE),
         TOOL_LUT_ITEM(DRAW_POLYGON_CIRCLE),
+        TOOL_LUT_ITEM(DRAW_CONNECTION_LINE),
+        TOOL_LUT_ITEM(BACKANNOTATE_CONNECTION_LINES),
 };
 } // namespace horizon

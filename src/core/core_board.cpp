@@ -77,6 +77,7 @@ bool CoreBoard::has_object_type(ObjectType ty) const
     case ObjectType::VIA:
     case ObjectType::DIMENSION:
     case ObjectType::KEEPOUT:
+    case ObjectType::CONNECTION_LINE:
         return true;
         break;
     default:;

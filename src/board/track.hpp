@@ -16,8 +16,6 @@ using json = nlohmann::json;
 
 class Track : public UUIDProvider {
 public:
-    enum class End { TO, FROM };
-
     Track(const UUID &uu, const json &j, class Board *brd = nullptr);
     Track(const UUID &uu);
 
@@ -57,6 +55,7 @@ public:
         void update_refs(class Board &brd);
         Coordi get_position() const;
         int get_layer() const;
+        Net *get_net();
 
         json serialize() const;
     };

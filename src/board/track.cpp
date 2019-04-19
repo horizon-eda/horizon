@@ -156,6 +156,20 @@ UUID Track::Connection::get_net_segment() const
     }
 }
 
+Net *Track::Connection::get_net()
+{
+    if (is_junc()) {
+        return junc->net;
+    }
+    else if (is_pad()) {
+        return pad->net;
+    }
+    else {
+        assert(false);
+        return nullptr;
+    }
+}
+
 bool Track::Connection::operator<(const Track::Connection &other) const
 {
     if (junc < other.junc)

@@ -89,7 +89,8 @@ protected:
     bool handle_click_release(GdkEventButton *button_event);
     bool handle_context_menu(GdkEventButton *button_event);
     void tool_process(const ToolResponse &resp);
-    void tool_begin(ToolID id, bool override_selection = false, const std::set<SelectableRef> &sel = {});
+    void tool_begin(ToolID id, bool override_selection = false, const std::set<SelectableRef> &sel = {},
+                    std::unique_ptr<ToolData> data = nullptr);
     void add_tool_button(ToolID id, const std::string &label, bool left = true);
     void handle_warning_selected(const Coordi &pos);
     virtual bool handle_broadcast(const json &j);

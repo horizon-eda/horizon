@@ -123,7 +123,7 @@ void TriangleRenderer::realize()
 
 class UBOBuffer {
 public:
-    std::array<std::array<float, 4>, 16> colors; // 16==ColorP::N_COLORS, keep in sync with shaders
+    std::array<std::array<float, 4>, 17> colors; // 17==ColorP::N_COLORS, keep in sync with shaders
     std::array<float, 12> screenmat;
     std::array<float, 12> viewmat;
     std::array<float, 3> layer_color;

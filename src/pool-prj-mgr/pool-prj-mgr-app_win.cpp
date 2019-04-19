@@ -350,6 +350,17 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             }
         }
     }
+    else if (op == "backannotate") {
+        auto top_block = project->get_top_block();
+        if (processes.count(top_block.schematic_filename)) {
+            auto pid = processes.at(top_block.schematic_filename).proc->get_pid();
+            json tx;
+            tx["op"] = "backannotate";
+            tx["connections"] = j.at("connections");
+            tx["time"] = timestamp;
+            app->send_json(pid, tx);
+        }
+    }
     return nullptr;
 }
 

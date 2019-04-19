@@ -78,6 +78,11 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
             for (const auto &it_text : pkg->texts) {
                 delete_extra.emplace(it_text->uuid, ObjectType::TEXT);
             }
+            for (const auto &it_li : core.b->get_board()->connection_lines) {
+                if (it_li.second.from.package.uuid == it.uuid || it_li.second.to.package.uuid == it.uuid) {
+                    delete_extra.emplace(it_li.second.uuid, ObjectType::CONNECTION_LINE);
+                }
+            }
         }
         else if (it.type == ObjectType::POLYGON_EDGE) {
             Polygon *poly = core.r->get_polygon(it.uuid);
@@ -316,6 +321,10 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         case ObjectType::DIMENSION: {
             core.r->delete_dimension(it.uuid);
         } break;
+        case ObjectType::CONNECTION_LINE: {
+            core.b->get_board()->connection_lines.erase(it.uuid);
+        } break;
+
 
         case ObjectType::INVALID:
             break;

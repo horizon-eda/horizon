@@ -66,6 +66,7 @@ SRC_COMMON = \
 	src/board/airwires.cpp\
 	src/board/fab_output_settings.cpp\
 	src/board/board_hole.cpp\
+	src/board/connection_line.cpp\
 	src/pool/pool.cpp \
 	src/util/placement.cpp\
 	src/util/util.cpp\
@@ -216,6 +217,8 @@ SRC_IMP = \
 	src/core/tool_place_refdes_and_value.cpp\
 	src/core/tool_helper_restrict.cpp\
 	src/core/tool_draw_polygon_circle.cpp\
+	src/core/tool_draw_connection_line.cpp\
+	src/core/tool_backannotate_connection_lines.cpp\
 	src/core/cores.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\

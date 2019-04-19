@@ -238,6 +238,32 @@ int ImpBoard::get_schematic_pid()
     return this->send_json(j);
 }
 
+static json serialize_connector(const Track::Connection &conn)
+{
+    if (conn.is_pad() && conn.pad->net == nullptr) {
+        const auto comp = conn.package->component;
+        auto pm = comp->part->pad_map.at(conn.pad->uuid);
+        UUIDPath<2> path(pm.gate->uuid, pm.pin->uuid);
+        json j;
+        j["component"] = (std::string)comp->uuid;
+        j["path"] = (std::string)path;
+        return j;
+    }
+    else if (conn.is_pad() && conn.pad->net) {
+        json j;
+        j["net"] = (std::string)conn.pad->net->uuid;
+        return j;
+    }
+    else if (conn.is_junc() && conn.junc->net) {
+        json j;
+        j["net"] = (std::string)conn.junc->net->uuid;
+        return j;
+    }
+    else {
+        return nullptr;
+    }
+}
+
 void ImpBoard::construct()
 {
     ImpLayer::construct_layer_box(false);
@@ -320,6 +346,25 @@ void ImpBoard::construct()
             }
         });
         set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), false);
+
+        connect_action(ActionID::BACKANNOTATE_CONNECTION_LINES, [this](const auto &conn) {
+            auto ev = gtk_get_current_event();
+            json j;
+            j["time"] = gdk_event_get_time(ev);
+            j["op"] = "backannotate";
+            allow_set_foreground_window(this->get_schematic_pid());
+            json a;
+            for (const auto &it : core_board.get_board()->connection_lines) {
+                json x;
+                x["from"] = serialize_connector(it.second.from);
+                x["to"] = serialize_connector(it.second.to);
+                if (!x["from"].is_null() && !x["to"].is_null())
+                    a.push_back(x);
+            }
+            j["connections"] = a;
+            allow_set_foreground_window(this->get_schematic_pid());
+            this->send_json(j);
+        });
     }
 
     add_tool_button(ToolID::MAP_PACKAGE, "Place package", false);
@@ -566,13 +611,9 @@ void ImpBoard::handle_maybe_drag()
     if (target.type == ObjectType::PAD) {
         auto pkg = brd->packages.at(target.path.at(0));
         auto pad = pkg.package.pads.at(target.path.at(1));
-        if (pad.net == nullptr)
-            return;
     }
     else if (target.type == ObjectType::JUNCTION) {
         auto ju = brd->junctions.at(target.path.at(0));
-        if (ju.net == nullptr)
-            return;
     }
     else {
         ImpBase::handle_maybe_drag();
@@ -587,24 +628,57 @@ void ImpBoard::handle_drag()
 {
     auto pos = canvas->get_cursor_pos_win();
     auto delta = pos - cursor_pos_drag_begin;
+    auto brd = core_board.get_board();
+    bool have_net = false;
+    if (target_drag_begin.type == ObjectType::PAD) {
+        auto &pkg = brd->packages.at(target_drag_begin.path.at(0));
+        auto &pad = pkg.package.pads.at(target_drag_begin.path.at(1));
+        have_net = pad.net;
+    }
+    else if (target_drag_begin.type == ObjectType::JUNCTION) {
+        have_net = brd->junctions.at(target_drag_begin.path.at(0)).net;
+    }
+
     if (delta.mag_sq() > (50 * 50)) {
-        {
-            highlights.clear();
-            update_highlights();
-            ToolArgs args;
-            args.coords = target_drag_begin.p;
-            ToolResponse r = core.r->tool_begin(ToolID::ROUTE_TRACK_INTERACTIVE, args, imp_interface.get());
-            tool_process(r);
+        if (have_net) {
+            {
+                highlights.clear();
+                update_highlights();
+                ToolArgs args;
+                args.coords = target_drag_begin.p;
+                ToolResponse r = core.r->tool_begin(ToolID::ROUTE_TRACK_INTERACTIVE, args, imp_interface.get());
+                tool_process(r);
+            }
+            {
+                ToolArgs args;
+                args.type = ToolEventType::CLICK;
+                args.coords = target_drag_begin.p;
+                args.button = 1;
+                args.target = target_drag_begin;
+                args.work_layer = canvas->property_work_layer();
+                ToolResponse r = core.r->tool_update(args);
+                tool_process(r);
+            }
         }
-        {
-            ToolArgs args;
-            args.type = ToolEventType::CLICK;
-            args.coords = target_drag_begin.p;
-            args.button = 1;
-            args.target = target_drag_begin;
-            args.work_layer = canvas->property_work_layer();
-            ToolResponse r = core.r->tool_update(args);
-            tool_process(r);
+        else {
+            {
+                highlights.clear();
+                update_highlights();
+                ToolArgs args;
+                args.coords = target_drag_begin.p;
+                ToolResponse r = core.r->tool_begin(ToolID::DRAW_CONNECTION_LINE, args, imp_interface.get());
+                tool_process(r);
+            }
+            {
+                ToolArgs args;
+                args.type = ToolEventType::CLICK;
+                args.coords = target_drag_begin.p;
+                args.button = 1;
+                args.target = target_drag_begin;
+                args.work_layer = canvas->property_work_layer();
+                ToolResponse r = core.r->tool_update(args);
+                tool_process(r);
+            }
         }
         target_drag_begin = Target();
     }
