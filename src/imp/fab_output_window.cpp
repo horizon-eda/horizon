@@ -3,6 +3,9 @@
 #include "export_gerber/gerber_export.hpp"
 #include "util/gtk_util.hpp"
 #include "widgets/spin_button_dim.hpp"
+#include "core/core_board.hpp"
+#include "rules/rules_with_core.hpp"
+#include "rules/cache.hpp"
 
 namespace horizon {
 
@@ -45,9 +48,10 @@ GerberLayerEditor *GerberLayerEditor::create(FabOutputWindow *pa, FabOutputSetti
     return w;
 }
 
-FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Board *bo,
-                                 FabOutputSettings *s, const std::string &project_dir)
-    : Gtk::Window(cobject), brd(bo), settings(s), state_store(this, "imp-fab-output")
+FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, CoreBoard *c,
+                                 const std::string &project_dir)
+    : Gtk::Window(cobject), core(c), brd(core->get_board()), settings(core->get_fab_output_settings()),
+      state_store(this, "imp-fab-output")
 {
     x->get_widget("gerber_layers_box", gerber_layers_box);
     x->get_widget("prefix_entry", prefix_entry);
@@ -126,8 +130,26 @@ void FabOutputWindow::update_drill_visibility()
     }
 }
 
+static void cb_nop(const std::string &)
+{
+}
+
 void FabOutputWindow::generate()
 {
+    RulesCheckCache cache(core);
+    auto r = rules_check(core->get_rules(), RuleID::PREFLIGHT_CHECKS, core, cache, &cb_nop);
+    if (r.level != RulesCheckErrorLevel::PASS) {
+        Gtk::MessageDialog md(*this, "Preflight checks didn't pass", false /* use_markup */, Gtk::MESSAGE_ERROR,
+                              Gtk::BUTTONS_NONE);
+        md.set_secondary_text("This might be due to unfilled planes.");
+        md.add_button("Ignore", Gtk::RESPONSE_ACCEPT);
+        md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+        md.set_default_response(Gtk::RESPONSE_CANCEL);
+        if (md.run() != Gtk::RESPONSE_ACCEPT) {
+            return;
+        }
+    }
+
     try {
         FabOutputSettings my_settings = *settings;
         my_settings.output_directory = export_filechooser.get_filename_abs();
@@ -151,12 +173,12 @@ void FabOutputWindow::set_can_generate(bool v)
     generate_button->set_sensitive(v);
 }
 
-FabOutputWindow *FabOutputWindow::create(Gtk::Window *p, Board *b, FabOutputSettings *s, const std::string &project_dir)
+FabOutputWindow *FabOutputWindow::create(Gtk::Window *p, CoreBoard *c, const std::string &project_dir)
 {
     FabOutputWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/net/carrotIndustries/horizon/imp/fab_output.ui");
-    x->get_widget_derived("window", w, b, s, project_dir);
+    x->get_widget_derived("window", w, c, project_dir);
 
     w->set_transient_for(*p);
 

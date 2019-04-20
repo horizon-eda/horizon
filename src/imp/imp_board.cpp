@@ -381,8 +381,7 @@ void ImpBoard::construct()
         main_window->header->pack_end(*button);
     }
 
-    fab_output_window =
-            FabOutputWindow::create(main_window, core.b->get_board(), core.b->get_fab_output_settings(), project_dir);
+    fab_output_window = FabOutputWindow::create(main_window, &core_board, project_dir);
     core.r->signal_tool_changed().connect([this](ToolID t) { fab_output_window->set_can_generate(t == ToolID::NONE); });
     fab_output_window->signal_changed().connect([this] { core_board.set_needs_save(); });
 
