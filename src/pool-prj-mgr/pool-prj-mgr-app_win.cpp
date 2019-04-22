@@ -55,6 +55,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("download_gh_repo_entry", download_gh_repo_entry);
     builder->get_widget("download_gh_username_entry", download_gh_username_entry);
     builder->get_widget("download_dest_dir_button", download_dest_dir_button);
+    builder->get_widget("download_dest_dir_entry", download_dest_dir_entry);
     builder->get_widget("info_bar", info_bar);
     builder->get_widget("info_bar_label", info_bar_label);
     builder->get_widget("menu_new_pool", menu_new_pool);
@@ -118,9 +119,20 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
         button_cancel->set_sensitive(!is_busy);
         button_do_download->set_sensitive(!is_busy);
         if (n.status == StatusDispatcher::Status::DONE) {
-            PoolManager::get().add_pool(download_dest_dir_button->get_filename());
-            open_file_view(Gio::File::create_for_path(
-                    Glib::build_filename(download_dest_dir_button->get_filename(), "pool.json")));
+            PoolManager::get().add_pool(download_dest_dir_entry->get_text());
+            open_file_view(
+                    Gio::File::create_for_path(Glib::build_filename(download_dest_dir_entry->get_text(), "pool.json")));
+        }
+    });
+
+    download_dest_dir_button->signal_clicked().connect([this] {
+        GtkFileChooserNative *native = gtk_file_chooser_native_new(
+                "Select", GTK_WINDOW(this->gobj()), GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER, "Set", "_Cancel");
+        auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+        chooser->set_filename(download_dest_dir_entry->get_text());
+
+        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+            download_dest_dir_entry->set_text(chooser->get_filename());
         }
     });
 
@@ -705,6 +717,8 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
         download_revealer->set_reveal_child(true);
         download_revealer->set_reveal_child(false);
         header->set_title("Horizon EDA");
+        download_dest_dir_entry->set_text(
+                Glib::build_filename(Glib::get_user_special_dir(Glib::USER_DIRECTORY_DOCUMENTS), "horizon-pool"));
         break;
 
     case ViewMode::PROJECT:

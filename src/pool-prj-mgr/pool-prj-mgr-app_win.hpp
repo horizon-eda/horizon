@@ -96,7 +96,8 @@ private:
 
     Gtk::Entry *download_gh_username_entry = nullptr;
     Gtk::Entry *download_gh_repo_entry = nullptr;
-    Gtk::FileChooserButton *download_dest_dir_button = nullptr;
+    Gtk::Entry *download_dest_dir_entry = nullptr;
+    Gtk::Button *download_dest_dir_button = nullptr;
 
     Gtk::HeaderBar *header = nullptr;
     Gtk::ListBox *recent_pools_listbox = nullptr;

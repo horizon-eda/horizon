@@ -11,7 +11,7 @@ namespace horizon {
 void PoolProjectManagerAppWindow::handle_do_download()
 {
 
-    std::string dest_dir = download_dest_dir_button->get_filename();
+    std::string dest_dir = download_dest_dir_entry->get_text();
     if (dest_dir.size()) {
         download_status_dispatcher.reset("Starting...");
         std::thread dl_thread(&PoolProjectManagerAppWindow::download_thread, this,
@@ -28,6 +28,10 @@ void PoolProjectManagerAppWindow::handle_do_download()
 void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::string gh_repo, std::string dest_dir)
 {
     try {
+
+        if (!Glib::file_test(dest_dir, Glib::FILE_TEST_IS_DIR)) {
+            Gio::File::create_for_path(dest_dir)->make_directory_with_parents();
+        }
 
         {
             Glib::Dir dd(dest_dir);

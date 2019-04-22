@@ -1,5 +1,6 @@
 #include "preferences_window_pool.hpp"
 #include "pool/pool_manager.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 class PoolItemEditor : public Gtk::Box {
@@ -45,6 +46,7 @@ PoolPreferencesEditor::PoolPreferencesEditor(BaseObjectType *cobject, const Glib
 {
     x->get_widget("listbox", listbox);
     x->get_widget("button_add_pool", button_add_pool);
+    listbox->set_header_func(&header_func_separator);
     size_group = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
     show_all();
 

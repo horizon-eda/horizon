@@ -5,15 +5,17 @@
   <object class="GtkBox" id="box">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="halign">start</property>
+    <property name="margin_left">10</property>
+    <property name="margin_right">10</property>
+    <property name="margin_top">10</property>
+    <property name="margin_bottom">10</property>
     <property name="orientation">vertical</property>
+    <property name="spacing">10</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">5</property>
-        <property name="margin_right">5</property>
-        <property name="margin_top">5</property>
-        <property name="margin_bottom">5</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkButton" id="button_add_pool">
@@ -21,18 +23,15 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="pack_type">end</property>
             <property name="position">0</property>
           </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
         </child>
       </object>
       <packing>
@@ -42,21 +41,12 @@
       </packing>
     </child>
     <child>
-      <object class="GtkSeparator">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
-    <child>
       <object class="GtkScrolledWindow">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="hscrollbar_policy">never</property>
+        <property name="shadow_type">in</property>
+        <property name="propagate_natural_width">True</property>
         <child>
           <object class="GtkViewport">
             <property name="visible">True</property>
@@ -83,7 +73,7 @@
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">user-trash-symbolic</property>
+    <property name="icon_name">list-remove-symbolic</property>
   </object>
   <object class="GtkBox" id="pool_item_box">
     <property name="visible">True</property>
@@ -92,7 +82,7 @@
     <property name="margin_right">5</property>
     <property name="margin_top">5</property>
     <property name="margin_bottom">5</property>
-    <property name="spacing">5</property>
+    <property name="spacing">10</property>
     <child>
       <object class="GtkBox" id="pool_item_box_box">
         <property name="visible">True</property>
@@ -176,13 +166,12 @@
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
+        <property name="tooltip_text" translatable="yes">Remove pool from list.
+Pool won't be deleted on disk.</property>
         <property name="halign">center</property>
         <property name="valign">center</property>
         <property name="image">image1</property>
         <property name="relief">none</property>
-        <style>
-          <class name="circular"/>
-        </style>
       </object>
       <packing>
         <property name="expand">False</property>

@@ -1610,11 +1610,36 @@ In case of modifying an existing part, provide rationale for the modification.</
                         <property name="orientation">vertical</property>
                         <property name="spacing">5</property>
                         <child>
-                          <object class="GtkFileChooserButton" id="download_dest_dir_button">
+                          <object class="GtkBox" id="box4">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="action">select-folder</property>
-                            <property name="title" translatable="yes">Select base path</property>
+                            <child>
+                              <object class="GtkEntry" id="download_dest_dir_entry">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="download_dest_dir_button">
+                                <property name="label" translatable="yes">Browse...</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <style>
+                              <class name="linked"/>
+                            </style>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1626,7 +1651,10 @@ In case of modifying an existing part, provide rationale for the modification.</
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Directory in which the pool will be cloned. Has to be empty.</property>
+                            <property name="label" translatable="yes">Directory in which the pool will be cloned. Has to be empty and will be created if neccessary.</property>
+                            <property name="justify">fill</property>
+                            <property name="wrap">True</property>
+                            <property name="max_width_chars">40</property>
                             <property name="xalign">0</property>
                             <attributes>
                               <attribute name="scale" value="0.83299999999999996"/>
@@ -2626,8 +2654,8 @@ In case of modifying an existing part, provide rationale for the modification.</
   <object class="GtkSizeGroup" id="sg_dest">
     <property name="mode">vertical</property>
     <widgets>
-      <widget name="download_dest_dir_button"/>
       <widget name="label3"/>
+      <widget name="box4"/>
     </widgets>
   </object>
   <object class="GtkSizeGroup" id="sg_pool_base_path">
