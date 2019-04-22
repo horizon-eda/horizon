@@ -22,6 +22,8 @@ RecentItemBox::RecentItemBox(const std::string &name, const std::string &pa, con
     {
         auto la = Gtk::manage(new Gtk::Label(path));
         la->set_xalign(0);
+        la->set_ellipsize(Pango::ELLIPSIZE_START);
+        la->set_tooltip_text(path);
         la->get_style_context()->add_class("dim-label");
         pack_start(*la, false, false, 0);
     }
