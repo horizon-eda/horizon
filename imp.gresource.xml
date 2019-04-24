@@ -20,6 +20,8 @@
     <file>pool-prj-mgr/prj-mgr/part_browser/part_browser.ui</file>
     <file>pool-prj-mgr/prj-mgr/pool_cache_window.ui</file>
     <file>pool-prj-mgr/prj-mgr/prefs.ui</file>
+    <file>pool-prj-mgr/welcome.ui</file>
+    <file>pool-prj-mgr/welcome-banner.jpg</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-schematic-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-board-symbolic.svg</file>

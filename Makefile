@@ -496,7 +496,8 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/padstack_preview.cpp\
 	src/widgets/tag_entry.cpp\
 	src/util/status_dispatcher.cpp\
-	src/util/exception_util.cpp
+	src/util/exception_util.cpp\
+	src/pool-prj-mgr/welcome_window.cpp
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

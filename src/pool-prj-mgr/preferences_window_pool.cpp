@@ -50,23 +50,26 @@ PoolPreferencesEditor::PoolPreferencesEditor(BaseObjectType *cobject, const Glib
     size_group = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
     show_all();
 
-    button_add_pool->signal_clicked().connect([this] {
-        auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
-        GtkFileChooserNative *native =
-                gtk_file_chooser_native_new("Add Pool", top->gobj(), GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
-        auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-        auto filter = Gtk::FileFilter::create();
-        filter->set_name("Horizon pool (pool.json)");
-        filter->add_pattern("pool.json");
-        chooser->add_filter(filter);
-
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-            auto path = chooser->get_file()->get_parent()->get_path();
-            mgr.add_pool(path);
-            update();
-        }
-    });
+    button_add_pool->signal_clicked().connect(sigc::mem_fun(*this, &PoolPreferencesEditor::add_pool));
     update();
+}
+
+void PoolPreferencesEditor::add_pool()
+{
+    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+    GtkFileChooserNative *native =
+            gtk_file_chooser_native_new("Add Pool", top->gobj(), GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    auto filter = Gtk::FileFilter::create();
+    filter->set_name("Horizon pool (pool.json)");
+    filter->add_pattern("pool.json");
+    chooser->add_filter(filter);
+
+    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        auto path = chooser->get_file()->get_parent()->get_path();
+        mgr.add_pool(path);
+        update();
+    }
 }
 
 PoolPreferencesEditor *PoolPreferencesEditor::create()

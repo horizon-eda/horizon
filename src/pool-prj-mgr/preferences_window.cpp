@@ -110,7 +110,7 @@ PreferencesWindow::PreferencesWindow(Preferences *prefs) : Gtk::Window(), prefer
     box->pack_start(*sidebar, false, false, 0);
     sidebar->show();
 
-    auto stack = Gtk::manage(new Gtk::Stack);
+    stack = Gtk::manage(new Gtk::Stack);
     sidebar->set_stack(*stack);
     box->pack_start(*stack, true, true, 0);
     stack->show();
@@ -152,9 +152,17 @@ PreferencesWindow::PreferencesWindow(Preferences *prefs) : Gtk::Window(), prefer
         auto ed = PoolPreferencesEditor::create();
         stack->add(*ed, "pools", "Pools");
         ed->show();
+        pool_prefs_editor = ed;
     }
 
     box->show();
     add(*box);
 }
+
+void PreferencesWindow::open_pool()
+{
+    stack->set_visible_child("pools");
+    pool_prefs_editor->add_pool();
+}
+
 } // namespace horizon

@@ -18,6 +18,7 @@
 #include "schematic/schematic.hpp"
 #include "board/board.hpp"
 #include "widgets/pool_chooser.hpp"
+#include "welcome_window.hpp"
 
 extern const char *gitversion;
 
@@ -177,7 +178,11 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
 
     Glib::signal_idle().connect_once([this] {
         update_recent_items();
-        check_pools();
+        if (PoolManager::get().get_pools().size() == 0) {
+        	auto w = WelcomeWindow::create(this);
+        	w->set_modal(true);
+        	w->present();
+        }
     });
 
     for (auto &lb : recent_listboxes) {
