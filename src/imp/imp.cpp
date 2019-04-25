@@ -795,10 +795,10 @@ std::string ImpBase::get_hud_text_for_part(const Part *part)
     if (!part)
         return "No part";
 
-    std::string s = "MPN: " + part->get_MPN() + "\n";
-    s += "Manufacturer: " + part->get_manufacturer() + "\n";
+    std::string s = "MPN: " + Glib::Markup::escape_text(part->get_MPN()) + "\n";
+    s += "Manufacturer: " + Glib::Markup::escape_text(part->get_manufacturer()) + "\n";
     if (part->get_description().size())
-        s += part->get_description() + "\n";
+        s += Glib::Markup::escape_text(part->get_description()) + "\n";
     if (part->get_datasheet().size())
         s += "<a href=\"" + Glib::Markup::escape_text(part->get_datasheet()) + "\" title=\""
              + Glib::Markup::escape_text(Glib::Markup::escape_text(part->get_datasheet())) + "\">Datasheet</a>\n";
