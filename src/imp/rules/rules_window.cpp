@@ -307,13 +307,31 @@ void RulesWindow::apply_rules()
 
 void RulesWindow::check_thread(RuleID id)
 {
-    auto result = rules_check(rules, id, core, *cache.get(), [this, id](const std::string &status) {
-        {
-            std::lock_guard<std::mutex> guard(run_store_mutex);
-            run_store.at(id).status = status;
-        }
-        dispatcher.emit();
-    });
+    RulesCheckResult result;
+    try {
+        result = rules_check(rules, id, core, *cache.get(), [this, id](const std::string &status) {
+            {
+                std::lock_guard<std::mutex> guard(run_store_mutex);
+                run_store.at(id).status = status;
+            }
+            dispatcher.emit();
+        });
+    }
+
+    catch (const std::exception &ex) {
+        result.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+        auto &e = result.errors.back();
+        e.comment = std::string("exception thrown: ") + ex.what();
+        e.level = RulesCheckErrorLevel::FAIL;
+        result.update();
+    }
+    catch (...) {
+        result.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+        auto &e = result.errors.back();
+        e.comment = "unknown exception thrown";
+        e.level = RulesCheckErrorLevel::FAIL;
+        result.update();
+    }
     {
         {
             std::lock_guard<std::mutex> guard(run_store_mutex);
