@@ -1146,15 +1146,23 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
             keys_current.emplace_back(keyval, mod);
         }
         std::set<ActionConnection *> connections_matched;
+        auto selection = canvas->get_selection();
         for (auto &it : action_connections) {
             auto k = std::make_pair(it.second.action_id, it.second.tool_id);
             if (action_catalog.at(k).availability & get_editor_type_for_action()) {
-                for (const auto &it2 : it.second.key_sequences) {
-                    auto minl = std::min(keys_current.size(), it2.size());
-                    if (minl && std::equal(keys_current.begin(), keys_current.begin() + minl, it2.begin())
-                        && !(core.r->tool_is_active()
-                             && !(action_catalog.at(k).flags & ActionCatalogItem::FLAGS_IN_TOOL))) {
-                        connections_matched.insert(&it.second);
+                bool can_begin = false;
+                if (it.second.action_id == ActionID::TOOL && !core.r->tool_is_active()) {
+                    can_begin = core.r->tool_can_begin(it.second.tool_id, selection).first;
+                }
+                else if (it.second.tool_id == ToolID::NONE) {
+                    can_begin = get_action_sensitive(k);
+                }
+                if (can_begin) {
+                    for (const auto &it2 : it.second.key_sequences) {
+                        auto minl = std::min(keys_current.size(), it2.size());
+                        if (minl && std::equal(keys_current.begin(), keys_current.begin() + minl, it2.begin())) {
+                            connections_matched.insert(&it.second);
+                        }
                     }
                 }
             }
