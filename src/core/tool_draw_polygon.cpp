@@ -32,8 +32,11 @@ void ToolDrawPolygon::update_tip()
 {
     std::stringstream ss;
     ss << "<b>LMB:</b>";
-    if (arc_mode) {
+    if (arc_mode == ArcMode::CURRENT) {
         ss << "place arc center";
+    }
+    else if (arc_mode == ArcMode::NEXT) {
+        ss << "place vertex, then arc center";
     }
     else {
         ss << "place vertex";
@@ -54,7 +57,7 @@ void ToolDrawPolygon::update_tip()
 
 void ToolDrawPolygon::update_vertex(const Coordi &c)
 {
-    if (arc_mode && last_vertex) {
+    if (arc_mode == ArcMode::CURRENT && last_vertex) {
         last_vertex->arc_center = c;
     }
     else {
@@ -75,9 +78,17 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
-            if (arc_mode) {
-                arc_mode = false;
-                vertex->position = args.coords;
+            if (arc_mode == ArcMode::CURRENT) {
+                arc_mode = ArcMode::OFF;
+                last_vertex = vertex;
+                vertex = temp->append_vertex();
+                cycle_restrict_mode_xy();
+                vertex->position = get_coord_restrict(last_vertex->position, args.coords);
+            }
+            else if (arc_mode == ArcMode::NEXT) {
+                arc_mode = ArcMode::CURRENT;
+                last_vertex->type = Polygon::Vertex::Type::ARC;
+                last_vertex->arc_center = args.coords;
             }
             else {
                 last_vertex = vertex;
@@ -103,9 +114,12 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_a) {
             if (last_vertex) {
-                last_vertex->type = Polygon::Vertex::Type::ARC;
-                last_vertex->arc_center = args.coords;
-                arc_mode = true;
+                if (arc_mode == ArcMode::OFF) {
+                    arc_mode = ArcMode::NEXT;
+                }
+                else if (arc_mode == ArcMode::NEXT) {
+                    arc_mode = ArcMode::OFF;
+                }
             }
         }
         else if (args.key == GDK_KEY_e) {

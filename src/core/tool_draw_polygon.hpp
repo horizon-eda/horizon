@@ -16,7 +16,8 @@ private:
     Polygon *temp = nullptr;
     Polygon::Vertex *vertex = nullptr;
     Polygon::Vertex *last_vertex = nullptr;
-    bool arc_mode = false;
+    enum class ArcMode { OFF, NEXT, CURRENT };
+    ArcMode arc_mode = ArcMode::OFF;
     void update_tip();
     void update_vertex(const Coordi &c);
 };
