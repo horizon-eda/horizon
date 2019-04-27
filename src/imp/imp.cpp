@@ -1147,6 +1147,7 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
         }
         std::set<ActionConnection *> connections_matched;
         auto selection = canvas->get_selection();
+        update_action_sensitivity();
         for (auto &it : action_connections) {
             auto k = std::make_pair(it.second.action_id, it.second.tool_id);
             if (action_catalog.at(k).availability & get_editor_type_for_action()) {
