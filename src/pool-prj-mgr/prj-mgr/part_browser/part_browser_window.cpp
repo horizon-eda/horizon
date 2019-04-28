@@ -72,7 +72,6 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
         add_search_parametric(it.first);
     }
     notebook->set_current_page(notebook->page_num(*ch_search));
-
 }
 
 void PartBrowserWindow::handle_favorites_selected(Gtk::ListBoxRow *row)
