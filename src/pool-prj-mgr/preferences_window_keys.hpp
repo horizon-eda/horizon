@@ -37,6 +37,9 @@ private:
 
     void update_action_editors();
     void update_keys();
+    void handle_save();
+    void handle_load();
+    void handle_load_default();
 };
 
 } // namespace horizon

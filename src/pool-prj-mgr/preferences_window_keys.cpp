@@ -1,9 +1,10 @@
 #include "preferences_window_keys.hpp"
 #include "preferences/preferences.hpp"
 #include "util/gtk_util.hpp"
+#include "util/util.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
-
 class ActionEditor : public Gtk::Box {
 public:
     ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
@@ -16,6 +17,7 @@ public:
 private:
     std::vector<KeySequence2> *keys;
     KeySequencesPreferencesEditor *parent;
+    Preferences *preferences;
 
     Gtk::ListBox *action_listbox = nullptr;
     void update();
@@ -59,6 +61,19 @@ KeySequencesPreferencesEditor::KeySequencesPreferencesEditor(BaseObjectType *cob
             sigc::mem_fun(*this, &KeySequencesPreferencesEditor::update_action_editors));
 
     key_sequences_treeview->expand_all();
+
+    Gtk::Button *save_button;
+    x->get_widget("key_sequences_save_button", save_button);
+    save_button->signal_clicked().connect(sigc::mem_fun(*this, &KeySequencesPreferencesEditor::handle_save));
+
+    Gtk::Button *load_button;
+    x->get_widget("key_sequences_load_button", load_button);
+    load_button->signal_clicked().connect(sigc::mem_fun(*this, &KeySequencesPreferencesEditor::handle_load));
+
+    Gtk::Button *load_default_button;
+    x->get_widget("key_sequences_load_default_button", load_default_button);
+    load_default_button->signal_clicked().connect(
+            sigc::mem_fun(*this, &KeySequencesPreferencesEditor::handle_load_default));
 
     update_action_editors();
 }
@@ -136,6 +151,92 @@ void KeySequencesPreferencesEditor::update_keys()
             }
         }
     }
+}
+
+void KeySequencesPreferencesEditor::handle_save()
+{
+    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+    std::string filename;
+    {
+
+        GtkFileChooserNative *native = gtk_file_chooser_native_new("Save keybindings", GTK_WINDOW(top->gobj()),
+                                                                   GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+        auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+        chooser->set_do_overwrite_confirmation(true);
+        chooser->set_current_name("keys.json");
+
+        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+            filename = chooser->get_filename();
+        }
+    }
+    if (filename.size()) {
+        while (1) {
+            std::string error_str;
+            try {
+                auto j = keyseq_preferences->serialize();
+                save_json_to_file(filename, j);
+                break;
+            }
+            catch (const std::exception &e) {
+                error_str = e.what();
+            }
+            catch (...) {
+                error_str = "unknown error";
+            }
+            if (error_str.size()) {
+                Gtk::MessageDialog dia(*top, "Export error", false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_NONE);
+                dia.set_secondary_text(error_str);
+                dia.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+                dia.add_button("Retry", 1);
+                if (dia.run() != 1)
+                    break;
+            }
+        }
+    }
+}
+
+
+void KeySequencesPreferencesEditor::handle_load()
+{
+    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+    GtkFileChooserNative *native = gtk_file_chooser_native_new("Open keybindings", GTK_WINDOW(top->gobj()),
+                                                               GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    auto filter = Gtk::FileFilter::create();
+    filter->set_name("Horizon key bindings");
+    filter->add_pattern("*.json");
+    chooser->add_filter(filter);
+
+    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        auto filename = chooser->get_filename();
+        std::string error_str;
+        try {
+            auto j = load_json_from_file(filename);
+            keyseq_preferences->load_from_json(j);
+            update_action_editors();
+            update_keys();
+            preferences->signal_changed().emit();
+        }
+        catch (const std::exception &e) {
+            error_str = e.what();
+        }
+        catch (...) {
+            error_str = "unknown error";
+        }
+        if (error_str.size()) {
+            Gtk::MessageDialog dia(*top, "Import error", false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+            dia.set_secondary_text(error_str);
+            dia.run();
+        }
+    }
+}
+
+void KeySequencesPreferencesEditor::handle_load_default()
+{
+    keyseq_preferences->load_from_json(json_from_resource("/net/carrotIndustries/horizon/imp/keys_default.json"));
+    update_action_editors();
+    update_keys();
+    preferences->signal_changed().emit();
 }
 
 KeySequencesPreferencesEditor *KeySequencesPreferencesEditor::create(Preferences *prefs,
@@ -247,7 +348,7 @@ public:
 ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
                            KeySequencesPreferences *keyseq_prefs, std::vector<KeySequence2> *k,
                            const std::string &title, KeySequencesPreferencesEditor *p)
-    : Gtk::Box(cobject), keys(k), parent(p)
+    : Gtk::Box(cobject), keys(k), parent(p), preferences(prefs)
 {
     Gtk::Label *la;
     x->get_widget("action_label", la);
@@ -264,6 +365,7 @@ ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
             if (dia.keys.size()) {
                 keys->push_back(dia.keys);
                 update();
+                preferences->signal_changed().emit();
             }
         }
         return false;
@@ -287,6 +389,7 @@ ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
             if (dia.keys.size()) {
                 my_box->keys = dia.keys;
                 update();
+                preferences->signal_changed().emit();
             }
         }
     });
@@ -313,6 +416,7 @@ void ActionEditor::update()
         delete_button->signal_clicked().connect([this, i] {
             keys->erase(keys->begin() + i);
             update();
+            preferences->signal_changed().emit();
         });
         delete_button->set_image_from_icon_name("list-remove-symbolic", Gtk::ICON_SIZE_BUTTON);
         box->pack_start(*la, true, true, 0);
