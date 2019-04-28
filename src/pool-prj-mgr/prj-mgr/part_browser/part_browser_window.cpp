@@ -67,10 +67,12 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
     update_part_current();
     update_favorites();
 
-    add_search();
+    auto ch_search = add_search();
     for (const auto &it : pool_parametric.get_tables()) {
         add_search_parametric(it.first);
     }
+    notebook->set_current_page(notebook->page_num(*ch_search));
+
 }
 
 void PartBrowserWindow::handle_favorites_selected(Gtk::ListBoxRow *row)
@@ -266,7 +268,7 @@ void PartBrowserWindow::set_can_assign(bool v)
     assign_part_button->set_sensitive(part_current && can_assign);
 }
 
-void PartBrowserWindow::add_search(const UUID &part)
+PoolBrowserPart *PartBrowserWindow::add_search(const UUID &part)
 {
     auto ch = Gtk::manage(new PoolBrowserPart(&pool));
     ch->get_style_context()->add_class("background");
@@ -288,6 +290,7 @@ void PartBrowserWindow::add_search(const UUID &part)
     ch->signal_activated().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_place_part));
     if (part)
         ch->go_to(part);
+    return ch;
 }
 
 void PartBrowserWindow::add_search_parametric(const std::string &table_name)

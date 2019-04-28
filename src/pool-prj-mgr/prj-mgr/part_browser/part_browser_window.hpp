@@ -39,7 +39,7 @@ private:
     Gtk::ListBox *lb_recent = nullptr;
     Gtk::Paned *paned = nullptr;
     class PartPreview *preview = nullptr;
-    void add_search(const UUID &part = UUID());
+    class PoolBrowserPart *add_search(const UUID &part = UUID());
     void add_search_parametric(const std::string &table_name);
     void handle_switch_page(Gtk::Widget *w, guint index);
     void handle_fav_toggled();
