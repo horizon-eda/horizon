@@ -8,19 +8,21 @@ namespace horizon {
 class ActionEditor : public Gtk::Box {
 public:
     ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
-                 KeySequencesPreferences *keyseq_prefs, std::vector<KeySequence> *keys, const std::string &title,
-                 KeySequencesPreferencesEditor *parent);
-    static ActionEditor *create(Preferences *prefs, KeySequencesPreferences *keyseq_prefs,
-                                std::vector<KeySequence> *keys, const std::string &title,
+                 std::pair<ActionID, ToolID> action, ActionCatalogItem::Availability availability,
+                 const std::string &title, KeySequencesPreferencesEditor *parent);
+    static ActionEditor *create(Preferences *prefs, std::pair<ActionID, ToolID> action,
+                                ActionCatalogItem::Availability availability, const std::string &title,
                                 KeySequencesPreferencesEditor *parent);
 
 private:
-    std::vector<KeySequence> *keys;
+    std::pair<ActionID, ToolID> action;
+    ActionCatalogItem::Availability availability;
     KeySequencesPreferencesEditor *parent;
     Preferences *preferences;
 
     Gtk::ListBox *action_listbox = nullptr;
     void update();
+    std::vector<KeySequence> *get_keys();
 };
 
 #define GET_WIDGET(name)                                                                                               \
@@ -95,8 +97,8 @@ void KeySequencesPreferencesEditor::update_action_editors()
     auto it = key_sequences_treeview->get_selection()->get_selected();
     if (it) {
         Gtk::TreeModel::Row row = *it;
-        std::pair<ActionID, ToolID> key = row[tree_columns.action];
-        if (key.first != ActionID::NONE) {
+        std::pair<ActionID, ToolID> action = row[tree_columns.action];
+        if (action.first != ActionID::NONE) {
             const auto cat = action_catalog.at(row[tree_columns.action]);
             auto av = static_cast<unsigned int>(cat.availability);
             int count = 0;
@@ -106,16 +108,13 @@ void KeySequencesPreferencesEditor::update_action_editors()
             }
             std::vector<ActionEditor *> eds;
             if (count > 1) {
-                auto ed = Gtk::manage(ActionEditor::create(
-                        preferences, keyseq_preferences,
-                        &keyseq_preferences->keys[key][ActionCatalogItem::AVAILABLE_EVERYWHERE], "Default", this));
+                auto ed = Gtk::manage(ActionEditor::create(preferences, action, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+                                                           "Default", this));
                 eds.push_back(ed);
             }
             for (const auto &it_av : availabilities) {
                 if (cat.availability & it_av.first) {
-                    auto ed = Gtk::manage(ActionEditor::create(preferences, keyseq_preferences,
-                                                               &keyseq_preferences->keys[key][it_av.first],
-                                                               it_av.second, this));
+                    auto ed = Gtk::manage(ActionEditor::create(preferences, action, it_av.first, it_av.second, this));
                     eds.push_back(ed);
                 }
             }
@@ -346,9 +345,9 @@ public:
 
 
 ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
-                           KeySequencesPreferences *keyseq_prefs, std::vector<KeySequence> *k, const std::string &title,
-                           KeySequencesPreferencesEditor *p)
-    : Gtk::Box(cobject), keys(k), parent(p), preferences(prefs)
+                           std::pair<ActionID, ToolID> act, ActionCatalogItem::Availability av,
+                           const std::string &title, KeySequencesPreferencesEditor *p)
+    : Gtk::Box(cobject), action(act), availability(av), parent(p), preferences(prefs)
 {
     Gtk::Label *la;
     x->get_widget("action_label", la);
@@ -363,7 +362,7 @@ ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         CaptureDialog dia(top);
         if (dia.run() == Gtk::RESPONSE_OK) {
             if (dia.keys.size()) {
-                keys->push_back(dia.keys);
+                preferences->key_sequences.keys[action][availability].push_back(dia.keys);
                 update();
                 preferences->signal_changed().emit();
             }
@@ -397,6 +396,17 @@ ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     update();
 }
 
+std::vector<KeySequence> *ActionEditor::get_keys()
+{
+    if (preferences->key_sequences.keys.count(action)
+        && preferences->key_sequences.keys.at(action).count(availability)) {
+        return &preferences->key_sequences.keys.at(action).at(availability);
+    }
+    else {
+        return nullptr;
+    }
+}
+
 void ActionEditor::update()
 {
     {
@@ -406,24 +416,27 @@ void ActionEditor::update()
         }
     }
     size_t i = 0;
-    for (auto &it : *keys) {
-        auto box = Gtk::manage(new MyBox(it));
-        box->property_margin() = 5;
-        auto la = Gtk::manage(new Gtk::Label(key_sequence_to_string(it)));
-        la->set_xalign(0);
-        auto delete_button = Gtk::manage(new Gtk::Button());
-        delete_button->set_relief(Gtk::RELIEF_NONE);
-        delete_button->signal_clicked().connect([this, i] {
-            keys->erase(keys->begin() + i);
-            update();
-            preferences->signal_changed().emit();
-        });
-        delete_button->set_image_from_icon_name("list-remove-symbolic", Gtk::ICON_SIZE_BUTTON);
-        box->pack_start(*la, true, true, 0);
-        box->pack_start(*delete_button, false, false, 0);
-        action_listbox->append(*box);
-        box->show_all();
-        i++;
+    auto keys = get_keys();
+    if (keys) {
+        for (auto &it : *keys) {
+            auto box = Gtk::manage(new MyBox(it));
+            box->property_margin() = 5;
+            auto la = Gtk::manage(new Gtk::Label(key_sequence_to_string(it)));
+            la->set_xalign(0);
+            auto delete_button = Gtk::manage(new Gtk::Button());
+            delete_button->set_relief(Gtk::RELIEF_NONE);
+            delete_button->signal_clicked().connect([this, i, keys] {
+                keys->erase(keys->begin() + i);
+                update();
+                preferences->signal_changed().emit();
+            });
+            delete_button->set_image_from_icon_name("list-remove-symbolic", Gtk::ICON_SIZE_BUTTON);
+            box->pack_start(*la, true, true, 0);
+            box->pack_start(*delete_button, false, false, 0);
+            action_listbox->append(*box);
+            box->show_all();
+            i++;
+        }
     }
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
     if (top)
@@ -432,14 +445,14 @@ void ActionEditor::update()
 }
 
 
-ActionEditor *ActionEditor::create(Preferences *prefs, KeySequencesPreferences *keyseq_prefs,
-                                   std::vector<KeySequence> *keys, const std::string &title,
+ActionEditor *ActionEditor::create(Preferences *prefs, std::pair<ActionID, ToolID> action,
+                                   ActionCatalogItem::Availability availability, const std::string &title,
                                    KeySequencesPreferencesEditor *parent)
 {
     ActionEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/preferences.ui", "action_editor");
-    x->get_widget_derived("action_editor", w, prefs, keyseq_prefs, keys, title, parent);
+    x->get_widget_derived("action_editor", w, prefs, action, availability, title, parent);
     w->reference();
     return w;
 }
