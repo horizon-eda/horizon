@@ -3,7 +3,7 @@
 #include <gdkmm.h>
 
 namespace horizon {
-std::string key_sequence_to_string(const KeySequence2 &keys)
+std::string key_sequence_to_string(const KeySequence &keys)
 {
     std::string txt;
     for (const auto &it : keys) {

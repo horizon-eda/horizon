@@ -884,7 +884,7 @@ void ImpBase::apply_preferences()
         auto act = action_catalog.at(it.first);
         if (!(act.flags & ActionCatalogItem::FLAGS_NO_PREFERENCES) && preferences.key_sequences.keys.count(it.first)) {
             auto pref = preferences.key_sequences.keys.at(it.first);
-            std::vector<KeySequence2> *seqs = nullptr;
+            std::vector<KeySequence> *seqs = nullptr;
             if (pref.count(av) && pref.at(av).size()) {
                 seqs = &pref.at(av);
             }

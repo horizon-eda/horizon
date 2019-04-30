@@ -187,7 +187,7 @@ void ToolPopover::set_can_begin(const std::map<std::pair<ActionID, ToolID>, bool
     }
 }
 
-void ToolPopover::set_key_sequences(std::pair<ActionID, ToolID> action_id, const std::vector<KeySequence2> &seqs)
+void ToolPopover::set_key_sequences(std::pair<ActionID, ToolID> action_id, const std::vector<KeySequence> &seqs)
 {
     std::stringstream s;
     std::transform(seqs.begin(), seqs.end(), std::ostream_iterator<std::string>(s, ","),

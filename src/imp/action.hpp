@@ -98,9 +98,9 @@ enum class ActionGroup {
     SEARCH
 };
 
-typedef std::vector<std::pair<unsigned int, GdkModifierType>> KeySequence2;
+typedef std::vector<std::pair<unsigned int, GdkModifierType>> KeySequence;
 
-std::string key_sequence_to_string(const KeySequence2 &keys);
+std::string key_sequence_to_string(const KeySequence &keys);
 
 class ActionConnection {
 public:
@@ -111,7 +111,7 @@ public:
 
     const ActionID action_id;
     const ToolID tool_id;
-    std::vector<KeySequence2> key_sequences;
+    std::vector<KeySequence> key_sequences;
     std::function<void(const ActionConnection &)> cb;
 };
 

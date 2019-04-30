@@ -175,7 +175,7 @@ private:
 
     void create_context_menu(Gtk::Menu *parent, const std::set<SelectableRef> &sel);
 
-    KeySequence2 keys_current;
+    KeySequence keys_current;
     bool handle_action_key(GdkEventKey *ev);
     void handle_tool_action(const ActionConnection &conn);
 

@@ -8,14 +8,14 @@ namespace horizon {
 class ActionEditor : public Gtk::Box {
 public:
     ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
-                 KeySequencesPreferences *keyseq_prefs, std::vector<KeySequence2> *keys, const std::string &title,
+                 KeySequencesPreferences *keyseq_prefs, std::vector<KeySequence> *keys, const std::string &title,
                  KeySequencesPreferencesEditor *parent);
     static ActionEditor *create(Preferences *prefs, KeySequencesPreferences *keyseq_prefs,
-                                std::vector<KeySequence2> *keys, const std::string &title,
+                                std::vector<KeySequence> *keys, const std::string &title,
                                 KeySequencesPreferencesEditor *parent);
 
 private:
-    std::vector<KeySequence2> *keys;
+    std::vector<KeySequence> *keys;
     KeySequencesPreferencesEditor *parent;
     Preferences *preferences;
 
@@ -254,7 +254,7 @@ KeySequencesPreferencesEditor *KeySequencesPreferencesEditor::create(Preferences
 class CaptureDialog : public Gtk::Dialog {
 public:
     CaptureDialog(Gtk::Window *parent);
-    KeySequence2 keys;
+    KeySequence keys;
 
 private:
     Gtk::Label *capture_label = nullptr;
@@ -337,17 +337,17 @@ void CaptureDialog::update()
 
 class MyBox : public Gtk::Box {
 public:
-    MyBox(KeySequence2 &k) : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5), keys(k)
+    MyBox(KeySequence &k) : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5), keys(k)
     {
         property_margin() = 5;
     }
-    KeySequence2 &keys;
+    KeySequence &keys;
 };
 
 
 ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
-                           KeySequencesPreferences *keyseq_prefs, std::vector<KeySequence2> *k,
-                           const std::string &title, KeySequencesPreferencesEditor *p)
+                           KeySequencesPreferences *keyseq_prefs, std::vector<KeySequence> *k, const std::string &title,
+                           KeySequencesPreferencesEditor *p)
     : Gtk::Box(cobject), keys(k), parent(p), preferences(prefs)
 {
     Gtk::Label *la;
@@ -433,7 +433,7 @@ void ActionEditor::update()
 
 
 ActionEditor *ActionEditor::create(Preferences *prefs, KeySequencesPreferences *keyseq_prefs,
-                                   std::vector<KeySequence2> *keys, const std::string &title,
+                                   std::vector<KeySequence> *keys, const std::string &title,
                                    KeySequencesPreferencesEditor *parent)
 {
     ActionEditor *w;

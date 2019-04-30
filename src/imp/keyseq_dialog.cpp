@@ -58,7 +58,7 @@ void KeySequenceDialog::add_sequence(const std::string &seq, const std::string &
     lb->append(*box);
 }
 
-void KeySequenceDialog::add_sequence(const std::vector<KeySequence2> &seqs, const std::string &label)
+void KeySequenceDialog::add_sequence(const std::vector<KeySequence> &seqs, const std::string &label)
 {
     std::stringstream s;
     std::transform(seqs.begin(), seqs.end(), std::ostream_iterator<std::string>(s, "\n"),
