@@ -100,7 +100,7 @@ std::string get_exe_dir()
 }
 
 #else
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(__linux__)
 std::string get_exe_dir()
 {
 
@@ -131,6 +131,17 @@ std::string get_exe_dir()
         throw std::runtime_error("can't find executable");
         return "";
     }
+}
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
+std::string get_exe_dir() {
+    char buf[PATH_MAX];
+    uint32_t size = sizeof(buf);
+    if (_NSGetExecutablePath(buf, &size) == 0)
+        return Glib::path_get_dirname(buf);
+    else
+        throw std::runtime_error("can't find executable");
+        return "";
 }
 #else
 #error Dont know how to find path to executable on your OS.
