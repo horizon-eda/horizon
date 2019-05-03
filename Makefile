@@ -539,7 +539,12 @@ ifeq ($(OS),Windows_NT)
     DEFINES += -DWIN32_UUID
     LDFLAGS_GUI = -Wl,-subsystem,windows
 else
-    LDFLAGS += -fuse-ld=gold
+    UNAME := $(shell uname)
+    ifeq ($(UNAME), Darwin)
+        # do nothing on mac os
+    else
+        LDFLAGS += -fuse-ld=gold
+    endif
 endif
 
 SRC_SHARED = $(SRC_COMMON) \

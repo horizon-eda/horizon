@@ -100,7 +100,7 @@ std::string get_exe_dir()
 }
 
 #else
-#if defined(__linux__)
+#if defined(__linux__) || defined(__APPLE__)
 std::string get_exe_dir()
 {
 
