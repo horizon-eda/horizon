@@ -15,8 +15,11 @@ private:
     class PoolProjectManagerAppWindow *appwin;
     Gtk::DrawingArea *banner_area = nullptr;
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
-    Gtk::Button *button_download = nullptr;
-    Gtk::Button *button_open = nullptr;
+    Gtk::Button *button_back = nullptr;
+    Gtk::Stack *stack = nullptr;
+    Gtk::Button *button_git_add_pool = nullptr;
+
+    void handle_open();
 
     bool draw_banner(const Cairo::RefPtr<Cairo::Context> &cr);
 };
