@@ -1518,6 +1518,24 @@
     {
         "action": "TOOL",
         "keys": {
+            "32": [
+                [
+                    {
+                        "key": "I",
+                        "mod": 0
+                    },
+                    {
+                        "key": "f",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "EDIT_FRAME_PROPERTIES"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
             "2": []
         },
         "tool": "CLEAR_NC"
