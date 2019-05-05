@@ -10,6 +10,7 @@
 #include "common/object_descr.hpp"
 #include "pool_remote_box.hpp"
 #include "pool_merge_dialog.hpp"
+#include "pool_git_box.hpp"
 #include <git2.h>
 #include "util/autofree_ptr.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app.hpp"
@@ -55,6 +56,8 @@ void PoolNotebook::pool_updated(bool success)
         settings_box->pool_updated();
     if (part_wizard)
         part_wizard->reload();
+    if (git_box && success && git_box->refreshed_once)
+        git_box->refresh();
 }
 
 PoolNotebook::~PoolNotebook()
@@ -214,6 +217,20 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         });
     }
 
+    if (Glib::file_test(Glib::build_filename(base_path, ".git"), Glib::FILE_TEST_IS_DIR)) {
+        git_box = PoolGitBox::create(this);
+        git_box->show();
+        append_page(*git_box, "Git");
+        git_box->unreference();
+
+        signal_switch_page().connect([this](Gtk::Widget *page, int page_num) {
+            if (page == git_box && !git_box->refreshed_once) {
+                git_box->refresh();
+                git_box->refreshed_once = true;
+            }
+        });
+    }
+
     for (const auto &it_tab : pool_parametric.get_tables()) {
         auto br = Gtk::manage(new PoolBrowserParametric(&pool, &pool_parametric, it_tab.first));
         br->show();
@@ -323,6 +340,8 @@ void PoolNotebook::prepare_close()
 {
     if (remote_box)
         remote_box->prs_refreshed_once = true;
+    if (git_box)
+        git_box->refreshed_once = true;
     closing = true;
 }
 

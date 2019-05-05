@@ -441,6 +441,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-mgr/pool_settings_box.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_merge_dialog.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_update_error_dialog.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_git_box.cpp\
 	src/widgets/pool_browser.cpp\
 	src/widgets/pool_browser_unit.cpp\
 	src/widgets/pool_browser_symbol.cpp\

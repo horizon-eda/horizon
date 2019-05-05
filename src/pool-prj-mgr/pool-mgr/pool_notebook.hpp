@@ -23,6 +23,7 @@
 namespace horizon {
 class PoolNotebook : public Gtk::Notebook {
     friend class PoolRemoteBox;
+    friend class PoolGitBox;
 
 public:
     PoolNotebook(const std::string &bp, class PoolProjectManagerAppWindow *aw);
@@ -115,6 +116,7 @@ private:
     std::string remote_repo;
     class PoolRemoteBox *remote_box = nullptr;
     class PoolSettingsBox *settings_box = nullptr;
+    class PoolGitBox *git_box = nullptr;
 
     UUID pool_uuid;
 };
