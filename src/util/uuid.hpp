@@ -1,6 +1,8 @@
 #pragma once
 #ifdef WIN32_UUID
 #include "uuid_win32.hpp"
+#elif __APPLE__
+#include <uuid/uuid.h>
 #else
 #include <uuid.h>
 #endif
