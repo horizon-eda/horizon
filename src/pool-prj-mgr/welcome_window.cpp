@@ -36,7 +36,7 @@ WelcomeWindow::WelcomeWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     banner_area->signal_draw().connect(sigc::mem_fun(*this, &WelcomeWindow::draw_banner));
 
     button_download->signal_clicked().connect([this] {
-        appwin->handle_download();
+        appwin->handle_download(true);
         delete this;
     });
 

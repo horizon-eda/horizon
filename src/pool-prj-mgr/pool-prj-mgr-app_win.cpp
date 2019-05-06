@@ -79,7 +79,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     button_open->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_open));
     button_close->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_close));
     button_update->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_update));
-    button_download->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_download));
+    button_download->signal_clicked().connect([this] { handle_download(); });
     button_do_download->signal_clicked().connect(
             sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_do_download));
     button_cancel->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_cancel));
@@ -115,14 +115,23 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     download_status_dispatcher.attach(download_label);
     download_status_dispatcher.attach(download_spinner);
 
-    download_status_dispatcher.signal_notified().connect([this](const StatusDispatcher::Notification &n) {
+    download_status_dispatcher.signal_notified().connect([this, app](const StatusDispatcher::Notification &n) {
         auto is_busy = n.status == StatusDispatcher::Status::BUSY;
         button_cancel->set_sensitive(!is_busy);
         button_do_download->set_sensitive(!is_busy);
         if (n.status == StatusDispatcher::Status::DONE) {
             PoolManager::get().add_pool(download_dest_dir_entry->get_text());
-            open_file_view(
-                    Gio::File::create_for_path(Glib::build_filename(download_dest_dir_entry->get_text(), "pool.json")));
+            if (download_back_to_start) {
+                app->recent_items[Glib::build_filename(download_dest_dir_entry->get_text(), "pool.json")] =
+                        Glib::DateTime::create_now_local();
+                check_schema_update(download_dest_dir_entry->get_text());
+                update_recent_items();
+                set_view_mode(ViewMode::OPEN);
+            }
+            else {
+                open_file_view(Gio::File::create_for_path(
+                        Glib::build_filename(download_dest_dir_entry->get_text(), "pool.json")));
+            }
         }
     });
 
@@ -434,8 +443,9 @@ void PoolProjectManagerAppWindow::handle_recent()
     // open_file_view(file);
 }
 
-void PoolProjectManagerAppWindow::handle_download()
+void PoolProjectManagerAppWindow::handle_download(bool back_to_start)
 {
+    download_back_to_start = back_to_start;
     set_view_mode(ViewMode::DOWNLOAD);
 }
 
