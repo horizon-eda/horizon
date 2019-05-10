@@ -156,6 +156,26 @@ void GerberWriter::write_lines()
     }
 }
 
+void GerberWriter::write_arcs()
+{
+    write_line("G75*");
+    for (const auto &it : arcs) {
+        if (it.flip)
+            write_line("G02*");
+        else
+            write_line("G03*");
+
+        ofs << "D" << it.aperture << "*"
+            << "\r\n";
+        ofs << it.from << "D02*"
+            << "\r\n";
+
+        auto center = it.center - it.from;
+        ofs << it.to << "I" << center.x << "J" << center.y << "D01*"
+            << "\r\n";
+    }
+}
+
 void GerberWriter::write_pads()
 {
     for (const auto &it : pads) {
@@ -194,6 +214,12 @@ void GerberWriter::draw_line(const Coordi &from, const Coordi &to, uint64_t widt
 {
     auto ap = get_or_create_aperture_circle(width);
     lines.emplace_back(from, to, ap);
+}
+
+void GerberWriter::draw_arc(const Coordi &from, const Coordi &to, const Coordi &center, bool flip, uint64_t width)
+{
+    auto ap = get_or_create_aperture_circle(width);
+    arcs.emplace_back(from, to, center, flip, ap);
 }
 
 void GerberWriter::draw_region(const ClipperLib::Path &path, bool dark, int prio)

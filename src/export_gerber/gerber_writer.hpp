@@ -19,12 +19,14 @@ public:
     void write_format();
     void write_apertures();
     void write_lines();
+    void write_arcs();
     void write_pads();
     void write_regions();
     unsigned int get_or_create_aperture_circle(uint64_t diameter);
     // unsigned int get_or_create_aperture_padstack(const class Padstack *ps,
     // int layer, )
     void draw_line(const Coordi &from, const Coordi &to, uint64_t width);
+    void draw_arc(const Coordi &from, const Coordi &to, const Coordi &center, bool flip, uint64_t width);
     void draw_padstack(const Padstack &ps, int layer, const Placement &transform);
     void draw_region(const ClipperLib::Path &path, bool dark = true, int prio = 0);
     const std::string &get_filename();
@@ -37,6 +39,18 @@ private:
         }
         Coordi from;
         Coordi to;
+        unsigned int aperture;
+    };
+    class Arc {
+    public:
+        Arc(const Coordi &f, const Coordi &t, const Coordi &c, bool fl, unsigned int ap)
+            : from(f), to(t), center(c), flip(fl), aperture(ap)
+        {
+        }
+        Coordi from;
+        Coordi to;
+        Coordi center;
+        bool flip = false;
         unsigned int aperture;
     };
 
@@ -101,6 +115,7 @@ private:
     unsigned int aperture_n = 10;
 
     std::deque<Line> lines;
+    std::deque<Arc> arcs;
     std::deque<Region> regions;
     std::deque<std::pair<unsigned int, Coordi>> pads;
     void write_decimal(int64_t x, bool comma = true);

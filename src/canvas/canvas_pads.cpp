@@ -12,8 +12,9 @@ void CanvasPads::request_push()
 {
 }
 
-void CanvasPads::img_polygon(const Polygon &poly, bool tr)
+void CanvasPads::img_polygon(const Polygon &ipoly, bool tr)
 {
+    auto poly = ipoly.remove_arcs(64);
     if (!BoardLayers::is_copper(poly.layer))
         return;
     if (object_refs_current.size() >= 2 && object_refs_current.back().type == ObjectType::PAD) {

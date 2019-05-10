@@ -136,8 +136,9 @@ void CanvasPDF::img_draw_text(const Coordf &p, float size, const std::string &rt
     }
 }
 
-void CanvasPDF::img_polygon(const Polygon &poly, bool tr)
+void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
 {
+    auto poly = ipoly.remove_arcs(64);
     if (poly.usage == nullptr) { // regular patch
         bool first = true;
         for (const auto &it : poly.vertices) {

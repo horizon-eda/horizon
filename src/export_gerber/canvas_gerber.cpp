@@ -22,14 +22,31 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
     if (padstack_mode)
         return;
     auto poly = ipoly.remove_arcs(16);
-    if (poly.layer == BoardLayers::L_OUTLINE) { // outline, convert poly to
-                                                // lines
-        auto last = poly.vertices.cbegin();
-        for (auto it = last + 1; it < poly.vertices.cend(); it++) {
-            img_line(last->position, it->position, outline_width, poly.layer);
-            last = it;
+    if (ipoly.layer == BoardLayers::L_OUTLINE) { // outline, convert poly to
+                                                 // draws
+        const auto &vertices = ipoly.vertices;
+        for (auto it = vertices.cbegin(); it < vertices.cend(); it++) {
+            auto it_next = it + 1;
+            if (it_next == vertices.cend()) {
+                it_next = vertices.cbegin();
+            }
+            if (it->type == Polygon::Vertex::Type::LINE) {
+                img_line(it->position, it_next->position, outline_width, ipoly.layer);
+            }
+            else if (it->type == Polygon::Vertex::Type::ARC) {
+                if (GerberWriter *wr = exporter->get_writer_for_layer(ipoly.layer)) {
+                    Coordi from = it->position;
+                    Coordi to = it_next->position;
+                    Coordi center = it->arc_center;
+                    if (tr) {
+                        from = transform.transform(from);
+                        to = transform.transform(to);
+                        center = transform.transform(center);
+                    }
+                    wr->draw_arc(from, to, center, it->arc_reverse, outline_width);
+                }
+            }
         }
-        img_line(poly.vertices.front().position, poly.vertices.back().position, outline_width, poly.layer);
     }
     else if (auto plane = dynamic_cast<const Plane *>(ipoly.usage.ptr)) {
         if (GerberWriter *wr = exporter->get_writer_for_layer(ipoly.layer)) {

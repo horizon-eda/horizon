@@ -36,6 +36,7 @@ void GerberExporter::generate()
         it.second.write_apertures();
         it.second.write_regions();
         it.second.write_lines();
+        it.second.write_arcs();
         it.second.write_pads();
         it.second.close();
         log << "Wrote layer " << brd->get_layers().at(it.first).name << " to gerber file " << it.second.get_filename()

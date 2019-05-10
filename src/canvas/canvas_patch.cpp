@@ -50,8 +50,9 @@ void CanvasPatch::append_polygon(const Polygon &poly)
     img_polygon(poly, false);
 }
 
-void CanvasPatch::img_polygon(const Polygon &poly, bool tr)
+void CanvasPatch::img_polygon(const Polygon &ipoly, bool tr)
 {
+    auto poly = ipoly.remove_arcs(64);
     if (poly.usage == nullptr) { // regular patch
         PatchKey patch_key{patch_type, poly.layer, net ? net->uuid : UUID()};
         patches[patch_key];

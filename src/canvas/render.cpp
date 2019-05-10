@@ -722,10 +722,10 @@ static const Coordf coordf_from_pt(const TPPLPoint &p)
 
 void Canvas::render(const Polygon &ipoly, bool interactive)
 {
-    Polygon poly = ipoly.remove_arcs(64);
-    img_polygon(poly);
+    img_polygon(ipoly);
     if (img_mode)
         return;
+    Polygon poly = ipoly.remove_arcs(64);
     if (poly.vertices.size() == 0)
         return;
 
@@ -823,7 +823,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive)
 void Canvas::render(const Shape &shape, bool interactive)
 {
     if (img_mode) {
-        img_polygon(shape.to_polygon().remove_arcs(64));
+        img_polygon(shape.to_polygon());
         return;
     }
     if (interactive) {
