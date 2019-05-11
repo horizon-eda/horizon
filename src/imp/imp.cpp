@@ -762,6 +762,28 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
         sel_erase_type(sel, ObjectType::LINE);
         return s;
     }
+
+    // Display the length if a single edge of a polygon is given
+    if (sel_count_type(sel, ObjectType::POLYGON_EDGE) == 1) {
+
+        auto n = sel_count_type(sel, ObjectType::POLYGON_EDGE);
+        s += "\n\n<b>" + std::to_string(n) + " " + object_descriptions.at(ObjectType::POLYGON_EDGE).get_name_for_n(n)
+             + "</b>\n";
+        int64_t length = 0;
+        for (const auto &it : sel) {
+            if (it.type == ObjectType::POLYGON_EDGE) {
+                const auto li = core.r->get_polygon(it.uuid);
+                const auto pair = li->get_vertices_for_edge(it.vertex);
+                length += sqrt((li->vertices[pair.first].position -
+                                li->vertices[pair.second].position).mag_sq());
+                s += "Layer: ";
+                s += core.r->get_layer_provider()->get_layers().at(li->layer).name + " ";
+                s += "\nTotal length: " + dim_to_string(length, false);
+                sel_erase_type(sel, ObjectType::POLYGON_EDGE);
+                return s;
+            }
+        }
+    }
     trim(s);
     if (sel.size()) {
         s += "\n\n<b>Others:</b>\n";
