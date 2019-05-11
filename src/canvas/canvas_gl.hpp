@@ -4,6 +4,7 @@
 #include "grid.hpp"
 #include "marker.hpp"
 #include "triangle.hpp"
+#include "selectables_renderer.hpp"
 #include "util/msd_animator.hpp"
 #include <gtkmm.h>
 #include <glm/glm.hpp>

@@ -110,6 +110,7 @@ SRC_CANVAS = \
 	src/canvas/hershey_fonts.cpp \
 	src/canvas/drag_selection.cpp \
 	src/canvas/selectables.cpp \
+	src/canvas/selectables_renderer.cpp \
 	src/canvas/hover_prelight.cpp\
 	src/canvas/triangle.cpp\
 	src/canvas/image.cpp\

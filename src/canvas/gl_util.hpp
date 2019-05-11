@@ -1,5 +1,6 @@
 #include <epoxy/gl.h>
 #include <string>
+#include <sstream>
 
 namespace horizon {
 // GLuint gl_create_shader (int type, char *src);
