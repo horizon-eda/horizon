@@ -777,7 +777,7 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
                 length += sqrt((li->vertices[pair.first].position - li->vertices[pair.second].position).mag_sq());
                 s += "Layer: ";
                 s += core.r->get_layer_provider()->get_layers().at(li->layer).name + " ";
-                s += "\nTotal length: " + dim_to_string(length, false);
+                s += "\nLength: " + dim_to_string(length, false);
                 sel_erase_type(sel, ObjectType::POLYGON_EDGE);
                 return s;
             }
