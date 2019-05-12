@@ -509,6 +509,11 @@ SRC_OCE = \
 	src/util/step_importer.cpp\
 	src/export_step/export_step.cpp\
 
+SRC_PYTHON = \
+	src/python_module/horizonmodule.cpp \
+	src/python_module/util.cpp \
+	src/python_module/schematic.cpp \
+	src/python_module/project.cpp \
 
 SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PGM_TEST) $(SRC_POOL_PRJ_MGR) $(SRC_GEN_PKG))
 
@@ -536,14 +541,39 @@ else
     LDFLAGS += -fuse-ld=gold
 endif
 
+SRC_SHARED = $(SRC_COMMON) \
+	src/pool/pool_cached.cpp \
+	src/export_pdf/export_pdf.cpp \
+	src/canvas/canvas.cpp \
+	src/canvas/render.cpp \
+	src/canvas/draw.cpp \
+	src/canvas/text.cpp \
+	src/canvas/hershey_fonts.cpp \
+	src/canvas/image.cpp\
+	src/canvas/selectables.cpp\
+	src/canvas/fragment_cache.cpp\
+	src/util/text_data.cpp \
+	3rd_party/polypartition/polypartition.cpp\
+	3rd_party/poly2tri/common/shapes.cpp\
+	3rd_party/poly2tri/sweep/cdt.cpp\
+	3rd_party/poly2tri/sweep/sweep.cpp\
+	3rd_party/poly2tri/sweep/sweep_context.cpp\
+	3rd_party/poly2tri/sweep/advancing_front.cpp\
+	src/export_bom/export_bom.cpp
+
 # Object files
 OBJ_ALL = $(SRC_ALL:.cpp=.o)
 OBJ_ROUTER = $(SRC_ROUTER:.cpp=.o)
 OBJ_COMMON = $(SRC_COMMON:.cpp=.o)
 OBJ_OCE = $(SRC_OCE:.cpp=.o)
+OBJ_PYTHON = $(SRC_PYTHON:.cpp=.o)
+OBJ_SHARED = $(SRC_SHARED:.cpp=.oshared)
+
+
 
 INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router -I3rd_party
 INC_OCE = -I/opt/opencascade/inc/ -I/mingw64/include/oce/ -I/usr/include/oce -I/usr/include/opencascade -I${CASROOT}/include/opencascade -I/usr/local/include/OpenCASCADE
+INC_PYTHON = $(shell pkg-config --cflags python3)
 LDFLAGS_OCE = -L /opt/opencascade/lib/ -L${CASROOT}/lib -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -lTKTopAlgo -lTKPrim -lTKBO -lTKG3d
 ifeq ($(OS),Windows_NT)
 	LDFLAGS_OCE += -lTKV3d
@@ -583,14 +613,23 @@ horizon-pgm-test: $(OBJ_COMMON) $(SRC_PGM_TEST:.cpp=.o)
 horizon-gen-pkg: $(OBJ_COMMON) $(SRC_GEN_PKG:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
+horizon.so: $(OBJ_PYTHON) $(OBJ_SHARED)
+	$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) python3 glibmm-2.4 giomm-2.4) -lpodofo -shared -o $@
+
 $(OBJ_ALL): %.o: %.cpp
 	$(CXX) -c $(INC) $(CXXFLAGS) $< -o $@
+
+$(OBJ_SHARED): %.oshared: %.cpp
+	$(CXX) -c $(INC) $(CXXFLAGS) -fPIC $< -o $@
 
 $(OBJ_ROUTER): %.o: %.cpp
 	$(CXX) -c $(INC) $(INC_ROUTER) $(CXXFLAGS) $< -o $@
 
 $(OBJ_OCE): %.o: %.cpp
 	$(CXX) -c $(INC) $(INC_OCE) $(CXXFLAGS) $< -o $@
+
+$(OBJ_PYTHON): %.o: %.cpp
+	$(CXX) -c -fPIC $(INC) $(INC_PYTHON) $(CXXFLAGS) $< -o $@
 
 $(OBJ_RES): %.res: %.rc
 	windres $< -O coff -o $@
