@@ -29,6 +29,7 @@ public:
     static Project new_from_file(const std::string &filename);
     Project(const UUID &uu);
     ProjectBlock &get_top_block();
+    const ProjectBlock &get_top_block() const;
 
     std::string create(const UUID &default_via = UUID());
 

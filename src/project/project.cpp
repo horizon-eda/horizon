@@ -65,10 +65,15 @@ Project::Project(const UUID &uu) : uuid(uu)
 {
 }
 
-ProjectBlock &Project::get_top_block()
+const ProjectBlock &Project::get_top_block() const
 {
     auto top_block = std::find_if(blocks.begin(), blocks.end(), [](const auto &a) { return a.second.is_top; });
     return top_block->second;
+}
+
+ProjectBlock &Project::get_top_block()
+{
+    return const_cast<ProjectBlock &>(const_cast<const Project *>(this)->get_top_block());
 }
 
 std::string Project::create(const UUID &default_via)

@@ -1,5 +1,6 @@
 #include "project.hpp"
 #include "schematic.hpp"
+#include "board.hpp"
 #include "pool/pool_manager.hpp"
 
 ProjectWrapper::ProjectWrapper(const std::string &path) : project(horizon::Project::new_from_file(path))
@@ -42,6 +43,31 @@ static PyObject *PyProject_open_top_schematic(PyObject *pself)
     PySchematic *sch = PyObject_New(PySchematic, &SchematicType);
     sch->schematic = schematic;
     return reinterpret_cast<PyObject *>(sch);
+}
+
+static PyObject *PyProject_open_board(PyObject *pself)
+{
+    auto self = reinterpret_cast<PyProject *>(pself);
+    if (horizon::PoolManager::get().get_by_uuid(self->project->project.pool_uuid) == nullptr) {
+        PyErr_SetString(PyExc_FileNotFoundError, "pool not found");
+        return NULL;
+    }
+    BoardWrapper *board = nullptr;
+    try {
+        board = new BoardWrapper(self->project->project);
+    }
+    catch (const std::exception &e) {
+        PyErr_SetString(PyExc_IOError, e.what());
+        return NULL;
+    }
+    catch (...) {
+        PyErr_SetString(PyExc_IOError, "unknown exception");
+        return NULL;
+    }
+
+    PyBoard *brd = PyObject_New(PyBoard, &BoardType);
+    brd->board = board;
+    return reinterpret_cast<PyObject *>(brd);
 }
 
 
@@ -89,6 +115,7 @@ static PyMethodDef PyProject_methods[] = {
         {"get_name", (PyCFunction)PyProject_get_name, METH_NOARGS, "Return project name"},
         {"get_title", (PyCFunction)PyProject_get_title, METH_NOARGS, "Return project title"},
         {"open_top_schematic", (PyCFunction)PyProject_open_top_schematic, METH_NOARGS, "Open top block"},
+        {"open_board", (PyCFunction)PyProject_open_board, METH_NOARGS, "Open board"},
         {NULL} /* Sentinel */
 };
 

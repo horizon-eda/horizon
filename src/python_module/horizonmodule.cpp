@@ -6,6 +6,7 @@
 
 #include "util.hpp"
 #include "schematic.hpp"
+#include "board.hpp"
 #include "project.hpp"
 
 PyDoc_STRVAR(module_doc, "Parts of horizon as a module");
@@ -26,6 +27,9 @@ PyMODINIT_FUNC PyInit_horizon(void)
         return NULL;
 
     if (PyType_Ready(&SchematicType) < 0)
+        return NULL;
+
+    if (PyType_Ready(&BoardType) < 0)
         return NULL;
 
     if (!json_init())

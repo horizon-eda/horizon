@@ -514,6 +514,7 @@ SRC_PYTHON = \
 	src/python_module/util.cpp \
 	src/python_module/schematic.cpp \
 	src/python_module/project.cpp \
+	src/python_module/board.cpp \
 
 SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PGM_TEST) $(SRC_POOL_PRJ_MGR) $(SRC_GEN_PKG))
 
@@ -559,7 +560,15 @@ SRC_SHARED = $(SRC_COMMON) \
 	3rd_party/poly2tri/sweep/sweep.cpp\
 	3rd_party/poly2tri/sweep/sweep_context.cpp\
 	3rd_party/poly2tri/sweep/advancing_front.cpp\
-	src/export_bom/export_bom.cpp
+	src/export_bom/export_bom.cpp\
+	src/export_gerber/gerber_writer.cpp\
+	src/export_gerber/excellon_writer.cpp\
+	src/export_gerber/gerber_export.cpp\
+	src/export_gerber/canvas_gerber.cpp\
+	src/export_gerber/hash.cpp\
+	src/board/plane_update.cpp\
+	src/canvas/canvas_pads.cpp\
+	src/canvas/canvas_patch.cpp\
 
 # Object files
 OBJ_ALL = $(SRC_ALL:.cpp=.o)
