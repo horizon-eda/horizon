@@ -774,8 +774,7 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
             if (it.type == ObjectType::POLYGON_EDGE) {
                 const auto li = core.r->get_polygon(it.uuid);
                 const auto pair = li->get_vertices_for_edge(it.vertex);
-                length += sqrt((li->vertices[pair.first].position -
-                                li->vertices[pair.second].position).mag_sq());
+                length += sqrt((li->vertices[pair.first].position - li->vertices[pair.second].position).mag_sq());
                 s += "Layer: ";
                 s += core.r->get_layer_provider()->get_layers().at(li->layer).name + " ";
                 s += "\nTotal length: " + dim_to_string(length, false);
