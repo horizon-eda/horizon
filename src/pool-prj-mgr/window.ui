@@ -1921,7 +1921,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                           <object class="GtkEntry" id="download_gh_username_entry">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="text" translatable="yes">carrotIndustries</property>
+                            <property name="text" translatable="yes">horizon-eda</property>
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
