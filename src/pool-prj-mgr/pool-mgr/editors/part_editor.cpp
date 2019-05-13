@@ -604,7 +604,7 @@ void PartEditor::populate_models()
 void PartEditor::update_parametric_editor()
 {
     auto chs = w_parametric_box->get_children();
-    if (chs.size() == 2) {
+    if (chs.size()) {
         delete chs.back();
     }
     parametric_editor = nullptr;
