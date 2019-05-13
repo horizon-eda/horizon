@@ -21,6 +21,7 @@ public:
         Type type = Type::STRING;
         std::string unit;
         bool use_si = true;
+        bool no_milli = false;
         int digits = -1;
         std::vector<std::string> enum_items;
 

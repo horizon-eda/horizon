@@ -97,6 +97,7 @@ PoolParametric::Column::Column(const json &j)
         unit = j.at("unit");
         digits = j.value("digits", 3);
         use_si = j.at("use_si");
+        no_milli = j.value("no_milli", false);
     }
     else if (type == Type::ENUM) {
         enum_items = j.at("items").get<std::vector<std::string>>();
@@ -126,6 +127,17 @@ std::string PoolParametric::Column::format(double v) const
                 }
             }
         }
+        if (exp == -3 && no_milli) {
+            if (v < 100) {
+                v *= 1e3;
+                exp -= 3;
+            }
+            else {
+                v /= 1e3;
+                exp += 3;
+            }
+        }
+
         std::string prefix = prefixes.at(exp);
         std::stringstream stream;
         stream.imbue(get_locale());
