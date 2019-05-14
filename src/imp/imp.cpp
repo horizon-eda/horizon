@@ -667,6 +667,8 @@ void ImpBase::run(int argc, char *argv[])
 
     Gtk::Window::set_default_icon_name("horizon-eda");
 
+    Glib::set_prgname("horizon-eda"); // Fixes icons on wayland
+
     app->signal_startup().connect([this, app] {
         app->add_window(*main_window);
         app->add_action("quit", [this] { main_window->close(); });
