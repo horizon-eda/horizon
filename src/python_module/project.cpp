@@ -120,16 +120,18 @@ static PyMethodDef PyProject_methods[] = {
 };
 
 
-PyTypeObject ProjectType = {
-        PyVarObject_HEAD_INIT(NULL, 0).tp_name = "horizon.Project",
-        .tp_basicsize = sizeof(PyProject),
+PyTypeObject ProjectType = [] {
+    PyTypeObject r = {PyVarObject_HEAD_INIT(NULL, 0)};
+    r.tp_name = "horizon.Project";
+    r.tp_basicsize = sizeof(PyProject);
 
-        .tp_itemsize = 0,
-        .tp_dealloc = PyProject_dealloc,
-        .tp_flags = Py_TPFLAGS_DEFAULT,
-        .tp_doc = "Project",
+    r.tp_itemsize = 0;
+    r.tp_dealloc = PyProject_dealloc;
+    r.tp_flags = Py_TPFLAGS_DEFAULT;
+    r.tp_doc = "Project";
 
-        .tp_methods = PyProject_methods,
-        .tp_init = PyProject_init,
-        .tp_new = PyProject_new,
-};
+    r.tp_methods = PyProject_methods;
+    r.tp_init = PyProject_init;
+    r.tp_new = PyProject_new;
+    return r;
+}();

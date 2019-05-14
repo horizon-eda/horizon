@@ -112,15 +112,17 @@ static PyMethodDef PySchematic_methods[] = {
         {NULL} /* Sentinel */
 };
 
-PyTypeObject SchematicType = {
-        PyVarObject_HEAD_INIT(NULL, 0).tp_name = "horizon.Schematic",
-        .tp_basicsize = sizeof(PySchematic),
+PyTypeObject SchematicType = [] {
+    PyTypeObject r = {PyVarObject_HEAD_INIT(NULL, 0)};
+    r.tp_name = "horizon.Schematic";
+    r.tp_basicsize = sizeof(PySchematic);
 
-        .tp_itemsize = 0,
-        .tp_dealloc = PySchematic_dealloc,
-        .tp_flags = Py_TPFLAGS_DEFAULT,
-        .tp_doc = "Schematic",
+    r.tp_itemsize = 0;
+    r.tp_dealloc = PySchematic_dealloc;
+    r.tp_flags = Py_TPFLAGS_DEFAULT;
+    r.tp_doc = "Schematic";
 
-        .tp_methods = PySchematic_methods,
-        .tp_new = PySchematic_new,
-};
+    r.tp_methods = PySchematic_methods;
+    r.tp_new = PySchematic_new;
+    return r;
+}();

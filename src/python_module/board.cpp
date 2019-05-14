@@ -70,15 +70,17 @@ static PyMethodDef PyBoard_methods[] = {
         {NULL} /* Sentinel */
 };
 
-PyTypeObject BoardType = {
-        PyVarObject_HEAD_INIT(NULL, 0).tp_name = "horizon.Board",
-        .tp_basicsize = sizeof(PyBoard),
+PyTypeObject BoardType = [] {
+    PyTypeObject r = {PyVarObject_HEAD_INIT(NULL, 0)};
+    r.tp_name = "horizon.Board";
+    r.tp_basicsize = sizeof(PyBoard);
 
-        .tp_itemsize = 0,
-        .tp_dealloc = PyBoard_dealloc,
-        .tp_flags = Py_TPFLAGS_DEFAULT,
-        .tp_doc = "Board",
+    r.tp_itemsize = 0;
+    r.tp_dealloc = PyBoard_dealloc;
+    r.tp_flags = Py_TPFLAGS_DEFAULT;
+    r.tp_doc = "Board";
 
-        .tp_methods = PyBoard_methods,
-        .tp_new = PyBoard_new,
-};
+    r.tp_methods = PyBoard_methods;
+    r.tp_new = PyBoard_new;
+    return r;
+}();
