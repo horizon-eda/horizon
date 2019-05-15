@@ -46,6 +46,7 @@ private:
     ListColumns list_columns;
     Gtk::Entry *MPN_entry = nullptr;
     Gtk::Entry *manufacturer_entry = nullptr;
+    Gtk::Entry *desc_entry = nullptr;
     class TagEntry *tag_entry = nullptr;
     UUID entity_uuid;
 };
