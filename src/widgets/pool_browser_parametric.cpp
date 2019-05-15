@@ -17,7 +17,10 @@ static Gtk::TreeViewColumn *create_tvc(const PoolParametric::Column &col,
             auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
             std::string v = row[tree_col];
             auto pos = v.find(' ');
-            mcr->property_text() = v.substr(0, pos);
+            if (pos == std::string::npos)
+                mcr->property_text() = v;
+            else
+                mcr->property_text() = v.substr(0, pos);
         });
         tvc->set_cell_data_func(*cr_unit,
                                 [&col, &tree_col](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
@@ -25,7 +28,10 @@ static Gtk::TreeViewColumn *create_tvc(const PoolParametric::Column &col,
                                     auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
                                     std::string v = row[tree_col];
                                     auto pos = v.find(' ');
-                                    mcr->property_text() = v.substr(pos + 1);
+                                    if (pos == std::string::npos)
+                                        mcr->property_text() = "";
+                                    else
+                                        mcr->property_text() = v.substr(pos + 1);
                                 });
         cr_val->property_xalign() = 1;
         cr_unit->property_xalign() = 1;
@@ -69,6 +75,10 @@ public:
                                      Gtk::TreeModel::Row rb = *ib;
                                      std::string a = ra[list_columns.value];
                                      std::string b = rb[list_columns.value];
+                                     if (a.size() == 0)
+                                         return -1;
+                                     else if (b.size() == 0)
+                                         return 1;
                                      auto d = string_to_double(b) - string_to_double(a);
                                      return sgn(d);
                                  });
@@ -80,6 +90,10 @@ public:
                                      Gtk::TreeModel::Row rb = *ib;
                                      std::string a = ra[list_columns.value];
                                      std::string b = rb[list_columns.value];
+                                     if (a.size() == 0)
+                                         return -1;
+                                     else if (b.size() == 0)
+                                         return 1;
                                      return strcmp_natural(a, b);
                                  });
         }

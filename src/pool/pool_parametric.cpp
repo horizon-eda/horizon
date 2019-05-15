@@ -91,7 +91,7 @@ static const LutEnumStr<PoolParametric::Column::Type> type_lut = {
 
 PoolParametric::Column::Column(const json &j)
     : name(j.at("name").get<std::string>()), display_name(j.at("display_name").get<std::string>()),
-      type(type_lut.lookup(j.at("type")))
+      type(type_lut.lookup(j.at("type"))), required(j.value("required", true))
 {
     if (type == Type::QUANTITY) {
         unit = j.at("unit");
@@ -154,7 +154,9 @@ std::string PoolParametric::Column::format(double v) const
 
 std::string PoolParametric::Column::format(const std::string &v) const
 {
-    if (type == Type::QUANTITY) {
+    if (v.size() == 0)
+        return "N/A";
+    else if (type == Type::QUANTITY) {
         double d;
         std::istringstream istr(v);
         istr.imbue(std::locale::classic());

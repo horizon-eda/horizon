@@ -149,6 +149,45 @@ public:
     }
 };
 
+class NullableParamEditor : public Gtk::Box, public ParametricParamEditor {
+public:
+    NullableParamEditor(Gtk::Widget *w, ParametricParamEditor *e, const PoolParametric::Column &c)
+        : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0), ParametricParamEditor(c), widget(w), editor(e)
+    {
+        get_style_context()->add_class("linked");
+        pack_start(*widget, true, true, 0);
+        widget->show();
+
+        nullbutton = Gtk::manage(new Gtk::ToggleButton("N/A"));
+        pack_start(*nullbutton, false, false, 0);
+        nullbutton->show();
+        nullbutton->set_sensitive(!column.required);
+
+        if (!column.required)
+            nullbutton->signal_toggled().connect([this] { widget->set_sensitive(!nullbutton->get_active()); });
+    }
+
+    std::string get_value() override
+    {
+        if (!column.required && nullbutton->get_active())
+            return "";
+        else
+            return editor->get_value();
+    }
+    void set_value(const std::string &value) override
+    {
+        if (value.size() || column.required)
+            editor->set_value(value);
+
+        nullbutton->set_active(!column.required && (value.size() == 0));
+    }
+
+private:
+    Gtk::Widget *widget;
+    Gtk::ToggleButton *nullbutton = nullptr;
+    ParametricParamEditor *editor;
+};
+
 
 ParametricEditor::ParametricEditor(PoolParametric *p, const std::string &t)
     : Gtk::Grid(), pool(p), table(pool->get_tables().at(t))
@@ -175,9 +214,10 @@ ParametricEditor::ParametricEditor(PoolParametric *p, const std::string &t)
         case PoolParametric::Column::Type::STRING:;
         }
         if (w && e) {
-            w->show();
-            grid_attach_label_and_widget(this, col.display_name, w, top);
-            editors[col.name] = e;
+            auto ne = Gtk::manage(new NullableParamEditor(w, e, col));
+            ne->show();
+            grid_attach_label_and_widget(this, col.display_name, ne, top);
+            editors[col.name] = ne;
         }
     }
 }

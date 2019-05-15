@@ -24,6 +24,7 @@ public:
         bool no_milli = false;
         int digits = -1;
         std::vector<std::string> enum_items;
+        bool required = true;
 
         std::string format(const std::string &v) const;
         std::string format(double v) const;

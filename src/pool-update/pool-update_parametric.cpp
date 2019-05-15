@@ -70,28 +70,34 @@ void pool_update_parametric(const std::string &pool_base_path, pool_update_cb_t 
                 std::string v;
                 if (part.parametric.count(col.name)) {
                     v = part.parametric.at(col.name);
-                    switch (col.type) {
-                    case PoolParametric::Column::Type::QUANTITY: {
-                        double d;
-                        std::istringstream istr(v);
-                        istr.imbue(std::locale::classic());
-                        istr >> d;
-                        if (!istr.eof() || istr.fail()) {
-                            skip = true;
-                            status_cb(PoolUpdateStatus::FILE_ERROR, filename,
-                                      col.display_name + " '" + v + "' not convertible to double");
-                        }
-                    } break;
+                    if (v.size()) {
+                        switch (col.type) {
+                        case PoolParametric::Column::Type::QUANTITY: {
+                            double d;
+                            std::istringstream istr(v);
+                            istr.imbue(std::locale::classic());
+                            istr >> d;
+                            if (!istr.eof() || istr.fail()) {
+                                skip = true;
+                                status_cb(PoolUpdateStatus::FILE_ERROR, filename,
+                                          col.display_name + " '" + v + "' not convertible to double");
+                            }
+                        } break;
 
-                    case PoolParametric::Column::Type::ENUM: {
-                        if (std::find(col.enum_items.begin(), col.enum_items.end(), v) == col.enum_items.end()) {
-                            skip = true;
-                            status_cb(PoolUpdateStatus::FILE_ERROR, filename,
-                                      col.display_name + " value '" + v + "' not in enum");
-                        }
+                        case PoolParametric::Column::Type::ENUM: {
+                            if (std::find(col.enum_items.begin(), col.enum_items.end(), v) == col.enum_items.end()) {
+                                skip = true;
+                                status_cb(PoolUpdateStatus::FILE_ERROR, filename,
+                                          col.display_name + " value '" + v + "' not in enum");
+                            }
 
-                    } break;
-                    default:;
+                        } break;
+                        default:;
+                        }
+                    }
+                    else if (col.required) {
+                        status_cb(PoolUpdateStatus::FILE_ERROR, filename,
+                                  col.display_name + " is required but not set");
                     }
                 }
                 q.bind(2 + i, v);
