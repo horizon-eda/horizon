@@ -9,6 +9,7 @@ PoolBrowserPart::PoolBrowserPart(Pool *p, const UUID &uu) : PoolBrowser(p), enti
     construct();
     MPN_entry = create_search_entry("MPN");
     manufacturer_entry = create_search_entry("Manufacturer");
+    desc_entry = create_search_entry("Description");
     tag_entry = create_tag_entry("Tags");
 
     install_pool_item_source_tooltip();
@@ -78,6 +79,7 @@ void PoolBrowserPart::search()
     Gtk::TreeModel::Row row;
     std::string MPN_search = MPN_entry->get_text();
     std::string manufacturer_search = manufacturer_entry->get_text();
+    std::string desc_search = desc_entry->get_text();
 
     auto tags = tag_entry->get_tags();
     std::stringstream query;
@@ -107,11 +109,13 @@ void PoolBrowserPart::search()
     }
     query << "WHERE parts.MPN LIKE $mpn "
              "AND parts.manufacturer LIKE $manufacturer "
+             "AND parts.description LIKE $desc "
              "AND (parts.entity=$entity or $entity_all) ";
     query << sort_controller->get_order_by();
     std::cout << query.str() << std::endl;
     SQLite::Query q(pool->db, query.str());
     q.bind("$mpn", "%" + MPN_search + "%");
+    q.bind("$desc", "%" + desc_search + "%");
     q.bind("$manufacturer", "%" + manufacturer_search + "%");
     q.bind("$entity", entity_uuid);
     q.bind("$entity_all", entity_uuid == UUID());
