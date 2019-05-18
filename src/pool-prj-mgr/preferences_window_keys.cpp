@@ -77,6 +77,27 @@ KeySequencesPreferencesEditor::KeySequencesPreferencesEditor(BaseObjectType *cob
     load_default_button->signal_clicked().connect(
             sigc::mem_fun(*this, &KeySequencesPreferencesEditor::handle_load_default));
 
+    signal_key_press_event().connect([this](const GdkEventKey *ev) {
+        if (ev->keyval == GDK_KEY_C && (ev->state & GDK_CONTROL_MASK)) {
+            std::ostringstream oss;
+            oss << "|Action | Key sequence | Comments|\n";
+            oss << "|-|-|-|\n";
+            for (const auto &it : keyseq_preferences->keys) {
+                for (const auto &it2 : it.second) {
+                    for (const auto &it3 : it2.second) {
+                        oss << "|" << action_catalog.at(it.first).name << "|`" << key_sequence_to_string(it3)
+                            << "` | |\n";
+                    }
+                }
+            }
+            Gtk::Clipboard::get()->set_text(oss.str());
+            return true;
+        }
+        else {
+            return false;
+        }
+    });
+
     update_action_editors();
 }
 
