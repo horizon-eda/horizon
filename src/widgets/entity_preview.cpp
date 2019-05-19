@@ -19,13 +19,15 @@ EntityPreview::EntityPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIE
         la->get_style_context()->add_class("dim-label");
         symbol_sel_box->pack_start(*la, false, false, 0);
     }
-    combo_gate = Gtk::manage(new Gtk::ComboBoxText);
+    combo_gate = Gtk::manage(new GenericComboBox<UUID>);
+    combo_gate->get_cr_text().property_ellipsize() = Pango::ELLIPSIZE_END;
+    combo_gate->get_cr_text().property_width_chars() = 10;
     combo_gate->signal_changed().connect(sigc::mem_fun(*this, &EntityPreview::handle_gate_sel));
     symbol_sel_box->pack_start(*combo_gate, true, true, 0);
 
     if (show_goto) {
         auto bu = create_goto_button(ObjectType::UNIT,
-                                     [this] { return entity->gates.at(UUID(combo_gate->get_active_id())).unit->uuid; });
+                                     [this] { return entity->gates.at(combo_gate->get_active_key()).unit->uuid; });
         symbol_sel_box->pack_start(*bu, false, false, 0);
     }
 
@@ -35,12 +37,14 @@ EntityPreview::EntityPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIE
         symbol_sel_box->pack_start(*la, false, false, 0);
         la->set_margin_start(4);
     }
-    combo_symbol = Gtk::manage(new Gtk::ComboBoxText);
+    combo_symbol = Gtk::manage(new GenericComboBox<UUID>);
+    combo_symbol->get_cr_text().property_ellipsize() = Pango::ELLIPSIZE_END;
+    combo_symbol->get_cr_text().property_width_chars() = 10;
     combo_symbol->signal_changed().connect(sigc::mem_fun(*this, &EntityPreview::handle_symbol_sel));
     symbol_sel_box->pack_start(*combo_symbol, true, true, 0);
 
     if (show_goto) {
-        auto bu = create_goto_button(ObjectType::SYMBOL, [this] { return UUID(combo_symbol->get_active_id()); });
+        auto bu = create_goto_button(ObjectType::SYMBOL, [this] { return combo_symbol->get_active_key(); });
         symbol_sel_box->pack_start(*bu, false, false, 0);
     }
 
@@ -99,9 +103,9 @@ void EntityPreview::load(const Entity *e, const Part *p)
 
     for (const auto it : gates) {
         if (it->suffix.size())
-            combo_gate->append((std::string)it->uuid, it->suffix + ": " + it->unit->name);
+            combo_gate->append(it->uuid, it->suffix + ": " + it->unit->name);
         else
-            combo_gate->append((std::string)it->uuid, it->unit->name);
+            combo_gate->append(it->uuid, it->unit->name);
     }
     combo_gate->set_active(0);
 }
@@ -114,7 +118,7 @@ void EntityPreview::handle_gate_sel()
     if (combo_gate->get_active_row_number() == -1)
         return;
 
-    const Gate *gate = &entity->gates.at(UUID(combo_gate->get_active_id()));
+    const Gate *gate = &entity->gates.at(combo_gate->get_active_key());
     auto unit = gate->unit;
 
     SQLite::Query q(pool.db, "SELECT uuid, name FROM symbols WHERE unit=? ORDER BY name");
@@ -122,7 +126,7 @@ void EntityPreview::handle_gate_sel()
     while (q.step()) {
         UUID uu = q.get<std::string>(0);
         std::string name = q.get<std::string>(1);
-        combo_symbol->append((std::string)uu, name);
+        combo_symbol->append(uu, name);
     }
     combo_symbol->set_active(0);
 }
@@ -135,7 +139,7 @@ void EntityPreview::handle_symbol_sel()
     if (combo_symbol->get_active_row_number() == -1)
         return;
 
-    canvas_symbol->load_symbol(UUID(combo_symbol->get_active_id()), Placement(), true, part ? part->uuid : UUID(),
-                               UUID(combo_gate->get_active_id()));
+    canvas_symbol->load_symbol(combo_symbol->get_active_key(), Placement(), true, part ? part->uuid : UUID(),
+                               combo_gate->get_active_key());
 }
 } // namespace horizon

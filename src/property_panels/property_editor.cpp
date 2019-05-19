@@ -171,9 +171,11 @@ void PropertyEditorDim::set_range(int64_t min, int64_t max)
 
 Gtk::Widget *PropertyEditorEnum::create_editor()
 {
-    combo = Gtk::manage(new Gtk::ComboBoxText());
+    combo = Gtk::manage(new GenericComboBox<int>);
+    combo->get_cr_text().property_ellipsize() = Pango::ELLIPSIZE_END;
+    combo->get_cr_text().property_width_chars() = 10;
     for (const auto &it : property.enum_items) {
-        combo->insert(-1, std::to_string(it.first), it.second);
+        combo->append(it.first, it.second);
     }
     connections.push_back(combo->signal_changed().connect(sigc::mem_fun(*this, &PropertyEditorEnum::changed)));
     return combo;
@@ -182,7 +184,7 @@ Gtk::Widget *PropertyEditorEnum::create_editor()
 void PropertyEditorEnum::reload()
 {
     ScopedBlock block(connections);
-    combo->set_active_id(std::to_string(value.value));
+    combo->set_active_key(value.value);
 }
 
 void PropertyEditorEnum::changed()
@@ -192,17 +194,17 @@ void PropertyEditorEnum::changed()
 
 PropertyValue &PropertyEditorEnum::get_value()
 {
-    auto active_id = combo->get_active_id();
-    if (active_id.size())
-        value.value = std::stoi(active_id);
+    if (combo->get_active_row_number() != -1)
+        value.value = combo->get_active_key();
     return value;
 }
-
 Gtk::Widget *PropertyEditorStringRO::create_editor()
 {
     apply_all_button->set_sensitive(false);
     readonly = true;
     la = Gtk::manage(new Gtk::Label(""));
+    la->set_line_wrap(true);
+    la->set_xalign(1);
     la->set_selectable(true);
     return la;
 }
@@ -219,7 +221,9 @@ PropertyValue &PropertyEditorStringRO::get_value()
 
 Gtk::Widget *PropertyEditorNetClass::create_editor()
 {
-    combo = Gtk::manage(new Gtk::ComboBoxText());
+    combo = Gtk::manage(new GenericComboBox<UUID>);
+    combo->get_cr_text().property_ellipsize() = Pango::ELLIPSIZE_END;
+    combo->get_cr_text().property_width_chars() = 10;
     connections.push_back(combo->signal_changed().connect(sigc::mem_fun(*this, &PropertyEditorNetClass::changed)));
     return combo;
 }
@@ -229,9 +233,9 @@ void PropertyEditorNetClass::reload()
     ScopedBlock block(connections);
     combo->remove_all();
     for (const auto &it : my_meta.net_classes) {
-        combo->append((std::string)it.first, it.second);
+        combo->append(it.first, it.second);
     }
-    combo->set_active_id((std::string)value.value);
+    combo->set_active_key(value.value);
 }
 
 void PropertyEditorNetClass::changed()
@@ -241,9 +245,8 @@ void PropertyEditorNetClass::changed()
 
 PropertyValue &PropertyEditorNetClass::get_value()
 {
-    auto active_id = combo->get_active_id();
-    if (active_id.size())
-        value.value = UUID(active_id);
+    if (combo->get_active_row_number() != -1)
+        value.value = combo->get_active_key();
     return value;
 }
 

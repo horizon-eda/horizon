@@ -124,12 +124,13 @@ PartPreview::PartPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIENTAT
         la->get_style_context()->add_class("dim-label");
         package_sel_box->pack_start(*la, false, false, 0);
     }
-    combo_package = Gtk::manage(new Gtk::ComboBoxText);
+    combo_package = Gtk::manage(new GenericComboBox<UUID>);
+    combo_package->get_cr_text().property_ellipsize() = Pango::ELLIPSIZE_END;
     combo_package->signal_changed().connect(sigc::mem_fun(*this, &PartPreview::handle_package_sel));
     package_sel_box->pack_start(*combo_package, true, true, 0);
 
     if (show_goto) {
-        auto bu = create_goto_button(ObjectType::PACKAGE, [this] { return UUID(combo_package->get_active_id()); });
+        auto bu = create_goto_button(ObjectType::PACKAGE, [this] { return combo_package->get_active_key(); });
         package_sel_box->pack_start(*bu, false, false, 0);
     }
 
@@ -200,7 +201,7 @@ void PartPreview::load(const Part *p)
     entity_preview->load(part);
 
     const class Package *pkg = part->package;
-    combo_package->append((std::string)pkg->uuid, pkg->name + " (Primary)");
+    combo_package->append(pkg->uuid, pkg->name + " (Primary)");
 
     SQLite::Query q(pool.db,
                     "SELECT uuid, name FROM packages WHERE alternate_for=? "
@@ -209,7 +210,7 @@ void PartPreview::load(const Part *p)
     while (q.step()) {
         UUID uu = q.get<std::string>(0);
         std::string name = q.get<std::string>(1);
-        combo_package->append((std::string)uu, name + " (Alternate)");
+        combo_package->append(uu, name + " (Alternate)");
     }
 
     combo_package->set_active(0);
@@ -223,6 +224,6 @@ void PartPreview::handle_package_sel()
     if (combo_package->get_active_row_number() == -1)
         return;
 
-    canvas_package->load(ObjectType::PACKAGE, UUID(combo_package->get_active_id()));
+    canvas_package->load(ObjectType::PACKAGE, combo_package->get_active_key());
 }
 } // namespace horizon

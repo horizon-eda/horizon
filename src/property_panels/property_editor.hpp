@@ -3,6 +3,7 @@
 #include "core/core.hpp"
 #include "common/object_descr.hpp"
 #include "core/core_properties.hpp"
+#include "widgets/generic_combo_box.hpp"
 
 namespace horizon {
 class PropertyEditor : public Gtk::Box {
@@ -124,7 +125,7 @@ protected:
     Gtk::Widget *create_editor() override;
 
 private:
-    Gtk::ComboBoxText *combo = nullptr;
+    GenericComboBox<int> *combo = nullptr;
     void changed();
     PropertyValueInt value;
 };
@@ -159,7 +160,7 @@ protected:
     Gtk::Widget *create_editor() override;
 
 private:
-    Gtk::ComboBoxText *combo = nullptr;
+    GenericComboBox<UUID> *combo = nullptr;
     void changed();
     PropertyValueUUID value;
     PropertyMetaNetClasses my_meta;

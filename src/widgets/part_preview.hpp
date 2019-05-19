@@ -4,6 +4,8 @@
 #include "common/common.hpp"
 #include "util/uuid.hpp"
 #include "preview_base.hpp"
+#include "generic_combo_box.hpp"
+
 
 namespace horizon {
 class PartPreview : public Gtk::Box, public PreviewBase {
@@ -18,7 +20,7 @@ private:
     class EntityPreview *entity_preview = nullptr;
 
     class PreviewCanvas *canvas_package = nullptr;
-    Gtk::ComboBoxText *combo_package = nullptr;
+    GenericComboBox<UUID> *combo_package = nullptr;
 
     Gtk::Label *label_MPN = nullptr;
     Gtk::Label *label_manufacturer = nullptr;
