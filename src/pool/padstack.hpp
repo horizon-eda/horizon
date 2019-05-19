@@ -51,6 +51,7 @@ public:
 
     UUID uuid;
     std::string name;
+    std::string well_known_name;
     Type type = Type::TOP;
     std::map<UUID, Polygon> polygons;
     std::map<UUID, Hole> holes;

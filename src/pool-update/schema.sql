@@ -1,4 +1,4 @@
-PRAGMA user_version=11; --keep in sync with pool.cpp
+PRAGMA user_version=12; --keep in sync with pool.cpp
 
 DROP TABLE IF EXISTS "units";
 CREATE TABLE "units" (
@@ -94,6 +94,7 @@ DROP TABLE IF EXISTS "padstacks";
 CREATE TABLE "padstacks" (
 	'uuid'	TEXT NOT NULL UNIQUE,
 	'name'	TEXT NOT NULL,
+	'well_known_name'	TEXT NOT NULL,
 	'package'	TEXT NOT NULL,
 	'filename'	TEXT NOT NULL,
 	'type'	TEXT NOT NULL,

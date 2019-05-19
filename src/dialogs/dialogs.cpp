@@ -448,4 +448,22 @@ std::pair<bool, std::string> Dialogs::ask_dxf_filename()
         return {false, ""};
     }
 }
+
+std::pair<bool, std::string> Dialogs::ask_kicad_package_filename()
+{
+    GtkFileChooserNative *native = gtk_file_chooser_native_new("Import KiCad package", GTK_WINDOW(parent->gobj()),
+                                                               GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    auto filter = Gtk::FileFilter::create();
+    filter->set_name("KiCad package");
+    filter->add_pattern("*.kicad_mod");
+    chooser->add_filter(filter);
+
+    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        return {true, chooser->get_filename()};
+    }
+    else {
+        return {false, ""};
+    }
+}
 } // namespace horizon

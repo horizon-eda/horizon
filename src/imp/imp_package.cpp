@@ -663,6 +663,9 @@ void ImpPackage::construct()
     hamburger_menu->append("Import DXF", "win.import_dxf");
     add_tool_action(ToolID::IMPORT_DXF, "import_dxf");
 
+    hamburger_menu->append("Import KiCad package", "win.import_kicad");
+    add_tool_action(ToolID::IMPORT_KICAD_PACKAGE, "import_kicad");
+
     hamburger_menu->append("Reload pool", "win.reload_pool");
     main_window->add_action("reload_pool", [this] { trigger_action(ActionID::RELOAD_POOL); });
 

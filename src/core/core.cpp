@@ -66,6 +66,7 @@
 #include "tool_draw_polygon_circle.hpp"
 #include "tool_draw_connection_line.hpp"
 #include "tool_backannotate_connection_lines.hpp"
+#include "tool_import_kicad_package.hpp"
 
 #include "common/dimension.hpp"
 #include "logger/logger.hpp"
@@ -337,6 +338,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::BACKANNOTATE_CONNECTION_LINES:
         return std::make_unique<ToolBackannotateConnectionLines>(this, tool_id);
+
+    case ToolID::IMPORT_KICAD_PACKAGE:
+        return std::make_unique<ToolImportKiCadPackage>(this, tool_id);
 
     default:
         return nullptr;

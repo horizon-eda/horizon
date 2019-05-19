@@ -220,6 +220,7 @@ SRC_IMP = \
 	src/core/tool_draw_polygon_circle.cpp\
 	src/core/tool_draw_connection_line.cpp\
 	src/core/tool_backannotate_connection_lines.cpp\
+	src/core/tool_import_kicad_package.cpp\
 	src/core/cores.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\
@@ -361,6 +362,9 @@ SRC_IMP = \
 	src/util/exception_util.cpp\
 	src/util/status_dispatcher.cpp\
 	src/util/export_file_chooser.cpp\
+	3rd_party/sexpr/sexpr_parser.cpp\
+	3rd_party/sexpr/sexpr.cpp\
+	src/util/kicad_package_parser.cpp\
 
 SRC_ROUTER = \
 	3rd_party/router/router/pns_router.cpp \

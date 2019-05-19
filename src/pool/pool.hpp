@@ -29,6 +29,7 @@ public:
     const class Entity *get_entity(const UUID &uu, UUID *pool_uuid_out = nullptr);
     const class Symbol *get_symbol(const UUID &uu, UUID *pool_uuid_out = nullptr);
     const class Padstack *get_padstack(const UUID &uu, UUID *pool_uuid_out = nullptr);
+    const class Padstack *get_well_known_padstack(const std::string &name, UUID *pool_uuid_out = nullptr);
     const class Package *get_package(const UUID &uu, UUID *pool_uuid_out = nullptr);
     const class Part *get_part(const UUID &uu, UUID *pool_uuid_out = nullptr);
     const class Frame *get_frame(const UUID &uu, UUID *pool_uuid_out = nullptr);

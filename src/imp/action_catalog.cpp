@@ -695,6 +695,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
           ActionCatalogItem::FLAGS_NO_MENU | ActionCatalogItem::FLAGS_NO_POPOVER
                   | ActionCatalogItem::FLAGS_NO_PREFERENCES}},
 
+        {{ActionID::TOOL, ToolID::IMPORT_KICAD_PACKAGE},
+         {"Import KiCad package", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -909,5 +913,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(DRAW_POLYGON_CIRCLE),
         TOOL_LUT_ITEM(DRAW_CONNECTION_LINE),
         TOOL_LUT_ITEM(BACKANNOTATE_CONNECTION_LINES),
+        TOOL_LUT_ITEM(IMPORT_KICAD_PACKAGE),
 };
 } // namespace horizon

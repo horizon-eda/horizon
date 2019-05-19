@@ -174,7 +174,8 @@ void Padstack::update_refs()
 }
 
 Padstack::Padstack(const UUID &uu, const json &j)
-    : uuid(uu), name(j.at("name").get<std::string>()), parameter_program(this, j.value("parameter_program", ""))
+    : uuid(uu), name(j.at("name").get<std::string>()), well_known_name(j.value("well_known_name", "")),
+      parameter_program(this, j.value("parameter_program", ""))
 {
     {
         const json &o = j["polygons"];
@@ -228,6 +229,7 @@ json Padstack::serialize() const
     j["uuid"] = (std::string)uuid;
     j["type"] = "padstack";
     j["name"] = name;
+    j["well_known_name"] = well_known_name;
     j["padstack_type"] = type_lut.lookup_reverse(type);
     j["parameter_program"] = parameter_program.get_code();
     j["parameter_set"] = parameter_set_serialize(parameter_set);

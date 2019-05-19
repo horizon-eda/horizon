@@ -131,7 +131,7 @@ const std::string &Pool::get_base_path() const
 
 int Pool::get_required_schema_version()
 { // keep in sync with schema definition
-    return 11;
+    return 12;
 }
 
 std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) const
@@ -230,6 +230,19 @@ const Package *Pool::get_package(const UUID &uu, UUID *pool_uuid_out)
         get_pool_uuid(ObjectType::PACKAGE, uu, pool_uuid_out);
     }
     return &packages.at(uu);
+}
+
+const Padstack *Pool::get_well_known_padstack(const std::string &name, UUID *pool_uuid_out)
+{
+    SQLite::Query q(db, "SELECT uuid FROM padstacks WHERE well_known_name = ?");
+    q.bind(1, name);
+    if (q.step()) {
+        UUID uu = q.get<std::string>(0);
+        return get_padstack(uu, pool_uuid_out);
+    }
+    else {
+        return nullptr;
+    }
 }
 
 const Padstack *Pool::get_padstack(const UUID &uu, UUID *pool_uuid_out)

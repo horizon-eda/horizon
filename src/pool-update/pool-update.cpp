@@ -99,6 +99,7 @@ private:
     void update_units(const std::string &directory, const std::string &prefix = "");
     void update_entities(const std::string &directory, const std::string &prefix = "");
     void update_symbols(const std::string &directory, const std::string &prefix = "");
+    void add_padstack(const Padstack &padstack, const UUID &pkg_uuid, bool overridden, const std::string &filename);
     void update_padstacks(const std::string &directory, const std::string &prefix = "");
     void update_padstacks_global(const std::string &directory, const std::string &prefix = "");
     void update_packages(const std::string &directory);
@@ -411,6 +412,25 @@ void PoolUpdater::update_symbols(const std::string &directory, const std::string
     }
 }
 
+void PoolUpdater::add_padstack(const Padstack &padstack, const UUID &pkg_uuid, bool overridden,
+                               const std::string &filename)
+{
+    SQLite::Query q(pool->db,
+                    "INSERT INTO padstacks "
+                    "(uuid, name, well_known_name, filename, package, type, pool_uuid, overridden) "
+                    "VALUES "
+                    "($uuid, $name, $well_known_name, $filename, $package, $type, $pool_uuid, $overridden)");
+    q.bind("$uuid", padstack.uuid);
+    q.bind("$name", padstack.name);
+    q.bind("$well_known_name", padstack.well_known_name);
+    q.bind("$type", Padstack::type_lut.lookup_reverse(padstack.type));
+    q.bind("$package", pkg_uuid);
+    q.bind("$pool_uuid", pool_uuid);
+    q.bind("$overridden", overridden);
+    q.bind("$filename", filename);
+    q.step();
+}
+
 void PoolUpdater::update_padstacks(const std::string &directory, const std::string &prefix)
 {
     Glib::Dir dir(directory);
@@ -450,19 +470,8 @@ void PoolUpdater::update_padstacks(const std::string &directory, const std::stri
                                     q.bind(1, padstack.uuid);
                                     q.step();
                                 }
-                                SQLite::Query q(pool->db,
-                                                "INSERT INTO padstacks "
-                                                "(uuid, name, filename, package, type, pool_uuid, overridden) "
-                                                "VALUES "
-                                                "($uuid, $name, $filename, $package, $type, $pool_uuid, $overridden)");
-                                q.bind("$uuid", padstack.uuid);
-                                q.bind("$name", padstack.name);
-                                q.bind("$type", Padstack::type_lut.lookup_reverse(padstack.type));
-                                q.bind("$package", pkg_uuid);
-                                q.bind("$pool_uuid", pool_uuid);
-                                q.bind("$overridden", overridden);
-                                q.bind("$filename", Glib::build_filename("packages", prefix, it, "padstacks", it2));
-                                q.step();
+                                add_padstack(padstack, pkg_uuid, overridden,
+                                             Glib::build_filename("packages", prefix, it, "padstacks", it2));
                             }
                             catch (const std::exception &e) {
                                 status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
@@ -497,19 +506,7 @@ void PoolUpdater::update_padstacks_global(const std::string &directory, const st
                     q.bind(1, padstack.uuid);
                     q.step();
                 }
-                SQLite::Query q(pool->db,
-                                "INSERT INTO padstacks "
-                                "(uuid, name, filename, package, type, pool_uuid, overridden) "
-                                "VALUES "
-                                "($uuid, $name, $filename, $package, $type, $pool_uuid, $overridden)");
-                q.bind("$uuid", padstack.uuid);
-                q.bind("$name", padstack.name);
-                q.bind("$type", Padstack::type_lut.lookup_reverse(padstack.type));
-                q.bind("$package", UUID());
-                q.bind("$pool_uuid", pool_uuid);
-                q.bind("$overridden", overridden);
-                q.bind("$filename", Glib::build_filename("padstacks", prefix, it));
-                q.step();
+                add_padstack(padstack, UUID(), overridden, Glib::build_filename("padstacks", prefix, it));
             }
             catch (const std::exception &e) {
                 status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());

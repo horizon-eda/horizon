@@ -57,6 +57,7 @@ public:
     bool edit_shapes(std::set<class Shape *> shapes);
     bool edit_via(class Via *via, class ViaPadstackProvider &vpp);
     std::pair<bool, std::string> ask_dxf_filename();
+    std::pair<bool, std::string> ask_kicad_package_filename();
 
 
 private:

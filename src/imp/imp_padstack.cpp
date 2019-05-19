@@ -71,8 +71,13 @@ void ImpPadstack::construct()
         core_padstack.set_needs_save();
     });
 
-    core_padstack.signal_save().connect([this, name_entry, header_button] {
+    auto well_known_name_entry = header_button->add_entry("Well-known name");
+    well_known_name_entry->set_text(core_padstack.get_padstack(false)->well_known_name);
+    well_known_name_entry->signal_changed().connect([this, well_known_name_entry] { core_padstack.set_needs_save(); });
+
+    core_padstack.signal_save().connect([this, name_entry, well_known_name_entry, header_button] {
         core_padstack.get_padstack(false)->name = name_entry->get_text();
+        core_padstack.get_padstack(false)->well_known_name = well_known_name_entry->get_text();
         header_button->set_label(core_padstack.get_padstack(false)->name);
     });
 
