@@ -30,7 +30,7 @@ void PreviewCanvas::load_symbol(const UUID &uu, const Placement &pl, bool fit, c
         }
     }
     sym.apply_placement(pl);
-    update(sym, pl);
+    update(sym, pl, false);
     auto bb = get_bbox();
     pad = 1_mm;
 
@@ -56,7 +56,7 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
         Symbol sym = *pool.get_symbol(uu);
         sym.expand();
         sym.apply_placement(pl);
-        update(sym, pl);
+        update(sym, pl, false);
         pad = 1_mm;
     } break;
 
@@ -71,7 +71,7 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
         }
         pkg.apply_parameter_set({});
         property_layer_opacity() = 75;
-        update(pkg);
+        update(pkg, false);
         pad = 1_mm;
     } break;
 
@@ -86,14 +86,14 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
         }
         ps.apply_parameter_set({});
         property_layer_opacity() = 75;
-        update(ps);
+        update(ps, false);
         pad = .1_mm;
     } break;
 
     case ObjectType::FRAME: {
         Frame fr = *pool.get_frame(uu);
         property_layer_opacity() = 100;
-        update(fr);
+        update(fr, false);
         pad = 1_mm;
     } break;
     default:;

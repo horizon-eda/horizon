@@ -149,12 +149,12 @@ void Canvas::add_triangle(int layer, const Coordf &p0, const Coordf &p1, const C
     }
 }
 
-void Canvas::update(const Symbol &sym, const Placement &tr)
+void Canvas::update(const Symbol &sym, const Placement &tr, bool edit)
 {
     clear();
     layer_provider = &sym;
     transform = tr;
-    render(sym);
+    render(sym, !edit);
     request_push();
 }
 
@@ -168,19 +168,19 @@ void Canvas::update(const Sheet &sheet)
     request_push();
 }
 
-void Canvas::update(const Padstack &padstack)
+void Canvas::update(const Padstack &padstack, bool edit)
 {
     clear();
     layer_provider = &padstack;
-    render(padstack);
+    render(padstack, edit);
     request_push();
 }
 
-void Canvas::update(const Package &pkg)
+void Canvas::update(const Package &pkg, bool edit)
 {
     clear();
     layer_provider = &pkg;
-    render(pkg);
+    render(pkg, edit);
     request_push();
 }
 
@@ -198,11 +198,11 @@ void Canvas::update(const Board &brd)
     render(brd);
     request_push();
 }
-void Canvas::update(const class Frame &fr)
+void Canvas::update(const class Frame &fr, bool edit)
 {
     clear();
     layer_provider = &fr;
-    render(fr);
+    render(fr, !edit);
     request_push();
 }
 

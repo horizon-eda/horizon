@@ -28,13 +28,13 @@ public:
     {
     }
     void clear();
-    void update(const class Symbol &sym, const Placement &transform = Placement());
+    void update(const class Symbol &sym, const Placement &transform = Placement(), bool edit = true);
     void update(const class Sheet &sheet);
-    void update(const class Padstack &padstack);
-    void update(const class Package &pkg);
+    void update(const class Padstack &padstack, bool edit = true);
+    void update(const class Package &pkg, bool edit = true);
     void update(const class Buffer &buf, class LayerProvider *lp);
     void update(const class Board &brd);
-    void update(const class Frame &fr);
+    void update(const class Frame &fr, bool edit = true);
 
     ObjectRef add_line(const std::deque<Coordi> &pts, int64_t width, ColorP color, int layer);
     void remove_obj(const ObjectRef &r);
