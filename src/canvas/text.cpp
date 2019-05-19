@@ -53,7 +53,7 @@ std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const 
             tr.set_angle(32768 - angle);
         else
             tr.set_angle(angle);
-        if (backwards ^ mirror)
+        if ((backwards ^ mirror) ^ flip)
             tf.shift += tr.transform(Coordi(0, -lineskip * (n_lines - i_line)));
         else
             tf.shift += tr.transform(Coordi(0, -lineskip * i_line));
