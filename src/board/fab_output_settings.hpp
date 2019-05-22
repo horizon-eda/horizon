@@ -40,6 +40,6 @@ public:
 
     std::string prefix;
     std::string output_directory;
-    bool zip_output;
+    bool zip_output = false;
 };
 } // namespace horizon

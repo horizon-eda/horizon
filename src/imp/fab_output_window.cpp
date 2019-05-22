@@ -77,6 +77,7 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     bind_widget(npth_filename_entry, settings->drill_npth_filename, [this](std::string &) { s_signal_changed.emit(); });
     bind_widget(pth_filename_entry, settings->drill_pth_filename, [this](std::string &) { s_signal_changed.emit(); });
     bind_widget(zip_output_switch, settings->zip_output);
+    zip_output_switch->property_active().signal_changed().connect([this] { s_signal_changed.emit(); });
 
     drill_mode_combo->set_active_id(FabOutputSettings::mode_lut.lookup_reverse(settings->drill_mode));
     drill_mode_combo->signal_changed().connect([this] {

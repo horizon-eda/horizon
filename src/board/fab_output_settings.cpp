@@ -61,7 +61,7 @@ json FabOutputSettings::GerberLayer::serialize() const
 FabOutputSettings::FabOutputSettings(const json &j)
     : drill_pth_filename(j.at("drill_pth").get<std::string>()),
       drill_npth_filename(j.at("drill_npth").get<std::string>()), prefix(j.at("prefix").get<std::string>()),
-      output_directory(j.at("output_directory").get<std::string>())
+      output_directory(j.at("output_directory").get<std::string>()), zip_output(j.value("zip_output", false))
 {
     {
         const json &o = j["layers"];
@@ -73,8 +73,6 @@ FabOutputSettings::FabOutputSettings(const json &j)
     if (j.count("drill_mode")) {
         drill_mode = mode_lut.lookup(j.at("drill_mode"));
     }
-
-    zip_output = j.count("zip_output") ? j.at("zip_output").get<bool>() : false;
 }
 
 void FabOutputSettings::update_for_board(const Board *brd)
