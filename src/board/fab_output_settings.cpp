@@ -73,6 +73,8 @@ FabOutputSettings::FabOutputSettings(const json &j)
     if (j.count("drill_mode")) {
         drill_mode = mode_lut.lookup(j.at("drill_mode"));
     }
+
+    zip_output = j.count("zip_output") ? j.at("zip_output").get<bool>() : false;
 }
 
 void FabOutputSettings::update_for_board(const Board *brd)
@@ -107,6 +109,7 @@ json FabOutputSettings::serialize() const
     j["drill_npth"] = drill_npth_filename;
     j["prefix"] = prefix;
     j["output_directory"] = output_directory;
+    j["zip_output"] = zip_output;
     j["drill_mode"] = mode_lut.lookup_reverse(drill_mode);
     j["layers"] = json::object();
     for (const auto &it : layers) {

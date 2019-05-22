@@ -64,6 +64,7 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     x->get_widget("directory_button", directory_button);
     x->get_widget("drill_mode_combo", drill_mode_combo);
     x->get_widget("log_textview", log_textview);
+    x->get_widget("zip_output", zip_output_checkbutton);
 
     export_filechooser.attach(directory_entry, directory_button, this);
     export_filechooser.set_project_dir(project_dir);
@@ -153,6 +154,7 @@ void FabOutputWindow::generate()
     try {
         FabOutputSettings my_settings = *settings;
         my_settings.output_directory = export_filechooser.get_filename_abs();
+        my_settings.zip_output = zip_output_checkbutton->get_active();
         GerberExporter ex(brd, &my_settings);
         ex.generate();
         log_textview->get_buffer()->set_text(ex.get_log());

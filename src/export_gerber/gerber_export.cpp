@@ -3,6 +3,8 @@
 #include "board/board.hpp"
 #include "board/fab_output_settings.hpp"
 #include <glibmm/miscutils.h>
+#include "libzippp/zip.hpp"
+
 
 namespace horizon {
 GerberExporter::GerberExporter(const Board *b, const FabOutputSettings *s) : brd(b), settings(s)
@@ -51,6 +53,31 @@ void GerberExporter::generate()
             log << "Wrote excellon drill file " << it->get_filename() << std::endl;
         }
     }
+
+    if (settings->zip_output) {
+        generate_zip();
+    }
+}
+
+void GerberExporter::generate_zip()
+{
+    std::string zip_file = Glib::build_filename(settings->output_directory, settings->prefix + ".zip");
+    libzip::archive zip(zip_file, ZIP_CREATE);
+
+    for (int64_t i = 0; i < zip.num_entries(); i++) {
+        zip.remove(i);
+    }
+
+    for (auto &it : writers) {
+        zip.add(libzip::source_file(it.second.get_filename()), Glib::path_get_basename(it.second.get_filename()));
+    }
+
+    for (auto it : {drill_writer_npth.get(), drill_writer_pth.get()}) {
+        if (it) {
+            zip.add(libzip::source_file(it->get_filename()), Glib::path_get_basename(it->get_filename()));
+        }
+    }
+    log << "Added files to " << zip_file << std::endl;
 }
 
 std::string GerberExporter::get_log()
