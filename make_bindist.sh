@@ -99,6 +99,7 @@ LIBS=(
 	libidn2-4.dll\
 	libpodofo.dll\
 	libidn-12.dll\
+	libzip.dll\
 	libzstd.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
