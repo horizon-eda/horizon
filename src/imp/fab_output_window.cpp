@@ -64,7 +64,7 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     x->get_widget("directory_button", directory_button);
     x->get_widget("drill_mode_combo", drill_mode_combo);
     x->get_widget("log_textview", log_textview);
-    x->get_widget("zip_output", zip_output_checkbutton);
+    x->get_widget("zip_output", zip_output_switch);
 
     export_filechooser.attach(directory_entry, directory_button, this);
     export_filechooser.set_project_dir(project_dir);
@@ -76,6 +76,7 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     prefix_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
     bind_widget(npth_filename_entry, settings->drill_npth_filename, [this](std::string &) { s_signal_changed.emit(); });
     bind_widget(pth_filename_entry, settings->drill_pth_filename, [this](std::string &) { s_signal_changed.emit(); });
+    bind_widget(zip_output_switch, settings->zip_output);
 
     drill_mode_combo->set_active_id(FabOutputSettings::mode_lut.lookup_reverse(settings->drill_mode));
     drill_mode_combo->signal_changed().connect([this] {
@@ -154,7 +155,7 @@ void FabOutputWindow::generate()
     try {
         FabOutputSettings my_settings = *settings;
         my_settings.output_directory = export_filechooser.get_filename_abs();
-        my_settings.zip_output = zip_output_checkbutton->get_active();
+        my_settings.zip_output = zip_output_switch->get_active();
         GerberExporter ex(brd, &my_settings);
         ex.generate();
         log_textview->get_buffer()->set_text(ex.get_log());
