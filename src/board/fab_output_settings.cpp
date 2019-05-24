@@ -61,7 +61,7 @@ json FabOutputSettings::GerberLayer::serialize() const
 FabOutputSettings::FabOutputSettings(const json &j)
     : drill_pth_filename(j.at("drill_pth").get<std::string>()),
       drill_npth_filename(j.at("drill_npth").get<std::string>()), prefix(j.at("prefix").get<std::string>()),
-      output_directory(j.at("output_directory").get<std::string>())
+      output_directory(j.at("output_directory").get<std::string>()), zip_output(j.value("zip_output", false))
 {
     {
         const json &o = j["layers"];
@@ -107,6 +107,7 @@ json FabOutputSettings::serialize() const
     j["drill_npth"] = drill_npth_filename;
     j["prefix"] = prefix;
     j["output_directory"] = output_directory;
+    j["zip_output"] = zip_output;
     j["drill_mode"] = mode_lut.lookup_reverse(drill_mode);
     j["layers"] = json::object();
     for (const auto &it : layers) {

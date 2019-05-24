@@ -22,5 +22,7 @@ private:
     std::unique_ptr<ExcellonWriter> drill_writer_pth;
     std::unique_ptr<ExcellonWriter> drill_writer_npth;
     std::stringstream log;
+
+    void generate_zip();
 };
 } // namespace horizon

@@ -34,6 +34,7 @@ private:
     Gtk::Button *directory_button = nullptr;
     Gtk::ComboBoxText *drill_mode_combo = nullptr;
     Gtk::TextView *log_textview = nullptr;
+    Gtk::Switch *zip_output_switch = nullptr;
 
     ExportFileChooser export_filechooser;
 
