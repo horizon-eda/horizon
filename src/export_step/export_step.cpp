@@ -469,7 +469,7 @@ void export_step(const std::string &filename, const Board &brd, class Pool &pool
                                 + std::to_string(n_pkg) + ")");
                     TDF_Label lmodel;
 
-                    if (!getModelLabel(Glib::build_filename(pool.get_base_path(), model->filename), lmodel, app, doc,
+                    if (!getModelLabel(pool.get_model_filename(it->package.uuid, model->uuid), lmodel, app, doc,
                                        it->component->refdes)) {
                         throw std::runtime_error("get model label");
                     }
