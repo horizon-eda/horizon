@@ -30,7 +30,9 @@ template<typename CharType>
 class output_vector_adapter : public output_adapter_protocol<CharType>
 {
   public:
-    explicit output_vector_adapter(std::vector<CharType>& vec) : v(vec) {}
+    explicit output_vector_adapter(std::vector<CharType>& vec) noexcept
+        : v(vec)
+    {}
 
     void write_character(CharType c) override
     {
@@ -51,7 +53,9 @@ template<typename CharType>
 class output_stream_adapter : public output_adapter_protocol<CharType>
 {
   public:
-    explicit output_stream_adapter(std::basic_ostream<CharType>& s) : stream(s) {}
+    explicit output_stream_adapter(std::basic_ostream<CharType>& s) noexcept
+        : stream(s)
+    {}
 
     void write_character(CharType c) override
     {
@@ -68,11 +72,13 @@ class output_stream_adapter : public output_adapter_protocol<CharType>
 };
 
 /// output adapter for basic_string
-template<typename CharType>
+template<typename CharType, typename StringType = std::basic_string<CharType>>
 class output_string_adapter : public output_adapter_protocol<CharType>
 {
   public:
-    explicit output_string_adapter(std::basic_string<CharType>& s) : str(s) {}
+    explicit output_string_adapter(StringType& s) noexcept
+        : str(s)
+    {}
 
     void write_character(CharType c) override
     {
@@ -85,10 +91,10 @@ class output_string_adapter : public output_adapter_protocol<CharType>
     }
 
   private:
-    std::basic_string<CharType>& str;
+    StringType& str;
 };
 
-template<typename CharType>
+template<typename CharType, typename StringType = std::basic_string<CharType>>
 class output_adapter
 {
   public:
@@ -98,8 +104,8 @@ class output_adapter
     output_adapter(std::basic_ostream<CharType>& s)
         : oa(std::make_shared<output_stream_adapter<CharType>>(s)) {}
 
-    output_adapter(std::basic_string<CharType>& s)
-        : oa(std::make_shared<output_string_adapter<CharType>>(s)) {}
+    output_adapter(StringType& s)
+        : oa(std::make_shared<output_string_adapter<CharType, StringType>>(s)) {}
 
     operator output_adapter_t<CharType>()
     {
@@ -109,5 +115,5 @@ class output_adapter
   private:
     output_adapter_t<CharType> oa = nullptr;
 };
-}
-}
+}  // namespace detail
+}  // namespace nlohmann
