@@ -2,7 +2,7 @@
 #ifdef WIN32_UUID
 #include "uuid_win32.hpp"
 #else
-#include <uuid.h>
+#include <uuid/uuid.h>
 #endif
 
 #include <iostream>
