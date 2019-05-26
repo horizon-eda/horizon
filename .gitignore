@@ -19,6 +19,7 @@ rest-test.cpp
 .gdb_history
 resources.cpp
 gitversion.cpp
+src/version_gen.cpp
 .cproject
 .settings
 .project
@@ -31,5 +32,6 @@ dist
 *.res
 docs
 */__pycache__
+__pycache__
 src/preferences/color_presets.json
 src/imp/layer_help.json

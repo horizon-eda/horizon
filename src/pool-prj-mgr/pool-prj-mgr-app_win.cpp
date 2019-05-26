@@ -19,8 +19,6 @@
 #include "board/board.hpp"
 #include "widgets/pool_chooser.hpp"
 
-extern const char *gitversion;
-
 namespace horizon {
 PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject,
                                                          const Glib::RefPtr<Gtk::Builder> &refBuilder,
@@ -43,7 +41,6 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("header", header);
     builder->get_widget("recent_pools_listbox", recent_pools_listbox);
     builder->get_widget("recent_projects_listbox", recent_projects_listbox);
-    builder->get_widget("label_gitversion", label_gitversion);
     builder->get_widget("pool_box", pool_box);
     builder->get_widget("pool_update_status_label", pool_update_status_label);
     builder->get_widget("pool_update_status_rev", pool_update_status_rev);
@@ -107,8 +104,6 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
 
     view_create_project.signal_valid_change().connect([this](bool v) { button_create->set_sensitive(v); });
     view_create_pool.signal_valid_change().connect([this](bool v) { button_create->set_sensitive(v); });
-
-    label_gitversion->set_text(gitversion);
 
     download_status_dispatcher.attach(download_revealer);
     download_status_dispatcher.attach(download_label);

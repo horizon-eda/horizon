@@ -103,7 +103,6 @@ private:
     Gtk::ListBox *recent_pools_listbox = nullptr;
     Gtk::ListBox *recent_projects_listbox = nullptr;
     std::vector<Gtk::ListBox *> recent_listboxes;
-    Gtk::Label *label_gitversion = nullptr;
     Gtk::Box *pool_box = nullptr;
     class PoolNotebook *pool_notebook = nullptr;
 

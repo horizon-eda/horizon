@@ -20,6 +20,7 @@
 #include "util/str_util.hpp"
 #include "preferences/preferences_provider.hpp"
 #include "parameter_window.hpp"
+#include "widgets/about_dialog.hpp"
 #include <glibmm/main.h>
 #include <glibmm/markup.h>
 #include <gtkmm.h>
@@ -618,6 +619,12 @@ void ImpBase::run(int argc, char *argv[])
 
     if (sockets_connected)
         main_window->add_action("preferences", [this] { trigger_action(ActionID::PREFERENCES); });
+
+    main_window->add_action("about", [this] {
+        AboutDialog dia;
+        dia.set_transient_for(*main_window);
+        dia.run();
+    });
 
     main_window->add_action("help", [this] { trigger_action(ActionID::HELP); });
 

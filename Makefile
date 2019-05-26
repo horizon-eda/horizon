@@ -75,7 +75,8 @@ SRC_COMMON = \
 	src/block/net_class.cpp\
 	src/project/project.cpp\
 	src/resources.cpp\
-	src/gitversion.cpp\
+	src/util/version.cpp\
+	src/version_gen.cpp\
 	src/rules/rules.cpp\
 	src/rules/rule.cpp\
 	src/rules/rule_descr.cpp\
@@ -277,6 +278,7 @@ SRC_IMP = \
 	src/widgets/component_selector.cpp\
 	src/widgets/component_button.cpp\
 	src/widgets/preview_canvas.cpp\
+	src/widgets/about_dialog.cpp\
 	src/export_pdf/export_pdf.cpp\
 	src/imp/keyseq_dialog.cpp\
 	src/canvas/canvas_patch.cpp\
@@ -500,6 +502,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/entity_info_box.cpp\
 	src/widgets/padstack_preview.cpp\
 	src/widgets/tag_entry.cpp\
+	src/widgets/about_dialog.cpp\
 	src/util/status_dispatcher.cpp\
 	src/util/exception_util.cpp
 
@@ -610,8 +613,8 @@ src/preferences/color_presets.json: $(wildcard src/preferences/color_presets/*)
 src/resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies imp.gresource.xml |  while read line; do echo "src/$$line"; done)
 	$(GLIB_COMPILE_RESOURCES) imp.gresource.xml --target=$@ --sourcedir=src --generate-source
 
-src/gitversion.cpp: .git/HEAD .git/index
-	echo "const char *gitversion = \"$(shell git log -1 --pretty="format:%h %ci %s")\";" > $@
+src/version_gen.cpp: $(wildcard .git/HEAD .git/index) version.py make_version.py
+	python3 make_version.py $@
 
 horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(OBJ_OCE) $(SRC_IMP:.cpp=.o)
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq) -lpodofo -o $@
@@ -653,7 +656,7 @@ $(OBJ_RES): %.res: %.rc
 	windres $< -O coff -o $@
 
 clean: clean_router clean_oce clean_res
-	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-prj-mgr horizon-pgm-test horizon-gen-pkg horizon-eda $(OBJ_ALL:.o=.d) src/resources.cpp src/gitversion.cpp
+	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-prj-mgr horizon-pgm-test horizon-gen-pkg horizon-eda $(OBJ_ALL:.o=.d) src/resources.cpp src/version_gen.cpp
 
 clean_router:
 	rm -f $(OBJ_ROUTER) $(OBJ_ROUTER:.o=.d)

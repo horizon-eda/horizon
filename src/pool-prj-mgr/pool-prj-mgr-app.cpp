@@ -11,6 +11,7 @@
 #include "pool/pool_manager.hpp"
 #include "preferences_window.hpp"
 #include "preferences/preferences_provider.hpp"
+#include "widgets/about_dialog.hpp"
 
 namespace horizon {
 
@@ -108,6 +109,7 @@ void PoolProjectManagerApplication::on_startup()
     add_action("preferences", [this] { show_preferences_window(); });
     add_action("quit", sigc::mem_fun(*this, &PoolProjectManagerApplication::on_action_quit));
     add_action("new_window", sigc::mem_fun(*this, &PoolProjectManagerApplication::on_action_new_window));
+    add_action("about", sigc::mem_fun(*this, &PoolProjectManagerApplication::on_action_about));
     set_accel_for_action("app.quit", "<Ctrl>Q");
 
     recent_items.clear();
@@ -301,6 +303,15 @@ void PoolProjectManagerApplication::on_action_new_window()
 {
     auto appwin = create_appwindow();
     appwin->present();
+}
+
+void PoolProjectManagerApplication::on_action_about()
+{
+    AboutDialog dia;
+    auto win = get_active_window();
+    if (win)
+        dia.set_transient_for(*win);
+    dia.run();
 }
 
 Preferences &PoolProjectManagerApplication::get_preferences()

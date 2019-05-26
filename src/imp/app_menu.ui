@@ -16,6 +16,10 @@
         <attribute name="action">win.view_log</attribute>
       </item>
       <item>
+        <attribute name="label" translatable="yes">_About</attribute>
+        <attribute name="action">win.about</attribute>
+      </item>
+      <item>
         <attribute name="label" translatable="yes">_Quit</attribute>
         <attribute name="action">app.quit</attribute>
       </item>

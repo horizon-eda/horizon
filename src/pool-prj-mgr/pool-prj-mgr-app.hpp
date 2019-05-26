@@ -53,6 +53,7 @@ private:
     void on_hide_window(Gtk::Window *window);
     void on_action_quit();
     void on_action_new_window();
+    void on_action_about();
     void load_from_config(const std::string &config_filename);
     Preferences preferences;
     class PreferencesWindow *preferences_window = nullptr;
