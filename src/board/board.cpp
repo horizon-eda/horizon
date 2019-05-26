@@ -364,11 +364,18 @@ void Board::set_n_inner_layers(unsigned int n)
     map_erase_if(stackup, [this](const auto &x) { return layers.count(x.first) == 0; });
 }
 
-static void flip_package_layer(int &layer)
+void Board::flip_package_layer(int &layer) const
 {
-    if (layer == -1)
-        return;
-    layer = -layer - 100;
+    if (layer < 0 && layer > -100) {
+        if (n_inner_layers == 0)
+            return;
+        if (-layer > (int)n_inner_layers)
+            throw std::runtime_error("layer out of range");
+        layer = -layer - (n_inner_layers + 1);
+    }
+    else {
+        layer = -layer - 100;
+    }
 }
 
 void Board::propagate_nets()

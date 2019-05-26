@@ -122,5 +122,6 @@ public:
 private:
     unsigned int n_inner_layers = 0;
     ClipperLib::Paths get_thermals(class Plane *plane, const class CanvasPads *ca) const;
+    void flip_package_layer(int &layer) const;
 };
 } // namespace horizon
