@@ -558,6 +558,31 @@ void Schematic::expand(bool careful)
             }
         }
     }
+
+    {
+        std::set<std::string> all_refdes;
+        std::set<std::string> duplicate_refdes;
+        for (const auto &it_comp : block->components) {
+            const auto &refdes = it_comp.second.refdes;
+            if (refdes.size() && refdes.back() != '?') {
+                if (all_refdes.count(refdes)) {
+                    duplicate_refdes.insert(refdes);
+                }
+                else {
+                    all_refdes.insert(refdes);
+                }
+            }
+        }
+
+        for (auto &it_sheet : sheets) {
+            for (auto &it_sym : it_sheet.second.symbols) {
+                const auto &refdes = it_sym.second.component->refdes;
+                if (duplicate_refdes.count(refdes))
+                    it_sheet.second.warnings.emplace_back(it_sym.second.placement.shift, "Duplicate refdes " + refdes);
+            }
+        }
+    }
+
     for (auto &it_sheet : sheets) {
         Sheet &sheet = it_sheet.second;
         if (sheet.pool_frame) {
