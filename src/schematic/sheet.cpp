@@ -662,7 +662,20 @@ void Sheet::merge_junction(Junction *j, Junction *into)
         if (it.second.junction == j)
             it.second.junction = into;
     }
-
+    for (auto &it : lines) {
+        if (it.second.to == j)
+            it.second.to = into;
+        if (it.second.from == j)
+            it.second.from = into;
+    }
+    for (auto &it : arcs) {
+        if (it.second.to == j)
+            it.second.to = into;
+        if (it.second.from == j)
+            it.second.from = into;
+        if (it.second.center == j)
+            it.second.center = into;
+    }
     junctions.erase(j->uuid);
 }
 
