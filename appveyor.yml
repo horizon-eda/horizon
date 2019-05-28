@@ -10,7 +10,7 @@ environment:
 
 before_build:
     - set PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%
-    - bash -c "pacman -R catgets libcatgets --noconfirm || true"
+    - bash -c "pacman -R mingw-w64-i686-gcc-ada mingw-w64-i686-gcc-objc mingw-w64-x86_64-gcc-ada mingw-w64-x86_64-gcc-objc --noconfirm || true"
     - bash -c "pacman -Syu --noconfirm"
     - bash -c "pacman -Syu --noconfirm"
     - bash -c "pacman -S --noconfirm --needed mingw-w64-%MSYS2_ARCH%-{gcc,gtkmm3,boost,yaml-cpp,sqlite3,toolchain,zeromq,glm,libgit2,oce,podofo,libzip} zip make"
