@@ -1,6 +1,11 @@
 PKGCONFIG=pkg-config
+BUILDDIR = build
+PROGS    = $(addprefix $(BUILDDIR)/horizon-,imp pool prj eda)
 
-all: horizon-imp horizon-pool horizon-prj horizon-eda
+all: $(PROGS)
+pymodule: $(BUILDDIR)/horizon.so
+
+.PHONY: all pymodule
 
 SRC_COMMON = \
 	src/util/uuid.cpp \
@@ -74,9 +79,7 @@ SRC_COMMON = \
 	src/common/object_descr.cpp\
 	src/block/net_class.cpp\
 	src/project/project.cpp\
-	src/resources.cpp\
 	src/util/version.cpp\
-	src/version_gen.cpp\
 	src/rules/rules.cpp\
 	src/rules/rule.cpp\
 	src/rules/rule_descr.cpp\
@@ -96,6 +99,8 @@ SRC_COMMON = \
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += src/util/uuid_win32.cpp
 endif
+SRC_COMMON_GEN += $(GENDIR)/resources.cpp
+SRC_COMMON_GEN += $(GENDIR)/version_gen.cpp
 
 
 SRC_CANVAS = \
@@ -582,13 +587,28 @@ SRC_SHARED = $(SRC_COMMON) \
 	src/canvas/canvas_pads.cpp\
 	src/canvas/canvas_patch.cpp\
 
+SRC_SHARED_GEN = $(SRC_COMMON_GEN)
+
+OBJDIR           = $(BUILDDIR)/obj
+GENDIR           = $(BUILDDIR)/gen
+MKDIR            = mkdir -p
+
 # Object files
-OBJ_ALL = $(SRC_ALL:.cpp=.o)
-OBJ_ROUTER = $(SRC_ROUTER:.cpp=.o)
-OBJ_COMMON = $(SRC_COMMON:.cpp=.o)
-OBJ_OCE = $(SRC_OCE:.cpp=.o)
-OBJ_PYTHON = $(SRC_PYTHON:.cpp=.o)
-OBJ_SHARED = $(SRC_SHARED:.cpp=.oshared)
+OBJ_ALL          = $(addprefix $(OBJDIR)/,$(SRC_ALL:.cpp=.o))
+OBJ_ROUTER       = $(addprefix $(OBJDIR)/,$(SRC_ROUTER:.cpp=.o))
+OBJ_COMMON       = $(addprefix $(OBJDIR)/,$(SRC_COMMON:.cpp=.o))
+OBJ_COMMON      += $(SRC_COMMON_GEN:.cpp=.o)
+OBJ_OCE          = $(addprefix $(OBJDIR)/,$(SRC_OCE:.cpp=.o))
+OBJ_PYTHON       = $(addprefix $(OBJDIR)/,$(SRC_PYTHON:.cpp=.o))
+OBJ_SHARED       = $(addprefix $(OBJDIR)/,$(SRC_SHARED:.cpp=.oshared))
+OBJ_SHARED      += $(SRC_SHARED_GEN:.cpp=.oshared)
+
+OBJ_IMP          = $(addprefix $(OBJDIR)/,$(SRC_IMP:.cpp=.o))
+OBJ_POOL_UTIL    = $(addprefix $(OBJDIR)/,$(SRC_POOL_UTIL:.cpp=.o))
+OBJ_PRJ_UTIL     = $(addprefix $(OBJDIR)/,$(SRC_PRJ_UTIL:.cpp=.o))
+OBJ_POOL_PRJ_MGR = $(addprefix $(OBJDIR)/,$(SRC_POOL_PRJ_MGR:.cpp=.o) $(OBJ_RES))
+OBJ_PGM_TEST     = $(addprefix $(OBJDIR)/,$(SRC_PGM_TEST:.cpp=.o))
+OBJ_GEN_PKG      = $(addprefix $(OBJDIR)/,$(SRC_GEN_PKG:.cpp=.o))
 
 
 
@@ -601,71 +621,87 @@ ifeq ($(OS),Windows_NT)
 endif
 
 SRC_RES =
-OBJ_RES =
 ifeq ($(OS),Windows_NT)
 	SRC_RES = src/horizon-pool-prj-mgr.rc
-	OBJ_RES = $(SRC_RES:.rc=.res)
 endif
+OBJ_RES = $(addprefix $(OBJDIR)/,$(SRC_RES:.rc=.res))
 
 src/preferences/color_presets.json: $(wildcard src/preferences/color_presets/*)
 	python3 scripts/make_color_presets.py $^ > $@
 
-src/resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies imp.gresource.xml |  while read line; do echo "src/$$line"; done)
+$(BUILDDIR)/gen/resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies imp.gresource.xml |  while read line; do echo "src/$$line"; done)
+	$(MKDIR) $(dir $@)
 	$(GLIB_COMPILE_RESOURCES) imp.gresource.xml --target=$@ --sourcedir=src --generate-source
 
-src/version_gen.cpp: $(wildcard .git/HEAD .git/index) version.py make_version.py
+$(BUILDDIR)/gen/version_gen.cpp: $(wildcard .git/HEAD .git/index) version.py make_version.py
+	$(MKDIR) $(dir $@)
 	python3 make_version.py $@
 
-horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(OBJ_OCE) $(SRC_IMP:.cpp=.o)
+$(BUILDDIR)/horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(OBJ_OCE) $(OBJ_IMP)
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq) -lpodofo -o $@
 
-horizon-pool: $(OBJ_COMMON) $(SRC_POOL_UTIL:.cpp=.o)
+$(BUILDDIR)/horizon-pool: $(OBJ_COMMON) $(OBJ_POOL_UTIL)
 	$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0) -o $@
 
-horizon-prj: $(OBJ_COMMON) $(SRC_PRJ_UTIL:.cpp=.o)
+$(BUILDDIR)/horizon-prj: $(OBJ_COMMON) $(OBJ_PRJ_UTIL)
 	$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
-horizon-eda: $(OBJ_COMMON) $(SRC_POOL_PRJ_MGR:.cpp=.o) $(OBJ_RES)
+$(BUILDDIR)/horizon-eda: $(OBJ_COMMON) $(OBJ_POOL_PRJ_MGR) $(OBJ_RES)
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy libzmq libcurl libgit2) -o $@
 
-horizon-pgm-test: $(OBJ_COMMON) $(SRC_PGM_TEST:.cpp=.o)
+$(BUILDDIR)/horizon-pgm-test: $(OBJ_COMMON) $(OBJ_PGM_TEST)
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
-horizon-gen-pkg: $(OBJ_COMMON) $(SRC_GEN_PKG:.cpp=.o)
+$(BUILDDIR)/horizon-gen-pkg: $(OBJ_COMMON) $(OBJ_GEN_PKG)
 	$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
-horizon.so: $(OBJ_PYTHON) $(OBJ_SHARED)
+$(BUILDDIR)/horizon.so: $(OBJ_PYTHON) $(OBJ_SHARED)
 	$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) python3 glibmm-2.4 giomm-2.4) -lpodofo -shared -o $@
 
-$(OBJ_ALL): %.o: %.cpp
+$(OBJ_ALL): $(OBJDIR)/%.o: %.cpp
+	$(MKDIR) $(dir $@)
 	$(CXX) -c $(INC) $(CXXFLAGS) $< -o $@
 
-$(OBJ_SHARED): %.oshared: %.cpp
+$(GENDIR)/%.o: $(GENDIR)/%.cpp
+	$(MKDIR) $(dir $@)
+	$(CXX) -c $(INC) $(CXXFLAGS) $< -o $@
+
+$(OBJDIR)/%.oshared: %.cpp
+	$(MKDIR) $(dir $@)
 	$(CXX) -c $(INC) $(CXXFLAGS) -fPIC $< -o $@
 
-$(OBJ_ROUTER): %.o: %.cpp
+$(GENDIR)/%.oshared: $(GENDIR)/%.cpp
+	$(MKDIR) $(dir $@)
+	$(CXX) -c $(INC) $(CXXFLAGS) -fPIC $< -o $@
+
+$(OBJ_ROUTER): $(OBJDIR)/%.o: %.cpp
+	$(MKDIR) $(dir $@)
 	$(CXX) -c $(INC) $(INC_ROUTER) $(CXXFLAGS) $< -o $@
 
-$(OBJ_OCE): %.o: %.cpp
+$(OBJ_OCE): $(OBJDIR)/%.o: %.cpp
+	$(MKDIR) $(dir $@)
 	$(CXX) -c $(INC) $(INC_OCE) $(CXXFLAGS) $< -o $@
 
-$(OBJ_PYTHON): %.o: %.cpp
+$(OBJ_PYTHON): $(OBJDIR)/%.o: %.cpp
+	$(MKDIR) $(dir $@)
 	$(CXX) -c -fPIC $(INC) $(INC_PYTHON) $(CXXFLAGS) $< -o $@
 
-$(OBJ_RES): %.res: %.rc
+$(OBJ_RES): $(OBJDIR)/%.res: %.rc
+	$(MKDIR) $(dir $@)
 	windres $< -O coff -o $@
 
 clean: clean_router clean_oce clean_res
-	rm -f $(OBJ_ALL) horizon-imp horizon-pool horizon-prj horizon-pool-mgr horizon-prj-mgr horizon-pgm-test horizon-gen-pkg horizon-eda $(OBJ_ALL:.o=.d) src/resources.cpp src/version_gen.cpp
+	$(RM) $(OBJ_ALL) $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-pool $(BUILDDIR)/horizon-prj $(BUILDDIR)/horizon-pool-mgr $(BUILDDIR)/horizon-prj-mgr $(BUILDDIR)/horizon-pgm-test $(BUILDDIR)/horizon-gen-pkg $(BUILDDIR)/horizon-eda $(OBJ_ALL:.o=.d) $(GENDIR)/resources.cpp $(GENDIR)/version_gen.cpp
+	$(RM) $(GENDIR)/*.d $(GENDIR)/*.o $(GENDIR)/*.oshared
 
 clean_router:
-	rm -f $(OBJ_ROUTER) $(OBJ_ROUTER:.o=.d)
+	$(RM) $(OBJ_ROUTER) $(OBJ_ROUTER:.o=.d)
 
 clean_oce:
-	rm -f $(OBJ_OCE) $(OBJ_OCE:.o=.d)
+	$(RM) $(OBJ_OCE) $(OBJ_OCE:.o=.d)
 
 clean_res:
-	rm -f $(OBJ_RES)
+	$(RM) $(OBJ_RES)
 
 -include  $(OBJ_ALL:.o=.d)
 -include  $(OBJ_ROUTER:.o=.d)
