@@ -890,6 +890,7 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
                 via->junction = ju;
             }
             via->junction->has_via = true;
+            aItem->SetParent(get_parent(via));
         }
     } break;
 
