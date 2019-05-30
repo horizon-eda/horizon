@@ -592,6 +592,8 @@ SRC_SHARED_GEN = $(SRC_COMMON_GEN)
 OBJDIR           = $(BUILDDIR)/obj
 GENDIR           = $(BUILDDIR)/gen
 MKDIR            = mkdir -p
+QUIET            = @
+ECHO             = @echo
 
 # Object files
 OBJ_ALL          = $(addprefix $(OBJDIR)/,$(SRC_ALL:.cpp=.o))
@@ -630,64 +632,80 @@ src/preferences/color_presets.json: $(wildcard src/preferences/color_presets/*)
 	python3 scripts/make_color_presets.py $^ > $@
 
 $(BUILDDIR)/gen/resources.cpp: imp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies imp.gresource.xml |  while read line; do echo "src/$$line"; done)
-	$(MKDIR) $(dir $@)
-	$(GLIB_COMPILE_RESOURCES) imp.gresource.xml --target=$@ --sourcedir=src --generate-source
+	$(QUIET)$(MKDIR) $(dir $@)
+	$(ECHO) " $@"
+	$(QUIET)$(GLIB_COMPILE_RESOURCES) imp.gresource.xml --target=$@ --sourcedir=src --generate-source
 
 $(BUILDDIR)/gen/version_gen.cpp: $(wildcard .git/HEAD .git/index) version.py make_version.py
-	$(MKDIR) $(dir $@)
-	python3 make_version.py $@
+	$(QUIET)$(MKDIR) $(dir $@)
+	$(ECHO) " $@"
+	$(QUIET)python3 make_version.py $@
 
 $(BUILDDIR)/horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(OBJ_OCE) $(OBJ_IMP)
-	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq) -lpodofo -o $@
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq) -lpodofo -o $@
 
 $(BUILDDIR)/horizon-pool: $(OBJ_COMMON) $(OBJ_POOL_UTIL)
-	$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0) -o $@
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0) -o $@
 
 $(BUILDDIR)/horizon-prj: $(OBJ_COMMON) $(OBJ_PRJ_UTIL)
-	$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
 $(BUILDDIR)/horizon-eda: $(OBJ_COMMON) $(OBJ_POOL_PRJ_MGR) $(OBJ_RES)
-	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy libzmq libcurl libgit2) -o $@
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy libzmq libcurl libgit2) -o $@
 
 $(BUILDDIR)/horizon-pgm-test: $(OBJ_COMMON) $(OBJ_PGM_TEST)
-	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
 $(BUILDDIR)/horizon-gen-pkg: $(OBJ_COMMON) $(OBJ_GEN_PKG)
-	$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
 $(BUILDDIR)/horizon.so: $(OBJ_PYTHON) $(OBJ_SHARED)
-	$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) python3 glibmm-2.4 giomm-2.4) -lpodofo -shared -o $@
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) python3 glibmm-2.4 giomm-2.4) -lpodofo -shared -o $@
 
 $(OBJ_ALL): $(OBJDIR)/%.o: %.cpp
-	$(MKDIR) $(dir $@)
-	$(CXX) -c $(INC) $(CXXFLAGS) $< -o $@
+	$(QUIET)$(MKDIR) $(dir $@)
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) -c $(INC) $(CXXFLAGS) $< -o $@
 
 $(GENDIR)/%.o: $(GENDIR)/%.cpp
-	$(MKDIR) $(dir $@)
-	$(CXX) -c $(INC) $(CXXFLAGS) $< -o $@
+	$(QUIET)$(MKDIR) $(dir $@)
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) -c $(INC) $(CXXFLAGS) $< -o $@
 
 $(OBJDIR)/%.oshared: %.cpp
-	$(MKDIR) $(dir $@)
-	$(CXX) -c $(INC) $(CXXFLAGS) -fPIC $< -o $@
+	$(QUIET)$(MKDIR) $(dir $@)
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) -c $(INC) $(CXXFLAGS) -fPIC $< -o $@
 
 $(GENDIR)/%.oshared: $(GENDIR)/%.cpp
-	$(MKDIR) $(dir $@)
-	$(CXX) -c $(INC) $(CXXFLAGS) -fPIC $< -o $@
+	$(QUIET)$(MKDIR) $(dir $@)
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) -c $(INC) $(CXXFLAGS) -fPIC $< -o $@
 
 $(OBJ_ROUTER): $(OBJDIR)/%.o: %.cpp
-	$(MKDIR) $(dir $@)
-	$(CXX) -c $(INC) $(INC_ROUTER) $(CXXFLAGS) $< -o $@
+	$(QUIET)$(MKDIR) $(dir $@)
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) -c $(INC) $(INC_ROUTER) $(CXXFLAGS) $< -o $@
 
 $(OBJ_OCE): $(OBJDIR)/%.o: %.cpp
-	$(MKDIR) $(dir $@)
-	$(CXX) -c $(INC) $(INC_OCE) $(CXXFLAGS) $< -o $@
+	$(QUIET)$(MKDIR) $(dir $@)
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) -c $(INC) $(INC_OCE) $(CXXFLAGS) $< -o $@
 
 $(OBJ_PYTHON): $(OBJDIR)/%.o: %.cpp
-	$(MKDIR) $(dir $@)
-	$(CXX) -c -fPIC $(INC) $(INC_PYTHON) $(CXXFLAGS) $< -o $@
+	$(QUIET)$(MKDIR) $(dir $@)
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) -c -fPIC $(INC) $(INC_PYTHON) $(CXXFLAGS) $< -o $@
 
 $(OBJ_RES): $(OBJDIR)/%.res: %.rc
-	$(MKDIR) $(dir $@)
+	$(QUIET)$(MKDIR) $(dir $@)
 	windres $< -O coff -o $@
 
 clean: clean_router clean_oce clean_res
