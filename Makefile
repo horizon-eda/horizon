@@ -299,6 +299,8 @@ SRC_IMP = \
 	src/imp/footprint_generator/footprint_generator_quad.cpp\
 	src/imp/footprint_generator/footprint_generator_grid.cpp\
 	src/imp/footprint_generator/svg_overlay.cpp\
+	src/imp/footprint_generator/footprint_generator_footag.cpp\
+	src/imp/footprint_generator/footag/display.cpp\
 	src/imp/imp_interface.cpp\
 	src/imp/parameter_window.cpp\
 	src/widgets/pool_browser_part.cpp\
@@ -372,6 +374,32 @@ SRC_IMP = \
 	3rd_party/sexpr/sexpr_parser.cpp\
 	3rd_party/sexpr/sexpr.cpp\
 	src/util/kicad_package_parser.cpp\
+
+SRC_IMPC = \
+	3rd_party/footag/wiz.c\
+	3rd_party/footag/wiz_setref.c\
+	3rd_party/footag/hint.c\
+	3rd_party/footag/chip.c\
+	3rd_party/footag/chiparray.c\
+	3rd_party/footag/molded.c\
+	3rd_party/footag/capae.c\
+	3rd_party/footag/soic.c\
+	3rd_party/footag/sod.c\
+	3rd_party/footag/soj.c\
+	3rd_party/footag/qfp.c\
+	3rd_party/footag/son.c\
+	3rd_party/footag/qfn.c\
+	3rd_party/footag/pson.c\
+	3rd_party/footag/pqfn.c\
+	3rd_party/footag/bga.c\
+	3rd_party/footag/sot223.c\
+	3rd_party/footag/sot23.c\
+	3rd_party/footag/dip.c\
+	3rd_party/footag/sip.c\
+	3rd_party/footag/pga.c\
+	3rd_party/footag/ipc7351b/ipc7351b.c\
+	3rd_party/footag/ipc7351b/table.c\
+	3rd_party/footag/ipc7251draft1/ipc7251draft1.c\
 
 SRC_ROUTER = \
 	3rd_party/router/router/pns_router.cpp \
@@ -543,6 +571,7 @@ LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq lib
 OPTIMIZE=-fdata-sections -ffunction-sections
 DEBUG   =-g3
 CXXFLAGS  =$(DEBUG) $(DEFINES) $(OPTIMIZE) $(shell $(PKGCONFIG) --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -std=c++14 -O3
+CFLAGS = $(filter-out -std=%,$(CXXFLAGS)) -std=c99
 LDFLAGS = -lm -lpthread
 GLIB_COMPILE_RESOURCES = $(shell $(PKGCONFIG) --variable=glib_compile_resources gio-2.0)
 
@@ -598,6 +627,7 @@ ECHO             = @echo
 
 # Object files
 OBJ_ALL          = $(addprefix $(OBJDIR)/,$(SRC_ALL:.cpp=.o))
+OBJ_ALL         += $(addprefix $(OBJDIR)/,$(SRC_IMPC:.c=.o))
 OBJ_ROUTER       = $(addprefix $(OBJDIR)/,$(SRC_ROUTER:.cpp=.o))
 OBJ_COMMON       = $(addprefix $(OBJDIR)/,$(SRC_COMMON:.cpp=.o))
 OBJ_COMMON      += $(addprefix $(OBJDIR)/,$(SRC_COMMON_GEN:.cpp=.o))
@@ -607,6 +637,7 @@ OBJ_SHARED       = $(addprefix $(PICOBJDIR)/,$(SRC_SHARED:.cpp=.o))
 OBJ_SHARED      += $(addprefix $(PICOBJDIR)/,$(SRC_SHARED_GEN:.cpp=.o))
 
 OBJ_IMP          = $(addprefix $(OBJDIR)/,$(SRC_IMP:.cpp=.o))
+OBJ_IMP         += $(addprefix $(OBJDIR)/,$(SRC_IMPC:.c=.o))
 OBJ_POOL_UTIL    = $(addprefix $(OBJDIR)/,$(SRC_POOL_UTIL:.cpp=.o))
 OBJ_PRJ_UTIL     = $(addprefix $(OBJDIR)/,$(SRC_PRJ_UTIL:.cpp=.o))
 OBJ_POOL_PRJ_MGR = $(addprefix $(OBJDIR)/,$(SRC_POOL_PRJ_MGR:.cpp=.o)) $(OBJ_RES)
@@ -669,6 +700,11 @@ $(BUILDDIR)/horizon-gen-pkg: $(OBJ_COMMON) $(OBJ_GEN_PKG)
 $(BUILDDIR)/horizon.so: $(OBJ_PYTHON) $(OBJ_SHARED)
 	$(ECHO) " $@"
 	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) python3 glibmm-2.4 giomm-2.4) -lpodofo -shared -o $@
+
+$(OBJDIR)/%.o: %.c
+	$(QUIET)$(MKDIR) $(dir $@)
+	$(ECHO) " $@"
+	$(QUIET)$(CC) -c $(INC) $(CFLAGS) $< -o $@
 
 $(OBJDIR)/%.o: %.cpp
 	$(QUIET)$(MKDIR) $(dir $@)
