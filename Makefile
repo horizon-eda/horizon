@@ -608,7 +608,7 @@ OBJ_SHARED      += $(SRC_SHARED_GEN:.cpp=.oshared)
 OBJ_IMP          = $(addprefix $(OBJDIR)/,$(SRC_IMP:.cpp=.o))
 OBJ_POOL_UTIL    = $(addprefix $(OBJDIR)/,$(SRC_POOL_UTIL:.cpp=.o))
 OBJ_PRJ_UTIL     = $(addprefix $(OBJDIR)/,$(SRC_PRJ_UTIL:.cpp=.o))
-OBJ_POOL_PRJ_MGR = $(addprefix $(OBJDIR)/,$(SRC_POOL_PRJ_MGR:.cpp=.o) $(OBJ_RES))
+OBJ_POOL_PRJ_MGR = $(addprefix $(OBJDIR)/,$(SRC_POOL_PRJ_MGR:.cpp=.o)) $(OBJ_RES)
 OBJ_PGM_TEST     = $(addprefix $(OBJDIR)/,$(SRC_PGM_TEST:.cpp=.o))
 OBJ_GEN_PKG      = $(addprefix $(OBJDIR)/,$(SRC_GEN_PKG:.cpp=.o))
 
@@ -622,11 +622,11 @@ ifeq ($(OS),Windows_NT)
 	LDFLAGS_OCE += -lTKV3d
 endif
 
-SRC_RES =
+OBJ_RES =
 ifeq ($(OS),Windows_NT)
 	SRC_RES = src/horizon-pool-prj-mgr.rc
+	OBJ_RES = $(addprefix $(OBJDIR)/,$(SRC_RES:.rc=.res))
 endif
-OBJ_RES = $(addprefix $(OBJDIR)/,$(SRC_RES:.rc=.res))
 
 src/preferences/color_presets.json: $(wildcard src/preferences/color_presets/*)
 	python3 scripts/make_color_presets.py $^ > $@

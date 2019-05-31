@@ -33,7 +33,7 @@ jobs:
           command: make -j2
       - run:
           name: Build python module
-          command: make -j2 horizon.so
+          command: make -j2 build/horizon.so
 
 workflows:
   version: 2
