@@ -45,6 +45,12 @@ void ImpBoard::update_highlights()
                     canvas->set_flags(ref, Triangle::FLAG_HIGHLIGHT, 0);
                 }
             }
+            for (const auto &it_track : core_board.get_board()->airwires) {
+                if (it_track.second.net.uuid == it.uuid) {
+                    ObjectRef ref(ObjectType::TRACK, it_track.first);
+                    canvas->set_flags(ref, Triangle::FLAG_HIGHLIGHT, 0);
+                }
+            }
             for (const auto &it_via : core_board.get_board()->vias) {
                 if (it_via.second.junction->net.uuid == it.uuid) {
                     ObjectRef ref(ObjectType::VIA, it_via.first);
