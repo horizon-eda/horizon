@@ -654,7 +654,7 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board *brd, Ru
             }
         }
     }
-
+    r.update();
     return r;
 }
 
