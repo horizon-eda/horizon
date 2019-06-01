@@ -38,7 +38,7 @@ bool ToolPlaceBusRipper::begin_attached()
               [](auto a, auto b) { return strcmp_natural(a->name, b->name) < 0; });
     imp->tool_bar_set_tip(
             "<b>LMB:</b>place bus ripper <b>RMB:</b>delete current ripper and "
-            "finish <b>r:</b>rotate <b>e:</b>mirror");
+            "finish <b>space:</b>select member <b>r:</b>rotate <b>e:</b>mirror");
     return true;
 }
 
