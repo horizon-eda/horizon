@@ -239,6 +239,39 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         }
     }
 
+    if (delete_extra.size() == 1) {
+        auto it = delete_extra.begin();
+        if (it->type == ObjectType::TRACK) {
+            const auto &track = core.b->get_board()->tracks.at(it->uuid);
+            const Track *other_track = nullptr;
+            bool multi = false;
+            for (const auto &it_ft : {track.from, track.to}) {
+                if (it_ft.is_junc()) {
+                    const Junction *ju = it_ft.junc;
+                    for (const auto &it_track : core.b->get_board()->tracks) {
+                        if (it_track.second.uuid != track.uuid
+                            && (it_track.second.from.junc == ju || it_track.second.to.junc == ju)) {
+                            if (other_track) { // second track, break
+                                other_track = nullptr;
+                                multi = true;
+                                break;
+                            }
+                            else {
+                                other_track = &it_track.second;
+                            }
+                        }
+                    }
+                    if (multi)
+                        break;
+                }
+            }
+            if (other_track) {
+                core.r->selection.clear();
+                core.r->selection.emplace(other_track->uuid, ObjectType::TRACK);
+            }
+        }
+    }
+
     std::set<Polygon *> polys_del;
     for (const auto &it : delete_extra) {
         switch (it.type) {
