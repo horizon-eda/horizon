@@ -37,6 +37,7 @@ public:
     void set_highlight_mode(HighlightMode mode);
     HighlightMode get_highlight_mode() const;
     void set_highlight_enabled(bool x);
+    void set_highlight_on_top(bool on_top);
 
     std::set<SelectableRef> get_selection();
     void set_selection(const std::set<SelectableRef> &sel, bool emit = true);
@@ -56,6 +57,7 @@ public:
 
     void set_cursor_size(float size);
     void set_cursor_size(Appearance::CursorSize);
+
 
     typedef sigc::signal<void> type_signal_selection_changed;
     type_signal_selection_changed signal_selection_changed()
@@ -206,6 +208,7 @@ private:
 
     HighlightMode highlight_mode = HighlightMode::HIGHLIGHT;
     bool highlight_enabled = false;
+    bool highlight_on_top = false;
     Appearance appearance;
 
     void update_palette_colors();

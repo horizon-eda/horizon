@@ -78,12 +78,13 @@ public:
     void realize();
     void render();
     void push();
+    enum class HighlightMode { SKIP, ONLY, ALL };
 
 private:
     CanvasGL *ca;
     enum class Type { TRIANGLE, LINE, LINE0, LINE_BUTT, GLYPH };
     std::unordered_map<int, std::vector<Triangle>> &triangles;
-    std::unordered_map<int, std::unordered_map<Type, std::pair<size_t, size_t>>> layer_offsets;
+    std::unordered_map<int, std::map<std::pair<Type, bool>, std::pair<size_t, size_t>>> layer_offsets;
     size_t n_tris = 0;
 
     GLuint program_line0;
@@ -95,8 +96,8 @@ private:
     GLuint ubo;
     GLuint ebo;
 
-    void render_layer(int layer);
-    void render_layer_with_overlay(int layer);
+    void render_layer(int layer, HighlightMode highlight_mode = HighlightMode::ALL);
+    void render_layer_with_overlay(int layer, HighlightMode highlight_mode = HighlightMode::ALL);
     int stencil = 0;
 };
 } // namespace horizon

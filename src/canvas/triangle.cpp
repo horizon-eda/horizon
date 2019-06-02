@@ -146,7 +146,7 @@ static void mat3_to_array(std::array<float, 12> &dest, const glm::mat3 &src)
     }
 }
 
-void TriangleRenderer::render_layer(int layer)
+void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode)
 {
     const auto &ld = ca->get_layer_display(layer);
 
@@ -181,7 +181,7 @@ void TriangleRenderer::render_layer(int layer)
 
     for (const auto &it : layer_offsets[layer]) {
         bool skip = false;
-        switch (it.first) {
+        switch (it.first.first) {
         case Type::TRIANGLE:
             glUseProgram(program_triangle);
             if (ld.mode == LayerDisplay::Mode::OUTLINE)
@@ -203,6 +203,21 @@ void TriangleRenderer::render_layer(int layer)
         case Type::GLYPH:
             break;
         }
+        switch (highlight_mode) {
+        case HighlightMode::ALL:
+            // nop
+            break;
+        case HighlightMode::ONLY: // only highlighted, skip not highlighted
+            if (!it.first.second) {
+                skip = true;
+            }
+            break;
+        case HighlightMode::SKIP: // only not highlighted, skip highlighted
+            if (it.first.second) {
+                skip = true;
+            }
+            break;
+        }
         if (!skip)
             glDrawElements(GL_POINTS, it.second.second, GL_UNSIGNED_INT,
                            (void *)(it.second.first * sizeof(unsigned int)));
@@ -211,11 +226,11 @@ void TriangleRenderer::render_layer(int layer)
     stencil++;
 }
 
-void TriangleRenderer::render_layer_with_overlay(int layer)
+void TriangleRenderer::render_layer_with_overlay(int layer, HighlightMode highlight_mode)
 {
-    render_layer(layer);
+    render_layer(layer, highlight_mode);
     if (ca->overlay_layers.count(layer))
-        render_layer(ca->overlay_layers.at(layer));
+        render_layer(ca->overlay_layers.at(layer), highlight_mode);
 }
 
 
@@ -241,17 +256,25 @@ void TriangleRenderer::render()
     glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
     glEnable(GL_STENCIL_TEST);
     stencil = 1;
-    for (auto layer : layers) {
-        const auto &ld = ca->get_layer_display(layer);
-        if (layer != ca->work_layer && layer < 10000 && ld.visible) {
-            render_layer_with_overlay(layer);
+
+    static const auto modes_on_top = {TriangleRenderer::HighlightMode::SKIP, TriangleRenderer::HighlightMode::ONLY};
+    static const auto modes_normal = {TriangleRenderer::HighlightMode::ALL};
+
+    const auto &modes = ca->highlight_on_top ? modes_on_top : modes_normal;
+
+    for (auto highlight_mode : modes) {
+        for (auto layer : layers) {
+            const auto &ld = ca->get_layer_display(layer);
+            if (layer != ca->work_layer && layer < 10000 && ld.visible) {
+                render_layer_with_overlay(layer, highlight_mode);
+            }
         }
-    }
-    render_layer_with_overlay(ca->work_layer);
-    for (auto layer : layers) {
-        const auto &ld = ca->get_layer_display(layer);
-        if (layer >= 10000 && layer < 30000 && ld.visible) {
-            render_layer(layer);
+        render_layer_with_overlay(ca->work_layer, highlight_mode);
+        for (auto layer : layers) {
+            const auto &ld = ca->get_layer_display(layer);
+            if (layer >= 10000 && layer < 30000 && ld.visible) {
+                render_layer(layer, highlight_mode);
+            }
         }
     }
     glDisable(GL_STENCIL_TEST);
@@ -280,7 +303,7 @@ void TriangleRenderer::push()
     for (const auto &it : triangles) {
         const auto &tris = it.second;
         glBufferSubData(GL_ARRAY_BUFFER, ofs * sizeof(Triangle), tris.size() * sizeof(Triangle), tris.data());
-        std::map<Type, std::vector<unsigned int>> type_indices;
+        std::map<std::pair<Type, bool>, std::vector<unsigned int>> type_indices;
         unsigned int i = 0;
         for (const auto &tri : tris) {
             auto ty = Type::LINE;
@@ -299,7 +322,7 @@ void TriangleRenderer::push()
             else {
                 throw std::runtime_error("unknown triangle type");
             }
-            type_indices[ty].push_back(i + ofs);
+            type_indices[std::make_pair(ty, tri.flags & Triangle::FLAG_HIGHLIGHT)].push_back(i + ofs);
             i++;
         }
         for (const auto &it2 : type_indices) {

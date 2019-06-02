@@ -66,6 +66,12 @@ BoardPreferencesEditor::BoardPreferencesEditor(Preferences *prefs, BoardPreferen
         bind_widget(sw, board_preferences->drag_start_track);
         sw->property_active().signal_changed().connect([this] { preferences->signal_changed().emit(); });
     }
+    {
+        auto sw = Gtk::manage(new Gtk::Switch);
+        grid_attach_label_and_widget(this, "Highlight on top", sw, top);
+        bind_widget(sw, board_preferences->highlight_on_top);
+        sw->property_active().signal_changed().connect([this] { preferences->signal_changed().emit(); });
+    }
 }
 
 class ZoomPreferencesEditor : public Gtk::Grid {

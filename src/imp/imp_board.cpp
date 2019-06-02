@@ -221,6 +221,7 @@ void ImpBoard::apply_preferences()
         view_3d_window->set_smooth_zoom(preferences.zoom.smooth_zoom_3d);
         view_3d_window->set_appearance(preferences.canvas_layer.appearance);
     }
+    canvas->set_highlight_on_top(preferences.board.highlight_on_top);
     ImpLayer::apply_preferences();
 }
 

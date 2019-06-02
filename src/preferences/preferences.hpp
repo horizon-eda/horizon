@@ -31,6 +31,7 @@ public:
 class BoardPreferences {
 public:
     bool drag_start_track = true;
+    bool highlight_on_top = true;
 
     void load_from_json(const json &j);
     json serialize() const;
