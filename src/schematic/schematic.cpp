@@ -229,7 +229,11 @@ void Schematic::smash_symbol(Sheet *sheet, SchematicSymbol *sym)
         x.from_smash = true;
         x.overridden = true;
         x.placement = sym->placement;
-        x.placement.accumulate(it.second.placement);
+        Placement placement = it.second.placement;
+        if (sym->symbol.texts.count(it.first)) {
+            placement = sym->symbol.texts.at(it.first).placement;
+        }
+        x.placement.accumulate(placement);
         x.text = it.second.text;
         x.layer = it.second.layer;
         x.size = it.second.size;
