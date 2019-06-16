@@ -344,7 +344,11 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
     move_init(cursor_pos_canvas);
     update_tip();
     if (core.c) {
-        core.c->get_schematic()->expand(true);
+        auto sch = core.c->get_schematic();
+        sch->expand(true);
+        for (auto &it : sch->sheets) {
+            it.second.warnings.clear();
+        }
     }
     return ToolResponse();
 }
