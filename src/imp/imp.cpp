@@ -663,10 +663,11 @@ void ImpBase::run(int argc, char *argv[])
 
     canvas_update();
 
-    {
+    initial_view_all_conn = canvas->signal_size_allocate().connect([this](const Gtk::Allocation &alloc) {
         auto bbox = canvas->get_bbox();
         canvas->zoom_to_bbox(bbox.first, bbox.second);
-    }
+        initial_view_all_conn.disconnect();
+    });
 
     handle_cursor_move(Coordi()); // fixes label
 

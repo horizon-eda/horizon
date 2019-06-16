@@ -197,5 +197,7 @@ private:
     type_signal_action_sensitive s_signal_action_sensitive;
 
     GdkModifierType grid_fine_modifier = GDK_MOD1_MASK;
+
+    sigc::connection initial_view_all_conn;
 };
 } // namespace horizon
