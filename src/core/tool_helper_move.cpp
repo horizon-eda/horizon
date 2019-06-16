@@ -254,6 +254,7 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
             else {
                 sym->placement.mirror = !sym->placement.mirror;
             }
+            sym->symbol.apply_placement(sym->placement);
 
         } break;
 
