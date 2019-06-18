@@ -159,7 +159,7 @@ protected:
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
-    void handle_drag();
+    void handle_drag(bool ctrl);
     void update_selection_label();
     std::string get_tool_settings_filename(ToolID id);
 

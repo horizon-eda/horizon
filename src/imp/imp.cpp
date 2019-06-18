@@ -683,7 +683,7 @@ void ImpBase::run(int argc, char *argv[])
 
     canvas->signal_motion_notify_event().connect([this](GdkEventMotion *ev) {
         if (selection_for_drag_move.size()) {
-            handle_drag();
+            handle_drag(ev->state & Gdk::CONTROL_MASK);
         }
         return false;
     });
@@ -878,7 +878,7 @@ void ImpBase::handle_tool_action(const ActionConnection &conn)
     tool_begin(conn.tool_id);
 }
 
-void ImpBase::handle_drag()
+void ImpBase::handle_drag(bool ctrl)
 {
     auto pos = canvas->get_cursor_pos_win();
     auto delta = pos - cursor_pos_drag_begin;
@@ -889,7 +889,13 @@ void ImpBase::handle_drag()
             ToolArgs args;
             args.coords = cursor_pos_grid_drag_begin;
             args.selection = selection_for_drag_move;
-            ToolResponse r = core.r->tool_begin(ToolID::MOVE, args, imp_interface.get(), true);
+            ToolID tool_id;
+            if (ctrl)
+                tool_id = ToolID::DUPLICATE;
+            else
+                tool_id = ToolID::MOVE;
+
+            ToolResponse r = core.r->tool_begin(tool_id, args, imp_interface.get(), true);
             tool_process(r);
         }
         selection_for_drag_move.clear();

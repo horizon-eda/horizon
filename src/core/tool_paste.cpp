@@ -417,7 +417,7 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
             update_tip();
             return ToolResponse::fast();
         }
-        else if (args.type == ToolEventType::CLICK) {
+        else if (args.type == ToolEventType::CLICK || (is_transient && args.type == ToolEventType::CLICK_RELEASE)) {
             if (args.button == 1) {
                 merge_selected_junctions();
                 core.r->commit();
