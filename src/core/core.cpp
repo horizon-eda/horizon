@@ -172,6 +172,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
         return std::make_unique<ToolPlacePad>(this, tool_id);
 
     case ToolID::PASTE:
+    case ToolID::DUPLICATE:
         return std::make_unique<ToolPaste>(this, tool_id);
 
     case ToolID::ASSIGN_PART:

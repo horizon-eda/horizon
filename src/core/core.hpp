@@ -52,6 +52,7 @@ public:
 class ToolResponse {
 public:
     ToolID next_tool = ToolID::NONE;
+    std::unique_ptr<ToolData> data = nullptr;
     bool end_tool = false;
     int layer = 10000;
     bool fast_draw = false;
@@ -90,11 +91,12 @@ public:
     /**
      * If you want another Tool to be launched you've finished, use this one.
      */
-    static ToolResponse next(ToolID t)
+    static ToolResponse next(ToolID t, std::unique_ptr<ToolData> data = nullptr)
     {
         ToolResponse r;
         r.end_tool = true;
         r.next_tool = t;
+        r.data = std::move(data);
         return r;
     };
 };

@@ -6,6 +6,7 @@
 #include "imp/imp_interface.hpp"
 #include "pool/entity.hpp"
 #include "util/util.hpp"
+#include "buffer.hpp"
 #include <iostream>
 #include <gtkmm.h>
 
@@ -48,12 +49,14 @@ void ToolPaste::apply_shift(Coordi &c, const Coordi &cursor_pos)
 
 class ToolDataPaste : public ToolData {
 public:
-    std::string clipboard_text;
+    ToolDataPaste(const json &j) : paste_data(j)
+    {
+    }
+    json paste_data;
 };
 
-ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi &cursor_pos_canvas)
+ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canvas)
 {
-    auto j = json::parse(paste_data);
     Coordi cursor_pos = j.at("cursor_pos").get<std::vector<int64_t>>();
     printf("Core %p\n", core.r);
     core.r->selection.clear();
@@ -356,19 +359,33 @@ ToolResponse ToolPaste::begin_paste(const std::string &paste_data, const Coordi 
 ToolResponse ToolPaste::begin(const ToolArgs &args)
 {
     update_tip();
-    auto ref_clipboard = Gtk::Clipboard::get();
-    ref_clipboard->request_contents("imp-buffer", [this](const Gtk::SelectionData &sel_data) {
-        auto td = std::make_unique<ToolDataPaste>();
-        if (sel_data.gobj())
-            td->clipboard_text = sel_data.get_data_as_string();
-        imp->tool_update_data(std::move(td));
-    });
-    return ToolResponse();
+    if (auto data = dynamic_cast<ToolDataPaste *>(args.data.get())) {
+        paste_data = data->paste_data;
+        return begin_paste(paste_data, args.coords);
+    }
+
+    if (tool_id == ToolID::DUPLICATE) {
+        Buffer buffer(core.r);
+        buffer.load(args.selection);
+        paste_data = buffer.serialize();
+        paste_data["cursor_pos"] = args.coords.as_array();
+        return begin_paste(paste_data, args.coords);
+    }
+    else {
+        auto ref_clipboard = Gtk::Clipboard::get();
+        ref_clipboard->request_contents("imp-buffer", [this](const Gtk::SelectionData &sel_data) {
+            auto td = std::make_unique<ToolDataPaste>(nullptr);
+            if (sel_data.gobj())
+                td->paste_data = json::parse(sel_data.get_data_as_string());
+            imp->tool_update_data(std::move(td));
+        });
+        return ToolResponse();
+    }
 }
 
 void ToolPaste::update_tip()
 {
-    if (!data_received) { // wait for data
+    if (paste_data == nullptr) { // wait for data
         imp->tool_bar_set_tip("waiting for paste data");
         return;
     }
@@ -383,15 +400,15 @@ void ToolPaste::update_tip()
 
 ToolResponse ToolPaste::update(const ToolArgs &args)
 {
-    if (!data_received) { // wait for data
+    if (paste_data == nullptr) { // wait for data
         if (args.type == ToolEventType::DATA) {
             auto data = dynamic_cast<ToolDataPaste *>(args.data.get());
-            if (data->clipboard_text.size() == 0) {
+            if (data->paste_data == nullptr) {
                 imp->tool_bar_flash("Empty Buffer");
                 return ToolResponse::end();
             }
-            data_received = true;
-            return begin_paste(data->clipboard_text, args.coords);
+            paste_data = data->paste_data;
+            return begin_paste(paste_data, args.coords);
         }
     }
     else {
@@ -404,7 +421,7 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
             if (args.button == 1) {
                 merge_selected_junctions();
                 core.r->commit();
-                return ToolResponse::next(ToolID::PASTE);
+                return ToolResponse::next(tool_id, std::make_unique<ToolDataPaste>(paste_data));
             }
             else {
                 core.r->revert();

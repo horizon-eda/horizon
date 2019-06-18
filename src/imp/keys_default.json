@@ -1048,7 +1048,7 @@
             "tool": "NONE"
         },
         {
-            "action": "DUPLICATE",
+            "action": "TOOL",
             "keys": {
                 "1": [],
                 "16": [],
@@ -1064,7 +1064,7 @@
                 "4": [],
                 "8": []
             },
-            "tool": "NONE"
+            "tool": "DUPLICATE"
         },
         {
             "action": "PLACE_PART",

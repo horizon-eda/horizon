@@ -10,7 +10,7 @@ ClipboardManager::ClipboardManager(Core *co) : buffer(co), core(co)
 void ClipboardManager::copy(std::set<SelectableRef> selection, const Coordi &cp)
 {
     std::cout << "copy" << std::endl;
-    buffer.load_from_symbol(selection);
+    buffer.load(selection);
     cursor_pos = cp;
 
     Glib::RefPtr<Gtk::Clipboard> refClipboard = Gtk::Clipboard::get();

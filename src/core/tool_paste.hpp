@@ -2,6 +2,7 @@
 #include "core.hpp"
 #include "tool_helper_merge.hpp"
 #include "tool_helper_move.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 
@@ -12,15 +13,22 @@ public:
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override
     {
-        return true;
+        if (tool_id == ToolID::PASTE)
+            return true;
+        else
+            return core.r->selection.size();
+    }
+    bool is_specific() override
+    {
+        return tool_id == ToolID::DUPLICATE;
     }
 
 private:
     void fix_layer(int &la);
     void apply_shift(Coordi &c, const Coordi &cursor_pos);
     Coordi shift;
-    bool data_received = false;
-    ToolResponse begin_paste(const std::string &paste_data, const Coordi &cursor_pos);
+    json paste_data;
+    ToolResponse begin_paste(const json &j, const Coordi &cursor_pos);
     void update_tip();
 };
 } // namespace horizon

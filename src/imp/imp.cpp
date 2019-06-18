@@ -344,11 +344,6 @@ void ImpBase::run(int argc, char *argv[])
     connect_action(ActionID::COPY,
                    [this](const auto &a) { clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos()); });
 
-    connect_action(ActionID::DUPLICATE, [this](const auto &a) {
-        clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos());
-        this->tool_begin(ToolID::PASTE);
-    });
-
     connect_action(ActionID::HELP, [this](const auto &a) { key_sequence_dialog->show(); });
 
     connect_action(ActionID::VIEW_ALL, [this](const auto &a) {
@@ -1070,7 +1065,6 @@ void ImpBase::update_action_sensitivity()
     set_action_sensitive(make_action(ActionID::REDO), core.r->can_redo());
     auto sel = canvas->get_selection();
     set_action_sensitive(make_action(ActionID::COPY), sel.size() > 0);
-    set_action_sensitive(make_action(ActionID::DUPLICATE), sel.size() > 0);
 }
 
 void ImpBase::add_hamburger_menu()
@@ -1445,7 +1439,7 @@ void ImpBase::handle_maybe_drag()
     }
 }
 
-void ImpBase::tool_process(const ToolResponse &resp)
+void ImpBase::tool_process(ToolResponse &resp)
 {
     if (!core.r->tool_is_active()) {
         main_window->tool_hint_label->set_text(">");
@@ -1469,6 +1463,7 @@ void ImpBase::tool_process(const ToolResponse &resp)
         ToolArgs args;
         args.coords = canvas->get_cursor_pos();
         args.keep_selection = true;
+        args.data = std::move(resp.data);
         ToolResponse r = core.r->tool_begin(resp.next_tool, args, imp_interface.get());
         tool_process(r);
     }

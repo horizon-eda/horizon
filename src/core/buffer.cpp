@@ -34,7 +34,7 @@ void Buffer::clear()
     dimensions.clear();
 }
 
-void Buffer::load_from_symbol(std::set<SelectableRef> selection)
+void Buffer::load(std::set<SelectableRef> selection)
 {
     clear();
     std::set<SelectableRef> new_sel;

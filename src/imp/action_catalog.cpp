@@ -75,9 +75,9 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::COPY, ToolID::NONE},
          {"Copy", ActionGroup::CLIPBOARD, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_SPECIFIC}},
 
-        {{ActionID::DUPLICATE, ToolID::NONE},
+        {{ActionID::TOOL, ToolID::DUPLICATE},
          {"Duplicate", ActionGroup::CLIPBOARD, ActionCatalogItem::AVAILABLE_EVERYWHERE,
-          ActionCatalogItem::FLAGS_SPECIFIC}},
+          ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::SAVE, ToolID::NONE},
          {"Save", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE, ActionCatalogItem::FLAGS_DEFAULT}},
@@ -727,7 +727,6 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(UNDO),
         ACTION_LUT_ITEM(REDO),
         ACTION_LUT_ITEM(COPY),
-        ACTION_LUT_ITEM(DUPLICATE),
         ACTION_LUT_ITEM(PREFERENCES),
         ACTION_LUT_ITEM(PLACE_PART),
         ACTION_LUT_ITEM(HELP),
@@ -914,5 +913,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(DRAW_CONNECTION_LINE),
         TOOL_LUT_ITEM(BACKANNOTATE_CONNECTION_LINES),
         TOOL_LUT_ITEM(IMPORT_KICAD_PACKAGE),
+        TOOL_LUT_ITEM(DUPLICATE),
 };
 } // namespace horizon

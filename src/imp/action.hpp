@@ -13,7 +13,6 @@ enum class ActionID {
     UNDO,
     REDO,
     COPY,
-    DUPLICATE,
     PLACE_PART,
     LAYER_UP,
     LAYER_DOWN,

@@ -29,7 +29,7 @@ class Buffer {
 public:
     Buffer(class Core *co);
     void clear();
-    void load_from_symbol(std::set<SelectableRef> selection);
+    void load(std::set<SelectableRef> selection);
 
     std::map<UUID, Text> texts;
     std::map<UUID, Junction> junctions;
