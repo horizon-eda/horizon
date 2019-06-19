@@ -675,25 +675,16 @@ $(OBJDIR)/%.o: %.cpp
 	$(ECHO) " $@"
 	$(QUIET)$(CXX) -c $(INC) $(CXXFLAGS) $< -o $@
 
+$(OBJ_ROUTER): INC += $(INC_ROUTER)
+
+$(OBJ_OCE): INC += $(INC_OCE)
+
 $(PICOBJDIR)/%.oshared: %.cpp
 	$(QUIET)$(MKDIR) $(dir $@)
 	$(ECHO) " $@"
 	$(QUIET)$(CXX) -c $(INC) $(CXXFLAGS) -fPIC $< -o $@
 
-$(OBJ_ROUTER): $(OBJDIR)/%.o: %.cpp
-	$(QUIET)$(MKDIR) $(dir $@)
-	$(ECHO) " $@"
-	$(QUIET)$(CXX) -c $(INC) $(INC_ROUTER) $(CXXFLAGS) $< -o $@
-
-$(OBJ_OCE): $(OBJDIR)/%.o: %.cpp
-	$(QUIET)$(MKDIR) $(dir $@)
-	$(ECHO) " $@"
-	$(QUIET)$(CXX) -c $(INC) $(INC_OCE) $(CXXFLAGS) $< -o $@
-
-$(OBJ_PYTHON): $(PICOBJDIR)/%.oshared: %.cpp
-	$(QUIET)$(MKDIR) $(dir $@)
-	$(ECHO) " $@"
-	$(QUIET)$(CXX) -c -fPIC $(INC) $(INC_PYTHON) $(CXXFLAGS) $< -o $@
+$(OBJ_PYTHON): INC += $(INC_PYTHON)
 
 $(OBJ_RES): $(OBJDIR)/%.res: %.rc
 	$(QUIET)$(MKDIR) $(dir $@)
