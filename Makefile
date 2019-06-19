@@ -590,6 +590,7 @@ SRC_SHARED = $(SRC_COMMON) \
 SRC_SHARED_GEN = $(SRC_COMMON_GEN)
 
 OBJDIR           = $(BUILDDIR)/obj
+PICOBJDIR        = $(BUILDDIR)/picobj
 GENDIR           = $(BUILDDIR)/gen
 MKDIR            = mkdir -p
 QUIET            = @
@@ -599,11 +600,11 @@ ECHO             = @echo
 OBJ_ALL          = $(addprefix $(OBJDIR)/,$(SRC_ALL:.cpp=.o))
 OBJ_ROUTER       = $(addprefix $(OBJDIR)/,$(SRC_ROUTER:.cpp=.o))
 OBJ_COMMON       = $(addprefix $(OBJDIR)/,$(SRC_COMMON:.cpp=.o))
-OBJ_COMMON      += $(SRC_COMMON_GEN:.cpp=.o)
+OBJ_COMMON      += $(addprefix $(OBJDIR)/,$(SRC_COMMON_GEN:.cpp=.o))
 OBJ_OCE          = $(addprefix $(OBJDIR)/,$(SRC_OCE:.cpp=.o))
-OBJ_PYTHON       = $(addprefix $(OBJDIR)/,$(SRC_PYTHON:.cpp=.o))
-OBJ_SHARED       = $(addprefix $(OBJDIR)/,$(SRC_SHARED:.cpp=.oshared))
-OBJ_SHARED      += $(SRC_SHARED_GEN:.cpp=.oshared)
+OBJ_PYTHON       = $(addprefix $(PICOBJDIR)/,$(SRC_PYTHON:.cpp=.oshared))
+OBJ_SHARED       = $(addprefix $(PICOBJDIR)/,$(SRC_SHARED:.cpp=.oshared))
+OBJ_SHARED      += $(addprefix $(PICOBJDIR)/,$(SRC_SHARED_GEN:.cpp=.oshared))
 
 OBJ_IMP          = $(addprefix $(OBJDIR)/,$(SRC_IMP:.cpp=.o))
 OBJ_POOL_UTIL    = $(addprefix $(OBJDIR)/,$(SRC_POOL_UTIL:.cpp=.o))
@@ -669,22 +670,12 @@ $(BUILDDIR)/horizon.so: $(OBJ_PYTHON) $(OBJ_SHARED)
 	$(ECHO) " $@"
 	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) python3 glibmm-2.4 giomm-2.4) -lpodofo -shared -o $@
 
-$(OBJ_ALL): $(OBJDIR)/%.o: %.cpp
+$(OBJDIR)/%.o: %.cpp
 	$(QUIET)$(MKDIR) $(dir $@)
 	$(ECHO) " $@"
 	$(QUIET)$(CXX) -c $(INC) $(CXXFLAGS) $< -o $@
 
-$(GENDIR)/%.o: $(GENDIR)/%.cpp
-	$(QUIET)$(MKDIR) $(dir $@)
-	$(ECHO) " $@"
-	$(QUIET)$(CXX) -c $(INC) $(CXXFLAGS) $< -o $@
-
-$(OBJDIR)/%.oshared: %.cpp
-	$(QUIET)$(MKDIR) $(dir $@)
-	$(ECHO) " $@"
-	$(QUIET)$(CXX) -c $(INC) $(CXXFLAGS) -fPIC $< -o $@
-
-$(GENDIR)/%.oshared: $(GENDIR)/%.cpp
+$(PICOBJDIR)/%.oshared: %.cpp
 	$(QUIET)$(MKDIR) $(dir $@)
 	$(ECHO) " $@"
 	$(QUIET)$(CXX) -c $(INC) $(CXXFLAGS) -fPIC $< -o $@
@@ -699,7 +690,7 @@ $(OBJ_OCE): $(OBJDIR)/%.o: %.cpp
 	$(ECHO) " $@"
 	$(QUIET)$(CXX) -c $(INC) $(INC_OCE) $(CXXFLAGS) $< -o $@
 
-$(OBJ_PYTHON): $(OBJDIR)/%.o: %.cpp
+$(OBJ_PYTHON): $(PICOBJDIR)/%.oshared: %.cpp
 	$(QUIET)$(MKDIR) $(dir $@)
 	$(ECHO) " $@"
 	$(QUIET)$(CXX) -c -fPIC $(INC) $(INC_PYTHON) $(CXXFLAGS) $< -o $@
@@ -710,7 +701,8 @@ $(OBJ_RES): $(OBJDIR)/%.res: %.rc
 
 clean: clean_router clean_oce clean_res
 	$(RM) $(OBJ_ALL) $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-pool $(BUILDDIR)/horizon-prj $(BUILDDIR)/horizon-pool-mgr $(BUILDDIR)/horizon-prj-mgr $(BUILDDIR)/horizon-pgm-test $(BUILDDIR)/horizon-gen-pkg $(BUILDDIR)/horizon-eda $(OBJ_ALL:.o=.d) $(GENDIR)/resources.cpp $(GENDIR)/version_gen.cpp
-	$(RM) $(GENDIR)/*.d $(GENDIR)/*.o $(GENDIR)/*.oshared
+	$(RM) $(BUILDDIR)/horizon.so
+	$(RM) $(OBJ_SHARED) $(OBJ_PYTHON) $(OBJ_SHARED:.oshared=.d) $(OBJ_PYTHON:.oshared=.d)
 
 clean_router:
 	$(RM) $(OBJ_ROUTER) $(OBJ_ROUTER:.o=.d)
