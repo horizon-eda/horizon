@@ -35,3 +35,4 @@ docs
 __pycache__
 src/preferences/color_presets.json
 src/imp/layer_help.json
+build
