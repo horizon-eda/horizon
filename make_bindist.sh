@@ -2,7 +2,7 @@
 DISTDIR=dist/horizon
 rm -rf dist
 mkdir -p $DISTDIR
-cp horizon-* $DISTDIR
+cp build/horizon-* $DISTDIR
 strip $DISTDIR/horizon-*
 LIBS=(
 	libstdc++-6.dll\
