@@ -520,14 +520,14 @@ void Board::expand(bool careful)
         it.second.junction->layer = 10000;
         it.second.padstack = *it.second.vpp_padstack;
         ParameterSet ps_via = it.second.parameter_set;
-        ps_via[ParameterID::VIA_SOLDER_MASK_EXPANSION] = params->via_solder_mask_expansion;
+        ps_via.emplace(ParameterID::VIA_SOLDER_MASK_EXPANSION, params->via_solder_mask_expansion);
         it.second.padstack.apply_parameter_set(ps_via);
         it.second.padstack.expand_inner(n_inner_layers);
     }
     for (auto &it : holes) {
         it.second.padstack = *it.second.pool_padstack;
         ParameterSet ps_hole = it.second.parameter_set;
-        ps_hole[ParameterID::HOLE_SOLDER_MASK_EXPANSION] = params->hole_solder_mask_expansion;
+        ps_hole.emplace(ParameterID::HOLE_SOLDER_MASK_EXPANSION, params->hole_solder_mask_expansion);
         it.second.padstack.apply_parameter_set(ps_hole);
         it.second.padstack.expand_inner(n_inner_layers);
         if (it.second.padstack.type == Padstack::Type::HOLE && it.second.net == nullptr) {
