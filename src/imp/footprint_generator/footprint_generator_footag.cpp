@@ -1,0 +1,45 @@
+#include "footprint_generator_footag.hpp"
+#include "footag/display.hpp"
+
+namespace horizon {
+FootprintGeneratorFootag::FootprintGeneratorFootag(CorePackage *c)
+    : Glib::ObjectBase(typeid(FootprintGeneratorFootag)), core(c), sidebar(),
+      separator(Gtk::Orientation::ORIENTATION_VERTICAL), stack()
+{
+    add(sidebar);
+    add(separator);
+    add(stack);
+
+    stack.set_transition_type(Gtk::StackTransitionType::STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);
+    sidebar.set_stack(stack);
+
+    for (int type = 0; type < FOOTAG_TYPE_NUM; type++) {
+        auto ti = footag_get_typeinfo((enum footag_type)type);
+        if (!ti) {
+            continue;
+        }
+        auto ed = Gtk::manage(new FootagDisplay(c, (enum footag_type)type));
+        if (ed->isopen()) {
+            stack.add(*ed, ti->name, ti->name);
+            ed->show();
+        }
+    }
+
+    {
+        auto ed = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
+        auto bu = Gtk::manage(new Gtk::Button("box and button"));
+        ed->pack_start(*bu, false, false, 0);
+        stack.add(*ed, "extra", "Extra");
+        ed->show();
+    }
+}
+
+bool FootprintGeneratorFootag::generate(void)
+{
+    auto gen = dynamic_cast<FootagDisplay *>(stack.get_visible_child());
+    if (gen) {
+        return gen->generate();
+    }
+    return false;
+}
+} // namespace horizon
