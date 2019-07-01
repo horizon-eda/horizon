@@ -4,6 +4,7 @@
 #include "footprint_generator_grid.hpp"
 #include "footprint_generator_quad.hpp"
 #include "footprint_generator_single.hpp"
+#include "footprint_generator_footag.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include <pangomm/layout.h>
 
@@ -16,11 +17,18 @@ FootprintGeneratorWindow::FootprintGeneratorWindow(BaseObjectType *cobject, cons
 
 void FootprintGeneratorWindow::update_can_generate()
 {
-    auto w = dynamic_cast<FootprintGeneratorBase *>(stack->get_visible_child());
-    if (w)
-        generate_button->set_sensitive(w->property_can_generate());
-    else
-        generate_button->set_sensitive(false);
+    bool sens = false;
+    {
+        auto w = dynamic_cast<FootprintGeneratorBase *>(stack->get_visible_child());
+        if (w)
+            sens = w->property_can_generate();
+    }
+    {
+        auto w = dynamic_cast<FootprintGeneratorFootag *>(stack->get_visible_child());
+        if (w)
+            sens = true;
+    }
+    generate_button->set_sensitive(sens);
 }
 
 FootprintGeneratorWindow *FootprintGeneratorWindow::create(Gtk::Window *p, CorePackage *c)
@@ -36,6 +44,11 @@ FootprintGeneratorWindow *FootprintGeneratorWindow::create(Gtk::Window *p, CoreP
     w->set_transient_for(*p);
     w->core = c;
 
+    {
+        auto gen = Gtk::manage(new FootprintGeneratorFootag(c));
+        gen->show();
+        w->stack->add(*gen, "footag", "IPC-7351B");
+    }
     {
         auto gen = Gtk::manage(new FootprintGeneratorDual(c));
         gen->show();
@@ -66,13 +79,26 @@ FootprintGeneratorWindow *FootprintGeneratorWindow::create(Gtk::Window *p, CoreP
     }
     w->stack->property_visible_child().signal_changed().connect(
             sigc::mem_fun(w, &FootprintGeneratorWindow::update_can_generate));
+    w->update_can_generate();
     w->generate_button->signal_clicked().connect([w] {
-        auto gen = dynamic_cast<FootprintGeneratorBase *>(w->stack->get_visible_child());
-        if (gen) {
-            if (gen->generate()) {
-                w->core->rebuild();
-                w->signal_generated().emit();
-                w->hide();
+        {
+            auto gen = dynamic_cast<FootprintGeneratorBase *>(w->stack->get_visible_child());
+            if (gen) {
+                if (gen->generate()) {
+                    w->core->rebuild();
+                    w->signal_generated().emit();
+                    w->hide();
+                }
+            }
+        }
+        {
+            auto gen = dynamic_cast<FootprintGeneratorFootag *>(w->stack->get_visible_child());
+            if (gen) {
+                if (gen->generate()) {
+                    w->core->rebuild();
+                    w->signal_generated().emit();
+                    w->hide();
+                }
             }
         }
     });
