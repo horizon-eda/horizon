@@ -8,6 +8,7 @@ public:
     void load(ObjectType ty, const UUID &uu, const Placement &pl = Placement(), bool fit = true);
     void load_symbol(const UUID &uu, const Placement &pl = Placement(), bool fit = true, const UUID &uu_part = UUID(),
                      const UUID &uu_gate = UUID());
+    void load(Package &pkg, bool fit = true);
 
 private:
     class Pool &pool;

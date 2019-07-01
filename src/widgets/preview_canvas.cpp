@@ -62,16 +62,7 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
 
     case ObjectType::PACKAGE: {
         Package pkg = *pool.get_package(uu);
-        for (const auto &la : pkg.get_layers()) {
-            auto ld = LayerDisplay::Mode::OUTLINE;
-            if (la.second.copper || la.first == BoardLayers::TOP_SILKSCREEN
-                || la.first == BoardLayers::BOTTOM_SILKSCREEN)
-                ld = LayerDisplay::Mode::FILL_ONLY;
-            set_layer_display(la.first, LayerDisplay(true, ld));
-        }
-        pkg.apply_parameter_set({});
-        property_layer_opacity() = 75;
-        update(pkg, false);
+        load(pkg, false);
         pad = 1_mm;
     } break;
 
@@ -108,5 +99,31 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
     bb.second.y += pad;
     if (fit)
         zoom_to_bbox(bb.first, bb.second);
+}
+
+void PreviewCanvas::load(Package &pkg, bool fit)
+{
+    for (const auto &la : pkg.get_layers()) {
+        auto ld = LayerDisplay::Mode::OUTLINE;
+        if (la.second.copper || la.first == BoardLayers::TOP_SILKSCREEN || la.first == BoardLayers::BOTTOM_SILKSCREEN)
+            ld = LayerDisplay::Mode::FILL_ONLY;
+        set_layer_display(la.first, LayerDisplay(true, ld));
+    }
+    pkg.apply_parameter_set({});
+    property_layer_opacity() = 75;
+    update(pkg, false);
+
+    if (!fit) {
+        return;
+    }
+    int64_t pad = .1_mm;
+    auto bb = get_bbox(true);
+
+    bb.first.x -= pad;
+    bb.first.y -= pad;
+
+    bb.second.x += pad;
+    bb.second.y += pad;
+    zoom_to_bbox(bb.first, bb.second);
 }
 } // namespace horizon
