@@ -325,9 +325,9 @@ FootagDisplay::FootagDisplay(CorePackage *c, enum footag_type type) : core(c), a
 static const horizon::UUID STACKLOOKUP[] = {
         [FOOTAG_PADSTACK_SMD_RECT] = "3846f4bf-7acf-403a-bc36-771ec675eac9",
         [FOOTAG_PADSTACK_SMD_RRECT] = "8e762581-e1b1-4fb4-81d3-7f8a1cabb97f",
+        [FOOTAG_PADSTACK_SMD_CIRC] = "244b0e3c-02eb-4627-9469-47c3a379f814",
         [FOOTAG_PADSTACK_SMD_OBLONG] = "00000000-0000-0000-0000-000000000000",
         [FOOTAG_PADSTACK_SMD_DSHAPE] = "d2aad97e-e7b2-40f1-9ffe-2bc7e6df4c56",
-        [FOOTAG_PADSTACK_SMD_CIRC] = "244b0e3c-02eb-4627-9469-47c3a379f814",
         [FOOTAG_PADSTACK_TH_ROUND] = "296cf69b-9d53-45e4-aaab-4aedf4087d3a",
         [FOOTAG_PADSTACK_TH_ROUND_RPAD] = "982142aa-2883-4fd0-9b0b-37eb5a37dd35",
         [FOOTAG_PADSTACK_NONE] = "00000000-0000-0000-0000-000000000000",
