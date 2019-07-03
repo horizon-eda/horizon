@@ -109,6 +109,7 @@ void PreviewCanvas::load(Package &pkg, bool fit)
             ld = LayerDisplay::Mode::FILL_ONLY;
         set_layer_display(la.first, LayerDisplay(true, ld));
     }
+    set_layer_display(10000, LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
     pkg.apply_parameter_set({});
     property_layer_opacity() = 75;
     update(pkg, false);

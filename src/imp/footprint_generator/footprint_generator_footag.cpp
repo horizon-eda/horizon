@@ -10,7 +10,7 @@ FootprintGeneratorFootag::FootprintGeneratorFootag(CorePackage *c)
     add(separator);
     add(stack);
 
-    stack.set_transition_type(Gtk::StackTransitionType::STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);
+    stack.set_transition_type(Gtk::StackTransitionType::STACK_TRANSITION_TYPE_CROSSFADE);
     sidebar.set_stack(stack);
 
     for (int type = 0; type < FOOTAG_TYPE_NUM; type++) {
@@ -18,19 +18,12 @@ FootprintGeneratorFootag::FootprintGeneratorFootag(CorePackage *c)
         if (!ti) {
             continue;
         }
-        auto ed = Gtk::manage(new FootagDisplay(c, (enum footag_type)type));
+        auto ed = FootagDisplay::create(c, (enum footag_type)type);
         if (ed->isopen()) {
             stack.add(*ed, ti->name, ti->name);
             ed->show();
         }
-    }
-
-    {
-        auto ed = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
-        auto bu = Gtk::manage(new Gtk::Button("box and button"));
-        ed->pack_start(*bu, false, false, 0);
-        stack.add(*ed, "extra", "Extra");
-        ed->show();
+        ed->unreference();
     }
 }
 

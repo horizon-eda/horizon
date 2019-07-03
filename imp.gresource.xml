@@ -40,6 +40,7 @@
     <file>icons/256x256/apps/horizon-eda.png</file>
 
     <file>imp/footprint_generator/footprint_generator.ui</file>
+    <file>imp/footprint_generator/footag/footag.ui</file>
     <file>imp/footprint_generator/dual.svg</file>
     <file>imp/footprint_generator/single.svg</file>
     <file>imp/footprint_generator/quad.svg</file>

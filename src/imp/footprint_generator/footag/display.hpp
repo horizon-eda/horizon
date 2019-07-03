@@ -1,5 +1,4 @@
 #pragma once
-#include "help_box.hpp"
 #include "core/core_package.hpp"
 #include <gtkmm.h>
 extern "C" {
@@ -8,16 +7,19 @@ extern "C" {
 namespace horizon {
 class FootagDisplay : public Gtk::Box {
 public:
-    FootagDisplay(CorePackage *c, enum footag_type type);
+    FootagDisplay(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, CorePackage *c, enum footag_type type);
+    static FootagDisplay *create(CorePackage *c, enum footag_type type);
+
     ~FootagDisplay() override;
     bool generate();
     bool isopen();
 
 private:
     CorePackage *core;
-    Gtk::CheckButton autofit;
-    FootagHelpBox hintbox;
-    FootagHelpBox refbox;
+    Gtk::Label *reference_label = nullptr;
+    Gtk::Label *reference_title = nullptr;
+    Gtk::CheckButton *autofit;
+    Gtk::Label *hint_label = nullptr;
     Package ppkg;
     class PreviewCanvas *canvas_package = nullptr;
 

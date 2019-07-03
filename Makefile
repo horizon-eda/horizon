@@ -301,7 +301,6 @@ SRC_IMP = \
 	src/imp/footprint_generator/svg_overlay.cpp\
 	src/imp/footprint_generator/footprint_generator_footag.cpp\
 	src/imp/footprint_generator/footag/display.cpp\
-	src/imp/footprint_generator/footag/help_box.cpp\
 	src/imp/imp_interface.cpp\
 	src/imp/parameter_window.cpp\
 	src/widgets/pool_browser_part.cpp\
