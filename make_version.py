@@ -17,6 +17,7 @@ const char *Version::commit = "$commit";
 gitversion = ""
 if os.path.isdir(".git"):
 	gitversion = subprocess.check_output(['git', 'log', '-1', '--pretty=format:%h %ci %s']).decode()
+	gitversion = gitversion.replace("\"", "\\\"")
 
 outfile = sys.argv[1]
 with open(outfile, "w") as fi:
