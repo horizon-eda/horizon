@@ -40,10 +40,6 @@ static const struct footag_param temp[] = {
         PARAM_T(LEAD_W,  "Width",       "b",  0.15, 0.25),
         PARAM_L(LEAD_PB, "Pullback",    "L1", 0.075),
         PARAM_CALC_IPC7351B_HIRES,
-        PARAM_TOPIC("Generate"), \
-        PARAM_E(CALC_ROUND, "Round-off", "-", 3, 4, \
-                "None", "0.01 mm", "0.02 mm", "0.05 mm" \
-        ),
         PARAM_PADSTACK_SMD_RECTS,
         PARAM_TERM,
 };
