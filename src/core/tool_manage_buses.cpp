@@ -52,7 +52,7 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
         r = imp->dialogs.edit_schematic_properties(core.c->get_schematic(), core.c->m_pool);
     }
     else if (tool_id == ToolID::EDIT_STACKUP) {
-        r = imp->dialogs.edit_stackup(core.b->get_board());
+        r = imp->dialogs.edit_stackup(core.b);
     }
     else if (tool_id == ToolID::MANAGE_POWER_NETS) {
         r = imp->dialogs.manage_power_nets(core.c->get_block());

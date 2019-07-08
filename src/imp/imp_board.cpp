@@ -390,6 +390,7 @@ void ImpBoard::construct()
 
     fab_output_window = FabOutputWindow::create(main_window, &core_board, project_dir);
     core.r->signal_tool_changed().connect([this](ToolID t) { fab_output_window->set_can_generate(t == ToolID::NONE); });
+    core.r->signal_rebuilt().connect([this] { fab_output_window->reload_layers(); });
     fab_output_window->signal_changed().connect([this] { core_board.set_needs_save(); });
 
     view_3d_window = View3DWindow::create(core_board.get_board(), pool.get());

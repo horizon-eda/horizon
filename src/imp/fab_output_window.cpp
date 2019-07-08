@@ -102,6 +102,16 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
     sg_layer_name = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
+    reload_layers();
+}
+
+void FabOutputWindow::reload_layers()
+{
+    {
+        auto children = gerber_layers_box->get_children();
+        for (auto ch : children)
+            delete ch;
+    }
     std::vector<FabOutputSettings::GerberLayer *> layers_sorted;
     layers_sorted.reserve(settings->layers.size());
     for (auto &la : settings->layers) {

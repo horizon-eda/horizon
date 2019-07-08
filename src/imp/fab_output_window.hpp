@@ -17,6 +17,7 @@ public:
     static FabOutputWindow *create(Gtk::Window *p, class CoreBoard *c, const std::string &project_dir);
 
     void set_can_generate(bool v);
+    void reload_layers();
 
 private:
     class CoreBoard *core;

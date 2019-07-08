@@ -9,9 +9,10 @@ class EditStackupDialog : public Gtk::Dialog {
     friend class StackupLayerEditor;
 
 public:
-    EditStackupDialog(Gtk::Window *parent, class Board *brd);
+    EditStackupDialog(Gtk::Window *parent, class CoreBoard *core);
 
 private:
+    class CoreBoard *core = nullptr;
     class Board *board = nullptr;
     Gtk::ListBox *lb = nullptr;
     Gtk::SpinButton *sp_n_inner_layers = nullptr;

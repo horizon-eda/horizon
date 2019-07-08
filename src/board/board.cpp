@@ -362,6 +362,7 @@ void Board::set_n_inner_layers(unsigned int n)
         stackup.emplace(-j, -j);
     }
     map_erase_if(stackup, [this](const auto &x) { return layers.count(x.first) == 0; });
+    fab_output_settings.update_for_board(this);
 }
 
 void Board::flip_package_layer(int &layer) const

@@ -6,6 +6,7 @@
 #include "board/board_layers.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "util/util.hpp"
+#include "core/core_board.hpp"
 
 namespace horizon {
 
@@ -62,9 +63,9 @@ StackupLayerEditor::StackupLayerEditor(EditStackupDialog *parent, int ly, bool c
 }
 
 
-EditStackupDialog::EditStackupDialog(Gtk::Window *parent, Board *brd)
+EditStackupDialog::EditStackupDialog(Gtk::Window *parent, CoreBoard *c)
     : Gtk::Dialog("Edit Stackup", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
-      board(brd)
+      core(c), board(core->get_board())
 {
     add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
     auto ok_button = add_button("OK", Gtk::ResponseType::RESPONSE_OK);
@@ -173,5 +174,6 @@ void EditStackupDialog::ok_clicked()
     map_erase_if(board->polygons, [this](const auto &x) { return board->get_layers().count(x.second.layer) == 0; });
     map_erase_if(board->lines, [this](const auto &x) { return board->get_layers().count(x.second.layer) == 0; });
     map_erase_if(board->texts, [this](const auto &x) { return board->get_layers().count(x.second.layer) == 0; });
+    core->get_fab_output_settings()->update_for_board(board);
 }
 } // namespace horizon
