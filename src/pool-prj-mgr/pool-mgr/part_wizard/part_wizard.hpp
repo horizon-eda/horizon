@@ -101,7 +101,7 @@ private:
     void create_pad_editors();
     void autolink_pads();
     void link_pads(const std::deque<class PadEditor *> &eds);
-    bool frozen = true;
+    bool frozen = false;
 
     enum class Mode { ASSIGN, EDIT };
 
