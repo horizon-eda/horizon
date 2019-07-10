@@ -11,6 +11,7 @@ GateEditorWizard::GateEditorWizard(BaseObjectType *cobject, const Glib::RefPtr<G
     : Gtk::Box(cobject), parent(pa), gate(g)
 {
     x->get_widget("gate_label", gate_label);
+    x->get_widget("gate_symbol_label", gate_symbol_label);
     x->get_widget("gate_edit_symbol", edit_symbol_button);
     x->get_widget("gate_suffix", suffix_entry);
     x->get_widget("gate_unit_name", unit_name_entry);
@@ -60,6 +61,18 @@ std::string GateEditorWizard::get_suffixed_filename_from_part()
     return rel;
 }
 
+void GateEditorWizard::update_symbol_pins(unsigned int n_mapped)
+{
+    if (n_mapped == 0) {
+        gate_symbol_label->set_text("no pins mapped in symbol");
+    }
+    else if (n_mapped == gate->unit->pins.size()) {
+        gate_symbol_label->set_text("all pins mapped in symbol");
+    }
+    else {
+        gate_symbol_label->set_text(format_m_of_n(n_mapped, gate->unit->pins.size()) + " pins mapped in symbol");
+    }
+}
 
 GateEditorWizard *GateEditorWizard::create(Gate *g, PartWizard *pa)
 {

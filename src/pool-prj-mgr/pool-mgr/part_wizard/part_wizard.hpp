@@ -125,7 +125,9 @@ private:
     void set_mode(Mode mo);
     void prepare_edit();
     std::map<std::string, Unit> units;
-    std::map<UUID, UUID> symbols;
+    std::map<UUID, UUID> symbols;                    // unit UUID -> symbol UUID
+    std::map<UUID, unsigned int> symbol_pins_mapped; // unit UUID -> pins mapped
+    void update_symbol_pins_mapped();
 
     std::map<std::string, class PoolProjectManagerProcess *> processes;
 

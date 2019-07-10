@@ -647,6 +647,7 @@ void PartWizard::prepare_edit()
                 proc->signal_exited().connect([this, symbol_filename](int status, bool modified) {
                     processes.erase(symbol_filename);
                     update_can_finish();
+                    update_symbol_pins_mapped();
                 });
                 update_can_finish();
             });
@@ -654,6 +655,8 @@ void PartWizard::prepare_edit()
             ed->unreference();
         }
     }
+
+    update_symbol_pins_mapped();
 }
 
 std::map<std::pair<std::string, std::string>, std::set<class PadEditor *>> PartWizard::get_pin_names()
@@ -793,6 +796,26 @@ void PartWizard::update_part()
         auto filename = pool->get_tmp_filename(ObjectType::UNIT, it.second.uuid);
         save_json_to_file(filename, it.second.serialize());
     }
+}
+
+void PartWizard::update_symbol_pins_mapped()
+{
+    for (const auto &it : symbols) {
+        const auto &unit_uu = it.first;
+        auto symbol_filename = pool->get_tmp_filename(ObjectType::SYMBOL, it.second);
+        auto sym = Symbol::new_from_file(symbol_filename, *pool);
+        auto n_pins = sym.pins.size();
+        symbol_pins_mapped[unit_uu] = n_pins;
+    }
+
+    auto children = edit_left_box->get_children();
+    for (auto ch : children) {
+        if (auto ed = dynamic_cast<GateEditorWizard *>(ch)) {
+            const auto &unit_uu = ed->gate->unit->uuid;
+            ed->update_symbol_pins(symbol_pins_mapped.at(unit_uu));
+        }
+    }
+    update_steps();
 }
 
 void PartWizard::autofill()
@@ -958,6 +981,17 @@ void PartWizard::update_steps()
         return 0;
     };
 
+    bool all_symbol_pins_mapped = true;
+    for (const auto &it : units) {
+        unsigned int n_mapped = 0;
+        if (symbol_pins_mapped.count(it.second.uuid)) {
+            n_mapped = symbol_pins_mapped.at(it.second.uuid);
+        }
+        if (n_mapped < it.second.pins.size()) {
+            all_symbol_pins_mapped = false;
+            break;
+        }
+    }
 
     if (entity.gates.size() == 1) {
         if (mpn_valid) {
@@ -966,12 +1000,16 @@ void PartWizard::update_steps()
                 progress = 2;
                 if (valid) {
                     progress = 3;
+                    if (all_symbol_pins_mapped) {
+                        progress = 4;
+                    }
                 }
             }
         }
         add_step("Enter MPN (and Manufacturer)", compare_progress(0));
         add_step("Enter part filename", compare_progress(1));
         add_step("Press Autofill", compare_progress(2));
+        add_step("Edit Symbol", compare_progress(3));
     }
     else {
         if (mpn_valid) {
@@ -982,14 +1020,18 @@ void PartWizard::update_steps()
                     progress = 3;
                     if (valid) {
                         progress = 4;
+                        if (all_symbol_pins_mapped) {
+                            progress = 5;
+                        }
                     }
                 }
             }
         }
         add_step("Enter MPN (and Manufacturer)", compare_progress(0));
-        add_step("Enter part filename", compare_progress(1));
+        add_step("Enter Part filename", compare_progress(1));
         add_step("Enter Gate suffixes", compare_progress(2));
         add_step("Press Autofill", compare_progress(3));
+        add_step("Edit Symbols", compare_progress(4));
     }
 
 

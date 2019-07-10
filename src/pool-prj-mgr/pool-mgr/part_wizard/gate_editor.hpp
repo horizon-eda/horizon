@@ -13,7 +13,7 @@ class GateEditorWizard : public Gtk::Box {
 public:
     GateEditorWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Gate *g, class PartWizard *pa);
     static GateEditorWizard *create(Gate *g, PartWizard *pa);
-    void load();
+    void update_symbol_pins(unsigned int n_mapped);
 
     virtual ~GateEditorWizard()
     {
@@ -24,6 +24,7 @@ private:
     uuid_ptr<Gate> gate;
 
     Gtk::Label *gate_label = nullptr;
+    Gtk::Label *gate_symbol_label = nullptr;
     Gtk::Button *edit_symbol_button = nullptr;
     class LocationEntry *unit_location_entry = nullptr;
     class LocationEntry *symbol_location_entry = nullptr;
