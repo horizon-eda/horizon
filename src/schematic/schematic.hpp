@@ -5,7 +5,7 @@
 #include "block/block.hpp"
 #include "sheet.hpp"
 #include "schematic_rules.hpp"
-#include "pdf_export_settings.hpp"
+#include "common/pdf_export_settings.hpp"
 #include <vector>
 #include <map>
 #include <fstream>

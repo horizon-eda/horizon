@@ -195,7 +195,16 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
             Logger::log_warning("couldn't colors", Logger::Domain::BOARD, e.what());
         }
     }
+    if (j.count("pdf_export_settings")) {
+        try {
+            pdf_export_settings = PDFExportSettings(j.at("pdf_export_settings"));
+        }
+        catch (const std::exception &e) {
+            Logger::log_warning("couldn't load pdf export settings", Logger::Domain::BOARD, e.what());
+        }
+    }
     fab_output_settings.update_for_board(this);
+    update_pdf_export_settings(pdf_export_settings);
     update_refs(); // fill in smashed texts
 }
 
@@ -238,7 +247,7 @@ Board::Board(const Board &brd)
       texts(brd.texts), lines(brd.lines), arcs(brd.arcs), planes(brd.planes), keepouts(brd.keepouts),
       dimensions(brd.dimensions), connection_lines(brd.connection_lines), warnings(brd.warnings), rules(brd.rules),
       fab_output_settings(brd.fab_output_settings), stackup(brd.stackup), colors(brd.colors),
-      n_inner_layers(brd.n_inner_layers)
+      pdf_export_settings(brd.pdf_export_settings), n_inner_layers(brd.n_inner_layers)
 {
     update_refs();
 }
@@ -270,6 +279,7 @@ void Board::operator=(const Board &brd)
     fab_output_settings = brd.fab_output_settings;
     stackup = brd.stackup;
     colors = brd.colors;
+    pdf_export_settings = brd.pdf_export_settings;
     update_refs();
 }
 
@@ -363,6 +373,42 @@ void Board::set_n_inner_layers(unsigned int n)
     }
     map_erase_if(stackup, [this](const auto &x) { return layers.count(x.first) == 0; });
     fab_output_settings.update_for_board(this);
+    update_pdf_export_settings(pdf_export_settings);
+}
+
+void Board::update_pdf_export_settings(PDFExportSettings &settings)
+{
+    auto layers_from_board = get_layers();
+    // remove layers not on board
+    map_erase_if(settings.layers,
+                 [&layers_from_board](const auto &it) { return layers_from_board.count(it.first) == 0; });
+
+    // add new layers
+    auto add_layer = [&settings](int l, bool enable = true) {
+        settings.layers.emplace(
+                std::piecewise_construct, std::forward_as_tuple(l),
+                std::forward_as_tuple(l, Color(0, 0, 0), PDFExportSettings::Layer::Mode::OUTLINE, enable));
+    };
+
+    add_layer(BoardLayers::L_OUTLINE);
+    add_layer(BoardLayers::TOP_PASTE, false);
+    add_layer(BoardLayers::TOP_SILKSCREEN, false);
+    add_layer(BoardLayers::TOP_MASK, false);
+    add_layer(BoardLayers::TOP_MASK, false);
+    add_layer(BoardLayers::TOP_ASSEMBLY);
+    add_layer(BoardLayers::TOP_PACKAGE, false);
+    add_layer(BoardLayers::TOP_COPPER, false);
+    for (const auto &la : layers_from_board) {
+        if (BoardLayers::is_copper(la.first) && la.first > BoardLayers::BOTTOM_COPPER
+            && la.first < BoardLayers::TOP_COPPER)
+            add_layer(la.first, false);
+    }
+    add_layer(BoardLayers::BOTTOM_COPPER, false);
+    add_layer(BoardLayers::BOTTOM_MASK, false);
+    add_layer(BoardLayers::BOTTOM_SILKSCREEN, false);
+    add_layer(BoardLayers::BOTTOM_PASTE, false);
+    add_layer(BoardLayers::BOTTOM_ASSEMBLY, false);
+    add_layer(BoardLayers::BOTTOM_PACKAGE, false);
 }
 
 void Board::flip_package_layer(int &layer) const
@@ -808,6 +854,23 @@ std::vector<KeepoutContour> Board::get_keepout_contours() const
     }
     return r;
 }
+std::pair<Coordi, Coordi> Board::get_bbox() const
+{
+    Coordi a, b;
+    bool found = false;
+    for (const auto &it : polygons) {
+        if (it.second.layer == BoardLayers::L_OUTLINE) { // outline
+            found = true;
+            for (const auto &v : it.second.vertices) {
+                a = Coordi::min(a, v.position);
+                b = Coordi::max(b, v.position);
+            }
+        }
+    }
+    if (!found)
+        return {{-10_mm, -10_mm}, {10_mm, 10_mm}};
+    return {a, b};
+}
 
 json Board::serialize() const
 {
@@ -825,6 +888,7 @@ json Board::serialize() const
         o["substrate"] = color_to_json(colors.substrate);
         j["colors"] = o;
     }
+    j["pdf_export_settings"] = pdf_export_settings.serialize_board();
     j["polygons"] = json::object();
     for (const auto &it : polygons) {
         j["polygons"][(std::string)it.first] = it.second.serialize();

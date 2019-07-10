@@ -398,7 +398,6 @@ void ImpSchematic::construct()
     connect_action(ActionID::MOVE_TO_OTHER_SHEET,
                    std::bind(&ImpSchematic::handle_move_to_other_sheet, this, std::placeholders::_1));
 
-
     connect_action(ActionID::HIGHLIGHT_NET, [this](const auto &a) {
         highlights.clear();
         auto sheet = core_schematic.get_sheet();
@@ -437,7 +436,6 @@ void ImpSchematic::construct()
     connect_action(ActionID::HIGHLIGHT_GROUP, sigc::mem_fun(*this, &ImpSchematic::handle_highlight_group_tag));
     connect_action(ActionID::HIGHLIGHT_TAG, sigc::mem_fun(*this, &ImpSchematic::handle_highlight_group_tag));
 
-
     bom_export_window = BOMExportWindow::create(main_window, core_schematic.get_block(),
                                                 core_schematic.get_bom_export_settings(), project_dir);
 
@@ -451,16 +449,14 @@ void ImpSchematic::construct()
     core.r->signal_tool_changed().connect([this](ToolID t) { bom_export_window->set_can_export(t == ToolID::NONE); });
     core.r->signal_rebuilt().connect([this] { bom_export_window->update_preview(); });
 
-
-    pdf_export_window = PDFExportWindow::create(main_window, *core_schematic.get_schematic(),
-                                                *core_schematic.get_pdf_export_settings(), project_dir);
+    pdf_export_window = PDFExportWindow::create(main_window, &core_schematic, *core_schematic.get_pdf_export_settings(),
+                                                project_dir);
     pdf_export_window->signal_changed().connect([this] { core_schematic.set_needs_save(); });
     connect_action(ActionID::PDF_EXPORT_WINDOW, [this](const auto &c) { pdf_export_window->present(); });
     connect_action(ActionID::EXPORT_PDF, [this](const auto &c) {
         pdf_export_window->present();
         pdf_export_window->generate();
     });
-
 
     grid_spin_button->set_sensitive(false);
 
@@ -538,7 +534,6 @@ void ImpSchematic::update_action_sensitivity()
     set_action_sensitive(make_action(ActionID::HIGHLIGHT_GROUP), can_higlight_group);
     set_action_sensitive(make_action(ActionID::HIGHLIGHT_TAG), can_higlight_tag);
 
-
     ImpBase::update_action_sensitivity();
 }
 
@@ -553,11 +548,6 @@ std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)
     }
     trim(s);
     return s;
-}
-
-void ImpSchematic::handle_export_pdf()
-{
-    pdf_export_window->present();
 }
 
 void ImpSchematic::handle_core_rebuilt()
@@ -833,7 +823,6 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
                 new_sel.emplace(it.first, ObjectType::LINE_NET);
             }
         }
-
 
         added = false;
         for (const auto &it : new_sel) {

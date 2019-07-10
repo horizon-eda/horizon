@@ -1,6 +1,7 @@
 #include "gtk_util.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "str_util.hpp"
+#include "common/common.hpp"
 
 namespace horizon {
 void bind_widget(Gtk::Switch *sw, bool &v)
@@ -44,6 +45,22 @@ void bind_widget(Gtk::Entry *en, std::string &v, std::function<void(std::string 
         if (extra_cb) {
             extra_cb(v);
         }
+    });
+}
+
+void bind_widget(Gtk::ColorButton *color_button, Color &color, std::function<void(const Color &c)> extra_cb)
+{
+    Gdk::RGBA r;
+    r.set_rgba(color.r, color.g, color.b);
+    color_button->set_rgba(r);
+
+    color_button->property_color().signal_changed().connect([color_button, &color, extra_cb] {
+        auto co = color_button->get_rgba();
+        color.r = co.get_red();
+        color.g = co.get_green();
+        color.b = co.get_blue();
+        if (extra_cb)
+            extra_cb(color);
     });
 }
 

@@ -807,7 +807,7 @@ json Schematic::serialize() const
     j["block"] = (std::string)block->uuid;
     j["name"] = name;
     j["annotation"] = annotation.serialize();
-    j["pdf_export_settings"] = pdf_export_settings.serialize();
+    j["pdf_export_settings"] = pdf_export_settings.serialize_schematic();
     j["rules"] = rules.serialize();
     j["title_block_values"] = title_block_values;
     j["group_tag_visible"] = group_tag_visible;

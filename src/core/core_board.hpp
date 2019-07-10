@@ -43,6 +43,10 @@ public:
     {
         return &fab_output_settings;
     }
+    PDFExportSettings *get_pdf_export_settings()
+    {
+        return &pdf_export_settings;
+    }
 
     Board::Colors *get_colors()
     {
@@ -73,6 +77,8 @@ private:
 
     BoardRules rules;
     FabOutputSettings fab_output_settings;
+    PDFExportSettings pdf_export_settings;
+
     Board::Colors colors;
 
     std::string m_board_filename;

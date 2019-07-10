@@ -40,7 +40,6 @@ private:
     void handle_remove_sheet(Sheet *sh);
     void handle_core_rebuilt();
     void handle_tool_change(ToolID id) override;
-    void handle_export_pdf();
     void handle_move_to_other_sheet(const ActionConnection &conn);
     void handle_highlight_group_tag(const ActionConnection &conn);
     std::string last_pdf_filename;

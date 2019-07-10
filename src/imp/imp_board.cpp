@@ -13,6 +13,9 @@
 #include "util/util.hpp"
 #include "util/str_util.hpp"
 #include "canvas/annotation.hpp"
+#include "export_pdf/export_pdf_board.hpp"
+#include "board/board_layers.hpp"
+#include "pdf_export_window.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
@@ -203,7 +206,6 @@ void ImpBoard::update_action_sensitivity()
                              }
                          }));
 
-
     if (sockets_connected) {
         json req;
         req["op"] = "has-schematic";
@@ -236,7 +238,6 @@ static Color color_from_rgba(const Gdk::RGBA &r)
 {
     return {r.get_red(), r.get_green(), r.get_blue()};
 }
-
 
 int ImpBoard::get_schematic_pid()
 {
@@ -289,6 +290,9 @@ void ImpBoard::construct()
     hamburger_menu->append("Fabrication output", "win.fab_out");
     main_window->add_action("fab_out", [this] { fab_output_window->present(); });
 
+    hamburger_menu->append("PDF Export", "win.export_pdf");
+    main_window->add_action("export_pdf", [this] { trigger_action(ActionID::PDF_EXPORT_WINDOW); });
+
     hamburger_menu->append("Stackup...", "win.edit_stackup");
     add_tool_action(ToolID::EDIT_STACKUP, "edit_stackup");
 
@@ -306,7 +310,6 @@ void ImpBoard::construct()
 
     hamburger_menu->append("Length tuning", "win.tuning");
     main_window->add_action("tuning", [this] { trigger_action(ActionID::TUNING); });
-
 
     if (sockets_connected) {
         hamburger_menu->append("Cross probing", "win.cross_probing");
@@ -393,6 +396,16 @@ void ImpBoard::construct()
     core.r->signal_rebuilt().connect([this] { fab_output_window->reload_layers(); });
     fab_output_window->signal_changed().connect([this] { core_board.set_needs_save(); });
 
+    pdf_export_window =
+            PDFExportWindow::create(main_window, &core_board, *core_board.get_pdf_export_settings(), project_dir);
+    pdf_export_window->signal_changed().connect([this] { core_board.set_needs_save(); });
+    core.r->signal_rebuilt().connect([this] { pdf_export_window->reload_layers(); });
+    connect_action(ActionID::PDF_EXPORT_WINDOW, [this](const auto &c) { pdf_export_window->present(); });
+    connect_action(ActionID::EXPORT_PDF, [this](const auto &c) {
+        pdf_export_window->present();
+        pdf_export_window->generate();
+    });
+
     view_3d_window = View3DWindow::create(core_board.get_board(), pool.get());
     view_3d_window->set_solder_mask_color(rgba_from_color(core_board.get_colors()->solder_mask));
     view_3d_window->set_substrate_color(rgba_from_color(core_board.get_colors()->substrate));
@@ -405,7 +418,6 @@ void ImpBoard::construct()
     step_export_window = StepExportWindow::create(main_window, &core_board);
     tuning_window = new TuningWindow(core.b->get_board());
     tuning_window->set_transient_for(*main_window);
-
 
     rules_window->signal_goto().connect([this](Coordi location, UUID sheet) { canvas->center_and_zoom(location); });
 

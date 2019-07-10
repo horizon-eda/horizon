@@ -3,6 +3,8 @@
 #include "nlohmann/json.hpp"
 #include "util.hpp"
 #include "export_gerber/gerber_export.hpp"
+#include "export_pdf/export_pdf_board.hpp"
+#include <podofo/podofo.h>
 
 BoardWrapper::BoardWrapper(const horizon::Project &prj)
     : pool(horizon::PoolManager::get().get_by_uuid(prj.pool_uuid)->base_path, prj.pool_cache_directory),
@@ -62,11 +64,47 @@ static PyObject *PyBoard_export_gerber(PyObject *pself, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject *PyBoard_get_pdf_export_settings(PyObject *pself)
+{
+    auto self = reinterpret_cast<PyBoard *>(pself);
+    auto settings = self->board->board.pdf_export_settings.serialize_board();
+    return py_from_json(settings);
+}
+
+static PyObject *PyBoard_export_pdf(PyObject *pself, PyObject *args)
+{
+    auto self = reinterpret_cast<PyBoard *>(pself);
+    PyObject *py_export_settings = nullptr;
+    if (!PyArg_ParseTuple(args, "O!", &PyDict_Type, &py_export_settings))
+        return NULL;
+    try {
+        auto settings_json = json_from_py(py_export_settings);
+        horizon::PDFExportSettings settings(settings_json);
+        horizon::export_pdf(self->board->board, settings, nullptr);
+    }
+    catch (const std::exception &e) {
+        PyErr_SetString(PyExc_IOError, e.what());
+        return NULL;
+    }
+    catch (const PoDoFo::PdfError &e) {
+        PyErr_SetString(PyExc_IOError, e.what());
+        return NULL;
+    }
+    catch (...) {
+        PyErr_SetString(PyExc_IOError, "unknown exception");
+        return NULL;
+    }
+    Py_RETURN_NONE;
+}
+
 
 static PyMethodDef PyBoard_methods[] = {
         {"get_gerber_export_settings", (PyCFunction)PyBoard_get_gerber_export_settings, METH_NOARGS,
          "Return gerber export settings"},
         {"export_gerber", (PyCFunction)PyBoard_export_gerber, METH_VARARGS, "Export gerber"},
+        {"get_pdf_export_settings", (PyCFunction)PyBoard_get_pdf_export_settings, METH_NOARGS,
+         "Return PDF export settings"},
+        {"export_pdf", (PyCFunction)PyBoard_export_pdf, METH_VARARGS, "Export PDF"},
         {NULL} /* Sentinel */
 };
 

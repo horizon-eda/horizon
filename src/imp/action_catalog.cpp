@@ -675,11 +675,11 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::PDF_EXPORT_WINDOW, ToolID::NONE},
-         {"PDF export window", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+         {"PDF export window", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::EXPORT_PDF, ToolID::NONE},
-         {"Export PDF", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+         {"Export PDF", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::DRAW_CONNECTION_LINE},

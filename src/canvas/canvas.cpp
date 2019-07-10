@@ -240,6 +240,11 @@ Color Canvas::get_layer_color(int layer) const
         return {1, 1, 0};
 }
 
+void Canvas::set_layer_color(int layer, const Color &color)
+{
+    layer_colors[layer] = color;
+}
+
 std::pair<Coordf, Coordf> Canvas::get_bbox(bool visible_only) const
 {
     Coordf a, b;

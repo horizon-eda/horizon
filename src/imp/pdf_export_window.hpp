@@ -4,24 +4,26 @@
 #include <set>
 #include "util/status_dispatcher.hpp"
 #include "util/changeable.hpp"
-#include "schematic/pdf_export_settings.hpp"
+#include "common/pdf_export_settings.hpp"
 #include "util/export_file_chooser.hpp"
 
 namespace horizon {
 
 class PDFExportWindow : public Gtk::Window, public Changeable {
+    friend class PDFLayerEditor;
 
 public:
-    PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Schematic &sch,
+    PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Core *c,
                     class PDFExportSettings &s, const std::string &project_dir);
-    static PDFExportWindow *create(Gtk::Window *p, const class Schematic &sch, class PDFExportSettings &s,
+    static PDFExportWindow *create(Gtk::Window *p, class Core *c, class PDFExportSettings &s,
                                    const std::string &project_dir);
 
     void set_can_export(bool v);
     void generate();
+    void reload_layers();
 
 private:
-    const class Schematic &sch;
+    class Core *core;
     class PDFExportSettings &settings;
 
     class MyExportFileChooser : public ExportFileChooser {
@@ -36,6 +38,8 @@ private:
     Gtk::Button *filename_button = nullptr;
     class SpinButtonDim *min_line_width_sp = nullptr;
     Gtk::Grid *grid = nullptr;
+    Gtk::ListBox *layers_box;
+    Glib::RefPtr<Gtk::SizeGroup> sg_layer_name;
 
     Gtk::Button *export_button = nullptr;
     Gtk::Label *progress_label = nullptr;

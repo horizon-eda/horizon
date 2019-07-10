@@ -40,7 +40,7 @@ SRC_COMMON = \
 	src/schematic/power_symbol.cpp\
 	src/schematic/schematic_rules.cpp\
 	src/schematic/rule_single_pin_net.cpp\
-	src/schematic/pdf_export_settings.cpp\
+	src/common/pdf_export_settings.cpp\
 	src/pool/padstack.cpp\
 	src/common/polygon.cpp\
 	src/common/hole.cpp\
@@ -284,7 +284,9 @@ SRC_IMP = \
 	src/widgets/component_button.cpp\
 	src/widgets/preview_canvas.cpp\
 	src/widgets/about_dialog.cpp\
+	src/export_pdf/canvas_pdf.cpp\
 	src/export_pdf/export_pdf.cpp\
+	src/export_pdf/export_pdf_board.cpp\
 	src/imp/keyseq_dialog.cpp\
 	src/canvas/canvas_patch.cpp\
 	src/export_gerber/gerber_writer.cpp\
@@ -590,8 +592,11 @@ endif
 
 SRC_SHARED = $(SRC_COMMON) \
 	src/pool/pool_cached.cpp \
+	src/export_pdf/canvas_pdf.cpp \
 	src/export_pdf/export_pdf.cpp \
+	src/export_pdf/export_pdf_board.cpp \
 	src/canvas/canvas.cpp \
+	src/canvas/appearance.cpp \
 	src/canvas/render.cpp \
 	src/canvas/draw.cpp \
 	src/canvas/text.cpp \

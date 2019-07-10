@@ -11,8 +11,8 @@ CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block
                      Pool &pool)
     : via_padstack_provider(via_dir, pool), block(Block::new_from_file(block_filename, pool)),
       brd(Board::new_from_file(board_filename, block, pool, via_padstack_provider)), rules(brd.rules),
-      fab_output_settings(brd.fab_output_settings), colors(brd.colors), m_board_filename(board_filename),
-      m_block_filename(block_filename), m_via_dir(via_dir)
+      fab_output_settings(brd.fab_output_settings), pdf_export_settings(brd.pdf_export_settings), colors(brd.colors),
+      m_board_filename(board_filename), m_block_filename(block_filename), m_via_dir(via_dir)
 {
     m_pool = &pool;
     rebuild();
@@ -613,20 +613,7 @@ json CoreBoard::get_meta()
 
 std::pair<Coordi, Coordi> CoreBoard::get_bbox()
 {
-    Coordi a, b;
-    bool found = false;
-    for (const auto &it : brd.polygons) {
-        if (it.second.layer == BoardLayers::L_OUTLINE) { // outline
-            found = true;
-            for (const auto &v : it.second.vertices) {
-                a = Coordi::min(a, v.position);
-                b = Coordi::max(b, v.position);
-            }
-        }
-    }
-    if (!found)
-        return {{-10_mm, -10_mm}, {10_mm, 10_mm}};
-    return {a, b};
+    return brd.get_bbox();
 }
 
 bool CoreBoard::can_search_for_object_type(ObjectType ty) const
@@ -664,6 +651,7 @@ void CoreBoard::save()
 {
     brd.rules = rules;
     brd.fab_output_settings = fab_output_settings;
+    brd.pdf_export_settings = pdf_export_settings;
     brd.colors = colors;
     auto j = brd.serialize();
     auto save_meta = s_signal_request_save_meta.emit();

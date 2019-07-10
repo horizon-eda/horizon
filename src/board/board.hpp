@@ -10,6 +10,7 @@
 #include "common/layer_provider.hpp"
 #include "common/polygon.hpp"
 #include "common/keepout.hpp"
+#include "common/pdf_export_settings.hpp"
 #include "fab_output_settings.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "plane.hpp"
@@ -61,6 +62,8 @@ public:
                       const class CanvasPads *ca_pads = nullptr); // when ca is given, patches will be read from it
     void update_planes();
     std::vector<KeepoutContour> get_keepout_contours() const;
+    std::pair<Coordi, Coordi> get_bbox() const;
+    void update_pdf_export_settings(PDFExportSettings &settings);
 
     UUID uuid;
     Block *block;
@@ -103,6 +106,7 @@ public:
         Color substrate;
     };
     Colors colors;
+    PDFExportSettings pdf_export_settings;
 
     ClipperLib::Paths obstacles;
     ClipperLib::Path track_path;

@@ -41,6 +41,7 @@ private:
     class View3DWindow *view_3d_window = nullptr;
     class StepExportWindow *step_export_window = nullptr;
     class TuningWindow *tuning_window = nullptr;
+    class PDFExportWindow *pdf_export_window;
     bool cross_probing_enabled = false;
 
     Coordf cursor_pos_drag_begin;

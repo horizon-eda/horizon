@@ -40,7 +40,7 @@ static void PySchematic_dealloc(PyObject *pself)
 static PyObject *PySchematic_get_pdf_export_settings(PyObject *pself)
 {
     auto self = reinterpret_cast<PySchematic *>(pself);
-    auto settings = self->schematic->schematic.pdf_export_settings.serialize();
+    auto settings = self->schematic->schematic.pdf_export_settings.serialize_schematic();
     return py_from_json(settings);
 }
 
