@@ -543,7 +543,7 @@ std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)
     if (sel_count_type(sel, ObjectType::SCHEMATIC_SYMBOL) == 1) {
         const auto &sym = core_schematic.get_sheet()->symbols.at(sel_find_one(sel, ObjectType::SCHEMATIC_SYMBOL));
         s += "<b>Symbol " + sym.component->refdes + "</b>\n";
-        s += get_hud_text_for_part(sym.component->part);
+        s += get_hud_text_for_component(sym.component);
         sel_erase_type(sel, ObjectType::SCHEMATIC_SYMBOL);
     }
     trim(s);

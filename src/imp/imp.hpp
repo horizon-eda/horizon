@@ -135,7 +135,7 @@ protected:
     }
 
     virtual std::string get_hud_text(std::set<SelectableRef> &sel);
-    std::string get_hud_text_for_part(const Part *part);
+    std::string get_hud_text_for_component(const Component *comp);
     std::string get_hud_text_for_net(const Net *net);
 
     void set_monitor_files(const std::set<std::string> &files);

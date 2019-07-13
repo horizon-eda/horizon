@@ -816,21 +816,26 @@ std::string ImpBase::get_hud_text_for_net(const Net *net)
     return s;
 }
 
-std::string ImpBase::get_hud_text_for_part(const Part *part)
+std::string ImpBase::get_hud_text_for_component(const Component *comp)
 {
-    if (!part)
-        return "No part";
+    const Part *part = comp->part;
+    if (!part) {
+        std::string s = "No part\n";
+        s += "Entity: " + comp->entity->name;
+        return s;
+    }
+    else {
+        std::string s = "MPN: " + Glib::Markup::escape_text(part->get_MPN()) + "\n";
+        s += "Manufacturer: " + Glib::Markup::escape_text(part->get_manufacturer()) + "\n";
+        if (part->get_description().size())
+            s += Glib::Markup::escape_text(part->get_description()) + "\n";
+        if (part->get_datasheet().size())
+            s += "<a href=\"" + Glib::Markup::escape_text(part->get_datasheet()) + "\" title=\""
+                 + Glib::Markup::escape_text(Glib::Markup::escape_text(part->get_datasheet())) + "\">Datasheet</a>\n";
 
-    std::string s = "MPN: " + Glib::Markup::escape_text(part->get_MPN()) + "\n";
-    s += "Manufacturer: " + Glib::Markup::escape_text(part->get_manufacturer()) + "\n";
-    if (part->get_description().size())
-        s += Glib::Markup::escape_text(part->get_description()) + "\n";
-    if (part->get_datasheet().size())
-        s += "<a href=\"" + Glib::Markup::escape_text(part->get_datasheet()) + "\" title=\""
-             + Glib::Markup::escape_text(Glib::Markup::escape_text(part->get_datasheet())) + "\">Datasheet</a>\n";
-
-    trim(s);
-    return s;
+        trim(s);
+        return s;
+    }
 }
 
 void ImpBase::edit_pool_item(ObjectType type, const UUID &uu)
