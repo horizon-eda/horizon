@@ -32,6 +32,7 @@ using json = nlohmann::json;
 
 int main(int argc, char *argv[])
 {
+    gtk_disable_setlocale();
     Gio::init();
     horizon::PoolManager::init();
 
