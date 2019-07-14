@@ -447,7 +447,10 @@ void ImpSchematic::construct()
 
     bom_export_window->signal_changed().connect([this] { core_schematic.set_needs_save(); });
     core.r->signal_tool_changed().connect([this](ToolID t) { bom_export_window->set_can_export(t == ToolID::NONE); });
-    core.r->signal_rebuilt().connect([this] { bom_export_window->update_preview(); });
+    core.r->signal_rebuilt().connect([this] {
+        bom_export_window->update_preview();
+        bom_export_window->update_orderable_MPNs();
+    });
 
     pdf_export_window = PDFExportWindow::create(main_window, &core_schematic, *core_schematic.get_pdf_export_settings(),
                                                 project_dir);

@@ -1,5 +1,6 @@
 #pragma once
 #include "common/lut.hpp"
+#include "util/uuid.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "bom.hpp"
 #include <vector>
@@ -15,6 +16,7 @@ public:
 
     enum class Format { CSV };
     Format format = Format::CSV;
+    std::map<UUID, UUID> orderable_MPNs; // part->orderable MPN
 
     class CSVSettings {
     public:

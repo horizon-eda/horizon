@@ -3,12 +3,19 @@
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
 #include "export_bom/export_bom.hpp"
+#include "pool/part.hpp"
+#include "widgets/generic_combo_box.hpp"
 
 namespace horizon {
 
 #define GET_WIDGET(name)                                                                                               \
     do {                                                                                                               \
         x->get_widget(#name, name);                                                                                    \
+    } while (0)
+
+#define GET_OBJECT(name)                                                                                               \
+    do {                                                                                                               \
+        name = name.cast_dynamic(x->get_object(#name));                                                                \
     } while (0)
 
 void BOMExportWindow::MyExportFileChooser::prepare_chooser(Glib::RefPtr<Gtk::FileChooser> chooser)
@@ -46,6 +53,10 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_WIDGET(done_label);
     GET_WIDGET(done_revealer);
     GET_WIDGET(preview_tv);
+    GET_WIDGET(orderable_MPNs_listbox);
+    GET_OBJECT(sg_manufacturer);
+    GET_OBJECT(sg_MPN);
+    GET_OBJECT(sg_orderable_MPN);
 
     export_filechooser.attach(filename_entry, filename_button, this);
     export_filechooser.set_project_dir(project_dir);
@@ -116,6 +127,8 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     update_incl_excl_sensitivity();
 
     export_button->signal_clicked().connect(sigc::mem_fun(*this, &BOMExportWindow::generate));
+
+    update_orderable_MPNs();
 }
 
 void BOMExportWindow::update_incl_excl_sensitivity()
@@ -293,6 +306,71 @@ void BOMExportWindow::update_preview()
             mcr->property_text() = bomrow.get_column(col);
         });
         preview_tv->append_column(*tvc);
+    }
+}
+
+class OrderableMPNSelector : public Gtk::Box {
+public:
+    OrderableMPNSelector(const Part *p, BOMExportWindow *par)
+        : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10), part(p), parent(par), settings(*parent->settings)
+    {
+        property_margin() = 5;
+        set_margin_start(10);
+        set_margin_end(10);
+        auto la_manufacturer = Gtk::manage(new Gtk::Label(part->get_manufacturer()));
+        la_manufacturer->set_xalign(0);
+        la_manufacturer->show();
+        pack_start(*la_manufacturer, false, false, 0);
+        parent->sg_manufacturer->add_widget(*la_manufacturer);
+
+        auto la_MPN = Gtk::manage(new Gtk::Label(part->get_MPN()));
+        la_MPN->set_xalign(0);
+        la_MPN->show();
+        pack_start(*la_MPN, false, false, 0);
+        parent->sg_MPN->add_widget(*la_MPN);
+
+        auto combo = Gtk::manage(new GenericComboBox<UUID>());
+        combo->append(UUID(), part->get_MPN() + " (default)");
+        for (const auto &it : part->orderable_MPNs) {
+            combo->append(it.first, it.second);
+        }
+        combo->show();
+        pack_start(*combo, false, false, 0);
+        parent->sg_orderable_MPN->add_widget(*combo);
+
+        if (settings.orderable_MPNs.count(part->uuid))
+            combo->set_active_key(settings.orderable_MPNs.at(part->uuid));
+        else
+            combo->set_active_key(UUID());
+        combo->signal_changed().connect([this, combo] {
+            settings.orderable_MPNs[part->uuid] = combo->get_active_key();
+            parent->update_preview();
+            parent->signal_changed().emit();
+        });
+    }
+
+private:
+    const Part *part;
+    BOMExportWindow *parent;
+    BOMExportSettings &settings;
+};
+
+void BOMExportWindow::update_orderable_MPNs()
+{
+    {
+        auto children = orderable_MPNs_listbox->get_children();
+        for (auto ch : children) {
+            delete ch;
+        }
+    }
+    auto rows = block->get_BOM(*settings);
+    for (const auto &row : rows) {
+        auto part = row.first;
+        if (part->orderable_MPNs.size()) {
+            auto ed = Gtk::manage(new OrderableMPNSelector(part, this));
+            ed->show();
+            orderable_MPNs_listbox->append(*ed);
+        }
     }
 }
 

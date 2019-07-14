@@ -10,6 +10,7 @@
 namespace horizon {
 
 class BOMExportWindow : public Gtk::Window, public Changeable {
+    friend class OrderableMPNSelector;
 
 public:
     BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Block *block,
@@ -20,6 +21,7 @@ public:
     void set_can_export(bool v);
     void generate();
     void update_preview();
+    void update_orderable_MPNs();
 
 private:
     class Block *block;
@@ -39,6 +41,11 @@ private:
     Gtk::Label *done_label = nullptr;
     Gtk::Entry *filename_entry = nullptr;
     Gtk::Button *filename_button = nullptr;
+    Gtk::ListBox *orderable_MPNs_listbox = nullptr;
+
+    Glib::RefPtr<Gtk::SizeGroup> sg_manufacturer;
+    Glib::RefPtr<Gtk::SizeGroup> sg_MPN;
+    Glib::RefPtr<Gtk::SizeGroup> sg_orderable_MPN;
 
     class ListColumns : public Gtk::TreeModelColumnRecord {
     public:

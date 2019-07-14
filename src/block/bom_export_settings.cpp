@@ -11,6 +11,13 @@ const LutEnumStr<BOMExportSettings::CSVSettings::Order> bom_order_lut = {
 BOMExportSettings::BOMExportSettings(const json &j)
     : csv_settings(j.at("csv_settings")), output_filename(j.at("output_filename").get<std::string>())
 {
+    if (j.count("orderable_MPNs")) {
+        const json &o = j["orderable_MPNs"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            orderable_MPNs.emplace(u, it.value().get<std::string>());
+        }
+    }
 }
 
 BOMExportSettings::BOMExportSettings()
@@ -22,6 +29,10 @@ json BOMExportSettings::serialize() const
     json j;
     j["output_filename"] = output_filename;
     j["csv_settings"] = csv_settings.serialize();
+    j["orderable_MPNs"] = json::object();
+    for (const auto &it : orderable_MPNs) {
+        j["orderable_MPNs"][(std::string)it.first] = (std::string)it.second;
+    }
     return j;
 }
 

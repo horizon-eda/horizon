@@ -301,7 +301,12 @@ std::map<const Part *, BOMRow> Block::get_BOM(const BOMExportSettings &settings)
         }
     }
     for (auto &it : rows) {
-        it.second.MPN = it.first->get_MPN();
+        if (settings.orderable_MPNs.count(it.first->uuid)
+            && it.first->orderable_MPNs.count(settings.orderable_MPNs.at(it.first->uuid)))
+            it.second.MPN = it.first->orderable_MPNs.at(settings.orderable_MPNs.at(it.first->uuid));
+        else
+            it.second.MPN = it.first->get_MPN();
+
         it.second.datasheet = it.first->get_datasheet();
         it.second.description = it.first->get_description();
         it.second.manufacturer = it.first->get_manufacturer();

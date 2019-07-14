@@ -31,6 +31,7 @@ public:
 
     enum class Attribute { MPN, VALUE, MANUFACTURER, DATASHEET, DESCRIPTION };
     std::map<Attribute, std::pair<bool, std::string>> attributes;
+    std::map<UUID, std::string> orderable_MPNs;
     const std::string &get_attribute(Attribute a) const;
     const std::pair<bool, std::string> &get_attribute_pair(Attribute a) const;
 

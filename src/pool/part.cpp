@@ -73,6 +73,12 @@ Part::Part(const UUID &uu, const json &j, Pool &pool)
             parametric.emplace(it.key(), it->get<std::string>());
         }
     }
+    if (j.count("orderable_MPNs")) {
+        const json &o = j["orderable_MPNs"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            orderable_MPNs.emplace(std::string(it.key()), it->get<std::string>());
+        }
+    }
     if (package->models.count(model) == 0)
         model = package->default_model;
     // if(value.size() == 0) {
@@ -202,7 +208,12 @@ json Part::serialize() const
             j["pad_map"][(std::string)it.first] = k;
         }
     }
-
+    if (orderable_MPNs.size()) {
+        j["orderable_MPNs"] = json::object();
+        for (const auto &it : orderable_MPNs) {
+            j["orderable_MPNs"][(std::string)it.first] = it.second;
+        }
+    }
     return j;
 }
 
