@@ -376,7 +376,17 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     });
 
     orderable_MPNs_store = Gtk::ListStore::create(orderable_MPNs_list_columns);
+    orderable_MPNs_store->set_sort_func(orderable_MPNs_list_columns.MPN,
+                                        [this](const Gtk::TreeModel::iterator &ia, const Gtk::TreeModel::iterator &ib) {
+                                            Gtk::TreeModel::Row ra = *ia;
+                                            Gtk::TreeModel::Row rb = *ib;
+                                            Glib::ustring a = ra[orderable_MPNs_list_columns.MPN];
+                                            Glib::ustring b = rb[orderable_MPNs_list_columns.MPN];
+                                            return strcmp_natural(a, b);
+                                        });
+    orderable_MPNs_store->set_sort_column(orderable_MPNs_list_columns.MPN, Gtk::SORT_ASCENDING);
     w_orderable_MPNs_view->set_model(orderable_MPNs_store);
+
     {
         auto cr = Gtk::manage(new Gtk::CellRendererText());
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn("MPN", *cr));

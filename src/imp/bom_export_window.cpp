@@ -330,10 +330,18 @@ public:
         parent->sg_MPN->add_widget(*la_MPN);
 
         auto combo = Gtk::manage(new GenericComboBox<UUID>());
-        combo->append(UUID(), part->get_MPN() + " (default)");
+        combo->append(UUID(), part->get_MPN() + " (base)");
+        std::vector<std::pair<UUID, std::string>> orderable_MPNs_sorted;
+
         for (const auto &it : part->orderable_MPNs) {
+            orderable_MPNs_sorted.push_back(it);
+        }
+        std::sort(orderable_MPNs_sorted.begin(), orderable_MPNs_sorted.end(),
+                  [](const auto &a, const auto &b) { return strcmp_natural(a.second, b.second) < 0; });
+        for (const auto &it : orderable_MPNs_sorted) {
             combo->append(it.first, it.second);
         }
+
         combo->show();
         pack_start(*combo, false, false, 0);
         parent->sg_orderable_MPN->add_widget(*combo);
