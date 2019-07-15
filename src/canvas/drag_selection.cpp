@@ -310,7 +310,15 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                         if (layers.count(sr.layer)) {
                             text += " (" + layers.at(sr.layer).name + ")";
                         }
-                        auto la = Gtk::manage(new Gtk::MenuItem(text));
+                        Gtk::MenuItem *la = nullptr;
+                        if (toggle) {
+                            auto l = Gtk::manage(new Gtk::CheckMenuItem(text));
+                            l->set_active(selection.count(sr));
+                            la = l;
+                        }
+                        else {
+                            la = Gtk::manage(new Gtk::MenuItem(text));
+                        }
                         la->signal_select().connect([this, selection, sr, toggle] {
                             auto sel = selection;
                             if (toggle) {
