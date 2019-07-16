@@ -47,6 +47,7 @@ private:
     Gtk::Button *w_button_automap = nullptr;
     Gtk::Button *w_button_select_pin = nullptr;
     Gtk::Button *w_button_select_pads = nullptr;
+    Gtk::Button *w_button_copy_from_other = nullptr;
     Gtk::Label *w_pin_stat = nullptr;
     Gtk::Label *w_pad_stat = nullptr;
 
@@ -124,6 +125,7 @@ private:
     void populate_models();
     void update_model_inherit();
     void map_pin(Gtk::TreeModel::iterator it_pin);
+    void copy_from_other_part();
 
     class ParametricEditor *parametric_editor = nullptr;
     void update_parametric_editor();

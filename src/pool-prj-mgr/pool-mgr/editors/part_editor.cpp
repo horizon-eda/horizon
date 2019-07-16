@@ -1,6 +1,7 @@
 #include "part_editor.hpp"
 #include "dialogs/pool_browser_dialog.hpp"
 #include "widgets/pool_browser_package.hpp"
+#include "widgets/pool_browser_part.hpp"
 #include "widgets/tag_entry.hpp"
 #include <iostream>
 #include "pool/part.hpp"
@@ -131,6 +132,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("button_automap", w_button_automap);
     x->get_widget("button_select_pin", w_button_select_pin);
     x->get_widget("button_select_pads", w_button_select_pads);
+    x->get_widget("button_copy_from_other", w_button_copy_from_other);
     x->get_widget("pin_stat", w_pin_stat);
     x->get_widget("pad_stat", w_pad_stat);
     x->get_widget("parametric_box", w_parametric_box);
@@ -249,6 +251,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     w_button_map->set_sensitive(!part->base);
     w_button_unmap->set_sensitive(!part->base);
     w_change_package_button->set_sensitive(!part->base);
+    w_button_copy_from_other->set_sensitive(!part->base);
 
     w_button_unmap->signal_clicked().connect([this] {
         auto sel = w_tv_pads->get_selection();
@@ -335,6 +338,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         }
         tree_view_scroll_to_selection(w_tv_pads);
     });
+    w_button_copy_from_other->signal_clicked().connect(sigc::mem_fun(*this, &PartEditor::copy_from_other_part));
 
     update_mapped();
     populate_models();
@@ -699,6 +703,38 @@ void PartEditor::update_parametric_editor()
         }
         parametric_editor = ed;
         parametric_editor->signal_changed().connect([this] { needs_save = true; });
+    }
+}
+
+void PartEditor::copy_from_other_part()
+{
+    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+    PoolBrowserDialog dia(top, ObjectType::PART, pool);
+    auto br = dynamic_cast<PoolBrowserPart *>(dia.get_browser());
+    br->set_entity_uuid(part->entity->uuid);
+    if (dia.run() == Gtk::RESPONSE_OK) {
+        auto uu = dia.get_browser()->get_selected();
+        auto other_part = pool->get_part(uu);
+        for (auto &it_pad : pad_store->children()) {
+            Gtk::TreeModel::Row row_pad = *it_pad;
+            if (row_pad.get_value(pad_list_columns.gate_uuid) == UUID()) { // only update unmapped pads
+                std::string pad_name = row_pad.get_value(pad_list_columns.pad_name);
+                // find other part mapping
+                for (const auto &it_map_other : other_part->pad_map) {
+                    auto pad_uu_other = it_map_other.first;
+                    const auto &pad_name_other = other_part->package->pads.at(pad_uu_other).name;
+                    if (pad_name_other == pad_name) { // found it
+                        row_pad[pad_list_columns.gate_name] = it_map_other.second.gate->name;
+                        row_pad[pad_list_columns.pin_name] = it_map_other.second.pin->primary_name;
+                        row_pad[pad_list_columns.pin_uuid] = it_map_other.second.pin->uuid;
+                        row_pad[pad_list_columns.gate_uuid] = it_map_other.second.gate->uuid;
+                        break;
+                    }
+                }
+            }
+        }
+        update_mapped();
+        needs_save = true;
     }
 }
 
