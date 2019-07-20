@@ -126,6 +126,7 @@ private:
     void update_model_inherit();
     void map_pin(Gtk::TreeModel::iterator it_pin);
     void copy_from_other_part();
+    void update_map_buttons();
 
     class ParametricEditor *parametric_editor = nullptr;
     void update_parametric_editor();

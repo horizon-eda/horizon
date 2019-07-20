@@ -232,7 +232,9 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     w_tv_pins->get_column(0)->set_sort_column(pin_list_columns.gate_name);
     w_tv_pins->get_column(1)->set_sort_column(pin_list_columns.pin_name);
 
-    pin_store->set_sort_column(pin_list_columns.gate_name, Gtk::SORT_ASCENDING);
+    pin_store->set_sort_column(pin_list_columns.pin_name, Gtk::SORT_ASCENDING);
+    Glib::signal_idle().connect_once(
+            [this] { pin_store->set_sort_column(pin_list_columns.gate_name, Gtk::SORT_ASCENDING); });
 
     pad_store = Gtk::ListStore::create(pad_list_columns);
     pad_store->set_sort_func(pad_list_columns.pad_name,
@@ -254,10 +256,10 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     update_treeview();
 
-    w_button_map->set_sensitive(!part->base);
-    w_button_unmap->set_sensitive(!part->base);
+    update_map_buttons();
+    w_tv_pads->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &PartEditor::update_map_buttons));
+    w_tv_pins->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &PartEditor::update_map_buttons));
     w_change_package_button->set_sensitive(!part->base);
-    w_button_copy_from_other->set_sensitive(!part->base);
 
     w_button_unmap->signal_clicked().connect([this] {
         auto sel = w_tv_pads->get_selection();
@@ -439,6 +441,26 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         row[orderable_MPNs_list_columns.MPN] = it.second;
     }
     update_orderable_MPNs_label();
+}
+
+void PartEditor::update_map_buttons()
+{
+    if (part->base) {
+        w_button_map->set_sensitive(false);
+        w_button_unmap->set_sensitive(false);
+        w_button_automap->set_sensitive(false);
+        w_button_copy_from_other->set_sensitive(false);
+    }
+    else {
+        bool can_map =
+                w_tv_pads->get_selection()->count_selected_rows() && w_tv_pins->get_selection()->count_selected_rows();
+        w_button_map->set_sensitive(can_map);
+        w_button_unmap->set_sensitive(w_tv_pads->get_selection()->count_selected_rows());
+        w_button_automap->set_sensitive(true);
+        w_button_copy_from_other->set_sensitive(true);
+    }
+    w_button_select_pads->set_sensitive(w_tv_pins->get_selection()->count_selected_rows());
+    w_button_select_pin->set_sensitive(w_tv_pads->get_selection()->count_selected_rows());
 }
 
 void PartEditor::update_orderable_MPNs_label()
