@@ -495,6 +495,14 @@ void PartEditor::update_model_inherit()
     w_model_combo->set_sensitive(!active);
 }
 
+static std::string append_with_slash(const std::string &s)
+{
+    if (s.size())
+        return " / " + s;
+    else
+        return "";
+}
+
 void PartEditor::update_entries()
 {
 
@@ -502,24 +510,27 @@ void PartEditor::update_entries()
     if (part->base) {
         w_base_label->set_markup(
                 "<a href=\"" + (std::string)part->base->uuid + "\">"
-                + Glib::Markup::escape_text(part->base->get_MPN() + " / " + part->base->get_manufacturer()) + "</a>");
-        w_entity_label->set_markup(
-                "<a href=\"" + (std::string)part->base->entity->uuid + "\">"
-                + Glib::Markup::escape_text(part->base->entity->name + " / " + part->base->entity->manufacturer)
+                + Glib::Markup::escape_text(part->base->get_MPN() + append_with_slash(part->base->get_manufacturer()))
                 + "</a>");
-        w_package_label->set_markup(
-                "<a href=\"" + (std::string)part->base->package->uuid + "\">"
-                + Glib::Markup::escape_text(part->base->package->name + " / " + part->base->package->manufacturer)
-                + "</a>");
+        w_entity_label->set_markup("<a href=\"" + (std::string)part->base->entity->uuid + "\">"
+                                   + Glib::Markup::escape_text(part->base->entity->name
+                                                               + append_with_slash(part->base->entity->manufacturer))
+                                   + "</a>");
+        w_package_label->set_markup("<a href=\"" + (std::string)part->base->package->uuid + "\">"
+                                    + Glib::Markup::escape_text(part->base->package->name
+                                                                + append_with_slash(part->base->package->manufacturer))
+                                    + "</a>");
     }
     else {
         w_base_label->set_text("none");
-        w_entity_label->set_markup("<a href=\"" + (std::string)part->entity->uuid + "\">"
-                                   + Glib::Markup::escape_text(part->entity->name + " / " + part->entity->manufacturer)
-                                   + "</a>");
+        w_entity_label->set_markup(
+                "<a href=\"" + (std::string)part->entity->uuid + "\">"
+                + Glib::Markup::escape_text(part->entity->name + append_with_slash(part->entity->manufacturer))
+                + "</a>");
         w_package_label->set_markup(
                 "<a href=\"" + (std::string)part->package->uuid + "\">"
-                + Glib::Markup::escape_text(part->package->name + " / " + part->package->manufacturer) + "</a>");
+                + Glib::Markup::escape_text(part->package->name + append_with_slash(part->package->manufacturer))
+                + "</a>");
     }
 
     if (part->base) {
