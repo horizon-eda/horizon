@@ -990,7 +990,8 @@ bool PoolProjectManagerAppWindow::on_delete_event(GdkEventAny *ev)
 
 PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManagerProcess::Type type,
                                                               const std::vector<std::string> &args,
-                                                              const std::vector<std::string> &ienv, bool read_only)
+                                                              const std::vector<std::string> &ienv, bool read_only,
+                                                              bool is_temp)
 {
     auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
     std::string pool_base_path;
@@ -1019,7 +1020,7 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
         }
         auto &proc = processes
                              .emplace(std::piecewise_construct, std::forward_as_tuple(filename),
-                                      std::forward_as_tuple(type, args, env, pool, pool_parametric, read_only))
+                                      std::forward_as_tuple(type, args, env, pool, pool_parametric, read_only, is_temp))
                              .first->second;
         if (proc.win && pool_notebook) {
             proc.win->signal_goto().connect(sigc::mem_fun(pool_notebook, &PoolNotebook::go_to));

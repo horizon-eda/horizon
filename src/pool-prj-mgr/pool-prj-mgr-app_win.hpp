@@ -40,7 +40,8 @@ public:
     std::string get_filename() const;
 
     PoolProjectManagerProcess *spawn(PoolProjectManagerProcess::Type type, const std::vector<std::string> &args,
-                                     const std::vector<std::string> &env = {}, bool read_only = false);
+                                     const std::vector<std::string> &env = {}, bool read_only = false,
+                                     bool is_temp = false);
     PoolProjectManagerProcess *spawn_for_project(PoolProjectManagerProcess::Type type,
                                                  const std::vector<std::string> &args);
 

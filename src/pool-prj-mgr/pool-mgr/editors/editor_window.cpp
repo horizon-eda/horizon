@@ -77,7 +77,7 @@ public:
 };
 
 EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p, class PoolParametric *pp,
-                           bool read_only)
+                           bool read_only, bool is_temp)
     : Gtk::Window(), type(ty), pool(p), pool_parametric(pp),
       state_store(this, "pool-editor-win-" + std::to_string(static_cast<int>(type)))
 {
@@ -85,14 +85,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p, 
     auto hb = Gtk::manage(new Gtk::HeaderBar());
     set_titlebar(*hb);
 
-    std::string save_label;
-    if (filename.size()) {
-        save_label = "Save";
-    }
-    else {
-        save_label = "Save as..";
-    }
-    save_button = Gtk::manage(new Gtk::Button(save_label));
+    save_button = Gtk::manage(new Gtk::Button());
     if (read_only)
         save_button->set_sensitive(false);
     hb->pack_start(*save_button);
@@ -132,6 +125,19 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p, 
     editor->show();
     add(*editor);
     editor->unreference();
+
+    if (is_temp) {
+        Gio::File::create_for_path(filename)->remove();
+        store->filename.clear();
+    }
+
+    if (store->filename.size()) {
+        save_button->set_label("Save");
+    }
+    else {
+        save_button->set_label("Save as..");
+    }
+
 
     if (iface) {
         iface->signal_goto().connect([this](ObjectType t, UUID uu) { s_signal_goto.emit(t, uu); });
@@ -198,11 +204,11 @@ bool EditorWindow::get_needs_save()
 
 void EditorWindow::save()
 {
-    if (iface)
-        iface->save();
-
     if (store->filename.size()) {
+        if (iface)
+            iface->save();
         store->save();
+        need_update = true;
     }
     else {
         GtkFileChooserNative *native = gtk_file_chooser_native_new("Save", GTK_WINDOW(gobj()),
@@ -217,16 +223,21 @@ void EditorWindow::save()
         case ObjectType::ENTITY:
             chooser->set_current_folder(Glib::build_filename(pool->get_base_path(), "entities"));
             break;
+        case ObjectType::PART:
+            chooser->set_current_folder(Glib::build_filename(pool->get_base_path(), "parts"));
+            break;
         default:;
         }
 
         if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+            if (iface)
+                iface->save();
             std::string fn = fix_filename(chooser->get_filename());
             store->save_as(fn);
             save_button->set_label("Save");
+            need_update = true;
         }
     }
-    need_update = true;
 }
 
 std::string EditorWindow::fix_filename(std::string s)

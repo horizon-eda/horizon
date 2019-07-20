@@ -187,8 +187,14 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             it.second->set_text_inherit(part->base->attributes.at(it.first).second);
             it.second->property_inherit() = part->attributes.at(it.first).first;
         }
-        it.second->entry->signal_changed().connect([this] { needs_save = true; });
-        it.second->button->signal_toggled().connect([this] { needs_save = true; });
+        it.second->entry->signal_changed().connect([this, it] {
+            needs_save = true;
+            part->attributes[it.first] = it.second->get_as_pair();
+        });
+        it.second->button->signal_toggled().connect([this, it] {
+            needs_save = true;
+            part->attributes[it.first] = it.second->get_as_pair();
+        });
     }
 
     update_entries();

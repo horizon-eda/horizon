@@ -40,24 +40,16 @@ void PoolNotebook::handle_create_part()
         return;
 
     auto entity = pool.get_entity(entity_uuid);
-    GtkFileChooserNative *native =
-            gtk_file_chooser_native_new("Save Part", top->gobj(), GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
-    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-    chooser->set_do_overwrite_confirmation(true);
-    chooser->set_current_name(entity->name + ".json");
-    chooser->set_current_folder(Glib::build_filename(base_path, "parts"));
 
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        std::string fn = EditorWindow::fix_filename(chooser->get_filename());
-        Part part(horizon::UUID::random());
-        auto package = pool.get_package(package_uuid);
-        part.attributes[Part::Attribute::MPN] = {false, entity->name};
-        part.attributes[Part::Attribute::MANUFACTURER] = {false, entity->manufacturer};
-        part.package = package;
-        part.entity = entity;
-        save_json_to_file(fn, part.serialize());
-        appwin->spawn(PoolProjectManagerProcess::Type::PART, {fn});
-    }
+    Part part(horizon::UUID::random());
+    auto package = pool.get_package(package_uuid);
+    part.attributes[Part::Attribute::MPN] = {false, entity->name};
+    part.attributes[Part::Attribute::MANUFACTURER] = {false, entity->manufacturer};
+    part.package = package;
+    part.entity = entity;
+    std::string fn = pool.get_tmp_filename(ObjectType::PART, part.uuid);
+    save_json_to_file(fn, part.serialize());
+    appwin->spawn(PoolProjectManagerProcess::Type::PART, {fn}, {}, false, true);
 }
 
 void PoolNotebook::handle_create_part_from_part(const UUID &uu)
@@ -65,27 +57,16 @@ void PoolNotebook::handle_create_part_from_part(const UUID &uu)
     if (!uu)
         return;
     auto base_part = pool.get_part(uu);
-    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
-
-    GtkFileChooserNative *native =
-            gtk_file_chooser_native_new("Save Part", top->gobj(), GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
-    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-    chooser->set_do_overwrite_confirmation(true);
-    chooser->set_current_name(base_part->get_MPN() + ".json");
-    chooser->set_current_folder(Glib::path_get_dirname(pool.get_filename(ObjectType::PART, uu)));
-
-    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        std::string fn = EditorWindow::fix_filename(chooser->get_filename());
-        Part part(horizon::UUID::random());
-        part.base = base_part;
-        part.attributes[Part::Attribute::MPN] = {true, base_part->get_MPN()};
-        part.attributes[Part::Attribute::MANUFACTURER] = {true, base_part->get_manufacturer()};
-        part.attributes[Part::Attribute::VALUE] = {true, base_part->get_value()};
-        part.attributes[Part::Attribute::DESCRIPTION] = {true, base_part->get_description()};
-        part.attributes[Part::Attribute::DATASHEET] = {true, base_part->get_datasheet()};
-        save_json_to_file(fn, part.serialize());
-        appwin->spawn(PoolProjectManagerProcess::Type::PART, {fn});
-    }
+    Part part(horizon::UUID::random());
+    part.base = base_part;
+    part.attributes[Part::Attribute::MPN] = {true, base_part->get_MPN()};
+    part.attributes[Part::Attribute::MANUFACTURER] = {true, base_part->get_manufacturer()};
+    part.attributes[Part::Attribute::VALUE] = {true, base_part->get_value()};
+    part.attributes[Part::Attribute::DESCRIPTION] = {true, base_part->get_description()};
+    part.attributes[Part::Attribute::DATASHEET] = {true, base_part->get_datasheet()};
+    std::string fn = pool.get_tmp_filename(ObjectType::PART, part.uuid);
+    save_json_to_file(fn, part.serialize());
+    appwin->spawn(PoolProjectManagerProcess::Type::PART, {fn}, {}, false, true);
 }
 
 void PoolNotebook::handle_duplicate_part(const UUID &uu)

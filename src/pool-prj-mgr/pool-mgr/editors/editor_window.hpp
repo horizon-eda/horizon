@@ -21,7 +21,8 @@ public:
 
 class EditorWindow : public Gtk::Window, public PoolGotoProvider {
 public:
-    EditorWindow(ObjectType type, const std::string &filename, class Pool *p, class PoolParametric *pp, bool read_only);
+    EditorWindow(ObjectType type, const std::string &filename, class Pool *p, class PoolParametric *pp, bool read_only,
+                 bool is_temp);
     void reload();
     bool get_need_update();
     static std::string fix_filename(std::string s);
