@@ -260,7 +260,7 @@ void PoolUpdater::update_frames(const std::string &directory, const std::string 
             }
         }
         else if (Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
-            update_units(filename, Glib::build_filename(prefix, it));
+            update_frames(filename, Glib::build_filename(prefix, it));
         }
     }
 }
