@@ -30,7 +30,7 @@ public:
     void populate();
     bool get_close_prohibited() const;
     void prepare_close();
-    void pool_update(std::function<void()> cb = nullptr);
+    void pool_update(std::function<void()> cb = nullptr, const std::vector<std::string> &filenames = {});
     bool get_needs_save() const;
     void save();
     void go_to(ObjectType type, const UUID &uu);
@@ -59,6 +59,7 @@ private:
     unsigned int pool_update_n_files = 0;
     unsigned int pool_update_n_files_last = 0;
     std::function<void()> pool_update_done_cb = nullptr;
+    std::vector<std::string> pool_update_filenames;
 
     void pool_update_thread();
 

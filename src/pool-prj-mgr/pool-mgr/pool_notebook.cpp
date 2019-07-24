@@ -134,7 +134,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     appwin->signal_process_exited().connect(sigc::track_obj(
             [this](std::string filename, int status, bool modified) {
                 if (modified)
-                    pool_update();
+                    pool_update(nullptr, {filename});
             },
             *this));
 
@@ -155,12 +155,13 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
                 appwin->set_pool_update_status_text(last_filename);
                 if (last_status == PoolUpdateStatus::DONE) {
                     pool_updated(true);
-                    pool_update_n_files_last = pool_update_n_files;
+                    if (pool_update_filenames.size() == 0) // only for full update
+                        pool_update_n_files_last = pool_update_n_files;
                 }
                 else if (last_status == PoolUpdateStatus::FILE) {
                     pool_update_last_file = last_filename;
                     pool_update_n_files++;
-                    if (pool_update_n_files_last) {
+                    if (pool_update_n_files_last && pool_update_filenames.size() == 0) { // only for full update
                         appwin->set_pool_update_progress((float)pool_update_n_files / pool_update_n_files_last);
                     }
                     else {
@@ -373,7 +374,7 @@ void PoolNotebook::pool_update_thread()
                     }
                     pool_update_dispatcher.emit();
                 },
-                true);
+                true, pool_update_filenames);
     }
     catch (const std::runtime_error &e) {
         {
@@ -408,7 +409,7 @@ void PoolNotebook::pool_update_thread()
     }
 }
 
-void PoolNotebook::pool_update(std::function<void()> cb)
+void PoolNotebook::pool_update(std::function<void()> cb, const std::vector<std::string> &filenames)
 {
     if (closing)
         return;
@@ -420,6 +421,7 @@ void PoolNotebook::pool_update(std::function<void()> cb)
     pool_update_n_files = 0;
     pool_updating = true;
     pool_update_done_cb = cb;
+    pool_update_filenames = filenames;
     pool_update_status_queue.clear();
     pool_update_error_queue.clear();
     std::thread thr(&PoolNotebook::pool_update_thread, this);
