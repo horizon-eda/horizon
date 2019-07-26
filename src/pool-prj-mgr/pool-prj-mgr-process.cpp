@@ -17,7 +17,6 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(PoolProjectManagerProcess::
                                                      bool is_temp)
     : type(ty)
 {
-    std::string filename;
     if (args.size())
         filename = args.front();
     if (Glib::file_test(filename, Glib::FILE_TEST_IS_REGULAR)) {
@@ -68,7 +67,7 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(PoolProjectManagerProcess::
         if (read_only)
             argv.push_back("-r");
         proc = std::make_unique<EditorProcess>(argv, env);
-        proc->signal_exited().connect([this, filename](auto rc) {
+        proc->signal_exited().connect([this](auto rc) {
             bool modified = false;
             if (Glib::file_test(filename, Glib::FILE_TEST_IS_REGULAR)) {
                 auto info = Gio::File::create_for_path(filename)->query_info();
@@ -95,7 +94,9 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(PoolProjectManagerProcess::
 
         win->signal_hide().connect([this] {
             auto need_update = win->get_need_update();
+            filename = win->get_filename();
             delete win;
+            win = nullptr;
             s_signal_exited.emit(0, need_update);
         });
     }
@@ -106,6 +107,11 @@ void PoolProjectManagerProcess::reload()
     if (auto w = dynamic_cast<EditorWindow *>(win)) {
         w->reload();
     }
+}
+
+std::string PoolProjectManagerProcess::get_filename()
+{
+    return filename;
 }
 
 } // namespace horizon

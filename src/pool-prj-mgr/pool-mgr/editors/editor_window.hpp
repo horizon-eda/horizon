@@ -29,6 +29,7 @@ public:
     void save();
     void force_close();
     bool get_needs_save();
+    std::string get_filename();
 
 private:
     ObjectType type;

@@ -260,4 +260,10 @@ bool EditorWindow::get_need_update()
 {
     return need_update;
 }
+
+std::string EditorWindow::get_filename()
+{
+    return store->filename;
+}
+
 } // namespace horizon

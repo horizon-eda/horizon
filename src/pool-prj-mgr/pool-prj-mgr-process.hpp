@@ -16,9 +16,11 @@ public:
         return s_signal_exited;
     }
     void reload();
+    std::string get_filename();
 
 private:
     type_signal_exited s_signal_exited;
     Glib::TimeVal mtime;
+    std::string filename;
 };
 } // namespace horizon

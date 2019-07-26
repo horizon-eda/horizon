@@ -1026,8 +1026,9 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
             proc.win->signal_goto().connect(sigc::mem_fun(pool_notebook, &PoolNotebook::go_to));
         }
         proc.signal_exited().connect([filename, this](int status, bool need_update) {
+            auto real_filename = processes.at(filename).get_filename();
             processes.erase(filename);
-            s_signal_process_exited.emit(filename, status, need_update);
+            s_signal_process_exited.emit(real_filename, status, need_update);
             if (status != 0) {
                 info_bar_label->set_text("Editor for '" + filename + "' exited with status " + std::to_string(status));
                 info_bar->show();
