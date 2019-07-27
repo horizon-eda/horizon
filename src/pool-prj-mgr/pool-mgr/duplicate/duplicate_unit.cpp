@@ -66,7 +66,7 @@ public:
         pack_start(*grid, true, true, 0);
     }
 
-    void duplicate(const UUID &new_unit_uuid)
+    std::string duplicate(const UUID &new_unit_uuid)
     {
         if (grid->get_visible()) {
             Symbol new_sym(*sym);
@@ -74,7 +74,12 @@ public:
             new_sym.name = name_entry->get_text();
             auto new_sym_json = new_sym.serialize();
             new_sym_json["unit"] = (std::string)new_unit_uuid;
-            save_json_to_file(location_entry->get_filename(), new_sym_json);
+            auto filename = location_entry->get_filename();
+            save_json_to_file(filename, new_sym_json);
+            return filename;
+        }
+        else {
+            return "";
         }
     }
 
@@ -87,8 +92,8 @@ private:
 };
 
 
-DuplicateUnitWidget::DuplicateUnitWidget(Pool *p, const UUID &unit_uuid, bool optional, DuplicateWindow *w)
-    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10), pool(p), unit(pool->get_unit(unit_uuid)), win(w)
+DuplicateUnitWidget::DuplicateUnitWidget(Pool *p, const UUID &unit_uuid, bool optional)
+    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10), pool(p), unit(pool->get_unit(unit_uuid))
 {
     auto la = Gtk::manage(new Gtk::Label);
     la->set_markup("<b>Unit: " + unit->name + "</b>");
@@ -161,22 +166,22 @@ DuplicateUnitWidget::DuplicateUnitWidget(Pool *p, const UUID &unit_uuid, bool op
     }
 }
 
-UUID DuplicateUnitWidget::duplicate()
+UUID DuplicateUnitWidget::duplicate(std::vector<std::string> *filenames)
 {
     if (grid->get_visible()) {
         Unit new_unit(*unit);
         new_unit.uuid = UUID::random();
         new_unit.name = name_entry->get_text();
         save_json_to_file(location_entry->get_filename(), new_unit.serialize());
+        if (filenames)
+            filenames->push_back(location_entry->get_filename());
 
         for (auto ch : get_children()) {
             if (auto c = dynamic_cast<DuplicateSymbolWidget *>(ch)) {
-                c->duplicate(new_unit.uuid);
+                auto symbol_filename = c->duplicate(new_unit.uuid);
+                if (filenames)
+                    filenames->push_back(symbol_filename);
             }
-        }
-        if (win) {
-            win->duplicated = true;
-            win->close();
         }
         return new_unit.uuid;
     }

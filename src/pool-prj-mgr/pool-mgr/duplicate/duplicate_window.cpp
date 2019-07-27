@@ -25,14 +25,14 @@ DuplicateWindow::DuplicateWindow(class Pool *p, ObjectType ty, const UUID &uu) :
     set_title("Duplicate " + object_descriptions.at(ty).name);
 
     if (ty == ObjectType::UNIT) {
-        auto w = Gtk::manage(new DuplicateUnitWidget(pool, uu, false, this));
+        auto w = Gtk::manage(new DuplicateUnitWidget(pool, uu, false));
         box->pack_start(*w, true, true, 0);
         w->show();
         duplicate_widget = w;
     }
     else if (ty == ObjectType::ENTITY) {
         auto ubox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
-        auto w = Gtk::manage(new DuplicateEntityWidget(pool, uu, ubox, false, this));
+        auto w = Gtk::manage(new DuplicateEntityWidget(pool, uu, ubox, false));
         box->pack_start(*w, true, true, 0);
         box->pack_start(*ubox, true, true, 0);
         w->show();
@@ -41,7 +41,7 @@ DuplicateWindow::DuplicateWindow(class Pool *p, ObjectType ty, const UUID &uu) :
     }
     else if (ty == ObjectType::PART) {
         auto ubox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
-        auto w = Gtk::manage(new DuplicatePartWidget(pool, uu, ubox, this));
+        auto w = Gtk::manage(new DuplicatePartWidget(pool, uu, ubox));
         box->pack_start(*w, true, true, 0);
         box->pack_start(*ubox, true, true, 0);
         w->show();
@@ -51,9 +51,9 @@ DuplicateWindow::DuplicateWindow(class Pool *p, ObjectType ty, const UUID &uu) :
     duplicate_button->signal_clicked().connect(sigc::mem_fun(*this, &DuplicateWindow::handle_duplicate));
 }
 
-bool DuplicateWindow::get_duplicated() const
+std::vector<std::string> DuplicateWindow::get_filenames() const
 {
-    return duplicated;
+    return filenames;
 }
 
 void DuplicateWindow::handle_duplicate()
@@ -62,7 +62,8 @@ void DuplicateWindow::handle_duplicate()
         return;
     std::string error_str;
     try {
-        duplicate_widget->duplicate();
+        filenames.clear();
+        duplicate_widget->duplicate(&filenames);
     }
     catch (const std::exception &e) {
         error_str = e.what();
@@ -74,9 +75,11 @@ void DuplicateWindow::handle_duplicate()
         error_str = "unknown exception";
     }
     if (error_str.size()) {
+        filenames.clear();
         Gtk::MessageDialog md(*this, "Error duplicating", false /* use_markup */, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
         md.set_secondary_text(error_str);
         md.run();
     }
+    close();
 }
 } // namespace horizon

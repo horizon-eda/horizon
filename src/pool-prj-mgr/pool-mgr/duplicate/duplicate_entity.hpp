@@ -6,10 +6,9 @@
 namespace horizon {
 class DuplicateEntityWidget : public Gtk::Box, public DuplicateBase {
 public:
-    DuplicateEntityWidget(class Pool *p, const UUID &entity_uuid, Gtk::Box *ubox, bool optional = false,
-                          class DuplicateWindow *w = nullptr);
+    DuplicateEntityWidget(class Pool *p, const UUID &entity_uuid, Gtk::Box *ubox, bool optional = false);
 
-    UUID duplicate() override;
+    UUID duplicate(std::vector<std::string> *filenames) override;
     UUID get_uuid() const;
 
 private:
@@ -19,7 +18,5 @@ private:
     class LocationEntry *location_entry = nullptr;
     Gtk::Grid *grid = nullptr;
     Gtk::Box *unit_box = nullptr;
-
-    class DuplicateWindow *win;
 };
 } // namespace horizon

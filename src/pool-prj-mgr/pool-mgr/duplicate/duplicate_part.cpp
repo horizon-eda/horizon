@@ -67,7 +67,7 @@ public:
         pack_start(*grid, true, true, 0);
     }
 
-    UUID duplicate()
+    UUID duplicate(std::vector<std::string> *filenames)
     {
         if (grid->get_visible()) {
             return DuplicatePartWidget::duplicate_package(pool, pkg->uuid, location_entry->get_filename(),
@@ -86,8 +86,8 @@ private:
     Gtk::Grid *grid = nullptr;
 };
 
-DuplicatePartWidget::DuplicatePartWidget(Pool *p, const UUID &part_uuid, Gtk::Box *ubox, DuplicateWindow *w)
-    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10), pool(p), part(pool->get_part(part_uuid)), win(w)
+DuplicatePartWidget::DuplicatePartWidget(Pool *p, const UUID &part_uuid, Gtk::Box *ubox)
+    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10), pool(p), part(pool->get_part(part_uuid))
 {
     auto la = Gtk::manage(new Gtk::Label);
     la->set_markup("<b>Part: " + part->get_MPN() + "</b>");
@@ -131,7 +131,7 @@ DuplicatePartWidget::DuplicatePartWidget(Pool *p, const UUID &part_uuid, Gtk::Bo
     dew->show();
 }
 
-UUID DuplicatePartWidget::duplicate()
+UUID DuplicatePartWidget::duplicate(std::vector<std::string> *filenames)
 {
     Part new_part(*part);
     new_part.uuid = UUID::random();
@@ -139,21 +139,22 @@ UUID DuplicatePartWidget::duplicate()
     new_part.attributes.at(Part::Attribute::MANUFACTURER).second = manufacturer_entry->get_text();
     auto new_part_json = new_part.serialize();
 
-    auto entity_uuid = dew->duplicate();
+    auto entity_uuid = dew->duplicate(filenames);
     new_part_json["entity"] = (std::string)entity_uuid;
 
-    auto pkg_uuid = dpw->duplicate();
+    auto pkg_uuid = dpw->duplicate(filenames);
     new_part_json["package"] = (std::string)pkg_uuid;
 
-    save_json_to_file(location_entry->get_filename(), new_part_json);
+    auto part_filename = location_entry->get_filename();
+    if (filenames)
+        filenames->push_back(part_filename);
+    save_json_to_file(part_filename, new_part_json);
 
-    win->duplicated = true;
-    win->close();
     return new_part.uuid;
 }
 
 UUID DuplicatePartWidget::duplicate_package(Pool *pool, const UUID &uu, const std::string &new_dir,
-                                            const std::string &new_name)
+                                            const std::string &new_name, std::vector<std::string> *filenames)
 {
     auto padstack_dir = Glib::build_filename(new_dir, "padstacks");
     auto fi = Gio::File::create_for_path(padstack_dir);
@@ -175,10 +176,14 @@ UUID DuplicatePartWidget::duplicate_package(Pool *pool, const UUID &uu, const st
                 pkg_json["pads"][(std::string)it.first]["padstack"] = (std::string)padstack.uuid;
             }
         }
-        save_json_to_file(Glib::build_filename(padstack_dir, padstack_basename), padstack.serialize());
+        auto new_padstack_filename = Glib::build_filename(padstack_dir, padstack_basename);
+        save_json_to_file(new_padstack_filename, padstack.serialize());
+        if (filenames)
+            filenames->push_back(new_padstack_filename);
     }
     std::string new_pkg_filename = Glib::build_filename(new_dir, "package.json");
-
+    if (filenames)
+        filenames->push_back(new_pkg_filename);
     save_json_to_file(new_pkg_filename, pkg_json);
     return pkg.uuid;
 }

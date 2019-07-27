@@ -11,9 +11,8 @@
 #include "nlohmann/json.hpp"
 
 namespace horizon {
-DuplicateEntityWidget::DuplicateEntityWidget(Pool *p, const UUID &entity_uuid, Gtk::Box *ubox, bool optional,
-                                             DuplicateWindow *w)
-    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10), pool(p), entity(pool->get_entity(entity_uuid)), win(w)
+DuplicateEntityWidget::DuplicateEntityWidget(Pool *p, const UUID &entity_uuid, Gtk::Box *ubox, bool optional)
+    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10), pool(p), entity(pool->get_entity(entity_uuid))
 {
     auto la = Gtk::manage(new Gtk::Label);
     la->set_markup("<b>Entity: " + entity->name + "</b>");
@@ -98,7 +97,7 @@ UUID DuplicateEntityWidget::get_uuid() const
     return entity->uuid;
 }
 
-UUID DuplicateEntityWidget::duplicate()
+UUID DuplicateEntityWidget::duplicate(std::vector<std::string> *filenames)
 {
     if (grid->get_visible()) {
         Entity new_entity(*entity);
@@ -110,7 +109,7 @@ UUID DuplicateEntityWidget::duplicate()
         for (auto ch : unit_box->get_children()) {
             if (auto c = dynamic_cast<DuplicateUnitWidget *>(ch)) {
                 auto old_unit_uuid = c->get_uuid();
-                auto new_unit_uuid = c->duplicate();
+                auto new_unit_uuid = c->duplicate(filenames);
                 unit_map[old_unit_uuid] = new_unit_uuid;
             }
         }
@@ -120,12 +119,10 @@ UUID DuplicateEntityWidget::duplicate()
             UUID unit_uu(v.at("unit").get<std::string>());
             v["unit"] = (std::string)unit_map.at(unit_uu);
         }
-
-        save_json_to_file(location_entry->get_filename(), new_entity_json);
-        if (win) {
-            win->duplicated = true;
-            win->close();
-        }
+        auto entity_filename = location_entry->get_filename();
+        if (filenames)
+            filenames->push_back(entity_filename);
+        save_json_to_file(entity_filename, new_entity_json);
         return new_entity.uuid;
     }
     else {
