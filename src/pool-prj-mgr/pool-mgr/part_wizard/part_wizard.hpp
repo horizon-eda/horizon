@@ -22,7 +22,7 @@ public:
                const std::string &bp, class Pool *po, class PoolProjectManagerAppWindow *aw);
     static PartWizard *create(const class Package *p, const std::string &pool_base_path, class Pool *po,
                               class PoolProjectManagerAppWindow *aw);
-    bool get_has_finished() const;
+    std::vector<std::string> get_files_saved() const;
     void reload();
 
     ~PartWizard();
@@ -109,7 +109,6 @@ private:
     void handle_back();
     void handle_finish();
     void finish();
-    bool has_finished = false;
 
     std::string get_rel_part_filename();
     void update_can_finish();
@@ -120,6 +119,7 @@ private:
     bool part_filename_valid = false;
     bool gates_valid = false;
     std::vector<std::string> get_filenames();
+    std::vector<std::string> files_saved;
 
     Mode mode = Mode::ASSIGN;
     void set_mode(Mode mo);

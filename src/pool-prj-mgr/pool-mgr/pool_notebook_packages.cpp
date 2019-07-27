@@ -144,8 +144,9 @@ void PoolNotebook::handle_part_wizard(const UUID &uu)
         part_wizard = PartWizard::create(pkg, base_path, &pool, appwin);
         part_wizard->present();
         part_wizard->signal_hide().connect([this] {
-            if (part_wizard->get_has_finished()) {
-                pool_update();
+            auto files_saved = part_wizard->get_files_saved();
+            if (files_saved.size()) {
+                pool_update(nullptr, files_saved);
             }
             delete part_wizard;
             part_wizard = nullptr;

@@ -149,7 +149,7 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             md.run();
             return true; // keep open
         }
-        if (has_finished)
+        if (files_saved.size())
             return false;
 
         Gtk::MessageDialog md(*this, "Really close?", false /* use_markup */, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
@@ -226,8 +226,6 @@ void PartWizard::handle_back()
 std::vector<std::string> PartWizard::get_filenames()
 {
     std::vector<std::string> filenames;
-    filenames.push_back(entity_location_entry->get_filename());
-    filenames.push_back(part_location_entry->get_filename());
     auto children = edit_left_box->get_children();
     for (auto ch : children) {
         if (auto ed = dynamic_cast<GateEditorWizard *>(ch)) {
@@ -237,7 +235,8 @@ std::vector<std::string> PartWizard::get_filenames()
             filenames.push_back(symbol_filename);
         }
     }
-
+    filenames.push_back(entity_location_entry->get_filename());
+    filenames.push_back(part_location_entry->get_filename());
     return filenames;
 }
 
@@ -271,7 +270,7 @@ void PartWizard::handle_finish()
 
     try {
         finish();
-        has_finished = true;
+        files_saved = filenames;
         Gtk::Window::close();
     }
     catch (const std::exception &e) {
@@ -286,9 +285,9 @@ void PartWizard::handle_finish()
     }
 }
 
-bool PartWizard::get_has_finished() const
+std::vector<std::string> PartWizard::get_files_saved() const
 {
-    return has_finished;
+    return files_saved;
 }
 
 std::string PartWizard::get_rel_part_filename()
