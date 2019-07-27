@@ -29,7 +29,12 @@ public:
     void save();
     void force_close();
     bool get_needs_save();
-    std::string get_filename();
+
+    typedef sigc::signal<void, std::string> type_signal_filename_changed;
+    type_signal_filename_changed signal_filename_changed()
+    {
+        return s_signal_filename_changed;
+    }
 
 private:
     ObjectType type;
@@ -39,6 +44,8 @@ private:
     class Pool *pool;
     class PoolParametric *pool_parametric;
     bool need_update = false;
+
+    type_signal_filename_changed s_signal_filename_changed;
 
     WindowStateStore state_store;
 };

@@ -233,6 +233,7 @@ void EditorWindow::save()
             if (iface)
                 iface->save();
             std::string fn = fix_filename(chooser->get_filename());
+            s_signal_filename_changed.emit(fn);
             store->save_as(fn);
             save_button->set_label("Save");
             need_update = true;
@@ -259,11 +260,6 @@ void EditorWindow::reload()
 bool EditorWindow::get_need_update()
 {
     return need_update;
-}
-
-std::string EditorWindow::get_filename()
-{
-    return store->filename;
 }
 
 } // namespace horizon

@@ -184,6 +184,29 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     }
 }
 
+PoolProjectManagerProcess *PoolProjectManagerAppWindow::find_process(const std::string &filename)
+{
+    for (auto &it : processes) {
+        if (it.second.get_filename() == filename)
+            return &it.second;
+    }
+    return nullptr;
+}
+
+PoolProjectManagerProcess *PoolProjectManagerAppWindow::find_top_schematic_process()
+{
+    if (!project)
+        return nullptr;
+    return find_process(project->get_top_block().schematic_filename);
+}
+
+PoolProjectManagerProcess *PoolProjectManagerAppWindow::find_board_process()
+{
+    if (!project)
+        return nullptr;
+    return find_process(project->board_filename);
+}
+
 bool PoolProjectManagerAppWindow::check_pools()
 {
     if (PoolManager::get().get_pools().size() == 0) {
@@ -210,9 +233,8 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         part_browser_window->present(timestamp);
     }
     else if (op == "schematic-select") {
-
-        if (processes.count(project->board_filename)) {
-            auto pid = processes.at(project->board_filename).proc->get_pid();
+        if (auto proc = find_board_process()) {
+            auto pid = proc->proc->get_pid();
             json tx;
             tx["op"] = "highlight";
             tx["objects"] = j.at("selection");
@@ -228,9 +250,8 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         part_browser_window->set_can_assign(can_assign);
     }
     else if (op == "board-select") {
-        auto top_block = project->get_top_block();
-        if (processes.count(top_block.schematic_filename)) {
-            auto pid = processes.at(top_block.schematic_filename).proc->get_pid();
+        if (auto proc = find_top_schematic_process()) {
+            auto pid = proc->proc->get_pid();
             json tx;
             tx["op"] = "highlight";
             tx["objects"] = j.at("selection");
@@ -238,8 +259,8 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         }
     }
     else if (op == "to-board") {
-        if (processes.count(project->board_filename)) {
-            auto pid = processes.at(project->board_filename).proc->get_pid();
+        if (auto proc = find_board_process()) {
+            auto pid = proc->proc->get_pid();
             json tx;
             tx["op"] = "place";
             tx["time"] = timestamp;
@@ -252,36 +273,34 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         part_browser_window->present(timestamp);
     }
     else if (op == "has-board") {
-        return processes.count(project->board_filename) > 0;
+        return find_board_process() != nullptr;
     }
     else if (op == "has-schematic") {
-        auto top_block = project->get_top_block();
-        return processes.count(top_block.schematic_filename) > 0;
+        return find_top_schematic_process() != nullptr;
     }
     else if (op == "get-board-pid") {
-        if (processes.count(project->board_filename))
-            return processes.at(project->board_filename).proc->get_pid();
+        if (auto proc = find_board_process())
+            return proc->proc->get_pid();
         else
             return -1;
     }
     else if (op == "get-schematic-pid") {
-        auto top_block = project->get_top_block();
-        if (processes.count(top_block.schematic_filename))
-            return processes.at(top_block.schematic_filename).proc->get_pid();
+        if (auto proc = find_top_schematic_process())
+            return proc->proc->get_pid();
         else
             return -1;
     }
     else if (op == "reload-netlist") {
-        if (processes.count(project->board_filename)) {
-            auto pid = processes.at(project->board_filename).proc->get_pid();
+        if (auto proc = find_board_process()) {
+            auto pid = proc->proc->get_pid();
             json tx;
             tx["op"] = "reload-netlist";
             app->send_json(pid, tx);
         }
     }
     else if (op == "present-board") {
-        if (processes.count(project->board_filename)) {
-            auto pid = processes.at(project->board_filename).proc->get_pid();
+        if (auto proc = find_board_process()) {
+            auto pid = proc->proc->get_pid();
             json tx;
             tx["op"] = "present";
             tx["time"] = timestamp;
@@ -289,9 +308,8 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         }
     }
     else if (op == "present-schematic") {
-        auto top_block = project->get_top_block();
-        if (processes.count(top_block.schematic_filename)) {
-            auto pid = processes.at(top_block.schematic_filename).proc->get_pid();
+        if (auto proc = find_top_schematic_process()) {
+            auto pid = proc->proc->get_pid();
             json tx;
             tx["op"] = "present";
             tx["time"] = timestamp;
@@ -358,9 +376,8 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         }
     }
     else if (op == "backannotate") {
-        auto top_block = project->get_top_block();
-        if (processes.count(top_block.schematic_filename)) {
-            auto pid = processes.at(top_block.schematic_filename).proc->get_pid();
+        if (auto proc = find_top_schematic_process()) {
+            auto pid = proc->proc->get_pid();
             json tx;
             tx["op"] = "backannotate";
             tx["connections"] = j.at("connections");
@@ -569,12 +586,12 @@ bool PoolProjectManagerAppWindow::close_pool_or_project()
         md.run();
         return false;
     }
-    else if (pol.files_need_save.size()) {
+    else if (pol.procs_need_save.size()) {
         ConfirmCloseDialog dia(this);
-        std::map<std::string, std::map<std::string, bool>> files;
+        std::map<std::string, std::map<UUID, std::string>> files;
         auto &this_files = files[get_filename()];
-        for (const auto &it : pol.files_need_save) {
-            this_files[it] = true;
+        for (const auto &it : pol.procs_need_save) {
+            this_files[it] = get_proc_filename(it);
         }
         dia.set_files(files);
         auto r = dia.run();
@@ -582,15 +599,16 @@ bool PoolProjectManagerAppWindow::close_pool_or_project()
             prepare_close();
             auto files_from_dia = dia.get_files();
             auto &this_files_from_dia = files_from_dia.at(get_filename());
-            for (auto &it : this_files_from_dia) {
-                if (it.second && r == ConfirmCloseDialog::RESPONSE_SAVE)
-                    process_save(it.first);
+            if (r == ConfirmCloseDialog::RESPONSE_SAVE) {
+                for (auto &it : this_files_from_dia) { // files that need save
+                    process_save(it);
+                }
             }
-            std::set<std::string> procs;
+            std::set<UUID> open_procs;
             for (auto &it : processes) {
-                procs.emplace(it.first);
+                open_procs.emplace(it.first);
             }
-            for (auto &it : procs) {
+            for (auto &it : open_procs) {
                 process_close(it);
             }
             wait_for_all_processes();
@@ -602,11 +620,11 @@ bool PoolProjectManagerAppWindow::close_pool_or_project()
     }
     else {
         prepare_close();
-        std::set<std::string> procs;
+        std::set<UUID> open_procs;
         for (auto &it : processes) {
-            procs.emplace(it.first);
+            open_procs.emplace(it.first);
         }
-        for (auto &it : procs) {
+        for (auto &it : open_procs) {
             process_close(it);
         }
         wait_for_all_processes();
@@ -964,8 +982,8 @@ void PoolProjectManagerAppWindow::open_pool(const std::string &pool_json, Object
 void PoolProjectManagerAppWindow::handle_place_part(const UUID &uu)
 {
     auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
-    if (processes.count(project->get_top_block().schematic_filename)) {
-        auto pid = processes.at(project->get_top_block().schematic_filename).proc->get_pid();
+    if (auto proc = find_top_schematic_process()) {
+        auto pid = proc->proc->get_pid();
         allow_set_foreground_window(pid);
         app->send_json(pid, {{"op", "place-part"}, {"part", (std::string)uu}});
     }
@@ -974,8 +992,8 @@ void PoolProjectManagerAppWindow::handle_place_part(const UUID &uu)
 void PoolProjectManagerAppWindow::handle_assign_part(const UUID &uu)
 {
     auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
-    if (processes.count(project->get_top_block().schematic_filename)) {
-        auto pid = processes.at(project->get_top_block().schematic_filename).proc->get_pid();
+    if (auto proc = find_top_schematic_process()) {
+        auto pid = proc->proc->get_pid();
         allow_set_foreground_window(pid);
         app->send_json(pid, {{"op", "assign-part"}, {"part", (std::string)uu}});
     }
@@ -1001,7 +1019,7 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
         pool_base_path = PoolManager::get().get_by_uuid(project->pool_uuid)->base_path;
     else
         throw std::runtime_error("can't locate pool");
-    if (processes.count(args.at(0)) == 0) { // need to launch imp
+    if (find_process(args.at(0)) == nullptr || args.at(0).size() == 0) { // need to launch imp
 
         std::vector<std::string> env = {"HORIZON_POOL=" + pool_base_path,
                                         "HORIZON_EP_BROADCAST=" + app->get_ep_broadcast(),
@@ -1018,19 +1036,22 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
                 return nullptr;
             }
         }
-        auto &proc = processes
-                             .emplace(std::piecewise_construct, std::forward_as_tuple(filename),
-                                      std::forward_as_tuple(type, args, env, pool, pool_parametric, read_only, is_temp))
-                             .first->second;
+        auto uu = UUID::random();
+        auto &proc =
+                processes
+                        .emplace(std::piecewise_construct, std::forward_as_tuple(uu),
+                                 std::forward_as_tuple(uu, type, args, env, pool, pool_parametric, read_only, is_temp))
+                        .first->second;
         if (proc.win && pool_notebook) {
             proc.win->signal_goto().connect(sigc::mem_fun(pool_notebook, &PoolNotebook::go_to));
         }
-        proc.signal_exited().connect([filename, this](int status, bool need_update) {
-            auto real_filename = processes.at(filename).get_filename();
-            processes.erase(filename);
+        proc.signal_exited().connect([uu, this](int status, bool need_update) {
+            auto real_filename = processes.at(uu).get_filename();
+            processes.erase(uu);
             s_signal_process_exited.emit(real_filename, status, need_update);
             if (status != 0) {
-                info_bar_label->set_text("Editor for '" + filename + "' exited with status " + std::to_string(status));
+                info_bar_label->set_text("Editor for '" + real_filename + "' exited with status "
+                                         + std::to_string(status));
                 info_bar->show();
 #if GTK_CHECK_VERSION(3, 22, 29)
                 gtk_info_bar_set_revealed(info_bar->gobj(), true);
@@ -1040,16 +1061,16 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
         return &proc;
     }
     else { // present imp
-        auto &proc = processes.at(args.at(0));
-        if (proc.proc) {
-            auto pid = proc.proc->get_pid();
+        auto proc = find_process(args.at(0));
+        if (proc->proc) {
+            auto pid = proc->proc->get_pid();
             Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application())
                     ->send_json(pid, {{"op", "present"}});
         }
         else {
-            proc.win->present();
+            proc->win->present();
         }
-        return &proc;
+        return proc;
     }
 }
 
@@ -1059,17 +1080,25 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn_for_project(PoolPr
     return spawn(type, args, {"HORIZON_POOL_CACHE=" + project->pool_cache_directory});
 }
 
-void PoolProjectManagerAppWindow::process_save(const std::string &file)
+std::string PoolProjectManagerAppWindow::get_proc_filename(const UUID &uu)
 {
-    if (pool_notebook && get_filename() == file) {
+    if (uu == uuid_pool_manager || uu == uuid_project_manager)
+        return get_filename();
+    else
+        return processes.at(uu).get_filename();
+}
+
+void PoolProjectManagerAppWindow::process_save(const UUID &uu)
+{
+    if (pool_notebook && uu == uuid_pool_manager) {
         pool_notebook->save();
         return;
     }
-    if (project && get_filename() == file) {
+    if (project && uu == uuid_project_manager) {
         save_project();
         return;
     }
-    auto &proc = processes.at(file);
+    auto &proc = processes.at(uu);
     if (proc.win) {
         proc.win->save();
     }
@@ -1080,9 +1109,9 @@ void PoolProjectManagerAppWindow::process_save(const std::string &file)
     }
 }
 
-void PoolProjectManagerAppWindow::process_close(const std::string &file)
+void PoolProjectManagerAppWindow::process_close(const UUID &uu)
 {
-    auto &proc = processes.at(file);
+    auto &proc = processes.at(uu);
     if (proc.win) {
         proc.win->force_close();
     }
@@ -1100,7 +1129,7 @@ std::string PoolProjectManagerAppWindow::get_filename() const
     else if (project)
         return project_filename;
     else
-        return "No open pool or project";
+        return "";
 }
 
 PoolProjectManagerAppWindow::ClosePolicy PoolProjectManagerAppWindow::get_close_policy()
@@ -1111,11 +1140,11 @@ PoolProjectManagerAppWindow::ClosePolicy PoolProjectManagerAppWindow::get_close_
         r.can_close = !close_prohibited;
         r.reason = "Pool is updating or dialog is open";
         if (pool_notebook->get_needs_save())
-            r.files_need_save.push_back(Glib::build_filename(pool->get_base_path(), "pool.json"));
+            r.procs_need_save.push_back(uuid_pool_manager);
     }
     if (project) {
         if (project_needs_save) {
-            r.files_need_save.push_back(project_filename);
+            r.procs_need_save.push_back(uuid_project_manager);
         }
     }
     for (auto &proc : processes) {
@@ -1131,15 +1160,15 @@ PoolProjectManagerAppWindow::ClosePolicy PoolProjectManagerAppWindow::get_close_
                 needs_save = false;
         }
         if (needs_save) {
-            r.files_need_save.push_back(proc.first);
+            r.procs_need_save.push_back(proc.first);
         }
     }
     return r;
 }
 
-std::map<std::string, PoolProjectManagerProcess *> PoolProjectManagerAppWindow::get_processes()
+std::map<UUID, PoolProjectManagerProcess *> PoolProjectManagerAppWindow::get_processes()
 {
-    std::map<std::string, PoolProjectManagerProcess *> r;
+    std::map<UUID, PoolProjectManagerProcess *> r;
     for (auto &it : processes) {
         r.emplace(it.first, &it.second);
     }
@@ -1151,7 +1180,7 @@ void PoolProjectManagerAppWindow::cleanup_pool_cache()
     if (project == nullptr)
         return;
     auto pol = get_close_policy();
-    if (pol.files_need_save.size()) {
+    if (pol.procs_need_save.size()) {
         Gtk::MessageDialog md(*pool_cache_window, "Close or save all open files first", false, Gtk::MESSAGE_INFO,
                               Gtk::BUTTONS_OK);
         md.run();

@@ -45,7 +45,7 @@ public:
     PoolProjectManagerProcess *spawn_for_project(PoolProjectManagerProcess::Type type,
                                                  const std::vector<std::string> &args);
 
-    std::map<std::string, PoolProjectManagerProcess *> get_processes();
+    std::map<UUID, PoolProjectManagerProcess *> get_processes();
 
     class Pool *pool = nullptr;
     class PoolParametric *pool_parametric = nullptr;
@@ -61,13 +61,14 @@ public:
     public:
         bool can_close = true;
         std::string reason;
-        std::vector<std::string> files_need_save;
+        std::vector<UUID> procs_need_save;
     };
 
     ClosePolicy get_close_policy();
 
-    void process_save(const std::string &file);
-    void process_close(const std::string &file);
+    std::string get_proc_filename(const UUID &uu);
+    void process_save(const UUID &uu);
+    void process_close(const UUID &uu);
     void cleanup_pool_cache();
 
     enum class ViewMode { OPEN, POOL, DOWNLOAD, PROJECT, CREATE_PROJECT, CREATE_POOL };
@@ -151,8 +152,14 @@ private:
 
     WindowStateStore state_store;
 
-    std::map<std::string, PoolProjectManagerProcess> processes;
+    std::map<UUID, PoolProjectManagerProcess> processes;
     std::map<int, bool> pids_need_save;
+    PoolProjectManagerProcess *find_process(const std::string &filename);
+    PoolProjectManagerProcess *find_top_schematic_process();
+    PoolProjectManagerProcess *find_board_process();
+
+    const UUID uuid_pool_manager = "1b9eecbe-7408-4b99-9aec-170d3658004a";
+    const UUID uuid_project_manager = "144a4ad6-4c7c-4136-9920-f58f954c678e";
 
     type_signal_process_exited s_signal_process_exited;
 

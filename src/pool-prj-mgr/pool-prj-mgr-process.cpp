@@ -10,12 +10,12 @@ template <typename T> constexpr bool any_of(T value, std::initializer_list<T> ch
 }
 
 
-PoolProjectManagerProcess::PoolProjectManagerProcess(PoolProjectManagerProcess::Type ty,
+PoolProjectManagerProcess::PoolProjectManagerProcess(const UUID &uu, PoolProjectManagerProcess::Type ty,
                                                      const std::vector<std::string> &args,
                                                      const std::vector<std::string> &ienv, Pool *pool,
                                                      class PoolParametric *pool_parametric, bool read_only,
                                                      bool is_temp)
-    : type(ty)
+    : uuid(uu), type(ty)
 {
     if (args.size())
         filename = args.front();
@@ -91,10 +91,10 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(PoolProjectManagerProcess::
         default:;
         }
         win->present();
+        win->signal_filename_changed().connect([this](std::string new_filename) { filename = new_filename; });
 
         win->signal_hide().connect([this] {
             auto need_update = win->get_need_update();
-            filename = win->get_filename();
             delete win;
             win = nullptr;
             s_signal_exited.emit(0, need_update);

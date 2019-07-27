@@ -22,7 +22,7 @@ ConfirmCloseDialog::ConfirmCloseDialog(Gtk::Window *parent)
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn("File"));
         tvc->pack_start(*cr_toggle, false);
         tvc->pack_start(*cr_text, true);
-        tvc->add_attribute(cr_text->property_text(), tree_columns.display_name);
+        tvc->add_attribute(cr_text->property_markup(), tree_columns.display_name);
         tvc->add_attribute(cr_toggle->property_active(), tree_columns.save);
         tvc->add_attribute(cr_toggle->property_inconsistent(), tree_columns.inconsistent);
 
@@ -85,7 +85,7 @@ ConfirmCloseDialog::ConfirmCloseDialog(Gtk::Window *parent)
     get_content_area()->set_spacing(0);
 }
 
-void ConfirmCloseDialog::set_files(const std::map<std::string, std::map<std::string, bool>> &files)
+void ConfirmCloseDialog::set_files(std::map<std::string, std::map<UUID, std::string>> &files)
 {
     store->clear();
     Gtk::TreeModel::Row row;
@@ -93,15 +93,20 @@ void ConfirmCloseDialog::set_files(const std::map<std::string, std::map<std::str
         auto itt = store->append();
         row = *itt;
         row[tree_columns.name] = it.first;
-        row[tree_columns.display_name] = it.first;
+        row[tree_columns.display_name] = Glib::Markup::escape_text(it.first);
         auto dir_parent = Gio::File::create_for_path(it.first)->get_parent();
         row[tree_columns.save] = true;
         row[tree_columns.inconsistent] = false;
         for (const auto &it2 : it.second) {
             auto itt2 = store->append(itt->children());
             row = *itt2;
-            row[tree_columns.name] = it2.first;
-            row[tree_columns.display_name] = dir_parent->get_relative_path(Gio::File::create_for_path(it2.first));
+            row[tree_columns.name] = it2.second;
+            row[tree_columns.uuid] = it2.first;
+            if (it2.second.size())
+                row[tree_columns.display_name] = Glib::Markup::escape_text(
+                        dir_parent->get_relative_path(Gio::File::create_for_path(it2.second)));
+            else
+                row[tree_columns.display_name] = "<i>not saved yet</i>";
             row[tree_columns.save] = true;
             row[tree_columns.inconsistent] = false;
         }
@@ -109,16 +114,17 @@ void ConfirmCloseDialog::set_files(const std::map<std::string, std::map<std::str
     tv->expand_all();
 }
 
-std::map<std::string, std::map<std::string, bool>> ConfirmCloseDialog::get_files() const
+std::map<std::string, std::set<UUID>> ConfirmCloseDialog::get_files() const
 {
-    std::map<std::string, std::map<std::string, bool>> r;
+    std::map<std::string, std::set<UUID>> r;
     Gtk::TreeModel::Row row;
     for (const auto &it : store->children()) {
         row = *it;
         auto &w = r[static_cast<std::string>(static_cast<Glib::ustring>(row[tree_columns.name]))];
         for (const auto &it2 : it->children()) {
             row = *it2;
-            w[static_cast<std::string>(static_cast<Glib::ustring>(row[tree_columns.name]))] = row[tree_columns.save];
+            if (row[tree_columns.save])
+                w.insert(row.get_value(tree_columns.uuid));
         }
     }
     return r;

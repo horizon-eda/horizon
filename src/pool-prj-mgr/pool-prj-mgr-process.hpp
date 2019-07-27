@@ -1,12 +1,15 @@
 #pragma once
 #include "util/editor_process.hpp"
+#include "util/uuid.hpp"
 
 namespace horizon {
 class PoolProjectManagerProcess {
 public:
     enum class Type { IMP_SYMBOL, IMP_PADSTACK, IMP_PACKAGE, IMP_SCHEMATIC, IMP_BOARD, IMP_FRAME, UNIT, ENTITY, PART };
-    PoolProjectManagerProcess(Type ty, const std::vector<std::string> &args, const std::vector<std::string> &env,
-                              class Pool *pool, class PoolParametric *pool_parametric, bool read_only, bool is_temp);
+    PoolProjectManagerProcess(const UUID &uu, Type ty, const std::vector<std::string> &args,
+                              const std::vector<std::string> &env, class Pool *pool,
+                              class PoolParametric *pool_parametric, bool read_only, bool is_temp);
+    UUID uuid;
     Type type;
     std::unique_ptr<EditorProcess> proc = nullptr;
     class EditorWindow *win = nullptr;

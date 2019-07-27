@@ -224,10 +224,11 @@ void PoolProjectManagerApplication::on_action_quit()
     // must remove the window from the application. One way of doing this
     // is to hide the window. See comment in create_appwindow().
     auto windows = dynamic_cast_vector<PoolProjectManagerAppWindow *>(get_windows());
-    std::map<std::string, std::map<std::string, bool>> files;
+    std::map<std::string, std::map<UUID, std::string>> files;
     std::map<std::string, PoolProjectManagerAppWindow *> files_windows;
     for (auto win : windows) {
-        files_windows[win->get_filename()] = win;
+        if (win->get_filename().size())
+            files_windows[win->get_filename()] = win;
     }
 
     bool need_dialog = false;
@@ -243,9 +244,9 @@ void PoolProjectManagerApplication::on_action_quit()
             return;
         }
         auto &fis = files[filename];
-        for (const auto &fi : pol.files_need_save) {
+        for (const auto &it : pol.procs_need_save) {
             need_dialog = true;
-            fis[fi] = true;
+            fis[it] = win->get_proc_filename(it);
         }
     }
 
@@ -258,9 +259,10 @@ void PoolProjectManagerApplication::on_action_quit()
             for (const auto &it : files_from_dia) {
                 auto win = files_windows.at(it.first);
                 win->prepare_close();
-                for (const auto &it2 : it.second) {
-                    if (it2.second && r == ConfirmCloseDialog::RESPONSE_SAVE)
-                        win->process_save(it2.first);
+                if (ConfirmCloseDialog::RESPONSE_SAVE) {
+                    for (const auto &it2 : it.second) {
+                        win->process_save(it2);
+                    }
                 }
                 auto procs = win->get_processes();
                 for (auto proc : procs) {
