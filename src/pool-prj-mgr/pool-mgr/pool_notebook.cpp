@@ -133,7 +133,10 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     appwin->pool_parametric = &pool_parametric;
     appwin->signal_process_exited().connect(sigc::track_obj(
             [this](std::string filename, int status, bool modified) {
-                if (modified)
+                auto in_pool = Gio::File::create_for_path(base_path)
+                                       ->get_relative_path(Gio::File::create_for_path(filename))
+                                       .size();
+                if (modified && in_pool)
                     pool_update(nullptr, {filename});
             },
             *this));
