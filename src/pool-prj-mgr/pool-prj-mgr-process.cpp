@@ -92,6 +92,7 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(const UUID &uu, PoolProject
         }
         win->present();
         win->signal_filename_changed().connect([this](std::string new_filename) { filename = new_filename; });
+        filename = win->get_filename();
 
         win->signal_hide().connect([this] {
             auto need_update = win->get_need_update();

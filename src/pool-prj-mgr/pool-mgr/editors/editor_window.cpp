@@ -250,6 +250,11 @@ std::string EditorWindow::fix_filename(std::string s)
     return s;
 }
 
+std::string EditorWindow::get_filename() const
+{
+    return store->filename;
+}
+
 void EditorWindow::reload()
 {
     if (iface) {

@@ -29,6 +29,7 @@ public:
     void save();
     void force_close();
     bool get_needs_save();
+    std::string get_filename() const;
 
     typedef sigc::signal<void, std::string> type_signal_filename_changed;
     type_signal_filename_changed signal_filename_changed()
