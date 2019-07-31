@@ -119,7 +119,7 @@ private:
     void update_symbol(const std::string &filename, bool partial);
     void update_entity(const std::string &filename, bool partial);
     void update_package(const std::string &filename, bool partial);
-    bool update_padstack(const std::string &filename);
+    void update_padstack(const std::string &filename);
 
     UUID pool_uuid;
     void set_pool_info(const std::string &bp);
@@ -183,10 +183,7 @@ bool PoolUpdater::update_some(const std::string &pool_base_path, const std::vect
             update_package(filename, true);
             break;
         case ObjectType::PADSTACK:
-            if (!update_padstack(filename)) {
-                pool->db.execute("ROLLBACK");
-                return false;
-            }
+            update_padstack(filename);
             break;
         default:
             status_cb(PoolUpdateStatus::FILE_ERROR, filename, "unsupported type " + object_descriptions.at(type).name);
@@ -633,30 +630,27 @@ void PoolUpdater::update_padstacks_global(const std::string &directory, const st
     }
 }
 
-bool PoolUpdater::update_padstack(const std::string &filename)
+void PoolUpdater::update_padstack(const std::string &filename)
 {
     try {
         status_cb(PoolUpdateStatus::FILE, filename, "");
         auto padstack = Padstack::new_from_file(filename);
         UUID package_uuid;
         {
-            SQLite::Query q(pool->db, "SELECT package FROM padstacks WHERE uuid = ?");
-            q.bind(1, padstack.uuid);
-            if (q.step()) { // found
-                package_uuid = q.get<std::string>(0);
-            }
-            else {
-                return false;
-            }
-        }
-
-        {
             SQLite::Query q(pool->db, "DELETE FROM padstacks WHERE uuid = ?");
             q.bind(1, padstack.uuid);
             q.step();
         }
+        auto ps_dir = Glib::path_get_dirname(filename);
+        if (Glib::path_get_basename(ps_dir) == "padstacks") {
+            auto pkg_dir = Glib::path_get_dirname(ps_dir);
+            auto pkg_json = Glib::build_filename(pkg_dir, "package.json");
+            if (Glib::file_test(pkg_json, Glib::FILE_TEST_IS_REGULAR)) {
+                auto j = load_json_from_file(pkg_json);
+                package_uuid = j.at("uuid").get<std::string>();
+            }
+        }
         add_padstack(padstack, package_uuid, false, get_path_rel(filename));
-        return true;
     }
     catch (const std::exception &e) {
         status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
@@ -664,7 +658,6 @@ bool PoolUpdater::update_padstack(const std::string &filename)
     catch (...) {
         status_cb(PoolUpdateStatus::FILE_ERROR, filename, "unknown exception");
     }
-    return false;
 }
 
 void PoolUpdater::update_packages(const std::string &directory)
