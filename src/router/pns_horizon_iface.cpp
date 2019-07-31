@@ -57,6 +57,9 @@ int PNS_HORIZON_IFACE::layer_from_router(int l)
     case In4_Cu:
         lo = horizon::BoardLayers::IN4_COPPER;
         break;
+    case UNDEFINED_LAYER:
+        lo = 10000;
+        break;
     default:
         assert(false);
     }
