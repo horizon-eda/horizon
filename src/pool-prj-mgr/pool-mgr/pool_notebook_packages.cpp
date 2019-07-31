@@ -8,7 +8,7 @@
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "widgets/pool_browser_package.hpp"
 #include "pool_remote_box.hpp"
-#include "widgets/where_used_box.hpp"
+#include "widgets/package_info_box.hpp"
 
 #ifdef G_OS_WIN32
 #undef ERROR
@@ -216,19 +216,27 @@ void PoolNotebook::construct_packages()
 
     auto canvas = Gtk::manage(new PreviewCanvas(pool, true));
 
-    auto where_used = Gtk::manage(new WhereUsedBox(pool));
-    where_used->property_margin() = 10;
-    where_used->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
+    auto info_box = PackageInfoBox::create(pool);
+    info_box->property_margin() = 10;
+    info_box->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
 
     stack->add(*canvas, "preview");
-    stack->add(*where_used, "info");
+    stack->add(*info_box, "info");
+    info_box->unreference();
 
     paned->add2(*stack);
     paned->show_all();
 
-    br->signal_selected().connect([br, canvas, where_used] {
+    stack->set_visible_child(*canvas);
+
+    br->signal_selected().connect([this, br, canvas, info_box] {
         auto sel = br->get_selected();
-        where_used->load(ObjectType::PACKAGE, sel);
+        if (!sel) {
+            info_box->load(nullptr);
+            canvas->clear();
+            return;
+        }
+        info_box->load(pool.get_package(sel));
         canvas->load(ObjectType::PACKAGE, sel);
     });
     append_page(*paned, "Packages");

@@ -539,7 +539,8 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/tag_entry.cpp\
 	src/widgets/about_dialog.cpp\
 	src/util/status_dispatcher.cpp\
-	src/util/exception_util.cpp
+	src/util/exception_util.cpp\
+	src/widgets/package_info_box.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp
