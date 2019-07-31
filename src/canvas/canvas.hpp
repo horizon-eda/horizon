@@ -27,7 +27,7 @@ public:
     virtual ~Canvas()
     {
     }
-    void clear();
+    virtual void clear();
     void update(const class Symbol &sym, const Placement &transform = Placement(), bool edit = true);
     void update(const class Sheet &sheet);
     void update(const class Padstack &padstack, bool edit = true);

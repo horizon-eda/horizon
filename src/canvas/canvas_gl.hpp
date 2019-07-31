@@ -58,6 +58,7 @@ public:
     void set_cursor_size(float size);
     void set_cursor_size(Appearance::CursorSize);
 
+    void clear() override;
 
     typedef sigc::signal<void> type_signal_selection_changed;
     type_signal_selection_changed signal_selection_changed()

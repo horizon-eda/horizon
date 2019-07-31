@@ -625,6 +625,12 @@ Target CanvasGL::get_current_target()
     return target_current;
 }
 
+void CanvasGL::clear()
+{
+    Canvas::clear();
+    request_push();
+}
+
 // copied from
 // https://github.com/solvespace/solvespace/blob/master/src/platform/gtkmain.cpp#L357
 // thanks to whitequark for running into this issue as well
