@@ -139,37 +139,15 @@ PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     make_treeview(status_treeview);
 }
 
-void PoolGitBox::row_from_filename(Gtk::TreeModel::Row &row, const std::string &filename)
-{
-    SQLite::Query q(notebook->pool.db, "SELECT type, uuid, name FROM all_items_view WHERE filename = ?");
-    q.bind(1, filename);
-    if (q.step()) {
-        ObjectType type = object_type_lut.lookup(q.get<std::string>(0));
-        UUID uu = q.get<std::string>(1);
-        std::string name = q.get<std::string>(2);
-        row[list_columns.type] = type;
-        row[list_columns.uuid] = uu;
-        row[list_columns.name] = name;
-    }
-    else {
-        SQLite::Query q_model(notebook->pool.db, "SELECT package_uuid FROM models WHERE model_filename = ?");
-        q_model.bind(1, filename);
-        if (q_model.step()) {
-            row[list_columns.type] = ObjectType::MODEL_3D;
-        }
-        else {
-            row[list_columns.name] = "Not found in pool";
-        }
-    }
-}
-
 void PoolGitBox::diff_file_cb(const git_diff_delta *delta)
 {
     Gtk::TreeModel::Row row = *diff_store->append();
     row[list_columns.status] = delta->status;
     row[list_columns.path] = delta->new_file.path;
     row[list_columns.type] = ObjectType::INVALID;
-    row_from_filename(row, delta->new_file.path);
+    SQLite::Query q(notebook->pool.db, "INSERT INTO 'git_files' VALUES (?)");
+    q.bind(1, std::string(delta->new_file.path));
+    q.step();
 }
 
 int PoolGitBox::diff_file_cb_c(const git_diff_delta *delta, float progress, void *pl)
@@ -193,7 +171,9 @@ void PoolGitBox::status_cb(const char *path, unsigned int status_flags)
         row[list_columns.path] = path;
         row[list_columns.type] = ObjectType::INVALID;
         row[list_columns.status_flags] = status_flags;
-        row_from_filename(row, path);
+        SQLite::Query q(notebook->pool.db, "INSERT INTO 'git_files' VALUES (?)");
+        q.bind(1, std::string(path));
+        q.step();
     }
 }
 
@@ -241,15 +221,22 @@ void PoolGitBox::refresh()
         {
             autofree_ptr<git_diff> diff(git_diff_free);
             git_diff_tree_to_workdir_with_index(&diff.ptr, repo, tree_master, nullptr);
-
+            diff_treeview->unset_model();
             diff_store->clear();
+            update_store_from_db_prepare();
             git_diff_foreach(diff, &PoolGitBox::diff_file_cb_c, nullptr, nullptr, nullptr, this);
+            update_store_from_db(diff_store);
+            diff_treeview->set_model(diff_store);
             diff_box->set_visible(tree_master != tree_head);
         }
 
         {
+            status_treeview->unset_model();
             status_store->clear();
+            update_store_from_db_prepare();
             git_status_foreach(repo, &PoolGitBox::status_cb_c, this);
+            update_store_from_db(status_store);
+            status_treeview->set_model(status_store);
         }
     }
     catch (const std::exception &e) {
@@ -258,6 +245,41 @@ void PoolGitBox::refresh()
     catch (...) {
         info_label->set_text("unknown exception");
     }
+}
+
+void PoolGitBox::update_store_from_db_prepare()
+{
+    notebook->pool.db.execute("CREATE TEMP TABLE 'git_files' ('git_filename' TEXT NOT NULL);");
+    notebook->pool.db.execute("BEGIN TRANSACTION");
+}
+
+void PoolGitBox::update_store_from_db(Glib::RefPtr<Gtk::ListStore> store)
+{
+    notebook->pool.db.execute("COMMIT");
+    notebook->pool.db.execute("CREATE INDEX git_file ON git_files (git_filename)");
+    SQLite::Query q(
+            notebook->pool.db,
+            "SELECT type, uuid, name, filename FROM git_files LEFT JOIN "
+            "(SELECT type, uuid, name, filename FROM all_items_view UNION ALL SELECT 'model_3d' AS type, "
+            "'00000000-0000-0000-0000-000000000000' as uuid, '' as name, model_filename as filename FROM models) "
+            "ON filename=git_filename");
+    auto it = store->children().begin();
+    while (q.step()) {
+        if (it->get_value(list_columns.path) == q.get<std::string>(3)) {
+            ObjectType type = object_type_lut.lookup(q.get<std::string>(0));
+            UUID uu = q.get<std::string>(1);
+            std::string name = q.get<std::string>(2);
+            it->set_value(list_columns.type, type);
+            it->set_value(list_columns.uuid, uu);
+            it->set_value(list_columns.name, Glib::ustring(name));
+        }
+        else {
+            it->set_value(list_columns.name, Glib::ustring("Not found in pool"));
+        }
+        it++;
+    }
+
+    notebook->pool.db.execute("DROP TABLE 'git_files'");
 }
 
 PoolGitBox *PoolGitBox::create(PoolNotebook *nb)

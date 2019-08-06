@@ -65,6 +65,7 @@ private:
     void status_cb(const char *path, unsigned int status_flags);
     void diff_file_cb(const git_diff_delta *delta);
 
-    void row_from_filename(Gtk::TreeModel::Row &row, const std::string &filename);
+    void update_store_from_db_prepare();
+    void update_store_from_db(Glib::RefPtr<Gtk::ListStore> store);
 };
 } // namespace horizon
