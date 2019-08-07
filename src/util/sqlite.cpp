@@ -1,16 +1,17 @@
 #include "sqlite.hpp"
 #include <glib.h>
 #include <string.h>
+#include "util/util.hpp"
 
 namespace SQLite {
 
 static int natural_compare(void *pArg, int len1, const void *data1, int len2, const void *data2)
 {
-    auto ca = g_utf8_collate_key_for_filename(static_cast<const char *>(data1), len1);
-    auto cb = g_utf8_collate_key_for_filename(static_cast<const char *>(data2), len2);
-    auto r = strcmp(ca, cb);
-    g_free(ca);
-    g_free(cb);
+    auto s1 = strndup(static_cast<const char *>(data1), len1);
+    auto s2 = strndup(static_cast<const char *>(data2), len2);
+    auto r = horizon::strcmp_natural(s1, s2);
+    free(s1);
+    free(s2);
     return r;
 }
 

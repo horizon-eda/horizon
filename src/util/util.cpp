@@ -9,6 +9,7 @@
 #endif
 #include <iomanip>
 #include "nlohmann/json.hpp"
+#include "alphanum/alphanum.hpp"
 
 namespace horizon {
 
@@ -245,12 +246,12 @@ bool endswith(const std::string &haystack, const std::string &needle)
 
 int strcmp_natural(const std::string &a, const std::string &b)
 {
-    auto ca = g_utf8_collate_key_for_filename(a.c_str(), -1);
-    auto cb = g_utf8_collate_key_for_filename(b.c_str(), -1);
-    auto r = strcmp(ca, cb);
-    g_free(ca);
-    g_free(cb);
-    return r;
+    return doj::alphanum_comp(a, b);
+}
+
+int strcmp_natural(const char *a, const char *b)
+{
+    return doj::alphanum_comp(a, b);
 }
 
 std::string get_config_dir()

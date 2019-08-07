@@ -1,4 +1,4 @@
-PRAGMA user_version=12; --keep in sync with pool.cpp
+PRAGMA user_version=13; --keep in sync with pool.cpp
 
 DROP TABLE IF EXISTS "units";
 CREATE TABLE "units" (
