@@ -105,6 +105,8 @@ public:
         view->get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
         view->set_rubber_banding(true);
         view->show();
+        view->signal_row_activated().connect(
+                [this](const Gtk::TreeModel::Path &, Gtk::TreeViewColumn *) { s_signal_activated.emit(); });
         auto sc = Gtk::manage(new Gtk::ScrolledWindow());
         sc->set_shadow_type(Gtk::SHADOW_IN);
         sc->set_min_content_height(150);
@@ -126,10 +128,9 @@ public:
         }
         store->clear();
         for (const auto &value : values) {
-            auto it = store->append();
-            Gtk::TreeModel::Row row = *it;
-            row[list_columns.value] = value;
-            row[list_columns.value_formatted] = column.format(value);
+            Gtk::TreeIter it;
+            gtk_list_store_insert_with_values(store->gobj(), it.gobj(), -1, list_columns.value.index(), value.c_str(),
+                                              list_columns.value_formatted.index(), column.format(value).c_str(), -1);
             if (values_selected.count(value))
                 view->get_selection()->select(it);
         }
@@ -152,6 +153,12 @@ public:
         view->get_selection()->unselect_all();
     }
 
+    typedef sigc::signal<void> type_signal_activated;
+    type_signal_activated signal_activated()
+    {
+        return s_signal_activated;
+    }
+
 private:
     PoolParametric *pool;
     const PoolParametric::Column &column;
@@ -169,6 +176,7 @@ private:
     ListColumns list_columns;
 
     Glib::RefPtr<Gtk::ListStore> store;
+    type_signal_activated s_signal_activated;
 };
 
 PoolBrowserParametric::PoolBrowserParametric(Pool *p, PoolParametric *pp, const std::string &table_name)
@@ -181,6 +189,10 @@ PoolBrowserParametric::PoolBrowserParametric(Pool *p, PoolParametric *pp, const 
 
     auto add_filter_col = [this, &filters_box](auto &col) {
         auto fbox = Gtk::manage(new ParametricFilterBox(pool_parametric, col));
+        fbox->signal_activated().connect([this] {
+            apply_filters();
+            search();
+        });
         fbox->show();
         filters_box->pack_start(*fbox, false, true, 0);
         filter_boxes.emplace(col.name, fbox);
