@@ -233,8 +233,10 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     w_tv_pins->get_column(1)->set_sort_column(pin_list_columns.pin_name);
 
     pin_store->set_sort_column(pin_list_columns.pin_name, Gtk::SORT_ASCENDING);
-    Glib::signal_idle().connect_once(
-            [this] { pin_store->set_sort_column(pin_list_columns.gate_name, Gtk::SORT_ASCENDING); });
+    Glib::signal_timeout().connect_once(
+            sigc::track_obj([this] { pin_store->set_sort_column(pin_list_columns.gate_name, Gtk::SORT_ASCENDING); },
+                            *this),
+            10);
 
     pad_store = Gtk::ListStore::create(pad_list_columns);
     pad_store->set_sort_func(pad_list_columns.pad_name,
