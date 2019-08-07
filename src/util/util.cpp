@@ -390,4 +390,66 @@ std::string format_m_of_n(unsigned int m, unsigned int n)
     return prefix + m_str + "/" + n_str;
 }
 
+double parse_si(const std::string &inps)
+{
+    static const auto regex = Glib::Regex::create(
+            "([+-]?)(?:(?:(\\d+)[\\.,]?(\\d*))|(?:[\\.,](\\d+)))(?:[eE]([-+]?)([0-9]+)|\\s*([a-zA-Zµ])|)");
+    Glib::ustring inp(inps);
+    Glib::MatchInfo ma;
+    if (regex->match(inp, ma)) {
+        auto sign = ma.fetch(1);
+        auto intv = ma.fetch(2);
+        auto fracv = ma.fetch(3);
+        auto fracv2 = ma.fetch(4);
+        auto exp_sign = ma.fetch(5);
+        auto exp = ma.fetch(6);
+        auto prefix = ma.fetch(7);
+
+        double v = 0;
+        if (intv.size()) {
+            v = std::stoi(intv);
+            if (fracv.size()) {
+                v += std::stoi(fracv) * std::pow(10, (int)fracv.size() * -1);
+            }
+        }
+        else {
+            v = std::stoi(fracv2) * std::pow(10, (int)fracv2.size() * -1);
+        }
+
+        if (exp.size()) {
+            int iexp = std::stoi(exp);
+            if (exp_sign == "-") {
+                iexp *= -1;
+            }
+            v *= std::pow(10, iexp);
+        }
+        else if (prefix.size()) {
+            int prefix_exp = 0;
+            if (prefix == "p")
+                prefix_exp = -12;
+            else if (prefix == "n" || prefix == "N")
+                prefix_exp = -9;
+            else if (prefix == "u" || prefix == "U" || prefix == "µ")
+                prefix_exp = -6;
+            else if (prefix == "m")
+                prefix_exp = -3;
+            else if (prefix == "k" || prefix == "K")
+                prefix_exp = 3;
+            else if (prefix == "M")
+                prefix_exp = 6;
+            else if (prefix == "G" || prefix == "g")
+                prefix_exp = 9;
+            else if (prefix == "T" || prefix == "t")
+                prefix_exp = 12;
+            v *= std::pow(10, prefix_exp);
+        }
+        if (sign == "-")
+            v *= -1;
+
+        return v;
+    }
+
+    return NAN;
+}
+
 } // namespace horizon

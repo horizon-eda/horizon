@@ -107,6 +107,33 @@ public:
         view->show();
         view->signal_row_activated().connect(
                 [this](const Gtk::TreeModel::Path &, Gtk::TreeViewColumn *) { s_signal_activated.emit(); });
+        if (col.type == PoolParametric::Column::Type::QUANTITY) {
+            view->set_search_equal_func([this](const Glib::RefPtr<Gtk::TreeModel> &model, int c,
+                                               const Glib::ustring &needle, const Gtk::TreeModel::iterator &it) {
+                auto v = string_to_double(it->get_value(list_columns.value));
+                auto needle_f = parse_si(needle);
+                if (isnan(needle_f))
+                    return true;
+                if (std::abs(needle_f) >= 1 && std::abs(needle_f) < 1000) { // ignore si prefix
+                    int exp = 0;
+                    while (v >= 1e3 && exp <= 12) {
+                        v /= 1e3;
+                        exp += 3;
+                    }
+                    if (v > 1e-15) {
+                        while (v < 1 && exp >= -12) {
+                            v *= 1e3;
+                            exp -= 3;
+                        }
+                    }
+                }
+
+                if (std::abs((v - needle_f) / v) < 0.001)
+                    return false;
+                else
+                    return true;
+            });
+        }
         auto sc = Gtk::manage(new Gtk::ScrolledWindow());
         sc->set_shadow_type(Gtk::SHADOW_IN);
         sc->set_min_content_height(150);

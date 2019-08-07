@@ -62,5 +62,6 @@ Color color_from_json(const json &j);
 json color_to_json(const Color &c);
 
 std::string format_m_of_n(unsigned int m, unsigned int n);
+double parse_si(const std::string &inps);
 
 } // namespace horizon
