@@ -44,6 +44,9 @@ void WhereUsedBox::clear()
 
 void WhereUsedBox::load(ObjectType type, const UUID &uu)
 {
+    store->clear();
+    if (!uu)
+        return;
     SQLite::Query q(pool.db,
                     "WITH RECURSIVE where_used(typex, uuidx) AS ( SELECT ?, ? UNION "
                     "SELECT type, uuid FROM dependencies, where_used "
@@ -56,7 +59,6 @@ void WhereUsedBox::load(ObjectType type, const UUID &uu)
                     "AND where_used.uuidx = all_items_view.uuid;");
     q.bind(1, object_type_lut.lookup_reverse(type));
     q.bind(2, uu);
-    store->clear();
     q.step(); // drop first one
     while (q.step()) {
         std::string type_str = q.get<std::string>(0);
