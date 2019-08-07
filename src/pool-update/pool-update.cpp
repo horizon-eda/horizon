@@ -91,7 +91,8 @@ class PoolUpdater {
 public:
     PoolUpdater(const std::string &bp, pool_update_cb_t status_cb);
     void update(const std::vector<std::string> &base_paths);
-    bool update_some(const std::string &pool_base_path, const std::vector<std::string> &filenames);
+    bool update_some(const std::string &pool_base_path, const std::vector<std::string> &filenames,
+                     std::set<UUID> &all_parts_updated);
 
 private:
     std::unique_ptr<Pool> pool;
@@ -154,7 +155,8 @@ std::string PoolUpdater::get_path_rel(const std::string &filename) const
 }
 
 
-bool PoolUpdater::update_some(const std::string &pool_base_path, const std::vector<std::string> &filenames)
+bool PoolUpdater::update_some(const std::string &pool_base_path, const std::vector<std::string> &filenames,
+                              std::set<UUID> &all_parts_updated)
 {
     set_pool_info(pool_base_path);
     pool->db.execute("BEGIN TRANSACTION");
@@ -169,6 +171,7 @@ bool PoolUpdater::update_some(const std::string &pool_base_path, const std::vect
         case ObjectType::PART:
             update_part(filename, true);
             parts_updated.emplace(j.at("uuid").get<std::string>());
+            all_parts_updated.emplace(j.at("uuid").get<std::string>());
             break;
         case ObjectType::UNIT:
             update_unit(filename, true);
@@ -204,6 +207,7 @@ bool PoolUpdater::update_some(const std::string &pool_base_path, const std::vect
         q.step();
         while (q.step()) {
             UUID uuid = q.get<std::string>(0);
+            all_parts_updated.insert(uuid);
             auto filename = pool->get_filename(ObjectType::PART, uuid);
             update_part(filename, true);
         }
@@ -912,17 +916,19 @@ void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb, 
         }
     }
     paths.push_back(pool_base_path);
+    std::set<UUID> parts_updated;
     if (filenames.size() == 0) {
         updater.update(paths);
     }
     else {
-        if (!updater.update_some(pool_base_path, filenames)) { // partial update failed, need full update
+        if (!updater.update_some(pool_base_path, filenames, parts_updated)) { // partial update failed, need full update
             updater.update(paths);
+            parts_updated.clear();
         }
     }
 
     if (parametric) {
-        pool_update_parametric(pool_base_path, status_cb);
+        pool_update_parametric(pool_base_path, status_cb, parts_updated);
     }
     status_cb(PoolUpdateStatus::DONE, "done", "");
 }
