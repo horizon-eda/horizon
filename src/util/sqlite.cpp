@@ -5,10 +5,18 @@
 
 namespace SQLite {
 
+static char *my_strndup(const char *src, size_t len)
+{
+    auto s = (char *)malloc(len + 1);
+    strncpy(s, src, len);
+    s[len] = 0;
+    return s;
+}
+
 static int natural_compare(void *pArg, int len1, const void *data1, int len2, const void *data2)
 {
-    auto s1 = strndup(static_cast<const char *>(data1), len1);
-    auto s2 = strndup(static_cast<const char *>(data2), len2);
+    char *s1 = my_strndup(static_cast<const char *>(data1), len1);
+    auto s2 = my_strndup(static_cast<const char *>(data2), len2);
     auto r = horizon::strcmp_natural(s1, s2);
     free(s1);
     free(s2);
