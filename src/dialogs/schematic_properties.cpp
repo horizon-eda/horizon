@@ -1,6 +1,6 @@
 #include "schematic_properties.hpp"
 #include "schematic/schematic.hpp"
-#include "widgets/chooser_buttons.hpp"
+#include "widgets/pool_browser_button.hpp"
 #include "widgets/title_block_values_editor.hpp"
 #include "pool/pool.hpp"
 #include <iostream>

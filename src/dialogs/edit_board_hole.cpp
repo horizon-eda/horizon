@@ -1,6 +1,6 @@
 #include "edit_board_hole.hpp"
 #include "widgets/parameter_set_editor.hpp"
-#include "widgets/chooser_buttons.hpp"
+#include "widgets/pool_browser_button.hpp"
 #include "widgets/net_button.hpp"
 #include "package/pad.hpp"
 #include "widgets/pool_browser_padstack.hpp"

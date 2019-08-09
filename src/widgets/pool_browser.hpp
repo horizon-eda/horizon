@@ -12,6 +12,7 @@ class PoolBrowser : public Gtk::Box, public SelectionProvider {
 public:
     PoolBrowser(class Pool *pool);
     UUID get_selected() override;
+    bool get_any_selected();
     void set_show_none(bool v);
     void set_show_path(bool v);
     void add_context_menu_item(const std::string &label, sigc::slot1<void, UUID> cb);

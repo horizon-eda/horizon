@@ -1,6 +1,6 @@
 #include "edit_pad_parameter_set.hpp"
 #include "widgets/parameter_set_editor.hpp"
-#include "widgets/chooser_buttons.hpp"
+#include "widgets/pool_browser_button.hpp"
 #include "package/pad.hpp"
 #include "widgets/pool_browser_padstack.hpp"
 #include "pool/package.hpp"

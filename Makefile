@@ -376,6 +376,7 @@ SRC_IMP = \
 	3rd_party/sexpr/sexpr_parser.cpp\
 	3rd_party/sexpr/sexpr.cpp\
 	src/util/kicad_package_parser.cpp\
+	src/widgets/pool_browser_button.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\
@@ -541,6 +542,7 @@ SRC_POOL_PRJ_MGR = \
 	src/util/status_dispatcher.cpp\
 	src/util/exception_util.cpp\
 	src/widgets/package_info_box.cpp\
+	src/widgets/pool_browser_button.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

@@ -11,7 +11,7 @@
 #include "util/pool_completion.hpp"
 #include "util/changeable.hpp"
 #include "util/str_util.hpp"
-#include "widgets/chooser_buttons.hpp"
+#include "widgets/pool_browser_button.hpp"
 #include "widgets/pool_browser.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/parameter_set_editor.hpp"

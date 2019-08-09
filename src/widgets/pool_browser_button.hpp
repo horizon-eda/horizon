@@ -5,18 +5,22 @@
 #include "dialogs/pool_browser_dialog.hpp"
 
 namespace horizon {
-class ViaPadstackButton : public Gtk::Button {
+
+class PoolBrowserButton : public Gtk::Button {
 public:
-    ViaPadstackButton(class ViaPadstackProvider &vpp);
+    PoolBrowserButton(ObjectType type, Pool *ipool);
+    class PoolBrowser *get_browser();
     Glib::PropertyProxy<horizon::UUID> property_selected_uuid()
     {
         return p_property_selected_uuid.get_proxy();
     }
 
-protected:
+private:
     Glib::Property<UUID> p_property_selected_uuid;
-    class ViaPadstackProvider &via_padstack_provider;
-
+    Pool *pool;
+    ObjectType type;
+    UUID selected_uuid;
+    PoolBrowserDialog dia;
     void on_clicked() override;
     void update_label();
 };

@@ -78,7 +78,7 @@ PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool 
 
     browser->signal_activated().connect([this] { response(Gtk::ResponseType::RESPONSE_OK); });
 
-    browser->signal_selected().connect([button_ok, this] { button_ok->set_sensitive(browser->get_selected()); });
+    browser->signal_selected().connect([button_ok, this] { button_ok->set_sensitive(browser->get_any_selected()); });
 
     get_content_area()->show_all();
 }

@@ -1,5 +1,5 @@
 #include "footprint_generator_single.hpp"
-#include "widgets/chooser_buttons.hpp"
+#include "widgets/pool_browser_button.hpp"
 
 namespace horizon {
 FootprintGeneratorSingle::FootprintGeneratorSingle(CorePackage *c)

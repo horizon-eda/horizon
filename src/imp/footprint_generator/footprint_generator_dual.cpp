@@ -1,6 +1,6 @@
 #include "footprint_generator_dual.hpp"
 #include "util/util.hpp"
-#include "widgets/chooser_buttons.hpp"
+#include "widgets/pool_browser_button.hpp"
 
 namespace horizon {
 FootprintGeneratorDual::FootprintGeneratorDual(CorePackage *c)

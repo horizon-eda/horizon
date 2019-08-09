@@ -163,6 +163,11 @@ UUID PoolBrowser::get_selected()
     return UUID();
 }
 
+bool PoolBrowser::get_any_selected()
+{
+    return treeview->get_selection()->count_selected_rows();
+}
+
 void PoolBrowser::set_show_none(bool v)
 {
     show_none = v;

@@ -1,5 +1,5 @@
 #include "footprint_generator_base.hpp"
-#include "widgets/chooser_buttons.hpp"
+#include "widgets/pool_browser_button.hpp"
 #include "widgets/pool_browser_padstack.hpp"
 
 namespace horizon {
