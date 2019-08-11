@@ -255,6 +255,14 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
     ObjectType ty = br->get_type();
     br->add_context_menu_item("Delete", [this, ty](const UUID &uu) { handle_delete(ty, uu); });
     br->add_context_menu_item("Copy path", [this, ty](const UUID &uu) { handle_copy_path(ty, uu); });
+    br->add_context_menu_item("Copy UUID", [this, ty](const UUID &uu) {
+        auto clip = Gtk::Clipboard::get();
+        clip->set_text((std::string)uu);
+    });
+    br->add_context_menu_item("Update this item", [this, ty](const UUID &uu) {
+        auto filename = pool.get_filename(ty, uu);
+        pool_update(nullptr, {filename});
+    });
 }
 
 void rmdir_recursive(const std::string &dirname)
