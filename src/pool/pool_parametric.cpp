@@ -106,7 +106,7 @@ PoolParametric::Column::Column(const json &j)
 
 
 static const std::map<int, std::string> prefixes = {
-        {-12, "p"}, {-9, "n"}, {-6, "µ"}, {-3, "m"}, {0, ""}, {3, "k"}, {6, "M"}, {9, "G"}, {12, "T"},
+        {-15, "f"}, {-12, "p"}, {-9, "n"}, {-6, "µ"}, {-3, "m"}, {0, ""}, {3, "k"}, {6, "M"}, {9, "G"}, {12, "T"},
 };
 
 std::string PoolParametric::Column::format(double v) const
