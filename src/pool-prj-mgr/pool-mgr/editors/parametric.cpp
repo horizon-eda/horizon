@@ -68,7 +68,6 @@ private:
     {
         return column.format(v);
     }
-
 };
 
 
