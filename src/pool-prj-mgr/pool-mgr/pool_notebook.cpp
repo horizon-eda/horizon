@@ -259,6 +259,7 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
         auto clip = Gtk::Clipboard::get();
         clip->set_text((std::string)uu);
     });
+    br->add_copy_name_context_menu_item();
     br->add_context_menu_item("Update this item", [this, ty](const UUID &uu) {
         auto filename = pool.get_filename(ty, uu);
         pool_update(nullptr, {filename});

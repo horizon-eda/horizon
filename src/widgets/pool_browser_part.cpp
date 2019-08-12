@@ -1,5 +1,6 @@
 #include "pool_browser_part.hpp"
 #include "pool/pool.hpp"
+#include "pool/part.hpp"
 #include "widgets/tag_entry.hpp"
 #include <set>
 
@@ -167,4 +168,14 @@ PoolBrowser::PoolItemSource PoolBrowserPart::pool_item_source_from_row(const Gtk
 {
     return row[list_columns.source];
 }
+
+void PoolBrowserPart::add_copy_name_context_menu_item()
+{
+    add_context_menu_item("Copy MPN", [this](const UUID &uu) {
+        auto part = pool->get_part(uu);
+        auto clip = Gtk::Clipboard::get();
+        clip->set_text(part->get_MPN());
+    });
+}
+
 } // namespace horizon

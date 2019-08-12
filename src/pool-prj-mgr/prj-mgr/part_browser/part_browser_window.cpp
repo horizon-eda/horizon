@@ -295,6 +295,7 @@ PoolBrowserPart *PartBrowserWindow::add_search(const UUID &part)
 void PartBrowserWindow::add_search_parametric(const std::string &table_name)
 {
     auto ch = Gtk::manage(new PoolBrowserParametric(&pool, &pool_parametric, table_name));
+    ch->add_copy_name_context_menu_item();
     ch->get_style_context()->add_class("background");
     auto tab_label = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
     auto la = Gtk::manage(new Gtk::Label(pool_parametric.get_tables().at(table_name).display_name));

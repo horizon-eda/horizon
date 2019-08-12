@@ -12,6 +12,7 @@ public:
     {
         return ObjectType::PART;
     }
+    void add_copy_name_context_menu_item() override;
 
 protected:
     Glib::RefPtr<Gtk::ListStore> create_list_store() override;

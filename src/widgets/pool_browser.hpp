@@ -16,6 +16,7 @@ public:
     void set_show_none(bool v);
     void set_show_path(bool v);
     void add_context_menu_item(const std::string &label, sigc::slot1<void, UUID> cb);
+    virtual void add_copy_name_context_menu_item(){};
     virtual void search() = 0;
     virtual ObjectType get_type() const
     {
