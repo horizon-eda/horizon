@@ -79,7 +79,7 @@ public:
                                          return -1;
                                      else if (b.size() == 0)
                                          return 1;
-                                     auto d = string_to_double(b) - string_to_double(a);
+                                     auto d = string_to_double(a) - string_to_double(b);
                                      return sgn(d);
                                  });
         }
@@ -97,7 +97,7 @@ public:
                                      return strcmp_natural(a, b);
                                  });
         }
-        store->set_sort_column(list_columns.value, Gtk::SORT_DESCENDING);
+        store->set_sort_column(list_columns.value, Gtk::SORT_ASCENDING);
         view = Gtk::manage(new Gtk::TreeView(store));
         auto tvc = create_tvc(col, list_columns.value_formatted);
         view->append_column(*tvc);
