@@ -31,5 +31,9 @@ private:
     GLuint grid_mod_loc;
     GLuint mark_size_loc;
     GLuint color_loc;
+
+    GLfloat grid_line_width;
+    GLfloat cursor_line_width;
+    void set_scale_factor(float sf);
 };
 } // namespace horizon

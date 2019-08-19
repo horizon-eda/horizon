@@ -11,6 +11,7 @@ void gl_show_error(const std::string &s);
 void gl_color_to_uniform_3f(GLuint loc, const class Color &c);
 void gl_color_to_uniform_4f(GLuint loc, const class Color &c, float alpha = 1);
 GLint gl_clamp_samples(GLint samples);
+void gl_log_info();
 
 #define GET_LOC(d, loc)                                                                                                \
     do {                                                                                                               \

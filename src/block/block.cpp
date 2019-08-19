@@ -57,14 +57,14 @@ Block::Block(const UUID &uu, const json &j, Pool &pool) : uuid(uu), name(j.at("n
         const json &o = j["group_names"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            group_names[u] = it.value();
+            group_names[u] = it.value().get<std::string>();
         }
     }
     if (j.count("tag_names")) {
         const json &o = j["tag_names"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            tag_names[u] = it.value();
+            tag_names[u] = it.value().get<std::string>();
         }
     }
     for (const auto &it : components) {

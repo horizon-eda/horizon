@@ -290,8 +290,8 @@ PullRequestItemBox::PullRequestItemBox(BaseObjectType *cobject, const Glib::RefP
     number_label->set_text("#" + std::to_string(nr));
     link_button->set_label("Open on GitHub");
     link_button->set_uri(j.at("_links").at("html").at("href").get<std::string>());
-    std::string open_user = j.at("user").at("login");
-    std::string created_at = j.at("created_at");
+    std::string open_user = j.at("user").at("login").get<std::string>();
+    std::string created_at = j.at("created_at").get<std::string>();
     descr_label->set_text("opened by " + open_user + " on " + created_at);
 }
 
@@ -711,7 +711,7 @@ void PoolRemoteBox::create_pr_thread()
         json user_info;
         try {
             user_info = client.login(gh_username, gh_password);
-            gh_username = user_info.at("login");
+            gh_username = user_info.at("login").get<std::string>();
             git_thread_dispatcher.emit();
         }
         catch (const std::runtime_error &e) {
@@ -747,14 +747,14 @@ void PoolRemoteBox::create_pr_thread()
         std::string user_name;
         std::cout << std::setw(4) << user_info << std::endl;
         try {
-            user_email = user_info.at("email");
+            user_email = user_info.at("email").get<std::string>();
         }
         catch (...) {
             user_email = "horizon@0x83.eu";
         }
 
         try {
-            user_name = user_info.at("name");
+            user_name = user_info.at("name").get<std::string>();
         }
         catch (...) {
             user_name = "horizon pool manager";

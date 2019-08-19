@@ -475,6 +475,10 @@ void PoolProjectManagerAppWindow::handle_open()
     auto filter = Gtk::FileFilter::create();
     filter->set_name("Horizon pools & projects");
     filter->add_pattern("pool.json");
+#ifdef __APPLE__
+    // full file name dnt worked on mac
+    filter->add_pattern("*.json");
+#endif
     filter->add_pattern("*.hprj");
     chooser->add_filter(filter);
 
@@ -550,9 +554,9 @@ void PoolProjectManagerAppWindow::update_recent_items()
                 json k;
                 ifs >> k;
                 if (endswith(path, "pool.json"))
-                    name = k.at("name");
+                    name = k.at("name").get<std::string>();
                 else
-                    name = k.at("title");
+                    name = k.at("title").get<std::string>();
             }
             ifs.close();
         }

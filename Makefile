@@ -573,9 +573,10 @@ ifneq ($(OS),Windows_NT)
 endif
 LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libgit2 libcurl glm
 
-OPTIMIZE=-fdata-sections -ffunction-sections
+OPTIMIZE=-fdata-sections -ffunction-sections -O3
+#OPTIMIZE=-fdata-sections -ffunction-sections
 DEBUG   =-g3
-CXXFLAGS  =$(DEBUG) $(DEFINES) $(OPTIMIZE) $(shell $(PKGCONFIG) --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -std=c++14 -O3
+CXXFLAGS  =$(DEBUG) $(DEFINES) $(OPTIMIZE) $(shell $(PKGCONFIG) --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -std=c++14 
 CFLAGS = $(filter-out -std=%,$(CXXFLAGS)) -std=c99
 LDFLAGS = -lm -lpthread
 GLIB_COMPILE_RESOURCES = $(shell $(PKGCONFIG) --variable=glib_compile_resources gio-2.0)
@@ -587,7 +588,17 @@ ifeq ($(OS),Windows_NT)
 else
     UNAME := $(shell uname)
     ifeq ($(UNAME), Darwin)
-        # do nothing on mac os
+    	# O3 generate incompatibel frames?
+    	OPTIMIZE=-fdata-sections -ffunction-sections -O2
+    	# support brew on non-standart location
+    	BREWROOT ?= $(shell brew --prefix)
+    	INC += -I$(BREWROOT)/include
+    	INC_OCE = -I$(BREWROOT)/include/opencascade
+    	LDFLAGS_OCE = -L$(BREWROOT)/lib/ -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -lTKTopAlgo -lTKPrim -lTKBO -lTKG3d
+    	CFLAGS += -mmacosx-version-min=10.12 
+    	CXXFLAGS += -mmacosx-version-min=10.12 
+    	LDFLAGS += -mmacosx-version-min=10.12 $(DEBUG)
+    	# osrf/homebrew-simulation/cppzmq, podofo
     else
         LDFLAGS += -fuse-ld=gold
     endif
@@ -630,7 +641,9 @@ OBJDIR           = $(BUILDDIR)/obj
 PICOBJDIR        = $(BUILDDIR)/picobj
 GENDIR           = $(BUILDDIR)/gen
 MKDIR            = mkdir -p
+ifneq ($(VERBOSE),1)
 QUIET            = @
+endif
 ECHO             = @echo
 
 # Object files
@@ -655,9 +668,9 @@ OBJ_GEN_PKG      = $(addprefix $(OBJDIR)/,$(SRC_GEN_PKG:.cpp=.o))
 
 
 INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router -I3rd_party
-INC_OCE = -I/opt/opencascade/inc/ -I/mingw64/include/oce/ -I/usr/include/oce -I/usr/include/opencascade -I${CASROOT}/include/opencascade -I/usr/local/include/OpenCASCADE
+INC_OCE ?= -I/opt/opencascade/inc/ -I/mingw64/include/oce/ -I/usr/include/oce -I/usr/include/opencascade -I${CASROOT}/include/opencascade -I/usr/local/include/OpenCASCADE
 INC_PYTHON = $(shell $(PKGCONFIG) --cflags python3)
-LDFLAGS_OCE = -L /opt/opencascade/lib/ -L${CASROOT}/lib -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -lTKTopAlgo -lTKPrim -lTKBO -lTKG3d
+LDFLAGS_OCE ?= -L /opt/opencascade/lib/ -L${CASROOT}/lib -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -lTKTopAlgo -lTKPrim -lTKBO -lTKG3d
 ifeq ($(OS),Windows_NT)
 	LDFLAGS_OCE += -lTKV3d
 endif

@@ -27,7 +27,7 @@ PoolManagerPool::PoolManagerPool(const std::string &bp) : base_path(bp)
     auto j = load_json_from_file(pool_json);
     uuid = j.at("uuid").get<std::string>();
     default_via = j.at("default_via").get<std::string>();
-    name = j.at("name");
+    name = j.at("name").get<std::string>();
     if (j.count("pools_included")) {
         auto &o = j.at("pools_included");
         for (auto &it : o) {

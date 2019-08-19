@@ -1,0 +1,30 @@
+language: cpp
+
+compiler:
+    - clang
+
+osx_image: 
+    - xcode11
+
+os:
+    - osx
+
+addons:
+  homebrew:
+    packages:
+    - pkg-config
+    - gtkmm3
+    - gobject-introspection
+    - opencascade
+    - libzip
+    - yaml-cpp
+    - osrf/homebrew-simulation/cppzmq
+    - podofo
+    - boost
+    - librsvg
+    - glm
+    - libffi
+    - libgit2
+   
+script: PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig:$PKG_CONFIG_PATH" make -j2
+
