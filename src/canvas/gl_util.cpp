@@ -169,5 +169,19 @@ GLint gl_clamp_samples(GLint samples_req)
     return samples;
 }
 
+void gl_log_info()
+{
+
+    std::cout << "GL_RENDERER:\t\t" << reinterpret_cast<const char *>(glGetString(GL_RENDERER)) << std::endl;
+    std::cout << "GL_VERSION:\t\t" << reinterpret_cast<const char *>(glGetString(GL_VERSION)) << std::endl;
+    std::cout << "GL_SHADING_LANGUAGE_VERSION:\t"
+              << reinterpret_cast<const char *>(glGetString(GL_SHADING_LANGUAGE_VERSION)) << std::endl;
+    std::cout << "GL_EXTENSIONS:" << std::endl;
+    GLint num_extensions = 0;
+    glGetIntegerv(GL_NUM_EXTENSIONS, &num_extensions);
+    for (GLint i = 0; i < num_extensions; ++i) {
+        std::cout << "\t" << reinterpret_cast<const char *>(glGetStringi(GL_EXTENSIONS, i)) << std::endl;
+    }
+}
 
 } // namespace horizon

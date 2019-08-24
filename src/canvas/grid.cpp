@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace horizon {
-Grid::Grid(class CanvasGL *c) : ca(c), spacing(1.25_mm), mark_size(5)
+Grid::Grid(class CanvasGL *c) : ca(c), spacing(1.25_mm), mark_size(5), grid_line_width(1.0f), cursor_line_width(4.0f)
 {
 }
 
@@ -56,6 +56,16 @@ void Grid::realize()
     GET_LOC(this, color);
 }
 
+void Grid::set_scale_factor(float sf)
+{
+    GLfloat max_width = 1.0f;
+    glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, &max_width);
+    GL_CHECK_ERROR
+
+    grid_line_width = std::max(std::min(1 * sf, max_width), 1.0f);
+    cursor_line_width = std::max(std::min(4 * sf, max_width), 1.0f);
+}
+
 void Grid::render()
 {
     glUseProgram(program);
@@ -88,8 +98,7 @@ void Grid::render()
 
     glUniform1f(grid_size_loc, sp);
     glUniform2f(grid_0_loc, grid_0.x, grid_0.y);
-
-    glLineWidth(1 * ca->get_scale_factor());
+    glLineWidth(grid_line_width);
     if (mark_size > 100) {
         glUniform1f(mark_size_loc, ca->height * 2);
         int n = (ca->width / ca->scale) / sp + 4;
@@ -119,7 +128,7 @@ void Grid::render()
     auto origin_color = ca->get_color(ColorP::ORIGIN);
     gl_color_to_uniform_4f(color_loc, origin_color);
 
-    glLineWidth(1 * ca->get_scale_factor());
+    glLineWidth(grid_line_width);
     glDrawArraysInstanced(GL_LINES, 0, 4, 1);
 
     glBindVertexArray(0);
@@ -143,7 +152,7 @@ void Grid::render_cursor(Coord<int64_t> &coord)
 
     auto bgcolor = ca->get_color(ColorP::BACKGROUND);
     glUniform4f(color_loc, bgcolor.r, bgcolor.g, bgcolor.b, 1);
-    glLineWidth(4 * ca->get_scale_factor());
+    glLineWidth(cursor_line_width);
     glDrawArrays(GL_LINES, 0, 12);
 
     Color cursor_color;
@@ -154,7 +163,7 @@ void Grid::render_cursor(Coord<int64_t> &coord)
         cursor_color = ca->get_color(ColorP::CURSOR_NORMAL);
     }
     glUniform4f(color_loc, cursor_color.r, cursor_color.g, cursor_color.b, 1);
-    glLineWidth(1 * ca->get_scale_factor());
+    glLineWidth(grid_line_width);
     glDrawArrays(GL_LINES, 0, 12);
 
     glBindVertexArray(0);

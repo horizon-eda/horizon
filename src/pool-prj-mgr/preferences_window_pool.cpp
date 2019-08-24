@@ -58,6 +58,10 @@ PoolPreferencesEditor::PoolPreferencesEditor(BaseObjectType *cobject, const Glib
         auto filter = Gtk::FileFilter::create();
         filter->set_name("Horizon pool (pool.json)");
         filter->add_pattern("pool.json");
+#ifdef __APPLE__
+        // full file name dnt worked on mac
+        filter->add_pattern("*.json");
+#endif
         chooser->add_filter(filter);
 
         if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {

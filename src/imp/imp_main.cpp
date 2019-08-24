@@ -109,6 +109,10 @@ int main(int argc, char *argv[])
 
     std::unique_ptr<horizon::ImpBase> imp = nullptr;
     if (mode_sch) {
+        if (filenames.size() < 2) {
+            std::cout << "wrong arguments number" << std::endl;
+            return 1;
+        }
         imp.reset(new horizon::ImpSchematic(filenames.at(0), filenames.at(1), {pool_base_path, pool_cache_path}));
     }
     else if (mode_symbol) {

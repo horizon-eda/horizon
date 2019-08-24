@@ -24,6 +24,7 @@ Canvas3D::Canvas3D()
     : Gtk::GLArea(), CanvasPatch::CanvasPatch(), cover_renderer(this), wall_renderer(this), face_renderer(this),
       background_renderer(this), center(0)
 {
+    set_required_version(4, 2);
     add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_MOTION_MASK | Gdk::SCROLL_MASK
                | Gdk::SMOOTH_SCROLL_MASK);
 
@@ -233,6 +234,9 @@ void Canvas3D::resize_buffers()
 {
     GLint rb;
     GLint samples = gl_clamp_samples(num_samples);
+#ifdef __APPLE__
+    samples = 0;
+#endif
     glGetIntegerv(GL_RENDERBUFFER_BINDING, &rb); // save rb
     glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
     glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_RGBA8, width * get_scale_factor(),
