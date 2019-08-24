@@ -62,7 +62,7 @@ Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, Pool &pool)
     if (j.count("title_block_values")) {
         const json &o = j["title_block_values"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            title_block_values[it.key()] = it.value();
+            title_block_values[it.key()] = it.value().get<std::string>();
         }
     }
     if (j.count("pdf_export_settings")) {

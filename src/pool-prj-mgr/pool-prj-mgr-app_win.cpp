@@ -550,9 +550,9 @@ void PoolProjectManagerAppWindow::update_recent_items()
                 json k;
                 ifs >> k;
                 if (endswith(path, "pool.json"))
-                    name = k.at("name");
+                    name = k.at("name").get<std::string>();
                 else
-                    name = k.at("title");
+                    name = k.at("title").get<std::string>();
             }
             ifs.close();
         }

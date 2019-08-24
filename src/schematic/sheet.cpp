@@ -100,7 +100,7 @@ Sheet::Sheet(const UUID &uu, const json &j, Block &block, Pool &pool)
     if (j.count("title_block_values")) {
         const json &o = j["title_block_values"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            title_block_values[it.key()] = it.value();
+            title_block_values[it.key()] = it.value().get<std::string>();
         }
     }
 }
