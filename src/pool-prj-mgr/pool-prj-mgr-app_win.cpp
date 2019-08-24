@@ -475,6 +475,10 @@ void PoolProjectManagerAppWindow::handle_open()
     auto filter = Gtk::FileFilter::create();
     filter->set_name("Horizon pools & projects");
     filter->add_pattern("pool.json");
+#ifdef __APPLE__
+    // full file name dnt worked on mac
+    filter->add_pattern("*.json");
+#endif
     filter->add_pattern("*.hprj");
     chooser->add_filter(filter);
 
