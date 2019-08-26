@@ -914,6 +914,9 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
     auto basename = file->get_basename();
     if (basename == "pool.json") {
         try {
+            if (!file->query_exists()) {
+                throw std::runtime_error("pool.json not found");
+            }
             auto pool_base_path = file->get_parent()->get_path();
             check_schema_update(pool_base_path);
             set_view_mode(ViewMode::POOL);
