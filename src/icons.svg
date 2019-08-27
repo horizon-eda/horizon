@@ -13,7 +13,7 @@
    width="16"
    height="16"
    id="svg7384"
-   inkscape:version="0.92.2 2405546, 2018-03-11"
+   inkscape:version="0.92.4 5da689c313, 2019-01-14"
    sodipodi:docname="icons.svg"
    inkscape:export-filename="/home/sam/dev/RESOURCES/gnome-icon-theme-symbolic/src/gnome-stencils.png"
    inkscape:export-xdpi="90"
@@ -41,16 +41,16 @@
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:window-width="1916"
-     inkscape:window-height="920"
+     inkscape:window-height="782"
      id="namedview88"
      showgrid="true"
-     inkscape:zoom="45.254831"
-     inkscape:cx="-61.224605"
-     inkscape:cy="-500.65359"
+     inkscape:zoom="15.999999"
+     inkscape:cx="-4.4722567"
+     inkscape:cy="-497.99423"
      inkscape:window-x="0"
      inkscape:window-y="37"
      inkscape:window-maximized="0"
-     inkscape:current-layer="g5496"
+     inkscape:current-layer="layer12"
      showborder="false"
      inkscape:snap-nodes="true"
      inkscape:snap-bbox="true"
@@ -1829,6 +1829,24 @@
        d="M -56.494141 524.50391 L -56.496094 527.89844 L -52.777344 528.45703 L -48.896484 525.35352 L -56.494141 524.50391 z M -47.494141 526.79102 L -51.494141 529.99023 L -51.494141 534.55664 L -47.5 535 L -47.494141 526.79102 z M -56.498047 529.92188 L -56.5 534 L -53.494141 534.33398 L -53.494141 530.37305 L -56.498047 529.92188 z "
        transform="translate(241.0002,217)"
        id="path5176" />
+    <g
+       inkscape:label="x-git"
+       id="g4847"
+       transform="translate(19.007043)">
+      <rect
+         transform="scale(-1,1)"
+         y="722"
+         x="-251.00024"
+         height="16"
+         width="16"
+         id="rect4819"
+         style="color:#bebebe;display:inline;overflow:visible;visibility:visible;fill:#1a1a1a;stroke:none;stroke-width:1;marker:none" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path4868"
+         d="m 250.69167,729.2876 -6.98612,-6.98543 c -0.40198,-0.40267 -1.05427,-0.40267 -1.45694,0 l -1.45081,1.45082 1.83987,1.83988 c 0.42784,-0.1442 0.91825,-0.0476 1.25902,0.29316 0.34281,0.34281 0.43871,0.83798 0.29111,1.26717 l 1.77322,1.77322 c 0.4292,-0.14828 0.92436,-0.0524 1.26718,0.29112 0.47884,0.47816 0.47884,1.25425 0,1.73377 -0.47953,0.47885 -1.25562,0.47885 -1.73445,0 -0.3605,-0.36049 -0.4496,-0.88967 -0.26664,-1.33382 l -1.65419,-1.6542 v 4.35314 c 0.11631,0.0579 0.2265,0.13467 0.32377,0.23126 0.47884,0.47885 0.47884,1.25493 0,1.73445 -0.47885,0.47885 -1.25493,0.47885 -1.73378,0 -0.47885,-0.47952 -0.47885,-1.2556 0,-1.73445 0.11835,-0.11767 0.25575,-0.20746 0.40199,-0.26731 v -4.39259 c -0.14624,-0.0599 -0.28296,-0.14896 -0.40199,-0.26799 -0.36254,-0.36253 -0.44959,-0.89443 -0.26391,-1.33995 l -1.81404,-1.81472 -4.78981,4.78982 c -0.40266,0.40266 -0.40266,1.05563 0,1.45762 l 6.98611,6.98543 c 0.40199,0.40267 1.05428,0.40267 1.45694,0 l 6.95347,-6.95278 c 0.40198,-0.40266 0.40198,-1.05564 0,-1.45762"
+         style="fill:#bebebe;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.17412558" />
+    </g>
   </g>
   <text
      xml:space="preserve"

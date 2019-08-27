@@ -77,6 +77,7 @@ public:
     UUID get_pool_uuid() const;
     void pool_notebook_go_to(ObjectType type, const UUID &uu);
     void open_pool(const std::string &pool_json, ObjectType type = ObjectType::INVALID, const UUID &uu = UUID());
+    void handle_download(bool back_to_start = false);
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;
@@ -135,7 +136,6 @@ private:
     void handle_close();
     void handle_recent();
     void handle_update();
-    void handle_download();
     void handle_do_download();
     void handle_new_project();
     void handle_new_pool();
@@ -175,6 +175,8 @@ private:
 
     bool check_pools();
     bool check_schema_update(const std::string &base_path);
+
+    bool download_back_to_start = false;
 
 public:
     zmq::context_t &zctx;

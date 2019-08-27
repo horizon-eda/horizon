@@ -543,6 +543,7 @@ SRC_POOL_PRJ_MGR = \
 	src/util/exception_util.cpp\
 	src/widgets/package_info_box.cpp\
 	src/widgets/pool_browser_button.cpp\
+	src/pool-prj-mgr/welcome_window.cpp
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp
