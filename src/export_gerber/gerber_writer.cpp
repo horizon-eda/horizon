@@ -71,6 +71,40 @@ void GerberWriter::write_decimal(int64_t x, bool comma)
     }
 }
 
+void GerberWriter::write_prim(const ApertureMacro::PrimitiveOutline *prim)
+{
+    assert(prim->vertices.size() > 0);
+    ofs << static_cast<int>(prim->code) << ",";
+    ofs << "1," << prim->vertices.size() << ","
+        << "\r\n";
+
+    auto write_vertex = [this](const Coordi &c) {
+        ofs << std::fixed << (double)c.x / 1e6 << "," << (double)c.y / 1e6 << ","
+            << "\r\n";
+    };
+    for (const auto &v : prim->vertices) {
+        write_vertex(v);
+    }
+    write_vertex(prim->vertices.front());
+    ofs << "0"
+        << "\r\n";
+}
+
+void GerberWriter::write_prim(const ApertureMacro::PrimitiveCenterLine *prim)
+{
+    ofs << static_cast<int>(prim->code) << ",";
+    ofs << "1,"; // exposure
+    write_decimal(prim->width);
+    write_decimal(prim->height);
+
+    Placement tr;
+    tr.set_angle(-prim->angle);
+    auto c = tr.transform(prim->center);
+    write_decimal(c.x); // x
+    write_decimal(c.y); // y
+    ofs << std::fixed << (prim->angle) * (360. / 65536.);
+}
+
 void GerberWriter::write_apertures()
 {
     ofs.precision(6);
@@ -83,9 +117,9 @@ void GerberWriter::write_apertures()
         ofs << "%AMPS" << it.second.name << "*"
             << "\r\n";
         for (const auto &itp : it.second.primitives) {
-            ofs << static_cast<int>(itp->code) << ",";
             switch (itp->code) {
             case ApertureMacro::Primitive::Code::CIRCLE: {
+                ofs << static_cast<int>(itp->code) << ",";
                 auto prim = dynamic_cast<ApertureMacro::PrimitiveCircle *>(itp.get());
                 ofs << "1,"; // exposure
                 write_decimal(prim->diameter);
@@ -94,35 +128,29 @@ void GerberWriter::write_apertures()
             } break;
             case ApertureMacro::Primitive::Code::CENTER_LINE: {
                 auto prim = dynamic_cast<ApertureMacro::PrimitiveCenterLine *>(itp.get());
-                ofs << "1,"; // exposure
-                write_decimal(prim->width);
-                write_decimal(prim->height);
-
-                Placement tr;
-                tr.set_angle(-prim->angle);
-                auto c = tr.transform(prim->center);
-                write_decimal(c.x); // x
-                write_decimal(c.y); // y
-                ofs << std::fixed << (prim->angle) * (360. / 65536.);
+                if (prim->center == Coordi()) {
+                    write_prim(prim);
+                }
+                else {
+                    /*
+                    CAM350 (popular among far-east PCB manufacturers) is broken and incrorrectly does translation before
+                    rotation. To work around this, export rectangles that aren't at the origin as outlines.
+                    */
+                    ApertureMacro::PrimitiveOutline prim_outline;
+                    Placement tr;
+                    tr.set_angle(prim->angle);
+                    tr.shift = prim->center;
+                    prim_outline.vertices.reserve(4);
+                    prim_outline.vertices.emplace_back(tr.transform(Coordi(-prim->width / 2, -prim->height / 2)));
+                    prim_outline.vertices.emplace_back(tr.transform(Coordi(-prim->width / 2, prim->height / 2)));
+                    prim_outline.vertices.emplace_back(tr.transform(Coordi(prim->width / 2, prim->height / 2)));
+                    prim_outline.vertices.emplace_back(tr.transform(Coordi(prim->width / 2, -prim->height / 2)));
+                    write_prim(&prim_outline);
+                }
             } break;
             case ApertureMacro::Primitive::Code::OUTLINE: {
                 auto prim = dynamic_cast<ApertureMacro::PrimitiveOutline *>(itp.get());
-                assert(prim->vertices.size() > 0);
-                ofs << "1," << prim->vertices.size() << ","
-                    << "\r\n";
-
-                auto write_vertex = [this](const Coordi &c) {
-                    ofs << std::fixed << (double)c.x / 1e6 << "," << (double)c.y / 1e6 << ","
-                        << "\r\n";
-                };
-                for (const auto &v : prim->vertices) {
-                    write_vertex(v);
-                }
-                write_vertex(prim->vertices.front());
-                ofs << "0"
-                    << "\r\n";
-
-
+                write_prim(prim);
             } break;
             }
             ofs << "*"
@@ -241,8 +269,6 @@ void GerberWriter::draw_padstack(const Padstack &ps, int layer, const Placement 
         auto n = aperture_n++;
         am = &apertures_macro.emplace(key, n).first->second;
         auto tr = transform;
-        if (tr.mirror)
-            tr.invert_angle();
         tr.shift = Coordi();
         for (const auto &it : ps.shapes) {
             if (it.second.layer == layer) {
@@ -260,9 +286,6 @@ void GerberWriter::draw_padstack(const Padstack &ps, int layer, const Placement 
                     prim->width = it.second.params.at(0);
                     prim->height = it.second.params.at(1);
                     auto tr2 = tr;
-                    if (tr2.mirror) {
-                        tr2.invert_angle();
-                    }
                     tr2.accumulate(it.second.placement);
                     prim->center = tr2.shift;
                     if (tr2.mirror)
@@ -277,9 +300,6 @@ void GerberWriter::draw_padstack(const Padstack &ps, int layer, const Placement 
                     prim->height = it.second.params.at(1);
                     prim->width = it.second.params.at(0) - prim->height;
                     auto tr2 = tr;
-                    if (tr2.mirror) {
-                        tr2.invert_angle();
-                    }
                     tr2.accumulate(it.second.placement);
                     prim->center = tr2.shift;
                     if (tr2.mirror)

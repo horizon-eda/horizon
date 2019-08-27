@@ -119,5 +119,7 @@ private:
     std::deque<Region> regions;
     std::deque<std::pair<unsigned int, Coordi>> pads;
     void write_decimal(int64_t x, bool comma = true);
+    void write_prim(const ApertureMacro::PrimitiveOutline *prim);
+    void write_prim(const ApertureMacro::PrimitiveCenterLine *prim);
 };
 } // namespace horizon
