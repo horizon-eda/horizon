@@ -165,10 +165,10 @@ PreferencesWindow::PreferencesWindow(Preferences *prefs) : Gtk::Window(), prefer
     add(*box);
 }
 
-void PreferencesWindow::open_pool()
+void PreferencesWindow::open_pool(const std::string &path)
 {
     stack->set_visible_child("pools");
-    pool_prefs_editor->add_pool();
+    pool_prefs_editor->add_pool(path);
 }
 
 } // namespace horizon

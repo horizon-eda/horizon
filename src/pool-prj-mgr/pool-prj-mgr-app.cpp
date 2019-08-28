@@ -145,7 +145,7 @@ void PoolProjectManagerApplication::on_startup()
     signal_shutdown().connect(sigc::mem_fun(*this, &PoolProjectManagerApplication::on_shutdown));
 }
 
-void PoolProjectManagerApplication::show_preferences_window(guint32 timestamp, PreferencesWindowAction action)
+PreferencesWindow *PoolProjectManagerApplication::show_preferences_window(guint32 timestamp)
 {
     /*auto prefs_dialog = new ProjectManagerPrefs(dynamic_cast<Gtk::ApplicationWindow *>(get_active_window()));
     prefs_dialog->present();
@@ -161,9 +161,7 @@ void PoolProjectManagerApplication::show_preferences_window(guint32 timestamp, P
         });
     }
     preferences_window->present(timestamp);
-    if (action == PreferencesWindowAction::OPEN_POOL) {
-        preferences_window->open_pool();
-    }
+    return preferences_window;
 }
 
 void PoolProjectManagerApplication::on_shutdown()

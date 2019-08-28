@@ -6,7 +6,7 @@ class PoolPreferencesEditor : public Gtk::Box {
 public:
     PoolPreferencesEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x);
     static PoolPreferencesEditor *create();
-    void add_pool();
+    void add_pool(const std::string &path);
 
 
 private:

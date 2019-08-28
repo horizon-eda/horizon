@@ -154,4 +154,22 @@ void label_set_tnum(Gtk::Label *la)
     pango_attr_list_unref(attributes_list);
 }
 
+void info_bar_show(Gtk::InfoBar *bar)
+{
+#if GTK_CHECK_VERSION(3, 24, 10)
+    gtk_info_bar_set_revealed(bar->gobj(), true);
+#else
+    bar->show();
+#endif
+}
+
+void info_bar_hide(Gtk::InfoBar *bar)
+{
+#if GTK_CHECK_VERSION(3, 24, 10)
+    gtk_info_bar_set_revealed(bar->gobj(), false);
+#else
+    bar->hide();
+#endif
+}
+
 } // namespace horizon

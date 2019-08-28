@@ -50,11 +50,11 @@ PoolPreferencesEditor::PoolPreferencesEditor(BaseObjectType *cobject, const Glib
     size_group = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
     show_all();
 
-    button_add_pool->signal_clicked().connect(sigc::mem_fun(*this, &PoolPreferencesEditor::add_pool));
+    button_add_pool->signal_clicked().connect([this] { add_pool(""); });
     update();
 }
 
-void PoolPreferencesEditor::add_pool()
+void PoolPreferencesEditor::add_pool(const std::string &path)
 {
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
     GtkFileChooserNative *native =
@@ -64,10 +64,12 @@ void PoolPreferencesEditor::add_pool()
     filter->set_name("Horizon pool (pool.json)");
     filter->add_pattern("pool.json");
     chooser->add_filter(filter);
+    if (path.size())
+        chooser->set_filename(path);
 
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        auto path = chooser->get_file()->get_parent()->get_path();
-        mgr.add_pool(path);
+        auto cpath = chooser->get_file()->get_parent()->get_path();
+        mgr.add_pool(cpath);
         update();
     }
 }

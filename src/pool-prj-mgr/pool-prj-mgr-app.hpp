@@ -37,9 +37,7 @@ public:
     void open_pool(const std::string &pool_json, ObjectType type = ObjectType::INVALID, const UUID &uu = UUID(),
                    guint32 timestamp = 0);
 
-    enum class PreferencesWindowAction { NONE, OPEN_POOL };
-
-    void show_preferences_window(guint32 timestamp = 0, PreferencesWindowAction action = PreferencesWindowAction::NONE);
+    class PreferencesWindow *show_preferences_window(guint32 timestamp = 0);
 
 protected:
     // Override default signal handlers:

@@ -1,6 +1,7 @@
 #include "welcome_window.hpp"
 #include "pool-prj-mgr-app_win.hpp"
 #include "pool-prj-mgr-app.hpp"
+#include "preferences_window.hpp"
 
 namespace horizon {
 WelcomeWindow *WelcomeWindow::create(PoolProjectManagerAppWindow *aw)
@@ -57,7 +58,8 @@ WelcomeWindow::WelcomeWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 void WelcomeWindow::handle_open()
 {
     auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(appwin->get_application());
-    app->show_preferences_window(0, PoolProjectManagerApplication::PreferencesWindowAction::OPEN_POOL);
+    auto prefs_window = app->show_preferences_window();
+    prefs_window->open_pool();
     delete this;
 }
 

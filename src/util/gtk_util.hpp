@@ -54,4 +54,8 @@ void entry_set_warning(Gtk::Entry *e, const std::string &text);
 void header_func_separator(Gtk::ListBoxRow *row, Gtk::ListBoxRow *before);
 
 void entry_add_sanitizer(Gtk::Entry *entry);
+
+void info_bar_show(Gtk::InfoBar *bar);
+void info_bar_hide(Gtk::InfoBar *bar);
+
 } // namespace horizon

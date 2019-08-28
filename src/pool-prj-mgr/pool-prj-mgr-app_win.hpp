@@ -117,6 +117,8 @@ private:
     Gtk::InfoBar *info_bar = nullptr;
     Gtk::Label *info_bar_label = nullptr;
 
+    Gtk::InfoBar *info_bar_pool_not_added = nullptr;
+
     Gtk::MenuItem *menu_new_pool = nullptr;
     Gtk::MenuItem *menu_new_project = nullptr;
 

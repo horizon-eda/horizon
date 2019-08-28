@@ -1,5 +1,6 @@
 #include "pool-prj-mgr-app_win.hpp"
 #include "pool-prj-mgr-app.hpp"
+#include "preferences_window.hpp"
 #include <iostream>
 #include <thread>
 #include "util/util.hpp"
@@ -59,6 +60,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("menu_new_pool", menu_new_pool);
     builder->get_widget("menu_new_project", menu_new_project);
     builder->get_widget("hamburger_menu_button", hamburger_menu_button);
+    builder->get_widget("info_bar_pool_not_added", info_bar_pool_not_added);
     set_view_mode(ViewMode::OPEN);
 
     {
@@ -95,13 +97,21 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
 
     info_bar->signal_response().connect([this](int resp) {
         if (resp == Gtk::RESPONSE_CLOSE) {
-#if GTK_CHECK_VERSION(3, 22, 29)
-            gtk_info_bar_set_revealed(info_bar->gobj(), false);
-#endif
-            info_bar->hide();
+            info_bar_hide(info_bar);
         }
     });
-    info_bar->hide();
+    info_bar_hide(info_bar);
+
+    info_bar_pool_not_added->signal_response().connect([this, app](int resp) {
+        if (resp == Gtk::RESPONSE_OK) {
+            if (pool) {
+                auto prefs_window = app->show_preferences_window();
+                prefs_window->open_pool(Glib::build_filename(pool->get_base_path(), "pool.json"));
+            }
+        }
+        info_bar_hide(info_bar_pool_not_added);
+    });
+    info_bar_hide(info_bar_pool_not_added);
 
     view_create_project.signal_valid_change().connect([this](bool v) { button_create->set_sensitive(v); });
     view_create_pool.signal_valid_change().connect([this](bool v) { button_create->set_sensitive(v); });
@@ -675,6 +685,7 @@ bool PoolProjectManagerAppWindow::really_close_pool_or_project()
         app->recent_items[Glib::build_filename(pool->get_base_path(), "pool.json")] =
                 Glib::DateTime::create_now_local();
         delete pool_notebook;
+        info_bar_hide(info_bar_pool_not_added);
         pool_notebook = nullptr;
         set_view_mode(ViewMode::OPEN);
     }
@@ -936,6 +947,9 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
             check_schema_update(pool_base_path);
             set_view_mode(ViewMode::POOL);
             pool_notebook = new PoolNotebook(pool_base_path, this);
+            if (!PoolManager::get().get_pools().count(pool_base_path)) {
+                info_bar_show(info_bar_pool_not_added);
+            }
             pool_box->pack_start(*pool_notebook, true, true, 0);
             pool_notebook->show();
             header->set_subtitle(pool_base_path);
@@ -1070,10 +1084,7 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
             if (status != 0) {
                 info_bar_label->set_text("Editor for '" + real_filename + "' exited with status "
                                          + std::to_string(status));
-                info_bar->show();
-#if GTK_CHECK_VERSION(3, 22, 29)
-                gtk_info_bar_set_revealed(info_bar->gobj(), true);
-#endif
+                info_bar_show(info_bar);
             }
         });
         return &proc;
