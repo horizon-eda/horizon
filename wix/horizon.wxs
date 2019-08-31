@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='windows-1252'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi' xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+	<?include version.wxi?>
+
+	<!-- change Product Id for every new version and subversion, do not change UpgradeCode -->
+	<Product Name="$(var.FullProductName)" Id='*' UpgradeCode='79a5f957-0a3a-423e-92bc-95dd303649f3' Language='1033' Codepage='1252' Version='$(var.ProductVersion)' Manufacturer='Horizon EDA project'>
+
+		<Package Id='*' Keywords='EDA, PCB' Description="Installer for Horizon EDA" Comments='Licensed under the GNU GPL' Manufacturer='Horizon EDA project' InstallerVersion='$(var.InstallerVersion)' Platform='$(var.Platform)' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
+
+		<Media Id='1' Cabinet='Sample.cab' EmbedCab='yes' DiskPrompt="CD-ROM #1" CompressionLevel="high"/>
+		<Property Id='DiskPrompt' Value="horizon EDA Installation [1]" />
+
+		<Property Id='ALLUSERS' Value="2" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />
+
+		<DirectoryRef Id="ApplicationProgramsFolder">
+			<Component Id="ApplicationShortcut" Guid="7636ef5c-8442-48e2-9216-c15aaefdf149" Win64='$(var.Win64)' >
+				<Shortcut Id="ApplicationStartMenuShortcut"
+						  Name="$(var.FullProductName)"
+						  Description="Horizon EDA Application"
+						  Target="[INSTALLDIR]horizon-eda.exe"
+						  WorkingDirectory="INSTALLDIR"/>
+				<util:InternetShortcut Id="OnlineDocumentationShortcut"
+								Name="Horizon EDA on GitHub"
+									   Target="http://github.com/horizon-eda/horizon/"/>
+				<RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+				<RegistryValue Root="HKCU" Key="Software\carrotIndustries.net\horizon" Name="startmenu_installed" Type="integer" Value="1" KeyPath="yes"/>
+			</Component>
+		</DirectoryRef>
+
+		<DirectoryRef Id="DesktopFolder">
+			<Component Id="DesktopShortcut" Guid="12177fc9-8bad-429c-94dc-793d162a3c0d" Win64='$(var.Win64)'>
+				<Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Target="[INSTALLDIR]horizon-eda.exe" Name="$(var.FullProductName)" WorkingDirectory='INSTALLDIR' />
+				<RemoveFolder Id="DesktopFolder" On="uninstall"/>
+				<RegistryValue Root="HKCU" Key="Software\carrotIndustries.net\horizon" Name="desktop_installed" Type="integer" Value="1" KeyPath="yes"/>
+			</Component>
+		</DirectoryRef>
+
+		<Feature Id='Horizon_EDA' Level='1' Absent="disallow" Display="expand" ConfigurableDirectory='INSTALLDIR' AllowAdvertise='no'
+				 Title="$(var.FullProductName)"
+				 Description='Horizon EDA core files and shortcuts'>
+			<!-- core files, i.e. everything that does not fit into any of the other features -->
+			<ComponentGroupRef Id='AllOther' />
+
+			<!-- shortcuts and file extensions -->
+			<Feature Id='ApplicationShortcut' Level='1' AllowAdvertise='no'
+					 Title='Start Menu entry'
+					 Description='Create a link in the start menu.'>
+				<ComponentRef Id='ApplicationShortcut' />
+			</Feature>
+			<Feature Id='DesktopShortcut' Level='1' AllowAdvertise='no'
+					 Title='Desktop shortcut'
+					 Description='Create a link on the desktop.' >
+				<ComponentRef Id='DesktopShortcut' />
+			</Feature>
+		</Feature>
+
+	
+		<!-- set license text -->
+		<WixVariable Id="WixUILicenseRtf" Value="gpl-3.0.rtf" />
+		<!-- set dialog custom bitmaps -->
+		<WixVariable Id="WixUIDialogBmp" Value="Bitmaps\dialog.bmp"/>
+		<WixVariable Id="WixUIBannerBmp" Value="Bitmaps\banner.bmp"/>
+
+		<UIRef Id="WixUI_Mondo" />
+		<UIRef Id="WixUI_ErrorProgressText" />
+
+		<Icon Id="horizon_eda.ico" SourceFile="..\src\icons\horizon-eda.ico" />
+		<Property Id="ARPPRODUCTICON" Value="horizon_eda.ico" />
+	</Product>
+</Wix>

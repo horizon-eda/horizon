@@ -37,3 +37,8 @@ src/preferences/color_presets.json
 src/imp/layer_help.json
 build
 .vscode
+wix/*.msi
+wix/*.wixobj
+wix/*.wixpdb
+wix/files.wxs
+wix/version.wxi
