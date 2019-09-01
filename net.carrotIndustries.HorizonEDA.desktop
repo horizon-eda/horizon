@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Horizon EDA
+Comment=Free EDA package
+Categories=Development;Engineering;Electronics;
+Type=Application
+Terminal=false
+Icon=net.carrotIndustries.HorizonEDA
+Exec=horizon-eda %U
