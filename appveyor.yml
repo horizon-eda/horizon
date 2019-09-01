@@ -9,7 +9,9 @@ environment:
       MSYSTEM: MINGW64
 
 before_build:
-    - set PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%
+    - set PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;C:\Program Files (x86)\WiX Toolset v3.11\bin;%PATH%
+    - where candle
+    - echo %APPVEYOR_REPO_TAG%
     - bash -c "pacman -R mingw-w64-i686-gcc-ada mingw-w64-i686-gcc-objc mingw-w64-x86_64-gcc-ada mingw-w64-x86_64-gcc-objc --noconfirm || true"
     - bash -c "pacman -Syu --noconfirm"
     - bash -c "pacman -Syu --noconfirm"
@@ -20,9 +22,11 @@ build_script:
     - echo %cd%
     - dir
     - bash -c "cd $APPVEYOR_BUILD_FOLDER && make -j2 && ./make_bindist.sh"
+    - ps: "if( $Env:APPVEYOR_REPO_TAG -eq \"true\" ) {cd $Env:APPVEYOR_BUILD_FOLDER/wix; dir; ./install.bat}"
 
 artifacts:
     - path: dist/horizon-*.zip
+    - path: wix/*.msi
 
 test_script:
     - set PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%
