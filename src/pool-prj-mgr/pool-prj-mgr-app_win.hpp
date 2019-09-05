@@ -116,11 +116,14 @@ private:
 
     Gtk::InfoBar *info_bar = nullptr;
     Gtk::Label *info_bar_label = nullptr;
+    Gtk::Button *show_output_button = nullptr;
 
     Gtk::InfoBar *info_bar_pool_not_added = nullptr;
 
     Gtk::MenuItem *menu_new_pool = nullptr;
     Gtk::MenuItem *menu_new_project = nullptr;
+
+    class OutputWindow *output_window = nullptr;
 
     std::unique_ptr<Project> project = nullptr;
     std::string project_filename;
@@ -172,6 +175,7 @@ private:
     void handle_place_part(const UUID &uu);
     void handle_assign_part(const UUID &uu);
 
+    PoolProjectManagerApplication *app;
     zmq::socket_t sock_mgr;
     std::string sock_mgr_ep;
 

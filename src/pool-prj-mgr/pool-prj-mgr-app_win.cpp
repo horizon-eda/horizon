@@ -20,14 +20,17 @@
 #include "board/board.hpp"
 #include "widgets/pool_chooser.hpp"
 #include "welcome_window.hpp"
+#include "output_window.hpp"
+#include "util/str_util.hpp"
+
 
 namespace horizon {
 PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject,
                                                          const Glib::RefPtr<Gtk::Builder> &refBuilder,
-                                                         PoolProjectManagerApplication *app)
+                                                         PoolProjectManagerApplication *aapp)
     : Gtk::ApplicationWindow(cobject), builder(refBuilder), state_store(this, "pool-mgr"),
       view_create_project(refBuilder, this), view_project(refBuilder, this), view_create_pool(refBuilder, this),
-      sock_mgr(app->zctx, ZMQ_REP), zctx(app->zctx)
+      app(aapp), sock_mgr(app->zctx, ZMQ_REP), zctx(app->zctx)
 {
     builder->get_widget("stack", stack);
     builder->get_widget("button_open", button_open);
@@ -57,6 +60,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("download_dest_dir_entry", download_dest_dir_entry);
     builder->get_widget("info_bar", info_bar);
     builder->get_widget("info_bar_label", info_bar_label);
+    builder->get_widget("show_output_button", show_output_button);
     builder->get_widget("menu_new_pool", menu_new_pool);
     builder->get_widget("menu_new_project", menu_new_project);
     builder->get_widget("hamburger_menu_button", hamburger_menu_button);
@@ -102,7 +106,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     });
     info_bar_hide(info_bar);
 
-    info_bar_pool_not_added->signal_response().connect([this, app](int resp) {
+    info_bar_pool_not_added->signal_response().connect([this](int resp) {
         if (resp == Gtk::RESPONSE_OK) {
             if (pool) {
                 auto prefs_window = app->show_preferences_window();
@@ -113,6 +117,11 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     });
     info_bar_hide(info_bar_pool_not_added);
 
+    show_output_button->signal_clicked().connect([this] {
+        output_window->present();
+        info_bar_hide(info_bar);
+    });
+
     view_create_project.signal_valid_change().connect([this](bool v) { button_create->set_sensitive(v); });
     view_create_pool.signal_valid_change().connect([this](bool v) { button_create->set_sensitive(v); });
 
@@ -120,7 +129,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     download_status_dispatcher.attach(download_label);
     download_status_dispatcher.attach(download_spinner);
 
-    download_status_dispatcher.signal_notified().connect([this, app](const StatusDispatcher::Notification &n) {
+    download_status_dispatcher.signal_notified().connect([this](const StatusDispatcher::Notification &n) {
         auto is_busy = n.status == StatusDispatcher::Status::BUSY;
         button_cancel->set_sensitive(!is_busy);
         button_do_download->set_sensitive(!is_busy);
@@ -206,6 +215,17 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
             open_file_view(Gio::File::create_for_path(ch->path));
         });
     }
+
+    output_window = OutputWindow::create();
+    output_window->set_transient_for(*this);
+
+    signal_key_press_event().connect([this](const GdkEventKey *ev) {
+        if (ev->keyval == GDK_KEY_O && (ev->state & GDK_CONTROL_MASK)) {
+            output_window->present();
+            return true;
+        }
+        return false;
+    });
 }
 
 PoolProjectManagerProcess *PoolProjectManagerAppWindow::find_process(const std::string &filename)
@@ -247,7 +267,6 @@ bool PoolProjectManagerAppWindow::check_pools()
 json PoolProjectManagerAppWindow::handle_req(const json &j)
 {
     std::string op = j.at("op");
-    auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
     guint32 timestamp = j.value("time", 0);
     if (op == "part-placed") {
         UUID part = j.at("part").get<std::string>();
@@ -457,6 +476,8 @@ PoolProjectManagerAppWindow::~PoolProjectManagerAppWindow()
         delete part_browser_window;
     if (pool_cache_window)
         delete pool_cache_window;
+    if (output_window)
+        delete output_window;
 }
 
 void PoolProjectManagerAppWindow::handle_recent()
@@ -487,7 +508,6 @@ void PoolProjectManagerAppWindow::handle_save()
 {
     if (project) {
         save_project();
-        auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
         app->send_json(0, {{"op", "save"}});
     }
 }
@@ -554,7 +574,6 @@ void PoolProjectManagerAppWindow::handle_create()
 
 void PoolProjectManagerAppWindow::update_recent_items()
 {
-    auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
     if (!app)
         return;
     {
@@ -601,7 +620,6 @@ void PoolProjectManagerAppWindow::prepare_close()
 
 bool PoolProjectManagerAppWindow::close_pool_or_project()
 {
-    auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
     auto pol = get_close_policy();
 
     if (!pol.can_close) {
@@ -671,7 +689,6 @@ void PoolProjectManagerAppWindow::wait_for_all_processes()
 
 bool PoolProjectManagerAppWindow::really_close_pool_or_project()
 {
-    auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
     if (pool_notebook) {
         if (processes.size() || pool_notebook->get_close_prohibited()) {
             Gtk::MessageDialog md(*this, "Can't close right now", false /* use_markup */, Gtk::MESSAGE_ERROR,
@@ -710,6 +727,7 @@ bool PoolProjectManagerAppWindow::really_close_pool_or_project()
     else {
         set_view_mode(ViewMode::OPEN);
     }
+    output_window->clear_all();
     return true;
 }
 
@@ -926,7 +944,6 @@ bool PoolProjectManagerAppWindow::check_schema_update(const std::string &base_pa
 void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &file)
 {
     auto path = file->get_path();
-    auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
     app->recent_items[path] = Glib::DateTime::create_now_local();
 
     auto windows = dynamic_cast_vector<PoolProjectManagerAppWindow *>(app->get_windows());
@@ -1013,7 +1030,6 @@ void PoolProjectManagerAppWindow::open_pool(const std::string &pool_json, Object
 
 void PoolProjectManagerAppWindow::handle_place_part(const UUID &uu)
 {
-    auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
     if (auto proc = find_top_schematic_process()) {
         auto pid = proc->proc->get_pid();
         allow_set_foreground_window(pid);
@@ -1023,7 +1039,6 @@ void PoolProjectManagerAppWindow::handle_place_part(const UUID &uu)
 
 void PoolProjectManagerAppWindow::handle_assign_part(const UUID &uu)
 {
-    auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
     if (auto proc = find_top_schematic_process()) {
         auto pid = proc->proc->get_pid();
         allow_set_foreground_window(pid);
@@ -1043,7 +1058,6 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
                                                               const std::vector<std::string> &ienv, bool read_only,
                                                               bool is_temp)
 {
-    auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
     std::string pool_base_path;
     if (pool)
         pool_base_path = pool->get_base_path();
@@ -1084,7 +1098,15 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
             if (status != 0) {
                 info_bar_label->set_text("Editor for '" + real_filename + "' exited with status "
                                          + std::to_string(status));
+                show_output_button->set_visible(app->get_preferences().capture_output);
                 info_bar_show(info_bar);
+            }
+        });
+        proc.signal_output().connect([uu, this](std::string line, bool err) {
+            trim(line);
+            if (line.size()) {
+                auto real_filename = processes.at(uu).get_filename();
+                output_window->handle_output("[" + real_filename + "] " + line, err);
             }
         });
         return &proc;
@@ -1133,7 +1155,6 @@ void PoolProjectManagerAppWindow::process_save(const UUID &uu)
     }
     else if (proc.proc) {
         auto pid = proc.proc->get_pid();
-        auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
         app->send_json(pid, {{"op", "save"}});
     }
 }
@@ -1146,7 +1167,6 @@ void PoolProjectManagerAppWindow::process_close(const UUID &uu)
     }
     else if (proc.proc) {
         auto pid = proc.proc->get_pid();
-        auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
         app->send_json(pid, {{"op", "close"}});
     }
 }
@@ -1215,7 +1235,6 @@ void PoolProjectManagerAppWindow::cleanup_pool_cache()
         md.run();
         return;
     }
-    auto app = Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application());
     std::set<std::pair<ObjectType, UUID>> items_needed;
 
     PoolCached pool_cached(PoolManager::get().get_by_uuid(project->pool_uuid)->base_path,

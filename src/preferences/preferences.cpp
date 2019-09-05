@@ -27,9 +27,16 @@ static const LutEnumStr<Appearance::CursorSize> cursor_size_lut = {
         {"full", Appearance::CursorSize::FULL},
 };
 
+#ifdef G_OS_WIN32
+static const bool capture_output_default = true;
+#else
+static const bool capture_output_default = false;
+#endif
+
 Preferences::Preferences()
 {
     canvas_non_layer.appearance.layer_colors[0] = {1, 1, 0};
+    capture_output = capture_output_default;
 }
 
 void Preferences::load_default()
@@ -38,6 +45,7 @@ void Preferences::load_default()
     canvas_non_layer = CanvasPreferences();
     canvas_non_layer.appearance.layer_colors[0] = {1, 1, 0};
     key_sequences.load_from_json(json_from_resource("/net/carrotIndustries/horizon/imp/keys_default.json"));
+    capture_output = capture_output_default;
 }
 
 std::string Preferences::get_preferences_filename()
@@ -269,6 +277,7 @@ json Preferences::serialize() const
     j["key_sequences"] = key_sequences.serialize();
     j["board"] = board.serialize();
     j["zoom"] = zoom.serialize();
+    j["capture_output"] = capture_output;
     return j;
 }
 
@@ -294,6 +303,7 @@ void Preferences::load_from_json(const json &j)
     if (j.count("key_sequences"))
         key_sequences.load_from_json(j.at("key_sequences"));
     key_sequences.append_from_json(json_from_resource("/net/carrotIndustries/horizon/imp/keys_default.json"));
+    capture_output = j.value("capture_output", capture_output_default);
 }
 
 void Preferences::load()

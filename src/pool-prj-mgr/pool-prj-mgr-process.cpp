@@ -1,6 +1,8 @@
 #include "pool-prj-mgr-process.hpp"
 #include "util/util.hpp"
 #include "pool-mgr/editors/editor_window.hpp"
+#include "preferences/preferences_provider.hpp"
+#include "preferences/preferences.hpp"
 
 namespace horizon {
 
@@ -66,7 +68,7 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(const UUID &uu, PoolProject
         }
         if (read_only)
             argv.push_back("-r");
-        proc = std::make_unique<EditorProcess>(argv, env);
+        proc = std::make_unique<EditorProcess>(argv, env, PreferencesProvider::get_prefs().capture_output);
         proc->signal_exited().connect([this](auto rc) {
             bool modified = false;
             if (Glib::file_test(filename, Glib::FILE_TEST_IS_REGULAR)) {
@@ -76,6 +78,7 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(const UUID &uu, PoolProject
             }
             s_signal_exited.emit(rc, modified);
         });
+        proc->signal_output().connect([this](std::string out, bool err) { s_signal_output.emit(out, err); });
     }
     else {
         switch (type) {

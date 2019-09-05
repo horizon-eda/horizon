@@ -72,6 +72,7 @@ public:
     BoardPreferences board;
     KeySequencesPreferences key_sequences;
     ZoomPreferences zoom;
+    bool capture_output = false;
 
     typedef sigc::signal<void> type_signal_changed;
     type_signal_changed signal_changed()
