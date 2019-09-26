@@ -240,6 +240,7 @@ void PoolNotebook::construct_packages()
         canvas->load(ObjectType::PACKAGE, sel);
     });
     append_page(*paned, "Packages");
+    install_search_once(paned, br);
 }
 
 } // namespace horizon

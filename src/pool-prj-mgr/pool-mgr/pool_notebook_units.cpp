@@ -153,6 +153,7 @@ void PoolNotebook::construct_units()
     stack->set_visible_child(*preview);
 
     append_page(*paned, "Units");
+    br->search_once(); // we're the first page to be displayed
 }
 
 } // namespace horizon

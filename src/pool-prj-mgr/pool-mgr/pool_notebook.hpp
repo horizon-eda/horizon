@@ -114,6 +114,8 @@ private:
     void handle_copy_path(ObjectType ty, const UUID &uu);
     void add_context_menu(class PoolBrowser *br);
 
+    void install_search_once(Gtk::Widget *page, PoolBrowser *browser);
+
     std::string remote_repo;
     class PoolRemoteBox *remote_box = nullptr;
     class PoolSettingsBox *settings_box = nullptr;

@@ -130,6 +130,7 @@ void PoolNotebook::construct_padstacks()
     });
 
     append_page(*paned, "Padstacks");
+    install_search_once(paned, br);
 }
 
 } // namespace horizon

@@ -40,7 +40,7 @@ private:
     Gtk::Paned *paned = nullptr;
     class PartPreview *preview = nullptr;
     class PoolBrowserPart *add_search(const UUID &part = UUID());
-    void add_search_parametric(const std::string &table_name);
+    class PoolBrowserParametric *add_search_parametric(const std::string &table_name);
     void handle_switch_page(Gtk::Widget *w, guint index);
     void handle_fav_toggled();
     void update_favorites();

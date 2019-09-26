@@ -6,7 +6,6 @@ PoolBrowserFrame::PoolBrowserFrame(Pool *p) : PoolBrowser(p)
 {
     construct();
     name_entry = create_search_entry("Name");
-    search();
     install_pool_item_source_tooltip();
 }
 
@@ -28,6 +27,7 @@ void PoolBrowserFrame::add_sort_controller_columns()
 
 void PoolBrowserFrame::search()
 {
+    searched_once = true;
     auto selected_uuid = get_selected();
     treeview->unset_model();
     store->clear();

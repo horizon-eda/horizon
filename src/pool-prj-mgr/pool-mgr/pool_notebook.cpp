@@ -241,6 +241,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         add_context_menu(br);
         br->signal_activated().connect([this, br] { go_to(ObjectType::PART, br->get_selected()); });
         append_page(*br, "Param: " + it_tab.second.display_name);
+        install_search_once(br, br);
         browsers_parametric.emplace(it_tab.first, br);
     }
 
@@ -440,4 +441,17 @@ void PoolNotebook::pool_update(std::function<void()> cb, const std::vector<std::
     std::thread thr(&PoolNotebook::pool_update_thread, this);
     thr.detach();
 }
+
+void PoolNotebook::install_search_once(Gtk::Widget *widget, PoolBrowser *browser)
+{
+    signal_switch_page().connect(sigc::track_obj(
+            [this, widget, browser](Gtk::Widget *page, guint page_num) {
+                if (in_destruction())
+                    return;
+                if (page == widget)
+                    browser->search_once();
+            },
+            *widget, *browser));
+}
+
 } // namespace horizon

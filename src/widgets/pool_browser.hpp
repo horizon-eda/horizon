@@ -18,6 +18,7 @@ public:
     void add_context_menu_item(const std::string &label, sigc::slot1<void, UUID> cb);
     virtual void add_copy_name_context_menu_item(){};
     virtual void search() = 0;
+    void search_once();
     virtual ObjectType get_type() const
     {
         return ObjectType::INVALID;
@@ -72,6 +73,7 @@ protected:
 
     void install_pool_item_source_tooltip();
     virtual PoolItemSource pool_item_source_from_row(const Gtk::TreeModel::Row &row);
+    bool searched_once = false;
 
 private:
     Gtk::Grid *grid = nullptr;

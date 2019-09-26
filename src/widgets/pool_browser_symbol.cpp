@@ -6,7 +6,6 @@ PoolBrowserSymbol::PoolBrowserSymbol(Pool *p, const UUID &uu) : PoolBrowser(p), 
 {
     construct();
     name_entry = create_search_entry("Name");
-    search();
     install_pool_item_source_tooltip();
 }
 
@@ -38,6 +37,7 @@ void PoolBrowserSymbol::set_unit_uuid(const UUID &uu)
 
 void PoolBrowserSymbol::search()
 {
+    searched_once = true;
     auto selected_uuid = get_selected();
     treeview->unset_model();
     store->clear();

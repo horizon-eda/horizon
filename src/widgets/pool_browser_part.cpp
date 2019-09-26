@@ -14,7 +14,6 @@ PoolBrowserPart::PoolBrowserPart(Pool *p, const UUID &uu) : PoolBrowser(p), enti
     tag_entry = create_tag_entry("Tags");
 
     install_pool_item_source_tooltip();
-    search();
 }
 
 void PoolBrowserPart::set_MPN(const std::string &s)
@@ -74,6 +73,7 @@ void PoolBrowserPart::add_sort_controller_columns()
 
 void PoolBrowserPart::search()
 {
+    searched_once = true;
     auto selected_uuid = get_selected();
     treeview->unset_model();
     store->clear();

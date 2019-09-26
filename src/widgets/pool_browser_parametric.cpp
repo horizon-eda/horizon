@@ -271,7 +271,6 @@ PoolBrowserParametric::PoolBrowserParametric(Pool *p, PoolParametric *pp, const 
     search_box->pack_start(*hbox, false, false, 0);
 
     construct(search_box);
-    search();
     install_pool_item_source_tooltip();
 }
 
@@ -339,6 +338,7 @@ void PoolBrowserParametric::apply_filters()
 
 void PoolBrowserParametric::search()
 {
+    searched_once = true;
     auto selected_uuid = get_selected();
     treeview->unset_model();
     store->clear();

@@ -59,6 +59,7 @@ PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool 
         break;
     default:;
     }
+    browser->search_once();
 
     if (!use_preview) {
         get_content_area()->pack_start(*browser, true, true, 0);

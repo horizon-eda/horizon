@@ -43,14 +43,20 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
 
     {
         auto la = Gtk::manage(new Gtk::MenuItem("MPN Search"));
-        la->signal_activate().connect([this] { add_search(); });
+        la->signal_activate().connect([this] {
+            auto ch = add_search();
+            ch->search_once();
+        });
         la->show();
         add_search_menu->append(*la);
     }
     for (const auto &it : pool_parametric.get_tables()) {
         auto la = Gtk::manage(new Gtk::MenuItem(it.second.display_name));
         std::string table_name = it.first;
-        la->signal_activate().connect([this, table_name] { add_search_parametric(table_name); });
+        la->signal_activate().connect([this, table_name] {
+            auto ch = add_search_parametric(table_name);
+            ch->search_once();
+        });
         la->show();
         add_search_menu->append(*la);
     }
@@ -72,6 +78,7 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
         add_search_parametric(it.first);
     }
     notebook->set_current_page(notebook->page_num(*ch_search));
+    signal_show().connect(sigc::track_obj([this, ch_search] { ch_search->search_once(); }, *ch_search));
 }
 
 void PartBrowserWindow::handle_favorites_selected(Gtk::ListBoxRow *row)
@@ -136,8 +143,10 @@ void PartBrowserWindow::go_to_part(const UUID &uu)
     auto br = dynamic_cast<PoolBrowserPart *>(page);
     if (br)
         br->go_to(uu);
-    else
-        add_search(uu);
+    else {
+        auto br_new = add_search(uu);
+        br_new->search_once();
+    }
 }
 
 void PartBrowserWindow::update_favorites()
@@ -292,7 +301,7 @@ PoolBrowserPart *PartBrowserWindow::add_search(const UUID &part)
     return ch;
 }
 
-void PartBrowserWindow::add_search_parametric(const std::string &table_name)
+PoolBrowserParametric *PartBrowserWindow::add_search_parametric(const std::string &table_name)
 {
     auto ch = Gtk::manage(new PoolBrowserParametric(&pool, &pool_parametric, table_name));
     ch->add_copy_name_context_menu_item();
@@ -302,7 +311,7 @@ void PartBrowserWindow::add_search_parametric(const std::string &table_name)
     auto close_button = Gtk::manage(new Gtk::Button());
     close_button->set_relief(Gtk::RELIEF_NONE);
     close_button->set_image_from_icon_name("window-close-symbolic");
-    close_button->signal_clicked().connect([this, ch] { notebook->remove(*ch); });
+    close_button->signal_clicked().connect([this, ch] { delete ch; });
     tab_label->pack_start(*close_button, false, false, 0);
     tab_label->pack_start(*la, true, true, 0);
     ch->show_all();
@@ -313,6 +322,16 @@ void PartBrowserWindow::add_search_parametric(const std::string &table_name)
     search_views.insert(ch);
     ch->signal_selected().connect(sigc::mem_fun(*this, &PartBrowserWindow::update_part_current));
     ch->signal_activated().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_place_part));
+
+    notebook->signal_switch_page().connect(sigc::track_obj(
+            [this, ch](Gtk::Widget *page, guint pagenum) {
+                if (notebook->in_destruction())
+                    return;
+                if (page == ch)
+                    ch->search_once();
+            },
+            *ch));
+    return ch;
 }
 
 PartBrowserWindow *PartBrowserWindow::create(Gtk::Window *p, const std::string &pool_path, std::deque<UUID> &favs)

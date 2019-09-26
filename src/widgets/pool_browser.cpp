@@ -171,7 +171,8 @@ bool PoolBrowser::get_any_selected()
 void PoolBrowser::set_show_none(bool v)
 {
     show_none = v;
-    search();
+    if (searched_once)
+        search();
 }
 
 void PoolBrowser::set_show_path(bool v)
@@ -180,7 +181,8 @@ void PoolBrowser::set_show_path(bool v)
     if (path_column) {
         path_column->set_visible(v);
     }
-    search();
+    if (searched_once)
+        search();
 }
 
 void PoolBrowser::scroll_to_selection()
@@ -299,4 +301,11 @@ CellRendererColorBox *PoolBrowser::create_pool_item_source_cr(Gtk::TreeViewColum
     });
     return cr_cb;
 }
+
+void PoolBrowser::search_once()
+{
+    if (!searched_once)
+        search();
+}
+
 } // namespace horizon

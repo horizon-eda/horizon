@@ -143,5 +143,6 @@ void PoolNotebook::construct_parts()
     });
 
     append_page(*paned, "Parts");
+    install_search_once(paned, br);
 }
 } // namespace horizon

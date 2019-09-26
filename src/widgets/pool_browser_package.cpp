@@ -11,7 +11,6 @@ PoolBrowserPackage::PoolBrowserPackage(Pool *p) : PoolBrowser(p)
     manufacturer_entry = create_search_entry("Manufacturer");
     tag_entry = create_tag_entry("Tags");
     install_pool_item_source_tooltip();
-    search();
 }
 
 Glib::RefPtr<Gtk::ListStore> PoolBrowserPackage::create_list_store()
@@ -49,6 +48,7 @@ void PoolBrowserPackage::add_sort_controller_columns()
 
 void PoolBrowserPackage::search()
 {
+    searched_once = true;
     auto selected_uuid = get_selected();
     treeview->unset_model();
     store->clear();

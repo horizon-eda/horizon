@@ -126,5 +126,6 @@ void PoolNotebook::construct_symbols()
     br->signal_activated().connect([this, br] { handle_edit_symbol(br->get_selected()); });
 
     append_page(*paned, "Symbols");
+    install_search_once(paned, br);
 }
 } // namespace horizon

@@ -10,7 +10,6 @@ PoolBrowserEntity::PoolBrowserEntity(Pool *p) : PoolBrowser(p)
     name_entry = create_search_entry("Name");
     tag_entry = create_tag_entry("Tags");
     install_pool_item_source_tooltip();
-    search();
 }
 
 Glib::RefPtr<Gtk::ListStore> PoolBrowserEntity::create_list_store()
@@ -36,6 +35,7 @@ void PoolBrowserEntity::add_sort_controller_columns()
 
 void PoolBrowserEntity::search()
 {
+    searched_once = true;
     auto selected_uuid = get_selected();
     treeview->unset_model();
     store->clear();

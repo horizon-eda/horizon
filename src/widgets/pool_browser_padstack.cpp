@@ -8,7 +8,6 @@ PoolBrowserPadstack::PoolBrowserPadstack(Pool *p) : PoolBrowser(p)
     construct();
     name_entry = create_search_entry("Name");
     install_pool_item_source_tooltip();
-    search();
 }
 
 Glib::RefPtr<Gtk::ListStore> PoolBrowserPadstack::create_list_store()
@@ -48,6 +47,7 @@ void PoolBrowserPadstack::set_include_padstack_type(Padstack::Type ty, bool v)
 
 void PoolBrowserPadstack::search()
 {
+    searched_once = true;
     auto selected_uuid = get_selected();
     treeview->unset_model();
     store->clear();
