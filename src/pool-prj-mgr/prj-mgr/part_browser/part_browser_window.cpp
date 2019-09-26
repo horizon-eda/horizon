@@ -144,7 +144,7 @@ void PartBrowserWindow::update_favorites()
 {
     auto children = lb_favorites->get_children();
     for (auto it : children) {
-        lb_favorites->remove(*it);
+        delete it;
     }
 
     for (const auto &it : favorites) {
@@ -182,7 +182,7 @@ void PartBrowserWindow::update_recents()
 {
     auto children = lb_recent->get_children();
     for (auto it : children) {
-        lb_recent->remove(*it);
+        delete it;
     }
 
     for (const auto &it : recents) {
@@ -276,7 +276,7 @@ PoolBrowserPart *PartBrowserWindow::add_search(const UUID &part)
     auto close_button = Gtk::manage(new Gtk::Button());
     close_button->set_relief(Gtk::RELIEF_NONE);
     close_button->set_image_from_icon_name("window-close-symbolic");
-    close_button->signal_clicked().connect([this, ch] { notebook->remove(*ch); });
+    close_button->signal_clicked().connect([this, ch] { delete ch; });
     tab_label->pack_start(*close_button, false, false, 0);
     tab_label->pack_start(*la, true, true, 0);
     ch->show_all();

@@ -1,8 +1,9 @@
 #pragma once
 #include <gtkmm.h>
+#include <sigc++/sigc++.h>
 
 namespace horizon {
-class SortController {
+class SortController : public sigc::trackable {
 public:
     enum class Sort { ASC, DESC, NONE };
 

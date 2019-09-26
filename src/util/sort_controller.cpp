@@ -6,11 +6,13 @@ namespace horizon {
 SortController::SortController(Gtk::TreeView *tv) : treeview(tv), is_simple(true)
 {
     tv->set_headers_clickable();
-    tv->property_model().signal_changed().connect([this] {
-        if (treeview->get_model()) {
-            update_treeview();
-        }
-    });
+    tv->property_model().signal_changed().connect(sigc::track_obj(
+            [this] {
+                if (treeview->get_model()) {
+                    update_treeview();
+                }
+            },
+            *this));
 }
 
 void SortController::add_column(unsigned int index, const std::string &name)
