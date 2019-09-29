@@ -282,6 +282,7 @@ PoolBrowserPart *PartBrowserWindow::add_search(const UUID &part)
     ch->get_style_context()->add_class("background");
     auto tab_label = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
     auto la = Gtk::manage(new Gtk::Label("MPN Search"));
+    la->set_xalign(1);
     auto close_button = Gtk::manage(new Gtk::Button());
     close_button->set_relief(Gtk::RELIEF_NONE);
     close_button->set_image_from_icon_name("window-close-symbolic");
@@ -308,6 +309,7 @@ PoolBrowserParametric *PartBrowserWindow::add_search_parametric(const std::strin
     ch->get_style_context()->add_class("background");
     auto tab_label = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
     auto la = Gtk::manage(new Gtk::Label(pool_parametric.get_tables().at(table_name).display_name));
+    la->set_xalign(1);
     auto close_button = Gtk::manage(new Gtk::Button());
     close_button->set_relief(Gtk::RELIEF_NONE);
     close_button->set_image_from_icon_name("window-close-symbolic");
