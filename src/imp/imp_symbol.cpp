@@ -105,6 +105,44 @@ void ImpSymbol::construct()
 
     header_button->add_widget("Can expand", can_expand_switch);
 
+    {
+        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
+        box->get_style_context()->add_class("linked");
+        auto rb_primary = Gtk::manage(new Gtk::RadioButton("Primary"));
+        rb_primary->set_mode(false);
+        auto rb_alt = Gtk::manage(new Gtk::RadioButton("Alt."));
+        rb_alt->set_mode(false);
+        auto rb_both = Gtk::manage(new Gtk::RadioButton("Both"));
+        rb_both->set_mode(false);
+        rb_alt->join_group(*rb_primary);
+        rb_both->join_group(*rb_primary);
+        box->pack_start(*rb_primary, true, true, 0);
+        box->pack_start(*rb_alt, true, true, 0);
+        box->pack_start(*rb_both, true, true, 0);
+        box->show_all();
+        header_button->add_widget("Pin display", box);
+        rb_primary->signal_toggled().connect([this, rb_primary] {
+            if (rb_primary->get_active()) {
+                core_symbol.set_pin_display_mode(Symbol::PinDisplayMode::PRIMARY);
+                canvas_update_from_pp();
+            }
+        });
+        rb_alt->signal_toggled().connect([this, rb_alt] {
+            if (rb_alt->get_active()) {
+                core_symbol.set_pin_display_mode(Symbol::PinDisplayMode::ALT);
+                canvas_update_from_pp();
+            }
+        });
+        rb_both->signal_toggled().connect([this, rb_both] {
+            if (rb_both->get_active()) {
+                core_symbol.set_pin_display_mode(Symbol::PinDisplayMode::BOTH);
+                canvas_update_from_pp();
+            }
+        });
+        core_symbol.signal_tool_changed().connect(
+                [this, box](ToolID tool_id) { box->set_sensitive(tool_id == ToolID::NONE); });
+    }
+
     core.r->signal_rebuilt().connect([this] { unit_label->set_text(core.y->get_symbol()->unit->name); });
 
     core.r->signal_save().connect([this, header_button] {

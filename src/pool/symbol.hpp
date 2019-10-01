@@ -85,7 +85,8 @@ public:
     /**
      * fills in information from the referenced unit
      */
-    void expand();
+    enum class PinDisplayMode { PRIMARY, ALT, BOTH };
+    void expand(PinDisplayMode mode = PinDisplayMode::PRIMARY);
     Symbol(const Symbol &sym);
     void operator=(Symbol const &sym);
 

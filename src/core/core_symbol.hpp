@@ -56,12 +56,15 @@ public:
 
     void reload_pool() override;
 
+    void set_pin_display_mode(Symbol::PinDisplayMode mode);
+
 private:
     std::map<UUID, Text> *get_text_map(bool work = true) override;
     std::map<UUID, Polygon> *get_polygon_map(bool work = true) override;
 
     Symbol sym;
     std::string m_filename;
+    Symbol::PinDisplayMode pin_display_mode = Symbol::PinDisplayMode::PRIMARY;
 
     class HistoryItem : public Core::HistoryItem {
     public:

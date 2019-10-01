@@ -255,7 +255,7 @@ std::string CoreSymbol::get_display_name(ObjectType type, const UUID &uu)
 
 void CoreSymbol::rebuild(bool from_undo)
 {
-    sym.expand();
+    sym.expand(pin_display_mode);
     Core::rebuild(from_undo);
 }
 
@@ -268,6 +268,7 @@ void CoreSymbol::history_load(unsigned int i)
 {
     auto x = dynamic_cast<CoreSymbol::HistoryItem *>(history.at(history_current).get());
     sym = x->sym;
+    sym.expand(pin_display_mode);
     s_signal_rebuilt.emit();
 }
 
@@ -335,6 +336,14 @@ void CoreSymbol::reload_pool()
     sym.unit = m_pool->get_unit(sym.unit.uuid);
     history_clear();
     rebuild();
+}
+
+void CoreSymbol::set_pin_display_mode(Symbol::PinDisplayMode mode)
+{
+    if (tool_is_active())
+        return;
+    pin_display_mode = mode;
+    sym.expand(pin_display_mode);
 }
 
 void CoreSymbol::commit()

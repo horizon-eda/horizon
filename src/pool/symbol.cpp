@@ -253,7 +253,7 @@ void Symbol::operator=(Symbol const &sym)
     update_refs();
 }
 
-void Symbol::expand()
+void Symbol::expand(PinDisplayMode mode)
 {
     std::vector<UUID> keys;
     keys.reserve(pins.size());
@@ -264,7 +264,21 @@ void Symbol::expand()
         if (unit->pins.count(uu)) {
             SymbolPin &p = pins.at(uu);
             p.pad = "$PAD";
-            p.name = unit->pins.at(uu).primary_name;
+            switch (mode) {
+            case PinDisplayMode::PRIMARY:
+                p.name = unit->pins.at(uu).primary_name;
+                break;
+            case PinDisplayMode::ALT:
+            case PinDisplayMode::BOTH:
+                p.name = "";
+                for (auto &pin_name : unit->pins.at(uu).names) {
+                    p.name += pin_name + " ";
+                }
+                if (mode == PinDisplayMode::BOTH) {
+                    p.name += "(" + unit->pins.at(uu).primary_name + ")";
+                }
+                break;
+            }
             p.direction = unit->pins.at(uu).direction;
         }
         else {
