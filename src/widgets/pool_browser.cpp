@@ -213,6 +213,7 @@ void PoolBrowser::clear_search()
 void PoolBrowser::go_to(const UUID &uu)
 {
     clear_search();
+    search_once();
     select_uuid(uu);
     scroll_to_selection();
 }
