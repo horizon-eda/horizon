@@ -485,7 +485,10 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
             draw_line(Coordf(ax * sc, ay * sc), Coordf(bx * sc, by * sc), ColorP::PIN, 0, true, 0);
         };
         transform_save();
-        transform.accumulate(pin.position + v_deco * (pin.length + schmitt_shift));
+        transform.accumulate(pin.position);
+        transform.set_angle(0);
+        transform.mirror = false;
+        transform.accumulate(v_deco * (pin.length + schmitt_shift));
         dl(-34, -20, -2, -20);
         dl(34, 20, 2, 20);
         dl(-20, -20, 2, 20);
@@ -499,7 +502,10 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
             draw_line(Coordf(ax * sc, ay * sc), Coordf(bx * sc, by * sc), ColorP::PIN, 0, true, 0);
         };
         transform_save();
-        transform.accumulate(pin.position + v_deco * (pin.length + driver_shift));
+        transform.accumulate(pin.position);
+        transform.set_angle(0);
+        transform.mirror = false;
+        transform.accumulate(v_deco * (pin.length + driver_shift));
 
         if (pin.decoration.driver != SymbolPin::Decoration::Driver::TRISTATE) {
             dl(0, -1, 1, 0);
