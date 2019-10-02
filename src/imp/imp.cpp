@@ -305,6 +305,7 @@ void ImpBase::run(int argc, char *argv[])
 
     panels = Gtk::manage(new PropertyPanels(core.r));
     panels->show_all();
+    panels->property_margin() = 10;
     main_window->property_viewport->add(*panels);
     panels->signal_update().connect([this] {
         canvas_update();
