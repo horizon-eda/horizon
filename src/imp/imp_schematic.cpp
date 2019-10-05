@@ -770,6 +770,20 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
                 }
             } break;
 
+            case ObjectType::LINE: {
+                auto line = &core.c->get_sheet()->lines.at(it.uuid);
+                for (auto &it_ft : {line->from, line->to}) {
+                    new_sel.emplace(it_ft->uuid, ObjectType::JUNCTION);
+                }
+            } break;
+
+            case ObjectType::ARC: {
+                auto arc = &core.c->get_sheet()->arcs.at(it.uuid);
+                for (auto &it_ft : {arc->from, arc->to, arc->center}) {
+                    new_sel.emplace(it_ft->uuid, ObjectType::JUNCTION);
+                }
+            } break;
+
             case ObjectType::SCHEMATIC_SYMBOL: {
                 auto sym = core.c->get_schematic_symbol(it.uuid);
                 for (const auto &itt : sym->texts) {
@@ -824,6 +838,20 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
             }
             if (add_line) {
                 new_sel.emplace(it.first, ObjectType::LINE_NET);
+            }
+        }
+        for (const auto &it : core.c->get_sheet()->lines) {
+            for (const auto &it_ft : {it.second.from, it.second.to}) {
+                if (selection.count(SelectableRef(it_ft->uuid, ObjectType::JUNCTION))) {
+                    new_sel.emplace(it.first, ObjectType::LINE);
+                }
+            }
+        }
+        for (const auto &it : core.c->get_sheet()->arcs) {
+            for (const auto &it_ft : {it.second.from, it.second.to, it.second.center}) {
+                if (selection.count(SelectableRef(it_ft->uuid, ObjectType::JUNCTION))) {
+                    new_sel.emplace(it.first, ObjectType::ARC);
+                }
             }
         }
 
@@ -884,6 +912,14 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
         case ObjectType::TEXT: {
             new_sheet->texts.insert(std::make_pair(it.uuid, std::move(old_sheet->texts.at(it.uuid))));
             old_sheet->texts.erase(it.uuid);
+        } break;
+        case ObjectType::LINE: {
+            new_sheet->lines.insert(std::make_pair(it.uuid, std::move(old_sheet->lines.at(it.uuid))));
+            old_sheet->lines.erase(it.uuid);
+        } break;
+        case ObjectType::ARC: {
+            new_sheet->arcs.insert(std::make_pair(it.uuid, std::move(old_sheet->arcs.at(it.uuid))));
+            old_sheet->arcs.erase(it.uuid);
         } break;
 
         default:;
