@@ -96,6 +96,15 @@ PartPreview::PartPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIENTAT
             false);
     infogrid->attach(*label_entity, 5, 1, 1, 1);
 
+    label_orderable_MPNs_title = Gtk::manage(new Gtk::Label("Orderable MPNs"));
+    label_orderable_MPNs_title->get_style_context()->add_class("dim-label");
+    label_orderable_MPNs_title->set_halign(Gtk::ALIGN_END);
+    infogrid->attach(*label_orderable_MPNs_title, 0, 2, 1, 1);
+
+    box_orderable_MPNs = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
+    box_orderable_MPNs->set_hexpand(true);
+    box_orderable_MPNs->set_halign(Gtk::ALIGN_START);
+    infogrid->attach(*box_orderable_MPNs, 1, 2, 5, 1);
 
     infogrid->show_all();
     pack_start(*infogrid, false, false, 0);
@@ -171,6 +180,8 @@ void PartPreview::load(const Part *p)
         label_entity->set_text("");
         canvas_package->clear();
         entity_preview->clear();
+        label_orderable_MPNs_title->hide();
+        box_orderable_MPNs->hide();
         return;
     }
 
@@ -189,6 +200,25 @@ void PartPreview::load(const Part *p)
     }
     label_entity->set_markup("<a href=\"" + (std::string)part->entity->uuid + "\">"
                              + Glib::Markup::escape_text(part->entity->name) + "</a>");
+
+    if (part->orderable_MPNs.size()) {
+        label_orderable_MPNs_title->show();
+        box_orderable_MPNs->show();
+        auto children = box_orderable_MPNs->get_children();
+        for (auto ch : children)
+            delete ch;
+        for (const auto &it : part->orderable_MPNs) {
+            auto la = Gtk::manage(new Gtk::Label(it.second));
+            la->set_selectable(true);
+            la->set_xalign(0);
+            box_orderable_MPNs->pack_start(*la, false, false, 0);
+            la->show();
+        }
+    }
+    else {
+        label_orderable_MPNs_title->hide();
+        box_orderable_MPNs->hide();
+    }
 
     std::vector<const Gate *> gates;
     gates.reserve(part->entity->gates.size());

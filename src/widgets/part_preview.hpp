@@ -28,6 +28,8 @@ private:
     Gtk::Label *label_description = nullptr;
     Gtk::Label *label_datasheet = nullptr;
     Gtk::Label *label_entity = nullptr;
+    Gtk::Box *box_orderable_MPNs = nullptr;
+    Gtk::Label *label_orderable_MPNs_title = nullptr;
 
     void handle_package_sel();
 };
