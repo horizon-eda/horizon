@@ -107,7 +107,24 @@ void ToolMove::expand_selection()
 void ToolMove::update_selection_center()
 {
     Accumulator<Coordi> accu;
+    std::set<SelectableRef> items_ignore;
     for (const auto &it : core.r->selection) {
+        if (it.type == ObjectType::BOARD_PACKAGE) {
+            const auto &pkg = core.b->get_board()->packages.at(it.uuid);
+            for (auto &it_txt : pkg.texts) {
+                items_ignore.emplace(it_txt->uuid, ObjectType::TEXT);
+            }
+        }
+        else if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
+            const auto &sym = core.c->get_sheet()->symbols.at(it.uuid);
+            for (auto &it_txt : sym.texts) {
+                items_ignore.emplace(it_txt->uuid, ObjectType::TEXT);
+            }
+        }
+    }
+    for (const auto &it : core.r->selection) {
+        if (items_ignore.count(it))
+            continue;
         switch (it.type) {
         case ObjectType::JUNCTION:
             accu.accumulate(core.r->get_junction(it.uuid)->position);
