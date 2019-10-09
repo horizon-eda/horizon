@@ -33,8 +33,11 @@ public:
 
         pack_start(*combo, false, false, 0);
 
+        auto name_visible_cb = Gtk::manage(new Gtk::CheckButton("Show net name"));
+        bind_widget(name_visible_cb, net->power_symbol_name_visible);
+        pack_start(*name_visible_cb, false, false, 0);
 
-        delete_button = Gtk::manage(new Gtk::Button());
+        auto delete_button = Gtk::manage(new Gtk::Button());
         delete_button->set_margin_start(4);
         delete_button->set_image_from_icon_name("list-remove-symbolic", Gtk::ICON_SIZE_BUTTON);
         delete_button->set_sensitive(net->n_pins_connected == 0 && net->is_power_forced == false);
@@ -50,7 +53,6 @@ public:
         set_margin_bottom(4);
         show_all();
     }
-    Gtk::Button *delete_button = nullptr;
 
 private:
     Net *net;
@@ -78,6 +80,11 @@ ManagePowerNetsDialog::ManagePowerNetsDialog(Gtk::Window *parent, Block *bl)
     add_button->set_margin_end(8);
 
     box->pack_start(*add_button, false, false, 0);
+
+    {
+        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+        box->pack_start(*sep, false, false, 0);
+    }
 
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());

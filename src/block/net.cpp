@@ -18,7 +18,8 @@ Net::Net(const UUID &uu, const json &j, Block &block) : Net(uu, j)
     net_class = &block.net_classes.at(j.at("net_class").get<std::string>());
 }
 Net::Net(const UUID &uu, const json &j)
-    : uuid(uu), name(j.at("name").get<std::string>()), is_power(j.value("is_power", false))
+    : uuid(uu), name(j.at("name").get<std::string>()), is_power(j.value("is_power", false)),
+      power_symbol_name_visible(j.value("power_symbol_name_visible", true))
 {
     net_class.uuid = j.at("net_class").get<std::string>();
     if (j.count("diffpair")) {
@@ -45,6 +46,7 @@ json Net::serialize() const
     j["name"] = name;
     j["is_power"] = is_power;
     j["net_class"] = net_class->uuid;
+    j["power_symbol_name_visible"] = power_symbol_name_visible;
     j["power_symbol_style"] = power_symbol_style_lut.lookup_reverse(power_symbol_style);
     if (diffpair_master)
         j["diffpair"] = diffpair->uuid;

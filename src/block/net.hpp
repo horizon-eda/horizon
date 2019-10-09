@@ -25,6 +25,7 @@ public:
 
     enum class PowerSymbolStyle { GND, EARTH, DOT, ANTENNA };
     PowerSymbolStyle power_symbol_style = PowerSymbolStyle::GND;
+    bool power_symbol_name_visible = true;
 
     uuid_ptr<NetClass> net_class;
     uuid_ptr<Net> diffpair;

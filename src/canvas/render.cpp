@@ -121,8 +121,9 @@ void Canvas::render(const PowerSymbol &sym)
             text_angle = 32768;
         }
 
-        draw_text0(sym.junction->position + text_offset, 1.5_mm, sym.junction->net->name, text_angle, false,
-                   TextOrigin::CENTER, c, 0);
+        if (sym.junction->net->power_symbol_name_visible)
+            draw_text0(sym.junction->position + text_offset, 1.5_mm, sym.junction->net->name, text_angle, false,
+                       TextOrigin::CENTER, c, 0);
     } break;
 
     case Net::PowerSymbolStyle::DOT:
@@ -172,8 +173,9 @@ void Canvas::render(const PowerSymbol &sym)
             text_angle = 32768;
         }
 
-        draw_text0(sym.junction->position + text_offset, 1.5_mm, sym.junction->net->name, text_angle, false,
-                   TextOrigin::CENTER, c, 0);
+        if (sym.junction->net->power_symbol_name_visible)
+            draw_text0(sym.junction->position + text_offset, 1.5_mm, sym.junction->net->name, text_angle, false,
+                       TextOrigin::CENTER, c, 0);
     }
     }
 
