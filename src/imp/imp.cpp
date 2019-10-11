@@ -422,8 +422,14 @@ void ImpBase::run(int argc, char *argv[])
         canvas->select_all();
     });
 
-    main_window->search_entry->property_has_focus().signal_changed().connect(
-            [this] { canvas->steal_focus = !main_window->search_entry->property_has_focus(); });
+    canvas->signal_can_steal_focus().connect([this](bool &can_steal) {
+        auto focus_widget = main_window->get_focus();
+        bool property_has_focus = false;
+        if (focus_widget && (dynamic_cast<Gtk::Entry *>(focus_widget) || dynamic_cast<Gtk::TextView *>(focus_widget)))
+            property_has_focus = focus_widget->is_ancestor(*main_window->property_viewport);
+        can_steal = !(main_window->search_entry->property_has_focus() || property_has_focus);
+    });
+
     main_window->search_entry->signal_changed().connect([this] {
         this->handle_search();
         this->search_go(0);

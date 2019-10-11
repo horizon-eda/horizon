@@ -93,6 +93,12 @@ public:
         return s_signal_request_display_name;
     }
 
+    typedef sigc::signal<void, bool &> type_signal_can_steal_focus;
+    type_signal_can_steal_focus signal_can_steal_focus()
+    {
+        return s_signal_can_steal_focus;
+    }
+
     void center_and_zoom(const Coordi &center, float scale = -1);
     void zoom_to_bbox(const Coordf &a, const Coordf &b);
 
@@ -122,8 +128,6 @@ public:
     bool smooth_zoom = true;
 
     void inhibit_drag_selection();
-
-    bool steal_focus = true;
 
     int _animate_step(GdkFrameClock *frame_clock);
 
@@ -244,5 +248,6 @@ protected:
     type_signal_cursor_moved s_signal_cursor_moved;
     type_signal_grid_mul_changed s_signal_grid_mul_changed;
     type_signal_request_display_name s_signal_request_display_name;
+    type_signal_can_steal_focus s_signal_can_steal_focus;
 };
 } // namespace horizon

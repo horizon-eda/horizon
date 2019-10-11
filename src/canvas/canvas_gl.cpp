@@ -184,7 +184,9 @@ bool CanvasGL::on_button_press_event(GdkEventButton *button_event)
 
 bool CanvasGL::on_motion_notify_event(GdkEventMotion *motion_event)
 {
-    if (steal_focus)
+    bool steal = true;
+    s_signal_can_steal_focus.emit(steal);
+    if (steal)
         grab_focus();
     pan_drag_move(motion_event);
     cursor_move((GdkEvent *)motion_event);
