@@ -571,12 +571,6 @@ CoreBoard::HistoryItem::HistoryItem(const Block &b, const Board &r) : block(b), 
 void CoreBoard::history_push()
 {
     history.push_back(std::make_unique<CoreBoard::HistoryItem>(block, brd));
-    auto x = dynamic_cast<CoreBoard::HistoryItem *>(history.back().get());
-    for (const auto &it : brd.planes) {
-        auto &frags = x->fragments[it.first];
-        frags.reserve(it.second.fragments.size());
-        std::copy(it.second.fragments.begin(), it.second.fragments.end(), std::back_inserter(frags));
-    }
 }
 
 void CoreBoard::history_load(unsigned int i)
@@ -592,13 +586,6 @@ void CoreBoard::history_load(unsigned int i)
 
     block = x->block;
     brd.update_refs();
-    for (const auto &it : x->fragments) {
-        if (brd.planes.count(it.first)) {
-            std::copy(it.second.begin(), it.second.end(), std::back_inserter(brd.planes.at(it.first).fragments));
-            if (plane_revs.count(it.first))
-                brd.planes.at(it.first).revision = plane_revs.at(it.first) + 1;
-        }
-    }
     brd.expand();
 }
 

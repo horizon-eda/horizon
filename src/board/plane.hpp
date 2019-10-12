@@ -40,9 +40,14 @@ class Plane : public PolygonUsage {
 public:
     class Fragment {
     public:
+        Fragment()
+        {
+        }
+        Fragment(const json &j);
         bool orphan = false;
         ClipperLib::Paths paths;              // first path is outline, others are holes
         bool contains(const Coordi &c) const; // checks if point is in area defined by paths
+        json serialize() const;
     };
 
     Plane(const UUID &uu, const json &j, class Board &brd);

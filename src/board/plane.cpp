@@ -72,6 +72,11 @@ Plane::Plane(const UUID &uu, const json &j, Board &brd)
     if (j.count("settings")) {
         settings = PlaneSettings(j.at("settings"));
     }
+    if (j.count("fragments")) {
+        for (const auto &it : j.at("fragments")) {
+            fragments.emplace_back(it);
+        }
+    }
 }
 
 Plane::Plane(const UUID &uu) : uuid(uu)
@@ -95,6 +100,11 @@ json Plane::serialize() const
     j["polygon"] = (std::string)polygon->uuid;
     j["priority"] = priority;
     j["settings"] = settings.serialize();
+    auto frags = json::array();
+    for (const auto &it : fragments) {
+        frags.push_back(it.serialize());
+    }
+    j["fragments"] = frags;
     return j;
 }
 
@@ -113,4 +123,35 @@ bool Plane::Fragment::contains(const Coordi &c) const
         return false;
     }
 }
+
+Plane::Fragment::Fragment(const json &j) : orphan(j.at("orphan"))
+{
+    const auto &j_paths = j.at("paths");
+    paths.reserve(j_paths.size());
+    for (const auto &j_path : j_paths) {
+        paths.emplace_back();
+        auto &path = paths.back();
+        path.reserve(j_path.size());
+        for (const auto &it : j_path) {
+            path.emplace_back(it.at(0), it.at(1));
+        }
+    }
+}
+
+json Plane::Fragment::serialize() const
+{
+    json j;
+    j["orphan"] = orphan;
+    auto j_paths = json::array();
+    for (const auto &path : paths) {
+        auto j_path = json::array();
+        for (const auto &it : path) {
+            j_path.push_back({it.X, it.Y});
+        }
+        j_paths.push_back(j_path);
+    }
+    j["paths"] = j_paths;
+    return j;
+}
+
 } // namespace horizon

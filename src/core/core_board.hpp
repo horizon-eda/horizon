@@ -90,7 +90,6 @@ private:
         HistoryItem(const Block &b, const Board &r);
         Block block;
         json brd;
-        std::map<UUID, std::vector<Plane::Fragment>> fragments;
     };
     void history_push() override;
     void history_load(unsigned int i) override;
