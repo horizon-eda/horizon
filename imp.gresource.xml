@@ -81,6 +81,8 @@
     <file>canvas/shaders/triangle-line-butt-geometry.glsl</file>
     <file>canvas/shaders/triangle-line-fragment.glsl</file>
     <file>canvas/shaders/triangle-line-geometry.glsl</file>
+    <file>canvas/shaders/triangle-glyph-fragment.glsl</file>
+    <file>canvas/shaders/triangle-glyph-geometry.glsl</file>
     <file>canvas/shaders/ubo.glsl</file>
 
     <file>canvas/shaders/marker-vertex.glsl</file>

@@ -134,6 +134,7 @@ SRC_CANVAS = \
 	src/util/msd.cpp\
 	src/util/msd_animator.cpp\
 	src/canvas/appearance.cpp\
+	src/canvas/bitmap_font_util.cpp\
 
 SRC_IMP = \
 	src/imp/imp_main.cpp \

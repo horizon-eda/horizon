@@ -251,6 +251,8 @@ std::pair<Coordf, Coordf> Canvas::get_bbox(bool visible_only) const
     for (const auto &it : triangles) {
         if (visible_only == false || layer_display.at(it.first).visible) {
             for (const auto &it2 : it.second) {
+                if (it2.flags & Triangle::FLAG_GLYPH)
+                    continue;
                 std::vector<Coordf> points = {Coordf(it2.x0, it2.y0), Coordf(it2.x1, it2.y2), Coordf(it2.x1, it2.y2)};
                 if (std::isnan(it2.y2)) { // line
                     float width = it2.x2;

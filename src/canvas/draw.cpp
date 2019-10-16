@@ -234,41 +234,4 @@ void Canvas::draw_lock(const Coordf &center, float size, ColorP color, int layer
     }
     set_lod_size(-1);
 }
-
-void Canvas::draw_text_box(const Placement &q, float width, float height, const std::string &s, ColorP color, int layer,
-                           uint64_t text_width, TextBoxMode mode)
-{
-    Placement p = q;
-    if (p.mirror)
-        p.invert_angle();
-    p.mirror = false;
-    if (height > width) {
-        std::swap(height, width);
-        p.inc_angle_deg(90);
-    }
-
-    if (p.get_angle() > 16384 && p.get_angle() <= 49152) {
-        if (mode == TextBoxMode::UPPER)
-            mode = TextBoxMode::LOWER;
-        else if (mode == TextBoxMode::LOWER)
-            mode = TextBoxMode::UPPER;
-    }
-
-    Coordf text_pos(-width / 2, 0);
-    if (mode == TextBoxMode::UPPER)
-        text_pos.y = height / 4;
-    else if (mode == TextBoxMode::LOWER)
-        text_pos.y = -height / 4;
-
-    auto text_bb =
-            draw_text0(text_pos, 1_mm, s, 0, false, TextOrigin::CENTER, ColorP::FROM_LAYER, 10000, text_width, false);
-    float scale_x = (text_bb.second.x - text_bb.first.x) / (float)(width);
-    float scale_y = ((text_bb.second.y - text_bb.first.y)) / (float)(height);
-    if (mode != TextBoxMode::FULL)
-        scale_y *= 2;
-    float sc = std::max(scale_x, scale_y) * 1.25;
-    text_pos.x += (width) / 2 - (text_bb.second.x - text_bb.first.x) / (2 * sc);
-    draw_text0(p.transform(text_pos), 1_mm / sc, s, get_flip_view() ? (32768 - p.get_angle()) : p.get_angle(),
-               get_flip_view(), TextOrigin::CENTER, color, layer, text_width);
-};
 } // namespace horizon

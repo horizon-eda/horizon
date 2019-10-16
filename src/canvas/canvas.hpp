@@ -128,9 +128,22 @@ protected:
                                          bool draw = true, TextData::Font font = TextData::Font::SIMPLEX,
                                          bool center = false, bool mirror = false);
 
+    virtual void draw_bitmap_text(const Coordf &p, float scale, const std::string &rtext, int angle, ColorP color,
+                                  int layer)
+    {
+    }
+
+    virtual std::pair<Coordf, Coordf> measure_bitmap_text(const std::string &text) const
+    {
+        return {{0, 0}, {0, 0}};
+    }
+
     enum class TextBoxMode { FULL, LOWER, UPPER };
-    void draw_text_box(const Placement &q, float width, float height, const std::string &s, ColorP color, int layer,
-                       uint64_t text_width, TextBoxMode mode);
+
+    virtual void draw_bitmap_text_box(const Placement &q, float width, float height, const std::string &s, ColorP color,
+                                      int layer, TextBoxMode mode)
+    {
+    }
 
     void draw_error(const Coordf &center, float scale, const std::string &text, bool tr = true);
     std::tuple<Coordf, Coordf, Coordi> draw_flag(const Coordf &position, const std::string &txt, int64_t size,

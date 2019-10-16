@@ -7,6 +7,7 @@
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "board/board_layers.hpp"
+#include "bitmap_font_util.hpp"
 
 namespace horizon {
 std::pair<float, Coordf> CanvasGL::get_scale_and_offset()
@@ -632,6 +633,113 @@ void CanvasGL::clear()
     Canvas::clear();
     request_push();
 }
+
+static const float char_space = 1.2;
+
+void CanvasGL::draw_bitmap_text(const Coordf &p, float sc, const std::string &rtext, int angle, ColorP color, int layer)
+{
+    Glib::ustring text(rtext);
+    auto smooth_px = bitmap_font::get_smooth_pixels();
+    Coordf point = p;
+    Placement tr;
+    tr.set_angle(angle);
+    for (auto codepoint : text) {
+        auto info = bitmap_font::get_glyph_info(codepoint);
+        if (!info.is_valid()) {
+            info = bitmap_font::get_glyph_info('?');
+        }
+
+        unsigned int glyph_x = info.atlas_x + smooth_px;
+        unsigned int glyph_y = info.atlas_y + smooth_px;
+        unsigned int glyph_w = info.atlas_w - smooth_px * 2;
+        unsigned int glyph_h = info.atlas_h - smooth_px * 2;
+        float aspect = (1.0 * info.atlas_h) / info.atlas_w;
+
+        unsigned int bits =
+                (glyph_h & 0x3f) | ((glyph_w & 0x3f) << 6) | ((glyph_y & 0x3ff) << 12) | ((glyph_x & 0x3ff) << 22);
+        auto fl = reinterpret_cast<const float *>(&bits);
+
+        Coordf shift(info.minx, info.miny);
+        Coordf p1(info.atlas_w * 1e6 * sc, 0);
+
+        add_triangle(layer, point + tr.transform(shift) * 1e6 * sc, tr.transform(p1), Coordf(aspect, *fl), color,
+                     Triangle::FLAG_GLYPH);
+        point += tr.transform(Coordf(info.advance * char_space * 1e6 * sc, 0));
+    }
+}
+
+std::pair<Coordf, Coordf> CanvasGL::measure_bitmap_text(const std::string &rtext) const
+{
+    std::pair<Coordf, Coordf> r;
+    Glib::ustring text(rtext);
+    Coordf point;
+    for (auto codepoint : text) {
+        auto info = bitmap_font::get_glyph_info(codepoint);
+        if (!info.is_valid()) {
+            info = bitmap_font::get_glyph_info('?');
+        }
+        Coordf p0(info.minx, info.miny);
+        Coordf p1(info.atlas_w, info.atlas_h);
+        p1 += p0;
+        r.first = Coordf::min(r.first, p0 + point);
+        r.second = Coordf::max(r.second, p1 + point);
+
+        point.x += info.advance * char_space;
+    }
+    r.first *= 1e6;
+    r.second *= 1e6;
+    return r;
+}
+
+
+void CanvasGL::draw_bitmap_text_box(const Placement &q, float width, float height, const std::string &s, ColorP color,
+                                    int layer, TextBoxMode mode)
+{
+    Placement p = q;
+    if (p.mirror)
+        p.invert_angle();
+    p.mirror = false;
+    if (height > width) {
+        std::swap(height, width);
+        p.inc_angle_deg(90);
+    }
+    if (height / width > .9) { // almost square
+        while (p.get_angle() >= 16384) {
+            std::swap(height, width);
+            p.inc_angle_deg(90);
+        }
+    }
+
+    auto text_bb = measure_bitmap_text(s);
+    float scale_x = width / (text_bb.second.x - text_bb.first.x);
+    float scale_y = height / ((text_bb.second.y - text_bb.first.y));
+    if (mode != TextBoxMode::FULL)
+        scale_y /= 2;
+    float sc = std::min(scale_x, scale_y) * .75;
+
+    const float text_height = (text_bb.second.y - text_bb.first.y) * sc;
+    const float text_width = (text_bb.second.x - text_bb.first.x) * sc;
+
+    Coordf text_pos(-width / 2, 0);
+    if (mode == TextBoxMode::UPPER)
+        text_pos.y = height / 4;
+    else if (mode == TextBoxMode::LOWER)
+        text_pos.y = -height / 4;
+    text_pos.y -= text_bb.first.y * sc;
+    text_pos.y -= text_height / 2;
+
+    text_pos.x += width / 2 - text_width / 2;
+
+    if (p.get_angle() > 16384 && p.get_angle() <= 49152) {
+        text_pos.x *= -1;
+        text_pos.y *= -1;
+        draw_bitmap_text(p.transform(text_pos), sc, s, p.get_angle() + 32768, color, layer);
+    }
+    else {
+
+        draw_bitmap_text(p.transform(text_pos), sc, s, p.get_angle(), color, layer);
+    }
+};
 
 // copied from
 // https://github.com/solvespace/solvespace/blob/master/src/platform/gtkmain.cpp#L357

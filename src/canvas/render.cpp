@@ -1059,14 +1059,14 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
             set_lod_size(std::min(pad_height, pad_width));
             for (const auto overlay_layer : text_layers) {
                 if (it.second.net && it.second.net->name.size() > 0) {
-                    draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::TEXT_OVERLAY, overlay_layer,
-                                  0, TextBoxMode::UPPER);
-                    draw_text_box(transform, pad_width, pad_height, it.second.net->name, ColorP::TEXT_OVERLAY,
-                                  overlay_layer, 0, TextBoxMode::LOWER);
+                    draw_bitmap_text_box(transform, pad_width, pad_height, it.second.name, ColorP::TEXT_OVERLAY,
+                                         overlay_layer, TextBoxMode::UPPER);
+                    draw_bitmap_text_box(transform, pad_width, pad_height, it.second.net->name, ColorP::TEXT_OVERLAY,
+                                         overlay_layer, TextBoxMode::LOWER);
                 }
                 else {
-                    draw_text_box(transform, pad_width, pad_height, it.second.name, ColorP::TEXT_OVERLAY, overlay_layer,
-                                  0, TextBoxMode::FULL);
+                    draw_bitmap_text_box(transform, pad_width, pad_height, it.second.name, ColorP::TEXT_OVERLAY,
+                                         overlay_layer, TextBoxMode::FULL);
                 }
             }
             set_lod_size(-1);

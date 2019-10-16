@@ -2,6 +2,7 @@
 #include "canvas_gl.hpp"
 #include "gl_util.hpp"
 #include <glm/gtc/type_ptr.hpp>
+#include "bitmap_font_util.hpp"
 
 namespace horizon {
 
@@ -76,8 +77,17 @@ TriangleRenderer::TriangleRenderer(CanvasGL *c, std::map<int, std::vector<Triang
 {
 }
 
+
 void TriangleRenderer::realize()
 {
+
+    glGenTextures(1, &texture_glyph);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_glyph);
+    bitmap_font::load_texture();
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     program_triangle =
             gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl",
                                             "/net/carrotIndustries/horizon/canvas/shaders/"
@@ -100,6 +110,11 @@ void TriangleRenderer::realize()
                                                    "triangle-line-fragment.glsl",
                                                    "/net/carrotIndustries/horizon/canvas/shaders/"
                                                    "triangle-line-geometry.glsl");
+    program_glyph = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl",
+                                                    "/net/carrotIndustries/horizon/canvas/shaders/"
+                                                    "triangle-glyph-fragment.glsl",
+                                                    "/net/carrotIndustries/horizon/canvas/shaders/"
+                                                    "triangle-glyph-geometry.glsl");
     GL_CHECK_ERROR;
     glGenBuffers(1, &ubo);
     glBindBuffer(GL_UNIFORM_BUFFER, ubo);
@@ -114,6 +129,7 @@ void TriangleRenderer::realize()
     glUniformBlockBinding(program_line0, block_index, binding_point_index);
     glUniformBlockBinding(program_line_butt, block_index, binding_point_index);
     glUniformBlockBinding(program_line, block_index, binding_point_index);
+    glUniformBlockBinding(program_glyph, block_index, binding_point_index);
     GL_CHECK_ERROR;
     vao = create_vao(program_line, vbo, ebo);
     GL_CHECK_ERROR;
@@ -200,6 +216,7 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode)
             break;
 
         case Type::GLYPH:
+            glUseProgram(program_glyph);
             break;
         }
         switch (highlight_mode) {
@@ -306,7 +323,10 @@ void TriangleRenderer::push()
         unsigned int i = 0;
         for (const auto &tri : tris) {
             auto ty = Type::LINE;
-            if (!isnan(tri.y2)) {
+            if (tri.flags & Triangle::FLAG_GLYPH) {
+                ty = Type::GLYPH;
+            }
+            else if (!isnan(tri.y2)) {
                 ty = Type::TRIANGLE;
             }
             else if (isnan(tri.y2) && tri.x2 == 0) {

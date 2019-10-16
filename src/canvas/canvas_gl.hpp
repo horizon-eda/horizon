@@ -233,6 +233,12 @@ private:
 
     GdkEventType last_button_event = GDK_BUTTON_PRESS;
 
+    void draw_bitmap_text(const Coordf &p, float scale, const std::string &rtext, int angle, ColorP color,
+                          int layer) override;
+    std::pair<Coordf, Coordf> measure_bitmap_text(const std::string &text) const override;
+    void draw_bitmap_text_box(const Placement &q, float width, float height, const std::string &s, ColorP color,
+                              int layer, TextBoxMode mode) override;
+
 protected:
     void on_size_allocate(Gtk::Allocation &alloc) override;
     void on_realize() override;

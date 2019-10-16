@@ -60,6 +60,7 @@ public:
     static const int FLAG_HIDDEN = 1 << 0;
     static const int FLAG_HIGHLIGHT = 1 << 1;
     static const int FLAG_BUTT = 1 << 2;
+    static const int FLAG_GLYPH = 1 << 3;
 
     Triangle(const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, Type ty, uint8_t flg = 0,
              uint8_t ilod = 0)
@@ -90,10 +91,12 @@ private:
     GLuint program_line;
     GLuint program_line_butt;
     GLuint program_triangle;
+    GLuint program_glyph;
     GLuint vao;
     GLuint vbo;
     GLuint ubo;
     GLuint ebo;
+    GLuint texture_glyph;
 
     void render_layer(int layer, HighlightMode highlight_mode = HighlightMode::ALL);
     void render_layer_with_overlay(int layer, HighlightMode highlight_mode = HighlightMode::ALL);
