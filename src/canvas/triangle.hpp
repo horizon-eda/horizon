@@ -3,7 +3,6 @@
 #include "util/uuid.hpp"
 #include "color_palette.hpp"
 #include <epoxy/gl.h>
-#include <unordered_map>
 
 namespace horizon {
 class ObjectRef {
@@ -74,7 +73,7 @@ class TriangleRenderer {
     friend class CanvasGL;
 
 public:
-    TriangleRenderer(class CanvasGL *c, std::unordered_map<int, std::vector<Triangle>> &tris);
+    TriangleRenderer(class CanvasGL *c, std::map<int, std::vector<Triangle>> &tris);
     void realize();
     void render();
     void push();
@@ -83,8 +82,8 @@ public:
 private:
     CanvasGL *ca;
     enum class Type { TRIANGLE, LINE, LINE0, LINE_BUTT, GLYPH };
-    std::unordered_map<int, std::vector<Triangle>> &triangles;
-    std::unordered_map<int, std::map<std::pair<Type, bool>, std::pair<size_t, size_t>>> layer_offsets;
+    std::map<int, std::vector<Triangle>> &triangles;
+    std::map<int, std::map<std::pair<Type, bool>, std::pair<size_t, size_t>>> layer_offsets;
     size_t n_tris = 0;
 
     GLuint program_line0;

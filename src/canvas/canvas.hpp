@@ -69,7 +69,7 @@ public:
 
 
 protected:
-    std::unordered_map<int, std::vector<Triangle>> triangles;
+    std::map<int, std::vector<Triangle>> triangles;
     void add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t flg = 0);
 
     std::map<ObjectRef, std::map<int, std::pair<size_t, size_t>>> object_refs;
@@ -174,7 +174,7 @@ protected:
     std::list<Placement> transforms;
 
     Selectables selectables;
-    std::set<Target> targets;
+    std::vector<Target> targets;
     Target target_current;
 
     const class LayerProvider *layer_provider = nullptr;

@@ -76,7 +76,7 @@ void Canvas::render(const Junction &junc, bool interactive, ObjectType mode)
     if (interactive) {
         selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, layer);
         if (!junc.temp) {
-            targets.emplace(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position), 0, layer);
+            targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position), 0, layer);
         }
     }
 }
@@ -593,8 +593,8 @@ void Canvas::render(const SchematicSymbol &sym)
     render(sym.symbol, true, sym.smashed);
     object_refs_current.pop_back();
     for (const auto &it : sym.symbol.pins) {
-        targets.emplace(UUIDPath<2>(sym.uuid, it.second.uuid), ObjectType::SYMBOL_PIN,
-                        transform.transform(it.second.position));
+        targets.emplace_back(UUIDPath<2>(sym.uuid, it.second.uuid), ObjectType::SYMBOL_PIN,
+                             transform.transform(it.second.position));
     }
     auto bb = sym.symbol.get_bbox();
     selectables.append(sym.uuid, ObjectType::SCHEMATIC_SYMBOL, {0, 0}, bb.first, bb.second);
@@ -623,7 +623,7 @@ void Canvas::render(const Text &text, bool interactive)
     if (interactive) {
         selectables.append(text.uuid, ObjectType::TEXT, text.placement.shift, extents.first, extents.second, 0,
                            text.layer);
-        targets.emplace(text.uuid, ObjectType::TEXT, transform.transform(text.placement.shift), 0, text.layer);
+        targets.emplace_back(text.uuid, ObjectType::TEXT, transform.transform(text.placement.shift), 0, text.layer);
     }
 }
 
@@ -714,7 +714,7 @@ void Canvas::render(const BusRipper &ripper)
     auto extents = draw_text0(connector_pos + Coordi(0, 0.5_mm), 1.5_mm, ripper.bus_member->name, angle, false,
                               TextOrigin::BASELINE, c);
     if (!ripper.temp)
-        targets.emplace(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos);
+        targets.emplace_back(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos);
     selectables.append(ripper.uuid, ObjectType::BUS_RIPPER, connector_pos, extents.first, extents.second);
 }
 
@@ -807,21 +807,21 @@ void Canvas::render(const Polygon &ipoly, bool interactive)
                     selectables.append_line(poly.uuid, ObjectType::POLYGON_EDGE, v_last->position, it.position, 0,
                                             i - 1, poly.layer);
 
-                    targets.emplace(poly.uuid, ObjectType::POLYGON_EDGE, center, i - 1, poly.layer);
+                    targets.emplace_back(poly.uuid, ObjectType::POLYGON_EDGE, center, i - 1, poly.layer);
                 }
             }
             selectables.append(poly.uuid, ObjectType::POLYGON_VERTEX, it.position, i, poly.layer);
-            targets.emplace(poly.uuid, ObjectType::POLYGON_VERTEX, it.position, i, poly.layer);
+            targets.emplace_back(poly.uuid, ObjectType::POLYGON_VERTEX, it.position, i, poly.layer);
             if (it.type == Polygon::Vertex::Type::ARC) {
                 selectables.append(poly.uuid, ObjectType::POLYGON_ARC_CENTER, it.arc_center, i, poly.layer);
-                targets.emplace(poly.uuid, ObjectType::POLYGON_ARC_CENTER, it.arc_center, i, poly.layer);
+                targets.emplace_back(poly.uuid, ObjectType::POLYGON_ARC_CENTER, it.arc_center, i, poly.layer);
             }
             v_last = &it;
             i++;
         }
         if (ipoly.vertices.back().type != Polygon::Vertex::Type::ARC) {
             auto center = (ipoly.vertices.front().position + ipoly.vertices.back().position) / 2;
-            targets.emplace(poly.uuid, ObjectType::POLYGON_EDGE, center, i - 1, poly.layer);
+            targets.emplace_back(poly.uuid, ObjectType::POLYGON_EDGE, center, i - 1, poly.layer);
             selectables.append_line(poly.uuid, ObjectType::POLYGON_EDGE, poly.vertices.front().position,
                                     ipoly.vertices.back().position, 0, i - 1, poly.layer);
         }
@@ -838,7 +838,7 @@ void Canvas::render(const Shape &shape, bool interactive)
         auto bb = shape.get_bbox();
         selectables.append(shape.uuid, ObjectType::SHAPE, shape.placement.shift, shape.placement.transform(bb.first),
                            shape.placement.transform(bb.second), 0, shape.layer);
-        targets.emplace(shape.uuid, ObjectType::SHAPE, shape.placement.shift, 0, shape.layer);
+        targets.emplace_back(shape.uuid, ObjectType::SHAPE, shape.placement.shift, 0, shape.layer);
     }
     if (shape.form == Shape::Form::CIRCLE) {
         auto r = shape.params.at(0);
@@ -901,7 +901,7 @@ void Canvas::render(const Hole &hole, bool interactive)
             selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-l - d, -d), Coordi(l + d, +d));
     }
     if (interactive)
-        targets.emplace(hole.uuid, ObjectType::HOLE, hole.placement.shift);
+        targets.emplace_back(hole.uuid, ObjectType::HOLE, hole.placement.shift);
     transform_restore();
 }
 
@@ -927,7 +927,7 @@ void Canvas::render(const Symbol &sym, bool on_sheet, bool smashed)
             auto &junc = it.second;
             selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, 10000, true);
             if (!junc.temp) {
-                targets.emplace(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
+                targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
             }
         }
     }
@@ -1025,7 +1025,7 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
             auto &junc = it.second;
             selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, 10000, true);
             if (!junc.temp) {
-                targets.emplace(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
+                targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
             }
         }
     }
@@ -1109,7 +1109,7 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
             auto bb = it.second.padstack.get_bbox();
             selectables.append(it.second.uuid, ObjectType::PAD, {0, 0}, bb.first, bb.second);
             transform_restore();
-            targets.emplace(it.second.uuid, ObjectType::PAD, it.second.placement.shift);
+            targets.emplace_back(it.second.uuid, ObjectType::PAD, it.second.placement.shift);
         }
         for (const auto &it : pkg.warnings) {
             render(it);
@@ -1165,10 +1165,10 @@ void Canvas::render(const BoardPackage &pkg)
         transform.invert_angle();
     }
     selectables.append(pkg.uuid, ObjectType::BOARD_PACKAGE, {0, 0}, bb.first, bb.second, 0, 10000);
-    targets.emplace(pkg.uuid, ObjectType::BOARD_PACKAGE, pkg.placement.shift);
+    targets.emplace_back(pkg.uuid, ObjectType::BOARD_PACKAGE, pkg.placement.shift);
     for (const auto &it : pkg.package.pads) {
-        targets.emplace(UUIDPath<2>(pkg.uuid, it.first), ObjectType::PAD,
-                        transform.transform(it.second.placement.shift));
+        targets.emplace_back(UUIDPath<2>(pkg.uuid, it.first), ObjectType::PAD,
+                             transform.transform(it.second.placement.shift));
     }
     object_refs_current.emplace_back(ObjectType::BOARD_PACKAGE, pkg.uuid);
     render(pkg.package, false, pkg.smashed);
@@ -1299,15 +1299,15 @@ void Canvas::render(const class Dimension &dim)
                                        TextOrigin::CENTER, co, 10000, 0, true);
 
         selectables.append(dim.uuid, ObjectType::DIMENSION, q0, real_text_bb.first, real_text_bb.second, 2);
-        targets.emplace(dim.uuid, ObjectType::DIMENSION, Coordi(q0.x, q0.y), 2);
+        targets.emplace_back(dim.uuid, ObjectType::DIMENSION, Coordi(q0.x, q0.y), 2);
     }
 
     selectables.append(dim.uuid, ObjectType::DIMENSION, dim.p0, 0);
     selectables.append(dim.uuid, ObjectType::DIMENSION, dim.p1, 1);
 
     if (!dim.temp) {
-        targets.emplace(dim.uuid, ObjectType::DIMENSION, dim.p0, 0);
-        targets.emplace(dim.uuid, ObjectType::DIMENSION, dim.p1, 1);
+        targets.emplace_back(dim.uuid, ObjectType::DIMENSION, dim.p0, 0);
+        targets.emplace_back(dim.uuid, ObjectType::DIMENSION, dim.p1, 1);
     }
 }
 
@@ -1388,7 +1388,7 @@ void Canvas::render(const Frame &fr, bool on_sheet)
             auto &junc = it.second;
             selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, 10000, true);
             if (!junc.temp) {
-                targets.emplace(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
+                targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
             }
         }
     }
