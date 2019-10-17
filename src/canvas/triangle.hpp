@@ -98,7 +98,7 @@ private:
     GLuint ebo;
     GLuint texture_glyph;
 
-    void render_layer(int layer, HighlightMode highlight_mode = HighlightMode::ALL);
+    void render_layer(int layer, HighlightMode highlight_mode = HighlightMode::ALL, bool ignore_flip = false);
     void render_layer_with_overlay(int layer, HighlightMode highlight_mode = HighlightMode::ALL);
     int stencil = 0;
 };

@@ -219,16 +219,16 @@ void Canvas::transform_restore()
     }
 }
 
-int Canvas::get_overlay_layer(int layer)
+int Canvas::get_overlay_layer(int layer, bool ignore_flip)
 {
-    if (overlay_layers.count(layer) == 0) {
+    if (overlay_layers.count({layer, ignore_flip}) == 0) {
         auto ol = overlay_layer_current++;
-        overlay_layers[layer] = ol;
+        overlay_layers[{layer, ignore_flip}] = ol;
         layer_display[ol].visible = true;
         layer_display[ol].mode = LayerDisplay::Mode::OUTLINE;
     }
 
-    return overlay_layers.at(layer);
+    return overlay_layers.at({layer, ignore_flip});
 }
 
 

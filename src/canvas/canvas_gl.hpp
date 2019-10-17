@@ -158,6 +158,7 @@ private:
     float scale = 1e-5;
     Coord<float> offset;
     glm::mat3 viewmat;
+    glm::mat3 viewmat_noflip;
     bool flip_view = false;
     void update_viewmat();
 

@@ -395,6 +395,7 @@ void CanvasGL::update_viewmat()
     if (flip_view)
         scale_x = -scale;
     viewmat = glm::scale(glm::translate(glm::mat3(1), glm::vec2(offset.x, offset.y)), glm::vec2(scale_x, -scale));
+    viewmat_noflip = glm::scale(glm::translate(glm::mat3(1), glm::vec2(offset.x, offset.y)), glm::vec2(scale, -scale));
 }
 
 void CanvasGL::push()

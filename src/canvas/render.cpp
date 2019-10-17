@@ -1034,28 +1034,34 @@ void Canvas::render_pad_overlay(const Pad &pad)
     std::set<int> text_layers;
     switch (pad.padstack.type) {
     case Padstack::Type::TOP:
-        text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER));
+        text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER, true));
         break;
 
     case Padstack::Type::BOTTOM:
-        text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER));
+        text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER, true));
         break;
 
     default:
-        text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER));
-        text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER));
+        text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER, true));
+        text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER, true));
+    }
+
+    Placement tr = transform;
+    if (get_flip_view()) {
+        tr.shift.x *= -1;
+        tr.invert_angle();
     }
 
     set_lod_size(std::min(pad_height, pad_width));
     for (const auto overlay_layer : text_layers) {
         if (pad.net && pad.net->name.size() > 0) {
-            draw_bitmap_text_box(transform, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, overlay_layer,
+            draw_bitmap_text_box(tr, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, overlay_layer,
                                  TextBoxMode::UPPER);
-            draw_bitmap_text_box(transform, pad_width, pad_height, pad.net->name, ColorP::TEXT_OVERLAY, overlay_layer,
+            draw_bitmap_text_box(tr, pad_width, pad_height, pad.net->name, ColorP::TEXT_OVERLAY, overlay_layer,
                                  TextBoxMode::LOWER);
         }
         else {
-            draw_bitmap_text_box(transform, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, overlay_layer,
+            draw_bitmap_text_box(tr, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, overlay_layer,
                                  TextBoxMode::FULL);
         }
     }

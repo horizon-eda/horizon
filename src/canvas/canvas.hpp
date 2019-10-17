@@ -201,9 +201,9 @@ protected:
 
     Triangle::Type triangle_type_current = Triangle::Type::NONE;
 
-    std::map<int, int> overlay_layers;
+    std::map<std::pair<int, bool>, int> overlay_layers;
     int overlay_layer_current = 30000;
-    int get_overlay_layer(int layer);
+    int get_overlay_layer(int layer, bool ignore_flip = false);
 
     FragmentCache fragment_cache;
 

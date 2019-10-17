@@ -161,7 +161,7 @@ static void mat3_to_array(std::array<float, 12> &dest, const glm::mat3 &src)
     }
 }
 
-void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode)
+void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, bool ignore_flip)
 {
     const auto &ld = ca->get_layer_display(layer);
 
@@ -171,7 +171,10 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode)
     buf.colors = ca->palette_colors;
     buf.alpha = ca->property_layer_opacity() / 100;
     mat3_to_array(buf.screenmat, ca->screenmat);
-    mat3_to_array(buf.viewmat, ca->viewmat);
+    if (ignore_flip)
+        mat3_to_array(buf.viewmat, ca->viewmat_noflip);
+    else
+        mat3_to_array(buf.viewmat, ca->viewmat);
     auto lc = ca->get_layer_color(layer);
     buf.layer_color[0] = lc.r;
     buf.layer_color[1] = lc.g;
@@ -245,8 +248,10 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode)
 void TriangleRenderer::render_layer_with_overlay(int layer, HighlightMode highlight_mode)
 {
     render_layer(layer, highlight_mode);
-    if (ca->overlay_layers.count(layer))
-        render_layer(ca->overlay_layers.at(layer), highlight_mode);
+    for (auto ignore_flip : {false, true}) {
+        if (ca->overlay_layers.count({layer, ignore_flip}))
+            render_layer(ca->overlay_layers.at({layer, ignore_flip}), highlight_mode, ignore_flip);
+    }
 }
 
 
