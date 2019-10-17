@@ -1018,6 +1018,51 @@ void Canvas::render(const Padstack &padstack, bool interactive)
     img_set_padstack(false);
 }
 
+void Canvas::render_pad_overlay(const Pad &pad)
+{
+    if (img_mode)
+        return;
+    transform_save();
+    transform.accumulate(pad.placement);
+    auto bb = pad.padstack.get_bbox(true); // only copper
+    auto a = bb.first;
+    auto b = bb.second;
+
+    auto pad_width = abs(b.x - a.x);
+    auto pad_height = abs(b.y - a.y);
+
+    std::set<int> text_layers;
+    switch (pad.padstack.type) {
+    case Padstack::Type::TOP:
+        text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER));
+        break;
+
+    case Padstack::Type::BOTTOM:
+        text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER));
+        break;
+
+    default:
+        text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER));
+        text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER));
+    }
+
+    set_lod_size(std::min(pad_height, pad_width));
+    for (const auto overlay_layer : text_layers) {
+        if (pad.net && pad.net->name.size() > 0) {
+            draw_bitmap_text_box(transform, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, overlay_layer,
+                                 TextBoxMode::UPPER);
+            draw_bitmap_text_box(transform, pad_width, pad_height, pad.net->name, ColorP::TEXT_OVERLAY, overlay_layer,
+                                 TextBoxMode::LOWER);
+        }
+        else {
+            draw_bitmap_text_box(transform, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, overlay_layer,
+                                 TextBoxMode::FULL);
+        }
+    }
+    set_lod_size(-1);
+    transform_restore();
+}
+
 void Canvas::render(const Package &pkg, bool interactive, bool smashed)
 {
     if (interactive) {
@@ -1027,50 +1072,6 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
             if (!junc.temp) {
                 targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
             }
-        }
-    }
-
-    if (!img_mode) {
-        for (const auto &it : pkg.pads) {
-            transform_save();
-            transform.accumulate(it.second.placement);
-            auto bb = it.second.padstack.get_bbox(true); // only copper
-            auto a = bb.first;
-            auto b = bb.second;
-
-            auto pad_width = abs(b.x - a.x);
-            auto pad_height = abs(b.y - a.y);
-
-            std::set<int> text_layers;
-            switch (it.second.padstack.type) {
-            case Padstack::Type::TOP:
-                text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER));
-                break;
-
-            case Padstack::Type::BOTTOM:
-                text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER));
-                break;
-
-            default:
-                text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER));
-                text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER));
-            }
-
-            set_lod_size(std::min(pad_height, pad_width));
-            for (const auto overlay_layer : text_layers) {
-                if (it.second.net && it.second.net->name.size() > 0) {
-                    draw_bitmap_text_box(transform, pad_width, pad_height, it.second.name, ColorP::TEXT_OVERLAY,
-                                         overlay_layer, TextBoxMode::UPPER);
-                    draw_bitmap_text_box(transform, pad_width, pad_height, it.second.net->name, ColorP::TEXT_OVERLAY,
-                                         overlay_layer, TextBoxMode::LOWER);
-                }
-                else {
-                    draw_bitmap_text_box(transform, pad_width, pad_height, it.second.name, ColorP::TEXT_OVERLAY,
-                                         overlay_layer, TextBoxMode::FULL);
-                }
-            }
-            set_lod_size(-1);
-            transform_restore();
         }
     }
 
@@ -1089,12 +1090,14 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
         auto pkg_uuid = object_refs_current.back().uuid;
         for (const auto &it : pkg.pads) {
             object_refs_current.emplace_back(ObjectType::PAD, it.second.uuid, pkg_uuid);
+            render_pad_overlay(it.second);
             render(it.second);
             object_refs_current.pop_back();
         }
     }
     else {
         for (const auto &it : pkg.pads) {
+            render_pad_overlay(it.second);
             render(it.second);
         }
     }
