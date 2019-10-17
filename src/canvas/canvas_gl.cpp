@@ -635,7 +635,7 @@ void CanvasGL::clear()
     request_push();
 }
 
-static const float char_space = 1.2;
+static const float char_space = 1;
 
 void CanvasGL::draw_bitmap_text(const Coordf &p, float sc, const std::string &rtext, int angle, ColorP color, int layer)
 {
@@ -654,14 +654,14 @@ void CanvasGL::draw_bitmap_text(const Coordf &p, float sc, const std::string &rt
         unsigned int glyph_y = info.atlas_y + smooth_px;
         unsigned int glyph_w = info.atlas_w - smooth_px * 2;
         unsigned int glyph_h = info.atlas_h - smooth_px * 2;
-        float aspect = (1.0 * info.atlas_h) / info.atlas_w;
+        float aspect = (1.0 * glyph_h) / glyph_w;
 
         unsigned int bits =
                 (glyph_h & 0x3f) | ((glyph_w & 0x3f) << 6) | ((glyph_y & 0x3ff) << 12) | ((glyph_x & 0x3ff) << 22);
         auto fl = reinterpret_cast<const float *>(&bits);
 
         Coordf shift(info.minx, info.miny);
-        Coordf p1(info.atlas_w * 1e6 * sc, 0);
+        Coordf p1(glyph_w * 1e6 * sc, 0);
 
         add_triangle(layer, point + tr.transform(shift) * 1e6 * sc, tr.transform(p1), Coordf(aspect, *fl), color,
                      Triangle::FLAG_GLYPH);
@@ -673,6 +673,7 @@ std::pair<Coordf, Coordf> CanvasGL::measure_bitmap_text(const std::string &rtext
 {
     std::pair<Coordf, Coordf> r;
     Glib::ustring text(rtext);
+    auto smooth_px = bitmap_font::get_smooth_pixels();
     Coordf point;
     for (auto codepoint : text) {
         auto info = bitmap_font::get_glyph_info(codepoint);
@@ -680,7 +681,7 @@ std::pair<Coordf, Coordf> CanvasGL::measure_bitmap_text(const std::string &rtext
             info = bitmap_font::get_glyph_info('?');
         }
         Coordf p0(info.minx, info.miny);
-        Coordf p1(info.atlas_w, info.atlas_h);
+        Coordf p1(info.atlas_w - smooth_px * 2, info.atlas_h - smooth_px * 2);
         p1 += p0;
         r.first = Coordf::min(r.first, p0 + point);
         r.second = Coordf::max(r.second, p1 + point);
