@@ -314,8 +314,8 @@ void PoolNotebook::go_to(ObjectType type, const UUID &uu)
 {
     browsers.at(type)->go_to(uu);
     static const std::map<ObjectType, int> pages = {
-            {ObjectType::UNIT, 0},     {ObjectType::SYMBOL, 1},  {ObjectType::ENTITY, 2},
-            {ObjectType::PADSTACK, 3}, {ObjectType::PACKAGE, 4}, {ObjectType::PART, 5},
+            {ObjectType::UNIT, 0},    {ObjectType::SYMBOL, 1}, {ObjectType::ENTITY, 2}, {ObjectType::PADSTACK, 3},
+            {ObjectType::PACKAGE, 4}, {ObjectType::PART, 5},   {ObjectType::FRAME, 6},
     };
     set_current_page(pages.at(type));
 }
