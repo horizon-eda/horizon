@@ -4,6 +4,7 @@
 out vec4 outputColor;
 smooth in vec3 color_to_fragment;
 smooth in vec2 texcoord_to_fragment;
+in float lod_alpha;
 
 uniform sampler2D msdf;
 
@@ -20,5 +21,5 @@ void main() {
     float opacity = smoothstep( 0.5 - derivative, 0.5 + derivative, dist );
     if(opacity > 0.99)
         discard;
-    outputColor = vec4(color_to_fragment, clamp(alpha*(1-opacity), 0, 1));
+    outputColor = vec4(color_to_fragment, lod_alpha*clamp((1-opacity), 0, 1));
 }

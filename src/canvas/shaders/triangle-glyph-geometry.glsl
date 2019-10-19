@@ -13,6 +13,7 @@ in int flags_to_geom[1];
 in int lod_to_geom[1];
 smooth out vec3 color_to_fragment;
 smooth out vec2 texcoord_to_fragment;
+out float lod_alpha;
 
 ##ubo
 
@@ -35,10 +36,15 @@ vec2 p2r(float phi, float l) {
 }
 
 void main() {
+	lod_alpha = 1;
 	if(lod_to_geom[0] != 0) {
 		float lod_size = lod_to_geom[0]*.02e6;
 		float lod_size_px = lod_size*scale;
-		if(lod_size_px<10)
+		const float th1 = 15;
+		const float th2 = 5;
+		if(lod_size_px<th1)
+			lod_alpha = (lod_size_px-th2)/(th1-th2);
+		if(lod_size_px<th2)
 			return;
 	}
 
