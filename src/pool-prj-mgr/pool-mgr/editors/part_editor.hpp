@@ -56,10 +56,8 @@ private:
     Gtk::Button *w_parametric_from_base = nullptr;
 
     Gtk::Label *w_orderable_MPNs_label = nullptr;
-    Gtk::TreeView *w_orderable_MPNs_view = nullptr;
     Gtk::Button *w_orderable_MPNs_add_button = nullptr;
-    Gtk::Button *w_orderable_MPNs_remove_button = nullptr;
-    Gtk::CellRendererText *w_orderable_MPNs_cr = nullptr;
+    Gtk::Box *w_orderable_MPNs_box = nullptr;
 
     class PinListColumns : public Gtk::TreeModelColumnRecord {
     public:
@@ -103,20 +101,6 @@ private:
 
     Glib::RefPtr<Gtk::ListStore> pad_store;
 
-    class OrderableMPNsListColumns : public Gtk::TreeModelColumnRecord {
-    public:
-        OrderableMPNsListColumns()
-        {
-            Gtk::TreeModelColumnRecord::add(uuid);
-            Gtk::TreeModelColumnRecord::add(MPN);
-        }
-        Gtk::TreeModelColumn<horizon::UUID> uuid;
-        Gtk::TreeModelColumn<Glib::ustring> MPN;
-    };
-    OrderableMPNsListColumns orderable_MPNs_list_columns;
-
-    Glib::RefPtr<Gtk::ListStore> orderable_MPNs_store;
-
     void update_orderable_MPNs_label();
     void update_treeview();
     void update_mapped();
@@ -130,5 +114,6 @@ private:
 
     class ParametricEditor *parametric_editor = nullptr;
     void update_parametric_editor();
+    class OrderableMPNEditor *create_orderable_MPN_editor(const UUID &uu);
 };
 } // namespace horizon
