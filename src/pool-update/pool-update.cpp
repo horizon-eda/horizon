@@ -91,7 +91,7 @@ class PoolUpdater {
 public:
     PoolUpdater(const std::string &bp, pool_update_cb_t status_cb);
     void update(const std::vector<std::string> &base_paths);
-    bool update_some(const std::string &pool_base_path, const std::vector<std::string> &filenames,
+    void update_some(const std::string &pool_base_path, const std::vector<std::string> &filenames,
                      std::set<UUID> &all_parts_updated);
 
 private:
@@ -155,7 +155,7 @@ std::string PoolUpdater::get_path_rel(const std::string &filename) const
 }
 
 
-bool PoolUpdater::update_some(const std::string &pool_base_path, const std::vector<std::string> &filenames,
+void PoolUpdater::update_some(const std::string &pool_base_path, const std::vector<std::string> &filenames,
                               std::set<UUID> &all_parts_updated)
 {
     set_pool_info(pool_base_path);
@@ -213,9 +213,6 @@ bool PoolUpdater::update_some(const std::string &pool_base_path, const std::vect
         }
     }
     pool->db.execute("COMMIT");
-
-
-    return true;
 }
 
 void PoolUpdater::update(const std::vector<std::string> &base_paths)
@@ -921,14 +918,14 @@ void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb, 
         updater.update(paths);
     }
     else {
-        if (!updater.update_some(pool_base_path, filenames, parts_updated)) { // partial update failed, need full update
-            updater.update(paths);
-            parts_updated.clear();
-        }
+        updater.update_some(pool_base_path, filenames, parts_updated);
     }
 
     if (parametric) {
-        pool_update_parametric(pool_base_path, status_cb, parts_updated);
+        if (filenames.size() == 0) // complete update
+            pool_update_parametric(pool_base_path, status_cb);
+        else if (parts_updated.size())
+            pool_update_parametric(pool_base_path, status_cb, parts_updated);
     }
     status_cb(PoolUpdateStatus::DONE, "done", "");
 }
