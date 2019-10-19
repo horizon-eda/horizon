@@ -2,17 +2,32 @@
 
 namespace horizon {
 
+std::string LocationEntry::get_rel_filename(const std::string &s) const
+{
+    return Gio::File::create_for_path(relative_to)->get_relative_path(Gio::File::create_for_path(s));
+}
+
+
 void LocationEntry::set_filename(const std::string &s)
 {
-    entry->set_text(s);
+    if (relative_to.size()) {
+        std::string rel = get_rel_filename(s);
+        if (rel.size())
+            entry->set_text(rel);
+    }
+    else
+        entry->set_text(s);
 }
 
 std::string LocationEntry::get_filename()
 {
-    return entry->get_text();
+    if (relative_to.size())
+        return Glib::build_filename(relative_to, entry->get_text());
+    else
+        return entry->get_text();
 }
 
-LocationEntry::LocationEntry() : Gtk::Box()
+LocationEntry::LocationEntry(const std::string &rel) : Gtk::Box(), relative_to(rel)
 {
     get_style_context()->add_class("linked");
     entry = Gtk::manage(new Gtk::Entry());
@@ -46,10 +61,26 @@ void LocationEntry::handle_button()
             gtk_file_chooser_native_new("Save", top->gobj(), GTK_FILE_CHOOSER_ACTION_SAVE, "Set", "_Cancel");
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
     chooser->set_do_overwrite_confirmation(true);
-    chooser->set_filename(entry->get_text());
+    chooser->set_filename(get_filename());
 
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        entry->set_text(chooser->get_filename());
+        auto filename = chooser->get_filename();
+        if (relative_to.size()) {
+            auto rel = get_rel_filename(filename);
+            if (rel.size()) {
+                entry->set_text(rel);
+            }
+            else {
+                Gtk::MessageDialog md(*dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW)),
+                                      "Incorrect file location", false /* use_markup */, Gtk::MESSAGE_ERROR,
+                                      Gtk::BUTTONS_OK);
+                md.set_secondary_text("File has to be in a (sub)directory of " + relative_to);
+                md.run();
+            }
+        }
+        else {
+            entry->set_text(filename);
+        }
     }
 }
 } // namespace horizon

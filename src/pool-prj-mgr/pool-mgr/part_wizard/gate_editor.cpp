@@ -24,7 +24,7 @@ GateEditorWizard::GateEditorWizard(BaseObjectType *cobject, const Glib::RefPtr<G
 
     {
         Gtk::Button *from_part_button;
-        unit_location_entry = PartWizard::pack_location_entry(x, "gate_unit_location_box", &from_part_button);
+        unit_location_entry = pa->pack_location_entry(x, "gate_unit_location_box", &from_part_button);
         from_part_button->set_label("From part");
         from_part_button->signal_clicked().connect([this] {
             auto rel = get_suffixed_filename_from_part();
@@ -36,7 +36,7 @@ GateEditorWizard::GateEditorWizard(BaseObjectType *cobject, const Glib::RefPtr<G
 
     {
         Gtk::Button *from_part_button;
-        symbol_location_entry = PartWizard::pack_location_entry(x, "gate_symbol_location_box", &from_part_button);
+        symbol_location_entry = pa->pack_location_entry(x, "gate_symbol_location_box", &from_part_button);
         from_part_button->set_label("From part");
         from_part_button->signal_clicked().connect([this] {
             auto rel = get_suffixed_filename_from_part();

@@ -16,7 +16,7 @@ namespace horizon {
 LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder> &x, const std::string &w,
                                                Gtk::Button **button_other)
 {
-    auto en = Gtk::manage(new LocationEntry());
+    auto en = Gtk::manage(new LocationEntry(pool_base_path));
     if (button_other) {
         *button_other = Gtk::manage(new Gtk::Button());
         en->pack_start(**button_other, false, false);

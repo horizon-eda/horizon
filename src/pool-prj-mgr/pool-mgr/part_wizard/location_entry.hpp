@@ -5,7 +5,7 @@ namespace horizon {
 
 class LocationEntry : public Gtk::Box {
 public:
-    LocationEntry();
+    LocationEntry(const std::string &rel = "");
     void set_filename(const std::string &s);
     std::string get_filename();
     void set_warning(const std::string &t);
@@ -17,6 +17,8 @@ public:
     }
 
 private:
+    const std::string relative_to;
+    std::string get_rel_filename(const std::string &s) const;
     Gtk::Entry *entry = nullptr;
     void handle_button();
 

@@ -133,8 +133,8 @@ private:
 
     PoolProjectManagerAppWindow *appwin;
 
-    static class LocationEntry *pack_location_entry(const Glib::RefPtr<Gtk::Builder> &x, const std::string &w,
-                                                    Gtk::Button **button_other = nullptr);
+    class LocationEntry *pack_location_entry(const Glib::RefPtr<Gtk::Builder> &x, const std::string &w,
+                                             Gtk::Button **button_other = nullptr);
 
     WindowStateStore state_store;
 };
