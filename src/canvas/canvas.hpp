@@ -58,6 +58,7 @@ public:
     bool layer_is_visible(int layer) const;
 
     bool show_all_junctions_in_schematic = false;
+    bool show_text_in_tracks = false;
     bool fast_draw = false;
 
     virtual bool get_flip_view() const

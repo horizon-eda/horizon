@@ -224,7 +224,9 @@ void ImpBoard::apply_preferences()
         view_3d_window->set_appearance(preferences.canvas_layer.appearance);
     }
     canvas->set_highlight_on_top(preferences.board.highlight_on_top);
+    canvas->show_text_in_tracks = preferences.board.show_text_in_tracks;
     ImpLayer::apply_preferences();
+    canvas_update_from_pp();
 }
 
 static Gdk::RGBA rgba_from_color(const Color &c)

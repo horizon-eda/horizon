@@ -174,6 +174,7 @@ json BoardPreferences::serialize() const
     json j;
     j["drag_start_track"] = drag_start_track;
     j["highlight_on_top"] = highlight_on_top;
+    j["show_text_in_tracks"] = show_text_in_tracks;
     return j;
 }
 
@@ -181,6 +182,7 @@ void BoardPreferences::load_from_json(const json &j)
 {
     drag_start_track = j.value("drag_start_track", true);
     highlight_on_top = j.value("highlight_on_top", true);
+    show_text_in_tracks = j.value("show_text_in_tracks", true);
 }
 
 json ZoomPreferences::serialize() const

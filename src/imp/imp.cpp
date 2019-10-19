@@ -982,6 +982,9 @@ void ImpBase::apply_preferences()
 
 void ImpBase::canvas_update_from_pp()
 {
+    if (core.r->tool_is_active())
+        return;
+
     auto sel = canvas->get_selection();
     canvas_update();
     canvas->set_selection(sel);

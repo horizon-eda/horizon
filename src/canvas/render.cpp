@@ -277,6 +277,21 @@ void Canvas::render(const Track &track)
         auto ol = get_overlay_layer(layer);
         draw_lock(center, 0.7 * track.width, ColorP::TEXT_OVERLAY, ol, true);
     }
+    if (show_text_in_tracks && width > 0 && track.net && track.net->name.size() && track.from.is_junc()
+        && track.to.is_junc()) {
+        auto overlay_layer = get_overlay_layer(track.layer, true);
+        set_lod_size(width);
+        auto vec = (track.from.get_position() - track.to.get_position());
+        auto length = sqrt(vec.mag_sq());
+        Placement p(center);
+        p.set_angle(atan2(vec.y, vec.x) * (32768 / M_PI));
+        if (get_flip_view()) {
+            p.shift.x *= -1;
+            p.invert_angle();
+        }
+        draw_bitmap_text_box(p, length, width, track.net->name, ColorP::TEXT_OVERLAY, overlay_layer, TextBoxMode::FULL);
+        set_lod_size(-1);
+    }
     object_refs_current.pop_back();
     if (!track.is_air) {
         selectables.append_line(track.uuid, ObjectType::TRACK, track.from.get_position(), track.to.get_position(),
