@@ -19,6 +19,7 @@
 #include "pool/pool_manager.hpp"
 #include "pool/pool_parametric.hpp"
 #include "part_wizard/part_wizard.hpp"
+#include "widgets/part_preview.hpp"
 #include <thread>
 #include "nlohmann/json.hpp"
 
@@ -240,8 +241,26 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         br->show();
         add_context_menu(br);
         br->signal_activated().connect([this, br] { go_to(ObjectType::PART, br->get_selected()); });
-        append_page(*br, "Param: " + it_tab.second.display_name);
-        install_search_once(br, br);
+        auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
+        paned->add1(*br);
+        paned->child_property_shrink(*br) = false;
+
+        auto preview = Gtk::manage(new PartPreview(pool));
+        preview->signal_goto().connect(sigc::mem_fun(*this, &PoolNotebook::go_to));
+        br->signal_selected().connect([this, br, preview] {
+            auto sel = br->get_selected();
+            if (!sel) {
+                preview->load(nullptr);
+                return;
+            }
+            auto part = pool.get_part(sel);
+            preview->load(part);
+        });
+        paned->add2(*preview);
+        paned->show_all();
+
+        append_page(*paned, "Param: " + it_tab.second.display_name);
+        install_search_once(paned, br);
         browsers_parametric.emplace(it_tab.first, br);
     }
 
