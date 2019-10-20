@@ -30,6 +30,7 @@ public:
     void force_close();
     bool get_needs_save();
     std::string get_filename() const;
+    void set_original_filename(const std::string &s);
 
     typedef sigc::signal<void, std::string> type_signal_filename_changed;
     type_signal_filename_changed signal_filename_changed()
@@ -45,6 +46,7 @@ private:
     class Pool *pool;
     class PoolParametric *pool_parametric;
     bool need_update = false;
+    std::string original_filename;
 
     type_signal_filename_changed s_signal_filename_changed;
 

@@ -202,6 +202,11 @@ bool EditorWindow::get_needs_save()
     return iface->get_needs_save();
 }
 
+void EditorWindow::set_original_filename(const std::string &s)
+{
+    original_filename = s;
+}
+
 void EditorWindow::save()
 {
     if (store->filename.size()) {
@@ -228,6 +233,8 @@ void EditorWindow::save()
             break;
         default:;
         }
+        if (original_filename.size())
+            chooser->set_current_folder(Glib::path_get_dirname(original_filename));
 
         if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
             if (iface)

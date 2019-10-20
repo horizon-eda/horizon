@@ -93,6 +93,9 @@ PoolProjectManagerProcess::PoolProjectManagerProcess(const UUID &uu, PoolProject
             break;
         default:;
         }
+        if (args.size() >= 2) {
+            win->set_original_filename(args.at(1));
+        }
         win->present();
         win->signal_filename_changed().connect([this](std::string new_filename) { filename = new_filename; });
         filename = win->get_filename();

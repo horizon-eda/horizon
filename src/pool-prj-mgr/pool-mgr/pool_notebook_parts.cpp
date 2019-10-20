@@ -66,7 +66,8 @@ void PoolNotebook::handle_create_part_from_part(const UUID &uu)
     part.attributes[Part::Attribute::DATASHEET] = {true, base_part->get_datasheet()};
     std::string fn = pool.get_tmp_filename(ObjectType::PART, part.uuid);
     save_json_to_file(fn, part.serialize());
-    appwin->spawn(PoolProjectManagerProcess::Type::PART, {fn}, {}, false, true);
+    appwin->spawn(PoolProjectManagerProcess::Type::PART, {fn, pool.get_filename(ObjectType::PART, uu)}, {}, false,
+                  true);
 }
 
 void PoolNotebook::handle_duplicate_part(const UUID &uu)
