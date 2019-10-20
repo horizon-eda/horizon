@@ -33,10 +33,15 @@ void PoolNotebook::handle_create_symbol_for_unit(const UUID &uu)
             gtk_file_chooser_native_new("Save Symbol", top->gobj(), GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
     chooser->set_do_overwrite_confirmation(true);
-    auto unit_filename = pool.get_filename(ObjectType::UNIT, uu);
-    auto basename = Gio::File::create_for_path(unit_filename)->get_basename();
-    chooser->set_current_folder(Glib::build_filename(base_path, "symbols"));
-    chooser->set_current_name(basename);
+    {
+        auto unit_filename = pool.get_filename(ObjectType::UNIT, uu);
+        auto unit_dirname_rel =
+                Gio::File::create_for_path(Glib::build_filename(base_path, "units"))
+                        ->get_relative_path(Gio::File::create_for_path(Glib::path_get_dirname(unit_filename)));
+
+        chooser->set_current_folder(Glib::build_filename(base_path, "symbols", unit_dirname_rel));
+        chooser->set_current_name(Glib::path_get_basename(unit_filename));
+    }
 
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         std::string fn = EditorWindow::fix_filename(chooser->get_filename());
@@ -59,10 +64,15 @@ void PoolNotebook::handle_create_entity_for_unit(const UUID &uu)
             gtk_file_chooser_native_new("Save Entity", top->gobj(), GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
     chooser->set_do_overwrite_confirmation(true);
-    auto unit_filename = pool.get_filename(ObjectType::UNIT, uu);
-    auto basename = Gio::File::create_for_path(unit_filename)->get_basename();
-    chooser->set_current_folder(Glib::build_filename(base_path, "entities"));
-    chooser->set_current_name(basename);
+    {
+        auto unit_filename = pool.get_filename(ObjectType::UNIT, uu);
+        auto unit_dirname_rel =
+                Gio::File::create_for_path(Glib::build_filename(base_path, "units"))
+                        ->get_relative_path(Gio::File::create_for_path(Glib::path_get_dirname(unit_filename)));
+
+        chooser->set_current_folder(Glib::build_filename(base_path, "entities", unit_dirname_rel));
+        chooser->set_current_name(Glib::path_get_basename(unit_filename));
+    }
 
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         std::string fn = EditorWindow::fix_filename(chooser->get_filename());
