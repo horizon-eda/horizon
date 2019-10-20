@@ -40,10 +40,16 @@ void PoolNotebook::pool_updated(bool success)
     appwin->set_pool_updating(false, success);
     pool.clear();
     for (auto &br : browsers) {
-        br.second->search();
+        if (widget_is_visible(br.second))
+            br.second->search();
+        else
+            br.second->clear_search_once();
     }
     for (auto &br : browsers_parametric) {
-        br.second->search();
+        if (widget_is_visible(br.second))
+            br.second->search();
+        else
+            br.second->clear_search_once();
     }
     auto procs = appwin->get_processes();
     for (auto &it : procs) {
@@ -58,7 +64,16 @@ void PoolNotebook::pool_updated(bool success)
     if (part_wizard)
         part_wizard->reload();
     if (git_box && success && git_box->refreshed_once)
-        git_box->refresh();
+        if (widget_is_visible(git_box))
+            git_box->refresh();
+        else
+            git_box->refreshed_once = false;
+}
+
+bool PoolNotebook::widget_is_visible(Gtk::Widget *widget)
+{
+    auto page = get_nth_page(get_current_page());
+    return widget == page || widget->is_ancestor(*page);
 }
 
 PoolNotebook::~PoolNotebook()

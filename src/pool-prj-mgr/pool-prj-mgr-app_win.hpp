@@ -113,6 +113,7 @@ private:
     Gtk::Revealer *pool_update_status_rev = nullptr;
     Gtk::Button *pool_update_status_close_button = nullptr;
     Gtk::ProgressBar *pool_update_progress = nullptr;
+    sigc::connection pool_update_conn;
 
     Gtk::InfoBar *info_bar = nullptr;
     Gtk::Label *info_bar_label = nullptr;

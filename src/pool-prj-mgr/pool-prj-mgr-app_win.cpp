@@ -438,9 +438,15 @@ void PoolProjectManagerAppWindow::set_pool_updating(bool v, bool success)
     pool_update_status_close_button->set_visible(!success);
     if (success) {
         if (v) { // show immediately
-            pool_update_status_rev->set_reveal_child(v);
+            pool_update_conn = Glib::signal_timeout().connect(
+                    [this] {
+                        pool_update_status_rev->set_reveal_child(true);
+                        return false;
+                    },
+                    500);
         }
         else {
+            pool_update_conn.disconnect();
             Glib::signal_timeout().connect(
                     [this] {
                         pool_update_status_rev->set_reveal_child(false);

@@ -19,6 +19,7 @@ public:
     virtual void add_copy_name_context_menu_item(){};
     virtual void search() = 0;
     void search_once();
+    void clear_search_once();
     virtual ObjectType get_type() const
     {
         return ObjectType::INVALID;

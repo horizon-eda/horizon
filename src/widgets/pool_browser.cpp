@@ -309,4 +309,9 @@ void PoolBrowser::search_once()
         search();
 }
 
+void PoolBrowser::clear_search_once()
+{
+    searched_once = false;
+}
+
 } // namespace horizon

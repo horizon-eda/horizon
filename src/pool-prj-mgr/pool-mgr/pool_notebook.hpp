@@ -115,6 +115,7 @@ private:
     void add_context_menu(class PoolBrowser *br);
 
     void install_search_once(Gtk::Widget *page, PoolBrowser *browser);
+    bool widget_is_visible(Gtk::Widget *widget);
 
     std::string remote_repo;
     class PoolRemoteBox *remote_box = nullptr;
