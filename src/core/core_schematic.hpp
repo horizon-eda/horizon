@@ -81,6 +81,8 @@ public:
     bool can_search_for_object_type(ObjectType type) const override;
     std::list<SearchResult> search(const SearchQuery &q) override;
 
+    const std::string &get_filename() const override;
+
 private:
     Block block;
 

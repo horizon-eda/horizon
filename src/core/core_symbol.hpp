@@ -58,6 +58,8 @@ public:
 
     void set_pin_display_mode(Symbol::PinDisplayMode mode);
 
+    const std::string &get_filename() const override;
+
 private:
     std::map<UUID, Text> *get_text_map(bool work = true) override;
     std::map<UUID, Polygon> *get_polygon_map(bool work = true) override;

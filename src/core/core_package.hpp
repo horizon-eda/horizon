@@ -48,6 +48,8 @@ public:
 
     void reload_pool() override;
 
+    const std::string &get_filename() const override;
+
 private:
     std::map<UUID, Junction> *get_junction_map(bool work = true) override;
     std::map<UUID, Line> *get_line_map(bool work = true) override;

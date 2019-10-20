@@ -380,6 +380,8 @@ public:
     bool get_needs_save() const;
     void set_needs_save();
 
+    virtual const std::string &get_filename() const = 0;
+
     typedef sigc::signal<void, ToolID> type_signal_tool_changed;
     type_signal_tool_changed signal_tool_changed()
     {

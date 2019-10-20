@@ -61,6 +61,8 @@ public:
 
     json get_meta() override;
 
+    const std::string &get_filename() const override;
+
 private:
     std::map<UUID, Polygon> *get_polygon_map(bool work = true) override;
     std::map<UUID, Junction> *get_junction_map(bool work = true) override;

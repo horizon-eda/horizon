@@ -263,6 +263,11 @@ void CorePadstack::revert()
     reverted = true;
 }
 
+const std::string &CorePadstack::get_filename() const
+{
+    return m_filename;
+}
+
 void CorePadstack::save()
 {
     padstack.parameter_program.set_code(parameter_program_code);

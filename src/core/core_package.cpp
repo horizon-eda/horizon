@@ -288,6 +288,11 @@ json CorePackage::get_meta()
     return nullptr;
 }
 
+const std::string &CorePackage::get_filename() const
+{
+    return m_filename;
+}
+
 void CorePackage::save()
 {
     package.parameter_set = parameter_set;

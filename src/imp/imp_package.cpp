@@ -660,6 +660,10 @@ void ImpPackage::construct()
 
     browser_alt_button->property_selected_uuid().signal_changed().connect([this] { core_package.set_needs_save(); });
 
+    if (core_package.get_package()->name.size() == 0) { // new package
+        entry_name->set_text(Glib::path_get_basename(Glib::path_get_dirname(core_package.get_filename())));
+    }
+
     hamburger_menu->append("Import DXF", "win.import_dxf");
     add_tool_action(ToolID::IMPORT_DXF, "import_dxf");
 

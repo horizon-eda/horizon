@@ -34,6 +34,8 @@ public:
     const Padstack *get_canvas_data();
     std::pair<Coordi, Coordi> get_bbox() override;
 
+    const std::string &get_filename() const override;
+
 private:
     std::map<UUID, Polygon> *get_polygon_map(bool work = true) override;
     std::map<UUID, Hole> *get_hole_map(bool work = true) override;

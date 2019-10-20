@@ -106,6 +106,11 @@ std::pair<Coordi, Coordi> CoreFrame::get_bbox()
     return frame.get_bbox();
 }
 
+const std::string &CoreFrame::get_filename() const
+{
+    return m_frame_filename;
+}
+
 void CoreFrame::save()
 {
     s_signal_save.emit();

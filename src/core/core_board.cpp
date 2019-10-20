@@ -634,6 +634,11 @@ std::list<Core::SearchResult> CoreBoard::search(const SearchQuery &q)
     return results;
 }
 
+const std::string &CoreBoard::get_filename() const
+{
+    return m_board_filename;
+}
+
 void CoreBoard::save()
 {
     brd.rules = rules;

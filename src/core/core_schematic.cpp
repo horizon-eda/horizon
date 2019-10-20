@@ -718,6 +718,11 @@ std::pair<Coordi, Coordi> CoreSchematic::get_bbox()
     return get_sheet()->frame.get_bbox();
 }
 
+const std::string &CoreSchematic::get_filename() const
+{
+    return m_schematic_filename;
+}
+
 void CoreSchematic::save()
 {
     sch.rules = rules;

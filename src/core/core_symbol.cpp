@@ -357,6 +357,11 @@ void CoreSymbol::revert()
     reverted = true;
 }
 
+const std::string &CoreSymbol::get_filename() const
+{
+    return m_filename;
+}
+
 void CoreSymbol::save()
 {
     s_signal_save.emit();
