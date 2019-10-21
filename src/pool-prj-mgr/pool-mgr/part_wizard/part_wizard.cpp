@@ -641,10 +641,22 @@ void PartWizard::prepare_edit()
             ed->edit_symbol_button->signal_clicked().connect([this, ed] {
                 auto symbol_uuid = symbols.at(ed->gate->unit->uuid);
                 auto symbol_filename = pool->get_tmp_filename(ObjectType::SYMBOL, symbol_uuid);
+                {
+                    auto sym = Symbol::new_from_file(symbol_filename, *pool);
+                    sym.name = ed->symbol_name_entry->get_text();
+                    save_json_to_file(symbol_filename, sym.serialize());
+                }
+
                 auto proc = appwin->spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {symbol_filename});
                 processes.emplace(symbol_filename, proc);
-                proc->signal_exited().connect([this, symbol_filename](int status, bool modified) {
+                symbols_open.emplace(symbol_uuid);
+                proc->signal_exited().connect([this, symbol_filename, symbol_uuid, ed](int status, bool modified) {
                     processes.erase(symbol_filename);
+                    symbols_open.erase(symbol_uuid);
+                    {
+                        auto sym = Symbol::new_from_file(symbol_filename, *pool);
+                        ed->symbol_name_entry->set_text(sym.name);
+                    }
                     update_can_finish();
                     update_symbol_pins_mapped();
                 });
@@ -828,10 +840,16 @@ void PartWizard::autofill()
             std::string suffix = ed->suffix_entry->get_text();
             trim(suffix);
             if (suffix.size()) {
-                ed->unit_name_entry->set_text(part_mpn_entry->get_text() + " " + suffix);
+                auto txt = part_mpn_entry->get_text() + " " + suffix;
+                ed->unit_name_entry->set_text(txt);
+                if (ed->symbol_name_entry->get_sensitive())
+                    ed->symbol_name_entry->set_text(txt);
             }
             else {
-                ed->unit_name_entry->set_text(part_mpn_entry->get_text());
+                auto txt = part_mpn_entry->get_text();
+                ed->unit_name_entry->set_text(txt);
+                if (ed->symbol_name_entry->get_sensitive())
+                    ed->symbol_name_entry->set_text(txt);
             }
             ed->unit_location_entry->set_filename(
                     Glib::build_filename(pool_base_path, "units", ed->get_suffixed_filename_from_part()));
@@ -940,6 +958,8 @@ void PartWizard::update_can_finish()
                 entry_set_warning(ed->unit_name_entry, "Duplicate unit name");
                 valid = false;
             }
+
+            ed->set_can_edit_symbol_name(symbols_open.count(symbols.at(ed->gate->unit->uuid)) == 0);
         }
     }
     update_steps();

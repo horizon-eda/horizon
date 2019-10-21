@@ -130,6 +130,7 @@ private:
     void update_symbol_pins_mapped();
 
     std::map<std::string, class PoolProjectManagerProcess *> processes;
+    std::set<UUID> symbols_open;
 
     PoolProjectManagerAppWindow *appwin;
 

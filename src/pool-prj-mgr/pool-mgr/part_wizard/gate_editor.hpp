@@ -14,6 +14,7 @@ public:
     GateEditorWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Gate *g, class PartWizard *pa);
     static GateEditorWizard *create(Gate *g, PartWizard *pa);
     void update_symbol_pins(unsigned int n_mapped);
+    void set_can_edit_symbol_name(bool v);
 
     virtual ~GateEditorWizard()
     {
@@ -30,6 +31,8 @@ private:
     class LocationEntry *symbol_location_entry = nullptr;
     Gtk::Entry *unit_name_entry = nullptr;
     Gtk::Button *unit_name_from_mpn_button = nullptr;
+    Gtk::Entry *symbol_name_entry = nullptr;
+    Gtk::Button *symbol_name_from_unit_button = nullptr;
     Gtk::Entry *suffix_entry = nullptr;
 
     std::string get_suffixed_filename_from_part();
