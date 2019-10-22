@@ -127,7 +127,7 @@ void PoolNotebook::handle_duplicate_package(const UUID &uu)
             else {
                 auto pkg = pool.get_package(uu);
                 std::vector<std::string> filenames;
-                DuplicatePartWidget::duplicate_package(&pool, uu, fn, pkg->name + " (Copy)", &filenames);
+                DuplicatePartWidget::duplicate_package(&pool, uu, fn, Glib::path_get_basename(fn), &filenames);
                 std::string new_pkg_filename = Glib::build_filename(fn, "package.json");
                 pool_update(
                         [this, new_pkg_filename] {
