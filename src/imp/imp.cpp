@@ -204,6 +204,15 @@ std::string ImpBase::get_tool_settings_filename(ToolID id)
     return Glib::build_filename(settings_dir, tool_lut.lookup_reverse(id) + ".json");
 }
 
+bool ImpBase::property_panel_has_focus()
+{
+    auto focus_widget = main_window->get_focus();
+    bool property_has_focus = false;
+    if (focus_widget && (dynamic_cast<Gtk::Entry *>(focus_widget) || dynamic_cast<Gtk::TextView *>(focus_widget)))
+        property_has_focus = focus_widget->is_ancestor(*main_window->property_viewport);
+    return property_has_focus;
+}
+
 void ImpBase::run(int argc, char *argv[])
 {
     auto app = Gtk::Application::create(argc, argv, "net.carrotIndustries.horizon.Imp", Gio::APPLICATION_NON_UNIQUE);
@@ -216,6 +225,17 @@ void ImpBase::run(int argc, char *argv[])
     canvas->signal_key_press_event().connect(sigc::mem_fun(*this, &ImpBase::handle_key_press));
     canvas->signal_cursor_moved().connect(sigc::mem_fun(*this, &ImpBase::handle_cursor_move));
     canvas->signal_button_press_event().connect(sigc::mem_fun(*this, &ImpBase::handle_click));
+    canvas->signal_button_press_event().connect(
+            [this](GdkEventButton *ev) {
+                if (property_panel_has_focus()) { // eat event so that things don't get deselected
+                    canvas->grab_focus();
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            },
+            false);
     canvas->signal_button_release_event().connect(sigc::mem_fun(*this, &ImpBase::handle_click_release));
     canvas->signal_request_display_name().connect(
             [this](ObjectType ty, UUID uu) { return core.r->get_display_name(ty, uu); });
@@ -423,11 +443,7 @@ void ImpBase::run(int argc, char *argv[])
     });
 
     canvas->signal_can_steal_focus().connect([this](bool &can_steal) {
-        auto focus_widget = main_window->get_focus();
-        bool property_has_focus = false;
-        if (focus_widget && (dynamic_cast<Gtk::Entry *>(focus_widget) || dynamic_cast<Gtk::TextView *>(focus_widget)))
-            property_has_focus = focus_widget->is_ancestor(*main_window->property_viewport);
-        can_steal = !(main_window->search_entry->property_has_focus() || property_has_focus);
+        can_steal = !(main_window->search_entry->property_has_focus() || property_panel_has_focus());
     });
 
     main_window->search_entry->signal_changed().connect([this] {

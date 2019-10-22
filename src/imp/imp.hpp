@@ -198,6 +198,8 @@ private:
 
     GdkModifierType grid_fine_modifier = GDK_MOD1_MASK;
 
+    bool property_panel_has_focus();
+
     sigc::connection initial_view_all_conn;
 };
 } // namespace horizon
