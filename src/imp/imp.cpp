@@ -227,7 +227,8 @@ void ImpBase::run(int argc, char *argv[])
     canvas->signal_button_press_event().connect(sigc::mem_fun(*this, &ImpBase::handle_click));
     canvas->signal_button_press_event().connect(
             [this](GdkEventButton *ev) {
-                if (property_panel_has_focus()) { // eat event so that things don't get deselected
+                if (property_panel_has_focus()
+                    && (ev->button == 1 || ev->button == 3)) { // eat event so that things don't get deselected
                     canvas->grab_focus();
                     return true;
                 }
