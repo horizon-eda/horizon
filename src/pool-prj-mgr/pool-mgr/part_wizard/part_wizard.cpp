@@ -352,11 +352,11 @@ void PartWizard::finish()
             auto unit_filename = ed->unit_location_entry->get_filename();
             save_json_to_file(unit_filename, ed->gate->unit->serialize());
 
-            auto symbol_filename_dest = ed->symbol_location_entry->get_filename();
             auto symbol_filename_src = pool->get_tmp_filename(ObjectType::SYMBOL, symbols.at(ed->gate->unit->uuid));
-            auto fi_src = Gio::File::create_for_path(symbol_filename_src);
-            auto fi_dest = Gio::File::create_for_path(symbol_filename_dest);
-            fi_src->copy(fi_dest, Gio::FILE_COPY_OVERWRITE);
+            auto symbol_filename_dest = ed->symbol_location_entry->get_filename();
+            auto sym = Symbol::new_from_file(symbol_filename_src, *pool);
+            sym.name = ed->symbol_name_entry->get_text();
+            save_json_to_file(symbol_filename_dest, sym.serialize());
         }
     }
     save_json_to_file(entity_location_entry->get_filename(), entity.serialize());
