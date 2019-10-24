@@ -149,7 +149,7 @@ int PNS_HORIZON_RULE_RESOLVER::Clearance(const PNS::ITEM *aA, const PNS::ITEM *a
     else if (parent_b && parent_b->hole && parent_b->hole->padstack.type == horizon::Padstack::Type::MECHANICAL)
         pt_b = horizon::PatchType::HOLE_NPTH;
 
-    std::cout << "pt " << static_cast<int>(pt_a) << " " << static_cast<int>(pt_b) << std::endl;
+    // std::cout << "pt " << static_cast<int>(pt_a) << " " << static_cast<int>(pt_b) << std::endl;
 
     if (parent_a == &parent_dummy_outline || parent_b == &parent_dummy_outline) { // one is the board edge
         auto a_is_edge = parent_a == &parent_dummy_outline;
