@@ -126,6 +126,7 @@ public:
     const Color &get_color(ColorP colorp) const;
 
     bool smooth_zoom = true;
+    bool snap_to_targets = true;
 
     void inhibit_drag_selection();
 

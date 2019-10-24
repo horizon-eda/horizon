@@ -279,68 +279,71 @@ void CanvasGL::cursor_move(GdkEvent *motion_event)
         target_current = Target();
     }
 
-    auto target_in_selection = [this](const Target &ta) {
-        if (ta.type == ObjectType::SYMBOL_PIN) {
-            SelectableRef key(ta.path.at(0), ObjectType::SCHEMATIC_SYMBOL, ta.vertex);
-            if (selectables.items_map.count(key)
-                && (selectables.items.at(selectables.items_map.at(key))
-                            .get_flag(horizon::Selectable::Flag::SELECTED))) {
-                return true;
-            }
-        }
-        else if (ta.type == ObjectType::PAD) {
-            SelectableRef key(ta.path.at(0), ObjectType::BOARD_PACKAGE, ta.vertex);
-            if (selectables.items_map.count(key)
-                && (selectables.items.at(selectables.items_map.at(key))
-                            .get_flag(horizon::Selectable::Flag::SELECTED))) {
-                return true;
-            }
-        }
-        else if (ta.type == ObjectType::POLYGON_EDGE) {
-            SelectableRef key(ta.path.at(0), ObjectType::POLYGON_VERTEX, ta.vertex);
-            if (selectables.items_map.count(key)
-                && (selectables.items.at(selectables.items_map.at(key))
-                            .get_flag(horizon::Selectable::Flag::SELECTED))) {
-                return true;
-            }
-        }
-        else if (ta.type == ObjectType::DIMENSION) {
-            for (int i = 0; i < 2; i++) {
-                SelectableRef key(ta.path.at(0), ObjectType::DIMENSION, i);
+    if (snap_to_targets) {
+        auto target_in_selection = [this](const Target &ta) {
+            if (ta.type == ObjectType::SYMBOL_PIN) {
+                SelectableRef key(ta.path.at(0), ObjectType::SCHEMATIC_SYMBOL, ta.vertex);
                 if (selectables.items_map.count(key)
                     && (selectables.items.at(selectables.items_map.at(key))
                                 .get_flag(horizon::Selectable::Flag::SELECTED))) {
                     return true;
                 }
             }
-        }
-        SelectableRef key(ta.path.at(0), ta.type, ta.vertex);
-        if (selectables.items_map.count(key)
-            && (selectables.items.at(selectables.items_map.at(key)).get_flag(horizon::Selectable::Flag::SELECTED))) {
-            return true;
-        }
-        return false;
-    };
+            else if (ta.type == ObjectType::PAD) {
+                SelectableRef key(ta.path.at(0), ObjectType::BOARD_PACKAGE, ta.vertex);
+                if (selectables.items_map.count(key)
+                    && (selectables.items.at(selectables.items_map.at(key))
+                                .get_flag(horizon::Selectable::Flag::SELECTED))) {
+                    return true;
+                }
+            }
+            else if (ta.type == ObjectType::POLYGON_EDGE) {
+                SelectableRef key(ta.path.at(0), ObjectType::POLYGON_VERTEX, ta.vertex);
+                if (selectables.items_map.count(key)
+                    && (selectables.items.at(selectables.items_map.at(key))
+                                .get_flag(horizon::Selectable::Flag::SELECTED))) {
+                    return true;
+                }
+            }
+            else if (ta.type == ObjectType::DIMENSION) {
+                for (int i = 0; i < 2; i++) {
+                    SelectableRef key(ta.path.at(0), ObjectType::DIMENSION, i);
+                    if (selectables.items_map.count(key)
+                        && (selectables.items.at(selectables.items_map.at(key))
+                                    .get_flag(horizon::Selectable::Flag::SELECTED))) {
+                        return true;
+                    }
+                }
+            }
+            SelectableRef key(ta.path.at(0), ta.type, ta.vertex);
+            if (selectables.items_map.count(key)
+                && (selectables.items.at(selectables.items_map.at(key))
+                            .get_flag(horizon::Selectable::Flag::SELECTED))) {
+                return true;
+            }
+            return false;
+        };
 
-    auto dfn = [this, target_in_selection](const Target &ta) -> float {
-        // return inf if target in selection and tool active (selection not
-        // allowed)
-        if (!layer_is_visible(ta.layer))
-            return INFINITY;
+        auto dfn = [this, target_in_selection](const Target &ta) -> float {
+            // return inf if target in selection and tool active (selection not
+            // allowed)
+            if (!layer_is_visible(ta.layer))
+                return INFINITY;
 
-        if (!selection_allowed && target_in_selection(ta))
-            return INFINITY;
-        else
-            return (cursor_pos - (Coordf)ta.p).mag_sq();
-    };
+            if (!selection_allowed && target_in_selection(ta))
+                return INFINITY;
+            else
+                return (cursor_pos - (Coordf)ta.p).mag_sq();
+        };
 
-    auto mi = std::min_element(targets.cbegin(), targets.cend(),
-                               [dfn](const auto &a, const auto &b) { return dfn(a) < dfn(b); });
-    if (mi != targets.cend()) {
-        auto d = sqrt(dfn(*mi));
-        if (d < 30 / scale) {
-            target_current = *mi;
-            t = mi->p;
+        auto mi = std::min_element(targets.cbegin(), targets.cend(),
+                                   [dfn](const auto &a, const auto &b) { return dfn(a) < dfn(b); });
+        if (mi != targets.cend()) {
+            auto d = sqrt(dfn(*mi));
+            if (d < 30 / scale) {
+                target_current = *mi;
+                t = mi->p;
+            }
         }
     }
 

@@ -462,6 +462,7 @@ void ImpSchematic::construct()
     });
 
     grid_spin_button->set_sensitive(false);
+    canvas->snap_to_targets = false;
 
     rules_window->signal_goto().connect([this](Coordi location, UUID sheet) {
         auto sch = core_schematic.get_schematic();
