@@ -388,7 +388,6 @@ PropertyValue &PropertyEditorStringMultiline::get_value()
 void PropertyEditorStringMultiline::changed()
 {
     modified = true;
-    s_signal_changed.emit();
 }
 
 void PropertyEditorStringMultiline::construct()
