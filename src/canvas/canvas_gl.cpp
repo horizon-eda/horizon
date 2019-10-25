@@ -207,10 +207,8 @@ void CanvasGL::update_cursor_pos(double x, double y)
 
 bool CanvasGL::on_button_release_event(GdkEventButton *button_event)
 {
-    if (last_button_event != GDK_2BUTTON_PRESS) {
-        pan_drag_end(button_event);
-        drag_selection.drag_end(button_event);
-    }
+    pan_drag_end(button_event);
+    drag_selection.drag_end(button_event);
     return Gtk::GLArea::on_button_release_event(button_event);
 }
 
