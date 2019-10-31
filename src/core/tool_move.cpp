@@ -349,7 +349,11 @@ void ToolMove::finish()
 {
     for (const auto &it : core.r->selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            core.c->get_schematic()->autoconnect_symbol(core.c->get_sheet(), core.c->get_schematic_symbol(it.uuid));
+            auto sym = core.c->get_schematic_symbol(it.uuid);
+            core.c->get_schematic()->autoconnect_symbol(core.c->get_sheet(), sym);
+            if (sym->component->connections.size() == 0) {
+                core.c->get_schematic()->place_bipole_on_line(core.c->get_sheet(), sym);
+            }
         }
     }
     if (core.c) {

@@ -94,6 +94,7 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
+            core.c->get_schematic()->place_bipole_on_line(core.c->get_sheet(), sym_current);
             if (current_gate + 1 == gates.size()) { // last gate
                 current_gate = 0;
                 // add next component

@@ -420,6 +420,15 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
         else if (args.type == ToolEventType::CLICK || (is_transient && args.type == ToolEventType::CLICK_RELEASE)) {
             if (args.button == 1) {
                 merge_selected_junctions();
+                for (const auto &it : core.r->selection) {
+                    if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
+                        auto sym = core.c->get_schematic_symbol(it.uuid);
+                        core.c->get_schematic()->autoconnect_symbol(core.c->get_sheet(), sym);
+                        if (sym->component->connections.size() == 0) {
+                            core.c->get_schematic()->place_bipole_on_line(core.c->get_sheet(), sym);
+                        }
+                    }
+                }
                 core.r->commit();
                 return ToolResponse::next(tool_id, std::make_unique<ToolDataPaste>(paste_data));
             }

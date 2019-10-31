@@ -75,6 +75,9 @@ public:
      */
     void unsmash_symbol(Sheet *sheet, SchematicSymbol *sym);
 
+    bool delete_net_line(Sheet *sheet, LineNet *line);
+
+    bool place_bipole_on_line(Sheet *sheet, SchematicSymbol *sym);
 
     UUID uuid;
     Block *block;

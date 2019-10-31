@@ -264,6 +264,183 @@ void Schematic::unsmash_symbol(Sheet *sheet, SchematicSymbol *sym)
     }
 }
 
+bool Schematic::delete_net_line(Sheet *sheet, LineNet *line)
+{
+    bool split = false;
+    if (line->net) {
+        for (auto &it_ft : {line->from, line->to}) {
+            if (it_ft.is_pin()) {
+                UUIDPath<2> conn_path(it_ft.symbol->gate.uuid, it_ft.pin->uuid);
+                if (it_ft.symbol->component->connections.count(conn_path)
+                    && it_ft.pin->connected_net_lines.size() <= 1) {
+                    it_ft.symbol->component->connections.erase(conn_path);
+                }
+                // prevents error in update_refs
+                it_ft.pin->connected_net_lines.erase(line->uuid);
+            }
+        }
+    }
+    auto from = line->from;
+    auto to = line->to;
+    Net *net = line->net;
+    sheet->net_lines.erase(line->uuid);
+    line = nullptr;
+    sheet->propagate_net_segments();
+    if (net) {
+        UUID from_net_segment = from.get_net_segment();
+        UUID to_net_segment = to.get_net_segment();
+        if (from_net_segment != to_net_segment) {
+            auto pins_from = sheet->get_pins_connected_to_net_segment(from_net_segment);
+            auto pins_to = sheet->get_pins_connected_to_net_segment(to_net_segment);
+            std::cout << "!!!net split" << std::endl;
+            if (!net->is_named() && !net->is_power && !net->is_bussed) {
+                // net is unnamed, not bussed and not a power net, user
+                // does't care which pins get extracted
+                // imp->tool_bar_flash("net split");
+                block->extract_pins(pins_to);
+            }
+            else if (net->is_power) {
+                auto ns_info = sheet->analyze_net_segments();
+                if (ns_info.count(from_net_segment) && ns_info.count(to_net_segment)) {
+                    auto &inf_from = ns_info.at(from_net_segment);
+                    auto &inf_to = ns_info.at(to_net_segment);
+                    if (inf_from.has_power_sym && inf_to.has_power_sym) {
+                        // both have label, don't need to split net
+                    }
+                    else if (inf_from.has_power_sym && !inf_to.has_power_sym) {
+                        // from has label, to not, extracts pins on to
+                        // net segment
+                        // imp->tool_bar_flash("net split");
+                        block->extract_pins(pins_to);
+                    }
+                    else if (!inf_from.has_power_sym && inf_to.has_power_sym) {
+                        // to has label, from not, extract pins on from
+                        // segment
+                        // imp->tool_bar_flash("net split");
+                        block->extract_pins(pins_from);
+                    }
+                    else {
+                        // imp->tool_bar_flash("net split");
+                        block->extract_pins(pins_from);
+                    }
+                }
+            }
+            else {
+                auto ns_info = sheet->analyze_net_segments();
+                if (ns_info.count(from_net_segment) && ns_info.count(to_net_segment)) {
+                    auto &inf_from = ns_info.at(from_net_segment);
+                    auto &inf_to = ns_info.at(to_net_segment);
+                    if (inf_from.has_label && inf_to.has_label) {
+                        // both have label, don't need to split net
+                    }
+                    else if (inf_from.has_label && !inf_to.has_label) {
+                        // from has label, to not, extracts pins on to
+                        // net segment
+                        // imp->tool_bar_flash("net split");
+                        block->extract_pins(pins_to);
+                    }
+                    else if (!inf_from.has_label && inf_to.has_label) {
+                        // to has label, from not, extract pins on from
+                        // segment
+                        // imp->tool_bar_flash("net split");
+                        block->extract_pins(pins_from);
+                    }
+                    else if (!inf_from.has_label && !inf_to.has_label) {
+                        // both segments are unlabeled, so don't care
+                        // imp->tool_bar_flash("net split");
+                        block->extract_pins(pins_from);
+                    }
+                }
+            }
+        }
+    }
+    return split;
+}
+
+bool Schematic::place_bipole_on_line(Sheet *sheet, SchematicSymbol *sym)
+{
+    bool placed = false;
+    if (sym->symbol.pins.size() == 2) {
+        auto it_sym = sym->symbol.pins.begin();
+        auto &pin1 = it_sym->second;
+        it_sym++;
+        auto &pin2 = it_sym->second;
+        if ((pin1.position.x == pin2.position.x) || (pin1.position.y == pin2.position.y)) {
+            std::cout << "place bipole" << std::endl;
+            auto pin1_pos = sym->placement.transform(pin1.position);
+            auto pin2_pos = sym->placement.transform(pin2.position);
+            LineNet *line = nullptr;
+            for (auto it : sheet->net_lines) {
+                auto &li = it.second;
+                if ((li.coord_on_line(pin1_pos) || li.from.get_position() == pin1_pos
+                     || li.to.get_position() == pin1_pos)
+                    && (li.coord_on_line(pin2_pos) || li.from.get_position() == pin2_pos
+                        || li.to.get_position() == pin2_pos)) {
+                    line = &li;
+                    break;
+                }
+            }
+            if (line) {
+                auto from = line->from;
+                auto to = line->to;
+                delete_net_line(sheet, line);
+                line = nullptr;
+                expand(true);
+                from.update_refs(*sheet);
+                to.update_refs(*sheet);
+
+                UUID from_net_segment = from.get_net_segment();
+                UUID to_net_segment = to.get_net_segment();
+                auto ns_info = sheet->analyze_net_segments(false);
+                Net *net_from = nullptr;
+                Net *net_to = nullptr;
+                if (ns_info.count(from_net_segment))
+                    net_from = ns_info.at(from_net_segment).net;
+                else if (from.is_bus_ripper())
+                    net_from = from.bus_ripper->bus_member->net;
+
+                if (ns_info.count(to_net_segment))
+                    net_to = ns_info.at(to_net_segment).net;
+                else if (to.is_bus_ripper())
+                    net_to = to.bus_ripper->bus_member->net;
+
+                // normal pin1-from pin2-to
+                // swapped pin1-to pin2-from
+                auto dst_normal = (pin1_pos - from.get_position()).mag_sq() + (pin2_pos - to.get_position()).mag_sq();
+                auto dst_swapped = (pin2_pos - from.get_position()).mag_sq() + (pin1_pos - to.get_position()).mag_sq();
+                SymbolPin *pin_from = &pin1;
+                SymbolPin *pin_to = &pin2;
+                if (dst_swapped > dst_normal) {
+                    std::swap(pin_from, pin_to);
+                }
+                auto connect_pin = [this, sheet, sym](SymbolPin &pin, const LineNet::Connection &conn, Net *net) {
+                    bool new_net = !net;
+                    if (!net)
+                        net = block->insert_net();
+
+                    auto uu = UUID::random();
+                    auto &new_line = sheet->net_lines.emplace(uu, uu).first->second;
+                    new_line.from = conn;
+                    new_line.to.connect(sym, &pin);
+                    new_line.net = net;
+                    sym->component->connections.emplace(std::piecewise_construct,
+                                                        std::forward_as_tuple(sym->gate->uuid, pin.uuid),
+                                                        std::forward_as_tuple(net));
+                    if (conn.is_pin() && new_net) {
+                        conn.symbol->component->connections.emplace(
+                                std::piecewise_construct,
+                                std::forward_as_tuple(conn.symbol->gate->uuid, conn.pin->uuid),
+                                std::forward_as_tuple(net));
+                    }
+                };
+                connect_pin(*pin_from, from, net_from);
+                connect_pin(*pin_to, to, net_to);
+                placed = true;
+            }
+        }
+    }
+    return placed;
+}
 
 void Schematic::expand(bool careful)
 {
