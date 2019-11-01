@@ -94,6 +94,7 @@ void Schematic::autoconnect_symbol(Sheet *sheet, SchematicSymbol *sym)
 {
     assert(sheet == &sheets.at(sheet->uuid));
     assert(sym == &sheet->symbols.at(sym->uuid));
+    bool connected = false;
     for (auto &it_pin : sym->symbol.pins) {
         auto pin_pos = sym->placement.transform(it_pin.second.position);
         if (sym->component->connections.count(UUIDPath<2>(sym->gate->uuid, it_pin.first)))
@@ -127,6 +128,7 @@ void Schematic::autoconnect_symbol(Sheet *sheet, SchematicSymbol *sym)
                 else {
                     sheet->replace_junction(&it_junc->second, sym, &it_pin.second);
                 }
+                connected = true;
             }
             if (erase) {
                 sheet->junctions.erase(it_junc++);
@@ -162,6 +164,7 @@ void Schematic::autoconnect_symbol(Sheet *sheet, SchematicSymbol *sym)
                     line->from.connect(sym, &it_pin.second);
                     line->to.connect(sym_other, &it_pin_other.second);
                     break;
+                    connected = true;
                 }
             }
         }
@@ -174,10 +177,13 @@ void Schematic::autoconnect_symbol(Sheet *sheet, SchematicSymbol *sym)
                 line->net = it_rip.second.bus_member->net;
                 line->from.connect(sym, &it_pin.second);
                 line->to.connect(&it_rip.second);
+                connected = true;
                 break;
             }
         }
     }
+    if (connected)
+        expand(true);
 }
 
 void Schematic::disconnect_symbol(Sheet *sheet, SchematicSymbol *sym)
