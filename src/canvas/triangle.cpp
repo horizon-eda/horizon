@@ -346,7 +346,9 @@ void TriangleRenderer::push()
             else {
                 throw std::runtime_error("unknown triangle type");
             }
-            type_indices[std::make_pair(ty, tri.flags & Triangle::FLAG_HIGHLIGHT)].push_back(i + ofs);
+            type_indices[std::make_pair(ty, (tri.flags & Triangle::FLAG_HIGHLIGHT)
+                                                    || (tri.type == static_cast<int>(Triangle::Type::TRACK_PREVIEW)))]
+                    .push_back(i + ofs);
             i++;
         }
         for (const auto &it2 : type_indices) {
