@@ -5,6 +5,7 @@
 #include "core_schematic.hpp"
 #include "core_symbol.hpp"
 #include "imp/imp_interface.hpp"
+#include "canvas/canvas_gl.hpp"
 #include "pool/entity.hpp"
 #include <iostream>
 
@@ -182,6 +183,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
             if (other_track) {
                 core.r->selection.clear();
                 core.r->selection.emplace(other_track->uuid, ObjectType::TRACK);
+                imp->get_canvas()->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
             }
         }
     }
