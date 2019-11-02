@@ -140,7 +140,7 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
         auto overlay = Gtk::manage(new Gtk::Overlay);
         overlay->add(*sc);
         overlay->show_all();
-
+        busy_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4));
         auto img = Gtk::manage(new Gtk::Image("hourglass-symbolic", Gtk::ICON_SIZE_DIALOG));
         busy_box->pack_start(*img, true, true, 0);
         auto la = Gtk::manage(new Gtk::Label("Database is busy"));
@@ -156,6 +156,7 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
         busy_box->set_no_show_all(true);
         pack_start(*overlay, true, true, 0);
     }
+
 
     treeview->show();
 
