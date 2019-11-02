@@ -79,5 +79,6 @@ protected:
 private:
     Gtk::Grid *grid = nullptr;
     int grid_top = 0;
+    class CellRendererColorBox *cell_renderer_item_source = nullptr;
 };
 } // namespace horizon

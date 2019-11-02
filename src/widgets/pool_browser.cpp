@@ -239,36 +239,48 @@ PoolBrowser::PoolItemSource PoolBrowser::pool_item_source_from_db(const UUID &uu
 void PoolBrowser::install_pool_item_source_tooltip()
 {
     treeview->set_has_tooltip(true);
-    treeview->signal_query_tooltip().connect(
-            [this](int x, int y, bool keyboard_tooltip, const Glib::RefPtr<Gtk::Tooltip> &tooltip) {
-                if (keyboard_tooltip)
-                    return false;
-                Gtk::TreeModel::Path path;
-                Gtk::TreeViewColumn *column;
-                int cell_x, cell_y;
-                int bx, by;
-                treeview->convert_widget_to_bin_window_coords(x, y, bx, by);
-                if (!treeview->get_path_at_pos(bx, by, path, column, cell_x, cell_y))
-                    return false;
-                Gtk::TreeIter iter(treeview->get_model()->get_iter(path));
-                if (!iter)
-                    return false;
-                PoolItemSource src = pool_item_source_from_row(*iter);
-                switch (src) {
-                case PoolItemSource::LOCAL:
-                    tooltip->set_text("Item is from this pool");
-                    break;
-                case PoolItemSource::INCLUDED:
-                    tooltip->set_text("Item is from included pool");
-                    break;
-                case PoolItemSource::OVERRIDING:
-                    tooltip->set_text("Item is from this pool overriding an item from an included pool");
+    treeview->signal_query_tooltip().connect([this](int x, int y, bool keyboard_tooltip,
+                                                    const Glib::RefPtr<Gtk::Tooltip> &tooltip) {
+        if (keyboard_tooltip)
+            return false;
+        Gtk::TreeModel::Path path;
+        Gtk::TreeViewColumn *column;
+        int cell_x, cell_y;
+        int bx, by;
+        treeview->convert_widget_to_bin_window_coords(x, y, bx, by);
+        if (!treeview->get_path_at_pos(bx, by, path, column, cell_x, cell_y))
+            return false;
+        auto cells = column->get_cells();
+        for (auto cell : cells) {
+            int start, width;
+            if (column->get_cell_position(*cell, start, width)) {
+                if ((cell_x >= start) && (cell_x < (start + width))) {
+                    if (cell == cell_renderer_item_source) {
+                        Gtk::TreeIter iter(treeview->get_model()->get_iter(path));
+                        if (!iter)
+                            return false;
+                        PoolItemSource src = pool_item_source_from_row(*iter);
+                        switch (src) {
+                        case PoolItemSource::LOCAL:
+                            tooltip->set_text("Item is from this pool");
+                            break;
+                        case PoolItemSource::INCLUDED:
+                            tooltip->set_text("Item is from included pool");
+                            break;
+                        case PoolItemSource::OVERRIDING:
+                            tooltip->set_text("Item is from this pool overriding an item from an included pool");
+                            break;
+                        }
+                        //
+                        treeview->set_tooltip_cell(tooltip, &path, column, cell);
+                        return true;
+                    }
                     break;
                 }
-                //
-                treeview->set_tooltip_row(tooltip, path);
-                return true;
-            });
+            }
+        }
+        return false;
+    });
 }
 
 PoolBrowser::PoolItemSource PoolBrowser::pool_item_source_from_row(const Gtk::TreeModel::Row &row)
@@ -300,6 +312,7 @@ CellRendererColorBox *PoolBrowser::create_pool_item_source_cr(Gtk::TreeViewColum
         va.set_blue(co.b);
         mcr->property_color() = va;
     });
+    cell_renderer_item_source = cr_cb;
     return cr_cb;
 }
 
