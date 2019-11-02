@@ -52,6 +52,14 @@ private:
     int get(int idx, int) const;
 };
 
+class Error : public std::runtime_error {
+public:
+    Error(int a_rc, const char *what) : std::runtime_error(what), rc(a_rc)
+    {
+    }
+    const int rc;
+};
+
 class Database {
     friend Query;
 

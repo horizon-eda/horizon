@@ -37,6 +37,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-3d-left-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-3d-right-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/x-git-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/hourglass-symbolic.svg</file>
     <file>icons/scalable/apps/horizon-eda.svg</file>
     <file>icons/16x16/apps/horizon-eda.png</file>
     <file>icons/32x32/apps/horizon-eda.png</file>

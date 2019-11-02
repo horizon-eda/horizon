@@ -136,7 +136,28 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
     sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     sc->show();
 
-    pack_start(*sc, true, true, 0);
+    {
+        auto overlay = Gtk::manage(new Gtk::Overlay);
+        overlay->add(*sc);
+        overlay->show_all();
+
+        auto img = Gtk::manage(new Gtk::Image("hourglass-symbolic", Gtk::ICON_SIZE_DIALOG));
+        busy_box->pack_start(*img, true, true, 0);
+        auto la = Gtk::manage(new Gtk::Label("Database is busy"));
+        busy_box->pack_start(*la, true, true, 0);
+        auto bu = Gtk::manage(new Gtk::Button("Retry search"));
+        bu->signal_clicked().connect([this] { search(); });
+        busy_box->pack_start(*bu, true, true, 0);
+        busy_box->show_all();
+        busy_box->set_valign(Gtk::ALIGN_CENTER);
+        busy_box->set_halign(Gtk::ALIGN_CENTER);
+        overlay->add_overlay(*busy_box);
+        busy_box->hide();
+        busy_box->set_no_show_all(true);
+    }
+
+
+    pack_start(*overlay, true, true, 0);
     treeview->show();
 
     create_columns();
@@ -166,6 +187,11 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
 #endif
         }
     });
+}
+
+void PoolBrowser::set_busy(bool busy)
+{
+    busy_box->set_visible(busy);
 }
 
 void PoolBrowser::row_activated(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column)

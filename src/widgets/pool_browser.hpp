@@ -77,9 +77,12 @@ protected:
     virtual PoolItemSource pool_item_source_from_row(const Gtk::TreeModel::Row &row);
     bool searched_once = false;
 
+    void set_busy(bool busy);
+
 private:
     Gtk::Grid *grid = nullptr;
     int grid_top = 0;
     class CellRendererColorBox *cell_renderer_item_source = nullptr;
+    Gtk::Box *busy_box = nullptr;
 };
 } // namespace horizon

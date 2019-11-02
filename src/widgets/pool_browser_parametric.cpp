@@ -381,27 +381,38 @@ void PoolBrowserParametric::search()
             bind_set(q, it.first, it.second);
         }
     }
-    Gtk::TreeModel::Row row;
-    while (q.step()) {
-        UUID uu(q.get<std::string>(0));
-        row = *(store->append());
-        row[list_columns.uuid] = q.get<std::string>(0);
-        for (size_t i = 0; i < table.columns.size(); i++) {
-            auto &col = table.columns.at(i);
-            std::string v = q.get<std::string>(1 + i);
-            row[list_columns.params.at(col.name)] = col.format(v);
-            values_remaining[col.name].emplace(v);
+    try {
+        Gtk::TreeModel::Row row;
+        while (q.step()) {
+            UUID uu(q.get<std::string>(0));
+            row = *(store->append());
+            row[list_columns.uuid] = q.get<std::string>(0);
+            for (size_t i = 0; i < table.columns.size(); i++) {
+                auto &col = table.columns.at(i);
+                std::string v = q.get<std::string>(1 + i);
+                row[list_columns.params.at(col.name)] = col.format(v);
+                values_remaining[col.name].emplace(v);
+            }
+            size_t ofs = table.columns.size() + 1;
+            row[list_columns.MPN] = q.get<std::string>(ofs + 0);
+            std::string manufacturer = q.get<std::string>(ofs + 1);
+            std::string package = q.get<std::string>(ofs + 2);
+            row[list_columns.path] = q.get<std::string>(ofs + 3);
+            row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(ofs + 4), q.get<int>(ofs + 5));
+            row[list_columns.manufacturer] = manufacturer;
+            row[list_columns.package] = package;
+            values_remaining["_manufacturer"].emplace(manufacturer);
+            values_remaining["_package"].emplace(package);
         }
-        size_t ofs = table.columns.size() + 1;
-        row[list_columns.MPN] = q.get<std::string>(ofs + 0);
-        std::string manufacturer = q.get<std::string>(ofs + 1);
-        std::string package = q.get<std::string>(ofs + 2);
-        row[list_columns.path] = q.get<std::string>(ofs + 3);
-        row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(ofs + 4), q.get<int>(ofs + 5));
-        row[list_columns.manufacturer] = manufacturer;
-        row[list_columns.package] = package;
-        values_remaining["_manufacturer"].emplace(manufacturer);
-        values_remaining["_package"].emplace(package);
+        set_busy(false);
+    }
+    catch (SQLite::Error &e) {
+        if (e.rc == SQLITE_BUSY) {
+            set_busy(true);
+        }
+        else {
+            throw;
+        }
     }
 
     treeview->set_model(store);

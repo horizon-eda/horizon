@@ -138,17 +138,27 @@ void PoolBrowserPart::search()
         row[list_columns.manufacturer] = "none";
         row[list_columns.package] = "none";
     }
-
-    while (q.step()) {
-        row = *(store->append());
-        row[list_columns.uuid] = q.get<std::string>(0);
-        row[list_columns.MPN] = q.get<std::string>(1);
-        row[list_columns.manufacturer] = q.get<std::string>(2);
-        row[list_columns.package] = q.get<std::string>(3);
-        row[list_columns.tags] = q.get<std::string>(4);
-        row[list_columns.path] = q.get<std::string>(5);
-        row[list_columns.description] = q.get<std::string>(6);
-        row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(7), q.get<int>(8));
+    try {
+        while (q.step()) {
+            row = *(store->append());
+            row[list_columns.uuid] = q.get<std::string>(0);
+            row[list_columns.MPN] = q.get<std::string>(1);
+            row[list_columns.manufacturer] = q.get<std::string>(2);
+            row[list_columns.package] = q.get<std::string>(3);
+            row[list_columns.tags] = q.get<std::string>(4);
+            row[list_columns.path] = q.get<std::string>(5);
+            row[list_columns.description] = q.get<std::string>(6);
+            row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(7), q.get<int>(8));
+        }
+        set_busy(false);
+    }
+    catch (SQLite::Error &e) {
+        if (e.rc == SQLITE_BUSY) {
+            set_busy(true);
+        }
+        else {
+            throw;
+        }
     }
     /*
     SQLite::Query q2(pool->db, "EXPLAIN QUERY PLAN " + query.str());

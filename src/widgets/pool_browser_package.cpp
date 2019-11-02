@@ -108,16 +108,26 @@ void PoolBrowserPackage::search()
         row[list_columns.name] = "none";
         row[list_columns.manufacturer] = "none";
     }
-
-    while (q.step()) {
-        row = *(store->append());
-        row[list_columns.uuid] = q.get<std::string>(0);
-        row[list_columns.name] = q.get<std::string>(1);
-        row[list_columns.manufacturer] = q.get<std::string>(2);
-        row[list_columns.n_pads] = q.get<int>(3);
-        row[list_columns.tags] = q.get<std::string>(4);
-        row[list_columns.path] = q.get<std::string>(5);
-        row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(6), q.get<int>(7));
+    try {
+        while (q.step()) {
+            row = *(store->append());
+            row[list_columns.uuid] = q.get<std::string>(0);
+            row[list_columns.name] = q.get<std::string>(1);
+            row[list_columns.manufacturer] = q.get<std::string>(2);
+            row[list_columns.n_pads] = q.get<int>(3);
+            row[list_columns.tags] = q.get<std::string>(4);
+            row[list_columns.path] = q.get<std::string>(5);
+            row[list_columns.source] = pool_item_source_from_db(q.get<std::string>(6), q.get<int>(7));
+        }
+        set_busy(false);
+    }
+    catch (SQLite::Error &e) {
+        if (e.rc == SQLITE_BUSY) {
+            set_busy(true);
+        }
+        else {
+            throw;
+        }
     }
     treeview->set_model(store);
     select_uuid(selected_uuid);

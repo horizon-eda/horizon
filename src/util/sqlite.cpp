@@ -82,7 +82,7 @@ bool Query::step()
 {
     auto rc = sqlite3_step(stmt);
     if (rc != SQLITE_ROW && rc != SQLITE_DONE) {
-        throw std::runtime_error(sqlite3_errmsg(db.db));
+        throw SQLite::Error(rc, sqlite3_errmsg(db.db));
     }
     return rc == SQLITE_ROW;
 }
