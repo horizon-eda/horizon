@@ -109,12 +109,12 @@ void PoolBrowserEntity::search()
         set_busy(false);
     }
     catch (SQLite::Error &e) {
-    	if(e.rc == SQLITE_BUSY) {
-    		set_busy(true);
-    	}
-    	else {
-    		throw;
-    	}
+        if (e.rc == SQLITE_BUSY) {
+            set_busy(true);
+        }
+        else {
+            throw;
+        }
     }
     treeview->set_model(store);
     select_uuid(selected_uuid);
