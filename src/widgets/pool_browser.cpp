@@ -154,10 +154,9 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
         overlay->add_overlay(*busy_box);
         busy_box->hide();
         busy_box->set_no_show_all(true);
+        pack_start(*overlay, true, true, 0);
     }
 
-
-    pack_start(*overlay, true, true, 0);
     treeview->show();
 
     create_columns();
