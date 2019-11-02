@@ -62,6 +62,7 @@ PartPreview::PartPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIENTAT
     label_description->set_hexpand(true);
     label_description->set_halign(Gtk::ALIGN_START);
     label_description->set_selectable(true);
+    label_description->set_ellipsize(Pango::ELLIPSIZE_END);
     infogrid->attach(*label_description, 1, 1, 1, 1);
 
     {
@@ -176,6 +177,7 @@ void PartPreview::load(const Part *p)
         label_value->set_text("");
         label_manufacturer->set_text("");
         label_description->set_text("");
+        label_description->set_has_tooltip(false);
         label_datasheet->set_text("");
         label_entity->set_text("");
         canvas_package->clear();
@@ -189,6 +191,7 @@ void PartPreview::load(const Part *p)
     label_value->set_text(part->get_value());
     label_manufacturer->set_text(part->get_manufacturer());
     label_description->set_text(part->get_description());
+    label_description->set_tooltip_text(part->get_description());
     auto datasheet = part->get_datasheet();
     if (datasheet.size()) {
         label_datasheet->set_markup("<a href=\"" + Glib::Markup::escape_text(datasheet) + "\">"
