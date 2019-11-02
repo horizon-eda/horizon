@@ -666,6 +666,12 @@ void PoolUpdater::update_packages(const std::string &directory)
     PoolUpdateGraph graph;
     pkg_add_dir_to_graph(graph, directory, status_cb);
     auto missing = graph.update_dependants();
+    for (const auto &it : missing) { // try to resolve missing from items already added
+        if (exists(ObjectType::PACKAGE, it.second))
+            graph.add_node(it.second, "", {});
+    }
+
+    missing = graph.update_dependants();
     for (const auto &it : missing) {
         status_cb(PoolUpdateStatus::FILE_ERROR, it.first->filename, "missing dependency " + (std::string)it.second);
     }
@@ -853,6 +859,12 @@ void PoolUpdater::update_parts(const std::string &directory)
     PoolUpdateGraph graph;
     part_add_dir_to_graph(graph, directory, status_cb);
     auto missing = graph.update_dependants();
+    for (const auto &it : missing) { // try to resolve missing from items already added
+        if (exists(ObjectType::PART, it.second))
+            graph.add_node(it.second, "", {});
+    }
+
+    missing = graph.update_dependants();
     for (const auto &it : missing) {
         status_cb(PoolUpdateStatus::FILE_ERROR, it.first->filename, "missing dependency " + (std::string)it.second);
     }
