@@ -31,7 +31,10 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
 
     bool r;
     if (tool_id == ToolID::ADD_PART) {
-        UUID part_uuid = imp->take_part();
+        UUID part_uuid;
+        if (auto data = dynamic_cast<const ToolDataAddPart *>(args.data.get())) {
+            part_uuid = data->part_uuid;
+        }
         if (!part_uuid) {
             std::tie(r, part_uuid) = imp->dialogs.select_part(core.r->m_pool, UUID(), UUID());
             if (!r) {

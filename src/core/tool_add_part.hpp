@@ -11,6 +11,14 @@ public:
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;
 
+    class ToolDataAddPart : public ToolData {
+    public:
+        ToolDataAddPart(const UUID &uu) : part_uuid(uu)
+        {
+        }
+        const UUID part_uuid;
+    };
+
 private:
     unsigned int current_gate = 0;
     class SchematicSymbol *sym_current = nullptr;

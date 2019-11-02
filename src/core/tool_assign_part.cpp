@@ -1,4 +1,5 @@
 #include "tool_assign_part.hpp"
+#include "tool_add_part.hpp"
 #include "core_schematic.hpp"
 #include "imp/imp_interface.hpp"
 #include "pool/part.hpp"
@@ -43,7 +44,10 @@ ToolResponse ToolAssignPart::begin(const ToolArgs &args)
     if (!entity) {
         return ToolResponse::end();
     }
-    UUID part_uuid = imp->take_part();
+    UUID part_uuid;
+    if (auto data = dynamic_cast<const ToolAddPart::ToolDataAddPart *>(args.data.get())) {
+        part_uuid = data->part_uuid;
+    }
     if (!part_uuid) {
         auto current_part_uuid = comp->part ? comp->part->uuid : UUID();
         auto r = imp->dialogs.select_part(core.r->m_pool, entity->uuid, current_part_uuid, true);

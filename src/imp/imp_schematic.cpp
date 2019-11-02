@@ -12,6 +12,7 @@
 #include "pdf_export_window.hpp"
 #include "nlohmann/json.hpp"
 #include "core/tool_backannotate_connection_lines.hpp"
+#include "core/tool_add_part.hpp"
 
 namespace horizon {
 ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,
@@ -123,13 +124,13 @@ bool ImpSchematic::handle_broadcast(const json &j)
         guint32 timestamp = j.value("time", 0);
         if (op == "place-part") {
             main_window->present(timestamp);
-            part_from_project_manager = j.at("part").get<std::string>();
-            tool_begin(ToolID::ADD_PART);
+            auto data = std::make_unique<ToolAddPart::ToolDataAddPart>(j.at("part").get<std::string>());
+            tool_begin(ToolID::ADD_PART, false, {}, std::move(data));
         }
         else if (op == "assign-part") {
             main_window->present(timestamp);
-            part_from_project_manager = j.at("part").get<std::string>();
-            tool_begin(ToolID::ASSIGN_PART);
+            auto data = std::make_unique<ToolAddPart::ToolDataAddPart>(j.at("part").get<std::string>());
+            tool_begin(ToolID::ASSIGN_PART, false, {}, std::move(data));
         }
         else if (op == "highlight" && cross_probing_enabled) {
             if (!core_schematic.tool_is_active()) {

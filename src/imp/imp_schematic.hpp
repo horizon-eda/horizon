@@ -43,7 +43,6 @@ private:
     void handle_move_to_other_sheet(const ActionConnection &conn);
     void handle_highlight_group_tag(const ActionConnection &conn);
     std::string last_pdf_filename;
-    UUID part_from_project_manager;
 
     std::map<UUID, std::pair<float, Coordf>> sheet_views;
     class SheetBox *sheet_box;

@@ -11,7 +11,6 @@ public:
     void tool_bar_set_tip(const std::string &s);
     void tool_bar_set_tool_name(const std::string &s);
     void tool_bar_flash(const std::string &s);
-    UUID take_part();
     void part_placed(const UUID &uu);
     void set_work_layer(int layer);
     int get_work_layer();
