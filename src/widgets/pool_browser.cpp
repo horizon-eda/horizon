@@ -45,6 +45,34 @@ void PoolBrowser::add_search_widget(const std::string &label, Gtk::Widget &w)
     w.show();
 }
 
+void PoolBrowser::install_column_tooltip(Gtk::TreeViewColumn &tvc, const Gtk::TreeModelColumnBase &col)
+{
+    treeview->set_has_tooltip(true);
+    treeview->signal_query_tooltip().connect(
+            [this, &col, &tvc](int x, int y, bool keyboard_tooltip, const Glib::RefPtr<Gtk::Tooltip> &tooltip) {
+                if (keyboard_tooltip)
+                    return false;
+                Gtk::TreeModel::Path path;
+                Gtk::TreeViewColumn *column;
+                int cell_x, cell_y;
+                int bx, by;
+                treeview->convert_widget_to_bin_window_coords(x, y, bx, by);
+                if (!treeview->get_path_at_pos(bx, by, path, column, cell_x, cell_y))
+                    return false;
+                if (column == &tvc) {
+                    Gtk::TreeIter iter(treeview->get_model()->get_iter(path));
+                    if (!iter)
+                        return false;
+                    Glib::ustring val;
+                    iter->get_value(col.index(), val);
+                    tooltip->set_text(val);
+                    treeview->set_tooltip_row(tooltip, path);
+                    return true;
+                }
+                return false;
+            });
+}
+
 Gtk::TreeViewColumn *PoolBrowser::append_column(const std::string &name, const Gtk::TreeModelColumnBase &column,
                                                 Pango::EllipsizeMode ellipsize)
 

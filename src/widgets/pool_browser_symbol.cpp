@@ -27,6 +27,7 @@ void PoolBrowserSymbol::add_sort_controller_columns()
     sort_controller->add_column(1, "units.name");
     sort_controller->add_column(2, "units.manufacturer");
     path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);
+    install_column_tooltip(*path_column, list_columns.path);
 }
 
 void PoolBrowserSymbol::set_unit_uuid(const UUID &uu)

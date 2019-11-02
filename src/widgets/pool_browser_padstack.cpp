@@ -21,6 +21,7 @@ void PoolBrowserPadstack::create_columns()
     treeview->append_column("Type", list_columns.padstack_type);
     treeview->append_column("Package", list_columns.package_name);
     path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);
+    install_column_tooltip(*path_column, list_columns.path);
 }
 
 void PoolBrowserPadstack::add_sort_controller_columns()

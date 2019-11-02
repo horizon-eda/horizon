@@ -25,6 +25,7 @@ void PoolBrowserPackage::create_columns()
         col->set_resizable(true);
         col->set_expand(true);
         col->set_min_width(200);
+        install_column_tooltip(*col, list_columns.name);
     }
     {
         auto col = append_column("Manufacturer", list_columns.manufacturer, Pango::ELLIPSIZE_END);
@@ -36,8 +37,10 @@ void PoolBrowserPackage::create_columns()
         auto col = append_column("Tags", list_columns.tags, Pango::ELLIPSIZE_END);
         col->set_resizable(true);
         col->set_min_width(100);
+        install_column_tooltip(*col, list_columns.tags);
     }
     path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);
+    install_column_tooltip(*path_column, list_columns.path);
 }
 
 void PoolBrowserPackage::add_sort_controller_columns()

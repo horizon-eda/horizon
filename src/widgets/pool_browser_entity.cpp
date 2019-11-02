@@ -23,8 +23,12 @@ void PoolBrowserEntity::create_columns()
     treeview->append_column("Manufacturer", list_columns.entity_manufacturer);
     treeview->append_column("Prefix", list_columns.prefix);
     treeview->append_column("Gates", list_columns.n_gates);
-    treeview->append_column("Tags", list_columns.tags);
+    {
+        auto col = append_column("Tags", list_columns.tags);
+        install_column_tooltip(*col, list_columns.tags);
+    }
     path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);
+    install_column_tooltip(*path_column, list_columns.path);
 }
 
 void PoolBrowserEntity::add_sort_controller_columns()

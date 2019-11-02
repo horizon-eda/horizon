@@ -17,12 +17,13 @@ Glib::RefPtr<Gtk::ListStore> PoolBrowserFrame::create_list_store()
 void PoolBrowserFrame::create_columns()
 {
     append_column_with_item_source_cr("Frame", list_columns.name);
+    path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);
+    install_column_tooltip(*path_column, list_columns.path);
 }
 
 void PoolBrowserFrame::add_sort_controller_columns()
 {
     sort_controller->add_column(0, "frames.name");
-    path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);
 }
 
 void PoolBrowserFrame::search()

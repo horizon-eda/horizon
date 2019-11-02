@@ -20,6 +20,7 @@ void PoolBrowserUnit::create_columns()
     append_column_with_item_source_cr("Unit", list_columns.name);
     treeview->append_column("Manufacturer", list_columns.manufacturer);
     path_column = append_column("Path", list_columns.path, Pango::ELLIPSIZE_START);
+    install_column_tooltip(*path_column, list_columns.path);
 }
 
 void PoolBrowserUnit::add_sort_controller_columns()

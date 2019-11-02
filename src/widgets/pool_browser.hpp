@@ -46,6 +46,7 @@ protected:
                                                            const Gtk::TreeModelColumnBase &column,
                                                            Pango::EllipsizeMode ellipsize = Pango::ELLIPSIZE_NONE);
     class CellRendererColorBox *create_pool_item_source_cr(Gtk::TreeViewColumn *tvc);
+    void install_column_tooltip(Gtk::TreeViewColumn &tvc, const Gtk::TreeModelColumnBase &col);
 
     Gtk::Entry *create_search_entry(const std::string &label);
     class TagEntry *create_tag_entry(const std::string &label);
