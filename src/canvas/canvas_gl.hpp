@@ -25,7 +25,13 @@ public:
     CanvasGL();
 
     enum class SelectionMode { HOVER, NORMAL };
-    SelectionMode selection_mode = SelectionMode::HOVER;
+    void set_selection_mode(SelectionMode mode);
+    SelectionMode get_selection_mode() const;
+    typedef sigc::signal<void, SelectionMode> type_signal_selection_mode_changed;
+    type_signal_selection_mode_changed signal_selection_mode_changed()
+    {
+        return s_signal_selection_mode_changed;
+    }
 
     enum class SelectionTool { BOX, LASSO, PAINT };
     SelectionTool selection_tool = SelectionTool::BOX;
@@ -233,13 +239,13 @@ private:
     int annotation_layer_current = 20000;
     std::map<int, CanvasAnnotation> annotations;
 
-    GdkEventType last_button_event = GDK_BUTTON_PRESS;
-
     void draw_bitmap_text(const Coordf &p, float scale, const std::string &rtext, int angle, ColorP color,
                           int layer) override;
     std::pair<Coordf, Coordf> measure_bitmap_text(const std::string &text) const override;
     void draw_bitmap_text_box(const Placement &q, float width, float height, const std::string &s, ColorP color,
                               int layer, TextBoxMode mode) override;
+
+    SelectionMode selection_mode = SelectionMode::HOVER;
 
 protected:
     void on_size_allocate(Gtk::Allocation &alloc) override;
@@ -253,6 +259,7 @@ protected:
 
     type_signal_selection_changed s_signal_selection_changed;
     type_signal_selection_changed s_signal_hover_selection_changed;
+    type_signal_selection_mode_changed s_signal_selection_mode_changed;
     type_signal_cursor_moved s_signal_cursor_moved;
     type_signal_grid_mul_changed s_signal_grid_mul_changed;
     type_signal_request_display_name s_signal_request_display_name;

@@ -30,6 +30,7 @@ public:
     Gtk::Revealer *search_revealer = nullptr;
     Gtk::Expander *search_expander = nullptr;
     Gtk::Box *search_types_box = nullptr;
+    Gtk::Label *selection_mode_label = nullptr;
 
     void tool_bar_set_visible(bool v);
     void tool_bar_set_tool_name(const std::string &s);

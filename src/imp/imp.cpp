@@ -324,6 +324,16 @@ void ImpBase::run(int argc, char *argv[])
         update_selection_label();
     }
 
+    canvas->signal_selection_mode_changed().connect([this](auto mode) {
+        if (mode == CanvasGL::SelectionMode::HOVER) {
+            main_window->selection_mode_label->set_text("Hover select");
+        }
+        else {
+            main_window->selection_mode_label->set_text("Click select");
+        }
+    });
+    canvas->set_selection_mode(CanvasGL::SelectionMode::HOVER);
+
     panels = Gtk::manage(new PropertyPanels(core.r));
     panels->show_all();
     panels->property_margin() = 10;
@@ -439,7 +449,7 @@ void ImpBase::run(int argc, char *argv[])
         this->search_go(-1);
     });
     connect_action(ActionID::SELECT_ALL, [this](const auto &a) {
-        canvas->selection_mode = CanvasGL::SelectionMode::NORMAL;
+        canvas->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
         canvas->select_all();
     });
 
@@ -1182,7 +1192,7 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
         return false;
     if (ev->keyval == GDK_KEY_Escape) {
         if (!core.r->tool_is_active()) {
-            canvas->selection_mode = CanvasGL::SelectionMode::HOVER;
+            canvas->set_selection_mode(CanvasGL::SelectionMode::HOVER);
             canvas->set_selection({});
             set_search_mode(false);
         }
@@ -1401,7 +1411,7 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
             delete it;
         }
         std::set<SelectableRef> sel_for_menu;
-        if (canvas->selection_mode == CanvasGL::SelectionMode::HOVER) {
+        if (canvas->get_selection_mode() == CanvasGL::SelectionMode::HOVER) {
             sel_for_menu = canvas->get_selection();
         }
         else {
@@ -1564,7 +1574,6 @@ void ImpBase::sc(void)
         panels->update_objects(sel);
         bool show_properties = panels->get_selection().size() > 0;
         main_window->property_scrolled_window->set_visible(show_properties);
-        main_window->property_throttled_revealer->set_visible(show_properties);
     }
 }
 

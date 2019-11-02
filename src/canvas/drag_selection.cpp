@@ -222,13 +222,13 @@ void DragSelection::drag_move(GdkEventMotion *motion_event)
         if (is_line_sel(ca->selection_tool)) {
             if (ABS(sel_o.x - x) > 10 || ABS(sel_o.y - y) > 10) {
                 active = 2;
-                ca->selection_mode = CanvasGL::SelectionMode::NORMAL;
+                ca->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
             }
         }
         else {
             if (ABS(sel_o.x - x) > 10 && ABS(sel_o.y - y) > 10) {
                 active = 2;
-                ca->selection_mode = CanvasGL::SelectionMode::NORMAL;
+                ca->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
             }
         }
     }
@@ -275,7 +275,7 @@ void DragSelection::drag_end(GdkEventButton *button_event)
             std::cout << "click select" << std::endl;
             if (ca->selection_mode == CanvasGL::SelectionMode::HOVER) { // just select what was
                                                                         // selecte by hover select
-                ca->selection_mode = CanvasGL::SelectionMode::NORMAL;
+                ca->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
                 ca->s_signal_selection_changed.emit();
             }
             else {

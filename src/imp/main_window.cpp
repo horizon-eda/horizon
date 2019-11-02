@@ -15,6 +15,7 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("grid_box", grid_box);
     x->get_widget("grid_mul_label", grid_mul_label);
     x->get_widget("cursor_label", cursor_label);
+    x->get_widget("selection_mode_label", selection_mode_label);
     x->get_widget("property_viewport", property_viewport);
     x->get_widget("tool_bar", tool_bar);
     x->get_widget("tool_bar_label", tool_bar_name_label);

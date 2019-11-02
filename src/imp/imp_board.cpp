@@ -337,7 +337,7 @@ void ImpBoard::handle_select_more(const ActionConnection &conn)
         new_sel.emplace(it->uuid, ObjectType::TRACK);
     }
     canvas->set_selection(new_sel);
-    canvas->selection_mode = CanvasGL::SelectionMode::NORMAL;
+    canvas->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
 }
 
 void ImpBoard::construct()

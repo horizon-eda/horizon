@@ -179,7 +179,6 @@ bool CanvasGL::on_button_press_event(GdkEventButton *button_event)
     pan_drag_begin(button_event);
     drag_selection.drag_begin(button_event);
     cursor_move((GdkEvent *)button_event);
-    last_button_event = button_event->type;
     return Gtk::GLArea::on_button_press_event(button_event);
 }
 
@@ -501,6 +500,17 @@ std::set<SelectableRef> CanvasGL::get_selection_at(const Coordi &c)
 void CanvasGL::inhibit_drag_selection()
 {
     drag_selection_inhibited = true;
+}
+
+void CanvasGL::set_selection_mode(SelectionMode mode)
+{
+    selection_mode = mode;
+    s_signal_selection_mode_changed.emit(mode);
+}
+
+CanvasGL::SelectionMode CanvasGL::get_selection_mode() const
+{
+    return selection_mode;
 }
 
 void CanvasGL::set_highlight_mode(CanvasGL::HighlightMode mode)
