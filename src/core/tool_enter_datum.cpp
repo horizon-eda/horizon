@@ -35,6 +35,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
     bool net_mode = false;
     bool text_mode = false;
     bool dim_mode = false;
+    bool vertex_mode = false;
 
     Accumulator<int64_t> ai;
     Accumulator<Coordi> ac;
@@ -83,9 +84,13 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         if (it.type == ObjectType::DIMENSION) {
             dim_mode = true;
         }
+        if (it.type == ObjectType::POLYGON_VERTEX) {
+            vertex_mode = true;
+            ac.accumulate(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).position);
+        }
     }
-    int m_total =
-            edge_mode + arc_mode + hole_mode + junction_mode + line_mode + pad_mode + net_mode + text_mode + dim_mode;
+    int m_total = edge_mode + arc_mode + hole_mode + junction_mode + line_mode + pad_mode + net_mode + text_mode
+                  + dim_mode + vertex_mode;
     if (m_total != 1) {
         return ToolResponse::end();
     }
@@ -393,6 +398,24 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             v *= r.second;
             *p_var = *p_ref + Coordi(v.x, v.y);
         } break;
+        }
+    }
+    else if (vertex_mode) {
+        bool r;
+        Coordi c;
+        std::pair<bool, bool> rc;
+        std::tie(r, c, rc) = imp->dialogs.ask_datum_coord2("Vertex position", ac.get());
+
+        if (!r) {
+            return ToolResponse::end();
+        }
+        for (const auto &it : args.selection) {
+            if (it.type == ObjectType::POLYGON_VERTEX) {
+                if (rc.first)
+                    core.r->get_polygon(it.uuid)->vertices.at(it.vertex).position.x = c.x;
+                if (rc.second)
+                    core.r->get_polygon(it.uuid)->vertices.at(it.vertex).position.y = c.y;
+            }
         }
     }
     else {
