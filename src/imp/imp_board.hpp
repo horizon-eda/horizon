@@ -55,6 +55,8 @@ private:
     void update_text_owners();
     void update_text_owner_annotation();
 
+    void handle_select_more(const ActionConnection &conn);
+
     int get_schematic_pid();
 };
 } // namespace horizon

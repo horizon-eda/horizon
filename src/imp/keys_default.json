@@ -853,13 +853,6 @@
             "keys": {
                 "16": []
             },
-            "tool": "SELECT_MORE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": []
-            },
             "tool": "SET_VIA_NET"
         },
         {

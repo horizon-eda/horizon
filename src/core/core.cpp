@@ -263,10 +263,6 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::CLEAR_DIFFPAIR:
         return std::make_unique<ToolSetDiffpair>(this, tool_id);
 
-    case ToolID::SELECT_MORE:
-    case ToolID::SELECT_MORE_NO_VIA:
-        return std::make_unique<ToolSelectMore>(this, tool_id);
-
     case ToolID::SET_VIA_NET:
     case ToolID::CLEAR_VIA_NET:
         return std::make_unique<ToolSetViaNet>(this, tool_id);

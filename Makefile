@@ -202,7 +202,6 @@ SRC_IMP = \
 	src/core/tool_update_all_planes.cpp\
 	src/core/tool_draw_dimension.cpp\
 	src/core/tool_set_diffpair.cpp\
-	src/core/tool_select_more.cpp\
 	src/core/tool_set_via_net.cpp\
 	src/core/tool_lock.cpp\
 	src/core/tool_add_vertex.cpp\

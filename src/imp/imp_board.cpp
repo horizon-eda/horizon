@@ -194,17 +194,21 @@ void ImpBoard::update_action_sensitivity()
     set_action_sensitive(make_action(ActionID::TUNING_ADD_TRACKS), have_tracks);
     set_action_sensitive(make_action(ActionID::TUNING_ADD_TRACKS_ALL), have_tracks);
 
-    set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET), std::any_of(sel.begin(), sel.end(), [](const auto &x) {
-                             switch (x.type) {
-                             case ObjectType::TRACK:
-                             case ObjectType::JUNCTION:
-                             case ObjectType::VIA:
-                                 return true;
+    bool can_select_more = std::any_of(sel.begin(), sel.end(), [](const auto &x) {
+        switch (x.type) {
+        case ObjectType::TRACK:
+        case ObjectType::JUNCTION:
+        case ObjectType::VIA:
+            return true;
 
-                             default:
-                                 return false;
-                             }
-                         }));
+        default:
+            return false;
+        }
+    });
+
+    set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET), can_select_more);
+    set_action_sensitive(make_action(ActionID::SELECT_MORE), can_select_more);
+    set_action_sensitive(make_action(ActionID::SELECT_MORE_NO_VIA), can_select_more);
 
     if (sockets_connected) {
         json req;
@@ -272,6 +276,68 @@ static json serialize_connector(const Track::Connection &conn)
     else {
         return nullptr;
     }
+}
+
+void ImpBoard::handle_select_more(const ActionConnection &conn)
+{
+    const bool no_via = conn.action_id == ActionID::SELECT_MORE_NO_VIA;
+    std::map<const Junction *, std::set<const Track *>> junction_connections;
+    const auto brd = core_board.get_board();
+    for (const auto &it : brd->tracks) {
+        for (const auto &it_ft : {it.second.from, it.second.to}) {
+            if (it_ft.is_junc()) {
+                junction_connections[it_ft.junc].insert(&it.second);
+            }
+        }
+    }
+    std::set<const Junction *> junctions;
+    std::set<const Track *> tracks;
+
+    auto sel = canvas->get_selection();
+
+    for (const auto &it : sel) {
+        if (it.type == ObjectType::TRACK) {
+            tracks.insert(&brd->tracks.at(it.uuid));
+        }
+        else if (it.type == ObjectType::JUNCTION) {
+            junctions.insert(&brd->junctions.at(it.uuid));
+        }
+        else if (it.type == ObjectType::VIA) {
+            junctions.insert(brd->vias.at(it.uuid).junction);
+        }
+    }
+    bool inserted = true;
+    while (inserted) {
+        inserted = false;
+        for (const auto it : tracks) {
+            for (const auto &it_ft : {it->from, it->to}) {
+                if (it_ft.is_junc()) {
+                    if (!no_via || (no_via && !it_ft.junc->has_via))
+                        if (junctions.insert(it_ft.junc).second)
+                            inserted = true;
+                }
+            }
+        }
+        for (const auto it : junctions) {
+            if (junction_connections.count(it)) {
+                for (const auto &it_track : junction_connections.at(it)) {
+                    if (tracks.insert(it_track).second)
+                        inserted = true;
+                }
+            }
+        }
+    }
+
+    std::set<SelectableRef> new_sel;
+
+    for (const auto it : junctions) {
+        new_sel.emplace(it->uuid, ObjectType::JUNCTION);
+    }
+    for (const auto it : tracks) {
+        new_sel.emplace(it->uuid, ObjectType::TRACK);
+    }
+    canvas->set_selection(new_sel);
+    canvas->selection_mode = CanvasGL::SelectionMode::NORMAL;
 }
 
 void ImpBoard::construct()
@@ -460,6 +526,8 @@ void ImpBoard::construct()
         }
         this->update_highlights();
     });
+    connect_action(ActionID::SELECT_MORE, sigc::mem_fun(*this, &ImpBoard::handle_select_more));
+    connect_action(ActionID::SELECT_MORE_NO_VIA, sigc::mem_fun(*this, &ImpBoard::handle_select_more));
 
     auto *display_control_notebook = Gtk::manage(new Gtk::Notebook);
     display_control_notebook->append_page(*layer_box, "Layers");
@@ -718,7 +786,7 @@ std::pair<ActionID, ToolID> ImpBoard::get_doubleclick_action(ObjectType type, co
         return make_action(ToolID::EDIT_VIA);
         break;
     case ObjectType::TRACK:
-        return make_action(ToolID::SELECT_MORE);
+        return make_action(ActionID::SELECT_MORE);
         break;
     case ObjectType::POLYGON:
     case ObjectType::POLYGON_EDGE:

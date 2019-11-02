@@ -501,12 +501,12 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Draw dimension", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
-        {{ActionID::TOOL, ToolID::SELECT_MORE},
-         {"Select more", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
+        {{ActionID::SELECT_MORE, ToolID::NONE},
+         {"Select more", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_SPECIFIC}},
 
-        {{ActionID::TOOL, ToolID::SELECT_MORE_NO_VIA},
+        {{ActionID::SELECT_MORE_NO_VIA, ToolID::NONE},
          {"Select more (stop at vias)", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::TOOL, ToolID::SET_VIA_NET},
          {"Set via net", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
@@ -785,6 +785,8 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(PDF_EXPORT_WINDOW),
         ACTION_LUT_ITEM(EXPORT_PDF),
         ACTION_LUT_ITEM(BACKANNOTATE_CONNECTION_LINES),
+        ACTION_LUT_ITEM(SELECT_MORE),
+        ACTION_LUT_ITEM(SELECT_MORE_NO_VIA),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
@@ -860,8 +862,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(SET_DIFFPAIR),
         TOOL_LUT_ITEM(CLEAR_DIFFPAIR),
         TOOL_LUT_ITEM(ROUTE_DIFFPAIR_INTERACTIVE),
-        TOOL_LUT_ITEM(SELECT_MORE),
-        TOOL_LUT_ITEM(SELECT_MORE_NO_VIA),
         TOOL_LUT_ITEM(SET_VIA_NET),
         TOOL_LUT_ITEM(CLEAR_VIA_NET),
         TOOL_LUT_ITEM(DRAG_TRACK_INTERACTIVE),
