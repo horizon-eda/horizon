@@ -57,114 +57,123 @@ void PoolCacheWindow::refresh_list()
     item_store->freeze_notify();
     item_store->clear();
     Glib::Dir dir(cache_path);
-    unsigned int n_total = 0;
+    int n_total = 0;
     unsigned int n_current = 0;
     unsigned int n_missing = 0;
     unsigned int n_out_of_date = 0;
-    for (const auto &it : dir) {
-        if (endswith(it, ".json")) {
-            auto itempath = Glib::build_filename(cache_path, it);
-            json j_cache;
-            {
-                j_cache = load_json_from_file(itempath);
-                if (j_cache.count("_imp"))
-                    j_cache.erase("_imp");
-            }
-            Gtk::TreeModel::Row row;
-            row = *item_store->append();
-            n_total++;
-            std::string type_str = j_cache.at("type");
-            row[tree_columns.filename_cached] = itempath;
-            if (type_str == "part") {
-                try {
-                    auto part = Part::new_from_file(itempath, pool_cached);
-                    row[tree_columns.name] = part.get_MPN() + " / " + part.get_manufacturer();
-                }
-                catch (...) {
-                    row[tree_columns.name] = "Part not found";
-                }
-            }
-            else {
-                row[tree_columns.name] = j_cache.at("name").get<std::string>();
-            }
-            ObjectType type = object_type_lut.lookup(type_str);
-            row[tree_columns.type] = type;
-
-            UUID uuid(j_cache.at("uuid").get<std::string>());
-            row[tree_columns.uuid] = uuid;
-
-            std::string pool_filename;
-            try {
-                pool_filename = pool.get_filename(type, uuid);
-            }
-            catch (...) {
-                pool_filename = "";
-            }
-            if (pool_filename.size() && Glib::file_test(pool_filename, Glib::FILE_TEST_IS_REGULAR)) {
-                json j_pool;
+    try {
+        for (const auto &it : dir) {
+            if (endswith(it, ".json")) {
+                auto itempath = Glib::build_filename(cache_path, it);
+                json j_cache;
                 {
-                    j_pool = load_json_from_file(pool_filename);
-                    if (j_pool.count("_imp"))
-                        j_pool.erase("_imp");
+                    j_cache = load_json_from_file(itempath);
+                    if (j_cache.count("_imp"))
+                        j_cache.erase("_imp");
                 }
-                auto delta = json::diff(j_cache, j_pool);
-                row[tree_columns.delta] = delta;
-                if (delta.size()) {
-                    row[tree_columns.state] = ItemState::OUT_OF_DATE;
-                    n_out_of_date++;
+                Gtk::TreeModel::Row row;
+                row = *item_store->append();
+                n_total++;
+                std::string type_str = j_cache.at("type");
+                row[tree_columns.filename_cached] = itempath;
+                if (type_str == "part") {
+                    try {
+                        auto part = Part::new_from_file(itempath, pool_cached);
+                        row[tree_columns.name] = part.get_MPN() + " / " + part.get_manufacturer();
+                    }
+                    catch (...) {
+                        row[tree_columns.name] = "Part not found";
+                    }
                 }
                 else {
-                    row[tree_columns.state] = ItemState::CURRENT;
-                    n_current++;
+                    row[tree_columns.name] = j_cache.at("name").get<std::string>();
+                }
+                ObjectType type = object_type_lut.lookup(type_str);
+                row[tree_columns.type] = type;
+
+                UUID uuid(j_cache.at("uuid").get<std::string>());
+                row[tree_columns.uuid] = uuid;
+
+                std::string pool_filename;
+                try {
+                    pool_filename = pool.get_filename(type, uuid);
+                }
+                catch (const SQLite::Error &e) {
+                    throw;
+                }
+                catch (...) {
+                    pool_filename = "";
+                }
+                if (pool_filename.size() && Glib::file_test(pool_filename, Glib::FILE_TEST_IS_REGULAR)) {
+                    json j_pool;
+                    {
+                        j_pool = load_json_from_file(pool_filename);
+                        if (j_pool.count("_imp"))
+                            j_pool.erase("_imp");
+                    }
+                    auto delta = json::diff(j_cache, j_pool);
+                    row[tree_columns.delta] = delta;
+                    if (delta.size()) {
+                        row[tree_columns.state] = ItemState::OUT_OF_DATE;
+                        n_out_of_date++;
+                    }
+                    else {
+                        row[tree_columns.state] = ItemState::CURRENT;
+                        n_current++;
+                    }
+                }
+                else {
+                    row[tree_columns.state] = ItemState::MISSING_IN_POOL;
+                    n_missing++;
                 }
             }
-            else {
-                row[tree_columns.state] = ItemState::MISSING_IN_POOL;
-                n_missing++;
-            }
         }
-    }
-    {
-        auto models_path = Glib::build_filename(cache_path, "3d_models");
-        if (Glib::file_test(models_path, Glib::FILE_TEST_IS_DIR)) {
-            Glib::Dir dir_3d(models_path);
-            for (const auto &it : dir_3d) {
-                if (it.find("pool_") == 0 && it.size() == 41) {
-                    UUID pool_uuid(it.substr(5));
-                    auto it_pool = PoolManager::get().get_by_uuid(pool_uuid);
-                    if (it_pool) {
-                        auto &pool_base_path = it_pool->base_path;
-                        auto pool_cache_path = Glib::build_filename(models_path, it);
-                        find_files(pool_cache_path, [this, &pool_cache_path, &n_total, &n_missing, &n_current,
-                                                     &n_out_of_date, &pool_base_path](const std::string &path) {
-                            Gtk::TreeModel::Row row;
-                            row = *item_store->append();
-                            n_total++;
-                            auto filename_cached = Glib::build_filename(pool_cache_path, path);
-                            auto filename_pool = Glib::build_filename(pool_base_path, path);
-                            row[tree_columns.filename_cached] = path;
-                            row[tree_columns.name] = Glib::path_get_basename(path);
-                            row[tree_columns.type] = ObjectType::MODEL_3D;
-                            row[tree_columns.uuid] = UUID::random();
-                            if (Glib::file_test(filename_pool, Glib::FILE_TEST_IS_REGULAR)) {
-                                if (compare_files(filename_cached, filename_pool)) {
-                                    row[tree_columns.state] = ItemState::CURRENT;
-                                    n_current++;
+        {
+            auto models_path = Glib::build_filename(cache_path, "3d_models");
+            if (Glib::file_test(models_path, Glib::FILE_TEST_IS_DIR)) {
+                Glib::Dir dir_3d(models_path);
+                for (const auto &it : dir_3d) {
+                    if (it.find("pool_") == 0 && it.size() == 41) {
+                        UUID pool_uuid(it.substr(5));
+                        auto it_pool = PoolManager::get().get_by_uuid(pool_uuid);
+                        if (it_pool) {
+                            auto &pool_base_path = it_pool->base_path;
+                            auto pool_cache_path = Glib::build_filename(models_path, it);
+                            find_files(pool_cache_path, [this, &pool_cache_path, &n_total, &n_missing, &n_current,
+                                                         &n_out_of_date, &pool_base_path](const std::string &path) {
+                                Gtk::TreeModel::Row row;
+                                row = *item_store->append();
+                                n_total++;
+                                auto filename_cached = Glib::build_filename(pool_cache_path, path);
+                                auto filename_pool = Glib::build_filename(pool_base_path, path);
+                                row[tree_columns.filename_cached] = path;
+                                row[tree_columns.name] = Glib::path_get_basename(path);
+                                row[tree_columns.type] = ObjectType::MODEL_3D;
+                                row[tree_columns.uuid] = UUID::random();
+                                if (Glib::file_test(filename_pool, Glib::FILE_TEST_IS_REGULAR)) {
+                                    if (compare_files(filename_cached, filename_pool)) {
+                                        row[tree_columns.state] = ItemState::CURRENT;
+                                        n_current++;
+                                    }
+                                    else {
+                                        row[tree_columns.state] = ItemState::OUT_OF_DATE;
+                                        n_out_of_date++;
+                                    }
                                 }
                                 else {
-                                    row[tree_columns.state] = ItemState::OUT_OF_DATE;
-                                    n_out_of_date++;
+                                    row[tree_columns.state] = ItemState::MISSING_IN_POOL;
+                                    n_missing++;
                                 }
-                            }
-                            else {
-                                row[tree_columns.state] = ItemState::MISSING_IN_POOL;
-                                n_missing++;
-                            }
-                        });
+                            });
+                        }
                     }
                 }
             }
         }
+    }
+    catch (const SQLite::Error &e) {
+        item_store->clear();
+        n_total = -1;
     }
     item_store->thaw_notify();
     for (const auto &it : item_store->children()) {
@@ -175,13 +184,17 @@ void PoolCacheWindow::refresh_list()
     }
     tree_view_scroll_to_selection(pool_item_view);
     std::stringstream ss;
-    ss << "Total:" << n_total << " ";
-    ss << "Current:" << n_current << " ";
-    if (n_out_of_date)
-        ss << "Out of date:" << n_out_of_date << " ";
-    if (n_missing)
-        ss << "Missing:" << n_missing;
-
+    if (n_total >= 0) {
+        ss << "Total:" << n_total << " ";
+        ss << "Current:" << n_current << " ";
+        if (n_out_of_date)
+            ss << "Out of date:" << n_out_of_date << " ";
+        if (n_missing)
+            ss << "Missing:" << n_missing;
+    }
+    else {
+        ss << "Database was busy";
+    }
     status_label->set_text(ss.str());
 }
 
