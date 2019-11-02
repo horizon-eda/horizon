@@ -46,7 +46,6 @@
 #include "tool_rotate_arbitrary.hpp"
 #include "tool_route_track.hpp"
 #include "tool_route_track_interactive.hpp"
-#include "tool_select_more.hpp"
 #include "tool_set_diffpair.hpp"
 #include "tool_set_via_net.hpp"
 #include "tool_smash.hpp"
