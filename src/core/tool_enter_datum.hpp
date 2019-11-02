@@ -9,10 +9,7 @@ public:
     ToolEnterDatum(Core *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
-    bool can_begin() override
-    {
-        return true;
-    }
+    bool can_begin() override;
     bool is_specific() override
     {
         return true;

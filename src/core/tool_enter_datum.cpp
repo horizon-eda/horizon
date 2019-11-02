@@ -22,6 +22,25 @@ template <typename T> T sgn(T x)
         return 1;
 }
 
+bool ToolEnterDatum::can_begin()
+{
+    std::set<ObjectType> types;
+    const std::set<ObjectType> types_supported = {
+            ObjectType::POLYGON_EDGE, ObjectType::POLYGON_VERTEX, ObjectType::POLYGON_ARC_CENTER,
+            ObjectType::HOLE,         ObjectType::JUNCTION,       ObjectType::LINE,
+            ObjectType::PAD,          ObjectType::NET_LABEL,      ObjectType::LINE_NET,
+            ObjectType::TEXT,         ObjectType::DIMENSION};
+    for (const auto &it : core.r->selection) {
+        types.insert(it.type);
+    }
+    if (types.size() == 1) {
+        auto type = *types.begin();
+        return types_supported.count(type);
+    }
+    else {
+        return false;
+    }
+}
 
 ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
 {
