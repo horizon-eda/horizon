@@ -307,6 +307,10 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
             dynamic_cast<PropertyValueInt &>(value).value = static_cast<int>(sym->expand);
             return true;
 
+        case ObjectProperty::ID::REFDES:
+            dynamic_cast<PropertyValueString &>(value).value = sym->component->refdes + sym->gate->suffix;
+            return true;
+
         default:
             return false;
         }
