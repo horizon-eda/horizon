@@ -154,6 +154,10 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             get_placement(pkg->placement, value, property);
             return true;
 
+        case ObjectProperty::ID::OMIT_SILKSCREEN:
+            dynamic_cast<PropertyValueBool &>(value).value = pkg->omit_silkscreen;
+            return true;
+
         default:
             return false;
         }
@@ -323,6 +327,10 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
                 text->placement.shift += delta;
             }
         } break;
+
+        case ObjectProperty::ID::OMIT_SILKSCREEN:
+            pkg->omit_silkscreen = dynamic_cast<const PropertyValueBool &>(value).value;
+            break;
 
         default:
             return false;

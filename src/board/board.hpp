@@ -53,6 +53,8 @@ public:
 
     void smash_package(BoardPackage *pkg);
     void unsmash_package(BoardPackage *pkg);
+    void smash_package_silkscreen_graphics(BoardPackage *pkg);
+
     Junction *get_junction(const UUID &uu) override;
     Polygon *get_polygon(const UUID &uu) override;
     const std::map<int, Layer> &get_layers() const override;

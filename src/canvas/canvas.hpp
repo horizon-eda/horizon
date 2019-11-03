@@ -93,7 +93,8 @@ protected:
     void render(const class Polygon &polygon, bool interactive = true);
     void render(const class Shape &shape, bool interactive = true);
     void render(const class Hole &hole, bool interactive = true);
-    void render(const class Package &package, bool interactive = true, bool smashed = false);
+    void render(const class Package &package, bool interactive = true, bool smashed = false,
+                bool omit_silkscreen = false);
     void render_pad_overlay(const class Pad &pad);
     void render(const class Pad &pad);
     void render(const class Buffer &buf);

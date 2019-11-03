@@ -34,6 +34,11 @@ public:
         return l <= TOP_COPPER && l >= BOTTOM_COPPER;
     }
 
+    static bool is_silkscreen(int l)
+    {
+        return l == TOP_SILKSCREEN || l == BOTTOM_SILKSCREEN;
+    }
+
     static std::string get_layer_name(int l);
     static const std::vector<int> &get_layers();
 };

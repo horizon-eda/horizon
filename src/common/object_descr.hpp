@@ -70,7 +70,8 @@ public:
         DISPLAY_ALL_PADS,
         GROUP,
         TAG,
-        EXPAND
+        EXPAND,
+        OMIT_SILKSCREEN
     };
     ObjectProperty(Type t, const std::string &l, int o = 0, const std::vector<std::pair<int, std::string>> &its = {})
         : type(t), label(l), enum_items(its), order(o)

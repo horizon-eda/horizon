@@ -699,6 +699,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Import KiCad package", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::SMASH_SILKSCREEN_GRAPHICS},
+         {"Smash silkscreen graphics", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -914,5 +918,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(BACKANNOTATE_CONNECTION_LINES),
         TOOL_LUT_ITEM(IMPORT_KICAD_PACKAGE),
         TOOL_LUT_ITEM(DUPLICATE),
+        TOOL_LUT_ITEM(SMASH_SILKSCREEN_GRAPHICS),
 };
 } // namespace horizon

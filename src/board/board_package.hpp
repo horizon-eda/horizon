@@ -30,6 +30,7 @@ public:
     Placement placement;
     bool flip = false;
     bool smashed = false;
+    bool omit_silkscreen = false;
     std::vector<uuid_ptr<Text>> texts;
 
     std::string replace_text(const std::string &t, bool *replaced = nullptr) const;

@@ -780,7 +780,7 @@ void Board::smash_package(BoardPackage *pkg)
         return;
     pkg->smashed = true;
     for (const auto &it : pkg->pool_package->texts) {
-        if (it.second.layer == 20 || it.second.layer == 120) { // top or bottom silkscreen
+        if (BoardLayers::is_silkscreen(it.second.layer)) { // top or bottom silkscreen
             auto uu = UUID::random();
             auto &x = texts.emplace(uu, uu).first->second;
             x.from_smash = true;
@@ -797,6 +797,49 @@ void Board::smash_package(BoardPackage *pkg)
             pkg->texts.push_back(&x);
         }
     }
+}
+
+void Board::smash_package_silkscreen_graphics(BoardPackage *pkg)
+{
+    std::map<Junction *, Junction *> junction_xlat;
+    auto tr = pkg->placement;
+    if (pkg->flip)
+        tr.invert_angle();
+    auto get_junction = [&junction_xlat, this, pkg, tr](Junction *ju) {
+        if (junction_xlat.count(ju)) {
+            return junction_xlat.at(ju);
+        }
+        else {
+            auto uu = UUID::random();
+            auto &new_junction = junctions.emplace(uu, uu).first->second;
+            new_junction.position = tr.transform(ju->position);
+            junction_xlat.emplace(ju, &new_junction);
+            return &new_junction;
+        }
+    };
+
+    for (const auto &it : pkg->package.lines) {
+        if (BoardLayers::is_silkscreen(it.second.layer)) {
+            auto uu = UUID::random();
+            auto &new_line = lines.emplace(uu, uu).first->second;
+            new_line.from = get_junction(it.second.from);
+            new_line.to = get_junction(it.second.to);
+            new_line.width = it.second.width;
+            new_line.layer = it.second.layer;
+        }
+    }
+    for (const auto &it : pkg->package.arcs) {
+        if (BoardLayers::is_silkscreen(it.second.layer)) {
+            auto uu = UUID::random();
+            auto &new_arc = arcs.emplace(uu, uu).first->second;
+            new_arc.from = get_junction(it.second.from);
+            new_arc.to = get_junction(it.second.to);
+            new_arc.center = get_junction(it.second.center);
+            new_arc.width = it.second.width;
+            new_arc.layer = it.second.layer;
+        }
+    }
+    pkg->omit_silkscreen = true;
 }
 
 void Board::unsmash_package(BoardPackage *pkg)

@@ -227,6 +227,7 @@ SRC_IMP = \
 	src/core/tool_draw_connection_line.cpp\
 	src/core/tool_backannotate_connection_lines.cpp\
 	src/core/tool_import_kicad_package.cpp\
+	src/core/tool_smash_silkscreen_graphics.cpp\
 	src/core/cores.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\

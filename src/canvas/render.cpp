@@ -1084,7 +1084,7 @@ void Canvas::render_pad_overlay(const Pad &pad)
     transform_restore();
 }
 
-void Canvas::render(const Package &pkg, bool interactive, bool smashed)
+void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omit_silkscreen)
 {
     if (interactive) {
         for (const auto &it : pkg.junctions) {
@@ -1097,14 +1097,20 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
     }
 
     for (const auto &it : pkg.lines) {
+        if (omit_silkscreen && BoardLayers::is_silkscreen(it.second.layer))
+            continue;
         render(it.second, interactive);
     }
     for (const auto &it : pkg.texts) {
-        if (!smashed
-            || !(it.second.layer == BoardLayers::TOP_SILKSCREEN || it.second.layer == BoardLayers::BOTTOM_SILKSCREEN))
+        if (omit_silkscreen && BoardLayers::is_silkscreen(it.second.layer))
+            continue;
+
+        if (!smashed || !BoardLayers::is_silkscreen(it.second.layer))
             render(it.second, interactive);
     }
     for (const auto &it : pkg.arcs) {
+        if (omit_silkscreen && BoardLayers::is_silkscreen(it.second.layer))
+            continue;
         render(it.second, interactive);
     }
     if (object_refs_current.size() && object_refs_current.back().type == ObjectType::BOARD_PACKAGE) {
@@ -1123,6 +1129,8 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed)
         }
     }
     for (const auto &it : pkg.polygons) {
+        if (omit_silkscreen && BoardLayers::is_silkscreen(it.second.layer))
+            continue;
         render(it.second, interactive);
     }
 
@@ -1195,7 +1203,7 @@ void Canvas::render(const BoardPackage &pkg)
                              transform.transform(it.second.placement.shift));
     }
     object_refs_current.emplace_back(ObjectType::BOARD_PACKAGE, pkg.uuid);
-    render(pkg.package, false, pkg.smashed);
+    render(pkg.package, false, pkg.smashed, pkg.omit_silkscreen);
     object_refs_current.pop_back();
 
     transform.reset();
