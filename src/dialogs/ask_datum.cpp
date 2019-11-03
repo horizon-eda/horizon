@@ -15,6 +15,7 @@ AskDatumDialog::AskDatumDialog(Gtk::Window *parent, const std::string &label, bo
 
 
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4));
+    box->property_margin() = 6;
     auto la = Gtk::manage(new Gtk::Label(label));
     la->set_halign(Gtk::ALIGN_START);
     box->pack_start(*la, false, false, 0);
@@ -50,6 +51,7 @@ AskDatumDialog::AskDatumDialog(Gtk::Window *parent, const std::string &label, bo
     }
 
     get_content_area()->pack_start(*box, true, true, 0);
+    get_content_area()->set_border_width(0);
     show_all();
 }
 } // namespace horizon

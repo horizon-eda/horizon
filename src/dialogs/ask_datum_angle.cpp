@@ -15,6 +15,7 @@ AskDatumAngleDialog::AskDatumAngleDialog(Gtk::Window *parent, const std::string 
 
 
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4));
+    box->property_margin() = 6;
     auto la = Gtk::manage(new Gtk::Label(label));
     la->set_halign(Gtk::ALIGN_START);
     box->pack_start(*la, false, false, 0);
@@ -22,6 +23,7 @@ AskDatumAngleDialog::AskDatumAngleDialog(Gtk::Window *parent, const std::string 
     sp = Gtk::manage(new SpinButtonAngle());
     sp->signal_activate().connect([this] { response(Gtk::RESPONSE_OK); });
     box->pack_start(*sp, false, false, 0);
+    get_content_area()->set_border_width(0);
     get_content_area()->pack_start(*box, true, true, 0);
     show_all();
 }
