@@ -93,31 +93,6 @@ PDFExportWindow *PDFExportWindow::create(Gtk::Window *p, Core *c, PDFExportSetti
     return w;
 }
 
-static Gtk::Box *make_boolean_ganged_switch(bool &v, const std::string &label_false, const std::string &label_true,
-                                            std::function<void(bool v)> extra_cb = nullptr)
-{
-    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
-    box->set_homogeneous(true);
-    box->get_style_context()->add_class("linked");
-    auto b1 = Gtk::manage(new Gtk::RadioButton(label_false));
-    b1->set_mode(false);
-    box->pack_start(*b1, true, true, 0);
-
-    auto b2 = Gtk::manage(new Gtk::RadioButton(label_true));
-    b2->set_mode(false);
-    b2->join_group(*b1);
-    box->pack_start(*b2, true, true, 0);
-
-    b2->set_active(v);
-    b2->signal_toggled().connect([b2, &v, extra_cb] {
-        v = b2->get_active();
-        if (extra_cb)
-            extra_cb(v);
-    });
-    box->show_all();
-    return box;
-}
-
 PDFExportWindow::PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Core *c,
                                  PDFExportSettings &s, const std::string &pd)
     : Gtk::Window(cobject), core(c), settings(s)

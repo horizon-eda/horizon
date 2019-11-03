@@ -60,6 +60,7 @@ public:
     std::pair<bool, std::string> ask_kicad_package_filename();
 
     class SymbolPinNamesWindow *show_symbol_pin_names_window(class SchematicSymbol *symbol);
+    class RenumberPadsWindow *show_renumber_pads_window(class Package *pkg, const std::set<UUID> &pads);
     void close_nonmodal();
 
 private:

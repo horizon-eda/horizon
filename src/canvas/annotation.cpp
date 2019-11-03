@@ -43,7 +43,7 @@ void CanvasAnnotation::clear()
     ca->request_push();
 }
 
-void CanvasAnnotation::draw_line(const Coordi &from, const Coordi &to, ColorP color, uint64_t width)
+void CanvasAnnotation::draw_line(const Coordf &from, const Coordf &to, ColorP color, uint64_t width)
 {
     ca->draw_line(from, to, color, layer, false, width);
     ca->request_push();

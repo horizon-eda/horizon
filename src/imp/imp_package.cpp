@@ -35,6 +35,7 @@ void ImpPackage::canvas_update()
 {
     canvas->update(*core_package.get_canvas_data());
     warnings_box->update(core_package.get_package()->warnings);
+    update_highlights();
 }
 
 void ImpPackage::apply_preferences()
@@ -702,6 +703,24 @@ void ImpPackage::construct()
                 header_button->set_label(pkg->name);
             });
 }
+
+
+void ImpPackage::update_highlights()
+{
+    canvas->set_flags_all(0, Triangle::FLAG_HIGHLIGHT);
+    canvas->set_highlight_enabled(highlights.size());
+    for (const auto &it : highlights) {
+        if (it.type == ObjectType::PAD) {
+            ObjectRef ref(ObjectType::PAD, it.uuid);
+            canvas->set_flags(ref, Triangle::FLAG_HIGHLIGHT, 0);
+        }
+
+        else {
+            canvas->set_flags(it, Triangle::FLAG_HIGHLIGHT, 0);
+        }
+    }
+}
+
 
 std::pair<ActionID, ToolID> ImpPackage::get_doubleclick_action(ObjectType type, const UUID &uu)
 {

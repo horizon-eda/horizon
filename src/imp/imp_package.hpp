@@ -14,6 +14,7 @@ public:
 protected:
     void construct() override;
     void apply_preferences() override;
+    void update_highlights() override;
 
     ActionCatalogItem::Availability get_editor_type_for_action() const override
     {

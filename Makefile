@@ -228,6 +228,7 @@ SRC_IMP = \
 	src/core/tool_backannotate_connection_lines.cpp\
 	src/core/tool_import_kicad_package.cpp\
 	src/core/tool_smash_silkscreen_graphics.cpp\
+	src/core/tool_renumber_pads.cpp\
 	src/core/cores.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\
@@ -261,6 +262,7 @@ SRC_IMP = \
 	src/dialogs/select_group_tag.cpp\
 	src/dialogs/ask_datum_angle.cpp\
 	src/dialogs/tool_window.cpp\
+	src/dialogs/renumber_pads_window.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\
 	src/core/core_schematic.cpp\

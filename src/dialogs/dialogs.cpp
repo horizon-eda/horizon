@@ -36,6 +36,7 @@
 #include "select_group_tag.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/spin_button_angle.hpp"
+#include "renumber_pads_window.hpp"
 #include <glibmm.h>
 
 namespace horizon {
@@ -471,6 +472,17 @@ class SymbolPinNamesWindow *Dialogs::show_symbol_pin_names_window(class Schemati
         return nullptr;
     auto win = new SymbolPinNamesWindow(parent, interface, symbol);
     window_nonmodal = win;
+    win->present();
+    return win;
+}
+
+class RenumberPadsWindow *Dialogs::show_renumber_pads_window(class Package *pkg, const std::set<UUID> &pads)
+{
+    if (window_nonmodal)
+        return nullptr;
+    auto win = new RenumberPadsWindow(parent, interface, pkg, pads);
+    window_nonmodal = win;
+    win->present();
     return win;
 }
 
