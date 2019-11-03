@@ -309,11 +309,10 @@ std::pair<bool, int64_t> Dialogs::ask_datum(const std::string &label, int64_t de
 std::pair<bool, std::string> Dialogs::ask_datum_string(const std::string &label, const std::string &def)
 {
     AskDatumStringDialog dia(parent, label);
-    dia.entry->set_text(Glib::strescape(def));
-    dia.entry->select_region(0, -1);
+    dia.set_text(def);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
-        return {true, Glib::strcompress(dia.entry->get_text())};
+        return {true, dia.get_text()};
     }
     else {
         return {false, ""};

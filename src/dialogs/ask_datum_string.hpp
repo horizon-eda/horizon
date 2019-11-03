@@ -8,10 +8,12 @@ namespace horizon {
 class AskDatumStringDialog : public Gtk::Dialog {
 public:
     AskDatumStringDialog(Gtk::Window *parent, const std::string &label);
-    Gtk::Entry *entry = nullptr;
-    ;
+    void set_text(const std::string &text);
+    std::string get_text();
 
-    // virtual ~MainWindow();
 private:
+    Gtk::Entry *entry = nullptr;
+    Gtk::TextView *view = nullptr;
+    Gtk::Stack *stack = nullptr;
 };
 } // namespace horizon
