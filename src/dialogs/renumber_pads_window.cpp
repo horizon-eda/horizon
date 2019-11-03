@@ -24,7 +24,7 @@ RenumberPadsWindow::RenumberPadsWindow(Gtk::Window *parent, ImpInterface *intf, 
 
     int top = 0;
 
-    auto fn_update = [this](auto v) { renumber(); };
+    auto fn_update = [this](auto v) { this->renumber(); };
 
     {
         auto b = make_boolean_ganged_switch(x_first, "X, then Y", "Y, then X", fn_update);
