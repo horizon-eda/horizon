@@ -268,6 +268,7 @@ SymbolPinNamesWindow::SymbolPinNamesWindow(Gtk::Window *parent, ImpInterface *in
     editor->signal_changed().connect([this] { emit_event(ToolDataWindow::Event::UPDATE); });
     editor->signal_selected_rows_changed().connect([this] { emit_event(ToolDataWindow::Event::UPDATE); });
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
+    sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     sc->add(*editor);
     box->pack_start(*sc, true, true, 0);
 
