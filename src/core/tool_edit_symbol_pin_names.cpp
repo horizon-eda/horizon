@@ -1,6 +1,8 @@
 #include "tool_edit_symbol_pin_names.hpp"
 #include "core_schematic.hpp"
+#include "tool_data_window.hpp"
 #include "imp/imp_interface.hpp"
+#include "dialogs/symbol_pin_names_window.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -16,21 +18,52 @@ bool ToolEditSymbolPinNames::can_begin()
 
 ToolResponse ToolEditSymbolPinNames::begin(const ToolArgs &args)
 {
-    SchematicSymbol *sym = get_symbol();
+    sym = get_symbol();
     if (!sym) {
         return ToolResponse::end();
     }
-    bool r = imp->dialogs.edit_symbol_pin_names(sym);
-    if (r) {
-        core.r->commit();
-    }
-    else {
-        core.r->revert();
-    }
-    return ToolResponse::end();
+
+    core.c->selection.clear();
+    auto &hl = imp->get_highlights();
+    hl.clear();
+    hl.emplace(ObjectType::SCHEMATIC_SYMBOL, sym->uuid);
+    imp->update_highlights();
+    win = imp->dialogs.show_symbol_pin_names_window(sym);
+    return ToolResponse();
 }
+
 ToolResponse ToolEditSymbolPinNames::update(const ToolArgs &args)
 {
+    if (args.type == ToolEventType::DATA) {
+        if (auto data = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
+            if (data->event == ToolDataWindow::Event::CLOSE) {
+                core.r->revert();
+                return ToolResponse::end();
+            }
+            else if (data->event == ToolDataWindow::Event::OK) {
+                core.r->commit();
+                return ToolResponse::end();
+            }
+            else if (data->event == ToolDataWindow::Event::UPDATE) {
+                auto pin = win->get_selected_pin();
+                auto &hl = imp->get_highlights();
+                hl.clear();
+                if (pin)
+                    hl.emplace(ObjectType::SYMBOL_PIN, pin, sym->uuid);
+                else
+                    hl.emplace(ObjectType::SCHEMATIC_SYMBOL, sym->uuid);
+                imp->update_highlights();
+                sym->apply_pin_names();
+            }
+        }
+    }
+    else if (args.type == ToolEventType::CLICK) {
+        if (args.target.type == ObjectType::SYMBOL_PIN) {
+            if (args.target.path.at(0) == sym->uuid) {
+                win->go_to_pin(args.target.path.at(1));
+            }
+        }
+    }
     return ToolResponse();
 }
 } // namespace horizon

@@ -236,7 +236,7 @@ SRC_IMP = \
 	src/dialogs/ask_net_merge.cpp\
 	src/dialogs/ask_delete_component.cpp\
 	src/dialogs/select_net.cpp\
-	src/dialogs/symbol_pin_names.cpp\
+	src/dialogs/symbol_pin_names_window.cpp\
 	src/dialogs/manage_buses.cpp\
 	src/dialogs/ask_datum.cpp\
 	src/dialogs/ask_datum_string.cpp\
@@ -259,6 +259,7 @@ SRC_IMP = \
 	src/dialogs/edit_keepout.cpp\
 	src/dialogs/select_group_tag.cpp\
 	src/dialogs/ask_datum_angle.cpp\
+	src/dialogs/tool_window.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\
 	src/core/core_schematic.cpp\

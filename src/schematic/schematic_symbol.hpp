@@ -34,6 +34,7 @@ public:
     bool display_all_pads = true;
     unsigned int expand = 0;
     void apply_expand();
+    void apply_pin_names();
 
     std::string replace_text(const std::string &t, bool *replaced, const class Schematic &sch) const;
 

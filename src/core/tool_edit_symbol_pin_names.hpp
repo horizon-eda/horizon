@@ -16,5 +16,9 @@ public:
     {
         return true;
     }
+
+private:
+    class SymbolPinNamesWindow *win = nullptr;
+    class SchematicSymbol *sym = nullptr;
 };
 } // namespace horizon

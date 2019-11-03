@@ -16,6 +16,7 @@ class Dialogs {
 public:
     Dialogs(){};
     void set_parent(Gtk::Window *w);
+    void set_interface(class ImpInterface *intf);
 
     std::pair<bool, UUID> map_pin(const std::vector<std::pair<const Pin *, bool>> &pins);
     std::pair<bool, UUIDPath<2>> map_symbol(const std::map<UUIDPath<2>, std::string> &gates);
@@ -32,7 +33,6 @@ public:
     std::pair<bool, UUID> select_bus(class Block *block);
     std::pair<bool, UUID> select_bus_member(class Block *block, const UUID &bus_uuid);
     std::pair<bool, UUID> select_group_tag(const class Block *block, bool tag_mode, const UUID &current);
-    bool edit_symbol_pin_names(class SchematicSymbol *symbol);
     unsigned int ask_net_merge(class Net *net, class Net *into);
     bool ask_delete_component(Component *comp);
     bool manage_buses(class Block *b);
@@ -59,8 +59,12 @@ public:
     std::pair<bool, std::string> ask_dxf_filename();
     std::pair<bool, std::string> ask_kicad_package_filename();
 
+    class SymbolPinNamesWindow *show_symbol_pin_names_window(class SchematicSymbol *symbol);
+    void close_nonmodal();
 
 private:
     Gtk::Window *parent = nullptr;
+    class ImpInterface *interface = nullptr;
+    Gtk::Window *window_nonmodal = nullptr;
 };
 } // namespace horizon

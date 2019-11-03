@@ -127,4 +127,73 @@ void SchematicSymbol::apply_expand()
 }
 
 
+static void append_pin_name(std::string &name, const std::string &x)
+{
+    if (name.size())
+        name += " ";
+    name += x;
+}
+
+void SchematicSymbol::apply_pin_names()
+{
+    for (auto &it_pin : symbol.pins) {
+        it_pin.second.name.clear();
+    }
+    if (pin_display_mode == SchematicSymbol::PinDisplayMode::ALL) {
+        for (auto &it_pin : symbol.pins) {
+            auto pin_uuid = it_pin.first;
+            for (auto &pin_name : gate->unit->pins.at(pin_uuid).names) {
+                it_pin.second.name += pin_name + " ";
+            }
+            UUIDPath<2> path(gate->uuid, pin_uuid);
+            if (component->custom_pin_names.count(path)) {
+                it_pin.second.name += component->custom_pin_names.at(path) + " ";
+            }
+            it_pin.second.name += "(" + gate->unit->pins.at(pin_uuid).primary_name + ")";
+        }
+    }
+    else if (pin_display_mode == SchematicSymbol::PinDisplayMode::CUSTOM_ONLY) {
+        for (auto &it_pin : symbol.pins) {
+            auto pin_uuid = it_pin.first;
+            UUIDPath<2> path(gate->uuid, pin_uuid);
+            if (component->custom_pin_names.count(path) && component->custom_pin_names.at(path).size()) {
+                it_pin.second.name = component->custom_pin_names.at(path);
+            }
+            else {
+                it_pin.second.name = gate->unit->pins.at(pin_uuid).primary_name;
+            }
+        }
+    }
+    else {
+        for (auto &it_pin : symbol.pins) {
+            auto pin_uuid = it_pin.first;
+            UUIDPath<2> path(gate->uuid, pin_uuid);
+            const auto &pin = gate->unit->pins.at(pin_uuid);
+            if (component->pin_names.count(path) && component->pin_names.at(path).size()) {
+                const auto &names = component->pin_names.at(path);
+                if (names.count(-1) || (pin_display_mode == SchematicSymbol::PinDisplayMode::BOTH))
+                    it_pin.second.name = gate->unit->pins.at(pin_uuid).primary_name;
+                for (const auto &it : names) {
+                    if (it == -2) {
+                        // nop, see later
+                    }
+                    else if (it == -1) {
+                        // nop see before
+                    }
+                    else {
+                        if (it >= 0 && it < ((int)pin.names.size()))
+                            append_pin_name(it_pin.second.name, pin.names.at(it));
+                    }
+                }
+                if (names.count(-2) && component->custom_pin_names.count(path)) {
+                    append_pin_name(it_pin.second.name, component->custom_pin_names.at(path));
+                }
+            }
+            else {
+                it_pin.second.name = gate->unit->pins.at(pin_uuid).primary_name;
+            }
+        }
+    }
+}
+
 } // namespace horizon

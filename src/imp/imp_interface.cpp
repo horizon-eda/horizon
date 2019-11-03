@@ -9,6 +9,7 @@ namespace horizon {
 ImpInterface::ImpInterface(ImpBase *i) : imp(i)
 {
     dialogs.set_parent(imp->main_window);
+    dialogs.set_interface(this);
 }
 
 void ImpInterface::tool_bar_set_tip(const std::string &s)

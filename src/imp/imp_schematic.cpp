@@ -29,6 +29,7 @@ void ImpSchematic::canvas_update()
 {
     canvas->update(*core_schematic.get_canvas_data());
     warnings_box->update(core_schematic.get_sheet()->warnings);
+    update_highlights();
 }
 
 void ImpSchematic::handle_select_sheet(Sheet *sh)
@@ -102,6 +103,14 @@ void ImpSchematic::update_highlights()
                         highlights_for_sheet[sheet->uuid].emplace(ObjectType::SCHEMATIC_SYMBOL, it_sym.first);
                     }
                 }
+            }
+            else if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
+                if (sheet->symbols.count(it.uuid))
+                    highlights_for_sheet[sheet->uuid].emplace(it);
+            }
+            else if (it.type == ObjectType::SYMBOL_PIN) {
+                if (sheet->symbols.count(it.uuid2))
+                    highlights_for_sheet[sheet->uuid].emplace(it);
             }
         }
         sheet_box->update_highlights(sheet->uuid, highlights_for_sheet[sheet->uuid].size());

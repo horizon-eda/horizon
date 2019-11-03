@@ -6,7 +6,7 @@
 #include "widgets/pool_browser_part.hpp"
 #include "widgets/pool_browser_symbol.hpp"
 #include "widgets/pool_browser_padstack.hpp"
-#include "symbol_pin_names.hpp"
+#include "symbol_pin_names_window.hpp"
 #include "select_net.hpp"
 #include "ask_net_merge.hpp"
 #include "ask_delete_component.hpp"
@@ -42,6 +42,11 @@ namespace horizon {
 void Dialogs::set_parent(Gtk::Window *w)
 {
     parent = w;
+}
+
+void Dialogs::set_interface(ImpInterface *intf)
+{
+    interface = intf;
 }
 
 std::pair<bool, UUID> Dialogs::map_pin(const std::vector<std::pair<const Pin *, bool>> &pins)
@@ -191,12 +196,6 @@ std::pair<bool, UUID> Dialogs::select_group_tag(const class Block *block, bool t
     else {
         return {false, UUID()};
     }
-}
-
-bool Dialogs::edit_symbol_pin_names(SchematicSymbol *sym)
-{
-    SymbolPinNamesDialog dia(parent, sym);
-    return dia.run() == Gtk::RESPONSE_OK;
 }
 
 bool Dialogs::edit_shapes(std::set<Shape *> shapes)
@@ -465,4 +464,20 @@ std::pair<bool, std::string> Dialogs::ask_kicad_package_filename()
         return {false, ""};
     }
 }
+
+class SymbolPinNamesWindow *Dialogs::show_symbol_pin_names_window(class SchematicSymbol *symbol)
+{
+    if (window_nonmodal)
+        return nullptr;
+    auto win = new SymbolPinNamesWindow(parent, interface, symbol);
+    window_nonmodal = win;
+    return win;
+}
+
+void Dialogs::close_nonmodal()
+{
+    delete window_nonmodal;
+    window_nonmodal = nullptr;
+}
+
 } // namespace horizon

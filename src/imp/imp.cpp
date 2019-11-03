@@ -1490,6 +1490,7 @@ void ImpBase::handle_maybe_drag()
 void ImpBase::tool_process(ToolResponse &resp)
 {
     if (!core.r->tool_is_active()) {
+        imp_interface->dialogs.close_nonmodal();
         main_window->tool_hint_label->set_text(">");
         canvas->set_cursor_external(false);
         no_update = false;
