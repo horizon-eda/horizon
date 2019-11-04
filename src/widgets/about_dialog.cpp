@@ -16,7 +16,7 @@ AboutDialog::AboutDialog() : Gtk::AboutDialog()
     set_authors(authors);
     set_license_type(Gtk::LICENSE_GPL_3_0);
     set_copyright("Copyright © 2017-2019 Lukas K., et al.");
-    set_website("https://horizon-eda.readthedocs.io/en/wip/");
+    set_website("https://horizon-eda.readthedocs.io/");
     set_website_label("Documentation");
     set_comments("a free EDA package");
 
