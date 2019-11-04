@@ -863,11 +863,11 @@ private:
 };
 
 ForcedPoolUpdateDialog::ForcedPoolUpdateDialog(const std::string &bp, Gtk::Window *parent)
-    : Gtk::Dialog("Pool updating", *parent, Gtk::DIALOG_MODAL), base_path(bp)
+    : Gtk::Dialog("Pool update", *parent, Gtk::DIALOG_MODAL), base_path(bp)
 {
     auto hb = Gtk::manage(new Gtk::HeaderBar);
     hb->set_show_close_button(false);
-    hb->set_title("Pool updating");
+    hb->set_title("Pool update");
     set_titlebar(*hb);
     hb->show_all();
 
@@ -884,6 +884,7 @@ ForcedPoolUpdateDialog::ForcedPoolUpdateDialog(const std::string &bp, Gtk::Windo
     filename_label = Gtk::manage(new Gtk::Label);
     filename_label->get_style_context()->add_class("dim-label");
     filename_label->set_ellipsize(Pango::ELLIPSIZE_START);
+    filename_label->set_xalign(1);
     box->pack_start(*filename_label, false, false, 0);
 
     box->property_margin() = 10;
