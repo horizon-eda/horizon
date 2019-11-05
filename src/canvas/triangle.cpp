@@ -183,7 +183,12 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
     buf.types_visible = ld.types_visible;
     buf.types_force_outline = ld.types_force_outline;
     buf.scale = ca->scale;
-    buf.highlight_mode = ca->highlight_enabled ? static_cast<int>(ca->highlight_mode) : 0;
+
+    if (layer >= 20000 && layer < 30000) // annotation layer, but not overlay
+        buf.highlight_mode = 0;
+    else
+        buf.highlight_mode = ca->highlight_enabled ? static_cast<int>(ca->highlight_mode) : 0;
+
     buf.highlight_dim = ca->appearance.highlight_dim;
     buf.highlight_lighten = ca->appearance.highlight_lighten;
 
