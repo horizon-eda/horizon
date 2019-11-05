@@ -27,7 +27,7 @@ Wanna chat about the project? Join #horizon on freenode
 - Everything is referenced by UUIDs
 
 # Getting Started
-See the [the docs](https://horizon-eda.readthedocs.io/en/latest/getting-started.html)
+See the [the docs](https://horizon-eda.readthedocs.io/en/latest/installation.html)
 
 # Included third-party software
 - https://github.com/nlohmann/json/
