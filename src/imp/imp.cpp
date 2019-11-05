@@ -70,7 +70,7 @@ ImpBase::ImpBase(const PoolParams &params)
                 [this](Glib::IOCondition cond) {
                     while (sock_broadcast_rx.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
                         zmq::message_t msg;
-                        sock_broadcast_rx.recv(&msg);
+                        sock_broadcast_rx.recv(msg);
                         int prefix;
                         memcpy(&prefix, msg.data(), 4);
                         char *data = ((char *)msg.data()) + 4;
@@ -100,10 +100,10 @@ json ImpBase::send_json(const json &j)
     memcpy(((uint8_t *)msg.data()), s.c_str(), s.size());
     auto m = (char *)msg.data();
     m[msg.size() - 1] = 0;
-    sock_project.send(msg);
+    sock_project.send(msg, zmq::send_flags::none);
 
     zmq::message_t rx;
-    sock_project.recv(&rx);
+    sock_project.recv(rx);
     char *rxdata = ((char *)rx.data());
     std::cout << "imp rx " << rxdata << std::endl;
     return json::parse(rxdata);

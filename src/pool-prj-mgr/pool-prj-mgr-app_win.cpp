@@ -181,7 +181,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
                                       [this](Glib::IOCondition cond) {
                                           while (sock_mgr.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
                                               zmq::message_t msg;
-                                              sock_mgr.recv(&msg);
+                                              sock_mgr.recv(msg);
                                               char *data = (char *)msg.data();
                                               json jrx = json::parse(data);
                                               json jtx = handle_req(jrx);
@@ -191,7 +191,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
                                               memcpy(((uint8_t *)tx.data()), stx.c_str(), stx.size());
                                               auto m = (char *)tx.data();
                                               m[tx.size() - 1] = 0;
-                                              sock_mgr.send(tx);
+                                              sock_mgr.send(tx, zmq::send_flags::none);
                                           }
                                           return true;
                                       },
