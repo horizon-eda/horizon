@@ -147,12 +147,8 @@ void PoolProjectManagerApplication::on_startup()
 
 PreferencesWindow *PoolProjectManagerApplication::show_preferences_window(guint32 timestamp)
 {
-    /*auto prefs_dialog = new ProjectManagerPrefs(dynamic_cast<Gtk::ApplicationWindow *>(get_active_window()));
-    prefs_dialog->present();
-    prefs_dialog->signal_hide().connect([prefs_dialog] { delete prefs_dialog; });*/
     if (!preferences_window) {
         preferences_window = new PreferencesWindow(&preferences);
-        preferences_window->set_transient_for(*get_active_window());
 
         preferences_window->signal_hide().connect([this] {
             delete preferences_window;
@@ -245,9 +241,9 @@ void PoolProjectManagerApplication::on_action_quit()
             return;
         }
         auto &fis = files[filename];
-        for (const auto &it : pol.procs_need_save) {
+        for (const auto &it_proc : pol.procs_need_save) {
             need_dialog = true;
-            fis[it] = win->get_proc_filename(it);
+            fis[it_proc] = win->get_proc_filename(it_proc);
         }
     }
 

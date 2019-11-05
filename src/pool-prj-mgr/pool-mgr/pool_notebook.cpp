@@ -63,11 +63,12 @@ void PoolNotebook::pool_updated(bool success)
         settings_box->pool_updated();
     if (part_wizard)
         part_wizard->reload();
-    if (git_box && success && git_box->refreshed_once)
+    if (git_box && success && git_box->refreshed_once) {
         if (widget_is_visible(git_box))
             git_box->refresh();
         else
             git_box->refreshed_once = false;
+    }
 }
 
 bool PoolNotebook::widget_is_visible(Gtk::Widget *widget)
