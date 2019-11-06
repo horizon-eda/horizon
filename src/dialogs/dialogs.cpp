@@ -308,7 +308,20 @@ std::pair<bool, int64_t> Dialogs::ask_datum(const std::string &label, int64_t de
 
 std::pair<bool, std::string> Dialogs::ask_datum_string(const std::string &label, const std::string &def)
 {
-    AskDatumStringDialog dia(parent, label);
+    AskDatumStringDialog dia(parent, label, false);
+    dia.set_text(def);
+    auto r = dia.run();
+    if (r == Gtk::RESPONSE_OK) {
+        return {true, dia.get_text()};
+    }
+    else {
+        return {false, ""};
+    }
+}
+
+std::pair<bool, std::string> Dialogs::ask_datum_string_multiline(const std::string &label, const std::string &def)
+{
+    AskDatumStringDialog dia(parent, label, true);
     dia.set_text(def);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {

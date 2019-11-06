@@ -4,7 +4,7 @@
 namespace horizon {
 
 
-AskDatumStringDialog::AskDatumStringDialog(Gtk::Window *parent, const std::string &label)
+AskDatumStringDialog::AskDatumStringDialog(Gtk::Window *parent, const std::string &label, bool multiline)
     : Gtk::Dialog("Enter Datum", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
 {
     add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
@@ -22,17 +22,19 @@ AskDatumStringDialog::AskDatumStringDialog(Gtk::Window *parent, const std::strin
     }
     entry = Gtk::manage(new Gtk::Entry());
     entry->signal_activate().connect([this] { response(Gtk::RESPONSE_OK); });
-    entry->signal_key_press_event().connect([this](GdkEventKey *ev) {
-        if (ev->keyval == GDK_KEY_Return && (ev->state & Gdk::SHIFT_MASK)) {
-            auto txt = get_text();
-            stack->set_transition_duration(100);
-            stack->set_visible_child("view");
-            set_text(txt + "\n");
-            view->get_buffer()->place_cursor(view->get_buffer()->end());
-            return true;
-        }
-        return false;
-    });
+    if (multiline) {
+        entry->signal_key_press_event().connect([this](GdkEventKey *ev) {
+            if (ev->keyval == GDK_KEY_Return && (ev->state & Gdk::SHIFT_MASK)) {
+                auto txt = get_text();
+                stack->set_transition_duration(100);
+                stack->set_visible_child("view");
+                set_text(txt + "\n");
+                view->get_buffer()->place_cursor(view->get_buffer()->end());
+                return true;
+            }
+            return false;
+        });
+    }
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow);
     sc->set_shadow_type(Gtk::SHADOW_IN);
@@ -61,15 +63,17 @@ AskDatumStringDialog::AskDatumStringDialog(Gtk::Window *parent, const std::strin
     {
         auto lbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 2));
         lbox->pack_start(*entry, true, true, 0);
-        auto la = Gtk::manage(new Gtk::Label("Press Shift+Enter to insert a line break"));
-        la->get_style_context()->add_class("dim-label");
-        la->set_xalign(0);
-        auto attributes_list = pango_attr_list_new();
-        auto attribute_scale = pango_attr_scale_new(.833);
-        pango_attr_list_insert(attributes_list, attribute_scale);
-        gtk_label_set_attributes(la->gobj(), attributes_list);
-        pango_attr_list_unref(attributes_list);
-        lbox->pack_start(*la, false, false, 0);
+        if (multiline) {
+            auto la = Gtk::manage(new Gtk::Label("Press Shift+Enter to insert a line break"));
+            la->get_style_context()->add_class("dim-label");
+            la->set_xalign(0);
+            auto attributes_list = pango_attr_list_new();
+            auto attribute_scale = pango_attr_scale_new(.833);
+            pango_attr_list_insert(attributes_list, attribute_scale);
+            gtk_label_set_attributes(la->gobj(), attributes_list);
+            pango_attr_list_unref(attributes_list);
+            lbox->pack_start(*la, false, false, 0);
+        }
         stack->add(*lbox, "entry");
     }
     {

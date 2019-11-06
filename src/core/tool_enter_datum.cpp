@@ -344,7 +344,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             return ToolResponse::end();
         std::string new_text;
         bool r;
-        std::tie(r, new_text) = imp->dialogs.ask_datum_string("Enter text", text->text);
+        std::tie(r, new_text) = imp->dialogs.ask_datum_string_multiline("Enter text", text->text);
         if (r) {
             for (const auto &it : args.selection) {
                 if (it.type == ObjectType::TEXT) {
