@@ -38,10 +38,7 @@ void PoolBrowserSymbol::set_unit_uuid(const UUID &uu)
 
 void PoolBrowserSymbol::search()
 {
-    searched_once = true;
-    auto selected_uuid = get_selected();
-    treeview->unset_model();
-    store->clear();
+    prepare_search();
 
     std::string name_search = name_entry->get_text();
 
@@ -83,9 +80,8 @@ void PoolBrowserSymbol::search()
             throw;
         }
     }
-    treeview->set_model(store);
-    select_uuid(selected_uuid);
-    scroll_to_selection();
+
+    finish_search();
 }
 
 UUID PoolBrowserSymbol::uuid_from_row(const Gtk::TreeModel::Row &row)

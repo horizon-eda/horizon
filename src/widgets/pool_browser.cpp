@@ -125,9 +125,11 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
         pack_start(*grid, false, false, 0);
     }
 
-    auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
-    sep->show();
-    pack_start(*sep, false, false, 0);
+    {
+        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+        sep->show();
+        pack_start(*sep, false, false, 0);
+    }
 
     treeview = Gtk::manage(new Gtk::TreeView(store));
 
@@ -156,6 +158,22 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
         busy_box->hide();
         busy_box->set_no_show_all(true);
         pack_start(*overlay, true, true, 0);
+    }
+
+    {
+        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+        sep->show();
+        pack_start(*sep, false, false, 0);
+    }
+
+    {
+        status_label = Gtk::manage(new Gtk::Label("Status"));
+        label_set_tnum(status_label);
+        status_label->property_margin() = 2;
+        status_label->get_style_context()->add_class("dim-label");
+        status_label->set_xalign(0);
+        status_label->show();
+        pack_start(*status_label, false, false, 0);
     }
 
 
@@ -380,6 +398,35 @@ void PoolBrowser::search_once()
 void PoolBrowser::clear_search_once()
 {
     searched_once = false;
+}
+
+void PoolBrowser::prepare_search()
+{
+    searched_once = true;
+    selected_uuid_before_search = get_selected();
+    treeview->unset_model();
+    store->clear();
+}
+
+static std::string format_digits(unsigned int m, unsigned int digits_max)
+{
+    auto m_str = std::to_string(m);
+    std::string prefix;
+    if (m_str.size() < digits_max) {
+        for (size_t i = 0; i < (digits_max - (int)m_str.size()); i++) {
+            prefix += " ";
+        }
+    }
+    return prefix + m_str;
+}
+
+void PoolBrowser::finish_search()
+{
+    treeview->set_model(store);
+    select_uuid(selected_uuid_before_search);
+    scroll_to_selection();
+    auto n_items = store->children().size();
+    status_label->set_text(format_digits(n_items, 5) + " " + (n_items == 1 ? "Result" : "Results"));
 }
 
 } // namespace horizon

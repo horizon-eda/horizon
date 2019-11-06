@@ -76,10 +76,8 @@ void PoolBrowserPart::add_sort_controller_columns()
 
 void PoolBrowserPart::search()
 {
-    searched_once = true;
-    auto selected_uuid = get_selected();
-    treeview->unset_model();
-    store->clear();
+    prepare_search();
+
     Gtk::TreeModel::Row row;
     std::string MPN_search = MPN_entry->get_text();
     std::string manufacturer_search = manufacturer_entry->get_text();
@@ -168,9 +166,7 @@ void PoolBrowserPart::search()
     }
     */
 
-    treeview->set_model(store);
-    select_uuid(selected_uuid);
-    scroll_to_selection();
+    finish_search();
 }
 
 UUID PoolBrowserPart::uuid_from_row(const Gtk::TreeModel::Row &row)

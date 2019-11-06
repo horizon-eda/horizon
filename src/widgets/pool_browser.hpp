@@ -78,11 +78,15 @@ protected:
     bool searched_once = false;
 
     void set_busy(bool busy);
+    void prepare_search();
+    void finish_search();
 
 private:
     Gtk::Grid *grid = nullptr;
     int grid_top = 0;
     class CellRendererColorBox *cell_renderer_item_source = nullptr;
     Gtk::Box *busy_box = nullptr;
+    UUID selected_uuid_before_search;
+    Gtk::Label *status_label = nullptr;
 };
 } // namespace horizon

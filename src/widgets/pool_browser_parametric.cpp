@@ -338,10 +338,7 @@ void PoolBrowserParametric::apply_filters()
 
 void PoolBrowserParametric::search()
 {
-    searched_once = true;
-    auto selected_uuid = get_selected();
-    treeview->unset_model();
-    store->clear();
+    prepare_search();
     values_remaining.clear();
 
 
@@ -415,9 +412,7 @@ void PoolBrowserParametric::search()
         }
     }
 
-    treeview->set_model(store);
-    select_uuid(selected_uuid);
-    scroll_to_selection();
+    finish_search();
     update_filters();
     update_filters_applied();
 }
