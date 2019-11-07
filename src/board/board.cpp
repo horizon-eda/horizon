@@ -779,7 +779,14 @@ void Board::smash_package(BoardPackage *pkg)
     if (pkg->smashed)
         return;
     pkg->smashed = true;
-    for (const auto &it : pkg->pool_package->texts) {
+    const Package *ppkg;
+
+    if (pkg->alternate_package)
+        ppkg = pkg->alternate_package;
+    else
+        ppkg = pkg->pool_package;
+
+    for (const auto &it : ppkg->texts) {
         if (BoardLayers::is_silkscreen(it.second.layer)) { // top or bottom silkscreen
             auto uu = UUID::random();
             auto &x = texts.emplace(uu, uu).first->second;
