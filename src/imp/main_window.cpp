@@ -100,7 +100,7 @@ void MainWindow::tool_bar_flash(const std::string &s)
                 tool_bar_queue_close = false;
                 return false;
             },
-            1000);
+            2000);
 }
 
 void MainWindow::hud_update(const std::string &s)
