@@ -55,7 +55,7 @@ ToolPopover::ToolPopover(Gtk::Widget *parent, ActionCatalogItem::Availability av
 
     view = Gtk::manage(new Gtk::TreeView(store_filtered));
     view->get_selection()->set_mode(Gtk::SELECTION_BROWSE);
-    view->append_column("Tool", list_columns.name);
+    view->append_column("Action", list_columns.name);
     view->append_column("Keys", list_columns.keys);
     view->set_enable_search(false);
     view->signal_key_press_event().connect([this](GdkEventKey *ev) -> bool {
@@ -84,8 +84,13 @@ ToolPopover::ToolPopover(Gtk::Widget *parent, ActionCatalogItem::Availability av
                 return row[list_columns_group.name] == "SEPARATOR";
             });
     view_group->get_selection()->signal_changed().connect([this] {
-        Gtk::TreeModel::Row row = *view_group->get_selection()->get_selected();
-        selected_group = row[list_columns_group.group];
+        auto iter = view_group->get_selection()->get_selected();
+        if (iter) {
+            selected_group = (*iter)[list_columns_group.group];
+        }
+        else {
+            selected_group = ActionGroup::ALL;
+        }
         store_filtered->refilter();
     });
 
@@ -141,6 +146,7 @@ ToolPopover::ToolPopover(Gtk::Widget *parent, ActionCatalogItem::Availability av
             {ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE},
             {ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED},
             {ActionGroup::FRAME, ActionCatalogItem::AVAILABLE_IN_FRAME},
+            {ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC},
     };
 
     for (const auto &it : action_group_catalog) {
