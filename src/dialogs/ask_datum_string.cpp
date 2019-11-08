@@ -1,4 +1,5 @@
 #include "ask_datum_string.hpp"
+#include "util/gtk_util.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -67,11 +68,7 @@ AskDatumStringDialog::AskDatumStringDialog(Gtk::Window *parent, const std::strin
             auto la = Gtk::manage(new Gtk::Label("Press Shift+Enter to insert a line break"));
             la->get_style_context()->add_class("dim-label");
             la->set_xalign(0);
-            auto attributes_list = pango_attr_list_new();
-            auto attribute_scale = pango_attr_scale_new(.833);
-            pango_attr_list_insert(attributes_list, attribute_scale);
-            gtk_label_set_attributes(la->gobj(), attributes_list);
-            pango_attr_list_unref(attributes_list);
+            make_label_small(la);
             lbox->pack_start(*la, false, false, 0);
         }
         stack->add(*lbox, "entry");
@@ -82,11 +79,7 @@ AskDatumStringDialog::AskDatumStringDialog(Gtk::Window *parent, const std::strin
         auto la = Gtk::manage(new Gtk::Label("Press Shift+Enter to finish editing"));
         la->get_style_context()->add_class("dim-label");
         la->set_xalign(0);
-        auto attributes_list = pango_attr_list_new();
-        auto attribute_scale = pango_attr_scale_new(.833);
-        pango_attr_list_insert(attributes_list, attribute_scale);
-        gtk_label_set_attributes(la->gobj(), attributes_list);
-        pango_attr_list_unref(attributes_list);
+        make_label_small(la);
         lbox->pack_start(*la, false, false, 0);
         stack->add(*lbox, "view");
     }

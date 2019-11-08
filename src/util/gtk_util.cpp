@@ -197,5 +197,13 @@ Gtk::Box *make_boolean_ganged_switch(bool &v, const std::string &label_false, co
     return box;
 }
 
+void make_label_small(Gtk::Label *la)
+{
+    auto attributes_list = pango_attr_list_new();
+    auto attribute_scale = pango_attr_scale_new(.833);
+    pango_attr_list_insert(attributes_list, attribute_scale);
+    gtk_label_set_attributes(la->gobj(), attributes_list);
+    pango_attr_list_unref(attributes_list);
+}
 
 } // namespace horizon
