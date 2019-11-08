@@ -50,6 +50,7 @@ ToolResponse ToolEditLineRectangle::begin(const ToolArgs &args)
     }
     if (!start) {
         imp->tool_bar_flash("no start junction found");
+        core.r->revert();
         return ToolResponse::end();
     }
     std::set<Line *> lines_found;
@@ -71,6 +72,7 @@ ToolResponse ToolEditLineRectangle::begin(const ToolArgs &args)
     }
     if (junctions_found.size() != 4) {
         imp->tool_bar_flash("didn't find 4 junctions");
+        core.r->revert();
         return ToolResponse::end();
     }
 
@@ -96,6 +98,7 @@ ToolResponse ToolEditLineRectangle::begin(const ToolArgs &args)
         }
         else {
             imp->tool_bar_flash("topology error");
+            core.r->revert();
             return ToolResponse::end();
         }
     }
