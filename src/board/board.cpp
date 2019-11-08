@@ -252,37 +252,6 @@ Board::Board(const Board &brd)
     update_refs();
 }
 
-void Board::operator=(const Board &brd)
-{
-    layers = brd.layers;
-    uuid = brd.uuid;
-    block = brd.block;
-    name = brd.name;
-    n_inner_layers = brd.n_inner_layers;
-    polygons = brd.polygons;
-    holes = brd.holes;
-    packages.clear();
-    packages = brd.packages;
-    junctions = brd.junctions;
-    tracks = brd.tracks;
-    airwires = brd.airwires;
-    vias = brd.vias;
-    texts = brd.texts;
-    lines = brd.lines;
-    arcs = brd.arcs;
-    planes = brd.planes;
-    keepouts = brd.keepouts;
-    dimensions = brd.dimensions;
-    connection_lines = brd.connection_lines;
-    warnings = brd.warnings;
-    rules = brd.rules;
-    fab_output_settings = brd.fab_output_settings;
-    stackup = brd.stackup;
-    colors = brd.colors;
-    pdf_export_settings = brd.pdf_export_settings;
-    update_refs();
-}
-
 void Board::update_refs()
 {
     for (auto &it : packages) {

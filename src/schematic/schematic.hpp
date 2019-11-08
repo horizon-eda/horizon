@@ -42,7 +42,7 @@ public:
     void expand(bool careful = false);
 
     Schematic(const Schematic &sch);
-    void operator=(const Schematic &sch);
+    void operator=(const Schematic &sch) = delete;
     /**
      * objects owned by the Sheets may hold pointers to other objects of the
      * same sheet

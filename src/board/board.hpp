@@ -46,7 +46,7 @@ public:
     void expand_packages();
 
     Board(const Board &brd);
-    void operator=(const Board &brd);
+    void operator=(const Board &brd) = delete;
     void update_refs();
     void update_airwires(bool fast = false, const std::set<UUID> &nets = {});
     void disconnect_package(BoardPackage *pkg);

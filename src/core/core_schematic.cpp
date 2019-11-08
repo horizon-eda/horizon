@@ -710,7 +710,8 @@ void CoreSchematic::history_push()
 void CoreSchematic::history_load(unsigned int i)
 {
     auto x = dynamic_cast<CoreSchematic::HistoryItem *>(history.at(history_current).get());
-    sch = x->sch;
+    sch.~Schematic();
+    new (&sch) Schematic(x->sch);
     block = x->block;
     sch.block = &block;
     sch.update_refs();

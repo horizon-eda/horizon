@@ -914,20 +914,6 @@ Schematic::Schematic(const Schematic &sch)
     update_refs();
 }
 
-void Schematic::operator=(const Schematic &sch)
-{
-    uuid = sch.uuid;
-    block = sch.block;
-    name = sch.name;
-    sheets = sch.sheets;
-    rules = sch.rules;
-    title_block_values = sch.title_block_values;
-    group_tag_visible = sch.group_tag_visible;
-    annotation = sch.annotation;
-    pdf_export_settings = sch.pdf_export_settings;
-    update_refs();
-}
-
 void Schematic::update_refs()
 {
     for (auto &it_sheet : sheets) {
