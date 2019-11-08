@@ -693,8 +693,10 @@ void ImpBoard::handle_measure_tracks(const ActionConnection &a)
 
 void ImpBoard::handle_maybe_drag()
 {
-    if (!preferences.board.drag_start_track)
+    if (!preferences.board.drag_start_track) {
+        ImpBase::handle_maybe_drag();
         return;
+    }
     auto target = canvas->get_current_target();
     auto brd = core_board.get_board();
     if (target.type == ObjectType::PAD) {
