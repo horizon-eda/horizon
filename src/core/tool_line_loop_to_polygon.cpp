@@ -96,6 +96,7 @@ void ToolLineLoopToPolygon::remove_from_selection(ObjectType type, const UUID &u
 ToolResponse ToolLineLoopToPolygon::begin(const ToolArgs &args)
 {
     bool success = false;
+    std::string error_message;
     while (true) {
         Junction *start_junction = nullptr;
         for (const auto &it : core.r->selection) {
@@ -112,8 +113,10 @@ ToolResponse ToolLineLoopToPolygon::begin(const ToolArgs &args)
                 break;
             }
         }
-        if (start_junction == nullptr)
+        if (start_junction == nullptr) {
+            error_message = "found no start junction";
             break;
+        }
 
         std::vector<Connector> all_connectors;
         {
@@ -135,8 +138,10 @@ ToolResponse ToolLineLoopToPolygon::begin(const ToolArgs &args)
         }
 
         auto path = visit(start_junction, nullptr, junction_connections, {});
-        if (path.size() == 0)
+        if (path.size() == 0) {
+            error_message = "didn't find a loop";
             break;
+        }
         std::set<Connector *> connectors;
         auto poly = core.r->insert_polygon(UUID::random());
         for (const auto &it : path) {
@@ -169,8 +174,13 @@ ToolResponse ToolLineLoopToPolygon::begin(const ToolArgs &args)
         }
         success = true;
     }
-    if (success)
+    if (success) {
         core.r->commit();
+    }
+    else {
+        core.r->revert();
+        imp->tool_bar_flash(error_message);
+    }
     return ToolResponse::end();
 }
 
