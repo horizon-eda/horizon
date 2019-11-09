@@ -10,6 +10,7 @@ PropertyPanels::PropertyPanels(Core *c) : Gtk::Box(Gtk::Orientation::ORIENTATION
     signal_key_press_event().connect([this](GdkEventKey *ev) {
         if (ev->keyval == GDK_KEY_Escape) {
             reload();
+            s_signal_activate.emit();
             return true;
         }
         return false;

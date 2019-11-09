@@ -33,6 +33,11 @@ public:
         return s_signal_apply_all;
     }
 
+    type_signal_changed signal_activate()
+    {
+        return s_signal_activate;
+    }
+
     bool get_apply_all();
 
     virtual ~PropertyEditor()
@@ -52,6 +57,7 @@ protected:
 
     type_signal_changed s_signal_changed;
     type_signal_changed s_signal_apply_all;
+    type_signal_changed s_signal_activate;
     PropertyValue dummy;
     PropertyMeta meta;
 

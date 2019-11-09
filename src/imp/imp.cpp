@@ -342,6 +342,7 @@ void ImpBase::run(int argc, char *argv[])
         canvas_update();
         canvas->set_selection(panels->get_selection(), false);
     });
+    panels->signal_activate().connect([this] { canvas->grab_focus(); });
     panels->signal_throttled().connect(
             [this](bool thr) { main_window->property_throttled_revealer->set_reveal_child(thr); });
 

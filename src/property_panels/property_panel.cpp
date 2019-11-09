@@ -93,6 +93,7 @@ PropertyPanel::PropertyPanel(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 
         e->signal_changed().connect(
                 [this, property, e] { handle_changed(property, e->get_value(), e->get_apply_all()); });
+        e->signal_activate().connect([this] { parent->s_signal_activate.emit(); });
         e->signal_apply_all().connect([this, property, e] {
             if (e->get_apply_all()) {
                 handle_apply_all(property, e->get_value());

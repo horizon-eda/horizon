@@ -118,6 +118,7 @@ void PropertyEditorString::activate()
     modified = false;
     std::string txt = en->get_text();
     s_signal_changed.emit();
+    s_signal_activate.emit();
 }
 
 bool PropertyEditorString::focus_out_event(GdkEventFocus *e)

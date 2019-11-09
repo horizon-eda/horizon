@@ -17,6 +17,10 @@ public:
     {
         return s_signal_update;
     }
+    type_signal_update signal_activate()
+    {
+        return s_signal_activate;
+    }
 
     typedef sigc::signal<void, bool> type_signal_throttled;
     type_signal_throttled signal_throttled()
@@ -32,6 +36,7 @@ public:
 private:
     Core *core;
     type_signal_update s_signal_update;
+    type_signal_update s_signal_activate;
     type_signal_throttled s_signal_throttled;
     std::set<SelectableRef> selection_stored;
 
