@@ -28,4 +28,10 @@ std::string RulePlane::get_brief(const class Block *block) const
 {
     return "Match " + match.get_brief(block) + "\nLayer " + std::to_string(layer);
 }
+
+bool RulePlane::is_match_all() const
+{
+    return match.mode == RuleMatch::Mode::ALL && layer == 10000;
+}
+
 } // namespace horizon

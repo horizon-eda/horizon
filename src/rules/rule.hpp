@@ -25,7 +25,6 @@ enum class RuleID {
 
 class Rule {
 public:
-    Rule();
     Rule(const UUID &uu);
     Rule(const json &j);
     Rule(const UUID &uu, const json &j);
@@ -36,7 +35,14 @@ public:
 
     virtual json serialize() const;
     virtual std::string get_brief(const class Block *block = nullptr) const = 0;
+    virtual bool is_match_all() const
+    {
+        return false;
+    }
 
     virtual ~Rule();
+
+protected:
+    Rule();
 };
 } // namespace horizon

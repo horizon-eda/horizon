@@ -53,4 +53,10 @@ std::string RuleTrackWidth::get_brief(const class Block *block) const
 {
     return "Match " + match.get_brief(block);
 }
+
+bool RuleTrackWidth::is_match_all() const
+{
+    return match.mode == RuleMatch::Mode::ALL;
+}
+
 } // namespace horizon

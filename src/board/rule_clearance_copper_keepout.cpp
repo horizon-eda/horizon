@@ -68,4 +68,10 @@ std::string RuleClearanceCopperKeepout::get_brief(const class Block *block) cons
     ss << match_keepout.get_brief(block);
     return ss.str();
 }
+
+bool RuleClearanceCopperKeepout::is_match_all() const
+{
+    return match.mode == RuleMatch::Mode::ALL && match_keepout.mode == RuleMatchKeepout::Mode::ALL;
+}
+
 } // namespace horizon

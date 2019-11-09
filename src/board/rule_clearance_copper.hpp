@@ -11,6 +11,7 @@ public:
     json serialize() const override;
 
     std::string get_brief(const class Block *block = nullptr) const override;
+    bool is_match_all() const override;
 
     RuleMatch match_1;
     RuleMatch match_2;

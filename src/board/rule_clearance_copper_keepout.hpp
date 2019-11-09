@@ -12,6 +12,7 @@ public:
     json serialize() const override;
 
     std::string get_brief(const class Block *block = nullptr) const override;
+    bool is_match_all() const override;
 
     uint64_t get_clearance(PatchType pt_copper) const;
     void set_clearance(PatchType pt_copper, uint64_t c);

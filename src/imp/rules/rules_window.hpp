@@ -45,6 +45,7 @@ private:
     Gtk::Button *apply_button = nullptr;
     Gtk::Stack *stack = nullptr;
     Gtk::StackSwitcher *stack_switcher = nullptr;
+    Gtk::Revealer *rev_warn = nullptr;
     Glib::RefPtr<Gtk::SizeGroup> sg_order;
 
     void rule_selected(RuleID id);
@@ -52,6 +53,7 @@ private:
     void update_rule_instances(RuleID id);
     void update_rule_instance_labels();
     void update_rules_enabled();
+    void update_warning();
 
 
     CanvasGL *canvas = nullptr;

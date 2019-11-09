@@ -76,4 +76,10 @@ std::string RuleClearanceCopperOther::get_brief(const class Block *block) const
     ss << "Layer " << layer;
     return ss.str();
 }
+
+bool RuleClearanceCopperOther::is_match_all() const
+{
+    return match.mode == RuleMatch::Mode::ALL && layer == 10000;
+}
+
 } // namespace horizon
