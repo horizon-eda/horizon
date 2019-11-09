@@ -5,6 +5,11 @@
 #include "widgets/pool_browser_parametric.hpp"
 #include "util/stock_info_provider_partinfo.hpp"
 #include "preferences/preferences_provider.hpp"
+#ifdef G_OS_WIN32
+#undef ERROR
+#undef DELETE
+#undef DUPLICATE
+#endif
 #include "preferences/preferences.hpp"
 
 namespace horizon {
