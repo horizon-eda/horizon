@@ -1,8 +1,8 @@
 #pragma once
-#include "pool_browser.hpp"
+#include "pool_browser_stockinfo.hpp"
 
 namespace horizon {
-class PoolBrowserPart : public PoolBrowser {
+class PoolBrowserPart : public PoolBrowserStockinfo {
 public:
     PoolBrowserPart(class Pool *p, const UUID &euuid = UUID());
     void search() override;
@@ -20,6 +20,7 @@ protected:
     void add_sort_controller_columns() override;
     UUID uuid_from_row(const Gtk::TreeModel::Row &row) override;
     PoolItemSource pool_item_source_from_row(const Gtk::TreeModel::Row &row) override;
+    Gtk::TreeModelColumn<std::shared_ptr<StockInfoRecord>> &get_stock_info_column() override;
 
 private:
     class ListColumns : public Gtk::TreeModelColumnRecord {
@@ -34,6 +35,7 @@ private:
             Gtk::TreeModelColumnRecord::add(tags);
             Gtk::TreeModelColumnRecord::add(path);
             Gtk::TreeModelColumnRecord::add(source);
+            Gtk::TreeModelColumnRecord::add(stock_info);
         }
         Gtk::TreeModelColumn<Glib::ustring> MPN;
         Gtk::TreeModelColumn<Glib::ustring> manufacturer;
@@ -43,6 +45,7 @@ private:
         Gtk::TreeModelColumn<Glib::ustring> path;
         Gtk::TreeModelColumn<UUID> uuid;
         Gtk::TreeModelColumn<PoolItemSource> source;
+        Gtk::TreeModelColumn<std::shared_ptr<StockInfoRecord>> stock_info;
     };
     ListColumns list_columns;
     Gtk::Entry *MPN_entry = nullptr;

@@ -20,9 +20,6 @@ Client::Client()
     curl = curl_easy_init();
     if (!curl)
         throw std::runtime_error("curl_easy_init failed");
-    header_list = curl_slist_append(header_list, "Accept: application/vnd.github.v3+json");
-    header_list = curl_slist_append(header_list, "Content-Type: application/json");
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_list);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "carrotIndustries/horizon");
 
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
@@ -39,6 +36,17 @@ Client::Client()
         curl_easy_setopt(curl, CURLOPT_CAINFO, cert_file.c_str());
     }
 #endif
+}
+
+void Client::set_timeout(int timeout)
+{
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
+}
+
+void Client::append_header(const char *header)
+{
+    header_list = curl_slist_append(header_list, header);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_list);
 }
 
 void Client::set_auth(const std::string &user, const std::string &passwd)

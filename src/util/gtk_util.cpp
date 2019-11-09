@@ -206,4 +206,11 @@ void make_label_small(Gtk::Label *la)
     pango_attr_list_unref(attributes_list);
 }
 
+std::string make_link_markup(const std::string &href, const std::string &label)
+{
+    return "<a href=\"" + Glib::Markup::escape_text(href) + "\" title=\""
+           + Glib::Markup::escape_text(Glib::Markup::escape_text(href)) + "\">" + Glib::Markup::escape_text(label)
+           + "</a>";
+}
+
 } // namespace horizon

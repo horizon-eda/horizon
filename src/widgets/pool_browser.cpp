@@ -2,6 +2,7 @@
 #include "pool/pool.hpp"
 #include <set>
 #include "util/gtk_util.hpp"
+#include "util/util.hpp"
 #include "cell_renderer_color_box.hpp"
 #include "pool/pool_manager.hpp"
 #include "tag_entry.hpp"
@@ -167,13 +168,16 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
     }
 
     {
+        status_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
+        status_box->get_style_context()->add_class("dim-label");
+        status_box->property_margin() = 2;
         status_label = Gtk::manage(new Gtk::Label("Status"));
         label_set_tnum(status_label);
-        status_label->property_margin() = 2;
-        status_label->get_style_context()->add_class("dim-label");
         status_label->set_xalign(0);
         status_label->show();
-        pack_start(*status_label, false, false, 0);
+        status_box->pack_start(*status_label, false, false, 0);
+        pack_start(*status_box, false, false, 0);
+        status_box->show_all();
     }
 
 
@@ -406,18 +410,6 @@ void PoolBrowser::prepare_search()
     selected_uuid_before_search = get_selected();
     treeview->unset_model();
     store->clear();
-}
-
-static std::string format_digits(unsigned int m, unsigned int digits_max)
-{
-    auto m_str = std::to_string(m);
-    std::string prefix;
-    if (m_str.size() < digits_max) {
-        for (size_t i = 0; i < (digits_max - (int)m_str.size()); i++) {
-            prefix += " ";
-        }
-    }
-    return prefix + m_str;
 }
 
 void PoolBrowser::finish_search()

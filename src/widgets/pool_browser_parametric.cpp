@@ -208,7 +208,7 @@ private:
 };
 
 PoolBrowserParametric::PoolBrowserParametric(Pool *p, PoolParametric *pp, const std::string &table_name)
-    : PoolBrowser(p), pool_parametric(pp), table(pp->get_tables().at(table_name)), list_columns(table)
+    : PoolBrowserStockinfo(p), pool_parametric(pp), table(pp->get_tables().at(table_name)), list_columns(table)
 {
     search_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
     search_box->property_margin() = 10;
@@ -289,11 +289,6 @@ void PoolBrowserParametric::create_columns()
         auto tvc = create_tvc(col, list_columns.params.at(col.name));
         treeview->append_column(*tvc);
     }
-    {
-        auto cr = Gtk::manage(new Gtk::CellRendererText());
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("", *cr));
-        treeview->append_column(*tvc);
-    }
 }
 
 void PoolBrowserParametric::add_sort_controller_columns()
@@ -340,7 +335,7 @@ void PoolBrowserParametric::search()
 {
     prepare_search();
     values_remaining.clear();
-
+    iter_cache.clear();
 
     std::set<std::string> manufacturers;
     if (filters_applied.count("_manufacturer"))
@@ -378,12 +373,16 @@ void PoolBrowserParametric::search()
             bind_set(q, it.first, it.second);
         }
     }
+    std::list<UUID> uuids;
     try {
         Gtk::TreeModel::Row row;
         while (q.step()) {
             UUID uu(q.get<std::string>(0));
-            row = *(store->append());
-            row[list_columns.uuid] = q.get<std::string>(0);
+            uuids.push_back(uu);
+            auto iter = store->append();
+            row = *(iter);
+            row[list_columns.uuid] = uu;
+            iter_cache.emplace(uu, iter);
             for (size_t i = 0; i < table.columns.size(); i++) {
                 auto &col = table.columns.at(i);
                 std::string v = q.get<std::string>(1 + i);
@@ -415,6 +414,8 @@ void PoolBrowserParametric::search()
     finish_search();
     update_filters();
     update_filters_applied();
+    if (stock_info_provider)
+        stock_info_provider->update_parts(uuids);
 }
 
 void PoolBrowserParametric::update_filters()
@@ -505,6 +506,11 @@ void PoolBrowserParametric::add_copy_name_context_menu_item()
         auto clip = Gtk::Clipboard::get();
         clip->set_text(part->get_MPN());
     });
+}
+
+Gtk::TreeModelColumn<std::shared_ptr<StockInfoRecord>> &PoolBrowserParametric::get_stock_info_column()
+{
+    return list_columns.stock_info;
 }
 
 } // namespace horizon

@@ -381,7 +381,7 @@ SRC_IMP = \
 	3rd_party/sexpr/sexpr_parser.cpp\
 	3rd_party/sexpr/sexpr.cpp\
 	src/util/kicad_package_parser.cpp\
-	src/widgets/pool_browser_button.cpp\
+	src/widgets/pool_browser_button.cpp
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\
@@ -500,6 +500,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/pool_browser_frame.cpp\
 	src/widgets/pool_browser_parametric.cpp\
 	src/dialogs/pool_browser_dialog.cpp\
+	src/widgets/pool_browser_stockinfo.cpp\
 	src/widgets/cell_renderer_color_box.cpp\
 	src/widgets/where_used_box.cpp\
 	src/util/sort_controller.cpp\
@@ -537,6 +538,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/preferences_window_keys.cpp\
 	src/pool-prj-mgr/preferences_window_canvas.cpp\
 	src/pool-prj-mgr/preferences_window_pool.cpp\
+	src/pool-prj-mgr/preferences_window_partinfo.cpp\
 	src/imp/action.cpp\
 	src/imp/action_catalog.cpp\
 	src/widgets/unit_info_box.cpp\
@@ -550,6 +552,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/pool_browser_button.cpp\
 	src/pool-prj-mgr/welcome_window.cpp\
 	src/pool-prj-mgr/output_window.cpp\
+	src/util/stock_info_provider_partinfo.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

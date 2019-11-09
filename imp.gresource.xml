@@ -23,6 +23,7 @@
     <file>pool-prj-mgr/welcome.ui</file>
     <file>pool-prj-mgr/output_window.ui</file>
     <file>pool-prj-mgr/splash1_1080.png</file>
+    <file>util/stock_info_provider_partinfo_schema.sql</file>
 
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-schematic-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/edit-board-symbolic.svg</file>

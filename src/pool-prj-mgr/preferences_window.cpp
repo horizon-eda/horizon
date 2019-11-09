@@ -5,6 +5,7 @@
 #include "preferences_window_keys.hpp"
 #include "preferences_window_canvas.hpp"
 #include "preferences_window_pool.hpp"
+#include "preferences_window_partinfo.hpp"
 #include "canvas/color_palette.hpp"
 #include "board/board_layers.hpp"
 #include "pool/pool_manager.hpp"
@@ -153,6 +154,12 @@ PreferencesWindow::PreferencesWindow(Preferences *prefs) : Gtk::Window(), prefer
         auto ed = Gtk::manage(new ZoomPreferencesEditor(preferences, &preferences->zoom));
         stack->add(*ed, "zoom", "Zoom");
         ed->show();
+    }
+    {
+        auto ed = PartinfoPreferencesEditor::create(preferences, &preferences->partinfo);
+        stack->add(*ed, "partinfo", "Partinfo");
+        ed->show();
+        ed->unreference();
     }
     {
         auto ed = KeySequencesPreferencesEditor::create(preferences, &preferences->key_sequences);

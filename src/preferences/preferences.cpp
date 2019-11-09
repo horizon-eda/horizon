@@ -268,7 +268,32 @@ void KeySequencesPreferences::append_from_json(const json &j)
             Logger::log_warning("error loading key sequence", Logger::Domain::UNSPECIFIED, "unknown error");
         }
     }
-} // namespace horizon
+}
+
+void PartInfoPreferences::load_from_json(const json &j)
+{
+    enable = j.at("enable");
+    url = j.at("url");
+    preferred_distributor = j.at("preferred_distributor");
+    ignore_moq_gt_1 = j.at("ignore_moq_gt_1");
+    max_price_breaks = j.value("max_price_breaks", 3);
+}
+
+json PartInfoPreferences::serialize() const
+{
+    json j;
+    j["enable"] = enable;
+    j["url"] = url;
+    j["preferred_distributor"] = preferred_distributor;
+    j["ignore_moq_gt_1"] = ignore_moq_gt_1;
+    j["max_price_breaks"] = max_price_breaks;
+    return j;
+}
+
+bool PartInfoPreferences::is_enabled() const
+{
+    return enable && preferred_distributor.size();
+}
 
 json Preferences::serialize() const
 {
@@ -280,6 +305,7 @@ json Preferences::serialize() const
     j["board"] = board.serialize();
     j["zoom"] = zoom.serialize();
     j["capture_output"] = capture_output;
+    j["partinfo"] = partinfo.serialize();
     return j;
 }
 
@@ -306,6 +332,8 @@ void Preferences::load_from_json(const json &j)
         key_sequences.load_from_json(j.at("key_sequences"));
     key_sequences.append_from_json(json_from_resource("/net/carrotIndustries/horizon/imp/keys_default.json"));
     capture_output = j.value("capture_output", capture_output_default);
+    if (j.count("partinfo"))
+        partinfo.load_from_json(j.at("partinfo"));
 }
 
 void Preferences::load()

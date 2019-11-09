@@ -5,7 +5,7 @@
 #include <set>
 
 namespace horizon {
-PoolBrowserPart::PoolBrowserPart(Pool *p, const UUID &uu) : PoolBrowser(p), entity_uuid(uu)
+PoolBrowserPart::PoolBrowserPart(Pool *p, const UUID &uu) : PoolBrowserStockinfo(p), entity_uuid(uu)
 {
     construct();
     MPN_entry = create_search_entry("MPN");
@@ -77,7 +77,7 @@ void PoolBrowserPart::add_sort_controller_columns()
 void PoolBrowserPart::search()
 {
     prepare_search();
-
+    iter_cache.clear();
     Gtk::TreeModel::Row row;
     std::string MPN_search = MPN_entry->get_text();
     std::string manufacturer_search = manufacturer_entry->get_text();
@@ -136,10 +136,15 @@ void PoolBrowserPart::search()
         row[list_columns.manufacturer] = "none";
         row[list_columns.package] = "none";
     }
+    std::list<UUID> uuids;
     try {
         while (q.step()) {
-            row = *(store->append());
-            row[list_columns.uuid] = q.get<std::string>(0);
+            auto iter = store->append();
+            row = *iter;
+            UUID uu(q.get<std::string>(0));
+            uuids.push_back(uu);
+            iter_cache.emplace(uu, iter);
+            row[list_columns.uuid] = uu;
             row[list_columns.MPN] = q.get<std::string>(1);
             row[list_columns.manufacturer] = q.get<std::string>(2);
             row[list_columns.package] = q.get<std::string>(3);
@@ -167,6 +172,8 @@ void PoolBrowserPart::search()
     */
 
     finish_search();
+    if (stock_info_provider)
+        stock_info_provider->update_parts(uuids);
 }
 
 UUID PoolBrowserPart::uuid_from_row(const Gtk::TreeModel::Row &row)
@@ -185,6 +192,11 @@ void PoolBrowserPart::add_copy_name_context_menu_item()
         auto clip = Gtk::Clipboard::get();
         clip->set_text(part->get_MPN());
     });
+}
+
+Gtk::TreeModelColumn<std::shared_ptr<StockInfoRecord>> &PoolBrowserPart::get_stock_info_column()
+{
+    return list_columns.stock_info;
 }
 
 } // namespace horizon

@@ -3,6 +3,9 @@
 namespace horizon {
 GitHubClient::GitHubClient() : client("https://api.github.com")
 {
+    client.append_header("Accept: application/vnd.github.v3+json");
+    client.append_header("Accept: application/json");
+    client.append_header("Content-Type: application/json");
 }
 
 json GitHubClient::login(const std::string &user, const std::string &passwd)

@@ -269,6 +269,7 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
     status_cb(PoolUpdateStatus::INFO, "", "parts");
     pool->db.execute("BEGIN TRANSACTION");
     pool->db.execute("DELETE FROM parts");
+    pool->db.execute("DELETE FROM orderable_MPNs");
     for (const auto &bp : base_paths) {
         set_pool_info(bp);
         update_parts(Glib::build_filename(bp, "parts"));
@@ -787,6 +788,11 @@ void PoolUpdater::update_part(const std::string &filename, bool partial)
                     q.bind(1, part.uuid);
                     q.step();
                 }
+                {
+                    SQLite::Query q(pool->db, "DELETE FROM orderable_MPNs WHERE part = ?");
+                    q.bind(1, part.uuid);
+                    q.step();
+                }
                 clear_tags(ObjectType::PART, part.uuid);
                 clear_dependencies(ObjectType::PART, part.uuid);
             }
@@ -820,6 +826,15 @@ void PoolUpdater::update_part(const std::string &filename, bool partial)
                                  "($tag, $uuid, 'part')");
                 q2.bind("$uuid", part.uuid);
                 q2.bind("$tag", it_tag);
+                q2.step();
+            }
+            for (const auto &it_MPN : part.orderable_MPNs) {
+                SQLite::Query q2(pool->db,
+                                 "INSERT into orderable_MPNs (part, uuid, MPN) VALUES "
+                                 "($part, $uuid, $MPN)");
+                q2.bind("$part", part.uuid);
+                q2.bind("$uuid", it_MPN.first);
+                q2.bind("$MPN", it_MPN.second);
                 q2.step();
             }
             if (part.base) {

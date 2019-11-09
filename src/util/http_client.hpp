@@ -10,6 +10,12 @@ class Client {
 public:
     Client();
     void set_auth(const std::string &user, const std::string &passwd);
+    void set_timeout(int timeout);
+    void append_header(const char *header);
+    void append_header(const std::string &header)
+    {
+        append_header(header.c_str());
+    }
 
     std::string get(const std::string &url);
     std::string post(const std::string &url, const std::string &postdata = "");

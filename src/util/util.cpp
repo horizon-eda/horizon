@@ -390,6 +390,18 @@ std::string format_m_of_n(unsigned int m, unsigned int n)
     return prefix + m_str + "/" + n_str;
 }
 
+std::string format_digits(unsigned int m, unsigned int digits_max)
+{
+    auto m_str = std::to_string(m);
+    std::string prefix;
+    if (m_str.size() < digits_max) {
+        for (size_t i = 0; i < (digits_max - (int)m_str.size()); i++) {
+            prefix += " ";
+        }
+    }
+    return prefix + m_str;
+}
+
 double parse_si(const std::string &inps)
 {
     static const auto regex = Glib::Regex::create(
