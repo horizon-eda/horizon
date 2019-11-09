@@ -1,10 +1,16 @@
 #include "stock_info_provider_partinfo.hpp"
 #include <thread>
 #include "nlohmann/json.hpp"
-#include "preferences/preferences.hpp"
+
 #include "preferences/preferences_provider.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
+#ifdef G_OS_WIN32
+#undef ERROR
+#undef DELETE
+#undef DUPLICATE
+#endif
+#include "preferences/preferences.hpp"
 #include <list>
 
 namespace horizon {
