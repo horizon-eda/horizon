@@ -101,7 +101,7 @@ public:
 private:
     PartInfoCacheManager()
         : cache_db(Glib::build_filename(Glib::get_user_cache_dir(), "horizon-stock_info_provider_part_info_cache.db"),
-                   SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, 1000),
+                   SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, 10000),
           prefs(PreferencesProvider::get_prefs().partinfo)
     {
         int user_version = cache_db.get_user_version();

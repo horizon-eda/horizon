@@ -4,7 +4,12 @@
 #include "util/util.hpp"
 #include "export_bom/export_bom.hpp"
 #include "pool/part.hpp"
+#include "pool/pool.hpp"
 #include "widgets/generic_combo_box.hpp"
+#include "widgets/pool_browser_parametric.hpp"
+#include "preferences/preferences_provider.hpp"
+#include "preferences/preferences.hpp"
+#include "util/stock_info_provider_partinfo.hpp"
 
 namespace horizon {
 
@@ -35,8 +40,9 @@ void BOMExportWindow::MyExportFileChooser::prepare_filename(std::string &filenam
 }
 
 BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Block *blo,
-                                 BOMExportSettings *s, const std::string &project_dir)
-    : Gtk::Window(cobject), block(blo), settings(s), state_store(this, "imp-bom-export")
+                                 BOMExportSettings *s, Pool &p, const std::string &project_dir)
+    : Gtk::Window(cobject), block(blo), settings(s), pool(p), pool_parametric(pool.get_base_path()),
+      state_store(this, "imp-bom-export")
 {
 
     GET_WIDGET(export_button);
@@ -57,6 +63,13 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_OBJECT(sg_manufacturer);
     GET_OBJECT(sg_MPN);
     GET_OBJECT(sg_orderable_MPN);
+    GET_WIDGET(meta_parts_tv);
+    GET_WIDGET(param_browser_box);
+    GET_WIDGET(concrete_parts_label);
+    GET_WIDGET(rb_tol_10);
+    GET_WIDGET(rb_tol_1);
+    GET_WIDGET(button_clear_similar);
+    GET_WIDGET(button_set_similar);
 
     export_filechooser.attach(filename_entry, filename_button, this);
     export_filechooser.set_project_dir(project_dir);
@@ -126,8 +139,60 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
     update_incl_excl_sensitivity();
 
+
+    meta_parts_store = Gtk::ListStore::create(meta_parts_list_columns);
+    meta_parts_tv->set_model(meta_parts_store);
+    meta_parts_tv->append_column("QTY", meta_parts_list_columns.qty);
+    meta_parts_tv->append_column("MPN", meta_parts_list_columns.MPN);
+    meta_parts_tv->append_column("Value", meta_parts_list_columns.value);
+    meta_parts_tv->append_column("Manufacturer", meta_parts_list_columns.manufacturer);
+    meta_parts_tv->append_column("S MPN", meta_parts_list_columns.concrete_MPN);
+    meta_parts_tv->append_column("S Value", meta_parts_list_columns.concrete_value);
+    meta_parts_tv->append_column("S Manufacturer", meta_parts_list_columns.concrete_manufacturer);
+
+    meta_parts_tv->get_selection()->signal_changed().connect(
+            sigc::mem_fun(*this, &BOMExportWindow::update_concrete_parts));
+    rb_tol_10->signal_toggled().connect(sigc::mem_fun(*this, &BOMExportWindow::update_concrete_parts));
+    rb_tol_1->set_active(true);
+
+    button_set_similar->signal_clicked().connect(sigc::mem_fun(*this, &BOMExportWindow::handle_set_similar));
+
+    button_clear_similar->signal_clicked().connect([this] {
+        settings->concrete_parts.erase(meta_part_current);
+        update_meta_mapping();
+        s_signal_changed.emit();
+        update_similar_button_sensitivity();
+        update_preview();
+        update_orderable_MPNs();
+    });
+    update_similar_button_sensitivity();
+
     export_button->signal_clicked().connect(sigc::mem_fun(*this, &BOMExportWindow::generate));
 
+    update();
+}
+
+void BOMExportWindow::update_similar_button_sensitivity()
+{
+    if (!meta_part_current) {
+        button_set_similar->set_sensitive(false);
+        button_clear_similar->set_sensitive(false);
+        return;
+    }
+    button_clear_similar->set_sensitive(settings->concrete_parts.count(meta_part_current));
+    button_set_similar->set_sensitive(browser_param ? browser_param->get_selected() : false);
+}
+
+void BOMExportWindow::handle_set_similar()
+{
+    auto sel = browser_param->get_selected();
+    if (sel) {
+        settings->concrete_parts[meta_part_current] = pool.get_part(sel);
+        update_meta_mapping();
+        s_signal_changed.emit();
+    }
+    update_similar_button_sensitivity();
+    update_preview();
     update_orderable_MPNs();
 }
 
@@ -382,17 +447,100 @@ void BOMExportWindow::update_orderable_MPNs()
     }
 }
 
+void BOMExportWindow::update()
+{
+    update_preview();
+    update_orderable_MPNs();
+    meta_parts_tv->unset_model();
+    meta_parts_store->clear();
+    std::map<const Part *, unsigned int> parts;
+    for (const auto &it : block->components) {
+        if (it.second.part) {
+            parts[it.second.part]++;
+        }
+    }
+    for (const auto &it : parts) {
+        if (it.first->parametric.count("table")) {
+            Gtk::TreeModel::Row row = *meta_parts_store->append();
+            row[meta_parts_list_columns.MPN] = it.first->get_MPN();
+            row[meta_parts_list_columns.value] = it.first->get_value();
+            row[meta_parts_list_columns.manufacturer] = it.first->get_manufacturer();
+            row[meta_parts_list_columns.uuid] = it.first->uuid;
+            row[meta_parts_list_columns.qty] = it.second;
+        }
+    }
+    meta_parts_tv->set_model(meta_parts_store);
+    update_meta_mapping();
+    update_concrete_parts();
+}
+
+void BOMExportWindow::update_meta_mapping()
+{
+    for (auto it : meta_parts_store->children()) {
+        Gtk::TreeModel::Row row = *it;
+        UUID uu = row[meta_parts_list_columns.uuid];
+        if (settings->concrete_parts.count(uu)) {
+            auto part = settings->concrete_parts.at(uu);
+            row[meta_parts_list_columns.concrete_MPN] = part->get_MPN();
+            row[meta_parts_list_columns.concrete_value] = part->get_value();
+            row[meta_parts_list_columns.concrete_manufacturer] = part->get_manufacturer();
+        }
+        else {
+            row[meta_parts_list_columns.concrete_MPN] = "";
+            row[meta_parts_list_columns.concrete_value] = "";
+            row[meta_parts_list_columns.concrete_manufacturer] = "";
+        }
+    }
+}
+
+void BOMExportWindow::update_concrete_parts()
+{
+    auto sel = meta_parts_tv->get_selection()->get_selected();
+    if (browser_param) {
+        delete browser_param;
+        browser_param = nullptr;
+    }
+    if (sel) {
+        auto row = *sel;
+        auto part = pool.get_part(row[meta_parts_list_columns.uuid]);
+        meta_part_current = part->uuid;
+        concrete_parts_label->set_text("Similar parts to " + part->get_MPN());
+
+        browser_param = Gtk::manage(new PoolBrowserParametric(&pool, &pool_parametric, part->parametric.at("table")));
+        browser_param->set_similar_part_uuid(part->uuid);
+        browser_param->search();
+        float tol = rb_tol_10->get_active() ? .1 : .01;
+        browser_param->filter_similar(part->uuid, tol);
+        if (PreferencesProvider::get_prefs().partinfo.is_enabled()) {
+            auto prv = std::make_unique<StockInfoProviderPartinfo>(pool.get_base_path());
+            browser_param->add_stock_info_provider(std::move(prv));
+        }
+        browser_param->search();
+        param_browser_box->pack_start(*browser_param, true, true);
+        browser_param->show();
+        browser_param->signal_activated().connect(sigc::mem_fun(*this, &BOMExportWindow::handle_set_similar));
+        browser_param->signal_selected().connect(
+                sigc::mem_fun(*this, &BOMExportWindow::update_similar_button_sensitivity));
+        update_similar_button_sensitivity();
+    }
+    else {
+        concrete_parts_label->set_text("Select part to pick similar part");
+        meta_part_current = UUID();
+    }
+}
+
 void BOMExportWindow::set_can_export(bool v)
 {
     export_button->set_sensitive(v);
 }
 
-BOMExportWindow *BOMExportWindow::create(Gtk::Window *p, Block *b, BOMExportSettings *s, const std::string &project_dir)
+BOMExportWindow *BOMExportWindow::create(Gtk::Window *p, Block *b, BOMExportSettings *s, Pool &pool,
+                                         const std::string &project_dir)
 {
     BOMExportWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/net/carrotIndustries/horizon/imp/bom_export.ui");
-    x->get_widget_derived("window", w, b, s, project_dir);
+    x->get_widget_derived("window", w, b, s, pool, project_dir);
 
     w->set_transient_for(*p);
 

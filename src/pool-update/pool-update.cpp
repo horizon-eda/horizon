@@ -804,10 +804,10 @@ void PoolUpdater::update_part(const std::string &filename, bool partial)
             SQLite::Query q(pool->db,
                             "INSERT INTO parts "
                             "(uuid, MPN, manufacturer, entity, package, description, filename, pool_uuid, overridden, "
-                            "parametric_table) "
+                            "parametric_table, base) "
                             "VALUES "
                             "($uuid, $MPN, $manufacturer, $entity, $package, $description, $filename, $pool_uuid, "
-                            "$overridden, $parametric_table)");
+                            "$overridden, $parametric_table, $base)");
             q.bind("$uuid", part.uuid);
             q.bind("$MPN", part.get_MPN());
             q.bind("$manufacturer", part.get_manufacturer());
@@ -817,6 +817,7 @@ void PoolUpdater::update_part(const std::string &filename, bool partial)
             q.bind("$pool_uuid", pool_uuid);
             q.bind("$overridden", overridden);
             q.bind("$parametric_table", table);
+            q.bind("$base", part.base ? part.base->uuid : UUID());
             q.bind("$filename", get_path_rel(filename));
             q.step();
 

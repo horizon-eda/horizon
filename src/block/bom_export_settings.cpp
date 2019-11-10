@@ -1,5 +1,7 @@
 #include "bom_export_settings.hpp"
 #include "nlohmann/json.hpp"
+#include "pool/pool.hpp"
+#include "pool/part.hpp"
 
 namespace horizon {
 
@@ -8,7 +10,7 @@ const LutEnumStr<BOMExportSettings::CSVSettings::Order> bom_order_lut = {
         {"desc", BOMExportSettings::CSVSettings::Order::DESC},
 };
 
-BOMExportSettings::BOMExportSettings(const json &j)
+BOMExportSettings::BOMExportSettings(const json &j, Pool &pool)
     : csv_settings(j.at("csv_settings")), output_filename(j.at("output_filename").get<std::string>())
 {
     if (j.count("orderable_MPNs")) {
@@ -16,6 +18,21 @@ BOMExportSettings::BOMExportSettings(const json &j)
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             orderable_MPNs.emplace(u, it.value().get<std::string>());
+        }
+    }
+    if (j.count("concrete_parts")) {
+        const json &o = j["concrete_parts"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            const Part *part = nullptr;
+            try {
+                part = pool.get_part(it.value().get<std::string>());
+            }
+            catch (...) {
+                // not found
+            }
+            if (part)
+                concrete_parts.emplace(u, part);
         }
     }
 }
@@ -32,6 +49,10 @@ json BOMExportSettings::serialize() const
     j["orderable_MPNs"] = json::object();
     for (const auto &it : orderable_MPNs) {
         j["orderable_MPNs"][(std::string)it.first] = (std::string)it.second;
+    }
+    j["concrete_parts"] = json::object();
+    for (const auto &it : concrete_parts) {
+        j["concrete_parts"][(std::string)it.first] = (std::string)it.second->uuid;
     }
     return j;
 }

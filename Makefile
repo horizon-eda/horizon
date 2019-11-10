@@ -318,6 +318,7 @@ SRC_IMP = \
 	src/widgets/pool_browser_unit.cpp\
 	src/widgets/pool_browser_symbol.cpp\
 	src/widgets/pool_browser_frame.cpp\
+	src/widgets/pool_browser_stockinfo.cpp\
 	src/widgets/plane_editor.cpp\
 	src/widgets/title_block_values_editor.cpp\
 	3rd_party/dxflib/dl_dxf.cpp\
@@ -381,7 +382,11 @@ SRC_IMP = \
 	3rd_party/sexpr/sexpr_parser.cpp\
 	3rd_party/sexpr/sexpr.cpp\
 	src/util/kicad_package_parser.cpp\
-	src/widgets/pool_browser_button.cpp
+	src/widgets/pool_browser_button.cpp\
+	src/widgets/pool_browser_parametric.cpp\
+	src/util/stock_info_provider_partinfo.cpp\
+	src/util/http_client.cpp\
+
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\
@@ -699,7 +704,7 @@ $(BUILDDIR)/gen/version_gen.cpp: $(wildcard .git/HEAD .git/index) version.py mak
 
 $(BUILDDIR)/horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(OBJ_OCE) $(OBJ_IMP)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq) -lpodofo -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libcurl) -lpodofo -o $@
 
 $(BUILDDIR)/horizon-pool: $(OBJ_COMMON) $(OBJ_POOL_UTIL)
 	$(ECHO) " $@"

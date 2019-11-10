@@ -343,13 +343,25 @@ void PoolBrowserParametric::search()
     std::set<std::string> packages;
     if (filters_applied.count("_package"))
         packages = filters_applied.at("_package");
-    std::string qs =
-            "SELECT p.*, parts.MPN, parts.manufacturer, packages.name, parts.filename, parts.pool_uuid, "
-            "parts.overridden "
-            "FROM "
-            + table.name
-            + " AS p LEFT JOIN pool.parts USING (uuid) LEFT JOIN pool.packages ON parts.package = packages.uuid "
-            + "WHERE 1 ";
+    std::string qs;
+    if (similar_part_uuid) {
+        qs += "WITH RECURSIVE all_bases(uuidx) AS (SELECT $similar_part UNION "
+              "SELECT parts.base FROM parts INNER JOIN all_bases ON parts.uuid = uuidx "
+              "WHERE parts.base != '00000000-0000-0000-0000-000000000000'), "
+              "all_derived(uuidy) AS (SELECT * FROM all_bases UNION "
+              "SELECT parts.uuid FROM parts INNER JOIN all_derived ON parts.base = uuidy), "
+              "real_bases(uuidz) AS (SELECT DISTINCT parts.base FROM parts INNER JOIN all_derived ON "
+              "all_derived.uuidy = parts.base) ";
+    }
+    qs += "SELECT p.*, parts.MPN, parts.manufacturer, packages.name, parts.filename, parts.pool_uuid, "
+          "parts.overridden "
+          "FROM "
+          + table.name
+          + " AS p LEFT JOIN pool.parts USING (uuid) LEFT JOIN pool.packages ON parts.package = packages.uuid ";
+    if (similar_part_uuid) {
+        qs += "INNER JOIN real_bases ON real_bases.uuidz = parts.base ";
+    }
+    qs += "WHERE 1 ";
     if (manufacturers.size()) {
         qs += " AND parts.manufacturer IN " + get_in("_manufacturer", manufacturers.size());
     }
@@ -368,6 +380,9 @@ void PoolBrowserParametric::search()
     SQLite::Query q(pool_parametric->db, qs);
     bind_set(q, "_manufacturer", manufacturers);
     bind_set(q, "_package", packages);
+    if (similar_part_uuid) {
+        q.bind("$similar_part", similar_part_uuid);
+    }
     for (const auto &it : filters_applied) {
         if (it.first.at(0) != '_') {
             bind_set(q, it.first, it.second);
@@ -511,6 +526,41 @@ void PoolBrowserParametric::add_copy_name_context_menu_item()
 Gtk::TreeModelColumn<std::shared_ptr<StockInfoRecord>> &PoolBrowserParametric::get_stock_info_column()
 {
     return list_columns.stock_info;
+}
+
+void PoolBrowserParametric::set_similar_part_uuid(const UUID &uu)
+{
+    similar_part_uuid = uu;
+}
+
+void PoolBrowserParametric::filter_similar(const UUID &uu, float tol)
+{
+    auto part = pool->get_part(uu);
+    if (part->parametric.count("table") == 0)
+        return;
+    if (part->parametric.at("table") != table.name)
+        return;
+    for (const auto &col : table.columns) {
+        if (part->parametric.count(col.name)) {
+            if (col.type == PoolParametric::Column::Type::QUANTITY) {
+                if (values_remaining.count(col.name)) {
+                    std::string x = part->parametric.at(col.name);
+                    auto target = string_to_double(x);
+                    auto lo = target * (1 - tol);
+                    auto hi = target * (1 + tol);
+                    filters_applied[col.name].clear();
+                    for (const auto &it : values_remaining.at(col.name)) {
+                        auto v = string_to_double(it);
+                        if (v >= lo && v <= hi)
+                            filters_applied[col.name].insert(it);
+                    }
+                }
+            }
+            else {
+                filters_applied[col.name] = {part->parametric.at(col.name)};
+            }
+        }
+    }
 }
 
 } // namespace horizon

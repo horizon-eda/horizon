@@ -77,7 +77,7 @@ Block::Block(const UUID &uu, const json &j, Pool &pool) : uuid(uu), name(j.at("n
     }
     if (j.count("bom_export_settings")) {
         try {
-            bom_export_settings = BOMExportSettings(j.at("bom_export_settings"));
+            bom_export_settings = BOMExportSettings(j.at("bom_export_settings"), pool);
         }
         catch (const std::exception &e) {
             Logger::log_warning("couldn't load bom export settings", Logger::Domain::BLOCK, e.what());
@@ -296,8 +296,12 @@ std::map<const Part *, BOMRow> Block::get_BOM(const BOMExportSettings &settings)
     std::map<const Part *, BOMRow> rows;
     for (const auto &it : components) {
         if (it.second.part) {
-            rows[it.second.part];
-            rows[it.second.part].refdes.push_back(it.second.refdes);
+            const Part *part;
+            if (settings.concrete_parts.count(it.second.part->uuid))
+                part = settings.concrete_parts.at(it.second.part->uuid);
+            else
+                part = it.second.part;
+            rows[part].refdes.push_back(it.second.refdes);
         }
     }
     for (auto &it : rows) {
