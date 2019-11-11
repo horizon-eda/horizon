@@ -31,6 +31,7 @@ public:
     bool flip = false;
     bool smashed = false;
     bool omit_silkscreen = false;
+    bool fixed = false;
     std::vector<uuid_ptr<Text>> texts;
 
     std::string replace_text(const std::string &t, bool *replaced = nullptr) const;

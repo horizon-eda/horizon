@@ -246,6 +246,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X", 5}},
                   {ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y", 6}},
                   {ObjectProperty::ID::OMIT_SILKSCREEN, {ObjectProperty::Type::BOOL, "Omit Silkscreen", 7}},
+                  {ObjectProperty::ID::FIXED, {ObjectProperty::Type::BOOL, "Fix", 8}},
           }}},
         {ObjectType::TRACK,
          {"Track",

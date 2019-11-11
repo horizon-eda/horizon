@@ -127,6 +127,10 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             dynamic_cast<PropertyValueBool &>(value).value = pkg->flip;
             return true;
 
+        case ObjectProperty::ID::FIXED:
+            dynamic_cast<PropertyValueBool &>(value).value = pkg->fixed;
+            return true;
+
         case ObjectProperty::ID::REFDES:
             dynamic_cast<PropertyValueString &>(value).value = pkg->component->refdes;
             return true;
@@ -306,6 +310,10 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             pkg->flip = dynamic_cast<const PropertyValueBool &>(value).value;
             break;
 
+        case ObjectProperty::ID::FIXED:
+            pkg->fixed = dynamic_cast<const PropertyValueBool &>(value).value;
+            break;
+
         case ObjectProperty::ID::ALTERNATE_PACKAGE: {
             const auto alt_uuid = dynamic_cast<const PropertyValueUUID &>(value).value;
             if (!alt_uuid) {
@@ -320,6 +328,8 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         case ObjectProperty::ID::POSITION_X:
         case ObjectProperty::ID::POSITION_Y:
         case ObjectProperty::ID::ANGLE: {
+            if (pkg->fixed)
+                return false;
             const auto shift_before = pkg->placement.shift;
             set_placement(pkg->placement, value, property);
             auto delta = pkg->placement.shift - shift_before;
@@ -438,6 +448,13 @@ bool CoreBoard::get_property_meta(ObjectType type, const UUID &uu, ObjectPropert
             }
             return true;
         }
+
+        case ObjectProperty::ID::POSITION_X:
+        case ObjectProperty::ID::POSITION_Y:
+        case ObjectProperty::ID::ANGLE:
+        case ObjectProperty::ID::FLIPPED:
+            meta.is_settable = !pkg->fixed;
+            return true;
 
         default:
             return false;

@@ -9,7 +9,7 @@ BoardPackage::BoardPackage(const UUID &uu, const json &j, Block &block, Pool &po
     : uuid(uu), component(&block.components.at(j.at("component").get<std::string>())),
       pool_package(component->part->package), package(*pool_package), placement(j.at("placement")),
       flip(j.at("flip").get<bool>()), smashed(j.value("smashed", false)),
-      omit_silkscreen(j.value("omit_silkscreen", false))
+      omit_silkscreen(j.value("omit_silkscreen", false)), fixed(j.value("fixed", false))
 {
     if (j.count("texts")) {
         const json &o = j.at("texts");
@@ -38,6 +38,7 @@ json BoardPackage::serialize() const
     j["flip"] = flip;
     j["smashed"] = smashed;
     j["omit_silkscreen"] = omit_silkscreen;
+    j["fixed"] = fixed;
     j["texts"] = json::array();
     for (const auto &it : texts) {
         j["texts"].push_back((std::string)it->uuid);

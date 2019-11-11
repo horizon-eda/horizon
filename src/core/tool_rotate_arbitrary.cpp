@@ -19,6 +19,7 @@ ToolRotateArbitrary::ToolRotateArbitrary(Core *c, ToolID tid) : ToolBase(c, tid)
 void ToolRotateArbitrary::expand_selection()
 {
     std::set<SelectableRef> new_sel;
+    std::set<SelectableRef> pkgs_fixed;
     for (const auto &it : core.r->selection) {
         switch (it.type) {
         case ObjectType::LINE: {
@@ -51,8 +52,13 @@ void ToolRotateArbitrary::expand_selection()
 
         case ObjectType::BOARD_PACKAGE: {
             BoardPackage *pkg = &core.b->get_board()->packages.at(it.uuid);
-            for (const auto &itt : pkg->texts) {
-                new_sel.emplace(itt->uuid, ObjectType::TEXT);
+            if (pkg->fixed) {
+                pkgs_fixed.insert(it);
+            }
+            else {
+                for (const auto &itt : pkg->texts) {
+                    new_sel.emplace(itt->uuid, ObjectType::TEXT);
+                }
             }
         } break;
 
@@ -60,6 +66,14 @@ void ToolRotateArbitrary::expand_selection()
         }
     }
     core.r->selection.insert(new_sel.begin(), new_sel.end());
+    if (pkgs_fixed.size() && imp)
+        imp->tool_bar_flash("can't move fixed package");
+    for (auto it = core.r->selection.begin(); it != core.r->selection.end();) {
+        if (pkgs_fixed.count(*it))
+            it = core.r->selection.erase(it);
+        else
+            ++it;
+    }
 }
 
 ToolResponse ToolRotateArbitrary::begin(const ToolArgs &args)
