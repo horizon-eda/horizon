@@ -83,11 +83,11 @@ void KiCadPackageParser::parse_line(const SEXPR::SEXPR *data)
             }
             else if (tag == "layer") {
                 auto l = ch->GetChild(1)->GetSymbol();
-                if (l == "Dwgs.User") {
-                    return;
-                }
-                else {
+                try {
                     layer = get_layer(l);
+                }
+                catch (...) {
+                    return; // ignore
                 }
             }
             else if (tag == "width") {
