@@ -86,7 +86,7 @@ static PyObject *PySchematic_export_bom(PyObject *pself, PyObject *args)
         return NULL;
     try {
         auto settings_json = json_from_py(py_export_settings);
-        horizon::BOMExportSettings settings(settings_json);
+        horizon::BOMExportSettings settings(settings_json, self->schematic->pool);
         horizon::export_BOM(settings.output_filename, self->schematic->block, settings);
     }
     catch (const std::exception &e) {
