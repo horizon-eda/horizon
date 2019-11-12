@@ -656,7 +656,11 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
     trim(s);
     if (sel_count_type(sel, ObjectType::BOARD_PACKAGE) == 1) {
         const auto &pkg = core_board.get_board()->packages.at(sel_find_one(sel, ObjectType::BOARD_PACKAGE));
-        s += "\n\n<b>Package " + pkg.component->refdes + "</b>\n";
+        s += "\n\n<b>Package " + pkg.component->refdes + "</b>";
+        if (pkg.fixed) {
+            s += " (not movable)";
+        }
+        s += "\n";
         s += get_hud_text_for_component(pkg.component);
         sel_erase_type(sel, ObjectType::BOARD_PACKAGE);
     }
