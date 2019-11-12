@@ -170,7 +170,7 @@ int PNS_HORIZON_RULE_RESOLVER::Clearance(const PNS::ITEM *aA, const PNS::ITEM *a
         || (parent_b && parent_b->pad && parent_b->pad->padstack.type == horizon::Padstack::Type::MECHANICAL)
         || (parent_a && parent_a->hole && parent_a->hole->padstack.type == horizon::Padstack::Type::MECHANICAL)
         || (parent_b && parent_b->hole && parent_b->hole->padstack.type == horizon::Padstack::Type::MECHANICAL)) {
-        std::cout << "npth" << std::endl;
+        // std::cout << "npth" << std::endl;
         // any is mechanical (NPTH)
         auto net = net_a ? net_a : net_b; // only one has net
         auto a_is_npth =
@@ -346,7 +346,7 @@ public:
 
     void Clear() override
     {
-        std::cout << "debug clear" << std::endl;
+        // std::cout << "debug clear" << std::endl;
         for (auto &li : lines) {
             m_canvas->remove_obj(li);
         }
@@ -648,7 +648,7 @@ std::unique_ptr<PNS::VIA> PNS_HORIZON_IFACE::syncVia(const horizon::Via *via)
 
 void PNS_HORIZON_IFACE::SyncWorld(PNS::NODE *aWorld)
 {
-    std::cout << "!!!sync world" << std::endl;
+    // std::cout << "!!!sync world" << std::endl;
     if (!board) {
         wxLogTrace("PNS", "No board attached, aborting sync.");
         return;
@@ -707,7 +707,7 @@ void PNS_HORIZON_IFACE::SyncWorld(PNS::NODE *aWorld)
 
 void PNS_HORIZON_IFACE::EraseView()
 {
-    std::cout << "iface erase view" << std::endl;
+    // std::cout << "iface erase view" << std::endl;
 
     canvas->show_all_obj();
 
@@ -782,7 +782,7 @@ void PNS_HORIZON_IFACE::RemoveItem(PNS::ITEM *aItem)
 {
 
     auto parent = aItem->Parent();
-    std::cout << "!!!iface remove item " << parent << " " << aItem->KindStr() << std::endl;
+    // std::cout << "!!!iface remove item " << parent << " " << aItem->KindStr() << std::endl;
     if (parent) {
         if (parent->track) {
             board->tracks.erase(parent->track->uuid);
@@ -828,7 +828,7 @@ horizon::Junction *PNS_HORIZON_IFACE::find_junction(int layer, const horizon::Co
 
 void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
 {
-    std::cout << "!!!iface add item" << std::endl;
+    // std::cout << "!!!iface add item" << std::endl;
     switch (aItem->Kind()) {
     case PNS::ITEM::SEGMENT_T: {
         PNS::SEGMENT *seg = static_cast<PNS::SEGMENT *>(aItem);
@@ -897,8 +897,8 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
         }
     } break;
 
-    default:
-        std::cout << "!!!unhandled add " << aItem->KindStr() << std::endl;
+    default:;
+        // std::cout << "!!!unhandled add " << aItem->KindStr() << std::endl;
     }
 }
 
