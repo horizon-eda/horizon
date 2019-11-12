@@ -923,5 +923,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(IMPORT_KICAD_PACKAGE),
         TOOL_LUT_ITEM(DUPLICATE),
         TOOL_LUT_ITEM(SMASH_SILKSCREEN_GRAPHICS),
+        TOOL_LUT_ITEM(RENUMBER_PADS),
 };
 } // namespace horizon
