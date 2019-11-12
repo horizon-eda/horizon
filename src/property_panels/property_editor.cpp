@@ -113,8 +113,10 @@ Gtk::Widget *PropertyEditorString::create_editor()
 
 void PropertyEditorString::activate()
 {
-    if (!modified)
+    if (!modified) {
+        s_signal_activate.emit();
         return;
+    }
     modified = false;
     std::string txt = en->get_text();
     s_signal_changed.emit();
@@ -148,6 +150,7 @@ void PropertyEditorString::changed()
 Gtk::Widget *PropertyEditorDim::create_editor()
 {
     sp = Gtk::manage(new SpinButtonDim);
+    sp->signal_activate().connect([this] { s_signal_activate.emit(); });
     sp->set_range(range.first, range.second);
     connections.push_back(sp->signal_value_changed().connect([this] { s_signal_changed.emit(); }));
     return sp;
@@ -291,6 +294,7 @@ Gtk::Widget *PropertyEditorAngle::create_editor()
     sp->set_increments(4096, 4096);
     sp->signal_output().connect(sigc::mem_fun(*this, &PropertyEditorAngle::sp_output));
     sp->signal_input().connect(sigc::mem_fun(*this, &PropertyEditorAngle::sp_input));
+    sp->signal_activate().connect([this] { s_signal_activate.emit(); });
     connections.push_back(sp->signal_value_changed().connect(sigc::mem_fun(*this, &PropertyEditorAngle::changed)));
     return sp;
 }
