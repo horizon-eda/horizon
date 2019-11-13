@@ -128,5 +128,7 @@ enum class ToolID {
     DUPLICATE,
     SMASH_SILKSCREEN_GRAPHICS,
     RENUMBER_PADS,
+    FIX,
+    UNFIX
 };
 } // namespace horizon

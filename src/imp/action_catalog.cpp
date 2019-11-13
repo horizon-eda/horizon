@@ -707,6 +707,12 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Renumber pads", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::FIX},
+         {"Fix package", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::UNFIX},
+         {"Unfix package", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -924,5 +930,7 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(DUPLICATE),
         TOOL_LUT_ITEM(SMASH_SILKSCREEN_GRAPHICS),
         TOOL_LUT_ITEM(RENUMBER_PADS),
+        TOOL_LUT_ITEM(FIX),
+        TOOL_LUT_ITEM(UNFIX),
 };
 } // namespace horizon

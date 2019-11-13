@@ -68,6 +68,7 @@
 #include "tool_import_kicad_package.hpp"
 #include "tool_smash_silkscreen_graphics.hpp"
 #include "tool_renumber_pads.hpp"
+#include "tool_fix.hpp"
 
 namespace horizon {
 
@@ -338,6 +339,10 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::RENUMBER_PADS:
         return std::make_unique<ToolRenumberPads>(this, tool_id);
+
+    case ToolID::FIX:
+    case ToolID::UNFIX:
+        return std::make_unique<ToolFix>(this, tool_id);
 
     default:
         return nullptr;

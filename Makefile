@@ -230,6 +230,7 @@ SRC_IMP = \
 	src/core/tool_import_kicad_package.cpp\
 	src/core/tool_smash_silkscreen_graphics.cpp\
 	src/core/tool_renumber_pads.cpp\
+	src/core/tool_fix.cpp\
 	src/core/cores.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\
