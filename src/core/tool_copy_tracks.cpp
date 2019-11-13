@@ -123,6 +123,8 @@ ToolResponse ToolCopyTracks::update(const ToolArgs &args)
                                     }
                                 }
                             }
+                            if (!dest->package)
+                                success = false;
                         }
                         else {
                             success = false;
