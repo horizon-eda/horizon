@@ -201,5 +201,8 @@ private:
     bool property_panel_has_focus();
 
     sigc::connection initial_view_all_conn;
+
+    bool sockets_broken = false;
+    void show_sockets_broken_dialog(const std::string &msg = "");
 };
 } // namespace horizon

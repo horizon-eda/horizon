@@ -86,12 +86,27 @@ ImpBase::ImpBase(const PoolParams &params)
     auto ep_project = Glib::getenv("HORIZON_EP_MGR");
     if (ep_project.size()) {
         sock_project.connect(ep_project);
+        sock_project.setsockopt(ZMQ_RCVTIMEO, 2000);
+        sock_project.setsockopt(ZMQ_SNDTIMEO, 2000);
     }
     sockets_connected = ep_project.size() && ep_broadcast.size();
 }
 
+
+void ImpBase::show_sockets_broken_dialog(const std::string &msg)
+{
+    Gtk::MessageDialog md(*main_window, "Lost connection to project/pool manager", false /* use_markup */,
+                          Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+    md.set_secondary_text("Save your work an reopen the current document\n" + msg);
+    md.run();
+}
+
 json ImpBase::send_json(const json &j)
 {
+    if (sockets_broken) {
+        show_sockets_broken_dialog();
+        return nullptr;
+    }
     if (!sockets_connected)
         return nullptr;
 
@@ -100,12 +115,37 @@ json ImpBase::send_json(const json &j)
     memcpy(((uint8_t *)msg.data()), s.c_str(), s.size());
     auto m = (char *)msg.data();
     m[msg.size() - 1] = 0;
-    sock_project.send(msg);
+    try {
+        if (sock_project.send(msg) == false) {
+            sockets_broken = true;
+            sockets_connected = false;
+            show_sockets_broken_dialog("send timeout");
+            return nullptr;
+        }
+    }
+    catch (zmq::error_t &e) {
+        sockets_broken = true;
+        sockets_connected = false;
+        show_sockets_broken_dialog(e.what());
+        return nullptr;
+    }
 
     zmq::message_t rx;
-    sock_project.recv(&rx);
+    try {
+        if (sock_project.recv(&rx) == false) {
+            sockets_broken = true;
+            sockets_connected = false;
+            show_sockets_broken_dialog("receive timeout");
+            return nullptr;
+        }
+    }
+    catch (zmq::error_t &e) {
+        sockets_broken = true;
+        sockets_connected = false;
+        show_sockets_broken_dialog(e.what());
+        return nullptr;
+    }
     char *rxdata = ((char *)rx.data());
-    std::cout << "imp rx " << rxdata << std::endl;
     return json::parse(rxdata);
 }
 
