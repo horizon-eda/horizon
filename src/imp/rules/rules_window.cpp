@@ -272,7 +272,8 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                     for (const auto &path : it_err.error_polygons) {
                         ClipperLib::IntPoint last = path.back();
                         for (const auto &pt : path) {
-                            annotation->draw_line(Coordf(last.X, last.Y), Coordf(pt.X, pt.Y), ColorP::FROM_LAYER, .01_mm);
+                            annotation->draw_line(Coordf(last.X, last.Y), Coordf(pt.X, pt.Y), ColorP::FROM_LAYER,
+                                                  .01_mm);
                             last = pt;
                         }
                     }
