@@ -11,6 +11,8 @@ class ImpPackage : public ImpLayer {
 public:
     ImpPackage(const std::string &package_filename, const std::string &pool_path);
 
+    std::map<ObjectType, SelectionFilterInfo> get_selection_filter_info() const override;
+
 protected:
     void construct() override;
     void apply_preferences() override;

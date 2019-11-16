@@ -40,3 +40,9 @@
   border-width: 0 1px 1px 1px;
   border-style: solid;
 }
+
+.imp-selection-filter-tiny-button {
+  min-width: 0px;
+  min-height: 0px;
+  padding: 0px;
+}

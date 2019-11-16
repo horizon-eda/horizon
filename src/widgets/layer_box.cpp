@@ -168,8 +168,8 @@ void LayerBoxRow::set_force_visible(bool v)
 
 LayerBox::LayerBox(LayerProvider *lpr, bool show_title)
     : Glib::ObjectBase(typeid(LayerBox)), Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 2), lp(lpr),
-      p_property_work_layer(*this, "work-layer"), p_property_select_work_layer_only(*this, "select-work-layer-only"),
-      p_property_layer_opacity(*this, "layer-opacity"), p_property_highlight_mode(*this, "highlight-mode")
+      p_property_work_layer(*this, "work-layer"), p_property_layer_opacity(*this, "layer-opacity"),
+      p_property_highlight_mode(*this, "highlight-mode")
 {
     if (show_title) {
         auto *la = Gtk::manage(new Gtk::Label());
@@ -209,17 +209,17 @@ LayerBox::LayerBox(LayerProvider *lpr, bool show_title)
     sc->show_all();
     frb->pack_start(*sc, true, true, 0);
 
+    {
+        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+        sep->show();
+        frb->pack_start(*sep, false, false, 0);
+    }
+
     auto ab = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 2));
     ab->set_margin_top(4);
     ab->set_margin_bottom(4);
     ab->set_margin_start(4);
     ab->set_margin_end(4);
-
-    auto sel_only_work_layer_tb = Gtk::manage(new Gtk::CheckButton("Select only on work layer"));
-    binding_select_work_layer_only = Glib::Binding::bind_property(
-            sel_only_work_layer_tb->property_active(), property_select_work_layer_only(), Glib::BINDING_BIDIRECTIONAL);
-    property_select_work_layer_only() = false;
-    ab->pack_start(*sel_only_work_layer_tb);
 
     auto layer_opacity_grid = Gtk::manage(new Gtk::Grid);
     layer_opacity_grid->set_hexpand(false);

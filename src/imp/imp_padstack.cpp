@@ -4,6 +4,7 @@
 #include "parameter_window.hpp"
 #include "pool/part.hpp"
 #include "widgets/parameter_set_editor.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 ImpPadstack::ImpPadstack(const std::string &padstack_filename, const std::string &pool_path)
@@ -152,5 +153,19 @@ std::pair<ActionID, ToolID> ImpPadstack::get_doubleclick_action(ObjectType type,
         return {ActionID::NONE, ToolID::NONE};
     }
 }
+
+std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpPadstack::get_selection_filter_info() const
+{
+    const std::vector<int> my_layers = {BoardLayers::TOP_PASTE,   BoardLayers::TOP_MASK,      BoardLayers::TOP_COPPER,
+                                        BoardLayers::IN1_COPPER,  BoardLayers::BOTTOM_COPPER, BoardLayers::BOTTOM_MASK,
+                                        BoardLayers::BOTTOM_PASTE};
+    std::map<ObjectType, ImpBase::SelectionFilterInfo> r = {
+            {ObjectType::SHAPE, {my_layers, false}},
+            {ObjectType::HOLE, {}},
+            {ObjectType::POLYGON, {my_layers, false}},
+    };
+    return r;
+}
+
 
 }; // namespace horizon

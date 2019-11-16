@@ -232,11 +232,6 @@ PNS::ITEM *ToolWrapper::pickSingleItem(const VECTOR2I &aWhere, int aNet, int aLa
 
     for (int i = 0; i < 4; i++) {
         PNS::ITEM *item = prioritized[i];
-
-        if (tool->canvas->selection_filter.work_layer_only)
-            if (item && !item->Layers().Overlaps(tl))
-                item = NULL;
-
         if (item) {
             rv = item;
             break;

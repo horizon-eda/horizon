@@ -30,10 +30,6 @@ public:
         return p_property_highlight_mode.get_proxy();
     }
 
-    Glib::PropertyProxy<bool> property_select_work_layer_only()
-    {
-        return p_property_select_work_layer_only.get_proxy();
-    }
     json serialize();
     void load_from_json(const json &j);
 
@@ -43,7 +39,6 @@ private:
     Gtk::ListBox *lb = nullptr;
 
     Glib::Property<int> p_property_work_layer;
-    Glib::Property<bool> p_property_select_work_layer_only;
     Glib::Property<float> p_property_layer_opacity;
     Glib::Property<CanvasGL::HighlightMode> p_property_highlight_mode;
     type_signal_set_layer_display s_signal_set_layer_display;

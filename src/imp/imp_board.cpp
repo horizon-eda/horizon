@@ -575,6 +575,8 @@ void ImpBoard::construct()
     canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBoard::update_text_owner_annotation));
     update_text_owners();
 
+    core_board.signal_rebuilt().connect([this] { selection_filter_dialog->update_layers(); });
+
     main_window->left_panel->pack_start(*display_control_notebook, false, false);
     display_control_notebook->show();
 }
@@ -818,4 +820,54 @@ std::pair<ActionID, ToolID> ImpBoard::get_doubleclick_action(ObjectType type, co
         return {ActionID::NONE, ToolID::NONE};
     }
 }
+
+
+static void append_bottom_layers(std::vector<int> &layers)
+{
+    std::vector<int> bottoms;
+    bottoms.reserve(layers.size());
+    for (auto it = layers.rbegin(); it != layers.rend(); it++) {
+        if (*it >= 0 && *it != BoardLayers::L_OUTLINE)
+            bottoms.push_back(-100 - *it);
+    }
+    layers.insert(layers.end(), bottoms.begin(), bottoms.end());
+}
+
+std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBoard::get_selection_filter_info() const
+{
+    std::vector<int> inner_layers;
+    for (unsigned i = 0; i < core_board.get_board()->get_n_inner_layers(); i++) {
+        inner_layers.push_back(-i - 1);
+    }
+    std::vector<int> layers_line = {BoardLayers::TOP_ASSEMBLY, BoardLayers::TOP_SILKSCREEN, BoardLayers::TOP_MASK,
+                                    BoardLayers::TOP_COPPER};
+    append_bottom_layers(layers_line);
+
+    std::vector<int> layers_polygon = {BoardLayers::L_OUTLINE, BoardLayers::TOP_SILKSCREEN, BoardLayers::TOP_MASK,
+                                       BoardLayers::TOP_COPPER};
+    layers_polygon.insert(layers_polygon.end(), inner_layers.begin(), inner_layers.end());
+    append_bottom_layers(layers_polygon);
+
+    std::vector<int> layers_package = {BoardLayers::TOP_PACKAGE, BoardLayers::BOTTOM_PACKAGE};
+
+    std::vector<int> layers_track = {BoardLayers::TOP_COPPER};
+    layers_track.insert(layers_track.end(), inner_layers.begin(), inner_layers.end());
+    append_bottom_layers(layers_track);
+
+    std::map<ObjectType, ImpBase::SelectionFilterInfo> r = {
+            {ObjectType::BOARD_PACKAGE, {layers_package, false}},
+            {ObjectType::TRACK, {layers_track, false}},
+            {ObjectType::VIA, {}},
+            {ObjectType::POLYGON, {layers_polygon, true}},
+            {ObjectType::TEXT, {layers_line, true}},
+            {ObjectType::LINE, {layers_line, true}},
+            {ObjectType::JUNCTION, {}},
+            {ObjectType::ARC, {layers_line, true}},
+            {ObjectType::DIMENSION, {}},
+            {ObjectType::BOARD_HOLE, {}},
+            {ObjectType::CONNECTION_LINE, {}},
+    };
+    return r;
+}
+
 } // namespace horizon

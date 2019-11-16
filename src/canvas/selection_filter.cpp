@@ -3,19 +3,28 @@
 #include "canvas.hpp"
 
 namespace horizon {
-bool SelectionFilter::can_select(const SelectableRef &sel)
+bool SelectionFilter::can_select(const SelectableRef &sel) const
 {
-    if (object_filter.count(sel.type))
-        if (!object_filter.at(sel.type))
-            return false;
-    if (work_layer_only && (sel.layer == 10000))
+    if (!ca->layer_is_visible(sel.layer) && sel.layer != 10000 && sel.layer != BoardLayers::TOP_PACKAGE
+        && sel.layer != BoardLayers::BOTTOM_PACKAGE)
         return false;
-    if (sel.layer == 10000)
+    ObjectType type = sel.type;
+    if (type == ObjectType::POLYGON_ARC_CENTER || sel.type == ObjectType::POLYGON_EDGE
+        || sel.type == ObjectType::POLYGON_VERTEX)
+        type = ObjectType::POLYGON;
+
+    if (object_filter.count(type)) {
+        const auto &filter = object_filter.at(type);
+        if (filter.layers.count(sel.layer)) {
+            return filter.layers.at(sel.layer);
+        }
+        else {
+            return filter.other_layers;
+        }
+    }
+    else {
         return true;
-    if (work_layer_only && (ca->work_layer != sel.layer))
-        return false;
-    if (!ca->layer_is_visible(sel.layer))
-        return false;
+    }
     return true;
 }
 } // namespace horizon

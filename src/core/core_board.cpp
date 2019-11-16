@@ -558,6 +558,11 @@ Board *CoreBoard::get_board(bool work)
     return &brd;
 }
 
+const Board *CoreBoard::get_board() const
+{
+    return &brd;
+}
+
 Block *CoreBoard::get_block(bool work)
 {
     return get_board(work)->block;

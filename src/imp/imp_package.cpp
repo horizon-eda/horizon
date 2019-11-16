@@ -736,4 +736,36 @@ std::pair<ActionID, ToolID> ImpPackage::get_doubleclick_action(ObjectType type, 
     }
 }
 
+static void append_bottom_layers(std::vector<int> &layers)
+{
+    std::vector<int> bottoms;
+    bottoms.reserve(layers.size());
+    for (auto it = layers.rbegin(); it != layers.rend(); it++) {
+        bottoms.push_back(-100 - *it);
+    }
+    layers.insert(layers.end(), bottoms.begin(), bottoms.end());
+}
+
+std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpPackage::get_selection_filter_info() const
+{
+    std::vector<int> layers_line = {BoardLayers::TOP_ASSEMBLY, BoardLayers::TOP_PACKAGE, BoardLayers::TOP_SILKSCREEN};
+    append_bottom_layers(layers_line);
+    std::vector<int> layers_text = {BoardLayers::TOP_ASSEMBLY, BoardLayers::TOP_SILKSCREEN};
+    append_bottom_layers(layers_text);
+    std::vector<int> layers_polygon = {BoardLayers::TOP_COURTYARD, BoardLayers::TOP_ASSEMBLY, BoardLayers::TOP_PACKAGE,
+                                       BoardLayers::TOP_SILKSCREEN};
+    append_bottom_layers(layers_polygon);
+    std::map<ObjectType, ImpBase::SelectionFilterInfo> r = {
+            {ObjectType::PAD, {}},
+            {ObjectType::LINE, {layers_line, true}},
+            {ObjectType::TEXT, {layers_text, true}},
+            {ObjectType::JUNCTION, {}},
+            {ObjectType::POLYGON, {layers_polygon, true}},
+            {ObjectType::DIMENSION, {}},
+            {ObjectType::ARC, {layers_line, true}},
+    };
+    return r;
+}
+
+
 } // namespace horizon

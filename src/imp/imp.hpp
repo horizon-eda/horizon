@@ -50,6 +50,20 @@ public:
     std::set<ObjectRef> highlights;
     virtual void update_highlights(){};
 
+    class SelectionFilterInfo {
+    public:
+        SelectionFilterInfo()
+        {
+        }
+        SelectionFilterInfo(const std::vector<int> &l, bool o) : layers(l), has_others(o)
+        {
+        }
+        std::vector<int> layers;
+        bool has_others = false;
+    };
+
+    virtual std::map<ObjectType, SelectionFilterInfo> get_selection_filter_info() const;
+
 protected:
     MainWindow *main_window;
     class CanvasGL *canvas;

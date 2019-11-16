@@ -27,8 +27,6 @@ void ImpLayer::construct_layer_box(bool pack)
         canvas->set_layer_display(index, ld);
         canvas->queue_draw();
     });
-    layer_box->property_select_work_layer_only().signal_changed().connect(
-            [this] { canvas->selection_filter.work_layer_only = layer_box->property_select_work_layer_only(); });
     core.r->signal_request_save_meta().connect([this] {
         json j;
         j["layer_display"] = layer_box->serialize();

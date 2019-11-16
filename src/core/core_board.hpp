@@ -37,6 +37,7 @@ public:
 
     const Board *get_canvas_data();
     Board *get_board(bool work = true);
+    const Board *get_board() const;
     ViaPadstackProvider *get_via_padstack_provider();
     class Rules *get_rules() override;
     FabOutputSettings *get_fab_output_settings()

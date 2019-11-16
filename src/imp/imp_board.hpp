@@ -11,6 +11,8 @@ public:
     const std::map<int, Layer> &get_layers();
     void update_highlights() override;
 
+    std::map<ObjectType, SelectionFilterInfo> get_selection_filter_info() const override;
+
 protected:
     void construct() override;
     bool handle_broadcast(const json &j) override;

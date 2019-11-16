@@ -391,7 +391,7 @@ void ImpBase::run(int argc, char *argv[])
     main_window->left_panel->pack_end(*warnings_box, false, false, 0);
 
     selection_filter_dialog =
-            std::make_unique<SelectionFilterDialog>(this->main_window, &canvas->selection_filter, core.r);
+            std::make_unique<SelectionFilterDialog>(this->main_window, canvas->selection_filter, *this);
 
     key_sequence_dialog = std::make_unique<KeySequenceDialog>(this->main_window);
 
@@ -1849,6 +1849,21 @@ std::pair<ActionID, ToolID> ImpBase::get_doubleclick_action(ObjectType type, con
     default:
         return {ActionID::NONE, ToolID::NONE};
     }
+}
+
+std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBase::get_selection_filter_info() const
+{
+    std::map<ObjectType, ImpBase::SelectionFilterInfo> r;
+    for (const auto &it : object_descriptions) {
+        ObjectType type = it.first;
+        if (type == ObjectType::POLYGON_ARC_CENTER || type == ObjectType::POLYGON_EDGE
+            || type == ObjectType::POLYGON_VERTEX)
+            type = ObjectType::POLYGON;
+        if (core.r->has_object_type(type)) {
+            r[type];
+        }
+    }
+    return r;
 }
 
 } // namespace horizon
