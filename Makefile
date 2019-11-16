@@ -777,9 +777,10 @@ install: $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-eda $(BUILDDIR)/horizon-prj
 
 
 clean: clean_router clean_oce clean_res
-	$(RM) $(OBJ_ALL) $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-pool $(BUILDDIR)/horizon-prj $(BUILDDIR)/horizon-pool-mgr $(BUILDDIR)/horizon-prj-mgr $(BUILDDIR)/horizon-pgm-test $(BUILDDIR)/horizon-gen-pkg $(BUILDDIR)/horizon-eda $(OBJ_ALL:.o=.d) $(GENDIR)/resources.cpp $(GENDIR)/version_gen.cpp
+	$(RM) $(OBJ_ALL) $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-pool $(BUILDDIR)/horizon-prj $(BUILDDIR)/horizon-pool-mgr $(BUILDDIR)/horizon-prj-mgr $(BUILDDIR)/horizon-pgm-test $(BUILDDIR)/horizon-gen-pkg $(BUILDDIR)/horizon-eda $(OBJ_ALL:.o=.d) $(GENDIR)/resources.cpp $(GENDIR)/version_gen.cpp $(OBJ_COMMON) $(OBJ_COMMON:.o=.d)
 	$(RM) $(BUILDDIR)/horizon.so
 	$(RM) $(OBJ_SHARED) $(OBJ_PYTHON) $(OBJ_SHARED:.o=.d) $(OBJ_PYTHON:.o=.d)
+	$(RM) -r __pycache__
 
 clean_router:
 	$(RM) $(OBJ_ROUTER) $(OBJ_ROUTER:.o=.d)
