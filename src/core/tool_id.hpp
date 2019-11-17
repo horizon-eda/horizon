@@ -129,6 +129,7 @@ enum class ToolID {
     SMASH_SILKSCREEN_GRAPHICS,
     RENUMBER_PADS,
     FIX,
-    UNFIX
+    UNFIX,
+    POLYGON_TO_LINE_LOOP
 };
 } // namespace horizon
