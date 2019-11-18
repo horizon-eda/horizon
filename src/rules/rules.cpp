@@ -33,6 +33,8 @@ Color rules_check_error_level_to_color(RulesCheckErrorLevel lev)
         return Color::new_from_int(252, 175, 62);
     case RulesCheckErrorLevel::FAIL:
         return Color::new_from_int(239, 41, 41);
+    case RulesCheckErrorLevel::DISABLED:
+        return Color::new_from_int(117, 80, 123);
     default:
         return Color::new_from_int(255, 0, 255);
     }
@@ -48,6 +50,8 @@ std::string rules_check_error_level_to_string(RulesCheckErrorLevel lev)
         return "Warn";
     case RulesCheckErrorLevel::FAIL:
         return "Fail";
+    case RulesCheckErrorLevel::DISABLED:
+        return "Disabled";
     default:
         return "invalid";
     }

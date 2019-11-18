@@ -477,6 +477,10 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd)
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
+    if (!rule_preflight_checks.enabled) {
+        r.level = RulesCheckErrorLevel::DISABLED;
+        return r;
+    }
 
     for (const auto &it : brd->airwires) {
         r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
