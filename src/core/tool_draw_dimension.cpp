@@ -39,9 +39,17 @@ void ToolDrawDimension::update_tip()
         ss << "label";
         break;
     }
-    ss << " <b>RMB:</b>cancel";
-    if (state == State::LABEL) {
-        ss << " <b>e:</b>flip <b>m:</b>mode ";
+    ss << " <b>RMB:</b>cancel ";
+    if (state == State::P1 || state == State::LABEL) {
+        if (restrict_mode == RestrictMode::ARB) {
+            ss << "<b>m:</b>mode ";
+        }
+        if (state == State::P1) {
+            ss << "<b>/:</b>restrict ";
+            if (restrict_mode != RestrictMode::ARB) {
+                ss << "<b>Return:</b>enter distance ";
+            }
+        }
         ss << "<i>";
         switch (temp->mode) {
         case Dimension::Mode::DISTANCE:
@@ -54,6 +62,11 @@ void ToolDrawDimension::update_tip()
             ss << "Vertical";
             break;
         }
+
+        if (state == State::P1) {
+            ss << " Restrict: " << restrict_mode_to_string();
+        }
+
         ss << "</i>";
     }
     imp->tool_bar_set_tip(ss.str());
@@ -68,7 +81,7 @@ ToolResponse ToolDrawDimension::update(const ToolArgs &args)
             temp->p1 = args.coords;
             break;
         case State::P1:
-            temp->p1 = args.coords;
+            temp->p1 = get_coord_restrict(temp->p0, args.coords);
             break;
         case State::LABEL: {
             temp->label_distance = temp->project(args.coords - temp->p0);
@@ -98,13 +111,8 @@ ToolResponse ToolDrawDimension::update(const ToolArgs &args)
         }
     }
     else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_e) {
-            if (state == State::LABEL) {
-                std::swap(temp->p0, temp->p1);
-                temp->label_distance *= -1;
-            }
-        }
-        else if (args.key == GDK_KEY_m) {
+        if (args.key == GDK_KEY_m && (state == State::P1 || state == State::LABEL)
+            && restrict_mode == RestrictMode::ARB) {
             switch (temp->mode) {
             case Dimension::Mode::DISTANCE:
                 temp->mode = Dimension::Mode::HORIZONTAL;
@@ -118,6 +126,42 @@ ToolResponse ToolDrawDimension::update(const ToolArgs &args)
             }
             temp->label_distance = temp->project(args.coords - temp->p0);
             update_tip();
+        }
+        else if (args.key == GDK_KEY_slash && state == State::P1) {
+            cycle_restrict_mode();
+            if (restrict_mode == RestrictMode::X) {
+                temp->mode = Dimension::Mode::HORIZONTAL;
+            }
+            else if (restrict_mode == RestrictMode::Y) {
+                temp->mode = Dimension::Mode::VERTICAL;
+            }
+            else if (restrict_mode == RestrictMode::ARB) {
+                temp->mode = Dimension::Mode::DISTANCE;
+            }
+            temp->p1 = get_coord_restrict(temp->p0, args.coords);
+            update_tip();
+        }
+        else if (args.key == GDK_KEY_Return && state == State::P1) {
+            if (restrict_mode == RestrictMode::X) {
+                auto dist = temp->p1.x - temp->p0.x;
+                auto dist_sign = dist > 0 ? 1 : -1;
+                auto r = imp->dialogs.ask_datum("Enter distance", std::abs(dist));
+                if (r.first) {
+                    temp->p1 = temp->p0 + Coordi(r.second * dist_sign, 0);
+                    state = State::LABEL;
+                    update_tip();
+                }
+            }
+            else if (restrict_mode == RestrictMode::Y) {
+                auto dist = temp->p1.y - temp->p0.y;
+                auto dist_sign = dist > 0 ? 1 : -1;
+                auto r = imp->dialogs.ask_datum("Enter distance", std::abs(dist));
+                if (r.first) {
+                    temp->p1 = temp->p0 + Coordi(0, r.second * dist_sign);
+                    state = State::LABEL;
+                    update_tip();
+                }
+            }
         }
         else if (args.key == GDK_KEY_Escape) {
             core.r->revert();

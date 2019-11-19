@@ -1,8 +1,9 @@
 #pragma once
 #include "core.hpp"
+#include "tool_helper_restrict.hpp"
 
 namespace horizon {
-class ToolDrawDimension : public ToolBase {
+class ToolDrawDimension : public ToolBase, public ToolHelperRestrict {
 public:
     ToolDrawDimension(Core *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
