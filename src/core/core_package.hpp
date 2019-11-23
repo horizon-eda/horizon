@@ -37,7 +37,6 @@ public:
     void rebuild(bool from_undo = false) override;
     void commit() override;
     void revert() override;
-    void save() override;
 
     bool can_search_for_object_type(ObjectType type) const override;
     std::list<SearchResult> search(const SearchQuery &q) override;
@@ -74,6 +73,8 @@ private:
     };
     void history_push() override;
     void history_load(unsigned int i) override;
+    void save(const std::string &suffix) override;
+    void delete_autosave() override;
 
 public:
     std::string parameter_program_code;

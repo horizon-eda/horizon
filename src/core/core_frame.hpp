@@ -18,7 +18,6 @@ public:
     void rebuild(bool from_undo = false) override;
     void commit() override;
     void revert() override;
-    void save() override;
 
     std::pair<Coordi, Coordi> get_bbox() override;
 
@@ -42,5 +41,7 @@ private:
     };
     void history_push() override;
     void history_load(unsigned int i) override;
+    void save(const std::string &suffix) override;
+    void delete_autosave() override;
 };
 } // namespace horizon

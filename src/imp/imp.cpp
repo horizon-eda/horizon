@@ -168,6 +168,7 @@ bool ImpBase::handle_close(GdkEventAny *ev)
         md.add_button("Save", 2);
         switch (md.run()) {
         case 1:
+            core.r->delete_autosave();
             return false; // close
 
         case 2:
@@ -771,6 +772,34 @@ void ImpBase::run(int argc, char *argv[])
     sc();
 
     core.r->signal_rebuilt().connect([this] { update_monitor(); });
+
+    Glib::signal_timeout().connect_seconds(sigc::track_obj(
+                                                   [this] {
+                                                       if (core.r->tool_is_active()) {
+                                                           queue_autosave = true;
+                                                       }
+                                                       else {
+                                                           if (needs_autosave) {
+                                                               core.r->autosave();
+                                                               needs_autosave = false;
+                                                           }
+                                                       }
+                                                       return true;
+                                                   },
+                                                   *main_window),
+                                           60);
+    core.r->signal_rebuilt().connect([this] {
+        if (queue_autosave) {
+            queue_autosave = false;
+            core.r->autosave();
+            needs_autosave = false;
+        }
+    });
+    core.r->signal_needs_save().connect([this](bool v) {
+        if (!v)
+            needs_autosave = false;
+    });
+    core.r->signal_modified().connect([this] { needs_autosave = true; });
 
     app->run(*main_window);
 }
@@ -1654,6 +1683,7 @@ bool ImpBase::handle_broadcast(const json &j)
         return true;
     }
     else if (op == "close") {
+        core.r->delete_autosave();
         delete main_window;
         return true;
     }

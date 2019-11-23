@@ -393,6 +393,9 @@ json Core::get_meta()
 
 void Core::set_needs_save(bool v)
 {
+    if (v)
+        s_signal_modified.emit();
+
     if (v != needs_save) {
         needs_save = v;
         s_signal_needs_save.emit(v);
@@ -407,6 +410,20 @@ void Core::set_needs_save()
 bool Core::get_needs_save() const
 {
     return needs_save;
+}
+
+void Core::save()
+{
+    save("");
+    delete_autosave();
+    set_needs_save(false);
+}
+
+const std::string Core::autosave_suffix = ".autosave";
+
+void Core::autosave()
+{
+    save(autosave_suffix);
 }
 
 void Core::sort_search_results(std::list<Core::SearchResult> &results, const SearchQuery &q)

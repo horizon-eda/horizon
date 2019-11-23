@@ -4,6 +4,8 @@
 #include <fstream>
 #include "nlohmann/json.hpp"
 #include "util/util.hpp"
+#include <giomm/file.h>
+#include <glibmm/fileutils.h>
 
 namespace horizon {
 CorePadstack::CorePadstack(const std::string &filename, Pool &pool)
@@ -268,7 +270,7 @@ const std::string &CorePadstack::get_filename() const
     return m_filename;
 }
 
-void CorePadstack::save()
+void CorePadstack::save(const std::string &suffix)
 {
     padstack.parameter_program.set_code(parameter_program_code);
     padstack.parameter_set = parameter_set;
@@ -277,8 +279,14 @@ void CorePadstack::save()
     s_signal_save.emit();
 
     json j = padstack.serialize();
-    save_json_to_file(m_filename, j);
-
-    set_needs_save(false);
+    save_json_to_file(m_filename + suffix, j);
 }
+
+
+void CorePadstack::delete_autosave()
+{
+    if (Glib::file_test(m_filename + autosave_suffix, Glib::FILE_TEST_IS_REGULAR))
+        Gio::File::create_for_path(m_filename + autosave_suffix)->remove();
+}
+
 } // namespace horizon

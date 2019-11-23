@@ -5,6 +5,8 @@
 #include "util/util.hpp"
 #include <algorithm>
 #include "nlohmann/json.hpp"
+#include <giomm/file.h>
+#include <glibmm/fileutils.h>
 
 namespace horizon {
 CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
@@ -669,7 +671,7 @@ const std::string &CoreBoard::get_filename() const
     return m_board_filename;
 }
 
-void CoreBoard::save()
+void CoreBoard::save(const std::string &suffix)
 {
     brd.rules = rules;
     brd.fab_output_settings = fab_output_settings;
@@ -678,11 +680,13 @@ void CoreBoard::save()
     auto j = brd.serialize();
     auto save_meta = s_signal_request_save_meta.emit();
     j["_imp"] = save_meta;
-    save_json_to_file(m_board_filename, j);
-
-    set_needs_save(false);
-
-    // json j = block.serialize();
-    // std::cout << std::setw(4) << j << std::endl;
+    save_json_to_file(m_board_filename + suffix, j);
 }
+
+void CoreBoard::delete_autosave()
+{
+    if (Glib::file_test(m_board_filename + autosave_suffix, Glib::FILE_TEST_IS_REGULAR))
+        Gio::File::create_for_path(m_board_filename + autosave_suffix)->remove();
+}
+
 } // namespace horizon

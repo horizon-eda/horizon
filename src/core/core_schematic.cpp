@@ -4,6 +4,8 @@
 #include "util/util.hpp"
 #include <algorithm>
 #include "nlohmann/json.hpp"
+#include <giomm/file.h>
+#include <glibmm/fileutils.h>
 
 namespace horizon {
 CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, Pool &pool)
@@ -728,16 +730,22 @@ const std::string &CoreSchematic::get_filename() const
     return m_schematic_filename;
 }
 
-void CoreSchematic::save()
+void CoreSchematic::save(const std::string &suffix)
 {
     sch.rules = rules;
     block.bom_export_settings = bom_export_settings;
     sch.pdf_export_settings = pdf_export_settings;
-    save_json_to_file(m_schematic_filename, sch.serialize());
-    save_json_to_file(m_block_filename, block.serialize());
-    set_needs_save(false);
-
-    // json j = block.serialize();
-    // std::cout << std::setw(4) << j << std::endl;
+    save_json_to_file(m_schematic_filename + suffix, sch.serialize());
+    save_json_to_file(m_block_filename + suffix, block.serialize());
 }
+
+
+void CoreSchematic::delete_autosave()
+{
+    if (Glib::file_test(m_schematic_filename + autosave_suffix, Glib::FILE_TEST_IS_REGULAR))
+        Gio::File::create_for_path(m_schematic_filename + autosave_suffix)->remove();
+    if (Glib::file_test(m_block_filename + autosave_suffix, Glib::FILE_TEST_IS_REGULAR))
+        Gio::File::create_for_path(m_block_filename + autosave_suffix)->remove();
+}
+
 } // namespace horizon

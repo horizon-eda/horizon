@@ -37,7 +37,6 @@ public:
     void rebuild(bool from_undo = false) override;
     void commit() override;
     void revert() override;
-    void save() override;
 
     bool set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property,
                       const class PropertyValue &value) override;
@@ -77,5 +76,7 @@ private:
     };
     void history_push() override;
     void history_load(unsigned int i) override;
+    void save(const std::string &suffix) override;
+    void delete_autosave() override;
 };
 } // namespace horizon

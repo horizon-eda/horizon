@@ -22,6 +22,7 @@
 #include "welcome_window.hpp"
 #include "output_window.hpp"
 #include "util/str_util.hpp"
+#include "autosave_recovery_dialog.hpp"
 
 
 namespace horizon {
@@ -1089,6 +1090,10 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
                 return nullptr;
             }
         }
+
+        if (!check_autosave(type, args))
+            return nullptr;
+
         auto uu = UUID::random();
         auto &proc =
                 processes
@@ -1136,6 +1141,59 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn_for_project(PoolPr
                                                                           const std::vector<std::string> &args)
 {
     return spawn(type, args, {"HORIZON_POOL_CACHE=" + project->pool_cache_directory});
+}
+
+bool PoolProjectManagerAppWindow::check_autosave(PoolProjectManagerProcess::Type type,
+                                                 const std::vector<std::string> &filenames)
+{
+    if (filenames.size() == 0)
+        return true;
+
+    std::vector<std::string> my_filenames = filenames;
+    if (type == PoolProjectManagerProcess::Type::IMP_SCHEMATIC) {
+        my_filenames.resize(2);
+    }
+    else {
+        my_filenames.resize(1);
+    }
+
+    bool have_autosave = std::all_of(my_filenames.begin(), my_filenames.end(), [](auto &x) {
+        return Glib::file_test(x + ".autosave", Glib::FILE_TEST_IS_REGULAR);
+    });
+    if (!have_autosave)
+        return true;
+
+    AutosaveRecoveryDialog dia(this);
+    if (dia.run() != GTK_RESPONSE_OK) {
+        return false;
+    }
+    auto result = dia.get_result();
+
+    switch (result) {
+    case AutosaveRecoveryDialog::Result::KEEP:
+        // nop
+        break;
+    case AutosaveRecoveryDialog::Result::DELETE:
+        for (const auto &fn : my_filenames) {
+            auto fn_autosave = fn + ".autosave";
+            if (Glib::file_test(fn_autosave, Glib::FILE_TEST_IS_REGULAR)) {
+                Gio::File::create_for_path(fn_autosave)->remove();
+            }
+        }
+        break;
+
+    case AutosaveRecoveryDialog::Result::USE:
+        for (const auto &fn : my_filenames) {
+            Gio::File::create_for_path(fn)->move(Gio::File::create_for_path(fn + ".bak"), Gio::FILE_COPY_OVERWRITE);
+            auto fn_autosave = fn + ".autosave";
+            if (Glib::file_test(fn_autosave, Glib::FILE_TEST_IS_REGULAR)) {
+                Gio::File::create_for_path(fn_autosave)->move(Gio::File::create_for_path(fn), Gio::FILE_COPY_OVERWRITE);
+            }
+        }
+        break;
+    }
+
+    return true;
 }
 
 std::string PoolProjectManagerAppWindow::get_proc_filename(const UUID &uu)

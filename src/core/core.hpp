@@ -296,7 +296,10 @@ public:
     bool tool_handles_esc();
     virtual void commit() = 0;
     virtual void revert() = 0;
-    virtual void save() = 0;
+    void save();
+    void autosave();
+    virtual void delete_autosave() = 0;
+
     void undo();
     void redo();
 
@@ -402,6 +405,11 @@ public:
         return s_signal_save;
     }
 
+    type_signal_rebuilt signal_modified()
+    {
+        return s_signal_modified;
+    }
+
     type_signal_rebuilt signal_can_undo_redo()
     {
         return s_signal_can_undo_redo;
@@ -478,6 +486,7 @@ protected:
     type_signal_tool_changed s_signal_tool_changed;
     type_signal_rebuilt s_signal_rebuilt;
     type_signal_rebuilt s_signal_save;
+    type_signal_rebuilt s_signal_modified;
     type_signal_rebuilt s_signal_can_undo_redo;
     type_signal_request_save_meta s_signal_request_save_meta;
     type_signal_needs_save s_signal_needs_save;
@@ -508,6 +517,9 @@ protected:
     void set_placement(Placement &placement, const class PropertyValue &value, ObjectProperty::ID property);
 
     void sort_search_results(std::list<Core::SearchResult> &results, const SearchQuery &q);
+
+    virtual void save(const std::string &suffix) = 0;
+    static const std::string autosave_suffix;
 
 private:
     std::unique_ptr<ToolBase> create_tool(ToolID tool_id);

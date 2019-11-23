@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <memory>
 #include "nlohmann/json.hpp"
+#include <giomm/file.h>
+#include <glibmm/fileutils.h>
 
 namespace horizon {
 CoreFrame::CoreFrame(const std::string &frame_filename)
@@ -111,12 +113,16 @@ const std::string &CoreFrame::get_filename() const
     return m_frame_filename;
 }
 
-void CoreFrame::save()
+void CoreFrame::save(const std::string &suffix)
 {
     s_signal_save.emit();
     auto j = frame.serialize();
-    save_json_to_file(m_frame_filename, j);
+    save_json_to_file(m_frame_filename + suffix, j);
+}
 
-    set_needs_save(false);
+void CoreFrame::delete_autosave()
+{
+    if (Glib::file_test(m_frame_filename + autosave_suffix, Glib::FILE_TEST_IS_REGULAR))
+        Gio::File::create_for_path(m_frame_filename + autosave_suffix)->remove();
 }
 } // namespace horizon

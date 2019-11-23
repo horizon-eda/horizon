@@ -18,7 +18,6 @@ public:
     void rebuild(bool from_undo = false) override;
     void commit() override;
     void revert() override;
-    void save() override;
 
     Padstack *get_padstack(bool work = true);
 
@@ -52,6 +51,8 @@ private:
     };
     void history_push() override;
     void history_load(unsigned int i) override;
+    void save(const std::string &suffix) override;
+    void delete_autosave() override;
 
 public:
     std::string parameter_program_code;

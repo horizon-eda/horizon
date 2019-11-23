@@ -5,6 +5,8 @@
 #include "nlohmann/json.hpp"
 #include "logger/logger.hpp"
 #include "util/util.hpp"
+#include <giomm/file.h>
+#include <glibmm/fileutils.h>
 
 namespace horizon {
 CorePackage::CorePackage(const std::string &filename, Pool &pool)
@@ -293,7 +295,7 @@ const std::string &CorePackage::get_filename() const
     return m_filename;
 }
 
-void CorePackage::save()
+void CorePackage::save(const std::string &suffix)
 {
     package.parameter_set = parameter_set;
     package.parameter_program.set_code(parameter_program_code);
@@ -305,8 +307,13 @@ void CorePackage::save()
     json j = package.serialize();
     auto save_meta = s_signal_request_save_meta.emit();
     j["_imp"] = save_meta;
-    save_json_to_file(m_filename, j);
+    save_json_to_file(m_filename + suffix, j);
+}
 
-    set_needs_save(false);
+
+void CorePackage::delete_autosave()
+{
+    if (Glib::file_test(m_filename + autosave_suffix, Glib::FILE_TEST_IS_REGULAR))
+        Gio::File::create_for_path(m_filename + autosave_suffix)->remove();
 }
 } // namespace horizon

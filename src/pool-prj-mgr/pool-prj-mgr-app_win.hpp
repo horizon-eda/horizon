@@ -185,6 +185,8 @@ private:
 
     bool download_back_to_start = false;
 
+    bool check_autosave(PoolProjectManagerProcess::Type type, const std::vector<std::string> &filenames);
+
 public:
     zmq::context_t &zctx;
     void set_pool_updating(bool v, bool success);

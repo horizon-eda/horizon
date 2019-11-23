@@ -559,6 +559,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/pool_browser_button.cpp\
 	src/pool-prj-mgr/welcome_window.cpp\
 	src/pool-prj-mgr/output_window.cpp\
+	src/pool-prj-mgr/autosave_recovery_dialog.cpp\
 	src/util/stock_info_provider_partinfo.cpp\
 
 SRC_PGM_TEST = \
