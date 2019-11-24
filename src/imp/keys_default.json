@@ -1,1740 +1,1972 @@
 [
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "m",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "MOVE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "r",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "ROTATE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "e",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "MIRROR"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "E",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "MIRROR_Y"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [],
-                "4": [],
-                "8": []
-            },
-            "tool": "PLACE_JUNCTION"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "d",
-                            "mod": 0
-                        },
-                        {
-                            "key": "l",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "DRAW_LINE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "Delete",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "DELETE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "d",
-                            "mod": 0
-                        },
-                        {
-                            "key": "a",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "DRAW_ARC"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [
-                    [
-                        {
-                            "key": "p",
-                            "mod": 0
-                        },
-                        {
-                            "key": "p",
-                            "mod": 0
-                        }
-                    ]
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "m",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "MAP_PIN"
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": [
-                    [
-                        {
-                            "key": "n",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "MOVE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [],
+            "4": [],
+            "8": []
+        },
+        "tool": "PLACE_JUNCTION"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "d",
+                        "mod": 0
+                    },
+                    {
+                        "key": "l",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "DRAW_NET"
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": [
-                    [
-                        {
-                            "key": "p",
-                            "mod": 0
-                        },
-                        {
-                            "key": "c",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "DRAW_LINE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "Delete",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "ADD_COMPONENT"
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "p",
-                            "mod": 0
-                        },
-                        {
-                            "key": "t",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "8": []
-            },
-            "tool": "PLACE_TEXT"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": [
-                    [
-                        {
-                            "key": "b",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "DELETE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "d",
+                        "mod": 0
+                    },
+                    {
+                        "key": "a",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "PLACE_NET_LABEL"
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": []
-            },
-            "tool": "DISCONNECT"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": [
-                    [
-                        {
-                            "key": "k",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "DRAW_ARC"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "r",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "BEND_LINE_NET"
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [],
-                "2": [],
-                "255": []
-            },
-            "tool": "SELECT_NET_SEGMENT"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": [
-                    [
-                        {
-                            "key": "p",
-                            "mod": 0
-                        },
-                        {
-                            "key": "o",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "ROTATE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "e",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "PLACE_POWER_SYMBOL"
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": [
-                    [
-                        {
-                            "key": "v",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "MIRROR"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "E",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "MOVE_NET_SEGMENT"
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": [
-                    [
-                        {
-                            "key": "V",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "MIRROR_Y"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "p",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "MOVE_NET_SEGMENT_NEW"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": []
-            },
-            "tool": "EDIT_SYMBOL_PIN_NAMES"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": [
-                    [
-                        {
-                            "key": "p",
-                            "mod": 0
-                        },
-                        {
-                            "key": "u",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "MAP_PIN"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "y",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "PLACE_BUS_LABEL"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": [
-                    [
-                        {
-                            "key": "slash",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "MAP_SYMBOL"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "n",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "PLACE_BUS_RIPPER"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": []
-            },
-            "tool": "MANAGE_BUSES"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "d",
-                            "mod": 0
-                        },
-                        {
-                            "key": "y",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "DRAW_POLYGON"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "Return",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "ENTER_DATUM"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "M",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "MOVE_EXACTLY"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "4": []
-            },
-            "tool": "PLACE_HOLE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "8": [
-                    [
-                        {
-                            "key": "p",
-                            "mod": 0
-                        },
-                        {
-                            "key": "p",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "DRAW_NET"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "c",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "PLACE_PAD"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "v",
-                            "mod": 4
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "PASTE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": []
-            },
-            "tool": "ASSIGN_PART"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [
-                    [
-                        {
-                            "key": "p",
-                            "mod": 0
-                        },
-                        {
-                            "key": "p",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "ADD_COMPONENT"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "t",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "MAP_PACKAGE"
+            ],
+            "8": []
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [
-                    [
-                        {
-                            "key": "p",
-                            "mod": 0
-                        },
-                        {
-                            "key": "v",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "PLACE_TEXT"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "b",
+                        "mod": 0
+                    }
+                ],
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "n",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "PLACE_VIA"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": []
-            },
-            "tool": "ROUTE_TRACK"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": []
-            },
-            "tool": "DRAG_KEEP_SLOPE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": []
-            },
-            "tool": "ADD_PART"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": []
-            },
-            "tool": "ANNOTATE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "h",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "PLACE_NET_LABEL"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "k",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "SMASH"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "H",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "BEND_LINE_NET"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [],
+            "2": [
+                [
+                    {
+                        "key": "plus",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "UNSMASH"
+            ],
+            "255": []
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "4": [
-                    [
-                        {
-                            "key": "p",
-                            "mod": 0
-                        },
-                        {
-                            "key": "s",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "SELECT_NET_SEGMENT"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "o",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "PLACE_SHAPE"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "4": [
-                    [
-                        {
-                            "key": "i",
-                            "mod": 0
-                        },
-                        {
-                            "key": "s",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "PLACE_POWER_SYMBOL"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "v",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "EDIT_SHAPE"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [],
-                "255": [],
-                "8": []
-            },
-            "tool": "IMPORT_DXF"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": []
-            },
-            "tool": "MANAGE_NET_CLASSES"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "8": [
-                    [
-                        {
-                            "key": "i",
-                            "mod": 0
-                        },
-                        {
-                            "key": "p",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "MOVE_NET_SEGMENT"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "V",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "EDIT_PAD_PARAMETER_SET"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "d",
-                            "mod": 0
-                        },
-                        {
-                            "key": "Y",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "DRAW_POLYGON_RECTANGLE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "d",
-                            "mod": 0
-                        },
-                        {
-                            "key": "L",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "DRAW_LINE_RECTANGLE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "i",
-                            "mod": 0
-                        },
-                        {
-                            "key": "l",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "EDIT_LINE_RECTANGLE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": []
-            },
-            "tool": "EDIT_SCHEMATIC_PROPERTIES"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [
-                    [
-                        {
-                            "key": "x",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "MOVE_NET_SEGMENT_NEW"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "i",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "ROUTE_TRACK_INTERACTIVE"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [
-                    [
-                        {
-                            "key": "i",
-                            "mod": 0
-                        },
-                        {
-                            "key": "v",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "EDIT_SYMBOL_PIN_NAMES"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "u",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "EDIT_VIA"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": []
-            },
-            "tool": "ADD_PLANE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": []
-            },
-            "tool": "UPDATE_PLANE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [
-                    [
-                        {
-                            "key": "q",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "PLACE_BUS_LABEL"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "r",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "UPDATE_ALL_PLANES"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": []
-            },
-            "tool": "CLEAR_PLANE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [
-                    [
-                        {
-                            "key": "Q",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "PLACE_BUS_RIPPER"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "d",
+                        "mod": 0
+                    },
+                    {
+                        "key": "y",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "CLEAR_ALL_PLANES"
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": []
-            },
-            "tool": "EDIT_STACKUP"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [
-                    [
-                        {
-                            "key": "d",
-                            "mod": 0
-                        },
-                        {
-                            "key": "d",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "DRAW_POLYGON"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "Return",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "DRAW_DIMENSION"
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": []
-            },
-            "tool": "SET_DIFFPAIR"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": []
-            },
-            "tool": "CLEAR_DIFFPAIR"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [
-                    [
-                        {
-                            "key": "X",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "ENTER_DATUM"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "M",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "ROUTE_DIFFPAIR_INTERACTIVE"
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": []
-            },
-            "tool": "SET_VIA_NET"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": []
-            },
-            "tool": "CLEAR_VIA_NET"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [
-                    [
-                        {
-                            "key": "g",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "MOVE_EXACTLY"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "4": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "h",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "DRAG_TRACK_INTERACTIVE"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [
-                    [
-                        {
-                            "key": "c",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "PLACE_HOLE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "8": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "p",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "LOCK"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": []
-            },
-            "tool": "UNLOCK"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [
-                    [
-                        {
-                            "key": "C",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "PLACE_PAD"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "v",
+                        "mod": 4
+                    }
                 ]
-            },
-            "tool": "UNLOCK_ALL"
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "p",
-                            "mod": 0
-                        },
-                        {
-                            "key": "x",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "ADD_VERTEX"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "2": []
-            },
-            "tool": "MANAGE_POWER_NETS"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [
-                    [
-                        {
-                            "key": "p",
-                            "mod": 0
-                        },
-                        {
-                            "key": "h",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "PASTE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "p",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "PLACE_BOARD_HOLE"
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "16": [
-                    [
-                        {
-                            "key": "i",
-                            "mod": 0
-                        },
-                        {
-                            "key": "h",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "MAP_PACKAGE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "v",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "EDIT_BOARD_HOLE"
+            ]
         },
-        {
-            "action": "UNDO",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "z",
-                            "mod": 4
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
-        },
-        {
-            "action": "REDO",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "y",
-                            "mod": 4
-                        }
-                    ],
-                    [
-                        {
-                            "key": "Z",
-                            "mod": 4
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
-        },
-        {
-            "action": "COPY",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "c",
-                            "mod": 4
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
-        },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "d",
-                            "mod": 4
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "DUPLICATE"
-        },
-        {
-            "action": "PLACE_PART",
-            "keys": {
-                "2": [
-                    [
-                        {
-                            "key": "p",
-                            "mod": 0
-                        },
-                        {
-                            "key": "p",
-                            "mod": 0
-                        }
-                    ]
+        "tool": "PLACE_VIA"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "G",
+                        "mod": 0
+                    }
                 ]
-            },
-            "tool": "NONE"
+            ]
         },
-        {
-            "action": "LAYER_UP",
-            "keys": {
-                "16": [],
-                "255": [
-                    [
-                        {
-                            "key": "Page_Up",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "DRAG_KEEP_SLOPE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "h",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "LAYER_DOWN",
-            "keys": {
-                "16": [],
-                "255": [
-                    [
-                        {
-                            "key": "Page_Down",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "SMASH"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "H",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "LAYER_TOP",
-            "keys": {
-                "16": [],
-                "255": [
-                    [
-                        {
-                            "key": "1",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "UNSMASH"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "4": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "s",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "LAYER_BOTTOM",
-            "keys": {
-                "16": [],
-                "255": [
-                    [
-                        {
-                            "key": "2",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "PLACE_SHAPE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "4": [
+                [
+                    {
+                        "key": "i",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "LAYER_INNER1",
-            "keys": {
-                "16": [],
-                "255": [
-                    [
-                        {
-                            "key": "3",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "EDIT_SHAPE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "8": [
+                [
+                    {
+                        "key": "i",
+                        "mod": 0
+                    },
+                    {
+                        "key": "p",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "LAYER_INNER2",
-            "keys": {
-                "16": [],
-                "255": [
-                    [
-                        {
-                            "key": "4",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "EDIT_PAD_PARAMETER_SET"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "d",
+                        "mod": 0
+                    },
+                    {
+                        "key": "Y",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "LAYER_INNER3",
-            "keys": {
-                "16": [],
-                "255": [
-                    [
-                        {
-                            "key": "5",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "DRAW_POLYGON_RECTANGLE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "d",
+                        "mod": 0
+                    },
+                    {
+                        "key": "L",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "LAYER_INNER4",
-            "keys": {
-                "16": [],
-                "255": [
-                    [
-                        {
-                            "key": "6",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "DRAW_LINE_RECTANGLE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "i",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "LAYER_INNER5",
-            "keys": {
-                "16": [],
-                "255": [
-                    [
-                        {
-                            "key": "7",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "EDIT_LINE_RECTANGLE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "x",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "LAYER_INNER6",
-            "keys": {
-                "16": [],
-                "255": [
-                    [
-                        {
-                            "key": "8",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "ROUTE_TRACK_INTERACTIVE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "i",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "LAYER_INNER7",
-            "keys": {
-                "16": [],
-                "255": [
-                    [
-                        {
-                            "key": "9",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "EDIT_VIA"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "R",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "LAYER_INNER8",
-            "keys": {
-                "16": [],
-                "255": [
-                    [
-                        {
-                            "key": "0",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "ROTATE_ARBITRARY"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "i",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "SELECTION_FILTER",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "i",
-                            "mod": 4
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "EDIT_PLANE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "q",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "SAVE",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "s",
-                            "mod": 4
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "UPDATE_ALL_PLANES"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "Q",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "VIEW_3D",
-            "keys": {
-                "16": [],
-                "255": [
-                    [
-                        {
-                            "key": "3",
-                            "mod": 8
-                        }
-                    ]
-                ],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "CLEAR_ALL_PLANES"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "d",
+                        "mod": 0
+                    },
+                    {
+                        "key": "d",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "PREFERENCES",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "P",
-                            "mod": 4
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "DRAW_DIMENSION"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "X",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "POPOVER",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "space",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "ROUTE_DIFFPAIR_INTERACTIVE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "g",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "HELP",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "question",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "DRAG_TRACK_INTERACTIVE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "c",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "VIEW_ALL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "Home",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "LOCK"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "C",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "SELECTION_TOOL_BOX",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "S",
-                            "mod": 0
-                        },
-                        {
-                            "key": "b",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "UNLOCK_ALL"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "x",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "SELECTION_TOOL_LASSO",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "S",
-                            "mod": 0
-                        },
-                        {
-                            "key": "l",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "ADD_VERTEX"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "h",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "SELECTION_TOOL_PAINT",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "S",
-                            "mod": 0
-                        },
-                        {
-                            "key": "p",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "PLACE_BOARD_HOLE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "i",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "SELECTION_QUALIFIER_AUTO",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "S",
-                            "mod": 0
-                        },
-                        {
-                            "key": "a",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "EDIT_BOARD_HOLE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "Up",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "SELECTION_QUALIFIER_INCLUDE_ORIGIN",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "S",
-                            "mod": 0
-                        },
-                        {
-                            "key": "o",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "MOVE_KEY_UP"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "Down",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "SELECTION_QUALIFIER_TOUCH_BOX",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "S",
-                            "mod": 0
-                        },
-                        {
-                            "key": "t",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "MOVE_KEY_DOWN"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "Left",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "SELECTION_QUALIFIER_INCLUDE_BOX",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "S",
-                            "mod": 0
-                        },
-                        {
-                            "key": "i",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "MOVE_KEY_LEFT"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "Right",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "Up",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "MOVE_KEY_UP"
+        "tool": "MOVE_KEY_RIGHT"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "s",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "Down",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "MOVE_KEY_DOWN"
+        "tool": "SWAP_NETS"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "i",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "Left",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "MOVE_KEY_LEFT"
+        "tool": "EDIT_KEEPOUT"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "r",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "TOOL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "Right",
-                            "mod": 0
-                        }
-                    ]
-                ],
-                "4": [],
-                "8": []
-            },
-            "tool": "MOVE_KEY_RIGHT"
+        "tool": "PLACE_REFDES_AND_VALUE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "d",
+                        "mod": 0
+                    },
+                    {
+                        "key": "c",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "FLIP_VIEW",
-            "keys": {
-                "16": [],
-                "255": [
-                    [
-                        {
-                            "key": "F",
-                            "mod": 4
-                        }
-                    ]
-                ],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "DRAW_CONNECTION_LINE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "d",
+                        "mod": 4
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "SEARCH",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "f",
-                            "mod": 4
-                        }
-                    ]
-                ],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "DUPLICATE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "f",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "SEARCH_NEXT",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "g",
-                            "mod": 4
-                        }
-                    ]
-                ],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "FIX"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "F",
+                        "mod": 0
+                    }
+                ]
+            ]
         },
-        {
-            "action": "SEARCH_PREVIOUS",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "G",
-                            "mod": 4
-                        }
-                    ]
-                ],
-                "8": []
-            },
-            "tool": "NONE"
+        "tool": "UNFIX"
+    },
+    {
+        "action": "UNDO",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "z",
+                        "mod": 4
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
         },
-        {
-            "action": "SELECT_ALL",
-            "keys": {
-                "1": [],
-                "16": [],
-                "2": [],
-                "255": [
-                    [
-                        {
-                            "key": "a",
-                            "mod": 4
-                        }
-                    ]
+        "tool": "NONE"
+    },
+    {
+        "action": "REDO",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "y",
+                        "mod": 4
+                    }
                 ],
-                "4": [],
-                "8": []
-            },
-            "tool": "NONE"
-        }
-    ]
+                [
+                    {
+                        "key": "Z",
+                        "mod": 4
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "COPY",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "c",
+                        "mod": 4
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "PLACE_PART",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "p",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "LAYER_UP",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "Page_Up",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "LAYER_DOWN",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "Page_Down",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "LAYER_TOP",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "1",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "LAYER_BOTTOM",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "2",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "LAYER_INNER1",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "3",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "LAYER_INNER2",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "4",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "LAYER_INNER3",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "5",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "LAYER_INNER4",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "6",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "LAYER_INNER5",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "7",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "LAYER_INNER6",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "8",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "LAYER_INNER7",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "9",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "LAYER_INNER8",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "0",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SELECTION_FILTER",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "i",
+                        "mod": 4
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SAVE",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "s",
+                        "mod": 4
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "VIEW_3D",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "3",
+                        "mod": 8
+                    }
+                ]
+            ],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "PREFERENCES",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "P",
+                        "mod": 4
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "POPOVER",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "space",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "HELP",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "question",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "VIEW_ALL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "Home",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SELECTION_TOOL_BOX",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "S",
+                        "mod": 0
+                    },
+                    {
+                        "key": "b",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SELECTION_TOOL_LASSO",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "S",
+                        "mod": 0
+                    },
+                    {
+                        "key": "l",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SELECTION_TOOL_PAINT",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "S",
+                        "mod": 0
+                    },
+                    {
+                        "key": "p",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SELECTION_QUALIFIER_AUTO",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "S",
+                        "mod": 0
+                    },
+                    {
+                        "key": "a",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SELECTION_QUALIFIER_INCLUDE_ORIGIN",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "S",
+                        "mod": 0
+                    },
+                    {
+                        "key": "o",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SELECTION_QUALIFIER_TOUCH_BOX",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "S",
+                        "mod": 0
+                    },
+                    {
+                        "key": "t",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SELECTION_QUALIFIER_INCLUDE_BOX",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "S",
+                        "mod": 0
+                    },
+                    {
+                        "key": "i",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "TO_BOARD",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 0
+                    },
+                    {
+                        "key": "b",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "HIGHLIGHT_NET",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "l",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "RELOAD_NETLIST",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "F5",
+                        "mod": 1
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SAVE_RELOAD_NETLIST",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "S",
+                        "mod": 4
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "BOM_EXPORT_WINDOW",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "b",
+                        "mod": 4
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "RELOAD_POOL",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "F5",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "FLIP_VIEW",
+        "keys": {
+            "16": [],
+            "255": [
+                [
+                    {
+                        "key": "v",
+                        "mod": 0
+                    },
+                    {
+                        "key": "f",
+                        "mod": 0
+                    }
+                ]
+            ],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "VIEW_TOP",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "v",
+                        "mod": 0
+                    },
+                    {
+                        "key": "t",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "VIEW_BOTTOM",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "v",
+                        "mod": 0
+                    },
+                    {
+                        "key": "b",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SEARCH",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "f",
+                        "mod": 4
+                    }
+                ]
+            ],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SEARCH_NEXT",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "g",
+                        "mod": 4
+                    }
+                ]
+            ],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SEARCH_PREVIOUS",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "G",
+                        "mod": 4
+                    }
+                ]
+            ],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "GO_TO_BOARD",
+        "keys": {
+            "2": [
+                [
+                    {
+                        "key": "Tab",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "GO_TO_SCHEMATIC",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "Tab",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SELECT_ALL",
+        "keys": {
+            "1": [],
+            "16": [],
+            "2": [],
+            "255": [
+                [
+                    {
+                        "key": "a",
+                        "mod": 4
+                    }
+                ]
+            ],
+            "4": [],
+            "8": []
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "PDF_EXPORT_WINDOW",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "p",
+                        "mod": 4
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SELECT_MORE",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "plus",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "SELECT_MORE_NO_VIA",
+        "keys": {
+            "16": [
+                [
+                    {
+                        "key": "equal",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    }
+]
