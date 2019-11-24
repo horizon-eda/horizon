@@ -251,7 +251,7 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Place pin", ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL, ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::SELECT_NET_SEGMENT},
-         {"Select net segment", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+         {"Select net segment", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::MOVE_NET_SEGMENT},
@@ -364,7 +364,7 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::PLACE_HOLE},
-         {"Place hole", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_PADSTACK,
+         {"Place hole", ActionGroup::PADSTACK, ActionCatalogItem::AVAILABLE_IN_PADSTACK,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::PLACE_SHAPE},
