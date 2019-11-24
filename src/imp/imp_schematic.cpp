@@ -378,10 +378,11 @@ void ImpSchematic::construct()
             json j;
             j["time"] = gdk_event_get_time(ev);
             j["op"] = "present-board";
-            allow_set_foreground_window(this->get_board_pid());
+            auto board_pid = this->get_board_pid();
+            if (board_pid != -1)
+                allow_set_foreground_window(board_pid);
             this->send_json(j);
         });
-        set_action_sensitive(make_action(ActionID::GO_TO_BOARD), false);
 
         connect_action(ActionID::SHOW_IN_POOL_MANAGER, [this](const auto &conn) {
             for (const auto &it : canvas->get_selection()) {
@@ -500,7 +501,6 @@ void ImpSchematic::update_action_sensitivity()
         req["op"] = "has-board";
         bool has_board = send_json(req);
         set_action_sensitive(make_action(ActionID::SAVE_RELOAD_NETLIST), has_board);
-        set_action_sensitive(make_action(ActionID::GO_TO_BOARD), has_board);
         auto n_sym = std::count_if(sel.begin(), sel.end(),
                                    [](const auto &x) { return x.type == ObjectType::SCHEMATIC_SYMBOL; });
         set_action_sensitive(make_action(ActionID::SHOW_IN_BROWSER), n_sym == 1);
@@ -518,6 +518,7 @@ void ImpSchematic::update_action_sensitivity()
         set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), false);
     }
     set_action_sensitive(make_action(ActionID::MOVE_TO_OTHER_SHEET), sel.size() > 0);
+    set_action_sensitive(make_action(ActionID::GO_TO_BOARD), sockets_connected);
 
     set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET), std::any_of(sel.begin(), sel.end(), [](const auto &x) {
                              switch (x.type) {

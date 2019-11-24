@@ -131,8 +131,8 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
     entry_project_title->signal_changed().connect([this] { win->project_needs_save = true; });
 
     button_top_schematic->signal_clicked().connect(
-            sigc::mem_fun(*this, &PoolProjectManagerViewProject::handle_button_top_schematic));
-    button_board->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerViewProject::handle_button_board));
+            sigc::mem_fun(*this, &PoolProjectManagerViewProject::open_top_schematic));
+    button_board->signal_clicked().connect(sigc::mem_fun(*this, &PoolProjectManagerViewProject::open_board));
     button_part_browser->signal_clicked().connect(
             sigc::mem_fun(*this, &PoolProjectManagerViewProject::handle_button_part_browser));
     button_pool_cache->signal_clicked().connect(
@@ -153,7 +153,7 @@ void PoolProjectManagerViewProject::handle_button_change_pool()
     }
 }
 
-void PoolProjectManagerViewProject::handle_button_top_schematic()
+void PoolProjectManagerViewProject::open_top_schematic()
 {
     auto prj = win->project.get();
     auto top_block = prj->get_top_block();
@@ -161,7 +161,7 @@ void PoolProjectManagerViewProject::handle_button_top_schematic()
     win->spawn_for_project(PoolProjectManagerProcess::Type::IMP_SCHEMATIC, args);
 }
 
-void PoolProjectManagerViewProject::handle_button_board()
+void PoolProjectManagerViewProject::open_board()
 {
     auto prj = win->project.get();
     auto top_block =

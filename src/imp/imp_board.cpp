@@ -210,12 +210,7 @@ void ImpBoard::update_action_sensitivity()
     set_action_sensitive(make_action(ActionID::SELECT_MORE), can_select_more);
     set_action_sensitive(make_action(ActionID::SELECT_MORE_NO_VIA), can_select_more);
 
-    if (sockets_connected) {
-        json req;
-        req["op"] = "has-schematic";
-        bool has_schematic = send_json(req);
-        set_action_sensitive(make_action(ActionID::GO_TO_SCHEMATIC), has_schematic);
-    }
+    set_action_sensitive(make_action(ActionID::GO_TO_SCHEMATIC), sockets_connected);
     set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), n_pkgs == 1 && sockets_connected);
 
     ImpBase::update_action_sensitivity();
@@ -399,10 +394,11 @@ void ImpBoard::construct()
             json j;
             j["time"] = gdk_event_get_time(ev);
             j["op"] = "present-schematic";
-            allow_set_foreground_window(this->get_schematic_pid());
+            auto sch_pid = this->get_schematic_pid();
+            if (sch_pid != -1)
+                allow_set_foreground_window(sch_pid);
             this->send_json(j);
         });
-        set_action_sensitive(make_action(ActionID::GO_TO_BOARD), false);
 
         connect_action(ActionID::SHOW_IN_POOL_MANAGER, [this](const auto &conn) {
             for (const auto &it : canvas->get_selection()) {

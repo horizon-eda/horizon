@@ -350,6 +350,9 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             tx["time"] = timestamp;
             app->send_json(pid, tx);
         }
+        else {
+            view_project.open_board();
+        }
     }
     else if (op == "present-schematic") {
         if (auto proc = find_top_schematic_process()) {
@@ -358,6 +361,9 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             tx["op"] = "present";
             tx["time"] = timestamp;
             app->send_json(pid, tx);
+        }
+        else {
+            view_project.open_top_schematic();
         }
     }
     else if (op == "needs-save") {

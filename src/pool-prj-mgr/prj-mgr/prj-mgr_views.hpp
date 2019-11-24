@@ -42,6 +42,9 @@ public:
     Gtk::InfoBar *pool_info_bar = nullptr;
     Gtk::Label *pool_info_bar_label = nullptr;
 
+    void open_top_schematic();
+    void open_board();
+
 private:
     PoolProjectManagerAppWindow *win = nullptr;
     Gtk::Button *button_top_schematic = nullptr;
@@ -50,8 +53,6 @@ private:
     Gtk::Button *button_pool_cache = nullptr;
     Gtk::Button *button_change_pool = nullptr;
 
-    void handle_button_top_schematic();
-    void handle_button_board();
     void handle_button_part_browser();
     void handle_button_pool_cache();
     void handle_button_change_pool();
