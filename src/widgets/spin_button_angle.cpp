@@ -9,7 +9,9 @@ SpinButtonAngle::SpinButtonAngle() : Gtk::SpinButton()
     set_range(0, 65536);
     set_wrap(true);
     set_width_chars(6);
-    set_increments(4096, 4096);
+    double step = (1.0 / 360.0) * 65536;
+    double page = (15.0 / 360.0) * 65536;
+    set_increments(step, page);
 }
 
 bool SpinButtonAngle::on_output()
