@@ -33,12 +33,25 @@ int SpinButtonAngle::on_input(double *v)
     std::replace(txt.begin(), txt.end(), ',', '.');
     int64_t va = 0;
     try {
-        va = (std::stod(txt) / 360.0) * 65536;
+        double d = std::fmod(std::stod(txt), 360.0);
+        if (d < 0) {
+            d += 360.0;
+        }
+        va = (d / 360.0) * 65536;
         *v = va;
     }
     catch (const std::exception &e) {
         return false;
     }
     return true;
+}
+
+void SpinButtonAngle::on_wrapped()
+{
+    auto adj = get_adjustment();
+    if (adj->get_value() == adj->get_upper()) {
+        // Wrap 0 -> maximum
+        adj->set_value(std::floor(65535 / adj->get_step_increment()) * adj->get_step_increment());
+    }
 }
 } // namespace horizon
