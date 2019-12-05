@@ -27,7 +27,8 @@ bool SpinButtonAngle::on_output()
 
 int SpinButtonAngle::on_input(double *v)
 {
-    auto txt = get_text();
+    auto txt = get_text().raw();
+    std::replace(txt.begin(), txt.end(), ',', '.');
     int64_t va = 0;
     try {
         va = (std::stod(txt) / 360.0) * 65536;
