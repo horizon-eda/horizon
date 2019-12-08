@@ -20,6 +20,6 @@ if os.path.isdir(".git"):
 	gitversion = gitversion.replace("\"", "\\\"")
 
 outfile = sys.argv[1]
-with open(outfile, "w") as fi:
+with open(outfile, "w", encoding="utf-8") as fi:
 	tmpl = Template(cpp_template)
 	fi.write(tmpl.substitute(major=v.major, minor=v.minor, micro=v.micro, string=v.string, name=v.name, commit=gitversion))
