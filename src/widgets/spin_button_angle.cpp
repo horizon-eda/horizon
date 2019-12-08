@@ -12,6 +12,12 @@ SpinButtonAngle::SpinButtonAngle() : Gtk::SpinButton()
     double step = (1.0 / 360.0) * 65536;
     double page = (15.0 / 360.0) * 65536;
     set_increments(step, page);
+
+    auto attributes_list = pango_attr_list_new();
+    auto attribute_font_features = pango_attr_font_features_new("tnum 1");
+    pango_attr_list_insert(attributes_list, attribute_font_features);
+    gtk_entry_set_attributes(GTK_ENTRY(gobj()), attributes_list);
+    pango_attr_list_unref(attributes_list);
 }
 
 bool SpinButtonAngle::on_output()
