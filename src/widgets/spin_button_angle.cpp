@@ -6,12 +6,15 @@ namespace horizon {
 
 SpinButtonAngle::SpinButtonAngle() : Gtk::SpinButton()
 {
-    set_range(0, 65536);
-    set_wrap(true);
+    set_wrap(false);
     set_width_chars(6);
     double step = (1.0 / 360.0) * 65536;
     double page = (15.0 / 360.0) * 65536;
     set_increments(step, page);
+    
+    // The value normally is only within 0..65536, but the range has to be larger to simulate the wrapping by
+    // temporarily allowing smaller/larger values and then readjusting them.
+    set_range(-page, 65536 + page);
 
     auto attributes_list = pango_attr_list_new();
     auto attribute_font_features = pango_attr_font_features_new("tnum 1");
@@ -24,6 +27,17 @@ bool SpinButtonAngle::on_output()
 {
     auto adj = get_adjustment();
     double v = adj->get_value();
+
+    // When changing the value by scroll wheel, on_output() is called for each step, but on_input() isn't until later.
+    // Without this check, negative angles could be displayed or the range limits could be hit while scrolling.
+    if (v < 0) {
+        v += 65536.0;
+        set_value(v);
+    }
+    else if (v >= 65536.0) {
+        v -= 65536.0;
+        set_value(v);
+    }
 
     std::stringstream stream;
     stream.imbue(get_locale());
