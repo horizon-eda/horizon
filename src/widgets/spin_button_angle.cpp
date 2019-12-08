@@ -43,7 +43,7 @@ int SpinButtonAngle::on_input(double *v)
         if (d < 0) {
             d += 360.0;
         }
-        va = (d / 360.0) * 65536;
+        va = std::round((d / 360.0) * 65536);
         *v = va;
     }
     catch (const std::exception &e) {
