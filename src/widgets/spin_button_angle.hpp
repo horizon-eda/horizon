@@ -10,5 +10,6 @@ public:
 protected:
     virtual int on_input(double *new_value);
     virtual bool on_output();
+    virtual void on_wrapped();
 };
 } // namespace horizon

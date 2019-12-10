@@ -207,9 +207,6 @@ protected:
 private:
     Gtk::SpinButton *sp = nullptr;
     PropertyValueInt value;
-    bool sp_output();
-    void changed();
-    int sp_input(double *v);
 };
 
 class PropertyEditorStringMultiline : public PropertyEditor {

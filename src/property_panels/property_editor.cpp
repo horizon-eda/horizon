@@ -6,6 +6,7 @@
 #include "core/core_schematic.hpp"
 #include "core/core_board.hpp"
 #include "widgets/spin_button_dim.hpp"
+#include "widgets/spin_button_angle.hpp"
 #include "util/util.hpp"
 #include <algorithm>
 #include <iostream>
@@ -287,15 +288,10 @@ PropertyValue &PropertyEditorLayer::get_value()
 
 Gtk::Widget *PropertyEditorAngle::create_editor()
 {
-    sp = Gtk::manage(new Gtk::SpinButton());
-    sp->set_range(0, 65536);
-    sp->set_wrap(true);
+    sp = Gtk::manage(new SpinButtonAngle);
     sp->set_width_chars(7);
-    sp->set_increments(4096, 4096);
-    sp->signal_output().connect(sigc::mem_fun(*this, &PropertyEditorAngle::sp_output));
-    sp->signal_input().connect(sigc::mem_fun(*this, &PropertyEditorAngle::sp_input));
     sp->signal_activate().connect([this] { s_signal_activate.emit(); });
-    connections.push_back(sp->signal_value_changed().connect(sigc::mem_fun(*this, &PropertyEditorAngle::changed)));
+    connections.push_back(sp->signal_value_changed().connect([this] { s_signal_changed.emit(); }));
     return sp;
 }
 
@@ -303,40 +299,6 @@ void PropertyEditorAngle::reload()
 {
     ScopedBlock block(connections);
     sp->set_value(value.value);
-}
-
-bool PropertyEditorAngle::sp_output()
-{
-    auto adj = sp->get_adjustment();
-    double v = adj->get_value();
-
-    std::stringstream stream;
-    stream.imbue(get_locale());
-    stream << std::fixed << std::setprecision(2) << (v / 65536.0) * 360 << "°";
-
-    sp->set_text(stream.str());
-    return true;
-}
-
-int PropertyEditorAngle::sp_input(double *v)
-{
-    auto txt = sp->get_text();
-    int64_t va = 0;
-    try {
-        va = (std::stod(txt) / 360.0) * 65536;
-        *v = va;
-    }
-    catch (const std::exception &e) {
-        return false;
-    }
-
-
-    return true;
-}
-
-void PropertyEditorAngle::changed()
-{
-    s_signal_changed.emit();
 }
 
 PropertyValue &PropertyEditorAngle::get_value()
