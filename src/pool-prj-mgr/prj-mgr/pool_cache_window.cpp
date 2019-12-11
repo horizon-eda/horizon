@@ -17,7 +17,7 @@ PoolCacheWindow *PoolCacheWindow::create(Gtk::Window *p, const std::string &cach
 {
     PoolCacheWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/prj-mgr/pool_cache_window.ui");
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/prj-mgr/pool_cache_window.ui");
     x->get_widget_derived("window", w, cache_path, pool_path, aw);
 
     w->set_transient_for(*p);

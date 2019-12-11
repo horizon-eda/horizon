@@ -61,7 +61,7 @@ static void include_shader(std::string &shader_string)
     auto index = shader_string.find("##ubo");
     if (index == std::string::npos)
         return;
-    std::string ubo_str = string_from_resource("/net/carrotIndustries/horizon/canvas/shaders/ubo.glsl");
+    std::string ubo_str = string_from_resource("/org/horizon-eda/horizon/canvas/shaders/ubo.glsl");
     shader_string.replace(index, 5, ubo_str);
 }
 

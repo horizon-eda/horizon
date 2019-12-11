@@ -4,7 +4,7 @@
 namespace horizon {
 FootprintGeneratorQuad::FootprintGeneratorQuad(CorePackage *c)
     : Glib::ObjectBase(typeid(FootprintGeneratorQuad)),
-      FootprintGeneratorBase("/net/carrotIndustries/horizon/imp/footprint_generator/quad.svg", c)
+      FootprintGeneratorBase("/org/horizon-eda/horizon/imp/footprint_generator/quad.svg", c)
 {
     update_preview();
     sp_spacing_h = Gtk::manage(new SpinButtonDim());

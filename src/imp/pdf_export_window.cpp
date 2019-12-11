@@ -62,7 +62,7 @@ PDFLayerEditor *PDFLayerEditor::create(PDFExportWindow *pa, PDFExportSettings::L
 {
     PDFLayerEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/imp/pdf_export.ui", "layer_editor");
+    x->add_from_resource("/org/horizon-eda/horizon/imp/pdf_export.ui", "layer_editor");
     x->get_widget_derived("layer_editor", w, pa, la);
     w->reference();
     return w;
@@ -87,7 +87,7 @@ PDFExportWindow *PDFExportWindow::create(Gtk::Window *p, Core *c, PDFExportSetti
 {
     PDFExportWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/imp/pdf_export.ui", "window");
+    x->add_from_resource("/org/horizon-eda/horizon/imp/pdf_export.ui", "window");
     x->get_widget_derived("window", w, c, s, pd);
     w->set_transient_for(*p);
     return w;

@@ -256,7 +256,7 @@ bool ImpBase::property_panel_has_focus()
 
 void ImpBase::run(int argc, char *argv[])
 {
-    auto app = Gtk::Application::create(argc, argv, "net.carrotIndustries.horizon.Imp", Gio::APPLICATION_NON_UNIQUE);
+    auto app = Gtk::Application::create(argc, argv, "org.horizon-eda.horizon.Imp", Gio::APPLICATION_NON_UNIQUE);
 
     main_window = MainWindow::create();
     canvas = main_window->canvas;
@@ -681,7 +681,7 @@ void ImpBase::run(int argc, char *argv[])
 
     {
         auto refBuilder = Gtk::Builder::create();
-        refBuilder->add_from_resource("/net/carrotIndustries/horizon/imp/app_menu.ui");
+        refBuilder->add_from_resource("/org/horizon-eda/horizon/imp/app_menu.ui");
 
         auto object = refBuilder->get_object("appmenu");
         auto app_menu = Glib::RefPtr<Gio::MenuModel>::cast_dynamic(object);
@@ -742,7 +742,7 @@ void ImpBase::run(int argc, char *argv[])
 
     handle_cursor_move(Coordi()); // fixes label
 
-    Gtk::IconTheme::get_default()->add_resource_path("/net/carrotIndustries/horizon/icons");
+    Gtk::IconTheme::get_default()->add_resource_path("/org/horizon-eda/horizon/icons");
 
     Gtk::Window::set_default_icon_name("horizon-eda");
 
@@ -754,7 +754,7 @@ void ImpBase::run(int argc, char *argv[])
     });
 
     auto cssp = Gtk::CssProvider::create();
-    cssp->load_from_resource("/net/carrotIndustries/horizon/global.css");
+    cssp->load_from_resource("/org/horizon-eda/horizon/global.css");
     Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 700);
 
     canvas->signal_motion_notify_event().connect([this](GdkEventMotion *ev) {

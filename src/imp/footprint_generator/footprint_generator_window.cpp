@@ -36,7 +36,7 @@ FootprintGeneratorWindow *FootprintGeneratorWindow::create(Gtk::Window *p, CoreP
     FootprintGeneratorWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource(
-            "/net/carrotIndustries/horizon/imp/footprint_generator/"
+            "/org/horizon-eda/horizon/imp/footprint_generator/"
             "footprint_generator.ui");
     x->get_widget_derived("window", w);
     x->get_widget("stack", w->stack);

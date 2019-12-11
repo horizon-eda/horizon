@@ -20,7 +20,7 @@ Client::Client()
     curl = curl_easy_init();
     if (!curl)
         throw std::runtime_error("curl_easy_init failed");
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "carrotIndustries/horizon");
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "horizon-eda/horizon");
 
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);

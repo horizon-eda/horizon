@@ -49,9 +49,9 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out)
 
 void WallRenderer::realize()
 {
-    program = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas3d/shaders/wall-vertex.glsl",
-                                              "/net/carrotIndustries/horizon/canvas3d/shaders/wall-fragment.glsl",
-                                              "/net/carrotIndustries/horizon/canvas3d/shaders/"
+    program = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas3d/shaders/wall-vertex.glsl",
+                                              "/org/horizon-eda/horizon/canvas3d/shaders/wall-fragment.glsl",
+                                              "/org/horizon-eda/horizon/canvas3d/shaders/"
                                               "wall-geometry.glsl");
     vao = create_vao(program, vbo);
 

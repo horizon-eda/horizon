@@ -4,7 +4,7 @@
 namespace horizon {
 FootprintGeneratorGrid::FootprintGeneratorGrid(CorePackage *c)
     : Glib::ObjectBase(typeid(FootprintGeneratorGrid)),
-      FootprintGeneratorBase("/net/carrotIndustries/horizon/imp/footprint_generator/grid.svg", c)
+      FootprintGeneratorBase("/org/horizon-eda/horizon/imp/footprint_generator/grid.svg", c)
 {
     update_preview();
 

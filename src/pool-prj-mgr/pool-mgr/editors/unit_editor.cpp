@@ -102,7 +102,7 @@ PinEditor *PinEditor::create(Pin *p, UnitEditor *pa)
 {
     PinEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/pool-mgr/editors/unit_editor.ui");
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/editors/unit_editor.ui");
     x->get_widget_derived("pin_editor", w, p, pa);
     w->reference();
     return w;
@@ -327,7 +327,7 @@ UnitEditor *UnitEditor::create(Unit *u, class Pool *p)
 {
     UnitEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/pool-mgr/editors/unit_editor.ui");
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/editors/unit_editor.ui");
     x->get_widget_derived("unit_editor", w, u, p);
     w->reference();
     return w;

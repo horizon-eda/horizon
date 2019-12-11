@@ -287,7 +287,7 @@ PoolGitBox *PoolGitBox::create(PoolNotebook *nb)
     PoolGitBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     std::vector<Glib::ustring> widgets = {"box_git"};
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/window.ui", widgets);
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/window.ui", widgets);
     x->get_widget_derived("box_git", w, nb);
     w->reference();
     return w;

@@ -82,7 +82,7 @@ PadEditor *PadEditor::create(const Pad *p, PartWizard *pa)
     PadEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource(
-            "/net/carrotIndustries/horizon/pool-prj-mgr/pool-mgr/part_wizard/"
+            "/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/part_wizard/"
             "part_wizard.ui");
     x->get_widget_derived("pad_editor", w, p, pa);
     w->reference();

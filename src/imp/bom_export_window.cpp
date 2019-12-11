@@ -539,7 +539,7 @@ BOMExportWindow *BOMExportWindow::create(Gtk::Window *p, Block *b, BOMExportSett
 {
     BOMExportWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/imp/bom_export.ui");
+    x->add_from_resource("/org/horizon-eda/horizon/imp/bom_export.ui");
     x->get_widget_derived("window", w, b, s, pool, project_dir);
 
     w->set_transient_for(*p);

@@ -44,7 +44,7 @@ void Preferences::load_default()
     canvas_layer = CanvasPreferences();
     canvas_non_layer = CanvasPreferences();
     canvas_non_layer.appearance.layer_colors[0] = {1, 1, 0};
-    key_sequences.load_from_json(json_from_resource("/net/carrotIndustries/horizon/imp/keys_default.json"));
+    key_sequences.load_from_json(json_from_resource("/org/horizon-eda/horizon/imp/keys_default.json"));
     capture_output = capture_output_default;
 }
 
@@ -330,7 +330,7 @@ void Preferences::load_from_json(const json &j)
         zoom.load_from_json(j.at("zoom"));
     if (j.count("key_sequences"))
         key_sequences.load_from_json(j.at("key_sequences"));
-    key_sequences.append_from_json(json_from_resource("/net/carrotIndustries/horizon/imp/keys_default.json"));
+    key_sequences.append_from_json(json_from_resource("/org/horizon-eda/horizon/imp/keys_default.json"));
     capture_output = j.value("capture_output", capture_output_default);
     if (j.count("partinfo"))
         partinfo.load_from_json(j.at("partinfo"));

@@ -5,7 +5,7 @@
 namespace horizon {
 FootprintGeneratorDual::FootprintGeneratorDual(CorePackage *c)
     : Glib::ObjectBase(typeid(FootprintGeneratorDual)),
-      FootprintGeneratorBase("/net/carrotIndustries/horizon/imp/footprint_generator/dual.svg", c)
+      FootprintGeneratorBase("/org/horizon-eda/horizon/imp/footprint_generator/dual.svg", c)
 {
 
     {

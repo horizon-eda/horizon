@@ -88,32 +88,30 @@ void TriangleRenderer::realize()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    program_triangle =
-            gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl",
-                                            "/net/carrotIndustries/horizon/canvas/shaders/"
-                                            "triangle-triangle-fragment.glsl",
-                                            "/net/carrotIndustries/horizon/canvas/shaders/"
-                                            "triangle-triangle-geometry.glsl");
-    program_line0 = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl",
-                                                    "/net/carrotIndustries/horizon/canvas/shaders/"
+    program_triangle = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas/shaders/triangle-vertex.glsl",
+                                                       "/org/horizon-eda/horizon/canvas/shaders/"
+                                                       "triangle-triangle-fragment.glsl",
+                                                       "/org/horizon-eda/horizon/canvas/shaders/"
+                                                       "triangle-triangle-geometry.glsl");
+    program_line0 = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas/shaders/triangle-vertex.glsl",
+                                                    "/org/horizon-eda/horizon/canvas/shaders/"
                                                     "triangle-line0-fragment.glsl",
-                                                    "/net/carrotIndustries/horizon/canvas/shaders/"
+                                                    "/org/horizon-eda/horizon/canvas/shaders/"
                                                     "triangle-line0-geometry.glsl");
-    program_line_butt =
-            gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl",
-                                            "/net/carrotIndustries/horizon/canvas/shaders/"
-                                            "triangle-line-butt-fragment.glsl",
-                                            "/net/carrotIndustries/horizon/canvas/shaders/"
-                                            "triangle-line-butt-geometry.glsl");
-    program_line = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl",
-                                                   "/net/carrotIndustries/horizon/canvas/shaders/"
+    program_line_butt = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas/shaders/triangle-vertex.glsl",
+                                                        "/org/horizon-eda/horizon/canvas/shaders/"
+                                                        "triangle-line-butt-fragment.glsl",
+                                                        "/org/horizon-eda/horizon/canvas/shaders/"
+                                                        "triangle-line-butt-geometry.glsl");
+    program_line = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas/shaders/triangle-vertex.glsl",
+                                                   "/org/horizon-eda/horizon/canvas/shaders/"
                                                    "triangle-line-fragment.glsl",
-                                                   "/net/carrotIndustries/horizon/canvas/shaders/"
+                                                   "/org/horizon-eda/horizon/canvas/shaders/"
                                                    "triangle-line-geometry.glsl");
-    program_glyph = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/triangle-vertex.glsl",
-                                                    "/net/carrotIndustries/horizon/canvas/shaders/"
+    program_glyph = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas/shaders/triangle-vertex.glsl",
+                                                    "/org/horizon-eda/horizon/canvas/shaders/"
                                                     "triangle-glyph-fragment.glsl",
-                                                    "/net/carrotIndustries/horizon/canvas/shaders/"
+                                                    "/org/horizon-eda/horizon/canvas/shaders/"
                                                     "triangle-glyph-geometry.glsl");
     GL_CHECK_ERROR;
     glGenBuffers(1, &ubo);

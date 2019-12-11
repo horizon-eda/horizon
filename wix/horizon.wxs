@@ -25,7 +25,7 @@
 								Name="Horizon EDA on GitHub"
 									   Target="http://github.com/horizon-eda/horizon/"/>
 				<RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
-				<RegistryValue Root="HKCU" Key="Software\carrotIndustries.net\horizon" Name="startmenu_installed" Type="integer" Value="1" KeyPath="yes"/>
+				<RegistryValue Root="HKCU" Key="Software\horizon-eda.org\horizon" Name="startmenu_installed" Type="integer" Value="1" KeyPath="yes"/>
 			</Component>
 		</DirectoryRef>
 
@@ -33,7 +33,7 @@
 			<Component Id="DesktopShortcut" Guid="12177fc9-8bad-429c-94dc-793d162a3c0d" Win64='$(var.Win64)'>
 				<Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Target="[INSTALLDIR]horizon-eda.exe" Name="$(var.FullProductName)" WorkingDirectory='INSTALLDIR' />
 				<RemoveFolder Id="DesktopFolder" On="uninstall"/>
-				<RegistryValue Root="HKCU" Key="Software\carrotIndustries.net\horizon" Name="desktop_installed" Type="integer" Value="1" KeyPath="yes"/>
+				<RegistryValue Root="HKCU" Key="Software\horizon-eda.org\horizon" Name="desktop_installed" Type="integer" Value="1" KeyPath="yes"/>
 			</Component>
 		</DirectoryRef>
 

@@ -765,17 +765,17 @@ install: $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-eda $(BUILDDIR)/horizon-prj
 	$(INSTALL) -m755 $(BUILDDIR)/horizon-prj $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m755 $(BUILDDIR)/horizon-pool $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(ICONDIR)/scalable/apps
-	$(INSTALL) -m644 src/icons/scalable/apps/horizon-eda.svg $(DESTDIR)$(ICONDIR)/scalable/apps/net.carrotIndustries.HorizonEDA.svg
+	$(INSTALL) -m644 src/icons/scalable/apps/horizon-eda.svg $(DESTDIR)$(ICONDIR)/scalable/apps/org.horizon_eda.HorizonEDA.svg
 	mkdir -p $(DESTDIR)$(ICONDIR)/16x16/apps
-	$(INSTALL) -m644 src/icons/16x16/apps/horizon-eda.png $(DESTDIR)$(ICONDIR)/16x16/apps/net.carrotIndustries.HorizonEDA.png
+	$(INSTALL) -m644 src/icons/16x16/apps/horizon-eda.png $(DESTDIR)$(ICONDIR)/16x16/apps/org.horizon_eda.HorizonEDA.png
 	mkdir -p $(DESTDIR)$(ICONDIR)/32x32/apps
-	$(INSTALL) -m644 src/icons/32x32/apps/horizon-eda.png $(DESTDIR)$(ICONDIR)/32x32/apps/net.carrotIndustries.HorizonEDA.png
+	$(INSTALL) -m644 src/icons/32x32/apps/horizon-eda.png $(DESTDIR)$(ICONDIR)/32x32/apps/org.horizon_eda.HorizonEDA.png
 	mkdir -p $(DESTDIR)$(ICONDIR)/64x64/apps
-	$(INSTALL) -m644 src/icons/64x64/apps/horizon-eda.png $(DESTDIR)$(ICONDIR)/64x64/apps/net.carrotIndustries.HorizonEDA.png
+	$(INSTALL) -m644 src/icons/64x64/apps/horizon-eda.png $(DESTDIR)$(ICONDIR)/64x64/apps/org.horizon_eda.HorizonEDA.png
 	mkdir -p $(DESTDIR)$(ICONDIR)/256x256/apps
-	$(INSTALL) -m644 src/icons/256x256/apps/horizon-eda.png $(DESTDIR)$(ICONDIR)/256x256/apps/net.carrotIndustries.HorizonEDA.png
+	$(INSTALL) -m644 src/icons/256x256/apps/horizon-eda.png $(DESTDIR)$(ICONDIR)/256x256/apps/org.horizon_eda.HorizonEDA.png
 	mkdir -p $(DESTDIR)$(APPSDIR)
-	$(INSTALL) -m644 net.carrotIndustries.HorizonEDA.desktop $(DESTDIR)$(APPSDIR)
+	$(INSTALL) -m644 org.horizon_eda.HorizonEDA.desktop $(DESTDIR)$(APPSDIR)
 
 
 clean: clean_router clean_oce clean_res

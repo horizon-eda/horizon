@@ -8,7 +8,7 @@ void RuleEditorHoleSize::populate()
 {
     rule2 = dynamic_cast<RuleHoleSize *>(rule);
 
-    builder = Gtk::Builder::create_from_resource("/net/carrotIndustries/horizon/imp/rules/rule_editor_hole_size.ui");
+    builder = Gtk::Builder::create_from_resource("/org/horizon-eda/horizon/imp/rules/rule_editor_hole_size.ui");
     Gtk::Box *editor;
     builder->get_widget("editor", editor);
     pack_start(*editor, true, true, 0);

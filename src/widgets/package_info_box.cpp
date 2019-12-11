@@ -115,7 +115,7 @@ PackageInfoBox *PackageInfoBox::create(Pool &p)
 {
     PackageInfoBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/window.ui", "info_box");
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/window.ui", "info_box");
     x->get_widget_derived("info_box", w, p);
     w->reference();
     return w;

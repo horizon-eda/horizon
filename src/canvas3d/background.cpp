@@ -42,9 +42,9 @@ static GLuint create_vao(GLuint program)
 void BackgroundRenderer::realize()
 {
     program = gl_create_program_from_resource(
-            "/net/carrotIndustries/horizon/canvas3d/shaders/"
+            "/org/horizon-eda/horizon/canvas3d/shaders/"
             "background-vertex.glsl",
-            "/net/carrotIndustries/horizon/canvas3d/shaders/"
+            "/org/horizon-eda/horizon/canvas3d/shaders/"
             "background-fragment.glsl",
             nullptr);
     vao = create_vao(program);

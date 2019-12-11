@@ -142,7 +142,7 @@ PropertyPanel *PropertyPanel::create(ObjectType t, Core *c, PropertyPanels *pare
 {
     PropertyPanel *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/property_panels/property_panel.ui");
+    x->add_from_resource("/org/horizon-eda/horizon/property_panels/property_panel.ui");
     x->get_widget_derived("PropertyPanel", w, t, c);
     w->reference();
     w->parent = parent;

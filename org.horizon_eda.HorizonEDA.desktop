@@ -4,5 +4,5 @@ Comment=Free EDA package
 Categories=Development;Engineering;Electronics;
 Type=Application
 Terminal=false
-Icon=net.carrotIndustries.HorizonEDA
+Icon=org.horizon_eda.HorizonEDA
 Exec=horizon-eda %U

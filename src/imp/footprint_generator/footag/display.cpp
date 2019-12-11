@@ -13,7 +13,7 @@ FootagDisplay *FootagDisplay::create(CorePackage *c, enum footag_type type)
 {
     FootagDisplay *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/imp/footprint_generator/footag/footag.ui");
+    x->add_from_resource("/org/horizon-eda/horizon/imp/footprint_generator/footag/footag.ui");
     x->get_widget_derived("box", w, c, type);
     w->reference();
     return w;

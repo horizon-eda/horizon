@@ -89,7 +89,7 @@ GateEditorWizard *GateEditorWizard::create(Gate *g, PartWizard *pa)
     GateEditorWizard *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource(
-            "/net/carrotIndustries/horizon/pool-prj-mgr/pool-mgr/part_wizard/"
+            "/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/part_wizard/"
             "part_wizard.ui");
     std::cout << "create gate ed" << std::endl;
     x->get_widget_derived("gate_editor", w, g, pa);

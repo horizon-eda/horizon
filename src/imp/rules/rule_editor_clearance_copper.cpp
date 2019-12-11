@@ -18,7 +18,7 @@ void RuleEditorClearanceCopper::populate()
     rule2 = dynamic_cast<RuleClearanceCopper *>(rule);
 
     builder = Gtk::Builder::create_from_resource(
-            "/net/carrotIndustries/horizon/imp/rules/"
+            "/org/horizon-eda/horizon/imp/rules/"
             "rule_editor_clearance_copper.ui");
     Gtk::Box *editor;
     builder->get_widget("editor", editor);

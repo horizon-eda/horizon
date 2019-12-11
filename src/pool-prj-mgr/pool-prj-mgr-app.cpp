@@ -16,7 +16,7 @@
 namespace horizon {
 
 PoolProjectManagerApplication::PoolProjectManagerApplication()
-    : Gtk::Application("net.carrotIndustries.horizon.pool-prj-mgr", Gio::APPLICATION_HANDLES_OPEN),
+    : Gtk::Application("org.horizon-eda.horizon.pool-prj-mgr", Gio::APPLICATION_HANDLES_OPEN),
       sock_broadcast(zctx, ZMQ_PUB)
 {
     sock_broadcast.bind("tcp://127.0.0.1:*");
@@ -135,11 +135,11 @@ void PoolProjectManagerApplication::on_startup()
         send_json(0, j);
     });
 
-    Gtk::IconTheme::get_default()->add_resource_path("/net/carrotIndustries/horizon/icons");
+    Gtk::IconTheme::get_default()->add_resource_path("/org/horizon-eda/horizon/icons");
     Gtk::Window::set_default_icon_name("horizon-eda");
 
     auto cssp = Gtk::CssProvider::create();
-    cssp->load_from_resource("/net/carrotIndustries/horizon/global.css");
+    cssp->load_from_resource("/org/horizon-eda/horizon/global.css");
     Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(), cssp, 700);
 
     signal_shutdown().connect(sigc::mem_fun(*this, &PoolProjectManagerApplication::on_shutdown));

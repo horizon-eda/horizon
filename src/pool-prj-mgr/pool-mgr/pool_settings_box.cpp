@@ -38,7 +38,7 @@ PoolSettingsBox *PoolSettingsBox::create(PoolNotebook *nb, const std::string &bp
     PoolSettingsBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     std::vector<Glib::ustring> widgets = {"box_settings", "image1", "image2", "image3", "image4"};
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/window.ui", widgets);
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/window.ui", widgets);
     x->get_widget_derived("box_settings", w, nb, bp);
     w->reference();
     return w;

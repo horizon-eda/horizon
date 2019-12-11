@@ -70,7 +70,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
 
     {
         auto rb = Gtk::Builder::create();
-        rb->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/app_menu.ui");
+        rb->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/app_menu.ui");
 
         auto object = rb->get_object("appmenu");
         auto app_menu = Glib::RefPtr<Gio::MenuModel>::cast_dynamic(object);
@@ -845,8 +845,7 @@ PoolProjectManagerAppWindow *PoolProjectManagerAppWindow::create(PoolProjectMana
     std::vector<Glib::ustring> widgets = {"app_window",        "sg_dest",         "sg_repo",          "menu1",
                                           "sg_base_path",      "sg_project_name", "sg_project_title", "sg_pool_name",
                                           "sg_pool_base_path", "sg_prj_pool"};
-    auto refBuilder =
-            Gtk::Builder::create_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/window.ui", widgets);
+    auto refBuilder = Gtk::Builder::create_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/window.ui", widgets);
 
     PoolProjectManagerAppWindow *window = nullptr;
     refBuilder->get_widget_derived("app_window", window, app);

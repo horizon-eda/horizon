@@ -108,7 +108,7 @@ private:
         if (user_version < min_user_version) {
             // update schema
             auto bytes = Gio::Resource::lookup_data_global(
-                    "/net/carrotIndustries/horizon/util/"
+                    "/org/horizon-eda/horizon/util/"
                     "stock_info_provider_partinfo_schema.sql");
             gsize size{bytes->get_size() + 1}; // null byte
             auto data = (const char *)bytes->get_data(size);

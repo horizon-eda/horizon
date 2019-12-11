@@ -229,7 +229,7 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
     Gtk::Menu *color_preset_menu;
     GET_WIDGET(color_preset_menu);
 
-    color_presets = json_from_resource("/net/carrotIndustries/horizon/preferences/color_presets.json");
+    color_presets = json_from_resource("/org/horizon-eda/horizon/preferences/color_presets.json");
 
     {
 
@@ -495,7 +495,7 @@ CanvasPreferencesEditor *CanvasPreferencesEditor::create(Preferences *prefs, Can
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     std::vector<Glib::ustring> widgets = {"canvas_box",  "adjustment1", "adjustment2",
                                           "adjustment3", "adjustment4", "color_preset_menu"};
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/preferences.ui", widgets);
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/preferences.ui", widgets);
     x->get_widget_derived("canvas_box", w, prefs, canvas_prefs, layered);
     w->reference();
     return w;

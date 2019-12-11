@@ -3,11 +3,10 @@
 
 namespace horizon {
 FootprintGeneratorSingle::FootprintGeneratorSingle(CorePackage *c)
-    : Glib::ObjectBase(typeid(FootprintGeneratorSingle)),
-      FootprintGeneratorBase(
-              "/net/carrotIndustries/horizon/imp/footprint_generator/"
-              "single.svg",
-              c)
+    : Glib::ObjectBase(typeid(FootprintGeneratorSingle)), FootprintGeneratorBase(
+                                                                  "/org/horizon-eda/horizon/imp/footprint_generator/"
+                                                                  "single.svg",
+                                                                  c)
 {
 
     {

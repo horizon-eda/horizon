@@ -8,7 +8,7 @@ WelcomeWindow *WelcomeWindow::create(PoolProjectManagerAppWindow *aw)
 {
     WelcomeWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/welcome.ui");
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/welcome.ui");
     x->get_widget_derived("window", w, aw);
 
     w->set_transient_for(*aw);
@@ -33,7 +33,7 @@ WelcomeWindow::WelcomeWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     x->get_widget("stack", stack);
     button_back->set_visible(false);
 
-    pixbuf = Gdk::Pixbuf::create_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/splash1_1080.png");
+    pixbuf = Gdk::Pixbuf::create_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/splash1_1080.png");
     banner_area->signal_draw().connect(sigc::mem_fun(*this, &WelcomeWindow::draw_banner));
 
     button_download->signal_clicked().connect([this] {

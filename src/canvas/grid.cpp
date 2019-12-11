@@ -42,9 +42,8 @@ static GLuint create_vao(GLuint program)
 
 void Grid::realize()
 {
-    program =
-            gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas/shaders/grid-vertex.glsl",
-                                            "/net/carrotIndustries/horizon/canvas/shaders/grid-fragment.glsl", nullptr);
+    program = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas/shaders/grid-vertex.glsl",
+                                              "/org/horizon-eda/horizon/canvas/shaders/grid-fragment.glsl", nullptr);
     vao = create_vao(program);
 
     GET_LOC(this, screenmat);

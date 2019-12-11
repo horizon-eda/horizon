@@ -25,7 +25,7 @@ public:
         PoolItemEditor *w;
         Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
         std::vector<Glib::ustring> objs = {"pool_item_box", "image1"};
-        x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/prj-mgr/prefs.ui", objs);
+        x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/prj-mgr/prefs.ui", objs);
         x->get_widget_derived("pool_item_box", w, pool);
 
         w->reference();
@@ -78,7 +78,7 @@ PoolPreferencesEditor *PoolPreferencesEditor::create()
 {
     PoolPreferencesEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/prj-mgr/prefs.ui", "box");
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/prj-mgr/prefs.ui", "box");
     x->get_widget_derived("box", w);
 
     w->reference();

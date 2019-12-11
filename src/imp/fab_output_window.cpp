@@ -42,7 +42,7 @@ GerberLayerEditor *GerberLayerEditor::create(FabOutputWindow *pa, FabOutputSetti
 {
     GerberLayerEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/imp/fab_output.ui", "gerber_layer_editor");
+    x->add_from_resource("/org/horizon-eda/horizon/imp/fab_output.ui", "gerber_layer_editor");
     x->get_widget_derived("gerber_layer_editor", w, pa, la);
     w->reference();
     return w;
@@ -191,7 +191,7 @@ FabOutputWindow *FabOutputWindow::create(Gtk::Window *p, CoreBoard *c, const std
 {
     FabOutputWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/imp/fab_output.ui");
+    x->add_from_resource("/org/horizon-eda/horizon/imp/fab_output.ui");
     x->get_widget_derived("window", w, c, project_dir);
 
     w->set_transient_for(*p);

@@ -50,10 +50,10 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out)
 
 void CoverRenderer::realize()
 {
-    program = gl_create_program_from_resource("/net/carrotIndustries/horizon/canvas3d/shaders/cover-vertex.glsl",
-                                              "/net/carrotIndustries/horizon/canvas3d/shaders/"
+    program = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas3d/shaders/cover-vertex.glsl",
+                                              "/org/horizon-eda/horizon/canvas3d/shaders/"
                                               "cover-fragment.glsl",
-                                              "/net/carrotIndustries/horizon/canvas3d/shaders/"
+                                              "/org/horizon-eda/horizon/canvas3d/shaders/"
                                               "cover-geometry.glsl");
     vao = create_vao(program, vbo);
 

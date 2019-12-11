@@ -252,7 +252,7 @@ void KeySequencesPreferencesEditor::handle_load()
 
 void KeySequencesPreferencesEditor::handle_load_default()
 {
-    keyseq_preferences->load_from_json(json_from_resource("/net/carrotIndustries/horizon/imp/keys_default.json"));
+    keyseq_preferences->load_from_json(json_from_resource("/org/horizon-eda/horizon/imp/keys_default.json"));
     update_action_editors();
     update_keys();
     preferences->signal_changed().emit();
@@ -263,7 +263,7 @@ KeySequencesPreferencesEditor *KeySequencesPreferencesEditor::create(Preferences
 {
     KeySequencesPreferencesEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/preferences.ui", "key_sequences_box");
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/preferences.ui", "key_sequences_box");
     x->get_widget_derived("key_sequences_box", w, prefs, keyseq_prefs);
     w->reference();
     return w;
@@ -471,7 +471,7 @@ ActionEditor *ActionEditor::create(Preferences *prefs, std::pair<ActionID, ToolI
 {
     ActionEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/pool-prj-mgr/preferences.ui", "action_editor");
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/preferences.ui", "action_editor");
     x->get_widget_derived("action_editor", w, prefs, action, availability, title, parent);
     w->reference();
     return w;

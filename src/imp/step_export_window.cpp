@@ -10,7 +10,7 @@ StepExportWindow *StepExportWindow::create(Gtk::Window *p, class CoreBoard *c)
 {
     StepExportWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/imp/step_export.ui");
+    x->add_from_resource("/org/horizon-eda/horizon/imp/step_export.ui");
     x->get_widget_derived("window", w, c);
     w->set_transient_for(*p);
     return w;

@@ -573,7 +573,7 @@ RulesWindow *RulesWindow::create(Gtk::Window *p, CanvasGL *ca, Rules *ru, Core *
 {
     RulesWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/net/carrotIndustries/horizon/imp/rules/rules_window.ui");
+    x->add_from_resource("/org/horizon-eda/horizon/imp/rules/rules_window.ui");
     x->get_widget_derived("window", w, ca, ru, c);
     w->set_transient_for(*p);
     return w;

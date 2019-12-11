@@ -60,7 +60,7 @@ void ImpLayer::construct_layer_box(bool pack)
     }
     if (!layers_loaded) {
         layer_box->load_from_json(
-                json_from_resource("/net/carrotIndustries/horizon/imp/"
+                json_from_resource("/org/horizon-eda/horizon/imp/"
                                    "layer_display_default.json"));
     }
 }
