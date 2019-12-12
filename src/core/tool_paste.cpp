@@ -375,7 +375,7 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
         auto ref_clipboard = Gtk::Clipboard::get();
         ref_clipboard->request_contents("imp-buffer", [this](const Gtk::SelectionData &sel_data) {
             auto td = std::make_unique<ToolDataPaste>(nullptr);
-            if (sel_data.gobj())
+            if (sel_data.gobj() && sel_data.get_data_type() == "imp-buffer")
                 td->paste_data = json::parse(sel_data.get_data_as_string());
             imp->tool_update_data(std::move(td));
         });
