@@ -256,7 +256,7 @@ bool ImpBase::property_panel_has_focus()
 
 void ImpBase::run(int argc, char *argv[])
 {
-    auto app = Gtk::Application::create(argc, argv, "org.horizon-eda.horizon.Imp", Gio::APPLICATION_NON_UNIQUE);
+    auto app = Gtk::Application::create(argc, argv, "org.horizon_eda.HorizonEDA.imp", Gio::APPLICATION_NON_UNIQUE);
 
     main_window = MainWindow::create();
     canvas = main_window->canvas;

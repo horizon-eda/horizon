@@ -16,7 +16,7 @@
 namespace horizon {
 
 PoolProjectManagerApplication::PoolProjectManagerApplication()
-    : Gtk::Application("org.horizon-eda.horizon.pool-prj-mgr", Gio::APPLICATION_HANDLES_OPEN),
+    : Gtk::Application("org.horizon_eda.HorizonEDA.pool_prj_mgr", Gio::APPLICATION_HANDLES_OPEN),
       sock_broadcast(zctx, ZMQ_PUB)
 {
     sock_broadcast.bind("tcp://127.0.0.1:*");
