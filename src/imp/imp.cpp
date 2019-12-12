@@ -513,19 +513,6 @@ void ImpBase::run(int argc, char *argv[])
                     search_go(-1);
                     return true;
                 }
-                else {
-                    for (auto &it : action_connections) {
-                        for (const auto &it2 : it.second.key_sequences) {
-                            if (it2.size() == 1) {
-                                auto k = it2.front();
-                                if (ev->keyval == k.first && (ev->state & k.second)) {
-                                    handle_key_press(ev);
-                                    return true;
-                                }
-                            }
-                        }
-                    }
-                }
                 return false;
             },
             false);
