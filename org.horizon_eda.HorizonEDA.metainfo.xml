@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2019 horizon-eda.org -->
+<component type="desktop-application">
+  <id>org.horizon_eda.HorizonEDA</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+  <name>Horizon EDA</name>
+  <summary>A free EDA package</summary>
+
+  <description>
+    <p>
+      A free from-scratch EDA package written in C++.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">org.horizon_eda.HorizonEDA.desktop</launchable>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/wiki/carrotIndustries/horizon/images/collage.png</image>
+    </screenshot>
+  </screenshots>
+
+  <url type="homepage">https://horizon-eda.org/</url>
+
+  <provides>
+    <binary>horizon-eda</binary>
+  </provides>
+
+  <releases>
+    <release version="0.9.4" date="2019-12-13">
+      <description>
+        <p>prerelease to test packaging</p>
+      </description>
+    </release>
+  </releases>
+</component>

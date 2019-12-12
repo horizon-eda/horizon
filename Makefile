@@ -690,6 +690,7 @@ PREFIX ?= /usr/local
 BINDIR = ${PREFIX}/bin/
 ICONDIR = ${PREFIX}/share/icons/hicolor/
 APPSDIR = ${PREFIX}/share/applications/
+METADIR = ${PREFIX}/share/metainfo/
 INSTALL = /usr/bin/install
 
 src/preferences/color_presets.json: $(wildcard src/preferences/color_presets/*)
@@ -776,6 +777,7 @@ install: $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-eda $(BUILDDIR)/horizon-prj
 	$(INSTALL) -m644 src/icons/256x256/apps/horizon-eda.png $(DESTDIR)$(ICONDIR)/256x256/apps/org.horizon_eda.HorizonEDA.png
 	mkdir -p $(DESTDIR)$(APPSDIR)
 	$(INSTALL) -m644 org.horizon_eda.HorizonEDA.desktop $(DESTDIR)$(APPSDIR)
+	$(INSTALL) -m644 org.horizon_eda.HorizonEDA.metainfo.xml $(DESTDIR)$(METADIR)
 
 
 clean: clean_router clean_oce clean_res
