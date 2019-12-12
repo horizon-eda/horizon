@@ -11,7 +11,7 @@ SpinButtonAngle::SpinButtonAngle() : Gtk::SpinButton()
     double step = (1.0 / 360.0) * 65536;
     double page = (15.0 / 360.0) * 65536;
     set_increments(step, page);
-    
+
     // The value normally is only within 0..65536, but the range has to be larger to simulate the wrapping by
     // temporarily allowing smaller/larger values and then readjusting them.
     set_range(-page, 65536 + page);
