@@ -777,6 +777,7 @@ install: $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-eda $(BUILDDIR)/horizon-prj
 	$(INSTALL) -m644 src/icons/256x256/apps/horizon-eda.png $(DESTDIR)$(ICONDIR)/256x256/apps/org.horizon_eda.HorizonEDA.png
 	mkdir -p $(DESTDIR)$(APPSDIR)
 	$(INSTALL) -m644 org.horizon_eda.HorizonEDA.desktop $(DESTDIR)$(APPSDIR)
+	mkdir -p $(DESTDIR)$(METADIR)
 	$(INSTALL) -m644 org.horizon_eda.HorizonEDA.metainfo.xml $(DESTDIR)$(METADIR)
 
 
