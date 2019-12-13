@@ -27,8 +27,10 @@
     <binary>horizon-eda</binary>
   </provides>
 
+  <content_rating type="oars-1.0" />
+
   <releases>
-    <release version="0.9.4" date="2019-12-13">
+    <release version="0.9.6" date="2019-12-13">
       <description>
         <p>prerelease to test packaging</p>
       </description>
