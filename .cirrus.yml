@@ -3,4 +3,8 @@ freebsd_instance:
 
 task:
   install_script: pkg install -y git gmake pkgconf e2fsprogs-libuuid sqlite3 yaml-cpp gtkmm30 cppzmq libgit2 boost-libs glm opencascade podofo libzip
-  script: make
+  script:
+    - ls
+    - echo $CXX
+    - $CXX --version
+    - gmake
