@@ -10,6 +10,7 @@
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include <giomm/file.h>
 #include "pool/pool_manager.hpp"
+#include <iomanip>
 
 namespace horizon {
 PoolCacheWindow *PoolCacheWindow::create(Gtk::Window *p, const std::string &cache_path, const std::string &pool_path,
