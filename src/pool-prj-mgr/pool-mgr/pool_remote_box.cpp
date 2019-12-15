@@ -12,6 +12,7 @@
 #include "util/github_client.hpp"
 #include "util/str_util.hpp"
 #include "util/util.hpp"
+#include <iomanip>
 
 namespace horizon {
 
