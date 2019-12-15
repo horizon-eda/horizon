@@ -4,6 +4,7 @@
 #include <ciso646> // and
 #include <cstddef> // size_t
 #include <cstdint> // uint8_t
+#include <string> // string
 
 namespace nlohmann
 {
@@ -72,5 +73,5 @@ inline bool operator<(const value_t lhs, const value_t rhs) noexcept
     const auto r_index = static_cast<std::size_t>(rhs);
     return l_index < order.size() and r_index < order.size() and order[l_index] < order[r_index];
 }
-}
-}
+}  // namespace detail
+}  // namespace nlohmann

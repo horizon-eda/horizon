@@ -6,18 +6,18 @@
 #include <cmath> // ldexp
 #include <cstddef> // size_t
 #include <cstdint> // uint8_t, uint16_t, uint32_t, uint64_t
+#include <cstdio> // snprintf
 #include <cstring> // memcpy
-#include <iomanip> // setw, setfill
-#include <ios> // hex
 #include <iterator> // back_inserter
 #include <limits> // numeric_limits
-#include <sstream> // stringstream
 #include <string> // char_traits, string
 #include <utility> // make_pair, move
 
-#include <nlohmann/detail/input/input_adapters.hpp>
 #include <nlohmann/detail/exceptions.hpp>
+#include <nlohmann/detail/input/input_adapters.hpp>
+#include <nlohmann/detail/input/json_sax.hpp>
 #include <nlohmann/detail/macro_scope.hpp>
+#include <nlohmann/detail/meta/is_sax.hpp>
 #include <nlohmann/detail/value_t.hpp>
 
 namespace nlohmann
@@ -29,14 +29,16 @@ namespace detail
 ///////////////////
 
 /*!
-@brief deserialization of CBOR and MessagePack values
+@brief deserialization of CBOR, MessagePack, and UBJSON values
 */
-template<typename BasicJsonType>
+template<typename BasicJsonType, typename SAX = json_sax_dom_parser<BasicJsonType>>
 class binary_reader
 {
     using number_integer_t = typename BasicJsonType::number_integer_t;
     using number_unsigned_t = typename BasicJsonType::number_unsigned_t;
+    using number_float_t = typename BasicJsonType::number_float_t;
     using string_t = typename BasicJsonType::string_t;
+    using json_sax_t = SAX;
 
   public:
     /*!
@@ -46,70 +48,74 @@ class binary_reader
     */
     explicit binary_reader(input_adapter_t adapter) : ia(std::move(adapter))
     {
+        (void)detail::is_sax_static_asserts<SAX, BasicJsonType> {};
         assert(ia);
     }
 
-    /*!
-    @brief create a JSON value from CBOR input
-
-    @param[in] strict  whether to expect the input to be consumed completed
-    @return JSON value created from CBOR input
-
-    @throw parse_error.110 if input ended unexpectedly or the end of file was
-                           not reached when @a strict was set to true
-    @throw parse_error.112 if unsupported byte was read
-    */
-    BasicJsonType parse_cbor(const bool strict)
-    {
-        const auto res = parse_cbor_internal();
-        if (strict)
-        {
-            get();
-            expect_eof();
-        }
-        return res;
-    }
+    // make class move-only
+    binary_reader(const binary_reader&) = delete;
+    binary_reader(binary_reader&&) = default;
+    binary_reader& operator=(const binary_reader&) = delete;
+    binary_reader& operator=(binary_reader&&) = default;
+    ~binary_reader() = default;
 
     /*!
-    @brief create a JSON value from MessagePack input
-
+    @param[in] format  the binary format to parse
+    @param[in] sax_    a SAX event processor
     @param[in] strict  whether to expect the input to be consumed completed
-    @return JSON value created from MessagePack input
 
-    @throw parse_error.110 if input ended unexpectedly or the end of file was
-                           not reached when @a strict was set to true
-    @throw parse_error.112 if unsupported byte was read
+    @return
     */
-    BasicJsonType parse_msgpack(const bool strict)
+    JSON_HEDLEY_NON_NULL(3)
+    bool sax_parse(const input_format_t format,
+                   json_sax_t* sax_,
+                   const bool strict = true)
     {
-        const auto res = parse_msgpack_internal();
-        if (strict)
+        sax = sax_;
+        bool result = false;
+
+        switch (format)
         {
-            get();
-            expect_eof();
+            case input_format_t::bson:
+                result = parse_bson_internal();
+                break;
+
+            case input_format_t::cbor:
+                result = parse_cbor_internal();
+                break;
+
+            case input_format_t::msgpack:
+                result = parse_msgpack_internal();
+                break;
+
+            case input_format_t::ubjson:
+                result = parse_ubjson_internal();
+                break;
+
+            default:            // LCOV_EXCL_LINE
+                assert(false);  // LCOV_EXCL_LINE
         }
-        return res;
-    }
 
-    /*!
-    @brief create a JSON value from UBJSON input
-
-    @param[in] strict  whether to expect the input to be consumed completed
-    @return JSON value created from UBJSON input
-
-    @throw parse_error.110 if input ended unexpectedly or the end of file was
-                           not reached when @a strict was set to true
-    @throw parse_error.112 if unsupported byte was read
-    */
-    BasicJsonType parse_ubjson(const bool strict)
-    {
-        const auto res = parse_ubjson_internal();
-        if (strict)
+        // strict mode: next byte must be EOF
+        if (result and strict)
         {
-            get_ignore_noop();
-            expect_eof();
+            if (format == input_format_t::ubjson)
+            {
+                get_ignore_noop();
+            }
+            else
+            {
+                get();
+            }
+
+            if (JSON_HEDLEY_UNLIKELY(current != std::char_traits<char>::eof()))
+            {
+                return sax->parse_error(chars_read, get_token_string(),
+                                        parse_error::create(110, chars_read, exception_message(format, "expected end of input; last byte: 0x" + get_token_string(), "value")));
+            }
         }
-        return res;
+
+        return result;
     }
 
     /*!
@@ -121,22 +127,240 @@ class binary_reader
     */
     static constexpr bool little_endianess(int num = 1) noexcept
     {
-        return (*reinterpret_cast<char*>(&num) == 1);
+        return *reinterpret_cast<char*>(&num) == 1;
     }
 
   private:
+    //////////
+    // BSON //
+    //////////
+
+    /*!
+    @brief Reads in a BSON-object and passes it to the SAX-parser.
+    @return whether a valid BSON-value was passed to the SAX parser
+    */
+    bool parse_bson_internal()
+    {
+        std::int32_t document_size;
+        get_number<std::int32_t, true>(input_format_t::bson, document_size);
+
+        if (JSON_HEDLEY_UNLIKELY(not sax->start_object(std::size_t(-1))))
+        {
+            return false;
+        }
+
+        if (JSON_HEDLEY_UNLIKELY(not parse_bson_element_list(/*is_array*/false)))
+        {
+            return false;
+        }
+
+        return sax->end_object();
+    }
+
+    /*!
+    @brief Parses a C-style string from the BSON input.
+    @param[in, out] result  A reference to the string variable where the read
+                            string is to be stored.
+    @return `true` if the \x00-byte indicating the end of the string was
+             encountered before the EOF; false` indicates an unexpected EOF.
+    */
+    bool get_bson_cstr(string_t& result)
+    {
+        auto out = std::back_inserter(result);
+        while (true)
+        {
+            get();
+            if (JSON_HEDLEY_UNLIKELY(not unexpect_eof(input_format_t::bson, "cstring")))
+            {
+                return false;
+            }
+            if (current == 0x00)
+            {
+                return true;
+            }
+            *out++ = static_cast<char>(current);
+        }
+
+        return true;
+    }
+
+    /*!
+    @brief Parses a zero-terminated string of length @a len from the BSON
+           input.
+    @param[in] len  The length (including the zero-byte at the end) of the
+                    string to be read.
+    @param[in, out] result  A reference to the string variable where the read
+                            string is to be stored.
+    @tparam NumberType The type of the length @a len
+    @pre len >= 1
+    @return `true` if the string was successfully parsed
+    */
+    template<typename NumberType>
+    bool get_bson_string(const NumberType len, string_t& result)
+    {
+        if (JSON_HEDLEY_UNLIKELY(len < 1))
+        {
+            auto last_token = get_token_string();
+            return sax->parse_error(chars_read, last_token, parse_error::create(112, chars_read, exception_message(input_format_t::bson, "string length must be at least 1, is " + std::to_string(len), "string")));
+        }
+
+        return get_string(input_format_t::bson, len - static_cast<NumberType>(1), result) and get() != std::char_traits<char>::eof();
+    }
+
+    /*!
+    @brief Read a BSON document element of the given @a element_type.
+    @param[in] element_type The BSON element type, c.f. http://bsonspec.org/spec.html
+    @param[in] element_type_parse_position The position in the input stream,
+               where the `element_type` was read.
+    @warning Not all BSON element types are supported yet. An unsupported
+             @a element_type will give rise to a parse_error.114:
+             Unsupported BSON record type 0x...
+    @return whether a valid BSON-object/array was passed to the SAX parser
+    */
+    bool parse_bson_element_internal(const int element_type,
+                                     const std::size_t element_type_parse_position)
+    {
+        switch (element_type)
+        {
+            case 0x01: // double
+            {
+                double number;
+                return get_number<double, true>(input_format_t::bson, number) and sax->number_float(static_cast<number_float_t>(number), "");
+            }
+
+            case 0x02: // string
+            {
+                std::int32_t len;
+                string_t value;
+                return get_number<std::int32_t, true>(input_format_t::bson, len) and get_bson_string(len, value) and sax->string(value);
+            }
+
+            case 0x03: // object
+            {
+                return parse_bson_internal();
+            }
+
+            case 0x04: // array
+            {
+                return parse_bson_array();
+            }
+
+            case 0x08: // boolean
+            {
+                return sax->boolean(get() != 0);
+            }
+
+            case 0x0A: // null
+            {
+                return sax->null();
+            }
+
+            case 0x10: // int32
+            {
+                std::int32_t value;
+                return get_number<std::int32_t, true>(input_format_t::bson, value) and sax->number_integer(value);
+            }
+
+            case 0x12: // int64
+            {
+                std::int64_t value;
+                return get_number<std::int64_t, true>(input_format_t::bson, value) and sax->number_integer(value);
+            }
+
+            default: // anything else not supported (yet)
+            {
+                std::array<char, 3> cr{{}};
+                (std::snprintf)(cr.data(), cr.size(), "%.2hhX", static_cast<unsigned char>(element_type));
+                return sax->parse_error(element_type_parse_position, std::string(cr.data()), parse_error::create(114, element_type_parse_position, "Unsupported BSON record type 0x" + std::string(cr.data())));
+            }
+        }
+    }
+
+    /*!
+    @brief Read a BSON element list (as specified in the BSON-spec)
+
+    The same binary layout is used for objects and arrays, hence it must be
+    indicated with the argument @a is_array which one is expected
+    (true --> array, false --> object).
+
+    @param[in] is_array Determines if the element list being read is to be
+                        treated as an object (@a is_array == false), or as an
+                        array (@a is_array == true).
+    @return whether a valid BSON-object/array was passed to the SAX parser
+    */
+    bool parse_bson_element_list(const bool is_array)
+    {
+        string_t key;
+        while (int element_type = get())
+        {
+            if (JSON_HEDLEY_UNLIKELY(not unexpect_eof(input_format_t::bson, "element list")))
+            {
+                return false;
+            }
+
+            const std::size_t element_type_parse_position = chars_read;
+            if (JSON_HEDLEY_UNLIKELY(not get_bson_cstr(key)))
+            {
+                return false;
+            }
+
+            if (not is_array and not sax->key(key))
+            {
+                return false;
+            }
+
+            if (JSON_HEDLEY_UNLIKELY(not parse_bson_element_internal(element_type, element_type_parse_position)))
+            {
+                return false;
+            }
+
+            // get_bson_cstr only appends
+            key.clear();
+        }
+
+        return true;
+    }
+
+    /*!
+    @brief Reads an array from the BSON input and passes it to the SAX-parser.
+    @return whether a valid BSON-array was passed to the SAX parser
+    */
+    bool parse_bson_array()
+    {
+        std::int32_t document_size;
+        get_number<std::int32_t, true>(input_format_t::bson, document_size);
+
+        if (JSON_HEDLEY_UNLIKELY(not sax->start_array(std::size_t(-1))))
+        {
+            return false;
+        }
+
+        if (JSON_HEDLEY_UNLIKELY(not parse_bson_element_list(/*is_array*/true)))
+        {
+            return false;
+        }
+
+        return sax->end_array();
+    }
+
+    //////////
+    // CBOR //
+    //////////
+
     /*!
     @param[in] get_char  whether a new character should be retrieved from the
                          input (true, default) or whether the last read
                          character should be considered instead
+
+    @return whether a valid CBOR value was passed to the SAX parser
     */
-    BasicJsonType parse_cbor_internal(const bool get_char = true)
+    bool parse_cbor_internal(const bool get_char = true)
     {
         switch (get_char ? get() : current)
         {
             // EOF
             case std::char_traits<char>::eof():
-                JSON_THROW(parse_error::create(110, chars_read, "unexpected end of input"));
+                return unexpect_eof(input_format_t::cbor, "value");
 
             // Integer 0x00..0x17 (0..23)
             case 0x00:
@@ -163,19 +387,31 @@ class binary_reader
             case 0x15:
             case 0x16:
             case 0x17:
-                return static_cast<number_unsigned_t>(current);
+                return sax->number_unsigned(static_cast<number_unsigned_t>(current));
 
             case 0x18: // Unsigned integer (one-byte uint8_t follows)
-                return get_number<uint8_t>();
+            {
+                std::uint8_t number;
+                return get_number(input_format_t::cbor, number) and sax->number_unsigned(number);
+            }
 
             case 0x19: // Unsigned integer (two-byte uint16_t follows)
-                return get_number<uint16_t>();
+            {
+                std::uint16_t number;
+                return get_number(input_format_t::cbor, number) and sax->number_unsigned(number);
+            }
 
             case 0x1A: // Unsigned integer (four-byte uint32_t follows)
-                return get_number<uint32_t>();
+            {
+                std::uint32_t number;
+                return get_number(input_format_t::cbor, number) and sax->number_unsigned(number);
+            }
 
             case 0x1B: // Unsigned integer (eight-byte uint64_t follows)
-                return get_number<uint64_t>();
+            {
+                std::uint64_t number;
+                return get_number(input_format_t::cbor, number) and sax->number_unsigned(number);
+            }
 
             // Negative integer -1-0x00..-1-0x17 (-1..-24)
             case 0x20:
@@ -202,27 +438,31 @@ class binary_reader
             case 0x35:
             case 0x36:
             case 0x37:
-                return static_cast<int8_t>(0x20 - 1 - current);
+                return sax->number_integer(static_cast<std::int8_t>(0x20 - 1 - current));
 
             case 0x38: // Negative integer (one-byte uint8_t follows)
             {
-                return static_cast<number_integer_t>(-1) - get_number<uint8_t>();
+                std::uint8_t number;
+                return get_number(input_format_t::cbor, number) and sax->number_integer(static_cast<number_integer_t>(-1) - number);
             }
 
             case 0x39: // Negative integer -1-n (two-byte uint16_t follows)
             {
-                return static_cast<number_integer_t>(-1) - get_number<uint16_t>();
+                std::uint16_t number;
+                return get_number(input_format_t::cbor, number) and sax->number_integer(static_cast<number_integer_t>(-1) - number);
             }
 
             case 0x3A: // Negative integer -1-n (four-byte uint32_t follows)
             {
-                return static_cast<number_integer_t>(-1) - get_number<uint32_t>();
+                std::uint32_t number;
+                return get_number(input_format_t::cbor, number) and sax->number_integer(static_cast<number_integer_t>(-1) - number);
             }
 
             case 0x3B: // Negative integer -1-n (eight-byte uint64_t follows)
             {
-                return static_cast<number_integer_t>(-1) -
-                       static_cast<number_integer_t>(get_number<uint64_t>());
+                std::uint64_t number;
+                return get_number(input_format_t::cbor, number) and sax->number_integer(static_cast<number_integer_t>(-1)
+                        - static_cast<number_integer_t>(number));
             }
 
             // UTF-8 string (0x00..0x17 bytes follow)
@@ -256,7 +496,8 @@ class binary_reader
             case 0x7B: // UTF-8 string (eight-byte uint64_t for n follow)
             case 0x7F: // UTF-8 string (indefinite length)
             {
-                return get_cbor_string();
+                string_t s;
+                return get_cbor_string(s) and sax->string(s);
             }
 
             // array (0x00..0x17 data items follow)
@@ -284,39 +525,34 @@ class binary_reader
             case 0x95:
             case 0x96:
             case 0x97:
-            {
-                return get_cbor_array(current & 0x1F);
-            }
+                return get_cbor_array(static_cast<std::size_t>(static_cast<unsigned int>(current) & 0x1Fu));
 
             case 0x98: // array (one-byte uint8_t for n follows)
             {
-                return get_cbor_array(get_number<uint8_t>());
+                std::uint8_t len;
+                return get_number(input_format_t::cbor, len) and get_cbor_array(static_cast<std::size_t>(len));
             }
 
             case 0x99: // array (two-byte uint16_t for n follow)
             {
-                return get_cbor_array(get_number<uint16_t>());
+                std::uint16_t len;
+                return get_number(input_format_t::cbor, len) and get_cbor_array(static_cast<std::size_t>(len));
             }
 
             case 0x9A: // array (four-byte uint32_t for n follow)
             {
-                return get_cbor_array(get_number<uint32_t>());
+                std::uint32_t len;
+                return get_number(input_format_t::cbor, len) and get_cbor_array(static_cast<std::size_t>(len));
             }
 
             case 0x9B: // array (eight-byte uint64_t for n follow)
             {
-                return get_cbor_array(get_number<uint64_t>());
+                std::uint64_t len;
+                return get_number(input_format_t::cbor, len) and get_cbor_array(static_cast<std::size_t>(len));
             }
 
             case 0x9F: // array (indefinite length)
-            {
-                BasicJsonType result = value_t::array;
-                while (get() != 0xFF)
-                {
-                    result.push_back(parse_cbor_internal(false));
-                }
-                return result;
-            }
+                return get_cbor_array(std::size_t(-1));
 
             // map (0x00..0x17 pairs of data items follow)
             case 0xA0:
@@ -343,62 +579,59 @@ class binary_reader
             case 0xB5:
             case 0xB6:
             case 0xB7:
-            {
-                return get_cbor_object(current & 0x1F);
-            }
+                return get_cbor_object(static_cast<std::size_t>(static_cast<unsigned int>(current) & 0x1Fu));
 
             case 0xB8: // map (one-byte uint8_t for n follows)
             {
-                return get_cbor_object(get_number<uint8_t>());
+                std::uint8_t len;
+                return get_number(input_format_t::cbor, len) and get_cbor_object(static_cast<std::size_t>(len));
             }
 
             case 0xB9: // map (two-byte uint16_t for n follow)
             {
-                return get_cbor_object(get_number<uint16_t>());
+                std::uint16_t len;
+                return get_number(input_format_t::cbor, len) and get_cbor_object(static_cast<std::size_t>(len));
             }
 
             case 0xBA: // map (four-byte uint32_t for n follow)
             {
-                return get_cbor_object(get_number<uint32_t>());
+                std::uint32_t len;
+                return get_number(input_format_t::cbor, len) and get_cbor_object(static_cast<std::size_t>(len));
             }
 
             case 0xBB: // map (eight-byte uint64_t for n follow)
             {
-                return get_cbor_object(get_number<uint64_t>());
+                std::uint64_t len;
+                return get_number(input_format_t::cbor, len) and get_cbor_object(static_cast<std::size_t>(len));
             }
 
             case 0xBF: // map (indefinite length)
-            {
-                BasicJsonType result = value_t::object;
-                while (get() != 0xFF)
-                {
-                    auto key = get_cbor_string();
-                    result[key] = parse_cbor_internal();
-                }
-                return result;
-            }
+                return get_cbor_object(std::size_t(-1));
 
             case 0xF4: // false
-            {
-                return false;
-            }
+                return sax->boolean(false);
 
             case 0xF5: // true
-            {
-                return true;
-            }
+                return sax->boolean(true);
 
             case 0xF6: // null
-            {
-                return value_t::null;
-            }
+                return sax->null();
 
             case 0xF9: // Half-Precision Float (two-byte IEEE 754)
             {
-                const int byte1 = get();
-                unexpect_eof();
-                const int byte2 = get();
-                unexpect_eof();
+                const int byte1_raw = get();
+                if (JSON_HEDLEY_UNLIKELY(not unexpect_eof(input_format_t::cbor, "number")))
+                {
+                    return false;
+                }
+                const int byte2_raw = get();
+                if (JSON_HEDLEY_UNLIKELY(not unexpect_eof(input_format_t::cbor, "number")))
+                {
+                    return false;
+                }
+
+                const auto byte1 = static_cast<unsigned char>(byte1_raw);
+                const auto byte2 = static_cast<unsigned char>(byte2_raw);
 
                 // code from RFC 7049, Appendix D, Figure 3:
                 // As half-precision floating-point numbers were only added
@@ -408,52 +641,245 @@ class binary_reader
                 // without such support. An example of a small decoder for
                 // half-precision floating-point numbers in the C language
                 // is shown in Fig. 3.
-                const int half = (byte1 << 8) + byte2;
-                const int exp = (half >> 10) & 0x1F;
-                const int mant = half & 0x3FF;
-                double val;
-                if (exp == 0)
+                const auto half = static_cast<unsigned int>((byte1 << 8u) + byte2);
+                const double val = [&half]
                 {
-                    val = std::ldexp(mant, -24);
-                }
-                else if (exp != 31)
-                {
-                    val = std::ldexp(mant + 1024, exp - 25);
-                }
-                else
-                {
-                    val = (mant == 0) ? std::numeric_limits<double>::infinity()
-                          : std::numeric_limits<double>::quiet_NaN();
-                }
-                return (half & 0x8000) != 0 ? -val : val;
+                    const int exp = (half >> 10u) & 0x1Fu;
+                    const unsigned int mant = half & 0x3FFu;
+                    assert(0 <= exp and exp <= 32);
+                    assert(mant <= 1024);
+                    switch (exp)
+                    {
+                        case 0:
+                            return std::ldexp(mant, -24);
+                        case 31:
+                            return (mant == 0)
+                            ? std::numeric_limits<double>::infinity()
+                            : std::numeric_limits<double>::quiet_NaN();
+                        default:
+                            return std::ldexp(mant + 1024, exp - 25);
+                    }
+                }();
+                return sax->number_float((half & 0x8000u) != 0
+                                         ? static_cast<number_float_t>(-val)
+                                         : static_cast<number_float_t>(val), "");
             }
 
             case 0xFA: // Single-Precision Float (four-byte IEEE 754)
             {
-                return get_number<float>();
+                float number;
+                return get_number(input_format_t::cbor, number) and sax->number_float(static_cast<number_float_t>(number), "");
             }
 
             case 0xFB: // Double-Precision Float (eight-byte IEEE 754)
             {
-                return get_number<double>();
+                double number;
+                return get_number(input_format_t::cbor, number) and sax->number_float(static_cast<number_float_t>(number), "");
             }
 
             default: // anything else (0xFF is handled inside the other types)
             {
-                std::stringstream ss;
-                ss << std::setw(2) << std::uppercase << std::setfill('0') << std::hex << current;
-                JSON_THROW(parse_error::create(112, chars_read, "error reading CBOR; last byte: 0x" + ss.str()));
+                auto last_token = get_token_string();
+                return sax->parse_error(chars_read, last_token, parse_error::create(112, chars_read, exception_message(input_format_t::cbor, "invalid byte: 0x" + last_token, "value")));
             }
         }
     }
 
-    BasicJsonType parse_msgpack_internal()
+    /*!
+    @brief reads a CBOR string
+
+    This function first reads starting bytes to determine the expected
+    string length and then copies this number of bytes into a string.
+    Additionally, CBOR's strings with indefinite lengths are supported.
+
+    @param[out] result  created string
+
+    @return whether string creation completed
+    */
+    bool get_cbor_string(string_t& result)
+    {
+        if (JSON_HEDLEY_UNLIKELY(not unexpect_eof(input_format_t::cbor, "string")))
+        {
+            return false;
+        }
+
+        switch (current)
+        {
+            // UTF-8 string (0x00..0x17 bytes follow)
+            case 0x60:
+            case 0x61:
+            case 0x62:
+            case 0x63:
+            case 0x64:
+            case 0x65:
+            case 0x66:
+            case 0x67:
+            case 0x68:
+            case 0x69:
+            case 0x6A:
+            case 0x6B:
+            case 0x6C:
+            case 0x6D:
+            case 0x6E:
+            case 0x6F:
+            case 0x70:
+            case 0x71:
+            case 0x72:
+            case 0x73:
+            case 0x74:
+            case 0x75:
+            case 0x76:
+            case 0x77:
+            {
+                return get_string(input_format_t::cbor, static_cast<unsigned int>(current) & 0x1Fu, result);
+            }
+
+            case 0x78: // UTF-8 string (one-byte uint8_t for n follows)
+            {
+                std::uint8_t len;
+                return get_number(input_format_t::cbor, len) and get_string(input_format_t::cbor, len, result);
+            }
+
+            case 0x79: // UTF-8 string (two-byte uint16_t for n follow)
+            {
+                std::uint16_t len;
+                return get_number(input_format_t::cbor, len) and get_string(input_format_t::cbor, len, result);
+            }
+
+            case 0x7A: // UTF-8 string (four-byte uint32_t for n follow)
+            {
+                std::uint32_t len;
+                return get_number(input_format_t::cbor, len) and get_string(input_format_t::cbor, len, result);
+            }
+
+            case 0x7B: // UTF-8 string (eight-byte uint64_t for n follow)
+            {
+                std::uint64_t len;
+                return get_number(input_format_t::cbor, len) and get_string(input_format_t::cbor, len, result);
+            }
+
+            case 0x7F: // UTF-8 string (indefinite length)
+            {
+                while (get() != 0xFF)
+                {
+                    string_t chunk;
+                    if (not get_cbor_string(chunk))
+                    {
+                        return false;
+                    }
+                    result.append(chunk);
+                }
+                return true;
+            }
+
+            default:
+            {
+                auto last_token = get_token_string();
+                return sax->parse_error(chars_read, last_token, parse_error::create(113, chars_read, exception_message(input_format_t::cbor, "expected length specification (0x60-0x7B) or indefinite string type (0x7F); last byte: 0x" + last_token, "string")));
+            }
+        }
+    }
+
+    /*!
+    @param[in] len  the length of the array or std::size_t(-1) for an
+                    array of indefinite size
+    @return whether array creation completed
+    */
+    bool get_cbor_array(const std::size_t len)
+    {
+        if (JSON_HEDLEY_UNLIKELY(not sax->start_array(len)))
+        {
+            return false;
+        }
+
+        if (len != std::size_t(-1))
+        {
+            for (std::size_t i = 0; i < len; ++i)
+            {
+                if (JSON_HEDLEY_UNLIKELY(not parse_cbor_internal()))
+                {
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            while (get() != 0xFF)
+            {
+                if (JSON_HEDLEY_UNLIKELY(not parse_cbor_internal(false)))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return sax->end_array();
+    }
+
+    /*!
+    @param[in] len  the length of the object or std::size_t(-1) for an
+                    object of indefinite size
+    @return whether object creation completed
+    */
+    bool get_cbor_object(const std::size_t len)
+    {
+        if (JSON_HEDLEY_UNLIKELY(not sax->start_object(len)))
+        {
+            return false;
+        }
+
+        string_t key;
+        if (len != std::size_t(-1))
+        {
+            for (std::size_t i = 0; i < len; ++i)
+            {
+                get();
+                if (JSON_HEDLEY_UNLIKELY(not get_cbor_string(key) or not sax->key(key)))
+                {
+                    return false;
+                }
+
+                if (JSON_HEDLEY_UNLIKELY(not parse_cbor_internal()))
+                {
+                    return false;
+                }
+                key.clear();
+            }
+        }
+        else
+        {
+            while (get() != 0xFF)
+            {
+                if (JSON_HEDLEY_UNLIKELY(not get_cbor_string(key) or not sax->key(key)))
+                {
+                    return false;
+                }
+
+                if (JSON_HEDLEY_UNLIKELY(not parse_cbor_internal()))
+                {
+                    return false;
+                }
+                key.clear();
+            }
+        }
+
+        return sax->end_object();
+    }
+
+    /////////////
+    // MsgPack //
+    /////////////
+
+    /*!
+    @return whether a valid MessagePack value was passed to the SAX parser
+    */
+    bool parse_msgpack_internal()
     {
         switch (get())
         {
             // EOF
             case std::char_traits<char>::eof():
-                JSON_THROW(parse_error::create(110, chars_read, "unexpected end of input"));
+                return unexpect_eof(input_format_t::msgpack, "value");
 
             // positive fixint
             case 0x00:
@@ -584,7 +1010,7 @@ class binary_reader
             case 0x7D:
             case 0x7E:
             case 0x7F:
-                return static_cast<number_unsigned_t>(current);
+                return sax->number_unsigned(static_cast<number_unsigned_t>(current));
 
             // fixmap
             case 0x80:
@@ -603,9 +1029,7 @@ class binary_reader
             case 0x8D:
             case 0x8E:
             case 0x8F:
-            {
-                return get_msgpack_object(current & 0x0F);
-            }
+                return get_msgpack_object(static_cast<std::size_t>(static_cast<unsigned int>(current) & 0x0Fu));
 
             // fixarray
             case 0x90:
@@ -624,9 +1048,7 @@ class binary_reader
             case 0x9D:
             case 0x9E:
             case 0x9F:
-            {
-                return get_msgpack_array(current & 0x0F);
-            }
+                return get_msgpack_array(static_cast<std::size_t>(static_cast<unsigned int>(current) & 0x0Fu));
 
             // fixstr
             case 0xA0:
@@ -661,73 +1083,108 @@ class binary_reader
             case 0xBD:
             case 0xBE:
             case 0xBF:
-                return get_msgpack_string();
-
-            case 0xC0: // nil
-                return value_t::null;
-
-            case 0xC2: // false
-                return false;
-
-            case 0xC3: // true
-                return true;
-
-            case 0xCA: // float 32
-                return get_number<float>();
-
-            case 0xCB: // float 64
-                return get_number<double>();
-
-            case 0xCC: // uint 8
-                return get_number<uint8_t>();
-
-            case 0xCD: // uint 16
-                return get_number<uint16_t>();
-
-            case 0xCE: // uint 32
-                return get_number<uint32_t>();
-
-            case 0xCF: // uint 64
-                return get_number<uint64_t>();
-
-            case 0xD0: // int 8
-                return get_number<int8_t>();
-
-            case 0xD1: // int 16
-                return get_number<int16_t>();
-
-            case 0xD2: // int 32
-                return get_number<int32_t>();
-
-            case 0xD3: // int 64
-                return get_number<int64_t>();
-
             case 0xD9: // str 8
             case 0xDA: // str 16
             case 0xDB: // str 32
-                return get_msgpack_string();
+            {
+                string_t s;
+                return get_msgpack_string(s) and sax->string(s);
+            }
+
+            case 0xC0: // nil
+                return sax->null();
+
+            case 0xC2: // false
+                return sax->boolean(false);
+
+            case 0xC3: // true
+                return sax->boolean(true);
+
+            case 0xCA: // float 32
+            {
+                float number;
+                return get_number(input_format_t::msgpack, number) and sax->number_float(static_cast<number_float_t>(number), "");
+            }
+
+            case 0xCB: // float 64
+            {
+                double number;
+                return get_number(input_format_t::msgpack, number) and sax->number_float(static_cast<number_float_t>(number), "");
+            }
+
+            case 0xCC: // uint 8
+            {
+                std::uint8_t number;
+                return get_number(input_format_t::msgpack, number) and sax->number_unsigned(number);
+            }
+
+            case 0xCD: // uint 16
+            {
+                std::uint16_t number;
+                return get_number(input_format_t::msgpack, number) and sax->number_unsigned(number);
+            }
+
+            case 0xCE: // uint 32
+            {
+                std::uint32_t number;
+                return get_number(input_format_t::msgpack, number) and sax->number_unsigned(number);
+            }
+
+            case 0xCF: // uint 64
+            {
+                std::uint64_t number;
+                return get_number(input_format_t::msgpack, number) and sax->number_unsigned(number);
+            }
+
+            case 0xD0: // int 8
+            {
+                std::int8_t number;
+                return get_number(input_format_t::msgpack, number) and sax->number_integer(number);
+            }
+
+            case 0xD1: // int 16
+            {
+                std::int16_t number;
+                return get_number(input_format_t::msgpack, number) and sax->number_integer(number);
+            }
+
+            case 0xD2: // int 32
+            {
+                std::int32_t number;
+                return get_number(input_format_t::msgpack, number) and sax->number_integer(number);
+            }
+
+            case 0xD3: // int 64
+            {
+                std::int64_t number;
+                return get_number(input_format_t::msgpack, number) and sax->number_integer(number);
+            }
 
             case 0xDC: // array 16
             {
-                return get_msgpack_array(get_number<uint16_t>());
+                std::uint16_t len;
+                return get_number(input_format_t::msgpack, len) and get_msgpack_array(static_cast<std::size_t>(len));
             }
 
             case 0xDD: // array 32
             {
-                return get_msgpack_array(get_number<uint32_t>());
+                std::uint32_t len;
+                return get_number(input_format_t::msgpack, len) and get_msgpack_array(static_cast<std::size_t>(len));
             }
 
             case 0xDE: // map 16
             {
-                return get_msgpack_object(get_number<uint16_t>());
+                std::uint16_t len;
+                return get_number(input_format_t::msgpack, len) and get_msgpack_object(static_cast<std::size_t>(len));
             }
 
             case 0xDF: // map 32
             {
-                return get_msgpack_object(get_number<uint32_t>());
+                std::uint32_t len;
+                return get_number(input_format_t::msgpack, len) and get_msgpack_object(static_cast<std::size_t>(len));
             }
 
-            // positive fixint
+            // negative fixint
             case 0xE0:
             case 0xE1:
             case 0xE2:
@@ -760,234 +1217,14 @@ class binary_reader
             case 0xFD:
             case 0xFE:
             case 0xFF:
-                return static_cast<int8_t>(current);
+                return sax->number_integer(static_cast<std::int8_t>(current));
 
             default: // anything else
             {
-                std::stringstream ss;
-                ss << std::setw(2) << std::uppercase << std::setfill('0') << std::hex << current;
-                JSON_THROW(parse_error::create(112, chars_read,
-                                               "error reading MessagePack; last byte: 0x" + ss.str()));
+                auto last_token = get_token_string();
+                return sax->parse_error(chars_read, last_token, parse_error::create(112, chars_read, exception_message(input_format_t::msgpack, "invalid byte: 0x" + last_token, "value")));
             }
         }
-    }
-
-    /*!
-    @param[in] get_char  whether a new character should be retrieved from the
-                         input (true, default) or whether the last read
-                         character should be considered instead
-    */
-    BasicJsonType parse_ubjson_internal(const bool get_char = true)
-    {
-        return get_ubjson_value(get_char ? get_ignore_noop() : current);
-    }
-
-    /*!
-    @brief get next character from the input
-
-    This function provides the interface to the used input adapter. It does
-    not throw in case the input reached EOF, but returns a -'ve valued
-    `std::char_traits<char>::eof()` in that case.
-
-    @return character read from the input
-    */
-    int get()
-    {
-        ++chars_read;
-        return (current = ia->get_character());
-    }
-
-    /*!
-    @return character read from the input after ignoring all 'N' entries
-    */
-    int get_ignore_noop()
-    {
-        do
-        {
-            get();
-        }
-        while (current == 'N');
-
-        return current;
-    }
-
-    /*
-    @brief read a number from the input
-
-    @tparam NumberType the type of the number
-
-    @return number of type @a NumberType
-
-    @note This function needs to respect the system's endianess, because
-          bytes in CBOR and MessagePack are stored in network order (big
-          endian) and therefore need reordering on little endian systems.
-
-    @throw parse_error.110 if input has less than `sizeof(NumberType)` bytes
-    */
-    template<typename NumberType> NumberType get_number()
-    {
-        // step 1: read input into array with system's byte order
-        std::array<uint8_t, sizeof(NumberType)> vec;
-        for (std::size_t i = 0; i < sizeof(NumberType); ++i)
-        {
-            get();
-            unexpect_eof();
-
-            // reverse byte order prior to conversion if necessary
-            if (is_little_endian)
-            {
-                vec[sizeof(NumberType) - i - 1] = static_cast<uint8_t>(current);
-            }
-            else
-            {
-                vec[i] = static_cast<uint8_t>(current); // LCOV_EXCL_LINE
-            }
-        }
-
-        // step 2: convert array into number of type T and return
-        NumberType result;
-        std::memcpy(&result, vec.data(), sizeof(NumberType));
-        return result;
-    }
-
-    /*!
-    @brief create a string by reading characters from the input
-
-    @param[in] len number of bytes to read
-
-    @note We can not reserve @a len bytes for the result, because @a len
-          may be too large. Usually, @ref unexpect_eof() detects the end of
-          the input before we run out of string memory.
-
-    @return string created by reading @a len bytes
-
-    @throw parse_error.110 if input has less than @a len bytes
-    */
-    template<typename NumberType>
-    string_t get_string(const NumberType len)
-    {
-        string_t result;
-        std::generate_n(std::back_inserter(result), len, [this]()
-        {
-            get();
-            unexpect_eof();
-            return static_cast<char>(current);
-        });
-        return result;
-    }
-
-    /*!
-    @brief reads a CBOR string
-
-    This function first reads starting bytes to determine the expected
-    string length and then copies this number of bytes into a string.
-    Additionally, CBOR's strings with indefinite lengths are supported.
-
-    @return string
-
-    @throw parse_error.110 if input ended
-    @throw parse_error.113 if an unexpected byte is read
-    */
-    string_t get_cbor_string()
-    {
-        unexpect_eof();
-
-        switch (current)
-        {
-            // UTF-8 string (0x00..0x17 bytes follow)
-            case 0x60:
-            case 0x61:
-            case 0x62:
-            case 0x63:
-            case 0x64:
-            case 0x65:
-            case 0x66:
-            case 0x67:
-            case 0x68:
-            case 0x69:
-            case 0x6A:
-            case 0x6B:
-            case 0x6C:
-            case 0x6D:
-            case 0x6E:
-            case 0x6F:
-            case 0x70:
-            case 0x71:
-            case 0x72:
-            case 0x73:
-            case 0x74:
-            case 0x75:
-            case 0x76:
-            case 0x77:
-            {
-                return get_string(current & 0x1F);
-            }
-
-            case 0x78: // UTF-8 string (one-byte uint8_t for n follows)
-            {
-                return get_string(get_number<uint8_t>());
-            }
-
-            case 0x79: // UTF-8 string (two-byte uint16_t for n follow)
-            {
-                return get_string(get_number<uint16_t>());
-            }
-
-            case 0x7A: // UTF-8 string (four-byte uint32_t for n follow)
-            {
-                return get_string(get_number<uint32_t>());
-            }
-
-            case 0x7B: // UTF-8 string (eight-byte uint64_t for n follow)
-            {
-                return get_string(get_number<uint64_t>());
-            }
-
-            case 0x7F: // UTF-8 string (indefinite length)
-            {
-                string_t result;
-                while (get() != 0xFF)
-                {
-                    unexpect_eof();
-                    result.push_back(static_cast<char>(current));
-                }
-                return result;
-            }
-
-            default:
-            {
-                std::stringstream ss;
-                ss << std::setw(2) << std::uppercase << std::setfill('0') << std::hex << current;
-                JSON_THROW(parse_error::create(113, chars_read, "expected a CBOR string; last byte: 0x" + ss.str()));
-            }
-        }
-    }
-
-    template<typename NumberType>
-    BasicJsonType get_cbor_array(const NumberType len)
-    {
-        BasicJsonType result = value_t::array;
-        std::generate_n(std::back_inserter(*result.m_value.array), len, [this]()
-        {
-            return parse_cbor_internal();
-        });
-        return result;
-    }
-
-    template<typename NumberType>
-    BasicJsonType get_cbor_object(const NumberType len)
-    {
-        BasicJsonType result = value_t::object;
-        std::generate_n(std::inserter(*result.m_value.object,
-                                      result.m_value.object->end()),
-                        len, [this]()
-        {
-            get();
-            auto key = get_cbor_string();
-            auto val = parse_cbor_internal();
-            return std::make_pair(std::move(key), std::move(val));
-        });
-        return result;
     }
 
     /*!
@@ -996,14 +1233,16 @@ class binary_reader
     This function first reads starting bytes to determine the expected
     string length and then copies this number of bytes into a string.
 
-    @return string
+    @param[out] result  created string
 
-    @throw parse_error.110 if input ended
-    @throw parse_error.113 if an unexpected byte is read
+    @return whether string creation completed
     */
-    string_t get_msgpack_string()
+    bool get_msgpack_string(string_t& result)
     {
-        unexpect_eof();
+        if (JSON_HEDLEY_UNLIKELY(not unexpect_eof(input_format_t::msgpack, "string")))
+        {
+            return false;
+        }
 
         switch (current)
         {
@@ -1041,59 +1280,101 @@ class binary_reader
             case 0xBE:
             case 0xBF:
             {
-                return get_string(current & 0x1F);
+                return get_string(input_format_t::msgpack, static_cast<unsigned int>(current) & 0x1Fu, result);
             }
 
             case 0xD9: // str 8
             {
-                return get_string(get_number<uint8_t>());
+                std::uint8_t len;
+                return get_number(input_format_t::msgpack, len) and get_string(input_format_t::msgpack, len, result);
             }
 
             case 0xDA: // str 16
             {
-                return get_string(get_number<uint16_t>());
+                std::uint16_t len;
+                return get_number(input_format_t::msgpack, len) and get_string(input_format_t::msgpack, len, result);
             }
 
             case 0xDB: // str 32
             {
-                return get_string(get_number<uint32_t>());
+                std::uint32_t len;
+                return get_number(input_format_t::msgpack, len) and get_string(input_format_t::msgpack, len, result);
             }
 
             default:
             {
-                std::stringstream ss;
-                ss << std::setw(2) << std::uppercase << std::setfill('0') << std::hex << current;
-                JSON_THROW(parse_error::create(113, chars_read,
-                                               "expected a MessagePack string; last byte: 0x" + ss.str()));
+                auto last_token = get_token_string();
+                return sax->parse_error(chars_read, last_token, parse_error::create(113, chars_read, exception_message(input_format_t::msgpack, "expected length specification (0xA0-0xBF, 0xD9-0xDB); last byte: 0x" + last_token, "string")));
             }
         }
     }
 
-    template<typename NumberType>
-    BasicJsonType get_msgpack_array(const NumberType len)
+    /*!
+    @param[in] len  the length of the array
+    @return whether array creation completed
+    */
+    bool get_msgpack_array(const std::size_t len)
     {
-        BasicJsonType result = value_t::array;
-        std::generate_n(std::back_inserter(*result.m_value.array), len, [this]()
+        if (JSON_HEDLEY_UNLIKELY(not sax->start_array(len)))
         {
-            return parse_msgpack_internal();
-        });
-        return result;
+            return false;
+        }
+
+        for (std::size_t i = 0; i < len; ++i)
+        {
+            if (JSON_HEDLEY_UNLIKELY(not parse_msgpack_internal()))
+            {
+                return false;
+            }
+        }
+
+        return sax->end_array();
     }
 
-    template<typename NumberType>
-    BasicJsonType get_msgpack_object(const NumberType len)
+    /*!
+    @param[in] len  the length of the object
+    @return whether object creation completed
+    */
+    bool get_msgpack_object(const std::size_t len)
     {
-        BasicJsonType result = value_t::object;
-        std::generate_n(std::inserter(*result.m_value.object,
-                                      result.m_value.object->end()),
-                        len, [this]()
+        if (JSON_HEDLEY_UNLIKELY(not sax->start_object(len)))
+        {
+            return false;
+        }
+
+        string_t key;
+        for (std::size_t i = 0; i < len; ++i)
         {
             get();
-            auto key = get_msgpack_string();
-            auto val = parse_msgpack_internal();
-            return std::make_pair(std::move(key), std::move(val));
-        });
-        return result;
+            if (JSON_HEDLEY_UNLIKELY(not get_msgpack_string(key) or not sax->key(key)))
+            {
+                return false;
+            }
+
+            if (JSON_HEDLEY_UNLIKELY(not parse_msgpack_internal()))
+            {
+                return false;
+            }
+            key.clear();
+        }
+
+        return sax->end_object();
+    }
+
+    ////////////
+    // UBJSON //
+    ////////////
+
+    /*!
+    @param[in] get_char  whether a new character should be retrieved from the
+                         input (true, default) or whether the last read
+                         character should be considered instead
+
+    @return whether a valid UBJSON value was passed to the SAX parser
+    */
+    bool parse_ubjson_internal(const bool get_char = true)
+    {
+        return get_ubjson_value(get_char ? get_ignore_noop() : current);
     }
 
     /*!
@@ -1103,41 +1384,131 @@ class binary_reader
     indicating a string, or in case of an object key where the 'S' byte can be
     left out.
 
+    @param[out] result   created string
     @param[in] get_char  whether a new character should be retrieved from the
                          input (true, default) or whether the last read
                          character should be considered instead
 
-    @return string
-
-    @throw parse_error.110 if input ended
-    @throw parse_error.113 if an unexpected byte is read
+    @return whether string creation completed
     */
-    string_t get_ubjson_string(const bool get_char = true)
+    bool get_ubjson_string(string_t& result, const bool get_char = true)
     {
         if (get_char)
         {
-            get();  // TODO: may we ignore N here?
+            get();  // TODO(niels): may we ignore N here?
         }
 
-        unexpect_eof();
+        if (JSON_HEDLEY_UNLIKELY(not unexpect_eof(input_format_t::ubjson, "value")))
+        {
+            return false;
+        }
 
         switch (current)
         {
             case 'U':
-                return get_string(get_number<uint8_t>());
+            {
+                std::uint8_t len;
+                return get_number(input_format_t::ubjson, len) and get_string(input_format_t::ubjson, len, result);
+            }
+
             case 'i':
-                return get_string(get_number<int8_t>());
+            {
+                std::int8_t len;
+                return get_number(input_format_t::ubjson, len) and get_string(input_format_t::ubjson, len, result);
+            }
+
             case 'I':
-                return get_string(get_number<int16_t>());
+            {
+                std::int16_t len;
+                return get_number(input_format_t::ubjson, len) and get_string(input_format_t::ubjson, len, result);
+            }
+
             case 'l':
-                return get_string(get_number<int32_t>());
+            {
+                std::int32_t len;
+                return get_number(input_format_t::ubjson, len) and get_string(input_format_t::ubjson, len, result);
+            }
+
             case 'L':
-                return get_string(get_number<int64_t>());
+            {
+                std::int64_t len;
+                return get_number(input_format_t::ubjson, len) and get_string(input_format_t::ubjson, len, result);
+            }
+
             default:
-                std::stringstream ss;
-                ss << std::setw(2) << std::uppercase << std::setfill('0') << std::hex << current;
-                JSON_THROW(parse_error::create(113, chars_read,
-                                               "expected a UBJSON string; last byte: 0x" + ss.str()));
+                auto last_token = get_token_string();
+                return sax->parse_error(chars_read, last_token, parse_error::create(113, chars_read, exception_message(input_format_t::ubjson, "expected length type specification (U, i, I, l, L); last byte: 0x" + last_token, "string")));
+        }
+    }
+
+    /*!
+    @param[out] result  determined size
+    @return whether size determination completed
+    */
+    bool get_ubjson_size_value(std::size_t& result)
+    {
+        switch (get_ignore_noop())
+        {
+            case 'U':
+            {
+                std::uint8_t number;
+                if (JSON_HEDLEY_UNLIKELY(not get_number(input_format_t::ubjson, number)))
+                {
+                    return false;
+                }
+                result = static_cast<std::size_t>(number);
+                return true;
+            }
+
+            case 'i':
+            {
+                std::int8_t number;
+                if (JSON_HEDLEY_UNLIKELY(not get_number(input_format_t::ubjson, number)))
+                {
+                    return false;
+                }
+                result = static_cast<std::size_t>(number);
+                return true;
+            }
+
+            case 'I':
+            {
+                std::int16_t number;
+                if (JSON_HEDLEY_UNLIKELY(not get_number(input_format_t::ubjson, number)))
+                {
+                    return false;
+                }
+                result = static_cast<std::size_t>(number);
+                return true;
+            }
+
+            case 'l':
+            {
+                std::int32_t number;
+                if (JSON_HEDLEY_UNLIKELY(not get_number(input_format_t::ubjson, number)))
+                {
+                    return false;
+                }
+                result = static_cast<std::size_t>(number);
+                return true;
+            }
+
+            case 'L':
+            {
+                std::int64_t number;
+                if (JSON_HEDLEY_UNLIKELY(not get_number(input_format_t::ubjson, number)))
+                {
+                    return false;
+                }
+                result = static_cast<std::size_t>(number);
+                return true;
+            }
+
+            default:
+            {
+                auto last_token = get_token_string();
+                return sax->parse_error(chars_read, last_token, parse_error::create(113, chars_read, exception_message(input_format_t::ubjson, "expected length type specification (U, i, I, l, L) after '#'; last byte: 0x" + last_token, "size")));
+            }
         }
     }
 
@@ -1147,84 +1518,129 @@ class binary_reader
     In the optimized UBJSON format, a type and a size can be provided to allow
     for a more compact representation.
 
-    @return pair of the size and the type
+    @param[out] result  pair of the size and the type
+
+    @return whether pair creation completed
     */
-    std::pair<std::size_t, int> get_ubjson_size_type()
+    bool get_ubjson_size_type(std::pair<std::size_t, int>& result)
     {
-        std::size_t sz = string_t::npos;
-        int tc = 0;
+        result.first = string_t::npos; // size
+        result.second = 0; // type
 
         get_ignore_noop();
 
         if (current == '$')
         {
-            tc = get();  // must not ignore 'N', because 'N' maybe the type
-            unexpect_eof();
+            result.second = get();  // must not ignore 'N', because 'N' maybe the type
+            if (JSON_HEDLEY_UNLIKELY(not unexpect_eof(input_format_t::ubjson, "type")))
+            {
+                return false;
+            }
 
             get_ignore_noop();
-            if (current != '#')
+            if (JSON_HEDLEY_UNLIKELY(current != '#'))
             {
-                std::stringstream ss;
-                ss << std::setw(2) << std::uppercase << std::setfill('0') << std::hex << current;
-                JSON_THROW(parse_error::create(112, chars_read,
-                                               "expected '#' after UBJSON type information; last byte: 0x" + ss.str()));
+                if (JSON_HEDLEY_UNLIKELY(not unexpect_eof(input_format_t::ubjson, "value")))
+                {
+                    return false;
+                }
+                auto last_token = get_token_string();
+                return sax->parse_error(chars_read, last_token, parse_error::create(112, chars_read, exception_message(input_format_t::ubjson, "expected '#' after type information; last byte: 0x" + last_token, "size")));
             }
-            sz = parse_ubjson_internal();
-        }
-        else if (current == '#')
-        {
-            sz = parse_ubjson_internal();
+
+            return get_ubjson_size_value(result.first);
         }
 
-        return std::make_pair(sz, tc);
+        if (current == '#')
+        {
+            return get_ubjson_size_value(result.first);
+        }
+
+        return true;
     }
 
-    BasicJsonType get_ubjson_value(const int prefix)
+    /*!
+    @param prefix  the previously read or set type prefix
+    @return whether value creation completed
+    */
+    bool get_ubjson_value(const int prefix)
     {
         switch (prefix)
         {
             case std::char_traits<char>::eof():  // EOF
-                JSON_THROW(parse_error::create(110, chars_read, "unexpected end of input"));
+                return unexpect_eof(input_format_t::ubjson, "value");
 
             case 'T':  // true
-                return true;
+                return sax->boolean(true);
             case 'F':  // false
-                return false;
+                return sax->boolean(false);
 
             case 'Z':  // null
-                return nullptr;
+                return sax->null();
 
             case 'U':
-                return get_number<uint8_t>();
+            {
+                std::uint8_t number;
+                return get_number(input_format_t::ubjson, number) and sax->number_unsigned(number);
+            }
+
             case 'i':
-                return get_number<int8_t>();
+            {
+                std::int8_t number;
+                return get_number(input_format_t::ubjson, number) and sax->number_integer(number);
+            }
+
             case 'I':
-                return get_number<int16_t>();
+            {
+                std::int16_t number;
+                return get_number(input_format_t::ubjson, number) and sax->number_integer(number);
+            }
+
             case 'l':
-                return get_number<int32_t>();
+            {
+                std::int32_t number;
+                return get_number(input_format_t::ubjson, number) and sax->number_integer(number);
+            }
+
             case 'L':
-                return get_number<int64_t>();
+            {
+                std::int64_t number;
+                return get_number(input_format_t::ubjson, number) and sax->number_integer(number);
+            }
+
             case 'd':
-                return get_number<float>();
+            {
+                float number;
+                return get_number(input_format_t::ubjson, number) and sax->number_float(static_cast<number_float_t>(number), "");
+            }
+
             case 'D':
-                return get_number<double>();
+            {
+                double number;
+                return get_number(input_format_t::ubjson, number) and sax->number_float(static_cast<number_float_t>(number), "");
+            }
 
             case 'C':  // char
             {
                 get();
-                unexpect_eof();
-                if (JSON_UNLIKELY(current > 127))
+                if (JSON_HEDLEY_UNLIKELY(not unexpect_eof(input_format_t::ubjson, "char")))
                 {
-                    std::stringstream ss;
-                    ss << std::setw(2) << std::uppercase << std::setfill('0') << std::hex << current;
-                    JSON_THROW(parse_error::create(113, chars_read,
-                                                   "byte after 'C' must be in range 0x00..0x7F; last byte: 0x" + ss.str()));
+                    return false;
                 }
-                return string_t(1, static_cast<char>(current));
+                if (JSON_HEDLEY_UNLIKELY(current > 127))
+                {
+                    auto last_token = get_token_string();
+                    return sax->parse_error(chars_read, last_token, parse_error::create(113, chars_read, exception_message(input_format_t::ubjson, "byte after 'C' must be in range 0x00..0x7F; last byte: 0x" + last_token, "char")));
+                }
+                string_t s(1, static_cast<char>(current));
+                return sax->string(s);
             }
 
             case 'S':  // string
-                return get_ubjson_string();
+            {
+                string_t s;
+                return get_ubjson_string(s) and sax->string(s);
+            }
 
             case '[':  // array
                 return get_ubjson_array();
@@ -1233,115 +1649,318 @@ class binary_reader
                 return get_ubjson_object();
 
             default: // anything else
-                std::stringstream ss;
-                ss << std::setw(2) << std::uppercase << std::setfill('0') << std::hex << current;
-                JSON_THROW(parse_error::create(112, chars_read,
-                                               "error reading UBJSON; last byte: 0x" + ss.str()));
+            {
+                auto last_token = get_token_string();
+                return sax->parse_error(chars_read, last_token, parse_error::create(112, chars_read, exception_message(input_format_t::ubjson, "invalid byte: 0x" + last_token, "value")));
+            }
         }
     }
 
-    BasicJsonType get_ubjson_array()
+    /*!
+    @return whether array creation completed
+    */
+    bool get_ubjson_array()
     {
-        BasicJsonType result = value_t::array;
-        const auto size_and_type = get_ubjson_size_type();
+        std::pair<std::size_t, int> size_and_type;
+        if (JSON_HEDLEY_UNLIKELY(not get_ubjson_size_type(size_and_type)))
+        {
+            return false;
+        }
 
         if (size_and_type.first != string_t::npos)
         {
+            if (JSON_HEDLEY_UNLIKELY(not sax->start_array(size_and_type.first)))
+            {
+                return false;
+            }
+
             if (size_and_type.second != 0)
             {
                 if (size_and_type.second != 'N')
-                    std::generate_n(std::back_inserter(*result.m_value.array),
-                                    size_and_type.first, [this, size_and_type]()
                 {
-                    return get_ubjson_value(size_and_type.second);
-                });
+                    for (std::size_t i = 0; i < size_and_type.first; ++i)
+                    {
+                        if (JSON_HEDLEY_UNLIKELY(not get_ubjson_value(size_and_type.second)))
+                        {
+                            return false;
+                        }
+                    }
+                }
             }
             else
             {
-                std::generate_n(std::back_inserter(*result.m_value.array),
-                                size_and_type.first, [this]()
+                for (std::size_t i = 0; i < size_and_type.first; ++i)
                 {
-                    return parse_ubjson_internal();
-                });
+                    if (JSON_HEDLEY_UNLIKELY(not parse_ubjson_internal()))
+                    {
+                        return false;
+                    }
+                }
             }
         }
         else
         {
+            if (JSON_HEDLEY_UNLIKELY(not sax->start_array(std::size_t(-1))))
+            {
+                return false;
+            }
+
             while (current != ']')
             {
-                result.push_back(parse_ubjson_internal(false));
+                if (JSON_HEDLEY_UNLIKELY(not parse_ubjson_internal(false)))
+                {
+                    return false;
+                }
                 get_ignore_noop();
             }
         }
 
-        return result;
+        return sax->end_array();
     }
 
-    BasicJsonType get_ubjson_object()
+    /*!
+    @return whether object creation completed
+    */
+    bool get_ubjson_object()
     {
-        BasicJsonType result = value_t::object;
-        const auto size_and_type = get_ubjson_size_type();
+        std::pair<std::size_t, int> size_and_type;
+        if (JSON_HEDLEY_UNLIKELY(not get_ubjson_size_type(size_and_type)))
+        {
+            return false;
+        }
 
+        string_t key;
         if (size_and_type.first != string_t::npos)
         {
+            if (JSON_HEDLEY_UNLIKELY(not sax->start_object(size_and_type.first)))
+            {
+                return false;
+            }
+
             if (size_and_type.second != 0)
             {
-                std::generate_n(std::inserter(*result.m_value.object,
-                                              result.m_value.object->end()),
-                                size_and_type.first, [this, size_and_type]()
+                for (std::size_t i = 0; i < size_and_type.first; ++i)
                 {
-                    auto key = get_ubjson_string();
-                    auto val = get_ubjson_value(size_and_type.second);
-                    return std::make_pair(std::move(key), std::move(val));
-                });
+                    if (JSON_HEDLEY_UNLIKELY(not get_ubjson_string(key) or not sax->key(key)))
+                    {
+                        return false;
+                    }
+                    if (JSON_HEDLEY_UNLIKELY(not get_ubjson_value(size_and_type.second)))
+                    {
+                        return false;
+                    }
+                    key.clear();
+                }
             }
             else
             {
-                std::generate_n(std::inserter(*result.m_value.object,
-                                              result.m_value.object->end()),
-                                size_and_type.first, [this]()
+                for (std::size_t i = 0; i < size_and_type.first; ++i)
                 {
-                    auto key = get_ubjson_string();
-                    auto val = parse_ubjson_internal();
-                    return std::make_pair(std::move(key), std::move(val));
-                });
+                    if (JSON_HEDLEY_UNLIKELY(not get_ubjson_string(key) or not sax->key(key)))
+                    {
+                        return false;
+                    }
+                    if (JSON_HEDLEY_UNLIKELY(not parse_ubjson_internal()))
+                    {
+                        return false;
+                    }
+                    key.clear();
+                }
             }
         }
         else
         {
+            if (JSON_HEDLEY_UNLIKELY(not sax->start_object(std::size_t(-1))))
+            {
+                return false;
+            }
+
             while (current != '}')
             {
-                auto key = get_ubjson_string(false);
-                result[std::move(key)] = parse_ubjson_internal();
+                if (JSON_HEDLEY_UNLIKELY(not get_ubjson_string(key, false) or not sax->key(key)))
+                {
+                    return false;
+                }
+                if (JSON_HEDLEY_UNLIKELY(not parse_ubjson_internal()))
+                {
+                    return false;
+                }
                 get_ignore_noop();
+                key.clear();
             }
         }
 
-        return result;
+        return sax->end_object();
+    }
+
+    ///////////////////////
+    // Utility functions //
+    ///////////////////////
+
+    /*!
+    @brief get next character from the input
+
+    This function provides the interface to the used input adapter. It does
+    not throw in case the input reached EOF, but returns a -'ve valued
+    `std::char_traits<char>::eof()` in that case.
+
+    @return character read from the input
+    */
+    int get()
+    {
+        ++chars_read;
+        return current = ia->get_character();
     }
 
     /*!
-    @brief throw if end of input is not reached
-    @throw parse_error.110 if input not ended
+    @return character read from the input after ignoring all 'N' entries
     */
-    void expect_eof() const
+    int get_ignore_noop()
     {
-        if (JSON_UNLIKELY(current != std::char_traits<char>::eof()))
+        do
         {
-            JSON_THROW(parse_error::create(110, chars_read, "expected end of input"));
+            get();
         }
+        while (current == 'N');
+
+        return current;
+    }
+
+    /*
+    @brief read a number from the input
+
+    @tparam NumberType the type of the number
+    @param[in] format   the current format (for diagnostics)
+    @param[out] result  number of type @a NumberType
+
+    @return whether conversion completed
+
+    @note This function needs to respect the system's endianess, because
+          bytes in CBOR, MessagePack, and UBJSON are stored in network order
+          (big endian) and therefore need reordering on little endian systems.
+    */
+    template<typename NumberType, bool InputIsLittleEndian = false>
+    bool get_number(const input_format_t format, NumberType& result)
+    {
+        // step 1: read input into array with system's byte order
+        std::array<std::uint8_t, sizeof(NumberType)> vec;
+        for (std::size_t i = 0; i < sizeof(NumberType); ++i)
+        {
+            get();
+            if (JSON_HEDLEY_UNLIKELY(not unexpect_eof(format, "number")))
+            {
+                return false;
+            }
+
+            // reverse byte order prior to conversion if necessary
+            if (is_little_endian != InputIsLittleEndian)
+            {
+                vec[sizeof(NumberType) - i - 1] = static_cast<std::uint8_t>(current);
+            }
+            else
+            {
+                vec[i] = static_cast<std::uint8_t>(current); // LCOV_EXCL_LINE
+            }
+        }
+
+        // step 2: convert array into number of type T and return
+        std::memcpy(&result, vec.data(), sizeof(NumberType));
+        return true;
     }
 
     /*!
-    @briefthrow if end of input is reached
-    @throw parse_error.110 if input ended
+    @brief create a string by reading characters from the input
+
+    @tparam NumberType the type of the number
+    @param[in] format the current format (for diagnostics)
+    @param[in] len number of characters to read
+    @param[out] result string created by reading @a len bytes
+
+    @return whether string creation completed
+
+    @note We can not reserve @a len bytes for the result, because @a len
+          may be too large. Usually, @ref unexpect_eof() detects the end of
+          the input before we run out of string memory.
     */
-    void unexpect_eof() const
+    template<typename NumberType>
+    bool get_string(const input_format_t format,
+                    const NumberType len,
+                    string_t& result)
     {
-        if (JSON_UNLIKELY(current == std::char_traits<char>::eof()))
+        bool success = true;
+        std::generate_n(std::back_inserter(result), len, [this, &success, &format]()
         {
-            JSON_THROW(parse_error::create(110, chars_read, "unexpected end of input"));
+            get();
+            if (JSON_HEDLEY_UNLIKELY(not unexpect_eof(format, "string")))
+            {
+                success = false;
+            }
+            return static_cast<char>(current);
+        });
+        return success;
+    }
+
+    /*!
+    @param[in] format   the current format (for diagnostics)
+    @param[in] context  further context information (for diagnostics)
+    @return whether the last read character is not EOF
+    */
+    JSON_HEDLEY_NON_NULL(3)
+    bool unexpect_eof(const input_format_t format, const char* context) const
+    {
+        if (JSON_HEDLEY_UNLIKELY(current == std::char_traits<char>::eof()))
+        {
+            return sax->parse_error(chars_read, "<end of file>",
+                                    parse_error::create(110, chars_read, exception_message(format, "unexpected end of input", context)));
         }
+        return true;
+    }
+
+    /*!
+    @return a string representation of the last read byte
+    */
+    std::string get_token_string() const
+    {
+        std::array<char, 3> cr{{}};
+        (std::snprintf)(cr.data(), cr.size(), "%.2hhX", static_cast<unsigned char>(current));
+        return std::string{cr.data()};
+    }
+
+    /*!
+    @param[in] format   the current format
+    @param[in] detail   a detailed error message
+    @param[in] context  further context information
+    @return a message string to use in the parse_error exceptions
+    */
+    std::string exception_message(const input_format_t format,
+                                  const std::string& detail,
+                                  const std::string& context) const
+    {
+        std::string error_msg = "syntax error while parsing ";
+
+        switch (format)
+        {
+            case input_format_t::cbor:
+                error_msg += "CBOR";
+                break;
+
+            case input_format_t::msgpack:
+                error_msg += "MessagePack";
+                break;
+
+            case input_format_t::ubjson:
+                error_msg += "UBJSON";
+                break;
+
+            case input_format_t::bson:
+                error_msg += "BSON";
+                break;
+
+            default:            // LCOV_EXCL_LINE
+                assert(false);  // LCOV_EXCL_LINE
+        }
+
+        return error_msg + " " + context + ": " + detail;
     }
 
   private:
@@ -1356,6 +1975,9 @@ class binary_reader
 
     /// whether we can assume little endianess
     const bool is_little_endian = little_endianess();
+
+    /// the SAX parser
+    json_sax_t* sax = nullptr;
 };
-}
-}
+}  // namespace detail
+}  // namespace nlohmann

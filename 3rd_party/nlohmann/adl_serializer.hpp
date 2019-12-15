@@ -7,6 +7,7 @@
 
 namespace nlohmann
 {
+
 template<typename, typename>
 struct adl_serializer
 {
@@ -16,12 +17,13 @@ struct adl_serializer
     This function is usually called by the `get()` function of the
     @ref basic_json class (either explicit or via conversion operators).
 
-    @param[in] j         JSON value to read from
+    @param[in] j        JSON value to read from
     @param[in,out] val  value to write to
     */
     template<typename BasicJsonType, typename ValueType>
-    static void from_json(BasicJsonType&& j, ValueType& val) noexcept(
+    static auto from_json(BasicJsonType&& j, ValueType& val) noexcept(
         noexcept(::nlohmann::from_json(std::forward<BasicJsonType>(j), val)))
+    -> decltype(::nlohmann::from_json(std::forward<BasicJsonType>(j), val), void())
     {
         ::nlohmann::from_json(std::forward<BasicJsonType>(j), val);
     }
@@ -33,13 +35,15 @@ struct adl_serializer
     class.
 
     @param[in,out] j  JSON value to write to
-    @param[in] val     value to read from
+    @param[in] val    value to read from
     */
-    template<typename BasicJsonType, typename ValueType>
-    static void to_json(BasicJsonType& j, ValueType&& val) noexcept(
+    template <typename BasicJsonType, typename ValueType>
+    static auto to_json(BasicJsonType& j, ValueType&& val) noexcept(
         noexcept(::nlohmann::to_json(j, std::forward<ValueType>(val))))
+    -> decltype(::nlohmann::to_json(j, std::forward<ValueType>(val)), void())
     {
         ::nlohmann::to_json(j, std::forward<ValueType>(val));
     }
 };
-}
+
+}  // namespace nlohmann
