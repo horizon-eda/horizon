@@ -1,17 +1,18 @@
 #pragma once
 
+#include <array> // array
 #include <clocale> // localeconv
 #include <cstddef> // size_t
+#include <cstdio> // snprintf
 #include <cstdlib> // strtof, strtod, strtold, strtoll, strtoull
 #include <initializer_list> // initializer_list
-#include <ios> // hex, uppercase
-#include <iomanip> // setw, setfill
-#include <sstream> // stringstream
 #include <string> // char_traits, string
+#include <utility> // move
 #include <vector> // vector
 
-#include <nlohmann/detail/macro_scope.hpp>
 #include <nlohmann/detail/input/input_adapters.hpp>
+#include <nlohmann/detail/input/position_t.hpp>
+#include <nlohmann/detail/macro_scope.hpp>
 
 namespace nlohmann
 {
@@ -32,6 +33,7 @@ class lexer
     using number_integer_t = typename BasicJsonType::number_integer_t;
     using number_unsigned_t = typename BasicJsonType::number_unsigned_t;
     using number_float_t = typename BasicJsonType::number_float_t;
+    using string_t = typename BasicJsonType::string_t;
 
   public:
     /// token types for the parser
@@ -57,6 +59,8 @@ class lexer
     };
 
     /// return name of values of type token_type (only used for errors)
+    JSON_HEDLEY_RETURNS_NON_NULL
+    JSON_HEDLEY_CONST
     static const char* token_type_name(const token_type t) noexcept
     {
         switch (t)
@@ -93,17 +97,22 @@ class lexer
                 return "end of input";
             case token_type::literal_or_value:
                 return "'[', '{', or a literal";
+            // LCOV_EXCL_START
             default: // catch non-enum values
-                return "unknown token"; // LCOV_EXCL_LINE
+                return "unknown token";
+                // LCOV_EXCL_STOP
         }
     }
 
-    explicit lexer(detail::input_adapter_t adapter)
+    explicit lexer(detail::input_adapter_t&& adapter)
         : ia(std::move(adapter)), decimal_point_char(get_decimal_point()) {}
 
     // delete because of pointer members
     lexer(const lexer&) = delete;
+    lexer(lexer&&) = delete;
     lexer& operator=(lexer&) = delete;
+    lexer& operator=(lexer&&) = delete;
+    ~lexer() = default;
 
   private:
     /////////////////////
@@ -111,6 +120,7 @@ class lexer
     /////////////////////
 
     /// return the locale-dependent decimal point
+    JSON_HEDLEY_PURE
     static char get_decimal_point() noexcept
     {
         const auto loc = localeconv();
@@ -143,22 +153,22 @@ class lexer
         assert(current == 'u');
         int codepoint = 0;
 
-        const auto factors = { 12, 8, 4, 0 };
+        const auto factors = { 12u, 8u, 4u, 0u };
         for (const auto factor : factors)
         {
             get();
 
             if (current >= '0' and current <= '9')
             {
-                codepoint += ((current - 0x30) << factor);
+                codepoint += static_cast<int>((static_cast<unsigned int>(current) - 0x30u) << factor);
             }
             else if (current >= 'A' and current <= 'F')
             {
-                codepoint += ((current - 0x37) << factor);
+                codepoint += static_cast<int>((static_cast<unsigned int>(current) - 0x37u) << factor);
             }
             else if (current >= 'a' and current <= 'f')
             {
-                codepoint += ((current - 0x57) << factor);
+                codepoint += static_cast<int>((static_cast<unsigned int>(current) - 0x57u) << factor);
             }
             else
             {
@@ -193,7 +203,7 @@ class lexer
         for (auto range = ranges.begin(); range != ranges.end(); ++range)
         {
             get();
-            if (JSON_LIKELY(*range <= current and current <= *(++range)))
+            if (JSON_HEDLEY_LIKELY(*range <= current and current <= *(++range)))
             {
                 add(current);
             }
@@ -292,7 +302,7 @@ class lexer
                             const int codepoint1 = get_codepoint();
                             int codepoint = codepoint1; // start with codepoint1
 
-                            if (JSON_UNLIKELY(codepoint1 == -1))
+                            if (JSON_HEDLEY_UNLIKELY(codepoint1 == -1))
                             {
                                 error_message = "invalid string: '\\u' must be followed by 4 hex digits";
                                 return token_type::parse_error;
@@ -302,29 +312,29 @@ class lexer
                             if (0xD800 <= codepoint1 and codepoint1 <= 0xDBFF)
                             {
                                 // expect next \uxxxx entry
-                                if (JSON_LIKELY(get() == '\\' and get() == 'u'))
+                                if (JSON_HEDLEY_LIKELY(get() == '\\' and get() == 'u'))
                                 {
                                     const int codepoint2 = get_codepoint();
 
-                                    if (JSON_UNLIKELY(codepoint2 == -1))
+                                    if (JSON_HEDLEY_UNLIKELY(codepoint2 == -1))
                                     {
                                         error_message = "invalid string: '\\u' must be followed by 4 hex digits";
                                         return token_type::parse_error;
                                     }
 
                                     // check if codepoint2 is a low surrogate
-                                    if (JSON_LIKELY(0xDC00 <= codepoint2 and codepoint2 <= 0xDFFF))
+                                    if (JSON_HEDLEY_LIKELY(0xDC00 <= codepoint2 and codepoint2 <= 0xDFFF))
                                     {
                                         // overwrite codepoint
-                                        codepoint =
-                                            // high surrogate occupies the most significant 22 bits
-                                            (codepoint1 << 10)
-                                            // low surrogate occupies the least significant 15 bits
-                                            + codepoint2
-                                            // there is still the 0xD800, 0xDC00 and 0x10000 noise
-                                            // in the result so we have to subtract with:
-                                            // (0xD800 << 10) + DC00 - 0x10000 = 0x35FDC00
-                                            - 0x35FDC00;
+                                        codepoint = static_cast<int>(
+                                                        // high surrogate occupies the most significant 22 bits
+                                                        (static_cast<unsigned int>(codepoint1) << 10u)
+                                                        // low surrogate occupies the least significant 15 bits
+                                                        + static_cast<unsigned int>(codepoint2)
+                                                        // there is still the 0xD800, 0xDC00 and 0x10000 noise
+                                                        // in the result so we have to subtract with:
+                                                        // (0xD800 << 10) + DC00 - 0x10000 = 0x35FDC00
+                                                        - 0x35FDC00u);
                                     }
                                     else
                                     {
@@ -340,7 +350,7 @@ class lexer
                             }
                             else
                             {
-                                if (JSON_UNLIKELY(0xDC00 <= codepoint1 and codepoint1 <= 0xDFFF))
+                                if (JSON_HEDLEY_UNLIKELY(0xDC00 <= codepoint1 and codepoint1 <= 0xDFFF))
                                 {
                                     error_message = "invalid string: surrogate U+DC00..U+DFFF must follow U+D800..U+DBFF";
                                     return token_type::parse_error;
@@ -359,23 +369,23 @@ class lexer
                             else if (codepoint <= 0x7FF)
                             {
                                 // 2-byte characters: 110xxxxx 10xxxxxx
-                                add(0xC0 | (codepoint >> 6));
-                                add(0x80 | (codepoint & 0x3F));
+                                add(static_cast<int>(0xC0u | (static_cast<unsigned int>(codepoint) >> 6u)));
+                                add(static_cast<int>(0x80u | (static_cast<unsigned int>(codepoint) & 0x3Fu)));
                             }
                             else if (codepoint <= 0xFFFF)
                             {
                                 // 3-byte characters: 1110xxxx 10xxxxxx 10xxxxxx
-                                add(0xE0 | (codepoint >> 12));
-                                add(0x80 | ((codepoint >> 6) & 0x3F));
-                                add(0x80 | (codepoint & 0x3F));
+                                add(static_cast<int>(0xE0u | (static_cast<unsigned int>(codepoint) >> 12u)));
+                                add(static_cast<int>(0x80u | ((static_cast<unsigned int>(codepoint) >> 6u) & 0x3Fu)));
+                                add(static_cast<int>(0x80u | (static_cast<unsigned int>(codepoint) & 0x3Fu)));
                             }
                             else
                             {
                                 // 4-byte characters: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-                                add(0xF0 | (codepoint >> 18));
-                                add(0x80 | ((codepoint >> 12) & 0x3F));
-                                add(0x80 | ((codepoint >> 6) & 0x3F));
-                                add(0x80 | (codepoint & 0x3F));
+                                add(static_cast<int>(0xF0u | (static_cast<unsigned int>(codepoint) >> 18u)));
+                                add(static_cast<int>(0x80u | ((static_cast<unsigned int>(codepoint) >> 12u) & 0x3Fu)));
+                                add(static_cast<int>(0x80u | ((static_cast<unsigned int>(codepoint) >> 6u) & 0x3Fu)));
+                                add(static_cast<int>(0x80u | (static_cast<unsigned int>(codepoint) & 0x3Fu)));
                             }
 
                             break;
@@ -392,39 +402,194 @@ class lexer
 
                 // invalid control characters
                 case 0x00:
+                {
+                    error_message = "invalid string: control character U+0000 (NUL) must be escaped to \\u0000";
+                    return token_type::parse_error;
+                }
+
                 case 0x01:
+                {
+                    error_message = "invalid string: control character U+0001 (SOH) must be escaped to \\u0001";
+                    return token_type::parse_error;
+                }
+
                 case 0x02:
+                {
+                    error_message = "invalid string: control character U+0002 (STX) must be escaped to \\u0002";
+                    return token_type::parse_error;
+                }
+
                 case 0x03:
+                {
+                    error_message = "invalid string: control character U+0003 (ETX) must be escaped to \\u0003";
+                    return token_type::parse_error;
+                }
+
                 case 0x04:
+                {
+                    error_message = "invalid string: control character U+0004 (EOT) must be escaped to \\u0004";
+                    return token_type::parse_error;
+                }
+
                 case 0x05:
+                {
+                    error_message = "invalid string: control character U+0005 (ENQ) must be escaped to \\u0005";
+                    return token_type::parse_error;
+                }
+
                 case 0x06:
+                {
+                    error_message = "invalid string: control character U+0006 (ACK) must be escaped to \\u0006";
+                    return token_type::parse_error;
+                }
+
                 case 0x07:
+                {
+                    error_message = "invalid string: control character U+0007 (BEL) must be escaped to \\u0007";
+                    return token_type::parse_error;
+                }
+
                 case 0x08:
+                {
+                    error_message = "invalid string: control character U+0008 (BS) must be escaped to \\u0008 or \\b";
+                    return token_type::parse_error;
+                }
+
                 case 0x09:
+                {
+                    error_message = "invalid string: control character U+0009 (HT) must be escaped to \\u0009 or \\t";
+                    return token_type::parse_error;
+                }
+
                 case 0x0A:
+                {
+                    error_message = "invalid string: control character U+000A (LF) must be escaped to \\u000A or \\n";
+                    return token_type::parse_error;
+                }
+
                 case 0x0B:
+                {
+                    error_message = "invalid string: control character U+000B (VT) must be escaped to \\u000B";
+                    return token_type::parse_error;
+                }
+
                 case 0x0C:
+                {
+                    error_message = "invalid string: control character U+000C (FF) must be escaped to \\u000C or \\f";
+                    return token_type::parse_error;
+                }
+
                 case 0x0D:
+                {
+                    error_message = "invalid string: control character U+000D (CR) must be escaped to \\u000D or \\r";
+                    return token_type::parse_error;
+                }
+
                 case 0x0E:
+                {
+                    error_message = "invalid string: control character U+000E (SO) must be escaped to \\u000E";
+                    return token_type::parse_error;
+                }
+
                 case 0x0F:
+                {
+                    error_message = "invalid string: control character U+000F (SI) must be escaped to \\u000F";
+                    return token_type::parse_error;
+                }
+
                 case 0x10:
+                {
+                    error_message = "invalid string: control character U+0010 (DLE) must be escaped to \\u0010";
+                    return token_type::parse_error;
+                }
+
                 case 0x11:
+                {
+                    error_message = "invalid string: control character U+0011 (DC1) must be escaped to \\u0011";
+                    return token_type::parse_error;
+                }
+
                 case 0x12:
+                {
+                    error_message = "invalid string: control character U+0012 (DC2) must be escaped to \\u0012";
+                    return token_type::parse_error;
+                }
+
                 case 0x13:
+                {
+                    error_message = "invalid string: control character U+0013 (DC3) must be escaped to \\u0013";
+                    return token_type::parse_error;
+                }
+
                 case 0x14:
+                {
+                    error_message = "invalid string: control character U+0014 (DC4) must be escaped to \\u0014";
+                    return token_type::parse_error;
+                }
+
                 case 0x15:
+                {
+                    error_message = "invalid string: control character U+0015 (NAK) must be escaped to \\u0015";
+                    return token_type::parse_error;
+                }
+
                 case 0x16:
+                {
+                    error_message = "invalid string: control character U+0016 (SYN) must be escaped to \\u0016";
+                    return token_type::parse_error;
+                }
+
                 case 0x17:
+                {
+                    error_message = "invalid string: control character U+0017 (ETB) must be escaped to \\u0017";
+                    return token_type::parse_error;
+                }
+
                 case 0x18:
+                {
+                    error_message = "invalid string: control character U+0018 (CAN) must be escaped to \\u0018";
+                    return token_type::parse_error;
+                }
+
                 case 0x19:
+                {
+                    error_message = "invalid string: control character U+0019 (EM) must be escaped to \\u0019";
+                    return token_type::parse_error;
+                }
+
                 case 0x1A:
+                {
+                    error_message = "invalid string: control character U+001A (SUB) must be escaped to \\u001A";
+                    return token_type::parse_error;
+                }
+
                 case 0x1B:
+                {
+                    error_message = "invalid string: control character U+001B (ESC) must be escaped to \\u001B";
+                    return token_type::parse_error;
+                }
+
                 case 0x1C:
+                {
+                    error_message = "invalid string: control character U+001C (FS) must be escaped to \\u001C";
+                    return token_type::parse_error;
+                }
+
                 case 0x1D:
+                {
+                    error_message = "invalid string: control character U+001D (GS) must be escaped to \\u001D";
+                    return token_type::parse_error;
+                }
+
                 case 0x1E:
+                {
+                    error_message = "invalid string: control character U+001E (RS) must be escaped to \\u001E";
+                    return token_type::parse_error;
+                }
+
                 case 0x1F:
                 {
-                    error_message = "invalid string: control character must be escaped";
+                    error_message = "invalid string: control character U+001F (US) must be escaped to \\u001F";
                     return token_type::parse_error;
                 }
 
@@ -560,7 +725,7 @@ class lexer
                 case 0xDE:
                 case 0xDF:
                 {
-                    if (JSON_UNLIKELY(not next_byte_in_range({0x80, 0xBF})))
+                    if (JSON_HEDLEY_UNLIKELY(not next_byte_in_range({0x80, 0xBF})))
                     {
                         return token_type::parse_error;
                     }
@@ -570,7 +735,7 @@ class lexer
                 // U+0800..U+0FFF: bytes E0 A0..BF 80..BF
                 case 0xE0:
                 {
-                    if (JSON_UNLIKELY(not (next_byte_in_range({0xA0, 0xBF, 0x80, 0xBF}))))
+                    if (JSON_HEDLEY_UNLIKELY(not (next_byte_in_range({0xA0, 0xBF, 0x80, 0xBF}))))
                     {
                         return token_type::parse_error;
                     }
@@ -594,7 +759,7 @@ class lexer
                 case 0xEE:
                 case 0xEF:
                 {
-                    if (JSON_UNLIKELY(not (next_byte_in_range({0x80, 0xBF, 0x80, 0xBF}))))
+                    if (JSON_HEDLEY_UNLIKELY(not (next_byte_in_range({0x80, 0xBF, 0x80, 0xBF}))))
                     {
                         return token_type::parse_error;
                     }
@@ -604,7 +769,7 @@ class lexer
                 // U+D000..U+D7FF: bytes ED 80..9F 80..BF
                 case 0xED:
                 {
-                    if (JSON_UNLIKELY(not (next_byte_in_range({0x80, 0x9F, 0x80, 0xBF}))))
+                    if (JSON_HEDLEY_UNLIKELY(not (next_byte_in_range({0x80, 0x9F, 0x80, 0xBF}))))
                     {
                         return token_type::parse_error;
                     }
@@ -614,7 +779,7 @@ class lexer
                 // U+10000..U+3FFFF F0 90..BF 80..BF 80..BF
                 case 0xF0:
                 {
-                    if (JSON_UNLIKELY(not (next_byte_in_range({0x90, 0xBF, 0x80, 0xBF, 0x80, 0xBF}))))
+                    if (JSON_HEDLEY_UNLIKELY(not (next_byte_in_range({0x90, 0xBF, 0x80, 0xBF, 0x80, 0xBF}))))
                     {
                         return token_type::parse_error;
                     }
@@ -626,7 +791,7 @@ class lexer
                 case 0xF2:
                 case 0xF3:
                 {
-                    if (JSON_UNLIKELY(not (next_byte_in_range({0x80, 0xBF, 0x80, 0xBF, 0x80, 0xBF}))))
+                    if (JSON_HEDLEY_UNLIKELY(not (next_byte_in_range({0x80, 0xBF, 0x80, 0xBF, 0x80, 0xBF}))))
                     {
                         return token_type::parse_error;
                     }
@@ -636,7 +801,7 @@ class lexer
                 // U+100000..U+10FFFF F4 80..8F 80..BF 80..BF
                 case 0xF4:
                 {
-                    if (JSON_UNLIKELY(not (next_byte_in_range({0x80, 0x8F, 0x80, 0xBF, 0x80, 0xBF}))))
+                    if (JSON_HEDLEY_UNLIKELY(not (next_byte_in_range({0x80, 0x8F, 0x80, 0xBF, 0x80, 0xBF}))))
                     {
                         return token_type::parse_error;
                     }
@@ -653,16 +818,19 @@ class lexer
         }
     }
 
+    JSON_HEDLEY_NON_NULL(2)
     static void strtof(float& f, const char* str, char** endptr) noexcept
     {
         f = std::strtof(str, endptr);
     }
 
+    JSON_HEDLEY_NON_NULL(2)
     static void strtof(double& f, const char* str, char** endptr) noexcept
     {
         f = std::strtod(str, endptr);
     }
 
+    JSON_HEDLEY_NON_NULL(2)
     static void strtof(long double& f, const char* str, char** endptr) noexcept
     {
         f = std::strtold(str, endptr);
@@ -708,7 +876,7 @@ class lexer
           locale's decimal point is used instead of `.` to work with the
           locale-dependent converters.
     */
-    token_type scan_number()
+    token_type scan_number()  // lgtm [cpp/use-of-goto]
     {
         // reset token_buffer to store the number's bytes
         reset();
@@ -746,11 +914,9 @@ class lexer
                 goto scan_number_any1;
             }
 
-            default:
-            {
-                // all other characters are rejected outside scan_number()
-                assert(false); // LCOV_EXCL_LINE
-            }
+            // all other characters are rejected outside scan_number()
+            default:            // LCOV_EXCL_LINE
+                assert(false);  // LCOV_EXCL_LINE
         }
 
 scan_number_minus:
@@ -1040,13 +1206,14 @@ scan_number_done:
     @param[in] length        the length of the passed literal text
     @param[in] return_type   the token type to return on success
     */
+    JSON_HEDLEY_NON_NULL(2)
     token_type scan_literal(const char* literal_text, const std::size_t length,
                             token_type return_type)
     {
         assert(current == literal_text[0]);
         for (std::size_t i = 1; i < length; ++i)
         {
-            if (JSON_UNLIKELY(get() != literal_text[i]))
+            if (JSON_HEDLEY_UNLIKELY(get() != literal_text[i]))
             {
                 error_message = "invalid literal";
                 return token_type::parse_error;
@@ -1079,23 +1246,63 @@ scan_number_done:
     */
     std::char_traits<char>::int_type get()
     {
-        ++chars_read;
-        current = ia->get_character();
-        if (JSON_LIKELY(current != std::char_traits<char>::eof()))
+        ++position.chars_read_total;
+        ++position.chars_read_current_line;
+
+        if (next_unget)
+        {
+            // just reset the next_unget variable and work with current
+            next_unget = false;
+        }
+        else
+        {
+            current = ia->get_character();
+        }
+
+        if (JSON_HEDLEY_LIKELY(current != std::char_traits<char>::eof()))
         {
             token_string.push_back(std::char_traits<char>::to_char_type(current));
         }
+
+        if (current == '\n')
+        {
+            ++position.lines_read;
+            position.chars_read_current_line = 0;
+        }
+
         return current;
     }
 
-    /// unget current character (return it again on next get)
+    /*!
+    @brief unget current character (read it again on next get)
+
+    We implement unget by setting variable next_unget to true. The input is not
+    changed - we just simulate ungetting by modifying chars_read_total,
+    chars_read_current_line, and token_string. The next call to get() will
+    behave as if the unget character is read again.
+    */
     void unget()
     {
-        --chars_read;
-        if (JSON_LIKELY(current != std::char_traits<char>::eof()))
+        next_unget = true;
+
+        --position.chars_read_total;
+
+        // in case we "unget" a newline, we have to also decrement the lines_read
+        if (position.chars_read_current_line == 0)
         {
-            ia->unget_character();
-            assert(token_string.size() != 0);
+            if (position.lines_read > 0)
+            {
+                --position.lines_read;
+            }
+        }
+        else
+        {
+            --position.chars_read_current_line;
+        }
+
+        if (JSON_HEDLEY_LIKELY(current != std::char_traits<char>::eof()))
+        {
+            assert(not token_string.empty());
             token_string.pop_back();
         }
     }
@@ -1130,9 +1337,9 @@ scan_number_done:
     }
 
     /// return current string value (implicitly resets the token; useful only once)
-    std::string move_string()
+    string_t& get_string()
     {
-        return std::move(token_buffer);
+        return token_buffer;
     }
 
     /////////////////////
@@ -1140,9 +1347,9 @@ scan_number_done:
     /////////////////////
 
     /// return position of last read token
-    constexpr std::size_t get_position() const noexcept
+    constexpr position_t get_position() const noexcept
     {
-        return chars_read;
+        return position;
     }
 
     /// return the last read token (for errors only).  Will never contain EOF
@@ -1157,10 +1364,9 @@ scan_number_done:
             if ('\x00' <= c and c <= '\x1F')
             {
                 // escape control characters
-                std::stringstream ss;
-                ss << "<U+" << std::setw(4) << std::uppercase << std::setfill('0')
-                   << std::hex << static_cast<int>(c) << ">";
-                result += ss.str();
+                std::array<char, 9> cs{{}};
+                (std::snprintf)(cs.data(), cs.size(), "<U+%.4X>", static_cast<unsigned char>(c));
+                result += cs.data();
             }
             else
             {
@@ -1173,6 +1379,7 @@ scan_number_done:
     }
 
     /// return syntax error message
+    JSON_HEDLEY_RETURNS_NON_NULL
     constexpr const char* get_error_message() const noexcept
     {
         return error_message;
@@ -1182,8 +1389,33 @@ scan_number_done:
     // actual scanner
     /////////////////////
 
+    /*!
+    @brief skip the UTF-8 byte order mark
+    @return true iff there is no BOM or the correct BOM has been skipped
+    */
+    bool skip_bom()
+    {
+        if (get() == 0xEF)
+        {
+            // check if we completely parse the BOM
+            return get() == 0xBB and get() == 0xBF;
+        }
+
+        // the first character is not the beginning of the BOM; unget it to
+        // process is later
+        unget();
+        return true;
+    }
+
     token_type scan()
     {
+        // initially, skip the BOM
+        if (position.chars_read_total == 0 and not skip_bom())
+        {
+            error_message = "invalid BOM; must be 0xEF 0xBB 0xBF if given";
+            return token_type::parse_error;
+        }
+
         // read next character and ignore whitespace
         do
         {
@@ -1253,14 +1485,17 @@ scan_number_done:
     /// the current character
     std::char_traits<char>::int_type current = std::char_traits<char>::eof();
 
-    /// the number of characters read
-    std::size_t chars_read = 0;
+    /// whether the next get() call should just return current
+    bool next_unget = false;
+
+    /// the start position of the current token
+    position_t position {};
 
     /// raw input token string (for error messages)
     std::vector<char> token_string {};
 
     /// buffer for variable-length tokens (numbers, strings)
-    std::string token_buffer {};
+    string_t token_buffer {};
 
     /// a description of occurred lexer errors
     const char* error_message = "";
@@ -1273,5 +1508,5 @@ scan_number_done:
     /// the decimal point
     const char decimal_point_char = '.';
 };
-}
-}
+}  // namespace detail
+}  // namespace nlohmann
