@@ -51,7 +51,7 @@ std::pair<bool, std::string> PoolProjectManagerViewCreatePool::create()
         auto pool_json = Glib::build_filename(base_path, "pool.json");
         json j;
         j["type"] = "pool";
-        j["name"] = pool_name_entry->get_text();
+        j["name"] = static_cast<std::string>(pool_name_entry->get_text());
         j["default_via"] = (std::string)UUID();
         j["uuid"] = (std::string)UUID::random();
 

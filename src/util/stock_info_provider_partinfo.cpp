@@ -11,6 +11,7 @@
 #endif
 #include "preferences/preferences.hpp"
 #include <list>
+#include <iomanip>
 
 namespace horizon {
 
