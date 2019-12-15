@@ -1,0 +1,6 @@
+freebsd_instance:
+  image_family: freebsd-12-1
+
+task:
+  install_script: pkg install -y git gmake pkgconf e2fsprogs-libuuid sqlite3 yaml-cpp gtkmm30 cppzmq libgit2 boost-libs glm opencascade podofo libzip
+  script: make
