@@ -6,4 +6,4 @@ task:
   script:
     - ls
     - clang --version
-    - gmake
+    - gmake -j2
