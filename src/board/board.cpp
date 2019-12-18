@@ -762,6 +762,9 @@ void Board::smash_package(BoardPackage *pkg)
             x.from_smash = true;
             x.overridden = true;
             x.placement = pkg->placement;
+            if (x.placement.mirror) {
+                x.placement.invert_angle();
+            }
             x.placement.accumulate(it.second.placement);
             x.text = it.second.text;
             x.layer = it.second.layer;
