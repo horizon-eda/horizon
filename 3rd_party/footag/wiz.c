@@ -272,7 +272,7 @@ void footag_gridnames(
                         snprintf(
                                 p[i].name,
                                 NELEM(p[0].name),
-                                "%2s%d",
+                                "%s%d",
                                 rowname,
                                 (col+1) % 1000
                         );
