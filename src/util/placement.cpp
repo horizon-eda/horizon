@@ -24,7 +24,7 @@ void Placement::accumulate(const Placement &p)
     if (angle == 0) {
         // nop
     }
-    if (angle == 16384) {
+    else if (angle == 16384) {
         q.shift.y = p.shift.x;
         q.shift.x = -p.shift.y;
     }
