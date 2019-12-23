@@ -381,6 +381,8 @@ void CanvasPreferencesEditor::handle_export()
 
         if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
             filename = chooser->get_filename();
+            if (!endswith(filename, ".json"))
+                filename += ".json";
         }
     }
     if (filename.size()) {
