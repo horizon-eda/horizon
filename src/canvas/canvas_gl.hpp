@@ -140,11 +140,11 @@ public:
 
     float get_width() const
     {
-        return width;
+        return m_width;
     }
     float get_height() const
     {
-        return height;
+        return m_height;
     }
 
     CanvasAnnotation *create_annotation();
@@ -160,7 +160,7 @@ private:
     static const int MAT3_YY = 4;
     static const int MAT3_Y0 = 5;
 
-    float width, height;
+    float m_width, m_height;
     glm::mat3 screenmat;
     float scale = 1e-5;
     Coord<float> offset;

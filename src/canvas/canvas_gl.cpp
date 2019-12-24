@@ -30,8 +30,8 @@ CanvasGL::CanvasGL()
 {
     add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_MOTION_MASK | Gdk::POINTER_MOTION_MASK
                | Gdk::SCROLL_MASK | Gdk::SMOOTH_SCROLL_MASK | Gdk::KEY_PRESS_MASK);
-    width = 1000;
-    height = 500;
+    m_width = 1000;
+    m_height = 500;
 
     set_can_focus(true);
     property_work_layer().signal_changed().connect([this] {
@@ -52,10 +52,10 @@ CanvasGL::CanvasGL()
 
 void CanvasGL::on_size_allocate(Gtk::Allocation &alloc)
 {
-    width = alloc.get_width();
-    height = alloc.get_height();
+    m_width = alloc.get_width();
+    m_height = alloc.get_height();
 
-    screenmat = glm::scale(glm::translate(glm::mat3(1), glm::vec2(-1, 1)), glm::vec2(2.0 / width, -2.0 / height));
+    screenmat = glm::scale(glm::translate(glm::mat3(1), glm::vec2(-1, 1)), glm::vec2(2.0 / m_width, -2.0 / m_height));
 
     needs_resize = true;
 
@@ -69,11 +69,11 @@ void CanvasGL::resize_buffers()
     GLint samples = gl_clamp_samples(appearance.msaa);
     glGetIntegerv(GL_RENDERBUFFER_BINDING, &rb); // save rb
     glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_RGBA8, width * get_scale_factor(),
-                                     height * get_scale_factor());
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_RGBA8, m_width * get_scale_factor(),
+                                     m_height * get_scale_factor());
     glBindRenderbuffer(GL_RENDERBUFFER, stencilrenderbuffer);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH24_STENCIL8, width * get_scale_factor(),
-                                     height * get_scale_factor());
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH24_STENCIL8, m_width * get_scale_factor(),
+                                     m_height * get_scale_factor());
     glBindRenderbuffer(GL_RENDERBUFFER, rb);
 }
 
@@ -161,8 +161,8 @@ bool CanvasGL::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-    glBlitFramebuffer(0, 0, width * get_scale_factor(), height * get_scale_factor(), 0, 0, width * get_scale_factor(),
-                      height * get_scale_factor(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, m_width * get_scale_factor(), m_height * get_scale_factor(), 0, 0,
+                      m_width * get_scale_factor(), m_height * get_scale_factor(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fb);
 
@@ -371,20 +371,20 @@ void CanvasGL::center_and_zoom(const Coordi &center, float sc)
     // we want center to be at width, height/2
     if (sc > 0)
         scale = sc;
-    offset.x = -((center.x * (flip_view ? -1 : 1) * scale) - width / 2);
-    offset.y = -((center.y * -scale) - height / 2);
+    offset.x = -((center.x * (flip_view ? -1 : 1) * scale) - m_width / 2);
+    offset.y = -((center.y * -scale) - m_height / 2);
     update_viewmat();
     queue_draw();
 }
 
 void CanvasGL::zoom_to_bbox(const Coordf &a, const Coordf &b)
 {
-    auto sc_x = width / abs(a.x - b.x);
-    auto sc_y = height / abs(a.y - b.y);
+    auto sc_x = m_width / abs(a.x - b.x);
+    auto sc_y = m_height / abs(a.y - b.y);
     scale = std::min(sc_x, sc_y);
     auto center = (a + b) / 2;
-    offset.x = -((center.x * (flip_view ? -1 : 1) * scale) - width / 2);
-    offset.y = -((center.y * -scale) - height / 2);
+    offset.x = -((center.x * (flip_view ? -1 : 1) * scale) - m_width / 2);
+    offset.y = -((center.y * -scale) - m_height / 2);
     update_viewmat();
     queue_draw();
 }
@@ -425,7 +425,7 @@ void CanvasGL::set_flip_view(bool fl)
     auto toggled = fl != flip_view;
     flip_view = fl;
     if (toggled) {
-        offset.x = width - offset.x;
+        offset.x = m_width - offset.x;
     }
     update_viewmat();
 }

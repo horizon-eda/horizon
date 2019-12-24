@@ -357,11 +357,9 @@ std::deque<Face> import(const std::string &filename)
     int nshapes = frshapes.Length();
     int id = 1;
     std::cout << "shapes " << nshapes << std::endl;
-    bool ret = false;
     while (id <= nshapes) {
         TopoDS_Shape shape = data.m_assy->GetShape(frshapes.Value(id));
         if (!shape.IsNull() && processNode(shape, data)) {
-            ret = true;
         }
         ++id;
     }

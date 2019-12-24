@@ -2,7 +2,7 @@
 #include <istream>
 
 namespace CSV {
-Csv::Csv(const std::string &delim) : delim(delim)
+Csv::Csv(const std::string &adelim) : delim(adelim)
 {
 }
 

@@ -102,7 +102,7 @@ static const std::string bga_letters = "ABCDEFGHJKLMNPRTUVWY";
 static std::string get_bga_letter(int x)
 {
     x -= 1;
-    size_t n_bga_letters = bga_letters.size();
+    int n_bga_letters = bga_letters.size();
     if (x < n_bga_letters) {
         char c[2] = {0};
         c[0] = bga_letters.at(x);
@@ -128,8 +128,8 @@ bool FootprintGeneratorGrid::generate()
 
     auto padstack = core->m_pool->get_padstack(browser_button->property_selected_uuid());
 
-    for (int x = 0; x < pad_count_h; x++) {
-        for (int y = 0; y < pad_count_v; y++) {
+    for (size_t x = 0; x < pad_count_h; x++) {
+        for (size_t y = 0; y < pad_count_v; y++) {
             auto uu = UUID::random();
             auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
             pad.placement.shift.x = pitch_h * x - (pitch_h * (pad_count_h - 1)) / 2;

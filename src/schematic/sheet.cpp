@@ -156,7 +156,6 @@ void Sheet::expand_symbols(const class Schematic &sch)
 {
     for (auto &it_sym : symbols) {
         SchematicSymbol &schsym = it_sym.second;
-        const Component *comp = schsym.component;
         if (schsym.symbol.unit->uuid != schsym.gate->unit->uuid) {
             throw std::logic_error("unit mismatch");
         }

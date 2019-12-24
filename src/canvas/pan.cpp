@@ -123,8 +123,8 @@ void CanvasGL::pan_zoom(GdkEventScroll *scroll_event, bool to_cursor)
         gdk_event_get_coords((GdkEvent *)scroll_event, &x, &y);
     }
     else {
-        x = width / 2;
-        y = height / 2;
+        x = m_width / 2;
+        y = m_height / 2;
     }
 
     float inc = 0;

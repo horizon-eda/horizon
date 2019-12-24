@@ -96,7 +96,7 @@ void Rules::move_rule(RuleID id, const UUID &uu, int dir)
     }
     if (dir < 0 && rule->order == 0)
         return;
-    if (dir > 0 && rule->order == rules.size() - 1)
+    if (dir > 0 && rule->order == static_cast<int>(rules.size()) - 1)
         return;
     auto rule_other = std::find_if(rules.begin(), rules.end(),
                                    [rule, dir](const auto x) { return x.second->order == rule->order + dir; });
