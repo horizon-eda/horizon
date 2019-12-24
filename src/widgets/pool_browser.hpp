@@ -39,6 +39,7 @@ protected:
 
 
     Gtk::TreeView *treeview = nullptr;
+    Gtk::ScrolledWindow *scrolled_window = nullptr;
 
     Gtk::TreeViewColumn *append_column(const std::string &name, const Gtk::TreeModelColumnBase &column,
                                        Pango::EllipsizeMode ellipsize = Pango::ELLIPSIZE_NONE);

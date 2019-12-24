@@ -134,14 +134,14 @@ void PoolBrowser::construct(Gtk::Widget *search_box)
 
     treeview = Gtk::manage(new Gtk::TreeView(store));
 
-    auto sc = Gtk::manage(new Gtk::ScrolledWindow());
-    sc->add(*treeview);
-    sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-    sc->show();
+    scrolled_window = Gtk::manage(new Gtk::ScrolledWindow());
+    scrolled_window->add(*treeview);
+    scrolled_window->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+    scrolled_window->show();
 
     {
         auto overlay = Gtk::manage(new Gtk::Overlay);
-        overlay->add(*sc);
+        overlay->add(*scrolled_window);
         overlay->show_all();
         busy_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4));
         auto img = Gtk::manage(new Gtk::Image);

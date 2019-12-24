@@ -222,6 +222,7 @@ PoolBrowserParametric::PoolBrowserParametric(Pool *p, PoolParametric *pp, const 
             search();
         });
         fbox->show();
+        fbox->set_no_show_all(true);
         filters_box->pack_start(*fbox, false, true, 0);
         filter_boxes.emplace(col.name, fbox);
         columns.emplace(col.name, col);
@@ -271,7 +272,9 @@ PoolBrowserParametric::PoolBrowserParametric(Pool *p, PoolParametric *pp, const 
     search_box->pack_start(*hbox, false, false, 0);
 
     construct(search_box);
+    scrolled_window->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
     install_pool_item_source_tooltip();
+    update_filters();
 }
 
 Glib::RefPtr<Gtk::ListStore> PoolBrowserParametric::create_list_store()
@@ -282,9 +285,22 @@ Glib::RefPtr<Gtk::ListStore> PoolBrowserParametric::create_list_store()
 
 void PoolBrowserParametric::create_columns()
 {
-    append_column_with_item_source_cr("MPN", list_columns.MPN);
-    append_column("Manufacturer", list_columns.manufacturer);
-    append_column("Package", list_columns.package);
+    {
+        auto col = append_column_with_item_source_cr("MPN", list_columns.MPN, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_expand(true);
+        col->set_min_width(100);
+    }
+    {
+        auto col = append_column("Manufacturer", list_columns.manufacturer, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_min_width(100);
+    }
+    {
+        auto col = append_column("Package", list_columns.package, Pango::ELLIPSIZE_END);
+        col->set_resizable(true);
+        col->set_min_width(100);
+    }
     for (const auto &col : table.columns) {
         auto tvc = create_tvc(col, list_columns.params.at(col.name));
         treeview->append_column(*tvc);
