@@ -229,7 +229,7 @@ void PoolGitBox::refresh()
             update_store_from_db_prepare();
             git_diff_foreach(diff, &PoolGitBox::diff_file_cb_c, nullptr, nullptr, nullptr, this);
             update_store_from_db(diff_store);
-            diff_treeview->set_model(diff_store);
+            diff_treeview->set_model(diff_store_filtered);
             diff_box->set_visible(tree_master != tree_head);
         }
 
