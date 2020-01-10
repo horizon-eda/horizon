@@ -509,6 +509,7 @@ protected:
     virtual void history_push() = 0;
     virtual void history_load(unsigned int i) = 0;
     void history_clear();
+    void history_trim();
 
     bool property_transaction = false;
 

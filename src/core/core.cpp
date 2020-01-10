@@ -318,6 +318,7 @@ void Core::rebuild(bool from_undo)
         assert(history_current + 1 == (int)history.size());
         history_push();
         history_current++;
+        history_trim();
     }
     s_signal_rebuilt.emit();
     signal_can_undo_redo().emit();
@@ -352,6 +353,15 @@ void Core::history_clear()
     history.clear();
     history_current = -1;
     signal_can_undo_redo().emit();
+}
+
+void Core::history_trim()
+{
+    const size_t history_max = 50;
+    while (history.size() > history_max) {
+        history.pop_front();
+        history_current--;
+    }
 }
 
 bool Core::can_redo() const
