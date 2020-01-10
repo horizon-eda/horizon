@@ -213,4 +213,16 @@ std::string make_link_markup(const std::string &href, const std::string &label)
            + "</a>";
 }
 
+Gtk::TreeViewColumn *tree_view_append_column_ellipsis(Gtk::TreeView *view, const std::string &name,
+                                                      const Gtk::TreeModelColumnBase &column,
+                                                      Pango::EllipsizeMode ellipsize)
+{
+    auto cr = Gtk::manage(new Gtk::CellRendererText());
+    auto tvc = Gtk::manage(new Gtk::TreeViewColumn(name, *cr));
+    tvc->add_attribute(cr->property_text(), column);
+    cr->property_ellipsize() = ellipsize;
+    view->append_column(*tvc);
+    return tvc;
+}
+
 } // namespace horizon

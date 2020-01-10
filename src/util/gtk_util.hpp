@@ -49,6 +49,10 @@ Gtk::Label *grid_attach_label_and_widget(Gtk::Grid *gr, const std::string &label
 void label_set_tnum(Gtk::Label *la);
 
 void tree_view_scroll_to_selection(Gtk::TreeView *view);
+Gtk::TreeViewColumn *tree_view_append_column_ellipsis(Gtk::TreeView *view, const std::string &name,
+                                                      const Gtk::TreeModelColumnBase &column,
+                                                      Pango::EllipsizeMode ellipsize);
+
 void entry_set_warning(Gtk::Entry *e, const std::string &text);
 
 void header_func_separator(Gtk::ListBoxRow *row, Gtk::ListBoxRow *before);

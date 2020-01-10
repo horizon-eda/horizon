@@ -26,9 +26,12 @@ void PoolGitBox::make_treeview(Gtk::TreeView *treeview)
         });
         treeview->append_column(*tvc);
     }
-
-    treeview->append_column("Name", list_columns.name);
-    treeview->append_column("Path", list_columns.path);
+    {
+        auto tvc = tree_view_append_column_ellipsis(treeview, "Name", list_columns.name, Pango::ELLIPSIZE_END);
+        tvc->set_min_width(200);
+        tvc->set_resizable(true);
+    }
+    tree_view_append_column_ellipsis(treeview, "Path", list_columns.path, Pango::ELLIPSIZE_START);
 
     treeview->signal_row_activated().connect([this, treeview](const Gtk::TreeModel::Path &path,
                                                               Gtk::TreeViewColumn *column) {

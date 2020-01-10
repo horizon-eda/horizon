@@ -81,12 +81,7 @@ Gtk::TreeViewColumn *PoolBrowser::append_column(const std::string &name, const G
                                                 Pango::EllipsizeMode ellipsize)
 
 {
-    auto cr = Gtk::manage(new Gtk::CellRendererText());
-    auto tvc = Gtk::manage(new Gtk::TreeViewColumn(name, *cr));
-    tvc->add_attribute(cr->property_text(), column);
-    cr->property_ellipsize() = ellipsize;
-    treeview->append_column(*tvc);
-    return tvc;
+    return tree_view_append_column_ellipsis(treeview, name, column, ellipsize);
 }
 Gtk::TreeViewColumn *PoolBrowser::append_column_with_item_source_cr(const std::string &name,
                                                                     const Gtk::TreeModelColumnBase &column,
