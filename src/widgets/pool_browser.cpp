@@ -11,8 +11,11 @@ namespace horizon {
 PoolBrowser::PoolBrowser(Pool *p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
 {
     const auto &pools = PoolManager::get().get_pools();
-    if (pools.count(pool->get_base_path()))
-        pool_uuid = pools.at(pool->get_base_path()).uuid;
+    if (pools.count(pool->get_base_path())) {
+        const auto &mpool = pools.at(pool->get_base_path());
+        pools_included = mpool.pools_included.size();
+        pool_uuid = mpool.uuid;
+    }
 }
 
 Gtk::Entry *PoolBrowser::create_search_entry(const std::string &label)
@@ -92,7 +95,7 @@ Gtk::TreeViewColumn *PoolBrowser::append_column_with_item_source_cr(const std::s
 {
     auto tvc = Gtk::manage(new Gtk::TreeViewColumn(name));
     auto cr = Gtk::manage(new Gtk::CellRendererText());
-    if (pool_uuid) {
+    if (pool_uuid && pools_included) {
         auto cr_cb = create_pool_item_source_cr(tvc);
         tvc->pack_start(*cr_cb, false);
     }
@@ -314,7 +317,11 @@ PoolBrowser::PoolItemSource PoolBrowser::pool_item_source_from_db(const UUID &uu
 }
 
 void PoolBrowser::install_pool_item_source_tooltip()
+
 {
+    if (!(pool_uuid && pools_included))
+        return;
+
     treeview->set_has_tooltip(true);
     treeview->signal_query_tooltip().connect([this](int x, int y, bool keyboard_tooltip,
                                                     const Glib::RefPtr<Gtk::Tooltip> &tooltip) {

@@ -33,6 +33,7 @@ protected:
     void construct(Gtk::Widget *search_box = nullptr);
     class Pool *pool = nullptr;
     UUID pool_uuid;
+    bool pools_included = false;
     bool show_none = false;
     bool show_path = false;
     Gtk::TreeViewColumn *path_column = nullptr;
