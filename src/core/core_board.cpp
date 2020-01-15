@@ -650,11 +650,11 @@ bool CoreBoard::can_search_for_object_type(ObjectType ty) const
 std::list<Core::SearchResult> CoreBoard::search(const SearchQuery &q)
 {
     std::list<Core::SearchResult> results;
-    if (q.query.size() == 0)
+    if (q.get_query().size() == 0)
         return results;
     if (q.types.count(ObjectType::BOARD_PACKAGE)) {
         for (const auto &it : brd.packages) {
-            if (it.second.component->refdes.find(q.query) != std::string::npos) {
+            if (q.contains(it.second.component->refdes)) {
                 results.emplace_back(ObjectType::BOARD_PACKAGE, it.first);
                 auto &x = results.back();
                 x.location = it.second.placement.shift;

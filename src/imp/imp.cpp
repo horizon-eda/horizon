@@ -1732,8 +1732,7 @@ void ImpBase::tool_update_data(std::unique_ptr<ToolData> &data)
 void ImpBase::handle_search()
 {
     Core::SearchQuery q;
-    q.query = main_window->search_entry->get_text();
-    trim(q.query);
+    q.set_query(main_window->search_entry->get_text());
     for (auto &it : search_check_buttons) {
         if (it.second->get_active()) {
             q.types.insert(it.first);

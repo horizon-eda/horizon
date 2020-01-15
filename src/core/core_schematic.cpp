@@ -647,13 +647,13 @@ static void sort_search_results_schematic(std::list<Core::SearchResult> &results
 std::list<Core::SearchResult> CoreSchematic::search(const SearchQuery &q)
 {
     std::list<Core::SearchResult> results;
-    if (q.query.size() == 0)
+    if (q.get_query().size() == 0)
         return results;
     for (const auto &it_sheet : sch.sheets) {
         const auto &sheet = it_sheet.second;
         if (q.types.count(ObjectType::SCHEMATIC_SYMBOL)) {
             for (const auto &it : sheet.symbols) {
-                if (it.second.component->refdes.find(q.query) != std::string::npos) {
+                if (q.contains(it.second.component->refdes)) {
                     results.emplace_back(ObjectType::SCHEMATIC_SYMBOL, it.first);
                     auto &x = results.back();
                     x.location = it.second.placement.shift;
@@ -664,7 +664,7 @@ std::list<Core::SearchResult> CoreSchematic::search(const SearchQuery &q)
         }
         if (q.types.count(ObjectType::NET_LABEL)) {
             for (const auto &it : sheet.net_labels) {
-                if (it.second.junction->net && it.second.junction->net->name.find(q.query) != std::string::npos) {
+                if (it.second.junction->net && q.contains(it.second.junction->net->name)) {
                     results.emplace_back(ObjectType::NET_LABEL, it.first);
                     auto &x = results.back();
                     x.location = it.second.junction->position;
@@ -675,7 +675,7 @@ std::list<Core::SearchResult> CoreSchematic::search(const SearchQuery &q)
         }
         if (q.types.count(ObjectType::BUS_RIPPER)) {
             for (const auto &it : sheet.bus_rippers) {
-                if (it.second.bus_member->net && it.second.bus_member->net->name.find(q.query) != std::string::npos) {
+                if (it.second.bus_member->net && q.contains(it.second.bus_member->net->name)) {
                     results.emplace_back(ObjectType::BUS_RIPPER, it.first);
                     auto &x = results.back();
                     x.location = it.second.get_connector_pos();
@@ -686,7 +686,7 @@ std::list<Core::SearchResult> CoreSchematic::search(const SearchQuery &q)
         }
         if (q.types.count(ObjectType::POWER_SYMBOL)) {
             for (const auto &it : sheet.power_symbols) {
-                if (it.second.junction->net && it.second.junction->net->name.find(q.query) != std::string::npos) {
+                if (it.second.junction->net && q.contains(it.second.junction->net->name)) {
                     results.emplace_back(ObjectType::POWER_SYMBOL, it.first);
                     auto &x = results.back();
                     x.location = it.second.junction->position;

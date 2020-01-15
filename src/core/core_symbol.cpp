@@ -311,11 +311,11 @@ bool CoreSymbol::can_search_for_object_type(ObjectType ty) const
 std::list<Core::SearchResult> CoreSymbol::search(const SearchQuery &q)
 {
     std::list<Core::SearchResult> results;
-    if (q.query.size() == 0)
+    if (q.get_query().size() == 0)
         return results;
     if (q.types.count(ObjectType::SYMBOL_PIN)) {
         for (const auto &it : sym.pins) {
-            if (it.second.name.find(q.query) != std::string::npos) {
+            if (q.contains(it.second.name)) {
                 results.emplace_back(ObjectType::SYMBOL_PIN, it.first);
                 auto &x = results.back();
                 x.location = it.second.position;

@@ -350,9 +350,14 @@ public:
 
     class SearchQuery {
     public:
-        std::string query;
+        void set_query(const std::string &q);
+        const std::string &get_query() const;
+        bool contains(const std::string &haystack) const;
         std::set<ObjectType> types;
         std::pair<Coordf, Coordf> area_visible;
+
+    private:
+        std::string query;
     };
 
     class SearchResult {

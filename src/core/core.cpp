@@ -5,6 +5,8 @@
 #include "nlohmann/json.hpp"
 #include "imp/action_catalog.hpp"
 #include "util/util.hpp"
+#include "util/str_util.hpp"
+#include <glibmm/ustring.h>
 
 namespace horizon {
 
@@ -468,6 +470,24 @@ void Core::sort_search_results(std::list<Core::SearchResult> &results, const Sea
         return a.location.y > b.location.y;
     });
 }
+
+void Core::SearchQuery::set_query(const std::string &q)
+{
+    query = Glib::ustring(q).casefold();
+    trim(query);
+}
+
+const std::string &Core::SearchQuery::get_query() const
+{
+    return query;
+}
+
+bool Core::SearchQuery::contains(const std::string &haystack) const
+{
+    Glib::ustring uhaystack(haystack);
+    return uhaystack.casefold().find(query) != Glib::ustring::npos;
+}
+
 ToolBase::ToolBase(Core *c, ToolID tid) : core(c), tool_id(tid)
 {
 }
