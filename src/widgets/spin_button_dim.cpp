@@ -60,6 +60,17 @@ static Operation op_from_char(char c)
     }
 }
 
+static bool op_is_mul(Operation op)
+{
+    switch (op) {
+    case Operation::MUL:
+    case Operation::DIV:
+        return true;
+    default:
+        return false;
+    }
+}
+
 
 static int64_t parse_str(const Glib::ustring &s)
 {
@@ -108,11 +119,11 @@ static int64_t parse_str(const Glib::ustring &s)
                 value = 0;
                 state = State::SIGN;
             }
-            else if (c == 'i' && operation == Operation::INVALID) {
+            else if (c == 'i' && !op_is_mul(operation)) {
                 value *= 25.4;
                 state = State::UNIT;
             }
-            else if (c == 'm' && operation == Operation::INVALID) {
+            else if (c == 'm' && !op_is_mul(operation)) {
                 state = State::UNIT_M;
             }
             break;
@@ -131,11 +142,11 @@ static int64_t parse_str(const Glib::ustring &s)
                 value = 0;
                 state = State::SIGN;
             }
-            else if (c == 'i' && operation == Operation::INVALID) {
+            else if (c == 'i' && !op_is_mul(operation)) {
                 value *= 25.4;
                 state = State::UNIT;
             }
-            else if (c == 'm' && operation == Operation::INVALID) {
+            else if (c == 'm' && !op_is_mul(operation)) {
                 state = State::UNIT_M;
             }
             break;
