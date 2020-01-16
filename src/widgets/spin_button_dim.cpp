@@ -60,6 +60,17 @@ static Operation op_from_char(char c)
     }
 }
 
+static bool op_is_mul(Operation op)
+{
+    switch (op) {
+    case Operation::MUL:
+    case Operation::DIV:
+        return true;
+    default:
+        return false;
+    }
+}
+
 
 static int64_t parse_str(const Glib::ustring &s)
 {
@@ -67,7 +78,7 @@ static int64_t parse_str(const Glib::ustring &s)
     int64_t value = 0;
     int64_t mul = 1000000;
     int sign = 1;
-    enum class State { SIGN, INT, DECIMAL, UNIT };
+    enum class State { SIGN, INT, DECIMAL, UNIT, UNIT_M };
     auto state = State::SIGN;
     bool parsed_any = false;
     Operation operation = Operation::INVALID;
@@ -108,9 +119,12 @@ static int64_t parse_str(const Glib::ustring &s)
                 value = 0;
                 state = State::SIGN;
             }
-            else if (c == 'i' && operation == Operation::INVALID) {
+            else if (c == 'i' && !op_is_mul(operation)) {
                 value *= 25.4;
                 state = State::UNIT;
+            }
+            else if (c == 'm' && !op_is_mul(operation)) {
+                state = State::UNIT_M;
             }
             break;
 
@@ -128,11 +142,21 @@ static int64_t parse_str(const Glib::ustring &s)
                 value = 0;
                 state = State::SIGN;
             }
-            else if (c == 'i' && operation == Operation::INVALID) {
+            else if (c == 'i' && !op_is_mul(operation)) {
                 value *= 25.4;
                 state = State::UNIT;
             }
+            else if (c == 'm' && !op_is_mul(operation)) {
+                state = State::UNIT_M;
+            }
             break;
+
+        case State::UNIT_M:
+            if (c == 'i') {
+                value *= 25.4 / 1000.0;
+            }
+            state = State::UNIT;
+            /* fall through */
 
         case State::UNIT:
             if (op_from_char(c) != Operation::INVALID && operation == Operation::INVALID) {
