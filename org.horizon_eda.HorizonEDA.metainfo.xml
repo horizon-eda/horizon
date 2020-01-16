@@ -9,7 +9,7 @@
 
   <description>
     <p>
-      A free from-scratch EDA package written in C++.
+      Horizon EDA is an Electronic Design Automation package supporting an integrated end-to-end workflow for printed circuit board design including parts management and schematic entry. 
     </p>
   </description>
 
@@ -17,7 +17,16 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/wiki/carrotIndustries/horizon/images/collage.png</image>
+      <image>https://horizon-eda.org/screenshots/brd.png</image>
+    </screenshot>
+    <screenshot type="default">
+      <image>https://horizon-eda.org/screenshots/sch.png</image>
+    </screenshot>
+    <screenshot type="default">
+      <image>https://horizon-eda.org/screenshots/pool-mgr.png</image>
+    </screenshot>
+    <screenshot type="default">
+      <image>https://horizon-eda.org/screenshots/3d.png</image>
     </screenshot>
   </screenshots>
 
@@ -30,6 +39,11 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="0.9.7" date="2020-01-17">
+      <description>
+        <p>prerelease to test packaging</p>
+      </description>
+    </release>
     <release version="0.9.6" date="2019-12-13">
       <description>
         <p>prerelease to test packaging</p>

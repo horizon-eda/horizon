@@ -1,11 +1,13 @@
-# Horizon is a free EDA package
-It's far from finished, but the overall 
-architecture is there. See [the docs](https://horizon-eda.readthedocs.io/en/latest/feature-overview.html) for an overview
+# Horizon EDA
+
+Horizon EDA is an **Electronic Design Automation** package supporting an integrated end-to-end workflow for printed circuit board design including parts management and schematic entry. 
+
+See [the docs](https://docs.horizon-eda.org/en/latest/feature-overview.html) for an overview
 of horizon's top features.
 
 Wanna chat about the project? Join #horizon on freenode
 
-![collage](https://raw.githubusercontent.com/wiki/carrotIndustries/horizon/images/collage.png)
+![collage](https://horizon-eda.org/screenshots/collage.png)
 
 # Features for users so far
 - Complete design flow from schematic entry to gerber export
@@ -27,7 +29,7 @@ Wanna chat about the project? Join #horizon on freenode
 - Everything is referenced by UUIDs
 
 # Getting Started
-See the [the docs](https://horizon-eda.readthedocs.io/en/latest/installation.html)
+See the [the docs](https://docs.horizon-eda.org/en/latest/installation.html)
 
 # Included third-party software
 - https://github.com/nlohmann/json/
