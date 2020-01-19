@@ -83,6 +83,15 @@ static void part_add_dir_to_graph(PoolUpdateGraph &graph, const std::string &dir
     }
 }
 
+static std::set<UUID> uuids_from_missing(const std::set<std::pair<const PoolUpdateNode *, UUID>> &missing)
+{
+    std::set<UUID> r;
+    for (const auto &it : missing) {
+        r.insert(it.second);
+    }
+    return r;
+}
+
 static void status_cb_nop(PoolUpdateStatus st, const std::string msg, const std::string filename)
 {
 }
@@ -666,13 +675,16 @@ void PoolUpdater::update_packages(const std::string &directory)
 {
     PoolUpdateGraph graph;
     pkg_add_dir_to_graph(graph, directory, status_cb);
-    auto missing = graph.update_dependants();
-    for (const auto &it : missing) { // try to resolve missing from items already added
-        if (exists(ObjectType::PACKAGE, it.second))
-            graph.add_node(it.second, "", {});
+    {
+        auto missing = graph.update_dependants();
+        auto uuids_missing = uuids_from_missing(missing);
+        for (const auto &it : uuids_missing) { // try to resolve missing from items already added
+            if (exists(ObjectType::PACKAGE, it))
+                graph.add_node(it, "", {});
+        }
     }
 
-    missing = graph.update_dependants();
+    auto missing = graph.update_dependants();
     for (const auto &it : missing) {
         status_cb(PoolUpdateStatus::FILE_ERROR, it.first->filename, "missing dependency " + (std::string)it.second);
     }
@@ -874,13 +886,16 @@ void PoolUpdater::update_parts(const std::string &directory)
 {
     PoolUpdateGraph graph;
     part_add_dir_to_graph(graph, directory, status_cb);
-    auto missing = graph.update_dependants();
-    for (const auto &it : missing) { // try to resolve missing from items already added
-        if (exists(ObjectType::PART, it.second))
-            graph.add_node(it.second, "", {});
+    {
+        auto missing = graph.update_dependants();
+        auto uuids_missing = uuids_from_missing(missing);
+        for (const auto &it : uuids_missing) { // try to resolve missing from items already added
+            if (exists(ObjectType::PART, it))
+                graph.add_node(it, "", {});
+        }
     }
 
-    missing = graph.update_dependants();
+    auto missing = graph.update_dependants();
     for (const auto &it : missing) {
         status_cb(PoolUpdateStatus::FILE_ERROR, it.first->filename, "missing dependency " + (std::string)it.second);
     }
