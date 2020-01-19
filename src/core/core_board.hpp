@@ -47,6 +47,10 @@ public:
     {
         return &pdf_export_settings;
     }
+    STEPExportSettings *get_step_export_settings()
+    {
+        return &step_export_settings;
+    }
 
     Board::Colors *get_colors()
     {
@@ -80,6 +84,7 @@ private:
     BoardRules rules;
     FabOutputSettings fab_output_settings;
     PDFExportSettings pdf_export_settings;
+    STEPExportSettings step_export_settings;
 
     Board::Colors colors;
 

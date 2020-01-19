@@ -75,7 +75,9 @@ enum class ActionID {
     EXPORT_PDF,
     BACKANNOTATE_CONNECTION_LINES,
     SELECT_MORE,
-    SELECT_MORE_NO_VIA
+    SELECT_MORE_NO_VIA,
+    STEP_EXPORT_WINDOW,
+    EXPORT_STEP
 };
 
 enum class ActionGroup {

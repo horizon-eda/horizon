@@ -72,6 +72,7 @@ SRC_COMMON = \
 	src/board/fab_output_settings.cpp\
 	src/board/board_hole.cpp\
 	src/board/connection_line.cpp\
+	src/board/step_export_settings.cpp\
 	src/pool/pool.cpp \
 	src/util/placement.cpp\
 	src/util/util.cpp\

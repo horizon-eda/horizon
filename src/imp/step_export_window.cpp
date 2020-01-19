@@ -1,23 +1,41 @@
 #include "step_export_window.hpp"
 #include "export_step/export_step.hpp"
 #include "util/util.hpp"
+#include "util/gtk_util.hpp"
 #include "core/core_board.hpp"
 #include <thread>
 
 namespace horizon {
 
-StepExportWindow *StepExportWindow::create(Gtk::Window *p, class CoreBoard *c)
+void StepExportWindow::MyExportFileChooser::prepare_chooser(Glib::RefPtr<Gtk::FileChooser> chooser)
+{
+    auto filter = Gtk::FileFilter::create();
+    filter->set_name("STEP models");
+    filter->add_pattern("*.step");
+    filter->add_pattern("*.stp");
+    chooser->add_filter(filter);
+}
+
+void StepExportWindow::MyExportFileChooser::prepare_filename(std::string &filename)
+{
+    if (!endswith(filename, ".step") && !endswith(filename, ".stp")) {
+        filename += ".step";
+    }
+}
+
+StepExportWindow *StepExportWindow::create(Gtk::Window *p, class CoreBoard *c, const std::string &project_dir)
 {
     StepExportWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/imp/step_export.ui");
-    x->get_widget_derived("window", w, c);
+    x->get_widget_derived("window", w, c, project_dir);
     w->set_transient_for(*p);
     return w;
 }
 
-StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, CoreBoard *c)
-    : Gtk::Window(cobject), core(c)
+StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, CoreBoard *c,
+                                   const std::string &project_dir)
+    : Gtk::Window(cobject), core(c), settings(*core->get_step_export_settings())
 {
     set_modal(true);
     x->get_widget("header", header);
@@ -28,27 +46,14 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
     x->get_widget("log_textview", log_textview);
     x->get_widget("include_3d_models_switch", include_3d_models_switch);
 
-    export_button->signal_clicked().connect(sigc::mem_fun(*this, &StepExportWindow::handle_export));
+    export_button->signal_clicked().connect(sigc::mem_fun(*this, &StepExportWindow::generate));
 
-    filename_button->signal_clicked().connect([this] {
-        GtkFileChooserNative *native = gtk_file_chooser_native_new("Select output directory", GTK_WINDOW(gobj()),
-                                                                   GTK_FILE_CHOOSER_ACTION_SAVE, "Select", "_Cancel");
-        auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
-        auto filter = Gtk::FileFilter::create();
-        filter->set_name("STEP models");
-        filter->add_pattern("*.step");
-        filter->add_pattern("*.stp");
-        chooser->add_filter(filter);
-        chooser->set_filename(filename_entry->get_text());
+    export_filechooser.attach(filename_entry, filename_button, this);
+    export_filechooser.set_project_dir(project_dir);
+    export_filechooser.bind_filename(settings.filename);
+    export_filechooser.signal_changed().connect([this] { s_signal_changed.emit(); });
 
-        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-            std::string filename = chooser->get_filename();
-            if (!endswith(filename, ".step") && !endswith(filename, ".stp")) {
-                filename += ".step";
-            }
-            filename_entry->set_text(filename);
-        }
-    });
+    bind_widget(include_3d_models_switch, settings.include_3d_models);
 
     export_dispatcher.connect([this] {
         std::lock_guard<std::mutex> guard(msg_queue_mutex);
@@ -67,8 +72,10 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
     });
 }
 
-void StepExportWindow::handle_export()
+void StepExportWindow::generate()
 {
+    if (export_running)
+        return;
     std::string filename = filename_entry->get_text();
     if (filename.size() == 0)
         return;

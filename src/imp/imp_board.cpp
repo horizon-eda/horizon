@@ -369,7 +369,7 @@ void ImpBoard::construct()
     add_tool_action(ToolID::IMPORT_DXF, "import_dxf");
 
     hamburger_menu->append("Export STEP", "win.export_step");
-    main_window->add_action("export_step", [this] { step_export_window->present(); });
+    main_window->add_action("export_step", [this] { trigger_action(ActionID::STEP_EXPORT_WINDOW); });
 
     hamburger_menu->append("Length tuning", "win.tuning");
     main_window->add_action("tuning", [this] { trigger_action(ActionID::TUNING); });
@@ -479,7 +479,14 @@ void ImpBoard::construct()
         core_board.set_needs_save();
     });
 
-    step_export_window = StepExportWindow::create(main_window, &core_board);
+    step_export_window = StepExportWindow::create(main_window, &core_board, project_dir);
+    step_export_window->signal_changed().connect([this] { core_board.set_needs_save(); });
+    connect_action(ActionID::STEP_EXPORT_WINDOW, [this](const auto &c) { step_export_window->present(); });
+    connect_action(ActionID::EXPORT_STEP, [this](const auto &c) {
+        step_export_window->present();
+        step_export_window->generate();
+    });
+
     tuning_window = new TuningWindow(core.b->get_board());
     tuning_window->set_transient_for(*main_window);
 

@@ -21,6 +21,7 @@
 #include "via.hpp"
 #include "via_padstack_provider.hpp"
 #include "connection_line.hpp"
+#include "step_export_settings.hpp"
 #include <fstream>
 #include <map>
 #include <vector>
@@ -109,6 +110,7 @@ public:
     };
     Colors colors;
     PDFExportSettings pdf_export_settings;
+    STEPExportSettings step_export_settings;
 
     ClipperLib::Paths obstacles;
     ClipperLib::Path track_path;

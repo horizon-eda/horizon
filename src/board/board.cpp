@@ -203,6 +203,14 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
             Logger::log_warning("couldn't load pdf export settings", Logger::Domain::BOARD, e.what());
         }
     }
+    if (j.count("step_export_settings")) {
+        try {
+            step_export_settings = STEPExportSettings(j.at("step_export_settings"));
+        }
+        catch (const std::exception &e) {
+            Logger::log_warning("couldn't load step export settings", Logger::Domain::BOARD, e.what());
+        }
+    }
     fab_output_settings.update_for_board(this);
     update_pdf_export_settings(pdf_export_settings);
     update_refs(); // fill in smashed texts
@@ -247,7 +255,8 @@ Board::Board(const Board &brd)
       texts(brd.texts), lines(brd.lines), arcs(brd.arcs), planes(brd.planes), keepouts(brd.keepouts),
       dimensions(brd.dimensions), connection_lines(brd.connection_lines), warnings(brd.warnings), rules(brd.rules),
       fab_output_settings(brd.fab_output_settings), stackup(brd.stackup), colors(brd.colors),
-      pdf_export_settings(brd.pdf_export_settings), n_inner_layers(brd.n_inner_layers)
+      pdf_export_settings(brd.pdf_export_settings), step_export_settings(brd.step_export_settings),
+      n_inner_layers(brd.n_inner_layers)
 {
     update_refs();
 }
@@ -914,6 +923,7 @@ json Board::serialize() const
         j["colors"] = o;
     }
     j["pdf_export_settings"] = pdf_export_settings.serialize_board();
+    j["step_export_settings"] = step_export_settings.serialize();
     j["polygons"] = json::object();
     for (const auto &it : polygons) {
         j["polygons"][(std::string)it.first] = it.second.serialize();
