@@ -254,7 +254,8 @@ static bool readSTEP(Handle(TDocStd_Document) & doc, const char *fname)
     return true;
 }
 
-static TDF_Label transferModel(Handle(TDocStd_Document) & source, Handle(TDocStd_Document) & dest)
+static TDF_Label transferModel(Handle(TDocStd_Document) & source, Handle(TDocStd_Document) & dest,
+                               const std::string &name)
 {
     // transfer data from Source into a top level component of Dest
 
@@ -282,7 +283,9 @@ static TDF_Label transferModel(Handle(TDocStd_Document) & source, Handle(TDocStd
         TopoDS_Shape shape = s_assy->GetShape(frshapes.Value(id));
 
         if (!shape.IsNull()) {
-            TDF_Label niulab = d_assy->AddComponent(component, shape, Standard_False);
+            TDF_Label la = d_assy->AddShape(shape, false);
+            TDF_Label niulab = d_assy->AddComponent(component, la, shape.Location());
+            TDataStd_Name::Set(la, (name + "-" + std::to_string(id)).c_str());
 
             // check for per-surface colors
             stop.Init(shape, TopAbs_FACE);
@@ -355,7 +358,7 @@ static bool getModelLabel(const std::string &aFileName, TDF_Label &aLabel, Handl
         throw std::runtime_error("error loading step");
     }
 
-    aLabel = transferModel(my_doc, doc);
+    aLabel = transferModel(my_doc, doc, name);
 
     TCollection_ExtendedString partname(name.c_str());
     TDataStd_Name::Set(aLabel, partname);
@@ -374,9 +377,11 @@ void export_step(const std::string &filename, const Board &brd, class Pool &pool
     auto app = XCAFApp_Application::GetApplication();
     Handle(TDocStd_Document) doc;
     app->NewDocument("MDTV-XCAF", doc);
+    XCAFDoc_ShapeTool::SetAutoNaming(false);
+    BRepBuilderAPI::Precision(1.0e-6);
     auto assy = XCAFDoc_DocumentTool::ShapeTool(doc->Main());
     auto assy_label = assy->NewShape();
-    BRepBuilderAPI::Precision(1.0e-6);
+    TDataStd_Name::Set(assy_label, "PCA");
 
     progress_cb("Board outline...");
     ClipperLib::Clipper cl;
@@ -427,7 +432,9 @@ void export_step(const std::string &filename, const Board &brd, class Pool &pool
         board = BRepAlgoAPI_Cut(board, it);
     }
 
-    auto board_label = assy->AddComponent(assy_label, board);
+    TDF_Label board_label = assy->AddShape(board, false);
+    assy->AddComponent(assy_label, board_label, board.Location());
+    TDataStd_Name::Set(board_label, "PCB");
 
     if (!board_label.IsNull()) {
         Handle(XCAFDoc_ColorTool) color = XCAFDoc_DocumentTool::ColorTool(doc->Main());
@@ -482,10 +489,10 @@ void export_step(const std::string &filename, const Board &brd, class Pool &pool
                                         angle_to_rad(model->yaw));
                     getModelLocation(it->flip, pos, rot, offset, orientation, toploc, total_thickness / 1e6);
 
-                    TDF_Label llabel = assy->AddComponent(assy_label, lmodel, toploc);
+                    assy->AddComponent(assy_label, lmodel, toploc);
 
                     TCollection_ExtendedString refdes(it->component->refdes.c_str());
-                    TDataStd_Name::Set(llabel, refdes);
+                    TDataStd_Name::Set(lmodel, refdes);
                 }
             }
             catch (const std::exception &e) {
