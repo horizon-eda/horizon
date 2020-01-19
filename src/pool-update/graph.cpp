@@ -13,7 +13,7 @@ PoolUpdateNode::PoolUpdateNode(const UUID &u, const std::string &fn, const std::
 void PoolUpdateGraph::add_node(const UUID &uu, const std::string &filename, const std::set<UUID> &dependencies)
 {
     if (nodes.count(uu)) {
-        throw std::runtime_error("duplicate nodes");
+        throw std::runtime_error("duplicate nodes (" + static_cast<std::string>(uu) + ", " + filename + ")");
     }
     nodes.emplace(std::piecewise_construct, std::forward_as_tuple(uu),
                   std::forward_as_tuple(uu, filename, dependencies));
