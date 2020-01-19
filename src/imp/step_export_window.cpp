@@ -88,7 +88,9 @@ void StepExportWindow::generate()
     log_textview->get_buffer()->set_text("");
     msg_queue.clear();
     export_running = true;
-    std::thread thr(&StepExportWindow::export_thread, this, settings);
+    STEPExportSettings my_settings;
+    my_settings.filename = export_filechooser.get_filename_abs();
+    std::thread thr(&StepExportWindow::export_thread, this, my_settings);
     thr.detach();
 }
 
