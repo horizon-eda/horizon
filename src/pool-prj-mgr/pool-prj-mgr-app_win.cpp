@@ -1316,25 +1316,31 @@ void PoolProjectManagerAppWindow::cleanup_pool_cache()
     auto board = Board::new_from_file(project->board_filename, block, pool_cached, vpp);
     board.expand();
 
+    auto add_part = [&items_needed](const Part *part) {
+        while (part) {
+            items_needed.emplace(ObjectType::PART, part->uuid);
+            items_needed.emplace(ObjectType::PACKAGE, part->package.uuid);
+            for (const auto &it_pad : part->package->pads) {
+                items_needed.emplace(ObjectType::PADSTACK, it_pad.second.pool_padstack->uuid);
+            }
+            if (part->base)
+                part = part->base;
+            else
+                part = nullptr;
+        }
+    };
+
     for (const auto &it : block.components) {
         items_needed.emplace(ObjectType::ENTITY, it.second.entity->uuid);
         for (const auto &it_gate : it.second.entity->gates) {
             items_needed.emplace(ObjectType::UNIT, it_gate.second.unit->uuid);
         }
         if (it.second.part) {
-            const Part *part = it.second.part;
-            while (part) {
-                items_needed.emplace(ObjectType::PART, part->uuid);
-                items_needed.emplace(ObjectType::PACKAGE, part->package.uuid);
-                for (const auto &it_pad : part->package->pads) {
-                    items_needed.emplace(ObjectType::PADSTACK, it_pad.second.pool_padstack->uuid);
-                }
-                if (part->base)
-                    part = part->base;
-                else
-                    part = nullptr;
-            }
+            add_part(it.second.part);
         }
+    }
+    for (const auto &it : block.bom_export_settings.concrete_parts) {
+        add_part(it.second);
     }
     for (const auto &it_sheet : sch.sheets) {
         for (const auto &it_sym : it_sheet.second.symbols) {
