@@ -372,7 +372,7 @@ static double angle_to_rad(int angle)
 }
 
 void export_step(const std::string &filename, const Board &brd, class Pool &pool, bool include_models,
-                 std::function<void(std::string)> progress_cb, const Board::Colors *colors)
+                 std::function<void(std::string)> progress_cb, const Board::Colors *colors, const std::string &prefix)
 {
     auto app = XCAFApp_Application::GetApplication();
     Handle(TDocStd_Document) doc;
@@ -381,7 +381,7 @@ void export_step(const std::string &filename, const Board &brd, class Pool &pool
     BRepBuilderAPI::Precision(1.0e-6);
     auto assy = XCAFDoc_DocumentTool::ShapeTool(doc->Main());
     auto assy_label = assy->NewShape();
-    TDataStd_Name::Set(assy_label, "PCA");
+    TDataStd_Name::Set(assy_label, (prefix + "PCA").c_str());
 
     progress_cb("Board outline...");
     ClipperLib::Clipper cl;
@@ -434,7 +434,7 @@ void export_step(const std::string &filename, const Board &brd, class Pool &pool
 
     TDF_Label board_label = assy->AddShape(board, false);
     assy->AddComponent(assy_label, board_label, board.Location());
-    TDataStd_Name::Set(board_label, "PCB");
+    TDataStd_Name::Set(board_label, (prefix + "PCB").c_str());
 
     if (!board_label.IsNull()) {
         Handle(XCAFDoc_ColorTool) color = XCAFDoc_DocumentTool::ColorTool(doc->Main());
@@ -477,7 +477,7 @@ void export_step(const std::string &filename, const Board &brd, class Pool &pool
                     TDF_Label lmodel;
 
                     if (!getModelLabel(pool.get_model_filename(it->package.uuid, model->uuid), lmodel, app, doc,
-                                       it->component->refdes)) {
+                                       prefix + it->component->refdes)) {
                         throw std::runtime_error("get model label");
                     }
 
@@ -491,7 +491,7 @@ void export_step(const std::string &filename, const Board &brd, class Pool &pool
 
                     assy->AddComponent(assy_label, lmodel, toploc);
 
-                    TCollection_ExtendedString refdes(it->component->refdes.c_str());
+                    TCollection_ExtendedString refdes((prefix + it->component->refdes).c_str());
                     TDataStd_Name::Set(lmodel, refdes);
                 }
             }

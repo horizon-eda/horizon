@@ -24,6 +24,7 @@ private:
     Gtk::Button *filename_button = nullptr;
     Gtk::Button *export_button = nullptr;
     Gtk::Switch *include_3d_models_switch = nullptr;
+    Gtk::Entry *prefix_entry = nullptr;
 
     Gtk::TextView *log_textview = nullptr;
     Gtk::Spinner *spinner = nullptr;
@@ -42,6 +43,6 @@ private:
 
     void set_is_busy(bool v);
 
-    void export_thread(std::string filename, bool include_models);
+    void export_thread(STEPExportSettings settings);
 };
 } // namespace horizon

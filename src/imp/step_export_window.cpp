@@ -43,6 +43,7 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
     x->get_widget("export_button", export_button);
     x->get_widget("filename_button", filename_button);
     x->get_widget("filename_entry", filename_entry);
+    x->get_widget("prefix_entry", prefix_entry);
     x->get_widget("log_textview", log_textview);
     x->get_widget("include_3d_models_switch", include_3d_models_switch);
 
@@ -54,6 +55,10 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
     export_filechooser.signal_changed().connect([this] { s_signal_changed.emit(); });
 
     bind_widget(include_3d_models_switch, settings.include_3d_models);
+    bind_widget(prefix_entry, settings.prefix);
+
+    include_3d_models_switch->property_active().signal_changed().connect([this] { s_signal_changed.emit(); });
+    prefix_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
 
     export_dispatcher.connect([this] {
         std::lock_guard<std::mutex> guard(msg_queue_mutex);
@@ -83,16 +88,15 @@ void StepExportWindow::generate()
     log_textview->get_buffer()->set_text("");
     msg_queue.clear();
     export_running = true;
-    auto include_models = include_3d_models_switch->get_active();
-    std::thread thr(&StepExportWindow::export_thread, this, filename, include_models);
+    std::thread thr(&StepExportWindow::export_thread, this, settings);
     thr.detach();
 }
 
-void StepExportWindow::export_thread(std::string filename, bool include_models)
+void StepExportWindow::export_thread(STEPExportSettings my_settings)
 {
     try {
         export_step(
-                filename, *core->get_board(), *core->m_pool, include_models,
+                my_settings.filename, *core->get_board(), *core->m_pool, my_settings.include_3d_models,
                 [this](std::string msg) {
                     {
                         std::lock_guard<std::mutex> guard(msg_queue_mutex);
@@ -100,7 +104,7 @@ void StepExportWindow::export_thread(std::string filename, bool include_models)
                     }
                     export_dispatcher.emit();
                 },
-                core->get_colors());
+                core->get_colors(), my_settings.prefix);
     }
     catch (const std::exception &e) {
         {
