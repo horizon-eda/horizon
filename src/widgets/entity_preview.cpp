@@ -26,9 +26,9 @@ EntityPreview::EntityPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIE
     symbol_sel_box->pack_start(*combo_gate, true, true, 0);
 
     if (show_goto) {
-        auto bu = create_goto_button(ObjectType::UNIT,
-                                     [this] { return entity->gates.at(combo_gate->get_active_key()).unit->uuid; });
-        symbol_sel_box->pack_start(*bu, false, false, 0);
+        goto_unit_button = create_goto_button(
+                ObjectType::UNIT, [this] { return entity->gates.at(combo_gate->get_active_key()).unit->uuid; });
+        symbol_sel_box->pack_start(*goto_unit_button, false, false, 0);
     }
 
     {
@@ -44,8 +44,8 @@ EntityPreview::EntityPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIE
     symbol_sel_box->pack_start(*combo_symbol, true, true, 0);
 
     if (show_goto) {
-        auto bu = create_goto_button(ObjectType::SYMBOL, [this] { return combo_symbol->get_active_key(); });
-        symbol_sel_box->pack_start(*bu, false, false, 0);
+        goto_symbol_button = create_goto_button(ObjectType::SYMBOL, [this] { return combo_symbol->get_active_key(); });
+        symbol_sel_box->pack_start(*goto_symbol_button, false, false, 0);
     }
 
     pack_start(*symbol_sel_box, false, false, 0);
@@ -100,6 +100,8 @@ void EntityPreview::load(const Entity *e, const Part *p)
     }
     std::sort(gates.begin(), gates.end(),
               [](const auto *a, const auto *b) { return strcmp_natural(a->suffix, b->suffix) < 0; });
+    if (goto_unit_button)
+        goto_unit_button->set_sensitive(gates.size());
 
     for (const auto it : gates) {
         if (it->suffix.size())
@@ -121,13 +123,18 @@ void EntityPreview::handle_gate_sel()
     const Gate *gate = &entity->gates.at(combo_gate->get_active_key());
     auto unit = gate->unit;
 
+    bool have_symbols = false;
     SQLite::Query q(pool.db, "SELECT uuid, name FROM symbols WHERE unit=? ORDER BY name");
     q.bind(1, unit->uuid);
     while (q.step()) {
         UUID uu = q.get<std::string>(0);
         std::string name = q.get<std::string>(1);
         combo_symbol->append(uu, name);
+        have_symbols = true;
     }
+    if (goto_symbol_button)
+        goto_symbol_button->set_sensitive(have_symbols);
+
     combo_symbol->set_active(0);
 }
 

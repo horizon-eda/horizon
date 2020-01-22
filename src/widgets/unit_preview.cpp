@@ -23,8 +23,9 @@ UnitPreview::UnitPreview(class Pool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0)
     symbol_sel_box->pack_start(*combo_symbol, true, true, 0);
 
     {
-        auto bu = create_goto_button(ObjectType::SYMBOL, [this] { return UUID(combo_symbol->get_active_id()); });
-        symbol_sel_box->pack_start(*bu, false, false, 0);
+        goto_symbol_button =
+                create_goto_button(ObjectType::SYMBOL, [this] { return UUID(combo_symbol->get_active_id()); });
+        symbol_sel_box->pack_start(*goto_symbol_button, false, false, 0);
     }
 
     pack_start(*symbol_sel_box, false, false, 0);
@@ -57,11 +58,16 @@ void UnitPreview::load(const Unit *u)
 
     SQLite::Query q(pool.db, "SELECT uuid, name FROM symbols WHERE unit=? ORDER BY name");
     q.bind(1, unit->uuid);
+    bool have_symbol = false;
     while (q.step()) {
         UUID uu = q.get<std::string>(0);
         std::string name = q.get<std::string>(1);
         combo_symbol->append((std::string)uu, name);
+        have_symbol = true;
     }
+    if (goto_symbol_button)
+        goto_symbol_button->set_sensitive(have_symbol);
+
     combo_symbol->set_active(0);
 }
 

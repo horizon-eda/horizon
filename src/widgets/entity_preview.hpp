@@ -24,6 +24,8 @@ private:
     class PreviewCanvas *canvas_symbol = nullptr;
     GenericComboBox<UUID> *combo_gate = nullptr;
     GenericComboBox<UUID> *combo_symbol = nullptr;
+    Gtk::Button *goto_symbol_button = nullptr;
+    Gtk::Button *goto_unit_button = nullptr;
 
     void handle_gate_sel();
     void handle_symbol_sel();

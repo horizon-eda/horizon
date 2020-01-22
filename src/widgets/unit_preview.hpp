@@ -17,6 +17,7 @@ private:
     const class Unit *unit = nullptr;
     class PreviewCanvas *canvas_symbol = nullptr;
     Gtk::ComboBoxText *combo_symbol = nullptr;
+    Gtk::Button *goto_symbol_button = nullptr;
 
     void handle_symbol_sel();
 };
