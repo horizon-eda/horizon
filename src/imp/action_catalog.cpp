@@ -318,6 +318,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Rename group", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::RETAG_GROUP},
+         {"Retag group", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::TOGGLE_GROUP_TAG_VISIBLE},
          {"Toggle group&tag visibility", ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -908,6 +912,7 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(SET_NEW_TAG),
         TOOL_LUT_ITEM(CLEAR_TAG),
         TOOL_LUT_ITEM(RENAME_TAG),
+        TOOL_LUT_ITEM(RETAG_GROUP),
         TOOL_LUT_ITEM(TOGGLE_GROUP_TAG_VISIBLE),
         TOOL_LUT_ITEM(COPY_PLACEMENT),
         TOOL_LUT_ITEM(COPY_TRACKS),

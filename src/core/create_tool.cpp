@@ -288,6 +288,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::CLEAR_TAG:
     case ToolID::RENAME_GROUP:
     case ToolID::RENAME_TAG:
+    case ToolID::RETAG_GROUP:
         return std::make_unique<ToolSetGroup>(this, tool_id);
 
     case ToolID::COPY_PLACEMENT:

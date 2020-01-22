@@ -41,6 +41,8 @@ bool ToolSetGroup::can_begin()
         return std::count_if(comps.begin(), comps.end(), [](auto a) { return a->tag; }) > 0;
     case ToolID::RENAME_GROUP:
         return comps.size() == 1 && ((*comps.begin())->group);
+    case ToolID::RETAG_GROUP:
+        return comps.size() == 1 && ((*comps.begin())->group);
     case ToolID::RENAME_TAG:
         return comps.size() == 1 && ((*comps.begin())->tag);
     default:
@@ -136,6 +138,20 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
         else {
             core.r->revert();
             return ToolResponse::end();
+        }
+    } break;
+
+    case ToolID::RETAG_GROUP: {
+        auto comp = *comps.begin();
+        auto group = comp->group;
+        int i = 1;
+        for (auto &it : block->components) {
+            if (it.second.group == group) {
+                auto new_tag = UUID::random();
+                it.second.tag = new_tag;
+                block->tag_names[new_tag] = std::to_string(i);
+                i++;
+            }
         }
     } break;
 
