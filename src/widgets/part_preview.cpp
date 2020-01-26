@@ -9,7 +9,7 @@
 #include "entity_preview.hpp"
 
 namespace horizon {
-PartPreview::PartPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
+PartPreview::PartPreview(class Pool &p, bool sgoto) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p), show_goto(sgoto)
 {
     auto infogrid = Gtk::manage(new Gtk::Grid());
     infogrid->property_margin() = 8;
@@ -201,8 +201,11 @@ void PartPreview::load(const Part *p)
     else {
         label_datasheet->set_text("");
     }
-    label_entity->set_markup("<a href=\"" + (std::string)part->entity->uuid + "\">"
-                             + Glib::Markup::escape_text(part->entity->name) + "</a>");
+    if (show_goto)
+        label_entity->set_markup("<a href=\"" + (std::string)part->entity->uuid + "\">"
+                                 + Glib::Markup::escape_text(part->entity->name) + "</a>");
+    else
+        label_entity->set_text(part->entity->name);
 
     if (part->orderable_MPNs.size()) {
         label_orderable_MPNs_title->show();

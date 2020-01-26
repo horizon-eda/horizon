@@ -16,6 +16,7 @@ public:
 
 private:
     class Pool &pool;
+    const bool show_goto;
     const class Part *part = nullptr;
     class EntityPreview *entity_preview = nullptr;
 
