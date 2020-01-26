@@ -70,7 +70,7 @@ void ImpSymbol::construct()
     unplaced_box->signal_place().connect([this](const auto &items) {
         std::set<SelectableRef> sel;
         for (const auto &it : items) {
-            sel.emplace(it, ObjectType::SYMBOL_PIN);
+            sel.emplace(it.at(0), ObjectType::SYMBOL_PIN);
         }
         this->tool_begin(ToolID::MAP_PIN, true, sel);
     });
@@ -172,7 +172,7 @@ void ImpSymbol::construct()
 void ImpSymbol::update_unplaced()
 {
     const auto &pins_from_symbol = core_symbol.get_symbol()->pins;
-    std::map<UUID, std::string> unplaced;
+    std::map<UUIDPath<2>, std::string> unplaced;
     for (const auto &it : core_symbol.get_symbol()->unit->pins) {
         if (pins_from_symbol.count(it.first) == 0) {
             unplaced.emplace(it.first, it.second.primary_name);

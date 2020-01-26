@@ -51,7 +51,7 @@ UnplacedBox::UnplacedBox(const std::string &title) : Gtk::Box(Gtk::Orientation::
         auto tbo = Gtk::manage(new Gtk::ToolButton("Place"));
         tbo->signal_clicked().connect([this] {
             auto paths = view->get_selection()->get_selected_rows();
-            std::set<UUID> uuids;
+            std::set<UUIDPath<2>> uuids;
             for (const auto &path : paths) {
                 auto it = store->get_iter(path);
                 if (it) {
@@ -80,7 +80,7 @@ void UnplacedBox::row_activated(const Gtk::TreeModel::Path &path, Gtk::TreeViewC
     }
 }
 
-void UnplacedBox::update(const std::map<UUID, std::string> &items)
+void UnplacedBox::update(const std::map<UUIDPath<2>, std::string> &items)
 {
     Gtk::TreeModel::Row row;
     store->freeze_notify();

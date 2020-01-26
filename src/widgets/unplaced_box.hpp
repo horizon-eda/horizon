@@ -3,14 +3,15 @@
 #include <map>
 #include <set>
 #include "util/uuid.hpp"
+#include "util/uuid_path.hpp"
 
 namespace horizon {
 class UnplacedBox : public Gtk::Box {
 public:
     UnplacedBox(const std::string &title);
 
-    void update(const std::map<UUID, std::string> &items);
-    typedef sigc::signal<void, std::set<UUID>> type_signal_place;
+    void update(const std::map<UUIDPath<2>, std::string> &items);
+    typedef sigc::signal<void, std::set<UUIDPath<2>>> type_signal_place;
     type_signal_place signal_place()
     {
         return s_signal_place;
@@ -25,7 +26,7 @@ private:
             Gtk::TreeModelColumnRecord::add(uuid);
         }
         Gtk::TreeModelColumn<Glib::ustring> text;
-        Gtk::TreeModelColumn<UUID> uuid;
+        Gtk::TreeModelColumn<UUIDPath<2>> uuid;
     };
     ListColumns list_columns;
 
