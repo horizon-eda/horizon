@@ -906,6 +906,35 @@ void Schematic::annotate()
     }
 }
 
+std::map<UUIDPath<2>, std::string> Schematic::get_unplaced_gates() const
+{
+    std::map<UUIDPath<2>, std::string> unplaced;
+    // collect gates
+    std::set<std::pair<const Component *, const Gate *>> gates;
+
+    // find all gates
+    for (const auto &it_component : block->components) {
+        for (const auto &it_gate : it_component.second.entity->gates) {
+            gates.emplace(&it_component.second, &it_gate.second);
+        }
+    }
+
+    // remove placed gates
+    for (auto &it_sheet : sheets) {
+        const auto &sheet = it_sheet.second;
+
+        for (const auto &it_sym : sheet.symbols) {
+            const auto &sym = it_sym.second;
+            gates.erase({sym.component, sym.gate});
+        }
+    }
+    for (const auto &it : gates) {
+        unplaced.emplace(std::piecewise_construct, std::forward_as_tuple(it.first->uuid, it.second->uuid),
+                         std::forward_as_tuple(it.first->refdes + it.second->suffix));
+    }
+    return unplaced;
+}
+
 Schematic::Schematic(const Schematic &sch)
     : uuid(sch.uuid), block(sch.block), name(sch.name), sheets(sch.sheets), rules(sch.rules),
       title_block_values(sch.title_block_values), group_tag_visible(sch.group_tag_visible), annotation(sch.annotation),

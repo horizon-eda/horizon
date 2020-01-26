@@ -13,6 +13,8 @@
 #include "nlohmann/json.hpp"
 #include "core/tool_backannotate_connection_lines.hpp"
 #include "core/tool_add_part.hpp"
+#include "core/tool_map_symbol.hpp"
+#include "widgets/unplaced_box.hpp"
 
 namespace horizon {
 ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,
@@ -468,6 +470,18 @@ void ImpSchematic::construct()
         pdf_export_window->present();
         pdf_export_window->generate();
     });
+
+    unplaced_box = Gtk::manage(new UnplacedBox("Symbol"));
+    unplaced_box->show();
+    main_window->left_panel->pack_end(*unplaced_box, true, true, 0);
+    unplaced_box->signal_place().connect([this](const auto &items) {
+        auto d = std::make_unique<ToolMapSymbol::ToolDataMapSymbol>(items);
+        this->tool_begin(ToolID::MAP_SYMBOL, false, {}, std::move(d));
+    });
+    core_schematic.signal_rebuilt().connect(sigc::mem_fun(*this, &ImpSchematic::update_unplaced));
+    update_unplaced();
+    core_schematic.signal_tool_changed().connect(
+            [this](ToolID tool_id) { unplaced_box->set_sensitive(tool_id == ToolID::NONE); });
 
     grid_spin_button->set_sensitive(false);
     canvas->snap_to_targets = false;
@@ -956,6 +970,11 @@ std::pair<ActionID, ToolID> ImpSchematic::get_doubleclick_action(ObjectType type
     default:
         return {ActionID::NONE, ToolID::NONE};
     }
+}
+
+void ImpSchematic::update_unplaced()
+{
+    unplaced_box->update(core_schematic.get_schematic()->get_unplaced_gates());
 }
 
 } // namespace horizon

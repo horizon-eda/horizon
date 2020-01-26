@@ -54,6 +54,8 @@ private:
 
     class BOMExportWindow *bom_export_window;
     class PDFExportWindow *pdf_export_window;
+    class UnplacedBox *unplaced_box = nullptr;
+    void update_unplaced();
 
     void handle_drag();
 

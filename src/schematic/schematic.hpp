@@ -79,6 +79,8 @@ public:
 
     bool place_bipole_on_line(Sheet *sheet, SchematicSymbol *sym);
 
+    std::map<UUIDPath<2>, std::string> get_unplaced_gates() const;
+
     UUID uuid;
     Block *block;
     std::string name;

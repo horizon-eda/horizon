@@ -19,50 +19,35 @@ bool ToolMapSymbol::can_begin()
 ToolResponse ToolMapSymbol::begin(const ToolArgs &args)
 {
     std::cout << "tool map sym\n";
-    Schematic *sch = core.c->get_schematic();
-    // collect gates
-    std::set<UUIDPath<2>> gates;
+    const auto sch = core.c->get_schematic();
 
-    // find all gates
-    for (const auto &it_component : sch->block->components) {
-        for (const auto &it_gate : it_component.second.entity->gates) {
-            gates.emplace(it_component.first, it_gate.first);
-        }
+    if (auto data = dynamic_cast<const ToolDataMapSymbol *>(args.data.get())) {
+        std::copy(data->gates.begin(), data->gates.end(), std::back_inserter(gates_from_data));
     }
+    UUIDPath<2> selected_gate;
+    if (gates_from_data.size() == 0) {
 
-    // remove placed gates
-    for (auto &it_sheet : sch->sheets) {
-        Sheet &sheet = it_sheet.second;
+        gates_out = sch->get_unplaced_gates();
 
-        for (const auto &it_sym : sheet.symbols) {
-            const auto &sym = it_sym.second;
-            if (gates.count({sym.component->uuid, sym.gate->uuid})) {
-                gates.erase({sym.component->uuid, sym.gate->uuid});
+        if (gates_out.size() == 0) {
+            imp->tool_bar_flash("all symbols placed");
+            return ToolResponse::end();
+        }
+
+        bool r;
+        if (gates_out.size() > 1) {
+            std::tie(r, selected_gate) = imp->dialogs.map_symbol(gates_out);
+            if (!r) {
+                return ToolResponse::end();
             }
         }
-    }
-
-    for (const auto &it : gates) {
-        Component *comp = &sch->block->components.at(it.at(0));
-        const Gate *gate = &comp->entity->gates.at(it.at(1));
-        gates_out.emplace(std::make_pair(it, comp->refdes + gate->suffix));
-    }
-
-    if (gates_out.size() == 0) {
-        imp->tool_bar_flash("all symbols placed");
-        return ToolResponse::end();
-    }
-
-    UUIDPath<2> selected_gate;
-    bool r;
-    if (gates_out.size() > 1) {
-        std::tie(r, selected_gate) = imp->dialogs.map_symbol(gates_out);
-        if (!r) {
-            return ToolResponse::end();
+        else {
+            selected_gate = gates_out.begin()->first;
         }
     }
     else {
-        selected_gate = gates_out.begin()->first;
+        data_mode = true;
+        selected_gate = gates_from_data.front();
     }
 
     Component *comp = &sch->block->components.at(selected_gate.at(0));
@@ -96,24 +81,37 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
-
-            gates_out.erase(UUIDPath<2>(sym_current->component->uuid, sym_current->gate->uuid));
-
+            core.c->get_schematic()->autoconnect_symbol(core.c->get_sheet(), sym_current);
+            if (sym_current->component->connections.size() == 0) {
+                core.c->get_schematic()->place_bipole_on_line(core.c->get_sheet(), sym_current);
+            }
             UUIDPath<2> selected_gate;
-            bool r;
-            if (gates_out.size() == 0) {
-                core.r->commit();
-                return ToolResponse::end();
-            }
-            else if (gates_out.size() == 1) {
-                selected_gate = gates_out.begin()->first;
-            }
-            else {
-                std::tie(r, selected_gate) = imp->dialogs.map_symbol(gates_out);
-                if (!r) {
+            if (data_mode == false) {
+                gates_out.erase(UUIDPath<2>(sym_current->component->uuid, sym_current->gate->uuid));
+
+                bool r;
+                if (gates_out.size() == 0) {
                     core.r->commit();
                     return ToolResponse::end();
                 }
+                else if (gates_out.size() == 1) {
+                    selected_gate = gates_out.begin()->first;
+                }
+                else {
+                    std::tie(r, selected_gate) = imp->dialogs.map_symbol(gates_out);
+                    if (!r) {
+                        core.r->commit();
+                        return ToolResponse::end();
+                    }
+                }
+            }
+            else {
+                gates_from_data.pop_front();
+                if (gates_from_data.size() == 0) {
+                    core.r->commit();
+                    return ToolResponse::end();
+                }
+                selected_gate = gates_from_data.front();
             }
             Schematic *sch = core.c->get_schematic();
 
