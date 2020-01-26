@@ -54,10 +54,10 @@ StackupLayerEditor::StackupLayerEditor(EditStackupDialog *parent, int ly, bool c
     sp->set_range(0, 10_mm);
     sp->show();
 
-    set_margin_start(10);
-    set_margin_end(10);
-    set_margin_top(5);
-    set_margin_bottom(5);
+    set_margin_start(8);
+    set_margin_end(8);
+    set_margin_top(4);
+    set_margin_bottom(4);
 
     pack_start(*sp, true, true, 0);
 }
@@ -75,11 +75,9 @@ EditStackupDialog::EditStackupDialog(Gtk::Window *parent, CoreBoard *c)
 
     sg_layer_name = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
-    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
-    auto box2 = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10));
-    box2->set_margin_start(10);
-    box2->set_margin_end(10);
-    box2->set_margin_top(10);
+    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+    auto box2 = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
+    box2->property_margin() = 8;
     auto la = Gtk::manage(new Gtk::Label("Inner Layers"));
     la->get_style_context()->add_class("dim-label");
     box2->pack_start(*la, false, false, 0);
@@ -94,10 +92,16 @@ EditStackupDialog::EditStackupDialog(Gtk::Window *parent, CoreBoard *c)
 
     box->pack_start(*box2, false, false, 0);
 
+    {
+        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+        box->pack_start(*sep, false, false, 0);
+    }
+
     auto sc = Gtk::manage(new Gtk::ScrolledWindow);
     sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
     lb = Gtk::manage(new Gtk::ListBox);
+    lb->set_selection_mode(Gtk::SELECTION_NONE);
     sc->add(*lb);
 
     box->pack_start(*sc, true, true, 0);

@@ -146,9 +146,9 @@ public:
     {
         auto labelbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
         labelbox->set_margin_start(10);
-        labelbox->set_margin_end(10);
+        labelbox->set_margin_end(8);
         labelbox->set_margin_top(4);
-        labelbox->set_margin_bottom(4);
+        labelbox->set_margin_bottom(8);
         auto la = Gtk::manage(new Gtk::Label("Bus Name"));
         la->get_style_context()->add_class("dim-label");
         bus_name_entry = Gtk::manage(new Gtk::Entry());
@@ -159,10 +159,10 @@ public:
 
         pack_start(*labelbox, false, false, 0);
 
-        auto buttonbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
-        buttonbox->set_margin_start(10);
-        buttonbox->set_margin_end(10);
-        buttonbox->set_margin_bottom(4);
+        auto buttonbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
+        buttonbox->set_margin_start(8);
+        buttonbox->set_margin_end(8);
+        buttonbox->set_margin_bottom(8);
 
         auto add_member_button = Gtk::manage(new Gtk::Button("Add member"));
         add_member_button->signal_clicked().connect(sigc::mem_fun(*this, &BusEditor::bus_add_member));
@@ -173,6 +173,11 @@ public:
         buttonbox->pack_start(*add_seq_button, false, false, 0);
 
         pack_start(*buttonbox, false, false, 0);
+
+        {
+            auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+            pack_start(*sep, false, false, 0);
+        }
 
         auto sc = Gtk::manage(new Gtk::ScrolledWindow());
         listbox = Gtk::manage(new Gtk::ListBox());

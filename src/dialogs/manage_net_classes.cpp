@@ -78,6 +78,10 @@ ManageNetClassesDialog::ManageNetClassesDialog(Gtk::Window *parent, Block *bl)
 
     box->pack_start(*add_button, false, false, 0);
 
+    {
+        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+        box->pack_start(*sep, false, false, 0);
+    }
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
     listbox = Gtk::manage(new Gtk::ListBox());

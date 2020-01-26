@@ -64,6 +64,12 @@ LogView::LogView() : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0)
     bbox->show_all();
     pack_start(*bbox, false, false, 0);
 
+    {
+        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+        pack_start(*sep, false, false, 0);
+        sep->show();
+    }
+
     sc = Gtk::manage(new Gtk::ScrolledWindow);
     sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
