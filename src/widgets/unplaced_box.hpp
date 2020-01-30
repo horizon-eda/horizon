@@ -11,7 +11,7 @@ public:
     UnplacedBox(const std::string &title);
 
     void update(const std::map<UUIDPath<2>, std::string> &items);
-    typedef sigc::signal<void, std::set<UUIDPath<2>>> type_signal_place;
+    typedef sigc::signal<void, std::vector<UUIDPath<2>>> type_signal_place;
     type_signal_place signal_place()
     {
         return s_signal_place;

@@ -51,12 +51,12 @@ UnplacedBox::UnplacedBox(const std::string &title) : Gtk::Box(Gtk::Orientation::
         auto tbo = Gtk::manage(new Gtk::ToolButton("Place"));
         tbo->signal_clicked().connect([this] {
             auto paths = view->get_selection()->get_selected_rows();
-            std::set<UUIDPath<2>> uuids;
+            std::vector<UUIDPath<2>> uuids;
             for (const auto &path : paths) {
                 auto it = store->get_iter(path);
                 if (it) {
                     Gtk::TreeModel::Row row = *it;
-                    uuids.insert(row[list_columns.uuid]);
+                    uuids.emplace_back(row[list_columns.uuid]);
                 }
             }
             if (uuids.size()) {
