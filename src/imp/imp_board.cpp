@@ -16,6 +16,7 @@
 #include "export_pdf/export_pdf_board.hpp"
 #include "board/board_layers.hpp"
 #include "pdf_export_window.hpp"
+#include "widgets/unplaced_box.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
@@ -581,6 +582,22 @@ void ImpBoard::construct()
     core_board.signal_rebuilt().connect([this] { selection_filter_dialog->update_layers(); });
 
     main_window->left_panel->pack_start(*display_control_notebook, false, false);
+
+    unplaced_box = Gtk::manage(new UnplacedBox("Package"));
+    unplaced_box->show();
+    main_window->left_panel->pack_end(*unplaced_box, true, true, 0);
+    unplaced_box->signal_place().connect([this](const auto &items) {
+        std::set<SelectableRef> components;
+        for (const auto &it : items) {
+            components.emplace(it.at(0), ObjectType::COMPONENT);
+        }
+        this->tool_begin(ToolID::MAP_PACKAGE, true, components);
+    });
+    core_board.signal_rebuilt().connect(sigc::mem_fun(*this, &ImpBoard::update_unplaced));
+    update_unplaced();
+    core_board.signal_tool_changed().connect(
+            [this](ToolID tool_id) { unplaced_box->set_sensitive(tool_id == ToolID::NONE); });
+
     display_control_notebook->show();
 }
 
@@ -871,6 +888,22 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBoard::get_selection_filte
             {ObjectType::CONNECTION_LINE, {}},
     };
     return r;
+}
+
+void ImpBoard::update_unplaced()
+{
+    std::map<UUIDPath<2>, std::string> components;
+    const auto brd = core_board.get_board();
+    for (const auto &it : brd->block->components) {
+        if (it.second.part)
+            components.emplace(std::piecewise_construct, std::forward_as_tuple(it.second.uuid),
+                               std::forward_as_tuple(it.second.refdes));
+    }
+
+    for (auto &it : brd->packages) {
+        components.erase(it.second.component->uuid);
+    }
+    unplaced_box->update(components);
 }
 
 } // namespace horizon

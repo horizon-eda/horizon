@@ -59,6 +59,9 @@ private:
 
     void handle_select_more(const ActionConnection &conn);
 
+    class UnplacedBox *unplaced_box = nullptr;
+    void update_unplaced();
+
     int get_schematic_pid();
 };
 } // namespace horizon
