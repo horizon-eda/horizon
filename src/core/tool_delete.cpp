@@ -236,10 +236,11 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
                 }
             }
             if (found == false) {
-                if ((comp->entity->gates.size() == 1) || imp->dialogs.ask_delete_component(comp)) {
-                    sch->block->components.erase(comp->uuid);
-                    comp = nullptr;
+                if (comp->entity->gates.size() > 1) {
+                    imp->tool_bar_flash("deleted last gate, deleting component");
                 }
+                sch->block->components.erase(comp->uuid);
+                comp = nullptr;
             }
         } break;
         case ObjectType::NET_LABEL: {

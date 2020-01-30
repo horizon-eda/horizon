@@ -240,7 +240,6 @@ SRC_IMP = \
 	src/dialogs/map_symbol.cpp\
 	src/dialogs/map_package.cpp\
 	src/dialogs/ask_net_merge.cpp\
-	src/dialogs/ask_delete_component.cpp\
 	src/dialogs/select_net.cpp\
 	src/dialogs/symbol_pin_names_window.cpp\
 	src/dialogs/manage_buses.cpp\

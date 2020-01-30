@@ -34,7 +34,6 @@ public:
     std::pair<bool, UUID> select_bus_member(class Block *block, const UUID &bus_uuid);
     std::pair<bool, UUID> select_group_tag(const class Block *block, bool tag_mode, const UUID &current);
     unsigned int ask_net_merge(class Net *net, class Net *into);
-    bool ask_delete_component(Component *comp);
     bool manage_buses(class Block *b);
     bool manage_net_classes(class Block *b);
     bool manage_power_nets(class Block *b);

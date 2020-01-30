@@ -9,7 +9,6 @@
 #include "symbol_pin_names_window.hpp"
 #include "select_net.hpp"
 #include "ask_net_merge.hpp"
-#include "ask_delete_component.hpp"
 #include "manage_buses.hpp"
 #include "manage_net_classes.hpp"
 #include "manage_power_nets.hpp"
@@ -215,12 +214,6 @@ unsigned int Dialogs::ask_net_merge(Net *net, Net *into)
 {
     AskNetMergeDialog dia(parent, net, into);
     return dia.run();
-}
-
-bool Dialogs::ask_delete_component(Component *comp)
-{
-    AskDeleteComponentDialog dia(parent, comp);
-    return dia.run() == Gtk::RESPONSE_OK;
 }
 
 bool Dialogs::manage_buses(Block *b)
