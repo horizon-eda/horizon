@@ -624,11 +624,7 @@ void CoreBoard::history_load(unsigned int i)
 
 json CoreBoard::get_meta()
 {
-    auto j = load_json_from_file(m_board_filename);
-    if (j.count("_imp")) {
-        return j["_imp"];
-    }
-    return nullptr;
+    return get_meta_from_file(m_board_filename);
 }
 
 std::pair<Coordi, Coordi> CoreBoard::get_bbox()
@@ -680,9 +676,8 @@ void CoreBoard::save(const std::string &suffix)
     brd.step_export_settings = step_export_settings;
     brd.colors = colors;
     auto j = brd.serialize();
-    auto save_meta = s_signal_request_save_meta.emit();
-    j["_imp"] = save_meta;
     save_json_to_file(m_board_filename + suffix, j);
+    save_meta(m_board_filename);
 }
 
 void CoreBoard::delete_autosave()

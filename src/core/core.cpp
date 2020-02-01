@@ -7,6 +7,7 @@
 #include "util/util.hpp"
 #include "util/str_util.hpp"
 #include <glibmm/ustring.h>
+#include <glibmm/fileutils.h>
 
 namespace horizon {
 
@@ -403,6 +404,28 @@ json Core::get_meta()
     return j;
 }
 
+json Core::get_meta_from_file(const std::string &filename)
+{
+    std::string meta_filename = filename + imp_meta_suffix;
+    if (Glib::file_test(meta_filename, Glib::FILE_TEST_IS_REGULAR)) {
+        return load_json_from_file(meta_filename);
+    }
+    else {
+        auto j = load_json_from_file(filename);
+        if (j.count("_imp")) {
+            return j["_imp"];
+        }
+        return nullptr;
+    }
+}
+
+void Core::save_meta(const std::string &filename)
+{
+    auto save_meta = s_signal_request_save_meta.emit();
+    if (save_meta != nullptr)
+        save_json_to_file(filename + imp_meta_suffix, save_meta);
+}
+
 void Core::set_needs_save(bool v)
 {
     if (v)
@@ -432,6 +455,7 @@ void Core::save()
 }
 
 const std::string Core::autosave_suffix = ".autosave";
+const std::string Core::imp_meta_suffix = ".imp_meta";
 
 void Core::autosave()
 {

@@ -526,6 +526,10 @@ protected:
 
     virtual void save(const std::string &suffix) = 0;
     static const std::string autosave_suffix;
+    static const std::string imp_meta_suffix;
+
+    json get_meta_from_file(const std::string &filename);
+    void save_meta(const std::string &filename);
 
 private:
     std::unique_ptr<ToolBase> create_tool(ToolID tool_id);
