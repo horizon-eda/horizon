@@ -219,7 +219,7 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
 Board Board::new_from_file(const std::string &filename, Block &block, Pool &pool, ViaPadstackProvider &vpp)
 {
     auto j = load_json_from_file(filename);
-    return Board(UUID(j["uuid"].get<std::string>()), j, block, pool, vpp);
+    return Board(UUID(j.at("uuid").get<std::string>()), j, block, pool, vpp);
 }
 
 Board::Board(const UUID &uu, Block &bl) : uuid(uu), block(&bl)

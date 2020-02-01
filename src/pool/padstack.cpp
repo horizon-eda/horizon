@@ -216,7 +216,7 @@ Padstack::Padstack(const UUID &uu, const json &j)
 Padstack Padstack::new_from_file(const std::string &filename)
 {
     auto j = load_json_from_file(filename);
-    return Padstack(UUID(j["uuid"].get<std::string>()), j);
+    return Padstack(UUID(j.at("uuid").get<std::string>()), j);
 }
 
 Padstack::Padstack(const UUID &uu) : uuid(uu), parameter_program(this, "")

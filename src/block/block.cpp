@@ -111,7 +111,7 @@ Block::Block(const UUID &uu) : uuid(uu)
 Block Block::new_from_file(const std::string &filename, Pool &obj)
 {
     auto j = load_json_from_file(filename);
-    return Block(UUID(j["uuid"].get<std::string>()), j, obj);
+    return Block(UUID(j.at("uuid").get<std::string>()), j, obj);
 }
 
 Net *Block::get_net(const UUID &uu)

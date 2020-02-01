@@ -41,7 +41,7 @@ Entity::Entity(const UUID &uu, const YAML::Node &n, Pool &pool)
 Entity Entity::new_from_file(const std::string &filename, Pool &pool)
 {
     auto j = load_json_from_file(filename);
-    return Entity(UUID(j["uuid"].get<std::string>()), j, pool);
+    return Entity(UUID(j.at("uuid").get<std::string>()), j, pool);
 }
 
 json Entity::serialize() const

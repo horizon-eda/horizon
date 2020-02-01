@@ -77,9 +77,9 @@ UUID Pin::get_uuid() const
 }
 
 Unit::Unit(const UUID &uu, const json &j)
-    : uuid(uu), name(j["name"].get<std::string>()), manufacturer(j.value("manufacturer", ""))
+    : uuid(uu), name(j.at("name").get<std::string>()), manufacturer(j.value("manufacturer", ""))
 {
-    const json &o = j["pins"];
+    const json &o = j.at("pins");
     for (auto it = o.cbegin(); it != o.cend(); ++it) {
         auto pin_uuid = UUID(it.key());
         pins.insert(std::make_pair(pin_uuid, Pin(pin_uuid, it.value())));
@@ -102,7 +102,7 @@ Unit::Unit(const UUID &uu) : uuid(uu)
 Unit Unit::new_from_file(const std::string &filename)
 {
     auto j = load_json_from_file(filename);
-    return Unit(UUID(j["uuid"].get<std::string>()), j);
+    return Unit(UUID(j.at("uuid").get<std::string>()), j);
 }
 
 json Unit::serialize() const

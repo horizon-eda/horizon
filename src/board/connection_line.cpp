@@ -8,7 +8,7 @@
 namespace horizon {
 
 ConnectionLine::ConnectionLine(const UUID &uu, const json &j, Board *brd)
-    : uuid(uu), from(j["from"], brd), to(j["to"], brd)
+    : uuid(uu), from(j.at("from"), brd), to(j.at("to"), brd)
 {
 }
 

@@ -160,7 +160,7 @@ Part::Part(const UUID &uu) : uuid(uu)
 Part Part::new_from_file(const std::string &filename, Pool &pool)
 {
     auto j = load_json_from_file(filename);
-    return Part(UUID(j["uuid"].get<std::string>()), j, pool);
+    return Part(UUID(j.at("uuid").get<std::string>()), j, pool);
 }
 
 json Part::serialize() const

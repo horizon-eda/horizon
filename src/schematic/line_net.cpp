@@ -173,7 +173,8 @@ bool LineNet::Connection::operator<(const LineNet::Connection &other) const
 }
 
 
-LineNet::LineNet(const UUID &uu, const json &j, Sheet *sheet) : uuid(uu), from(j["from"], sheet), to(j["to"], sheet)
+LineNet::LineNet(const UUID &uu, const json &j, Sheet *sheet)
+    : uuid(uu), from(j.at("from"), sheet), to(j.at("to"), sheet)
 {
 }
 

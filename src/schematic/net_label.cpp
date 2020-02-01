@@ -5,7 +5,7 @@
 
 namespace horizon {
 NetLabel::NetLabel(const UUID &uu, const json &j, Sheet *sheet)
-    : uuid(uu), orientation(orientation_lut.lookup(j["orientation"])), size(j.value("size", 2500000)),
+    : uuid(uu), orientation(orientation_lut.lookup(j.at("orientation"))), size(j.value("size", 2500000)),
       offsheet_refs(j.value("offsheet_refs", true))
 {
     if (sheet)

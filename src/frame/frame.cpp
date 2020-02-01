@@ -56,7 +56,7 @@ Frame::Frame(const UUID &uu) : uuid(uu)
 Frame Frame::new_from_file(const std::string &filename)
 {
     json j = load_json_from_file(filename);
-    return Frame(UUID(j["uuid"].get<std::string>()), j);
+    return Frame(UUID(j.at("uuid").get<std::string>()), j);
 }
 
 Junction *Frame::get_junction(const UUID &uu)

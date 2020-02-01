@@ -25,7 +25,7 @@ static const LutEnumStr<TextData::Font> font_lut = {
 };
 
 Text::Text(const UUID &uu, const json &j)
-    : uuid(uu), origin(origin_lut.lookup(j["origin"])),
+    : uuid(uu), origin(origin_lut.lookup(j.at("origin"))),
       font(font_lut.lookup(j.value("font", ""), TextData::Font::SIMPLEX)), placement(j.at("placement")),
       text(j.at("text").get<std::string>()), size(j.value("size", 2500000)), width(j.value("width", 0)),
       layer(j.value("layer", 0)), from_smash(j.value("from_smash", false)), temp(false)

@@ -58,7 +58,7 @@ Project::Project(const UUID &uu, const json &j, const std::string &base)
 Project Project::new_from_file(const std::string &filename)
 {
     auto j = load_json_from_file(filename);
-    return Project(UUID(j["uuid"].get<std::string>()), j, Glib::path_get_dirname(filename));
+    return Project(UUID(j.at("uuid").get<std::string>()), j, Glib::path_get_dirname(filename));
 }
 
 Project::Project(const UUID &uu) : uuid(uu)

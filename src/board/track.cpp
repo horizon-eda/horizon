@@ -181,8 +181,8 @@ bool Track::Connection::operator<(const Track::Connection &other) const
 
 Track::Track(const UUID &uu, const json &j, Board *brd)
     : uuid(uu), layer(j.value("layer", 0)), width(j.value("width", 0)),
-      width_from_rules(j.value("width_from_net_class", true)), locked(j.value("locked", false)), from(j["from"], brd),
-      to(j["to"], brd)
+      width_from_rules(j.value("width_from_net_class", true)), locked(j.value("locked", false)),
+      from(j.at("from"), brd), to(j.at("to"), brd)
 {
 }
 

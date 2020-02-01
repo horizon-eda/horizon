@@ -155,7 +155,7 @@ Package::Package(const UUID &uu, const json &j, Pool &pool)
 Package Package::new_from_file(const std::string &filename, Pool &pool)
 {
     auto j = load_json_from_file(filename);
-    return Package(UUID(j["uuid"].get<std::string>()), j, pool);
+    return Package(UUID(j.at("uuid").get<std::string>()), j, pool);
 }
 
 Package::Package(const UUID &uu) : uuid(uu), parameter_program(this, "")

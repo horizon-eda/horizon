@@ -45,9 +45,9 @@ json SymbolPin::Decoration::serialize() const
 }
 
 SymbolPin::SymbolPin(const UUID &uu, const json &j)
-    : uuid(uu), position(j["position"].get<std::vector<int64_t>>()), length(j["length"]),
+    : uuid(uu), position(j.at("position").get<std::vector<int64_t>>()), length(j.at("length")),
       name_visible(j.value("name_visible", true)), pad_visible(j.value("pad_visible", true)),
-      orientation(orientation_lut.lookup(j["orientation"]))
+      orientation(orientation_lut.lookup(j.at("orientation")))
 {
     if (j.count("decoration")) {
         decoration = Decoration(j.at("decoration"));
@@ -201,7 +201,7 @@ Symbol::Symbol(const UUID &uu) : uuid(uu)
 Symbol Symbol::new_from_file(const std::string &filename, Pool &pool)
 {
     auto j = load_json_from_file(filename);
-    return Symbol(UUID(j["uuid"].get<std::string>()), j, pool);
+    return Symbol(UUID(j.at("uuid").get<std::string>()), j, pool);
 }
 
 Junction *Symbol::get_junction(const UUID &uu)
