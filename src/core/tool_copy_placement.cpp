@@ -71,22 +71,35 @@ ToolResponse ToolCopyPlacement::update(const ToolArgs &args)
                 }
 
                 for (auto it : target_pkgs) {
-                    if (it != target_pkg) {
-                        BoardPackage *this_ref_pkg = nullptr;
-                        for (auto &it_ref : brd->packages) {
-                            if (it_ref.second.component->tag == it->component->tag
-                                && it_ref.second.component->group == ref_group) {
-                                this_ref_pkg = &it_ref.second;
-                            }
+                    BoardPackage *this_ref_pkg = nullptr;
+                    for (auto &it_ref : brd->packages) {
+                        if (it_ref.second.component->tag == it->component->tag
+                            && it_ref.second.component->group == ref_group) {
+                            this_ref_pkg = &it_ref.second;
                         }
-                        if (this_ref_pkg) {
-                            auto offset = this_ref_pkg->placement.shift - ref_pkg.placement.shift;
-                            auto delta_angle = target_pkg->placement.get_angle() - ref_pkg.placement.get_angle();
-                            Placement tr;
-                            tr.set_angle(delta_angle);
+                    }
+                    if (this_ref_pkg) {
+                        if (it != target_pkg) {
+                            Placement rp = this_ref_pkg->placement;
+                            Placement ref_placement = ref_pkg.placement;
 
-                            it->placement.shift = target_pkg->placement.shift + tr.transform(offset);
-                            it->placement.set_angle(this_ref_pkg->placement.get_angle() + delta_angle);
+                            if (ref_pkg.placement.mirror) {
+                                ref_placement.invert_angle();
+                                rp.invert_angle();
+                            }
+
+                            rp.make_relative(ref_placement);
+                            it->placement = target_pkg->placement;
+
+                            if (target_pkg->placement.mirror) {
+                                rp.invert_angle();
+                                rp.shift.x = -rp.shift.x;
+                                rp.mirror = !rp.mirror;
+                                it->placement.mirror = !it->placement.mirror;
+                            }
+
+                            it->placement.accumulate(rp);
+                            it->flip = it->placement.mirror;
                         }
                     }
                 }
