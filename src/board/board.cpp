@@ -775,6 +775,51 @@ void Board::smash_package(BoardPackage *pkg)
     }
 }
 
+void Board::copy_package_silkscreen_texts(BoardPackage *dest, const BoardPackage *src)
+{
+    // Copy smash status
+    unsmash_package(dest);
+    if (!src->smashed) {
+        return;
+    }
+    dest->smashed = true;
+
+    // Copy all texts from src
+    for (const auto &it : src->texts) {
+        if (!BoardLayers::is_silkscreen(it->layer)) {
+            // Not on top or bottom silkscreen
+            continue;
+        }
+
+        auto uu = UUID::random();
+        auto &x = texts.emplace(uu, uu).first->second;
+        x.from_smash = true;
+        x.overridden = true;
+
+        x.placement = dest->placement;
+        Placement rp = it->placement;
+        Placement ref_placement = src->placement;
+        if (ref_placement.mirror) {
+            ref_placement.invert_angle();
+        }
+        rp.make_relative(ref_placement);
+        if (x.placement.mirror) {
+            x.placement.invert_angle();
+        }
+        x.placement.accumulate(rp);
+
+        x.text = it->text;
+        x.layer = it->layer;
+        if (src->flip != dest->flip) {
+            flip_package_layer(x.layer);
+        }
+
+        x.size = it->size;
+        x.width = it->width;
+        dest->texts.push_back(&x);
+    }
+}
+
 void Board::smash_package_silkscreen_graphics(BoardPackage *pkg)
 {
     std::map<Junction *, Junction *> junction_xlat;

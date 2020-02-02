@@ -101,6 +101,18 @@ ToolResponse ToolCopyPlacement::update(const ToolArgs &args)
                             it->placement.accumulate(rp);
                             it->flip = it->placement.mirror;
                         }
+
+                        if (this_ref_pkg->alternate_package == it->alternate_package
+                            && this_ref_pkg->pool_package == it->pool_package) {
+                            if (this_ref_pkg->omit_silkscreen && it->smashed) {
+                                core.b->get_board()->unsmash_package(it);
+                            }
+                            it->omit_silkscreen = this_ref_pkg->omit_silkscreen;
+
+                            if (this_ref_pkg->smashed) {
+                                core.b->get_board()->copy_package_silkscreen_texts(it, this_ref_pkg);
+                            }
+                        }
                     }
                 }
 
