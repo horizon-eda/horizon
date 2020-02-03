@@ -302,22 +302,6 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
     });
 }
 
-void rmdir_recursive(const std::string &dirname)
-{
-    Glib::Dir dir(dirname);
-    std::list<std::string> entries(dir.begin(), dir.end());
-    for (const auto &it : entries) {
-        auto filename = Glib::build_filename(dirname, it);
-        if (Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
-            rmdir_recursive(filename);
-        }
-        else {
-            Gio::File::create_for_path(filename)->remove();
-        }
-    }
-    Gio::File::create_for_path(dirname)->remove();
-}
-
 void PoolNotebook::handle_delete(ObjectType ty, const UUID &uu)
 {
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));

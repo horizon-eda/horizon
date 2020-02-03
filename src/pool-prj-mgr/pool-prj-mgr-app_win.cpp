@@ -129,12 +129,17 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     download_status_dispatcher.attach(download_revealer);
     download_status_dispatcher.attach(download_label);
     download_status_dispatcher.attach(download_spinner);
+    label_set_tnum(download_label);
 
     download_status_dispatcher.signal_notified().connect([this](const StatusDispatcher::Notification &n) {
         auto is_busy = n.status == StatusDispatcher::Status::BUSY;
-        button_cancel->set_sensitive(!is_busy);
         button_do_download->set_sensitive(!is_busy);
+        downloading = is_busy;
         if (n.status == StatusDispatcher::Status::DONE) {
+            if (download_cancel) {
+                set_view_mode(ViewMode::OPEN);
+                return;
+            }
             PoolManager::get().add_pool(download_dest_dir_entry->get_text());
             if (download_back_to_start) {
                 app->recent_items[Glib::build_filename(download_dest_dir_entry->get_text(), "pool.json")] =
@@ -507,7 +512,12 @@ void PoolProjectManagerAppWindow::handle_download(bool back_to_start)
 
 void PoolProjectManagerAppWindow::handle_cancel()
 {
-    set_view_mode(ViewMode::OPEN);
+    if (downloading) {
+        download_cancel = true;
+    }
+    else {
+        set_view_mode(ViewMode::OPEN);
+    }
 }
 
 void PoolProjectManagerAppWindow::save_project()

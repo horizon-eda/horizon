@@ -2,6 +2,7 @@
 #include <fstream>
 #include <giomm.h>
 #include <glibmm/miscutils.h>
+#include <glib/gstdio.h>
 #include <unistd.h>
 #ifdef G_OS_WIN32
 #include <windows.h>
@@ -462,6 +463,24 @@ double parse_si(const std::string &inps)
     }
 
     return NAN;
+}
+
+void rmdir_recursive(const std::string &dir_name)
+{
+    Glib::Dir dir(dir_name);
+    std::list<std::string> entries(dir.begin(), dir.end());
+    for (const auto &it : entries) {
+        auto filename = Glib::build_filename(dir_name, it);
+        if (Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
+            rmdir_recursive(filename);
+        }
+        else {
+            if (g_unlink(filename.c_str()) != 0)
+                throw std::runtime_error("g_unlink");
+        }
+    }
+    if (g_rmdir(dir_name.c_str()) != 0)
+        throw std::runtime_error("g_rmdir");
 }
 
 } // namespace horizon

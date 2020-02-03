@@ -5,6 +5,8 @@
 #include <git2.h>
 #include <git2/clone.h>
 #include "pool/pool.hpp"
+#include "util/util.hpp"
+#include "util/autofree_ptr.hpp"
 
 namespace horizon {
 
@@ -14,9 +16,11 @@ void PoolProjectManagerAppWindow::handle_do_download()
     std::string dest_dir = download_dest_dir_entry->get_text();
     if (dest_dir.size()) {
         download_status_dispatcher.reset("Starting...");
+        download_cancel = false;
         std::thread dl_thread(&PoolProjectManagerAppWindow::download_thread, this,
                               download_gh_username_entry->get_text(), download_gh_repo_entry->get_text(), dest_dir);
         dl_thread.detach();
+        downloading = true;
     }
     else {
         Gtk::MessageDialog md(*this, "Destination directory needs to be set", false /* use_markup */,
@@ -24,6 +28,24 @@ void PoolProjectManagerAppWindow::handle_do_download()
         md.run();
     }
 }
+
+int PoolProjectManagerAppWindow::git_transfer_cb(const git_transfer_progress *stats, void *payload)
+{
+    auto self = static_cast<PoolProjectManagerAppWindow *>(payload);
+    std::string msg = "Cloning: fetching object " + format_m_of_n(stats->received_objects, stats->total_objects);
+    self->download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, msg);
+    if (self->download_cancel)
+        return -1;
+    return 0;
+}
+
+#define RETURN_IF_CANCELLED                                                                                            \
+    if (download_cancel) {                                                                                             \
+        download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Cancelled, cleaning up");               \
+        rmdir_recursive(dest_dir);                                                                                     \
+        download_status_dispatcher.set_status(StatusDispatcher::Status::DONE, "Cancelled");                            \
+        return;                                                                                                        \
+    }
 
 void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::string gh_repo, std::string dest_dir)
 {
@@ -47,28 +69,33 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
         json repo = client.get_repo(gh_username, gh_repo);
         std::string clone_url = repo.at("clone_url");
 
-        git_repository *cloned_repo = NULL;
+        autofree_ptr<git_repository> cloned_repo(git_repository_free);
         git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
         git_checkout_options checkout_opts = GIT_CHECKOUT_OPTIONS_INIT;
 
         checkout_opts.checkout_strategy = GIT_CHECKOUT_SAFE;
         clone_opts.checkout_opts = checkout_opts;
+        clone_opts.fetch_opts.callbacks.transfer_progress = &PoolProjectManagerAppWindow::git_transfer_cb;
+        clone_opts.fetch_opts.callbacks.payload = this;
 
         download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Cloning repository...");
 
         auto remote_dir = Glib::build_filename(dest_dir, ".remote");
         Gio::File::create_for_path(remote_dir)->make_directory_with_parents();
-        int error = git_clone(&cloned_repo, clone_url.c_str(), remote_dir.c_str(), &clone_opts);
+        int error = git_clone(&cloned_repo.ptr, clone_url.c_str(), remote_dir.c_str(), &clone_opts);
 
         if (error != 0) {
+            RETURN_IF_CANCELLED
             auto gerr = giterr_last();
             throw std::runtime_error("git error " + std::to_string(gerr->klass) + " " + std::string(gerr->message));
         }
+        RETURN_IF_CANCELLED
 
 
         download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Updating remote pool...");
 
         pool_update(remote_dir);
+        RETURN_IF_CANCELLED
         Pool pool_remote(remote_dir);
 
         download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Copying...");
@@ -76,6 +103,7 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
         {
             SQLite::Query q(pool_remote.db, "SELECT filename FROM all_items_view");
             while (q.step()) {
+                RETURN_IF_CANCELLED
                 std::string filename = q.get<std::string>(0);
                 auto dirname = Glib::build_filename(dest_dir, Glib::path_get_dirname(filename));
                 if (!Glib::file_test(dirname, Glib::FILE_TEST_IS_DIR)) {
@@ -88,6 +116,7 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
         {
             SQLite::Query q(pool_remote.db, "SELECT DISTINCT model_filename FROM models");
             while (q.step()) {
+                RETURN_IF_CANCELLED
                 std::string filename = q.get<std::string>(0);
                 auto remote_filename = Glib::build_filename(remote_dir, filename);
                 if (Glib::file_test(remote_filename, Glib::FILE_TEST_IS_REGULAR)) {
@@ -123,10 +152,7 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
                 }
             }
         }
-
-        git_repository_free(cloned_repo);
-
-
+        RETURN_IF_CANCELLED
         download_status_dispatcher.set_status(StatusDispatcher::Status::DONE, "Done");
     }
     catch (const std::exception &e) {

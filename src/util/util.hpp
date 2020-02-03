@@ -65,4 +65,6 @@ std::string format_m_of_n(unsigned int m, unsigned int n);
 std::string format_digits(unsigned int m, unsigned int digits_max);
 double parse_si(const std::string &inps);
 
+void rmdir_recursive(const std::string &dir_name);
+
 } // namespace horizon

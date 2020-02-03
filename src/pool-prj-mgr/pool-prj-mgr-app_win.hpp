@@ -17,6 +17,8 @@
 #include "prj-mgr/prj-mgr_views.hpp"
 #include "pool-mgr/view_create_pool.hpp"
 #include "common/common.hpp"
+#include <git2/types.h>
+
 
 namespace horizon {
 using json = nlohmann::json;
@@ -186,6 +188,10 @@ private:
     bool download_back_to_start = false;
 
     bool check_autosave(PoolProjectManagerProcess::Type type, const std::vector<std::string> &filenames);
+
+    static int git_transfer_cb(const git_transfer_progress *stats, void *payload);
+    bool downloading = false;
+    bool download_cancel = false;
 
 public:
     zmq::context_t &zctx;
