@@ -512,24 +512,4 @@ bool Core::SearchQuery::contains(const std::string &haystack) const
     return uhaystack.casefold().find(query) != Glib::ustring::npos;
 }
 
-ToolBase::ToolBase(Core *c, ToolID tid) : core(c), tool_id(tid)
-{
-}
-
-void ToolBase::set_imp_interface(ImpInterface *i)
-{
-    if (imp == nullptr) {
-        imp = i;
-    }
-}
-
-void ToolBase::set_transient()
-{
-    is_transient = true;
-}
-
-ToolSettingsProxy::~ToolSettingsProxy()
-{
-    tool->apply_settings();
-}
 } // namespace horizon
