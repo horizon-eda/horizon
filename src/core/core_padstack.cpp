@@ -254,17 +254,6 @@ std::pair<Coordi, Coordi> CorePadstack::get_bbox()
     return bb;
 }
 
-void CorePadstack::commit()
-{
-    set_needs_save(true);
-}
-
-void CorePadstack::revert()
-{
-    history_load(history_current);
-    reverted = true;
-}
-
 const std::string &CorePadstack::get_filename() const
 {
     return m_filename;

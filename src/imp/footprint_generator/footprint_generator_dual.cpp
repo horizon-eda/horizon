@@ -169,8 +169,6 @@ bool FootprintGeneratorDual::generate()
             }
         }
     }
-
-    core->commit();
     return true;
 }
 

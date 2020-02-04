@@ -30,12 +30,11 @@ ToolResponse ToolEditPadParameterSet::begin(const ToolArgs &args)
     auto pads = get_pads();
     auto r = imp->dialogs.edit_pad_parameter_set(pads, core.r->m_pool, core.k->get_package());
     if (r) {
-        core.r->commit();
+        return ToolResponse::commit();
     }
     else {
-        core.r->revert();
+        return ToolResponse::revert();
     }
-    return ToolResponse::end();
 }
 ToolResponse ToolEditPadParameterSet::update(const ToolArgs &args)
 {

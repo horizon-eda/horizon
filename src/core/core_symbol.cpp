@@ -348,17 +348,6 @@ void CoreSymbol::set_pin_display_mode(Symbol::PinDisplayMode mode)
     sym.expand(pin_display_mode);
 }
 
-void CoreSymbol::commit()
-{
-    set_needs_save(true);
-}
-
-void CoreSymbol::revert()
-{
-    history_load(history_current);
-    reverted = true;
-}
-
 const std::string &CoreSymbol::get_filename() const
 {
     return m_filename;

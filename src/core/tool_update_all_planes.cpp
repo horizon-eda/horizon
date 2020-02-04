@@ -23,8 +23,7 @@ ToolResponse ToolUpdateAllPlanes::begin(const ToolArgs &args)
             it.second.revision++;
         }
     }
-    core.r->commit();
-    return ToolResponse::end();
+    return ToolResponse::commit();
 }
 ToolResponse ToolUpdateAllPlanes::update(const ToolArgs &args)
 {

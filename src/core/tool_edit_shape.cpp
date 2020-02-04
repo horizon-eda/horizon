@@ -35,12 +35,11 @@ ToolResponse ToolEditShape::begin(const ToolArgs &args)
 
     bool r = imp->dialogs.edit_shapes(shapes);
     if (r) {
-        core.r->commit();
+        return ToolResponse::commit();
     }
     else {
-        core.r->revert();
+        return ToolResponse::revert();
     }
-    return ToolResponse::end();
 }
 ToolResponse ToolEditShape::update(const ToolArgs &args)
 {

@@ -27,8 +27,7 @@ ToolResponse ToolFix::begin(const ToolArgs &args)
             core.b->get_board()->packages.at(it.uuid).fixed = tool_id == ToolID::FIX;
         }
     }
-    core.r->commit();
-    return ToolResponse::end();
+    return ToolResponse::commit();
 }
 ToolResponse ToolFix::update(const ToolArgs &args)
 {

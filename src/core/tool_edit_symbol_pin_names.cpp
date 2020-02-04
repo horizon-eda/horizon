@@ -37,12 +37,10 @@ ToolResponse ToolEditSymbolPinNames::update(const ToolArgs &args)
     if (args.type == ToolEventType::DATA) {
         if (auto data = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
             if (data->event == ToolDataWindow::Event::CLOSE) {
-                core.r->revert();
-                return ToolResponse::end();
+                return ToolResponse::revert();
             }
             else if (data->event == ToolDataWindow::Event::OK) {
-                core.r->commit();
-                return ToolResponse::end();
+                return ToolResponse::commit();
             }
             else if (data->event == ToolDataWindow::Event::UPDATE) {
                 auto pin = win->get_selected_pin();

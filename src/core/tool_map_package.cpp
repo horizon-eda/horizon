@@ -134,8 +134,7 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
                 component_index++;
             }
             if (component_index == components.size()) {
-                core.r->commit();
-                return ToolResponse::end();
+                return ToolResponse::commit();
             }
             Component *comp = components.at(component_index).first;
             place_package(comp, args.coords);
@@ -144,8 +143,7 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
             if (pkg) {
                 core.b->get_board()->packages.erase(pkg->uuid);
             }
-            core.r->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
     }
     else if (args.type == ToolEventType::KEY) {
@@ -173,8 +171,7 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
             angle = pkg->placement.get_angle();
         }
         else if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     return ToolResponse();

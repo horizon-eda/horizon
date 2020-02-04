@@ -586,17 +586,6 @@ ViaPadstackProvider *CoreBoard::get_via_padstack_provider()
     return &via_padstack_provider;
 }
 
-void CoreBoard::commit()
-{
-    set_needs_save(true);
-}
-
-void CoreBoard::revert()
-{
-    history_load(history_current);
-    reverted = true;
-}
-
 CoreBoard::HistoryItem::HistoryItem(const Block &b, const Board &r) : block(b), brd(r.serialize())
 {
 }

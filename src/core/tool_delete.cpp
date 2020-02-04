@@ -294,8 +294,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES | Board::EXPAND_PROPAGATE_NETS);
     }
 
-    core.r->commit();
-    return ToolResponse::end();
+    return ToolResponse::commit();
 }
 ToolResponse ToolDelete::update(const ToolArgs &args)
 {

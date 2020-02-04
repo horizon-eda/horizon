@@ -81,8 +81,6 @@ bool FootprintGeneratorSingle::generate()
             pad.parameter_set[ParameterID::PAD_WIDTH] = pad_width;
         }
     }
-
-    core->commit();
     return true;
 }
 

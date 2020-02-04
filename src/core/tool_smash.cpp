@@ -43,8 +43,7 @@ ToolResponse ToolSmash::begin(const ToolArgs &args)
                 core.b->get_board()->unsmash_package(&core.b->get_board()->packages.at(it.uuid));
         }
     }
-    core.r->commit();
-    return ToolResponse::end();
+    return ToolResponse::commit();
 }
 ToolResponse ToolSmash::update(const ToolArgs &args)
 {

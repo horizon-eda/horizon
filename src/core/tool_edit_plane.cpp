@@ -65,14 +65,12 @@ ToolResponse ToolEditPlane::begin(const ToolArgs &args)
         plane = dynamic_cast<Plane *>(poly->usage.ptr);
         if (tool_id == ToolID::UPDATE_PLANE) {
             brd->update_plane(plane);
-            core.r->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
         else if (tool_id == ToolID::CLEAR_PLANE) {
             plane->fragments.clear();
             plane->revision++;
-            core.r->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
     }
     else {
@@ -90,12 +88,11 @@ ToolResponse ToolEditPlane::begin(const ToolArgs &args)
             poly->usage = nullptr;
             brd->update_planes();
         }
-        core.r->commit();
+        return ToolResponse::commit();
     }
     else {
-        core.r->revert();
+        return ToolResponse::revert();
     }
-    return ToolResponse::end();
 }
 ToolResponse ToolEditPlane::update(const ToolArgs &args)
 {

@@ -67,8 +67,7 @@ ToolResponse ToolImportDXF::begin(const ToolArgs &args)
         return ToolResponse();
     }
     else {
-        core.r->revert();
-        return ToolResponse::end();
+        return ToolResponse::revert();
     }
     return ToolResponse::end();
 }
@@ -80,12 +79,10 @@ ToolResponse ToolImportDXF::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
-            core.r->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
         else if (args.button == 3) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     else if (args.type == ToolEventType::KEY) {

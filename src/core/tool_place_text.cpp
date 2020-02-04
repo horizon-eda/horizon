@@ -120,8 +120,7 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
             for (auto it : texts_placed) {
                 selection.emplace(it->uuid, ObjectType::TEXT);
             }
-            core.r->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
     }
     else if (args.type == ToolEventType::LAYER_CHANGE) {
@@ -154,8 +153,7 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
             move_mirror_or_rotate(temp->placement.shift, rotate);
         }
         else if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     return ToolResponse();

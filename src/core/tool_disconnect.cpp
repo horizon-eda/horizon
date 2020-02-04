@@ -33,8 +33,7 @@ ToolResponse ToolDisconnect::begin(const ToolArgs &args)
             core.b->get_board()->disconnect_package(&core.b->get_board()->packages.at(it.uuid));
         }
     }
-    core.r->commit();
-    return ToolResponse::end();
+    return ToolResponse::commit();
 }
 ToolResponse ToolDisconnect::update(const ToolArgs &args)
 {

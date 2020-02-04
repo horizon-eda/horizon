@@ -449,7 +449,6 @@ bool FootagDisplay::generate(void)
     }
 
     calc(pkg, s);
-    core->commit();
     return true;
 }
 

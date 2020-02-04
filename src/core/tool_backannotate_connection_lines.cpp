@@ -110,8 +110,7 @@ ToolResponse ToolBackannotateConnectionLines::begin(const ToolArgs &args)
                 create_net_stub(it.first.component, it.first.connpath, it.second.net);
             }
         }
-        core.r->commit();
-        return ToolResponse::end();
+        return ToolResponse::commit();
     }
     else {
         return ToolResponse::end();

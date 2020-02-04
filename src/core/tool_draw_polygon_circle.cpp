@@ -73,13 +73,11 @@ ToolResponse ToolDrawPolygonCircle::update(const ToolArgs &args)
             }
             else {
                 temp->temp = false;
-                core.r->commit();
-                return ToolResponse::end();
+                return ToolResponse::commit();
             }
         }
         else if (args.button == 3) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     else if (args.type == ToolEventType::LAYER_CHANGE) {
@@ -92,13 +90,11 @@ ToolResponse ToolDrawPolygonCircle::update(const ToolArgs &args)
                 second_pos = first_pos + Coordi(r.second, 0);
                 update_polygon();
                 temp->temp = false;
-                core.r->commit();
-                return ToolResponse::end();
+                return ToolResponse::commit();
             }
         }
         else if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     update_tip();

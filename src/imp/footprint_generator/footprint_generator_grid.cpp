@@ -144,8 +144,6 @@ bool FootprintGeneratorGrid::generate()
             pad.name = get_bga_letter(x + 1) + std::to_string(y + 1);
         }
     }
-
-    core->commit();
     return true;
 }
 

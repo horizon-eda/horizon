@@ -71,7 +71,7 @@ ToolResponse ToolAssignPart::begin(const ToolArgs &args)
             }
         }
 
-        core.r->commit();
+        return ToolResponse::commit();
     }
     return ToolResponse::end();
 }

@@ -175,13 +175,12 @@ ToolResponse ToolLineLoopToPolygon::begin(const ToolArgs &args)
         success = true;
     }
     if (success) {
-        core.r->commit();
+        return ToolResponse::commit();
     }
     else {
-        core.r->revert();
         imp->tool_bar_flash(error_message);
+        return ToolResponse::revert();
     }
-    return ToolResponse::end();
 }
 
 ToolResponse ToolLineLoopToPolygon::update(const ToolArgs &args)

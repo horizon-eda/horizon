@@ -361,8 +361,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             }
             else {
                 core.r->delete_junction(temp_junc_head->uuid);
-                core.c->commit();
-                return ToolResponse::end();
+                return ToolResponse::commit();
             }
         }
     }
@@ -376,8 +375,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     component_floating->connections.erase(connpath_floating);
             }
             core.r->delete_junction(temp_junc_head->uuid);
-            core.c->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
         else if (args.key == GDK_KEY_space) {
             Junction *ju = temp_junc_head;
@@ -402,8 +400,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             temp_line_head->to.connect(temp_junc_head);
         }
         else if (args.key == GDK_KEY_Return) {
-            core.c->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
         else if (args.key == GDK_KEY_slash) {
             switch (bend_mode) {

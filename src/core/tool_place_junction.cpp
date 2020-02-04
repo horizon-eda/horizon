@@ -69,18 +69,16 @@ ToolResponse ToolPlaceJunction::update(const ToolArgs &args)
             delete_attached();
             core.r->delete_junction(temp->uuid);
             temp = 0;
-            core.r->commit();
             selection.clear();
             for (auto it : junctions_placed) {
                 selection.emplace(it->uuid, ObjectType::JUNCTION);
             }
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     return ToolResponse();

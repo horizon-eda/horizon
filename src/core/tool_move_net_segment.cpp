@@ -81,9 +81,7 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
         Net *net = core.c->get_schematic()->block->insert_net();
         auto pins = core.c->get_sheet()->get_pins_connected_to_net_segment(net_segment);
         core.c->get_schematic()->block->extract_pins(pins, net);
-        core.c->commit();
-
-        return ToolResponse::end();
+        return ToolResponse::commit();
     }
     if (tool_id == ToolID::MOVE_NET_SEGMENT) {
         if (nsinfo.net->is_bussed) {
@@ -109,7 +107,7 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
             }
         }
 
-        core.c->commit();
+        return ToolResponse::commit();
     }
     return ToolResponse::end();
 }

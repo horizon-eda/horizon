@@ -572,17 +572,6 @@ const Sheet *CoreSchematic::get_canvas_data()
     return &sch.sheets.at(sheet_uuid);
 }
 
-void CoreSchematic::commit()
-{
-    set_needs_save(true);
-}
-
-void CoreSchematic::revert()
-{
-    history_load(history_current);
-    reverted = true;
-}
-
 bool CoreSchematic::can_search_for_object_type(ObjectType ty) const
 {
     switch (ty) {

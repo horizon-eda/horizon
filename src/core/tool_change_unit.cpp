@@ -39,8 +39,7 @@ ToolResponse ToolChangeUnit::begin(const ToolArgs &args)
     for (const auto &it : pinmap) {
         sym->pins.emplace(it.second, sym->pins.at(it.first));
     }
-    core.r->commit();
-    return ToolResponse::end();
+    return ToolResponse::commit();
 }
 
 

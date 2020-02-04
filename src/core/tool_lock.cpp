@@ -64,16 +64,14 @@ ToolResponse ToolLock::begin(const ToolArgs &args)
         for (auto &it : brd->tracks) {
             it.second.locked = false;
         }
-        core.r->commit();
-        return ToolResponse::end();
+        return ToolResponse::commit();
     }
     else {
         for (auto via : get_vias(tool_id != ToolID::LOCK))
             via->locked = tool_id == ToolID::LOCK;
         for (auto track : get_tracks(tool_id != ToolID::LOCK))
             track->locked = tool_id == ToolID::LOCK;
-        core.r->commit();
-        return ToolResponse::end();
+        return ToolResponse::commit();
     }
 
     return ToolResponse::end();

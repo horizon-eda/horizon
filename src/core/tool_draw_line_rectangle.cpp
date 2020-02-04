@@ -122,13 +122,11 @@ ToolResponse ToolDrawLineRectangle::update(const ToolArgs &args)
                 for (int i = 0; i < 4; i++) {
                     junctions[i]->temp = false;
                 }
-                core.r->commit();
-                return ToolResponse::end();
+                return ToolResponse::commit();
             }
         }
         else if (args.button == 3) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     else if (args.type == ToolEventType::KEY) {
@@ -140,8 +138,7 @@ ToolResponse ToolDrawLineRectangle::update(const ToolArgs &args)
             ask_line_width();
         }
         else if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     else if (args.type == ToolEventType::LAYER_CHANGE) {

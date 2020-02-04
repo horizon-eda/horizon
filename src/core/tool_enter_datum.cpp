@@ -295,8 +295,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             }
         }
         else {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     else if (net_mode) {
@@ -353,8 +352,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             }
         }
         else {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     else if (dim_mode) {
@@ -442,8 +440,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
     }
 
 
-    core.r->commit();
-    return ToolResponse::end();
+    return ToolResponse::commit();
 }
 ToolResponse ToolEnterDatum::update(const ToolArgs &args)
 {

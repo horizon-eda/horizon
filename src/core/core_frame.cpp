@@ -75,17 +75,6 @@ Frame *CoreFrame::get_frame()
     return &frame;
 }
 
-void CoreFrame::commit()
-{
-    set_needs_save(true);
-}
-
-void CoreFrame::revert()
-{
-    history_load(history_current);
-    reverted = true;
-}
-
 CoreFrame::HistoryItem::HistoryItem(const Frame &fr) : frame(fr)
 {
 }

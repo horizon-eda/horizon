@@ -52,12 +52,11 @@ ToolResponse ToolPlaceShape::update(const ToolArgs &args)
         else if (args.button == 3) {
             core.a->get_padstack()->shapes.erase(temp->uuid);
             temp = 0;
-            core.r->commit();
             selection.clear();
             for (auto it : shapes_placed) {
                 selection.emplace(it->uuid, ObjectType::SHAPE);
             }
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
     }
     else if (args.type == ToolEventType::LAYER_CHANGE) {
@@ -65,8 +64,7 @@ ToolResponse ToolPlaceShape::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
         else if (args.key == GDK_KEY_i) {
             auto form = temp->form;

@@ -149,16 +149,14 @@ ToolResponse ToolCopyTracks::update(const ToolArgs &args)
                     }
                 }
 
-                core.r->commit();
-                return ToolResponse::end();
+                return ToolResponse::commit();
             }
             else {
                 imp->tool_bar_flash("please click on a package");
             }
         }
         else if (args.button == 3) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     return ToolResponse();

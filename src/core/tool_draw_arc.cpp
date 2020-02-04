@@ -103,13 +103,11 @@ ToolResponse ToolDrawArc::update(const ToolArgs &args)
                     temp_junc->temp = false;
                     temp_arc->center = temp_junc;
                 }
-                core.r->commit();
-                return ToolResponse::end();
+                return ToolResponse::commit();
             }
         }
         else if (args.button == 3) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     else if (args.type == ToolEventType::LAYER_CHANGE) {
@@ -121,8 +119,7 @@ ToolResponse ToolDrawArc::update(const ToolArgs &args)
             ask_line_width();
         }
         else if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
         else if (args.key == GDK_KEY_e) {
             if (temp_arc) {

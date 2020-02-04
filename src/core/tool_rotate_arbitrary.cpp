@@ -281,8 +281,7 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
                     update_tip();
                 }
                 else {
-                    core.r->commit();
-                    return ToolResponse::end();
+                    return ToolResponse::commit();
                 }
             }
             else { // scale
@@ -296,14 +295,12 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
                     update_tip();
                 }
                 else {
-                    core.r->commit();
-                    return ToolResponse::end();
+                    return ToolResponse::commit();
                 }
             }
         }
         else {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     else if (args.type == ToolEventType::KEY) {
@@ -314,13 +311,11 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
             auto r = imp->dialogs.ask_datum_angle("Enter angle", 0);
             if (r.first) {
                 apply_placements_rotation(r.second);
-                core.r->commit();
-                return ToolResponse::end();
+                return ToolResponse::commit();
             }
         }
         else if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     return ToolResponse();

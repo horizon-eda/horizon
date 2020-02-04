@@ -74,12 +74,11 @@ ToolResponse ToolAddKeepout::begin(const ToolArgs &args)
             == 0) { // may have been deleted
             poly->usage = nullptr;
         }
-        core.r->commit();
+        return ToolResponse::commit();
     }
     else {
-        core.r->revert();
+        return ToolResponse::revert();
     }
-    return ToolResponse::end();
 }
 
 ToolResponse ToolAddKeepout::update(const ToolArgs &args)

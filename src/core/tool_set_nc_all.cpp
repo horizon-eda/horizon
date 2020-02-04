@@ -55,8 +55,7 @@ ToolResponse ToolSetNotConnectedAll::begin(const ToolArgs &args)
             }
         }
     }
-    core.r->commit();
-    return ToolResponse::end();
+    return ToolResponse::commit();
 }
 ToolResponse ToolSetNotConnectedAll::update(const ToolArgs &args)
 {

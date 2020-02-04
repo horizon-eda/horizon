@@ -99,15 +99,13 @@ ToolResponse ToolDrawDimension::update(const ToolArgs &args)
                 break;
             case State::LABEL:
                 temp->temp = false;
-                core.r->commit();
-                return ToolResponse::end();
+                return ToolResponse::commit();
                 break;
             }
             update_tip();
         }
         else if (args.button == 3) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     else if (args.type == ToolEventType::KEY) {
@@ -164,8 +162,7 @@ ToolResponse ToolDrawDimension::update(const ToolArgs &args)
             }
         }
         else if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     return ToolResponse();

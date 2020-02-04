@@ -270,17 +270,6 @@ void CorePackage::reload_pool()
     rebuild();
 }
 
-void CorePackage::commit()
-{
-    set_needs_save(true);
-}
-
-void CorePackage::revert()
-{
-    history_load(history_current);
-    reverted = true;
-}
-
 json CorePackage::get_meta()
 {
     return get_meta_from_file(m_filename);

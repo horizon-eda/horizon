@@ -25,8 +25,7 @@ ToolResponse ToolSmashSilkscreenGraphics::begin(const ToolArgs &args)
             core.b->get_board()->smash_package_silkscreen_graphics(&core.b->get_board()->packages.at(it.uuid));
         }
     }
-    core.r->commit();
-    return ToolResponse::end();
+    return ToolResponse::commit();
 }
 ToolResponse ToolSmashSilkscreenGraphics::update(const ToolArgs &args)
 {

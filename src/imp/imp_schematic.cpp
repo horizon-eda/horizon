@@ -950,7 +950,7 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
     }
     core.c->get_schematic()->update_refs();
 
-    core.c->commit();
+    core.c->set_needs_save();
     core.c->rebuild();
     canvas_update();
     canvas->set_selection(selection);

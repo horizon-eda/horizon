@@ -75,8 +75,7 @@ ToolResponse ToolSetNotConnected::update(const ToolArgs &args)
             }
         }
         else if (args.button == 3) {
-            core.r->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
     }
     else if (args.type == ToolEventType::KEY) {

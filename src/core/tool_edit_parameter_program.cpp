@@ -24,12 +24,11 @@ ToolResponse ToolEditParameterProgram::begin(const ToolArgs &args)
         r = imp->dialogs.edit_parameter_set(&ps->parameter_set);
     }
     if (r) {
-        core.r->commit();
+        return ToolResponse::commit();
     }
     else {
-        core.r->revert();
+        return ToolResponse::revert();
     }
-    return ToolResponse::end();
 }
 ToolResponse ToolEditParameterProgram::update(const ToolArgs &args)
 {

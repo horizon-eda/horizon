@@ -99,7 +99,7 @@ ToolResponse ToolSetDiffpair::begin(const ToolArgs &args)
                 else {
                     net->diffpair = other_net;
                     net->diffpair_master = true;
-                    core.r->commit();
+                    return ToolResponse::commit();
                 }
             }
             else {
@@ -113,7 +113,7 @@ ToolResponse ToolSetDiffpair::begin(const ToolArgs &args)
         }
         nets.first->diffpair_master = true;
         nets.first->diffpair = nets.second;
-        core.r->commit();
+        return ToolResponse::commit();
     }
 
     return ToolResponse::end();

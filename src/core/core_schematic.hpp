@@ -67,8 +67,6 @@ public:
     }
 
     void rebuild(bool from_undo = false) override;
-    void commit() override;
-    void revert() override;
 
     void add_sheet();
     void delete_sheet(const UUID &uu);

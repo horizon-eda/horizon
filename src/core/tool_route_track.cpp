@@ -277,10 +277,9 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
-            core.b->revert();
             core.b->get_board()->obstacles.clear();
             core.b->get_board()->track_path.clear();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     if (net == nullptr) { // begin route
@@ -399,8 +398,7 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
 
                     core.b->get_board()->track_path.clear();
                     core.b->get_board()->obstacles.clear();
-                    core.b->commit();
-                    return ToolResponse::end();
+                    return ToolResponse::commit();
                 }
             }
             else if (args.button == 3) {
@@ -414,8 +412,7 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
 
                 brd->track_path.clear();
                 brd->obstacles.clear();
-                core.b->commit();
-                return ToolResponse::end();
+                return ToolResponse::commit();
             }
         }
         else if (args.type == ToolEventType::KEY) {

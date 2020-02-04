@@ -44,8 +44,7 @@ ToolResponse ToolSetViaNet::begin(const ToolArgs &args)
     if (tool_id == ToolID::CLEAR_VIA_NET) {
         for (auto via : vias)
             via->net_set = nullptr;
-        core.r->commit();
-        return ToolResponse::end();
+        return ToolResponse::commit();
     }
 
     if (tool_id == ToolID::SET_VIA_NET) {
@@ -56,8 +55,7 @@ ToolResponse ToolSetViaNet::begin(const ToolArgs &args)
                 via->net_set = net;
         }
     }
-    core.r->commit();
-    return ToolResponse::end();
+    return ToolResponse::commit();
 }
 ToolResponse ToolSetViaNet::update(const ToolArgs &args)
 {

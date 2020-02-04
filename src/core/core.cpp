@@ -72,7 +72,7 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
 
 void Core::maybe_end_tool(const ToolResponse &r)
 {
-    if (r.end_tool) {
+    if (r.result != ToolResponse::Result::NOP) { // end tool
         auto tid = tool->get_tool_id_for_settings();
         auto settings = tool->get_settings_const();
         if (settings)
@@ -80,7 +80,17 @@ void Core::maybe_end_tool(const ToolResponse &r)
         tool_selection = tool->selection;
         tool.reset();
         s_signal_tool_changed.emit(ToolID::NONE);
-        rebuild();
+        if (r.result == ToolResponse::Result::COMMIT) {
+            set_needs_save(true);
+            rebuild();
+        }
+        else if (r.result == ToolResponse::Result::REVERT) {
+            history_load(history_current);
+            rebuild(true);
+        }
+        else if (r.result == ToolResponse::Result::END) { // did nothing
+            // do nothing
+        }
     }
 }
 
@@ -319,7 +329,7 @@ std::vector<Keepout *> Core::get_keepouts()
 
 void Core::rebuild(bool from_undo)
 {
-    if (!from_undo && !reverted) {
+    if (!from_undo) {
         while (history_current + 1 != (int)history.size()) {
             history.pop_back();
         }
@@ -330,7 +340,6 @@ void Core::rebuild(bool from_undo)
     }
     s_signal_rebuilt.emit();
     signal_can_undo_redo().emit();
-    reverted = false;
 }
 
 void Core::undo()

@@ -44,18 +44,16 @@ ToolResponse ToolPlaceHole::update(const ToolArgs &args)
         else if (args.button == 3) {
             core.r->delete_hole(temp->uuid);
             temp = 0;
-            core.r->commit();
             selection.clear();
             for (auto it : holes_placed) {
                 selection.emplace(it->uuid, ObjectType::HOLE);
             }
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     return ToolResponse();

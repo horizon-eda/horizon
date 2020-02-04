@@ -16,8 +16,6 @@ public:
     class LayerProvider *get_layer_provider() override;
 
     void rebuild(bool from_undo = false) override;
-    void commit() override;
-    void revert() override;
 
     Padstack *get_padstack(bool work = true);
 

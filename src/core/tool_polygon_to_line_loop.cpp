@@ -41,8 +41,7 @@ ToolResponse ToolPolygonToLineLoop::begin(const ToolArgs &args)
 {
     auto poly = get_polygon();
     if (!poly) {
-        core.r->revert();
-        return ToolResponse::end();
+        return ToolResponse::revert();
     }
 
     const Polygon::Vertex *v0 = &poly->vertices.back();
@@ -82,8 +81,7 @@ ToolResponse ToolPolygonToLineLoop::begin(const ToolArgs &args)
     }
     core.r->delete_polygon(poly->uuid);
 
-    core.r->commit();
-    return ToolResponse::end();
+    return ToolResponse::commit();
 }
 
 ToolResponse ToolPolygonToLineLoop::update(const ToolArgs &args)

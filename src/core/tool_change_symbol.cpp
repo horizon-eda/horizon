@@ -41,9 +41,7 @@ ToolResponse ToolChangeSymbol::begin(const ToolArgs &args)
     }
 
     sym->pool_symbol = new_sym;
-    core.c->commit();
-
-    return ToolResponse::end();
+    return ToolResponse::commit();
 }
 ToolResponse ToolChangeSymbol::update(const ToolArgs &args)
 {

@@ -69,8 +69,7 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
 
     sym_current = map_symbol(comp, gates.front());
     if (!sym_current) {
-        core.r->revert();
-        return ToolResponse::end();
+        return ToolResponse::revert();
     }
     sym_current->placement.shift = args.coords;
     selection.clear();
@@ -117,8 +116,7 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
                 sym_current = map_symbol(comp, gates.front());
                 if (!sym_current) {
                     core.c->get_block()->components.erase(comp->uuid);
-                    core.r->commit();
-                    return ToolResponse::end();
+                    return ToolResponse::commit();
                 }
                 sym_current->placement = old_symbol->placement;
                 sym_current->placement.shift = args.coords;
@@ -147,14 +145,12 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
             }
             core.c->delete_schematic_symbol(sym_current->uuid);
             sym_current = nullptr;
-            core.r->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
         else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
             bool rotate = args.key == GDK_KEY_r;

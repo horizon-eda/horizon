@@ -69,15 +69,13 @@ ToolResponse ToolPlacePad::update(const ToolArgs &args)
         else if (args.button == 3) {
             core.k->get_package()->pads.erase(temp->uuid);
             temp = 0;
-            core.r->commit();
             selection.clear();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
         else if (args.key == GDK_KEY_r) {
             temp->placement.inc_angle_deg(90);

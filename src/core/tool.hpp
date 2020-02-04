@@ -49,22 +49,28 @@ class ToolResponse {
 public:
     ToolID next_tool = ToolID::NONE;
     std::unique_ptr<ToolData> data = nullptr;
-    bool end_tool = false;
+    enum class Result { NOP, END, COMMIT, REVERT };
+    Result result = Result::NOP;
     int layer = 10000;
     bool fast_draw = false;
 
-    ToolResponse()
-    {
-    }
     /**
      * Use this if you're done. The Core will then delete the active tool and
      * initiate a rebuild.
      */
     static ToolResponse end()
     {
-        ToolResponse r;
-        r.end_tool = true;
-        return r;
+        return ToolResponse(Result::END);
+    }
+
+    static ToolResponse commit()
+    {
+        return ToolResponse(Result::COMMIT);
+    }
+
+    static ToolResponse revert()
+    {
+        return ToolResponse(Result::REVERT);
     }
 
     static ToolResponse fast()
@@ -87,14 +93,22 @@ public:
     /**
      * If you want another Tool to be launched you've finished, use this one.
      */
-    static ToolResponse next(ToolID t, std::unique_ptr<ToolData> data = nullptr)
+    static ToolResponse next(Result res, ToolID t, std::unique_ptr<ToolData> data = nullptr)
     {
-        ToolResponse r;
-        r.end_tool = true;
+        ToolResponse r(res);
         r.next_tool = t;
         r.data = std::move(data);
         return r;
     };
+
+    ToolResponse()
+    {
+    }
+
+private:
+    ToolResponse(Result r) : result(r)
+    {
+    }
 };
 
 class ToolSettings {

@@ -66,13 +66,13 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
         r = true;
     }
     if (r) {
-        core.r->commit();
+        return ToolResponse::commit();
     }
     else {
-        core.r->revert();
+        return ToolResponse::revert();
     }
-    return ToolResponse::end();
 }
+
 ToolResponse ToolManageBuses::update(const ToolArgs &args)
 {
     return ToolResponse();

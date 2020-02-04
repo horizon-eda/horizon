@@ -101,8 +101,6 @@ public:
     ToolResponse tool_update(const ToolArgs &args);
     std::pair<bool, bool> tool_can_begin(ToolID tool_id, const std::set<SelectableRef> &selection);
     bool tool_handles_esc();
-    virtual void commit() = 0;
-    virtual void revert() = 0;
     void save();
     void autosave();
     virtual void delete_autosave() = 0;
@@ -293,7 +291,6 @@ protected:
         return nullptr;
     }
 
-    bool reverted = false;
     std::unique_ptr<ToolBase> tool = nullptr;
     type_signal_tool_changed s_signal_tool_changed;
     type_signal_rebuilt s_signal_rebuilt;

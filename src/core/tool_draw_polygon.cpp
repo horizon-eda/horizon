@@ -104,8 +104,7 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
             if (!temp->is_valid()) {
                 core.r->delete_polygon(temp->uuid);
             }
-            core.r->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
     }
     else if (args.type == ToolEventType::LAYER_CHANGE) {
@@ -132,8 +131,7 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
             update_vertex(args.coords);
         }
         else if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     update_tip();

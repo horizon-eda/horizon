@@ -55,15 +55,13 @@ ToolResponse ToolRenumberPads::update(const ToolArgs &args)
                 for (auto &it : win->get_pads_sorted()) {
                     selection.emplace(it->uuid, ObjectType::PAD);
                 }
-                core.r->revert();
-                return ToolResponse::end();
+                return ToolResponse::revert();
             }
             else if (data->event == ToolDataWindow::Event::OK) {
                 for (auto &it : win->get_pads_sorted()) {
                     selection.emplace(it->uuid, ObjectType::PAD);
                 }
-                core.r->commit();
-                return ToolResponse::end();
+                return ToolResponse::commit();
             }
             else if (data->event == ToolDataWindow::Event::UPDATE) {
                 annotation->clear();

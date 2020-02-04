@@ -30,12 +30,11 @@ ToolResponse ToolEditBoardHole::begin(const ToolArgs &args)
     auto holes = get_holes();
     auto r = imp->dialogs.edit_board_hole(holes, core.r->m_pool, core.b->get_block());
     if (r) {
-        core.r->commit();
+        return ToolResponse::commit();
     }
     else {
-        core.r->revert();
+        return ToolResponse::revert();
     }
-    return ToolResponse::end();
 }
 ToolResponse ToolEditBoardHole::update(const ToolArgs &args)
 {

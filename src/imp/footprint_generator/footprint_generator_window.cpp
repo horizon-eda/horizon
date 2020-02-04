@@ -85,6 +85,7 @@ FootprintGeneratorWindow *FootprintGeneratorWindow::create(Gtk::Window *p, CoreP
             auto gen = dynamic_cast<FootprintGeneratorBase *>(w->stack->get_visible_child());
             if (gen) {
                 if (gen->generate()) {
+                    w->core->set_needs_save();
                     w->core->rebuild();
                     w->signal_generated().emit();
                     w->hide();
@@ -95,6 +96,7 @@ FootprintGeneratorWindow *FootprintGeneratorWindow::create(Gtk::Window *p, CoreP
             auto gen = dynamic_cast<FootprintGeneratorFootag *>(w->stack->get_visible_child());
             if (gen) {
                 if (gen->generate()) {
+                    w->core->set_needs_save();
                     w->core->rebuild();
                     w->signal_generated().emit();
                     w->hide();

@@ -171,14 +171,12 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
             }
             core.b->delete_junction(temp_junc->uuid);
             temp_junc = nullptr;
-            core.b->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
-            core.b->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     return ToolResponse();

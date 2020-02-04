@@ -144,7 +144,6 @@ bool FootprintGeneratorQuad::generate()
             }
         }
     }
-    core->commit();
     return true;
 }
 

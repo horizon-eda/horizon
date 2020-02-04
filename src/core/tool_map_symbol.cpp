@@ -55,8 +55,7 @@ ToolResponse ToolMapSymbol::begin(const ToolArgs &args)
 
     sym_current = map_symbol(comp, gate);
     if (!sym_current) {
-        core.r->revert();
-        return ToolResponse::end();
+        return ToolResponse::revert();
     }
     sym_current->placement.shift = args.coords;
 
@@ -91,8 +90,7 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
 
                 bool r;
                 if (gates_out.size() == 0) {
-                    core.r->commit();
-                    return ToolResponse::end();
+                    return ToolResponse::commit();
                 }
                 else if (gates_out.size() == 1) {
                     selected_gate = gates_out.begin()->first;
@@ -100,16 +98,14 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
                 else {
                     std::tie(r, selected_gate) = imp->dialogs.map_symbol(gates_out);
                     if (!r) {
-                        core.r->commit();
-                        return ToolResponse::end();
+                        return ToolResponse::commit();
                     }
                 }
             }
             else {
                 gates_from_data.pop_front();
                 if (gates_from_data.size() == 0) {
-                    core.r->commit();
-                    return ToolResponse::end();
+                    return ToolResponse::commit();
                 }
                 selected_gate = gates_from_data.front();
             }
@@ -120,8 +116,7 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
 
             sym_current = map_symbol(comp, gate);
             if (!sym_current) {
-                core.r->revert();
-                return ToolResponse::end();
+                return ToolResponse::revert();
             }
             sym_current->placement.shift = args.coords;
 
@@ -131,14 +126,12 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
         else {
             core.c->delete_schematic_symbol(sym_current->uuid);
             sym_current = nullptr;
-            core.r->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
         else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
             bool rotate = args.key == GDK_KEY_r;

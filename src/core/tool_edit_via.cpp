@@ -29,12 +29,11 @@ ToolResponse ToolEditVia::begin(const ToolArgs &args)
 
     bool r = imp->dialogs.edit_via(via, *core.b->get_via_padstack_provider());
     if (r) {
-        core.r->commit();
+        return ToolResponse::commit();
     }
     else {
-        core.r->revert();
+        return ToolResponse::revert();
     }
-    return ToolResponse::end();
 }
 ToolResponse ToolEditVia::update(const ToolArgs &args)
 {

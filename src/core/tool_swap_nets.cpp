@@ -64,8 +64,7 @@ ToolResponse ToolSwapNets::begin(const ToolArgs &args)
     core.c->get_schematic()->block->extract_pins(pins1, nsi2.net);
     core.c->get_schematic()->block->extract_pins(pins2, nsi1.net);
 
-    core.c->commit();
-    return ToolResponse::end();
+    return ToolResponse::commit();
 }
 ToolResponse ToolSwapNets::update(const ToolArgs &args)
 {

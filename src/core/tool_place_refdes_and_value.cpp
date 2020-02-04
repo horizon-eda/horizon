@@ -46,12 +46,10 @@ ToolResponse ToolPlaceRefdesAndValue::update(const ToolArgs &args)
             selection.clear();
             selection.emplace(text_value->uuid, ObjectType::TEXT);
             selection.emplace(text_refdes->uuid, ObjectType::TEXT);
-            core.r->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
         else if (args.button == 3) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     return ToolResponse();

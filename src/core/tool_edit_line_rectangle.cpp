@@ -50,8 +50,7 @@ ToolResponse ToolEditLineRectangle::begin(const ToolArgs &args)
     }
     if (!start) {
         imp->tool_bar_flash("no start junction found");
-        core.r->revert();
-        return ToolResponse::end();
+        return ToolResponse::revert();
     }
     std::set<Line *> lines_found;
     std::set<Junction *> junctions_found;
@@ -72,8 +71,7 @@ ToolResponse ToolEditLineRectangle::begin(const ToolArgs &args)
     }
     if (junctions_found.size() != 4) {
         imp->tool_bar_flash("didn't find 4 junctions");
-        core.r->revert();
-        return ToolResponse::end();
+        return ToolResponse::revert();
     }
 
     // figure out correct order
@@ -98,8 +96,7 @@ ToolResponse ToolEditLineRectangle::begin(const ToolArgs &args)
         }
         else {
             imp->tool_bar_flash("topology error");
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
 
@@ -119,18 +116,15 @@ ToolResponse ToolEditLineRectangle::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
-            core.r->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
         else if (args.button == 3) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
     return ToolResponse();

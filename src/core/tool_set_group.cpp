@@ -64,8 +64,7 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
                 block->group_names[new_group] = r.second;
             }
             else {
-                core.r->revert();
-                return ToolResponse::end();
+                return ToolResponse::revert();
             }
         }
         else if (tool_id == ToolID::SET_GROUP) {
@@ -74,8 +73,7 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
                 new_group = r.second;
             }
             else {
-                core.r->revert();
-                return ToolResponse::end();
+                return ToolResponse::revert();
             }
         }
         for (auto comp : comps) {
@@ -94,8 +92,7 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
                 block->tag_names[new_tag] = r.second;
             }
             else {
-                core.r->revert();
-                return ToolResponse::end();
+                return ToolResponse::revert();
             }
         }
         else if (tool_id == ToolID::SET_TAG) {
@@ -104,8 +101,7 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
                 new_tag = r.second;
             }
             else {
-                core.r->revert();
-                return ToolResponse::end();
+                return ToolResponse::revert();
             }
         }
         for (auto comp : comps) {
@@ -121,8 +117,7 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
                 block->group_names[comp->group] = r.second;
         }
         else {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     } break;
 
@@ -134,8 +129,7 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
                 block->tag_names[comp->tag] = r.second;
         }
         else {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     } break;
 
@@ -143,8 +137,7 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
     }
 
 
-    core.r->commit();
-    return ToolResponse::end();
+    return ToolResponse::commit();
 }
 ToolResponse ToolSetGroup::update(const ToolArgs &args)
 {

@@ -30,8 +30,6 @@ public:
     std::vector<Line *> get_lines(bool work = true) override;
 
     void rebuild(bool from_undo = false) override;
-    void commit() override;
-    void revert() override;
     void reload_netlist();
 
     const Board *get_canvas_data();

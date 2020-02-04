@@ -205,8 +205,7 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
             auto brd = core.b->get_board();
             brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
         }
-        core.r->commit();
-        return ToolResponse::end();
+        return ToolResponse::commit();
     }
     if (tool_id == ToolID::MOVE_EXACTLY) {
         auto r = imp->dialogs.ask_datum_coord("Move exactly");
@@ -218,8 +217,7 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
             auto brd = core.b->get_board();
             brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
         }
-        core.r->commit();
-        return ToolResponse::end();
+        return ToolResponse::commit();
     }
 
     collect_nets();
@@ -380,8 +378,6 @@ void ToolMove::finish()
             brd->update_plane(plane);
         }
     }
-
-    core.r->commit();
 }
 
 ToolResponse ToolMove::update(const ToolArgs &args)
@@ -394,16 +390,15 @@ ToolResponse ToolMove::update(const ToolArgs &args)
     else if (args.type == ToolEventType::CLICK || (is_transient && args.type == ToolEventType::CLICK_RELEASE)) {
         if (args.button == 1) {
             finish();
+            return ToolResponse::commit();
         }
         else {
-            core.r->revert();
+            return ToolResponse::revert();
         }
-        return ToolResponse::end();
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
         else if (args.key == GDK_KEY_slash) {
             cycle_restrict_mode();
@@ -419,7 +414,7 @@ ToolResponse ToolMove::update(const ToolArgs &args)
         }
         else if (args.key == GDK_KEY_Return) {
             finish();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
         else {
             auto sp = imp->get_grid_spacing();

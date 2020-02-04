@@ -35,8 +35,6 @@ public:
     class Rules *get_rules() override;
 
     void rebuild(bool from_undo = false) override;
-    void commit() override;
-    void revert() override;
 
     bool can_search_for_object_type(ObjectType type) const override;
     std::list<SearchResult> search(const SearchQuery &q) override;

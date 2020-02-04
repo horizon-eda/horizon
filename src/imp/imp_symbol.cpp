@@ -50,7 +50,7 @@ void ImpSymbol::construct()
             if (pl.count(key))
                 it.second.placement = pl.at(key);
         }
-        core_symbol.commit();
+        core_symbol.set_needs_save();
         core_symbol.rebuild();
         auto sel = canvas->get_selection();
         canvas_update();

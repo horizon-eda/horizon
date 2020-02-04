@@ -109,8 +109,7 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
                 pin_index++;
             }
             if (pin_index == pins.size()) {
-                core.r->commit();
-                return ToolResponse::end();
+                return ToolResponse::commit();
             }
             create_pin(pins.at(pin_index).first->uuid);
             pin->position = args.coords;
@@ -119,8 +118,7 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
             if (pin) {
                 core.y->get_symbol()->pins.erase(pin->uuid);
             }
-            core.r->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
     }
     else if (args.type == ToolEventType::KEY) {
@@ -138,8 +136,7 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
                         pin_index++;
                     }
                     if (pin_index == pins.size()) {
-                        core.r->commit();
-                        return ToolResponse::end();
+                        return ToolResponse::commit();
                     }
                     create_pin(pins.at(pin_index).first->uuid);
                     pin->position = args.coords;
@@ -170,8 +167,7 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
             pin->orientation = ToolHelperMove::transform_orientation(pin->orientation, args.key == GDK_KEY_r);
         }
         else if (args.key == GDK_KEY_Escape) {
-            core.r->revert();
-            return ToolResponse::end();
+            return ToolResponse::revert();
         }
     }
 

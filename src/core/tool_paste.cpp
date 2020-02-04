@@ -341,8 +341,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
     }
     if (selection.size() == 0) {
         imp->tool_bar_flash("Empty buffer");
-        core.r->revert();
-        return ToolResponse::end();
+        return ToolResponse::revert();
     }
     move_init(cursor_pos_canvas);
     update_tip();
@@ -429,18 +428,16 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
                         }
                     }
                 }
-                core.r->commit();
-                return ToolResponse::next(tool_id, std::make_unique<ToolDataPaste>(paste_data));
+                return ToolResponse::next(ToolResponse::Result::COMMIT, tool_id,
+                                          std::make_unique<ToolDataPaste>(paste_data));
             }
             else {
-                core.r->revert();
-                return ToolResponse::end();
+                return ToolResponse::revert();
             }
         }
         else if (args.type == ToolEventType::KEY) {
             if (args.key == GDK_KEY_Escape) {
-                core.r->revert();
-                return ToolResponse::end();
+                return ToolResponse::revert();
             }
             else if (args.key == GDK_KEY_slash) {
                 cycle_restrict_mode();

@@ -108,8 +108,7 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
             else {
                 core.r->delete_junction(temp_junc->uuid);
                 temp_junc = nullptr;
-                core.r->commit();
-                return ToolResponse::end();
+                return ToolResponse::commit();
             }
         }
     }
@@ -134,8 +133,7 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
             }
             core.r->delete_junction(temp_junc->uuid);
             temp_junc = nullptr;
-            core.r->commit();
-            return ToolResponse::end();
+            return ToolResponse::commit();
         }
     }
     update_tip();
