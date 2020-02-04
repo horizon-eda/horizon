@@ -569,7 +569,14 @@ std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)
     if (sel_count_type(sel, ObjectType::SCHEMATIC_SYMBOL) == 1) {
         const auto &sym = core_schematic.get_sheet()->symbols.at(sel_find_one(sel, ObjectType::SCHEMATIC_SYMBOL));
         s += "<b>Symbol " + sym.component->refdes + "</b>\n";
-        s += get_hud_text_for_component(sym.component);
+        s += get_hud_text_for_component(sym.component) + "\n";
+
+        auto block = core_schematic.get_block();
+        if (sym.component->group)
+            s += "Group: " + Glib::Markup::escape_text(block->group_names[sym.component->group]) + "\n";
+        if (sym.component->tag)
+            s += "Tag: " + Glib::Markup::escape_text(block->tag_names[sym.component->tag]) + "\n";
+
         sel_erase_type(sel, ObjectType::SCHEMATIC_SYMBOL);
     }
     trim(s);
