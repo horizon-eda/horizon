@@ -55,7 +55,7 @@ public:
     std::pair<bool, std::string> ask_datum_string(const std::string &label, const std::string &def);
     std::pair<bool, int> ask_datum_angle(const std::string &label, int def = 0);
     bool edit_shapes(std::set<class Shape *> shapes);
-    bool edit_via(class Via *via, class ViaPadstackProvider &vpp);
+    bool edit_via(std::set<class Via *> &vias, class ViaPadstackProvider &vpp);
     std::pair<bool, std::string> ask_dxf_filename();
     std::pair<bool, std::string> ask_kicad_package_filename();
 

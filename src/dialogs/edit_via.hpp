@@ -9,11 +9,11 @@ namespace horizon {
 
 class EditViaDialog : public Gtk::Dialog {
 public:
-    EditViaDialog(Gtk::Window *parent, class Via *via, class ViaPadstackProvider &vpp);
+    EditViaDialog(Gtk::Window *parent, std::set<class Via *> &vias, class ViaPadstackProvider &vpp);
     bool valid = false;
 
 private:
-    class ParameterSetEditor *editor = nullptr;
+    class MyParameterSetEditor *editor = nullptr;
     Gtk::CheckButton *cb_from_rules = nullptr;
     class ViaPadstackButton *button_vp = nullptr;
     void update_sensitive();

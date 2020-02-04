@@ -14,5 +14,8 @@ public:
     {
         return true;
     }
+
+private:
+    std::set<class Via *> get_vias();
 };
 } // namespace horizon
