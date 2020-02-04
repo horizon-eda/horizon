@@ -20,7 +20,7 @@ void ToolRotateArbitrary::expand_selection()
 {
     std::set<SelectableRef> new_sel;
     std::set<SelectableRef> pkgs_fixed;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         switch (it.type) {
         case ObjectType::LINE: {
             Line *line = core.r->get_line(it.uuid);
@@ -65,12 +65,12 @@ void ToolRotateArbitrary::expand_selection()
         default:;
         }
     }
-    core.r->selection.insert(new_sel.begin(), new_sel.end());
+    selection.insert(new_sel.begin(), new_sel.end());
     if (pkgs_fixed.size() && imp)
         imp->tool_bar_flash("can't move fixed package");
-    for (auto it = core.r->selection.begin(); it != core.r->selection.end();) {
+    for (auto it = selection.begin(); it != selection.end();) {
         if (pkgs_fixed.count(*it))
-            it = core.r->selection.erase(it);
+            it = selection.erase(it);
         else
             ++it;
     }
@@ -104,7 +104,7 @@ bool ToolRotateArbitrary::can_begin()
     if (core.c) // dont' rotate arbitraryily in schematic
         return false;
     expand_selection();
-    return core.r->selection.size() > 0;
+    return selection.size() > 0;
 }
 
 void ToolRotateArbitrary::update_tip()
@@ -139,7 +139,7 @@ void ToolRotateArbitrary::update_tip()
 
 void ToolRotateArbitrary::save_placements()
 {
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         switch (it.type) {
         case ObjectType::JUNCTION:
             placements[it] = Placement(core.r->get_junction(it.uuid)->position);

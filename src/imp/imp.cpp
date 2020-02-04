@@ -1558,7 +1558,7 @@ void ImpBase::tool_process(ToolResponse &resp)
         canvas->fast_draw = resp.fast_draw;
         canvas_update();
         canvas->fast_draw = false;
-        canvas->set_selection(core.r->selection);
+        canvas->set_selection(core.r->get_tool_selection());
     }
     if (resp.layer != 10000) {
         canvas->property_work_layer() = resp.layer;

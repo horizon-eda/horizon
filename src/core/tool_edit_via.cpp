@@ -13,8 +13,7 @@ bool ToolEditVia::can_begin()
 {
     if (!core.b)
         return false;
-    return std::count_if(core.r->selection.begin(), core.r->selection.end(),
-                         [](const auto &x) { return x.type == ObjectType::VIA; })
+    return std::count_if(selection.begin(), selection.end(), [](const auto &x) { return x.type == ObjectType::VIA; })
            == 1;
 }
 
@@ -23,7 +22,7 @@ ToolResponse ToolEditVia::begin(const ToolArgs &args)
     std::cout << "tool edit via\n";
     auto board = core.b->get_board();
 
-    auto uu = std::find_if(core.r->selection.begin(), core.r->selection.end(), [](const auto &x) {
+    auto uu = std::find_if(selection.begin(), selection.end(), [](const auto &x) {
                   return x.type == ObjectType::VIA;
               })->uuid;
     auto via = &board->vias.at(uu);

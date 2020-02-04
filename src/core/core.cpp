@@ -17,10 +17,7 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
         throw std::runtime_error("can't begin tool while tool is active");
         return ToolResponse::end();
     }
-    if (!args.keep_selection) {
-        selection.clear();
-        selection = args.selection;
-    }
+
     update_rules(); // write rules to board, so tool has the current rules
     try {
         tool = create_tool(tool_id);
@@ -34,6 +31,10 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
             }
         }
         tool->set_imp_interface(imp);
+        if (!args.keep_selection) {
+            tool->selection.clear();
+            tool->selection = args.selection;
+        }
         if (transient)
             tool->set_transient();
         if (!tool->can_begin()) { // check if we can actually use this tool
@@ -61,15 +62,7 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
                                  Logger::Domain::CORE, e.what());
             return ToolResponse::end();
         }
-        if (r.end_tool) {
-            auto tid = tool->get_tool_id_for_settings();
-            auto settings = tool->get_settings_const();
-            if (settings)
-                s_signal_save_tool_settings.emit(tid, settings->serialize());
-            tool.reset();
-            s_signal_tool_changed.emit(ToolID::NONE);
-            rebuild();
-        }
+        maybe_end_tool(r);
 
         return r;
     }
@@ -77,14 +70,34 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
     return ToolResponse();
 }
 
+void Core::maybe_end_tool(const ToolResponse &r)
+{
+    if (r.end_tool) {
+        auto tid = tool->get_tool_id_for_settings();
+        auto settings = tool->get_settings_const();
+        if (settings)
+            s_signal_save_tool_settings.emit(tid, settings->serialize());
+        tool_selection = tool->selection;
+        tool.reset();
+        s_signal_tool_changed.emit(ToolID::NONE);
+        rebuild();
+    }
+}
+
+std::set<SelectableRef> &Core::get_tool_selection()
+{
+    if (tool)
+        return tool->selection;
+    else
+        return tool_selection;
+}
+
 std::pair<bool, bool> Core::tool_can_begin(ToolID tool_id, const std::set<SelectableRef> &sel)
 {
     auto t = create_tool(tool_id);
-    auto sel_saved = selection;
-    selection = sel;
+    t->selection = sel;
     auto r = t->can_begin();
     auto s = t->is_specific();
-    selection = sel_saved;
     return {r, s};
 }
 
@@ -109,15 +122,7 @@ ToolResponse Core::tool_update(const ToolArgs &args)
             Logger::log_critical("exception thrown in tool_update", Logger::Domain::CORE, e.what());
             return ToolResponse::end();
         }
-        if (r.end_tool) {
-            auto tid = tool->get_tool_id_for_settings();
-            auto settings = tool->get_settings_const();
-            if (settings)
-                s_signal_save_tool_settings.emit(tid, settings->serialize());
-            tool.reset();
-            s_signal_tool_changed.emit(ToolID::NONE);
-            rebuild();
-        }
+        maybe_end_tool(r);
         return r;
     }
     return ToolResponse();

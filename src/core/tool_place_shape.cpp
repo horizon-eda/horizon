@@ -53,9 +53,9 @@ ToolResponse ToolPlaceShape::update(const ToolArgs &args)
             core.a->get_padstack()->shapes.erase(temp->uuid);
             temp = 0;
             core.r->commit();
-            core.r->selection.clear();
+            selection.clear();
             for (auto it : shapes_placed) {
-                core.r->selection.emplace(it->uuid, ObjectType::SHAPE);
+                selection.emplace(it->uuid, ObjectType::SHAPE);
             }
             return ToolResponse::end();
         }

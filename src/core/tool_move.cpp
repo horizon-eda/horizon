@@ -19,7 +19,7 @@ void ToolMove::expand_selection()
 {
     std::set<SelectableRef> pkgs_fixed;
     std::set<SelectableRef> new_sel;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         switch (it.type) {
         case ObjectType::LINE: {
             Line *line = core.r->get_line(it.uuid);
@@ -107,12 +107,12 @@ void ToolMove::expand_selection()
         default:;
         }
     }
-    core.r->selection.insert(new_sel.begin(), new_sel.end());
+    selection.insert(new_sel.begin(), new_sel.end());
     if (pkgs_fixed.size() && imp)
         imp->tool_bar_flash("can't move fixed package");
-    for (auto it = core.r->selection.begin(); it != core.r->selection.end();) {
+    for (auto it = selection.begin(); it != selection.end();) {
         if (pkgs_fixed.count(*it))
-            it = core.r->selection.erase(it);
+            it = selection.erase(it);
         else
             ++it;
     }
@@ -122,7 +122,7 @@ void ToolMove::update_selection_center()
 {
     Accumulator<Coordi> accu;
     std::set<SelectableRef> items_ignore;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::BOARD_PACKAGE) {
             const auto &pkg = core.b->get_board()->packages.at(it.uuid);
             for (auto &it_txt : pkg.texts) {
@@ -136,7 +136,7 @@ void ToolMove::update_selection_center()
             }
         }
     }
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (items_ignore.count(it))
             continue;
         switch (it.type) {
@@ -226,7 +226,7 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
 
     update_tip();
 
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::POLYGON_VERTEX || it.type == ObjectType::POLYGON_EDGE) {
             auto poly = core.r->get_polygon(it.uuid);
             if (auto plane = dynamic_cast<Plane *>(poly->usage.ptr)) {
@@ -287,7 +287,7 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
 
 void ToolMove::collect_nets()
 {
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         switch (it.type) {
 
         case ObjectType::BOARD_PACKAGE: {
@@ -311,7 +311,7 @@ void ToolMove::collect_nets()
 bool ToolMove::can_begin()
 {
     expand_selection();
-    return core.r->selection.size() > 0;
+    return selection.size() > 0;
 }
 
 void ToolMove::update_tip()
@@ -361,7 +361,7 @@ static Coordi dir_from_arrow_key(unsigned int key)
 
 void ToolMove::finish()
 {
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
             auto sym = core.c->get_schematic_symbol(it.uuid);
             core.c->get_schematic()->autoconnect_symbol(core.c->get_sheet(), sym);

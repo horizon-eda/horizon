@@ -32,9 +32,9 @@ ToolResponse ToolImportDXF::begin(const ToolArgs &args)
     importer.set_width(0);
     if (importer.import(filename)) {
         auto unsupported = importer.get_items_unsupported();
-        core.r->selection.clear();
+        selection.clear();
         for (const auto it : importer.junctions) {
-            core.r->selection.emplace(it->uuid, ObjectType::JUNCTION);
+            selection.emplace(it->uuid, ObjectType::JUNCTION);
         }
         lines = importer.lines;
         arcs = importer.arcs;

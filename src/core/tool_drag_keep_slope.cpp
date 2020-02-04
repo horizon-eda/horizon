@@ -12,7 +12,7 @@ bool ToolDragKeepSlope::can_begin()
 {
     if (!core.b)
         return false;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::TRACK)
             return true;
     }
@@ -41,7 +41,7 @@ ToolResponse ToolDragKeepSlope::begin(const ToolArgs &args)
 {
     std::cout << "tool drag keep slope\n";
 
-    core.r->selection.clear();
+    selection.clear();
     for (const auto &it : args.selection) {
         if (it.type == ObjectType::TRACK) {
             auto track = &core.b->get_board()->tracks.at(it.uuid);
@@ -69,9 +69,9 @@ ToolResponse ToolDragKeepSlope::begin(const ToolArgs &args)
                     if ((tr_from->from.get_position() != tr_from->to.get_position())
                         && (tr_to->from.get_position() != tr_to->to.get_position())) {
                         track_info.emplace_back(track, tr_from, tr_to);
-                        core.r->selection.emplace(it);
-                        core.r->selection.emplace(track->from.junc->uuid, ObjectType::JUNCTION);
-                        core.r->selection.emplace(track->to.junc->uuid, ObjectType::JUNCTION);
+                        selection.emplace(it);
+                        selection.emplace(track->from.junc->uuid, ObjectType::JUNCTION);
+                        selection.emplace(track->to.junc->uuid, ObjectType::JUNCTION);
                     }
                 }
             }
@@ -79,7 +79,7 @@ ToolResponse ToolDragKeepSlope::begin(const ToolArgs &args)
     }
     pos_orig = args.coords;
 
-    if (core.r->selection.size() < 1)
+    if (selection.size() < 1)
         return ToolResponse::end();
 
     return ToolResponse();

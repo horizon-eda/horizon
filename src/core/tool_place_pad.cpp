@@ -70,7 +70,7 @@ ToolResponse ToolPlacePad::update(const ToolArgs &args)
             core.k->get_package()->pads.erase(temp->uuid);
             temp = 0;
             core.r->commit();
-            core.r->selection.clear();
+            selection.clear();
             return ToolResponse::end();
         }
     }

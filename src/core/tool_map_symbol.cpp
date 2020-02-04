@@ -60,8 +60,8 @@ ToolResponse ToolMapSymbol::begin(const ToolArgs &args)
     }
     sym_current->placement.shift = args.coords;
 
-    core.c->selection.clear();
-    core.c->selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
+    selection.clear();
+    selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
 
     move_init(args.coords);
 
@@ -125,8 +125,8 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
             }
             sym_current->placement.shift = args.coords;
 
-            core.c->selection.clear();
-            core.c->selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
+            selection.clear();
+            selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
         }
         else {
             core.c->delete_schematic_symbol(sym_current->uuid);

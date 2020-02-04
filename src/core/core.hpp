@@ -189,7 +189,7 @@ public:
     virtual ~Core()
     {
     }
-    std::set<SelectableRef> selection;
+    std::set<SelectableRef> &get_tool_selection();
     Pool *m_pool;
 
     bool get_needs_save() const;
@@ -340,5 +340,7 @@ protected:
 
 private:
     std::unique_ptr<ToolBase> create_tool(ToolID tool_id);
+    std::set<SelectableRef> tool_selection;
+    void maybe_end_tool(const ToolResponse &r);
 };
 } // namespace horizon

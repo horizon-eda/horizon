@@ -59,7 +59,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
 {
     Coordi cursor_pos = j.at("cursor_pos").get<std::vector<int64_t>>();
     printf("Core %p\n", core.r);
-    core.r->selection.clear();
+    selection.clear();
     shift = cursor_pos_canvas - cursor_pos;
 
     std::map<UUID, const UUID> text_xlat;
@@ -72,7 +72,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             *x = Text(u, it.value());
             fix_layer(x->layer);
             apply_shift(x->placement.shift, cursor_pos_canvas);
-            core.r->selection.emplace(u, ObjectType::TEXT);
+            selection.emplace(u, ObjectType::TEXT);
         }
     }
     if (j.count("dimensions") && core.r->has_object_type(ObjectType::DIMENSION)) {
@@ -83,8 +83,8 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             *x = Dimension(u, it.value());
             apply_shift(x->p0, cursor_pos_canvas);
             apply_shift(x->p1, cursor_pos_canvas);
-            core.r->selection.emplace(u, ObjectType::DIMENSION, 0);
-            core.r->selection.emplace(u, ObjectType::DIMENSION, 1);
+            selection.emplace(u, ObjectType::DIMENSION, 0);
+            selection.emplace(u, ObjectType::DIMENSION, 1);
         }
     }
     std::map<UUID, const UUID> junction_xlat;
@@ -96,7 +96,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             auto x = core.r->insert_junction(u);
             *x = Junction(u, it.value());
             apply_shift(x->position, cursor_pos_canvas);
-            core.r->selection.emplace(u, ObjectType::JUNCTION);
+            selection.emplace(u, ObjectType::JUNCTION);
         }
     }
     if (j.count("lines")) {
@@ -107,7 +107,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             JunctionProvider p(core.r, junction_xlat);
             *x = Line(u, it.value(), p);
             fix_layer(x->layer);
-            core.r->selection.emplace(u, ObjectType::LINE);
+            selection.emplace(u, ObjectType::LINE);
         }
     }
     if (j.count("arcs")) {
@@ -118,7 +118,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             JunctionProvider p(core.r, junction_xlat);
             *x = Arc(u, it.value(), p);
             fix_layer(x->layer);
-            core.r->selection.emplace(u, ObjectType::ARC);
+            selection.emplace(u, ObjectType::ARC);
         }
     }
     if (j.count("pads") && core.k) {
@@ -130,7 +130,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             auto &x = core.k->get_package()->pads.emplace(u, Pad(u, it.value(), *core.r->m_pool)).first->second;
             apply_shift(x.placement.shift, cursor_pos_canvas);
             pads.push_back(&x);
-            core.r->selection.emplace(u, ObjectType::PAD);
+            selection.emplace(u, ObjectType::PAD);
         }
         core.k->get_package()->apply_parameter_set({});
         if (max_name > 0) {
@@ -149,7 +149,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             auto x = core.r->insert_hole(u);
             *x = Hole(u, it.value());
             apply_shift(x->placement.shift, cursor_pos_canvas);
-            core.r->selection.emplace(u, ObjectType::HOLE);
+            selection.emplace(u, ObjectType::HOLE);
         }
     }
     if (j.count("polygons")) {
@@ -163,8 +163,8 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
                 itv.arc_center += shift;
                 itv.position += shift;
                 if (itv.type == Polygon::Vertex::Type::ARC)
-                    core.r->selection.emplace(u, ObjectType::POLYGON_ARC_CENTER, vertex);
-                core.r->selection.emplace(u, ObjectType::POLYGON_VERTEX, vertex++);
+                    selection.emplace(u, ObjectType::POLYGON_ARC_CENTER, vertex);
+                selection.emplace(u, ObjectType::POLYGON_VERTEX, vertex++);
             }
         }
     }
@@ -226,7 +226,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
                 it_txt = core.r->get_text(text_xlat.at(it_txt.uuid));
             }
             x->placement.shift += shift;
-            core.r->selection.emplace(u, ObjectType::SCHEMATIC_SYMBOL);
+            selection.emplace(u, ObjectType::SCHEMATIC_SYMBOL);
         }
     }
     if (j.count("net_lines") && core.c) {
@@ -247,7 +247,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             update_net_line_conn(line.from);
             update_net_line_conn(line.to);
             sheet->net_lines.emplace(u, line);
-            core.r->selection.emplace(u, ObjectType::LINE_NET);
+            selection.emplace(u, ObjectType::LINE_NET);
         }
     }
     if (j.count("net_labels") && core.c) {
@@ -257,7 +257,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             auto u = UUID::random();
             auto x = &core.c->get_sheet()->net_labels.emplace(u, NetLabel(u, it.value())).first->second;
             x->junction = &sheet->junctions.at(junction_xlat.at(x->junction.uuid));
-            core.r->selection.emplace(u, ObjectType::NET_LABEL);
+            selection.emplace(u, ObjectType::NET_LABEL);
         }
     }
     if (j.count("power_symbols") && core.c) {
@@ -269,7 +269,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             auto x = &core.c->get_sheet()->power_symbols.emplace(u, PowerSymbol(u, it.value())).first->second;
             x->junction = &sheet->junctions.at(junction_xlat.at(x->junction.uuid));
             x->net = &block->nets.at(net_xlat.at(x->net.uuid));
-            core.r->selection.emplace(u, ObjectType::POWER_SYMBOL);
+            selection.emplace(u, ObjectType::POWER_SYMBOL);
         }
     }
     if (j.count("shapes") && core.a) {
@@ -278,7 +278,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             auto u = UUID::random();
             auto x = &core.a->get_padstack()->shapes.emplace(u, Shape(u, it.value())).first->second;
             x->placement.shift += shift;
-            core.r->selection.emplace(u, ObjectType::SHAPE);
+            selection.emplace(u, ObjectType::SHAPE);
         }
     }
     if (j.count("vias") && core.b) {
@@ -302,7 +302,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
                 x->net_set = nullptr;
             }
             x->junction = &brd->junctions.at(junction_xlat.at(x->junction.uuid));
-            core.r->selection.emplace(u, ObjectType::VIA);
+            selection.emplace(u, ObjectType::VIA);
         }
     }
     if (j.count("tracks") && core.b) {
@@ -316,7 +316,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
                               .first->second;
             x->to.junc = &brd->junctions.at(junction_xlat.at(x->to.junc.uuid));
             x->from.junc = &brd->junctions.at(junction_xlat.at(x->from.junc.uuid));
-            core.r->selection.emplace(u, ObjectType::TRACK);
+            selection.emplace(u, ObjectType::TRACK);
         }
     }
     if (j.count("board_holes") && core.b) {
@@ -336,10 +336,10 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             }
             x->padstack.apply_parameter_set(x->parameter_set);
             apply_shift(x->placement.shift, cursor_pos_canvas);
-            core.r->selection.emplace(u, ObjectType::BOARD_HOLE);
+            selection.emplace(u, ObjectType::BOARD_HOLE);
         }
     }
-    if (core.r->selection.size() == 0) {
+    if (selection.size() == 0) {
         imp->tool_bar_flash("Empty buffer");
         core.r->revert();
         return ToolResponse::end();
@@ -420,7 +420,7 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
         else if (args.type == ToolEventType::CLICK || (is_transient && args.type == ToolEventType::CLICK_RELEASE)) {
             if (args.button == 1) {
                 merge_selected_junctions();
-                for (const auto &it : core.r->selection) {
+                for (const auto &it : selection) {
                     if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
                         auto sym = core.c->get_schematic_symbol(it.uuid);
                         core.c->get_schematic()->autoconnect_symbol(core.c->get_sheet(), sym);

@@ -26,12 +26,12 @@ static Coordi *get_dim_coord(Dimension *dim, int vertex)
 void ToolHelperMove::move_do(const Coordi &delta)
 {
     std::set<UUID> no_label_distance;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::DIMENSION && it.vertex < 2) {
             no_label_distance.emplace(it.uuid);
         }
     }
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         switch (it.type) {
         case ObjectType::JUNCTION:
             core.r->get_junction(it.uuid)->position += delta;
@@ -168,7 +168,7 @@ Orientation ToolHelperMove::transform_orientation(Orientation orientation, bool 
 
 void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
 {
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         switch (it.type) {
         case ObjectType::JUNCTION:
             transform(core.r->get_junction(it.uuid)->position, center, rotate);

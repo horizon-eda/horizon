@@ -19,7 +19,7 @@ bool ToolAssignPart::can_begin()
 const Entity *ToolAssignPart::get_entity()
 {
     const Entity *entity = nullptr;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
             auto sym = core.c->get_schematic_symbol(it.uuid);
             if (entity) {

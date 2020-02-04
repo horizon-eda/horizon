@@ -30,7 +30,7 @@ bool ToolEnterDatum::can_begin()
             ObjectType::HOLE,         ObjectType::JUNCTION,       ObjectType::LINE,
             ObjectType::PAD,          ObjectType::NET_LABEL,      ObjectType::LINE_NET,
             ObjectType::TEXT,         ObjectType::DIMENSION};
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         types.insert(it.type);
     }
     if (types.size() == 1) {

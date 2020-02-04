@@ -11,7 +11,7 @@ ToolAddVertex::ToolAddVertex(Core *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolAddVertex::can_begin()
 {
-    return std::count_if(core.r->selection.begin(), core.r->selection.end(),
+    return std::count_if(selection.begin(), selection.end(),
                          [](const auto &x) { return x.type == ObjectType::POLYGON_EDGE; })
            == 1;
 }
@@ -34,8 +34,8 @@ ToolResponse ToolAddVertex::begin(const ToolArgs &args)
 
     auto v_next = (v + 1) % poly->vertices.size();
     vertex = &*poly->vertices.insert(poly->vertices.begin() + v_next, args.coords);
-    core.r->selection.clear();
-    core.r->selection.emplace(poly->uuid, ObjectType::POLYGON_VERTEX, v_next);
+    selection.clear();
+    selection.emplace(poly->uuid, ObjectType::POLYGON_VERTEX, v_next);
     imp->tool_bar_set_tip("<b>LMB:</b>place vertex <b>RMB:</b>cancel");
     return ToolResponse();
 }
@@ -51,14 +51,14 @@ ToolResponse ToolAddVertex::update(const ToolArgs &args)
         }
         else if (args.button == 3) {
             core.r->revert();
-            core.r->selection.clear();
+            selection.clear();
             return ToolResponse::end();
         }
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
             core.r->revert();
-            core.r->selection.clear();
+            selection.clear();
             return ToolResponse::end();
         }
     }

@@ -14,8 +14,7 @@ bool ToolCopyTracks::can_begin()
     if (!core.b)
         return false;
 
-    return std::count_if(core.r->selection.begin(), core.r->selection.end(),
-                         [](const auto &x) { return x.type == ObjectType::TRACK; })
+    return std::count_if(selection.begin(), selection.end(), [](const auto &x) { return x.type == ObjectType::TRACK; })
            > 0;
 }
 
@@ -37,28 +36,28 @@ ToolResponse ToolCopyTracks::update(const ToolArgs &args)
                 const auto &dest_tag = dest_pkg.component->tag;
 
                 std::set<Track *> source_tracks;
-                for (const auto &it : core.r->selection) {
+                for (const auto &it : selection) {
                     if (it.type == ObjectType::TRACK) {
                         source_tracks.insert(&brd->tracks.at(it.uuid));
                     }
                 }
 
                 std::set<Via *> source_vias;
-                for (const auto &it : core.r->selection) {
+                for (const auto &it : selection) {
                     if (it.type == ObjectType::VIA) {
                         source_vias.insert(&brd->vias.at(it.uuid));
                     }
                 }
 
                 std::set<BoardPackage *> source_pkgs;
-                for (const auto &it : core.r->selection) {
+                for (const auto &it : selection) {
                     if (it.type == ObjectType::BOARD_PACKAGE) {
                         source_pkgs.insert(&brd->packages.at(it.uuid));
                     }
                 }
 
                 BoardPackage *ref_pkg = nullptr;
-                for (const auto &it : core.r->selection) {
+                for (const auto &it : selection) {
                     if (it.type == ObjectType::BOARD_PACKAGE) {
                         auto pkg = &brd->packages.at(it.uuid);
                         if (pkg->component->tag == dest_tag) {

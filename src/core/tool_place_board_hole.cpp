@@ -54,7 +54,7 @@ ToolResponse ToolPlaceBoardHole::update(const ToolArgs &args)
             core.b->get_board()->holes.erase(temp->uuid);
             temp = 0;
             core.r->commit();
-            core.r->selection.clear();
+            selection.clear();
             return ToolResponse::end();
         }
     }

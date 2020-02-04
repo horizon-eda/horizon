@@ -11,7 +11,7 @@ ToolLock::ToolLock(Core *c, ToolID tid) : ToolBase(c, tid)
 std::set<Via *> ToolLock::get_vias(bool locked)
 {
     std::set<Via *> vias;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::VIA) {
             auto via = &core.b->get_board()->vias.at(it.uuid);
             if (via->locked == locked)
@@ -23,7 +23,7 @@ std::set<Via *> ToolLock::get_vias(bool locked)
 std::set<Track *> ToolLock::get_tracks(bool locked)
 {
     std::set<Track *> tracks;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::TRACK) {
             auto track = &core.b->get_board()->tracks.at(it.uuid);
             if (track->locked == locked)

@@ -19,7 +19,7 @@ bool ToolRenumberPads::can_begin()
 std::set<UUID> ToolRenumberPads::get_pads()
 {
     std::set<UUID> pads;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::PAD) {
             pads.emplace(it.uuid);
         }
@@ -30,7 +30,7 @@ std::set<UUID> ToolRenumberPads::get_pads()
 ToolResponse ToolRenumberPads::begin(const ToolArgs &args)
 {
     auto pads = get_pads();
-    core.k->selection.clear();
+    selection.clear();
     auto &hl = imp->get_highlights();
     hl.clear();
     for (const auto &it : pads) {
@@ -53,14 +53,14 @@ ToolResponse ToolRenumberPads::update(const ToolArgs &args)
         if (auto data = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
             if (data->event == ToolDataWindow::Event::CLOSE) {
                 for (auto &it : win->get_pads_sorted()) {
-                    core.k->selection.emplace(it->uuid, ObjectType::PAD);
+                    selection.emplace(it->uuid, ObjectType::PAD);
                 }
                 core.r->revert();
                 return ToolResponse::end();
             }
             else if (data->event == ToolDataWindow::Event::OK) {
                 for (auto &it : win->get_pads_sorted()) {
-                    core.k->selection.emplace(it->uuid, ObjectType::PAD);
+                    selection.emplace(it->uuid, ObjectType::PAD);
                 }
                 core.r->commit();
                 return ToolResponse::end();

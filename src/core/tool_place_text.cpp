@@ -86,10 +86,10 @@ ToolResponse ToolPlaceText::begin(const ToolArgs &args)
     }
     else {
         core.r->delete_text(temp->uuid);
-        core.r->selection.clear();
+        selection.clear();
         return ToolResponse::end();
     }
-    core.r->selection.emplace(temp->uuid, ObjectType::TEXT);
+    selection.emplace(temp->uuid, ObjectType::TEXT);
 
     return ToolResponse();
 }
@@ -111,14 +111,14 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
             temp->placement = old_text->placement;
             temp->placement.shift = args.coords;
             apply_settings();
-            core.r->selection.clear();
-            core.r->selection.emplace(temp->uuid, ObjectType::TEXT);
+            selection.clear();
+            selection.emplace(temp->uuid, ObjectType::TEXT);
         }
         else if (args.button == 3) {
             core.r->delete_text(temp->uuid);
-            core.r->selection.clear();
+            selection.clear();
             for (auto it : texts_placed) {
-                core.r->selection.emplace(it->uuid, ObjectType::TEXT);
+                selection.emplace(it->uuid, ObjectType::TEXT);
             }
             core.r->commit();
             return ToolResponse::end();

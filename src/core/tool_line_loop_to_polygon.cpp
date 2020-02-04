@@ -15,7 +15,7 @@ bool ToolLineLoopToPolygon::can_begin()
 {
     if (!(core.r->has_object_type(ObjectType::LINE) && core.r->has_object_type(ObjectType::POLYGON)))
         return false;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::JUNCTION || it.type == ObjectType::LINE || it.type == ObjectType::ARC) {
             return true;
         }
@@ -87,10 +87,10 @@ visit(Junction *node, Junction *from, const std::map<Junction *, std::set<Connec
 
 void ToolLineLoopToPolygon::remove_from_selection(ObjectType type, const UUID &uu)
 {
-    auto sel = std::find_if(core.r->selection.begin(), core.r->selection.end(),
+    auto sel = std::find_if(selection.begin(), selection.end(),
                             [type, uu](const auto &x) { return x.type == type && x.uuid == uu; });
-    if (sel != core.r->selection.end())
-        core.r->selection.erase(sel);
+    if (sel != selection.end())
+        selection.erase(sel);
 }
 
 ToolResponse ToolLineLoopToPolygon::begin(const ToolArgs &args)
@@ -99,7 +99,7 @@ ToolResponse ToolLineLoopToPolygon::begin(const ToolArgs &args)
     std::string error_message;
     while (true) {
         Junction *start_junction = nullptr;
-        for (const auto &it : core.r->selection) {
+        for (const auto &it : selection) {
             if (it.type == ObjectType::JUNCTION) {
                 start_junction = core.r->get_junction(it.uuid);
                 break;

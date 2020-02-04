@@ -16,7 +16,7 @@ public:
         if (tool_id == ToolID::PASTE)
             return true;
         else
-            return core.r->selection.size();
+            return selection.size();
     }
     bool is_specific() override
     {

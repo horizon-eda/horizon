@@ -12,7 +12,7 @@ ToolSetGroup::ToolSetGroup(Core *c, ToolID tid) : ToolBase(c, tid)
 std::set<Component *> ToolSetGroup::get_components()
 {
     std::set<Component *> components;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
             components.insert(core.c->get_schematic_symbol(it.uuid)->component);
         }

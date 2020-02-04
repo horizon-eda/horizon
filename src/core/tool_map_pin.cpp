@@ -90,7 +90,7 @@ ToolResponse ToolMapPin::begin(const ToolArgs &args)
             "<b>r:</b>rotate <b>e:</b>mirror <b>Space</b>:select pin "
             "<b>Return:</b>autoplace");
 
-    core.r->selection.clear();
+    selection.clear();
 
     return ToolResponse();
 }

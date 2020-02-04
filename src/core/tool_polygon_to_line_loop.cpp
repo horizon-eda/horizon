@@ -20,7 +20,7 @@ bool ToolPolygonToLineLoop::can_begin()
 
 Polygon *ToolPolygonToLineLoop::get_polygon()
 {
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::POLYGON_ARC_CENTER || it.type == ObjectType::POLYGON_EDGE
             || it.type == ObjectType::POLYGON_VERTEX) {
             return core.r->get_polygon(it.uuid);

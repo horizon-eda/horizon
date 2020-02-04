@@ -43,9 +43,9 @@ ToolResponse ToolPlaceRefdesAndValue::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
-            core.r->selection.clear();
-            core.r->selection.emplace(text_value->uuid, ObjectType::TEXT);
-            core.r->selection.emplace(text_refdes->uuid, ObjectType::TEXT);
+            selection.clear();
+            selection.emplace(text_value->uuid, ObjectType::TEXT);
+            selection.emplace(text_refdes->uuid, ObjectType::TEXT);
             core.r->commit();
             return ToolResponse::end();
         }

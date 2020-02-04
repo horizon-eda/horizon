@@ -57,11 +57,11 @@ bool ToolRouteTrackInteractive::can_begin()
     switch (tool_id) {
     case ToolID::DRAG_TRACK_INTERACTIVE:
     case ToolID::TUNE_TRACK:
-        return get_track(core.r->selection);
+        return get_track(selection);
 
     case ToolID::TUNE_DIFFPAIR:
     case ToolID::TUNE_DIFFPAIR_SKEW: {
-        auto track = get_track(core.r->selection);
+        auto track = get_track(selection);
         return track && track->net && track->net->diffpair;
     }
 
@@ -101,7 +101,7 @@ Track *ToolRouteTrackInteractive::get_track(const std::set<SelectableRef> &sel)
 ToolResponse ToolRouteTrackInteractive::begin(const ToolArgs &args)
 {
     std::cout << "tool route track\n";
-    core.r->selection.clear();
+    selection.clear();
     canvas = imp->get_canvas();
     canvas->set_cursor_external(true);
     imp->set_no_update(true);

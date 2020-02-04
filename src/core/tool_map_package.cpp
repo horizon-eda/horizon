@@ -99,8 +99,8 @@ void ToolMapPackage::place_package(Component *comp, const Coordi &c)
         if (it.second.net)
             nets.insert(it.second.net->uuid);
     }
-    core.r->selection.clear();
-    core.r->selection.emplace(uu, ObjectType::BOARD_PACKAGE);
+    selection.clear();
+    selection.emplace(uu, ObjectType::BOARD_PACKAGE);
     update_tooltip();
     move_init(c);
 }

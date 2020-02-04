@@ -17,7 +17,7 @@ bool ToolEditPadParameterSet::can_begin()
 std::set<Pad *> ToolEditPadParameterSet::get_pads()
 {
     std::set<Pad *> pads;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::PAD) {
             pads.emplace(&core.k->get_package()->pads.at(it.uuid));
         }

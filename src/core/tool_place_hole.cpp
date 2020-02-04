@@ -45,9 +45,9 @@ ToolResponse ToolPlaceHole::update(const ToolArgs &args)
             core.r->delete_hole(temp->uuid);
             temp = 0;
             core.r->commit();
-            core.r->selection.clear();
+            selection.clear();
             for (auto it : holes_placed) {
-                core.r->selection.emplace(it->uuid, ObjectType::HOLE);
+                selection.emplace(it->uuid, ObjectType::HOLE);
             }
             return ToolResponse::end();
         }

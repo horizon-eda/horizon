@@ -21,7 +21,7 @@ bool ToolSwapNets::can_begin()
 std::set<UUID> ToolSwapNets::get_net_segments()
 {
     std::set<UUID> net_segments;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::JUNCTION) {
             net_segments.insert(core.r->get_junction(it.uuid)->net_segment);
         }

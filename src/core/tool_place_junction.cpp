@@ -70,9 +70,9 @@ ToolResponse ToolPlaceJunction::update(const ToolArgs &args)
             core.r->delete_junction(temp->uuid);
             temp = 0;
             core.r->commit();
-            core.r->selection.clear();
+            selection.clear();
             for (auto it : junctions_placed) {
-                core.r->selection.emplace(it->uuid, ObjectType::JUNCTION);
+                selection.emplace(it->uuid, ObjectType::JUNCTION);
             }
             return ToolResponse::end();
         }

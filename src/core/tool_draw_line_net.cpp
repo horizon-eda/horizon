@@ -23,7 +23,7 @@ ToolResponse ToolDrawLineNet::begin(const ToolArgs &args)
     temp_junc_head = core.c->insert_junction(UUID::random());
     temp_junc_head->temp = true;
     temp_junc_head->position = args.coords;
-    core.c->selection.clear();
+    selection.clear();
 
     update_tip();
     return ToolResponse();

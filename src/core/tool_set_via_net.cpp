@@ -12,7 +12,7 @@ ToolSetViaNet::ToolSetViaNet(Core *c, ToolID tid) : ToolBase(c, tid)
 std::set<Via *> ToolSetViaNet::get_vias()
 {
     std::set<Via *> vias;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::VIA) {
             auto via = &core.b->get_board()->vias.at(it.uuid);
             if (tool_id == ToolID::SET_VIA_NET) {

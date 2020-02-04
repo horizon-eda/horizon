@@ -11,7 +11,7 @@ ToolSmash::ToolSmash(Core *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolSmash::can_begin()
 {
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
             auto sym = core.c->get_schematic_symbol(it.uuid);
             if (sym->smashed == (tool_id == ToolID::UNSMASH))

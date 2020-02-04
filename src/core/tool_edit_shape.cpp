@@ -19,7 +19,7 @@ bool ToolEditShape::can_begin()
 std::set<Shape *> ToolEditShape::get_shapes()
 {
     std::set<Shape *> shapes;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::SHAPE) {
             shapes.emplace(&core.a->get_padstack()->shapes.at(it.uuid));
         }

@@ -19,7 +19,7 @@ bool ToolRouteTrack::can_begin()
 ToolResponse ToolRouteTrack::begin(const ToolArgs &args)
 {
     std::cout << "tool route track\n";
-    core.r->selection.clear();
+    selection.clear();
     update_tip();
     rules = dynamic_cast<BoardRules *>(core.r->get_rules());
     canvas_patch.update(*core.b->get_board());

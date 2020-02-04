@@ -73,8 +73,8 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
         return ToolResponse::end();
     }
     sym_current->placement.shift = args.coords;
-    core.c->selection.clear();
-    core.c->selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
+    selection.clear();
+    selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
     move_init(args.coords);
     current_gate = 0;
 
@@ -123,8 +123,8 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
                 sym_current->placement = old_symbol->placement;
                 sym_current->placement.shift = args.coords;
 
-                core.c->selection.clear();
-                core.c->selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
+                selection.clear();
+                selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
 
                 return ToolResponse();
             }
@@ -135,8 +135,8 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
                     sym_current = sym;
                     current_gate++;
                     sym_current->placement.shift = args.coords;
-                    core.c->selection.clear();
-                    core.c->selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
+                    selection.clear();
+                    selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
                     return ToolResponse();
                 }
             }

@@ -11,7 +11,7 @@ ToolDisconnect::ToolDisconnect(Core *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolDisconnect::can_begin()
 {
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
             return true;
         }

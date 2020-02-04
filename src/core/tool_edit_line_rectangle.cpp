@@ -13,7 +13,7 @@ bool ToolEditLineRectangle::can_begin()
 {
     if (!core.r->has_object_type(ObjectType::LINE))
         return false;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::JUNCTION || it.type == ObjectType::LINE) {
             return true;
         }
@@ -103,9 +103,9 @@ ToolResponse ToolEditLineRectangle::begin(const ToolArgs &args)
         }
     }
 
-    core.r->selection.clear();
+    selection.clear();
     for (auto ju : junctions) {
-        core.r->selection.emplace(ju->uuid, ObjectType::JUNCTION);
+        selection.emplace(ju->uuid, ObjectType::JUNCTION);
     }
     update_junctions(args.coords);
     imp->tool_bar_set_tip("<b>LMB:</b>finish <b>RMB:</b>cancel");

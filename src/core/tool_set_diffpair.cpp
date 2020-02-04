@@ -12,7 +12,7 @@ ToolSetDiffpair::ToolSetDiffpair(Core *c, ToolID tid) : ToolBase(c, tid)
 std::pair<Net *, Net *> ToolSetDiffpair::get_net()
 {
     std::set<Net *> nets;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::JUNCTION) {
             nets.insert(core.c->get_junction(it.uuid)->net);
         }

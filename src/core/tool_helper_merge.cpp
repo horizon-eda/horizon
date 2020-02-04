@@ -103,13 +103,13 @@ void ToolHelperMerge::merge_selected_junctions()
 {
     if (!core.c)
         return;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::JUNCTION) {
             auto ju = core.c->get_junction(it.uuid);
             for (auto &it_other : core.c->get_sheet()->junctions) {
                 auto ju_other = &it_other.second;
-                if (!core.r->selection.count(SelectableRef(ju_other->uuid, ObjectType::JUNCTION))) { // not in selection
-                    if (ju_other->position == ju->position) { // need to merge junctions
+                if (!selection.count(SelectableRef(ju_other->uuid, ObjectType::JUNCTION))) { // not in selection
+                    if (ju_other->position == ju->position) {                                // need to merge junctions
                         std::cout << "maybe merge junction" << std::endl;
                         Net *net = ju->net;
                         Bus *bus = ju->bus;
@@ -125,7 +125,7 @@ void ToolHelperMerge::merge_selected_junctions()
             // doesn't work well enough for now...
             /*for(auto &it_other: core.c->get_sheet()->net_lines) {
                     auto line = &it_other.second;
-                    if(!core.r->selection.count(SelectableRef(line->uuid,
+                    if(!selection.count(SelectableRef(line->uuid,
             ObjectType::LINE_NET))) {  //not in selection
                             if(line->coord_on_line(ju->position)) { //need to
             split line

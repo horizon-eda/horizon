@@ -17,7 +17,7 @@ ToolDelete::ToolDelete(Core *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolDelete::can_begin()
 {
-    return core.r->selection.size() > 0;
+    return selection.size() > 0;
 }
 
 ToolResponse ToolDelete::begin(const ToolArgs &args)
@@ -181,8 +181,8 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
                 }
             }
             if (other_track) {
-                core.r->selection.clear();
-                core.r->selection.emplace(other_track->uuid, ObjectType::TRACK);
+                selection.clear();
+                selection.emplace(other_track->uuid, ObjectType::TRACK);
                 imp->get_canvas()->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
             }
         }

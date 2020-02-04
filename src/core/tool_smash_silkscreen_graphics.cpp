@@ -10,7 +10,7 @@ ToolSmashSilkscreenGraphics::ToolSmashSilkscreenGraphics(Core *c, ToolID tid) : 
 
 bool ToolSmashSilkscreenGraphics::can_begin()
 {
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::BOARD_PACKAGE) {
             return true;
         }

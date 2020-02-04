@@ -193,6 +193,8 @@ public:
         return false;
     }
 
+    std::set<SelectableRef> selection;
+
     virtual ~ToolBase()
     {
     }

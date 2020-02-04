@@ -17,7 +17,7 @@ bool ToolEditBoardHole::can_begin()
 std::set<BoardHole *> ToolEditBoardHole::get_holes()
 {
     std::set<BoardHole *> holes;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         if (it.type == ObjectType::BOARD_HOLE) {
             holes.emplace(&core.b->get_board()->holes.at(it.uuid));
         }

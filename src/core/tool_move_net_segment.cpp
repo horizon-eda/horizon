@@ -21,7 +21,7 @@ bool ToolMoveNetSegment::can_begin()
 
 UUID ToolMoveNetSegment::get_net_segment()
 {
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         UUID this_ns;
         if (it.type == ObjectType::JUNCTION) {
             this_ns = core.r->get_junction(it.uuid)->net_segment;
@@ -51,7 +51,7 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
 {
     std::cout << "tool select net seg\n";
     net_segment = get_net_segment();
-    core.r->selection.clear();
+    selection.clear();
     if (!net_segment) {
         return ToolResponse::end();
     }
@@ -63,12 +63,12 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
 
     for (const auto &it : core.c->get_sheet()->junctions) {
         if (it.second.net_segment == net_segment) {
-            core.c->selection.emplace(it.first, ObjectType::JUNCTION);
+            selection.emplace(it.first, ObjectType::JUNCTION);
         }
     }
     for (const auto &it : core.c->get_sheet()->net_lines) {
         if (it.second.net_segment == net_segment) {
-            core.c->selection.emplace(it.first, ObjectType::LINE_NET);
+            selection.emplace(it.first, ObjectType::LINE_NET);
         }
     }
     if (tool_id == ToolID::SELECT_NET_SEGMENT)

@@ -14,7 +14,7 @@ bool ToolCopyPlacement::can_begin()
     if (!core.b)
         return false;
 
-    return std::count_if(core.r->selection.begin(), core.r->selection.end(),
+    return std::count_if(selection.begin(), selection.end(),
                          [](const auto &x) { return x.type == ObjectType::BOARD_PACKAGE; })
            > 0;
 }
@@ -36,7 +36,7 @@ ToolResponse ToolCopyPlacement::update(const ToolArgs &args)
                 const auto &ref_tag = ref_pkg.component->tag;
 
                 std::set<BoardPackage *> target_pkgs;
-                for (const auto &it : core.r->selection) {
+                for (const auto &it : selection) {
                     if (it.type == ObjectType::BOARD_PACKAGE) {
                         target_pkgs.insert(&brd->packages.at(it.uuid));
                     }

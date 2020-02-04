@@ -23,7 +23,7 @@ ToolResponse ToolEditSymbolPinNames::begin(const ToolArgs &args)
         return ToolResponse::end();
     }
 
-    core.c->selection.clear();
+    selection.clear();
     auto &hl = imp->get_highlights();
     hl.clear();
     hl.emplace(ObjectType::SCHEMATIC_SYMBOL, sym->uuid);

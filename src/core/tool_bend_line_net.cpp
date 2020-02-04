@@ -11,10 +11,10 @@ ToolBendLineNet::ToolBendLineNet(Core *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolBendLineNet::can_begin()
 {
-    if (core.r->selection.size() != 1)
+    if (selection.size() != 1)
         return false;
 
-    const auto it = core.r->selection.begin();
+    const auto it = selection.begin();
     if (it->type != ObjectType::LINE_NET)
         return false;
     return true;

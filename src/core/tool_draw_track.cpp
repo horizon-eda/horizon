@@ -22,7 +22,7 @@ ToolResponse ToolDrawTrack::begin(const ToolArgs &args)
     temp_junc->temp = true;
     temp_junc->position = args.coords;
     temp_track = nullptr;
-    core.b->selection.clear();
+    selection.clear();
 
     rules = dynamic_cast<BoardRules *>(core.r->get_rules());
 

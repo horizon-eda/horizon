@@ -15,7 +15,7 @@ ToolAddKeepout::ToolAddKeepout(Core *c, ToolID tid) : ToolBase(c, tid)
 Polygon *ToolAddKeepout::get_poly()
 {
     Polygon *poly = nullptr;
-    for (const auto &it : core.r->selection) {
+    for (const auto &it : selection) {
         switch (it.type) {
         case ObjectType::POLYGON_ARC_CENTER:
         case ObjectType::POLYGON_EDGE:
