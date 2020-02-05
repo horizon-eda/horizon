@@ -89,23 +89,23 @@ bool CoreBoard::has_object_type(ObjectType ty) const
     return false;
 }
 
-std::map<UUID, Polygon> *CoreBoard::get_polygon_map(bool work)
+std::map<UUID, Polygon> *CoreBoard::get_polygon_map()
 {
     return &brd.polygons;
 }
-std::map<UUID, Junction> *CoreBoard::get_junction_map(bool work)
+std::map<UUID, Junction> *CoreBoard::get_junction_map()
 {
     return &brd.junctions;
 }
-std::map<UUID, Text> *CoreBoard::get_text_map(bool work)
+std::map<UUID, Text> *CoreBoard::get_text_map()
 {
     return &brd.texts;
 }
-std::map<UUID, Line> *CoreBoard::get_line_map(bool work)
+std::map<UUID, Line> *CoreBoard::get_line_map()
 {
     return &brd.lines;
 }
-std::map<UUID, Arc> *CoreBoard::get_arc_map(bool work)
+std::map<UUID, Arc> *CoreBoard::get_arc_map()
 {
     return &brd.arcs;
 }
@@ -518,7 +518,7 @@ std::string CoreBoard::get_display_name(ObjectType type, const UUID &uu)
     }
 }
 
-std::vector<Track *> CoreBoard::get_tracks(bool work)
+std::vector<Track *> CoreBoard::get_tracks()
 {
     std::vector<Track *> r;
     for (auto &it : brd.tracks) {
@@ -527,7 +527,7 @@ std::vector<Track *> CoreBoard::get_tracks(bool work)
     return r;
 }
 
-std::vector<Line *> CoreBoard::get_lines(bool work)
+std::vector<Line *> CoreBoard::get_lines()
 {
     std::vector<Line *> r;
     for (auto &it : brd.lines) {
@@ -556,7 +556,7 @@ const Board *CoreBoard::get_canvas_data()
     return &brd;
 }
 
-Board *CoreBoard::get_board(bool work)
+Board *CoreBoard::get_board()
 {
     return &brd;
 }
@@ -566,9 +566,9 @@ const Board *CoreBoard::get_board() const
     return &brd;
 }
 
-Block *CoreBoard::get_block(bool work)
+Block *CoreBoard::get_block()
 {
-    return get_board(work)->block;
+    return get_board()->block;
 }
 
 Rules *CoreBoard::get_rules()

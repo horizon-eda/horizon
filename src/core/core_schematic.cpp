@@ -20,29 +20,29 @@ CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::s
     rebuild();
 }
 
-Junction *CoreSchematic::get_junction(const UUID &uu, bool work)
+Junction *CoreSchematic::get_junction(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     return &sheet.junctions.at(uu);
 }
-SchematicSymbol *CoreSchematic::get_schematic_symbol(const UUID &uu, bool work)
+SchematicSymbol *CoreSchematic::get_schematic_symbol(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     return &sheet.symbols.at(uu);
 }
-Text *CoreSchematic::get_text(const UUID &uu, bool work)
+Text *CoreSchematic::get_text(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     return &sheet.texts.at(uu);
 }
-Schematic *CoreSchematic::get_schematic(bool work)
+Schematic *CoreSchematic::get_schematic()
 {
     return &sch;
 }
 
-Block *CoreSchematic::get_block(bool work)
+Block *CoreSchematic::get_block()
 {
-    return get_schematic(work)->block;
+    return get_schematic()->block;
 }
 
 LayerProvider *CoreSchematic::get_layer_provider()
@@ -50,51 +50,51 @@ LayerProvider *CoreSchematic::get_layer_provider()
     return get_sheet();
 }
 
-Sheet *CoreSchematic::get_sheet(bool work)
+Sheet *CoreSchematic::get_sheet()
 {
     return &sch.sheets.at(sheet_uuid);
 }
-Line *CoreSchematic::get_line(const UUID &uu, bool work)
+Line *CoreSchematic::get_line(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     return &sheet.lines.at(uu);
 }
-Arc *CoreSchematic::get_arc(const UUID &uu, bool work)
+Arc *CoreSchematic::get_arc(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     return &sheet.arcs.at(uu);
 }
 
-Junction *CoreSchematic::insert_junction(const UUID &uu, bool work)
+Junction *CoreSchematic::insert_junction(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     auto x = sheet.junctions.emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
 
-LineNet *CoreSchematic::insert_line_net(const UUID &uu, bool work)
+LineNet *CoreSchematic::insert_line_net(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     auto x = sheet.net_lines.emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
 
-void CoreSchematic::delete_junction(const UUID &uu, bool work)
+void CoreSchematic::delete_junction(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     sheet.junctions.erase(uu);
 }
-void CoreSchematic::delete_line_net(const UUID &uu, bool work)
+void CoreSchematic::delete_line_net(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     sheet.net_lines.erase(uu);
 }
-void CoreSchematic::delete_schematic_symbol(const UUID &uu, bool work)
+void CoreSchematic::delete_schematic_symbol(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     sheet.symbols.erase(uu);
 }
-SchematicSymbol *CoreSchematic::insert_schematic_symbol(const UUID &uu, const Symbol *sym, bool work)
+SchematicSymbol *CoreSchematic::insert_schematic_symbol(const UUID &uu, const Symbol *sym)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     auto x = sheet.symbols.emplace(std::make_pair(uu, SchematicSymbol{uu, sym}));
@@ -102,31 +102,31 @@ SchematicSymbol *CoreSchematic::insert_schematic_symbol(const UUID &uu, const Sy
     return nullptr;
 }
 
-Line *CoreSchematic::insert_line(const UUID &uu, bool work)
+Line *CoreSchematic::insert_line(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     auto x = sheet.lines.emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
-void CoreSchematic::delete_line(const UUID &uu, bool work)
+void CoreSchematic::delete_line(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     sheet.lines.erase(uu);
 }
 
-Arc *CoreSchematic::insert_arc(const UUID &uu, bool work)
+Arc *CoreSchematic::insert_arc(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     auto x = sheet.arcs.emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
-void CoreSchematic::delete_arc(const UUID &uu, bool work)
+void CoreSchematic::delete_arc(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     sheet.arcs.erase(uu);
 }
 
-std::vector<LineNet *> CoreSchematic::get_net_lines(bool work)
+std::vector<LineNet *> CoreSchematic::get_net_lines()
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     std::vector<LineNet *> r;
@@ -135,7 +135,7 @@ std::vector<LineNet *> CoreSchematic::get_net_lines(bool work)
     }
     return r;
 }
-std::vector<NetLabel *> CoreSchematic::get_net_labels(bool work)
+std::vector<NetLabel *> CoreSchematic::get_net_labels()
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     std::vector<NetLabel *> r;
@@ -145,7 +145,7 @@ std::vector<NetLabel *> CoreSchematic::get_net_labels(bool work)
     return r;
 }
 
-std::vector<Line *> CoreSchematic::get_lines(bool work)
+std::vector<Line *> CoreSchematic::get_lines()
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     std::vector<Line *> r;
@@ -155,7 +155,7 @@ std::vector<Line *> CoreSchematic::get_lines(bool work)
     return r;
 }
 
-std::vector<Arc *> CoreSchematic::get_arcs(bool work)
+std::vector<Arc *> CoreSchematic::get_arcs()
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     std::vector<Arc *> r;
@@ -165,12 +165,12 @@ std::vector<Arc *> CoreSchematic::get_arcs(bool work)
     return r;
 }
 
-void CoreSchematic::delete_text(const UUID &uu, bool work)
+void CoreSchematic::delete_text(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     sheet.texts.erase(uu);
 }
-Text *CoreSchematic::insert_text(const UUID &uu, bool work)
+Text *CoreSchematic::insert_text(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);
     auto x = sheet.texts.emplace(std::make_pair(uu, uu));

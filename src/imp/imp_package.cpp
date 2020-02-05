@@ -594,7 +594,7 @@ void ImpPackage::construct()
     parameter_window->signal_apply().connect([this, parameter_window] {
         if (core.r->tool_is_active())
             return;
-        auto ps = core_package.get_package(false);
+        auto ps = core_package.get_package();
         auto r_compile = ps->parameter_program.set_code(core_package.parameter_program_code);
         if (r_compile.first) {
             parameter_window->set_error_message("<b>Compile error:</b>" + r_compile.second);
@@ -626,7 +626,7 @@ void ImpPackage::construct()
 
 
     auto header_button = Gtk::manage(new HeaderButton);
-    header_button->set_label(core_package.get_package(false)->name);
+    header_button->set_label(core_package.get_package()->name);
     main_window->header->set_custom_title(*header_button);
     header_button->show();
 
@@ -643,7 +643,7 @@ void ImpPackage::construct()
     header_button->add_widget("Alternate for", browser_alt_button);
 
     {
-        auto pkg = core_package.get_package(false);
+        auto pkg = core_package.get_package();
         entry_name->set_text(pkg->name);
         entry_manufacturer->set_text(pkg->manufacturer);
         std::stringstream s;
@@ -689,7 +689,7 @@ void ImpPackage::construct()
 
     core_package.signal_save().connect(
             [this, entry_name, entry_manufacturer, entry_tags, header_button, browser_alt_button] {
-                auto pkg = core_package.get_package(false);
+                auto pkg = core_package.get_package();
                 pkg->tags = entry_tags->get_tags();
                 pkg->name = entry_name->get_text();
                 pkg->manufacturer = entry_manufacturer->get_text();

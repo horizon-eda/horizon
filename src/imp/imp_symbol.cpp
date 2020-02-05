@@ -37,7 +37,7 @@ void ImpSymbol::construct()
     state_store = std::make_unique<WindowStateStore>(main_window, "imp-symbol");
 
     symbol_preview_window = new SymbolPreviewWindow(main_window);
-    symbol_preview_window->set_text_placements(core.y->get_symbol(false)->text_placements);
+    symbol_preview_window->set_text_placements(core.y->get_symbol()->text_placements);
     symbol_preview_window->signal_changed().connect([this] { core_symbol.set_needs_save(); });
     core_symbol.signal_tool_changed().connect(
             [this](ToolID tool_id) { symbol_preview_window->set_can_load(tool_id == ToolID::NONE); });
@@ -146,7 +146,7 @@ void ImpSymbol::construct()
     core.r->signal_rebuilt().connect([this] { unit_label->set_text(core.y->get_symbol()->unit->name); });
 
     core.r->signal_save().connect([this, header_button] {
-        auto sym = core.y->get_symbol(false);
+        auto sym = core.y->get_symbol();
         sym->name = name_entry->get_text();
         header_button->set_label(sym->name);
         sym->text_placements = symbol_preview_window->get_text_placements();

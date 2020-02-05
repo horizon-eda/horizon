@@ -138,47 +138,47 @@ ToolResponse Core::tool_update(const ToolArgs &args)
     return ToolResponse();
 }
 
-Junction *Core::insert_junction(const UUID &uu, bool work)
+Junction *Core::insert_junction(const UUID &uu)
 {
-    auto map = get_junction_map(work);
+    auto map = get_junction_map();
     auto x = map->emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
 
-Junction *Core::get_junction(const UUID &uu, bool work)
+Junction *Core::get_junction(const UUID &uu)
 {
-    auto map = get_junction_map(work);
+    auto map = get_junction_map();
     return &map->at(uu);
 }
 
-void Core::delete_junction(const UUID &uu, bool work)
+void Core::delete_junction(const UUID &uu)
 {
-    auto map = get_junction_map(work);
+    auto map = get_junction_map();
     map->erase(uu);
 }
 
-Line *Core::insert_line(const UUID &uu, bool work)
+Line *Core::insert_line(const UUID &uu)
 {
-    auto map = get_line_map(work);
+    auto map = get_line_map();
     auto x = map->emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
 
-Line *Core::get_line(const UUID &uu, bool work)
+Line *Core::get_line(const UUID &uu)
 {
-    auto map = get_line_map(work);
+    auto map = get_line_map();
     return &map->at(uu);
 }
 
-void Core::delete_line(const UUID &uu, bool work)
+void Core::delete_line(const UUID &uu)
 {
-    auto map = get_line_map(work);
+    auto map = get_line_map();
     map->erase(uu);
 }
 
-std::vector<Line *> Core::get_lines(bool work)
+std::vector<Line *> Core::get_lines()
 {
-    auto *map = get_line_map(work);
+    auto *map = get_line_map();
     std::vector<Line *> r;
     if (!map)
         return r;
@@ -188,28 +188,28 @@ std::vector<Line *> Core::get_lines(bool work)
     return r;
 }
 
-Arc *Core::insert_arc(const UUID &uu, bool work)
+Arc *Core::insert_arc(const UUID &uu)
 {
-    auto map = get_arc_map(work);
+    auto map = get_arc_map();
     auto x = map->emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
 
-Arc *Core::get_arc(const UUID &uu, bool work)
+Arc *Core::get_arc(const UUID &uu)
 {
-    auto map = get_arc_map(work);
+    auto map = get_arc_map();
     return &map->at(uu);
 }
 
-void Core::delete_arc(const UUID &uu, bool work)
+void Core::delete_arc(const UUID &uu)
 {
-    auto map = get_arc_map(work);
+    auto map = get_arc_map();
     map->erase(uu);
 }
 
-std::vector<Arc *> Core::get_arcs(bool work)
+std::vector<Arc *> Core::get_arcs()
 {
-    auto *map = get_arc_map(work);
+    auto *map = get_arc_map();
     std::vector<Arc *> r;
     if (!map)
         return r;
@@ -219,60 +219,60 @@ std::vector<Arc *> Core::get_arcs(bool work)
     return r;
 }
 
-Text *Core::insert_text(const UUID &uu, bool work)
+Text *Core::insert_text(const UUID &uu)
 {
-    auto map = get_text_map(work);
+    auto map = get_text_map();
     auto x = map->emplace(uu, uu);
     return &(x.first->second);
 }
 
-Text *Core::get_text(const UUID &uu, bool work)
+Text *Core::get_text(const UUID &uu)
 {
-    auto map = get_text_map(work);
+    auto map = get_text_map();
     return &map->at(uu);
 }
 
-void Core::delete_text(const UUID &uu, bool work)
+void Core::delete_text(const UUID &uu)
 {
-    auto map = get_text_map(work);
+    auto map = get_text_map();
     map->erase(uu);
 }
 
-Polygon *Core::insert_polygon(const UUID &uu, bool work)
+Polygon *Core::insert_polygon(const UUID &uu)
 {
-    auto map = get_polygon_map(work);
+    auto map = get_polygon_map();
     auto x = map->emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
 
-Polygon *Core::get_polygon(const UUID &uu, bool work)
+Polygon *Core::get_polygon(const UUID &uu)
 {
-    auto map = get_polygon_map(work);
+    auto map = get_polygon_map();
     return &map->at(uu);
 }
 
-void Core::delete_polygon(const UUID &uu, bool work)
+void Core::delete_polygon(const UUID &uu)
 {
-    auto map = get_polygon_map(work);
+    auto map = get_polygon_map();
     map->erase(uu);
 }
 
-Hole *Core::insert_hole(const UUID &uu, bool work)
+Hole *Core::insert_hole(const UUID &uu)
 {
-    auto map = get_hole_map(work);
+    auto map = get_hole_map();
     auto x = map->emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
 
-Hole *Core::get_hole(const UUID &uu, bool work)
+Hole *Core::get_hole(const UUID &uu)
 {
-    auto map = get_hole_map(work);
+    auto map = get_hole_map();
     return &map->at(uu);
 }
 
-void Core::delete_hole(const UUID &uu, bool work)
+void Core::delete_hole(const UUID &uu)
 {
-    auto map = get_hole_map(work);
+    auto map = get_hole_map();
     map->erase(uu);
 }
 

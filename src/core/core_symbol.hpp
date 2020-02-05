@@ -11,28 +11,28 @@ class CoreSymbol : public Core {
 public:
     CoreSymbol(const std::string &filename, Pool &pool);
     bool has_object_type(ObjectType ty) const override;
-    Symbol *get_symbol(bool work = true);
+    Symbol *get_symbol();
 
-    Junction *get_junction(const UUID &uu, bool work = true) override;
-    Line *get_line(const UUID &uu, bool work = true) override;
-    SymbolPin *get_symbol_pin(const UUID &uu, bool work = true);
-    Arc *get_arc(const UUID &uu, bool work = true) override;
+    Junction *get_junction(const UUID &uu) override;
+    Line *get_line(const UUID &uu) override;
+    SymbolPin *get_symbol_pin(const UUID &uu);
+    Arc *get_arc(const UUID &uu) override;
 
-    Junction *insert_junction(const UUID &uu, bool work = true) override;
-    void delete_junction(const UUID &uu, bool work = true) override;
-    Line *insert_line(const UUID &uu, bool work = true) override;
-    void delete_line(const UUID &uu, bool work = true) override;
-    Arc *insert_arc(const UUID &uu, bool work = true) override;
-    void delete_arc(const UUID &uu, bool work = true) override;
+    Junction *insert_junction(const UUID &uu) override;
+    void delete_junction(const UUID &uu) override;
+    Line *insert_line(const UUID &uu) override;
+    void delete_line(const UUID &uu) override;
+    Arc *insert_arc(const UUID &uu) override;
+    void delete_arc(const UUID &uu) override;
 
-    SymbolPin *insert_symbol_pin(const UUID &uu, bool work = true);
-    void delete_symbol_pin(const UUID &uu, bool work = true);
+    SymbolPin *insert_symbol_pin(const UUID &uu);
+    void delete_symbol_pin(const UUID &uu);
 
     class LayerProvider *get_layer_provider() override;
 
-    std::vector<Line *> get_lines(bool work = true) override;
-    std::vector<Arc *> get_arcs(bool work = true) override;
-    std::vector<const Pin *> get_pins(bool work = true);
+    std::vector<Line *> get_lines() override;
+    std::vector<Arc *> get_arcs() override;
+    std::vector<const Pin *> get_pins();
 
     void rebuild(bool from_undo = false) override;
 
@@ -58,8 +58,8 @@ public:
     const std::string &get_filename() const override;
 
 private:
-    std::map<UUID, Text> *get_text_map(bool work = true) override;
-    std::map<UUID, Polygon> *get_polygon_map(bool work = true) override;
+    std::map<UUID, Text> *get_text_map() override;
+    std::map<UUID, Polygon> *get_polygon_map() override;
 
     Symbol sym;
     std::string m_filename;

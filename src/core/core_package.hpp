@@ -13,14 +13,14 @@ public:
     CorePackage(const std::string &filename, Pool &pool);
     bool has_object_type(ObjectType ty) const override;
 
-    Package *get_package(bool work = true);
+    Package *get_package();
 
-    /*Polygon *insert_polygon(const UUID &uu, bool work = true);
-    Polygon *get_polygon(const UUID &uu, bool work=true);
-    void delete_polygon(const UUID &uu, bool work = true);
-    Hole *insert_hole(const UUID &uu, bool work = true);
-    Hole *get_hole(const UUID &uu, bool work=true);
-    void delete_hole(const UUID &uu, bool work = true);*/
+    /*Polygon *insert_polygon(const UUID &uu);
+    Polygon *get_polygon(const UUID &uu=true);
+    void delete_polygon(const UUID &uu);
+    Hole *insert_hole(const UUID &uu);
+    Hole *get_hole(const UUID &uu=true);
+    void delete_hole(const UUID &uu);*/
 
     class LayerProvider *get_layer_provider() override;
 
@@ -48,12 +48,12 @@ public:
     const std::string &get_filename() const override;
 
 private:
-    std::map<UUID, Junction> *get_junction_map(bool work = true) override;
-    std::map<UUID, Line> *get_line_map(bool work = true) override;
-    std::map<UUID, Arc> *get_arc_map(bool work = true) override;
-    std::map<UUID, Text> *get_text_map(bool work = true) override;
-    std::map<UUID, Polygon> *get_polygon_map(bool work = true) override;
-    std::map<UUID, Hole> *get_hole_map(bool work = true) override;
+    std::map<UUID, Junction> *get_junction_map() override;
+    std::map<UUID, Line> *get_line_map() override;
+    std::map<UUID, Arc> *get_arc_map() override;
+    std::map<UUID, Text> *get_text_map() override;
+    std::map<UUID, Polygon> *get_polygon_map() override;
+    std::map<UUID, Hole> *get_hole_map() override;
     std::map<UUID, Keepout> *get_keepout_map() override;
     std::map<UUID, Dimension> *get_dimension_map() override;
 

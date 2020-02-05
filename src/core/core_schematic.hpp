@@ -13,35 +13,35 @@ public:
     CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, Pool &pool);
     bool has_object_type(ObjectType ty) const override;
 
-    Junction *get_junction(const UUID &uu, bool work = true) override;
-    Line *get_line(const UUID &uu, bool work = true) override;
-    Arc *get_arc(const UUID &uu, bool work = true) override;
-    SchematicSymbol *get_schematic_symbol(const UUID &uu, bool work = true);
-    Schematic *get_schematic(bool work = true);
-    Sheet *get_sheet(bool work = true);
-    Text *get_text(const UUID &uu, bool work = true) override;
+    Junction *get_junction(const UUID &uu) override;
+    Line *get_line(const UUID &uu) override;
+    Arc *get_arc(const UUID &uu) override;
+    SchematicSymbol *get_schematic_symbol(const UUID &uu);
+    Schematic *get_schematic();
+    Sheet *get_sheet();
+    Text *get_text(const UUID &uu) override;
 
-    Junction *insert_junction(const UUID &uu, bool work = true) override;
-    void delete_junction(const UUID &uu, bool work = true) override;
-    Line *insert_line(const UUID &uu, bool work = true) override;
-    void delete_line(const UUID &uu, bool work = true) override;
-    Arc *insert_arc(const UUID &uu, bool work = true) override;
-    void delete_arc(const UUID &uu, bool work = true) override;
-    SchematicSymbol *insert_schematic_symbol(const UUID &uu, const Symbol *sym, bool work = true);
-    void delete_schematic_symbol(const UUID &uu, bool work = true);
+    Junction *insert_junction(const UUID &uu) override;
+    void delete_junction(const UUID &uu) override;
+    Line *insert_line(const UUID &uu) override;
+    void delete_line(const UUID &uu) override;
+    Arc *insert_arc(const UUID &uu) override;
+    void delete_arc(const UUID &uu) override;
+    SchematicSymbol *insert_schematic_symbol(const UUID &uu, const Symbol *sym);
+    void delete_schematic_symbol(const UUID &uu);
 
-    LineNet *insert_line_net(const UUID &uu, bool work = true);
-    void delete_line_net(const UUID &uu, bool work = true);
+    LineNet *insert_line_net(const UUID &uu);
+    void delete_line_net(const UUID &uu);
 
-    Text *insert_text(const UUID &uu, bool work = true) override;
-    void delete_text(const UUID &uu, bool work = true) override;
+    Text *insert_text(const UUID &uu) override;
+    void delete_text(const UUID &uu) override;
 
-    std::vector<Line *> get_lines(bool work = true) override;
-    std::vector<Arc *> get_arcs(bool work = true) override;
-    std::vector<LineNet *> get_net_lines(bool work = true);
-    std::vector<NetLabel *> get_net_labels(bool work = true);
+    std::vector<Line *> get_lines() override;
+    std::vector<Arc *> get_arcs() override;
+    std::vector<LineNet *> get_net_lines();
+    std::vector<NetLabel *> get_net_labels();
 
-    class Block *get_block(bool work = true) override;
+    class Block *get_block() override;
     class LayerProvider *get_layer_provider() override;
 
     bool set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property,

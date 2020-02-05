@@ -76,7 +76,7 @@ LayerProvider *CorePackage::get_layer_provider()
     return &package;
 }
 
-Package *CorePackage::get_package(bool work)
+Package *CorePackage::get_package()
 {
     return &package;
 }
@@ -86,23 +86,23 @@ Rules *CorePackage::get_rules()
     return &rules;
 }
 
-std::map<UUID, Junction> *CorePackage::get_junction_map(bool work)
+std::map<UUID, Junction> *CorePackage::get_junction_map()
 {
     return &package.junctions;
 }
-std::map<UUID, Line> *CorePackage::get_line_map(bool work)
+std::map<UUID, Line> *CorePackage::get_line_map()
 {
     return &package.lines;
 }
-std::map<UUID, Arc> *CorePackage::get_arc_map(bool work)
+std::map<UUID, Arc> *CorePackage::get_arc_map()
 {
     return &package.arcs;
 }
-std::map<UUID, Text> *CorePackage::get_text_map(bool work)
+std::map<UUID, Text> *CorePackage::get_text_map()
 {
     return &package.texts;
 }
-std::map<UUID, Polygon> *CorePackage::get_polygon_map(bool work)
+std::map<UUID, Polygon> *CorePackage::get_polygon_map()
 {
     return &package.polygons;
 }
@@ -114,7 +114,7 @@ std::map<UUID, Dimension> *CorePackage::get_dimension_map()
 {
     return &package.dimensions;
 }
-std::map<UUID, Hole> *CorePackage::get_hole_map(bool work)
+std::map<UUID, Hole> *CorePackage::get_hole_map()
 {
     return nullptr;
 }

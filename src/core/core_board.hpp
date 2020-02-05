@@ -14,7 +14,7 @@ public:
               Pool &pool);
     bool has_object_type(ObjectType ty) const override;
 
-    class Block *get_block(bool work = true) override;
+    class Block *get_block() override;
     class LayerProvider *get_layer_provider() override;
 
     bool set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property,
@@ -26,14 +26,14 @@ public:
 
     std::string get_display_name(ObjectType type, const UUID &uu) override;
 
-    std::vector<Track *> get_tracks(bool work = true);
-    std::vector<Line *> get_lines(bool work = true) override;
+    std::vector<Track *> get_tracks();
+    std::vector<Line *> get_lines() override;
 
     void rebuild(bool from_undo = false) override;
     void reload_netlist();
 
     const Board *get_canvas_data();
-    Board *get_board(bool work = true);
+    Board *get_board();
     const Board *get_board() const;
     ViaPadstackProvider *get_via_padstack_provider();
     class Rules *get_rules() override;
@@ -66,12 +66,12 @@ public:
     const std::string &get_filename() const override;
 
 private:
-    std::map<UUID, Polygon> *get_polygon_map(bool work = true) override;
-    std::map<UUID, Junction> *get_junction_map(bool work = true) override;
-    std::map<UUID, Text> *get_text_map(bool work = true) override;
-    std::map<UUID, Line> *get_line_map(bool work = true) override;
+    std::map<UUID, Polygon> *get_polygon_map() override;
+    std::map<UUID, Junction> *get_junction_map() override;
+    std::map<UUID, Text> *get_text_map() override;
+    std::map<UUID, Line> *get_line_map() override;
     std::map<UUID, Dimension> *get_dimension_map() override;
-    std::map<UUID, Arc> *get_arc_map(bool work = true) override;
+    std::map<UUID, Arc> *get_arc_map() override;
     std::map<UUID, Keepout> *get_keepout_map() override;
 
     ViaPadstackProvider via_padstack_provider;

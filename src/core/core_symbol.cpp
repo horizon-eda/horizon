@@ -34,74 +34,74 @@ bool CoreSymbol::has_object_type(ObjectType ty) const
     return false;
 }
 
-std::map<UUID, Text> *CoreSymbol::get_text_map(bool work)
+std::map<UUID, Text> *CoreSymbol::get_text_map()
 {
     return &sym.texts;
 }
 
-std::map<UUID, Polygon> *CoreSymbol::get_polygon_map(bool work)
+std::map<UUID, Polygon> *CoreSymbol::get_polygon_map()
 {
     return &sym.polygons;
 }
 
-Junction *CoreSymbol::get_junction(const UUID &uu, bool work)
+Junction *CoreSymbol::get_junction(const UUID &uu)
 {
     return sym.get_junction(uu);
 }
-Line *CoreSymbol::get_line(const UUID &uu, bool work)
+Line *CoreSymbol::get_line(const UUID &uu)
 {
     return &sym.lines.at(uu);
 }
-SymbolPin *CoreSymbol::get_symbol_pin(const UUID &uu, bool work)
+SymbolPin *CoreSymbol::get_symbol_pin(const UUID &uu)
 {
     return sym.get_symbol_pin(uu);
 }
-Arc *CoreSymbol::get_arc(const UUID &uu, bool work)
+Arc *CoreSymbol::get_arc(const UUID &uu)
 {
     return &sym.arcs.at(uu);
 }
 
-Junction *CoreSymbol::insert_junction(const UUID &uu, bool work)
+Junction *CoreSymbol::insert_junction(const UUID &uu)
 {
     auto x = sym.junctions.emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
-void CoreSymbol::delete_junction(const UUID &uu, bool work)
+void CoreSymbol::delete_junction(const UUID &uu)
 {
     sym.junctions.erase(uu);
 }
 
-Line *CoreSymbol::insert_line(const UUID &uu, bool work)
+Line *CoreSymbol::insert_line(const UUID &uu)
 {
     auto x = sym.lines.emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
-void CoreSymbol::delete_line(const UUID &uu, bool work)
+void CoreSymbol::delete_line(const UUID &uu)
 {
     sym.lines.erase(uu);
 }
 
-Arc *CoreSymbol::insert_arc(const UUID &uu, bool work)
+Arc *CoreSymbol::insert_arc(const UUID &uu)
 {
     auto x = sym.arcs.emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
-void CoreSymbol::delete_arc(const UUID &uu, bool work)
+void CoreSymbol::delete_arc(const UUID &uu)
 {
     sym.arcs.erase(uu);
 }
 
-void CoreSymbol::delete_symbol_pin(const UUID &uu, bool work)
+void CoreSymbol::delete_symbol_pin(const UUID &uu)
 {
     sym.pins.erase(uu);
 }
-SymbolPin *CoreSymbol::insert_symbol_pin(const UUID &uu, bool work)
+SymbolPin *CoreSymbol::insert_symbol_pin(const UUID &uu)
 {
     auto x = sym.pins.emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
 
-std::vector<Line *> CoreSymbol::get_lines(bool work)
+std::vector<Line *> CoreSymbol::get_lines()
 {
     std::vector<Line *> r;
     for (auto &it : sym.lines) {
@@ -110,7 +110,7 @@ std::vector<Line *> CoreSymbol::get_lines(bool work)
     return r;
 }
 
-std::vector<Arc *> CoreSymbol::get_arcs(bool work)
+std::vector<Arc *> CoreSymbol::get_arcs()
 {
     std::vector<Arc *> r;
     for (auto &it : sym.arcs) {
@@ -119,7 +119,7 @@ std::vector<Arc *> CoreSymbol::get_arcs(bool work)
     return r;
 }
 
-std::vector<const Pin *> CoreSymbol::get_pins(bool work)
+std::vector<const Pin *> CoreSymbol::get_pins()
 {
     std::vector<const Pin *> r;
     for (auto &it : sym.unit->pins) {
@@ -327,7 +327,7 @@ std::list<Core::SearchResult> CoreSymbol::search(const SearchQuery &q)
     return results;
 }
 
-Symbol *CoreSymbol::get_symbol(bool work)
+Symbol *CoreSymbol::get_symbol()
 {
     return &sym;
 }

@@ -22,11 +22,11 @@ public:
     const std::string &get_filename() const override;
 
 private:
-    std::map<UUID, Polygon> *get_polygon_map(bool work = true) override;
-    std::map<UUID, Junction> *get_junction_map(bool work = true) override;
-    std::map<UUID, Text> *get_text_map(bool work = true) override;
-    std::map<UUID, Line> *get_line_map(bool work = true) override;
-    std::map<UUID, Arc> *get_arc_map(bool work = true) override;
+    std::map<UUID, Polygon> *get_polygon_map() override;
+    std::map<UUID, Junction> *get_junction_map() override;
+    std::map<UUID, Text> *get_text_map() override;
+    std::map<UUID, Line> *get_line_map() override;
+    std::map<UUID, Arc> *get_arc_map() override;
 
     Frame frame;
 

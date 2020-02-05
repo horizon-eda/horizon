@@ -51,29 +51,29 @@ public:
         return false;
     }
 
-    virtual class Junction *insert_junction(const UUID &uu, bool work = true);
-    virtual class Junction *get_junction(const UUID &uu, bool work = true);
-    virtual void delete_junction(const UUID &uu, bool work = true);
+    virtual class Junction *insert_junction(const UUID &uu);
+    virtual class Junction *get_junction(const UUID &uu);
+    virtual void delete_junction(const UUID &uu);
 
-    virtual class Line *insert_line(const UUID &uu, bool work = true);
-    virtual class Line *get_line(const UUID &uu, bool work = true);
-    virtual void delete_line(const UUID &uu, bool work = true);
+    virtual class Line *insert_line(const UUID &uu);
+    virtual class Line *get_line(const UUID &uu);
+    virtual void delete_line(const UUID &uu);
 
-    virtual class Arc *insert_arc(const UUID &uu, bool work = true);
-    virtual class Arc *get_arc(const UUID &uu, bool work = true);
-    virtual void delete_arc(const UUID &uu, bool work = true);
+    virtual class Arc *insert_arc(const UUID &uu);
+    virtual class Arc *get_arc(const UUID &uu);
+    virtual void delete_arc(const UUID &uu);
 
-    virtual class Text *insert_text(const UUID &uu, bool work = true);
-    virtual class Text *get_text(const UUID &uu, bool work = true);
-    virtual void delete_text(const UUID &uu, bool work = true);
+    virtual class Text *insert_text(const UUID &uu);
+    virtual class Text *get_text(const UUID &uu);
+    virtual void delete_text(const UUID &uu);
 
-    virtual class Polygon *insert_polygon(const UUID &uu, bool work = true);
-    virtual class Polygon *get_polygon(const UUID &uu, bool work = true);
-    virtual void delete_polygon(const UUID &uu, bool work = true);
+    virtual class Polygon *insert_polygon(const UUID &uu);
+    virtual class Polygon *get_polygon(const UUID &uu);
+    virtual void delete_polygon(const UUID &uu);
 
-    virtual class Hole *insert_hole(const UUID &uu, bool work = true);
-    virtual class Hole *get_hole(const UUID &uu, bool work = true);
-    virtual void delete_hole(const UUID &uu, bool work = true);
+    virtual class Hole *insert_hole(const UUID &uu);
+    virtual class Hole *get_hole(const UUID &uu);
+    virtual void delete_hole(const UUID &uu);
 
     virtual class Dimension *insert_dimension(const UUID &uu);
     virtual class Dimension *get_dimension(const UUID &uu);
@@ -83,11 +83,11 @@ public:
     virtual class Keepout *get_keepout(const UUID &uu);
     virtual void delete_keepout(const UUID &uu);
 
-    virtual std::vector<Line *> get_lines(bool work = true);
-    virtual std::vector<Arc *> get_arcs(bool work = true);
+    virtual std::vector<Line *> get_lines();
+    virtual std::vector<Arc *> get_arcs();
     virtual std::vector<Keepout *> get_keepouts();
 
-    virtual class Block *get_block(bool work = true)
+    virtual class Block *get_block()
     {
         return nullptr;
     }
@@ -258,27 +258,27 @@ public:
     }
 
 protected:
-    virtual std::map<UUID, Junction> *get_junction_map(bool work = true)
+    virtual std::map<UUID, Junction> *get_junction_map()
     {
         return nullptr;
     }
-    virtual std::map<UUID, Line> *get_line_map(bool work = true)
+    virtual std::map<UUID, Line> *get_line_map()
     {
         return nullptr;
     }
-    virtual std::map<UUID, Arc> *get_arc_map(bool work = true)
+    virtual std::map<UUID, Arc> *get_arc_map()
     {
         return nullptr;
     }
-    virtual std::map<UUID, Text> *get_text_map(bool work = true)
+    virtual std::map<UUID, Text> *get_text_map()
     {
         return nullptr;
     }
-    virtual std::map<UUID, Polygon> *get_polygon_map(bool work = true)
+    virtual std::map<UUID, Polygon> *get_polygon_map()
     {
         return nullptr;
     }
-    virtual std::map<UUID, Hole> *get_hole_map(bool work = true)
+    virtual std::map<UUID, Hole> *get_hole_map()
     {
         return nullptr;
     }

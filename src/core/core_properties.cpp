@@ -376,7 +376,7 @@ bool Core::get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID
     case ObjectType::HOLE:
         switch (property) {
         case ObjectProperty::ID::LENGTH:
-            meta.is_settable = get_hole(uu, false)->shape == Hole::Shape::SLOT;
+            meta.is_settable = get_hole(uu)->shape == Hole::Shape::SLOT;
             return true;
         default:
             return false;

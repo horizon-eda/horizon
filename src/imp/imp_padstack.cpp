@@ -60,26 +60,26 @@ void ImpPadstack::construct()
     state_store = std::make_unique<WindowStateStore>(main_window, "imp-padstack");
 
     auto header_button = Gtk::manage(new HeaderButton);
-    header_button->set_label(core_padstack.get_padstack(false)->name);
+    header_button->set_label(core_padstack.get_padstack()->name);
     main_window->header->set_custom_title(*header_button);
     header_button->show();
 
     auto name_entry = header_button->add_entry("Name");
-    name_entry->set_text(core_padstack.get_padstack(false)->name);
-    name_entry->set_width_chars(core_padstack.get_padstack(false)->name.size());
+    name_entry->set_text(core_padstack.get_padstack()->name);
+    name_entry->set_width_chars(core_padstack.get_padstack()->name.size());
     name_entry->signal_changed().connect([this, name_entry, header_button] {
         header_button->set_label(name_entry->get_text());
         core_padstack.set_needs_save();
     });
 
     auto well_known_name_entry = header_button->add_entry("Well-known name");
-    well_known_name_entry->set_text(core_padstack.get_padstack(false)->well_known_name);
+    well_known_name_entry->set_text(core_padstack.get_padstack()->well_known_name);
     well_known_name_entry->signal_changed().connect([this, well_known_name_entry] { core_padstack.set_needs_save(); });
 
     core_padstack.signal_save().connect([this, name_entry, well_known_name_entry, header_button] {
-        core_padstack.get_padstack(false)->name = name_entry->get_text();
-        core_padstack.get_padstack(false)->well_known_name = well_known_name_entry->get_text();
-        header_button->set_label(core_padstack.get_padstack(false)->name);
+        core_padstack.get_padstack()->name = name_entry->get_text();
+        core_padstack.get_padstack()->well_known_name = well_known_name_entry->get_text();
+        header_button->set_label(core_padstack.get_padstack()->name);
     });
 
     auto type_combo = Gtk::manage(new Gtk::ComboBoxText());
@@ -91,7 +91,7 @@ void ImpPadstack::construct()
     type_combo->append("mechanical", "Mechanical");
     type_combo->show();
     header_button->add_widget("Type", type_combo);
-    type_combo->set_active_id(Padstack::type_lut.lookup_reverse(core_padstack.get_padstack(false)->type));
+    type_combo->set_active_id(Padstack::type_lut.lookup_reverse(core_padstack.get_padstack()->type));
     type_combo->signal_changed().connect([this] { core_padstack.set_needs_save(); });
 
     auto editor = new ImpPadstackParameterSetEditor(&core_padstack.parameter_set, &core_padstack.parameters_required);
@@ -111,7 +111,7 @@ void ImpPadstack::construct()
     parameter_window->signal_apply().connect([this, parameter_window] {
         if (core.r->tool_is_active())
             return;
-        auto ps = core_padstack.get_padstack(false);
+        auto ps = core_padstack.get_padstack();
         auto r_compile = ps->parameter_program.set_code(core_padstack.parameter_program_code);
         if (r_compile.first) {
             parameter_window->set_error_message("<b>Compile error:</b>" + r_compile.second);
@@ -136,7 +136,7 @@ void ImpPadstack::construct()
             [parameter_window](ToolID t) { parameter_window->set_can_apply(t == ToolID::NONE); });
 
     core_padstack.signal_save().connect([this, type_combo] {
-        core_padstack.get_padstack(false)->type = Padstack::type_lut.lookup(type_combo->get_active_id());
+        core_padstack.get_padstack()->type = Padstack::type_lut.lookup(type_combo->get_active_id());
     });
 }
 

@@ -33,23 +33,23 @@ bool CoreFrame::has_object_type(ObjectType ty) const
     return false;
 }
 
-std::map<UUID, Polygon> *CoreFrame::get_polygon_map(bool work)
+std::map<UUID, Polygon> *CoreFrame::get_polygon_map()
 {
     return &frame.polygons;
 }
-std::map<UUID, Junction> *CoreFrame::get_junction_map(bool work)
+std::map<UUID, Junction> *CoreFrame::get_junction_map()
 {
     return &frame.junctions;
 }
-std::map<UUID, Text> *CoreFrame::get_text_map(bool work)
+std::map<UUID, Text> *CoreFrame::get_text_map()
 {
     return &frame.texts;
 }
-std::map<UUID, Line> *CoreFrame::get_line_map(bool work)
+std::map<UUID, Line> *CoreFrame::get_line_map()
 {
     return &frame.lines;
 }
-std::map<UUID, Arc> *CoreFrame::get_arc_map(bool work)
+std::map<UUID, Arc> *CoreFrame::get_arc_map()
 {
     return &frame.arcs;
 }
