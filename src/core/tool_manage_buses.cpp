@@ -1,6 +1,8 @@
 #include "tool_manage_buses.hpp"
-#include "core_board.hpp"
-#include "core_schematic.hpp"
+#include "idocument_board.hpp"
+#include "board/board.hpp"
+#include "idocument_schematic.hpp"
+#include "schematic/schematic.hpp"
 #include "core_frame.hpp"
 #include <iostream>
 

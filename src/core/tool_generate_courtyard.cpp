@@ -1,5 +1,6 @@
 #include "tool_generate_courtyard.hpp"
-#include "core_package.hpp"
+#include "idocument_package.hpp"
+#include "pool/package.hpp"
 #include "board/board_layers.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>

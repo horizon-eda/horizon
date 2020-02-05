@@ -1,5 +1,6 @@
 #include "tool_copy_tracks.hpp"
-#include "core_board.hpp"
+#include "idocument_board.hpp"
+#include "board/board.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>
 

@@ -1,5 +1,6 @@
 #include "tool_import_kicad_package.hpp"
-#include "core_package.hpp"
+#include "idocument_package.hpp"
+#include "pool/package.hpp"
 #include "imp/imp_interface.hpp"
 #include "util/kicad_package_parser.hpp"
 #include "sexpr/sexpr_parser.h"

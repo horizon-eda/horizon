@@ -1,5 +1,6 @@
 #include "tool_smash_silkscreen_graphics.hpp"
-#include "core_board.hpp"
+#include "idocument_board.hpp"
+#include "board/board.hpp"
 #include <iostream>
 
 namespace horizon {

@@ -1,5 +1,6 @@
 #include "tool_map_pin.hpp"
-#include "core_symbol.hpp"
+#include "idocument_symbol.hpp"
+#include "pool/symbol.hpp"
 #include "imp/imp_interface.hpp"
 #include "tool_helper_move.hpp"
 #include "util/util.hpp"

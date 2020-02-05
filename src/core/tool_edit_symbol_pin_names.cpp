@@ -1,5 +1,6 @@
 #include "tool_edit_symbol_pin_names.hpp"
-#include "core_schematic.hpp"
+#include "idocument_schematic.hpp"
+#include "schematic/schematic.hpp"
 #include "tool_data_window.hpp"
 #include "imp/imp_interface.hpp"
 #include "dialogs/symbol_pin_names_window.hpp"

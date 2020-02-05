@@ -1,5 +1,6 @@
 #include "tool_place_hole.hpp"
-#include "core_padstack.hpp"
+#include "idocument_padstack.hpp"
+#include "pool/padstack.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>
 

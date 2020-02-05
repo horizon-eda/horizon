@@ -1,6 +1,7 @@
 #include "tool_assign_part.hpp"
 #include "tool_add_part.hpp"
-#include "core_schematic.hpp"
+#include "idocument_schematic.hpp"
+#include "schematic/schematic.hpp"
 #include "imp/imp_interface.hpp"
 #include "pool/part.hpp"
 #include <iostream>

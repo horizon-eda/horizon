@@ -1,5 +1,6 @@
 #include "tool_set_via_net.hpp"
-#include "core_board.hpp"
+#include "idocument_board.hpp"
+#include "board/board.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>
 

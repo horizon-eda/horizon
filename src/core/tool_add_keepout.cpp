@@ -1,7 +1,9 @@
 #include "tool_add_keepout.hpp"
 #include "board/board_layers.hpp"
-#include "core_board.hpp"
-#include "core_package.hpp"
+#include "idocument_board.hpp"
+#include "board/board.hpp"
+#include "idocument_package.hpp"
+#include "pool/package.hpp"
 #include "imp/imp_interface.hpp"
 #include "pool/part.hpp"
 #include <iostream>

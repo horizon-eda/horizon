@@ -1,6 +1,8 @@
 #include "tool_place_junction.hpp"
-#include "core_schematic.hpp"
-#include "core_symbol.hpp"
+#include "idocument_schematic.hpp"
+#include "schematic/schematic.hpp"
+#include "idocument_symbol.hpp"
+#include "pool/symbol.hpp"
 #include <iostream>
 
 namespace horizon {

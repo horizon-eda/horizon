@@ -1,5 +1,6 @@
 #include "tool_helper_map_symbol.hpp"
-#include "core_schematic.hpp"
+#include "idocument_schematic.hpp"
+#include "schematic/schematic.hpp"
 #include "imp/imp_interface.hpp"
 #include "util/sqlite.hpp"
 

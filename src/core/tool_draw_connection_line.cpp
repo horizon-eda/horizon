@@ -3,7 +3,8 @@
 #include "pool/part.hpp"
 #include <algorithm>
 #include "nlohmann/json.hpp"
-#include "core_board.hpp"
+#include "idocument_board.hpp"
+#include "board/board.hpp"
 
 namespace horizon {
 

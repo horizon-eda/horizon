@@ -1,5 +1,6 @@
 #include "tool_edit_parameter_program.hpp"
-#include "core_padstack.hpp"
+#include "idocument_padstack.hpp"
+#include "pool/padstack.hpp"
 #include <iostream>
 
 namespace horizon {

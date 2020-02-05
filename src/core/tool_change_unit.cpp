@@ -1,5 +1,6 @@
 #include "tool_change_unit.hpp"
-#include "core_symbol.hpp"
+#include "idocument_symbol.hpp"
+#include "pool/symbol.hpp"
 #include "imp/imp_interface.hpp"
 #include "pool/unit.hpp"
 #include <iostream>

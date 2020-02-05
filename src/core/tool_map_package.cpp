@@ -1,5 +1,6 @@
 #include "tool_map_package.hpp"
-#include "core_board.hpp"
+#include "idocument_board.hpp"
+#include "board/board.hpp"
 #include "imp/imp_interface.hpp"
 #include "pool/part.hpp"
 #include <iostream>

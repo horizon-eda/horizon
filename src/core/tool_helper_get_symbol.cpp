@@ -1,5 +1,6 @@
 #include "tool_helper_get_symbol.hpp"
-#include "core_schematic.hpp"
+#include "idocument_schematic.hpp"
+#include "schematic/schematic.hpp"
 
 namespace horizon {
 SchematicSymbol *ToolHelperGetSymbol::get_symbol()

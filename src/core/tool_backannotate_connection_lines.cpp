@@ -1,5 +1,6 @@
 #include "tool_backannotate_connection_lines.hpp"
-#include "core_schematic.hpp"
+#include "idocument_schematic.hpp"
+#include "schematic/schematic.hpp"
 #include "nlohmann/json.hpp"
 
 namespace horizon {

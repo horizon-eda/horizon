@@ -1,5 +1,6 @@
 #include "tool_renumber_pads.hpp"
-#include "core_package.hpp"
+#include "idocument_package.hpp"
+#include "pool/package.hpp"
 #include "imp/imp_interface.hpp"
 #include "dialogs/renumber_pads_window.hpp"
 #include "canvas/canvas_gl.hpp"
