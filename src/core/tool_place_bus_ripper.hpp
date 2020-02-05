@@ -1,6 +1,6 @@
 #pragma once
 #include "block/bus.hpp"
-#include "core.hpp"
+#include "tool.hpp"
 #include "tool_place_junction.hpp"
 #include "tool_helper_move.hpp"
 

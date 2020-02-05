@@ -1,7 +1,8 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
 #include "tool_helper_map_symbol.hpp"
 #include "tool_helper_move.hpp"
+#include <list>
 
 namespace horizon {
 class ToolMapSymbol : public ToolHelperMapSymbol, public ToolHelperMove {

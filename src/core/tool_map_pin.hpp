@@ -1,5 +1,5 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
 
 namespace horizon {
 class ToolMapPin : public ToolBase {
@@ -10,9 +10,9 @@ public:
     bool can_begin() override;
 
 private:
-    std::vector<std::pair<const Pin *, bool>> pins;
+    std::vector<std::pair<const class Pin *, bool>> pins;
     unsigned int pin_index = 0;
-    SymbolPin *pin = nullptr;
+    class SymbolPin *pin = nullptr;
     SymbolPin *pin_last = nullptr;
     SymbolPin *pin_last2 = nullptr;
     void create_pin(const UUID &uu);

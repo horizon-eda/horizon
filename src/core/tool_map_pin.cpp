@@ -6,6 +6,7 @@
 #include "util/util.hpp"
 #include <algorithm>
 #include <iostream>
+#include <gdk/gdkkeysyms.h>
 
 namespace horizon {
 

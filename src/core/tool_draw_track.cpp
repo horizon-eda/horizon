@@ -3,6 +3,7 @@
 #include "idocument_board.hpp"
 #include "board/board.hpp"
 #include <iostream>
+#include <gdk/gdkkeysyms.h>
 
 namespace horizon {
 

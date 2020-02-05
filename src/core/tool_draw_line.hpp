@@ -1,5 +1,5 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
 #include "tool_helper_line_width_setting.hpp"
 #include "tool_helper_restrict.hpp"
 
@@ -19,8 +19,8 @@ public:
     void apply_settings() override;
 
 private:
-    Junction *temp_junc = 0;
-    Line *temp_line = 0;
+    class Junction *temp_junc = 0;
+    class Line *temp_line = 0;
     void update_tip();
     bool first_line = true;
     std::set<const Junction *> junctions_created;

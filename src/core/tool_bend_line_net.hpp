@@ -1,5 +1,5 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
 #include <forward_list>
 
 namespace horizon {
@@ -16,7 +16,7 @@ public:
     }
 
 private:
-    Junction *temp = 0;
+    class Junction *temp = 0;
     std::forward_list<Junction *> junctions_placed;
 };
 } // namespace horizon

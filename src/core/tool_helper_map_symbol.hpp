@@ -1,5 +1,5 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
 
 namespace horizon {
 class ToolHelperMapSymbol : public virtual ToolBase {

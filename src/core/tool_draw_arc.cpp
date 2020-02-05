@@ -1,6 +1,9 @@
 #include "tool_draw_arc.hpp"
 #include "imp/imp_interface.hpp"
+#include "core/idocument.hpp"
 #include <iostream>
+#include "common/arc.hpp"
+#include <gdk/gdkkeysyms.h>
 
 namespace horizon {
 

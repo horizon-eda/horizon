@@ -1,5 +1,5 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
 #include "schematic/power_symbol.hpp"
 #include "tool_place_junction.hpp"
 #include <forward_list>

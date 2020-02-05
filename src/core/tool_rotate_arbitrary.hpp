@@ -1,5 +1,7 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
+#include "canvas/selectables.hpp"
+#include "util/placement.hpp"
 
 namespace horizon {
 

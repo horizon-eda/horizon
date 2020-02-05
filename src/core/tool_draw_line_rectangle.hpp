@@ -1,5 +1,5 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
 #include "tool_helper_line_width_setting.hpp"
 
 namespace horizon {

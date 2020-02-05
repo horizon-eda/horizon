@@ -1,5 +1,5 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
 #include "tool_helper_merge.hpp"
 #include "tool_helper_move.hpp"
 #include "nlohmann/json.hpp"

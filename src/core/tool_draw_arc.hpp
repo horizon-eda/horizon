@@ -1,5 +1,5 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
 #include "tool_helper_line_width_setting.hpp"
 
 namespace horizon {
@@ -14,11 +14,11 @@ public:
 
 private:
     enum class DrawArcState { FROM, TO, CENTER };
-    DrawArcState state;
-    Junction *temp_junc = 0;
+    DrawArcState state = DrawArcState::FROM;
+    class Junction *temp_junc = 0;
     Junction *from_junc = 0;
     Junction *to_junc = 0;
-    Arc *temp_arc = 0;
+    class Arc *temp_arc = 0;
     Junction *make_junction(const Coordi &coords);
     void update_tip();
 };

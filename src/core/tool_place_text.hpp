@@ -1,5 +1,5 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
 #include "tool_helper_move.hpp"
 #include <forward_list>
 #include <map>
@@ -45,7 +45,7 @@ protected:
     }
 
 private:
-    Text *temp = 0;
+    class Text *temp = 0;
     std::forward_list<Text *> texts_placed;
     Settings settings;
 };

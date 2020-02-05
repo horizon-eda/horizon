@@ -1,9 +1,11 @@
 #include "tool_line_loop_to_polygon.hpp"
 #include "common/polygon.hpp"
 #include "common/line.hpp"
+#include "common/arc.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>
 #include <functional>
+#include "idocument.hpp"
 
 namespace horizon {
 

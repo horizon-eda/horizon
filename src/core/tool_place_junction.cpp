@@ -3,6 +3,7 @@
 #include "schematic/schematic.hpp"
 #include "idocument_symbol.hpp"
 #include "pool/symbol.hpp"
+#include <gdk/gdkkeysyms.h>
 #include <iostream>
 
 namespace horizon {

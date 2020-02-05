@@ -2,6 +2,9 @@
 #include "imp/imp_interface.hpp"
 #include <iostream>
 #include "nlohmann/json.hpp"
+#include "common/text.hpp"
+#include "idocument.hpp"
+#include <gdk/gdkkeysyms.h>
 
 namespace horizon {
 

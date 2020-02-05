@@ -3,6 +3,8 @@
 #include "imp/imp_interface.hpp"
 #include "pool/part.hpp"
 #include <algorithm>
+#include "idocument.hpp"
+#include <gdk/gdkkeysyms.h>
 
 namespace horizon {
 ToolDrawDimension::ToolDrawDimension(IDocument *c, ToolID tid) : ToolBase(c, tid)

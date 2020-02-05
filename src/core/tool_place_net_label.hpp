@@ -1,5 +1,5 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
 #include "schematic/net_label.hpp"
 #include "tool_place_junction.hpp"
 #include "tool_helper_draw_net_setting.hpp"

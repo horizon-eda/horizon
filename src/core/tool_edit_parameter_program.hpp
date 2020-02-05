@@ -1,6 +1,6 @@
 #pragma once
 #include "block/component.hpp"
-#include "core.hpp"
+#include "tool.hpp"
 #include "imp/imp_interface.hpp"
 #include <forward_list>
 

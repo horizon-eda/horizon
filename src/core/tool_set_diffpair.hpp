@@ -1,5 +1,5 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
 #include <forward_list>
 
 namespace horizon {
@@ -15,6 +15,6 @@ public:
     }
 
 private:
-    std::pair<Net *, Net *> get_net();
+    std::pair<class Net *, Net *> get_net();
 };
 } // namespace horizon

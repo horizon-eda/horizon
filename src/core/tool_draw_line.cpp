@@ -3,6 +3,8 @@
 #include "pool/part.hpp"
 #include <algorithm>
 #include "nlohmann/json.hpp"
+#include "idocument.hpp"
+#include <gdk/gdkkeysyms.h>
 
 namespace horizon {
 

@@ -4,7 +4,7 @@
 #include "canvas/canvas_patch.hpp"
 #include "clipper/clipper.hpp"
 #include "common/hole.hpp"
-#include "core.hpp"
+#include "tool.hpp"
 #include <deque>
 
 namespace horizon {

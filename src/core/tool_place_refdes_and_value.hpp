@@ -1,5 +1,5 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
 #include <forward_list>
 #include <map>
 
@@ -13,7 +13,7 @@ public:
     bool can_begin() override;
 
 private:
-    Text *text_refdes = nullptr;
+    class Text *text_refdes = nullptr;
     Text *text_value = nullptr;
 
     void update_texts(const Coordi &c);

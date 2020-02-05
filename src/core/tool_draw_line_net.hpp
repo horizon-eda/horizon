@@ -1,5 +1,5 @@
 #pragma once
-#include "core.hpp"
+#include "tool.hpp"
 #include "tool_helper_merge.hpp"
 #include "tool_helper_draw_net_setting.hpp"
 
@@ -17,7 +17,7 @@ public:
     }
 
 private:
-    Junction *temp_junc_head = 0;
+    class Junction *temp_junc_head = 0;
     Junction *temp_junc_mid = 0;
     class LineNet *temp_line_head = 0;
     class LineNet *temp_line_mid = 0;

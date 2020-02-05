@@ -1,6 +1,6 @@
 #pragma once
 #include "common/polygon.hpp"
-#include "core.hpp"
+#include "tool.hpp"
 #include "tool_helper_restrict.hpp"
 
 namespace horizon {
