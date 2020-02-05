@@ -8,7 +8,7 @@ namespace horizon {
 
 class ToolPaste : public ToolHelperMove, public ToolHelperMerge {
 public:
-    ToolPaste(Core *c, ToolID tid);
+    ToolPaste(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override

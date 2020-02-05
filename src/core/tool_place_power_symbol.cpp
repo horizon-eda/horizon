@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-ToolPlacePowerSymbol::ToolPlacePowerSymbol(Core *c, ToolID tid) : ToolBase(c, tid), ToolPlaceJunction(c, tid)
+ToolPlacePowerSymbol::ToolPlacePowerSymbol(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolPlaceJunction(c, tid)
 {
 }
 

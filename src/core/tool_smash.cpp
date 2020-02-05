@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolSmash::ToolSmash(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolSmash::ToolSmash(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

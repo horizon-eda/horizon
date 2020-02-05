@@ -8,7 +8,7 @@ namespace horizon {
 
 class ToolEditParameterProgram : public ToolBase {
 public:
-    ToolEditParameterProgram(Core *c, ToolID tid);
+    ToolEditParameterProgram(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

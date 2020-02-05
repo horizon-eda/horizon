@@ -5,7 +5,7 @@ namespace horizon {
 
 class ToolDrawConnectionLine : public ToolBase {
 public:
-    ToolDrawConnectionLine(Core *c, ToolID tid);
+    ToolDrawConnectionLine(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

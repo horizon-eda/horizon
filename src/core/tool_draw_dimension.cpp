@@ -5,7 +5,7 @@
 #include <algorithm>
 
 namespace horizon {
-ToolDrawDimension::ToolDrawDimension(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolDrawDimension::ToolDrawDimension(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

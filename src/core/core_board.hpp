@@ -38,11 +38,11 @@ public:
     const Board *get_board() const;
     ViaPadstackProvider *get_via_padstack_provider() override;
     class Rules *get_rules() override;
-    FabOutputSettings *get_fab_output_settings()
+    FabOutputSettings *get_fab_output_settings() override
     {
         return &fab_output_settings;
     }
-    PDFExportSettings *get_pdf_export_settings()
+    PDFExportSettings *get_pdf_export_settings() override
     {
         return &pdf_export_settings;
     }

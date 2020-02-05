@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolDrawTrack::ToolDrawTrack(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolDrawTrack::ToolDrawTrack(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

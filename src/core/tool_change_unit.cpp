@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-ToolChangeUnit::ToolChangeUnit(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolChangeUnit::ToolChangeUnit(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

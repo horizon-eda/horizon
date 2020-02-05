@@ -5,7 +5,7 @@ namespace horizon {
 
 class ToolRotateArbitrary : public ToolBase {
 public:
-    ToolRotateArbitrary(Core *c, ToolID tid);
+    ToolRotateArbitrary(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

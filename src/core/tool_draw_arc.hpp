@@ -6,7 +6,7 @@ namespace horizon {
 
 class ToolDrawArc : public ToolHelperLineWidthSetting {
 public:
-    ToolDrawArc(Core *c, ToolID tid);
+    ToolDrawArc(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

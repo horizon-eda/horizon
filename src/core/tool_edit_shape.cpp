@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolEditShape::ToolEditShape(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolEditShape::ToolEditShape(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolBendLineNet::ToolBendLineNet(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolBendLineNet::ToolBendLineNet(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

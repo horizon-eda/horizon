@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolDisconnect::ToolDisconnect(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolDisconnect::ToolDisconnect(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

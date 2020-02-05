@@ -4,7 +4,7 @@
 namespace horizon {
 class ToolAddKeepout : public ToolBase {
 public:
-    ToolAddKeepout(Core *c, ToolID tid);
+    ToolAddKeepout(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

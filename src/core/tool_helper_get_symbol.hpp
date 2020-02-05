@@ -4,7 +4,7 @@
 namespace horizon {
 class ToolHelperGetSymbol : public virtual ToolBase {
 public:
-    ToolHelperGetSymbol(Core *c, ToolID tid) : ToolBase(c, tid)
+    ToolHelperGetSymbol(IDocument *c, ToolID tid) : ToolBase(c, tid)
     {
     }
 

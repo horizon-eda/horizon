@@ -6,7 +6,7 @@ namespace horizon {
 
 class ToolImportDXF : public ToolHelperMove {
 public:
-    ToolImportDXF(Core *c, ToolID tid);
+    ToolImportDXF(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args);
     ToolResponse update(const ToolArgs &args);
     bool can_begin();

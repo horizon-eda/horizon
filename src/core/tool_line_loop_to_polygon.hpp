@@ -5,7 +5,7 @@ namespace horizon {
 
 class ToolLineLoopToPolygon : public ToolBase {
 public:
-    ToolLineLoopToPolygon(Core *c, ToolID tid);
+    ToolLineLoopToPolygon(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

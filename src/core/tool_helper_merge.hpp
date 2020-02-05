@@ -4,7 +4,7 @@
 namespace horizon {
 class ToolHelperMerge : public virtual ToolBase {
 public:
-    ToolHelperMerge(class Core *c, ToolID tid) : ToolBase(c, tid)
+    ToolHelperMerge(class IDocument *c, ToolID tid) : ToolBase(c, tid)
     {
     }
 

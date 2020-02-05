@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolEditVia::ToolEditVia(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolEditVia::ToolEditVia(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

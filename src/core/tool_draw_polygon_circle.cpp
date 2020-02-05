@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolDrawPolygonCircle::ToolDrawPolygonCircle(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolDrawPolygonCircle::ToolDrawPolygonCircle(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

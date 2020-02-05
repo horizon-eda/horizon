@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-ToolDrawLine::ToolDrawLine(Core *c, ToolID tid) : ToolHelperLineWidthSetting(c, tid)
+ToolDrawLine::ToolDrawLine(IDocument *c, ToolID tid) : ToolHelperLineWidthSetting(c, tid)
 {
 }
 

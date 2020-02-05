@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-ToolPlaceBusLabel::ToolPlaceBusLabel(Core *c, ToolID tid) : ToolBase(c, tid), ToolPlaceJunction(c, tid)
+ToolPlaceBusLabel::ToolPlaceBusLabel(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolPlaceJunction(c, tid)
 {
 }
 

@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolSetDiffpair::ToolSetDiffpair(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolSetDiffpair::ToolSetDiffpair(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

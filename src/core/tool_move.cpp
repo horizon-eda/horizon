@@ -11,7 +11,7 @@
 
 namespace horizon {
 
-ToolMove::ToolMove(Core *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid), ToolHelperMerge(c, tid)
+ToolMove::ToolMove(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid), ToolHelperMerge(c, tid)
 {
 }
 

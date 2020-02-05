@@ -6,7 +6,7 @@ namespace horizon {
 
 class ToolFix : public ToolBase {
 public:
-    ToolFix(Core *c, ToolID tid);
+    ToolFix(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

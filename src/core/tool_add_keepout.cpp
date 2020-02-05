@@ -8,7 +8,7 @@
 
 namespace horizon {
 
-ToolAddKeepout::ToolAddKeepout(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolAddKeepout::ToolAddKeepout(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

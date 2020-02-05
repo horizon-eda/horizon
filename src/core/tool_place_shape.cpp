@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolPlaceShape::ToolPlaceShape(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolPlaceShape::ToolPlaceShape(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

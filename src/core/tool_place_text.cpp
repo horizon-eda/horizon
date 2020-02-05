@@ -50,7 +50,7 @@ json ToolPlaceText::Settings::serialize() const
     return j;
 }
 
-ToolPlaceText::ToolPlaceText(Core *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid)
+ToolPlaceText::ToolPlaceText(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid)
 {
 }
 

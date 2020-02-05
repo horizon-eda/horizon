@@ -5,7 +5,7 @@
 namespace horizon {
 class ToolSetViaNet : public ToolBase {
 public:
-    ToolSetViaNet(Core *c, ToolID tid);
+    ToolSetViaNet(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

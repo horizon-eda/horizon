@@ -7,7 +7,7 @@ namespace horizon {
 
 class ToolChangeSymbol : public ToolHelperGetSymbol, public ToolHelperMapSymbol {
 public:
-    ToolChangeSymbol(Core *c, ToolID tid);
+    ToolChangeSymbol(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolSwapNets::ToolSwapNets(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolSwapNets::ToolSwapNets(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

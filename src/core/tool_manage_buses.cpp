@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-ToolManageBuses::ToolManageBuses(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolManageBuses::ToolManageBuses(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

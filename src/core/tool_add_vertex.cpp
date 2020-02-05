@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolAddVertex::ToolAddVertex(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolAddVertex::ToolAddVertex(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

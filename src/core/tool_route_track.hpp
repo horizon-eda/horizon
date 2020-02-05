@@ -11,7 +11,7 @@ namespace horizon {
 
 class ToolRouteTrack : public ToolBase {
 public:
-    ToolRouteTrack(Core *c, ToolID tid);
+    ToolRouteTrack(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

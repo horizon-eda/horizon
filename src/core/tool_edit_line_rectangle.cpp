@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolEditLineRectangle::ToolEditLineRectangle(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolEditLineRectangle::ToolEditLineRectangle(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolPlaceJunction::ToolPlaceJunction(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolPlaceJunction::ToolPlaceJunction(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

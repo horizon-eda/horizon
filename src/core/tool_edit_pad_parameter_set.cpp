@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolEditPadParameterSet::ToolEditPadParameterSet(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolEditPadParameterSet::ToolEditPadParameterSet(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

@@ -4,7 +4,7 @@
 
 namespace horizon {
 
-ToolEditParameterProgram::ToolEditParameterProgram(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolEditParameterProgram::ToolEditParameterProgram(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

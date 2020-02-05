@@ -4,7 +4,7 @@
 
 namespace horizon {
 
-ToolHelperLineWidthSetting::ToolHelperLineWidthSetting(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolHelperLineWidthSetting::ToolHelperLineWidthSetting(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

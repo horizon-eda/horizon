@@ -7,7 +7,7 @@ namespace horizon {
 
 class ToolPlaceBusLabel : public ToolPlaceJunction {
 public:
-    ToolPlaceBusLabel(Core *c, ToolID tid);
+    ToolPlaceBusLabel(IDocument *c, ToolID tid);
     bool can_begin() override;
 
 private:

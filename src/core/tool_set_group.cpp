@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolSetGroup::ToolSetGroup(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolSetGroup::ToolSetGroup(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

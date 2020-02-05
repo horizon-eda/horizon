@@ -9,7 +9,7 @@ namespace horizon {
 
 class ToolPlaceNetLabel : public ToolPlaceJunction, public ToolHelperDrawNetSetting {
 public:
-    ToolPlaceNetLabel(Core *c, ToolID tid);
+    ToolPlaceNetLabel(IDocument *c, ToolID tid);
     bool can_begin() override;
 
 protected:

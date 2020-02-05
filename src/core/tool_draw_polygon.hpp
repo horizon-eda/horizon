@@ -7,7 +7,7 @@ namespace horizon {
 
 class ToolDrawPolygon : public ToolBase, public ToolHelperRestrict {
 public:
-    ToolDrawPolygon(Core *c, ToolID tid);
+    ToolDrawPolygon(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

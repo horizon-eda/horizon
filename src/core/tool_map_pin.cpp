@@ -8,7 +8,7 @@
 
 namespace horizon {
 
-ToolMapPin::ToolMapPin(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolMapPin::ToolMapPin(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

@@ -12,7 +12,7 @@
 
 namespace horizon {
 
-ToolRotateArbitrary::ToolRotateArbitrary(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolRotateArbitrary::ToolRotateArbitrary(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

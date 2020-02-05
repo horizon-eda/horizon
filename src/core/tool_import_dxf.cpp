@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-ToolImportDXF::ToolImportDXF(Core *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid)
+ToolImportDXF::ToolImportDXF(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid)
 {
 }
 

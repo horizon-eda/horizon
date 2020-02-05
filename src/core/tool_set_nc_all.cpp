@@ -4,7 +4,7 @@
 
 namespace horizon {
 
-ToolSetNotConnectedAll::ToolSetNotConnectedAll(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolSetNotConnectedAll::ToolSetNotConnectedAll(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

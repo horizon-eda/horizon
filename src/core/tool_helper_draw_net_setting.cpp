@@ -4,7 +4,7 @@
 
 namespace horizon {
 
-ToolHelperDrawNetSetting::ToolHelperDrawNetSetting(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolHelperDrawNetSetting::ToolHelperDrawNetSetting(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

@@ -8,7 +8,7 @@ namespace horizon {
 
 class ToolPlacePowerSymbol : public ToolPlaceJunction {
 public:
-    ToolPlacePowerSymbol(Core *c, ToolID tid);
+    ToolPlacePowerSymbol(IDocument *c, ToolID tid);
     bool can_begin() override;
 
 protected:

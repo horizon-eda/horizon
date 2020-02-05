@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-ToolDrawLineNet::ToolDrawLineNet(Core *c, ToolID tid)
+ToolDrawLineNet::ToolDrawLineNet(IDocument *c, ToolID tid)
     : ToolBase(c, tid), ToolHelperMerge(c, tid), ToolHelperDrawNetSetting(c, tid)
 {
 }

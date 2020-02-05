@@ -6,7 +6,7 @@ namespace horizon {
 
 class ToolCopyTracks : public ToolBase {
 public:
-    ToolCopyTracks(Core *c, ToolID tid);
+    ToolCopyTracks(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

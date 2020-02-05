@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolSetViaNet::ToolSetViaNet(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolSetViaNet::ToolSetViaNet(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

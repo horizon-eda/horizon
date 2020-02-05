@@ -25,7 +25,7 @@ bool ToolBackannotateConnectionLines::ToolDataBackannotate::Item::is_valid() con
     return component || net;
 }
 
-ToolBackannotateConnectionLines::ToolBackannotateConnectionLines(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolBackannotateConnectionLines::ToolBackannotateConnectionLines(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

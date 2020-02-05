@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolPlaceRefdesAndValue::ToolPlaceRefdesAndValue(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolPlaceRefdesAndValue::ToolPlaceRefdesAndValue(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

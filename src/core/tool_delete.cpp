@@ -11,7 +11,7 @@
 
 namespace horizon {
 
-ToolDelete::ToolDelete(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolDelete::ToolDelete(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 
@@ -41,9 +41,9 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
                 }
             }
             if (core.b) {
-                for (const auto track : core.b->get_tracks()) {
-                    if (track->to.junc.uuid == it.uuid || track->from.junc.uuid == it.uuid) {
-                        delete_extra.emplace(track->uuid, ObjectType::TRACK);
+                for (const auto &it_track : core.b->get_board()->tracks) {
+                    if (it_track.second.to.junc.uuid == it.uuid || it_track.second.from.junc.uuid == it.uuid) {
+                        delete_extra.emplace(it_track.second.uuid, ObjectType::TRACK);
                     }
                 }
             }

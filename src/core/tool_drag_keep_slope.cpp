@@ -4,7 +4,7 @@
 
 namespace horizon {
 
-ToolDragKeepSlope::ToolDragKeepSlope(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolDragKeepSlope::ToolDragKeepSlope(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

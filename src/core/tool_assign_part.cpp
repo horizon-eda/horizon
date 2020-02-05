@@ -7,7 +7,7 @@
 
 namespace horizon {
 
-ToolAssignPart::ToolAssignPart(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolAssignPart::ToolAssignPart(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

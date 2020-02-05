@@ -7,7 +7,7 @@
 
 namespace horizon {
 
-ToolDrawConnectionLine::ToolDrawConnectionLine(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolDrawConnectionLine::ToolDrawConnectionLine(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

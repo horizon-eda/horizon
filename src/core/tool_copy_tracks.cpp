@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolCopyTracks::ToolCopyTracks(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolCopyTracks::ToolCopyTracks(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

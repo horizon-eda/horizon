@@ -10,7 +10,7 @@
 
 namespace horizon {
 
-ToolEnterDatum::ToolEnterDatum(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolEnterDatum::ToolEnterDatum(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

@@ -4,7 +4,7 @@
 
 namespace horizon {
 
-ToolSmashSilkscreenGraphics::ToolSmashSilkscreenGraphics(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolSmashSilkscreenGraphics::ToolSmashSilkscreenGraphics(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

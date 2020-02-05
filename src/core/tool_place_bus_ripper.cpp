@@ -7,7 +7,7 @@
 
 namespace horizon {
 
-ToolPlaceBusRipper::ToolPlaceBusRipper(Core *c, ToolID tid)
+ToolPlaceBusRipper::ToolPlaceBusRipper(IDocument *c, ToolID tid)
     : ToolBase(c, tid), ToolPlaceJunction(c, tid), ToolHelperMove(c, tid)
 {
 }

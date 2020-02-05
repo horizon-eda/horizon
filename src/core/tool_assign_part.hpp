@@ -7,7 +7,7 @@ namespace horizon {
 
 class ToolAssignPart : public ToolBase {
 public:
-    ToolAssignPart(Core *c, ToolID tid);
+    ToolAssignPart(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

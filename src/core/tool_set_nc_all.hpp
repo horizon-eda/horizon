@@ -6,7 +6,7 @@ namespace horizon {
 
 class ToolSetNotConnectedAll : public ToolBase {
 public:
-    ToolSetNotConnectedAll(Core *c, ToolID tid);
+    ToolSetNotConnectedAll(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

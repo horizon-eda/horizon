@@ -429,9 +429,9 @@ bool Dialogs::edit_keepout(class Keepout *keepout, class IDocument *c, bool add_
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_stackup(class CoreBoard *core)
+bool Dialogs::edit_stackup(class IDocumentBoard *doc)
 {
-    EditStackupDialog dia(parent, core);
+    EditStackupDialog dia(parent, doc);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 

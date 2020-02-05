@@ -4,7 +4,7 @@
 namespace horizon {
 class ToolMapPin : public ToolBase {
 public:
-    ToolMapPin(Core *c, ToolID tid);
+    ToolMapPin(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

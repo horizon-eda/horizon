@@ -7,7 +7,7 @@
 
 namespace horizon {
 
-ToolRouteTrack::ToolRouteTrack(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolRouteTrack::ToolRouteTrack(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

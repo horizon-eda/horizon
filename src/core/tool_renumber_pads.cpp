@@ -7,7 +7,7 @@
 
 namespace horizon {
 
-ToolRenumberPads::ToolRenumberPads(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolRenumberPads::ToolRenumberPads(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

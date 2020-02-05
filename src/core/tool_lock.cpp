@@ -4,7 +4,7 @@
 
 namespace horizon {
 
-ToolLock::ToolLock(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolLock::ToolLock(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

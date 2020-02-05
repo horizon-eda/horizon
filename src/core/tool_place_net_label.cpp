@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-ToolPlaceNetLabel::ToolPlaceNetLabel(Core *c, ToolID tid)
+ToolPlaceNetLabel::ToolPlaceNetLabel(IDocument *c, ToolID tid)
     : ToolBase(c, tid), ToolPlaceJunction(c, tid), ToolHelperDrawNetSetting(c, tid)
 {
 }

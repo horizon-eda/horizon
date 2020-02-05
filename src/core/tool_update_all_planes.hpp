@@ -6,7 +6,7 @@ namespace horizon {
 
 class ToolUpdateAllPlanes : public ToolBase {
 public:
-    ToolUpdateAllPlanes(Core *c, ToolID tid);
+    ToolUpdateAllPlanes(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

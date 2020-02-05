@@ -8,7 +8,7 @@
 
 namespace horizon {
 
-ToolImportKiCadPackage::ToolImportKiCadPackage(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolImportKiCadPackage::ToolImportKiCadPackage(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

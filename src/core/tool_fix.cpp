@@ -4,7 +4,7 @@
 
 namespace horizon {
 
-ToolFix::ToolFix(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolFix::ToolFix(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

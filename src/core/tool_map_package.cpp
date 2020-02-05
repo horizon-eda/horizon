@@ -5,7 +5,7 @@
 #include <iostream>
 
 namespace horizon {
-ToolMapPackage::ToolMapPackage(Core *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid)
+ToolMapPackage::ToolMapPackage(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid)
 {
 }
 

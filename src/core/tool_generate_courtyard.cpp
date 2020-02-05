@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-ToolGenerateCourtyard::ToolGenerateCourtyard(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolGenerateCourtyard::ToolGenerateCourtyard(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

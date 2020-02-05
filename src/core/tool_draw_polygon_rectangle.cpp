@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolDrawPolygonRectangle::ToolDrawPolygonRectangle(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolDrawPolygonRectangle::ToolDrawPolygonRectangle(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

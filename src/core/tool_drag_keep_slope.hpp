@@ -7,7 +7,7 @@ namespace horizon {
 
 class ToolDragKeepSlope : public ToolBase {
 public:
-    ToolDragKeepSlope(Core *c, ToolID tid);
+    ToolDragKeepSlope(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

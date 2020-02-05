@@ -7,7 +7,7 @@ namespace horizon {
 
 class ToolMove : public ToolHelperMove, public ToolHelperMerge {
 public:
-    ToolMove(Core *c, ToolID tid);
+    ToolMove(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

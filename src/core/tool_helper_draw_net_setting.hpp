@@ -5,7 +5,7 @@ namespace horizon {
 
 class ToolHelperDrawNetSetting : public virtual ToolBase {
 public:
-    ToolHelperDrawNetSetting(Core *c, ToolID tid);
+    ToolHelperDrawNetSetting(IDocument *c, ToolID tid);
     class Settings : public ToolSettings {
     public:
         json serialize() const override;

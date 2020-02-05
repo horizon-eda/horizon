@@ -7,7 +7,7 @@ namespace horizon {
 using json = nlohmann::json;
 class ToolBackannotateConnectionLines : public ToolBase {
 public:
-    ToolBackannotateConnectionLines(Core *c, ToolID tid);
+    ToolBackannotateConnectionLines(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

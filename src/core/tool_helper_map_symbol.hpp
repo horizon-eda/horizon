@@ -4,7 +4,7 @@
 namespace horizon {
 class ToolHelperMapSymbol : public virtual ToolBase {
 public:
-    ToolHelperMapSymbol(Core *c, ToolID tid) : ToolBase(c, tid)
+    ToolHelperMapSymbol(IDocument *c, ToolID tid) : ToolBase(c, tid)
     {
     }
 

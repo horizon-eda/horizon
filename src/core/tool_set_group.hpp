@@ -4,7 +4,7 @@
 namespace horizon {
 class ToolSetGroup : public ToolBase {
 public:
-    ToolSetGroup(Core *c, ToolID tid);
+    ToolSetGroup(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

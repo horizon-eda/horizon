@@ -5,7 +5,7 @@ namespace horizon {
 
 class ToolDrawPolygonRectangle : public ToolBase {
 public:
-    ToolDrawPolygonRectangle(Core *c, ToolID tid);
+    ToolDrawPolygonRectangle(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

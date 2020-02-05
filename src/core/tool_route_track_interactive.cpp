@@ -34,7 +34,7 @@ public:
     ToolRouteTrackInteractive *tool = nullptr;
 };
 
-ToolRouteTrackInteractive::ToolRouteTrackInteractive(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolRouteTrackInteractive::ToolRouteTrackInteractive(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

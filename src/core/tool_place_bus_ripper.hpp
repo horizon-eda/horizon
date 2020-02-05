@@ -8,7 +8,7 @@ namespace horizon {
 
 class ToolPlaceBusRipper : public ToolPlaceJunction, public ToolHelperMove {
 public:
-    ToolPlaceBusRipper(Core *c, ToolID tid);
+    ToolPlaceBusRipper(IDocument *c, ToolID tid);
     bool can_begin() override;
 
 private:

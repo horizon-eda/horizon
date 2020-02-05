@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolDrawPolygon::ToolDrawPolygon(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolDrawPolygon::ToolDrawPolygon(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

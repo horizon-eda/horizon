@@ -7,7 +7,7 @@
 
 namespace horizon {
 
-ToolEditPlane::ToolEditPlane(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolEditPlane::ToolEditPlane(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-ToolMapSymbol::ToolMapSymbol(Core *c, ToolID tid)
+ToolMapSymbol::ToolMapSymbol(IDocument *c, ToolID tid)
     : ToolBase(c, tid), ToolHelperMapSymbol(c, tid), ToolHelperMove(c, tid)
 {
 }

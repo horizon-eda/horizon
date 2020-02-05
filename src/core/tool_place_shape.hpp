@@ -7,7 +7,7 @@ namespace horizon {
 
 class ToolPlaceShape : public ToolBase {
 public:
-    ToolPlaceShape(Core *c, ToolID tid);
+    ToolPlaceShape(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

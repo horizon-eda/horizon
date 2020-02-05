@@ -7,7 +7,7 @@
 
 namespace horizon {
 
-ToolPolygonToLineLoop::ToolPolygonToLineLoop(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolPolygonToLineLoop::ToolPolygonToLineLoop(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

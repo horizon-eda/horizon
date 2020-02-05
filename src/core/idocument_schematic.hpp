@@ -14,7 +14,7 @@ public:
     virtual class LineNet *insert_line_net(const UUID &uu) = 0;
     virtual void delete_line_net(const UUID &uu) = 0;
 
-    virtual std::vector<LineNet *> get_net_lines() = 0;
-    virtual std::vector<NetLabel *> get_net_labels() = 0;
+    virtual std::vector<class LineNet *> get_net_lines() = 0;
+    virtual std::vector<class NetLabel *> get_net_labels() = 0;
 };
 } // namespace horizon

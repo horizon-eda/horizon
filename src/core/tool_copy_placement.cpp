@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolCopyPlacement::ToolCopyPlacement(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolCopyPlacement::ToolCopyPlacement(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

@@ -6,7 +6,7 @@ namespace horizon {
 
 class ToolBendLineNet : public ToolBase {
 public:
-    ToolBendLineNet(Core *c, ToolID tid);
+    ToolBendLineNet(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

@@ -7,7 +7,7 @@ namespace horizon {
 
 class ToolPlaceVia : public ToolPlaceJunction {
 public:
-    ToolPlaceVia(Core *c, ToolID tid);
+    ToolPlaceVia(IDocument *c, ToolID tid);
     bool can_begin() override;
 
 protected:

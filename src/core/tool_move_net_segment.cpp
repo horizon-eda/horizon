@@ -6,7 +6,7 @@
 
 namespace horizon {
 
-ToolMoveNetSegment::ToolMoveNetSegment(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolMoveNetSegment::ToolMoveNetSegment(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

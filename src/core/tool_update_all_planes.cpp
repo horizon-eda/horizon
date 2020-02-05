@@ -3,7 +3,7 @@
 
 namespace horizon {
 
-ToolUpdateAllPlanes::ToolUpdateAllPlanes(Core *c, ToolID tid) : ToolBase(c, tid)
+ToolUpdateAllPlanes::ToolUpdateAllPlanes(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
 }
 

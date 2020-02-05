@@ -5,7 +5,7 @@ namespace horizon {
 
 class ToolHelperLineWidthSetting : public ToolBase {
 public:
-    ToolHelperLineWidthSetting(Core *c, ToolID tid);
+    ToolHelperLineWidthSetting(IDocument *c, ToolID tid);
     class Settings : public ToolSettings {
     public:
         json serialize() const override;

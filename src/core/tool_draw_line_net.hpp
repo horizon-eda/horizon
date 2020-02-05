@@ -7,7 +7,7 @@ namespace horizon {
 
 class ToolDrawLineNet : public ToolHelperMerge, public ToolHelperDrawNetSetting {
 public:
-    ToolDrawLineNet(Core *c, ToolID tid);
+    ToolDrawLineNet(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

@@ -150,7 +150,7 @@ private:
  */
 class ToolBase {
 public:
-    ToolBase(class Core *c, ToolID tid);
+    ToolBase(class IDocument *c, ToolID tid);
     void set_imp_interface(class ImpInterface *i);
     void set_transient();
     virtual ToolID get_tool_id_for_settings() const

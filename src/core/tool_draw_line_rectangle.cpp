@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-ToolDrawLineRectangle::ToolDrawLineRectangle(Core *c, ToolID tid) : ToolHelperLineWidthSetting(c, tid)
+ToolDrawLineRectangle::ToolDrawLineRectangle(IDocument *c, ToolID tid) : ToolHelperLineWidthSetting(c, tid)
 {
 }
 
