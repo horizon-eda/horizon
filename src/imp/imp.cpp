@@ -260,7 +260,10 @@ void ImpBase::run(int argc, char *argv[])
 
     main_window = MainWindow::create();
     canvas = main_window->canvas;
-    clipboard.reset(new ClipboardManager(core.r));
+    {
+        Documents docs(core.r);
+        clipboard.reset(new ClipboardManager(docs));
+    }
 
     canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBase::sc));
     canvas->signal_key_press_event().connect(sigc::mem_fun(*this, &ImpBase::handle_key_press));

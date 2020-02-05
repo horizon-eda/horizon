@@ -19,12 +19,12 @@ ToolResponse ToolPlacePad::begin(const ToolArgs &args)
     std::cout << "tool add comp\n";
     bool r;
     UUID padstack_uuid;
-    std::tie(r, padstack_uuid) = imp->dialogs.select_padstack(core.r->m_pool, core.k->get_package()->uuid);
+    std::tie(r, padstack_uuid) = imp->dialogs.select_padstack(core.r->get_pool(), core.k->get_package()->uuid);
     if (!r) {
         return ToolResponse::end();
     }
 
-    padstack = core.r->m_pool->get_padstack(padstack_uuid);
+    padstack = core.r->get_pool()->get_padstack(padstack_uuid);
     create_pad(args.coords);
 
     imp->tool_bar_set_tip(
@@ -83,7 +83,8 @@ ToolResponse ToolPlacePad::update(const ToolArgs &args)
         else if (args.key == GDK_KEY_i) {
             std::set<Pad *> pads{temp};
             auto params = temp->parameter_set;
-            if (imp->dialogs.edit_pad_parameter_set(pads, core.r->m_pool, core.k->get_package()) == false) { // rollback
+            if (imp->dialogs.edit_pad_parameter_set(pads, core.r->get_pool(), core.k->get_package())
+                == false) { // rollback
                 temp->parameter_set = params;
             }
             core.k->get_package()->apply_parameter_set({});

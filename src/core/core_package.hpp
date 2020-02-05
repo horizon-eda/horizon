@@ -6,14 +6,15 @@
 #include <deque>
 #include <iostream>
 #include <memory>
+#include "idocument_package.hpp"
 
 namespace horizon {
-class CorePackage : public Core {
+class CorePackage : public Core, public virtual IDocumentPackage {
 public:
     CorePackage(const std::string &filename, Pool &pool);
     bool has_object_type(ObjectType ty) const override;
 
-    Package *get_package();
+    Package *get_package() override;
 
     /*Polygon *insert_polygon(const UUID &uu);
     Polygon *get_polygon(const UUID &uu=true);

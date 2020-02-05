@@ -4,11 +4,12 @@
 #include "pool/pool.hpp"
 #include "pool/symbol.hpp"
 #include "schematic/schematic.hpp"
+#include "idocument_schematic.hpp"
 #include <iostream>
 #include <memory>
 
 namespace horizon {
-class CoreSchematic : public Core {
+class CoreSchematic : public Core, public virtual IDocumentSchematic {
 public:
     CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, Pool &pool);
     bool has_object_type(ObjectType ty) const override;
@@ -16,9 +17,9 @@ public:
     Junction *get_junction(const UUID &uu) override;
     Line *get_line(const UUID &uu) override;
     Arc *get_arc(const UUID &uu) override;
-    SchematicSymbol *get_schematic_symbol(const UUID &uu);
-    Schematic *get_schematic();
-    Sheet *get_sheet();
+    SchematicSymbol *get_schematic_symbol(const UUID &uu) override;
+    Schematic *get_schematic() override;
+    Sheet *get_sheet() override;
     Text *get_text(const UUID &uu) override;
 
     Junction *insert_junction(const UUID &uu) override;
@@ -27,19 +28,19 @@ public:
     void delete_line(const UUID &uu) override;
     Arc *insert_arc(const UUID &uu) override;
     void delete_arc(const UUID &uu) override;
-    SchematicSymbol *insert_schematic_symbol(const UUID &uu, const Symbol *sym);
-    void delete_schematic_symbol(const UUID &uu);
+    SchematicSymbol *insert_schematic_symbol(const UUID &uu, const Symbol *sym) override;
+    void delete_schematic_symbol(const UUID &uu) override;
 
-    LineNet *insert_line_net(const UUID &uu);
-    void delete_line_net(const UUID &uu);
+    LineNet *insert_line_net(const UUID &uu) override;
+    void delete_line_net(const UUID &uu) override;
 
     Text *insert_text(const UUID &uu) override;
     void delete_text(const UUID &uu) override;
 
     std::vector<Line *> get_lines() override;
     std::vector<Arc *> get_arcs() override;
-    std::vector<LineNet *> get_net_lines();
-    std::vector<NetLabel *> get_net_labels();
+    std::vector<LineNet *> get_net_lines() override;
+    std::vector<NetLabel *> get_net_labels() override;
 
     class Block *get_block() override;
     class LayerProvider *get_layer_provider() override;

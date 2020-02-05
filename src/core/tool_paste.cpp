@@ -18,7 +18,7 @@ ToolPaste::ToolPaste(Core *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, 
 
 class JunctionProvider : public ObjectProvider {
 public:
-    JunctionProvider(Core *c, const std::map<UUID, const UUID> &xj) : core(c), junction_xlat(xj)
+    JunctionProvider(IDocument *c, const std::map<UUID, const UUID> &xj) : core(c), junction_xlat(xj)
     {
     }
     virtual ~JunctionProvider()
@@ -31,7 +31,7 @@ public:
     }
 
 private:
-    Core *core;
+    IDocument *core;
     const std::map<UUID, const UUID> &junction_xlat;
 };
 
@@ -127,7 +127,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         int max_name = core.k->get_package()->get_max_pad_name();
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto &x = core.k->get_package()->pads.emplace(u, Pad(u, it.value(), *core.r->m_pool)).first->second;
+            auto &x = core.k->get_package()->pads.emplace(u, Pad(u, it.value(), *core.r->get_pool())).first->second;
             apply_shift(x.placement.shift, cursor_pos_canvas);
             pads.push_back(&x);
             selection.emplace(u, ObjectType::PAD);
@@ -203,7 +203,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             component_xlat.emplace(it.key(), u);
-            Component comp(u, it.value(), *core.r->m_pool);
+            Component comp(u, it.value(), *core.r->get_pool());
             for (auto &it_conn : comp.connections) {
                 it_conn.second.net = &block->nets.at(net_xlat.at(it_conn.second.net.uuid));
             }
@@ -218,7 +218,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             symbol_xlat.emplace(it.key(), u);
-            SchematicSymbol sym(u, it.value(), *core.r->m_pool);
+            SchematicSymbol sym(u, it.value(), *core.r->get_pool());
             sym.component = &block->components.at(component_xlat.at(sym.component.uuid));
             sym.gate = &sym.component->entity->gates.at(sym.gate.uuid);
             auto x = &sheet->symbols.emplace(u, sym).first->second;
@@ -326,7 +326,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             auto brd = core.b->get_board();
             auto x = &brd->holes
                               .emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                                       std::forward_as_tuple(u, it.value(), nullptr, core.r->m_pool))
+                                       std::forward_as_tuple(u, it.value(), nullptr, core.r->get_pool()))
                               .first->second;
             if (net_xlat.count(x->net.uuid)) {
                 x->net = &brd->block->nets.at(net_xlat.at(x->net.uuid));
@@ -364,7 +364,7 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
     }
 
     if (tool_id == ToolID::DUPLICATE) {
-        Buffer buffer(core.r);
+        Buffer buffer(core);
         buffer.load(args.selection);
         paste_data = buffer.serialize();
         paste_data["cursor_pos"] = args.coords.as_array();

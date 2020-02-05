@@ -50,13 +50,13 @@ ToolResponse ToolAssignPart::begin(const ToolArgs &args)
     }
     if (!part_uuid) {
         auto current_part_uuid = comp->part ? comp->part->uuid : UUID();
-        auto r = imp->dialogs.select_part(core.r->m_pool, entity->uuid, current_part_uuid, true);
+        auto r = imp->dialogs.select_part(core.r->get_pool(), entity->uuid, current_part_uuid, true);
         if (r.first) {
             part_uuid = r.second;
         }
     }
     if (part_uuid) {
-        auto part = core.r->m_pool->get_part(part_uuid);
+        auto part = core.r->get_pool()->get_part(part_uuid);
         if (part->entity->uuid != entity->uuid) {
             imp->tool_bar_flash("wrong entity");
             return ToolResponse::end();

@@ -9,7 +9,7 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
     UUID selected_symbol;
 
     std::string query = "SELECT symbols.uuid FROM symbols WHERE symbols.unit = ?";
-    SQLite::Query q(core.r->m_pool->db, query);
+    SQLite::Query q(core.r->get_pool()->db, query);
     q.bind(1, unit_uu);
     int n = 0;
     while (q.step()) {
@@ -20,7 +20,7 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
         *auto_selected = false;
     bool r = false;
     if (n != 1) {
-        std::tie(r, selected_symbol) = imp->dialogs.select_symbol(core.r->m_pool, unit_uu);
+        std::tie(r, selected_symbol) = imp->dialogs.select_symbol(core.r->get_pool(), unit_uu);
         if (!r) {
             return nullptr;
         }
@@ -33,7 +33,7 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
         return nullptr;
     }
 
-    return core.c->m_pool->get_symbol(selected_symbol);
+    return core.c->get_pool()->get_symbol(selected_symbol);
 }
 
 

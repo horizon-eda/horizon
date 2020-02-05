@@ -4,14 +4,15 @@
 #include <iostream>
 #include <memory>
 #include "nlohmann/json.hpp"
+#include "idocument_frame.hpp"
 
 namespace horizon {
-class CoreFrame : public Core {
+class CoreFrame : public Core, public IDocumentFrame {
 public:
     CoreFrame(const std::string &frame_filename);
     bool has_object_type(ObjectType ty) const override;
 
-    Frame *get_frame();
+    Frame *get_frame() override;
     const Frame *get_canvas_data() const;
     class LayerProvider *get_layer_provider() override;
 

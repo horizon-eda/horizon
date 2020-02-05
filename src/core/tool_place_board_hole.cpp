@@ -19,12 +19,12 @@ ToolResponse ToolPlaceBoardHole::begin(const ToolArgs &args)
     std::cout << "tool add comp\n";
     bool r;
     UUID padstack_uuid;
-    std::tie(r, padstack_uuid) = imp->dialogs.select_hole_padstack(core.r->m_pool);
+    std::tie(r, padstack_uuid) = imp->dialogs.select_hole_padstack(core.r->get_pool());
     if (!r) {
         return ToolResponse::end();
     }
 
-    padstack = core.r->m_pool->get_padstack(padstack_uuid);
+    padstack = core.r->get_pool()->get_padstack(padstack_uuid);
     create_hole(args.coords);
 
     imp->tool_bar_set_tip("<b>LMB:</b>place pad <b>RMB:</b>delete current pad and finish");

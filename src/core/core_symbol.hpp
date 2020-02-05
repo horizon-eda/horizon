@@ -5,17 +5,18 @@
 #include <deque>
 #include <iostream>
 #include <memory>
+#include "idocument_symbol.hpp"
 
 namespace horizon {
-class CoreSymbol : public Core {
+class CoreSymbol : public Core, public IDocumentSymbol {
 public:
     CoreSymbol(const std::string &filename, Pool &pool);
     bool has_object_type(ObjectType ty) const override;
-    Symbol *get_symbol();
+    Symbol *get_symbol() override;
 
     Junction *get_junction(const UUID &uu) override;
     Line *get_line(const UUID &uu) override;
-    SymbolPin *get_symbol_pin(const UUID &uu);
+    SymbolPin *get_symbol_pin(const UUID &uu) override;
     Arc *get_arc(const UUID &uu) override;
 
     Junction *insert_junction(const UUID &uu) override;
@@ -25,14 +26,14 @@ public:
     Arc *insert_arc(const UUID &uu) override;
     void delete_arc(const UUID &uu) override;
 
-    SymbolPin *insert_symbol_pin(const UUID &uu);
-    void delete_symbol_pin(const UUID &uu);
+    SymbolPin *insert_symbol_pin(const UUID &uu) override;
+    void delete_symbol_pin(const UUID &uu) override;
 
     class LayerProvider *get_layer_provider() override;
 
     std::vector<Line *> get_lines() override;
     std::vector<Arc *> get_arcs() override;
-    std::vector<const Pin *> get_pins();
+    std::vector<const Pin *> get_pins() override;
 
     void rebuild(bool from_undo = false) override;
 

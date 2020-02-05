@@ -19,11 +19,11 @@ ToolResponse ToolChangeUnit::begin(const ToolArgs &args)
 {
     bool r;
     UUID unit_uuid;
-    std::tie(r, unit_uuid) = imp->dialogs.select_unit(core.r->m_pool);
+    std::tie(r, unit_uuid) = imp->dialogs.select_unit(core.r->get_pool());
     if (!r) {
         return ToolResponse::end();
     }
-    auto new_unit = core.r->m_pool->get_unit(unit_uuid);
+    auto new_unit = core.r->get_pool()->get_unit(unit_uuid);
     auto sym = core.y->get_symbol();
     const auto old_unit = sym->unit;
     std::map<UUID, UUID> pinmap; // old pin->new pin

@@ -6,9 +6,10 @@
 #include <iostream>
 #include <memory>
 #include "nlohmann/json.hpp"
+#include "idocument_board.hpp"
 
 namespace horizon {
-class CoreBoard : public Core {
+class CoreBoard : public Core, public virtual IDocumentBoard {
 public:
     CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
               Pool &pool);
@@ -33,9 +34,9 @@ public:
     void reload_netlist();
 
     const Board *get_canvas_data();
-    Board *get_board();
+    Board *get_board() override;
     const Board *get_board() const;
-    ViaPadstackProvider *get_via_padstack_provider();
+    ViaPadstackProvider *get_via_padstack_provider() override;
     class Rules *get_rules() override;
     FabOutputSettings *get_fab_output_settings()
     {

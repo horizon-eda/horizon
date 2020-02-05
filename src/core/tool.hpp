@@ -5,7 +5,7 @@
 #include "canvas/target.hpp"
 #include "tool_data.hpp"
 #include "nlohmann/json_fwd.hpp"
-#include "cores.hpp"
+#include "documents.hpp"
 #include <set>
 #include <memory>
 
@@ -214,7 +214,7 @@ public:
     }
 
 protected:
-    Cores core;
+    Documents core;
     class ImpInterface *imp = nullptr;
     ToolID tool_id = ToolID::NONE;
     bool is_transient = false;

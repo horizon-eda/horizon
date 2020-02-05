@@ -235,6 +235,7 @@ SRC_IMP = \
 	src/core/tool_fix.cpp\
 	src/core/tool_polygon_to_line_loop.cpp\
 	src/core/cores.cpp\
+	src/core/documents.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\
 	src/dialogs/map_pin.cpp\

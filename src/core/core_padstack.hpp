@@ -6,9 +6,10 @@
 #include <deque>
 #include <iostream>
 #include <memory>
+#include "idocument_padstack.hpp"
 
 namespace horizon {
-class CorePadstack : public Core {
+class CorePadstack : public Core, public virtual IDocumentPadstack {
 public:
     CorePadstack(const std::string &filename, Pool &pool);
     bool has_object_type(ObjectType ty) const override;
@@ -17,7 +18,7 @@ public:
 
     void rebuild(bool from_undo = false) override;
 
-    Padstack *get_padstack();
+    Padstack *get_padstack() override;
 
     bool set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property,
                       const class PropertyValue &value) override;

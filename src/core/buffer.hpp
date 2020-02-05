@@ -9,7 +9,7 @@
 #include "common/polygon.hpp"
 #include "common/shape.hpp"
 #include "common/text.hpp"
-#include "cores.hpp"
+#include "documents.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "package/pad.hpp"
 #include "pool/symbol.hpp"
@@ -27,7 +27,7 @@
 namespace horizon {
 class Buffer {
 public:
-    Buffer(class Core *co);
+    Buffer(Documents &cr);
     void clear();
     void load(std::set<SelectableRef> selection);
 
@@ -54,7 +54,7 @@ public:
     json serialize();
 
 private:
-    Cores core;
+    Documents core;
     NetClass net_class_dummy;
 };
 } // namespace horizon

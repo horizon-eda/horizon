@@ -36,13 +36,13 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
             part_uuid = data->part_uuid;
         }
         if (!part_uuid) {
-            std::tie(r, part_uuid) = imp->dialogs.select_part(core.r->m_pool, UUID(), UUID());
+            std::tie(r, part_uuid) = imp->dialogs.select_part(core.r->get_pool(), UUID(), UUID());
             if (!r) {
                 return ToolResponse::end();
             }
         }
         imp->part_placed(part_uuid);
-        auto part = core.c->m_pool->get_part(part_uuid);
+        auto part = core.c->get_pool()->get_part(part_uuid);
 
         auto uu = UUID::random();
         comp = &sch->block->components.emplace(uu, uu).first->second;
@@ -51,13 +51,13 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
     }
     else {
         UUID entity_uuid;
-        std::tie(r, entity_uuid) = imp->dialogs.select_entity(core.r->m_pool);
+        std::tie(r, entity_uuid) = imp->dialogs.select_entity(core.r->get_pool());
         if (!r) {
             return ToolResponse::end();
         }
         auto uu = UUID::random();
         comp = &sch->block->components.emplace(uu, uu).first->second;
-        comp->entity = core.c->m_pool->get_entity(entity_uuid);
+        comp->entity = core.c->get_pool()->get_entity(entity_uuid);
     }
     comp->refdes = comp->entity->prefix + "?";
     comp->tag = create_tag();

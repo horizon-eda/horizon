@@ -15,6 +15,7 @@
 #include <sigc++/sigc++.h>
 #include "tool_id.hpp"
 #include "tool.hpp"
+#include "idocument.hpp"
 
 namespace horizon {
 
@@ -44,52 +45,62 @@ namespace horizon {
  *
  * The Core also handles undo/redo by storing a full copy for each step.
  */
-class Core {
+class Core : public virtual IDocument {
 public:
-    virtual bool has_object_type(ObjectType ty) const
+    bool has_object_type(ObjectType ty) const override
     {
         return false;
     }
 
-    virtual class Junction *insert_junction(const UUID &uu);
-    virtual class Junction *get_junction(const UUID &uu);
-    virtual void delete_junction(const UUID &uu);
+    class Junction *insert_junction(const UUID &uu) override;
+    class Junction *get_junction(const UUID &uu) override;
+    void delete_junction(const UUID &uu) override;
 
-    virtual class Line *insert_line(const UUID &uu);
-    virtual class Line *get_line(const UUID &uu);
-    virtual void delete_line(const UUID &uu);
+    class Line *insert_line(const UUID &uu) override;
+    class Line *get_line(const UUID &uu) override;
+    void delete_line(const UUID &uu) override;
 
-    virtual class Arc *insert_arc(const UUID &uu);
-    virtual class Arc *get_arc(const UUID &uu);
-    virtual void delete_arc(const UUID &uu);
+    class Arc *insert_arc(const UUID &uu) override;
+    class Arc *get_arc(const UUID &uu) override;
+    void delete_arc(const UUID &uu) override;
 
-    virtual class Text *insert_text(const UUID &uu);
-    virtual class Text *get_text(const UUID &uu);
-    virtual void delete_text(const UUID &uu);
+    class Text *insert_text(const UUID &uu) override;
+    class Text *get_text(const UUID &uu) override;
+    void delete_text(const UUID &uu) override;
 
-    virtual class Polygon *insert_polygon(const UUID &uu);
-    virtual class Polygon *get_polygon(const UUID &uu);
-    virtual void delete_polygon(const UUID &uu);
+    class Polygon *insert_polygon(const UUID &uu) override;
+    class Polygon *get_polygon(const UUID &uu) override;
+    void delete_polygon(const UUID &uu) override;
 
-    virtual class Hole *insert_hole(const UUID &uu);
-    virtual class Hole *get_hole(const UUID &uu);
-    virtual void delete_hole(const UUID &uu);
+    class Hole *insert_hole(const UUID &uu) override;
+    class Hole *get_hole(const UUID &uu) override;
+    void delete_hole(const UUID &uu) override;
 
-    virtual class Dimension *insert_dimension(const UUID &uu);
-    virtual class Dimension *get_dimension(const UUID &uu);
-    virtual void delete_dimension(const UUID &uu);
+    class Dimension *insert_dimension(const UUID &uu) override;
+    class Dimension *get_dimension(const UUID &uu) override;
+    void delete_dimension(const UUID &uu) override;
 
-    virtual class Keepout *insert_keepout(const UUID &uu);
-    virtual class Keepout *get_keepout(const UUID &uu);
-    virtual void delete_keepout(const UUID &uu);
+    class Keepout *insert_keepout(const UUID &uu) override;
+    class Keepout *get_keepout(const UUID &uu) override;
+    void delete_keepout(const UUID &uu) override;
 
-    virtual std::vector<Line *> get_lines();
-    virtual std::vector<Arc *> get_arcs();
-    virtual std::vector<Keepout *> get_keepouts();
+    std::vector<Line *> get_lines() override;
+    std::vector<Arc *> get_arcs() override;
+    std::vector<Keepout *> get_keepouts() override;
 
-    virtual class Block *get_block()
+    class Block *get_block() override
     {
         return nullptr;
+    }
+
+    class Rules *get_rules() override
+    {
+        return nullptr;
+    }
+
+    class Pool *get_pool() override
+    {
+        return m_pool;
     }
 
     /**
@@ -129,7 +140,7 @@ public:
     void set_property_commit();
     bool get_property_transaction() const;
 
-    virtual class LayerProvider *get_layer_provider()
+    class LayerProvider *get_layer_provider() override
     {
         return nullptr;
     };
@@ -140,10 +151,7 @@ public:
      */
     virtual json get_meta();
 
-    virtual class Rules *get_rules()
-    {
-        return nullptr;
-    }
+
     virtual void update_rules()
     {
     }
