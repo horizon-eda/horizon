@@ -1,8 +1,9 @@
 #include "step_export_window.hpp"
 #include "export_step/export_step.hpp"
+#include "board/step_export_settings.hpp"
 #include "util/util.hpp"
 #include "util/gtk_util.hpp"
-#include "core/core_board.hpp"
+#include "core/idocument_board.hpp"
 #include <thread>
 
 namespace horizon {
@@ -23,7 +24,7 @@ void StepExportWindow::MyExportFileChooser::prepare_filename(std::string &filena
     }
 }
 
-StepExportWindow *StepExportWindow::create(Gtk::Window *p, class CoreBoard *c, const std::string &project_dir)
+StepExportWindow *StepExportWindow::create(Gtk::Window *p, IDocumentBoard *c, const std::string &project_dir)
 {
     StepExportWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
@@ -33,7 +34,7 @@ StepExportWindow *StepExportWindow::create(Gtk::Window *p, class CoreBoard *c, c
     return w;
 }
 
-StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, CoreBoard *c,
+StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocumentBoard *c,
                                    const std::string &project_dir)
     : Gtk::Window(cobject), core(c), settings(*core->get_step_export_settings())
 {
@@ -98,7 +99,7 @@ void StepExportWindow::export_thread(STEPExportSettings my_settings)
 {
     try {
         export_step(
-                my_settings.filename, *core->get_board(), *core->m_pool, my_settings.include_3d_models,
+                my_settings.filename, *core->get_board(), *core->get_pool(), my_settings.include_3d_models,
                 [this](std::string msg) {
                     {
                         std::lock_guard<std::mutex> guard(msg_queue_mutex);

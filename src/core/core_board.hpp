@@ -46,12 +46,12 @@ public:
     {
         return &pdf_export_settings;
     }
-    STEPExportSettings *get_step_export_settings()
+    STEPExportSettings *get_step_export_settings() override
     {
         return &step_export_settings;
     }
 
-    Board::Colors *get_colors()
+    BoardColors *get_colors() override
     {
         return &colors;
     }
@@ -85,7 +85,7 @@ private:
     PDFExportSettings pdf_export_settings;
     STEPExportSettings step_export_settings;
 
-    Board::Colors colors;
+    BoardColors colors;
 
     std::string m_board_filename;
     std::string m_block_filename;

@@ -5,11 +5,13 @@
 #include "board/board_layers.hpp"
 #include "logger/logger.hpp"
 #include "util/str_util.hpp"
+#include "core/idocument_package.hpp"
+#include "pool/pool.hpp"
 
 namespace horizon {
 static const auto PLUSMINUS = std::string("\u00B1");
 
-FootagDisplay *FootagDisplay::create(CorePackage *c, enum footag_type type)
+FootagDisplay *FootagDisplay::create(IDocumentPackage *c, enum footag_type type)
 {
     FootagDisplay *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
@@ -19,7 +21,7 @@ FootagDisplay *FootagDisplay::create(CorePackage *c, enum footag_type type)
     return w;
 }
 
-FootagDisplay::FootagDisplay(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, CorePackage *c,
+FootagDisplay::FootagDisplay(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocumentPackage *c,
                              enum footag_type type)
     : Gtk::Box(cobject), core(c), ppkg(UUID::random())
 {
@@ -30,7 +32,7 @@ FootagDisplay::FootagDisplay(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 
     params = footag_get_param(ctx);
 
-    canvas_package = Gtk::manage(new PreviewCanvas(*core->m_pool, true));
+    canvas_package = Gtk::manage(new PreviewCanvas(*core->get_pool(), true));
     canvas_package->set_size_request(400, 500);
     canvas_package->signal_resize().connect([this](int width, int height) {
         if (autofit->get_active()) {
@@ -364,7 +366,7 @@ void FootagDisplay::calc(Package *pkg, const struct footag_spec *s)
         if (p->stack == FOOTAG_PADSTACK_NONE) {
             continue;
         }
-        auto ps = getpadstack(*core->m_pool, p->stack);
+        auto ps = getpadstack(*core->get_pool(), p->stack);
         if (!ps) {
             continue;
         }

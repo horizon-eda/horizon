@@ -1,8 +1,6 @@
 #include "rule_editor_clearance_copper_keepout.hpp"
 #include "board/rule_clearance_copper_keepout.hpp"
 #include "common/patch_type_names.hpp"
-#include "core/core.hpp"
-#include "core/core_board.hpp"
 #include "rule_match_editor.hpp"
 #include "rule_match_keepout_editor.hpp"
 #include "widgets/chooser_buttons.hpp"

@@ -3,8 +3,6 @@
 #include "property_panel.hpp"
 #include "property_panels.hpp"
 #include "block/block.hpp"
-#include "core/core_schematic.hpp"
-#include "core/core_board.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/spin_button_angle.hpp"
 #include "util/util.hpp"

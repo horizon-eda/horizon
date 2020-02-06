@@ -1,6 +1,5 @@
 #pragma once
 #include "common/common.hpp"
-#include "core/core_package.hpp"
 #include "svg_overlay.hpp"
 #include "util/uuid.hpp"
 #include <array>
@@ -9,7 +8,7 @@
 namespace horizon {
 class FootprintGeneratorBase : public Gtk::Box {
 public:
-    FootprintGeneratorBase(const char *resource, CorePackage *c);
+    FootprintGeneratorBase(const char *resource, class IDocumentPackage *c);
     Glib::PropertyProxy<bool> property_can_generate()
     {
         return p_property_can_generate.get_proxy();
@@ -23,6 +22,6 @@ protected:
 
     SVGOverlay *overlay = nullptr;
     Gtk::Box *box_top = nullptr;
-    CorePackage *core;
+    class IDocumentPackage *core;
 };
 } // namespace horizon

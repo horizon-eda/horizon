@@ -1,6 +1,5 @@
 #pragma once
 #include "common/common.hpp"
-#include "core/core_package.hpp"
 #include "util/uuid.hpp"
 #include <array>
 #include <experimental/optional>
@@ -11,7 +10,7 @@ namespace horizon {
 class FootprintGeneratorWindow : public Gtk::Window {
 public:
     FootprintGeneratorWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x);
-    static FootprintGeneratorWindow *create(Gtk::Window *p, CorePackage *c);
+    static FootprintGeneratorWindow *create(Gtk::Window *p, class CorePackage *c);
     typedef sigc::signal<void> type_signal_generated;
     type_signal_generated signal_generated()
     {

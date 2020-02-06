@@ -9,15 +9,15 @@ namespace horizon {
 
 class StepExportWindow : public Gtk::Window, public Changeable {
 public:
-    StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class CoreBoard *c,
+    StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class IDocumentBoard *c,
                      const std::string &project_dir);
-    static StepExportWindow *create(Gtk::Window *p, class CoreBoard *c, const std::string &project_dir);
+    static StepExportWindow *create(Gtk::Window *p, class IDocumentBoard *c, const std::string &project_dir);
 
     void set_can_export(bool v);
     void generate();
 
 private:
-    class CoreBoard *core;
+    class IDocumentBoard *core;
     class STEPExportSettings &settings;
     Gtk::HeaderBar *header = nullptr;
     Gtk::Entry *filename_entry = nullptr;

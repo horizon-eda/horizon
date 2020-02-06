@@ -6,6 +6,7 @@
 #include "footprint_generator_single.hpp"
 #include "footprint_generator_footag.hpp"
 #include "widgets/spin_button_dim.hpp"
+#include "core/core_package.hpp"
 #include <pangomm/layout.h>
 
 namespace horizon {

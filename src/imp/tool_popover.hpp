@@ -1,5 +1,4 @@
 #pragma once
-#include "core/core.hpp"
 #include "action.hpp"
 #include "action_catalog.hpp"
 #include <gtkmm.h>

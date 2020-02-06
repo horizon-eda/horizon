@@ -29,6 +29,13 @@
 namespace horizon {
 using json = nlohmann::json;
 
+class BoardColors {
+public:
+    BoardColors();
+    Color solder_mask;
+    Color substrate;
+};
+
 class Board : public ObjectProvider, public LayerProvider {
 private:
     // unsigned int update_nets();
@@ -102,13 +109,7 @@ public:
     };
     std::map<int, StackupLayer> stackup;
 
-    class Colors {
-    public:
-        Colors();
-        Color solder_mask;
-        Color substrate;
-    };
-    Colors colors;
+    BoardColors colors;
     PDFExportSettings pdf_export_settings;
     STEPExportSettings step_export_settings;
 

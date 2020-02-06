@@ -1,7 +1,6 @@
 #include "canvas/canvas.hpp"
 #include "common/common.hpp"
 #include "common/lut.hpp"
-#include "core/core.hpp"
 #include "imp.hpp"
 #include "imp_board.hpp"
 #include "imp_package.hpp"

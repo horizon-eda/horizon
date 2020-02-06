@@ -1,9 +1,10 @@
 #include "cache.hpp"
-#include "core/core_board.hpp"
-#include "core/core_schematic.hpp"
+#include "core/idocument_board.hpp"
+#include "core/idocument_schematic.hpp"
+#include "schematic/schematic.hpp"
 
 namespace horizon {
-RulesCheckCache::RulesCheckCache(Core *c) : core(c)
+RulesCheckCache::RulesCheckCache(IDocument *c) : core(c)
 {
 }
 
@@ -12,9 +13,9 @@ void RulesCheckCache::clear()
     cache.clear();
 }
 
-RulesCheckCacheBoardImage::RulesCheckCacheBoardImage(Core *c)
+RulesCheckCacheBoardImage::RulesCheckCacheBoardImage(IDocument *c)
 {
-    auto core = dynamic_cast<CoreBoard *>(c);
+    auto core = dynamic_cast<IDocumentBoard *>(c);
     canvas.update(*core->get_board());
 }
 
@@ -23,11 +24,11 @@ const CanvasPatch *RulesCheckCacheBoardImage::get_canvas() const
     return &canvas;
 }
 
-RulesCheckCacheNetPins::RulesCheckCacheNetPins(Core *c)
+RulesCheckCacheNetPins::RulesCheckCacheNetPins(IDocument *c)
 {
-    auto core = dynamic_cast<CoreSchematic *>(c);
+    auto core = dynamic_cast<IDocumentSchematic *>(c);
     assert(core);
-    auto block = core->get_schematic()->block;
+    auto block = core->get_block();
     for (auto &it : block->nets) {
         net_pins[&it.second];
     }

@@ -1,10 +1,11 @@
 #pragma once
 #include "footprint_generator_base.hpp"
 #include "widgets/spin_button_dim.hpp"
+
 namespace horizon {
 class FootprintGeneratorQuad : public FootprintGeneratorBase {
 public:
-    FootprintGeneratorQuad(CorePackage *c);
+    FootprintGeneratorQuad(class IDocumentPackage *c);
     bool generate() override;
 
 private:

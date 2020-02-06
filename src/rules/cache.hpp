@@ -20,7 +20,7 @@ public:
 
 class RulesCheckCacheBoardImage : public RulesCheckCacheBase {
 public:
-    RulesCheckCacheBoardImage(class Core *c);
+    RulesCheckCacheBoardImage(class IDocument *c);
     const CanvasPatch *get_canvas() const;
 
 private:
@@ -29,7 +29,7 @@ private:
 
 class RulesCheckCacheNetPins : public RulesCheckCacheBase {
 public:
-    RulesCheckCacheNetPins(class Core *c);
+    RulesCheckCacheNetPins(class IDocument *c);
     const std::map<class Net *,
                    std::deque<std::tuple<class Component *, const class Gate *, const class Pin *, UUID, Coordi>>> &
     get_net_pins() const;
@@ -42,13 +42,13 @@ private:
 
 class RulesCheckCache {
 public:
-    RulesCheckCache(class Core *c);
+    RulesCheckCache(class IDocument *c);
     RulesCheckCacheBase *get_cache(RulesCheckCacheID id);
     void clear();
 
 private:
     std::map<RulesCheckCacheID, std::unique_ptr<RulesCheckCacheBase>> cache;
-    class Core *core;
+    class IDocument *core;
     std::mutex mutex;
 };
 } // namespace horizon

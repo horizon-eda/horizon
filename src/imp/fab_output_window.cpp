@@ -3,7 +3,7 @@
 #include "export_gerber/gerber_export.hpp"
 #include "util/gtk_util.hpp"
 #include "widgets/spin_button_dim.hpp"
-#include "core/core_board.hpp"
+#include "core/idocument_board.hpp"
 #include "rules/rules_with_core.hpp"
 #include "rules/cache.hpp"
 
@@ -48,7 +48,7 @@ GerberLayerEditor *GerberLayerEditor::create(FabOutputWindow *pa, FabOutputSetti
     return w;
 }
 
-FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, CoreBoard *c,
+FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocumentBoard *c,
                                  const std::string &project_dir)
     : Gtk::Window(cobject), core(c), brd(core->get_board()), settings(core->get_fab_output_settings()),
       state_store(this, "imp-fab-output")
@@ -187,7 +187,7 @@ void FabOutputWindow::set_can_generate(bool v)
     generate_button->set_sensitive(v);
 }
 
-FabOutputWindow *FabOutputWindow::create(Gtk::Window *p, CoreBoard *c, const std::string &project_dir)
+FabOutputWindow *FabOutputWindow::create(Gtk::Window *p, IDocumentBoard *c, const std::string &project_dir)
 {
     FabOutputWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();

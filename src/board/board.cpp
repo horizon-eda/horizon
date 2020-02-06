@@ -25,7 +25,7 @@ json Board::StackupLayer::serialize() const
     return j;
 }
 
-Board::Colors::Colors() : solder_mask({0, .5, 0}), substrate({.2, .15, 0})
+BoardColors::BoardColors() : solder_mask({0, .5, 0}), substrate({.2, .15, 0})
 {
 }
 
