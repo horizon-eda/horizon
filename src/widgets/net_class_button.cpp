@@ -1,9 +1,9 @@
 #include "net_class_button.hpp"
-#include "core/core.hpp"
+#include "core/idocument.hpp"
 #include "block/block.hpp"
 
 namespace horizon {
-NetClassButton::NetClassButton(Core *c) : Gtk::ComboBoxText(), core(c)
+NetClassButton::NetClassButton(IDocument *c) : Gtk::ComboBoxText(), core(c)
 {
     update();
     signal_changed().connect([this] {
