@@ -592,7 +592,7 @@ void ImpPackage::construct()
         });
     }
     parameter_window->signal_apply().connect([this, parameter_window] {
-        if (core.r->tool_is_active())
+        if (core->tool_is_active())
             return;
         auto ps = core_package.get_package();
         auto r_compile = ps->parameter_program.set_code(core_package.parameter_program_code);
@@ -681,7 +681,7 @@ void ImpPackage::construct()
             footprint_generator_window->show_all();
         });
         button->show();
-        core.r->signal_tool_changed().connect([button](ToolID t) { button->set_sensitive(t == ToolID::NONE); });
+        core->signal_tool_changed().connect([button](ToolID t) { button->set_sensitive(t == ToolID::NONE); });
         main_window->header->pack_end(*button);
     }
 

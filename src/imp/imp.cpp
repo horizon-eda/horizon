@@ -1,8 +1,6 @@
 #include "imp.hpp"
 #include "block/block.hpp"
 #include "canvas/canvas_gl.hpp"
-#include "core/core_board.hpp"
-#include "core/core_schematic.hpp"
 #include "export_gerber/gerber_export.hpp"
 #include "logger/logger.hpp"
 #include "pool/part.hpp"
@@ -26,6 +24,7 @@
 #include <gtkmm.h>
 #include <iomanip>
 #include <functional>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 
@@ -156,7 +155,7 @@ bool ImpBase::handle_close(GdkEventAny *ev)
     if (dontask)
         return false;
 
-    if (!core.r->get_needs_save()) {
+    if (!core->get_needs_save()) {
         return false;
     }
     if (!read_only) {
@@ -168,11 +167,11 @@ bool ImpBase::handle_close(GdkEventAny *ev)
         md.add_button("Save", 2);
         switch (md.run()) {
         case 1:
-            core.r->delete_autosave();
+            core->delete_autosave();
             return false; // close
 
         case 2:
-            core.r->save();
+            core->save();
             return false; // close
 
         default:
@@ -261,11 +260,11 @@ void ImpBase::run(int argc, char *argv[])
     main_window = MainWindow::create();
     canvas = main_window->canvas;
     {
-        Documents docs(core.r);
+        Documents docs(core);
         clipboard.reset(new ClipboardManager(docs));
     }
 
-    canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBase::sc));
+    canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_selection_changed));
     canvas->signal_key_press_event().connect(sigc::mem_fun(*this, &ImpBase::handle_key_press));
     canvas->signal_cursor_moved().connect(sigc::mem_fun(*this, &ImpBase::handle_cursor_move));
     canvas->signal_button_press_event().connect(sigc::mem_fun(*this, &ImpBase::handle_click));
@@ -283,7 +282,7 @@ void ImpBase::run(int argc, char *argv[])
             false);
     canvas->signal_button_release_event().connect(sigc::mem_fun(*this, &ImpBase::handle_click_release));
     canvas->signal_request_display_name().connect(
-            [this](ObjectType ty, UUID uu) { return core.r->get_display_name(ty, uu); });
+            [this](ObjectType ty, UUID uu) { return core->get_display_name(ty, uu); });
 
     {
         Gtk::RadioButton *selection_tool_box_button, *selection_tool_lasso_button, *selection_tool_paint_button;
@@ -378,7 +377,7 @@ void ImpBase::run(int argc, char *argv[])
     });
     canvas->set_selection_mode(CanvasGL::SelectionMode::HOVER);
 
-    panels = Gtk::manage(new PropertyPanels(core.r));
+    panels = Gtk::manage(new PropertyPanels(core));
     panels->show_all();
     panels->property_margin() = 10;
     main_window->property_viewport->add(*panels);
@@ -402,19 +401,19 @@ void ImpBase::run(int argc, char *argv[])
     connect_action(ActionID::SELECTION_FILTER, [this](const auto &a) { selection_filter_dialog->present(); });
     connect_action(ActionID::SAVE, [this](const auto &a) {
         if (!read_only)
-            core.r->save();
+            core->save();
     });
     connect_action(ActionID::UNDO, [this](const auto &a) {
-        core.r->undo();
+        core->undo();
         this->canvas_update_from_pp();
     });
     connect_action(ActionID::REDO, [this](const auto &a) {
-        core.r->redo();
+        core->redo();
         this->canvas_update_from_pp();
     });
 
     connect_action(ActionID::RELOAD_POOL, [this](const auto &a) {
-        core.r->reload_pool();
+        core->reload_pool();
         this->canvas_update_from_pp();
     });
 
@@ -440,7 +439,7 @@ void ImpBase::run(int argc, char *argv[])
         auto sel = canvas->get_selection();
         for (const auto &it : action_catalog) {
             if (it.first.first == ActionID::TOOL) {
-                bool r = core.r->tool_can_begin(it.first.second, sel).first;
+                bool r = core->tool_can_begin(it.first.second, sel).first;
                 can_begin[it.first] = r;
             }
             else {
@@ -525,7 +524,7 @@ void ImpBase::run(int argc, char *argv[])
     main_window->search_entry->signal_activate().connect([this] { trigger_action(ActionID::SEARCH_NEXT); });
 
     for (const auto &it : object_descriptions) {
-        if (core.r->can_search_for_object_type(it.first)) {
+        if (core->can_search_for_object_type(it.first)) {
             auto b = Gtk::manage(new Gtk::CheckButton(it.second.name_pl));
             search_check_buttons.emplace(it.first, b);
             main_window->search_types_box->pack_start(*b, false, false, 0);
@@ -541,7 +540,7 @@ void ImpBase::run(int argc, char *argv[])
     if (search_check_buttons.size() < 2) {
         main_window->search_expander->hide();
     }
-    core.r->signal_tool_changed().connect([this](ToolID id) {
+    core->signal_tool_changed().connect([this](ToolID id) {
         if (id != ToolID::NONE) {
             set_search_mode(false);
         }
@@ -565,12 +564,12 @@ void ImpBase::run(int argc, char *argv[])
     auto save_button = create_action_button(make_action(ActionID::SAVE));
     save_button->show();
     main_window->header->pack_start(*save_button);
-    core.r->signal_needs_save().connect([this](bool v) {
+    core->signal_needs_save().connect([this](bool v) {
         update_action_sensitivity();
         json j;
         j["op"] = "needs-save";
         j["pid"] = getpid();
-        j["needs_save"] = core.r->get_needs_save();
+        j["needs_save"] = core->get_needs_save();
         send_json(j);
     });
     set_action_sensitive(make_action(ActionID::SAVE), false);
@@ -595,15 +594,15 @@ void ImpBase::run(int argc, char *argv[])
         main_window->header->pack_start(*undo_redo_box);
     }
 
-    core.r->signal_can_undo_redo().connect([this] { update_action_sensitivity(); });
+    core->signal_can_undo_redo().connect([this] { update_action_sensitivity(); });
     canvas->signal_selection_changed().connect([this] {
-        if (!core.r->tool_is_active()) {
+        if (!core->tool_is_active()) {
             update_action_sensitivity();
         }
     });
-    core.r->signal_can_undo_redo().emit();
+    core->signal_can_undo_redo().emit();
 
-    core.r->signal_load_tool_settings().connect([this](ToolID id) {
+    core->signal_load_tool_settings().connect([this](ToolID id) {
         json j;
         auto fn = get_tool_settings_filename(id);
         if (Glib::file_test(fn, Glib::FILE_TEST_IS_REGULAR)) {
@@ -611,14 +610,14 @@ void ImpBase::run(int argc, char *argv[])
         }
         return j;
     });
-    core.r->signal_save_tool_settings().connect(
+    core->signal_save_tool_settings().connect(
             [this](ToolID id, json j) { save_json_to_file(get_tool_settings_filename(id), j); });
 
-    if (core.r->get_rules()) {
-        rules_window = RulesWindow::create(main_window, canvas, core.r->get_rules(), core.r);
+    if (core->get_rules()) {
+        rules_window = RulesWindow::create(main_window, canvas, core->get_rules(), core);
         rules_window->signal_canvas_update().connect(sigc::mem_fun(*this, &ImpBase::canvas_update_from_pp));
-        rules_window->signal_changed().connect([this] { core.r->set_needs_save(); });
-        core.r->signal_tool_changed().connect([this](ToolID id) { rules_window->set_enabled(id == ToolID::NONE); });
+        rules_window->signal_changed().connect([this] { core->set_needs_save(); });
+        core->signal_tool_changed().connect([this](ToolID id) { rules_window->set_enabled(id == ToolID::NONE); });
 
         connect_action(ActionID::RULES, [this](const auto &conn) { rules_window->present(); });
         connect_action(ActionID::RULES_RUN_CHECKS, [this](const auto &conn) {
@@ -648,7 +647,7 @@ void ImpBase::run(int argc, char *argv[])
 
     main_window->signal_delete_event().connect(sigc::mem_fun(*this, &ImpBase::handle_close));
 
-    for (const auto &la : core.r->get_layer_provider()->get_layers()) {
+    for (const auto &la : core->get_layer_provider()->get_layers()) {
         canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL));
     }
 
@@ -694,12 +693,12 @@ void ImpBase::run(int argc, char *argv[])
     apply_preferences();
 
     canvas->property_work_layer().signal_changed().connect([this] {
-        if (core.r->tool_is_active()) {
+        if (core->tool_is_active()) {
             ToolArgs args;
             args.type = ToolEventType::LAYER_CHANGE;
             args.coords = canvas->get_cursor_pos();
             args.work_layer = canvas->property_work_layer();
-            ToolResponse r = core.r->tool_update(args);
+            ToolResponse r = core->tool_update(args);
             tool_process(r);
         }
     });
@@ -717,7 +716,7 @@ void ImpBase::run(int argc, char *argv[])
 
     imp_interface = std::make_unique<ImpInterface>(this);
 
-    core.r->signal_tool_changed().connect([this](ToolID id) { s_signal_action_sensitive.emit(); });
+    core->signal_tool_changed().connect([this](ToolID id) { s_signal_action_sensitive.emit(); });
 
     canvas->signal_hover_selection_changed().connect(sigc::mem_fun(*this, &ImpBase::hud_update));
     canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBase::hud_update));
@@ -759,18 +758,18 @@ void ImpBase::run(int argc, char *argv[])
         return false;
     });
 
-    sc();
+    handle_selection_changed();
 
-    core.r->signal_rebuilt().connect([this] { update_monitor(); });
+    core->signal_rebuilt().connect([this] { update_monitor(); });
 
     Glib::signal_timeout().connect_seconds(sigc::track_obj(
                                                    [this] {
-                                                       if (core.r->tool_is_active()) {
+                                                       if (core->tool_is_active()) {
                                                            queue_autosave = true;
                                                        }
                                                        else {
                                                            if (needs_autosave) {
-                                                               core.r->autosave();
+                                                               core->autosave();
                                                                needs_autosave = false;
                                                            }
                                                        }
@@ -778,18 +777,18 @@ void ImpBase::run(int argc, char *argv[])
                                                    },
                                                    *main_window),
                                            60);
-    core.r->signal_rebuilt().connect([this] {
+    core->signal_rebuilt().connect([this] {
         if (queue_autosave) {
             queue_autosave = false;
-            core.r->autosave();
+            core->autosave();
             needs_autosave = false;
         }
     });
-    core.r->signal_needs_save().connect([this](bool v) {
+    core->signal_needs_save().connect([this](bool v) {
         if (!v)
             needs_autosave = false;
     });
-    core.r->signal_modified().connect([this] { needs_autosave = true; });
+    core->signal_modified().connect([this] { needs_autosave = true; });
 
     app->run(*main_window);
 }
@@ -803,7 +802,7 @@ void ImpBase::parameter_window_add_polygon_expand(ParameterWindow *parameter_win
         if (sel.size() == 1) {
             auto &s = *sel.begin();
             if (s.type == ObjectType::POLYGON_EDGE || s.type == ObjectType::POLYGON_VERTEX) {
-                auto poly = core.r->get_polygon(s.uuid);
+                auto poly = core->get_polygon(s.uuid);
                 if (!poly->has_arcs()) {
                     std::stringstream ss;
                     ss.imbue(std::locale::classic());
@@ -821,7 +820,7 @@ void ImpBase::parameter_window_add_polygon_expand(ParameterWindow *parameter_win
 
 void ImpBase::hud_update()
 {
-    if (core.r->tool_is_active())
+    if (core->tool_is_active())
         return;
 
     auto sel = canvas->get_selection();
@@ -848,14 +847,14 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
         int64_t length = 0;
         for (const auto &it : sel) {
             if (it.type == ObjectType::LINE) {
-                const auto li = core.r->get_line(it.uuid);
+                const auto li = core->get_line(it.uuid);
                 layers.insert(li->layer);
                 length += sqrt((li->from->position - li->to->position).mag_sq());
             }
         }
         s += "Layers: ";
         for (auto layer : layers) {
-            s += core.r->get_layer_provider()->get_layers().at(layer).name + " ";
+            s += core->get_layer_provider()->get_layers().at(layer).name + " ";
         }
         s += "\nTotal length: " + dim_to_string(length, false);
         sel_erase_type(sel, ObjectType::LINE);
@@ -871,11 +870,11 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
         int64_t length = 0;
         for (const auto &it : sel) {
             if (it.type == ObjectType::POLYGON_EDGE) {
-                const auto li = core.r->get_polygon(it.uuid);
+                const auto li = core->get_polygon(it.uuid);
                 const auto pair = li->get_vertices_for_edge(it.vertex);
                 length += sqrt((li->vertices[pair.first].position - li->vertices[pair.second].position).mag_sq());
                 s += "Layer: ";
-                s += core.r->get_layer_provider()->get_layers().at(li->layer).name + " ";
+                s += core->get_layer_provider()->get_layers().at(li->layer).name + " ";
                 s += "\nLength: " + dim_to_string(length, false);
                 sel_erase_type(sel, ObjectType::POLYGON_EDGE);
                 return s;
@@ -953,7 +952,7 @@ Gtk::Button *ImpBase::create_action_button(std::pair<ActionID, ToolID> action)
 
 bool ImpBase::trigger_action(const std::pair<ActionID, ToolID> &action)
 {
-    if (core.r->tool_is_active() && !(action_catalog.at(action).flags & ActionCatalogItem::FLAGS_IN_TOOL)) {
+    if (core->tool_is_active() && !(action_catalog.at(action).flags & ActionCatalogItem::FLAGS_IN_TOOL)) {
         return false;
     }
     auto conn = action_connections.at(action);
@@ -994,7 +993,7 @@ void ImpBase::handle_drag(bool ctrl)
             else
                 tool_id = ToolID::MOVE;
 
-            ToolResponse r = core.r->tool_begin(tool_id, args, imp_interface.get(), true);
+            ToolResponse r = core->tool_begin(tool_id, args, imp_interface.get(), true);
             tool_process(r);
         }
         selection_for_drag_move.clear();
@@ -1005,7 +1004,7 @@ void ImpBase::apply_preferences()
 {
     auto canvas_prefs = get_canvas_preferences();
     canvas->set_appearance(canvas_prefs->appearance);
-    if (core.r->tool_is_active()) {
+    if (core->tool_is_active()) {
         canvas->set_cursor_size(canvas_prefs->appearance.cursor_size_tool);
     }
     canvas->show_all_junctions_in_schematic = preferences.schematic.show_all_junctions;
@@ -1069,7 +1068,7 @@ void ImpBase::apply_preferences()
 
 void ImpBase::canvas_update_from_pp()
 {
-    if (core.r->tool_is_active())
+    if (core->tool_is_active())
         return;
 
     auto sel = canvas->get_selection();
@@ -1113,7 +1112,7 @@ ActionConnection &ImpBase::connect_action(ActionID action_id, ToolID tool_id,
 void ImpBase::tool_begin(ToolID id, bool override_selection, const std::set<SelectableRef> &sel,
                          std::unique_ptr<ToolData> data)
 {
-    if (core.r->tool_is_active()) {
+    if (core->tool_is_active()) {
         Logger::log_critical("can't begin tool while tool is active", Logger::Domain::IMP);
         return;
     }
@@ -1129,7 +1128,7 @@ void ImpBase::tool_begin(ToolID id, bool override_selection, const std::set<Sele
         args.selection = canvas->get_selection();
 
     args.work_layer = canvas->property_work_layer();
-    ToolResponse r = core.r->tool_begin(id, args, imp_interface.get());
+    ToolResponse r = core->tool_begin(id, args, imp_interface.get());
     tool_process(r);
 }
 
@@ -1138,7 +1137,7 @@ void ImpBase::add_tool_button(ToolID id, const std::string &label, bool left)
     auto button = Gtk::manage(new Gtk::Button(label));
     button->signal_clicked().connect([this, id] { tool_begin(id); });
     button->show();
-    core.r->signal_tool_changed().connect([button](ToolID t) { button->set_sensitive(t == ToolID::NONE); });
+    core->signal_tool_changed().connect([button](ToolID t) { button->set_sensitive(t == ToolID::NONE); });
     if (left)
         main_window->header->pack_start(*button);
     else
@@ -1158,7 +1157,7 @@ void ImpBase::set_action_sensitive(std::pair<ActionID, ToolID> action, bool v)
 
 bool ImpBase::get_action_sensitive(std::pair<ActionID, ToolID> action) const
 {
-    if (core.r->tool_is_active())
+    if (core->tool_is_active())
         return action_catalog.at(action).flags & ActionCatalogItem::FLAGS_IN_TOOL;
     if (action_sensitivity.count(action))
         return action_sensitivity.at(action);
@@ -1168,9 +1167,9 @@ bool ImpBase::get_action_sensitive(std::pair<ActionID, ToolID> action) const
 
 void ImpBase::update_action_sensitivity()
 {
-    set_action_sensitive(make_action(ActionID::SAVE), !read_only && core.r->get_needs_save());
-    set_action_sensitive(make_action(ActionID::UNDO), core.r->can_undo());
-    set_action_sensitive(make_action(ActionID::REDO), core.r->can_redo());
+    set_action_sensitive(make_action(ActionID::SAVE), !read_only && core->get_needs_save());
+    set_action_sensitive(make_action(ActionID::UNDO), core->can_undo());
+    set_action_sensitive(make_action(ActionID::REDO), core->can_redo());
     auto sel = canvas->get_selection();
     set_action_sensitive(make_action(ActionID::COPY), sel.size() > 0);
 }
@@ -1179,7 +1178,7 @@ void ImpBase::add_hamburger_menu()
 {
     auto hamburger_button = Gtk::manage(new Gtk::MenuButton);
     hamburger_button->set_image_from_icon_name("open-menu-symbolic", Gtk::ICON_SIZE_BUTTON);
-    core.r->signal_tool_changed().connect(
+    core->signal_tool_changed().connect(
             [hamburger_button](ToolID t) { hamburger_button->set_sensitive(t == ToolID::NONE); });
 
     hamburger_menu = Gio::Menu::create();
@@ -1191,7 +1190,7 @@ void ImpBase::add_hamburger_menu()
 void ImpBase::layer_up_down(bool up)
 {
     int wl = canvas->property_work_layer();
-    auto layers = core.r->get_layer_provider()->get_layers();
+    auto layers = core->get_layer_provider()->get_layers();
     std::vector<int> layer_indexes;
     layer_indexes.reserve(layers.size());
     std::transform(layers.begin(), layers.end(), std::back_inserter(layer_indexes),
@@ -1211,21 +1210,21 @@ void ImpBase::layer_up_down(bool up)
 
 void ImpBase::goto_layer(int layer)
 {
-    if (core.r->get_layer_provider()->get_layers().count(layer)) {
+    if (core->get_layer_provider()->get_layers().count(layer)) {
         canvas->property_work_layer() = layer;
     }
 }
 
 bool ImpBase::handle_key_press(GdkEventKey *key_event)
 {
-    if (core.r->tool_is_active()) {
+    if (core->tool_is_active()) {
         if (handle_action_key(key_event))
             return true;
 
         ToolArgs args;
         args.coords = canvas->get_cursor_pos();
         args.work_layer = canvas->property_work_layer();
-        if (!core.r->tool_handles_esc() && key_event->keyval == GDK_KEY_Escape) {
+        if (!core->tool_handles_esc() && key_event->keyval == GDK_KEY_Escape) {
             args.type = ToolEventType::CLICK;
             args.button = 3;
         }
@@ -1236,7 +1235,7 @@ bool ImpBase::handle_key_press(GdkEventKey *key_event)
                 args.mod = ToolArgs::MOD_FINE;
         }
 
-        ToolResponse r = core.r->tool_update(args);
+        ToolResponse r = core->tool_update(args);
         tool_process(r);
         return true;
     }
@@ -1251,7 +1250,7 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
     if (ev->is_modifier)
         return false;
     if (ev->keyval == GDK_KEY_Escape) {
-        if (!core.r->tool_is_active()) {
+        if (!core->tool_is_active()) {
             canvas->set_selection_mode(CanvasGL::SelectionMode::HOVER);
             canvas->set_selection({});
             set_search_mode(false);
@@ -1285,8 +1284,8 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
             auto k = std::make_pair(it.second.action_id, it.second.tool_id);
             if (action_catalog.at(k).availability & get_editor_type_for_action()) {
                 bool can_begin = false;
-                if (it.second.action_id == ActionID::TOOL && !core.r->tool_is_active()) {
-                    can_begin = core.r->tool_can_begin(it.second.tool_id, selection).first;
+                if (it.second.action_id == ActionID::TOOL && !core->tool_is_active()) {
+                    can_begin = core->tool_can_begin(it.second.tool_id, selection).first;
                 }
                 else if (it.second.tool_id == ToolID::NONE) {
                     can_begin = get_action_sensitive(k);
@@ -1329,12 +1328,12 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
 
 void ImpBase::handle_cursor_move(const Coordi &pos)
 {
-    if (core.r->tool_is_active()) {
+    if (core->tool_is_active()) {
         ToolArgs args;
         args.type = ToolEventType::MOVE;
         args.coords = pos;
         args.work_layer = canvas->property_work_layer();
-        ToolResponse r = core.r->tool_update(args);
+        ToolResponse r = core->tool_update(args);
         tool_process(r);
     }
     main_window->cursor_label->set_text(coord_to_string(pos));
@@ -1357,14 +1356,14 @@ void ImpBase::fix_cursor_pos()
 
 bool ImpBase::handle_click_release(GdkEventButton *button_event)
 {
-    if (core.r->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)) {
+    if (core->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)) {
         ToolArgs args;
         args.type = ToolEventType::CLICK_RELEASE;
         args.coords = canvas->get_cursor_pos();
         args.button = button_event->button;
         args.target = canvas->get_current_target();
         args.work_layer = canvas->property_work_layer();
-        ToolResponse r = core.r->tool_update(args);
+        ToolResponse r = core->tool_update(args);
         tool_process(r);
     }
     return false;
@@ -1380,7 +1379,7 @@ void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRe
             if (it.second.group == it_gr.first && (it.second.availability & get_editor_type_for_action())
                 && !(it.second.flags & ActionCatalogItem::FLAGS_NO_MENU)) {
                 if (it.first.first == ActionID::TOOL) {
-                    auto r = core.r->tool_can_begin(it.first.second, {sel});
+                    auto r = core->tool_can_begin(it.first.second, {sel});
                     if (r.first && r.second) {
                         auto la_sub = Gtk::manage(new Gtk::MenuItem(it.second.name));
                         ToolID tool_id = it.first.second;
@@ -1442,7 +1441,7 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
         set_search_mode(false);
 
     bool need_menu = false;
-    if (core.r->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)
+    if (core->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)
         && button_event->type != GDK_2BUTTON_PRESS && button_event->type != GDK_3BUTTON_PRESS) {
         ToolArgs args;
         args.type = ToolEventType::CLICK;
@@ -1450,10 +1449,10 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
         args.button = button_event->button;
         args.target = canvas->get_current_target();
         args.work_layer = canvas->property_work_layer();
-        ToolResponse r = core.r->tool_update(args);
+        ToolResponse r = core->tool_update(args);
         tool_process(r);
     }
-    else if (!core.r->tool_is_active() && button_event->type == GDK_2BUTTON_PRESS) {
+    else if (!core->tool_is_active() && button_event->type == GDK_2BUTTON_PRESS) {
         auto sel = canvas->get_selection();
         if (sel.size() == 1) {
             auto a = get_doubleclick_action(sel.begin()->type, sel.begin()->uuid);
@@ -1463,10 +1462,10 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
             }
         }
     }
-    else if (!core.r->tool_is_active() && button_event->button == 1) {
+    else if (!core->tool_is_active() && button_event->button == 1) {
         handle_maybe_drag();
     }
-    else if (!core.r->tool_is_active() && button_event->button == 3) {
+    else if (!core->tool_is_active() && button_event->button == 3) {
         for (const auto it : context_menu->get_children()) {
             delete it;
         }
@@ -1492,11 +1491,11 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
                 canvas->set_selection({}, false);
                 for (const auto &sr : sel) {
                     std::string text = object_descriptions.at(sr.type).name;
-                    auto display_name = core.r->get_display_name(sr.type, sr.uuid);
+                    auto display_name = core->get_display_name(sr.type, sr.uuid);
                     if (display_name.size()) {
                         text += " " + display_name;
                     }
-                    auto layers = core.r->get_layer_provider()->get_layers();
+                    auto layers = core->get_layer_provider()->get_layers();
                     if (layers.count(sr.layer)) {
                         text += " (" + layers.at(sr.layer).name + ")";
                     }
@@ -1549,7 +1548,7 @@ void ImpBase::handle_maybe_drag()
 
 void ImpBase::tool_process(ToolResponse &resp)
 {
-    if (!core.r->tool_is_active()) {
+    if (!core->tool_is_active()) {
         imp_interface->dialogs.close_nonmodal();
         main_window->tool_hint_label->set_text(">");
         canvas->set_cursor_external(false);
@@ -1561,7 +1560,7 @@ void ImpBase::tool_process(ToolResponse &resp)
         canvas->fast_draw = resp.fast_draw;
         canvas_update();
         canvas->fast_draw = false;
-        canvas->set_selection(core.r->get_tool_selection());
+        canvas->set_selection(core->get_tool_selection());
     }
     if (resp.layer != 10000) {
         canvas->property_work_layer() = resp.layer;
@@ -1573,16 +1572,21 @@ void ImpBase::tool_process(ToolResponse &resp)
         args.coords = canvas->get_cursor_pos();
         args.keep_selection = true;
         args.data = std::move(resp.data);
-        ToolResponse r = core.r->tool_begin(resp.next_tool, args, imp_interface.get());
+        ToolResponse r = core->tool_begin(resp.next_tool, args, imp_interface.get());
         tool_process(r);
     }
 }
 
-void ImpBase::sc(void)
+void ImpBase::expand_selection_for_property_panel(std::set<SelectableRef> &sel_extra,
+                                                  const std::set<SelectableRef> &sel)
+{
+}
+
+void ImpBase::handle_selection_changed(void)
 {
     // std::cout << "Selection changed\n";
     // std::cout << "---" << std::endl;
-    if (!core.r->tool_is_active()) {
+    if (!core->tool_is_active()) {
         highlights.clear();
         update_highlights();
 
@@ -1590,36 +1594,10 @@ void ImpBase::sc(void)
         decltype(sel) sel_extra;
         for (const auto &it : sel) {
             switch (it.type) {
-            case ObjectType::SCHEMATIC_SYMBOL:
-                sel_extra.emplace(core.c->get_schematic_symbol(it.uuid)->component->uuid, ObjectType::COMPONENT);
-                break;
-            case ObjectType::JUNCTION:
-                if (core.r->get_junction(it.uuid)->net && core.c) {
-                    sel_extra.emplace(core.r->get_junction(it.uuid)->net->uuid, ObjectType::NET);
-                }
-                break;
-            case ObjectType::LINE_NET: {
-                LineNet &li = core.c->get_sheet()->net_lines.at(it.uuid);
-                if (li.net) {
-                    sel_extra.emplace(li.net->uuid, ObjectType::NET);
-                }
-            } break;
-            case ObjectType::NET_LABEL: {
-                NetLabel &la = core.c->get_sheet()->net_labels.at(it.uuid);
-                if (la.junction->net) {
-                    sel_extra.emplace(la.junction->net->uuid, ObjectType::NET);
-                }
-            } break;
-            case ObjectType::POWER_SYMBOL: {
-                PowerSymbol &sym = core.c->get_sheet()->power_symbols.at(it.uuid);
-                if (sym.net) {
-                    sel_extra.emplace(sym.net->uuid, ObjectType::NET);
-                }
-            } break;
             case ObjectType::POLYGON_EDGE:
             case ObjectType::POLYGON_VERTEX: {
                 sel_extra.emplace(it.uuid, ObjectType::POLYGON);
-                auto poly = core.r->get_polygon(it.uuid);
+                auto poly = core->get_polygon(it.uuid);
                 if (poly->usage && poly->usage->get_type() == PolygonUsage::Type::PLANE) {
                     sel_extra.emplace(poly->usage->get_uuid(), ObjectType::PLANE);
                 }
@@ -1630,6 +1608,7 @@ void ImpBase::sc(void)
             default:;
             }
         }
+        expand_selection_for_property_panel(sel_extra, sel);
 
         sel.insert(sel_extra.begin(), sel_extra.end());
         panels->update_objects(sel);
@@ -1669,11 +1648,11 @@ bool ImpBase::handle_broadcast(const json &j)
     }
     else if (op == "save") {
         if (!read_only)
-            core.r->save();
+            core->save();
         return true;
     }
     else if (op == "close") {
-        core.r->delete_autosave();
+        core->delete_autosave();
         delete main_window;
         return true;
     }
@@ -1722,12 +1701,12 @@ void ImpBase::set_read_only(bool v)
 void ImpBase::tool_update_data(std::unique_ptr<ToolData> &data)
 {
 
-    if (core.r->tool_is_active()) {
+    if (core->tool_is_active()) {
         ToolArgs args;
         args.type = ToolEventType::DATA;
         args.data = std::move(data);
         args.coords = canvas->get_cursor_pos();
-        ToolResponse r = core.r->tool_update(args);
+        ToolResponse r = core->tool_update(args);
         tool_process(r);
     }
 }
@@ -1745,7 +1724,7 @@ void ImpBase::handle_search()
     auto max_c = canvas->screen2canvas({canvas->get_width(), 0});
     q.area_visible = {min_c, max_c};
     search_result_current = 0;
-    search_results = core.r->search(q);
+    search_results = core->search(q);
     update_search_markers();
 }
 
@@ -1778,8 +1757,7 @@ void ImpBase::search_go(int dir)
         status = "Match " + format_m_of_n(search_result_current + 1, search_results.size()) + ":";
     }
     auto &res = *std::next(search_results.begin(), search_result_current);
-    status +=
-            " " + object_descriptions.at(res.type).name + " " + core.r->get_display_name(res.type, res.uuid, res.sheet);
+    status += " " + object_descriptions.at(res.type).name + " " + core->get_display_name(res.type, res.uuid, res.sheet);
     main_window->search_status_label->set_text(status);
     canvas->update_markers();
     search_center(res);
@@ -1878,7 +1856,7 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBase::get_selection_filter
         if (type == ObjectType::POLYGON_ARC_CENTER || type == ObjectType::POLYGON_EDGE
             || type == ObjectType::POLYGON_VERTEX)
             type = ObjectType::POLYGON;
-        if (core.r->has_object_type(type)) {
+        if (core->has_object_type(type)) {
             r[type];
         }
     }

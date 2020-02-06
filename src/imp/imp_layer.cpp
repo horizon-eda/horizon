@@ -7,7 +7,7 @@
 namespace horizon {
 void ImpLayer::construct_layer_box(bool pack)
 {
-    layer_box = Gtk::manage(new LayerBox(core.r->get_layer_provider(), pack));
+    layer_box = Gtk::manage(new LayerBox(core->get_layer_provider(), pack));
     layer_box->show_all();
     if (pack)
         main_window->left_panel->pack_start(*layer_box, false, false, 0);
@@ -27,13 +27,13 @@ void ImpLayer::construct_layer_box(bool pack)
         canvas->set_layer_display(index, ld);
         canvas->queue_draw();
     });
-    core.r->signal_request_save_meta().connect([this] {
+    core->signal_request_save_meta().connect([this] {
         json j;
         j["layer_display"] = layer_box->serialize();
         j["grid_spacing"] = canvas->property_grid_spacing().get_value();
         return j;
     });
-    core.r->signal_rebuilt().connect([this] { layer_box->update(); });
+    core->signal_rebuilt().connect([this] { layer_box->update(); });
 
     connect_action(ActionID::LAYER_DOWN, [this](const auto &a) { this->layer_up_down(false); });
     connect_action(ActionID::LAYER_UP, [this](const auto &a) { this->layer_up_down(true); });
@@ -49,7 +49,7 @@ void ImpLayer::construct_layer_box(bool pack)
     connect_action(ActionID::LAYER_INNER7, [this](const auto &a) { this->goto_layer(-7); });
     connect_action(ActionID::LAYER_INNER8, [this](const auto &a) { this->goto_layer(-8); });
 
-    json j = core.r->get_meta();
+    json j = core->get_meta();
     bool layers_loaded = false;
     if (!j.is_null()) {
         canvas->property_grid_spacing() = j.value("grid_spacing", 1.25_mm);

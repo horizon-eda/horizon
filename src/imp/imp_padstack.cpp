@@ -109,7 +109,7 @@ void ImpPadstack::construct()
 
 
     parameter_window->signal_apply().connect([this, parameter_window] {
-        if (core.r->tool_is_active())
+        if (core->tool_is_active())
             return;
         auto ps = core_padstack.get_padstack();
         auto r_compile = ps->parameter_program.set_code(core_padstack.parameter_program_code);
@@ -132,7 +132,7 @@ void ImpPadstack::construct()
         core_padstack.rebuild();
         canvas_update();
     });
-    core.r->signal_tool_changed().connect(
+    core->signal_tool_changed().connect(
             [parameter_window](ToolID t) { parameter_window->set_can_apply(t == ToolID::NONE); });
 
     core_padstack.signal_save().connect([this, type_combo] {
