@@ -1,7 +1,6 @@
 #pragma once
 #include "core/clipboard.hpp"
 #include "core/core.hpp"
-#include "core/cores.hpp"
 #include "imp_interface.hpp"
 #include "keyseq_dialog.hpp"
 #include "main_window.hpp"

@@ -4,7 +4,6 @@
 #include "common/layer.hpp"
 #include "common/object_descr.hpp"
 #include "common/keepout.hpp"
-#include "cores.hpp"
 #include "tool_data.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "pool/pool.hpp"
