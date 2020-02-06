@@ -926,9 +926,9 @@ std::string ImpBase::get_hud_text_for_component(const Component *comp)
 
         const auto block = core.r->get_block();
         if (comp->group)
-            s += "Group: " + Glib::Markup::escape_text(block->group_names.at(comp->group)) + "\n";
+            s += "Group: " + Glib::Markup::escape_text(block->get_group_name(comp->group)) + "\n";
         if (comp->tag)
-            s += "Tag: " + Glib::Markup::escape_text(block->tag_names.at(comp->tag)) + "\n";
+            s += "Tag: " + Glib::Markup::escape_text(block->get_tag_name(comp->tag)) + "\n";
 
         trim(s);
         return s;
