@@ -5,7 +5,7 @@
 #include <deque>
 #include <iostream>
 #include <memory>
-#include "idocument_symbol.hpp"
+#include "document/idocument_symbol.hpp"
 
 namespace horizon {
 class CoreSymbol : public Core, public IDocumentSymbol {

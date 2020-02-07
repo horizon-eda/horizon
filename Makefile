@@ -234,7 +234,7 @@ SRC_IMP = \
 	src/core/tool_renumber_pads.cpp\
 	src/core/tool_fix.cpp\
 	src/core/tool_polygon_to_line_loop.cpp\
-	src/core/documents.cpp\
+	src/document/documents.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\
 	src/dialogs/map_pin.cpp\

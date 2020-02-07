@@ -6,7 +6,7 @@
 #include <iostream>
 #include <memory>
 #include "nlohmann/json.hpp"
-#include "idocument_board.hpp"
+#include "document/idocument_board.hpp"
 
 namespace horizon {
 class CoreBoard : public Core, public virtual IDocumentBoard {

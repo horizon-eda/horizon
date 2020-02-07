@@ -1,5 +1,5 @@
 #include "tool_smash_silkscreen_graphics.hpp"
-#include "idocument_board.hpp"
+#include "document/idocument_board.hpp"
 #include "board/board.hpp"
 #include <iostream>
 

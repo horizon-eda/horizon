@@ -1,6 +1,6 @@
 #include "cache.hpp"
-#include "core/idocument_board.hpp"
-#include "core/idocument_schematic.hpp"
+#include "document/idocument_board.hpp"
+#include "document/idocument_schematic.hpp"
 #include "schematic/schematic.hpp"
 
 namespace horizon {

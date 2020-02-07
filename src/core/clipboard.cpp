@@ -1,7 +1,7 @@
 #include "clipboard.hpp"
 #include "canvas/canvas_cairo.hpp"
 #include "nlohmann/json.hpp"
-#include "core/idocument.hpp"
+#include "document/idocument.hpp"
 
 namespace horizon {
 ClipboardManager::ClipboardManager(Documents &ds) : buffer(ds), docs(ds)

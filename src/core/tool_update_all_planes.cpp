@@ -1,5 +1,5 @@
 #include "tool_update_all_planes.hpp"
-#include "idocument_board.hpp"
+#include "document/idocument_board.hpp"
 #include "board/board.hpp"
 
 namespace horizon {

@@ -1,6 +1,6 @@
 #include "rule_match_keepout_editor.hpp"
 #include "block/block.hpp"
-#include "core/idocument.hpp"
+#include "document/idocument.hpp"
 #include "rules/rule_match_keepout.hpp"
 #include "widgets/component_button.hpp"
 

@@ -1,5 +1,5 @@
 #include "tool_import_kicad_package.hpp"
-#include "idocument_package.hpp"
+#include "document/idocument_package.hpp"
 #include "pool/package.hpp"
 #include "imp/imp_interface.hpp"
 #include "util/kicad_package_parser.hpp"

@@ -2,7 +2,7 @@
 #include "board/board_layers.hpp"
 #include "board/board_rules.hpp"
 #include "canvas/canvas_gl.hpp"
-#include "idocument_board.hpp"
+#include "document/idocument_board.hpp"
 #include "board/board.hpp"
 #include "imp/imp_interface.hpp"
 #include "router/pns_horizon_iface.hpp"

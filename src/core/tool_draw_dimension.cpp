@@ -3,7 +3,7 @@
 #include "imp/imp_interface.hpp"
 #include "pool/part.hpp"
 #include <algorithm>
-#include "idocument.hpp"
+#include "document/idocument.hpp"
 #include <gdk/gdkkeysyms.h>
 
 namespace horizon {

@@ -6,7 +6,7 @@
 #include "board/board_layers.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "util/util.hpp"
-#include "core/idocument_board.hpp"
+#include "document/idocument_board.hpp"
 
 namespace horizon {
 

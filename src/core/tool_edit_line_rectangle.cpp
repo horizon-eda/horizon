@@ -2,7 +2,7 @@
 #include "common/polygon.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>
-#include "idocument.hpp"
+#include "document/idocument.hpp"
 #include "common/line.hpp"
 #include <gdk/gdkkeysyms.h>
 

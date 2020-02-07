@@ -5,7 +5,7 @@
 #include "board/board_layers.hpp"
 #include "logger/logger.hpp"
 #include "util/str_util.hpp"
-#include "core/idocument_package.hpp"
+#include "document/idocument_package.hpp"
 #include "pool/pool.hpp"
 
 namespace horizon {

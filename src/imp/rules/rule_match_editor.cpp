@@ -1,6 +1,6 @@
 #include "rule_match_editor.hpp"
 #include "block/block.hpp"
-#include "core/idocument.hpp"
+#include "document/idocument.hpp"
 #include "rules/rule_match.hpp"
 #include "widgets/net_button.hpp"
 #include "widgets/net_class_button.hpp"

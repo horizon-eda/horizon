@@ -14,7 +14,7 @@
 #include <sigc++/sigc++.h>
 #include "tool_id.hpp"
 #include "tool.hpp"
-#include "idocument.hpp"
+#include "document/idocument.hpp"
 
 namespace horizon {
 

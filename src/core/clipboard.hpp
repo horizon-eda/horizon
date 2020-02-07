@@ -1,7 +1,7 @@
 #pragma once
 #include "buffer.hpp"
 #include "canvas/selectables.hpp"
-#include "documents.hpp"
+#include "document/documents.hpp"
 #include "schematic/line_net.hpp"
 #include <gtkmm.h>
 #include <set>

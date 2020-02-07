@@ -1,7 +1,7 @@
 #include "rule_editor_diffpair.hpp"
 #include "board/rule_diffpair.hpp"
 #include "block/block.hpp"
-#include "core/idocument_board.hpp"
+#include "document/idocument_board.hpp"
 #include "common/layer_provider.hpp"
 #include "rule_match_editor.hpp"
 #include "util/gtk_util.hpp"

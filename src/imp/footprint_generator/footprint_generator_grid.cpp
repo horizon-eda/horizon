@@ -1,6 +1,6 @@
 #include "footprint_generator_grid.hpp"
 #include "widgets/pool_browser_button.hpp"
-#include "core/idocument_package.hpp"
+#include "document/idocument_package.hpp"
 #include "pool/pool.hpp"
 
 namespace horizon {

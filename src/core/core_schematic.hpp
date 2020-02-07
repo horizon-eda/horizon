@@ -4,7 +4,7 @@
 #include "pool/pool.hpp"
 #include "pool/symbol.hpp"
 #include "schematic/schematic.hpp"
-#include "idocument_schematic.hpp"
+#include "document/idocument_schematic.hpp"
 #include <iostream>
 #include <memory>
 

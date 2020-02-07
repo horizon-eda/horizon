@@ -5,7 +5,7 @@
 #include "canvas/target.hpp"
 #include "tool_data.hpp"
 #include "nlohmann/json_fwd.hpp"
-#include "documents.hpp"
+#include "document/documents.hpp"
 #include <set>
 #include <memory>
 

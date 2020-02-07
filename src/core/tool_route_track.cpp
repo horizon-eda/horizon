@@ -1,6 +1,6 @@
 #include "tool_route_track.hpp"
 #include "board/board_rules.hpp"
-#include "idocument_board.hpp"
+#include "document/idocument_board.hpp"
 #include "board/board.hpp"
 #include "imp/imp_interface.hpp"
 #include "util/util.hpp"

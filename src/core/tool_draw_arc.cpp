@@ -1,6 +1,6 @@
 #include "tool_draw_arc.hpp"
 #include "imp/imp_interface.hpp"
-#include "idocument.hpp"
+#include "document/idocument.hpp"
 #include <iostream>
 #include "common/arc.hpp"
 #include <gdk/gdkkeysyms.h>

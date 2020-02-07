@@ -4,7 +4,7 @@
 #include <iostream>
 #include <memory>
 #include "nlohmann/json.hpp"
-#include "idocument_frame.hpp"
+#include "document/idocument_frame.hpp"
 
 namespace horizon {
 class CoreFrame : public Core, public IDocumentFrame {

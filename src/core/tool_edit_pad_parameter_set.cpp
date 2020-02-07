@@ -1,5 +1,5 @@
 #include "tool_edit_pad_parameter_set.hpp"
-#include "idocument_package.hpp"
+#include "document/idocument_package.hpp"
 #include "pool/package.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>

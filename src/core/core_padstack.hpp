@@ -6,7 +6,7 @@
 #include <deque>
 #include <iostream>
 #include <memory>
-#include "idocument_padstack.hpp"
+#include "document/idocument_padstack.hpp"
 
 namespace horizon {
 class CorePadstack : public Core, public virtual IDocumentPadstack {

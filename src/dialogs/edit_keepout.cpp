@@ -4,7 +4,7 @@
 #include <iostream>
 #include <deque>
 #include <algorithm>
-#include "core/idocument.hpp"
+#include "document/idocument.hpp"
 #include "common/keepout.hpp"
 #include "board/board_layers.hpp"
 #include "util/gtk_util.hpp"

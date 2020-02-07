@@ -5,7 +5,7 @@
 #include "imp/imp_interface.hpp"
 #include <iostream>
 #include <functional>
-#include "idocument.hpp"
+#include "document/idocument.hpp"
 
 namespace horizon {
 

@@ -1,5 +1,5 @@
 #include "dxf_importer.hpp"
-#include "core/idocument.hpp"
+#include "document/idocument.hpp"
 #include "dxflib/dl_creationadapter.h"
 #include "dxflib/dl_dxf.h"
 #include "util/uuid.hpp"

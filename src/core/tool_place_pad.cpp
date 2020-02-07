@@ -1,5 +1,5 @@
 #include "tool_place_pad.hpp"
-#include "idocument_package.hpp"
+#include "document/idocument_package.hpp"
 #include "pool/package.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>

@@ -1,5 +1,5 @@
 #include "tool_draw_polygon.hpp"
-#include "idocument_padstack.hpp"
+#include "document/idocument_padstack.hpp"
 #include "pool/padstack.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>

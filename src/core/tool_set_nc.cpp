@@ -1,5 +1,5 @@
 #include "tool_set_nc.hpp"
-#include "idocument_schematic.hpp"
+#include "document/idocument_schematic.hpp"
 #include "schematic/schematic.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>

@@ -1,7 +1,7 @@
 #include "tool_move_net_segment.hpp"
-#include "idocument_board.hpp"
+#include "document/idocument_board.hpp"
 #include "board/board.hpp"
-#include "idocument_schematic.hpp"
+#include "document/idocument_schematic.hpp"
 #include "schematic/schematic.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>

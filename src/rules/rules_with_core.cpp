@@ -1,8 +1,8 @@
 #include "rules_with_core.hpp"
 #include "board/board_rules.hpp"
-#include "core/idocument_board.hpp"
-#include "core/idocument_schematic.hpp"
-#include "core/idocument_package.hpp"
+#include "document/idocument_board.hpp"
+#include "document/idocument_schematic.hpp"
+#include "document/idocument_package.hpp"
 #include "schematic/schematic_rules.hpp"
 #include "package/package_rules.hpp"
 

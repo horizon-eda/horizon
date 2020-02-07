@@ -3,7 +3,7 @@
 #include "board/step_export_settings.hpp"
 #include "util/util.hpp"
 #include "util/gtk_util.hpp"
-#include "core/idocument_board.hpp"
+#include "document/idocument_board.hpp"
 #include <thread>
 
 namespace horizon {

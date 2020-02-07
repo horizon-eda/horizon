@@ -1,5 +1,5 @@
 #include "tool_place_bus_ripper.hpp"
-#include "idocument_schematic.hpp"
+#include "document/idocument_schematic.hpp"
 #include "schematic/schematic.hpp"
 #include "imp/imp_interface.hpp"
 #include "tool_helper_move.hpp"

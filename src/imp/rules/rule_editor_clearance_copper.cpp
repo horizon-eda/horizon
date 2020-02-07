@@ -2,7 +2,7 @@
 #include "board/rule_clearance_copper.hpp"
 #include "common/lut.hpp"
 #include "common/patch_type_names.hpp"
-#include "core/idocument.hpp"
+#include "document/idocument.hpp"
 #include "common/layer_provider.hpp"
 #include "dialogs/dialogs.hpp"
 #include "rule_match_editor.hpp"

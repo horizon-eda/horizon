@@ -3,7 +3,7 @@
 #include <iostream>
 #include "nlohmann/json.hpp"
 #include "common/text.hpp"
-#include "idocument.hpp"
+#include "document/idocument.hpp"
 
 namespace horizon {
 

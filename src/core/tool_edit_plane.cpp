@@ -1,6 +1,6 @@
 #include "tool_edit_plane.hpp"
 #include "board/board_layers.hpp"
-#include "idocument_board.hpp"
+#include "document/idocument_board.hpp"
 #include "board/board.hpp"
 #include "imp/imp_interface.hpp"
 #include "pool/part.hpp"

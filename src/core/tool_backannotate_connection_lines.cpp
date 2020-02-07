@@ -1,5 +1,5 @@
 #include "tool_backannotate_connection_lines.hpp"
-#include "idocument_schematic.hpp"
+#include "document/idocument_schematic.hpp"
 #include "schematic/schematic.hpp"
 #include "nlohmann/json.hpp"
 

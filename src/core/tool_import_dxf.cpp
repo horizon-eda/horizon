@@ -1,5 +1,5 @@
 #include "tool_import_dxf.hpp"
-#include "idocument.hpp"
+#include "document/idocument.hpp"
 #include "imp/imp_interface.hpp"
 #include "import_dxf/dxf_importer.hpp"
 #include "common/junction.hpp"

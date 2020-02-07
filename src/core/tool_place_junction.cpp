@@ -1,7 +1,7 @@
 #include "tool_place_junction.hpp"
-#include "idocument_schematic.hpp"
+#include "document/idocument_schematic.hpp"
 #include "schematic/schematic.hpp"
-#include "idocument_symbol.hpp"
+#include "document/idocument_symbol.hpp"
 #include "pool/symbol.hpp"
 #include <gdk/gdkkeysyms.h>
 #include <iostream>

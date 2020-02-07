@@ -6,7 +6,7 @@
 #include <deque>
 #include <iostream>
 #include <memory>
-#include "idocument_package.hpp"
+#include "document/idocument_package.hpp"
 
 namespace horizon {
 class CorePackage : public Core, public virtual IDocumentPackage {

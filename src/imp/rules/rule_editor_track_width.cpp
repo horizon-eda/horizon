@@ -1,6 +1,6 @@
 #include "rule_editor_track_width.hpp"
 #include "board/rule_track_width.hpp"
-#include "core/idocument.hpp"
+#include "document/idocument.hpp"
 #include "common/layer_provider.hpp"
 #include "rule_match_editor.hpp"
 #include "widgets/spin_button_dim.hpp"

@@ -1,5 +1,5 @@
 #include "tool_fix.hpp"
-#include "idocument_board.hpp"
+#include "document/idocument_board.hpp"
 #include "board/board.hpp"
 #include <iostream>
 

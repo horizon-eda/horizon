@@ -1,7 +1,7 @@
 #include "footprint_generator_base.hpp"
 #include "widgets/pool_browser_button.hpp"
 #include "widgets/pool_browser_padstack.hpp"
-#include "core/idocument_package.hpp"
+#include "document/idocument_package.hpp"
 
 namespace horizon {
 FootprintGeneratorBase::FootprintGeneratorBase(const char *resource, IDocumentPackage *c)

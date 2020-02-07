@@ -3,7 +3,7 @@
 #include "export_gerber/gerber_export.hpp"
 #include "util/gtk_util.hpp"
 #include "widgets/spin_button_dim.hpp"
-#include "core/idocument_board.hpp"
+#include "document/idocument_board.hpp"
 #include "rules/rules_with_core.hpp"
 #include "rules/cache.hpp"
 

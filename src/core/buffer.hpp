@@ -9,7 +9,7 @@
 #include "common/polygon.hpp"
 #include "common/shape.hpp"
 #include "common/text.hpp"
-#include "documents.hpp"
+#include "document/documents.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "package/pad.hpp"
 #include "pool/symbol.hpp"

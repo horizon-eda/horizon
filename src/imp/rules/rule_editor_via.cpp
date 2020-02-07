@@ -1,6 +1,6 @@
 #include "rule_editor_via.hpp"
 #include "board/rule_via.hpp"
-#include "core/idocument_board.hpp"
+#include "document/idocument_board.hpp"
 #include "rule_match_editor.hpp"
 #include "widgets/chooser_buttons.hpp"
 #include "widgets/parameter_set_editor.hpp"

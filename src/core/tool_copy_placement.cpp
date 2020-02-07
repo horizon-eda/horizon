@@ -1,5 +1,5 @@
 #include "tool_copy_placement.hpp"
-#include "idocument_board.hpp"
+#include "document/idocument_board.hpp"
 #include "board/board.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>

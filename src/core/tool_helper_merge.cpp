@@ -1,7 +1,7 @@
 #include "tool_helper_merge.hpp"
 #include "block/bus.hpp"
 #include "block/net.hpp"
-#include "idocument_schematic.hpp"
+#include "document/idocument_schematic.hpp"
 #include "schematic/schematic.hpp"
 #include "imp/imp_interface.hpp"
 

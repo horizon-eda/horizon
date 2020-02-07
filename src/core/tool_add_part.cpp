@@ -1,5 +1,5 @@
 #include "tool_add_part.hpp"
-#include "idocument_schematic.hpp"
+#include "document/idocument_schematic.hpp"
 #include "schematic/schematic.hpp"
 #include "imp/imp_interface.hpp"
 #include "pool/part.hpp"

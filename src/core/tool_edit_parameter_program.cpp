@@ -1,5 +1,5 @@
 #include "tool_edit_parameter_program.hpp"
-#include "idocument_padstack.hpp"
+#include "document/idocument_padstack.hpp"
 #include "pool/padstack.hpp"
 #include <iostream>
 
