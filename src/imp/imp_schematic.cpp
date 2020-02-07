@@ -11,9 +11,9 @@
 #include "bom_export_window.hpp"
 #include "pdf_export_window.hpp"
 #include "nlohmann/json.hpp"
-#include "core/tool_backannotate_connection_lines.hpp"
-#include "core/tool_add_part.hpp"
-#include "core/tool_map_symbol.hpp"
+#include "core/tools/tool_backannotate_connection_lines.hpp"
+#include "core/tools/tool_add_part.hpp"
+#include "core/tools/tool_map_symbol.hpp"
 #include "widgets/unplaced_box.hpp"
 
 namespace horizon {
