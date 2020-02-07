@@ -53,7 +53,7 @@ bool ToolRouteTrackInteractive::is_tune() const
 
 bool ToolRouteTrackInteractive::can_begin()
 {
-    if (!core.b)
+    if (!doc.b)
         return false;
     switch (tool_id) {
     case ToolID::DRAG_TRACK_INTERACTIVE:
@@ -89,7 +89,7 @@ Track *ToolRouteTrackInteractive::get_track(const std::set<SelectableRef> &sel)
     for (const auto &it : sel) {
         if (it.type == ObjectType::TRACK) {
             if (track == nullptr) {
-                track = &core.b->get_board()->tracks.at(it.uuid);
+                track = &doc.b->get_board()->tracks.at(it.uuid);
             }
             else {
                 return nullptr;
@@ -109,15 +109,15 @@ ToolResponse ToolRouteTrackInteractive::begin(const ToolArgs &args)
 
     wrapper = new ToolWrapper(this);
 
-    board = core.b->get_board();
-    rules = dynamic_cast<BoardRules *>(core.r->get_rules());
+    board = doc.b->get_board();
+    rules = dynamic_cast<BoardRules *>(doc.r->get_rules());
 
     iface = new PNS::PNS_HORIZON_IFACE;
     iface->SetBoard(board);
     iface->create_debug_decorator(imp->get_canvas());
     iface->SetCanvas(imp->get_canvas());
     iface->SetRules(rules);
-    iface->SetViaPadstackProvider(core.b->get_via_padstack_provider());
+    iface->SetViaPadstackProvider(doc.b->get_via_padstack_provider());
     // m_iface->SetHostFrame( m_frame );
 
     router = new PNS::ROUTER;

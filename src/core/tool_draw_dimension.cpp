@@ -13,12 +13,12 @@ ToolDrawDimension::ToolDrawDimension(IDocument *c, ToolID tid) : ToolBase(c, tid
 
 bool ToolDrawDimension::can_begin()
 {
-    return core.r->has_object_type(ObjectType::DIMENSION);
+    return doc.r->has_object_type(ObjectType::DIMENSION);
 }
 
 ToolResponse ToolDrawDimension::begin(const ToolArgs &args)
 {
-    temp = core.r->insert_dimension(UUID::random());
+    temp = doc.r->insert_dimension(UUID::random());
     temp->temp = true;
     temp->p0 = args.coords;
     temp->p1 = args.coords;

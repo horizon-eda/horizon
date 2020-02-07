@@ -15,16 +15,16 @@ std::pair<Net *, Net *> ToolSetDiffpair::get_net()
     std::set<Net *> nets;
     for (const auto &it : selection) {
         if (it.type == ObjectType::JUNCTION) {
-            nets.insert(core.c->get_junction(it.uuid)->net);
+            nets.insert(doc.c->get_junction(it.uuid)->net);
         }
         else if (it.type == ObjectType::LINE_NET) {
-            nets.insert(core.c->get_sheet()->net_lines.at(it.uuid).net);
+            nets.insert(doc.c->get_sheet()->net_lines.at(it.uuid).net);
         }
         else if (it.type == ObjectType::POWER_SYMBOL) {
-            nets.insert(core.c->get_sheet()->power_symbols.at(it.uuid).junction->net);
+            nets.insert(doc.c->get_sheet()->power_symbols.at(it.uuid).junction->net);
         }
         else if (it.type == ObjectType::NET_LABEL) {
-            nets.insert(core.c->get_sheet()->net_labels.at(it.uuid).junction->net);
+            nets.insert(doc.c->get_sheet()->net_labels.at(it.uuid).junction->net);
         }
     }
     if (nets.size() == 1) {
@@ -41,7 +41,7 @@ std::pair<Net *, Net *> ToolSetDiffpair::get_net()
 
 bool ToolSetDiffpair::can_begin()
 {
-    if (!core.c)
+    if (!doc.c)
         return false;
     auto nets = get_net();
     if (!nets.first)
@@ -90,10 +90,10 @@ ToolResponse ToolSetDiffpair::begin(const ToolArgs &args)
             return ToolResponse::end();
         }
 
-        auto r = imp->dialogs.select_net(core.c->get_block(), false);
+        auto r = imp->dialogs.select_net(doc.c->get_block(), false);
         if (r.first) {
             if (r.second != net->uuid) {
-                auto other_net = &core.c->get_block()->nets.at(r.second);
+                auto other_net = &doc.c->get_block()->nets.at(r.second);
                 if (other_net->diffpair) {
                     imp->tool_bar_flash("Selected net is already a diffpair");
                 }

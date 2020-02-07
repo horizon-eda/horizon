@@ -15,7 +15,7 @@ ToolPolygonToLineLoop::ToolPolygonToLineLoop(IDocument *c, ToolID tid) : ToolBas
 
 bool ToolPolygonToLineLoop::can_begin()
 {
-    if (!(core.r->has_object_type(ObjectType::LINE) && core.r->has_object_type(ObjectType::POLYGON)))
+    if (!(doc.r->has_object_type(ObjectType::LINE) && doc.r->has_object_type(ObjectType::POLYGON)))
         return false;
     return get_polygon();
 }
@@ -25,7 +25,7 @@ Polygon *ToolPolygonToLineLoop::get_polygon()
     for (const auto &it : selection) {
         if (it.type == ObjectType::POLYGON_ARC_CENTER || it.type == ObjectType::POLYGON_EDGE
             || it.type == ObjectType::POLYGON_VERTEX) {
-            return core.r->get_polygon(it.uuid);
+            return doc.r->get_polygon(it.uuid);
         }
     }
     return nullptr;
@@ -34,7 +34,7 @@ Polygon *ToolPolygonToLineLoop::get_polygon()
 Junction *ToolPolygonToLineLoop::make_junction(const Coordi &c)
 {
     auto uu = UUID::random();
-    auto ju = core.r->insert_junction(uu);
+    auto ju = doc.r->insert_junction(uu);
     ju->position = c;
     return ju;
 }
@@ -58,14 +58,14 @@ ToolResponse ToolPolygonToLineLoop::begin(const ToolArgs &args)
             ju = ju_back;
         }
         if (v0->type == Polygon::Vertex::Type::LINE) {
-            auto li = core.r->insert_line(UUID::random());
+            auto li = doc.r->insert_line(UUID::random());
             li->from = j0;
             li->to = ju;
             li->width = 0;
             li->layer = poly->layer;
         }
         else if (v0->type == Polygon::Vertex::Type::ARC) {
-            auto arc = core.r->insert_arc(UUID::random());
+            auto arc = doc.r->insert_arc(UUID::random());
             if (!v0->arc_reverse) {
                 arc->from = j0;
                 arc->to = ju;
@@ -81,7 +81,7 @@ ToolResponse ToolPolygonToLineLoop::begin(const ToolArgs &args)
         v0 = &v;
         j0 = ju;
     }
-    core.r->delete_polygon(poly->uuid);
+    doc.r->delete_polygon(poly->uuid);
 
     return ToolResponse::commit();
 }

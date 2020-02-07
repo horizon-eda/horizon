@@ -15,7 +15,7 @@ ToolLineLoopToPolygon::ToolLineLoopToPolygon(IDocument *c, ToolID tid) : ToolBas
 
 bool ToolLineLoopToPolygon::can_begin()
 {
-    if (!(core.r->has_object_type(ObjectType::LINE) && core.r->has_object_type(ObjectType::POLYGON)))
+    if (!(doc.r->has_object_type(ObjectType::LINE) && doc.r->has_object_type(ObjectType::POLYGON)))
         return false;
     for (const auto &it : selection) {
         if (it.type == ObjectType::JUNCTION || it.type == ObjectType::LINE || it.type == ObjectType::ARC) {
@@ -103,15 +103,15 @@ ToolResponse ToolLineLoopToPolygon::begin(const ToolArgs &args)
         Junction *start_junction = nullptr;
         for (const auto &it : selection) {
             if (it.type == ObjectType::JUNCTION) {
-                start_junction = core.r->get_junction(it.uuid);
+                start_junction = doc.r->get_junction(it.uuid);
                 break;
             }
             else if (it.type == ObjectType::LINE) {
-                start_junction = core.r->get_line(it.uuid)->from;
+                start_junction = doc.r->get_line(it.uuid)->from;
                 break;
             }
             else if (it.type == ObjectType::ARC) {
-                start_junction = core.r->get_arc(it.uuid)->from;
+                start_junction = doc.r->get_arc(it.uuid)->from;
                 break;
             }
         }
@@ -122,11 +122,11 @@ ToolResponse ToolLineLoopToPolygon::begin(const ToolArgs &args)
 
         std::vector<Connector> all_connectors;
         {
-            auto all_lines = core.r->get_lines();
+            auto all_lines = doc.r->get_lines();
             for (auto li : all_lines) {
                 all_connectors.emplace_back(li);
             }
-            auto all_arcs = core.r->get_arcs();
+            auto all_arcs = doc.r->get_arcs();
             for (auto ar : all_arcs) {
                 all_connectors.emplace_back(ar);
             }
@@ -145,7 +145,7 @@ ToolResponse ToolLineLoopToPolygon::begin(const ToolArgs &args)
             break;
         }
         std::set<Connector *> connectors;
-        auto poly = core.r->insert_polygon(UUID::random());
+        auto poly = doc.r->insert_polygon(UUID::random());
         for (const auto &it : path) {
             auto v = poly->append_vertex(it.first->position);
             if (it.second->arc) {
@@ -157,21 +157,21 @@ ToolResponse ToolLineLoopToPolygon::begin(const ToolArgs &args)
                 connectors.insert(con);
         }
         poly->layer = start_junction->layer;
-        if (core.c || core.y || core.f)
+        if (doc.c || doc.y || doc.f)
             poly->layer = 0;
 
         for (auto con : connectors) {
             if (con->li) {
-                core.r->delete_line(con->li->uuid);
+                doc.r->delete_line(con->li->uuid);
                 remove_from_selection(ObjectType::LINE, con->li->uuid);
             }
             else if (con->arc) {
-                core.r->delete_arc(con->arc->uuid);
+                doc.r->delete_arc(con->arc->uuid);
                 remove_from_selection(ObjectType::ARC, con->arc->uuid);
             }
         }
         for (auto &it : path) {
-            core.r->delete_junction(it.first->uuid);
+            doc.r->delete_junction(it.first->uuid);
             remove_from_selection(ObjectType::JUNCTION, it.first->uuid);
         }
         success = true;

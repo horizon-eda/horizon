@@ -15,7 +15,7 @@ ToolRouteTrack::ToolRouteTrack(IDocument *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolRouteTrack::can_begin()
 {
-    return core.b;
+    return doc.b;
 }
 
 ToolResponse ToolRouteTrack::begin(const ToolArgs &args)
@@ -23,8 +23,8 @@ ToolResponse ToolRouteTrack::begin(const ToolArgs &args)
     std::cout << "tool route track\n";
     selection.clear();
     update_tip();
-    rules = dynamic_cast<BoardRules *>(core.r->get_rules());
-    canvas_patch.update(*core.b->get_board());
+    rules = dynamic_cast<BoardRules *>(doc.r->get_rules());
+    canvas_patch.update(*doc.b->get_board());
 
     return ToolResponse();
 }
@@ -52,7 +52,7 @@ void ToolRouteTrack::update_obstacles()
 {
     obstacles.clear();
     canvas_patch.patches.clear();
-    canvas_patch.update(*core.b->get_board());
+    canvas_patch.update(*doc.b->get_board());
 
     ClipperLib::Clipper clipper;
 
@@ -62,8 +62,7 @@ void ToolRouteTrack::update_obstacles()
             ClipperLib::ClipperOffset ofs;
             ofs.ArcTolerance = 10e3;
             ofs.AddPaths(it.second, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
-            auto clearance =
-                    rules->get_clearance_copper(core.b->get_block()->get_net(it.first.net), net, routing_layer);
+            auto clearance = rules->get_clearance_copper(doc.b->get_block()->get_net(it.first.net), net, routing_layer);
             auto expand = clearance->get_clearance(it.first.type, PatchType::TRACK) + clearance->routing_offset;
 
             ClipperLib::Paths t_ofs;
@@ -72,7 +71,7 @@ void ToolRouteTrack::update_obstacles()
         }
     }
     clipper.Execute(ClipperLib::ctUnion, obstacles, ClipperLib::pftNonZero);
-    core.b->get_board()->obstacles = obstacles;
+    doc.b->get_board()->obstacles = obstacles;
 }
 
 void ToolRouteTrack::update_track(const Coordi &c)
@@ -109,7 +108,7 @@ void ToolRouteTrack::update_track(const Coordi &c)
         }
     }
 
-    core.b->get_board()->track_path = track_path;
+    doc.b->get_board()->track_path = track_path;
 }
 
 bool ToolRouteTrack::check_track_path(const ClipperLib::Path &p)
@@ -130,7 +129,7 @@ static Coordi coordi_fron_intpt(const ClipperLib::IntPoint &p)
 
 void ToolRouteTrack::update_temp_track()
 {
-    auto brd = core.b->get_board();
+    auto brd = doc.b->get_board();
     for (auto &it : temp_tracks) {
         brd->tracks.erase(it->uuid);
     }
@@ -162,7 +161,7 @@ void ToolRouteTrack::update_temp_track()
             }
         }
 
-        /*auto tj = core.r->insert_junction(UUID::random());
+        /*auto tj = doc.r->insert_junction(UUID::random());
         tj->temp = true;
         tj->net = net;
         tj->net_segment = net_segment;
@@ -189,7 +188,7 @@ void ToolRouteTrack::update_temp_track()
                 tr->width_from_rules = routing_width_use_default;
                 temp_tracks.push_back(tr);
 
-                auto ju = core.r->insert_junction(UUID::random());
+                auto ju = doc.r->insert_junction(UUID::random());
                 ju->temp = true;
                 ju->position = coordi_fron_intpt(*it);
                 ju->net = net;
@@ -211,7 +210,7 @@ void ToolRouteTrack::update_temp_track()
         via->junction = temp_junctions.back();
     }
 
-    core.b->get_board()->update_airwires();
+    doc.b->get_board()->update_airwires();
 }
 
 bool ToolRouteTrack::try_move_track(const ToolArgs &args)
@@ -227,7 +226,7 @@ bool ToolRouteTrack::try_move_track(const ToolArgs &args)
             bend_mode ^= true;
             track_path = track_path_known_good;
             assert(check_track_path(track_path));
-            core.b->get_board()->track_path = track_path;
+            doc.b->get_board()->track_path = track_path;
 
             // create new segment
             // track_path.emplace_back(args.coords.x, args.coords.y);
@@ -279,15 +278,15 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
-            core.b->get_board()->obstacles.clear();
-            core.b->get_board()->track_path.clear();
+            doc.b->get_board()->obstacles.clear();
+            doc.b->get_board()->track_path.clear();
             return ToolResponse::revert();
         }
     }
     if (net == nullptr) { // begin route
         if (args.type == ToolEventType::CLICK) {
             if (args.target.type == ObjectType::PAD) {
-                auto pkg = &core.b->get_board()->packages.at(args.target.path.at(0));
+                auto pkg = &doc.b->get_board()->packages.at(args.target.path.at(0));
                 auto pad = &pkg->package.pads.at(args.target.path.at(1));
                 net = pad->net;
                 if (net) {
@@ -296,7 +295,7 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                     a.target = args.target;
                     a.coords = args.coords;
                     a.work_layer = args.work_layer;
-                    if (!core.b->get_board()->get_layers().at(a.work_layer).copper) {
+                    if (!doc.b->get_board()->get_layers().at(a.work_layer).copper) {
                         a.work_layer = 0;
                     }
                     if (pad->padstack.type == Padstack::Type::TOP) {
@@ -320,7 +319,7 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                 }
             }
             else if (args.target.type == ObjectType::JUNCTION) {
-                auto junc = core.r->get_junction(args.target.path.at(0));
+                auto junc = doc.r->get_junction(args.target.path.at(0));
                 net = junc->net;
                 if (net) {
                     ToolArgs a;
@@ -328,7 +327,7 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                     a.target = args.target;
                     a.coords = args.coords;
                     a.work_layer = args.work_layer;
-                    if (!core.b->get_board()->get_layers().at(a.work_layer).copper) {
+                    if (!doc.b->get_board()->get_layers().at(a.work_layer).copper) {
                         a.work_layer = 0;
                     }
                     if (!junc->has_via) {
@@ -371,7 +370,7 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                         return ToolResponse();
                     }
                     if (args.target.type == ObjectType::PAD) {
-                        auto pkg = &core.b->get_board()->packages.at(args.target.path.at(0));
+                        auto pkg = &doc.b->get_board()->packages.at(args.target.path.at(0));
                         auto pad = &pkg->package.pads.at(args.target.path.at(1));
                         if (pad->net != net) {
                             imp->tool_bar_flash("pad connected to wrong net");
@@ -385,7 +384,7 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                             std::cout << it.X << " " << it.Y << std::endl;
                         }
 
-                        auto junc = core.r->get_junction(args.target.path.at(0));
+                        auto junc = doc.r->get_junction(args.target.path.at(0));
                         if (junc->net && (junc->net != net)) {
                             imp->tool_bar_flash("junction connected to wrong net");
                             return ToolResponse();
@@ -396,15 +395,15 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                         return ToolResponse();
                     }
 
-                    core.r->delete_junction(temp_junctions.back()->uuid);
+                    doc.r->delete_junction(temp_junctions.back()->uuid);
 
-                    core.b->get_board()->track_path.clear();
-                    core.b->get_board()->obstacles.clear();
+                    doc.b->get_board()->track_path.clear();
+                    doc.b->get_board()->obstacles.clear();
                     return ToolResponse::commit();
                 }
             }
             else if (args.button == 3) {
-                auto brd = core.b->get_board();
+                auto brd = doc.b->get_board();
 
                 if (track_path.size() >= 2 && via == nullptr) {
                     track_path.pop_back();
@@ -430,12 +429,12 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
             }
             else if (args.key == GDK_KEY_v) {
                 if (via == nullptr) {
-                    auto vpp = core.b->get_via_padstack_provider();
+                    auto vpp = doc.b->get_via_padstack_provider();
                     auto padstack = vpp->get_padstack(rules->get_via_padstack_uuid(net));
                     if (padstack) {
                         auto uu = UUID::random();
                         auto ps = rules->get_via_parameter_set(net);
-                        via = &core.b->get_board()
+                        via = &doc.b->get_board()
                                        ->vias
                                        .emplace(std::piecewise_construct, std::forward_as_tuple(uu),
                                                 std::forward_as_tuple(uu, padstack))
@@ -445,7 +444,7 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                     }
                 }
                 else {
-                    core.b->get_board()->vias.erase(via->uuid);
+                    doc.b->get_board()->vias.erase(via->uuid);
                     via = nullptr;
                 }
             }
@@ -501,7 +500,7 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                             bend_mode ^= true;
                             track_path = track_path_known_good;
                             assert(check_track_path(track_path));
-                            core.b->get_board()->track_path = track_path;
+                            doc.b->get_board()->track_path = track_path;
                         }
                         else {
                             std::cout << "no drc error after flip" << std::endl;

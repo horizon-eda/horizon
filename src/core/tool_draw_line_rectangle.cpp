@@ -21,7 +21,7 @@ void ToolDrawLineRectangle::apply_settings()
 
 bool ToolDrawLineRectangle::can_begin()
 {
-    return core.r->has_object_type(ObjectType::LINE);
+    return doc.r->has_object_type(ObjectType::LINE);
 }
 
 void ToolDrawLineRectangle::update_junctions()
@@ -52,12 +52,12 @@ ToolResponse ToolDrawLineRectangle::begin(const ToolArgs &args)
     std::cout << "tool draw line\n";
 
     for (int i = 0; i < 4; i++) {
-        junctions[i] = core.r->insert_junction(UUID::random());
+        junctions[i] = doc.r->insert_junction(UUID::random());
         junctions[i]->temp = true;
     }
 
     for (int i = 0; i < 4; i++) {
-        auto line = core.r->insert_line(UUID::random());
+        auto line = doc.r->insert_line(UUID::random());
         lines.insert(line);
         line->layer = args.work_layer;
         line->from = junctions[i];

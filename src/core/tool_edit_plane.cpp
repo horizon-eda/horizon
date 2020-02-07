@@ -20,7 +20,7 @@ Polygon *ToolEditPlane::get_poly()
         case ObjectType::POLYGON_ARC_CENTER:
         case ObjectType::POLYGON_EDGE:
         case ObjectType::POLYGON_VERTEX: {
-            auto p = core.b->get_polygon(it.uuid);
+            auto p = doc.b->get_polygon(it.uuid);
             if (poly && poly != p) {
                 return nullptr;
             }
@@ -36,7 +36,7 @@ Polygon *ToolEditPlane::get_poly()
 
 bool ToolEditPlane::can_begin()
 {
-    if (!core.b)
+    if (!doc.b)
         return false;
     auto poly = get_poly();
     if (!poly)
@@ -61,7 +61,7 @@ ToolResponse ToolEditPlane::begin(const ToolArgs &args)
 
     auto poly = get_poly();
     Plane *plane = nullptr;
-    auto brd = core.b->get_board();
+    auto brd = doc.b->get_board();
     if (tool_id == ToolID::EDIT_PLANE || tool_id == ToolID::UPDATE_PLANE || tool_id == ToolID::CLEAR_PLANE) {
         plane = dynamic_cast<Plane *>(poly->usage.ptr);
         if (tool_id == ToolID::UPDATE_PLANE) {
@@ -81,7 +81,7 @@ ToolResponse ToolEditPlane::begin(const ToolArgs &args)
         poly->usage = plane;
     }
     UUID plane_uuid = plane->uuid;
-    bool r = imp->dialogs.edit_plane(plane, brd, core.b->get_block());
+    bool r = imp->dialogs.edit_plane(plane, brd, doc.b->get_block());
     if (r) {
         if (brd->planes.count(plane_uuid)) // may have been deleted
             brd->update_plane(plane);

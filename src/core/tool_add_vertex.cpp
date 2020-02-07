@@ -25,7 +25,7 @@ ToolResponse ToolAddVertex::begin(const ToolArgs &args)
     int v = 0;
     for (const auto &it : args.selection) {
         if (it.type == ObjectType::POLYGON_EDGE) {
-            poly = core.r->get_polygon(it.uuid);
+            poly = doc.r->get_polygon(it.uuid);
             v = it.vertex;
             break;
         }

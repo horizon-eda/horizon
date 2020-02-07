@@ -59,7 +59,7 @@ ToolPlaceText::ToolPlaceText(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolH
 
 bool ToolPlaceText::can_begin()
 {
-    return core.r->has_object_type(ObjectType::TEXT);
+    return doc.r->has_object_type(ObjectType::TEXT);
 }
 
 void ToolPlaceText::apply_settings()
@@ -75,7 +75,7 @@ ToolResponse ToolPlaceText::begin(const ToolArgs &args)
 {
     std::cout << "tool place text\n";
 
-    temp = core.r->insert_text(UUID::random());
+    temp = doc.r->insert_text(UUID::random());
     temp->layer = args.work_layer;
     temp->placement.shift = args.coords;
     apply_settings();
@@ -88,7 +88,7 @@ ToolResponse ToolPlaceText::begin(const ToolArgs &args)
         temp->text = r.second;
     }
     else {
-        core.r->delete_text(temp->uuid);
+        doc.r->delete_text(temp->uuid);
         selection.clear();
         return ToolResponse::end();
     }
@@ -108,7 +108,7 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
             text = &temp->text;
             texts_placed.push_front(temp);
             auto old_text = temp;
-            temp = core.r->insert_text(UUID::random());
+            temp = doc.r->insert_text(UUID::random());
             temp->text = *text;
             temp->layer = args.work_layer;
             temp->placement = old_text->placement;
@@ -118,7 +118,7 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
             selection.emplace(temp->uuid, ObjectType::TEXT);
         }
         else if (args.button == 3) {
-            core.r->delete_text(temp->uuid);
+            doc.r->delete_text(temp->uuid);
             selection.clear();
             for (auto it : texts_placed) {
                 selection.emplace(it->uuid, ObjectType::TEXT);

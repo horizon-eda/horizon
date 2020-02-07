@@ -13,7 +13,7 @@ ToolPlaceRefdesAndValue::ToolPlaceRefdesAndValue(IDocument *c, ToolID tid) : Too
 
 bool ToolPlaceRefdesAndValue::can_begin()
 {
-    return core.y;
+    return doc.y;
 }
 
 void ToolPlaceRefdesAndValue::update_texts(const Coordi &c)
@@ -25,11 +25,11 @@ void ToolPlaceRefdesAndValue::update_texts(const Coordi &c)
 ToolResponse ToolPlaceRefdesAndValue::begin(const ToolArgs &args)
 {
 
-    text_refdes = core.r->insert_text(UUID::random());
+    text_refdes = doc.r->insert_text(UUID::random());
     text_refdes->layer = 0;
     text_refdes->text = "$REFDES";
 
-    text_value = core.r->insert_text(UUID::random());
+    text_value = doc.r->insert_text(UUID::random());
     text_value->layer = 0;
     text_value->text = "$VALUE";
     imp->tool_bar_set_tip("<b>LMB:</b>place text <b>RMB:</b>cancel ");

@@ -13,7 +13,7 @@ ToolDrawPolygonRectangle::ToolDrawPolygonRectangle(IDocument *c, ToolID tid) : T
 
 bool ToolDrawPolygonRectangle::can_begin()
 {
-    return core.r->has_object_type(ObjectType::POLYGON);
+    return doc.r->has_object_type(ObjectType::POLYGON);
 }
 
 void ToolDrawPolygonRectangle::update_polygon()
@@ -150,7 +150,7 @@ ToolResponse ToolDrawPolygonRectangle::begin(const ToolArgs &args)
 {
     std::cout << "tool draw line poly\n";
 
-    temp = core.r->insert_polygon(UUID::random());
+    temp = doc.r->insert_polygon(UUID::random());
     temp->temp = true;
     temp->layer = args.work_layer;
     first_pos = args.coords;

@@ -65,7 +65,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
     for (const auto &it : args.selection) {
         if (it.type == ObjectType::POLYGON_EDGE) {
             edge_mode = true;
-            Polygon *poly = core.r->get_polygon(it.uuid);
+            Polygon *poly = doc.r->get_polygon(it.uuid);
             auto v1i = it.vertex;
             auto v2i = (it.vertex + 1) % poly->vertices.size();
             Polygon::Vertex *v1 = &poly->vertices.at(v1i);
@@ -74,19 +74,19 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         }
         if (it.type == ObjectType::POLYGON_ARC_CENTER) {
             arc_mode = true;
-            ac.accumulate(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center);
+            ac.accumulate(doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center);
         }
         if (it.type == ObjectType::HOLE) {
             hole_mode = true;
-            ac.accumulate(core.r->get_hole(it.uuid)->placement.shift);
+            ac.accumulate(doc.r->get_hole(it.uuid)->placement.shift);
         }
         if (it.type == ObjectType::JUNCTION) {
             junction_mode = true;
-            ac.accumulate(core.r->get_junction(it.uuid)->position);
+            ac.accumulate(doc.r->get_junction(it.uuid)->position);
         }
         if (it.type == ObjectType::LINE) {
             line_mode = true;
-            auto li = core.r->get_line(it.uuid);
+            auto li = doc.r->get_line(it.uuid);
             auto p0 = li->from->position;
             auto p1 = li->to->position;
             ai.accumulate(sqrt((p0 - p1).mag_sq()));
@@ -108,7 +108,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         }
         if (it.type == ObjectType::POLYGON_VERTEX) {
             vertex_mode = true;
-            ac.accumulate(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).position);
+            ac.accumulate(doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).position);
         }
     }
     int m_total = edge_mode + arc_mode + hole_mode + junction_mode + line_mode + pad_mode + net_mode + text_mode
@@ -124,7 +124,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         double l = r.second / 2.0;
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::POLYGON_EDGE) {
-                Polygon *poly = core.r->get_polygon(it.uuid);
+                Polygon *poly = doc.r->get_polygon(it.uuid);
                 auto v1i = it.vertex;
                 auto v2i = (it.vertex + 1) % poly->vertices.size();
                 Polygon::Vertex *v1 = &poly->vertices.at(v1i);
@@ -188,7 +188,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         double l = r.second / 2.0;
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::LINE) {
-                Line *line = core.r->get_line(it.uuid);
+                Line *line = doc.r->get_line(it.uuid);
                 Junction *j1 = dynamic_cast<Junction *>(line->from.ptr);
                 Junction *j2 = dynamic_cast<Junction *>(line->to.ptr);
                 Coordi center = (j1->position + j2->position) / 2;
@@ -234,7 +234,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         double l = r.second;
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::POLYGON_ARC_CENTER) {
-                Polygon *poly = core.r->get_polygon(it.uuid);
+                Polygon *poly = doc.r->get_polygon(it.uuid);
                 auto v1i = it.vertex;
                 auto v2i = (it.vertex + 1) % poly->vertices.size();
                 Polygon::Vertex *v1 = &poly->vertices.at(v1i);
@@ -255,7 +255,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         }
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::HOLE) {
-                core.r->get_hole(it.uuid)->placement.shift = r.second;
+                doc.r->get_hole(it.uuid)->placement.shift = r.second;
             }
         }
     }
@@ -271,9 +271,9 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::JUNCTION) {
                 if (rc.first)
-                    core.r->get_junction(it.uuid)->position.x = c.x;
+                    doc.r->get_junction(it.uuid)->position.x = c.x;
                 if (rc.second)
-                    core.r->get_junction(it.uuid)->position.y = c.y;
+                    doc.r->get_junction(it.uuid)->position.y = c.y;
             }
         }
     }
@@ -281,7 +281,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         Pad *pad = nullptr;
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::PAD) {
-                pad = &core.k->get_package()->pads.at(it.uuid);
+                pad = &doc.k->get_package()->pads.at(it.uuid);
                 break;
             }
         }
@@ -293,7 +293,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         if (r) {
             for (const auto &it : args.selection) {
                 if (it.type == ObjectType::PAD) {
-                    core.k->get_package()->pads.at(it.uuid).name = new_text;
+                    doc.k->get_package()->pads.at(it.uuid).name = new_text;
                 }
             }
         }
@@ -305,7 +305,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         Net *net = nullptr;
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::NET_LABEL) {
-                auto la = &core.c->get_sheet()->net_labels.at(it.uuid);
+                auto la = &doc.c->get_sheet()->net_labels.at(it.uuid);
                 if (net) {
                     if (net != la->junction->net)
                         return ToolResponse::end();
@@ -315,7 +315,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
                 }
             }
             if (it.type == ObjectType::LINE_NET) {
-                auto li = &core.c->get_sheet()->net_lines.at(it.uuid);
+                auto li = &doc.c->get_sheet()->net_lines.at(it.uuid);
                 if (net) {
                     if (net != li->net)
                         return ToolResponse::end();
@@ -338,7 +338,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         Text *text = nullptr;
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::TEXT) {
-                text = core.r->get_text(it.uuid);
+                text = doc.r->get_text(it.uuid);
                 break;
             }
         }
@@ -350,7 +350,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         if (r) {
             for (const auto &it : args.selection) {
                 if (it.type == ObjectType::TEXT) {
-                    core.r->get_text(it.uuid)->text = new_text;
+                    doc.r->get_text(it.uuid)->text = new_text;
                 }
             }
         }
@@ -368,7 +368,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
                     return ToolResponse::end();
                 }
                 vertex = it.vertex;
-                dim = core.r->get_dimension(it.uuid);
+                dim = doc.r->get_dimension(it.uuid);
             }
         }
         if (!dim)
@@ -432,9 +432,9 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::POLYGON_VERTEX) {
                 if (rc.first)
-                    core.r->get_polygon(it.uuid)->vertices.at(it.vertex).position.x = c.x;
+                    doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).position.x = c.x;
                 if (rc.second)
-                    core.r->get_polygon(it.uuid)->vertices.at(it.vertex).position.y = c.y;
+                    doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).position.y = c.y;
             }
         }
     }

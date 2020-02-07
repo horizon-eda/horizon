@@ -15,7 +15,7 @@ std::set<Component *> ToolSetGroup::get_components()
     std::set<Component *> components;
     for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            components.insert(core.c->get_schematic_symbol(it.uuid)->component);
+            components.insert(doc.c->get_schematic_symbol(it.uuid)->component);
         }
     }
     return components;
@@ -23,10 +23,10 @@ std::set<Component *> ToolSetGroup::get_components()
 
 bool ToolSetGroup::can_begin()
 {
-    if (!core.c)
+    if (!doc.c)
         return false;
     auto comps = get_components();
-    auto block = core.c->get_block();
+    auto block = doc.c->get_block();
     switch (tool_id) {
     case ToolID::SET_GROUP:
         return comps.size() > 0 && block->group_names.size();
@@ -52,7 +52,7 @@ bool ToolSetGroup::can_begin()
 ToolResponse ToolSetGroup::begin(const ToolArgs &args)
 {
     auto comps = get_components();
-    auto block = core.c->get_block();
+    auto block = doc.c->get_block();
     switch (tool_id) {
     case ToolID::SET_GROUP:
     case ToolID::SET_NEW_GROUP:

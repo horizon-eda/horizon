@@ -10,7 +10,7 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
     UUID selected_symbol;
 
     std::string query = "SELECT symbols.uuid FROM symbols WHERE symbols.unit = ?";
-    SQLite::Query q(core.r->get_pool()->db, query);
+    SQLite::Query q(doc.r->get_pool()->db, query);
     q.bind(1, unit_uu);
     int n = 0;
     while (q.step()) {
@@ -21,7 +21,7 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
         *auto_selected = false;
     bool r = false;
     if (n != 1) {
-        std::tie(r, selected_symbol) = imp->dialogs.select_symbol(core.r->get_pool(), unit_uu);
+        std::tie(r, selected_symbol) = imp->dialogs.select_symbol(doc.r->get_pool(), unit_uu);
         if (!r) {
             return nullptr;
         }
@@ -34,7 +34,7 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
         return nullptr;
     }
 
-    return core.c->get_pool()->get_symbol(selected_symbol);
+    return doc.c->get_pool()->get_symbol(selected_symbol);
 }
 
 
@@ -43,10 +43,10 @@ SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *ga
     const Symbol *sym = get_symbol_for_unit(gate->unit->uuid);
     if (!sym)
         return nullptr;
-    SchematicSymbol *schsym = core.c->insert_schematic_symbol(UUID::random(), sym);
+    SchematicSymbol *schsym = doc.c->insert_schematic_symbol(UUID::random(), sym);
     schsym->component = comp;
     schsym->gate = gate;
-    core.c->get_sheet()->expand_symbols(*core.c->get_schematic());
+    doc.c->get_sheet()->expand_symbols(*doc.c->get_schematic());
 
     return schsym;
 }

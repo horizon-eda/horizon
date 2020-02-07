@@ -214,7 +214,7 @@ public:
     }
 
 protected:
-    Documents core;
+    Documents doc;
     class ImpInterface *imp = nullptr;
     ToolID tool_id = ToolID::NONE;
     bool is_transient = false;

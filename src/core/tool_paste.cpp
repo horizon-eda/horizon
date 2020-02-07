@@ -22,7 +22,7 @@ ToolPaste::ToolPaste(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolHelperMov
 
 class JunctionProvider : public ObjectProvider {
 public:
-    JunctionProvider(IDocument *c, const std::map<UUID, const UUID> &xj) : core(c), junction_xlat(xj)
+    JunctionProvider(IDocument *c, const std::map<UUID, const UUID> &xj) : doc(c), junction_xlat(xj)
     {
     }
     virtual ~JunctionProvider()
@@ -31,17 +31,17 @@ public:
 
     Junction *get_junction(const UUID &uu) override
     {
-        return core->get_junction(junction_xlat.at(uu));
+        return doc->get_junction(junction_xlat.at(uu));
     }
 
 private:
-    IDocument *core;
+    IDocument *doc;
     const std::map<UUID, const UUID> &junction_xlat;
 };
 
 void ToolPaste::fix_layer(int &la)
 {
-    if (core.r->get_layer_provider()->get_layers().count(la) == 0) {
+    if (doc.r->get_layer_provider()->get_layers().count(la) == 0) {
         la = 0;
     }
 }
@@ -62,28 +62,28 @@ public:
 ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canvas)
 {
     Coordi cursor_pos = j.at("cursor_pos").get<std::vector<int64_t>>();
-    printf("Core %p\n", core.r);
+    printf("Core %p\n", doc.r);
     selection.clear();
     shift = cursor_pos_canvas - cursor_pos;
 
     std::map<UUID, const UUID> text_xlat;
-    if (j.count("texts") && core.r->has_object_type(ObjectType::TEXT)) {
+    if (j.count("texts") && doc.r->has_object_type(ObjectType::TEXT)) {
         const json &o = j["texts"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             text_xlat.emplace(it.key(), u);
-            auto x = core.r->insert_text(u);
+            auto x = doc.r->insert_text(u);
             *x = Text(u, it.value());
             fix_layer(x->layer);
             apply_shift(x->placement.shift, cursor_pos_canvas);
             selection.emplace(u, ObjectType::TEXT);
         }
     }
-    if (j.count("dimensions") && core.r->has_object_type(ObjectType::DIMENSION)) {
+    if (j.count("dimensions") && doc.r->has_object_type(ObjectType::DIMENSION)) {
         const json &o = j["dimensions"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto x = core.r->insert_dimension(u);
+            auto x = doc.r->insert_dimension(u);
             *x = Dimension(u, it.value());
             apply_shift(x->p0, cursor_pos_canvas);
             apply_shift(x->p1, cursor_pos_canvas);
@@ -97,7 +97,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             junction_xlat.emplace(it.key(), u);
-            auto x = core.r->insert_junction(u);
+            auto x = doc.r->insert_junction(u);
             *x = Junction(u, it.value());
             apply_shift(x->position, cursor_pos_canvas);
             selection.emplace(u, ObjectType::JUNCTION);
@@ -107,8 +107,8 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         const json &o = j["lines"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto x = core.r->insert_line(u);
-            JunctionProvider p(core.r, junction_xlat);
+            auto x = doc.r->insert_line(u);
+            JunctionProvider p(doc.r, junction_xlat);
             *x = Line(u, it.value(), p);
             fix_layer(x->layer);
             selection.emplace(u, ObjectType::LINE);
@@ -118,25 +118,25 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         const json &o = j["arcs"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto x = core.r->insert_arc(u);
-            JunctionProvider p(core.r, junction_xlat);
+            auto x = doc.r->insert_arc(u);
+            JunctionProvider p(doc.r, junction_xlat);
             *x = Arc(u, it.value(), p);
             fix_layer(x->layer);
             selection.emplace(u, ObjectType::ARC);
         }
     }
-    if (j.count("pads") && core.k) {
+    if (j.count("pads") && doc.k) {
         const json &o = j["pads"];
         std::vector<Pad *> pads;
-        int max_name = core.k->get_package()->get_max_pad_name();
+        int max_name = doc.k->get_package()->get_max_pad_name();
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto &x = core.k->get_package()->pads.emplace(u, Pad(u, it.value(), *core.r->get_pool())).first->second;
+            auto &x = doc.k->get_package()->pads.emplace(u, Pad(u, it.value(), *doc.r->get_pool())).first->second;
             apply_shift(x.placement.shift, cursor_pos_canvas);
             pads.push_back(&x);
             selection.emplace(u, ObjectType::PAD);
         }
-        core.k->get_package()->apply_parameter_set({});
+        doc.k->get_package()->apply_parameter_set({});
         if (max_name > 0) {
             std::sort(pads.begin(), pads.end(),
                       [](const Pad *a, const Pad *b) { return strcmp_natural(a->name, b->name) < 0; });
@@ -150,7 +150,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         const json &o = j["holes"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto x = core.r->insert_hole(u);
+            auto x = doc.r->insert_hole(u);
             *x = Hole(u, it.value());
             apply_shift(x->placement.shift, cursor_pos_canvas);
             selection.emplace(u, ObjectType::HOLE);
@@ -160,7 +160,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         const json &o = j["polygons"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto x = core.r->insert_polygon(u);
+            auto x = doc.r->insert_polygon(u);
             *x = Polygon(u, it.value());
             int vertex = 0;
             for (auto &itv : x->vertices) {
@@ -173,9 +173,9 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         }
     }
     std::map<UUID, const UUID> net_xlat;
-    if (j.count("nets") && core.r->get_block()) {
+    if (j.count("nets") && doc.r->get_block()) {
         const json &o = j["nets"];
-        auto block = core.r->get_block();
+        auto block = doc.r->get_block();
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             Net net_from_json(it.key(), it.value());
             std::string net_name = net_from_json.name;
@@ -189,7 +189,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
                     }
                 }
             }
-            if (!net_new && core.c) {
+            if (!net_new && doc.c) {
                 net_new = block->insert_net();
                 net_new->is_power = net_from_json.is_power;
                 net_new->name = net_name;
@@ -201,13 +201,13 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
     }
 
     std::map<UUID, const UUID> component_xlat;
-    if (j.count("components") && core.c) {
+    if (j.count("components") && doc.c) {
         const json &o = j["components"];
-        auto block = core.c->get_schematic()->block;
+        auto block = doc.c->get_schematic()->block;
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             component_xlat.emplace(it.key(), u);
-            Component comp(u, it.value(), *core.r->get_pool());
+            Component comp(u, it.value(), *doc.r->get_pool());
             for (auto &it_conn : comp.connections) {
                 it_conn.second.net = &block->nets.at(net_xlat.at(it_conn.second.net.uuid));
             }
@@ -215,27 +215,27 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         }
     }
     std::map<UUID, const UUID> symbol_xlat;
-    if (j.count("symbols") && core.c) {
+    if (j.count("symbols") && doc.c) {
         const json &o = j["symbols"];
-        auto sheet = core.c->get_sheet();
-        auto block = core.c->get_schematic()->block;
+        auto sheet = doc.c->get_sheet();
+        auto block = doc.c->get_schematic()->block;
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             symbol_xlat.emplace(it.key(), u);
-            SchematicSymbol sym(u, it.value(), *core.r->get_pool());
+            SchematicSymbol sym(u, it.value(), *doc.r->get_pool());
             sym.component = &block->components.at(component_xlat.at(sym.component.uuid));
             sym.gate = &sym.component->entity->gates.at(sym.gate.uuid);
             auto x = &sheet->symbols.emplace(u, sym).first->second;
             for (auto &it_txt : x->texts) {
-                it_txt = core.r->get_text(text_xlat.at(it_txt.uuid));
+                it_txt = doc.r->get_text(text_xlat.at(it_txt.uuid));
             }
             x->placement.shift += shift;
             selection.emplace(u, ObjectType::SCHEMATIC_SYMBOL);
         }
     }
-    if (j.count("net_lines") && core.c) {
+    if (j.count("net_lines") && doc.c) {
         const json &o = j["net_lines"];
-        auto sheet = core.c->get_sheet();
+        auto sheet = doc.c->get_sheet();
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             LineNet line(u, it.value());
@@ -254,47 +254,47 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             selection.emplace(u, ObjectType::LINE_NET);
         }
     }
-    if (j.count("net_labels") && core.c) {
+    if (j.count("net_labels") && doc.c) {
         const json &o = j["net_labels"];
-        auto sheet = core.c->get_sheet();
+        auto sheet = doc.c->get_sheet();
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto x = &core.c->get_sheet()->net_labels.emplace(u, NetLabel(u, it.value())).first->second;
+            auto x = &doc.c->get_sheet()->net_labels.emplace(u, NetLabel(u, it.value())).first->second;
             x->junction = &sheet->junctions.at(junction_xlat.at(x->junction.uuid));
             selection.emplace(u, ObjectType::NET_LABEL);
         }
     }
-    if (j.count("power_symbols") && core.c) {
+    if (j.count("power_symbols") && doc.c) {
         const json &o = j["power_symbols"];
-        auto sheet = core.c->get_sheet();
-        auto block = core.c->get_schematic()->block;
+        auto sheet = doc.c->get_sheet();
+        auto block = doc.c->get_schematic()->block;
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto x = &core.c->get_sheet()->power_symbols.emplace(u, PowerSymbol(u, it.value())).first->second;
+            auto x = &doc.c->get_sheet()->power_symbols.emplace(u, PowerSymbol(u, it.value())).first->second;
             x->junction = &sheet->junctions.at(junction_xlat.at(x->junction.uuid));
             x->net = &block->nets.at(net_xlat.at(x->net.uuid));
             selection.emplace(u, ObjectType::POWER_SYMBOL);
         }
     }
-    if (j.count("shapes") && core.a) {
+    if (j.count("shapes") && doc.a) {
         const json &o = j["shapes"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto x = &core.a->get_padstack()->shapes.emplace(u, Shape(u, it.value())).first->second;
+            auto x = &doc.a->get_padstack()->shapes.emplace(u, Shape(u, it.value())).first->second;
             x->placement.shift += shift;
             selection.emplace(u, ObjectType::SHAPE);
         }
     }
-    if (j.count("vias") && core.b) {
+    if (j.count("vias") && doc.b) {
         const json &o = j["vias"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto brd = core.b->get_board();
+            auto brd = doc.b->get_board();
             auto x = &brd->vias
                               .emplace(std::piecewise_construct, std::forward_as_tuple(u),
                                        std::forward_as_tuple(u, it.value()))
                               .first->second;
-            if (auto ps = core.b->get_via_padstack_provider()->get_padstack(x->vpp_padstack.uuid)) {
+            if (auto ps = doc.b->get_via_padstack_provider()->get_padstack(x->vpp_padstack.uuid)) {
                 x->vpp_padstack = ps;
                 x->padstack = *ps;
                 x->padstack.apply_parameter_set(x->parameter_set);
@@ -309,11 +309,11 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             selection.emplace(u, ObjectType::VIA);
         }
     }
-    if (j.count("tracks") && core.b) {
+    if (j.count("tracks") && doc.b) {
         const json &o = j["tracks"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto brd = core.b->get_board();
+            auto brd = doc.b->get_board();
             auto x = &brd->tracks
                               .emplace(std::piecewise_construct, std::forward_as_tuple(u),
                                        std::forward_as_tuple(u, it.value()))
@@ -323,14 +323,14 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             selection.emplace(u, ObjectType::TRACK);
         }
     }
-    if (j.count("board_holes") && core.b) {
+    if (j.count("board_holes") && doc.b) {
         const json &o = j["board_holes"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto brd = core.b->get_board();
+            auto brd = doc.b->get_board();
             auto x = &brd->holes
                               .emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                                       std::forward_as_tuple(u, it.value(), nullptr, core.r->get_pool()))
+                                       std::forward_as_tuple(u, it.value(), nullptr, doc.r->get_pool()))
                               .first->second;
             if (net_xlat.count(x->net.uuid)) {
                 x->net = &brd->block->nets.at(net_xlat.at(x->net.uuid));
@@ -349,8 +349,8 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
     }
     move_init(cursor_pos_canvas);
     update_tip();
-    if (core.c) {
-        auto sch = core.c->get_schematic();
+    if (doc.c) {
+        auto sch = doc.c->get_schematic();
         sch->expand(true);
         for (auto &it : sch->sheets) {
             it.second.warnings.clear();
@@ -368,7 +368,7 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
     }
 
     if (tool_id == ToolID::DUPLICATE) {
-        Buffer buffer(core);
+        Buffer buffer(doc);
         buffer.load(args.selection);
         paste_data = buffer.serialize();
         paste_data["cursor_pos"] = args.coords.as_array();
@@ -425,10 +425,10 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
                 merge_selected_junctions();
                 for (const auto &it : selection) {
                     if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-                        auto sym = core.c->get_schematic_symbol(it.uuid);
-                        core.c->get_schematic()->autoconnect_symbol(core.c->get_sheet(), sym);
+                        auto sym = doc.c->get_schematic_symbol(it.uuid);
+                        doc.c->get_schematic()->autoconnect_symbol(doc.c->get_sheet(), sym);
                         if (sym->component->connections.size() == 0) {
-                            core.c->get_schematic()->place_bipole_on_line(core.c->get_sheet(), sym);
+                            doc.c->get_schematic()->place_bipole_on_line(doc.c->get_sheet(), sym);
                         }
                     }
                 }

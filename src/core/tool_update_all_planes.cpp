@@ -10,16 +10,16 @@ ToolUpdateAllPlanes::ToolUpdateAllPlanes(IDocument *c, ToolID tid) : ToolBase(c,
 
 bool ToolUpdateAllPlanes::can_begin()
 {
-    return core.b;
+    return doc.b;
 }
 
 ToolResponse ToolUpdateAllPlanes::begin(const ToolArgs &args)
 {
     if (tool_id == ToolID::UPDATE_ALL_PLANES) {
-        core.b->get_board()->update_planes();
+        doc.b->get_board()->update_planes();
     }
     else if (tool_id == ToolID::CLEAR_ALL_PLANES) {
-        for (auto &it : core.b->get_board()->planes) {
+        for (auto &it : doc.b->get_board()->planes) {
             it.second.fragments.clear();
             it.second.revision++;
         }

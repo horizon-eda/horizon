@@ -11,13 +11,13 @@ ToolEditParameterProgram::ToolEditParameterProgram(IDocument *c, ToolID tid) : T
 
 bool ToolEditParameterProgram::can_begin()
 {
-    return core.a;
+    return doc.a;
 }
 
 ToolResponse ToolEditParameterProgram::begin(const ToolArgs &args)
 {
     bool r;
-    auto ps = core.a->get_padstack();
+    auto ps = doc.a->get_padstack();
     if (tool_id == ToolID::EDIT_PARAMETER_PROGRAM) {
         r = imp->dialogs.edit_parameter_program(&ps->parameter_program);
     }

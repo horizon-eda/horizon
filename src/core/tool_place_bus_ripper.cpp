@@ -16,7 +16,7 @@ ToolPlaceBusRipper::ToolPlaceBusRipper(IDocument *c, ToolID tid)
 
 bool ToolPlaceBusRipper::can_begin()
 {
-    return core.c;
+    return doc.c;
 }
 
 bool ToolPlaceBusRipper::begin_attached()
@@ -25,11 +25,11 @@ bool ToolPlaceBusRipper::begin_attached()
 
     bool r;
     UUID bus_uuid;
-    std::tie(r, bus_uuid) = imp->dialogs.select_bus(core.c->get_schematic()->block);
+    std::tie(r, bus_uuid) = imp->dialogs.select_bus(doc.c->get_schematic()->block);
     if (!r) {
         return false;
     }
-    bus = &core.c->get_schematic()->block->buses.at(bus_uuid);
+    bus = &doc.c->get_schematic()->block->buses.at(bus_uuid);
 
     for (auto &it : bus->members) {
         bus_members.push_back(&it.second);
@@ -52,7 +52,7 @@ void ToolPlaceBusRipper::create_attached()
         orientation = ri->orientation;
     }
     auto uu = UUID::random();
-    ri = &core.c->get_sheet()->bus_rippers.emplace(uu, uu).first->second;
+    ri = &doc.c->get_sheet()->bus_rippers.emplace(uu, uu).first->second;
     ri->bus = bus;
     ri->temp = true;
     ri->bus_member = bus_members.at(bus_member_current);
@@ -65,7 +65,7 @@ void ToolPlaceBusRipper::create_attached()
 void ToolPlaceBusRipper::delete_attached()
 {
     if (ri) {
-        core.c->get_sheet()->bus_rippers.erase(ri->uuid);
+        doc.c->get_sheet()->bus_rippers.erase(ri->uuid);
         temp->bus = nullptr;
         ri = nullptr;
     }
@@ -83,7 +83,7 @@ bool ToolPlaceBusRipper::update_attached(const ToolArgs &args)
     if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
             if (args.target.type == ObjectType::JUNCTION) {
-                Junction *j = core.r->get_junction(args.target.path.at(0));
+                Junction *j = doc.r->get_junction(args.target.path.at(0));
                 if (j->bus != bus) {
                     imp->tool_bar_flash("junction connected to wrong bus");
                     return true;
@@ -92,11 +92,11 @@ bool ToolPlaceBusRipper::update_attached(const ToolArgs &args)
                 create_attached();
             }
             else {
-                for (auto it : core.c->get_net_lines()) {
+                for (auto it : doc.c->get_net_lines()) {
                     if (it->coord_on_line(temp->position)) {
                         std::cout << "on line" << std::endl;
                         if (it->bus == bus) {
-                            core.c->get_sheet()->split_line_net(it, temp);
+                            doc.c->get_sheet()->split_line_net(it, temp);
                             temp->temp = false;
                             junctions_placed.push_front(temp);
                             create_junction(args.coords);
@@ -119,7 +119,7 @@ bool ToolPlaceBusRipper::update_attached(const ToolArgs &args)
             bool r;
             UUID bus_member_uuid;
 
-            std::tie(r, bus_member_uuid) = imp->dialogs.select_bus_member(core.c->get_schematic()->block, bus->uuid);
+            std::tie(r, bus_member_uuid) = imp->dialogs.select_bus_member(doc.c->get_schematic()->block, bus->uuid);
             if (!r)
                 return true;
             Bus::Member *bus_member = &bus->members.at(bus_member_uuid);

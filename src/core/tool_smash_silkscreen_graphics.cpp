@@ -23,7 +23,7 @@ ToolResponse ToolSmashSilkscreenGraphics::begin(const ToolArgs &args)
 {
     for (const auto &it : args.selection) {
         if (it.type == ObjectType::BOARD_PACKAGE) {
-            core.b->get_board()->smash_package_silkscreen_graphics(&core.b->get_board()->packages.at(it.uuid));
+            doc.b->get_board()->smash_package_silkscreen_graphics(&doc.b->get_board()->packages.at(it.uuid));
         }
     }
     return ToolResponse::commit();

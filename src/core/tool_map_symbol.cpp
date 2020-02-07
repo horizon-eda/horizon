@@ -15,13 +15,13 @@ ToolMapSymbol::ToolMapSymbol(IDocument *c, ToolID tid)
 
 bool ToolMapSymbol::can_begin()
 {
-    return core.c;
+    return doc.c;
 }
 
 ToolResponse ToolMapSymbol::begin(const ToolArgs &args)
 {
     std::cout << "tool map sym\n";
-    const auto sch = core.c->get_schematic();
+    const auto sch = doc.c->get_schematic();
 
     if (auto data = dynamic_cast<const ToolDataMapSymbol *>(args.data.get())) {
         std::copy(data->gates.begin(), data->gates.end(), std::back_inserter(gates_from_data));
@@ -82,9 +82,9 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
-            core.c->get_schematic()->autoconnect_symbol(core.c->get_sheet(), sym_current);
+            doc.c->get_schematic()->autoconnect_symbol(doc.c->get_sheet(), sym_current);
             if (sym_current->component->connections.size() == 0) {
-                core.c->get_schematic()->place_bipole_on_line(core.c->get_sheet(), sym_current);
+                doc.c->get_schematic()->place_bipole_on_line(doc.c->get_sheet(), sym_current);
             }
             UUIDPath<2> selected_gate;
             if (data_mode == false) {
@@ -111,7 +111,7 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
                 }
                 selected_gate = gates_from_data.front();
             }
-            Schematic *sch = core.c->get_schematic();
+            Schematic *sch = doc.c->get_schematic();
 
             Component *comp = &sch->block->components.at(selected_gate.at(0));
             const Gate *gate = &comp->entity->gates.at(selected_gate.at(1));
@@ -126,7 +126,7 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
             selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
         }
         else {
-            core.c->delete_schematic_symbol(sym_current->uuid);
+            doc.c->delete_schematic_symbol(sym_current->uuid);
             sym_current = nullptr;
             return ToolResponse::commit();
         }

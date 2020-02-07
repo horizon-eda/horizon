@@ -39,40 +39,40 @@ void ToolHelperMove::move_do(const Coordi &delta)
     for (const auto &it : selection) {
         switch (it.type) {
         case ObjectType::JUNCTION:
-            core.r->get_junction(it.uuid)->position += delta;
+            doc.r->get_junction(it.uuid)->position += delta;
             break;
         case ObjectType::HOLE:
-            core.r->get_hole(it.uuid)->placement.shift += delta;
+            doc.r->get_hole(it.uuid)->placement.shift += delta;
             break;
         case ObjectType::SYMBOL_PIN:
-            core.y->get_symbol_pin(it.uuid)->position += delta;
+            doc.y->get_symbol_pin(it.uuid)->position += delta;
             break;
         case ObjectType::SCHEMATIC_SYMBOL:
-            core.c->get_schematic_symbol(it.uuid)->placement.shift += delta;
+            doc.c->get_schematic_symbol(it.uuid)->placement.shift += delta;
             break;
         case ObjectType::BOARD_PACKAGE:
-            core.b->get_board()->packages.at(it.uuid).placement.shift += delta;
+            doc.b->get_board()->packages.at(it.uuid).placement.shift += delta;
             break;
         case ObjectType::PAD:
-            core.k->get_package()->pads.at(it.uuid).placement.shift += delta;
+            doc.k->get_package()->pads.at(it.uuid).placement.shift += delta;
             break;
         case ObjectType::BOARD_HOLE:
-            core.b->get_board()->holes.at(it.uuid).placement.shift += delta;
+            doc.b->get_board()->holes.at(it.uuid).placement.shift += delta;
             break;
         case ObjectType::TEXT:
-            core.r->get_text(it.uuid)->placement.shift += delta;
+            doc.r->get_text(it.uuid)->placement.shift += delta;
             break;
         case ObjectType::POLYGON_VERTEX:
-            core.r->get_polygon(it.uuid)->vertices.at(it.vertex).position += delta;
+            doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).position += delta;
             break;
         case ObjectType::POLYGON_ARC_CENTER:
-            core.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center += delta;
+            doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center += delta;
             break;
         case ObjectType::SHAPE:
-            core.a->get_padstack()->shapes.at(it.uuid).placement.shift += delta;
+            doc.a->get_padstack()->shapes.at(it.uuid).placement.shift += delta;
             break;
         case ObjectType::DIMENSION: {
-            auto dim = core.r->get_dimension(it.uuid);
+            auto dim = doc.r->get_dimension(it.uuid);
             if (it.vertex < 2) {
                 Coordi *c = get_dim_coord(dim, it.vertex);
                 *c += delta;
@@ -176,36 +176,36 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
     for (const auto &it : selection) {
         switch (it.type) {
         case ObjectType::JUNCTION:
-            transform(core.r->get_junction(it.uuid)->position, center, rotate);
+            transform(doc.r->get_junction(it.uuid)->position, center, rotate);
             break;
         case ObjectType::POLYGON_VERTEX:
-            transform(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).position, center, rotate);
+            transform(doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).position, center, rotate);
             break;
         case ObjectType::DIMENSION:
             if (it.vertex < 2) {
-                transform(*get_dim_coord(core.r->get_dimension(it.uuid), it.vertex), center, rotate);
+                transform(*get_dim_coord(doc.r->get_dimension(it.uuid), it.vertex), center, rotate);
             }
             else if (rotate == false) {
-                auto dim = core.r->get_dimension(it.uuid);
+                auto dim = doc.r->get_dimension(it.uuid);
                 std::swap(dim->p0, dim->p1);
                 dim->label_distance *= -1;
             }
             break;
         case ObjectType::POLYGON_ARC_CENTER:
-            transform(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center, center, rotate);
+            transform(doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center, center, rotate);
             if (!rotate) {
-                core.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_reverse ^= 1;
+                doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_reverse ^= 1;
             }
             break;
 
         case ObjectType::SYMBOL_PIN: {
-            SymbolPin *pin = core.y->get_symbol_pin(it.uuid);
+            SymbolPin *pin = doc.y->get_symbol_pin(it.uuid);
             transform(pin->position, center, rotate);
             pin->orientation = transform_orientation(pin->orientation, rotate);
         } break;
 
         case ObjectType::BUS_RIPPER: {
-            auto &ri = core.c->get_sheet()->bus_rippers.at(it.uuid);
+            auto &ri = doc.c->get_sheet()->bus_rippers.at(it.uuid);
             if (rotate) {
                 ri.orientation = transform_orientation(ri.orientation, true);
             }
@@ -215,7 +215,7 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
 
         case ObjectType::TEXT: {
-            Text *txt = core.r->get_text(it.uuid);
+            Text *txt = doc.r->get_text(it.uuid);
             transform(txt->placement.shift, center, rotate);
             if (rotate) {
                 if (txt->placement.mirror) {
@@ -232,11 +232,11 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
 
         case ObjectType::ARC:
             if (!rotate) {
-                core.r->get_arc(it.uuid)->reverse();
+                doc.r->get_arc(it.uuid)->reverse();
             }
             break;
         case ObjectType::POWER_SYMBOL: {
-            auto &ps = core.c->get_sheet()->power_symbols.at(it.uuid);
+            auto &ps = doc.c->get_sheet()->power_symbols.at(it.uuid);
             if (rotate) {
                 ps.orientation = transform_orientation(ps.orientation, true);
             }
@@ -246,7 +246,7 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
 
         case ObjectType::SCHEMATIC_SYMBOL: {
-            SchematicSymbol *sym = core.c->get_schematic_symbol(it.uuid);
+            SchematicSymbol *sym = doc.c->get_schematic_symbol(it.uuid);
             transform(sym->placement.shift, center, rotate);
             if (rotate) {
                 if (sym->placement.mirror) {
@@ -265,7 +265,7 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
 
         case ObjectType::TRACK: {
             if (!rotate) {
-                auto &track = core.b->get_board()->tracks.at(it.uuid);
+                auto &track = doc.b->get_board()->tracks.at(it.uuid);
 
                 if (track.layer == BoardLayers::TOP_COPPER)
                     track.layer = BoardLayers::BOTTOM_COPPER;
@@ -275,7 +275,7 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
 
         case ObjectType::BOARD_PACKAGE: {
-            auto brd = core.b->get_board();
+            auto brd = doc.b->get_board();
             BoardPackage *pkg = &brd->packages.at(it.uuid);
             transform(pkg->placement.shift, center, rotate);
             if (rotate) {
@@ -291,7 +291,7 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
 
         case ObjectType::HOLE: {
-            Hole *hole = core.r->get_hole(it.uuid);
+            Hole *hole = doc.r->get_hole(it.uuid);
             transform(hole->placement.shift, center, rotate);
             if (rotate) {
                 hole->placement.inc_angle_deg(-90);
@@ -299,7 +299,7 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
 
         case ObjectType::PAD: {
-            Pad *pad = &core.k->get_package()->pads.at(it.uuid);
+            Pad *pad = &doc.k->get_package()->pads.at(it.uuid);
             transform(pad->placement.shift, center, rotate);
             if (rotate) {
                 pad->placement.inc_angle_deg(-90);
@@ -307,7 +307,7 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
 
         case ObjectType::BOARD_HOLE: {
-            BoardHole *hole = &core.b->get_board()->holes.at(it.uuid);
+            BoardHole *hole = &doc.b->get_board()->holes.at(it.uuid);
             transform(hole->placement.shift, center, rotate);
             if (rotate) {
                 hole->placement.inc_angle_deg(-90);
@@ -315,7 +315,7 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
 
         case ObjectType::SHAPE: {
-            Shape *shape = &core.a->get_padstack()->shapes.at(it.uuid);
+            Shape *shape = &doc.a->get_padstack()->shapes.at(it.uuid);
             transform(shape->placement.shift, center, rotate);
             if (rotate) {
                 shape->placement.inc_angle_deg(-90);
@@ -323,20 +323,20 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
 
         case ObjectType::NET_LABEL: {
-            auto sheet = core.c->get_sheet();
+            auto sheet = doc.c->get_sheet();
             auto *label = &sheet->net_labels.at(it.uuid);
             label->orientation = transform_orientation(label->orientation, rotate);
         } break;
         case ObjectType::BUS_LABEL: {
-            auto sheet = core.c->get_sheet();
+            auto sheet = doc.c->get_sheet();
             auto *label = &sheet->bus_labels.at(it.uuid);
             label->orientation = transform_orientation(label->orientation, rotate);
         } break;
         default:;
         }
     }
-    if (core.b && core.b->get_board()->packages_expand.size()) {
-        core.b->get_board()->expand();
+    if (doc.b && doc.b->get_board()->packages_expand.size()) {
+        doc.b->get_board()->expand();
     }
 }
 } // namespace horizon

@@ -20,7 +20,7 @@ std::set<BoardHole *> ToolEditBoardHole::get_holes()
     std::set<BoardHole *> holes;
     for (const auto &it : selection) {
         if (it.type == ObjectType::BOARD_HOLE) {
-            holes.emplace(&core.b->get_board()->holes.at(it.uuid));
+            holes.emplace(&doc.b->get_board()->holes.at(it.uuid));
         }
     }
     return holes;
@@ -29,7 +29,7 @@ std::set<BoardHole *> ToolEditBoardHole::get_holes()
 ToolResponse ToolEditBoardHole::begin(const ToolArgs &args)
 {
     auto holes = get_holes();
-    auto r = imp->dialogs.edit_board_hole(holes, core.r->get_pool(), core.b->get_block());
+    auto r = imp->dialogs.edit_board_hole(holes, doc.r->get_pool(), doc.b->get_block());
     if (r) {
         return ToolResponse::commit();
     }

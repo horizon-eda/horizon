@@ -28,18 +28,18 @@ void ToolRotateArbitrary::expand_selection()
     for (const auto &it : selection) {
         switch (it.type) {
         case ObjectType::LINE: {
-            Line *line = core.r->get_line(it.uuid);
+            Line *line = doc.r->get_line(it.uuid);
             new_sel.emplace(line->from.uuid, ObjectType::JUNCTION);
             new_sel.emplace(line->to.uuid, ObjectType::JUNCTION);
         } break;
         case ObjectType::POLYGON_EDGE: {
-            Polygon *poly = core.r->get_polygon(it.uuid);
+            Polygon *poly = doc.r->get_polygon(it.uuid);
             auto vs = poly->get_vertices_for_edge(it.vertex);
             new_sel.emplace(poly->uuid, ObjectType::POLYGON_VERTEX, vs.first);
             new_sel.emplace(poly->uuid, ObjectType::POLYGON_VERTEX, vs.second);
         } break;
         case ObjectType::POLYGON: {
-            auto poly = core.r->get_polygon(it.uuid);
+            auto poly = doc.r->get_polygon(it.uuid);
             int i = 0;
             for (const auto &itv : poly->vertices) {
                 (void)sizeof itv;
@@ -49,14 +49,14 @@ void ToolRotateArbitrary::expand_selection()
         } break;
 
         case ObjectType::ARC: {
-            Arc *arc = core.r->get_arc(it.uuid);
+            Arc *arc = doc.r->get_arc(it.uuid);
             new_sel.emplace(arc->from.uuid, ObjectType::JUNCTION);
             new_sel.emplace(arc->to.uuid, ObjectType::JUNCTION);
             new_sel.emplace(arc->center.uuid, ObjectType::JUNCTION);
         } break;
 
         case ObjectType::BOARD_PACKAGE: {
-            BoardPackage *pkg = &core.b->get_board()->packages.at(it.uuid);
+            BoardPackage *pkg = &doc.b->get_board()->packages.at(it.uuid);
             if (pkg->fixed) {
                 pkgs_fixed.insert(it);
             }
@@ -106,7 +106,7 @@ ToolRotateArbitrary::~ToolRotateArbitrary()
 
 bool ToolRotateArbitrary::can_begin()
 {
-    if (core.c) // dont' rotate arbitraryily in schematic
+    if (doc.c) // dont' rotate arbitraryily in schematic
         return false;
     expand_selection();
     return selection.size() > 0;
@@ -147,22 +147,22 @@ void ToolRotateArbitrary::save_placements()
     for (const auto &it : selection) {
         switch (it.type) {
         case ObjectType::JUNCTION:
-            placements[it] = Placement(core.r->get_junction(it.uuid)->position);
+            placements[it] = Placement(doc.r->get_junction(it.uuid)->position);
             break;
         case ObjectType::POLYGON_VERTEX:
-            placements[it] = Placement(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).position);
+            placements[it] = Placement(doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).position);
             break;
         case ObjectType::POLYGON_ARC_CENTER:
-            placements[it] = Placement(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center);
+            placements[it] = Placement(doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center);
             break;
         case ObjectType::TEXT:
-            placements[it] = core.r->get_text(it.uuid)->placement;
+            placements[it] = doc.r->get_text(it.uuid)->placement;
             break;
         case ObjectType::BOARD_PACKAGE:
-            placements[it] = core.b->get_board()->packages.at(it.uuid).placement;
+            placements[it] = doc.b->get_board()->packages.at(it.uuid).placement;
             break;
         case ObjectType::PAD:
-            placements[it] = core.k->get_package()->pads.at(it.uuid).placement;
+            placements[it] = doc.k->get_package()->pads.at(it.uuid).placement;
             break;
         default:;
         }
@@ -183,27 +183,27 @@ void ToolRotateArbitrary::apply_placements_rotation(int angle)
     for (const auto &it : placements) {
         switch (it.first.type) {
         case ObjectType::JUNCTION:
-            core.r->get_junction(it.first.uuid)->position = rotate_placement(it.second, origin, angle).shift;
+            doc.r->get_junction(it.first.uuid)->position = rotate_placement(it.second, origin, angle).shift;
             break;
         case ObjectType::POLYGON_VERTEX:
-            core.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).position =
+            doc.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).position =
                     rotate_placement(it.second, origin, angle).shift;
             break;
         case ObjectType::POLYGON_ARC_CENTER:
-            core.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).arc_center =
+            doc.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).arc_center =
                     rotate_placement(it.second, origin, angle).shift;
             break;
         case ObjectType::TEXT: {
-            auto &pl = core.r->get_text(it.first.uuid)->placement;
+            auto &pl = doc.r->get_text(it.first.uuid)->placement;
             pl = rotate_placement(it.second, origin, angle);
             if (pl.mirror)
                 pl.inc_angle(-2 * angle);
         } break;
         case ObjectType::BOARD_PACKAGE:
-            core.b->get_board()->packages.at(it.first.uuid).placement = rotate_placement(it.second, origin, angle);
+            doc.b->get_board()->packages.at(it.first.uuid).placement = rotate_placement(it.second, origin, angle);
             break;
         case ObjectType::PAD:
-            core.k->get_package()->pads.at(it.first.uuid).placement = rotate_placement(it.second, origin, angle);
+            doc.k->get_package()->pads.at(it.first.uuid).placement = rotate_placement(it.second, origin, angle);
             break;
         default:;
         }
@@ -225,21 +225,21 @@ void ToolRotateArbitrary::apply_placements_scale(double sc)
     for (const auto &it : placements) {
         switch (it.first.type) {
         case ObjectType::JUNCTION:
-            core.r->get_junction(it.first.uuid)->position = scale_placement(it.second, origin, sc).shift;
+            doc.r->get_junction(it.first.uuid)->position = scale_placement(it.second, origin, sc).shift;
             break;
         case ObjectType::POLYGON_VERTEX:
-            core.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).position =
+            doc.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).position =
                     scale_placement(it.second, origin, sc).shift;
             break;
         case ObjectType::POLYGON_ARC_CENTER:
-            core.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).arc_center =
+            doc.r->get_polygon(it.first.uuid)->vertices.at(it.first.vertex).arc_center =
                     scale_placement(it.second, origin, sc).shift;
             break;
         case ObjectType::TEXT:
-            core.r->get_text(it.first.uuid)->placement = scale_placement(it.second, origin, sc);
+            doc.r->get_text(it.first.uuid)->placement = scale_placement(it.second, origin, sc);
             break;
         case ObjectType::BOARD_PACKAGE:
-            core.b->get_board()->packages.at(it.first.uuid).placement = scale_placement(it.second, origin, sc);
+            doc.b->get_board()->packages.at(it.first.uuid).placement = scale_placement(it.second, origin, sc);
             break;
         default:;
         }

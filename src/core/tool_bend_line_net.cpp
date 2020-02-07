@@ -33,12 +33,12 @@ ToolResponse ToolBendLineNet::begin(const ToolArgs &args)
     if (it->type != ObjectType::LINE_NET)
         return ToolResponse::end();
 
-    temp = core.c->insert_junction(UUID::random());
+    temp = doc.c->insert_junction(UUID::random());
     temp->temp = true;
     temp->position = args.coords;
 
-    LineNet *li = &core.c->get_sheet()->net_lines.at(it->uuid);
-    core.c->get_sheet()->split_line_net(li, temp);
+    LineNet *li = &doc.c->get_sheet()->net_lines.at(it->uuid);
+    doc.c->get_sheet()->split_line_net(li, temp);
     imp->tool_bar_set_tip("<b>LMB:</b>place junction <b>RMB:</b>cancel");
     return ToolResponse();
 }

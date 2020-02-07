@@ -16,7 +16,7 @@ ToolImportDXF::ToolImportDXF(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolH
 
 bool ToolImportDXF::can_begin()
 {
-    return core.r->has_object_type(ObjectType::ARC) && core.r->has_object_type(ObjectType::LINE);
+    return doc.r->has_object_type(ObjectType::ARC) && doc.r->has_object_type(ObjectType::LINE);
 }
 
 ToolResponse ToolImportDXF::begin(const ToolArgs &args)
@@ -29,7 +29,7 @@ ToolResponse ToolImportDXF::begin(const ToolArgs &args)
         return ToolResponse::end();
     }
 
-    DXFImporter importer(core.r);
+    DXFImporter importer(doc.r);
     importer.set_layer(args.work_layer);
     importer.set_scale(1);
     importer.set_shift(args.coords);

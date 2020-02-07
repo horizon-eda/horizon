@@ -14,7 +14,7 @@ ToolPlacePad::ToolPlacePad(IDocument *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolPlacePad::can_begin()
 {
-    return core.k;
+    return doc.k;
 }
 
 ToolResponse ToolPlacePad::begin(const ToolArgs &args)
@@ -22,12 +22,12 @@ ToolResponse ToolPlacePad::begin(const ToolArgs &args)
     std::cout << "tool add comp\n";
     bool r;
     UUID padstack_uuid;
-    std::tie(r, padstack_uuid) = imp->dialogs.select_padstack(core.r->get_pool(), core.k->get_package()->uuid);
+    std::tie(r, padstack_uuid) = imp->dialogs.select_padstack(doc.r->get_pool(), doc.k->get_package()->uuid);
     if (!r) {
         return ToolResponse::end();
     }
 
-    padstack = core.r->get_pool()->get_padstack(padstack_uuid);
+    padstack = doc.r->get_pool()->get_padstack(padstack_uuid);
     create_pad(args.coords);
 
     imp->tool_bar_set_tip(
@@ -37,7 +37,7 @@ ToolResponse ToolPlacePad::begin(const ToolArgs &args)
 
 void ToolPlacePad::create_pad(const Coordi &pos)
 {
-    Package *pkg = core.k->get_package();
+    Package *pkg = doc.k->get_package();
     auto uu = UUID::random();
     temp = &pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
     temp->placement.shift = pos;
@@ -67,10 +67,10 @@ ToolResponse ToolPlacePad::update(const ToolArgs &args)
             create_pad(args.coords);
             temp->placement.set_angle(old_pad->placement.get_angle());
             temp->parameter_set = old_pad->parameter_set;
-            core.k->get_package()->apply_parameter_set({});
+            doc.k->get_package()->apply_parameter_set({});
         }
         else if (args.button == 3) {
-            core.k->get_package()->pads.erase(temp->uuid);
+            doc.k->get_package()->pads.erase(temp->uuid);
             temp = 0;
             selection.clear();
             return ToolResponse::commit();
@@ -86,11 +86,11 @@ ToolResponse ToolPlacePad::update(const ToolArgs &args)
         else if (args.key == GDK_KEY_i) {
             std::set<Pad *> pads{temp};
             auto params = temp->parameter_set;
-            if (imp->dialogs.edit_pad_parameter_set(pads, core.r->get_pool(), core.k->get_package())
+            if (imp->dialogs.edit_pad_parameter_set(pads, doc.r->get_pool(), doc.k->get_package())
                 == false) { // rollback
                 temp->parameter_set = params;
             }
-            core.k->get_package()->apply_parameter_set({});
+            doc.k->get_package()->apply_parameter_set({});
         }
     }
     return ToolResponse();

@@ -14,7 +14,7 @@ ToolDrawLine::ToolDrawLine(IDocument *c, ToolID tid) : ToolHelperLineWidthSettin
 
 bool ToolDrawLine::can_begin()
 {
-    return core.r->has_object_type(ObjectType::LINE);
+    return doc.r->has_object_type(ObjectType::LINE);
 }
 
 void ToolDrawLine::apply_settings()
@@ -27,7 +27,7 @@ ToolResponse ToolDrawLine::begin(const ToolArgs &args)
 {
     std::cout << "tool draw line junction\n";
 
-    temp_junc = core.r->insert_junction(UUID::random());
+    temp_junc = doc.r->insert_junction(UUID::random());
     junctions_created.insert(temp_junc);
     temp_junc->temp = true;
     temp_junc->position = args.coords;
@@ -74,17 +74,17 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
         if (args.button == 1) {
             if (args.target.type == ObjectType::JUNCTION && restrict_mode == RestrictMode::ARB) {
                 if (temp_line != nullptr) {
-                    temp_line->to = core.r->get_junction(args.target.path.at(0));
+                    temp_line->to = doc.r->get_junction(args.target.path.at(0));
                 }
                 if (temp_line)
                     first_line = false;
-                temp_line = core.r->insert_line(UUID::random());
-                temp_line->from = core.r->get_junction(args.target.path.at(0));
+                temp_line = doc.r->insert_line(UUID::random());
+                temp_line->from = doc.r->get_junction(args.target.path.at(0));
             }
             else {
                 Junction *last = temp_junc;
                 temp_junc->temp = false;
-                temp_junc = core.r->insert_junction(UUID::random());
+                temp_junc = doc.r->insert_junction(UUID::random());
                 junctions_created.insert(temp_junc);
                 temp_junc->temp = true;
                 cycle_restrict_mode_xy();
@@ -92,7 +92,7 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
 
                 if (temp_line)
                     first_line = false;
-                temp_line = core.r->insert_line(UUID::random());
+                temp_line = doc.r->insert_line(UUID::random());
                 temp_line->from = last;
             }
             temp_line->layer = args.work_layer;
@@ -102,13 +102,13 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
         else if (args.button == 3) {
             if (temp_line) {
                 if (first_line && junctions_created.count(temp_line->from))
-                    core.r->delete_junction(temp_line->from->uuid);
-                core.r->delete_line(temp_line->uuid);
+                    doc.r->delete_junction(temp_line->from->uuid);
+                doc.r->delete_line(temp_line->uuid);
                 temp_line = nullptr;
                 first_line = true;
             }
             else {
-                core.r->delete_junction(temp_junc->uuid);
+                doc.r->delete_junction(temp_junc->uuid);
                 temp_junc = nullptr;
                 return ToolResponse::commit();
             }
@@ -129,11 +129,11 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
         else if (args.key == GDK_KEY_Escape) {
             if (temp_line) {
                 if (first_line && junctions_created.count(temp_line->from))
-                    core.r->delete_junction(temp_line->from->uuid);
-                core.r->delete_line(temp_line->uuid);
+                    doc.r->delete_junction(temp_line->from->uuid);
+                doc.r->delete_line(temp_line->uuid);
                 temp_line = nullptr;
             }
-            core.r->delete_junction(temp_junc->uuid);
+            doc.r->delete_junction(temp_junc->uuid);
             temp_junc = nullptr;
             return ToolResponse::commit();
         }

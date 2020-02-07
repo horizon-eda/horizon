@@ -43,7 +43,7 @@ ToolResponse ToolRenumberPads::begin(const ToolArgs &args)
     annotation->set_visible(true);
     annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
 
-    win = imp->dialogs.show_renumber_pads_window(core.k->get_package(), pads);
+    win = imp->dialogs.show_renumber_pads_window(doc.k->get_package(), pads);
     win->renumber();
 
     return ToolResponse();

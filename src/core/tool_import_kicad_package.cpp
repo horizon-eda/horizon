@@ -15,7 +15,7 @@ ToolImportKiCadPackage::ToolImportKiCadPackage(IDocument *c, ToolID tid) : ToolB
 
 bool ToolImportKiCadPackage::can_begin()
 {
-    return core.k;
+    return doc.k;
 }
 
 static std::string slurp_from_file(const std::string &filename)
@@ -42,7 +42,7 @@ ToolResponse ToolImportKiCadPackage::begin(const ToolArgs &args)
 
     SEXPR::PARSER parser;
     std::unique_ptr<SEXPR::SEXPR> sexpr_data(parser.Parse(slurp_from_file(filename)));
-    KiCadPackageParser kp(*core.k->get_package(), core.k->get_pool());
+    KiCadPackageParser kp(*doc.k->get_package(), doc.k->get_pool());
     kp.parse(sexpr_data.get());
     return ToolResponse::commit();
 }

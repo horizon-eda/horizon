@@ -13,7 +13,7 @@ ToolDrawPolygonCircle::ToolDrawPolygonCircle(IDocument *c, ToolID tid) : ToolBas
 
 bool ToolDrawPolygonCircle::can_begin()
 {
-    return core.r->has_object_type(ObjectType::POLYGON);
+    return doc.r->has_object_type(ObjectType::POLYGON);
 }
 
 void ToolDrawPolygonCircle::update_polygon()
@@ -31,7 +31,7 @@ void ToolDrawPolygonCircle::update_polygon()
 
 ToolResponse ToolDrawPolygonCircle::begin(const ToolArgs &args)
 {
-    temp = core.r->insert_polygon(UUID::random());
+    temp = doc.r->insert_polygon(UUID::random());
     temp->temp = true;
     temp->layer = args.work_layer;
     first_pos = args.coords;

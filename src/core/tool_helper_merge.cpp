@@ -55,8 +55,8 @@ int ToolHelperMerge::merge_nets(Net *net, Net *into)
     }
 
     imp->tool_bar_flash("merged net \"" + net->name + "\" into net \"" + into->name + "\"");
-    core.c->get_schematic()->block->merge_nets(net, into); // net will be erased
-    core.c->get_schematic()->expand(true);                 // be careful
+    doc.c->get_schematic()->block->merge_nets(net, into); // net will be erased
+    doc.c->get_schematic()->expand(true);                 // be careful
 
     std::cout << "merging nets" << std::endl;
     return 0; // merged, 1: error
@@ -102,12 +102,12 @@ bool ToolHelperMerge::merge_bus_net(class Net *net, class Bus *bus, class Net *n
 
 void ToolHelperMerge::merge_selected_junctions()
 {
-    if (!core.c)
+    if (!doc.c)
         return;
     for (const auto &it : selection) {
         if (it.type == ObjectType::JUNCTION) {
-            auto ju = core.c->get_junction(it.uuid);
-            for (auto &it_other : core.c->get_sheet()->junctions) {
+            auto ju = doc.c->get_junction(it.uuid);
+            for (auto &it_other : doc.c->get_sheet()->junctions) {
                 auto ju_other = &it_other.second;
                 if (!selection.count(SelectableRef(ju_other->uuid, ObjectType::JUNCTION))) { // not in selection
                     if (ju_other->position == ju->position) {                                // need to merge junctions
@@ -118,13 +118,13 @@ void ToolHelperMerge::merge_selected_junctions()
                         Bus *bus_other = ju_other->bus;
                         auto do_merge = merge_bus_net(net, bus, net_other, bus_other);
                         if (do_merge) {
-                            core.c->get_sheet()->merge_junction(ju, ju_other);
+                            doc.c->get_sheet()->merge_junction(ju, ju_other);
                         }
                     }
                 }
             }
             // doesn't work well enough for now...
-            /*for(auto &it_other: core.c->get_sheet()->net_lines) {
+            /*for(auto &it_other: doc.c->get_sheet()->net_lines) {
                     auto line = &it_other.second;
                     if(!selection.count(SelectableRef(line->uuid,
             ObjectType::LINE_NET))) {  //not in selection
@@ -135,7 +135,7 @@ void ToolHelperMerge::merge_selected_junctions()
                                     auto do_merge = merge_bus_net(ju->net,
             ju->bus, line->net, line->bus);
                                     if(do_merge) {
-                                            core.c->get_sheet()->split_line_net(line,
+                                            doc.c->get_sheet()->split_line_net(line,
             ju);
                                     }
                             }

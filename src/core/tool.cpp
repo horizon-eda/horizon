@@ -2,7 +2,7 @@
 
 namespace horizon {
 
-ToolBase::ToolBase(IDocument *c, ToolID tid) : core(c), tool_id(tid)
+ToolBase::ToolBase(IDocument *c, ToolID tid) : doc(c), tool_id(tid)
 {
 }
 

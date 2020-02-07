@@ -13,7 +13,7 @@ ToolPlaceShape::ToolPlaceShape(IDocument *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolPlaceShape::can_begin()
 {
-    return core.a;
+    return doc.a;
 }
 
 ToolResponse ToolPlaceShape::begin(const ToolArgs &args)
@@ -32,7 +32,7 @@ ToolResponse ToolPlaceShape::begin(const ToolArgs &args)
 void ToolPlaceShape::create_shape(const Coordi &c)
 {
     auto uu = UUID::random();
-    temp = &core.a->get_padstack()->shapes.emplace(uu, uu).first->second;
+    temp = &doc.a->get_padstack()->shapes.emplace(uu, uu).first->second;
     temp->placement.shift = c;
 }
 
@@ -52,7 +52,7 @@ ToolResponse ToolPlaceShape::update(const ToolArgs &args)
             temp->params = last->params;
         }
         else if (args.button == 3) {
-            core.a->get_padstack()->shapes.erase(temp->uuid);
+            doc.a->get_padstack()->shapes.erase(temp->uuid);
             temp = 0;
             selection.clear();
             for (auto it : shapes_placed) {

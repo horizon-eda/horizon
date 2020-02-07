@@ -12,7 +12,7 @@ ToolDragKeepSlope::ToolDragKeepSlope(IDocument *c, ToolID tid) : ToolBase(c, tid
 
 bool ToolDragKeepSlope::can_begin()
 {
-    if (!core.b)
+    if (!doc.b)
         return false;
     for (const auto &it : selection) {
         if (it.type == ObjectType::TRACK)
@@ -46,12 +46,12 @@ ToolResponse ToolDragKeepSlope::begin(const ToolArgs &args)
     selection.clear();
     for (const auto &it : args.selection) {
         if (it.type == ObjectType::TRACK) {
-            auto track = &core.b->get_board()->tracks.at(it.uuid);
+            auto track = &doc.b->get_board()->tracks.at(it.uuid);
             if (track->from.is_junc() && track->to.is_junc()) {
                 if (track->from.junc->connection_count == 2 && track->to.junc->connection_count == 2) {
                     Track *tr_from = nullptr;
                     Track *tr_to = nullptr;
-                    for (auto &it_tr : core.b->get_board()->tracks) {
+                    for (auto &it_tr : doc.b->get_board()->tracks) {
                         auto track_other = &it_tr.second;
                         if (track_other == track)
                             continue;

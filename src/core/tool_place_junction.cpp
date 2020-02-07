@@ -14,7 +14,7 @@ ToolPlaceJunction::ToolPlaceJunction(IDocument *c, ToolID tid) : ToolBase(c, tid
 
 bool ToolPlaceJunction::can_begin()
 {
-    return core.r->has_object_type(ObjectType::JUNCTION);
+    return doc.r->has_object_type(ObjectType::JUNCTION);
 }
 
 ToolResponse ToolPlaceJunction::begin(const ToolArgs &args)
@@ -33,7 +33,7 @@ ToolResponse ToolPlaceJunction::begin(const ToolArgs &args)
 
 void ToolPlaceJunction::create_junction(const Coordi &c)
 {
-    temp = core.r->insert_junction(UUID::random());
+    temp = doc.r->insert_junction(UUID::random());
     temp->temp = true;
     temp->position = c;
 }
@@ -50,14 +50,14 @@ ToolResponse ToolPlaceJunction::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
-            if (core.c) {
-                for (auto it : core.c->get_net_lines()) {
+            if (doc.c) {
+                for (auto it : doc.c->get_net_lines()) {
                     if (it->coord_on_line(temp->position)) {
                         std::cout << "on line" << std::endl;
                         if (!check_line(it))
                             return ToolResponse();
 
-                        core.c->get_sheet()->split_line_net(it, temp);
+                        doc.c->get_sheet()->split_line_net(it, temp);
                         break;
                     }
                 }
@@ -70,7 +70,7 @@ ToolResponse ToolPlaceJunction::update(const ToolArgs &args)
         }
         else if (args.button == 3) {
             delete_attached();
-            core.r->delete_junction(temp->uuid);
+            doc.r->delete_junction(temp->uuid);
             temp = 0;
             selection.clear();
             for (auto it : junctions_placed) {

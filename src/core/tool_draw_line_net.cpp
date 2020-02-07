@@ -15,14 +15,14 @@ ToolDrawLineNet::ToolDrawLineNet(IDocument *c, ToolID tid)
 
 bool ToolDrawLineNet::can_begin()
 {
-    return core.c;
+    return doc.c;
 }
 
 ToolResponse ToolDrawLineNet::begin(const ToolArgs &args)
 {
     std::cout << "tool draw net line junction\n";
 
-    temp_junc_head = core.c->insert_junction(UUID::random());
+    temp_junc_head = doc.c->insert_junction(UUID::random());
     temp_junc_head->temp = true;
     temp_junc_head->position = args.coords;
     selection.clear();
@@ -33,8 +33,8 @@ ToolResponse ToolDrawLineNet::begin(const ToolArgs &args)
 
 void ToolDrawLineNet::restart(const Coordi &c)
 {
-    core.c->get_schematic()->expand(); // gets rid of warnings...
-    temp_junc_head = core.c->insert_junction(UUID::random());
+    doc.c->get_schematic()->expand(); // gets rid of warnings...
+    temp_junc_head = doc.c->insert_junction(UUID::random());
     temp_junc_head->temp = true;
     temp_junc_head->position = c;
     temp_line_head = nullptr;
@@ -65,7 +65,7 @@ void ToolDrawLineNet::move_temp_junc(const Coordi &c)
 
 Junction *ToolDrawLineNet::make_temp_junc(const Coordi &c)
 {
-    Junction *j = core.r->insert_junction(UUID::random());
+    Junction *j = doc.r->insert_junction(UUID::random());
     j->position = c;
     j->temp = true;
     return j;
@@ -130,12 +130,12 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             Bus *bus = nullptr;
             if (!temp_line_head) { // no line yet, first click
                 if (args.target.type == ObjectType::JUNCTION) {
-                    ju = core.r->get_junction(args.target.path.at(0));
+                    ju = doc.r->get_junction(args.target.path.at(0));
                     net = ju->net;
                     bus = ju->bus;
                 }
                 else if (args.target.type == ObjectType::SYMBOL_PIN) {
-                    sym = core.c->get_schematic_symbol(args.target.path.at(0));
+                    sym = doc.c->get_schematic_symbol(args.target.path.at(0));
                     pin = &sym->symbol.pins.at(args.target.path.at(1));
                     pin_start = pin;
                     UUIDPath<2> connpath(sym->gate->uuid, args.target.path.at(1));
@@ -162,19 +162,19 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                         net = conn.net;
                     }
                     else { // pin needs net
-                        net = core.c->get_schematic()->block->insert_net();
+                        net = doc.c->get_schematic()->block->insert_net();
                         sym->component->connections.emplace(connpath, net);
                         component_floating = sym->component;
                         connpath_floating = connpath;
                     }
                 }
                 else if (args.target.type == ObjectType::BUS_RIPPER) {
-                    rip = &core.c->get_sheet()->bus_rippers.at(args.target.path.at(0));
+                    rip = &doc.c->get_sheet()->bus_rippers.at(args.target.path.at(0));
                     net = rip->bus_member->net;
                 }
                 else { // unknown or no target
                     ju = make_temp_junc(args.coords);
-                    for (auto it : core.c->get_net_lines()) {
+                    for (auto it : doc.c->get_net_lines()) {
                         if (it->coord_on_line(temp_junc_head->position)) {
                             if (it != temp_line_head && it != temp_line_mid) {
                                 bool is_temp_line = false;
@@ -186,7 +186,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                                 }
                                 if (!is_temp_line) {
                                     imp->tool_bar_flash("split net line");
-                                    auto li = core.c->get_sheet()->split_line_net(it, ju);
+                                    auto li = doc.c->get_sheet()->split_line_net(it, ju);
                                     net = li->net;
                                     bus = li->bus;
                                     ju->net = li->net;
@@ -208,11 +208,11 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             else { // already have net line
                 component_floating = nullptr;
                 if (args.target.type == ObjectType::JUNCTION) {
-                    ju = core.r->get_junction(args.target.path.at(0));
+                    ju = doc.r->get_junction(args.target.path.at(0));
                     auto do_merge = merge_bus_net(temp_line_head->net, temp_line_head->bus, ju->net, ju->bus);
                     if (do_merge) {
                         temp_line_head->to.connect(ju);
-                        core.r->delete_junction(temp_junc_head->uuid);
+                        doc.r->delete_junction(temp_junc_head->uuid);
                         restart(args.coords);
                         return ToolResponse();
                     }
@@ -221,7 +221,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     }
                 }
                 else if (args.target.type == ObjectType::SYMBOL_PIN) {
-                    sym = core.c->get_schematic_symbol(args.target.path.at(0));
+                    sym = doc.c->get_schematic_symbol(args.target.path.at(0));
                     pin = &sym->symbol.pins.at(args.target.path.at(1));
                     if (pin == pin_start) // do noting
                         return ToolResponse();
@@ -248,17 +248,17 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                             net = temp_junc_head->net;
                         }
                         else {
-                            net = core.c->get_schematic()->block->insert_net();
+                            net = doc.c->get_schematic()->block->insert_net();
                         }
                         sym->component->connections.emplace(connpath, net);
                     }
                     temp_line_head->to.connect(sym, pin);
-                    core.r->delete_junction(temp_junc_head->uuid);
+                    doc.r->delete_junction(temp_junc_head->uuid);
                     restart(args.coords);
                     return ToolResponse();
                 }
                 else if (args.target.type == ObjectType::BUS_RIPPER) {
-                    rip = &core.c->get_sheet()->bus_rippers.at(args.target.path.at(0));
+                    rip = &doc.c->get_sheet()->bus_rippers.at(args.target.path.at(0));
                     net = rip->bus_member->net;
                     if (temp_line_head->bus) { // can't connect bus to bus
                                                // ripper
@@ -271,7 +271,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     }
 
                     temp_line_head->to.connect(rip);
-                    core.r->delete_junction(temp_junc_head->uuid);
+                    doc.r->delete_junction(temp_junc_head->uuid);
                     restart(args.coords);
                     return ToolResponse();
                 }
@@ -286,7 +286,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     }
 
                     ju = temp_junc_head;
-                    for (auto it : core.c->get_net_lines()) {
+                    for (auto it : doc.c->get_net_lines()) {
                         if (it->coord_on_line(temp_junc_head->position)) {
                             if (it != temp_line_head && it != temp_line_mid) {
                                 bool is_temp_line = false;
@@ -304,7 +304,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                                     auto do_merge =
                                             merge_bus_net(temp_line_head->net, temp_line_head->bus, it->net, it->bus);
                                     if (do_merge) {
-                                        core.c->get_sheet()->split_line_net(it, ju);
+                                        doc.c->get_sheet()->split_line_net(it, ju);
                                         restart(args.coords);
                                         return ToolResponse();
                                     }
@@ -328,7 +328,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     temp_junc_head->bus = bus;
                 }
             }
-            temp_line_mid = core.c->insert_line_net(UUID::random());
+            temp_line_mid = doc.c->insert_line_net(UUID::random());
             temp_line_mid->net = net;
             temp_line_mid->bus = bus;
             if (ju) {
@@ -345,7 +345,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             }
             temp_line_mid->to.connect(temp_junc_mid);
 
-            temp_line_head = core.c->insert_line_net(UUID::random());
+            temp_line_head = doc.c->insert_line_net(UUID::random());
             temp_line_head->net = net;
             temp_line_head->bus = bus;
             temp_line_head->from.connect(temp_junc_mid);
@@ -353,16 +353,16 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
         }
         else if (args.button == 3) {
             if (temp_line_head) {
-                core.c->delete_line_net(temp_line_head->uuid);
-                core.c->delete_line_net(temp_line_mid->uuid);
-                core.r->delete_junction(temp_junc_mid->uuid);
+                doc.c->delete_line_net(temp_line_head->uuid);
+                doc.c->delete_line_net(temp_line_mid->uuid);
+                doc.r->delete_junction(temp_junc_mid->uuid);
                 if (component_floating)
                     component_floating->connections.erase(connpath_floating);
                 restart(args.coords);
                 return ToolResponse();
             }
             else {
-                core.r->delete_junction(temp_junc_head->uuid);
+                doc.r->delete_junction(temp_junc_head->uuid);
                 return ToolResponse::commit();
             }
         }
@@ -370,13 +370,13 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
             if (temp_line_head) {
-                core.c->delete_line_net(temp_line_head->uuid);
-                core.c->delete_line_net(temp_line_mid->uuid);
-                core.r->delete_junction(temp_junc_mid->uuid);
+                doc.c->delete_line_net(temp_line_head->uuid);
+                doc.c->delete_line_net(temp_line_mid->uuid);
+                doc.r->delete_junction(temp_junc_mid->uuid);
                 if (component_floating)
                     component_floating->connections.erase(connpath_floating);
             }
-            core.r->delete_junction(temp_junc_head->uuid);
+            doc.r->delete_junction(temp_junc_head->uuid);
             return ToolResponse::commit();
         }
         else if (args.key == GDK_KEY_space) {
@@ -389,13 +389,13 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             temp_junc_head->net = ju->net;
             temp_junc_head->bus = ju->bus;
 
-            temp_line_mid = core.c->insert_line_net(UUID::random());
+            temp_line_mid = doc.c->insert_line_net(UUID::random());
             temp_line_mid->net = ju->net;
             temp_line_mid->bus = ju->bus;
             temp_line_mid->from.connect(ju);
             temp_line_mid->to.connect(temp_junc_mid);
 
-            temp_line_head = core.c->insert_line_net(UUID::random());
+            temp_line_head = doc.c->insert_line_net(UUID::random());
             temp_line_head->net = ju->net;
             temp_line_head->bus = ju->bus;
             temp_line_head->from.connect(temp_junc_mid);
@@ -421,12 +421,12 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             if (temp_junc_head && !temp_junc_head->bus) {
                 if (!net_label) {
                     auto uu = UUID::random();
-                    net_label = &core.c->get_sheet()->net_labels.emplace(uu, uu).first->second;
+                    net_label = &doc.c->get_sheet()->net_labels.emplace(uu, uu).first->second;
                     net_label->junction = temp_junc_head;
                     net_label->size = settings.net_label_size;
                 }
                 else {
-                    core.c->get_sheet()->net_labels.erase(net_label->uuid);
+                    doc.c->get_sheet()->net_labels.erase(net_label->uuid);
                     net_label = nullptr;
                 }
             }

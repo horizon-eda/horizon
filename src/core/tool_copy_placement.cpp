@@ -12,7 +12,7 @@ ToolCopyPlacement::ToolCopyPlacement(IDocument *c, ToolID tid) : ToolBase(c, tid
 
 bool ToolCopyPlacement::can_begin()
 {
-    if (!core.b)
+    if (!doc.b)
         return false;
 
     return std::count_if(selection.begin(), selection.end(),
@@ -31,7 +31,7 @@ ToolResponse ToolCopyPlacement::update(const ToolArgs &args)
         if (args.button == 1) {
             if (args.target.type == ObjectType::BOARD_PACKAGE || args.target.type == ObjectType::PAD) {
                 auto pkg_uuid = args.target.path.at(0);
-                auto brd = core.b->get_board();
+                auto brd = doc.b->get_board();
                 const auto &ref_pkg = brd->packages.at(pkg_uuid);
                 const auto &ref_group = ref_pkg.component->group;
                 const auto &ref_tag = ref_pkg.component->tag;

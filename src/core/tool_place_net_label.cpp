@@ -15,13 +15,13 @@ ToolPlaceNetLabel::ToolPlaceNetLabel(IDocument *c, ToolID tid)
 
 bool ToolPlaceNetLabel::can_begin()
 {
-    return core.c;
+    return doc.c;
 }
 
 void ToolPlaceNetLabel::create_attached()
 {
     auto uu = UUID::random();
-    la = &core.c->get_sheet()->net_labels.emplace(uu, uu).first->second;
+    la = &doc.c->get_sheet()->net_labels.emplace(uu, uu).first->second;
     la->orientation = last_orientation;
     la->size = settings.net_label_size;
     la->junction = temp;
@@ -30,7 +30,7 @@ void ToolPlaceNetLabel::create_attached()
 void ToolPlaceNetLabel::delete_attached()
 {
     if (la) {
-        core.c->get_sheet()->net_labels.erase(la->uuid);
+        doc.c->get_sheet()->net_labels.erase(la->uuid);
         la = nullptr;
     }
 }
@@ -61,7 +61,7 @@ bool ToolPlaceNetLabel::update_attached(const ToolArgs &args)
     if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
             if (args.target.type == ObjectType::JUNCTION) {
-                Junction *j = core.r->get_junction(args.target.path.at(0));
+                Junction *j = doc.r->get_junction(args.target.path.at(0));
                 if (j->bus)
                     return true;
                 la->junction = j;
@@ -69,14 +69,14 @@ bool ToolPlaceNetLabel::update_attached(const ToolArgs &args)
                 return true;
             }
             else if (args.target.type == ObjectType::SYMBOL_PIN) {
-                SchematicSymbol *schsym = core.c->get_schematic_symbol(args.target.path.at(0));
+                SchematicSymbol *schsym = doc.c->get_schematic_symbol(args.target.path.at(0));
                 SymbolPin *pin = &schsym->symbol.pins.at(args.target.path.at(1));
                 UUIDPath<2> connpath(schsym->gate->uuid, args.target.path.at(1));
                 if (schsym->component->connections.count(connpath) == 0) {
                     // sympin not connected
                     auto uu = UUID::random();
-                    auto *line = &core.c->get_sheet()->net_lines.emplace(uu, uu).first->second;
-                    line->net = core.c->get_schematic()->block->insert_net();
+                    auto *line = &doc.c->get_sheet()->net_lines.emplace(uu, uu).first->second;
+                    line->net = doc.c->get_schematic()->block->insert_net();
                     line->from.connect(schsym, pin);
                     line->to.connect(temp);
                     schsym->component->connections.emplace(UUIDPath<2>(schsym->gate->uuid, pin->uuid),

@@ -22,7 +22,7 @@ const Entity *ToolAssignPart::get_entity()
     const Entity *entity = nullptr;
     for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            auto sym = core.c->get_schematic_symbol(it.uuid);
+            auto sym = doc.c->get_schematic_symbol(it.uuid);
             if (entity) {
                 if (entity != sym->component->entity) {
                     return nullptr;
@@ -51,13 +51,13 @@ ToolResponse ToolAssignPart::begin(const ToolArgs &args)
     }
     if (!part_uuid) {
         auto current_part_uuid = comp->part ? comp->part->uuid : UUID();
-        auto r = imp->dialogs.select_part(core.r->get_pool(), entity->uuid, current_part_uuid, true);
+        auto r = imp->dialogs.select_part(doc.r->get_pool(), entity->uuid, current_part_uuid, true);
         if (r.first) {
             part_uuid = r.second;
         }
     }
     if (part_uuid) {
-        auto part = core.r->get_pool()->get_part(part_uuid);
+        auto part = doc.r->get_pool()->get_part(part_uuid);
         if (part->entity->uuid != entity->uuid) {
             imp->tool_bar_flash("wrong entity");
             return ToolResponse::end();
@@ -65,7 +65,7 @@ ToolResponse ToolAssignPart::begin(const ToolArgs &args)
 
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-                auto sym = core.c->get_schematic_symbol(it.uuid);
+                auto sym = doc.c->get_schematic_symbol(it.uuid);
                 if (sym->component->entity == entity) {
                     sym->component->part = part;
                 }

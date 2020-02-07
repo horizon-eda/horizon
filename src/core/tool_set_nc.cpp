@@ -13,7 +13,7 @@ ToolSetNotConnected::ToolSetNotConnected(IDocument *c, ToolID tid) : ToolBase(c,
 
 bool ToolSetNotConnected::can_begin()
 {
-    return core.c;
+    return doc.c;
 }
 
 ToolResponse ToolSetNotConnected::begin(const ToolArgs &args)
@@ -49,7 +49,7 @@ ToolResponse ToolSetNotConnected::update(const ToolArgs &args)
     if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
             if (args.target.type == ObjectType::SYMBOL_PIN) {
-                auto sym = core.c->get_schematic_symbol(args.target.path.at(0));
+                auto sym = doc.c->get_schematic_symbol(args.target.path.at(0));
                 auto pin = &sym->symbol.pins.at(args.target.path.at(1));
                 UUIDPath<2> connpath(sym->gate->uuid, args.target.path.at(1));
                 if (sym->component->connections.count(connpath) == 0) { // pin is not connected

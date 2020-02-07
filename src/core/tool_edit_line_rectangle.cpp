@@ -14,7 +14,7 @@ ToolEditLineRectangle::ToolEditLineRectangle(IDocument *c, ToolID tid) : ToolBas
 
 bool ToolEditLineRectangle::can_begin()
 {
-    if (!core.r->has_object_type(ObjectType::LINE))
+    if (!doc.r->has_object_type(ObjectType::LINE))
         return false;
     for (const auto &it : selection) {
         if (it.type == ObjectType::JUNCTION || it.type == ObjectType::LINE) {
@@ -43,11 +43,11 @@ ToolResponse ToolEditLineRectangle::begin(const ToolArgs &args)
     Junction *start = nullptr;
     for (const auto &it : args.selection) {
         if (it.type == ObjectType::JUNCTION) {
-            start = core.r->get_junction(it.uuid);
+            start = doc.r->get_junction(it.uuid);
             break;
         }
         else if (it.type == ObjectType::LINE) {
-            start = core.r->get_line(it.uuid)->from;
+            start = doc.r->get_line(it.uuid)->from;
             break;
         }
     }
@@ -61,7 +61,7 @@ ToolResponse ToolEditLineRectangle::begin(const ToolArgs &args)
     bool found = true;
     while (found) {
         found = false;
-        for (auto li : core.r->get_lines()) {
+        for (auto li : doc.r->get_lines()) {
             if (junctions_found.count(li->from)) {
                 if (junctions_found.insert(li->to).second)
                     found = true;
@@ -84,7 +84,7 @@ ToolResponse ToolEditLineRectangle::begin(const ToolArgs &args)
     for (int i = 1; i < 4; i++) {
         auto ju_prev = junctions[i - 1];
         junctions[i] = nullptr;
-        for (auto li : core.r->get_lines()) {
+        for (auto li : doc.r->get_lines()) {
             if (li->from == ju_prev && junctions_found.count(li->to)) {
                 junctions[i] = li->to;
                 break;

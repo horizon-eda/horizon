@@ -12,7 +12,7 @@ ToolSwapNets::ToolSwapNets(IDocument *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolSwapNets::can_begin()
 {
-    if (!core.c) {
+    if (!doc.c) {
         return false;
     }
 
@@ -24,16 +24,16 @@ std::set<UUID> ToolSwapNets::get_net_segments()
     std::set<UUID> net_segments;
     for (const auto &it : selection) {
         if (it.type == ObjectType::JUNCTION) {
-            net_segments.insert(core.r->get_junction(it.uuid)->net_segment);
+            net_segments.insert(doc.r->get_junction(it.uuid)->net_segment);
         }
         else if (it.type == ObjectType::LINE_NET) {
-            net_segments.insert(core.c->get_sheet()->net_lines.at(it.uuid).net_segment);
+            net_segments.insert(doc.c->get_sheet()->net_lines.at(it.uuid).net_segment);
         }
         else if (it.type == ObjectType::POWER_SYMBOL) {
-            net_segments.insert(core.c->get_sheet()->power_symbols.at(it.uuid).junction->net_segment);
+            net_segments.insert(doc.c->get_sheet()->power_symbols.at(it.uuid).junction->net_segment);
         }
         else if (it.type == ObjectType::NET_LABEL) {
-            net_segments.insert(core.c->get_sheet()->net_labels.at(it.uuid).junction->net_segment);
+            net_segments.insert(doc.c->get_sheet()->net_labels.at(it.uuid).junction->net_segment);
         }
     }
     return net_segments;
@@ -52,18 +52,18 @@ ToolResponse ToolSwapNets::begin(const ToolArgs &args)
         ns2 = *it;
     }
 
-    auto nsinfo = core.c->get_sheet()->analyze_net_segments();
+    auto nsinfo = doc.c->get_sheet()->analyze_net_segments();
     auto nsi1 = nsinfo.at(ns1);
     auto nsi2 = nsinfo.at(ns2);
 
     if (nsi1.bus || nsi1.has_power_sym || nsi1.net->is_bussed || nsi2.bus || nsi2.has_power_sym || nsi2.net->is_bussed)
         return ToolResponse::end();
 
-    auto pins1 = core.c->get_sheet()->get_pins_connected_to_net_segment(ns1);
-    auto pins2 = core.c->get_sheet()->get_pins_connected_to_net_segment(ns2);
+    auto pins1 = doc.c->get_sheet()->get_pins_connected_to_net_segment(ns1);
+    auto pins2 = doc.c->get_sheet()->get_pins_connected_to_net_segment(ns2);
 
-    core.c->get_schematic()->block->extract_pins(pins1, nsi2.net);
-    core.c->get_schematic()->block->extract_pins(pins2, nsi1.net);
+    doc.c->get_schematic()->block->extract_pins(pins1, nsi2.net);
+    doc.c->get_schematic()->block->extract_pins(pins2, nsi1.net);
 
     return ToolResponse::commit();
 }

@@ -13,14 +13,14 @@ ToolDrawPolygon::ToolDrawPolygon(IDocument *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolDrawPolygon::can_begin()
 {
-    return core.r->has_object_type(ObjectType::POLYGON);
+    return doc.r->has_object_type(ObjectType::POLYGON);
 }
 
 ToolResponse ToolDrawPolygon::begin(const ToolArgs &args)
 {
     std::cout << "tool draw line poly\n";
 
-    temp = core.r->insert_polygon(UUID::random());
+    temp = doc.r->insert_polygon(UUID::random());
     temp->temp = true;
     temp->layer = args.work_layer;
     vertex = temp->append_vertex();
@@ -104,7 +104,7 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
             temp->temp = false;
             vertex = nullptr;
             if (!temp->is_valid()) {
-                core.r->delete_polygon(temp->uuid);
+                doc.r->delete_polygon(temp->uuid);
             }
             return ToolResponse::commit();
         }

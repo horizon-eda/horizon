@@ -13,12 +13,12 @@ ToolMapPackage::ToolMapPackage(IDocument *c, ToolID tid) : ToolBase(c, tid), Too
 
 bool ToolMapPackage::can_begin()
 {
-    return core.b;
+    return doc.b;
 }
 
 ToolResponse ToolMapPackage::begin(const ToolArgs &args)
 {
-    Board *brd = core.b->get_board();
+    Board *brd = doc.b->get_board();
 
     std::set<Component *> components_from_selection; // used for placing from schematic
     for (const auto &it : args.selection) {
@@ -86,7 +86,7 @@ ToolResponse ToolMapPackage::begin(const ToolArgs &args)
 
 void ToolMapPackage::place_package(Component *comp, const Coordi &c)
 {
-    Board *brd = core.b->get_board();
+    Board *brd = doc.b->get_board();
     auto uu = UUID::random();
     pkg = &brd->packages.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, comp))
                    .first->second;
@@ -123,7 +123,7 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
         move_do_cursor(args.coords);
-        core.b->get_board()->update_airwires(true, nets);
+        doc.b->get_board()->update_airwires(true, nets);
         return ToolResponse::fast();
     }
     else if (args.type == ToolEventType::CLICK) {
@@ -143,7 +143,7 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
         }
         else if (args.button == 3) {
             if (pkg) {
-                core.b->get_board()->packages.erase(pkg->uuid);
+                doc.b->get_board()->packages.erase(pkg->uuid);
             }
             return ToolResponse::commit();
         }
@@ -154,7 +154,7 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
             UUID selected_component;
             std::tie(r, selected_component) = imp->dialogs.map_package(components);
             if (r) {
-                core.b->get_board()->packages.erase(pkg->uuid);
+                doc.b->get_board()->packages.erase(pkg->uuid);
 
                 auto x = std::find_if(components.begin(), components.end(), [selected_component](const auto &a) {
                     return a.first->uuid == selected_component;

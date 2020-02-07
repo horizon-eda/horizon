@@ -22,7 +22,7 @@ Polygon *ToolAddKeepout::get_poly()
         case ObjectType::POLYGON_ARC_CENTER:
         case ObjectType::POLYGON_EDGE:
         case ObjectType::POLYGON_VERTEX: {
-            auto p = core.r->get_polygon(it.uuid);
+            auto p = doc.r->get_polygon(it.uuid);
             if (poly && poly != p) {
                 return nullptr;
             }
@@ -38,7 +38,7 @@ Polygon *ToolAddKeepout::get_poly()
 
 bool ToolAddKeepout::can_begin()
 {
-    if (!core.r->has_object_type(ObjectType::KEEPOUT))
+    if (!doc.r->has_object_type(ObjectType::KEEPOUT))
         return false;
     auto poly = get_poly();
     if (!poly)
@@ -64,13 +64,13 @@ ToolResponse ToolAddKeepout::begin(const ToolArgs &args)
         keepout = dynamic_cast<Keepout *>(poly->usage.ptr);
     }
     else {
-        keepout = core.r->insert_keepout(UUID::random());
+        keepout = doc.r->insert_keepout(UUID::random());
         keepout->polygon = poly;
         poly->usage = keepout;
     }
     UUID keepout_uuid = keepout->uuid;
-    bool r = imp->dialogs.edit_keepout(keepout, core.r, tool_id == ToolID::ADD_KEEPOUT);
-    auto keepouts = core.r->get_keepouts();
+    bool r = imp->dialogs.edit_keepout(keepout, doc.r, tool_id == ToolID::ADD_KEEPOUT);
+    auto keepouts = doc.r->get_keepouts();
     if (r) {
         if (std::count_if(keepouts.begin(), keepouts.end(), [keepout_uuid](auto x) { return x->uuid == keepout_uuid; })
             == 0) { // may have been deleted

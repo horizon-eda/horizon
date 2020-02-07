@@ -13,7 +13,7 @@ ToolPlaceHole::ToolPlaceHole(IDocument *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolPlaceHole::can_begin()
 {
-    return core.r->has_object_type(ObjectType::HOLE);
+    return doc.r->has_object_type(ObjectType::HOLE);
 }
 
 ToolResponse ToolPlaceHole::begin(const ToolArgs &args)
@@ -28,7 +28,7 @@ ToolResponse ToolPlaceHole::begin(const ToolArgs &args)
 
 void ToolPlaceHole::create_hole(const Coordi &c)
 {
-    temp = core.r->insert_hole(UUID::random());
+    temp = doc.r->insert_hole(UUID::random());
     temp->placement.shift = c;
 }
 
@@ -44,7 +44,7 @@ ToolResponse ToolPlaceHole::update(const ToolArgs &args)
             create_hole(args.coords);
         }
         else if (args.button == 3) {
-            core.r->delete_hole(temp->uuid);
+            doc.r->delete_hole(temp->uuid);
             temp = 0;
             selection.clear();
             for (auto it : holes_placed) {

@@ -19,13 +19,13 @@ void ToolDrawArc::apply_settings()
 
 bool ToolDrawArc::can_begin()
 {
-    return core.r->has_object_type(ObjectType::ARC);
+    return doc.r->has_object_type(ObjectType::ARC);
 }
 
 Junction *ToolDrawArc::make_junction(const Coordi &coords)
 {
     Junction *ju;
-    ju = core.r->insert_junction(UUID::random());
+    ju = doc.r->insert_junction(UUID::random());
     ju->temp = true;
     ju->position = coords;
     return ju;
@@ -70,7 +70,7 @@ ToolResponse ToolDrawArc::update(const ToolArgs &args)
         if (args.button == 1) {
             if (state == DrawArcState::FROM) {
                 if (args.target.type == ObjectType::JUNCTION) {
-                    from_junc = core.r->get_junction(args.target.path.at(0));
+                    from_junc = doc.r->get_junction(args.target.path.at(0));
                 }
                 else {
                     temp_junc->temp = false;
@@ -81,14 +81,14 @@ ToolResponse ToolDrawArc::update(const ToolArgs &args)
             }
             else if (state == DrawArcState::TO) {
                 if (args.target.type == ObjectType::JUNCTION) {
-                    to_junc = core.r->get_junction(args.target.path.at(0));
+                    to_junc = doc.r->get_junction(args.target.path.at(0));
                 }
                 else {
                     temp_junc->temp = false;
                     to_junc = temp_junc;
                     temp_junc = make_junction(args.coords);
                 }
-                temp_arc = core.r->insert_arc(UUID::random());
+                temp_arc = doc.r->insert_arc(UUID::random());
                 apply_settings();
                 temp_arc->from = from_junc;
                 temp_arc->to = to_junc;
@@ -98,8 +98,8 @@ ToolResponse ToolDrawArc::update(const ToolArgs &args)
             }
             else if (state == DrawArcState::CENTER) {
                 if (args.target.type == ObjectType::JUNCTION) {
-                    temp_arc->center = core.r->get_junction(args.target.path.at(0));
-                    core.r->delete_junction(temp_junc->uuid);
+                    temp_arc->center = doc.r->get_junction(args.target.path.at(0));
+                    doc.r->delete_junction(temp_junc->uuid);
                     temp_junc = nullptr;
                 }
                 else {

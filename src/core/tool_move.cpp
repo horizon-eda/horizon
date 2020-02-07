@@ -28,36 +28,36 @@ void ToolMove::expand_selection()
     for (const auto &it : selection) {
         switch (it.type) {
         case ObjectType::LINE: {
-            Line *line = core.r->get_line(it.uuid);
+            Line *line = doc.r->get_line(it.uuid);
             new_sel.emplace(line->from.uuid, ObjectType::JUNCTION);
             new_sel.emplace(line->to.uuid, ObjectType::JUNCTION);
         } break;
         case ObjectType::POLYGON_EDGE: {
-            Polygon *poly = core.r->get_polygon(it.uuid);
+            Polygon *poly = doc.r->get_polygon(it.uuid);
             auto vs = poly->get_vertices_for_edge(it.vertex);
             new_sel.emplace(poly->uuid, ObjectType::POLYGON_VERTEX, vs.first);
             new_sel.emplace(poly->uuid, ObjectType::POLYGON_VERTEX, vs.second);
         } break;
 
         case ObjectType::NET_LABEL: {
-            auto &la = core.c->get_sheet()->net_labels.at(it.uuid);
+            auto &la = doc.c->get_sheet()->net_labels.at(it.uuid);
             new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
         } break;
         case ObjectType::BUS_LABEL: {
-            auto &la = core.c->get_sheet()->bus_labels.at(it.uuid);
+            auto &la = doc.c->get_sheet()->bus_labels.at(it.uuid);
             new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
         } break;
         case ObjectType::POWER_SYMBOL: {
-            auto &ps = core.c->get_sheet()->power_symbols.at(it.uuid);
+            auto &ps = doc.c->get_sheet()->power_symbols.at(it.uuid);
             new_sel.emplace(ps.junction->uuid, ObjectType::JUNCTION);
         } break;
         case ObjectType::BUS_RIPPER: {
-            auto &rip = core.c->get_sheet()->bus_rippers.at(it.uuid);
+            auto &rip = doc.c->get_sheet()->bus_rippers.at(it.uuid);
             new_sel.emplace(rip.junction->uuid, ObjectType::JUNCTION);
         } break;
 
         case ObjectType::LINE_NET: {
-            auto line = &core.c->get_sheet()->net_lines.at(it.uuid);
+            auto line = &doc.c->get_sheet()->net_lines.at(it.uuid);
             for (auto &it_ft : {line->from, line->to}) {
                 if (it_ft.is_junc()) {
                     new_sel.emplace(it_ft.junc.uuid, ObjectType::JUNCTION);
@@ -65,7 +65,7 @@ void ToolMove::expand_selection()
             }
         } break;
         case ObjectType::TRACK: {
-            auto track = &core.b->get_board()->tracks.at(it.uuid);
+            auto track = &doc.b->get_board()->tracks.at(it.uuid);
             for (auto &it_ft : {track->from, track->to}) {
                 if (it_ft.is_junc()) {
                     new_sel.emplace(it_ft.junc.uuid, ObjectType::JUNCTION);
@@ -73,11 +73,11 @@ void ToolMove::expand_selection()
             }
         } break;
         case ObjectType::VIA: {
-            auto via = &core.b->get_board()->vias.at(it.uuid);
+            auto via = &doc.b->get_board()->vias.at(it.uuid);
             new_sel.emplace(via->junction->uuid, ObjectType::JUNCTION);
         } break;
         case ObjectType::POLYGON: {
-            auto poly = core.r->get_polygon(it.uuid);
+            auto poly = doc.r->get_polygon(it.uuid);
             int i = 0;
             for (const auto &itv : poly->vertices) {
                 (void)sizeof itv;
@@ -87,20 +87,20 @@ void ToolMove::expand_selection()
         } break;
 
         case ObjectType::ARC: {
-            Arc *arc = core.r->get_arc(it.uuid);
+            Arc *arc = doc.r->get_arc(it.uuid);
             new_sel.emplace(arc->from.uuid, ObjectType::JUNCTION);
             new_sel.emplace(arc->to.uuid, ObjectType::JUNCTION);
             new_sel.emplace(arc->center.uuid, ObjectType::JUNCTION);
         } break;
 
         case ObjectType::SCHEMATIC_SYMBOL: {
-            auto sym = core.c->get_schematic_symbol(it.uuid);
+            auto sym = doc.c->get_schematic_symbol(it.uuid);
             for (const auto &itt : sym->texts) {
                 new_sel.emplace(itt->uuid, ObjectType::TEXT);
             }
         } break;
         case ObjectType::BOARD_PACKAGE: {
-            BoardPackage *pkg = &core.b->get_board()->packages.at(it.uuid);
+            BoardPackage *pkg = &doc.b->get_board()->packages.at(it.uuid);
             if (pkg->fixed) {
                 pkgs_fixed.insert(it);
             }
@@ -130,13 +130,13 @@ void ToolMove::update_selection_center()
     std::set<SelectableRef> items_ignore;
     for (const auto &it : selection) {
         if (it.type == ObjectType::BOARD_PACKAGE) {
-            const auto &pkg = core.b->get_board()->packages.at(it.uuid);
+            const auto &pkg = doc.b->get_board()->packages.at(it.uuid);
             for (auto &it_txt : pkg.texts) {
                 items_ignore.emplace(it_txt->uuid, ObjectType::TEXT);
             }
         }
         else if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            const auto &sym = core.c->get_sheet()->symbols.at(it.uuid);
+            const auto &sym = doc.c->get_sheet()->symbols.at(it.uuid);
             for (auto &it_txt : sym.texts) {
                 items_ignore.emplace(it_txt->uuid, ObjectType::TEXT);
             }
@@ -147,48 +147,48 @@ void ToolMove::update_selection_center()
             continue;
         switch (it.type) {
         case ObjectType::JUNCTION:
-            accu.accumulate(core.r->get_junction(it.uuid)->position);
+            accu.accumulate(doc.r->get_junction(it.uuid)->position);
             break;
         case ObjectType::HOLE:
-            accu.accumulate(core.r->get_hole(it.uuid)->placement.shift);
+            accu.accumulate(doc.r->get_hole(it.uuid)->placement.shift);
             break;
         case ObjectType::BOARD_HOLE:
-            accu.accumulate(core.b->get_board()->holes.at(it.uuid).placement.shift);
+            accu.accumulate(doc.b->get_board()->holes.at(it.uuid).placement.shift);
             break;
         case ObjectType::SYMBOL_PIN:
-            accu.accumulate(core.y->get_symbol_pin(it.uuid)->position);
+            accu.accumulate(doc.y->get_symbol_pin(it.uuid)->position);
             break;
         case ObjectType::SCHEMATIC_SYMBOL:
-            accu.accumulate(core.c->get_schematic_symbol(it.uuid)->placement.shift);
+            accu.accumulate(doc.c->get_schematic_symbol(it.uuid)->placement.shift);
             break;
         case ObjectType::BOARD_PACKAGE:
-            accu.accumulate(core.b->get_board()->packages.at(it.uuid).placement.shift);
+            accu.accumulate(doc.b->get_board()->packages.at(it.uuid).placement.shift);
             break;
         case ObjectType::PAD:
-            accu.accumulate(core.k->get_package()->pads.at(it.uuid).placement.shift);
+            accu.accumulate(doc.k->get_package()->pads.at(it.uuid).placement.shift);
             break;
         case ObjectType::TEXT:
-            accu.accumulate(core.r->get_text(it.uuid)->placement.shift);
+            accu.accumulate(doc.r->get_text(it.uuid)->placement.shift);
             break;
         case ObjectType::POLYGON_VERTEX:
-            accu.accumulate(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).position);
+            accu.accumulate(doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).position);
             break;
         case ObjectType::DIMENSION:
             if (it.vertex < 2) {
-                auto dim = core.r->get_dimension(it.uuid);
+                auto dim = doc.r->get_dimension(it.uuid);
                 accu.accumulate(it.vertex == 0 ? dim->p0 : dim->p1);
             }
             break;
         case ObjectType::POLYGON_ARC_CENTER:
-            accu.accumulate(core.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center);
+            accu.accumulate(doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center);
             break;
         case ObjectType::SHAPE:
-            accu.accumulate(core.a->get_padstack()->shapes.at(it.uuid).placement.shift);
+            accu.accumulate(doc.a->get_padstack()->shapes.at(it.uuid).placement.shift);
             break;
         default:;
         }
     }
-    if (core.c || core.y)
+    if (doc.c || doc.y)
         selection_center = (accu.get() / 1.25_mm) * 1.25_mm;
     else
         selection_center = accu.get();
@@ -207,8 +207,8 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
             move_mirror_or_rotate(selection_center, true);
             move_mirror_or_rotate(selection_center, true);
         }
-        if (core.b) {
-            auto brd = core.b->get_board();
+        if (doc.b) {
+            auto brd = doc.b->get_board();
             brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
         }
         return ToolResponse::commit();
@@ -219,8 +219,8 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
             return ToolResponse::end();
         }
         move_do(r.second);
-        if (core.b) {
-            auto brd = core.b->get_board();
+        if (doc.b) {
+            auto brd = doc.b->get_board();
             brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
         }
         return ToolResponse::commit();
@@ -232,7 +232,7 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
 
     for (const auto &it : selection) {
         if (it.type == ObjectType::POLYGON_VERTEX || it.type == ObjectType::POLYGON_EDGE) {
-            auto poly = core.r->get_polygon(it.uuid);
+            auto poly = doc.r->get_polygon(it.uuid);
             if (auto plane = dynamic_cast<Plane *>(poly->usage.ptr)) {
                 planes.insert(plane);
             }
@@ -295,7 +295,7 @@ void ToolMove::collect_nets()
         switch (it.type) {
 
         case ObjectType::BOARD_PACKAGE: {
-            BoardPackage *pkg = &core.b->get_board()->packages.at(it.uuid);
+            BoardPackage *pkg = &doc.b->get_board()->packages.at(it.uuid);
             for (const auto &itt : pkg->package.pads) {
                 if (itt.second.net)
                     nets.insert(itt.second.net->uuid);
@@ -303,7 +303,7 @@ void ToolMove::collect_nets()
         } break;
 
         case ObjectType::JUNCTION: {
-            auto ju = core.r->get_junction(it.uuid);
+            auto ju = doc.r->get_junction(it.uuid);
             if (ju->net)
                 nets.insert(ju->net->uuid);
         } break;
@@ -341,8 +341,8 @@ void ToolMove::update_tip()
 void ToolMove::do_move(const Coordi &d)
 {
     move_do_cursor(d);
-    if (core.b && update_airwires && nets.size()) {
-        core.b->get_board()->update_airwires(true, nets);
+    if (doc.b && update_airwires && nets.size()) {
+        doc.b->get_board()->update_airwires(true, nets);
     }
     update_tip();
 }
@@ -367,18 +367,18 @@ void ToolMove::finish()
 {
     for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            auto sym = core.c->get_schematic_symbol(it.uuid);
-            core.c->get_schematic()->autoconnect_symbol(core.c->get_sheet(), sym);
+            auto sym = doc.c->get_schematic_symbol(it.uuid);
+            doc.c->get_schematic()->autoconnect_symbol(doc.c->get_sheet(), sym);
             if (sym->component->connections.size() == 0) {
-                core.c->get_schematic()->place_bipole_on_line(core.c->get_sheet(), sym);
+                doc.c->get_schematic()->place_bipole_on_line(doc.c->get_sheet(), sym);
             }
         }
     }
-    if (core.c) {
+    if (doc.c) {
         merge_selected_junctions();
     }
-    if (core.b) {
-        auto brd = core.b->get_board();
+    if (doc.b) {
+        auto brd = doc.b->get_board();
         brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
         for (auto plane : planes) {
             brd->update_plane(plane);

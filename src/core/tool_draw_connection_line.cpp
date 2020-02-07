@@ -14,12 +14,12 @@ ToolDrawConnectionLine::ToolDrawConnectionLine(IDocument *c, ToolID tid) : ToolB
 
 bool ToolDrawConnectionLine::can_begin()
 {
-    return core.b;
+    return doc.b;
 }
 
 ToolResponse ToolDrawConnectionLine::begin(const ToolArgs &args)
 {
-    temp_junc = core.r->insert_junction(UUID::random());
+    temp_junc = doc.r->insert_junction(UUID::random());
     temp_junc->temp = true;
     temp_junc->position = args.coords;
     temp_line = nullptr;
@@ -41,7 +41,7 @@ void ToolDrawConnectionLine::update_tip()
 
 ToolResponse ToolDrawConnectionLine::update(const ToolArgs &args)
 {
-    auto brd = core.b->get_board();
+    auto brd = doc.b->get_board();
     if (args.type == ToolEventType::MOVE) {
         if (temp_line)
             temp_junc->position = args.coords;
@@ -107,11 +107,11 @@ ToolResponse ToolDrawConnectionLine::update(const ToolArgs &args)
         }
         else if (args.button == 3) {
             if (temp_line) {
-                core.b->get_board()->connection_lines.erase(temp_line->uuid);
+                doc.b->get_board()->connection_lines.erase(temp_line->uuid);
                 temp_line = nullptr;
             }
             else {
-                core.r->delete_junction(temp_junc->uuid);
+                doc.r->delete_junction(temp_junc->uuid);
                 temp_junc = nullptr;
                 return ToolResponse::commit();
             }

@@ -32,12 +32,12 @@ ToolBackannotateConnectionLines::ToolBackannotateConnectionLines(IDocument *c, T
 
 bool ToolBackannotateConnectionLines::can_begin()
 {
-    return core.c;
+    return doc.c;
 }
 
 Net *ToolBackannotateConnectionLines::create_net_stub(Component *comp, const UUIDPath<2> &connpath, Net *net)
 {
-    auto sch = core.c->get_schematic();
+    auto sch = doc.c->get_schematic();
     if (comp->connections.count(connpath))
         return nullptr;
     SchematicSymbol *sym = nullptr;

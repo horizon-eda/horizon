@@ -14,13 +14,13 @@ ToolGenerateCourtyard::ToolGenerateCourtyard(IDocument *c, ToolID tid) : ToolBas
 
 bool ToolGenerateCourtyard::can_begin()
 {
-    return core.k;
+    return doc.k;
 }
 
 ToolResponse ToolGenerateCourtyard::begin(const ToolArgs &args)
 {
     Coordi a, b;
-    auto pkg = core.k->get_package();
+    auto pkg = doc.k->get_package();
     for (const auto &it : pkg->pads) {
         auto bb_pad = it.second.placement.transform_bb(it.second.padstack.get_bbox(true));
         a = Coordi::min(a, bb_pad.first);
@@ -50,7 +50,7 @@ ToolResponse ToolGenerateCourtyard::begin(const ToolArgs &args)
         }
     }
     if (!courtyard_poly) {
-        courtyard_poly = core.k->insert_polygon(UUID::random());
+        courtyard_poly = doc.k->insert_polygon(UUID::random());
         courtyard_poly->layer = BoardLayers::TOP_COURTYARD;
         imp->tool_bar_flash("created new courtyard polygon");
     }

@@ -12,7 +12,7 @@ ToolCopyTracks::ToolCopyTracks(IDocument *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolCopyTracks::can_begin()
 {
-    if (!core.b)
+    if (!doc.b)
         return false;
 
     return std::count_if(selection.begin(), selection.end(), [](const auto &x) { return x.type == ObjectType::TRACK; })
@@ -31,7 +31,7 @@ ToolResponse ToolCopyTracks::update(const ToolArgs &args)
         if (args.button == 1) {
             if (args.target.type == ObjectType::BOARD_PACKAGE || args.target.type == ObjectType::PAD) {
                 auto pkg_uuid = args.target.path.at(0);
-                auto brd = core.b->get_board();
+                auto brd = doc.b->get_board();
                 const auto &dest_pkg = brd->packages.at(pkg_uuid);
                 const auto &dest_group = dest_pkg.component->group;
                 const auto &dest_tag = dest_pkg.component->tag;

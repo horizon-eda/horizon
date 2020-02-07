@@ -21,13 +21,13 @@ bool ToolManageBuses::can_begin()
     case ToolID::EDIT_SCHEMATIC_PROPERTIES:
     case ToolID::MANAGE_POWER_NETS:
     case ToolID::TOGGLE_GROUP_TAG_VISIBLE:
-        return core.c;
+        return doc.c;
 
     case ToolID::EDIT_STACKUP:
-        return core.b;
+        return doc.b;
 
     case ToolID::EDIT_FRAME_PROPERTIES:
-        return core.f;
+        return doc.f;
 
     default:
         return false;
@@ -39,31 +39,31 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
     bool r = false;
 
     if (tool_id == ToolID::MANAGE_BUSES) {
-        auto sch = core.c->get_schematic();
+        auto sch = doc.c->get_schematic();
         r = imp->dialogs.manage_buses(sch->block);
     }
     else if (tool_id == ToolID::ANNOTATE) {
-        auto sch = core.c->get_schematic();
+        auto sch = doc.c->get_schematic();
         r = imp->dialogs.annotate(sch);
     }
     else if (tool_id == ToolID::MANAGE_NET_CLASSES) {
-        auto sch = core.c->get_schematic();
+        auto sch = doc.c->get_schematic();
         r = imp->dialogs.manage_net_classes(sch->block);
     }
     else if (tool_id == ToolID::EDIT_SCHEMATIC_PROPERTIES) {
-        r = imp->dialogs.edit_schematic_properties(core.c->get_schematic(), core.c->get_pool());
+        r = imp->dialogs.edit_schematic_properties(doc.c->get_schematic(), doc.c->get_pool());
     }
     else if (tool_id == ToolID::EDIT_STACKUP) {
-        r = imp->dialogs.edit_stackup(core.b);
+        r = imp->dialogs.edit_stackup(doc.b);
     }
     else if (tool_id == ToolID::MANAGE_POWER_NETS) {
-        r = imp->dialogs.manage_power_nets(core.c->get_block());
+        r = imp->dialogs.manage_power_nets(doc.c->get_block());
     }
     else if (tool_id == ToolID::EDIT_FRAME_PROPERTIES) {
-        r = imp->dialogs.edit_frame_properties(core.f->get_frame());
+        r = imp->dialogs.edit_frame_properties(doc.f->get_frame());
     }
     else if (tool_id == ToolID::TOGGLE_GROUP_TAG_VISIBLE) {
-        auto sch = core.c->get_schematic();
+        auto sch = doc.c->get_schematic();
         sch->group_tag_visible = !sch->group_tag_visible;
         r = true;
     }

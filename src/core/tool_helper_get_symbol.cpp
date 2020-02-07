@@ -8,7 +8,7 @@ SchematicSymbol *ToolHelperGetSymbol::get_symbol()
     SchematicSymbol *rsym = nullptr;
     for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            auto sym = core.c->get_schematic_symbol(it.uuid);
+            auto sym = doc.c->get_schematic_symbol(it.uuid);
             if (rsym) {
                 if (rsym != sym) {
                     return nullptr;

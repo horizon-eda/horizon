@@ -12,7 +12,7 @@ ToolEditShape::ToolEditShape(IDocument *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolEditShape::can_begin()
 {
-    if (!core.a)
+    if (!doc.a)
         return false;
     return get_shapes().size() > 0;
 }
@@ -22,7 +22,7 @@ std::set<Shape *> ToolEditShape::get_shapes()
     std::set<Shape *> shapes;
     for (const auto &it : selection) {
         if (it.type == ObjectType::SHAPE) {
-            shapes.emplace(&core.a->get_padstack()->shapes.at(it.uuid));
+            shapes.emplace(&doc.a->get_padstack()->shapes.at(it.uuid));
         }
     }
     return shapes;

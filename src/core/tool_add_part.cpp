@@ -16,13 +16,13 @@ ToolAddPart::ToolAddPart(IDocument *c, ToolID tid)
 
 bool ToolAddPart::can_begin()
 {
-    return core.c;
+    return doc.c;
 }
 
 UUID ToolAddPart::create_tag()
 {
     auto uu = UUID::random();
-    auto block = core.c->get_block();
+    auto block = doc.c->get_block();
     block->tag_names[uu] = std::to_string(block->tag_names.size());
     return uu;
 }
@@ -30,7 +30,7 @@ UUID ToolAddPart::create_tag()
 ToolResponse ToolAddPart::begin(const ToolArgs &args)
 {
     std::cout << "tool add part\n";
-    Schematic *sch = core.c->get_schematic();
+    Schematic *sch = doc.c->get_schematic();
 
     bool r;
     if (tool_id == ToolID::ADD_PART) {
@@ -39,13 +39,13 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
             part_uuid = data->part_uuid;
         }
         if (!part_uuid) {
-            std::tie(r, part_uuid) = imp->dialogs.select_part(core.r->get_pool(), UUID(), UUID());
+            std::tie(r, part_uuid) = imp->dialogs.select_part(doc.r->get_pool(), UUID(), UUID());
             if (!r) {
                 return ToolResponse::end();
             }
         }
         imp->part_placed(part_uuid);
-        auto part = core.c->get_pool()->get_part(part_uuid);
+        auto part = doc.c->get_pool()->get_part(part_uuid);
 
         auto uu = UUID::random();
         comp = &sch->block->components.emplace(uu, uu).first->second;
@@ -54,13 +54,13 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
     }
     else {
         UUID entity_uuid;
-        std::tie(r, entity_uuid) = imp->dialogs.select_entity(core.r->get_pool());
+        std::tie(r, entity_uuid) = imp->dialogs.select_entity(doc.r->get_pool());
         if (!r) {
             return ToolResponse::end();
         }
         auto uu = UUID::random();
         comp = &sch->block->components.emplace(uu, uu).first->second;
-        comp->entity = core.c->get_pool()->get_entity(entity_uuid);
+        comp->entity = doc.c->get_pool()->get_entity(entity_uuid);
     }
     comp->refdes = comp->entity->prefix + "?";
     comp->tag = create_tag();
@@ -99,16 +99,16 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
-            core.c->get_schematic()->autoconnect_symbol(core.c->get_sheet(), sym_current);
+            doc.c->get_schematic()->autoconnect_symbol(doc.c->get_sheet(), sym_current);
             if (sym_current->component->connections.size() == 0) {
-                core.c->get_schematic()->place_bipole_on_line(core.c->get_sheet(), sym_current);
+                doc.c->get_schematic()->place_bipole_on_line(doc.c->get_sheet(), sym_current);
             }
             if (current_gate + 1 == gates.size()) { // last gate
                 current_gate = 0;
                 // add next component
                 auto last_comp = comp;
                 auto uu = UUID::random();
-                Schematic *sch = core.c->get_schematic();
+                Schematic *sch = doc.c->get_schematic();
                 comp = &sch->block->components.emplace(uu, uu).first->second;
                 comp->entity = last_comp->entity;
                 comp->part = last_comp->part;
@@ -118,7 +118,7 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
                 auto old_symbol = sym_current;
                 sym_current = map_symbol(comp, gates.front());
                 if (!sym_current) {
-                    core.c->get_block()->components.erase(comp->uuid);
+                    doc.c->get_block()->components.erase(comp->uuid);
                     return ToolResponse::commit();
                 }
                 sym_current->placement = old_symbol->placement;
@@ -144,9 +144,9 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
         }
         else {
             if (current_gate == 0) { // also delete the component
-                core.c->get_block()->components.erase(comp->uuid);
+                doc.c->get_block()->components.erase(comp->uuid);
             }
-            core.c->delete_schematic_symbol(sym_current->uuid);
+            doc.c->delete_schematic_symbol(sym_current->uuid);
             sym_current = nullptr;
             return ToolResponse::commit();
         }

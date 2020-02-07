@@ -13,20 +13,20 @@ ToolDrawTrack::ToolDrawTrack(IDocument *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolDrawTrack::can_begin()
 {
-    return core.b;
+    return doc.b;
 }
 
 ToolResponse ToolDrawTrack::begin(const ToolArgs &args)
 {
     std::cout << "tool draw track\n";
 
-    temp_junc = core.b->insert_junction(UUID::random());
+    temp_junc = doc.b->insert_junction(UUID::random());
     temp_junc->temp = true;
     temp_junc->position = args.coords;
     temp_track = nullptr;
     selection.clear();
 
-    rules = dynamic_cast<BoardRules *>(core.r->get_rules());
+    rules = dynamic_cast<BoardRules *>(doc.r->get_rules());
 
     return ToolResponse();
 }
@@ -34,7 +34,7 @@ ToolResponse ToolDrawTrack::begin(const ToolArgs &args)
 Track *ToolDrawTrack::create_temp_track()
 {
     auto uu = UUID::random();
-    temp_track = &core.b->get_board()->tracks.emplace(uu, uu).first->second;
+    temp_track = &doc.b->get_board()->tracks.emplace(uu, uu).first->second;
     return temp_track;
 }
 
@@ -46,14 +46,14 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
         if (temp_junc->net) {
             std::set<UUID> nets;
             nets.insert(temp_junc->net->uuid);
-            core.b->get_board()->update_airwires(true, nets);
+            doc.b->get_board()->update_airwires(true, nets);
         }
         return ToolResponse::fast();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
             if (args.target.type == ObjectType::JUNCTION) {
-                uuid_ptr<Junction> j = core.b->get_junction(args.target.path.at(0));
+                uuid_ptr<Junction> j = doc.b->get_junction(args.target.path.at(0));
                 if (temp_track != nullptr) {
                     if (temp_track->net && j->net && (temp_track->net->uuid != j->net->uuid)) {
                         return ToolResponse();
@@ -76,7 +76,7 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
                 temp_track->width = rules->get_default_track_width(j->net, 0);
             }
             else if (args.target.type == ObjectType::PAD) {
-                auto pkg = &core.b->get_board()->packages.at(args.target.path.at(0));
+                auto pkg = &doc.b->get_board()->packages.at(args.target.path.at(0));
                 auto pad = &pkg->package.pads.at(args.target.path.at(1));
                 if (temp_track != nullptr) {
                     if (temp_track->net && (temp_track->net->uuid != pad->net->uuid)) {
@@ -98,7 +98,7 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
             else {
                 Junction *last = temp_junc;
 
-                /*for(auto it: core.c->get_net_lines()) {
+                /*for(auto it: doc.c->get_net_lines()) {
                         if(it->coord_on_line(temp_junc->position)) {
                                 if(it != temp_line) {
                                         std::cout << "on line" <<
@@ -135,7 +135,7 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
                                                 }
                                         }
                                         auto li =
-                core.c->get_sheet()->split_line_net(it, temp_junc);
+                doc.c->get_sheet()->split_line_net(it, temp_junc);
                                         temp_junc->net = li->net;
                                         temp_junc->bus = li->bus;
                                         break;
@@ -143,7 +143,7 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
                         }
                 }*/
                 temp_junc->temp = false;
-                temp_junc = core.b->insert_junction(UUID::random());
+                temp_junc = doc.b->insert_junction(UUID::random());
                 temp_junc->temp = true;
                 temp_junc->position = args.coords;
                 if (last && temp_track) {
@@ -168,10 +168,10 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
         }
         else if (args.button == 3) {
             if (temp_track) {
-                core.b->get_board()->tracks.erase(temp_track->uuid);
+                doc.b->get_board()->tracks.erase(temp_track->uuid);
                 temp_track = nullptr;
             }
-            core.b->delete_junction(temp_junc->uuid);
+            doc.b->delete_junction(temp_junc->uuid);
             temp_junc = nullptr;
             return ToolResponse::commit();
         }

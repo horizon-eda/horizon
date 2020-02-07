@@ -13,7 +13,7 @@ bool ToolSetNotConnectedAll::can_begin()
 {
     for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            auto sym = core.c->get_schematic_symbol(it.uuid);
+            auto sym = doc.c->get_schematic_symbol(it.uuid);
             auto gate = sym->gate;
             for (auto &it_pin : gate->unit->pins) {
                 auto path = UUIDPath<2>(gate->uuid, it_pin.first);
@@ -38,7 +38,7 @@ ToolResponse ToolSetNotConnectedAll::begin(const ToolArgs &args)
 {
     for (const auto &it : args.selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            auto sym = core.c->get_schematic_symbol(it.uuid);
+            auto sym = doc.c->get_schematic_symbol(it.uuid);
             auto gate = sym->gate;
             for (auto &it_pin : gate->unit->pins) {
                 auto path = UUIDPath<2>(gate->uuid, it_pin.first);
