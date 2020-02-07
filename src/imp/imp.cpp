@@ -926,6 +926,12 @@ std::string ImpBase::get_hud_text_for_component(const Component *comp)
             s += "<a href=\"" + Glib::Markup::escape_text(part->get_datasheet()) + "\" title=\""
                  + Glib::Markup::escape_text(Glib::Markup::escape_text(part->get_datasheet())) + "\">Datasheet</a>\n";
 
+        const auto block = core->get_block();
+        if (comp->group)
+            s += "Group: " + Glib::Markup::escape_text(block->get_group_name(comp->group)) + "\n";
+        if (comp->tag)
+            s += "Tag: " + Glib::Markup::escape_text(block->get_tag_name(comp->tag)) + "\n";
+
         trim(s);
         return s;
     }
