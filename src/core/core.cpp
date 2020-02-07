@@ -17,10 +17,7 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
         throw std::runtime_error("can't begin tool while tool is active");
         return ToolResponse::end();
     }
-    if (!args.keep_selection) {
-        selection.clear();
-        selection = args.selection;
-    }
+
     update_rules(); // write rules to board, so tool has the current rules
     try {
         tool = create_tool(tool_id);
@@ -34,6 +31,10 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
             }
         }
         tool->set_imp_interface(imp);
+        if (!args.keep_selection) {
+            tool->selection.clear();
+            tool->selection = args.selection;
+        }
         if (transient)
             tool->set_transient();
         if (!tool->can_begin()) { // check if we can actually use this tool
@@ -61,15 +62,7 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
                                  Logger::Domain::CORE, e.what());
             return ToolResponse::end();
         }
-        if (r.end_tool) {
-            auto tid = tool->get_tool_id_for_settings();
-            auto settings = tool->get_settings_const();
-            if (settings)
-                s_signal_save_tool_settings.emit(tid, settings->serialize());
-            tool.reset();
-            s_signal_tool_changed.emit(ToolID::NONE);
-            rebuild();
-        }
+        maybe_end_tool(r);
 
         return r;
     }
@@ -77,14 +70,44 @@ ToolResponse Core::tool_begin(ToolID tool_id, const ToolArgs &args, class ImpInt
     return ToolResponse();
 }
 
+void Core::maybe_end_tool(const ToolResponse &r)
+{
+    if (r.result != ToolResponse::Result::NOP) { // end tool
+        auto tid = tool->get_tool_id_for_settings();
+        auto settings = tool->get_settings_const();
+        if (settings)
+            s_signal_save_tool_settings.emit(tid, settings->serialize());
+        tool_selection = tool->selection;
+        tool.reset();
+        s_signal_tool_changed.emit(ToolID::NONE);
+        if (r.result == ToolResponse::Result::COMMIT) {
+            set_needs_save(true);
+            rebuild();
+        }
+        else if (r.result == ToolResponse::Result::REVERT) {
+            history_load(history_current);
+            rebuild(true);
+        }
+        else if (r.result == ToolResponse::Result::END) { // did nothing
+            // do nothing
+        }
+    }
+}
+
+std::set<SelectableRef> &Core::get_tool_selection()
+{
+    if (tool)
+        return tool->selection;
+    else
+        return tool_selection;
+}
+
 std::pair<bool, bool> Core::tool_can_begin(ToolID tool_id, const std::set<SelectableRef> &sel)
 {
     auto t = create_tool(tool_id);
-    auto sel_saved = selection;
-    selection = sel;
+    t->selection = sel;
     auto r = t->can_begin();
     auto s = t->is_specific();
-    selection = sel_saved;
     return {r, s};
 }
 
@@ -109,61 +132,53 @@ ToolResponse Core::tool_update(const ToolArgs &args)
             Logger::log_critical("exception thrown in tool_update", Logger::Domain::CORE, e.what());
             return ToolResponse::end();
         }
-        if (r.end_tool) {
-            auto tid = tool->get_tool_id_for_settings();
-            auto settings = tool->get_settings_const();
-            if (settings)
-                s_signal_save_tool_settings.emit(tid, settings->serialize());
-            tool.reset();
-            s_signal_tool_changed.emit(ToolID::NONE);
-            rebuild();
-        }
+        maybe_end_tool(r);
         return r;
     }
     return ToolResponse();
 }
 
-Junction *Core::insert_junction(const UUID &uu, bool work)
+Junction *Core::insert_junction(const UUID &uu)
 {
-    auto map = get_junction_map(work);
+    auto map = get_junction_map();
     auto x = map->emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
 
-Junction *Core::get_junction(const UUID &uu, bool work)
+Junction *Core::get_junction(const UUID &uu)
 {
-    auto map = get_junction_map(work);
+    auto map = get_junction_map();
     return &map->at(uu);
 }
 
-void Core::delete_junction(const UUID &uu, bool work)
+void Core::delete_junction(const UUID &uu)
 {
-    auto map = get_junction_map(work);
+    auto map = get_junction_map();
     map->erase(uu);
 }
 
-Line *Core::insert_line(const UUID &uu, bool work)
+Line *Core::insert_line(const UUID &uu)
 {
-    auto map = get_line_map(work);
+    auto map = get_line_map();
     auto x = map->emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
 
-Line *Core::get_line(const UUID &uu, bool work)
+Line *Core::get_line(const UUID &uu)
 {
-    auto map = get_line_map(work);
+    auto map = get_line_map();
     return &map->at(uu);
 }
 
-void Core::delete_line(const UUID &uu, bool work)
+void Core::delete_line(const UUID &uu)
 {
-    auto map = get_line_map(work);
+    auto map = get_line_map();
     map->erase(uu);
 }
 
-std::vector<Line *> Core::get_lines(bool work)
+std::vector<Line *> Core::get_lines()
 {
-    auto *map = get_line_map(work);
+    auto *map = get_line_map();
     std::vector<Line *> r;
     if (!map)
         return r;
@@ -173,28 +188,28 @@ std::vector<Line *> Core::get_lines(bool work)
     return r;
 }
 
-Arc *Core::insert_arc(const UUID &uu, bool work)
+Arc *Core::insert_arc(const UUID &uu)
 {
-    auto map = get_arc_map(work);
+    auto map = get_arc_map();
     auto x = map->emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
 
-Arc *Core::get_arc(const UUID &uu, bool work)
+Arc *Core::get_arc(const UUID &uu)
 {
-    auto map = get_arc_map(work);
+    auto map = get_arc_map();
     return &map->at(uu);
 }
 
-void Core::delete_arc(const UUID &uu, bool work)
+void Core::delete_arc(const UUID &uu)
 {
-    auto map = get_arc_map(work);
+    auto map = get_arc_map();
     map->erase(uu);
 }
 
-std::vector<Arc *> Core::get_arcs(bool work)
+std::vector<Arc *> Core::get_arcs()
 {
-    auto *map = get_arc_map(work);
+    auto *map = get_arc_map();
     std::vector<Arc *> r;
     if (!map)
         return r;
@@ -204,60 +219,60 @@ std::vector<Arc *> Core::get_arcs(bool work)
     return r;
 }
 
-Text *Core::insert_text(const UUID &uu, bool work)
+Text *Core::insert_text(const UUID &uu)
 {
-    auto map = get_text_map(work);
+    auto map = get_text_map();
     auto x = map->emplace(uu, uu);
     return &(x.first->second);
 }
 
-Text *Core::get_text(const UUID &uu, bool work)
+Text *Core::get_text(const UUID &uu)
 {
-    auto map = get_text_map(work);
+    auto map = get_text_map();
     return &map->at(uu);
 }
 
-void Core::delete_text(const UUID &uu, bool work)
+void Core::delete_text(const UUID &uu)
 {
-    auto map = get_text_map(work);
+    auto map = get_text_map();
     map->erase(uu);
 }
 
-Polygon *Core::insert_polygon(const UUID &uu, bool work)
+Polygon *Core::insert_polygon(const UUID &uu)
 {
-    auto map = get_polygon_map(work);
+    auto map = get_polygon_map();
     auto x = map->emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
 
-Polygon *Core::get_polygon(const UUID &uu, bool work)
+Polygon *Core::get_polygon(const UUID &uu)
 {
-    auto map = get_polygon_map(work);
+    auto map = get_polygon_map();
     return &map->at(uu);
 }
 
-void Core::delete_polygon(const UUID &uu, bool work)
+void Core::delete_polygon(const UUID &uu)
 {
-    auto map = get_polygon_map(work);
+    auto map = get_polygon_map();
     map->erase(uu);
 }
 
-Hole *Core::insert_hole(const UUID &uu, bool work)
+Hole *Core::insert_hole(const UUID &uu)
 {
-    auto map = get_hole_map(work);
+    auto map = get_hole_map();
     auto x = map->emplace(std::make_pair(uu, uu));
     return &(x.first->second);
 }
 
-Hole *Core::get_hole(const UUID &uu, bool work)
+Hole *Core::get_hole(const UUID &uu)
 {
-    auto map = get_hole_map(work);
+    auto map = get_hole_map();
     return &map->at(uu);
 }
 
-void Core::delete_hole(const UUID &uu, bool work)
+void Core::delete_hole(const UUID &uu)
 {
-    auto map = get_hole_map(work);
+    auto map = get_hole_map();
     map->erase(uu);
 }
 
@@ -314,7 +329,7 @@ std::vector<Keepout *> Core::get_keepouts()
 
 void Core::rebuild(bool from_undo)
 {
-    if (!from_undo && !reverted) {
+    if (!from_undo) {
         while (history_current + 1 != (int)history.size()) {
             history.pop_back();
         }
@@ -325,7 +340,6 @@ void Core::rebuild(bool from_undo)
     }
     s_signal_rebuilt.emit();
     signal_can_undo_redo().emit();
-    reverted = false;
 }
 
 void Core::undo()
@@ -512,24 +526,4 @@ bool Core::SearchQuery::contains(const std::string &haystack) const
     return uhaystack.casefold().find(query) != Glib::ustring::npos;
 }
 
-ToolBase::ToolBase(Core *c, ToolID tid) : core(c), tool_id(tid)
-{
-}
-
-void ToolBase::set_imp_interface(ImpInterface *i)
-{
-    if (imp == nullptr) {
-        imp = i;
-    }
-}
-
-void ToolBase::set_transient()
-{
-    is_transient = true;
-}
-
-ToolSettingsProxy::~ToolSettingsProxy()
-{
-    tool->apply_settings();
-}
 } // namespace horizon

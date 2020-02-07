@@ -6,7 +6,7 @@
 #include "board/board_layers.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "util/util.hpp"
-#include "core/core_board.hpp"
+#include "document/idocument_board.hpp"
 
 namespace horizon {
 
@@ -63,7 +63,7 @@ StackupLayerEditor::StackupLayerEditor(EditStackupDialog *parent, int ly, bool c
 }
 
 
-EditStackupDialog::EditStackupDialog(Gtk::Window *parent, CoreBoard *c)
+EditStackupDialog::EditStackupDialog(Gtk::Window *parent, IDocumentBoard *c)
     : Gtk::Dialog("Edit Stackup", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       core(c), board(core->get_board())
 {

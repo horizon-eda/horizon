@@ -1,7 +1,7 @@
 #pragma once
 #include "buffer.hpp"
 #include "canvas/selectables.hpp"
-#include "core.hpp"
+#include "document/documents.hpp"
 #include "schematic/line_net.hpp"
 #include <gtkmm.h>
 #include <set>
@@ -17,7 +17,7 @@ namespace horizon {
  */
 class ClipboardManager {
 public:
-    ClipboardManager(Core *co);
+    ClipboardManager(Documents &ds);
     /**
      * Copys the objects specified by selection to the buffer.
      * \param selection Which objects to copy
@@ -29,7 +29,7 @@ private:
     void on_clipboard_get(Gtk::SelectionData &selection_data, guint /* info */);
     void on_clipboard_clear();
     Buffer buffer;
-    Core *core;
+    Documents docs;
     Coordi cursor_pos;
 };
 } // namespace horizon

@@ -17,9 +17,6 @@
 #include "ask_datum_angle.hpp"
 #include "select_via_padstack.hpp"
 #include "annotate.hpp"
-#include "core/core.hpp"
-#include "core/core_schematic.hpp"
-#include "core/cores.hpp"
 #include "pool/part.hpp"
 #include "edit_shape.hpp"
 #include "edit_parameter_program.hpp"
@@ -423,15 +420,15 @@ bool Dialogs::edit_plane(class Plane *plane, class Board *brd, class Block *bloc
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_keepout(class Keepout *keepout, class Core *c, bool add_mode)
+bool Dialogs::edit_keepout(class Keepout *keepout, class IDocument *c, bool add_mode)
 {
     EditKeepoutDialog dia(parent, keepout, c, add_mode);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_stackup(class CoreBoard *core)
+bool Dialogs::edit_stackup(class IDocumentBoard *doc)
 {
-    EditStackupDialog dia(parent, core);
+    EditStackupDialog dia(parent, doc);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 

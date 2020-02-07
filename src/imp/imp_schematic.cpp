@@ -11,9 +11,9 @@
 #include "bom_export_window.hpp"
 #include "pdf_export_window.hpp"
 #include "nlohmann/json.hpp"
-#include "core/tool_backannotate_connection_lines.hpp"
-#include "core/tool_add_part.hpp"
-#include "core/tool_map_symbol.hpp"
+#include "core/tools/tool_backannotate_connection_lines.hpp"
+#include "core/tools/tool_add_part.hpp"
+#include "core/tools/tool_map_symbol.hpp"
 #include "widgets/unplaced_box.hpp"
 
 namespace horizon {
@@ -302,7 +302,7 @@ void ImpSchematic::construct()
         auto button = Gtk::manage(new Gtk::Button("Place part"));
         button->signal_clicked().connect([this] { trigger_action(ActionID::PLACE_PART); });
         button->show();
-        core.r->signal_tool_changed().connect([button](ToolID t) { button->set_sensitive(t == ToolID::NONE); });
+        core->signal_tool_changed().connect([button](ToolID t) { button->set_sensitive(t == ToolID::NONE); });
         main_window->header->pack_end(*button);
     }
 
@@ -459,11 +459,11 @@ void ImpSchematic::construct()
     });
 
     bom_export_window->signal_changed().connect([this] { core_schematic.set_needs_save(); });
-    core.r->signal_tool_changed().connect([this](ToolID t) { bom_export_window->set_can_export(t == ToolID::NONE); });
-    core.r->signal_rebuilt().connect([this] { bom_export_window->update(); });
+    core->signal_tool_changed().connect([this](ToolID t) { bom_export_window->set_can_export(t == ToolID::NONE); });
+    core->signal_rebuilt().connect([this] { bom_export_window->update(); });
 
-    pdf_export_window = PDFExportWindow::create(main_window, &core_schematic, *core_schematic.get_pdf_export_settings(),
-                                                project_dir);
+    pdf_export_window = PDFExportWindow::create(main_window, dynamic_cast<IDocument *>(&core_schematic),
+                                                *core_schematic.get_pdf_export_settings(), project_dir);
     pdf_export_window->signal_changed().connect([this] { core_schematic.set_needs_save(); });
     connect_action(ActionID::PDF_EXPORT_WINDOW, [this](const auto &c) { pdf_export_window->present(); });
     connect_action(ActionID::EXPORT_PDF, [this](const auto &c) {
@@ -671,7 +671,7 @@ void ImpSchematic::handle_drag()
             update_highlights();
             ToolArgs args;
             args.coords = target_drag_begin.p;
-            ToolResponse r = core.r->tool_begin(ToolID::DRAW_NET, args, imp_interface.get());
+            ToolResponse r = core->tool_begin(ToolID::DRAW_NET, args, imp_interface.get());
             tool_process(r);
         }
         {
@@ -681,7 +681,7 @@ void ImpSchematic::handle_drag()
             args.button = 1;
             args.target = target_drag_begin;
             args.work_layer = canvas->property_work_layer();
-            ToolResponse r = core.r->tool_update(args);
+            ToolResponse r = core->tool_update(args);
             tool_process(r);
         }
         target_drag_begin = Target();
@@ -762,24 +762,24 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
         for (const auto &it : selection) {
             switch (it.type) {
             case ObjectType::NET_LABEL: {
-                auto &la = core.c->get_sheet()->net_labels.at(it.uuid);
+                auto &la = core_schematic.get_sheet()->net_labels.at(it.uuid);
                 new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
             } break;
             case ObjectType::BUS_LABEL: {
-                auto &la = core.c->get_sheet()->bus_labels.at(it.uuid);
+                auto &la = core_schematic.get_sheet()->bus_labels.at(it.uuid);
                 new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
             } break;
             case ObjectType::POWER_SYMBOL: {
-                auto &ps = core.c->get_sheet()->power_symbols.at(it.uuid);
+                auto &ps = core_schematic.get_sheet()->power_symbols.at(it.uuid);
                 new_sel.emplace(ps.junction->uuid, ObjectType::JUNCTION);
             } break;
             case ObjectType::BUS_RIPPER: {
-                auto &rip = core.c->get_sheet()->bus_rippers.at(it.uuid);
+                auto &rip = core_schematic.get_sheet()->bus_rippers.at(it.uuid);
                 new_sel.emplace(rip.junction->uuid, ObjectType::JUNCTION);
             } break;
 
             case ObjectType::LINE_NET: {
-                auto line = &core.c->get_sheet()->net_lines.at(it.uuid);
+                auto line = &core_schematic.get_sheet()->net_lines.at(it.uuid);
                 for (auto &it_ft : {line->from, line->to}) {
                     if (it_ft.is_junc()) {
                         new_sel.emplace(it_ft.junc->uuid, ObjectType::JUNCTION);
@@ -794,21 +794,21 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
             } break;
 
             case ObjectType::LINE: {
-                auto line = &core.c->get_sheet()->lines.at(it.uuid);
+                auto line = &core_schematic.get_sheet()->lines.at(it.uuid);
                 for (auto &it_ft : {line->from, line->to}) {
                     new_sel.emplace(it_ft->uuid, ObjectType::JUNCTION);
                 }
             } break;
 
             case ObjectType::ARC: {
-                auto arc = &core.c->get_sheet()->arcs.at(it.uuid);
+                auto arc = &core_schematic.get_sheet()->arcs.at(it.uuid);
                 for (auto &it_ft : {arc->from, arc->to, arc->center}) {
                     new_sel.emplace(it_ft->uuid, ObjectType::JUNCTION);
                 }
             } break;
 
             case ObjectType::SCHEMATIC_SYMBOL: {
-                auto sym = core.c->get_schematic_symbol(it.uuid);
+                auto sym = core_schematic.get_schematic_symbol(it.uuid);
                 for (const auto &itt : sym->texts) {
                     new_sel.emplace(itt->uuid, ObjectType::TEXT);
                 }
@@ -819,27 +819,27 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
         }
 
         // other direction
-        for (const auto &it : core.c->get_sheet()->net_labels) {
+        for (const auto &it : core_schematic.get_sheet()->net_labels) {
             if (selection.count(SelectableRef(it.second.junction->uuid, ObjectType::JUNCTION))) {
                 new_sel.emplace(it.first, ObjectType::NET_LABEL);
             }
         }
-        for (const auto &it : core.c->get_sheet()->bus_labels) {
+        for (const auto &it : core_schematic.get_sheet()->bus_labels) {
             if (selection.count(SelectableRef(it.second.junction->uuid, ObjectType::JUNCTION))) {
                 new_sel.emplace(it.first, ObjectType::BUS_LABEL);
             }
         }
-        for (const auto &it : core.c->get_sheet()->bus_rippers) {
+        for (const auto &it : core_schematic.get_sheet()->bus_rippers) {
             if (selection.count(SelectableRef(it.second.junction->uuid, ObjectType::JUNCTION))) {
                 new_sel.emplace(it.first, ObjectType::BUS_RIPPER);
             }
         }
-        for (const auto &it : core.c->get_sheet()->power_symbols) {
+        for (const auto &it : core_schematic.get_sheet()->power_symbols) {
             if (selection.count(SelectableRef(it.second.junction->uuid, ObjectType::JUNCTION))) {
                 new_sel.emplace(it.first, ObjectType::POWER_SYMBOL);
             }
         }
-        for (const auto &it : core.c->get_sheet()->net_lines) {
+        for (const auto &it : core_schematic.get_sheet()->net_lines) {
             const auto line = it.second;
             bool add_line = false;
             for (auto &it_ft : {line.from, line.to}) {
@@ -863,14 +863,14 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
                 new_sel.emplace(it.first, ObjectType::LINE_NET);
             }
         }
-        for (const auto &it : core.c->get_sheet()->lines) {
+        for (const auto &it : core_schematic.get_sheet()->lines) {
             for (const auto &it_ft : {it.second.from, it.second.to}) {
                 if (selection.count(SelectableRef(it_ft->uuid, ObjectType::JUNCTION))) {
                     new_sel.emplace(it.first, ObjectType::LINE);
                 }
             }
         }
-        for (const auto &it : core.c->get_sheet()->arcs) {
+        for (const auto &it : core_schematic.get_sheet()->arcs) {
             for (const auto &it_ft : {it.second.from, it.second.to, it.second.center}) {
                 if (selection.count(SelectableRef(it_ft->uuid, ObjectType::JUNCTION))) {
                     new_sel.emplace(it.first, ObjectType::ARC);
@@ -887,19 +887,19 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
     }
     canvas->set_selection(selection);
 
-    auto old_sheet = core.c->get_sheet();
+    auto old_sheet = core_schematic.get_sheet();
     Sheet *new_sheet = nullptr;
     {
-        SelectSheetDialog dia(core.c->get_schematic(), old_sheet);
+        SelectSheetDialog dia(core_schematic.get_schematic(), old_sheet);
         dia.set_transient_for(*main_window);
         if (dia.run() == Gtk::RESPONSE_OK) {
-            new_sheet = &core.c->get_schematic()->sheets.at(dia.selected_sheet);
+            new_sheet = &core_schematic.get_schematic()->sheets.at(dia.selected_sheet);
         }
     }
     if (!new_sheet)
         return;
     sheet_box->select_sheet(new_sheet->uuid);
-    assert(core.c->get_sheet() == new_sheet);
+    assert(core_schematic.get_sheet() == new_sheet);
 
     // actually move things to new sheet
     for (const auto &it : selection) {
@@ -948,10 +948,10 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
         default:;
         }
     }
-    core.c->get_schematic()->update_refs();
+    core_schematic.get_schematic()->update_refs();
 
-    core.c->commit();
-    core.c->rebuild();
+    core_schematic.set_needs_save();
+    core_schematic.rebuild();
     canvas_update();
     canvas->set_selection(selection);
     tool_begin(ToolID::MOVE);
@@ -977,4 +977,39 @@ void ImpSchematic::update_unplaced()
     unplaced_box->update(core_schematic.get_schematic()->get_unplaced_gates());
 }
 
+void ImpSchematic::expand_selection_for_property_panel(std::set<SelectableRef> &sel_extra,
+                                                       const std::set<SelectableRef> &sel)
+{
+    for (const auto &it : sel) {
+        switch (it.type) {
+        case ObjectType::SCHEMATIC_SYMBOL:
+            sel_extra.emplace(core_schematic.get_schematic_symbol(it.uuid)->component->uuid, ObjectType::COMPONENT);
+            break;
+        case ObjectType::JUNCTION:
+            if (core->get_junction(it.uuid)->net) {
+                sel_extra.emplace(core->get_junction(it.uuid)->net->uuid, ObjectType::NET);
+            }
+            break;
+        case ObjectType::LINE_NET: {
+            LineNet &li = core_schematic.get_sheet()->net_lines.at(it.uuid);
+            if (li.net) {
+                sel_extra.emplace(li.net->uuid, ObjectType::NET);
+            }
+        } break;
+        case ObjectType::NET_LABEL: {
+            NetLabel &la = core_schematic.get_sheet()->net_labels.at(it.uuid);
+            if (la.junction->net) {
+                sel_extra.emplace(la.junction->net->uuid, ObjectType::NET);
+            }
+        } break;
+        case ObjectType::POWER_SYMBOL: {
+            PowerSymbol &sym = core_schematic.get_sheet()->power_symbols.at(it.uuid);
+            if (sym.net) {
+                sel_extra.emplace(sym.net->uuid, ObjectType::NET);
+            }
+        } break;
+        default:;
+        }
+    }
+}
 } // namespace horizon

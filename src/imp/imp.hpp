@@ -1,7 +1,6 @@
 #pragma once
 #include "core/clipboard.hpp"
 #include "core/core.hpp"
-#include "core/cores.hpp"
 #include "imp_interface.hpp"
 #include "keyseq_dialog.hpp"
 #include "main_window.hpp"
@@ -75,7 +74,7 @@ protected:
     std::unique_ptr<SelectionFilterDialog> selection_filter_dialog;
 
     std::unique_ptr<Pool> pool;
-    Cores core;
+    class Core *core = nullptr;
     std::unique_ptr<ClipboardManager> clipboard = nullptr;
     std::unique_ptr<KeySequenceDialog> key_sequence_dialog = nullptr;
     std::unique_ptr<ImpInterface> imp_interface = nullptr;
@@ -96,7 +95,9 @@ protected:
     bool no_update = false;
 
     virtual void canvas_update() = 0;
-    void sc(void);
+    virtual void expand_selection_for_property_panel(std::set<SelectableRef> &sel_extra,
+                                                     const std::set<SelectableRef> &sel);
+    void handle_selection_changed(void);
     bool handle_key_press(GdkEventKey *key_event);
     void handle_cursor_move(const Coordi &pos);
     bool handle_click(GdkEventButton *button_event);

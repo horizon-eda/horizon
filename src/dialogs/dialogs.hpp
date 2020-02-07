@@ -3,9 +3,9 @@
 #include "util/uuid.hpp"
 #include "common/common.hpp"
 #include "util/uuid_path.hpp"
-#include "block/component.hpp"
 #include "parameter/set.hpp"
 #include <map>
+#include <set>
 
 namespace Gtk {
 class Window;
@@ -18,9 +18,9 @@ public:
     void set_parent(Gtk::Window *w);
     void set_interface(class ImpInterface *intf);
 
-    std::pair<bool, UUID> map_pin(const std::vector<std::pair<const Pin *, bool>> &pins);
+    std::pair<bool, UUID> map_pin(const std::vector<std::pair<const class Pin *, bool>> &pins);
     std::pair<bool, UUIDPath<2>> map_symbol(const std::map<UUIDPath<2>, std::string> &gates);
-    std::pair<bool, UUID> map_package(const std::vector<std::pair<Component *, bool>> &components);
+    std::pair<bool, UUID> map_package(const std::vector<std::pair<class Component *, bool>> &components);
     std::pair<bool, UUID> select_symbol(class Pool *p, const UUID &unit_uuid);
     std::pair<bool, UUID> select_part(class Pool *p, const UUID &entity_uuid, const UUID &part_uuid,
                                       bool show_none = false);
@@ -44,8 +44,8 @@ public:
     bool edit_board_hole(std::set<class BoardHole *> &holes, class Pool *pool, class Block *block);
     bool annotate(class Schematic *s);
     bool edit_plane(class Plane *plane, class Board *brd, class Block *block);
-    bool edit_keepout(class Keepout *keepout, class Core *c, bool add_mode);
-    bool edit_stackup(class CoreBoard *brd);
+    bool edit_keepout(class Keepout *keepout, class IDocument *c, bool add_mode);
+    bool edit_stackup(class IDocumentBoard *brd);
     bool edit_schematic_properties(class Schematic *s, class Pool *pool);
     bool edit_frame_properties(class Frame *fr);
     std::pair<bool, int64_t> ask_datum(const std::string &label, int64_t def = 0);

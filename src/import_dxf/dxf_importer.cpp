@@ -1,7 +1,11 @@
 #include "dxf_importer.hpp"
-#include "core/core.hpp"
+#include "document/idocument.hpp"
 #include "dxflib/dl_creationadapter.h"
 #include "dxflib/dl_dxf.h"
+#include "util/uuid.hpp"
+#include "common/junction.hpp"
+#include "common/arc.hpp"
+#include "common/line.hpp"
 
 namespace horizon {
 static int64_t fix(int64_t x)
@@ -21,7 +25,7 @@ static int64_t fix(int64_t x)
 
 class DXFAdapter : public DL_CreationAdapter {
 public:
-    DXFAdapter(Core *c) : core(c)
+    DXFAdapter(IDocument *c) : core(c)
     {
     }
     std::set<Junction *> junctions;
@@ -35,7 +39,7 @@ public:
     std::map<DXFImporter::UnsupportedType, unsigned int> items_unsupported;
 
 private:
-    Core *core = nullptr;
+    IDocument *core = nullptr;
     std::deque<Junction *> polyline_junctions;
     unsigned int polyline_n = 0;
     bool polyline_closed = false;
@@ -145,7 +149,7 @@ private:
     }
 };
 
-DXFImporter::DXFImporter(Core *c) : core(c)
+DXFImporter::DXFImporter(IDocument *c) : core(c)
 {
 }
 

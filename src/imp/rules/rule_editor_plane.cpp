@@ -1,7 +1,6 @@
 #include "rule_editor_plane.hpp"
 #include "board/rule_plane.hpp"
-#include "core/core.hpp"
-#include "core/core_board.hpp"
+#include "document/idocument_board.hpp"
 #include "rule_match_editor.hpp"
 #include "widgets/chooser_buttons.hpp"
 #include "widgets/plane_editor.hpp"

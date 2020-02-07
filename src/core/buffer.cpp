@@ -8,7 +8,7 @@
 #include "util/util.hpp"
 
 namespace horizon {
-Buffer::Buffer(Core *co) : core(co), net_class_dummy(UUID::random())
+Buffer::Buffer(Documents &cr) : core(cr), net_class_dummy(UUID::random())
 {
 }
 

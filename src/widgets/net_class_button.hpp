@@ -6,7 +6,7 @@ namespace horizon {
 
 class NetClassButton : public Gtk::ComboBoxText {
 public:
-    NetClassButton(class Core *c);
+    NetClassButton(class Block *b);
     void set_net_class(const UUID &uu);
     typedef sigc::signal<void, UUID> type_signal_net_class_changed;
     type_signal_net_class_changed signal_net_class_changed()
@@ -16,7 +16,7 @@ public:
     void update();
 
 private:
-    class Core *core;
+    Block *block;
     UUID net_class_current;
 
     type_signal_net_class_changed s_signal_net_class_changed;

@@ -1,9 +1,10 @@
 #include "clipboard.hpp"
 #include "canvas/canvas_cairo.hpp"
 #include "nlohmann/json.hpp"
+#include "document/idocument.hpp"
 
 namespace horizon {
-ClipboardManager::ClipboardManager(Core *co) : buffer(co), core(co)
+ClipboardManager::ClipboardManager(Documents &ds) : buffer(ds), docs(ds)
 {
 }
 
@@ -53,7 +54,7 @@ void ClipboardManager::on_clipboard_get(Gtk::SelectionData &selection_data, guin
             cr->scale(1, -1);
             cr->translate(1e3, -1e3);
             CanvasCairo ca(cr);
-            ca.update(buffer, core->get_layer_provider());
+            ca.update(buffer, docs.r->get_layer_provider());
         }
         selection_data.set("image/svg+xml", stream.str());
     }

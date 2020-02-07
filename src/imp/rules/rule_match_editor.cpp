@@ -1,12 +1,12 @@
 #include "rule_match_editor.hpp"
 #include "block/block.hpp"
-#include "core/core_board.hpp"
+#include "document/idocument.hpp"
 #include "rules/rule_match.hpp"
 #include "widgets/net_button.hpp"
 #include "widgets/net_class_button.hpp"
 
 namespace horizon {
-RuleMatchEditor::RuleMatchEditor(RuleMatch *ma, class Core *c)
+RuleMatchEditor::RuleMatchEditor(RuleMatch *ma, class IDocument *c)
     : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4), match(ma), core(c)
 {
     combo_mode = Gtk::manage(new Gtk::ComboBoxText());
@@ -26,10 +26,7 @@ RuleMatchEditor::RuleMatchEditor(RuleMatch *ma, class Core *c)
 
     sel_stack = Gtk::manage(new Gtk::Stack());
     sel_stack->set_homogeneous(true);
-    Block *block = nullptr;
-    if (auto co = dynamic_cast<CoreBoard *>(core)) {
-        block = co->get_board()->block;
-    }
+    Block *block = core->get_block();
     assert(block);
 
     net_button = Gtk::manage(new NetButton(block));
@@ -40,7 +37,7 @@ RuleMatchEditor::RuleMatchEditor(RuleMatch *ma, class Core *c)
     });
     sel_stack->add(*net_button, std::to_string(static_cast<int>(RuleMatch::Mode::NET)));
 
-    net_class_button = Gtk::manage(new NetClassButton(core));
+    net_class_button = Gtk::manage(new NetClassButton(core->get_block()));
     if (!match->net_class) {
         match->net_class = core->get_block()->net_class_default->uuid;
     }

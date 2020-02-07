@@ -1,7 +1,8 @@
 #include "rule_editor_diffpair.hpp"
 #include "board/rule_diffpair.hpp"
-#include "core/core.hpp"
-#include "core/core_board.hpp"
+#include "block/block.hpp"
+#include "document/idocument_board.hpp"
+#include "common/layer_provider.hpp"
 #include "rule_match_editor.hpp"
 #include "util/gtk_util.hpp"
 #include "widgets/net_class_button.hpp"
@@ -34,7 +35,7 @@ void RuleEditorDiffpair::populate()
         grid->attach(*la, 1, 0, 1, 1);
     }
 
-    auto net_class_button = Gtk::manage(new NetClassButton(core));
+    auto net_class_button = Gtk::manage(new NetClassButton(core->get_block()));
     net_class_button->set_net_class(rule2->net_class);
     net_class_button->signal_net_class_changed().connect([this](const UUID &net_class) {
         rule2->net_class = net_class;

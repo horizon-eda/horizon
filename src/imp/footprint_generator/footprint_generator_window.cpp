@@ -6,6 +6,7 @@
 #include "footprint_generator_single.hpp"
 #include "footprint_generator_footag.hpp"
 #include "widgets/spin_button_dim.hpp"
+#include "core/core_package.hpp"
 #include <pangomm/layout.h>
 
 namespace horizon {
@@ -85,6 +86,7 @@ FootprintGeneratorWindow *FootprintGeneratorWindow::create(Gtk::Window *p, CoreP
             auto gen = dynamic_cast<FootprintGeneratorBase *>(w->stack->get_visible_child());
             if (gen) {
                 if (gen->generate()) {
+                    w->core->set_needs_save();
                     w->core->rebuild();
                     w->signal_generated().emit();
                     w->hide();
@@ -95,6 +97,7 @@ FootprintGeneratorWindow *FootprintGeneratorWindow::create(Gtk::Window *p, CoreP
             auto gen = dynamic_cast<FootprintGeneratorFootag *>(w->stack->get_visible_child());
             if (gen) {
                 if (gen->generate()) {
+                    w->core->set_needs_save();
                     w->core->rebuild();
                     w->signal_generated().emit();
                     w->hide();

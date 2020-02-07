@@ -6,7 +6,7 @@
 namespace horizon {
 class DXFImporter {
 public:
-    DXFImporter(class Core *c);
+    DXFImporter(class IDocument *c);
     bool import(const std::string &filename);
     void set_layer(int la);
     void set_width(uint64_t w);
@@ -22,7 +22,7 @@ public:
     const std::map<UnsupportedType, unsigned int> &get_items_unsupported() const;
 
 private:
-    class Core *core = nullptr;
+    class IDocument *core = nullptr;
     int layer = 0;
     uint64_t width = 0;
     Coordi shift;

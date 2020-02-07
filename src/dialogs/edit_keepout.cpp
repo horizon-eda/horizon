@@ -4,7 +4,7 @@
 #include <iostream>
 #include <deque>
 #include <algorithm>
-#include "core/core.hpp"
+#include "document/idocument.hpp"
 #include "common/keepout.hpp"
 #include "board/board_layers.hpp"
 #include "util/gtk_util.hpp"
@@ -16,7 +16,7 @@ namespace horizon {
 static const std::vector<PatchType> patch_types_cu = {PatchType::TRACK, PatchType::PAD, PatchType::PAD_TH,
                                                       PatchType::PLANE, PatchType::VIA, PatchType::HOLE_PTH};
 
-EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout *k, Core *core, bool add_mode)
+EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout *k, IDocument *core, bool add_mode)
     : Gtk::Dialog("Edit Keepout", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       keepout(k)
 {

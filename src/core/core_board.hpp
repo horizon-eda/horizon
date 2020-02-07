@@ -6,15 +6,16 @@
 #include <iostream>
 #include <memory>
 #include "nlohmann/json.hpp"
+#include "document/idocument_board.hpp"
 
 namespace horizon {
-class CoreBoard : public Core {
+class CoreBoard : public Core, public virtual IDocumentBoard {
 public:
     CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
               Pool &pool);
     bool has_object_type(ObjectType ty) const override;
 
-    class Block *get_block(bool work = true) override;
+    class Block *get_block() override;
     class LayerProvider *get_layer_provider() override;
 
     bool set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property,
@@ -26,33 +27,31 @@ public:
 
     std::string get_display_name(ObjectType type, const UUID &uu) override;
 
-    std::vector<Track *> get_tracks(bool work = true);
-    std::vector<Line *> get_lines(bool work = true) override;
+    std::vector<Track *> get_tracks();
+    std::vector<Line *> get_lines() override;
 
     void rebuild(bool from_undo = false) override;
-    void commit() override;
-    void revert() override;
     void reload_netlist();
 
     const Board *get_canvas_data();
-    Board *get_board(bool work = true);
+    Board *get_board() override;
     const Board *get_board() const;
-    ViaPadstackProvider *get_via_padstack_provider();
+    ViaPadstackProvider *get_via_padstack_provider() override;
     class Rules *get_rules() override;
-    FabOutputSettings *get_fab_output_settings()
+    FabOutputSettings *get_fab_output_settings() override
     {
         return &fab_output_settings;
     }
-    PDFExportSettings *get_pdf_export_settings()
+    PDFExportSettings *get_pdf_export_settings() override
     {
         return &pdf_export_settings;
     }
-    STEPExportSettings *get_step_export_settings()
+    STEPExportSettings *get_step_export_settings() override
     {
         return &step_export_settings;
     }
 
-    Board::Colors *get_colors()
+    BoardColors *get_colors() override
     {
         return &colors;
     }
@@ -68,12 +67,12 @@ public:
     const std::string &get_filename() const override;
 
 private:
-    std::map<UUID, Polygon> *get_polygon_map(bool work = true) override;
-    std::map<UUID, Junction> *get_junction_map(bool work = true) override;
-    std::map<UUID, Text> *get_text_map(bool work = true) override;
-    std::map<UUID, Line> *get_line_map(bool work = true) override;
+    std::map<UUID, Polygon> *get_polygon_map() override;
+    std::map<UUID, Junction> *get_junction_map() override;
+    std::map<UUID, Text> *get_text_map() override;
+    std::map<UUID, Line> *get_line_map() override;
     std::map<UUID, Dimension> *get_dimension_map() override;
-    std::map<UUID, Arc> *get_arc_map(bool work = true) override;
+    std::map<UUID, Arc> *get_arc_map() override;
     std::map<UUID, Keepout> *get_keepout_map() override;
 
     ViaPadstackProvider via_padstack_provider;
@@ -86,7 +85,7 @@ private:
     PDFExportSettings pdf_export_settings;
     STEPExportSettings step_export_settings;
 
-    Board::Colors colors;
+    BoardColors colors;
 
     std::string m_board_filename;
     std::string m_block_filename;

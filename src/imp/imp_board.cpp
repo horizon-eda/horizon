@@ -457,14 +457,14 @@ void ImpBoard::construct()
     }
 
     fab_output_window = FabOutputWindow::create(main_window, &core_board, project_dir);
-    core.r->signal_tool_changed().connect([this](ToolID t) { fab_output_window->set_can_generate(t == ToolID::NONE); });
-    core.r->signal_rebuilt().connect([this] { fab_output_window->reload_layers(); });
+    core->signal_tool_changed().connect([this](ToolID t) { fab_output_window->set_can_generate(t == ToolID::NONE); });
+    core->signal_rebuilt().connect([this] { fab_output_window->reload_layers(); });
     fab_output_window->signal_changed().connect([this] { core_board.set_needs_save(); });
 
     pdf_export_window =
             PDFExportWindow::create(main_window, &core_board, *core_board.get_pdf_export_settings(), project_dir);
     pdf_export_window->signal_changed().connect([this] { core_board.set_needs_save(); });
-    core.r->signal_rebuilt().connect([this] { pdf_export_window->reload_layers(); });
+    core->signal_rebuilt().connect([this] { pdf_export_window->reload_layers(); });
     connect_action(ActionID::PDF_EXPORT_WINDOW, [this](const auto &c) { pdf_export_window->present(); });
     connect_action(ActionID::EXPORT_PDF, [this](const auto &c) {
         pdf_export_window->present();
@@ -488,7 +488,7 @@ void ImpBoard::construct()
         step_export_window->generate();
     });
 
-    tuning_window = new TuningWindow(core.b->get_board());
+    tuning_window = new TuningWindow(core_board.get_board());
     tuning_window->set_transient_for(*main_window);
 
     rules_window->signal_goto().connect([this](Coordi location, UUID sheet) { canvas->center_and_zoom(location); });
@@ -538,7 +538,7 @@ void ImpBoard::construct()
     layer_box->show();
     layer_box->get_style_context()->add_class("background");
 
-    auto board_display_options = Gtk::manage(new BoardDisplayOptionsBox(core.b->get_layer_provider()));
+    auto board_display_options = Gtk::manage(new BoardDisplayOptionsBox(core_board.get_layer_provider()));
     {
         auto fbox = Gtk::manage(new Gtk::Box());
         fbox->pack_start(*board_display_options, true, true, 0);
@@ -556,7 +556,7 @@ void ImpBoard::construct()
         canvas->queue_draw();
     });
     canvas->set_layer_display(10000, LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
-    core.r->signal_rebuilt().connect([board_display_options] { board_display_options->update(); });
+    core->signal_rebuilt().connect([board_display_options] { board_display_options->update(); });
 
     canvas->signal_motion_notify_event().connect([this](GdkEventMotion *ev) {
         if (target_drag_begin.type != ObjectType::INVALID) {
@@ -663,7 +663,7 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
         }
         s += "Layers: ";
         for (auto layer : layers) {
-            s += core.r->get_layer_provider()->get_layers().at(layer).name + " ";
+            s += core->get_layer_provider()->get_layers().at(layer).name + " ";
         }
         s += "\nTotal length: " + dim_to_string(length, false);
         if (sel_count_type(sel, ObjectType::TRACK) == 1) {
@@ -763,7 +763,7 @@ void ImpBoard::handle_drag()
                 update_highlights();
                 ToolArgs args;
                 args.coords = target_drag_begin.p;
-                ToolResponse r = core.r->tool_begin(ToolID::ROUTE_TRACK_INTERACTIVE, args, imp_interface.get());
+                ToolResponse r = core->tool_begin(ToolID::ROUTE_TRACK_INTERACTIVE, args, imp_interface.get());
                 tool_process(r);
             }
             {
@@ -773,7 +773,7 @@ void ImpBoard::handle_drag()
                 args.button = 1;
                 args.target = target_drag_begin;
                 args.work_layer = canvas->property_work_layer();
-                ToolResponse r = core.r->tool_update(args);
+                ToolResponse r = core->tool_update(args);
                 tool_process(r);
             }
         }
@@ -783,7 +783,7 @@ void ImpBoard::handle_drag()
                 update_highlights();
                 ToolArgs args;
                 args.coords = target_drag_begin.p;
-                ToolResponse r = core.r->tool_begin(ToolID::DRAW_CONNECTION_LINE, args, imp_interface.get());
+                ToolResponse r = core->tool_begin(ToolID::DRAW_CONNECTION_LINE, args, imp_interface.get());
                 tool_process(r);
             }
             {
@@ -793,7 +793,7 @@ void ImpBoard::handle_drag()
                 args.button = 1;
                 args.target = target_drag_begin;
                 args.work_layer = canvas->property_work_layer();
-                ToolResponse r = core.r->tool_update(args);
+                ToolResponse r = core->tool_update(args);
                 tool_process(r);
             }
         }

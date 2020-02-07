@@ -1,7 +1,6 @@
 #include "rule_editor_via.hpp"
 #include "board/rule_via.hpp"
-#include "core/core.hpp"
-#include "core/core_board.hpp"
+#include "document/idocument_board.hpp"
 #include "rule_match_editor.hpp"
 #include "widgets/chooser_buttons.hpp"
 #include "widgets/parameter_set_editor.hpp"
@@ -37,7 +36,7 @@ void RuleEditorVia::populate()
     match_editor->signal_updated().connect([this] { s_signal_updated.emit(); });
     grid->attach(*match_editor, 0, 1, 1, 1);
 
-    auto c = dynamic_cast<CoreBoard *>(core);
+    auto c = dynamic_cast<IDocumentBoard *>(core);
     auto ps_button = Gtk::manage(new ViaPadstackButton(*c->get_via_padstack_provider()));
     ps_button->property_selected_uuid() = rule2->padstack;
     ps_button->property_selected_uuid().signal_changed().connect(

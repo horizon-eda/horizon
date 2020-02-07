@@ -18,8 +18,7 @@
 #include "rules/rules.hpp"
 #include "rules/rules_with_core.hpp"
 #include "util/util.hpp"
-#include "core/core_board.hpp"
-#include "core/core_schematic.hpp"
+#include "core/core.hpp"
 
 #include <thread>
 

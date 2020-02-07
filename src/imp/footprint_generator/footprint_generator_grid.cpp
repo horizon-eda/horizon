@@ -1,8 +1,10 @@
 #include "footprint_generator_grid.hpp"
 #include "widgets/pool_browser_button.hpp"
+#include "document/idocument_package.hpp"
+#include "pool/pool.hpp"
 
 namespace horizon {
-FootprintGeneratorGrid::FootprintGeneratorGrid(CorePackage *c)
+FootprintGeneratorGrid::FootprintGeneratorGrid(IDocumentPackage *c)
     : Glib::ObjectBase(typeid(FootprintGeneratorGrid)),
       FootprintGeneratorBase("/org/horizon-eda/horizon/imp/footprint_generator/grid.svg", c)
 {
@@ -126,7 +128,7 @@ bool FootprintGeneratorGrid::generate()
     int64_t pad_width = sp_pad_width->get_value_as_int();
     int64_t pad_height = sp_pad_height->get_value_as_int();
 
-    auto padstack = core->m_pool->get_padstack(browser_button->property_selected_uuid());
+    auto padstack = core->get_pool()->get_padstack(browser_button->property_selected_uuid());
 
     for (size_t x = 0; x < pad_count_h; x++) {
         for (size_t y = 0; y < pad_count_v; y++) {
@@ -144,8 +146,6 @@ bool FootprintGeneratorGrid::generate()
             pad.name = get_bga_letter(x + 1) + std::to_string(y + 1);
         }
     }
-
-    core->commit();
     return true;
 }
 

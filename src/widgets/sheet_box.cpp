@@ -105,7 +105,7 @@ void SheetBox::sheet_move(int dir)
                                         [sheet, dir](const auto x) { return x.second.index == sheet->index + dir; });
         assert(sheet_other != sheets.end());
         std::swap(sheet_other->second.index, sheet->index);
-        core->commit();
+        core->set_needs_save();
         core->rebuild();
     }
 }
@@ -145,7 +145,7 @@ void SheetBox::name_edited(const Glib::ustring &path, const Glib::ustring &new_t
     if (it) {
         Gtk::TreeModel::Row row = *it;
         core->get_schematic()->sheets.at(row[list_columns.uuid]).name = new_text;
-        core->commit();
+        core->set_needs_save();
         core->rebuild();
     }
 }

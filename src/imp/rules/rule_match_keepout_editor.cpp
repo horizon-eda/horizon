@@ -1,11 +1,11 @@
 #include "rule_match_keepout_editor.hpp"
 #include "block/block.hpp"
-#include "core/core_board.hpp"
+#include "document/idocument.hpp"
 #include "rules/rule_match_keepout.hpp"
 #include "widgets/component_button.hpp"
 
 namespace horizon {
-RuleMatchKeepoutEditor::RuleMatchKeepoutEditor(RuleMatchKeepout *ma, class Core *c)
+RuleMatchKeepoutEditor::RuleMatchKeepoutEditor(RuleMatchKeepout *ma, class IDocument *c)
     : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4), match(ma), core(c)
 {
     combo_mode = Gtk::manage(new Gtk::ComboBoxText());
@@ -24,10 +24,7 @@ RuleMatchKeepoutEditor::RuleMatchKeepoutEditor(RuleMatchKeepout *ma, class Core 
 
     sel_stack = Gtk::manage(new Gtk::Stack());
     sel_stack->set_homogeneous(true);
-    Block *block = nullptr;
-    if (auto co = dynamic_cast<CoreBoard *>(core)) {
-        block = co->get_board()->block;
-    }
+    Block *block = core->get_block();
     assert(block);
 
     keepout_class_entry = Gtk::manage(new Gtk::Entry());

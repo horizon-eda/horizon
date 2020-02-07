@@ -206,11 +206,11 @@ LayerProvider *CorePadstack::get_layer_provider()
     return &padstack;
 }
 
-std::map<UUID, Polygon> *CorePadstack::get_polygon_map(bool work)
+std::map<UUID, Polygon> *CorePadstack::get_polygon_map()
 {
     return &padstack.polygons;
 }
-std::map<UUID, Hole> *CorePadstack::get_hole_map(bool work)
+std::map<UUID, Hole> *CorePadstack::get_hole_map()
 {
     return &padstack.holes;
 }
@@ -237,7 +237,7 @@ const Padstack *CorePadstack::get_canvas_data()
     return &padstack;
 }
 
-Padstack *CorePadstack::get_padstack(bool work)
+Padstack *CorePadstack::get_padstack()
 {
     return &padstack;
 }
@@ -252,17 +252,6 @@ std::pair<Coordi, Coordi> CorePadstack::get_bbox()
     bb.second.x += pad;
     bb.second.y += pad;
     return bb;
-}
-
-void CorePadstack::commit()
-{
-    set_needs_save(true);
-}
-
-void CorePadstack::revert()
-{
-    history_load(history_current);
-    reverted = true;
 }
 
 const std::string &CorePadstack::get_filename() const

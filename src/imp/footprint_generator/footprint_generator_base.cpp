@@ -1,9 +1,10 @@
 #include "footprint_generator_base.hpp"
 #include "widgets/pool_browser_button.hpp"
 #include "widgets/pool_browser_padstack.hpp"
+#include "document/idocument_package.hpp"
 
 namespace horizon {
-FootprintGeneratorBase::FootprintGeneratorBase(const char *resource, CorePackage *c)
+FootprintGeneratorBase::FootprintGeneratorBase(const char *resource, IDocumentPackage *c)
     : Glib::ObjectBase(typeid(FootprintGeneratorBase)), Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4),
       p_property_can_generate(*this, "can-generate"), core(c)
 {
@@ -14,7 +15,7 @@ FootprintGeneratorBase::FootprintGeneratorBase(const char *resource, CorePackage
         auto la = Gtk::manage(new Gtk::Label("Padstack:"));
         tbox->pack_start(*la, false, false, 0);
 
-        browser_button = Gtk::manage(new PoolBrowserButton(ObjectType::PADSTACK, core->m_pool));
+        browser_button = Gtk::manage(new PoolBrowserButton(ObjectType::PADSTACK, core->get_pool()));
         auto br = dynamic_cast<PoolBrowserPadstack *>(browser_button->get_browser());
         br->set_package_uuid(c->get_package()->uuid);
         browser_button->property_selected_uuid().signal_changed().connect(

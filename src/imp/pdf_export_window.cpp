@@ -1,13 +1,13 @@
 #include "pdf_export_window.hpp"
 #include "util/util.hpp"
-#include "core/core_schematic.hpp"
-#include "core/core_board.hpp"
+#include "document/idocument_board.hpp"
+#include "document/idocument_schematic.hpp"
 #include "export_pdf/export_pdf.hpp"
 #include "export_pdf/export_pdf_board.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
 #include "widgets/spin_button_dim.hpp"
-#include "core/core.hpp"
+#include "common/layer_provider.hpp"
 #include <podofo/podofo.h>
 #ifdef G_OS_WIN32
 #undef DELETE
@@ -83,7 +83,7 @@ void PDFExportWindow::MyExportFileChooser::prepare_filename(std::string &filenam
     }
 }
 
-PDFExportWindow *PDFExportWindow::create(Gtk::Window *p, Core *c, PDFExportSettings &s, const std::string &pd)
+PDFExportWindow *PDFExportWindow::create(Gtk::Window *p, IDocument *c, PDFExportSettings &s, const std::string &pd)
 {
     PDFExportWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
@@ -93,7 +93,7 @@ PDFExportWindow *PDFExportWindow::create(Gtk::Window *p, Core *c, PDFExportSetti
     return w;
 }
 
-PDFExportWindow::PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Core *c,
+PDFExportWindow::PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocument *c,
                                  PDFExportSettings &s, const std::string &pd)
     : Gtk::Window(cobject), core(c), settings(s)
 {
@@ -122,7 +122,7 @@ PDFExportWindow::PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
         grid_attach_label_and_widget(grid, "Min. line width", sp, top);
     }
 
-    if (dynamic_cast<CoreSchematic *>(core)) {
+    if (dynamic_cast<IDocumentSchematic *>(core)) {
         Gtk::ScrolledWindow *sc;
         x->get_widget("layers_sc", sc);
         sc->set_visible(false);
@@ -201,13 +201,13 @@ void PDFExportWindow::generate()
 void PDFExportWindow::export_thread(PDFExportSettings s)
 {
     try {
-        if (auto core_sch = dynamic_cast<CoreSchematic *>(core)) {
+        if (auto core_sch = dynamic_cast<IDocumentSchematic *>(core)) {
             export_pdf(*core_sch->get_schematic(), s, [this](std::string st, double p) {
                 status_dispatcher.set_status(StatusDispatcher::Status::BUSY, st, p);
             });
             status_dispatcher.set_status(StatusDispatcher::Status::DONE, "Done", 1);
         }
-        else if (auto core_brd = dynamic_cast<CoreBoard *>(core)) {
+        else if (auto core_brd = dynamic_cast<IDocumentBoard *>(core)) {
             export_pdf(*core_brd->get_board(), s, [this](std::string st, double p) {
                 status_dispatcher.set_status(StatusDispatcher::Status::BUSY, st, p);
             });

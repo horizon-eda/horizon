@@ -6,9 +6,10 @@
 #include <deque>
 #include <iostream>
 #include <memory>
+#include "document/idocument_padstack.hpp"
 
 namespace horizon {
-class CorePadstack : public Core {
+class CorePadstack : public Core, public virtual IDocumentPadstack {
 public:
     CorePadstack(const std::string &filename, Pool &pool);
     bool has_object_type(ObjectType ty) const override;
@@ -16,10 +17,8 @@ public:
     class LayerProvider *get_layer_provider() override;
 
     void rebuild(bool from_undo = false) override;
-    void commit() override;
-    void revert() override;
 
-    Padstack *get_padstack(bool work = true);
+    Padstack *get_padstack() override;
 
     bool set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property,
                       const class PropertyValue &value) override;
@@ -36,8 +35,8 @@ public:
     const std::string &get_filename() const override;
 
 private:
-    std::map<UUID, Polygon> *get_polygon_map(bool work = true) override;
-    std::map<UUID, Hole> *get_hole_map(bool work = true) override;
+    std::map<UUID, Polygon> *get_polygon_map() override;
+    std::map<UUID, Hole> *get_hole_map() override;
 
     Padstack padstack;
     std::string m_filename;

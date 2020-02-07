@@ -37,7 +37,7 @@ void ImpSymbol::construct()
     state_store = std::make_unique<WindowStateStore>(main_window, "imp-symbol");
 
     symbol_preview_window = new SymbolPreviewWindow(main_window);
-    symbol_preview_window->set_text_placements(core.y->get_symbol(false)->text_placements);
+    symbol_preview_window->set_text_placements(core_symbol.get_symbol()->text_placements);
     symbol_preview_window->signal_changed().connect([this] { core_symbol.set_needs_save(); });
     core_symbol.signal_tool_changed().connect(
             [this](ToolID tool_id) { symbol_preview_window->set_can_load(tool_id == ToolID::NONE); });
@@ -50,7 +50,7 @@ void ImpSymbol::construct()
             if (pl.count(key))
                 it.second.placement = pl.at(key);
         }
-        core_symbol.commit();
+        core_symbol.set_needs_save();
         core_symbol.rebuild();
         auto sel = canvas->get_selection();
         canvas_update();
@@ -81,25 +81,25 @@ void ImpSymbol::construct()
             [this](ToolID tool_id) { unplaced_box->set_sensitive(tool_id == ToolID::NONE); });
 
     auto header_button = Gtk::manage(new HeaderButton);
-    header_button->set_label(core.y->get_symbol()->name);
+    header_button->set_label(core_symbol.get_symbol()->name);
     main_window->header->set_custom_title(*header_button);
     header_button->show();
 
     name_entry = header_button->add_entry("Name");
-    name_entry->set_text(core.y->get_symbol()->name);
-    name_entry->set_width_chars(std::min<int>(core.y->get_symbol()->name.size(), 20));
+    name_entry->set_text(core_symbol.get_symbol()->name);
+    name_entry->set_width_chars(std::min<int>(core_symbol.get_symbol()->name.size(), 20));
     name_entry->signal_changed().connect([this, header_button] {
         header_button->set_label(name_entry->get_text());
         core_symbol.set_needs_save();
     });
 
-    unit_label = Gtk::manage(new Gtk::Label(core.y->get_symbol()->unit->name));
+    unit_label = Gtk::manage(new Gtk::Label(core_symbol.get_symbol()->unit->name));
     unit_label->set_xalign(0);
     unit_label->set_selectable(true);
     header_button->add_widget("Unit", unit_label);
 
     can_expand_switch = Gtk::manage(new Gtk::Switch);
-    can_expand_switch->set_active(core.y->get_symbol()->can_expand);
+    can_expand_switch->set_active(core_symbol.get_symbol()->can_expand);
     can_expand_switch->set_halign(Gtk::ALIGN_START);
     can_expand_switch->property_active().signal_changed().connect([this] { core_symbol.set_needs_save(); });
 
@@ -143,10 +143,10 @@ void ImpSymbol::construct()
                 [this, box](ToolID tool_id) { box->set_sensitive(tool_id == ToolID::NONE); });
     }
 
-    core.r->signal_rebuilt().connect([this] { unit_label->set_text(core.y->get_symbol()->unit->name); });
+    core->signal_rebuilt().connect([this] { unit_label->set_text(core_symbol.get_symbol()->unit->name); });
 
-    core.r->signal_save().connect([this, header_button] {
-        auto sym = core.y->get_symbol(false);
+    core->signal_save().connect([this, header_button] {
+        auto sym = core_symbol.get_symbol();
         sym->name = name_entry->get_text();
         header_button->set_label(sym->name);
         sym->text_placements = symbol_preview_window->get_text_placements();
