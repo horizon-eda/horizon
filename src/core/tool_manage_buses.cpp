@@ -2,8 +2,8 @@
 #include "idocument_board.hpp"
 #include "board/board.hpp"
 #include "idocument_schematic.hpp"
+#include "idocument_frame.hpp"
 #include "schematic/schematic.hpp"
-#include "core_frame.hpp"
 #include <iostream>
 
 namespace horizon {

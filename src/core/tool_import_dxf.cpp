@@ -1,7 +1,11 @@
 #include "tool_import_dxf.hpp"
-#include "core.hpp"
+#include "idocument.hpp"
 #include "imp/imp_interface.hpp"
 #include "import_dxf/dxf_importer.hpp"
+#include "common/junction.hpp"
+#include "common/line.hpp"
+#include "common/arc.hpp"
+#include <gdk/gdkkeysyms.h>
 #include <iostream>
 
 namespace horizon {
