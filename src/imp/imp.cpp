@@ -403,7 +403,7 @@ void ImpBase::run(int argc, char *argv[])
         if (!read_only) {
             core->save();
             json j;
-            get_save_meta(j);
+            this->get_save_meta(j);
             if (!j.is_null()) {
                 save_json_to_file(core->get_filename() + meta_suffix, j);
             }
