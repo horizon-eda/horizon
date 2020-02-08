@@ -3,6 +3,7 @@
 #include "board/board_layers.hpp"
 #include <set>
 #include <iostream>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 
@@ -21,6 +22,14 @@ public:
         property_expanded().signal_changed().connect([this] { parent->update_expand_all(); });
     }
 
+    int get_layer() const
+    {
+        return layer;
+    }
+
+    virtual json serialize() = 0;
+    virtual void load_from_json(const json &j) = 0;
+
 protected:
     Gtk::CheckButton *add_checkbutton(const std::string &la)
     {
@@ -36,7 +45,7 @@ protected:
     }
 
     BoardDisplayOptionsBox *parent;
-    int layer;
+    const int layer;
     Gtk::Box *box = nullptr;
 };
 
@@ -53,6 +62,22 @@ public:
 
         cb_text->signal_toggled().connect(sigc::mem_fun(*this, &LayerOptionsExpSilkscreen::emit));
         cb_gfx->signal_toggled().connect(sigc::mem_fun(*this, &LayerOptionsExpSilkscreen::emit));
+    }
+
+    json serialize() override
+    {
+        json j;
+        j["text"] = cb_text->get_active();
+        j["gfx"] = cb_gfx->get_active();
+        return j;
+    }
+
+    virtual void load_from_json(const json &j) override
+    {
+        if (j.count("text"))
+            cb_text->set_active(j.at("text"));
+        if (j.count("gfx"))
+            cb_gfx->set_active(j.at("gfx"));
     }
 
 private:
@@ -78,6 +103,19 @@ public:
     {
         cb_planes_outline = add_checkbutton("Don't fill planes");
         cb_planes_outline->signal_toggled().connect(sigc::mem_fun(*this, &LayerOptionsCopper::emit));
+    }
+
+    json serialize() override
+    {
+        json j;
+        j["planes_outline"] = cb_planes_outline->get_active();
+        return j;
+    }
+
+    virtual void load_from_json(const json &j) override
+    {
+        if (j.count("planes_outline"))
+            cb_planes_outline->set_active(j.at("planes_outline"));
     }
 
 private:
@@ -173,6 +211,28 @@ void BoardDisplayOptionsBox::update()
         reorder_child(*e, i++);
     }
     update_expand_all();
+}
+
+json BoardDisplayOptionsBox::serialize()
+{
+    json j;
+    for (auto child : get_children()) {
+        if (auto e = dynamic_cast<LayerOptionsExp *>(child)) {
+            j[std::to_string(e->get_layer())] = e->serialize();
+        }
+    }
+    return j;
+}
+
+void BoardDisplayOptionsBox::load_from_json(const json &j)
+{
+    for (auto child : get_children()) {
+        if (auto e = dynamic_cast<LayerOptionsExp *>(child)) {
+            const std::string layer = std::to_string(e->get_layer());
+            if (j.count(layer))
+                e->load_from_json(j.at(layer));
+        }
+    }
 }
 
 void BoardDisplayOptionsBox::update_expand_all()

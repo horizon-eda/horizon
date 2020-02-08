@@ -15,6 +15,8 @@ public:
     {
         return s_signal_set_layer_display;
     }
+    json serialize();
+    void load_from_json(const json &j);
 
     void update();
 

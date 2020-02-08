@@ -539,17 +539,17 @@ void ImpBoard::construct()
     layer_box->show();
     layer_box->get_style_context()->add_class("background");
 
-    auto board_display_options = Gtk::manage(new BoardDisplayOptionsBox(core_board.get_layer_provider()));
+    board_display_options_box = Gtk::manage(new BoardDisplayOptionsBox(core_board.get_layer_provider()));
     {
         auto fbox = Gtk::manage(new Gtk::Box());
-        fbox->pack_start(*board_display_options, true, true, 0);
+        fbox->pack_start(*board_display_options_box, true, true, 0);
         fbox->get_style_context()->add_class("background");
         fbox->show();
         display_control_notebook->append_page(*fbox, "Options");
-        board_display_options->show();
+        board_display_options_box->show();
     }
 
-    board_display_options->signal_set_layer_display().connect([this](int index, const LayerDisplay &lda) {
+    board_display_options_box->signal_set_layer_display().connect([this](int index, const LayerDisplay &lda) {
         LayerDisplay ld = canvas->get_layer_display(index);
         ld.types_force_outline = lda.types_force_outline;
         ld.types_visible = lda.types_visible;
@@ -557,7 +557,9 @@ void ImpBoard::construct()
         canvas->queue_draw();
     });
     canvas->set_layer_display(10000, LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
-    core->signal_rebuilt().connect([board_display_options] { board_display_options->update(); });
+    core->signal_rebuilt().connect([this] { board_display_options_box->update(); });
+    if (m_meta.count("board_display_options"))
+        board_display_options_box->load_from_json(m_meta.at("board_display_options"));
 
     canvas->signal_motion_notify_event().connect([this](GdkEventMotion *ev) {
         if (target_drag_begin.type != ObjectType::INVALID) {
@@ -905,6 +907,12 @@ void ImpBoard::update_unplaced()
         components.erase(it.second.component->uuid);
     }
     unplaced_box->update(components);
+}
+
+void ImpBoard::get_save_meta(json &j)
+{
+    ImpLayer::get_save_meta(j);
+    j["board_display_options"] = board_display_options_box->serialize();
 }
 
 } // namespace horizon

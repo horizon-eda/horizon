@@ -32,6 +32,8 @@ protected:
     std::string get_hud_text(std::set<SelectableRef> &sel) override;
     std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu) override;
 
+    void get_save_meta(json &j) override;
+
 private:
     void canvas_update() override;
     void handle_selection_cross_probe();
@@ -43,7 +45,8 @@ private:
     class View3DWindow *view_3d_window = nullptr;
     class StepExportWindow *step_export_window = nullptr;
     class TuningWindow *tuning_window = nullptr;
-    class PDFExportWindow *pdf_export_window;
+    class PDFExportWindow *pdf_export_window = nullptr;
+    class BoardDisplayOptionsBox *board_display_options_box = nullptr;
     bool cross_probing_enabled = false;
 
     Coordf cursor_pos_drag_begin;
