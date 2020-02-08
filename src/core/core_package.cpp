@@ -291,7 +291,6 @@ void CorePackage::save(const std::string &suffix)
 
     json j = package.serialize();
     save_json_to_file(m_filename + suffix, j);
-    save_meta(m_filename);
 }
 
 

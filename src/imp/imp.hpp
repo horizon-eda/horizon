@@ -11,6 +11,7 @@
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/warnings_box.hpp"
 #include "action.hpp"
+#include "nlohmann/json.hpp"
 #include <zmq.hpp>
 
 #ifdef G_OS_WIN32
@@ -170,6 +171,14 @@ protected:
     virtual std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu);
 
     Glib::RefPtr<Gio::Menu> hamburger_menu;
+
+    json m_meta;
+    void load_meta();
+    static const std::string meta_suffix;
+
+    virtual void get_save_meta(json &j)
+    {
+    }
 
 private:
     void fix_cursor_pos();

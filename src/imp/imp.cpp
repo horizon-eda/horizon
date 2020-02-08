@@ -171,7 +171,7 @@ bool ImpBase::handle_close(GdkEventAny *ev)
             return false; // close
 
         case 2:
-            core->save();
+            trigger_action(ActionID::SAVE);
             return false; // close
 
         default:
@@ -400,8 +400,14 @@ void ImpBase::run(int argc, char *argv[])
 
     connect_action(ActionID::SELECTION_FILTER, [this](const auto &a) { selection_filter_dialog->present(); });
     connect_action(ActionID::SAVE, [this](const auto &a) {
-        if (!read_only)
+        if (!read_only) {
             core->save();
+            json j;
+            get_save_meta(j);
+            if (!j.is_null()) {
+                save_json_to_file(core->get_filename() + meta_suffix, j);
+            }
+        }
     });
     connect_action(ActionID::UNDO, [this](const auto &a) {
         core->undo();
@@ -1653,8 +1659,7 @@ bool ImpBase::handle_broadcast(const json &j)
         return true;
     }
     else if (op == "save") {
-        if (!read_only)
-            core->save();
+        trigger_action(ActionID::SAVE);
         return true;
     }
     else if (op == "close") {
@@ -1867,6 +1872,19 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBase::get_selection_filter
         }
     }
     return r;
+}
+
+const std::string ImpBase::meta_suffix = ".imp_meta";
+
+void ImpBase::load_meta()
+{
+    std::string meta_filename = core->get_filename() + meta_suffix;
+    if (Glib::file_test(meta_filename, Glib::FILE_TEST_IS_REGULAR)) {
+        m_meta = load_json_from_file(meta_filename);
+    }
+    else {
+        m_meta = core->get_meta();
+    }
 }
 
 } // namespace horizon

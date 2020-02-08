@@ -666,7 +666,6 @@ void CoreBoard::save(const std::string &suffix)
     brd.colors = colors;
     auto j = brd.serialize();
     save_json_to_file(m_board_filename + suffix, j);
-    save_meta(m_board_filename);
 }
 
 void CoreBoard::delete_autosave()

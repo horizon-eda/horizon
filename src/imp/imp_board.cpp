@@ -26,6 +26,7 @@ ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_f
 {
     core = &core_board;
     core_board.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
+    load_meta();
 }
 
 void ImpBoard::canvas_update()

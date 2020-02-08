@@ -29,6 +29,7 @@ ImpPackage::ImpPackage(const std::string &package_filename, const std::string &p
 {
     core = &core_package;
     core_package.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
+    load_meta();
 }
 
 void ImpPackage::canvas_update()

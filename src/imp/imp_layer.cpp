@@ -27,12 +27,7 @@ void ImpLayer::construct_layer_box(bool pack)
         canvas->set_layer_display(index, ld);
         canvas->queue_draw();
     });
-    core->signal_request_save_meta().connect([this] {
-        json j;
-        j["layer_display"] = layer_box->serialize();
-        j["grid_spacing"] = canvas->property_grid_spacing().get_value();
-        return j;
-    });
+
     core->signal_rebuilt().connect([this] { layer_box->update(); });
 
     connect_action(ActionID::LAYER_DOWN, [this](const auto &a) { this->layer_up_down(false); });
@@ -49,12 +44,11 @@ void ImpLayer::construct_layer_box(bool pack)
     connect_action(ActionID::LAYER_INNER7, [this](const auto &a) { this->goto_layer(-7); });
     connect_action(ActionID::LAYER_INNER8, [this](const auto &a) { this->goto_layer(-8); });
 
-    json j = core->get_meta();
     bool layers_loaded = false;
-    if (!j.is_null()) {
-        canvas->property_grid_spacing() = j.value("grid_spacing", 1.25_mm);
-        if (j.count("layer_display")) {
-            layer_box->load_from_json(j.at("layer_display"));
+    if (!m_meta.is_null()) {
+        canvas->property_grid_spacing() = m_meta.value("grid_spacing", 1.25_mm);
+        if (m_meta.count("layer_display")) {
+            layer_box->load_from_json(m_meta.at("layer_display"));
             layers_loaded = true;
         }
     }
@@ -64,6 +58,13 @@ void ImpLayer::construct_layer_box(bool pack)
                                    "layer_display_default.json"));
     }
 }
+
+void ImpLayer::get_save_meta(json &j)
+{
+    j["layer_display"] = layer_box->serialize();
+    j["grid_spacing"] = canvas->property_grid_spacing().get_value();
+}
+
 
 void ImpLayer::apply_preferences()
 {

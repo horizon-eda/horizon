@@ -150,7 +150,6 @@ public:
      */
     virtual json get_meta();
 
-
     virtual void update_rules()
     {
     }
@@ -232,16 +231,6 @@ public:
         return s_signal_can_undo_redo;
     }
 
-    typedef sigc::signal<json> type_signal_request_save_meta;
-    /**
-     * connect to this signal for providing meta information when the document
-     * is saved
-     */
-    type_signal_request_save_meta signal_request_save_meta()
-    {
-        return s_signal_request_save_meta;
-    }
-
     typedef sigc::signal<void, bool> type_signal_needs_save;
     type_signal_needs_save signal_needs_save()
     {
@@ -304,7 +293,6 @@ protected:
     type_signal_rebuilt s_signal_save;
     type_signal_rebuilt s_signal_modified;
     type_signal_rebuilt s_signal_can_undo_redo;
-    type_signal_request_save_meta s_signal_request_save_meta;
     type_signal_needs_save s_signal_needs_save;
     type_signal_load_tool_settings s_signal_load_tool_settings;
     type_signal_save_tool_settings s_signal_save_tool_settings;
@@ -337,10 +325,7 @@ protected:
 
     virtual void save(const std::string &suffix) = 0;
     static const std::string autosave_suffix;
-    static const std::string imp_meta_suffix;
-
     json get_meta_from_file(const std::string &filename);
-    void save_meta(const std::string &filename);
 
 private:
     std::unique_ptr<ToolBase> create_tool(ToolID tool_id);
