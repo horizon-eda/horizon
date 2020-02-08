@@ -62,7 +62,7 @@ Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, Pool &pool)
     if (j.count("title_block_values")) {
         const json &o = j["title_block_values"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
-            title_block_values[it.key()] = it.value();
+            block->project_meta[it.key()] = it.value();
         }
     }
     if (j.count("pdf_export_settings")) {
@@ -773,7 +773,7 @@ void Schematic::expand(bool careful)
     for (auto &it_sheet : sheets) {
         Sheet &sheet = it_sheet.second;
         if (sheet.pool_frame) {
-            std::map<std::string, std::string> values = title_block_values;
+            std::map<std::string, std::string> values = block->project_meta;
             for (const auto &it_v : sheet.title_block_values) {
                 values[it_v.first] = it_v.second;
             }
@@ -937,8 +937,7 @@ std::map<UUIDPath<2>, std::string> Schematic::get_unplaced_gates() const
 
 Schematic::Schematic(const Schematic &sch)
     : uuid(sch.uuid), block(sch.block), name(sch.name), sheets(sch.sheets), rules(sch.rules),
-      title_block_values(sch.title_block_values), group_tag_visible(sch.group_tag_visible), annotation(sch.annotation),
-      pdf_export_settings(sch.pdf_export_settings)
+      group_tag_visible(sch.group_tag_visible), annotation(sch.annotation), pdf_export_settings(sch.pdf_export_settings)
 {
     update_refs();
 }
@@ -1007,7 +1006,6 @@ json Schematic::serialize() const
     j["annotation"] = annotation.serialize();
     j["pdf_export_settings"] = pdf_export_settings.serialize_schematic();
     j["rules"] = rules.serialize();
-    j["title_block_values"] = title_block_values;
     j["group_tag_visible"] = group_tag_visible;
 
     j["sheets"] = json::object();

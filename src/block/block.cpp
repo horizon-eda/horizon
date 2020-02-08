@@ -83,6 +83,12 @@ Block::Block(const UUID &uu, const json &j, Pool &pool) : uuid(uu), name(j.at("n
             Logger::log_warning("couldn't load bom export settings", Logger::Domain::BLOCK, e.what());
         }
     }
+    if (j.count("project_meta")) {
+        const json &o = j["project_meta"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            project_meta[it.key()] = it.value();
+        }
+    }
 }
 
 void Block::update_diffpairs()
@@ -267,6 +273,7 @@ json Block::serialize()
         j["tag_names"][(std::string)it.first] = it.second;
     }
     j["bom_export_settings"] = bom_export_settings.serialize();
+    j["project_meta"] = project_meta;
 
     return j;
 }

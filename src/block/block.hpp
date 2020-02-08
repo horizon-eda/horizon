@@ -39,6 +39,7 @@ public:
 
     std::map<UUID, std::string> group_names;
     std::map<UUID, std::string> tag_names;
+    std::map<std::string, std::string> project_meta;
     std::string get_group_name(const UUID &uu) const;
     std::string get_tag_name(const UUID &uu) const;
 
