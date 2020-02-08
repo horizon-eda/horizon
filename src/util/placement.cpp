@@ -17,6 +17,43 @@ json Placement::serialize() const
     return j;
 }
 
+void Placement::make_relative(const Placement &to)
+{
+    mirror ^= to.mirror;
+    shift -= to.shift;
+
+    if (to.mirror) {
+        shift.x = -shift.x;
+    }
+    angle -= to.angle;
+    while (angle < 0) {
+        angle += 65536;
+    }
+    angle %= 65536;
+
+    Coordi s = shift;
+    if (to.angle == 0) {
+        // nop
+    }
+    else if (to.angle == 16384) {
+        shift.y = -s.x;
+        shift.x = s.y;
+    }
+    else if (to.angle == 32768) {
+        shift.y = -s.y;
+        shift.x = -s.x;
+    }
+    else if (to.angle == 49152) {
+        shift.y = s.x;
+        shift.x = -s.y;
+    }
+    else {
+        double af = -(to.angle / 65536.0) * 2 * M_PI;
+        shift.x = s.x * cos(af) - s.y * sin(af);
+        shift.y = s.x * sin(af) + s.y * cos(af);
+    }
+}
+
 void Placement::accumulate(const Placement &p)
 {
     Placement q = p;
@@ -24,7 +61,7 @@ void Placement::accumulate(const Placement &p)
     if (angle == 0) {
         // nop
     }
-    if (angle == 16384) {
+    else if (angle == 16384) {
         q.shift.y = p.shift.x;
         q.shift.x = -p.shift.y;
     }

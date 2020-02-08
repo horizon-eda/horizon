@@ -68,6 +68,7 @@ public:
     {
         shift = {0, 0}, angle = 0, mirror = false;
     }
+    void make_relative(const Placement &to);
     void accumulate(const Placement &p);
     void invert_angle();
     void set_angle(int a);
