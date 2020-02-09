@@ -349,4 +349,18 @@ std::string Block::get_tag_name(const UUID &uu) const
         return (std::string)uu;
 }
 
+std::map<std::string, std::string> Block::peek_project_meta(const std::string &filename)
+{
+    auto j = load_json_from_file(filename);
+    if (j.count("project_meta")) {
+        const json &o = j["project_meta"];
+        std::map<std::string, std::string> project_meta;
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            project_meta[it.key()] = it.value();
+        }
+        return project_meta;
+    }
+    return {};
+}
+
 } // namespace horizon

@@ -28,6 +28,7 @@ public:
     Block(const UUID &uu, const json &, Pool &pool);
     Block(const UUID &uu);
     static Block new_from_file(const std::string &filename, Pool &pool);
+    static std::map<std::string, std::string> peek_project_meta(const std::string &filename);
     Net *get_net(const UUID &uu);
     UUID uuid;
     std::string name;

@@ -31,12 +31,10 @@ public:
     ProjectBlock &get_top_block();
     const ProjectBlock &get_top_block() const;
 
-    std::string create(const UUID &default_via = UUID());
+    std::string create(const std::map<std::string, std::string> &meta, const UUID &default_via);
 
     std::string base_path;
     UUID uuid;
-    std::string name;
-    std::string title;
     std::map<UUID, ProjectBlock> blocks;
 
     UUID pool_uuid;

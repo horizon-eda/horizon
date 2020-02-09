@@ -95,6 +95,7 @@ SchematicPropertiesDialog::SchematicPropertiesDialog(Gtk::Window *parent, Schema
 
     {
         auto ed = Gtk::manage(new ProjectMetaEditor(sch->block->project_meta));
+        ed->property_margin() = 20;
         ed->show();
         stack->add(*ed, "global", "Global");
     }

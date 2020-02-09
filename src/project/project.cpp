@@ -18,8 +18,7 @@ static void create_file(const std::string &filename)
 }
 
 Project::Project(const UUID &uu, const json &j, const std::string &base)
-    : base_path(base), uuid(uu), name(j.at("name").get<std::string>()), title(j.at("title").get<std::string>()),
-      pool_uuid(j.at("pool_uuid").get<std::string>()),
+    : base_path(base), uuid(uu), pool_uuid(j.at("pool_uuid").get<std::string>()),
       vias_directory(Glib::build_filename(base, j.at("vias_directory"))),
       board_filename(Glib::build_filename(base, j.at("board_filename"))),
       pool_cache_directory(Glib::build_filename(base, j.value("pool_cache_directory", "cache")))
@@ -76,7 +75,7 @@ ProjectBlock &Project::get_top_block()
     return const_cast<ProjectBlock &>(const_cast<const Project *>(this)->get_top_block());
 }
 
-std::string Project::create(const UUID &default_via)
+std::string Project::create(const std::map<std::string, std::string> &meta, const UUID &default_via)
 {
     if (Glib::file_test(base_path, Glib::FILE_TEST_EXISTS)) {
         throw std::runtime_error("project directory already exists");
@@ -91,8 +90,10 @@ std::string Project::create(const UUID &default_via)
     blocks.clear();
     auto block_filename = Glib::build_filename(base_path, "top_block.json");
     auto schematic_filename = Glib::build_filename(base_path, "top_sch.json");
+    auto &name = meta.at("project_name");
 
     Block block(UUID::random());
+    block.project_meta = meta;
     save_json_to_file(block_filename, block.serialize());
 
     Schematic schematic(UUID::random(), block);
@@ -138,8 +139,6 @@ json Project::serialize() const
     json j;
     j["type"] = "project";
     j["uuid"] = (std::string)uuid;
-    j["name"] = name;
-    j["title"] = title;
     j["pool_uuid"] = (std::string)pool_uuid;
     j["vias_directory"] = get_filename_rel(vias_directory);
     j["board_filename"] = get_filename_rel(board_filename);

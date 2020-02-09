@@ -376,6 +376,17 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         bool needs_save = j.at("needs_save");
         std::cout << "needs save " << pid << " " << needs_save << std::endl;
         pids_need_save[pid] = needs_save;
+        if (project && !needs_save)
+            view_project.update_meta();
+    }
+    else if (op == "ready") {
+        int pid = j.at("pid");
+        for (auto &it : processes) {
+            if (it.second.proc && it.second.proc->get_pid() == pid) {
+                it.second.signal_ready().emit();
+                break;
+            }
+        }
     }
     else if (op == "edit") {
         auto type = object_type_lut.lookup(j.at("type"));
@@ -522,7 +533,6 @@ void PoolProjectManagerAppWindow::handle_cancel()
 
 void PoolProjectManagerAppWindow::save_project()
 {
-    project->title = view_project.entry_project_title->get_text();
     save_json_to_file(project_filename, project->serialize());
     project_needs_save = false;
 }
@@ -568,6 +578,7 @@ void PoolProjectManagerAppWindow::handle_new_project()
 {
     if (!check_pools())
         return;
+    view_create_project.clear();
     set_view_mode(ViewMode::CREATE_PROJECT);
 }
 
@@ -595,6 +606,30 @@ void PoolProjectManagerAppWindow::handle_create()
     }
 }
 
+static std::string peek_name(const std::string &path)
+{
+    std::string name;
+    try {
+        auto j = load_json_from_file(path);
+        if (Glib::path_get_basename(path) == "pool.json") {
+            name = j.at("name");
+        }
+        else {
+            auto prj = Project::new_from_file(path);
+            auto block_filename = prj.get_top_block().block_filename;
+            auto meta = Block::peek_project_meta(block_filename);
+            if (meta.count("project_title"))
+                name = meta.at("project_title");
+            if (!name.size())
+                name = j.at("title");
+        }
+    }
+    catch (...) {
+        name = "error opening!";
+    }
+    return name;
+}
+
 void PoolProjectManagerAppWindow::update_recent_items()
 {
     if (!app)
@@ -610,22 +645,7 @@ void PoolProjectManagerAppWindow::update_recent_items()
     std::vector<std::pair<std::string, Glib::DateTime>> recent_items_sorted = recent_sort(app->recent_items);
     for (const auto &it : recent_items_sorted) {
         const std::string &path = it.first;
-        std::string name;
-        try {
-            auto ifs = make_ifstream(path);
-            if (ifs.is_open()) {
-                json k;
-                ifs >> k;
-                if (endswith(path, "pool.json"))
-                    name = k.at("name");
-                else
-                    name = k.at("title");
-            }
-            ifs.close();
-        }
-        catch (...) {
-            name = "error opening!";
-        }
+        std::string name = peek_name(path);
         auto box = Gtk::manage(new RecentItemBox(name, it.first, it.second));
         if (endswith(path, "pool.json"))
             recent_pools_listbox->append(*box);
@@ -852,9 +872,9 @@ void PoolProjectManagerAppWindow::pool_notebook_go_to(ObjectType type, const UUI
 PoolProjectManagerAppWindow *PoolProjectManagerAppWindow::create(PoolProjectManagerApplication *app)
 {
     // Load the Builder file and instantiate its widgets.
-    std::vector<Glib::ustring> widgets = {"app_window",        "sg_dest",         "sg_repo",          "menu1",
-                                          "sg_base_path",      "sg_project_name", "sg_project_title", "sg_pool_name",
-                                          "sg_pool_base_path", "sg_prj_pool"};
+    std::vector<Glib::ustring> widgets = {"app_window",        "sg_dest",         "sg_repo",           "menu1",
+                                          "sg_base_path",      "sg_project_name", "sg_project_title",  "sg_pool_name",
+                                          "sg_pool_base_path", "sg_prj_pool",     "sg_prj_open_change"};
     auto refBuilder = Gtk::Builder::create_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/window.ui", widgets);
 
     PoolProjectManagerAppWindow *window = nullptr;
@@ -1023,11 +1043,7 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         std::string pool_path = prj_pool->base_path;
         check_schema_update(pool_path);
 
-        header->set_subtitle(project->title);
         view_project.label_project_directory->set_text(Glib::path_get_dirname(project_filename));
-        view_project.entry_project_title->set_text(project->title);
-        view_project.entry_project_title->grab_focus_without_selecting();
-
 
         view_project.pool_info_bar->hide();
         view_project.label_pool_name->set_text(prj_pool->name);
@@ -1041,6 +1057,8 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         pool_cache_window = PoolCacheWindow::create(this, project->pool_cache_directory, prj_pool->base_path, this);
         project_needs_save = modified;
         set_view_mode(ViewMode::PROJECT);
+
+        view_project.update_meta();
     }
 }
 

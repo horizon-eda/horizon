@@ -796,6 +796,13 @@ void ImpBase::run(int argc, char *argv[])
     });
     core->signal_modified().connect([this] { needs_autosave = true; });
 
+    {
+        json j;
+        j["op"] = "ready";
+        j["pid"] = getpid();
+        send_json(j);
+    }
+
     app->run(*main_window);
 }
 
