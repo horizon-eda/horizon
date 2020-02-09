@@ -244,7 +244,7 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
     std::set<Gtk::SpinButton *> placement_spin_buttons;
     {
         auto sp = Gtk::manage(new SpinButtonDim);
-        sp->set_range(-100_mm, 100_mm);
+        sp->set_range(-1000_mm, 1000_mm);
         placement_grid->attach(*sp, 1, 0, 1, 1);
         bind_widget(sp, model.x);
         placement_spin_buttons.insert(sp);
@@ -252,7 +252,7 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
     }
     {
         auto sp = Gtk::manage(new SpinButtonDim);
-        sp->set_range(-100_mm, 100_mm);
+        sp->set_range(-1000_mm, 1000_mm);
         placement_grid->attach(*sp, 1, 1, 1, 1);
         bind_widget(sp, model.y);
         placement_spin_buttons.insert(sp);
@@ -260,7 +260,7 @@ ModelEditor::ModelEditor(ImpPackage *iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
     }
     {
         auto sp = Gtk::manage(new SpinButtonDim);
-        sp->set_range(-100_mm, 100_mm);
+        sp->set_range(-1000_mm, 1000_mm);
         placement_grid->attach(*sp, 1, 2, 1, 1);
         bind_widget(sp, model.z);
         placement_spin_buttons.insert(sp);
