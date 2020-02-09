@@ -12,23 +12,24 @@ ToolEditVia::ToolEditVia(IDocument *c, ToolID tid) : ToolBase(c, tid)
 
 bool ToolEditVia::can_begin()
 {
-    if (!doc.b)
-        return false;
-    return std::count_if(selection.begin(), selection.end(), [](const auto &x) { return x.type == ObjectType::VIA; })
-           == 1;
+    return get_vias().size() > 0;
+}
+
+std::set<Via *> ToolEditVia::get_vias()
+{
+    std::set<Via *> vias;
+    for (const auto &it : selection) {
+        if (it.type == ObjectType::VIA) {
+            vias.emplace(&doc.b->get_board()->vias.at(it.uuid));
+        }
+    }
+    return vias;
 }
 
 ToolResponse ToolEditVia::begin(const ToolArgs &args)
 {
-    std::cout << "tool edit via\n";
-    auto board = doc.b->get_board();
-
-    auto uu = std::find_if(selection.begin(), selection.end(), [](const auto &x) {
-                  return x.type == ObjectType::VIA;
-              })->uuid;
-    auto via = &board->vias.at(uu);
-
-    bool r = imp->dialogs.edit_via(via, *doc.b->get_via_padstack_provider());
+    auto holes = get_vias();
+    bool r = imp->dialogs.edit_via(holes, *doc.b->get_via_padstack_provider());
     if (r) {
         return ToolResponse::commit();
     }

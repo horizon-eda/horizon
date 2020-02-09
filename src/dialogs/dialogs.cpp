@@ -201,9 +201,9 @@ bool Dialogs::edit_shapes(std::set<Shape *> shapes)
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_via(class Via *via, class ViaPadstackProvider &vpp)
+bool Dialogs::edit_via(std::set<class Via *> &vias, class ViaPadstackProvider &vpp)
 {
-    EditViaDialog dia(parent, via, vpp);
+    EditViaDialog dia(parent, vias, vpp);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
