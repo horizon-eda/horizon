@@ -174,6 +174,10 @@ bool ImpSchematic::handle_broadcast(const json &j)
                 tool_begin(ToolID::BACKANNOTATE_CONNECTION_LINES, true, {}, std::move(data));
             }
         }
+        else if (op == "edit-meta" && !core_schematic.tool_is_active()) {
+            main_window->present(timestamp);
+            tool_begin(ToolID::EDIT_SCHEMATIC_PROPERTIES);
+        }
     }
     return true;
 }

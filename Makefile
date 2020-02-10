@@ -292,6 +292,7 @@ SRC_IMP = \
 	src/widgets/component_button.cpp\
 	src/widgets/preview_canvas.cpp\
 	src/widgets/about_dialog.cpp\
+	src/widgets/project_meta_editor.cpp\
 	src/export_pdf/canvas_pdf.cpp\
 	src/export_pdf/export_pdf.cpp\
 	src/export_pdf/export_pdf_board.cpp\
@@ -511,6 +512,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/pool_browser_stockinfo.cpp\
 	src/widgets/cell_renderer_color_box.cpp\
 	src/widgets/where_used_box.cpp\
+	src/widgets/project_meta_editor.cpp\
 	src/util/sort_controller.cpp\
 	src/util/editor_process.cpp\
 	$(SRC_CANVAS)\

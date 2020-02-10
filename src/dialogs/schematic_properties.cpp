@@ -2,6 +2,7 @@
 #include "schematic/schematic.hpp"
 #include "widgets/pool_browser_button.hpp"
 #include "widgets/title_block_values_editor.hpp"
+#include "widgets/project_meta_editor.hpp"
 #include "pool/pool.hpp"
 #include <iostream>
 #include <deque>
@@ -93,7 +94,9 @@ SchematicPropertiesDialog::SchematicPropertiesDialog(Gtk::Window *parent, Schema
     box->pack_start(*stack, true, true, 0);
 
     {
-        auto ed = Gtk::manage(new TitleBlockValuesEditor(sch->title_block_values));
+        auto ed = Gtk::manage(new ProjectMetaEditor(sch->block->project_meta));
+        ed->property_margin() = 20;
+        ed->show();
         stack->add(*ed, "global", "Global");
     }
 

@@ -22,12 +22,12 @@ void export_pdf(const class Schematic &sch, const class PDFExportSettings &setti
     auto info = document.GetInfo();
     info->SetCreator("horizon EDA");
     info->SetProducer("horizon EDA");
-    if (sch.title_block_values.count("author")) {
-        info->SetAuthor(sch.title_block_values.at("author"));
+    if (sch.block->project_meta.count("author")) {
+        info->SetAuthor(sch.block->project_meta.at("author"));
     }
     std::string title = "Schematic";
-    if (sch.title_block_values.count("project_title")) {
-        title = sch.title_block_values.at("project_title");
+    if (sch.block->project_meta.count("project_title")) {
+        title = sch.block->project_meta.at("project_title");
     }
     info->SetTitle(title);
 

@@ -23,12 +23,18 @@ public:
     {
         return s_signal_output;
     }
+    typedef sigc::signal<void> type_signal_ready;
+    type_signal_ready signal_ready()
+    {
+        return s_signal_ready;
+    }
     void reload();
     std::string get_filename();
 
 private:
     type_signal_exited s_signal_exited;
     type_signal_output s_signal_output;
+    type_signal_ready s_signal_ready;
     Glib::TimeVal mtime;
     std::string filename;
 };

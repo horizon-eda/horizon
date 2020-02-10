@@ -22,12 +22,11 @@ public:
 
 private:
     PoolProjectManagerAppWindow *win = nullptr;
-    Gtk::Entry *project_name_entry = nullptr;
-    Gtk::Entry *project_description_entry = nullptr;
     Gtk::FileChooserButton *project_path_chooser = nullptr;
     Gtk::Label *project_dir_label = nullptr;
     Gtk::ComboBoxText *project_pool_combo = nullptr;
-
+    std::map<std::string, std::string> meta_values;
+    class ProjectMetaEditor *meta_editor = nullptr;
 
     type_signal_valid_change s_signal_valid_change;
 };
@@ -35,7 +34,8 @@ private:
 class PoolProjectManagerViewProject {
 public:
     PoolProjectManagerViewProject(const Glib::RefPtr<Gtk::Builder> &refBuilder, class PoolProjectManagerAppWindow *w);
-    Gtk::Entry *entry_project_title = nullptr;
+    Gtk::Label *label_project_title = nullptr;
+    Gtk::Label *label_project_author = nullptr;
     Gtk::Label *label_pool_name = nullptr;
     Gtk::Label *label_pool_path = nullptr;
     Gtk::Label *label_project_directory = nullptr;
@@ -44,6 +44,8 @@ public:
 
     void open_top_schematic();
     void open_board();
+    bool update_meta();
+
 
 private:
     PoolProjectManagerAppWindow *win = nullptr;

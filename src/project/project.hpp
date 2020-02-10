@@ -24,19 +24,16 @@ private:
     Project(const UUID &uu, const json &, const std::string &base);
     std::string get_filename_rel(const std::string &p) const;
 
-
 public:
     static Project new_from_file(const std::string &filename);
     Project(const UUID &uu);
     ProjectBlock &get_top_block();
     const ProjectBlock &get_top_block() const;
 
-    std::string create(const UUID &default_via = UUID());
+    std::string create(const std::map<std::string, std::string> &meta, const UUID &default_via);
 
     std::string base_path;
     UUID uuid;
-    std::string name;
-    std::string title;
     std::map<UUID, ProjectBlock> blocks;
 
     UUID pool_uuid;
@@ -45,5 +42,9 @@ public:
     std::string pool_cache_directory;
 
     json serialize() const;
+
+private:
+    std::string title_old;
+    std::string name_old;
 };
 } // namespace horizon
