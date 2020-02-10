@@ -44,7 +44,7 @@ public:
 
     void open_top_schematic();
     void open_board();
-    void update_meta();
+    bool update_meta();
 
 
 private:

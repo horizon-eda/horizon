@@ -1058,7 +1058,13 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         project_needs_save = modified;
         set_view_mode(ViewMode::PROJECT);
 
-        view_project.update_meta();
+        if (view_project.update_meta() == false) {
+            Gtk::MessageDialog md(*this, "Metadata update required", false /* use_markup */, Gtk::MESSAGE_ERROR,
+                                  Gtk::BUTTONS_OK);
+            md.set_secondary_text(
+                    "Open and save the schematic for the project title to appear in the project manager.");
+            md.run();
+        }
     }
 }
 

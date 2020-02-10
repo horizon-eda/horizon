@@ -206,7 +206,7 @@ void PoolProjectManagerViewProject::handle_button_pool_cache()
     win->pool_cache_window->present();
 }
 
-void PoolProjectManagerViewProject::update_meta()
+bool PoolProjectManagerViewProject::update_meta()
 {
     auto top_block_filename = win->project->get_top_block().block_filename;
     auto meta = Block::peek_project_meta(top_block_filename);
@@ -222,6 +222,7 @@ void PoolProjectManagerViewProject::update_meta()
         win->set_title("Project Manager");
     label_project_title->set_text(title);
     label_project_author->set_text(author);
+    return meta.size();
 }
 
 } // namespace horizon
