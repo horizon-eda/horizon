@@ -21,7 +21,8 @@ Project::Project(const UUID &uu, const json &j, const std::string &base)
     : base_path(base), uuid(uu), pool_uuid(j.at("pool_uuid").get<std::string>()),
       vias_directory(Glib::build_filename(base, j.at("vias_directory"))),
       board_filename(Glib::build_filename(base, j.at("board_filename"))),
-      pool_cache_directory(Glib::build_filename(base, j.value("pool_cache_directory", "cache")))
+      pool_cache_directory(Glib::build_filename(base, j.value("pool_cache_directory", "cache"))),
+      title_old(j.value("title", "")), name_old(j.value("name", ""))
 {
     if (!Glib::file_test(pool_cache_directory, Glib::FILE_TEST_IS_DIR)) {
         auto fi = Gio::File::create_for_path(pool_cache_directory);
@@ -139,6 +140,8 @@ json Project::serialize() const
     json j;
     j["type"] = "project";
     j["uuid"] = (std::string)uuid;
+    j["title"] = title_old;
+    j["name"] = name_old;
     j["pool_uuid"] = (std::string)pool_uuid;
     j["vias_directory"] = get_filename_rel(vias_directory);
     j["board_filename"] = get_filename_rel(board_filename);

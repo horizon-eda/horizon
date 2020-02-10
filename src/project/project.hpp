@@ -24,7 +24,6 @@ private:
     Project(const UUID &uu, const json &, const std::string &base);
     std::string get_filename_rel(const std::string &p) const;
 
-
 public:
     static Project new_from_file(const std::string &filename);
     Project(const UUID &uu);
@@ -43,5 +42,9 @@ public:
     std::string pool_cache_directory;
 
     json serialize() const;
+
+private:
+    std::string title_old;
+    std::string name_old;
 };
 } // namespace horizon

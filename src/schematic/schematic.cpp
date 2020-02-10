@@ -1007,6 +1007,7 @@ json Schematic::serialize() const
     j["pdf_export_settings"] = pdf_export_settings.serialize_schematic();
     j["rules"] = rules.serialize();
     j["group_tag_visible"] = group_tag_visible;
+    j["title_block_values"] = block->project_meta;
 
     j["sheets"] = json::object();
     for (const auto &it : sheets) {
