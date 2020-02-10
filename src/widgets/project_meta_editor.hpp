@@ -1,6 +1,7 @@
 #pragma once
 #include <gtkmm.h>
 #include "util/changeable.hpp"
+#include <set>
 
 namespace horizon {
 
