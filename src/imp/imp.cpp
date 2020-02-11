@@ -796,6 +796,11 @@ void ImpBase::run(int argc, char *argv[])
     });
     core->signal_modified().connect([this] { needs_autosave = true; });
 
+    if (core->get_block()) {
+        core->signal_rebuilt().connect(sigc::mem_fun(*this, &ImpBase::set_window_title_from_block));
+        set_window_title_from_block();
+    }
+
     {
         json j;
         j["op"] = "ready";
@@ -1902,6 +1907,16 @@ void ImpBase::set_window_title(const std::string &s)
     else {
         main_window->set_title("Untitled " + object_descriptions.at(get_editor_type()).name);
     }
+}
+
+
+void ImpBase::set_window_title_from_block()
+{
+    std::string title;
+    if (core->get_block()->project_meta.count("project_title"))
+        title = core->get_block()->project_meta.at("project_title");
+
+    set_window_title(title);
 }
 
 } // namespace horizon

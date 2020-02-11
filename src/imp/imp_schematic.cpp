@@ -249,8 +249,6 @@ int ImpSchematic::get_board_pid()
 
 void ImpSchematic::construct()
 {
-
-    main_window->set_title("Schematic - Interactive Manipulator");
     state_store = std::make_unique<WindowStateStore>(main_window, "imp-schematic");
 
     sheet_box = Gtk::manage(new SheetBox(&core_schematic));

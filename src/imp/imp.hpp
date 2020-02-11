@@ -181,6 +181,7 @@ protected:
     }
 
     void set_window_title(const std::string &s);
+    void set_window_title_from_block();
 
 private:
     void fix_cursor_pos();

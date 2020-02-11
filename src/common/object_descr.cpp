@@ -290,5 +290,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::KEEPOUT_CLASS, {ObjectProperty::Type::STRING, "Keepout class", 0}},
           }}},
         {ObjectType::CONNECTION_LINE, {"Connection line", "Connection lines", {}}},
+        {ObjectType::SCHEMATIC, {"Schematic", "Schematics", {}}},
+        {ObjectType::BOARD, {"Board", "Boards", {}}},
 };
 } // namespace horizon
