@@ -222,7 +222,7 @@ void Block::update_connection_count()
 Block::Block(const Block &block)
     : uuid(block.uuid), name(block.name), nets(block.nets), buses(block.buses), components(block.components),
       net_classes(block.net_classes), net_class_default(block.net_class_default), group_names(block.group_names),
-      tag_names(block.tag_names), bom_export_settings(block.bom_export_settings)
+      tag_names(block.tag_names), project_meta(block.project_meta), bom_export_settings(block.bom_export_settings)
 {
     update_refs();
 }
@@ -238,6 +238,7 @@ void Block::operator=(const Block &block)
     net_class_default = block.net_class_default;
     group_names = block.group_names;
     tag_names = block.tag_names;
+    project_meta = block.project_meta;
     bom_export_settings = block.bom_export_settings;
     update_refs();
 }
