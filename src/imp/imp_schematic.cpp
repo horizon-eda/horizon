@@ -509,6 +509,9 @@ void ImpSchematic::construct()
         target_drag_begin = Target();
         return false;
     });
+
+    if (!core_schematic.get_project_meta_loaded_from_block())
+        core_schematic.set_needs_save();
 } // namespace horizon
 
 void ImpSchematic::update_action_sensitivity()

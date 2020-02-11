@@ -81,9 +81,14 @@ public:
 
     const std::string &get_filename() const override;
 
+    bool get_project_meta_loaded_from_block() const
+    {
+        return project_meta_loaded_from_block;
+    };
+
 private:
     Block block;
-
+    const bool project_meta_loaded_from_block;
     Schematic sch;
 
     SchematicRules rules;
