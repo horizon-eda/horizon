@@ -7,18 +7,6 @@ ProjectWrapper::ProjectWrapper(const std::string &path) : project(horizon::Proje
 {
 }
 
-static PyObject *PyProject_get_name(PyObject *pself)
-{
-    auto self = reinterpret_cast<PyProject *>(pself);
-    return PyUnicode_FromString(self->project->project.name.c_str());
-}
-
-static PyObject *PyProject_get_title(PyObject *pself)
-{
-    auto self = reinterpret_cast<PyProject *>(pself);
-    return PyUnicode_FromString(self->project->project.title.c_str());
-}
-
 static PyObject *PyProject_open_top_schematic(PyObject *pself)
 {
     auto self = reinterpret_cast<PyProject *>(pself);
@@ -112,8 +100,6 @@ static int PyProject_init(PyObject *pself, PyObject *args, PyObject *kwds)
 }
 
 static PyMethodDef PyProject_methods[] = {
-        {"get_name", (PyCFunction)PyProject_get_name, METH_NOARGS, "Return project name"},
-        {"get_title", (PyCFunction)PyProject_get_title, METH_NOARGS, "Return project title"},
         {"open_top_schematic", (PyCFunction)PyProject_open_top_schematic, METH_NOARGS, "Open top block"},
         {"open_board", (PyCFunction)PyProject_open_board, METH_NOARGS, "Open board"},
         {NULL} /* Sentinel */
