@@ -26,11 +26,13 @@ private:
     void apply_preferences() override;
     CoreSymbol core_symbol;
 
+    class HeaderButton *header_button = nullptr;
     Gtk::Entry *name_entry = nullptr;
     Gtk::Label *unit_label = nullptr;
     Gtk::Switch *can_expand_switch = nullptr;
     class SymbolPreviewWindow *symbol_preview_window = nullptr;
     class UnplacedBox *unplaced_box = nullptr;
     void update_unplaced();
+    void update_header();
 };
 } // namespace horizon

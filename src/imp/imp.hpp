@@ -180,6 +180,8 @@ protected:
     {
     }
 
+    void set_window_title(const std::string &s);
+
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;

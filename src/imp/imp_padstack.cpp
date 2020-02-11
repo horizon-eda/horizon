@@ -59,24 +59,22 @@ void ImpPadstack::construct()
     main_window->set_title("Padstack - Interactive Manipulator");
     state_store = std::make_unique<WindowStateStore>(main_window, "imp-padstack");
 
-    auto header_button = Gtk::manage(new HeaderButton);
-    header_button->set_label(core_padstack.get_padstack()->name);
+    header_button = Gtk::manage(new HeaderButton);
     main_window->header->set_custom_title(*header_button);
     header_button->show();
+    header_button->signal_closed().connect(sigc::mem_fun(*this, &ImpPadstack::update_header));
 
-    auto name_entry = header_button->add_entry("Name");
+    name_entry = header_button->add_entry("Name");
     name_entry->set_text(core_padstack.get_padstack()->name);
     name_entry->set_width_chars(core_padstack.get_padstack()->name.size());
-    name_entry->signal_changed().connect([this, name_entry, header_button] {
-        header_button->set_label(name_entry->get_text());
-        core_padstack.set_needs_save();
-    });
+    name_entry->signal_changed().connect([this] { core_padstack.set_needs_save(); });
+    name_entry->signal_activate().connect(sigc::mem_fun(*this, &ImpPadstack::update_header));
 
     auto well_known_name_entry = header_button->add_entry("Well-known name");
     well_known_name_entry->set_text(core_padstack.get_padstack()->well_known_name);
     well_known_name_entry->signal_changed().connect([this, well_known_name_entry] { core_padstack.set_needs_save(); });
 
-    core_padstack.signal_save().connect([this, name_entry, well_known_name_entry, header_button] {
+    core_padstack.signal_save().connect([this, well_known_name_entry] {
         core_padstack.get_padstack()->name = name_entry->get_text();
         core_padstack.get_padstack()->well_known_name = well_known_name_entry->get_text();
         header_button->set_label(core_padstack.get_padstack()->name);
@@ -138,6 +136,8 @@ void ImpPadstack::construct()
     core_padstack.signal_save().connect([this, type_combo] {
         core_padstack.get_padstack()->type = Padstack::type_lut.lookup(type_combo->get_active_id());
     });
+
+    update_header();
 }
 
 std::pair<ActionID, ToolID> ImpPadstack::get_doubleclick_action(ObjectType type, const UUID &uu)
@@ -165,6 +165,12 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpPadstack::get_selection_fi
             {ObjectType::POLYGON, {my_layers, false}},
     };
     return r;
+}
+
+void ImpPadstack::update_header()
+{
+    header_button->set_label(name_entry->get_text());
+    set_window_title(name_entry->get_text());
 }
 
 

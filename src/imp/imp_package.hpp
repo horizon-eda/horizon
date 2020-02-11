@@ -46,5 +46,10 @@ private:
     Gtk::ListBox *models_listbox = nullptr;
     class LayerHelpBox *layer_help_box = nullptr;
     UUID current_model;
+
+    class HeaderButton *header_button = nullptr;
+    Gtk::Entry *entry_name = nullptr;
+
+    void update_header();
 };
 } // namespace horizon

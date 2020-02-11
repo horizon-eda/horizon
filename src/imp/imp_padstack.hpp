@@ -25,5 +25,10 @@ protected:
 private:
     void canvas_update() override;
     CorePadstack core_padstack;
+
+    class HeaderButton *header_button = nullptr;
+    Gtk::Entry *name_entry = nullptr;
+
+    void update_header();
 };
 } // namespace horizon

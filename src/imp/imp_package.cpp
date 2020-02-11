@@ -415,7 +415,6 @@ void ImpPackage::construct()
 {
     ImpLayer::construct_layer_box();
 
-    main_window->set_title("Package - Interactive Manipulator");
     state_store = std::make_unique<WindowStateStore>(main_window, "imp-package");
 
     auto view_3d_button = Gtk::manage(new Gtk::Button("3D"));
@@ -626,12 +625,14 @@ void ImpPackage::construct()
     layer_help_box->signal_trigger_action().connect([this](auto a) { this->trigger_action(a); });
 
 
-    auto header_button = Gtk::manage(new HeaderButton);
-    header_button->set_label(core_package.get_package()->name);
+    header_button = Gtk::manage(new HeaderButton);
     main_window->header->set_custom_title(*header_button);
     header_button->show();
+    header_button->signal_closed().connect(sigc::mem_fun(*this, &ImpPackage::update_header));
 
-    auto entry_name = header_button->add_entry("Name");
+    entry_name = header_button->add_entry("Name");
+    entry_name->signal_activate().connect(sigc::mem_fun(*this, &ImpPackage::update_header));
+
     auto entry_manufacturer = header_button->add_entry("Manufacturer");
     entry_manufacturer->set_completion(create_pool_manufacturer_completion(pool.get()));
 
@@ -653,10 +654,7 @@ void ImpPackage::construct()
             browser_alt_button->property_selected_uuid() = pkg->alternate_for->uuid;
     }
 
-    entry_name->signal_changed().connect([this, entry_name, header_button] {
-        header_button->set_label(entry_name->get_text());
-        core_package.set_needs_save();
-    });
+    entry_name->signal_changed().connect([this] { core_package.set_needs_save(); });
     entry_manufacturer->signal_changed().connect([this] { core_package.set_needs_save(); });
     entry_tags->signal_changed().connect([this] { core_package.set_needs_save(); });
 
@@ -688,21 +686,21 @@ void ImpPackage::construct()
 
     update_monitor();
 
-    core_package.signal_save().connect(
-            [this, entry_name, entry_manufacturer, entry_tags, header_button, browser_alt_button] {
-                auto pkg = core_package.get_package();
-                pkg->tags = entry_tags->get_tags();
-                pkg->name = entry_name->get_text();
-                pkg->manufacturer = entry_manufacturer->get_text();
-                UUID alt_uuid = browser_alt_button->property_selected_uuid();
-                if (alt_uuid) {
-                    pkg->alternate_for = pool->get_package(alt_uuid);
-                }
-                else {
-                    pkg->alternate_for = nullptr;
-                }
-                header_button->set_label(pkg->name);
-            });
+    core_package.signal_save().connect([this, entry_manufacturer, entry_tags, browser_alt_button] {
+        auto pkg = core_package.get_package();
+        pkg->tags = entry_tags->get_tags();
+        pkg->name = entry_name->get_text();
+        pkg->manufacturer = entry_manufacturer->get_text();
+        UUID alt_uuid = browser_alt_button->property_selected_uuid();
+        if (alt_uuid) {
+            pkg->alternate_for = pool->get_package(alt_uuid);
+        }
+        else {
+            pkg->alternate_for = nullptr;
+        }
+    });
+
+    update_header();
 }
 
 
@@ -768,5 +766,11 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpPackage::get_selection_fil
     return r;
 }
 
+
+void ImpPackage::update_header()
+{
+    header_button->set_label(entry_name->get_text());
+    set_window_title(entry_name->get_text());
+}
 
 } // namespace horizon

@@ -28,6 +28,7 @@ HeaderButton::HeaderButton() : Gtk::MenuButton()
     grid->set_margin_top(20);
     grid->set_margin_bottom(20);
     popover->add(*grid);
+    popover->signal_closed().connect([this] { s_signal_closed.emit(); });
     grid->show();
 }
 
