@@ -300,6 +300,8 @@ void Package::expand()
             }
         }
     }
+
+    map_erase_if(junctions, [](const auto &it) { return it.second.connection_count == 0; });
 }
 
 void Package::update_warnings()

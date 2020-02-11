@@ -1089,9 +1089,10 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omi
     if (interactive) {
         for (const auto &it : pkg.junctions) {
             auto &junc = it.second;
-            selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, 10000, true);
+            selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, junc.layer);
             if (!junc.temp) {
-                targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
+                targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position), 0,
+                                     junc.layer);
             }
         }
     }
