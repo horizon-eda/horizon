@@ -22,6 +22,7 @@
 #include "via_padstack_provider.hpp"
 #include "connection_line.hpp"
 #include "step_export_settings.hpp"
+#include "pnp_export_settings.hpp"
 #include <fstream>
 #include <map>
 #include <vector>
@@ -75,6 +76,8 @@ public:
     std::vector<KeepoutContour> get_keepout_contours() const;
     std::pair<Coordi, Coordi> get_bbox() const;
     void update_pdf_export_settings(PDFExportSettings &settings);
+    std::map<const BoardPackage *, PnPRow> get_PnP(const PnPExportSettings &settings) const;
+
 
     UUID uuid;
     Block *block;
@@ -113,6 +116,7 @@ public:
     BoardColors colors;
     PDFExportSettings pdf_export_settings;
     STEPExportSettings step_export_settings;
+    PnPExportSettings pnp_export_settings;
 
     ClipperLib::Paths obstacles;
     ClipperLib::Path track_path;

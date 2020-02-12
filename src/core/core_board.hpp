@@ -50,6 +50,10 @@ public:
     {
         return &step_export_settings;
     }
+    PnPExportSettings *get_pnp_export_settings() override
+    {
+        return &pnp_export_settings;
+    }
 
     BoardColors *get_colors() override
     {
@@ -84,6 +88,7 @@ private:
     FabOutputSettings fab_output_settings;
     PDFExportSettings pdf_export_settings;
     STEPExportSettings step_export_settings;
+    PnPExportSettings pnp_export_settings;
 
     BoardColors colors;
 

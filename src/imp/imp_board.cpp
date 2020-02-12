@@ -17,6 +17,7 @@
 #include "board/board_layers.hpp"
 #include "pdf_export_window.hpp"
 #include "widgets/unplaced_box.hpp"
+#include "pnp_export_window.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
@@ -372,6 +373,9 @@ void ImpBoard::construct()
     hamburger_menu->append("Export STEP", "win.export_step");
     main_window->add_action("export_step", [this] { trigger_action(ActionID::STEP_EXPORT_WINDOW); });
 
+    hamburger_menu->append("Export Pick & place", "win.export_pnp");
+    main_window->add_action("export_pnp", [this] { trigger_action(ActionID::PNP_EXPORT_WINDOW); });
+
     hamburger_menu->append("Length tuning", "win.tuning");
     main_window->add_action("tuning", [this] { trigger_action(ActionID::TUNING); });
 
@@ -599,6 +603,20 @@ void ImpBoard::construct()
     update_unplaced();
     core_board.signal_tool_changed().connect(
             [this](ToolID tool_id) { unplaced_box->set_sensitive(tool_id == ToolID::NONE); });
+
+
+    pnp_export_window = PnPExportWindow::create(main_window, *core_board.get_board(),
+                                                *core_board.get_pnp_export_settings(), project_dir);
+
+    connect_action(ActionID::PNP_EXPORT_WINDOW, [this](const auto &c) { pnp_export_window->present(); });
+    connect_action(ActionID::EXPORT_PNP, [this](const auto &c) {
+        pnp_export_window->present();
+        pnp_export_window->generate();
+    });
+
+    pnp_export_window->signal_changed().connect([this] { core_board.set_needs_save(); });
+    core->signal_tool_changed().connect([this](ToolID t) { pnp_export_window->set_can_export(t == ToolID::NONE); });
+    core->signal_rebuilt().connect([this] { pnp_export_window->update(); });
 
     display_control_notebook->show();
 }

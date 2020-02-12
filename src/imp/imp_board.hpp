@@ -47,6 +47,7 @@ private:
     class TuningWindow *tuning_window = nullptr;
     class PDFExportWindow *pdf_export_window = nullptr;
     class BoardDisplayOptionsBox *board_display_options_box = nullptr;
+    class PnPExportWindow *pnp_export_window = nullptr;
     bool cross_probing_enabled = false;
 
     Coordf cursor_pos_drag_begin;

@@ -73,6 +73,8 @@ SRC_COMMON = \
 	src/board/board_hole.cpp\
 	src/board/connection_line.cpp\
 	src/board/step_export_settings.cpp\
+	src/board/pnp_export_settings.cpp\
+	src/board/pnp.cpp\
 	src/pool/pool.cpp \
 	src/util/placement.cpp\
 	src/util/util.cpp\
@@ -392,7 +394,8 @@ SRC_IMP = \
 	src/util/http_client.cpp\
 	src/widgets/column_chooser.cpp\
 	src/util/csv_util.cpp\
-
+	src/imp/pnp_export_window.cpp\
+	src/export_pnp/export_pnp.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\

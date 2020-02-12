@@ -211,6 +211,14 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
             Logger::log_warning("couldn't load step export settings", Logger::Domain::BOARD, e.what());
         }
     }
+    if (j.count("pnp_export_settings")) {
+        try {
+            pnp_export_settings = PnPExportSettings(j.at("pnp_export_settings"));
+        }
+        catch (const std::exception &e) {
+            Logger::log_warning("couldn't load p&p export settings", Logger::Domain::BOARD, e.what());
+        }
+    }
     fab_output_settings.update_for_board(this);
     update_pdf_export_settings(pdf_export_settings);
     update_refs(); // fill in smashed texts
@@ -256,7 +264,7 @@ Board::Board(const Board &brd)
       dimensions(brd.dimensions), connection_lines(brd.connection_lines), warnings(brd.warnings), rules(brd.rules),
       fab_output_settings(brd.fab_output_settings), stackup(brd.stackup), colors(brd.colors),
       pdf_export_settings(brd.pdf_export_settings), step_export_settings(brd.step_export_settings),
-      n_inner_layers(brd.n_inner_layers)
+      pnp_export_settings(brd.pnp_export_settings), n_inner_layers(brd.n_inner_layers)
 {
     update_refs();
 }
@@ -951,6 +959,26 @@ std::pair<Coordi, Coordi> Board::get_bbox() const
     return {a, b};
 }
 
+std::map<const BoardPackage *, PnPRow> Board::get_PnP(const PnPExportSettings &settings) const
+{
+    std::map<const BoardPackage *, PnPRow> r;
+    for (const auto &it : packages) {
+        PnPRow row;
+        row.refdes = it.second.component->refdes;
+        row.package = it.second.package.name;
+        row.MPN = it.second.component->part->get_MPN();
+        row.value = it.second.component->part->get_value();
+        row.manufacturer = it.second.component->part->get_manufacturer();
+        row.side = it.second.flip ? PnPRow::Side::BOTTOM : PnPRow::Side::TOP;
+        row.placement = it.second.placement;
+        if (it.second.flip)
+            row.placement.inc_angle_deg(180);
+        row.placement.mirror = false;
+        r.emplace(&it.second, row);
+    }
+    return r;
+}
+
 json Board::serialize() const
 {
     json j;
@@ -969,6 +997,7 @@ json Board::serialize() const
     }
     j["pdf_export_settings"] = pdf_export_settings.serialize_board();
     j["step_export_settings"] = step_export_settings.serialize();
+    j["pnp_export_settings"] = pnp_export_settings.serialize();
     j["polygons"] = json::object();
     for (const auto &it : polygons) {
         j["polygons"][(std::string)it.first] = it.second.serialize();

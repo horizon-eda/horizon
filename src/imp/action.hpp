@@ -77,7 +77,9 @@ enum class ActionID {
     SELECT_MORE,
     SELECT_MORE_NO_VIA,
     STEP_EXPORT_WINDOW,
-    EXPORT_STEP
+    EXPORT_STEP,
+    PNP_EXPORT_WINDOW,
+    EXPORT_PNP,
 };
 
 enum class ActionGroup {

@@ -724,6 +724,14 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
 
         {{ActionID::EXPORT_STEP, ToolID::NONE},
          {"Export STEP", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::PNP_EXPORT_WINDOW, ToolID::NONE},
+         {"Pick & place export window", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::EXPORT_PNP, ToolID::NONE},
+         {"Export Pick & place", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -814,6 +822,8 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(SELECT_MORE_NO_VIA),
         ACTION_LUT_ITEM(EXPORT_STEP),
         ACTION_LUT_ITEM(STEP_EXPORT_WINDOW),
+        ACTION_LUT_ITEM(EXPORT_PNP),
+        ACTION_LUT_ITEM(PNP_EXPORT_WINDOW),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
