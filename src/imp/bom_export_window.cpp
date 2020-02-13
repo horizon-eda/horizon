@@ -39,10 +39,24 @@ void BOMExportWindow::MyExportFileChooser::prepare_filename(std::string &filenam
     }
 }
 
+std::map<int, std::string> BOMExportWindow::MyAdapter::get_column_names() const
+{
+    std::map<int, std::string> r;
+    for (const auto &it : bom_column_names) {
+        r.emplace(static_cast<int>(it.first), it.second);
+    }
+    return r;
+}
+
+std::string BOMExportWindow::MyAdapter::get_column_name(int col) const
+{
+    return bom_column_names.at(static_cast<BOMColumn>(col));
+}
+
 BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Block *blo,
                                  BOMExportSettings *s, Pool &p, const std::string &project_dir)
     : Gtk::Window(cobject), block(blo), settings(s), pool(p), pool_parametric(pool.get_base_path()),
-      state_store(this, "imp-bom-export")
+      state_store(this, "imp-bom-export"), adapter(settings->csv_settings.columns)
 {
 
     GET_WIDGET(export_button);
@@ -50,12 +64,6 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_WIDGET(filename_entry);
     GET_WIDGET(sort_column_combo);
     GET_WIDGET(sort_order_combo);
-    GET_WIDGET(cols_available_tv);
-    GET_WIDGET(cols_included_tv);
-    GET_WIDGET(col_inc_button);
-    GET_WIDGET(col_excl_button);
-    GET_WIDGET(col_up_button);
-    GET_WIDGET(col_down_button);
     GET_WIDGET(done_label);
     GET_WIDGET(done_revealer);
     GET_WIDGET(preview_tv);
@@ -99,46 +107,21 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
                                                            });
     }
 
-    bom_store = Gtk::ListStore::create(list_columns_preview);
-    preview_tv->set_model(bom_store);
-
-    columns_store = Gtk::ListStore::create(list_columns);
-    for (const auto &it : bom_column_names) {
-        Gtk::TreeModel::Row row = *columns_store->append();
-        row[list_columns.column] = it.first;
-        row[list_columns.name] = it.second;
+    {
+        Gtk::Box *column_chooser_box;
+        GET_WIDGET(column_chooser_box);
+        column_chooser = ColumnChooser::create(adapter);
+        column_chooser_box->pack_start(*column_chooser, true, true, 0);
+        column_chooser->show();
+        column_chooser->unreference();
+        column_chooser->signal_changed().connect([this] {
+            s_signal_changed.emit();
+            update_preview();
+        });
     }
 
-    columns_available = Gtk::TreeModelFilter::create(columns_store);
-    columns_available->set_visible_func([this](const Gtk::TreeModel::const_iterator &it) -> bool {
-        Gtk::TreeModel::Row row = *it;
-        BOMColumn col = row[list_columns.column];
-        return std::count_if(settings->csv_settings.columns.begin(), settings->csv_settings.columns.end(),
-                             [col](const auto a) { return a == col; })
-               == 0;
-    });
-    cols_available_tv->set_model(columns_available);
-    cols_available_tv->append_column("Column", list_columns.name);
-
-    columns_store_included = Gtk::ListStore::create(list_columns);
-    update_cols_included();
-
-    cols_included_tv->set_model(columns_store_included);
-    cols_included_tv->append_column("Column", list_columns.name);
-
-    col_inc_button->signal_clicked().connect([this] { incl_excl_col(true); });
-    col_excl_button->signal_clicked().connect([this] { incl_excl_col(false); });
-
-    col_up_button->signal_clicked().connect([this] { up_down_col(true); });
-    col_down_button->signal_clicked().connect([this] { up_down_col(false); });
-
-    cols_included_tv->get_selection()->signal_changed().connect(
-            sigc::mem_fun(*this, &BOMExportWindow::update_incl_excl_sensitivity));
-    cols_available_tv->get_selection()->signal_changed().connect(
-            sigc::mem_fun(*this, &BOMExportWindow::update_incl_excl_sensitivity));
-
-    update_incl_excl_sensitivity();
-
+    bom_store = Gtk::ListStore::create(list_columns_preview);
+    preview_tv->set_model(bom_store);
 
     meta_parts_store = Gtk::ListStore::create(meta_parts_list_columns);
     meta_parts_tv->set_model(meta_parts_store);
@@ -194,112 +177,6 @@ void BOMExportWindow::handle_set_similar()
     update_similar_button_sensitivity();
     update_preview();
     update_orderable_MPNs();
-}
-
-void BOMExportWindow::update_incl_excl_sensitivity()
-{
-    col_inc_button->set_sensitive(cols_available_tv->get_selection()->count_selected_rows());
-    auto count_inc = cols_included_tv->get_selection()->count_selected_rows();
-    col_excl_button->set_sensitive(count_inc);
-    col_up_button->set_sensitive(count_inc);
-    col_down_button->set_sensitive(count_inc);
-}
-
-void BOMExportWindow::incl_excl_col(bool incl)
-{
-    Gtk::TreeView *tv;
-    if (incl)
-        tv = cols_available_tv;
-    else
-        tv = cols_included_tv;
-
-    if (tv->get_selection()->count_selected_rows() != 1)
-        return;
-
-    BOMColumn col;
-    {
-        Gtk::TreeModel::Row row = *tv->get_selection()->get_selected();
-        col = row[list_columns.column];
-    }
-
-    auto &cols = settings->csv_settings.columns;
-    auto c = std::count(cols.begin(), cols.end(), col);
-
-    if (incl && c == 0)
-        cols.push_back(col);
-
-    else if (!incl && c > 0)
-        cols.erase(std::remove(cols.begin(), cols.end(), col), cols.end());
-
-    columns_available->refilter();
-    update_cols_included();
-
-    if (incl) {
-        for (const auto &it : columns_store_included->children()) {
-            Gtk::TreeModel::Row row = *it;
-            if (row[list_columns.column] == col) {
-                cols_included_tv->get_selection()->select(it);
-                break;
-            }
-        }
-    }
-
-    s_signal_changed.emit();
-}
-
-void BOMExportWindow::up_down_col(bool up)
-{
-    if (cols_included_tv->get_selection()->count_selected_rows() != 1)
-        return;
-
-    Gtk::TreeModel::Row row = *cols_included_tv->get_selection()->get_selected();
-    BOMColumn col = row[list_columns.column];
-
-    auto &cols = settings->csv_settings.columns;
-
-    auto it = std::find(cols.begin(), cols.end(), col);
-    if (it == cols.end())
-        return;
-
-    if (up && it == cols.begin()) // already at the top
-        return;
-
-    if (!up && it == cols.end() - 1) // already at the bottom
-        return;
-
-    auto it_other = it + (up ? -1 : +1);
-
-    std::swap(*it_other, *it);
-    update_cols_included();
-    s_signal_changed.emit();
-}
-
-void BOMExportWindow::update_cols_included()
-{
-    bool selected = cols_included_tv->get_selection()->count_selected_rows() == 1;
-    BOMColumn col_selected = BOMColumn::MPN;
-    if (selected) {
-        Gtk::TreeModel::Row row = *cols_included_tv->get_selection()->get_selected();
-        col_selected = row[list_columns.column];
-    }
-
-    columns_store_included->clear();
-    for (const auto &it : settings->csv_settings.columns) {
-        Gtk::TreeModel::Row row = *columns_store_included->append();
-        row[list_columns.column] = it;
-        row[list_columns.name] = bom_column_names.at(it);
-    }
-
-    if (selected) {
-        for (const auto &it : columns_store_included->children()) {
-            Gtk::TreeModel::Row row = *it;
-            if (row[list_columns.column] == col_selected) {
-                cols_included_tv->get_selection()->select(it);
-                break;
-            }
-        }
-    }
-    update_preview();
 }
 
 void BOMExportWindow::flash(const std::string &s)

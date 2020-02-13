@@ -390,6 +390,7 @@ SRC_IMP = \
 	src/widgets/pool_browser_parametric.cpp\
 	src/util/stock_info_provider_partinfo.cpp\
 	src/util/http_client.cpp\
+	src/widgets/column_chooser.cpp\
 
 
 SRC_IMPC = \

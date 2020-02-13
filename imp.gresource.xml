@@ -62,6 +62,8 @@
     <file>imp/3d_view.ui</file>
     <file>imp/step_export.ui</file>
 
+    <file>widgets/column_chooser.ui</file>
+
     <file>global.css</file>
 
     <file>canvas/shaders/grid-vertex.glsl</file>

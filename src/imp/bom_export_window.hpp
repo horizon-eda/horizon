@@ -7,6 +7,7 @@
 #include "util/changeable.hpp"
 #include "util/export_file_chooser.hpp"
 #include "pool/pool_parametric.hpp"
+#include "widgets/column_chooser.hpp"
 
 namespace horizon {
 
@@ -94,38 +95,20 @@ private:
     void handle_set_similar();
     void update_similar_button_sensitivity();
 
-    class ListColumns : public Gtk::TreeModelColumnRecord {
-    public:
-        ListColumns()
-        {
-            Gtk::TreeModelColumnRecord::add(name);
-            Gtk::TreeModelColumnRecord::add(column);
-        }
-        Gtk::TreeModelColumn<BOMColumn> column;
-        Gtk::TreeModelColumn<Glib::ustring> name;
-    };
-    ListColumns list_columns;
-
-    Glib::RefPtr<Gtk::ListStore> columns_store;
-    Glib::RefPtr<Gtk::TreeModelFilter> columns_available;
-
-    Glib::RefPtr<Gtk::ListStore> columns_store_included;
-
-    Gtk::TreeView *cols_available_tv = nullptr;
-    Gtk::TreeView *cols_included_tv = nullptr;
     Gtk::TreeView *preview_tv = nullptr;
-
-    Gtk::Button *col_inc_button = nullptr;
-    Gtk::Button *col_excl_button = nullptr;
-    Gtk::Button *col_up_button = nullptr;
-    Gtk::Button *col_down_button = nullptr;
 
     WindowStateStore state_store;
 
-    void incl_excl_col(bool incl);
-    void up_down_col(bool up);
-    void update_incl_excl_sensitivity();
-    void update_cols_included();
+    ColumnChooser *column_chooser = nullptr;
+
+    class MyAdapter : public ColumnChooser::Adapter<BOMColumn> {
+    public:
+        using ColumnChooser::Adapter<BOMColumn>::Adapter;
+        std::string get_column_name(int col) const override;
+        std::map<int, std::string> get_column_names() const override;
+    };
+
+    MyAdapter adapter;
 
     void flash(const std::string &s);
     sigc::connection flash_connection;
