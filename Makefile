@@ -391,6 +391,7 @@ SRC_IMP = \
 	src/util/stock_info_provider_partinfo.cpp\
 	src/util/http_client.cpp\
 	src/widgets/column_chooser.cpp\
+	src/util/csv_util.cpp\
 
 
 SRC_IMPC = \

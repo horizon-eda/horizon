@@ -1,28 +1,9 @@
 #include "export_bom.hpp"
 #include "block/block.hpp"
 #include "util/util.hpp"
+#include "util/csv_util.hpp"
 
 namespace horizon {
-
-static bool needs_quote(const std::string &s)
-{
-    return std::count(s.begin(), s.end(), ',') || std::count(s.begin(), s.end(), '"');
-}
-
-static std::string escape_csv(const std::string &s)
-{
-    if (s.size() == 0)
-        return "\"\"";
-
-    std::string o;
-    for (const auto &c : s) {
-        if (c == '"')
-            o += "\"\"";
-        else
-            o += c;
-    }
-    return o;
-}
 
 void export_BOM(const std::string &filename, const class Block &block, const class BOMExportSettings &settings)
 {
