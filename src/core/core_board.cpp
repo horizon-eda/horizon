@@ -586,7 +586,7 @@ ViaPadstackProvider *CoreBoard::get_via_padstack_provider()
     return &via_padstack_provider;
 }
 
-CoreBoard::HistoryItem::HistoryItem(const Block &b, const Board &r) : block(b), brd(r.serialize())
+CoreBoard::HistoryItem::HistoryItem(const Block &b, const Board &r) : block(b), brd(shallow_copy, r)
 {
 }
 
@@ -598,14 +598,12 @@ void CoreBoard::history_push()
 void CoreBoard::history_load(unsigned int i)
 {
     auto x = dynamic_cast<CoreBoard::HistoryItem *>(history.at(history_current).get());
-    UUID uu(x->brd.at("uuid").get<std::string>());
     std::map<UUID, unsigned int> plane_revs;
     for (const auto &it : brd.planes) {
         plane_revs[it.first] = it.second.revision;
     }
     brd.~Board(); // reconstruct board from json
-    new (&brd) Board(uu, x->brd, x->block, *m_pool, via_padstack_provider);
-
+    new (&brd) Board(x->brd);
     block = x->block;
     brd.update_refs();
     brd.expand();

@@ -55,6 +55,7 @@ public:
     void expand_packages();
 
     Board(const Board &brd);
+    Board(shallow_copy_t sh, const Board &brd);
     void operator=(const Board &brd) = delete;
     void update_refs();
     void update_airwires(bool fast = false, const std::set<UUID> &nets = {});
@@ -137,5 +138,6 @@ private:
     unsigned int n_inner_layers = 0;
     ClipperLib::Paths get_thermals(class Plane *plane, const class CanvasPads *ca) const;
     void flip_package_layer(int &layer) const;
+    Board(const Board &brd, CopyMode copy_mode);
 };
 } // namespace horizon

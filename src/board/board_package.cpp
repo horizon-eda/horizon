@@ -58,4 +58,11 @@ UUID BoardPackage::get_uuid() const
 {
     return uuid;
 }
+BoardPackage::BoardPackage(shallow_copy_t sh, const BoardPackage &other)
+    : uuid(other.uuid), component(other.component), alternate_package(other.alternate_package), model(other.model),
+      pool_package(other.pool_package), package(other.package.uuid), placement(other.placement), flip(other.flip),
+      smashed(other.smashed), omit_silkscreen(other.omit_silkscreen), fixed(other.fixed), texts(other.texts)
+{
+}
+
 } // namespace horizon

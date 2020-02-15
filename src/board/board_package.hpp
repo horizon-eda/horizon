@@ -19,6 +19,7 @@ public:
     BoardPackage(const UUID &uu, const json &, Block &block, Pool &pool);
     BoardPackage(const UUID &uu, Component *comp);
     BoardPackage(const UUID &uu);
+    BoardPackage(shallow_copy_t sh, const BoardPackage &other);
     UUID uuid;
     uuid_ptr<Component> component;
     const Package *alternate_package = nullptr;

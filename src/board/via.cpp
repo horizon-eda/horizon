@@ -38,6 +38,14 @@ Via::Via(const UUID &uu, const Padstack *ps) : uuid(uu), vpp_padstack(ps), padst
     padstack.apply_parameter_set(parameter_set);
 }
 
+Via::Via(shallow_copy_t sh, const Via &other)
+    : uuid(other.uuid), net_set(other.net_set), junction(other.junction), vpp_padstack(other.vpp_padstack),
+      padstack(other.padstack.uuid), parameter_set(other.parameter_set), from_rules(other.from_rules),
+      locked(other.locked)
+{
+}
+
+
 json Via::serialize() const
 {
     json j;

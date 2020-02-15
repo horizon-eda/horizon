@@ -100,7 +100,7 @@ private:
     public:
         HistoryItem(const Block &b, const Board &r);
         Block block;
-        json brd;
+        Board brd;
     };
     void history_push() override;
     void history_load(unsigned int i) override;

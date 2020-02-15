@@ -8,7 +8,8 @@
 namespace horizon {
 ParameterProgram::ParameterProgram(const std::string &s) : code(s)
 {
-    init_error = compile();
+    if (code.size())
+        init_error = compile();
 }
 
 ParameterProgram::ParameterProgram(const ParameterProgram &other) : code(other.code)

@@ -17,6 +17,7 @@ class Via {
 public:
     Via(const UUID &uu, const json &j, class Board *brd = nullptr, class ViaPadstackProvider *vpp = nullptr);
     Via(const UUID &uu, const Padstack *ps);
+    Via(shallow_copy_t sh, const Via &other);
 
     UUID uuid;
 

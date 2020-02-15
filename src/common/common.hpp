@@ -237,4 +237,13 @@ constexpr int64_t operator"" _mm(unsigned long long int i)
 {
     return i * 1000000;
 }
+
+struct shallow_copy_t {
+    explicit shallow_copy_t() = default;
+};
+
+constexpr shallow_copy_t shallow_copy = shallow_copy_t();
+
+enum class CopyMode { DEEP, SHALLOW };
+
 } // namespace horizon
