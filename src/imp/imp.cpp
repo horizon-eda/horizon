@@ -938,6 +938,7 @@ std::string ImpBase::get_hud_text_for_component(const Component *comp)
     else {
         std::string s = "MPN: " + Glib::Markup::escape_text(part->get_MPN()) + "\n";
         s += "Manufacturer: " + Glib::Markup::escape_text(part->get_manufacturer()) + "\n";
+        s += "Package: " + Glib::Markup::escape_text(part->package->name) + "\n";
         if (part->get_description().size())
             s += Glib::Markup::escape_text(part->get_description()) + "\n";
         if (part->get_datasheet().size())
