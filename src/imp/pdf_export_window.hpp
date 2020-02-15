@@ -53,5 +53,6 @@ private:
 
 
     void export_thread(PDFExportSettings settings);
+    unsigned int n_layers = 0;
 };
 } // namespace horizon

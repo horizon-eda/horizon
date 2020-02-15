@@ -165,6 +165,11 @@ PDFExportWindow::PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
 void PDFExportWindow::reload_layers()
 {
+    if (n_layers == settings.layers.size())
+        return;
+    else
+        n_layers = settings.layers.size();
+
     {
         auto children = layers_box->get_children();
         for (auto ch : children)

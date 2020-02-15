@@ -107,6 +107,11 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
 void FabOutputWindow::reload_layers()
 {
+    if (n_layers == settings->layers.size())
+        return;
+    else
+        n_layers = settings->layers.size();
+
     {
         auto children = gerber_layers_box->get_children();
         for (auto ch : children)

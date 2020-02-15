@@ -45,5 +45,6 @@ private:
 
     void generate();
     void update_drill_visibility();
+    unsigned int n_layers = 0;
 };
 } // namespace horizon
