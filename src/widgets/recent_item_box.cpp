@@ -8,7 +8,7 @@ RecentItemBox::RecentItemBox(const std::string &name, const std::string &pa, con
     auto tbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 12));
     {
         auto la = Gtk::manage(new Gtk::Label());
-        la->set_markup("<b>" + name + "</b>");
+        la->set_markup("<b>" + Glib::Markup::escape_text(name) + "</b>");
         la->set_xalign(0);
         tbox->pack_start(*la, true, true, 0);
     }
