@@ -513,10 +513,26 @@ void Board::vacuum_junctions()
     }
 }
 
+
+static std::string replace_text_map(const std::string &s, const std::map<std::string, std::string> &m)
+{
+    auto fn = [m](const auto &k) -> std::string {
+        if (m.count(k))
+            return m.at(k);
+        else
+            return "";
+    };
+    return replace_placeholders(s, fn, true);
+}
+
 void Board::expand(bool careful)
 {
     delete_dependants();
     warnings.clear();
+
+    for (auto &it : texts) {
+        it.second.overridden = false;
+    }
 
     expand_packages();
 
@@ -623,6 +639,15 @@ void Board::expand(bool careful)
         }
         else if (it.second.junction->net && it.second.net_set && (it.second.junction->net != it.second.net_set)) {
             warnings.emplace_back(it.second.junction->position, "Via net mismatch");
+        }
+    }
+
+    for (auto &it : texts) {
+        if (it.second.overridden == false) {
+            if (std::count(it.second.text.begin(), it.second.text.end(), '$')) {
+                it.second.overridden = true;
+                it.second.text_override = replace_text_map(it.second.text, block->project_meta);
+            }
         }
     }
 

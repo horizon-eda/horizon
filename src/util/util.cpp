@@ -483,4 +483,50 @@ void rmdir_recursive(const std::string &dir_name)
         throw std::runtime_error("g_rmdir");
 }
 
+std::string replace_placeholders(const std::string &s, std::function<std::string(const std::string &)> fn,
+                                 bool keep_empty)
+{
+    std::string r;
+    r.reserve(s.size());
+    std::string var_current;
+    bool var_mode = false;
+    for (const auto &it : s) {
+        if (var_mode) {
+            if (std::isspace(it)) {
+                auto repl = fn(var_current);
+                if (repl.size()) {
+                    r += repl;
+                }
+                else if (keep_empty) {
+                    r += "$" + var_current;
+                }
+                r += it;
+                var_current.clear();
+                var_mode = false;
+            }
+            else {
+                var_current += it;
+            }
+        }
+        else {
+            if (it == '$') {
+                var_mode = true;
+            }
+            else {
+                r += it;
+            }
+        }
+    }
+    if (var_mode) {
+        auto repl = fn(var_current);
+        if (repl.size()) {
+            r += repl;
+        }
+        else if (keep_empty) {
+            r += "$" + var_current;
+        }
+    }
+    return r;
+}
+
 } // namespace horizon

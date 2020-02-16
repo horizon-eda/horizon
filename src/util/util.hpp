@@ -66,5 +66,7 @@ std::string format_digits(unsigned int m, unsigned int digits_max);
 double parse_si(const std::string &inps);
 
 void rmdir_recursive(const std::string &dir_name);
+std::string replace_placeholders(const std::string &s, std::function<std::string(const std::string &)> fn,
+                                 bool keep_empty);
 
 } // namespace horizon
