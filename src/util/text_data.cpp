@@ -166,6 +166,8 @@ static unsigned int codepoint_to_hershey(gunichar c, TextData::Font font)
             return codepoint_to_hershey(' ', font);
         case 0x1F384: // U+1F384 CHRISTMAS TREE
             return 871;
+        case 0xb0: // U+00B0 DEGREE SIGN
+            return 718;
         default:
             return 870; // palm tree
         }
