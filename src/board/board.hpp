@@ -23,6 +23,7 @@
 #include "connection_line.hpp"
 #include "step_export_settings.hpp"
 #include "pnp_export_settings.hpp"
+#include "airwire.hpp"
 #include <fstream>
 #include <map>
 #include <vector>
@@ -88,7 +89,6 @@ public:
     std::map<UUID, BoardPackage> packages;
     std::map<UUID, Junction> junctions;
     std::map<UUID, Track> tracks;
-    std::map<UUID, Track> airwires;
     std::map<UUID, Via> vias;
     std::map<UUID, Text> texts;
     std::map<UUID, Line> lines;
@@ -102,6 +102,8 @@ public:
 
     BoardRules rules;
     FabOutputSettings fab_output_settings;
+
+    std::map<UUID, std::list<Airwire>> airwires;
 
     class StackupLayer {
     public:

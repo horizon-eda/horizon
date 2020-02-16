@@ -364,4 +364,27 @@ std::map<std::string, std::string> Block::peek_project_meta(const std::string &f
     return {};
 }
 
+std::string Block::get_net_name(const UUID &uu) const
+{
+    auto &net = nets.at(uu);
+    if (net.name.size()) {
+        return net.name;
+    }
+    else {
+        std::string n;
+        for (const auto &it : components) {
+            for (const auto &it_conn : it.second.connections) {
+                if (it_conn.second.net && it_conn.second.net->uuid == uu) {
+                    n += it.second.refdes + ", ";
+                }
+            }
+        }
+        if (n.size()) {
+            n.pop_back();
+            n.pop_back();
+        }
+        return n;
+    }
+}
+
 } // namespace horizon

@@ -1098,7 +1098,8 @@ void ImpBase::canvas_update_from_pp()
 
     auto sel = canvas->get_selection();
     canvas_update();
-    canvas->set_selection(sel);
+    canvas->set_selection(sel, false);
+    update_highlights();
 }
 
 ActionConnection &ImpBase::connect_action(ActionID action_id, std::function<void(const ActionConnection &)> cb)

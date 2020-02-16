@@ -53,7 +53,8 @@ enum class ObjectType {
     MODEL_3D,
     FRAME,
     KEEPOUT,
-    CONNECTION_LINE
+    CONNECTION_LINE,
+    AIRWIRE
 };
 enum class PatchType { OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH, BOARD_EDGE, TEXT };
 

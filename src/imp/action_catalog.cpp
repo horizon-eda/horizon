@@ -732,6 +732,18 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::EXPORT_PNP, ToolID::NONE},
          {"Export Pick & place", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::AIRWIRE_FILTER_WINDOW, ToolID::NONE},
+         {"Airwire filter", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::RESET_AIRWIRE_FILTER, ToolID::NONE},
+         {"Reset airwire filter", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::FILTER_AIRWIRES, ToolID::NONE},
+         {"Filter airwires", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -824,6 +836,9 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(STEP_EXPORT_WINDOW),
         ACTION_LUT_ITEM(EXPORT_PNP),
         ACTION_LUT_ITEM(PNP_EXPORT_WINDOW),
+        ACTION_LUT_ITEM(RESET_AIRWIRE_FILTER),
+        ACTION_LUT_ITEM(FILTER_AIRWIRES),
+        ACTION_LUT_ITEM(AIRWIRE_FILTER_WINDOW),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

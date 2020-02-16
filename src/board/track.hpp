@@ -28,7 +28,6 @@ public:
     int layer = 0;
     uint64_t width = 0;
     bool width_from_rules = true;
-    bool is_air = false;
 
     bool locked = false;
 

@@ -26,6 +26,7 @@
 #include "triangle.hpp"
 #include "util/placement.hpp"
 #include "util/util.hpp"
+#include "iairwire_filter.hpp"
 #include <algorithm>
 #include <ctime>
 #include <sstream>
@@ -253,27 +254,20 @@ void Canvas::render(const Track &track)
     if (track.net == nullptr) {
         c = ColorP::BUS;
     }
-    if (track.is_air) {
-        c = ColorP::AIRWIRE;
-    }
     auto width = track.width;
-    if (!track.is_air) {
-        img_net(track.net);
-        img_patch_type(PatchType::TRACK);
-        img_line(track.from.get_position(), track.to.get_position(), width, track.layer);
-        img_patch_type(PatchType::OTHER);
-        img_net(nullptr);
-    }
+    img_net(track.net);
+    img_patch_type(PatchType::TRACK);
+    img_line(track.from.get_position(), track.to.get_position(), width, track.layer);
+    img_patch_type(PatchType::OTHER);
+    img_net(nullptr);
     if (img_mode)
         return;
     auto layer = track.layer;
-    if (track.is_air)
-        layer = 10000;
 
     auto center = (track.from.get_position() + track.to.get_position()) / 2;
     object_refs_current.emplace_back(ObjectType::TRACK, track.uuid);
     draw_line(track.from.get_position(), track.to.get_position(), c, layer, true, width);
-    if (track.locked && !track.is_air) {
+    if (track.locked) {
         auto ol = get_overlay_layer(layer);
         draw_lock(center, 0.7 * track.width, ColorP::TEXT_OVERLAY, ol, true);
     }
@@ -293,10 +287,13 @@ void Canvas::render(const Track &track)
         set_lod_size(-1);
     }
     object_refs_current.pop_back();
-    if (!track.is_air) {
-        selectables.append_line(track.uuid, ObjectType::TRACK, track.from.get_position(), track.to.get_position(),
-                                track.width, 0, track.layer);
-    }
+    selectables.append_line(track.uuid, ObjectType::TRACK, track.from.get_position(), track.to.get_position(),
+                            track.width, 0, track.layer);
+}
+
+void Canvas::render(const Airwire &airwire)
+{
+    draw_line(airwire.from.get_position(), airwire.to.get_position(), ColorP::AIRWIRE, 10000, true, 0);
 }
 
 void Canvas::render(const ConnectionLine &line)
@@ -1357,8 +1354,16 @@ void Canvas::render(const Board &brd)
     for (const auto &it : brd.junctions) {
         render(it.second, true, ObjectType::BOARD);
     }
-    for (const auto &it : brd.airwires) {
-        render(it.second);
+    if (!img_mode) {
+        for (const auto &it_net : brd.airwires) {
+            if (airwire_filter == nullptr || airwire_filter->airwire_is_visible(it_net.first)) {
+                object_refs_current.emplace_back(ObjectType::AIRWIRE, it_net.first);
+                for (const auto &it : it_net.second) {
+                    render(it);
+                }
+                object_refs_current.pop_back();
+            }
+        }
     }
     for (const auto &it : brd.polygons) {
         render(it.second);

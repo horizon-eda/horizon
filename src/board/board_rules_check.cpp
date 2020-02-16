@@ -482,12 +482,15 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd)
         return r;
     }
 
-    for (const auto &it : brd->airwires) {
-        r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
-        auto &e = r.errors.back();
-        e.has_location = true;
-        e.location = (it.second.from.get_position() + it.second.to.get_position()) / 2;
-        e.comment = "Airwire of net " + (it.second.net ? it.second.net->name : "No net");
+    for (const auto &it_net : brd->airwires) {
+        const auto &net = brd->block->nets.at(it_net.first);
+        for (const auto &it : it_net.second) {
+            r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+            auto &e = r.errors.back();
+            e.has_location = true;
+            e.location = (it.from.get_position() + it.to.get_position()) / 2;
+            e.comment = "Airwire of net " + net.name;
+        }
     }
     for (const auto &it : brd->planes) {
         if (it.second.fragments.size() == 0) {

@@ -1,6 +1,7 @@
 #pragma once
 #include "core/core_board.hpp"
 #include "imp_layer.hpp"
+#include "airwire_filter.hpp"
 
 namespace horizon {
 class ImpBoard : public ImpLayer {
@@ -48,6 +49,7 @@ private:
     class PDFExportWindow *pdf_export_window = nullptr;
     class BoardDisplayOptionsBox *board_display_options_box = nullptr;
     class PnPExportWindow *pnp_export_window = nullptr;
+    class AirwireFilterWindow *airwire_filter_window = nullptr;
     bool cross_probing_enabled = false;
 
     Coordf cursor_pos_drag_begin;
@@ -66,6 +68,10 @@ private:
     class UnplacedBox *unplaced_box = nullptr;
     void update_unplaced();
 
+    void update_airwires();
+
     int get_schematic_pid();
+
+    AirwireFilter airwire_filter;
 };
 } // namespace horizon

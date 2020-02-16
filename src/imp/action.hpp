@@ -80,6 +80,9 @@ enum class ActionID {
     EXPORT_STEP,
     PNP_EXPORT_WINDOW,
     EXPORT_PNP,
+    RESET_AIRWIRE_FILTER,
+    FILTER_AIRWIRES,
+    AIRWIRE_FILTER_WINDOW
 };
 
 enum class ActionGroup {

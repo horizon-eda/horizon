@@ -18,12 +18,13 @@
 #include "pdf_export_window.hpp"
 #include "widgets/unplaced_box.hpp"
 #include "pnp_export_window.hpp"
+#include "airwire_filter_window.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
                    const PoolParams &pool_params)
     : ImpLayer(pool_params), core_board(board_filename, block_filename, via_dir, *pool),
-      project_dir(Glib::path_get_dirname(board_filename))
+      project_dir(Glib::path_get_dirname(board_filename)), airwire_filter(*core_board.get_board())
 {
     core = &core_board;
     core_board.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
@@ -51,9 +52,10 @@ void ImpBoard::update_highlights()
                     canvas->set_flags(ref, Triangle::FLAG_HIGHLIGHT, 0);
                 }
             }
-            for (const auto &it_track : core_board.get_board()->airwires) {
-                if (it_track.second.net.uuid == it.uuid) {
-                    ObjectRef ref(ObjectType::TRACK, it_track.first);
+            {
+                const auto &airwires = core_board.get_board()->airwires;
+                if (airwires.count(it.uuid)) {
+                    ObjectRef ref(ObjectType::AIRWIRE, it.uuid);
                     canvas->set_flags(ref, Triangle::FLAG_HIGHLIGHT, 0);
                 }
             }
@@ -212,6 +214,7 @@ void ImpBoard::update_action_sensitivity()
     set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET), can_select_more);
     set_action_sensitive(make_action(ActionID::SELECT_MORE), can_select_more);
     set_action_sensitive(make_action(ActionID::SELECT_MORE_NO_VIA), can_select_more);
+    set_action_sensitive(make_action(ActionID::FILTER_AIRWIRES), can_select_more || n_pkgs);
 
     set_action_sensitive(make_action(ActionID::GO_TO_SCHEMATIC), sockets_connected);
     set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), n_pkgs == 1 && sockets_connected);
@@ -618,7 +621,58 @@ void ImpBoard::construct()
     core->signal_tool_changed().connect([this](ToolID t) { pnp_export_window->set_can_export(t == ToolID::NONE); });
     core->signal_rebuilt().connect([this] { pnp_export_window->update(); });
 
+    airwire_filter_window = AirwireFilterWindow::create(main_window, *core_board.get_block(), airwire_filter);
+    connect_action(ActionID::AIRWIRE_FILTER_WINDOW, [this](const auto &a) { airwire_filter_window->present(); });
+    core_board.signal_rebuilt().connect(sigc::mem_fun(*this, &ImpBoard::update_airwires));
+    update_airwires();
+    canvas->set_airwire_filter(&airwire_filter);
+    airwire_filter.signal_changed().connect([this] { canvas_update_from_pp(); });
+    connect_action(ActionID::RESET_AIRWIRE_FILTER, [this](const auto &a) { airwire_filter.set_all(true); });
+    connect_action(ActionID::FILTER_AIRWIRES, [this](const auto &a) {
+        std::set<UUID> nets;
+        const auto board = core_board.get_board();
+        for (const auto &it : canvas->get_selection()) {
+            switch (it.type) {
+            case ObjectType::TRACK: {
+                auto &track = board->tracks.at(it.uuid);
+                if (track.net) {
+                    nets.emplace(track.net->uuid);
+                }
+            } break;
+            case ObjectType::VIA: {
+                auto &via = board->vias.at(it.uuid);
+                if (via.junction->net) {
+                    nets.emplace(via.junction->net->uuid);
+                }
+            } break;
+            case ObjectType::JUNCTION: {
+                auto &ju = board->junctions.at(it.uuid);
+                if (ju.net) {
+                    nets.emplace(ju.net->uuid);
+                }
+            } break;
+            case ObjectType::BOARD_PACKAGE: {
+                auto &pkg = board->packages.at(it.uuid);
+                for (const auto &it_pad : pkg.package.pads) {
+                    if (it_pad.second.net) {
+                        nets.emplace(it_pad.second.net->uuid);
+                    }
+                }
+            } break;
+            default:;
+            }
+        }
+
+        airwire_filter.set_only(nets);
+    });
+
     display_control_notebook->show();
+}
+
+void ImpBoard::update_airwires()
+{
+    airwire_filter.update_from_board();
+    airwire_filter_window->update_from_filter();
 }
 
 void ImpBoard::update_text_owners()

@@ -53,6 +53,7 @@ SRC_COMMON = \
 	src/board/board.cpp\
 	src/board/board_package.cpp\
 	src/board/track.cpp\
+	src/board/airwire.cpp\
 	src/board/via_padstack_provider.cpp\
 	src/board/via.cpp\
 	src/board/plane.cpp\
@@ -396,6 +397,8 @@ SRC_IMP = \
 	src/util/csv_util.cpp\
 	src/imp/pnp_export_window.cpp\
 	src/export_pnp/export_pnp.cpp\
+	src/imp/airwire_filter_window.cpp\
+	src/imp/airwire_filter.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\

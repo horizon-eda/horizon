@@ -75,6 +75,8 @@ public:
      */
     Net *insert_net();
 
+    std::string get_net_name(const UUID &uu) const;
+
     json serialize();
 
 private:

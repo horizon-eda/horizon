@@ -305,7 +305,9 @@ void Board::update_refs()
         it.second.update_refs(*this);
     }
     for (auto &it : airwires) {
-        it.second.update_refs(*this);
+        for (auto &it2 : it.second) {
+            it2.update_refs(*this);
+        }
     }
     for (auto &it : vias) {
         it.second.junction.update(junctions);

@@ -145,14 +145,14 @@ void Board::update_airwires(bool fast, const std::set<UUID> &nets_only)
                     nets.insert(it_pad.second.net);
         }
     }
-    std::set<UUID> uuids_old;
-    for (const auto &it : airwires) {
-        uuids_old.insert(it.first);
+    if (partial) {
+        for (const auto &it : nets_only) {
+            airwires.erase(it);
+        }
     }
-    if (partial)
-        map_erase_if(airwires, [nets_only](const auto &it) { return nets_only.count(it.second.net->uuid); });
-    else
+    else {
         airwires.clear();
+    }
     for (auto net : nets) {
         std::vector<delaunay::Vector2<double>> points;
         std::vector<Track::Connection> points_ref;
@@ -277,20 +277,11 @@ void Board::update_airwires(bool fast, const std::set<UUID> &nets_only)
         // run MST algorithm for removing superflous edges
         auto edges_from_mst = kruskalMST(edges_for_mst, points);
 
-        for (const auto &e : edges_from_mst) {
-            UUID uu;
-            if (uuids_old.size() && !partial) {
-                uu = *uuids_old.begin();
-                uuids_old.erase(uu);
+        if (edges_from_mst.size()) {
+            auto &li = airwires[net->uuid];
+            for (const auto &e : edges_from_mst) {
+                li.emplace_back(points_ref.at(e.p1.id), points_ref.at(e.p2.id));
             }
-            else {
-                uu = UUID::random();
-            }
-            auto &aw = airwires.emplace(uu, uu).first->second;
-            aw.from = points_ref.at(e.p1.id);
-            aw.to = points_ref.at(e.p2.id);
-            aw.net = net;
-            aw.is_air = true;
         }
     }
 }

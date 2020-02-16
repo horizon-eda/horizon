@@ -68,6 +68,10 @@ public:
 
     std::pair<Coordf, Coordf> get_bbox(bool visible_only = true) const;
 
+    void set_airwire_filter(class IAirwireFilter *f)
+    {
+        airwire_filter = f;
+    }
 
 protected:
     std::map<int, std::vector<Triangle>> triangles;
@@ -106,6 +110,7 @@ protected:
     void render(const class Dimension &dim);
     void render(const class Frame &frame, bool on_sheet = false);
     void render(const class ConnectionLine &line);
+    void render(const class Airwire &airwire);
 
     bool needs_push = true;
     virtual void request_push() = 0;
@@ -211,5 +216,6 @@ protected:
 
 private:
     uint8_t lod_current = 0;
+    class IAirwireFilter *airwire_filter = nullptr;
 };
 } // namespace horizon
