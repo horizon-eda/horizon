@@ -104,8 +104,10 @@ void Schematic::autoconnect_symbol(Sheet *sheet, SchematicSymbol *sym)
             if (!it_junc->second.bus && it_junc->second.position == pin_pos
                 && (it_junc->second.net || it_junc->second.connection_count > 0)) {
                 erase = true;
+                bool net_created = false;
                 if (it_junc->second.net == nullptr) {
                     it_junc->second.net = block->insert_net();
+                    net_created = true;
                 }
                 sym->component->connections.emplace(UUIDPath<2>(sym->gate->uuid, it_pin.first),
                                                     static_cast<Net *>(it_junc->second.net));
@@ -129,6 +131,9 @@ void Schematic::autoconnect_symbol(Sheet *sheet, SchematicSymbol *sym)
                     sheet->replace_junction(&it_junc->second, sym, &it_pin.second);
                 }
                 connected = true;
+
+                if (net_created)
+                    expand(true);
             }
             if (erase) {
                 sheet->junctions.erase(it_junc++);
@@ -531,7 +536,8 @@ void Schematic::expand(bool careful)
                                        [&sheet](const auto &a) { return sheet.texts.count(a.uuid) == 0; }),
                         texts.end());
         }
-        sheet.expand_symbols(*this);
+        if (!careful)
+            sheet.expand_symbols(*this);
     }
 
 
