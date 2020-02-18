@@ -478,19 +478,19 @@ void ImpBase::run(int argc, char *argv[])
     connect_action(ActionID::VIEW_TOP, [this](const auto &a) {
         canvas->set_flip_view(false);
         this->canvas_update_from_pp();
-        update_view_hints();
+        this->update_view_hints();
     });
 
     connect_action(ActionID::VIEW_BOTTOM, [this](const auto &a) {
         canvas->set_flip_view(true);
         this->canvas_update_from_pp();
-        update_view_hints();
+        this->update_view_hints();
     });
 
     connect_action(ActionID::FLIP_VIEW, [this](const auto &a) {
         canvas->set_flip_view(!canvas->get_flip_view());
         this->canvas_update_from_pp();
-        update_view_hints();
+        this->update_view_hints();
     });
 
     connect_action(ActionID::SEARCH, [this](const auto &a) { this->set_search_mode(true); });
