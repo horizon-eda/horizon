@@ -200,6 +200,7 @@ void SelectionFilterDialog::update()
     for (auto &it : checkbuttons) {
         it.second.update();
     }
+    s_signal_changed.emit();
 }
 
 void SelectionFilterDialog::set_all(bool state)
@@ -281,6 +282,11 @@ void SelectionFilterDialog::update_layers()
             }
         }
     }
+}
+
+bool SelectionFilterDialog::get_filtered()
+{
+    return !std::all_of(checkbuttons.begin(), checkbuttons.end(), [](auto x) { return x.second.get_all_active(); });
 }
 
 } // namespace horizon

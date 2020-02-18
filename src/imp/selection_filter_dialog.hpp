@@ -1,12 +1,14 @@
 #pragma once
 #include <gtkmm.h>
 #include "common/common.hpp"
+#include "util/changeable.hpp"
 namespace horizon {
 
-class SelectionFilterDialog : public Gtk::Window {
+class SelectionFilterDialog : public Gtk::Window, public Changeable {
 public:
     SelectionFilterDialog(Gtk::Window *parent, class SelectionFilter &sf, class ImpBase &imp);
     void update_layers();
+    bool get_filtered();
 
 private:
     SelectionFilter &selection_filter;

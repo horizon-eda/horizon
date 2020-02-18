@@ -626,7 +626,10 @@ void ImpBoard::construct()
     core_board.signal_rebuilt().connect(sigc::mem_fun(*this, &ImpBoard::update_airwires));
     update_airwires();
     canvas->set_airwire_filter(&airwire_filter);
-    airwire_filter.signal_changed().connect([this] { canvas_update_from_pp(); });
+    airwire_filter.signal_changed().connect([this] {
+        canvas_update_from_pp();
+        update_view_hints();
+    });
     connect_action(ActionID::RESET_AIRWIRE_FILTER, [this](const auto &a) { airwire_filter.set_all(true); });
     connect_action(ActionID::FILTER_AIRWIRES, [this](const auto &a) {
         std::set<UUID> nets;
@@ -984,6 +987,17 @@ void ImpBoard::get_save_meta(json &j)
 {
     ImpLayer::get_save_meta(j);
     j["board_display_options"] = board_display_options_box->serialize();
+}
+
+std::vector<std::string> ImpBoard::get_view_hints()
+{
+    auto r = ImpBase::get_view_hints();
+
+    const auto &aws = airwire_filter.get_airwires();
+    if (std::any_of(aws.begin(), aws.end(), [](const auto &x) { return x.second.visible == false; }))
+        r.emplace_back("airwires filtered");
+
+    return r;
 }
 
 } // namespace horizon

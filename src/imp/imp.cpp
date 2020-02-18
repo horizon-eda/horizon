@@ -395,6 +395,7 @@ void ImpBase::run(int argc, char *argv[])
 
     selection_filter_dialog =
             std::make_unique<SelectionFilterDialog>(this->main_window, canvas->selection_filter, *this);
+    selection_filter_dialog->signal_changed().connect(sigc::mem_fun(*this, &ImpBase::update_view_hints));
 
     key_sequence_dialog = std::make_unique<KeySequenceDialog>(this->main_window);
 
@@ -477,16 +478,19 @@ void ImpBase::run(int argc, char *argv[])
     connect_action(ActionID::VIEW_TOP, [this](const auto &a) {
         canvas->set_flip_view(false);
         this->canvas_update_from_pp();
+        update_view_hints();
     });
 
     connect_action(ActionID::VIEW_BOTTOM, [this](const auto &a) {
         canvas->set_flip_view(true);
         this->canvas_update_from_pp();
+        update_view_hints();
     });
 
     connect_action(ActionID::FLIP_VIEW, [this](const auto &a) {
         canvas->set_flip_view(!canvas->get_flip_view());
         this->canvas_update_from_pp();
+        update_view_hints();
     });
 
     connect_action(ActionID::SEARCH, [this](const auto &a) { this->set_search_mode(true); });
@@ -800,6 +804,7 @@ void ImpBase::run(int argc, char *argv[])
         core->signal_rebuilt().connect(sigc::mem_fun(*this, &ImpBase::set_window_title_from_block));
         set_window_title_from_block();
     }
+    update_view_hints();
 
     {
         json j;
@@ -1919,6 +1924,23 @@ void ImpBase::set_window_title_from_block()
         title = core->get_block()->project_meta.at("project_title");
 
     set_window_title(title);
+}
+
+std::vector<std::string> ImpBase::get_view_hints()
+{
+    std::vector<std::string> r;
+    if (canvas->get_flip_view())
+        r.emplace_back("bottom view");
+
+    if (selection_filter_dialog->get_filtered())
+        r.emplace_back("selection filtered");
+    return r;
+}
+
+void ImpBase::update_view_hints()
+{
+    auto hints = get_view_hints();
+    main_window->set_view_hints_label(hints);
 }
 
 } // namespace horizon

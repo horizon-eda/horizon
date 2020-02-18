@@ -183,6 +183,9 @@ protected:
     void set_window_title(const std::string &s);
     void set_window_title_from_block();
 
+    void update_view_hints();
+    virtual std::vector<std::string> get_view_hints();
+
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;

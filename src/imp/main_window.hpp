@@ -43,6 +43,8 @@ public:
     void show_nonmodal(const std::string &la, const std::string &button, std::function<void(void)> fn,
                        const std::string &la2 = "");
 
+    void set_view_hints_label(const std::vector<std::string> &s);
+
     // virtual ~MainWindow();
 private:
     Gtk::Box *gl_container = nullptr;
@@ -66,6 +68,8 @@ private:
     Gtk::Label *nonmodal_label = nullptr;
     Gtk::Label *nonmodal_label2 = nullptr;
     std::function<void(void)> nonmodal_fn;
+
+    Gtk::Label *view_hints_label = nullptr;
 
     void sc(void);
     void cm(const horizon::Coordi &cursor_pos);

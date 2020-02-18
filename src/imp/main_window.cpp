@@ -33,6 +33,7 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("nonmodal_close_button", nonmodal_close_button);
     x->get_widget("nonmodal_label", nonmodal_label);
     x->get_widget("nonmodal_label2", nonmodal_label2);
+    x->get_widget("view_hints_label", view_hints_label);
 
     x->get_widget("search_revealer", search_revealer);
     x->get_widget("search_entry", search_entry);
@@ -134,6 +135,28 @@ void MainWindow::show_nonmodal(const std::string &la, const std::string &button,
     nonmodal_button->set_label(button);
     nonmodal_fn = fn;
     nonmodal_rev->set_reveal_child(true);
+}
+
+void MainWindow::set_view_hints_label(const std::vector<std::string> &s)
+{
+    if (s.size()) {
+        std::string label_text;
+        std::string tooltip_text;
+        for (const auto &it : s) {
+            if (label_text.size())
+                label_text += ", ";
+            if (tooltip_text.size())
+                tooltip_text += "\n";
+            label_text += it;
+            tooltip_text += it;
+        }
+        view_hints_label->set_text(label_text);
+        view_hints_label->set_tooltip_text(tooltip_text);
+    }
+    else {
+        view_hints_label->set_text("");
+        view_hints_label->set_has_tooltip(false);
+    }
 }
 
 MainWindow *MainWindow::create()

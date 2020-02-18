@@ -34,6 +34,7 @@ protected:
     std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu) override;
 
     void get_save_meta(json &j) override;
+    std::vector<std::string> get_view_hints() override;
 
 private:
     void canvas_update() override;
