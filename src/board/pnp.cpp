@@ -1,5 +1,8 @@
 #include "pnp.hpp"
+#include <sstream>
 #include <iomanip>
+#include <cmath>
+#include <cstdlib>
 
 namespace horizon {
 
@@ -43,7 +46,7 @@ static std::string pnp_angle_to_string(int x)
 
     std::ostringstream ss;
     ss.imbue(std::locale::classic());
-    ss << std::fixed << std::setprecision(3) << std::internal << std::abs((x / 65536.0) * 360); // NBSP
+    ss << std::fixed << std::setprecision(3) << std::internal << std::abs((x / 65536.0) * 360);
     return ss.str();
 }
 
