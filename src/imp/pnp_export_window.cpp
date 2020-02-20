@@ -124,7 +124,7 @@ void PnPExportWindow::generate()
     try {
         PnPExportSettings my_settings = settings;
         my_settings.output_directory = export_filechooser.get_filename_abs();
-        export_PnP(board, settings);
+        export_PnP(board, my_settings);
         flash("Pick & place export done");
     }
     catch (const std::exception &e) {
