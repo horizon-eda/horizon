@@ -208,13 +208,13 @@ ObjectRef Canvas::add_line(const std::deque<Coordi> &pts, int64_t width, ColorP 
     return sr;
 }
 
-void Canvas::render(const Line &line, bool interactive)
+void Canvas::render(const Line &line, bool interactive, ColorP co)
 {
     img_line(line.from->position, line.to->position, line.width, line.layer);
     if (img_mode)
         return;
     triangle_type_current = Triangle::Type::GRAPHICS;
-    draw_line(line.from->position, line.to->position, ColorP::FROM_LAYER, line.layer, true, line.width);
+    draw_line(line.from->position, line.to->position, co, line.layer, true, line.width);
     triangle_type_current = Triangle::Type::NONE;
     if (interactive) {
         selectables.append_line(line.uuid, ObjectType::LINE, line.from->position, line.to->position, line.width, 0,
@@ -305,7 +305,7 @@ void Canvas::render(const ConnectionLine &line)
                             0);
 }
 
-void Canvas::render(const SymbolPin &pin, bool interactive)
+void Canvas::render(const SymbolPin &pin, bool interactive, ColorP co)
 {
     Coordi p0 = transform.transform(pin.position);
     Coordi p1 = p0;
@@ -392,13 +392,21 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
         pad_orientation = Orientation::DOWN;
         break;
     }
+    ColorP c_main = co;
     ColorP c_name = ColorP::PIN;
     ColorP c_pad = ColorP::PIN;
+    ColorP c_pin = ColorP::PIN;
+
     if (!pin.name_visible) {
         c_name = ColorP::PIN_HIDDEN;
     }
     if (!pin.pad_visible) {
         c_pad = ColorP::PIN_HIDDEN;
+    }
+    if (co != ColorP::FROM_LAYER) {
+        c_name = co;
+        c_pad = co;
+        c_pin = co;
     }
     img_auto_line = img_mode;
     if (interactive || pin.name_visible) {
@@ -444,18 +452,15 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
     }
 
     if (pin.decoration.dot) {
-        draw_arc(Coordf(-((int64_t)pin.length) + dot_size / 2, 0), dot_size / 2, 0, 2 * M_PI, ColorP::FROM_LAYER, 0,
-                 true, 0);
+        draw_arc(Coordf(-((int64_t)pin.length) + dot_size / 2, 0), dot_size / 2, 0, 2 * M_PI, c_main, 0, true, 0);
     }
     if (pin.decoration.clock) {
-        draw_line(Coordf(-(int64_t)pin.length, .375_mm), Coordf(-(int64_t)pin.length - .75_mm, 0), ColorP::FROM_LAYER,
-                  0, true, 0);
-        draw_line(Coordf(-(int64_t)pin.length, -.375_mm), Coordf(-(int64_t)pin.length - .75_mm, 0), ColorP::FROM_LAYER,
-                  0, true, 0);
+        draw_line(Coordf(-(int64_t)pin.length, .375_mm), Coordf(-(int64_t)pin.length - .75_mm, 0), c_main, 0, true, 0);
+        draw_line(Coordf(-(int64_t)pin.length, -.375_mm), Coordf(-(int64_t)pin.length - .75_mm, 0), c_main, 0, true, 0);
     }
     {
-        auto dl = [this](float ax, float ay, float bx, float by) {
-            draw_line(Coordf(ax * 1_mm, ay * 1_mm), Coordf(bx * 1_mm, by * 1_mm), ColorP::PIN, 0, true, 0);
+        auto dl = [this, c_pin](float ax, float ay, float bx, float by) {
+            draw_line(Coordf(ax * 1_mm, ay * 1_mm), Coordf(bx * 1_mm, by * 1_mm), c_pin, 0, true, 0);
         };
         switch (pin.direction) {
         case Pin::Direction::OUTPUT:
@@ -494,9 +499,9 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
     transform_restore();
 
     if (pin.decoration.schmitt) {
-        auto dl = [this](float ax, float ay, float bx, float by) {
+        auto dl = [this, c_pin](float ax, float ay, float bx, float by) {
             auto sc = .025_mm;
-            draw_line(Coordf(ax * sc, ay * sc), Coordf(bx * sc, by * sc), ColorP::PIN, 0, true, 0);
+            draw_line(Coordf(ax * sc, ay * sc), Coordf(bx * sc, by * sc), c_pin, 0, true, 0);
         };
         transform_save();
         transform.accumulate(pin.position);
@@ -511,9 +516,9 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
         transform_restore();
     }
     if (pin.decoration.driver != SymbolPin::Decoration::Driver::DEFAULT) {
-        auto dl = [this](float ax, float ay, float bx, float by) {
+        auto dl = [this, c_pin](float ax, float ay, float bx, float by) {
             auto sc = .5_mm;
-            draw_line(Coordf(ax * sc, ay * sc), Coordf(bx * sc, by * sc), ColorP::PIN, 0, true, 0);
+            draw_line(Coordf(ax * sc, ay * sc), Coordf(bx * sc, by * sc), c_pin, 0, true, 0);
         };
         transform_save();
         transform.accumulate(pin.position);
@@ -557,21 +562,21 @@ void Canvas::render(const SymbolPin &pin, bool interactive)
 
     switch (pin.connector_style) {
     case SymbolPin::ConnectorStyle::BOX:
-        draw_box(p0, 0.25_mm, ColorP::FROM_LAYER, 0, false);
+        draw_box(p0, 0.25_mm, c_main, 0, false);
         break;
 
     case SymbolPin::ConnectorStyle::NC:
-        draw_cross(p0, 0.25_mm, ColorP::FROM_LAYER, 0, false);
-        draw_text0(p_nc, 1.5_mm, "NC", orientation_to_angle(nc_orientation), false, TextOrigin::CENTER, ColorP::PIN, 0);
+        draw_cross(p0, 0.25_mm, c_main, 0, false);
+        draw_text0(p_nc, 1.5_mm, "NC", orientation_to_angle(nc_orientation), false, TextOrigin::CENTER, c_pin, 0);
         break;
 
     case SymbolPin::ConnectorStyle::NONE:
         break;
     }
     if (pin.connected_net_lines.size() > 1) {
-        draw_line(p0, p0 + Coordi(0, 10), ColorP::FROM_LAYER, 0, false, 0.75_mm);
+        draw_line(p0, p0 + Coordi(0, 10), c_main, 0, false, 0.75_mm);
     }
-    draw_line(p0, p1, ColorP::FROM_LAYER, 0, false);
+    draw_line(p0, p1, c_main, 0, false);
     if (interactive)
         selectables.append(pin.uuid, ObjectType::SYMBOL_PIN, p0, Coordf::min(pad_extents.first, Coordf::min(p0, p1)),
                            Coordf::max(pad_extents.second, Coordf::max(p0, p1)));
@@ -583,7 +588,7 @@ static int64_t sq(int64_t x)
     return x * x;
 }
 
-void Canvas::render(const Arc &arc, bool interactive)
+void Canvas::render(const Arc &arc, bool interactive, ColorP co)
 {
     Coordf a(arc.from->position);   // ,b,c;
     Coordf b(arc.to->position);     // ,b,c;
@@ -592,7 +597,7 @@ void Canvas::render(const Arc &arc, bool interactive)
     float radius1 = sqrt(sq(c.x - b.x) + sq(c.y - b.y));
     float a0 = atan2f(a.y - c.y, a.x - c.x);
     float a1 = atan2f(b.y - c.y, b.x - c.x);
-    auto bb = draw_arc2(c, radius0, a0, radius1, a1, ColorP::FROM_LAYER, arc.layer, true, arc.width);
+    auto bb = draw_arc2(c, radius0, a0, radius1, a1, co, arc.layer, true, arc.width);
     Coordf t(radius0, radius0);
     if (interactive)
         selectables.append(arc.uuid, ObjectType::ARC, c, bb.first, bb.second, 0, arc.layer);
@@ -602,7 +607,7 @@ void Canvas::render(const SchematicSymbol &sym)
 {
     transform = sym.placement;
     object_refs_current.emplace_back(ObjectType::SCHEMATIC_SYMBOL, sym.uuid);
-    render(sym.symbol, true, sym.smashed);
+    render(sym.symbol, true, sym.smashed, ColorP::FROM_LAYER);
     object_refs_current.pop_back();
     for (const auto &it : sym.symbol.pins) {
         targets.emplace_back(UUIDPath<2>(sym.uuid, it.second.uuid), ObjectType::SYMBOL_PIN,
@@ -612,7 +617,11 @@ void Canvas::render(const SchematicSymbol &sym)
     selectables.append(sym.uuid, ObjectType::SCHEMATIC_SYMBOL, {0, 0}, bb.first, bb.second);
     transform.reset();
 
-    if (sym.component && sym.component->nopopulate) {
+    for (const auto &it : sym.texts) {
+        render(*it, true, ColorP::FROM_LAYER);
+    }
+
+    if (sym.component->nopopulate) {
         transform = sym.placement;
         draw_line(bb.first - Coordi(0.2_mm, 0.2_mm), bb.second + Coordi(0.2_mm, 0.2_mm), ColorP::NOPOPULATE_X, 0, true,
                   0.2_mm);
@@ -622,7 +631,7 @@ void Canvas::render(const SchematicSymbol &sym)
     }
 }
 
-void Canvas::render(const Text &text, bool interactive)
+void Canvas::render(const Text &text, bool interactive, ColorP co)
 {
     bool rev = layer_provider->get_layers().at(text.layer).reverse;
     transform_save();
@@ -635,8 +644,7 @@ void Canvas::render(const Text &text, bool interactive)
     img_patch_type(PatchType::TEXT);
     triangle_type_current = Triangle::Type::TEXT;
     auto extents = draw_text0(transform.shift, text.size, text.overridden ? text.text_override : text.text, angle, rev,
-                              text.origin, ColorP::FROM_LAYER, text.layer, text.width, true, text.font, false,
-                              transform.mirror);
+                              text.origin, co, text.layer, text.width, true, text.font, false, transform.mirror);
     triangle_type_current = Triangle::Type::NONE;
     // img_text_extents(text, extents);
     img_patch_type(PatchType::OTHER);
@@ -749,7 +757,7 @@ static const Coordf coordf_from_pt(const TPPLPoint &p)
     return Coordf(p.x, p.y);
 }
 
-void Canvas::render(const Polygon &ipoly, bool interactive)
+void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
 {
     img_polygon(ipoly);
     if (img_mode)
@@ -764,25 +772,25 @@ void Canvas::render(const Polygon &ipoly, bool interactive)
         triangle_type_current = Triangle::Type::PLANE;
         auto tris = fragment_cache.get_triangles(*plane);
         for (const auto &tri : tris) {
-            add_triangle(poly.layer, tri[0], tri[1], tri[2], ColorP::FROM_LAYER);
+            add_triangle(poly.layer, tri[0], tri[1], tri[2], co);
         }
         for (const auto &frag : plane->fragments) {
-            ColorP co = ColorP::FROM_LAYER;
+            ColorP co_orphan = co;
             if (frag.orphan == true)
-                co = ColorP::FRAG_ORPHAN;
+                co_orphan = ColorP::FRAG_ORPHAN;
 
             for (const auto &path : frag.paths) {
                 for (size_t i = 0; i < path.size(); i++) {
                     auto &c0 = path[i];
                     auto &c1 = path[(i + 1) % path.size()];
-                    draw_line(Coordf(c0.X, c0.Y), Coordf(c1.X, c1.Y), co, poly.layer);
+                    draw_line(Coordf(c0.X, c0.Y), Coordf(c1.X, c1.Y), co_orphan, poly.layer);
                 }
             }
         }
         if (plane->fragments.size() == 0) { // empty, draw poly outline
             for (size_t i = 0; i < poly.vertices.size(); i++) {
-                draw_line(poly.vertices[i].position, poly.vertices[(i + 1) % poly.vertices.size()].position,
-                          ColorP::FROM_LAYER, poly.layer);
+                draw_line(poly.vertices[i].position, poly.vertices[(i + 1) % poly.vertices.size()].position, co,
+                          poly.layer);
             }
         }
         triangle_type_current = Triangle::Type::NONE;
@@ -809,11 +817,11 @@ void Canvas::render(const Polygon &ipoly, bool interactive)
             Coordf p0 = transform.transform(coordf_from_pt(tri[0]));
             Coordf p1 = transform.transform(coordf_from_pt(tri[1]));
             Coordf p2 = transform.transform(coordf_from_pt(tri[2]));
-            add_triangle(poly.layer, p0, p1, p2, ColorP::FROM_LAYER);
+            add_triangle(poly.layer, p0, p1, p2, co);
         }
         for (size_t i = 0; i < poly.vertices.size(); i++) {
-            draw_line(poly.vertices[i].position, poly.vertices[(i + 1) % poly.vertices.size()].position,
-                      ColorP::FROM_LAYER, poly.layer);
+            draw_line(poly.vertices[i].position, poly.vertices[(i + 1) % poly.vertices.size()].position, co,
+                      poly.layer);
         }
         triangle_type_current = Triangle::Type::NONE;
     }
@@ -941,7 +949,7 @@ void Canvas::render(const Pad &pad)
     transform_restore();
 }
 
-void Canvas::render(const Symbol &sym, bool on_sheet, bool smashed)
+void Canvas::render(const Symbol &sym, bool on_sheet, bool smashed, ColorP co)
 {
     if (!on_sheet) {
         for (const auto &it : sym.junctions) {
@@ -952,33 +960,34 @@ void Canvas::render(const Symbol &sym, bool on_sheet, bool smashed)
             }
         }
     }
+
     for (const auto &it : sym.lines) {
-        render(it.second, !on_sheet);
+        render(it.second, !on_sheet, co);
     }
 
     if (object_refs_current.size() && object_refs_current.back().type == ObjectType::SCHEMATIC_SYMBOL) {
         auto sym_uuid = object_refs_current.back().uuid;
         for (const auto &it : sym.pins) {
             object_refs_current.emplace_back(ObjectType::SYMBOL_PIN, it.second.uuid, sym_uuid);
-            render(it.second, !on_sheet);
+            render(it.second, !on_sheet, co);
             object_refs_current.pop_back();
         }
     }
     else {
         for (const auto &it : sym.pins) {
-            render(it.second, !on_sheet);
+            render(it.second, !on_sheet, co);
         }
     }
 
     for (const auto &it : sym.arcs) {
-        render(it.second, !on_sheet);
+        render(it.second, !on_sheet, co);
     }
     for (const auto &it : sym.polygons) {
-        render(it.second, !on_sheet);
+        render(it.second, !on_sheet, co);
     }
     if (!smashed) {
         for (const auto &it : sym.texts) {
-            render(it.second, !on_sheet);
+            render(it.second, !on_sheet, co);
         }
     }
 }
@@ -998,7 +1007,8 @@ void Canvas::render(const Sheet &sheet)
         render(it.second);
     }
     for (const auto &it : sheet.texts) {
-        render(it.second);
+        if (!it.second.from_smash)
+            render(it.second);
     }
     for (const auto &it : sheet.net_labels) {
         render(it.second);
