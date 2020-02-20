@@ -165,6 +165,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::REFDES, {ObjectProperty::Type::STRING, "Ref. Desig.", 0}},
                   {ObjectProperty::ID::VALUE, {ObjectProperty::Type::STRING, "Value", 2}},
                   {ObjectProperty::ID::MPN, {ObjectProperty::Type::STRING_RO, "MPN", 1}},
+                  {ObjectProperty::ID::NOPOPULATE, {ObjectProperty::Type::BOOL, "Do not pop.", 3}},
           }}},
         {ObjectType::NET,
          {"Net",

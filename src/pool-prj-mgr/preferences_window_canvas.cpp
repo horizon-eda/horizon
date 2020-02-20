@@ -34,6 +34,7 @@ static const std::map<ColorP, std::string> color_names = {
         {ColorP::PIN, "Pin"},
         {ColorP::PIN_HIDDEN, "Hidden Pin"},
         {ColorP::DIFFPAIR, "Diff. pair"},
+        {ColorP::NOPOPULATE_X, "Do not pop. X-out"},
         {ColorP::BACKGROUND, "Background"},
         {ColorP::GRID, "Grid"},
         {ColorP::CURSOR_NORMAL, "Cursor"},
@@ -51,8 +52,9 @@ static const std::map<ColorP, std::string> color_names = {
         {ColorP::SHADOW, "Highlight shadow"},
 };
 
-static const std::set<ColorP> colors_non_layer = {ColorP::NET, ColorP::BUS,        ColorP::FRAME,
-                                                  ColorP::PIN, ColorP::PIN_HIDDEN, ColorP::DIFFPAIR};
+static const std::set<ColorP> colors_non_layer = {ColorP::NET,         ColorP::BUS,        ColorP::FRAME,
+                                                  ColorP::PIN,         ColorP::PIN_HIDDEN, ColorP::DIFFPAIR,
+                                                  ColorP::NOPOPULATE_X};
 
 static const std::set<ColorP> colors_layer = {ColorP::FRAG_ORPHAN, ColorP::AIRWIRE_ROUTER, ColorP::TEXT_OVERLAY,
                                               ColorP::HOLE,        ColorP::DIMENSION,      ColorP::AIRWIRE,

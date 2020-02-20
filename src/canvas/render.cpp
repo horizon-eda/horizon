@@ -611,6 +611,15 @@ void Canvas::render(const SchematicSymbol &sym)
     auto bb = sym.symbol.get_bbox();
     selectables.append(sym.uuid, ObjectType::SCHEMATIC_SYMBOL, {0, 0}, bb.first, bb.second);
     transform.reset();
+
+    if (sym.component && sym.component->nopopulate) {
+        transform = sym.placement;
+        draw_line(bb.first - Coordi(0.2_mm, 0.2_mm), bb.second + Coordi(0.2_mm, 0.2_mm), ColorP::NOPOPULATE_X, 0, true,
+                  0.2_mm);
+        draw_line(Coordi(bb.first.x, bb.second.y) + Coordi(-0.2_mm, 0.2_mm),
+                  Coordi(bb.second.x, bb.first.y) + Coordi(0.2_mm, -0.2_mm), ColorP::NOPOPULATE_X, 0, true, 0.2_mm);
+        transform.reset();
+    }
 }
 
 void Canvas::render(const Text &text, bool interactive)
