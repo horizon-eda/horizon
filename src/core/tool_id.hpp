@@ -130,6 +130,8 @@ enum class ToolID {
     RENUMBER_PADS,
     FIX,
     UNFIX,
+    NOPOPULATE,
+    POPULATE,
     POLYGON_TO_LINE_LOOP
 };
 } // namespace horizon

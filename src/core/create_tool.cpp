@@ -69,6 +69,7 @@
 #include "tools/tool_smash_silkscreen_graphics.hpp"
 #include "tools/tool_renumber_pads.hpp"
 #include "tools/tool_fix.hpp"
+#include "tools/tool_nopopulate.hpp"
 #include "tools/tool_polygon_to_line_loop.hpp"
 
 namespace horizon {
@@ -344,6 +345,10 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::FIX:
     case ToolID::UNFIX:
         return std::make_unique<ToolFix>(this, tool_id);
+
+    case ToolID::NOPOPULATE:
+    case ToolID::POPULATE:
+        return std::make_unique<ToolNoPopulate>(this, tool_id);
 
     case ToolID::POLYGON_TO_LINE_LOOP:
         return std::make_unique<ToolPolygonToLineLoop>(this, tool_id);
