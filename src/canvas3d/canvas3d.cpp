@@ -803,6 +803,7 @@ bool Canvas3D::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
     glDisable(GL_DEPTH_TEST);
     background_renderer.render();
     glEnable(GL_DEPTH_TEST);
+    GL_CHECK_ERROR
 
     layers[20000].offset = get_layer_offset(BoardLayers::TOP_COPPER);
     layers[20000].thickness =
@@ -845,9 +846,11 @@ bool Canvas3D::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
 
     cam_normal = glm::normalize(cam_offset);
     wall_renderer.render();
+    GL_CHECK_ERROR
 
     if (show_models)
         face_renderer.render();
+    GL_CHECK_ERROR
 
     cover_renderer.render();
 

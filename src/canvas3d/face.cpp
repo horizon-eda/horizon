@@ -135,13 +135,17 @@ void FaceRenderer::push()
     glBindBuffer(GL_ARRAY_BUFFER, vbo_instance);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Canvas3D::ModelTransform) * ca->package_transforms.size(),
                  ca->package_transforms.data(), GL_STATIC_DRAW);
+    GL_CHECK_ERROR
 }
 
 void FaceRenderer::render()
 {
     if (ca->models_loading_mutex.try_lock()) {
         glUseProgram(program);
+        GL_CHECK_ERROR
+
         glBindVertexArray(vao);
+        GL_CHECK_ERROR
 
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
         glUniformMatrix4fv(proj_loc, 1, GL_FALSE, glm::value_ptr(ca->projmat));
@@ -151,12 +155,14 @@ void FaceRenderer::render()
         glUniform1f(z_bottom_loc, ca->layers[BoardLayers::BOTTOM_COPPER].offset
                                           + (ca->layers[BoardLayers::BOTTOM_COPPER].explode_mul - 4) * ca->explode);
         glUniform1f(highlight_intensity_loc, ca->highlight_intensity);
+        GL_CHECK_ERROR
 
         for (const auto &it : ca->models) {
             if (ca->package_transform_idxs.count(it.first)) {
                 auto idxs = ca->package_transform_idxs.at(it.first);
                 glDrawElementsInstancedBaseInstance(GL_TRIANGLES, it.second.second, GL_UNSIGNED_INT,
                                                     (void *)(it.second.first * sizeof(int)), idxs.second, idxs.first);
+                GL_CHECK_ERROR
             }
         }
         ca->models_loading_mutex.unlock();
