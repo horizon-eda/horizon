@@ -35,5 +35,7 @@ public:
     CSVSettings csv_settings;
 
     std::string output_filename;
+
+    bool include_nopopulate = true;
 };
 } // namespace horizon

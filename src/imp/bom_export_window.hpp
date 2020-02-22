@@ -42,6 +42,7 @@ private:
     MyExportFileChooser export_filechooser;
 
     Gtk::Button *export_button = nullptr;
+    Gtk::CheckButton *nopopulate_check = nullptr;
     Gtk::ComboBoxText *sort_column_combo = nullptr;
     Gtk::ComboBoxText *sort_order_combo = nullptr;
     Gtk::Revealer *done_revealer = nullptr;

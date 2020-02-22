@@ -60,6 +60,7 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 {
 
     GET_WIDGET(export_button);
+    GET_WIDGET(nopopulate_check);
     GET_WIDGET(filename_button);
     GET_WIDGET(filename_entry);
     GET_WIDGET(sort_column_combo);
@@ -83,6 +84,13 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     export_filechooser.set_project_dir(project_dir);
     export_filechooser.bind_filename(settings->output_filename);
     export_filechooser.signal_changed().connect([this] { s_signal_changed.emit(); });
+
+    nopopulate_check->set_active(settings->include_nopopulate);
+    nopopulate_check->signal_toggled().connect([this] {
+        settings->include_nopopulate = nopopulate_check->get_active();
+        s_signal_changed.emit();
+        update_preview();
+    });
 
     for (const auto &it : bom_column_names) {
         sort_column_combo->append(std::to_string(static_cast<int>(it.first)), it.second);

@@ -303,6 +303,9 @@ std::map<const Part *, BOMRow> Block::get_BOM(const BOMExportSettings &settings)
 {
     std::map<const Part *, BOMRow> rows;
     for (const auto &it : components) {
+        if (it.second.nopopulate && !settings.include_nopopulate) {
+            continue;
+        }
         if (it.second.part) {
             const Part *part;
             if (settings.concrete_parts.count(it.second.part->uuid))
