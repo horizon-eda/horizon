@@ -247,6 +247,19 @@ private:
 
     SelectionMode selection_mode = SelectionMode::HOVER;
 
+    Glib::RefPtr<Gtk::GestureZoom> gesture_zoom;
+    void zoom_gesture_begin_cb(GdkEventSequence *seq);
+    void zoom_gesture_update_cb(GdkEventSequence *seq);
+    Coord<float> gesture_zoom_pos_orig;
+    Coord<float> gesture_zoom_offset_orig;
+    float gesture_zoom_scale_orig = 1;
+
+    Glib::RefPtr<Gtk::GestureDrag> gesture_drag;
+    Coord<float> gesture_drag_offset_orig;
+
+    void drag_gesture_begin_cb(GdkEventSequence *seq);
+    void drag_gesture_update_cb(GdkEventSequence *seq);
+
 protected:
     void on_size_allocate(Gtk::Allocation &alloc) override;
     void on_realize() override;

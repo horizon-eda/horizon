@@ -48,6 +48,63 @@ CanvasGL::CanvasGL()
 
     update_palette_colors();
     layer_colors = appearance.layer_colors;
+
+    gesture_zoom = Gtk::GestureZoom::create(*this);
+    gesture_zoom->signal_begin().connect(sigc::mem_fun(*this, &CanvasGL::zoom_gesture_begin_cb));
+    gesture_zoom->signal_update().connect(sigc::mem_fun(*this, &CanvasGL::zoom_gesture_update_cb));
+    gesture_zoom->set_propagation_phase(Gtk::PHASE_BUBBLE);
+
+    gesture_drag = Gtk::GestureDrag::create(*this);
+    gesture_drag->signal_begin().connect(sigc::mem_fun(*this, &CanvasGL::drag_gesture_begin_cb));
+    gesture_drag->signal_update().connect(sigc::mem_fun(*this, &CanvasGL::drag_gesture_update_cb));
+    gesture_drag->set_propagation_phase(Gtk::PHASE_BUBBLE);
+    gesture_drag->set_touch_only(true);
+}
+
+void CanvasGL::zoom_gesture_begin_cb(GdkEventSequence *seq)
+{
+    if (pan_dragging) {
+        gesture_zoom->set_state(Gtk::EVENT_SEQUENCE_DENIED);
+        return;
+    }
+    gesture_zoom_scale_orig = scale;
+    gesture_zoom_offset_orig = offset;
+    double cx, cy;
+    gesture_zoom->get_bounding_box_center(cx, cy);
+    gesture_zoom_pos_orig = Coordf(cx, cy);
+    gesture_zoom->set_state(Gtk::EVENT_SEQUENCE_CLAIMED);
+}
+
+void CanvasGL::zoom_gesture_update_cb(GdkEventSequence *seq)
+{
+    auto delta = gesture_zoom->get_scale_delta();
+    double cx, cy;
+    gesture_zoom->get_bounding_box_center(cx, cy);
+    set_scale(cx, cy, gesture_zoom_scale_orig * delta);
+    offset = gesture_zoom_offset_orig + Coordf(cx, cy) - gesture_zoom_pos_orig;
+    update_viewmat();
+    queue_draw();
+}
+
+void CanvasGL::drag_gesture_begin_cb(GdkEventSequence *seq)
+{
+    inhibit_drag_selection();
+    if (pan_dragging) {
+        gesture_drag->set_state(Gtk::EVENT_SEQUENCE_DENIED);
+    }
+    else {
+        gesture_drag_offset_orig = offset;
+        gesture_drag->set_state(Gtk::EVENT_SEQUENCE_CLAIMED);
+    }
+}
+void CanvasGL::drag_gesture_update_cb(GdkEventSequence *seq)
+{
+    double x, y;
+    if (gesture_drag->get_offset(x, y)) {
+        offset = gesture_drag_offset_orig + Coordf(x, y);
+        update_viewmat();
+        queue_draw();
+    }
 }
 
 void CanvasGL::on_size_allocate(Gtk::Allocation &alloc)

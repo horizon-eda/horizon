@@ -6,6 +6,9 @@
 namespace horizon {
 void CanvasGL::pan_drag_begin(GdkEventButton *button_event)
 {
+    if (gesture_zoom->is_recognized() || gesture_drag->is_recognized())
+        return;
+
     gdouble x, y;
     gdk_event_get_coords((GdkEvent *)button_event, &x, &y);
     if (button_event->button == 2 || (button_event->button == 1 && (button_event->state & Gdk::SHIFT_MASK))) {
@@ -84,6 +87,10 @@ void CanvasGL::set_scale(float x, float y, float scale_new)
         pan_offset_orig.x += xi;
         pan_offset_orig.y += yi;
     }
+    if (gesture_zoom->is_recognized()) {
+        gesture_zoom_offset_orig.x += xi;
+        gesture_zoom_offset_orig.y += yi;
+    }
     update_viewmat();
     queue_draw();
 }
@@ -118,6 +125,8 @@ static int tick_cb(GtkWidget *cwidget, GdkFrameClock *frame_clock, gpointer user
 
 void CanvasGL::pan_zoom(GdkEventScroll *scroll_event, bool to_cursor)
 {
+    if (gesture_zoom->is_recognized() || gesture_drag->is_recognized())
+        return;
     gdouble x, y;
     if (to_cursor) {
         gdk_event_get_coords((GdkEvent *)scroll_event, &x, &y);
