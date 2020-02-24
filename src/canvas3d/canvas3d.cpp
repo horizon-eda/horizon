@@ -35,7 +35,30 @@ Canvas3D::Canvas3D()
         request_push();
         s_signal_models_loading.emit(false);
     });
+
+    gesture_drag = Gtk::GestureDrag::create(*this);
+    gesture_drag->signal_begin().connect(sigc::mem_fun(*this, &Canvas3D::drag_gesture_begin_cb));
+    gesture_drag->signal_update().connect(sigc::mem_fun(*this, &Canvas3D::drag_gesture_update_cb));
+    gesture_drag->set_propagation_phase(Gtk::PHASE_CAPTURE);
+    gesture_drag->set_touch_only(true);
+
+    gesture_zoom = Gtk::GestureZoom::create(*this);
+    gesture_zoom->signal_begin().connect(sigc::mem_fun(*this, &Canvas3D::zoom_gesture_begin_cb));
+    gesture_zoom->signal_update().connect(sigc::mem_fun(*this, &Canvas3D::zoom_gesture_update_cb));
+    gesture_zoom->set_propagation_phase(Gtk::PHASE_CAPTURE);
+
+    gesture_rotate = Gtk::GestureRotate::create(*this);
+    gesture_rotate->signal_begin().connect(sigc::mem_fun(*this, &Canvas3D::rotate_gesture_begin_cb));
+    gesture_rotate->signal_update().connect(sigc::mem_fun(*this, &Canvas3D::rotate_gesture_update_cb));
+    gesture_rotate->set_propagation_phase(Gtk::PHASE_CAPTURE);
 }
+
+glm::vec2 Canvas3D::get_center_shift(const glm::vec2 &shift) const
+{
+    return glm::rotate(glm::mat2(1, 0, 0, sin(glm::radians(cam_elevation))) * shift * 0.1218f * cam_distance / 105.f,
+                       glm::radians(cam_azimuth - 90));
+}
+
 
 void Canvas3D::set_appearance(const Appearance &a)
 {
@@ -73,25 +96,27 @@ bool Canvas3D::on_button_press_event(GdkEventButton *button_event)
     return Gtk::GLArea::on_button_press_event(button_event);
 }
 
+void Canvas3D::fix_cam_elevation()
+{
+    while (cam_elevation >= 360)
+        cam_elevation -= 360;
+    while (cam_elevation < 0)
+        cam_elevation += 360;
+    if (cam_elevation > 180)
+        cam_elevation -= 360;
+}
+
 bool Canvas3D::on_motion_notify_event(GdkEventMotion *motion_event)
 {
     auto delta = glm::mat2(1, 0, 0, -1) * (glm::vec2(motion_event->x, motion_event->y) - pointer_pos_orig);
     if (pan_mode == PanMode::ROTATE) {
         cam_azimuth = cam_azimuth_orig - (delta.x / width) * 360;
         cam_elevation = cam_elevation_orig - (delta.y / height) * 90;
-        while (cam_elevation >= 360)
-            cam_elevation -= 360;
-        while (cam_elevation < 0)
-            cam_elevation += 360;
-        if (cam_elevation > 180)
-            cam_elevation -= 360;
+        fix_cam_elevation();
         queue_draw();
     }
     else if (pan_mode == PanMode::MOVE) {
-        center = center_orig
-                 + glm::rotate(glm::mat2(1, 0, 0, sin(glm::radians(cam_elevation))) * delta * 0.1f * cam_distance
-                                       / 105.f,
-                               glm::radians(cam_azimuth - 90));
+        center = center_orig + get_center_shift(delta);
         queue_draw();
     }
     return Gtk::GLArea::on_motion_notify_event(motion_event);
@@ -101,6 +126,71 @@ bool Canvas3D::on_button_release_event(GdkEventButton *button_event)
 {
     pan_mode = PanMode::NONE;
     return Gtk::GLArea::on_button_release_event(button_event);
+}
+
+void Canvas3D::drag_gesture_begin_cb(GdkEventSequence *seq)
+{
+    if (pan_mode != PanMode::NONE) {
+        gesture_drag->set_state(Gtk::EVENT_SEQUENCE_DENIED);
+    }
+    else {
+        gesture_drag_center_orig = center;
+        gesture_drag->set_state(Gtk::EVENT_SEQUENCE_CLAIMED);
+    }
+}
+void Canvas3D::drag_gesture_update_cb(GdkEventSequence *seq)
+{
+    double x, y;
+    if (gesture_drag->get_offset(x, y)) {
+        center = gesture_drag_center_orig + get_center_shift({x, -y});
+        queue_draw();
+    }
+}
+
+void Canvas3D::zoom_gesture_begin_cb(GdkEventSequence *seq)
+{
+    if (pan_mode != PanMode::NONE) {
+        gesture_zoom->set_state(Gtk::EVENT_SEQUENCE_DENIED);
+        return;
+    }
+    gesture_zoom_cam_dist_orig = cam_distance;
+    gesture_zoom->set_state(Gtk::EVENT_SEQUENCE_CLAIMED);
+}
+
+void Canvas3D::zoom_gesture_update_cb(GdkEventSequence *seq)
+{
+    auto delta = gesture_zoom->get_scale_delta();
+    cam_distance = gesture_zoom_cam_dist_orig / delta;
+    queue_draw();
+}
+
+void Canvas3D::rotate_gesture_begin_cb(GdkEventSequence *seq)
+{
+    if (pan_mode != PanMode::NONE) {
+        gesture_zoom->set_state(Gtk::EVENT_SEQUENCE_DENIED);
+        return;
+    }
+    gesture_rotate_cam_azimuth_orig = cam_azimuth;
+    gesture_rotate_cam_elevation_orig = cam_elevation;
+    double cx, cy;
+    gesture_rotate->get_bounding_box_center(cx, cy);
+    gesture_rotate_pos_orig = glm::vec2(cx, cy);
+    gesture_zoom->set_state(Gtk::EVENT_SEQUENCE_CLAIMED);
+}
+
+void Canvas3D::rotate_gesture_update_cb(GdkEventSequence *seq)
+{
+    auto delta = gesture_rotate->get_angle_delta();
+    if (cam_elevation < 0)
+        delta *= -1;
+    cam_azimuth = gesture_rotate_cam_azimuth_orig + glm::degrees(delta);
+    inc_cam_azimuth(0);
+    double cx, cy;
+    gesture_rotate->get_bounding_box_center(cx, cy);
+    auto dy = cy - gesture_rotate_pos_orig.y;
+    cam_elevation = gesture_rotate_cam_elevation_orig + (dy / height) * 180;
+    fix_cam_elevation();
+    queue_draw();
 }
 
 int Canvas3D::_animate_step(GdkFrameClock *frame_clock)

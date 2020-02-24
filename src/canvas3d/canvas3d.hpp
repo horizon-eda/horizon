@@ -146,6 +146,25 @@ private:
     bool on_button_release_event(GdkEventButton *button_event) override;
     bool on_scroll_event(GdkEventScroll *scroll_event) override;
 
+    Glib::RefPtr<Gtk::GestureDrag> gesture_drag;
+    glm::vec2 gesture_drag_center_orig;
+    glm::vec2 get_center_shift(const glm::vec2 &shift) const;
+    void drag_gesture_begin_cb(GdkEventSequence *seq);
+    void drag_gesture_update_cb(GdkEventSequence *seq);
+
+    Glib::RefPtr<Gtk::GestureZoom> gesture_zoom;
+    float gesture_zoom_cam_dist_orig = 1;
+    void zoom_gesture_begin_cb(GdkEventSequence *seq);
+    void zoom_gesture_update_cb(GdkEventSequence *seq);
+
+    Glib::RefPtr<Gtk::GestureRotate> gesture_rotate;
+    float gesture_rotate_cam_azimuth_orig = 0;
+    float gesture_rotate_cam_elevation_orig = 0;
+    glm::vec2 gesture_rotate_pos_orig;
+    void rotate_gesture_begin_cb(GdkEventSequence *seq);
+    void rotate_gesture_update_cb(GdkEventSequence *seq);
+    void fix_cam_elevation();
+
     glm::vec2 pointer_pos_orig;
     float cam_azimuth_orig;
     float cam_elevation_orig;
