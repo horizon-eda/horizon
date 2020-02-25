@@ -623,10 +623,12 @@ void Canvas::render(const SchematicSymbol &sym)
 
     if (sym.component->nopopulate) {
         transform = sym.placement;
+        img_auto_line = img_mode;
         draw_line(bb.first - Coordi(0.2_mm, 0.2_mm), bb.second + Coordi(0.2_mm, 0.2_mm), ColorP::NOPOPULATE_X, 0, true,
                   0.2_mm);
         draw_line(Coordi(bb.first.x, bb.second.y) + Coordi(-0.2_mm, 0.2_mm),
                   Coordi(bb.second.x, bb.first.y) + Coordi(0.2_mm, -0.2_mm), ColorP::NOPOPULATE_X, 0, true, 0.2_mm);
+        img_auto_line = false;
         transform.reset();
     }
 }
