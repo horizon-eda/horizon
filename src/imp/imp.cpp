@@ -850,6 +850,7 @@ void ImpBase::hud_update()
     if (sel.size()) {
         std::string hud_text = get_hud_text(sel);
         trim(hud_text);
+        hud_text += "\n\n";
         hud_text += ImpBase::get_hud_text(sel);
         trim(hud_text);
         main_window->hud_update(hud_text);
@@ -904,6 +905,24 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
             }
         }
     }
+
+    if (sel_count_type(sel, ObjectType::TEXT) == 1) {
+        const auto text = core->get_text(sel_find_one(sel, ObjectType::TEXT));
+        const auto txt = Glib::ustring(text->text);
+        auto regex = Glib::Regex::create(R"(https?:\/\/([\w\.-]+)(\/\S+)?)");
+        Glib::MatchInfo ma;
+        if (regex->match(txt, ma)) {
+            s += "\n\n<b>Text with links</b>\n";
+            do {
+                auto url = ma.fetch(0);
+                auto domain = ma.fetch(1);
+                s += "<a href=\"" + Glib::Markup::escape_text(url) + "\" title=\""
+                     + Glib::Markup::escape_text(Glib::Markup::escape_text(url)) + "\">" + domain + "</a>\n";
+            } while (ma.next());
+            sel_erase_type(sel, ObjectType::TEXT);
+        }
+    }
+
     trim(s);
     if (sel.size()) {
         s += "\n\n<b>Others:</b>\n";
