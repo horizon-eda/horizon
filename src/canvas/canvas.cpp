@@ -249,7 +249,7 @@ std::pair<Coordf, Coordf> Canvas::get_bbox(bool visible_only) const
 {
     Coordf a, b;
     for (const auto &it : triangles) {
-        if (visible_only == false || layer_display.at(it.first).visible) {
+        if (visible_only == false || get_layer_display(it.first).visible) {
             for (const auto &it2 : it.second) {
                 if (it2.flags & Triangle::FLAG_GLYPH)
                     continue;
