@@ -18,8 +18,18 @@
 #include "pool-mgr/view_create_pool.hpp"
 #include "common/common.hpp"
 #include <git2/types.h>
-#include <git2/deprecated.h>
+#include <git2/version.h>
 
+
+#define CHECK_LIBGIT_VERSION(major, minor, rev)                                                                        \
+    (LIBGIT2_VER_MAJOR > (major) || (LIBGIT2_VER_MAJOR == (major) && LIBGIT2_VER_MINOR > (minor))                      \
+     || (LIBGIT2_VER_MAJOR == (major) && LIBGIT2_VER_MINOR == (minor) && LIBGIT2_VER_REVISION >= (rev)))
+
+#if CHECK_LIBGIT_VERSION(0, 28, 0)
+#include <git2/deprecated.h>
+#endif
+
+#undef CHECK_LIBGIT_VERSION
 
 namespace horizon {
 using json = nlohmann::json;
