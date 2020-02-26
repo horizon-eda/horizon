@@ -18,6 +18,7 @@
 #include "pool-mgr/view_create_pool.hpp"
 #include "common/common.hpp"
 #include <git2/types.h>
+#include <git2/deprecated.h>
 
 
 namespace horizon {
