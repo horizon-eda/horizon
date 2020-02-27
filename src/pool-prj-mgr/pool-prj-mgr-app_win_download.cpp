@@ -2,8 +2,6 @@
 #include "util/github_client.hpp"
 #include "pool-update/pool-update.hpp"
 #include <thread>
-#include <git2.h>
-#include <git2/clone.h>
 #include "pool/pool.hpp"
 #include "util/util.hpp"
 #include "util/autofree_ptr.hpp"

@@ -5,7 +5,7 @@
 #include "util/uuid.hpp"
 #include "common/common.hpp"
 #include "nlohmann/json.hpp"
-#include <git2/sys/repository.h>
+#include <git2.h>
 
 namespace horizon {
 using json = nlohmann::json;

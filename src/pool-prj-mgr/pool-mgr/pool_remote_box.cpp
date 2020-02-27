@@ -1,7 +1,6 @@
 #include "pool_remote_box.hpp"
 #include <git2.h>
 #include <git2/cred_helpers.h>
-#include <git2/sys/repository.h>
 #include "util/autofree_ptr.hpp"
 #include "util/gtk_util.hpp"
 #include "pool_notebook.hpp"
