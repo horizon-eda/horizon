@@ -1011,6 +1011,10 @@ std::map<const BoardPackage *, PnPRow> Board::get_PnP(const PnPExportSettings &s
 {
     std::map<const BoardPackage *, PnPRow> r;
     for (const auto &it : packages) {
+        if (it.second.component->nopopulate && !settings.include_nopopulate) {
+            continue;
+        }
+
         PnPRow row;
         row.refdes = it.second.component->refdes;
         row.package = it.second.package.name;

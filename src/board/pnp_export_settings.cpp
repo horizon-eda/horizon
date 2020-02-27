@@ -9,7 +9,8 @@ const LutEnumStr<PnPExportSettings::Mode> PnPExportSettings::mode_lut = {
 };
 
 PnPExportSettings::PnPExportSettings(const json &j)
-    : mode(mode_lut.lookup(j.at("mode"))), output_directory(j.at("output_directory").get<std::string>()),
+    : mode(mode_lut.lookup(j.at("mode"))), include_nopopulate(j.value("include_nopopulate", true)),
+      output_directory(j.at("output_directory").get<std::string>()),
       filename_top(j.at("filename_top").get<std::string>()),
       filename_bottom(j.at("filename_bottom").get<std::string>()),
       filename_merged(j.at("filename_merged").get<std::string>())
@@ -28,6 +29,9 @@ json PnPExportSettings::serialize() const
 {
     json j;
     j["mode"] = mode_lut.lookup_reverse(mode);
+    if (!include_nopopulate) {
+        j["include_nopopulate"] = false;
+    }
     j["output_directory"] = output_directory;
     j["filename_top"] = filename_top;
     j["filename_bottom"] = filename_bottom;

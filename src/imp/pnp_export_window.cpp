@@ -50,6 +50,7 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_WIDGET(done_label);
     GET_WIDGET(done_revealer);
     GET_WIDGET(mode_combo);
+    GET_WIDGET(nopopulate_check);
     GET_WIDGET(filename_merged_entry);
     GET_WIDGET(filename_top_entry);
     GET_WIDGET(filename_bottom_entry);
@@ -73,6 +74,13 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
         s_signal_changed.emit();
     });
     update_filename_visibility();
+
+    nopopulate_check->set_active(settings.include_nopopulate);
+    nopopulate_check->signal_toggled().connect([this] {
+        settings.include_nopopulate = nopopulate_check->get_active();
+        s_signal_changed.emit();
+        update_preview();
+    });
 
     {
         Gtk::Box *column_chooser_box;
