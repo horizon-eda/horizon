@@ -714,6 +714,14 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Unfix package", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::NOPOPULATE},
+         {"Mark do not populate", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::POPULATE},
+         {"Mark populate", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::POLYGON_TO_LINE_LOOP},
          {"Polygon to line loop", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -970,6 +978,8 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(RENUMBER_PADS),
         TOOL_LUT_ITEM(FIX),
         TOOL_LUT_ITEM(UNFIX),
+        TOOL_LUT_ITEM(NOPOPULATE),
+        TOOL_LUT_ITEM(POPULATE),
         TOOL_LUT_ITEM(POLYGON_TO_LINE_LOOP),
 };
 } // namespace horizon

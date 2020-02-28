@@ -286,6 +286,13 @@ bool CoreSchematic::get_property(ObjectType type, const UUID &uu, ObjectProperty
                 dynamic_cast<PropertyValueString &>(value).value = "<no part>";
             return true;
 
+        case ObjectProperty::ID::NOPOPULATE:
+            if (block.components.at(uu).part)
+                dynamic_cast<PropertyValueBool &>(value).value = comp->nopopulate;
+            else
+                dynamic_cast<PropertyValueBool &>(value).value = false;
+            return true;
+
         default:
             return false;
         }
@@ -342,6 +349,10 @@ bool CoreSchematic::set_property(ObjectType type, const UUID &uu, ObjectProperty
             if (comp->part)
                 return false;
             comp->value = dynamic_cast<const PropertyValueString &>(value).value;
+            break;
+
+        case ObjectProperty::ID::NOPOPULATE:
+            comp->nopopulate = dynamic_cast<const PropertyValueBool &>(value).value;
             break;
 
         default:

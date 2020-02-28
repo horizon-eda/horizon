@@ -24,6 +24,8 @@ public:
 
     static const LutEnumStr<Mode> mode_lut;
 
+    bool include_nopopulate = true;
+
     std::string output_directory;
 
     std::string filename_top;

@@ -50,6 +50,7 @@ public:
     std::string value;
     UUID group;
     UUID tag;
+    bool nopopulate = false;
 
     /**
      * which Nins are connected to which Net

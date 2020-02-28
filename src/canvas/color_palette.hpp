@@ -19,6 +19,7 @@ enum class ColorP {
     DIFFPAIR,
     SHADOW,
     CONNECTION_LINE,
+    NOPOPULATE_X,
     N_COLORS,
     // colors after N_COLORS aren't part of the UBO
     BACKGROUND,

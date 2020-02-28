@@ -41,6 +41,7 @@ private:
     Gtk::Button *directory_button = nullptr;
 
     Gtk::ComboBoxText *mode_combo = nullptr;
+    Gtk::CheckButton *nopopulate_check = nullptr;
     Gtk::Label *filename_merged_label = nullptr;
     Gtk::Label *filename_top_label = nullptr;
     Gtk::Label *filename_bottom_label = nullptr;

@@ -35,7 +35,7 @@ Connection::Connection(const json &j, Block *block)
 
 Component::Component(const UUID &uu, const json &j, Pool &pool, Block *block)
     : uuid(uu), entity(pool.get_entity(j.at("entity").get<std::string>())), refdes(j.at("refdes").get<std::string>()),
-      value(j.at("value").get<std::string>())
+      value(j.at("value").get<std::string>()), nopopulate(j.value("nopopulate", false))
 {
     if (j.count("part")) {
         part = pool.get_part(j.at("part").get<std::string>());
@@ -158,6 +158,9 @@ json Component::serialize() const
     j["group"] = (std::string)group;
     j["tag"] = (std::string)tag;
     j["connections"] = json::object();
+    if (nopopulate) {
+        j["nopopulate"] = true;
+    }
     if (part != nullptr) {
         j["part"] = part->uuid;
     }

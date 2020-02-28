@@ -236,6 +236,7 @@ SRC_IMP = \
 	src/core/tools/tool_smash_silkscreen_graphics.cpp\
 	src/core/tools/tool_renumber_pads.cpp\
 	src/core/tools/tool_fix.cpp\
+	src/core/tools/tool_nopopulate.cpp\
 	src/core/tools/tool_polygon_to_line_loop.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard.cpp\

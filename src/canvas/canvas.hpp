@@ -79,11 +79,11 @@ protected:
 
     std::map<ObjectRef, std::map<int, std::pair<size_t, size_t>>> object_refs;
     std::vector<ObjectRef> object_refs_current;
-    void render(const class Symbol &sym, bool on_sheet = false, bool smashed = false);
+    void render(const class Symbol &sym, bool on_sheet = false, bool smashed = false, ColorP co = ColorP::FROM_LAYER);
     void render(const class Junction &junc, bool interactive = true, ObjectType mode = ObjectType::INVALID);
-    void render(const class Line &line, bool interactive = true);
-    void render(const class SymbolPin &pin, bool interactive = true);
-    void render(const class Arc &arc, bool interactive = true);
+    void render(const class Line &line, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
+    void render(const class SymbolPin &pin, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
+    void render(const class Arc &arc, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
     void render(const class Sheet &sheet);
     void render(const class SchematicSymbol &sym);
     void render(const class LineNet &line);
@@ -92,9 +92,9 @@ protected:
     void render(const class Warning &warn);
     void render(const class PowerSymbol &sym);
     void render(const class BusRipper &ripper);
-    void render(const class Text &text, bool interactive = true);
+    void render(const class Text &text, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
     void render(const class Padstack &padstack, bool interactive = true);
-    void render(const class Polygon &polygon, bool interactive = true);
+    void render(const class Polygon &polygon, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
     void render(const class Shape &shape, bool interactive = true);
     void render(const class Hole &hole, bool interactive = true);
     void render(const class Package &package, bool interactive = true, bool smashed = false,

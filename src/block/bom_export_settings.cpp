@@ -11,7 +11,8 @@ const LutEnumStr<BOMExportSettings::CSVSettings::Order> bom_order_lut = {
 };
 
 BOMExportSettings::BOMExportSettings(const json &j, Pool &pool)
-    : csv_settings(j.at("csv_settings")), output_filename(j.at("output_filename").get<std::string>())
+    : csv_settings(j.at("csv_settings")), output_filename(j.at("output_filename").get<std::string>()),
+      include_nopopulate(j.value("include_nopopulate", true))
 {
     if (j.count("orderable_MPNs")) {
         const json &o = j["orderable_MPNs"];
@@ -54,6 +55,8 @@ json BOMExportSettings::serialize() const
     for (const auto &it : concrete_parts) {
         j["concrete_parts"][(std::string)it.first] = (std::string)it.second->uuid;
     }
+    if (!include_nopopulate)
+        j["include_nopopulate"] = false;
     return j;
 }
 
