@@ -321,7 +321,9 @@ void BOMExportWindow::update_orderable_MPNs()
             delete ch;
         }
     }
-    auto rows = block->get_BOM(*settings);
+    BOMExportSettings my_settings(*settings);
+    my_settings.include_nopopulate = true;
+    auto rows = block->get_BOM(my_settings);
     for (const auto &row : rows) {
         auto part = row.first;
         if (part->orderable_MPNs.size()) {
