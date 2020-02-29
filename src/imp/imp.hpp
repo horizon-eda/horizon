@@ -208,6 +208,7 @@ private:
     KeySequence keys_current;
     bool handle_action_key(GdkEventKey *ev);
     void handle_tool_action(const ActionConnection &conn);
+    void handle_select_polygon(const ActionConnection &a);
 
     void handle_search();
     void search_go(int dir);

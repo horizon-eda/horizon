@@ -752,6 +752,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::FILTER_AIRWIRES, ToolID::NONE},
          {"Filter airwires", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_SPECIFIC}},
+
+        {{ActionID::SELECT_POLYGON, ToolID::NONE},
+         {"Select polygon", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -847,6 +851,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(RESET_AIRWIRE_FILTER),
         ACTION_LUT_ITEM(FILTER_AIRWIRES),
         ACTION_LUT_ITEM(AIRWIRE_FILTER_WINDOW),
+        ACTION_LUT_ITEM(SELECT_POLYGON),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

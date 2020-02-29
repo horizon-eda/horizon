@@ -82,7 +82,8 @@ enum class ActionID {
     EXPORT_PNP,
     RESET_AIRWIRE_FILTER,
     FILTER_AIRWIRES,
-    AIRWIRE_FILTER_WINDOW
+    AIRWIRE_FILTER_WINDOW,
+    SELECT_POLYGON
 };
 
 enum class ActionGroup {

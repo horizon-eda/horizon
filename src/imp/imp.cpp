@@ -806,6 +806,8 @@ void ImpBase::run(int argc, char *argv[])
     }
     update_view_hints();
 
+    connect_action(ActionID::SELECT_POLYGON, sigc::mem_fun(*this, &ImpBase::handle_select_polygon));
+
     {
         json j;
         j["op"] = "ready";
@@ -1222,6 +1224,18 @@ void ImpBase::update_action_sensitivity()
     set_action_sensitive(make_action(ActionID::REDO), core->can_redo());
     auto sel = canvas->get_selection();
     set_action_sensitive(make_action(ActionID::COPY), sel.size() > 0);
+    bool can_select_polygon = std::any_of(sel.begin(), sel.end(), [](const auto &x) {
+        switch (x.type) {
+        case ObjectType::POLYGON_ARC_CENTER:
+        case ObjectType::POLYGON_EDGE:
+        case ObjectType::POLYGON_VERTEX:
+            return true;
+
+        default:
+            return false;
+        }
+    });
+    set_action_sensitive(make_action(ActionID::SELECT_POLYGON), can_select_polygon);
 }
 
 void ImpBase::add_hamburger_menu()
@@ -1892,6 +1906,11 @@ std::pair<ActionID, ToolID> ImpBase::get_doubleclick_action(ObjectType type, con
     case ObjectType::TEXT:
         return make_action(ToolID::ENTER_DATUM);
         break;
+    case ObjectType::POLYGON_ARC_CENTER:
+    case ObjectType::POLYGON_VERTEX:
+    case ObjectType::POLYGON_EDGE:
+        return make_action(ActionID::SELECT_POLYGON);
+        break;
     default:
         return {ActionID::NONE, ToolID::NONE};
     }
@@ -1960,6 +1979,38 @@ void ImpBase::update_view_hints()
 {
     auto hints = get_view_hints();
     main_window->set_view_hints_label(hints);
+}
+
+static bool is_poly(ObjectType type)
+{
+    switch (type) {
+    case ObjectType::POLYGON_ARC_CENTER:
+    case ObjectType::POLYGON_EDGE:
+    case ObjectType::POLYGON_VERTEX:
+        return true;
+    default:
+        return false;
+    }
+}
+
+void ImpBase::handle_select_polygon(const ActionConnection &a)
+{
+    auto sel = canvas->get_selection();
+    auto new_sel = sel;
+    for (const auto &it : sel) {
+        if (is_poly(it.type)) {
+            auto poly = core->get_polygon(it.uuid);
+            unsigned int v = 0;
+            for (const auto &it_v : poly->vertices) {
+                new_sel.emplace(it.uuid, ObjectType::POLYGON_VERTEX, v);
+                if (it_v.type == Polygon::Vertex::Type::ARC)
+                    new_sel.emplace(it.uuid, ObjectType::POLYGON_ARC_CENTER, v);
+                v++;
+            }
+        }
+    }
+    canvas->set_selection(new_sel, false);
+    canvas->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
 }
 
 } // namespace horizon
