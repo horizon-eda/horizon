@@ -203,7 +203,6 @@ CustomFieldEditor *ProjectMetaEditor::add_custom_editor(const std::string &key)
     custom_box->pack_start(*ed, true, true, 0);
     ed->show();
     ed->signal_changed().connect([this] { s_signal_changed.emit(); });
-    custom_editors.emplace(ed);
     return ed;
 }
 
@@ -212,11 +211,13 @@ void ProjectMetaEditor::clear()
     for (auto &w : entries) {
         w.second->set_text("");
     }
-    for (auto w : custom_editors) {
-        values.erase(w->get_key());
-        delete w;
+    auto children = custom_box->get_children();
+    for (auto ch : children) {
+        if (auto w = dynamic_cast<CustomFieldEditor *>(ch)) {
+            values.erase(w->get_key());
+            delete w;
+        }
     }
-    custom_editors.clear();
 }
 
 void ProjectMetaEditor::preset()
