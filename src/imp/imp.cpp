@@ -152,10 +152,13 @@ bool ImpBase::handle_close(GdkEventAny *ev)
 {
     bool dontask = false;
     Glib::getenv("HORIZON_NOEXITCONFIRM", dontask);
-    if (dontask)
+    if (dontask) {
+        core->delete_autosave();
         return false;
+    }
 
     if (!core->get_needs_save()) {
+        core->delete_autosave();
         return false;
     }
     if (!read_only) {
@@ -172,6 +175,7 @@ bool ImpBase::handle_close(GdkEventAny *ev)
 
         case 2:
             trigger_action(ActionID::SAVE);
+            core->delete_autosave();
             return false; // close
 
         default:
@@ -186,12 +190,15 @@ bool ImpBase::handle_close(GdkEventAny *ev)
         md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
         switch (md.run()) {
         case 1:
+            core->delete_autosave();
             return false; // close
 
         default:
             return true; // keep window open
         }
     }
+
+    core->delete_autosave();
     return false;
 }
 
