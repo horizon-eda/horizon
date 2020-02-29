@@ -21,8 +21,7 @@ public:
     }
 
 private:
-    Coordi selection_center;
-    void update_selection_center();
+    Coordi get_selection_center();
     void expand_selection();
     void update_tip();
     void do_move(const Coordi &c);

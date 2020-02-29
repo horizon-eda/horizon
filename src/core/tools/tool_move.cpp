@@ -124,7 +124,7 @@ void ToolMove::expand_selection()
     }
 }
 
-void ToolMove::update_selection_center()
+Coordi ToolMove::get_selection_center()
 {
     Accumulator<Coordi> accu;
     std::set<SelectableRef> items_ignore;
@@ -189,9 +189,9 @@ void ToolMove::update_selection_center()
         }
     }
     if (doc.c || doc.y)
-        selection_center = (accu.get() / 1.25_mm) * 1.25_mm;
+        return (accu.get() / 1.25_mm) * 1.25_mm;
     else
-        selection_center = accu.get();
+        return accu.get();
 }
 
 ToolResponse ToolMove::begin(const ToolArgs &args)
@@ -199,10 +199,15 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
     std::cout << "tool move\n";
     move_init(args.coords);
 
-    update_selection_center();
+    Coordi selection_center;
+    if (tool_id == ToolID::ROTATE_CURSOR || tool_id == ToolID::MIRROR_CURSOR)
+        selection_center = args.coords;
+    else
+        selection_center = get_selection_center();
 
-    if (tool_id == ToolID::ROTATE || tool_id == ToolID::MIRROR_X || tool_id == ToolID::MIRROR_Y) {
-        move_mirror_or_rotate(selection_center, tool_id == ToolID::ROTATE);
+    if (tool_id == ToolID::ROTATE || tool_id == ToolID::MIRROR_X || tool_id == ToolID::MIRROR_Y
+        || tool_id == ToolID::ROTATE_CURSOR || tool_id == ToolID::MIRROR_CURSOR) {
+        move_mirror_or_rotate(selection_center, tool_id == ToolID::ROTATE || tool_id == ToolID::ROTATE_CURSOR);
         if (tool_id == ToolID::MIRROR_Y) {
             move_mirror_or_rotate(selection_center, true);
             move_mirror_or_rotate(selection_center, true);
@@ -323,7 +328,9 @@ void ToolMove::update_tip()
     auto delta = get_delta();
     std::string s =
             "<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate "
-            "<b>e:</b>mirror ";
+            "<b>e:</b>mirror "
+            "<b>t:</b>rotate cursor "
+            "<b>w:</b>mirror cursor";
     if (is_key)
         s += "<b>Enter:</b>place";
     else
@@ -412,8 +419,12 @@ ToolResponse ToolMove::update(const ToolArgs &args)
         }
         else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
             bool rotate = args.key == GDK_KEY_r;
-            update_selection_center();
+            const auto selection_center = get_selection_center();
             move_mirror_or_rotate(selection_center, rotate);
+        }
+        else if (args.key == GDK_KEY_w || args.key == GDK_KEY_t) {
+            bool rotate = args.key == GDK_KEY_t;
+            move_mirror_or_rotate(args.coords, rotate);
         }
         else if (args.key == GDK_KEY_a) {
             update_airwires ^= true;

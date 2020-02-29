@@ -756,6 +756,14 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::SELECT_POLYGON, ToolID::NONE},
          {"Select polygon", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_SPECIFIC}},
+
+        {{ActionID::TOOL, ToolID::ROTATE_CURSOR},
+         {"Rotate around cursor", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::MIRROR_CURSOR},
+         {"Mirror around cursor", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -986,5 +994,7 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(NOPOPULATE),
         TOOL_LUT_ITEM(POPULATE),
         TOOL_LUT_ITEM(POLYGON_TO_LINE_LOOP),
+        TOOL_LUT_ITEM(ROTATE_CURSOR),
+        TOOL_LUT_ITEM(MIRROR_CURSOR),
 };
 } // namespace horizon

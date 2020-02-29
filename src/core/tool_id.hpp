@@ -132,6 +132,8 @@ enum class ToolID {
     UNFIX,
     NOPOPULATE,
     POPULATE,
-    POLYGON_TO_LINE_LOOP
+    POLYGON_TO_LINE_LOOP,
+    ROTATE_CURSOR,
+    MIRROR_CURSOR,
 };
 } // namespace horizon
