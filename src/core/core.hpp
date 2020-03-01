@@ -132,8 +132,8 @@ public:
     virtual bool get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property,
                                    class PropertyMeta &meta);
 
-    virtual std::string get_display_name(ObjectType type, const UUID &uu);
-    virtual std::string get_display_name(ObjectType type, const UUID &uu, const UUID &sheet);
+    virtual std::string get_display_name(ObjectType type, const UUID &uu) override;
+    virtual std::string get_display_name(ObjectType type, const UUID &uu, const UUID &sheet) override;
 
     void set_property_begin();
     void set_property_commit();
@@ -153,40 +153,6 @@ public:
     virtual void update_rules()
     {
     }
-
-    virtual bool can_search_for_object_type(ObjectType type) const
-    {
-        return false;
-    };
-
-    class SearchQuery {
-    public:
-        void set_query(const std::string &q);
-        const std::string &get_query() const;
-        bool contains(const std::string &haystack) const;
-        std::set<ObjectType> types;
-        std::pair<Coordf, Coordf> area_visible;
-
-    private:
-        std::string query;
-    };
-
-    class SearchResult {
-    public:
-        SearchResult(ObjectType ty, const UUID &uu) : type(ty), uuid(uu)
-        {
-        }
-        ObjectType type;
-        UUID uuid;
-        Coordi location;
-        UUID sheet;
-        bool selectable = false;
-    };
-
-    virtual std::list<SearchResult> search(const SearchQuery &q)
-    {
-        return {};
-    };
 
     virtual std::pair<Coordi, Coordi> get_bbox() = 0;
 
@@ -320,8 +286,6 @@ protected:
     void layers_to_meta(class PropertyMeta &meta);
     void get_placement(const Placement &placement, class PropertyValue &value, ObjectProperty::ID property);
     void set_placement(Placement &placement, const class PropertyValue &value, ObjectProperty::ID property);
-
-    void sort_search_results(std::list<Core::SearchResult> &results, const SearchQuery &q);
 
     virtual void save(const std::string &suffix) = 0;
     static const std::string autosave_suffix;

@@ -12,6 +12,7 @@
 #include "widgets/warnings_box.hpp"
 #include "action.hpp"
 #include "nlohmann/json.hpp"
+#include "search/searcher.hpp"
 #include <zmq.hpp>
 
 #ifdef G_OS_WIN32
@@ -167,7 +168,7 @@ protected:
 
     void tool_update_data(std::unique_ptr<ToolData> &data);
 
-    virtual void search_center(const Core::SearchResult &res);
+    virtual void search_center(const Searcher::SearchResult &res);
     virtual std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu);
 
     Glib::RefPtr<Gio::Menu> hamburger_menu;
@@ -185,6 +186,12 @@ protected:
 
     void update_view_hints();
     virtual std::vector<std::string> get_view_hints();
+
+    virtual Searcher *get_searcher()
+    {
+        throw std::runtime_error("not implemented");
+        return nullptr;
+    }
 
 private:
     void fix_cursor_pos();
@@ -212,12 +219,12 @@ private:
 
     void handle_search();
     void search_go(int dir);
-    std::list<Core::SearchResult> search_results;
+    std::list<Searcher::SearchResult> search_results;
     unsigned int search_result_current = 0;
     void update_search_markers();
     void update_search_types_label();
     void set_search_mode(bool enabled, bool focus = true);
-    std::map<ObjectType, Gtk::CheckButton *> search_check_buttons;
+    std::map<Searcher::Type, Gtk::CheckButton *> search_check_buttons;
 
     class LogWindow *log_window = nullptr;
     std::set<SelectableRef> selection_for_drag_move;

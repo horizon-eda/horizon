@@ -1,6 +1,7 @@
 #pragma once
 #include "imp.hpp"
 #include "core/core_symbol.hpp"
+#include "search/searcher_symbol.hpp"
 
 namespace horizon {
 class ImpSymbol : public ImpBase {
@@ -21,10 +22,16 @@ protected:
 
     void update_monitor() override;
 
+    Searcher *get_searcher() override
+    {
+        return &searcher;
+    };
+
 private:
     void canvas_update() override;
     void apply_preferences() override;
     CoreSymbol core_symbol;
+    SearcherSymbol searcher;
 
     class HeaderButton *header_button = nullptr;
     Gtk::Entry *name_entry = nullptr;

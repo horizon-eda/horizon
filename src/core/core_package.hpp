@@ -37,9 +37,6 @@ public:
 
     void rebuild(bool from_undo = false) override;
 
-    bool can_search_for_object_type(ObjectType type) const override;
-    std::list<SearchResult> search(const SearchQuery &q) override;
-
     const Package *get_canvas_data();
     std::pair<Coordi, Coordi> get_bbox() override;
     json get_meta() override;

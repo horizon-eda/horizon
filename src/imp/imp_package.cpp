@@ -24,7 +24,7 @@
 
 namespace horizon {
 ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path)
-    : ImpLayer(pool_path), core_package(package_filename, *pool), fake_block(UUID::random()),
+    : ImpLayer(pool_path), core_package(package_filename, *pool), searcher(core_package), fake_block(UUID::random()),
       fake_board(UUID::random(), fake_block)
 {
     core = &core_package;

@@ -63,9 +63,6 @@ public:
 
     std::pair<Coordi, Coordi> get_bbox() override;
 
-    bool can_search_for_object_type(ObjectType type) const override;
-    std::list<SearchResult> search(const SearchQuery &q) override;
-
     json get_meta() override;
 
     const std::string &get_filename() const override;

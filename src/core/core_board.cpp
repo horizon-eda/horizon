@@ -619,37 +619,6 @@ std::pair<Coordi, Coordi> CoreBoard::get_bbox()
     return brd.get_bbox();
 }
 
-bool CoreBoard::can_search_for_object_type(ObjectType ty) const
-{
-    switch (ty) {
-    case ObjectType::BOARD_PACKAGE:
-        return true;
-        break;
-    default:;
-    }
-
-    return false;
-}
-
-std::list<Core::SearchResult> CoreBoard::search(const SearchQuery &q)
-{
-    std::list<Core::SearchResult> results;
-    if (q.get_query().size() == 0)
-        return results;
-    if (q.types.count(ObjectType::BOARD_PACKAGE)) {
-        for (const auto &it : brd.packages) {
-            if (q.contains(it.second.component->refdes)) {
-                results.emplace_back(ObjectType::BOARD_PACKAGE, it.first);
-                auto &x = results.back();
-                x.location = it.second.placement.shift;
-                x.selectable = true;
-            }
-        }
-    }
-    sort_search_results(results, q);
-    return results;
-}
-
 const std::string &CoreBoard::get_filename() const
 {
     return m_board_filename;

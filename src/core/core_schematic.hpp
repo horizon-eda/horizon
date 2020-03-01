@@ -76,9 +76,6 @@ public:
     const Sheet *get_canvas_data();
     std::pair<Coordi, Coordi> get_bbox() override;
 
-    bool can_search_for_object_type(ObjectType type) const override;
-    std::list<SearchResult> search(const SearchQuery &q) override;
-
     const std::string &get_filename() const override;
 
     bool get_project_meta_loaded_from_block() const

@@ -3,6 +3,7 @@
 #include "block/block.hpp"
 #include "board/board.hpp"
 #include "imp_layer.hpp"
+#include "search/searcher_package.hpp"
 
 namespace horizon {
 class ImpPackage : public ImpLayer {
@@ -32,9 +33,15 @@ protected:
     void update_monitor() override;
     std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu) override;
 
+    Searcher *get_searcher() override
+    {
+        return &searcher;
+    }
+
 private:
     void canvas_update() override;
     CorePackage core_package;
+    SearcherPackage searcher;
 
     Block fake_block;
     Board fake_board;

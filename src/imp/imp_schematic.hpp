@@ -1,6 +1,7 @@
 #pragma once
 #include "imp.hpp"
 #include "core/core_schematic.hpp"
+#include "search/searcher_schematic.hpp"
 
 namespace horizon {
 class ImpSchematic : public ImpBase {
@@ -26,15 +27,21 @@ protected:
     }
 
     std::string get_hud_text(std::set<SelectableRef> &sel) override;
-    void search_center(const Core::SearchResult &res) override;
+    void search_center(const Searcher::SearchResult &res) override;
     std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu) override;
     void expand_selection_for_property_panel(std::set<SelectableRef> &sel_extra,
                                              const std::set<SelectableRef> &sel) override;
+
+    Searcher *get_searcher() override
+    {
+        return &searcher;
+    }
 
 private:
     void canvas_update() override;
     CoreSchematic core_schematic;
     const std::string project_dir;
+    SearcherSchematic searcher;
 
     int handle_ask_net_merge(class Net *net, class Net *into);
     int handle_ask_delete_component(class Component *comp);

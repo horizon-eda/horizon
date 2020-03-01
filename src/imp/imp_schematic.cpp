@@ -20,7 +20,7 @@ namespace horizon {
 ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,
                            const PoolParams &pool_params)
     : ImpBase(pool_params), core_schematic(schematic_filename, block_filename, *pool),
-      project_dir(Glib::path_get_dirname(schematic_filename))
+      project_dir(Glib::path_get_dirname(schematic_filename)), searcher(core_schematic)
 {
     core = &core_schematic;
     core_schematic.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpSchematic::handle_tool_change));
@@ -693,7 +693,7 @@ void ImpSchematic::handle_drag()
     }
 }
 
-void ImpSchematic::search_center(const Core::SearchResult &res)
+void ImpSchematic::search_center(const Searcher::SearchResult &res)
 {
     if (res.sheet != core_schematic.get_sheet()->uuid) {
         sheet_box->select_sheet(res.sheet);

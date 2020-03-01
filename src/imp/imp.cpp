@@ -540,10 +540,10 @@ void ImpBase::run(int argc, char *argv[])
             [this] { trigger_action(ActionID::SEARCH_PREVIOUS); });
     main_window->search_entry->signal_activate().connect([this] { trigger_action(ActionID::SEARCH_NEXT); });
 
-    for (const auto &it : object_descriptions) {
-        if (core->can_search_for_object_type(it.first)) {
-            auto b = Gtk::manage(new Gtk::CheckButton(it.second.name_pl));
-            search_check_buttons.emplace(it.first, b);
+    if (auto searcher = get_searcher()) {
+        for (const auto &type : searcher->get_types()) {
+            auto b = Gtk::manage(new Gtk::CheckButton(Searcher::type_info.at(type).name_pl));
+            search_check_buttons.emplace(type, b);
             main_window->search_types_box->pack_start(*b, false, false, 0);
             b->set_active(true);
             b->signal_toggled().connect([this] {
@@ -1783,7 +1783,7 @@ void ImpBase::tool_update_data(std::unique_ptr<ToolData> &data)
 
 void ImpBase::handle_search()
 {
-    Core::SearchQuery q;
+    Searcher::SearchQuery q;
     q.set_query(main_window->search_entry->get_text());
     for (auto &it : search_check_buttons) {
         if (it.second->get_active()) {
@@ -1794,7 +1794,7 @@ void ImpBase::handle_search()
     auto max_c = canvas->screen2canvas({canvas->get_width(), 0});
     q.area_visible = {min_c, max_c};
     search_result_current = 0;
-    search_results = core->search(q);
+    search_results = get_searcher()->search(q);
     update_search_markers();
 }
 
@@ -1827,13 +1827,13 @@ void ImpBase::search_go(int dir)
         status = "Match " + format_m_of_n(search_result_current + 1, search_results.size()) + ":";
     }
     auto &res = *std::next(search_results.begin(), search_result_current);
-    status += " " + object_descriptions.at(res.type).name + " " + core->get_display_name(res.type, res.uuid, res.sheet);
+    status += " " + Searcher::type_info.at(res.type).name + " " + get_searcher()->get_display_name(res);
     main_window->search_status_label->set_text(status);
     canvas->update_markers();
     search_center(res);
 }
 
-void ImpBase::search_center(const Core::SearchResult &res)
+void ImpBase::search_center(const Searcher::SearchResult &res)
 {
     auto c = res.location;
     auto min_c = canvas->screen2canvas({0, canvas->get_height()});
@@ -1888,7 +1888,7 @@ void ImpBase::update_search_types_label()
         la = "All but ";
         for (auto &it : search_check_buttons) {
             if (!it.second->get_active()) {
-                la += object_descriptions.at(it.first).name_pl + ", ";
+                la += Searcher::type_info.at(it.first).name_pl + ", ";
             }
         }
         la.pop_back();
@@ -1898,7 +1898,7 @@ void ImpBase::update_search_types_label()
     else {
         for (auto &it : search_check_buttons) {
             if (it.second->get_active()) {
-                la += object_descriptions.at(it.first).name_pl + ", ";
+                la += Searcher::type_info.at(it.first).name_pl + ", ";
             }
         }
         la.pop_back();

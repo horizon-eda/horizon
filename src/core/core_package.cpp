@@ -40,37 +40,6 @@ bool CorePackage::has_object_type(ObjectType ty) const
     return false;
 }
 
-bool CorePackage::can_search_for_object_type(ObjectType ty) const
-{
-    switch (ty) {
-    case ObjectType::PAD:
-        return true;
-        break;
-    default:;
-    }
-
-    return false;
-}
-
-std::list<Core::SearchResult> CorePackage::search(const SearchQuery &q)
-{
-    std::list<Core::SearchResult> results;
-    if (q.get_query().size() == 0)
-        return results;
-    if (q.types.count(ObjectType::PAD)) {
-        for (const auto &it : package.pads) {
-            if (q.contains(it.second.name)) {
-                results.emplace_back(ObjectType::PAD, it.first);
-                auto &x = results.back();
-                x.location = it.second.placement.shift;
-                x.selectable = true;
-            }
-        }
-    }
-    sort_search_results(results, q);
-    return results;
-}
-
 LayerProvider *CorePackage::get_layer_provider()
 {
     return &package;

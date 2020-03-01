@@ -2,6 +2,7 @@
 #include "core/core_board.hpp"
 #include "imp_layer.hpp"
 #include "airwire_filter.hpp"
+#include "search/searcher_board.hpp"
 
 namespace horizon {
 class ImpBoard : public ImpLayer {
@@ -36,12 +37,18 @@ protected:
     void get_save_meta(json &j) override;
     std::vector<std::string> get_view_hints() override;
 
+    Searcher *get_searcher() override
+    {
+        return &searcher;
+    }
+
 private:
     void canvas_update() override;
     void handle_selection_cross_probe();
 
     CoreBoard core_board;
     const std::string project_dir;
+    SearcherBoard searcher;
 
     class FabOutputWindow *fab_output_window = nullptr;
     class View3DWindow *view_3d_window = nullptr;

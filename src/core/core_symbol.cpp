@@ -296,37 +296,6 @@ std::pair<Coordi, Coordi> CoreSymbol::get_bbox()
     return bb;
 }
 
-bool CoreSymbol::can_search_for_object_type(ObjectType ty) const
-{
-    switch (ty) {
-    case ObjectType::SYMBOL_PIN:
-        return true;
-        break;
-    default:;
-    }
-
-    return false;
-}
-
-std::list<Core::SearchResult> CoreSymbol::search(const SearchQuery &q)
-{
-    std::list<Core::SearchResult> results;
-    if (q.get_query().size() == 0)
-        return results;
-    if (q.types.count(ObjectType::SYMBOL_PIN)) {
-        for (const auto &it : sym.pins) {
-            if (q.contains(it.second.name)) {
-                results.emplace_back(ObjectType::SYMBOL_PIN, it.first);
-                auto &x = results.back();
-                x.location = it.second.position;
-                x.selectable = true;
-            }
-        }
-    }
-    sort_search_results(results, q);
-    return results;
-}
-
 Symbol *CoreSymbol::get_symbol()
 {
     return &sym;

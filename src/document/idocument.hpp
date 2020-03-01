@@ -47,6 +47,9 @@ public:
     virtual class Pool *get_pool() = 0;
     virtual class LayerProvider *get_layer_provider() = 0;
 
+    virtual std::string get_display_name(ObjectType type, const UUID &uu) = 0;
+    virtual std::string get_display_name(ObjectType type, const UUID &uu, const UUID &sheet) = 0;
+
     virtual ~IDocument()
     {
     }
