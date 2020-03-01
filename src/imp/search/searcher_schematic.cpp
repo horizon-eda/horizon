@@ -27,8 +27,8 @@ void SearcherSchematic::sort_search_results_schematic(std::list<Searcher::Search
         if (index_a < index_b)
             return true;
 
-        auto da = get_display_name(a);
-        auto db = get_display_name(b);
+        auto da = this->get_display_name(a);
+        auto db = this->get_display_name(b);
         auto ina = !Coordf(a.location).in_range(q.area_visible.first, q.area_visible.second);
         auto inb = !Coordf(b.location).in_range(q.area_visible.first, q.area_visible.second);
         if (ina > inb)
