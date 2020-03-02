@@ -860,7 +860,9 @@ void ImpBase::hud_update()
         std::string hud_text = get_hud_text(sel);
         trim(hud_text);
         hud_text += "\n\n";
-        hud_text += ImpBase::get_hud_text(sel);
+        auto text_generic = ImpBase::get_hud_text(sel);
+        trim(text_generic);
+        hud_text += text_generic;
         trim(hud_text);
         main_window->hud_update(hud_text);
     }
