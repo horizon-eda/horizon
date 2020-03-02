@@ -61,7 +61,7 @@ std::string SearcherBoard::get_display_name(const Searcher::SearchResult &r)
         return pkg_name + "." + pkg.package.pads.at(r.path.at(1)).name;
     }
     else {
-        return doc.get_display_name(type_info.at(r.type).object_type, r.path.at(0));
+        return doc.get_display_name(get_type_info(r.type).object_type, r.path.at(0));
     }
 }
 

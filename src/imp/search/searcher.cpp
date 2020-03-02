@@ -5,18 +5,29 @@
 #include "common/object_descr.hpp"
 
 namespace horizon {
-const std::map<Searcher::Type, Searcher::TypeInfo> Searcher::type_info = {
-        {Searcher::Type::SYMBOL_PIN, {ObjectType::SYMBOL_PIN}},
-        {Searcher::Type::TEXT, {ObjectType::TEXT}},
-        {Searcher::Type::SYMBOL_REFDES, {"Symbol ref. designator", ObjectType::SCHEMATIC_SYMBOL}},
-        {Searcher::Type::SYMBOL_MPN, {"Symbol MPN", ObjectType::SCHEMATIC_SYMBOL}},
-        {Searcher::Type::NET_LABEL, {ObjectType::NET_LABEL}},
-        {Searcher::Type::POWER_SYMBOL, {ObjectType::POWER_SYMBOL}},
-        {Searcher::Type::BUS_RIPPER, {ObjectType::BUS_RIPPER}},
-        {Searcher::Type::PAD, {ObjectType::PAD}},
-        {Searcher::Type::PACKAGE_REFDES, {"Package ref. designator", ObjectType::BOARD_PACKAGE}},
-        {Searcher::Type::PACKAGE_MPN, {"Package MPN", ObjectType::BOARD_PACKAGE}},
-};
+
+const std::map<Searcher::Type, Searcher::TypeInfo> &Searcher::get_type_info()
+{
+    static const std::map<Searcher::Type, Searcher::TypeInfo> type_info = {
+            {Searcher::Type::SYMBOL_PIN, {ObjectType::SYMBOL_PIN}},
+            {Searcher::Type::TEXT, {ObjectType::TEXT}},
+            {Searcher::Type::SYMBOL_REFDES, {"Symbol ref. designator", ObjectType::SCHEMATIC_SYMBOL}},
+            {Searcher::Type::SYMBOL_MPN, {"Symbol MPN", ObjectType::SCHEMATIC_SYMBOL}},
+            {Searcher::Type::NET_LABEL, {ObjectType::NET_LABEL}},
+            {Searcher::Type::POWER_SYMBOL, {ObjectType::POWER_SYMBOL}},
+            {Searcher::Type::BUS_RIPPER, {ObjectType::BUS_RIPPER}},
+            {Searcher::Type::PAD, {ObjectType::PAD}},
+            {Searcher::Type::PACKAGE_REFDES, {"Package ref. designator", ObjectType::BOARD_PACKAGE}},
+            {Searcher::Type::PACKAGE_MPN, {"Package MPN", ObjectType::BOARD_PACKAGE}},
+    };
+    return type_info;
+}
+
+const Searcher::TypeInfo &Searcher::get_type_info(Searcher::Type type)
+{
+    return get_type_info().at(type);
+}
+
 
 Searcher::TypeInfo::TypeInfo(ObjectType ot)
     : name(object_descriptions.at(ot).name), name_pl(object_descriptions.at(ot).name_pl), object_type(ot)

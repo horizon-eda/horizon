@@ -42,7 +42,7 @@ std::set<Searcher::Type> SearcherSymbol::get_types() const
 
 std::string SearcherSymbol::get_display_name(const SearcherSymbol::SearchResult &r)
 {
-    return doc.get_display_name(type_info.at(r.type).object_type, r.path.at(0));
+    return doc.get_display_name(get_type_info(r.type).object_type, r.path.at(0));
 }
 
 } // namespace horizon

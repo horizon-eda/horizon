@@ -37,7 +37,8 @@ public:
         const ObjectType object_type;
     };
 
-    static const std::map<Type, TypeInfo> type_info;
+    static const std::map<Type, TypeInfo> &get_type_info();
+    static const TypeInfo &get_type_info(Type type);
 
     class SearchQuery {
     public:

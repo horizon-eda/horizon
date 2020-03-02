@@ -542,7 +542,7 @@ void ImpBase::run(int argc, char *argv[])
 
     if (auto searcher = get_searcher()) {
         for (const auto &type : searcher->get_types()) {
-            auto b = Gtk::manage(new Gtk::CheckButton(Searcher::type_info.at(type).name_pl));
+            auto b = Gtk::manage(new Gtk::CheckButton(Searcher::get_type_info(type).name_pl));
             search_check_buttons.emplace(type, b);
             main_window->search_types_box->pack_start(*b, false, false, 0);
             b->set_active(true);
@@ -1827,7 +1827,7 @@ void ImpBase::search_go(int dir)
         status = "Match " + format_m_of_n(search_result_current + 1, search_results.size()) + ":";
     }
     auto &res = *std::next(search_results.begin(), search_result_current);
-    status += " " + Searcher::type_info.at(res.type).name + " " + get_searcher()->get_display_name(res);
+    status += " " + Searcher::get_type_info(res.type).name + " " + get_searcher()->get_display_name(res);
     main_window->search_status_label->set_text(status);
     canvas->update_markers();
     search_center(res);
@@ -1888,7 +1888,7 @@ void ImpBase::update_search_types_label()
         la = "All but ";
         for (auto &it : search_check_buttons) {
             if (!it.second->get_active()) {
-                la += Searcher::type_info.at(it.first).name_pl + ", ";
+                la += Searcher::get_type_info(it.first).name_pl + ", ";
             }
         }
         la.pop_back();
@@ -1898,7 +1898,7 @@ void ImpBase::update_search_types_label()
     else {
         for (auto &it : search_check_buttons) {
             if (it.second->get_active()) {
-                la += Searcher::type_info.at(it.first).name_pl + ", ";
+                la += Searcher::get_type_info(it.first).name_pl + ", ";
             }
         }
         la.pop_back();
