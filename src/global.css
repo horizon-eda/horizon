@@ -46,3 +46,7 @@
   min-height: 0px;
   padding: 0px;
 }
+
+.app-notification *:link {
+  color:#4CC6EF;
+}
