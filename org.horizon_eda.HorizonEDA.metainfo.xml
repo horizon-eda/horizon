@@ -39,6 +39,11 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="1.0.0" date="2020-01-29">
+      <description>
+        <p>initial release</p>
+      </description>
+    </release>
     <release version="0.9.7" date="2020-01-17">
       <description>
         <p>prerelease to test packaging</p>
