@@ -33,7 +33,7 @@ protected:
     void update_monitor() override;
     std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu) override;
 
-    Searcher *get_searcher() override
+    Searcher *get_searcher_ptr() override
     {
         return &searcher;
     }

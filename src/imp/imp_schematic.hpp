@@ -32,7 +32,7 @@ protected:
     void expand_selection_for_property_panel(std::set<SelectableRef> &sel_extra,
                                              const std::set<SelectableRef> &sel) override;
 
-    Searcher *get_searcher() override
+    Searcher *get_searcher_ptr() override
     {
         return &searcher;
     }

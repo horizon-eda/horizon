@@ -540,8 +540,9 @@ void ImpBase::run(int argc, char *argv[])
             [this] { trigger_action(ActionID::SEARCH_PREVIOUS); });
     main_window->search_entry->signal_activate().connect([this] { trigger_action(ActionID::SEARCH_NEXT); });
 
-    if (auto searcher = get_searcher()) {
-        for (const auto &type : searcher->get_types()) {
+    if (has_searcher()) {
+        auto &searcher = get_searcher();
+        for (const auto &type : searcher.get_types()) {
             auto b = Gtk::manage(new Gtk::CheckButton(Searcher::get_type_info(type).name_pl));
             search_check_buttons.emplace(type, b);
             main_window->search_types_box->pack_start(*b, false, false, 0);
@@ -1796,7 +1797,7 @@ void ImpBase::handle_search()
     auto max_c = canvas->screen2canvas({canvas->get_width(), 0});
     q.area_visible = {min_c, max_c};
     search_result_current = 0;
-    search_results = get_searcher()->search(q);
+    search_results = get_searcher().search(q);
     update_search_markers();
 }
 
@@ -1829,7 +1830,7 @@ void ImpBase::search_go(int dir)
         status = "Match " + format_m_of_n(search_result_current + 1, search_results.size()) + ":";
     }
     auto &res = *std::next(search_results.begin(), search_result_current);
-    status += " " + Searcher::get_type_info(res.type).name + " " + get_searcher()->get_display_name(res);
+    status += " " + Searcher::get_type_info(res.type).name + " " + get_searcher().get_display_name(res);
     main_window->search_status_label->set_text(status);
     canvas->update_markers();
     search_center(res);

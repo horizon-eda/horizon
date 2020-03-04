@@ -22,7 +22,7 @@ protected:
 
     void update_monitor() override;
 
-    Searcher *get_searcher() override
+    Searcher *get_searcher_ptr() override
     {
         return &searcher;
     };

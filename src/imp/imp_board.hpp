@@ -37,7 +37,7 @@ protected:
     void get_save_meta(json &j) override;
     std::vector<std::string> get_view_hints() override;
 
-    Searcher *get_searcher() override
+    Searcher *get_searcher_ptr() override
     {
         return &searcher;
     }

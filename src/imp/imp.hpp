@@ -187,10 +187,22 @@ protected:
     void update_view_hints();
     virtual std::vector<std::string> get_view_hints();
 
-    virtual Searcher *get_searcher()
+    virtual Searcher *get_searcher_ptr()
     {
-        throw std::runtime_error("not implemented");
         return nullptr;
+    }
+
+    bool has_searcher()
+    {
+        return get_searcher_ptr();
+    }
+
+    Searcher &get_searcher()
+    {
+        auto s = get_searcher_ptr();
+        if (!s)
+            throw std::runtime_error("not implemented");
+        return *s;
     }
 
 private:
