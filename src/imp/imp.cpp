@@ -554,21 +554,22 @@ void ImpBase::run(int argc, char *argv[])
             });
             b->show();
         }
-    }
-    if (search_check_buttons.size() < 2) {
-        main_window->search_expander->hide();
-    }
-    core->signal_tool_changed().connect([this](ToolID id) {
-        if (id != ToolID::NONE) {
-            set_search_mode(false);
-        }
-        else {
-            handle_search();
-        }
-    });
 
-    update_search_types_label();
-    search_go(0);
+        if (search_check_buttons.size() < 2) {
+            main_window->search_expander->hide();
+        }
+        core->signal_tool_changed().connect([this](ToolID id) {
+            if (id != ToolID::NONE) {
+                set_search_mode(false);
+            }
+            else {
+                handle_search();
+            }
+        });
+
+        update_search_types_label();
+        search_go(0);
+    }
 
 
     grid_spin_button = Gtk::manage(new SpinButtonDim());
