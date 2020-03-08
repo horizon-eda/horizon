@@ -895,7 +895,6 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
         }
         s += "\nTotal length: " + dim_to_string(length, false);
         sel_erase_type(sel, ObjectType::LINE);
-        return s;
     }
 
     // Display the length if a single edge of a polygon is given
@@ -914,7 +913,7 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
                 s += core->get_layer_provider()->get_layers().at(li->layer).name + " ";
                 s += "\nLength: " + dim_to_string(length, false);
                 sel_erase_type(sel, ObjectType::POLYGON_EDGE);
-                return s;
+                break;
             }
         }
     }
