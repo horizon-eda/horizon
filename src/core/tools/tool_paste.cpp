@@ -343,6 +343,23 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             selection.emplace(u, ObjectType::BOARD_HOLE);
         }
     }
+    if (j.count("board_panels") && doc.b) {
+        const json &o = j["board_panels"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID::random();
+            auto brd = doc.b->get_board();
+            auto j2 = it.value();
+            UUID inc_board = j2.at("included_board").get<std::string>();
+            if (brd->included_boards.count(inc_board)) {
+                auto x = &brd->board_panels
+                                  .emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                                           std::forward_as_tuple(u, it.value(), *brd))
+                                  .first->second;
+                apply_shift(x->placement.shift, cursor_pos_canvas);
+                selection.emplace(u, ObjectType::BOARD_PANEL);
+            }
+        }
+    }
     if (selection.size() == 0) {
         imp->tool_bar_flash("Empty buffer");
         return ToolResponse::revert();

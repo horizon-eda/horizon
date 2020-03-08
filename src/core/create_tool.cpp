@@ -71,6 +71,8 @@
 #include "tools/tool_fix.hpp"
 #include "tools/tool_nopopulate.hpp"
 #include "tools/tool_polygon_to_line_loop.hpp"
+#include "tools/tool_place_board_panel.hpp"
+#include "tools/tool_smash_panel_outline.hpp"
 
 namespace horizon {
 
@@ -156,6 +158,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::MANAGE_POWER_NETS:
     case ToolID::EDIT_FRAME_PROPERTIES:
     case ToolID::TOGGLE_GROUP_TAG_VISIBLE:
+    case ToolID::MANAGE_INCLUDED_BOARDS:
         return std::make_unique<ToolManageBuses>(this, tool_id);
 
     case ToolID::DRAW_POLYGON:
@@ -354,6 +357,12 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::POLYGON_TO_LINE_LOOP:
         return std::make_unique<ToolPolygonToLineLoop>(this, tool_id);
+
+    case ToolID::PLACE_BOARD_PANEL:
+        return std::make_unique<ToolPlaceBoardPanel>(this, tool_id);
+
+    case ToolID::SMASH_OUTLINE:
+        return std::make_unique<ToolSmashPanelOutline>(this, tool_id);
 
     default:
         return nullptr;

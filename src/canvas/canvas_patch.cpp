@@ -2,6 +2,7 @@
 #include "board/plane.hpp"
 #include "common/hole.hpp"
 #include "board/board_layers.hpp"
+#include "util/clipper_util.hpp"
 
 namespace horizon {
 CanvasPatch::CanvasPatch() : Canvas::Canvas()
@@ -83,7 +84,7 @@ void CanvasPatch::img_polygon(const Polygon &ipoly, bool tr)
         for (const auto &frag : plane->fragments) {
             patches[patch_key].emplace_back();
             ClipperLib::Path &contour = patches[patch_key].back();
-            contour = frag.paths.front();
+            contour = transform_path(transform, frag.paths.front());
 
             bool needs_reverse = false;
             if (ClipperLib::Orientation(contour)) {
@@ -94,7 +95,7 @@ void CanvasPatch::img_polygon(const Polygon &ipoly, bool tr)
             for (size_t i = 1; i < frag.paths.size(); i++) {
                 patches[patch_key].emplace_back();
                 ClipperLib::Path &hole = patches[patch_key].back();
-                hole = frag.paths[i];
+                hole = transform_path(transform, frag.paths[i]);
                 if (needs_reverse) {
                     std::reverse(hole.begin(), hole.end());
                 }

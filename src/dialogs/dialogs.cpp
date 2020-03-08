@@ -33,6 +33,8 @@
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/spin_button_angle.hpp"
 #include "renumber_pads_window.hpp"
+#include "select_included_board.hpp"
+#include "manage_included_boards.hpp"
 #include <glibmm.h>
 
 namespace horizon {
@@ -195,6 +197,18 @@ std::pair<bool, UUID> Dialogs::select_group_tag(const class Block *block, bool t
     }
 }
 
+std::pair<bool, UUID> Dialogs::select_included_board(const Board &brd)
+{
+    SelectIncludedBoardDialog dia(parent, brd);
+    auto r = dia.run();
+    if (r == Gtk::RESPONSE_OK) {
+        return {dia.valid, dia.selected_uuid};
+    }
+    else {
+        return {false, UUID()};
+    }
+}
+
 bool Dialogs::edit_shapes(std::set<Shape *> shapes)
 {
     ShapeDialog dia(parent, shapes);
@@ -228,6 +242,12 @@ bool Dialogs::manage_net_classes(Block *b)
 bool Dialogs::manage_power_nets(Block *b)
 {
     ManagePowerNetsDialog dia(parent, b);
+    return dia.run() == Gtk::RESPONSE_OK;
+}
+
+bool Dialogs::manage_included_boards(Board &b)
+{
+    ManageIncludedBoardsDialog dia(parent, b);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 

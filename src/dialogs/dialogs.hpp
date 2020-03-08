@@ -33,11 +33,13 @@ public:
     std::pair<bool, UUID> select_bus(class Block *block);
     std::pair<bool, UUID> select_bus_member(class Block *block, const UUID &bus_uuid);
     std::pair<bool, UUID> select_group_tag(const class Block *block, bool tag_mode, const UUID &current);
+    std::pair<bool, UUID> select_included_board(const class Board &brd);
     unsigned int ask_net_merge(class Net *net, class Net *into);
     bool manage_buses(class Block *b);
     bool manage_net_classes(class Block *b);
     bool manage_power_nets(class Block *b);
     bool manage_via_templates(class Board *b, class ViaPadstackProvider *vpp);
+    bool manage_included_boards(class Board &b);
     bool edit_parameter_program(class ParameterProgram *program);
     bool edit_parameter_set(ParameterSet *pset);
     bool edit_pad_parameter_set(std::set<class Pad *> &pads, class Pool *pool, class Package *pkg);

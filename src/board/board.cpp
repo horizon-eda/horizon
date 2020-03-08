@@ -168,6 +168,22 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
                          Logger::Domain::BOARD);
         }
     }
+    if (j.count("included_boards")) {
+        const json &o = j["included_boards"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(included_boards, ObjectType::BOARD, std::forward_as_tuple(u, it.value()),
+                         Logger::Domain::BOARD);
+        }
+    }
+    if (j.count("board_panels")) {
+        const json &o = j["board_panels"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(board_panels, ObjectType::BOARD, std::forward_as_tuple(u, it.value(), *this),
+                         Logger::Domain::BOARD);
+        }
+    }
     if (j.count("rules")) {
         try {
             rules.load_from_json(j.at("rules"));
@@ -259,10 +275,10 @@ const std::map<int, Layer> &Board::get_layers() const
 
 Board::Board(const Board &brd, CopyMode copy_mode)
     : layers(brd.layers), uuid(brd.uuid), block(brd.block), name(brd.name), polygons(brd.polygons), holes(brd.holes),
-      junctions(brd.junctions), tracks(brd.tracks), airwires(brd.airwires), texts(brd.texts), lines(brd.lines),
-      arcs(brd.arcs), planes(brd.planes), keepouts(brd.keepouts), dimensions(brd.dimensions),
-      connection_lines(brd.connection_lines), warnings(brd.warnings), rules(brd.rules),
-      fab_output_settings(brd.fab_output_settings), stackup(brd.stackup), colors(brd.colors),
+      junctions(brd.junctions), tracks(brd.tracks), texts(brd.texts), lines(brd.lines), arcs(brd.arcs),
+      planes(brd.planes), keepouts(brd.keepouts), dimensions(brd.dimensions), connection_lines(brd.connection_lines),
+      included_boards(brd.included_boards), board_panels(brd.board_panels), warnings(brd.warnings), rules(brd.rules),
+      fab_output_settings(brd.fab_output_settings), airwires(brd.airwires), stackup(brd.stackup), colors(brd.colors),
       pdf_export_settings(brd.pdf_export_settings), step_export_settings(brd.step_export_settings),
       pnp_export_settings(brd.pnp_export_settings), n_inner_layers(brd.n_inner_layers)
 {
@@ -342,6 +358,9 @@ void Board::update_refs()
     for (auto &it : connection_lines) {
         it.second.update_refs(*this);
     }
+    for (auto &it : board_panels) {
+        it.second.included_board.update(included_boards);
+    }
 }
 
 unsigned int Board::get_n_inner_layers() const
@@ -354,6 +373,7 @@ void Board::set_n_inner_layers(unsigned int n)
     n_inner_layers = n;
     layers.clear();
     layers = {{200, {200, "Top Notes"}},
+              {BoardLayers::OUTLINE_NOTES, {BoardLayers::OUTLINE_NOTES, "Outline Notes"}},
               {100, {100, "Outline"}},
               {60, {60, "Top Courtyard"}},
               {50, {50, "Top Assembly"}},
@@ -399,6 +419,7 @@ void Board::update_pdf_export_settings(PDFExportSettings &settings)
                 std::forward_as_tuple(l, Color(0, 0, 0), PDFExportSettings::Layer::Mode::OUTLINE, enable));
     };
 
+    add_layer(BoardLayers::OUTLINE_NOTES);
     add_layer(BoardLayers::L_OUTLINE);
     add_layer(BoardLayers::TOP_PASTE, false);
     add_layer(BoardLayers::TOP_SILKSCREEN, false);
@@ -931,6 +952,26 @@ void Board::smash_package_silkscreen_graphics(BoardPackage *pkg)
     pkg->omit_silkscreen = true;
 }
 
+void Board::smash_panel_outline(BoardPanel &panel)
+{
+    for (const auto &it : panel.included_board->board->polygons) {
+        if (it.second.layer == BoardLayers::L_OUTLINE) {
+            auto uu = UUID::random();
+            auto &new_poly = polygons.emplace(uu, uu).first->second;
+            new_poly.layer = BoardLayers::L_OUTLINE;
+            for (const auto &it_v : it.second.vertices) {
+                new_poly.vertices.emplace_back();
+                auto &v = new_poly.vertices.back();
+                v.arc_center = panel.placement.transform(it_v.arc_center);
+                v.arc_reverse = it_v.arc_reverse;
+                v.type = it_v.type;
+                v.position = panel.placement.transform(it_v.position);
+            }
+        }
+    }
+    panel.omit_outline = true;
+}
+
 void Board::unsmash_package(BoardPackage *pkg)
 {
     if (!pkg->smashed)
@@ -1105,6 +1146,18 @@ json Board::serialize() const
     j["connection_lines"] = json::object();
     for (const auto &it : connection_lines) {
         j["connection_lines"][(std::string)it.first] = it.second.serialize();
+    }
+    if (included_boards.size()) {
+        j["included_boards"] = json::object();
+        for (const auto &it : included_boards) {
+            j["included_boards"][(std::string)it.first] = it.second.serialize();
+        }
+    }
+    if (board_panels.size()) {
+        j["board_panels"] = json::object();
+        for (const auto &it : board_panels) {
+            j["board_panels"][(std::string)it.first] = it.second.serialize();
+        }
     }
     return j;
 }

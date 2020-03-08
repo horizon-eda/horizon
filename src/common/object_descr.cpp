@@ -293,5 +293,15 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
         {ObjectType::CONNECTION_LINE, {"Connection line", "Connection lines", {}}},
         {ObjectType::SCHEMATIC, {"Schematic", "Schematics", {}}},
         {ObjectType::BOARD, {"Board", "Boards", {}}},
+        {ObjectType::BOARD_PANEL,
+         {"Board panel",
+          "Board panels",
+          {
+                  {ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Board", 0}},
+                  {ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X", 1}},
+                  {ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y", 2}},
+                  {ObjectProperty::ID::ANGLE, {ObjectProperty::Type::ANGLE, "Angle", 3}},
+                  {ObjectProperty::ID::OMIT_OUTLINE, {ObjectProperty::Type::BOOL, "Omit outline", 4}},
+          }}},
 };
 } // namespace horizon

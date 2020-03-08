@@ -764,6 +764,18 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::TOOL, ToolID::MIRROR_CURSOR},
          {"Mirror around cursor", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::PLACE_BOARD_PANEL},
+         {"Place board panel", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::MANAGE_INCLUDED_BOARDS},
+         {"Manage included boards", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::SMASH_OUTLINE},
+         {"Smash outline", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -996,5 +1008,9 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(POLYGON_TO_LINE_LOOP),
         TOOL_LUT_ITEM(ROTATE_CURSOR),
         TOOL_LUT_ITEM(MIRROR_CURSOR),
+        TOOL_LUT_ITEM(PLACE_BOARD_PANEL),
+        TOOL_LUT_ITEM(MANAGE_INCLUDED_BOARDS),
+        TOOL_LUT_ITEM(RELOAD_INCLUDED_BOARDS),
+        TOOL_LUT_ITEM(SMASH_OUTLINE),
 };
 } // namespace horizon

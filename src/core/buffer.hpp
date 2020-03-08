@@ -20,6 +20,7 @@
 #include "board/track.hpp"
 #include "board/board_hole.hpp"
 #include "common/dimension.hpp"
+#include "board/board_panel.hpp"
 #include "util/uuid.hpp"
 #include <map>
 #include <set>
@@ -50,6 +51,7 @@ public:
     std::map<UUID, Track> tracks;
     std::map<UUID, BoardHole> board_holes;
     std::map<UUID, Dimension> dimensions;
+    std::map<UUID, BoardPanel> board_panels;
 
     json serialize();
 

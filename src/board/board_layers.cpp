@@ -7,6 +7,9 @@ std::string BoardLayers::get_layer_name(int l)
     case TOP_NOTES:
         return "Top Notes";
 
+    case OUTLINE_NOTES:
+        return "Outline Notes";
+
     case L_OUTLINE:
         return "Outline";
 
@@ -65,13 +68,14 @@ std::string BoardLayers::get_layer_name(int l)
 }
 
 static const std::vector<int> layers = {
-        BoardLayers::TOP_NOTES,         BoardLayers::L_OUTLINE,        BoardLayers::TOP_COURTYARD,
-        BoardLayers::TOP_ASSEMBLY,      BoardLayers::TOP_PACKAGE,      BoardLayers::TOP_PASTE,
-        BoardLayers::TOP_SILKSCREEN,    BoardLayers::TOP_MASK,         BoardLayers::TOP_COPPER,
-        BoardLayers::IN1_COPPER,        BoardLayers::IN2_COPPER,       BoardLayers::IN3_COPPER,
-        BoardLayers::IN4_COPPER,        BoardLayers::BOTTOM_COPPER,    BoardLayers::BOTTOM_MASK,
-        BoardLayers::BOTTOM_SILKSCREEN, BoardLayers::BOTTOM_PASTE,     BoardLayers::BOTTOM_PACKAGE,
-        BoardLayers::BOTTOM_ASSEMBLY,   BoardLayers::BOTTOM_COURTYARD, BoardLayers::BOTTOM_NOTES};
+        BoardLayers::TOP_NOTES,      BoardLayers::OUTLINE_NOTES,     BoardLayers::L_OUTLINE,
+        BoardLayers::TOP_COURTYARD,  BoardLayers::TOP_ASSEMBLY,      BoardLayers::TOP_PACKAGE,
+        BoardLayers::TOP_PASTE,      BoardLayers::TOP_SILKSCREEN,    BoardLayers::TOP_MASK,
+        BoardLayers::TOP_COPPER,     BoardLayers::IN1_COPPER,        BoardLayers::IN2_COPPER,
+        BoardLayers::IN3_COPPER,     BoardLayers::IN4_COPPER,        BoardLayers::BOTTOM_COPPER,
+        BoardLayers::BOTTOM_MASK,    BoardLayers::BOTTOM_SILKSCREEN, BoardLayers::BOTTOM_PASTE,
+        BoardLayers::BOTTOM_PACKAGE, BoardLayers::BOTTOM_ASSEMBLY,   BoardLayers::BOTTOM_COURTYARD,
+        BoardLayers::BOTTOM_NOTES};
 
 const std::vector<int> &BoardLayers::get_layers()
 {

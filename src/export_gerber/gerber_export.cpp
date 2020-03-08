@@ -4,7 +4,7 @@
 #include "board/fab_output_settings.hpp"
 #include <glibmm/miscutils.h>
 #include "libzippp/zip.hpp"
-
+#include "board/board_layers.hpp"
 
 namespace horizon {
 GerberExporter::GerberExporter(const Board *b, const FabOutputSettings *s) : brd(b), settings(s)
@@ -87,6 +87,9 @@ std::string GerberExporter::get_log()
 
 GerberWriter *GerberExporter::get_writer_for_layer(int l)
 {
+    if (l == BoardLayers::OUTLINE_NOTES)
+        l = BoardLayers::L_OUTLINE;
+
     if (writers.count(l)) {
         return &writers.at(l);
     }

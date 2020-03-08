@@ -71,6 +71,9 @@ void ToolHelperMove::move_do(const Coordi &delta)
         case ObjectType::SHAPE:
             doc.a->get_padstack()->shapes.at(it.uuid).placement.shift += delta;
             break;
+        case ObjectType::BOARD_PANEL:
+            doc.b->get_board()->board_panels.at(it.uuid).placement.shift += delta;
+            break;
         case ObjectType::DIMENSION: {
             auto dim = doc.r->get_dimension(it.uuid);
             if (it.vertex < 2) {
@@ -311,6 +314,14 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
             transform(hole->placement.shift, center, rotate);
             if (rotate) {
                 hole->placement.inc_angle_deg(-90);
+            }
+        } break;
+
+        case ObjectType::BOARD_PANEL: {
+            auto &panel = doc.b->get_board()->board_panels.at(it.uuid);
+            transform(panel.placement.shift, center, rotate);
+            if (rotate) {
+                panel.placement.inc_angle_deg(-90);
             }
         } break;
 

@@ -32,6 +32,7 @@ void Buffer::clear()
     tracks.clear();
     board_holes.clear();
     dimensions.clear();
+    board_panels.clear();
 }
 
 void Buffer::load(std::set<SelectableRef> selection)
@@ -174,6 +175,10 @@ void Buffer::load(std::set<SelectableRef> selection)
         else if (it.type == ObjectType::DIMENSION) {
             auto x = core.r->get_dimension(it.uuid);
             dimensions.emplace(x->uuid, *x);
+        }
+        else if (it.type == ObjectType::BOARD_PANEL) {
+            auto &x = core.b->get_board()->board_panels.at(it.uuid);
+            board_panels.emplace(x.uuid, x);
         }
     }
     for (const auto &it : selection) {
@@ -371,6 +376,10 @@ json Buffer::serialize()
     j["dimensions"] = json::object();
     for (const auto &it : dimensions) {
         j["dimensions"][(std::string)it.first] = it.second.serialize();
+    }
+    j["board_panels"] = json::object();
+    for (const auto &it : board_panels) {
+        j["board_panels"][(std::string)it.first] = it.second.serialize();
     }
     return j;
 }

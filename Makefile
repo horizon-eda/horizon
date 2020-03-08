@@ -99,6 +99,9 @@ SRC_COMMON = \
 	src/common/keepout.cpp\
 	src/board/board_layers.cpp\
 	src/pool/pool_parametric.cpp \
+	src/board/included_board.cpp \
+	src/board/board_panel.cpp \
+	src/pool/pool_cached.cpp\
 
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += src/util/uuid_win32.cpp
@@ -238,6 +241,8 @@ SRC_IMP = \
 	src/core/tools/tool_fix.cpp\
 	src/core/tools/tool_nopopulate.cpp\
 	src/core/tools/tool_polygon_to_line_loop.cpp\
+	src/core/tools/tool_place_board_panel.cpp\
+	src/core/tools/tool_smash_panel_outline.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\
@@ -271,6 +276,8 @@ SRC_IMP = \
 	src/dialogs/ask_datum_angle.cpp\
 	src/dialogs/tool_window.cpp\
 	src/dialogs/renumber_pads_window.cpp\
+	src/dialogs/select_included_board.cpp\
+	src/dialogs/manage_included_boards.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\
 	src/core/core_schematic.cpp\
@@ -405,6 +412,7 @@ SRC_IMP = \
 	src/imp/search/searcher_schematic.cpp\
 	src/imp/search/searcher_package.cpp\
 	src/imp/search/searcher_board.cpp\
+	src/util/clipper_util.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\

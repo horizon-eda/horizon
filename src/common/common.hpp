@@ -54,7 +54,8 @@ enum class ObjectType {
     FRAME,
     KEEPOUT,
     CONNECTION_LINE,
-    AIRWIRE
+    AIRWIRE,
+    BOARD_PANEL
 };
 enum class PatchType { OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH, BOARD_EDGE, TEXT };
 

@@ -24,6 +24,7 @@ bool ToolManageBuses::can_begin()
         return doc.c;
 
     case ToolID::EDIT_STACKUP:
+    case ToolID::MANAGE_INCLUDED_BOARDS:
         return doc.b;
 
     case ToolID::EDIT_FRAME_PROPERTIES:
@@ -66,6 +67,9 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
         auto sch = doc.c->get_schematic();
         sch->group_tag_visible = !sch->group_tag_visible;
         r = true;
+    }
+    else if (tool_id == ToolID::MANAGE_INCLUDED_BOARDS) {
+        r = imp->dialogs.manage_included_boards(*doc.b->get_board());
     }
     if (r) {
         return ToolResponse::commit();

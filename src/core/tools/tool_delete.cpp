@@ -223,6 +223,9 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         case ObjectType::BOARD_PACKAGE:
             doc.b->get_board()->packages.erase(it.uuid);
             break;
+        case ObjectType::BOARD_PANEL:
+            doc.b->get_board()->board_panels.erase(it.uuid);
+            break;
         case ObjectType::SCHEMATIC_SYMBOL: {
             SchematicSymbol *schsym = doc.c->get_schematic_symbol(it.uuid);
             Component *comp = schsym->component.ptr;

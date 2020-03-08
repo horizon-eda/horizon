@@ -41,6 +41,10 @@
 		"display_mode": "outline",
 		"visible": true
 	},
+	"110": {
+		"display_mode": "outline",
+		"visible": true
+	},
 	"20": {
 		"display_mode": "fill_only",
 		"visible": false

@@ -171,6 +171,29 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
 
     } break;
 
+    case ObjectType::BOARD_PANEL: {
+        auto &panel = brd.board_panels.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::OMIT_OUTLINE:
+            dynamic_cast<PropertyValueBool &>(value).value = panel.omit_outline;
+            return true;
+
+        case ObjectProperty::ID::NAME:
+            dynamic_cast<PropertyValueString &>(value).value = panel.included_board->get_name();
+            return true;
+
+        case ObjectProperty::ID::POSITION_X:
+        case ObjectProperty::ID::POSITION_Y:
+        case ObjectProperty::ID::ANGLE:
+            get_placement(panel.placement, value, property);
+            return true;
+
+        default:
+            return false;
+        }
+
+    } break;
+
     case ObjectType::TRACK: {
         auto track = &brd.tracks.at(uu);
         switch (property) {
@@ -344,6 +367,25 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         case ObjectProperty::ID::OMIT_SILKSCREEN:
             pkg->omit_silkscreen = dynamic_cast<const PropertyValueBool &>(value).value;
             break;
+
+        default:
+            return false;
+        }
+    } break;
+
+    case ObjectType::BOARD_PANEL: {
+        auto &panel = brd.board_panels.at(uu);
+        switch (property) {
+
+        case ObjectProperty::ID::OMIT_OUTLINE:
+            panel.omit_outline = dynamic_cast<const PropertyValueBool &>(value).value;
+            break;
+
+        case ObjectProperty::ID::POSITION_X:
+        case ObjectProperty::ID::POSITION_Y:
+        case ObjectProperty::ID::ANGLE: {
+            set_placement(panel.placement, value, property);
+        } break;
 
         default:
             return false;

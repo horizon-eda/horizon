@@ -38,6 +38,7 @@ Appearance::Appearance()
     colors[ColorP::NOPOPULATE_X] = {.8, .4, .4};
 
     layer_colors[BoardLayers::TOP_NOTES] = {1, 1, 1};
+    layer_colors[BoardLayers::OUTLINE_NOTES] = {.6, .6, 0};
     layer_colors[BoardLayers::L_OUTLINE] = {.6, .6, 0};
     layer_colors[BoardLayers::TOP_COURTYARD] = {.5, .5, .5};
     layer_colors[BoardLayers::TOP_ASSEMBLY] = {.5, .5, .5};

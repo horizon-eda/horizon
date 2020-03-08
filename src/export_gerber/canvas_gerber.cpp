@@ -3,6 +3,7 @@
 #include "common/keepout.hpp"
 #include "board/plane.hpp"
 #include "board/board_layers.hpp"
+#include "util/clipper_util.hpp"
 
 namespace horizon {
 CanvasGerber::CanvasGerber(GerberExporter *exp) : Canvas::Canvas(), exporter(exp)
@@ -22,8 +23,8 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
     if (padstack_mode)
         return;
     auto poly = ipoly.remove_arcs(16);
-    if (ipoly.layer == BoardLayers::L_OUTLINE) { // outline, convert poly to
-                                                 // draws
+    if (ipoly.layer == BoardLayers::L_OUTLINE || ipoly.layer == BoardLayers::OUTLINE_NOTES) { // outline, convert poly
+                                                                                              // to draws
         const auto &vertices = ipoly.vertices;
         for (auto it = vertices.cbegin(); it < vertices.cend(); it++) {
             auto it_next = it + 1;
@@ -53,7 +54,7 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
             for (const auto &frag : plane->fragments) {
                 bool dark = true; // first path ist outline, the rest are holes
                 for (const auto &path : frag.paths) {
-                    wr->draw_region(path, dark, plane->priority);
+                    wr->draw_region(transform_path(transform, path), dark, plane->priority);
                     dark = false;
                 }
             }

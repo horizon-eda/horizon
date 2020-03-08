@@ -82,14 +82,14 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
     CanvasPatch ca_my;
     const CanvasPatch *ca = ca_ext;
     if (!ca_ext) {
-        ca_my.update(*this);
+        ca_my.update(*this, Canvas::PanelMode::SKIP);
         ca = &ca_my;
     }
 
     CanvasPads ca_pads_my;
     const CanvasPads *ca_pads = ca_pads_ext;
     if (!ca_pads_ext) {
-        ca_pads_my.update(*this);
+        ca_pads_my.update(*this, Canvas::PanelMode::SKIP);
         ca_pads = &ca_pads_my;
     }
 
@@ -472,10 +472,10 @@ void Board::update_planes()
     std::sort(plane_priorities.begin(), plane_priorities.end());
 
     CanvasPads cp;
-    cp.update(*this);
+    cp.update(*this, Canvas::PanelMode::SKIP);
 
     CanvasPatch ca;
-    ca.update(*this);
+    ca.update(*this, Canvas::PanelMode::SKIP);
 
     for (auto priority : plane_priorities) {
         std::mutex plane_update_mutex;

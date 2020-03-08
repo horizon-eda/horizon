@@ -936,8 +936,8 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBoard::get_selection_filte
     for (unsigned i = 0; i < core_board.get_board()->get_n_inner_layers(); i++) {
         inner_layers.push_back(-i - 1);
     }
-    std::vector<int> layers_line = {BoardLayers::TOP_ASSEMBLY, BoardLayers::TOP_SILKSCREEN, BoardLayers::TOP_MASK,
-                                    BoardLayers::TOP_COPPER};
+    std::vector<int> layers_line = {BoardLayers::OUTLINE_NOTES, BoardLayers::TOP_ASSEMBLY, BoardLayers::TOP_SILKSCREEN,
+                                    BoardLayers::TOP_MASK, BoardLayers::TOP_COPPER};
     append_bottom_layers(layers_line);
 
     std::vector<int> layers_polygon = {BoardLayers::L_OUTLINE, BoardLayers::TOP_SILKSCREEN, BoardLayers::TOP_MASK,
@@ -963,6 +963,7 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBoard::get_selection_filte
             {ObjectType::DIMENSION, {}},
             {ObjectType::BOARD_HOLE, {}},
             {ObjectType::CONNECTION_LINE, {}},
+            {ObjectType::BOARD_PANEL, {}},
     };
     return r;
 }

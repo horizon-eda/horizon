@@ -33,7 +33,8 @@ public:
     void update(const class Padstack &padstack, bool edit = true);
     void update(const class Package &pkg, bool edit = true);
     void update(const class Buffer &buf, class LayerProvider *lp);
-    void update(const class Board &brd);
+    enum class PanelMode { INCLUDE, SKIP };
+    void update(const class Board &brd, PanelMode mode = PanelMode::INCLUDE);
     void update(const class Frame &fr, bool edit = true);
 
     ObjectRef add_line(const std::deque<Coordi> &pts, int64_t width, ColorP color, int layer);
@@ -102,15 +103,18 @@ protected:
     void render_pad_overlay(const class Pad &pad);
     void render(const class Pad &pad);
     void render(const class Buffer &buf);
-    void render(const class Board &brd);
-    void render(const class BoardPackage &pkg);
-    void render(const class BoardHole &hole);
-    void render(const class Track &track);
-    void render(const class Via &via);
+    enum class OutlineMode { INCLUDE, OMIT };
+    void render(const class Board &brd, bool interactive = true, PanelMode mode = PanelMode::INCLUDE,
+                OutlineMode outline_mode = OutlineMode::INCLUDE);
+    void render(const class BoardPackage &pkg, bool interactive = true);
+    void render(const class BoardHole &hole, bool interactive = true);
+    void render(const class Track &track, bool interactive = true);
+    void render(const class Via &via, bool interactive = true);
     void render(const class Dimension &dim);
     void render(const class Frame &frame, bool on_sheet = false);
     void render(const class ConnectionLine &line);
     void render(const class Airwire &airwire);
+    void render(const class BoardPanel &panel);
 
     bool needs_push = true;
     virtual void request_push() = 0;

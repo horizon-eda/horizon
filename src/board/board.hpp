@@ -24,6 +24,8 @@
 #include "step_export_settings.hpp"
 #include "pnp_export_settings.hpp"
 #include "airwire.hpp"
+#include "included_board.hpp"
+#include "board_panel.hpp"
 #include <fstream>
 #include <map>
 #include <vector>
@@ -66,6 +68,7 @@ public:
     void copy_package_silkscreen_texts(BoardPackage *dest, const BoardPackage *src);
     void unsmash_package(BoardPackage *pkg);
     void smash_package_silkscreen_graphics(BoardPackage *pkg);
+    void smash_panel_outline(BoardPanel &panel);
 
     Junction *get_junction(const UUID &uu) override;
     Polygon *get_polygon(const UUID &uu) override;
@@ -97,6 +100,8 @@ public:
     std::map<UUID, Keepout> keepouts;
     std::map<UUID, Dimension> dimensions;
     std::map<UUID, ConnectionLine> connection_lines;
+    std::map<UUID, IncludedBoard> included_boards;
+    std::map<UUID, BoardPanel> board_panels;
 
     std::vector<Warning> warnings;
 

@@ -27,6 +27,7 @@
 #include "util/placement.hpp"
 #include "util/util.hpp"
 #include "iairwire_filter.hpp"
+#include "board/board_panel.hpp"
 #include <algorithm>
 #include <ctime>
 #include <sstream>
@@ -248,7 +249,7 @@ void Canvas::render(const LineNet &line)
     selectables.append_line(line.uuid, ObjectType::LINE_NET, line.from.get_position(), line.to.get_position(), width);
 }
 
-void Canvas::render(const Track &track)
+void Canvas::render(const Track &track, bool interactive)
 {
     auto c = ColorP::FROM_LAYER;
     if (track.net == nullptr) {
@@ -265,13 +266,14 @@ void Canvas::render(const Track &track)
     auto layer = track.layer;
 
     auto center = (track.from.get_position() + track.to.get_position()) / 2;
-    object_refs_current.emplace_back(ObjectType::TRACK, track.uuid);
+    if (interactive)
+        object_refs_current.emplace_back(ObjectType::TRACK, track.uuid);
     draw_line(track.from.get_position(), track.to.get_position(), c, layer, true, width);
     if (track.locked) {
         auto ol = get_overlay_layer(layer);
         draw_lock(center, 0.7 * track.width, ColorP::TEXT_OVERLAY, ol, true);
     }
-    if (show_text_in_tracks && width > 0 && track.net && track.net->name.size() && track.from.is_junc()
+    if (interactive && show_text_in_tracks && width > 0 && track.net && track.net->name.size() && track.from.is_junc()
         && track.to.is_junc()) {
         auto overlay_layer = get_overlay_layer(track.layer, true);
         set_lod_size(width);
@@ -286,9 +288,11 @@ void Canvas::render(const Track &track)
         draw_bitmap_text_box(p, length, width, track.net->name, ColorP::TEXT_OVERLAY, overlay_layer, TextBoxMode::FULL);
         set_lod_size(-1);
     }
-    object_refs_current.pop_back();
-    selectables.append_line(track.uuid, ObjectType::TRACK, track.from.get_position(), track.to.get_position(),
-                            track.width, 0, track.layer);
+    if (interactive)
+        object_refs_current.pop_back();
+    if (interactive)
+        selectables.append_line(track.uuid, ObjectType::TRACK, track.from.get_position(), track.to.get_position(),
+                                track.width, 0, track.layer);
 }
 
 void Canvas::render(const Airwire &airwire)
@@ -774,7 +778,8 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
         triangle_type_current = Triangle::Type::PLANE;
         auto tris = fragment_cache.get_triangles(*plane);
         for (const auto &tri : tris) {
-            add_triangle(poly.layer, tri[0], tri[1], tri[2], co);
+            add_triangle(poly.layer, transform.transform(tri[0]), transform.transform(tri[1]),
+                         transform.transform(tri[2]), co);
         }
         for (const auto &frag : plane->fragments) {
             ColorP co_orphan = co;
@@ -1141,12 +1146,18 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omi
             object_refs_current.pop_back();
         }
     }
-    else {
+    else if (interactive) {
         for (const auto &it : pkg.pads) {
             object_refs_current.emplace_back(ObjectType::PAD, it.second.uuid);
             render_pad_overlay(it.second);
             render(it.second);
             object_refs_current.pop_back();
+        }
+    }
+    else {
+        for (const auto &it : pkg.pads) {
+            render_pad_overlay(it.second);
+            render(it.second);
         }
     }
     for (const auto &it : pkg.polygons) {
@@ -1210,63 +1221,81 @@ void Canvas::render(const Buffer &buf)
     }
 }
 
-void Canvas::render(const BoardPackage &pkg)
+void Canvas::render(const BoardPackage &pkg, bool interactive)
 {
-    transform = pkg.placement;
+    transform_save();
+    transform.accumulate(pkg.placement);
     auto bb = pkg.package.get_bbox();
     if (pkg.flip) {
         transform.invert_angle();
     }
-    selectables.append(pkg.uuid, ObjectType::BOARD_PACKAGE, {0, 0}, bb.first, bb.second, 0,
-                       pkg.flip ? BoardLayers::BOTTOM_PACKAGE : BoardLayers::TOP_PACKAGE);
-    targets.emplace_back(pkg.uuid, ObjectType::BOARD_PACKAGE, pkg.placement.shift);
-    for (const auto &it : pkg.package.pads) {
-        targets.emplace_back(UUIDPath<2>(pkg.uuid, it.first), ObjectType::PAD,
-                             transform.transform(it.second.placement.shift));
+    if (interactive) {
+        selectables.append(pkg.uuid, ObjectType::BOARD_PACKAGE, {0, 0}, bb.first, bb.second, 0,
+                           pkg.flip ? BoardLayers::BOTTOM_PACKAGE : BoardLayers::TOP_PACKAGE);
+        targets.emplace_back(pkg.uuid, ObjectType::BOARD_PACKAGE, pkg.placement.shift);
+
+        for (const auto &it : pkg.package.pads) {
+            targets.emplace_back(UUIDPath<2>(pkg.uuid, it.first), ObjectType::PAD,
+                                 transform.transform(it.second.placement.shift));
+        }
     }
-    object_refs_current.emplace_back(ObjectType::BOARD_PACKAGE, pkg.uuid);
+    if (interactive)
+        object_refs_current.emplace_back(ObjectType::BOARD_PACKAGE, pkg.uuid);
+
     render(pkg.package, false, pkg.smashed, pkg.omit_silkscreen);
-    object_refs_current.pop_back();
+
+    if (interactive)
+        object_refs_current.pop_back();
 
     transform.reset();
+    transform_restore();
 }
 
-void Canvas::render(const Via &via)
+void Canvas::render(const Via &via, bool interactive)
 {
     transform_save();
-    transform.reset();
-    transform.shift = via.junction->position;
+    {
+        Placement pl;
+        pl.shift = via.junction->position;
+        transform.accumulate(pl);
+    }
     auto bb = via.padstack.get_bbox();
-    selectables.append(via.uuid, ObjectType::VIA, {0, 0}, bb.first, bb.second);
+    if (interactive)
+        selectables.append(via.uuid, ObjectType::VIA, {0, 0}, bb.first, bb.second);
     img_net(via.junction->net);
     img_patch_type(PatchType::VIA);
-    object_refs_current.emplace_back(ObjectType::VIA, via.uuid);
+    if (interactive)
+        object_refs_current.emplace_back(ObjectType::VIA, via.uuid);
     render(via.padstack, false);
     if (via.locked) {
         auto ol = get_overlay_layer(BoardLayers::TOP_COPPER);
         draw_lock({0, 0}, 0.7 * std::min(std::abs(bb.second.x - bb.first.x), std::abs(bb.second.y - bb.first.y)),
                   ColorP::TEXT_OVERLAY, ol, true);
     }
-    object_refs_current.pop_back();
+    if (interactive)
+        object_refs_current.pop_back();
     img_net(nullptr);
     img_patch_type(PatchType::OTHER);
     transform_restore();
 }
 
-void Canvas::render(const BoardHole &hole)
+void Canvas::render(const BoardHole &hole, bool interactive)
 {
     transform_save();
-    transform = hole.placement;
+    transform.accumulate(hole.placement);
     auto bb = hole.padstack.get_bbox();
-    selectables.append(hole.uuid, ObjectType::BOARD_HOLE, {0, 0}, bb.first, bb.second);
+    if (interactive)
+        selectables.append(hole.uuid, ObjectType::BOARD_HOLE, {0, 0}, bb.first, bb.second);
     img_net(hole.net);
     if (hole.padstack.type == Padstack::Type::HOLE)
         img_patch_type(PatchType::HOLE_PTH);
     else
         img_patch_type(PatchType::HOLE_NPTH);
-    object_refs_current.emplace_back(ObjectType::BOARD_HOLE, hole.uuid);
+    if (interactive)
+        object_refs_current.emplace_back(ObjectType::BOARD_HOLE, hole.uuid);
     render(hole.padstack, false);
-    object_refs_current.pop_back();
+    if (interactive)
+        object_refs_current.pop_back();
     img_net(nullptr);
     img_patch_type(PatchType::OTHER);
     transform_restore();
@@ -1365,17 +1394,19 @@ void Canvas::render(const class Dimension &dim)
     }
 }
 
-void Canvas::render(const Board &brd)
+void Canvas::render(const Board &brd, bool interactive, PanelMode mode, OutlineMode outline_mode)
 {
     clock_t begin = clock();
 
     for (const auto &it : brd.holes) {
-        render(it.second);
+        render(it.second, interactive);
     }
-    for (const auto &it : brd.junctions) {
-        render(it.second, true, ObjectType::BOARD);
+    if (interactive) {
+        for (const auto &it : brd.junctions) {
+            render(it.second, true, ObjectType::BOARD);
+        }
     }
-    if (!img_mode) {
+    if (!img_mode && interactive) {
         for (const auto &it_net : brd.airwires) {
             if (airwire_filter == nullptr || airwire_filter->airwire_is_visible(it_net.first)) {
                 object_refs_current.emplace_back(ObjectType::AIRWIRE, it_net.first);
@@ -1387,60 +1418,85 @@ void Canvas::render(const Board &brd)
         }
     }
     for (const auto &it : brd.polygons) {
-        render(it.second);
+        if (outline_mode == OutlineMode::OMIT && it.second.layer == BoardLayers::L_OUTLINE)
+            continue;
+        render(it.second, interactive);
     }
     for (const auto &it : brd.texts) {
-        render(it.second);
+        render(it.second, interactive);
     }
     for (const auto &it : brd.tracks) {
-        render(it.second);
+        render(it.second, interactive);
     }
     for (const auto &it : brd.packages) {
-        render(it.second);
+        render(it.second, interactive);
     }
     for (const auto &it : brd.vias) {
-        render(it.second);
+        render(it.second, interactive);
     }
     for (const auto &it : brd.lines) {
-        render(it.second);
+        render(it.second, interactive);
     }
     for (const auto &it : brd.arcs) {
-        render(it.second);
+        render(it.second, interactive);
     }
-    for (const auto &it : brd.dimensions) {
-        render(it.second);
-    }
-    for (const auto &it : brd.connection_lines) {
-        render(it.second);
+    if (mode == PanelMode::INCLUDE) {
+        for (const auto &it : brd.board_panels) {
+            render(it.second);
+        }
     }
 
-    for (const auto &path : brd.obstacles) {
-        for (auto it = path.cbegin(); it < path.cend(); it++) {
-            if (it != path.cbegin()) {
+    if (interactive) {
+        for (const auto &it : brd.dimensions) {
+            render(it.second);
+        }
+        for (const auto &it : brd.connection_lines) {
+            render(it.second);
+        }
+
+        for (const auto &path : brd.obstacles) {
+            for (auto it = path.cbegin(); it < path.cend(); it++) {
+                if (it != path.cbegin()) {
+                    auto b = it - 1;
+                    draw_line(Coordf(b->X, b->Y), Coordf(it->X, it->Y), ColorP::AIRWIRE, 10000, false, 0);
+                }
+            }
+        }
+
+        unsigned int i = 0;
+        for (auto it = brd.track_path.cbegin(); it < brd.track_path.cend(); it++) {
+            if (it != brd.track_path.cbegin()) {
                 auto b = it - 1;
                 draw_line(Coordf(b->X, b->Y), Coordf(it->X, it->Y), ColorP::AIRWIRE, 10000, false, 0);
             }
+            if (i % 2 == 0) {
+                draw_line(Coordf(it->X, it->Y), Coordf(it->X, it->Y), ColorP::AIRWIRE, 10000, false, .1_mm);
+            }
+            i++;
         }
-    }
-
-    unsigned int i = 0;
-    for (auto it = brd.track_path.cbegin(); it < brd.track_path.cend(); it++) {
-        if (it != brd.track_path.cbegin()) {
-            auto b = it - 1;
-            draw_line(Coordf(b->X, b->Y), Coordf(it->X, it->Y), ColorP::AIRWIRE, 10000, false, 0);
+        for (const auto &it : brd.warnings) {
+            render(it);
         }
-        if (i % 2 == 0) {
-            draw_line(Coordf(it->X, it->Y), Coordf(it->X, it->Y), ColorP::AIRWIRE, 10000, false, .1_mm);
-        }
-        i++;
-    }
-    for (const auto &it : brd.warnings) {
-        render(it);
     }
 
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
     std::cout << "render took " << 1 / elapsed_secs << std::endl;
+}
+
+void Canvas::render(const BoardPanel &panel)
+{
+    if (!panel.included_board->is_valid()) {
+        draw_error(panel.placement.shift, 2e5, "invalid board", false);
+        return;
+    }
+    transform_save();
+    transform.accumulate(panel.placement);
+    auto bb = panel.included_board->board->get_bbox();
+    selectables.append(panel.uuid, ObjectType::BOARD_PANEL, {0, 0}, bb.first, bb.second, 0, 10000);
+    render(*panel.included_board->board, false, PanelMode::SKIP,
+           panel.omit_outline ? OutlineMode::OMIT : OutlineMode::INCLUDE);
+    transform_restore();
 }
 
 void Canvas::render(const Frame &fr, bool on_sheet)

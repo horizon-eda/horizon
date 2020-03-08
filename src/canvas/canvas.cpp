@@ -191,11 +191,11 @@ void Canvas::update(const Buffer &buf, LayerProvider *lp)
     render(buf);
     request_push();
 }
-void Canvas::update(const Board &brd)
+void Canvas::update(const Board &brd, PanelMode mode)
 {
     clear();
     layer_provider = &brd;
-    render(brd);
+    render(brd, true, mode);
     request_push();
 }
 void Canvas::update(const class Frame &fr, bool edit)

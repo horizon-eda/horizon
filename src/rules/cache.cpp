@@ -16,7 +16,7 @@ void RulesCheckCache::clear()
 RulesCheckCacheBoardImage::RulesCheckCacheBoardImage(IDocument *c)
 {
     auto core = dynamic_cast<IDocumentBoard *>(c);
-    canvas.update(*core->get_board());
+    canvas.update(*core->get_board(), Canvas::PanelMode::SKIP);
 }
 
 const CanvasPatch *RulesCheckCacheBoardImage::get_canvas() const

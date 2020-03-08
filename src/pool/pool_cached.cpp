@@ -106,4 +106,9 @@ std::string PoolCached::get_model_filename(const UUID &pkg_uuid, const UUID &mod
     }
 }
 
+const std::string &PoolCached::get_cache_path() const
+{
+    return cache_path;
+}
+
 } // namespace horizon

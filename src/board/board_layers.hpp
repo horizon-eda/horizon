@@ -7,6 +7,7 @@ class BoardLayers {
 public:
     enum Layer {
         TOP_NOTES = 200,
+        OUTLINE_NOTES = 110,
         L_OUTLINE = 100,
         TOP_COURTYARD = 60,
         TOP_ASSEMBLY = 50,
