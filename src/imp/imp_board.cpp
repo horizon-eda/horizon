@@ -398,9 +398,8 @@ void ImpBoard::construct()
         canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBoard::handle_selection_cross_probe));
 
         connect_action(ActionID::GO_TO_SCHEMATIC, [this](const auto &conn) {
-            auto ev = gtk_get_current_event();
             json j;
-            j["time"] = gdk_event_get_time(ev);
+            j["time"] = gtk_get_current_event_time();
             j["op"] = "present-schematic";
             auto sch_pid = this->get_schematic_pid();
             if (sch_pid != -1)
@@ -430,9 +429,8 @@ void ImpBoard::construct()
         set_action_sensitive(make_action(ActionID::SHOW_IN_POOL_MANAGER), false);
 
         connect_action(ActionID::BACKANNOTATE_CONNECTION_LINES, [this](const auto &conn) {
-            auto ev = gtk_get_current_event();
             json j;
-            j["time"] = gdk_event_get_time(ev);
+            j["time"] = gtk_get_current_event_time();
             j["op"] = "backannotate";
             allow_set_foreground_window(this->get_schematic_pid());
             json a;

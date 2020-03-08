@@ -344,6 +344,7 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             auto pid = proc->proc->get_pid();
             json tx;
             tx["op"] = "reload-netlist";
+            tx["time"] = timestamp;
             app->send_json(pid, tx);
         }
     }
@@ -1080,7 +1081,7 @@ void PoolProjectManagerAppWindow::handle_place_part(const UUID &uu)
     if (auto proc = find_top_schematic_process()) {
         auto pid = proc->proc->get_pid();
         allow_set_foreground_window(pid);
-        app->send_json(pid, {{"op", "place-part"}, {"part", (std::string)uu}});
+        app->send_json(pid, {{"op", "place-part"}, {"part", (std::string)uu}, {"time", gtk_get_current_event_time()}});
     }
 }
 
@@ -1089,7 +1090,7 @@ void PoolProjectManagerAppWindow::handle_assign_part(const UUID &uu)
     if (auto proc = find_top_schematic_process()) {
         auto pid = proc->proc->get_pid();
         allow_set_foreground_window(pid);
-        app->send_json(pid, {{"op", "assign-part"}, {"part", (std::string)uu}});
+        app->send_json(pid, {{"op", "assign-part"}, {"part", (std::string)uu}, {"time", gtk_get_current_event_time()}});
     }
 }
 
@@ -1167,7 +1168,7 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
         if (proc->proc) {
             auto pid = proc->proc->get_pid();
             Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application())
-                    ->send_json(pid, {{"op", "present"}});
+                    ->send_json(pid, {{"op", "present"}, {"time", gtk_get_current_event_time()}});
         }
         else {
             proc->win->present();
