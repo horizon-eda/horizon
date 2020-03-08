@@ -85,8 +85,8 @@ ImpBase::ImpBase(const PoolParams &params)
     auto ep_project = Glib::getenv("HORIZON_EP_MGR");
     if (ep_project.size()) {
         sock_project.connect(ep_project);
-        sock_project.setsockopt(ZMQ_RCVTIMEO, 2000);
-        sock_project.setsockopt(ZMQ_SNDTIMEO, 2000);
+        sock_project.setsockopt(ZMQ_RCVTIMEO, 5000);
+        sock_project.setsockopt(ZMQ_SNDTIMEO, 5000);
     }
     sockets_connected = ep_project.size() && ep_broadcast.size();
 }
