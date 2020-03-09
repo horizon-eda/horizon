@@ -7,7 +7,7 @@
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
 #include "util/str_util.hpp"
-#include "hud_util.hpp"
+#include "util/selection_util.hpp"
 #include "bom_export_window.hpp"
 #include "pdf_export_window.hpp"
 #include "nlohmann/json.hpp"
@@ -568,7 +568,7 @@ std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)
 {
     std::string s;
     if (sel_count_type(sel, ObjectType::SCHEMATIC_SYMBOL) == 1) {
-        const auto &sym = core_schematic.get_sheet()->symbols.at(sel_find_one(sel, ObjectType::SCHEMATIC_SYMBOL));
+        const auto &sym = core_schematic.get_sheet()->symbols.at(sel_find_one(sel, ObjectType::SCHEMATIC_SYMBOL).uuid);
         s += "<b>Symbol " + sym.component->refdes + "</b>\n";
         s += get_hud_text_for_component(sym.component);
         sel_erase_type(sel, ObjectType::SCHEMATIC_SYMBOL);

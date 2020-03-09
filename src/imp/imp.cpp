@@ -14,7 +14,7 @@
 #include "widgets/spin_button_dim.hpp"
 #include "action_catalog.hpp"
 #include "tool_popover.hpp"
-#include "hud_util.hpp"
+#include "util/selection_util.hpp"
 #include "util/str_util.hpp"
 #include "preferences/preferences_provider.hpp"
 #include "parameter_window.hpp"
@@ -919,7 +919,7 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
     }
 
     if (sel_count_type(sel, ObjectType::TEXT) == 1) {
-        const auto text = core->get_text(sel_find_one(sel, ObjectType::TEXT));
+        const auto text = core->get_text(sel_find_one(sel, ObjectType::TEXT).uuid);
         const auto txt = Glib::ustring(text->text);
         auto regex = Glib::Regex::create(R"(https?:\/\/([\w\.-]+)(\/\S+)?)");
         Glib::MatchInfo ma;

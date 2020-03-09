@@ -9,7 +9,7 @@
 #include "widgets/board_display_options.hpp"
 #include "widgets/layer_box.hpp"
 #include "tuning_window.hpp"
-#include "hud_util.hpp"
+#include "util/selection_util.hpp"
 #include "util/util.hpp"
 #include "util/str_util.hpp"
 #include "canvas/annotation.hpp"
@@ -752,7 +752,7 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
     }
     trim(s);
     if (sel_count_type(sel, ObjectType::BOARD_PACKAGE) == 1) {
-        const auto &pkg = core_board.get_board()->packages.at(sel_find_one(sel, ObjectType::BOARD_PACKAGE));
+        const auto &pkg = core_board.get_board()->packages.at(sel_find_one(sel, ObjectType::BOARD_PACKAGE).uuid);
         s += "\n\n<b>Package " + pkg.component->refdes + "</b>";
         if (pkg.fixed) {
             s += " (not movable)";

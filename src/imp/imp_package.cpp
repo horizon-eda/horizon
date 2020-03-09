@@ -19,7 +19,7 @@
 #include "widgets/layer_box.hpp"
 #include "widgets/layer_help_box.hpp"
 #include "widgets/spin_button_angle.hpp"
-#include "hud_util.hpp"
+#include "util/selection_util.hpp"
 #include <iomanip>
 
 namespace horizon {
@@ -312,7 +312,7 @@ std::string ImpPackage::get_hud_text(std::set<SelectableRef> &sel)
 {
     std::string s;
     if (sel_count_type(sel, ObjectType::PAD) == 1) {
-        const auto &pad = core_package.get_package()->pads.at(sel_find_one(sel, ObjectType::PAD));
+        const auto &pad = core_package.get_package()->pads.at(sel_find_one(sel, ObjectType::PAD).uuid);
         s += "<b>Pad " + pad.name + "</b>\n";
         for (const auto &it : pad.parameter_set) {
             s += parameter_id_to_name(it.first) + ": " + dim_to_string(it.second, true) + "\n";
@@ -532,7 +532,8 @@ void ImpPackage::construct()
 
     connect_action(ActionID::EDIT_PADSTACK, [this](const auto &a) {
         auto sel = canvas->get_selection();
-        if (auto uu = sel_find_one(sel, ObjectType::PAD)) {
+        if (sel_count_type(sel, ObjectType::PAD)) {
+            auto uu = sel_find_one(sel, ObjectType::PAD).uuid;
             this->edit_pool_item(ObjectType::PADSTACK, core_package.get_package()->pads.at(uu).pool_padstack->uuid);
         }
     });
