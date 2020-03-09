@@ -23,7 +23,12 @@ bool Selectable::inside(const Coordf &c, float expand) const
 
 float Selectable::area() const
 {
-    return width * height;
+    if (width == 0)
+        return height;
+    else if (height == 0)
+        return width;
+    else
+        return width * height;
 }
 
 static void rotate(float &x, float &y, float a)
