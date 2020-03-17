@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run:
           name: Install preliminary dependencies
-          command: apt-get update -y && apt-get install curl gnupg -y
+          command: apt-get update -y && apt-get install curl gnupg apt-transport-https -y
       - run:
           name: Add clang 8.0 to apt sources
           command: echo "deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch-8 main" >> /etc/apt/sources.list
