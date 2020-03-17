@@ -68,7 +68,7 @@ Gtk::Label *grid_attach_label_and_widget(Gtk::Grid *gr, const std::string &label
 {
     auto la = Gtk::manage(new Gtk::Label(label));
     la->get_style_context()->add_class("dim-label");
-    la->set_halign(Gtk::ALIGN_END);
+    la->set_xalign(1);
     la->show();
     gr->attach(*la, 0, top, 1, 1);
     w->show();

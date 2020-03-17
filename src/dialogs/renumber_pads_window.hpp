@@ -18,12 +18,20 @@ private:
     class Package *pkg = nullptr;
     std::set<class Pad *> pads;
 
+    bool circular = false;
     bool x_first = true;
     bool down = true;
     bool right = true;
+    enum class Origin { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT };
+    bool clockwise = false;
+    Origin circular_origin = Origin::TOP_LEFT;
+
     Gtk::Entry *entry_prefix = nullptr;
     Gtk::SpinButton *sp_start = nullptr;
     Gtk::SpinButton *sp_step = nullptr;
+    std::set<Gtk::Widget *> widgets_circular;
+    std::set<Gtk::Widget *> widgets_axis;
+
 
     std::vector<Pad *> pads_sorted;
 };
