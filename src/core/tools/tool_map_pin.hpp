@@ -8,6 +8,7 @@ public:
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;
+    ~ToolMapPin();
 
 private:
     std::vector<std::pair<const class Pin *, bool>> pins;
@@ -18,5 +19,7 @@ private:
     void create_pin(const UUID &uu);
     bool can_autoplace() const;
     void update_tip();
+    class CanvasAnnotation *annotation = nullptr;
+    void update_annotation();
 };
 } // namespace horizon

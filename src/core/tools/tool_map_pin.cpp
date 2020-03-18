@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <iostream>
 #include <gdk/gdkkeysyms.h>
+#include "canvas/canvas_gl.hpp"
 
 namespace horizon {
 
@@ -32,6 +33,7 @@ void ToolMapPin::create_pin(const UUID &uu)
     pin->length = 2.5_mm;
     pin->name = doc.y->get_symbol()->unit->pins.at(uu).primary_name;
     pin->orientation = orientation;
+    update_annotation();
 }
 
 ToolResponse ToolMapPin::begin(const ToolArgs &args)
@@ -85,6 +87,10 @@ ToolResponse ToolMapPin::begin(const ToolArgs &args)
     assert(x != pins.end());
     pin_index = x - pins.begin();
 
+    annotation = imp->get_canvas()->create_annotation();
+    annotation->set_visible(true);
+    annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
+
     create_pin(selected_pin);
     pin->position = args.coords;
     update_tip();
@@ -100,6 +106,30 @@ bool ToolMapPin::can_autoplace() const
         return pin_last2->orientation == pin_last->orientation;
     else
         return false;
+}
+
+void ToolMapPin::update_annotation()
+{
+    if (!annotation)
+        return;
+    annotation->clear();
+    if (can_autoplace()) {
+        auto shift = pin_last->position - pin_last2->position;
+        Coordf center = pin_last->position + shift;
+        float size = 0.25_mm;
+        std::vector<Coordf> pts = {center + Coordf(-size, size), center + Coordf(size, size),
+                                   center + Coordf(size, -size), center + Coordf(-size, -size)};
+        for (size_t i = 0; i < pts.size(); i++) {
+            const auto &p0 = pts.at(i);
+            const auto &p2 = pts.at((i + 1) % pts.size());
+            annotation->draw_line(p0, p2, ColorP::PIN_HIDDEN, 0);
+        }
+
+        Placement pl;
+        pl.set_angle(orientation_to_angle(pin_last->orientation));
+        Coordf p = pl.transform(Coordf(pin_last->length, 0));
+        annotation->draw_line(center, center - p, ColorP::PIN_HIDDEN, 0);
+    }
 }
 
 void ToolMapPin::update_tip()
@@ -194,4 +224,13 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
     update_tip();
     return ToolResponse();
 }
+
+ToolMapPin::~ToolMapPin()
+{
+    if (annotation) {
+        imp->get_canvas()->remove_annotation(annotation);
+        annotation = nullptr;
+    }
+}
+
 } // namespace horizon
