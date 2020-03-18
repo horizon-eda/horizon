@@ -51,6 +51,7 @@ class ZoomPreferences {
 public:
     bool smooth_zoom_2d = true;
     bool smooth_zoom_3d = false;
+    bool touchpad_pan = false;
 
     void load_from_json(const json &j);
     json serialize() const;

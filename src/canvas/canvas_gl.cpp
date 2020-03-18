@@ -273,7 +273,7 @@ bool CanvasGL::on_scroll_event(GdkEventScroll *scroll_event)
 #if GTK_CHECK_VERSION(3, 22, 0)
     auto *dev = gdk_event_get_source_device((GdkEvent *)scroll_event);
     auto src = gdk_device_get_source(dev);
-    if (src == GDK_SOURCE_TRACKPOINT) {
+    if (src == GDK_SOURCE_TRACKPOINT || (src == GDK_SOURCE_TOUCHPAD && touchpad_pan)) {
         if (scroll_event->state & GDK_CONTROL_MASK) {
             pan_zoom(scroll_event, false);
         }

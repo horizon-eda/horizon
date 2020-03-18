@@ -1125,6 +1125,7 @@ void ImpBase::apply_preferences()
         }
     }
     canvas->smooth_zoom = preferences.zoom.smooth_zoom_2d;
+    canvas->touchpad_pan = preferences.zoom.touchpad_pan;
 }
 
 void ImpBase::canvas_update_from_pp()

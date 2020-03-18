@@ -107,6 +107,12 @@ ZoomPreferencesEditor::ZoomPreferencesEditor(Preferences *prefs, ZoomPreferences
         bind_widget(sw, zoom_preferences->smooth_zoom_3d);
         sw->property_active().signal_changed().connect([this] { preferences->signal_changed().emit(); });
     }
+    {
+        auto sw = Gtk::manage(new Gtk::Switch);
+        grid_attach_label_and_widget(this, "Use Touchpad to Pan", sw, top);
+        bind_widget(sw, zoom_preferences->touchpad_pan);
+        sw->property_active().signal_changed().connect([this] { preferences->signal_changed().emit(); });
+    }
 }
 
 PreferencesWindow::PreferencesWindow(Preferences *prefs) : Gtk::Window(), preferences(prefs)
@@ -152,7 +158,7 @@ PreferencesWindow::PreferencesWindow(Preferences *prefs) : Gtk::Window(), prefer
     }
     {
         auto ed = Gtk::manage(new ZoomPreferencesEditor(preferences, &preferences->zoom));
-        stack->add(*ed, "zoom", "Zoom");
+        stack->add(*ed, "zoom", "Zoom & Pan");
         ed->show();
     }
     {

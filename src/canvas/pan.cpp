@@ -63,9 +63,8 @@ void CanvasGL::pan_drag_move(GdkEventScroll *scroll_event)
 {
     gdouble dx, dy;
     gdk_event_get_scroll_deltas((GdkEvent *)scroll_event, &dx, &dy);
-
-    offset.x += dx * 50;
-    offset.y += dy * 50;
+    offset.x -= dx * 50;
+    offset.y -= dy * 50;
     update_viewmat();
     queue_draw();
 }
