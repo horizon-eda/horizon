@@ -16,5 +16,7 @@ private:
     SymbolPin *pin_last = nullptr;
     SymbolPin *pin_last2 = nullptr;
     void create_pin(const UUID &uu);
+    bool can_autoplace() const;
+    void update_tip();
 };
 } // namespace horizon

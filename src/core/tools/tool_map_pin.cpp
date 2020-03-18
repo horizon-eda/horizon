@@ -87,15 +87,31 @@ ToolResponse ToolMapPin::begin(const ToolArgs &args)
 
     create_pin(selected_pin);
     pin->position = args.coords;
-    imp->tool_bar_set_tip(
-            "<b>LMB:</b>place pin <b>RMB:</b>delete current pin and finish "
-            "<b>r:</b>rotate <b>e:</b>mirror <b>Space</b>:select pin "
-            "<b>Return:</b>autoplace");
+    update_tip();
 
     selection.clear();
 
     return ToolResponse();
 }
+
+bool ToolMapPin::can_autoplace() const
+{
+    if (pin_last && pin_last2)
+        return pin_last2->orientation == pin_last->orientation;
+    else
+        return false;
+}
+
+void ToolMapPin::update_tip()
+{
+    std::string s =
+            "<b>LMB:</b>place pin <b>RMB:</b>delete current pin and finish "
+            "<b>r:</b>rotate <b>e:</b>mirror <b>Space</b>:select pin";
+    if (can_autoplace())
+        s += " <b>Return:</b>autoplace <b>p:</b>autoplace all";
+    imp->tool_bar_set_tip(s);
+}
+
 ToolResponse ToolMapPin::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
@@ -124,10 +140,10 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
         }
     }
     else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Return) {
-            if (pin_last && pin_last2) {
-                if (pin_last2->orientation == pin_last->orientation) {
-                    auto shift = pin_last->position - pin_last2->position;
+        if (args.key == GDK_KEY_p || args.key == GDK_KEY_Return) {
+            if (can_autoplace()) {
+                auto shift = pin_last->position - pin_last2->position;
+                while (1) {
                     pin->position = pin_last->position + shift;
 
                     pins.at(pin_index).second = true;
@@ -142,6 +158,9 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
                     }
                     create_pin(pins.at(pin_index).first->uuid);
                     pin->position = args.coords;
+
+                    if (args.key == GDK_KEY_Return)
+                        break;
                 }
             }
         }
@@ -172,7 +191,7 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
             return ToolResponse::revert();
         }
     }
-
+    update_tip();
     return ToolResponse();
 }
 } // namespace horizon
