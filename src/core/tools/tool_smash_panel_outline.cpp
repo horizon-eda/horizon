@@ -13,7 +13,7 @@ bool ToolSmashPanelOutline::can_begin()
 {
     for (const auto &it : selection) {
         if (it.type == ObjectType::BOARD_PANEL) {
-            return true;
+            return doc.b->get_board()->board_panels.at(it.uuid).omit_outline == false;
         }
     }
     return false;

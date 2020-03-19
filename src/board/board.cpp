@@ -957,6 +957,9 @@ void Board::smash_package_silkscreen_graphics(BoardPackage *pkg)
 
 void Board::smash_panel_outline(BoardPanel &panel)
 {
+    if (panel.omit_outline)
+        return;
+
     for (const auto &it : panel.included_board->board->polygons) {
         if (it.second.layer == BoardLayers::L_OUTLINE) {
             auto uu = UUID::random();
