@@ -911,6 +911,9 @@ void Board::copy_package_silkscreen_texts(BoardPackage *dest, const BoardPackage
 
 void Board::smash_package_silkscreen_graphics(BoardPackage *pkg)
 {
+    if (pkg->omit_silkscreen)
+        return;
+
     std::map<Junction *, Junction *> junction_xlat;
     auto tr = pkg->placement;
     if (pkg->flip)

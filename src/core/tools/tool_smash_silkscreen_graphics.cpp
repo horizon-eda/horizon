@@ -13,7 +13,7 @@ bool ToolSmashSilkscreenGraphics::can_begin()
 {
     for (const auto &it : selection) {
         if (it.type == ObjectType::BOARD_PACKAGE) {
-            return true;
+            return doc.b->get_board()->packages.at(it.uuid).omit_silkscreen == false;
         }
     }
     return false;
