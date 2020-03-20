@@ -41,5 +41,8 @@ private:
     class UnplacedBox *unplaced_box = nullptr;
     void update_unplaced();
     void update_header();
+
+    class CanvasAnnotation *bbox_annotation = nullptr;
+    void update_bbox_annotation();
 };
 } // namespace horizon

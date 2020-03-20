@@ -17,6 +17,7 @@ void ImpSymbol::canvas_update()
 {
     canvas->update(*core_symbol.get_canvas_data());
     symbol_preview_window->update(*core_symbol.get_canvas_data());
+    update_bbox_annotation();
 }
 
 void ImpSymbol::update_monitor()
@@ -165,6 +166,10 @@ void ImpSymbol::construct()
     }
 
     update_header();
+
+    bbox_annotation = canvas->create_annotation();
+    bbox_annotation->set_visible(true);
+    bbox_annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
 }
 
 void ImpSymbol::update_header()
@@ -183,6 +188,23 @@ void ImpSymbol::update_unplaced()
         }
     }
     unplaced_box->update(unplaced);
+}
+
+void ImpSymbol::update_bbox_annotation()
+{
+    if (!bbox_annotation)
+        return;
+    Coordi a;
+    for (const auto &it : core_symbol.get_symbol()->pins) {
+        const auto &p = it.second.position;
+        a = Coordi::max(a, {std::abs(p.x), std::abs(p.y)});
+    }
+    Coordi b = a * -1;
+    bbox_annotation->clear();
+    bbox_annotation->draw_line(a, Coordf(b.x, a.y), ColorP::PIN_HIDDEN, 0);
+    bbox_annotation->draw_line(Coordf(b.x, a.y), b, ColorP::PIN_HIDDEN, 0);
+    bbox_annotation->draw_line(b, Coordf(a.x, b.y), ColorP::PIN_HIDDEN, 0);
+    bbox_annotation->draw_line(Coordf(a.x, b.y), a, ColorP::PIN_HIDDEN, 0);
 }
 
 } // namespace horizon
