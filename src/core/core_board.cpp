@@ -28,6 +28,9 @@ void CoreBoard::reload_netlist()
     brd.update_refs();
     for (auto it = brd.packages.begin(); it != brd.packages.end();) {
         if (it->second.component == nullptr || it->second.component->part == nullptr) {
+            for (auto &it_txt : it->second.texts) {
+                brd.texts.erase(it_txt->uuid);
+            }
             brd.packages.erase(it++);
         }
         else {

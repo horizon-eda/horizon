@@ -40,5 +40,6 @@ public:
 
     UUID get_uuid() const override;
     json serialize() const;
+    static std::vector<UUID> peek_texts(const json &j);
 };
 } // namespace horizon

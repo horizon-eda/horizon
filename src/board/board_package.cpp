@@ -69,4 +69,16 @@ BoardPackage::BoardPackage(shallow_copy_t sh, const BoardPackage &other)
 {
 }
 
+std::vector<UUID> BoardPackage::peek_texts(const json &j)
+{
+    std::vector<UUID> r;
+    if (j.count("texts")) {
+        const json &o = j.at("texts");
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            r.emplace_back(UUID(it.value().get<std::string>()));
+        }
+    }
+    return r;
+}
+
 } // namespace horizon

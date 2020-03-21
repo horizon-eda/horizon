@@ -57,6 +57,7 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
                          Logger::Domain::BOARD);
         }
     }
+    std::set<UUID> texts_skip;
     if (j.count("packages")) {
         const json &o = j["packages"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -67,6 +68,8 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
                              Logger::Domain::BOARD);
             }
             else {
+                auto texts_lost = BoardPackage::peek_texts(it.value());
+                std::copy(texts_lost.begin(), texts_lost.end(), std::inserter(texts_skip, texts_skip.end()));
                 Logger::log_warning("not loading package " + (std::string)u + " since component is gone");
             }
         }
@@ -120,7 +123,8 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
         const json &o = j["texts"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            load_and_log(texts, ObjectType::TEXT, std::forward_as_tuple(u, it.value()), Logger::Domain::BOARD);
+            if (!texts_skip.count(u))
+                load_and_log(texts, ObjectType::TEXT, std::forward_as_tuple(u, it.value()), Logger::Domain::BOARD);
         }
     }
     if (j.count("lines")) {
