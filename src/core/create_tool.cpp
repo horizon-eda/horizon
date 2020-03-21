@@ -361,7 +361,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::PLACE_BOARD_PANEL:
         return std::make_unique<ToolPlaceBoardPanel>(this, tool_id);
 
-    case ToolID::SMASH_OUTLINE:
+    case ToolID::SMASH_PANEL_OUTLINE:
         return std::make_unique<ToolSmashPanelOutline>(this, tool_id);
 
     default:
