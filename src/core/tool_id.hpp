@@ -139,5 +139,6 @@ enum class ToolID {
     MANAGE_INCLUDED_BOARDS,
     RELOAD_INCLUDED_BOARDS,
     SMASH_PANEL_OUTLINE,
+    SMASH_PACKAGE_OUTLINE,
 };
 } // namespace horizon

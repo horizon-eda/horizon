@@ -776,6 +776,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::TOOL, ToolID::SMASH_PANEL_OUTLINE},
          {"Smash panel outline", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::SMASH_PACKAGE_OUTLINE},
+         {"Smash package outline", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1012,5 +1016,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(MANAGE_INCLUDED_BOARDS),
         TOOL_LUT_ITEM(RELOAD_INCLUDED_BOARDS),
         TOOL_LUT_ITEM(SMASH_PANEL_OUTLINE),
+        TOOL_LUT_ITEM(SMASH_PACKAGE_OUTLINE),
 };
 } // namespace horizon

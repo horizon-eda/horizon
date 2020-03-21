@@ -351,6 +351,7 @@ const std::map<int, Layer> &Package::get_layers() const
             pkg_layers.emplace(std::piecewise_construct, std::forward_as_tuple(n),
                                std::forward_as_tuple(n, BoardLayers::get_layer_name(n), r, c));
         };
+        add_layer(BoardLayers::L_OUTLINE);
         add_layer(BoardLayers::TOP_COURTYARD);
         add_layer(BoardLayers::TOP_ASSEMBLY);
         add_layer(BoardLayers::TOP_PACKAGE);

@@ -978,6 +978,32 @@ void Board::smash_panel_outline(BoardPanel &panel)
     panel.omit_outline = true;
 }
 
+void Board::smash_package_outline(BoardPackage &pkg)
+{
+    if (pkg.omit_outline)
+        return;
+    auto tr = pkg.placement;
+    if (pkg.flip)
+        tr.invert_angle();
+
+    for (const auto &it : pkg.package.polygons) {
+        if (it.second.layer == BoardLayers::L_OUTLINE) {
+            auto uu = UUID::random();
+            auto &new_poly = polygons.emplace(uu, uu).first->second;
+            new_poly.layer = BoardLayers::L_OUTLINE;
+            for (const auto &it_v : it.second.vertices) {
+                new_poly.vertices.emplace_back();
+                auto &v = new_poly.vertices.back();
+                v.arc_center = tr.transform(it_v.arc_center);
+                v.arc_reverse = it_v.arc_reverse;
+                v.type = it_v.type;
+                v.position = tr.transform(it_v.position);
+            }
+        }
+    }
+    pkg.omit_outline = true;
+}
+
 void Board::unsmash_package(BoardPackage *pkg)
 {
     if (!pkg->smashed)

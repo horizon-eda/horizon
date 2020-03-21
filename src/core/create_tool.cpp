@@ -73,6 +73,7 @@
 #include "tools/tool_polygon_to_line_loop.hpp"
 #include "tools/tool_place_board_panel.hpp"
 #include "tools/tool_smash_panel_outline.hpp"
+#include "tools/tool_smash_package_outline.hpp"
 
 namespace horizon {
 
@@ -363,6 +364,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::SMASH_PANEL_OUTLINE:
         return std::make_unique<ToolSmashPanelOutline>(this, tool_id);
+
+    case ToolID::SMASH_PACKAGE_OUTLINE:
+        return std::make_unique<ToolSmashPackageOutline>(this, tool_id);
 
     default:
         return nullptr;

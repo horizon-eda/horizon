@@ -68,6 +68,7 @@ public:
     void copy_package_silkscreen_texts(BoardPackage *dest, const BoardPackage *src);
     void unsmash_package(BoardPackage *pkg);
     void smash_package_silkscreen_graphics(BoardPackage *pkg);
+    void smash_package_outline(BoardPackage &pkg);
     void smash_panel_outline(BoardPanel &panel);
 
     Junction *get_junction(const UUID &uu) override;

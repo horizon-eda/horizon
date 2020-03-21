@@ -243,6 +243,7 @@ SRC_IMP = \
 	src/core/tools/tool_polygon_to_line_loop.cpp\
 	src/core/tools/tool_place_board_panel.cpp\
 	src/core/tools/tool_smash_panel_outline.cpp\
+	src/core/tools/tool_smash_package_outline.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\
