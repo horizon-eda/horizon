@@ -653,6 +653,10 @@ void PoolProjectManagerAppWindow::update_recent_items()
         else
             recent_projects_listbox->append(*box);
         box->show();
+        box->signal_remove().connect([this, box] {
+            app->recent_items.erase(box->path);
+            Glib::signal_idle().connect_once([this] { update_recent_items(); });
+        });
     }
 }
 
