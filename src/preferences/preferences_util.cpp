@@ -14,7 +14,12 @@ void preferences_provider_attach_canvas(CanvasGL *ca, bool layer)
         a = &PreferencesProvider::get_prefs().canvas_non_layer.appearance;
     }
     ca->set_appearance(*a);
-    PreferencesProvider::get().signal_changed().connect(sigc::track_obj([ca, a] { ca->set_appearance(*a); }, *ca));
+    PreferencesProvider::get().signal_changed().connect(sigc::track_obj(
+            [ca, a] {
+                ca->set_appearance(*a);
+                ca->smooth_zoom = PreferencesProvider::get_prefs().zoom.smooth_zoom_2d;
+            },
+            *ca));
 }
 
 } // namespace horizon
