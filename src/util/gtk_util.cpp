@@ -225,4 +225,17 @@ Gtk::TreeViewColumn *tree_view_append_column_ellipsis(Gtk::TreeView *view, const
     return tvc;
 }
 
+void install_esc_to_close(Gtk::Window &win)
+{
+    win.signal_key_press_event().connect([&win](GdkEventKey *ev) {
+        if (ev->keyval == GDK_KEY_Escape) {
+            win.close();
+            return true;
+        }
+        else {
+            return false;
+        }
+    });
+}
+
 } // namespace horizon

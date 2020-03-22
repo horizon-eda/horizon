@@ -22,6 +22,7 @@ SelectionFilterDialog::SelectionFilterDialog(Gtk::Window *parent, SelectionFilte
     set_titlebar(*hb);
     hb->show();
     set_title("Selection filter");
+    install_esc_to_close(*this);
 
     reset_button = Gtk::manage(new Gtk::Button());
     reset_button->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
