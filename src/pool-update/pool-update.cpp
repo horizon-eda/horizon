@@ -315,6 +315,7 @@ PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb
         }
     }
     pool = std::make_unique<Pool>(bp, false);
+    pool->db.execute("PRAGMA journal_mode=WAL");
 }
 
 void PoolUpdater::update_frames(const std::string &directory, const std::string &prefix)
