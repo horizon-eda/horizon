@@ -421,7 +421,7 @@ bool Schematic::place_bipole_on_line(Sheet *sheet, SchematicSymbol *sym)
                 auto dst_swapped = (pin2_pos - from.get_position()).mag_sq() + (pin1_pos - to.get_position()).mag_sq();
                 SymbolPin *pin_from = &pin1;
                 SymbolPin *pin_to = &pin2;
-                if (dst_swapped > dst_normal) {
+                if (dst_swapped < dst_normal) {
                     std::swap(pin_from, pin_to);
                 }
                 auto connect_pin = [this, sheet, sym](SymbolPin &pin, const LineNet::Connection &conn, Net *net) {
