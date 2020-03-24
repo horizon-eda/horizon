@@ -27,12 +27,7 @@ private:
     const class Board &board;
     class PnPExportSettings &settings;
 
-    class MyExportFileChooser : public ExportFileChooser {
-    protected:
-        void prepare_chooser(Glib::RefPtr<Gtk::FileChooser> chooser) override;
-        void prepare_filename(std::string &filename) override;
-    };
-    MyExportFileChooser export_filechooser;
+    ExportFileChooser export_filechooser;
 
     Gtk::Button *export_button = nullptr;
     Gtk::Label *done_label = nullptr;

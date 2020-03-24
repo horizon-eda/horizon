@@ -16,15 +16,6 @@ namespace horizon {
         name = name.cast_dynamic(x->get_object(#name));                                                                \
     } while (0)
 
-void PnPExportWindow::MyExportFileChooser::prepare_chooser(Glib::RefPtr<Gtk::FileChooser> chooser)
-{
-    chooser->set_action(Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
-}
-
-void PnPExportWindow::MyExportFileChooser::prepare_filename(std::string &filename)
-{
-}
-
 std::map<int, std::string> PnPExportWindow::MyAdapter::get_column_names() const
 {
     std::map<int, std::string> r;
@@ -62,6 +53,7 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     export_filechooser.attach(directory_entry, directory_button, this);
     export_filechooser.set_project_dir(project_dir);
     export_filechooser.bind_filename(settings.output_directory);
+    export_filechooser.set_action(GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
     export_filechooser.signal_changed().connect([this] { s_signal_changed.emit(); });
     bind_widget(filename_top_entry, settings.filename_top, [this](std::string &) { s_signal_changed.emit(); });
     bind_widget(filename_bottom_entry, settings.filename_bottom, [this](std::string &) { s_signal_changed.emit(); });
