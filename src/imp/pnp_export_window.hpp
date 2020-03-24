@@ -43,6 +43,8 @@ private:
     Gtk::Entry *filename_merged_entry = nullptr;
     Gtk::Entry *filename_top_entry = nullptr;
     Gtk::Entry *filename_bottom_entry = nullptr;
+    bool can_export = true;
+    void update_export_button();
 
     void update_filename_visibility();
 

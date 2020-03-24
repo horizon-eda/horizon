@@ -238,4 +238,17 @@ void install_esc_to_close(Gtk::Window &win)
     });
 }
 
+void widget_set_insensitive_tooltip(Gtk::Widget &w, const std::string &txt)
+{
+    if (txt.size()) {
+        w.set_tooltip_text(txt);
+        w.set_has_tooltip(true);
+        w.set_sensitive(false);
+    }
+    else {
+        w.set_has_tooltip(false);
+        w.set_sensitive(true);
+    }
+}
+
 } // namespace horizon

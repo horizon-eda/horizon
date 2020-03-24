@@ -54,16 +54,29 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     export_filechooser.set_project_dir(project_dir);
     export_filechooser.bind_filename(settings.output_directory);
     export_filechooser.set_action(GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
-    export_filechooser.signal_changed().connect([this] { s_signal_changed.emit(); });
-    bind_widget(filename_top_entry, settings.filename_top, [this](std::string &) { s_signal_changed.emit(); });
-    bind_widget(filename_bottom_entry, settings.filename_bottom, [this](std::string &) { s_signal_changed.emit(); });
-    bind_widget(filename_merged_entry, settings.filename_merged, [this](std::string &) { s_signal_changed.emit(); });
+    export_filechooser.signal_changed().connect([this] {
+        s_signal_changed.emit();
+        update_export_button();
+    });
+    bind_widget(filename_top_entry, settings.filename_top, [this](std::string &) {
+        s_signal_changed.emit();
+        update_export_button();
+    });
+    bind_widget(filename_bottom_entry, settings.filename_bottom, [this](std::string &) {
+        s_signal_changed.emit();
+        update_export_button();
+    });
+    bind_widget(filename_merged_entry, settings.filename_merged, [this](std::string &) {
+        s_signal_changed.emit();
+        update_export_button();
+    });
 
     mode_combo->set_active_id(PnPExportSettings::mode_lut.lookup_reverse(settings.mode));
     mode_combo->signal_changed().connect([this] {
         settings.mode = PnPExportSettings::mode_lut.lookup(mode_combo->get_active_id());
         update_filename_visibility();
         s_signal_changed.emit();
+        update_export_button();
     });
     update_filename_visibility();
 
@@ -93,6 +106,7 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     export_button->signal_clicked().connect(sigc::mem_fun(*this, &PnPExportWindow::generate));
 
     update();
+    update_export_button();
 }
 
 void PnPExportWindow::update_filename_visibility()
@@ -186,7 +200,34 @@ void PnPExportWindow::update()
 
 void PnPExportWindow::set_can_export(bool v)
 {
-    export_button->set_sensitive(v);
+    can_export = v;
+    update_export_button();
+}
+
+void PnPExportWindow::update_export_button()
+{
+    std::string txt;
+    if (can_export) {
+        if (settings.output_directory.size()) {
+            if (settings.mode == PnPExportSettings::Mode::INDIVIDUAL) {
+                if (settings.filename_bottom.size() == 0 || settings.filename_top.size() == 0) {
+                    txt = "output filename not set";
+                }
+            }
+            else {
+                if (settings.filename_merged.size() == 0) {
+                    txt = "output filename not set";
+                }
+            }
+        }
+        else {
+            txt = "output directory not set";
+        }
+    }
+    else {
+        txt = "tool is active";
+    }
+    widget_set_insensitive_tooltip(*export_button, txt);
 }
 
 PnPExportWindow *PnPExportWindow::create(Gtk::Window *p, const class Board &brd, class PnPExportSettings &settings,

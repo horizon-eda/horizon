@@ -68,5 +68,7 @@ Gtk::Box *make_boolean_ganged_switch(bool &v, const std::string &label_false, co
 
 void make_label_small(Gtk::Label *label);
 void install_esc_to_close(Gtk::Window &win);
+void widget_set_insensitive_tooltip(Gtk::Widget &w, const std::string &txt);
+
 
 } // namespace horizon
