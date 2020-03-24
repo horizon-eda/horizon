@@ -18,8 +18,12 @@ void ExportFileChooser::attach(Gtk::Entry *en, Gtk::Button *bu, Gtk::Window *w)
     window = w;
 
     button->signal_clicked().connect([this] {
-        GtkFileChooserNative *native = gtk_file_chooser_native_new(
-                "Select output file name", GTK_WINDOW(window->gobj()), action, "Select", "_Cancel");
+        const char *title = "Select output file name";
+        if (action == GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER) {
+            title = "Select output folder";
+        }
+        GtkFileChooserNative *native =
+                gtk_file_chooser_native_new(title, GTK_WINDOW(window->gobj()), action, "Select", "_Cancel");
         auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
         prepare_chooser(chooser);
         chooser->add_shortcut_folder(project_dir);
