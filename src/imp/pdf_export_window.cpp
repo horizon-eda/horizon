@@ -147,7 +147,10 @@ PDFExportWindow::PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     export_filechooser.attach(filename_entry, filename_button, this);
     export_filechooser.set_project_dir(pd);
     export_filechooser.bind_filename(settings.output_filename);
-    export_filechooser.signal_changed().connect([this] { s_signal_changed.emit(); });
+    export_filechooser.signal_changed().connect([this] {
+        s_signal_changed.emit();
+        update_export_button();
+    });
 
     status_dispatcher.attach(progress_label);
     status_dispatcher.attach(progress_bar);
@@ -155,12 +158,13 @@ PDFExportWindow::PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     status_dispatcher.attach(progress_revealer);
     status_dispatcher.signal_notified().connect([this](const StatusDispatcher::Notification &n) {
         is_busy = n.status == StatusDispatcher::Status::BUSY;
-        export_button->set_sensitive(!is_busy);
+        update_export_button();
         header->set_show_close_button(!is_busy);
     });
 
     signal_delete_event().connect([this](GdkEventAny *ev) { return is_busy; });
     reload_layers();
+    update_export_button();
 }
 
 void PDFExportWindow::reload_layers()
@@ -201,6 +205,20 @@ void PDFExportWindow::generate()
     my_settings.output_filename = export_filechooser.get_filename_abs();
     std::thread thr(&PDFExportWindow::export_thread, this, my_settings);
     thr.detach();
+}
+
+void PDFExportWindow::update_export_button()
+{
+    std::string txt;
+    if (!is_busy) {
+        if (settings.output_filename.size() == 0) {
+            txt = "output filename not set";
+        }
+    }
+    else {
+        txt = "busy";
+    }
+    widget_set_insensitive_tooltip(*export_button, txt);
 }
 
 void PDFExportWindow::export_thread(PDFExportSettings s)

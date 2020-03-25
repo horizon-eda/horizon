@@ -18,7 +18,6 @@ public:
     static PDFExportWindow *create(Gtk::Window *p, class IDocument *c, class PDFExportSettings &s,
                                    const std::string &project_dir);
 
-    void set_can_export(bool v);
     void generate();
     void reload_layers();
 
@@ -45,6 +44,7 @@ private:
     Gtk::Label *progress_label = nullptr;
     Gtk::ProgressBar *progress_bar = nullptr;
     Gtk::Revealer *progress_revealer = nullptr;
+    void update_export_button();
 
     Gtk::Spinner *spinner = nullptr;
 
