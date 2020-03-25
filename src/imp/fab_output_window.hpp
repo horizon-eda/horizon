@@ -36,6 +36,8 @@ private:
     Gtk::ComboBoxText *drill_mode_combo = nullptr;
     Gtk::TextView *log_textview = nullptr;
     Gtk::Switch *zip_output_switch = nullptr;
+    bool can_export = true;
+    void update_export_button();
 
     ExportFileChooser export_filechooser;
 

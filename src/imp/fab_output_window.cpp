@@ -69,13 +69,25 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     export_filechooser.attach(directory_entry, directory_button, this);
     export_filechooser.set_project_dir(project_dir);
     export_filechooser.bind_filename(settings->output_directory);
-    export_filechooser.signal_changed().connect([this] { s_signal_changed.emit(); });
+    export_filechooser.signal_changed().connect([this] {
+        s_signal_changed.emit();
+        update_export_button();
+    });
     export_filechooser.set_action(GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
 
-    bind_widget(prefix_entry, settings->prefix, [this](std::string &) { s_signal_changed.emit(); });
+    bind_widget(prefix_entry, settings->prefix, [this](std::string &) {
+        s_signal_changed.emit();
+        update_export_button();
+    });
     prefix_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
-    bind_widget(npth_filename_entry, settings->drill_npth_filename, [this](std::string &) { s_signal_changed.emit(); });
-    bind_widget(pth_filename_entry, settings->drill_pth_filename, [this](std::string &) { s_signal_changed.emit(); });
+    bind_widget(npth_filename_entry, settings->drill_npth_filename, [this](std::string &) {
+        s_signal_changed.emit();
+        update_export_button();
+    });
+    bind_widget(pth_filename_entry, settings->drill_pth_filename, [this](std::string &) {
+        s_signal_changed.emit();
+        update_export_button();
+    });
     bind_widget(zip_output_switch, settings->zip_output);
     zip_output_switch->property_active().signal_changed().connect([this] { s_signal_changed.emit(); });
 
@@ -84,6 +96,7 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
         settings->drill_mode = FabOutputSettings::mode_lut.lookup(drill_mode_combo->get_active_id());
         update_drill_visibility();
         s_signal_changed.emit();
+        update_export_button();
     });
     update_drill_visibility();
 
@@ -103,6 +116,7 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     sg_layer_name = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
     reload_layers();
+    update_export_button();
 }
 
 void FabOutputWindow::reload_layers()
@@ -127,7 +141,10 @@ void FabOutputWindow::reload_layers()
 
     for (auto la : layers_sorted) {
         auto ed = GerberLayerEditor::create(this, la);
-        ed->signal_changed().connect([this] { s_signal_changed.emit(); });
+        ed->signal_changed().connect([this] {
+            s_signal_changed.emit();
+            update_export_button();
+        });
         gerber_layers_box->add(*ed);
         ed->show();
         ed->unreference();
@@ -189,7 +206,47 @@ void FabOutputWindow::generate()
 
 void FabOutputWindow::set_can_generate(bool v)
 {
-    generate_button->set_sensitive(v);
+    can_export = v;
+    update_export_button();
+}
+
+void FabOutputWindow::update_export_button()
+{
+    std::string txt;
+    if (can_export) {
+        if (settings->output_directory.size()) {
+            if (settings->prefix.size()) {
+                if (settings->drill_mode == FabOutputSettings::DrillMode::INDIVIDUAL) {
+                    if (settings->drill_pth_filename.size() == 0 || settings->drill_npth_filename.size() == 0) {
+                        txt = "drill filenames not set";
+                    }
+                }
+                else {
+                    if (settings->drill_pth_filename.size() == 0) {
+                        txt = "drill filename not set";
+                    }
+                }
+                if (txt.size() == 0) { // still okay
+                    for (const auto &it : settings->layers) {
+                        if (it.second.enabled && it.second.filename.size() == 0) {
+                            txt = brd->get_layers().at(it.first).name + " filename not set";
+                            break;
+                        }
+                    }
+                }
+            }
+            else {
+                txt = "prefix not set";
+            }
+        }
+        else {
+            txt = "output directory not set";
+        }
+    }
+    else {
+        txt = "tool is active";
+    }
+    widget_set_insensitive_tooltip(*generate_button, txt);
 }
 
 FabOutputWindow *FabOutputWindow::create(Gtk::Window *p, IDocumentBoard *c, const std::string &project_dir)
