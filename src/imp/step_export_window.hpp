@@ -28,6 +28,8 @@ private:
 
     Gtk::TextView *log_textview = nullptr;
     Gtk::Spinner *spinner = nullptr;
+    bool can_export = true;
+    void update_export_button();
 
     class MyExportFileChooser : public ExportFileChooser {
     protected:

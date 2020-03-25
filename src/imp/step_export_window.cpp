@@ -53,7 +53,10 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
     export_filechooser.attach(filename_entry, filename_button, this);
     export_filechooser.set_project_dir(project_dir);
     export_filechooser.bind_filename(settings.filename);
-    export_filechooser.signal_changed().connect([this] { s_signal_changed.emit(); });
+    export_filechooser.signal_changed().connect([this] {
+        s_signal_changed.emit();
+        update_export_button();
+    });
 
     bind_widget(include_3d_models_switch, settings.include_3d_models);
     bind_widget(prefix_entry, settings.prefix);
@@ -76,14 +79,14 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
         if (export_running == false)
             set_is_busy(false);
     });
+    update_export_button();
 }
 
 void StepExportWindow::generate()
 {
     if (export_running)
         return;
-    std::string filename = filename_entry->get_text();
-    if (filename.size() == 0)
+    if (settings.filename.size() == 0)
         return;
     set_is_busy(true);
     log_textview->get_buffer()->set_text("");
@@ -130,12 +133,27 @@ void StepExportWindow::export_thread(STEPExportSettings my_settings)
 
 void StepExportWindow::set_can_export(bool v)
 {
-    export_button->set_sensitive(v);
+    can_export = v;
+    update_export_button();
+}
+
+void StepExportWindow::update_export_button()
+{
+    std::string txt;
+    if (!export_running) {
+        if (settings.filename.size() == 0) {
+            txt = "output filename not set";
+        }
+    }
+    else {
+        txt = "busy";
+    }
+    widget_set_insensitive_tooltip(*export_button, txt);
 }
 
 void StepExportWindow::set_is_busy(bool v)
 {
-    export_button->set_sensitive(!v);
+    update_export_button();
     spinner->property_active() = v;
     header->set_show_close_button(!v);
 }
