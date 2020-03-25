@@ -50,6 +50,8 @@ private:
     Gtk::Entry *filename_entry = nullptr;
     Gtk::Button *filename_button = nullptr;
     Gtk::ListBox *orderable_MPNs_listbox = nullptr;
+    bool can_export = true;
+    void update_export_button();
 
     Glib::RefPtr<Gtk::SizeGroup> sg_manufacturer;
     Glib::RefPtr<Gtk::SizeGroup> sg_MPN;

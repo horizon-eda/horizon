@@ -83,7 +83,10 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     export_filechooser.attach(filename_entry, filename_button, this);
     export_filechooser.set_project_dir(project_dir);
     export_filechooser.bind_filename(settings->output_filename);
-    export_filechooser.signal_changed().connect([this] { s_signal_changed.emit(); });
+    export_filechooser.signal_changed().connect([this] {
+        s_signal_changed.emit();
+        update_export_button();
+    });
 
     nopopulate_check->set_active(settings->include_nopopulate);
     nopopulate_check->signal_toggled().connect([this] {
@@ -161,6 +164,7 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     export_button->signal_clicked().connect(sigc::mem_fun(*this, &BOMExportWindow::generate));
 
     update();
+    update_export_button();
 }
 
 void BOMExportWindow::update_similar_button_sensitivity()
@@ -418,7 +422,22 @@ void BOMExportWindow::update_concrete_parts()
 
 void BOMExportWindow::set_can_export(bool v)
 {
-    export_button->set_sensitive(v);
+    can_export = v;
+    update_export_button();
+}
+
+void BOMExportWindow::update_export_button()
+{
+    std::string txt;
+    if (can_export) {
+        if (settings->output_filename.size() == 0) {
+            txt = "output filename not set";
+        }
+    }
+    else {
+        txt = "tool is active";
+    }
+    widget_set_insensitive_tooltip(*export_button, txt);
 }
 
 BOMExportWindow *BOMExportWindow::create(Gtk::Window *p, Block *b, BOMExportSettings *s, Pool &pool,
