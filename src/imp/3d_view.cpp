@@ -245,7 +245,6 @@ void View3DWindow::set_smooth_zoom(bool smooth)
 void View3DWindow::update(bool clear)
 {
     s_signal_request_update.emit();
-    canvas->patches.clear();
     canvas->update2(*board);
     if (clear)
         canvas->clear_3d_models();

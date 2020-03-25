@@ -1,6 +1,6 @@
 #pragma once
 #include "background.hpp"
-#include "canvas/canvas_patch.hpp"
+#include "canvas_mesh.hpp"
 #include "canvas/appearance.hpp"
 #include "clipper/clipper.hpp"
 #include "common/common.hpp"
@@ -14,7 +14,7 @@
 #include <unordered_map>
 
 namespace horizon {
-class Canvas3D : public Gtk::GLArea, public CanvasPatch {
+class Canvas3D : public Gtk::GLArea {
 public:
     friend CoverRenderer;
     friend WallRenderer;
@@ -45,9 +45,8 @@ public:
     Color background_top_color;
     Color background_bottom_color;
 
-    void request_push() override;
+    void request_push();
     void update2(const class Board &brd);
-    void prepare();
     void update_packages();
     void set_highlights(const std::set<UUID> &pkgs);
     enum class Projection { PERSP, ORTHO };
@@ -69,23 +68,6 @@ public:
         return s_signal_models_loading;
     }
 
-    class Layer3D {
-    public:
-        class Vertex {
-        public:
-            Vertex(float ix, float iy) : x(ix), y(iy)
-            {
-            }
-
-            float x, y;
-        };
-        std::vector<Vertex> tris;
-        std::vector<Vertex> walls;
-        float offset = 0;
-        float thickness = 0.035;
-        float alpha = 1;
-        float explode_mul = 0;
-    };
 
     class FaceVertex {
     public:
@@ -125,9 +107,11 @@ public:
     int _animate_step(GdkFrameClock *frame_clock);
 
 private:
+    CanvasMesh ca;
+
     float width;
     float height;
-    void push() override;
+    void push();
     bool needs_push = false;
     bool needs_view_all = false;
 
@@ -195,10 +179,9 @@ private:
 
     void polynode_to_tris(const ClipperLib::PolyNode *node, int layer);
 
-    void prepare_layer(int layer);
-    void prepare_soldermask(int layer);
+    void prepare();
     void prepare_packages();
-    float get_layer_offset(int layer);
+    float get_layer_offset(int layer) const;
     const class Board *brd = nullptr;
     void add_path(int layer, const ClipperLib::Path &path);
     bool layer_is_visible(int layer) const;
@@ -209,8 +192,6 @@ private:
     void load_models_thread(std::map<std::string, std::string> model_filenames);
 
     std::set<UUID> packages_highlight;
-
-    std::unordered_map<int, Layer3D> layers;
 
     std::mutex models_loading_mutex;
     std::vector<FaceVertex> face_vertex_buffer;              // vertices of all models, sequentially

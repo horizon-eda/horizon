@@ -370,6 +370,7 @@ SRC_IMP = \
 	src/imp/3d_view.cpp\
 	src/imp/step_export_window.cpp\
 	src/imp/tuning_window.cpp\
+	src/canvas3d/canvas_mesh.cpp\
 	src/canvas3d/canvas3d.cpp\
 	src/canvas3d/cover.cpp\
 	src/canvas3d/wall.cpp\
