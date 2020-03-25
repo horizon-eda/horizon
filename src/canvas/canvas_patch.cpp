@@ -104,6 +104,23 @@ void CanvasPatch::img_polygon(const Polygon &ipoly, bool tr)
     }
 }
 
+const std::map<CanvasPatch::PatchKey, ClipperLib::Paths> &CanvasPatch::get_patches() const
+{
+    return patches;
+}
+
+const std::set<std::tuple<int, Coordi, Coordi>> &CanvasPatch::get_text_extents() const
+{
+    return text_extents;
+}
+
+void CanvasPatch::clear()
+{
+    patches.clear();
+    text_extents.clear();
+    Canvas::clear();
+}
+
 /*void CanvasPatch::img_text_extents(const Text &txt, std::pair<Coordf, Coordf> &extents)
 {
     std::pair<Coordi, Coordi> ext(Coordi(extents.first.x, extents.first.y), Coordi(extents.second.x, extents.second.y));

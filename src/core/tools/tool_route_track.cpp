@@ -51,12 +51,11 @@ void ToolRouteTrack::begin_track(const ToolArgs &args)
 void ToolRouteTrack::update_obstacles()
 {
     obstacles.clear();
-    canvas_patch.patches.clear();
     canvas_patch.update(*doc.b->get_board());
 
     ClipperLib::Clipper clipper;
 
-    for (const auto &it : canvas_patch.patches) {
+    for (const auto &it : canvas_patch.get_patches()) {
         if (it.first.layer == routing_layer && it.first.net != net->uuid
             && !(it.first.type == PatchType::TRACK && it.first.net == UUID())) { // patch is an obstacle
             ClipperLib::ClipperOffset ofs;

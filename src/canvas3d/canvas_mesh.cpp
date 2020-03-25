@@ -9,7 +9,6 @@ namespace horizon {
 void CanvasMesh::update(const Board &b)
 {
     brd = &b;
-    ca.patches.clear();
     ca.update(b);
     prepare();
 }
@@ -121,7 +120,7 @@ void CanvasMesh::prepare()
     layers[layer].offset = 0;
     layers[layer].thickness = -board_thickness;
 
-    for (const auto &it : ca.patches) {
+    for (const auto &it : ca.get_patches()) {
         if (it.first.layer == 10000 && it.first.type == PatchType::HOLE_PTH) {
             ClipperLib::ClipperOffset ofs;
             ofs.AddPaths(it.second, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
@@ -140,7 +139,7 @@ void CanvasMesh::prepare_soldermask(int layer)
     ClipperLib::Paths temp;
     {
         ClipperLib::Clipper cl;
-        for (const auto &it : ca.patches) {
+        for (const auto &it : ca.get_patches()) {
             if (it.first.layer == BoardLayers::L_OUTLINE) { // add outline
                 cl.AddPaths(it.second, ClipperLib::ptSubject, true);
             }
@@ -164,7 +163,7 @@ void CanvasMesh::prepare_soldermask(int layer)
 void CanvasMesh::prepare_layer(int layer)
 {
     ClipperLib::Clipper cl;
-    for (const auto &it : ca.patches) {
+    for (const auto &it : ca.get_patches()) {
         if (it.first.layer == layer) {
             cl.AddPaths(it.second, ClipperLib::ptSubject, true);
         }
@@ -179,7 +178,7 @@ void CanvasMesh::prepare_layer(int layer)
     ClipperLib::PolyTree pt;
     cl.Clear();
     cl.AddPaths(result, ClipperLib::ptSubject, true);
-    for (const auto &it : ca.patches) {
+    for (const auto &it : ca.get_patches()) {
         if (it.first.layer == 10000
             && (it.first.type == PatchType::HOLE_NPTH || it.first.type == PatchType::HOLE_PTH)) {
             cl.AddPaths(it.second, ClipperLib::ptClip, true);
@@ -289,7 +288,7 @@ void CanvasMesh::polynode_to_tris(const ClipperLib::PolyNode *node, int layer)
 
 const std::map<CanvasPatch::PatchKey, ClipperLib::Paths> &CanvasMesh::get_patches() const
 {
-    return ca.patches;
+    return ca.get_patches();
 }
 
 } // namespace horizon

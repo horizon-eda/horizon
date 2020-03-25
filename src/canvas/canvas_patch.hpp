@@ -25,8 +25,11 @@ public:
             return net < other.net;
         }
     };
-    std::map<PatchKey, ClipperLib::Paths> patches;
-    std::set<std::tuple<int, Coordi, Coordi>> text_extents;
+
+    const std::map<PatchKey, ClipperLib::Paths> &get_patches() const;
+    const std::set<std::tuple<int, Coordi, Coordi>> &get_text_extents() const;
+    void clear() override;
+
     void append_polygon(const Polygon &poly);
 
     CanvasPatch();
@@ -42,5 +45,8 @@ private:
     virtual void img_polygon(const Polygon &poly, bool tr) override;
     virtual void img_hole(const class Hole &hole) override;
     virtual void img_patch_type(PatchType type) override;
+
+    std::map<PatchKey, ClipperLib::Paths> patches;
+    std::set<std::tuple<int, Coordi, Coordi>> text_extents;
 };
 } // namespace horizon

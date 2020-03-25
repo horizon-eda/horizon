@@ -231,7 +231,7 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board *brd, RulesCheck
     status_cb("Getting patches");
     auto c = dynamic_cast<RulesCheckCacheBoardImage *>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
     std::set<int> layers;
-    const auto &patches = c->get_canvas()->patches;
+    const auto &patches = c->get_canvas()->get_patches();
     for (const auto &it : patches) { // collect copper layers
         if (brd->get_layers().count(it.first.layer) && brd->get_layers().at(it.first.layer).copper) {
             layers.emplace(it.first.layer);
@@ -285,7 +285,7 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board *brd,
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
     auto c = dynamic_cast<RulesCheckCacheBoardImage *>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
-    const auto &patches = c->get_canvas()->patches;
+    const auto &patches = c->get_canvas()->get_patches();
     CanvasPatch::PatchKey npth_key;
     npth_key.layer = 10000;
     npth_key.net = UUID();
@@ -586,7 +586,7 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board *brd, Ru
     auto rules = dynamic_cast_vector<RuleClearanceCopperKeepout *>(get_rules_sorted(RuleID::CLEARANCE_COPPER_KEEPOUT));
     auto c = dynamic_cast<RulesCheckCacheBoardImage *>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
     std::set<int> layers;
-    const auto &patches = c->get_canvas()->patches;
+    const auto &patches = c->get_canvas()->get_patches();
     for (const auto &it : patches) { // collect copper layers
         if (brd->get_layers().count(it.first.layer) && brd->get_layers().at(it.first.layer).copper) {
             layers.emplace(it.first.layer);

@@ -132,7 +132,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
 
     double twiddle = .005_mm;
 
-    for (const auto &patch : ca->patches) { // add cutouts
+    for (const auto &patch : ca->get_patches()) { // add cutouts
         if ((patch.first.layer == poly.layer && patch.first.net != plane->net->uuid && patch.second.size()
              && patch.first.type != PatchType::OTHER && patch.first.type != PatchType::TEXT)
             || (patch.first.layer == 10000 && patch.first.type == PatchType::HOLE_NPTH)) {
@@ -175,7 +175,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
 
     // add text cutouts
     if (plane->settings.text_style == PlaneSettings::TextStyle::EXPAND) {
-        for (const auto &patch : ca->patches) { // add cutouts
+        for (const auto &patch : ca->get_patches()) { // add cutouts
             if (patch.first.layer == poly.layer && patch.first.type == PatchType::TEXT) {
                 ClipperLib::ClipperOffset ofs; // expand patch for cutout
                 ofs.ArcTolerance = 2e3;
@@ -190,7 +190,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
         }
     }
     else {
-        for (const auto &ext : ca->text_extents) { // add cutouts
+        for (const auto &ext : ca->get_text_extents()) { // add cutouts
             Coordi a, b;
             int text_layer;
             std::tie(text_layer, a, b) = ext;
@@ -234,7 +234,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
 
     // add thermal coutouts
     if (plane->settings.connect_style == PlaneSettings::ConnectStyle::THERMAL) {
-        for (const auto &patch : ca->patches) {
+        for (const auto &patch : ca->get_patches()) {
             if ((patch.first.layer == poly.layer && patch.first.net == plane->net->uuid
                  && (patch.first.type == PatchType::PAD || patch.first.type == PatchType::PAD_TH))) {
                 ClipperLib::ClipperOffset ofs; // expand patch for cutout
@@ -259,8 +259,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
     outline_key.layer = BoardLayers::L_OUTLINE;
     outline_key.net = UUID();
     outline_key.type = PatchType::OTHER;
-    if (ca->patches.count(outline_key) != 0) {
-        auto &patch_outline = ca->patches.at(outline_key);
+    if (ca->get_patches().count(outline_key) != 0) {
+        auto &patch_outline = ca->get_patches().at(outline_key);
         // cleanup board outline so that it conforms to nonzero filling rule
         ClipperLib::Paths board_outline;
         {

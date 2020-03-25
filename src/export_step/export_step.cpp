@@ -388,7 +388,7 @@ void export_step(const std::string &filename, const Board &brd, class Pool &pool
     {
         CanvasPatch canvas;
         canvas.update(brd);
-        for (const auto &it : canvas.patches) {
+        for (const auto &it : canvas.get_patches()) {
             if (it.first.layer == BoardLayers::L_OUTLINE) {
                 cl.AddPaths(it.second, ClipperLib::ptSubject, true);
             }
