@@ -373,7 +373,7 @@ void Canvas3D::on_realize()
     GL_CHECK_ERROR
 }
 
-void Canvas3D::update2(const Board &b)
+void Canvas3D::update(const Board &b)
 {
     needs_view_all = brd == nullptr;
     brd = &b;

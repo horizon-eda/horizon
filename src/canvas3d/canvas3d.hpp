@@ -46,7 +46,7 @@ public:
     Color background_bottom_color;
 
     void request_push();
-    void update2(const class Board &brd);
+    void update(const class Board &brd);
     void update_packages();
     void set_highlights(const std::set<UUID> &pkgs);
     enum class Projection { PERSP, ORTHO };
