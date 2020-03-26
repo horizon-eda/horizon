@@ -668,6 +668,8 @@ SRC_SHARED = $(SRC_COMMON) \
 	src/board/plane_update.cpp\
 	src/canvas/canvas_pads.cpp\
 	src/canvas/canvas_patch.cpp\
+	src/util/csv_util.cpp\
+	src/util/clipper_util.cpp\
 
 SRC_SHARED_GEN = $(SRC_COMMON_GEN)
 
