@@ -37,6 +37,9 @@ jobs:
       - run:
           name: Build python module
           command: make -j2 build/horizon.so
+      - run:
+          name: Test python module
+          command: python3 -c 'import sys; sys.path.append("build"); import horizon'
 
 workflows:
   version: 2
