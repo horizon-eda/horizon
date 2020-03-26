@@ -98,6 +98,13 @@ static PyObject *PyBoard_export_pdf(PyObject *pself, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject *PyBoard_get_pnp_export_settings(PyObject *pself)
+{
+    auto self = reinterpret_cast<PyBoard *>(pself);
+    auto settings = self->board->board.pnp_export_settings.serialize();
+    return py_from_json(settings);
+}
+
 static PyObject *PyBoard_export_pnp(PyObject *pself, PyObject *args)
 {
     auto self = reinterpret_cast<PyBoard *>(pself);
@@ -130,6 +137,8 @@ static PyMethodDef PyBoard_methods[] = {
         {"export_gerber", (PyCFunction)PyBoard_export_gerber, METH_VARARGS, "Export gerber"},
         {"get_pdf_export_settings", (PyCFunction)PyBoard_get_pdf_export_settings, METH_NOARGS,
          "Return PDF export settings"},
+        {"get_pnp_export_settings", (PyCFunction)PyBoard_get_pnp_export_settings, METH_NOARGS,
+         "Return PnP export settings"},
         {"export_pdf", (PyCFunction)PyBoard_export_pdf, METH_VARARGS, "Export PDF"},
         {"export_pnp", (PyCFunction)PyBoard_export_pnp, METH_VARARGS, "Export pick and place"},
         {NULL} /* Sentinel */
