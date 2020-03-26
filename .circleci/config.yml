@@ -1,3 +1,8 @@
+aliases: &install-deps
+  run:
+    name: Install dependencies
+    command: apt-get update -y && apt-get install libyaml-cpp-dev libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git -y
+
 version: 3
 jobs:
   teststyle:
@@ -25,15 +30,19 @@ jobs:
       - image: debian:stretch-backports
     steps:
       - checkout
-      - run:
-          name: Install dependencies
-          command: apt-get update -y && apt-get install libyaml-cpp-dev libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git -y
+      - *install-deps
       - run:
           name: Check version
           command: python3 check_version.py
       - run:
           name: Build
           command: make -j2
+  build-python:
+    docker:
+      - image: debian:stretch-backports
+    steps:
+      - checkout
+      - *install-deps
       - run:
           name: Build python module
           command: make -j2 build/horizon.so
@@ -47,5 +56,8 @@ workflows:
     jobs:
       - teststyle
       - build:
+          requires:
+            - teststyle
+      - build-python:
           requires:
             - teststyle
