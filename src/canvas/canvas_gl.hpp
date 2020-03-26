@@ -131,6 +131,8 @@ public:
     void set_appearance(const Appearance &a);
     const Color &get_color(ColorP colorp) const;
 
+    bool touchpad_pan = false;
+
     bool smooth_zoom = true;
     bool snap_to_targets = true;
 
