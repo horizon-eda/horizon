@@ -4,6 +4,7 @@
 #include "util.hpp"
 #include "export_gerber/gerber_export.hpp"
 #include "export_pdf/export_pdf_board.hpp"
+#include "export_pnp/export_pnp.hpp"
 #include <podofo/podofo.h>
 
 BoardWrapper::BoardWrapper(const horizon::Project &prj)
@@ -97,6 +98,31 @@ static PyObject *PyBoard_export_pdf(PyObject *pself, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject *PyBoard_export_pnp(PyObject *pself, PyObject *args)
+{
+    auto self = reinterpret_cast<PyBoard *>(pself);
+    PyObject *py_export_settings = nullptr;
+    if (!PyArg_ParseTuple(args, "O!", &PyDict_Type, &py_export_settings))
+        return NULL;
+    try {
+        auto settings_json = json_from_py(py_export_settings);
+        horizon::PnPExportSettings settings(settings_json);
+        horizon::export_PnP(self->board->board, settings);
+    }
+    catch (const std::exception &e) {
+        PyErr_SetString(PyExc_IOError, e.what());
+        return NULL;
+    }
+    catch (const PoDoFo::PdfError &e) {
+        PyErr_SetString(PyExc_IOError, e.what());
+        return NULL;
+    }
+    catch (...) {
+        PyErr_SetString(PyExc_IOError, "unknown exception");
+        return NULL;
+    }
+    Py_RETURN_NONE;
+}
 
 static PyMethodDef PyBoard_methods[] = {
         {"get_gerber_export_settings", (PyCFunction)PyBoard_get_gerber_export_settings, METH_NOARGS,
@@ -105,6 +131,7 @@ static PyMethodDef PyBoard_methods[] = {
         {"get_pdf_export_settings", (PyCFunction)PyBoard_get_pdf_export_settings, METH_NOARGS,
          "Return PDF export settings"},
         {"export_pdf", (PyCFunction)PyBoard_export_pdf, METH_VARARGS, "Export PDF"},
+        {"export_pnp", (PyCFunction)PyBoard_export_pnp, METH_VARARGS, "Export pick and place"},
         {NULL} /* Sentinel */
 };
 
