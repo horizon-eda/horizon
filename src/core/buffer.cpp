@@ -223,15 +223,18 @@ void Buffer::load(std::set<SelectableRef> selection)
     }
     for (const auto &it : selection) {
         if (it.type == ObjectType::LINE_NET) {
-            auto &x = core.c->get_sheet()->net_lines.at(it.uuid);
+            LineNet x = core.c->get_sheet()->net_lines.at(it.uuid);
             bool valid = true;
-            for (auto &it_ft : {x.from, x.to}) {
-                if (it_ft.is_bus_ripper()) {
+            for (auto &it_ft : {&x.from, &x.to}) {
+                if (it_ft->is_bus_ripper()) {
                     valid = false;
                 }
-                else if (it_ft.is_pin()) {
-                    if (symbols.count(it_ft.symbol->uuid) == 0) {
-                        valid = false;
+                else if (it_ft->is_pin()) {
+                    if (symbols.count(it_ft->symbol->uuid) == 0) {
+                        auto uu = UUID::random();
+                        auto &ju = junctions.emplace(uu, uu).first->second;
+                        ju.position = it_ft->get_position();
+                        it_ft->connect(&ju);
                     }
                 }
             }
