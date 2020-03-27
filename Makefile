@@ -643,6 +643,7 @@ SRC_SHARED = $(SRC_COMMON) \
 	src/export_pdf/canvas_pdf.cpp \
 	src/export_pdf/export_pdf.cpp \
 	src/export_pdf/export_pdf_board.cpp \
+	src/export_pnp/export_pnp.cpp \
 	src/canvas/canvas.cpp \
 	src/canvas/appearance.cpp \
 	src/canvas/render.cpp \
