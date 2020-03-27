@@ -120,10 +120,6 @@ static PyObject *PyBoard_export_pnp(PyObject *pself, PyObject *args)
         PyErr_SetString(PyExc_IOError, e.what());
         return NULL;
     }
-    catch (const PoDoFo::PdfError &e) {
-        PyErr_SetString(PyExc_IOError, e.what());
-        return NULL;
-    }
     catch (...) {
         PyErr_SetString(PyExc_IOError, "unknown exception");
         return NULL;
