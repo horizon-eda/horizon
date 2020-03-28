@@ -69,6 +69,10 @@ void PoolNotebook::pool_updated(bool success)
         else
             git_box->refreshed_once = false;
     }
+    if (success)
+        Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(appwin->get_application())
+                ->signal_pool_updated()
+                .emit(pool_uuid);
 }
 
 bool PoolNotebook::widget_is_visible(Gtk::Widget *widget)

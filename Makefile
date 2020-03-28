@@ -558,6 +558,7 @@ SRC_POOL_PRJ_MGR = \
 	src/util/pool_completion.cpp\
 	src/pool/pool_cached.cpp\
 	src/pool-prj-mgr/prj-mgr/prj-mgr_views.cpp\
+	src/pool-prj-mgr/prj-mgr/pool_cache_monitor.cpp\
 	src/pool-prj-mgr/prj-mgr/pool_cache_window.cpp\
 	src/pool-prj-mgr/prj-mgr/part_browser/part_browser_window.cpp\
 	src/pool-prj-mgr/prj-mgr/pool_cache_window.cpp\

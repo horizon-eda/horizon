@@ -11,6 +11,8 @@
 #undef DUPLICATE
 #endif
 #include "preferences/preferences.hpp"
+#include "util/gtk_util.hpp"
+#include "pool-prj-mgr/prj-mgr/pool_cache_status.hpp"
 
 namespace horizon {
 
@@ -40,7 +42,8 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
     x->get_widget("fav_button", fav_button);
     x->get_widget("lb_favorites", lb_favorites);
     x->get_widget("lb_recent", lb_recent);
-    x->get_widget("paned", paned);
+    x->get_widget("out_of_date_info_bar", out_of_date_info_bar);
+    info_bar_hide(out_of_date_info_bar);
 
     lb_favorites->set_header_func(sigc::ptr_fun(header_fun));
     lb_recent->set_header_func(sigc::ptr_fun(header_fun));
@@ -48,6 +51,13 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
     lb_favorites->signal_row_activated().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_favorites_activated));
     lb_recent->signal_row_selected().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_favorites_selected));
     lb_recent->signal_row_activated().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_favorites_activated));
+
+    {
+        Gtk::Button *pool_cache_button;
+        x->get_widget("pool_cache_button", pool_cache_button);
+        pool_cache_button->signal_clicked().connect(
+                [this] { s_signal_open_pool_cache_window.emit(items_out_of_date); });
+    }
 
     {
         auto la = Gtk::manage(new Gtk::MenuItem("MPN Search"));
@@ -75,7 +85,11 @@ PartBrowserWindow::PartBrowserWindow(BaseObjectType *cobject, const Glib::RefPtr
     assign_part_button->signal_clicked().connect(sigc::mem_fun(*this, &PartBrowserWindow::handle_assign_part));
 
     preview = Gtk::manage(new PartPreview(pool, false));
-    paned->add2(*preview);
+    {
+        Gtk::Box *box;
+        x->get_widget("box", box);
+        box->pack_start(*preview, true, true, 0);
+    }
     preview->show();
 
     update_part_current();
@@ -271,10 +285,50 @@ void PartBrowserWindow::update_part_current()
     assign_part_button->set_sensitive(part_current && can_assign);
     fav_button->set_sensitive(part_current);
     if (part_current) {
-        preview->load(pool.get_part(part_current));
+        auto part = pool.get_part(part_current);
+        preview->load(part);
     }
     else {
         preview->load(nullptr);
+    }
+    update_out_of_date_info_bar();
+}
+
+void PartBrowserWindow::set_pool_cache_status(const PoolCacheStatus &st)
+{
+    pool_cache_status = &st;
+    update_out_of_date_info_bar();
+}
+
+void PartBrowserWindow::update_out_of_date_info_bar()
+{
+    info_bar_hide(out_of_date_info_bar);
+    items_out_of_date.clear();
+    if (!part_current || !pool_cache_status) {
+        return;
+    }
+    SQLite::Query q(pool.db,
+                    "WITH RECURSIVE deps(typex, uuidx) AS "
+                    "( SELECT 'part', ? UNION "
+                    "SELECT dep_type, dep_uuid FROM dependencies, deps "
+                    "WHERE dependencies.type = deps.typex AND dependencies.uuid = deps.uuidx) "
+                    "SELECT * FROM deps UNION SELECT 'symbol', symbols.uuid FROM symbols "
+                    "INNER JOIN deps ON (symbols.unit = uuidx AND typex = 'unit')");
+    q.bind(1, part_current);
+    while (q.step()) {
+        ObjectType type = object_type_lut.lookup(q.get<std::string>(0));
+        UUID uu(q.get<std::string>(1));
+
+        auto r = std::find_if(pool_cache_status->items.begin(), pool_cache_status->items.end(),
+                              [type, uu](const PoolCacheStatus::Item &it) { return it.type == type && it.uuid == uu; });
+        if (r != pool_cache_status->items.end()) {
+            if (r->state == PoolCacheStatus::Item::State::OUT_OF_DATE) {
+                items_out_of_date.emplace(type, uu);
+            }
+        }
+    }
+    if (items_out_of_date.size()) {
+        info_bar_show(out_of_date_info_bar);
     }
 }
 

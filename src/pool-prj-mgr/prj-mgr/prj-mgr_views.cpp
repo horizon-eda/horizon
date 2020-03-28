@@ -118,6 +118,7 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
     builder->get_widget("label_project_directory", label_project_directory);
     builder->get_widget("prj_pool_change_button", button_change_pool);
     builder->get_widget("prj_pool_info_bar", pool_info_bar);
+    builder->get_widget("pool_cache_status_label", pool_cache_status_label);
 
     Gtk::Button *open_button;
     builder->get_widget("prj_open_dir_button", open_button);
@@ -202,7 +203,7 @@ void PoolProjectManagerViewProject::handle_button_part_browser()
 
 void PoolProjectManagerViewProject::handle_button_pool_cache()
 {
-    win->pool_cache_window->refresh_list();
+    win->update_pool_cache_status_now();
     win->pool_cache_window->present();
 }
 
@@ -223,6 +224,23 @@ bool PoolProjectManagerViewProject::update_meta()
     label_project_title->set_text(title);
     label_project_author->set_text(author);
     return meta.size();
+}
+
+void PoolProjectManagerViewProject::update_pool_cache_status(const PoolCacheStatus &status)
+{
+    std::string txt;
+    if (status.n_current == status.n_total) {
+        txt = "All current";
+    }
+    else {
+        txt = std::to_string(status.n_out_of_date) + " out of date";
+    }
+    pool_cache_status_label->set_text(txt);
+}
+
+void PoolProjectManagerViewProject::reset_pool_cache_status()
+{
+    pool_cache_status_label->set_text("");
 }
 
 } // namespace horizon

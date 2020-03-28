@@ -39,6 +39,12 @@ public:
 
     class PreferencesWindow *show_preferences_window(guint32 timestamp = 0);
 
+    typedef sigc::signal<void, UUID> type_signal_pool_updated;
+    type_signal_pool_updated signal_pool_updated()
+    {
+        return s_signal_pool_updated;
+    }
+
 protected:
     // Override default signal handlers:
     void on_activate() override;
@@ -58,6 +64,8 @@ private:
     void load_from_config(const std::string &config_filename);
     Preferences preferences;
     class PreferencesWindow *preferences_window = nullptr;
+
+    type_signal_pool_updated s_signal_pool_updated;
 
 
 public:

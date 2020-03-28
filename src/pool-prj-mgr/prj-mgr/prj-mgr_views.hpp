@@ -45,7 +45,8 @@ public:
     void open_top_schematic();
     void open_board();
     bool update_meta();
-
+    void update_pool_cache_status(const class PoolCacheStatus &status);
+    void reset_pool_cache_status();
 
 private:
     PoolProjectManagerAppWindow *win = nullptr;
@@ -54,6 +55,8 @@ private:
     Gtk::Button *button_part_browser = nullptr;
     Gtk::Button *button_pool_cache = nullptr;
     Gtk::Button *button_change_pool = nullptr;
+    Gtk::Label *pool_cache_status_label = nullptr;
+
 
     void handle_button_part_browser();
     void handle_button_pool_cache();

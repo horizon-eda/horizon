@@ -2,11 +2,12 @@
 #include "common/common.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "pool/pool.hpp"
-#include "pool/pool_cached.hpp"
 #include "util/uuid.hpp"
 #include <array>
 #include <gtkmm.h>
 #include <set>
+#include "pool_cache_status.hpp"
+#include "util/item_set.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -18,7 +19,8 @@ public:
     static PoolCacheWindow *create(Gtk::Window *p, const std::string &cache_path, const std::string &pool_path,
                                    class PoolProjectManagerAppWindow *aw);
 
-    void refresh_list();
+    void refresh_list(const class PoolCacheStatus &status);
+    void select_items(const ItemSet &items);
 
 private:
     void selection_changed();
@@ -28,7 +30,6 @@ private:
     std::string cache_path;
     std::string base_path;
 
-    PoolCached pool_cached;
     Pool pool;
     class PoolProjectManagerAppWindow *appwin;
 
@@ -37,8 +38,6 @@ private:
     Gtk::TextView *delta_text_view = nullptr;
     Gtk::Button *update_from_pool_button = nullptr;
     Gtk::Label *status_label = nullptr;
-
-    enum class ItemState { CURRENT, OUT_OF_DATE, MISSING_IN_POOL };
 
     class TreeColumns : public Gtk::TreeModelColumnRecord {
     public:
@@ -55,7 +54,7 @@ private:
         Gtk::TreeModelColumn<std::string> filename_cached;
         Gtk::TreeModelColumn<ObjectType> type;
         Gtk::TreeModelColumn<UUID> uuid;
-        Gtk::TreeModelColumn<ItemState> state;
+        Gtk::TreeModelColumn<PoolCacheStatus::Item::State> state;
         Gtk::TreeModelColumn<json> delta;
     };
     TreeColumns tree_columns;

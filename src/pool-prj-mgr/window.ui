@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.18"/>
   <object class="GtkBox" id="box_git">
@@ -2403,12 +2403,12 @@ In case of modifying an existing part, provide rationale for the modification.</
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox" id="box3">
+                      <object class="GtkGrid">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="halign">center</property>
-                        <property name="spacing">20</property>
-                        <property name="homogeneous">True</property>
+                        <property name="row_spacing">10</property>
+                        <property name="column_spacing">20</property>
+                        <property name="column_homogeneous">True</property>
                         <child>
                           <object class="GtkButton" id="button_top_schematic">
                             <property name="visible">True</property>
@@ -2449,9 +2449,8 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">0</property>
                           </packing>
                         </child>
                         <child>
@@ -2494,9 +2493,8 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="left_attach">1</property>
+                            <property name="top_attach">0</property>
                           </packing>
                         </child>
                         <child>
@@ -2539,9 +2537,8 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="left_attach">2</property>
+                            <property name="top_attach">0</property>
                           </packing>
                         </child>
                         <child>
@@ -2584,16 +2581,38 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">3</property>
+                            <property name="left_attach">3</property>
+                            <property name="top_attach">0</property>
                           </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="pool_cache_status_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="margin_left">9</property>
+                            <property name="wrap">True</property>
+                            <property name="max_width_chars">0</property>
+                            <property name="xalign">0</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">3</property>
+                            <property name="top_attach">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
                         </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>

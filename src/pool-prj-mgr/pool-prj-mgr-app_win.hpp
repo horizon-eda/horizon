@@ -79,6 +79,7 @@ public:
     void pool_notebook_go_to(ObjectType type, const UUID &uu);
     void open_pool(const std::string &pool_json, ObjectType type = ObjectType::INVALID, const UUID &uu = UUID());
     void handle_download(bool back_to_start = false);
+    void update_pool_cache_status_now();
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;
@@ -133,6 +134,8 @@ private:
     void save_project();
     class PartBrowserWindow *part_browser_window = nullptr;
     class PoolCacheWindow *pool_cache_window = nullptr;
+    std::unique_ptr<class PoolCacheMonitor> pool_cache_monitor;
+    void cleanup();
 
     ViewMode view_mode = ViewMode::OPEN;
     void set_view_mode(ViewMode mode);

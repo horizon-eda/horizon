@@ -24,6 +24,7 @@
 #include "util/str_util.hpp"
 #include "autosave_recovery_dialog.hpp"
 #include "util/item_set.hpp"
+#include "prj-mgr/pool_cache_monitor.hpp"
 
 namespace horizon {
 PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject,
@@ -502,12 +503,22 @@ void PoolProjectManagerAppWindow::set_pool_update_progress(float progress)
 
 PoolProjectManagerAppWindow::~PoolProjectManagerAppWindow()
 {
-    if (part_browser_window)
-        delete part_browser_window;
-    if (pool_cache_window)
-        delete pool_cache_window;
     if (output_window)
         delete output_window;
+    cleanup();
+}
+
+void PoolProjectManagerAppWindow::cleanup()
+{
+    if (part_browser_window) {
+        delete part_browser_window;
+        part_browser_window = nullptr;
+    }
+    if (pool_cache_window) {
+        delete pool_cache_window;
+        pool_cache_window = nullptr;
+    }
+    pool_cache_monitor.reset();
 }
 
 void PoolProjectManagerAppWindow::handle_recent()
@@ -764,12 +775,7 @@ bool PoolProjectManagerAppWindow::really_close_pool_or_project()
         }
         app->recent_items[project_filename] = Glib::DateTime::create_now_local();
         project.reset();
-        if (part_browser_window)
-            delete part_browser_window;
-        part_browser_window = nullptr;
-        if (pool_cache_window)
-            delete pool_cache_window;
-        pool_cache_window = nullptr;
+        cleanup();
         set_view_mode(ViewMode::OPEN);
     }
     else {
@@ -1053,6 +1059,7 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         view_project.pool_info_bar->hide();
         view_project.label_pool_name->set_text(prj_pool->name);
         view_project.label_pool_path->set_text(prj_pool->base_path);
+        view_project.reset_pool_cache_status();
 
         part_browser_window = PartBrowserWindow::create(this, prj_pool->base_path, app->part_favorites);
         part_browser_window->signal_place_part().connect(
@@ -1060,6 +1067,27 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         part_browser_window->signal_assign_part().connect(
                 sigc::mem_fun(*this, &PoolProjectManagerAppWindow::handle_assign_part));
         pool_cache_window = PoolCacheWindow::create(this, project->pool_cache_directory, prj_pool->base_path, this);
+        pool_cache_monitor = std::make_unique<PoolCacheMonitor>(prj_pool->base_path, project->pool_cache_directory);
+        app->signal_pool_updated().connect(sigc::track_obj(
+                [this](const UUID &pool_uu) {
+                    if (pool_uu == project->pool_uuid) {
+                        pool_cache_monitor->update();
+                    }
+                },
+                *pool_cache_monitor));
+        pool_cache_monitor->signal_changed().connect([this] {
+            auto status = pool_cache_monitor->get_status();
+            pool_cache_window->refresh_list(status);
+            view_project.update_pool_cache_status(status);
+            part_browser_window->set_pool_cache_status(pool_cache_monitor->get_status());
+        });
+        pool_cache_monitor->update_now();
+        part_browser_window->signal_open_pool_cache_window().connect([this](auto &items) {
+            pool_cache_window->select_items(items);
+            pool_cache_window->present();
+        });
+
+
         project_needs_save = modified;
         set_view_mode(ViewMode::PROJECT);
 
@@ -1468,6 +1496,13 @@ void PoolProjectManagerAppWindow::cleanup_pool_cache()
 
     PoolCacheCleanupDialog dia(pool_cache_window, files_to_delete, models_to_delete, &pool_cached);
     dia.run();
+}
+
+void PoolProjectManagerAppWindow::update_pool_cache_status_now()
+{
+    if (pool_cache_monitor) {
+        pool_cache_monitor->update_now();
+    }
 }
 
 } // namespace horizon
