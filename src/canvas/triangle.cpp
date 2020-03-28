@@ -286,21 +286,24 @@ void TriangleRenderer::render()
 
     const auto &modes = ca->highlight_on_top ? modes_on_top : modes_normal;
 
+    render_annotations(false);
     for (auto highlight_mode : modes) {
         for (auto layer : layers) {
             const auto &ld = ca->get_layer_display(layer);
-            if (layer != ca->work_layer && layer < 10000 && ld.visible) {
+            if (layer != ca->work_layer && layer < 10000 && ld.visible && !ca->layer_is_annotation(layer)) {
                 render_layer_with_overlay(layer, highlight_mode);
             }
         }
         render_layer_with_overlay(ca->work_layer, highlight_mode);
         for (auto layer : layers) {
             const auto &ld = ca->get_layer_display(layer);
-            if (layer >= 10000 && layer < 30000 && ld.visible) {
+            if (layer >= 10000 && layer < Canvas::first_overlay_layer && ld.visible
+                && !ca->layer_is_annotation(layer)) {
                 render_layer(layer, highlight_mode);
             }
         }
     }
+    render_annotations(true);
     glDisable(GL_STENCIL_TEST);
 
     GL_CHECK_ERROR
@@ -310,6 +313,14 @@ void TriangleRenderer::render()
     GL_CHECK_ERROR
 }
 
+void TriangleRenderer::render_annotations(bool top)
+{
+    for (const auto &it : ca->annotations) {
+        if (it.second.on_top == top) {
+            render_layer(it.first);
+        }
+    }
+}
 
 void TriangleRenderer::push()
 {

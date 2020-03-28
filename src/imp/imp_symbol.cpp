@@ -169,6 +169,7 @@ void ImpSymbol::construct()
 
     bbox_annotation = canvas->create_annotation();
     bbox_annotation->set_visible(true);
+    bbox_annotation->on_top = false;
     bbox_annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
 }
 

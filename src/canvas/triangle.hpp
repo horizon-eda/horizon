@@ -100,6 +100,7 @@ private:
 
     void render_layer(int layer, HighlightMode highlight_mode = HighlightMode::ALL, bool ignore_flip = false);
     void render_layer_with_overlay(int layer, HighlightMode highlight_mode = HighlightMode::ALL);
+    void render_annotations(bool top);
     int stencil = 0;
 };
 } // namespace horizon

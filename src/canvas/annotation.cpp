@@ -20,6 +20,11 @@ void CanvasGL::remove_annotation(CanvasAnnotation *a)
         triangles.erase(layer);
 }
 
+bool CanvasGL::layer_is_annotation(int l) const
+{
+    return annotations.count(l);
+}
+
 CanvasAnnotation::CanvasAnnotation(CanvasGL *c, int l) : ca(c), layer(l)
 {
     LayerDisplay ld(false, LayerDisplay::Mode::FILL_ONLY);

@@ -15,6 +15,7 @@ public:
     void draw_line(const std::deque<Coordf> &pts, ColorP color, uint64_t width);
     void draw_line(const Coordf &from, const Coordf &to, ColorP color, uint64_t width);
     void draw_polygon(const std::deque<Coordf> &pts, ColorP color, uint64_t width);
+    bool on_top = true;
 
 private:
     class CanvasGL *ca;

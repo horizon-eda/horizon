@@ -151,6 +151,7 @@ public:
 
     CanvasAnnotation *create_annotation();
     void remove_annotation(CanvasAnnotation *a);
+    bool layer_is_annotation(int l) const;
 
 protected:
     void push() override;
@@ -238,7 +239,8 @@ private:
     Gdk::ModifierType grid_fine_modifier = Gdk::MOD1_MASK;
     float cursor_size = 20;
 
-    int annotation_layer_current = 20000;
+    static const int first_annotation_layer = 20000;
+    int annotation_layer_current = first_annotation_layer;
     std::map<int, CanvasAnnotation> annotations;
 
     void draw_bitmap_text(const Coordf &p, float scale, const std::string &rtext, int angle, ColorP color,
