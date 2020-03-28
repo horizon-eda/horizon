@@ -7,6 +7,7 @@
 #include "nlohmann/json.hpp"
 #include <git2.h>
 #include "util/status_dispatcher.hpp"
+#include "util/item_set.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -84,10 +85,10 @@ private:
     std::string gh_owner;
     std::string gh_repo;
 
-    std::set<std::pair<ObjectType, UUID>> items_merge;
+    ItemSet items_merge;
     std::set<std::string> models_merge;
     void update_items_merge();
-    std::set<std::pair<ObjectType, UUID>> get_referenced(ObjectType ty, const UUID &uu);
+    ItemSet get_referenced(ObjectType ty, const UUID &uu);
     bool exists_in_pool(class Pool &pool, ObjectType ty, const UUID &uu);
 
     void update_prs();

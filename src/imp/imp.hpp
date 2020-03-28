@@ -14,6 +14,7 @@
 #include "nlohmann/json.hpp"
 #include "search/searcher.hpp"
 #include <zmq.hpp>
+#include "util/item_set.hpp"
 
 #ifdef G_OS_WIN32
 #undef DELETE
@@ -156,7 +157,7 @@ protected:
     std::string get_hud_text_for_net(const Net *net);
 
     void set_monitor_files(const std::set<std::string> &files);
-    void set_monitor_items(const std::set<std::pair<ObjectType, UUID>> &items);
+    void set_monitor_items(const ItemSet &items);
     virtual void update_monitor()
     {
     }

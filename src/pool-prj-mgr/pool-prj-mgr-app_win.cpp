@@ -23,7 +23,7 @@
 #include "output_window.hpp"
 #include "util/str_util.hpp"
 #include "autosave_recovery_dialog.hpp"
-
+#include "util/item_set.hpp"
 
 namespace horizon {
 PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject,
@@ -1344,7 +1344,7 @@ void PoolProjectManagerAppWindow::cleanup_pool_cache()
         md.run();
         return;
     }
-    std::set<std::pair<ObjectType, UUID>> items_needed;
+    ItemSet items_needed;
 
     PoolCached pool_cached(PoolManager::get().get_by_uuid(project->pool_uuid)->base_path,
                            project->pool_cache_directory);

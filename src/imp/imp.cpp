@@ -1751,7 +1751,7 @@ void ImpBase::set_monitor_files(const std::set<std::string> &files)
     map_erase_if(file_monitors, [files](auto &it) { return files.count(it.first) == 0; });
 }
 
-void ImpBase::set_monitor_items(const std::set<std::pair<ObjectType, UUID>> &items)
+void ImpBase::set_monitor_items(const ItemSet &items)
 {
     std::set<std::string> filenames;
     std::transform(items.begin(), items.end(), std::inserter(filenames, filenames.begin()),

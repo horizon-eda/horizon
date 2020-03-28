@@ -403,7 +403,7 @@ void ImpPackage::update_action_sensitivity()
 
 void ImpPackage::update_monitor()
 {
-    std::set<std::pair<ObjectType, UUID>> items;
+    ItemSet items;
     const auto pkg = core_package.get_package();
     for (const auto &it : pkg->pads) {
         items.emplace(ObjectType::PADSTACK, it.second.pool_padstack->uuid);

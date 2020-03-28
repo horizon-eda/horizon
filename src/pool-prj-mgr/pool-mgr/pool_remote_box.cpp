@@ -347,9 +347,9 @@ bool PoolRemoteBox::exists_in_pool(Pool &pool, ObjectType ty, const UUID &uu)
     }
 }
 
-std::set<std::pair<ObjectType, UUID>> PoolRemoteBox::get_referenced(ObjectType ty, const UUID &uu)
+ItemSet PoolRemoteBox::get_referenced(ObjectType ty, const UUID &uu)
 {
-    std::set<std::pair<ObjectType, UUID>> items;
+    ItemSet items;
     items.emplace(ty, uu);
     Pool pool_remote(notebook->remote_repo);
     bool added = true;
