@@ -169,6 +169,8 @@ void Buffer::load(std::set<SelectableRef> selection)
         else if (it.type == ObjectType::NET) {
             auto &x = core.r->get_block()->nets.at(it.uuid);
             auto net = &nets.emplace(x.uuid, x).first->second;
+            net->diffpair = nullptr;
+            net->diffpair_master = false;
             net->net_class = &net_class_dummy;
         }
         else if (it.type == ObjectType::SYMBOL_PIN) {
