@@ -30,6 +30,7 @@ private:
     Gtk::CheckButton *diff_show_deleted_checkbutton = nullptr;
     Gtk::CheckButton *diff_show_modified_checkbutton = nullptr;
     Gtk::Box *diff_box = nullptr;
+    Gtk::Button *add_with_deps_button = nullptr;
 
     void make_treeview(Gtk::TreeView *treeview);
 
@@ -67,5 +68,6 @@ private:
 
     void update_store_from_db_prepare();
     void update_store_from_db(Glib::RefPtr<Gtk::ListStore> store);
+    void handle_add_with_deps();
 };
 } // namespace horizon

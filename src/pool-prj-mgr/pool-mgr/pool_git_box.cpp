@@ -68,7 +68,11 @@ PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("checkbutton_git_diff_show_deleted", diff_show_deleted_checkbutton);
     x->get_widget("checkbutton_git_diff_show_modified", diff_show_modified_checkbutton);
     x->get_widget("git_diff_box", diff_box);
+    x->get_widget("git_add_with_deps_button", add_with_deps_button);
     refresh_button->signal_clicked().connect(sigc::mem_fun(this, &PoolGitBox::refresh));
+    add_with_deps_button->signal_clicked().connect(sigc::mem_fun(this, &PoolGitBox::handle_add_with_deps));
+    status_treeview->get_selection()->signal_changed().connect(
+            [this] { add_with_deps_button->set_sensitive(status_treeview->get_selection()->count_selected_rows()); });
 
     diff_show_deleted_checkbutton->signal_toggled().connect([this] { diff_store_filtered->refilter(); });
     diff_show_modified_checkbutton->signal_toggled().connect([this] { diff_store_filtered->refilter(); });
@@ -283,11 +287,59 @@ void PoolGitBox::update_store_from_db(Glib::RefPtr<Gtk::ListStore> store)
     notebook->pool.db.execute("DROP TABLE 'git_files'");
 }
 
+void PoolGitBox::handle_add_with_deps()
+{
+    auto it = status_treeview->get_selection()->get_selected();
+    if (it) {
+        Gtk::TreeModel::Row row = *it;
+        UUID uu = row[list_columns.uuid];
+        ObjectType type = row[list_columns.type];
+        SQLite::Query q(notebook->pool.db,
+                        "WITH RECURSIVE deps(typex, uuidx) AS "
+                        "( SELECT ?, ? UNION "
+                        "SELECT dep_type, dep_uuid FROM dependencies, deps "
+                        "WHERE dependencies.type = deps.typex AND dependencies.uuid = deps.uuidx) "
+                        ", deps_sym(typey, uuidy) AS (SELECT * FROM deps UNION SELECT 'symbol', symbols.uuid FROM "
+                        "symbols INNER JOIN deps ON (symbols.unit = uuidx AND typex = 'unit')) "
+                        "SELECT filename FROM deps_sym INNER JOIN all_items_view "
+                        "ON(all_items_view.type =deps_sym.typey AND all_items_view.uuid = deps_sym.uuidy) "
+                        "UNION SELECT model_filename FROM models INNER JOIN deps "
+                        "ON (deps.typex = 'package' AND deps.uuidx = models.package_uuid)");
+        q.bind(1, object_type_lut.lookup_reverse(type));
+        q.bind(2, uu);
+
+        autofree_ptr<git_repository> repo(git_repository_free);
+        if (git_repository_open(&repo.ptr, notebook->base_path.c_str()) != 0) {
+            throw std::runtime_error("error opening repo");
+        }
+
+        autofree_ptr<git_index> index(git_index_free);
+        if (git_repository_index(&index.ptr, repo) != 0) {
+            throw std::runtime_error("index error");
+        }
+
+        while (q.step()) {
+            std::string filename = q.get<std::string>(0);
+            if (git_index_add_bypath(index, filename.c_str()) != 0) {
+                auto last_error = giterr_last();
+                std::string err_str = last_error->message;
+                throw std::runtime_error("add error: " + err_str);
+            }
+        }
+
+        if (git_index_write(index) != 0) {
+            throw std::runtime_error("error saving index");
+        }
+
+        refresh();
+    }
+}
+
 PoolGitBox *PoolGitBox::create(PoolNotebook *nb)
 {
     PoolGitBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    std::vector<Glib::ustring> widgets = {"box_git"};
+    std::vector<Glib::ustring> widgets = {"box_git", "sg_git_header"};
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/window.ui", widgets);
     x->get_widget_derived("box_git", w, nb);
     w->reference();
