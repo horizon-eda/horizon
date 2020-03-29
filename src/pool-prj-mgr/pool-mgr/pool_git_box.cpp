@@ -22,6 +22,7 @@ void PoolGitBox::make_treeview(Gtk::TreeView *treeview)
             else
                 mcr->property_text() = object_descriptions.at(row[list_columns.type]).name;
         });
+        tvc->set_sort_column(list_columns.type);
         treeview->append_column(*tvc);
     }
     {
@@ -58,6 +59,27 @@ static const std::map<unsigned int, std::string> status_names = {{GIT_STATUS_CUR
                                                                  {GIT_STATUS_IGNORED, "Ignored"},
                                                                  {GIT_STATUS_CONFLICTED, "Conflicted"}};
 
+void PoolGitBox::install_sort(Glib::RefPtr<Gtk::TreeSortable> store)
+{
+    store->set_sort_func(list_columns.type,
+                         [this](const Gtk::TreeModel::iterator &a, const Gtk::TreeModel::iterator &b) {
+                             Gtk::TreeModel::Row ra = *a;
+                             Gtk::TreeModel::Row rb = *b;
+                             ObjectType ta = ra[list_columns.type];
+                             ObjectType tb = rb[list_columns.type];
+                             return static_cast<int>(ta) - static_cast<int>(tb);
+                         });
+    store->set_sort_func(list_columns.status,
+                         [this](const Gtk::TreeModel::iterator &a, const Gtk::TreeModel::iterator &b) {
+                             Gtk::TreeModel::Row ra = *a;
+                             Gtk::TreeModel::Row rb = *b;
+                             git_delta_t ta = ra[list_columns.status];
+                             git_delta_t tb = rb[list_columns.status];
+                             return static_cast<int>(ta) - static_cast<int>(tb);
+                         });
+    store->set_sort_column(list_columns.status_flags, Gtk::SORT_ASCENDING);
+}
+
 PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PoolNotebook *nb)
     : Gtk::Box(cobject), notebook(nb)
 {
@@ -79,6 +101,8 @@ PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     diff_store = Gtk::ListStore::create(list_columns);
     status_store = Gtk::ListStore::create(list_columns);
+    status_store_sorted = Gtk::TreeModelSort::create(status_store);
+
     diff_store_filtered = Gtk::TreeModelFilter::create(diff_store);
     diff_store_filtered->set_visible_func([this](const Gtk::TreeModel::const_iterator &it) -> bool {
         const Gtk::TreeModel::Row row = *it;
@@ -90,8 +114,13 @@ PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         else
             return true;
     });
-    diff_treeview->set_model(diff_store_filtered);
-    status_treeview->set_model(status_store);
+    diff_store_sorted = Gtk::TreeModelSort::create(diff_store_filtered);
+
+    install_sort(status_store_sorted);
+    install_sort(diff_store_sorted);
+
+    diff_treeview->set_model(diff_store_sorted);
+    status_treeview->set_model(status_store_sorted);
     {
         auto cr = Gtk::manage(new Gtk::CellRendererText());
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn("State", *cr));
@@ -117,6 +146,7 @@ PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             }
             mcr->property_text() = state;
         });
+        tvc->set_sort_column(list_columns.status);
         diff_treeview->append_column(*tvc);
     }
     make_treeview(diff_treeview);
@@ -139,6 +169,7 @@ PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             }
             mcr->property_text() = s;
         });
+        tvc->set_sort_column(list_columns.status_flags);
         status_treeview->append_column(*tvc);
     }
     make_treeview(status_treeview);
@@ -231,7 +262,7 @@ void PoolGitBox::refresh()
             update_store_from_db_prepare();
             git_diff_foreach(diff, &PoolGitBox::diff_file_cb_c, nullptr, nullptr, nullptr, this);
             update_store_from_db(diff_store);
-            diff_treeview->set_model(diff_store_filtered);
+            diff_treeview->set_model(diff_store_sorted);
             diff_box->set_visible(tree_master != tree_head);
         }
 
@@ -241,7 +272,7 @@ void PoolGitBox::refresh()
             update_store_from_db_prepare();
             git_status_foreach(repo, &PoolGitBox::status_cb_c, this);
             update_store_from_db(status_store);
-            status_treeview->set_model(status_store);
+            status_treeview->set_model(status_store_sorted);
         }
     }
     catch (const std::exception &e) {
