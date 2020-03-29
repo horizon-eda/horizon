@@ -171,25 +171,34 @@ void RenumberPadsWindow::renumber()
             b = Coordi::max(b, it->placement.shift);
         }
         const Coordi center = (a + b) / 2;
+        const Coordi ar = a - center;
+        const Coordi br = b - center;
 
         double angle_offset = 0;
         switch (circular_origin) {
         case Origin::TOP_LEFT:
-            angle_offset = 0.75 * M_PI;
+            angle_offset = get_angle({ar.x, br.y});
             break;
 
         case Origin::TOP_RIGHT:
-            angle_offset = 0.25 * M_PI;
+            angle_offset = get_angle({br.x, br.y});
             break;
 
         case Origin::BOTTOM_LEFT:
-            angle_offset = 1.25 * M_PI;
+            angle_offset = get_angle({ar.x, ar.y});
             break;
 
         case Origin::BOTTOM_RIGHT:
-            angle_offset = 1.75 * M_PI;
+            angle_offset = get_angle({br.x, ar.y});
             break;
         }
+
+        // compensate for rounding errors
+        if (clockwise)
+            angle_offset += 1e-3;
+        else
+            angle_offset -= 1e-3;
+
         std::sort(pads_sorted.begin(), pads_sorted.end(), [this, center, angle_offset](const Pad *x, const Pad *y) {
             auto alpha_a = add_angle(get_angle(x->placement.shift - center), -angle_offset);
             auto alpha_b = add_angle(get_angle(y->placement.shift - center), -angle_offset);
