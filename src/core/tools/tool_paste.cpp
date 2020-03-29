@@ -233,25 +233,52 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             selection.emplace(u, ObjectType::SCHEMATIC_SYMBOL);
         }
     }
+
+    std::map<UUID, const UUID> bus_ripper_xlat;
+    if (j.count("bus_rippers") && doc.c) {
+        const json &o = j["bus_rippers"];
+        auto sheet = doc.c->get_sheet();
+        auto block = doc.c->get_block();
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID::random();
+            BusRipper rip(u, it.value());
+            if (block->buses.count(rip.bus.uuid)) {
+                bus_ripper_xlat.emplace(it.key(), u);
+                auto &x = doc.c->get_sheet()->bus_rippers.emplace(u, rip).first->second;
+                x.junction = &sheet->junctions.at(junction_xlat.at(x.junction.uuid));
+                x.bus.update(block->buses);
+                x.bus_member.update(x.bus->members);
+                selection.emplace(u, ObjectType::BUS_RIPPER);
+            }
+        }
+    }
     if (j.count("net_lines") && doc.c) {
         const json &o = j["net_lines"];
         auto sheet = doc.c->get_sheet();
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
             LineNet line(u, it.value());
-            auto update_net_line_conn = [&junction_xlat, &symbol_xlat, sheet](LineNet::Connection &c) {
+            auto update_net_line_conn = [&junction_xlat, &symbol_xlat, &bus_ripper_xlat,
+                                         sheet](LineNet::Connection &c) {
                 if (c.junc.uuid) {
                     c.junc = &sheet->junctions.at(junction_xlat.at(c.junc.uuid));
                 }
-                if (c.symbol.uuid) {
+                else if (c.symbol.uuid) {
                     c.symbol = &sheet->symbols.at(symbol_xlat.at(c.symbol.uuid));
                     c.pin = &c.symbol->symbol.pins.at(c.pin.uuid);
                 }
+                else if (c.bus_ripper.uuid) {
+                    if (bus_ripper_xlat.count(c.bus_ripper.uuid))
+                        c.bus_ripper = &sheet->bus_rippers.at(bus_ripper_xlat.at(c.bus_ripper.uuid));
+                    else
+                        return false;
+                }
+                return true;
             };
-            update_net_line_conn(line.from);
-            update_net_line_conn(line.to);
-            sheet->net_lines.emplace(u, line);
-            selection.emplace(u, ObjectType::LINE_NET);
+            if (update_net_line_conn(line.from) && update_net_line_conn(line.to)) {
+                sheet->net_lines.emplace(u, line);
+                selection.emplace(u, ObjectType::LINE_NET);
+            }
         }
     }
     if (j.count("net_labels") && doc.c) {
@@ -262,6 +289,21 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             auto x = &doc.c->get_sheet()->net_labels.emplace(u, NetLabel(u, it.value())).first->second;
             x->junction = &sheet->junctions.at(junction_xlat.at(x->junction.uuid));
             selection.emplace(u, ObjectType::NET_LABEL);
+        }
+    }
+    if (j.count("bus_labels") && doc.c) {
+        const json &o = j["bus_labels"];
+        auto sheet = doc.c->get_sheet();
+        auto block = doc.c->get_block();
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID::random();
+            BusLabel la(u, it.value());
+            if (block->buses.count(la.bus.uuid)) {
+                auto &x = doc.c->get_sheet()->bus_labels.emplace(u, la).first->second;
+                x.junction = &sheet->junctions.at(junction_xlat.at(x.junction.uuid));
+                x.bus.update(block->buses);
+                selection.emplace(u, ObjectType::BUS_LABEL);
+            }
         }
     }
     if (j.count("power_symbols") && doc.c) {

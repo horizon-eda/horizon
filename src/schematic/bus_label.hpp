@@ -22,6 +22,7 @@ using json = nlohmann::json;
 class BusLabel {
 public:
     BusLabel(const UUID &uu, const json &j, class Sheet &sheet, class Block &block);
+    BusLabel(const UUID &uu, const json &j);
     BusLabel(const UUID &uu);
 
     UUID uuid;

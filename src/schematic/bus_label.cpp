@@ -5,10 +5,16 @@
 #include "nlohmann/json.hpp"
 
 namespace horizon {
-BusLabel::BusLabel(const UUID &uu, const json &j, Sheet &sheet, Block &block)
-    : uuid(uu), junction(&sheet.junctions.at(j.at("junction").get<std::string>())),
+BusLabel::BusLabel(const UUID &uu, const json &j, Sheet &sheet, Block &block) : BusLabel(uu, j)
+{
+    junction.update(sheet.junctions);
+    bus.update(block.buses);
+}
+
+BusLabel::BusLabel(const UUID &uu, const json &j)
+    : uuid(uu), junction(UUID(j.at("junction").get<std::string>())),
       orientation(orientation_lut.lookup(j.at("orientation"))), size(j.value("size", 2500000)),
-      offsheet_refs(j.value("offsheet_refs", true)), bus(&block.buses.at(j.at("bus").get<std::string>()))
+      offsheet_refs(j.value("offsheet_refs", true)), bus(UUID(j.at("bus").get<std::string>()))
 {
 }
 

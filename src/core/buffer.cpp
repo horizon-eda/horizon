@@ -33,6 +33,9 @@ void Buffer::clear()
     board_holes.clear();
     dimensions.clear();
     board_panels.clear();
+    buses.clear();
+    bus_labels.clear();
+    bus_rippers.clear();
 }
 
 void Buffer::load(std::set<SelectableRef> selection)
@@ -73,9 +76,11 @@ void Buffer::load(std::set<SelectableRef> selection)
                 if (it_ft.is_junc()) {
                     new_sel.emplace(it_ft.junc.uuid, ObjectType::JUNCTION);
                 }
-                if (line->net)
-                    new_sel.emplace(line->net->uuid, ObjectType::NET);
             }
+            if (line->net)
+                new_sel.emplace(line->net->uuid, ObjectType::NET);
+            else if (line->bus)
+                new_sel.emplace(line->bus->uuid, ObjectType::BUS);
         } break;
         case ObjectType::NET_LABEL: {
             auto &la = core.c->get_sheet()->net_labels.at(it.uuid);
@@ -105,24 +110,34 @@ void Buffer::load(std::set<SelectableRef> selection)
             }
         } break;
 
-            /*
-            case ObjectType::BUS_LABEL : {
-                    auto &la = core.c->get_sheet()->bus_labels.at(it.uuid);
-                    new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
-            } break;
+        case ObjectType::BUS_LABEL: {
+            const auto &la = core.c->get_sheet()->bus_labels.at(it.uuid);
+            new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
+            new_sel.emplace(la.bus->uuid, ObjectType::BUS);
+        } break;
 
-            case ObjectType::BUS_RIPPER : {
-                    auto &rip = core.c->get_sheet()->bus_rippers.at(it.uuid);
-                    new_sel.emplace(rip.junction->uuid, ObjectType::JUNCTION);
-            } break;
-
-
-            */
+        case ObjectType::BUS_RIPPER: {
+            const auto &rip = core.c->get_sheet()->bus_rippers.at(it.uuid);
+            new_sel.emplace(rip.junction->uuid, ObjectType::JUNCTION);
+            new_sel.emplace(rip.bus->uuid, ObjectType::BUS);
+        } break;
 
         default:;
         }
     }
     selection.insert(new_sel.begin(), new_sel.end());
+
+    new_sel.clear();
+    for (const auto &it : selection) {
+        if (it.type == ObjectType::BUS) {
+            const auto &bus = core.c->get_block()->buses.at(it.uuid);
+            for (const auto &it_m : bus.members) {
+                new_sel.emplace(it_m.second.net->uuid, ObjectType::NET);
+            }
+        }
+    }
+    selection.insert(new_sel.begin(), new_sel.end());
+
 
     // don't need nets from components
     /*new_sel.clear();
@@ -209,6 +224,13 @@ void Buffer::load(std::set<SelectableRef> selection)
             auto &comp = components.emplace(x.uuid, x).first->second;
             comp.refdes = comp.entity->prefix + "?";
         }
+        else if (it.type == ObjectType::BUS) {
+            const auto &x = core.r->get_block()->buses.at(it.uuid);
+            auto &bus = buses.emplace(x.uuid, x).first->second;
+            for (auto &it_m : bus.members) {
+                it_m.second.net.update(nets);
+            }
+        }
     }
     for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
@@ -222,12 +244,32 @@ void Buffer::load(std::set<SelectableRef> selection)
         }
     }
     for (const auto &it : selection) {
+        if (it.type == ObjectType::BUS_LABEL) {
+            const auto &x = core.c->get_sheet()->bus_labels.at(it.uuid);
+            auto &la = bus_labels.emplace(x.uuid, x).first->second;
+            la.bus.update(buses);
+            la.junction.update(junctions);
+        }
+        else if (it.type == ObjectType::BUS_RIPPER) {
+            const auto &x = core.c->get_sheet()->bus_rippers.at(it.uuid);
+            auto &rip = bus_rippers.emplace(x.uuid, x).first->second;
+            rip.bus.update(buses);
+            rip.junction.update(junctions);
+            rip.bus_member.update(rip.bus->members);
+        }
+    }
+    for (const auto &it : selection) {
         if (it.type == ObjectType::LINE_NET) {
             LineNet x = core.c->get_sheet()->net_lines.at(it.uuid);
             bool valid = true;
             for (auto &it_ft : {&x.from, &x.to}) {
                 if (it_ft->is_bus_ripper()) {
-                    valid = false;
+                    if (bus_rippers.count(it_ft->bus_ripper->uuid) == 0) {
+                        auto uu = UUID::random();
+                        auto &ju = junctions.emplace(uu, uu).first->second;
+                        ju.position = it_ft->get_position();
+                        it_ft->connect(&ju);
+                    }
                 }
                 else if (it_ft->is_pin()) {
                     if (symbols.count(it_ft->symbol->uuid) == 0) {
@@ -246,8 +288,11 @@ void Buffer::load(std::set<SelectableRef> selection)
                         c.symbol.update(symbols);
                         c.pin.update(c.symbol->symbol.pins);
                     }
-                    if (c.junc) {
+                    else if (c.junc) {
                         c.junc.update(junctions);
+                    }
+                    else if (c.bus_ripper) {
+                        c.bus_ripper.update(bus_rippers);
                     }
                 };
                 update_conn(li.from);
@@ -277,6 +322,7 @@ void Buffer::load(std::set<SelectableRef> selection)
             hole.net.update(nets);
         }
     }
+
     for (const auto &it : selection) {
         if (it.type == ObjectType::COMPONENT) {
             auto comp = &components.at(it.uuid);
@@ -383,6 +429,18 @@ json Buffer::serialize()
     j["board_panels"] = json::object();
     for (const auto &it : board_panels) {
         j["board_panels"][(std::string)it.first] = it.second.serialize();
+    }
+    j["buses"] = json::object();
+    for (const auto &it : buses) {
+        j["buses"][(std::string)it.first] = it.second.serialize();
+    }
+    j["bus_labels"] = json::object();
+    for (const auto &it : bus_labels) {
+        j["bus_labels"][(std::string)it.first] = it.second.serialize();
+    }
+    j["bus_rippers"] = json::object();
+    for (const auto &it : bus_rippers) {
+        j["bus_rippers"][(std::string)it.first] = it.second.serialize();
     }
     return j;
 }

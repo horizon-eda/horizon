@@ -5,10 +5,9 @@
 
 namespace horizon {
 
-BusRipper::BusRipper(const UUID &uu, const json &j, Sheet &sheet, Block &block)
-    : uuid(uu), junction(&sheet.junctions.at(j.at("junction").get<std::string>())),
-      bus(&block.buses.at(j.at("bus").get<std::string>())),
-      bus_member(&bus->members.at(j.at("bus_member").get<std::string>()))
+BusRipper::BusRipper(const UUID &uu, const json &j)
+    : uuid(uu), junction(UUID(j.at("junction").get<std::string>())), bus(UUID(j.at("bus").get<std::string>())),
+      bus_member(UUID(j.at("bus_member").get<std::string>()))
 {
 
     if (j.count("orientation")) {
@@ -22,6 +21,14 @@ BusRipper::BusRipper(const UUID &uu, const json &j, Sheet &sheet, Block &block)
             orientation = Orientation::UP;
     }
 }
+
+BusRipper::BusRipper(const UUID &uu, const json &j, Sheet &sheet, Block &block) : BusRipper(uu, j)
+{
+    junction.update(sheet.junctions);
+    bus.update(block.buses);
+    bus_member.update(bus->members);
+}
+
 BusRipper::BusRipper(const UUID &uu) : uuid(uu)
 {
 }

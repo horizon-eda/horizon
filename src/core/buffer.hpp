@@ -21,6 +21,8 @@
 #include "board/board_hole.hpp"
 #include "common/dimension.hpp"
 #include "board/board_panel.hpp"
+#include "schematic/bus_label.hpp"
+#include "schematic/bus_ripper.hpp"
 #include "util/uuid.hpp"
 #include <map>
 #include <set>
@@ -52,6 +54,9 @@ public:
     std::map<UUID, BoardHole> board_holes;
     std::map<UUID, Dimension> dimensions;
     std::map<UUID, BoardPanel> board_panels;
+    std::map<UUID, Bus> buses;
+    std::map<UUID, BusLabel> bus_labels;
+    std::map<UUID, BusRipper> bus_rippers;
 
     json serialize();
 
