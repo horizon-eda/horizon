@@ -74,6 +74,8 @@ public:
         airwire_filter = f;
     }
 
+    static const int first_overlay_layer = 30000;
+
 protected:
     std::map<int, std::vector<Triangle>> triangles;
     void add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t flg = 0);
@@ -212,7 +214,6 @@ protected:
 
     Triangle::Type triangle_type_current = Triangle::Type::NONE;
 
-    static const int first_overlay_layer = 30000;
     std::map<std::pair<int, bool>, int> overlay_layers;
     int overlay_layer_current = first_overlay_layer;
     int get_overlay_layer(int layer, bool ignore_flip = false);
