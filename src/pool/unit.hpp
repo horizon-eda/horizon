@@ -7,7 +7,6 @@
 #include <map>
 #include <set>
 #include <vector>
-#include <yaml-cpp/yaml.h>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -30,7 +29,6 @@ public:
     };
 
     Pin(const UUID &uu, const json &j);
-    Pin(const UUID &uu, const YAML::Node &n);
     Pin(const UUID &uu);
 
     const UUID uuid;
@@ -52,7 +50,6 @@ public:
     std::vector<std::string> names;
 
     json serialize() const;
-    void serialize_yaml(YAML::Emitter &em) const;
     UUID get_uuid() const;
 };
 /**
@@ -67,13 +64,11 @@ private:
 public:
     static Unit new_from_file(const std::string &filename);
     Unit(const UUID &uu);
-    Unit(const UUID &uu, const YAML::Node &n);
     UUID uuid;
     std::string name;
     std::string manufacturer;
     std::map<UUID, Pin> pins;
     json serialize() const;
-    void serialize_yaml(YAML::Emitter &em) const;
     UUID get_uuid() const;
 };
 } // namespace horizon

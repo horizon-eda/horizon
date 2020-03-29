@@ -17,7 +17,6 @@
 #include <iostream>
 #include <memory>
 #include <stdlib.h>
-#include <yaml-cpp/yaml.h>
 #include "nlohmann/json.hpp"
 #include "util/util.hpp"
 

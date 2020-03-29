@@ -2,6 +2,7 @@
 #include "pool/pool_parametric.hpp"
 #include "pool/pool.hpp"
 #include "pool/part.hpp"
+#include <sstream>
 
 namespace horizon {
 

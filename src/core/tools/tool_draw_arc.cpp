@@ -4,6 +4,7 @@
 #include <iostream>
 #include "common/arc.hpp"
 #include <gdk/gdkkeysyms.h>
+#include <sstream>
 
 namespace horizon {
 

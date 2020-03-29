@@ -32,13 +32,6 @@ Pin::Pin(const UUID &uu, const json &j)
 {
 }
 
-Pin::Pin(const UUID &uu, const YAML::Node &n)
-    : uuid(uu), primary_name(n["primary_name"].as<std::string>()),
-      direction(direction_lut.lookup(n["direction"].as<std::string>("input"))), swap_group(n["swap_group"].as<int>(0)),
-      names(n["names"].as<std::vector<std::string>>(std::vector<std::string>()))
-{
-}
-
 Pin::Pin(const UUID &uu) : uuid(uu)
 {
 }
@@ -53,24 +46,6 @@ json Pin::serialize() const
     return j;
 }
 
-void Pin::serialize_yaml(YAML::Emitter &em) const
-{
-    using namespace YAML;
-    em << BeginMap;
-    em << Key << "primary_name" << Value << primary_name;
-    em << Key << "uuid" << Value << (std::string)uuid;
-    em << Key << "names" << Value << names;
-    em << Key << "direction" << Value << direction_lut.lookup_reverse(direction);
-    em << Key << "swap_group" << Value << swap_group;
-    em << EndMap;
-    /*YAML::Node n;
-    n["uuid"] = (std::string)uuid;
-    n["primary_name"] = primary_name;
-    n["names"] = names;
-    n["direction"] = pin_direction_lut.lookup_reverse(direction);
-    return n;*/
-}
-
 UUID Pin::get_uuid() const
 {
     return uuid;
@@ -83,15 +58,6 @@ Unit::Unit(const UUID &uu, const json &j)
     for (auto it = o.cbegin(); it != o.cend(); ++it) {
         auto pin_uuid = UUID(it.key());
         pins.insert(std::make_pair(pin_uuid, Pin(pin_uuid, it.value())));
-    }
-}
-
-Unit::Unit(const UUID &uu, const YAML::Node &n)
-    : uuid(uu), name(n["name"].as<std::string>()), manufacturer(n["manufacturer"].as<std::string>())
-{
-    for (const auto &it : n["pins"]) {
-        UUID pin_uuid = it["uuid"].as<std::string>(UUID::random());
-        pins.insert(std::make_pair(pin_uuid, Pin(pin_uuid, it)));
     }
 }
 
@@ -117,21 +83,6 @@ json Unit::serialize() const
         j["pins"][(std::string)it.first] = it.second.serialize();
     }
     return j;
-}
-
-void Unit::serialize_yaml(YAML::Emitter &em) const
-{
-    using namespace YAML;
-    em << BeginMap;
-    em << Key << "name" << Value << name;
-    em << Key << "manufacturer" << Value << manufacturer;
-    em << Key << "uuid" << Value << (std::string)uuid;
-    em << Key << "pins" << Value << BeginSeq;
-    for (const auto &it : pins) {
-        it.second.serialize_yaml(em);
-    }
-    em << EndSeq;
-    em << EndMap;
 }
 
 UUID Unit::get_uuid() const

@@ -26,18 +26,6 @@ Entity::Entity(const UUID &uu) : uuid(uu)
 {
 }
 
-Entity::Entity(const UUID &uu, const YAML::Node &n, Pool &pool)
-    : uuid(uu), name(n["name"].as<std::string>()), manufacturer(n["manufacturer"].as<std::string>()),
-      prefix(n["prefix"].as<std::string>())
-{
-    auto tv = n["tags"].as<std::vector<std::string>>(std::vector<std::string>());
-    tags.insert(tv.begin(), tv.end());
-    for (const auto &it : n["gates"]) {
-        UUID g_uuid = it["uuid"].as<std::string>(UUID::random());
-        gates.insert(std::make_pair(g_uuid, Gate(g_uuid, it, pool)));
-    }
-}
-
 Entity Entity::new_from_file(const std::string &filename, Pool &pool)
 {
     auto j = load_json_from_file(filename);
@@ -58,23 +46,6 @@ json Entity::serialize() const
         j["gates"][(std::string)it.first] = it.second.serialize();
     }
     return j;
-}
-
-void Entity::serialize_yaml(YAML::Emitter &em) const
-{
-    using namespace YAML;
-    em << BeginMap;
-    em << Key << "name" << Value << name;
-    em << Key << "manufacturer" << Value << manufacturer;
-    em << Key << "uuid" << Value << (std::string)uuid;
-    em << Key << "prefix" << Value << prefix;
-    em << Key << "tags" << Value << tags;
-    em << Key << "gates" << Value << BeginSeq;
-    for (const auto &it : gates) {
-        it.second.serialize_yaml(em);
-    }
-    em << EndSeq;
-    em << EndMap;
 }
 
 void Entity::update_refs(Pool &pool)

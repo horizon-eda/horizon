@@ -15,12 +15,6 @@ Gate::Gate(const UUID &uu) : uuid(uu)
 {
 }
 
-Gate::Gate(const UUID &uu, const YAML::Node &n, Pool &pool)
-    : uuid(uu), name(n["name"].as<std::string>()), suffix(n["suffix"].as<std::string>(name)),
-      swap_group(n["swap_group"].as<unsigned int>(0)), unit(pool.get_unit(n["unit"].as<std::string>()))
-{
-}
-
 UUID Gate::get_uuid() const
 {
     return uuid;
@@ -36,16 +30,4 @@ json Gate::serialize() const
     return j;
 }
 
-void Gate::serialize_yaml(YAML::Emitter &em) const
-{
-    using namespace YAML;
-    em << BeginMap;
-    em << Key << "name" << Value << name;
-    em << Key << "suffix" << Value << suffix;
-    em << Key << "uuid" << Value << (std::string)uuid;
-    em << Key << "unit" << Value << (std::string)unit->uuid;
-    em << Key << "unit_name" << Value << unit->name;
-    em << Key << "swap_group" << Value << swap_group;
-    em << EndMap;
-}
 } // namespace horizon

@@ -613,7 +613,7 @@ INC = -Isrc -I3rd_party
 
 DEFINES = -D_USE_MATH_DEFINES -DGLM_ENABLE_EXPERIMENTAL
 
-LIBS_COMMON = sqlite3 yaml-cpp libzip
+LIBS_COMMON = sqlite3 libzip
 ifneq ($(OS),Windows_NT)
 	LIBS_COMMON += uuid
 endif

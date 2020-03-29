@@ -1,7 +1,7 @@
 #include "tool_draw_polygon_circle.hpp"
 #include "common/polygon.hpp"
 #include "imp/imp_interface.hpp"
-#include <iostream>
+#include <sstream>
 #include "document/idocument.hpp"
 #include <gdk/gdkkeysyms.h>
 

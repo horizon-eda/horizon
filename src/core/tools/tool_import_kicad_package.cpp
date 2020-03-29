@@ -6,6 +6,7 @@
 #include "sexpr/sexpr_parser.h"
 #include "util/util.hpp"
 #include <iostream>
+#include <sstream>
 
 namespace horizon {
 

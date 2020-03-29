@@ -7,6 +7,7 @@
 #include "util/util.hpp"
 #include <thread>
 #include <future>
+#include <sstream>
 
 namespace horizon {
 RulesCheckResult BoardRules::check_track_width(const Board *brd)

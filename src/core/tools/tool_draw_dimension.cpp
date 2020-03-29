@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "document/idocument.hpp"
 #include <gdk/gdkkeysyms.h>
+#include <sstream>
 
 namespace horizon {
 ToolDrawDimension::ToolDrawDimension(IDocument *c, ToolID tid) : ToolBase(c, tid)

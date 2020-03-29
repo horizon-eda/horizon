@@ -15,7 +15,6 @@ class Gate : public UUIDProvider {
 public:
     Gate(const UUID &uu, const json &, class Pool &pool);
     Gate(const UUID &uu);
-    Gate(const UUID &uu, const YAML::Node &n, Pool &pool);
     virtual UUID get_uuid() const;
     UUID uuid;
     std::string name;
@@ -24,6 +23,5 @@ public:
     uuid_ptr<const Unit> unit;
 
     json serialize() const;
-    void serialize_yaml(YAML::Emitter &em) const;
 };
 } // namespace horizon
