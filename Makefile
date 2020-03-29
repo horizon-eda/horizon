@@ -1,6 +1,6 @@
 PKGCONFIG=pkg-config
 BUILDDIR = build
-PROGS    = $(addprefix $(BUILDDIR)/horizon-,imp pool prj eda)
+PROGS    = $(addprefix $(BUILDDIR)/horizon-,imp eda)
 
 all: $(PROGS)
 pymodule: $(BUILDDIR)/horizon.so
