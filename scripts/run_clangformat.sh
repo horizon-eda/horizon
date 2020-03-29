@@ -34,3 +34,4 @@ echo "Using clang-format command: ${CLANG_BIN}"
 
 # Search using the binary found
 find ./src -iname *.h -o -iname *.cpp -o -iname *.hpp -o -iname *.cc -o -iname *.c | xargs $CLANG_BIN -style=file -i
+exit $?
