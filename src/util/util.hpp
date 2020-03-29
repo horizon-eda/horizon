@@ -69,4 +69,6 @@ void rmdir_recursive(const std::string &dir_name);
 std::string replace_placeholders(const std::string &s, std::function<std::string(const std::string &)> fn,
                                  bool keep_empty);
 
+Coordi dir_from_arrow_key(unsigned int key);
+
 } // namespace horizon

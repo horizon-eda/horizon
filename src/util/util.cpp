@@ -11,6 +11,7 @@
 #include <iomanip>
 #include "nlohmann/json.hpp"
 #include "alphanum/alphanum.hpp"
+#include <gdk/gdkkeysyms.h>
 
 namespace horizon {
 
@@ -527,6 +528,23 @@ std::string replace_placeholders(const std::string &s, std::function<std::string
         }
     }
     return r;
+}
+
+
+Coordi dir_from_arrow_key(unsigned int key)
+{
+    switch (key) {
+    case GDK_KEY_Up:
+        return {0, 1};
+    case GDK_KEY_Down:
+        return {0, -1};
+    case GDK_KEY_Left:
+        return {-1, 0};
+    case GDK_KEY_Right:
+        return {1, 0};
+    default:
+        return {0, 0};
+    }
 }
 
 } // namespace horizon

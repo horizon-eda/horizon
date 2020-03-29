@@ -74,6 +74,7 @@
 #include "tools/tool_place_board_panel.hpp"
 #include "tools/tool_smash_panel_outline.hpp"
 #include "tools/tool_smash_package_outline.hpp"
+#include "tools/tool_resize_symbol.hpp"
 
 namespace horizon {
 
@@ -367,6 +368,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::SMASH_PACKAGE_OUTLINE:
         return std::make_unique<ToolSmashPackageOutline>(this, tool_id);
+
+    case ToolID::RESIZE_SYMBOL:
+        return std::make_unique<ToolResizeSymbol>(this, tool_id);
 
     default:
         return nullptr;
