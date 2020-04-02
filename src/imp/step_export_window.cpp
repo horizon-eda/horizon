@@ -64,17 +64,26 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
     include_3d_models_switch->property_active().signal_changed().connect([this] { s_signal_changed.emit(); });
     prefix_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
 
+    tag = log_textview->get_buffer()->create_tag();
+    tag->property_font_features() = "tnum 1";
+    tag->property_font_features_set() = true;
+
+
     export_dispatcher.connect([this] {
         std::lock_guard<std::mutex> guard(msg_queue_mutex);
+        auto buffer = log_textview->get_buffer();
         while (msg_queue.size()) {
             const std::string &msg = msg_queue.front();
-            auto buffer = log_textview->get_buffer();
-            auto end_iter = buffer->get_iter_at_offset(-1);
-            buffer->insert(end_iter, msg + "\n");
+            buffer->insert(buffer->end(), msg + "\n");
             auto adj = log_textview->get_vadjustment();
             adj->set_value(adj->get_upper());
-
             msg_queue.pop_front();
+        }
+        {
+            Gtk::TextIter ibegin, iend;
+            buffer->get_bounds(ibegin, iend);
+            buffer->remove_all_tags(ibegin, iend);
+            buffer->apply_tag(tag, ibegin, iend);
         }
         if (export_running == false)
             set_is_busy(false);

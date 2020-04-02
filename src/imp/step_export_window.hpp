@@ -30,6 +30,7 @@ private:
     Gtk::Spinner *spinner = nullptr;
     bool can_export = true;
     void update_export_button();
+    Glib::RefPtr<Gtk::TextTag> tag;
 
     class MyExportFileChooser : public ExportFileChooser {
     protected:
