@@ -97,7 +97,7 @@ private:
         }
         else if (hole.shape == Hole::Shape::SLOT) {
             int64_t box_width = hole.length - hole.diameter;
-            {
+            if (box_width > 0) {
                 TopoDS_Shape s = BRepPrimAPI_MakeBox(gp_Pnt(-box_width / 2e6, hole.diameter / -2e6, 0), box_width / 1e6,
                                                      hole.diameter / 1e6, thickness * 2e-6)
                                          .Shape();
