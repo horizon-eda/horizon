@@ -1,4 +1,5 @@
 #include <regex>
+#include <iomanip>
 #include "display.hpp"
 #include "widgets/preview_canvas.hpp"
 #include "widgets/spin_button_dim.hpp"
@@ -348,6 +349,11 @@ static const Padstack *getpadstack(Pool &pool, enum footag_padstack stack)
     return ps;
 }
 
+static short compare_range(double a, double b, double c)
+{
+    return c >= a && c <= b ? 0 : c < a ? -1 : 1;
+}
+
 static void make_rlimit_rect(Polygon &poly, const struct footag_rlimit *r, enum BoardLayers::Layer layer)
 {
     poly.vertices.clear();
@@ -356,6 +362,117 @@ static void make_rlimit_rect(Polygon &poly, const struct footag_rlimit *r, enum 
     poly.append_vertex(Coordi(r->maxx * 1_mm, -r->miny * 1_mm));
     poly.append_vertex(Coordi(r->minx * 1_mm, -r->miny * 1_mm));
     poly.layer = layer;
+    if (poly.layer == BoardLayers::TOP_COURTYARD) {
+        poly.parameter_class = "courtyard";
+    }
+}
+
+static void make_silk_box(Package *pkg, const struct footag_spec *s)
+{
+    auto width = .15_mm;
+    auto pad = 1.5 * width;
+    std::list<std::array<Coordi, 2>> lines;
+    std::list<Coordi> points;
+    std::list<Junction *> junctions;
+
+    {
+        std::array<Coordi, 4> corners;
+        corners[0] = Coordi(s->body.minx * 1_mm - pad, s->body.miny * 1_mm - pad);
+        corners[1] = Coordi(s->body.maxx * 1_mm + pad, s->body.miny * 1_mm - pad);
+        corners[2] = Coordi(s->body.maxx * 1_mm + pad, s->body.maxy * 1_mm + pad);
+        corners[3] = Coordi(s->body.minx * 1_mm - pad, s->body.maxy * 1_mm + pad);
+        for (int i = 0; i < 4; i++) {
+            auto j = (i + 1) % 4;
+            bool reverse = corners.at(i).x > corners.at(j).x || corners.at(i).y > corners.at(j).y;
+            lines.push_back({reverse ? corners.at(j) : corners.at(i), reverse ? corners.at(i) : corners.at(j)});
+        }
+    }
+
+    for (int i = 0; i < s->npads; i++) {
+        struct footag_rlimit padrect;
+        switch (s->pads[i].angle) {
+        case FOOTAG_ANGLE_0:
+        case FOOTAG_ANGLE_180:
+            padrect.minx = (s->pads[i].x - s->pads[i].w / 2) * 1_mm - pad;
+            padrect.maxx = (s->pads[i].x + s->pads[i].w / 2) * 1_mm + pad;
+            padrect.miny = (s->pads[i].y - s->pads[i].h / 2) * 1_mm - pad;
+            padrect.maxy = (s->pads[i].y + s->pads[i].h / 2) * 1_mm + pad;
+            break;
+        case FOOTAG_ANGLE_90:
+        case FOOTAG_ANGLE_270:
+            padrect.minx = (s->pads[i].x - s->pads[i].h / 2) * 1_mm - pad;
+            padrect.maxx = (s->pads[i].x + s->pads[i].h / 2) * 1_mm + pad;
+            padrect.miny = (s->pads[i].y - s->pads[i].w / 2) * 1_mm - pad;
+            padrect.maxy = (s->pads[i].y + s->pads[i].w / 2) * 1_mm + pad;
+            break;
+        default:
+            padrect.minx = 0;
+            padrect.maxx = 0;
+            padrect.miny = 0;
+            padrect.maxy = 0;
+            break;
+        }
+        for (auto line = lines.begin(); line != lines.end(); ++line) {
+            auto within_x_0 = compare_range(padrect.minx, padrect.maxx, line->at(0).x);
+            auto within_y_0 = compare_range(padrect.miny, padrect.maxy, line->at(0).y);
+            auto within_x_1 = compare_range(padrect.minx, padrect.maxx, line->at(1).x);
+            auto within_y_1 = compare_range(padrect.miny, padrect.maxy, line->at(1).y);
+            if (within_x_0 == 0 && within_y_0 == 0 && within_x_1 == 0 && within_y_1 == 0) {
+                line = lines.erase(line);
+                line--;
+            }
+            else if (within_x_0 == 0 && within_y_0 == 0 && within_x_1 == 0) {
+                line->at(0).y = padrect.maxy;
+            }
+            else if (within_x_0 == 0 && within_y_0 == 0 && within_y_1 == 0) {
+                line->at(0).x = padrect.maxx;
+            }
+            else if (within_x_0 == 0 && within_x_1 == 0 && within_y_1 == 0) {
+                line->at(1).y = padrect.miny;
+            }
+            else if (within_y_0 == 0 && within_x_1 == 0 && within_y_1 == 0) {
+                line->at(1).x = padrect.minx;
+            }
+            else if (within_x_0 == 0 && within_x_1 == 0 && within_y_0 != within_y_1) {
+                lines.push_back({Coordi(line->at(0).x, padrect.maxy), Coordi(line->at(1).x, line->at(1).y)});
+                line->at(1).y = padrect.miny;
+            }
+            else if (within_x_0 != within_x_1 && within_y_0 == 0 && within_y_1 == 0) {
+                lines.push_back({Coordi(padrect.maxx, line->at(0).y), Coordi(line->at(1).x, line->at(1).y)});
+                line->at(1).x = padrect.minx;
+            }
+        }
+    }
+
+    for (const auto &line : lines) {
+        points.push_back(line.at(0));
+        points.push_back(line.at(1));
+    }
+    points.sort();
+    points.unique();
+
+    for (const auto &point : points) {
+        auto uu = UUID::random();
+        auto junction = &pkg->junctions.emplace(uu, uu).first->second;
+        junction->position = point;
+        junctions.push_back(junction);
+    }
+
+    for (const auto &coords : lines) {
+        auto uu = UUID::random();
+        auto line = &pkg->lines.emplace(uu, uu).first->second;
+        line->width = width;
+        line->layer = BoardLayers::TOP_SILKSCREEN;
+        for (const auto junction : junctions) {
+            auto pos = junction->position;
+            if (pos.x == coords.at(0).x && pos.y == coords.at(0).y) {
+                line->from = junction;
+            }
+            if (pos.x == coords.at(1).x && pos.y == coords.at(1).y) {
+                line->to = junction;
+            }
+        }
+    }
 }
 
 void FootagDisplay::calc(Package *pkg, const struct footag_spec *s)
@@ -401,6 +518,28 @@ void FootagDisplay::calc(Package *pkg, const struct footag_spec *s)
         auto &poly = pkg->polygons.emplace(uu, uu).first->second;
         make_rlimit_rect(poly, &s->courtyard, BoardLayers::TOP_COURTYARD);
     }
+
+    {
+        auto uu = UUID::random();
+        auto &text = pkg->texts.emplace(uu, uu).first->second;
+        text.size = (s->body.maxx - s->body.minx) / 6 * 1_mm;
+        text.placement.shift = {(long int)(-(text.size * 3)), 0};
+        text.text = "$RD";
+        text.layer = BoardLayers::TOP_ASSEMBLY;
+    }
+
+    {
+        auto uu = UUID::random();
+        auto &text = pkg->texts.emplace(uu, uu).first->second;
+        text.placement.shift = {(long int)((s->body.minx * 1_mm) + 0.5),
+                                (long int)(((s->body.miny - 1.5) * 1_mm) + 0.5)};
+        text.text = "$RD";
+        text.layer = BoardLayers::TOP_SILKSCREEN;
+        text.size = 1_mm;
+        text.width = .15_mm;
+    }
+
+    make_silk_box(pkg, s);
 }
 
 void FootagDisplay::calc_and_display(void)
