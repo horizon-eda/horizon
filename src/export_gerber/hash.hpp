@@ -5,12 +5,13 @@
 namespace horizon {
 class GerberHash {
 public:
-    GerberHash();
-    void update(const class Padstack &padstack);
-    std::string get_digest();
     static std::string hash(const class Padstack &padstack);
 
 private:
+    GerberHash();
+    void update(const class Padstack &padstack);
+    std::string get_digest();
+
     Glib::Checksum checksum;
 
     void update(const class Hole &hole);
