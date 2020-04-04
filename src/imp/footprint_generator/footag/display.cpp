@@ -400,6 +400,7 @@ void FootagDisplay::calc(Package *pkg, const struct footag_spec *s)
         auto uu = UUID::random();
         auto &poly = pkg->polygons.emplace(uu, uu).first->second;
         make_rlimit_rect(poly, &s->courtyard, BoardLayers::TOP_COURTYARD);
+        poly.parameter_class = "courtyard";
     }
 }
 
