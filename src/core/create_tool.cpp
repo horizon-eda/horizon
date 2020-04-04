@@ -17,7 +17,6 @@
 #include "tools/tool_edit_board_hole.hpp"
 #include "tools/tool_edit_line_rectangle.hpp"
 #include "tools/tool_edit_pad_parameter_set.hpp"
-#include "tools/tool_edit_parameter_program.hpp"
 #include "tools/tool_edit_plane.hpp"
 #include "tools/tool_edit_shape.hpp"
 #include "tools/tool_edit_symbol_pin_names.hpp"
@@ -210,12 +209,6 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::IMPORT_DXF:
         return std::make_unique<ToolImportDXF>(this, tool_id);
-
-    case ToolID::EDIT_PARAMETER_PROGRAM:
-        return std::make_unique<ToolEditParameterProgram>(this, tool_id);
-
-    case ToolID::EDIT_PARAMETER_SET:
-        return std::make_unique<ToolEditParameterProgram>(this, tool_id);
 
     case ToolID::EDIT_PAD_PARAMETER_SET:
         return std::make_unique<ToolEditPadParameterSet>(this, tool_id);

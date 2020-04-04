@@ -197,7 +197,6 @@ SRC_IMP = \
 	src/core/tools/tool_place_shape.cpp\
 	src/core/tools/tool_edit_shape.cpp\
 	src/core/tools/tool_import_dxf.cpp\
-	src/core/tools/tool_edit_parameter_program.cpp\
 	src/core/tools/tool_edit_pad_parameter_set.cpp\
 	src/core/tools/tool_draw_polygon_rectangle.cpp\
 	src/core/tools/tool_draw_line_rectangle.cpp\
@@ -263,8 +262,6 @@ SRC_IMP = \
 	src/dialogs/edit_shape.cpp\
 	src/dialogs/manage_net_classes.cpp\
 	src/dialogs/manage_power_nets.cpp\
-	src/dialogs/edit_parameter_program.cpp\
-	src/dialogs/edit_parameter_set.cpp\
 	src/dialogs/edit_pad_parameter_set.cpp\
 	src/dialogs/edit_via.cpp\
 	src/dialogs/pool_browser_dialog.cpp\

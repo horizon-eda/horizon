@@ -19,8 +19,6 @@
 #include "annotate.hpp"
 #include "pool/part.hpp"
 #include "edit_shape.hpp"
-#include "edit_parameter_program.hpp"
-#include "edit_parameter_set.hpp"
 #include "edit_pad_parameter_set.hpp"
 #include "schematic_properties.hpp"
 #include "edit_via.hpp"
@@ -254,27 +252,6 @@ bool Dialogs::manage_included_boards(Board &b)
 bool Dialogs::annotate(Schematic *s)
 {
     AnnotateDialog dia(parent, s);
-    return dia.run() == Gtk::RESPONSE_OK;
-}
-
-bool Dialogs::edit_parameter_program(class ParameterProgram *pgm)
-{
-    ParameterProgramDialog dia(parent, pgm);
-    while (true) {
-        auto r = dia.run();
-        if (r != Gtk::RESPONSE_OK)
-            return false;
-        else {
-            if (dia.valid)
-                return true;
-        }
-    }
-    return dia.run() == Gtk::RESPONSE_OK;
-}
-
-bool Dialogs::edit_parameter_set(ParameterSet *pset)
-{
-    ParameterSetDialog dia(parent, pset);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 

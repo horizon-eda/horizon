@@ -40,8 +40,6 @@ public:
     bool manage_power_nets(class Block *b);
     bool manage_via_templates(class Board *b, class ViaPadstackProvider *vpp);
     bool manage_included_boards(class Board &b);
-    bool edit_parameter_program(class ParameterProgram *program);
-    bool edit_parameter_set(ParameterSet *pset);
     bool edit_pad_parameter_set(std::set<class Pad *> &pads, class Pool *pool, class Package *pkg);
     bool edit_board_hole(std::set<class BoardHole *> &holes, class Pool *pool, class Block *block);
     bool annotate(class Schematic *s);
