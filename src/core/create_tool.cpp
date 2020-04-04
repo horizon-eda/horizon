@@ -121,6 +121,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
         return std::make_unique<ToolDrawLineNet>(this, tool_id);
 
     case ToolID::ADD_COMPONENT:
+    case ToolID::ADD_PART:
         return std::make_unique<ToolAddPart>(this, tool_id);
 
     case ToolID::PLACE_TEXT:
@@ -197,12 +198,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
     case ToolID::DRAG_KEEP_SLOPE:
         return std::make_unique<ToolDragKeepSlope>(this, tool_id);
 
-    case ToolID::ADD_PART:
-        return std::make_unique<ToolAddPart>(this, tool_id);
-
     case ToolID::SMASH:
-        return std::make_unique<ToolSmash>(this, tool_id);
-
     case ToolID::UNSMASH:
         return std::make_unique<ToolSmash>(this, tool_id);
 
@@ -249,8 +245,6 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
         return std::make_unique<ToolRotateArbitrary>(this, tool_id);
 
     case ToolID::ADD_PLANE:
-        return std::make_unique<ToolEditPlane>(this, tool_id);
-
     case ToolID::EDIT_PLANE:
     case ToolID::CLEAR_PLANE:
     case ToolID::UPDATE_PLANE:
