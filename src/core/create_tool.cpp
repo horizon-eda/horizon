@@ -51,6 +51,7 @@
 #include "tools/tool_smash.hpp"
 #include "tools/tool_update_all_planes.hpp"
 #include "tools/tool_generate_courtyard.hpp"
+#include "tools/tool_generate_silkscreen.hpp"
 #include "tools/tool_set_group.hpp"
 #include "tools/tool_copy_placement.hpp"
 #include "tools/tool_copy_tracks.hpp"
@@ -287,6 +288,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::GENERATE_COURTYARD:
         return std::make_unique<ToolGenerateCourtyard>(this, tool_id);
+
+    case ToolID::GENERATE_SILKSCREEN:
+        return std::make_unique<ToolGenerateSilkscreen>(this, tool_id);
 
     case ToolID::SET_GROUP:
     case ToolID::SET_NEW_GROUP:

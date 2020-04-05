@@ -542,6 +542,10 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Generate courtyard", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::GENERATE_SILKSCREEN},
+         {"Generate silkscreen", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::MOVE_KEY},
          {"Move by keyboard", ActionGroup::MOVE, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -966,6 +970,7 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(PLACE_BOARD_HOLE),
         TOOL_LUT_ITEM(EDIT_BOARD_HOLE),
         TOOL_LUT_ITEM(GENERATE_COURTYARD),
+        TOOL_LUT_ITEM(GENERATE_SILKSCREEN),
         TOOL_LUT_ITEM(SET_GROUP),
         TOOL_LUT_ITEM(SET_NEW_GROUP),
         TOOL_LUT_ITEM(CLEAR_GROUP),
