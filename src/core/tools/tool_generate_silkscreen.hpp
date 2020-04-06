@@ -20,6 +20,25 @@ public:
         return true;
     }
 
+    class Settings : public ToolSettings {
+    public:
+        json serialize() const override;
+        void load_from_json(const json &j) override;
+        int64_t expand_silk = .2_mm;
+        int64_t expand_pad = .2_mm;
+    };
+
+    const ToolSettings *get_settings_const() const override
+    {
+        return &settings;
+    }
+
+protected:
+    ToolSettings *get_settings() override
+    {
+        return &settings;
+    }
+
 private:
     bool select_polygon();
     void update_tip();
@@ -27,10 +46,9 @@ private:
 
     enum class Adjust { SILK, PAD };
 
+    Settings settings;
     Adjust adjust = Adjust::SILK;
     const Polygon *pp;
-    int64_t expand_silk;
-    int64_t expand_pad;
     bool first_update;
     ClipperLib::Path path_pkg;
     ClipperLib::Paths pads;

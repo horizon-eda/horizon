@@ -2,6 +2,7 @@
 #include "document/idocument_package.hpp"
 #include "board/board_layers.hpp"
 #include "imp/imp_interface.hpp"
+#include "nlohmann/json.hpp"
 #include <gdk/gdkkeysyms.h>
 #include <sstream>
 #include <iomanip>
@@ -12,6 +13,19 @@ ToolGenerateSilkscreen::ToolGenerateSilkscreen(IDocument *c, ToolID tid) : ToolB
 {
 }
 
+void ToolGenerateSilkscreen::Settings::load_from_json(const json &j)
+{
+    expand_silk = j.value("expand_silk", .2_mm);
+    expand_pad = j.value("expand_pad", .2_mm);
+}
+
+json ToolGenerateSilkscreen::Settings::serialize() const
+{
+    json j;
+    j["expand_silk"] = expand_silk;
+    j["expand_pad"] = expand_pad;
+    return j;
+}
 
 bool ToolGenerateSilkscreen::can_begin()
 {
@@ -59,10 +73,10 @@ void ToolGenerateSilkscreen::update_tip()
     ss << "<b>o:</b>adjust outline expansion <b>p:</b>adjust pad expansion <b>Return:</b>finish" << std::endl;
     switch (adjust) {
     case Adjust::SILK:
-        ss << "<b>+/-:</b>outline expansion (" << (1.0 * expand_silk / 1_mm) << " mm)";
+        ss << "<b>+/-:</b>outline expansion (" << (1.0 * settings.expand_silk / 1_mm) << " mm)";
         break;
     case Adjust::PAD:
-        ss << "<b>+/-:</b>pad expansion (" << (1.0 * expand_pad / 1_mm) << " mm)";
+        ss << "<b>+/-:</b>pad expansion (" << (1.0 * settings.expand_pad / 1_mm) << " mm)";
         break;
     }
     imp->tool_bar_set_tip(ss.str());
@@ -86,8 +100,6 @@ ToolResponse ToolGenerateSilkscreen::begin(const ToolArgs &args)
 {
     auto pkg = doc.k->get_package();
     pp = nullptr;
-    expand_silk = .15_mm;
-    expand_pad = .15_mm;
     first_update = true;
 
     if (!select_polygon()) {
@@ -158,20 +170,20 @@ ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
         if (args.key == GDK_KEY_plus || args.key == GDK_KEY_KP_Add) {
             switch (adjust) {
             case Adjust::SILK:
-                expand_silk += .05_mm;
+                settings.expand_silk += .05_mm;
                 break;
             case Adjust::PAD:
-                expand_pad += .05_mm;
+                settings.expand_pad += .05_mm;
                 break;
             }
         }
         else if (args.key == GDK_KEY_minus || args.key == GDK_KEY_KP_Subtract) {
             switch (adjust) {
             case Adjust::SILK:
-                expand_silk -= .05_mm;
+                settings.expand_silk -= .05_mm;
                 break;
             case Adjust::PAD:
-                expand_pad -= .05_mm;
+                settings.expand_pad -= .05_mm;
                 break;
             }
         }
@@ -202,12 +214,12 @@ ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
     ClipperLib::ClipperOffset ofs_pads;
     ClipperLib::Paths pads_expanded;
     ofs_pads.AddPaths(pads, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
-    ofs_pads.Execute(pads_expanded, expand_pad + .075_mm);
+    ofs_pads.Execute(pads_expanded, settings.expand_pad + .075_mm);
 
     ClipperLib::ClipperOffset ofs_pkg;
     ClipperLib::Paths pkg_expanded;
     ofs_pkg.AddPath(path_pkg, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
-    ofs_pkg.Execute(pkg_expanded, expand_silk + .075_mm);
+    ofs_pkg.Execute(pkg_expanded, settings.expand_silk + .075_mm);
     if (pkg_expanded.size() != 1) {
         imp->tool_bar_flash("expand failed, aborting");
         return ToolResponse::revert();
