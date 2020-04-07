@@ -26,9 +26,16 @@ bool SpinButtonDim::on_output()
             prec = 5;
     }
 
+    double min, max;
+    get_range(min, max);
     std::stringstream stream;
     stream.imbue(get_locale());
-    stream << std::fixed << std::setprecision(prec) << value / 1e6 << " mm";
+    if (value < 0)
+        stream << "−"; // this is U+2212 MINUS SIGN, has same width as +
+    else if (value >= 0 && min < 0)
+        stream << "+";
+
+    stream << std::fixed << std::setprecision(prec) << std::abs(value) / 1e6 << " mm";
 
     set_text(stream.str());
     return true;
@@ -71,6 +78,14 @@ static bool op_is_mul(Operation op)
     }
 }
 
+static bool is_minus(gunichar c)
+{
+    if (c == '-' || c == 0x2212) // U+2212 MINUS SIGN
+        return true;
+    else
+        return false;
+}
+
 
 static int64_t parse_str(const Glib::ustring &s)
 {
@@ -85,7 +100,7 @@ static int64_t parse_str(const Glib::ustring &s)
     for (const auto c : s) {
         switch (state) {
         case State::SIGN:
-            if (c == '-') {
+            if (is_minus(c)) {
                 sign = -1;
                 state = State::INT;
             }
