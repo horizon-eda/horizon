@@ -3,6 +3,7 @@
 #include "dialogs/generate_silkscreen_window.hpp"
 #include "document/idocument_package.hpp"
 #include "imp/imp_interface.hpp"
+#include "util/util.hpp"
 #include "tool_generate_silkscreen.hpp"
 #include "nlohmann/json.hpp"
 #include <gdk/gdkkeysyms.h>
@@ -19,6 +20,7 @@ void ToolGenerateSilkscreen::Settings::load_from_json(const json &j)
 {
     expand_silk = j.value("expand_silk", .2_mm);
     expand_pad = j.value("expand_pad", .2_mm);
+    line_width = j.value("line_width", .15_mm);
 }
 
 json ToolGenerateSilkscreen::Settings::serialize() const
@@ -26,7 +28,13 @@ json ToolGenerateSilkscreen::Settings::serialize() const
     json j;
     j["expand_silk"] = expand_silk;
     j["expand_pad"] = expand_pad;
+    j["line_width"] = line_width;
     return j;
+}
+
+void ToolGenerateSilkscreen::Settings::load_defaults()
+{
+    load_from_json(json::object({}));
 }
 
 bool ToolGenerateSilkscreen::can_begin()
@@ -57,13 +65,17 @@ bool ToolGenerateSilkscreen::select_polygon()
         }
     }
 
+    if (!pp) {
+        return ret;
+    }
+
     auto package = pp->remove_arcs();
 
     path_pkg.clear();
 
 
     for (const auto &it : package.vertices) {
-        path_pkg.emplace_back(ClipperLib::IntPoint(it.position.x, it.position.y));
+        path_pkg.emplace_back(it.position.x, it.position.y);
     }
     return ret;
 }
@@ -71,15 +83,7 @@ bool ToolGenerateSilkscreen::select_polygon()
 void ToolGenerateSilkscreen::clear_silkscreen()
 {
     auto pkg = doc.k->get_package();
-    std::list<UUID> silklines;
-    for (const auto &it : pkg->lines) {
-        if (it.second.layer == BoardLayers::TOP_SILKSCREEN) {
-            silklines.push_back(it.first);
-        }
-    }
-    for (const auto &it : silklines) {
-        doc.r->delete_line(it);
-    }
+    map_erase_if(pkg->lines, [](const auto &a) { return a.second.layer == BoardLayers::TOP_SILKSCREEN; });
 }
 
 void ToolGenerateSilkscreen::restore_package_visibility()
@@ -94,7 +98,6 @@ ToolResponse ToolGenerateSilkscreen::begin(const ToolArgs &args)
 {
     auto pkg = doc.k->get_package();
     pp = nullptr;
-    first_update = true;
 
     if (!select_polygon()) {
         if (!pp) {
@@ -113,9 +116,9 @@ ToolResponse ToolGenerateSilkscreen::begin(const ToolArgs &args)
                 auto polygon = it_poly.second.remove_arcs();
                 for (const auto &vertex : polygon.vertices) {
                     auto pos = it.second.placement.transform(vertex.position);
-                    pad_path.emplace_back(ClipperLib::IntPoint(pos.x, pos.y));
+                    pad_path.emplace_back(pos.x, pos.y);
                 }
-                pads.emplace_back(pad_path);
+                pads.emplace_back(std::move(pad_path));
             }
         }
         for (const auto &it_shape : it.second.padstack.shapes) {
@@ -124,9 +127,9 @@ ToolResponse ToolGenerateSilkscreen::begin(const ToolArgs &args)
                 auto polygon = it_shape.second.to_polygon().remove_arcs();
                 for (const auto &vertex : polygon.vertices) {
                     auto pos = it.second.placement.transform(vertex.position);
-                    pad_path.emplace_back(ClipperLib::IntPoint(pos.x, pos.y));
+                    pad_path.emplace_back(pos.x, pos.y);
                 }
-                pads.emplace_back(pad_path);
+                pads.emplace_back(std::move(pad_path));
             }
         }
         for (const auto &it_hole : it.second.padstack.holes) {
@@ -134,9 +137,9 @@ ToolResponse ToolGenerateSilkscreen::begin(const ToolArgs &args)
             auto polygon = it_hole.second.to_polygon().remove_arcs();
             for (const auto &vertex : polygon.vertices) {
                 auto pos = it.second.placement.transform(vertex.position);
-                pad_path.emplace_back(ClipperLib::IntPoint(pos.x, pos.y));
+                pad_path.emplace_back(pos.x, pos.y);
             }
-            pads.emplace_back(pad_path);
+            pads.emplace_back(std::move(pad_path));
         }
     }
     ClipperLib::Clipper join;
@@ -181,14 +184,10 @@ ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
         }
     }
     else if (args.type == ToolEventType::CLICK && args.button == 1 && args.target.layer == BoardLayers::TOP_PACKAGE
-        && (args.target.type == ObjectType::POLYGON_EDGE || args.target.type == ObjectType::POLYGON_VERTEX)) {
+             && (args.target.type == ObjectType::POLYGON_EDGE || args.target.type == ObjectType::POLYGON_VERTEX)) {
         selection.clear();
-        selection.emplace(
-                SelectableRef(args.target.path.at(0), args.target.type, args.target.vertex, args.target.layer));
+        selection.emplace(args.target.path.at(0), args.target.type, args.target.vertex, args.target.layer);
         select_polygon();
-    }
-    else if (first_update) {
-        first_update = false;
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Return || args.key == GDK_KEY_KP_Enter) {
@@ -203,7 +202,7 @@ ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
             return ToolResponse();
         }
     }
-    else {
+    else if (args.type != ToolEventType::NONE) {
         return ToolResponse();
     }
 
@@ -213,7 +212,7 @@ ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
     ClipperLib::Paths pads_expanded;
     ofs_pads.AddPaths(pads, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
     /* additional .000001_mm offset helps with rounding errors */
-    ofs_pads.Execute(pads_expanded, settings.expand_pad + .075_mm + .000001_mm);
+    ofs_pads.Execute(pads_expanded, settings.expand_pad + (settings.line_width / 2) + .000001_mm);
 
     ClipperLib::ClipperOffset ofs_pkg;
     ClipperLib::Paths pkg_expanded;
@@ -250,7 +249,7 @@ ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
             }
             if (to != from) {
                 auto line = doc.r->insert_line(UUID::random());
-                line->width = .15_mm;
+                line->width = settings.line_width;
                 line->layer = BoardLayers::TOP_SILKSCREEN;
                 line->from = from;
                 line->to = to;

@@ -24,8 +24,10 @@ public:
     public:
         json serialize() const override;
         void load_from_json(const json &j) override;
+        void load_defaults();
         int64_t expand_silk = .2_mm;
         int64_t expand_pad = .2_mm;
+        int64_t line_width = .15_mm;
     };
 
     const ToolSettings *get_settings_const() const override
@@ -48,7 +50,6 @@ private:
     Settings settings;
     const Polygon *pp;
     bool package_visible;
-    bool first_update;
     ClipperLib::Path path_pkg;
     ClipperLib::Paths pads;
 };

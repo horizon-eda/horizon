@@ -1,16 +1,13 @@
 #include "generate_silkscreen_window.hpp"
-//#include "pool/package.hpp"
-//#include "widgets/spin_button_dim.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
 #include <math.h>
 
 namespace horizon {
 GenerateSilkscreenWindow::GenerateSilkscreenWindow(Gtk::Window *parent, ImpInterface *intf, ToolSettings *stg)
-    : ToolWindow(parent, intf)
+    : ToolWindow(parent, intf), settings(dynamic_cast<ToolGenerateSilkscreen::Settings *>(stg))
 {
     set_title("Generate silkscreen");
-    settings = (ToolGenerateSilkscreen::Settings *)stg;
 
     auto grid = Gtk::manage(new Gtk::Grid());
     grid->set_column_spacing(10);
@@ -22,21 +19,36 @@ GenerateSilkscreenWindow::GenerateSilkscreenWindow(Gtk::Window *parent, ImpInter
 
     int top = 0;
 
-    const int width_chars = 9;
+    auto defaults_button = Gtk::manage(new Gtk::Button("Defaults"));
+    headerbar->pack_start(*defaults_button);
+    defaults_button->show();
+    defaults_button->signal_clicked().connect([this] { load_defaults(); });
+
     sp_silk = Gtk::manage(new SpinButtonDim);
-    sp_silk->set_range(-1_mm, 5_mm);
-    bind_widget(sp_silk, settings->expand_silk);
+    sp_silk->set_range(0, 5_mm);
+    sp_silk->set_value(settings->expand_silk);
     sp_silk->signal_value_changed().connect(sigc::mem_fun(*this, &GenerateSilkscreenWindow::update));
-    grid_attach_label_and_widget(grid, "Outline offset", sp_silk, top)->set_width_chars(width_chars);
+    grid_attach_label_and_widget(grid, "Outline offset", sp_silk, top);
 
     sp_pad = Gtk::manage(new SpinButtonDim);
-    sp_pad->set_range(-1_mm, 5_mm);
-    bind_widget(sp_pad, settings->expand_pad);
+    sp_pad->set_range(0, 5_mm);
+    sp_pad->set_value(settings->expand_pad);
     sp_pad->signal_value_changed().connect(sigc::mem_fun(*this, &GenerateSilkscreenWindow::update));
-    grid_attach_label_and_widget(grid, "Pad offset", sp_pad, top)->set_width_chars(width_chars);
+    grid_attach_label_and_widget(grid, "Pad offset", sp_pad, top);
 
     grid->show_all();
     add(*grid);
+}
+
+void GenerateSilkscreenWindow::load_defaults()
+{
+    settings->load_defaults();
+    if (sp_silk) {
+        sp_silk->set_value(settings->expand_silk);
+    }
+    if (sp_pad) {
+        sp_pad->set_value(settings->expand_pad);
+    }
 }
 
 void GenerateSilkscreenWindow::update()

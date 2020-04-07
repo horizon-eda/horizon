@@ -8,7 +8,6 @@
 #include "core/tools/tool_generate_silkscreen.hpp"
 
 namespace horizon {
-
 class GenerateSilkscreenWindow : public ToolWindow {
 public:
     GenerateSilkscreenWindow(Gtk::Window *parent, class ImpInterface *intf, class ToolSettings *stg);
@@ -16,8 +15,7 @@ public:
     void update();
 
 private:
-    class Package *pkg = nullptr;
-    std::set<class Pad *> pads;
+    void load_defaults();
 
     ToolGenerateSilkscreen::Settings *settings;
 
