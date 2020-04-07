@@ -41,14 +41,13 @@ protected:
 
 private:
     bool select_polygon();
-    void update_tip();
     void clear_silkscreen();
+    void restore_package_visibility();
 
-    enum class Adjust { SILK, PAD };
-
+    class GenerateSilkscreenWindow *win = nullptr;
     Settings settings;
-    Adjust adjust = Adjust::SILK;
     const Polygon *pp;
+    bool package_visible;
     bool first_update;
     ClipperLib::Path path_pkg;
     ClipperLib::Paths pads;

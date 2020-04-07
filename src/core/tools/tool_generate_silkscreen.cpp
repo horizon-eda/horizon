@@ -1,7 +1,9 @@
-#include "tool_generate_silkscreen.hpp"
-#include "document/idocument_package.hpp"
 #include "board/board_layers.hpp"
+#include "canvas/canvas_gl.hpp"
+#include "dialogs/generate_silkscreen_window.hpp"
+#include "document/idocument_package.hpp"
 #include "imp/imp_interface.hpp"
+#include "tool_generate_silkscreen.hpp"
 #include "nlohmann/json.hpp"
 #include <gdk/gdkkeysyms.h>
 #include <sstream>
@@ -66,22 +68,6 @@ bool ToolGenerateSilkscreen::select_polygon()
     return ret;
 }
 
-void ToolGenerateSilkscreen::update_tip()
-{
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(3);
-    ss << "<b>o:</b>adjust outline expansion <b>p:</b>adjust pad expansion <b>Return:</b>finish" << std::endl;
-    switch (adjust) {
-    case Adjust::SILK:
-        ss << "<b>+/-:</b>outline expansion (" << (1.0 * settings.expand_silk / 1_mm) << " mm)";
-        break;
-    case Adjust::PAD:
-        ss << "<b>+/-:</b>pad expansion (" << (1.0 * settings.expand_pad / 1_mm) << " mm)";
-        break;
-    }
-    imp->tool_bar_set_tip(ss.str());
-}
-
 void ToolGenerateSilkscreen::clear_silkscreen()
 {
     auto pkg = doc.k->get_package();
@@ -94,6 +80,14 @@ void ToolGenerateSilkscreen::clear_silkscreen()
     for (const auto &it : silklines) {
         doc.r->delete_line(it);
     }
+}
+
+void ToolGenerateSilkscreen::restore_package_visibility()
+{
+    auto canvas = imp->get_canvas();
+    auto ld = imp->get_canvas()->get_layer_display(BoardLayers::TOP_PACKAGE);
+    ld.visible = package_visible;
+    canvas->set_layer_display(BoardLayers::TOP_PACKAGE, ld);
 }
 
 ToolResponse ToolGenerateSilkscreen::begin(const ToolArgs &args)
@@ -151,12 +145,42 @@ ToolResponse ToolGenerateSilkscreen::begin(const ToolArgs &args)
 
     update(args);
 
+    {
+        auto canvas = imp->get_canvas();
+        auto ld = canvas->get_layer_display(BoardLayers::TOP_PACKAGE);
+        package_visible = ld.visible;
+        ld.visible = true;
+        canvas->set_layer_display(BoardLayers::TOP_PACKAGE, ld);
+    }
+
+    win = imp->dialogs.show_generate_silkscreen_window(&settings);
+
     return ToolResponse::change_layer(BoardLayers::TOP_SILKSCREEN);
 }
 
 ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
 {
-    if (args.type == ToolEventType::CLICK && args.button == 1 && args.target.layer == BoardLayers::TOP_PACKAGE
+    if (args.type == ToolEventType::DATA) {
+        if (auto data = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
+            if (data->event == ToolDataWindow::Event::CLOSE) {
+                restore_package_visibility();
+                return ToolResponse::revert();
+            }
+            else if (data->event == ToolDataWindow::Event::OK) {
+                restore_package_visibility();
+                return ToolResponse::commit();
+            }
+            else if (data->event == ToolDataWindow::Event::UPDATE) {
+            }
+            else {
+                return ToolResponse();
+            }
+        }
+        else {
+            return ToolResponse();
+        }
+    }
+    else if (args.type == ToolEventType::CLICK && args.button == 1 && args.target.layer == BoardLayers::TOP_PACKAGE
         && (args.target.type == ObjectType::POLYGON_EDGE || args.target.type == ObjectType::POLYGON_VERTEX)) {
         selection.clear();
         selection.emplace(
@@ -167,36 +191,12 @@ ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
         first_update = false;
     }
     else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_plus || args.key == GDK_KEY_KP_Add) {
-            switch (adjust) {
-            case Adjust::SILK:
-                settings.expand_silk += .05_mm;
-                break;
-            case Adjust::PAD:
-                settings.expand_pad += .05_mm;
-                break;
-            }
-        }
-        else if (args.key == GDK_KEY_minus || args.key == GDK_KEY_KP_Subtract) {
-            switch (adjust) {
-            case Adjust::SILK:
-                settings.expand_silk -= .05_mm;
-                break;
-            case Adjust::PAD:
-                settings.expand_pad -= .05_mm;
-                break;
-            }
-        }
-        else if (args.key == GDK_KEY_o) {
-            adjust = Adjust::SILK;
-        }
-        else if (args.key == GDK_KEY_p) {
-            adjust = Adjust::PAD;
-        }
-        else if (args.key == GDK_KEY_Return || args.key == GDK_KEY_KP_Enter) {
+        if (args.key == GDK_KEY_Return || args.key == GDK_KEY_KP_Enter) {
+            restore_package_visibility();
             return ToolResponse::commit();
         }
         else if (args.key == GDK_KEY_Escape) {
+            restore_package_visibility();
             return ToolResponse::revert();
         }
         else {
@@ -207,15 +207,13 @@ ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
         return ToolResponse();
     }
 
-    update_tip();
-
     clear_silkscreen();
 
     ClipperLib::ClipperOffset ofs_pads;
     ClipperLib::Paths pads_expanded;
     ofs_pads.AddPaths(pads, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
-    /* additional 0.000001_mm offset helps with rounding errors */
-    ofs_pads.Execute(pads_expanded, settings.expand_pad + .075_mm + 0.000001_mm);
+    /* additional .000001_mm offset helps with rounding errors */
+    ofs_pads.Execute(pads_expanded, settings.expand_pad + .075_mm + .000001_mm);
 
     ClipperLib::ClipperOffset ofs_pkg;
     ClipperLib::Paths pkg_expanded;

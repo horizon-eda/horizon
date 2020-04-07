@@ -279,6 +279,7 @@ SRC_IMP = \
 	src/dialogs/ask_datum_angle.cpp\
 	src/dialogs/tool_window.cpp\
 	src/dialogs/renumber_pads_window.cpp\
+	src/dialogs/generate_silkscreen_window.cpp\
 	src/dialogs/select_included_board.cpp\
 	src/dialogs/manage_included_boards.cpp\
 	src/util/sort_controller.cpp\
