@@ -420,12 +420,12 @@ void ImpBase::run(int argc, char *argv[])
     connect_action(ActionID::UNDO, [this](const auto &a) {
         core->undo();
         this->canvas_update_from_pp();
-        update_property_panels();
+        this->update_property_panels();
     });
     connect_action(ActionID::REDO, [this](const auto &a) {
         core->redo();
         this->canvas_update_from_pp();
-        update_property_panels();
+        this->update_property_panels();
     });
 
     connect_action(ActionID::RELOAD_POOL, [this](const auto &a) {
