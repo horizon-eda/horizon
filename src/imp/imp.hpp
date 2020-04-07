@@ -257,5 +257,7 @@ private:
     void show_sockets_broken_dialog(const std::string &msg = "");
     bool needs_autosave = false;
     bool queue_autosave = false;
+
+    void update_property_panels();
 };
 } // namespace horizon

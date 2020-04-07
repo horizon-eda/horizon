@@ -420,10 +420,12 @@ void ImpBase::run(int argc, char *argv[])
     connect_action(ActionID::UNDO, [this](const auto &a) {
         core->undo();
         this->canvas_update_from_pp();
+        update_property_panels();
     });
     connect_action(ActionID::REDO, [this](const auto &a) {
         core->redo();
         this->canvas_update_from_pp();
+        update_property_panels();
     });
 
     connect_action(ActionID::RELOAD_POOL, [this](const auto &a) {
@@ -1664,32 +1666,36 @@ void ImpBase::handle_selection_changed(void)
     if (!core->tool_is_active()) {
         highlights.clear();
         update_highlights();
-
-        auto sel = canvas->get_selection();
-        decltype(sel) sel_extra;
-        for (const auto &it : sel) {
-            switch (it.type) {
-            case ObjectType::POLYGON_EDGE:
-            case ObjectType::POLYGON_VERTEX: {
-                sel_extra.emplace(it.uuid, ObjectType::POLYGON);
-                auto poly = core->get_polygon(it.uuid);
-                if (poly->usage && poly->usage->get_type() == PolygonUsage::Type::PLANE) {
-                    sel_extra.emplace(poly->usage->get_uuid(), ObjectType::PLANE);
-                }
-                if (poly->usage && poly->usage->get_type() == PolygonUsage::Type::KEEPOUT) {
-                    sel_extra.emplace(poly->usage->get_uuid(), ObjectType::KEEPOUT);
-                }
-            } break;
-            default:;
-            }
-        }
-        expand_selection_for_property_panel(sel_extra, sel);
-
-        sel.insert(sel_extra.begin(), sel_extra.end());
-        panels->update_objects(sel);
-        bool show_properties = panels->get_selection().size() > 0;
-        main_window->property_scrolled_window->set_visible(show_properties);
+        update_property_panels();
     }
+}
+
+void ImpBase::update_property_panels()
+{
+    auto sel = canvas->get_selection();
+    decltype(sel) sel_extra;
+    for (const auto &it : sel) {
+        switch (it.type) {
+        case ObjectType::POLYGON_EDGE:
+        case ObjectType::POLYGON_VERTEX: {
+            sel_extra.emplace(it.uuid, ObjectType::POLYGON);
+            auto poly = core->get_polygon(it.uuid);
+            if (poly->usage && poly->usage->get_type() == PolygonUsage::Type::PLANE) {
+                sel_extra.emplace(poly->usage->get_uuid(), ObjectType::PLANE);
+            }
+            if (poly->usage && poly->usage->get_type() == PolygonUsage::Type::KEEPOUT) {
+                sel_extra.emplace(poly->usage->get_uuid(), ObjectType::KEEPOUT);
+            }
+        } break;
+        default:;
+        }
+    }
+    expand_selection_for_property_panel(sel_extra, sel);
+
+    sel.insert(sel_extra.begin(), sel_extra.end());
+    panels->update_objects(sel);
+    bool show_properties = panels->get_selection().size() > 0;
+    main_window->property_scrolled_window->set_visible(show_properties);
 }
 
 void ImpBase::handle_tool_change(ToolID id)
