@@ -214,7 +214,8 @@ ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
     ClipperLib::ClipperOffset ofs_pads;
     ClipperLib::Paths pads_expanded;
     ofs_pads.AddPaths(pads, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
-    ofs_pads.Execute(pads_expanded, settings.expand_pad + .075_mm);
+    /* additional 0.000001_mm offset helps with rounding errors */
+    ofs_pads.Execute(pads_expanded, settings.expand_pad + .075_mm + 0.000001_mm);
 
     ClipperLib::ClipperOffset ofs_pkg;
     ClipperLib::Paths pkg_expanded;
