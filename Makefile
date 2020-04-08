@@ -706,7 +706,8 @@ OBJ_GEN_PKG      = $(addprefix $(OBJDIR)/,$(SRC_GEN_PKG:.cpp=.o))
 INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router -I3rd_party
 INC_OCE ?= -I/opt/opencascade/inc/ -I/mingw64/include/oce/ -I/usr/include/oce -I/usr/include/opencascade -I${CASROOT}/include/opencascade -I/usr/local/include/OpenCASCADE
 INC_PYTHON = $(shell $(PKGCONFIG) --cflags python3)
-LDFLAGS_OCE = -L /opt/opencascade/lib/ -L${CASROOT}/lib -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -lTKTopAlgo -lTKPrim -lTKBO -lTKG3d
+OCE_LIBDIRS = -L/opt/opencascade/lib/ -L${CASROOT}/lib
+LDFLAGS_OCE = $(OCE_LIBDIRS) -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -lTKTopAlgo -lTKPrim -lTKBO
 ifeq ($(OS),Windows_NT)
 	LDFLAGS_OCE += -lTKV3d
 endif
