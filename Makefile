@@ -216,6 +216,7 @@ SRC_IMP = \
 	src/core/tools/tool_place_board_hole.cpp\
 	src/core/tools/tool_edit_board_hole.cpp\
 	src/core/tools/tool_generate_courtyard.cpp\
+	src/core/tools/tool_generate_silkscreen.cpp\
 	src/core/tools/tool_set_group.cpp\
 	src/core/tools/tool_copy_placement.cpp\
 	src/core/tools/tool_copy_tracks.cpp\
@@ -275,6 +276,7 @@ SRC_IMP = \
 	src/dialogs/ask_datum_angle.cpp\
 	src/dialogs/tool_window.cpp\
 	src/dialogs/renumber_pads_window.cpp\
+	src/dialogs/generate_silkscreen_window.cpp\
 	src/dialogs/select_included_board.cpp\
 	src/dialogs/manage_included_boards.cpp\
 	src/util/sort_controller.cpp\

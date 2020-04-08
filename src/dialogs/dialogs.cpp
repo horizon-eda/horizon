@@ -31,6 +31,7 @@
 #include "widgets/spin_button_dim.hpp"
 #include "widgets/spin_button_angle.hpp"
 #include "renumber_pads_window.hpp"
+#include "generate_silkscreen_window.hpp"
 #include "select_included_board.hpp"
 #include "manage_included_boards.hpp"
 #include <glibmm.h>
@@ -481,6 +482,16 @@ class RenumberPadsWindow *Dialogs::show_renumber_pads_window(class Package *pkg,
     if (window_nonmodal)
         return nullptr;
     auto win = new RenumberPadsWindow(parent, interface, pkg, pads);
+    window_nonmodal = win;
+    win->present();
+    return win;
+}
+
+class GenerateSilkscreenWindow *Dialogs::show_generate_silkscreen_window(class ToolSettings *settings)
+{
+    if (window_nonmodal)
+        return nullptr;
+    auto win = new GenerateSilkscreenWindow(parent, interface, settings);
     window_nonmodal = win;
     win->present();
     return win;
