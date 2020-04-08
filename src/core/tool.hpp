@@ -51,7 +51,6 @@ public:
     std::unique_ptr<ToolData> data = nullptr;
     enum class Result { NOP, END, COMMIT, REVERT };
     Result result = Result::NOP;
-    int layer = 10000;
     bool fast_draw = false;
 
     /**
@@ -77,16 +76,6 @@ public:
     {
         ToolResponse r;
         r.fast_draw = true;
-        return r;
-    }
-
-    /**
-     * Use this for changing the work layer from a Tool.
-     */
-    static ToolResponse change_layer(int l)
-    {
-        ToolResponse r;
-        r.layer = l;
         return r;
     }
 

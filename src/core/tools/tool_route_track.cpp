@@ -312,7 +312,8 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                     conn_start.connect(pkg, pad);
                     std::cout << "begin net" << std::endl;
                     update_tip();
-                    return ToolResponse::change_layer(a.work_layer);
+                    imp->set_work_layer(a.work_layer);
+                    return ToolResponse();
                 }
                 else {
                     imp->tool_bar_flash("pad is not connected to a net");
@@ -339,7 +340,8 @@ ToolResponse ToolRouteTrack::update(const ToolArgs &args)
                     conn_start.connect(junc);
                     std::cout << "begin net" << std::endl;
                     update_tip();
-                    return ToolResponse::change_layer(a.work_layer);
+                    imp->set_work_layer(a.work_layer);
+                    return ToolResponse();
                 }
                 else {
                     imp->tool_bar_flash("junction is not connected to a net");

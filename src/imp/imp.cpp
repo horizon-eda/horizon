@@ -1639,9 +1639,6 @@ void ImpBase::tool_process(ToolResponse &resp)
         canvas->fast_draw = false;
         canvas->set_selection(core->get_tool_selection());
     }
-    if (resp.layer != 10000) {
-        canvas->property_work_layer() = resp.layer;
-    }
     if (resp.next_tool != ToolID::NONE) {
         highlights.clear();
         update_highlights();
