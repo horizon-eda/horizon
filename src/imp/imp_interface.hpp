@@ -14,6 +14,8 @@ public:
     void part_placed(const UUID &uu);
     void set_work_layer(int layer);
     int get_work_layer();
+    void set_layer_display(int layer, const class LayerDisplay &ld);
+    const LayerDisplay &get_layer_display(int layer) const;
     void set_no_update(bool v);
     void canvas_update();
     class CanvasGL *get_canvas();

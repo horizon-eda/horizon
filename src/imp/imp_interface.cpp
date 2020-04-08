@@ -1,7 +1,8 @@
 #include "imp_interface.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "imp.hpp"
-#include "imp_schematic.hpp"
+#include "imp_layer.hpp"
+#include "widgets/layer_box.hpp"
 #include "pool/part.hpp"
 #include "nlohmann/json.hpp"
 
@@ -76,4 +77,18 @@ void ImpInterface::tool_update_data(std::unique_ptr<ToolData> data)
 {
     imp->tool_update_data(data);
 }
+
+void ImpInterface::set_layer_display(int layer, const class LayerDisplay &ld)
+{
+    if (auto imp_layer = dynamic_cast<ImpLayer *>(imp)) {
+        imp_layer->layer_box->set_layer_display(layer, ld);
+    }
+}
+
+const LayerDisplay &ImpInterface::get_layer_display(int layer) const
+{
+    return imp->canvas->get_layer_display(layer);
+}
+
+
 } // namespace horizon

@@ -367,6 +367,19 @@ void LayerBox::load_from_json(const json &j)
     }
 }
 
+void LayerBox::set_layer_display(int layer, const LayerDisplay &ld)
+{
+    for (auto ch : lb->get_children()) {
+        auto lrow = dynamic_cast<Gtk::ListBoxRow *>(ch);
+        auto row = dynamic_cast<LayerBoxRow *>(lrow->get_child());
+        if (row->layer == layer) {
+            row->property_layer_visible() = ld.visible;
+            row->ld_button->property_display_mode() = ld.mode;
+            emit_layer_display(row);
+        }
+    }
+}
+
 void LayerBox::set_layer_color(int layer, const Color &c)
 {
     auto layers = lb->get_children();

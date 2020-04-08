@@ -145,10 +145,9 @@ ToolResponse ToolGenerateSilkscreen::redraw_silkscreen()
 
 void ToolGenerateSilkscreen::restore_package_visibility()
 {
-    auto canvas = imp->get_canvas();
-    auto ld = imp->get_canvas()->get_layer_display(BoardLayers::TOP_PACKAGE);
+    auto ld = imp->get_layer_display(BoardLayers::TOP_PACKAGE);
     ld.visible = package_visible;
-    canvas->set_layer_display(BoardLayers::TOP_PACKAGE, ld);
+    imp->set_layer_display(BoardLayers::TOP_PACKAGE, ld);
 }
 
 ToolResponse ToolGenerateSilkscreen::begin(const ToolArgs &args)
@@ -206,11 +205,10 @@ ToolResponse ToolGenerateSilkscreen::begin(const ToolArgs &args)
     update(args);
 
     {
-        auto canvas = imp->get_canvas();
-        auto ld = canvas->get_layer_display(BoardLayers::TOP_PACKAGE);
+        auto ld = imp->get_layer_display(BoardLayers::TOP_PACKAGE);
         package_visible = ld.visible;
         ld.visible = true;
-        canvas->set_layer_display(BoardLayers::TOP_PACKAGE, ld);
+        imp->set_layer_display(BoardLayers::TOP_PACKAGE, ld);
     }
 
     imp->set_work_layer(BoardLayers::TOP_SILKSCREEN);

@@ -29,6 +29,7 @@ public:
     {
         return p_property_highlight_mode.get_proxy();
     }
+    void set_layer_display(int layer, const LayerDisplay &ld);
 
     json serialize();
     void load_from_json(const json &j);

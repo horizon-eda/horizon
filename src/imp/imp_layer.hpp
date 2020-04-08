@@ -3,6 +3,8 @@
 
 namespace horizon {
 class ImpLayer : public ImpBase {
+    friend class ImpInterface;
+
 public:
     using ImpBase::ImpBase;
 
