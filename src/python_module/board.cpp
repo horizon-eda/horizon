@@ -5,6 +5,7 @@
 #include "export_gerber/gerber_export.hpp"
 #include "export_pdf/export_pdf_board.hpp"
 #include "export_pnp/export_pnp.hpp"
+#include "export_step/export_step.hpp"
 #include <podofo/podofo.h>
 
 BoardWrapper::BoardWrapper(const horizon::Project &prj)
@@ -127,6 +128,41 @@ static PyObject *PyBoard_export_pnp(PyObject *pself, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject *PyBoard_get_step_export_settings(PyObject *pself)
+{
+    auto self = reinterpret_cast<PyBoard *>(pself);
+    auto settings = self->board->board.step_export_settings.serialize();
+    return py_from_json(settings);
+}
+
+static void progress_cb(std::string s)
+{
+    std::cout << s << std::endl;
+}
+
+static PyObject *PyBoard_export_step(PyObject *pself, PyObject *args)
+{
+    auto self = reinterpret_cast<PyBoard *>(pself);
+    PyObject *py_export_settings = nullptr;
+    if (!PyArg_ParseTuple(args, "O!", &PyDict_Type, &py_export_settings))
+        return NULL;
+    try {
+        auto settings_json = json_from_py(py_export_settings);
+        horizon::STEPExportSettings settings(settings_json);
+        horizon::export_step(settings.filename, self->board->board, self->board->pool, settings.include_3d_models,
+                             &progress_cb, nullptr, settings.prefix);
+    }
+    catch (const std::exception &e) {
+        PyErr_SetString(PyExc_IOError, e.what());
+        return NULL;
+    }
+    catch (...) {
+        PyErr_SetString(PyExc_IOError, "unknown exception");
+        return NULL;
+    }
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef PyBoard_methods[] = {
         {"get_gerber_export_settings", (PyCFunction)PyBoard_get_gerber_export_settings, METH_NOARGS,
          "Return gerber export settings"},
@@ -135,8 +171,11 @@ static PyMethodDef PyBoard_methods[] = {
          "Return PDF export settings"},
         {"get_pnp_export_settings", (PyCFunction)PyBoard_get_pnp_export_settings, METH_NOARGS,
          "Return PnP export settings"},
+        {"get_step_export_settings", (PyCFunction)PyBoard_get_step_export_settings, METH_NOARGS,
+         "Return STEP export settings"},
         {"export_pdf", (PyCFunction)PyBoard_export_pdf, METH_VARARGS, "Export PDF"},
         {"export_pnp", (PyCFunction)PyBoard_export_pnp, METH_VARARGS, "Export pick and place"},
+        {"export_step", (PyCFunction)PyBoard_export_step, METH_VARARGS, "Export STEP"},
         {NULL} /* Sentinel */
 };
 

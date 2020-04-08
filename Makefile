@@ -607,6 +607,9 @@ SRC_PYTHON = \
 	src/python_module/project.cpp \
 	src/python_module/board.cpp \
 
+SRC_OCE_EXPORT = \
+	src/export_step/export_step.cpp\
+
 SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PGM_TEST) $(SRC_POOL_PRJ_MGR) $(SRC_GEN_PKG))
 
 INC = -Isrc -I3rd_party
@@ -692,6 +695,8 @@ OBJ_OCE          = $(addprefix $(OBJDIR)/,$(SRC_OCE:.cpp=.o))
 OBJ_PYTHON       = $(addprefix $(PICOBJDIR)/,$(SRC_PYTHON:.cpp=.o))
 OBJ_SHARED       = $(addprefix $(PICOBJDIR)/,$(SRC_SHARED:.cpp=.o))
 OBJ_SHARED      += $(addprefix $(PICOBJDIR)/,$(SRC_SHARED_GEN:.cpp=.o))
+OBJ_SHARED_OCE   = $(addprefix $(PICOBJDIR)/,$(SRC_OCE_EXPORT:.cpp=.o))
+
 
 OBJ_IMP          = $(addprefix $(OBJDIR)/,$(SRC_IMP:.cpp=.o))
 OBJ_IMP         += $(addprefix $(OBJDIR)/,$(SRC_IMPC:.c=.o))
@@ -762,9 +767,9 @@ $(BUILDDIR)/horizon-gen-pkg: $(OBJ_COMMON) $(OBJ_GEN_PKG)
 	$(ECHO) " $@"
 	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
-$(BUILDDIR)/horizon.so: $(OBJ_PYTHON) $(OBJ_SHARED)
+$(BUILDDIR)/horizon.so: $(OBJ_PYTHON) $(OBJ_SHARED) $(OBJ_SHARED_OCE)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) python3 glibmm-2.4 giomm-2.4) -lpodofo -shared -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) python3 glibmm-2.4 giomm-2.4) -lpodofo  $(OCE_LIBDIRS) -lTKXDESTEP -shared -o $@
 
 $(OBJDIR)/%.o: %.c
 	$(QUIET)$(MKDIR) $(dir $@)
@@ -779,6 +784,7 @@ $(OBJDIR)/%.o: %.cpp
 $(OBJ_ROUTER): INC += $(INC_ROUTER)
 
 $(OBJ_OCE): INC += $(INC_OCE)
+$(OBJ_SHARED_OCE): INC += $(INC_OCE)
 
 $(PICOBJDIR)/%.o: %.cpp
 	$(QUIET)$(MKDIR) $(dir $@)
