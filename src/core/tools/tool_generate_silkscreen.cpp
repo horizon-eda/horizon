@@ -86,6 +86,63 @@ void ToolGenerateSilkscreen::clear_silkscreen()
     map_erase_if(pkg->lines, [](const auto &a) { return a.second.layer == BoardLayers::TOP_SILKSCREEN; });
 }
 
+ToolResponse ToolGenerateSilkscreen::redraw_silkscreen()
+{
+    clear_silkscreen();
+
+    ClipperLib::ClipperOffset ofs_pads;
+    ClipperLib::Paths pads_expanded;
+    ofs_pads.AddPaths(pads, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
+    /* additional .000001_mm offset helps with rounding errors */
+    ofs_pads.Execute(pads_expanded, settings.expand_pad + (settings.line_width / 2) + .000001_mm);
+
+    ClipperLib::ClipperOffset ofs_pkg;
+    ClipperLib::Paths pkg_expanded;
+    ofs_pkg.AddPath(path_pkg, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
+    ofs_pkg.Execute(pkg_expanded, settings.expand_silk + .075_mm);
+    if (pkg_expanded.size() != 1) {
+        imp->tool_bar_flash("expand failed, aborting");
+        return ToolResponse::revert();
+    }
+    /* turn closed polygon into closed polyline */
+    pkg_expanded[0].emplace_back(pkg_expanded[0].at(0));
+
+    ClipperLib::Clipper clip;
+    ClipperLib::PolyTree silk_tree;
+    ClipperLib::Paths silk_paths;
+    clip.AddPaths(pkg_expanded, ClipperLib::ptSubject, false);
+    clip.AddPaths(pads_expanded, ClipperLib::ptClip, true);
+    clip.Execute(ClipperLib::ctDifference, silk_tree, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+
+    ClipperLib::OpenPathsFromPolyTree(silk_tree, silk_paths);
+    for (const auto &silk_path : silk_paths) {
+        auto first = doc.r->insert_junction(UUID::random());
+        auto from = first;
+        first->position = Coordi(silk_path.at(0).X, silk_path.at(0).Y);
+        for (const auto &c : silk_path) {
+            auto to = from;
+            /* loop detection and handling */
+            if (silk_path.at(0).X == c.X && silk_path.at(0).Y == c.Y) {
+                to = first;
+            }
+            else {
+                to = doc.r->insert_junction(UUID::random());
+                to->position = Coordi(c.X, c.Y);
+            }
+            if (to != from) {
+                auto line = doc.r->insert_line(UUID::random());
+                line->width = settings.line_width;
+                line->layer = BoardLayers::TOP_SILKSCREEN;
+                line->from = from;
+                line->to = to;
+                from = to;
+            }
+        }
+    }
+
+    return ToolResponse();
+}
+
 void ToolGenerateSilkscreen::restore_package_visibility()
 {
     auto canvas = imp->get_canvas();
@@ -156,9 +213,11 @@ ToolResponse ToolGenerateSilkscreen::begin(const ToolArgs &args)
         canvas->set_layer_display(BoardLayers::TOP_PACKAGE, ld);
     }
 
+    imp->set_work_layer(BoardLayers::TOP_SILKSCREEN);
+
     win = imp->dialogs.show_generate_silkscreen_window(&settings);
 
-    return ToolResponse::change_layer(BoardLayers::TOP_SILKSCREEN);
+    return ToolResponse();
 }
 
 ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
@@ -174,13 +233,8 @@ ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
                 return ToolResponse::commit();
             }
             else if (data->event == ToolDataWindow::Event::UPDATE) {
+                return redraw_silkscreen();
             }
-            else {
-                return ToolResponse();
-            }
-        }
-        else {
-            return ToolResponse();
         }
     }
     else if (args.type == ToolEventType::CLICK && args.button == 1 && args.target.layer == BoardLayers::TOP_PACKAGE
@@ -188,6 +242,7 @@ ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
         selection.clear();
         selection.emplace(args.target.path.at(0), args.target.type, args.target.vertex, args.target.layer);
         select_polygon();
+        return redraw_silkscreen();
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Return || args.key == GDK_KEY_KP_Enter) {
@@ -198,66 +253,10 @@ ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
             restore_package_visibility();
             return ToolResponse::revert();
         }
-        else {
-            return ToolResponse();
-        }
     }
-    else if (args.type != ToolEventType::NONE) {
-        return ToolResponse();
+    else if (args.type == ToolEventType::NONE) {
+        return redraw_silkscreen();
     }
-
-    clear_silkscreen();
-
-    ClipperLib::ClipperOffset ofs_pads;
-    ClipperLib::Paths pads_expanded;
-    ofs_pads.AddPaths(pads, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
-    /* additional .000001_mm offset helps with rounding errors */
-    ofs_pads.Execute(pads_expanded, settings.expand_pad + (settings.line_width / 2) + .000001_mm);
-
-    ClipperLib::ClipperOffset ofs_pkg;
-    ClipperLib::Paths pkg_expanded;
-    ofs_pkg.AddPath(path_pkg, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
-    ofs_pkg.Execute(pkg_expanded, settings.expand_silk + .075_mm);
-    if (pkg_expanded.size() != 1) {
-        imp->tool_bar_flash("expand failed, aborting");
-        return ToolResponse::revert();
-    }
-    /* turn closed polygon into closed polyline */
-    pkg_expanded[0].emplace_back(pkg_expanded[0].at(0));
-
-    ClipperLib::Clipper clip;
-    ClipperLib::PolyTree silk_tree;
-    ClipperLib::Paths silk_paths;
-    clip.AddPaths(pkg_expanded, ClipperLib::ptSubject, false);
-    clip.AddPaths(pads_expanded, ClipperLib::ptClip, true);
-    clip.Execute(ClipperLib::ctDifference, silk_tree, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
-
-    ClipperLib::OpenPathsFromPolyTree(silk_tree, silk_paths);
-    for (const auto &silk_path : silk_paths) {
-        auto first = doc.r->insert_junction(UUID::random());
-        auto from = first;
-        first->position = Coordi(silk_path.at(0).X, silk_path.at(0).Y);
-        for (const auto &c : silk_path) {
-            auto to = from;
-            /* loop detection and handling */
-            if (silk_path.at(0).X == c.X && silk_path.at(0).Y == c.Y) {
-                to = first;
-            }
-            else {
-                to = doc.r->insert_junction(UUID::random());
-                to->position = Coordi(c.X, c.Y);
-            }
-            if (to != from) {
-                auto line = doc.r->insert_line(UUID::random());
-                line->width = settings.line_width;
-                line->layer = BoardLayers::TOP_SILKSCREEN;
-                line->from = from;
-                line->to = to;
-                from = to;
-            }
-        }
-    }
-
     return ToolResponse();
 }
 } // namespace horizon

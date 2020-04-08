@@ -43,6 +43,7 @@ protected:
 
 private:
     bool select_polygon();
+    ToolResponse redraw_silkscreen();
     void clear_silkscreen();
     void restore_package_visibility();
 

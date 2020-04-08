@@ -19,11 +19,6 @@ GenerateSilkscreenWindow::GenerateSilkscreenWindow(Gtk::Window *parent, ImpInter
 
     int top = 0;
 
-    auto defaults_button = Gtk::manage(new Gtk::Button("Defaults"));
-    headerbar->pack_start(*defaults_button);
-    defaults_button->show();
-    defaults_button->signal_clicked().connect([this] { load_defaults(); });
-
     sp_silk = Gtk::manage(new SpinButtonDim);
     sp_silk->set_range(0, 5_mm);
     sp_silk->set_value(settings->expand_silk);
@@ -36,18 +31,25 @@ GenerateSilkscreenWindow::GenerateSilkscreenWindow(Gtk::Window *parent, ImpInter
     sp_pad->signal_value_changed().connect(sigc::mem_fun(*this, &GenerateSilkscreenWindow::update));
     grid_attach_label_and_widget(grid, "Pad offset", sp_pad, top);
 
+    auto defaults_button = Gtk::manage(new Gtk::Button("Restore defaults"));
+    defaults_button->show();
+    defaults_button->signal_clicked().connect([this] { load_defaults(); });
+    grid->attach(*defaults_button, 0, top++, 2, 1);
+
+    grid->set_halign(Gtk::ALIGN_CENTER);
+
     grid->show_all();
     add(*grid);
 }
 
 void GenerateSilkscreenWindow::load_defaults()
 {
-    settings->load_defaults();
+    auto def = ToolGenerateSilkscreen::Settings();
     if (sp_silk) {
-        sp_silk->set_value(settings->expand_silk);
+        sp_silk->set_value(def.expand_silk);
     }
     if (sp_pad) {
-        sp_pad->set_value(settings->expand_pad);
+        sp_pad->set_value(def.expand_pad);
     }
 }
 
