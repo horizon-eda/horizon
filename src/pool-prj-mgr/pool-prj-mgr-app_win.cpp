@@ -559,7 +559,7 @@ void PoolProjectManagerAppWindow::handle_save()
 
 void PoolProjectManagerAppWindow::handle_open()
 {
-    GtkFileChooserNative *native = gtk_file_chooser_native_new("Open Pool", GTK_WINDOW(gobj()),
+    GtkFileChooserNative *native = gtk_file_chooser_native_new("Open Pool or Project", GTK_WINDOW(gobj()),
                                                                GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
     auto filter = Gtk::FileFilter::create();
