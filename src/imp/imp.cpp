@@ -923,15 +923,23 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
     if (sel_count_type(sel, ObjectType::TEXT) == 1) {
         const auto text = core->get_text(sel_find_one(sel, ObjectType::TEXT).uuid);
         const auto txt = Glib::ustring(text->text);
-        auto regex = Glib::Regex::create(R"(https?:\/\/([\w\.-]+)(\/\S+)?)");
+        auto regex = Glib::Regex::create(R"((https?:\/\/|file:\/\/\/?)([\w\.-]+)(\/\S+)?)");
         Glib::MatchInfo ma;
         if (regex->match(txt, ma)) {
             s += "\n\n<b>Text with links</b>\n";
             do {
                 auto url = ma.fetch(0);
-                auto domain = ma.fetch(1);
+                auto regex_file = Glib::Regex::create(R"(file:\/\/?(\S+\/|)([^\/\s]+))");
+                Glib::MatchInfo ma_f;
+                auto name = ma.fetch(2);
+                if (regex_file->match(url, ma_f)) {
+                    name = ma_f.fetch(2);
+                }
+                if (ma.fetch(1).compare("file://") == 0) {
+                    url = url.replace(0, 7, "file://" + Glib::path_get_dirname(core->get_filename()) + "/");
+                }
                 s += "<a href=\"" + Glib::Markup::escape_text(url) + "\" title=\""
-                     + Glib::Markup::escape_text(Glib::Markup::escape_text(url)) + "\">" + domain + "</a>\n";
+                     + Glib::Markup::escape_text(Glib::Markup::escape_text(url)) + "\">" + name + "</a>\n";
             } while (ma.next());
             sel_erase_type(sel, ObjectType::TEXT);
         }
