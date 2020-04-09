@@ -524,6 +524,11 @@ void ImpPackage::construct()
 
     models_box->show_all();
     view_3d_window->add_widget(models_box);
+    {
+        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+        sep->show();
+        view_3d_window->add_widget(sep);
+    }
 
     connect_action(ActionID::VIEW_3D, [this](const auto &a) {
         view_3d_window->update();

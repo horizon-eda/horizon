@@ -119,6 +119,11 @@ ParameterSetEditor::ParameterSetEditor(ParameterSet *ps, bool populate_init)
         populate();
 
     sc->show_all();
+    {
+        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+        sep->show();
+        pack_start(*sep, false, false, 0);
+    }
     pack_start(*sc, true, true, 0);
 }
 
