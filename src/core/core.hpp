@@ -14,7 +14,7 @@
 #include <sigc++/sigc++.h>
 #include "tool_id.hpp"
 #include "tool.hpp"
-#include "document/idocument.hpp"
+#include "document/document.hpp"
 
 namespace horizon {
 
@@ -44,49 +44,8 @@ namespace horizon {
  *
  * The Core also handles undo/redo by storing a full copy for each step.
  */
-class Core : public virtual IDocument {
+class Core : public virtual Document {
 public:
-    bool has_object_type(ObjectType ty) const override
-    {
-        return false;
-    }
-
-    class Junction *insert_junction(const UUID &uu) override;
-    class Junction *get_junction(const UUID &uu) override;
-    void delete_junction(const UUID &uu) override;
-
-    class Line *insert_line(const UUID &uu) override;
-    class Line *get_line(const UUID &uu) override;
-    void delete_line(const UUID &uu) override;
-
-    class Arc *insert_arc(const UUID &uu) override;
-    class Arc *get_arc(const UUID &uu) override;
-    void delete_arc(const UUID &uu) override;
-
-    class Text *insert_text(const UUID &uu) override;
-    class Text *get_text(const UUID &uu) override;
-    void delete_text(const UUID &uu) override;
-
-    class Polygon *insert_polygon(const UUID &uu) override;
-    class Polygon *get_polygon(const UUID &uu) override;
-    void delete_polygon(const UUID &uu) override;
-
-    class Hole *insert_hole(const UUID &uu) override;
-    class Hole *get_hole(const UUID &uu) override;
-    void delete_hole(const UUID &uu) override;
-
-    class Dimension *insert_dimension(const UUID &uu) override;
-    class Dimension *get_dimension(const UUID &uu) override;
-    void delete_dimension(const UUID &uu) override;
-
-    class Keepout *insert_keepout(const UUID &uu) override;
-    class Keepout *get_keepout(const UUID &uu) override;
-    void delete_keepout(const UUID &uu) override;
-
-    std::vector<Line *> get_lines() override;
-    std::vector<Arc *> get_arcs() override;
-    std::vector<Keepout *> get_keepouts() override;
-
     class Block *get_block() override
     {
         return nullptr;
@@ -131,9 +90,6 @@ public:
     virtual bool get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, class PropertyValue &value);
     virtual bool get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property,
                                    class PropertyMeta &meta);
-
-    virtual std::string get_display_name(ObjectType type, const UUID &uu) override;
-    virtual std::string get_display_name(ObjectType type, const UUID &uu, const UUID &sheet) override;
 
     void set_property_begin();
     void set_property_commit();
@@ -220,39 +176,6 @@ public:
     }
 
 protected:
-    virtual std::map<UUID, Junction> *get_junction_map()
-    {
-        return nullptr;
-    }
-    virtual std::map<UUID, Line> *get_line_map()
-    {
-        return nullptr;
-    }
-    virtual std::map<UUID, Arc> *get_arc_map()
-    {
-        return nullptr;
-    }
-    virtual std::map<UUID, Text> *get_text_map()
-    {
-        return nullptr;
-    }
-    virtual std::map<UUID, Polygon> *get_polygon_map()
-    {
-        return nullptr;
-    }
-    virtual std::map<UUID, Hole> *get_hole_map()
-    {
-        return nullptr;
-    }
-    virtual std::map<UUID, Dimension> *get_dimension_map()
-    {
-        return nullptr;
-    }
-    virtual std::map<UUID, Keepout> *get_keepout_map()
-    {
-        return nullptr;
-    }
-
     std::unique_ptr<ToolBase> tool = nullptr;
     type_signal_tool_changed s_signal_tool_changed;
     type_signal_rebuilt s_signal_rebuilt;

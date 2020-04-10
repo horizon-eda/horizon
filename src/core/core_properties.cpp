@@ -471,38 +471,5 @@ void Core::set_placement(Placement &placement, const class PropertyValue &value,
     }
 }
 
-std::string Core::get_display_name(ObjectType type, const UUID &uu, const UUID &sheet)
-{
-    return get_display_name(type, uu);
-}
 
-std::string Core::get_display_name(ObjectType type, const UUID &uu)
-{
-    switch (type) {
-    case ObjectType::HOLE:
-        return get_hole(uu)->shape == Hole::Shape::ROUND ? "Round" : "Slot";
-
-    case ObjectType::TEXT:
-        return get_text(uu)->text;
-
-    case ObjectType::DIMENSION: {
-        auto dim = get_dimension(uu);
-        auto s = dim_to_string(dim->get_length(), false);
-        switch (dim->mode) {
-        case Dimension::Mode::DISTANCE:
-            return s + " D";
-
-        case Dimension::Mode::HORIZONTAL:
-            return s + " H";
-
-        case Dimension::Mode::VERTICAL:
-            return s + " V";
-        }
-        return "";
-    }
-
-    default:
-        return "";
-    }
-}
 } // namespace horizon

@@ -6,14 +6,13 @@
 #include <iostream>
 #include <memory>
 #include "nlohmann/json.hpp"
-#include "document/idocument_board.hpp"
+#include "document/document_board.hpp"
 
 namespace horizon {
-class CoreBoard : public Core, public virtual IDocumentBoard {
+class CoreBoard : public Core, public DocumentBoard {
 public:
     CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
               Pool &pool);
-    bool has_object_type(ObjectType ty) const override;
 
     class Block *get_block() override;
     class LayerProvider *get_layer_provider() override;
@@ -25,10 +24,7 @@ public:
     bool get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property,
                            class PropertyMeta &meta) override;
 
-    std::string get_display_name(ObjectType type, const UUID &uu) override;
-
     std::vector<Track *> get_tracks();
-    std::vector<Line *> get_lines() override;
 
     void rebuild(bool from_undo = false) override;
     void reload_netlist();
@@ -68,14 +64,6 @@ public:
     const std::string &get_filename() const override;
 
 private:
-    std::map<UUID, Polygon> *get_polygon_map() override;
-    std::map<UUID, Junction> *get_junction_map() override;
-    std::map<UUID, Text> *get_text_map() override;
-    std::map<UUID, Line> *get_line_map() override;
-    std::map<UUID, Dimension> *get_dimension_map() override;
-    std::map<UUID, Arc> *get_arc_map() override;
-    std::map<UUID, Keepout> *get_keepout_map() override;
-
     ViaPadstackProvider via_padstack_provider;
 
     Block block;

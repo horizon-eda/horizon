@@ -66,61 +66,6 @@ void CoreBoard::reload_netlist()
     rebuild();
 }
 
-bool CoreBoard::has_object_type(ObjectType ty) const
-{
-    switch (ty) {
-    case ObjectType::JUNCTION:
-    case ObjectType::POLYGON:
-    case ObjectType::BOARD_HOLE:
-    case ObjectType::TRACK:
-    case ObjectType::POLYGON_EDGE:
-    case ObjectType::POLYGON_VERTEX:
-    case ObjectType::POLYGON_ARC_CENTER:
-    case ObjectType::TEXT:
-    case ObjectType::LINE:
-    case ObjectType::ARC:
-    case ObjectType::BOARD_PACKAGE:
-    case ObjectType::VIA:
-    case ObjectType::DIMENSION:
-    case ObjectType::KEEPOUT:
-    case ObjectType::CONNECTION_LINE:
-        return true;
-        break;
-    default:;
-    }
-
-    return false;
-}
-
-std::map<UUID, Polygon> *CoreBoard::get_polygon_map()
-{
-    return &brd.polygons;
-}
-std::map<UUID, Junction> *CoreBoard::get_junction_map()
-{
-    return &brd.junctions;
-}
-std::map<UUID, Text> *CoreBoard::get_text_map()
-{
-    return &brd.texts;
-}
-std::map<UUID, Line> *CoreBoard::get_line_map()
-{
-    return &brd.lines;
-}
-std::map<UUID, Arc> *CoreBoard::get_arc_map()
-{
-    return &brd.arcs;
-}
-std::map<UUID, Dimension> *CoreBoard::get_dimension_map()
-{
-    return &brd.dimensions;
-}
-std::map<UUID, Keepout> *CoreBoard::get_keepout_map()
-{
-    return &brd.keepouts;
-}
-
 bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID property, PropertyValue &value)
 {
     if (Core::get_property(type, uu, property, value))
@@ -550,40 +495,10 @@ bool CoreBoard::get_property_meta(ObjectType type, const UUID &uu, ObjectPropert
     }
 }
 
-std::string CoreBoard::get_display_name(ObjectType type, const UUID &uu)
-{
-    switch (type) {
-    case ObjectType::BOARD_PACKAGE:
-        return brd.packages.at(uu).component->refdes;
-
-    case ObjectType::TRACK: {
-        const auto &tr = brd.tracks.at(uu);
-        return tr.net ? tr.net->name : "";
-    }
-
-    case ObjectType::VIA: {
-        const auto ju = brd.vias.at(uu).junction;
-        return ju->net ? ju->net->name : "";
-    }
-
-    default:
-        return Core::get_display_name(type, uu);
-    }
-}
-
 std::vector<Track *> CoreBoard::get_tracks()
 {
     std::vector<Track *> r;
     for (auto &it : brd.tracks) {
-        r.push_back(&it.second);
-    }
-    return r;
-}
-
-std::vector<Line *> CoreBoard::get_lines()
-{
-    std::vector<Line *> r;
-    for (auto &it : brd.lines) {
         r.push_back(&it.second);
     }
     return r;

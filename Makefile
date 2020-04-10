@@ -159,6 +159,8 @@ SRC_IMP = \
 	src/imp/action.cpp\
 	src/imp/action_catalog.cpp\
 	$(SRC_CANVAS) \
+	src/document/document.cpp \
+	src/document/document_board.cpp \
 	src/core/core.cpp \
 	src/core/tool.cpp \
 	src/core/create_tool.cpp \
