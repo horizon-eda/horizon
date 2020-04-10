@@ -135,22 +135,39 @@ static PyObject *PyBoard_get_step_export_settings(PyObject *pself)
     return py_from_json(settings);
 }
 
-static void progress_cb(std::string s)
-{
-    std::cout << s << std::endl;
-}
+class py_exception : public std::exception {
+};
 
 static PyObject *PyBoard_export_step(PyObject *pself, PyObject *args)
 {
     auto self = reinterpret_cast<PyBoard *>(pself);
     PyObject *py_export_settings = nullptr;
-    if (!PyArg_ParseTuple(args, "O!", &PyDict_Type, &py_export_settings))
+    PyObject *py_callback = nullptr;
+    if (!PyArg_ParseTuple(args, "O!|O", &PyDict_Type, &py_export_settings, &py_callback))
         return NULL;
+    if (py_callback && !PyCallable_Check(py_callback)) {
+        PyErr_SetString(PyExc_TypeError, "callback must be callable");
+        return NULL;
+    }
     try {
         auto settings_json = json_from_py(py_export_settings);
         horizon::STEPExportSettings settings(settings_json);
-        horizon::export_step(settings.filename, self->board->board, self->board->pool, settings.include_3d_models,
-                             &progress_cb, nullptr, settings.prefix);
+        horizon::export_step(
+                settings.filename, self->board->board, self->board->pool, settings.include_3d_models,
+                [py_callback](const std::string &s) {
+                    if (py_callback) {
+                        PyObject *arglist = Py_BuildValue("(s)", s.c_str());
+                        PyObject *result = PyObject_CallObject(py_callback, arglist);
+                        Py_DECREF(arglist);
+                        if (result == NULL)
+                            throw py_exception();
+                        Py_DECREF(result);
+                    }
+                },
+                nullptr, settings.prefix);
+    }
+    catch (const py_exception &e) {
+        return NULL;
     }
     catch (const std::exception &e) {
         PyErr_SetString(PyExc_IOError, e.what());

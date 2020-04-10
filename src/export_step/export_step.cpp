@@ -372,7 +372,8 @@ static double angle_to_rad(int angle)
 }
 
 void export_step(const std::string &filename, const Board &brd, class Pool &pool, bool include_models,
-                 std::function<void(std::string)> progress_cb, const BoardColors *colors, const std::string &prefix)
+                 std::function<void(const std::string &)> progress_cb, const BoardColors *colors,
+                 const std::string &prefix)
 {
     auto app = XCAFApp_Application::GetApplication();
     Handle(TDocStd_Document) doc;
