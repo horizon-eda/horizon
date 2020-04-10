@@ -1,5 +1,6 @@
 #include "rules.hpp"
 #include <assert.h>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 
@@ -18,8 +19,38 @@ void RulesCheckResult::update()
     }
 }
 
+static const std::map<RulesCheckErrorLevel, std::string> level_names = {
+        {RulesCheckErrorLevel::DISABLED, "disabled"}, {RulesCheckErrorLevel::FAIL, "fail"},
+        {RulesCheckErrorLevel::NOT_RUN, "not_run"},   {RulesCheckErrorLevel::PASS, "pass"},
+        {RulesCheckErrorLevel::WARN, "warn"},
+};
+
+json RulesCheckResult::serialize() const
+{
+    json j;
+    j["level"] = level_names.at(level);
+    j["comment"] = comment;
+    auto a = json::array();
+    for (const auto &it : errors) {
+        a.push_back(it.serialize());
+    }
+    j["errors"] = a;
+    return j;
+}
+
 RulesCheckError::RulesCheckError(RulesCheckErrorLevel lev) : level(lev)
 {
+}
+
+json RulesCheckError::serialize() const
+{
+    json j;
+    j["level"] = level_names.at(level);
+    j["comment"] = comment;
+    j["sheet"] = (std::string)sheet;
+    j["location"] = location.as_array();
+    j["has_location"] = has_location;
+    return j;
 }
 
 Color rules_check_error_level_to_color(RulesCheckErrorLevel lev)

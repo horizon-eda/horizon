@@ -2,6 +2,7 @@
 #include "nlohmann/json_fwd.hpp"
 #include "rule_match.hpp"
 #include "util/uuid.hpp"
+#include "common/lut.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -22,6 +23,8 @@ enum class RuleID {
     PREFLIGHT_CHECKS,
     CLEARANCE_COPPER_KEEPOUT
 };
+
+extern const LutEnumStr<RuleID> rule_id_lut;
 
 class Rule {
 public:
