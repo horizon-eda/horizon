@@ -24,8 +24,6 @@ public:
     bool get_property_meta(ObjectType type, const UUID &uu, ObjectProperty::ID property,
                            class PropertyMeta &meta) override;
 
-    std::vector<Track *> get_tracks();
-
     void rebuild(bool from_undo = false) override;
     void reload_netlist();
 

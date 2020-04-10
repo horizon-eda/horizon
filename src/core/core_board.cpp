@@ -495,15 +495,6 @@ bool CoreBoard::get_property_meta(ObjectType type, const UUID &uu, ObjectPropert
     }
 }
 
-std::vector<Track *> CoreBoard::get_tracks()
-{
-    std::vector<Track *> r;
-    for (auto &it : brd.tracks) {
-        r.push_back(&it.second);
-    }
-    return r;
-}
-
 void CoreBoard::rebuild(bool from_undo)
 {
     clock_t begin = clock();
