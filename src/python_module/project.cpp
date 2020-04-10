@@ -40,9 +40,9 @@ static PyObject *PyProject_open_board(PyObject *pself)
         PyErr_SetString(PyExc_FileNotFoundError, "pool not found");
         return NULL;
     }
-    BoardWrapper *board = nullptr;
+    class BoardWrapper *board = nullptr;
     try {
-        board = new BoardWrapper(self->project->project);
+        board = create_board_wrapper(self->project->project);
     }
     catch (const std::exception &e) {
         PyErr_SetString(PyExc_IOError, e.what());

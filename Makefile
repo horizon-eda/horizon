@@ -677,6 +677,10 @@ SRC_SHARED = $(SRC_COMMON) \
 	src/canvas/canvas_patch.cpp\
 	src/util/csv_util.cpp\
 	src/util/clipper_util.cpp\
+	src/document/document.cpp \
+	src/document/document_board.cpp \
+	src/rules/cache.cpp \
+	src/board/board_rules_check.cpp \
 
 SRC_SHARED_GEN = $(SRC_COMMON_GEN)
 
