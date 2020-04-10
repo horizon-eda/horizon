@@ -159,7 +159,7 @@ clearance_cu_worker(std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::Patch
 
             {
                 std::stringstream ss;
-                ss << " Patch pair " << (n_patch_pairs - patch_pairs.size()) << "/" << n_patch_pairs;
+                ss << "Patch pair " << (n_patch_pairs - patch_pairs.size()) << "/" << n_patch_pairs;
                 status_cb(ss.str());
             }
         }
