@@ -61,7 +61,7 @@ public:
     json serialize();
 
 private:
-    Documents core;
+    Documents doc;
     NetClass net_class_dummy;
 };
 } // namespace horizon

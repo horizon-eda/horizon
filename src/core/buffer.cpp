@@ -1,14 +1,17 @@
 #include "buffer.hpp"
-#include "core_package.hpp"
-#include "core_padstack.hpp"
-#include "core_schematic.hpp"
-#include "core_symbol.hpp"
-#include "core_board.hpp"
+#include "document/idocument_package.hpp"
+#include "document/idocument_padstack.hpp"
+#include "document/idocument_schematic.hpp"
+#include "document/idocument_symbol.hpp"
+#include "document/idocument_board.hpp"
 #include "pool/entity.hpp"
 #include "util/util.hpp"
+#include "nlohmann/json.hpp"
+#include "schematic/schematic.hpp"
+#include "board/board.hpp"
 
 namespace horizon {
-Buffer::Buffer(Documents &cr) : core(cr), net_class_dummy(UUID::random())
+Buffer::Buffer(Documents &cr) : doc(cr), net_class_dummy(UUID::random())
 {
 }
 
@@ -45,33 +48,33 @@ void Buffer::load(std::set<SelectableRef> selection)
     for (const auto &it : selection) {
         switch (it.type) {
         case ObjectType::LINE: {
-            Line *line = core.r->get_line(it.uuid);
+            Line *line = doc.r->get_line(it.uuid);
             new_sel.emplace(line->from.uuid, ObjectType::JUNCTION);
             new_sel.emplace(line->to.uuid, ObjectType::JUNCTION);
         } break;
         case ObjectType::POLYGON_EDGE: {
-            Polygon *poly = core.r->get_polygon(it.uuid);
+            Polygon *poly = doc.r->get_polygon(it.uuid);
             new_sel.emplace(poly->uuid, ObjectType::POLYGON);
         } break;
         case ObjectType::POLYGON_VERTEX: {
-            Polygon *poly = core.r->get_polygon(it.uuid);
+            Polygon *poly = doc.r->get_polygon(it.uuid);
             new_sel.emplace(poly->uuid, ObjectType::POLYGON);
         } break;
         case ObjectType::ARC: {
-            Arc *arc = core.r->get_arc(it.uuid);
+            Arc *arc = doc.r->get_arc(it.uuid);
             new_sel.emplace(arc->from.uuid, ObjectType::JUNCTION);
             new_sel.emplace(arc->to.uuid, ObjectType::JUNCTION);
             new_sel.emplace(arc->center.uuid, ObjectType::JUNCTION);
         } break;
         case ObjectType::SCHEMATIC_SYMBOL: {
-            auto &sym = core.c->get_sheet()->symbols.at(it.uuid);
+            auto &sym = doc.c->get_sheet()->symbols.at(it.uuid);
             new_sel.emplace(sym.component->uuid, ObjectType::COMPONENT);
             for (const auto &it_txt : sym.texts) {
                 new_sel.emplace(it_txt->uuid, ObjectType::TEXT);
             }
         } break;
         case ObjectType::LINE_NET: {
-            auto line = &core.c->get_sheet()->net_lines.at(it.uuid);
+            auto line = &doc.c->get_sheet()->net_lines.at(it.uuid);
             for (auto &it_ft : {line->from, line->to}) {
                 if (it_ft.is_junc()) {
                     new_sel.emplace(it_ft.junc.uuid, ObjectType::JUNCTION);
@@ -83,27 +86,27 @@ void Buffer::load(std::set<SelectableRef> selection)
                 new_sel.emplace(line->bus->uuid, ObjectType::BUS);
         } break;
         case ObjectType::NET_LABEL: {
-            auto &la = core.c->get_sheet()->net_labels.at(it.uuid);
+            auto &la = doc.c->get_sheet()->net_labels.at(it.uuid);
             new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
         } break;
         case ObjectType::POWER_SYMBOL: {
-            auto &ps = core.c->get_sheet()->power_symbols.at(it.uuid);
+            auto &ps = doc.c->get_sheet()->power_symbols.at(it.uuid);
             new_sel.emplace(ps.net->uuid, ObjectType::NET);
             new_sel.emplace(ps.junction->uuid, ObjectType::JUNCTION);
         } break;
         case ObjectType::VIA: {
-            auto &via = core.b->get_board()->vias.at(it.uuid);
+            auto &via = doc.b->get_board()->vias.at(it.uuid);
             new_sel.emplace(via.junction->uuid, ObjectType::JUNCTION);
             if (via.net_set)
                 new_sel.emplace(via.net_set->uuid, ObjectType::NET);
         } break;
         case ObjectType::BOARD_HOLE: {
-            auto &hole = core.b->get_board()->holes.at(it.uuid);
+            auto &hole = doc.b->get_board()->holes.at(it.uuid);
             if (hole.net)
                 new_sel.emplace(hole.net->uuid, ObjectType::NET);
         } break;
         case ObjectType::TRACK: {
-            const auto &track = core.b->get_board()->tracks.at(it.uuid);
+            const auto &track = doc.b->get_board()->tracks.at(it.uuid);
             if (track.from.is_junc() && track.to.is_junc()) {
                 new_sel.emplace(track.from.junc->uuid, ObjectType::JUNCTION);
                 new_sel.emplace(track.to.junc->uuid, ObjectType::JUNCTION);
@@ -111,13 +114,13 @@ void Buffer::load(std::set<SelectableRef> selection)
         } break;
 
         case ObjectType::BUS_LABEL: {
-            const auto &la = core.c->get_sheet()->bus_labels.at(it.uuid);
+            const auto &la = doc.c->get_sheet()->bus_labels.at(it.uuid);
             new_sel.emplace(la.junction->uuid, ObjectType::JUNCTION);
             new_sel.emplace(la.bus->uuid, ObjectType::BUS);
         } break;
 
         case ObjectType::BUS_RIPPER: {
-            const auto &rip = core.c->get_sheet()->bus_rippers.at(it.uuid);
+            const auto &rip = doc.c->get_sheet()->bus_rippers.at(it.uuid);
             new_sel.emplace(rip.junction->uuid, ObjectType::JUNCTION);
             new_sel.emplace(rip.bus->uuid, ObjectType::BUS);
         } break;
@@ -130,7 +133,7 @@ void Buffer::load(std::set<SelectableRef> selection)
     new_sel.clear();
     for (const auto &it : selection) {
         if (it.type == ObjectType::BUS) {
-            const auto &bus = core.c->get_block()->buses.at(it.uuid);
+            const auto &bus = doc.c->get_block()->buses.at(it.uuid);
             for (const auto &it_m : bus.members) {
                 new_sel.emplace(it_m.second.net->uuid, ObjectType::NET);
             }
@@ -144,7 +147,7 @@ void Buffer::load(std::set<SelectableRef> selection)
     for(const auto &it : selection) {
             if(it.type == ObjectType::COMPONENT) {
                     auto &comp =
-    core.c->get_schematic()->block->components.at(it.uuid);
+    doc.c->get_schematic()->block->components.at(it.uuid);
                     for(const auto &it_conn: comp.connections) {
                             new_sel.emplace(it_conn.second.net->uuid,
     ObjectType::NET);
@@ -155,58 +158,58 @@ void Buffer::load(std::set<SelectableRef> selection)
 
     for (const auto &it : selection) {
         if (it.type == ObjectType::TEXT) {
-            auto x = core.r->get_text(it.uuid);
+            auto x = doc.r->get_text(it.uuid);
             texts.emplace(x->uuid, *x);
         }
         else if (it.type == ObjectType::JUNCTION) {
-            auto x = core.r->get_junction(it.uuid);
+            auto x = doc.r->get_junction(it.uuid);
             junctions.emplace(x->uuid, *x);
         }
         else if (it.type == ObjectType::PAD) {
-            auto x = &core.k->get_package()->pads.at(it.uuid);
+            auto x = &doc.k->get_package()->pads.at(it.uuid);
             pads.emplace(x->uuid, *x);
         }
         else if (it.type == ObjectType::NET) {
-            auto &x = core.r->get_block()->nets.at(it.uuid);
+            auto &x = doc.r->get_block()->nets.at(it.uuid);
             auto net = &nets.emplace(x.uuid, x).first->second;
             net->diffpair = nullptr;
             net->diffpair_master = false;
             net->net_class = &net_class_dummy;
         }
         else if (it.type == ObjectType::SYMBOL_PIN) {
-            auto x = core.y->get_symbol_pin(it.uuid);
+            auto x = doc.y->get_symbol_pin(it.uuid);
             pins.emplace(x->uuid, *x);
         }
         else if (it.type == ObjectType::HOLE) {
-            auto x = core.r->get_hole(it.uuid);
+            auto x = doc.r->get_hole(it.uuid);
             holes.emplace(x->uuid, *x);
         }
         else if (it.type == ObjectType::POLYGON) {
-            auto x = core.r->get_polygon(it.uuid);
+            auto x = doc.r->get_polygon(it.uuid);
             polygons.emplace(x->uuid, *x);
         }
         else if (it.type == ObjectType::SHAPE) {
-            auto x = &core.a->get_padstack()->shapes.at(it.uuid);
+            auto x = &doc.a->get_padstack()->shapes.at(it.uuid);
             shapes.emplace(x->uuid, *x);
         }
         else if (it.type == ObjectType::DIMENSION) {
-            auto x = core.r->get_dimension(it.uuid);
+            auto x = doc.r->get_dimension(it.uuid);
             dimensions.emplace(x->uuid, *x);
         }
         else if (it.type == ObjectType::BOARD_PANEL) {
-            auto &x = core.b->get_board()->board_panels.at(it.uuid);
+            auto &x = doc.b->get_board()->board_panels.at(it.uuid);
             board_panels.emplace(x.uuid, x);
         }
     }
     for (const auto &it : selection) {
         if (it.type == ObjectType::LINE) {
-            auto x = core.r->get_line(it.uuid);
+            auto x = doc.r->get_line(it.uuid);
             auto &li = lines.emplace(x->uuid, *x).first->second;
             li.from = &junctions.at(li.from.uuid);
             li.to = &junctions.at(li.to.uuid);
         }
         else if (it.type == ObjectType::TRACK) {
-            const auto &x = core.b->get_board()->tracks.at(it.uuid);
+            const auto &x = doc.b->get_board()->tracks.at(it.uuid);
             if (x.from.is_junc() && x.to.is_junc()) {
                 auto &track = tracks.emplace(x.uuid, x).first->second;
                 track.from.junc.update(junctions);
@@ -215,19 +218,19 @@ void Buffer::load(std::set<SelectableRef> selection)
         }
 
         else if (it.type == ObjectType::ARC) {
-            auto x = core.r->get_arc(it.uuid);
+            auto x = doc.r->get_arc(it.uuid);
             auto &arc = arcs.emplace(x->uuid, *x).first->second;
             arc.from = &junctions.at(arc.from.uuid);
             arc.to = &junctions.at(arc.to.uuid);
             arc.center = &junctions.at(arc.center.uuid);
         }
         else if (it.type == ObjectType::COMPONENT) {
-            auto &x = core.c->get_schematic()->block->components.at(it.uuid);
+            auto &x = doc.c->get_schematic()->block->components.at(it.uuid);
             auto &comp = components.emplace(x.uuid, x).first->second;
             comp.refdes = comp.entity->prefix + "?";
         }
         else if (it.type == ObjectType::BUS) {
-            const auto &x = core.r->get_block()->buses.at(it.uuid);
+            const auto &x = doc.r->get_block()->buses.at(it.uuid);
             auto &bus = buses.emplace(x.uuid, x).first->second;
             for (auto &it_m : bus.members) {
                 it_m.second.net.update(nets);
@@ -236,7 +239,7 @@ void Buffer::load(std::set<SelectableRef> selection)
     }
     for (const auto &it : selection) {
         if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
-            auto &x = core.c->get_sheet()->symbols.at(it.uuid);
+            auto &x = doc.c->get_sheet()->symbols.at(it.uuid);
             auto &sym = symbols.emplace(x.uuid, x).first->second;
             for (auto &it_txt : sym.texts) {
                 it_txt.update(texts);
@@ -247,13 +250,13 @@ void Buffer::load(std::set<SelectableRef> selection)
     }
     for (const auto &it : selection) {
         if (it.type == ObjectType::BUS_LABEL) {
-            const auto &x = core.c->get_sheet()->bus_labels.at(it.uuid);
+            const auto &x = doc.c->get_sheet()->bus_labels.at(it.uuid);
             auto &la = bus_labels.emplace(x.uuid, x).first->second;
             la.bus.update(buses);
             la.junction.update(junctions);
         }
         else if (it.type == ObjectType::BUS_RIPPER) {
-            const auto &x = core.c->get_sheet()->bus_rippers.at(it.uuid);
+            const auto &x = doc.c->get_sheet()->bus_rippers.at(it.uuid);
             auto &rip = bus_rippers.emplace(x.uuid, x).first->second;
             rip.bus.update(buses);
             rip.junction.update(junctions);
@@ -262,7 +265,7 @@ void Buffer::load(std::set<SelectableRef> selection)
     }
     for (const auto &it : selection) {
         if (it.type == ObjectType::LINE_NET) {
-            LineNet x = core.c->get_sheet()->net_lines.at(it.uuid);
+            LineNet x = doc.c->get_sheet()->net_lines.at(it.uuid);
             bool valid = true;
             for (auto &it_ft : {&x.from, &x.to}) {
                 if (it_ft->is_bus_ripper()) {
@@ -302,24 +305,24 @@ void Buffer::load(std::set<SelectableRef> selection)
             }
         }
         if (it.type == ObjectType::NET_LABEL) {
-            auto x = &core.c->get_sheet()->net_labels.at(it.uuid);
+            auto x = &doc.c->get_sheet()->net_labels.at(it.uuid);
             auto &la = net_labels.emplace(x->uuid, *x).first->second;
             la.junction.update(junctions);
         }
         if (it.type == ObjectType::POWER_SYMBOL) {
-            auto x = &core.c->get_sheet()->power_symbols.at(it.uuid);
+            auto x = &doc.c->get_sheet()->power_symbols.at(it.uuid);
             auto &ps = power_symbols.emplace(x->uuid, *x).first->second;
             ps.junction.update(junctions);
             ps.net.update(nets);
         }
         if (it.type == ObjectType::VIA) {
-            auto x = &core.b->get_board()->vias.at(it.uuid);
+            auto x = &doc.b->get_board()->vias.at(it.uuid);
             auto &via = vias.emplace(x->uuid, *x).first->second;
             via.junction.update(junctions);
             via.net_set.update(nets);
         }
         if (it.type == ObjectType::BOARD_HOLE) {
-            auto x = &core.b->get_board()->holes.at(it.uuid);
+            auto x = &doc.b->get_board()->holes.at(it.uuid);
             auto &hole = board_holes.emplace(x->uuid, *x).first->second;
             hole.net.update(nets);
         }
