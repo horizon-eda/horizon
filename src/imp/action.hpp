@@ -2,10 +2,11 @@
 #include <string>
 #include <vector>
 #include <gdk/gdk.h>
-#include "core/tool_id.hpp"
 #include <functional>
 
 namespace horizon {
+
+enum class ToolID;
 
 enum class ActionID {
     NONE,

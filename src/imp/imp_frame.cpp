@@ -1,6 +1,7 @@
 #include "imp_frame.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "header_button.hpp"
+#include "core/tool_id.hpp"
 
 namespace horizon {
 ImpFrame::ImpFrame(const std::string &frame_filename, const std::string &pool_path)

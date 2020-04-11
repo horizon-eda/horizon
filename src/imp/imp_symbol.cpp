@@ -4,6 +4,7 @@
 #include "pool/part.hpp"
 #include "symbol_preview/symbol_preview_window.hpp"
 #include "widgets/unplaced_box.hpp"
+#include "core/tool_id.hpp"
 
 namespace horizon {
 ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool_path)

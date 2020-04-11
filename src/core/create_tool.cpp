@@ -1,4 +1,5 @@
 #include "core.hpp"
+#include "tool_id.hpp"
 #include "tools/tool_add_part.hpp"
 #include "tools/tool_add_vertex.hpp"
 #include "tools/tool_assign_part.hpp"

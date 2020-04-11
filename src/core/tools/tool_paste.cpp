@@ -13,11 +13,25 @@
 #include "core/buffer.hpp"
 #include <iostream>
 #include <gtkmm.h>
+#include "core/tool_id.hpp"
 
 namespace horizon {
 
 ToolPaste::ToolPaste(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid), ToolHelperMerge(c, tid)
 {
+}
+
+bool ToolPaste::can_begin()
+{
+    if (tool_id == ToolID::PASTE)
+        return true;
+    else
+        return selection.size();
+}
+
+bool ToolPaste::is_specific()
+{
+    return tool_id == ToolID::DUPLICATE;
 }
 
 class JunctionProvider : public ObjectProvider {

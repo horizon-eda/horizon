@@ -5,6 +5,7 @@
 #include "imp/imp_interface.hpp"
 #include "pool/part.hpp"
 #include <iostream>
+#include "core/tool_id.hpp"
 
 namespace horizon {
 

@@ -1,4 +1,5 @@
 #include "tool.hpp"
+#include "tool_id.hpp"
 
 namespace horizon {
 
@@ -22,4 +23,13 @@ ToolSettingsProxy::~ToolSettingsProxy()
 {
     tool->apply_settings();
 }
+
+ToolResponse::ToolResponse() : next_tool(ToolID::NONE)
+{
+}
+
+ToolResponse::ToolResponse(ToolResponse::Result r) : next_tool(ToolID::NONE), result(r)
+{
+}
+
 } // namespace horizon

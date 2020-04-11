@@ -25,6 +25,8 @@
 #include <iomanip>
 #include <functional>
 #include "nlohmann/json.hpp"
+#include "core/tool_id.hpp"
+#include "imp/action.hpp"
 
 namespace horizon {
 

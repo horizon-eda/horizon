@@ -19,6 +19,7 @@
 #include "widgets/unplaced_box.hpp"
 #include "pnp_export_window.hpp"
 #include "airwire_filter_window.hpp"
+#include "core/tool_id.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,

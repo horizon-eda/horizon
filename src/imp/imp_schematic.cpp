@@ -15,6 +15,7 @@
 #include "core/tools/tool_add_part.hpp"
 #include "core/tools/tool_map_symbol.hpp"
 #include "widgets/unplaced_box.hpp"
+#include "core/tool_id.hpp"
 
 namespace horizon {
 ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,

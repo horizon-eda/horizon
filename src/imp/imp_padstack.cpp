@@ -5,6 +5,7 @@
 #include "pool/part.hpp"
 #include "widgets/parameter_set_editor.hpp"
 #include "board/board_layers.hpp"
+#include "core/tool_id.hpp"
 
 namespace horizon {
 ImpPadstack::ImpPadstack(const std::string &padstack_filename, const std::string &pool_path)

@@ -2,6 +2,7 @@
 #include "document/idocument_board.hpp"
 #include "board/board.hpp"
 #include <iostream>
+#include "core/tool_id.hpp"
 
 namespace horizon {
 

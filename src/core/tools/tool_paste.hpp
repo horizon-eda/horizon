@@ -11,17 +11,8 @@ public:
     ToolPaste(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
-    bool can_begin() override
-    {
-        if (tool_id == ToolID::PASTE)
-            return true;
-        else
-            return selection.size();
-    }
-    bool is_specific() override
-    {
-        return tool_id == ToolID::DUPLICATE;
-    }
+    bool can_begin() override;
+    bool is_specific() override;
 
 private:
     void fix_layer(int &la);

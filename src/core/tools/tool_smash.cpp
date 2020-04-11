@@ -4,6 +4,7 @@
 #include "document/idocument_schematic.hpp"
 #include "schematic/schematic.hpp"
 #include <iostream>
+#include "core/tool_id.hpp"
 
 namespace horizon {
 

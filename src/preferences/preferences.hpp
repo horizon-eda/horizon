@@ -4,11 +4,12 @@
 #include <sigc++/sigc++.h>
 #include <string>
 #include "imp/action_catalog.hpp"
-#include "imp/action.hpp"
-#include "core/tool_id.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
+
+enum class ActionID;
+enum class ToolID;
 
 class CanvasPreferences {
 public:

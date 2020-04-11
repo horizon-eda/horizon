@@ -3,6 +3,7 @@
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
+#include "core/tool_id.hpp"
 
 namespace horizon {
 class ActionEditor : public Gtk::Box {

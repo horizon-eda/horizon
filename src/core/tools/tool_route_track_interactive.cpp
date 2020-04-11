@@ -10,6 +10,7 @@
 #include "router/router/pns_router.h"
 #include "router/router/pns_meander_placer_base.h"
 #include "util/util.hpp"
+#include "core/tool_id.hpp"
 #include <iostream>
 
 namespace horizon {

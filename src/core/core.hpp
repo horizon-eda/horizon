@@ -12,12 +12,12 @@
 #include <iostream>
 #include <memory>
 #include <sigc++/sigc++.h>
-#include "tool_id.hpp"
 #include "tool.hpp"
 #include "document/document.hpp"
 
 namespace horizon {
 
+enum class ToolID;
 
 /**
  * Where Tools and and documents meet.

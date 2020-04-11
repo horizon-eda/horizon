@@ -1,5 +1,4 @@
 #pragma once
-#include "tool_id.hpp"
 #include "common/common.hpp"
 #include "canvas/selectables.hpp"
 #include "canvas/target.hpp"
@@ -14,6 +13,7 @@ using json = nlohmann::json;
 
 enum class ToolEventType { NONE, MOVE, CLICK, CLICK_RELEASE, KEY, LAYER_CHANGE, DATA };
 
+enum class ToolID;
 
 /**
  * This is what a Tool receives when the user did something.
@@ -47,7 +47,7 @@ public:
  */
 class ToolResponse {
 public:
-    ToolID next_tool = ToolID::NONE;
+    ToolID next_tool;
     std::unique_ptr<ToolData> data = nullptr;
     enum class Result { NOP, END, COMMIT, REVERT };
     Result result = Result::NOP;
@@ -90,14 +90,10 @@ public:
         return r;
     };
 
-    ToolResponse()
-    {
-    }
+    ToolResponse();
 
 private:
-    ToolResponse(Result r) : result(r)
-    {
-    }
+    ToolResponse(Result r);
 };
 
 class ToolSettings {
@@ -205,7 +201,7 @@ public:
 protected:
     Documents doc;
     class ImpInterface *imp = nullptr;
-    ToolID tool_id = ToolID::NONE;
+    ToolID tool_id;
     bool is_transient = false;
     virtual ToolSettings *get_settings()
     {

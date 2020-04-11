@@ -21,6 +21,7 @@
 #include "widgets/spin_button_angle.hpp"
 #include "util/selection_util.hpp"
 #include <iomanip>
+#include "core/tool_id.hpp"
 
 namespace horizon {
 ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path)

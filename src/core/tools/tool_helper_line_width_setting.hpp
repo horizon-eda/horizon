@@ -18,10 +18,7 @@ public:
         return &settings;
     }
 
-    ToolID get_tool_id_for_settings() const override
-    {
-        return ToolID::DRAW_LINE;
-    }
+    ToolID get_tool_id_for_settings() const override;
 
 protected:
     ToolSettings *get_settings() override
