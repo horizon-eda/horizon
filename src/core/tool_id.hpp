@@ -140,5 +140,6 @@ enum class ToolID {
     SMASH_PANEL_OUTLINE,
     SMASH_PACKAGE_OUTLINE,
     RESIZE_SYMBOL,
+    ROUND_OFF_VERTEX
 };
 } // namespace horizon

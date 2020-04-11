@@ -76,6 +76,7 @@
 #include "tools/tool_smash_panel_outline.hpp"
 #include "tools/tool_smash_package_outline.hpp"
 #include "tools/tool_resize_symbol.hpp"
+#include "tools/tool_round_off_vertex.hpp"
 
 namespace horizon {
 
@@ -363,6 +364,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::RESIZE_SYMBOL:
         return std::make_unique<ToolResizeSymbol>(this, tool_id);
+
+    case ToolID::ROUND_OFF_VERTEX:
+        return std::make_unique<ToolRoundOffVertex>(this, tool_id);
 
     default:
         return nullptr;
