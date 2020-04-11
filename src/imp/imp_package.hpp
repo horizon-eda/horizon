@@ -49,6 +49,7 @@ private:
     class FootprintGeneratorWindow *footprint_generator_window;
     class View3DWindow *view_3d_window = nullptr;
     std::string ask_3d_model_filename(const std::string &current_filename = "");
+    void construct_3d();
 
     Gtk::ListBox *models_listbox = nullptr;
     class LayerHelpBox *layer_help_box = nullptr;
