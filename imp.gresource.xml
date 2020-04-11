@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/org/horizon-eda/horizon">
-    <file>window.ui</file>
+    <file>imp/window.ui</file>
     <file>util/window_state_schema.sql</file>
     <file>imp/layer_display_default.json</file>
     <file>imp/keys_default.json</file>

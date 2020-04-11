@@ -163,7 +163,7 @@ MainWindow *MainWindow::create()
 {
     MainWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/org/horizon-eda/horizon/window.ui");
+    x->add_from_resource("/org/horizon-eda/horizon/imp/window.ui");
     x->get_widget_derived("mainWindow", w);
     return w;
 }
