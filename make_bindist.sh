@@ -18,7 +18,7 @@ LIBS=(
 	zlib1.dll\
 	libintl-8.dll\
 	libsigc-2.0-0.dll\
-	libffi-6.dll\
+	libffi-7.dll\
 	libiconv-2.dll\
 	libpcre-1.dll\
 	libatkmm-1.6-1.dll\
@@ -56,8 +56,6 @@ LIBS=(
 	libcurl-4.dll\
 	libgit2.dll\
 	libidn2-0.dll\
-	ssleay32.dll\
-	libeay32.dll\
 	libnghttp2-14.dll\
 	libssh2-1.dll\
 	libunistring-2.dll\
@@ -89,14 +87,12 @@ LIBS=(
 	libbrotlicommon.dll\
 	libbrotlidec.dll\
 	libfribidi-0.dll\
-	yaml-cpp.dll\
 	libhttp_parser-2.dll\
 	libpsl-5.dll\
 	libthai-0.dll\
 	libdatrie-1.dll\
 	libssl-1_1-x64.dll\
 	libcrypto-1_1-x64.dll\
-	libidn2-4.dll\
 	libpodofo.dll\
 	libidn-12.dll\
 	libzip.dll\
