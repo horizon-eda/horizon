@@ -8,6 +8,8 @@
 #include "schematic.hpp"
 #include "board.hpp"
 #include "project.hpp"
+#include "pool_manager.hpp"
+#include "pool.hpp"
 
 PyDoc_STRVAR(module_doc, "Parts of horizon as a module");
 
@@ -32,6 +34,13 @@ PyMODINIT_FUNC PyInit_horizon(void)
     if (PyType_Ready(&BoardType) < 0)
         return NULL;
 
+    if (PyType_Ready(&PoolManagerType) < 0)
+        return NULL;
+
+    PoolType_init();
+    if (PyType_Ready(&PoolType) < 0)
+        return NULL;
+
     if (!json_init())
         return NULL;
 
@@ -43,5 +52,7 @@ PyMODINIT_FUNC PyInit_horizon(void)
 
     Py_INCREF(&ProjectType);
     PyModule_AddObject(m, "Project", (PyObject *)&ProjectType);
+    PyModule_AddObject(m, "PoolManager", (PyObject *)&PoolManagerType);
+    PyModule_AddObject(m, "Pool", (PyObject *)&PoolType);
     return m;
 }

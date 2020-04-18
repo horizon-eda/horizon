@@ -610,6 +610,8 @@ SRC_PYTHON = \
 	src/python_module/schematic.cpp \
 	src/python_module/project.cpp \
 	src/python_module/board.cpp \
+	src/python_module/pool_manager.cpp \
+	src/python_module/pool.cpp \
 
 SRC_OCE_EXPORT = \
 	src/export_step/export_step.cpp\
@@ -683,6 +685,9 @@ SRC_SHARED = $(SRC_COMMON) \
 	src/document/document_board.cpp \
 	src/rules/cache.cpp \
 	src/board/board_rules_check.cpp \
+	src/pool-update/pool-update.cpp \
+	src/pool-update/pool-update_parametric.cpp\
+	src/pool-update/graph.cpp\
 
 SRC_SHARED_GEN = $(SRC_COMMON_GEN)
 

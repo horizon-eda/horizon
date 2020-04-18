@@ -201,9 +201,6 @@ static PyObject *PyBoard_get_step_export_settings(PyObject *pself, PyObject *arg
     return py_from_json(settings);
 }
 
-class py_exception : public std::exception {
-};
-
 static void callback_wrapper(PyObject *cb, const std::string &s)
 {
     if (cb) {
