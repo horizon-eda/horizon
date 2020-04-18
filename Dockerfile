@@ -9,5 +9,5 @@ RUN strip build/horizon.so
 
 FROM debian:buster
 RUN apt-get update && apt-get upgrade  -y
-RUN apt-get install -y --no-install-recommends python3 libzip4 libpython3.7 libglibmm-2.4-1v5 libpodofo0.9.6 liboce-ocaf11 python3-pygit2 git
+RUN apt-get install -y --no-install-recommends python3 libzip4 libpython3.7 libglibmm-2.4-1v5 libpodofo0.9.6 liboce-ocaf11 python3-pygit2 git ca-certificates
 COPY --from=build /src/build/horizon.so /usr/local/lib/python3.7/dist-packages
