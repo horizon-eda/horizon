@@ -5,6 +5,7 @@
 #include <giomm/init.h>
 
 #include "util.hpp"
+#include "util/util.hpp"
 #include "schematic.hpp"
 #include "board.hpp"
 #include "project.hpp"
@@ -24,6 +25,8 @@ PyMODINIT_FUNC PyInit_horizon(void)
 {
     Gio::init();
     horizon::PoolManager::init();
+    horizon::setup_locale();
+    horizon::create_config_dir();
 
     if (PyType_Ready(&ProjectType) < 0)
         return NULL;
