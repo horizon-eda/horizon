@@ -1,11 +1,17 @@
 #include "pool_manager.hpp"
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
+#include <giomm/file.h>
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
 
 namespace horizon {
 static PoolManager *the_pool_manager = nullptr;
+
+static std::string get_abs_path(const std::string &rel)
+{
+    return Gio::File::create_for_path(rel)->get_path();
+}
 
 PoolManager &PoolManager::get()
 {
@@ -92,37 +98,41 @@ PoolManager::PoolManager()
 
 void PoolManager::set_pool_enabled(const std::string &base_path, bool enabled)
 {
-    set_pool_enabled_no_write(base_path, enabled);
+    auto path = get_abs_path(base_path);
+    set_pool_enabled_no_write(path, enabled);
     write();
     s_signal_changed.emit();
 }
 
 void PoolManager::set_pool_enabled_no_write(const std::string &base_path, bool enabled)
 {
+    auto path = get_abs_path(base_path);
     if (enabled) { // disable conflicting pools
-        auto uu = pools.at(base_path).uuid;
+        auto uu = pools.at(path).uuid;
         for (auto &it : pools) {
             if (it.second.uuid == uu) {
                 it.second.enabled = false;
             }
         }
     }
-    pools.at(base_path).enabled = enabled;
+    pools.at(path).enabled = enabled;
 }
 
 void PoolManager::add_pool(const std::string &base_path)
 {
-    if (pools.count(base_path))
+    auto path = get_abs_path(base_path);
+    if (pools.count(path))
         return;
-    pools.emplace(std::piecewise_construct, std::forward_as_tuple(base_path), std::forward_as_tuple(base_path));
-    set_pool_enabled(base_path, true);
+    pools.emplace(std::piecewise_construct, std::forward_as_tuple(path), std::forward_as_tuple(path));
+    set_pool_enabled(path, true);
 }
 
 void PoolManager::remove_pool(const std::string &base_path)
 {
-    if (!pools.count(base_path))
+    auto path = get_abs_path(base_path);
+    if (!pools.count(path))
         return;
-    pools.erase(base_path);
+    pools.erase(path);
     write();
     s_signal_changed.emit();
 }
@@ -140,7 +150,8 @@ void PoolManager::write()
 
 void PoolManager::update_pool(const std::string &base_path, const PoolManagerPool &settings)
 {
-    auto &p = pools.at(base_path);
+    auto path = get_abs_path(base_path);
+    auto &p = pools.at(path);
     p.name = settings.name;
     p.default_via = settings.default_via;
     p.pools_included = settings.pools_included;
