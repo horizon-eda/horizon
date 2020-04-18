@@ -120,5 +120,7 @@ cp /mingw64/share/glib-2.0/schemas/gschemas.compiled $DISTDIR/share/glib-2.0/sch
 cp /mingw64/ssl/certs/ca-bundle.crt $DISTDIR/ca-bundle.crt
 
 git log -10 | unix2dos > dist/log.txt
-cd dist
-zip -r horizon-$(date +%Y-%m-%d-%H%M).zip horizon log.txt
+if [ "$1" != "-n" ]; then
+	cd dist
+	zip -r horizon-$(date +%Y-%m-%d-%H%M).zip horizon log.txt
+fi

@@ -1,0 +1,92 @@
+name: Stylecheck and CI
+
+on:
+  push:
+    branches: [ '*' ]
+    tags: [ '*' ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  stylecheck:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install preliminary dependencies
+      run: sudo apt-get update -y && sudo apt-get install curl gnupg apt-transport-https -y
+    - name: Add clang 9.0 to apt sources
+      run: echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main" | sudo tee -a /etc/apt/sources.list
+    - name: Add LLVM apt key
+      run: curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    - name: Install dependencies
+      run: sudo apt-get update -y && sudo apt-get install git clang-format-9 -y
+    - name: Style checker
+      run: bash scripts/stylecheck.sh
+
+  build:
+    runs-on: ubuntu-latest
+    container: debian:stretch-backports
+    needs: stylecheck
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: apt-get update -y && apt-get install libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git -y
+    - name: Check version
+      run: python3 check_version.py
+    - name: Build
+      run: make -j2
+
+  build-py:
+    runs-on: ubuntu-latest
+    container: debian:stretch-backports
+    needs: stylecheck
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: apt-get update -y && apt-get install libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git -y
+    - name: Build
+      run: make -j2 build/horizon.so
+    - name: Test python module
+      run: python3 -c 'import sys; sys.path.append("build"); import horizon'
+
+  build-win32:
+    runs-on: windows-latest
+    steps:
+    - name: Check tag
+      if: startsWith(github.ref, 'refs/tags/')
+      run: echo "Building tag ${{ github.ref }}"
+    - uses: actions/checkout@v2
+    - uses: numworks/setup-msys2@v1
+      with:
+        msystem: MINGW64
+    - name: Install updates
+      run: |
+        msys2do pacman -Syu --noconfirm
+        msys2do pacman -Syu --noconfirm
+    - name: Install dependencies
+      shell: cmd
+      run: msys2do pacman -S --noconfirm --needed mingw-w64-x86_64-gcc mingw-w64-x86_64-{gcc,gtkmm3,boost,sqlite3,toolchain,zeromq,glm,libgit2,oce,podofo,libzip} zip make git dos2unix
+    - name: Build
+      run: msys2do make -j2
+    - name: Make dist
+      run: msys2do bash ./make_bindist.sh -n
+    - name: Check for missing DLLs
+      run: msys2do bash ./check_dll.sh
+    - name: set artifact name
+      shell: bash
+      run: echo "::set-env name=artifact_name::horizon-win64-$(date +%Y-%m-%d-%H%M)"
+    - uses: actions/upload-artifact@v2-preview
+      with:
+        name: ${{ env.artifact_name }}
+        path: dist/
+    - name: Build MSI
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        $env:PATH += ";$($Env:WIX)\bin"
+        cd wix
+        .\install.bat
+    - uses: actions/upload-artifact@v2-preview
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        name: horizon-win64-installer
+        path: wix/*.msi
