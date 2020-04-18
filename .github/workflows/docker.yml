@@ -1,0 +1,19 @@
+name: Build docker image
+
+on:
+  push:
+    branches: [ docker ]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+    - name: login to docker
+      run: echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com -u carrotIndustries --password-stdin
+    - uses: actions/checkout@v2
+      with:
+        path: src
+    - name: build docker image
+      run: docker build . -f src/Dockerfile --network=host -t docker.pkg.github.com/horizon-eda/horizon/horizon:latest
+    - name: publish docker image
+      run: docker push docker.pkg.github.com/horizon-eda/horizon/horizon:latest
