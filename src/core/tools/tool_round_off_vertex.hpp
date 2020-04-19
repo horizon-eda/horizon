@@ -28,11 +28,13 @@ private:
     Coord<double> vn;
     Coord<double> vh;
     double delta_max = 0;
+    double r_max = 0;
     double alpha = 0;
     double radius_current = 0;
 
     void update_poly(double r);
     void update_cursor(const Coordi &c);
+    void update_tip();
 
     bool orientation = false;
 };

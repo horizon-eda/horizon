@@ -62,11 +62,14 @@ public:
     class SymbolPinNamesWindow *show_symbol_pin_names_window(class SchematicSymbol *symbol);
     class RenumberPadsWindow *show_renumber_pads_window(class Package *pkg, const std::set<UUID> &pads);
     class GenerateSilkscreenWindow *show_generate_silkscreen_window(class ToolSettings *settings);
+    class EnterDatumWindow *show_enter_datum_window(const std::string &label, int64_t def = 0);
+
     void close_nonmodal();
+    class ToolWindow *get_nonmodal();
 
 private:
     Gtk::Window *parent = nullptr;
     class ImpInterface *interface = nullptr;
-    Gtk::Window *window_nonmodal = nullptr;
+    class ToolWindow *window_nonmodal = nullptr;
 };
 } // namespace horizon

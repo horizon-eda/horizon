@@ -6,6 +6,7 @@
 #include <gdk/gdkkeysyms.h>
 #include "util/selection_util.hpp"
 #include "clipper/clipper.hpp"
+#include "dialogs/enter_datum_window.hpp"
 
 namespace horizon {
 
@@ -72,6 +73,7 @@ ToolResponse ToolRoundOffVertex::begin(const ToolArgs &args)
         imp->tool_bar_flash("can't round off collinear edges");
         return ToolResponse::end();
     }
+    r_max = tan(alpha) * delta_max;
 
     bool rev = false;
     {
@@ -103,7 +105,6 @@ ToolResponse ToolRoundOffVertex::begin(const ToolArgs &args)
 
 void ToolRoundOffVertex::update_poly(double r)
 {
-    auto r_max = tan(alpha) * delta_max;
     r = std::min(r_max, r);
     auto delta = r / tan(alpha);
     auto u = r / sin(alpha);
@@ -117,19 +118,24 @@ void ToolRoundOffVertex::update_cursor(const Coordi &c)
     auto vm = Coordd(c) - p0;
     auto u = std::max(sqrt(vm.mag_sq()) * vh.dot(normalize(vm)), 0.);
     auto r = u * sin(alpha);
-    auto r_max = tan(alpha) * delta_max;
     r = std::min(r_max, r);
     radius_current = r;
+    update_poly(r);
+    update_tip();
+}
+
+void ToolRoundOffVertex::update_tip()
+{
     imp->tool_bar_set_tip(
             "<b>LMB:</b>set radius <b>RMB:</b>cancel <b>Return:</b>enter radius <b>e:</b>flip arc <i>Current radius:"
-            + dim_to_string(r, false) + "</i>");
-    update_poly(r);
+            + dim_to_string(radius_current, false) + "</i>");
 }
 
 ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
-        update_cursor(args.coords);
+        if (imp->dialogs.get_nonmodal() == nullptr)
+            update_cursor(args.coords);
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
@@ -141,6 +147,21 @@ ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
             return ToolResponse::revert();
         }
     }
+    else if (args.type == ToolEventType::DATA) {
+        if (auto data = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
+            if (data->event == ToolDataWindow::Event::UPDATE) {
+                if (auto d = dynamic_cast<const ToolDataEnterDatumWindow *>(args.data.get())) {
+                    radius_current = d->value;
+                    update_poly(radius_current);
+                    update_tip();
+                }
+            }
+            else if (data->event == ToolDataWindow::Event::OK) {
+                poly->temp = false;
+                return ToolResponse::commit();
+            }
+        }
+    }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_Escape) {
             selection.clear();
@@ -150,12 +171,14 @@ ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
             vxp->arc_reverse = !vxp->arc_reverse;
         }
         else if (args.key == GDK_KEY_Return) {
-            auto r = imp->dialogs.ask_datum("Enter arc radius", radius_current);
+            auto win = imp->dialogs.show_enter_datum_window("Enter arc radius", radius_current);
+            win->set_range(0, r_max);
+            /*auto r = imp->dialogs.ask_datum("Enter arc radius", radius_current);
             if (r.first && r.second > 0) {
                 update_poly(r.second);
                 poly->temp = false;
                 return ToolResponse::commit();
-            }
+            }*/
         }
     }
     return ToolResponse();

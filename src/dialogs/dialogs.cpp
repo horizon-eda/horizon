@@ -34,6 +34,7 @@
 #include "generate_silkscreen_window.hpp"
 #include "select_included_board.hpp"
 #include "manage_included_boards.hpp"
+#include "enter_datum_window.hpp"
 #include <glibmm.h>
 
 namespace horizon {
@@ -497,10 +498,30 @@ class GenerateSilkscreenWindow *Dialogs::show_generate_silkscreen_window(class T
     return win;
 }
 
+EnterDatumWindow *Dialogs::show_enter_datum_window(const std::string &label, int64_t def)
+{
+    if (window_nonmodal) {
+        if (auto win = dynamic_cast<EnterDatumWindow *>(window_nonmodal)) {
+            win->present();
+            return win;
+        }
+    }
+    auto win = new EnterDatumWindow(parent, interface, label, def);
+    window_nonmodal = win;
+    win->signal_hide().connect([this] { close_nonmodal(); });
+    win->present();
+    return win;
+}
+
 void Dialogs::close_nonmodal()
 {
     delete window_nonmodal;
     window_nonmodal = nullptr;
+}
+
+ToolWindow *Dialogs::get_nonmodal()
+{
+    return window_nonmodal;
 }
 
 } // namespace horizon
