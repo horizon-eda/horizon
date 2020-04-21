@@ -31,6 +31,10 @@ ParameterWindow::ParameterWindow(Gtk::Window *p, std::string *ppc, ParameterSet 
     extra_button_box->set_margin_bottom(10);
 
     tbox->pack_start(*extra_button_box, false, false, 0);
+    {
+        auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+        tbox->pack_start(*sep, false, false, 0);
+    }
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
     tv = Gtk::manage(new Gtk::TextView());
     tv->get_buffer()->set_text(*ppc);
