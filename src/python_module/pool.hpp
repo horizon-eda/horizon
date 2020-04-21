@@ -1,6 +1,9 @@
 #pragma once
 #include <Python.h>
-#include "pool/pool.hpp"
+
+namespace horizon {
+class Pool;
+}
 
 extern PyTypeObject PoolType;
 

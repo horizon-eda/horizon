@@ -1,6 +1,7 @@
 #include "pool.hpp"
 #include "pool-update/pool-update.hpp"
 #include "util.hpp"
+#include "pool/pool.hpp"
 #include <structmember.h>
 
 static PyObject *PyPool_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
