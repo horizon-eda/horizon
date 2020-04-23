@@ -6,6 +6,7 @@
 #include "export_pdf/export_pdf_board.hpp"
 #include "export_pnp/export_pnp.hpp"
 #include "export_step/export_step.hpp"
+#include "export_3d_image/export_3d_image.hpp"
 #include "document/document_board.hpp"
 #include "rules/cache.hpp"
 #include <podofo/podofo.h>
@@ -15,6 +16,7 @@
 #include "project/project.hpp"
 #include "pool/pool_cached.hpp"
 #include "rules/rule_descr.hpp"
+#include "3d_image_exporter.hpp"
 
 class BoardWrapper : public horizon::DocumentBoard {
 public:
@@ -343,6 +345,31 @@ static PyObject *PyBoard_get_rule_ids(PyObject *pself, PyObject *args)
     return r;
 }
 
+static PyObject *PyBoard_export_3d(PyObject *pself, PyObject *args)
+{
+    auto self = reinterpret_cast<PyBoard *>(pself);
+    unsigned int w, h;
+    if (!PyArg_ParseTuple(args, "II", &w, &h))
+        return NULL;
+    class horizon::Image3DExporter *exporter = nullptr;
+    try {
+        exporter = new horizon::Image3DExporter(self->board->board, self->board->pool, w, h);
+    }
+    catch (const std::exception &e) {
+        PyErr_SetString(PyExc_IOError, e.what());
+        return NULL;
+    }
+    catch (...) {
+        PyErr_SetString(PyExc_IOError, "unknown exception");
+        return NULL;
+    }
+
+    PyImage3DExporter *ex = PyObject_New(PyImage3DExporter, &Image3DExporterType);
+    ex->exporter = exporter;
+    return reinterpret_cast<PyObject *>(ex);
+}
+
+
 static PyMethodDef PyBoard_methods[] = {
         {"get_gerber_export_settings", PyBoard_get_gerber_export_settings, METH_NOARGS,
          "Return gerber export settings"},
@@ -356,6 +383,7 @@ static PyMethodDef PyBoard_methods[] = {
         {"export_pnp", PyBoard_export_pnp, METH_VARARGS, "Export pick and place"},
         {"export_step", PyBoard_export_step, METH_VARARGS, "Export STEP"},
         {"run_checks", PyBoard_run_checks, METH_VARARGS, "Run checks"},
+        {"export_3d", PyBoard_export_3d, METH_VARARGS, "Export 3D image"},
         {NULL} /* Sentinel */
 };
 

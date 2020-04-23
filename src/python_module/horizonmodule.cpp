@@ -1,4 +1,5 @@
 #include <Python.h>
+#include <py3cairo.h>
 
 #include "pool/pool_manager.hpp"
 
@@ -11,6 +12,7 @@
 #include "project.hpp"
 #include "pool_manager.hpp"
 #include "pool.hpp"
+#include "3d_image_exporter.hpp"
 
 PyDoc_STRVAR(module_doc, "Parts of horizon as a module");
 
@@ -44,7 +46,13 @@ PyMODINIT_FUNC PyInit_horizon(void)
     if (PyType_Ready(&PoolType) < 0)
         return NULL;
 
+    if (PyType_Ready(&Image3DExporterType) < 0)
+        return NULL;
+
     if (!json_init())
+        return NULL;
+
+    if (import_cairo() < 0)
         return NULL;
 
     PyObject *m;
