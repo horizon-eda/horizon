@@ -614,9 +614,11 @@ SRC_PYTHON = \
 	src/python_module/board.cpp \
 	src/python_module/pool_manager.cpp \
 	src/python_module/pool.cpp \
+	src/python_module/3d_image_exporter.cpp \
 
 SRC_OCE_EXPORT = \
 	src/export_step/export_step.cpp\
+	src/util/step_importer.cpp\
 
 SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PGM_TEST) $(SRC_POOL_PRJ_MGR) $(SRC_GEN_PKG))
 
@@ -690,6 +692,14 @@ SRC_SHARED = $(SRC_COMMON) \
 	src/pool-update/pool-update.cpp \
 	src/pool-update/pool-update_parametric.cpp\
 	src/pool-update/graph.cpp\
+	src/export_3d_image/export_3d_image.cpp\
+	src/canvas3d/canvas3d_base.cpp\
+	src/canvas3d/canvas_mesh.cpp\
+	src/canvas3d/background.cpp\
+	src/canvas3d/wall.cpp\
+	src/canvas3d/cover.cpp\
+	src/canvas3d/face.cpp\
+	src/canvas/gl_util.cpp\
 
 SRC_SHARED_GEN = $(SRC_COMMON_GEN)
 
@@ -725,7 +735,7 @@ OBJ_GEN_PKG      = $(addprefix $(OBJDIR)/,$(SRC_GEN_PKG:.cpp=.o))
 
 INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router -I3rd_party
 INC_OCE ?= -I/opt/opencascade/inc/ -I/mingw64/include/oce/ -I/usr/include/oce -I/usr/include/opencascade -I${CASROOT}/include/opencascade -I/usr/local/include/OpenCASCADE
-INC_PYTHON = $(shell $(PKGCONFIG) --cflags python3)
+INC_PYTHON = $(shell $(PKGCONFIG) --cflags python3 py3cairo)
 OCE_LIBDIRS = -L/opt/opencascade/lib/ -L${CASROOT}/lib
 LDFLAGS_OCE = $(OCE_LIBDIRS) -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -lTKTopAlgo -lTKPrim -lTKBO
 ifeq ($(OS),Windows_NT)
@@ -784,7 +794,7 @@ $(BUILDDIR)/horizon-gen-pkg: $(OBJ_COMMON) $(OBJ_GEN_PKG)
 
 $(BUILDDIR)/horizon.so: $(OBJ_PYTHON) $(OBJ_SHARED) $(OBJ_SHARED_OCE)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) python3 glibmm-2.4 giomm-2.4) -lpodofo  $(OCE_LIBDIRS) -lTKXDESTEP -shared -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) python3 glibmm-2.4 giomm-2.4 cairomm-1.0 py3cairo) -lpodofo  $(OCE_LIBDIRS) -lTKXDESTEP -lOSMesa -shared -o $@
 
 $(OBJDIR)/%.o: %.c
 	$(QUIET)$(MKDIR) $(dir $@)
@@ -804,7 +814,7 @@ $(OBJ_SHARED_OCE): INC += $(INC_OCE)
 $(PICOBJDIR)/%.o: %.cpp
 	$(QUIET)$(MKDIR) $(dir $@)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) -c $(INC) $(CXXFLAGS) -fPIC $< -o $@
+	$(QUIET)$(CXX) -c $(INC) $(CXXFLAGS) -fPIC -DOFFSCREEN=1 $< -o $@
 
 $(OBJ_PYTHON): INC += $(INC_PYTHON)
 
