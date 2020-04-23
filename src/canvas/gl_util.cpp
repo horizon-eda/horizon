@@ -1,6 +1,5 @@
 #include "gl_util.hpp"
 #include <giomm/resource.h>
-#include <gtkmm.h>
 #include <iostream>
 #include "common/common.hpp"
 #include "logger/logger.hpp"

@@ -1,4 +1,4 @@
-#include <epoxy/gl.h>
+#include "util/gl_inc.h"
 #include <string>
 #include <sstream>
 

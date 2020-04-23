@@ -6,5 +6,5 @@ in vec3 normal_to_fragment;
 uniform vec3 cam_normal;
 
 void main() {
-  outputColor = vec4(color_to_fragment, 1)*(abs(dot(cam_normal, normal_to_fragment))+.1);
+  outputColor = vec4(color_to_fragment*(abs(dot(cam_normal, normal_to_fragment))+.1), 1);
 }

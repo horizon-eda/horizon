@@ -2,7 +2,7 @@
 #include "common/common.hpp"
 #include "util/uuid.hpp"
 #include "color_palette.hpp"
-#include <epoxy/gl.h>
+#include "util/gl_inc.h"
 
 namespace horizon {
 class ObjectRef {

@@ -377,6 +377,7 @@ SRC_IMP = \
 	src/imp/tuning_window.cpp\
 	src/canvas3d/canvas_mesh.cpp\
 	src/canvas3d/canvas3d.cpp\
+	src/canvas3d/canvas3d_base.cpp\
 	src/canvas3d/cover.cpp\
 	src/canvas3d/wall.cpp\
 	src/canvas3d/face.cpp\

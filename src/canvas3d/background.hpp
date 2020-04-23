@@ -1,15 +1,15 @@
 #pragma once
-#include <epoxy/gl.h>
+#include "util/gl_inc.h"
 
 namespace horizon {
 class BackgroundRenderer {
 public:
-    BackgroundRenderer(class Canvas3D *c);
+    BackgroundRenderer(class Canvas3DBase &c);
     void realize();
     void render();
 
 private:
-    Canvas3D *ca;
+    Canvas3DBase &ca;
 
     GLuint program;
     GLuint vao;

@@ -1,17 +1,17 @@
 #pragma once
-#include <epoxy/gl.h>
+#include "util/gl_inc.h"
 #include <unordered_map>
 
 namespace horizon {
 class WallRenderer {
 public:
-    WallRenderer(class Canvas3D *c);
+    WallRenderer(class Canvas3DBase &c);
     void realize();
     void render();
     void push();
 
 private:
-    Canvas3D *ca;
+    Canvas3DBase &ca;
     std::unordered_map<int, size_t> layer_offsets;
     size_t n_vertices = 0;
     void render(int layer);
