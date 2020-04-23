@@ -1,17 +1,17 @@
 #pragma once
-#include <epoxy/gl.h>
+#include "util/gl_inc.h"
 #include <unordered_map>
 
 namespace horizon {
 class FaceRenderer {
 public:
-    FaceRenderer(class Canvas3D *c);
+    FaceRenderer(class Canvas3DBase &c);
     void realize();
     void render();
     void push();
 
 private:
-    Canvas3D *ca;
+    Canvas3DBase &ca;
 
     GLuint program;
     GLuint vao;
