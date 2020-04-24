@@ -923,7 +923,7 @@ static void append_bottom_layers(std::vector<int> &layers)
     std::vector<int> bottoms;
     bottoms.reserve(layers.size());
     for (auto it = layers.rbegin(); it != layers.rend(); it++) {
-        if (*it >= 0 && *it != BoardLayers::L_OUTLINE)
+        if (*it >= 0 && *it != BoardLayers::L_OUTLINE && *it != BoardLayers::OUTLINE_NOTES)
             bottoms.push_back(-100 - *it);
     }
     layers.insert(layers.end(), bottoms.begin(), bottoms.end());

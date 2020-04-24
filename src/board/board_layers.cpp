@@ -64,7 +64,7 @@ std::string BoardLayers::get_layer_name(int l)
     case BOTTOM_NOTES:
         return "Bottom Notes";
     }
-    return "Invalid layer";
+    return "Invalid layer " + std::to_string(l);
 }
 
 static const std::vector<int> layers = {
