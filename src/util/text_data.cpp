@@ -168,6 +168,8 @@ static unsigned int codepoint_to_hershey(gunichar c, TextData::Font font)
             return 871;
         case 0xb0: // U+00B0 DEGREE SIGN
             return 718;
+        case 0xb1: // U+00B1 PLUS MINUS SIGN
+            return 2233;
         default:
             return 870; // palm tree
         }
