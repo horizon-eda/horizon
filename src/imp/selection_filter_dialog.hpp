@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include "common/common.hpp"
 #include "util/changeable.hpp"
+#include <set>
 namespace horizon {
 
 class SelectionFilterDialog : public Gtk::Window, public Changeable {
