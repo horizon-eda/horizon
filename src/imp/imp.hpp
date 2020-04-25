@@ -65,6 +65,10 @@ public:
     };
 
     virtual std::map<ObjectType, SelectionFilterInfo> get_selection_filter_info() const;
+    virtual bool is_layered() const
+    {
+        return false;
+    };
 
 protected:
     MainWindow *main_window;

@@ -47,10 +47,9 @@ SelectionFilterDialog::SelectionFilterDialog(Gtk::Window *parent, SelectionFilte
             cb->set_active(true);
             if (it.second.layers.size() == 0) {
                 cb->signal_toggled().connect([this, ot, cb] {
-                    selection_filter.object_filter.at(ot).other_layers = cb->get_active();
+                    update_filter();
                     update();
                 });
-                selection_filter.object_filter[ot].other_layers = true;
             }
             else {
                 cb->signal_toggled().connect([this, ot, cb] {
@@ -74,6 +73,7 @@ SelectionFilterDialog::SelectionFilterDialog(Gtk::Window *parent, SelectionFilte
             box->property_margin() = 3;
             if (it.second.layers.size() != 0) {
                 auto expand_button = Gtk::manage(new Gtk::ToggleButton);
+                checkbuttons.at(ot).expand_button = expand_button;
                 expand_button->set_image_from_icon_name("pan-end-symbolic", Gtk::ICON_SIZE_BUTTON);
                 expand_button->get_style_context()->add_class("imp-selection-filter-tiny-button");
                 expand_button->set_relief(Gtk::RELIEF_NONE);
@@ -117,10 +117,9 @@ SelectionFilterDialog::SelectionFilterDialog(Gtk::Window *parent, SelectionFilte
             listbox->append(*cbl);
             cbl->show();
             cbl->get_parent()->set_visible(false);
-            selection_filter.object_filter[ot].other_layers = true;
             connect_doubleclick(cbl);
             cbl->signal_toggled().connect([this, ot, cbl] {
-                selection_filter.object_filter[ot].other_layers = cbl->get_active();
+                update_filter();
                 if (!checkbuttons[ot].blocked)
                     update();
             });
@@ -133,6 +132,19 @@ SelectionFilterDialog::SelectionFilterDialog(Gtk::Window *parent, SelectionFilte
     sc->add(*listbox);
 
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+
+    if (imp.is_layered()) {
+        work_layer_only_cb = Gtk::manage(new Gtk::CheckButton("Work layer only"));
+        work_layer_only_cb->property_margin() = 3;
+        work_layer_only_cb->signal_toggled().connect(
+                sigc::mem_fun(*this, &SelectionFilterDialog::update_work_layer_only));
+        box->pack_start(*work_layer_only_cb, false, false, 0);
+        {
+            auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+            box->pack_start(*sep, false, false, 0);
+        }
+    }
+
     box->pack_start(*sc, true, true, 0);
 
     {
@@ -150,6 +162,87 @@ SelectionFilterDialog::SelectionFilterDialog(Gtk::Window *parent, SelectionFilte
     add(*box);
     box->show_all();
     update();
+    update_filter();
+}
+
+void SelectionFilterDialog::update_filter()
+{
+    for (const auto &it : checkbuttons) {
+        if (it.second.layer_buttons.size() == 0) {
+            if (work_layer_only)
+                selection_filter.object_filter[it.first].other_layers = false;
+            else
+                selection_filter.object_filter[it.first].other_layers = it.second.checkbutton->get_active();
+        }
+        else {
+            if (work_layer_only) {
+                selection_filter.object_filter[it.first].other_layers = false;
+                if (it.second.checkbutton->get_active())
+                    selection_filter.object_filter[it.first].layers = {{work_layer, true}};
+                else
+                    selection_filter.object_filter[it.first].layers.clear();
+            }
+            else {
+                if (it.second.other_layer_checkbutton)
+                    selection_filter.object_filter[it.first].other_layers =
+                            it.second.other_layer_checkbutton->get_active();
+                for (auto &it_la : it.second.layer_buttons) {
+                    selection_filter.object_filter[it.first].layers[it_la.first] = it_la.second->get_active();
+                }
+            }
+        }
+    }
+}
+
+void SelectionFilterDialog::set_work_layer(int layer)
+{
+    work_layer = layer;
+    update_work_layer_only();
+}
+
+void SelectionFilterDialog::update_work_layer_only()
+{
+    if (!work_layer_only_cb)
+        return;
+    work_layer_only = work_layer_only_cb->get_active();
+    if (work_layer_only && !work_layer_only_before) { // got activated, save
+        saved.clear();
+        for (auto &it : checkbuttons) {
+            saved[it.first];
+            if (it.second.layer_buttons.size() == 0) {
+                if (it.second.checkbutton->get_active())
+                    saved.at(it.first).insert(0);
+                it.second.checkbutton->set_active(false);
+                it.second.checkbutton->set_sensitive(false);
+            }
+            else {
+                if (it.second.expand_button) {
+                    if (it.second.expand_button->get_active())
+                        saved.at(it.first).insert(10001);
+                    it.second.expand_button->set_active(false);
+                    it.second.expand_button->set_sensitive(false);
+                }
+            }
+        }
+    }
+
+    if (!work_layer_only && work_layer_only_before) { // got deactivated, restore
+        for (auto &it : checkbuttons) {
+            if (saved.count(it.first)) {
+                const auto &sav = saved.at(it.first);
+                it.second.checkbutton->set_sensitive(true);
+                if (it.second.layer_buttons.size() == 0) {
+                    it.second.checkbutton->set_active(sav.count(0));
+                }
+                else {
+                    it.second.expand_button->set_active(sav.count(10001));
+                    it.second.expand_button->set_sensitive(true);
+                }
+            }
+        }
+    }
+    work_layer_only_before = work_layer_only;
+    update_filter();
 }
 
 bool SelectionFilterDialog::Type::get_all_active()
@@ -196,10 +289,28 @@ void SelectionFilterDialog::Type::update()
 
 void SelectionFilterDialog::update()
 {
-    reset_button->set_sensitive(
-            !std::all_of(checkbuttons.begin(), checkbuttons.end(), [](auto x) { return x.second.get_all_active(); }));
+    if (!work_layer_only) {
+        reset_button->set_sensitive(!std::all_of(checkbuttons.begin(), checkbuttons.end(),
+                                                 [](auto x) { return x.second.get_all_active(); }));
+    }
+    else {
+        reset_button->set_sensitive(false);
+        for (const auto &it : checkbuttons) {
+            if (it.second.layer_buttons.size()) {
+                if (!it.second.checkbutton->get_active()) {
+                    reset_button->set_sensitive(true);
+                    break;
+                }
+            }
+        }
+    }
     for (auto &it : checkbuttons) {
-        it.second.update();
+        if (work_layer_only) {
+            it.second.checkbutton->set_inconsistent(false);
+        }
+        else {
+            it.second.update();
+        }
     }
     s_signal_changed.emit();
 }
@@ -212,7 +323,8 @@ void SelectionFilterDialog::set_all(bool state)
         }
         if (it.second.other_layer_checkbutton)
             it.second.other_layer_checkbutton->set_active(state);
-        it.second.checkbutton->set_active(state);
+        if (it.second.checkbutton->get_sensitive())
+            it.second.checkbutton->set_active(state);
     }
 }
 
@@ -243,13 +355,13 @@ Gtk::CheckButton *SelectionFilterDialog::add_layer_button(ObjectType type, int l
     cbl->show();
     cbl->get_parent()->set_visible(false);
     cbl->set_active(active);
-    selection_filter.object_filter[type].layers[layer] = active;
     connect_doubleclick(cbl);
     cbl->signal_toggled().connect([this, type, layer, cbl] {
-        selection_filter.object_filter.at(type).layers.at(layer) = cbl->get_active();
+        update_filter();
         if (!checkbuttons[type].blocked)
             update();
     });
+    update_filter();
     return cbl;
 }
 
@@ -287,7 +399,8 @@ void SelectionFilterDialog::update_layers()
 
 bool SelectionFilterDialog::get_filtered()
 {
-    return !std::all_of(checkbuttons.begin(), checkbuttons.end(), [](auto x) { return x.second.get_all_active(); });
+    return work_layer_only
+           || !std::all_of(checkbuttons.begin(), checkbuttons.end(), [](auto x) { return x.second.get_all_active(); });
 }
 
 } // namespace horizon

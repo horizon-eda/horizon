@@ -724,6 +724,7 @@ void ImpBase::run(int argc, char *argv[])
             ToolResponse r = core->tool_update(args);
             tool_process(r);
         }
+        selection_filter_dialog->set_work_layer(canvas->property_work_layer());
     });
 
     canvas->signal_grid_mul_changed().connect([this](unsigned int mul) {

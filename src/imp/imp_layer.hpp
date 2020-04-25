@@ -8,6 +8,11 @@ class ImpLayer : public ImpBase {
 public:
     using ImpBase::ImpBase;
 
+    bool is_layered() const override
+    {
+        return true;
+    };
+
 protected:
     void construct_layer_box(bool pack = true);
     class LayerBox *layer_box;
