@@ -39,6 +39,31 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="1.0.90" date="2020-04-25" type="development">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v1.0.90</url>
+      <description>
+        <p>New features</p>
+        <ul>
+          <li>Pick&amp;place export</li>
+          <li>Support replacing project metadata variables on board</li>
+          <li>Airwire filter</li>
+          <li>Support for touchscreen pan and zoom gestures</li>
+          <li>Support for "dot not populate" components</li>
+          <li>Action for selecting all vertices of a polygon</li>
+          <li>Panelisation</li>
+          <li>Outline layer in packages</li>
+          <li>Automatic update of pool cache status and hint when placing out of date part</li>
+          <li>Recursive `git add` from git tab in pool manager</li>
+          <li>Tool for resizing symbols</li>
+          <li>Tool for generating silkscreen</li>
+          <li>Run board checks from python module</li>
+          <li>Tool for rounding off polygon vertices</li>
+          <li>Pool update from python module</li>
+          <li>Package python module as docker image</li>
+          <li>Export 3D rendering from python module</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.0.0" date="2020-01-29">
       <description>
         <p>initial release</p>
