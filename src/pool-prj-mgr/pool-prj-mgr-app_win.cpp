@@ -1199,6 +1199,7 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
         auto proc = find_process(args.at(0));
         if (proc->proc) {
             auto pid = proc->proc->get_pid();
+            allow_set_foreground_window(pid);
             Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(get_application())
                     ->send_json(pid, {{"op", "present"}, {"time", gtk_get_current_event_time()}});
         }
