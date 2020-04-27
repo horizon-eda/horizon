@@ -1,0 +1,28 @@
+name: Build on debian bullseye
+
+on:
+  push:
+    branches: [ '*' ]
+    tags: [ '*' ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-gcc-10:
+    runs-on: ubuntu-latest
+    container: debian:bullseye
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: apt-get update -y && apt-get install libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git g++-10 make -y
+    - name: Build
+      run: make CXX=g++-10 CC=gcc-10 -j2
+  build:
+    runs-on: ubuntu-latest
+    container: debian:bullseye
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: apt-get update -y && apt-get install libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git g++ make -y
+    - name: Build
+      run: make -j2
