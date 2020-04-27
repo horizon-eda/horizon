@@ -156,7 +156,11 @@ void Canvas3DBase::push()
     face_renderer.push();
 }
 
-static const float magic_number = 0.4143;
+float Canvas3DBase::get_magic_number() const
+{
+    return tan(0.5 * glm::radians(cam_fov));
+}
+
 
 void Canvas3DBase::render(RenderBackground mode)
 {
@@ -203,7 +207,7 @@ void Canvas3DBase::render(RenderBackground mode)
         cam_dist_max = std::max(dist, cam_dist_max);
         cam_dist_min = std::min(dist, cam_dist_min);
     }
-    float m = magic_number / height * cam_distance;
+    float m = get_magic_number() / height * cam_distance;
     float d = cam_dist_max * 2;
     if (projection == Projection::PERSP) {
         projmat = glm::perspective(glm::radians(cam_fov), width / height, cam_dist_min / 2, cam_dist_max * 2);
@@ -259,7 +263,7 @@ void Canvas3DBase::view_all()
     center = {(xmin + xmax) / 2e6, (ymin + ymax) / 2e6};
 
 
-    cam_distance = std::max(board_width / width, board_height / height) / (2 * magic_number / height) * 1.1;
+    cam_distance = std::max(board_width / width, board_height / height) / (2 * get_magic_number() / height) * 1.1;
     cam_azimuth = 270;
     cam_elevation = 89.99;
 }

@@ -138,6 +138,8 @@ protected:
     std::map<std::string, std::pair<size_t, size_t>>
             package_transform_idxs; // key: model filename: value: first: offset
                                     // in package_transforms second: no of items
+private:
+    float get_magic_number() const;
 };
 
 } // namespace horizon
