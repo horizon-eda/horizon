@@ -58,10 +58,7 @@ void Image3DExporter::load_3d_models()
         std::cout << "load " << it.first << std::endl;
         load_3d_model(it.first, it.second);
     }
-    package_height_max = 0;
-    for (const auto &it : face_vertex_buffer) {
-        package_height_max = std::max(it.z, package_height_max);
-    }
+    update_max_package_height();
     face_renderer.push();
 }
 

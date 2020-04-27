@@ -403,4 +403,12 @@ void Canvas3DBase::clear_3d_models()
     models.clear();
 }
 
+void Canvas3DBase::update_max_package_height()
+{
+    package_height_max = 0;
+    for (const auto &it : face_vertex_buffer) {
+        package_height_max = std::max(it.z, package_height_max);
+    }
+}
+
 } // namespace horizon

@@ -93,9 +93,6 @@ protected:
     FaceRenderer face_renderer;
     BackgroundRenderer background_renderer;
 
-    float get_layer_offset(int layer) const;
-    float get_layer_thickness(int layer) const;
-    bool layer_is_visible(int layer) const;
     void a_realize();
     void resize_buffers();
     void push();
@@ -105,20 +102,9 @@ protected:
     void prepare();
     void prepare_packages();
 
-
-    GLuint renderbuffer;
-    GLuint fbo;
-    GLuint depthrenderbuffer;
     unsigned int num_samples = 1;
 
-    glm::mat4 viewmat;
-    glm::mat4 projmat;
-    glm::vec3 cam_normal;
-
     const class Board *brd = nullptr;
-
-    std::pair<glm::vec3, glm::vec3> bbox;
-    float package_height_max = 0;
 
     std::set<UUID> packages_highlight;
 
@@ -127,6 +113,25 @@ protected:
     std::map<std::string, std::string> get_model_filenames(class Pool &pool);
 
     std::mutex models_loading_mutex;
+
+    void update_max_package_height();
+
+private:
+    float get_layer_offset(int layer) const;
+    float get_layer_thickness(int layer) const;
+    bool layer_is_visible(int layer) const;
+
+    std::pair<glm::vec3, glm::vec3> bbox;
+
+    GLuint renderbuffer;
+    GLuint fbo;
+    GLuint depthrenderbuffer;
+
+    glm::mat4 viewmat;
+    glm::mat4 projmat;
+    glm::vec3 cam_normal;
+
+    float package_height_max = 0;
     std::vector<FaceVertex> face_vertex_buffer;              // vertices of all models, sequentially
     std::vector<unsigned int> face_index_buffer;             // indexes face_vertex_buffer to form triangles
     std::map<std::string, std::pair<size_t, size_t>> models; // key: filename value: first: offset in face_index_buffer
@@ -138,7 +143,7 @@ protected:
     std::map<std::string, std::pair<size_t, size_t>>
             package_transform_idxs; // key: model filename: value: first: offset
                                     // in package_transforms second: no of items
-private:
+
     float get_magic_number() const;
 };
 

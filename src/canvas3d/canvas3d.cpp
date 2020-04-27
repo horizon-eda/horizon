@@ -25,10 +25,7 @@ Canvas3D::Canvas3D()
                | Gdk::SMOOTH_SCROLL_MASK);
 
     models_loading_dispatcher.connect([this] {
-        package_height_max = 0;
-        for (const auto &it : face_vertex_buffer) {
-            package_height_max = std::max(it.z, package_height_max);
-        }
+        update_max_package_height();
         request_push();
         s_signal_models_loading.emit(false);
     });
