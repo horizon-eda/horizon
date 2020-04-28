@@ -58,6 +58,7 @@ ToolPopover::ToolPopover(Gtk::Widget *parent, ActionCatalogItem::Availability av
     view->append_column("Action", list_columns.name);
     view->append_column("Keys", list_columns.keys);
     view->set_enable_search(false);
+    view->set_activate_on_single_click(true);
     view->signal_key_press_event().connect([this](GdkEventKey *ev) -> bool {
         search_entry->grab_focus_without_selecting();
         return search_entry->handle_event(ev);
