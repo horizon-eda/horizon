@@ -34,6 +34,7 @@
  - Show project title in window title of project manager, schematic and board interactive manipulator ([71e69cc](https://github.com/horizon-eda/horizon/commit/71e69ccf0713ec92504f0a93d7241b08eabf9940))
  - Show package in component head-up display ([6214fa1](https://github.com/horizon-eda/horizon/commit/6214fa1c6d90ab35bfb7f343be0e84285fd23603))
  - Support degree sign (U+00B0) in texts ([5875829](https://github.com/horizon-eda/horizon/commit/587582958876ef160f6866aaac04bc515a1f073d))
+ - Support plus/minus sign (U+00B1) in texts ([3f90d8f](https://github.com/horizon-eda/horizon/commit/3f90d8f6503ced3f73d37c6a19b251d4c07de060))
  - Show status of selection filter, airwire filter and flipped view in status bar ([162a679](https://github.com/horizon-eda/horizon/commit/162a6793302870ae84c5f66fb1e3b6c8002a5270))
  - Make URLs in text clickable in head-up display ([6fd2652](https://github.com/horizon-eda/horizon/commit/6fd26526f170eee3f52c06a6a5e36a1d0e8eba7d))
  - Support for mirroring/rotating around cursor in move tool ([455599e](https://github.com/horizon-eda/horizon/commit/455599e7fa696cedd4bb68cb51ff448ca95ba7c2))
@@ -78,6 +79,7 @@
  - Update property panels after undo/redo ([cb29541](https://github.com/horizon-eda/horizon/commit/cb29541418fb2546a3470b0d013729a61ff2b7df))
  - Use proper window title in open pool/project file chooser ([93998c0](https://github.com/horizon-eda/horizon/commit/93998c05983d17dfcb3ab63c3dc02c3fe9df6d05))
  - Fix selection preview in selection clarification menu on win32 ([db61b45](https://github.com/horizon-eda/horizon/commit/db61b4542b8f8abc51e29b50c0a9dac80f0b7e3d))
+ - Fix focus passing from project manager to editor on win32 ([940aa17](https://github.com/horizon-eda/horizon/commit/940aa17dfa77869e5cbc37110b7302656b5f3998))
 
 ## Changed behavior
 
