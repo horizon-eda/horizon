@@ -1,4 +1,4 @@
-# Version 1.0.90 (will eventually become 1.1.0)
+# Version 1.1.0
 
 ## Added features
 
@@ -53,7 +53,7 @@
  - Improve typesetting in dimension inputs ([058fdb8](https://github.com/horizon-eda/horizon/commit/058fdb8d9a0305f88b22d6aa2c8e6b9c0c00656b))
  - Export STEP from python module ([ea5e8b2](https://github.com/horizon-eda/horizon/commit/ea5e8b2c780ab8e5b138efe468f2a664ffc30c64))
  - Support `file://` schema in Links ([fedc6f6](https://github.com/horizon-eda/horizon/commit/fedc6f6ef2a4c92bac5f4398ea376230f1c29e91))
- - Add "Work layer only" checkbox to selection filter dialog
+ - Add "Work layer only" checkbox to selection filter dialog ([e464ec4](https://github.com/horizon-eda/horizon/commit/e464ec4b6266d2a0ff835af8db57cfd7b817a18f))
 
 ## Bugfixes
 
@@ -86,6 +86,7 @@
  - Deleting the last gate's symbol of a component in a schematic will automatically delete the entire component without the option to keep the component with no symbols visible ([f34e006](https://github.com/horizon-eda/horizon/commit/f34e006e7ddee06c1b4126611b9695c0d4498ef5))
  - Save interactive manipulator metadata such as layer visibility and grid spacing to a separate file such as `board.json.imp_meta` rather than to the board file itself ([bb1aa8c](https://github.com/horizon-eda/horizon/commit/bb1aa8c398f051d272c9576dbd783091e3a95a35))
  - Package interactive manipulator automatically deletes floating junctions and shows junctions only if selected ([acd5c44](https://github.com/horizon-eda/horizon/commit/acd5c4498f9c1d5ed4c16a0f43fba86d53bc87ad))
+ - Actions in tool popover are activated with a single click rather than a double click ([576da12](https://github.com/horizon-eda/horizon/commit/576da12accf2176a836ed4634ae7feda8303efcd))
 
 ## Removals
 
