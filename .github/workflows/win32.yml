@@ -25,6 +25,8 @@ jobs:
     - name: Install dependencies
       shell: cmd
       run: msys2do pacman -S --noconfirm --needed mingw-w64-x86_64-gcc mingw-w64-x86_64-{gcc,gtkmm3,boost,sqlite3,toolchain,zeromq,glm,libgit2,oce,podofo,libzip} zip make git dos2unix
+    - name: Pixbuf loader test
+      run: msys2do gdk-pixbuf-query-loaders
     - name: Build
       run: msys2do make -j2
     - name: Make dist
