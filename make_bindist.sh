@@ -49,7 +49,6 @@ LIBS=(
 	librsvg-2-2.dll\
 	libxml2-2.dll\
 	liblzma-5.dll\
-	libcroco-0.6-3.dll\
 	libtiff-5.dll\
 	libzmq.dll\
 	libsodium-23.dll\
@@ -112,6 +111,7 @@ rm -rf $DISTDIR/share/icons/Adwaita/cursors
 
 mkdir -p $DISTDIR/lib
 cp -r /mingw64/lib/gdk-pixbuf-2.0 $DISTDIR/lib
+gdk-pixbuf-query-loaders > $DISTDIR/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
 rm $DISTDIR/lib/gdk-pixbuf-*/*/loaders/*.a
 
 mkdir -p $DISTDIR/share/glib-2.0/schemas
