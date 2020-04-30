@@ -822,7 +822,7 @@ $(OBJ_RES): $(OBJDIR)/%.res: %.rc
 	$(QUIET)$(MKDIR) $(dir $@)
 	windres $< -O coff -o $@
 
-install: $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-eda $(BUILDDIR)/horizon-prj $(BUILDDIR)/horizon-pool
+install: $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-eda
 	mkdir -p $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m755 $(BUILDDIR)/horizon-imp $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m755 $(BUILDDIR)/horizon-eda $(DESTDIR)$(BINDIR)
