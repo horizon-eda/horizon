@@ -9,6 +9,8 @@
 #include <gtkmm.h>
 #include <unordered_map>
 #include "canvas3d_base.hpp"
+#include <atomic>
+#include <thread>
 
 namespace horizon {
 class Canvas3D : public Gtk::GLArea, public Canvas3DBase {
@@ -38,13 +40,15 @@ public:
 
     void view_all();
 
-    typedef sigc::signal<void, bool> type_signal_models_loading;
+    typedef sigc::signal<void, unsigned int, unsigned int> type_signal_models_loading;
     type_signal_models_loading signal_models_loading()
     {
         return s_signal_models_loading;
     }
 
     int _animate_step(GdkFrameClock *frame_clock);
+
+    ~Canvas3D();
 
 private:
     bool needs_push = false;
@@ -101,5 +105,10 @@ private:
     Glib::Dispatcher models_loading_dispatcher;
 
     type_signal_models_loading s_signal_models_loading;
+    unsigned int n_models_loading = 0;
+    std::atomic<unsigned int> i_model_loading;
+
+    std::thread model_load_thread;
+    std::atomic<bool> stop_model_load_thread;
 };
 } // namespace horizon

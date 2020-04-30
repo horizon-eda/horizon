@@ -331,25 +331,29 @@ void Canvas3DBase::load_3d_model(const std::string &filename, const std::string 
         return;
 
     auto faces = STEPImporter::import(filename_abs);
-    // canvas->face_vertex_buffer.reserve(faces.size());
-    size_t vertex_offset = face_vertex_buffer.size();
-    size_t first_index = face_index_buffer.size();
-    for (const auto &face : faces) {
-        for (const auto &v : face.vertices) {
-            face_vertex_buffer.emplace_back(v.x, v.y, v.z, face.color.r * 255, face.color.g * 255, face.color.b * 255);
+    {
+        std::lock_guard<std::mutex> lock(models_loading_mutex);
+        // canvas->face_vertex_buffer.reserve(faces.size());
+        size_t vertex_offset = face_vertex_buffer.size();
+        size_t first_index = face_index_buffer.size();
+        for (const auto &face : faces) {
+            for (const auto &v : face.vertices) {
+                face_vertex_buffer.emplace_back(v.x, v.y, v.z, face.color.r * 255, face.color.g * 255,
+                                                face.color.b * 255);
+            }
+            for (const auto &tri : face.triangle_indices) {
+                size_t a, b, c;
+                std::tie(a, b, c) = tri;
+                face_index_buffer.push_back(a + vertex_offset);
+                face_index_buffer.push_back(b + vertex_offset);
+                face_index_buffer.push_back(c + vertex_offset);
+            }
+            vertex_offset += face.vertices.size();
         }
-        for (const auto &tri : face.triangle_indices) {
-            size_t a, b, c;
-            std::tie(a, b, c) = tri;
-            face_index_buffer.push_back(a + vertex_offset);
-            face_index_buffer.push_back(b + vertex_offset);
-            face_index_buffer.push_back(c + vertex_offset);
-        }
-        vertex_offset += face.vertices.size();
+        size_t last_index = face_index_buffer.size();
+        models.emplace(std::piecewise_construct, std::forward_as_tuple(filename),
+                       std::forward_as_tuple(first_index, last_index - first_index));
     }
-    size_t last_index = face_index_buffer.size();
-    models.emplace(std::piecewise_construct, std::forward_as_tuple(filename),
-                   std::forward_as_tuple(first_index, last_index - first_index));
 }
 
 

@@ -19,7 +19,7 @@
 
 namespace horizon {
 
-Canvas3D::Canvas3D()
+Canvas3D::Canvas3D() : i_model_loading(0), stop_model_load_thread(false)
 {
     add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_MOTION_MASK | Gdk::SCROLL_MASK
                | Gdk::SMOOTH_SCROLL_MASK);
@@ -27,7 +27,10 @@ Canvas3D::Canvas3D()
     models_loading_dispatcher.connect([this] {
         update_max_package_height();
         request_push();
-        s_signal_models_loading.emit(false);
+        s_signal_models_loading.emit(i_model_loading, n_models_loading);
+        if ((i_model_loading >= n_models_loading) && model_load_thread.joinable()) {
+            model_load_thread.join();
+        }
     });
 
     gesture_drag = Gtk::GestureDrag::create(*this);
@@ -306,22 +309,48 @@ void Canvas3D::prepare()
 
 void Canvas3D::load_models_thread(std::map<std::string, std::string> model_filenames)
 {
-    std::lock_guard<std::mutex> lock(models_loading_mutex);
-    for (const auto &it : model_filenames) {
-        load_3d_model(it.first, it.second);
+    class FilenameItem {
+    public:
+        FilenameItem(const std::string &fn, const std::string &fn_abs, goffset sz)
+            : filename(fn), filename_abs(fn_abs), size(sz)
+        {
+        }
+        std::string filename;
+        std::string filename_abs;
+        goffset size;
+    };
+    std::vector<FilenameItem> model_filenames_sorted;
+    model_filenames_sorted.reserve(model_filenames.size());
+    std::transform(model_filenames.begin(), model_filenames.end(), std::back_inserter(model_filenames_sorted),
+                   [](const auto &x) {
+                       auto fi = Gio::File::create_for_path(x.second);
+                       auto sz = fi->query_info(G_FILE_ATTRIBUTE_STANDARD_SIZE)->get_size();
+                       return FilenameItem(x.first, x.second, sz);
+                   });
+    std::sort(model_filenames_sorted.begin(), model_filenames_sorted.end(),
+              [](const auto &a, const auto &b) { return a.size < b.size; });
+
+    for (const auto &it : model_filenames_sorted) {
+        load_3d_model(it.filename, it.filename_abs);
+        i_model_loading++;
+        models_loading_dispatcher.emit();
+        if (stop_model_load_thread)
+            return;
     }
-    models_loading_dispatcher.emit();
 }
 
 void Canvas3D::load_models_async(Pool *pool)
 {
+    if (model_load_thread.joinable())
+        return;
+
     std::map<std::string, std::string> model_filenames =
             get_model_filenames(*pool); // first: relative, second: absolute
 
-    s_signal_models_loading.emit(true);
-    std::thread thr(&Canvas3D::load_models_thread, this, model_filenames);
-
-    thr.detach();
+    n_models_loading = model_filenames.size();
+    i_model_loading = 0;
+    s_signal_models_loading.emit(i_model_loading, n_models_loading);
+    model_load_thread = std::thread(&Canvas3D::load_models_thread, this, model_filenames);
 }
 
 void Canvas3D::update_packages()
@@ -358,4 +387,13 @@ bool Canvas3D::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
 
     return Gtk::GLArea::on_render(context);
 }
+
+Canvas3D::~Canvas3D()
+{
+    stop_model_load_thread = true;
+    if (model_load_thread.joinable()) {
+        model_load_thread.join();
+    }
+}
+
 } // namespace horizon

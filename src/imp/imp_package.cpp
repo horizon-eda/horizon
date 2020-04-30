@@ -350,4 +350,9 @@ void ImpPackage::update_header()
     set_window_title(entry_name->get_text());
 }
 
+ImpPackage::~ImpPackage()
+{
+    delete view_3d_window;
+}
+
 } // namespace horizon

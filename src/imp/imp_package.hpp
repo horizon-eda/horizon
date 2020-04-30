@@ -14,6 +14,8 @@ public:
 
     std::map<ObjectType, SelectionFilterInfo> get_selection_filter_info() const override;
 
+    ~ImpPackage();
+
 protected:
     void construct() override;
     void apply_preferences() override;

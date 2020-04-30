@@ -1000,4 +1000,9 @@ std::vector<std::string> ImpBoard::get_view_hints()
     return r;
 }
 
+ImpBoard::~ImpBoard()
+{
+    delete view_3d_window;
+}
+
 } // namespace horizon

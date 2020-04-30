@@ -15,6 +15,8 @@ public:
 
     std::map<ObjectType, SelectionFilterInfo> get_selection_filter_info() const override;
 
+    ~ImpBoard();
+
 protected:
     void construct() override;
     bool handle_broadcast(const json &j) override;

@@ -212,9 +212,13 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
 
     x->get_widget("model_loading_revealer", model_loading_revealer);
     x->get_widget("model_loading_spinner", model_loading_spinner);
-    canvas->signal_models_loading().connect([this](bool v) {
-        model_loading_revealer->set_reveal_child(v);
-        model_loading_spinner->property_active() = v;
+    x->get_widget("model_loading_progress", model_loading_progress);
+    canvas->signal_models_loading().connect([this](unsigned int i, unsigned int n) {
+        bool loading = i < n;
+        model_loading_revealer->set_reveal_child(loading);
+        model_loading_spinner->property_active() = loading;
+        model_loading_progress->set_visible(n > 1);
+        model_loading_progress->set_fraction(i / (n * 1.0));
     });
 
     Gtk::ComboBoxText *msaa_combo;
