@@ -92,10 +92,18 @@ void ImpSymbol::construct()
     name_entry->signal_changed().connect([this] { core_symbol.set_needs_save(); });
     name_entry->signal_activate().connect(sigc::mem_fun(*this, &ImpSymbol::update_header));
 
-    unit_label = Gtk::manage(new Gtk::Label(core_symbol.get_symbol()->unit->name));
-    unit_label->set_xalign(0);
-    unit_label->set_selectable(true);
-    header_button->add_widget("Unit", unit_label);
+    {
+        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10));
+        unit_label = Gtk::manage(new Gtk::Label(core_symbol.get_symbol()->unit->name));
+        unit_label->set_xalign(0);
+        unit_label->set_selectable(true);
+        box->pack_start(*unit_label, true, true, 0);
+        auto button = create_action_button(make_action(ToolID::CHANGE_UNIT));
+        button->set_label("Change");
+        box->pack_start(*button, false, false, 0);
+        box->show_all();
+        header_button->add_widget("Unit", box);
+    }
 
     can_expand_switch = Gtk::manage(new Gtk::Switch);
     can_expand_switch->set_active(core_symbol.get_symbol()->can_expand);
