@@ -38,7 +38,12 @@ ToolResponse ToolResizeSymbol::begin(const ToolArgs &args)
 
 void ToolResizeSymbol::update_positions(const Coordi &ac)
 {
-    auto c = (ac - pos_orig) + delta_key;
+    auto d = ac - pos_orig;
+    if (pos_orig.y < 0)
+        d.y *= -1;
+    if (pos_orig.x < 0)
+        d.x *= -1;
+    auto c = d + delta_key;
     imp->tool_bar_set_tip("<b>LMB:</b>finish <b>RMB:</b>cancel <i>" + coord_to_string(c, true) + "</i>");
     auto &sym = *doc.y->get_symbol();
     for (auto &it : sym.pins) {
