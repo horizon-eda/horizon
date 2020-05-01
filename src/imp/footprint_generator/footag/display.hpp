@@ -30,6 +30,7 @@ private:
     void calc_and_display();
     void calc(Package *pkg, const struct footag_spec *s);
     void display();
+    Gtk::Allocation old_alloc;
     void help(const struct footag_param *p);
 };
 } // namespace horizon

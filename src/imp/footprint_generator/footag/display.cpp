@@ -7,6 +7,7 @@
 #include "util/str_util.hpp"
 #include "document/idocument_package.hpp"
 #include "pool/pool.hpp"
+#include "canvas/canvas_gl.hpp"
 
 namespace horizon {
 static const auto PLUSMINUS = std::string("\u00B1");
@@ -34,9 +35,10 @@ FootagDisplay::FootagDisplay(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 
     canvas_package = Gtk::manage(new PreviewCanvas(*core->get_pool(), true));
     canvas_package->set_size_request(400, 500);
-    canvas_package->signal_resize().connect([this](int width, int height) {
-        if (autofit->get_active()) {
+    canvas_package->signal_size_allocate().connect([this](auto &alloc) {
+        if (autofit->get_active() && !(alloc == old_alloc)) {
             display();
+            old_alloc = alloc;
         }
     });
     canvas_package->set_hexpand(true);
@@ -424,7 +426,6 @@ void FootagDisplay::calc_and_display(void)
 
 void FootagDisplay::display(void)
 {
-    canvas_package->clear();
     canvas_package->load(ppkg, autofit->get_active());
     for (const auto &la : ppkg.get_layers()) {
         auto ld = LayerDisplay::Mode::FILL_ONLY;
@@ -439,7 +440,7 @@ void FootagDisplay::display(void)
             visible = true;
             ld = LayerDisplay::Mode::OUTLINE;
         }
-        canvas_package->set_layer_display(la.first, LayerDisplay(visible, ld));
+        canvas_package->get_canvas().set_layer_display(la.first, LayerDisplay(visible, ld));
     }
 }
 

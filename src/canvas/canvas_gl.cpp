@@ -20,6 +20,7 @@ void CanvasGL::set_scale_and_offset(float sc, Coordf ofs)
     scale = sc;
     offset = ofs;
     update_viewmat();
+    s_signal_scale_changed.emit();
 }
 
 CanvasGL::CanvasGL()
@@ -83,6 +84,7 @@ void CanvasGL::zoom_gesture_update_cb(GdkEventSequence *seq)
     set_scale(cx, cy, gesture_zoom_scale_orig * delta);
     offset = gesture_zoom_offset_orig + Coordf(cx, cy) - gesture_zoom_pos_orig;
     update_viewmat();
+    s_signal_scale_changed.emit();
     queue_draw();
 }
 
@@ -431,6 +433,7 @@ void CanvasGL::center_and_zoom(const Coordi &center, float sc)
     offset.x = -((center.x * (flip_view ? -1 : 1) * scale) - m_width / 2);
     offset.y = -((center.y * -scale) - m_height / 2);
     update_viewmat();
+    s_signal_scale_changed.emit();
     queue_draw();
 }
 
@@ -443,6 +446,7 @@ void CanvasGL::zoom_to_bbox(const Coordf &a, const Coordf &b)
     offset.x = -((center.x * (flip_view ? -1 : 1) * scale) - m_width / 2);
     offset.y = -((center.y * -scale) - m_height / 2);
     update_viewmat();
+    s_signal_scale_changed.emit();
     queue_draw();
 }
 

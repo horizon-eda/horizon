@@ -54,3 +54,8 @@
 .app-notification *:link {
   color:#4CC6EF;
 }
+
+.horizon-scale-label {
+  border-radius:0px;
+  border-top-left-radius: 5px;
+}

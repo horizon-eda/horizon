@@ -105,6 +105,12 @@ public:
         return s_signal_can_steal_focus;
     }
 
+    typedef sigc::signal<void> type_signal_scale_changed;
+    type_signal_scale_changed signal_scale_changed()
+    {
+        return s_signal_scale_changed;
+    }
+
     void center_and_zoom(const Coordi &center, float scale = -1);
     void zoom_to_bbox(const Coordf &a, const Coordf &b);
 
@@ -281,5 +287,6 @@ protected:
     type_signal_grid_mul_changed s_signal_grid_mul_changed;
     type_signal_request_display_name s_signal_request_display_name;
     type_signal_can_steal_focus s_signal_can_steal_focus;
+    type_signal_scale_changed s_signal_scale_changed;
 };
 } // namespace horizon

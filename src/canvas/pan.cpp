@@ -91,6 +91,7 @@ void CanvasGL::set_scale(float x, float y, float scale_new)
         gesture_zoom_offset_orig.y += yi;
     }
     update_viewmat();
+    s_signal_scale_changed.emit();
     queue_draw();
 }
 
