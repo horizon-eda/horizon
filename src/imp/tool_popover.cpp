@@ -139,23 +139,11 @@ ToolPopover::ToolPopover(Gtk::Widget *parent, ActionCatalogItem::Availability av
         row[list_columns_group.group] = ActionGroup::ALL;
     }
 
-    static const std::map<ActionGroup, ActionCatalogItem::Availability> group_av = {
-            {ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD},
-            {ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC},
-            {ActionGroup::SYMBOL, ActionCatalogItem::AVAILABLE_IN_SYMBOL},
-            {ActionGroup::PADSTACK, ActionCatalogItem::AVAILABLE_IN_PADSTACK},
-            {ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE},
-            {ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED},
-            {ActionGroup::FRAME, ActionCatalogItem::AVAILABLE_IN_FRAME},
-            {ActionGroup::GROUP_TAG, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC},
-    };
-
     for (const auto &it : action_group_catalog) {
-        bool show = false;
-        if (group_av.count(it.first) == 0)
-            show = true;
-        else
-            show = group_av.at(it.first) & availability;
+        bool show = std::any_of(action_catalog.begin(), action_catalog.end(), [availability, it](const auto &x) {
+            return (x.second.group == it.first) && (x.second.availability & availability);
+        });
+
         if (show) {
             Gtk::TreeModel::Row row = *(store_group->append());
             row[list_columns_group.name] = it.second;
