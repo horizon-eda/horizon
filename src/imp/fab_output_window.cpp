@@ -171,6 +171,9 @@ static void cb_nop(const std::string &)
 
 void FabOutputWindow::generate()
 {
+    if (!generate_button->get_sensitive())
+        return;
+
     RulesCheckCache cache(core);
     auto r = rules_check(core->get_rules(), RuleID::PREFLIGHT_CHECKS, core, cache, &cb_nop);
     if (r.level != RulesCheckErrorLevel::PASS) {

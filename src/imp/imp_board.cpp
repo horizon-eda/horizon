@@ -357,7 +357,7 @@ void ImpBoard::construct()
     });
 
     hamburger_menu->append("Fabrication output", "win.fab_out");
-    main_window->add_action("fab_out", [this] { fab_output_window->present(); });
+    main_window->add_action("fab_out", [this] { trigger_action(ActionID::FAB_OUTPUT_WINDOW); });
 
     hamburger_menu->append("PDF Export", "win.export_pdf");
     main_window->add_action("export_pdf", [this] { trigger_action(ActionID::PDF_EXPORT_WINDOW); });
@@ -466,6 +466,11 @@ void ImpBoard::construct()
     core->signal_tool_changed().connect([this](ToolID t) { fab_output_window->set_can_generate(t == ToolID::NONE); });
     core->signal_rebuilt().connect([this] { fab_output_window->reload_layers(); });
     fab_output_window->signal_changed().connect([this] { core_board.set_needs_save(); });
+    connect_action(ActionID::FAB_OUTPUT_WINDOW, [this](const auto &c) { fab_output_window->present(); });
+    connect_action(ActionID::GEN_FAB_OUTPUT, [this](const auto &c) {
+        fab_output_window->present();
+        fab_output_window->generate();
+    });
 
     pdf_export_window =
             PDFExportWindow::create(main_window, &core_board, *core_board.get_pdf_export_settings(), project_dir);

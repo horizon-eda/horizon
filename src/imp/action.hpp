@@ -84,7 +84,9 @@ enum class ActionID {
     RESET_AIRWIRE_FILTER,
     FILTER_AIRWIRES,
     AIRWIRE_FILTER_WINDOW,
-    SELECT_POLYGON
+    SELECT_POLYGON,
+    FAB_OUTPUT_WINDOW,
+    GEN_FAB_OUTPUT
 };
 
 enum class ActionGroup {
@@ -105,7 +107,8 @@ enum class ActionGroup {
     VIEW,
     FRAME,
     GROUP_TAG,
-    SEARCH
+    SEARCH,
+    EXPORT_IMPORT,
 };
 
 typedef std::vector<std::pair<unsigned int, GdkModifierType>> KeySequence;

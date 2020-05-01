@@ -377,7 +377,7 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::IMPORT_DXF},
-         {"Import dxf", ActionGroup::UNKNOWN,
+         {"Import dxf", ActionGroup::EXPORT_IMPORT,
           ActionCatalogItem::AVAILABLE_IN_BOARD | ActionCatalogItem::AVAILABLE_IN_PACKAGE
                   | ActionCatalogItem::AVAILABLE_IN_FRAME,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -592,11 +592,11 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
                   | ActionCatalogItem::FLAGS_NO_PREFERENCES}},
 
         {{ActionID::BOM_EXPORT_WINDOW, ToolID::NONE},
-         {"BOM export window", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+         {"BOM export window", ActionGroup::EXPORT_IMPORT, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::EXPORT_BOM, ToolID::NONE},
-         {"Export BOM", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+         {"Export BOM", ActionGroup::EXPORT_IMPORT, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::SWAP_NETS},
@@ -680,11 +680,11 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::PDF_EXPORT_WINDOW, ToolID::NONE},
-         {"PDF export window", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
+         {"PDF export window", ActionGroup::EXPORT_IMPORT, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::EXPORT_PDF, ToolID::NONE},
-         {"Export PDF", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
+         {"Export PDF", ActionGroup::EXPORT_IMPORT, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::DRAW_CONNECTION_LINE},
@@ -701,7 +701,7 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
                   | ActionCatalogItem::FLAGS_NO_PREFERENCES}},
 
         {{ActionID::TOOL, ToolID::IMPORT_KICAD_PACKAGE},
-         {"Import KiCad package", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
+         {"Import KiCad package", ActionGroup::EXPORT_IMPORT, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::SMASH_SILKSCREEN_GRAPHICS},
@@ -732,18 +732,19 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::STEP_EXPORT_WINDOW, ToolID::NONE},
-         {"STEP export window", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+         {"STEP export window", ActionGroup::EXPORT_IMPORT, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::EXPORT_STEP, ToolID::NONE},
-         {"Export STEP", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
+         {"Export STEP", ActionGroup::EXPORT_IMPORT, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::PNP_EXPORT_WINDOW, ToolID::NONE},
-         {"Pick & place export window", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+         {"Pick & place export window", ActionGroup::EXPORT_IMPORT, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::EXPORT_PNP, ToolID::NONE},
-         {"Export Pick & place", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+         {"Export Pick & place", ActionGroup::EXPORT_IMPORT, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::AIRWIRE_FILTER_WINDOW, ToolID::NONE},
@@ -793,17 +794,34 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
         {{ActionID::TOOL, ToolID::ROUND_OFF_VERTEX},
          {"Round off vertex", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::FAB_OUTPUT_WINDOW, ToolID::NONE},
+         {"Fab. output window", ActionGroup::EXPORT_IMPORT, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::GEN_FAB_OUTPUT, ToolID::NONE},
+         {"Generate fab. output", ActionGroup::EXPORT_IMPORT, ActionCatalogItem::AVAILABLE_IN_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
-        {ActionGroup::CLIPBOARD, "Clipboard"}, {ActionGroup::GRAPHICS, "Graphics"},
-        {ActionGroup::MOVE, "Move"},           {ActionGroup::BOARD, "Board"},
-        {ActionGroup::SCHEMATIC, "Schematic"}, {ActionGroup::GROUP_TAG, "Group & Tag"},
-        {ActionGroup::SYMBOL, "Symbol"},       {ActionGroup::PADSTACK, "Padstack"},
-        {ActionGroup::PACKAGE, "Package"},     {ActionGroup::FRAME, "Frame"},
-        {ActionGroup::UNDO, "Undo"},           {ActionGroup::LAYER, "Layer"},
-        {ActionGroup::SELECTION, "Selection"}, {ActionGroup::RULES, "Rules"},
-        {ActionGroup::UNKNOWN, "Misc"},        {ActionGroup::VIEW, "View"},
+        {ActionGroup::CLIPBOARD, "Clipboard"},
+        {ActionGroup::GRAPHICS, "Graphics"},
+        {ActionGroup::MOVE, "Move"},
+        {ActionGroup::BOARD, "Board"},
+        {ActionGroup::SCHEMATIC, "Schematic"},
+        {ActionGroup::GROUP_TAG, "Group & Tag"},
+        {ActionGroup::SYMBOL, "Symbol"},
+        {ActionGroup::PADSTACK, "Padstack"},
+        {ActionGroup::PACKAGE, "Package"},
+        {ActionGroup::FRAME, "Frame"},
+        {ActionGroup::UNDO, "Undo"},
+        {ActionGroup::LAYER, "Layer"},
+        {ActionGroup::SELECTION, "Selection"},
+        {ActionGroup::RULES, "Rules"},
+        {ActionGroup::UNKNOWN, "Misc"},
+        {ActionGroup::VIEW, "View"},
+        {ActionGroup::EXPORT_IMPORT, "Export / import"},
         {ActionGroup::SEARCH, "Search"},
 
 };
@@ -889,6 +907,8 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(FILTER_AIRWIRES),
         ACTION_LUT_ITEM(AIRWIRE_FILTER_WINDOW),
         ACTION_LUT_ITEM(SELECT_POLYGON),
+        ACTION_LUT_ITEM(FAB_OUTPUT_WINDOW),
+        ACTION_LUT_ITEM(GEN_FAB_OUTPUT),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

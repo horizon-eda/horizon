@@ -18,6 +18,7 @@ public:
 
     void set_can_generate(bool v);
     void reload_layers();
+    void generate();
 
 private:
     class IDocumentBoard *core;
@@ -45,7 +46,6 @@ private:
 
     WindowStateStore state_store;
 
-    void generate();
     void update_drill_visibility();
     unsigned int n_layers = 0;
 };
