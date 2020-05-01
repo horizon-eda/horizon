@@ -37,7 +37,7 @@ FootagDisplay::FootagDisplay(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     canvas_package->set_size_request(400, 500);
     canvas_package->signal_size_allocate().connect([this](auto &alloc) {
         if (autofit->get_active() && !(alloc == old_alloc)) {
-            display();
+            this->display();
             old_alloc = alloc;
         }
     });
