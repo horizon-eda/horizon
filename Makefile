@@ -421,6 +421,7 @@ SRC_IMP = \
 	src/imp/search/searcher_package.cpp\
 	src/imp/search/searcher_board.cpp\
 	src/util/clipper_util.cpp\
+	src/widgets/action_button.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\

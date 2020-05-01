@@ -210,6 +210,8 @@ protected:
         return *s;
     }
 
+    class ActionButton &add_action_button(std::pair<ActionID, ToolID> action, const char *icon_name);
+
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;

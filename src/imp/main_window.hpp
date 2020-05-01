@@ -32,6 +32,10 @@ public:
     Gtk::Box *search_types_box = nullptr;
     Gtk::Label *selection_mode_label = nullptr;
 
+    Gtk::Revealer *action_bar_revealer = nullptr;
+    Gtk::Box *action_bar_box = nullptr;
+    void set_use_action_bar(bool u);
+
     void tool_bar_set_visible(bool v);
     void tool_bar_set_tool_name(const std::string &s);
     void tool_bar_set_tool_tip(const std::string &s);
