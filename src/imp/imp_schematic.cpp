@@ -959,7 +959,7 @@ void ImpSchematic::handle_move_to_other_sheet(const ActionConnection &conn)
     tool_begin(ToolID::MOVE);
 }
 
-std::pair<ActionID, ToolID> ImpSchematic::get_doubleclick_action(ObjectType type, const UUID &uu)
+ActionToolID ImpSchematic::get_doubleclick_action(ObjectType type, const UUID &uu)
 {
     auto a = ImpBase::get_doubleclick_action(type, uu);
     if (a.first != ActionID::NONE)

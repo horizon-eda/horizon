@@ -10,7 +10,7 @@ public:
     LayerHelpBox(class Pool &p);
     void set_layer(int layer);
 
-    typedef sigc::signal<void, std::pair<ActionID, ToolID>> type_signal_trigger_action;
+    typedef sigc::signal<void, ActionToolID> type_signal_trigger_action;
     type_signal_trigger_action signal_trigger_action()
     {
         return s_signal_trigger_action;

@@ -18,7 +18,7 @@ protected:
     {
         return ObjectType::PADSTACK;
     }
-    std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu) override;
+    ActionToolID get_doubleclick_action(ObjectType type, const UUID &uu) override;
 
     std::map<ObjectType, SelectionFilterInfo> get_selection_filter_info() const override;
 

@@ -34,7 +34,7 @@ protected:
     }
 
     std::string get_hud_text(std::set<SelectableRef> &sel) override;
-    std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu) override;
+    ActionToolID get_doubleclick_action(ObjectType type, const UUID &uu) override;
 
     void get_save_meta(json &j) override;
     std::vector<std::string> get_view_hints() override;

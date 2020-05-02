@@ -141,7 +141,7 @@ void ImpPadstack::construct()
     update_header();
 }
 
-std::pair<ActionID, ToolID> ImpPadstack::get_doubleclick_action(ObjectType type, const UUID &uu)
+ActionToolID ImpPadstack::get_doubleclick_action(ObjectType type, const UUID &uu)
 {
     auto a = ImpBase::get_doubleclick_action(type, uu);
     if (a.first != ActionID::NONE)

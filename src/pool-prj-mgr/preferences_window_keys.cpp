@@ -8,15 +8,14 @@
 namespace horizon {
 class ActionEditor : public Gtk::Box {
 public:
-    ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
-                 std::pair<ActionID, ToolID> action, ActionCatalogItem::Availability availability,
-                 const std::string &title, KeySequencesPreferencesEditor *parent);
-    static ActionEditor *create(Preferences *prefs, std::pair<ActionID, ToolID> action,
-                                ActionCatalogItem::Availability availability, const std::string &title,
-                                KeySequencesPreferencesEditor *parent);
+    ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs, ActionToolID action,
+                 ActionCatalogItem::Availability availability, const std::string &title,
+                 KeySequencesPreferencesEditor *parent);
+    static ActionEditor *create(Preferences *prefs, ActionToolID action, ActionCatalogItem::Availability availability,
+                                const std::string &title, KeySequencesPreferencesEditor *parent);
 
 private:
-    std::pair<ActionID, ToolID> action;
+    ActionToolID action;
     ActionCatalogItem::Availability availability;
     KeySequencesPreferencesEditor *parent;
     Preferences *preferences;
@@ -118,7 +117,7 @@ void KeySequencesPreferencesEditor::update_action_editors()
     auto it = key_sequences_treeview->get_selection()->get_selected();
     if (it) {
         Gtk::TreeModel::Row row = *it;
-        std::pair<ActionID, ToolID> action = row[tree_columns.action];
+        ActionToolID action = row[tree_columns.action];
         if (action.first != ActionID::NONE) {
             const auto cat = action_catalog.at(row[tree_columns.action]);
             auto av = static_cast<unsigned int>(cat.availability);
@@ -368,8 +367,8 @@ public:
 
 
 ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
-                           std::pair<ActionID, ToolID> act, ActionCatalogItem::Availability av,
-                           const std::string &title, KeySequencesPreferencesEditor *p)
+                           ActionToolID act, ActionCatalogItem::Availability av, const std::string &title,
+                           KeySequencesPreferencesEditor *p)
     : Gtk::Box(cobject), action(act), availability(av), parent(p), preferences(prefs)
 {
     Gtk::Label *la;
@@ -468,7 +467,7 @@ void ActionEditor::update()
 }
 
 
-ActionEditor *ActionEditor::create(Preferences *prefs, std::pair<ActionID, ToolID> action,
+ActionEditor *ActionEditor::create(Preferences *prefs, ActionToolID action,
                                    ActionCatalogItem::Availability availability, const std::string &title,
                                    KeySequencesPreferencesEditor *parent)
 {

@@ -298,7 +298,7 @@ void ImpPackage::update_highlights()
 }
 
 
-std::pair<ActionID, ToolID> ImpPackage::get_doubleclick_action(ObjectType type, const UUID &uu)
+ActionToolID ImpPackage::get_doubleclick_action(ObjectType type, const UUID &uu)
 {
     auto a = ImpBase::get_doubleclick_action(type, uu);
     if (a.first != ActionID::NONE)

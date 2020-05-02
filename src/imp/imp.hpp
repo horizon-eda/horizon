@@ -87,7 +87,7 @@ protected:
     std::unique_ptr<ImpInterface> imp_interface = nullptr;
     Glib::RefPtr<Glib::Binding> grid_spacing_binding;
 
-    std::map<std::pair<ActionID, ToolID>, ActionConnection> action_connections;
+    std::map<ActionToolID, ActionConnection> action_connections;
     ActionConnection &connect_action(ToolID tool_id, std::function<void(const ActionConnection &)> cb);
     ActionConnection &connect_action(ToolID tool_id);
     ActionConnection &connect_action(ActionID action_id, std::function<void(const ActionConnection &)> cb);
@@ -119,7 +119,7 @@ protected:
     bool handle_close(GdkEventAny *ev);
     json send_json(const json &j);
 
-    bool trigger_action(const std::pair<ActionID, ToolID> &action);
+    bool trigger_action(const ActionToolID &action);
     bool trigger_action(ActionID aid);
     bool trigger_action(ToolID tid);
 
@@ -144,10 +144,10 @@ protected:
     void layer_up_down(bool up);
     void goto_layer(int layer);
 
-    Gtk::Button *create_action_button(std::pair<ActionID, ToolID> action);
+    Gtk::Button *create_action_button(ActionToolID action);
 
-    void set_action_sensitive(std::pair<ActionID, ToolID>, bool v);
-    bool get_action_sensitive(std::pair<ActionID, ToolID>) const;
+    void set_action_sensitive(ActionToolID, bool v);
+    bool get_action_sensitive(ActionToolID) const;
     virtual void update_action_sensitivity();
 
     typedef sigc::signal<void> type_signal_action_sensitive;
@@ -174,7 +174,7 @@ protected:
     void tool_update_data(std::unique_ptr<ToolData> &data);
 
     virtual void search_center(const Searcher::SearchResult &res);
-    virtual std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu);
+    virtual ActionToolID get_doubleclick_action(ObjectType type, const UUID &uu);
 
     Glib::RefPtr<Gio::Menu> hamburger_menu;
 
@@ -248,7 +248,7 @@ private:
     Coordf cursor_pos_drag_begin;
     Coordi cursor_pos_grid_drag_begin;
 
-    std::map<std::pair<ActionID, ToolID>, bool> action_sensitivity;
+    std::map<ActionToolID, bool> action_sensitivity;
     type_signal_action_sensitive s_signal_action_sensitive;
 
     GdkModifierType grid_fine_modifier = GDK_MOD1_MASK;

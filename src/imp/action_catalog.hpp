@@ -37,7 +37,7 @@ public:
     const Availability availability;
 };
 
-extern const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog;
+extern const std::map<ActionToolID, ActionCatalogItem> action_catalog;
 extern const LutEnumStr<ActionID> action_lut;
 extern const LutEnumStr<ToolID> tool_lut;
 

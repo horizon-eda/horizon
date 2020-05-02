@@ -453,7 +453,7 @@ void ImpBase::run(int argc, char *argv[])
         tool_popover->set_pointing_to(rect);
 
         this->update_action_sensitivity();
-        std::map<std::pair<ActionID, ToolID>, bool> can_begin;
+        std::map<ActionToolID, bool> can_begin;
         auto sel = canvas->get_selection();
         for (const auto &it : action_catalog) {
             if (it.first.first == ActionID::TOOL) {
@@ -1014,7 +1014,7 @@ void ImpBase::edit_pool_item(ObjectType type, const UUID &uu)
     send_json(j);
 }
 
-Gtk::Button *ImpBase::create_action_button(std::pair<ActionID, ToolID> action)
+Gtk::Button *ImpBase::create_action_button(ActionToolID action)
 {
     auto &catitem = action_catalog.at(action);
     auto button = Gtk::manage(new Gtk::Button(catitem.name));
@@ -1024,7 +1024,7 @@ Gtk::Button *ImpBase::create_action_button(std::pair<ActionID, ToolID> action)
     return button;
 }
 
-bool ImpBase::trigger_action(const std::pair<ActionID, ToolID> &action)
+bool ImpBase::trigger_action(const ActionToolID &action)
 {
     if (core->tool_is_active() && !(action_catalog.at(action).flags & ActionCatalogItem::FLAGS_IN_TOOL)) {
         return false;
@@ -1225,13 +1225,13 @@ void ImpBase::add_tool_action(ToolID tid, const std::string &action)
     auto tool_action = main_window->add_action(action, [this, tid] { tool_begin(tid); });
 }
 
-void ImpBase::set_action_sensitive(std::pair<ActionID, ToolID> action, bool v)
+void ImpBase::set_action_sensitive(ActionToolID action, bool v)
 {
     action_sensitivity[action] = v;
     s_signal_action_sensitive.emit();
 }
 
-bool ImpBase::get_action_sensitive(std::pair<ActionID, ToolID> action) const
+bool ImpBase::get_action_sensitive(ActionToolID action) const
 {
     if (core->tool_is_active())
         return action_catalog.at(action).flags & ActionCatalogItem::FLAGS_IN_TOOL;
@@ -1938,7 +1938,7 @@ void ImpBase::update_search_types_label()
     main_window->search_expander->set_label(la);
 }
 
-std::pair<ActionID, ToolID> ImpBase::get_doubleclick_action(ObjectType type, const UUID &uu)
+ActionToolID ImpBase::get_doubleclick_action(ObjectType type, const UUID &uu)
 {
     switch (type) {
     case ObjectType::TEXT:

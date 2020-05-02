@@ -89,6 +89,8 @@ enum class ActionID {
     GEN_FAB_OUTPUT
 };
 
+using ActionToolID = std::pair<ActionID, ToolID>;
+
 enum class ActionGroup {
     ALL,
     UNKNOWN,
@@ -129,7 +131,7 @@ public:
     std::function<void(const ActionConnection &)> cb;
 };
 
-std::pair<ActionID, ToolID> make_action(ActionID id);
-std::pair<ActionID, ToolID> make_action(ToolID id);
+ActionToolID make_action(ActionID id);
+ActionToolID make_action(ToolID id);
 
 } // namespace horizon

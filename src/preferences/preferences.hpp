@@ -41,7 +41,7 @@ public:
 
 class KeySequencesPreferences {
 public:
-    std::map<std::pair<ActionID, ToolID>, std::map<ActionCatalogItem::Availability, std::vector<KeySequence>>> keys;
+    std::map<ActionToolID, std::map<ActionCatalogItem::Availability, std::vector<KeySequence>>> keys;
 
     void load_from_json(const json &j);
     void append_from_json(const json &j);

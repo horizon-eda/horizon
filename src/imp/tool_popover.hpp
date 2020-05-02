@@ -13,8 +13,8 @@ public:
     {
         return s_signal_action_activated;
     }
-    void set_can_begin(const std::map<std::pair<ActionID, ToolID>, bool> &can_begin);
-    void set_key_sequences(std::pair<ActionID, ToolID> action_id, const std::vector<KeySequence> &seqs);
+    void set_can_begin(const std::map<ActionToolID, bool> &can_begin);
+    void set_key_sequences(ActionToolID action_id, const std::vector<KeySequence> &seqs);
 
 private:
     Gtk::SearchEntry *search_entry;

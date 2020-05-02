@@ -26,7 +26,7 @@ private:
         }
         Gtk::TreeModelColumn<Glib::ustring> name;
         Gtk::TreeModelColumn<Glib::ustring> keys;
-        Gtk::TreeModelColumn<std::pair<ActionID, ToolID>> action;
+        Gtk::TreeModelColumn<ActionToolID> action;
     };
     TreeColumns tree_columns;
 

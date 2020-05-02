@@ -882,7 +882,7 @@ void ImpBoard::handle_drag()
     }
 }
 
-std::pair<ActionID, ToolID> ImpBoard::get_doubleclick_action(ObjectType type, const UUID &uu)
+ActionToolID ImpBoard::get_doubleclick_action(ObjectType type, const UUID &uu)
 {
     auto a = ImpBase::get_doubleclick_action(type, uu);
     if (a.first != ActionID::NONE)

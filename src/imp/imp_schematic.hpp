@@ -27,7 +27,7 @@ protected:
 
     std::string get_hud_text(std::set<SelectableRef> &sel) override;
     void search_center(const Searcher::SearchResult &res) override;
-    std::pair<ActionID, ToolID> get_doubleclick_action(ObjectType type, const UUID &uu) override;
+    ActionToolID get_doubleclick_action(ObjectType type, const UUID &uu) override;
     void expand_selection_for_property_panel(std::set<SelectableRef> &sel_extra,
                                              const std::set<SelectableRef> &sel) override;
 

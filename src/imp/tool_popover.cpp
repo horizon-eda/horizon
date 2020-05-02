@@ -169,7 +169,7 @@ void ToolPopover::emit_tool_activated()
     }
 }
 
-void ToolPopover::set_can_begin(const std::map<std::pair<ActionID, ToolID>, bool> &can_begin)
+void ToolPopover::set_can_begin(const std::map<ActionToolID, bool> &can_begin)
 {
     for (auto &it : store->children()) {
         auto k = std::make_pair(it[list_columns.action_id], it[list_columns.tool_id]);
@@ -182,7 +182,7 @@ void ToolPopover::set_can_begin(const std::map<std::pair<ActionID, ToolID>, bool
     }
 }
 
-void ToolPopover::set_key_sequences(std::pair<ActionID, ToolID> action_id, const std::vector<KeySequence> &seqs)
+void ToolPopover::set_key_sequences(ActionToolID action_id, const std::vector<KeySequence> &seqs)
 {
     std::stringstream s;
     std::transform(seqs.begin(), seqs.end(), std::ostream_iterator<std::string>(s, ","),

@@ -3,7 +3,7 @@
 #include "imp/action.hpp"
 
 namespace horizon {
-const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = {
+const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::SELECTION_FILTER, ToolID::NONE},
          {"Selection filter", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
