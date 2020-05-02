@@ -48,5 +48,6 @@ private:
     Gtk::SpinButton *sp_er = nullptr;
 
     WindowStateStore state_store;
+    Gtk::Label *placeholder_label = nullptr;
 };
 } // namespace horizon

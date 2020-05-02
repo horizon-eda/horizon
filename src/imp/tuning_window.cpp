@@ -15,15 +15,18 @@ TuningWindow::TuningWindow(const Board *brd) : Gtk::Window(), board(brd), state_
 
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
     {
-        auto button_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
-        button_box->property_margin() = 8;
         {
             auto bu = Gtk::manage(new Gtk::Button("Clear"));
-            bu->signal_clicked().connect([this] { store->clear(); });
-            button_box->pack_start(*bu, false, false, 0);
+            bu->signal_clicked().connect([this] {
+                store->clear();
+                update();
+            });
+            bu->show();
+            header->pack_start(*bu);
         }
 
         auto tbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
+        tbox->property_margin() = 8;
         {
             auto la = Gtk::manage(new Gtk::Label("Velocity factor:"));
             tbox->pack_start(*la, false, false, 0);
@@ -63,10 +66,7 @@ TuningWindow::TuningWindow(const Board *brd) : Gtk::Window(), board(brd), state_
         sp_er->signal_value_changed().connect([this] { sp_vf->set_value(100 / sqrt(sp_er->get_value())); });
         tbox->pack_start(*sp_er, false, false, 0);
 
-
-        button_box->pack_start(*tbox, false, false, 0);
-
-        box->pack_start(*button_box, false, false, 0);
+        box->pack_start(*tbox, false, false, 0);
     }
     {
         auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
@@ -156,13 +156,25 @@ TuningWindow::TuningWindow(const Board *brd) : Gtk::Window(), board(brd), state_
             auto paths = tree_view->get_selection()->get_selected_rows();
             for (auto it = paths.rbegin(); it != paths.rend(); it++)
                 store->erase(store->get_iter(*it));
+            update();
             return true;
         }
         return false;
     });
 
     sc->add(*tree_view);
-    box->pack_start(*sc, true, true, 0);
+    {
+        auto overlay = Gtk::manage(new Gtk::Overlay);
+        overlay->add(*sc);
+        placeholder_label = Gtk::manage(
+                new Gtk::Label("No tracks to measure.\nUse \"Measure (all) tracks\" to add tracks to this list."));
+        placeholder_label->set_justify(Gtk::JUSTIFY_CENTER);
+        placeholder_label->set_halign(Gtk::ALIGN_CENTER);
+        placeholder_label->set_valign(Gtk::ALIGN_CENTER);
+        placeholder_label->get_style_context()->add_class("dim-label");
+        overlay->add_overlay(*placeholder_label);
+        box->pack_start(*overlay, true, true, 0);
+    }
 
     box->show_all();
     add(*box);
@@ -201,6 +213,7 @@ void TuningWindow::update()
     uint64_t length_max = 0;
     double c = 299.79e6 * (sp_vf->get_value() / 100);
     double ref_ps = -1;
+    placeholder_label->set_visible(children.size() == 0);
     for (auto it : children) {
         Gtk::TreeModel::Row row = *it;
         uint64_t length = 0;
