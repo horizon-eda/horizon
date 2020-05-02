@@ -30,7 +30,7 @@ std::string key_sequences_to_string(const std::vector<KeySequence> &seqs)
 {
     std::string s;
     for (const auto &it : seqs) {
-        if (s.size) {
+        if (s.size()) {
             s += ", ";
         }
         s += key_sequence_to_string(it);

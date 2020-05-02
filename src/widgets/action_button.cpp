@@ -2,12 +2,12 @@
 #include "imp/action_catalog.hpp"
 
 namespace horizon {
-ActionButton::ActionButton(std::pair<ActionID, ToolID> action, const char *icon_name)
+ActionButton::ActionButton(ActionToolID act, const char *icon_name) : action(act)
 {
     button = Gtk::manage(new Gtk::Button);
     button->set_image_from_icon_name(icon_name, Gtk::ICON_SIZE_DND);
     button->set_tooltip_text(action_catalog.at(action).name);
-    button->signal_clicked().connect([this, action] { s_signal_clicked.emit(action); });
+    button->signal_clicked().connect([this] { s_signal_clicked.emit(action); });
     add(*button);
     button->show();
     /*auto ex = Gtk::manage(new Gtk::Button);
@@ -18,5 +18,10 @@ ActionButton::ActionButton(std::pair<ActionID, ToolID> action, const char *icon_
     ex->set_valign(Gtk::ALIGN_END);
     add_overlay(*ex);
     ex->show();*/
+}
+
+void ActionButton::set_key_sequences(const std::string &keys)
+{
+    button->set_tooltip_text(action_catalog.at(action).name + " " + keys);
 }
 } // namespace horizon

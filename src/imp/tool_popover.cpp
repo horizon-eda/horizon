@@ -184,12 +184,7 @@ void ToolPopover::set_can_begin(const std::map<ActionToolID, bool> &can_begin)
 
 void ToolPopover::set_key_sequences(ActionToolID action_id, const std::vector<KeySequence> &seqs)
 {
-    std::stringstream s;
-    std::transform(seqs.begin(), seqs.end(), std::ostream_iterator<std::string>(s, ","),
-                   [](const auto &x) { return key_sequence_to_string(x); });
-    auto str = s.str();
-    if (str.size())
-        str.pop_back();
+    auto str = key_sequences_to_string(seqs);
     for (auto &it : store->children()) {
         if (it[list_columns.tool_id] == action_id.second && it[list_columns.action_id] == action_id.first) {
             it[list_columns.keys] = str;

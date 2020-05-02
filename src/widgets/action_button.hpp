@@ -1,21 +1,22 @@
 #pragma once
 #include <gtkmm.h>
+#include "imp/action.hpp"
 
 namespace horizon {
-enum class ActionID;
-enum class ToolID;
 class ActionButton : public Gtk::Overlay {
 public:
-    ActionButton(std::pair<ActionID, ToolID> action, const char *icon_name);
+    ActionButton(ActionToolID action, const char *icon_name);
 
-    typedef sigc::signal<void, std::pair<ActionID, ToolID>> type_signal_clicked;
+    typedef sigc::signal<void, ActionToolID> type_signal_clicked;
     type_signal_clicked signal_clicked()
     {
         return s_signal_clicked;
     }
 
+    void set_key_sequences(const std::string &keys);
 
 private:
+    ActionToolID action;
     Gtk::Button *button = nullptr;
     type_signal_clicked s_signal_clicked;
 };

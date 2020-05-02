@@ -210,7 +210,7 @@ protected:
         return *s;
     }
 
-    class ActionButton &add_action_button(std::pair<ActionID, ToolID> action, const char *icon_name);
+    class ActionButton &add_action_button(ActionToolID action, const char *icon_name);
 
 private:
     void fix_cursor_pos();
@@ -265,7 +265,7 @@ private:
     bool queue_autosave = false;
 
     void update_property_panels();
-    void set_action_button_key_sequences(std::pair<ActionID, ToolID> action,
-                                         const std::string &action_button_key_sequences);
+    void set_action_button_key_sequences(ActionToolID action, const std::string &keys);
+    std::map<ActionToolID, ActionButton *> action_buttons;
 };
 } // namespace horizon
