@@ -49,6 +49,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-shape-obround-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-hole-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-hole-slot-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-resize-symbol-symbolic.svg</file>
     <file>icons/scalable/apps/horizon-eda.svg</file>
     <file>icons/16x16/apps/horizon-eda.png</file>
     <file>icons/32x32/apps/horizon-eda.png</file>

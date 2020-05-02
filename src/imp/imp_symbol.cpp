@@ -185,6 +185,7 @@ void ImpSymbol::construct()
     add_action_button(make_action(ToolID::PLACE_REFDES_AND_VALUE), "action-place-refdes-and-value-symbolic");
     add_action_button(make_action(ToolID::DRAW_LINE), "action-draw-line");
     add_action_button(make_action(ToolID::PLACE_TEXT), "action-place-text-symbolic");
+    add_action_button(make_action(ToolID::RESIZE_SYMBOL), "action-resize-symbol-symbolic");
 }
 
 void ImpSymbol::update_header()
