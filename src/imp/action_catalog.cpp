@@ -151,15 +151,15 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
           ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::TUNING, ToolID::NONE},
-         {"Length tuning", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+         {"Length tuning", ActionGroup::TUNING, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TUNING_ADD_TRACKS, ToolID::NONE},
-         {"Measure track", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+         {"Measure track", ActionGroup::TUNING, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::TUNING_ADD_TRACKS_ALL, ToolID::NONE},
-         {"Measure all tracks", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+         {"Measure all tracks", ActionGroup::TUNING, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_SPECIFIC}},
 
         {{ActionID::HIGHLIGHT_NET, ToolID::NONE},
@@ -465,14 +465,14 @@ const std::map<std::pair<ActionID, ToolID>, ActionCatalogItem> action_catalog = 
          {"Drag track", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::TUNE_TRACK},
-         {"Tune track", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
+         {"Tune track", ActionGroup::TUNING, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::TUNE_DIFFPAIR},
-         {"Tune diff. pair", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+         {"Tune diff. pair", ActionGroup::TUNING, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::TUNE_DIFFPAIR_SKEW},
-         {"Tune diff. pair skew", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
+         {"Tune diff. pair skew", ActionGroup::TUNING, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::ADD_PLANE},
@@ -823,6 +823,7 @@ const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
         {ActionGroup::VIEW, "View"},
         {ActionGroup::EXPORT_IMPORT, "Export / import"},
         {ActionGroup::SEARCH, "Search"},
+        {ActionGroup::TUNING, "Tuning"},
 
 };
 

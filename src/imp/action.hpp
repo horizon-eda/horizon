@@ -109,6 +109,7 @@ enum class ActionGroup {
     GROUP_TAG,
     SEARCH,
     EXPORT_IMPORT,
+    TUNING,
 };
 
 typedef std::vector<std::pair<unsigned int, GdkModifierType>> KeySequence;
