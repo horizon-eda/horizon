@@ -26,6 +26,18 @@ std::string key_sequence_to_string(const KeySequence &keys)
     return txt;
 }
 
+std::string key_sequences_to_string(const std::vector<KeySequence> &seqs)
+{
+    std::string s;
+    for (const auto &it : seqs) {
+        if (s.size) {
+            s += ", ";
+        }
+        s += key_sequence_to_string(it);
+    }
+    return s;
+}
+
 ActionToolID make_action(ActionID id)
 {
     return {id, ToolID::NONE};

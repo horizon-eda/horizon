@@ -265,5 +265,7 @@ private:
     bool queue_autosave = false;
 
     void update_property_panels();
+    void set_action_button_key_sequences(std::pair<ActionID, ToolID> action,
+                                         const std::string &action_button_key_sequences);
 };
 } // namespace horizon
