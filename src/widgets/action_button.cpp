@@ -4,6 +4,7 @@
 namespace horizon {
 ActionButton::ActionButton(ActionToolID act, const char *icon_name) : action(act)
 {
+    get_style_context()->add_class("osd");
     button = Gtk::manage(new Gtk::Button);
     button->set_image_from_icon_name(icon_name, Gtk::ICON_SIZE_DND);
     button->set_tooltip_text(action_catalog.at(action).name);
