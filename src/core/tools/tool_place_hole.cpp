@@ -4,6 +4,7 @@
 #include "imp/imp_interface.hpp"
 #include <iostream>
 #include <gdk/gdkkeysyms.h>
+#include "core/tool_id.hpp"
 
 namespace horizon {
 
@@ -30,6 +31,10 @@ void ToolPlaceHole::create_hole(const Coordi &c)
 {
     temp = doc.r->insert_hole(UUID::random());
     temp->placement.shift = c;
+    if (tool_id == ToolID::PLACE_HOLE_SLOT) {
+        temp->shape = Hole::Shape::SLOT;
+        temp->length = 1_mm;
+    }
 }
 
 ToolResponse ToolPlaceHole::update(const ToolArgs &args)

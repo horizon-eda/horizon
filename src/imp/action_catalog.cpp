@@ -368,8 +368,20 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Place hole", ActionGroup::PADSTACK, ActionCatalogItem::AVAILABLE_IN_PADSTACK,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::PLACE_HOLE_SLOT},
+         {"Place slot hole", ActionGroup::PADSTACK, ActionCatalogItem::AVAILABLE_IN_PADSTACK,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::PLACE_SHAPE},
-         {"Place shape", ActionGroup::PADSTACK, ActionCatalogItem::AVAILABLE_IN_PADSTACK,
+         {"Place circular shape", ActionGroup::PADSTACK, ActionCatalogItem::AVAILABLE_IN_PADSTACK,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::PLACE_SHAPE_RECTANGLE},
+         {"Place rectangular shape", ActionGroup::PADSTACK, ActionCatalogItem::AVAILABLE_IN_PADSTACK,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::PLACE_SHAPE_OBROUND},
+         {"Place obround shape", ActionGroup::PADSTACK, ActionCatalogItem::AVAILABLE_IN_PADSTACK,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::EDIT_SHAPE},
@@ -949,6 +961,7 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(ENTER_DATUM),
         TOOL_LUT_ITEM(MOVE_EXACTLY),
         TOOL_LUT_ITEM(PLACE_HOLE),
+        TOOL_LUT_ITEM(PLACE_HOLE_SLOT),
         TOOL_LUT_ITEM(PLACE_PAD),
         TOOL_LUT_ITEM(PASTE),
         TOOL_LUT_ITEM(ASSIGN_PART),
@@ -962,6 +975,8 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(SMASH),
         TOOL_LUT_ITEM(UNSMASH),
         TOOL_LUT_ITEM(PLACE_SHAPE),
+        TOOL_LUT_ITEM(PLACE_SHAPE_RECTANGLE),
+        TOOL_LUT_ITEM(PLACE_SHAPE_OBROUND),
         TOOL_LUT_ITEM(EDIT_SHAPE),
         TOOL_LUT_ITEM(IMPORT_DXF),
         TOOL_LUT_ITEM(MANAGE_NET_CLASSES),

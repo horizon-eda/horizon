@@ -22,6 +22,6 @@ ActionButton::ActionButton(ActionToolID act, const char *icon_name) : action(act
 
 void ActionButton::set_key_sequences(const std::string &keys)
 {
-    button->set_tooltip_text(action_catalog.at(action).name + " " + keys);
+    button->set_tooltip_text(action_catalog.at(action).name + " (" + keys + ")");
 }
 } // namespace horizon

@@ -6,6 +6,7 @@
 #include "widgets/parameter_set_editor.hpp"
 #include "board/board_layers.hpp"
 #include "core/tool_id.hpp"
+#include "widgets/action_button.hpp"
 
 namespace horizon {
 ImpPadstack::ImpPadstack(const std::string &padstack_filename, const std::string &pool_path)
@@ -137,6 +138,12 @@ void ImpPadstack::construct()
     core_padstack.signal_save().connect([this, type_combo] {
         core_padstack.get_padstack()->type = Padstack::type_lut.lookup(type_combo->get_active_id());
     });
+
+    add_action_button(make_action(ToolID::PLACE_SHAPE), "action-place-shape-circle-symbolic");
+    add_action_button(make_action(ToolID::PLACE_SHAPE_RECTANGLE), "action-place-shape-rectangle-symbolic");
+    add_action_button(make_action(ToolID::PLACE_SHAPE_OBROUND), "action-place-shape-obround-symbolic");
+    add_action_button(make_action(ToolID::PLACE_HOLE), "action-place-hole-symbolic").set_margin_top(5);
+    add_action_button(make_action(ToolID::PLACE_HOLE_SLOT), "action-place-hole-slot-symbolic");
 
     update_header();
 }

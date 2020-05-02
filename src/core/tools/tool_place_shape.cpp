@@ -4,6 +4,7 @@
 #include "imp/imp_interface.hpp"
 #include <iostream>
 #include <gdk/gdkkeysyms.h>
+#include "core/tool_id.hpp"
 
 namespace horizon {
 
@@ -34,6 +35,18 @@ void ToolPlaceShape::create_shape(const Coordi &c)
     auto uu = UUID::random();
     temp = &doc.a->get_padstack()->shapes.emplace(uu, uu).first->second;
     temp->placement.shift = c;
+    switch (tool_id) {
+    case ToolID::PLACE_SHAPE_RECTANGLE:
+        temp->form = Shape::Form::RECTANGLE;
+        temp->params = {1_mm, 0.5_mm};
+        break;
+
+    case ToolID::PLACE_SHAPE_OBROUND:
+        temp->form = Shape::Form::OBROUND;
+        temp->params = {1_mm, 0.5_mm};
+        break;
+    default:;
+    }
 }
 
 ToolResponse ToolPlaceShape::update(const ToolArgs &args)

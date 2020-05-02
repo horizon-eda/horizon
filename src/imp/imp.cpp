@@ -2059,7 +2059,7 @@ ActionButton &ImpBase::add_action_button(ActionToolID action, const char *icon_n
     main_window->set_use_action_bar(true);
     auto ab = Gtk::manage(new ActionButton(action, icon_name));
     ab->show();
-    ab->signal_clicked().connect([this](auto act) { trigger_action(act); });
+    ab->signal_clicked().connect([this](auto act) { this->trigger_action(act); });
     main_window->action_bar_box->pack_start(*ab, false, false, 0);
     action_buttons.emplace(action, ab);
     return *ab;
