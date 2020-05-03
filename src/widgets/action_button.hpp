@@ -14,10 +14,14 @@ public:
     }
 
     void set_key_sequences(const std::string &keys);
+    void add_action(ActionToolID act);
 
 private:
     ActionToolID action;
     Gtk::Button *button = nullptr;
+    Gtk::MenuButton *menu_button = nullptr;
+    Gtk::Menu menu;
+    int button_current = -1;
     type_signal_clicked s_signal_clicked;
 };
 } // namespace horizon
