@@ -11,13 +11,13 @@ std::string key_sequence_to_string(const KeySequence &keys)
         std::string keyname(gdk_keyval_name(it.first));
         auto mod = it.second;
         if (mod & Gdk::CONTROL_MASK) {
-            txt += "Ctrl-";
+            txt += "Ctrl+";
         }
         if (mod & Gdk::SHIFT_MASK) {
-            txt += "Shift-";
+            txt += "Shift+";
         }
         if (mod & Gdk::MOD1_MASK) {
-            txt += "Alt-";
+            txt += "Alt+";
         }
         txt += keyname;
         txt += " ";
