@@ -30,7 +30,7 @@ const char *get_icon(ActionToolID act)
         return "face-worried-symbolic";
 }
 
-ActionButton::ActionButton(ActionToolID act, const std::map<ActionToolID, std::string> &ks) : action(act), keys(ks)
+ActionButton::ActionButton(ActionToolID act, const std::map<ActionToolID, ActionConnection> &ks) : action(act), keys(ks)
 {
     get_style_context()->add_class("osd");
     button = Gtk::manage(new Gtk::Button);
@@ -104,7 +104,7 @@ void ActionButton::update_key_sequences()
     set_primary_action(action);
     for (auto &it : key_labels) {
         if (keys.count(it.first)) {
-            it.second->set_text(keys.at(it.first));
+            it.second->set_text(key_sequences_to_string(keys.at(it.first).key_sequences));
         }
     }
 }
@@ -120,8 +120,8 @@ void ActionButton::set_primary_action(ActionToolID act)
     action = act;
     button->set_image_from_icon_name(get_icon(action), Gtk::ICON_SIZE_DND);
     std::string l = action_catalog.at(action).name;
-    if (keys.count(action) && keys.at(action).size()) {
-        l += " (" + keys.at(action) + ")";
+    if (keys.at(action).key_sequences.size()) {
+        l += " (" + key_sequences_to_string(keys.at(action).key_sequences) + ")";
     }
     button->set_tooltip_text(l);
 }
@@ -140,8 +140,8 @@ Gtk::MenuItem &ActionButton::add_menu_item(ActionToolID act)
     auto la_keys = Gtk::manage(new Gtk::Label);
     la_keys->set_margin_start(4);
     la_keys->set_xalign(1);
-    if (keys.count(act) && keys.at(act).size()) {
-        la_keys->set_text(keys.at(act));
+    if (keys.at(act).key_sequences.size()) {
+        la_keys->set_text(key_sequences_to_string(keys.at(act).key_sequences));
     }
     key_labels.emplace(act, la_keys);
     box->pack_start(*la_keys, true, true, 0);

@@ -265,7 +265,6 @@ private:
     bool queue_autosave = false;
 
     void update_property_panels();
-    std::map<ActionToolID, std::string> action_button_keys;
     std::list<ActionButton *> action_buttons;
 };
 } // namespace horizon

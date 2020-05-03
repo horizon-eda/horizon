@@ -5,7 +5,7 @@
 namespace horizon {
 class ActionButton : public Gtk::Overlay {
 public:
-    ActionButton(ActionToolID action, const std::map<ActionToolID, std::string> &k);
+    ActionButton(ActionToolID action, const std::map<ActionToolID, ActionConnection> &k);
 
     typedef sigc::signal<void, ActionToolID> type_signal_clicked;
     type_signal_clicked signal_clicked()
@@ -24,7 +24,7 @@ private:
     int button_current = -1;
     type_signal_clicked s_signal_clicked;
     Gtk::MenuItem &add_menu_item(ActionToolID act);
-    const std::map<ActionToolID, std::string> &keys;
+    const std::map<ActionToolID, ActionConnection> &keys;
     std::map<ActionToolID, Gtk::Label *> key_labels;
     void set_primary_action(ActionToolID act);
 };

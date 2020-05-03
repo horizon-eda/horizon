@@ -1132,12 +1132,10 @@ void ImpBase::apply_preferences()
     }
 
     key_sequence_dialog->clear();
-    action_button_keys.clear();
     for (const auto &it : action_connections) {
         if (it.second.key_sequences.size()) {
             key_sequence_dialog->add_sequence(it.second.key_sequences, action_catalog.at(it.first).name);
             tool_popover->set_key_sequences(it.first, it.second.key_sequences);
-            action_button_keys.emplace(it.first, key_sequences_to_string(it.second.key_sequences));
         }
     }
     for (auto it : action_buttons) {
@@ -2061,7 +2059,7 @@ void ImpBase::handle_select_polygon(const ActionConnection &a)
 ActionButton &ImpBase::add_action_button(ActionToolID action)
 {
     main_window->set_use_action_bar(true);
-    auto ab = Gtk::manage(new ActionButton(action, action_button_keys));
+    auto ab = Gtk::manage(new ActionButton(action, action_connections));
     ab->show();
     ab->signal_clicked().connect([this](auto act) { this->trigger_action(act); });
     main_window->action_bar_box->pack_start(*ab, false, false, 0);
