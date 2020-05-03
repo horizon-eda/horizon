@@ -117,6 +117,7 @@ enum class ActionGroup {
 typedef std::vector<std::pair<unsigned int, GdkModifierType>> KeySequence;
 
 std::string key_sequence_to_string(const KeySequence &keys);
+std::string key_sequences_to_string(const std::vector<KeySequence> &seqs);
 
 class ActionConnection {
 public:
