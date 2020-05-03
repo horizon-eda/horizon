@@ -1457,6 +1457,32 @@ bool ImpBase::handle_click_release(GdkEventButton *button_event)
     return false;
 }
 
+Gtk::MenuItem *ImpBase::create_context_menu_item(ActionToolID act)
+{
+    auto it = Gtk::manage(new Gtk::MenuItem);
+    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
+
+    {
+        auto la = Gtk::manage(new Gtk::Label);
+        la->set_xalign(0);
+        la->set_label(action_catalog.at(act).name);
+        box->pack_start(*la, false, false, 0);
+    }
+
+    {
+        auto la = Gtk::manage(new Gtk::Label);
+        la->set_xalign(1);
+        la->get_style_context()->add_class("dim-label");
+        la->set_label(key_sequences_to_string(action_connections.at(act).key_sequences));
+        la->set_margin_end(4);
+        box->pack_start(*la, true, true, 0);
+    }
+
+    box->show_all();
+    it->add(*box);
+    return it;
+}
+
 void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRef> &sel)
 {
     update_action_sensitivity();
@@ -1469,7 +1495,7 @@ void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRe
                 if (it.first.first == ActionID::TOOL) {
                     auto r = core->tool_can_begin(it.first.second, {sel});
                     if (r.first && r.second) {
-                        auto la_sub = Gtk::manage(new Gtk::MenuItem(it.second.name));
+                        auto la_sub = create_context_menu_item(it.first);
                         ToolID tool_id = it.first.second;
                         std::set<SelectableRef> sr(sel);
                         la_sub->signal_activate().connect([this, tool_id, sr] {
@@ -1483,7 +1509,7 @@ void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRe
                 }
                 else {
                     if (get_action_sensitive(it.first) && (it.second.flags & ActionCatalogItem::FLAGS_SPECIFIC)) {
-                        auto la_sub = Gtk::manage(new Gtk::MenuItem(it.second.name));
+                        auto la_sub = create_context_menu_item(it.first);
                         ActionID action_id = it.first.first;
                         std::set<SelectableRef> sr(sel);
                         la_sub->signal_activate().connect([this, action_id, sr] {

@@ -228,6 +228,7 @@ private:
                                      std::function<void(const ActionConnection &)> cb);
 
     void create_context_menu(Gtk::Menu *parent, const std::set<SelectableRef> &sel);
+    Gtk::MenuItem *create_context_menu_item(ActionToolID act);
 
     KeySequence keys_current;
     bool handle_action_key(GdkEventKey *ev);
