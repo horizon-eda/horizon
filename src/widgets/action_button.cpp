@@ -1,14 +1,36 @@
 #include "action_button.hpp"
 #include "imp/action_catalog.hpp"
+#include "core/tool_id.hpp"
 #include <iostream>
 
 namespace horizon {
-ActionButton::ActionButton(ActionToolID act, const char *icon_name) : action(act)
+
+static const std::map<ActionToolID, const char *> action_icons = {
+        {make_action(ToolID::DRAW_POLYGON), "action-draw-polygon-symbolic"},
+        {make_action(ToolID::PLACE_TEXT), "action-place-text-symbolic"},
+        {make_action(ToolID::PLACE_REFDES_AND_VALUE), "action-place-refdes-and-value-symbolic"},
+        {make_action(ToolID::PLACE_SHAPE), "action-place-shape-circle-symbolic"},
+        {make_action(ToolID::PLACE_SHAPE_OBROUND), "action-place-shape-obround-symbolic"},
+        {make_action(ToolID::PLACE_SHAPE_RECTANGLE), "action-place-shape-rectangle-symbolic"},
+        {make_action(ToolID::DRAW_LINE), "action-draw-line-symbolic"},
+        {make_action(ToolID::DRAW_LINE_RECTANGLE), "action-draw-line-rectangle-symbolic"},
+        {make_action(ToolID::PLACE_HOLE), "action-place-hole-symbolic"},
+        {make_action(ToolID::PLACE_HOLE_SLOT), "action-place-hole-slot-symbolic"},
+};
+
+const char *get_icon(ActionToolID act)
+{
+    if (action_icons.count(act))
+        return action_icons.at(act);
+    else
+        return "face-worried-symbolic";
+}
+
+ActionButton::ActionButton(ActionToolID act, const std::map<ActionToolID, std::string> &ks) : action(act), keys(ks)
 {
     get_style_context()->add_class("osd");
     button = Gtk::manage(new Gtk::Button);
-    button->set_image_from_icon_name(icon_name, Gtk::ICON_SIZE_DND);
-    button->set_tooltip_text(action_catalog.at(action).name);
+    set_primary_action(action);
     button->signal_clicked().connect([this] { s_signal_clicked.emit(action); });
     button->signal_button_press_event().connect(
             [this](GdkEventButton *ev) {
@@ -68,21 +90,50 @@ ActionButton::ActionButton(ActionToolID act, const char *icon_name) : action(act
     });
     add_overlay(*menu_button);
     menu_button->set_no_show_all();
+    add_menu_item(action);
+    menu.get_style_context()->add_class("osd");
+    menu.set_reserve_toggle_size(false);
 }
 
-void ActionButton::set_key_sequences(const std::string &keys)
+void ActionButton::update_key_sequences()
 {
-    button->set_tooltip_text(action_catalog.at(action).name + " (" + keys + ")");
+    set_primary_action(action);
 }
 
 void ActionButton::add_action(ActionToolID act)
 {
     menu_button->show();
-    {
-        auto it = Gtk::manage(new Gtk::MenuItem(action_catalog.at(act).name));
-        it->show();
-        it->signal_activate().connect([this, act] { s_signal_clicked.emit(act); });
-        menu.append(*it);
-    }
+    add_menu_item(act);
 }
+
+void ActionButton::set_primary_action(ActionToolID act)
+{
+    action = act;
+    button->set_image_from_icon_name(get_icon(action), Gtk::ICON_SIZE_DND);
+    std::string l = action_catalog.at(action).name;
+    if (keys.count(action) && keys.at(action).size()) {
+        l += " (" + keys.at(action) + ")";
+    }
+    button->set_tooltip_text(l);
+}
+
+Gtk::MenuItem &ActionButton::add_menu_item(ActionToolID act)
+{
+    auto it = Gtk::manage(new Gtk::MenuItem());
+    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
+    auto img = Gtk::manage(new Gtk::Image(get_icon(act), Gtk::ICON_SIZE_DND));
+    box->pack_start(*img, false, false, 0);
+    auto la = Gtk::manage(new Gtk::Label(action_catalog.at(act).name));
+    la->set_xalign(0);
+    box->pack_start(*la, true, true, 0);
+    it->add(*box);
+    it->show_all();
+    it->signal_activate().connect([this, act] {
+        set_primary_action(act);
+        s_signal_clicked.emit(act);
+    });
+    menu.append(*it);
+    return *it;
+}
+
 } // namespace horizon

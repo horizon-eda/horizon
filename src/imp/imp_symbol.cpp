@@ -181,11 +181,11 @@ void ImpSymbol::construct()
     bbox_annotation->on_top = false;
     bbox_annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
 
-    add_action_button(make_action(ToolID::DRAW_LINE_RECTANGLE), "action-draw-line-rectangle-symbolic");
-    add_action_button(make_action(ToolID::PLACE_REFDES_AND_VALUE), "action-place-refdes-and-value-symbolic");
-    add_action_button(make_action(ToolID::DRAW_LINE), "action-draw-line");
-    add_action_button(make_action(ToolID::PLACE_TEXT), "action-place-text-symbolic");
-    add_action_button(make_action(ToolID::RESIZE_SYMBOL), "action-resize-symbol-symbolic");
+    add_action_button(make_action(ToolID::DRAW_LINE_RECTANGLE));
+    add_action_button(make_action(ToolID::PLACE_REFDES_AND_VALUE));
+    add_action_button(make_action(ToolID::DRAW_LINE));
+    add_action_button(make_action(ToolID::PLACE_TEXT));
+    add_action_button(make_action(ToolID::RESIZE_SYMBOL));
 }
 
 void ImpSymbol::update_header()

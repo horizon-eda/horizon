@@ -1132,12 +1132,16 @@ void ImpBase::apply_preferences()
     }
 
     key_sequence_dialog->clear();
+    action_button_keys.clear();
     for (const auto &it : action_connections) {
         if (it.second.key_sequences.size()) {
             key_sequence_dialog->add_sequence(it.second.key_sequences, action_catalog.at(it.first).name);
             tool_popover->set_key_sequences(it.first, it.second.key_sequences);
-            set_action_button_key_sequences(it.first, key_sequences_to_string(it.second.key_sequences));
+            action_button_keys.emplace(it.first, key_sequences_to_string(it.second.key_sequences));
         }
+    }
+    for (auto it : action_buttons) {
+        it->update_key_sequences();
     }
     canvas->smooth_zoom = preferences.zoom.smooth_zoom_2d;
     canvas->touchpad_pan = preferences.zoom.touchpad_pan;
@@ -2054,21 +2058,15 @@ void ImpBase::handle_select_polygon(const ActionConnection &a)
     canvas->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
 }
 
-ActionButton &ImpBase::add_action_button(ActionToolID action, const char *icon_name)
+ActionButton &ImpBase::add_action_button(ActionToolID action)
 {
     main_window->set_use_action_bar(true);
-    auto ab = Gtk::manage(new ActionButton(action, icon_name));
+    auto ab = Gtk::manage(new ActionButton(action, action_button_keys));
     ab->show();
     ab->signal_clicked().connect([this](auto act) { this->trigger_action(act); });
     main_window->action_bar_box->pack_start(*ab, false, false, 0);
-    action_buttons.emplace(action, ab);
+    action_buttons.push_back(ab);
     return *ab;
-}
-
-void ImpBase::set_action_button_key_sequences(ActionToolID action, const std::string &keys)
-{
-    if (action_buttons.count(action))
-        action_buttons.at(action)->set_key_sequences(keys);
 }
 
 
