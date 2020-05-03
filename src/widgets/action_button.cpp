@@ -7,6 +7,8 @@ namespace horizon {
 
 static const std::map<ActionToolID, const char *> action_icons = {
         {make_action(ToolID::DRAW_POLYGON), "action-draw-polygon-symbolic"},
+        {make_action(ToolID::DRAW_POLYGON_RECTANGLE), "action-draw-polygon-rectangle-symbolic"},
+        {make_action(ToolID::DRAW_POLYGON_CIRCLE), "action-draw-polygon-circle-symbolic"},
         {make_action(ToolID::PLACE_TEXT), "action-place-text-symbolic"},
         {make_action(ToolID::PLACE_REFDES_AND_VALUE), "action-place-refdes-and-value-symbolic"},
         {make_action(ToolID::PLACE_SHAPE), "action-place-shape-circle-symbolic"},
@@ -16,6 +18,7 @@ static const std::map<ActionToolID, const char *> action_icons = {
         {make_action(ToolID::DRAW_LINE_RECTANGLE), "action-draw-line-rectangle-symbolic"},
         {make_action(ToolID::PLACE_HOLE), "action-place-hole-symbolic"},
         {make_action(ToolID::PLACE_HOLE_SLOT), "action-place-hole-slot-symbolic"},
+        {make_action(ToolID::RESIZE_SYMBOL), "action-resize-symbol-symbolic"},
 };
 
 const char *get_icon(ActionToolID act)
@@ -121,7 +124,8 @@ Gtk::MenuItem &ActionButton::add_menu_item(ActionToolID act)
 {
     auto it = Gtk::manage(new Gtk::MenuItem());
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
-    auto img = Gtk::manage(new Gtk::Image(get_icon(act), Gtk::ICON_SIZE_DND));
+    auto img = Gtk::manage(new Gtk::Image);
+    img->set_from_icon_name(get_icon(act), Gtk::ICON_SIZE_DND);
     box->pack_start(*img, false, false, 0);
     auto la = Gtk::manage(new Gtk::Label(action_catalog.at(act).name));
     la->set_xalign(0);
