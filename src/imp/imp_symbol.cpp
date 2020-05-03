@@ -5,6 +5,7 @@
 #include "symbol_preview/symbol_preview_window.hpp"
 #include "widgets/unplaced_box.hpp"
 #include "core/tool_id.hpp"
+#include "widgets/action_button.hpp"
 
 namespace horizon {
 ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool_path)
@@ -183,7 +184,10 @@ void ImpSymbol::construct()
 
     add_action_button(make_action(ToolID::DRAW_LINE_RECTANGLE));
     add_action_button(make_action(ToolID::PLACE_REFDES_AND_VALUE));
-    add_action_button(make_action(ToolID::DRAW_LINE));
+    {
+        auto &x = add_action_button(make_action(ToolID::DRAW_LINE));
+        x.add_action(make_action(ToolID::DRAW_ARC));
+    }
     add_action_button(make_action(ToolID::PLACE_TEXT));
     add_action_button(make_action(ToolID::RESIZE_SYMBOL));
 }

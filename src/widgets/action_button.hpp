@@ -25,6 +25,7 @@ private:
     type_signal_clicked s_signal_clicked;
     Gtk::MenuItem &add_menu_item(ActionToolID act);
     const std::map<ActionToolID, std::string> &keys;
+    std::map<ActionToolID, Gtk::Label *> key_labels;
     void set_primary_action(ActionToolID act);
 };
 } // namespace horizon

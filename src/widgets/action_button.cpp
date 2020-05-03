@@ -19,6 +19,7 @@ static const std::map<ActionToolID, const char *> action_icons = {
         {make_action(ToolID::PLACE_HOLE), "action-place-hole-symbolic"},
         {make_action(ToolID::PLACE_HOLE_SLOT), "action-place-hole-slot-symbolic"},
         {make_action(ToolID::RESIZE_SYMBOL), "action-resize-symbol-symbolic"},
+        {make_action(ToolID::DRAW_ARC), "action-draw-arc-symbolic"},
 };
 
 const char *get_icon(ActionToolID act)
@@ -101,6 +102,11 @@ ActionButton::ActionButton(ActionToolID act, const std::map<ActionToolID, std::s
 void ActionButton::update_key_sequences()
 {
     set_primary_action(action);
+    for (auto &it : key_labels) {
+        if (keys.count(it.first)) {
+            it.second->set_text(keys.at(it.first));
+        }
+    }
 }
 
 void ActionButton::add_action(ActionToolID act)
@@ -129,7 +135,17 @@ Gtk::MenuItem &ActionButton::add_menu_item(ActionToolID act)
     box->pack_start(*img, false, false, 0);
     auto la = Gtk::manage(new Gtk::Label(action_catalog.at(act).name));
     la->set_xalign(0);
-    box->pack_start(*la, true, true, 0);
+    box->pack_start(*la, false, false, 0);
+
+    auto la_keys = Gtk::manage(new Gtk::Label);
+    la_keys->set_margin_start(4);
+    la_keys->set_xalign(1);
+    if (keys.count(act) && keys.at(act).size()) {
+        la_keys->set_text(keys.at(act));
+    }
+    key_labels.emplace(act, la_keys);
+    box->pack_start(*la_keys, true, true, 0);
+
     it->add(*box);
     it->show_all();
     it->signal_activate().connect([this, act] {
