@@ -15,20 +15,18 @@ def chopSVG(icon)
 	unless (File.exists?(icon[:file]) && !icon[:forcerender])
 		FileUtils.cp(SRC,icon[:file]) 
 		puts " >> #{icon[:name]}"
-		cmd = "#{INKSCAPE} -f #{icon[:file]} --select #{icon[:id]} --verb=FitCanvasToSelection  --verb=EditInvertInAllLayers "
-		cmd += "--verb=EditDelete --verb=EditSelectAll --verb=SelectionUnGroup --verb=SelectionUnGroup --verb=SelectionUnGroup --verb=StrokeToPath --verb=FileVacuum "
-		cmd += "--verb=FileSave --verb=FileQuit"
+		cmd = "#{INKSCAPE} -g #{icon[:file]} --select #{icon[:id]} --verb=\"FitCanvasToSelection;EditInvertInAllLayers"
+		cmd += ";EditDelete;EditSelectAll;SelectionUnGroup;SelectionUnGroup;SelectionUnGroup;StrokeToPath;FileVacuum"
+		cmd += ";FileSave;FileQuit\""
 		puts cmd
 		system(cmd)
 		#saving as plain SVG gets rid of the classes :/
 		#cmd = "#{INKSCAPE} -f #{icon[:file]} -z --vacuum-defs -l #{icon[:file]} > /dev/null 2>&1"
 		#system(cmd)
 		svgcrop = Document.new(File.new(icon[:file], 'r'))
-		svgcrop.root.each_element("//rect") do |rect| 
-			w = ((rect.attributes["width"].to_f * 10).round / 10.0).to_i #get rid of 16 vs 15.99999 
-			h = ((rect.attributes["width"].to_f * 10).round / 10.0).to_i #Inkscape bugs
-			if w == 16 && h == 16
-				rect.remove
+		svgcrop.root.each_element("//path") do |path|
+			if path.attributes['style'].include? 'fill:#1a1a1a;'
+				path.remove
 			end
 		end
     icon_f = File.new(icon[:file],'w+')
