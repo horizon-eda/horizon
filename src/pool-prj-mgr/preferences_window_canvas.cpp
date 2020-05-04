@@ -70,7 +70,6 @@ public:
 protected:
     virtual std::string get_color_name() = 0;
     Gtk::DrawingArea *colorbox = nullptr;
-    void update_color(const Color &c);
 };
 
 ColorEditor::ColorEditor() : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5)
@@ -467,6 +466,7 @@ void CanvasPreferencesEditor::handle_default()
     preferences->signal_changed().emit();
     update_color_chooser();
     queue_draw();
+    canvas_colors_fb->queue_draw();
 }
 
 void CanvasPreferencesEditor::load_colors(const json &j)
@@ -475,6 +475,7 @@ void CanvasPreferencesEditor::load_colors(const json &j)
     preferences->signal_changed().emit();
     update_color_chooser();
     queue_draw();
+    canvas_colors_fb->queue_draw();
 }
 
 void CanvasPreferencesEditor::update_color_chooser()
