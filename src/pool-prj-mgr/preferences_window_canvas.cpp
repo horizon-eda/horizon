@@ -70,7 +70,6 @@ public:
 protected:
     virtual std::string get_color_name() = 0;
     Gtk::DrawingArea *colorbox = nullptr;
-    void update_color(const Color &c);
 };
 
 ColorEditor::ColorEditor() : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5)
