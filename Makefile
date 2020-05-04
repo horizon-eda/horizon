@@ -826,8 +826,6 @@ install: $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-eda
 	mkdir -p $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m755 $(BUILDDIR)/horizon-imp $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m755 $(BUILDDIR)/horizon-eda $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m755 $(BUILDDIR)/horizon-prj $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m755 $(BUILDDIR)/horizon-pool $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(ICONDIR)/scalable/apps
 	$(INSTALL) -m644 src/icons/scalable/apps/horizon-eda.svg $(DESTDIR)$(ICONDIR)/scalable/apps/org.horizon_eda.HorizonEDA.svg
 	mkdir -p $(DESTDIR)$(ICONDIR)/16x16/apps
