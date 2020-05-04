@@ -466,6 +466,7 @@ void CanvasPreferencesEditor::handle_default()
     preferences->signal_changed().emit();
     update_color_chooser();
     queue_draw();
+    canvas_colors_fb->queue_draw();
 }
 
 void CanvasPreferencesEditor::load_colors(const json &j)
@@ -474,6 +475,7 @@ void CanvasPreferencesEditor::load_colors(const json &j)
     preferences->signal_changed().emit();
     update_color_chooser();
     queue_draw();
+    canvas_colors_fb->queue_draw();
 }
 
 void CanvasPreferencesEditor::update_color_chooser()
