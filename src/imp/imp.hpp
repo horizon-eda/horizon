@@ -15,6 +15,7 @@
 #include "search/searcher.hpp"
 #include <zmq.hpp>
 #include "util/item_set.hpp"
+#include "canvas/canvas_gl.hpp"
 
 #ifdef G_OS_WIN32
 #undef DELETE
@@ -72,7 +73,7 @@ public:
 
 protected:
     MainWindow *main_window;
-    class CanvasGL *canvas;
+    CanvasGL *canvas;
     class PropertyPanels *panels;
     WarningsBox *warnings_box;
     class ToolPopover *tool_popover;
@@ -264,5 +265,6 @@ private:
     bool queue_autosave = false;
 
     void update_property_panels();
+    std::map<CanvasGL::SelectionTool, CanvasGL::SelectionQualifier> selection_qualifiers;
 };
 } // namespace horizon

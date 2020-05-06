@@ -294,6 +294,12 @@ void ImpBase::run(int argc, char *argv[])
             [this](ObjectType ty, UUID uu) { return core->get_display_name(ty, uu); });
 
     {
+        selection_qualifiers = {
+                {CanvasGL::SelectionTool::BOX, CanvasGL::SelectionQualifier::INCLUDE_ORIGIN},
+                {CanvasGL::SelectionTool::LASSO, CanvasGL::SelectionQualifier::INCLUDE_ORIGIN},
+                {CanvasGL::SelectionTool::PAINT, CanvasGL::SelectionQualifier::TOUCH_BOX},
+        };
+
         Gtk::RadioButton *selection_tool_box_button, *selection_tool_lasso_button, *selection_tool_paint_button;
         Gtk::RadioButton *selection_qualifier_include_origin_button, *selection_qualifier_touch_box_button,
                 *selection_qualifier_include_box_button, *selection_qualifier_auto_button;
@@ -313,34 +319,25 @@ void ImpBase::run(int argc, char *argv[])
                 {CanvasGL::SelectionQualifier::TOUCH_BOX, selection_qualifier_touch_box_button},
                 {CanvasGL::SelectionQualifier::INCLUDE_ORIGIN, selection_qualifier_include_origin_button},
                 {CanvasGL::SelectionQualifier::AUTO, selection_qualifier_auto_button}};
-        bind_widget<CanvasGL::SelectionQualifier>(qual_map, canvas->selection_qualifier,
-                                                  [this](auto v) { this->update_selection_label(); });
+        bind_widget<CanvasGL::SelectionQualifier>(qual_map, canvas->selection_qualifier, [this](auto v) {
+            selection_qualifiers.at(canvas->selection_tool) = v;
+            this->update_selection_label();
+        });
 
         std::map<CanvasGL::SelectionTool, Gtk::RadioButton *> tool_map = {
                 {CanvasGL::SelectionTool::BOX, selection_tool_box_button},
                 {CanvasGL::SelectionTool::LASSO, selection_tool_lasso_button},
                 {CanvasGL::SelectionTool::PAINT, selection_tool_paint_button},
         };
-        bind_widget<CanvasGL::SelectionTool>(tool_map, canvas->selection_tool,
-                                             [this, selection_qualifier_touch_box_button, selection_qualifier_box,
-                                              selection_qualifier_auto_button,
-                                              selection_qualifier_include_origin_button](auto v) {
-                                                 this->update_selection_label();
-                                                 auto is_paint = (v == CanvasGL::SelectionTool::PAINT);
-                                                 if (is_paint) {
-                                                     selection_qualifier_touch_box_button->set_active(true);
-                                                 }
-                                                 selection_qualifier_box->set_sensitive(!is_paint);
+        bind_widget<CanvasGL::SelectionTool>(
+                tool_map, canvas->selection_tool, [this, selection_qualifier_box, qual_map](auto v) {
+                    this->update_selection_label();
+                    selection_qualifier_box->set_sensitive(v != CanvasGL::SelectionTool::PAINT);
+                    qual_map.at(CanvasGL::SelectionQualifier::AUTO)->set_sensitive(v != CanvasGL::SelectionTool::LASSO);
 
-                                                 auto is_box = (v == CanvasGL::SelectionTool::BOX);
-                                                 selection_qualifier_auto_button->set_sensitive(is_box);
-                                                 if (is_box)
-                                                     selection_qualifier_auto_button->set_active(true);
-
-                                                 if (v == CanvasGL::SelectionTool::LASSO) {
-                                                     selection_qualifier_include_origin_button->set_active(true);
-                                                 }
-                                             });
+                    auto qual = selection_qualifiers.at(v);
+                    qual_map.at(qual)->set_active(true);
+                });
 
         connect_action(ActionID::SELECTION_TOOL_BOX,
                        [selection_tool_box_button](const auto &a) { selection_tool_box_button->set_active(true); });
