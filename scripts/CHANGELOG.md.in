@@ -1,3 +1,10 @@
+# Version 1.1.1
+
+## Bugfixes
+
+ - Makefile: don't build during make install (e991aff73919b6b0d05ea22ed7ecc2c61d8a0c0b)
+ - win32: regenerate gdk pixbuf loader cache during build (b7a128bed12da74accec4231baf01caa333323fe)
+
 # Version 1.1.0
 
 ## Added features

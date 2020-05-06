@@ -1,6 +1,6 @@
-PKGCONFIG=pkg-config
-BUILDDIR = build
-PROGS    = $(addprefix $(BUILDDIR)/horizon-,imp eda)
+PKG_CONFIG ?= pkg-config
+BUILDDIR    = build
+PROGS       = $(addprefix $(BUILDDIR)/horizon-,imp eda)
 
 all: $(PROGS)
 pymodule: $(BUILDDIR)/horizon.so
@@ -635,10 +635,10 @@ LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq lib
 
 OPTIMIZE=-fdata-sections -ffunction-sections
 DEBUG   =-g3
-CXXFLAGS  =$(DEBUG) $(DEFINES) $(OPTIMIZE) $(shell $(PKGCONFIG) --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -std=c++14 -O3
+CXXFLAGS  =$(DEBUG) $(DEFINES) $(OPTIMIZE) $(shell $(PKG_CONFIG) --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -std=c++14 -O3
 CFLAGS = $(filter-out -std=%,$(CXXFLAGS)) -std=c99
 LDFLAGS = -lm -lpthread
-GLIB_COMPILE_RESOURCES = $(shell $(PKGCONFIG) --variable=glib_compile_resources gio-2.0)
+GLIB_COMPILE_RESOURCES = $(shell $(PKG_CONFIG) --variable=glib_compile_resources gio-2.0)
 
 ifeq ($(OS),Windows_NT)
     LDFLAGS += -lrpcrt4
@@ -736,7 +736,7 @@ OBJ_GEN_PKG      = $(addprefix $(OBJDIR)/,$(SRC_GEN_PKG:.cpp=.o))
 
 INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router -I3rd_party
 INC_OCE ?= -I/opt/opencascade/inc/ -I/mingw64/include/oce/ -I/usr/include/oce -I/usr/include/opencascade -I${CASROOT}/include/opencascade -I/usr/local/include/OpenCASCADE
-INC_PYTHON = $(shell $(PKGCONFIG) --cflags python3 py3cairo)
+INC_PYTHON = $(shell $(PKG_CONFIG) --cflags python3 py3cairo)
 OCE_LIBDIRS = -L/opt/opencascade/lib/ -L${CASROOT}/lib
 LDFLAGS_OCE = $(OCE_LIBDIRS) -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -lTKTopAlgo -lTKPrim -lTKBO
 ifeq ($(OS),Windows_NT)
@@ -771,31 +771,31 @@ $(BUILDDIR)/gen/version_gen.cpp: $(wildcard .git/HEAD .git/index) version.py mak
 
 $(BUILDDIR)/horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(OBJ_OCE) $(OBJ_IMP)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libcurl) -lpodofo -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libcurl) -lpodofo -o $@
 
 $(BUILDDIR)/horizon-pool: $(OBJ_COMMON) $(OBJ_POOL_UTIL)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0) -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) gtkmm-3.0) -o $@
 
 $(BUILDDIR)/horizon-prj: $(OBJ_COMMON) $(OBJ_PRJ_UTIL)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
 $(BUILDDIR)/horizon-eda: $(OBJ_COMMON) $(OBJ_POOL_PRJ_MGR) $(OBJ_RES)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy libzmq libcurl libgit2) -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy libzmq libcurl libgit2) -o $@
 
 $(BUILDDIR)/horizon-pgm-test: $(OBJ_COMMON) $(OBJ_PGM_TEST)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
 $(BUILDDIR)/horizon-gen-pkg: $(OBJ_COMMON) $(OBJ_GEN_PKG)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
 
 $(BUILDDIR)/horizon.so: $(OBJ_PYTHON) $(OBJ_SHARED) $(OBJ_SHARED_OCE)
 	$(ECHO) " $@"
-	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKGCONFIG) --libs $(LIBS_COMMON) python3 glibmm-2.4 giomm-2.4 cairomm-1.0 py3cairo) -lpodofo  $(OCE_LIBDIRS) -lTKXDESTEP -lOSMesa -shared -o $@
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) python3 glibmm-2.4 giomm-2.4 cairomm-1.0 py3cairo) -lpodofo  $(OCE_LIBDIRS) -lTKXDESTEP -lOSMesa -shared -o $@
 
 $(OBJDIR)/%.o: %.c
 	$(QUIET)$(MKDIR) $(dir $@)
@@ -827,8 +827,6 @@ install: $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-eda
 	mkdir -p $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m755 $(BUILDDIR)/horizon-imp $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m755 $(BUILDDIR)/horizon-eda $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m755 $(BUILDDIR)/horizon-prj $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m755 $(BUILDDIR)/horizon-pool $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(ICONDIR)/scalable/apps
 	$(INSTALL) -m644 src/icons/scalable/apps/horizon-eda.svg $(DESTDIR)$(ICONDIR)/scalable/apps/org.horizon_eda.HorizonEDA.svg
 	mkdir -p $(DESTDIR)$(ICONDIR)/16x16/apps

@@ -39,7 +39,15 @@
   <content_rating type="oars-1.0" />
 
   <releases>
-    <release version="1.1.0" date="2020-04-29" type="development">
+    <release version="1.1.1" date="2020-05-04">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v1.1.1</url>
+      <description>
+        <p>
+          Fix Makefile to not compile during make install.
+        </p>
+      </description>
+    </release>
+    <release version="1.1.0" date="2020-04-29">
       <url>https://github.com/horizon-eda/horizon/releases/tag/v1.1.0</url>
       <description>
         <p>New features</p>
