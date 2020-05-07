@@ -20,6 +20,7 @@
 #include "widgets/layer_help_box.hpp"
 #include "widgets/spin_button_angle.hpp"
 #include "util/selection_util.hpp"
+#include "widgets/action_button.hpp"
 #include <iomanip>
 #include "core/tool_id.hpp"
 
@@ -276,6 +277,20 @@ void ImpPackage::construct()
             pkg->alternate_for = nullptr;
         }
     });
+
+    add_action_button(make_action(ToolID::PLACE_PAD));
+    {
+        auto &b = add_action_button(make_action(ToolID::DRAW_LINE));
+        b.add_action(make_action(ToolID::DRAW_LINE_RECTANGLE));
+        b.add_action(make_action(ToolID::DRAW_ARC));
+    }
+    {
+        auto &b = add_action_button(make_action(ToolID::DRAW_POLYGON));
+        b.add_action(make_action(ToolID::DRAW_POLYGON_RECTANGLE));
+        b.add_action(make_action(ToolID::DRAW_POLYGON_CIRCLE));
+    }
+    add_action_button(make_action(ToolID::PLACE_TEXT));
+    add_action_button(make_action(ToolID::DRAW_DIMENSION));
 
     update_header();
 }

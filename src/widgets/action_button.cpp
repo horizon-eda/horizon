@@ -20,6 +20,8 @@ static const std::map<ActionToolID, const char *> action_icons = {
         {make_action(ToolID::PLACE_HOLE_SLOT), "action-place-hole-slot-symbolic"},
         {make_action(ToolID::RESIZE_SYMBOL), "action-resize-symbol-symbolic"},
         {make_action(ToolID::DRAW_ARC), "action-draw-arc-symbolic"},
+        {make_action(ToolID::DRAW_DIMENSION), "action-draw-dimension-symbolic"},
+        {make_action(ToolID::PLACE_PAD), "action-place-pad-symbolic"},
 };
 
 const char *get_icon(ActionToolID act)
