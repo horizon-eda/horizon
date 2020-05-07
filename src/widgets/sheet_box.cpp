@@ -51,6 +51,32 @@ SheetBox::SheetBox(CoreSchematic *c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VE
     view->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SheetBox::selection_changed));
     pack_start(*sc, true, true, 0);
 
+    {
+        auto item = Gtk::manage(new Gtk::MenuItem("Copy UUID"));
+        item->signal_activate().connect([this] {
+            auto it = view->get_selection()->get_selected();
+            if (it) {
+                Gtk::TreeModel::Row row = *it;
+                horizon::UUID uuid = row[list_columns.uuid];
+                std::string str = uuid;
+                auto clip = Gtk::Clipboard::get();
+                clip->set_text(str);
+            }
+        });
+        item->show();
+        menu.append(*item);
+    }
+
+    view->signal_button_press_event().connect_notify([this](GdkEventButton *ev) {
+        Gtk::TreeModel::Path path;
+        if (ev->button == 3) {
+#if GTK_CHECK_VERSION(3, 22, 0)
+            menu.popup_at_pointer((GdkEvent *)ev);
+#else
+            menu.popup(ev->button, gtk_get_current_event_time());
+#endif
+        }
+    });
 
     auto tb = Gtk::manage(new Gtk::Toolbar());
     tb->get_style_context()->add_class("inline-toolbar");
