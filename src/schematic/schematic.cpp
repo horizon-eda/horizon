@@ -6,6 +6,7 @@
 #include "nlohmann/json.hpp"
 #include "util/util.hpp"
 #include "logger/logger.hpp"
+#include <glibmm/regex.h>
 
 namespace horizon {
 
@@ -792,6 +793,34 @@ void Schematic::expand(bool careful)
                 for (const auto &it_v : values) {
                     replace_substr(txt, "$" + it_v.first, it_v.second);
                 }
+            }
+        }
+    }
+
+    if (!careful) {
+        auto regex = Glib::Regex::create(
+                R"(\$sheetref_([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}))",
+                Glib::RegexCompileFlags::REGEX_CASELESS | Glib::RegexCompileFlags::REGEX_OPTIMIZE);
+        for (auto &it_sheet : sheets) {
+            Sheet &sheet = it_sheet.second;
+            for (auto &it_text : sheet.texts) {
+                auto &text = it_text.second;
+                auto txt = text.text;
+                Glib::MatchInfo ma;
+                int start, end;
+                while (regex->match(txt, ma) && ma.fetch_pos(0, start, end)) {
+                    auto ref_uuid = UUID(ma.fetch(1));
+                    if (sheets.count(ref_uuid)) {
+                        std::stringstream ss;
+                        ss << "[" << sheets.at(ref_uuid).index << "]";
+                        txt.replace(start, end - start, ss.str());
+                    }
+                    else {
+                        txt.replace(start, end - start, "[?]");
+                    }
+                    text.overridden = true;
+                }
+                text.text_override = txt;
             }
         }
     }
