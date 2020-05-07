@@ -33,6 +33,12 @@ public:
     Gtk::Box *search_types_box = nullptr;
     Gtk::Label *selection_mode_label = nullptr;
 
+    Glib::SignalProxy<bool, const Glib::ustring &> signal_activate_hud_link()
+    {
+        return hud_label->signal_activate_link();
+    }
+
+
     void tool_bar_set_visible(bool v);
     void tool_bar_set_tool_name(const std::string &s);
     void tool_bar_set_tool_tip(const std::string &s);
