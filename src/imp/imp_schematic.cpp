@@ -516,7 +516,6 @@ void ImpSchematic::construct()
             [this](const std::string &url) {
                 if (url.find("s:") == 0) {
                     std::string sheet = url.substr(2);
-                    std::cout << "sheet " << sheet << std::endl;
                     auto uuid = UUID(sheet);
                     auto sch = core_schematic.get_schematic();
                     if (sch->sheets.count(uuid)) {
@@ -600,11 +599,8 @@ std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)
     if (sel_count_type(sel, ObjectType::TEXT) == 1) {
         const auto text = core->get_text(sel_find_one(sel, ObjectType::TEXT).uuid);
         const auto txt = Glib::ustring(text->text);
-        auto regex = Glib::Regex::create(
-                R"(\$sheetref_([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}))",
-                Glib::RegexCompileFlags::REGEX_CASELESS);
         Glib::MatchInfo ma;
-        if (regex->match(txt, ma)) {
+        if (core_schematic.get_schematic()->get_sheetref_regex()->match(txt, ma)) {
             s += "\n\n<b>Text with sheet references</b>\n";
             do {
                 auto uuid = ma.fetch(1);
@@ -613,8 +609,9 @@ std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)
                     s += make_link_markup(url, core_schematic.get_schematic()->sheets.at(UUID(uuid)).name);
                 }
                 else {
-                    s += make_link_markup(url, "Unknown Sheet");
+                    s += "Unknown Sheet";
                 }
+                s += "\n";
             } while (ma.next());
             sel_erase_type(sel, ObjectType::TEXT);
         }

@@ -6,6 +6,7 @@
 #include "sheet.hpp"
 #include "schematic_rules.hpp"
 #include "common/pdf_export_settings.hpp"
+#include <glibmm/regex.h>
 #include <vector>
 #include <map>
 #include <fstream>
@@ -28,7 +29,6 @@ class Schematic {
 private:
     Schematic(const UUID &uu, const json &, Block &block, class Pool &pool);
     unsigned int update_nets();
-
 
 public:
     static Schematic new_from_file(const std::string &filename, Block &block, Pool &pool);
@@ -82,6 +82,8 @@ public:
     void swap_gates(const UUID &comp, const UUID &g1, const UUID &g2);
 
     std::map<UUIDPath<2>, std::string> get_unplaced_gates() const;
+
+    static Glib::RefPtr<Glib::Regex> get_sheetref_regex();
 
     UUID uuid;
     Block *block;
