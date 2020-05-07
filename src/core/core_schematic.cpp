@@ -543,7 +543,7 @@ void CoreSchematic::add_sheet()
     auto *sheet = &sch.sheets.emplace(uu, uu).first->second;
     sheet->index = sheet_max->second.index + 1;
     sheet->name = "sheet " + std::to_string(sheet->index);
-    sheet->frame = sch.sheets.at(sheet_uuid).frame;
+    sheet->pool_frame = sch.sheets.at(sheet_uuid).pool_frame;
     rebuild();
 }
 
