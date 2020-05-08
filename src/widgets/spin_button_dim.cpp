@@ -1,5 +1,6 @@
 #include "spin_button_dim.hpp"
 #include "util/util.hpp"
+#include "util/gtk_util.hpp"
 #include <iomanip>
 
 namespace horizon {
@@ -7,11 +8,7 @@ SpinButtonDim::SpinButtonDim() : Gtk::SpinButton()
 {
     set_increments(.1e6, .01e6);
     set_width_chars(11);
-    auto attributes_list = pango_attr_list_new();
-    auto attribute_font_features = pango_attr_font_features_new("tnum 1");
-    pango_attr_list_insert(attributes_list, attribute_font_features);
-    gtk_entry_set_attributes(GTK_ENTRY(gobj()), attributes_list);
-    pango_attr_list_unref(attributes_list);
+    entry_set_tnum(*this);
 }
 
 bool SpinButtonDim::on_output()

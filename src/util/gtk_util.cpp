@@ -154,6 +154,15 @@ void label_set_tnum(Gtk::Label *la)
     pango_attr_list_unref(attributes_list);
 }
 
+void entry_set_tnum(Gtk::Entry &en)
+{
+    auto attributes_list = pango_attr_list_new();
+    auto attribute_font_features = pango_attr_font_features_new("tnum 1");
+    pango_attr_list_insert(attributes_list, attribute_font_features);
+    gtk_entry_set_attributes(GTK_ENTRY(en.gobj()), attributes_list);
+    pango_attr_list_unref(attributes_list);
+}
+
 void info_bar_show(Gtk::InfoBar *bar)
 {
 #if GTK_CHECK_VERSION(3, 24, 10)
