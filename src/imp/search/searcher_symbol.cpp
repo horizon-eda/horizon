@@ -14,7 +14,7 @@ std::list<Searcher::SearchResult> SearcherSymbol::search(const Searcher::SearchQ
         return results;
     if (q.types.count(Type::SYMBOL_PIN)) {
         for (const auto &it : doc.get_symbol()->pins) {
-            if (q.contains(it.second.name)) {
+            if (q.matches(it.second.name)) {
                 results.emplace_back(Type::SYMBOL_PIN, it.first);
                 auto &x = results.back();
                 x.location = it.second.position;
@@ -24,7 +24,7 @@ std::list<Searcher::SearchResult> SearcherSymbol::search(const Searcher::SearchQ
     }
     if (q.types.count(Type::TEXT)) {
         for (const auto &it : doc.get_symbol()->texts) {
-            if (q.contains(it.second.text)) {
+            if (q.matches(it.second.text)) {
                 results.emplace_back(Type::TEXT, it.first);
                 auto &x = results.back();
                 x.location = it.second.placement.shift;

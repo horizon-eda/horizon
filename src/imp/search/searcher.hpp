@@ -45,7 +45,7 @@ public:
         void set_query(const std::string &q);
         bool is_valid() const;
         const std::string &get_query() const;
-        bool contains(const std::string &haystack) const;
+        bool matches(const std::string &haystack) const;
         std::set<Type> types;
         std::pair<Coordf, Coordf> area_visible;
 

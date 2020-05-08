@@ -50,7 +50,7 @@ bool Searcher::SearchQuery::is_valid() const
     return query.size();
 }
 
-bool Searcher::SearchQuery::contains(const std::string &haystack) const
+bool Searcher::SearchQuery::matches(const std::string &haystack) const
 {
     Glib::ustring uhaystack(haystack);
     return uhaystack.casefold().find(query) != Glib::ustring::npos;

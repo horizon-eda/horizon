@@ -15,7 +15,7 @@ std::list<Searcher::SearchResult> SearcherBoard::search(const Searcher::SearchQu
         return results;
     if (q.types.count(Type::PACKAGE_REFDES)) {
         for (const auto &it : doc.get_board()->packages) {
-            if (q.contains(it.second.component->refdes)) {
+            if (q.matches(it.second.component->refdes)) {
                 results.emplace_back(Type::PACKAGE_REFDES, it.first);
                 auto &x = results.back();
                 x.location = it.second.placement.shift;
@@ -25,7 +25,7 @@ std::list<Searcher::SearchResult> SearcherBoard::search(const Searcher::SearchQu
     }
     if (q.types.count(Type::PACKAGE_MPN)) {
         for (const auto &it : doc.get_board()->packages) {
-            if (it.second.component->part && q.contains(it.second.component->part->get_MPN())) {
+            if (it.second.component->part && q.matches(it.second.component->part->get_MPN())) {
                 results.emplace_back(Type::PACKAGE_MPN, it.first);
                 auto &x = results.back();
                 x.location = it.second.placement.shift;
@@ -36,7 +36,7 @@ std::list<Searcher::SearchResult> SearcherBoard::search(const Searcher::SearchQu
     if (q.types.count(Type::PAD)) {
         for (const auto &it : doc.get_board()->packages) {
             for (const auto &it_pad : it.second.package.pads) {
-                if (it_pad.second.net && q.contains(it_pad.second.net->name)) {
+                if (it_pad.second.net && q.matches(it_pad.second.net->name)) {
                     results.emplace_back(Type::PAD, it.first, it_pad.first);
                     auto &x = results.back();
                     x.location = it.second.placement.transform(it_pad.second.placement.shift);
