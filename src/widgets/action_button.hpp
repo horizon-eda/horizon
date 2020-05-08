@@ -3,18 +3,36 @@
 #include "imp/action.hpp"
 
 namespace horizon {
-class ActionButton : public Gtk::Overlay {
+
+class ActionButtonBase {
+public:
+    typedef sigc::signal<void, ActionToolID> type_signal_action;
+    type_signal_action signal_action()
+    {
+        return s_signal_action;
+    }
+
+    virtual void update_key_sequences();
+    virtual void add_action(ActionToolID act) = 0;
+
+    virtual ~ActionButtonBase()
+    {
+    }
+
+protected:
+    ActionButtonBase(const std::map<ActionToolID, ActionConnection> &k);
+
+    type_signal_action s_signal_action;
+    std::map<ActionToolID, Gtk::Label *> key_labels;
+    const std::map<ActionToolID, ActionConnection> &keys;
+};
+
+class ActionButton : public Gtk::Overlay, public ActionButtonBase {
 public:
     ActionButton(ActionToolID action, const std::map<ActionToolID, ActionConnection> &k);
 
-    typedef sigc::signal<void, ActionToolID> type_signal_clicked;
-    type_signal_clicked signal_clicked()
-    {
-        return s_signal_clicked;
-    }
-
-    void update_key_sequences();
-    void add_action(ActionToolID act);
+    void update_key_sequences() override;
+    void add_action(ActionToolID act) override;
 
 private:
     ActionToolID action;
@@ -22,10 +40,21 @@ private:
     Gtk::MenuButton *menu_button = nullptr;
     Gtk::Menu menu;
     int button_current = -1;
-    type_signal_clicked s_signal_clicked;
     Gtk::MenuItem &add_menu_item(ActionToolID act);
-    const std::map<ActionToolID, ActionConnection> &keys;
-    std::map<ActionToolID, Gtk::Label *> key_labels;
     void set_primary_action(ActionToolID act);
 };
+
+class ActionButtonMenu : public Gtk::Button, public ActionButtonBase {
+public:
+    ActionButtonMenu(const char *icon_name, const std::map<ActionToolID, ActionConnection> &k);
+
+    void add_action(ActionToolID act) override;
+
+private:
+    Gtk::Menu menu;
+    int button_current = -1;
+    Gtk::MenuItem &add_menu_item(ActionToolID act);
+};
+
+
 } // namespace horizon

@@ -32,12 +32,17 @@ const char *get_icon(ActionToolID act)
         return "face-worried-symbolic";
 }
 
-ActionButton::ActionButton(ActionToolID act, const std::map<ActionToolID, ActionConnection> &ks) : action(act), keys(ks)
+ActionButtonBase::ActionButtonBase(const std::map<ActionToolID, ActionConnection> &ks) : keys(ks)
+{
+}
+
+ActionButton::ActionButton(ActionToolID act, const std::map<ActionToolID, ActionConnection> &ks)
+    : ActionButtonBase(ks), action(act)
 {
     get_style_context()->add_class("osd");
     button = Gtk::manage(new Gtk::Button);
     set_primary_action(action);
-    button->signal_clicked().connect([this] { s_signal_clicked.emit(action); });
+    button->signal_clicked().connect([this] { s_signal_action.emit(action); });
     button->signal_button_press_event().connect(
             [this](GdkEventButton *ev) {
                 if (!menu_button->get_visible())
@@ -104,6 +109,11 @@ ActionButton::ActionButton(ActionToolID act, const std::map<ActionToolID, Action
 void ActionButton::update_key_sequences()
 {
     set_primary_action(action);
+    ActionButtonBase::update_key_sequences();
+}
+
+void ActionButtonBase::update_key_sequences()
+{
     for (auto &it : key_labels) {
         if (keys.count(it.first)) {
             it.second->set_text(key_sequences_to_string(keys.at(it.first).key_sequences));
@@ -152,8 +162,72 @@ Gtk::MenuItem &ActionButton::add_menu_item(ActionToolID act)
     it->show_all();
     it->signal_activate().connect([this, act] {
         set_primary_action(act);
-        s_signal_clicked.emit(act);
+        s_signal_action.emit(act);
     });
+    menu.append(*it);
+    return *it;
+}
+
+ActionButtonMenu::ActionButtonMenu(const char *icon_name, const std::map<ActionToolID, ActionConnection> &ks)
+    : ActionButtonBase(ks)
+{
+    get_style_context()->add_class("osd");
+    set_image_from_icon_name(icon_name, Gtk::ICON_SIZE_DND);
+    menu.get_style_context()->add_class("osd");
+
+
+    signal_clicked().connect(
+            [this] { menu.popup_at_widget(this, Gdk::GRAVITY_NORTH_EAST, Gdk::GRAVITY_NORTH_WEST, NULL); });
+    signal_button_press_event().connect(
+            [this](GdkEventButton *ev) {
+                if (gdk_event_triggers_context_menu((GdkEvent *)ev)) {
+                    menu.popup_at_widget(this, Gdk::GRAVITY_NORTH_EAST, Gdk::GRAVITY_NORTH_WEST, (GdkEvent *)ev);
+                    return true;
+                }
+                else if (ev->button == 1) {
+                    button_current = 1;
+                }
+                return false;
+            },
+            false);
+    signal_button_release_event().connect([this](GdkEventButton *ev) {
+        button_current = -1;
+        return false;
+    });
+    signal_leave_notify_event().connect([this](GdkEventCrossing *ev) {
+        if (ev->x > get_allocated_width() / 2 && button_current == 1) {
+            menu.popup_at_widget(this, Gdk::GRAVITY_NORTH_EAST, Gdk::GRAVITY_NORTH_WEST, (GdkEvent *)ev);
+        }
+        button_current = -1;
+        return false;
+    });
+}
+
+void ActionButtonMenu::add_action(ActionToolID act)
+{
+    add_menu_item(act);
+}
+
+Gtk::MenuItem &ActionButtonMenu::add_menu_item(ActionToolID act)
+{
+    auto it = Gtk::manage(new Gtk::MenuItem());
+    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
+    auto la = Gtk::manage(new Gtk::Label(action_catalog.at(act).name));
+    la->set_xalign(0);
+    box->pack_start(*la, false, false, 0);
+
+    auto la_keys = Gtk::manage(new Gtk::Label);
+    la_keys->set_margin_start(4);
+    la_keys->set_xalign(1);
+    if (keys.at(act).key_sequences.size()) {
+        la_keys->set_text(key_sequences_to_string(keys.at(act).key_sequences));
+    }
+    key_labels.emplace(act, la_keys);
+    box->pack_start(*la_keys, true, true, 0);
+
+    it->add(*box);
+    it->show_all();
+    it->signal_activate().connect([this, act] { s_signal_action.emit(act); });
     menu.append(*it);
     return *it;
 }

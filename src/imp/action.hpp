@@ -86,7 +86,8 @@ enum class ActionID {
     AIRWIRE_FILTER_WINDOW,
     SELECT_POLYGON,
     FAB_OUTPUT_WINDOW,
-    GEN_FAB_OUTPUT
+    GEN_FAB_OUTPUT,
+    FOOTPRINT_GENERATOR
 };
 
 using ActionToolID = std::pair<ActionID, ToolID>;

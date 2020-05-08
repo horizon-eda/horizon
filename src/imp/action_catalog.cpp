@@ -814,6 +814,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::GEN_FAB_OUTPUT, ToolID::NONE},
          {"Generate fab. output", ActionGroup::EXPORT_IMPORT, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::FOOTPRINT_GENERATOR, ToolID::NONE},
+         {"Footprint generator", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -922,6 +926,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(SELECT_POLYGON),
         ACTION_LUT_ITEM(FAB_OUTPUT_WINDOW),
         ACTION_LUT_ITEM(GEN_FAB_OUTPUT),
+        ACTION_LUT_ITEM(FOOTPRINT_GENERATOR),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

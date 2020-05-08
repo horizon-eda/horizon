@@ -57,6 +57,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-draw-polygon-rectangle-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-draw-dimension-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-pad-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-generate-symbolic.svg</file>
     <file>icons/scalable/apps/horizon-eda.svg</file>
     <file>icons/16x16/apps/horizon-eda.png</file>
     <file>icons/32x32/apps/horizon-eda.png</file>

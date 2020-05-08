@@ -251,14 +251,14 @@ void ImpPackage::construct()
     hamburger_menu->append("Reload pool", "win.reload_pool");
     main_window->add_action("reload_pool", [this] { trigger_action(ActionID::RELOAD_POOL); });
 
+    connect_action(ActionID::FOOTPRINT_GENERATOR, [this](auto &a) {
+        footprint_generator_window->present();
+        footprint_generator_window->show_all();
+    });
     {
-        auto button = Gtk::manage(new Gtk::Button("Footprint gen."));
-        button->signal_clicked().connect([this] {
-            footprint_generator_window->present();
-            footprint_generator_window->show_all();
-        });
+        auto button = create_action_button(make_action(ActionID::FOOTPRINT_GENERATOR));
+        button->set_label("Footprint gen.");
         button->show();
-        core->signal_tool_changed().connect([button](ToolID t) { button->set_sensitive(t == ToolID::NONE); });
         main_window->header->pack_end(*button);
     }
 
@@ -291,6 +291,15 @@ void ImpPackage::construct()
     }
     add_action_button(make_action(ToolID::PLACE_TEXT));
     add_action_button(make_action(ToolID::DRAW_DIMENSION));
+
+    {
+        auto &b = add_action_button_menu("action-generate-symbolic");
+        b.set_margin_top(5);
+        b.add_action(make_action(ActionID::FOOTPRINT_GENERATOR));
+        b.add_action(make_action(ToolID::GENERATE_COURTYARD));
+        b.add_action(make_action(ToolID::GENERATE_SILKSCREEN));
+        b.set_tooltip_text("Generate…");
+    }
 
     update_header();
 }
