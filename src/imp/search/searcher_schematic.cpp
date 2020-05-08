@@ -59,7 +59,7 @@ void SearcherSchematic::sort_search_results_schematic(std::list<Searcher::Search
 std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::SearchQuery &q)
 {
     std::list<SearchResult> results;
-    if (q.get_query().size() == 0)
+    if (!q.is_valid())
         return results;
     for (const auto &it_sheet : doc.get_schematic()->sheets) {
         const auto &sheet = it_sheet.second;

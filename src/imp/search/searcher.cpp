@@ -45,6 +45,11 @@ const std::string &Searcher::SearchQuery::get_query() const
     return query;
 }
 
+bool Searcher::SearchQuery::is_valid() const
+{
+    return query.size();
+}
+
 bool Searcher::SearchQuery::contains(const std::string &haystack) const
 {
     Glib::ustring uhaystack(haystack);

@@ -11,7 +11,7 @@ SearcherBoard::SearcherBoard(IDocumentBoard &d) : doc(d)
 std::list<Searcher::SearchResult> SearcherBoard::search(const Searcher::SearchQuery &q)
 {
     std::list<SearchResult> results;
-    if (q.get_query().size() == 0)
+    if (!q.is_valid())
         return results;
     if (q.types.count(Type::PACKAGE_REFDES)) {
         for (const auto &it : doc.get_board()->packages) {
