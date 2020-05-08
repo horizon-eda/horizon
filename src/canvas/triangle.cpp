@@ -142,6 +142,7 @@ public:
     std::array<float, 3> layer_color;
     float alpha;
     float scale;
+    float min_line_width;
     unsigned int types_visible;
     unsigned int types_force_outline;
     int layer_flags;
@@ -181,6 +182,7 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
     buf.types_visible = ld.types_visible;
     buf.types_force_outline = ld.types_force_outline;
     buf.scale = ca->scale;
+    buf.min_line_width = ca->appearance.min_line_width;
 
     if (layer >= 20000 && layer < 30000) // annotation layer, but not overlay
         buf.highlight_mode = 0;

@@ -79,14 +79,14 @@ void main() {
 
 	float width = p2.x/2;
 		
-	width = max(width, .5/scale);
+	width = max(width, min_line_width*.5/scale);
 	vec2 v = p1-p0;
 	vec2 o = vec2(-v.y, v.x);
 	o /= length(o);
 	o *= width;
 	vec2 vw = (v/length(v))*width;
 		
-	const float border_width = 1;
+	float border_width = min_line_width;
 	float xm = 1/(1-border_width*2/(length(v)*scale));
 	float ym = 1/(1-border_width/(width*scale));
 	

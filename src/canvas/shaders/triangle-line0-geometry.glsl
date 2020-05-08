@@ -68,7 +68,7 @@ void main() {
 	color_to_fragment = apply_highlight(color, highlight, type);
 	
 
-	float width = .5/scale;
+	float width = min_line_width*.5/scale;
 	vec2 v = p1-p0;
 	vec2 o = vec2(-v.y, v.x);
 	o /= length(o);

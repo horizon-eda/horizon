@@ -104,6 +104,7 @@ json CanvasPreferences::serialize() const
     j["cursor_size"] = cursor_size_lut.lookup_reverse(appearance.cursor_size);
     j["cursor_size_tool"] = cursor_size_lut.lookup_reverse(appearance.cursor_size_tool);
     j["msaa"] = appearance.msaa;
+    j["min_line_width"] = appearance.min_line_width;
     return j;
 }
 
@@ -153,6 +154,7 @@ void CanvasPreferences::load_from_json(const json &j)
     appearance.cursor_size = cursor_size_lut.lookup(j.value("cursor_size", "default"));
     appearance.cursor_size_tool = cursor_size_lut.lookup(j.value("cursor_size_tool", "default"));
     appearance.msaa = j.value("msaa", 0);
+    appearance.min_line_width = j.value("min_line_width", 1.0);
     load_colors_from_json(j);
 }
 
