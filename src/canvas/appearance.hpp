@@ -20,5 +20,6 @@ public:
     enum class CursorSize { DEFAULT, LARGE, FULL };
     CursorSize cursor_size = CursorSize::DEFAULT;
     CursorSize cursor_size_tool = CursorSize::LARGE;
+    float min_line_width = 1;
 };
 } // namespace horizon

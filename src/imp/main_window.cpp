@@ -42,6 +42,7 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("search_status_label", search_status_label);
     x->get_widget("search_types_box", search_types_box);
     x->get_widget("search_expander", search_expander);
+    x->get_widget("search_exact_cb", search_exact_cb);
     x->get_widget("action_bar_revealer", action_bar_revealer);
     x->get_widget("action_bar_box", action_bar_box);
     search_revealer->set_reveal_child(false);

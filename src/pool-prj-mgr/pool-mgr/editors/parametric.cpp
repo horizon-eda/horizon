@@ -26,11 +26,7 @@ class ParamQuantityEditor : public Gtk::Entry, public ParametricParamEditor {
 public:
     ParamQuantityEditor(const PoolParametric::Column &c) : Gtk::Entry(), ParametricParamEditor(c)
     {
-        auto attributes_list = pango_attr_list_new();
-        auto attribute_font_features = pango_attr_font_features_new("tnum 1");
-        pango_attr_list_insert(attributes_list, attribute_font_features);
-        gtk_entry_set_attributes(GTK_ENTRY(gobj()), attributes_list);
-        pango_attr_list_unref(attributes_list);
+        entry_set_tnum(*this);
 
         signal_activate().connect(sigc::mem_fun(*this, &ParamQuantityEditor::parse));
         signal_focus_out_event().connect([this](GdkEventFocus *ev) {

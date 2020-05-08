@@ -42,11 +42,18 @@ void ImpSchematic::handle_select_sheet(Sheet *sh)
 
     auto v = canvas->get_scale_and_offset();
     sheet_views[core_schematic.get_sheet()->uuid] = v;
+    sheet_selections[core_schematic.get_sheet()->uuid] = canvas->get_selection();
     core_schematic.set_sheet(sh->uuid);
     canvas_update();
     if (sheet_views.count(sh->uuid)) {
         auto v2 = sheet_views.at(sh->uuid);
         canvas->set_scale_and_offset(v2.first, v2.second);
+    }
+    if (sheet_selections.count(sh->uuid)) {
+        canvas->set_selection(sheet_selections.at(sh->uuid));
+    }
+    else {
+        canvas->set_selection({});
     }
     update_highlights();
 }

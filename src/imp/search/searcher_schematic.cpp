@@ -59,13 +59,13 @@ void SearcherSchematic::sort_search_results_schematic(std::list<Searcher::Search
 std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::SearchQuery &q)
 {
     std::list<SearchResult> results;
-    if (q.get_query().size() == 0)
+    if (!q.is_valid())
         return results;
     for (const auto &it_sheet : doc.get_schematic()->sheets) {
         const auto &sheet = it_sheet.second;
         if (q.types.count(Type::SYMBOL_REFDES)) {
             for (const auto &it : sheet.symbols) {
-                if (q.contains(it.second.component->refdes)) {
+                if (q.matches(it.second.component->refdes)) {
                     results.emplace_back(Type::SYMBOL_REFDES, it.first);
                     auto &x = results.back();
                     x.location = it.second.placement.shift;
@@ -77,7 +77,7 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
         if (q.types.count(Type::SYMBOL_PIN)) {
             for (const auto &it : sheet.symbols) {
                 for (const auto &it_pin : it.second.symbol.pins) {
-                    if (q.contains(it_pin.second.name)) {
+                    if (q.matches(it_pin.second.name)) {
                         results.emplace_back(Type::SYMBOL_PIN, it.first, it_pin.first);
                         auto &x = results.back();
                         x.location = it.second.placement.transform(it_pin.second.position);
@@ -89,7 +89,7 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
         }
         if (q.types.count(Type::SYMBOL_MPN)) {
             for (const auto &it : sheet.symbols) {
-                if (it.second.component->part && q.contains(it.second.component->part->get_MPN())) {
+                if (it.second.component->part && q.matches(it.second.component->part->get_MPN())) {
                     results.emplace_back(Type::SYMBOL_MPN, it.first);
                     auto &x = results.back();
                     x.location = it.second.placement.shift;
@@ -100,7 +100,7 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
         }
         if (q.types.count(Type::NET_LABEL)) {
             for (const auto &it : sheet.net_labels) {
-                if (it.second.junction->net && q.contains(it.second.junction->net->name)) {
+                if (it.second.junction->net && q.matches(it.second.junction->net->name)) {
                     results.emplace_back(Type::NET_LABEL, it.first);
                     auto &x = results.back();
                     x.location = it.second.junction->position;
@@ -111,7 +111,7 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
         }
         if (q.types.count(Type::BUS_RIPPER)) {
             for (const auto &it : sheet.bus_rippers) {
-                if (it.second.bus_member->net && q.contains(it.second.bus_member->net->name)) {
+                if (it.second.bus_member->net && q.matches(it.second.bus_member->net->name)) {
                     results.emplace_back(Type::BUS_RIPPER, it.first);
                     auto &x = results.back();
                     x.location = it.second.get_connector_pos();
@@ -122,7 +122,7 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
         }
         if (q.types.count(Type::POWER_SYMBOL)) {
             for (const auto &it : sheet.power_symbols) {
-                if (it.second.junction->net && q.contains(it.second.junction->net->name)) {
+                if (it.second.junction->net && q.matches(it.second.junction->net->name)) {
                     results.emplace_back(Type::POWER_SYMBOL, it.first);
                     auto &x = results.back();
                     x.location = it.second.junction->position;
@@ -133,7 +133,7 @@ std::list<Searcher::SearchResult> SearcherSchematic::search(const Searcher::Sear
         }
         if (q.types.count(Type::TEXT)) {
             for (const auto &it : sheet.texts) {
-                if (q.contains(it.second.text)) {
+                if (q.matches(it.second.text)) {
                     results.emplace_back(Type::TEXT, it.first);
                     auto &x = results.back();
                     x.location = it.second.placement.shift;

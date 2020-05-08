@@ -40,13 +40,7 @@ PartinfoPreferencesEditor::PartinfoPreferencesEditor(BaseObjectType *cobject, co
             partinfo_cache_days_sp->set_text(std::to_string(v) + " days");
         return true;
     });
-    {
-        auto attributes_list = pango_attr_list_new();
-        auto attribute_font_features = pango_attr_font_features_new("tnum 1");
-        pango_attr_list_insert(attributes_list, attribute_font_features);
-        gtk_entry_set_attributes(GTK_ENTRY(partinfo_cache_days_sp->gobj()), attributes_list);
-        pango_attr_list_unref(attributes_list);
-    }
+    entry_set_tnum(*partinfo_cache_days_sp);
     partinfo_cache_days_sp->set_value(partinfo_prefs->cache_days);
     partinfo_cache_days_sp->signal_changed().connect([this] {
         partinfo_preferences->cache_days = partinfo_cache_days_sp->get_value_as_int();

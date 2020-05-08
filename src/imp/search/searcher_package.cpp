@@ -10,11 +10,11 @@ SearcherPackage::SearcherPackage(IDocumentPackage &d) : doc(d)
 std::list<Searcher::SearchResult> SearcherPackage::search(const Searcher::SearchQuery &q)
 {
     std::list<SearchResult> results;
-    if (q.get_query().size() == 0)
+    if (!q.is_valid())
         return results;
     if (q.types.count(Type::PAD)) {
         for (const auto &it : doc.get_package()->pads) {
-            if (q.contains(it.second.name)) {
+            if (q.matches(it.second.name)) {
                 results.emplace_back(Type::PAD, it.first);
                 auto &x = results.back();
                 x.location = it.second.placement.shift;

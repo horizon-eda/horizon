@@ -45,10 +45,20 @@ const std::string &Searcher::SearchQuery::get_query() const
     return query;
 }
 
-bool Searcher::SearchQuery::contains(const std::string &haystack) const
+bool Searcher::SearchQuery::is_valid() const
 {
-    Glib::ustring uhaystack(haystack);
-    return uhaystack.casefold().find(query) != Glib::ustring::npos;
+    return query.size();
+}
+
+bool Searcher::SearchQuery::matches(const std::string &haystack) const
+{
+    auto uhaystack = Glib::ustring(haystack).casefold();
+    if (exact) {
+        return query == uhaystack;
+    }
+    else {
+        return uhaystack.find(query) != Glib::ustring::npos;
+    }
 }
 
 

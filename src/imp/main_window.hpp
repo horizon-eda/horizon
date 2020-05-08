@@ -28,6 +28,7 @@ public:
     Gtk::Button *search_next_button = nullptr;
     Gtk::Label *search_status_label = nullptr;
     Gtk::Revealer *search_revealer = nullptr;
+    Gtk::CheckButton *search_exact_cb = nullptr;
     Gtk::Expander *search_expander = nullptr;
     Gtk::Box *search_types_box = nullptr;
     Gtk::Label *selection_mode_label = nullptr;

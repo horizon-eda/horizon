@@ -47,6 +47,7 @@ void bind_widget(Gtk::ComboBoxText *combo, const std::map<T, std::string> &lut, 
 
 Gtk::Label *grid_attach_label_and_widget(Gtk::Grid *gr, const std::string &label, Gtk::Widget *w, int &top);
 void label_set_tnum(Gtk::Label *la);
+void entry_set_tnum(Gtk::Entry &en);
 
 void tree_view_scroll_to_selection(Gtk::TreeView *view);
 Gtk::TreeViewColumn *tree_view_append_column_ellipsis(Gtk::TreeView *view, const std::string &name,

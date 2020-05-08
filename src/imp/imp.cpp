@@ -27,6 +27,7 @@
 #include "nlohmann/json.hpp"
 #include "core/tool_id.hpp"
 #include "imp/action.hpp"
+#include "preferences/preferences_util.hpp"
 #include "widgets/action_button.hpp"
 
 namespace horizon {
@@ -521,6 +522,10 @@ void ImpBase::run(int argc, char *argv[])
     });
 
     main_window->search_entry->signal_changed().connect([this] {
+        this->handle_search();
+        this->search_go(0);
+    });
+    main_window->search_exact_cb->signal_toggled().connect([this] {
         this->handle_search();
         this->search_go(0);
     });
@@ -1135,11 +1140,10 @@ void ImpBase::apply_preferences()
             tool_popover->set_key_sequences(it.first, it.second.key_sequences);
         }
     }
+    preferences_apply_to_canvas(canvas, preferences);
     for (auto it : action_buttons) {
         it->update_key_sequences();
     }
-    canvas->smooth_zoom = preferences.zoom.smooth_zoom_2d;
-    canvas->touchpad_pan = preferences.zoom.touchpad_pan;
 }
 
 void ImpBase::canvas_update_from_pp()
@@ -1849,6 +1853,7 @@ void ImpBase::handle_search()
             q.types.insert(it.first);
         }
     }
+    q.exact = main_window->search_exact_cb->get_active();
     auto min_c = canvas->screen2canvas({0, canvas->get_height()});
     auto max_c = canvas->screen2canvas({canvas->get_width(), 0});
     q.area_visible = {min_c, max_c};

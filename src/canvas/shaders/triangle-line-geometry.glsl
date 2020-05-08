@@ -80,7 +80,7 @@ void main() {
 
 	float width = p2.x/2;
 	float real_width = width;
-	width = max(width, .5/scale);
+	width = max(width, min_line_width*.5/scale);
 	vec2 v = p1-p0;
 	vec2 o = vec2(-v.y, v.x);
 	o /= length(o);
@@ -89,7 +89,7 @@ void main() {
 	vec2 p0x = p0-vw;
 	vec2 p1x = p1+vw;
 		
-	const float border_width = 1;
+	float border_width = min_line_width;
 	float ym = 1/(1-border_width/(width*scale));
 	discard_threshold = ym;
 	if(real_width < .5/scale) {
