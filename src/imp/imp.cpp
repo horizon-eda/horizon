@@ -524,6 +524,10 @@ void ImpBase::run(int argc, char *argv[])
         this->handle_search();
         this->search_go(0);
     });
+    main_window->search_exact_cb->signal_toggled().connect([this] {
+        this->handle_search();
+        this->search_go(0);
+    });
     main_window->search_entry->signal_key_press_event().connect(
             [this](GdkEventKey *ev) {
                 if (ev->keyval == GDK_KEY_Escape) {
@@ -1844,6 +1848,7 @@ void ImpBase::handle_search()
             q.types.insert(it.first);
         }
     }
+    q.exact = main_window->search_exact_cb->get_active();
     auto min_c = canvas->screen2canvas({0, canvas->get_height()});
     auto max_c = canvas->screen2canvas({canvas->get_width(), 0});
     q.area_visible = {min_c, max_c};

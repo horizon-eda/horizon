@@ -48,6 +48,7 @@ public:
         bool matches(const std::string &haystack) const;
         std::set<Type> types;
         std::pair<Coordf, Coordf> area_visible;
+        bool exact = false;
 
     private:
         std::string query;

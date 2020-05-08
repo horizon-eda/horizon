@@ -52,8 +52,13 @@ bool Searcher::SearchQuery::is_valid() const
 
 bool Searcher::SearchQuery::matches(const std::string &haystack) const
 {
-    Glib::ustring uhaystack(haystack);
-    return uhaystack.casefold().find(query) != Glib::ustring::npos;
+    auto uhaystack = Glib::ustring(haystack).casefold();
+    if (exact) {
+        return query == uhaystack;
+    }
+    else {
+        return uhaystack.find(query) != Glib::ustring::npos;
+    }
 }
 
 

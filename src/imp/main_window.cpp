@@ -42,6 +42,7 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("search_status_label", search_status_label);
     x->get_widget("search_types_box", search_types_box);
     x->get_widget("search_expander", search_expander);
+    x->get_widget("search_exact_cb", search_exact_cb);
     search_revealer->set_reveal_child(false);
 
     nonmodal_close_button->signal_clicked().connect([this] { nonmodal_rev->set_reveal_child(false); });
