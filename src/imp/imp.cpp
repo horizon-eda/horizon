@@ -27,6 +27,7 @@
 #include "nlohmann/json.hpp"
 #include "core/tool_id.hpp"
 #include "imp/action.hpp"
+#include "preferences/preferences_util.hpp"
 
 namespace horizon {
 
@@ -1134,8 +1135,7 @@ void ImpBase::apply_preferences()
             tool_popover->set_key_sequences(it.first, it.second.key_sequences);
         }
     }
-    canvas->smooth_zoom = preferences.zoom.smooth_zoom_2d;
-    canvas->touchpad_pan = preferences.zoom.touchpad_pan;
+    preferences_apply_to_canvas(canvas, preferences);
 }
 
 void ImpBase::canvas_update_from_pp()
