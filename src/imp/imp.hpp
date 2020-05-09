@@ -76,7 +76,8 @@ protected:
     CanvasGL *canvas;
     class PropertyPanels *panels;
     WarningsBox *warnings_box;
-    class ToolPopover *tool_popover;
+    class ToolPopover *tool_popover = nullptr;
+    class ToolBox *tool_box = nullptr;
     Gtk::Menu *context_menu = nullptr;
     SpinButtonDim *grid_spin_button;
     std::unique_ptr<SelectionFilterDialog> selection_filter_dialog;
@@ -270,5 +271,6 @@ private:
     void update_property_panels();
     std::map<CanvasGL::SelectionTool, CanvasGL::SelectionQualifier> selection_qualifiers;
     std::list<class ActionButtonBase *> action_buttons;
+    std::map<ActionToolID, bool> get_can_begin();
 };
 } // namespace horizon

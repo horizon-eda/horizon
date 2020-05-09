@@ -35,7 +35,11 @@ public:
 
     Gtk::Revealer *action_bar_revealer = nullptr;
     Gtk::Box *action_bar_box = nullptr;
+    Gtk::Box *action_list_box = nullptr;
+    Gtk::Button *action_bar_list_button = nullptr;
     void set_use_action_bar(bool u);
+    enum class ActionBarMode { BUTTONS, LIST };
+    void set_action_bar_mode(ActionBarMode mode);
 
     void tool_bar_set_visible(bool v);
     void tool_bar_set_tool_name(const std::string &s);
@@ -75,6 +79,7 @@ private:
     std::function<void(void)> nonmodal_fn;
 
     Gtk::Label *view_hints_label = nullptr;
+    Gtk::Stack *action_bar_stack = nullptr;
 
     void sc(void);
     void cm(const horizon::Coordi &cursor_pos);

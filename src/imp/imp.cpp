@@ -451,20 +451,7 @@ void ImpBase::run(int argc, char *argv[])
         rect.set_x(c.x);
         rect.set_y(c.y);
         tool_popover->set_pointing_to(rect);
-
-        this->update_action_sensitivity();
-        std::map<ActionToolID, bool> can_begin;
-        auto sel = canvas->get_selection();
-        for (const auto &it : action_catalog) {
-            if (it.first.first == ActionID::TOOL) {
-                bool r = core->tool_can_begin(it.first.second, sel).first;
-                can_begin[it.first] = r;
-            }
-            else {
-                can_begin[it.first] = this->get_action_sensitive(it.first);
-            }
-        }
-        tool_popover->get_tool_box().set_can_begin(can_begin);
+        tool_popover->get_tool_box().set_can_begin(get_can_begin());
 
 #if GTK_CHECK_VERSION(3, 22, 0)
         tool_popover->popup();
@@ -665,6 +652,16 @@ void ImpBase::run(int argc, char *argv[])
     tool_popover->set_position(Gtk::POS_BOTTOM);
     tool_popover->get_tool_box().signal_action_activated().connect([this](auto act) { trigger_action(act); });
 
+    tool_box = Gtk::manage(new ToolBox(get_editor_type_for_action()));
+    main_window->action_list_box->pack_start(*tool_box, true, true, 0);
+    tool_box->show_all();
+    main_window->action_bar_list_button->signal_clicked().connect([this] {
+        tool_box->set_can_begin(get_can_begin());
+        tool_box->select_all();
+        main_window->set_action_bar_mode(MainWindow::ActionBarMode::LIST);
+    });
+    tool_box->signal_action_activated().connect([this](auto act) { trigger_action(act); });
+
 
     log_window = new LogWindow(main_window);
     Logger::get().set_log_handler([this](const Logger::Item &it) { log_window->get_view()->push_log(it); });
@@ -833,6 +830,23 @@ void ImpBase::run(int argc, char *argv[])
     }
 
     app->run(*main_window);
+}
+
+std::map<ActionToolID, bool> ImpBase::get_can_begin()
+{
+    this->update_action_sensitivity();
+    std::map<ActionToolID, bool> can_begin;
+    auto sel = canvas->get_selection();
+    for (const auto &it : action_catalog) {
+        if (it.first.first == ActionID::TOOL) {
+            bool r = core->tool_can_begin(it.first.second, sel).first;
+            can_begin[it.first] = r;
+        }
+        else {
+            can_begin[it.first] = this->get_action_sensitive(it.first);
+        }
+    }
+    return can_begin;
 }
 
 void ImpBase::parameter_window_add_polygon_expand(ParameterWindow *parameter_window)
@@ -1138,6 +1152,7 @@ void ImpBase::apply_preferences()
         if (it.second.key_sequences.size()) {
             key_sequence_dialog->add_sequence(it.second.key_sequences, action_catalog.at(it.first).name);
             tool_popover->get_tool_box().set_key_sequences(it.first, it.second.key_sequences);
+            tool_box->set_key_sequences(it.first, it.second.key_sequences);
         }
     }
     preferences_apply_to_canvas(canvas, preferences);
