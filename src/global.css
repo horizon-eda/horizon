@@ -71,3 +71,11 @@
   min-width: 0px;
   min-height: 0px;
 }
+
+.imp-action-list-box {
+  background-color: @theme_base_color;
+  border-color: @borders;
+  border-radius: 0 3px 3px 0px;
+  border-width: 1px 1px 1px 0px;
+  border-style: solid;
+}
