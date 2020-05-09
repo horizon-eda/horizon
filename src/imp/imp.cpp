@@ -14,6 +14,7 @@
 #include "widgets/spin_button_dim.hpp"
 #include "action_catalog.hpp"
 #include "tool_popover.hpp"
+#include "tool_box.hpp"
 #include "util/selection_util.hpp"
 #include "util/str_util.hpp"
 #include "preferences/preferences_provider.hpp"
@@ -463,7 +464,7 @@ void ImpBase::run(int argc, char *argv[])
                 can_begin[it.first] = this->get_action_sensitive(it.first);
             }
         }
-        tool_popover->set_can_begin(can_begin);
+        tool_popover->get_tool_box().set_can_begin(can_begin);
 
 #if GTK_CHECK_VERSION(3, 22, 0)
         tool_popover->popup();
@@ -662,8 +663,7 @@ void ImpBase::run(int argc, char *argv[])
 
     tool_popover = Gtk::manage(new ToolPopover(canvas, get_editor_type_for_action()));
     tool_popover->set_position(Gtk::POS_BOTTOM);
-    tool_popover->signal_action_activated().connect(
-            [this](ActionID action_id, ToolID tool_id) { trigger_action(std::make_pair(action_id, tool_id)); });
+    tool_popover->get_tool_box().signal_action_activated().connect([this](auto act) { trigger_action(act); });
 
 
     log_window = new LogWindow(main_window);
@@ -1137,7 +1137,7 @@ void ImpBase::apply_preferences()
     for (const auto &it : action_connections) {
         if (it.second.key_sequences.size()) {
             key_sequence_dialog->add_sequence(it.second.key_sequences, action_catalog.at(it.first).name);
-            tool_popover->set_key_sequences(it.first, it.second.key_sequences);
+            tool_popover->get_tool_box().set_key_sequences(it.first, it.second.key_sequences);
         }
     }
     preferences_apply_to_canvas(canvas, preferences);
