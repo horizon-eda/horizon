@@ -468,11 +468,11 @@ void PartEditor::update_map_buttons()
                 w_tv_pads->get_selection()->count_selected_rows() && w_tv_pins->get_selection()->count_selected_rows();
         w_button_map->set_sensitive(can_map);
         w_button_unmap->set_sensitive(w_tv_pads->get_selection()->count_selected_rows());
-        w_button_automap->set_sensitive(true);
+        w_button_automap->set_sensitive(w_tv_pads->get_selection()->count_selected_rows());
         w_button_copy_from_other->set_sensitive(true);
     }
     w_button_select_pads->set_sensitive(w_tv_pins->get_selection()->count_selected_rows());
-    w_button_select_pin->set_sensitive(w_tv_pads->get_selection()->count_selected_rows());
+    w_button_select_pin->set_sensitive(w_tv_pads->get_selection()->count_selected_rows() == 1);
 }
 
 void PartEditor::update_orderable_MPNs_label()
