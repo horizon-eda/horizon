@@ -9,6 +9,7 @@
 #include "pool_remote_box.hpp"
 #include "widgets/part_preview.hpp"
 #include "widgets/where_used_box.hpp"
+#include "part_wizard/part_wizard.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_part(const UUID &uu)
@@ -70,6 +71,26 @@ void PoolNotebook::handle_create_part_from_part(const UUID &uu)
                   true);
 }
 
+void PoolNotebook::handle_part_wizard()
+{
+    if (!part_wizard) {
+        auto package_uuid = browsers.at(ObjectType::PACKAGE)->get_selected();
+        part_wizard = PartWizard::create(package_uuid, base_path, &pool, appwin);
+        part_wizard->present();
+        part_wizard->signal_hide().connect([this] {
+            auto files_saved = part_wizard->get_files_saved();
+            if (files_saved.size()) {
+                pool_update(nullptr, files_saved);
+            }
+            delete part_wizard;
+            part_wizard = nullptr;
+        });
+    }
+    else {
+        part_wizard->present();
+    }
+}
+
 void PoolNotebook::handle_duplicate_part(const UUID &uu)
 {
     if (!uu)
@@ -100,6 +121,11 @@ void PoolNotebook::construct_parts()
     add_action_button("Duplicate", bbox, br, sigc::mem_fun(*this, &PoolNotebook::handle_duplicate_part));
     add_action_button("Create Part from Part", bbox, br,
                       sigc::mem_fun(*this, &PoolNotebook::handle_create_part_from_part));
+
+    add_action_button("Part Wizard...", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_part_wizard))
+            ->get_style_context()
+            ->add_class("suggested-action");
+
     if (remote_repo.size())
         add_action_button("Merge", bbox, br, [this](const UUID &uu) { remote_box->merge_item(ObjectType::PART, uu); });
 

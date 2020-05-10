@@ -11,6 +11,8 @@
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "util/csv.hpp"
 #include "widgets/tag_entry.hpp"
+#include "widgets/pool_browser_package.hpp"
+#include "widgets/preview_canvas.hpp"
 
 namespace horizon {
 LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder> &x, const std::string &w,
@@ -29,15 +31,17 @@ LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder> 
     return en;
 }
 
-PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const Package *p,
+PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const UUID &pkg_uuid,
                        const std::string &bp, class Pool *po, PoolProjectManagerAppWindow *aw)
-    : Gtk::Window(cobject), pkg(p), pool_base_path(bp), pool(po), part(UUID::random()), entity(UUID::random()),
-      appwin(aw), state_store(this, "part-wizard")
+    : Gtk::Window(cobject), pool_base_path(bp), pool(po), part(UUID::random()), entity(UUID::random()), appwin(aw),
+      state_store(this, "part-wizard")
 {
+    x->get_widget("header", header);
     x->get_widget("stack", stack);
     x->get_widget("button_back", button_back);
     x->get_widget("button_next", button_next);
     x->get_widget("button_finish", button_finish);
+    x->get_widget("button_select", button_select);
 
     x->get_widget("pads_lb", pads_lb);
     x->get_widget("link_pads", button_link_pads);
@@ -111,8 +115,6 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     sg_name = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
-    part.attributes[Part::Attribute::MANUFACTURER] = {false, pkg->manufacturer};
-
     gate_name_store = Gtk::ListStore::create(list_columns);
 
     {
@@ -120,26 +122,43 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         row[list_columns.name] = "Main";
     }
 
-    create_pad_editors();
-
     pads_lb->set_sort_func([](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b) {
         auto na = dynamic_cast<PadEditor *>(a->get_child())->names.front();
         auto nb = dynamic_cast<PadEditor *>(b->get_child())->names.front();
         return strcmp_natural(na, nb);
     });
 
-    part.package = pkg;
     part.entity = &entity;
-
 
     button_link_pads->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_link));
     button_unlink_pads->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_unlink));
     button_import_pads->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_import));
     button_next->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_next));
     button_back->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_back));
+    button_select->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_select));
     button_finish->signal_clicked().connect(sigc::mem_fun(*this, &PartWizard::handle_finish));
 
-    set_mode(Mode::ASSIGN);
+    {
+        Gtk::Paned *page_package;
+        x->get_widget("page_package", page_package);
+        browser_package = Gtk::manage(new PoolBrowserPackage(pool));
+        browser_package->show();
+        page_package->add1(*browser_package);
+
+        auto preview = Gtk::manage(new PreviewCanvas(*pool, true));
+        button_select->set_sensitive(false);
+        browser_package->signal_selected().connect([this, preview] {
+            preview->load(ObjectType::PACKAGE, browser_package->get_selected());
+            button_select->set_sensitive(browser_package->get_selected());
+        });
+        browser_package->signal_activated().connect(sigc::mem_fun(*this, &PartWizard::handle_select));
+        browser_package->go_to(pkg_uuid);
+
+        preview->show();
+        page_package->add2(*preview);
+    }
+
+    set_mode(Mode::PACKAGE);
 
     signal_delete_event().connect([this](GdkEventAny *ev) {
         if (processes.size()) {
@@ -150,6 +169,9 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             return true; // keep open
         }
         if (files_saved.size())
+            return false;
+
+        if (mode == Mode::PACKAGE)
             return false;
 
         Gtk::MessageDialog md(*this, "Really close?", false /* use_markup */, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
@@ -166,6 +188,16 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             return true; // keep window open
         }
     });
+}
+
+void PartWizard::set_pkg(const Package *p)
+{
+    if (pkg)
+        return;
+    pkg = p;
+    part.attributes[Part::Attribute::MANUFACTURER] = {false, pkg->manufacturer};
+    part.package = pkg;
+    create_pad_editors();
 }
 
 void PartWizard::create_pad_editors()
@@ -194,18 +226,28 @@ void PartWizard::set_mode(PartWizard::Mode mo)
 {
     if (mo == Mode::ASSIGN && processes.size() > 0)
         return;
+
     if (mo == Mode::ASSIGN) {
         stack->set_visible_child("assign");
+        header->set_subtitle("Assign pins");
     }
-    else {
+    else if (mo == Mode::EDIT) {
         prepare_edit();
         stack->set_visible_child("edit");
         update_can_finish();
+        header->set_subtitle("Part details & symbol");
     }
+    else if (mo == Mode::PACKAGE) {
+        prepare_edit();
+        stack->set_visible_child("package");
+        header->set_subtitle("Select package");
+    }
+
 
     button_back->set_visible(mo == Mode::EDIT);
     button_finish->set_visible(mo == Mode::EDIT);
     button_next->set_visible(mo == Mode::ASSIGN);
+    button_select->set_visible(mo == Mode::PACKAGE);
     mode = mo;
 }
 
@@ -221,6 +263,15 @@ void PartWizard::handle_back()
     if (processes.size())
         return;
     set_mode(Mode::ASSIGN);
+}
+
+void PartWizard::handle_select()
+{
+    auto p = browser_package->get_selected();
+    if (p) {
+        set_pkg(pool->get_package(p));
+        set_mode(Mode::ASSIGN);
+    }
 }
 
 std::vector<std::string> PartWizard::get_filenames()
@@ -1057,7 +1108,7 @@ void PartWizard::update_steps()
     steps_grid->show_all();
 }
 
-PartWizard *PartWizard::create(const Package *p, const std::string &bp, class Pool *po,
+PartWizard *PartWizard::create(const UUID &pkg_uuid, const std::string &bp, class Pool *po,
                                class PoolProjectManagerAppWindow *aw)
 {
     PartWizard *w;
@@ -1065,7 +1116,7 @@ PartWizard *PartWizard::create(const Package *p, const std::string &bp, class Po
     x->add_from_resource(
             "/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/part_wizard/"
             "part_wizard.ui");
-    x->get_widget_derived("part_wizard", w, p, bp, po, aw);
+    x->get_widget_derived("part_wizard", w, pkg_uuid, bp, po, aw);
     return w;
 }
 
