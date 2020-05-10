@@ -102,7 +102,7 @@ PreviewCanvas::PreviewCanvas(Pool &p, bool layered) : Glib::ObjectBase(typeid(Pr
 
 void PreviewCanvas::update_scale_deferred()
 {
-    Glib::signal_idle().connect_once([this] { update_scale(); });
+    Glib::signal_idle().connect_once(sigc::track_obj([this] { update_scale(); }, *this));
 }
 
 void PreviewCanvas::set_has_scale(bool h)
