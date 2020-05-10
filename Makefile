@@ -852,7 +852,7 @@ clean_router:
 	$(RM) $(OBJ_ROUTER) $(OBJ_ROUTER:.o=.d)
 
 clean_oce:
-	$(RM) $(OBJ_OCE) $(OBJ_OCE:.o=.d)
+	$(RM) $(OBJ_OCE) $(OBJ_OCE:.o=.d) $(OBJ_SHARED_OCE) $(OBJ_SHARED_OCE:.o=.d)
 
 clean_res:
 	$(RM) $(OBJ_RES)
