@@ -1057,7 +1057,9 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         view_project.label_project_directory->set_text(Glib::path_get_dirname(project_filename));
 
         view_project.pool_info_bar->hide();
-        view_project.label_pool_name->set_text(prj_pool->name);
+        view_project.label_pool_name->set_markup("<a href=\"" + prj_pool->base_path + "\""
+        		"title=\"Open in pool manager\">"
+                                                 + Glib::Markup::escape_text(prj_pool->name) + "</a>");
         view_project.label_pool_path->set_text(prj_pool->base_path);
         view_project.reset_pool_cache_status();
 
@@ -1104,7 +1106,8 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
 void PoolProjectManagerAppWindow::open_pool(const std::string &pool_json, ObjectType type, const UUID &uu)
 {
     open_file_view(Gio::File::create_for_path(pool_json));
-    pool_notebook_go_to(type, uu);
+    if (type != ObjectType::INVALID)
+        pool_notebook_go_to(type, uu);
 }
 
 
