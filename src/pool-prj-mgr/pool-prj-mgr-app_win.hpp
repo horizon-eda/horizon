@@ -56,6 +56,13 @@ public:
     {
         return s_signal_process_exited;
     }
+
+    typedef sigc::signal<void, std::string> type_signal_process_saved;
+    type_signal_process_saved signal_process_saved()
+    {
+        return s_signal_process_saved;
+    }
+
     void reload();
 
     class ClosePolicy {
@@ -172,6 +179,7 @@ private:
     const UUID uuid_project_manager = "144a4ad6-4c7c-4136-9920-f58f954c678e";
 
     type_signal_process_exited s_signal_process_exited;
+    type_signal_process_saved s_signal_process_saved;
 
     PoolProjectManagerViewCreateProject view_create_project;
     PoolProjectManagerViewProject view_project;

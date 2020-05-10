@@ -380,6 +380,9 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         pids_need_save[pid] = needs_save;
         if (project && !needs_save)
             view_project.update_meta();
+        if (!needs_save) {
+            s_signal_process_saved.emit(j.at("filename"));
+        }
     }
     else if (op == "ready") {
         int pid = j.at("pid");
@@ -1196,6 +1199,9 @@ PoolProjectManagerProcess *PoolProjectManagerAppWindow::spawn(PoolProjectManager
                 output_window->handle_output("[" + real_filename + "] " + line, err);
             }
         });
+        if (proc.win)
+            proc.win->signal_saved().connect([this](auto fn) { s_signal_process_saved.emit(fn); });
+
         return &proc;
     }
     else { // present imp

@@ -37,6 +37,10 @@ public:
     {
         return s_signal_filename_changed;
     }
+    type_signal_filename_changed signal_saved()
+    {
+        return s_signal_saved;
+    }
 
 private:
     ObjectType type;
@@ -49,6 +53,7 @@ private:
     std::string original_filename;
 
     type_signal_filename_changed s_signal_filename_changed;
+    type_signal_filename_changed s_signal_saved;
 
     WindowStateStore state_store;
 };
