@@ -183,14 +183,16 @@ PoolCacheWindow::PoolCacheWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     }
 
     {
-        auto col = pool_item_view->append_column("Name", tree_columns.name);
-        std::cout << "col " << col << std::endl;
-        pool_item_view->get_column(col - 1)->set_sort_column(tree_columns.name);
+        auto col = tree_view_append_column_ellipsis(pool_item_view, "Name", tree_columns.name, Pango::ELLIPSIZE_END);
+        col->set_min_width(200);
+        col->set_sort_column(tree_columns.name);
+        col->set_expand(true);
     }
 
     {
         auto cr = Gtk::manage(new CellRendererColorBox());
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("State", *cr));
+        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("State"));
+        tvc->pack_start(*cr, false);
         auto cr2 = Gtk::manage(new Gtk::CellRendererText());
         cr2->property_text() = "hallo";
 
