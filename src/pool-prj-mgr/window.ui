@@ -2291,7 +2291,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">Top Schematic</property>
+                                    <property name="label" translatable="yes">Schematic</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
