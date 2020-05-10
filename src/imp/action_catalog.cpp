@@ -802,6 +802,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::GEN_FAB_OUTPUT, ToolID::NONE},
          {"Generate fab. output", ActionGroup::EXPORT_IMPORT, ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::SWAP_GATES},
+         {"Swap gates", ActionGroup::SCHEMATIC, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1052,5 +1056,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(SMASH_PACKAGE_OUTLINE),
         TOOL_LUT_ITEM(RESIZE_SYMBOL),
         TOOL_LUT_ITEM(ROUND_OFF_VERTEX),
+        TOOL_LUT_ITEM(SWAP_GATES),
 };
 } // namespace horizon

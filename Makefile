@@ -249,6 +249,7 @@ SRC_IMP = \
 	src/core/tools/tool_smash_package_outline.cpp\
 	src/core/tools/tool_resize_symbol.cpp\
 	src/core/tools/tool_round_off_vertex.cpp\
+	src/core/tools/tool_swap_gates.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\

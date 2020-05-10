@@ -941,6 +941,22 @@ std::map<UUIDPath<2>, std::string> Schematic::get_unplaced_gates() const
     return unplaced;
 }
 
+void Schematic::swap_gates(const UUID &comp_uu, const UUID &g1_uu, const UUID &g2_uu)
+{
+    block->swap_gates(comp_uu, g1_uu, g2_uu);
+    auto entity = block->components.at(comp_uu).entity;
+    for (auto &it_sheet : sheets) {
+        for (auto &it_sym : it_sheet.second.symbols) {
+            if (it_sym.second.gate->uuid == g1_uu) {
+                it_sym.second.gate = &entity->gates.at(g2_uu);
+            }
+            else if (it_sym.second.gate->uuid == g2_uu) {
+                it_sym.second.gate = &entity->gates.at(g1_uu);
+            }
+        }
+    }
+}
+
 Schematic::Schematic(const Schematic &sch)
     : uuid(sch.uuid), block(sch.block), name(sch.name), sheets(sch.sheets), rules(sch.rules),
       group_tag_visible(sch.group_tag_visible), annotation(sch.annotation), pdf_export_settings(sch.pdf_export_settings)
