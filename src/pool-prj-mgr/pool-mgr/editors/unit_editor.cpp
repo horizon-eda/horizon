@@ -21,7 +21,6 @@ private:
     Gtk::Entry *name_entry = nullptr;
     Gtk::Entry *names_entry = nullptr;
     Gtk::ComboBoxText *dir_combo = nullptr;
-    Gtk::SpinButton *swap_group_spin_button = nullptr;
 };
 
 PinEditor::PinEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Pin *p, UnitEditor *pa)
@@ -30,9 +29,11 @@ PinEditor::PinEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
     x->get_widget("pin_name", name_entry);
     x->get_widget("pin_names", names_entry);
     x->get_widget("pin_direction", dir_combo);
-    x->get_widget("pin_swap_group", swap_group_spin_button);
     entry_add_sanitizer(name_entry);
     entry_add_sanitizer(names_entry);
+    parent->sg_name->add_widget(*name_entry);
+    parent->sg_direction->add_widget(*dir_combo);
+    parent->sg_names->add_widget(*names_entry);
 
     for (const auto &it : Pin::direction_names) {
         dir_combo->append(std::to_string(static_cast<int>(it.first)), it.second);
@@ -90,19 +91,14 @@ PinEditor::PinEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
         propagate([this](PinEditor *ed) { ed->dir_combo->set_active_id(dir_combo->get_active_id()); });
         parent->needs_save = true;
     });
-    swap_group_spin_button->set_value(pin->swap_group);
-    swap_group_spin_button->signal_value_changed().connect([this, propagate] {
-        pin->swap_group = swap_group_spin_button->get_value_as_int();
-        propagate([this](PinEditor *ed) { ed->swap_group_spin_button->set_value(pin->swap_group); });
-        parent->needs_save = true;
-    });
 }
 
 PinEditor *PinEditor::create(Pin *p, UnitEditor *pa)
 {
     PinEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/editors/unit_editor.ui");
+    static const std::vector<Glib::ustring> widgets = {"pin_editor"};
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/editors/unit_editor.ui", widgets);
     x->get_widget_derived("pin_editor", w, p, pa);
     w->reference();
     return w;
@@ -135,6 +131,10 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("pin_delete", delete_button);
     entry_add_sanitizer(name_entry);
     entry_add_sanitizer(manufacturer_entry);
+
+    sg_name = decltype(sg_name)::cast_dynamic(x->get_object("sg_name"));
+    sg_direction = decltype(sg_direction)::cast_dynamic(x->get_object("sg_direction"));
+    sg_names = decltype(sg_names)::cast_dynamic(x->get_object("sg_names"));
 
     name_entry->set_text(unit->name);
     name_entry->signal_changed().connect([this] {

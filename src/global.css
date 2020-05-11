@@ -59,3 +59,17 @@
   border-radius:0px;
   border-top-left-radius: 5px;
 }
+
+.editor-header > label:not(:first-child) {
+  border-left: 1px solid rgba(0,0,0,.1);
+}
+
+.editor-header > label {
+  padding: 5px 5px 5px 10px;
+}
+
+.editor-header {
+  border-top: 1px solid rgba(0,0,0,.1);
+  border-bottom: 1px solid rgba(0,0,0,.05);
+}
+

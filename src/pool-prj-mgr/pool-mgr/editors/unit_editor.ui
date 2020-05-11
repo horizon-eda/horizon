@@ -2,30 +2,14 @@
 <!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkAdjustment" id="adjustment1">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
   <object class="GtkBox" id="pin_editor">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="margin_left">5</property>
-    <property name="margin_right">5</property>
+    <property name="margin_start">5</property>
+    <property name="margin_end">5</property>
     <property name="margin_top">5</property>
     <property name="margin_bottom">5</property>
     <property name="spacing">10</property>
-    <child>
-      <object class="GtkComboBoxText" id="pin_direction">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">0</property>
-      </packing>
-    </child>
     <child>
       <object class="GtkEntry" id="pin_name">
         <property name="visible">True</property>
@@ -38,37 +22,9 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox">
+      <object class="GtkComboBoxText" id="pin_direction">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="spacing">5</property>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Swap group</property>
-            <style>
-              <class name="dim-label"/>
-            </style>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSpinButton" id="pin_swap_group">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="adjustment">adjustment1</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -77,36 +33,9 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox">
+      <object class="GtkEntry" id="pin_names">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="spacing">5</property>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Alt. Names</property>
-            <style>
-              <class name="dim-label"/>
-            </style>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="pin_names">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
+        <property name="can_focus">True</property>
       </object>
       <packing>
         <property name="expand">True</property>
@@ -189,9 +118,71 @@
       </packing>
     </child>
     <child>
-      <object class="GtkSeparator">
+      <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="margin_start">1</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkLabel" id="label_name">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Pin</property>
+            <property name="xalign">0</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+            <style>
+              <class name="dim-label"/>
+            </style>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label_direction">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Direction</property>
+            <property name="xalign">0</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+            <style>
+              <class name="dim-label"/>
+            </style>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label_names">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Alternate names</property>
+            <property name="xalign">0</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+            <style>
+              <class name="dim-label"/>
+            </style>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <style>
+          <class name="editor-header"/>
+        </style>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -304,5 +295,20 @@ Click the plus icon to add pins.</property>
         <property name="position">4</property>
       </packing>
     </child>
+  </object>
+  <object class="GtkSizeGroup" id="sg_direction">
+    <widgets>
+      <widget name="label_direction"/>
+    </widgets>
+  </object>
+  <object class="GtkSizeGroup" id="sg_name">
+    <widgets>
+      <widget name="label_name"/>
+    </widgets>
+  </object>
+  <object class="GtkSizeGroup" id="sg_names">
+    <widgets>
+      <widget name="label_names"/>
+    </widgets>
   </object>
 </interface>
