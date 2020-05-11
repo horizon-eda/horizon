@@ -883,7 +883,7 @@ void Schematic::annotate()
                     if (annotation.fill_gaps && v.size() >= 2) {
                         bool hole = false;
                         for (auto it = v.begin(); it < v.end() - 1; it++) {
-                            if (*(it + 1) != (*it) + 1) {
+                            if (*it > sheet_offset && *(it + 1) != (*it) + 1) {
                                 n = (*it) + 1;
                                 hole = true;
                                 break;
