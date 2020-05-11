@@ -6,6 +6,8 @@
 #include <iomanip>
 #include "util/pool_completion.hpp"
 #include "util/gtk_util.hpp"
+#include "widgets/help_button.hpp"
+#include "help_texts.hpp"
 
 namespace horizon {
 
@@ -135,6 +137,8 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     sg_name = decltype(sg_name)::cast_dynamic(x->get_object("sg_name"));
     sg_direction = decltype(sg_direction)::cast_dynamic(x->get_object("sg_direction"));
     sg_names = decltype(sg_names)::cast_dynamic(x->get_object("sg_names"));
+
+    HelpButton::pack_into(x, "box_names", HelpTexts::UNIT_PIN_ALT_NAMES);
 
     name_entry->set_text(unit->name);
     name_entry->signal_changed().connect([this] {

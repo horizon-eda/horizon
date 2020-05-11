@@ -162,17 +162,29 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel" id="label_names">
+          <object class="GtkBox" id="box_names">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Alternate names</property>
-            <property name="xalign">0</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-            </attributes>
-            <style>
-              <class name="dim-label"/>
-            </style>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Alternate names</property>
+                <property name="xalign">0</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+                <style>
+                  <class name="dim-label"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -308,7 +320,7 @@ Click the plus icon to add pins.</property>
   </object>
   <object class="GtkSizeGroup" id="sg_names">
     <widgets>
-      <widget name="label_names"/>
+      <widget name="box_names"/>
     </widgets>
   </object>
 </interface>
