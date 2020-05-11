@@ -260,4 +260,44 @@ void widget_set_insensitive_tooltip(Gtk::Widget &w, const std::string &txt)
     }
 }
 
+/*
+ * adapted from glade:
+ * https://gitlab.gnome.org/GNOME/glade/blob/master/gladeui/glade-utils.c#L2115
+ */
+
+/* Use this to disable scroll events on property editors,
+ * we dont want them handling scroll because they are inside
+ * a scrolled window and interrupt workflow causing unexpected
+ * results when scrolled.
+ */
+static gint abort_scroll_events(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+    GtkWidget *parent = gtk_widget_get_parent(widget);
+
+    /* Removing the events from the mask doesnt work for
+     * stubborn combo boxes which call gtk_widget_add_events()
+     * in it's gtk_combo_box_init() - so handle the event and propagate
+     * it up the tree so the scrollwindow still handles the scroll event.
+     */
+    gtk_propagate_event(parent, event);
+
+    return TRUE;
+}
+
+static void util_remove_scroll_events(GtkWidget *widget)
+{
+    gint events = gtk_widget_get_events(widget);
+
+    events &= ~(GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK);
+    gtk_widget_set_events(widget, events);
+
+    g_signal_connect(G_OBJECT(widget), "scroll-event", G_CALLBACK(abort_scroll_events), NULL);
+}
+
+
+void widget_remove_scroll_events(Gtk::Widget &widget)
+{
+    util_remove_scroll_events(widget.gobj());
+}
+
 } // namespace horizon
