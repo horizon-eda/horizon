@@ -92,7 +92,7 @@ private:
     void handle_create_package();
     void handle_create_padstack_for_package(const UUID &uu);
     void handle_duplicate_package(const UUID &uu);
-    void handle_part_wizard(const UUID &uu);
+    void handle_part_wizard();
 
     void construct_parts();
     void handle_edit_part(const UUID &uu);

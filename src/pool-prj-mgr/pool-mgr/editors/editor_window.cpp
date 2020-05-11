@@ -214,6 +214,7 @@ void EditorWindow::save()
             iface->save();
         store->save();
         need_update = true;
+        s_signal_saved.emit(store->filename);
     }
     else {
         GtkFileChooserNative *native = gtk_file_chooser_native_new("Save", GTK_WINDOW(gobj()),
@@ -242,6 +243,7 @@ void EditorWindow::save()
             std::string fn = fix_filename(chooser->get_filename());
             s_signal_filename_changed.emit(fn);
             store->save_as(fn);
+            s_signal_saved.emit(store->filename);
             save_button->set_label("Save");
             need_update = true;
         }

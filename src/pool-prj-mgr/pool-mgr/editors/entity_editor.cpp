@@ -7,6 +7,8 @@
 #include "widgets/tag_entry.hpp"
 #include "util/pool_completion.hpp"
 #include "util/gtk_util.hpp"
+#include "widgets/help_button.hpp"
+#include "help_texts.hpp"
 
 namespace horizon {
 
@@ -32,6 +34,11 @@ GateEditor::GateEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("gate_suffix", suffix_entry);
     x->get_widget("gate_swap_group", swap_group_spin_button);
     x->get_widget("gate_unit", unit_label);
+    parent->sg_name->add_widget(*name_entry);
+    parent->sg_suffix->add_widget(*suffix_entry);
+    parent->sg_swap_group->add_widget(*swap_group_spin_button);
+    parent->sg_unit->add_widget(*unit_label);
+
     entry_add_sanitizer(name_entry);
     entry_add_sanitizer(suffix_entry);
 
@@ -74,7 +81,8 @@ GateEditor *GateEditor::create(Gate *g, EntityEditor *pa)
 {
     GateEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/editors/entity_editor.ui");
+    static const std::vector<Glib::ustring> widgets = {"gate_editor", "adjustment1"};
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/pool-mgr/editors/entity_editor.ui", widgets);
     x->get_widget_derived("gate_editor", w, g, pa);
     w->reference();
     return w;
@@ -109,6 +117,15 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     entry_add_sanitizer(name_entry);
     entry_add_sanitizer(manufacturer_entry);
     entry_add_sanitizer(prefix_entry);
+
+    HelpButton::pack_into(x, "box_swap_group", HelpTexts::ENTITY_GATE_SWAP_GROUP);
+    HelpButton::pack_into(x, "box_suffix", HelpTexts::ENTITY_GATE_SUFFIX);
+    HelpButton::pack_into(x, "box_name", HelpTexts::ENTITY_GATE_NAME);
+
+    sg_name = decltype(sg_name)::cast_dynamic(x->get_object("sg_name"));
+    sg_suffix = decltype(sg_name)::cast_dynamic(x->get_object("sg_suffix"));
+    sg_swap_group = decltype(sg_name)::cast_dynamic(x->get_object("sg_swap_group"));
+    sg_unit = decltype(sg_name)::cast_dynamic(x->get_object("sg_unit"));
 
     bind_entry(name_entry, entity->name, needs_save);
     bind_entry(manufacturer_entry, entity->manufacturer, needs_save);

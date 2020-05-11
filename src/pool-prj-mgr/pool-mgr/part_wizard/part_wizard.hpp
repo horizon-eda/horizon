@@ -18,9 +18,9 @@ class PartWizard : public Gtk::Window {
     friend class GateEditorWizard;
 
 public:
-    PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Package *p,
+    PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const UUID &pkg_uuid,
                const std::string &bp, class Pool *po, class PoolProjectManagerAppWindow *aw);
-    static PartWizard *create(const class Package *p, const std::string &pool_base_path, class Pool *po,
+    static PartWizard *create(const UUID &pkg_uuid, const std::string &pool_base_path, class Pool *po,
                               class PoolProjectManagerAppWindow *aw);
     std::vector<std::string> get_files_saved() const;
     void reload();
@@ -28,14 +28,18 @@ public:
     ~PartWizard();
 
 private:
-    const class Package *pkg;
+    const class Package *pkg = nullptr;
+    void set_pkg(const Package *p);
     std::string pool_base_path;
     class Pool *pool;
 
+    Gtk::HeaderBar *header = nullptr;
     Gtk::Button *button_back = nullptr;
     Gtk::Button *button_next = nullptr;
     Gtk::Button *button_finish = nullptr;
+    Gtk::Button *button_select = nullptr;
     Gtk::Stack *stack = nullptr;
+    class PoolBrowserPackage *browser_package = nullptr;
 
     Gtk::ListBox *pads_lb = nullptr;
     Gtk::ToolButton *button_link_pads = nullptr;
@@ -103,11 +107,12 @@ private:
     void link_pads(const std::deque<class PadEditor *> &eds);
     bool frozen = false;
 
-    enum class Mode { ASSIGN, EDIT };
+    enum class Mode { PACKAGE, ASSIGN, EDIT };
 
     void handle_next();
     void handle_back();
     void handle_finish();
+    void handle_select();
     void finish();
 
     std::string get_rel_part_filename();

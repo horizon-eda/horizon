@@ -47,6 +47,9 @@ public:
     BOMExportSettings bom_export_settings;
     std::map<const class Part *, BOMRow> get_BOM(const BOMExportSettings &settings) const;
 
+    bool can_swap_gates(const UUID &comp, const UUID &g1, const UUID &g2) const;
+    void swap_gates(const UUID &comp, const UUID &g1, const UUID &g2);
+
     Block(const Block &block);
     void operator=(const Block &block);
 

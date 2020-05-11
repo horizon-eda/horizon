@@ -1,0 +1,21 @@
+#ENTITY_GATE_SWAP_GROUP
+Defines whether a gate can be swapped with other gates of the same unit.
+
+Gates in swap group 0 can't be swapped at all.
+
+Gates in a nonzero swap group can be swapped with other gates of the same swap group and unit.
+
+#ENTITY_GATE_SUFFIX
+Suffix that gets appended to the reference designator, for example U101B.
+
+Leave blank for single-gate entities. Use A,B,C,… for multi-gate entities.
+
+If there's a gate dedicated to power supply, its suffix should be P.
+
+#ENTITY_GATE_NAME
+If there's only a single gate, its name should be "Main".
+
+#UNIT_PIN_ALT_NAMES
+If a pin has multiple functions, add these here, separated by spaces.
+
+For example: Pin name: PB0, alternate names: I2C0_SDA ADC2_IN.

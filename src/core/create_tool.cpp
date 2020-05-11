@@ -77,6 +77,7 @@
 #include "tools/tool_smash_package_outline.hpp"
 #include "tools/tool_resize_symbol.hpp"
 #include "tools/tool_round_off_vertex.hpp"
+#include "tools/tool_swap_gates.hpp"
 
 namespace horizon {
 
@@ -370,6 +371,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::ROUND_OFF_VERTEX:
         return std::make_unique<ToolRoundOffVertex>(this, tool_id);
+
+    case ToolID::SWAP_GATES:
+        return std::make_unique<ToolSwapGates>(this, tool_id);
 
     default:
         return nullptr;

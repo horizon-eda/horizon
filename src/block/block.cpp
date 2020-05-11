@@ -390,4 +390,35 @@ std::string Block::get_net_name(const UUID &uu) const
     }
 }
 
+bool Block::can_swap_gates(const UUID &comp_uu, const UUID &g1_uu, const UUID &g2_uu) const
+{
+    const auto &comp = components.at(comp_uu);
+    const auto &g1 = comp.entity->gates.at(g1_uu);
+    const auto &g2 = comp.entity->gates.at(g2_uu);
+    return (g1.unit->uuid == g2.unit->uuid) && (g1.swap_group == g2.swap_group) && (g1.swap_group != 0);
+}
+
+void Block::swap_gates(const UUID &comp_uu, const UUID &g1_uu, const UUID &g2_uu)
+{
+    if (!can_swap_gates(comp_uu, g1_uu, g2_uu))
+        throw std::runtime_error("can't swap gates");
+
+    auto &comp = components.at(comp_uu);
+    std::map<UUIDPath<2>, Connection> new_connections;
+    for (const auto &it : comp.connections) {
+        if (it.first.at(0) == g1_uu) {
+            new_connections.emplace(std::piecewise_construct, std::forward_as_tuple(g2_uu, it.first.at(1)),
+                                    std::forward_as_tuple(it.second));
+        }
+        else if (it.first.at(0) == g2_uu) {
+            new_connections.emplace(std::piecewise_construct, std::forward_as_tuple(g1_uu, it.first.at(1)),
+                                    std::forward_as_tuple(it.second));
+        }
+        else {
+            new_connections.emplace(it);
+        }
+    }
+    comp.connections = new_connections;
+}
+
 } // namespace horizon

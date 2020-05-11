@@ -595,6 +595,7 @@ void ImpBase::run(int argc, char *argv[])
         json j;
         j["op"] = "needs-save";
         j["pid"] = getpid();
+        j["filename"] = core->get_filename();
         j["needs_save"] = core->get_needs_save();
         send_json(j);
     });

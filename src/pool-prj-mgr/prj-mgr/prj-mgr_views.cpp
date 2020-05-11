@@ -119,6 +119,20 @@ PoolProjectManagerViewProject::PoolProjectManagerViewProject(const Glib::RefPtr<
     builder->get_widget("prj_pool_change_button", button_change_pool);
     builder->get_widget("prj_pool_info_bar", pool_info_bar);
     builder->get_widget("pool_cache_status_label", pool_cache_status_label);
+    label_pool_name->signal_activate_link().connect(
+            [this](const Glib::ustring &l) {
+                auto path = Glib::build_filename(l, "pool.json");
+                for (auto ws : win->app->get_windows()) {
+                    auto wi = dynamic_cast<PoolProjectManagerAppWindow *>(ws);
+                    if (wi && wi->get_filename() == path) {
+                        wi->present();
+                        return true;
+                    }
+                }
+                win->app->open_pool(path);
+                return true;
+            },
+            false);
 
     Gtk::Button *open_button;
     builder->get_widget("prj_open_dir_button", open_button);

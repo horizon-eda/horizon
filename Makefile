@@ -108,6 +108,7 @@ ifeq ($(OS),Windows_NT)
 endif
 SRC_COMMON_GEN += $(GENDIR)/resources.cpp
 SRC_COMMON_GEN += $(GENDIR)/version_gen.cpp
+SRC_COMMON_GEN += $(GENDIR)/help_texts.cpp
 
 
 SRC_CANVAS = \
@@ -249,6 +250,7 @@ SRC_IMP = \
 	src/core/tools/tool_smash_package_outline.cpp\
 	src/core/tools/tool_resize_symbol.cpp\
 	src/core/tools/tool_round_off_vertex.cpp\
+	src/core/tools/tool_swap_gates.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\
@@ -596,6 +598,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/output_window.cpp\
 	src/pool-prj-mgr/autosave_recovery_dialog.cpp\
 	src/util/stock_info_provider_partinfo.cpp\
+	src/widgets/help_button.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp
@@ -623,7 +626,7 @@ SRC_OCE_EXPORT = \
 
 SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PGM_TEST) $(SRC_POOL_PRJ_MGR) $(SRC_GEN_PKG))
 
-INC = -Isrc -I3rd_party
+INC = -Isrc -I3rd_party -Ibuild/gen
 
 DEFINES = -D_USE_MATH_DEFINES -DGLM_ENABLE_EXPERIMENTAL
 
@@ -769,6 +772,16 @@ $(BUILDDIR)/gen/version_gen.cpp: $(wildcard .git/HEAD .git/index) version.py mak
 	$(ECHO) " $@"
 	$(QUIET)python3 make_version.py $@
 
+$(BUILDDIR)/gen/help_texts.cpp: scripts/make_help.py src/help_texts.txt $(BUILDDIR)/gen/help_texts.hpp
+	$(QUIET)$(MKDIR) $(dir $@)
+	$(ECHO) " $@"
+	$(QUIET)python3 scripts/make_help.py c src/help_texts.txt > $@
+
+$(BUILDDIR)/gen/help_texts.hpp: scripts/make_help.py src/help_texts.txt
+	$(QUIET)$(MKDIR) $(dir $@)
+	$(ECHO) " $@"
+	$(QUIET)python3 scripts/make_help.py h src/help_texts.txt > $@
+
 $(BUILDDIR)/horizon-imp: $(OBJ_COMMON) $(OBJ_ROUTER) $(OBJ_OCE) $(OBJ_IMP)
 	$(ECHO) " $@"
 	$(QUIET)$(CXX) $^ $(LDFLAGS) $(LDFLAGS_GUI) $(LDFLAGS_OCE) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libcurl) -lpodofo -o $@
@@ -846,6 +859,8 @@ install: $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-eda
 clean: clean_router clean_oce clean_res
 	$(RM) $(OBJ_ALL) $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-pool $(BUILDDIR)/horizon-prj $(BUILDDIR)/horizon-pool-mgr $(BUILDDIR)/horizon-prj-mgr $(BUILDDIR)/horizon-pgm-test $(BUILDDIR)/horizon-gen-pkg $(BUILDDIR)/horizon-eda $(OBJ_ALL:.o=.d) $(GENDIR)/resources.cpp $(GENDIR)/version_gen.cpp $(OBJ_COMMON) $(OBJ_COMMON:.o=.d)
 	$(RM) $(BUILDDIR)/horizon.so
+	$(RM) $(GENDIR)/help_texts.hpp
+	$(RM) $(GENDIR)/help_texts.cpp
 	$(RM) $(OBJ_SHARED) $(OBJ_PYTHON) $(OBJ_SHARED:.o=.d) $(OBJ_PYTHON:.o=.d)
 	$(RM) -r __pycache__
 
@@ -853,7 +868,7 @@ clean_router:
 	$(RM) $(OBJ_ROUTER) $(OBJ_ROUTER:.o=.d)
 
 clean_oce:
-	$(RM) $(OBJ_OCE) $(OBJ_OCE:.o=.d)
+	$(RM) $(OBJ_OCE) $(OBJ_OCE:.o=.d) $(OBJ_SHARED_OCE) $(OBJ_SHARED_OCE:.o=.d)
 
 clean_res:
 	$(RM) $(OBJ_RES)

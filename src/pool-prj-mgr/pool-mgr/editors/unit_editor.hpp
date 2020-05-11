@@ -25,7 +25,7 @@ private:
 
     Glib::RefPtr<Gtk::SizeGroup> sg_direction;
     Glib::RefPtr<Gtk::SizeGroup> sg_name;
-    Glib::RefPtr<Gtk::SizeGroup> sg_swap_group;
+    Glib::RefPtr<Gtk::SizeGroup> sg_names;
 
     void handle_add();
     void handle_delete();
