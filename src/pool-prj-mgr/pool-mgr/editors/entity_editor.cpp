@@ -7,6 +7,8 @@
 #include "widgets/tag_entry.hpp"
 #include "util/pool_completion.hpp"
 #include "util/gtk_util.hpp"
+#include "widgets/help_button.hpp"
+#include "help_texts.hpp"
 
 namespace horizon {
 
@@ -115,6 +117,10 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     entry_add_sanitizer(name_entry);
     entry_add_sanitizer(manufacturer_entry);
     entry_add_sanitizer(prefix_entry);
+
+    HelpButton::pack_into(x, "box_swap_group", HelpTexts::ENTITY_GATE_SWAP_GROUP);
+    HelpButton::pack_into(x, "box_suffix", HelpTexts::ENTITY_GATE_SUFFIX);
+    HelpButton::pack_into(x, "box_name", HelpTexts::ENTITY_GATE_NAME);
 
     sg_name = decltype(sg_name)::cast_dynamic(x->get_object("sg_name"));
     sg_suffix = decltype(sg_name)::cast_dynamic(x->get_object("sg_suffix"));

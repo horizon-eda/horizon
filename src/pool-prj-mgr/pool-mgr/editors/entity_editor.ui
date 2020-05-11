@@ -199,17 +199,29 @@
         <property name="margin_start">1</property>
         <property name="spacing">10</property>
         <child>
-          <object class="GtkLabel" id="label_name">
+          <object class="GtkBox" id="box_name">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Gate</property>
-            <property name="xalign">0</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-            </attributes>
-            <style>
-              <class name="dim-label"/>
-            </style>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Gate</property>
+                <property name="xalign">0</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+                <style>
+                  <class name="dim-label"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -218,17 +230,29 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel" id="label_suffix">
+          <object class="GtkBox" id="box_suffix">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Suffix</property>
-            <property name="xalign">0</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-            </attributes>
-            <style>
-              <class name="dim-label"/>
-            </style>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Suffix</property>
+                <property name="xalign">0</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+                <style>
+                  <class name="dim-label"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -237,17 +261,29 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel" id="label_swap_group">
+          <object class="GtkBox" id="box_swap_group">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Swap group</property>
-            <property name="xalign">0</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-            </attributes>
-            <style>
-              <class name="dim-label"/>
-            </style>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Swap group</property>
+                <property name="xalign">0</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+                <style>
+                  <class name="dim-label"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -256,17 +292,30 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel" id="label_unit">
+          <object class="GtkBox" id="box_unit">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Unit</property>
-            <property name="xalign">0</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-            </attributes>
-            <style>
-              <class name="dim-label"/>
-            </style>
+            <property name="orientation">vertical</property>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Unit</property>
+                <property name="xalign">0</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+                <style>
+                  <class name="dim-label"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -376,22 +425,22 @@
   </object>
   <object class="GtkSizeGroup" id="sg_name">
     <widgets>
-      <widget name="label_name"/>
+      <widget name="box_name"/>
     </widgets>
   </object>
   <object class="GtkSizeGroup" id="sg_suffix">
     <widgets>
-      <widget name="label_suffix"/>
+      <widget name="box_suffix"/>
     </widgets>
   </object>
   <object class="GtkSizeGroup" id="sg_swap_group">
     <widgets>
-      <widget name="label_swap_group"/>
+      <widget name="box_swap_group"/>
     </widgets>
   </object>
   <object class="GtkSizeGroup" id="sg_unit">
     <widgets>
-      <widget name="label_unit"/>
+      <widget name="box_unit"/>
     </widgets>
   </object>
 </interface>

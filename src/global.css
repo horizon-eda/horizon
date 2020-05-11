@@ -60,11 +60,11 @@
   border-top-left-radius: 5px;
 }
 
-.editor-header > label:not(:first-child) {
+.editor-header > *:not(:first-child) {
   border-left: 1px solid rgba(0,0,0,.1);
 }
 
-.editor-header > label {
+.editor-header label {
   padding: 5px 5px 5px 10px;
 }
 
@@ -73,3 +73,8 @@
   border-bottom: 1px solid rgba(0,0,0,.05);
 }
 
+.help-button {
+  min-height: 0px;
+  min-width: 0px;
+  padding: 2px;
+}
