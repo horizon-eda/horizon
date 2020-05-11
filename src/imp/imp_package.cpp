@@ -255,12 +255,6 @@ void ImpPackage::construct()
         footprint_generator_window->present();
         footprint_generator_window->show_all();
     });
-    {
-        auto button = create_action_button(make_action(ActionID::FOOTPRINT_GENERATOR));
-        button->set_label("Footprint gen.");
-        button->show();
-        main_window->header->pack_end(*button);
-    }
 
     update_monitor();
 
