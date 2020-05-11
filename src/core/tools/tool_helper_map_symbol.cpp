@@ -1,6 +1,7 @@
 #include "tool_helper_map_symbol.hpp"
 #include "document/idocument_schematic.hpp"
 #include "schematic/schematic.hpp"
+#include "canvas/canvas_gl.hpp"
 #include "imp/imp_interface.hpp"
 #include "util/sqlite.hpp"
 
@@ -46,6 +47,10 @@ SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *ga
     SchematicSymbol *schsym = doc.c->insert_schematic_symbol(UUID::random(), sym);
     schsym->component = comp;
     schsym->gate = gate;
+    auto bb = schsym->symbol.get_bbox(true);
+    auto sz = bb.second - bb.first;
+    imp->get_canvas()->ensure_min_size(sz.x * 1.5, sz.y * 1.5);
+
     doc.c->get_sheet()->expand_symbols(*doc.c->get_schematic());
 
     return schsym;
