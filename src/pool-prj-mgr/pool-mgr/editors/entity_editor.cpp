@@ -38,6 +38,7 @@ GateEditor::GateEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     parent->sg_suffix->add_widget(*suffix_entry);
     parent->sg_swap_group->add_widget(*swap_group_spin_button);
     parent->sg_unit->add_widget(*unit_label);
+    widget_remove_scroll_events(*swap_group_spin_button);
 
     entry_add_sanitizer(name_entry);
     entry_add_sanitizer(suffix_entry);

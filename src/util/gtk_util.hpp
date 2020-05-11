@@ -71,5 +71,6 @@ void make_label_small(Gtk::Label *label);
 void install_esc_to_close(Gtk::Window &win);
 void widget_set_insensitive_tooltip(Gtk::Widget &w, const std::string &txt);
 
+void widget_remove_scroll_events(Gtk::Widget &widget);
 
 } // namespace horizon

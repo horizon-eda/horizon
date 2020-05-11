@@ -36,6 +36,7 @@ PinEditor::PinEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
     parent->sg_name->add_widget(*name_entry);
     parent->sg_direction->add_widget(*dir_combo);
     parent->sg_names->add_widget(*names_entry);
+    widget_remove_scroll_events(*dir_combo);
 
     for (const auto &it : Pin::direction_names) {
         dir_combo->append(std::to_string(static_cast<int>(it.first)), it.second);
