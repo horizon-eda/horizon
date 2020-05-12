@@ -123,6 +123,18 @@ bool ImpBoard::handle_broadcast(const json &j)
             main_window->present(timestamp);
             trigger_action(ActionID::RELOAD_NETLIST);
         }
+        else if (op == "reload-netlist-hint") {
+            reload_netlist_delay_conn = Glib::signal_timeout().connect(
+                    [this] {
+#if GTK_CHECK_VERSION(3, 22, 0)
+                        reload_netlist_popover->popup();
+#else
+                        reload_netlist_popover->show();
+#endif
+                        return false;
+                    },
+                    500);
+        }
     }
     return true;
 }
@@ -448,9 +460,13 @@ void ImpBoard::construct()
         });
     }
 
-    add_tool_button(ToolID::MAP_PACKAGE, "Place package", false);
-
     connect_action(ActionID::RELOAD_NETLIST, [this](const ActionConnection &c) {
+        reload_netlist_delay_conn.disconnect();
+#if GTK_CHECK_VERSION(3, 22, 0)
+        reload_netlist_popover->popdown();
+#else
+        reload_netlist_popover->hide();
+#endif
         core_board.reload_netlist();
         core_board.set_needs_save();
         canvas_update();
@@ -460,6 +476,18 @@ void ImpBoard::construct()
         auto button = create_action_button(make_action(ActionID::RELOAD_NETLIST));
         button->show();
         main_window->header->pack_end(*button);
+
+        reload_netlist_popover = Gtk::manage(new Gtk::Popover);
+        reload_netlist_popover->set_modal(false);
+        reload_netlist_popover->set_relative_to(*button);
+
+        auto la = Gtk::manage(
+                new Gtk::Label("Netlist has changed.\nReload the netlist to update the board to the latest netlist."));
+        la->show();
+        reload_netlist_popover->add(*la);
+        la->set_line_wrap(true);
+        la->set_max_width_chars(20);
+        la->property_margin() = 10;
     }
 
     fab_output_window = FabOutputWindow::create(main_window, &core_board, project_dir);
@@ -1007,6 +1035,7 @@ std::vector<std::string> ImpBoard::get_view_hints()
 
 ImpBoard::~ImpBoard()
 {
+    reload_netlist_delay_conn.disconnect();
     delete view_3d_window;
 }
 

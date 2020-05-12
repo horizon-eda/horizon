@@ -83,5 +83,8 @@ private:
     int get_schematic_pid();
 
     AirwireFilter airwire_filter;
+
+    Gtk::Popover *reload_netlist_popover = nullptr;
+    sigc::connection reload_netlist_delay_conn;
 };
 } // namespace horizon
