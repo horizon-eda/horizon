@@ -448,8 +448,6 @@ void ImpBoard::construct()
         });
     }
 
-    add_tool_button(ToolID::MAP_PACKAGE, "Place package", false);
-
     connect_action(ActionID::RELOAD_NETLIST, [this](const ActionConnection &c) {
         core_board.reload_netlist();
         core_board.set_needs_save();
