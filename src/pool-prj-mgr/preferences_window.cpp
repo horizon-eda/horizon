@@ -22,6 +22,7 @@ namespace horizon {
 
 PreferencesWindow::PreferencesWindow(Preferences *prefs) : Gtk::Window(), preferences(prefs)
 {
+    set_default_size(1300, -1);
     set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
     auto header = Gtk::manage(new Gtk::HeaderBar());
     header->set_show_close_button(true);
