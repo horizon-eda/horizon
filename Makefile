@@ -582,6 +582,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/preferences_window_canvas.cpp\
 	src/pool-prj-mgr/preferences_window_pool.cpp\
 	src/pool-prj-mgr/preferences_window_partinfo.cpp\
+	src/pool-prj-mgr/preferences_window_misc.cpp\
 	src/imp/action.cpp\
 	src/imp/action_catalog.cpp\
 	src/widgets/unit_info_box.cpp\
