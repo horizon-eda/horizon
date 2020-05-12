@@ -382,6 +382,16 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             view_project.update_meta();
         if (!needs_save) {
             s_signal_process_saved.emit(j.at("filename"));
+            if (auto proc = find_top_schematic_process()) {
+                if (proc->proc->get_pid() == pid) { // schematic got saved
+                    if (auto proc_board = find_board_process()) {
+                        auto board_pid = proc_board->proc->get_pid();
+                        json tx;
+                        tx["op"] = "reload-netlist-hint";
+                        app->send_json(board_pid, tx);
+                    }
+                }
+            }
         }
     }
     else if (op == "ready") {
