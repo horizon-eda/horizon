@@ -61,5 +61,8 @@ private:
     void on_show() override;
     std::unique_ptr<Glib::PatternSpec> pattern;
     ActionGroup selected_group = ActionGroup::ALL;
+    double y_start = NAN;
+    Gtk::ScrolledWindow *sc = nullptr;
+    int sc_height = 0;
 };
 } // namespace horizon

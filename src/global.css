@@ -78,3 +78,7 @@
   min-width: 0px;
   padding: 2px;
 }
+
+.imp-tool-popover {
+  padding-bottom: 0px;
+}
