@@ -1,6 +1,7 @@
 #include "action_button.hpp"
 #include "imp/action_catalog.hpp"
 #include "core/tool_id.hpp"
+#include "imp/action.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -22,6 +23,12 @@ static const std::map<ActionToolID, const char *> action_icons = {
         {make_action(ToolID::DRAW_ARC), "action-draw-arc-symbolic"},
         {make_action(ToolID::DRAW_DIMENSION), "action-draw-dimension-symbolic"},
         {make_action(ToolID::PLACE_PAD), "action-place-pad-symbolic"},
+        {make_action(ToolID::PLACE_POWER_SYMBOL), "action-place-power-symbol-symbolic"},
+        {make_action(ToolID::DRAW_NET), "action-draw-net-symbolic"},
+        {make_action(ToolID::PLACE_NET_LABEL), "action-place-net-label-symbolic"},
+        {make_action(ToolID::PLACE_BUS_LABEL), "action-place-bus-label-symbolic"},
+        {make_action(ToolID::PLACE_BUS_RIPPER), "action-place-bus-ripper-symbolic"},
+        {make_action(ActionID::PLACE_PART), "action-place-part-symbolic"},
 };
 
 const char *get_icon(ActionToolID act)

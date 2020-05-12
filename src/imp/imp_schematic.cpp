@@ -16,6 +16,7 @@
 #include "core/tools/tool_map_symbol.hpp"
 #include "widgets/unplaced_box.hpp"
 #include "core/tool_id.hpp"
+#include "widgets/action_button.hpp"
 
 namespace horizon {
 ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::string &block_filename,
@@ -308,14 +309,6 @@ void ImpSchematic::construct()
 
     canvas->set_highlight_mode(CanvasGL::HighlightMode::DIM);
 
-    {
-        auto button = Gtk::manage(new Gtk::Button("Place part"));
-        button->signal_clicked().connect([this] { trigger_action(ActionID::PLACE_PART); });
-        button->show();
-        core->signal_tool_changed().connect([button](ToolID t) { button->set_sensitive(t == ToolID::NONE); });
-        main_window->header->pack_end(*button);
-    }
-
     connect_action(ActionID::PLACE_PART, [this](const auto &conn) {
         if (!sockets_connected) {
             this->tool_begin(ToolID::ADD_PART);
@@ -350,10 +343,6 @@ void ImpSchematic::construct()
             this->send_json(j);
         });
         set_action_sensitive(make_action(ActionID::TO_BOARD), false);
-        auto button = create_action_button(make_action(ActionID::TO_BOARD));
-        button->set_tooltip_text("Place selected components on board");
-        button->show();
-        main_window->header->pack_end(*button);
 
         connect_action(ActionID::SHOW_IN_BROWSER, [this](const auto &conn) {
             for (const auto &it : canvas->get_selection()) {
@@ -512,9 +501,27 @@ void ImpSchematic::construct()
         return false;
     });
 
+    add_action_button(make_action(ActionID::PLACE_PART));
+    add_action_button(make_action(ToolID::DRAW_NET));
+    {
+        auto &b = add_action_button(make_action(ToolID::PLACE_NET_LABEL));
+        b.add_action(make_action(ToolID::PLACE_BUS_LABEL));
+        b.add_action(make_action(ToolID::PLACE_BUS_RIPPER));
+    }
+    {
+        auto &b = add_action_button(make_action(ToolID::PLACE_POWER_SYMBOL));
+    }
+    {
+        auto &b = add_action_button(make_action(ToolID::DRAW_LINE));
+        b.add_action(make_action(ToolID::DRAW_LINE_RECTANGLE));
+        b.add_action(make_action(ToolID::DRAW_ARC));
+    }
+    add_action_button(make_action(ToolID::PLACE_TEXT));
+
+
     if (!core_schematic.get_project_meta_loaded_from_block())
         core_schematic.set_needs_save();
-} // namespace horizon
+}
 
 void ImpSchematic::update_action_sensitivity()
 {
