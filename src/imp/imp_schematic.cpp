@@ -521,8 +521,9 @@ void ImpSchematic::construct()
                     if (sch->sheets.count(uuid)) {
                         sheet_box->select_sheet(uuid);
                     }
+                    return true;
                 }
-                return true;
+                return false;
             },
             false);
 
