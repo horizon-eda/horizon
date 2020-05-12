@@ -18,6 +18,7 @@ static const std::map<ActionToolID, const char *> action_icons = {
         {make_action(ToolID::DRAW_LINE), "action-draw-line-symbolic"},
         {make_action(ToolID::DRAW_LINE_RECTANGLE), "action-draw-line-rectangle-symbolic"},
         {make_action(ToolID::PLACE_HOLE), "action-place-hole-symbolic"},
+        {make_action(ToolID::PLACE_BOARD_HOLE), "action-place-hole-symbolic"},
         {make_action(ToolID::PLACE_HOLE_SLOT), "action-place-hole-slot-symbolic"},
         {make_action(ToolID::RESIZE_SYMBOL), "action-resize-symbol-symbolic"},
         {make_action(ToolID::DRAW_ARC), "action-draw-arc-symbolic"},
@@ -29,6 +30,9 @@ static const std::map<ActionToolID, const char *> action_icons = {
         {make_action(ToolID::PLACE_BUS_LABEL), "action-place-bus-label-symbolic"},
         {make_action(ToolID::PLACE_BUS_RIPPER), "action-place-bus-ripper-symbolic"},
         {make_action(ActionID::PLACE_PART), "action-place-part-symbolic"},
+        {make_action(ToolID::ROUTE_TRACK_INTERACTIVE), "action-route-track-symbolic"},
+        {make_action(ToolID::ROUTE_DIFFPAIR_INTERACTIVE), "action-route-diffpair-symbolic"},
+        {make_action(ToolID::PLACE_VIA), "action-place-via-symbolic"},
 };
 
 const char *get_icon(ActionToolID act)

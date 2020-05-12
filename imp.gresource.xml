@@ -64,6 +64,9 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-bus-label-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-bus-ripper-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-part-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-via-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-route-track-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-route-diffpair-symbolic.svg</file>
     <file>icons/scalable/apps/horizon-eda.svg</file>
     <file>icons/16x16/apps/horizon-eda.png</file>
     <file>icons/32x32/apps/horizon-eda.png</file>
