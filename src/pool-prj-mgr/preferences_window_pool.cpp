@@ -42,15 +42,14 @@ private:
 };
 
 PoolPreferencesEditor::PoolPreferencesEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x)
-    : Gtk::Box(cobject), mgr(PoolManager::get())
+    : Gtk::ScrolledWindow(cobject), mgr(PoolManager::get())
 {
     x->get_widget("listbox", listbox);
-    x->get_widget("button_add_pool", button_add_pool);
     listbox->set_header_func(&header_func_separator);
     size_group = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
     show_all();
 
-    button_add_pool->signal_clicked().connect([this] { add_pool(""); });
+    listbox->signal_row_activated().connect([this](Gtk::ListBoxRow *row) { add_pool(""); });
     update();
 }
 
@@ -94,7 +93,11 @@ void PoolPreferencesEditor::update()
     auto pools = mgr.get_pools();
     for (const auto &it : pools) {
         auto x = PoolItemEditor::create(it.second);
-        listbox->add(*x);
+        auto row = Gtk::manage(new Gtk::ListBoxRow);
+        row->add(*x);
+        row->show_all();
+        listbox->add(*row);
+        row->set_activatable(false);
         size_group->add_widget(*x->box);
         x->unreference();
         std::string bp = it.first;
@@ -106,6 +109,12 @@ void PoolPreferencesEditor::update()
             mgr.set_pool_enabled(bp, x->switch_enabled->get_active());
             update();
         });
+    }
+    {
+        auto la = Gtk::manage(new Gtk::Label("Add pool…"));
+        la->property_margin() = 10;
+        la->show();
+        listbox->add(*la);
     }
 }
 } // namespace horizon
