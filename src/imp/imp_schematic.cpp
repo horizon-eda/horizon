@@ -512,6 +512,21 @@ void ImpSchematic::construct()
         return false;
     });
 
+    main_window->signal_activate_hud_link().connect(
+            [this](const std::string &url) {
+                if (url.find("s:") == 0) {
+                    std::string sheet = url.substr(2);
+                    auto uuid = UUID(sheet);
+                    auto sch = core_schematic.get_schematic();
+                    if (sch->sheets.count(uuid)) {
+                        sheet_box->select_sheet(uuid);
+                    }
+                    return true;
+                }
+                return false;
+            },
+            false);
+
     if (!core_schematic.get_project_meta_loaded_from_block())
         core_schematic.set_needs_save();
 } // namespace horizon
@@ -580,6 +595,27 @@ std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)
         s += "<b>Symbol " + sym.component->refdes + "</b>\n";
         s += get_hud_text_for_component(sym.component);
         sel_erase_type(sel, ObjectType::SCHEMATIC_SYMBOL);
+    }
+
+    if (sel_count_type(sel, ObjectType::TEXT) == 1) {
+        const auto text = core->get_text(sel_find_one(sel, ObjectType::TEXT).uuid);
+        const auto txt = Glib::ustring(text->text);
+        Glib::MatchInfo ma;
+        if (core_schematic.get_schematic()->get_sheetref_regex()->match(txt, ma)) {
+            s += "\n\n<b>Text with sheet references</b>\n";
+            do {
+                auto uuid = ma.fetch(1);
+                std::string url = "s:" + uuid;
+                if (core_schematic.get_schematic()->sheets.count(UUID(uuid))) {
+                    s += make_link_markup(url, core_schematic.get_schematic()->sheets.at(UUID(uuid)).name);
+                }
+                else {
+                    s += "Unknown Sheet";
+                }
+                s += "\n";
+            } while (ma.next());
+            sel_erase_type(sel, ObjectType::TEXT);
+        }
     }
     trim(s);
     return s;

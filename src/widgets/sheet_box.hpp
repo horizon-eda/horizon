@@ -53,6 +53,8 @@ private:
     Gtk::TreeView *view;
     Glib::RefPtr<Gtk::ListStore> store;
 
+    Gtk::Menu menu;
+
     type_signal_select_sheet s_signal_select_sheet;
     type_signal_add_sheet s_signal_add_sheet;
     type_signal_remove_sheet s_signal_remove_sheet;

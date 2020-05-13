@@ -795,6 +795,31 @@ void Schematic::expand(bool careful)
             }
         }
     }
+
+    if (!careful) {
+        for (auto &it_sheet : sheets) {
+            Sheet &sheet = it_sheet.second;
+            for (auto &it_text : sheet.texts) {
+                auto &text = it_text.second;
+                Glib::ustring txt = text.text;
+                Glib::MatchInfo ma;
+                int start, end;
+                while (get_sheetref_regex()->match(txt, ma) && ma.fetch_pos(0, start, end)) {
+                    auto ref_uuid = UUID(ma.fetch(1));
+                    if (sheets.count(ref_uuid)) {
+                        std::stringstream ss;
+                        ss << "[" << sheets.at(ref_uuid).index << "]";
+                        txt.replace(start, end - start, ss.str());
+                    }
+                    else {
+                        txt.replace(start, end - start, "[?]");
+                    }
+                    text.overridden = true;
+                }
+                text.text_override = txt;
+            }
+        }
+    }
 }
 
 void Schematic::annotate()
@@ -955,6 +980,14 @@ void Schematic::swap_gates(const UUID &comp_uu, const UUID &g1_uu, const UUID &g
             }
         }
     }
+}
+
+Glib::RefPtr<Glib::Regex> Schematic::get_sheetref_regex()
+{
+    static auto regex =
+            Glib::Regex::create(R"(\$sheetref:([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}))",
+                                Glib::RegexCompileFlags::REGEX_CASELESS | Glib::RegexCompileFlags::REGEX_OPTIMIZE);
+    return regex;
 }
 
 Schematic::Schematic(const Schematic &sch)
