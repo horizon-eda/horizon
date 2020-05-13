@@ -40,10 +40,12 @@ void export_pdf(const class Schematic &sch, const class PDFExportSettings &setti
 
     auto font = document.CreateFont("Helvetica");
 
+#if PODOFO_VERSION_MAJOR != 0 || PODOFO_VERSION_MINOR != 9 || PODOFO_VERSION_PATCH != 5
     auto outlines = document.GetOutlines();
     auto proot = outlines->CreateRoot(title);
 
     bool first_outline_item = true;
+#endif
 
     CanvasPDF ca(&painter, font, settings);
     ca.use_layer_colors = false;
@@ -62,11 +64,13 @@ void export_pdf(const class Schematic &sch, const class PDFExportSettings &setti
         painter.FinishPage();
 
 
+#if PODOFO_VERSION_MAJOR != 0 || PODOFO_VERSION_MINOR != 9 || PODOFO_VERSION_PATCH != 5
         if (first_outline_item)
             proot->CreateChild(sheet->name, PoDoFo::PdfDestination(page));
         else
             proot->Last()->CreateNext(sheet->name, PoDoFo::PdfDestination(page));
         first_outline_item = false;
+#endif
     }
     document.Close();
 }
