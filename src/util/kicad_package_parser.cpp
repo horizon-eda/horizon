@@ -163,13 +163,17 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
         }
     }
 
-    enum class PadType { INVALID, SMD_RECT, TH_CIRC, NPTH_CIRC, TH_OBROUND };
+    enum class PadType { INVALID, SMD_RECT, SMD_CIRC, TH_CIRC, NPTH_CIRC, TH_OBROUND };
     PadType pad_type = PadType::INVALID;
 
     std::string padstack_name;
     if (type == "smd" && shape == "rect" && layers.count(BoardLayers::TOP_COPPER)) {
         padstack_name = "smd rectangular";
         pad_type = PadType::SMD_RECT;
+    }
+    else if (type == "smd" && shape == "circle" && layers.count(BoardLayers::TOP_COPPER)) {
+        padstack_name = "smd circular";
+        pad_type = PadType::SMD_CIRC;
     }
     else if (type == "thru_hole" && shape == "circle" && layers.count(BoardLayers::TOP_COPPER)) {
         padstack_name = "th circular";
@@ -216,6 +220,9 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
         if (pad_type == PadType::SMD_RECT) {
             pad.parameter_set[ParameterID::PAD_WIDTH] = size.x;
             pad.parameter_set[ParameterID::PAD_HEIGHT] = size.y;
+        }
+        else if (pad_type == PadType::SMD_CIRC) {
+            pad.parameter_set[ParameterID::PAD_DIAMETER] = size.x;
         }
         else if (pad_type == PadType::TH_CIRC) {
             pad.parameter_set[ParameterID::PAD_DIAMETER] = size.x;
