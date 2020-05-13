@@ -14,6 +14,9 @@ public:
 
     virtual void update_key_sequences();
     virtual void add_action(ActionToolID act) = 0;
+    virtual void set_keep_primary_action(bool keep)
+    {
+    }
 
     virtual ~ActionButtonBase()
     {
@@ -33,8 +36,10 @@ public:
 
     void update_key_sequences() override;
     void add_action(ActionToolID act) override;
+    void set_keep_primary_action(bool keep) override;
 
 private:
+    const ActionToolID action_orig;
     ActionToolID action;
     Gtk::Button *button = nullptr;
     Gtk::MenuButton *menu_button = nullptr;
@@ -42,6 +47,7 @@ private:
     int button_current = -1;
     Gtk::MenuItem &add_menu_item(ActionToolID act);
     void set_primary_action(ActionToolID act);
+    bool keep_primary_action = false;
 };
 
 class ActionButtonMenu : public Gtk::Button, public ActionButtonBase {

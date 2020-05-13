@@ -48,7 +48,7 @@ ActionButtonBase::ActionButtonBase(const std::map<ActionToolID, ActionConnection
 }
 
 ActionButton::ActionButton(ActionToolID act, const std::map<ActionToolID, ActionConnection> &ks)
-    : ActionButtonBase(ks), action(act)
+    : ActionButtonBase(ks), action_orig(act), action(act)
 {
     get_style_context()->add_class("osd");
     button = Gtk::manage(new Gtk::Button);
@@ -149,6 +149,14 @@ void ActionButton::set_primary_action(ActionToolID act)
     button->set_tooltip_text(l);
 }
 
+void ActionButton::set_keep_primary_action(bool keep)
+{
+    if (keep) {
+        set_primary_action(action_orig);
+    }
+    keep_primary_action = keep;
+}
+
 Gtk::MenuItem &ActionButton::add_menu_item(ActionToolID act)
 {
     auto it = Gtk::manage(new Gtk::MenuItem());
@@ -172,7 +180,8 @@ Gtk::MenuItem &ActionButton::add_menu_item(ActionToolID act)
     it->add(*box);
     it->show_all();
     it->signal_activate().connect([this, act] {
-        set_primary_action(act);
+        if (!keep_primary_action)
+            set_primary_action(act);
         s_signal_action.emit(act);
     });
     menu.append(*it);

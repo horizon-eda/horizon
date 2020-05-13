@@ -1144,7 +1144,9 @@ void ImpBase::apply_preferences()
     preferences_apply_to_canvas(canvas, preferences);
     for (auto it : action_buttons) {
         it->update_key_sequences();
+        it->set_keep_primary_action(preferences.action_bar.keep_primary);
     }
+    main_window->set_use_action_bar(preferences.action_bar.enable);
 }
 
 void ImpBase::canvas_update_from_pp()

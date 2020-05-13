@@ -179,6 +179,23 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
             gr->add_row(*r);
         }
     }
+    {
+        auto gr = Gtk::manage(new PreferencesGroup("Action Bar"));
+        box->pack_start(*gr, false, false, 0);
+        gr->show();
+        {
+            auto r = Gtk::manage(new PreferencesRowBool(
+                    "Use action bar", "Show action bar in editors to quickly access commonly-used tools", preferences,
+                    preferences.action_bar.enable));
+            gr->add_row(*r);
+        }
+        {
+            auto r = Gtk::manage(new PreferencesRowBool("Keep primary action",
+                                                        "Keep primary action rather than the last-used one",
+                                                        preferences, preferences.action_bar.keep_primary));
+            gr->add_row(*r);
+        }
+    }
 }
 
 } // namespace horizon
