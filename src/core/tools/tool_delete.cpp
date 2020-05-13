@@ -44,6 +44,16 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
                         delete_extra.emplace(line->uuid, ObjectType::LINE_NET);
                     }
                 }
+                for (const auto label : doc.c->get_net_labels()) {
+                    if (label->junction.uuid == it.uuid) {
+                        delete_extra.emplace(label->uuid, ObjectType::NET_LABEL);
+                    }
+                }
+                for (const auto &it_rip : doc.c->get_sheet()->bus_rippers) {
+                    if (it_rip.second.junction->uuid == it.uuid) {
+                        delete_extra.emplace(it_rip.first, ObjectType::BUS_RIPPER);
+                    }
+                }
             }
             if (doc.b) {
                 for (const auto &it_track : doc.b->get_board()->tracks) {
@@ -55,13 +65,6 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
             for (const auto arc : arcs) {
                 if (arc->to.uuid == it.uuid || arc->from.uuid == it.uuid || arc->center.uuid == it.uuid) {
                     delete_extra.emplace(arc->uuid, ObjectType::ARC);
-                }
-            }
-            if (doc.c) {
-                for (const auto label : doc.c->get_net_labels()) {
-                    if (label->junction.uuid == it.uuid) {
-                        delete_extra.emplace(label->uuid, ObjectType::NET_LABEL);
-                    }
                 }
             }
         }
