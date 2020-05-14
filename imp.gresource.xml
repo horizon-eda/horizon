@@ -143,5 +143,6 @@
     <file>canvas3d/shaders/background-fragment.glsl</file>
 
     <file>preferences/color_presets.json</file>
+    <file>imp/space.png</file>
   </gresource>
 </gresources>
