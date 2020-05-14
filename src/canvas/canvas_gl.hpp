@@ -113,6 +113,7 @@ public:
 
     void center_and_zoom(const Coordi &center, float scale = -1);
     void zoom_to_bbox(const Coordf &a, const Coordf &b);
+    void zoom_to_bbox(const std::pair<Coordf, Coordf> &bb);
     void ensure_min_size(float w, float h);
 
     Glib::PropertyProxy<int> property_work_layer()

@@ -450,6 +450,12 @@ void CanvasGL::zoom_to_bbox(const Coordf &a, const Coordf &b)
     queue_draw();
 }
 
+void CanvasGL::zoom_to_bbox(const std::pair<Coordf, Coordf> &bb)
+{
+    zoom_to_bbox(bb.first, bb.second);
+}
+
+
 void CanvasGL::ensure_min_size(float w, float h)
 {
     auto sc_x = m_width / w;

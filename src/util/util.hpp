@@ -71,4 +71,14 @@ std::string replace_placeholders(const std::string &s, std::function<std::string
 
 Coordi dir_from_arrow_key(unsigned int key);
 
+template <typename T> std::pair<Coord<T>, Coord<T>> pad_bbox(std::pair<Coord<T>, Coord<T>> bb, T pad)
+{
+    bb.first.x -= pad;
+    bb.first.y -= pad;
+
+    bb.second.x += pad;
+    bb.second.y += pad;
+    return bb;
+}
+
 } // namespace horizon

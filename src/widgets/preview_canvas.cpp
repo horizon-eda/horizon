@@ -152,7 +152,7 @@ CanvasGL &PreviewCanvas::get_canvas()
 
 void PreviewCanvas::load_symbol(const UUID &uu, const Placement &pl, bool fit, const UUID &uu_part, const UUID &uu_gate)
 {
-    int64_t pad = 0;
+
     Symbol sym = *pool.get_symbol(uu);
     sym.expand();
     if (uu_part) {
@@ -173,15 +173,9 @@ void PreviewCanvas::load_symbol(const UUID &uu, const Placement &pl, bool fit, c
         return;
     }
 
-    auto bb = canvas->get_bbox();
-    pad = 1_mm;
-
-    bb.first.x -= pad;
-    bb.first.y -= pad;
-
-    bb.second.x += pad;
-    bb.second.y += pad;
-    canvas->zoom_to_bbox(bb.first, bb.second);
+    float pad = 1_mm;
+    auto bb = pad_bbox(canvas->get_bbox(), pad);
+    canvas->zoom_to_bbox(bb);
     update_scale_deferred();
 }
 
@@ -192,7 +186,7 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
         return;
     }
 
-    int64_t pad = 0;
+    float pad = 0;
     switch (type) {
     case ObjectType::SYMBOL: {
         Symbol sym = *pool.get_symbol(uu);
@@ -234,14 +228,8 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
     if (!fit) {
         return;
     }
-    auto bb = canvas->get_bbox(true);
-
-    bb.first.x -= pad;
-    bb.first.y -= pad;
-
-    bb.second.x += pad;
-    bb.second.y += pad;
-    canvas->zoom_to_bbox(bb.first, bb.second);
+    auto bb = pad_bbox(canvas->get_bbox(true), pad);
+    canvas->zoom_to_bbox(bb);
     update_scale_deferred();
 }
 
@@ -261,15 +249,9 @@ void PreviewCanvas::load(Package &pkg, bool fit)
     if (!fit) {
         return;
     }
-    int64_t pad = .1_mm;
-    auto bb = canvas->get_bbox(true);
-
-    bb.first.x -= pad;
-    bb.first.y -= pad;
-
-    bb.second.x += pad;
-    bb.second.y += pad;
-    canvas->zoom_to_bbox(bb.first, bb.second);
+    float pad = .1_mm;
+    auto bb = pad_bbox(canvas->get_bbox(true), pad);
+    canvas->zoom_to_bbox(bb);
     update_scale_deferred();
 }
 
