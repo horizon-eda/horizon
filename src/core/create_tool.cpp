@@ -174,6 +174,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
         return std::make_unique<ToolEnterDatum>(this, tool_id);
 
     case ToolID::PLACE_HOLE:
+    case ToolID::PLACE_HOLE_SLOT:
         return std::make_unique<ToolPlaceHole>(this, tool_id);
 
     case ToolID::PLACE_PAD:
@@ -206,6 +207,8 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
         return std::make_unique<ToolSmash>(this, tool_id);
 
     case ToolID::PLACE_SHAPE:
+    case ToolID::PLACE_SHAPE_OBROUND:
+    case ToolID::PLACE_SHAPE_RECTANGLE:
         return std::make_unique<ToolPlaceShape>(this, tool_id);
 
     case ToolID::EDIT_SHAPE:

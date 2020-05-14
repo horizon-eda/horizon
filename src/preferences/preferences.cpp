@@ -300,6 +300,20 @@ bool PartInfoPreferences::is_enabled() const
     return enable && preferred_distributor.size();
 }
 
+json ActionBarPreferences::serialize() const
+{
+    json j;
+    j["enable"] = enable;
+    j["remember"] = remember;
+    return j;
+}
+
+void ActionBarPreferences::load_from_json(const json &j)
+{
+    enable = j.value("enable", true);
+    remember = j.value("remember", true);
+}
+
 json Preferences::serialize() const
 {
     json j;
@@ -311,6 +325,7 @@ json Preferences::serialize() const
     j["zoom"] = zoom.serialize();
     j["capture_output"] = capture_output;
     j["partinfo"] = partinfo.serialize();
+    j["action_bar"] = action_bar.serialize();
     return j;
 }
 
@@ -335,6 +350,8 @@ void Preferences::load_from_json(const json &j)
         zoom.load_from_json(j.at("zoom"));
     if (j.count("key_sequences"))
         key_sequences.load_from_json(j.at("key_sequences"));
+    if (j.count("action_bar"))
+        action_bar.load_from_json(j.at("action_bar"));
     key_sequences.append_from_json(json_from_resource("/org/horizon-eda/horizon/imp/keys_default.json"));
     capture_output = j.value("capture_output", capture_output_default);
     if (j.count("partinfo"))

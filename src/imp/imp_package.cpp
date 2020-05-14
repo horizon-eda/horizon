@@ -20,6 +20,7 @@
 #include "widgets/layer_help_box.hpp"
 #include "widgets/spin_button_angle.hpp"
 #include "util/selection_util.hpp"
+#include "widgets/action_button.hpp"
 #include <iomanip>
 #include "core/tool_id.hpp"
 
@@ -250,16 +251,10 @@ void ImpPackage::construct()
     hamburger_menu->append("Reload pool", "win.reload_pool");
     main_window->add_action("reload_pool", [this] { trigger_action(ActionID::RELOAD_POOL); });
 
-    {
-        auto button = Gtk::manage(new Gtk::Button("Footprint gen."));
-        button->signal_clicked().connect([this] {
-            footprint_generator_window->present();
-            footprint_generator_window->show_all();
-        });
-        button->show();
-        core->signal_tool_changed().connect([button](ToolID t) { button->set_sensitive(t == ToolID::NONE); });
-        main_window->header->pack_end(*button);
-    }
+    connect_action(ActionID::FOOTPRINT_GENERATOR, [this](auto &a) {
+        footprint_generator_window->present();
+        footprint_generator_window->show_all();
+    });
 
     update_monitor();
 
@@ -276,6 +271,29 @@ void ImpPackage::construct()
             pkg->alternate_for = nullptr;
         }
     });
+
+    add_action_button(make_action(ToolID::PLACE_PAD));
+    {
+        auto &b = add_action_button(make_action(ToolID::DRAW_LINE));
+        b.add_action(make_action(ToolID::DRAW_LINE_RECTANGLE));
+        b.add_action(make_action(ToolID::DRAW_ARC));
+    }
+    {
+        auto &b = add_action_button(make_action(ToolID::DRAW_POLYGON));
+        b.add_action(make_action(ToolID::DRAW_POLYGON_RECTANGLE));
+        b.add_action(make_action(ToolID::DRAW_POLYGON_CIRCLE));
+    }
+    add_action_button(make_action(ToolID::PLACE_TEXT));
+    add_action_button(make_action(ToolID::DRAW_DIMENSION));
+
+    {
+        auto &b = add_action_button_menu("action-generate-symbolic");
+        b.set_margin_top(5);
+        b.add_action(make_action(ActionID::FOOTPRINT_GENERATOR));
+        b.add_action(make_action(ToolID::GENERATE_COURTYARD));
+        b.add_action(make_action(ToolID::GENERATE_SILKSCREEN));
+        b.set_tooltip_text("Generate…");
+    }
 
     update_header();
 }

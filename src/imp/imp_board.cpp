@@ -20,6 +20,7 @@
 #include "pnp_export_window.hpp"
 #include "airwire_filter_window.hpp"
 #include "core/tool_id.hpp"
+#include "widgets/action_button.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
@@ -700,6 +701,27 @@ void ImpBoard::construct()
 
         airwire_filter.set_only(nets);
     });
+    {
+        auto &b = add_action_button(make_action(ToolID::ROUTE_TRACK_INTERACTIVE));
+        b.add_action(make_action(ToolID::ROUTE_DIFFPAIR_INTERACTIVE));
+    }
+    {
+        auto &b = add_action_button(make_action(ToolID::DRAW_POLYGON));
+        b.add_action(make_action(ToolID::DRAW_POLYGON_RECTANGLE));
+        b.add_action(make_action(ToolID::DRAW_POLYGON_CIRCLE));
+    }
+    {
+        auto &b = add_action_button(make_action(ToolID::PLACE_BOARD_HOLE));
+        b.add_action(make_action(ToolID::PLACE_VIA));
+    }
+    {
+        auto &b = add_action_button(make_action(ToolID::DRAW_LINE));
+        b.add_action(make_action(ToolID::DRAW_LINE_RECTANGLE));
+        b.add_action(make_action(ToolID::DRAW_ARC));
+    }
+
+    add_action_button(make_action(ToolID::PLACE_TEXT));
+    add_action_button(make_action(ToolID::DRAW_DIMENSION));
 
     display_control_notebook->show();
 }

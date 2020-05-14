@@ -28,6 +28,7 @@
 #include "core/tool_id.hpp"
 #include "imp/action.hpp"
 #include "preferences/preferences_util.hpp"
+#include "widgets/action_button.hpp"
 
 namespace horizon {
 
@@ -1141,6 +1142,11 @@ void ImpBase::apply_preferences()
         }
     }
     preferences_apply_to_canvas(canvas, preferences);
+    for (auto it : action_buttons) {
+        it->update_key_sequences();
+        it->set_keep_primary_action(!preferences.action_bar.remember);
+    }
+    main_window->set_use_action_bar(preferences.action_bar.enable);
 }
 
 void ImpBase::canvas_update_from_pp()
@@ -1761,6 +1767,7 @@ void ImpBase::handle_tool_change(ToolID id)
         canvas->set_cursor_size(get_canvas_preferences()->appearance.cursor_size);
     }
     main_window->tool_bar_set_visible(id != ToolID::NONE);
+    main_window->action_bar_revealer->set_reveal_child(id == ToolID::NONE);
 }
 
 void ImpBase::handle_warning_selected(const Coordi &pos)
@@ -2079,5 +2086,28 @@ void ImpBase::handle_select_polygon(const ActionConnection &a)
     canvas->set_selection(new_sel, false);
     canvas->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
 }
+
+ActionButton &ImpBase::add_action_button(ActionToolID action)
+{
+    main_window->set_use_action_bar(true);
+    auto ab = Gtk::manage(new ActionButton(action, action_connections));
+    ab->show();
+    ab->signal_action().connect([this](auto act) { this->trigger_action(act); });
+    main_window->action_bar_box->pack_start(*ab, false, false, 0);
+    action_buttons.push_back(ab);
+    return *ab;
+}
+
+ActionButtonMenu &ImpBase::add_action_button_menu(const char *icon_name)
+{
+    main_window->set_use_action_bar(true);
+    auto ab = Gtk::manage(new ActionButtonMenu(icon_name, action_connections));
+    ab->show();
+    ab->signal_action().connect([this](auto act) { this->trigger_action(act); });
+    main_window->action_bar_box->pack_start(*ab, false, false, 0);
+    action_buttons.push_back(ab);
+    return *ab;
+}
+
 
 } // namespace horizon

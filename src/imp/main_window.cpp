@@ -43,6 +43,8 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("search_types_box", search_types_box);
     x->get_widget("search_expander", search_expander);
     x->get_widget("search_exact_cb", search_exact_cb);
+    x->get_widget("action_bar_revealer", action_bar_revealer);
+    x->get_widget("action_bar_box", action_bar_box);
     search_revealer->set_reveal_child(false);
 
     nonmodal_close_button->signal_clicked().connect([this] { nonmodal_rev->set_reveal_child(false); });
@@ -64,6 +66,7 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     canvas->show();
     tool_bar_set_visible(false);
     hud->set_reveal_child(false);
+    set_use_action_bar(false);
 }
 
 void MainWindow::tool_bar_set_visible(bool v)
@@ -158,6 +161,12 @@ void MainWindow::set_view_hints_label(const std::vector<std::string> &s)
         view_hints_label->set_text("");
         view_hints_label->set_has_tooltip(false);
     }
+}
+
+void MainWindow::set_use_action_bar(bool u)
+{
+    action_bar_revealer->set_visible(u);
+    hud->set_margin_start(u ? 100 : 20);
 }
 
 MainWindow *MainWindow::create()

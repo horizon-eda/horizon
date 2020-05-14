@@ -211,6 +211,9 @@ protected:
         return *s;
     }
 
+    class ActionButton &add_action_button(ActionToolID action);
+    class ActionButtonMenu &add_action_button_menu(const char *icon_name);
+
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;
@@ -266,5 +269,6 @@ private:
 
     void update_property_panels();
     std::map<CanvasGL::SelectionTool, CanvasGL::SelectionQualifier> selection_qualifiers;
+    std::list<class ActionButtonBase *> action_buttons;
 };
 } // namespace horizon

@@ -72,6 +72,15 @@ public:
     json serialize() const;
 };
 
+class ActionBarPreferences {
+public:
+    bool enable = true;
+    bool remember = true;
+
+    void load_from_json(const json &j);
+    json serialize() const;
+};
+
 class Preferences {
 public:
     Preferences();
@@ -91,6 +100,7 @@ public:
     ZoomPreferences zoom;
     bool capture_output = false;
     PartInfoPreferences partinfo;
+    ActionBarPreferences action_bar;
 
     typedef sigc::signal<void> type_signal_changed;
     type_signal_changed signal_changed()

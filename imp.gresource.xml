@@ -39,6 +39,34 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/view-3d-right-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/x-git-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/hourglass-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-button-expander-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-refdes-and-value-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-text-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-draw-line-rectangle-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-draw-line-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-draw-line-circle-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-draw-arc-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-shape-rectangle-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-shape-circle-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-shape-obround-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-hole-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-hole-slot-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-resize-symbol-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-draw-polygon-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-draw-polygon-circle-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-draw-polygon-rectangle-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-draw-dimension-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-pad-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-generate-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-power-symbol-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-draw-net-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-net-label-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-bus-label-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-bus-ripper-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-part-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-via-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-route-track-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-route-diffpair-symbolic.svg</file>
     <file>icons/scalable/apps/horizon-eda.svg</file>
     <file>icons/16x16/apps/horizon-eda.png</file>
     <file>icons/32x32/apps/horizon-eda.png</file>

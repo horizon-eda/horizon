@@ -82,3 +82,15 @@
 .imp-tool-popover {
   padding-bottom: 0px;
 }
+
+.imp-action-bar {
+  border-radius:0px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.imp-action-bar-expander {
+  padding:0px;
+  min-width: 0px;
+  min-height: 0px;
+}

@@ -33,6 +33,10 @@ public:
     Gtk::Box *search_types_box = nullptr;
     Gtk::Label *selection_mode_label = nullptr;
 
+    Gtk::Revealer *action_bar_revealer = nullptr;
+    Gtk::Box *action_bar_box = nullptr;
+    void set_use_action_bar(bool u);
+
     Glib::SignalProxy<bool, const Glib::ustring &> signal_activate_hud_link()
     {
         return hud_label->signal_activate_link();

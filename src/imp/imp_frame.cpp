@@ -2,6 +2,7 @@
 #include "canvas/canvas_gl.hpp"
 #include "header_button.hpp"
 #include "core/tool_id.hpp"
+#include "widgets/action_button.hpp"
 
 namespace horizon {
 ImpFrame::ImpFrame(const std::string &frame_filename, const std::string &pool_path)
@@ -39,6 +40,19 @@ void ImpFrame::construct()
 
     hamburger_menu->append("Frame properties...", "win.edit_frame");
     add_tool_action(ToolID::EDIT_FRAME_PROPERTIES, "edit_frame");
+
+    {
+        auto &b = add_action_button(make_action(ToolID::DRAW_LINE));
+        b.add_action(make_action(ToolID::DRAW_LINE_RECTANGLE));
+        b.add_action(make_action(ToolID::DRAW_ARC));
+    }
+    {
+        auto &b = add_action_button(make_action(ToolID::DRAW_POLYGON));
+        b.add_action(make_action(ToolID::DRAW_POLYGON_RECTANGLE));
+        b.add_action(make_action(ToolID::DRAW_POLYGON_CIRCLE));
+    }
+    add_action_button(make_action(ToolID::PLACE_TEXT));
+
 
     update_header();
 }
