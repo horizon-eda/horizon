@@ -1,28 +1,15 @@
 #include "window_state_store.hpp"
 #include "util.hpp"
+#include "sqlite.hpp"
+#include "implicit_prefs.hpp"
 #include <glibmm/miscutils.h>
 #include <gtkmm.h>
 
 namespace horizon {
 
-static const int min_user_version = 1; // keep in sync with schema
-
 WindowStateStore::WindowStateStore(Gtk::Window *w, const std::string &wn)
-    : db(Glib::build_filename(get_config_dir(), "window_state.db"), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, 1000),
-      window_name(wn), win(w)
+    : db(ImplicitPreferences::get().db), window_name(wn), win(w)
 {
-    {
-        int user_version = db.get_user_version();
-        if (user_version < min_user_version) {
-            // update schema
-            auto bytes = Gio::Resource::lookup_data_global(
-                    "/org/horizon-eda/horizon/util/"
-                    "window_state_schema.sql");
-            gsize size{bytes->get_size() + 1}; // null byte
-            auto data = (const char *)bytes->get_data(size);
-            db.execute(data);
-        }
-    }
     {
         SQLite::Query q(db,
                         "SELECT width, height, x, y, maximized FROM "

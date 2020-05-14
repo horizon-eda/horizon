@@ -2,7 +2,7 @@
 <gresources>
   <gresource prefix="/org/horizon-eda/horizon">
     <file>imp/window.ui</file>
-    <file>util/window_state_schema.sql</file>
+    <file>util/implicit_prefs_schema.sql</file>
     <file>imp/layer_display_default.json</file>
     <file>imp/keys_default.json</file>
     <file>imp/app_menu.ui</file>

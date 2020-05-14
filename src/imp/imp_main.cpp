@@ -16,6 +16,7 @@
 #include "util/uuid.hpp"
 #include "pool/pool_manager.hpp"
 #include "util/exception_util.hpp"
+#include "util/implicit_prefs.hpp"
 #include <curl/curl.h>
 #include <fstream>
 #include <gtkmm.h>
@@ -34,6 +35,7 @@ int main(int argc, char *argv[])
     gtk_disable_setlocale();
     Gio::init();
     horizon::PoolManager::init();
+    horizon::ImplicitPreferences::get();
 
     Glib::OptionContext options;
     options.set_summary("horizon interactive manipulator");

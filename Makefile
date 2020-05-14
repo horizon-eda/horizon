@@ -424,6 +424,8 @@ SRC_IMP = \
 	src/imp/search/searcher_board.cpp\
 	src/util/clipper_util.cpp\
 	src/widgets/action_button.cpp\
+	src/util/implicit_prefs.cpp\
+
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\
@@ -600,6 +602,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/autosave_recovery_dialog.cpp\
 	src/util/stock_info_provider_partinfo.cpp\
 	src/widgets/help_button.cpp\
+	src/util/implicit_prefs.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

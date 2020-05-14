@@ -2,6 +2,7 @@
 #include "util/util.hpp"
 #include "pool/pool_manager.hpp"
 #include "util/exception_util.hpp"
+#include "util/implicit_prefs.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -10,6 +11,7 @@ int main(int argc, char *argv[])
     horizon::setup_locale();
     horizon::create_config_dir();
     horizon::PoolManager::init();
+    horizon::ImplicitPreferences::get();
     horizon::install_signal_exception_handler();
 
     // Start the application, showing the initial window,
