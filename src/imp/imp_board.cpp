@@ -855,13 +855,21 @@ void ImpBoard::handle_maybe_drag()
         return;
     }
     auto target = canvas->get_current_target();
-    auto brd = core_board.get_board();
+    const auto brd = core_board.get_board();
     if (target.type == ObjectType::PAD) {
-        auto pkg = brd->packages.at(target.path.at(0));
-        auto pad = pkg.package.pads.at(target.path.at(1));
+        auto &pkg = brd->packages.at(target.path.at(0));
+        auto &pad = pkg.package.pads.at(target.path.at(1));
+        if (pad.padstack.type == Padstack::Type::MECHANICAL) {
+            ImpBase::handle_maybe_drag();
+            return;
+        }
     }
     else if (target.type == ObjectType::JUNCTION) {
-        auto ju = brd->junctions.at(target.path.at(0));
+        const auto &ju = brd->junctions.at(target.path.at(0));
+        if (!ju.net) {
+            ImpBase::handle_maybe_drag();
+            return;
+        }
     }
     else {
         ImpBase::handle_maybe_drag();
