@@ -707,12 +707,15 @@ void Board::expand_packages()
             if (it.second.alternate_package) {
                 std::set<std::string> pads_from_primary, pads_from_alt;
                 for (const auto &it_pad : it.second.pool_package->pads) {
-                    pads_from_primary.insert(it_pad.second.name);
+                    if (it_pad.second.padstack.type != Padstack::Type::MECHANICAL)
+                        pads_from_primary.insert(it_pad.second.name);
                 }
                 bool alt_valid = true;
                 for (const auto &it_pad : it.second.alternate_package->pads) {
-                    if (!pads_from_alt.insert(it_pad.second.name).second) { // duplicate pad name
-                        alt_valid = false;
+                    if (it_pad.second.padstack.type != Padstack::Type::MECHANICAL) {
+                        if (!pads_from_alt.insert(it_pad.second.name).second) { // duplicate pad name
+                            alt_valid = false;
+                        }
                     }
                 }
                 if (!alt_valid || pads_from_alt != pads_from_primary) { // alt pkg isn't pad-equal
@@ -721,15 +724,21 @@ void Board::expand_packages()
                 }
                 else {
                     it.second.package = *it.second.alternate_package;
-                    it.second.package.pads.clear(); // need to adjust pad uuids to primary package
+
+                    // need to adjust pad uuids to primary package
+                    map_erase_if(it.second.package.pads,
+                                 [](const auto &x) { return x.second.padstack.type != Padstack::Type::MECHANICAL; });
                     std::map<std::string, UUID> pad_uuids;
                     for (const auto &it_pad : it.second.pool_package->pads) {
-                        assert(pad_uuids.emplace(it_pad.second.name, it_pad.first).second); // no duplicates
+                        if (it_pad.second.padstack.type != Padstack::Type::MECHANICAL)
+                            assert(pad_uuids.emplace(it_pad.second.name, it_pad.first).second); // no duplicates
                     }
                     for (const auto &it_pad : it.second.alternate_package->pads) {
-                        auto uu = pad_uuids.at(it_pad.second.name);
-                        auto &pad = it.second.package.pads.emplace(uu, it_pad.second).first->second;
-                        pad.uuid = uu;
+                        if (it_pad.second.padstack.type != Padstack::Type::MECHANICAL) {
+                            auto uu = pad_uuids.at(it_pad.second.name);
+                            auto &pad = it.second.package.pads.emplace(uu, it_pad.second).first->second;
+                            pad.uuid = uu;
+                        }
                     }
                 }
             }
