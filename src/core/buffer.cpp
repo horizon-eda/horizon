@@ -210,13 +210,18 @@ void Buffer::load(std::set<SelectableRef> selection)
         }
         else if (it.type == ObjectType::TRACK) {
             const auto &x = doc.b->get_board()->tracks.at(it.uuid);
-            if (x.from.is_junc() && x.to.is_junc()) {
-                auto &track = tracks.emplace(x.uuid, x).first->second;
-                track.from.junc.update(junctions);
-                track.to.junc.update(junctions);
+            auto &track = tracks.emplace(x.uuid, x).first->second;
+            for (auto &it_ft : {&track.from, &track.to}) {
+                if (it_ft->is_pad()) {
+                    auto uu = UUID::random();
+                    auto &ju = junctions.emplace(uu, uu).first->second;
+                    ju.position = it_ft->get_position();
+                    it_ft->connect(&ju);
+                }
             }
+            track.from.junc.update(junctions);
+            track.to.junc.update(junctions);
         }
-
         else if (it.type == ObjectType::ARC) {
             auto x = doc.r->get_arc(it.uuid);
             auto &arc = arcs.emplace(x->uuid, *x).first->second;
