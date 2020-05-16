@@ -18,6 +18,8 @@ Pool::Pool(const std::string &bp, bool read_only)
 {
 }
 
+const UUID Pool::tmp_pool_uuid = "5e8d1bb6-7e61-4c59-9f01-1e1307069df0";
+
 Pool::~Pool()
 {
 }
@@ -74,10 +76,14 @@ std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_
     if (!q.step()) {
         auto tf = get_tmp_filename(type, uu);
 
-        if (tf.size() && Glib::file_test(tf, Glib::FILE_TEST_IS_REGULAR))
+        if (tf.size() && Glib::file_test(tf, Glib::FILE_TEST_IS_REGULAR)) {
+            if (pool_uuid_out)
+                *pool_uuid_out = Pool::tmp_pool_uuid;
             return tf;
-        else
+        }
+        else {
             throw std::runtime_error(object_descriptions.at(type).name + " " + (std::string)uu + " not found");
+        }
     }
     auto filename = q.get<std::string>(0);
     std::string bp = base_path;

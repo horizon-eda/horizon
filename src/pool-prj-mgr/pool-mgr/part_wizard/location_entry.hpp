@@ -16,6 +16,8 @@ public:
         return s_signal_changed;
     }
 
+    bool check_ends_json(bool *v = nullptr);
+
 private:
     const std::string relative_to;
     std::string get_rel_filename(const std::string &s) const;

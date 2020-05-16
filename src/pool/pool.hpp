@@ -52,6 +52,7 @@ public:
     std::string get_tmp_filename(ObjectType type, const UUID &uu) const;
     static int get_required_schema_version();
     virtual ~Pool();
+    static const UUID tmp_pool_uuid;
 
 protected:
     std::string base_path;

@@ -16,6 +16,7 @@
     <file>pool-prj-mgr/pool-mgr/editors/entity_editor.ui</file>
     <file>pool-prj-mgr/pool-mgr/editors/part_editor.ui</file>
     <file>pool-prj-mgr/pool-mgr/part_wizard/part_wizard.ui</file>
+    <file>pool-prj-mgr/pool-mgr/kicad_symbol_import_wizard/kicad_symbol_import_wizard.ui</file>
     <file>pool-prj-mgr/pool-mgr/pool_merge.ui</file>
     <file>pool-prj-mgr/prj-mgr/part_browser/part_browser.ui</file>
     <file>pool-prj-mgr/prj-mgr/pool_cache_window.ui</file>

@@ -38,6 +38,19 @@ void PoolNotebook::pool_updated(bool success)
         dia.run();
     }
     appwin->set_pool_updating(false, success);
+    reload();
+    if (success && pool_update_done_cb) {
+        pool_update_done_cb();
+        pool_update_done_cb = nullptr;
+    }
+    if (success)
+        Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(appwin->get_application())
+                ->signal_pool_updated()
+                .emit(pool_uuid);
+}
+
+void PoolNotebook::reload()
+{
     pool.clear();
     for (auto &br : browsers) {
         if (widget_is_visible(br.second))
@@ -55,24 +68,16 @@ void PoolNotebook::pool_updated(bool success)
     for (auto &it : procs) {
         it.second->reload();
     }
-    if (success && pool_update_done_cb) {
-        pool_update_done_cb();
-        pool_update_done_cb = nullptr;
-    }
     if (settings_box)
         settings_box->pool_updated();
     if (part_wizard)
         part_wizard->reload();
-    if (git_box && success && git_box->refreshed_once) {
+    if (git_box && git_box->refreshed_once) {
         if (widget_is_visible(git_box))
             git_box->refresh();
         else
             git_box->refreshed_once = false;
     }
-    if (success)
-        Glib::RefPtr<PoolProjectManagerApplication>::cast_dynamic(appwin->get_application())
-                ->signal_pool_updated()
-                .emit(pool_uuid);
 }
 
 bool PoolNotebook::widget_is_visible(Gtk::Widget *widget)
@@ -160,6 +165,8 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
                                        .size();
                 if (in_pool)
                     pool_update(nullptr, {filename});
+                else
+                    reload();
             },
             *this));
 
@@ -372,7 +379,7 @@ void PoolNotebook::show_duplicate_window(ObjectType ty, const UUID &uu)
 
 bool PoolNotebook::get_close_prohibited() const
 {
-    return part_wizard || pool_updating || duplicate_window;
+    return part_wizard || pool_updating || duplicate_window || kicad_symbol_import_wizard;
 }
 
 void PoolNotebook::prepare_close()

@@ -4,13 +4,37 @@
 #include <set>
 
 namespace horizon {
-PoolBrowserPackage::PoolBrowserPackage(Pool *p) : PoolBrowser(p)
+PoolBrowserPackage::PoolBrowserPackage(Pool *p, bool pads_filter) : PoolBrowser(p)
 {
     construct();
     name_entry = create_search_entry("Name");
     manufacturer_entry = create_search_entry("Manufacturer");
     tag_entry = create_tag_entry("Tags");
+    if (pads_filter) {
+        pads_cb = Gtk::manage(new Gtk::CheckButton);
+        pads_cb->set_active(true);
+        pads_sp = Gtk::manage(new Gtk::SpinButton);
+        pads_sp->set_range(1, 2000);
+        pads_sp->set_increments(1, 1);
+        pads_cb->show();
+        pads_sp->show();
+        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
+        box->pack_start(*pads_cb, false, false, 0);
+        box->pack_start(*pads_sp, false, false, 0);
+        add_search_widget("Pads", *box);
+        pads_cb->signal_toggled().connect([this] {
+            pads_sp->set_sensitive(pads_cb->get_active());
+            search();
+        });
+        pads_sp->signal_value_changed().connect(sigc::mem_fun(*this, &PoolBrowserPackage::search));
+    }
     install_pool_item_source_tooltip();
+}
+
+void PoolBrowserPackage::set_pads_filter(unsigned int n)
+{
+    if (pads_sp)
+        pads_sp->set_value(n);
 }
 
 Glib::RefPtr<Gtk::ListStore> PoolBrowserPackage::create_list_store()
@@ -76,6 +100,9 @@ void PoolBrowserPackage::search()
               "GROUP by tags.uuid HAVING count(*) >= $ntags) as x ON x.uuid = packages.uuid ";
     }
     qs << "WHERE packages.name LIKE $name AND packages.manufacturer LIKE $manufacturer ";
+    if (pads_cb && pads_cb->get_active()) {
+        qs << "AND packages.n_pads = $npads ";
+    }
     qs << sort_controller->get_order_by();
 
     SQLite::Query q(pool->db, qs.str());
@@ -88,6 +115,9 @@ void PoolBrowserPackage::search()
     }
     if (tags.size())
         q.bind("$ntags", tags.size());
+    if (pads_cb && pads_cb->get_active()) {
+        q.bind("$npads", pads_sp->get_value_as_int());
+    }
 
     if (show_none) {
         row = *(store->append());

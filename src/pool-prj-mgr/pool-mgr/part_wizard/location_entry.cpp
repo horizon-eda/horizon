@@ -1,4 +1,5 @@
 #include "location_entry.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -62,6 +63,7 @@ void LocationEntry::handle_button()
     auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
     chooser->set_do_overwrite_confirmation(true);
     chooser->set_filename(get_filename());
+    chooser->set_current_name(Glib::path_get_basename(get_filename()));
 
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
         auto filename = chooser->get_filename();
@@ -83,4 +85,24 @@ void LocationEntry::handle_button()
         }
     }
 }
+
+bool LocationEntry::check_ends_json(bool *v)
+{
+    bool r;
+    std::string t = get_filename();
+    if (!endswith(t, ".json")) {
+        set_warning("Filename has to end in .json");
+        r = false;
+        if (v)
+            *v = false;
+    }
+    else {
+        set_warning("");
+        r = true;
+        if (v)
+            *v = true;
+    }
+    return r;
+}
+
 } // namespace horizon

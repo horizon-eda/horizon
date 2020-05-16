@@ -7,6 +7,7 @@
 #include "widgets/entity_preview.hpp"
 #include "widgets/entity_info_box.hpp"
 #include "pool_remote_box.hpp"
+#include "pool-prj-mgr/pool-mgr/kicad_symbol_import_wizard/kicad_symbol_import_wizard.hpp"
 
 namespace horizon {
 void PoolNotebook::handle_edit_entity(const UUID &uu)
@@ -28,6 +29,37 @@ void PoolNotebook::handle_duplicate_entity(const UUID &uu)
     if (!uu)
         return;
     show_duplicate_window(ObjectType::ENTITY, uu);
+}
+
+void PoolNotebook::handle_kicad_symbol_import_wizard()
+{
+    if (!kicad_symbol_import_wizard) {
+        auto package_uuid = browsers.at(ObjectType::PACKAGE)->get_selected();
+        GtkFileChooserNative *native = gtk_file_chooser_native_new("Import KiCad library", GTK_WINDOW(appwin->gobj()),
+                                                                   GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+        auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+        auto filter = Gtk::FileFilter::create();
+        filter->set_name("KiCad library");
+        filter->add_pattern("*.lib");
+        chooser->add_filter(filter);
+
+        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+            kicad_symbol_import_wizard =
+                    KiCadSymbolImportWizard::create(package_uuid, pool, appwin, chooser->get_filename());
+            kicad_symbol_import_wizard->present();
+            kicad_symbol_import_wizard->signal_hide().connect([this] {
+                auto files_saved = kicad_symbol_import_wizard->get_files_saved();
+                if (files_saved.size()) {
+                    pool_update(nullptr, files_saved);
+                }
+                delete kicad_symbol_import_wizard;
+                kicad_symbol_import_wizard = nullptr;
+            });
+        }
+    }
+    else {
+        kicad_symbol_import_wizard->present();
+    }
 }
 
 void PoolNotebook::construct_entities()
@@ -52,6 +84,10 @@ void PoolNotebook::construct_entities()
     if (remote_repo.size())
         add_action_button("Merge", bbox, br,
                           [this](const UUID &uu) { remote_box->merge_item(ObjectType::ENTITY, uu); });
+    add_action_button("Import KiCad symbol", bbox,
+                      sigc::mem_fun(*this, &PoolNotebook::handle_kicad_symbol_import_wizard))
+            ->get_style_context()
+            ->add_class("suggested-action");
 
     auto stack = Gtk::manage(new Gtk::Stack);
     add_preview_stack_switcher(bbox, stack);

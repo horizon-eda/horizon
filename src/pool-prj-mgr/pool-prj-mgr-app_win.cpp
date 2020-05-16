@@ -421,7 +421,8 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             default:
                 return nullptr;
             }
-            spawn(ptype, {path}, {}, this_pool_uuid && (item_pool_uuid != this_pool_uuid));
+            spawn(ptype, {path}, {},
+                  (item_pool_uuid != Pool::tmp_pool_uuid) && this_pool_uuid && (item_pool_uuid != this_pool_uuid));
         }
         catch (const std::exception &e) {
             Gtk::MessageDialog md(*this, "Can't open editor", false /* use_markup */, Gtk::MESSAGE_ERROR,

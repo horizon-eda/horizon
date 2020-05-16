@@ -45,6 +45,7 @@ private:
     std::map<ObjectType, class PoolBrowser *> browsers;
     std::map<std::string, class PoolBrowserParametric *> browsers_parametric;
     class PartWizard *part_wizard = nullptr;
+    class KiCadSymbolImportWizard *kicad_symbol_import_wizard = nullptr;
     class DuplicateWindow *duplicate_window = nullptr;
     bool closing = false;
 
@@ -55,6 +56,7 @@ private:
     std::deque<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_error_queue;
     bool pool_updating = false;
     void pool_updated(bool success);
+    void reload();
     std::string pool_update_last_file;
     unsigned int pool_update_n_files = 0;
     unsigned int pool_update_n_files_last = 0;
@@ -93,6 +95,7 @@ private:
     void handle_create_padstack_for_package(const UUID &uu);
     void handle_duplicate_package(const UUID &uu);
     void handle_part_wizard();
+    void handle_kicad_symbol_import_wizard();
 
     void construct_parts();
     void handle_edit_part(const UUID &uu);

@@ -600,6 +600,10 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/autosave_recovery_dialog.cpp\
 	src/util/stock_info_provider_partinfo.cpp\
 	src/widgets/help_button.cpp\
+	src/pool-prj-mgr/pool-mgr/kicad_symbol_import_wizard/kicad_symbol_import_wizard.cpp\
+	src/pool-prj-mgr/pool-mgr/kicad_symbol_import_wizard/gate_editor.cpp\
+	src/util/kicad_lib_parser.cpp\
+
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

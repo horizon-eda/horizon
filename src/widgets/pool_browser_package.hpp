@@ -5,12 +5,13 @@
 namespace horizon {
 class PoolBrowserPackage : public PoolBrowser {
 public:
-    PoolBrowserPackage(class Pool *p);
+    PoolBrowserPackage(class Pool *p, bool show_pads_filter = false);
     void search() override;
     ObjectType get_type() const override
     {
         return ObjectType::PACKAGE;
     }
+    void set_pads_filter(unsigned int n);
 
 protected:
     Glib::RefPtr<Gtk::ListStore> create_list_store() override;
@@ -44,5 +45,7 @@ private:
     Gtk::Entry *name_entry = nullptr;
     Gtk::Entry *manufacturer_entry = nullptr;
     class TagEntry *tag_entry = nullptr;
+    Gtk::SpinButton *pads_sp = nullptr;
+    Gtk::CheckButton *pads_cb = nullptr;
 };
 } // namespace horizon
