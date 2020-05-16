@@ -41,6 +41,7 @@ private:
     class UnplacedBox *unplaced_box = nullptr;
     void update_unplaced();
     void update_header();
+    void handle_selection_cross_probe();
 
     class CanvasAnnotation *bbox_annotation = nullptr;
     void update_bbox_annotation();

@@ -182,6 +182,10 @@ void ImpSymbol::construct()
     bbox_annotation->on_top = false;
     bbox_annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
 
+    if (sockets_connected) {
+        canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpSymbol::handle_selection_cross_probe));
+    }
+
     add_action_button(make_action(ToolID::DRAW_LINE_RECTANGLE));
     add_action_button(make_action(ToolID::PLACE_REFDES_AND_VALUE));
     {
@@ -227,4 +231,21 @@ void ImpSymbol::update_bbox_annotation()
     bbox_annotation->draw_line(Coordf(a.x, b.y), a, ColorP::PIN_HIDDEN, 0);
 }
 
+
+void ImpSymbol::handle_selection_cross_probe()
+{
+    if (core_symbol.tool_is_active())
+        return;
+    json j;
+    j["op"] = "symbol-select";
+    j["unit"] = (std::string)core_symbol.get_symbol()->unit->uuid;
+    auto pins = json::array();
+    for (const auto &it : canvas->get_selection()) {
+        if (it.type == ObjectType::SYMBOL_PIN) {
+            pins.push_back((std::string)it.uuid);
+        }
+    }
+    j["pins"] = pins;
+    send_json(j);
+}
 } // namespace horizon

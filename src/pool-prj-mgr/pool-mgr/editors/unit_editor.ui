@@ -2,47 +2,10 @@
 <!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkBox" id="pin_editor">
+  <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="margin_start">5</property>
-    <property name="margin_end">5</property>
-    <property name="margin_top">5</property>
-    <property name="margin_bottom">5</property>
-    <property name="spacing">10</property>
-    <child>
-      <object class="GtkEntry" id="pin_name">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkComboBoxText" id="pin_direction">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">2</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkEntry" id="pin_names">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-      </object>
-      <packing>
-        <property name="expand">True</property>
-        <property name="fill">True</property>
-        <property name="position">3</property>
-      </packing>
-    </child>
+    <property name="icon_name">list-add-symbolic</property>
   </object>
   <object class="GtkBox" id="unit_editor">
     <property name="visible">True</property>
@@ -257,54 +220,78 @@ Click the plus icon to add pins.</property>
       </packing>
     </child>
     <child>
-      <object class="GtkToolbar">
+      <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="toolbar_style">icons</property>
-        <property name="show_arrow">False</property>
-        <property name="icon_size">2</property>
+        <property name="margin_start">4</property>
+        <property name="margin_end">4</property>
+        <property name="margin_top">4</property>
+        <property name="margin_bottom">4</property>
+        <property name="spacing">2</property>
         <child>
-          <object class="GtkToolButton" id="pin_add">
+          <object class="GtkButton" id="pin_add">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="use_underline">True</property>
-            <property name="icon_name">list-add-symbolic</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">image1</property>
+            <property name="relief">none</property>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="homogeneous">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkToolButton" id="pin_delete">
+          <object class="GtkButton" id="pin_delete">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="use_underline">True</property>
-            <property name="icon_name">list-remove-symbolic</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">image2</property>
+            <property name="relief">none</property>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="homogeneous">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
-          <object class="GtkToolButton" id="unit_pins_refresh">
+          <object class="GtkButton" id="unit_pins_refresh">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Re-sort pins</property>
-            <property name="use_underline">True</property>
-            <property name="icon_name">view-refresh-symbolic</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">image3</property>
+            <property name="relief">none</property>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="homogeneous">True</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="cross_probing">
+            <property name="label" translatable="yes">Cross probing</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="tooltip_text" translatable="yes">Selecting pins in the symbol editor selects pins here as well.</property>
+            <property name="margin_start">4</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">4</property>
+        <property name="position">5</property>
       </packing>
     </child>
   </object>
@@ -322,5 +309,57 @@ Click the plus icon to add pins.</property>
     <widgets>
       <widget name="box_names"/>
     </widgets>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">list-remove-symbolic</property>
+  </object>
+  <object class="GtkImage" id="image3">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">view-refresh-symbolic</property>
+  </object>
+  <object class="GtkBox" id="pin_editor">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="margin_start">5</property>
+    <property name="margin_end">5</property>
+    <property name="margin_top">5</property>
+    <property name="margin_bottom">5</property>
+    <property name="spacing">10</property>
+    <child>
+      <object class="GtkEntry" id="pin_name">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkComboBoxText" id="pin_direction">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkEntry" id="pin_names">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+      </object>
+      <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
+        <property name="position">3</property>
+      </packing>
+    </child>
   </object>
 </interface>

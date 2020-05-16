@@ -132,6 +132,7 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("unit_pins_refresh", refresh_button);
     x->get_widget("pin_add", add_button);
     x->get_widget("pin_delete", delete_button);
+    x->get_widget("cross_probing", cross_probing_cb);
     entry_add_sanitizer(name_entry);
     entry_add_sanitizer(manufacturer_entry);
 
@@ -325,6 +326,21 @@ void UnitEditor::handle_activate(PinEditor *ed)
             return;
         }
         i++;
+    }
+}
+
+void UnitEditor::select(const ItemSet &items)
+{
+    if (!cross_probing_cb->get_active())
+        return;
+
+    pins_listbox->unselect_all();
+    for (auto &ch : pins_listbox->get_children()) {
+        auto row = dynamic_cast<Gtk::ListBoxRow *>(ch);
+        auto ed_row = dynamic_cast<PinEditor *>(row->get_child());
+        if (items.count({ObjectType::SYMBOL_PIN, ed_row->pin->uuid})) {
+            pins_listbox->select_row(*row);
+        }
     }
 }
 

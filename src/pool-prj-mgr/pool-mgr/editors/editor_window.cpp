@@ -36,6 +36,10 @@ public:
     {
         return unit.name;
     }
+    const UUID &get_uuid() const override
+    {
+        return unit.uuid;
+    }
     Unit unit;
 };
 
@@ -55,6 +59,10 @@ public:
     {
         return entity.name;
     }
+    const UUID &get_uuid() const override
+    {
+        return entity.uuid;
+    }
     Entity entity;
 };
 
@@ -72,6 +80,10 @@ public:
     std::string get_name() const override
     {
         return part.get_MPN();
+    }
+    const UUID &get_uuid() const override
+    {
+        return part.uuid;
     }
     Part part;
 };
@@ -197,7 +209,7 @@ void EditorWindow::force_close()
     hide();
 }
 
-bool EditorWindow::get_needs_save()
+bool EditorWindow::get_needs_save() const
 {
     return iface->get_needs_save();
 }
@@ -271,9 +283,25 @@ void EditorWindow::reload()
     }
 }
 
-bool EditorWindow::get_need_update()
+bool EditorWindow::get_need_update() const
 {
     return need_update;
+}
+
+ObjectType EditorWindow::get_object_type() const
+{
+    return type;
+}
+
+void EditorWindow::select(const ItemSet &items)
+{
+    if (iface)
+        iface->select(items);
+}
+
+const UUID &EditorWindow::get_uuid() const
+{
+    return store->get_uuid();
 }
 
 } // namespace horizon

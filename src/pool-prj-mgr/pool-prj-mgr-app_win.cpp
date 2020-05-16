@@ -466,6 +466,20 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
             app->send_json(pid, tx);
         }
     }
+    else if (op == "symbol-select") {
+        UUID unit_uuid = j.at("unit").get<std::string>();
+        for (auto &it_proc : processes) {
+            if (it_proc.second.win && it_proc.second.win->get_object_type() == ObjectType::UNIT
+                && it_proc.second.win->get_uuid() == unit_uuid) {
+                ItemSet sel;
+                for (const auto &pin : j.at("pins")) {
+                    sel.emplace(ObjectType::SYMBOL_PIN, pin.get<std::string>());
+                }
+                it_proc.second.win->select(sel);
+                break;
+            }
+        }
+    }
     return nullptr;
 }
 

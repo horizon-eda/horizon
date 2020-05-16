@@ -11,6 +11,7 @@ class UnitEditor : public Gtk::Box, public PoolEditorInterface {
 public:
     UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Unit *u, class Pool *p);
     static UnitEditor *create(class Unit *u, class Pool *p);
+    void select(const ItemSet &items) override;
 
     virtual ~UnitEditor(){};
 
@@ -19,9 +20,10 @@ private:
     Gtk::Entry *name_entry = nullptr;
     Gtk::Entry *manufacturer_entry = nullptr;
     Gtk::ListBox *pins_listbox = nullptr;
-    Gtk::ToolButton *refresh_button = nullptr;
-    Gtk::ToolButton *add_button = nullptr;
-    Gtk::ToolButton *delete_button = nullptr;
+    Gtk::Button *refresh_button = nullptr;
+    Gtk::Button *add_button = nullptr;
+    Gtk::Button *delete_button = nullptr;
+    Gtk::CheckButton *cross_probing_cb = nullptr;
 
     Glib::RefPtr<Gtk::SizeGroup> sg_direction;
     Glib::RefPtr<Gtk::SizeGroup> sg_name;
