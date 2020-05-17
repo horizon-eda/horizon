@@ -125,6 +125,7 @@ protected:
     bool trigger_action(ToolID tid);
 
     void add_tool_action(ToolID tid, const std::string &action);
+    void add_tool_action(ActionID aid, const std::string &action);
     void add_hamburger_menu();
 
     Preferences preferences;
@@ -192,6 +193,8 @@ protected:
 
     void update_view_hints();
     virtual std::vector<std::string> get_view_hints();
+
+    Glib::RefPtr<Gio::Menu> view_options_menu;
 
     virtual Searcher *get_searcher_ptr()
     {
@@ -270,5 +273,7 @@ private:
     void update_property_panels();
     std::map<CanvasGL::SelectionTool, CanvasGL::SelectionQualifier> selection_qualifiers;
     std::list<class ActionButtonBase *> action_buttons;
+
+    Glib::RefPtr<Gio::SimpleAction> bottom_view_action;
 };
 } // namespace horizon

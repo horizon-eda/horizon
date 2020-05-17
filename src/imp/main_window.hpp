@@ -32,6 +32,7 @@ public:
     Gtk::Expander *search_expander = nullptr;
     Gtk::Box *search_types_box = nullptr;
     Gtk::Label *selection_mode_label = nullptr;
+    Gtk::MenuButton *view_options_button = nullptr;
 
     Gtk::Revealer *action_bar_revealer = nullptr;
     Gtk::Box *action_bar_box = nullptr;

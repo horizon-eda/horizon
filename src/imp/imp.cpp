@@ -489,18 +489,32 @@ void ImpBase::run(int argc, char *argv[])
         canvas->set_flip_view(false);
         this->canvas_update_from_pp();
         this->update_view_hints();
+        g_simple_action_set_state(bottom_view_action->gobj(), g_variant_new_boolean(canvas->get_flip_view()));
     });
 
     connect_action(ActionID::VIEW_BOTTOM, [this](const auto &a) {
         canvas->set_flip_view(true);
         this->canvas_update_from_pp();
         this->update_view_hints();
+        g_simple_action_set_state(bottom_view_action->gobj(), g_variant_new_boolean(canvas->get_flip_view()));
     });
 
     connect_action(ActionID::FLIP_VIEW, [this](const auto &a) {
         canvas->set_flip_view(!canvas->get_flip_view());
         this->canvas_update_from_pp();
         this->update_view_hints();
+        g_simple_action_set_state(bottom_view_action->gobj(), g_variant_new_boolean(canvas->get_flip_view()));
+    });
+
+    bottom_view_action = main_window->add_action_bool("bottom_view", false);
+    bottom_view_action->signal_change_state().connect([this](const Glib::VariantBase &v) {
+        auto b = Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(v).get();
+        if (b) {
+            trigger_action(ActionID::VIEW_BOTTOM);
+        }
+        else {
+            trigger_action(ActionID::VIEW_TOP);
+        }
     });
 
     connect_action(ActionID::SEARCH, [this](const auto &a) { this->set_search_mode(true); });
@@ -692,6 +706,16 @@ void ImpBase::run(int argc, char *argv[])
     PreferencesProvider::get().set_prefs(preferences);
 
     add_hamburger_menu();
+
+    view_options_menu = Gio::Menu::create();
+    main_window->view_options_button->set_menu_model(view_options_menu);
+    {
+        Gdk::Rectangle rect;
+        rect.set_width(24);
+        main_window->view_options_button->get_popover()->set_pointing_to(rect);
+    }
+    add_tool_action(ActionID::SELECTION_FILTER, "selection_filter");
+    view_options_menu->append("Selection filter", "win.selection_filter");
 
     construct();
 
@@ -1231,6 +1255,11 @@ void ImpBase::add_tool_button(ToolID id, const std::string &label, bool left)
 void ImpBase::add_tool_action(ToolID tid, const std::string &action)
 {
     auto tool_action = main_window->add_action(action, [this, tid] { tool_begin(tid); });
+}
+
+void ImpBase::add_tool_action(ActionID aid, const std::string &action)
+{
+    auto tool_action = main_window->add_action(action, [this, aid] { trigger_action(aid); });
 }
 
 void ImpBase::set_action_sensitive(ActionToolID action, bool v)

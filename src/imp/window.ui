@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 -->
+<!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.18"/>
   <object class="GtkImage" id="image1">
@@ -202,17 +202,6 @@
     <property name="can_focus">False</property>
     <property name="default_width">1000</property>
     <property name="default_height">600</property>
-    <child type="titlebar">
-      <object class="GtkHeaderBar" id="header">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="title">Interactive Manipulator</property>
-        <property name="show_close_button">True</property>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-    </child>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -875,15 +864,51 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="view_hints_label">
+              <object class="GtkMenuButton" id="view_options_button">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">selection filtered, airwires filtered, bottom view</property>
-                <property name="ellipsize">end</property>
-                <property name="xalign">0</property>
-                <attributes>
-                  <attribute name="weight" value="bold"/>
-                </attributes>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="relief">none</property>
+                <property name="direction">up</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="spacing">3</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="icon_name">pan-up-symbolic</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="view_hints_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">selection filtered, airwires filtered, bottom view</property>
+                        <property name="ellipsize">end</property>
+                        <property name="xalign">0</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </child>
+                <style>
+                  <class name="imp-status-menu-button"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -926,6 +951,17 @@
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
+        </child>
+      </object>
+    </child>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="header">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="title">Interactive Manipulator</property>
+        <property name="show_close_button">True</property>
+        <child>
+          <placeholder/>
         </child>
       </object>
     </child>

@@ -45,6 +45,7 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("search_exact_cb", search_exact_cb);
     x->get_widget("action_bar_revealer", action_bar_revealer);
     x->get_widget("action_bar_box", action_bar_box);
+    x->get_widget("view_options_button", view_options_button);
     search_revealer->set_reveal_child(false);
 
     nonmodal_close_button->signal_clicked().connect([this] { nonmodal_rev->set_reveal_child(false); });
@@ -154,11 +155,11 @@ void MainWindow::set_view_hints_label(const std::vector<std::string> &s)
             label_text += it;
             tooltip_text += it;
         }
-        view_hints_label->set_text(label_text);
+        view_hints_label->set_markup("<b>" + Glib::Markup::escape_text(label_text) + "</b>");
         view_hints_label->set_tooltip_text(tooltip_text);
     }
     else {
-        view_hints_label->set_text("");
+        view_hints_label->set_text("View & Selection");
         view_hints_label->set_has_tooltip(false);
     }
 }

@@ -396,6 +396,11 @@ void ImpBoard::construct()
     hamburger_menu->append("Length tuning", "win.tuning");
     main_window->add_action("tuning", [this] { trigger_action(ActionID::TUNING); });
 
+    add_tool_action(ActionID::AIRWIRE_FILTER_WINDOW, "airwire_filter");
+    view_options_menu->append("Airwire filter", "win.airwire_filter");
+
+    view_options_menu->append("Bottom view", "win.bottom_view");
+
     if (sockets_connected) {
         hamburger_menu->append("Cross probing", "win.cross_probing");
         auto cp_action = main_window->add_action_bool("cross_probing", true);
