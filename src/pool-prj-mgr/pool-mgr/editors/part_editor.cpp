@@ -421,8 +421,10 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         }
     }
     update_parametric_editor();
-    w_parametric_table_combo->signal_changed().connect(sigc::mem_fun(*this, &PartEditor::update_parametric_editor));
-
+    w_parametric_table_combo->signal_changed().connect([this] {
+        needs_save = true;
+        update_parametric_editor();
+    });
     w_parametric_from_base->set_sensitive(part->base);
     w_parametric_from_base->signal_clicked().connect([this] {
         if (part->base) {
@@ -660,6 +662,9 @@ void PartEditor::save()
 
     if (parametric_editor) {
         part->parametric = parametric_editor->get_values();
+    }
+    else {
+        part->parametric.clear();
     }
 
     part->orderable_MPNs.clear();
