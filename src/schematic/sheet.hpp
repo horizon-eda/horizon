@@ -59,6 +59,7 @@ public:
     LineNet *split_line_net(LineNet *it, Junction *ju);
     void merge_net_lines(LineNet *a, LineNet *b, Junction *ju);
     void expand_symbols(const class Schematic &sch);
+    void expand_symbol(const UUID &sym_uuid, const Schematic &sch);
     void simplify_net_lines(bool simplify);
     void fix_junctions();
     void delete_duplicate_net_lines();
@@ -84,5 +85,8 @@ public:
     Frame frame;
 
     json serialize() const;
+
+private:
+    void expand_symbol_without_net_lines(const UUID &sym_uuid, const Schematic &sch);
 };
 } // namespace horizon

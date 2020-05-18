@@ -51,7 +51,7 @@ SchematicSymbol *ToolHelperMapSymbol::map_symbol(Component *comp, const Gate *ga
     auto sz = bb.second - bb.first;
     imp->get_canvas()->ensure_min_size(sz.x * 1.5, sz.y * 1.5);
 
-    doc.c->get_sheet()->expand_symbols(*doc.c->get_schematic());
+    doc.c->get_sheet()->expand_symbol(schsym->uuid, *doc.c->get_schematic());
 
     return schsym;
 }

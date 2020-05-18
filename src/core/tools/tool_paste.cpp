@@ -243,6 +243,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             for (auto &it_txt : x->texts) {
                 it_txt = doc.r->get_text(text_xlat.at(it_txt.uuid));
             }
+            sheet->expand_symbol(u, *doc.c->get_schematic());
             x->placement.shift += shift;
             selection.emplace(u, ObjectType::SCHEMATIC_SYMBOL);
         }
