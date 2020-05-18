@@ -179,7 +179,7 @@ UUID DuplicateUnitWidget::duplicate(std::vector<std::string> *filenames)
         for (auto ch : get_children()) {
             if (auto c = dynamic_cast<DuplicateSymbolWidget *>(ch)) {
                 auto symbol_filename = c->duplicate(new_unit.uuid);
-                if (filenames)
+                if (filenames && symbol_filename.size())
                     filenames->push_back(symbol_filename);
             }
         }
