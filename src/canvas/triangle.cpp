@@ -318,7 +318,7 @@ void TriangleRenderer::render()
 void TriangleRenderer::render_annotations(bool top)
 {
     for (const auto &it : ca->annotations) {
-        if (it.second.on_top == top) {
+        if (ca->get_layer_display(it.first).visible && it.second.on_top == top) {
             render_layer(it.first);
         }
     }
