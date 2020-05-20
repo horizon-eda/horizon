@@ -96,7 +96,7 @@ ToolResponse ToolRoundOffVertex::begin(const ToolArgs &args)
     vxp->type = Polygon::Vertex::Type::ARC;
     vxp->arc_reverse = rev;
 
-    poly->temp = true;
+    imp->set_snap_filter({{ObjectType::POLYGON, poly->uuid}});
 
     update_cursor(args.coords);
 
@@ -139,7 +139,6 @@ ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
-            poly->temp = false;
             return ToolResponse::commit();
         }
         else if (args.button == 3) {
@@ -157,7 +156,6 @@ ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
                 }
             }
             else if (data->event == ToolDataWindow::Event::OK) {
-                poly->temp = false;
                 return ToolResponse::commit();
             }
         }

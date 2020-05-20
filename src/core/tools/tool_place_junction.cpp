@@ -3,6 +3,7 @@
 #include "schematic/schematic.hpp"
 #include "document/idocument_symbol.hpp"
 #include "pool/symbol.hpp"
+#include "imp/imp_interface.hpp"
 #include <gdk/gdkkeysyms.h>
 #include <iostream>
 
@@ -34,7 +35,7 @@ ToolResponse ToolPlaceJunction::begin(const ToolArgs &args)
 void ToolPlaceJunction::create_junction(const Coordi &c)
 {
     temp = doc.r->insert_junction(UUID::random());
-    temp->temp = true;
+    imp->set_snap_filter({{ObjectType::JUNCTION, temp->uuid}});
     temp->position = c;
 }
 
@@ -62,7 +63,6 @@ ToolResponse ToolPlaceJunction::update(const ToolArgs &args)
                     }
                 }
             }
-            temp->temp = false;
             junctions_placed.push_front(temp);
 
             create_junction(args.coords);

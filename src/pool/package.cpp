@@ -275,7 +275,6 @@ void Package::expand()
 {
     map_erase_if(keepouts, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
     for (auto &it : junctions) {
-        it.second.temp = false;
         it.second.layer = 10000;
         it.second.has_via = false;
         it.second.needs_via = false;

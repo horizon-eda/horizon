@@ -28,8 +28,8 @@ ToolResponse ToolDrawLine::begin(const ToolArgs &args)
     std::cout << "tool draw line junction\n";
 
     temp_junc = doc.r->insert_junction(UUID::random());
+    imp->set_snap_filter({{ObjectType::JUNCTION, temp_junc->uuid}});
     junctions_created.insert(temp_junc);
-    temp_junc->temp = true;
     temp_junc->position = args.coords;
     temp_line = nullptr;
     update_tip();
@@ -83,10 +83,9 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
             }
             else {
                 Junction *last = temp_junc;
-                temp_junc->temp = false;
                 temp_junc = doc.r->insert_junction(UUID::random());
+                imp->set_snap_filter({{ObjectType::JUNCTION, temp_junc->uuid}});
                 junctions_created.insert(temp_junc);
-                temp_junc->temp = true;
                 cycle_restrict_mode_xy();
                 temp_junc->position = get_coord_restrict(last->position, args.coords);
 

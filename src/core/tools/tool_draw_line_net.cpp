@@ -23,7 +23,7 @@ ToolResponse ToolDrawLineNet::begin(const ToolArgs &args)
     std::cout << "tool draw net line junction\n";
 
     temp_junc_head = doc.c->insert_junction(UUID::random());
-    temp_junc_head->temp = true;
+    imp->set_snap_filter({{ObjectType::JUNCTION, temp_junc_head->uuid}});
     temp_junc_head->position = args.coords;
     selection.clear();
 
@@ -31,16 +31,27 @@ ToolResponse ToolDrawLineNet::begin(const ToolArgs &args)
     return ToolResponse();
 }
 
+void ToolDrawLineNet::set_snap_filter()
+{
+    std::set<SnapFilter> sf;
+    if (temp_junc_head)
+        sf.emplace(ObjectType::JUNCTION, temp_junc_head->uuid);
+    if (temp_junc_mid)
+        sf.emplace(ObjectType::JUNCTION, temp_junc_mid->uuid);
+    imp->set_snap_filter(sf);
+}
+
 void ToolDrawLineNet::restart(const Coordi &c)
 {
     doc.c->get_schematic()->expand(); // gets rid of warnings...
     temp_junc_head = doc.c->insert_junction(UUID::random());
-    temp_junc_head->temp = true;
     temp_junc_head->position = c;
+    temp_junc_mid = nullptr;
     temp_line_head = nullptr;
     temp_line_mid = nullptr;
     component_floating = nullptr;
     net_label = nullptr;
+    set_snap_filter();
     update_tip();
 }
 
@@ -67,7 +78,6 @@ Junction *ToolDrawLineNet::make_temp_junc(const Coordi &c)
 {
     Junction *j = doc.r->insert_junction(UUID::random());
     j->position = c;
-    j->temp = true;
     return j;
 }
 
@@ -177,23 +187,14 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     for (auto it : doc.c->get_net_lines()) {
                         if (it->coord_on_line(temp_junc_head->position)) {
                             if (it != temp_line_head && it != temp_line_mid) {
-                                bool is_temp_line = false;
-                                for (const auto &it_ft : {it->from, it->to}) {
-                                    if (it_ft.is_junc()) {
-                                        if (it_ft.junc->temp)
-                                            is_temp_line = true;
-                                    }
-                                }
-                                if (!is_temp_line) {
-                                    imp->tool_bar_flash("split net line");
-                                    auto li = doc.c->get_sheet()->split_line_net(it, ju);
-                                    net = li->net;
-                                    bus = li->bus;
-                                    ju->net = li->net;
-                                    ju->bus = li->bus;
-                                    ju->connection_count = 3;
-                                    break;
-                                }
+                                imp->tool_bar_flash("split net line");
+                                auto li = doc.c->get_sheet()->split_line_net(it, ju);
+                                net = li->net;
+                                bus = li->bus;
+                                ju->net = li->net;
+                                ju->bus = li->bus;
+                                ju->connection_count = 3;
+                                break;
                             }
                         }
                     }
@@ -204,6 +205,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                 temp_junc_mid->bus = bus;
                 temp_junc_head->net = net;
                 temp_junc_head->bus = bus;
+                set_snap_filter();
             }
             else { // already have net line
                 component_floating = nullptr;
@@ -289,31 +291,22 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     for (auto it : doc.c->get_net_lines()) {
                         if (it->coord_on_line(temp_junc_head->position)) {
                             if (it != temp_line_head && it != temp_line_mid) {
-                                bool is_temp_line = false;
-                                for (const auto &it_ft : {it->from, it->to}) {
-                                    if (it_ft.is_junc()) {
-                                        if (it_ft.junc->temp)
-                                            is_temp_line = true;
-                                    }
-                                }
-                                if (!is_temp_line) {
-                                    imp->tool_bar_flash("split net line");
-                                    net = it->net;
-                                    bus = it->bus;
+                                imp->tool_bar_flash("split net line");
+                                net = it->net;
+                                bus = it->bus;
 
-                                    auto do_merge =
-                                            merge_bus_net(temp_line_head->net, temp_line_head->bus, it->net, it->bus);
-                                    if (do_merge) {
-                                        doc.c->get_sheet()->split_line_net(it, ju);
-                                        restart(args.coords);
-                                        return ToolResponse();
-                                    }
-                                    else {
-                                        return ToolResponse(); // bus-net
-                                                               // illegal
-                                    }
-                                    break;
+                                auto do_merge =
+                                        merge_bus_net(temp_line_head->net, temp_line_head->bus, it->net, it->bus);
+                                if (do_merge) {
+                                    doc.c->get_sheet()->split_line_net(it, ju);
+                                    restart(args.coords);
+                                    return ToolResponse();
                                 }
+                                else {
+                                    return ToolResponse(); // bus-net
+                                                           // illegal
+                                }
+                                break;
                             }
                         }
                     }
@@ -326,6 +319,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     temp_junc_head = make_temp_junc(args.coords);
                     temp_junc_head->net = net;
                     temp_junc_head->bus = bus;
+                    set_snap_filter();
                 }
             }
             temp_line_mid = doc.c->insert_line_net(UUID::random());
@@ -400,6 +394,8 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             temp_line_head->bus = ju->bus;
             temp_line_head->from.connect(temp_junc_mid);
             temp_line_head->to.connect(temp_junc_head);
+
+            set_snap_filter();
         }
         else if (args.key == GDK_KEY_Return) {
             return ToolResponse::commit();

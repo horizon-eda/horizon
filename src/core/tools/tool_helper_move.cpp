@@ -10,12 +10,14 @@
 #include "document/idocument_symbol.hpp"
 #include "pool/symbol.hpp"
 #include "board/board_layers.hpp"
+#include "imp/imp_interface.hpp"
 
 namespace horizon {
 void ToolHelperMove::move_init(const Coordi &c)
 {
     last = c;
     origin = c;
+    imp->set_snap_filter_from_selection(selection);
 }
 
 static Coordi *get_dim_coord(Dimension *dim, int vertex)

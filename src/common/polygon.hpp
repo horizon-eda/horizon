@@ -73,7 +73,6 @@ public:
     int layer = 0;
     std::string parameter_class;
 
-    bool temp = false;
     uuid_ptr<PolygonUsage> usage;
     json serialize() const;
 };

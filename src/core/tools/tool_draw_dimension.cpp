@@ -20,7 +20,7 @@ bool ToolDrawDimension::can_begin()
 ToolResponse ToolDrawDimension::begin(const ToolArgs &args)
 {
     temp = doc.r->insert_dimension(UUID::random());
-    temp->temp = true;
+    imp->set_snap_filter({{ObjectType::DIMENSION, temp->uuid}});
     temp->p0 = args.coords;
     temp->p1 = args.coords;
     update_tip();
@@ -101,7 +101,6 @@ ToolResponse ToolDrawDimension::update(const ToolArgs &args)
                 state = State::LABEL;
                 break;
             case State::LABEL:
-                temp->temp = false;
                 return ToolResponse::commit();
                 break;
             }

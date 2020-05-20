@@ -152,7 +152,7 @@ ToolResponse ToolDrawPolygonRectangle::begin(const ToolArgs &args)
     std::cout << "tool draw line poly\n";
 
     temp = doc.r->insert_polygon(UUID::random());
-    temp->temp = true;
+    imp->set_snap_filter({{ObjectType::POLYGON, temp->uuid}});
     temp->layer = args.work_layer;
     first_pos = args.coords;
 
@@ -216,7 +216,6 @@ ToolResponse ToolDrawPolygonRectangle::update(const ToolArgs &args)
                 step = 1;
             }
             else {
-                temp->temp = false;
                 return ToolResponse::commit();
             }
         }

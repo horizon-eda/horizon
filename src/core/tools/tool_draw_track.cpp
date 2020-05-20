@@ -2,6 +2,7 @@
 #include "board/board_rules.hpp"
 #include "document/idocument_board.hpp"
 #include "board/board.hpp"
+#include "imp/imp_interface.hpp"
 #include <iostream>
 #include <gdk/gdkkeysyms.h>
 
@@ -21,7 +22,7 @@ ToolResponse ToolDrawTrack::begin(const ToolArgs &args)
     std::cout << "tool draw track\n";
 
     temp_junc = doc.b->insert_junction(UUID::random());
-    temp_junc->temp = true;
+    imp->set_snap_filter({{ObjectType::JUNCTION, temp_junc->uuid}});
     temp_junc->position = args.coords;
     temp_track = nullptr;
     selection.clear();
@@ -97,54 +98,8 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
 
             else {
                 Junction *last = temp_junc;
-
-                /*for(auto it: doc.c->get_net_lines()) {
-                        if(it->coord_on_line(temp_junc->position)) {
-                                if(it != temp_line) {
-                                        std::cout << "on line" <<
-                (std::string)it->uuid << std::endl;
-                                        if(temp_junc->bus || it->bus) { //either
-                is bus
-                                                if(temp_junc->net || it->net)
-                                                        return ToolResponse();
-                //bus-net illegal
-
-                                                if(temp_junc->bus && it->bus) {
-                //both are bus
-                                                        if(temp_junc->bus !=
-                it->bus) //not the same bus
-                                                                return
-                ToolResponse(); //illegal
-                                                }
-                                                else if(temp_junc->bus &&
-                !it->bus) {
-                                                        it->bus =
-                temp_junc->bus;
-                                                }
-                                                else if(!temp_junc->bus &&
-                it->bus) {
-                                                        temp_junc->bus =
-                it->bus;
-                                                }
-                                        }
-                                        if(temp_junc->net && it->net &&
-                it->net.uuid != temp_junc->net->uuid) {
-                                                if(merge_nets(it->net,
-                temp_junc->net)) {
-                                                        return ToolResponse();
-                                                }
-                                        }
-                                        auto li =
-                doc.c->get_sheet()->split_line_net(it, temp_junc);
-                                        temp_junc->net = li->net;
-                                        temp_junc->bus = li->bus;
-                                        break;
-                                }
-                        }
-                }*/
-                temp_junc->temp = false;
                 temp_junc = doc.b->insert_junction(UUID::random());
-                temp_junc->temp = true;
+                imp->set_snap_filter({{ObjectType::JUNCTION, temp_junc->uuid}});
                 temp_junc->position = args.coords;
                 if (last && temp_track) {
                     temp_track->net = last->net;

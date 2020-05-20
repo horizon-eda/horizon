@@ -189,7 +189,7 @@ void ToolRouteTrack::update_temp_track()
                 temp_tracks.push_back(tr);
 
                 auto ju = doc.r->insert_junction(UUID::random());
-                ju->temp = true;
+                imp->set_snap_filter({{ObjectType::JUNCTION, ju->uuid}});
                 ju->position = coordi_fron_intpt(*it);
                 ju->net = net;
                 temp_junctions.push_back(ju);

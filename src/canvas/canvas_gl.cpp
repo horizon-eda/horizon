@@ -326,7 +326,7 @@ void CanvasGL::cursor_move(GdkEvent *motion_event)
     Coordi t(xi, yi);
 
     const auto &f = std::find_if(targets.begin(), targets.end(), [t, this](const auto &a) -> bool {
-        return a.p == t && this->layer_is_visible(a.layer);
+        return a.p == t && this->layer_is_visible(a.layer) && can_snap_to_target(a);
     });
     if (f != targets.end()) {
         target_current = *f;
@@ -336,57 +336,13 @@ void CanvasGL::cursor_move(GdkEvent *motion_event)
     }
 
     if (snap_to_targets) {
-        auto target_in_selection = [this](const Target &ta) {
-            if (ta.type == ObjectType::SYMBOL_PIN) {
-                SelectableRef key(ta.path.at(0), ObjectType::SCHEMATIC_SYMBOL, ta.vertex);
-                if (selectables.items_map.count(key)
-                    && (selectables.items.at(selectables.items_map.at(key))
-                                .get_flag(horizon::Selectable::Flag::SELECTED))) {
-                    return true;
-                }
-            }
-            else if (ta.type == ObjectType::PAD) {
-                SelectableRef key(ta.path.at(0), ObjectType::BOARD_PACKAGE, ta.vertex);
-                if (selectables.items_map.count(key)
-                    && (selectables.items.at(selectables.items_map.at(key))
-                                .get_flag(horizon::Selectable::Flag::SELECTED))) {
-                    return true;
-                }
-            }
-            else if (ta.type == ObjectType::POLYGON_EDGE) {
-                SelectableRef key(ta.path.at(0), ObjectType::POLYGON_VERTEX, ta.vertex);
-                if (selectables.items_map.count(key)
-                    && (selectables.items.at(selectables.items_map.at(key))
-                                .get_flag(horizon::Selectable::Flag::SELECTED))) {
-                    return true;
-                }
-            }
-            else if (ta.type == ObjectType::DIMENSION) {
-                for (int i = 0; i < 2; i++) {
-                    SelectableRef key(ta.path.at(0), ObjectType::DIMENSION, i);
-                    if (selectables.items_map.count(key)
-                        && (selectables.items.at(selectables.items_map.at(key))
-                                    .get_flag(horizon::Selectable::Flag::SELECTED))) {
-                        return true;
-                    }
-                }
-            }
-            SelectableRef key(ta.path.at(0), ta.type, ta.vertex);
-            if (selectables.items_map.count(key)
-                && (selectables.items.at(selectables.items_map.at(key))
-                            .get_flag(horizon::Selectable::Flag::SELECTED))) {
-                return true;
-            }
-            return false;
-        };
-
-        auto dfn = [this, target_in_selection](const Target &ta) -> float {
+        auto dfn = [this](const Target &ta) -> float {
             // return inf if target in selection and tool active (selection not
             // allowed)
             if (!layer_is_visible(ta.layer))
                 return INFINITY;
 
-            if (!selection_allowed && target_in_selection(ta))
+            if (!selection_allowed && !can_snap_to_target(ta))
                 return INFINITY;
             else
                 return (cursor_pos - (Coordf)ta.p).mag_sq();
@@ -723,6 +679,24 @@ void CanvasGL::clear()
     Canvas::clear();
     request_push();
 }
+
+bool CanvasGL::can_snap_to_target(const Target &t) const
+{
+    SnapFilter k(t.type, t.path.at(0), t.vertex);
+    if (snap_filter.count(k))
+        return false;
+    k.vertex = -1;
+    if (snap_filter.count(k))
+        return false;
+    if (t.type == ObjectType::POLYGON_ARC_CENTER || t.type == ObjectType::POLYGON_EDGE
+        || t.type == ObjectType::POLYGON_VERTEX) {
+        k.type = ObjectType::POLYGON;
+        if (snap_filter.count(k))
+            return false;
+    }
+    return true;
+}
+
 
 static const float char_space = 1;
 

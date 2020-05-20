@@ -27,7 +27,7 @@ Junction *ToolDrawArc::make_junction(const Coordi &coords)
 {
     Junction *ju;
     ju = doc.r->insert_junction(UUID::random());
-    ju->temp = true;
+    imp->set_snap_filter({{ObjectType::JUNCTION, ju->uuid}});
     ju->position = coords;
     return ju;
 }
@@ -74,7 +74,6 @@ ToolResponse ToolDrawArc::update(const ToolArgs &args)
                     from_junc = doc.r->get_junction(args.target.path.at(0));
                 }
                 else {
-                    temp_junc->temp = false;
                     from_junc = temp_junc;
                     temp_junc = make_junction(args.coords);
                 }
@@ -85,7 +84,6 @@ ToolResponse ToolDrawArc::update(const ToolArgs &args)
                     to_junc = doc.r->get_junction(args.target.path.at(0));
                 }
                 else {
-                    temp_junc->temp = false;
                     to_junc = temp_junc;
                     temp_junc = make_junction(args.coords);
                 }
@@ -104,7 +102,6 @@ ToolResponse ToolDrawArc::update(const ToolArgs &args)
                     temp_junc = nullptr;
                 }
                 else {
-                    temp_junc->temp = false;
                     temp_arc->center = temp_junc;
                 }
                 return ToolResponse::commit();

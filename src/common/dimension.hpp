@@ -19,7 +19,6 @@ public:
     Coordi p1;
     int64_t label_distance = 3_mm;
     uint64_t label_size = 1.5_mm;
-    bool temp = false;
 
     enum class Mode { HORIZONTAL, VERTICAL, DISTANCE };
     Mode mode = Mode::DISTANCE;

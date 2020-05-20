@@ -48,13 +48,11 @@ void ToolPlaceBusRipper::create_attached()
 {
     Orientation orientation = Orientation::UP;
     if (ri) {
-        ri->temp = false;
         orientation = ri->orientation;
     }
     auto uu = UUID::random();
     ri = &doc.c->get_sheet()->bus_rippers.emplace(uu, uu).first->second;
     ri->bus = bus;
-    ri->temp = true;
     ri->bus_member = bus_members.at(bus_member_current);
     ri->junction = temp;
     ri->orientation = orientation;
@@ -97,7 +95,6 @@ bool ToolPlaceBusRipper::update_attached(const ToolArgs &args)
                         std::cout << "on line" << std::endl;
                         if (it->bus == bus) {
                             doc.c->get_sheet()->split_line_net(it, temp);
-                            temp->temp = false;
                             junctions_placed.push_front(temp);
                             create_junction(args.coords);
                             create_attached();

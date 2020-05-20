@@ -44,9 +44,6 @@ public:
      */
     bool from_smash = false;
 
-    // not stored
-    bool temp;
-
     UUID get_uuid() const override;
     json serialize() const;
 };

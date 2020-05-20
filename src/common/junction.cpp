@@ -5,8 +5,7 @@
 namespace horizon {
 using json = nlohmann::json;
 
-Junction::Junction(const UUID &uu, const json &j)
-    : uuid(uu), position(j.at("position").get<std::vector<int64_t>>()), temp(false)
+Junction::Junction(const UUID &uu, const json &j) : uuid(uu), position(j.at("position").get<std::vector<int64_t>>())
 {
 }
 

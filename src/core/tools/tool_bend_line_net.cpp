@@ -34,7 +34,6 @@ ToolResponse ToolBendLineNet::begin(const ToolArgs &args)
         return ToolResponse::end();
 
     temp = doc.c->insert_junction(UUID::random());
-    temp->temp = true;
     temp->position = args.coords;
 
     LineNet *li = &doc.c->get_sheet()->net_lines.at(it->uuid);
@@ -48,7 +47,6 @@ ToolResponse ToolBendLineNet::update(const ToolArgs &args)
         temp->position = args.coords;
     }
     else if (args.type == ToolEventType::CLICK) {
-        temp->temp = false;
         if (args.button == 1) {
             return ToolResponse::commit();
         }

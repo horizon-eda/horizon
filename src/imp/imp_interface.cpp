@@ -90,5 +90,24 @@ const LayerDisplay &ImpInterface::get_layer_display(int layer) const
     return imp->canvas->get_layer_display(layer);
 }
 
+void ImpInterface::set_snap_filter(const std::set<SnapFilter> &filter)
+{
+    imp->canvas->snap_filter = filter;
+}
+
+void ImpInterface::set_snap_filter_from_selection(const std::set<SelectableRef> &sel)
+{
+    std::set<SnapFilter> sf;
+    for (const auto &it : sel) {
+        sf.emplace(it.type, it.uuid, it.vertex);
+        if (it.type == ObjectType::BOARD_PACKAGE)
+            sf.emplace(ObjectType::PAD, it.uuid);
+        else if (it.type == ObjectType::SCHEMATIC_SYMBOL)
+            sf.emplace(ObjectType::SYMBOL_PIN, it.uuid);
+        else if (it.type == ObjectType::POLYGON_VERTEX)
+            sf.emplace(ObjectType::POLYGON_EDGE, it.uuid, it.vertex);
+    }
+    imp->canvas->snap_filter = sf;
+}
 
 } // namespace horizon

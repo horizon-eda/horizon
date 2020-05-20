@@ -34,5 +34,6 @@ private:
 
     Junction *make_temp_junc(const Coordi &c);
     void apply_settings() override;
+    void set_snap_filter();
 };
 } // namespace horizon

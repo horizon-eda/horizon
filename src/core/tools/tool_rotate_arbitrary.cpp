@@ -284,6 +284,7 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
             if (tool_id == ToolID::ROTATE_ARBITRARY) {
                 if (state == State::ORIGIN) {
                     state = State::ROTATE;
+                    imp->set_snap_filter_from_selection(selection);
                     update_tip();
                 }
                 else {
@@ -298,6 +299,7 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
                 }
                 else if (state == State::REF) {
                     state = State::SCALE;
+                    imp->set_snap_filter_from_selection(selection);
                     update_tip();
                 }
                 else {

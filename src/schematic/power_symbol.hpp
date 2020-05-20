@@ -35,9 +35,6 @@ public:
     virtual UUID get_uuid() const;
     void update_refs(Sheet &sheet, Block &block);
 
-    // not stored
-    bool temp;
-
     json serialize() const;
 };
 } // namespace horizon

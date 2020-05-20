@@ -52,10 +52,12 @@ ToolResponse ToolDrawLineRectangle::begin(const ToolArgs &args)
 {
     std::cout << "tool draw line\n";
 
+    std::set<SnapFilter> sf;
     for (int i = 0; i < 4; i++) {
         junctions[i] = doc.r->insert_junction(UUID::random());
-        junctions[i]->temp = true;
+        sf.emplace(ObjectType::JUNCTION, junctions[i]->uuid);
     }
+    imp->set_snap_filter(sf);
 
     for (int i = 0; i < 4; i++) {
         auto line = doc.r->insert_line(UUID::random());
@@ -124,7 +126,6 @@ ToolResponse ToolDrawLineRectangle::update(const ToolArgs &args)
             }
             else {
                 for (int i = 0; i < 4; i++) {
-                    junctions[i]->temp = false;
                 }
                 return ToolResponse::commit();
             }

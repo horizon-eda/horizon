@@ -1,5 +1,7 @@
 #pragma once
 #include "canvas/triangle.hpp"
+#include "canvas/selectables.hpp"
+#include "canvas/snap_filter.hpp"
 #include "dialogs/dialogs.hpp"
 #include "core/tool_data.hpp"
 
@@ -24,6 +26,9 @@ public:
 
     void update_highlights();
     std::set<ObjectRef> &get_highlights();
+
+    void set_snap_filter(const std::set<SnapFilter> &filter);
+    void set_snap_filter_from_selection(const std::set<SelectableRef> &sel);
 
 private:
     class ImpBase *imp;

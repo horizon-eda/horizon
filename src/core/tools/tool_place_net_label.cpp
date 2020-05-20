@@ -82,7 +82,6 @@ bool ToolPlaceNetLabel::update_attached(const ToolArgs &args)
                     schsym->component->connections.emplace(UUIDPath<2>(schsym->gate->uuid, pin->uuid),
                                                            static_cast<Net *>(line->net));
 
-                    temp->temp = false;
                     temp->net = line->net;
                     switch (la->orientation) {
                     case Orientation::LEFT:

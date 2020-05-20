@@ -116,7 +116,6 @@ bool ToolPlacePowerSymbol::update_attached(const ToolArgs &args)
                     line->to.connect(temp);
                     schsym->component->connections.emplace(UUIDPath<2>(schsym->gate->uuid, pin->uuid), net);
 
-                    temp->temp = false;
                     temp->position.y -= 1.25_mm;
                     create_junction(args.coords);
                     create_attached();

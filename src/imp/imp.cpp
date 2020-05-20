@@ -1716,6 +1716,7 @@ void ImpBase::tool_process(ToolResponse &resp)
         imp_interface->dialogs.close_nonmodal();
         main_window->tool_hint_label->set_text(">");
         canvas->set_cursor_external(false);
+        canvas->snap_filter.clear();
         no_update = false;
         highlights.clear();
         update_highlights();

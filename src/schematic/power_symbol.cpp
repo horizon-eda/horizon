@@ -7,7 +7,7 @@ namespace horizon {
 
 
 PowerSymbol::PowerSymbol(const UUID &uu, const json &j, Sheet *sheet, Block *block)
-    : uuid(uu), mirror(j.value("mirror", false)), temp(false)
+    : uuid(uu), mirror(j.value("mirror", false))
 {
     if (sheet)
         junction = &sheet->junctions.at(j.at("junction").get<std::string>());

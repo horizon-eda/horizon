@@ -566,7 +566,6 @@ void Board::expand(bool careful)
     expand_packages();
 
     for (auto &it : junctions) {
-        it.second.temp = false;
         it.second.layer = 10000;
         it.second.has_via = false;
         it.second.needs_via = false;

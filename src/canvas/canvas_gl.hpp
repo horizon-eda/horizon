@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include "appearance.hpp"
 #include "annotation.hpp"
+#include "snap_filter.hpp"
 
 namespace horizon {
 class CanvasGL : public Canvas, public Gtk::GLArea {
@@ -161,6 +162,8 @@ public:
     void remove_annotation(CanvasAnnotation *a);
     bool layer_is_annotation(int l) const;
 
+    std::set<SnapFilter> snap_filter;
+
 protected:
     void push() override;
     void request_push() override;
@@ -271,6 +274,8 @@ private:
 
     void drag_gesture_begin_cb(GdkEventSequence *seq);
     void drag_gesture_update_cb(GdkEventSequence *seq);
+
+    bool can_snap_to_target(const Target &t) const;
 
 protected:
     void on_size_allocate(Gtk::Allocation &alloc) override;

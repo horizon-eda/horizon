@@ -547,7 +547,6 @@ void Schematic::expand(bool careful)
         for (auto &it_junc : sheet.junctions) {
             it_junc.second.net = nullptr;
             it_junc.second.bus = nullptr;
-            it_junc.second.temp = false;
         }
         for (auto &it_line : sheet.net_lines) {
             it_line.second.net = nullptr;

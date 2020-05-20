@@ -20,7 +20,7 @@ bool ToolDrawConnectionLine::can_begin()
 ToolResponse ToolDrawConnectionLine::begin(const ToolArgs &args)
 {
     temp_junc = doc.r->insert_junction(UUID::random());
-    temp_junc->temp = true;
+    imp->set_snap_filter({{ObjectType::JUNCTION, temp_junc->uuid}});
     temp_junc->position = args.coords;
     temp_line = nullptr;
     update_tip();

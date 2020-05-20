@@ -20,5 +20,6 @@ private:
     ArcMode arc_mode = ArcMode::OFF;
     void update_tip();
     void update_vertex(const Coordi &c);
+    void set_snap_filter();
 };
 } // namespace horizon

@@ -76,6 +76,7 @@ ToolResponse ToolPlaceText::begin(const ToolArgs &args)
     std::cout << "tool place text\n";
 
     temp = doc.r->insert_text(UUID::random());
+    imp->set_snap_filter({{ObjectType::TEXT, temp->uuid}});
     temp->layer = args.work_layer;
     temp->placement.shift = args.coords;
     apply_settings();
@@ -92,7 +93,6 @@ ToolResponse ToolPlaceText::begin(const ToolArgs &args)
         selection.clear();
         return ToolResponse::end();
     }
-    selection.emplace(temp->uuid, ObjectType::TEXT);
 
     return ToolResponse();
 }
@@ -109,13 +109,12 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
             texts_placed.push_front(temp);
             auto old_text = temp;
             temp = doc.r->insert_text(UUID::random());
+            imp->set_snap_filter({{ObjectType::TEXT, temp->uuid}});
             temp->text = *text;
             temp->layer = args.work_layer;
             temp->placement = old_text->placement;
             temp->placement.shift = args.coords;
             apply_settings();
-            selection.clear();
-            selection.emplace(temp->uuid, ObjectType::TEXT);
         }
         else if (args.button == 3) {
             doc.r->delete_text(temp->uuid);

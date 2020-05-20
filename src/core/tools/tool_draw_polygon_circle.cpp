@@ -32,7 +32,7 @@ void ToolDrawPolygonCircle::update_polygon()
 ToolResponse ToolDrawPolygonCircle::begin(const ToolArgs &args)
 {
     temp = doc.r->insert_polygon(UUID::random());
-    temp->temp = true;
+    imp->set_snap_filter({{ObjectType::POLYGON, temp->uuid}});
     temp->layer = args.work_layer;
     first_pos = args.coords;
 
@@ -74,7 +74,6 @@ ToolResponse ToolDrawPolygonCircle::update(const ToolArgs &args)
                 step = 1;
             }
             else {
-                temp->temp = false;
                 return ToolResponse::commit();
             }
         }
@@ -91,7 +90,6 @@ ToolResponse ToolDrawPolygonCircle::update(const ToolArgs &args)
             if (r.first) {
                 second_pos = first_pos + Coordi(r.second, 0);
                 update_polygon();
-                temp->temp = false;
                 return ToolResponse::commit();
             }
         }
