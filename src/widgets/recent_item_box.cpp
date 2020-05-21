@@ -73,6 +73,7 @@ void RecentItemBox::update_time()
     auto one_minute = (60);
     int n = 0;
     std::string unit;
+    bool is_hour = false;
     if (delta_sec >= one_year) {
         n = delta_sec / one_year;
         unit = "year";
@@ -92,6 +93,7 @@ void RecentItemBox::update_time()
     else if (delta_sec >= one_hour) {
         n = delta_sec / one_hour;
         unit = "hour";
+        is_hour = true;
     }
     else if (delta_sec >= one_minute) {
         n = delta_sec / one_minute;
@@ -103,7 +105,10 @@ void RecentItemBox::update_time()
         s = "just now";
     }
     else {
-        if (n == 1) {
+        if (is_hour && n == 1) {
+            s = "an";
+        }
+        else if (n == 1) {
             s = "a";
         }
         else {
