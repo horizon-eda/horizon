@@ -1087,10 +1087,10 @@ void Canvas::render_pad_overlay(const Pad &pad)
 
     set_lod_size(std::min(pad_height, pad_width));
     for (const auto overlay_layer : text_layers) {
-        if (pad.net && pad.net->name.size() > 0) {
+        if (pad.secondary_text.size()) {
             draw_bitmap_text_box(tr, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, overlay_layer,
                                  TextBoxMode::UPPER);
-            draw_bitmap_text_box(tr, pad_width, pad_height, pad.net->name, ColorP::TEXT_OVERLAY, overlay_layer,
+            draw_bitmap_text_box(tr, pad_width, pad_height, pad.secondary_text, ColorP::TEXT_OVERLAY, overlay_layer,
                                  TextBoxMode::LOWER);
         }
         else {

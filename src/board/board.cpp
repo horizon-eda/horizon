@@ -799,19 +799,34 @@ void Board::expand_packages()
     // assign nets to pads based on netlist
     for (auto &it : packages) {
         for (auto &it_pad : it.second.package.pads) {
+            it_pad.second.is_nc = false;
             if (it.second.component->part->pad_map.count(it_pad.first)) {
                 const auto &pad_map_item = it.second.component->part->pad_map.at(it_pad.first);
                 auto pin_path = UUIDPath<2>(pad_map_item.gate->uuid, pad_map_item.pin->uuid);
                 if (it.second.component->connections.count(pin_path)) {
                     const auto &conn = it.second.component->connections.at(pin_path);
                     it_pad.second.net = conn.net;
+                    if (conn.net) {
+                        it_pad.second.secondary_text = conn.net->name;
+                    }
+                    else {
+                        it_pad.second.secondary_text = "NC";
+                        it_pad.second.is_nc = true;
+                    }
                 }
                 else {
                     it_pad.second.net = nullptr;
+                    it_pad.second.secondary_text = "("
+                                                   + it.second.component->part->entity->gates.at(pin_path.at(0))
+                                                             .unit->pins.at(pin_path.at(1))
+                                                             .primary_name
+                                                   + ")";
                 }
             }
             else {
                 it_pad.second.net = nullptr;
+                it_pad.second.secondary_text = "NC";
+                it_pad.second.is_nc = true;
             }
         }
     }

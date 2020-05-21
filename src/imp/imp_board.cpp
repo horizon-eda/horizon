@@ -864,7 +864,7 @@ void ImpBoard::handle_maybe_drag()
     if (target.type == ObjectType::PAD) {
         auto &pkg = brd->packages.at(target.path.at(0));
         auto &pad = pkg.package.pads.at(target.path.at(1));
-        if (pad.padstack.type == Padstack::Type::MECHANICAL) {
+        if (pad.padstack.type == Padstack::Type::MECHANICAL || pad.is_nc) {
             ImpBase::handle_maybe_drag();
             return;
         }

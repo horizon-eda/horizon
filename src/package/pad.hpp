@@ -25,6 +25,8 @@ public:
     ParameterSet parameter_set;
 
     uuid_ptr<Net> net = nullptr;
+    bool is_nc = false;
+    std::string secondary_text;
 
     virtual UUID get_uuid() const;
     json serialize() const;
