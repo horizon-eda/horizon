@@ -525,6 +525,13 @@ void ImpBoard::construct()
         core_board.get_colors()->substrate = color_from_rgba(view_3d_window->get_substrate_color());
         core_board.set_needs_save();
     });
+    view_3d_window->signal_key_press_event().connect([this](GdkEventKey *ev) {
+        if (ev->keyval == GDK_KEY_Escape) {
+            main_window->present();
+            return true;
+        }
+        return false;
+    });
 
     step_export_window = StepExportWindow::create(main_window, &core_board, project_dir);
     step_export_window->signal_changed().connect([this] { core_board.set_needs_save(); });

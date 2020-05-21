@@ -361,6 +361,13 @@ void ImpPackage::construct_3d()
             fake_package.model = current_model;
         }
     });
+    view_3d_window->signal_key_press_event().connect([this](GdkEventKey *ev) {
+        if (ev->keyval == GDK_KEY_Escape) {
+            main_window->present();
+            return true;
+        }
+        return false;
+    });
 
     auto models_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
     {
