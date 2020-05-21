@@ -272,7 +272,7 @@ void Canvas::render(const Track &track, bool interactive)
         draw_lock(center, 0.7 * track.width, ColorP::TEXT_OVERLAY, ol, true);
     }
     if (interactive && show_text_in_tracks && width > 0 && track.net && track.net->name.size() && track.from.is_junc()
-        && track.to.is_junc()) {
+        && track.to.is_junc() && (!show_text_in_vias || (!track.from.junc->has_via && !track.to.junc->has_via))) {
         auto overlay_layer = get_overlay_layer(track.layer, true);
         set_lod_size(width);
         auto vec = (track.from.get_position() - track.to.get_position());
@@ -1266,6 +1266,15 @@ void Canvas::render(const Via &via, bool interactive)
         draw_lock({0, 0}, 0.7 * std::min(std::abs(bb.second.x - bb.first.x), std::abs(bb.second.y - bb.first.y)),
                   ColorP::TEXT_OVERLAY, ol, true);
     }
+    if (show_text_in_vias && interactive && via.junction->net && via.junction->net->name.size()) {
+        auto size = (bb.second.x - bb.first.x) * 1.2;
+        set_lod_size(size);
+        Placement p(via.junction->position);
+        draw_bitmap_text_box(p, size, size, via.junction->net->name, ColorP::TEXT_OVERLAY, 10000, TextBoxMode::FULL);
+        set_lod_size(-1);
+    }
+
+
     if (interactive)
         object_refs_current.pop_back();
     img_net(nullptr);

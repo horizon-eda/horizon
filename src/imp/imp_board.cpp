@@ -244,6 +244,7 @@ void ImpBoard::apply_preferences()
     }
     canvas->set_highlight_on_top(preferences.board.highlight_on_top);
     canvas->show_text_in_tracks = preferences.board.show_text_in_tracks;
+    canvas->show_text_in_vias = preferences.board.show_text_in_vias;
     ImpLayer::apply_preferences();
     canvas_update_from_pp();
 }

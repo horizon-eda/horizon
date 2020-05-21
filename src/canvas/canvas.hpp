@@ -60,6 +60,7 @@ public:
 
     bool show_all_junctions_in_schematic = false;
     bool show_text_in_tracks = false;
+    bool show_text_in_vias = false;
     bool fast_draw = false;
 
     virtual bool get_flip_view() const

@@ -178,6 +178,7 @@ json BoardPreferences::serialize() const
     j["drag_start_track"] = drag_start_track;
     j["highlight_on_top"] = highlight_on_top;
     j["show_text_in_tracks"] = show_text_in_tracks;
+    j["show_text_in_vias"] = show_text_in_vias;
     return j;
 }
 
@@ -186,6 +187,7 @@ void BoardPreferences::load_from_json(const json &j)
     drag_start_track = j.value("drag_start_track", true);
     highlight_on_top = j.value("highlight_on_top", true);
     show_text_in_tracks = j.value("show_text_in_tracks", true);
+    show_text_in_vias = j.value("show_text_in_vias", true);
 }
 
 json ZoomPreferences::serialize() const

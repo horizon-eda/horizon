@@ -155,6 +155,11 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
                                                         preferences, preferences.board.show_text_in_tracks));
             gr->add_row(*r);
         }
+        {
+            auto r = Gtk::manage(new PreferencesRowBool("Net names on vias", "Shows net names overlaid on vias",
+                                                        preferences, preferences.board.show_text_in_vias));
+            gr->add_row(*r);
+        }
     }
     {
         auto gr = Gtk::manage(new PreferencesGroup("Zoom & Pan"));
