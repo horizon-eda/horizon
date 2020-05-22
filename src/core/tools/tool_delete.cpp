@@ -167,6 +167,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         if (it->type == ObjectType::TRACK) {
             const auto &track = doc.b->get_board()->tracks.at(it->uuid);
             const Track *other_track = nullptr;
+            const Via *other_via = nullptr;
             bool multi = false;
             for (const auto &it_ft : {track.from, track.to}) {
                 if (it_ft.is_junc()) {
@@ -181,11 +182,44 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
                             }
                             else {
                                 other_track = &it_track.second;
+                                if (ju->has_via) {
+                                    for (const auto &it_via : doc.b->get_board()->vias) {
+                                        if (it_via.second.junction == ju) {
+                                            other_via = &it_via.second;
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                     if (multi)
                         break;
+                }
+            }
+            if (other_track) {
+                selection.clear();
+                if (other_via) {
+                    selection.emplace(other_via->uuid, ObjectType::VIA);
+                }
+                else {
+                    selection.emplace(other_track->uuid, ObjectType::TRACK);
+                }
+                imp->get_canvas()->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
+            }
+        }
+        else if (it->type == ObjectType::VIA) {
+            const Junction *ju = doc.b->get_board()->vias.at(it->uuid).junction;
+            const Track *other_track = nullptr;
+            for (const auto &it_track : doc.b->get_board()->tracks) {
+                if (it_track.second.from.junc == ju || it_track.second.to.junc == ju) {
+                    if (other_track) { // second track, break
+                        other_track = nullptr;
+                        break;
+                    }
+                    else {
+                        other_track = &it_track.second;
+                    }
                 }
             }
             if (other_track) {
