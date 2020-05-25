@@ -2151,6 +2151,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="hexpand">True</property>
+                            <property name="spacing">10</property>
                             <child>
                               <object class="GtkLabel" id="label_project_directory">
                                 <property name="visible">True</property>
