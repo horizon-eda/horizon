@@ -131,6 +131,7 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
     int drill = 0;
     int drill_length = 0;
     std::set<int> layers;
+    double roundrect_rratio = 1;
 
     for (size_t i_ch = 0; i_ch < nc; i_ch++) {
         auto ch = data->GetChild(i_ch);
@@ -160,16 +161,23 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
                     drill = ch->GetChild(1)->GetDouble() * 1_mm;
                 }
             }
+            else if (tag == "roundrect_rratio") {
+                roundrect_rratio = ch->GetChild(1)->GetDouble();
+            }
         }
     }
 
-    enum class PadType { INVALID, SMD_RECT, SMD_CIRC, TH_CIRC, NPTH_CIRC, TH_OBROUND };
+    enum class PadType { INVALID, SMD_RECT, SMD_RECT_ROUND, SMD_CIRC, TH_CIRC, NPTH_CIRC, TH_OBROUND };
     PadType pad_type = PadType::INVALID;
 
     std::string padstack_name;
     if (type == "smd" && shape == "rect" && layers.count(BoardLayers::TOP_COPPER)) {
         padstack_name = "smd rectangular";
         pad_type = PadType::SMD_RECT;
+    }
+    else if (type == "smd" && shape == "roundrect" && layers.count(BoardLayers::TOP_COPPER)) {
+        padstack_name = "smd rectangular rounded";
+        pad_type = PadType::SMD_RECT_ROUND;
     }
     else if (type == "smd" && shape == "circle" && layers.count(BoardLayers::TOP_COPPER)) {
         padstack_name = "smd circular";
@@ -220,6 +228,11 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
         if (pad_type == PadType::SMD_RECT) {
             pad.parameter_set[ParameterID::PAD_WIDTH] = size.x;
             pad.parameter_set[ParameterID::PAD_HEIGHT] = size.y;
+        }
+        else if (pad_type == PadType::SMD_RECT_ROUND) {
+            pad.parameter_set[ParameterID::PAD_WIDTH] = size.x;
+            pad.parameter_set[ParameterID::PAD_HEIGHT] = size.y;
+            pad.parameter_set[ParameterID::CORNER_RADIUS] = std::min(size.x, size.y) * roundrect_rratio;
         }
         else if (pad_type == PadType::SMD_CIRC) {
             pad.parameter_set[ParameterID::PAD_DIAMETER] = size.x;
