@@ -238,7 +238,6 @@ void Schematic::smash_symbol(Sheet *sheet, SchematicSymbol *sym)
         auto uu = UUID::random();
         auto &x = sheet->texts.emplace(uu, uu).first->second;
         x.from_smash = true;
-        x.overridden = true;
         x.placement = sym->placement;
         Placement placement = it.second.placement;
         if (sym->symbol.texts.count(it.first)) {
@@ -470,6 +469,9 @@ void Schematic::expand(bool careful)
         for (auto &it_sym : sheet.power_symbols) {
             it_sym.second.net->is_power = true;
             it_sym.second.net->is_power_forced = true;
+        }
+        for (auto &it : sheet.texts) {
+            it.second.overridden = false;
         }
     }
 
@@ -800,22 +802,24 @@ void Schematic::expand(bool careful)
             Sheet &sheet = it_sheet.second;
             for (auto &it_text : sheet.texts) {
                 auto &text = it_text.second;
-                Glib::ustring txt = text.text;
-                Glib::MatchInfo ma;
-                int start, end;
-                while (get_sheetref_regex()->match(txt, ma) && ma.fetch_pos(0, start, end)) {
-                    auto ref_uuid = UUID(ma.fetch(1));
-                    if (sheets.count(ref_uuid)) {
-                        std::stringstream ss;
-                        ss << "[" << sheets.at(ref_uuid).index << "]";
-                        txt.replace(start, end - start, ss.str());
+                if (!text.overridden) {
+                    Glib::ustring txt = text.text;
+                    Glib::MatchInfo ma;
+                    int start, end;
+                    while (get_sheetref_regex()->match(txt, ma) && ma.fetch_pos(0, start, end)) {
+                        auto ref_uuid = UUID(ma.fetch(1));
+                        if (sheets.count(ref_uuid)) {
+                            std::stringstream ss;
+                            ss << "[" << sheets.at(ref_uuid).index << "]";
+                            txt.replace(start, end - start, ss.str());
+                        }
+                        else {
+                            txt.replace(start, end - start, "[?]");
+                        }
+                        text.overridden = true;
                     }
-                    else {
-                        txt.replace(start, end - start, "[?]");
-                    }
-                    text.overridden = true;
+                    text.text_override = txt;
                 }
-                text.text_override = txt;
             }
         }
     }
