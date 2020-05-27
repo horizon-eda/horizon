@@ -15,22 +15,29 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       run: echo "Building tag ${{ github.ref }}"
     - uses: actions/checkout@v2
-    - uses: numworks/setup-msys2@v1
-      with:
-        msystem: MINGW64
-    - name: Install updates
+    - name: Add msys2 to path
+      shell: cmd
       run: |
-        msys2do pacman -Syu --noconfirm
-        msys2do pacman -Syu --noconfirm
+        echo ::add-path::C:\MSYS64\usr\bin
+        echo ::set-env name=MSYSTEM::MINGW64
+        echo ::set-env name=MSYS2_PATH_TYPE::strict
+    - name: Install updates
+      shell: cmd
+      run: |
+        bash -c "pacman -Syu --noconfirm"
+        bash -c "pacman -Syu --noconfirm"
     - name: Install dependencies
       shell: cmd
-      run: msys2do pacman -S --noconfirm --needed mingw-w64-x86_64-gcc mingw-w64-x86_64-{gcc,gtkmm3,boost,sqlite3,toolchain,zeromq,glm,libgit2,oce,podofo,libzip} zip make git dos2unix
+      run: bash -ilc "cd $OLDPWD && pacman -S --noconfirm --needed mingw-w64-x86_64-gcc mingw-w64-x86_64-{gcc,gtkmm3,boost,sqlite3,toolchain,zeromq,glm,libgit2,oce,podofo,libzip} zip make git dos2unix"
     - name: Build
-      run: msys2do make -j2
+      shell: cmd
+      run: bash -ilc "cd $OLDPWD && make -j2"
     - name: Make dist
-      run: msys2do bash ./make_bindist.sh -n
+      shell: cmd
+      run: bash -ilc "cd $OLDPWD && ./make_bindist.sh -n"
     - name: Check for missing DLLs
-      run: msys2do bash ./check_dll.sh
+      shell: cmd
+      run: bash -ilc "cd $OLDPWD && ./check_dll.sh"
     - name: set artifact name
       shell: bash
       run: echo "::set-env name=artifact_name::horizon-win64-$(date +%Y-%m-%d-%H%M)"
