@@ -341,11 +341,14 @@ void Canvas3D::load_models_thread(std::map<std::string, std::string> model_filen
 
 void Canvas3D::load_models_async(Pool *pool)
 {
-    if (model_load_thread.joinable())
-        return;
-
     std::map<std::string, std::string> model_filenames =
             get_model_filenames(*pool); // first: relative, second: absolute
+
+    if (model_filenames.size() == 0)
+        return;
+
+    if (model_load_thread.joinable())
+        return;
 
     n_models_loading = model_filenames.size();
     i_model_loading = 0;
