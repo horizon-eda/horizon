@@ -296,23 +296,28 @@ void PoolGitBox::update_store_from_db(Glib::RefPtr<Gtk::ListStore> store)
     SQLite::Query q(
             notebook->pool.db,
             "SELECT type, uuid, name, filename FROM git_files LEFT JOIN "
-            "(SELECT type, uuid, name, filename FROM all_items_view UNION ALL SELECT 'model_3d' AS type, "
+            "(SELECT type, uuid, name, filename FROM all_items_view UNION ALL SELECT DISTINCT 'model_3d' AS type, "
             "'00000000-0000-0000-0000-000000000000' as uuid, '' as name, model_filename as filename FROM models) "
             "ON filename=git_filename");
     auto it = store->children().begin();
     while (q.step()) {
-        if (it->get_value(list_columns.path) == q.get<std::string>(3)) {
-            ObjectType type = object_type_lut.lookup(q.get<std::string>(0));
-            UUID uu = q.get<std::string>(1);
-            std::string name = q.get<std::string>(2);
-            it->set_value(list_columns.type, type);
-            it->set_value(list_columns.uuid, uu);
-            it->set_value(list_columns.name, Glib::ustring(name));
+        if (it != store->children().end()) {
+            if (it->get_value(list_columns.path) == q.get<std::string>(3)) {
+                ObjectType type = object_type_lut.lookup(q.get<std::string>(0));
+                UUID uu = q.get<std::string>(1);
+                std::string name = q.get<std::string>(2);
+                it->set_value(list_columns.type, type);
+                it->set_value(list_columns.uuid, uu);
+                it->set_value(list_columns.name, Glib::ustring(name));
+            }
+            else {
+                it->set_value(list_columns.name, Glib::ustring("Not found in pool"));
+            }
+            it++;
         }
         else {
-            it->set_value(list_columns.name, Glib::ustring("Not found in pool"));
+            throw std::runtime_error("db vs store mismatch");
         }
-        it++;
     }
 
     notebook->pool.db.execute("DROP TABLE 'git_files'");
