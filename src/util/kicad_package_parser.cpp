@@ -167,13 +167,17 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
         }
     }
 
-    enum class PadType { INVALID, SMD_RECT, SMD_RECT_ROUND, SMD_CIRC, TH_CIRC, NPTH_CIRC, TH_OBROUND };
+    enum class PadType { INVALID, SMD_RECT, SMD_RECT_ROUND, SMD_OBROUND, SMD_CIRC, TH_CIRC, NPTH_CIRC, TH_OBROUND };
     PadType pad_type = PadType::INVALID;
 
     std::string padstack_name;
     if (type == "smd" && shape == "rect" && layers.count(BoardLayers::TOP_COPPER)) {
         padstack_name = "smd rectangular";
         pad_type = PadType::SMD_RECT;
+    }
+    else if (type == "smd" && shape == "oval" && layers.count(BoardLayers::TOP_COPPER)) {
+        padstack_name = "smd obround";
+        pad_type = PadType::SMD_OBROUND;
     }
     else if (type == "smd" && shape == "roundrect" && layers.count(BoardLayers::TOP_COPPER)) {
         padstack_name = "smd rectangular rounded";
@@ -226,6 +230,16 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
         pad.placement.shift = pos;
         pad.placement.set_angle_deg(angle);
         if (pad_type == PadType::SMD_RECT) {
+            pad.parameter_set[ParameterID::PAD_WIDTH] = size.x;
+            pad.parameter_set[ParameterID::PAD_HEIGHT] = size.y;
+        }
+        else if (pad_type == PadType::SMD_OBROUND) {
+            if (size.y > size.x) {
+                std::swap(size.x, size.y);
+                pad.placement.inc_angle_deg(90);
+                if (pad.placement.get_angle_deg() == 180)
+                    pad.placement.set_angle(0);
+            }
             pad.parameter_set[ParameterID::PAD_WIDTH] = size.x;
             pad.parameter_set[ParameterID::PAD_HEIGHT] = size.y;
         }
