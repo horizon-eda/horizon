@@ -35,12 +35,12 @@ void ToolDrawPolygon::set_snap_filter()
 {
     if (arc_mode == ArcMode::CURRENT)
         imp->set_snap_filter({
-                {ObjectType::POLYGON_ARC_CENTER, temp->uuid, temp->vertices.size() - 2},
+                {ObjectType::POLYGON_ARC_CENTER, temp->uuid, static_cast<int>(temp->vertices.size() - 2)},
                 {ObjectType::POLYGON_EDGE, temp->uuid},
         });
     else
         imp->set_snap_filter({
-                {ObjectType::POLYGON_VERTEX, temp->uuid, temp->vertices.size() - 1},
+                {ObjectType::POLYGON_VERTEX, temp->uuid, static_cast<int>(temp->vertices.size() - 1)},
                 {ObjectType::POLYGON_EDGE, temp->uuid},
         });
 }

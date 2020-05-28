@@ -654,6 +654,9 @@ ifeq ($(OS),Windows_NT)
     LDFLAGS_GUI = -Wl,-subsystem,windows
 else
     UNAME := $(shell uname)
+    ifeq ($(UNAME), FreeBSD)
+        CXXFLAGS += -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR
+    endif
     ifeq ($(UNAME), Darwin)
         # do nothing on mac os
     else
