@@ -816,6 +816,8 @@ void Board::expand_packages()
                 }
                 else {
                     it_pad.second.net = nullptr;
+                }
+                if (it.second.pin_name_on_pad || it_pad.second.net == nullptr) {
                     it_pad.second.secondary_text = "("
                                                    + it.second.component->part->entity->gates.at(pin_path.at(0))
                                                              .unit->pins.at(pin_path.at(1))
@@ -825,7 +827,7 @@ void Board::expand_packages()
             }
             else {
                 it_pad.second.net = nullptr;
-                it_pad.second.secondary_text = "NC";
+                it_pad.second.secondary_text = "(unmapped)";
                 it_pad.second.is_nc = true;
             }
         }
