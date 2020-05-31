@@ -75,8 +75,10 @@ public:
     void inc_angle(int a);
     void inc_angle_deg(int a);
     void set_angle_deg(int a);
+    void set_angle_rad(double a);
     int get_angle() const;
     int get_angle_deg() const;
+    double get_angle_rad() const;
     Coordi shift;
 
     bool mirror = false;

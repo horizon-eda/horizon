@@ -105,9 +105,9 @@ private:
                 trsf.SetTranslation(gp_Vec(tr.shift.x / 1e6, tr.shift.y / 1e6, -thickness / 2e6));
                 gp_Trsf rot;
                 if (tr.mirror)
-                    rot.SetRotation(gp_Ax1(), (-tr.get_angle() / 32768.) * M_PI);
+                    rot.SetRotation(gp_Ax1(), -tr.get_angle_rad());
                 else
-                    rot.SetRotation(gp_Ax1(), (tr.get_angle() / 32768.) * M_PI);
+                    rot.SetRotation(gp_Ax1(), tr.get_angle_rad());
                 trsf.Multiply(rot);
                 BRepBuilderAPI_Transform s_shift(s, trsf);
                 cutouts.push_back(s_shift.Shape());

@@ -115,6 +115,11 @@ void Placement::set_angle_deg(int a)
     set_angle((a * 65536) / 360);
 }
 
+void Placement::set_angle_rad(double a)
+{
+    set_angle((a * 32768) / M_PI);
+}
+
 void Placement::inc_angle_deg(int a)
 {
     inc_angle((a * 65536) / 360);
@@ -128,5 +133,10 @@ int Placement::get_angle() const
 int Placement::get_angle_deg() const
 {
     return (angle * 360) / 65536;
+}
+
+double Placement::get_angle_rad() const
+{
+    return (angle / 32768.0) * M_PI;
 }
 } // namespace horizon

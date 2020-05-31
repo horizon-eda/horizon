@@ -278,7 +278,7 @@ void Canvas::render(const Track &track, bool interactive)
         auto vec = (track.from.get_position() - track.to.get_position());
         auto length = sqrt(vec.mag_sq());
         Placement p(center);
-        p.set_angle(atan2(vec.y, vec.x) * (32768 / M_PI));
+        p.set_angle_rad(atan2(vec.y, vec.x));
         if (get_flip_view()) {
             p.shift.x *= -1;
             p.invert_angle();
@@ -1349,7 +1349,6 @@ void Canvas::render(const class Dimension &dim)
 
         Coordf text_pos = (q0 + v / 2) - (vn * text_width / 2);
         auto angle = atan2(v.y, v.x);
-        int angle_i = (angle / M_PI) * 32768;
 
         if ((text_width + 2 * dim.label_size) > length) {
             text_pos = q1;
@@ -1371,7 +1370,7 @@ void Canvas::render(const class Dimension &dim)
         transform_save();
         transform.reset();
         transform.shift = Coordi(q0.x, q0.y);
-        transform.set_angle(angle_i);
+        transform.set_angle_rad(angle);
         draw_line({0, 0}, Coordf(arrow_mul * dim.label_size, dim.label_size / 2), co, 10000, true, 0);
         draw_line({0, 0}, Coordf(arrow_mul * dim.label_size, (int64_t)dim.label_size / -2), co, 10000, true, 0);
 
@@ -1380,6 +1379,7 @@ void Canvas::render(const class Dimension &dim)
         draw_line({0, 0}, Coordf(-arrow_mul * dim.label_size, (int64_t)dim.label_size / -2), co, 10000, true, 0);
         transform_restore();
 
+        int angle_i = (angle / M_PI) * 32768;
         auto real_text_bb = draw_text0(Coordi(text_pos.x, text_pos.y), dim.label_size, s,
                                        get_flip_view() ? (32768 - angle_i) : angle_i, get_flip_view(),
                                        TextOrigin::CENTER, co, 10000, 0, true);
