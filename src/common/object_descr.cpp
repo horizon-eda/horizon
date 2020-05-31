@@ -249,6 +249,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::OMIT_SILKSCREEN, {ObjectProperty::Type::BOOL, "Omit Silkscreen", 7}},
                   {ObjectProperty::ID::OMIT_OUTLINE, {ObjectProperty::Type::BOOL, "Omit outline", 8}},
                   {ObjectProperty::ID::FIXED, {ObjectProperty::Type::BOOL, "Fix", 9}},
+                  {ObjectProperty::ID::PIN_NAME_ON_PAD, {ObjectProperty::Type::BOOL, "Pin names on pads", 10}},
           }}},
         {ObjectType::TRACK,
          {"Track",

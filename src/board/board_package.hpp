@@ -34,6 +34,7 @@ public:
     bool omit_silkscreen = false;
     bool fixed = false;
     bool omit_outline = false;
+    bool pin_name_on_pad = false;
     std::vector<uuid_ptr<Text>> texts;
 
     std::string replace_text(const std::string &t, bool *replaced = nullptr) const;

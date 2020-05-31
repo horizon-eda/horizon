@@ -74,6 +74,7 @@ public:
         OMIT_SILKSCREEN,
         FIXED,
         NOPOPULATE,
+        PIN_NAME_ON_PAD,
         OMIT_OUTLINE
     };
     ObjectProperty(Type t, const std::string &l, int o = 0, const std::vector<std::pair<int, std::string>> &its = {})
