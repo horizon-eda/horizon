@@ -37,6 +37,11 @@ void EnterDatumWindow::set_range(int64_t lo, int64_t hi)
     sp->set_range(lo, hi);
 }
 
+void EnterDatumWindow::set_step_size(uint64_t sz)
+{
+    sp->set_increments(sz, sz);
+}
+
 int64_t EnterDatumWindow::get_value()
 {
     return sp->get_value_as_int();

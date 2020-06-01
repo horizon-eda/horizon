@@ -4,6 +4,7 @@
 #include "logger/logger.hpp"
 #include "pool/part.hpp"
 #include "util/util.hpp"
+#include "util/picture_load.hpp"
 #include <list>
 #include "nlohmann/json.hpp"
 
@@ -188,6 +189,13 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
                          Logger::Domain::BOARD);
         }
     }
+    if (j.count("pictures")) {
+        const json &o = j["pictures"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(pictures, ObjectType::PICTURE, std::forward_as_tuple(u, it.value()), Logger::Domain::BOARD);
+        }
+    }
     if (j.count("rules")) {
         try {
             rules.load_from_json(j.at("rules"));
@@ -281,10 +289,11 @@ Board::Board(const Board &brd, CopyMode copy_mode)
     : layers(brd.layers), uuid(brd.uuid), block(brd.block), name(brd.name), polygons(brd.polygons), holes(brd.holes),
       junctions(brd.junctions), tracks(brd.tracks), texts(brd.texts), lines(brd.lines), arcs(brd.arcs),
       planes(brd.planes), keepouts(brd.keepouts), dimensions(brd.dimensions), connection_lines(brd.connection_lines),
-      included_boards(brd.included_boards), board_panels(brd.board_panels), warnings(brd.warnings), rules(brd.rules),
-      fab_output_settings(brd.fab_output_settings), airwires(brd.airwires), stackup(brd.stackup), colors(brd.colors),
-      pdf_export_settings(brd.pdf_export_settings), step_export_settings(brd.step_export_settings),
-      pnp_export_settings(brd.pnp_export_settings), n_inner_layers(brd.n_inner_layers)
+      included_boards(brd.included_boards), board_panels(brd.board_panels), pictures(brd.pictures),
+      warnings(brd.warnings), rules(brd.rules), fab_output_settings(brd.fab_output_settings), airwires(brd.airwires),
+      stackup(brd.stackup), colors(brd.colors), pdf_export_settings(brd.pdf_export_settings),
+      step_export_settings(brd.step_export_settings), pnp_export_settings(brd.pnp_export_settings),
+      n_inner_layers(brd.n_inner_layers)
 {
     if (copy_mode == CopyMode::DEEP) {
         packages = brd.packages;
@@ -1220,6 +1229,23 @@ json Board::serialize() const
             j["board_panels"][(std::string)it.first] = it.second.serialize();
         }
     }
+    if (pictures.size()) {
+        j["pictures"] = json::object();
+        for (const auto &it : pictures) {
+            j["pictures"][(std::string)it.first] = it.second.serialize();
+        }
+    }
     return j;
 }
+
+void Board::save_pictures(const std::string &dir) const
+{
+    pictures_save({&pictures}, dir, "brd");
+}
+
+void Board::load_pictures(const std::string &dir)
+{
+    pictures_load({&pictures}, dir, "brd");
+}
+
 } // namespace horizon

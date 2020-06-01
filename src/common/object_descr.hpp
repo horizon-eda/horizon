@@ -21,7 +21,8 @@ public:
         ANGLE90,
         GROUP,
         TAG,
-        EXPAND
+        EXPAND,
+        OPACITY,
     };
     enum class ID {
         NAME,
@@ -74,7 +75,9 @@ public:
         OMIT_SILKSCREEN,
         FIXED,
         NOPOPULATE,
-        OMIT_OUTLINE
+        OMIT_OUTLINE,
+        ON_TOP,
+        OPACITY,
     };
     ObjectProperty(Type t, const std::string &l, int o = 0, const std::vector<std::pair<int, std::string>> &its = {})
         : type(t), label(l), enum_items(its), order(o)

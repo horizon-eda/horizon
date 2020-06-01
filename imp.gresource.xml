@@ -128,6 +128,9 @@
     <file>canvas/shaders/selection-line-fragment.glsl</file>
     <file>canvas/shaders/selection-line-geometry.glsl</file>
 
+    <file>canvas/shaders/picture-vertex.glsl</file>
+    <file>canvas/shaders/picture-fragment.glsl</file>
+
     <file>canvas3d/shaders/cover-vertex.glsl</file>
     <file>canvas3d/shaders/cover-fragment.glsl</file>
     <file>canvas3d/shaders/cover-geometry.glsl</file>

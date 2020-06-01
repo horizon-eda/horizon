@@ -38,6 +38,7 @@ public:
 
     UUID pool_uuid;
     std::string vias_directory;
+    std::string pictures_directory;
     std::string board_filename;
     std::string pool_cache_directory;
 

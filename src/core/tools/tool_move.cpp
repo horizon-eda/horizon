@@ -189,6 +189,9 @@ Coordi ToolMove::get_selection_center()
         case ObjectType::BOARD_PANEL:
             accu.accumulate(doc.b->get_board()->board_panels.at(it.uuid).placement.shift);
             break;
+        case ObjectType::PICTURE:
+            accu.accumulate(doc.r->get_picture(it.uuid)->placement.shift);
+            break;
         default:;
         }
     }

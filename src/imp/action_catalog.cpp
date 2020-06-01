@@ -822,6 +822,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::FOOTPRINT_GENERATOR, ToolID::NONE},
          {"Footprint generator", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::PLACE_PICTURE},
+         {"Place picture", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1077,5 +1081,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(RESIZE_SYMBOL),
         TOOL_LUT_ITEM(ROUND_OFF_VERTEX),
         TOOL_LUT_ITEM(SWAP_GATES),
+        TOOL_LUT_ITEM(PLACE_PICTURE),
 };
 } // namespace horizon

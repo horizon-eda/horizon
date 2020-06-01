@@ -304,5 +304,16 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::ANGLE, {ObjectProperty::Type::ANGLE, "Angle", 3}},
                   {ObjectProperty::ID::OMIT_OUTLINE, {ObjectProperty::Type::BOOL, "Omit outline", 4}},
           }}},
+        {ObjectType::PICTURE,
+         {"Picture",
+          "Pictures",
+          {
+                  {ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X", 0}},
+                  {ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y", 1}},
+                  {ObjectProperty::ID::ANGLE, {ObjectProperty::Type::ANGLE, "Angle", 2}},
+                  {ObjectProperty::ID::SIZE, {ObjectProperty::Type::LENGTH, "Pixel size", 3}},
+                  {ObjectProperty::ID::ON_TOP, {ObjectProperty::Type::BOOL, "On top", 4}},
+                  {ObjectProperty::ID::OPACITY, {ObjectProperty::Type::OPACITY, "Opacity", 5}},
+          }}},
 };
 } // namespace horizon

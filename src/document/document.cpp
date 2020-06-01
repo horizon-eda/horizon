@@ -6,6 +6,7 @@
 #include "common/hole.hpp"
 #include "common/dimension.hpp"
 #include "common/keepout.hpp"
+#include "common/picture.hpp"
 #include "util/util.hpp"
 
 namespace horizon {
@@ -196,6 +197,25 @@ std::vector<Keepout *> Document::get_keepouts()
         r.push_back(&it.second);
     }
     return r;
+}
+
+Picture *Document::insert_picture(const UUID &uu)
+{
+    auto map = get_picture_map();
+    auto x = map->emplace(std::make_pair(uu, uu));
+    return &(x.first->second);
+}
+
+Picture *Document::get_picture(const UUID &uu)
+{
+    auto map = get_picture_map();
+    return &map->at(uu);
+}
+
+void Document::delete_picture(const UUID &uu)
+{
+    auto map = get_picture_map();
+    map->erase(uu);
 }
 
 std::string Document::get_display_name(ObjectType type, const UUID &uu, const UUID &sheet)

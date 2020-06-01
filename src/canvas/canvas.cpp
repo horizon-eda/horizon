@@ -46,6 +46,7 @@ void Canvas::clear()
     sheet_current_uuid = UUID();
     object_refs.clear();
     object_refs_current.clear();
+    pictures.clear();
 }
 
 void Canvas::remove_obj(const ObjectRef &r)

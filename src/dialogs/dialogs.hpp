@@ -6,6 +6,7 @@
 #include "parameter/set.hpp"
 #include <map>
 #include <set>
+#include <optional>
 
 namespace Gtk {
 class Window;
@@ -58,6 +59,7 @@ public:
     bool edit_via(std::set<class Via *> &vias, class ViaPadstackProvider &vpp);
     std::pair<bool, std::string> ask_dxf_filename();
     std::pair<bool, std::string> ask_kicad_package_filename();
+    std::optional<std::string> ask_picture_filename();
 
     class SymbolPinNamesWindow *show_symbol_pin_names_window(class SchematicSymbol *symbol);
     class RenumberPadsWindow *show_renumber_pads_window(class Package *pkg, const std::set<UUID> &pads);

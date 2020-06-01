@@ -11,6 +11,7 @@
 #include "appearance.hpp"
 #include "annotation.hpp"
 #include "snap_filter.hpp"
+#include "picture_renderer.hpp"
 
 namespace horizon {
 class CanvasGL : public Canvas, public Gtk::GLArea {
@@ -21,6 +22,7 @@ class CanvasGL : public Canvas, public Gtk::GLArea {
     friend MarkerRenderer;
     friend Markers;
     friend CanvasAnnotation;
+    friend PictureRenderer;
 
 public:
     CanvasGL();
@@ -212,6 +214,8 @@ private:
     TriangleRenderer triangle_renderer;
 
     MarkerRenderer marker_renderer;
+
+    PictureRenderer picture_renderer;
 
     void pan_drag_begin(GdkEventButton *button_event);
     void pan_drag_end(GdkEventButton *button_event);

@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         imp.reset(new horizon::ImpPackage(filenames.at(0), pool_base_path));
     }
     else if (mode_board) {
-        imp.reset(new horizon::ImpBoard(filenames.at(0), filenames.at(1), filenames.at(2),
+        imp.reset(new horizon::ImpBoard(filenames.at(0), filenames.at(1), filenames.at(2), filenames.at(3),
                                         {pool_base_path, pool_cache_path}));
     }
     else if (mode_frame) {

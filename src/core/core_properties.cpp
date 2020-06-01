@@ -3,6 +3,7 @@
 #include "common/hole.hpp"
 #include "common/layer_provider.hpp"
 #include "common/polygon.hpp"
+#include "common/picture.hpp"
 #include "core.hpp"
 #include "util/util.hpp"
 
@@ -196,6 +197,32 @@ bool Core::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
         }
     } break;
 
+    case ObjectType::PICTURE: {
+        auto pic = get_picture(uu);
+        switch (property) {
+        case ObjectProperty::ID::SIZE:
+            dynamic_cast<PropertyValueInt &>(value).value = pic->px_size;
+            return true;
+
+        case ObjectProperty::ID::ON_TOP:
+            dynamic_cast<PropertyValueBool &>(value).value = pic->on_top;
+            return true;
+
+        case ObjectProperty::ID::OPACITY:
+            dynamic_cast<PropertyValueDouble &>(value).value = pic->opacity;
+            return true;
+
+        case ObjectProperty::ID::POSITION_X:
+        case ObjectProperty::ID::POSITION_Y:
+        case ObjectProperty::ID::ANGLE:
+            get_placement(pic->placement, value, property);
+            return true;
+
+        default:
+            return false;
+        }
+    } break;
+
     default:
         return false;
     }
@@ -352,6 +379,32 @@ bool Core::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID prop
         switch (property) {
         case ObjectProperty::ID::KEEPOUT_CLASS:
             keepout->keepout_class = dynamic_cast<const PropertyValueString &>(value).value;
+            break;
+
+        default:
+            return false;
+        }
+    } break;
+
+    case ObjectType::PICTURE: {
+        auto pic = get_picture(uu);
+        switch (property) {
+        case ObjectProperty::ID::SIZE:
+            pic->px_size = dynamic_cast<const PropertyValueInt &>(value).value;
+            break;
+
+        case ObjectProperty::ID::ON_TOP:
+            pic->on_top = dynamic_cast<const PropertyValueBool &>(value).value;
+            break;
+
+        case ObjectProperty::ID::OPACITY:
+            pic->opacity = dynamic_cast<const PropertyValueDouble &>(value).value;
+            break;
+
+        case ObjectProperty::ID::POSITION_X:
+        case ObjectProperty::ID::POSITION_Y:
+        case ObjectProperty::ID::ANGLE:
+            set_placement(pic->placement, value, property);
             break;
 
         default:

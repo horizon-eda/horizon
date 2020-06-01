@@ -396,4 +396,40 @@ Gtk::Widget *PropertyEditorExpand::create_editor()
     return sp;
 }
 
+Gtk::Widget *PropertyEditorDouble::create_editor()
+{
+    sp = Gtk::manage(new Gtk::SpinButton());
+    sp->set_range(0, 1);
+    sp->set_width_chars(7);
+    connections.push_back(sp->signal_value_changed().connect(sigc::mem_fun(*this, &PropertyEditorDouble::changed)));
+    return sp;
+}
+
+void PropertyEditorDouble::reload()
+{
+    ScopedBlock block(connections);
+    sp->set_value(value.value);
+}
+
+void PropertyEditorDouble::changed()
+{
+    s_signal_changed.emit();
+}
+
+PropertyValue &PropertyEditorDouble::get_value()
+{
+    value.value = sp->get_value();
+    return value;
+}
+
+Gtk::Widget *PropertyEditorOpacity::create_editor()
+{
+    PropertyEditorDouble::create_editor();
+    ScopedBlock block(connections);
+    sp->set_range(.1, 1);
+    sp->set_increments(.1, .1);
+    sp->set_digits(1);
+    return sp;
+}
+
 } // namespace horizon

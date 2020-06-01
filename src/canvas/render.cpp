@@ -28,6 +28,7 @@
 #include "util/util.hpp"
 #include "iairwire_filter.hpp"
 #include "board/board_panel.hpp"
+#include "common/picture.hpp"
 #include <algorithm>
 #include <ctime>
 #include <sstream>
@@ -1478,6 +1479,9 @@ void Canvas::render(const Board &brd, bool interactive, PanelMode mode, OutlineM
         for (const auto &it : brd.warnings) {
             render(it);
         }
+        for (const auto &it : brd.pictures) {
+            render(it.second);
+        }
     }
 
     clock_t end = clock();
@@ -1528,6 +1532,31 @@ void Canvas::render(const Frame &fr, bool on_sheet)
     draw_line(Coordf(fr.width, 0), Coordf(fr.width, fr.height), c);
     draw_line(Coordf(fr.width, fr.height), Coordf(0, fr.height), c);
     draw_line(Coordf(0, fr.height), Coordf(), c);
+}
+
+void Canvas::render(const Picture &pic)
+{
+    if (!pic.data && !img_mode) {
+        draw_error(pic.placement.shift, 2e5, "Image " + (std::string)pic.data_uuid + " not found");
+        selectables.append_angled(pic.uuid, ObjectType::PICTURE, pic.placement.shift, pic.placement.shift,
+                                  Coordf(1_mm, 1_mm), 0);
+        return;
+    }
+    pictures.emplace_back();
+    auto &x = pictures.back();
+    x.angle = pic.placement.get_angle() / 65536.0 * 2 * M_PI;
+    x.x = pic.placement.shift.x;
+    x.y = pic.placement.shift.y;
+    x.px_size = pic.px_size;
+    x.data = pic.data;
+    x.on_top = pic.on_top;
+    x.opacity = pic.opacity;
+    float w = pic.data->width * pic.px_size;
+    float h = pic.data->height * pic.px_size;
+    if (img_mode)
+        return;
+    selectables.append_angled(pic.uuid, ObjectType::PICTURE, pic.placement.shift, pic.placement.shift, {w, h},
+                              pic.placement.get_angle_rad());
 }
 
 } // namespace horizon

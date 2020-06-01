@@ -10,14 +10,15 @@
 
 namespace horizon {
 CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
-                     Pool &pool)
+                     const std::string &pictures_dir, Pool &pool)
     : via_padstack_provider(via_dir, pool), block(Block::new_from_file(block_filename, pool)),
       brd(Board::new_from_file(board_filename, block, pool, via_padstack_provider)), rules(brd.rules),
       fab_output_settings(brd.fab_output_settings), pdf_export_settings(brd.pdf_export_settings),
       step_export_settings(brd.step_export_settings), pnp_export_settings(brd.pnp_export_settings), colors(brd.colors),
-      m_board_filename(board_filename), m_block_filename(block_filename), m_via_dir(via_dir)
+      m_board_filename(board_filename), m_block_filename(block_filename), m_pictures_dir(pictures_dir)
 {
     m_pool = &pool;
+    brd.load_pictures(pictures_dir);
     rebuild();
 }
 
@@ -593,6 +594,7 @@ void CoreBoard::save(const std::string &suffix)
     brd.colors = colors;
     auto j = brd.serialize();
     save_json_to_file(m_board_filename + suffix, j);
+    brd.save_pictures(m_pictures_dir);
 }
 
 void CoreBoard::delete_autosave()

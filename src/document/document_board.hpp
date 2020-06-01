@@ -8,6 +8,7 @@
 #include "common/hole.hpp"
 #include "common/dimension.hpp"
 #include "common/keepout.hpp"
+#include "common/picture.hpp"
 
 namespace horizon {
 class DocumentBoard : public virtual Document, public virtual IDocumentBoard {
@@ -23,5 +24,6 @@ protected:
     std::map<UUID, Dimension> *get_dimension_map() override;
     std::map<UUID, Arc> *get_arc_map() override;
     std::map<UUID, Keepout> *get_keepout_map() override;
+    std::map<UUID, Picture> *get_picture_map() override;
 };
 } // namespace horizon

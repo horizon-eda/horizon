@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <deque>
 #include <list>
+#include "picture.hpp"
 
 namespace horizon {
 class Canvas {
@@ -79,6 +80,7 @@ public:
 
 protected:
     std::map<int, std::vector<Triangle>> triangles;
+    std::list<CanvasPicture> pictures;
     void add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t flg = 0);
 
     std::map<ObjectRef, std::map<int, std::pair<size_t, size_t>>> object_refs;
@@ -118,6 +120,7 @@ protected:
     void render(const class ConnectionLine &line);
     void render(const class Airwire &airwire);
     void render(const class BoardPanel &panel);
+    void render(const class Picture &pic);
 
     bool needs_push = true;
     virtual void request_push() = 0;

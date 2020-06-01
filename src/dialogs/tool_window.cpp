@@ -14,14 +14,14 @@ ToolWindow::ToolWindow(Gtk::Window *parent, ImpInterface *intf) : interface(intf
 
     auto sg = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
-    auto cancel_button = Gtk::manage(new Gtk::Button("Cancel"));
+    cancel_button = Gtk::manage(new Gtk::Button("Cancel"));
     headerbar->pack_start(*cancel_button);
     cancel_button->show();
     cancel_button->signal_clicked().connect([this] { hide(); });
     sg->add_widget(*cancel_button);
 
 
-    auto ok_button = Gtk::manage(new Gtk::Button("OK"));
+    ok_button = Gtk::manage(new Gtk::Button("OK"));
     ok_button->get_style_context()->add_class("suggested-action");
     headerbar->pack_end(*ok_button);
     ok_button->show();
@@ -43,4 +43,12 @@ void ToolWindow::set_title(const std::string &title)
 {
     headerbar->set_title(title);
 }
+
+void ToolWindow::set_use_ok(bool okay)
+{
+    cancel_button->set_visible(okay);
+    ok_button->set_visible(okay);
+    headerbar->set_show_close_button(!okay);
+}
+
 } // namespace horizon

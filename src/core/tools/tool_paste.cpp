@@ -14,6 +14,7 @@
 #include <iostream>
 #include <gtkmm.h>
 #include "core/tool_id.hpp"
+#include "util/picture_util.hpp"
 
 namespace horizon {
 
@@ -70,7 +71,11 @@ public:
     ToolDataPaste(const json &j) : paste_data(j)
     {
     }
+    ToolDataPaste(Glib::RefPtr<Gdk::Pixbuf> pb) : pixbuf(pb)
+    {
+    }
     json paste_data;
+    Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 };
 
 ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canvas)
@@ -449,12 +454,21 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
         return begin_paste(paste_data, args.coords);
     }
     else {
-        auto ref_clipboard = Gtk::Clipboard::get();
-        ref_clipboard->request_contents("imp-buffer", [this](const Gtk::SelectionData &sel_data) {
-            auto td = std::make_unique<ToolDataPaste>(nullptr);
-            if (sel_data.gobj() && sel_data.get_data_type() == "imp-buffer")
-                td->paste_data = json::parse(sel_data.get_data_as_string());
-            imp->tool_update_data(std::move(td));
+        Gtk::Clipboard::get()->request_contents("imp-buffer", [this](const Gtk::SelectionData &sel_data) {
+            if (sel_data.gobj() && sel_data.get_data_type() == "imp-buffer") {
+                auto td = std::make_unique<ToolDataPaste>(json::parse(sel_data.get_data_as_string()));
+                imp->tool_update_data(std::move(td));
+            }
+            else if (doc.r->has_object_type(ObjectType::PICTURE)) {
+                Gtk::Clipboard::get()->request_image([this](const Glib::RefPtr<Gdk::Pixbuf> &pb) {
+                    auto td = std::make_unique<ToolDataPaste>(pb);
+                    imp->tool_update_data(std::move(td));
+                });
+            }
+            else {
+                auto td = std::make_unique<ToolDataPaste>(nullptr);
+                imp->tool_update_data(std::move(td));
+            }
         });
         return ToolResponse();
     }
@@ -462,7 +476,7 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
 
 void ToolPaste::update_tip()
 {
-    if (paste_data == nullptr) { // wait for data
+    if (paste_data == nullptr && pic == nullptr) { // wait for data
         imp->tool_bar_set_tip("waiting for paste data");
         return;
     }
@@ -477,15 +491,29 @@ void ToolPaste::update_tip()
 
 ToolResponse ToolPaste::update(const ToolArgs &args)
 {
-    if (paste_data == nullptr) { // wait for data
+    if (paste_data == nullptr && pic == nullptr) { // wait for data
         if (args.type == ToolEventType::DATA) {
             auto data = dynamic_cast<ToolDataPaste *>(args.data.get());
-            if (data->paste_data == nullptr) {
+            if (data->paste_data != nullptr) {
+                paste_data = data->paste_data;
+                return begin_paste(paste_data, args.coords);
+            }
+            else if (data->pixbuf) {
+                pic = doc.r->insert_picture(UUID::random());
+                pic->placement.shift = args.coords;
+                pic->data = picture_data_from_pixbuf(data->pixbuf);
+                pic->data_uuid = pic->data->uuid;
+                float width = 10_mm;
+                pic->px_size = width / pic->data->width;
+                selection.clear();
+                selection.emplace(pic->uuid, ObjectType::PICTURE);
+                update_tip();
+                move_init(args.coords);
+            }
+            else {
                 imp->tool_bar_flash("Empty Buffer");
                 return ToolResponse::end();
             }
-            paste_data = data->paste_data;
-            return begin_paste(paste_data, args.coords);
         }
     }
     else {
@@ -496,6 +524,9 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
         }
         else if (args.type == ToolEventType::CLICK || (is_transient && args.type == ToolEventType::CLICK_RELEASE)) {
             if (args.button == 1) {
+                if (pic) {
+                    return ToolResponse::commit();
+                }
                 merge_selected_junctions();
                 for (const auto &it : selection) {
                     if (it.type == ObjectType::SCHEMATIC_SYMBOL) {

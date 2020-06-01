@@ -252,4 +252,26 @@ protected:
     Gtk::Widget *create_editor() override;
 };
 
+class PropertyEditorDouble : public PropertyEditor {
+    using PropertyEditor::PropertyEditor;
+
+public:
+    void reload() override;
+    PropertyValue &get_value() override;
+
+protected:
+    Gtk::Widget *create_editor() override;
+
+    Gtk::SpinButton *sp = nullptr;
+    PropertyValueDouble value;
+    void changed();
+};
+
+class PropertyEditorOpacity : public PropertyEditorDouble {
+    using PropertyEditorDouble::PropertyEditorDouble;
+
+protected:
+    Gtk::Widget *create_editor() override;
+};
+
 } // namespace horizon

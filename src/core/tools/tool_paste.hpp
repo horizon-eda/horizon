@@ -19,6 +19,7 @@ private:
     void apply_shift(Coordi &c, const Coordi &cursor_pos);
     Coordi shift;
     json paste_data;
+    class Picture *pic = nullptr;
     ToolResponse begin_paste(const json &j, const Coordi &cursor_pos);
     void update_tip();
 };

@@ -36,6 +36,10 @@ public:
     class Keepout *get_keepout(const UUID &uu) override;
     void delete_keepout(const UUID &uu) override;
 
+    class Picture *insert_picture(const UUID &uu) override;
+    class Picture *get_picture(const UUID &uu) override;
+    void delete_picture(const UUID &uu) override;
+
     std::vector<Line *> get_lines() override;
     std::vector<Arc *> get_arcs() override;
     std::vector<Keepout *> get_keepouts() override;
@@ -73,6 +77,10 @@ protected:
         return nullptr;
     }
     virtual std::map<UUID, Keepout> *get_keepout_map()
+    {
+        return nullptr;
+    }
+    virtual std::map<UUID, Picture> *get_picture_map()
     {
         return nullptr;
     }

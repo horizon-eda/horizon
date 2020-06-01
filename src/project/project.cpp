@@ -17,27 +17,29 @@ static void create_file(const std::string &filename)
     ofs.close();
 }
 
+static void mkdir_if_not_exists(const std::string &dir, bool keep)
+{
+    if (!Glib::file_test(dir, Glib::FILE_TEST_IS_DIR)) {
+        auto fi = Gio::File::create_for_path(dir);
+        fi->make_directory();
+        if (keep) {
+            create_file(Glib::build_filename(dir, ".keep"));
+        }
+    }
+}
+
 Project::Project(const UUID &uu, const json &j, const std::string &base)
     : base_path(base), uuid(uu), pool_uuid(j.at("pool_uuid").get<std::string>()),
       vias_directory(Glib::build_filename(base, j.at("vias_directory"))),
+      pictures_directory(Glib::build_filename(base, j.value("pictures_directory", "pictures"))),
       board_filename(Glib::build_filename(base, j.at("board_filename"))),
       pool_cache_directory(Glib::build_filename(base, j.value("pool_cache_directory", "cache"))),
       title_old(j.value("title", "")), name_old(j.value("name", ""))
 {
-    if (!Glib::file_test(pool_cache_directory, Glib::FILE_TEST_IS_DIR)) {
-        auto fi = Gio::File::create_for_path(pool_cache_directory);
-        fi->make_directory();
-    }
 
-    if (!Glib::file_test(vias_directory, Glib::FILE_TEST_IS_DIR)) {
-        {
-            auto fi = Gio::File::create_for_path(vias_directory);
-            fi->make_directory();
-        }
-        {
-            create_file(Glib::build_filename(vias_directory, ".keep"));
-        }
-    }
+    mkdir_if_not_exists(pool_cache_directory, false);
+    mkdir_if_not_exists(vias_directory, true);
+    mkdir_if_not_exists(pictures_directory, true);
 
     if (j.count("blocks")) {
         const json &o = j.at("blocks");
@@ -103,11 +105,9 @@ std::string Project::create(const std::map<std::string, std::string> &meta, cons
     blocks.emplace(block.uuid, ProjectBlock(block.uuid, block_filename, schematic_filename, true));
 
     vias_directory = Glib::build_filename(base_path, "vias");
-    {
-        auto fi = Gio::File::create_for_path(vias_directory);
-        fi->make_directory();
-    }
-    create_file(Glib::build_filename(vias_directory, ".keep"));
+    mkdir_if_not_exists(vias_directory, true);
+    pictures_directory = Glib::build_filename(base_path, "pictures");
+    mkdir_if_not_exists(pictures_directory, true);
     pool_cache_directory = Glib::build_filename(base_path, "cache");
     {
         auto fi = Gio::File::create_for_path(pool_cache_directory);
@@ -144,6 +144,7 @@ json Project::serialize() const
     j["name"] = name_old;
     j["pool_uuid"] = (std::string)pool_uuid;
     j["vias_directory"] = get_filename_rel(vias_directory);
+    j["pictures_filename"] = get_filename_rel(pictures_directory);
     j["board_filename"] = get_filename_rel(board_filename);
     j["pool_cache_directory"] = get_filename_rel(pool_cache_directory);
     {

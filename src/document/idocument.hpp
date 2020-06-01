@@ -38,6 +38,10 @@ public:
     virtual class Keepout *get_keepout(const UUID &uu) = 0;
     virtual void delete_keepout(const UUID &uu) = 0;
 
+    virtual class Picture *insert_picture(const UUID &uu) = 0;
+    virtual class Picture *get_picture(const UUID &uu) = 0;
+    virtual void delete_picture(const UUID &uu) = 0;
+
     virtual std::vector<Line *> get_lines() = 0;
     virtual std::vector<Arc *> get_arcs() = 0;
     virtual std::vector<Keepout *> get_keepouts() = 0;

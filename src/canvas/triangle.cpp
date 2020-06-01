@@ -264,6 +264,7 @@ void TriangleRenderer::render()
 {
     glBindVertexArray(vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glActiveTexture(GL_TEXTURE0);
 
     GL_CHECK_ERROR
 

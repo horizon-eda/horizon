@@ -102,6 +102,10 @@ SRC_COMMON = \
 	src/board/included_board.cpp \
 	src/board/board_panel.cpp \
 	src/pool/pool_cached.cpp\
+	src/common/picture.cpp\
+	src/util/picture_data.cpp\
+	src/util/picture_load.cpp\
+
 
 ifeq ($(OS),Windows_NT)
     SRC_COMMON += src/util/uuid_win32.cpp
@@ -143,6 +147,7 @@ SRC_CANVAS = \
 	src/util/msd_animator.cpp\
 	src/canvas/appearance.cpp\
 	src/canvas/bitmap_font_util.cpp\
+	src/canvas/picture_renderer.cpp\
 
 SRC_IMP = \
 	src/imp/imp_main.cpp \
@@ -251,6 +256,7 @@ SRC_IMP = \
 	src/core/tools/tool_resize_symbol.cpp\
 	src/core/tools/tool_round_off_vertex.cpp\
 	src/core/tools/tool_swap_gates.cpp\
+	src/core/tools/tool_place_picture.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\
@@ -424,6 +430,7 @@ SRC_IMP = \
 	src/imp/search/searcher_board.cpp\
 	src/util/clipper_util.cpp\
 	src/widgets/action_button.cpp\
+	src/util/picture_util.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\

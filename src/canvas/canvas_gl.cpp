@@ -26,8 +26,8 @@ void CanvasGL::set_scale_and_offset(float sc, Coordf ofs)
 CanvasGL::CanvasGL()
     : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), markers(this), grid(this), drag_selection(this),
       selectables_renderer(this, &selectables), triangle_renderer(this, triangles), marker_renderer(this, markers),
-      p_property_work_layer(*this, "work-layer"), p_property_grid_spacing(*this, "grid-spacing"),
-      p_property_layer_opacity(*this, "layer-opacity")
+      picture_renderer(*this), p_property_work_layer(*this, "work-layer"),
+      p_property_grid_spacing(*this, "grid-spacing"), p_property_layer_opacity(*this, "layer-opacity")
 {
     add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_MOTION_MASK | Gdk::POINTER_MOTION_MASK
                | Gdk::SCROLL_MASK | Gdk::SMOOTH_SCROLL_MASK | Gdk::KEY_PRESS_MASK);
@@ -151,6 +151,8 @@ void CanvasGL::on_realize()
     GL_CHECK_ERROR
     marker_renderer.realize();
     GL_CHECK_ERROR
+    picture_renderer.realize();
+    GL_CHECK_ERROR
 
     GLint fb;
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fb); // save fb
@@ -205,11 +207,14 @@ bool CanvasGL::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
     GL_CHECK_ERROR
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    picture_renderer.render(false);
+    GL_CHECK_ERROR
     grid.render();
     GL_CHECK_ERROR
     triangle_renderer.render();
     GL_CHECK_ERROR
-
+    picture_renderer.render(true);
+    GL_CHECK_ERROR
     selectables_renderer.render();
     GL_CHECK_ERROR
     drag_selection.render();
@@ -444,6 +449,7 @@ void CanvasGL::push()
         marker_renderer.push();
     if (push_filter & PF_DRAG_SELECTION)
         drag_selection.push();
+    picture_renderer.push();
     push_filter = PF_NONE;
     GL_CHECK_ERROR
 }

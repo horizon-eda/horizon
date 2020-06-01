@@ -468,6 +468,24 @@ std::pair<bool, std::string> Dialogs::ask_kicad_package_filename()
     }
 }
 
+std::optional<std::string> Dialogs::ask_picture_filename()
+{
+    GtkFileChooserNative *native = gtk_file_chooser_native_new("Import Picture", GTK_WINDOW(parent->gobj()),
+                                                               GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    auto filter = Gtk::FileFilter::create();
+    filter->set_name("Supported image formats");
+    filter->add_pixbuf_formats();
+    chooser->add_filter(filter);
+
+    if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+        return chooser->get_filename();
+    }
+    else {
+        return std::nullopt;
+    }
+}
+
 class SymbolPinNamesWindow *Dialogs::show_symbol_pin_names_window(class SchematicSymbol *symbol)
 {
     if (window_nonmodal)

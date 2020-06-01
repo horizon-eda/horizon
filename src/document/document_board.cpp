@@ -30,6 +30,10 @@ std::map<UUID, Keepout> *DocumentBoard::get_keepout_map()
 {
     return &get_board()->keepouts;
 }
+std::map<UUID, Picture> *DocumentBoard::get_picture_map()
+{
+    return &get_board()->pictures;
+}
 
 bool DocumentBoard::has_object_type(ObjectType ty) const
 {
@@ -49,6 +53,7 @@ bool DocumentBoard::has_object_type(ObjectType ty) const
     case ObjectType::DIMENSION:
     case ObjectType::KEEPOUT:
     case ObjectType::CONNECTION_LINE:
+    case ObjectType::PICTURE:
         return true;
         break;
     default:;

@@ -26,6 +26,7 @@
 #include "airwire.hpp"
 #include "included_board.hpp"
 #include "board_panel.hpp"
+#include "common/picture.hpp"
 #include <fstream>
 #include <map>
 #include <vector>
@@ -103,6 +104,7 @@ public:
     std::map<UUID, ConnectionLine> connection_lines;
     std::map<UUID, IncludedBoard> included_boards;
     std::map<UUID, BoardPanel> board_panels;
+    std::map<UUID, Picture> pictures;
 
     std::vector<Warning> warnings;
 
@@ -141,6 +143,8 @@ public:
     std::set<UUID> packages_expand;
 
     json serialize() const;
+    void save_pictures(const std::string &dir) const;
+    void load_pictures(const std::string &dir);
 
 private:
     unsigned int n_inner_layers = 0;

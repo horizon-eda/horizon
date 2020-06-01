@@ -24,8 +24,8 @@
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
-                   const PoolParams &pool_params)
-    : ImpLayer(pool_params), core_board(board_filename, block_filename, via_dir, *pool),
+                   const std::string &pictures_dir, const PoolParams &pool_params)
+    : ImpLayer(pool_params), core_board(board_filename, block_filename, via_dir, pictures_dir, *pool),
       project_dir(Glib::path_get_dirname(board_filename)), searcher(core_board), airwire_filter(*core_board.get_board())
 {
     core = &core_board;
@@ -1039,6 +1039,7 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBoard::get_selection_filte
             {ObjectType::BOARD_HOLE, {}},
             {ObjectType::CONNECTION_LINE, {}},
             {ObjectType::BOARD_PANEL, {}},
+            {ObjectType::PICTURE, {}},
     };
     return r;
 }

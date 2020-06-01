@@ -12,7 +12,7 @@ namespace horizon {
 class CoreBoard : public Core, public DocumentBoard {
 public:
     CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
-              Pool &pool);
+              const std::string &pictures_dir, Pool &pool);
 
     class Block *get_block() override;
     class LayerProvider *get_layer_provider() override;
@@ -77,7 +77,7 @@ private:
 
     std::string m_board_filename;
     std::string m_block_filename;
-    std::string m_via_dir;
+    std::string m_pictures_dir;
 
     class HistoryItem : public Core::HistoryItem {
     public:

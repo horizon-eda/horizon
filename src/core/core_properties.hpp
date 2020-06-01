@@ -6,7 +6,7 @@
 namespace horizon {
 class PropertyValue {
 public:
-    enum class Type { INVALID, INT, BOOL, STRING, UUID };
+    enum class Type { INVALID, INT, BOOL, STRING, UUID, DOUBLE };
     PropertyValue()
     {
     }
@@ -33,6 +33,19 @@ public:
     };
 
     int64_t value;
+};
+
+class PropertyValueDouble : public PropertyValue {
+public:
+    PropertyValueDouble(const double &v = 0) : value(v)
+    {
+    }
+    Type get_type() const override
+    {
+        return Type::DOUBLE;
+    };
+
+    double value;
 };
 
 class PropertyValueBool : public PropertyValue {
