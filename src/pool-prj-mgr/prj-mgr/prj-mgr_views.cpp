@@ -195,7 +195,7 @@ void PoolProjectManagerViewProject::open_top_schematic()
 {
     auto prj = win->project.get();
     auto top_block = prj->get_top_block();
-    std::vector<std::string> args = {top_block.schematic_filename, top_block.block_filename};
+    std::vector<std::string> args = {top_block.schematic_filename, top_block.block_filename, prj->pictures_directory};
     win->spawn_for_project(PoolProjectManagerProcess::Type::IMP_SCHEMATIC, args);
 }
 

@@ -6,6 +6,7 @@
 #include "nlohmann/json.hpp"
 #include "util/util.hpp"
 #include "logger/logger.hpp"
+#include "util/picture_load.hpp"
 
 namespace horizon {
 
@@ -1074,4 +1075,24 @@ json Schematic::serialize() const
 
     return j;
 }
+
+
+void Schematic::save_pictures(const std::string &dir) const
+{
+    std::list<const std::map<UUID, Picture> *> pictures;
+    for (const auto &it : sheets) {
+        pictures.push_back(&it.second.pictures);
+    }
+    pictures_save(pictures, dir, "sch");
+}
+
+void Schematic::load_pictures(const std::string &dir)
+{
+    std::list<std::map<UUID, Picture> *> pictures;
+    for (auto &it : sheets) {
+        pictures.push_back(&it.second.pictures);
+    }
+    pictures_load(pictures, dir, "sch");
+}
+
 } // namespace horizon

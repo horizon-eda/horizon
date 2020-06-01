@@ -90,6 +90,7 @@ ToolResponse ToolDrawDimension::update(const ToolArgs &args)
             temp->label_distance = temp->project(args.coords - temp->p0);
         } break;
         }
+        return ToolResponse::fast();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {

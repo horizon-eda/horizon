@@ -15,6 +15,7 @@
 #include "util/warning.hpp"
 #include "common/layer_provider.hpp"
 #include "frame/frame.hpp"
+#include "common/picture.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -53,6 +54,7 @@ public:
     std::map<UUID, BusRipper> bus_rippers;
     std::map<UUID, Line> lines;
     std::map<UUID, Arc> arcs;
+    std::map<UUID, Picture> pictures;
     std::map<std::string, std::string> title_block_values;
     std::vector<Warning> warnings;
 

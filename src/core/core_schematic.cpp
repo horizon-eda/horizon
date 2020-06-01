@@ -8,16 +8,18 @@
 #include <glibmm/fileutils.h>
 
 namespace horizon {
-CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, Pool &pool)
+CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename,
+                             const std::string &pictures_dir, Pool &pool)
     : block(Block::new_from_file(block_filename, pool)), project_meta_loaded_from_block(block.project_meta.size()),
       sch(Schematic::new_from_file(schematic_filename, block, pool)), rules(sch.rules),
       bom_export_settings(block.bom_export_settings), pdf_export_settings(sch.pdf_export_settings),
-      m_schematic_filename(schematic_filename), m_block_filename(block_filename)
+      m_schematic_filename(schematic_filename), m_block_filename(block_filename), m_pictures_dir(pictures_dir)
 {
     auto x = std::find_if(sch.sheets.cbegin(), sch.sheets.cend(), [](const auto &a) { return a.second.index == 1; });
     assert(x != sch.sheets.cend());
     sheet_uuid = x->first;
     m_pool = &pool;
+    sch.load_pictures(m_pictures_dir);
     rebuild();
 }
 
@@ -178,6 +180,23 @@ Text *CoreSchematic::insert_text(const UUID &uu)
     return &(x.first->second);
 }
 
+Picture *CoreSchematic::get_picture(const UUID &uu)
+{
+    auto &sheet = sch.sheets.at(sheet_uuid);
+    return &sheet.pictures.at(uu);
+}
+void CoreSchematic::delete_picture(const UUID &uu)
+{
+    auto &sheet = sch.sheets.at(sheet_uuid);
+    sheet.pictures.erase(uu);
+}
+Picture *CoreSchematic::insert_picture(const UUID &uu)
+{
+    auto &sheet = sch.sheets.at(sheet_uuid);
+    auto x = sheet.pictures.emplace(std::make_pair(uu, uu));
+    return &(x.first->second);
+}
+
 bool CoreSchematic::has_object_type(ObjectType ty) const
 {
     switch (ty) {
@@ -191,6 +210,7 @@ bool CoreSchematic::has_object_type(ObjectType ty) const
     case ObjectType::TEXT:
     case ObjectType::LINE:
     case ObjectType::ARC:
+    case ObjectType::PICTURE:
         return true;
         break;
     default:;
@@ -623,6 +643,7 @@ void CoreSchematic::save(const std::string &suffix)
     sch.pdf_export_settings = pdf_export_settings;
     save_json_to_file(m_schematic_filename + suffix, sch.serialize());
     save_json_to_file(m_block_filename + suffix, block.serialize());
+    sch.save_pictures(m_pictures_dir);
 }
 
 

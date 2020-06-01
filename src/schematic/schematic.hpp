@@ -115,5 +115,7 @@ public:
     PDFExportSettings pdf_export_settings;
 
     json serialize() const;
+    void save_pictures(const std::string &dir) const;
+    void load_pictures(const std::string &dir);
 };
 } // namespace horizon

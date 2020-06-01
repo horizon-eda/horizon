@@ -11,7 +11,8 @@
 namespace horizon {
 class CoreSchematic : public Core, public virtual IDocumentSchematic {
 public:
-    CoreSchematic(const std::string &schematic_filename, const std::string &block_filename, Pool &pool);
+    CoreSchematic(const std::string &schematic_filename, const std::string &block_filename,
+                  const std::string &pictures_dir, Pool &pool);
     bool has_object_type(ObjectType ty) const override;
 
     Junction *get_junction(const UUID &uu) override;
@@ -36,6 +37,10 @@ public:
 
     Text *insert_text(const UUID &uu) override;
     void delete_text(const UUID &uu) override;
+
+    class Picture *insert_picture(const UUID &uu) override;
+    class Picture *get_picture(const UUID &uu) override;
+    void delete_picture(const UUID &uu) override;
 
     std::vector<Line *> get_lines() override;
     std::vector<Arc *> get_arcs() override;
@@ -96,6 +101,7 @@ private:
     UUID sheet_uuid;
     std::string m_schematic_filename;
     std::string m_block_filename;
+    std::string m_pictures_dir;
 
     class HistoryItem : public Core::HistoryItem {
     public:

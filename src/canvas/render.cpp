@@ -1034,6 +1034,9 @@ void Canvas::render(const Sheet &sheet)
     for (const auto &it : sheet.arcs) {
         render(it.second);
     }
+    for (const auto &it : sheet.pictures) {
+        render(it.second);
+    }
 }
 
 void Canvas::render(const Padstack &padstack, bool interactive)

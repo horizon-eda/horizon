@@ -97,6 +97,14 @@ Sheet::Sheet(const UUID &uu, const json &j, Block &block, Pool &pool)
             load_and_log(arcs, ObjectType::ARC, std::forward_as_tuple(u, it.value(), *this), Logger::Domain::SCHEMATIC);
         }
     }
+    if (j.count("pictures")) {
+        const json &o = j["pictures"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(pictures, ObjectType::PICTURE, std::forward_as_tuple(u, it.value()),
+                         Logger::Domain::SCHEMATIC);
+        }
+    }
     if (j.count("title_block_values")) {
         const json &o = j["title_block_values"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -715,6 +723,12 @@ json Sheet::serialize() const
     j["arcs"] = json::object();
     for (const auto &it : arcs) {
         j["arcs"][(std::string)it.first] = it.second.serialize();
+    }
+    if (pictures.size()) {
+        j["pictures"] = json::object();
+        for (const auto &it : pictures) {
+            j["pictures"][(std::string)it.first] = it.second.serialize();
+        }
     }
 
     return j;
