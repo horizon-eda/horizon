@@ -5,6 +5,7 @@
 #include <cairomm/cairomm.h>
 #include <set>
 #include "util/util.hpp"
+#include <algorithm>
 
 namespace horizon {
 
@@ -59,6 +60,10 @@ void pictures_load(const std::list<std::map<UUID, Picture> *> &pictures, const s
 void pictures_save(const std::list<const std::map<UUID, Picture> *> &pictures, const std::string &pic_dir,
                    const std::string &suffix)
 {
+    bool has_pics = std::any_of(pictures.begin(), pictures.end(), [](const auto &x) { return x->size(); });
+    if (has_pics && !Glib::file_test(pic_dir, Glib::FILE_TEST_IS_DIR)) {
+        Gio::File::create_for_path(pic_dir)->make_directory_with_parents();
+    }
     std::set<UUID> pictures_to_delete;
     {
         Glib::Dir dir(pic_dir);

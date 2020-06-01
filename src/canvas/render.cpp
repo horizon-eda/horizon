@@ -1179,6 +1179,9 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omi
         for (const auto &it : pkg.dimensions) {
             render(it.second);
         }
+        for (const auto &it : pkg.pictures) {
+            render(it.second);
+        }
     }
 }
 

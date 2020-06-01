@@ -3,6 +3,7 @@
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
 #include "board/board_layers.hpp"
+#include "util/picture_load.hpp"
 
 namespace horizon {
 
@@ -119,6 +120,13 @@ Package::Package(const UUID &uu, const json &j, Pool &pool)
                                std::forward_as_tuple(u, it.value()));
         }
     }
+    if (j.count("pictures")) {
+        const json &o = j["pictures"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            pictures.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
+        }
+    }
     for (auto &it : keepouts) {
         it.second.polygon.update(polygons);
         it.second.polygon->usage = &it.second;
@@ -175,7 +183,7 @@ Polygon *Package::get_polygon(const UUID &uu)
 Package::Package(const Package &pkg)
     : uuid(pkg.uuid), name(pkg.name), manufacturer(pkg.manufacturer), tags(pkg.tags), junctions(pkg.junctions),
       lines(pkg.lines), arcs(pkg.arcs), texts(pkg.texts), pads(pkg.pads), polygons(pkg.polygons),
-      keepouts(pkg.keepouts), dimensions(pkg.dimensions), parameter_set(pkg.parameter_set),
+      keepouts(pkg.keepouts), dimensions(pkg.dimensions), pictures(pkg.pictures), parameter_set(pkg.parameter_set),
       parameter_program(pkg.parameter_program), models(pkg.models), default_model(pkg.default_model),
       alternate_for(pkg.alternate_for), warnings(pkg.warnings)
 {
@@ -196,6 +204,7 @@ void Package::operator=(Package const &pkg)
     polygons = pkg.polygons;
     keepouts = pkg.keepouts;
     dimensions = pkg.dimensions;
+    pictures = pkg.pictures;
     parameter_set = pkg.parameter_set;
     parameter_program = pkg.parameter_program;
     models = pkg.models;
@@ -419,6 +428,12 @@ json Package::serialize() const
     for (const auto &it : dimensions) {
         j["dimensions"][(std::string)it.first] = it.second.serialize();
     }
+    if (pictures.size()) {
+        j["pictures"] = json::object();
+        for (const auto &it : pictures) {
+            j["pictures"][(std::string)it.first] = it.second.serialize();
+        }
+    }
     return j;
 }
 
@@ -458,4 +473,15 @@ int Package::get_max_pad_name() const
     }
     return -1;
 }
+
+void Package::save_pictures(const std::string &dir) const
+{
+    pictures_save({&pictures}, dir, "pkg");
+}
+
+void Package::load_pictures(const std::string &dir)
+{
+    pictures_load({&pictures}, dir, "pkg");
+}
+
 } // namespace horizon

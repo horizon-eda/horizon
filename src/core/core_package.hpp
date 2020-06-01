@@ -54,9 +54,11 @@ private:
     std::map<UUID, Hole> *get_hole_map() override;
     std::map<UUID, Keepout> *get_keepout_map() override;
     std::map<UUID, Dimension> *get_dimension_map() override;
+    std::map<UUID, Picture> *get_picture_map() override;
 
     Package package;
     std::string m_filename;
+    std::string m_pictures_dir;
 
     PackageRules rules;
 

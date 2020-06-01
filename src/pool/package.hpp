@@ -17,6 +17,7 @@
 #include "util/uuid_provider.hpp"
 #include "util/warning.hpp"
 #include "parameter/program_polygon.hpp"
+#include "common/picture.hpp"
 #include <fstream>
 #include <map>
 #include <set>
@@ -92,6 +93,7 @@ public:
     std::map<UUID, Polygon> polygons;
     std::map<UUID, Keepout> keepouts;
     std::map<UUID, Dimension> dimensions;
+    std::map<UUID, Picture> pictures;
 
     ParameterSet parameter_set;
     MyParameterProgram parameter_program;
@@ -106,6 +108,9 @@ public:
     std::vector<Warning> warnings;
 
     void update_refs(class Pool &pool);
+
+    void save_pictures(const std::string &dir) const;
+    void load_pictures(const std::string &dir);
 
 private:
     void update_refs();

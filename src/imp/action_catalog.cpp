@@ -824,7 +824,8 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::PLACE_PICTURE},
-         {"Place picture", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
+         {"Place picture", ActionGroup::GRAPHICS,
+          ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD | ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
