@@ -29,8 +29,6 @@ int ToolRoundOffVertex::wrap_index(int i) const
     return i;
 }
 
-using Coordd = Coord<double>;
-
 static Coordd normalize(const Coordd &c)
 {
     return c / (sqrt(c.mag_sq()));

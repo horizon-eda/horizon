@@ -87,8 +87,6 @@ ToolResponse ToolDragKeepSlope::begin(const ToolArgs &args)
     return ToolResponse();
 }
 
-typedef Coord<double> Coordd;
-
 ToolResponse ToolDragKeepSlope::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {

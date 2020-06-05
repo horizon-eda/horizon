@@ -212,6 +212,7 @@ public:
 
 typedef Coord<float> Coordf;
 typedef Coord<int64_t> Coordi;
+typedef Coord<double> Coordd;
 
 class Color {
 public:

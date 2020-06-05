@@ -103,8 +103,6 @@ static const std::vector<delaunay::Edge<double>> kruskalMST(std::list<delaunay::
     return mst;
 }
 
-typedef Coord<double> Coordd;
-
 static bool points_are_linear(const std::vector<delaunay::Vector2<double>> &points)
 {
     if (points.size() < 3)
