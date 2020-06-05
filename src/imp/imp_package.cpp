@@ -358,6 +358,7 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpPackage::get_selection_fil
             {ObjectType::JUNCTION, {}},
             {ObjectType::POLYGON, {layers_polygon, true}},
             {ObjectType::DIMENSION, {}},
+            {ObjectType::PICTURE, {}},
             {ObjectType::ARC, {layers_line, true}},
     };
     return r;
