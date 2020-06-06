@@ -6,7 +6,7 @@
 #include <ctype.h>
 
 namespace horizon {
-RulesCheckResult PackageRules::check_package(const class Package *pkg)
+RulesCheckResult PackageRules::check_package(const class Package *pkg) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
@@ -162,7 +162,7 @@ RulesCheckResult PackageRules::check_package(const class Package *pkg)
     return r;
 }
 
-RulesCheckResult PackageRules::check(RuleID id, const Package *pkg, RulesCheckCache &cache)
+RulesCheckResult PackageRules::check(RuleID id, const Package *pkg, RulesCheckCache &cache) const
 {
     switch (id) {
     case RuleID::PACKAGE_CHECKS:

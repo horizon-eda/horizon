@@ -34,7 +34,7 @@ std::set<RuleID> SchematicRules::get_rule_ids() const
     return {RuleID::SINGLE_PIN_NET};
 }
 
-Rule *SchematicRules::get_rule(RuleID id)
+const Rule *SchematicRules::get_rule(RuleID id) const
 {
     if (id == RuleID::SINGLE_PIN_NET) {
         return &rule_single_pin_net;
@@ -42,14 +42,14 @@ Rule *SchematicRules::get_rule(RuleID id)
     return nullptr;
 }
 
-Rule *SchematicRules::get_rule(RuleID id, const UUID &uu)
+const Rule *SchematicRules::get_rule(RuleID id, const UUID &uu) const
 {
     return nullptr;
 }
 
-std::map<UUID, Rule *> SchematicRules::get_rules(RuleID id)
+std::map<UUID, const Rule *> SchematicRules::get_rules(RuleID id) const
 {
-    std::map<UUID, Rule *> r;
+    std::map<UUID, const Rule *> r;
     switch (id) {
     default:;
     }

@@ -80,9 +80,9 @@ public:
 
 private:
     PNS::ROUTER *m_router;
-    horizon::BoardRules *m_rules;
+    const horizon::BoardRules *m_rules;
     PNS_HORIZON_IFACE *m_iface = nullptr;
-    std::vector<horizon::RuleClearanceCopperKeepout *> m_rules_keepout;
+    std::vector<const horizon::RuleClearanceCopperKeepout *> m_rules_keepout;
 };
 
 PNS_HORIZON_RULE_RESOLVER::PNS_HORIZON_RULE_RESOLVER(const horizon::Board *aBoard, horizon::BoardRules *rules,
@@ -94,8 +94,8 @@ PNS_HORIZON_RULE_RESOLVER::PNS_HORIZON_RULE_RESOLVER(const horizon::Board *aBoar
     PNS::TOPOLOGY topo(world);
 
     m_iface = static_cast<PNS_HORIZON_IFACE *>(m_router->GetInterface());
-    m_rules_keepout = horizon::dynamic_cast_vector<horizon::RuleClearanceCopperKeepout *>(
-            m_rules->get_rules_sorted(horizon::RuleID::CLEARANCE_COPPER_KEEPOUT));
+    m_rules_keepout =
+            m_rules->get_rules_sorted<horizon::RuleClearanceCopperKeepout>(horizon::RuleID::CLEARANCE_COPPER_KEEPOUT);
 }
 
 PNS_HORIZON_RULE_RESOLVER::~PNS_HORIZON_RULE_RESOLVER()

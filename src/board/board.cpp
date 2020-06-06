@@ -258,13 +258,14 @@ Board Board::new_from_file(const std::string &filename, Block &block, Pool &pool
     return Board(UUID(j.at("uuid").get<std::string>()), j, block, pool, vpp);
 }
 
+
 Board::Board(const UUID &uu, Block &bl) : uuid(uu), block(&bl)
 {
     rules.add_rule(RuleID::CLEARANCE_COPPER);
     rules.add_rule(RuleID::CLEARANCE_COPPER_OTHER);
     rules.add_rule(RuleID::TRACK_WIDTH);
     rules.add_rule(RuleID::PLANE);
-    auto r = dynamic_cast<RuleTrackWidth *>(rules.get_rules(RuleID::TRACK_WIDTH).begin()->second);
+    auto r = dynamic_cast<RuleTrackWidth *>(rules.get_rules_nc(RuleID::TRACK_WIDTH).begin()->second);
     r->widths.emplace(std::piecewise_construct, std::forward_as_tuple(0), std::forward_as_tuple());
     // TBD: inner layers
     r->widths.emplace(std::piecewise_construct, std::forward_as_tuple(-100), std::forward_as_tuple());

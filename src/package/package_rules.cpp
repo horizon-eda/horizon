@@ -30,7 +30,7 @@ std::set<RuleID> PackageRules::get_rule_ids() const
     return {RuleID::PACKAGE_CHECKS};
 }
 
-Rule *PackageRules::get_rule(RuleID id)
+const Rule *PackageRules::get_rule(RuleID id) const
 {
     if (id == RuleID::PACKAGE_CHECKS) {
         return &rule_package_checks;
@@ -38,14 +38,14 @@ Rule *PackageRules::get_rule(RuleID id)
     return nullptr;
 }
 
-Rule *PackageRules::get_rule(RuleID id, const UUID &uu)
+const Rule *PackageRules::get_rule(RuleID id, const UUID &uu) const
 {
     return nullptr;
 }
 
-std::map<UUID, Rule *> PackageRules::get_rules(RuleID id)
+std::map<UUID, const Rule *> PackageRules::get_rules(RuleID id) const
 {
-    std::map<UUID, Rule *> r;
+    std::map<UUID, const Rule *> r;
     switch (id) {
     default:;
     }

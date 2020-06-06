@@ -10,11 +10,11 @@
 #include <sstream>
 
 namespace horizon {
-RulesCheckResult BoardRules::check_track_width(const Board *brd)
+RulesCheckResult BoardRules::check_track_width(const Board *brd) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
-    auto rules = dynamic_cast_vector<RuleTrackWidth *>(get_rules_sorted(RuleID::TRACK_WIDTH));
+    auto rules = get_rules_sorted<RuleTrackWidth>(RuleID::TRACK_WIDTH);
     for (const auto &it : brd->tracks) {
         auto width = it.second.width;
         Net *net = it.second.net;
@@ -64,11 +64,11 @@ static RulesCheckError *check_hole(RulesCheckResult &r, uint64_t dia, const Rule
     return nullptr;
 }
 
-RulesCheckResult BoardRules::check_hole_size(const Board *brd)
+RulesCheckResult BoardRules::check_hole_size(const Board *brd) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
-    auto rules = dynamic_cast_vector<RuleHoleSize *>(get_rules_sorted(RuleID::HOLE_SIZE));
+    auto rules = get_rules_sorted<RuleHoleSize>(RuleID::HOLE_SIZE);
     for (const auto &it : brd->holes) {
         Net *net = it.second.net;
         for (const auto &it_hole : it.second.padstack.holes) {
@@ -144,7 +144,7 @@ static std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint> get_patch_bb(const 
 static std::deque<RulesCheckError>
 clearance_cu_worker(std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey>> &patch_pairs,
                     std::mutex &patch_pair_mutex, const std::map<CanvasPatch::PatchKey, ClipperLib::Paths> &patches,
-                    const Board *brd, BoardRules *rules, int n_patch_pairs, check_status_cb_t status_cb)
+                    const Board *brd, const BoardRules *rules, int n_patch_pairs, check_status_cb_t status_cb)
 {
     std::deque<RulesCheckError> r_errors;
     while (true) {
@@ -225,7 +225,7 @@ clearance_cu_worker(std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::Patch
 }
 
 RulesCheckResult BoardRules::check_clearance_copper(const Board *brd, RulesCheckCache &cache,
-                                                    check_status_cb_t status_cb)
+                                                    check_status_cb_t status_cb) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
@@ -281,7 +281,7 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board *brd, RulesCheck
 }
 
 RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board *brd, RulesCheckCache &cache,
-                                                               check_status_cb_t status_cb)
+                                                               check_status_cb_t status_cb) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
@@ -474,7 +474,7 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board *brd,
     return r;
 }
 
-RulesCheckResult BoardRules::check_preflight(const Board *brd)
+RulesCheckResult BoardRules::check_preflight(const Board *brd) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
@@ -579,12 +579,12 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd)
 
 
 RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board *brd, RulesCheckCache &cache,
-                                                            check_status_cb_t status_cb)
+                                                            check_status_cb_t status_cb) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
     status_cb("Getting patches");
-    auto rules = dynamic_cast_vector<RuleClearanceCopperKeepout *>(get_rules_sorted(RuleID::CLEARANCE_COPPER_KEEPOUT));
+    auto rules = get_rules_sorted<RuleClearanceCopperKeepout>(RuleID::CLEARANCE_COPPER_KEEPOUT);
     auto c = dynamic_cast<RulesCheckCacheBoardImage *>(cache.get_cache(RulesCheckCacheID::BOARD_IMAGE));
     std::set<int> layers;
     const auto &patches = c->get_canvas()->get_patches();
@@ -666,7 +666,8 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board *brd, Ru
     return r;
 }
 
-RulesCheckResult BoardRules::check(RuleID id, const Board *brd, RulesCheckCache &cache, check_status_cb_t status_cb)
+RulesCheckResult BoardRules::check(RuleID id, const Board *brd, RulesCheckCache &cache,
+                                   check_status_cb_t status_cb) const
 {
     switch (id) {
     case RuleID::TRACK_WIDTH:

@@ -103,18 +103,6 @@ void Rules::fix_order(RuleID id)
     }
 }
 
-std::vector<Rule *> Rules::get_rules_sorted(RuleID id)
-{
-    auto rs = get_rules(id);
-    std::vector<Rule *> rv;
-    rv.reserve(rs.size());
-    for (auto &it : rs) {
-        rv.push_back(it.second);
-    }
-    std::sort(rv.begin(), rv.end(), [](auto a, auto b) { return a->order < b->order; });
-    return rv;
-}
-
 void Rules::move_rule(RuleID id, const UUID &uu, int dir)
 {
     auto rules = get_rules(id);
@@ -134,4 +122,24 @@ void Rules::move_rule(RuleID id, const UUID &uu, int dir)
     assert(rule_other != rules.end());
     std::swap(rule_other->second->order, rule->order);
 }
+
+Rule *Rules::get_rule(RuleID id)
+{
+    return const_cast<Rule *>(static_cast<const Rules *>(this)->get_rule(id));
+}
+
+Rule *Rules::get_rule(RuleID id, const UUID &uu)
+{
+    return const_cast<Rule *>(static_cast<const Rules *>(this)->get_rule(id, uu));
+}
+
+std::map<UUID, Rule *> Rules::get_rules(RuleID id)
+{
+    auto t = static_cast<const Rules *>(this)->get_rules(id);
+    std::map<UUID, Rule *> r;
+    std::transform(t.begin(), t.end(), std::inserter(r, r.begin()),
+                   [](auto &x) { return std::make_pair(x.first, const_cast<Rule *>(x.second)); });
+    return r;
+}
+
 } // namespace horizon

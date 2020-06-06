@@ -4,11 +4,11 @@
 #include "util/accumulator.hpp"
 
 namespace horizon {
-RulesCheckResult SchematicRules::check_single_pin_net(const class Schematic *sch, class RulesCheckCache &cache)
+RulesCheckResult SchematicRules::check_single_pin_net(const class Schematic *sch, class RulesCheckCache &cache) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
-    auto rule = dynamic_cast<RuleSinglePinNet *>(get_rule(RuleID::SINGLE_PIN_NET));
+    auto rule = dynamic_cast<const RuleSinglePinNet *>(get_rule(RuleID::SINGLE_PIN_NET));
     auto c = dynamic_cast<RulesCheckCacheNetPins *>(cache.get_cache(RulesCheckCacheID::NET_PINS));
 
     for (const auto &it : c->get_net_pins()) {
@@ -29,7 +29,7 @@ RulesCheckResult SchematicRules::check_single_pin_net(const class Schematic *sch
     return r;
 }
 
-RulesCheckResult SchematicRules::check(RuleID id, const Schematic *sch, RulesCheckCache &cache)
+RulesCheckResult SchematicRules::check(RuleID id, const Schematic *sch, RulesCheckCache &cache) const
 {
     switch (id) {
     case RuleID::SINGLE_PIN_NET:

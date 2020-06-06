@@ -212,8 +212,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
 
     // add keepouts
     {
-        auto keepout_rules = dynamic_cast_vector<RuleClearanceCopperKeepout *>(
-                rules.get_rules_sorted(RuleID::CLEARANCE_COPPER_KEEPOUT));
+        auto keepout_rules = rules.get_rules_sorted<RuleClearanceCopperKeepout>(RuleID::CLEARANCE_COPPER_KEEPOUT);
         auto keepout_contours = get_keepout_contours();
         for (const auto &it_keepout : keepout_contours) {
             const auto keepout = it_keepout.keepout;

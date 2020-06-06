@@ -12,18 +12,18 @@ public:
     PackageRules();
 
     void load_from_json(const json &j);
-    RulesCheckResult check(RuleID id, const class Package *pkg, class RulesCheckCache &cache);
+    RulesCheckResult check(RuleID id, const class Package *pkg, class RulesCheckCache &cache) const;
     json serialize() const;
     std::set<RuleID> get_rule_ids() const;
-    Rule *get_rule(RuleID id);
-    Rule *get_rule(RuleID id, const UUID &uu);
-    std::map<UUID, Rule *> get_rules(RuleID id);
+    const Rule *get_rule(RuleID id) const override;
+    const Rule *get_rule(RuleID id, const UUID &uu) const override;
+    std::map<UUID, const Rule *> get_rules(RuleID id) const override;
     void remove_rule(RuleID id, const UUID &uu);
     Rule *add_rule(RuleID id);
 
 private:
     RulePackageChecks rule_package_checks;
 
-    RulesCheckResult check_package(const class Package *pkg);
+    RulesCheckResult check_package(const class Package *pkg) const;
 };
 } // namespace horizon
