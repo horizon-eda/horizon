@@ -6,6 +6,7 @@
 #include "widgets/chooser_buttons.hpp"
 #include "widgets/parameter_set_editor.hpp"
 #include "widgets/spin_button_dim.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 
@@ -75,16 +76,6 @@ void RuleEditorClearanceCopperKeepout::populate()
     clearance_grid->set_column_spacing(10);
 
     {
-
-        int top = 0;
-        for (const auto it : patch_types_cu) {
-            auto *la = Gtk::manage(new Gtk::Label(patch_type_names.at(it)));
-            la->set_xalign(1);
-            clearance_grid->attach(*la, 0, top, 1, 1);
-            top++;
-        }
-    }
-    {
         int top = 0;
         for (const auto it_row : patch_types_cu) {
             auto *sp = Gtk::manage(new SpinButtonDim());
@@ -94,8 +85,7 @@ void RuleEditorClearanceCopperKeepout::populate()
                 rule2->set_clearance(it_row, sp->get_value_as_int());
                 s_signal_updated.emit();
             });
-            clearance_grid->attach(*sp, 1, top, 1, 1);
-            top++;
+            grid_attach_label_and_widget(clearance_grid, patch_type_names.at(it_row), sp, top);
         }
     }
 

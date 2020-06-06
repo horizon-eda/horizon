@@ -11,6 +11,7 @@ void RuleEditorHoleSize::populate()
     builder = Gtk::Builder::create_from_resource("/org/horizon-eda/horizon/imp/rules/rule_editor_hole_size.ui");
     Gtk::Box *editor;
     builder->get_widget("editor", editor);
+    editor->set_halign(Gtk::ALIGN_START);
     pack_start(*editor, true, true, 0);
     auto sp_min = create_spinbutton("min_dia_box");
     auto sp_max = create_spinbutton("max_dia_box");

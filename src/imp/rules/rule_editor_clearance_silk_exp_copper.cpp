@@ -29,6 +29,7 @@ void RuleEditorClearanceSilkscreenExposedCopper::populate()
     grid->set_margin_end(20);
     grid->set_margin_bottom(20);
     pack_start(*grid, true, true, 0);
+    grid->set_halign(Gtk::ALIGN_START);
 
     if (auto rule1 = dynamic_cast<RuleClearanceSilkscreenExposedCopper *>(rule)) {
         auto sp_top = create_sp_dim("Top clearance");

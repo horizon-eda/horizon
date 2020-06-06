@@ -17,6 +17,7 @@ void RuleEditorDiffpair::populate()
     editor->set_margin_start(20);
     editor->set_margin_end(20);
     editor->set_margin_bottom(20);
+    editor->set_halign(Gtk::ALIGN_START);
 
     auto grid = Gtk::manage(new Gtk::Grid());
     grid->set_row_spacing(10);
@@ -71,6 +72,7 @@ void RuleEditorDiffpair::populate()
         sp->set_range(0, 10_mm);
         bind_widget(sp, rule2->track_width);
         sp->signal_value_changed().connect([this] { s_signal_updated.emit(); });
+        sp->set_hexpand(true);
         grid_attach_label_and_widget(grid2, "Track width", sp, top);
     }
     {
