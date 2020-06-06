@@ -255,7 +255,12 @@ std::pair<Coordf, Coordf> Canvas::get_bbox(bool visible_only) const
                 if (it2.flags & Triangle::FLAG_GLYPH)
                     continue;
                 std::vector<Coordf> points = {Coordf(it2.x0, it2.y0), Coordf(it2.x1, it2.y2), Coordf(it2.x1, it2.y2)};
-                if (std::isnan(it2.y2)) { // line
+                if (std::isnan(it2.y1) && std::isnan(it2.x2) && std::isnan(it2.y2)) { // circle
+                    auto r = Coordf(it2.x1, it2.x1);
+                    a = Coordf::min(a, points.at(0) - r);
+                    b = Coordf::max(b, points.at(0) + r);
+                }
+                else if (std::isnan(it2.y2)) { // line
                     float width = it2.x2;
                     Coordf offset(width / 2, width / 2);
                     a = Coordf::min(a, points.at(0) - offset);

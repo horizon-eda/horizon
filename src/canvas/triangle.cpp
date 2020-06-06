@@ -113,6 +113,11 @@ void TriangleRenderer::realize()
                                                     "triangle-glyph-fragment.glsl",
                                                     "/org/horizon-eda/horizon/canvas/shaders/"
                                                     "triangle-glyph-geometry.glsl");
+    program_circle = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas/shaders/triangle-vertex.glsl",
+                                                     "/org/horizon-eda/horizon/canvas/shaders/"
+                                                     "triangle-circle-fragment.glsl",
+                                                     "/org/horizon-eda/horizon/canvas/shaders/"
+                                                     "triangle-circle-geometry.glsl");
     GL_CHECK_ERROR;
     glGenBuffers(1, &ubo);
     glBindBuffer(GL_UNIFORM_BUFFER, ubo);
@@ -128,6 +133,7 @@ void TriangleRenderer::realize()
     glUniformBlockBinding(program_line_butt, block_index, binding_point_index);
     glUniformBlockBinding(program_line, block_index, binding_point_index);
     glUniformBlockBinding(program_glyph, block_index, binding_point_index);
+    glUniformBlockBinding(program_circle, block_index, binding_point_index);
     GL_CHECK_ERROR;
     vao = create_vao(program_line, vbo, ebo);
     GL_CHECK_ERROR;
@@ -225,6 +231,10 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
 
         case Type::GLYPH:
             glUseProgram(program_glyph);
+            break;
+
+        case Type::CIRCLE:
+            glUseProgram(program_circle);
             break;
         }
         switch (highlight_mode) {
@@ -353,6 +363,9 @@ void TriangleRenderer::push()
             }
             else if (isnan(tri.y2) && tri.x2 == 0) {
                 ty = Type::LINE0;
+            }
+            else if (isnan(tri.y1) && isnan(tri.x2) && isnan(tri.y2)) {
+                ty = Type::CIRCLE;
             }
             else if (isnan(tri.y2) && (tri.flags & Triangle::FLAG_BUTT)) {
                 ty = Type::LINE_BUTT;

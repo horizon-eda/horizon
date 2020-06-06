@@ -82,7 +82,7 @@ public:
 
 private:
     CanvasGL *ca;
-    enum class Type { TRIANGLE, LINE, LINE0, LINE_BUTT, GLYPH };
+    enum class Type { TRIANGLE, LINE, LINE0, LINE_BUTT, GLYPH, CIRCLE };
     std::map<int, std::vector<Triangle>> &triangles;
     std::map<int, std::map<std::pair<Type, bool>, std::pair<size_t, size_t>>> layer_offsets;
     size_t n_tris = 0;
@@ -91,6 +91,7 @@ private:
     GLuint program_line;
     GLuint program_line_butt;
     GLuint program_triangle;
+    GLuint program_circle;
     GLuint program_glyph;
     GLuint vao;
     GLuint vbo;

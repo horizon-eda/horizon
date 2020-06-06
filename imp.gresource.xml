@@ -118,6 +118,8 @@
     <file>canvas/shaders/triangle-line-geometry.glsl</file>
     <file>canvas/shaders/triangle-glyph-fragment.glsl</file>
     <file>canvas/shaders/triangle-glyph-geometry.glsl</file>
+    <file>canvas/shaders/triangle-circle-fragment.glsl</file>
+    <file>canvas/shaders/triangle-circle-geometry.glsl</file>
     <file>canvas/shaders/ubo.glsl</file>
 
     <file>canvas/shaders/marker-vertex.glsl</file>

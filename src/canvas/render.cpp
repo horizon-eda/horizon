@@ -875,10 +875,10 @@ void Canvas::render(const Shape &shape, bool interactive)
         targets.emplace_back(shape.uuid, ObjectType::SHAPE, shape.placement.shift, 0, shape.layer);
     }
     if (shape.form == Shape::Form::CIRCLE) {
-        auto r = shape.params.at(0);
+        auto r = shape.params.at(0) / 2;
         transform_save();
         transform.accumulate(shape.placement);
-        draw_line(Coordf(0, 0), Coordf(.1e3, 0), ColorP::FROM_LAYER, shape.layer, true, r);
+        add_triangle(shape.layer, transform.shift, Coordf(r, NAN), Coordf(NAN, NAN), ColorP::FROM_LAYER);
         transform_restore();
     }
     else if (shape.form == Shape::Form::RECTANGLE) {
