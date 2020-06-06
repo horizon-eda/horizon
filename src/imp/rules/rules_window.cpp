@@ -559,6 +559,11 @@ void RulesWindow::set_enabled(bool enable)
 
 void RulesWindow::update_warning()
 {
+    if (!rule_descriptions.at(rule_current).needs_match_all) {
+        rev_warn->set_reveal_child(false);
+        return;
+    }
+
     auto sorted = rules->get_rules_sorted(rule_current);
     if (sorted.size() == 0) {
         rev_warn->set_reveal_child(true);
