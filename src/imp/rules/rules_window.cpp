@@ -394,6 +394,7 @@ void RulesWindow::rule_selected(RuleID id)
     if (multi) {
         show_editor(nullptr);
         update_rule_instances(id);
+        update_warning();
     }
     else {
         auto rule = rules->get_rule(id);
