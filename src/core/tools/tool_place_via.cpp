@@ -18,12 +18,12 @@ bool ToolPlaceVia::can_begin()
 bool ToolPlaceVia::begin_attached()
 {
     bool r;
-    UUID ps_uuid;
-    std::tie(r, ps_uuid) = imp->dialogs.select_via_padstack(doc.b->get_via_padstack_provider());
+    UUID net_uuid;
+    std::tie(r, net_uuid) = imp->dialogs.select_net(doc.b->get_block(), false);
     if (!r) {
         return false;
     }
-    padstack = doc.b->get_via_padstack_provider()->get_padstack(ps_uuid);
+    net = doc.b->get_block()->get_net(net_uuid);
     imp->tool_bar_set_tip("<b>LMB:</b>place via <b>RMB:</b>delete current via and finish");
     return true;
 }
@@ -31,10 +31,12 @@ bool ToolPlaceVia::begin_attached()
 void ToolPlaceVia::create_attached()
 {
     auto uu = UUID::random();
-    via = &doc.b->get_board()
-                   ->vias
-                   .emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, padstack))
-                   .first->second;
+    auto &rules = dynamic_cast<BoardRules &>(*doc.b->get_rules());
+    auto ps = doc.b->get_via_padstack_provider()->get_padstack(rules.get_via_padstack_uuid(net));
+
+    &doc.b->get_board()
+             ->vias.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, padstack))
+             .first->second;
     via->junction = temp;
 }
 
