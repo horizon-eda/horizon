@@ -106,6 +106,8 @@ void ImpInterface::set_snap_filter_from_selection(const std::set<SelectableRef> 
             sf.emplace(ObjectType::SYMBOL_PIN, it.uuid);
         else if (it.type == ObjectType::POLYGON_VERTEX)
             sf.emplace(ObjectType::POLYGON_EDGE, it.uuid, it.vertex);
+        else if (it.type == ObjectType::DIMENSION)
+            sf.emplace(ObjectType::DIMENSION, it.uuid, -1);
     }
     imp->canvas->snap_filter = sf;
 }
