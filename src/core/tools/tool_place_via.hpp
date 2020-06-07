@@ -16,7 +16,7 @@ protected:
     bool begin_attached() override;
     bool update_attached(const ToolArgs &args) override;
     class Via *via = nullptr;
-    const class Net *net = nullptr;
+    class Net *net = nullptr;
 
     std::forward_list<class Via *> vias_placed;
 

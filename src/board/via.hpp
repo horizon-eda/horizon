@@ -25,6 +25,7 @@ public:
     uuid_ptr<Junction> junction = nullptr;
     uuid_ptr<const Padstack> vpp_padstack;
     Padstack padstack;
+    void expand(const class Board &brd);
 
     ParameterSet parameter_set;
 

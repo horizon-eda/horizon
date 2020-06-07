@@ -31,13 +31,16 @@ bool ToolPlaceVia::begin_attached()
 void ToolPlaceVia::create_attached()
 {
     auto uu = UUID::random();
-    auto &rules = dynamic_cast<BoardRules &>(*doc.b->get_rules());
+    const auto &rules = dynamic_cast<BoardRules &>(*doc.b->get_rules());
     auto ps = doc.b->get_via_padstack_provider()->get_padstack(rules.get_via_padstack_uuid(net));
-
-    &doc.b->get_board()
-             ->vias.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, padstack))
-             .first->second;
+    via = &doc.b->get_board()
+                   ->vias.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, ps))
+                   .first->second;
     via->junction = temp;
+    via->from_rules = true;
+    via->net_set = net;
+    via->parameter_set = rules.get_via_parameter_set(net);
+    via->expand(*doc.b->get_board());
 }
 
 void ToolPlaceVia::delete_attached()

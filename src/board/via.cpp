@@ -45,6 +45,16 @@ Via::Via(shallow_copy_t sh, const Via &other)
 {
 }
 
+void Via::expand(const Board &brd)
+{
+    junction->has_via = true;
+    junction->layer = 10000;
+    padstack = *vpp_padstack;
+    ParameterSet ps_via = parameter_set;
+    ps_via.emplace(ParameterID::VIA_SOLDER_MASK_EXPANSION, brd.rules.get_parameters()->via_solder_mask_expansion);
+    padstack.apply_parameter_set(ps_via);
+    padstack.expand_inner(brd.get_n_inner_layers());
+}
 
 json Via::serialize() const
 {

@@ -626,13 +626,7 @@ void Board::expand(bool careful)
 
     auto params = rules.get_parameters();
     for (auto &it : vias) {
-        it.second.junction->has_via = true;
-        it.second.junction->layer = 10000;
-        it.second.padstack = *it.second.vpp_padstack;
-        ParameterSet ps_via = it.second.parameter_set;
-        ps_via.emplace(ParameterID::VIA_SOLDER_MASK_EXPANSION, params->via_solder_mask_expansion);
-        it.second.padstack.apply_parameter_set(ps_via);
-        it.second.padstack.expand_inner(n_inner_layers);
+        it.second.expand(*this);
     }
     for (auto &it : holes) {
         it.second.padstack = *it.second.pool_padstack;
