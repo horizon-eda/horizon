@@ -45,6 +45,11 @@ public:
 
     const std::string &get_filename() const override;
 
+    ObjectType get_object_type() const override
+    {
+        return ObjectType::PACKAGE;
+    }
+
 private:
     std::map<UUID, Junction> *get_junction_map() override;
     std::map<UUID, Line> *get_line_map() override;

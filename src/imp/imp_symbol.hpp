@@ -15,10 +15,6 @@ protected:
     {
         return ActionCatalogItem::AVAILABLE_IN_SYMBOL;
     };
-    ObjectType get_editor_type() const override
-    {
-        return ObjectType::SYMBOL;
-    }
 
     void update_monitor() override;
 

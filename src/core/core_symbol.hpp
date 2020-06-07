@@ -55,6 +55,11 @@ public:
 
     const std::string &get_filename() const override;
 
+    ObjectType get_object_type() const override
+    {
+        return ObjectType::SYMBOL;
+    }
+
 private:
     std::map<UUID, Text> *get_text_map() override;
     std::map<UUID, Polygon> *get_polygon_map() override;

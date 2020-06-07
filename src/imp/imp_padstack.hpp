@@ -14,10 +14,6 @@ protected:
     {
         return ActionCatalogItem::AVAILABLE_IN_PADSTACK;
     };
-    ObjectType get_editor_type() const override
-    {
-        return ObjectType::PADSTACK;
-    }
     ActionToolID get_doubleclick_action(ObjectType type, const UUID &uu) override;
 
     std::map<ObjectType, SelectionFilterInfo> get_selection_filter_info() const override;

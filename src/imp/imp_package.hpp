@@ -25,10 +25,6 @@ protected:
     {
         return ActionCatalogItem::AVAILABLE_IN_PACKAGE;
     };
-    ObjectType get_editor_type() const override
-    {
-        return ObjectType::PACKAGE;
-    }
 
     std::string get_hud_text(std::set<SelectableRef> &sel) override;
     void update_action_sensitivity() override;

@@ -88,6 +88,11 @@ public:
         return project_meta_loaded_from_block;
     };
 
+    ObjectType get_object_type() const override
+    {
+        return ObjectType::SCHEMATIC;
+    }
+
 private:
     Block block;
     const bool project_meta_loaded_from_block;

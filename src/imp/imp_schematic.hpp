@@ -21,10 +21,6 @@ protected:
     {
         return ActionCatalogItem::AVAILABLE_IN_SCHEMATIC;
     };
-    ObjectType get_editor_type() const override
-    {
-        return ObjectType::SCHEMATIC;
-    }
 
     std::string get_hud_text(std::set<SelectableRef> &sel) override;
     void search_center(const Searcher::SearchResult &res) override;

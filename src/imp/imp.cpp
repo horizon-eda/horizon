@@ -2139,5 +2139,9 @@ ActionButtonMenu &ImpBase::add_action_button_menu(const char *icon_name)
     return *ab;
 }
 
+ObjectType ImpBase::get_editor_type() const
+{
+    return core->get_object_type();
+}
 
 } // namespace horizon

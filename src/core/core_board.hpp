@@ -61,6 +61,11 @@ public:
 
     const std::string &get_filename() const override;
 
+    ObjectType get_object_type() const override
+    {
+        return ObjectType::BOARD;
+    }
+
 private:
     ViaPadstackProvider via_padstack_provider;
 

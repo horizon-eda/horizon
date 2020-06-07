@@ -60,6 +60,7 @@ public:
     {
         return m_pool;
     }
+    virtual ObjectType get_object_type() const = 0;
 
     /**
      * Expands the non-working document.

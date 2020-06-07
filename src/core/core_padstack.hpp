@@ -34,6 +34,11 @@ public:
 
     const std::string &get_filename() const override;
 
+    ObjectType get_object_type() const override
+    {
+        return ObjectType::PADSTACK;
+    }
+
 private:
     std::map<UUID, Polygon> *get_polygon_map() override;
     std::map<UUID, Hole> *get_hole_map() override;

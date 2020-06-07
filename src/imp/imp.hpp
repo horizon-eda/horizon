@@ -141,7 +141,7 @@ protected:
     virtual void handle_maybe_drag();
 
     virtual ActionCatalogItem::Availability get_editor_type_for_action() const = 0;
-    virtual ObjectType get_editor_type() const = 0;
+    ObjectType get_editor_type() const;
 
     void layer_up_down(bool up);
     void goto_layer(int layer);

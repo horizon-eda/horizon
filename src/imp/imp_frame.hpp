@@ -14,10 +14,6 @@ protected:
     {
         return ActionCatalogItem::AVAILABLE_IN_FRAME;
     };
-    ObjectType get_editor_type() const override
-    {
-        return ObjectType::FRAME;
-    }
 
 private:
     void canvas_update() override;
