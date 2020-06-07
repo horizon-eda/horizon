@@ -10,11 +10,32 @@ public:
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;
 
+    class Settings : public ToolSettings {
+    public:
+        json serialize() const override;
+        void load_from_json(const json &j) override;
+        enum class Mode { CENTER, CORNER };
+        Mode mode = Mode::CENTER;
+    };
+
+    const ToolSettings *get_settings_const() const override
+    {
+        return &settings;
+    }
+
+    void apply_settings() override;
+
+protected:
+    ToolSettings *get_settings() override
+    {
+        return &settings;
+    }
+
 private:
-    enum class Mode { CENTER, CORNER };
+    Settings settings;
+
     enum class Decoration { NONE, CHAMFER, NOTCH };
 
-    Mode mode = Mode::CENTER;
     Decoration decoration = Decoration::NONE;
     int decoration_pos = 0;
     Coordi first_pos;

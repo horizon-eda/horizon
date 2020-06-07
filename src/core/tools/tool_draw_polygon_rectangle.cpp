@@ -5,8 +5,26 @@
 #include <sstream>
 #include "document/idocument.hpp"
 #include <gdk/gdkkeysyms.h>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
+
+static const LutEnumStr<ToolDrawPolygonRectangle::Settings::Mode> mode_lut = {
+        {"center", ToolDrawPolygonRectangle::Settings::Mode::CENTER},
+        {"corner", ToolDrawPolygonRectangle::Settings::Mode::CORNER},
+};
+
+void ToolDrawPolygonRectangle::Settings::load_from_json(const json &j)
+{
+    mode = mode_lut.lookup(j.at("mode"));
+}
+
+json ToolDrawPolygonRectangle::Settings::serialize() const
+{
+    json j;
+    j["mode"] = mode_lut.lookup_reverse(mode);
+    return j;
+}
 
 ToolDrawPolygonRectangle::ToolDrawPolygonRectangle(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
@@ -17,13 +35,21 @@ bool ToolDrawPolygonRectangle::can_begin()
     return doc.r->has_object_type(ObjectType::POLYGON);
 }
 
+void ToolDrawPolygonRectangle::apply_settings()
+{
+    if (!temp)
+        return;
+    update_polygon();
+    update_tip();
+}
+
 void ToolDrawPolygonRectangle::update_polygon()
 {
     temp->vertices.clear();
     if (step == 1) {
         Coordi p0, p1;
         Coordi min_size(corner_radius * 2 + 100, corner_radius * 2 + 100);
-        if (mode == Mode::CORNER) {
+        if (settings.mode == Settings::Mode::CORNER) {
             p0 = Coordi::min(first_pos, second_pos);
             p1 = Coordi::max(Coordi::max(first_pos, second_pos), p0 + min_size);
         }
@@ -164,7 +190,7 @@ void ToolDrawPolygonRectangle::update_tip()
 {
     std::stringstream ss;
     ss << "<b>LMB:</b>";
-    if (mode == Mode::CENTER) {
+    if (settings.mode == Settings::Mode::CENTER) {
         if (step == 0) {
             ss << "place center";
         }
@@ -188,7 +214,7 @@ void ToolDrawPolygonRectangle::update_tip()
               "<b>s:</b>decoration size";
 
     ss << " <i>";
-    if (mode == Mode::CENTER) {
+    if (settings.mode == Settings::Mode::CENTER) {
         ss << "from center";
     }
     else {
@@ -228,7 +254,7 @@ ToolResponse ToolDrawPolygonRectangle::update(const ToolArgs &args)
     }
     else if (args.type == ToolEventType::KEY) {
         if (args.key == GDK_KEY_c) {
-            mode = mode == Mode::CENTER ? Mode::CORNER : Mode::CENTER;
+            settings.mode = settings.mode == Settings::Mode::CENTER ? Settings::Mode::CORNER : Settings::Mode::CENTER;
             update_polygon();
         }
         else if (args.key == GDK_KEY_p && corner_radius == 0) {
