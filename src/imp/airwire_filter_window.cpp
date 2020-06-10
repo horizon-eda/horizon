@@ -2,6 +2,7 @@
 #include "block/block.hpp"
 #include "util/util.hpp"
 #include "airwire_filter.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 AirwireFilterWindow *AirwireFilterWindow::create(Gtk::Window *p, const class Block &b, class AirwireFilter &fi)
@@ -23,6 +24,8 @@ AirwireFilterWindow::AirwireFilterWindow(BaseObjectType *cobject, const Glib::Re
                                          const class Block &bl, class AirwireFilter &fi)
     : Gtk::Window(cobject), block(bl), filter(fi)
 {
+    install_esc_to_close(*this);
+
     GET_WIDGET(treeview);
     GET_WIDGET(all_on_button);
     GET_WIDGET(all_off_button);
