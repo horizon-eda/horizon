@@ -598,8 +598,12 @@ void CoreSchematic::set_sheet(const UUID &uu)
 
 void CoreSchematic::rebuild(bool from_undo)
 {
+    clock_t begin = clock();
     sch.expand();
     Core::rebuild(from_undo);
+    clock_t end = clock();
+    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    std::cout << "rebuild took " << elapsed_secs << std::endl;
 }
 
 const Sheet *CoreSchematic::get_canvas_data()
