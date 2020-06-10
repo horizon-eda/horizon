@@ -1,9 +1,14 @@
 #include "uuid.hpp"
+#include <string.h>
 
 namespace horizon {
+
 UUID::UUID()
 {
-    uuid_clear(uu);
+    static_assert(sizeof(UUID::uu) == 16, "UUID size must be 16");
+    static_assert(sizeof(UUID::uu[0]) == 1, "UUID element size must be 1");
+
+    memset(uu, 0, sizeof(uu));
 }
 
 UUID UUID::random()
@@ -29,7 +34,7 @@ UUID::UUID(const std::string &str)
 
 bool operator==(const UUID &self, const UUID &other)
 {
-    return !uuid_compare(self.uu, other.uu);
+    return memcmp(self.uu, other.uu, sizeof(self.uu)) == 0;
 }
 
 bool operator!=(const UUID &self, const UUID &other)
@@ -39,11 +44,17 @@ bool operator!=(const UUID &self, const UUID &other)
 
 bool operator<(const UUID &self, const UUID &other)
 {
-    return uuid_compare(self.uu, other.uu) < 0;
+    return memcmp(self.uu, other.uu, sizeof(self.uu)) < 0;
 }
 
 bool operator>(const UUID &self, const UUID &other)
 {
     return other < self;
+}
+
+UUID::operator bool() const
+{
+    static const uuid_t null_uuid = {0};
+    return memcmp(uu, null_uuid, sizeof(uu)) != 0;
 }
 }; // namespace horizon

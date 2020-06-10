@@ -28,10 +28,7 @@ public:
     /**
      *  @return true if uuid is non-null, false otherwise
      */
-    operator bool() const
-    {
-        return !uuid_is_null(uu);
-    }
+    operator bool() const;
 
     friend bool operator==(const UUID &self, const UUID &other);
     friend bool operator!=(const UUID &self, const UUID &other);
