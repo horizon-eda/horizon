@@ -103,6 +103,7 @@ protected:
     bool sockets_connected = false;
     int mgr_pid = -1;
     bool no_update = false;
+    bool distraction_free = false;
 
     virtual void canvas_update() = 0;
     virtual void expand_selection_for_property_panel(std::set<SelectableRef> &sel_extra,
@@ -279,5 +280,6 @@ private:
     std::list<class ActionButtonBase *> action_buttons;
 
     Glib::RefPtr<Gio::SimpleAction> bottom_view_action;
+    Glib::RefPtr<Gio::SimpleAction> distraction_free_action;
 };
 } // namespace horizon

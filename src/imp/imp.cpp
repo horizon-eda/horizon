@@ -407,6 +407,22 @@ void ImpBase::run(int argc, char *argv[])
 
     key_sequence_dialog = std::make_unique<KeySequenceDialog>(this->main_window);
 
+    distraction_free_action = main_window->add_action_bool("distraction_free", distraction_free);
+    distraction_free_action->signal_change_state().connect([this](const Glib::VariantBase &v) {
+        auto b = Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(v).get();
+        if (b != distraction_free) {
+            trigger_action(ActionID::DISTRACTION_FREE);
+        }
+    });
+
+    connect_action(ActionID::DISTRACTION_FREE, [this](const auto &a) {
+        distraction_free = !distraction_free;
+        g_simple_action_set_state(distraction_free_action->gobj(), g_variant_new_boolean(distraction_free));
+        main_window->left_panel->set_visible(!distraction_free);
+        bool show_properties = panels->get_selection().size() > 0;
+        main_window->property_scrolled_window->set_visible(show_properties && !distraction_free);
+        this->update_view_hints();
+    });
     connect_action(ActionID::SELECTION_FILTER, [this](const auto &a) { selection_filter_dialog->present(); });
     connect_action(ActionID::SAVE, [this](const auto &a) {
         if (!read_only) {
@@ -711,6 +727,8 @@ void ImpBase::run(int argc, char *argv[])
         rect.set_width(24);
         main_window->view_options_button->get_popover()->set_pointing_to(rect);
     }
+
+    view_options_menu->append("Distraction free mode", "win.distraction_free");
     add_tool_action(ActionID::SELECTION_FILTER, "selection_filter");
     view_options_menu->append("Selection filter", "win.selection_filter");
 
@@ -1782,7 +1800,7 @@ void ImpBase::update_property_panels()
     sel.insert(sel_extra.begin(), sel_extra.end());
     panels->update_objects(sel);
     bool show_properties = panels->get_selection().size() > 0;
-    main_window->property_scrolled_window->set_visible(show_properties);
+    main_window->property_scrolled_window->set_visible(show_properties && !distraction_free);
 }
 
 void ImpBase::handle_tool_change(ToolID id)
@@ -2073,6 +2091,9 @@ void ImpBase::set_window_title_from_block()
 std::vector<std::string> ImpBase::get_view_hints()
 {
     std::vector<std::string> r;
+    if (distraction_free)
+        r.emplace_back("distraction free mode");
+
     if (canvas->get_flip_view())
         r.emplace_back("bottom view");
 

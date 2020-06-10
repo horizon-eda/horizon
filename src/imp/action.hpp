@@ -89,6 +89,7 @@ enum class ActionID {
     GEN_FAB_OUTPUT,
     FOOTPRINT_GENERATOR,
     SET_GRID_ORIGIN,
+    DISTRACTION_FREE,
 };
 
 using ActionToolID = std::pair<ActionID, ToolID>;
