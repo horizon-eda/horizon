@@ -49,9 +49,6 @@ void main() {
 	int flags = flags_to_geom[0];
 	int type = type_to_geom[0];
 	
-	if((types_visible & uint(1<<type)) == uint(0))
-		return;
-	
 	vec3 color;
 	if(color_to_geom[0] == 0) {
 		color = layer_color;

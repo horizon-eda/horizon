@@ -46,9 +46,6 @@ void main() {
 	if((types_force_outline & uint(1<<type)) != uint(0))
 		return;
 	
-	if((types_visible & uint(1<<type)) == uint(0))
-		return;
-	
 	vec3 color;
 	if(color_to_geom[0] == 0) {
 		color = layer_color;

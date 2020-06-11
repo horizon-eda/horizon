@@ -48,9 +48,6 @@ void main() {
 	int type = type_to_geom[0];
 	flags_to_fragment = flags;
 	
-	if((types_visible & uint(1<<type)) == uint(0))
-		return;
-	
 	if((types_force_outline & uint(1<<type)) != uint(0))
 		force_outline = 1;
 	

@@ -344,14 +344,15 @@ void TriangleRenderer::push()
     size_t ofs = 0;
     layer_offsets.clear();
     std::vector<unsigned int> elements;
-    for (const auto &it : triangles) {
-        const auto &tris = it.second;
+    for (const auto &[layer, tris] : triangles) {
+        const auto &ld = ca->get_layer_display(layer);
         glBufferSubData(GL_ARRAY_BUFFER, ofs * sizeof(Triangle), tris.size() * sizeof(Triangle), tris.data());
         std::map<std::pair<Type, bool>, std::vector<unsigned int>> type_indices;
         unsigned int i = 0;
         for (const auto &tri : tris) {
             const bool hidden = tri.flags & Triangle::FLAG_HIDDEN;
-            if (!hidden) {
+            const bool type_visible = ld.types_visible & (1 << tri.type);
+            if (!hidden && type_visible) {
                 auto ty = Type::LINE;
                 if (tri.flags & Triangle::FLAG_GLYPH) {
                     ty = Type::GLYPH;
@@ -384,7 +385,7 @@ void TriangleRenderer::push()
         for (const auto &it2 : type_indices) {
             auto el_offset = elements.size();
             elements.insert(elements.end(), it2.second.begin(), it2.second.end());
-            layer_offsets[it.first][it2.first] = std::make_pair(el_offset, it2.second.size());
+            layer_offsets[layer][it2.first] = std::make_pair(el_offset, it2.second.size());
         }
         ofs += tris.size();
     }

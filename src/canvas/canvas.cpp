@@ -18,6 +18,7 @@ Canvas::Canvas() : selection_filter(this), selectables(this)
 void Canvas::set_layer_display(int index, const LayerDisplay &ld)
 {
     layer_display[index] = ld;
+    request_push();
 }
 
 static const LayerDisplay ld_default;

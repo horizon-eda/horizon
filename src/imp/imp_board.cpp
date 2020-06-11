@@ -606,7 +606,6 @@ void ImpBoard::construct()
         ld.types_force_outline = lda.types_force_outline;
         ld.types_visible = lda.types_visible;
         canvas->set_layer_display(index, ld);
-        canvas->queue_draw();
     });
     canvas->set_layer_display(10000, LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
     core->signal_rebuilt().connect([this] { board_display_options_box->update(); });
