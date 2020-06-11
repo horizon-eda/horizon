@@ -6,7 +6,6 @@ layout(triangle_strip, max_vertices = 64) out;
 in vec2 p0_to_geom[1];
 in vec2 p1_to_geom[1];
 in vec2 p2_to_geom[1];
-in int oid_to_geom[1];
 in int type_to_geom[1];
 in int color_to_geom[1];
 in int flags_to_geom[1];

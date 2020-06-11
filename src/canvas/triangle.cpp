@@ -12,13 +12,13 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out)
     if (err != GL_NO_ERROR) {
         std::cout << "gl error t " << err << std::endl;
     }
-    GLuint p0_index = glGetAttribLocation(program, "p0");
-    GLuint p1_index = glGetAttribLocation(program, "p1");
-    GLuint p2_index = glGetAttribLocation(program, "p2");
-    GLuint type_index = glGetAttribLocation(program, "type");
-    GLuint color_index = glGetAttribLocation(program, "color");
-    GLuint lod_index = glGetAttribLocation(program, "lod");
-    GLuint flags_index = glGetAttribLocation(program, "flags");
+    GLuint p0_index = 0;
+    GLuint p1_index = 1;
+    GLuint p2_index = 2;
+    GLuint type_index = 3;
+    GLuint color_index = 4;
+    GLuint flags_index = 5;
+    GLuint lod_index = 6;
     GL_CHECK_ERROR;
     GLuint vao, buffer, ebuffer;
 
@@ -45,10 +45,6 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out)
     glVertexAttribPointer(p1_index, 2, GL_FLOAT, GL_FALSE, sizeof(Triangle), (void *)offsetof(Triangle, x1));
     glEnableVertexAttribArray(p2_index);
     glVertexAttribPointer(p2_index, 2, GL_FLOAT, GL_FALSE, sizeof(Triangle), (void *)offsetof(Triangle, x2));
-    /*glEnableVertexAttribArray (oid_index);
-    glVertexAttribIPointer (oid_index, 1, GL_UNSIGNED_INT,
-                                             sizeof(Triangle),
-                                             (void*)offsetof(Triangle, oid));*/
     glEnableVertexAttribArray(type_index);
     glVertexAttribIPointer(type_index, 1, GL_UNSIGNED_BYTE, sizeof(Triangle), (void *)offsetof(Triangle, type));
     glEnableVertexAttribArray(color_index);
@@ -135,7 +131,7 @@ void TriangleRenderer::realize()
     glUniformBlockBinding(program_glyph, block_index, binding_point_index);
     glUniformBlockBinding(program_circle, block_index, binding_point_index);
     GL_CHECK_ERROR;
-    vao = create_vao(program_line, vbo, ebo);
+    vao = create_vao(program_line0, vbo, ebo);
     GL_CHECK_ERROR;
 }
 
