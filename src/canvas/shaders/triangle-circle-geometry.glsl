@@ -44,9 +44,6 @@ void main() {
 	color_to_fragment = vec3(1,0,0);
 	
 	int flags = flags_to_geom[0];
-	if((flags & (1<<0)) != 0) { //hidden
-		return;
-	}
 	int type = type_to_geom[0];
 	
 	if((types_visible & uint(1<<type)) == uint(0))

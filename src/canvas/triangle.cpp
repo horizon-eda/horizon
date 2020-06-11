@@ -350,31 +350,35 @@ void TriangleRenderer::push()
         std::map<std::pair<Type, bool>, std::vector<unsigned int>> type_indices;
         unsigned int i = 0;
         for (const auto &tri : tris) {
-            auto ty = Type::LINE;
-            if (tri.flags & Triangle::FLAG_GLYPH) {
-                ty = Type::GLYPH;
-            }
-            else if (!isnan(tri.y2)) {
-                ty = Type::TRIANGLE;
-            }
-            else if (isnan(tri.y2) && tri.x2 == 0) {
-                ty = Type::LINE0;
-            }
-            else if (isnan(tri.y1) && isnan(tri.x2) && isnan(tri.y2)) {
-                ty = Type::CIRCLE;
-            }
-            else if (isnan(tri.y2) && (tri.flags & Triangle::FLAG_BUTT)) {
-                ty = Type::LINE_BUTT;
-            }
-            else if (isnan(tri.y2)) {
-                ty = Type::LINE;
-            }
-            else {
-                throw std::runtime_error("unknown triangle type");
-            }
-            type_indices[std::make_pair(ty, (tri.flags & Triangle::FLAG_HIGHLIGHT)
+            const bool hidden = tri.flags & Triangle::FLAG_HIDDEN;
+            if (!hidden) {
+                auto ty = Type::LINE;
+                if (tri.flags & Triangle::FLAG_GLYPH) {
+                    ty = Type::GLYPH;
+                }
+                else if (!isnan(tri.y2)) {
+                    ty = Type::TRIANGLE;
+                }
+                else if (isnan(tri.y2) && tri.x2 == 0) {
+                    ty = Type::LINE0;
+                }
+                else if (isnan(tri.y1) && isnan(tri.x2) && isnan(tri.y2)) {
+                    ty = Type::CIRCLE;
+                }
+                else if (isnan(tri.y2) && (tri.flags & Triangle::FLAG_BUTT)) {
+                    ty = Type::LINE_BUTT;
+                }
+                else if (isnan(tri.y2)) {
+                    ty = Type::LINE;
+                }
+                else {
+                    throw std::runtime_error("unknown triangle type");
+                }
+                type_indices[std::make_pair(ty,
+                                            (tri.flags & Triangle::FLAG_HIGHLIGHT)
                                                     || (tri.type == static_cast<int>(Triangle::Type::TRACK_PREVIEW)))]
-                    .push_back(i + ofs);
+                        .push_back(i + ofs);
+            }
             i++;
         }
         for (const auto &it2 : type_indices) {
