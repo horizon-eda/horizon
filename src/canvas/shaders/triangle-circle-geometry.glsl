@@ -14,8 +14,6 @@ smooth out vec3 color_to_fragment;
 smooth out vec2 round_pos_to_fragment;
 smooth out float striper_to_fragment;
 flat out float border_threshold;
-flat out int force_outline;
-
 
 ##ubo
 
@@ -45,10 +43,6 @@ void main() {
 	
 	int flags = flags_to_geom[0];
 	int type = type_to_geom[0];
-	
-	force_outline = 0;
-	if((types_force_outline & uint(1<<type)) != uint(0))
-		force_outline = 1;
 	
 	vec3 color;
 	if(color_to_geom[0] == 0) {

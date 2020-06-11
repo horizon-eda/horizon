@@ -773,12 +773,13 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
     if (!layer_display.count(poly.layer))
         return;
     if (auto plane = dynamic_cast<Plane *>(poly.usage.ptr)) {
-        triangle_type_current = Triangle::Type::PLANE;
+        triangle_type_current = Triangle::Type::PLANE_FILL;
         auto tris = fragment_cache.get_triangles(*plane);
         for (const auto &tri : tris) {
             add_triangle(poly.layer, transform.transform(tri[0]), transform.transform(tri[1]),
                          transform.transform(tri[2]), co);
         }
+        triangle_type_current = Triangle::Type::PLANE_OUTLINE;
         for (const auto &frag : plane->fragments) {
             ColorP co_orphan = co;
             if (frag.orphan == true)

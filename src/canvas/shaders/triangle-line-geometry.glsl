@@ -13,7 +13,6 @@ in int lod_to_geom[1];
 smooth out vec3 color_to_fragment;
 smooth out float striper_to_fragment;
 smooth out vec2 round_pos_to_fragment;
-flat out int force_outline;
 flat out int flags_to_fragment;
 flat out float discard_threshold;
 
@@ -42,14 +41,10 @@ void main() {
 	vec2 p1 = p1_to_geom[0];
 	vec2 p2 = p2_to_geom[0];
 	color_to_fragment = vec3(1,0,0);
-	force_outline = 0;
 	
 	int flags = flags_to_geom[0];
 	int type = type_to_geom[0];
 	flags_to_fragment = flags;
-	
-	if((types_force_outline & uint(1<<type)) != uint(0))
-		force_outline = 1;
 	
 	vec3 color;
 	if(color_to_geom[0] == 0) {

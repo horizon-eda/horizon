@@ -124,7 +124,7 @@ private:
     {
         LayerDisplay ld;
         if (cb_planes_outline->get_active()) {
-            ld.types_force_outline |= (1 << static_cast<int>(Triangle::Type::PLANE));
+            ld.types_visible &= ~(1 << static_cast<int>(Triangle::Type::PLANE_FILL));
         }
         emit_layer_display(ld);
     }

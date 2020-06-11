@@ -8,7 +8,6 @@ layout (std140) uniform layer_setup
 	float scale;
 	float min_line_width;
 	uint types_visible;
-	uint types_force_outline;
 	int layer_flags;
 	int highlight_mode;
 	float highlight_dim;

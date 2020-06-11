@@ -146,7 +146,6 @@ public:
     float scale;
     float min_line_width;
     unsigned int types_visible;
-    unsigned int types_force_outline;
     int layer_flags;
     int highlight_mode;
     float highlight_dim;
@@ -182,7 +181,6 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
     buf.layer_color[2] = lc.b;
     buf.layer_flags = static_cast<int>(ld.mode);
     buf.types_visible = ld.types_visible;
-    buf.types_force_outline = ld.types_force_outline;
     buf.scale = ca->scale;
     buf.min_line_width = ca->appearance.min_line_width;
 

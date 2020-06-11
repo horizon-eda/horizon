@@ -603,7 +603,6 @@ void ImpBoard::construct()
 
     board_display_options_box->signal_set_layer_display().connect([this](int index, const LayerDisplay &lda) {
         LayerDisplay ld = canvas->get_layer_display(index);
-        ld.types_force_outline = lda.types_force_outline;
         ld.types_visible = lda.types_visible;
         canvas->set_layer_display(index, ld);
     });
