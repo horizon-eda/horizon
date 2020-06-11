@@ -65,7 +65,7 @@ void pictures_save(const std::list<const std::map<UUID, Picture> *> &pictures, c
         Gio::File::create_for_path(pic_dir)->make_directory_with_parents();
     }
     std::set<UUID> pictures_to_delete;
-    {
+    if (Glib::file_test(pic_dir, Glib::FILE_TEST_IS_DIR)) {
         Glib::Dir dir(pic_dir);
         for (const auto &it : dir) {
             if (endswith(it, "_" + suffix + ".png")) {
