@@ -29,25 +29,31 @@ public:
     }
     T &operator*()
     {
+#ifdef UUID_PTR_CHECK
         if (ptr) {
             assert(ptr->get_uuid() == uuid);
         }
+#endif
         return *ptr;
     }
 
     T *operator->() const
     {
+#ifdef UUID_PTR_CHECK
         if (ptr) {
             assert(ptr->get_uuid() == uuid);
         }
+#endif
         return ptr;
     }
 
     operator T *() const
     {
+#ifdef UUID_PTR_CHECK
         if (ptr) {
             assert(ptr->get_uuid() == uuid);
         }
+#endif
         return ptr;
     }
 

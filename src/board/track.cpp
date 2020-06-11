@@ -49,7 +49,9 @@ UUIDPath<2> Track::Connection::get_pad_path() const
 bool Track::Connection::is_junc() const
 {
     if (junc) {
+#ifdef CONNECTION_CHECK
         assert(!is_pad());
+#endif
         return true;
     }
     return false;
@@ -58,8 +60,10 @@ bool Track::Connection::is_junc() const
 bool Track::Connection::is_pad() const
 {
     if (package) {
+#ifdef CONNECTION_CHECK
         assert(pad);
         assert(!is_junc());
+#endif
         return true;
     }
     return false;

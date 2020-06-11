@@ -649,11 +649,16 @@ endif
 LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libgit2 libcurl glm
 
 OPTIMIZE=-fdata-sections -ffunction-sections
-DEBUG   =-g3
-CXXFLAGS  =$(DEBUG) $(DEFINES) $(OPTIMIZE) $(shell $(PKG_CONFIG) --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -std=c++17 -O3
+DEBUGFLAGS   =-g3
+CXXFLAGS  =$(DEBUGFLAGS) $(DEFINES) $(OPTIMIZE) $(shell $(PKG_CONFIG) --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -std=c++17 -O3
 CFLAGS = $(filter-out -std=%,$(CXXFLAGS)) -std=c99
 LDFLAGS = -lm -lpthread
 GLIB_COMPILE_RESOURCES = $(shell $(PKG_CONFIG) --variable=glib_compile_resources gio-2.0)
+
+ifeq ($(DEBUG),1)
+	CXXFLAGS += -DUUID_PTR_CHECK -DCONNECTION_CHECK
+endif
+
 
 ifeq ($(OS),Windows_NT)
     LDFLAGS += -lrpcrt4

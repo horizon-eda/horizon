@@ -45,8 +45,10 @@ UUIDPath<2> LineNet::Connection::get_pin_path() const
 bool LineNet::Connection::is_junc() const
 {
     if (junc) {
+#ifdef CONNECTION_CHECK
         assert(!is_pin());
         assert(!is_bus_ripper());
+#endif
         return true;
     }
     return false;
@@ -54,8 +56,10 @@ bool LineNet::Connection::is_junc() const
 bool LineNet::Connection::is_bus_ripper() const
 {
     if (bus_ripper) {
+#ifdef CONNECTION_CHECK
         assert(!is_pin());
         assert(!is_junc());
+#endif
         return true;
     }
     return false;
@@ -64,9 +68,11 @@ bool LineNet::Connection::is_bus_ripper() const
 bool LineNet::Connection::is_pin() const
 {
     if (symbol) {
+#ifdef CONNECTION_CHECK
         assert(pin);
         assert(!is_junc());
         assert(!is_bus_ripper());
+#endif
         return true;
     }
     return false;
