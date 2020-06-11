@@ -3,6 +3,7 @@
 namespace horizon {
 enum class ColorP {
     FROM_LAYER,
+    LAYER_HIGHLIGHT,
     JUNCTION,
     FRAG_ORPHAN,
     AIRWIRE_ROUTER,

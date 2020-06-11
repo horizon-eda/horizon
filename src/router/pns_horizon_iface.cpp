@@ -732,7 +732,7 @@ void PNS_HORIZON_IFACE::DisplayItem(const PNS::ITEM *aItem, int aColor, int aCle
         }
         int la = line_item->Layer();
         m_preview_items.insert(
-                canvas->add_line(pts, line_item->Width(), horizon::ColorP::FROM_LAYER, layer_from_router(la)));
+                canvas->add_line(pts, line_item->Width(), horizon::ColorP::LAYER_HIGHLIGHT, layer_from_router(la)));
     }
     else if (aItem->Kind() == PNS::ITEM::SEGMENT_T) {
         auto seg_item = dynamic_cast<const PNS::SEGMENT *>(aItem);
@@ -742,7 +742,7 @@ void PNS_HORIZON_IFACE::DisplayItem(const PNS::ITEM *aItem, int aColor, int aCle
         pts.emplace_back(seg.B.x, seg.B.y);
         int la = seg_item->Layer();
         m_preview_items.insert(
-                canvas->add_line(pts, seg_item->Width(), horizon::ColorP::FROM_LAYER, layer_from_router(la)));
+                canvas->add_line(pts, seg_item->Width(), horizon::ColorP::LAYER_HIGHLIGHT, layer_from_router(la)));
     }
     else if (aItem->Kind() == PNS::ITEM::VIA_T) {
         auto via_item = dynamic_cast<const PNS::VIA *>(aItem);
@@ -753,10 +753,10 @@ void PNS_HORIZON_IFACE::DisplayItem(const PNS::ITEM *aItem, int aColor, int aCle
         pts.emplace_back(pos.x + 10, pos.y);
         int la = via_item->Layers().Start();
         m_preview_items.insert(
-                canvas->add_line(pts, via_item->Diameter(), horizon::ColorP::FROM_LAYER, layer_from_router(la)));
+                canvas->add_line(pts, via_item->Diameter(), horizon::ColorP::LAYER_HIGHLIGHT, layer_from_router(la)));
         la = via_item->Layers().End();
         m_preview_items.insert(
-                canvas->add_line(pts, via_item->Diameter(), horizon::ColorP::FROM_LAYER, layer_from_router(la)));
+                canvas->add_line(pts, via_item->Diameter(), horizon::ColorP::LAYER_HIGHLIGHT, layer_from_router(la)));
     }
     else {
         assert(false);

@@ -15,10 +15,8 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out)
     GLuint p0_index = 0;
     GLuint p1_index = 1;
     GLuint p2_index = 2;
-    GLuint type_index = 3;
-    GLuint color_index = 4;
-    GLuint flags_index = 5;
-    GLuint lod_index = 6;
+    GLuint color_index = 3;
+    GLuint lod_index = 4;
     GL_CHECK_ERROR;
     GLuint vao, buffer, ebuffer;
 
@@ -45,15 +43,10 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out)
     glVertexAttribPointer(p1_index, 2, GL_FLOAT, GL_FALSE, sizeof(Triangle), (void *)offsetof(Triangle, x1));
     glEnableVertexAttribArray(p2_index);
     glVertexAttribPointer(p2_index, 2, GL_FLOAT, GL_FALSE, sizeof(Triangle), (void *)offsetof(Triangle, x2));
-    glEnableVertexAttribArray(type_index);
-    glVertexAttribIPointer(type_index, 1, GL_UNSIGNED_BYTE, sizeof(Triangle), (void *)offsetof(Triangle, type));
     glEnableVertexAttribArray(color_index);
     glVertexAttribIPointer(color_index, 1, GL_UNSIGNED_BYTE, sizeof(Triangle), (void *)offsetof(Triangle, color));
     glEnableVertexAttribArray(lod_index);
     glVertexAttribIPointer(lod_index, 1, GL_UNSIGNED_BYTE, sizeof(Triangle), (void *)offsetof(Triangle, lod));
-
-    glEnableVertexAttribArray(flags_index);
-    glVertexAttribIPointer(flags_index, 1, GL_UNSIGNED_BYTE, sizeof(Triangle), (void *)offsetof(Triangle, flags));
 
     GL_CHECK_ERROR;
 
@@ -138,18 +131,14 @@ void TriangleRenderer::realize()
 
 class UBOBuffer {
 public:
-    std::array<std::array<float, 4>, 18> colors; // 18==ColorP::N_COLORS, keep in sync with shaders
+    static_assert(static_cast<int>(ColorP::N_COLORS) == 19, "ubo size mismatch");
+    std::array<std::array<float, 4>, 19> colors; // 18==ColorP::N_COLORS, keep in sync with shaders
     std::array<float, 12> screenmat;
     std::array<float, 12> viewmat;
-    std::array<float, 3> layer_color;
     float alpha;
     float scale;
     float min_line_width;
-    unsigned int types_visible;
     int layer_flags;
-    int highlight_mode;
-    float highlight_dim;
-    float highlight_lighten;
 };
 
 static void mat3_to_array(std::array<float, 12> &dest, const glm::mat3 &src)
@@ -161,94 +150,136 @@ static void mat3_to_array(std::array<float, 12> &dest, const glm::mat3 &src)
     }
 }
 
+static std::array<float, 4> operator+(const std::array<float, 4> &a, float b)
+{
+    return {a.at(0) + b, a.at(1) + b, a.at(2) + b, a.at(3)};
+}
+
+static std::array<float, 4> operator*(const std::array<float, 4> &a, float b)
+{
+    return {a.at(0) * b, a.at(1) * b, a.at(2) * b, a.at(3)};
+}
+
+static std::array<float, 4> array_from_color(const Color &c)
+{
+    return {c.r, c.g, c.b, 1};
+}
+
+
+std::array<float, 4> TriangleRenderer::apply_highlight(const Color &icolor, HighlightMode mode, int layer) const
+{
+    const std::array<float, 4> color = array_from_color(icolor);
+    if (layer >= 20000 && layer < 30000) {
+        return color;
+    }
+    if (!ca->highlight_enabled)
+        return color;
+    switch (ca->highlight_mode) {
+    case CanvasGL::HighlightMode::HIGHLIGHT:
+        if (mode == HighlightMode::ONLY)
+            return color + ca->appearance.highlight_lighten;
+        else
+            return color;
+
+    case CanvasGL::HighlightMode::DIM:
+        if (mode == HighlightMode::ONLY)
+            return color;
+        else
+            return color * ca->appearance.highlight_dim;
+
+    case CanvasGL::HighlightMode::SHADOW:
+        if (mode == HighlightMode::ONLY)
+            return color;
+        else
+            return array_from_color(ca->appearance.colors.at(ColorP::SHADOW));
+    }
+    return color;
+}
+
+
 void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, bool ignore_flip)
 {
     const auto &ld = ca->get_layer_display(layer);
 
     GL_CHECK_ERROR
-    glBindBuffer(GL_UNIFORM_BUFFER, ubo);
     UBOBuffer buf;
-    buf.colors = ca->palette_colors;
+
     buf.alpha = ca->property_layer_opacity() / 100;
     mat3_to_array(buf.screenmat, ca->screenmat);
     if (ignore_flip)
         mat3_to_array(buf.viewmat, ca->viewmat_noflip);
     else
         mat3_to_array(buf.viewmat, ca->viewmat);
-    auto lc = ca->get_layer_color(layer);
-    buf.layer_color[0] = lc.r;
-    buf.layer_color[1] = lc.g;
-    buf.layer_color[2] = lc.b;
+
     buf.layer_flags = static_cast<int>(ld.mode);
-    buf.types_visible = ld.types_visible;
     buf.scale = ca->scale;
     buf.min_line_width = ca->appearance.min_line_width;
-
-    if (layer >= 20000 && layer < 30000) // annotation layer, but not overlay
-        buf.highlight_mode = 0;
-    else
-        buf.highlight_mode = ca->highlight_enabled ? static_cast<int>(ca->highlight_mode) : 0;
-
-    buf.highlight_dim = ca->appearance.highlight_dim;
-    buf.highlight_lighten = ca->appearance.highlight_lighten;
-
-
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(buf), &buf, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    GL_CHECK_ERROR
 
     if (ld.mode == LayerDisplay::Mode::FILL_ONLY)
         glStencilFunc(GL_GREATER, stencil, 0xff);
     else
         glStencilFunc(GL_ALWAYS, stencil, 0xff);
 
-    for (const auto &it : layer_offsets[layer]) {
-        bool skip = false;
-        switch (it.first.first) {
-        case Type::TRIANGLE:
-            glUseProgram(program_triangle);
-            if (ld.mode == LayerDisplay::Mode::OUTLINE)
-                skip = true;
-            break;
+    if (layer_offsets.count(layer)) {
+        for (const auto &it : layer_offsets.at(layer)) {
+            bool skip = false;
+            switch (it.first.first) {
+            case Type::TRIANGLE:
+                glUseProgram(program_triangle);
+                if (ld.mode == LayerDisplay::Mode::OUTLINE)
+                    skip = true;
+                break;
 
-        case Type::LINE0:
-            glUseProgram(program_line0);
-            break;
+            case Type::LINE0:
+                glUseProgram(program_line0);
+                break;
 
-        case Type::LINE_BUTT:
-            glUseProgram(program_line_butt);
-            break;
+            case Type::LINE_BUTT:
+                glUseProgram(program_line_butt);
+                break;
 
-        case Type::LINE:
-            glUseProgram(program_line);
-            break;
+            case Type::LINE:
+                glUseProgram(program_line);
+                break;
 
-        case Type::GLYPH:
-            glUseProgram(program_glyph);
-            break;
+            case Type::GLYPH:
+                glUseProgram(program_glyph);
+                break;
 
-        case Type::CIRCLE:
-            glUseProgram(program_circle);
-            break;
-        }
-        switch (highlight_mode) {
-        case HighlightMode::ALL:
-            // nop
-            break;
-        case HighlightMode::ONLY: // only highlighted, skip not highlighted
-            if (!it.first.second) {
-                skip = true;
+            case Type::CIRCLE:
+                glUseProgram(program_circle);
+                break;
             }
-            break;
-        case HighlightMode::SKIP: // only not highlighted, skip highlighted
-            if (it.first.second) {
-                skip = true;
+            switch (highlight_mode) {
+            case HighlightMode::ONLY: // only highlighted, skip not highlighted
+                if (!it.first.second) {
+                    skip = true;
+                }
+                break;
+            case HighlightMode::SKIP: // only not highlighted, skip highlighted
+                if (it.first.second) {
+                    skip = true;
+                }
+                break;
             }
-            break;
+            if (!skip) {
+                for (size_t i = 0; i < buf.colors.size(); i++) {
+                    auto k = static_cast<ColorP>(i);
+                    if (ca->appearance.colors.count(k))
+                        buf.colors[i] = apply_highlight(ca->appearance.colors.at(k), highlight_mode, layer);
+                }
+                auto lc = ca->get_layer_color(layer);
+                buf.colors[static_cast<int>(ColorP::FROM_LAYER)] = apply_highlight(lc, highlight_mode, layer);
+                buf.colors[static_cast<int>(ColorP::LAYER_HIGHLIGHT)] =
+                        array_from_color(lc) + ca->appearance.highlight_lighten;
+                glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+                glBufferData(GL_UNIFORM_BUFFER, sizeof(buf), &buf, GL_DYNAMIC_DRAW);
+                glBindBuffer(GL_UNIFORM_BUFFER, 0);
+                GL_CHECK_ERROR
+                glDrawElements(GL_POINTS, it.second.second, GL_UNSIGNED_INT,
+                               (void *)(it.second.first * sizeof(unsigned int)));
+            }
         }
-        if (!skip)
-            glDrawElements(GL_POINTS, it.second.second, GL_UNSIGNED_INT,
-                           (void *)(it.second.first * sizeof(unsigned int)));
     }
     // glDrawArrays(GL_POINTS, layer_offsets[layer], triangles[layer].size());
     stencil++;
@@ -288,29 +319,35 @@ void TriangleRenderer::render()
     glEnable(GL_STENCIL_TEST);
     stencil = 1;
 
-    static const auto modes_on_top = {TriangleRenderer::HighlightMode::SKIP, TriangleRenderer::HighlightMode::ONLY};
-    static const auto modes_normal = {TriangleRenderer::HighlightMode::ALL};
+    static const std::vector<std::vector<HighlightMode>> modes_on_top = {{HighlightMode::SKIP}, {HighlightMode::ONLY}};
+    static const std::vector<std::vector<HighlightMode>> modes_normal = {{HighlightMode::SKIP, HighlightMode::ONLY}};
 
     const auto &modes = ca->highlight_on_top ? modes_on_top : modes_normal;
 
-    render_annotations(false);
-    for (auto highlight_mode : modes) {
+    render_annotations(false); // annotation bottom
+    for (const auto &highlight_modes : modes) {
         for (auto layer : layers) {
             const auto &ld = ca->get_layer_display(layer);
             if (layer != ca->work_layer && layer < 10000 && ld.visible && !ca->layer_is_annotation(layer)) {
-                render_layer_with_overlay(layer, highlight_mode);
+                for (const auto highlight_mode : highlight_modes) {
+                    render_layer_with_overlay(layer, highlight_mode);
+                }
             }
         }
-        render_layer_with_overlay(ca->work_layer, highlight_mode);
+        for (const auto highlight_mode : highlight_modes) {
+            render_layer_with_overlay(ca->work_layer, highlight_mode);
+        }
         for (auto layer : layers) {
             const auto &ld = ca->get_layer_display(layer);
             if (layer >= 10000 && layer < Canvas::first_overlay_layer && ld.visible
                 && !ca->layer_is_annotation(layer)) {
-                render_layer(layer, highlight_mode);
+                for (const auto highlight_mode : highlight_modes) {
+                    render_layer(layer, highlight_mode);
+                }
             }
         }
     }
-    render_annotations(true);
+    render_annotations(true); // anotations top
     glDisable(GL_STENCIL_TEST);
 
     GL_CHECK_ERROR
@@ -324,7 +361,8 @@ void TriangleRenderer::render_annotations(bool top)
 {
     for (const auto &it : ca->annotations) {
         if (ca->get_layer_display(it.first).visible && it.second.on_top == top) {
-            render_layer(it.first);
+            render_layer(it.first, HighlightMode::SKIP);
+            render_layer(it.first, HighlightMode::ONLY);
         }
     }
 }
@@ -373,9 +411,8 @@ void TriangleRenderer::push()
                 else {
                     throw std::runtime_error("unknown triangle type");
                 }
-                type_indices[std::make_pair(ty,
-                                            (tri.flags & Triangle::FLAG_HIGHLIGHT)
-                                                    || (tri.type == static_cast<int>(Triangle::Type::TRACK_PREVIEW)))]
+                type_indices[std::make_pair(ty, (tri.flags & Triangle::FLAG_HIGHLIGHT)
+                                                        || (tri.color == static_cast<int>(ColorP::LAYER_HIGHLIGHT)))]
                         .push_back(i + ofs);
             }
             i++;

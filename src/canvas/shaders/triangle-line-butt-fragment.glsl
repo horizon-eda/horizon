@@ -6,7 +6,6 @@ smooth in vec3 color_to_fragment;
 smooth in float striper_to_fragment;
 smooth in float alpha_to_fragment;
 smooth in vec2 round_pos_to_fragment;
-flat in int flags_to_fragment;
 
 void main() {
   float my_alpha = alpha;

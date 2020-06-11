@@ -242,9 +242,6 @@ private:
     bool highlight_on_top = false;
     Appearance appearance;
 
-    void update_palette_colors();
-    std::array<std::array<float, 4>, static_cast<size_t>(ColorP::N_COLORS)> palette_colors;
-
     bool drag_selection_inhibited = false;
 
     MSDAnimator zoom_animator;

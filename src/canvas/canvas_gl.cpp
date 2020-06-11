@@ -47,7 +47,6 @@ CanvasGL::CanvasGL()
     property_layer_opacity().signal_changed().connect([this] { queue_draw(); });
     clarify_menu = Gtk::manage(new Gtk::Menu);
 
-    update_palette_colors();
     layer_colors = appearance.layer_colors;
 
     gesture_zoom = Gtk::GestureZoom::create(*this);
@@ -574,7 +573,6 @@ void CanvasGL::set_highlight_on_top(bool v)
 void CanvasGL::set_appearance(const Appearance &a)
 {
     appearance = a;
-    update_palette_colors();
     layer_colors = appearance.layer_colors;
     switch (a.grid_fine_modifier) {
     case Appearance::GridFineModifier::ALT:
@@ -621,16 +619,6 @@ void CanvasGL::set_cursor_size(Appearance::CursorSize csize)
         break;
     }
     set_cursor_size(size);
-}
-
-void CanvasGL::update_palette_colors()
-{
-    for (unsigned int i = 0; i < palette_colors.size(); i++) {
-        auto c = get_color(static_cast<ColorP>(i));
-        palette_colors[i][0] = c.r;
-        palette_colors[i][1] = c.g;
-        palette_colors[i][2] = c.b;
-    }
 }
 
 const Color default_color(1, 0, 1);

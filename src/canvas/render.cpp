@@ -190,7 +190,6 @@ ObjectRef Canvas::add_line(const std::deque<Coordi> &pts, int64_t width, ColorP 
     auto uu = UUID::random();
     ObjectRef sr(ObjectType::LINE, uu);
     object_refs_current.push_back(sr);
-    triangle_type_current = Triangle::Type::TRACK_PREVIEW;
     if (pts.size() >= 2) {
         for (size_t i = 1; i < pts.size(); i++) {
             auto pt1 = pts.at(i - 1);
@@ -201,7 +200,6 @@ ObjectRef Canvas::add_line(const std::deque<Coordi> &pts, int64_t width, ColorP 
     else {
         object_refs[sr];
     }
-    triangle_type_current = Triangle::Type::NONE;
     object_refs_current.pop_back();
     request_push();
     return sr;

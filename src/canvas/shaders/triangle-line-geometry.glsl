@@ -6,21 +6,16 @@ layout(triangle_strip, max_vertices = 8) out;
 in vec2 p0_to_geom[1];
 in vec2 p1_to_geom[1];
 in vec2 p2_to_geom[1];
-in int type_to_geom[1];
 in int color_to_geom[1];
-in int flags_to_geom[1];
 in int lod_to_geom[1];
 smooth out vec3 color_to_fragment;
 smooth out float striper_to_fragment;
 smooth out vec2 round_pos_to_fragment;
-flat out int flags_to_fragment;
 flat out float discard_threshold;
 
 ##ubo
 
 int mode = layer_flags;
-
-#define PI 3.1415926535897932384626433832795
 
 vec4 t(vec2 p) {
     return vec4((screenmat*viewmat*vec3(p, 1)), 1);
@@ -40,23 +35,7 @@ void main() {
 	vec2 p0 = p0_to_geom[0];
 	vec2 p1 = p1_to_geom[0];
 	vec2 p2 = p2_to_geom[0];
-	color_to_fragment = vec3(1,0,0);
-	
-	int flags = flags_to_geom[0];
-	int type = type_to_geom[0];
-	flags_to_fragment = flags;
-	
-	vec3 color;
-	if(color_to_geom[0] == 0) {
-		color = layer_color;
-	}
-	else {
-		color = colors[color_to_geom[0]];
-	}
-	
-	bool highlight = (type == 1 || ((flags & (1<<1)) != 0));
-	color_to_fragment = apply_highlight(color, highlight, type);
-	
+	color_to_fragment = colors[color_to_geom[0]];
 
 	float width = p2.x/2;
 	float real_width = width;

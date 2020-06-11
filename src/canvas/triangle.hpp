@@ -12,7 +12,7 @@ public:
     float y1;
     float x2;
     float y2;
-    enum class Type { NONE, TRACK_PREVIEW, TEXT, GRAPHICS, PLANE_OUTLINE, PLANE_FILL, POLYGON };
+    enum class Type { NONE, TEXT, GRAPHICS, PLANE_OUTLINE, PLANE_FILL, POLYGON };
 
     uint8_t type;
     uint8_t color;
