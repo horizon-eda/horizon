@@ -3,7 +3,6 @@
 
 out vec4 outputColor;
 smooth in vec3 color_to_fragment;
-smooth in float striper_to_fragment;
 smooth in float alpha_to_fragment;
 smooth in vec2 round_pos_to_fragment;
 
@@ -14,7 +13,7 @@ void main() {
     my_alpha = 1;
   }
   else { //filled area
-    if(mod(striper_to_fragment,20)>10 || layer_flags==0) {
+    if(get_striper_discard(gl_FragCoord.xy) || layer_flags == 0) { //HATCH
       discard;
     }
   }

@@ -137,6 +137,7 @@ public:
     std::array<float, 12> viewmat;
     float alpha;
     float scale;
+    std::array<float, 2> offset;
     float min_line_width;
     int layer_flags;
 };
@@ -213,6 +214,8 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
 
     buf.layer_flags = static_cast<int>(ld.mode);
     buf.scale = ca->scale;
+    buf.offset[0] = ca->offset.x;
+    buf.offset[1] = ca->offset.y;
     buf.min_line_width = ca->appearance.min_line_width;
 
     if (ld.mode == LayerDisplay::Mode::FILL_ONLY)

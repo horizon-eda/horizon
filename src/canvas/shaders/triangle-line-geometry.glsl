@@ -9,7 +9,6 @@ in vec2 p2_to_geom[1];
 in int color_to_geom[1];
 in int lod_to_geom[1];
 smooth out vec3 color_to_fragment;
-smooth out float striper_to_fragment;
 smooth out vec2 round_pos_to_fragment;
 flat out float discard_threshold;
 
@@ -19,12 +18,6 @@ int mode = layer_flags;
 
 vec4 t(vec2 p) {
     return vec4((screenmat*viewmat*vec3(p, 1)), 1);
-}
-
-float t2(vec2 p) {
-	if(mode==1) //HATCH
-		return scale*p.x -scale*p.y;
-	return 0.0;
 }
 
 vec2 p2r(float phi, float l) {
@@ -56,42 +49,34 @@ void main() {
 	}
 	
 	
-	striper_to_fragment = t2(p0x+o);
 	gl_Position = t(p0x+o);
 	round_pos_to_fragment = vec2(-ym,ym);
 	EmitVertex();
 	
-	striper_to_fragment = t2(p0x-o);
 	gl_Position = t(p0x-o);
 	round_pos_to_fragment = vec2(-ym,-ym);
 	EmitVertex();
 	
-	striper_to_fragment = t2(p0+o);
 	gl_Position = t(p0+o);
 	round_pos_to_fragment = vec2(0,ym);
 	EmitVertex();
 	
-	striper_to_fragment = t2(p0-o);
 	gl_Position = t(p0-o);
 	round_pos_to_fragment = vec2(0,-ym);
 	EmitVertex();
 	
-	striper_to_fragment = t2(p1+o);
 	gl_Position = t(p1+o);
 	round_pos_to_fragment = vec2(0,ym);
 	EmitVertex();
 	
-	striper_to_fragment = t2(p1-o);
 	gl_Position = t(p1-o);
 	round_pos_to_fragment = vec2(0,-ym);
 	EmitVertex();
 	
-	striper_to_fragment = t2(p1x+o);
 	gl_Position = t(p1x+o);
 	round_pos_to_fragment = vec2(ym,ym);
 	EmitVertex();
 	
-	striper_to_fragment = t2(p1x-o);
 	gl_Position = t(p1x-o);
 	round_pos_to_fragment = vec2(ym,-ym);
 	EmitVertex();
