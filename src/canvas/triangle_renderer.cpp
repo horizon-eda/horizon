@@ -1,4 +1,4 @@
-#include "triangle.hpp"
+#include "triangle_renderer.hpp"
 #include "canvas_gl.hpp"
 #include "gl_util.hpp"
 #include <glm/gtc/type_ptr.hpp>

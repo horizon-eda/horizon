@@ -1,5 +1,5 @@
 #pragma once
-#include "canvas/triangle.hpp"
+#include "canvas/object_ref.hpp"
 #include "canvas/selectables.hpp"
 #include "canvas/snap_filter.hpp"
 #include "dialogs/dialogs.hpp"

@@ -1,47 +1,9 @@
 #pragma once
-#include "common/common.hpp"
-#include "util/uuid.hpp"
-#include "color_palette.hpp"
 #include "util/gl_inc.h"
+#include "color_palette.hpp"
+#include "common/common.hpp"
 
 namespace horizon {
-class ObjectRef {
-public:
-    ObjectRef(ObjectType ty, const UUID &uu, const UUID &uu2 = UUID()) : type(ty), uuid(uu), uuid2(uu2)
-    {
-    }
-    ObjectRef() : type(ObjectType::INVALID)
-    {
-    }
-    ObjectType type;
-    UUID uuid;
-    UUID uuid2;
-    bool operator<(const ObjectRef &other) const
-    {
-        if (type < other.type) {
-            return true;
-        }
-        if (type > other.type) {
-            return false;
-        }
-        if (uuid < other.uuid) {
-            return true;
-        }
-        else if (uuid > other.uuid) {
-            return false;
-        }
-        return uuid2 < other.uuid2;
-    }
-    bool operator==(const ObjectRef &other) const
-    {
-        return (type == other.type) && (uuid == other.uuid) && (uuid2 == other.uuid2);
-    }
-    bool operator!=(const ObjectRef &other) const
-    {
-        return !(*this == other);
-    }
-};
-
 class Triangle {
 public:
     float x0;
@@ -70,38 +32,4 @@ public:
     }
 } __attribute__((packed));
 
-class TriangleRenderer {
-    friend class CanvasGL;
-
-public:
-    TriangleRenderer(class CanvasGL *c, std::map<int, std::vector<Triangle>> &tris);
-    void realize();
-    void render();
-    void push();
-    enum class HighlightMode { SKIP, ONLY, ALL };
-
-private:
-    CanvasGL *ca;
-    enum class Type { TRIANGLE, LINE, LINE0, LINE_BUTT, GLYPH, CIRCLE };
-    std::map<int, std::vector<Triangle>> &triangles;
-    std::map<int, std::map<std::pair<Type, bool>, std::pair<size_t, size_t>>> layer_offsets;
-    size_t n_tris = 0;
-
-    GLuint program_line0;
-    GLuint program_line;
-    GLuint program_line_butt;
-    GLuint program_triangle;
-    GLuint program_circle;
-    GLuint program_glyph;
-    GLuint vao;
-    GLuint vbo;
-    GLuint ubo;
-    GLuint ebo;
-    GLuint texture_glyph;
-
-    void render_layer(int layer, HighlightMode highlight_mode = HighlightMode::ALL, bool ignore_flip = false);
-    void render_layer_with_overlay(int layer, HighlightMode highlight_mode = HighlightMode::ALL);
-    void render_annotations(bool top);
-    int stencil = 0;
-};
 } // namespace horizon

@@ -1,6 +1,6 @@
 #pragma once
 #include "canvas/selectables.hpp"
-#include "canvas/triangle.hpp"
+#include "canvas/object_ref.hpp"
 #include "router/pns_router.h"
 #include "util/uuid.hpp"
 

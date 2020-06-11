@@ -23,7 +23,6 @@
 #include "selectables.hpp"
 #include "selection_filter.hpp"
 #include "target.hpp"
-#include "triangle.hpp"
 #include "util/placement.hpp"
 #include "util/util.hpp"
 #include "iairwire_filter.hpp"

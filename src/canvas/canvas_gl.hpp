@@ -3,7 +3,7 @@
 #include "drag_selection.hpp"
 #include "grid.hpp"
 #include "marker.hpp"
-#include "triangle.hpp"
+#include "triangle_renderer.hpp"
 #include "selectables_renderer.hpp"
 #include "util/msd_animator.hpp"
 #include <gtkmm.h>

@@ -1,7 +1,6 @@
 #include "canvas.hpp"
 #include "common/common.hpp"
 #include "common/text.hpp"
-#include "triangle.hpp"
 #include "util/placement.hpp"
 #include "util/util.hpp"
 #include <cstdint>

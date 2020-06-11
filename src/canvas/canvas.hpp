@@ -6,6 +6,7 @@
 #include "selection_filter.hpp"
 #include "target.hpp"
 #include "triangle.hpp"
+#include "object_ref.hpp"
 #include "fragment_cache.hpp"
 #include "util/placement.hpp"
 #include "util/text_data.hpp"

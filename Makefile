@@ -130,7 +130,7 @@ SRC_CANVAS = \
 	src/canvas/selectables.cpp \
 	src/canvas/selectables_renderer.cpp \
 	src/canvas/hover_prelight.cpp\
-	src/canvas/triangle.cpp\
+	src/canvas/triangle_renderer.cpp\
 	src/canvas/image.cpp\
 	src/canvas/selection_filter.cpp\
 	3rd_party/polypartition/polypartition.cpp\
