@@ -591,6 +591,8 @@ int BoardRules::get_layer_pair(const Net *net, int layer) const
                 return rule->layers.second;
             else if (rule->layers.second == layer)
                 return rule->layers.first;
+            else
+                return layer;
         }
     }
     return layer;
