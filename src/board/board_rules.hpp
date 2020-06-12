@@ -11,6 +11,7 @@
 #include "rule_via.hpp"
 #include "rule_preflight_checks.hpp"
 #include "rule_clearance_copper_keepout.hpp"
+#include "rule_layer_pair.hpp"
 #include "rules/rules.hpp"
 #include "util/uuid.hpp"
 
@@ -48,6 +49,8 @@ public:
 
     const PlaneSettings &get_plane_settings(const class Net *net, int layer) const;
 
+    int get_layer_pair(const Net *net, int layer) const;
+
 private:
     std::map<UUID, RuleHoleSize> rule_hole_size;
     std::map<UUID, RuleTrackWidth> rule_track_width;
@@ -57,6 +60,7 @@ private:
     std::map<UUID, RulePlane> rule_plane;
     std::map<UUID, RuleDiffpair> rule_diffpair;
     std::map<UUID, RuleClearanceCopperKeepout> rule_clearance_copper_keepout;
+    std::map<UUID, RuleLayerPair> rule_layer_pair;
 
     RuleClearanceSilkscreenExposedCopper rule_clearance_silkscreen_exposed_copper;
     RuleParameters rule_parameters;

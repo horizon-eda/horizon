@@ -701,6 +701,8 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                 if (args.button == 1) {
                     wrapper->updateEndItem(args);
 
+                    const bool was_placing_via = router->IsPlacingVia();
+
                     if (router->FixRoute(wrapper->m_endSnapPoint, wrapper->m_endItem)) {
                         router->StopRouting();
                         imp->canvas_update();
@@ -711,6 +713,18 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                         return ToolResponse();
                     }
                     imp->canvas_update();
+
+
+                    if (was_placing_via) {
+                        auto layer = PNS::PNS_HORIZON_IFACE::layer_from_router(router->GetCurrentLayer());
+                        auto nets = router->GetCurrentNets();
+                        const Net *net = nullptr;
+                        for (auto x : nets) {
+                            net = iface->get_net_for_code(x);
+                        }
+                        layer = rules->get_layer_pair(net, layer);
+                        router->SwitchLayer(PNS::PNS_HORIZON_IFACE::layer_to_router(layer));
+                    }
 
                     // Synchronize the indicated layer
                     imp->set_work_layer(PNS::PNS_HORIZON_IFACE::layer_from_router(router->GetCurrentLayer()));

@@ -21,7 +21,8 @@ enum class RuleID {
     DIFFPAIR,
     PACKAGE_CHECKS,
     PREFLIGHT_CHECKS,
-    CLEARANCE_COPPER_KEEPOUT
+    CLEARANCE_COPPER_KEEPOUT,
+    LAYER_PAIR
 };
 
 extern const LutEnumStr<RuleID> rule_id_lut;

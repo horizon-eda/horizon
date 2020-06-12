@@ -92,6 +92,15 @@ void BoardRules::load_from_json(const json &j)
         }
         fix_order(RuleID::CLEARANCE_COPPER_KEEPOUT);
     }
+    if (j.count("layer_pair")) {
+        const json &o = j["layer_pair"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            rule_layer_pair.emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                                    std::forward_as_tuple(u, it.value()));
+        }
+        fix_order(RuleID::LAYER_PAIR);
+    }
     if (j.count("clearance_silkscreen_exposed_copper")) {
         const json &o = j["clearance_silkscreen_exposed_copper"];
         rule_clearance_silkscreen_exposed_copper = RuleClearanceSilkscreenExposedCopper(o);
@@ -126,6 +135,9 @@ void BoardRules::cleanup(const Block *block)
     for (auto &it : rule_clearance_copper_keepout) {
         it.second.match.cleanup(block);
         it.second.match_keepout.cleanup(block);
+    }
+    for (auto &it : rule_layer_pair) {
+        it.second.match.cleanup(block);
     }
     for (auto &it : rule_diffpair) {
         if (!block->net_classes.count(it.second.net_class))
@@ -202,6 +214,10 @@ json BoardRules::serialize() const
     for (const auto &it : rule_clearance_copper_keepout) {
         j["clearance_copper_keepout"][(std::string)it.first] = it.second.serialize();
     }
+    j["layer_pair"] = json::object();
+    for (const auto &it : rule_layer_pair) {
+        j["layer_pair"][(std::string)it.first] = it.second.serialize();
+    }
     j["clearance_silkscreen_exposed_copper"] = rule_clearance_silkscreen_exposed_copper.serialize();
     j["parameters"] = rule_parameters.serialize();
     return j;
@@ -219,7 +235,8 @@ std::set<RuleID> BoardRules::get_rule_ids() const
             RuleID::PLANE,
             RuleID::DIFFPAIR,
             RuleID::PREFLIGHT_CHECKS,
-            RuleID::CLEARANCE_COPPER_KEEPOUT};
+            RuleID::CLEARANCE_COPPER_KEEPOUT,
+            RuleID::LAYER_PAIR};
 }
 
 const Rule *BoardRules::get_rule(RuleID id) const
@@ -255,6 +272,8 @@ const Rule *BoardRules::get_rule(RuleID id, const UUID &uu) const
         return &rule_diffpair.at(uu);
     case RuleID::CLEARANCE_COPPER_KEEPOUT:
         return &rule_clearance_copper_keepout.at(uu);
+    case RuleID::LAYER_PAIR:
+        return &rule_layer_pair.at(uu);
     default:
         return nullptr;
     }
@@ -310,6 +329,12 @@ std::map<UUID, const Rule *> BoardRules::get_rules(RuleID id) const
         }
         break;
 
+    case RuleID::LAYER_PAIR:
+        for (auto &it : rule_layer_pair) {
+            r.emplace(it.first, &it.second);
+        }
+        break;
+
     default:;
     }
     return r;
@@ -348,6 +373,10 @@ void BoardRules::remove_rule(RuleID id, const UUID &uu)
 
     case RuleID::CLEARANCE_COPPER_KEEPOUT:
         rule_clearance_copper_keepout.erase(uu);
+        break;
+
+    case RuleID::LAYER_PAIR:
+        rule_layer_pair.erase(uu);
         break;
 
     default:;
@@ -397,6 +426,11 @@ Rule *BoardRules::add_rule(RuleID id)
 
     case RuleID::CLEARANCE_COPPER_KEEPOUT:
         r = &rule_clearance_copper_keepout.emplace(uu, uu).first->second;
+        r->order = -1;
+        break;
+
+    case RuleID::LAYER_PAIR:
+        r = &rule_layer_pair.emplace(uu, uu).first->second;
         r->order = -1;
         break;
 
@@ -547,4 +581,20 @@ const PlaneSettings &BoardRules::get_plane_settings(const Net *net, int layer) c
     }
     return plane_settings_default;
 }
+
+int BoardRules::get_layer_pair(const Net *net, int layer) const
+{
+    auto rules = get_rules_sorted<RuleLayerPair>(RuleID::LAYER_PAIR);
+    for (auto rule : rules) {
+        if (rule->enabled && rule->match.match(net)) {
+            if (rule->layers.first == layer)
+                return rule->layers.second;
+            else if (rule->layers.second == layer)
+                return rule->layers.first;
+        }
+    }
+    return layer;
+}
+
+
 } // namespace horizon
