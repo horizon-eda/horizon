@@ -58,13 +58,12 @@ void Canvas::remove_obj(const ObjectRef &r)
     for (const auto &it : object_refs.at(r)) {
         auto layer = it.first;
         layers.insert(layer);
-        auto begin = triangles[layer].begin();
-        auto first = begin + it.second.first;
-        auto last = begin + it.second.second + 1;
+        auto first = it.second.first;
+        auto last = it.second.second + 1;
         assert(it.second.first < triangles[layer].size());
         assert(it.second.second < triangles[layer].size());
 
-        triangles[layer].erase(first, last);
+        triangles.at(layer).erase(first, last);
     }
 
     // fix refs that changed due to triangles being deleted
@@ -96,8 +95,8 @@ void Canvas::set_flags(const ObjectRef &r, uint8_t mask_set, uint8_t mask_clear)
     for (const auto &it : object_refs.at(r)) {
         auto layer = it.first;
         for (auto i = it.second.first; i <= it.second.second; i++) {
-            triangles[layer][i].flags |= mask_set;
-            triangles[layer][i].flags &= ~mask_clear;
+            triangles.at(layer).atm(i).second.flags |= mask_set;
+            triangles.at(layer).atm(i).second.flags &= ~mask_clear;
         }
     }
     request_push();
@@ -106,9 +105,9 @@ void Canvas::set_flags(const ObjectRef &r, uint8_t mask_set, uint8_t mask_clear)
 void Canvas::set_flags_all(uint8_t mask_set, uint8_t mask_clear)
 {
     for (auto &it : triangles) {
-        for (auto &it2 : it.second) {
-            it2.flags |= mask_set;
-            it2.flags &= ~mask_clear;
+        for (auto it2 : it.second) {
+            it2.second.flags |= mask_set;
+            it2.second.flags &= ~mask_clear;
         }
     }
     request_push();
@@ -116,22 +115,23 @@ void Canvas::set_flags_all(uint8_t mask_set, uint8_t mask_clear)
 
 void Canvas::hide_obj(const ObjectRef &r)
 {
-    set_flags(r, Triangle::FLAG_HIDDEN, 0);
+    set_flags(r, TriangleInfo::FLAG_HIDDEN, 0);
 }
 
 void Canvas::show_obj(const ObjectRef &r)
 {
-    set_flags(r, 0, Triangle::FLAG_HIDDEN);
+    set_flags(r, 0, TriangleInfo::FLAG_HIDDEN);
 }
 
 void Canvas::show_all_obj()
 {
-    set_flags_all(0, Triangle::FLAG_HIDDEN);
+    set_flags_all(0, TriangleInfo::FLAG_HIDDEN);
 }
 
 void Canvas::add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP color, uint8_t flags)
 {
-    triangles[layer].emplace_back(p0, p1, p2, color, triangle_type_current, flags, lod_current);
+    triangles[layer].emplace_back(std::forward_as_tuple(p0, p1, p2, color, lod_current),
+                                  std::forward_as_tuple(triangle_type_current, flags));
     if (!fast_draw) {
         auto idx = triangles[layer].size() - 1;
         for (auto &ref : object_refs_current) {
@@ -252,8 +252,8 @@ std::pair<Coordf, Coordf> Canvas::get_bbox(bool visible_only) const
     Coordf a, b;
     for (const auto &it : triangles) {
         if (visible_only == false || get_layer_display(it.first).visible) {
-            for (const auto &it2 : it.second) {
-                if (it2.flags & Triangle::FLAG_GLYPH)
+            for (const auto &[it2, it_info] : it.second) {
+                if (it_info.flags & TriangleInfo::FLAG_GLYPH)
                     continue;
                 std::vector<Coordf> points = {Coordf(it2.x0, it2.y0), Coordf(it2.x1, it2.y2), Coordf(it2.x1, it2.y2)};
                 if (std::isnan(it2.y1) && std::isnan(it2.x2) && std::isnan(it2.y2)) { // circle

@@ -8,10 +8,6 @@ namespace horizon {
 
 static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out)
 {
-    auto err = glGetError();
-    if (err != GL_NO_ERROR) {
-        std::cout << "gl error t " << err << std::endl;
-    }
     GLuint p0_index = 0;
     GLuint p1_index = 1;
     GLuint p2_index = 2;
@@ -62,7 +58,8 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out)
     return vao;
 }
 
-TriangleRenderer::TriangleRenderer(CanvasGL *c, std::map<int, std::vector<Triangle>> &tris) : ca(c), triangles(tris)
+TriangleRenderer::TriangleRenderer(CanvasGL *c, const std::map<int, vector_pair<Triangle, TriangleInfo>> &tris)
+    : ca(c), triangles(tris)
 {
 }
 
@@ -385,15 +382,15 @@ void TriangleRenderer::push()
     std::vector<unsigned int> elements;
     for (const auto &[layer, tris] : triangles) {
         const auto &ld = ca->get_layer_display(layer);
-        glBufferSubData(GL_ARRAY_BUFFER, ofs * sizeof(Triangle), tris.size() * sizeof(Triangle), tris.data());
+        glBufferSubData(GL_ARRAY_BUFFER, ofs * sizeof(Triangle), tris.size() * sizeof(Triangle), tris.first.data());
         std::map<std::pair<Type, bool>, std::vector<unsigned int>> type_indices;
         unsigned int i = 0;
-        for (const auto &tri : tris) {
-            const bool hidden = tri.flags & Triangle::FLAG_HIDDEN;
-            const bool type_visible = ld.types_visible & (1 << tri.type);
+        for (const auto &[tri, tri_info] : tris) {
+            const bool hidden = tri_info.flags & TriangleInfo::FLAG_HIDDEN;
+            const bool type_visible = ld.types_visible & (1 << static_cast<int>(tri_info.type));
             if (!hidden && type_visible) {
                 auto ty = Type::LINE;
-                if (tri.flags & Triangle::FLAG_GLYPH) {
+                if (tri_info.flags & TriangleInfo::FLAG_GLYPH) {
                     ty = Type::GLYPH;
                 }
                 else if (!isnan(tri.y2)) {
@@ -405,7 +402,7 @@ void TriangleRenderer::push()
                 else if (isnan(tri.y1) && isnan(tri.x2) && isnan(tri.y2)) {
                     ty = Type::CIRCLE;
                 }
-                else if (isnan(tri.y2) && (tri.flags & Triangle::FLAG_BUTT)) {
+                else if (isnan(tri.y2) && (tri_info.flags & TriangleInfo::FLAG_BUTT)) {
                     ty = Type::LINE_BUTT;
                 }
                 else if (isnan(tri.y2)) {
@@ -414,7 +411,7 @@ void TriangleRenderer::push()
                 else {
                     throw std::runtime_error("unknown triangle type");
                 }
-                type_indices[std::make_pair(ty, (tri.flags & Triangle::FLAG_HIGHLIGHT)
+                type_indices[std::make_pair(ty, (tri_info.flags & TriangleInfo::FLAG_HIGHLIGHT)
                                                         || (tri.color == static_cast<int>(ColorP::LAYER_HIGHLIGHT)))]
                         .push_back(i + ofs);
             }

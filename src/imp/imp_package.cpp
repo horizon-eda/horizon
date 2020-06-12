@@ -303,16 +303,16 @@ void ImpPackage::construct()
 
 void ImpPackage::update_highlights()
 {
-    canvas->set_flags_all(0, Triangle::FLAG_HIGHLIGHT);
+    canvas->set_flags_all(0, TriangleInfo::FLAG_HIGHLIGHT);
     canvas->set_highlight_enabled(highlights.size());
     for (const auto &it : highlights) {
         if (it.type == ObjectType::PAD) {
             ObjectRef ref(ObjectType::PAD, it.uuid);
-            canvas->set_flags(ref, Triangle::FLAG_HIGHLIGHT, 0);
+            canvas->set_flags(ref, TriangleInfo::FLAG_HIGHLIGHT, 0);
         }
 
         else {
-            canvas->set_flags(it, Triangle::FLAG_HIGHLIGHT, 0);
+            canvas->set_flags(it, TriangleInfo::FLAG_HIGHLIGHT, 0);
         }
     }
 }

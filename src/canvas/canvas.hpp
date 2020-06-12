@@ -17,6 +17,7 @@
 #include <deque>
 #include <list>
 #include "picture.hpp"
+#include "util/vector_pair.hpp"
 
 namespace horizon {
 class Canvas {
@@ -80,7 +81,7 @@ public:
     static const int first_overlay_layer = 30000;
 
 protected:
-    std::map<int, std::vector<Triangle>> triangles;
+    std::map<int, vector_pair<Triangle, TriangleInfo>> triangles;
     std::list<CanvasPicture> pictures;
     void add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t flg = 0);
 
@@ -217,7 +218,7 @@ protected:
 
     UUID sheet_current_uuid;
 
-    Triangle::Type triangle_type_current = Triangle::Type::NONE;
+    TriangleInfo::Type triangle_type_current = TriangleInfo::Type::NONE;
 
     std::map<std::pair<int, bool>, int> overlay_layers;
     int overlay_layer_current = first_overlay_layer;

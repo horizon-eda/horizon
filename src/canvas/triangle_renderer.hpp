@@ -3,13 +3,14 @@
 #include "util/gl_inc.h"
 #include <map>
 #include <vector>
+#include "util/vector_pair.hpp"
 
 namespace horizon {
 class TriangleRenderer {
     friend class CanvasGL;
 
 public:
-    TriangleRenderer(class CanvasGL *c, std::map<int, std::vector<Triangle>> &tris);
+    TriangleRenderer(class CanvasGL *c, const std::map<int, vector_pair<Triangle, TriangleInfo>> &tris);
     void realize();
     void render();
     void push();
@@ -17,7 +18,7 @@ public:
 private:
     CanvasGL *ca;
     enum class Type { TRIANGLE, LINE, LINE0, LINE_BUTT, GLYPH, CIRCLE };
-    std::map<int, std::vector<Triangle>> &triangles;
+    const std::map<int, vector_pair<Triangle, TriangleInfo>> &triangles;
     std::map<int, std::map<std::pair<Type, bool>, std::pair<size_t, size_t>>> layer_offsets;
     size_t n_tris = 0;
 

@@ -44,34 +44,34 @@ void ImpBoard::canvas_update()
 
 void ImpBoard::update_highlights()
 {
-    canvas->set_flags_all(0, Triangle::FLAG_HIGHLIGHT);
+    canvas->set_flags_all(0, TriangleInfo::FLAG_HIGHLIGHT);
     canvas->set_highlight_enabled(highlights.size());
     for (const auto &it : highlights) {
         if (it.type == ObjectType::NET) {
             for (const auto &it_track : core_board.get_board()->tracks) {
                 if (it_track.second.net.uuid == it.uuid) {
                     ObjectRef ref(ObjectType::TRACK, it_track.first);
-                    canvas->set_flags(ref, Triangle::FLAG_HIGHLIGHT, 0);
+                    canvas->set_flags(ref, TriangleInfo::FLAG_HIGHLIGHT, 0);
                 }
             }
             {
                 const auto &airwires = core_board.get_board()->airwires;
                 if (airwires.count(it.uuid)) {
                     ObjectRef ref(ObjectType::AIRWIRE, it.uuid);
-                    canvas->set_flags(ref, Triangle::FLAG_HIGHLIGHT, 0);
+                    canvas->set_flags(ref, TriangleInfo::FLAG_HIGHLIGHT, 0);
                 }
             }
             for (const auto &it_via : core_board.get_board()->vias) {
                 if (it_via.second.junction->net.uuid == it.uuid) {
                     ObjectRef ref(ObjectType::VIA, it_via.first);
-                    canvas->set_flags(ref, Triangle::FLAG_HIGHLIGHT, 0);
+                    canvas->set_flags(ref, TriangleInfo::FLAG_HIGHLIGHT, 0);
                 }
             }
             for (const auto &it_pkg : core_board.get_board()->packages) {
                 for (const auto &it_pad : it_pkg.second.package.pads) {
                     if (it_pad.second.net.uuid == it.uuid) {
                         ObjectRef ref(ObjectType::PAD, it_pad.first, it_pkg.first);
-                        canvas->set_flags(ref, Triangle::FLAG_HIGHLIGHT, 0);
+                        canvas->set_flags(ref, TriangleInfo::FLAG_HIGHLIGHT, 0);
                     }
                 }
             }
@@ -80,12 +80,12 @@ void ImpBoard::update_highlights()
             for (const auto &it_pkg : core_board.get_board()->packages) {
                 if (it_pkg.second.component->uuid == it.uuid) {
                     ObjectRef ref(ObjectType::BOARD_PACKAGE, it_pkg.first);
-                    canvas->set_flags(ref, Triangle::FLAG_HIGHLIGHT, 0);
+                    canvas->set_flags(ref, TriangleInfo::FLAG_HIGHLIGHT, 0);
                 }
             }
         }
         else {
-            canvas->set_flags(it, Triangle::FLAG_HIGHLIGHT, 0);
+            canvas->set_flags(it, TriangleInfo::FLAG_HIGHLIGHT, 0);
         }
     }
 }

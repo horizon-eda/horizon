@@ -210,9 +210,9 @@ void Canvas::render(const Line &line, bool interactive, ColorP co)
     img_line(line.from->position, line.to->position, line.width, line.layer);
     if (img_mode)
         return;
-    triangle_type_current = Triangle::Type::GRAPHICS;
+    triangle_type_current = TriangleInfo::Type::GRAPHICS;
     draw_line(line.from->position, line.to->position, co, line.layer, true, line.width);
-    triangle_type_current = Triangle::Type::NONE;
+    triangle_type_current = TriangleInfo::Type::NONE;
     if (interactive) {
         selectables.append_line(line.uuid, ObjectType::LINE, line.from->position, line.to->position, line.width, 0,
                                 line.layer);
@@ -644,10 +644,10 @@ void Canvas::render(const Text &text, bool interactive, ColorP co)
     }
 
     img_patch_type(PatchType::TEXT);
-    triangle_type_current = Triangle::Type::TEXT;
+    triangle_type_current = TriangleInfo::Type::TEXT;
     auto extents = draw_text0(transform.shift, text.size, text.overridden ? text.text_override : text.text, angle, rev,
                               text.origin, co, text.layer, text.width, true, text.font, false, transform.mirror);
-    triangle_type_current = Triangle::Type::NONE;
+    triangle_type_current = TriangleInfo::Type::NONE;
     // img_text_extents(text, extents);
     img_patch_type(PatchType::OTHER);
     transform_restore();
@@ -770,13 +770,13 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
     if (!layer_display.count(poly.layer))
         return;
     if (auto plane = dynamic_cast<Plane *>(poly.usage.ptr)) {
-        triangle_type_current = Triangle::Type::PLANE_FILL;
+        triangle_type_current = TriangleInfo::Type::PLANE_FILL;
         auto tris = fragment_cache.get_triangles(*plane);
         for (const auto &tri : tris) {
             add_triangle(poly.layer, transform.transform(tri[0]), transform.transform(tri[1]),
                          transform.transform(tri[2]), co);
         }
-        triangle_type_current = Triangle::Type::PLANE_OUTLINE;
+        triangle_type_current = TriangleInfo::Type::PLANE_OUTLINE;
         for (const auto &frag : plane->fragments) {
             ColorP co_orphan = co;
             if (frag.orphan == true)
@@ -796,10 +796,10 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
                           poly.layer);
             }
         }
-        triangle_type_current = Triangle::Type::NONE;
+        triangle_type_current = TriangleInfo::Type::NONE;
     }
     else { // normal polygon
-        triangle_type_current = Triangle::Type::POLYGON;
+        triangle_type_current = TriangleInfo::Type::POLYGON;
         TPPLPoly po;
         po.Init(poly.vertices.size());
         po.SetHole(false);
@@ -826,7 +826,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
             draw_line(poly.vertices[i].position, poly.vertices[(i + 1) % poly.vertices.size()].position, co,
                       poly.layer);
         }
-        triangle_type_current = Triangle::Type::NONE;
+        triangle_type_current = TriangleInfo::Type::NONE;
     }
 
     if (interactive) {
@@ -885,7 +885,7 @@ void Canvas::render(const Shape &shape, bool interactive)
         auto w = shape.params.at(0);
         auto h = shape.params.at(1);
         add_triangle(shape.layer, transform.transform(Coordf(-w / 2, 0)), transform.transform(Coordf(w / 2, 0)),
-                     Coordf(h, NAN), ColorP::FROM_LAYER, Triangle::FLAG_BUTT);
+                     Coordf(h, NAN), ColorP::FROM_LAYER, TriangleInfo::FLAG_BUTT);
         transform_restore();
     }
     else if (shape.form == Shape::Form::OBROUND) {

@@ -87,10 +87,10 @@ private:
     {
         LayerDisplay ld;
         if (!cb_text->get_active()) {
-            ld.types_visible &= ~(1 << static_cast<int>(Triangle::Type::TEXT));
+            ld.types_visible &= ~(1 << static_cast<int>(TriangleInfo::Type::TEXT));
         }
         if (!cb_gfx->get_active()) {
-            ld.types_visible &= ~(1 << static_cast<int>(Triangle::Type::GRAPHICS));
+            ld.types_visible &= ~(1 << static_cast<int>(TriangleInfo::Type::GRAPHICS));
         }
         emit_layer_display(ld);
     }
@@ -124,7 +124,7 @@ private:
     {
         LayerDisplay ld;
         if (cb_planes_outline->get_active()) {
-            ld.types_visible &= ~(1 << static_cast<int>(Triangle::Type::PLANE_FILL));
+            ld.types_visible &= ~(1 << static_cast<int>(TriangleInfo::Type::PLANE_FILL));
         }
         emit_layer_display(ld);
     }

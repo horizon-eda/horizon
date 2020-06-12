@@ -130,10 +130,10 @@ void ImpSchematic::update_highlights()
     }
 
     auto sheet = core_schematic.get_sheet();
-    canvas->set_flags_all(0, Triangle::FLAG_HIGHLIGHT);
+    canvas->set_flags_all(0, TriangleInfo::FLAG_HIGHLIGHT);
     canvas->set_highlight_enabled(highlights_for_sheet[sheet->uuid].size());
     for (const auto &it : highlights_for_sheet[sheet->uuid]) {
-        canvas->set_flags(it, Triangle::FLAG_HIGHLIGHT, 0);
+        canvas->set_flags(it, TriangleInfo::FLAG_HIGHLIGHT, 0);
     }
 }
 

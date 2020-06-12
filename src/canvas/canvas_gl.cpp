@@ -722,7 +722,7 @@ void CanvasGL::draw_bitmap_text(const Coordf &p, float sc, const std::string &rt
             Coordf p1(glyph_w * 1e6 * sc, 0);
 
             add_triangle(layer, point + tr.transform(shift) * 1e6 * sc, tr.transform(p1), Coordf(aspect, *fl), color,
-                         Triangle::FLAG_GLYPH);
+                         TriangleInfo::FLAG_GLYPH);
             point += tr.transform(Coordf(info.advance * char_space * 1e6 * sc, 0));
         }
         else {
