@@ -69,7 +69,7 @@ int PNS_HORIZON_IFACE::layer_from_router(int l)
 
 class PNS_HORIZON_RULE_RESOLVER : public PNS::RULE_RESOLVER {
 public:
-    PNS_HORIZON_RULE_RESOLVER(const horizon::Board *aBoard, horizon::BoardRules *aRules, PNS::ROUTER *aRouter);
+    PNS_HORIZON_RULE_RESOLVER(const horizon::Board *aBoard, const horizon::BoardRules *aRules, PNS::ROUTER *aRouter);
     virtual ~PNS_HORIZON_RULE_RESOLVER();
 
     virtual int Clearance(const PNS::ITEM *aA, const PNS::ITEM *aB) const override;
@@ -85,7 +85,7 @@ private:
     std::vector<const horizon::RuleClearanceCopperKeepout *> m_rules_keepout;
 };
 
-PNS_HORIZON_RULE_RESOLVER::PNS_HORIZON_RULE_RESOLVER(const horizon::Board *aBoard, horizon::BoardRules *rules,
+PNS_HORIZON_RULE_RESOLVER::PNS_HORIZON_RULE_RESOLVER(const horizon::Board *aBoard, const horizon::BoardRules *rules,
                                                      PNS::ROUTER *aRouter)
     : m_router(aRouter), m_rules(rules)
 {
@@ -372,7 +372,7 @@ void PNS_HORIZON_IFACE::SetCanvas(horizon::CanvasGL *ca)
     canvas = ca;
 }
 
-void PNS_HORIZON_IFACE::SetRules(horizon::BoardRules *ru)
+void PNS_HORIZON_IFACE::SetRules(const horizon::BoardRules *ru)
 {
     rules = ru;
 }

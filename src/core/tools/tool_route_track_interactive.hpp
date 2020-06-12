@@ -40,7 +40,7 @@ private:
     State state = State::START;
 
     Board *board = nullptr;
-    class BoardRules *rules = nullptr;
+    const class BoardRules *rules = nullptr;
     bool shove = false;
 
     void update_tip();

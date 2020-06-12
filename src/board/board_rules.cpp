@@ -441,7 +441,7 @@ Rule *BoardRules::add_rule(RuleID id)
     return r;
 }
 
-uint64_t BoardRules::get_default_track_width(Net *net, int layer) const
+uint64_t BoardRules::get_default_track_width(const Net *net, int layer) const
 {
     auto rules = get_rules_sorted<RuleTrackWidth>(RuleID::TRACK_WIDTH);
     for (auto rule : rules) {
@@ -456,7 +456,7 @@ uint64_t BoardRules::get_default_track_width(Net *net, int layer) const
 
 static const RuleClearanceCopper fallback_clearance_copper = UUID();
 
-const RuleClearanceCopper *BoardRules::get_clearance_copper(Net *net1, Net *net2, int layer) const
+const RuleClearanceCopper *BoardRules::get_clearance_copper(const Net *net1, const Net *net2, int layer) const
 {
     auto rules = get_rules_sorted<RuleClearanceCopper>(RuleID::CLEARANCE_COPPER);
     for (auto ru : rules) {
@@ -472,7 +472,7 @@ const RuleClearanceCopper *BoardRules::get_clearance_copper(Net *net1, Net *net2
 
 static const RuleClearanceCopperOther fallback_clearance_copper_non_copper = UUID();
 
-const RuleClearanceCopperOther *BoardRules::get_clearance_copper_other(Net *net, int layer) const
+const RuleClearanceCopperOther *BoardRules::get_clearance_copper_other(const Net *net, int layer) const
 {
     auto rules = get_rules_sorted<RuleClearanceCopperOther>(RuleID::CLEARANCE_COPPER_OTHER);
     for (auto ru : rules) {
@@ -485,7 +485,7 @@ const RuleClearanceCopperOther *BoardRules::get_clearance_copper_other(Net *net,
 
 static const RuleDiffpair diffpair_fallback = UUID();
 
-const RuleDiffpair *BoardRules::get_diffpair(NetClass *net_class, int layer) const
+const RuleDiffpair *BoardRules::get_diffpair(const NetClass *net_class, int layer) const
 {
     auto rules = get_rules_sorted<RuleDiffpair>(RuleID::DIFFPAIR);
     for (auto ru : rules) {
@@ -498,7 +498,7 @@ const RuleDiffpair *BoardRules::get_diffpair(NetClass *net_class, int layer) con
 
 static const RuleClearanceCopperKeepout keepout_fallback = UUID();
 
-const RuleClearanceCopperKeepout *BoardRules::get_clearance_copper_keepout(Net *net,
+const RuleClearanceCopperKeepout *BoardRules::get_clearance_copper_keepout(const Net *net,
                                                                            const KeepoutContour *contour) const
 {
     auto rules = get_rules_sorted<RuleClearanceCopperKeepout>(RuleID::CLEARANCE_COPPER_KEEPOUT);

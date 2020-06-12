@@ -70,7 +70,7 @@ public:
     void SetRouter(PNS::ROUTER *aRouter) override;
     void SetBoard(horizon::Board *brd);
     void SetCanvas(class horizon::CanvasGL *ca);
-    void SetRules(horizon::BoardRules *rules);
+    void SetRules(const horizon::BoardRules *rules);
     void SetViaPadstackProvider(horizon::ViaPadstackProvider *v);
 
     void SyncWorld(PNS::NODE *aWorld) override;
@@ -119,7 +119,7 @@ private:
 
     horizon::Board *board = nullptr;
     class horizon::CanvasGL *canvas = nullptr;
-    class horizon::BoardRules *rules = nullptr;
+    const class horizon::BoardRules *rules = nullptr;
     class horizon::ViaPadstackProvider *vpp = nullptr;
     PNS::ROUTER *m_router;
 
