@@ -1062,6 +1062,7 @@ void Canvas::render_pad_overlay(const Pad &pad)
     auto bb = pad.padstack.get_bbox(true); // only copper
     auto a = bb.first;
     auto b = bb.second;
+    transform.accumulate(Placement((a + b) / 2));
 
     auto pad_width = abs(b.x - a.x);
     auto pad_height = abs(b.y - a.y);
