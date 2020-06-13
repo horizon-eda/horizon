@@ -11,6 +11,7 @@
 #include "router/router/pns_meander_placer_base.h"
 #include "util/util.hpp"
 #include "core/tool_id.hpp"
+#include "util/selection_util.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -56,16 +57,18 @@ bool ToolRouteTrackInteractive::can_begin()
 {
     if (!doc.b)
         return false;
+    auto via = get_via(selection);
+    auto track = get_track(selection);
     switch (tool_id) {
     case ToolID::DRAG_TRACK_INTERACTIVE:
+        return !!via != !!track; // xor
+
     case ToolID::TUNE_TRACK:
-        return get_track(selection);
+        return track;
 
     case ToolID::TUNE_DIFFPAIR:
-    case ToolID::TUNE_DIFFPAIR_SKEW: {
-        auto track = get_track(selection);
+    case ToolID::TUNE_DIFFPAIR_SKEW:
         return track && track->net && track->net->diffpair;
-    }
 
     default:
         return true;
@@ -86,18 +89,18 @@ bool ToolRouteTrackInteractive::is_specific()
 
 Track *ToolRouteTrackInteractive::get_track(const std::set<SelectableRef> &sel)
 {
-    Track *track = nullptr;
-    for (const auto &it : sel) {
-        if (it.type == ObjectType::TRACK) {
-            if (track == nullptr) {
-                track = &doc.b->get_board()->tracks.at(it.uuid);
-            }
-            else {
-                return nullptr;
-            }
-        }
-    }
-    return track;
+    if (sel_count_type(sel, ObjectType::TRACK) == 1)
+        return &doc.b->get_board()->tracks.at(sel_find_one(sel, ObjectType::TRACK).uuid);
+    else
+        return nullptr;
+}
+
+Via *ToolRouteTrackInteractive::get_via(const std::set<SelectableRef> &sel)
+{
+    if (sel_count_type(sel, ObjectType::VIA) == 1)
+        return &doc.b->get_board()->vias.at(sel_find_one(sel, ObjectType::VIA).uuid);
+    else
+        return nullptr;
 }
 
 ToolResponse ToolRouteTrackInteractive::begin(const ToolArgs &args)
@@ -159,12 +162,22 @@ ToolResponse ToolRouteTrackInteractive::begin(const ToolArgs &args)
     update_tip();
 
     if (tool_id == ToolID::DRAG_TRACK_INTERACTIVE) {
-        Track *track = get_track(args.selection);
-        if (!track) {
-            return ToolResponse::end();
+        auto track = get_track(args.selection);
+        auto via = get_via(args.selection);
+        const PNS::PNS_HORIZON_PARENT_ITEM *parent = nullptr;
+        Net *net = nullptr;
+        if (track) {
+            parent = iface->get_parent(track);
+            net = track->net;
         }
-        auto parent = iface->get_parent(track);
-        wrapper->m_startItem = router->GetWorld()->FindItemByParent(parent, iface->get_net_code(track->net.uuid));
+        else if (via) {
+            parent = iface->get_parent(via);
+            net = via->junction->net;
+        }
+        else
+            return ToolResponse::end();
+
+        wrapper->m_startItem = router->GetWorld()->FindItemByParent(parent, iface->get_net_code(net->uuid));
 
         VECTOR2I p0(args.coords.x, args.coords.y);
         if (!router->StartDragging(p0, wrapper->m_startItem, PNS::DM_ANY))
@@ -820,7 +833,8 @@ void ToolRouteTrackInteractive::update_tip()
     }
     if (is_tune()) {
         if (meander_placer) {
-            ss << "<b>LMB:</b>place <b>RMB:</b>cancel <b>l:</b>set length <b>&lt;&gt;:</b>+/- amplitude <b>,.:</b>+/- "
+            ss << "<b>LMB:</b>place <b>RMB:</b>cancel <b>l:</b>set length <b>&lt;&gt;:</b>+/- amplitude "
+                  "<b>,.:</b>+/- "
                   "spacing";
             ss << " <i>";
             ss << meander_placer->TuningInfo();

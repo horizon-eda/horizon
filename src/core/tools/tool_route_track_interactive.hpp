@@ -45,6 +45,7 @@ private:
 
     void update_tip();
     class Track *get_track(const std::set<SelectableRef> &sel);
+    class Via *get_via(const std::set<SelectableRef> &sel);
     bool is_tune() const;
 };
 } // namespace horizon
