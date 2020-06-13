@@ -212,6 +212,8 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
     else
         selection_center = get_selection_center();
 
+    collect_nets();
+
     if (tool_id == ToolID::ROTATE || tool_id == ToolID::MIRROR_X || tool_id == ToolID::MIRROR_Y
         || tool_id == ToolID::ROTATE_CURSOR || tool_id == ToolID::MIRROR_CURSOR) {
         move_mirror_or_rotate(selection_center, tool_id == ToolID::ROTATE || tool_id == ToolID::ROTATE_CURSOR);
@@ -219,10 +221,7 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
             move_mirror_or_rotate(selection_center, true);
             move_mirror_or_rotate(selection_center, true);
         }
-        if (doc.b) {
-            auto brd = doc.b->get_board();
-            brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
-        }
+        finish();
         return ToolResponse::commit();
     }
     if (tool_id == ToolID::MOVE_EXACTLY) {
@@ -231,14 +230,9 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
             return ToolResponse::end();
         }
         move_do(r.second);
-        if (doc.b) {
-            auto brd = doc.b->get_board();
-            brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
-        }
+        finish();
         return ToolResponse::commit();
     }
-
-    collect_nets();
 
     update_tip();
 
@@ -378,6 +372,7 @@ void ToolMove::finish()
     if (doc.b) {
         auto brd = doc.b->get_board();
         brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
+        brd->airwires_expand = nets;
         for (auto plane : planes) {
             brd->update_plane(plane);
         }

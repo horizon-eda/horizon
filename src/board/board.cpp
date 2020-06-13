@@ -684,10 +684,11 @@ void Board::expand(bool careful)
     }
 
     if (expand_flags & EXPAND_AIRWIRES)
-        update_airwires();
+        update_airwires(false, airwires_expand);
 
     expand_flags = EXPAND_ALL;
     packages_expand.clear();
+    airwires_expand.clear();
 }
 
 void Board::expand_packages()

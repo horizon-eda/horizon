@@ -141,6 +141,7 @@ public:
 
     ExpandFlags expand_flags = EXPAND_ALL;
     std::set<UUID> packages_expand;
+    std::set<UUID> airwires_expand;
 
     json serialize() const;
     void save_pictures(const std::string &dir) const;
