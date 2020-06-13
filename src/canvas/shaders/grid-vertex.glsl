@@ -12,8 +12,8 @@ void main() {
 	int gr_y = int(gl_InstanceID/grid_mod);
 	float size = mark_size;
 	if(gl_VertexID >= 4) {
-		size = 20;
+		size = 20.5;
 	}
-	vec2 pos = (viewmat*vec3(grid_0+grid_size*vec2(gr_x, gr_y), 1)).xy+position*size;
+	vec2 pos = round((viewmat*vec3(grid_0+grid_size*vec2(gr_x, gr_y), 1)).xy)+vec2(.5,.5)+position*size;
 	gl_Position = vec4((screenmat*vec3(pos, 1)), 1);
 }

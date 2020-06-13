@@ -600,7 +600,7 @@ void CanvasGL::set_appearance(const Appearance &a)
     }
     switch (a.grid_style) {
     case Appearance::GridStyle::CROSS:
-        grid.mark_size = 5;
+        grid.mark_size = 5.5;
         break;
     case Appearance::GridStyle::DOT:
         grid.mark_size = 1;
