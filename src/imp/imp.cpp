@@ -593,6 +593,10 @@ void ImpBase::run(int argc, char *argv[])
     }
 
     grid_controller.emplace(*main_window, *canvas);
+    connect_action(ActionID::SET_GRID_ORIGIN, [this](const auto &c) {
+        auto co = canvas->get_cursor_pos();
+        grid_controller->set_origin(co);
+    });
 
     auto save_button = create_action_button(make_action(ActionID::SAVE));
     save_button->show();

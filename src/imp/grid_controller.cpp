@@ -92,6 +92,12 @@ void GridController::apply()
             Coordi(grid_spin_button_origin_x->get_value_as_int(), grid_spin_button_origin_y->get_value_as_int()));
 }
 
+void GridController::set_origin(const Coordi &c)
+{
+    grid_spin_button_origin_x->set_value(c.x);
+    grid_spin_button_origin_y->set_value(c.y);
+}
+
 enum class GridMode { SQUARE, RECTANGULAR };
 
 static const LutEnumStr<GridMode> mode_lut = {

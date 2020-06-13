@@ -87,7 +87,8 @@ enum class ActionID {
     SELECT_POLYGON,
     FAB_OUTPUT_WINDOW,
     GEN_FAB_OUTPUT,
-    FOOTPRINT_GENERATOR
+    FOOTPRINT_GENERATOR,
+    SET_GRID_ORIGIN,
 };
 
 using ActionToolID = std::pair<ActionID, ToolID>;

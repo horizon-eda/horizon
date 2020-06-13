@@ -827,6 +827,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Place picture", ActionGroup::GRAPHICS,
           ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD | ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::SET_GRID_ORIGIN, ToolID::NONE},
+         {"Set grid origin", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -936,6 +940,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(FAB_OUTPUT_WINDOW),
         ACTION_LUT_ITEM(GEN_FAB_OUTPUT),
         ACTION_LUT_ITEM(FOOTPRINT_GENERATOR),
+        ACTION_LUT_ITEM(SET_GRID_ORIGIN),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
