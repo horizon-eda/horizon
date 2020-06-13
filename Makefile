@@ -433,6 +433,7 @@ SRC_IMP = \
 	src/util/clipper_util.cpp\
 	src/widgets/action_button.cpp\
 	src/util/picture_util.cpp\
+	src/imp/grid_controller.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\

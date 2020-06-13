@@ -64,7 +64,7 @@ PreviewCanvas::PreviewCanvas(Pool &p, bool layered) : Glib::ObjectBase(typeid(Pr
 {
     canvas = Gtk::manage(new CanvasGL());
     if (layered)
-        canvas->property_grid_spacing() = .25_mm;
+        canvas->set_grid_spacing(.25_mm);
     canvas->set_scale_and_offset(100e-6, Coordf());
     canvas->show();
     add(*canvas);

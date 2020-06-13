@@ -16,6 +16,8 @@
 #include <zmq.hpp>
 #include "util/item_set.hpp"
 #include "canvas/canvas_gl.hpp"
+#include "grid_controller.hpp"
+#include <optional>
 
 #ifdef G_OS_WIN32
 #undef DELETE
@@ -78,8 +80,8 @@ protected:
     WarningsBox *warnings_box;
     class ToolPopover *tool_popover;
     Gtk::Menu *context_menu = nullptr;
-    SpinButtonDim *grid_spin_button;
     std::unique_ptr<SelectionFilterDialog> selection_filter_dialog;
+    std::optional<GridController> grid_controller;
 
     std::unique_ptr<Pool> pool;
     class Core *core = nullptr;

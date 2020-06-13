@@ -12,7 +12,9 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("gl_container", gl_container);
     x->get_widget("tool_hint_label", tool_hint_label);
     x->get_widget("left_panel", left_panel);
-    x->get_widget("grid_box", grid_box);
+    x->get_widget("grid_box_square", grid_box_square);
+    x->get_widget("grid_box_rect", grid_box_rect);
+    x->get_widget("grid_box_stack", grid_box_stack);
     x->get_widget("grid_mul_label", grid_mul_label);
     x->get_widget("cursor_label", cursor_label);
     x->get_widget("selection_mode_label", selection_mode_label);
@@ -47,6 +49,34 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("action_bar_box", action_bar_box);
     x->get_widget("view_options_button", view_options_button);
     search_revealer->set_reveal_child(false);
+
+    x->get_widget("grid_options_button", grid_options_button);
+    x->get_widget("grid_options_revealer", grid_options_revealer);
+    x->get_widget("grid_square_button", grid_square_button);
+    x->get_widget("grid_rect_button", grid_rect_button);
+    x->get_widget("grid_grid", grid_grid);
+    x->get_widget("grid_reset_origin_button", grid_reset_origin_button);
+
+    grid_options_button->signal_clicked().connect([this] {
+        const auto a = grid_options_button->get_active();
+        grid_options_revealer->set_reveal_child(a);
+        if (a) {
+            grid_options_button->set_image_from_icon_name("pan-down-symbolic", Gtk::ICON_SIZE_BUTTON);
+        }
+        else {
+            grid_options_button->set_image_from_icon_name("pan-end-symbolic", Gtk::ICON_SIZE_BUTTON);
+        }
+    });
+
+    grid_square_button->signal_toggled().connect([this] {
+        if (grid_square_button->get_active()) {
+            grid_box_stack->set_visible_child("square");
+        }
+        else {
+            grid_box_stack->set_visible_child("rect");
+        }
+    });
+
 
     nonmodal_close_button->signal_clicked().connect([this] { nonmodal_rev->set_reveal_child(false); });
     nonmodal_button->signal_clicked().connect([this] {
@@ -168,6 +198,13 @@ void MainWindow::set_use_action_bar(bool u)
 {
     action_bar_revealer->set_visible(u);
     hud->set_margin_start(u ? 100 : 20);
+}
+
+void MainWindow::disable_grid_options()
+{
+    grid_options_button->set_active(false);
+    grid_options_button->set_visible(false);
+    grid_options_revealer->set_visible(false);
 }
 
 MainWindow *MainWindow::create()

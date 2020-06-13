@@ -59,7 +59,7 @@ public:
     void set_selection_allowed(bool a);
     std::pair<float, Coordf> get_scale_and_offset();
     void set_scale_and_offset(float sc, Coordf ofs);
-    Coordi snap_to_grid(const Coordi &c);
+    Coordi snap_to_grid(const Coordi &c, unsigned int div = 1) const;
 
     void set_flip_view(bool fl);
     bool get_flip_view() const override;
@@ -123,10 +123,6 @@ public:
     {
         return p_property_work_layer.get_proxy();
     }
-    Glib::PropertyProxy<uint64_t> property_grid_spacing()
-    {
-        return p_property_grid_spacing.get_proxy();
-    }
     Glib::PropertyProxy<float> property_layer_opacity()
     {
         return p_property_layer_opacity.get_proxy();
@@ -165,6 +161,11 @@ public:
     bool layer_is_annotation(int l) const;
 
     std::set<SnapFilter> snap_filter;
+
+    void set_grid_spacing(uint64_t x, uint64_t y);
+    void set_grid_spacing(uint64_t s);
+    Coordi get_grid_spacing() const;
+    void set_grid_origin(const Coordi &c);
 
 protected:
     void push() override;
@@ -232,7 +233,6 @@ private:
 
     bool selection_allowed = true;
     Glib::Property<int> p_property_work_layer;
-    Glib::Property<uint64_t> p_property_grid_spacing;
     Glib::Property<float> p_property_layer_opacity;
 
     Gtk::Menu *clarify_menu;

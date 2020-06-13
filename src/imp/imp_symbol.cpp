@@ -159,7 +159,7 @@ void ImpSymbol::construct()
         sym->text_placements = symbol_preview_window->get_text_placements();
         sym->can_expand = can_expand_switch->get_active();
     });
-    grid_spin_button->set_sensitive(false);
+    grid_controller->disable();
     update_monitor();
 
     connect_action(ActionID::EDIT_UNIT, [this](const auto &a) {

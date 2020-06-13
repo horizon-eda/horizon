@@ -427,7 +427,7 @@ ToolResponse ToolMove::update(const ToolArgs &args)
         else {
             auto sp = imp->get_grid_spacing();
             if (args.mod & ToolArgs::MOD_FINE)
-                sp /= 10;
+                sp = sp / 10;
             auto dir = dir_from_arrow_key(args.key) * sp;
             if (dir.x || dir.y) {
                 key_delta += dir;

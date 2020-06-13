@@ -15,7 +15,9 @@ public:
 
 private:
     CanvasGL *ca;
-    int64_t spacing;
+    Coordi spacing;
+    Coordi origin;
+    unsigned int major = 0;
     float mark_size;
     unsigned int mul = 0;
 

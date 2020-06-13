@@ -592,14 +592,7 @@ void ImpBase::run(int argc, char *argv[])
         search_go(0);
     }
 
-
-    grid_spin_button = Gtk::manage(new SpinButtonDim());
-    grid_spin_button->set_range(0.01_mm, 10_mm);
-    grid_spacing_binding = Glib::Binding::bind_property(grid_spin_button->property_value(),
-                                                        canvas->property_grid_spacing(), Glib::BINDING_BIDIRECTIONAL);
-    grid_spin_button->set_value(1.25_mm);
-    grid_spin_button->show_all();
-    main_window->grid_box->pack_start(*grid_spin_button, true, true, 0);
+    grid_controller.emplace(*main_window, *canvas);
 
     auto save_button = create_action_button(make_action(ActionID::SAVE));
     save_button->show();

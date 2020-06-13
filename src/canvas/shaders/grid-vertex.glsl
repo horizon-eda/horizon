@@ -2,7 +2,7 @@
 in vec2 position;
 uniform mat3 screenmat;
 uniform mat3 viewmat;
-uniform float grid_size;
+uniform vec2 grid_size;
 uniform vec2 grid_0;
 uniform int grid_mod;
 uniform float mark_size;

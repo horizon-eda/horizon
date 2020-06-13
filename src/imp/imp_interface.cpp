@@ -48,9 +48,9 @@ class CanvasGL *ImpInterface::get_canvas()
     return imp->canvas;
 }
 
-uint64_t ImpInterface::get_grid_spacing()
+Coordi ImpInterface::get_grid_spacing() const
 {
-    return imp->canvas->property_grid_spacing();
+    return imp->canvas->get_grid_spacing();
 }
 
 void ImpInterface::set_no_update(bool v)

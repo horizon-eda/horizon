@@ -21,7 +21,7 @@ public:
     void set_no_update(bool v);
     void canvas_update();
     class CanvasGL *get_canvas();
-    uint64_t get_grid_spacing();
+    Coordi get_grid_spacing() const;
     void tool_update_data(std::unique_ptr<ToolData> data);
 
     void update_highlights();

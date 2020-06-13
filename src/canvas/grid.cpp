@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace horizon {
-Grid::Grid(class CanvasGL *c) : ca(c), spacing(1.25_mm), mark_size(5)
+Grid::Grid(class CanvasGL *c) : ca(c), spacing(1.25_mm, 1.25_mm), mark_size(5)
 {
 }
 
@@ -60,50 +60,49 @@ void Grid::render()
     glUseProgram(program);
     glBindVertexArray(vao);
     glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca->screenmat));
-    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
+    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat_noflip));
     glUniform1f(mark_size_loc, mark_size);
     auto color = ca->get_color(ColorP::GRID);
     glUniform4f(color_loc, color.r, color.g, color.b, ca->appearance.grid_opacity);
 
-    float sp = spacing;
-    float sp_px = sp * ca->scale;
+    Coordf sp = spacing;
+    Coordf sp_px = sp * ca->scale;
     unsigned int newmul = 1;
-    while (sp_px < 20) {
+    while (sp_px.x < 20 || sp_px.y < 20) {
         newmul *= 2;
         sp = spacing * newmul;
         sp_px = sp * ca->scale;
     }
 
     Coord<float> grid_0;
-    grid_0.x = (round((ca->flip_view ? -1 : 1) * (-(ca->offset.x - (ca->flip_view ? ca->m_width : 0)) / ca->scale) / sp)
-                - 1)
-               * sp;
-    grid_0.y = (round((-(ca->m_height - ca->offset.y) / ca->scale) / sp) - 1) * sp;
+    grid_0.x = (round(((-ca->offset.x / ca->scale) - origin.x) / sp.x) - 1) * sp.x + origin.x;
+    grid_0.y = (round(((-(ca->m_height - ca->offset.y) / ca->scale) - origin.y) / sp.y) - 1) * sp.y + origin.y;
 
     if (mul != newmul) {
         mul = newmul;
         ca->s_signal_grid_mul_changed.emit(mul);
     }
 
-    glUniform1f(grid_size_loc, sp);
+    glUniform2f(grid_size_loc, sp.x, sp.y);
     glUniform2f(grid_0_loc, grid_0.x, grid_0.y);
 
+    auto spmin = std::min(sp.x, sp.y);
     glLineWidth(1 * ca->get_scale_factor());
     if (mark_size > 100) {
         glUniform1f(mark_size_loc, ca->m_height * 2);
-        int n = (ca->m_width / ca->scale) / sp + 4;
+        int n = (ca->m_width / ca->scale) / spmin + 4;
         glUniform1i(grid_mod_loc, n + 1);
         glDrawArraysInstanced(GL_LINES, 0, 2, n);
 
         glUniform1f(mark_size_loc, ca->m_width * 2);
-        n = (ca->m_height / ca->scale) / sp + 4;
+        n = (ca->m_height / ca->scale) / spmin + 4;
         glUniform1i(grid_mod_loc, 1);
         glDrawArraysInstanced(GL_LINES, 2, 2, n);
     }
     else {
-        int mod = (ca->m_width / ca->scale) / sp + 4;
+        int mod = (ca->m_width / ca->scale) / spmin + 4;
         glUniform1i(grid_mod_loc, mod);
-        int n = mod * ((ca->m_height / ca->scale) / sp + 4);
+        int n = mod * ((ca->m_height / ca->scale) / spmin + 4);
         glDrawArraysInstanced(GL_LINES, 0, 4, n);
     }
 
@@ -111,7 +110,7 @@ void Grid::render()
     grid_0.x = 0;
     grid_0.y = 0;
 
-    glUniform1f(grid_size_loc, 0);
+    glUniform2f(grid_size_loc, 0, 0);
     glUniform2f(grid_0_loc, grid_0.x, grid_0.y);
     glUniform1i(grid_mod_loc, 1);
     glUniform1f(mark_size_loc, 15);
@@ -136,7 +135,7 @@ void Grid::render_cursor(Coord<int64_t> &coord)
     else
         glUniform1f(mark_size_loc, std::max(ca->m_width, ca->m_height));
 
-    glUniform1f(grid_size_loc, 0);
+    glUniform2f(grid_size_loc, 0, 0);
     glUniform2f(grid_0_loc, coord.x, coord.y);
     glUniform1i(grid_mod_loc, 1);
 

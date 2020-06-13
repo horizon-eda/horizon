@@ -480,7 +480,7 @@ void ImpSchematic::construct()
     core_schematic.signal_tool_changed().connect(
             [this](ToolID tool_id) { unplaced_box->set_sensitive(tool_id == ToolID::NONE); });
 
-    grid_spin_button->set_sensitive(false);
+    grid_controller->disable();
     canvas->snap_to_targets = false;
 
     rules_window->signal_goto().connect([this](Coordi location, UUID sheet) {

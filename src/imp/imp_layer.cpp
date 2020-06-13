@@ -46,7 +46,11 @@ void ImpLayer::construct_layer_box(bool pack)
 
     bool layers_loaded = false;
     if (!m_meta.is_null()) {
-        canvas->property_grid_spacing() = m_meta.value("grid_spacing", 1.25_mm);
+        if (m_meta.count("grid_settings")) {
+            grid_controller->load_from_json(m_meta.at("grid_settings"));
+        }
+        else
+            grid_controller->set_spacing_square(m_meta.value("grid_spacing", 1.25_mm));
         if (m_meta.count("layer_display")) {
             layer_box->load_from_json(m_meta.at("layer_display"));
             layers_loaded = true;
@@ -62,7 +66,8 @@ void ImpLayer::construct_layer_box(bool pack)
 void ImpLayer::get_save_meta(json &j)
 {
     j["layer_display"] = layer_box->serialize();
-    j["grid_spacing"] = canvas->property_grid_spacing().get_value();
+    j["grid_spacing"] = grid_controller->get_spacing_square();
+    j["grid_settings"] = grid_controller->serialize();
 }
 
 

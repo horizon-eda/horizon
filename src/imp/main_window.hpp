@@ -12,7 +12,8 @@ public:
     Gtk::Label *tool_hint_label = nullptr;
     Gtk::Label *cursor_label = nullptr;
     Gtk::Box *left_panel = nullptr;
-    Gtk::Box *grid_box = nullptr;
+    Gtk::Box *grid_box_square = nullptr;
+    Gtk::Box *grid_box_rect = nullptr;
     Gtk::Label *grid_mul_label = nullptr;
     Gtk::Label *selection_label = nullptr;
     Gtk::Viewport *property_viewport = nullptr;
@@ -38,6 +39,12 @@ public:
     Gtk::Box *action_bar_box = nullptr;
     void set_use_action_bar(bool u);
 
+    Gtk::RadioButton *grid_square_button = nullptr;
+    Gtk::RadioButton *grid_rect_button = nullptr;
+    Gtk::Grid *grid_grid = nullptr;
+    Gtk::Button *grid_reset_origin_button = nullptr;
+
+
     Glib::SignalProxy<bool, const Glib::ustring &> signal_activate_hud_link()
     {
         return hud_label->signal_activate_link();
@@ -56,6 +63,8 @@ public:
                        const std::string &la2 = "");
 
     void set_view_hints_label(const std::vector<std::string> &s);
+
+    void disable_grid_options();
 
     // virtual ~MainWindow();
 private:
@@ -82,6 +91,11 @@ private:
     std::function<void(void)> nonmodal_fn;
 
     Gtk::Label *view_hints_label = nullptr;
+
+    Gtk::ToggleButton *grid_options_button = nullptr;
+    Gtk::Revealer *grid_options_revealer = nullptr;
+
+    Gtk::Stack *grid_box_stack = nullptr;
 
     void sc(void);
     void cm(const horizon::Coordi &cursor_pos);

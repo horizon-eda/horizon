@@ -27,7 +27,7 @@ CanvasGL::CanvasGL()
     : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), markers(this), grid(this), drag_selection(this),
       selectables_renderer(this, &selectables), triangle_renderer(this, triangles), marker_renderer(this, markers),
       picture_renderer(*this), p_property_work_layer(*this, "work-layer"),
-      p_property_grid_spacing(*this, "grid-spacing"), p_property_layer_opacity(*this, "layer-opacity")
+      p_property_layer_opacity(*this, "layer-opacity")
 {
     add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_MOTION_MASK | Gdk::POINTER_MOTION_MASK
                | Gdk::SCROLL_MASK | Gdk::SMOOTH_SCROLL_MASK | Gdk::KEY_PRESS_MASK);
@@ -39,10 +39,7 @@ CanvasGL::CanvasGL()
         work_layer = property_work_layer();
         request_push();
     });
-    property_grid_spacing().signal_changed().connect([this] {
-        grid.spacing = property_grid_spacing();
-        queue_draw();
-    });
+
     property_layer_opacity() = 100;
     property_layer_opacity().signal_changed().connect([this] { queue_draw(); });
     clarify_menu = Gtk::manage(new Gtk::Menu);
@@ -59,6 +56,28 @@ CanvasGL::CanvasGL()
     gesture_drag->signal_update().connect(sigc::mem_fun(*this, &CanvasGL::drag_gesture_update_cb));
     gesture_drag->set_propagation_phase(Gtk::PHASE_BUBBLE);
     gesture_drag->set_touch_only(true);
+}
+
+void CanvasGL::set_grid_spacing(uint64_t x, uint64_t y)
+{
+    grid.spacing = Coordi(x, y);
+    queue_draw();
+}
+
+void CanvasGL::set_grid_spacing(uint64_t s)
+{
+    set_grid_spacing(s, s);
+}
+
+void CanvasGL::set_grid_origin(const Coordi &c)
+{
+    grid.origin = c;
+    queue_draw();
+}
+
+Coordi CanvasGL::get_grid_spacing() const
+{
+    return grid.spacing;
 }
 
 void CanvasGL::zoom_gesture_begin_cb(GdkEventSequence *seq)
@@ -297,13 +316,12 @@ bool CanvasGL::on_scroll_event(GdkEventScroll *scroll_event)
     return Gtk::GLArea::on_scroll_event(scroll_event);
 }
 
-Coordi CanvasGL::snap_to_grid(const Coordi &c)
+Coordi CanvasGL::snap_to_grid(const Coordi &c, unsigned int div) const
 {
-    auto sp = grid.spacing;
-    int64_t xi = round_multiple(cursor_pos.x, sp);
-    int64_t yi = round_multiple(cursor_pos.y, sp);
-    Coordi t(xi, yi);
-    return t;
+    auto c2 = c - grid.origin;
+    int64_t xi = round_multiple(c2.x, grid.spacing.x / div);
+    int64_t yi = round_multiple(c2.y, grid.spacing.y / div);
+    return grid.origin + Coordi(xi, yi);
 }
 
 void CanvasGL::cursor_move(GdkEvent *motion_event)
@@ -318,16 +336,14 @@ void CanvasGL::cursor_move(GdkEvent *motion_event)
         return;
     }
 
-    auto sp = grid.spacing;
     GdkModifierType state;
     gdk_event_get_state(motion_event, &state);
+    unsigned int div = 1;
     if (state & grid_fine_modifier) {
-        sp /= 10;
+        div = 10;
     }
 
-    int64_t xi = round_multiple(cursor_pos.x, sp);
-    int64_t yi = round_multiple(cursor_pos.y, sp);
-    Coordi t(xi, yi);
+    Coordi t = snap_to_grid(Coordi(cursor_pos.x, cursor_pos.y), div);
 
     const auto &f = std::find_if(targets.begin(), targets.end(), [t, this](const auto &a) -> bool {
         return a.p == t && this->layer_is_visible(a.layer) && can_snap_to_target(a);
