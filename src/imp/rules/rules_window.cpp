@@ -510,8 +510,8 @@ void RulesWindow::update_rule_instances(RuleID id)
         delete it;
     }
     for (const auto &it : inst) {
-        auto la =
-                Gtk::manage(new RuleLabel(sg_order, it.second->get_brief(get_block()), id, it.first, it.second->order));
+        auto la = Gtk::manage(
+                new RuleLabel(sg_order, it.second->get_brief(get_block()), id, it.first, it.second->get_order()));
         la->set_sensitive(it.second->enabled);
         la->show();
         lb_multi->append(*la);
@@ -533,7 +533,7 @@ void RulesWindow::update_rule_instance_labels()
         auto rule = rules->get_rule(la->id, la->uuid);
         la->set_text(rule->get_brief(get_block()));
         la->set_sensitive(rule->enabled);
-        la->set_order(rule->order);
+        la->set_order(rule->get_order());
     }
     lb_multi->invalidate_sort();
 }

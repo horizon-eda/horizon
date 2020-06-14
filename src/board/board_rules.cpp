@@ -38,6 +38,7 @@ void BoardRules::load_from_json(const json &j)
                                           std::forward_as_tuple(u, it.value()));
         }
         fix_order(RuleID::CLEARANCE_COPPER);
+        update_sorted();
     }
     if (j.count("via")) {
         const json &o = j["via"];
@@ -382,6 +383,7 @@ void BoardRules::remove_rule(RuleID id, const UUID &uu)
     default:;
     }
     fix_order(id);
+    update_sorted();
 }
 
 Rule *BoardRules::add_rule(RuleID id)
@@ -391,54 +393,51 @@ Rule *BoardRules::add_rule(RuleID id)
     switch (id) {
     case RuleID::HOLE_SIZE:
         r = &rule_hole_size.emplace(uu, uu).first->second;
-        r->order = -1;
         break;
 
     case RuleID::TRACK_WIDTH:
         r = &rule_track_width.emplace(uu, uu).first->second;
-        r->order = -1;
         break;
 
     case RuleID::CLEARANCE_COPPER:
         r = &rule_clearance_copper.emplace(uu, uu).first->second;
-        r->order = -1;
         break;
 
     case RuleID::VIA:
         r = &rule_via.emplace(uu, uu).first->second;
-        r->order = -1;
         break;
 
     case RuleID::CLEARANCE_COPPER_OTHER:
         r = &rule_clearance_copper_other.emplace(uu, uu).first->second;
-        r->order = -1;
         break;
 
     case RuleID::PLANE:
         r = &rule_plane.emplace(uu, uu).first->second;
-        r->order = -1;
         break;
 
     case RuleID::DIFFPAIR:
         r = &rule_diffpair.emplace(uu, uu).first->second;
-        r->order = -1;
         break;
 
     case RuleID::CLEARANCE_COPPER_KEEPOUT:
         r = &rule_clearance_copper_keepout.emplace(uu, uu).first->second;
-        r->order = -1;
         break;
 
     case RuleID::LAYER_PAIR:
         r = &rule_layer_pair.emplace(uu, uu).first->second;
-        r->order = -1;
         break;
 
     default:
         return nullptr;
     }
     fix_order(id);
+    update_sorted();
     return r;
+}
+
+void BoardRules::update_sorted()
+{
+    rule_sorted_clearance_copper = get_rules_sorted<const RuleClearanceCopper>(RuleID::CLEARANCE_COPPER);
 }
 
 uint64_t BoardRules::get_default_track_width(const Net *net, int layer) const
@@ -458,8 +457,7 @@ static const RuleClearanceCopper fallback_clearance_copper = UUID();
 
 const RuleClearanceCopper *BoardRules::get_clearance_copper(const Net *net1, const Net *net2, int layer) const
 {
-    auto rules = get_rules_sorted<RuleClearanceCopper>(RuleID::CLEARANCE_COPPER);
-    for (auto ru : rules) {
+    for (auto ru : rule_sorted_clearance_copper) {
         if (ru->enabled
             && ((ru->match_1.match(net1) && ru->match_2.match(net2))
                 || (ru->match_1.match(net2) && ru->match_2.match(net1)))

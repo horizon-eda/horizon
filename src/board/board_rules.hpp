@@ -62,6 +62,9 @@ private:
     std::map<UUID, RuleClearanceCopperKeepout> rule_clearance_copper_keepout;
     std::map<UUID, RuleLayerPair> rule_layer_pair;
 
+    std::vector<const RuleClearanceCopper *> rule_sorted_clearance_copper;
+    void update_sorted();
+
     RuleClearanceSilkscreenExposedCopper rule_clearance_silkscreen_exposed_copper;
     RuleParameters rule_parameters;
     RulePreflightChecks rule_preflight_checks;
