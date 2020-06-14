@@ -23,6 +23,6 @@ public:
     uint64_t get_max_clearance() const;
 
 private:
-    std::map<std::pair<PatchType, PatchType>, uint64_t> clearances;
+    std::array<uint64_t, static_cast<size_t>(PatchType::N_TYPES) * static_cast<size_t>(PatchType::N_TYPES)> clearances;
 };
 } // namespace horizon

@@ -58,7 +58,7 @@ enum class ObjectType {
     BOARD_PANEL,
     PICTURE
 };
-enum class PatchType { OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH, BOARD_EDGE, TEXT };
+enum class PatchType { OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH, BOARD_EDGE, TEXT, N_TYPES };
 
 extern const LutEnumStr<PatchType> patch_type_lut;
 extern const LutEnumStr<ObjectType> object_type_lut;
