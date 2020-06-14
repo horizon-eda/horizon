@@ -485,6 +485,7 @@ SRC_ROUTER = \
 	3rd_party/router/router/pns_meander_skew_placer.cpp\
 	3rd_party/router/router/pns_meander.cpp\
 	3rd_party/router/router/pns_shove.cpp \
+	3rd_party/router/router/pns_index.cpp \
 	3rd_party/router/router/time_limit.cpp \
 	3rd_party/router/router/pns_routing_settings.cpp \
 	3rd_party/router/router/pns_sizes_settings.cpp \

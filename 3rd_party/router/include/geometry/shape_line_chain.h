@@ -35,6 +35,8 @@
 #include <geometry/shape.h>
 #include <geometry/seg.h>
 
+#include "clipper/clipper.hpp"
+
 /**
  * Class SHAPE_LINE_CHAIN
  *
@@ -72,15 +74,17 @@ public:
      * Constructor
      * Initializes an empty line chain.
      */
-    SHAPE_LINE_CHAIN() :
-        SHAPE( SH_LINE_CHAIN ), m_closed( false )
+    SHAPE_LINE_CHAIN() : SHAPE( SH_LINE_CHAIN ), m_closed( false ), m_width( 0 )
     {}
 
     /**
      * Copy Constructor
      */
-    SHAPE_LINE_CHAIN( const SHAPE_LINE_CHAIN& aShape ) :
-        SHAPE( SH_LINE_CHAIN ), m_points( aShape.m_points ), m_closed( aShape.m_closed )
+    SHAPE_LINE_CHAIN( const SHAPE_LINE_CHAIN& aShape )
+            : SHAPE( SH_LINE_CHAIN ),
+              m_points( aShape.m_points ),
+              m_closed( aShape.m_closed ),
+              m_width( aShape.m_width )
     {}
 
     /**
@@ -88,7 +92,7 @@ public:
      * Initializes a 2-point line chain (a single segment)
      */
     SHAPE_LINE_CHAIN( const VECTOR2I& aA, const VECTOR2I& aB ) :
-        SHAPE( SH_LINE_CHAIN ), m_closed( false )
+        SHAPE( SH_LINE_CHAIN ), m_closed( false ), m_width( 0 )
     {
         m_points.resize( 2 );
         m_points[0] = aA;
@@ -96,7 +100,7 @@ public:
     }
 
     SHAPE_LINE_CHAIN( const VECTOR2I& aA, const VECTOR2I& aB, const VECTOR2I& aC ) :
-        SHAPE( SH_LINE_CHAIN ), m_closed( false )
+        SHAPE( SH_LINE_CHAIN ), m_closed( false ), m_width( 0 )
     {
         m_points.resize( 3 );
         m_points[0] = aA;
@@ -105,7 +109,7 @@ public:
     }
 
     SHAPE_LINE_CHAIN( const VECTOR2I& aA, const VECTOR2I& aB, const VECTOR2I& aC, const VECTOR2I& aD ) :
-        SHAPE( SH_LINE_CHAIN ), m_closed( false )
+        SHAPE( SH_LINE_CHAIN ), m_closed( false ), m_width( 0 )
     {
         m_points.resize( 4 );
         m_points[0] = aA;
@@ -117,12 +121,22 @@ public:
 
     SHAPE_LINE_CHAIN( const VECTOR2I* aV, int aCount ) :
         SHAPE( SH_LINE_CHAIN ),
-        m_closed( false )
+        m_closed( false ),
+        m_width( 0 )
     {
         m_points.resize( aCount );
 
         for( int i = 0; i < aCount; i++ )
             m_points[i] = *aV++;
+    }
+
+    SHAPE_LINE_CHAIN( const ClipperLib::Path& aPath )
+            : SHAPE( SH_LINE_CHAIN ), m_closed( true ), m_width( 0 )
+    {
+        m_points.reserve( aPath.size() );
+
+        for( const auto& point : aPath )
+            m_points.emplace_back( point.X, point.Y );
     }
 
     ~SHAPE_LINE_CHAIN()
@@ -160,6 +174,24 @@ public:
     bool IsClosed() const
     {
         return m_closed;
+    }
+
+    /**
+     * Sets the width of all segments in the chain
+     * @param aWidth width in internal units
+     */
+    void SetWidth( int aWidth )
+    {
+        m_width = aWidth;
+    }
+
+    /**
+     * Gets the current width of the segments in the chain
+     * @return width in internal units
+     */
+    int Width() const
+    {
+        return m_width;
     }
 
     /**
@@ -260,6 +292,11 @@ public:
         return m_points[aIndex];
     }
 
+    const std::vector<VECTOR2I>& CPoints() const
+    {
+        return m_points;
+    }
+
     /**
      * Returns the last point in the line chain.
      */
@@ -282,8 +319,8 @@ public:
         BOX2I bbox;
         bbox.Compute( m_points );
 
-        if( aClearance != 0 )
-            bbox.Inflate( aClearance );
+        if( aClearance != 0 || m_width != 0 )
+            bbox.Inflate( aClearance + m_width );
 
         return bbox;
     }
@@ -532,8 +569,8 @@ public:
     /**
      * Function PointInside()
      *
-     * Checks if point aP lies inside a polygon (any type) defined by the line chain. For closed
-     * shapes only.
+     * Checks if point aP lies inside a polygon (any type) defined by the line chain.
+     * For closed shapes only.
      * @param aP point to check
      * @return true if the point is inside the shape (edge is not treated as being inside).
      */
@@ -547,6 +584,15 @@ public:
      * @return true if the point lies on the edge.
      */
     bool PointOnEdge( const VECTOR2I& aP ) const;
+
+    /**
+     * Function EdgeContainingPoint()
+     *
+     * Checks if point aP lies on an edge or vertex of the line chain.
+     * @param aP point to check
+     * @return index of the first edge containing the point, otherwise negative
+     */
+    int EdgeContainingPoint( const VECTOR2I& aP ) const;
 
     /**
      * Function CheckClearance()
@@ -573,6 +619,19 @@ public:
      * @return reference to self.
      */
     SHAPE_LINE_CHAIN& Simplify();
+
+    /**
+     * Function convertFromClipper()
+     * Appends the Clipper path to the current SHAPE_LINE_CHAIN
+     *
+     */
+    void convertFromClipper( const ClipperLib::Path& aPath );
+
+    /**
+     * Creates a new Clipper path from the SHAPE_LINE_CHAIN in a given orientation
+     *
+     */
+    ClipperLib::Path convertToClipper( bool aRequiredOrientation ) const;
 
     /**
      * Function NearestPoint()
@@ -644,6 +703,12 @@ private:
 
     /// is the line chain closed?
     bool m_closed;
+
+    /// Width of the segments (for BBox calculations in RTree)
+    /// TODO Adjust usage of SHAPE_LINE_CHAIN to account for where we need a width and where not
+    /// Alternatively, we could split the class into a LINE_CHAIN (no width) and SHAPE_LINE_CHAIN that derives from
+    /// SHAPE as well that does have a width.  Not sure yet on the correct path.
+    int m_width;
 
     /// cached bounding box
     BOX2I m_bbox;

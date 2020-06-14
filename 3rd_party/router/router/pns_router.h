@@ -28,6 +28,7 @@
 #include <core/optional.h>
 #include <boost/unordered_set.hpp>
 
+#include <layers_id_colors_and_visibility.h>
 #include <geometry/shape_line_chain.h>
 
 #include "pns_routing_settings.h"
@@ -94,7 +95,9 @@ enum DRAG_MODE
         virtual void SyncWorld( NODE* aNode ) = 0;
         virtual void AddItem( ITEM* aItem ) = 0;
         virtual void RemoveItem( ITEM* aItem ) = 0;
-        virtual void DisplayItem( const ITEM* aItem, int aColor = -1, int aClearance = -1 ) = 0;
+        virtual bool IsAnyLayerVisible( const LAYER_RANGE& aLayer ) = 0;
+        virtual bool IsItemVisible( const PNS::ITEM* aItem ) = 0;
+        virtual void DisplayItem( const ITEM* aItem, int aColor = -1, int aClearance = -1, bool aEdit = false ) = 0;
         virtual void HideItem( ITEM* aItem ) = 0;
         virtual void Commit() = 0;
 //        virtual void Abort () = 0;
@@ -148,7 +151,7 @@ public:
 
     void FlipPosture();
 
-    void DisplayItem( const ITEM* aItem, int aColor = -1, int aClearance = -1 );
+    void DisplayItem( const ITEM* aItem, int aColor = -1, int aClearance = -1, bool aEdit = false );
     void DisplayItems( const ITEM_SET& aItems );
     void DeleteTraces( ITEM* aStartItem, bool aWholeTrack );
     void SwitchLayer( int layer );
@@ -224,7 +227,7 @@ private:
     void moveDragging( const VECTOR2I& aP, ITEM* aItem );
 
     void eraseView();
-    void updateView( NODE* aNode, ITEM_SET& aCurrent );
+    void updateView( NODE* aNode, ITEM_SET& aCurrent, bool aDragging = false );
 
     void clearViewFlags();
 

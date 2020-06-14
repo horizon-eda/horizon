@@ -151,7 +151,7 @@ const SEG DP_MEANDER_PLACER::baselineSegment( const DIFF_PAIR::COUPLED_SEGMENTS&
 }
 
 
-static bool pairOrientation( const DIFF_PAIR::COUPLED_SEGMENTS& aPair )
+bool DP_MEANDER_PLACER::pairOrientation( const DIFF_PAIR::COUPLED_SEGMENTS& aPair )
 {
     VECTOR2I midp = ( aPair.coupledP.A + aPair.coupledN.A ) / 2;
 
@@ -198,7 +198,7 @@ bool DP_MEANDER_PLACER::Move( const VECTOR2I& aP, ITEM* aEndItem )
 
     int offset = ( tuned.Gap() + tuned.Width() ) / 2;
 
-    if( !pairOrientation( coupledSegments[0] ) )
+    if( pairOrientation( coupledSegments[0] ) )
         offset *= -1;
 
     m_result.SetBaselineOffset( offset );

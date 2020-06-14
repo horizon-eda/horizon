@@ -115,8 +115,8 @@ NODE* NODE::Branch()
     child->m_depth = m_depth + 1;
     child->m_parent = this;
     child->m_ruleResolver = m_ruleResolver;
-    child->m_maxClearance = m_maxClearance;
     child->m_root = isRoot() ? this : m_root;
+    child->m_maxClearance = m_maxClearance;
 
     // immmediate offspring of the root branch needs not copy anything.
     // For the rest, deep-copy joints, overridden item map and pointers
@@ -533,7 +533,9 @@ const ITEM_SET NODE::HitTest( const VECTOR2I& aPoint ) const
 
 void NODE::addSolid( SOLID* aSolid )
 {
-    linkJoint( aSolid->Pos(), aSolid->Layers(), aSolid->Net(), aSolid );
+    if( aSolid->IsRoutable() )
+        linkJoint( aSolid->Pos(), aSolid->Layers(), aSolid->Net(), aSolid );
+
     m_index->Add( aSolid );
 }
 
@@ -1205,24 +1207,23 @@ void NODE::releaseGarbage()
 
 
 void NODE::Commit( NODE* aNode )
-{
-    if( aNode->isRoot() )
-        return;
-
-    for( ITEM* item : aNode->m_override )
-    Remove( item );
-
-    for( INDEX::ITEM_SET::iterator i = aNode->m_index->begin();
-         i != aNode->m_index->end(); ++i )
     {
-        (*i)->SetRank( -1 );
-        (*i)->Unmark();
-        Add( std::unique_ptr<ITEM>( *i ) );
-    }
+        if( aNode->isRoot() )
+            return;
 
-    releaseChildren();
-    releaseGarbage();
-}
+        for( ITEM* item : aNode->m_override )
+            Remove( item );
+
+        for( auto i : *aNode->m_index )
+        {
+            i->SetRank( -1 );
+            i->Unmark();
+            Add( std::unique_ptr<ITEM>( i ) );
+        }
+
+        releaseChildren();
+        releaseGarbage();
+    }
 
 
 void NODE::KillChildren()

@@ -403,7 +403,7 @@ void DP_GATEWAYS::FilterByOrientation ( int aAngleMask, DIRECTION_45 aRefOrienta
     m_gateways.erase(
         std::remove_if( m_gateways.begin(), m_gateways.end(), [aAngleMask, aRefOrientation]( const DP_GATEWAY& dp) {
             DIRECTION_45 orient( dp.AnchorP() - dp.AnchorN() );
-            return !( orient.Angle( aRefOrientation ) & aAngleMask );
+            return ( orient.Angle( aRefOrientation ) & aAngleMask );
         } ), m_gateways.end()
     );
 }
@@ -646,7 +646,7 @@ void DP_GATEWAYS::BuildGeneric( const VECTOR2I& p0_p, const VECTOR2I& p0_n, bool
     SEG d_n[2], d_p[2];
 
     const int padToGapThreshold = 3;
-    int padDist = ( p0_p - p0_p ).EuclideanNorm();
+    int padDist = ( p0_n - p0_p ).EuclideanNorm();
 
     st_p[0] = SEG(p0_p + VECTOR2I( -100, 0 ), p0_p + VECTOR2I( 100, 0 ) );
     st_n[0] = SEG(p0_n + VECTOR2I( -100, 0 ), p0_n + VECTOR2I( 100, 0 ) );
@@ -771,7 +771,7 @@ DP_PRIMITIVE_PAIR DIFF_PAIR::EndingPrimitives()
 }
 
 
-bool commonParallelProjection( SEG n, SEG p, SEG &pClip, SEG& nClip )
+bool commonParallelProjection( SEG p, SEG n, SEG &pClip, SEG& nClip )
 {
     SEG n_proj_p( p.LineProject( n.A ), p.LineProject( n.B ) );
 

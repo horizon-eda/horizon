@@ -99,12 +99,13 @@ public:
     /// @copydoc ITEM::Clone()
     virtual LINE* Clone() const override;
 
-    const LINE& operator=( const LINE& aOther );
+    LINE& operator=( const LINE& aOther );
 
     ///> Assigns a shape to the line (a polyline/line chain)
     void SetShape( const SHAPE_LINE_CHAIN& aLine )
     {
         m_line = aLine;
+        m_line.SetWidth( m_width );
     }
 
     ///> Returns the shape of the line
@@ -153,6 +154,7 @@ public:
     void SetWidth( int aWidth )
     {
         m_width = aWidth;
+        m_line.SetWidth( aWidth );
     }
 
     ///> Returns line width

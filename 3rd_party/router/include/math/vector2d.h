@@ -28,13 +28,12 @@
 #ifndef VECTOR2D_H_
 #define VECTOR2D_H_
 
-#include <cmath>
 #include <limits>
 #include <iostream>
 #include <sstream>
-#include <cmath>
 
 #include <math/math_util.h>
+#include <math.h>
 
 #ifdef WX_COMPATIBILITY
         #include <wx/gdicmn.h>
@@ -241,8 +240,6 @@ public:
     /// Greater than operator
     bool operator>( const VECTOR2<T>& aVector ) const;
     bool operator>=( const VECTOR2<T>& aVector ) const;
-
-    friend std::ostream & operator<< <T> ( std::ostream & stream, const VECTOR2<T> &vector );
 };
 
 

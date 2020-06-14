@@ -130,7 +130,7 @@ bool DIFF_PAIR_PLACER::propagateDpHeadForces ( const VECTOR2I& aP, VECTOR2I& aNe
     else
     {
         virtHead.SetLayer( m_currentLayer );
-        virtHead.SetDiameter( m_sizes.DiffPairGap() + 2 * m_sizes.TrackWidth() );
+        virtHead.SetDiameter( m_sizes.DiffPairGap() + 2 * m_sizes.DiffPairWidth() );
     }
 
     VECTOR2I lead( 0, 0 );// = aP - m_currentStart ;
@@ -444,7 +444,15 @@ bool DIFF_PAIR_PLACER::findDpPrimitivePair( const VECTOR2I& aP, ITEM* aItem,
     bool result = m_world->GetRuleResolver()->DpNetPair( aItem, netP, netN );
 
     if( !result )
+    {
+        if( aErrorMsg )
+        {
+            *aErrorMsg = ( "Unable to find complementary differential pair "
+                            "nets. Make sure the names of the nets belonging "
+                            "to a differential pair end with either _N/_P or +/-." );
+        }
         return false;
+    }
 
     int refNet = aItem->Net();
     int coupledNet = ( refNet == netP ) ? netN : netP;
@@ -457,7 +465,15 @@ bool DIFF_PAIR_PLACER::findDpPrimitivePair( const VECTOR2I& aP, ITEM* aItem,
     wxLogTrace( "PNS", "refAnchor %p", aItem );
 
     if( !refAnchor )
+    {
+        if( aErrorMsg )
+        {
+            *aErrorMsg = ( "Can't find a suitable starting point.  If starting "
+                            "from an existing differential pair make sure you are "
+                            "at the end." );
+        }
         return false;
+    }
 
     std::set<ITEM*> coupledItems;
 
@@ -487,7 +503,7 @@ bool DIFF_PAIR_PLACER::findDpPrimitivePair( const VECTOR2I& aP, ITEM* aItem,
                 found = true;
                 bestDist = dist;
 
-                if( refNet == netP )
+                if( refNet != netP )
                 {
                     aPair = DP_PRIMITIVE_PAIR ( item, primRef );
                     aPair.SetAnchors( *anchor, *refAnchor );
@@ -501,7 +517,18 @@ bool DIFF_PAIR_PLACER::findDpPrimitivePair( const VECTOR2I& aP, ITEM* aItem,
         }
     }
 
-    return found;
+    if( !found )
+    {
+        if( aErrorMsg )
+        {
+            *aErrorMsg =  "Can't find a suitable starting point "
+                          "for coupled net \""+
+                           m_world->GetRuleResolver()->NetName( coupledNet ) +  "\".";
+        }
+        return false;
+    }
+
+    return true;
 }
 
 
@@ -520,6 +547,7 @@ int DIFF_PAIR_PLACER::gap() const
 bool DIFF_PAIR_PLACER::Start( const VECTOR2I& aP, ITEM* aStartItem )
 {
     VECTOR2I p( aP );
+    std::string msg;
 
     if( !aStartItem )
     {
@@ -531,11 +559,9 @@ bool DIFF_PAIR_PLACER::Start( const VECTOR2I& aP, ITEM* aStartItem )
     setWorld( Router()->GetWorld() );
     m_currentNode = m_world;
 
-    if( !findDpPrimitivePair( aP, aStartItem, m_start ) )
+    if( !findDpPrimitivePair( aP, aStartItem, m_start, &msg ) )
     {
-        Router()->SetFailureReason( ( "Unable to find complementary differential pair "
-                                       "net. Make sure the names of the nets belonging "
-                                       "to a differential pair end with either _N/_P or +/-." ) );
+        Router()->SetFailureReason( msg );
         return false;
     }
 
@@ -635,14 +661,20 @@ bool DIFF_PAIR_PLACER::routeHead( const VECTOR2I& aP )
         m_prevPair->CursorOrientation( fp, midp, dirV );
 
         VECTOR2I fpProj = SEG( midp, midp + dirV ).LineProject( fp );
+
+        // compute 'leader point' distance from the cursor (project cursor position
+        // on the extension of the starting segment pair of the DP)
         int lead_dist = ( fpProj - fp ).EuclideanNorm();
 
         gwsTarget.SetFitVias( m_placingVia, m_sizes.ViaDiameter(), viaGap() );
 
+        // far from the initial segment extension line -> allow a 45-degree obtuse turn
         if( lead_dist > m_sizes.DiffPairGap() + m_sizes.DiffPairWidth() )
         {
             gwsTarget.BuildForCursor( fp );
         }
+        // close to the initial segment extension line -> keep straight part only, project as close
+        // as possible to the cursor
         else
         {
             gwsTarget.BuildForCursor( fpProj );
@@ -685,8 +717,7 @@ bool DIFF_PAIR_PLACER::Move( const VECTOR2I& aP , ITEM* aEndItem )
     delete m_lastNode;
     m_lastNode = NULL;
 
-    if( !route( aP ) )
-        return false;
+    bool retval = route( aP );
 
     NODE* latestNode = m_currentNode;
     m_lastNode = latestNode->Branch();
@@ -696,7 +727,7 @@ bool DIFF_PAIR_PLACER::Move( const VECTOR2I& aP , ITEM* aEndItem )
 
     updateLeadingRatLine();
 
-    return true;
+    return retval;
 }
 
 
@@ -714,7 +745,7 @@ void DIFF_PAIR_PLACER::UpdateSizes( const SIZES_SETTINGS& aSizes )
 
 bool DIFF_PAIR_PLACER::FixRoute( const VECTOR2I& aP, ITEM* aEndItem, bool aForceFinish )
 {
-    if( !m_fitOk )
+    if( !m_fitOk && !Settings().CanViolateDRC() )
         return false;
 
     if( m_currentTrace.CP().SegmentCount() < 1 ||

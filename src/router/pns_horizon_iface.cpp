@@ -72,11 +72,12 @@ public:
     PNS_HORIZON_RULE_RESOLVER(const horizon::Board *aBoard, const horizon::BoardRules *aRules, PNS::ROUTER *aRouter);
     virtual ~PNS_HORIZON_RULE_RESOLVER();
 
-    virtual int Clearance(const PNS::ITEM *aA, const PNS::ITEM *aB) const override;
-    virtual int Clearance(int aNetCode) const override;
-    virtual int DpCoupledNet(int aNet) override;
-    virtual int DpNetPolarity(int aNet) override;
-    virtual bool DpNetPair(PNS::ITEM *aItem, int &aNetP, int &aNetN) override;
+    int Clearance(const PNS::ITEM *aA, const PNS::ITEM *aB) const override;
+    int Clearance(int aNetCode) const override;
+    int DpCoupledNet(int aNet) override;
+    int DpNetPolarity(int aNet) override;
+    bool DpNetPair(PNS::ITEM *aItem, int &aNetP, int &aNetN) override;
+    std::string NetName(int aNet);
 
 private:
     PNS::ROUTER *m_router;
@@ -265,6 +266,15 @@ bool PNS_HORIZON_RULE_RESOLVER::DpNetPair(PNS::ITEM *aItem, int &aNetP, int &aNe
         return true;
     }
     return false;
+}
+
+std::string PNS_HORIZON_RULE_RESOLVER::NetName(int aNet)
+{
+    auto net = m_iface->get_net_for_code(aNet);
+    if (net)
+        return net->name;
+    else
+        return "";
 }
 
 class PNS_HORIZON_DEBUG_DECORATOR : public PNS::DEBUG_DECORATOR {
@@ -719,7 +729,7 @@ void PNS_HORIZON_IFACE::EraseView()
         m_debugDecorator->Clear();
 }
 
-void PNS_HORIZON_IFACE::DisplayItem(const PNS::ITEM *aItem, int aColor, int aClearance)
+void PNS_HORIZON_IFACE::DisplayItem(const PNS::ITEM *aItem, int aColor, int aClearance, bool aEdit)
 {
     wxLogTrace("PNS", "DisplayItem %p %s", aItem, aItem->KindStr().c_str());
     if (aItem->Kind() == PNS::ITEM::LINE_T) {
@@ -940,4 +950,18 @@ void PNS_HORIZON_IFACE::SetRouter(PNS::ROUTER *aRouter)
 {
     m_router = aRouter;
 }
+
+bool PNS_HORIZON_IFACE::IsAnyLayerVisible(const LAYER_RANGE &aLayer)
+{
+    throw std::runtime_error("IsAnyLayerVisible not implemented");
+    return true;
+}
+
+bool PNS_HORIZON_IFACE::IsItemVisible(const PNS::ITEM *aItem)
+{
+    throw std::runtime_error("IsItemVisible not implemented");
+    return true;
+}
+
+
 } // namespace PNS

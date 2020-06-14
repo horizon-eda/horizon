@@ -2,7 +2,7 @@
  * KiRouter - a push-and-(sometimes-)shove PCB router
  *
  * Copyright (C) 2013-2017 CERN
- * Copyright (C) 2016 KiCad Developers, see AUTHORS.txt for contributors.
+ * Copyright (C) 2016-2020 KiCad Developers, see AUTHORS.txt for contributors.
  * Author: Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -103,6 +103,19 @@ bool LINE_PLACER::handleSelfIntersections()
     // if there is no tail, there is nothing to intersect with
     if( tail.PointCount() < 2 )
         return false;
+
+    if( head.PointCount() < 2 )
+        return false;
+
+    // completely new head trace? chop off the tail
+    if( tail.CPoint(0) == head.CPoint(0) )
+    {
+        m_p_start = tail.CPoint( 0 );
+        m_direction = m_initial_direction;
+        tail.Clear();
+        return true;
+    }
+
 
     tail.Intersect( head, ips );
 
@@ -243,6 +256,9 @@ bool LINE_PLACER::reduceTail( const VECTOR2I& aEnd )
         // the direction of the segment to be replaced
         SHAPE_LINE_CHAIN replacement = dir.BuildInitialTrace( s.A, aEnd );
 
+        if( replacement.SegmentCount() < 1 )
+            continue;
+
         LINE tmp( m_tail, replacement );
 
         if( m_currentNode->CheckColliding( &tmp, ITEM::ANY_T ) )
@@ -364,6 +380,7 @@ bool LINE_PLACER::rhWalkOnly( const VECTOR2I& aP, LINE& aNewHead )
     WALKAROUND walkaround( m_currentNode, Router() );
 
     walkaround.SetSolidsOnly( false );
+    walkaround.SetDebugDecorator( Dbg() );
     walkaround.SetIterationLimit( Settings().WalkaroundIterationLimit() );
 
     WALKAROUND::WALKAROUND_STATUS wf = walkaround.Route( initTrack, walkFull, false );
@@ -410,23 +427,45 @@ bool LINE_PLACER::rhWalkOnly( const VECTOR2I& aP, LINE& aNewHead )
 
 bool LINE_PLACER::rhMarkObstacles( const VECTOR2I& aP, LINE& aNewHead )
 {
-    buildInitialLine( aP, m_head );
+    LINE newHead( m_head ), bestHead( m_head );
+    bool hasBest = false;
 
-    auto obs = m_currentNode->NearestObstacle( &m_head );
+    buildInitialLine( aP, newHead );
 
-    if( obs )
+    NODE::OBSTACLES obstacles;
+
+    m_currentNode->QueryColliding( &newHead, obstacles );
+
+    // If we are allowing DRC violations, we don't push back to the hull
+    if( !Settings().CanViolateDRC() )
     {
-        int cl = m_currentNode->GetClearance( obs->m_item, &m_head );
-        auto hull = obs->m_item->Hull( cl, m_head.Width() );
-
-        auto nearest = hull.NearestPoint( aP );
-        Dbg()->AddLine( hull, 2, 10000 );
-
-        if( ( nearest - aP ).EuclideanNorm() < m_head.Width() )
+        for( auto& obs : obstacles )
         {
-            buildInitialLine( nearest, m_head );
+            int cl = m_currentNode->GetClearance( obs.m_item, &newHead );
+            auto hull = obs.m_item->Hull( cl, newHead.Width() );
+
+            auto nearest = hull.NearestPoint( aP );
+            Dbg()->AddLine( hull, 2, 10000 );
+
+            if( ( nearest - aP ).EuclideanNorm() < newHead.Width() + cl )
+            {
+                buildInitialLine( nearest, newHead );
+
+                // We want the shortest line here to ensure we don't break a clearance
+                // rule on larger, overlapping items (e.g. vias)
+                if( newHead.CLine().Length() < bestHead.CLine().Length() )
+                {
+                    bestHead = newHead;
+                    hasBest = true;
+                }
+            }
         }
     }
+
+    if( hasBest )
+        m_head = bestHead;
+    else
+        m_head = newHead;
 
     aNewHead = m_head;
 
@@ -547,6 +586,7 @@ bool LINE_PLACER::rhShoveOnly( const VECTOR2I& aP, LINE& aNewHead )
 
     walkaround.SetSolidsOnly( true );
     walkaround.SetIterationLimit( 10 );
+    walkaround.SetDebugDecorator( Dbg() );
     WALKAROUND::WALKAROUND_STATUS stat_solids = walkaround.Route( initTrack, walkSolids );
 
     optimizer.SetEffortLevel( OPTIMIZER::MERGE_SEGMENTS );
@@ -760,7 +800,11 @@ void LINE_PLACER::routeStep( const VECTOR2I& aP )
 bool LINE_PLACER::route( const VECTOR2I& aP )
 {
     routeStep( aP );
-    return CurrentEnd() == aP;
+
+    if (!m_head.PointCount() )
+        return false;
+
+    return m_head.CPoint(-1) == aP;
 }
 
 
@@ -926,7 +970,7 @@ bool LINE_PLACER::Move( const VECTOR2I& aP, ITEM* aEndItem )
         m_lastNode = NULL;
     }
 
-    route( p );
+    bool reachesEnd = route( p );
 
     current = Trace();
 
@@ -938,7 +982,7 @@ bool LINE_PLACER::Move( const VECTOR2I& aP, ITEM* aEndItem )
     NODE* latestNode = m_currentNode;
     m_lastNode = latestNode->Branch();
 
-    if( eiDepth >= 0 && aEndItem && latestNode->Depth() > eiDepth && current.SegmentCount() )
+    if( reachesEnd && eiDepth >= 0 && aEndItem && latestNode->Depth() > eiDepth && current.SegmentCount() )
     {
         SplitAdjacentSegments( m_lastNode, aEndItem, current.CPoint( -1 ) );
 

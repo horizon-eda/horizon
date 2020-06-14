@@ -45,7 +45,7 @@ public:
         m_viaDiameter( 600000 ),
         m_viaDrill( 250000 ),
         m_diffPairViaGapSameAsTraceGap( true ),
-		m_widthFromRules( false),
+        m_widthFromRules( false),
         m_viaType( VIA_THROUGH )
     {};
 
@@ -97,9 +97,9 @@ public:
     void SetViaType( VIATYPE_T aViaType ) { m_viaType = aViaType; }
     VIATYPE_T ViaType() const { return m_viaType; }
 
-    static int inheritTrackWidth( ITEM* aItem );
-
 private:
+
+    int inheritTrackWidth( ITEM* aItem );
 
     int m_trackWidth;
     int m_diffPairWidth;

@@ -25,7 +25,6 @@
 #include "pns_solid.h"
 #include "pns_node.h"
 #include "pns_sizes_settings.h"
-#include "layers_id_colors_and_visibility.h"
 
 namespace PNS {
 

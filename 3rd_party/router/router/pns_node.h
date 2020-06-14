@@ -64,6 +64,7 @@ public:
     virtual int DpCoupledNet( int aNet ) = 0;
     virtual int DpNetPolarity( int aNet ) = 0;
     virtual bool DpNetPair( ITEM* aItem, int& aNetP, int& aNetN ) = 0;
+    virtual std::string NetName( int aNet ) = 0;
 };
 
 /**

@@ -55,7 +55,7 @@ LINE::~LINE()
 }
 
 
-const LINE& LINE::operator=( const LINE& aOther )
+LINE& LINE::operator=( const LINE& aOther )
 {
     m_line = aOther.m_line;
     m_width = aOther.m_width;
@@ -163,12 +163,20 @@ bool LINE::Walkaround( SHAPE_LINE_CHAIN aObstacle, SHAPE_LINE_CHAIN& aPre,
     if( line.SegmentCount() < 1 )
         return false;
 
+    const auto pFirst = line.CPoint(0);
+    const auto pLast = line.CPoint(-1);
+
     if( aObstacle.PointInside( line.CPoint( 0 ) ) || aObstacle.PointInside( line.CPoint( -1 ) ) )
+    {
         return false;
+    }
 
     SHAPE_LINE_CHAIN::INTERSECTIONS ips;
 
     line.Intersect( aObstacle, ips );
+
+    auto eFirst = aObstacle.EdgeContainingPoint( pFirst );
+    auto eLast = aObstacle.EdgeContainingPoint( pLast );
 
     aWalk.Clear();
     aPost.Clear();
@@ -177,6 +185,23 @@ bool LINE::Walkaround( SHAPE_LINE_CHAIN aObstacle, SHAPE_LINE_CHAIN& aPre,
     int farthest_dist = 0;
 
     SHAPE_LINE_CHAIN::INTERSECTION nearest, farthest;
+    SHAPE_LINE_CHAIN::INTERSECTION is;
+
+    if( eFirst >= 0 )
+    {
+        is.our = line.CSegment(0);
+        is.their = aObstacle.CSegment( eFirst );
+        is.p = pFirst;
+        ips.push_back(is);
+    }
+
+    if ( eLast >= 0 )
+    {
+        is.our = line.CSegment(-1);
+        is.their = aObstacle.CSegment( eLast );
+        is.p = pLast;
+        ips.push_back(is);
+    }
 
     for( int i = 0; i < (int) ips.size(); i++ )
     {
@@ -339,6 +364,7 @@ void LINE::ShowLinks() const
         wxLogTrace( "PNS", "seg %d: %p\n", i, m_segmentRefs[i] );
 }
 
+
 SHAPE_LINE_CHAIN dragCornerInternal( const SHAPE_LINE_CHAIN& aOrigin, const VECTOR2I& aP )
 {
     OPT<SHAPE_LINE_CHAIN> picked;
@@ -362,14 +388,22 @@ SHAPE_LINE_CHAIN dragCornerInternal( const SHAPE_LINE_CHAIN& aOrigin, const VECT
         SHAPE_LINE_CHAIN paths[2];
         DIRECTION_45 dirs[2];
         DIRECTION_45 d_prev = ( i > 0 ? DIRECTION_45( aOrigin.CSegment( i-1 ) ) : DIRECTION_45() );
+        int dirCount = 0;
 
         for( int j = 0; j < 2; j++ )
         {
             paths[j] = d_start.BuildInitialTrace( p_start, aP, j );
-            dirs[j] = DIRECTION_45( paths[j].CSegment( 0 ) );
+
+            if( paths[j].SegmentCount() < 1 )
+                continue;
+
+            assert( dirCount < int( sizeof( dirs ) / sizeof( dirs[0] ) ) );
+
+            dirs[dirCount] = DIRECTION_45( paths[j].CSegment( 0 ) );
+            ++dirCount;
         }
 
-        for( int j = 0; j < 2; j++ )
+        for( int j = 0; j < dirCount; j++ )
         {
             if( dirs[j] == d_start )
             {
@@ -381,7 +415,7 @@ SHAPE_LINE_CHAIN dragCornerInternal( const SHAPE_LINE_CHAIN& aOrigin, const VECT
         if( picked )
             break;
 
-        for( int j = 0; j < 2; j++ )
+        for( int j = 0; j < dirCount; j++ )
         {
             if( dirs[j].IsObtuse( d_prev ) )
             {
@@ -616,7 +650,7 @@ void LINE::dragSegment45( const VECTOR2I& aP, int aIndex, int aSnappingThreshold
     }
     else
     {
-        if( dir_prev.IsObtuse(drag_dir ) )
+        if( dir_prev.Angle( drag_dir ) & (DIRECTION_45::ANG_OBTUSE | DIRECTION_45::ANG_HALF_FULL) )
         {
             guideA[0] = SEG( s_prev.A, s_prev.A + drag_dir.Left().ToVector() );
             guideA[1] = SEG( s_prev.A, s_prev.A + drag_dir.Right().ToVector() );
@@ -640,13 +674,14 @@ void LINE::dragSegment45( const VECTOR2I& aP, int aIndex, int aSnappingThreshold
     }
     else
     {
-        if( dir_next.IsObtuse( drag_dir ) )
+        if( dir_next.Angle( drag_dir ) & (DIRECTION_45::ANG_OBTUSE | DIRECTION_45::ANG_HALF_FULL) )
         {
             guideB[0] = SEG( s_next.B, s_next.B + drag_dir.Left().ToVector() );
             guideB[1] = SEG( s_next.B, s_next.B + drag_dir.Right().ToVector() );
         }
         else
             guideB[0] = guideB[1] =    SEG( dragged.B, dragged.B + dir_next.ToVector() );
+        
     }
 
     SEG s_current( target, target + drag_dir.ToVector() );
