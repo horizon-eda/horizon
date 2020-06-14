@@ -28,14 +28,19 @@ enum class RuleID {
 extern const LutEnumStr<RuleID> rule_id_lut;
 
 class Rule {
+    friend class Rules;
+
 public:
     Rule(const UUID &uu);
     Rule(const json &j);
     Rule(const UUID &uu, const json &j);
     UUID uuid;
-    int order = 0;
     RuleID id = RuleID::NONE;
     bool enabled = true;
+    int get_order() const
+    {
+        return order;
+    }
 
     virtual json serialize() const;
     virtual std::string get_brief(const class Block *block = nullptr) const = 0;
@@ -48,5 +53,8 @@ public:
 
 protected:
     Rule();
+
+private:
+    int order = -1;
 };
 } // namespace horizon
