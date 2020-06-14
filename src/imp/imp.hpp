@@ -219,6 +219,8 @@ protected:
     class ActionButton &add_action_button(ActionToolID action);
     class ActionButtonMenu &add_action_button_menu(const char *icon_name);
 
+    virtual ToolID get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> &sel) const;
+
 private:
     void fix_cursor_pos();
     Glib::RefPtr<Gio::FileMonitor> preferences_monitor;

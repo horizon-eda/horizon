@@ -568,7 +568,7 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
             wrapper->updateEndItem(args);
             router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
         }
-        else if (args.type == ToolEventType::CLICK) {
+        else if (args.type == ToolEventType::CLICK || (is_transient && args.type == ToolEventType::CLICK_RELEASE)) {
             if (args.button == 1) {
                 wrapper->updateEndItem(args);
                 if (router->FixRoute(wrapper->m_endSnapPoint, wrapper->m_endItem)) {

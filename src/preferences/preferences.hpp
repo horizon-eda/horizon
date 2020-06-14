@@ -35,6 +35,7 @@ public:
     bool highlight_on_top = true;
     bool show_text_in_tracks = true;
     bool show_text_in_vias = true;
+    bool move_using_router = true;
 
     void load_from_json(const json &j);
     json serialize() const;

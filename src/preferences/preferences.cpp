@@ -179,6 +179,7 @@ json BoardPreferences::serialize() const
     j["highlight_on_top"] = highlight_on_top;
     j["show_text_in_tracks"] = show_text_in_tracks;
     j["show_text_in_vias"] = show_text_in_vias;
+    j["move_using_router"] = move_using_router;
     return j;
 }
 
@@ -188,6 +189,7 @@ void BoardPreferences::load_from_json(const json &j)
     highlight_on_top = j.value("highlight_on_top", true);
     show_text_in_tracks = j.value("show_text_in_tracks", true);
     show_text_in_vias = j.value("show_text_in_vias", true);
+    move_using_router = j.value("move_using_router", true);
 }
 
 json ZoomPreferences::serialize() const

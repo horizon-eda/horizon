@@ -145,6 +145,13 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
             gr->add_row(*r);
         }
         {
+            auto r = Gtk::manage(
+                    new PreferencesRowBool("Drag tracks with router",
+                                           "Dragging a track will invoke interactive drag rather than the move tool",
+                                           preferences, preferences.board.move_using_router));
+            gr->add_row(*r);
+        }
+        {
             auto r = Gtk::manage(new PreferencesRowBool(
                     "Highlight on top", "Show highlighted objects on top of other objects, regardless of layer",
                     preferences, preferences.board.highlight_on_top));

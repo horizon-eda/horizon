@@ -859,6 +859,14 @@ void ImpBoard::handle_measure_tracks(const ActionConnection &a)
     tuning_window->present();
 }
 
+ToolID ImpBoard::get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> &sel) const
+{
+    if (preferences.board.move_using_router && sel.size() == 1 && sel_count_type(sel, ObjectType::TRACK) == 1)
+        return ToolID::DRAG_TRACK_INTERACTIVE;
+    else
+        return ImpBase::get_tool_for_drag_move(ctrl, sel);
+}
+
 void ImpBoard::handle_maybe_drag()
 {
     if (!preferences.board.drag_start_track) {

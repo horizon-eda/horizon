@@ -1075,6 +1075,15 @@ void ImpBase::handle_tool_action(const ActionConnection &conn)
     tool_begin(conn.tool_id);
 }
 
+
+ToolID ImpBase::get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> &sel) const
+{
+    if (ctrl)
+        return ToolID::DUPLICATE;
+    else
+        return ToolID::MOVE;
+}
+
 void ImpBase::handle_drag(bool ctrl)
 {
     auto pos = canvas->get_cursor_pos_win();
@@ -1086,11 +1095,7 @@ void ImpBase::handle_drag(bool ctrl)
             ToolArgs args;
             args.coords = cursor_pos_grid_drag_begin;
             args.selection = selection_for_drag_move;
-            ToolID tool_id;
-            if (ctrl)
-                tool_id = ToolID::DUPLICATE;
-            else
-                tool_id = ToolID::MOVE;
+            ToolID tool_id = get_tool_for_drag_move(ctrl, selection_for_drag_move);
 
             ToolResponse r = core->tool_begin(tool_id, args, imp_interface.get(), true);
             tool_process(r);
