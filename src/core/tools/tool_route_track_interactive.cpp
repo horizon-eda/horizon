@@ -12,6 +12,7 @@
 #include "util/util.hpp"
 #include "core/tool_id.hpp"
 #include <iostream>
+#include <iomanip>
 
 namespace horizon {
 
@@ -811,6 +812,16 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
     return ToolResponse();
 }
 
+static std::string format_length(double l)
+{
+    l /= 1e6;
+    std::stringstream ss;
+    ss.imbue(get_locale());
+    ss << l;
+    ss << " mm";
+    return ss.str();
+}
+
 void ToolRouteTrackInteractive::update_tip()
 {
     std::stringstream ss;
@@ -830,10 +841,13 @@ void ToolRouteTrackInteractive::update_tip()
         return;
     }
     if (state == State::ROUTING) {
-        ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete "
-              "last segment <b>/:</b>track posture <b>v:</b>toggle via "
-              "<b>w:</b>track width <b>W:</b>default track width "
-              "<b>o:</b>clearance offset <b>O:</b>default cl. offset"
+        const auto &sz = router->Sizes();
+        ss << "<b>LMB:</b>connect <b>RMB:</b>finish "
+              "<b>/:</b>track posture <b>v:</b>toggle via "
+              "<b>w:</b>track width ";
+        if (!sz.WidthFromRules())
+            ss << "<b>W:</b>default track width ";
+        ss << "<b>o:</b>clearance offset <b>O:</b>default cl. offset"
               "<i> ";
         auto nets = router->GetCurrentNets();
         Net *net = nullptr;
@@ -842,7 +856,7 @@ void ToolRouteTrackInteractive::update_tip()
         }
         if (net) {
             if (net->name.size()) {
-                ss << "routing net \"" << net->name << "\"";
+                ss << "Net \"" << net->name << "\"";
             }
             else {
                 ss << "routing unnamed net";
@@ -852,15 +866,14 @@ void ToolRouteTrackInteractive::update_tip()
             ss << "routing no net";
         }
 
-        PNS::SIZES_SETTINGS sz(router->Sizes());
-        ss << "  track width " << dim_to_string(sz.TrackWidth());
+        ss << "  width " << format_length(sz.TrackWidth());
         if (sz.WidthFromRules()) {
             ss << " (default)";
         }
         ss << "</i>";
     }
     else {
-        ss << "<b>LMB:</b>select starting junction/pad <b>RMB:</b>cancel "
+        ss << "<b>LMB:</b>select starting point <b>RMB:</b>cancel "
               "<b>s:</b>shove/walkaround ";
         ss << "<i>";
         ss << "Mode: ";
