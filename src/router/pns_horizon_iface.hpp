@@ -134,8 +134,7 @@ private:
     void syncOutline(const horizon::Polygon *poly, PNS::NODE *aWorld);
     void syncKeepout(const horizon::KeepoutContour *keepout_contour, PNS::NODE *aWorld);
     std::map<horizon::UUID, int> net_code_map;
-    std::map<int, horizon::UUID> net_code_map_r;
-    int net_code_max = 0;
+    std::vector<horizon::Net *> net_code_map_r;
 
     int64_t override_routing_offset = -1;
 

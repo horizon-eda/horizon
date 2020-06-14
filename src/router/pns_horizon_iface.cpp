@@ -398,10 +398,10 @@ int PNS_HORIZON_IFACE::get_net_code(const horizon::UUID &uu)
         return net_code_map.at(uu);
     }
     else {
-        net_code_max++;
-        net_code_map.emplace(uu, net_code_max);
-        net_code_map_r.emplace(net_code_max, uu);
-        return net_code_max;
+        net_code_map_r.emplace_back(&board->block->nets.at(uu));
+        auto nc = net_code_map_r.size() - 1;
+        net_code_map.emplace(uu, nc);
+        return nc;
     }
 }
 
@@ -409,9 +409,9 @@ horizon::Net *PNS_HORIZON_IFACE::get_net_for_code(int code)
 {
     if (code == PNS::ITEM::UnusedNet)
         return nullptr;
-    if (!net_code_map_r.count(code))
+    if (code >= (int)net_code_map_r.size())
         return nullptr;
-    return &board->block->nets.at(net_code_map_r.at(code));
+    return net_code_map_r.at(code);
 }
 
 const PNS_HORIZON_PARENT_ITEM *PNS_HORIZON_IFACE::get_parent(const horizon::Track *track)
