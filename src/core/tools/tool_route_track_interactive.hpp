@@ -29,7 +29,31 @@ public:
     }
     ~ToolRouteTrackInteractive();
 
+
+    class Settings : public ToolSettings {
+    public:
+        json serialize() const override;
+        void load_from_json(const json &j) override;
+        int effort = 1;
+        bool remove_loops = true;
+    };
+
+    const ToolSettings *get_settings_const() const override
+    {
+        return &settings;
+    }
+
+    void apply_settings() override;
+
+protected:
+    ToolSettings *get_settings() override
+    {
+        return &settings;
+    }
+
 private:
+    Settings settings;
+
     PNS::ROUTER *router = nullptr;
     PNS::PNS_HORIZON_IFACE *iface = nullptr;
     PNS::MEANDER_PLACER_BASE *meander_placer = nullptr;

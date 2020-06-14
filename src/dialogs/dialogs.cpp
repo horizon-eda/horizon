@@ -35,6 +35,7 @@
 #include "select_included_board.hpp"
 #include "manage_included_boards.hpp"
 #include "enter_datum_window.hpp"
+#include "router_settings_window.hpp"
 #include <glibmm.h>
 
 namespace horizon {
@@ -525,6 +526,21 @@ EnterDatumWindow *Dialogs::show_enter_datum_window(const std::string &label, int
         }
     }
     auto win = new EnterDatumWindow(parent, interface, label, def);
+    window_nonmodal = win;
+    win->signal_hide().connect([this] { close_nonmodal(); });
+    win->present();
+    return win;
+}
+
+RouterSettingsWindow *Dialogs::show_router_settings_window(ToolSettings &settings)
+{
+    if (window_nonmodal) {
+        if (auto win = dynamic_cast<RouterSettingsWindow *>(window_nonmodal)) {
+            win->present();
+            return win;
+        }
+    }
+    auto win = new RouterSettingsWindow(parent, interface, settings);
     window_nonmodal = win;
     win->signal_hide().connect([this] { close_nonmodal(); });
     win->present();

@@ -13,6 +13,8 @@
 #include "core/tool_id.hpp"
 #include <iostream>
 #include <iomanip>
+#include "nlohmann/json.hpp"
+#include "core/tool_data_window.hpp"
 
 namespace horizon {
 
@@ -39,6 +41,30 @@ public:
 
 ToolRouteTrackInteractive::ToolRouteTrackInteractive(IDocument *c, ToolID tid) : ToolBase(c, tid)
 {
+}
+
+json ToolRouteTrackInteractive::Settings::serialize() const
+{
+    json j;
+    j["effort"] = effort;
+    j["remove_loops"] = remove_loops;
+    return j;
+}
+
+void ToolRouteTrackInteractive::Settings::load_from_json(const json &j)
+{
+    effort = j.value("effort", 1);
+    remove_loops = j.value("remove_loops", true);
+}
+
+void ToolRouteTrackInteractive::apply_settings()
+{
+    if (!router)
+        return;
+    PNS::ROUTING_SETTINGS routing_settings(router->Settings());
+    routing_settings.SetRemoveLoops(settings.remove_loops);
+    routing_settings.SetOptimizerEffort(static_cast<PNS::PNS_OPTIMIZATION_EFFORT>(settings.effort));
+    router->LoadSettings(routing_settings);
 }
 
 bool ToolRouteTrackInteractive::is_tune() const
@@ -148,13 +174,14 @@ ToolResponse ToolRouteTrackInteractive::begin(const ToolArgs &args)
     router->ClearWorld();
     router->SyncWorld();
 
-    PNS::ROUTING_SETTINGS settings;
-    settings.SetShoveVias(false);
+    PNS::ROUTING_SETTINGS routing_settings;
+    routing_settings.SetShoveVias(false);
 
     PNS::SIZES_SETTINGS sizes_settings;
 
-    router->LoadSettings(settings);
+    router->LoadSettings(routing_settings);
     router->UpdateSizes(sizes_settings);
+    apply_settings();
 
     imp->canvas_update();
     update_tip();
@@ -613,12 +640,12 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
             }
         }
         else if (args.type == ToolEventType::KEY) {
-            PNS::MEANDER_SETTINGS settings = meander_placer->MeanderSettings();
+            PNS::MEANDER_SETTINGS meander_settings = meander_placer->MeanderSettings();
             if (args.key == GDK_KEY_l) {
-                auto r = imp->dialogs.ask_datum("Target length", settings.m_targetLength);
+                auto r = imp->dialogs.ask_datum("Target length", meander_settings.m_targetLength);
                 if (r.first) {
-                    settings.m_targetLength = r.second;
-                    meander_placer->UpdateSettings(settings);
+                    meander_settings.m_targetLength = r.second;
+                    meander_placer->UpdateSettings(meander_settings);
                     router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
                 }
             }
@@ -806,6 +833,16 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                 iface->set_override_routing_offset(-1);
                 router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
             }
+            else if (args.key == GDK_KEY_S) {
+                imp->dialogs.show_router_settings_window(settings);
+            }
+        }
+        else if (args.type == ToolEventType::DATA) {
+            if (auto data = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
+                if (data->event == ToolDataWindow::Event::UPDATE) {
+                    apply_settings();
+                }
+            }
         }
     }
     update_tip();
@@ -844,7 +881,8 @@ void ToolRouteTrackInteractive::update_tip()
         const auto &sz = router->Sizes();
         ss << "<b>LMB:</b>connect <b>RMB:</b>finish "
               "<b>/:</b>track posture <b>v:</b>toggle via "
-              "<b>w:</b>track width ";
+              "<b>w:</b>track width "
+              "<b>S:</b>settings ";
         if (!sz.WidthFromRules())
             ss << "<b>W:</b>default track width ";
         ss << "<b>o:</b>clearance offset <b>O:</b>default cl. offset"
@@ -874,7 +912,8 @@ void ToolRouteTrackInteractive::update_tip()
     }
     else {
         ss << "<b>LMB:</b>select starting point <b>RMB:</b>cancel "
-              "<b>s:</b>shove/walkaround ";
+              "<b>s:</b>shove/walkaround "
+              "<b>S:</b>settings ";
         ss << "<i>";
         ss << "Mode: ";
         if (shove)
