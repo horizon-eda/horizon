@@ -9,6 +9,7 @@ namespace horizon {
 RuleClearanceCopper::RuleClearanceCopper(const UUID &uu) : Rule(uu)
 {
     id = RuleID::CLEARANCE_COPPER;
+    std::fill(clearances.begin(), clearances.end(), .1_mm);
 }
 
 RuleClearanceCopper::RuleClearanceCopper(const UUID &uu, const json &j)
@@ -16,6 +17,7 @@ RuleClearanceCopper::RuleClearanceCopper(const UUID &uu, const json &j)
       routing_offset(j.value("routing_offset", 0.05_mm))
 {
     id = RuleID::CLEARANCE_COPPER;
+    std::fill(clearances.begin(), clearances.end(), .1_mm);
     {
         const json &o = j["clearances"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -27,6 +29,27 @@ RuleClearanceCopper::RuleClearanceCopper(const UUID &uu, const json &j)
     }
 }
 
+static size_t get_index(PatchType a, PatchType b)
+{
+    if (a > b) {
+        std::swap(a, b);
+    }
+    return static_cast<size_t>(a) * static_cast<size_t>(PatchType::N_TYPES) + static_cast<size_t>(b);
+}
+
+static std::optional<std::pair<PatchType, PatchType>> pt_from_index(size_t idx)
+{
+    constexpr auto nt = static_cast<size_t>(PatchType::N_TYPES);
+    auto ai = (idx / nt);
+    auto bi = (idx % nt);
+    if (ai > bi)
+        return std::nullopt;
+    auto a = static_cast<PatchType>(ai);
+    auto b = static_cast<PatchType>(bi);
+    assert(idx == get_index(a, b));
+    return std::make_pair(a, b);
+}
+
 json RuleClearanceCopper::serialize() const
 {
     json j = Rule::serialize();
@@ -35,47 +58,38 @@ json RuleClearanceCopper::serialize() const
     j["layer"] = layer;
     j["routing_offset"] = routing_offset;
     j["clearances"] = json::array();
+    size_t i = 0;
     for (const auto &it : clearances) {
-        json k;
-        k["types"] = {patch_type_lut.lookup_reverse(it.first.first), patch_type_lut.lookup_reverse(it.first.second)};
-        k["clearance"] = it.second;
-        j["clearances"].push_back(k);
+        auto pts = pt_from_index(i);
+        if (pts.has_value()) {
+            json k;
+            k["types"] = {patch_type_lut.lookup_reverse(pts->first), patch_type_lut.lookup_reverse(pts->second)};
+            k["clearance"] = it;
+            j["clearances"].push_back(k);
+        }
+        i++;
     }
     return j;
 }
 
+
 uint64_t RuleClearanceCopper::get_clearance(PatchType a, PatchType b) const
 {
-    std::pair<PatchType, PatchType> key(a, b);
-    if (clearances.count(key)) {
-        return clearances.at(key);
-    }
-    std::swap(key.first, key.second);
-    if (clearances.count(key)) {
-        return clearances.at(key);
-    }
-    return .1_mm;
+    return clearances.at(get_index(a, b));
 }
 
 uint64_t RuleClearanceCopper::get_max_clearance() const
 {
     uint64_t max_clearance = 0;
     for (auto &it : clearances) {
-        max_clearance = std::max(max_clearance, it.second);
+        max_clearance = std::max(max_clearance, it);
     }
     return max_clearance;
 }
 
 void RuleClearanceCopper::set_clearance(PatchType a, PatchType b, uint64_t c)
 {
-    std::pair<PatchType, PatchType> key;
-    if (a < b) {
-        key = {a, b};
-    }
-    else {
-        key = {b, a};
-    }
-    clearances[key] = c;
+    clearances.at(get_index(a, b)) = c;
 }
 
 std::string RuleClearanceCopper::get_brief(const class Block *block) const
