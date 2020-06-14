@@ -27,31 +27,37 @@ void CanvasGL::pan_drag_move(GdkEventMotion *motion_event)
 {
     gdouble x, y;
     gdk_event_get_coords((GdkEvent *)motion_event, &x, &y);
-    if (warped) {
-        pan_pointer_pos_orig = {(float)x, (float)y};
-        pan_offset_orig = offset;
-        warped = false;
-        return;
-    }
+
     if (pan_dragging) {
-        if (x > get_allocated_width() || x < 0 || y > get_allocated_height() || y < 0) {
-            auto dev = gdk_event_get_device((GdkEvent *)motion_event);
-            auto scr = gdk_event_get_screen((GdkEvent *)motion_event);
-            gdouble rx, ry;
-            gdk_event_get_root_coords((GdkEvent *)motion_event, &rx, &ry);
-            if (x > get_allocated_width()) {
-                gdk_device_warp(dev, scr, rx - get_allocated_width(), ry);
+        if (warp_distance.x || warp_distance.y) {
+            pan_pointer_pos_orig += warp_distance;
+            offset = pan_offset_orig + Coordf(x, y) - pan_pointer_pos_orig;
+            warp_distance = {0, 0};
+        }
+        else {
+            const bool wr = x >= get_allocated_width();
+            const bool wl = x <= 0;
+            const bool wb = y >= get_allocated_height();
+            const bool wt = y <= 0;
+            if (wr || wl || wb || wt) {
+                auto dev = gdk_event_get_device((GdkEvent *)motion_event);
+                auto scr = gdk_event_get_screen((GdkEvent *)motion_event);
+                gdouble rx, ry;
+                gdk_event_get_root_coords((GdkEvent *)motion_event, &rx, &ry);
+                if (wr) {
+                    warp_distance = Coordi(-get_allocated_width(), 0);
+                }
+                else if (wl) {
+                    warp_distance = Coordi(+get_allocated_width(), 0);
+                }
+                else if (wb) {
+                    warp_distance = Coordi(0, -get_allocated_height());
+                }
+                else if (wt) {
+                    warp_distance = Coordi(0, get_allocated_height());
+                }
+                gdk_device_warp(dev, scr, rx + warp_distance.x, ry + warp_distance.y);
             }
-            else if (x < 0) {
-                gdk_device_warp(dev, scr, rx + get_allocated_width(), ry);
-            }
-            else if (y > get_allocated_height()) {
-                gdk_device_warp(dev, scr, rx, ry - get_allocated_height());
-            }
-            else if (y < 0) {
-                gdk_device_warp(dev, scr, rx, ry + get_allocated_height());
-            }
-            warped = true;
         }
         offset = pan_offset_orig + Coordf(x, y) - pan_pointer_pos_orig;
         update_viewmat();
