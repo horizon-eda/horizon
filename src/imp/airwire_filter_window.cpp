@@ -15,11 +15,6 @@ AirwireFilterWindow *AirwireFilterWindow::create(Gtk::Window *p, const class Blo
     return w;
 }
 
-#define GET_WIDGET(name)                                                                                               \
-    do {                                                                                                               \
-        x->get_widget(#name, name);                                                                                    \
-    } while (0)
-
 AirwireFilterWindow::AirwireFilterWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
                                          const class Block &bl, class AirwireFilter &fi)
     : Gtk::Window(cobject), block(bl), filter(fi)

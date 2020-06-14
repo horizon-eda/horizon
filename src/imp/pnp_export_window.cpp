@@ -6,16 +6,6 @@
 
 namespace horizon {
 
-#define GET_WIDGET(name)                                                                                               \
-    do {                                                                                                               \
-        x->get_widget(#name, name);                                                                                    \
-    } while (0)
-
-#define GET_OBJECT(name)                                                                                               \
-    do {                                                                                                               \
-        name = name.cast_dynamic(x->get_object(#name));                                                                \
-    } while (0)
-
 std::map<int, std::string> PnPExportWindow::MyAdapter::get_column_names() const
 {
     std::map<int, std::string> r;

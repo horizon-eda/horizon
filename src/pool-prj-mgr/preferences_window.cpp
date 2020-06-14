@@ -14,12 +14,6 @@
 
 namespace horizon {
 
-#define GET_WIDGET(name)                                                                                               \
-    do {                                                                                                               \
-        x->get_widget(#name, name);                                                                                    \
-    } while (0)
-
-
 PreferencesWindow::PreferencesWindow(Preferences *prefs) : Gtk::Window(), preferences(prefs)
 {
     set_default_size(1300, -1);

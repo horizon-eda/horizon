@@ -9,11 +9,6 @@
 
 namespace horizon {
 
-#define GET_WIDGET(name)                                                                                               \
-    do {                                                                                                               \
-        x->get_widget(#name, name);                                                                                    \
-    } while (0)
-
 PartinfoPreferencesEditor::PartinfoPreferencesEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
                                                      Preferences *prefs, PartInfoPreferences *partinfo_prefs)
     : Gtk::Box(cobject), preferences(prefs), partinfo_preferences(partinfo_prefs)

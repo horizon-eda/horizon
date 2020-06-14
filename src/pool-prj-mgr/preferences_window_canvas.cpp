@@ -14,11 +14,6 @@
 
 namespace horizon {
 
-#define GET_WIDGET(name)                                                                                               \
-    do {                                                                                                               \
-        x->get_widget(#name, name);                                                                                    \
-    } while (0)
-
 static const std::map<ColorP, std::string> color_names = {
         {ColorP::JUNCTION, "Junction"},
         {ColorP::FRAG_ORPHAN, "Orphan fragment"},

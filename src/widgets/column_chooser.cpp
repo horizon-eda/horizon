@@ -1,4 +1,5 @@
 #include "column_chooser.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 ColumnChooser *ColumnChooser::create(IAdapter &adap)
@@ -10,12 +11,6 @@ ColumnChooser *ColumnChooser::create(IAdapter &adap)
     w->reference();
     return w;
 }
-
-
-#define GET_WIDGET(name)                                                                                               \
-    do {                                                                                                               \
-        x->get_widget(#name, name);                                                                                    \
-    } while (0)
 
 ColumnChooser::ColumnChooser(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IAdapter &adap)
     : Gtk::Grid(cobject), adapter(adap)

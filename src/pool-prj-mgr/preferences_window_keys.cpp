@@ -25,11 +25,6 @@ private:
     std::vector<KeySequence> *get_keys();
 };
 
-#define GET_WIDGET(name)                                                                                               \
-    do {                                                                                                               \
-        x->get_widget(#name, name);                                                                                    \
-    } while (0)
-
 KeySequencesPreferencesEditor::KeySequencesPreferencesEditor(BaseObjectType *cobject,
                                                              const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
                                                              KeySequencesPreferences *keyseq_prefs)

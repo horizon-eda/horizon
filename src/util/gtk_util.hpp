@@ -73,4 +73,14 @@ void widget_set_insensitive_tooltip(Gtk::Widget &w, const std::string &txt);
 
 void widget_remove_scroll_events(Gtk::Widget &widget);
 
+#define GET_WIDGET(name)                                                                                               \
+    do {                                                                                                               \
+        x->get_widget(#name, name);                                                                                    \
+    } while (0)
+
+#define GET_OBJECT(name)                                                                                               \
+    do {                                                                                                               \
+        name = name.cast_dynamic(x->get_object(#name));                                                                \
+    } while (0)
+
 } // namespace horizon

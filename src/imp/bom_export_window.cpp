@@ -13,16 +13,6 @@
 
 namespace horizon {
 
-#define GET_WIDGET(name)                                                                                               \
-    do {                                                                                                               \
-        x->get_widget(#name, name);                                                                                    \
-    } while (0)
-
-#define GET_OBJECT(name)                                                                                               \
-    do {                                                                                                               \
-        name = name.cast_dynamic(x->get_object(#name));                                                                \
-    } while (0)
-
 void BOMExportWindow::MyExportFileChooser::prepare_chooser(Glib::RefPtr<Gtk::FileChooser> chooser)
 {
     auto filter = Gtk::FileFilter::create();

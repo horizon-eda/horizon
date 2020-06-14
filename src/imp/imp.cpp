@@ -206,6 +206,7 @@ bool ImpBase::handle_close(GdkEventAny *ev)
     return false;
 }
 
+#undef GET_WIDGET
 #define GET_WIDGET(name)                                                                                               \
     do {                                                                                                               \
         main_window->builder->get_widget(#name, name);                                                                 \
