@@ -189,7 +189,6 @@ private:
     Coord<float> cursor_pos;
     Coord<int64_t> cursor_pos_grid;
     bool cursor_external = false;
-    Coordi warp_distance;
 
     GLuint renderbuffer;
     GLuint stencilrenderbuffer;
