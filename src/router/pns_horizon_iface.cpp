@@ -409,6 +409,8 @@ horizon::Net *PNS_HORIZON_IFACE::get_net_for_code(int code)
 {
     if (code == PNS::ITEM::UnusedNet)
         return nullptr;
+    if (code < 0)
+        return nullptr;
     if (code >= (int)net_code_map_r.size())
         return nullptr;
     return net_code_map_r.at(code);
