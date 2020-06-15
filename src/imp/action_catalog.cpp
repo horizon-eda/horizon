@@ -4,6 +4,10 @@
 
 namespace horizon {
 const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
+        {{ActionID::DISTRACTION_FREE, ToolID::NONE},
+         {"Toggle distraction free mode", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::SELECTION_FILTER, ToolID::NONE},
          {"Selection filter", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -864,6 +868,7 @@ const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
 const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(TOOL),
         ACTION_LUT_ITEM(SELECTION_FILTER),
+        ACTION_LUT_ITEM(DISTRACTION_FREE),
         ACTION_LUT_ITEM(SAVE),
         ACTION_LUT_ITEM(VIEW_3D),
         ACTION_LUT_ITEM(UNDO),
