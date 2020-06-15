@@ -31,6 +31,7 @@
 #define GEOMETRY_UTILS_H
 
 #include <math/vector2d.h>
+#include <cmath>
 
 /**
  * @return the number of segments to approximate a arc by segments
