@@ -47,5 +47,7 @@ private:
     type_signal_logged s_signal_logged;
 
     std::set<Logger::Level> levels_visible;
+
+    void copy_to_clipboard();
 };
 } // namespace horizon

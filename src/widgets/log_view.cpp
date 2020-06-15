@@ -1,5 +1,6 @@
 #include "log_view.hpp"
 #include <iostream>
+#include <iomanip>
 
 namespace horizon {
 LogView::LogView() : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0)
@@ -60,6 +61,11 @@ LogView::LogView() : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0)
     });
     bbox->pack_start(*follow_cb, false, false, 0);
 
+    auto copy_button = Gtk::manage(new Gtk::Button);
+    copy_button->set_tooltip_text("Copy to clipboard");
+    copy_button->set_image_from_icon_name("edit-copy-symbolic", Gtk::ICON_SIZE_BUTTON);
+    copy_button->signal_clicked().connect(sigc::mem_fun(*this, &LogView::copy_to_clipboard));
+    bbox->pack_end(*copy_button, false, false, 0);
 
     bbox->show_all();
     pack_start(*bbox, false, false, 0);
@@ -127,4 +133,32 @@ void LogView::push_log(const Logger::Item &it)
     }
     s_signal_logged.emit(it);
 }
+
+void LogView::copy_to_clipboard()
+{
+    std::ostringstream oss;
+    static constexpr auto w_seq = 4;
+    static constexpr auto w_level = 8;
+    static constexpr auto w_domain = 24;
+    oss << std::left;
+    oss << std::setw(w_seq) << "Seq"
+        << "| ";
+    oss << std::setw(w_level) << "Level"
+        << "| ";
+    oss << std::setw(w_domain) << "Domain"
+        << "| Message; Detail";
+    oss << std::endl;
+    for (const auto &it : store_filtered->children()) {
+        Gtk::TreeModel::Row row = *it;
+        oss << std::setw(w_seq) << row[list_columns.seq] << "| ";
+        oss << std::setw(w_level) << Logger::level_to_string(row[list_columns.level]) << "| ";
+        oss << std::setw(w_domain) << Logger::domain_to_string(row[list_columns.domain]) << "| ";
+        oss << row[list_columns.message] << "; ";
+        oss << row[list_columns.detail];
+        oss << std::endl;
+    }
+
+    Gtk::Clipboard::get()->set_text(oss.str());
+}
+
 } // namespace horizon
