@@ -9,7 +9,7 @@
 
 namespace horizon {
 
-Canvas::Canvas() : selection_filter(this), selectables(this)
+Canvas::Canvas() : selection_filter(*this), selectables(*this)
 {
     layer_display[10000] = LayerDisplay(true, LayerDisplay::Mode::FILL);
     layer_display[0] = LayerDisplay(true, LayerDisplay::Mode::FILL);

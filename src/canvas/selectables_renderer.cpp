@@ -54,7 +54,7 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out)
     return vao;
 }
 
-SelectablesRenderer::SelectablesRenderer(CanvasGL *c, Selectables *s) : ca(c), sel(s)
+SelectablesRenderer::SelectablesRenderer(const CanvasGL &c, const Selectables &s) : ca(c), sel(s)
 {
 }
 
@@ -84,15 +84,15 @@ void SelectablesRenderer::render()
 {
     glUseProgram(program);
     glBindVertexArray(vao);
-    glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca->screenmat));
-    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
-    glUniform1f(scale_loc, ca->scale);
-    gl_color_to_uniform_3f(color_always_loc, ca->get_color(ColorP::SELECTABLE_ALWAYS));
-    gl_color_to_uniform_3f(color_inner_loc, ca->get_color(ColorP::SELECTABLE_INNER));
-    gl_color_to_uniform_3f(color_outer_loc, ca->get_color(ColorP::SELECTABLE_OUTER));
-    gl_color_to_uniform_3f(color_prelight_loc, ca->get_color(ColorP::SELECTABLE_PRELIGHT));
+    glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca.screenmat));
+    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca.viewmat));
+    glUniform1f(scale_loc, ca.scale);
+    gl_color_to_uniform_3f(color_always_loc, ca.get_color(ColorP::SELECTABLE_ALWAYS));
+    gl_color_to_uniform_3f(color_inner_loc, ca.get_color(ColorP::SELECTABLE_INNER));
+    gl_color_to_uniform_3f(color_outer_loc, ca.get_color(ColorP::SELECTABLE_OUTER));
+    gl_color_to_uniform_3f(color_prelight_loc, ca.get_color(ColorP::SELECTABLE_PRELIGHT));
 
-    glDrawArrays(GL_POINTS, 0, sel->items.size());
+    glDrawArrays(GL_POINTS, 0, sel.items.size());
 
     glBindVertexArray(0);
     glUseProgram(0);
@@ -107,6 +107,6 @@ void SelectablesRenderer::push()
     }
     std::cout << "---" << std::endl;*/
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Selectable) * sel->items.size(), sel->items.data(), GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Selectable) * sel.items.size(), sel.items.data(), GL_STREAM_DRAW);
 }
 } // namespace horizon

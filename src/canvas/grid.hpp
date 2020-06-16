@@ -7,14 +7,14 @@ class Grid {
     friend class CanvasGL;
 
 public:
-    Grid(class CanvasGL *c);
+    Grid(const class CanvasGL &c);
     void realize();
     void render();
     void render_cursor(Coord<int64_t> &coord);
     enum class Style { CROSS, DOT, GRID };
 
 private:
-    CanvasGL *ca;
+    const CanvasGL &ca;
     Coordi spacing;
     Coordi origin;
     unsigned int major = 0;

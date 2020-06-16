@@ -24,8 +24,8 @@ void CanvasGL::set_scale_and_offset(float sc, Coordf ofs)
 }
 
 CanvasGL::CanvasGL()
-    : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), markers(this), grid(this), drag_selection(this),
-      selectables_renderer(this, &selectables), triangle_renderer(this, triangles), marker_renderer(this, markers),
+    : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), markers(*this), grid(*this), drag_selection(*this),
+      selectables_renderer(*this, selectables), triangle_renderer(this, triangles), marker_renderer(*this, markers),
       picture_renderer(*this), p_property_work_layer(*this, "work-layer"),
       p_property_layer_opacity(*this, "layer-opacity")
 {

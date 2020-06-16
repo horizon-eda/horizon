@@ -52,7 +52,7 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out)
     return vao;
 }
 
-Markers::Markers(CanvasGL *c) : ca(c)
+Markers::Markers(CanvasGL &c) : ca(c)
 {
     std::fill(domains_visible.begin(), domains_visible.end(), false);
 }
@@ -60,7 +60,7 @@ Markers::Markers(CanvasGL *c) : ca(c)
 void Markers::set_domain_visible(MarkerDomain dom, bool vis)
 {
     domains_visible.at(static_cast<int>(dom)) = vis;
-    ca->update_markers();
+    ca.update_markers();
 }
 
 std::deque<MarkerRef> &Markers::get_domain(MarkerDomain dom)
@@ -70,11 +70,11 @@ std::deque<MarkerRef> &Markers::get_domain(MarkerDomain dom)
 
 void Markers::update()
 {
-    ca->update_markers();
-    ca->request_push(CanvasGL::PF_MARKER);
+    ca.update_markers();
+    ca.request_push(CanvasGL::PF_MARKER);
 }
 
-MarkerRenderer::MarkerRenderer(CanvasGL *c, Markers &ma) : ca(c), markers_ref(ma)
+MarkerRenderer::MarkerRenderer(const CanvasGL &c, Markers &ma) : ca(c), markers_ref(ma)
 {
 }
 
@@ -95,10 +95,10 @@ void MarkerRenderer::render()
 {
     glUseProgram(program);
     glBindVertexArray(vao);
-    glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca->screenmat));
-    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca->viewmat));
-    glUniform1f(alpha_loc, ca->property_layer_opacity() / 100);
-    gl_color_to_uniform_3f(border_color_loc, ca->get_color(ColorP::MARKER_BORDER));
+    glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca.screenmat));
+    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca.viewmat));
+    glUniform1f(alpha_loc, ca.property_layer_opacity() / 100);
+    gl_color_to_uniform_3f(border_color_loc, ca.get_color(ColorP::MARKER_BORDER));
     glDrawArrays(GL_POINTS, 0, markers.size());
 
     glBindVertexArray(0);
@@ -112,7 +112,7 @@ void MarkerRenderer::update()
     for (const auto &dom : markers_ref.domains) {
         if (markers_ref.domains_visible.at(i)) {
             for (const auto &mkr : dom) {
-                if (mkr.sheet == ca->sheet_current_uuid || mkr.sheet == UUID()) {
+                if (mkr.sheet == ca.sheet_current_uuid || mkr.sheet == UUID()) {
                     uint8_t flags = 0;
                     if (mkr.size == MarkerRef::Size::SMALL)
                         flags = 1;

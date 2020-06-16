@@ -64,7 +64,7 @@ class Selectables {
     friend class SelectablesRenderer;
 
 public:
-    Selectables(class Canvas *ca);
+    Selectables(const class Canvas &ca);
     void clear();
     void append(const UUID &uu, ObjectType ot, const Coordf &center, const Coordf &a, const Coordf &b,
                 unsigned int vertex = 0, int layer = 10000, bool always = false);
@@ -77,7 +77,7 @@ public:
                      unsigned int vertex = 0, int layer = 10000, bool always = false);
 
 private:
-    Canvas *ca;
+    const Canvas &ca;
     std::vector<Selectable> items;
     std::vector<SelectableRef> items_ref;
     std::map<SelectableRef, unsigned int> items_map;

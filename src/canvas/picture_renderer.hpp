@@ -12,13 +12,13 @@ class PictureRenderer {
     friend class CanvasGL;
 
 public:
-    PictureRenderer(class CanvasGL &c);
+    PictureRenderer(const class CanvasGL &c);
     void realize();
     void render(bool on_top);
     void push();
 
 private:
-    CanvasGL &ca;
+    const CanvasGL &ca;
 
     GLuint program;
     GLuint vao;

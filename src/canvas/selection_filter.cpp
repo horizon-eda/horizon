@@ -5,7 +5,7 @@
 namespace horizon {
 bool SelectionFilter::can_select(const SelectableRef &sel) const
 {
-    if (!ca->layer_is_visible(sel.layer) && sel.layer != 10000 && sel.type != ObjectType::BOARD_PACKAGE)
+    if (!ca.layer_is_visible(sel.layer) && sel.layer != 10000 && sel.type != ObjectType::BOARD_PACKAGE)
         return false;
     ObjectType type = sel.type;
     if (type == ObjectType::POLYGON_ARC_CENTER || sel.type == ObjectType::POLYGON_EDGE

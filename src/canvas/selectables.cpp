@@ -72,18 +72,18 @@ bool Selectable::get_flag(Selectable::Flag f) const
     return flags & mask;
 }
 
-Selectables::Selectables(class Canvas *c) : ca(c)
+Selectables::Selectables(const Canvas &c) : ca(c)
 {
 }
 
 void Selectables::append(const UUID &uu, ObjectType ot, const Coordf &center, const Coordf &a, const Coordf &b,
                          unsigned int vertex, int layer, bool always)
 {
-    Placement tr = ca->transform;
+    Placement tr = ca.transform;
     if (tr.mirror)
         tr.invert_angle();
     tr.mirror = false;
-    auto box_center = ca->transform.transform((b + a) / 2);
+    auto box_center = ca.transform.transform((b + a) / 2);
     auto box_dim = b - a;
     append_angled(uu, ot, center, box_center, box_dim, tr.get_angle_rad(), vertex, layer, always);
 }
@@ -99,7 +99,7 @@ void Selectables::append_angled(const UUID &uu, ObjectType ot, const Coordf &cen
 {
     items_map.emplace(std::piecewise_construct, std::forward_as_tuple(uu, ot, vertex, layer),
                       std::forward_as_tuple(items.size()));
-    items.emplace_back(ca->transform.transform(center), box_center, box_dim, angle, always);
+    items.emplace_back(ca.transform.transform(center), box_center, box_dim, angle, always);
     items_ref.emplace_back(uu, ot, vertex, layer);
 }
 

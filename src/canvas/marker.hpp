@@ -39,7 +39,7 @@ class Markers {
     friend class MarkerRenderer;
 
 public:
-    Markers(class CanvasGL *c);
+    Markers(class CanvasGL &c);
 
     std::deque<MarkerRef> &get_domain(MarkerDomain dom);
     void set_domain_visible(MarkerDomain dom, bool vis);
@@ -48,21 +48,21 @@ public:
 private:
     std::array<std::deque<MarkerRef>, static_cast<int>(MarkerDomain::N_DOMAINS)> domains;
     std::array<bool, static_cast<int>(MarkerDomain::N_DOMAINS)> domains_visible;
-    CanvasGL *ca;
+    CanvasGL &ca;
 };
 
 class MarkerRenderer {
     friend class CanvasGL;
 
 public:
-    MarkerRenderer(class CanvasGL *c, Markers &ma);
+    MarkerRenderer(const class CanvasGL &c, Markers &ma);
     void realize();
     void render();
     void push();
     void update();
 
 private:
-    CanvasGL *ca;
+    const CanvasGL &ca;
     std::vector<Marker> markers;
     Markers &markers_ref;
 

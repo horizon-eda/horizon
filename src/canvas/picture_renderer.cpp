@@ -36,7 +36,7 @@ static GLuint create_vao(GLuint program)
     return vao;
 }
 
-PictureRenderer::PictureRenderer(CanvasGL &c) : ca(c)
+PictureRenderer::PictureRenderer(const CanvasGL &c) : ca(c)
 {
 }
 

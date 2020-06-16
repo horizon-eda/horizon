@@ -10,7 +10,7 @@ class DragSelection {
     friend class Box;
 
 public:
-    DragSelection(class CanvasGL *c);
+    DragSelection(class CanvasGL &c);
     void realize();
     void render();
     void push();
@@ -19,20 +19,19 @@ public:
     void drag_move(GdkEventMotion *motion_event);
 
 private:
-    CanvasGL *ca;
+    CanvasGL &ca;
 
     int active;
     Coordf sel_o;
 
     class Box {
     public:
-        Box(class DragSelection *s) : parent(s), ca(parent->ca)
+        Box(class CanvasGL &c) : ca(c)
         {
         }
         void realize();
         void render();
-        class DragSelection *parent;
-        CanvasGL *ca;
+        CanvasGL &ca;
 
         GLuint program;
         GLuint vao;
@@ -56,15 +55,14 @@ private:
 
     class Line {
     public:
-        Line(class DragSelection *s) : parent(s), ca(parent->ca)
+        Line(class CanvasGL &c) : ca(c)
         {
         }
         void realize();
         void render();
         void push();
         void create_vao();
-        class DragSelection *parent;
-        CanvasGL *ca;
+        CanvasGL &ca;
 
         GLuint program;
         GLuint vao;

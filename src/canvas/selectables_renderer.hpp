@@ -4,14 +4,14 @@
 namespace horizon {
 class SelectablesRenderer {
 public:
-    SelectablesRenderer(class CanvasGL *ca, class Selectables *sel);
+    SelectablesRenderer(const class CanvasGL &ca, const class Selectables &sel);
     void realize();
     void render();
     void push();
 
 private:
-    CanvasGL *ca;
-    Selectables *sel;
+    const CanvasGL &ca;
+    const Selectables &sel;
 
     GLuint program;
     GLuint vao;
