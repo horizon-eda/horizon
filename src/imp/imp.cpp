@@ -419,6 +419,19 @@ void ImpBase::run(int argc, char *argv[])
     connect_action(ActionID::DISTRACTION_FREE, [this](const auto &a) {
         distraction_free = !distraction_free;
         g_simple_action_set_state(distraction_free_action->gobj(), g_variant_new_boolean(distraction_free));
+        if (distraction_free) {
+            left_panel_width = main_window->left_panel->get_allocated_width()
+                               + main_window->left_panel->get_margin_start()
+                               + main_window->left_panel->get_margin_end();
+        }
+
+        auto [scale, offset] = canvas->get_scale_and_offset();
+        if (distraction_free)
+            offset.x += left_panel_width;
+        else
+            offset.x -= left_panel_width;
+        canvas->set_scale_and_offset(scale, offset);
+
         main_window->left_panel->set_visible(!distraction_free);
         bool show_properties = panels->get_selection().size() > 0;
         main_window->property_scrolled_window->set_visible(show_properties && !distraction_free);

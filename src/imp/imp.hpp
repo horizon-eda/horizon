@@ -281,5 +281,7 @@ private:
 
     Glib::RefPtr<Gio::SimpleAction> bottom_view_action;
     Glib::RefPtr<Gio::SimpleAction> distraction_free_action;
+
+    int left_panel_width = 0;
 };
 } // namespace horizon
