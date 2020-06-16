@@ -127,6 +127,10 @@ public:
     {
         return p_property_layer_opacity.get_proxy();
     }
+    Glib::PropertyProxy_ReadOnly<float> property_layer_opacity() const
+    {
+        return p_property_layer_opacity.get_proxy();
+    }
     Markers markers;
     void update_markers() override;
 

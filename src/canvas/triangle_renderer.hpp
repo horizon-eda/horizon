@@ -10,13 +10,13 @@ class TriangleRenderer {
     friend class CanvasGL;
 
 public:
-    TriangleRenderer(class CanvasGL *c, const std::map<int, vector_pair<Triangle, TriangleInfo>> &tris);
+    TriangleRenderer(const class CanvasGL *c, const std::map<int, vector_pair<Triangle, TriangleInfo>> &tris);
     void realize();
     void render();
     void push();
 
 private:
-    CanvasGL *ca;
+    const CanvasGL *ca;
     enum class Type { TRIANGLE, LINE, LINE0, LINE_BUTT, GLYPH, CIRCLE };
     const std::map<int, vector_pair<Triangle, TriangleInfo>> &triangles;
     std::map<int, std::map<std::pair<Type, bool>, std::pair<size_t, size_t>>> layer_offsets;

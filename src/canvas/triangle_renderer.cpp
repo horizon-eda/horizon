@@ -58,7 +58,7 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out)
     return vao;
 }
 
-TriangleRenderer::TriangleRenderer(CanvasGL *c, const std::map<int, vector_pair<Triangle, TriangleInfo>> &tris)
+TriangleRenderer::TriangleRenderer(const CanvasGL *c, const std::map<int, vector_pair<Triangle, TriangleInfo>> &tris)
     : ca(c), triangles(tris)
 {
 }
