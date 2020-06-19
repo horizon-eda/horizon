@@ -28,6 +28,7 @@ public:
     bool show_silkscreen = true;
     bool show_substrate = true;
     bool show_models = true;
+    bool show_dnp_models = false;
     bool show_solder_paste = true;
     bool use_layer_colors = false;
     Color solder_mask_color = {0, .5, 0};
@@ -140,9 +141,9 @@ private:
     std::vector<ModelTransform> package_transforms; // position and rotation of
                                                     // all board packages,
                                                     // grouped by package
-    std::map<std::string, std::pair<size_t, size_t>>
-            package_transform_idxs; // key: model filename: value: first: offset
-                                    // in package_transforms second: no of items
+    std::map<std::pair<std::string, bool>, std::pair<size_t, size_t>>
+            package_transform_idxs; // key: first: model filename second: nopopulate
+                                    // value: first: offset in package_transforms second: no of items
 
     float get_magic_number() const;
 };

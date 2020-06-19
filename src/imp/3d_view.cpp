@@ -156,10 +156,17 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         canvas->queue_draw();
     });
 
-    Gtk::Switch *models_switch;
-    x->get_widget("models_switch", models_switch);
-    models_switch->property_active().signal_changed().connect([this, models_switch] {
-        canvas->show_models = models_switch->get_active();
+    Gtk::RadioButton *models_none_rb;
+    x->get_widget("models_none_rb", models_none_rb);
+    models_none_rb->property_active().signal_changed().connect([this, models_none_rb] {
+        canvas->show_models = !models_none_rb->get_active();
+        canvas->queue_draw();
+    });
+
+    Gtk::RadioButton *models_placed_rb;
+    x->get_widget("models_placed_rb", models_placed_rb);
+    models_placed_rb->property_active().signal_changed().connect([this, models_placed_rb] {
+        canvas->show_dnp_models = !models_placed_rb->get_active();
         canvas->queue_draw();
     });
 
