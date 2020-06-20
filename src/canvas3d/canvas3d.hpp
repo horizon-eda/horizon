@@ -64,8 +64,8 @@ private:
     bool on_scroll_event(GdkEventScroll *scroll_event) override;
 
     Glib::RefPtr<Gtk::GestureDrag> gesture_drag;
-    glm::vec2 gesture_drag_center_orig;
-    glm::vec2 get_center_shift(const glm::vec2 &shift) const;
+    glm::vec3 gesture_drag_center_orig;
+    glm::vec3 get_center_shift(const glm::vec2 &shift) const;
     void drag_gesture_begin_cb(GdkEventSequence *seq);
     void drag_gesture_update_cb(GdkEventSequence *seq);
 
@@ -86,7 +86,7 @@ private:
     float cam_azimuth_orig;
     float cam_elevation_orig;
 
-    glm::vec2 center_orig;
+    glm::vec3 center_orig;
 
     enum class PanMode { NONE, MOVE, ROTATE };
     PanMode pan_mode = PanMode::NONE;

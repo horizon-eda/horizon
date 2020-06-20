@@ -39,7 +39,7 @@ public:
     float cam_elevation = 45;
     float cam_distance = 20;
     float cam_fov = 45;
-    glm::vec2 center;
+    glm::vec3 center;
 
 
     enum class Projection { PERSP, ORTHO };

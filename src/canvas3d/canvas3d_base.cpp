@@ -185,11 +185,11 @@ void Canvas3DBase::render(RenderBackground mode)
     float phi = glm::radians(cam_azimuth);
     float theta = glm::radians(90 - cam_elevation);
     auto cam_offset = glm::vec3(r * sin(theta) * cos(phi), r * sin(theta) * sin(phi), r * cos(theta));
-    auto cam_pos = cam_offset + glm::vec3(center, 0);
+    auto cam_pos = cam_offset + center;
 
     glm::vec3 right(sin(phi - 3.14f / 2.0f), cos(phi - 3.14f / 2.0f), 0);
 
-    viewmat = glm::lookAt(cam_pos, glm::vec3(center, 0), glm::vec3(0, 0, std::abs(cam_elevation) < 90 ? 1 : -1));
+    viewmat = glm::lookAt(cam_pos, center, glm::vec3(0, 0, std::abs(cam_elevation) < 90 ? 1 : -1));
 
     float cam_dist_min = std::max(std::abs(cam_pos.z) - (10 + explode * (brd->get_n_inner_layers() * 2 + 3)), 1.0f);
     float cam_dist_max = 0;
@@ -260,7 +260,7 @@ void Canvas3DBase::view_all()
     if (board_height < 1 || board_width < 1)
         return;
 
-    center = {(xmin + xmax) / 2e6, (ymin + ymax) / 2e6};
+    center = {(xmin + xmax) / 2e6, (ymin + ymax) / 2e6, 0};
 
 
     cam_distance = std::max(board_width / width, board_height / height) / (2 * get_magic_number() / height) * 1.1;

@@ -156,6 +156,7 @@ enum class FloatAttr : intptr_t {
     CAM_FOV,
     CENTER_X,
     CENTER_Y,
+    CENTER_Z,
 };
 
 static float &get_float_attr(PyObject *pself, void *pa)
@@ -181,6 +182,9 @@ static float &get_float_attr(PyObject *pself, void *pa)
 
     case FloatAttr::CENTER_Y:
         return ex->center.y;
+
+    case FloatAttr::CENTER_Z:
+        return ex->center.z;
 
     default:
         throw std::runtime_error("invalid attr");
@@ -347,6 +351,7 @@ static PyGetSetDef PyImage3DExporter_getset[] = {
 
         {"center_x", &float_attr_get, &float_attr_set, NULL, reinterpret_cast<void *>(FloatAttr::CENTER_X)},
         {"center_y", &float_attr_get, &float_attr_set, NULL, reinterpret_cast<void *>(FloatAttr::CENTER_Y)},
+        {"center_z", &float_attr_get, &float_attr_set, NULL, reinterpret_cast<void *>(FloatAttr::CENTER_Z)},
 
         {"background_top_color", &color_attr_get, &color_attr_set, NULL,
          reinterpret_cast<void *>(ColorAttr::BACKGROUND_TOP)},

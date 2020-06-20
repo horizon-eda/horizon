@@ -50,10 +50,12 @@ Canvas3D::Canvas3D() : i_model_loading(0), stop_model_load_thread(false)
     gesture_rotate->set_propagation_phase(Gtk::PHASE_CAPTURE);
 }
 
-glm::vec2 Canvas3D::get_center_shift(const glm::vec2 &shift) const
+glm::vec3 Canvas3D::get_center_shift(const glm::vec2 &shift) const
 {
-    return glm::rotate(glm::mat2(1, 0, 0, sin(glm::radians(cam_elevation))) * shift * 0.1218f * cam_distance / 105.f,
-                       glm::radians(cam_azimuth - 90));
+    const float m = 0.1218f * cam_distance / 105.f;
+    return {glm::rotate(glm::mat2(1, 0, 0, sin(glm::radians(cam_elevation))) * shift * m,
+                        glm::radians(cam_azimuth - 90)),
+            -cos(glm::radians(cam_elevation)) * shift.y * m};
 }
 
 
