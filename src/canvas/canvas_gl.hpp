@@ -12,6 +12,7 @@
 #include "annotation.hpp"
 #include "snap_filter.hpp"
 #include "picture_renderer.hpp"
+#include "selection_filter.hpp"
 
 namespace horizon {
 class CanvasGL : public Canvas, public Gtk::GLArea {
@@ -47,6 +48,9 @@ public:
     HighlightMode get_highlight_mode() const;
     void set_highlight_enabled(bool x);
     void set_highlight_on_top(bool on_top);
+
+    enum class LayerMode { AS_IS, WORK_ONLY, SHADOW_OTHER };
+    void set_layer_mode(LayerMode mode);
 
     std::set<SelectableRef> get_selection();
     void set_selection(const std::set<SelectableRef> &sel, bool emit = true);
@@ -171,6 +175,10 @@ public:
     Coordi get_grid_spacing() const;
     void set_grid_origin(const Coordi &c);
 
+    SelectionFilter selection_filter;
+
+    bool layer_is_visible(int layer) const;
+
 protected:
     void push() override;
     void request_push() override;
@@ -244,6 +252,8 @@ private:
     bool highlight_enabled = false;
     bool highlight_on_top = false;
     Appearance appearance;
+
+    LayerMode layer_mode = LayerMode::AS_IS;
 
     bool drag_selection_inhibited = false;
 

@@ -20,6 +20,11 @@ void ImpLayer::construct_layer_box(bool pack)
             [this] { canvas->set_highlight_mode(layer_box->property_highlight_mode()); });
     canvas->set_highlight_mode(CanvasGL::HighlightMode::DIM);
 
+    layer_box->property_layer_mode().signal_changed().connect([this] {
+        canvas->set_layer_mode(layer_box->property_layer_mode());
+        selection_filter_dialog->force_work_layer_only(layer_box->property_layer_mode() != CanvasGL::LayerMode::AS_IS);
+    });
+
     layer_box->signal_set_layer_display().connect([this](int index, const LayerDisplay &lda) {
         LayerDisplay ld = canvas->get_layer_display(index);
         ld.visible = lda.visible;

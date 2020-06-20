@@ -9,7 +9,7 @@
 
 namespace horizon {
 
-Canvas::Canvas() : selection_filter(*this), selectables(*this)
+Canvas::Canvas() : selectables(*this)
 {
     layer_display[10000] = LayerDisplay(true, LayerDisplay::Mode::FILL);
     layer_display[0] = LayerDisplay(true, LayerDisplay::Mode::FILL);
@@ -231,6 +231,18 @@ int Canvas::get_overlay_layer(int layer, bool ignore_flip)
     }
 
     return overlay_layers.at({layer, ignore_flip});
+}
+
+bool Canvas::is_overlay_layer(int overlay_layer, int layer) const
+{
+    for (const bool ignore_flip : {true, false}) {
+        const auto k = std::make_pair(layer, ignore_flip);
+        if (overlay_layers.count(k)) {
+            if (overlay_layers.at(k) == overlay_layer)
+                return true;
+        }
+    }
+    return false;
 }
 
 

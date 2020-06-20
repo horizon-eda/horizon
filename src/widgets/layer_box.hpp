@@ -29,6 +29,10 @@ public:
     {
         return p_property_highlight_mode.get_proxy();
     }
+    Glib::PropertyProxy<CanvasGL::LayerMode> property_layer_mode()
+    {
+        return p_property_layer_mode.get_proxy();
+    }
     void set_layer_display(int layer, const LayerDisplay &ld);
 
     json serialize();
@@ -42,6 +46,7 @@ private:
     Glib::Property<int> p_property_work_layer;
     Glib::Property<float> p_property_layer_opacity;
     Glib::Property<CanvasGL::HighlightMode> p_property_highlight_mode;
+    Glib::Property<CanvasGL::LayerMode> p_property_layer_mode;
     type_signal_set_layer_display s_signal_set_layer_display;
     void emit_layer_display(class LayerBoxRow *row);
     void update_work_layer();

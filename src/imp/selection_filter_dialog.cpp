@@ -403,4 +403,18 @@ bool SelectionFilterDialog::get_filtered()
            || !std::all_of(checkbuttons.begin(), checkbuttons.end(), [](auto x) { return x.second.get_all_active(); });
 }
 
+void SelectionFilterDialog::force_work_layer_only(bool force)
+{
+    if (force) {
+        if (work_layer_only_cb->get_sensitive())
+            work_layer_only_before_force = work_layer_only;
+        work_layer_only_cb->set_active(true);
+    }
+    else {
+        if (!work_layer_only_cb->get_sensitive())
+            work_layer_only_cb->set_active(work_layer_only_before_force);
+    }
+    work_layer_only_cb->set_sensitive(!force);
+}
+
 } // namespace horizon

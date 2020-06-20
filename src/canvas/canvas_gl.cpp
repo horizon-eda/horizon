@@ -24,9 +24,9 @@ void CanvasGL::set_scale_and_offset(float sc, Coordf ofs)
 }
 
 CanvasGL::CanvasGL()
-    : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), markers(*this), grid(*this), drag_selection(*this),
-      selectables_renderer(*this, selectables), triangle_renderer(this, triangles), marker_renderer(*this, markers),
-      picture_renderer(*this), p_property_work_layer(*this, "work-layer"),
+    : Glib::ObjectBase(typeid(CanvasGL)), Canvas::Canvas(), markers(*this), selection_filter(*this), grid(*this),
+      drag_selection(*this), selectables_renderer(*this, selectables), triangle_renderer(*this, triangles),
+      marker_renderer(*this, markers), picture_renderer(*this), p_property_work_layer(*this, "work-layer"),
       p_property_layer_opacity(*this, "layer-opacity")
 {
     add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_MOTION_MASK | Gdk::POINTER_MOTION_MASK
@@ -586,6 +586,12 @@ void CanvasGL::set_highlight_on_top(bool v)
     queue_draw();
 }
 
+void CanvasGL::set_layer_mode(CanvasGL::LayerMode mode)
+{
+    layer_mode = mode;
+    queue_draw();
+}
+
 void CanvasGL::set_appearance(const Appearance &a)
 {
     appearance = a;
@@ -705,6 +711,14 @@ bool CanvasGL::can_snap_to_target(const Target &t) const
             return false;
     }
     return true;
+}
+
+bool CanvasGL::layer_is_visible(int layer) const
+{
+    if (layer_mode == LayerMode::AS_IS)
+        return Canvas::layer_is_visible(layer);
+    else
+        return layer == work_layer || layer >= 10000;
 }
 
 

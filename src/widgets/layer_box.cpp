@@ -169,7 +169,7 @@ void LayerBoxRow::set_force_visible(bool v)
 LayerBox::LayerBox(LayerProvider *lpr, bool show_title)
     : Glib::ObjectBase(typeid(LayerBox)), Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 2), lp(lpr),
       p_property_work_layer(*this, "work-layer"), p_property_layer_opacity(*this, "layer-opacity"),
-      p_property_highlight_mode(*this, "highlight-mode")
+      p_property_highlight_mode(*this, "highlight-mode"), p_property_layer_mode(*this, "layer-mode")
 {
     if (show_title) {
         auto *la = Gtk::manage(new Gtk::Label());
@@ -252,6 +252,16 @@ LayerBox::LayerBox(LayerProvider *lpr, bool show_title)
     highlight_mode_combo->set_active(1);
     grid_attach_label_and_widget(layer_opacity_grid, "Highlight mode", highlight_mode_combo, top);
 
+    auto layer_mode_combo = Gtk::manage(new Gtk::ComboBoxText);
+    layer_mode_combo->append(std::to_string(static_cast<int>(CanvasGL::LayerMode::AS_IS)), "As is");
+    layer_mode_combo->append(std::to_string(static_cast<int>(CanvasGL::LayerMode::WORK_ONLY)), "Work layer only");
+    layer_mode_combo->append(std::to_string(static_cast<int>(CanvasGL::LayerMode::SHADOW_OTHER)), "Shadow other");
+    layer_mode_combo->set_hexpand(true);
+    layer_mode_combo->signal_changed().connect([this, layer_mode_combo] {
+        p_property_layer_mode.set_value(static_cast<CanvasGL::LayerMode>(std::stoi(layer_mode_combo->get_active_id())));
+    });
+    layer_mode_combo->set_active(0);
+    grid_attach_label_and_widget(layer_opacity_grid, "Layer mode", layer_mode_combo, top);
 
     ab->pack_start(*layer_opacity_grid);
 

@@ -3,7 +3,6 @@
 #include "common/text.hpp"
 #include "layer_display.hpp"
 #include "selectables.hpp"
-#include "selection_filter.hpp"
 #include "target.hpp"
 #include "triangle.hpp"
 #include "object_ref.hpp"
@@ -55,8 +54,6 @@ public:
 
     const LayerDisplay &get_layer_display(int index) const;
     void set_layer_display(int index, const LayerDisplay &ld);
-    class SelectionFilter selection_filter;
-
     void set_layer_color(int layer, const Color &color);
 
     bool layer_is_visible(int layer) const;
@@ -220,9 +217,10 @@ protected:
 
     TriangleInfo::Type triangle_type_current = TriangleInfo::Type::NONE;
 
-    std::map<std::pair<int, bool>, int> overlay_layers;
+    std::map<std::pair<int, bool>, int> overlay_layers; // layer, ignore_flip -> overlay layer
     int overlay_layer_current = first_overlay_layer;
     int get_overlay_layer(int layer, bool ignore_flip = false);
+    bool is_overlay_layer(int overlay_layer, int layer) const;
 
     FragmentCache fragment_cache;
 

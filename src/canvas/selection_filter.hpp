@@ -5,7 +5,7 @@
 namespace horizon {
 class SelectionFilter {
 public:
-    SelectionFilter(const class Canvas &c) : ca(c)
+    SelectionFilter(const class CanvasGL &c) : ca(c)
     {
     }
     bool can_select(const class SelectableRef &sel) const;
@@ -19,6 +19,6 @@ public:
     std::map<ObjectType, ObjectFilter> object_filter;
 
 private:
-    const Canvas &ca;
+    const CanvasGL &ca;
 };
 } // namespace horizon

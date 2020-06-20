@@ -11,6 +11,7 @@ public:
     void update_layers();
     bool get_filtered();
     void set_work_layer(int layer);
+    void force_work_layer_only(bool force);
 
 private:
     SelectionFilter &selection_filter;
@@ -43,5 +44,6 @@ private:
     std::map<ObjectType, std::set<int>> saved;
     int work_layer = 0;
     void update_filter();
+    bool work_layer_only_before_force = false;
 };
 } // namespace horizon
