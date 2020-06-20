@@ -547,4 +547,14 @@ Coordi dir_from_arrow_key(unsigned int key)
     }
 }
 
+Coordd project_onto_perp_bisector(const Coordd &a, const Coordd &b, const Coordd &p)
+{
+    const auto c = (a + b) / 2;
+    const auto d = b - a;
+    if (d.mag_sq() == 0)
+        return p;
+    const auto u = (d.dot(c) - d.dot(p)) / d.mag_sq();
+    return p + d * u;
+}
+
 } // namespace horizon

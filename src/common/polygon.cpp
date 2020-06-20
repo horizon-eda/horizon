@@ -1,6 +1,7 @@
 #include "polygon.hpp"
 #include "lut.hpp"
 #include "nlohmann/json.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 
@@ -72,9 +73,9 @@ Polygon Polygon::remove_arcs(unsigned int precision) const
             if (it_next == vertices.cend()) {
                 it_next = vertices.cbegin();
             }
-            Coord<double> a(it->position);
-            Coord<double> b(it_next->position);
-            Coord<double> c(it->arc_center);
+            Coordd a(it->position);
+            Coordd b(it_next->position);
+            Coordd c = project_onto_perp_bisector(a, b, it->arc_center);
             double radius0 = sqrt(sq(c.x - a.x) + sq(c.y - a.y));
             double radius1 = sqrt(sq(c.x - b.x) + sq(c.y - b.y));
             Color co(1, 1, 0);
@@ -102,7 +103,7 @@ Polygon Polygon::remove_arcs(unsigned int precision) const
             segments--;
             while (segments--) {
                 a0 += dphi;
-                auto p1f = c + Coord<double>::euler(radius0, a0);
+                auto p1f = c + Coordd::euler(radius0, a0);
                 Coordi p1(p1f.x, p1f.y);
                 out.append_vertex(p1);
                 radius0 += dr;

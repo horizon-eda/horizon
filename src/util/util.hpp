@@ -80,5 +80,6 @@ template <typename T> std::pair<Coord<T>, Coord<T>> pad_bbox(std::pair<Coord<T>,
     bb.second.y += pad;
     return bb;
 }
+Coordd project_onto_perp_bisector(const Coordd &a, const Coordd &b, const Coordd &p);
 
 } // namespace horizon

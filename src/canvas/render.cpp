@@ -590,9 +590,9 @@ static int64_t sq(int64_t x)
 
 void Canvas::render(const Arc &arc, bool interactive, ColorP co)
 {
-    Coordf a(arc.from->position);   // ,b,c;
-    Coordf b(arc.to->position);     // ,b,c;
-    Coordf c(arc.center->position); // ,b,c;
+    Coordf a(arc.from->position); // ,b,c;
+    Coordf b(arc.to->position);   // ,b,c;
+    Coordf c = project_onto_perp_bisector(a, b, arc.center->position);
     float radius0 = sqrt(sq(c.x - a.x) + sq(c.y - a.y));
     float radius1 = sqrt(sq(c.x - b.x) + sq(c.y - b.y));
     float a0 = atan2f(a.y - c.y, a.x - c.x);
