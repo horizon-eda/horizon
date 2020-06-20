@@ -129,7 +129,7 @@ public:
     }
     Glib::PropertyProxy_ReadOnly<float> property_layer_opacity() const
     {
-        return p_property_layer_opacity.get_proxy();
+        return Glib::PropertyProxy_ReadOnly<float>(this, "layer-opacity");
     }
     Markers markers;
     void update_markers() override;
