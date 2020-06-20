@@ -60,5 +60,8 @@ private:
 
     std::string tables_remote, tables_local;
     std::string layer_help_remote, layer_help_local;
+
+    enum class MenuOP { CHECK, UNCHECK, TOGGLE };
+    void append_context_menu_item(const std::string &name, MenuOP op);
 };
 } // namespace horizon

@@ -22,6 +22,7 @@ public:
     Gtk::TextView *delta_text_view = nullptr;
     Gtk::CheckButton *cb_update_layer_help = nullptr;
     Gtk::CheckButton *cb_update_tables = nullptr;
+    Gtk::Menu context_menu;
 
 private:
 };
@@ -105,15 +106,7 @@ PoolMergeDialog::PoolMergeDialog(Gtk::Window *parent, const std::string &lp, con
 
 
     item_store = Gtk::ListStore::create(list_columns);
-    item_store->set_sort_func(list_columns.state,
-                              [this](const Gtk::TreeModel::iterator &a, const Gtk::TreeModel::iterator &b) {
-                                  Gtk::TreeModel::Row ra = *a;
-                                  Gtk::TreeModel::Row rb = *b;
-                                  ItemState sa = ra[list_columns.state];
-                                  ItemState sb = rb[list_columns.state];
-                                  return static_cast<int>(sb) - static_cast<int>(sa);
-                              });
-    box->pool_item_view->set_model(item_store);
+
     box->pool_item_view->get_selection()->signal_changed().connect(
             sigc::mem_fun(*this, &PoolMergeDialog::selection_changed));
 
@@ -272,7 +265,6 @@ PoolMergeDialog::PoolMergeDialog(Gtk::Window *parent, const std::string &lp, con
         box->pool_item_view->append_column(*tvc);
     }
 
-    item_store->set_sort_column(list_columns.state, Gtk::SORT_ASCENDING);
 
     {
         tables_remote = Glib::build_filename(remote_path, "tables.json");
@@ -340,6 +332,62 @@ PoolMergeDialog::PoolMergeDialog(Gtk::Window *parent, const std::string &lp, con
 
 
     populate_store();
+    item_store->set_sort_func(list_columns.state,
+                              [this](const Gtk::TreeModel::iterator &a, const Gtk::TreeModel::iterator &b) {
+                                  Gtk::TreeModel::Row ra = *a;
+                                  Gtk::TreeModel::Row rb = *b;
+                                  ItemState sa = ra[list_columns.state];
+                                  ItemState sb = rb[list_columns.state];
+                                  return static_cast<int>(sb) - static_cast<int>(sa);
+                              });
+    item_store->set_sort_column(list_columns.state, Gtk::SORT_ASCENDING);
+
+    box->pool_item_view->set_model(item_store);
+
+
+    append_context_menu_item("Check", MenuOP::CHECK);
+    append_context_menu_item("Uncheck", MenuOP::UNCHECK);
+    append_context_menu_item("Toggle", MenuOP::TOGGLE);
+
+    box->pool_item_view->signal_button_press_event().connect(
+            [this](GdkEventButton *ev) {
+                Gtk::TreeModel::Path path;
+                if (gdk_event_triggers_context_menu((GdkEvent *)ev)
+                    && box->pool_item_view->get_selection()->count_selected_rows()) {
+#if GTK_CHECK_VERSION(3, 22, 0)
+                    box->context_menu.popup_at_pointer((GdkEvent *)ev);
+#else
+                    box->context_menu.popup(ev->button, gtk_get_current_event_time());
+#endif
+                    return true;
+                }
+                return false;
+            },
+            false);
+}
+
+void PoolMergeDialog::append_context_menu_item(const std::string &name, MenuOP op)
+{
+    auto it = Gtk::manage(new Gtk::MenuItem(name));
+    it->signal_activate().connect([this, op] {
+        auto rows = box->pool_item_view->get_selection()->get_selected_rows();
+        for (const auto &path : rows) {
+            Gtk::TreeModel::Row row = *item_store->get_iter(path);
+            switch (op) {
+            case MenuOP::CHECK:
+                row[list_columns.merge] = true;
+                break;
+            case MenuOP::UNCHECK:
+                row[list_columns.merge] = false;
+                break;
+            case MenuOP::TOGGLE:
+                row[list_columns.merge] = !row[list_columns.merge];
+                break;
+            }
+        }
+    });
+    box->context_menu.append(*it);
+    it->show();
 }
 
 bool PoolMergeDialog::get_merged() const
