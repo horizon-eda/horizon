@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include "util/uuid.hpp"
 #include "util/changeable.hpp"
+#include <set>
 
 namespace horizon {
 
