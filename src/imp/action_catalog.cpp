@@ -764,8 +764,7 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::AIRWIRE_FILTER_WINDOW, ToolID::NONE},
-         {"Airwire filter", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+         {"Nets window", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::RESET_AIRWIRE_FILTER, ToolID::NONE},
          {"Reset airwire filter", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,

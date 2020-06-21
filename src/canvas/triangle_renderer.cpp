@@ -167,8 +167,9 @@ static std::array<float, 4> array_from_color(const Color &c)
 std::array<float, 4> TriangleRenderer::apply_highlight(const Color &icolor, HighlightMode mode, int layer) const
 {
     const std::array<float, 4> color = array_from_color(icolor);
-    if (layer >= 20000 && layer < 30000) {
-        return color;
+    if (layer >= 20000 && layer < 30000) { // is annotation
+        if (!ca.annotations.at(layer).use_highlight)
+            return color;
     }
     if (ca.layer_mode == CanvasGL::LayerMode::SHADOW_OTHER) {
         if (layer == ca.work_layer || ca.is_overlay_layer(layer, ca.work_layer)) {

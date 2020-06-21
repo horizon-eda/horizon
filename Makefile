@@ -425,7 +425,6 @@ SRC_IMP = \
 	src/imp/pnp_export_window.cpp\
 	src/export_pnp/export_pnp.cpp\
 	src/imp/airwire_filter_window.cpp\
-	src/imp/airwire_filter.cpp\
 	src/imp/search/searcher.cpp\
 	src/imp/search/searcher_symbol.cpp\
 	src/imp/search/searcher_schematic.cpp\

@@ -1,92 +1,292 @@
 #include "airwire_filter_window.hpp"
-#include "block/block.hpp"
+#include "board/board.hpp"
 #include "util/util.hpp"
-#include "airwire_filter.hpp"
 #include "util/gtk_util.hpp"
+#include "util/str_util.hpp"
 
 namespace horizon {
-AirwireFilterWindow *AirwireFilterWindow::create(Gtk::Window *p, const class Block &b, class AirwireFilter &fi)
+AirwireFilterWindow *AirwireFilterWindow::create(Gtk::Window *p, const class Board &b)
 {
     AirwireFilterWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/imp/airwire_filter.ui");
-    x->get_widget_derived("window", w, b, fi);
+    x->get_widget_derived("window", w, b);
     w->set_transient_for(*p);
     return w;
 }
 
 AirwireFilterWindow::AirwireFilterWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
-                                         const class Block &bl, class AirwireFilter &fi)
-    : Gtk::Window(cobject), block(bl), filter(fi)
+                                         const class Board &bd)
+    : Gtk::Window(cobject), brd(bd), block(*bd.block)
 {
     install_esc_to_close(*this);
 
     GET_WIDGET(treeview);
     GET_WIDGET(all_on_button);
     GET_WIDGET(all_off_button);
-    GET_WIDGET(placeholder_box);
+    GET_WIDGET(search_button);
+    GET_WIDGET(search_revealer);
+    GET_WIDGET(airwires_button);
+    GET_WIDGET(airwires_revealer);
+    GET_WIDGET(netclass_combo);
+    GET_WIDGET(search_entry);
+    GET_WIDGET(airwires_only_cb);
+
+    airwires_button->signal_toggled().connect(
+            [this] { airwires_revealer->set_reveal_child(airwires_button->get_active()); });
+
+    search_button->signal_toggled().connect([this] { search_revealer->set_reveal_child(search_button->get_active()); });
 
     store = Gtk::ListStore::create(list_columns);
-    treeview->set_model(store);
-    {
-        auto cr_toggle = Gtk::manage(new Gtk::CellRendererToggle());
-        cr_toggle->property_xalign() = 1;
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Net"));
-        tvc->pack_start(*cr_toggle, false);
-        tvc->add_attribute(cr_toggle->property_active(), list_columns.visible);
-        cr_toggle->signal_toggled().connect([this](const Glib::ustring &path) {
-            auto it = store->get_iter(path);
-            if (it) {
-                Gtk::TreeModel::Row row = *it;
-                row[list_columns.visible] = !row[list_columns.visible];
-                filter.set_visible(row[list_columns.net], row[list_columns.visible]);
-            }
-        });
+    store_filtered = Gtk::TreeModelFilter::create(store);
+    store_filtered->set_visible_func([this](const Gtk::TreeModel::const_iterator &it) -> bool {
+        const Gtk::TreeModel::Row row = *it;
+        if (airwires_only_cb->get_active()) {
+            if (row[list_columns.n_airwires] == 0)
+                return false;
+        }
+        if (netclass_filter) {
+            if (row[list_columns.net_class] != netclass_filter)
+                return false;
+        }
+        if (search_spec.has_value()) {
+            return search_spec->match(row.get_value(list_columns.net_name).casefold());
+        }
+        return true;
+    });
+    store_sorted = Gtk::TreeModelSort::create(store_filtered);
 
+    treeview->set_model(store_sorted);
+    {
+        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Net"));
         auto cr = Gtk::manage(new Gtk::CellRendererText());
         tvc->pack_start(*cr, true);
         tvc->add_attribute(cr->property_text(), list_columns.net_name);
         tvc->set_sort_column(list_columns.net_name);
         treeview->append_column(*tvc);
     }
-    treeview->append_column("Airwires", list_columns.n_airwires);
-    treeview->get_column(1)->set_sort_column(list_columns.n_airwires);
-    store->set_sort_column(list_columns.net_name, Gtk::SORT_ASCENDING);
-    store->set_sort_column(list_columns.n_airwires, Gtk::SORT_ASCENDING);
-    store->set_sort_func(list_columns.net_name,
-                         [this](const Gtk::TreeModel::iterator &ia, const Gtk::TreeModel::iterator &ib) {
-                             Gtk::TreeModel::Row ra = *ia;
-                             Gtk::TreeModel::Row rb = *ib;
-                             Glib::ustring a = ra[list_columns.net_name];
-                             Glib::ustring b = rb[list_columns.net_name];
-                             return strcmp_natural(a, b);
-                         });
+    {
+        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Net class"));
+        auto cr = Gtk::manage(new Gtk::CellRendererText());
+        tvc->pack_start(*cr, true);
+        tvc->add_attribute(cr->property_text(), list_columns.net_class_name);
+        tvc->set_sort_column(list_columns.net_class_name);
+        treeview->append_column(*tvc);
+    }
+    {
+        auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Airwires"));
+        auto cr_toggle = Gtk::manage(new Gtk::CellRendererToggle());
+        cr_toggle->property_xalign() = 1;
+        tvc->pack_start(*cr_toggle, false);
+        tvc->add_attribute(cr_toggle->property_active(), list_columns.airwires_visible);
+        cr_toggle->signal_toggled().connect([this](const Glib::ustring &path) {
+            auto it = store->get_iter(store_filtered->convert_path_to_child_path(
+                    store_sorted->convert_path_to_child_path(Gtk::TreeModel::Path(path))));
+            if (it) {
+                Gtk::TreeModel::Row row = *it;
+                const bool v = !row[list_columns.airwires_visible];
+                airwires_visible[row[list_columns.net]] = v;
+                row[list_columns.airwires_visible] = v;
+                s_signal_changed.emit();
+            }
+        });
 
-    filter.signal_changed().connect(sigc::mem_fun(*this, &AirwireFilterWindow::update_from_filter));
-    all_on_button->signal_clicked().connect([this] { filter.set_all(true); });
-    all_off_button->signal_clicked().connect([this] { filter.set_all(false); });
+
+        auto cr = Gtk::manage(new Gtk::CellRendererText());
+        tvc->pack_start(*cr, true);
+        tvc->add_attribute(cr->property_text(), list_columns.n_airwires);
+        tvc->set_sort_column(list_columns.n_airwires);
+
+        treeview->append_column(*tvc);
+    }
+    store_sorted->set_sort_column(list_columns.net_name, Gtk::SORT_ASCENDING);
+    store_sorted->set_sort_column(list_columns.n_airwires, Gtk::SORT_ASCENDING);
+    store_sorted->set_sort_func(list_columns.net_name,
+                                [this](const Gtk::TreeModel::iterator &ia, const Gtk::TreeModel::iterator &ib) {
+                                    Gtk::TreeModel::Row ra = *ia;
+                                    Gtk::TreeModel::Row rb = *ib;
+                                    Glib::ustring a = ra[list_columns.net_name];
+                                    Glib::ustring b = rb[list_columns.net_name];
+                                    return strcmp_natural(a, b);
+                                });
+
+    all_on_button->signal_clicked().connect([this] { set_all(true); });
+    all_off_button->signal_clicked().connect([this] { set_all(false); });
+
+
+    append_context_menu_item("Check", MenuOP::CHECK);
+    append_context_menu_item("Uncheck", MenuOP::UNCHECK);
+    append_context_menu_item("Toggle", MenuOP::TOGGLE);
+
+    treeview->signal_button_press_event().connect(
+            [this](GdkEventButton *ev) {
+                Gtk::TreeModel::Path path;
+                if (gdk_event_triggers_context_menu((GdkEvent *)ev)
+                    && treeview->get_selection()->count_selected_rows()) {
+#if GTK_CHECK_VERSION(3, 22, 0)
+                    context_menu.popup_at_pointer((GdkEvent *)ev);
+#else
+                    context_menu.popup(ev->button, gtk_get_current_event_time());
+#endif
+                    return true;
+                }
+                return false;
+            },
+            false);
+
+    treeview->get_selection()->signal_changed().connect([this] {
+        std::set<UUID> nets;
+        auto rows = treeview->get_selection()->get_selected_rows();
+        for (const auto &path : rows) {
+            Gtk::TreeModel::Row row = *store_sorted->get_iter(path);
+            nets.emplace(row[list_columns.net]);
+        }
+        s_signal_selection_changed.emit(nets);
+    });
+
+    netclass_combo->signal_changed().connect([this] {
+        try {
+            netclass_filter = UUID(netclass_combo->get_active_id());
+        }
+        catch (...) {
+            netclass_filter = UUID();
+        }
+        store_filtered->refilter();
+    });
+    search_entry->signal_search_changed().connect([this] {
+        search_spec.reset();
+        auto utxt = search_entry->get_text();
+        std::string txt = utxt.casefold();
+        trim(txt);
+        if (txt.size())
+            search_spec.emplace("*" + txt + "*");
+        store_filtered->refilter();
+    });
+    airwires_only_cb->signal_toggled().connect([this] { store_filtered->refilter(); });
+    s_signal_changed.connect([this] {
+        bool all_on = true;
+        bool all_off = true;
+        for (const auto &it : store->children()) {
+            Gtk::TreeModel::Row row = *it;
+            const bool v = row[list_columns.airwires_visible];
+            if (v)
+                all_off = false;
+            else
+                all_on = false;
+        }
+        all_on_button->set_sensitive(!all_on);
+        all_off_button->set_sensitive(!all_off);
+    });
 }
 
-void AirwireFilterWindow::update_from_filter()
+bool AirwireFilterWindow::airwire_is_visible(const UUID &net) const
+{
+    if (airwires_visible.count(net))
+        return airwires_visible.at(net);
+    else
+        return true;
+}
+
+void AirwireFilterWindow::set_all(bool v)
+{
+    for (auto &it : store->children()) {
+        Gtk::TreeModel::Row row = *it;
+        row[list_columns.airwires_visible] = v;
+        airwires_visible[row[list_columns.net]] = v;
+    }
+    s_signal_changed.emit();
+}
+
+void AirwireFilterWindow::set_only(const std::set<UUID> &nets)
+{
+    for (auto &it : store->children()) {
+        Gtk::TreeModel::Row row = *it;
+        const bool v = nets.count(row[list_columns.net]);
+        row[list_columns.airwires_visible] = v;
+        airwires_visible[row[list_columns.net]] = v;
+    }
+    s_signal_changed.emit();
+}
+
+void AirwireFilterWindow::append_context_menu_item(const std::string &name, MenuOP op)
+{
+    auto it = Gtk::manage(new Gtk::MenuItem(name));
+    it->signal_activate().connect([this, op] {
+        auto rows = treeview->get_selection()->get_selected_rows();
+        for (const auto &path : rows) {
+            Gtk::TreeModel::Row row = *store->get_iter(
+                    store_filtered->convert_path_to_child_path(store_sorted->convert_path_to_child_path(path)));
+            switch (op) {
+            case MenuOP::CHECK:
+                row[list_columns.airwires_visible] = true;
+                airwires_visible[row[list_columns.net]] = true;
+                break;
+            case MenuOP::UNCHECK:
+                row[list_columns.airwires_visible] = false;
+                airwires_visible[row[list_columns.net]] = false;
+                break;
+            case MenuOP::TOGGLE:
+                row[list_columns.airwires_visible] = !row[list_columns.airwires_visible];
+                airwires_visible[row[list_columns.net]] = row[list_columns.airwires_visible];
+                break;
+            }
+        }
+        s_signal_changed.emit();
+    });
+    context_menu.append(*it);
+    it->show();
+}
+
+void AirwireFilterWindow::update_nets()
 {
     store->clear();
-    bool all_on = true;
-    bool all_off = true;
-    for (const auto &it : filter.get_airwires()) {
-        if (it.second.visible)
-            all_off = false;
-        else
-            all_on = false;
-
+    for (const auto &[net_uuid, net] : block.nets) {
         Gtk::TreeModel::Row row = *store->append();
-        row[list_columns.net] = it.first;
-        row[list_columns.net_name] = block.get_net_name(it.first);
-        row[list_columns.n_airwires] = it.second.n;
-        row[list_columns.visible] = it.second.visible;
+        row[list_columns.net] = net_uuid;
+        row[list_columns.net_class] = net.net_class->uuid;
+        row[list_columns.net_name] = block.get_net_name(net_uuid);
+        row[list_columns.net_class_name] = net.net_class->name;
+        row[list_columns.airwires_visible] = airwire_is_visible(net_uuid);
+        if (brd.airwires.count(net_uuid)) {
+            row[list_columns.n_airwires] = brd.airwires.at(net_uuid).size();
+        }
     }
-    placeholder_box->set_visible(filter.get_airwires().size() == 0);
-    all_on_button->set_sensitive(!all_on);
-    all_off_button->set_sensitive(!all_off);
+    auto nc_current = netclass_combo->get_active_id();
+    netclass_combo->remove_all();
+    netclass_combo->append((std::string)UUID(), "All");
+    for (const auto &[nc_uuid, nc] : block.net_classes) {
+        netclass_combo->append((std::string)nc_uuid, nc.name);
+    }
+    try {
+        auto uu = UUID(nc_current);
+        if (block.net_classes.count(uu)) {
+            netclass_combo->set_active_id(nc_current);
+        }
+        else {
+            netclass_combo->set_active_id((std::string)UUID());
+        }
+    }
+    catch (...) {
+        netclass_combo->set_active_id((std::string)UUID());
+    }
+    s_signal_changed.emit();
+}
+
+bool AirwireFilterWindow::get_filtered() const
+{
+    return std::any_of(airwires_visible.begin(), airwires_visible.end(),
+                       [](const auto &x) { return x.second == false; });
+}
+
+void AirwireFilterWindow::update_from_board()
+{
+    for (auto &it : store->children()) {
+        Gtk::TreeModel::Row row = *it;
+        if (brd.airwires.count(row[list_columns.net])) {
+            row[list_columns.n_airwires] = brd.airwires.at(row[list_columns.net]).size();
+        }
+    }
+    s_signal_changed.emit();
 }
 
 }; // namespace horizon

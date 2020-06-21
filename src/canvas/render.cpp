@@ -25,7 +25,6 @@
 #include "target.hpp"
 #include "util/placement.hpp"
 #include "util/util.hpp"
-#include "iairwire_filter.hpp"
 #include "board/board_panel.hpp"
 #include "common/picture.hpp"
 #include <algorithm>
@@ -289,11 +288,6 @@ void Canvas::render(const Track &track, bool interactive)
     if (interactive)
         selectables.append_line(track.uuid, ObjectType::TRACK, track.from.get_position(), track.to.get_position(),
                                 track.width, 0, track.layer);
-}
-
-void Canvas::render(const Airwire &airwire)
-{
-    draw_line(airwire.from.get_position(), airwire.to.get_position(), ColorP::AIRWIRE, 10000, true, 0);
 }
 
 void Canvas::render(const ConnectionLine &line)
@@ -1424,17 +1418,6 @@ void Canvas::render(const Board &brd, bool interactive, PanelMode mode, OutlineM
     if (interactive) {
         for (const auto &it : brd.junctions) {
             render(it.second, true, ObjectType::BOARD);
-        }
-    }
-    if (!img_mode && interactive) {
-        for (const auto &it_net : brd.airwires) {
-            if (airwire_filter == nullptr || airwire_filter->airwire_is_visible(it_net.first)) {
-                object_refs_current.emplace_back(ObjectType::AIRWIRE, it_net.first);
-                for (const auto &it : it_net.second) {
-                    render(it);
-                }
-                object_refs_current.pop_back();
-            }
         }
     }
     for (const auto &it : brd.polygons) {

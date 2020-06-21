@@ -26,7 +26,7 @@ namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
                    const std::string &pictures_dir, const PoolParams &pool_params)
     : ImpLayer(pool_params), core_board(board_filename, block_filename, via_dir, pictures_dir, *pool),
-      project_dir(Glib::path_get_dirname(board_filename)), searcher(core_board), airwire_filter(*core_board.get_board())
+      project_dir(Glib::path_get_dirname(board_filename)), searcher(core_board)
 {
     core = &core_board;
     core_board.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
@@ -40,6 +40,23 @@ void ImpBoard::canvas_update()
     update_highlights();
     tuning_window->update();
     update_text_owner_annotation();
+    update_airwire_annotation();
+}
+
+void ImpBoard::update_airwire_annotation()
+{
+    airwire_annotation->clear();
+    for (const auto &[net, airwires] : core_board.get_board()->airwires) {
+        if (!airwire_filter_window->airwire_is_visible(net))
+            continue;
+        const bool highlight = highlights.count(ObjectRef(ObjectType::NET, net));
+        if (core_board.tool_is_active() && !highlight && highlights.size())
+            continue;
+        for (const auto &airwire : airwires) {
+            airwire_annotation->draw_line(airwire.from.get_position(), airwire.to.get_position(), ColorP::AIRWIRE, 0,
+                                          highlight);
+        }
+    }
 }
 
 void ImpBoard::update_highlights()
@@ -51,13 +68,6 @@ void ImpBoard::update_highlights()
             for (const auto &it_track : core_board.get_board()->tracks) {
                 if (it_track.second.net.uuid == it.uuid) {
                     ObjectRef ref(ObjectType::TRACK, it_track.first);
-                    canvas->set_flags(ref, TriangleInfo::FLAG_HIGHLIGHT, 0);
-                }
-            }
-            {
-                const auto &airwires = core_board.get_board()->airwires;
-                if (airwires.count(it.uuid)) {
-                    ObjectRef ref(ObjectType::AIRWIRE, it.uuid);
                     canvas->set_flags(ref, TriangleInfo::FLAG_HIGHLIGHT, 0);
                 }
             }
@@ -88,6 +98,7 @@ void ImpBoard::update_highlights()
             canvas->set_flags(it, TriangleInfo::FLAG_HIGHLIGHT, 0);
         }
     }
+    update_airwire_annotation();
 }
 
 bool ImpBoard::handle_broadcast(const json &j)
@@ -398,7 +409,7 @@ void ImpBoard::construct()
     main_window->add_action("tuning", [this] { trigger_action(ActionID::TUNING); });
 
     add_tool_action(ActionID::AIRWIRE_FILTER_WINDOW, "airwire_filter");
-    view_options_menu->append("Airwire filter", "win.airwire_filter");
+    view_options_menu->append("Nets…", "win.airwire_filter");
 
     view_options_menu->append("Bottom view", "win.bottom_view");
 
@@ -477,6 +488,7 @@ void ImpBoard::construct()
         core_board.reload_netlist();
         core_board.set_needs_save();
         canvas_update();
+        airwire_filter_window->update_nets();
     });
 
     {
@@ -627,6 +639,11 @@ void ImpBoard::construct()
     text_owner_annotation->set_visible(true);
     text_owner_annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
 
+    airwire_annotation = canvas->create_annotation();
+    airwire_annotation->set_visible(true);
+    airwire_annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
+    airwire_annotation->use_highlight = true;
+
     core_board.signal_rebuilt().connect(sigc::mem_fun(*this, &ImpBoard::update_text_owners));
     canvas->signal_hover_selection_changed().connect(sigc::mem_fun(*this, &ImpBoard::update_text_owner_annotation));
     canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBoard::update_text_owner_annotation));
@@ -665,16 +682,22 @@ void ImpBoard::construct()
     core->signal_tool_changed().connect([this](ToolID t) { pnp_export_window->set_can_export(t == ToolID::NONE); });
     core->signal_rebuilt().connect([this] { pnp_export_window->update(); });
 
-    airwire_filter_window = AirwireFilterWindow::create(main_window, *core_board.get_block(), airwire_filter);
-    connect_action(ActionID::AIRWIRE_FILTER_WINDOW, [this](const auto &a) { airwire_filter_window->present(); });
-    core_board.signal_rebuilt().connect(sigc::mem_fun(*this, &ImpBoard::update_airwires));
-    update_airwires();
-    canvas->set_airwire_filter(&airwire_filter);
-    airwire_filter.signal_changed().connect([this] {
-        canvas_update_from_pp();
+    airwire_filter_window = AirwireFilterWindow::create(main_window, *core_board.get_board());
+    airwire_filter_window->update_nets();
+    airwire_filter_window->signal_changed().connect([this] {
+        update_airwire_annotation();
         update_view_hints();
     });
-    connect_action(ActionID::RESET_AIRWIRE_FILTER, [this](const auto &a) { airwire_filter.set_all(true); });
+    airwire_filter_window->signal_selection_changed().connect([this](auto nets) {
+        highlights.clear();
+        for (const auto &net : nets) {
+            highlights.emplace(ObjectType::NET, net);
+        }
+        update_highlights();
+    });
+    connect_action(ActionID::AIRWIRE_FILTER_WINDOW, [this](const auto &a) { airwire_filter_window->present(); });
+    core_board.signal_rebuilt().connect(sigc::mem_fun(*this, &ImpBoard::update_airwires));
+    connect_action(ActionID::RESET_AIRWIRE_FILTER, [this](const auto &a) { airwire_filter_window->set_all(true); });
     connect_action(ActionID::FILTER_AIRWIRES, [this](const auto &a) {
         std::set<UUID> nets;
         const auto board = core_board.get_board();
@@ -710,7 +733,7 @@ void ImpBoard::construct()
             }
         }
 
-        airwire_filter.set_only(nets);
+        airwire_filter_window->set_only(nets);
     });
     {
         auto &b = add_action_button(make_action(ToolID::ROUTE_TRACK_INTERACTIVE));
@@ -739,8 +762,7 @@ void ImpBoard::construct()
 
 void ImpBoard::update_airwires()
 {
-    airwire_filter.update_from_board();
-    airwire_filter_window->update_from_filter();
+    airwire_filter_window->update_from_board();
 }
 
 void ImpBoard::update_text_owners()
@@ -1076,8 +1098,7 @@ std::vector<std::string> ImpBoard::get_view_hints()
 {
     auto r = ImpBase::get_view_hints();
 
-    const auto &aws = airwire_filter.get_airwires();
-    if (std::any_of(aws.begin(), aws.end(), [](const auto &x) { return x.second.visible == false; }))
+    if (airwire_filter_window->get_filtered())
         r.emplace_back("airwires filtered");
 
     return r;

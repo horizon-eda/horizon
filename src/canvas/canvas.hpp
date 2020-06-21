@@ -70,11 +70,6 @@ public:
 
     std::pair<Coordf, Coordf> get_bbox(bool visible_only = true) const;
 
-    void set_airwire_filter(class IAirwireFilter *f)
-    {
-        airwire_filter = f;
-    }
-
     static const int first_overlay_layer = 30000;
 
 protected:
@@ -117,7 +112,6 @@ protected:
     void render(const class Dimension &dim);
     void render(const class Frame &frame, bool on_sheet = false);
     void render(const class ConnectionLine &line);
-    void render(const class Airwire &airwire);
     void render(const class BoardPanel &panel);
     void render(const class Picture &pic);
 
@@ -226,6 +220,5 @@ protected:
 
 private:
     uint8_t lod_current = 0;
-    class IAirwireFilter *airwire_filter = nullptr;
 };
 } // namespace horizon

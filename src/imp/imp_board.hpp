@@ -1,7 +1,6 @@
 #pragma once
 #include "core/core_board.hpp"
 #include "imp_layer.hpp"
-#include "airwire_filter.hpp"
 #include "search/searcher_board.hpp"
 
 namespace horizon {
@@ -80,7 +79,9 @@ private:
 
     int get_schematic_pid();
 
-    AirwireFilter airwire_filter;
+    class CanvasAnnotation *airwire_annotation = nullptr;
+    void update_airwire_annotation();
+
 
     Gtk::Popover *reload_netlist_popover = nullptr;
     sigc::connection reload_netlist_delay_conn;
