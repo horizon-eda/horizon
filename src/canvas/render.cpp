@@ -1105,6 +1105,19 @@ void Canvas::render_pad_overlay(const Pad &pad)
     transform_restore();
 }
 
+static int get_target_layer_for_padstack_type(Padstack::Type type)
+{
+    if (type == Padstack::Type::TOP) {
+        return BoardLayers::TOP_COPPER;
+    }
+    else if (type == Padstack::Type::BOTTOM) {
+        return BoardLayers::BOTTOM_COPPER;
+    }
+    else {
+        return 10000;
+    }
+}
+
 void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omit_silkscreen, bool omit_outline)
 {
     if (interactive) {
@@ -1164,13 +1177,14 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omi
     }
 
     if (interactive) {
-        for (const auto &it : pkg.pads) {
+        for (const auto &[pad_uuid, pad] : pkg.pads) {
             transform_save();
-            transform.accumulate(it.second.placement);
-            auto bb = it.second.padstack.get_bbox();
-            selectables.append(it.second.uuid, ObjectType::PAD, {0, 0}, bb.first, bb.second);
+            transform.accumulate(pad.placement);
+            auto bb = pad.padstack.get_bbox();
+            selectables.append(pad.uuid, ObjectType::PAD, {0, 0}, bb.first, bb.second);
             transform_restore();
-            targets.emplace_back(it.second.uuid, ObjectType::PAD, it.second.placement.shift);
+            int target_layer = get_target_layer_for_padstack_type(pad.padstack.type);
+            targets.emplace_back(pad.uuid, ObjectType::PAD, pad.placement.shift, 0, target_layer);
         }
         for (const auto &it : pkg.warnings) {
             render(it);
@@ -1234,9 +1248,10 @@ void Canvas::render(const BoardPackage &pkg, bool interactive)
                            pkg.flip ? BoardLayers::BOTTOM_PACKAGE : BoardLayers::TOP_PACKAGE);
         targets.emplace_back(pkg.uuid, ObjectType::BOARD_PACKAGE, pkg.placement.shift);
 
-        for (const auto &it : pkg.package.pads) {
-            targets.emplace_back(UUIDPath<2>(pkg.uuid, it.first), ObjectType::PAD,
-                                 transform.transform(it.second.placement.shift));
+        for (const auto &[pad_uuid, pad] : pkg.package.pads) {
+            int target_layer = get_target_layer_for_padstack_type(pad.padstack.type);
+            targets.emplace_back(UUIDPath<2>(pkg.uuid, pad.uuid), ObjectType::PAD,
+                                 transform.transform(pad.placement.shift), 0, target_layer);
         }
     }
     if (interactive)
