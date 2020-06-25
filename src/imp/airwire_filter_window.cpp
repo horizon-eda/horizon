@@ -3,6 +3,7 @@
 #include "util/util.hpp"
 #include "util/gtk_util.hpp"
 #include "util/str_util.hpp"
+#include "widgets/cell_renderer_color_box.hpp"
 
 namespace horizon {
 AirwireFilterWindow *AirwireFilterWindow::create(Gtk::Window *p, const class Board &b)
@@ -59,6 +60,11 @@ AirwireFilterWindow::AirwireFilterWindow(BaseObjectType *cobject, const Glib::Re
     treeview->set_model(store_sorted);
     {
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Net"));
+
+        auto cr_color = Gtk::manage(new CellRendererColorBox);
+        tvc->pack_start(*cr_color, false);
+        tvc->add_attribute(cr_color->property_color(), list_columns.color);
+
         auto cr = Gtk::manage(new Gtk::CellRendererText());
         tvc->pack_start(*cr, true);
         tvc->add_attribute(cr->property_text(), list_columns.net_name);
@@ -117,6 +123,8 @@ AirwireFilterWindow::AirwireFilterWindow(BaseObjectType *cobject, const Glib::Re
     append_context_menu_item("Check", MenuOP::CHECK);
     append_context_menu_item("Uncheck", MenuOP::UNCHECK);
     append_context_menu_item("Toggle", MenuOP::TOGGLE);
+    append_context_menu_item("Set color", MenuOP::SET_COLOR);
+    append_context_menu_item("Clear color", MenuOP::CLEAR_COLOR);
 
     treeview->signal_button_press_event().connect(
             [this](GdkEventButton *ev) {
@@ -208,11 +216,47 @@ void AirwireFilterWindow::set_only(const std::set<UUID> &nets)
     s_signal_changed.emit();
 }
 
+
 void AirwireFilterWindow::append_context_menu_item(const std::string &name, MenuOP op)
 {
     auto it = Gtk::manage(new Gtk::MenuItem(name));
     it->signal_activate().connect([this, op] {
         auto rows = treeview->get_selection()->get_selected_rows();
+        ColorI color;
+        Gdk::RGBA rgba;
+        if (op == MenuOP::SET_COLOR) {
+            auto cdia = GTK_COLOR_CHOOSER_DIALOG(gtk_color_chooser_dialog_new("Pick net color", gobj()));
+            auto dia = Glib::wrap(cdia, false);
+            dia->property_show_editor() = true;
+            dia->set_use_alpha(false);
+            for (const auto &path : rows) {
+                Gtk::TreeModel::Row row = *store->get_iter(
+                        store_filtered->convert_path_to_child_path(store_sorted->convert_path_to_child_path(path)));
+                UUID net = row[list_columns.net];
+                if (net_colors.count(net)) {
+                    const auto c = net_colors.at(net);
+                    Gdk::RGBA rg;
+                    rg.set_red(c.r / 255.);
+                    rg.set_green(c.g / 255.);
+                    rg.set_blue(c.b / 255.);
+                    dia->set_rgba(rg);
+                    break;
+                }
+            }
+
+
+            if (dia->run() == Gtk::RESPONSE_OK) {
+                rgba = dia->get_rgba();
+                color.r = rgba.get_red() * 255;
+                color.g = rgba.get_green() * 255;
+                color.b = rgba.get_blue() * 255;
+                gtk_widget_destroy(GTK_WIDGET(cdia));
+            }
+            else {
+                gtk_widget_destroy(GTK_WIDGET(cdia));
+                return;
+            }
+        }
         for (const auto &path : rows) {
             Gtk::TreeModel::Row row = *store->get_iter(
                     store_filtered->convert_path_to_child_path(store_sorted->convert_path_to_child_path(path)));
@@ -228,6 +272,18 @@ void AirwireFilterWindow::append_context_menu_item(const std::string &name, Menu
             case MenuOP::TOGGLE:
                 row[list_columns.airwires_visible] = !row[list_columns.airwires_visible];
                 airwires_visible[row[list_columns.net]] = row[list_columns.airwires_visible];
+                break;
+            case MenuOP::CLEAR_COLOR: {
+                auto v = row.get_value(list_columns.color);
+                if (v.gobj()) {
+                    v.set_alpha(0);
+                    row.set_value(list_columns.color, v);
+                }
+                net_colors.erase(row[list_columns.net]);
+            } break;
+            case MenuOP::SET_COLOR:
+                row[list_columns.color] = rgba;
+                net_colors[row[list_columns.net]] = color;
                 break;
             }
         }

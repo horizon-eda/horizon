@@ -128,9 +128,32 @@ void Canvas::show_all_obj()
     set_flags_all(0, TriangleInfo::FLAG_HIDDEN);
 }
 
-void Canvas::add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP color, uint8_t flags)
+void Canvas::reset_color2()
 {
-    triangles[layer].emplace_back(std::forward_as_tuple(p0, p1, p2, color, lod_current),
+    for (auto &[layer, tris] : triangles) {
+        for (auto [tri, tri_info] : tris) {
+            tri.color2 = 0;
+        }
+    }
+    request_push();
+}
+
+void Canvas::set_color2(const ObjectRef &r, uint8_t color)
+{
+    if (!object_refs.count(r))
+        return;
+    for (const auto &[layer, range] : object_refs.at(r)) {
+        const auto [first, last] = range;
+        for (auto i = first; i <= last; i++) {
+            triangles.at(layer).atm(i).first.color2 = color;
+        }
+    }
+}
+
+void Canvas::add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP color, uint8_t flags,
+                          uint8_t color2)
+{
+    triangles[layer].emplace_back(std::forward_as_tuple(p0, p1, p2, color, lod_current, color2),
                                   std::forward_as_tuple(triangle_type_current, flags));
     if (!fast_draw) {
         auto idx = triangles[layer].size() - 1;

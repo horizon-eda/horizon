@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include "util/uuid.hpp"
 #include "util/changeable.hpp"
+#include "common/common.hpp"
 #include <set>
 
 namespace horizon {
@@ -23,11 +24,16 @@ public:
     {
         return s_signal_selection_changed;
     }
+    const std::map<UUID, ColorI> &get_net_colors() const
+    {
+        return net_colors;
+    }
 
 private:
     const class Board &brd;
     const class Block &block;
     std::map<UUID, bool> airwires_visible;
+    std::map<UUID, ColorI> net_colors;
 
     class ListColumns : public Gtk::TreeModelColumnRecord {
     public:
@@ -39,6 +45,7 @@ private:
             Gtk::TreeModelColumnRecord::add(net_class_name);
             Gtk::TreeModelColumnRecord::add(airwires_visible);
             Gtk::TreeModelColumnRecord::add(n_airwires);
+            Gtk::TreeModelColumnRecord::add(color);
         }
         Gtk::TreeModelColumn<UUID> net;
         Gtk::TreeModelColumn<Glib::ustring> net_name;
@@ -46,6 +53,7 @@ private:
         Gtk::TreeModelColumn<Glib::ustring> net_class_name;
         Gtk::TreeModelColumn<bool> airwires_visible;
         Gtk::TreeModelColumn<unsigned int> n_airwires;
+        Gtk::TreeModelColumn<Gdk::RGBA> color;
     };
     ListColumns list_columns;
 
@@ -69,7 +77,7 @@ private:
     Gtk::CheckButton *airwires_only_cb = nullptr;
 
     Gtk::Menu context_menu;
-    enum class MenuOP { CHECK, UNCHECK, TOGGLE };
+    enum class MenuOP { CHECK, UNCHECK, TOGGLE, SET_COLOR, CLEAR_COLOR };
     void append_context_menu_item(const std::string &name, MenuOP op);
 
     type_signal_selection_changed s_signal_selection_changed;

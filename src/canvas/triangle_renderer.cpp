@@ -13,6 +13,7 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out)
     GLuint p2_index = 2;
     GLuint color_index = 3;
     GLuint lod_index = 4;
+    GLuint color2_index = 5;
     GL_CHECK_ERROR;
     GLuint vao, buffer, ebuffer;
 
@@ -43,6 +44,8 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out)
     glVertexAttribIPointer(color_index, 1, GL_UNSIGNED_BYTE, sizeof(Triangle), (void *)offsetof(Triangle, color));
     glEnableVertexAttribArray(lod_index);
     glVertexAttribIPointer(lod_index, 1, GL_UNSIGNED_BYTE, sizeof(Triangle), (void *)offsetof(Triangle, lod));
+    glEnableVertexAttribArray(color2_index);
+    glVertexAttribIPointer(color2_index, 1, GL_UNSIGNED_BYTE, sizeof(Triangle), (void *)offsetof(Triangle, color2));
 
     GL_CHECK_ERROR;
 
@@ -129,7 +132,8 @@ void TriangleRenderer::realize()
 class UBOBuffer {
 public:
     static_assert(static_cast<int>(ColorP::N_COLORS) == 19, "ubo size mismatch");
-    std::array<std::array<float, 4>, 19> colors; // 18==ColorP::N_COLORS, keep in sync with shaders
+    std::array<std::array<float, 4>, 19> colors;   // 18==ColorP::N_COLORS, keep in sync with shaders
+    std::array<std::array<float, 4>, 256> colors2; // keep in sync with shader
     std::array<float, 12> screenmat;
     std::array<float, 12> viewmat;
     float alpha;
@@ -284,6 +288,10 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
                 buf.colors[static_cast<int>(ColorP::FROM_LAYER)] = apply_highlight(lc, highlight_mode, layer);
                 buf.colors[static_cast<int>(ColorP::LAYER_HIGHLIGHT)] =
                         array_from_color(lc) + ca.appearance.highlight_lighten;
+                for (size_t i = 0; i < std::min(buf.colors2.size(), ca.colors2.size()); i++) {
+                    buf.colors2[i] = apply_highlight(ca.colors2[i].to_color(), highlight_mode, layer);
+                }
+
                 glBindBuffer(GL_UNIFORM_BUFFER, ubo);
                 glBufferData(GL_UNIFORM_BUFFER, sizeof(buf), &buf, GL_DYNAMIC_DRAW);
                 glBindBuffer(GL_UNIFORM_BUFFER, 0);

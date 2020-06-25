@@ -15,9 +15,11 @@ public:
 
     uint8_t color;
     uint8_t lod;
+    uint8_t color2 = 0;
 
-    Triangle(const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t ilod = 0)
-        : x0(p0.x), y0(p0.y), x1(p1.x), y1(p1.y), x2(p2.x), y2(p2.y), color(static_cast<uint8_t>(co)), lod(ilod)
+    Triangle(const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t ilod = 0, uint8_t c2 = 0)
+        : x0(p0.x), y0(p0.y), x1(p1.x), y1(p1.y), x2(p2.x), y2(p2.y), color(static_cast<uint8_t>(co)), lod(ilod),
+          color2(c2)
     {
     }
 } __attribute__((packed));

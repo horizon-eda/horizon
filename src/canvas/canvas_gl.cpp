@@ -721,6 +721,12 @@ bool CanvasGL::layer_is_visible(int layer) const
         return layer == work_layer || layer >= 10000;
 }
 
+void CanvasGL::set_colors2(const std::vector<ColorI> &c)
+{
+    colors2 = c;
+    request_push();
+}
+
 
 static const float char_space = 1;
 

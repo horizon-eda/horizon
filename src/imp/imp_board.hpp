@@ -81,7 +81,9 @@ private:
 
     class CanvasAnnotation *airwire_annotation = nullptr;
     void update_airwire_annotation();
-
+    void update_net_colors();
+    void apply_net_colors();
+    std::map<UUID, uint8_t> net_color_map;
 
     Gtk::Popover *reload_netlist_popover = nullptr;
     sigc::connection reload_netlist_delay_conn;

@@ -7,6 +7,7 @@ in vec2 p0_to_geom[1];
 in vec2 p1_to_geom[1];
 in vec2 p2_to_geom[1];
 in int color_to_geom[1];
+in int color2_to_geom[1];
 in int lod_to_geom[1];
 smooth out vec3 color_to_fragment;
 smooth out vec2 round_pos_to_fragment;
@@ -28,7 +29,7 @@ void main() {
 	vec2 p1 = p1_to_geom[0];
 	vec2 p2 = p2_to_geom[0];
 
-	color_to_fragment = colors[color_to_geom[0]];
+	color_to_fragment = get_color(color_to_geom[0], color2_to_geom[0]);
 	
 
 	float width = p2.x/2;

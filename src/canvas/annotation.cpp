@@ -47,9 +47,10 @@ void CanvasAnnotation::clear()
     ca->request_push();
 }
 
-void CanvasAnnotation::draw_line(const Coordf &from, const Coordf &to, ColorP color, uint64_t width, bool highlight)
+void CanvasAnnotation::draw_line(const Coordf &from, const Coordf &to, ColorP color, uint64_t width, bool highlight,
+                                 uint8_t color2)
 {
-    ca->add_triangle(layer, from, to, Coordf(width, NAN), color, highlight ? TriangleInfo::FLAG_HIGHLIGHT : 0);
+    ca->add_triangle(layer, from, to, Coordf(width, NAN), color, highlight ? TriangleInfo::FLAG_HIGHLIGHT : 0, color2);
     ca->request_push();
 }
 } // namespace horizon

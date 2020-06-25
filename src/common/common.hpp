@@ -233,6 +233,28 @@ public:
     }
 };
 
+struct ColorI {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+
+    bool operator<(const ColorI &other) const
+    {
+        return hashify() < other.hashify();
+    }
+
+    Color to_color() const
+    {
+        return Color::new_from_int(r, g, b);
+    }
+
+private:
+    uint32_t hashify() const
+    {
+        return r | (g << 8) | (b << 16);
+    }
+};
+
 constexpr int64_t operator"" _mm(long double i)
 {
     return i * 1e6;

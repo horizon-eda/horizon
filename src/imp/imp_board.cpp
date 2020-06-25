@@ -38,9 +38,9 @@ void ImpBoard::canvas_update()
     canvas->update(*core_board.get_canvas_data());
     warnings_box->update(core_board.get_board()->warnings);
     update_highlights();
+    apply_net_colors();
     tuning_window->update();
     update_text_owner_annotation();
-    update_airwire_annotation();
 }
 
 void ImpBoard::update_airwire_annotation()
@@ -50,11 +50,14 @@ void ImpBoard::update_airwire_annotation()
         if (!airwire_filter_window->airwire_is_visible(net))
             continue;
         const bool highlight = highlights.count(ObjectRef(ObjectType::NET, net));
+        uint8_t color2 = 0;
+        if (net_color_map.count(net))
+            color2 = net_color_map.at(net);
         if (core_board.tool_is_active() && !highlight && highlights.size())
             continue;
         for (const auto &airwire : airwires) {
             airwire_annotation->draw_line(airwire.from.get_position(), airwire.to.get_position(), ColorP::AIRWIRE, 0,
-                                          highlight);
+                                          highlight, color2);
         }
     }
 }
@@ -99,6 +102,33 @@ void ImpBoard::update_highlights()
         }
     }
     update_airwire_annotation();
+}
+
+void ImpBoard::apply_net_colors()
+{
+    canvas->reset_color2();
+    for (const auto &[net, color] : net_color_map) {
+        for (const auto &it_track : core_board.get_board()->tracks) {
+            if (it_track.second.net.uuid == net) {
+                ObjectRef ref(ObjectType::TRACK, it_track.first);
+                canvas->set_color2(ref, color);
+            }
+        }
+        for (const auto &it_via : core_board.get_board()->vias) {
+            if (it_via.second.junction->net.uuid == net) {
+                ObjectRef ref(ObjectType::VIA, it_via.first);
+                canvas->set_color2(ref, color);
+            }
+        }
+        for (const auto &it_pkg : core_board.get_board()->packages) {
+            for (const auto &it_pad : it_pkg.second.package.pads) {
+                if (it_pad.second.net.uuid == net) {
+                    ObjectRef ref(ObjectType::PAD, it_pad.first, it_pkg.first);
+                    canvas->set_color2(ref, color);
+                }
+            }
+        }
+    }
 }
 
 bool ImpBoard::handle_broadcast(const json &j)
@@ -685,8 +715,10 @@ void ImpBoard::construct()
     airwire_filter_window = AirwireFilterWindow::create(main_window, *core_board.get_board());
     airwire_filter_window->update_nets();
     airwire_filter_window->signal_changed().connect([this] {
+        update_net_colors();
         update_airwire_annotation();
         update_view_hints();
+        apply_net_colors();
     });
     airwire_filter_window->signal_selection_changed().connect([this](auto nets) {
         highlights.clear();
@@ -1102,6 +1134,34 @@ std::vector<std::string> ImpBoard::get_view_hints()
         r.emplace_back("airwires filtered");
 
     return r;
+}
+
+void ImpBoard::update_net_colors()
+{
+    auto &net_colors = airwire_filter_window->get_net_colors();
+    net_color_map.clear();
+    if (net_colors.size()) {
+        std::vector<ColorI> t;
+        t.emplace_back(ColorI{0, 0, 0});
+
+        std::map<ColorI, int> colors_idxs;
+        auto get_or_create_color = [&t, &colors_idxs](ColorI c) -> int {
+            if (colors_idxs.count(c)) {
+                return colors_idxs.at(c);
+            }
+            else {
+                t.emplace_back(c);
+                const auto i = t.size() - 1;
+                colors_idxs.emplace(c, i);
+                return i;
+            }
+        };
+
+        for (const auto &[net, color] : net_colors) {
+            net_color_map[net] = get_or_create_color(color);
+        }
+        canvas->set_colors2(t);
+    }
 }
 
 ImpBoard::~ImpBoard()

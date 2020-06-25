@@ -13,7 +13,8 @@ public:
     void set_visible(bool v);
     void clear();
     void draw_line(const std::deque<Coordf> &pts, ColorP color, uint64_t width);
-    void draw_line(const Coordf &from, const Coordf &to, ColorP color, uint64_t width, bool highlight = false);
+    void draw_line(const Coordf &from, const Coordf &to, ColorP color, uint64_t width, bool highlight = false,
+                   uint8_t color2 = 0);
     void draw_polygon(const std::deque<Coordf> &pts, ColorP color, uint64_t width);
     bool on_top = true;
     bool use_highlight = false;

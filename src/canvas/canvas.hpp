@@ -46,6 +46,9 @@ public:
     void set_flags(const ObjectRef &r, uint8_t mask_set, uint8_t mask_clear);
     void set_flags_all(uint8_t mask_set, uint8_t mask_clear);
 
+    void reset_color2();
+    void set_color2(const ObjectRef &r, uint8_t color);
+
     void show_all_obj();
 
     virtual void update_markers()
@@ -75,7 +78,8 @@ public:
 protected:
     std::map<int, vector_pair<Triangle, TriangleInfo>> triangles;
     std::list<CanvasPicture> pictures;
-    void add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t flg = 0);
+    void add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t flg = 0,
+                      uint8_t color2 = 0);
 
     std::map<ObjectRef, std::map<int, std::pair<size_t, size_t>>> object_refs;
     std::vector<ObjectRef> object_refs_current;

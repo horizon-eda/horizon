@@ -179,6 +179,8 @@ public:
 
     bool layer_is_visible(int layer) const;
 
+    void set_colors2(const std::vector<ColorI> &c);
+
 protected:
     void push() override;
     void request_push() override;
@@ -290,6 +292,8 @@ private:
     void drag_gesture_update_cb(GdkEventSequence *seq);
 
     bool can_snap_to_target(const Target &t) const;
+
+    std::vector<ColorI> colors2;
 
 protected:
     void on_size_allocate(Gtk::Allocation &alloc) override;
