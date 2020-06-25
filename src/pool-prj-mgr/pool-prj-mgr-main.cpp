@@ -2,9 +2,16 @@
 #include "util/util.hpp"
 #include "pool/pool_manager.hpp"
 #include "util/exception_util.hpp"
+#ifdef G_OS_WIN32
+#include <windows.h>
+#endif
 
 int main(int argc, char *argv[])
 {
+#ifdef G_OS_WIN32
+    SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
+#endif
+
     gtk_disable_setlocale();
     auto application = horizon::PoolProjectManagerApplication::create();
     horizon::setup_locale();

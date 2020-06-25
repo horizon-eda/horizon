@@ -21,6 +21,9 @@
 #include <gtkmm.h>
 #include <iostream>
 #include <memory>
+#ifdef G_OS_WIN32
+#include <windows.h>
+#endif
 
 using horizon::Canvas;
 using horizon::LutEnumStr;
@@ -31,6 +34,10 @@ using json = nlohmann::json;
 
 int main(int argc, char *argv[])
 {
+#ifdef G_OS_WIN32
+    SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
+#endif
+
     gtk_disable_setlocale();
     Gio::init();
     horizon::PoolManager::init();
