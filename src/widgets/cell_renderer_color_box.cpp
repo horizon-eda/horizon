@@ -27,7 +27,10 @@ void CellRendererColorBox::render_vfunc(const Cairo::RefPtr<Cairo::Context> &cr,
     cr->translate(cell_area.get_x() + (cell_area.get_width() - d) / 2,
                   cell_area.get_y() + (cell_area.get_height() - d) / 2);
     cr->rectangle(0, 0, 16, 16);
-    cr->set_source_rgb(c.get_red(), c.get_green(), c.get_blue());
+    if (c.gobj())
+        cr->set_source_rgba(c.get_red(), c.get_green(), c.get_blue(), c.get_alpha());
+    else
+        cr->set_source_rgba(0, 0, 0, 0);
     cr->set_line_width(2);
     // cr->stroke_preserve();
     cr->fill();

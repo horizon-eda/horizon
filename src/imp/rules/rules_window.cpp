@@ -213,6 +213,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
             auto mcr = dynamic_cast<CellRendererColorBox *>(tcr);
             auto co = rules_check_error_level_to_color(row[tree_columns.result]);
             Gdk::RGBA va;
+            va.set_alpha(1);
             va.set_red(co.r);
             va.set_green(co.g);
             va.set_blue(co.b);

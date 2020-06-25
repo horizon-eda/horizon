@@ -225,6 +225,7 @@ PoolMergeDialog::PoolMergeDialog(Gtk::Window *parent, const std::string &lp, con
                 co = Color::new_from_int(239, 41, 41);
             }
             Gdk::RGBA va;
+            va.set_alpha(1);
             va.set_red(co.r);
             va.set_green(co.g);
             va.set_blue(co.b);

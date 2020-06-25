@@ -386,6 +386,7 @@ CellRendererColorBox *PoolBrowser::create_pool_item_source_cr(Gtk::TreeViewColum
             co = Color::new_from_int(239, 41, 41);
         }
         Gdk::RGBA va;
+        va.set_alpha(1);
         va.set_red(co.r);
         va.set_green(co.g);
         va.set_blue(co.b);

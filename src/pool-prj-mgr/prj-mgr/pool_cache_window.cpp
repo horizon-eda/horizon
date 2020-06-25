@@ -231,6 +231,7 @@ PoolCacheWindow::PoolCacheWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
                 break;
             }
             Gdk::RGBA va;
+            va.set_alpha(1);
             va.set_red(co.r);
             va.set_green(co.g);
             va.set_blue(co.b);
