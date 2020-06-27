@@ -277,7 +277,7 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
             apply_placements_rotation(iangle);
         }
         update_tip();
-        return ToolResponse::fast();
+        return ToolResponse();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {

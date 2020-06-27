@@ -41,6 +41,7 @@ std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const 
     if (mirror) {
         lineskip *= -1;
     }
+    begin_group(layer);
     while (std::getline(ss, line, '\n')) {
         TextData td(line, font);
 
@@ -100,7 +101,7 @@ std::pair<Coordf, Coordf> Canvas::draw_text0(const Coordf &p, float size, const 
         }
         i_line++;
     }
-
+    end_group();
 
     Coordf e(width / 2, width / 2);
     return {a - e, b + e};

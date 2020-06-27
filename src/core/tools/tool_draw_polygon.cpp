@@ -91,7 +91,7 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
         update_vertex(args.coords);
-        return ToolResponse::fast();
+        return ToolResponse();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {

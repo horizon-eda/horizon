@@ -384,7 +384,7 @@ ToolResponse ToolMove::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         if (!is_key)
             do_move(args.coords);
-        return ToolResponse::fast();
+        return ToolResponse();
     }
     else if (args.type == ToolEventType::CLICK || (is_transient && args.type == ToolEventType::CLICK_RELEASE)) {
         if (args.button == 1) {
@@ -428,7 +428,7 @@ ToolResponse ToolMove::update(const ToolArgs &args)
                 key_delta += dir;
                 move_do(dir);
                 update_tip();
-                return ToolResponse::fast();
+                return ToolResponse();
             }
         }
     }

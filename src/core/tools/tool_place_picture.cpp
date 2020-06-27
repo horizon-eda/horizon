@@ -43,7 +43,7 @@ ToolResponse ToolPlacePicture::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         if (imp->dialogs.get_nonmodal() == nullptr)
             temp->placement.shift = args.coords;
-        return ToolResponse::fast();
+        return ToolResponse();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {
@@ -58,7 +58,7 @@ ToolResponse ToolPlacePicture::update(const ToolArgs &args)
             if (data->event == ToolDataWindow::Event::UPDATE) {
                 if (auto d = dynamic_cast<const ToolDataEnterDatumWindow *>(args.data.get())) {
                     temp->px_size = d->value;
-                    return ToolResponse::fast();
+                    return ToolResponse();
                 }
             }
         }

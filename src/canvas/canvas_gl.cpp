@@ -737,6 +737,7 @@ void CanvasGL::draw_bitmap_text(const Coordf &p, float sc, const std::string &rt
     Coordf point = p;
     Placement tr;
     tr.set_angle(angle);
+    Coordf v = tr.transform(Coordf(1, 0));
     for (auto codepoint : text) {
         if (codepoint != ' ') {
             auto info = bitmap_font::get_glyph_info(codepoint);
@@ -755,14 +756,13 @@ void CanvasGL::draw_bitmap_text(const Coordf &p, float sc, const std::string &rt
             auto fl = reinterpret_cast<const float *>(&bits);
 
             Coordf shift(info.minx, info.miny);
-            Coordf p1(glyph_w * 1e6 * sc, 0);
 
-            add_triangle(layer, point + tr.transform(shift) * 1e6 * sc, tr.transform(p1), Coordf(aspect, *fl), color,
-                         TriangleInfo::FLAG_GLYPH);
-            point += tr.transform(Coordf(info.advance * char_space * 1e6 * sc, 0));
+            add_triangle(layer, point + tr.transform(shift) * 1e6 * sc, v * (glyph_w * 1e6 * sc), Coordf(aspect, *fl),
+                         color, TriangleInfo::FLAG_GLYPH);
+            point += v * (info.advance * char_space * 1e6 * sc);
         }
         else {
-            point += tr.transform(Coordf(7 * char_space * 1e6 * sc, 0));
+            point += v * (7 * char_space * 1e6 * sc);
         }
     }
 }
@@ -830,6 +830,7 @@ void CanvasGL::draw_bitmap_text_box(const Placement &q, float width, float heigh
 
     text_pos.x += width / 2 - text_width / 2;
 
+    begin_group(layer);
     if (p.get_angle() > 16384 && p.get_angle() <= 49152) {
         text_pos.x *= -1;
         text_pos.y *= -1;
@@ -839,6 +840,7 @@ void CanvasGL::draw_bitmap_text_box(const Placement &q, float width, float heigh
 
         draw_bitmap_text(p.transform(text_pos), sc, s, p.get_angle(), color, layer);
     }
+    end_group();
 };
 
 // copied from

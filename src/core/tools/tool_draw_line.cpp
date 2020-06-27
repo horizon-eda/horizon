@@ -68,7 +68,7 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         do_move(args.coords);
         update_tip();
-        return ToolResponse::fast();
+        return ToolResponse();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {

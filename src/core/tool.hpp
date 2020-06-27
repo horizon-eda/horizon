@@ -51,8 +51,6 @@ public:
     std::unique_ptr<ToolData> data = nullptr;
     enum class Result { NOP, END, COMMIT, REVERT };
     Result result = Result::NOP;
-    bool fast_draw = false;
-
     /**
      * Use this if you're done. The Core will then delete the active tool and
      * initiate a rebuild.
@@ -70,13 +68,6 @@ public:
     static ToolResponse revert()
     {
         return ToolResponse(Result::REVERT);
-    }
-
-    static ToolResponse fast()
-    {
-        ToolResponse r;
-        r.fast_draw = true;
-        return r;
     }
 
     /**

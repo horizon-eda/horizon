@@ -42,12 +42,12 @@ void ToolPlaceJunction::create_junction(const Coordi &c)
 ToolResponse ToolPlaceJunction::update(const ToolArgs &args)
 {
     if (update_attached(args)) {
-        return ToolResponse::fast();
+        return ToolResponse();
     }
 
     if (args.type == ToolEventType::MOVE) {
         temp->position = args.coords;
-        return ToolResponse::fast();
+        return ToolResponse();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {

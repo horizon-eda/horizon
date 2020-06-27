@@ -124,7 +124,7 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         move_do_cursor(args.coords);
         doc.b->get_board()->update_airwires(true, nets);
-        return ToolResponse::fast();
+        return ToolResponse();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {

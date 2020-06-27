@@ -1,6 +1,7 @@
 #pragma once
 #include "common/common.hpp"
 #include "util/uuid.hpp"
+#include <functional>
 
 namespace horizon {
 class ObjectRef {
@@ -40,3 +41,12 @@ public:
     }
 };
 } // namespace horizon
+
+namespace std {
+template <> struct hash<horizon::ObjectRef> {
+    std::size_t operator()(const horizon::ObjectRef &k) const
+    {
+        return static_cast<size_t>(k.type) ^ std::hash<horizon::UUID>{}(k.uuid) ^ std::hash<horizon::UUID>{}(k.uuid2);
+    }
+};
+} // namespace std

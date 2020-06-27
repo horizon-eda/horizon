@@ -34,8 +34,25 @@ public:
     friend bool operator!=(const UUID &self, const UUID &other);
     friend bool operator<(const UUID &self, const UUID &other);
     friend bool operator>(const UUID &self, const UUID &other);
+    size_t hash() const
+    {
+        size_t r = 0;
+        for (size_t i = 0; i < 16; i++) {
+            r ^= uu[i] << ((i % sizeof(size_t)) * 8);
+        }
+        return r;
+    }
 
 private:
     uuid_t uu;
 };
 } // namespace horizon
+
+namespace std {
+template <> struct hash<horizon::UUID> {
+    std::size_t operator()(const horizon::UUID &k) const
+    {
+        return k.hash();
+    }
+};
+} // namespace std

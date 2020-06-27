@@ -55,7 +55,7 @@ void Canvas::render(const Junction &junc, bool interactive, ObjectType mode)
 
     auto layer = layer_display.count(junc.layer) ? junc.layer : 10000;
 
-    object_refs_current.emplace_back(ObjectType::JUNCTION, junc.uuid);
+    object_ref_push(ObjectType::JUNCTION, junc.uuid);
     if (draw) {
         if (junc.connection_count == 2) {
             if (show_all_junctions_in_schematic)
@@ -72,7 +72,7 @@ void Canvas::render(const Junction &junc, bool interactive, ObjectType mode)
             draw_cross(junc.position, 0.25_mm, c);
         }
     }
-    object_refs_current.pop_back();
+    object_ref_pop();
 
     if (interactive) {
         selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, layer);
@@ -84,7 +84,7 @@ void Canvas::render(const PowerSymbol &sym)
 {
     auto c = ColorP::FROM_LAYER;
     transform.shift = sym.junction->position;
-    object_refs_current.emplace_back(ObjectType::POWER_SYMBOL, sym.uuid);
+    object_ref_push(ObjectType::POWER_SYMBOL, sym.uuid);
 
     auto style = sym.net->power_symbol_style;
     img_auto_line = img_mode;
@@ -181,25 +181,23 @@ void Canvas::render(const PowerSymbol &sym)
     transform.reset();
     img_auto_line = false;
 
-    object_refs_current.pop_back();
+    object_ref_pop();
 }
 
 ObjectRef Canvas::add_line(const std::deque<Coordi> &pts, int64_t width, ColorP color, int layer)
 {
+    if (pts.size() < 2) {
+        return ObjectRef();
+    }
     auto uu = UUID::random();
     ObjectRef sr(ObjectType::LINE, uu);
-    object_refs_current.push_back(sr);
-    if (pts.size() >= 2) {
-        for (size_t i = 1; i < pts.size(); i++) {
-            auto pt1 = pts.at(i - 1);
-            auto pt2 = pts.at(i);
-            draw_line(pt1, pt2, color, layer, false, width);
-        }
+    object_ref_push(sr);
+    for (size_t i = 1; i < pts.size(); i++) {
+        auto pt1 = pts.at(i - 1);
+        auto pt2 = pts.at(i);
+        draw_line(pt1, pt2, color, layer, false, width);
     }
-    else {
-        object_refs[sr];
-    }
-    object_refs_current.pop_back();
+    object_ref_pop();
     request_push();
     return sr;
 }
@@ -238,9 +236,9 @@ void Canvas::render(const LineNet &line)
     img_line(line.from.get_position(), line.to.get_position(), width, 0);
     if (img_mode)
         return;
-    object_refs_current.emplace_back(ObjectType::LINE_NET, line.uuid);
+    object_ref_push(ObjectType::LINE_NET, line.uuid);
     draw_line(line.from.get_position(), line.to.get_position(), c, 0, true, width);
-    object_refs_current.pop_back();
+    object_ref_pop();
     selectables.append_line(line.uuid, ObjectType::LINE_NET, line.from.get_position(), line.to.get_position(), width);
 }
 
@@ -262,7 +260,7 @@ void Canvas::render(const Track &track, bool interactive)
 
     auto center = (track.from.get_position() + track.to.get_position()) / 2;
     if (interactive)
-        object_refs_current.emplace_back(ObjectType::TRACK, track.uuid);
+        object_ref_push(ObjectType::TRACK, track.uuid);
     draw_line(track.from.get_position(), track.to.get_position(), c, layer, true, width);
     if (track.locked) {
         auto ol = get_overlay_layer(layer);
@@ -284,7 +282,7 @@ void Canvas::render(const Track &track, bool interactive)
         set_lod_size(-1);
     }
     if (interactive)
-        object_refs_current.pop_back();
+        object_ref_pop();
     if (interactive)
         selectables.append_line(track.uuid, ObjectType::TRACK, track.from.get_position(), track.to.get_position(),
                                 track.width, 0, track.layer);
@@ -600,9 +598,9 @@ void Canvas::render(const Arc &arc, bool interactive, ColorP co)
 void Canvas::render(const SchematicSymbol &sym)
 {
     transform = sym.placement;
-    object_refs_current.emplace_back(ObjectType::SCHEMATIC_SYMBOL, sym.uuid);
+    object_ref_push(ObjectType::SCHEMATIC_SYMBOL, sym.uuid);
     render(sym.symbol, true, sym.smashed, ColorP::FROM_LAYER);
-    object_refs_current.pop_back();
+    object_ref_pop();
     for (const auto &it : sym.symbol.pins) {
         targets.emplace_back(UUIDPath<2>(sym.uuid, it.second.uuid), ObjectType::SYMBOL_PIN,
                              transform.transform(it.second.position));
@@ -680,7 +678,7 @@ void Canvas::render(const NetLabel &label)
         txt += " [" + join(label.on_sheets, ",") + "]";
     }
 
-    object_refs_current.emplace_back(ObjectType::NET_LABEL, label.uuid);
+    object_ref_push(ObjectType::NET_LABEL, label.uuid);
     if (label.style == NetLabel::Style::FLAG) {
 
         std::pair<Coordf, Coordf> extents;
@@ -696,7 +694,7 @@ void Canvas::render(const NetLabel &label)
         selectables.append(label.uuid, ObjectType::NET_LABEL, label.junction->position + Coordi(0, 1000000),
                            extents.first, extents.second);
     }
-    object_refs_current.pop_back();
+    object_ref_pop();
 }
 void Canvas::render(const BusLabel &label)
 {
@@ -766,6 +764,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
     if (auto plane = dynamic_cast<Plane *>(poly.usage.ptr)) {
         triangle_type_current = TriangleInfo::Type::PLANE_FILL;
         auto tris = fragment_cache.get_triangles(*plane);
+        begin_group(poly.layer);
         for (const auto &tri : tris) {
             add_triangle(poly.layer, transform.transform(tri[0]), transform.transform(tri[1]),
                          transform.transform(tri[2]), co);
@@ -790,6 +789,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
                           poly.layer);
             }
         }
+        end_group();
         triangle_type_current = TriangleInfo::Type::NONE;
     }
     else { // normal polygon
@@ -809,6 +809,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
         TPPLPartition part;
         po.SetOrientation(TPPL_CCW);
         part.Triangulate_EC(&po, &outpolys);
+        begin_group(poly.layer);
         for (auto &tri : outpolys) {
             assert(tri.GetNumPoints() == 3);
             Coordf p0 = transform.transform(coordf_from_pt(tri[0]));
@@ -820,6 +821,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
             draw_line(poly.vertices[i].position, poly.vertices[(i + 1) % poly.vertices.size()].position, co,
                       poly.layer);
         }
+        end_group();
         triangle_type_current = TriangleInfo::Type::NONE;
     }
 
@@ -963,9 +965,9 @@ void Canvas::render(const Symbol &sym, bool on_sheet, bool smashed, ColorP co)
     if (object_refs_current.size() && object_refs_current.back().type == ObjectType::SCHEMATIC_SYMBOL) {
         auto sym_uuid = object_refs_current.back().uuid;
         for (const auto &it : sym.pins) {
-            object_refs_current.emplace_back(ObjectType::SYMBOL_PIN, it.second.uuid, sym_uuid);
+            object_ref_push(ObjectType::SYMBOL_PIN, it.second.uuid, sym_uuid);
             render(it.second, !on_sheet, co);
-            object_refs_current.pop_back();
+            object_ref_pop();
         }
     }
     else {
@@ -1142,18 +1144,18 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omi
     if (object_refs_current.size() && object_refs_current.back().type == ObjectType::BOARD_PACKAGE) {
         auto pkg_uuid = object_refs_current.back().uuid;
         for (const auto &it : pkg.pads) {
-            object_refs_current.emplace_back(ObjectType::PAD, it.second.uuid, pkg_uuid);
+            object_ref_push(ObjectType::PAD, it.second.uuid, pkg_uuid);
             render_pad_overlay(it.second);
             render(it.second);
-            object_refs_current.pop_back();
+            object_ref_pop();
         }
     }
     else if (interactive) {
         for (const auto &it : pkg.pads) {
-            object_refs_current.emplace_back(ObjectType::PAD, it.second.uuid);
+            object_ref_push(ObjectType::PAD, it.second.uuid);
             render_pad_overlay(it.second);
             render(it.second);
-            object_refs_current.pop_back();
+            object_ref_pop();
         }
     }
     else {
@@ -1249,12 +1251,12 @@ void Canvas::render(const BoardPackage &pkg, bool interactive)
         }
     }
     if (interactive)
-        object_refs_current.emplace_back(ObjectType::BOARD_PACKAGE, pkg.uuid);
+        object_ref_push(ObjectType::BOARD_PACKAGE, pkg.uuid);
 
     render(pkg.package, false, pkg.smashed, pkg.omit_silkscreen, pkg.omit_outline);
 
     if (interactive)
-        object_refs_current.pop_back();
+        object_ref_pop();
 
     transform.reset();
     transform_restore();
@@ -1274,7 +1276,7 @@ void Canvas::render(const Via &via, bool interactive)
     img_net(via.junction->net);
     img_patch_type(PatchType::VIA);
     if (interactive)
-        object_refs_current.emplace_back(ObjectType::VIA, via.uuid);
+        object_ref_push(ObjectType::VIA, via.uuid);
     render(via.padstack, false);
     if (via.locked) {
         auto ol = get_overlay_layer(BoardLayers::TOP_COPPER);
@@ -1291,7 +1293,7 @@ void Canvas::render(const Via &via, bool interactive)
 
 
     if (interactive)
-        object_refs_current.pop_back();
+        object_ref_pop();
     img_net(nullptr);
     img_patch_type(PatchType::OTHER);
     transform_restore();
@@ -1310,10 +1312,10 @@ void Canvas::render(const BoardHole &hole, bool interactive)
     else
         img_patch_type(PatchType::HOLE_NPTH);
     if (interactive)
-        object_refs_current.emplace_back(ObjectType::BOARD_HOLE, hole.uuid);
+        object_ref_push(ObjectType::BOARD_HOLE, hole.uuid);
     render(hole.padstack, false);
     if (interactive)
-        object_refs_current.pop_back();
+        object_ref_pop();
     img_net(nullptr);
     img_patch_type(PatchType::OTHER);
     transform_restore();

@@ -45,7 +45,7 @@ ToolResponse ToolDrawConnectionLine::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         if (temp_line)
             temp_junc->position = args.coords;
-        return ToolResponse::fast();
+        return ToolResponse();
     }
     else if (args.type == ToolEventType::CLICK) {
         if (args.button == 1) {

@@ -1756,9 +1756,7 @@ void ImpBase::tool_process(ToolResponse &resp)
         update_highlights();
     }
     if (!no_update) {
-        canvas->fast_draw = resp.fast_draw;
         canvas_update();
-        canvas->fast_draw = false;
         canvas->set_selection(core->get_tool_selection());
     }
     if (resp.next_tool != ToolID::NONE) {

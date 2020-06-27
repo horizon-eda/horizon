@@ -520,7 +520,7 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
         if (args.type == ToolEventType::MOVE) {
             move_do_cursor(args.coords);
             update_tip();
-            return ToolResponse::fast();
+            return ToolResponse();
         }
         else if (args.type == ToolEventType::CLICK || (is_transient && args.type == ToolEventType::CLICK_RELEASE)) {
             if (args.button == 1) {

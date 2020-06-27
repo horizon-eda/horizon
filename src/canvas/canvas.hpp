@@ -64,7 +64,6 @@ public:
     bool show_all_junctions_in_schematic = false;
     bool show_text_in_tracks = false;
     bool show_text_in_vias = false;
-    bool fast_draw = false;
 
     virtual bool get_flip_view() const
     {
@@ -81,8 +80,19 @@ protected:
     void add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP co, uint8_t flg = 0,
                       uint8_t color2 = 0);
 
-    std::map<ObjectRef, std::map<int, std::pair<size_t, size_t>>> object_refs;
+    using ObjectRefIdx = std::map<int, std::pair<size_t, size_t>>;
+    std::unordered_map<ObjectRef, ObjectRefIdx> object_refs;
+    void begin_group(int layer);
+    void end_group();
     std::vector<ObjectRef> object_refs_current;
+    std::vector<ObjectRefIdx *> object_ref_idx;
+    void object_ref_push(const ObjectRef &ref);
+    template <typename... Args> void object_ref_push(Args... args)
+    {
+        object_ref_push(ObjectRef(args...));
+    }
+    void object_ref_pop();
+
     void render(const class Symbol &sym, bool on_sheet = false, bool smashed = false, ColorP co = ColorP::FROM_LAYER);
     void render(const class Junction &junc, bool interactive = true, ObjectType mode = ObjectType::INVALID);
     void render(const class Line &line, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
@@ -224,5 +234,9 @@ protected:
 
 private:
     uint8_t lod_current = 0;
+
+    int group_layer = 0;
+    vector_pair<Triangle, TriangleInfo> *group_tris = nullptr;
+    size_t group_size = 0;
 };
 } // namespace horizon

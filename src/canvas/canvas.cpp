@@ -45,8 +45,11 @@ void Canvas::clear()
     }
     targets.clear();
     sheet_current_uuid = UUID();
-    object_refs.clear();
+    for (auto &it : object_refs) {
+        it.second.clear();
+    }
     object_refs_current.clear();
+    object_ref_idx.clear();
     pictures.clear();
 }
 
@@ -153,23 +156,26 @@ void Canvas::set_color2(const ObjectRef &r, uint8_t color)
 void Canvas::add_triangle(int layer, const Coordf &p0, const Coordf &p1, const Coordf &p2, ColorP color, uint8_t flags,
                           uint8_t color2)
 {
+    if (group_tris) {
+        assert(group_layer == layer);
+        group_tris->emplace_back(std::forward_as_tuple(p0, p1, p2, color, lod_current, color2),
+                                 std::forward_as_tuple(triangle_type_current, flags));
+        return;
+    }
     triangles[layer].emplace_back(std::forward_as_tuple(p0, p1, p2, color, lod_current, color2),
                                   std::forward_as_tuple(triangle_type_current, flags));
-    if (!fast_draw) {
-        auto idx = triangles[layer].size() - 1;
-        for (auto &ref : object_refs_current) {
-            auto &layers = object_refs[ref];
-
-            if (layers.count(layer)) {
-                auto &idxs = layers[layer];
-                assert(idxs.second == idx - 1);
-                idxs.second = idx;
-            }
-            else {
-                auto &idxs = layers[layer];
-                idxs.first = idx;
-                idxs.second = idx;
-            }
+    auto idx = triangles[layer].size() - 1;
+    for (auto it : object_ref_idx) {
+        auto &layers = *it;
+        if (layers.count(layer)) {
+            auto &idxs = layers[layer];
+            assert(idxs.second == idx - 1);
+            idxs.second = idx;
+        }
+        else {
+            auto &idxs = layers[layer];
+            idxs.first = idx;
+            idxs.second = idx;
         }
     }
 }
@@ -280,6 +286,44 @@ Color Canvas::get_layer_color(int layer) const
 void Canvas::set_layer_color(int layer, const Color &color)
 {
     layer_colors[layer] = color;
+}
+
+void Canvas::object_ref_pop()
+{
+    object_refs_current.pop_back();
+    object_ref_idx.pop_back();
+}
+
+void Canvas::object_ref_push(const ObjectRef &ref)
+{
+    object_refs_current.push_back(ref);
+    object_ref_idx.push_back(&object_refs[ref]);
+}
+
+void Canvas::begin_group(int layer)
+{
+    group_layer = layer;
+    assert(group_tris == nullptr);
+    group_tris = &triangles[layer];
+    group_size = group_tris->size();
+}
+
+void Canvas::end_group()
+{
+    auto new_size = group_tris->size();
+    for (auto it : object_ref_idx) {
+        auto &layers = *it;
+        if (layers.count(group_layer)) {
+            auto &idxs = layers[group_layer];
+            idxs.second = new_size - 1;
+        }
+        else {
+            auto &idxs = layers[group_layer];
+            idxs.first = group_size;
+            idxs.second = new_size - 1;
+        }
+    }
+    group_tris = nullptr;
 }
 
 std::pair<Coordf, Coordf> Canvas::get_bbox(bool visible_only) const
