@@ -764,6 +764,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
     if (auto plane = dynamic_cast<Plane *>(poly.usage.ptr)) {
         triangle_type_current = TriangleInfo::Type::PLANE_FILL;
         auto tris = fragment_cache.get_triangles(*plane);
+        object_ref_push(ObjectType::PLANE, plane->uuid);
         begin_group(poly.layer);
         for (const auto &tri : tris) {
             add_triangle(poly.layer, transform.transform(tri[0]), transform.transform(tri[1]),
@@ -791,6 +792,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
         }
         end_group();
         triangle_type_current = TriangleInfo::Type::NONE;
+        object_ref_pop();
     }
     else { // normal polygon
         triangle_type_current = TriangleInfo::Type::POLYGON;

@@ -128,6 +128,12 @@ void ImpBoard::apply_net_colors()
                 }
             }
         }
+        for (const auto &it_plane : core_board.get_board()->planes) {
+            if (it_plane.second.net.uuid == net) {
+                ObjectRef ref(ObjectType::PLANE, it_plane.first);
+                canvas->set_color2(ref, color);
+            }
+        }
     }
 }
 
