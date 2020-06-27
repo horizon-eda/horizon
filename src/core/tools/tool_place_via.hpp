@@ -21,5 +21,7 @@ protected:
     std::forward_list<class Via *> vias_placed;
 
 private:
+    const class BoardRules *rules = nullptr;
+    void update_tip();
 };
 } // namespace horizon

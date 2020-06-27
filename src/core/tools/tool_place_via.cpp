@@ -3,6 +3,7 @@
 #include "board/board.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>
+#include <gdk/gdkkeysyms.h>
 
 namespace horizon {
 
@@ -17,29 +18,27 @@ bool ToolPlaceVia::can_begin()
 
 bool ToolPlaceVia::begin_attached()
 {
-    bool r;
-    UUID net_uuid;
-    std::tie(r, net_uuid) = imp->dialogs.select_net(doc.b->get_block(), false);
+    rules = dynamic_cast<BoardRules *>(doc.b->get_rules());
+    auto [r, net_uuid] = imp->dialogs.select_net(doc.b->get_block(), false);
     if (!r) {
         return false;
     }
     net = doc.b->get_block()->get_net(net_uuid);
-    imp->tool_bar_set_tip("<b>LMB:</b>place via <b>RMB:</b>delete current via and finish");
+    update_tip();
     return true;
 }
 
 void ToolPlaceVia::create_attached()
 {
     auto uu = UUID::random();
-    const auto &rules = dynamic_cast<BoardRules &>(*doc.b->get_rules());
-    auto ps = doc.b->get_via_padstack_provider()->get_padstack(rules.get_via_padstack_uuid(net));
+    auto ps = doc.b->get_via_padstack_provider()->get_padstack(rules->get_via_padstack_uuid(net));
     via = &doc.b->get_board()
                    ->vias.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, ps))
                    .first->second;
     via->junction = temp;
     via->from_rules = true;
     via->net_set = net;
-    via->parameter_set = rules.get_via_parameter_set(net);
+    via->parameter_set = rules->get_via_parameter_set(net);
     via->expand(*doc.b->get_board());
 }
 
@@ -48,6 +47,14 @@ void ToolPlaceVia::delete_attached()
     if (via) {
         doc.b->get_board()->vias.erase(via->uuid);
     }
+}
+
+void ToolPlaceVia::update_tip()
+{
+    std::string s = "<b>LMB:</b>place via <b>RMB:</b>delete current via and finish <b>Space:</b>change net <i>Net: "
+                    + net->name + "</i>";
+
+    imp->tool_bar_set_tip(s);
 }
 
 bool ToolPlaceVia::update_attached(const ToolArgs &args)
@@ -59,6 +66,21 @@ bool ToolPlaceVia::update_attached(const ToolArgs &args)
                 via->junction = j;
                 create_attached();
                 return true;
+            }
+        }
+    }
+    if (args.type == ToolEventType::KEY) {
+        if (args.key == GDK_KEY_space) {
+            if (via) {
+                auto [r, net_uuid] = imp->dialogs.select_net(doc.b->get_block(), false);
+                if (!r) {
+                    return true;
+                }
+                net = doc.b->get_block()->get_net(net_uuid);
+                via->net_set = net;
+                via->parameter_set = rules->get_via_parameter_set(net);
+                via->expand(*doc.b->get_board());
+                update_tip();
             }
         }
     }
