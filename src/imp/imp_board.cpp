@@ -37,8 +37,8 @@ void ImpBoard::canvas_update()
 {
     canvas->update(*core_board.get_canvas_data());
     warnings_box->update(core_board.get_board()->warnings);
-    update_highlights();
     apply_net_colors();
+    update_highlights();
     tuning_window->update();
     update_text_owner_annotation();
 }
@@ -716,9 +716,9 @@ void ImpBoard::construct()
     airwire_filter_window->update_nets();
     airwire_filter_window->signal_changed().connect([this] {
         update_net_colors();
+        apply_net_colors();
         update_airwire_annotation();
         update_view_hints();
-        apply_net_colors();
     });
     airwire_filter_window->signal_selection_changed().connect([this](auto nets) {
         highlights.clear();
