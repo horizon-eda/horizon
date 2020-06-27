@@ -10,6 +10,36 @@ BoardRules::BoardRules()
 {
 }
 
+BoardRules::BoardRules(const BoardRules &other)
+    : rule_hole_size(other.rule_hole_size), rule_track_width(other.rule_track_width),
+      rule_clearance_copper(other.rule_clearance_copper), rule_via(other.rule_via),
+      rule_clearance_copper_other(other.rule_clearance_copper_other), rule_plane(other.rule_plane),
+      rule_diffpair(other.rule_diffpair), rule_clearance_copper_keepout(other.rule_clearance_copper_keepout),
+      rule_layer_pair(other.rule_layer_pair),
+      rule_clearance_silkscreen_exposed_copper(other.rule_clearance_silkscreen_exposed_copper),
+      rule_parameters(other.rule_parameters), rule_preflight_checks(other.rule_preflight_checks)
+{
+    update_sorted();
+}
+
+void BoardRules::operator=(const BoardRules &other)
+{
+    rule_hole_size = other.rule_hole_size;
+    rule_track_width = other.rule_track_width;
+    rule_clearance_copper = other.rule_clearance_copper;
+    rule_via = other.rule_via;
+    rule_clearance_copper_other = other.rule_clearance_copper_other;
+    rule_plane = other.rule_plane;
+    rule_diffpair = other.rule_diffpair;
+    rule_clearance_copper_keepout = other.rule_clearance_copper_keepout;
+    rule_layer_pair = other.rule_layer_pair;
+    rule_clearance_silkscreen_exposed_copper = other.rule_clearance_silkscreen_exposed_copper;
+    rule_parameters = other.rule_parameters;
+    rule_preflight_checks = other.rule_preflight_checks;
+
+    update_sorted();
+}
+
 void BoardRules::load_from_json(const json &j)
 {
     if (j.count("hole_size")) {

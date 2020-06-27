@@ -21,6 +21,8 @@ using json = nlohmann::json;
 class BoardRules : public Rules {
 public:
     BoardRules();
+    BoardRules(const BoardRules &other);
+    void operator=(const BoardRules &other);
 
     void load_from_json(const json &j);
     RulesCheckResult check(RuleID id, const class Board *b, class RulesCheckCache &cache,
