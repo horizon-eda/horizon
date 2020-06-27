@@ -333,6 +333,25 @@ Color color_from_json(const json &j)
     return c;
 }
 
+json colori_to_json(const ColorI &c)
+{
+    json j;
+    j["r"] = c.r;
+    j["g"] = c.g;
+    j["b"] = c.b;
+    return j;
+}
+
+
+ColorI colori_from_json(const json &j)
+{
+    ColorI c;
+    c.r = j.at("r");
+    c.g = j.at("g");
+    c.b = j.at("b");
+    return c;
+}
+
 static std::locale the_locale = std::locale::classic();
 
 void setup_locale()

@@ -4,8 +4,10 @@
 #include "util/changeable.hpp"
 #include "common/common.hpp"
 #include <set>
+#include "nlohmann/json.hpp"
 
 namespace horizon {
+using json = nlohmann::json;
 
 class AirwireFilterWindow : public Gtk::Window, public Changeable {
 public:
@@ -28,6 +30,9 @@ public:
     {
         return net_colors;
     }
+
+    json serialize();
+    void load_from_json(const json &j);
 
 private:
     const class Board &brd;

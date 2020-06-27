@@ -61,6 +61,9 @@ void find_files_recursive(const std::string &base_path, std::function<void(const
 Color color_from_json(const json &j);
 json color_to_json(const Color &c);
 
+ColorI colori_from_json(const json &j);
+json colori_to_json(const ColorI &c);
+
 std::string format_m_of_n(unsigned int m, unsigned int n);
 std::string format_digits(unsigned int m, unsigned int digits_max);
 double parse_si(const std::string &inps);

@@ -773,6 +773,10 @@ void ImpBoard::construct()
 
         airwire_filter_window->set_only(nets);
     });
+
+    if (m_meta.count("nets"))
+        airwire_filter_window->load_from_json(m_meta.at("nets"));
+
     {
         auto &b = add_action_button(make_action(ToolID::ROUTE_TRACK_INTERACTIVE));
         b.add_action(make_action(ToolID::ROUTE_DIFFPAIR_INTERACTIVE));
@@ -1130,6 +1134,7 @@ void ImpBoard::get_save_meta(json &j)
 {
     ImpLayer::get_save_meta(j);
     j["board_display_options"] = board_display_options_box->serialize();
+    j["nets"] = airwire_filter_window->serialize();
 }
 
 std::vector<std::string> ImpBoard::get_view_hints()

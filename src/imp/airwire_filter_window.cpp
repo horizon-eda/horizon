@@ -4,6 +4,7 @@
 #include "util/gtk_util.hpp"
 #include "util/str_util.hpp"
 #include "widgets/cell_renderer_color_box.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 AirwireFilterWindow *AirwireFilterWindow::create(Gtk::Window *p, const class Board &b)
@@ -216,6 +217,15 @@ void AirwireFilterWindow::set_only(const std::set<UUID> &nets)
     s_signal_changed.emit();
 }
 
+static Gdk::RGBA rgba_from_colori(ColorI c)
+{
+    Gdk::RGBA rg;
+    rg.set_red(c.r / 255.);
+    rg.set_green(c.g / 255.);
+    rg.set_blue(c.b / 255.);
+    rg.set_alpha(1);
+    return rg;
+}
 
 void AirwireFilterWindow::append_context_menu_item(const std::string &name, MenuOP op)
 {
@@ -235,11 +245,7 @@ void AirwireFilterWindow::append_context_menu_item(const std::string &name, Menu
                 UUID net = row[list_columns.net];
                 if (net_colors.count(net)) {
                     const auto c = net_colors.at(net);
-                    Gdk::RGBA rg;
-                    rg.set_red(c.r / 255.);
-                    rg.set_green(c.g / 255.);
-                    rg.set_blue(c.b / 255.);
-                    dia->set_rgba(rg);
+                    dia->set_rgba(rgba_from_colori(c));
                     break;
                 }
             }
@@ -343,6 +349,50 @@ void AirwireFilterWindow::update_from_board()
         }
     }
     s_signal_changed.emit();
+}
+
+void AirwireFilterWindow::load_from_json(const json &j)
+{
+    for (const auto &[key, value] : j.at("airwires_visible").items()) {
+        const UUID net = key;
+        airwires_visible[net] = value;
+    }
+    for (const auto &[key, value] : j.at("net_colors").items()) {
+        const UUID net = key;
+        net_colors[net] = colori_from_json(value);
+    }
+    for (auto &it : store->children()) {
+        Gtk::TreeModel::Row row = *it;
+        const UUID net = row[list_columns.net];
+        if (airwires_visible.count(net)) {
+            row[list_columns.airwires_visible] = airwires_visible.at(net);
+        }
+        if (net_colors.count(net)) {
+            row[list_columns.color] = rgba_from_colori(net_colors.at(net));
+        }
+    }
+    s_signal_changed.emit();
+}
+
+json AirwireFilterWindow::serialize()
+{
+    json j;
+    {
+        json o;
+        for (const auto &[net, v] : airwires_visible) {
+            o[(std::string)net] = v;
+        }
+        j["airwires_visible"] = o;
+    }
+    {
+        json o;
+        for (const auto &[net, color] : net_colors) {
+            o[(std::string)net] = colori_to_json(color);
+        }
+        j["net_colors"] = o;
+    }
+
+    return j;
 }
 
 }; // namespace horizon
