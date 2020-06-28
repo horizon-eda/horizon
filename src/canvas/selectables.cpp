@@ -121,10 +121,12 @@ void Selectables::update_preview(const std::set<SelectableRef> &sel)
 {
     std::set<int> groups;
     for (const auto &it : sel) {
-        auto idx = items_map.at(it);
-        auto group = items_group.at(idx);
-        if (group != -1)
-            groups.insert(group);
+        if (items_map.count(it)) {
+            auto idx = items_map.at(it);
+            auto group = items_group.at(idx);
+            if (group != -1)
+                groups.insert(group);
+        }
     }
     for (size_t i = 0; i < items.size(); i++) {
         auto group = items_group.at(i);
@@ -151,5 +153,6 @@ void Selectables::clear()
     items_ref.clear();
     items_group.clear();
     items_map.clear();
+    group_max = 0;
 }
 } // namespace horizon
