@@ -70,6 +70,7 @@ SRC_COMMON = \
 	src/board/rule_preflight_checks.cpp\
 	src/board/rule_clearance_copper_keepout.cpp\
 	src/board/rule_layer_pair.cpp\
+	src/board/rule_clearance_same_net.cpp\
 	src/board/airwires.cpp\
 	src/board/fab_output_settings.cpp\
 	src/board/board_hole.cpp\
@@ -371,6 +372,7 @@ SRC_IMP = \
 	src/imp/rules/rule_editor_package_checks.cpp\
 	src/imp/rules/rule_editor_clearance_copper_keepout.cpp\
 	src/imp/rules/rule_editor_layer_pair.cpp\
+	src/imp/rules/rule_editor_clearance_same_net.cpp\
 	src/rules/rules_with_core.cpp\
 	src/rules/cache.cpp\
 	src/board/board_rules_check.cpp\

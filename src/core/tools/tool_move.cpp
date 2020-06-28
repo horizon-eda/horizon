@@ -245,11 +245,6 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
         }
     }
 
-    for (auto plane : planes) {
-        plane->fragments.clear();
-        plane->revision++;
-    }
-
     int key = 0;
     unsigned int mod = 0;
     switch (tool_id) {

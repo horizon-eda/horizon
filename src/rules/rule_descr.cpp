@@ -16,5 +16,6 @@ const std::map<RuleID, RuleDescription> rule_descriptions = {
         {RuleID::PREFLIGHT_CHECKS, {"Preflight checks", false, true}},
         {RuleID::CLEARANCE_COPPER_KEEPOUT, {"Clearance Copper - Keepout", true, true, true}},
         {RuleID::LAYER_PAIR, {"Layer pairs", true, false, false}},
+        {RuleID::CLEARANCE_SAME_NET, {"Same net clearance", true, true, false}},
 };
 }

@@ -12,6 +12,7 @@
 #include "rule_preflight_checks.hpp"
 #include "rule_clearance_copper_keepout.hpp"
 #include "rule_layer_pair.hpp"
+#include "rule_clearance_same_net.hpp"
 #include "rules/rules.hpp"
 #include "util/uuid.hpp"
 
@@ -42,6 +43,7 @@ public:
     const RuleClearanceCopperOther *get_clearance_copper_other(const Net *net, int layer) const;
     const RuleDiffpair *get_diffpair(const NetClass *net_class, int layer) const;
     const RuleClearanceCopperKeepout *get_clearance_copper_keepout(const Net *net, const KeepoutContour *contour) const;
+    const RuleClearanceSameNet *get_clearance_same_net(const Net *net, int layer) const;
     uint64_t get_max_clearance() const;
 
     const RuleParameters *get_parameters() const;
@@ -63,6 +65,7 @@ private:
     std::map<UUID, RuleDiffpair> rule_diffpair;
     std::map<UUID, RuleClearanceCopperKeepout> rule_clearance_copper_keepout;
     std::map<UUID, RuleLayerPair> rule_layer_pair;
+    std::map<UUID, RuleClearanceSameNet> rule_clearance_same_net;
 
     std::vector<const RuleClearanceCopper *> rule_sorted_clearance_copper;
     void update_sorted();
@@ -80,5 +83,7 @@ private:
     RulesCheckResult check_preflight(const class Board *b) const;
     RulesCheckResult check_clearance_copper_keepout(const class Board *b, class RulesCheckCache &cache,
                                                     check_status_cb_t status_cb) const;
+    RulesCheckResult check_clearance_same_net(const class Board *b, class RulesCheckCache &cache,
+                                              check_status_cb_t status_cb) const;
 };
 } // namespace horizon

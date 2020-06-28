@@ -22,7 +22,8 @@ enum class RuleID {
     PACKAGE_CHECKS,
     PREFLIGHT_CHECKS,
     CLEARANCE_COPPER_KEEPOUT,
-    LAYER_PAIR
+    LAYER_PAIR,
+    CLEARANCE_SAME_NET,
 };
 
 extern const LutEnumStr<RuleID> rule_id_lut;
