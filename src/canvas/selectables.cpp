@@ -1,11 +1,12 @@
 #include "selectables.hpp"
 #include "canvas.hpp"
+#include <assert.h>
 
 namespace horizon {
 
 Selectable::Selectable(const Coordf &center, const Coordf &box_center, const Coordf &box_dim, float a, bool always)
     : x(center.x), y(center.y), c_x(box_center.x), c_y(box_center.y), width(std::abs(box_dim.x)),
-      height(std::abs(box_dim.y)), angle(a), flags(always ? 4 : 0)
+      height(std::abs(box_dim.y)), angle(a), flags(always ? static_cast<int>(Flag::ALWAYS) : 0)
 {
 }
 
@@ -101,6 +102,7 @@ void Selectables::append_angled(const UUID &uu, ObjectType ot, const Coordf &cen
                       std::forward_as_tuple(items.size()));
     items.emplace_back(ca.transform.transform(center), box_center, box_dim, angle, always);
     items_ref.emplace_back(uu, ot, vertex, layer);
+    items_group.push_back(group_current);
 }
 
 void Selectables::append_line(const UUID &uu, ObjectType ot, const Coordf &p0, const Coordf &p1, float width,
@@ -115,10 +117,39 @@ void Selectables::append_line(const UUID &uu, ObjectType ot, const Coordf &p0, c
 }
 
 
+void Selectables::update_preview(const std::set<SelectableRef> &sel)
+{
+    std::set<int> groups;
+    for (const auto &it : sel) {
+        auto idx = items_map.at(it);
+        auto group = items_group.at(idx);
+        if (group != -1)
+            groups.insert(group);
+    }
+    for (size_t i = 0; i < items.size(); i++) {
+        auto group = items_group.at(i);
+        items.at(i).set_flag(Selectable::Flag::PREVIEW, groups.count(group));
+    }
+}
+
+void Selectables::group_begin()
+{
+    assert(group_current == -1);
+    group_current = group_max;
+}
+
+void Selectables::group_end()
+{
+    assert(group_current != -1);
+    group_current = -1;
+    group_max++;
+}
+
 void Selectables::clear()
 {
     items.clear();
     items_ref.clear();
+    items_group.clear();
     items_map.clear();
 }
 } // namespace horizon

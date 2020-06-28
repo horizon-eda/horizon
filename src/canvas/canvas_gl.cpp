@@ -521,6 +521,7 @@ void CanvasGL::set_selection(const std::set<SelectableRef> &sel, bool emit)
             selectables.items.at(selectables.items_map.at(key)).set_flag(horizon::Selectable::Flag::SELECTED, true);
         }
     }
+    selectables.update_preview(sel);
     if (emit)
         s_signal_selection_changed.emit();
     request_push(PF_SELECTABLES);

@@ -2,6 +2,7 @@
 #include "common/common.hpp"
 #include "util/uuid.hpp"
 #include <map>
+#include <set>
 
 namespace horizon {
 class Selectable {
@@ -14,7 +15,7 @@ public:
     float height;
     float angle;
     uint8_t flags;
-    enum class Flag { SELECTED = 1, PRELIGHT = 2 };
+    enum class Flag { SELECTED = 1, PRELIGHT = 2, ALWAYS = 4, PREVIEW = 8 };
     bool get_flag(Flag f) const;
     void set_flag(Flag f, bool v);
 
@@ -75,11 +76,19 @@ public:
                        bool always = false);
     void append_line(const UUID &uu, ObjectType ot, const Coordf &p0, const Coordf &p1, float width,
                      unsigned int vertex = 0, int layer = 10000, bool always = false);
+    void update_preview(const std::set<SelectableRef> &sel);
+
+    void group_begin();
+    void group_end();
 
 private:
     const Canvas &ca;
     std::vector<Selectable> items;
     std::vector<SelectableRef> items_ref;
     std::map<SelectableRef, unsigned int> items_map;
+    std::vector<int> items_group;
+
+    int group_max = 0;
+    int group_current = -1;
 };
 } // namespace horizon

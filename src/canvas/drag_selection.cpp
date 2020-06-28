@@ -267,6 +267,7 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                 }
                 it.set_flag(Selectable::Flag::PRELIGHT, false);
             }
+            ca.selectables.update_preview(ca.get_selection());
             ca.request_push(CanvasGL::PF_DRAG_SELECTION);
             ca.request_push(CanvasGL::PF_SELECTABLES);
             ca.s_signal_selection_changed.emit();
@@ -276,6 +277,7 @@ void DragSelection::drag_end(GdkEventButton *button_event)
             if (ca.selection_mode == CanvasGL::SelectionMode::HOVER) { // just select what was
                                                                        // selecte by hover select
                 ca.set_selection_mode(CanvasGL::SelectionMode::NORMAL);
+                ca.selectables.update_preview(ca.get_selection());
                 ca.s_signal_selection_changed.emit();
             }
             else {

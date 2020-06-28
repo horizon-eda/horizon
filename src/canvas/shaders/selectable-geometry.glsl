@@ -73,8 +73,9 @@ void main() {
 	}
 	color_to_fragment = vec3(1,0,1);
 	
-	if((flags & uint(4))!=uint(0)) { //always
+	if((flags & uint(4|8))!=uint(0)) { //always or preview
 		color_to_fragment = color_always;
+		origin_size = 7/scale;
 	}
 	if((flags & uint(1))!=uint(0)) { //selected
 		color_to_fragment = color_outer;

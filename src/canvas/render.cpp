@@ -828,6 +828,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
     }
 
     if (interactive) {
+        selectables.group_begin();
         const Polygon::Vertex *v_last = nullptr;
         size_t i = 0;
         for (const auto &it : ipoly.vertices) {
@@ -855,6 +856,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
             selectables.append_line(poly.uuid, ObjectType::POLYGON_EDGE, poly.vertices.front().position,
                                     ipoly.vertices.back().position, 0, i - 1, poly.layer);
         }
+        selectables.group_end();
     }
 }
 
@@ -1348,6 +1350,7 @@ void Canvas::render(const class Dimension &dim)
 
     ColorP co = ColorP::DIMENSION;
 
+    selectables.group_begin();
     if (v.mag_sq()) {
 
         auto q0 = p0 + wn * dim.label_distance;
@@ -1407,6 +1410,7 @@ void Canvas::render(const class Dimension &dim)
 
     selectables.append(dim.uuid, ObjectType::DIMENSION, dim.p0, 0);
     selectables.append(dim.uuid, ObjectType::DIMENSION, dim.p1, 1);
+    selectables.group_end();
 
     targets.emplace_back(dim.uuid, ObjectType::DIMENSION, dim.p0, 0);
     targets.emplace_back(dim.uuid, ObjectType::DIMENSION, dim.p1, 1);

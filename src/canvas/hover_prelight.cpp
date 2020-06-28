@@ -28,8 +28,13 @@ void CanvasGL::hover_prelight_update(GdkEvent *motion_event)
         i++;
     }
     if (area_min_i != -1) {
-        selectables.items[area_min_i].set_flag(horizon::Selectable::Flag::SELECTED, true);
+        selectables.items.at(area_min_i).set_flag(horizon::Selectable::Flag::SELECTED, true);
+        selectables.update_preview({selectables.items_ref.at(area_min_i)});
     }
+    else {
+        selectables.update_preview({});
+    }
+
     request_push(PF_SELECTABLES);
     s_signal_hover_selection_changed.emit();
 }
