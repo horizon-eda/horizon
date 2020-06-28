@@ -2142,6 +2142,7 @@ void ImpBase::handle_select_polygon(const ActionConnection &a)
             unsigned int v = 0;
             for (const auto &it_v : poly->vertices) {
                 new_sel.emplace(it.uuid, ObjectType::POLYGON_VERTEX, v);
+                new_sel.emplace(it.uuid, ObjectType::POLYGON_EDGE, v);
                 if (it_v.type == Polygon::Vertex::Type::ARC)
                     new_sel.emplace(it.uuid, ObjectType::POLYGON_ARC_CENTER, v);
                 v++;
