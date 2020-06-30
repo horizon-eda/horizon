@@ -252,6 +252,13 @@ protected:
     Gtk::Widget *create_editor() override;
 };
 
+class PropertyEditorPriority : public PropertyEditorInt {
+    using PropertyEditorInt::PropertyEditorInt;
+
+protected:
+    Gtk::Widget *create_editor() override;
+};
+
 class PropertyEditorDouble : public PropertyEditor {
     using PropertyEditor::PropertyEditor;
 

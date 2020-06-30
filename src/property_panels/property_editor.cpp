@@ -396,6 +396,14 @@ Gtk::Widget *PropertyEditorExpand::create_editor()
     return sp;
 }
 
+Gtk::Widget *PropertyEditorPriority::create_editor()
+{
+    PropertyEditorInt::create_editor();
+    sp->set_range(0, 100);
+    sp->set_increments(1, 1);
+    return sp;
+}
+
 Gtk::Widget *PropertyEditorDouble::create_editor()
 {
     sp = Gtk::manage(new Gtk::SpinButton());

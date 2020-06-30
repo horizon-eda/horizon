@@ -224,6 +224,10 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             dynamic_cast<PropertyValueString &>(value).value = plane->net ? (plane->net->name) : "<no net>";
             return true;
 
+        case ObjectProperty::ID::PRIORITY:
+            dynamic_cast<PropertyValueInt &>(value).value = plane->priority;
+            return true;
+
         default:
             return false;
         }
@@ -402,6 +406,10 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             if (plane->from_rules)
                 return false;
             plane->settings.min_width = dynamic_cast<const PropertyValueInt &>(value).value;
+            break;
+
+        case ObjectProperty::ID::PRIORITY:
+            plane->priority = dynamic_cast<const PropertyValueInt &>(value).value;
             break;
 
         default:

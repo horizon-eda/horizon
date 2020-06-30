@@ -91,6 +91,10 @@ PropertyPanel::PropertyPanel(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
             e = new PropertyEditorOpacity(type, property, this);
             break;
 
+        case ObjectProperty::Type::PRIORITY:
+            e = new PropertyEditorPriority(type, property, this);
+            break;
+
         default:
             e = new PropertyEditor(type, property, this);
         }

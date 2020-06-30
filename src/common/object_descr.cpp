@@ -268,6 +268,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::WIDTH, {ObjectProperty::Type::LENGTH, "Min. Width", 2}},
                   {ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Net", 0}},
                   {ObjectProperty::ID::FROM_RULES, {ObjectProperty::Type::BOOL, "From rules", 1}},
+                  {ObjectProperty::ID::PRIORITY, {ObjectProperty::Type::PRIORITY, "Priority", 3}},
           }}},
         {ObjectType::DIMENSION,
          {"Dimension",
