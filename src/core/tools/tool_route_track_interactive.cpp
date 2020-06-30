@@ -88,10 +88,17 @@ bool ToolRouteTrackInteractive::can_begin()
     auto track = get_track(selection);
     switch (tool_id) {
     case ToolID::DRAG_TRACK_INTERACTIVE:
-        return !!via != !!track; // xor
+        if (via && track)
+            return false;
+        else if (via)
+            return via->junction->net;
+        else if (track)
+            return track->net;
+        else
+            return false;
 
     case ToolID::TUNE_TRACK:
-        return track;
+        return track && track->net;
 
     case ToolID::TUNE_DIFFPAIR:
     case ToolID::TUNE_DIFFPAIR_SKEW:
