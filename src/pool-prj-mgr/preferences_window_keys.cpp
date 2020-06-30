@@ -34,6 +34,7 @@ KeySequencesPreferencesEditor::KeySequencesPreferencesEditor(BaseObjectType *cob
     GET_WIDGET(action_editors);
     key_sequences_store = Gtk::TreeStore::create(tree_columns);
     key_sequences_treeview->set_model(key_sequences_store);
+    tree_view_set_search_contains(key_sequences_treeview);
 
     for (const auto &it_gr : action_group_catalog) {
         Gtk::TreeModel::Row gr_row = *key_sequences_store->append();
