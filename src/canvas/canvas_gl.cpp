@@ -542,15 +542,35 @@ void CanvasGL::select_all()
 
 std::set<SelectableRef> CanvasGL::get_selection_at(const Coordi &c)
 {
-    std::set<SelectableRef> in_selection;
+
+    std::list<std::pair<const Selectable &, const SelectableRef &>> sel;
     unsigned int i = 0;
     for (auto &it : selectables.items) {
         if (it.inside(c, 10 / scale) && selection_filter.can_select(selectables.items_ref[i])) {
-            in_selection.insert(selectables.items_ref[i]);
+            // in_selection.insert(selectables.items_ref[i]);
+            sel.emplace_back(it, selectables.items_ref.at(i));
         }
         i++;
     }
-    return in_selection;
+    auto n_point = std::count_if(sel.begin(), sel.end(), [](const auto &x) { return x.first.is_point(); });
+    auto n_line = std::count_if(sel.begin(), sel.end(), [](const auto &x) { return x.first.is_line(); });
+    if (n_point == 1) { // only one point, select that one
+        auto r = std::find_if(sel.begin(), sel.end(), [](const auto &x) { return x.first.is_point(); });
+        assert(r != sel.end());
+        return {r->second};
+    }
+    else if (n_line == 1) { // only one line, select that one
+        auto r = std::find_if(sel.begin(), sel.end(), [](const auto &x) { return x.first.is_line(); });
+        assert(r != sel.end());
+        return {r->second};
+    }
+    else {
+        std::set<SelectableRef> in_selection;
+        for (const auto &[s, sr] : sel) {
+            in_selection.emplace(sr);
+        }
+        return in_selection;
+    }
 }
 
 void CanvasGL::inhibit_drag_selection()

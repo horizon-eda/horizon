@@ -23,6 +23,9 @@ public:
                bool always = false);
     bool inside(const Coordf &c, float expand = 0) const;
     float area() const;
+    bool is_line() const;
+    bool is_point() const;
+    bool is_box() const;
     std::array<Coordf, 4> get_corners() const;
 } __attribute__((packed));
 

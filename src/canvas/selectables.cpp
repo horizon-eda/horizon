@@ -32,6 +32,21 @@ float Selectable::area() const
         return width * height;
 }
 
+bool Selectable::is_line() const
+{
+    return (width == 0) != (height == 0);
+}
+
+bool Selectable::is_point() const
+{
+    return width == 0 && height == 0;
+}
+
+bool Selectable::is_box() const
+{
+    return width > 0 && height > 0;
+}
+
 static void rotate(float &x, float &y, float a)
 {
     float ix = x;

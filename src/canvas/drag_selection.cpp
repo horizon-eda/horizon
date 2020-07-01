@@ -286,27 +286,18 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                 gdouble x, y;
                 gdk_event_get_coords((GdkEvent *)button_event, &x, &y);
                 auto c = ca.screen2canvas({(float)x, (float)y});
-                std::vector<unsigned int> in_selection;
-                {
-                    unsigned int i = 0;
-                    for (auto &it : ca.selectables.items) {
-                        it.set_flag(Selectable::Flag::PRELIGHT, false);
-                        it.set_flag(Selectable::Flag::SELECTED, false);
-                        if (it.inside(c, 10 / ca.scale)
-                            && ca.selection_filter.can_select(ca.selectables.items_ref[i])) {
-                            in_selection.push_back(i);
-                        }
-                        i++;
-                    }
+                for (auto &it : ca.selectables.items) {
+                    it.set_flag(Selectable::Flag::PRELIGHT, false);
+                    it.set_flag(Selectable::Flag::SELECTED, false);
                 }
-                if (in_selection.size() > 1) {
+                auto sel_from_canvas = ca.get_selection_at(Coordi(c.x, c.y));
+
+                if (sel_from_canvas.size() > 1) {
                     ca.set_selection(selection, false);
                     for (const auto it : ca.clarify_menu->get_children()) {
                         ca.clarify_menu->remove(*it);
                     }
-                    for (auto i : in_selection) {
-                        const auto sr = ca.selectables.items_ref[i];
-
+                    for (const auto sr : sel_from_canvas) {
                         std::string text = object_descriptions.at(sr.type).name;
                         auto display_name = ca.s_signal_request_display_name.emit(sr.type, sr.uuid);
                         if (display_name.size()) {
@@ -378,8 +369,8 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                     ca.clarify_menu->popup(0, gtk_get_current_event_time());
 #endif
                 }
-                else if (in_selection.size() == 1) {
-                    auto sel = ca.selectables.items_ref[in_selection.front()];
+                else if (sel_from_canvas.size() == 1) {
+                    auto sel = *sel_from_canvas.begin();
                     if (toggle) {
                         if (selection.count(sel)) {
                             selection.erase(sel);
@@ -393,7 +384,7 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                         ca.set_selection({sel});
                     }
                 }
-                else if (in_selection.size() == 0) {
+                else if (sel_from_canvas.size() == 0) {
                     if (toggle)
                         ca.set_selection(selection);
                     else
