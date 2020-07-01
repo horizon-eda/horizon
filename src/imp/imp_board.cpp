@@ -907,6 +907,23 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
         sel_erase_type(sel, ObjectType::BOARD_PACKAGE);
     }
     trim(s);
+    if (sel_count_type(sel, ObjectType::POLYGON_VERTEX) == 1 || sel_count_type(sel, ObjectType::POLYGON_EDGE) == 1) {
+        const auto &brd = *core_board.get_board();
+        const Polygon *poly = nullptr;
+        if (sel_count_type(sel, ObjectType::POLYGON_VERTEX))
+            poly = &brd.polygons.at(sel_find_one(sel, ObjectType::POLYGON_VERTEX).uuid);
+        if (sel_count_type(sel, ObjectType::POLYGON_EDGE))
+            poly = &brd.polygons.at(sel_find_one(sel, ObjectType::POLYGON_EDGE).uuid);
+        if (poly) {
+            if (auto plane = dynamic_cast<const Plane *>(poly->usage.ptr)) {
+                s += "\n\n<b>Plane " + plane->net->name + "</b>\n";
+                s += "Priority: " + std::to_string(plane->priority) + "\n";
+                s += "Layer: ";
+                s += core_board.get_layer_provider()->get_layers().at(poly->layer).name + "\n";
+            }
+        }
+    }
+    trim(s);
     return s;
 }
 
