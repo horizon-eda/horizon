@@ -162,29 +162,41 @@ void CanvasMesh::prepare_soldermask(int layer)
 
 void CanvasMesh::prepare_layer(int layer)
 {
-    ClipperLib::Clipper cl;
-    for (const auto &it : ca.get_patches()) {
-        if (it.first.layer == layer) {
-            cl.AddPaths(it.second, ClipperLib::ptSubject, true);
-        }
-    }
     ClipperLib::Paths result;
     auto pft = ClipperLib::pftNonZero;
-    if (layer == BoardLayers::L_OUTLINE) {
-        pft = ClipperLib::pftEvenOdd;
-    }
-    cl.Execute(ClipperLib::ctUnion, result, pft);
+    {
 
-    ClipperLib::PolyTree pt;
-    cl.Clear();
-    cl.AddPaths(result, ClipperLib::ptSubject, true);
-    for (const auto &it : ca.get_patches()) {
-        if (it.first.layer == 10000
-            && (it.first.type == PatchType::HOLE_NPTH || it.first.type == PatchType::HOLE_PTH)) {
-            cl.AddPaths(it.second, ClipperLib::ptClip, true);
+        ClipperLib::Clipper cl;
+        for (const auto &it : ca.get_patches()) {
+            if (it.first.layer == layer) {
+                cl.AddPaths(it.second, ClipperLib::ptSubject, true);
+            }
         }
+
+        if (layer == BoardLayers::L_OUTLINE) {
+            pft = ClipperLib::pftEvenOdd;
+        }
+        cl.Execute(ClipperLib::ctUnion, result, pft);
     }
-    cl.Execute(ClipperLib::ctDifference, pt, pft, ClipperLib::pftNonZero);
+
+    ClipperLib::Paths result_with_holes;
+    {
+        ClipperLib::Clipper cl;
+        cl.AddPaths(result, ClipperLib::ptSubject, true);
+        for (const auto &it : ca.get_patches()) {
+            if (it.first.layer == 10000
+                && (it.first.type == PatchType::HOLE_NPTH || it.first.type == PatchType::HOLE_PTH)) {
+                cl.AddPaths(it.second, ClipperLib::ptClip, true);
+            }
+        }
+        cl.Execute(ClipperLib::ctDifference, result_with_holes, pft, ClipperLib::pftNonZero);
+    }
+    ClipperLib::PolyTree pt;
+    {
+        ClipperLib::ClipperOffset cl;
+        cl.AddPaths(result_with_holes, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
+        cl.Execute(pt, -100); // .1um
+    }
 
     for (const auto node : pt.Childs) {
         polynode_to_tris(node, layer);
