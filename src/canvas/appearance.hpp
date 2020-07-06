@@ -21,5 +21,7 @@ public:
     CursorSize cursor_size = CursorSize::DEFAULT;
     CursorSize cursor_size_tool = CursorSize::LARGE;
     float min_line_width = 1;
+    float min_selectable_size = 20;
+    float snap_radius = 30;
 };
 } // namespace horizon

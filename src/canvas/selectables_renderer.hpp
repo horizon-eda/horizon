@@ -25,5 +25,6 @@ private:
     GLuint color_inner_loc;
     GLuint color_outer_loc;
     GLuint color_prelight_loc;
+    GLuint min_size_loc;
 };
 } // namespace horizon

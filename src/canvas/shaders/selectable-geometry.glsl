@@ -8,6 +8,7 @@ uniform vec3 color_inner;
 uniform vec3 color_outer;
 uniform vec3 color_always;
 uniform vec3 color_prelight;
+uniform float min_size;
 in vec2 origin_to_geom[1];
 in vec2 box_center_to_geom[1];
 in vec2 box_dim_to_geom[1];
@@ -34,38 +35,35 @@ void main() {
 	vec2 box_center = box_center_to_geom[0];
 	float angle = -angle_to_geom[0];
 	
-	const float min_sz = 10;
-	vec2 size = abs(bb_tr-bb_bl);
+	vec2 size = abs(box_dim_to_geom[0]);
 	bool no_bb = (size.x == 0) && (size.y == 0);
 	float origin_size = 10/scale;
 	if(no_bb)
 		origin_size = 7/scale;
 	
 	
-	if((size.x > 0) && (size.x < min_sz/scale)) {
-		bb_tr.x = +.5*min_sz/scale;
-		bb_bl.x = -.5*min_sz/scale;
+	if(size.x == 0 && size.y == 0) { //point
+		//nop
 	}
-	if((size.y > 0) && (size.y < min_sz/scale)) {
-		bb_tr.y = +.5*min_sz/scale;
-		bb_bl.y = -.5*min_sz/scale;
+	else if(size.x == 0) {
+		bb_tr.x += 1/scale;
+		bb_bl.x -= 1/scale;
 	}
-	
-	vec2 border_width = vec2(5,5);
-	if(size.x == 0) {
-		border_width.x = 1;
-		border_width.y = 0;
+	else if(size.y == 0) {
+		bb_tr.y += 1/scale;
+		bb_bl.y -= 1/scale;
 	}
-	if(size.y == 0) {
-		border_width.y = 1;
-		border_width.x = 0;
-	}
+	else {
+		vec2 border_width = vec2(4,4); //2 border, 2 space
+		float sz = .5*min_size/scale;
+		bb_tr.x += border_width.x/scale;
+		bb_bl.x -= border_width.x/scale;
+		bb_tr.y += border_width.y/scale;
+		bb_bl.y -= border_width.y/scale;
 		
-		
-	bb_tr.x += border_width.x/scale;
-	bb_bl.x -= border_width.x/scale;
-	bb_tr.y += border_width.y/scale;
-	bb_bl.y -= border_width.y/scale;
+		bb_tr = max(bb_tr, vec2(1,1)*sz);
+		bb_bl = min(bb_bl, -vec2(1,1)*sz);
+	}
 	
 	uint flags = flags_to_geom[0];
 	if(flags == uint(0)) {

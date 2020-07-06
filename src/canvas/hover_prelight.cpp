@@ -19,7 +19,8 @@ void CanvasGL::hover_prelight_update(GdkEvent *motion_event)
     unsigned int i = 0;
     for (auto &it : selectables.items) {
         it.set_flag(horizon::Selectable::Flag::SELECTED, false);
-        if (it.inside(c, 10 / scale) && selection_filter.can_select(selectables.items_ref[i])) {
+        if (it.inside(c, appearance.min_selectable_size / scale)
+            && selection_filter.can_select(selectables.items_ref[i])) {
             if (it.area() < area_min) {
                 area_min = it.area();
                 area_min_i = i;

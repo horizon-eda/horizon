@@ -198,6 +198,19 @@ static void make_cursor_size_editor(Gtk::Box *box, Appearance::CursorSize &curso
     bind_widget<Appearance::CursorSize>(widgets, cursor_size, [cb](auto _) { cb(); });
 }
 
+static void spinbutton_set_px(Gtk::SpinButton &sp)
+{
+    sp.signal_output().connect([&sp] {
+        auto v = sp.get_value();
+        std::ostringstream oss;
+        oss.imbue(get_locale());
+        oss << std::fixed << std::setprecision(1) << v << " px";
+        sp.set_text(oss.str());
+        return true;
+    });
+    entry_set_tnum(sp);
+}
+
 CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
                                                  Preferences *prefs, CanvasPreferences *canvas_prefs, bool layered)
     : Gtk::Box(cobject), preferences(prefs), canvas_preferences(canvas_prefs), is_layered(layered)
@@ -323,19 +336,30 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
     {
         Gtk::SpinButton *min_line_width_sp;
         GET_WIDGET(min_line_width_sp);
-
-        min_line_width_sp->signal_output().connect([min_line_width_sp] {
-            auto v = min_line_width_sp->get_value();
-            std::ostringstream oss;
-            oss.imbue(get_locale());
-            oss << std::fixed << std::setprecision(1) << v << " px";
-            min_line_width_sp->set_text(oss.str());
-            return true;
-        });
-        entry_set_tnum(*min_line_width_sp);
+        spinbutton_set_px(*min_line_width_sp);
         min_line_width_sp->set_value(appearance.min_line_width);
-        min_line_width_sp->signal_changed().connect([this, min_line_width_sp, &appearance] {
+        min_line_width_sp->signal_value_changed().connect([this, min_line_width_sp, &appearance] {
             appearance.min_line_width = min_line_width_sp->get_value();
+            preferences->signal_changed().emit();
+        });
+    }
+    {
+        Gtk::SpinButton *min_selectable_size_sp;
+        GET_WIDGET(min_selectable_size_sp);
+        spinbutton_set_px(*min_selectable_size_sp);
+        min_selectable_size_sp->set_value(appearance.min_selectable_size);
+        min_selectable_size_sp->signal_value_changed().connect([this, min_selectable_size_sp, &appearance] {
+            appearance.min_selectable_size = min_selectable_size_sp->get_value();
+            preferences->signal_changed().emit();
+        });
+    }
+    {
+        Gtk::SpinButton *snap_radius_sp;
+        GET_WIDGET(snap_radius_sp);
+        spinbutton_set_px(*snap_radius_sp);
+        snap_radius_sp->set_value(appearance.snap_radius);
+        snap_radius_sp->signal_value_changed().connect([this, snap_radius_sp, &appearance] {
+            appearance.snap_radius = snap_radius_sp->get_value();
             preferences->signal_changed().emit();
         });
     }
@@ -515,8 +539,9 @@ CanvasPreferencesEditor *CanvasPreferencesEditor::create(Preferences *prefs, Can
 {
     CanvasPreferencesEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    std::vector<Glib::ustring> widgets = {"canvas_box",  "adjustment1", "adjustment2",      "adjustment3",
-                                          "adjustment4", "adjustment7", "color_preset_menu"};
+    std::vector<Glib::ustring> widgets = {"canvas_box",  "adjustment1", "adjustment2",
+                                          "adjustment3", "adjustment4", "adjustment7",
+                                          "adjustment8", "adjustment9", "color_preset_menu"};
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/preferences.ui", widgets);
     x->get_widget_derived("canvas_box", w, prefs, canvas_prefs, layered);
     w->reference();

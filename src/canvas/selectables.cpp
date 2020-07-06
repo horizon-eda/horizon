@@ -16,10 +16,10 @@ bool Selectable::inside(const Coordf &c, float expand) const
     float a = -angle;
     float dx = d.x * cos(a) - d.y * sin(a);
     float dy = d.x * sin(a) + d.y * cos(a);
-    float w = width / 2;
-    float h = height / 2;
+    float w = std::max(width, expand) / 2;
+    float h = std::max(height, expand) / 2;
 
-    return (dx >= -w - expand) && (dx <= w + expand) && (dy >= -h - expand) && (dy <= h + expand);
+    return (dx >= -w) && (dx <= w) && (dy >= -h) && (dy <= h);
 }
 
 float Selectable::area() const

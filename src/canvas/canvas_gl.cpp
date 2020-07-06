@@ -372,7 +372,7 @@ void CanvasGL::cursor_move(GdkEvent *motion_event)
                                    [dfn](const auto &a, const auto &b) { return dfn(a) < dfn(b); });
         if (mi != targets.cend()) {
             auto d = sqrt(dfn(*mi));
-            if (d < 30 / scale) {
+            if (d < appearance.snap_radius / scale) {
                 target_current = *mi;
                 t = mi->p;
             }
@@ -546,7 +546,8 @@ std::set<SelectableRef> CanvasGL::get_selection_at(const Coordi &c)
     std::list<std::pair<const Selectable &, const SelectableRef &>> sel;
     unsigned int i = 0;
     for (auto &it : selectables.items) {
-        if (it.inside(c, 10 / scale) && selection_filter.can_select(selectables.items_ref[i])) {
+        if (it.inside(c, appearance.min_selectable_size / scale)
+            && selection_filter.can_select(selectables.items_ref[i])) {
             // in_selection.insert(selectables.items_ref[i]);
             sel.emplace_back(it, selectables.items_ref.at(i));
         }
