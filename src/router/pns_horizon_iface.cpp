@@ -5,6 +5,7 @@
 #include "canvas/canvas_gl.hpp"
 #include "clipper/clipper.hpp"
 #include "geometry/shape_simple.h"
+#include "geometry/shape_rect.h"
 #include "router/pns_debug_decorator.h"
 #include "router/pns_solid.h"
 #include "router/pns_topology.h"
@@ -557,6 +558,21 @@ std::unique_ptr<PNS::SOLID> PNS_HORIZON_IFACE::syncHole(const horizon::BoardHole
     return solid;
 }
 
+bool shape_is_at_origin(const horizon::Shape &sh)
+{
+    return sh.placement.shift == horizon::Coordi();
+}
+
+bool angle_is_rect(int angle)
+{
+    return (angle % 16384) == 0; // multiple of 90°
+}
+
+bool angle_needs_swap(int angle)
+{
+    return angle == 16384 || angle == 49152; // 90° or 270°
+}
+
 std::unique_ptr<PNS::SOLID> PNS_HORIZON_IFACE::syncPadstack(const horizon::Padstack *padstack,
                                                             const horizon::Placement &tr)
 {
@@ -566,6 +582,57 @@ std::unique_ptr<PNS::SOLID> PNS_HORIZON_IFACE::syncPadstack(const horizon::Padst
     ClipperLib::Clipper clipper;
 
     if (padstack->type != horizon::Padstack::Type::MECHANICAL) { // normal pad
+
+        auto n_shapes_cu = std::count_if(padstack->shapes.begin(), padstack->shapes.end(), [](const auto &it) {
+            return horizon::BoardLayers::is_copper(it.second.layer);
+        });
+
+        auto n_polys_cu = std::count_if(padstack->polygons.begin(), padstack->polygons.end(), [](const auto &it) {
+            return horizon::BoardLayers::is_copper(it.second.layer);
+        });
+
+        if (n_shapes_cu == 1 && n_polys_cu == 0) { // single SMD pad
+            const auto &shape = std::find_if(padstack->shapes.begin(), padstack->shapes.end(), [](const auto &it) {
+                                    return horizon::BoardLayers::is_copper(it.second.layer);
+                                })->second;
+            if (shape_is_at_origin(shape)) {
+                const int angle = tr.get_angle() + shape.placement.get_angle();
+                if (shape.form == horizon::Shape::Form::CIRCLE) {
+                    std::unique_ptr<PNS::SOLID> solid(new PNS::SOLID);
+
+                    solid->SetLayers(LAYER_RANGE(layer_to_router(shape.layer)));
+
+                    solid->SetOffset(VECTOR2I(0, 0));
+                    solid->SetPos(VECTOR2I(tr.shift.x, tr.shift.y));
+
+                    auto *sshape = new SHAPE_CIRCLE(VECTOR2I(tr.shift.x, tr.shift.y), shape.params.at(0) / 2);
+
+                    solid->SetShape(sshape);
+
+                    return solid;
+                }
+                else if (shape.form == horizon::Shape::Form::RECTANGLE && angle_is_rect(angle)) {
+                    std::unique_ptr<PNS::SOLID> solid(new PNS::SOLID);
+
+                    solid->SetLayers(LAYER_RANGE(layer_to_router(shape.layer)));
+
+                    solid->SetOffset(VECTOR2I(0, 0));
+                    const auto c = VECTOR2I(tr.shift.x, tr.shift.y);
+                    solid->SetPos(c);
+                    auto sz = VECTOR2I(shape.params.at(0), shape.params.at(1));
+                    if (angle_needs_swap(angle))
+                        std::swap(sz.x, sz.y);
+
+                    auto *sshape = new SHAPE_RECT(c - sz / 2, sz.x, sz.y);
+
+                    solid->SetShape(sshape);
+
+                    return solid;
+                }
+            }
+        }
+
+
         auto add_polygon = [&clipper, &tr](const auto &poly) {
             ClipperLib::Path path;
             if (poly.vertices.size() == 0) {
