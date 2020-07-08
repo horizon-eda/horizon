@@ -483,6 +483,22 @@ void ImpSchematic::construct()
     grid_controller->disable();
     canvas->snap_to_targets = false;
 
+    connect_action(ActionID::TOGGLE_SNAP_TO_TARGETS, [this](const ActionConnection &c) {
+        canvas->snap_to_targets = !canvas->snap_to_targets;
+        g_simple_action_set_state(toggle_snap_to_targets_action->gobj(),
+                                  g_variant_new_boolean(canvas->snap_to_targets));
+    });
+    view_options_menu->append("Snap to targets", "win.snap_to_targets");
+
+    toggle_snap_to_targets_action = main_window->add_action_bool("snap_to_targets", canvas->snap_to_targets);
+    toggle_snap_to_targets_action->signal_change_state().connect([this](const Glib::VariantBase &v) {
+        auto b = Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(v).get();
+        if (b != canvas->snap_to_targets) {
+            trigger_action(ActionID::TOGGLE_SNAP_TO_TARGETS);
+        }
+    });
+
+
     rules_window->signal_goto().connect([this](Coordi location, UUID sheet) {
         auto sch = core_schematic.get_schematic();
         if (sch->sheets.count(sheet)) {

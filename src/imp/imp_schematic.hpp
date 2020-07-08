@@ -65,6 +65,8 @@ private:
 
     void handle_drag();
 
+    Glib::RefPtr<Gio::SimpleAction> toggle_snap_to_targets_action;
+
     int get_board_pid();
 };
 } // namespace horizon
