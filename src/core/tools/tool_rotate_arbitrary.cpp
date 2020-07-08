@@ -25,7 +25,7 @@ ToolRotateArbitrary::ToolRotateArbitrary(IDocument *c, ToolID tid) : ToolBase(c,
 void ToolRotateArbitrary::expand_selection()
 {
     std::set<SelectableRef> new_sel;
-    std::set<SelectableRef> pkgs_fixed;
+    std::set<SelectableRef> sel_remove;
     for (const auto &it : selection) {
         switch (it.type) {
         case ObjectType::LINE: {
@@ -59,7 +59,7 @@ void ToolRotateArbitrary::expand_selection()
         case ObjectType::BOARD_PACKAGE: {
             BoardPackage *pkg = &doc.b->get_board()->packages.at(it.uuid);
             if (pkg->fixed) {
-                pkgs_fixed.insert(it);
+                sel_remove.insert(it);
             }
             else {
                 for (const auto &itt : pkg->texts) {
@@ -72,10 +72,23 @@ void ToolRotateArbitrary::expand_selection()
         }
     }
     selection.insert(new_sel.begin(), new_sel.end());
-    if (pkgs_fixed.size() && imp)
+
+    if (sel_remove.size() && imp)
         imp->tool_bar_flash("can't move fixed package");
+
+    if (doc.c) {
+        for (const auto &it : selection) {
+            if (it.type == ObjectType::JUNCTION) {
+                const auto ju = doc.r->get_junction(it.uuid);
+                if (ju->net) {
+                    sel_remove.insert(it);
+                }
+            }
+        }
+    }
+
     for (auto it = selection.begin(); it != selection.end();) {
-        if (pkgs_fixed.count(*it))
+        if (sel_remove.count(*it))
             it = selection.erase(it);
         else
             ++it;
@@ -107,8 +120,6 @@ ToolRotateArbitrary::~ToolRotateArbitrary()
 
 bool ToolRotateArbitrary::can_begin()
 {
-    if (doc.c) // dont' rotate arbitraryily in schematic
-        return false;
     expand_selection();
     return selection.size() > 0;
 }
