@@ -11,6 +11,7 @@
 #include "router/pns_topology.h"
 #include "router/pns_via.h"
 #include "util/util.hpp"
+#include "logger/logger.hpp"
 
 namespace PNS {
 
@@ -286,7 +287,13 @@ public:
 
     ~PNS_HORIZON_DEBUG_DECORATOR()
     {
-        Clear();
+        try {
+            Clear();
+        }
+        catch (const std::exception &e) {
+            horizon::Logger::log_critical("exception thrown in ~PNS_HORIZON_DEBUG_DECORATOR",
+                                          horizon::Logger::Domain::TOOL, e.what());
+        }
     }
 
     void AddPoint(VECTOR2I aP, int aColor) override
