@@ -6,6 +6,7 @@
 #include "util/util.hpp"
 #include <algorithm>
 #include <iostream>
+#include "common/object_descr.hpp"
 
 namespace horizon {
 
@@ -53,10 +54,18 @@ void Canvas::clear()
     pictures.clear();
 }
 
+static void dump_object_ref(const ObjectRef &r)
+{
+    std::cout << object_descriptions.at(r.type).name << " " << (std::string)r.uuid << " " << (std::string)r.uuid2
+              << std::endl;
+}
+
 void Canvas::remove_obj(const ObjectRef &r)
 {
     if (!object_refs.count(r))
         return;
+    std::cout << "remove ref ";
+    dump_object_ref(r);
     std::set<int> layers;
     for (const auto &it : object_refs.at(r)) {
         auto layer = it.first;
@@ -75,6 +84,9 @@ void Canvas::remove_obj(const ObjectRef &r)
             for (auto layer : layers) {
                 if (it.second.count(layer)) {
                     auto &idx = it.second.at(layer);
+                    std::cout << "get ref ";
+                    dump_object_ref(r);
+                    std::cout << "ref count " << object_refs.count(r) << std::endl;
                     auto idx_removed = object_refs.at(r).at(layer);
                     auto n_removed = (idx_removed.second - idx_removed.first) + 1;
                     if (idx.first > idx_removed.first) {
