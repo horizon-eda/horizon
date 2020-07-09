@@ -157,6 +157,11 @@ static std::array<float, 4> operator+(const std::array<float, 4> &a, float b)
     return {a.at(0) + b, a.at(1) + b, a.at(2) + b, a.at(3)};
 }
 
+static std::array<float, 4> operator+(const std::array<float, 4> &a, const std::array<float, 4> &b)
+{
+    return {a.at(0) + b.at(0), a.at(1) + b.at(1), a.at(2) + b.at(2), a.at(3)};
+}
+
 static std::array<float, 4> operator*(const std::array<float, 4> &a, float b)
 {
     return {a.at(0) * b, a.at(1) * b, a.at(2) * b, a.at(3)};
@@ -166,7 +171,6 @@ static std::array<float, 4> array_from_color(const Color &c)
 {
     return {c.r, c.g, c.b, 1};
 }
-
 
 std::array<float, 4> TriangleRenderer::apply_highlight(const Color &icolor, HighlightMode mode, int layer) const
 {
@@ -199,7 +203,9 @@ std::array<float, 4> TriangleRenderer::apply_highlight(const Color &icolor, High
         if (mode == HighlightMode::ONLY)
             return color;
         else
-            return color * ca.appearance.highlight_dim;
+            return (color * ca.appearance.highlight_dim)
+                   + (array_from_color(ca.appearance.colors.at(ColorP::BACKGROUND))
+                      * (1 - ca.appearance.highlight_dim));
 
     case CanvasGL::HighlightMode::SHADOW:
         if (mode == HighlightMode::ONLY)
