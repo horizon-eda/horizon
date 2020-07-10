@@ -4,6 +4,7 @@
 #include "imp/imp_interface.hpp"
 #include <iostream>
 #include <gdk/gdkkeysyms.h>
+#include "logger/logger.hpp"
 
 namespace horizon {
 
@@ -24,6 +25,12 @@ bool ToolPlaceVia::begin_attached()
         return false;
     }
     net = doc.b->get_block()->get_net(net_uuid);
+    auto ps_uu = rules->get_via_padstack_uuid(net);
+    if (!ps_uu) {
+        Logger::log_warning("Didn't find a via for net " + net->name, Logger::Domain::TOOL,
+                            "make sure that there's a default via rule");
+        return false;
+    }
     update_tip();
     return true;
 }
@@ -32,6 +39,9 @@ void ToolPlaceVia::create_attached()
 {
     auto uu = UUID::random();
     auto ps = doc.b->get_via_padstack_provider()->get_padstack(rules->get_via_padstack_uuid(net));
+    if (!ps) {
+        throw std::runtime_error("padstack not found");
+    }
     via = &doc.b->get_board()
                    ->vias.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, ps))
                    .first->second;
