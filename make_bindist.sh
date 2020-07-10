@@ -96,6 +96,7 @@ LIBS=(
 	libidn-12.dll\
 	libzip.dll\
 	libzstd.dll\
+	libssp-0.dll\
 	gspawn-win64-helper.exe\
 	gspawn-win64-helper-console.exe
 )
