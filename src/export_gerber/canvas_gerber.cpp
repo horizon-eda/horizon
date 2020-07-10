@@ -4,6 +4,7 @@
 #include "board/plane.hpp"
 #include "board/board_layers.hpp"
 #include "util/clipper_util.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 CanvasGerber::CanvasGerber(GerberExporter *exp) : Canvas::Canvas(), exporter(exp)
@@ -38,7 +39,8 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
                 if (GerberWriter *wr = exporter->get_writer_for_layer(ipoly.layer)) {
                     Coordi from = it->position;
                     Coordi to = it_next->position;
-                    Coordi center = it->arc_center;
+                    Coordd centerd = project_onto_perp_bisector(from, to, it->arc_center);
+                    Coordi center(centerd.x, centerd.y);
                     if (tr) {
                         from = transform.transform(from);
                         to = transform.transform(to);
