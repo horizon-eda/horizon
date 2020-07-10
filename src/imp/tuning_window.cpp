@@ -147,6 +147,7 @@ TuningWindow::TuningWindow(const Board *brd) : Gtk::Window(), board(brd), state_
             mcr->property_text() = ss.str();
             mcr->property_value() = row[list_columns.fill_value];
         });
+        tvc->set_sort_column(list_columns.length);
         tree_view->append_column(*tvc);
     }
 
