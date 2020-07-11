@@ -15,5 +15,7 @@ jobs:
         path: src
     - name: build docker image
       run: docker build . -f src/Dockerfile --network=host -t horizoneda/horizon:latest
+    - name: test docker image
+      run: docker run horizoneda/horizon:latest python3 -c 'import horizon'
     - name: publish docker image
       run: docker push horizoneda/horizon:latest
