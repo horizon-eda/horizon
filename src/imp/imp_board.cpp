@@ -591,6 +591,7 @@ void ImpBoard::construct()
 
     tuning_window = new TuningWindow(core_board.get_board());
     tuning_window->set_transient_for(*main_window);
+    imp_interface->signal_request_length_tuning_ref().connect([this] { return tuning_window->get_ref_length(); });
 
     rules_window->signal_goto().connect([this](Coordi location, UUID sheet) { canvas->center_and_zoom(location); });
 

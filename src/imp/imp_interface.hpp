@@ -4,6 +4,7 @@
 #include "canvas/snap_filter.hpp"
 #include "dialogs/dialogs.hpp"
 #include "core/tool_data.hpp"
+#include <sigc++/sigc++.h>
 
 namespace horizon {
 class ImpInterface {
@@ -29,8 +30,16 @@ public:
 
     void set_snap_filter(const std::set<SnapFilter> &filter);
     void set_snap_filter_from_selection(const std::set<SelectableRef> &sel);
+    uint64_t get_length_tuning_ref() const;
+
+    typedef sigc::signal<uint64_t> type_signal_request_length_tuning_ref;
+    type_signal_request_length_tuning_ref signal_request_length_tuning_ref()
+    {
+        return s_signal_request_length_tuning_ref;
+    }
 
 private:
     class ImpBase *imp;
+    type_signal_request_length_tuning_ref s_signal_request_length_tuning_ref;
 };
 } // namespace horizon

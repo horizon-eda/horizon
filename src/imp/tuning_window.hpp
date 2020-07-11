@@ -11,6 +11,7 @@ public:
     TuningWindow(const class Board *brd);
     void update();
     void add_tracks(const std::set<UUID> &tracks, bool all);
+    uint64_t get_ref_length() const;
 
 private:
     const Board *board;
@@ -49,5 +50,7 @@ private:
 
     WindowStateStore state_store;
     Gtk::Label *placeholder_label = nullptr;
+
+    uint64_t ref_length = 0;
 };
 } // namespace horizon

@@ -215,6 +215,7 @@ void TuningWindow::update()
     double c = 299.79e6 * (sp_vf->get_value() / 100);
     double ref_ps = -1;
     placeholder_label->set_visible(children.size() == 0);
+    ref_length = 0;
     for (auto it : children) {
         Gtk::TreeModel::Row row = *it;
         uint64_t length = 0;
@@ -235,8 +236,10 @@ void TuningWindow::update()
         row[list_columns.length] = length;
         auto length_ps = ((length / 1e9) / c) * 1e12;
         row[list_columns.length_ps] = length_ps;
-        if (row[list_columns.ref])
+        if (row[list_columns.ref]) {
             ref_ps = length_ps;
+            ref_length = length;
+        }
         length_max = std::max(length_max, length);
     }
     for (auto it : children) {
@@ -249,6 +252,11 @@ void TuningWindow::update()
             row[list_columns.delta_ps] = NAN;
         }
     }
+}
+
+uint64_t TuningWindow::get_ref_length() const
+{
+    return ref_length;
 }
 
 } // namespace horizon

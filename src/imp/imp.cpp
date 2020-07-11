@@ -746,6 +746,8 @@ void ImpBase::run(int argc, char *argv[])
     add_tool_action(ActionID::SELECTION_FILTER, "selection_filter");
     view_options_menu->append("Selection filter", "win.selection_filter");
 
+    imp_interface = std::make_unique<ImpInterface>(this);
+
     construct();
 
     {
@@ -794,8 +796,6 @@ void ImpBase::run(int argc, char *argv[])
     });
 
     context_menu = Gtk::manage(new Gtk::Menu());
-
-    imp_interface = std::make_unique<ImpInterface>(this);
 
     core->signal_tool_changed().connect([this](ToolID id) { s_signal_action_sensitive.emit(); });
 

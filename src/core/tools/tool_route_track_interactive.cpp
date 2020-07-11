@@ -228,8 +228,13 @@ ToolResponse ToolRouteTrackInteractive::begin(const ToolArgs &args)
         VECTOR2I p0(args.coords.x, args.coords.y);
         if (!router->StartRouting(p0, wrapper->m_startItem, 0))
             return ToolResponse::end();
-        router->Move(p0, NULL);
         meander_placer = dynamic_cast<PNS::MEANDER_PLACER_BASE *>(router->Placer());
+        if (auto ref = imp->get_length_tuning_ref()) {
+            PNS::MEANDER_SETTINGS meander_settings = meander_placer->MeanderSettings();
+            meander_settings.m_targetLength = ref;
+            meander_placer->UpdateSettings(meander_settings);
+        }
+        router->Move(p0, NULL);
     }
     update_tip();
     return ToolResponse();

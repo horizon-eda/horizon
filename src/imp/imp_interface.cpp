@@ -112,4 +112,9 @@ void ImpInterface::set_snap_filter_from_selection(const std::set<SelectableRef> 
     imp->canvas->snap_filter = sf;
 }
 
+uint64_t ImpInterface::get_length_tuning_ref() const
+{
+    return s_signal_request_length_tuning_ref.emit();
+}
+
 } // namespace horizon
