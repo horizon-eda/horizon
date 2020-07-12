@@ -9,17 +9,17 @@
 namespace horizon {
 class ActionEditor : public Gtk::Box {
 public:
-    ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs, ActionToolID action,
+    ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences &prefs, ActionToolID action,
                  ActionCatalogItem::Availability availability, const std::string &title,
-                 KeySequencesPreferencesEditor *parent);
-    static ActionEditor *create(Preferences *prefs, ActionToolID action, ActionCatalogItem::Availability availability,
-                                const std::string &title, KeySequencesPreferencesEditor *parent);
+                 KeySequencesPreferencesEditor &parent);
+    static ActionEditor *create(Preferences &prefs, ActionToolID action, ActionCatalogItem::Availability availability,
+                                const std::string &title, KeySequencesPreferencesEditor &parent);
 
 private:
     ActionToolID action;
     ActionCatalogItem::Availability availability;
-    KeySequencesPreferencesEditor *parent;
-    Preferences *preferences;
+    KeySequencesPreferencesEditor &parent;
+    Preferences &preferences;
 
     Gtk::ListBox *action_listbox = nullptr;
     void update();
@@ -27,9 +27,8 @@ private:
 };
 
 KeySequencesPreferencesEditor::KeySequencesPreferencesEditor(BaseObjectType *cobject,
-                                                             const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
-                                                             KeySequencesPreferences *keyseq_prefs)
-    : Gtk::Grid(cobject), preferences(prefs), keyseq_preferences(keyseq_prefs)
+                                                             const Glib::RefPtr<Gtk::Builder> &x, Preferences &prefs)
+    : Gtk::Grid(cobject), preferences(prefs), keyseq_preferences(preferences.key_sequences)
 {
     GET_WIDGET(key_sequences_treeview);
     GET_WIDGET(action_editors);
@@ -78,7 +77,7 @@ KeySequencesPreferencesEditor::KeySequencesPreferencesEditor(BaseObjectType *cob
             std::ostringstream oss;
             oss << "|Action | Key sequence | Comments|\n";
             oss << "|-|-|-|\n";
-            for (const auto &it : keyseq_preferences->keys) {
+            for (const auto &it : keyseq_preferences.keys) {
                 for (const auto &it2 : it.second) {
                     for (const auto &it3 : it2.second) {
                         oss << "|" << action_catalog.at(it.first).name << "|`" << key_sequence_to_string(it3)
@@ -125,12 +124,12 @@ void KeySequencesPreferencesEditor::update_action_editors()
             std::vector<ActionEditor *> eds;
             if (count > 1) {
                 auto ed = Gtk::manage(ActionEditor::create(preferences, action, ActionCatalogItem::AVAILABLE_EVERYWHERE,
-                                                           "Default", this));
+                                                           "Default", *this));
                 eds.push_back(ed);
             }
             for (const auto &it_av : availabilities) {
                 if (cat.availability & it_av.first) {
-                    auto ed = Gtk::manage(ActionEditor::create(preferences, action, it_av.first, it_av.second, this));
+                    auto ed = Gtk::manage(ActionEditor::create(preferences, action, it_av.first, it_av.second, *this));
                     eds.push_back(ed);
                 }
             }
@@ -147,9 +146,9 @@ void KeySequencesPreferencesEditor::update_keys()
 {
     for (auto &it : key_sequences_store->children()) {
         for (auto &it2 : it->children()) {
-            if (keyseq_preferences->keys.count(it2[tree_columns.action])) {
+            if (keyseq_preferences.keys.count(it2[tree_columns.action])) {
                 std::stringstream s;
-                for (const auto &it_seq : keyseq_preferences->keys.at(it2[tree_columns.action])) {
+                for (const auto &it_seq : keyseq_preferences.keys.at(it2[tree_columns.action])) {
                     const auto &seqs = it_seq.second;
                     std::transform(seqs.begin(), seqs.end(), std::ostream_iterator<std::string>(s, ", "),
                                    [](const auto &x) { return key_sequence_to_string(x); });
@@ -190,7 +189,7 @@ void KeySequencesPreferencesEditor::handle_save()
         while (1) {
             std::string error_str;
             try {
-                auto j = keyseq_preferences->serialize();
+                auto j = keyseq_preferences.serialize();
                 save_json_to_file(filename, j);
                 break;
             }
@@ -229,10 +228,10 @@ void KeySequencesPreferencesEditor::handle_load()
         std::string error_str;
         try {
             auto j = load_json_from_file(filename);
-            keyseq_preferences->load_from_json(j);
+            keyseq_preferences.load_from_json(j);
             update_action_editors();
             update_keys();
-            preferences->signal_changed().emit();
+            preferences.signal_changed().emit();
         }
         catch (const std::exception &e) {
             error_str = e.what();
@@ -250,19 +249,18 @@ void KeySequencesPreferencesEditor::handle_load()
 
 void KeySequencesPreferencesEditor::handle_load_default()
 {
-    keyseq_preferences->load_from_json(json_from_resource("/org/horizon-eda/horizon/imp/keys_default.json"));
+    keyseq_preferences.load_from_json(json_from_resource("/org/horizon-eda/horizon/imp/keys_default.json"));
     update_action_editors();
     update_keys();
-    preferences->signal_changed().emit();
+    preferences.signal_changed().emit();
 }
 
-KeySequencesPreferencesEditor *KeySequencesPreferencesEditor::create(Preferences *prefs,
-                                                                     KeySequencesPreferences *keyseq_prefs)
+KeySequencesPreferencesEditor *KeySequencesPreferencesEditor::create(Preferences &prefs)
 {
     KeySequencesPreferencesEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/preferences.ui", "key_sequences_box");
-    x->get_widget_derived("key_sequences_box", w, prefs, keyseq_prefs);
+    x->get_widget_derived("key_sequences_box", w, prefs);
     w->reference();
     return w;
 }
@@ -277,9 +275,9 @@ public:
 };
 
 
-ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences *prefs,
+ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Preferences &prefs,
                            ActionToolID act, ActionCatalogItem::Availability av, const std::string &title,
-                           KeySequencesPreferencesEditor *p)
+                           KeySequencesPreferencesEditor &p)
     : Gtk::Box(cobject), action(act), availability(av), parent(p), preferences(prefs)
 {
     Gtk::Label *la;
@@ -295,9 +293,9 @@ ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         CaptureDialog dia(top);
         if (dia.run() == Gtk::RESPONSE_OK) {
             if (dia.keys.size()) {
-                preferences->key_sequences.keys[action][availability].push_back(dia.keys);
+                preferences.key_sequences.keys[action][availability].push_back(dia.keys);
                 update();
-                preferences->signal_changed().emit();
+                preferences.signal_changed().emit();
             }
         }
         return false;
@@ -321,7 +319,7 @@ ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
             if (dia.keys.size()) {
                 my_box->keys = dia.keys;
                 update();
-                preferences->signal_changed().emit();
+                preferences.signal_changed().emit();
             }
         }
     });
@@ -331,9 +329,8 @@ ActionEditor::ActionEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
 
 std::vector<KeySequence> *ActionEditor::get_keys()
 {
-    if (preferences->key_sequences.keys.count(action)
-        && preferences->key_sequences.keys.at(action).count(availability)) {
-        return &preferences->key_sequences.keys.at(action).at(availability);
+    if (preferences.key_sequences.keys.count(action) && preferences.key_sequences.keys.at(action).count(availability)) {
+        return &preferences.key_sequences.keys.at(action).at(availability);
     }
     else {
         return nullptr;
@@ -361,7 +358,7 @@ void ActionEditor::update()
             delete_button->signal_clicked().connect([this, i, keys] {
                 keys->erase(keys->begin() + i);
                 update();
-                preferences->signal_changed().emit();
+                preferences.signal_changed().emit();
             });
             delete_button->set_image_from_icon_name("list-remove-symbolic", Gtk::ICON_SIZE_BUTTON);
             box->pack_start(*la, true, true, 0);
@@ -374,13 +371,13 @@ void ActionEditor::update()
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
     if (top)
         top->queue_draw();
-    parent->update_keys();
+    parent.update_keys();
 }
 
 
-ActionEditor *ActionEditor::create(Preferences *prefs, ActionToolID action,
+ActionEditor *ActionEditor::create(Preferences &prefs, ActionToolID action,
                                    ActionCatalogItem::Availability availability, const std::string &title,
-                                   KeySequencesPreferencesEditor *parent)
+                                   KeySequencesPreferencesEditor &parent)
 {
     ActionEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();

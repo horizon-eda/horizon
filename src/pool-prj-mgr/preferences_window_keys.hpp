@@ -9,12 +9,12 @@ class KeySequencesPreferencesEditor : public Gtk::Grid {
 
 public:
     KeySequencesPreferencesEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
-                                  class Preferences *prefs, class KeySequencesPreferences *keyseq_prefs);
-    static KeySequencesPreferencesEditor *create(Preferences *prefs, KeySequencesPreferences *keyseq_prefs);
+                                  class Preferences &prefs);
+    static KeySequencesPreferencesEditor *create(Preferences &prefs);
 
 private:
-    Preferences *preferences;
-    KeySequencesPreferences *keyseq_preferences;
+    class Preferences &preferences;
+    class KeySequencesPreferences &keyseq_preferences;
 
     class TreeColumns : public Gtk::TreeModelColumnRecord {
     public:

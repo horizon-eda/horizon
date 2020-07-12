@@ -7,13 +7,12 @@ namespace horizon {
 using json = nlohmann::json;
 class PartinfoPreferencesEditor : public Gtk::Box {
 public:
-    PartinfoPreferencesEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Preferences *prefs,
-                              class PartInfoPreferences *partinfo_prefs);
-    static PartinfoPreferencesEditor *create(Preferences *prefs, PartInfoPreferences *partinfo_prefs);
-    Preferences *preferences;
-    PartInfoPreferences *partinfo_preferences;
+    PartinfoPreferencesEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Preferences &prefs);
+    static PartinfoPreferencesEditor *create(Preferences &prefs);
 
 private:
+    Preferences &preferences;
+    PartInfoPreferences &partinfo_preferences;
     Gtk::Switch *partinfo_enable_switch = nullptr;
     Gtk::Grid *partinfo_grid = nullptr;
     Gtk::Entry *partinfo_base_url_entry = nullptr;

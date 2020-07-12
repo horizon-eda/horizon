@@ -14,7 +14,7 @@
 
 namespace horizon {
 
-PreferencesWindow::PreferencesWindow(Preferences *prefs) : Gtk::Window(), preferences(prefs)
+PreferencesWindow::PreferencesWindow(Preferences &prefs) : Gtk::Window(), preferences(prefs)
 {
     set_default_size(1300, -1);
     set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
@@ -35,30 +35,30 @@ PreferencesWindow::PreferencesWindow(Preferences *prefs) : Gtk::Window(), prefer
     stack->show();
 
     {
-        auto ed = CanvasPreferencesEditor::create(preferences, &preferences->canvas_layer, true);
+        auto ed = CanvasPreferencesEditor::create(preferences, true);
         stack->add(*ed, "layer", "Board appearance");
         ed->show();
         ed->unreference();
     }
     {
-        auto ed = CanvasPreferencesEditor::create(preferences, &preferences->canvas_non_layer, false);
+        auto ed = CanvasPreferencesEditor::create(preferences, false);
         stack->add(*ed, "non-layer", "Schematic appearance");
         ed->show();
         ed->unreference();
     }
     {
-        auto ed = Gtk::manage(new MiscPreferencesEditor(*preferences));
+        auto ed = Gtk::manage(new MiscPreferencesEditor(preferences));
         stack->add(*ed, "misc", "Editor");
         ed->show();
     }
     {
-        auto ed = PartinfoPreferencesEditor::create(preferences, &preferences->partinfo);
+        auto ed = PartinfoPreferencesEditor::create(preferences);
         stack->add(*ed, "partinfo", "Partinfo");
         ed->show();
         ed->unreference();
     }
     {
-        auto ed = KeySequencesPreferencesEditor::create(preferences, &preferences->key_sequences);
+        auto ed = KeySequencesPreferencesEditor::create(preferences);
         stack->add(*ed, "keys", "Keys");
         ed->show();
         ed->unreference();

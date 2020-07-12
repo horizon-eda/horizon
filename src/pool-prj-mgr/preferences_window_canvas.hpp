@@ -7,13 +7,13 @@ namespace horizon {
 using json = nlohmann::json;
 class CanvasPreferencesEditor : public Gtk::Box {
 public:
-    CanvasPreferencesEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Preferences *prefs,
-                            class CanvasPreferences *canvas_prefs, bool layered);
-    static CanvasPreferencesEditor *create(Preferences *prefs, CanvasPreferences *canvas_prefs, bool layered);
-    Preferences *preferences;
-    CanvasPreferences *canvas_preferences;
+    CanvasPreferencesEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Preferences &prefs,
+                            bool layered);
+    static CanvasPreferencesEditor *create(Preferences &prefs, bool layered);
 
 private:
+    Preferences &preferences;
+    CanvasPreferences &canvas_preferences;
     const bool is_layered;
     json color_presets;
     Gtk::FlowBox *canvas_colors_fb = nullptr;

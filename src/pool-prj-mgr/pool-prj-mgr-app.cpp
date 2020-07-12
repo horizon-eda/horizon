@@ -148,7 +148,7 @@ void PoolProjectManagerApplication::on_startup()
 PreferencesWindow *PoolProjectManagerApplication::show_preferences_window(guint32 timestamp)
 {
     if (!preferences_window) {
-        preferences_window = new PreferencesWindow(&preferences);
+        preferences_window = new PreferencesWindow(preferences);
 
         preferences_window->signal_hide().connect([this] {
             delete preferences_window;

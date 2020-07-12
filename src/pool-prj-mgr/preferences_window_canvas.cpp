@@ -100,11 +100,11 @@ void ColorEditor::construct()
 
 class ColorEditorPalette : public ColorEditor {
 public:
-    ColorEditorPalette(Appearance &a, Preferences *p, ColorP c);
+    ColorEditorPalette(Appearance &a, Preferences &p, ColorP c);
 
 private:
     Appearance &apperance;
-    Preferences *prefs;
+    Preferences &prefs;
     ColorP color;
 
     Color get_color() override;
@@ -112,7 +112,7 @@ private:
     std::string get_color_name() override;
 };
 
-ColorEditorPalette::ColorEditorPalette(Appearance &a, Preferences *p, ColorP c) : apperance(a), prefs(p), color(c)
+ColorEditorPalette::ColorEditorPalette(Appearance &a, Preferences &p, ColorP c) : apperance(a), prefs(p), color(c)
 {
 }
 
@@ -125,7 +125,7 @@ void ColorEditorPalette::set_color(const Color &c)
 {
     apperance.colors.at(color) = c;
     queue_draw();
-    prefs->signal_changed().emit();
+    prefs.signal_changed().emit();
 }
 
 std::string ColorEditorPalette::get_color_name()
@@ -135,11 +135,11 @@ std::string ColorEditorPalette::get_color_name()
 
 class ColorEditorLayer : public ColorEditor {
 public:
-    ColorEditorLayer(Appearance &a, Preferences *p, int layer, const std::string &na = "");
+    ColorEditorLayer(Appearance &a, Preferences &p, int layer, const std::string &na = "");
 
 private:
     Appearance &apperance;
-    Preferences *prefs;
+    Preferences &prefs;
     int layer;
     std::string name;
 
@@ -148,7 +148,7 @@ private:
     std::string get_color_name() override;
 };
 
-ColorEditorLayer::ColorEditorLayer(Appearance &a, Preferences *p, int l, const std::string &na)
+ColorEditorLayer::ColorEditorLayer(Appearance &a, Preferences &p, int l, const std::string &na)
     : apperance(a), prefs(p), layer(l), name(na)
 {
 }
@@ -162,7 +162,7 @@ void ColorEditorLayer::set_color(const Color &c)
 {
     apperance.layer_colors.at(layer) = c;
     queue_draw();
-    prefs->signal_changed().emit();
+    prefs.signal_changed().emit();
 }
 
 std::string ColorEditorLayer::get_color_name()
@@ -212,8 +212,9 @@ static void spinbutton_set_px(Gtk::SpinButton &sp)
 }
 
 CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
-                                                 Preferences *prefs, CanvasPreferences *canvas_prefs, bool layered)
-    : Gtk::Box(cobject), preferences(prefs), canvas_preferences(canvas_prefs), is_layered(layered)
+                                                 Preferences &prefs, bool layered)
+    : Gtk::Box(cobject), preferences(prefs),
+      canvas_preferences(layered ? preferences.canvas_layer : preferences.canvas_non_layer), is_layered(layered)
 {
 
     Gtk::RadioButton *canvas_grid_style_cross, *canvas_grid_style_dot, *canvas_grid_style_grid,
@@ -290,7 +291,7 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
     canvas_colors_fb->signal_selected_children_changed().connect(
             sigc::mem_fun(*this, &CanvasPreferencesEditor::update_color_chooser));
 
-    if (canvas_preferences == &preferences->canvas_layer) {
+    if (is_layered) {
         canvas_label->set_text("Affects Padstack, Package and Board");
     }
     else {
@@ -308,7 +309,7 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
             {Appearance::GridFineModifier::CTRL, canvas_grid_fine_mod_ctrl},
     };
 
-    auto &appearance = canvas_preferences->appearance;
+    auto &appearance = canvas_preferences.appearance;
 
     bind_widget(grid_style_widgets, appearance.grid_style);
     bind_widget(grid_fine_mod_widgets, appearance.grid_fine_modifier);
@@ -317,21 +318,21 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
     bind_widget(canvas_highlight_lighten, appearance.highlight_lighten);
 
     for (auto &it : grid_style_widgets) {
-        it.second->signal_toggled().connect([this] { preferences->signal_changed().emit(); });
+        it.second->signal_toggled().connect([this] { preferences.signal_changed().emit(); });
     }
     for (auto &it : grid_fine_mod_widgets) {
-        it.second->signal_toggled().connect([this] { preferences->signal_changed().emit(); });
+        it.second->signal_toggled().connect([this] { preferences.signal_changed().emit(); });
     }
-    canvas_grid_opacity->signal_value_changed().connect([this] { preferences->signal_changed().emit(); });
-    canvas_highlight_dim->signal_value_changed().connect([this] { preferences->signal_changed().emit(); });
-    canvas_highlight_lighten->signal_value_changed().connect([this] { preferences->signal_changed().emit(); });
+    canvas_grid_opacity->signal_value_changed().connect([this] { preferences.signal_changed().emit(); });
+    canvas_highlight_dim->signal_value_changed().connect([this] { preferences.signal_changed().emit(); });
+    canvas_highlight_lighten->signal_value_changed().connect([this] { preferences.signal_changed().emit(); });
 
     Gtk::Box *cursor_size_tool_box, *cursor_size_box;
     GET_WIDGET(cursor_size_box);
     GET_WIDGET(cursor_size_tool_box);
-    make_cursor_size_editor(cursor_size_box, appearance.cursor_size, [this] { preferences->signal_changed().emit(); });
+    make_cursor_size_editor(cursor_size_box, appearance.cursor_size, [this] { preferences.signal_changed().emit(); });
     make_cursor_size_editor(cursor_size_tool_box, appearance.cursor_size_tool,
-                            [this] { preferences->signal_changed().emit(); });
+                            [this] { preferences.signal_changed().emit(); });
 
     {
         Gtk::SpinButton *min_line_width_sp;
@@ -340,7 +341,7 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
         min_line_width_sp->set_value(appearance.min_line_width);
         min_line_width_sp->signal_value_changed().connect([this, min_line_width_sp, &appearance] {
             appearance.min_line_width = min_line_width_sp->get_value();
-            preferences->signal_changed().emit();
+            preferences.signal_changed().emit();
         });
     }
     {
@@ -350,7 +351,7 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
         min_selectable_size_sp->set_value(appearance.min_selectable_size);
         min_selectable_size_sp->signal_value_changed().connect([this, min_selectable_size_sp, &appearance] {
             appearance.min_selectable_size = min_selectable_size_sp->get_value();
-            preferences->signal_changed().emit();
+            preferences.signal_changed().emit();
         });
     }
     {
@@ -360,7 +361,7 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
         snap_radius_sp->set_value(appearance.snap_radius);
         snap_radius_sp->signal_value_changed().connect([this, snap_radius_sp, &appearance] {
             appearance.snap_radius = snap_radius_sp->get_value();
-            preferences->signal_changed().emit();
+            preferences.signal_changed().emit();
         });
     }
 
@@ -375,7 +376,7 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
         msaa_combo->signal_changed().connect([this, msaa_combo, &appearance] {
             int msaa = std::stoi(msaa_combo->get_active_id());
             appearance.msaa = msaa;
-            preferences->signal_changed().emit();
+            preferences.signal_changed().emit();
         });
     }
 
@@ -431,7 +432,7 @@ void CanvasPreferencesEditor::handle_export()
         while (1) {
             std::string error_str;
             try {
-                auto j = canvas_preferences->serialize_colors();
+                auto j = canvas_preferences.serialize_colors();
                 j["layered"] = is_layered;
                 save_json_to_file(filename, j);
                 break;
@@ -502,9 +503,9 @@ void CanvasPreferencesEditor::handle_default()
     CanvasPreferences def;
     if (!is_layered)
         def.appearance.layer_colors[0] = {1, 1, 0};
-    canvas_preferences->appearance.colors = def.appearance.colors;
-    canvas_preferences->appearance.layer_colors = def.appearance.layer_colors;
-    preferences->signal_changed().emit();
+    canvas_preferences.appearance.colors = def.appearance.colors;
+    canvas_preferences.appearance.layer_colors = def.appearance.layer_colors;
+    preferences.signal_changed().emit();
     update_color_chooser();
     queue_draw();
     canvas_colors_fb->queue_draw();
@@ -512,8 +513,8 @@ void CanvasPreferencesEditor::handle_default()
 
 void CanvasPreferencesEditor::load_colors(const json &j)
 {
-    canvas_preferences->load_colors_from_json(j);
-    preferences->signal_changed().emit();
+    canvas_preferences.load_colors_from_json(j);
+    preferences.signal_changed().emit();
     update_color_chooser();
     queue_draw();
     canvas_colors_fb->queue_draw();
@@ -534,8 +535,7 @@ void CanvasPreferencesEditor::update_color_chooser()
     color_chooser_conn.unblock();
 }
 
-CanvasPreferencesEditor *CanvasPreferencesEditor::create(Preferences *prefs, CanvasPreferences *canvas_prefs,
-                                                         bool layered)
+CanvasPreferencesEditor *CanvasPreferencesEditor::create(Preferences &prefs, bool layered)
 {
     CanvasPreferencesEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
@@ -543,7 +543,7 @@ CanvasPreferencesEditor *CanvasPreferencesEditor::create(Preferences *prefs, Can
                                           "adjustment3", "adjustment4", "adjustment7",
                                           "adjustment8", "adjustment9", "color_preset_menu"};
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/preferences.ui", widgets);
-    x->get_widget_derived("canvas_box", w, prefs, canvas_prefs, layered);
+    x->get_widget_derived("canvas_box", w, prefs, layered);
     w->reference();
     return w;
 }
