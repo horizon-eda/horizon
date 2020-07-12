@@ -1,7 +1,7 @@
 #include "welcome_window.hpp"
 #include "pool-prj-mgr-app_win.hpp"
 #include "pool-prj-mgr-app.hpp"
-#include "preferences_window.hpp"
+#include "preferences/preferences_window.hpp"
 
 namespace horizon {
 WelcomeWindow *WelcomeWindow::create(PoolProjectManagerAppWindow *aw)

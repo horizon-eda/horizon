@@ -9,7 +9,7 @@
 #include "nlohmann/json.hpp"
 #include "close_utils.hpp"
 #include "pool/pool_manager.hpp"
-#include "preferences_window.hpp"
+#include "preferences/preferences_window.hpp"
 #include "preferences/preferences_provider.hpp"
 #include "widgets/about_dialog.hpp"
 

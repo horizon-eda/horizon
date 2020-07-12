@@ -542,7 +542,7 @@ CanvasPreferencesEditor *CanvasPreferencesEditor::create(Preferences &prefs, boo
     std::vector<Glib::ustring> widgets = {"canvas_box",  "adjustment1", "adjustment2",
                                           "adjustment3", "adjustment4", "adjustment7",
                                           "adjustment8", "adjustment9", "color_preset_menu"};
-    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/preferences.ui", widgets);
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/preferences/preferences.ui", widgets);
     x->get_widget_derived("canvas_box", w, prefs, layered);
     w->reference();
     return w;

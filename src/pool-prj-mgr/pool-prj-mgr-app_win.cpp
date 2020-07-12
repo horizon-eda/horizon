@@ -1,6 +1,6 @@
 #include "pool-prj-mgr-app_win.hpp"
 #include "pool-prj-mgr-app.hpp"
-#include "preferences_window.hpp"
+#include "preferences/preferences_window.hpp"
 #include <iostream>
 #include <thread>
 #include "util/util.hpp"

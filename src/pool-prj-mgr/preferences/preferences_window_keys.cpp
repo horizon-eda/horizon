@@ -259,7 +259,7 @@ KeySequencesPreferencesEditor *KeySequencesPreferencesEditor::create(Preferences
 {
     KeySequencesPreferencesEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/preferences.ui", "key_sequences_box");
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/preferences/preferences.ui", "key_sequences_box");
     x->get_widget_derived("key_sequences_box", w, prefs);
     w->reference();
     return w;
@@ -381,7 +381,7 @@ ActionEditor *ActionEditor::create(Preferences &prefs, ActionToolID action,
 {
     ActionEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
-    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/preferences.ui", "action_editor");
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/preferences/preferences.ui", "action_editor");
     x->get_widget_derived("action_editor", w, prefs, action, availability, title, parent);
     w->reference();
     return w;

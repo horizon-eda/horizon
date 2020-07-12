@@ -88,7 +88,7 @@ PartinfoPreferencesEditor *PartinfoPreferencesEditor::create(Preferences &prefs)
     PartinfoPreferencesEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     std::vector<Glib::ustring> widgets = {"partinfo_box", "adjustment5", "adjustment6"};
-    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/preferences.ui", widgets);
+    x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/preferences/preferences.ui", widgets);
     x->get_widget_derived("partinfo_box", w, prefs);
     w->reference();
     return w;

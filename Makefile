@@ -589,12 +589,12 @@ SRC_POOL_PRJ_MGR = \
 	src/preferences/preferences.cpp\
 	src/preferences/preferences_provider.cpp\
 	src/preferences/preferences_util.cpp\
-	src/pool-prj-mgr/preferences_window.cpp\
-	src/pool-prj-mgr/preferences_window_keys.cpp\
-	src/pool-prj-mgr/preferences_window_canvas.cpp\
-	src/pool-prj-mgr/preferences_window_pool.cpp\
-	src/pool-prj-mgr/preferences_window_partinfo.cpp\
-	src/pool-prj-mgr/preferences_window_misc.cpp\
+	src/pool-prj-mgr/preferences/preferences_window.cpp\
+	src/pool-prj-mgr/preferences/preferences_window_keys.cpp\
+	src/pool-prj-mgr/preferences/preferences_window_canvas.cpp\
+	src/pool-prj-mgr/preferences/preferences_window_pool.cpp\
+	src/pool-prj-mgr/preferences/preferences_window_partinfo.cpp\
+	src/pool-prj-mgr/preferences/preferences_window_misc.cpp\
 	src/imp/action.cpp\
 	src/imp/action_catalog.cpp\
 	src/widgets/unit_info_box.cpp\

@@ -6,7 +6,7 @@
     <file>imp/layer_display_default.json</file>
     <file>imp/keys_default.json</file>
     <file>imp/app_menu.ui</file>
-    <file>pool-prj-mgr/preferences.ui</file>
+    <file>pool-prj-mgr/preferences/preferences.ui</file>
     <file>property_panels/property_panel.ui</file>
     <file>pool-update/schema.sql</file>
 
