@@ -1,0 +1,312 @@
+{
+    "ARBITRARY_ANGLE_MODE": [
+        [
+            {
+                "key": "a",
+                "mod": 0
+            }
+        ]
+    ],
+    "AUTOPLACE_ALL_PINS": [
+        [
+            {
+                "key": "a",
+                "mod": 0
+            }
+        ]
+    ],
+    "AUTOPLACE_NEXT_PIN": [
+        [
+            {
+                "key": "Return",
+                "mod": 0
+            }
+        ]
+    ],
+    "CLEARANCE_OFFSET": [
+        [
+            {
+                "key": "o",
+                "mod": 0
+            }
+        ]
+    ],
+    "CLEARANCE_OFFSET_DEFAULT": [
+        [
+            {
+                "key": "O",
+                "mod": 0
+            }
+        ]
+    ],
+    "DIMENSION_MODE": [
+        [
+            {
+                "key": "m",
+                "mod": 0
+            }
+        ]
+    ],
+    "EDIT": [
+        [
+            {
+                "key": "space",
+                "mod": 0
+            }
+        ]
+    ],
+    "ENTER_DATUM": [
+        [
+            {
+                "key": "Return",
+                "mod": 0
+            }
+        ]
+    ],
+    "ENTER_SIZE": [
+        [
+            {
+                "key": "s",
+                "mod": 0
+            }
+        ]
+    ],
+    "ENTER_WIDTH": [
+        [
+            {
+                "key": "w",
+                "mod": 0
+            }
+        ]
+    ],
+    "FLIP_ARC": [
+        [
+            {
+                "key": "e",
+                "mod": 0
+            }
+        ]
+    ],
+    "LENGTH_TUNING_AMPLITUDE_DEC": [
+        [
+            {
+                "key": "less",
+                "mod": 0
+            }
+        ]
+    ],
+    "LENGTH_TUNING_AMPLITUDE_INC": [
+        [
+            {
+                "key": "greater",
+                "mod": 0
+            }
+        ]
+    ],
+    "LENGTH_TUNING_LENGTH": [
+        [
+            {
+                "key": "l",
+                "mod": 0
+            }
+        ]
+    ],
+    "LENGTH_TUNING_SPACING_DEC": [
+        [
+            {
+                "key": "comma",
+                "mod": 0
+            }
+        ]
+    ],
+    "LENGTH_TUNING_SPACING_INC": [
+        [
+            {
+                "key": "period",
+                "mod": 0
+            }
+        ]
+    ],
+    "MIRROR": [
+        [
+            {
+                "key": "e",
+                "mod": 0
+            }
+        ]
+    ],
+    "MIRROR_CURSOR": [
+        [
+            {
+                "key": "w",
+                "mod": 0
+            }
+        ]
+    ],
+    "NC_MODE": [
+        [
+            {
+                "key": "m",
+                "mod": 0
+            }
+        ]
+    ],
+    "NET_LABEL_SIZE_DEC": [
+        [
+            {
+                "key": "minus",
+                "mod": 0
+            }
+        ]
+    ],
+    "NET_LABEL_SIZE_INC": [
+        [
+            {
+                "key": "plus",
+                "mod": 0
+            }
+        ],
+        [
+            {
+                "key": "equal",
+                "mod": 0
+            }
+        ]
+    ],
+    "PLACE_JUNCTION": [
+        [
+            {
+                "key": "space",
+                "mod": 0
+            }
+        ]
+    ],
+    "POLYGON_CORNER_RADIUS": [
+        [
+            {
+                "key": "r",
+                "mod": 0
+            }
+        ]
+    ],
+    "POLYGON_DECORATION_POSITION": [
+        [
+            {
+                "key": "p",
+                "mod": 0
+            }
+        ]
+    ],
+    "POLYGON_DECORATION_SIZE": [
+        [
+            {
+                "key": "s",
+                "mod": 0
+            }
+        ]
+    ],
+    "POLYGON_DECORATION_STYLE": [
+        [
+            {
+                "key": "d",
+                "mod": 0
+            }
+        ]
+    ],
+    "POSTURE": [
+        [
+            {
+                "key": "slash",
+                "mod": 0
+            }
+        ]
+    ],
+    "RECTANGLE_MODE": [
+        [
+            {
+                "key": "c",
+                "mod": 0
+            }
+        ]
+    ],
+    "RESTRICT": [
+        [
+            {
+                "key": "slash",
+                "mod": 0
+            }
+        ]
+    ],
+    "ROTATE": [
+        [
+            {
+                "key": "r",
+                "mod": 0
+            }
+        ]
+    ],
+    "ROTATE_CURSOR": [
+        [
+            {
+                "key": "t",
+                "mod": 0
+            }
+        ]
+    ],
+    "ROUTER_MODE": [
+        [
+            {
+                "key": "s",
+                "mod": 0
+            }
+        ]
+    ],
+    "ROUTER_SETTINGS": [
+        [
+            {
+                "key": "S",
+                "mod": 0
+            }
+        ]
+    ],
+    "TOGGLE_ANGLE_SNAP": [
+        [
+            {
+                "key": "a",
+                "mod": 0
+            }
+        ]
+    ],
+    "TOGGLE_ARC": [
+        [
+            {
+                "key": "a",
+                "mod": 0
+            }
+        ]
+    ],
+    "TOGGLE_NET_LABEL": [
+        [
+            {
+                "key": "b",
+                "mod": 0
+            }
+        ]
+    ],
+    "TOGGLE_VIA": [
+        [
+            {
+                "key": "v",
+                "mod": 0
+            }
+        ]
+    ],
+    "TRACK_WIDTH_DEFAULT": [
+        [
+            {
+                "key": "W",
+                "mod": 0
+            }
+        ]
+    ]
+}

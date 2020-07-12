@@ -38,7 +38,10 @@ ToolResponse ToolAddVertex::begin(const ToolArgs &args)
     vertex = &*poly->vertices.insert(poly->vertices.begin() + v_next, args.coords);
     selection.clear();
     selection.emplace(poly->uuid, ObjectType::POLYGON_VERTEX, v_next);
-    imp->tool_bar_set_tip("<b>LMB:</b>place vertex <b>RMB:</b>cancel");
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB, "place vertex"},
+            {InToolActionID::RMB, "cancel"},
+    });
     return ToolResponse();
 }
 ToolResponse ToolAddVertex::update(const ToolArgs &args)
@@ -46,19 +49,17 @@ ToolResponse ToolAddVertex::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         vertex->position = args.coords;
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             return ToolResponse::commit();
-        }
-        else if (args.button == 3) {
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             selection.clear();
             return ToolResponse::revert();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
-            selection.clear();
-            return ToolResponse::revert();
+
+        default:;
         }
     }
     return ToolResponse();

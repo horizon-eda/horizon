@@ -43,9 +43,17 @@ ToolResponse ToolImportDXF::begin(const ToolArgs &args)
         lines = importer.lines;
         arcs = importer.arcs;
         move_init(args.coords);
-        std::string s = "<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate <b>e:</b>mirror <b>w:</b>line width ";
+
+        imp->tool_bar_set_actions({
+                {InToolActionID::LMB},
+                {InToolActionID::RMB},
+                {InToolActionID::ROTATE},
+                {InToolActionID::MIRROR},
+                {InToolActionID::ENTER_WIDTH, "line width"},
+        });
+
         if (unsupported.size()) {
-            s += "<span color='red' weight='bold'> Unsupported items: ";
+            std::string s = "<span color='red' weight='bold'> Unsupported items: ";
             for (const auto &it : unsupported) {
                 s += std::to_string(it.second) + " ";
                 switch (it.first) {
@@ -66,8 +74,9 @@ ToolResponse ToolImportDXF::begin(const ToolArgs &args)
             s.pop_back();
             s.pop_back();
             s += "</span>";
+            imp->tool_bar_set_tip(s);
         }
-        imp->tool_bar_set_tip(s);
+
         return ToolResponse();
     }
     else {
@@ -81,22 +90,21 @@ ToolResponse ToolImportDXF::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         move_do_cursor(args.coords);
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             return ToolResponse::commit();
-        }
-        else if (args.button == 3) {
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             return ToolResponse::revert();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_r) {
-            move_mirror_or_rotate(args.coords, true);
-        }
-        else if (args.key == GDK_KEY_e) {
-            move_mirror_or_rotate(args.coords, false);
-        }
-        else if (args.key == GDK_KEY_w) {
+
+        case InToolActionID::MIRROR:
+        case InToolActionID::ROTATE:
+            move_mirror_or_rotate(args.coords, args.action == InToolActionID::ROTATE);
+            break;
+
+        case InToolActionID::ENTER_WIDTH: {
             auto r = imp->dialogs.ask_datum("Enter width", width);
             if (r.first) {
                 width = r.second;
@@ -107,6 +115,9 @@ ToolResponse ToolImportDXF::update(const ToolArgs &args)
                     it->width = width;
                 }
             }
+        } break;
+
+        default:;
         }
     }
     else if (args.type == ToolEventType::LAYER_CHANGE) {

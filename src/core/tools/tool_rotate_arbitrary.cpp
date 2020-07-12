@@ -126,32 +126,38 @@ bool ToolRotateArbitrary::can_begin()
 
 void ToolRotateArbitrary::update_tip()
 {
+    std::vector<ActionLabelInfo> actions;
+    actions.reserve(8);
+
+
     if (state == State::ORIGIN) {
-        imp->tool_bar_set_tip("<b>LMB:</b>set origin <b>RMB:</b>cancel");
+        actions.emplace_back(InToolActionID::LMB, "set origin");
+        actions.emplace_back(InToolActionID::RMB);
     }
     else if (state == State::REF) {
-        imp->tool_bar_set_tip("<b>LMB:</b>set ref <b>RMB:</b>cancel");
+        actions.emplace_back(InToolActionID::LMB, "set ref");
+        actions.emplace_back(InToolActionID::RMB);
     }
     else if (state == State::ROTATE) {
-        std::stringstream ss;
-        ss << "<b>LMB:</b>finish <b>RMB:</b>cancel <b>s:</b>toggle snap <b>Enter:</b>enter angle <i>";
-        ss << "Angle: " << angle_to_string(iangle, false);
+        actions.emplace_back(InToolActionID::LMB, "finish");
+        actions.emplace_back(InToolActionID::RMB);
+        actions.emplace_back(InToolActionID::TOGGLE_ANGLE_SNAP, "toggle snap");
+        actions.emplace_back(InToolActionID::ENTER_DATUM, "enter angle");
+
+        std::string s = "Angle: " + angle_to_string(iangle, false);
         if (snap)
-            ss << " (snapped)";
-        ss << "</i>";
-        imp->tool_bar_set_tip(ss.str());
+            s += " (snapped)";
+        imp->tool_bar_set_tip(s);
     }
     else if (state == State::SCALE) {
+        actions.emplace_back(InToolActionID::LMB, "finish");
+        actions.emplace_back(InToolActionID::RMB);
         std::stringstream ss;
-        ss << "<b>LMB:</b>finish <b>RMB:</b>cancel <i>";
         ss << "Scale: " << scale;
-        ss << "</i>";
         imp->tool_bar_set_tip(ss.str());
     }
-    // auto delta = last-origin;
 
-    // imp->tool_bar_set_tip("<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate
-    // <b>e:</b>mirror "+coord_to_string(delta, true));
+    imp->tool_bar_set_actions(actions);
 }
 
 void ToolRotateArbitrary::save_placements()
@@ -290,8 +296,9 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
         update_tip();
         return ToolResponse();
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (tool_id == ToolID::ROTATE_ARBITRARY) {
                 if (state == State::ORIGIN) {
                     state = State::ROTATE;
@@ -317,24 +324,25 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
                     return ToolResponse::commit();
                 }
             }
-        }
-        else {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             return ToolResponse::revert();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_s) {
+
+        case InToolActionID::TOGGLE_ANGLE_SNAP:
             snap ^= true;
-        }
-        else if (args.key == GDK_KEY_Return) {
+            break;
+
+        case InToolActionID::ENTER_DATUM: {
             auto r = imp->dialogs.ask_datum_angle("Enter angle", 0);
             if (r.first) {
                 apply_placements_rotation(r.second);
                 return ToolResponse::commit();
             }
-        }
-        else if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
+        } break;
+
+        default:;
         }
     }
     return ToolResponse();

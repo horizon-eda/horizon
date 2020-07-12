@@ -9,6 +9,13 @@ class ToolPlaceBusLabel : public ToolPlaceJunction {
 public:
     ToolPlaceBusLabel(IDocument *c, ToolID tid);
     bool can_begin() override;
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB, I::CANCEL, I::RMB, I::ROTATE, I::MIRROR,
+        };
+    }
 
 private:
     void create_attached() override;

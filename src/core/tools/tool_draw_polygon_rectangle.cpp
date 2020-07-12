@@ -188,41 +188,43 @@ ToolResponse ToolDrawPolygonRectangle::begin(const ToolArgs &args)
 
 void ToolDrawPolygonRectangle::update_tip()
 {
-    std::stringstream ss;
-    ss << "<b>LMB:</b>";
+
+    std::vector<ActionLabelInfo> actions;
+    actions.reserve(8);
+
     if (settings.mode == Settings::Mode::CENTER) {
         if (step == 0) {
-            ss << "place center";
+            actions.emplace_back(InToolActionID::LMB, "place center");
         }
         else {
-            ss << "place corner";
+            actions.emplace_back(InToolActionID::LMB, "place corner");
         }
     }
     else {
         if (step == 0) {
-            ss << "place first corner";
+            actions.emplace_back(InToolActionID::LMB, "place first corner");
         }
         else {
-            ss << "place second corner";
+            actions.emplace_back(InToolActionID::LMB, "place second corner");
         }
     }
-    ss << " <b>RMB:</b>cancel";
-    ss << " <b>c:</b>switch mode <b>r:</b>corner radius ";
+    actions.emplace_back(InToolActionID::RMB, "cancel");
+    actions.emplace_back(InToolActionID::RECTANGLE_MODE, "switch mode");
+    actions.emplace_back(InToolActionID::POLYGON_CORNER_RADIUS);
 
-    if (corner_radius == 0)
-        ss << "<b>d:</b>switch decoration <b>p:</b>decoration position "
-              "<b>s:</b>decoration size";
+    if (corner_radius == 0) {
+        actions.emplace_back(InToolActionID::POLYGON_DECORATION_STYLE);
+        actions.emplace_back(InToolActionID::POLYGON_DECORATION_POSITION);
+        actions.emplace_back(InToolActionID::POLYGON_DECORATION_SIZE);
+    }
 
-    ss << " <i>";
+    imp->tool_bar_set_actions(actions);
     if (settings.mode == Settings::Mode::CENTER) {
-        ss << "from center";
+        imp->tool_bar_set_tip("from center");
     }
     else {
-        ss << "corners";
+        imp->tool_bar_set_tip("corners");
     }
-    ss << " </i>";
-
-    imp->tool_bar_set_tip(ss.str());
 }
 
 ToolResponse ToolDrawPolygonRectangle::update(const ToolArgs &args)
@@ -236,68 +238,71 @@ ToolResponse ToolDrawPolygonRectangle::update(const ToolArgs &args)
             update_polygon();
         }
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (step == 0) {
                 step = 1;
             }
             else {
                 return ToolResponse::commit();
             }
-        }
-        else if (args.button == 3) {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             return ToolResponse::revert();
-        }
-    }
-    else if (args.type == ToolEventType::LAYER_CHANGE) {
-        temp->layer = args.work_layer;
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_c) {
+
+        case InToolActionID::RECTANGLE_MODE:
             settings.mode = settings.mode == Settings::Mode::CENTER ? Settings::Mode::CORNER : Settings::Mode::CENTER;
             update_polygon();
-        }
-        else if (args.key == GDK_KEY_p && corner_radius == 0) {
-            decoration_pos = (decoration_pos + 1) % 4;
-            update_polygon();
-        }
-        else if (args.key == GDK_KEY_s && corner_radius == 0) {
-            auto r = imp->dialogs.ask_datum("Decoration size", decoration_size);
-            if (r.first) {
-                decoration_size = r.second;
+            break;
+
+        case InToolActionID::POLYGON_DECORATION_POSITION:
+            if (corner_radius == 0) {
+                decoration_pos = (decoration_pos + 1) % 4;
+                update_polygon();
             }
-            update_polygon();
-        }
-        else if (args.key == GDK_KEY_d && corner_radius == 0) {
-            if (decoration == Decoration::NONE) {
-                decoration = Decoration::CHAMFER;
+            break;
+
+        case InToolActionID::POLYGON_DECORATION_SIZE:
+            if (corner_radius == 0) {
+                auto r = imp->dialogs.ask_datum("Decoration size", decoration_size);
+                if (r.first) {
+                    decoration_size = r.second;
+                }
+                update_polygon();
             }
-            else if (decoration == Decoration::CHAMFER) {
-                decoration = Decoration::NOTCH;
+            break;
+
+        case InToolActionID::POLYGON_DECORATION_STYLE:
+            if (corner_radius == 0) {
+                if (decoration == Decoration::NONE) {
+                    decoration = Decoration::CHAMFER;
+                }
+                else if (decoration == Decoration::CHAMFER) {
+                    decoration = Decoration::NOTCH;
+                }
+                else {
+                    decoration = Decoration::NONE;
+                }
+                update_polygon();
             }
-            else {
-                decoration = Decoration::NONE;
-            }
-            update_polygon();
-        }
-        else if (args.key == GDK_KEY_r) {
+            break;
+
+        case InToolActionID::POLYGON_CORNER_RADIUS: {
             auto r = imp->dialogs.ask_datum("Corner radius", corner_radius);
             if (r.first) {
                 corner_radius = r.second;
             }
             update_polygon();
+        } break;
+
+        default:;
         }
-        /*
-        if(args.key == GDK_KEY_e) {
-                if(last_vertex && (last_vertex->type ==
-        Polygon::Vertex::Type::ARC)) {
-                        last_vertex->arc_reverse ^= 1;
-                }
-        }
-        else*/
-        if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
-        }
+    }
+    else if (args.type == ToolEventType::LAYER_CHANGE) {
+        temp->layer = args.work_layer;
     }
     update_tip();
     return ToolResponse();

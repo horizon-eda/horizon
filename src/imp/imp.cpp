@@ -29,6 +29,7 @@
 #include "imp/action.hpp"
 #include "preferences/preferences_util.hpp"
 #include "widgets/action_button.hpp"
+#include "in_tool_action_catalog.hpp"
 
 namespace horizon {
 
@@ -1166,12 +1167,25 @@ void ImpBase::apply_preferences()
             }
         }
     }
+    in_tool_key_sequeces_preferences = preferences.in_tool_key_sequences;
+    in_tool_key_sequeces_preferences.keys.erase(InToolActionID::LMB);
+    in_tool_key_sequeces_preferences.keys.erase(InToolActionID::RMB);
+    in_tool_key_sequeces_preferences.keys.erase(InToolActionID::LMB_RELEASE);
     {
         const auto mod0 = static_cast<GdkModifierType>(0);
         action_connections.at(make_action(ToolID::MOVE_KEY_LEFT)).key_sequences = {{{GDK_KEY_Left, mod0}}};
         action_connections.at(make_action(ToolID::MOVE_KEY_RIGHT)).key_sequences = {{{GDK_KEY_Right, mod0}}};
         action_connections.at(make_action(ToolID::MOVE_KEY_UP)).key_sequences = {{{GDK_KEY_Up, mod0}}};
         action_connections.at(make_action(ToolID::MOVE_KEY_DOWN)).key_sequences = {{{GDK_KEY_Down, mod0}}};
+
+        in_tool_key_sequeces_preferences.keys[InToolActionID::CANCEL] = {{{GDK_KEY_Escape, mod0}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::COMMIT] = {{{GDK_KEY_Return, mod0}},
+                                                                         {{GDK_KEY_KP_Enter, mod0}}};
+
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_LEFT] = {{{GDK_KEY_Left, mod0}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_RIGHT] = {{{GDK_KEY_Right, mod0}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_UP] = {{{GDK_KEY_Up, mod0}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_DOWN] = {{{GDK_KEY_Down, mod0}}};
     }
     {
         switch (canvas_prefs->appearance.grid_fine_modifier) {
@@ -1190,6 +1204,11 @@ void ImpBase::apply_preferences()
                 {{GDK_KEY_Up, grid_fine_modifier}}};
         action_connections.at(make_action(ToolID::MOVE_KEY_FINE_DOWN)).key_sequences = {
                 {{GDK_KEY_Down, grid_fine_modifier}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_LEFT_FINE] = {{{GDK_KEY_Left, grid_fine_modifier}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_RIGHT_FINE] = {
+                {{GDK_KEY_Right, grid_fine_modifier}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_UP_FINE] = {{{GDK_KEY_Up, grid_fine_modifier}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_DOWN_FINE] = {{{GDK_KEY_Down, grid_fine_modifier}}};
     }
 
     key_sequence_dialog->clear();
@@ -1404,6 +1423,12 @@ bool ImpBase::handle_key_press(GdkEventKey *key_event)
     return false;
 }
 
+bool ImpBase::keys_match(const KeySequence &keys) const
+{
+    auto minl = std::min(keys_current.size(), keys.size());
+    return minl && std::equal(keys_current.begin(), keys_current.begin() + minl, keys.begin());
+}
+
 bool ImpBase::handle_action_key(GdkEventKey *ev)
 {
     if (ev->is_modifier)
@@ -1414,6 +1439,17 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
             canvas->set_selection({});
             set_search_mode(false);
         }
+        else {
+            ToolArgs args;
+            args.coords = canvas->get_cursor_pos();
+            args.work_layer = canvas->property_work_layer();
+            args.type = ToolEventType::ACTION;
+            args.action = InToolActionID::CANCEL;
+            ToolResponse r = core->tool_update(args);
+            tool_process(r);
+            return true;
+        }
+
         if (keys_current.size() == 0) {
             return false;
         }
@@ -1436,6 +1472,8 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
                                                     & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK));
             keys_current.emplace_back(keyval, mod);
         }
+        auto in_tool_actions = core->get_tool_actions();
+        std::set<InToolActionID> in_tool_actions_matched;
         std::set<ActionConnection *> connections_matched;
         auto selection = canvas->get_selection();
         update_action_sensitivity();
@@ -1451,22 +1489,29 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
                 }
                 if (can_begin) {
                     for (const auto &it2 : it.second.key_sequences) {
-                        auto minl = std::min(keys_current.size(), it2.size());
-                        if (minl && std::equal(keys_current.begin(), keys_current.begin() + minl, it2.begin())) {
+                        if (keys_match(it2)) {
                             connections_matched.insert(&it.second);
                         }
                     }
                 }
             }
         }
-        if (connections_matched.size() == 0) {
-            main_window->tool_hint_label->set_text("Unknown key sequence");
-            keys_current.clear();
-            return false;
+        if (in_tool_actions.size()) {
+            for (const auto &[action, seqs] : in_tool_key_sequeces_preferences.keys) {
+                if (in_tool_actions.count(action)) {
+                    for (const auto &seq : seqs) {
+                        if (keys_match(seq))
+                            in_tool_actions_matched.insert(action);
+                    }
+                }
+            }
         }
-        else if (connections_matched.size() > 1) { // still ambigous
-            main_window->tool_hint_label->set_text(key_sequence_to_string(keys_current) + "?");
-            return true;
+
+        std::cout << "match " << connections_matched.size() << " " << in_tool_actions_matched.size() << std::endl;
+
+        if (connections_matched.size() == 1 && in_tool_actions_matched.size() == 1) {
+            main_window->tool_hint_label->set_text("Ambiguous");
+            keys_current.clear();
         }
         else if (connections_matched.size() == 1) {
             main_window->tool_hint_label->set_text(key_sequence_to_string(keys_current));
@@ -1478,8 +1523,34 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
             }
             return true;
         }
+        else if (in_tool_actions_matched.size() == 1) {
+            main_window->tool_hint_label->set_text(key_sequence_to_string(keys_current));
+            keys_current.clear();
+
+            ToolArgs args;
+            args.coords = canvas->get_cursor_pos();
+            args.work_layer = canvas->property_work_layer();
+            args.type = ToolEventType::ACTION;
+            args.action = *in_tool_actions_matched.begin();
+            ToolResponse r = core->tool_update(args);
+            tool_process(r);
+
+            return true;
+        }
+        else if (connections_matched.size() > 1 || in_tool_actions_matched.size() > 1) { // still ambigous
+            main_window->tool_hint_label->set_text(key_sequence_to_string(keys_current) + "?");
+            return true;
+        }
+        else if (connections_matched.size() == 0 || in_tool_actions_matched.size() == 0) {
+            main_window->tool_hint_label->set_text("Unknown key sequence");
+            keys_current.clear();
+            return false;
+        }
         else {
-            assert(false); // don't go here
+            Logger::log_warning("Key sequence??", Logger::Domain::IMP,
+                                std::to_string(connections_matched.size()) + " "
+                                        + std::to_string(in_tool_actions_matched.size()));
+            return false;
         }
     }
     return false;
@@ -1517,9 +1588,15 @@ bool ImpBase::handle_click_release(GdkEventButton *button_event)
 {
     if (core->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)) {
         ToolArgs args;
-        args.type = ToolEventType::CLICK_RELEASE;
+        if (core->get_tool_actions().size()) {
+            args.type = ToolEventType::ACTION;
+            args.action = InToolActionID::LMB_RELEASE;
+        }
+        else {
+            args.type = ToolEventType::CLICK_RELEASE;
+            args.button = button_event->button;
+        }
         args.coords = canvas->get_cursor_pos();
-        args.button = button_event->button;
         args.target = canvas->get_current_target();
         args.work_layer = canvas->property_work_layer();
         ToolResponse r = core->tool_update(args);
@@ -1629,9 +1706,18 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
     if (core->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)
         && button_event->type != GDK_2BUTTON_PRESS && button_event->type != GDK_3BUTTON_PRESS) {
         ToolArgs args;
-        args.type = ToolEventType::CLICK;
+        if (core->get_tool_actions().size()) {
+            args.type = ToolEventType::ACTION;
+            if (button_event->button == 1)
+                args.action = InToolActionID::LMB;
+            else
+                args.action = InToolActionID::RMB;
+        }
+        else {
+            args.type = ToolEventType::CLICK;
+            args.button = button_event->button;
+        }
         args.coords = canvas->get_cursor_pos();
-        args.button = button_event->button;
         args.target = canvas->get_current_target();
         args.work_layer = canvas->property_work_layer();
         ToolResponse r = core->tool_update(args);
@@ -1819,6 +1905,7 @@ void ImpBase::handle_tool_change(ToolID id)
 {
     panels->set_sensitive(id == ToolID::NONE);
     canvas->set_selection_allowed(id == ToolID::NONE);
+    main_window->tool_bar_set_use_actions(core->get_tool_actions().size());
     if (id != ToolID::NONE) {
         main_window->tool_bar_set_tool_name(action_catalog.at({ActionID::TOOL, id}).name);
         main_window->tool_bar_set_tool_tip("");
@@ -1829,6 +1916,7 @@ void ImpBase::handle_tool_change(ToolID id)
         canvas->set_cursor_size(get_canvas_preferences()->appearance.cursor_size);
     }
     main_window->tool_bar_set_visible(id != ToolID::NONE);
+    tool_bar_clear_actions();
     main_window->action_bar_revealer->set_reveal_child(id == ToolID::NONE);
 }
 
@@ -2173,6 +2261,72 @@ ActionButtonMenu &ImpBase::add_action_button_menu(const char *icon_name)
     main_window->action_bar_box->pack_start(*ab, false, false, 0);
     action_buttons.push_back(ab);
     return *ab;
+}
+
+void ImpBase::tool_bar_set_actions(const std::vector<ActionLabelInfo> &labels)
+{
+    if (in_tool_action_label_infos != labels) {
+        tool_bar_clear_actions();
+        for (const auto &it : labels) {
+            tool_bar_append_action(it.action1, it.action2, it.label);
+        }
+
+        in_tool_action_label_infos = labels;
+    }
+}
+
+void ImpBase::tool_bar_append_action(InToolActionID action1, InToolActionID action2, const std::string &s)
+{
+    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
+    if (any_of(action1, {InToolActionID::LMB, InToolActionID::RMB})) {
+        std::string icon_name = "action-";
+        if (action1 == InToolActionID::LMB) {
+            icon_name += "lmb";
+        }
+        else {
+            icon_name += "rmb";
+        }
+        icon_name += "-symbolic";
+        auto img = Gtk::manage(new Gtk::Image(icon_name, Gtk::ICON_SIZE_BUTTON));
+        img->show();
+        box->pack_start(*img, false, false, 0);
+    }
+    else {
+        auto key_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 0));
+        for (const auto action : {action1, action2}) {
+            if (action != InToolActionID::NONE) {
+                const auto &prefs = in_tool_key_sequeces_preferences.keys;
+                if (prefs.count(action)) {
+                    if (prefs.at(action).size()) {
+                        auto seq = prefs.at(action).front();
+                        auto kl = Gtk::manage(new Gtk::Label(key_sequence_to_string_short(seq)));
+                        kl->set_valign(Gtk::ALIGN_BASELINE);
+                        key_box->pack_start(*kl, false, false, 0);
+                    }
+                }
+            }
+        }
+        key_box->show_all();
+        key_box->get_style_context()->add_class("imp-key-box");
+
+        box->pack_start(*key_box, false, false, 0);
+    }
+    const auto &as = s.size() ? s : in_tool_action_catalog.at(action1).name;
+
+    auto la = Gtk::manage(new Gtk::Label(as));
+    la->set_valign(Gtk::ALIGN_BASELINE);
+
+    la->show();
+
+    box->pack_start(*la, false, false, 0);
+
+    main_window->tool_bar_append_action(*box);
+}
+
+void ImpBase::tool_bar_clear_actions()
+{
+    in_tool_action_label_infos.clear();
+    main_window->tool_bar_clear_actions();
 }
 
 ObjectType ImpBase::get_editor_type() const

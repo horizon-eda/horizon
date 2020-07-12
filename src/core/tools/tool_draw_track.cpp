@@ -27,8 +27,12 @@ ToolResponse ToolDrawTrack::begin(const ToolArgs &args)
     temp_track = nullptr;
     selection.clear();
 
-    rules = dynamic_cast<BoardRules *>(doc.r->get_rules());
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB, "finish"},
+    });
 
+    rules = dynamic_cast<BoardRules *>(doc.r->get_rules());
     return ToolResponse();
 }
 
@@ -51,8 +55,9 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
         }
         return ToolResponse();
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (args.target.type == ObjectType::JUNCTION) {
                 uuid_ptr<Junction> j = doc.b->get_junction(args.target.path.at(0));
                 if (temp_track != nullptr) {
@@ -120,8 +125,10 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
                     temp_track->width = rules->get_default_track_width(last->net, 0);
                 }
             }
-        }
-        else if (args.button == 3) {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             if (temp_track) {
                 doc.b->get_board()->tracks.erase(temp_track->uuid);
                 temp_track = nullptr;
@@ -129,11 +136,8 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
             doc.b->delete_junction(temp_junc->uuid);
             temp_junc = nullptr;
             return ToolResponse::commit();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
+
+        default:;
         }
     }
     return ToolResponse();

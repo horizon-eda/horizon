@@ -47,19 +47,22 @@ ToolResponse ToolDrawArc::begin(const ToolArgs &args)
 
 void ToolDrawArc::update_tip()
 {
-    std::stringstream ss;
-    ss << "<b>LMB:</b>";
+    std::vector<ActionLabelInfo> actions;
+    actions.reserve(8);
     if (state == DrawArcState::FROM) {
-        ss << "place from junction";
+        actions.emplace_back(InToolActionID::LMB, "place from junction");
     }
     else if (state == DrawArcState::TO) {
-        ss << "place to junction";
+        actions.emplace_back(InToolActionID::LMB, "place to junction");
     }
     else if (state == DrawArcState::CENTER) {
-        ss << "place center junction";
+        actions.emplace_back(InToolActionID::LMB, "place center junction");
     }
-    ss << " <b>RMB:</b>cancel <b>e:</b>reverse arc direction <b>w:</b>line width";
-    imp->tool_bar_set_tip(ss.str());
+    actions.emplace_back(InToolActionID::RMB, "cancel");
+    if (temp_arc)
+        actions.emplace_back(InToolActionID::FLIP_ARC);
+    actions.emplace_back(InToolActionID::ENTER_WIDTH, "line width");
+    imp->tool_bar_set_actions(actions);
 }
 
 ToolResponse ToolDrawArc::update(const ToolArgs &args)
@@ -67,8 +70,9 @@ ToolResponse ToolDrawArc::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         temp_junc->position = args.coords;
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (state == DrawArcState::FROM) {
                 if (args.target.type == ObjectType::JUNCTION) {
                     from_junc = doc.r->get_junction(args.target.path.at(0));
@@ -106,27 +110,28 @@ ToolResponse ToolDrawArc::update(const ToolArgs &args)
                 }
                 return ToolResponse::commit();
             }
-        }
-        else if (args.button == 3) {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             return ToolResponse::revert();
+
+        case InToolActionID::ENTER_WIDTH:
+            ask_line_width();
+            break;
+
+        case InToolActionID::FLIP_ARC:
+            if (temp_arc) {
+                temp_arc->reverse();
+            }
+            break;
+
+        default:;
         }
     }
     else if (args.type == ToolEventType::LAYER_CHANGE) {
         if (temp_arc)
             temp_arc->layer = args.work_layer;
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_w) {
-            ask_line_width();
-        }
-        else if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
-        }
-        else if (args.key == GDK_KEY_e) {
-            if (temp_arc) {
-                temp_arc->reverse();
-            }
-        }
     }
     update_tip();
     return ToolResponse();

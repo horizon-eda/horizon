@@ -17,6 +17,7 @@
 #include "util/item_set.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "grid_controller.hpp"
+#include "util/action_label.hpp"
 #include <optional>
 
 #ifdef G_OS_WIN32
@@ -243,6 +244,7 @@ private:
     Gtk::MenuItem *create_context_menu_item(ActionToolID act);
 
     KeySequence keys_current;
+    bool keys_match(const KeySequence &keys) const;
     bool handle_action_key(GdkEventKey *ev);
     void handle_tool_action(const ActionConnection &conn);
     void handle_select_polygon(const ActionConnection &a);
@@ -283,5 +285,11 @@ private:
     Glib::RefPtr<Gio::SimpleAction> distraction_free_action;
 
     int left_panel_width = 0;
+
+    void tool_bar_set_actions(const std::vector<ActionLabelInfo> &labels);
+    void tool_bar_append_action(InToolActionID action1, InToolActionID action2, const std::string &s);
+    void tool_bar_clear_actions();
+    InToolKeySequencesPreferences in_tool_key_sequeces_preferences;
+    std::vector<ActionLabelInfo> in_tool_action_label_infos;
 };
 } // namespace horizon

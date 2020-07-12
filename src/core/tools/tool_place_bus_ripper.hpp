@@ -10,6 +10,13 @@ class ToolPlaceBusRipper : public ToolPlaceJunction, public ToolHelperMove {
 public:
     ToolPlaceBusRipper(IDocument *c, ToolID tid);
     bool can_begin() override;
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB, I::CANCEL, I::RMB, I::ROTATE, I::MIRROR, I::EDIT,
+        };
+    }
 
 private:
     void create_attached() override;

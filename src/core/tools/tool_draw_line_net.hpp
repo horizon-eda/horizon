@@ -15,6 +15,24 @@ public:
     {
         return true;
     }
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB,
+                I::CANCEL,
+                I::RMB,
+                I::PLACE_JUNCTION,
+                I::COMMIT,
+                I::POSTURE,
+                I::ARBITRARY_ANGLE_MODE,
+                I::NET_LABEL_SIZE_INC,
+                I::NET_LABEL_SIZE_DEC,
+                I::ENTER_SIZE,
+                I::ROTATE,
+                I::TOGGLE_NET_LABEL,
+        };
+    }
 
 private:
     class Junction *temp_junc_head = 0;

@@ -11,9 +11,12 @@ public:
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;
-    bool handles_esc() override
+    std::set<InToolActionID> get_actions() const override
     {
-        return true;
+        using I = InToolActionID;
+        return {
+                I::LMB, I::CANCEL, I::RMB, I::RESTRICT, I::ENTER_WIDTH,
+        };
     }
 
     void apply_settings() override;

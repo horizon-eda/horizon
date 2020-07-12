@@ -134,12 +134,20 @@ void ToolMapPin::update_annotation()
 
 void ToolMapPin::update_tip()
 {
-    std::string s =
-            "<b>LMB:</b>place pin <b>RMB:</b>delete current pin and finish "
-            "<b>r:</b>rotate <b>e:</b>mirror <b>Space</b>:select pin";
-    if (can_autoplace())
-        s += " <b>Return:</b>autoplace <b>p:</b>autoplace all";
-    imp->tool_bar_set_tip(s);
+
+    std::vector<ActionLabelInfo> actions;
+    actions.reserve(8);
+    actions.emplace_back(InToolActionID::LMB);
+    actions.emplace_back(InToolActionID::RMB);
+    actions.emplace_back(InToolActionID::ROTATE);
+    actions.emplace_back(InToolActionID::MIRROR);
+    actions.emplace_back(InToolActionID::EDIT, "select pin");
+    if (can_autoplace()) {
+        actions.emplace_back(InToolActionID::AUTOPLACE_NEXT_PIN);
+        actions.emplace_back(InToolActionID::AUTOPLACE_ALL_PINS);
+    }
+
+    imp->tool_bar_set_actions(actions);
 }
 
 ToolResponse ToolMapPin::update(const ToolArgs &args)
@@ -147,8 +155,9 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         pin->position = args.coords;
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             pins.at(pin_index).second = true;
             pin_index++;
             while (pin_index < pins.size()) {
@@ -161,16 +170,17 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
             }
             create_pin(pins.at(pin_index).first->uuid);
             pin->position = args.coords;
-        }
-        else if (args.button == 3) {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             if (pin) {
                 doc.y->get_symbol()->pins.erase(pin->uuid);
             }
             return ToolResponse::commit();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_p || args.key == GDK_KEY_Return) {
+
+        case InToolActionID::AUTOPLACE_ALL_PINS:
+        case InToolActionID::AUTOPLACE_NEXT_PIN:
             if (can_autoplace()) {
                 auto shift = pin_last->position - pin_last2->position;
                 while (1) {
@@ -189,12 +199,13 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
                     create_pin(pins.at(pin_index).first->uuid);
                     pin->position = args.coords;
 
-                    if (args.key == GDK_KEY_Return)
+                    if (args.action == InToolActionID::AUTOPLACE_NEXT_PIN)
                         break;
                 }
             }
-        }
-        else if (args.key == GDK_KEY_space) {
+            break;
+
+        case InToolActionID::EDIT: {
             bool r;
             UUID selected_pin;
             std::tie(r, selected_pin) = imp->dialogs.map_pin(pins);
@@ -213,12 +224,15 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
                 pin_last2 = p2;
                 pin_last = p1;
             }
-        }
-        else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
-            pin->orientation = ToolHelperMove::transform_orientation(pin->orientation, args.key == GDK_KEY_r);
-        }
-        else if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
+        } break;
+
+        case InToolActionID::ROTATE:
+        case InToolActionID::MIRROR:
+            pin->orientation =
+                    ToolHelperMove::transform_orientation(pin->orientation, args.action == InToolActionID::ROTATE);
+            break;
+
+        default:;
         }
     }
     update_tip();

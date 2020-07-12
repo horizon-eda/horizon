@@ -22,24 +22,28 @@ ToolResponse ToolSetNotConnected::begin(const ToolArgs &args)
     if (tool_id == ToolID::CLEAR_NC)
         mode = Mode::CLEAR;
     update_tip();
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB, "modify pin"},
+            {InToolActionID::RMB, "finish"},
+            {InToolActionID::NC_MODE, "mode"},
+    });
     return ToolResponse();
 }
 
 void ToolSetNotConnected::update_tip()
 {
-    std::string s = "<b>LMB:</b>set pin NC <b>RMB:</b>cancel <b>m:</b>mode <i>";
+    std::string s;
     switch (mode) {
     case Mode::SET:
-        s += "Set";
+        s = "Set";
         break;
     case Mode::CLEAR:
-        s += "Clear";
+        s = "Clear";
         break;
     case Mode::TOGGLE:
-        s += "Toggle";
+        s = "Toggle";
         break;
     }
-    s += "</i>";
 
     imp->tool_bar_set_tip(s);
 }
@@ -47,8 +51,9 @@ void ToolSetNotConnected::update_tip()
 
 ToolResponse ToolSetNotConnected::update(const ToolArgs &args)
 {
-    if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (args.target.type == ObjectType::SYMBOL_PIN) {
                 auto sym = doc.c->get_schematic_symbol(args.target.path.at(0));
                 auto pin = &sym->symbol.pins.at(args.target.path.at(1));
@@ -76,13 +81,13 @@ ToolResponse ToolSetNotConnected::update(const ToolArgs &args)
             else {
                 imp->tool_bar_flash("Please click on a pin");
             }
-        }
-        else if (args.button == 3) {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             return ToolResponse::commit();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_m) {
+
+        case InToolActionID::NC_MODE:
             switch (mode) {
             case Mode::SET:
                 mode = Mode::CLEAR;
@@ -97,9 +102,11 @@ ToolResponse ToolSetNotConnected::update(const ToolArgs &args)
                 break;
             }
             update_tip();
+            break;
+
+        default:;
         }
     }
-
     return ToolResponse();
 }
 } // namespace horizon

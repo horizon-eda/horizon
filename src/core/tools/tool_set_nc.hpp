@@ -14,6 +14,16 @@ public:
     {
         return false;
     }
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB,
+                I::CANCEL,
+                I::RMB,
+                I::NC_MODE,
+        };
+    }
 
 private:
     enum class Mode { SET, CLEAR, TOGGLE };

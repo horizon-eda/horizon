@@ -5,8 +5,10 @@
 #include "dialogs/dialogs.hpp"
 #include "core/tool_data.hpp"
 #include <sigc++/sigc++.h>
+#include "util/action_label.hpp"
 
 namespace horizon {
+enum class InToolActionID;
 class ImpInterface {
 public:
     ImpInterface(class ImpBase *i);
@@ -14,6 +16,8 @@ public:
     void tool_bar_set_tip(const std::string &s);
     void tool_bar_set_tool_name(const std::string &s);
     void tool_bar_flash(const std::string &s);
+    void tool_bar_set_actions(const std::vector<ActionLabelInfo> &labels);
+
     void part_placed(const UUID &uu);
     void set_work_layer(int layer);
     int get_work_layer();

@@ -30,8 +30,12 @@ ToolResponse ToolPlacePad::begin(const ToolArgs &args)
     padstack = doc.r->get_pool()->get_padstack(padstack_uuid);
     create_pad(args.coords);
 
-    imp->tool_bar_set_tip(
-            "<b>LMB:</b>place pad <b>RMB:</b>delete current pad and finish <b>i:</b>edit pad <b>r:</b>rotate");
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::ROTATE},
+            {InToolActionID::EDIT, "edit pad"},
+    });
     return ToolResponse();
 }
 
@@ -61,29 +65,28 @@ ToolResponse ToolPlacePad::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         temp->placement.shift = args.coords;
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB: {
             auto old_pad = temp;
             create_pad(args.coords);
             temp->placement.set_angle(old_pad->placement.get_angle());
             temp->parameter_set = old_pad->parameter_set;
             doc.k->get_package()->apply_parameter_set({});
-        }
-        else if (args.button == 3) {
+        } break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             doc.k->get_package()->pads.erase(temp->uuid);
             temp = 0;
             selection.clear();
             return ToolResponse::commit();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
-        }
-        else if (args.key == GDK_KEY_r) {
+
+        case InToolActionID::ROTATE:
             temp->placement.inc_angle_deg(90);
-        }
-        else if (args.key == GDK_KEY_i) {
+            break;
+
+        case InToolActionID::EDIT: {
             std::set<Pad *> pads{temp};
             auto params = temp->parameter_set;
             if (imp->dialogs.edit_pad_parameter_set(pads, doc.r->get_pool(), doc.k->get_package())
@@ -91,6 +94,9 @@ ToolResponse ToolPlacePad::update(const ToolArgs &args)
                 temp->parameter_set = params;
             }
             doc.k->get_package()->apply_parameter_set({});
+        } break;
+
+        default:;
         }
     }
     return ToolResponse();

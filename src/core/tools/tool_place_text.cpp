@@ -79,11 +79,17 @@ ToolResponse ToolPlaceText::begin(const ToolArgs &args)
     imp->set_snap_filter({{ObjectType::TEXT, temp->uuid}});
     temp->layer = args.work_layer;
     temp->placement.shift = args.coords;
+    selection = {{temp->uuid, ObjectType::TEXT}};
     apply_settings();
-    imp->tool_bar_set_tip(
-            "<b>LMB:</b>place text <b>RMB:</b>finish "
-            "<b>space:</b>change text <b>w:</b>text width <b>s:</b>text size");
-
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::ROTATE},
+            {InToolActionID::MIRROR},
+            {InToolActionID::ENTER_WIDTH, "text width"},
+            {InToolActionID::ENTER_SIZE, "text size"},
+            {InToolActionID::EDIT, "change text"},
+    });
     auto r = imp->dialogs.ask_datum_string("Enter text", temp->text);
     if (r.first) {
         temp->text = r.second;
@@ -103,8 +109,9 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         temp->placement.shift = args.coords;
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB: {
             text = &temp->text;
             texts_placed.push_front(temp);
             auto old_text = temp;
@@ -114,49 +121,53 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
             temp->layer = args.work_layer;
             temp->placement = old_text->placement;
             temp->placement.shift = args.coords;
+            selection = {{temp->uuid, ObjectType::TEXT}};
             apply_settings();
-        }
-        else if (args.button == 3) {
+        } break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             doc.r->delete_text(temp->uuid);
             selection.clear();
             for (auto it : texts_placed) {
                 selection.emplace(it->uuid, ObjectType::TEXT);
             }
             return ToolResponse::commit();
-        }
-    }
-    else if (args.type == ToolEventType::LAYER_CHANGE) {
-        temp->layer = args.work_layer;
-        apply_settings();
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_space) {
+
+        case InToolActionID::EDIT: {
             auto r = imp->dialogs.ask_datum_string("Enter text", temp->text);
             if (r.first) {
                 temp->text = r.second;
             }
-        }
-        else if (args.key == GDK_KEY_w) {
+        } break;
+
+        case InToolActionID::ENTER_WIDTH: {
             auto r = imp->dialogs.ask_datum("Enter width", settings.get_layer(temp->layer).width);
             if (r.first) {
                 settings.layers[temp->layer].width = std::max(r.second, (int64_t)0);
                 apply_settings();
             }
-        }
-        else if (args.key == GDK_KEY_s) {
+        } break;
+
+        case InToolActionID::ENTER_SIZE: {
             auto r = imp->dialogs.ask_datum("Enter size", settings.get_layer(temp->layer).size);
             if (r.first) {
                 settings.layers[temp->layer].size = std::max(r.second, (int64_t)0);
                 apply_settings();
             }
+        } break;
+
+        case InToolActionID::ROTATE:
+        case InToolActionID::MIRROR:
+            move_mirror_or_rotate(temp->placement.shift, args.action == InToolActionID::ROTATE);
+            break;
+
+        default:;
         }
-        else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
-            bool rotate = args.key == GDK_KEY_r;
-            move_mirror_or_rotate(temp->placement.shift, rotate);
-        }
-        else if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
-        }
+    }
+    else if (args.type == ToolEventType::LAYER_CHANGE) {
+        temp->layer = args.work_layer;
+        apply_settings();
     }
     return ToolResponse();
 }

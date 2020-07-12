@@ -3,6 +3,7 @@
 #include "util/gtk_util.hpp"
 #include "imp/action_catalog.hpp"
 #include "preferences_window_keys.hpp"
+#include "preferences_window_in_tool_keys.hpp"
 #include "preferences_window_canvas.hpp"
 #include "preferences_window_pool.hpp"
 #include "preferences_window_partinfo.hpp"
@@ -60,6 +61,12 @@ PreferencesWindow::PreferencesWindow(Preferences &prefs) : Gtk::Window(), prefer
     {
         auto ed = KeySequencesPreferencesEditor::create(preferences);
         stack->add(*ed, "keys", "Keys");
+        ed->show();
+        ed->unreference();
+    }
+    {
+        auto ed = InToolKeySequencesPreferencesEditor::create(preferences);
+        stack->add(*ed, "in_tool_keys", "In-tool keys");
         ed->show();
         ed->unreference();
     }

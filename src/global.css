@@ -94,3 +94,19 @@
   min-width: 0px;
   min-height: 0px;
 }
+
+.imp-key-box {
+  font-weight: bold;
+  border: 2px solid;
+  border-radius: 5px;
+}
+
+.imp-key-box > label {
+ padding-left:.25em;
+ padding-right:.25em;
+ min-width:1em;
+}
+
+.imp-key-box > label:not(:last-child) {
+  border-right: 2px solid;
+}

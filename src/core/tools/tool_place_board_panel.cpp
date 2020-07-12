@@ -28,7 +28,11 @@ ToolResponse ToolPlaceBoardPanel::begin(const ToolArgs &args)
     inc_board = &doc.b->get_board()->included_boards.at(board_uuid);
     create_board(args.coords);
 
-    imp->tool_bar_set_tip("<b>LMB:</b>place board <b>RMB:</b>delete current board and finish <b>r:</b>rotate");
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::ROTATE},
+    });
     return ToolResponse();
 }
 
@@ -48,23 +52,24 @@ ToolResponse ToolPlaceBoardPanel::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         temp->placement.shift = args.coords;
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             create_board(args.coords);
-        }
-        else if (args.button == 3) {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             doc.b->get_board()->board_panels.erase(temp->uuid);
             temp = 0;
             selection.clear();
             return ToolResponse::commit();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_r) {
+
+        case InToolActionID::ROTATE:
             temp->placement.inc_angle_deg(-90);
-        }
-        else if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
+            break;
+
+        default:;
         }
     }
     return ToolResponse();

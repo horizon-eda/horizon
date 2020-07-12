@@ -119,6 +119,8 @@ public:
     std::set<SelectableRef> &get_tool_selection();
     Pool *m_pool;
 
+    std::set<InToolActionID> get_tool_actions() const;
+
     bool get_needs_save() const;
     void set_needs_save();
 

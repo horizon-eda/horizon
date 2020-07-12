@@ -16,6 +16,13 @@ public:
         return true;
     }
     ~ToolRotateArbitrary();
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB, I::CANCEL, I::RMB, I::ENTER_DATUM, I::TOGGLE_ANGLE_SNAP,
+        };
+    }
 
 private:
     Coordi origin;

@@ -74,38 +74,36 @@ ToolResponse ToolDrawLineRectangle::begin(const ToolArgs &args)
 
 void ToolDrawLineRectangle::update_tip()
 {
-    std::stringstream ss;
-    ss << "<b>LMB:</b>";
+    std::vector<ActionLabelInfo> actions;
+    actions.reserve(8);
+
     if (mode == Mode::CENTER) {
         if (step == 0) {
-            ss << "place center";
+            actions.emplace_back(InToolActionID::LMB, "place center");
         }
         else {
-            ss << "place corner";
+            actions.emplace_back(InToolActionID::LMB, "place corner");
         }
     }
     else {
         if (step == 0) {
-            ss << "place first corner";
+            actions.emplace_back(InToolActionID::LMB, "place first corner");
         }
         else {
-            ss << "place second corner";
+            actions.emplace_back(InToolActionID::LMB, "place second corner");
         }
     }
-    ss << " <b>RMB:</b>cancel";
-    ss << " <b>c:</b>switch mode";
-    ss << "  <b>w:</b>line width";
+    actions.emplace_back(InToolActionID::RMB, "cancel");
+    actions.emplace_back(InToolActionID::RECTANGLE_MODE, "switch mode");
+    actions.emplace_back(InToolActionID::ENTER_WIDTH, "line width");
+    imp->tool_bar_set_actions(actions);
 
-    ss << " <i>";
     if (mode == Mode::CENTER) {
-        ss << "from center";
+        imp->tool_bar_set_tip("from center");
     }
     else {
-        ss << "corners";
+        imp->tool_bar_set_tip("corners");
     }
-    ss << " </i>";
-
-    imp->tool_bar_set_tip(ss.str());
 }
 
 ToolResponse ToolDrawLineRectangle::update(const ToolArgs &args)
@@ -119,8 +117,9 @@ ToolResponse ToolDrawLineRectangle::update(const ToolArgs &args)
             update_junctions();
         }
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (step == 0) {
                 step = 1;
             }
@@ -129,21 +128,22 @@ ToolResponse ToolDrawLineRectangle::update(const ToolArgs &args)
                 }
                 return ToolResponse::commit();
             }
-        }
-        else if (args.button == 3) {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             return ToolResponse::revert();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_c) {
+
+        case InToolActionID::RECTANGLE_MODE:
             mode = mode == Mode::CENTER ? Mode::CORNER : Mode::CENTER;
             update_junctions();
-        }
-        else if (args.key == GDK_KEY_w) {
+            break;
+
+        case InToolActionID::ENTER_WIDTH:
             ask_line_width();
-        }
-        else if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
+            break;
+
+        default:;
         }
     }
     else if (args.type == ToolEventType::LAYER_CHANGE) {

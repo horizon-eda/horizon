@@ -39,18 +39,20 @@ ToolResponse ToolDrawLine::begin(const ToolArgs &args)
 
 void ToolDrawLine::update_tip()
 {
-    std::string s("<b>LMB:</b>place junction/connect <b>RMB:</b>");
+    std::vector<ActionLabelInfo> actions;
+    actions.reserve(8);
+    actions.emplace_back(InToolActionID::LMB, "place junction");
     if (temp_line) {
-        s += "finish current segment";
+        actions.emplace_back(InToolActionID::RMB, "finish current segment");
     }
     else {
-        s += "end tool";
+        actions.emplace_back(InToolActionID::RMB, "end tool");
     }
-    s += " <b>w:</b>line width ";
-    s += "<b>/:</b>restrict <i>";
-    s += restrict_mode_to_string();
-    s += "</i>";
-    imp->tool_bar_set_tip(s);
+    actions.emplace_back(InToolActionID::ENTER_WIDTH, "line width");
+    actions.emplace_back(InToolActionID::RESTRICT);
+
+    imp->tool_bar_set_tip(restrict_mode_to_string());
+    imp->tool_bar_set_actions(actions);
 }
 
 void ToolDrawLine::do_move(const Coordi &c)
@@ -70,8 +72,9 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
         update_tip();
         return ToolResponse();
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (args.target.type == ObjectType::JUNCTION && restrict_mode == RestrictMode::ARB) {
                 if (temp_line != nullptr) {
                     temp_line->to = doc.r->get_junction(args.target.path.at(0));
@@ -97,8 +100,9 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
             temp_line->layer = args.work_layer;
             temp_line->width = settings.width;
             temp_line->to = temp_junc;
-        }
-        else if (args.button == 3) {
+            break;
+
+        case InToolActionID::RMB:
             if (temp_line) {
                 if (first_line && junctions_created.count(temp_line->from))
                     doc.r->delete_junction(temp_line->from->uuid);
@@ -111,21 +115,18 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
                 temp_junc = nullptr;
                 return ToolResponse::commit();
             }
-        }
-    }
-    else if (args.type == ToolEventType::LAYER_CHANGE) {
-        if (temp_line)
-            temp_line->layer = args.work_layer;
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_w) {
+            break;
+
+        case InToolActionID::ENTER_WIDTH:
             ask_line_width();
-        }
-        else if (args.key == GDK_KEY_slash) {
+            break;
+
+        case InToolActionID::RESTRICT:
             cycle_restrict_mode();
             do_move(args.coords);
-        }
-        else if (args.key == GDK_KEY_Escape) {
+            break;
+
+        case InToolActionID::CANCEL:
             if (temp_line) {
                 if (first_line && junctions_created.count(temp_line->from))
                     doc.r->delete_junction(temp_line->from->uuid);
@@ -135,8 +136,15 @@ ToolResponse ToolDrawLine::update(const ToolArgs &args)
             doc.r->delete_junction(temp_junc->uuid);
             temp_junc = nullptr;
             return ToolResponse::commit();
+
+        default:;
         }
     }
+    else if (args.type == ToolEventType::LAYER_CHANGE) {
+        if (temp_line)
+            temp_line->layer = args.work_layer;
+    }
+
     update_tip();
     return ToolResponse();
 }

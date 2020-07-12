@@ -25,6 +25,21 @@ public:
 
     void apply_settings() override;
 
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB,
+                I::CANCEL,
+                I::RMB,
+                I::RECTANGLE_MODE,
+                I::POLYGON_CORNER_RADIUS,
+                I::POLYGON_DECORATION_POSITION,
+                I::POLYGON_DECORATION_SIZE,
+                I::POLYGON_DECORATION_STYLE,
+        };
+    }
+
 protected:
     ToolSettings *get_settings() override
     {

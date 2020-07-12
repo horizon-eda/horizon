@@ -14,6 +14,14 @@ public:
     bool can_begin() override;
     bool is_specific() override;
 
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB, I::CANCEL, I::RMB, I::ROTATE, I::MIRROR, I::RESTRICT,
+        };
+    }
+
 private:
     void fix_layer(int &la);
     void apply_shift(Coordi &c, const Coordi &cursor_pos);

@@ -5,13 +5,14 @@
 #include "tool_data.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "document/documents.hpp"
+#include "imp/in_tool_action.hpp"
 #include <set>
 #include <memory>
 
 namespace horizon {
 using json = nlohmann::json;
 
-enum class ToolEventType { NONE, MOVE, CLICK, CLICK_RELEASE, KEY, LAYER_CHANGE, DATA };
+enum class ToolEventType { NONE, MOVE, CLICK, CLICK_RELEASE, KEY, ACTION, LAYER_CHANGE, DATA };
 
 enum class ToolID;
 
@@ -27,6 +28,7 @@ public:
     bool keep_selection = false;
     unsigned int button = 0;
     unsigned int key = 0;
+    InToolActionID action = InToolActionID::NONE;
     enum Modifieres {
         MOD_FINE = (1 << 0),
         MOD_ALT = (1 << 1),
@@ -145,6 +147,10 @@ public:
     {
     }
 
+    virtual std::set<InToolActionID> get_actions() const
+    {
+        return {};
+    }
 
     /**
      * Gets called right after the constructor has finished.

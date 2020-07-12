@@ -16,6 +16,13 @@ public:
     {
         return true;
     }
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB,
+        };
+    }
 
 private:
     class SymbolPinNamesWindow *win = nullptr;

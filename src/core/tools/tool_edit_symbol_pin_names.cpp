@@ -24,6 +24,11 @@ ToolResponse ToolEditSymbolPinNames::begin(const ToolArgs &args)
         return ToolResponse::end();
     }
 
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB, "pick pin"},
+    });
+
+
     selection.clear();
     auto &hl = imp->get_highlights();
     hl.clear();
@@ -56,11 +61,9 @@ ToolResponse ToolEditSymbolPinNames::update(const ToolArgs &args)
             }
         }
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.target.type == ObjectType::SYMBOL_PIN) {
-            if (args.target.path.at(0) == sym->uuid) {
-                win->go_to_pin(args.target.path.at(1));
-            }
+    else if (args.type == ToolEventType::ACTION && args.action == InToolActionID::LMB) {
+        if (args.target.path.at(0) == sym->uuid) {
+            win->go_to_pin(args.target.path.at(1));
         }
     }
     return ToolResponse();

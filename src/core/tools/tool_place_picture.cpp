@@ -29,7 +29,12 @@ ToolResponse ToolPlacePicture::begin(const ToolArgs &args)
         float width = 10_mm;
         temp->px_size = width / temp->data->width;
 
-        imp->tool_bar_set_tip("<b>LMB:</b>place picture <b>RMB:</b>cancel <b>r:</b>rotate <b>s:</b>set size");
+        imp->tool_bar_set_actions({
+                {InToolActionID::LMB},
+                {InToolActionID::RMB},
+                {InToolActionID::ROTATE},
+                {InToolActionID::ENTER_SIZE, "set size"},
+        });
         return ToolResponse();
     }
     else {
@@ -45,12 +50,28 @@ ToolResponse ToolPlacePicture::update(const ToolArgs &args)
             temp->placement.shift = args.coords;
         return ToolResponse();
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             return ToolResponse::commit();
-        }
-        else if (args.button == 3) {
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             return ToolResponse::revert();
+
+        case InToolActionID::ROTATE:
+            temp->placement.inc_angle_deg(-90);
+            break;
+
+        case InToolActionID::ENTER_SIZE: {
+            auto win = imp->dialogs.show_enter_datum_window("Enter pixel size", temp->px_size);
+            win->set_use_ok(false);
+            win->set_range(.00001_mm, 10_mm);
+            win->set_step_size(.0001_mm);
+        } break;
+
+
+        default:;
         }
     }
     else if (args.type == ToolEventType::DATA) {
@@ -61,20 +82,6 @@ ToolResponse ToolPlacePicture::update(const ToolArgs &args)
                     return ToolResponse();
                 }
             }
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_r) {
-            temp->placement.inc_angle_deg(-90);
-        }
-        else if (args.key == GDK_KEY_s) {
-            auto win = imp->dialogs.show_enter_datum_window("Enter pixel size", temp->px_size);
-            win->set_use_ok(false);
-            win->set_range(.00001_mm, 10_mm);
-            win->set_step_size(.0001_mm);
-        }
-        else if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
         }
     }
     return ToolResponse();

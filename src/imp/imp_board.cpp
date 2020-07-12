@@ -1008,9 +1008,9 @@ void ImpBoard::handle_drag()
             }
             {
                 ToolArgs args;
-                args.type = ToolEventType::CLICK;
+                args.type = ToolEventType::ACTION;
                 args.coords = target_drag_begin.p;
-                args.button = 1;
+                args.action = InToolActionID::LMB;
                 args.target = target_drag_begin;
                 args.work_layer = canvas->property_work_layer();
                 ToolResponse r = core->tool_update(args);
@@ -1028,9 +1028,9 @@ void ImpBoard::handle_drag()
             }
             {
                 ToolArgs args;
-                args.type = ToolEventType::CLICK;
+                args.type = ToolEventType::ACTION;
                 args.coords = target_drag_begin.p;
-                args.button = 1;
+                args.action = InToolActionID::LMB;
                 args.target = target_drag_begin;
                 args.work_layer = canvas->property_work_layer();
                 ToolResponse r = core->tool_update(args);

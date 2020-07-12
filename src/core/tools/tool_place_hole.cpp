@@ -23,7 +23,10 @@ ToolResponse ToolPlaceHole::begin(const ToolArgs &args)
 
     create_hole(args.coords);
 
-    imp->tool_bar_set_tip("<b>LMB:</b>place hole <b>RMB:</b>delete current hole and finish");
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+    });
     return ToolResponse();
 }
 
@@ -42,13 +45,15 @@ ToolResponse ToolPlaceHole::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         temp->placement.shift = args.coords;
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             holes_placed.push_front(temp);
-
             create_hole(args.coords);
-        }
-        else if (args.button == 3) {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             doc.r->delete_hole(temp->uuid);
             temp = 0;
             selection.clear();
@@ -56,11 +61,8 @@ ToolResponse ToolPlaceHole::update(const ToolArgs &args)
                 selection.emplace(it->uuid, ObjectType::HOLE);
             }
             return ToolResponse::commit();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
+
+        default:;
         }
     }
     return ToolResponse();

@@ -11,6 +11,13 @@ public:
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;
     void apply_settings() override;
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB, I::CANCEL, I::RMB, I::ENTER_WIDTH, I::FLIP_ARC,
+        };
+    }
 
 private:
     enum class DrawArcState { FROM, TO, CENTER };

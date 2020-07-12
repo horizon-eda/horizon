@@ -32,6 +32,11 @@ bool ToolPlaceVia::begin_attached()
         return false;
     }
     update_tip();
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::EDIT, "change net"},
+    });
     return true;
 }
 
@@ -61,26 +66,23 @@ void ToolPlaceVia::delete_attached()
 
 void ToolPlaceVia::update_tip()
 {
-    std::string s = "<b>LMB:</b>place via <b>RMB:</b>delete current via and finish <b>Space:</b>change net <i>Net: "
-                    + net->name + "</i>";
-
-    imp->tool_bar_set_tip(s);
+    imp->tool_bar_set_tip(net->name);
 }
 
 bool ToolPlaceVia::update_attached(const ToolArgs &args)
 {
-    if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (args.target.type == ObjectType::JUNCTION) {
                 Junction *j = doc.r->get_junction(args.target.path.at(0));
                 via->junction = j;
                 create_attached();
                 return true;
             }
-        }
-    }
-    if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_space) {
+            return false;
+
+        case InToolActionID::EDIT:
             if (via) {
                 auto [r, net_uuid] = imp->dialogs.select_net(doc.b->get_block(), false);
                 if (!r) {
@@ -91,7 +93,11 @@ bool ToolPlaceVia::update_attached(const ToolArgs &args)
                 via->parameter_set = rules->get_via_parameter_set(net);
                 via->expand(*doc.b->get_board());
                 update_tip();
+                return true;
             }
+            return false;
+
+        default:;
         }
     }
     return false;

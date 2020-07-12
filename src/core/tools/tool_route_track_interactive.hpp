@@ -23,12 +23,7 @@ public:
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;
     bool is_specific() override;
-    bool handles_esc() override
-    {
-        return true;
-    }
     ~ToolRouteTrackInteractive();
-
 
     class Settings : public ToolSettings {
     public:
@@ -44,6 +39,29 @@ public:
     }
 
     void apply_settings() override;
+
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB,
+                I::CANCEL,
+                I::RMB,
+                I::LENGTH_TUNING_LENGTH,
+                I::LENGTH_TUNING_AMPLITUDE_INC,
+                I::LENGTH_TUNING_AMPLITUDE_DEC,
+                I::LENGTH_TUNING_SPACING_INC,
+                I::LENGTH_TUNING_SPACING_DEC,
+                I::POSTURE,
+                I::TOGGLE_VIA,
+                I::ROUTER_SETTINGS,
+                I::ROUTER_MODE,
+                I::ENTER_WIDTH,
+                I::TRACK_WIDTH_DEFAULT,
+                I::CLEARANCE_OFFSET,
+                I::CLEARANCE_OFFSET_DEFAULT,
+        };
+    }
 
 protected:
     ToolSettings *get_settings() override

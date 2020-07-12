@@ -441,6 +441,13 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
 ToolResponse ToolPaste::begin(const ToolArgs &args)
 {
     update_tip();
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::ROTATE},
+            {InToolActionID::MIRROR},
+            {InToolActionID::RESTRICT},
+    });
     if (auto data = dynamic_cast<ToolDataPaste *>(args.data.get())) {
         paste_data = data->paste_data;
         return begin_paste(paste_data, args.coords);
@@ -478,15 +485,11 @@ void ToolPaste::update_tip()
 {
     if (paste_data == nullptr && pic == nullptr) { // wait for data
         imp->tool_bar_set_tip("waiting for paste data");
-        return;
     }
-    auto delta = get_delta();
-
-    std::string s =
-            "<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate "
-            "<b>e:</b>mirror <b>/:</b>restrict <i>"
-            + coord_to_string(delta, true) + " " + restrict_mode_to_string() + "</i> ";
-    imp->tool_bar_set_tip(s);
+    else {
+        auto delta = get_delta();
+        imp->tool_bar_set_tip(coord_to_string(delta, true) + " " + restrict_mode_to_string());
+    }
 }
 
 ToolResponse ToolPaste::update(const ToolArgs &args)
@@ -522,8 +525,8 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
             update_tip();
             return ToolResponse();
         }
-        else if (args.type == ToolEventType::CLICK || (is_transient && args.type == ToolEventType::CLICK_RELEASE)) {
-            if (args.button == 1) {
+        else if (args.type == ToolEventType::ACTION) {
+            if (args.action == InToolActionID::LMB || (is_transient && args.action == InToolActionID::LMB_RELEASE)) {
                 if (pic) {
                     return ToolResponse::commit();
                 }
@@ -540,21 +543,15 @@ ToolResponse ToolPaste::update(const ToolArgs &args)
                 return ToolResponse::next(ToolResponse::Result::COMMIT, tool_id,
                                           std::make_unique<ToolDataPaste>(paste_data));
             }
-            else {
+            else if (any_of(args.action, {InToolActionID::RMB, InToolActionID::CANCEL})) {
                 return ToolResponse::revert();
             }
-        }
-        else if (args.type == ToolEventType::KEY) {
-            if (args.key == GDK_KEY_Escape) {
-                return ToolResponse::revert();
-            }
-            else if (args.key == GDK_KEY_slash) {
+            else if (args.action == InToolActionID::RESTRICT) {
                 cycle_restrict_mode();
                 move_do_cursor(args.coords);
             }
-            else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
-                bool rotate = args.key == GDK_KEY_r;
-                move_mirror_or_rotate(args.coords, rotate);
+            else if (any_of(args.action, {InToolActionID::ROTATE, InToolActionID::MIRROR})) {
+                move_mirror_or_rotate(args.coords, args.action == InToolActionID::ROTATE);
             }
         }
     }

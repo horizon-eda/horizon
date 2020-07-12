@@ -11,6 +11,13 @@ public:
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;
     void apply_settings() override;
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB, I::CANCEL, I::RMB, I::RECTANGLE_MODE, I::ENTER_WIDTH,
+        };
+    }
 
 private:
     std::set<class Line *> lines;

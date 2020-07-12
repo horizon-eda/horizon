@@ -5,6 +5,7 @@
     <file>util/window_state_schema.sql</file>
     <file>imp/layer_display_default.json</file>
     <file>imp/keys_default.json</file>
+    <file>imp/in_tool_keys_default.json</file>
     <file>imp/app_menu.ui</file>
     <file>pool-prj-mgr/preferences/preferences.ui</file>
     <file>property_panels/property_panel.ui</file>
@@ -68,6 +69,8 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-place-via-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-route-track-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-route-diffpair-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-lmb-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/action-rmb-symbolic.svg</file>
     <file>icons/scalable/apps/horizon-eda.svg</file>
     <file>icons/16x16/apps/horizon-eda.png</file>
     <file>icons/32x32/apps/horizon-eda.png</file>

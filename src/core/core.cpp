@@ -103,6 +103,14 @@ std::set<SelectableRef> &Core::get_tool_selection()
         return tool_selection;
 }
 
+std::set<InToolActionID> Core::get_tool_actions() const
+{
+    if (tool)
+        return tool->get_actions();
+    else
+        return {};
+}
+
 std::pair<bool, bool> Core::tool_can_begin(ToolID tool_id, const std::set<SelectableRef> &sel)
 {
     auto t = create_tool(tool_id);

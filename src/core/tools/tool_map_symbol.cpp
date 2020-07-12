@@ -66,13 +66,14 @@ ToolResponse ToolMapSymbol::begin(const ToolArgs &args)
 
     move_init(args.coords);
 
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::ROTATE},
+            {InToolActionID::MIRROR},
+    });
+
     return ToolResponse();
-}
-void ToolMapSymbol::update_tip()
-{
-    imp->tool_bar_set_tip(
-            "<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate "
-            "<b>e:</b>mirror");
 }
 
 ToolResponse ToolMapSymbol::update(const ToolArgs &args)
@@ -80,8 +81,9 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         move_do_cursor(args.coords);
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB: {
             doc.c->get_schematic()->autoconnect_symbol(doc.c->get_sheet(), sym_current);
             if (sym_current->component->connections.size() == 0) {
                 doc.c->get_schematic()->place_bipole_on_line(doc.c->get_sheet(), sym_current);
@@ -124,23 +126,25 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
 
             selection.clear();
             selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
-        }
-        else {
+        } break;
+
+        case InToolActionID::RMB:
             doc.c->delete_schematic_symbol(sym_current->uuid);
             sym_current = nullptr;
             return ToolResponse::commit();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
+            break;
+
+        case InToolActionID::CANCEL:
             return ToolResponse::revert();
-        }
-        else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
-            bool rotate = args.key == GDK_KEY_r;
-            move_mirror_or_rotate(sym_current->placement.shift, rotate);
+
+        case InToolActionID::ROTATE:
+        case InToolActionID::MIRROR:
+            move_mirror_or_rotate(sym_current->placement.shift, args.action == InToolActionID::ROTATE);
+            break;
+
+        default:;
         }
     }
-    update_tip();
     return ToolResponse();
 }
 } // namespace horizon

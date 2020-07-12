@@ -166,6 +166,7 @@ SRC_IMP = \
 	src/imp/selection_filter_dialog.cpp\
 	src/imp/action.cpp\
 	src/imp/action_catalog.cpp\
+	src/imp/in_tool_action_catalog.cpp\
 	$(SRC_CANVAS) \
 	src/document/document.cpp \
 	src/document/document_board.cpp \
@@ -591,12 +592,15 @@ SRC_POOL_PRJ_MGR = \
 	src/preferences/preferences_util.cpp\
 	src/pool-prj-mgr/preferences/preferences_window.cpp\
 	src/pool-prj-mgr/preferences/preferences_window_keys.cpp\
+	src/pool-prj-mgr/preferences/preferences_window_in_tool_keys.cpp\
 	src/pool-prj-mgr/preferences/preferences_window_canvas.cpp\
 	src/pool-prj-mgr/preferences/preferences_window_pool.cpp\
 	src/pool-prj-mgr/preferences/preferences_window_partinfo.cpp\
 	src/pool-prj-mgr/preferences/preferences_window_misc.cpp\
+	src/pool-prj-mgr/preferences/action_editor.cpp\
 	src/imp/action.cpp\
 	src/imp/action_catalog.cpp\
+	src/imp/in_tool_action_catalog.cpp\
 	src/widgets/unit_info_box.cpp\
 	src/widgets/entity_info_box.cpp\
 	src/widgets/padstack_preview.cpp\

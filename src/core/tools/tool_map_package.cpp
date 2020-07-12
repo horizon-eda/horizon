@@ -81,6 +81,13 @@ ToolResponse ToolMapPackage::begin(const ToolArgs &args)
 
     update_tooltip();
 
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::ROTATE},
+            {InToolActionID::MIRROR},
+            {InToolActionID::EDIT, "select package"},
+    });
     return ToolResponse();
 }
 
@@ -94,7 +101,7 @@ void ToolMapPackage::place_package(Component *comp, const Coordi &c)
     pkg->flip = flipped;
     pkg->placement.set_angle(angle);
     brd->packages_expand = {uu};
-    brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_PACKAGES);
+    brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_PACKAGES | Board::EXPAND_AIRWIRES);
     brd->expand(true);
     nets.clear();
     for (const auto &it : pkg->package.pads) {
@@ -109,14 +116,12 @@ void ToolMapPackage::place_package(Component *comp, const Coordi &c)
 
 void ToolMapPackage::update_tooltip()
 {
-    std::string text =
-            "<b>LMB:</b>place package <b>RMB:</b>delete current package and "
-            "finish <b>r:</b>rotate <b>e:</b>mirror <b>Space</b>:select "
-            "package";
     if (pkg) {
-        text += " <i>placing package " + pkg->component->refdes + " " + pkg->component->part->get_value() + "</i>";
+        imp->tool_bar_set_tip("placing package " + pkg->component->refdes + " " + pkg->component->part->get_value());
     }
-    imp->tool_bar_set_tip(text);
+    else {
+        imp->tool_bar_set_tip("");
+    }
 }
 
 ToolResponse ToolMapPackage::update(const ToolArgs &args)
@@ -126,8 +131,9 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
         doc.b->get_board()->update_airwires(true, nets);
         return ToolResponse();
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB: {
             components.at(component_index).second = true;
             component_index++;
             while (component_index < components.size()) {
@@ -140,16 +146,16 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
             }
             Component *comp = components.at(component_index).first;
             place_package(comp, args.coords);
-        }
-        else if (args.button == 3) {
+        } break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             if (pkg) {
                 doc.b->get_board()->packages.erase(pkg->uuid);
             }
             return ToolResponse::commit();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_space) {
+
+        case InToolActionID::EDIT: {
             bool r;
             UUID selected_component;
             std::tie(r, selected_component) = imp->dialogs.map_package(components);
@@ -165,15 +171,16 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
                 Component *comp = components.at(component_index).first;
                 place_package(comp, args.coords);
             }
-        }
-        else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
-            bool rotate = args.key == GDK_KEY_r;
-            move_mirror_or_rotate(pkg->placement.shift, rotate);
+        } break;
+
+        case InToolActionID::ROTATE:
+        case InToolActionID::MIRROR:
+            move_mirror_or_rotate(pkg->placement.shift, args.action == InToolActionID::ROTATE);
             flipped = pkg->flip;
             angle = pkg->placement.get_angle();
-        }
-        else if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
+            break;
+
+        default:;
         }
     }
     return ToolResponse();

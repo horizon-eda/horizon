@@ -24,9 +24,12 @@ ToolResponse ToolPlaceShape::begin(const ToolArgs &args)
     create_shape(args.coords);
     temp->layer = args.work_layer;
 
-    imp->tool_bar_set_tip(
-            "<b>LMB:</b>place shape <b>RMB:</b>delete current shape and "
-            "finish <b>i:</b>edit shape <b>r:</b>rotate");
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::ROTATE},
+            {InToolActionID::EDIT, "edit shape"},
+    });
     return ToolResponse();
 }
 
@@ -54,8 +57,9 @@ ToolResponse ToolPlaceShape::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         temp->placement.shift = args.coords;
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB: {
             auto last = temp;
             shapes_placed.push_front(temp);
 
@@ -63,8 +67,10 @@ ToolResponse ToolPlaceShape::update(const ToolArgs &args)
             temp->layer = last->layer;
             temp->form = last->form;
             temp->params = last->params;
-        }
-        else if (args.button == 3) {
+        } break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             doc.a->get_padstack()->shapes.erase(temp->uuid);
             temp = 0;
             selection.clear();
@@ -72,26 +78,25 @@ ToolResponse ToolPlaceShape::update(const ToolArgs &args)
                 selection.emplace(it->uuid, ObjectType::SHAPE);
             }
             return ToolResponse::commit();
-        }
-    }
-    else if (args.type == ToolEventType::LAYER_CHANGE) {
-        temp->layer = args.work_layer;
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
-        }
-        else if (args.key == GDK_KEY_i) {
+
+        case InToolActionID::ROTATE:
+            temp->placement.inc_angle_deg(90);
+            break;
+
+        case InToolActionID::EDIT: {
             auto form = temp->form;
             auto params = temp->params;
             if (imp->dialogs.edit_shapes({temp}) == false) { // rollback
                 temp->form = form;
                 temp->params = params;
             }
+        } break;
+
+        default:;
         }
-        else if (args.key == GDK_KEY_r) {
-            temp->placement.inc_angle_deg(90);
-        }
+    }
+    else if (args.type == ToolEventType::LAYER_CHANGE) {
+        temp->layer = args.work_layer;
     }
     return ToolResponse();
 }

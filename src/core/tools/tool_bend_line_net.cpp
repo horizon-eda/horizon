@@ -38,7 +38,10 @@ ToolResponse ToolBendLineNet::begin(const ToolArgs &args)
 
     LineNet *li = &doc.c->get_sheet()->net_lines.at(it->uuid);
     doc.c->get_sheet()->split_line_net(li, temp);
-    imp->tool_bar_set_tip("<b>LMB:</b>place junction <b>RMB:</b>cancel");
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+    });
     return ToolResponse();
 }
 ToolResponse ToolBendLineNet::update(const ToolArgs &args)
@@ -46,17 +49,16 @@ ToolResponse ToolBendLineNet::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         temp->position = args.coords;
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             return ToolResponse::commit();
-        }
-        else if (args.button == 3) {
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             return ToolResponse::revert();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
+
+        default:;
         }
     }
     return ToolResponse();

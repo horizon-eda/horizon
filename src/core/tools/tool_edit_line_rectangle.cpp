@@ -108,7 +108,11 @@ ToolResponse ToolEditLineRectangle::begin(const ToolArgs &args)
         selection.emplace(ju->uuid, ObjectType::JUNCTION);
     }
     update_junctions(args.coords);
-    imp->tool_bar_set_tip("<b>LMB:</b>finish <b>RMB:</b>cancel");
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB, "finish"},
+            {InToolActionID::RMB, "cancel"},
+    });
+
     return ToolResponse();
 }
 
@@ -117,17 +121,16 @@ ToolResponse ToolEditLineRectangle::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         update_junctions(args.coords);
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             return ToolResponse::commit();
-        }
-        else if (args.button == 3) {
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             return ToolResponse::revert();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
+
+        default:;
         }
     }
     return ToolResponse();

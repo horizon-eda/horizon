@@ -55,6 +55,9 @@ public:
     void tool_bar_set_tool_name(const std::string &s);
     void tool_bar_set_tool_tip(const std::string &s);
     void tool_bar_flash(const std::string &s);
+    void tool_bar_set_use_actions(bool use_actions);
+    void tool_bar_clear_actions();
+    void tool_bar_append_action(Gtk::Widget &w);
 
     void hud_update(const std::string &s);
     void hud_hide();
@@ -74,6 +77,8 @@ private:
     Gtk::Label *tool_bar_tip_label = nullptr;
     Gtk::Label *tool_bar_flash_label = nullptr;
     Gtk::Stack *tool_bar_stack = nullptr;
+    Gtk::Label *tool_bar_action_tip_label = nullptr;
+    Gtk::Box *tool_bar_actions_box = nullptr;
     sigc::connection tip_timeout_connection;
     bool tool_bar_queue_close = false;
 
@@ -97,7 +102,6 @@ private:
 
     Gtk::Stack *grid_box_stack = nullptr;
 
-    void sc(void);
-    void cm(const horizon::Coordi &cursor_pos);
+    bool tool_bar_use_actions = false;
 };
 } // namespace horizon

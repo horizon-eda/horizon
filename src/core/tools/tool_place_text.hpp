@@ -38,6 +38,14 @@ public:
 
     void apply_settings() override;
 
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB, I::CANCEL, I::RMB, I::EDIT, I::ROTATE, I::MIRROR, I::ENTER_SIZE, I::ENTER_WIDTH,
+        };
+    }
+
 protected:
     ToolSettings *get_settings() override
     {

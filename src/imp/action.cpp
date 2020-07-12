@@ -26,6 +26,42 @@ std::string key_sequence_to_string(const KeySequence &keys)
     return txt;
 }
 
+static std::string keyval_to_string(unsigned int kv)
+{
+    switch (kv) {
+    case GDK_KEY_slash:
+        return "/";
+    case GDK_KEY_Return:
+        return "⏎";
+    case GDK_KEY_space:
+        return "␣";
+    case GDK_KEY_plus:
+        return "+";
+    case GDK_KEY_minus:
+        return "−";
+    case GDK_KEY_comma:
+        return ",";
+    case GDK_KEY_period:
+        return ".";
+    case GDK_KEY_less:
+        return "<";
+    case GDK_KEY_greater:
+        return ">";
+    default:
+        return gdk_keyval_name(kv);
+    }
+}
+
+std::string key_sequence_to_string_short(const KeySequence &keys)
+{
+    if (keys.size() == 1 && keys.front().second == static_cast<GdkModifierType>(0)) {
+        return keyval_to_string(keys.front().first);
+    }
+    else {
+        return key_sequence_to_string(keys);
+    }
+}
+
 std::string key_sequences_to_string(const std::vector<KeySequence> &seqs)
 {
     std::string s;

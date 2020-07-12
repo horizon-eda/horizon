@@ -98,6 +98,13 @@ ToolResponse ToolRoundOffVertex::begin(const ToolArgs &args)
 
     update_cursor(args.coords);
 
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB, "set radius"},
+            {InToolActionID::RMB},
+            {InToolActionID::FLIP_ARC},
+            {InToolActionID::ENTER_DATUM, "enter radius"},
+    });
+
     return ToolResponse();
 }
 
@@ -124,9 +131,7 @@ void ToolRoundOffVertex::update_cursor(const Coordi &c)
 
 void ToolRoundOffVertex::update_tip()
 {
-    imp->tool_bar_set_tip(
-            "<b>LMB:</b>set radius <b>RMB:</b>cancel <b>Return:</b>enter radius <b>e:</b>flip arc <i>Current radius:"
-            + dim_to_string(radius_current, false) + "</i>");
+    imp->tool_bar_set_tip("Current radius:" + dim_to_string(radius_current, false));
 }
 
 ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
@@ -135,13 +140,25 @@ ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
         if (imp->dialogs.get_nonmodal() == nullptr)
             update_cursor(args.coords);
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             return ToolResponse::commit();
-        }
-        else if (args.button == 3) {
-            selection.clear();
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             return ToolResponse::revert();
+
+        case InToolActionID::FLIP_ARC:
+            vxp->arc_reverse = !vxp->arc_reverse;
+            break;
+
+        case InToolActionID::ENTER_DATUM: {
+            auto win = imp->dialogs.show_enter_datum_window("Enter arc radius", radius_current);
+            win->set_range(0, r_max);
+        } break;
+
+        default:;
         }
     }
     else if (args.type == ToolEventType::DATA) {
@@ -156,25 +173,6 @@ ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
             else if (data->event == ToolDataWindow::Event::OK) {
                 return ToolResponse::commit();
             }
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
-            selection.clear();
-            return ToolResponse::revert();
-        }
-        else if (args.key == GDK_KEY_e) {
-            vxp->arc_reverse = !vxp->arc_reverse;
-        }
-        else if (args.key == GDK_KEY_Return) {
-            auto win = imp->dialogs.show_enter_datum_window("Enter arc radius", radius_current);
-            win->set_range(0, r_max);
-            /*auto r = imp->dialogs.ask_datum("Enter arc radius", radius_current);
-            if (r.first && r.second > 0) {
-                update_poly(r.second);
-                poly->temp = false;
-                return ToolResponse::commit();
-            }*/
         }
     }
     return ToolResponse();

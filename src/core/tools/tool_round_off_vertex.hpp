@@ -15,6 +15,13 @@ public:
     {
         return true;
     }
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB, I::CANCEL, I::RMB, I::ENTER_DATUM, I::FLIP_ARC,
+        };
+    }
 
 private:
     Polygon *poly = nullptr;

@@ -44,9 +44,14 @@ bool ToolPlaceNetLabel::check_line(LineNet *li)
 
 bool ToolPlaceNetLabel::begin_attached()
 {
-    imp->tool_bar_set_tip(
-            "<b>LMB:</b>place label <b>RMB:</b>delete current label and finish "
-            "<b>r:</b>rotate <b>e:</b>mirror <b>+-:</b>change label size <b>s:</b>set label size");
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::ROTATE},
+            {InToolActionID::MIRROR},
+            {InToolActionID::NET_LABEL_SIZE_INC, InToolActionID::NET_LABEL_SIZE_DEC, "label size"},
+            {InToolActionID::ENTER_SIZE, "enter label size"},
+    });
     return true;
 }
 
@@ -58,8 +63,9 @@ void ToolPlaceNetLabel::apply_settings()
 
 bool ToolPlaceNetLabel::update_attached(const ToolArgs &args)
 {
-    if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (args.target.type == ObjectType::JUNCTION) {
                 Junction *j = doc.r->get_junction(args.target.path.at(0));
                 if (j->bus)
@@ -103,27 +109,28 @@ bool ToolPlaceNetLabel::update_attached(const ToolArgs &args)
 
                 return true;
             }
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (la) {
-            if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
-                la->orientation = ToolHelperMove::transform_orientation(la->orientation, args.key == GDK_KEY_r);
-                last_orientation = la->orientation;
-                return true;
-            }
-            else if (args.key == GDK_KEY_plus || args.key == GDK_KEY_equal) {
-                step_net_label_size(true);
-                return true;
-            }
-            else if (args.key == GDK_KEY_minus) {
-                step_net_label_size(false);
-                return true;
-            }
-            else if (args.key == GDK_KEY_s) {
-                ask_net_label_size();
-                return true;
-            }
+            break;
+
+        case InToolActionID::ROTATE:
+        case InToolActionID::MIRROR:
+            la->orientation =
+                    ToolHelperMove::transform_orientation(la->orientation, args.action == InToolActionID::ROTATE);
+            last_orientation = la->orientation;
+            return true;
+
+        case InToolActionID::NET_LABEL_SIZE_INC:
+            step_net_label_size(true);
+            return true;
+
+        case InToolActionID::NET_LABEL_SIZE_DEC:
+            step_net_label_size(false);
+            return true;
+
+        case InToolActionID::ENTER_SIZE:
+            ask_net_label_size();
+            return true;
+
+        default:;
         }
     }
     return false;

@@ -215,6 +215,10 @@ ToolResponse ToolGenerateSilkscreen::begin(const ToolArgs &args)
 
     win = imp->dialogs.show_generate_silkscreen_window(&settings);
 
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB, "select package polygon"},
+    });
+
     return ToolResponse();
 }
 
@@ -235,21 +239,27 @@ ToolResponse ToolGenerateSilkscreen::update(const ToolArgs &args)
             }
         }
     }
-    else if (args.type == ToolEventType::CLICK && args.button == 1 && args.target.layer == BoardLayers::TOP_PACKAGE
-             && (args.target.type == ObjectType::POLYGON_EDGE || args.target.type == ObjectType::POLYGON_VERTEX)) {
-        selection.clear();
-        selection.emplace(args.target.path.at(0), args.target.type, args.target.vertex, args.target.layer);
-        select_polygon();
-        return redraw_silkscreen();
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Return || args.key == GDK_KEY_KP_Enter) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
+            if (args.target.layer == BoardLayers::TOP_PACKAGE
+                && (args.target.type == ObjectType::POLYGON_EDGE || args.target.type == ObjectType::POLYGON_VERTEX)) {
+                selection.clear();
+                selection.emplace(args.target.path.at(0), args.target.type, args.target.vertex, args.target.layer);
+                select_polygon();
+                return redraw_silkscreen();
+            }
+            break;
+
+        case InToolActionID::COMMIT:
             restore_package_visibility();
             return ToolResponse::commit();
-        }
-        else if (args.key == GDK_KEY_Escape) {
+
+        case InToolActionID::CANCEL:
             restore_package_visibility();
             return ToolResponse::revert();
+
+        default:;
         }
     }
     else if (args.type == ToolEventType::NONE) {

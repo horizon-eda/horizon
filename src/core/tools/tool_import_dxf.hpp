@@ -10,6 +10,13 @@ public:
     ToolResponse begin(const ToolArgs &args);
     ToolResponse update(const ToolArgs &args);
     bool can_begin();
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB, I::CANCEL, I::RMB, I::ROTATE, I::MIRROR, I::ENTER_WIDTH,
+        };
+    }
 
 private:
     std::set<class Line *> lines;

@@ -6,12 +6,6 @@
 
 namespace horizon {
 
-template <typename T> constexpr bool any_of(T value, std::initializer_list<T> choices)
-{
-    return std::count(choices.begin(), choices.end(), value);
-}
-
-
 PoolProjectManagerProcess::PoolProjectManagerProcess(const UUID &uu, PoolProjectManagerProcess::Type ty,
                                                      const std::vector<std::string> &args,
                                                      const std::vector<std::string> &ienv, Pool *pool,

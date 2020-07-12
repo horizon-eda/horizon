@@ -1,8 +1,8 @@
 #include "tool_drag_keep_slope.hpp"
 #include "document/idocument_board.hpp"
 #include "board/board.hpp"
-#include <iostream>
-#include <gdk/gdkkeysyms.h>
+#include "imp/imp_interface.hpp"
+#include "util/selection_util.hpp"
 
 namespace horizon {
 
@@ -14,11 +14,7 @@ bool ToolDragKeepSlope::can_begin()
 {
     if (!doc.b)
         return false;
-    for (const auto &it : selection) {
-        if (it.type == ObjectType::TRACK)
-            return true;
-    }
-    return false;
+    return sel_count_type(selection, ObjectType::TRACK) > 0;
 }
 
 ToolDragKeepSlope::TrackInfo::TrackInfo(Track *tr, Track *fr, Track *to) : track(tr), track_from(fr), track_to(to)
@@ -84,6 +80,11 @@ ToolResponse ToolDragKeepSlope::begin(const ToolArgs &args)
     if (selection.size() < 1)
         return ToolResponse::end();
 
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB, "place"},
+            {InToolActionID::RMB, "cancel"},
+    });
+
     return ToolResponse();
 }
 
@@ -110,18 +111,16 @@ ToolResponse ToolDragKeepSlope::update(const ToolArgs &args)
             it.track->to.junc->position = it.pos_to_orig + Coordi(shift_to.x, shift_to.y);
         }
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             return ToolResponse::commit();
-        }
-        else if (args.button == 3) {
-            return ToolResponse::revert();
-        }
-    }
 
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             return ToolResponse::revert();
+
+        default:;
         }
     }
     return ToolResponse();

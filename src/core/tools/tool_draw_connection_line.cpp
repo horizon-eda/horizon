@@ -29,14 +29,14 @@ ToolResponse ToolDrawConnectionLine::begin(const ToolArgs &args)
 
 void ToolDrawConnectionLine::update_tip()
 {
-    std::string s("<b>LMB:</b>connect <b>RMB:</b>");
-    if (temp_line) {
-        s += "cancel current line";
-    }
-    else {
-        s += "end tool";
-    }
-    imp->tool_bar_set_tip(s);
+    std::vector<ActionLabelInfo> actions;
+    actions.reserve(2);
+    actions.emplace_back(InToolActionID::LMB, "connect");
+    if (temp_line)
+        actions.emplace_back(InToolActionID::RMB, "cancel current line");
+    else
+        actions.emplace_back(InToolActionID::RMB, "end tool");
+    imp->tool_bar_set_actions(actions);
 }
 
 ToolResponse ToolDrawConnectionLine::update(const ToolArgs &args)
@@ -47,8 +47,9 @@ ToolResponse ToolDrawConnectionLine::update(const ToolArgs &args)
             temp_junc->position = args.coords;
         return ToolResponse();
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (args.target.type == ObjectType::PAD) {
                 auto pkg = &brd->packages.at(args.target.path.at(0));
                 auto pad = &pkg->package.pads.at(args.target.path.at(1));
@@ -104,8 +105,10 @@ ToolResponse ToolDrawConnectionLine::update(const ToolArgs &args)
             else {
                 imp->tool_bar_flash("only connects to pads or junctions");
             }
-        }
-        else if (args.button == 3) {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             if (temp_line) {
                 doc.b->get_board()->connection_lines.erase(temp_line->uuid);
                 temp_line = nullptr;
@@ -115,6 +118,9 @@ ToolResponse ToolDrawConnectionLine::update(const ToolArgs &args)
                 temp_junc = nullptr;
                 return ToolResponse::commit();
             }
+            break;
+
+        default:;
         }
     }
     update_tip();

@@ -234,6 +234,13 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
         return ToolResponse::commit();
     }
 
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::ROTATE, InToolActionID::MIRROR, "rotate/mirror"},
+            {InToolActionID::ROTATE_CURSOR, InToolActionID::MIRROR_CURSOR, "rotate/mirror around cursor"},
+            {InToolActionID::RESTRICT},
+    });
     update_tip();
 
     for (const auto &it : selection) {
@@ -250,40 +257,46 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
         plane->revision++;
     }
 
-    int key = 0;
-    unsigned int mod = 0;
+    InToolActionID action = InToolActionID::NONE;
     switch (tool_id) {
     case ToolID::MOVE_KEY_FINE_UP:
-        mod = ToolArgs::MOD_FINE;
+        action = InToolActionID::MOVE_UP_FINE;
+        break;
     case ToolID::MOVE_KEY_UP:
-        key = GDK_KEY_Up;
+        action = InToolActionID::MOVE_UP;
         break;
 
     case ToolID::MOVE_KEY_FINE_DOWN:
-        mod = ToolArgs::MOD_FINE;
+        action = InToolActionID::MOVE_DOWN_FINE;
+        break;
+
     case ToolID::MOVE_KEY_DOWN:
-        key = GDK_KEY_Down;
+        action = InToolActionID::MOVE_DOWN;
         break;
 
     case ToolID::MOVE_KEY_FINE_LEFT:
-        mod = ToolArgs::MOD_FINE;
+        action = InToolActionID::MOVE_LEFT_FINE;
+        break;
+
     case ToolID::MOVE_KEY_LEFT:
-        key = GDK_KEY_Left;
+        action = InToolActionID::MOVE_LEFT;
         break;
 
     case ToolID::MOVE_KEY_FINE_RIGHT:
-        mod = ToolArgs::MOD_FINE;
-    case ToolID::MOVE_KEY_RIGHT:
-        key = GDK_KEY_Right;
+        action = InToolActionID::MOVE_RIGHT_FINE;
         break;
+
+    case ToolID::MOVE_KEY_RIGHT:
+        action = InToolActionID::MOVE_RIGHT;
+        break;
+
     default:;
     }
-    if (key) {
+    if (action != InToolActionID::NONE) {
         is_key = true;
         ToolArgs args2;
-        args2.type = ToolEventType::KEY;
-        args2.key = key;
-        args2.mod = mod;
+        args2.type = ToolEventType::ACTION;
+        args2.action = action;
         update(args2);
     }
     if (tool_id == ToolID::MOVE_KEY)
@@ -327,21 +340,10 @@ bool ToolMove::can_begin()
 void ToolMove::update_tip()
 {
     auto delta = get_delta();
-    std::string s =
-            "<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate "
-            "<b>e:</b>mirror "
-            "<b>t:</b>rotate cursor "
-            "<b>w:</b>mirror cursor";
-    if (is_key)
-        s += "<b>Enter:</b>place";
-    else
-        s += "<b>/:</b>restrict";
-    s += " <i>" + coord_to_string(delta + key_delta, true) + " ";
+    std::string s = coord_to_string(delta + key_delta, true) + " ";
     if (!is_key) {
         s += restrict_mode_to_string();
     }
-
-    s += "</i>";
     imp->tool_bar_set_tip(s);
 }
 
@@ -386,49 +388,37 @@ ToolResponse ToolMove::update(const ToolArgs &args)
             do_move(args.coords);
         return ToolResponse();
     }
-    else if (args.type == ToolEventType::CLICK || (is_transient && args.type == ToolEventType::CLICK_RELEASE)) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        if (any_of(args.action, {InToolActionID::LMB, InToolActionID::COMMIT})
+            || (is_transient && args.action == InToolActionID::LMB_RELEASE)) {
             finish();
             return ToolResponse::commit();
         }
-        else {
+        else if (any_of(args.action, {InToolActionID::RMB, InToolActionID::CANCEL})) {
             return ToolResponse::revert();
         }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
-        }
-        else if (args.key == GDK_KEY_slash) {
+        else if (args.action == InToolActionID::RESTRICT) {
             cycle_restrict_mode();
             do_move(args.coords);
         }
-        else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
-            bool rotate = args.key == GDK_KEY_r;
+        else if (any_of(args.action, {InToolActionID::ROTATE, InToolActionID::MIRROR})) {
+            bool rotate = args.action == InToolActionID::ROTATE;
             const auto selection_center = get_selection_center();
             move_mirror_or_rotate(selection_center, rotate);
         }
-        else if (args.key == GDK_KEY_w || args.key == GDK_KEY_t) {
-            bool rotate = args.key == GDK_KEY_t;
+        else if (any_of(args.action, {InToolActionID::ROTATE_CURSOR, InToolActionID::MIRROR_CURSOR})) {
+            bool rotate = args.action == InToolActionID::ROTATE_CURSOR;
             move_mirror_or_rotate(args.coords, rotate);
         }
-        else if (args.key == GDK_KEY_a) {
-            update_airwires ^= true;
-        }
-        else if (args.key == GDK_KEY_Return) {
-            finish();
-            return ToolResponse::commit();
-        }
         else {
-            auto sp = imp->get_grid_spacing();
-            if (args.mod & ToolArgs::MOD_FINE)
-                sp = sp / 10;
-            auto dir = dir_from_arrow_key(args.key) * sp;
+            const auto [dir, fine] = dir_from_action(args.action);
             if (dir.x || dir.y) {
-                key_delta += dir;
-                move_do(dir);
+                auto sp = imp->get_grid_spacing();
+                if (fine)
+                    sp = sp / 10;
+                key_delta += dir * sp;
+                move_do(dir * sp);
                 update_tip();
-                return ToolResponse();
             }
         }
     }

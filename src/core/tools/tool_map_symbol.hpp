@@ -20,8 +20,15 @@ public:
         const std::vector<UUIDPath<2>> gates;
     };
 
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB, I::CANCEL, I::RMB, I::ROTATE, I::MIRROR,
+        };
+    }
+
 private:
-    void update_tip();
     std::map<UUIDPath<2>, std::string> gates_out;
     class SchematicSymbol *sym_current = nullptr;
     std::list<UUIDPath<2>> gates_from_data;

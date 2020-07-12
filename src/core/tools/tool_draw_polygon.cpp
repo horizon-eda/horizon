@@ -47,29 +47,25 @@ void ToolDrawPolygon::set_snap_filter()
 
 void ToolDrawPolygon::update_tip()
 {
-    std::stringstream ss;
-    ss << "<b>LMB:</b>";
+    std::vector<ActionLabelInfo> actions;
+    actions.reserve(8);
     if (arc_mode == ArcMode::CURRENT) {
-        ss << "place arc center";
+        actions.emplace_back(InToolActionID::LMB, "place arc enter");
     }
     else if (arc_mode == ArcMode::NEXT) {
-        ss << "place vertex, then arc center";
+        actions.emplace_back(InToolActionID::LMB, "place vertex, then arc enter");
     }
     else {
-        ss << "place vertex";
+        actions.emplace_back(InToolActionID::LMB, "place vertex");
     }
-
-    ss << " <b>RMB:</b>delete last vertex and finish <b>a:</b> make the "
-          "current edge an arc ";
+    actions.emplace_back(InToolActionID::RMB, "delete last vertex and finish");
+    actions.emplace_back(InToolActionID::TOGGLE_ARC);
+    actions.emplace_back(InToolActionID::RESTRICT);
     if (last_vertex && (last_vertex->type == Polygon::Vertex::Type::ARC)) {
-        ss << "<b>e:</b> reverse arc direction";
+        actions.emplace_back(InToolActionID::FLIP_ARC);
     }
-    else {
-        ss << "<b>/:</b>restrict <i>";
-        ss << restrict_mode_to_string();
-        ss << "</i>";
-    }
-    imp->tool_bar_set_tip(ss.str());
+    imp->tool_bar_set_actions(actions);
+    imp->tool_bar_set_tip(restrict_mode_to_string());
 }
 
 void ToolDrawPolygon::update_vertex(const Coordi &c)
@@ -93,8 +89,9 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
         update_vertex(args.coords);
         return ToolResponse();
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (arc_mode == ArcMode::CURRENT) {
                 arc_mode = ArcMode::OFF;
                 last_vertex = vertex;
@@ -116,21 +113,19 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
                 cycle_restrict_mode_xy();
                 vertex->position = get_coord_restrict(last_vertex->position, args.coords);
             }
-        }
-        else if (args.button == 3) {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             temp->vertices.pop_back();
             vertex = nullptr;
             if (!temp->is_valid()) {
                 doc.r->delete_polygon(temp->uuid);
             }
             return ToolResponse::commit();
-        }
-    }
-    else if (args.type == ToolEventType::LAYER_CHANGE) {
-        temp->layer = args.work_layer;
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_a) {
+            break;
+
+        case InToolActionID::TOGGLE_ARC:
             if (last_vertex) {
                 if (arc_mode == ArcMode::OFF) {
                     arc_mode = ArcMode::NEXT;
@@ -140,19 +135,23 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
                 }
                 set_snap_filter();
             }
-        }
-        else if (args.key == GDK_KEY_e) {
+            break;
+
+        case InToolActionID::FLIP_ARC:
             if (last_vertex && (last_vertex->type == Polygon::Vertex::Type::ARC)) {
                 last_vertex->arc_reverse ^= 1;
             }
-        }
-        else if (args.key == GDK_KEY_slash) {
+            break;
+
+        case InToolActionID::RESTRICT:
             cycle_restrict_mode();
             update_vertex(args.coords);
+            break;
+        default:;
         }
-        else if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
-        }
+    }
+    else if (args.type == ToolEventType::LAYER_CHANGE) {
+        temp->layer = args.work_layer;
     }
     update_tip();
     return ToolResponse();

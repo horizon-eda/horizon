@@ -81,16 +81,23 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
     selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
     move_init(args.coords);
     current_gate = 0;
+    update_tip();
 
     return ToolResponse();
 }
 
 void ToolAddPart::update_tip()
 {
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB, "place"},
+            {InToolActionID::RMB, "cancel"},
+            {InToolActionID::ROTATE},
+            {InToolActionID::MIRROR},
+    });
+
     std::stringstream ss;
-    ss << "<b>LMB:</b>place <b>RMB:</b>cancel <b>r:</b>rotate <b>e:</b>mirror "
-          "<i>placing gate ";
-    ss << current_gate + 1 << "/" << gates.size() << "</i>";
+    ss << "placing gate ";
+    ss << current_gate + 1 << "/" << gates.size();
     imp->tool_bar_set_tip(ss.str());
 }
 
@@ -99,8 +106,9 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         move_do_cursor(args.coords);
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             doc.c->get_schematic()->autoconnect_symbol(doc.c->get_sheet(), sym_current);
             if (sym_current->component->connections.size() == 0) {
                 doc.c->get_schematic()->place_bipole_on_line(doc.c->get_sheet(), sym_current);
@@ -143,23 +151,24 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
                     return ToolResponse();
                 }
             }
-        }
-        else {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             if (current_gate == 0) { // also delete the component
                 doc.c->get_block()->components.erase(comp->uuid);
             }
             doc.c->delete_schematic_symbol(sym_current->uuid);
             sym_current = nullptr;
             return ToolResponse::commit();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
-        }
-        else if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
-            bool rotate = args.key == GDK_KEY_r;
-            move_mirror_or_rotate(sym_current->placement.shift, rotate);
+            break;
+
+        case InToolActionID::MIRROR:
+        case InToolActionID::ROTATE:
+            move_mirror_or_rotate(sym_current->placement.shift, args.action == InToolActionID::ROTATE);
+            break;
+
+        default:;
         }
     }
     update_tip();

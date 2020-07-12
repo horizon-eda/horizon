@@ -10,6 +10,7 @@ using json = nlohmann::json;
 
 enum class ActionID;
 enum class ToolID;
+enum class InToolActionID;
 
 class CanvasPreferences {
 public:
@@ -44,6 +45,15 @@ public:
 class KeySequencesPreferences {
 public:
     std::map<ActionToolID, std::map<ActionCatalogItem::Availability, std::vector<KeySequence>>> keys;
+
+    void load_from_json(const json &j);
+    void append_from_json(const json &j);
+    json serialize() const;
+};
+
+class InToolKeySequencesPreferences {
+public:
+    std::map<InToolActionID, std::vector<KeySequence>> keys;
 
     void load_from_json(const json &j);
     void append_from_json(const json &j);
@@ -103,6 +113,8 @@ public:
     bool capture_output = false;
     PartInfoPreferences partinfo;
     ActionBarPreferences action_bar;
+    InToolKeySequencesPreferences in_tool_key_sequences;
+
 
     typedef sigc::signal<void> type_signal_changed;
     type_signal_changed signal_changed()

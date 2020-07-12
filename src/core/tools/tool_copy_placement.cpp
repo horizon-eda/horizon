@@ -2,7 +2,8 @@
 #include "document/idocument_board.hpp"
 #include "board/board.hpp"
 #include "imp/imp_interface.hpp"
-#include <iostream>
+#include "util/util.hpp"
+#include "util/selection_util.hpp"
 
 namespace horizon {
 
@@ -15,20 +16,21 @@ bool ToolCopyPlacement::can_begin()
     if (!doc.b)
         return false;
 
-    return std::count_if(selection.begin(), selection.end(),
-                         [](const auto &x) { return x.type == ObjectType::BOARD_PACKAGE; })
-           > 0;
+    return sel_count_type(selection, ObjectType::BOARD_PACKAGE) > 0;
 }
 
 ToolResponse ToolCopyPlacement::begin(const ToolArgs &args)
 {
-    imp->tool_bar_set_tip("LMB: pick reference RMB: cancel");
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB, "pick reference"},
+            {InToolActionID::RMB, "cancel"},
+    });
     return ToolResponse();
 }
 ToolResponse ToolCopyPlacement::update(const ToolArgs &args)
 {
-    if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    if (args.type == ToolEventType::ACTION) {
+        if (args.action == InToolActionID::LMB) {
             if (args.target.type == ObjectType::BOARD_PACKAGE || args.target.type == ObjectType::PAD) {
                 auto pkg_uuid = args.target.path.at(0);
                 auto brd = doc.b->get_board();
@@ -121,7 +123,7 @@ ToolResponse ToolCopyPlacement::update(const ToolArgs &args)
                 imp->tool_bar_flash("please click on a package");
             }
         }
-        else if (args.button == 3) {
+        else if (any_of(args.action, {InToolActionID::RMB, InToolActionID::CANCEL})) {
             return ToolResponse::revert();
         }
     }

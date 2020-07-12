@@ -19,6 +19,13 @@ bool ToolPlaceBusLabel::can_begin()
 
 bool ToolPlaceBusLabel::begin_attached()
 {
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::ROTATE},
+            {InToolActionID::MIRROR},
+    });
+
     bool r;
     UUID net_uuid;
     std::tie(r, net_uuid) = imp->dialogs.select_bus(doc.c->get_schematic()->block);
@@ -26,9 +33,7 @@ bool ToolPlaceBusLabel::begin_attached()
         return false;
     }
     bus = &doc.c->get_schematic()->block->buses.at(net_uuid);
-    imp->tool_bar_set_tip(
-            "<b>LMB:</b>place bus label <b>RMB:</b>delete current label and "
-            "finish <b>r:</b>rotate <b>e:</b>mirror");
+
     return true;
 }
 
@@ -63,8 +68,9 @@ bool ToolPlaceBusLabel::check_line(LineNet *li)
 
 bool ToolPlaceBusLabel::update_attached(const ToolArgs &args)
 {
-    if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (args.target.type == ObjectType::JUNCTION) {
                 Junction *j = doc.r->get_junction(args.target.path.at(0));
                 if (j->net)
@@ -76,12 +82,17 @@ bool ToolPlaceBusLabel::update_attached(const ToolArgs &args)
                 create_attached();
                 return true;
             }
+            break;
+
+        case InToolActionID::ROTATE:
+        case InToolActionID::MIRROR:
+            la->orientation =
+                    ToolHelperMove::transform_orientation(la->orientation, args.action == InToolActionID::ROTATE);
+            last_orientation = la->orientation;
+            return true;
+
+        default:;
         }
-    }
-    if (args.key == GDK_KEY_r || args.key == GDK_KEY_e) {
-        la->orientation = ToolHelperMove::transform_orientation(la->orientation, args.key == GDK_KEY_r);
-        last_orientation = la->orientation;
-        return true;
     }
 
     return false;

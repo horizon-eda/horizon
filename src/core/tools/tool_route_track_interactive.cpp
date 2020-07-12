@@ -621,8 +621,8 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
             wrapper->updateEndItem(args);
             router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
         }
-        else if (args.type == ToolEventType::CLICK || (is_transient && args.type == ToolEventType::CLICK_RELEASE)) {
-            if (args.button == 1) {
+        else if (args.type == ToolEventType::ACTION) {
+            if ((args.action == InToolActionID::LMB) || (is_transient && args.action == InToolActionID::LMB_RELEASE)) {
                 wrapper->updateEndItem(args);
                 if (router->FixRoute(wrapper->m_endSnapPoint, wrapper->m_endItem)) {
                     router->StopRouting();
@@ -632,15 +632,8 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     return ToolResponse::commit();
                 }
             }
-            else if (args.button == 3) {
+            else if (any_of(args.action, {InToolActionID::RMB, InToolActionID::CANCEL})) {
                 return ToolResponse::revert();
-            }
-        }
-        else if (args.type == ToolEventType::KEY) {
-            if (args.key == GDK_KEY_Escape) {
-                board->expand_flags =
-                        static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
-                return ToolResponse::commit();
             }
         }
     }
@@ -649,34 +642,51 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
             canvas->set_cursor_pos(args.coords);
             router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
         }
-        else if (args.type == ToolEventType::CLICK) {
-            if (args.button == 1) {
+        else if (args.type == ToolEventType::ACTION) {
+            PNS::MEANDER_SETTINGS meander_settings = meander_placer->MeanderSettings();
+
+            switch (args.action) {
+            case InToolActionID::LMB:
                 if (router->FixRoute(VECTOR2I(args.coords.x, args.coords.y), NULL)) {
                     router->StopRouting();
                     board->expand_flags =
                             static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
                     return ToolResponse::commit();
                 }
-            }
-            else if (args.button == 3) {
-                board->expand_flags =
-                        static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
-                return ToolResponse::commit();
-            }
-        }
-        else if (args.type == ToolEventType::KEY) {
-            PNS::MEANDER_SETTINGS meander_settings = meander_placer->MeanderSettings();
-            if (args.key == GDK_KEY_l) {
+                break;
+
+            case InToolActionID::RMB:
+            case InToolActionID::CANCEL:
+                return ToolResponse::revert();
+
+            case InToolActionID::LENGTH_TUNING_LENGTH: {
                 auto r = imp->dialogs.ask_datum("Target length", meander_settings.m_targetLength);
                 if (r.first) {
                     meander_settings.m_targetLength = r.second;
                     meander_placer->UpdateSettings(meander_settings);
                     router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
                 }
-            }
-            else if (args.key == GDK_KEY_less || args.key == GDK_KEY_greater) {
+            } break;
+
+            case InToolActionID::LENGTH_TUNING_SPACING_INC:
+            case InToolActionID::LENGTH_TUNING_SPACING_DEC: {
                 int dir = 0;
-                if (args.key == GDK_KEY_less) {
+                if (args.action == InToolActionID::LENGTH_TUNING_SPACING_DEC) {
+                    dir = -1;
+                }
+                else {
+                    dir = 1;
+                }
+                meander_placer->SpacingStep(dir);
+                imp->tool_bar_flash("Meander spacing: " + dim_to_string(meander_placer->MeanderSettings().m_spacing)
+                                    + " <i>" + meander_placer->TuningInfo() + "</i>");
+                router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
+            } break;
+
+            case InToolActionID::LENGTH_TUNING_AMPLITUDE_INC:
+            case InToolActionID::LENGTH_TUNING_AMPLITUDE_DEC: {
+                int dir = 0;
+                if (args.action == InToolActionID::LENGTH_TUNING_AMPLITUDE_DEC) {
                     dir = -1;
                 }
                 else {
@@ -687,24 +697,9 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                                     + dim_to_string(meander_placer->MeanderSettings().m_maxAmplitude) + " <i>"
                                     + meander_placer->TuningInfo() + "</i>");
                 router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
-            }
-            else if (args.key == GDK_KEY_comma || args.key == GDK_KEY_period) {
-                int dir = 0;
-                if (args.key == GDK_KEY_comma) {
-                    dir = -1;
-                }
-                else {
-                    dir = 1;
-                }
-                meander_placer->SpacingStep(dir);
-                imp->tool_bar_flash("Meander spacing: " + dim_to_string(meander_placer->MeanderSettings().m_spacing)
-                                    + " <i>" + meander_placer->TuningInfo() + "</i>");
-                router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
-            }
-            else if (args.key == GDK_KEY_Escape) {
-                board->expand_flags =
-                        static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
-                return ToolResponse::commit();
+            } break;
+
+            default:;
             }
         }
     }
@@ -713,19 +708,10 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
             if (args.type == ToolEventType::MOVE) {
                 wrapper->updateStartItem(args);
             }
-            else if (args.type == ToolEventType::KEY) {
-                if (args.key == GDK_KEY_s) {
-                    shove ^= true;
-                }
-                else if (args.key == GDK_KEY_Escape) {
-                    board->expand_flags =
-                            static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
-                    return ToolResponse::commit();
-                }
-            }
-            else if (args.type == ToolEventType::CLICK) {
-                wrapper->updateStartItem(args);
-                if (args.button == 1) {
+            else if (args.type == ToolEventType::ACTION) {
+                switch (args.action) {
+                case InToolActionID::LMB:
+                    wrapper->updateStartItem(args);
                     for (const auto &it : board->keepouts) {
                         if (keepout_hit(it.second, {wrapper->m_startSnapPoint.x, wrapper->m_startSnapPoint.y},
                                         PNS::PNS_HORIZON_IFACE::layer_from_router(wrapper->getStartLayer()))) {
@@ -737,11 +723,19 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     if (!wrapper->prepareInteractive()) {
                         return ToolResponse::end();
                     }
-                }
-                else if (args.button == 3) {
+                    break;
+
+                case InToolActionID::ROUTER_MODE:
+                    shove ^= true;
+                    break;
+
+                case InToolActionID::RMB:
+                case InToolActionID::CANCEL:
                     board->expand_flags =
                             static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
                     return ToolResponse::commit();
+
+                default:;
                 }
             }
         }
@@ -750,8 +744,9 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                 wrapper->updateEndItem(args);
                 router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
             }
-            else if (args.type == ToolEventType::CLICK) {
-                if (args.button == 1) {
+            else if (args.type == ToolEventType::ACTION) {
+                switch (args.action) {
+                case InToolActionID::LMB: {
                     wrapper->updateEndItem(args);
 
                     const bool was_placing_via = router->IsPlacingVia();
@@ -784,8 +779,9 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     wrapper->updateEndItem(args);
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
                     wrapper->m_startItem = NULL;
-                }
-                else if (args.button == 3) {
+                } break;
+
+                case InToolActionID::RMB:
                     router->StopRouting();
                     imp->canvas_update();
                     state = State::START;
@@ -793,6 +789,26 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     imp->update_highlights();
                     update_tip();
                     return ToolResponse();
+
+                case InToolActionID::CANCEL:
+                    router->StopRouting();
+                    board->expand_flags =
+                            static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
+                    return ToolResponse::commit();
+
+                case InToolActionID::POSTURE:
+                    router->FlipPosture();
+                    wrapper->updateEndItem(args);
+                    router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
+                    break;
+
+                case InToolActionID::TOGGLE_VIA:
+                    router->ToggleViaPlacement();
+                    wrapper->updateEndItem(args);
+                    router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
+                    break;
+
+                default:;
                 }
             }
             else if (args.type == ToolEventType::LAYER_CHANGE) {
@@ -802,27 +818,10 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
                 }
             }
-            else if (args.type == ToolEventType::KEY) {
-                if (args.key == GDK_KEY_slash) {
-                    router->FlipPosture();
-                    wrapper->updateEndItem(args);
-                    router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
-                }
-                else if (args.key == GDK_KEY_v) {
-                    router->ToggleViaPlacement();
-                    wrapper->updateEndItem(args);
-                    router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
-                }
-                else if (args.key == GDK_KEY_Escape) {
-                    router->StopRouting();
-                    board->expand_flags =
-                            static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
-                    return ToolResponse::commit();
-                }
-            }
         }
-        if (args.type == ToolEventType::KEY) {
-            if (args.key == GDK_KEY_w) {
+        if (args.type == ToolEventType::ACTION) {
+            switch (args.action) {
+            case InToolActionID::ENTER_WIDTH: {
                 PNS::SIZES_SETTINGS sz(router->Sizes());
                 auto r = imp->dialogs.ask_datum("Track width", sz.TrackWidth());
                 if (r.first) {
@@ -831,8 +830,9 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     router->UpdateSizes(sz);
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
                 }
-            }
-            else if (args.key == GDK_KEY_W) {
+            } break;
+
+            case InToolActionID::TRACK_WIDTH_DEFAULT: {
                 auto nets = router->GetCurrentNets();
                 Net *net = nullptr;
                 for (auto x : nets) {
@@ -846,20 +846,26 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     router->UpdateSizes(sz);
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
                 }
-            }
-            else if (args.key == GDK_KEY_o) {
+            } break;
+
+            case InToolActionID::CLEARANCE_OFFSET: {
                 auto r = imp->dialogs.ask_datum("Routing offset", .1_mm);
                 if (r.first) {
                     iface->set_override_routing_offset(r.second);
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
                 }
-            }
-            else if (args.key == GDK_KEY_O) {
+            } break;
+
+            case InToolActionID::CLEARANCE_OFFSET_DEFAULT: {
                 iface->set_override_routing_offset(-1);
                 router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
-            }
-            else if (args.key == GDK_KEY_S) {
+            } break;
+
+            case InToolActionID::ROUTER_SETTINGS:
                 imp->dialogs.show_router_settings_window(settings);
+                break;
+
+            default:;
             }
         }
         else if (args.type == ToolEventType::DATA) {
@@ -887,31 +893,51 @@ static std::string format_length(double l)
 void ToolRouteTrackInteractive::update_tip()
 {
     std::stringstream ss;
+    std::vector<ActionLabelInfo> actions;
+    actions.reserve(12);
     if (tool_id == ToolID::DRAG_TRACK_INTERACTIVE) {
-        imp->tool_bar_set_tip("<b>LMB:</b>place <b>RMB:</b>cancel");
+        imp->tool_bar_set_actions({
+                {InToolActionID::LMB},
+                {InToolActionID::RMB},
+        });
         return;
     }
     if (is_tune()) {
         if (meander_placer) {
-            ss << "<b>LMB:</b>place <b>RMB:</b>cancel <b>l:</b>set length <b>&lt;&gt;:</b>+/- amplitude <b>,.:</b>+/- "
-                  "spacing";
-            ss << " <i>";
-            ss << meander_placer->TuningInfo();
-            ss << "</i>";
-            imp->tool_bar_set_tip(ss.str());
+            imp->tool_bar_set_actions({
+                    {InToolActionID::LMB},
+                    {InToolActionID::RMB},
+                    {InToolActionID::LENGTH_TUNING_LENGTH},
+                    {InToolActionID::LENGTH_TUNING_AMPLITUDE_DEC, InToolActionID::LENGTH_TUNING_AMPLITUDE_INC,
+                     "amplitude"},
+                    {InToolActionID::LENGTH_TUNING_SPACING_DEC, InToolActionID::LENGTH_TUNING_SPACING_INC, "spacing"},
+            });
+            imp->tool_bar_set_tip(meander_placer->TuningInfo());
         }
         return;
     }
     if (state == State::ROUTING) {
+        actions.emplace_back(InToolActionID::LMB, "connect");
+        actions.emplace_back(InToolActionID::RMB, "finish");
+        actions.emplace_back(InToolActionID::POSTURE);
+        actions.emplace_back(InToolActionID::TOGGLE_VIA);
+        actions.emplace_back(InToolActionID::ROUTER_SETTINGS);
         const auto &sz = router->Sizes();
-        ss << "<b>LMB:</b>connect <b>RMB:</b>finish "
-              "<b>/:</b>track posture <b>v:</b>toggle via "
-              "<b>w:</b>track width "
-              "<b>S:</b>settings ";
-        if (!sz.WidthFromRules())
-            ss << "<b>W:</b>default track width ";
-        ss << "<b>o:</b>clearance offset <b>O:</b>default cl. offset"
-              "<i> ";
+        if (sz.WidthFromRules()) {
+            actions.emplace_back(InToolActionID::ENTER_WIDTH, "track width");
+        }
+        else {
+            actions.emplace_back(InToolActionID::ENTER_WIDTH, InToolActionID::TRACK_WIDTH_DEFAULT,
+                                 "track width / default");
+        }
+        if (iface->get_override_routing_offset() == -1) {
+            actions.emplace_back(InToolActionID::CLEARANCE_OFFSET, "set clearance offset");
+        }
+        else {
+            actions.emplace_back(InToolActionID::CLEARANCE_OFFSET, InToolActionID::CLEARANCE_OFFSET_DEFAULT,
+                                 "set / reset clearance offset");
+        }
+
         auto nets = router->GetCurrentNets();
         Net *net = nullptr;
         for (auto x : nets) {
@@ -933,13 +959,12 @@ void ToolRouteTrackInteractive::update_tip()
         if (sz.WidthFromRules()) {
             ss << " (default)";
         }
-        ss << "</i>";
     }
     else {
-        ss << "<b>LMB:</b>select starting point <b>RMB:</b>cancel "
-              "<b>s:</b>shove/walkaround "
-              "<b>S:</b>settings ";
-        ss << "<i>";
+        actions.emplace_back(InToolActionID::LMB, "select staring point");
+        actions.emplace_back(InToolActionID::RMB, "cancel");
+        actions.emplace_back(InToolActionID::ROUTER_MODE);
+        actions.emplace_back(InToolActionID::ROUTER_SETTINGS);
         ss << "Mode: ";
         if (shove)
             ss << "shove";
@@ -953,8 +978,8 @@ void ToolRouteTrackInteractive::update_tip()
                 ss << " Current Net: " << net->name;
             ;
         }
-        ss << "</i>";
     }
+    imp->tool_bar_set_actions(actions);
     imp->tool_bar_set_tip(ss.str());
 }
 } // namespace horizon

@@ -32,7 +32,10 @@ ToolResponse ToolPlaceRefdesAndValue::begin(const ToolArgs &args)
     text_value = doc.r->insert_text(UUID::random());
     text_value->layer = 0;
     text_value->text = "$VALUE";
-    imp->tool_bar_set_tip("<b>LMB:</b>place text <b>RMB:</b>cancel ");
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+    });
 
     update_texts(args.coords);
 
@@ -43,15 +46,19 @@ ToolResponse ToolPlaceRefdesAndValue::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         update_texts(args.coords);
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             selection.clear();
             selection.emplace(text_value->uuid, ObjectType::TEXT);
             selection.emplace(text_refdes->uuid, ObjectType::TEXT);
             return ToolResponse::commit();
-        }
-        else if (args.button == 3) {
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             return ToolResponse::revert();
+
+        default:;
         }
     }
     return ToolResponse();

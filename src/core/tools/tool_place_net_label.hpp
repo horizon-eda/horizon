@@ -11,6 +11,14 @@ class ToolPlaceNetLabel : public ToolPlaceJunction, public ToolHelperDrawNetSett
 public:
     ToolPlaceNetLabel(IDocument *c, ToolID tid);
     bool can_begin() override;
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB,        I::CANCEL, I::RMB, I::ROTATE, I::MIRROR, I::NET_LABEL_SIZE_INC, I::NET_LABEL_SIZE_DEC,
+                I::ENTER_SIZE,
+        };
+    }
 
 protected:
     std::forward_list<NetLabel *> labels_placed;

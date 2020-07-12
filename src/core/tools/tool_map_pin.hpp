@@ -9,6 +9,13 @@ public:
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;
     ~ToolMapPin();
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB, I::CANCEL, I::RMB, I::ROTATE, I::MIRROR, I::EDIT, I::AUTOPLACE_ALL_PINS, I::AUTOPLACE_NEXT_PIN,
+        };
+    }
 
 private:
     std::vector<std::pair<const class Pin *, bool>> pins;

@@ -26,9 +26,12 @@ bool ToolPlacePowerSymbol::begin_attached()
         return false;
     }
     net = &doc.c->get_schematic()->block->nets.at(net_uuid);
-    imp->tool_bar_set_tip(
-            "<b>LMB:</b>place power symbol <b>RMB:</b>delete current power "
-            "symbol and finish <b>e:</b>mirror  <b>r:</b>rotate");
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::ROTATE},
+            {InToolActionID::MIRROR},
+    });
     return true;
 }
 
@@ -86,8 +89,9 @@ bool ToolPlacePowerSymbol::check_line(LineNet *li)
 
 bool ToolPlacePowerSymbol::update_attached(const ToolArgs &args)
 {
-    if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (args.target.type == ObjectType::JUNCTION) {
                 Junction *j = doc.r->get_junction(args.target.path.at(0));
                 if (j->bus)
@@ -103,7 +107,7 @@ bool ToolPlacePowerSymbol::update_attached(const ToolArgs &args)
                 create_attached();
                 return true;
             }
-            if (args.target.type == ObjectType::SYMBOL_PIN) {
+            else if (args.target.type == ObjectType::SYMBOL_PIN) {
                 SchematicSymbol *schsym = doc.c->get_schematic_symbol(args.target.path.at(0));
                 SymbolPin *pin = &schsym->symbol.pins.at(args.target.path.at(1));
                 UUIDPath<2> connpath(schsym->gate->uuid, args.target.path.at(1));
@@ -120,20 +124,21 @@ bool ToolPlacePowerSymbol::update_attached(const ToolArgs &args)
                     create_junction(args.coords);
                     create_attached();
                 }
-
                 return true;
             }
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_e) {
-            sym->mirrorx();
-        }
-        else if (args.key == GDK_KEY_r) {
-            sym->orientation = ToolHelperMove::transform_orientation(sym->orientation, true, false);
-        }
-    }
+            return false;
 
+        case InToolActionID::ROTATE:
+            sym->orientation = ToolHelperMove::transform_orientation(sym->orientation, true, false);
+            return true;
+
+        case InToolActionID::MIRROR:
+            sym->mirrorx();
+            return true;
+
+        default:;
+        }
+    }
     return false;
 }
 } // namespace horizon

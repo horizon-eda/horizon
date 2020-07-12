@@ -12,6 +12,7 @@
 #include "nlohmann/json.hpp"
 #include "alphanum/alphanum.hpp"
 #include <gdk/gdkkeysyms.h>
+#include "imp/in_tool_action.hpp"
 
 namespace horizon {
 
@@ -549,20 +550,32 @@ std::string replace_placeholders(const std::string &s, std::function<std::string
     return r;
 }
 
-
-Coordi dir_from_arrow_key(unsigned int key)
+std::pair<Coordi, bool> dir_from_action(InToolActionID a)
 {
-    switch (key) {
-    case GDK_KEY_Up:
-        return {0, 1};
-    case GDK_KEY_Down:
-        return {0, -1};
-    case GDK_KEY_Left:
-        return {-1, 0};
-    case GDK_KEY_Right:
-        return {1, 0};
+    using I = InToolActionID;
+    switch (a) {
+    case I::MOVE_UP_FINE:
+        return {{0, 1}, true};
+    case I::MOVE_UP:
+        return {{0, 1}, false};
+
+    case I::MOVE_DOWN_FINE:
+        return {{0, -1}, true};
+    case I::MOVE_DOWN:
+        return {{0, -1}, false};
+
+    case I::MOVE_LEFT_FINE:
+        return {{-1, 0}, true};
+    case I::MOVE_LEFT:
+        return {{-1, 0}, false};
+
+    case I::MOVE_RIGHT_FINE:
+        return {{1, 0}, true};
+    case I::MOVE_RIGHT:
+        return {{1, 0}, false};
+
     default:
-        return {0, 0};
+        return {{0, 0}, false};
     }
 }
 

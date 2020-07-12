@@ -33,6 +33,12 @@ ToolResponse ToolResizeSymbol::begin(const ToolArgs &args)
                           std::forward_as_tuple(it.second.placement.shift));
     }
     update_positions(args.coords);
+
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB, "finish"},
+            {InToolActionID::RMB},
+    });
+
     return ToolResponse();
 }
 
@@ -44,7 +50,7 @@ void ToolResizeSymbol::update_positions(const Coordi &ac)
     if (pos_orig.x < 0)
         d.x *= -1;
     auto c = d + delta_key;
-    imp->tool_bar_set_tip("<b>LMB:</b>finish <b>RMB:</b>cancel <i>" + coord_to_string(c, true) + "</i>");
+    imp->tool_bar_set_tip(coord_to_string(c, true));
     auto &sym = *doc.y->get_symbol();
     for (auto &it : sym.pins) {
         const auto k = std::make_pair(ObjectType::SYMBOL_PIN, it.first);
@@ -97,19 +103,22 @@ ToolResponse ToolResizeSymbol::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         update_positions(args.coords);
     }
-    else if (args.type == ToolEventType::KEY) {
-        auto dir = dir_from_arrow_key(args.key);
-        if (dir.x || dir.y) {
-            delta_key += dir * 1.25_mm;
-            update_positions(args.coords);
-        }
-    }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             return ToolResponse::commit();
-        }
-        else if (args.button == 3) {
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             return ToolResponse::revert();
+
+        default: {
+            const auto [dir, fine] = dir_from_action(args.action);
+            if (dir.x || dir.y) {
+                delta_key += dir * 1.25_mm;
+                update_positions(args.coords);
+            }
+        };
         }
     }
     return ToolResponse();

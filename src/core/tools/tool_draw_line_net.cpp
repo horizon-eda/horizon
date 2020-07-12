@@ -83,17 +83,24 @@ Junction *ToolDrawLineNet::make_temp_junc(const Coordi &c)
 
 void ToolDrawLineNet::update_tip()
 {
+    std::vector<ActionLabelInfo> actions;
+    actions.reserve(12);
+    actions.emplace_back(InToolActionID::LMB, "connect");
+    actions.emplace_back(InToolActionID::RMB);
+    actions.emplace_back(InToolActionID::PLACE_JUNCTION);
+    actions.emplace_back(InToolActionID::COMMIT, "finish");
+    actions.emplace_back(InToolActionID::POSTURE);
+    actions.emplace_back(InToolActionID::ARBITRARY_ANGLE_MODE);
+
     std::stringstream ss;
-    ss << "<b>LMB:</b>place junction/connect <b>RMB:</b>finish and delete last "
-          "segment <b>space:</b>place junction <b>⏎:</b>finish <b>/:</b>line "
-          "posture <b>a:</b>arbitrary angle ";
     if (net_label) {
-        ss << "<b>+-:</b>change label size <b>s:</b>set label size ";
+        actions.emplace_back(InToolActionID::NET_LABEL_SIZE_INC, InToolActionID::NET_LABEL_SIZE_DEC, "label size");
+        actions.emplace_back(InToolActionID::ENTER_SIZE, "enter label size");
+        actions.emplace_back(InToolActionID::ROTATE, "rotate label");
     }
     if (temp_line_head) {
         if (temp_line_head->net) {
-            ss << "<b>b:</b>toggle label <b>r:</b>rotate label";
-            ss << " <i>";
+            actions.emplace_back(InToolActionID::TOGGLE_NET_LABEL);
             if (temp_line_head->net->name.size()) {
                 ss << "drawing net \"" << temp_line_head->net->name << "\"";
             }
@@ -102,20 +109,17 @@ void ToolDrawLineNet::update_tip()
             }
         }
         else if (temp_line_head->bus) {
-            ss << " <i>";
             ss << "drawing bus \"" << temp_line_head->bus->name << "\"";
         }
         else {
-            ss << " <i>";
             ss << "drawing no net";
         }
     }
     else {
-        ss << " <i>";
         ss << "select starting point";
     }
-    ss << "</i>";
     imp->tool_bar_set_tip(ss.str());
+    imp->tool_bar_set_actions(actions);
 }
 
 void ToolDrawLineNet::apply_settings()
@@ -130,8 +134,9 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         move_temp_junc(args.coords);
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB: {
             Junction *ju = nullptr;
             SchematicSymbol *sym = nullptr;
             uuid_ptr<SymbolPin> pin = nullptr;
@@ -344,8 +349,9 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             temp_line_head->bus = bus;
             temp_line_head->from.connect(temp_junc_mid);
             temp_line_head->to.connect(temp_junc_head);
-        }
-        else if (args.button == 3) {
+        } break;
+
+        case InToolActionID::RMB:
             if (temp_line_head) {
                 doc.c->delete_line_net(temp_line_head->uuid);
                 doc.c->delete_line_net(temp_line_mid->uuid);
@@ -359,10 +365,9 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                 doc.r->delete_junction(temp_junc_head->uuid);
                 return ToolResponse::commit();
             }
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
+            break;
+
+        case InToolActionID::CANCEL:
             if (temp_line_head) {
                 doc.c->delete_line_net(temp_line_head->uuid);
                 doc.c->delete_line_net(temp_line_mid->uuid);
@@ -372,8 +377,8 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             }
             doc.r->delete_junction(temp_junc_head->uuid);
             return ToolResponse::commit();
-        }
-        else if (args.key == GDK_KEY_space) {
+
+        case InToolActionID::PLACE_JUNCTION: {
             Junction *ju = temp_junc_head;
             temp_junc_mid = make_temp_junc(args.coords);
             temp_junc_mid->net = ju->net;
@@ -396,11 +401,12 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             temp_line_head->to.connect(temp_junc_head);
 
             set_snap_filter();
-        }
-        else if (args.key == GDK_KEY_Return) {
+        } break;
+
+        case InToolActionID::COMMIT:
             return ToolResponse::commit();
-        }
-        else if (args.key == GDK_KEY_slash) {
+
+        case InToolActionID::POSTURE:
             switch (bend_mode) {
             case BendMode::XY:
                 bend_mode = BendMode::YX;
@@ -412,8 +418,14 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                 bend_mode = BendMode::XY;
             }
             move_temp_junc(args.coords);
-        }
-        else if (args.key == GDK_KEY_b) {
+            break;
+
+        case InToolActionID::ARBITRARY_ANGLE_MODE:
+            bend_mode = BendMode::ARB;
+            move_temp_junc(args.coords);
+            break;
+
+        case InToolActionID::TOGGLE_NET_LABEL:
             if (temp_junc_head && !temp_junc_head->bus) {
                 if (!net_label) {
                     auto uu = UUID::random();
@@ -426,27 +438,29 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                     net_label = nullptr;
                 }
             }
-        }
-        else if (args.key == GDK_KEY_plus || args.key == GDK_KEY_equal) {
+            break;
+
+        case InToolActionID::NET_LABEL_SIZE_INC:
             if (net_label)
                 step_net_label_size(true);
-        }
-        else if (args.key == GDK_KEY_minus) {
+            break;
+
+        case InToolActionID::NET_LABEL_SIZE_DEC:
             if (net_label)
                 step_net_label_size(false);
-        }
-        else if (args.key == GDK_KEY_s) {
+            break;
+
+        case InToolActionID::ENTER_SIZE:
             if (net_label)
                 ask_net_label_size();
-        }
-        else if (args.key == GDK_KEY_r) {
+            break;
+
+        case InToolActionID::ROTATE:
             if (net_label)
-                net_label->orientation =
-                        ToolHelperMove::transform_orientation(net_label->orientation, args.key == GDK_KEY_r);
-        }
-        else if (args.key == GDK_KEY_a) {
-            bend_mode = BendMode::ARB;
-            move_temp_junc(args.coords);
+                net_label->orientation = ToolHelperMove::transform_orientation(net_label->orientation, true);
+            break;
+
+        default:;
         }
     }
     update_tip();

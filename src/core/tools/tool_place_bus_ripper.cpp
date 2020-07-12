@@ -23,6 +23,14 @@ bool ToolPlaceBusRipper::begin_attached()
 {
     std::cout << "tool place bus ripper\n";
 
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+            {InToolActionID::ROTATE},
+            {InToolActionID::MIRROR},
+            {InToolActionID::EDIT, "select member"},
+    });
+
     bool r;
     UUID bus_uuid;
     std::tie(r, bus_uuid) = imp->dialogs.select_bus(doc.c->get_schematic()->block);
@@ -38,9 +46,6 @@ bool ToolPlaceBusRipper::begin_attached()
         return false;
     std::sort(bus_members.begin(), bus_members.end(),
               [](auto a, auto b) { return strcmp_natural(a->name, b->name) < 0; });
-    imp->tool_bar_set_tip(
-            "<b>LMB:</b>place bus ripper <b>RMB:</b>delete current ripper and "
-            "finish <b>space:</b>select member <b>r:</b>rotate <b>e:</b>mirror");
     return true;
 }
 
@@ -78,8 +83,9 @@ bool ToolPlaceBusRipper::check_line(LineNet *li)
 
 bool ToolPlaceBusRipper::update_attached(const ToolArgs &args)
 {
-    if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (args.target.type == ObjectType::JUNCTION) {
                 Junction *j = doc.r->get_junction(args.target.path.at(0));
                 if (j->bus != bus) {
@@ -109,10 +115,8 @@ bool ToolPlaceBusRipper::update_attached(const ToolArgs &args)
                 imp->tool_bar_flash("can't place bus ripper nowhere");
             }
             return true;
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_space) {
+
+        case InToolActionID::EDIT: {
             bool r;
             UUID bus_member_uuid;
 
@@ -128,14 +132,18 @@ bool ToolPlaceBusRipper::update_attached(const ToolArgs &args)
 
             return true;
         }
-        else if (args.key == GDK_KEY_e) {
-            ri->mirror();
-        }
-        else if (args.key == GDK_KEY_r) {
+
+        case InToolActionID::ROTATE:
             ri->orientation = transform_orientation(ri->orientation, true);
+            break;
+
+        case InToolActionID::MIRROR:
+            ri->mirror();
+            break;
+
+        default:;
         }
     }
-
     return false;
 }
 } // namespace horizon

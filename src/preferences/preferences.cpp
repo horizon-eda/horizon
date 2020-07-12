@@ -7,6 +7,7 @@
 #include <glibmm/miscutils.h>
 #include "nlohmann/json.hpp"
 #include "logger/logger.hpp"
+#include "imp/in_tool_action_catalog.hpp"
 
 namespace horizon {
 
@@ -282,6 +283,59 @@ void KeySequencesPreferences::append_from_json(const json &j)
         }
     }
 }
+json InToolKeySequencesPreferences::serialize() const
+{
+    json j;
+    for (const auto &[action, sequences] : keys) {
+        auto a_str = in_tool_action_lut.lookup_reverse(action);
+        for (const auto &it2 : sequences) {
+            json seq;
+            for (const auto &it4 : it2) {
+                json o;
+                o["key"] = gdk_keyval_name(it4.first);
+                o["mod"] = static_cast<int>(it4.second);
+                seq.push_back(o);
+            }
+            if (seq.size())
+                j[a_str].push_back(seq);
+        }
+    }
+    return j;
+}
+
+void InToolKeySequencesPreferences::load_from_json(const json &j)
+{
+    keys.clear();
+    append_from_json(j);
+}
+
+void InToolKeySequencesPreferences::append_from_json(const json &j)
+{
+    for (const auto &[a_str, keys_seqs] : j.items()) {
+        try {
+            auto action = in_tool_action_lut.lookup(a_str, InToolActionID::NONE);
+            if (action != InToolActionID::NONE) {
+                if (keys.count(action) == 0) {
+                    for (const auto &seq : keys_seqs) {
+                        keys[action].emplace_back();
+                        for (const auto &it4 : seq) {
+                            std::string keyname = it4.at("key");
+                            auto key = gdk_keyval_from_name(keyname.c_str());
+                            auto mod = static_cast<GdkModifierType>(it4.at("mod").get<int>());
+                            keys[action].back().emplace_back(key, mod);
+                        }
+                    }
+                }
+            }
+        }
+        catch (const std::exception &e) {
+            Logger::log_warning("error loading in-tool key sequence", Logger::Domain::UNSPECIFIED, e.what());
+        }
+        catch (...) {
+            Logger::log_warning("error loading int-tool key sequence", Logger::Domain::UNSPECIFIED, "unknown error");
+        }
+    }
+}
 
 void PartInfoPreferences::load_from_json(const json &j)
 {
@@ -329,6 +383,7 @@ json Preferences::serialize() const
     j["canvas_non_layer"] = canvas_non_layer.serialize();
     j["schematic"] = schematic.serialize();
     j["key_sequences"] = key_sequences.serialize();
+    j["in_tool_key_sequences"] = in_tool_key_sequences.serialize();
     j["board"] = board.serialize();
     j["zoom"] = zoom.serialize();
     j["capture_output"] = capture_output;
@@ -358,9 +413,13 @@ void Preferences::load_from_json(const json &j)
         zoom.load_from_json(j.at("zoom"));
     if (j.count("key_sequences"))
         key_sequences.load_from_json(j.at("key_sequences"));
+    if (j.count("in_tool_key_sequences"))
+        in_tool_key_sequences.load_from_json(j.at("in_tool_key_sequences"));
     if (j.count("action_bar"))
         action_bar.load_from_json(j.at("action_bar"));
     key_sequences.append_from_json(json_from_resource("/org/horizon-eda/horizon/imp/keys_default.json"));
+    in_tool_key_sequences.append_from_json(
+            json_from_resource("/org/horizon-eda/horizon/imp/in_tool_keys_default.json"));
     capture_output = j.value("capture_output", capture_output_default);
     if (j.count("partinfo"))
         partinfo.load_from_json(j.at("partinfo"));

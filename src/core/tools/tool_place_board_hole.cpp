@@ -29,7 +29,10 @@ ToolResponse ToolPlaceBoardHole::begin(const ToolArgs &args)
     padstack = doc.r->get_pool()->get_padstack(padstack_uuid);
     create_hole(args.coords);
 
-    imp->tool_bar_set_tip("<b>LMB:</b>place pad <b>RMB:</b>delete current pad and finish");
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+    });
     return ToolResponse();
 }
 
@@ -48,20 +51,20 @@ ToolResponse ToolPlaceBoardHole::update(const ToolArgs &args)
     if (args.type == ToolEventType::MOVE) {
         temp->placement.shift = args.coords;
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             create_hole(args.coords);
-        }
-        else if (args.button == 3) {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             doc.b->get_board()->holes.erase(temp->uuid);
             temp = 0;
             selection.clear();
             return ToolResponse::commit();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
+
+        default:;
         }
     }
     return ToolResponse();

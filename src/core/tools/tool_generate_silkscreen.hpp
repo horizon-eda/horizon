@@ -35,6 +35,15 @@ public:
         return &settings;
     }
 
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB,
+                I::CANCEL,
+        };
+    }
+
 protected:
     ToolSettings *get_settings() override
     {

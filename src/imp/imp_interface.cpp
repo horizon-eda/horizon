@@ -5,6 +5,7 @@
 #include "widgets/layer_box.hpp"
 #include "pool/part.hpp"
 #include "nlohmann/json.hpp"
+#include "util/util.hpp"
 
 namespace horizon {
 ImpInterface::ImpInterface(ImpBase *i) : imp(i)
@@ -115,6 +116,11 @@ void ImpInterface::set_snap_filter_from_selection(const std::set<SelectableRef> 
 uint64_t ImpInterface::get_length_tuning_ref() const
 {
     return s_signal_request_length_tuning_ref.emit();
+}
+
+void ImpInterface::tool_bar_set_actions(const std::vector<ActionLabelInfo> &labels)
+{
+    imp->tool_bar_set_actions(labels);
 }
 
 } // namespace horizon

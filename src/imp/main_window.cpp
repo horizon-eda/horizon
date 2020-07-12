@@ -56,6 +56,8 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     x->get_widget("grid_rect_button", grid_rect_button);
     x->get_widget("grid_grid", grid_grid);
     x->get_widget("grid_reset_origin_button", grid_reset_origin_button);
+    GET_WIDGET(tool_bar_action_tip_label);
+    GET_WIDGET(tool_bar_actions_box);
 
     grid_options_button->signal_clicked().connect([this] {
         const auto a = grid_options_button->get_active();
@@ -90,7 +92,11 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     label_set_tnum(tool_bar_tip_label);
     label_set_tnum(grid_mul_label);
     label_set_tnum(search_status_label);
-
+    {
+        auto attributes_list = gtk_label_get_attributes(tool_bar_action_tip_label->gobj());
+        auto attribute_font_features = pango_attr_font_features_new("tnum 1");
+        pango_attr_list_insert(attributes_list, attribute_font_features);
+    }
 
     canvas = Gtk::manage(new CanvasGL());
     gl_container->pack_start(*canvas, true, true, 0);
@@ -120,7 +126,12 @@ void MainWindow::tool_bar_set_tool_name(const std::string &s)
 
 void MainWindow::tool_bar_set_tool_tip(const std::string &s)
 {
-    tool_bar_tip_label->set_markup(s);
+    if (tool_bar_use_actions) {
+        tool_bar_action_tip_label->set_markup(s);
+    }
+    else {
+        tool_bar_tip_label->set_markup(s);
+    }
 }
 
 void MainWindow::tool_bar_flash(const std::string &s)
@@ -130,7 +141,11 @@ void MainWindow::tool_bar_flash(const std::string &s)
     tip_timeout_connection.disconnect();
     tip_timeout_connection = Glib::signal_timeout().connect(
             [this] {
-                tool_bar_stack->set_visible_child("tip");
+                if (tool_bar_use_actions)
+                    tool_bar_stack->set_visible_child("action");
+
+                else
+                    tool_bar_stack->set_visible_child("tip");
                 if (tool_bar_queue_close)
                     tool_bar->set_reveal_child(false);
                 tool_bar_queue_close = false;
@@ -205,6 +220,30 @@ void MainWindow::disable_grid_options()
     grid_options_button->set_active(false);
     grid_options_button->set_visible(false);
     grid_options_revealer->set_visible(false);
+}
+
+void MainWindow::tool_bar_set_use_actions(bool use_actions)
+{
+    tool_bar_use_actions = use_actions;
+    if (!tip_timeout_connection.connected()) {
+        if (use_actions)
+            tool_bar_stack->set_visible_child("action");
+
+        else
+            tool_bar_stack->set_visible_child("tip");
+    }
+}
+
+void MainWindow::tool_bar_clear_actions()
+{
+    for (auto ch : tool_bar_actions_box->get_children())
+        delete ch;
+}
+
+void MainWindow::tool_bar_append_action(Gtk::Widget &w)
+{
+    w.show();
+    tool_bar_actions_box->pack_start(w, false, false, 0);
 }
 
 MainWindow *MainWindow::create()

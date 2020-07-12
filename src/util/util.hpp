@@ -9,6 +9,7 @@
 
 namespace horizon {
 using json = nlohmann::json;
+enum class InToolActionID;
 
 std::ifstream make_ifstream(const std::string &filename_utf8, std::ios_base::openmode mode = std::ios_base::in);
 std::ofstream make_ofstream(const std::string &filename_utf8, std::ios_base::openmode mode = std::ios_base::out);
@@ -72,7 +73,7 @@ void rmdir_recursive(const std::string &dir_name);
 std::string replace_placeholders(const std::string &s, std::function<std::string(const std::string &)> fn,
                                  bool keep_empty);
 
-Coordi dir_from_arrow_key(unsigned int key);
+std::pair<Coordi, bool> dir_from_action(InToolActionID a);
 
 template <typename T> std::pair<Coord<T>, Coord<T>> pad_bbox(std::pair<Coord<T>, Coord<T>> bb, T pad)
 {
@@ -84,5 +85,10 @@ template <typename T> std::pair<Coord<T>, Coord<T>> pad_bbox(std::pair<Coord<T>,
     return bb;
 }
 Coordd project_onto_perp_bisector(const Coordd &a, const Coordd &b, const Coordd &p);
+
+template <typename T> constexpr bool any_of(T value, std::initializer_list<T> choices)
+{
+    return std::count(choices.begin(), choices.end(), value);
+}
 
 } // namespace horizon

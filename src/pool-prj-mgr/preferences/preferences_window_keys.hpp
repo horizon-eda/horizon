@@ -5,8 +5,6 @@
 namespace horizon {
 
 class KeySequencesPreferencesEditor : public Gtk::Grid {
-    friend class ActionEditor;
-
 public:
     KeySequencesPreferencesEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x,
                                   class Preferences &prefs);

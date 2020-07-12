@@ -15,9 +15,29 @@ public:
     {
         return true;
     }
-    bool handles_esc() override
+    std::set<InToolActionID> get_actions() const override
     {
-        return true;
+        using I = InToolActionID;
+        return {
+                I::LMB,
+                I::LMB_RELEASE,
+                I::CANCEL,
+                I::COMMIT,
+                I::RMB,
+                I::MIRROR,
+                I::MIRROR_CURSOR,
+                I::ROTATE,
+                I::ROTATE_CURSOR,
+                I::RESTRICT,
+                I::MOVE_UP,
+                I::MOVE_DOWN,
+                I::MOVE_LEFT,
+                I::MOVE_RIGHT,
+                I::MOVE_UP_FINE,
+                I::MOVE_DOWN_FINE,
+                I::MOVE_LEFT_FINE,
+                I::MOVE_RIGHT_FINE,
+        };
     }
 
 private:

@@ -42,19 +42,22 @@ ToolResponse ToolDrawPolygonCircle::begin(const ToolArgs &args)
 
 void ToolDrawPolygonCircle::update_tip()
 {
-    std::stringstream ss;
-    ss << "<b>LMB:</b>";
+
+    std::vector<ActionLabelInfo> actions;
+    actions.reserve(8);
+
     if (step == 0) {
-        ss << "place center";
+        actions.emplace_back(InToolActionID::LMB, "place center");
     }
     else {
-        ss << "place radius";
+        actions.emplace_back(InToolActionID::LMB, "place radius");
     }
-    ss << " <b>RMB:</b>cancel";
-    if (step == 1)
-        ss << " <b>r:</b>set radius and finish";
+    actions.emplace_back(InToolActionID::RMB, "cancel");
+    if (step == 1) {
+        actions.emplace_back(InToolActionID::ENTER_DATUM, "set radius and finish");
+    }
 
-    imp->tool_bar_set_tip(ss.str());
+    imp->tool_bar_set_actions(actions);
 }
 
 ToolResponse ToolDrawPolygonCircle::update(const ToolArgs &args)
@@ -68,34 +71,38 @@ ToolResponse ToolDrawPolygonCircle::update(const ToolArgs &args)
             update_polygon();
         }
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (step == 0) {
                 step = 1;
             }
             else {
                 return ToolResponse::commit();
             }
-        }
-        else if (args.button == 3) {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             return ToolResponse::revert();
+
+        case InToolActionID::ENTER_DATUM:
+            if (step == 1) {
+                auto r = imp->dialogs.ask_datum("Radius", 1_mm);
+                if (r.first) {
+                    second_pos = first_pos + Coordi(r.second, 0);
+                    update_polygon();
+                    return ToolResponse::commit();
+                }
+            }
+            break;
+
+        default:;
         }
     }
+
     else if (args.type == ToolEventType::LAYER_CHANGE) {
         temp->layer = args.work_layer;
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_r && step == 1) {
-            auto r = imp->dialogs.ask_datum("Radius", 1_mm);
-            if (r.first) {
-                second_pos = first_pos + Coordi(r.second, 0);
-                update_polygon();
-                return ToolResponse::commit();
-            }
-        }
-        else if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
-        }
     }
     update_tip();
     return ToolResponse();

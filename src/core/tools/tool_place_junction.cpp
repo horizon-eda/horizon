@@ -22,6 +22,11 @@ ToolResponse ToolPlaceJunction::begin(const ToolArgs &args)
 {
     std::cout << "tool place junction\n";
 
+    imp->tool_bar_set_actions({
+            {InToolActionID::LMB},
+            {InToolActionID::RMB},
+    });
+
     if (!begin_attached()) {
         return ToolResponse::end();
     }
@@ -49,8 +54,9 @@ ToolResponse ToolPlaceJunction::update(const ToolArgs &args)
         temp->position = args.coords;
         return ToolResponse();
     }
-    else if (args.type == ToolEventType::CLICK) {
-        if (args.button == 1) {
+    else if (args.type == ToolEventType::ACTION) {
+        switch (args.action) {
+        case InToolActionID::LMB:
             if (doc.c) {
                 for (auto it : doc.c->get_net_lines()) {
                     if (it->coord_on_line(temp->position)) {
@@ -67,8 +73,10 @@ ToolResponse ToolPlaceJunction::update(const ToolArgs &args)
 
             create_junction(args.coords);
             create_attached();
-        }
-        else if (args.button == 3) {
+            break;
+
+        case InToolActionID::RMB:
+        case InToolActionID::CANCEL:
             delete_attached();
             doc.r->delete_junction(temp->uuid);
             temp = 0;
@@ -77,11 +85,8 @@ ToolResponse ToolPlaceJunction::update(const ToolArgs &args)
                 selection.emplace(it->uuid, ObjectType::JUNCTION);
             }
             return ToolResponse::commit();
-        }
-    }
-    else if (args.type == ToolEventType::KEY) {
-        if (args.key == GDK_KEY_Escape) {
-            return ToolResponse::revert();
+
+        default:;
         }
     }
     return ToolResponse();
