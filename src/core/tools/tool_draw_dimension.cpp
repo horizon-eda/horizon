@@ -153,9 +153,8 @@ ToolResponse ToolDrawDimension::update(const ToolArgs &args)
                 if (restrict_mode == RestrictMode::X) {
                     auto dist = temp->p1.x - temp->p0.x;
                     auto dist_sign = dist > 0 ? 1 : -1;
-                    auto r = imp->dialogs.ask_datum("Enter distance", std::abs(dist));
-                    if (r.first) {
-                        temp->p1 = temp->p0 + Coordi(r.second * dist_sign, 0);
+                    if (auto r = imp->dialogs.ask_datum("Enter distance", std::abs(dist))) {
+                        temp->p1 = temp->p0 + Coordi(*r * dist_sign, 0);
                         state = State::LABEL;
                         update_tip();
                     }
@@ -163,9 +162,8 @@ ToolResponse ToolDrawDimension::update(const ToolArgs &args)
                 else if (restrict_mode == RestrictMode::Y) {
                     auto dist = temp->p1.y - temp->p0.y;
                     auto dist_sign = dist > 0 ? 1 : -1;
-                    auto r = imp->dialogs.ask_datum("Enter distance", std::abs(dist));
-                    if (r.first) {
-                        temp->p1 = temp->p0 + Coordi(0, r.second * dist_sign);
+                    if (auto r = imp->dialogs.ask_datum("Enter distance", std::abs(dist))) {
+                        temp->p1 = temp->p0 + Coordi(0, *r * dist_sign);
                         state = State::LABEL;
                         update_tip();
                     }

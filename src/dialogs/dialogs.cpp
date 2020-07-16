@@ -49,61 +49,58 @@ void Dialogs::set_interface(ImpInterface *intf)
     interface = intf;
 }
 
-std::pair<bool, UUID> Dialogs::map_pin(const std::vector<std::pair<const Pin *, bool>> &pins)
+std::optional<UUID> Dialogs::map_pin(const std::vector<std::pair<const Pin *, bool>> &pins)
 {
     MapPinDialog dia(parent, pins);
     auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK) {
-        return {dia.selection_valid, dia.selected_uuid};
+    if (r == Gtk::RESPONSE_OK && dia.selection_valid) {
+        return dia.selected_uuid;
     }
     else {
-        return {false, UUID()};
+        return {};
     }
 }
-std::pair<bool, UUIDPath<2>> Dialogs::map_symbol(const std::map<UUIDPath<2>, std::string> &gates)
+std::optional<UUIDPath<2>> Dialogs::map_symbol(const std::map<UUIDPath<2>, std::string> &gates)
 {
     MapSymbolDialog dia(parent, gates);
     auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK) {
-        return {dia.selection_valid, dia.selected_uuid_path};
+    if (r == Gtk::RESPONSE_OK && dia.selection_valid) {
+        return dia.selected_uuid_path;
     }
     else {
-        return {false, UUIDPath<2>()};
+        return {};
     }
 }
 
-std::pair<bool, UUID> Dialogs::select_symbol(Pool *pool, const UUID &unit_uuid)
+std::optional<UUID> Dialogs::select_symbol(Pool *pool, const UUID &unit_uuid)
 {
     PoolBrowserDialog dia(parent, ObjectType::SYMBOL, pool);
     auto br = dynamic_cast<PoolBrowserSymbol *>(dia.get_browser());
     br->set_unit_uuid(unit_uuid);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
-        auto uu = br->get_selected();
-        return {uu, uu};
+        return br->get_selected();
     }
     else {
-        return {false, UUID()};
+        return {};
     }
 }
 
-std::pair<bool, UUID> Dialogs::select_padstack(Pool *pool, const UUID &package_uuid)
+std::optional<UUID> Dialogs::select_padstack(Pool *pool, const UUID &package_uuid)
 {
     PoolBrowserDialog dia(parent, ObjectType::PADSTACK, pool);
     auto br = dynamic_cast<PoolBrowserPadstack *>(dia.get_browser());
     br->set_package_uuid(package_uuid);
     br->set_include_padstack_type(Padstack::Type::MECHANICAL, true);
-    auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK) {
-        auto uu = br->get_selected();
-        return {uu, uu};
+    if (dia.run() == Gtk::RESPONSE_OK) {
+        return br->get_selected();
     }
     else {
-        return {false, UUID()};
+        return {};
     }
 }
 
-std::pair<bool, UUID> Dialogs::select_hole_padstack(Pool *pool)
+std::optional<UUID> Dialogs::select_hole_padstack(Pool *pool)
 {
     PoolBrowserDialog dia(parent, ObjectType::PADSTACK, pool);
     auto br = dynamic_cast<PoolBrowserPadstack *>(dia.get_browser());
@@ -112,101 +109,95 @@ std::pair<bool, UUID> Dialogs::select_hole_padstack(Pool *pool)
     br->set_include_padstack_type(Padstack::Type::TOP, false);
     br->set_include_padstack_type(Padstack::Type::THROUGH, false);
     br->set_include_padstack_type(Padstack::Type::BOTTOM, false);
-    auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK) {
-        auto uu = br->get_selected();
-        return {uu, uu};
+    if (dia.run() == Gtk::RESPONSE_OK) {
+        return br->get_selected();
     }
     else {
-        return {false, UUID()};
+        return {};
     }
 }
 
-std::pair<bool, UUID> Dialogs::select_entity(Pool *pool)
+std::optional<UUID> Dialogs::select_entity(Pool *pool)
 {
     PoolBrowserDialog dia(parent, ObjectType::ENTITY, pool);
-    auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK) {
-        auto uu = dia.get_browser()->get_selected();
-        return {uu, uu};
+    if (dia.run() == Gtk::RESPONSE_OK) {
+        return dia.get_browser()->get_selected();
     }
     else {
-        return {false, UUID()};
+        return {};
     }
 }
 
-std::pair<bool, UUID> Dialogs::select_unit(Pool *pool)
+std::optional<UUID> Dialogs::select_unit(Pool *pool)
 {
     PoolBrowserDialog dia(parent, ObjectType::UNIT, pool);
-    auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK) {
-        auto uu = dia.get_browser()->get_selected();
-        return {uu, uu};
+    if (dia.run() == Gtk::RESPONSE_OK) {
+        return dia.get_browser()->get_selected();
     }
     else {
-        return {false, UUID()};
+        return {};
     }
 }
 
-std::pair<bool, UUID> Dialogs::select_net(class Block *block, bool power_only, const UUID &net_default)
+std::optional<UUID> Dialogs::select_net(class Block *block, bool power_only, const UUID &net_default)
 {
     SelectNetDialog dia(parent, block, "Select net");
     dia.net_selector->set_power_only(power_only);
     dia.net_selector->select_net(net_default);
     auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK) {
-        return {dia.valid, dia.net};
+    if (r == Gtk::RESPONSE_OK && dia.valid) {
+        return dia.net;
     }
     else {
-        return {false, UUID()};
+        return {};
     }
 }
-std::pair<bool, UUID> Dialogs::select_bus(class Block *block)
+std::optional<UUID> Dialogs::select_bus(class Block *block)
 {
     SelectNetDialog dia(parent, block, "Select bus");
     dia.net_selector->set_bus_mode(true);
     auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK) {
-        return {dia.valid, dia.net};
+    if (r == Gtk::RESPONSE_OK && dia.valid) {
+        return dia.net;
     }
     else {
-        return {false, UUID()};
+        return {};
     }
 }
-std::pair<bool, UUID> Dialogs::select_bus_member(class Block *block, const UUID &bus_uuid)
+std::optional<UUID> Dialogs::select_bus_member(class Block *block, const UUID &bus_uuid)
 {
     SelectNetDialog dia(parent, block, "Select bus member");
     dia.net_selector->set_bus_member_mode(bus_uuid);
     auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK) {
-        return {dia.valid, dia.net};
+    if (r == Gtk::RESPONSE_OK && dia.valid) {
+        return dia.net;
     }
     else {
-        return {false, UUID()};
+        return {};
     }
 }
 
-std::pair<bool, UUID> Dialogs::select_group_tag(const class Block *block, bool tag_mode, const UUID &current)
+std::optional<UUID> Dialogs::select_group_tag(const class Block *block, bool tag_mode, const UUID &current)
 {
     SelectGroupTagDialog dia(parent, block, tag_mode);
     auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK) {
-        return {dia.selection_valid, dia.selected_uuid};
+    if (r == Gtk::RESPONSE_OK && dia.selection_valid) {
+        return dia.selected_uuid;
     }
     else {
-        return {false, UUID()};
+        return {};
     }
 }
 
-std::pair<bool, UUID> Dialogs::select_included_board(const Board &brd)
+std::optional<UUID> Dialogs::select_included_board(const Board &brd)
 {
     SelectIncludedBoardDialog dia(parent, brd);
     auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK) {
-        return {dia.valid, dia.selected_uuid};
+    if (r == Gtk::RESPONSE_OK && dia.valid) {
+        return dia.selected_uuid;
     }
     else {
-        return {false, UUID()};
+        return {};
     }
 }
 
@@ -282,47 +273,47 @@ bool Dialogs::edit_frame_properties(class Frame *fr)
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-std::pair<bool, int64_t> Dialogs::ask_datum(const std::string &label, int64_t def)
+std::optional<int64_t> Dialogs::ask_datum(const std::string &label, int64_t def)
 {
     AskDatumDialog dia(parent, label);
     dia.sp->set_value(def);
     dia.sp->select_region(0, -1);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
-        return {true, dia.sp->get_value_as_int()};
+        return dia.sp->get_value_as_int();
     }
     else {
-        return {false, 0};
+        return {};
     }
 }
 
-std::pair<bool, std::string> Dialogs::ask_datum_string(const std::string &label, const std::string &def)
+std::optional<std::string> Dialogs::ask_datum_string(const std::string &label, const std::string &def)
 {
     AskDatumStringDialog dia(parent, label, false);
     dia.set_text(def);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
-        return {true, dia.get_text()};
+        return dia.get_text();
     }
     else {
-        return {false, ""};
+        return {};
     }
 }
 
-std::pair<bool, std::string> Dialogs::ask_datum_string_multiline(const std::string &label, const std::string &def)
+std::optional<std::string> Dialogs::ask_datum_string_multiline(const std::string &label, const std::string &def)
 {
     AskDatumStringDialog dia(parent, label, true);
     dia.set_text(def);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
-        return {true, dia.get_text()};
+        return dia.get_text();
     }
     else {
-        return {false, ""};
+        return {};
     }
 }
 
-std::pair<bool, Coordi> Dialogs::ask_datum_coord(const std::string &label, Coordi def)
+std::optional<Coordi> Dialogs::ask_datum_coord(const std::string &label, Coordi def)
 {
     AskDatumDialog dia(parent, label, true);
     dia.sp_x->set_value(def.x);
@@ -332,14 +323,14 @@ std::pair<bool, Coordi> Dialogs::ask_datum_coord(const std::string &label, Coord
     dia.cb_y->set_sensitive(false);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
-        return {true, {dia.sp_x->get_value_as_int(), dia.sp_y->get_value_as_int()}};
+        return {{dia.sp_x->get_value_as_int(), dia.sp_y->get_value_as_int()}};
     }
     else {
-        return {false, Coordi()};
+        return {};
     }
 }
 
-std::tuple<bool, Coordi, std::pair<bool, bool>> Dialogs::ask_datum_coord2(const std::string &label, Coordi def)
+std::optional<std::pair<Coordi, std::pair<bool, bool>>> Dialogs::ask_datum_coord2(const std::string &label, Coordi def)
 {
     AskDatumDialog dia(parent, label, true);
     dia.sp_x->set_value(def.x);
@@ -347,30 +338,29 @@ std::tuple<bool, Coordi, std::pair<bool, bool>> Dialogs::ask_datum_coord2(const 
     dia.sp_x->select_region(0, -1);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
-        return std::make_tuple<bool, Coordi, std::pair<bool, bool>>(
-                true, {dia.sp_x->get_value_as_int(), dia.sp_y->get_value_as_int()},
-                std::make_pair(dia.cb_x->get_active(), dia.cb_y->get_active()));
+        return {{{dia.sp_x->get_value_as_int(), dia.sp_y->get_value_as_int()},
+                 {dia.cb_x->get_active(), dia.cb_y->get_active()}}};
     }
     else {
-        return std::make_tuple<bool, Coordi, std::pair<bool, bool>>(false, Coordi(), {false, false});
+        return {};
     }
 }
 
-std::pair<bool, int> Dialogs::ask_datum_angle(const std::string &label, int def)
+std::optional<int> Dialogs::ask_datum_angle(const std::string &label, int def)
 {
     AskDatumAngleDialog dia(parent, label);
     dia.sp->set_value(def);
     dia.sp->select_region(0, -1);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
-        return {true, dia.sp->get_value()};
+        return dia.sp->get_value();
     }
     else {
-        return {false, 0};
+        return {};
     }
 }
 
-std::pair<bool, UUID> Dialogs::select_part(Pool *pool, const UUID &entity_uuid, const UUID &part_uuid, bool show_none)
+std::optional<UUID> Dialogs::select_part(Pool *pool, const UUID &entity_uuid, const UUID &part_uuid, bool show_none)
 {
     PoolBrowserDialog dia(parent, ObjectType::PART, pool);
     auto br = dynamic_cast<PoolBrowserPart *>(dia.get_browser());
@@ -382,35 +372,34 @@ std::pair<bool, UUID> Dialogs::select_part(Pool *pool, const UUID &entity_uuid, 
     }
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
-        auto uu = br->get_selected();
-        return {uu, uu};
+        return br->get_selected();
     }
     else {
-        return {false, UUID()};
+        return {};
     }
 }
 
-std::pair<bool, UUID> Dialogs::map_package(const std::vector<std::pair<Component *, bool>> &components)
+std::optional<UUID> Dialogs::map_package(const std::vector<std::pair<Component *, bool>> &components)
 {
     MapPackageDialog dia(parent, components);
     auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK) {
-        return {dia.selection_valid, dia.selected_uuid};
+    if (r == Gtk::RESPONSE_OK && dia.selection_valid) {
+        return dia.selected_uuid;
     }
     else {
-        return {false, UUID()};
+        return {};
     }
 }
 
-std::pair<bool, UUID> Dialogs::select_via_padstack(class ViaPadstackProvider *vpp)
+std::optional<UUID> Dialogs::select_via_padstack(class ViaPadstackProvider *vpp)
 {
     SelectViaPadstackDialog dia(parent, vpp);
     auto r = dia.run();
-    if (r == Gtk::RESPONSE_OK) {
-        return {dia.selection_valid, dia.selected_uuid};
+    if (r == Gtk::RESPONSE_OK && dia.selection_valid) {
+        return dia.selected_uuid;
     }
     else {
-        return {false, UUID()};
+        return {};
     }
 }
 
@@ -432,7 +421,7 @@ bool Dialogs::edit_stackup(class IDocumentBoard *doc)
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-std::pair<bool, std::string> Dialogs::ask_dxf_filename()
+std::optional<std::string> Dialogs::ask_dxf_filename()
 {
     GtkFileChooserNative *native = gtk_file_chooser_native_new("Import DXF", GTK_WINDOW(parent->gobj()),
                                                                GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
@@ -444,14 +433,14 @@ std::pair<bool, std::string> Dialogs::ask_dxf_filename()
     chooser->add_filter(filter);
 
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        return {true, chooser->get_filename()};
+        return chooser->get_filename();
     }
     else {
-        return {false, ""};
+        return {};
     }
 }
 
-std::pair<bool, std::string> Dialogs::ask_kicad_package_filename()
+std::optional<std::string> Dialogs::ask_kicad_package_filename()
 {
     GtkFileChooserNative *native = gtk_file_chooser_native_new("Import KiCad package", GTK_WINDOW(parent->gobj()),
                                                                GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
@@ -462,10 +451,10 @@ std::pair<bool, std::string> Dialogs::ask_kicad_package_filename()
     chooser->add_filter(filter);
 
     if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
-        return {true, chooser->get_filename()};
+        return chooser->get_filename();
     }
     else {
-        return {false, ""};
+        return {};
     }
 }
 
@@ -483,7 +472,7 @@ std::optional<std::string> Dialogs::ask_picture_filename()
         return chooser->get_filename();
     }
     else {
-        return std::nullopt;
+        return {};
     }
 }
 

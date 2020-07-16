@@ -335,9 +335,8 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
             break;
 
         case InToolActionID::ENTER_DATUM: {
-            auto r = imp->dialogs.ask_datum_angle("Enter angle", 0);
-            if (r.first) {
-                apply_placements_rotation(r.second);
+            if (auto r = imp->dialogs.ask_datum_angle("Enter angle", 0)) {
+                apply_placements_rotation(*r);
                 return ToolResponse::commit();
             }
         } break;

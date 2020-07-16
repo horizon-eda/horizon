@@ -19,24 +19,25 @@ bool ToolPlaceVia::can_begin()
 bool ToolPlaceVia::begin_attached()
 {
     rules = dynamic_cast<BoardRules *>(doc.b->get_rules());
-    auto [r, net_uuid] = imp->dialogs.select_net(doc.b->get_block(), false);
-    if (!r) {
+    if (auto r = imp->dialogs.select_net(doc.b->get_block(), false)) {
+        net = doc.b->get_block()->get_net(*r);
+        auto ps_uu = rules->get_via_padstack_uuid(net);
+        if (!ps_uu) {
+            Logger::log_warning("Didn't find a via for net " + net->name, Logger::Domain::TOOL,
+                                "make sure that there's a default via rule");
+            return false;
+        }
+        update_tip();
+        imp->tool_bar_set_actions({
+                {InToolActionID::LMB},
+                {InToolActionID::RMB},
+                {InToolActionID::EDIT, "change net"},
+        });
+        return true;
+    }
+    else {
         return false;
     }
-    net = doc.b->get_block()->get_net(net_uuid);
-    auto ps_uu = rules->get_via_padstack_uuid(net);
-    if (!ps_uu) {
-        Logger::log_warning("Didn't find a via for net " + net->name, Logger::Domain::TOOL,
-                            "make sure that there's a default via rule");
-        return false;
-    }
-    update_tip();
-    imp->tool_bar_set_actions({
-            {InToolActionID::LMB},
-            {InToolActionID::RMB},
-            {InToolActionID::EDIT, "change net"},
-    });
-    return true;
 }
 
 void ToolPlaceVia::create_attached()
@@ -83,15 +84,13 @@ bool ToolPlaceVia::update_attached(const ToolArgs &args)
 
         case InToolActionID::EDIT:
             if (via) {
-                auto [r, net_uuid] = imp->dialogs.select_net(doc.b->get_block(), false);
-                if (!r) {
-                    return true;
+                if (auto r = imp->dialogs.select_net(doc.b->get_block(), false)) {
+                    net = doc.b->get_block()->get_net(*r);
+                    via->net_set = net;
+                    via->parameter_set = rules->get_via_parameter_set(net);
+                    via->expand(*doc.b->get_board());
+                    update_tip();
                 }
-                net = doc.b->get_block()->get_net(net_uuid);
-                via->net_set = net;
-                via->parameter_set = rules->get_via_parameter_set(net);
-                via->expand(*doc.b->get_board());
-                update_tip();
                 return true;
             }
             return false;

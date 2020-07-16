@@ -38,9 +38,8 @@ void ToolHelperDrawNetSetting::step_net_label_size(bool up)
 
 void ToolHelperDrawNetSetting::ask_net_label_size()
 {
-    auto r = imp->dialogs.ask_datum("Enter size", settings.net_label_size);
-    if (r.first) {
-        settings.net_label_size = std::max(r.second, (int64_t)0.5_mm);
+    if (auto r = imp->dialogs.ask_datum("Enter size", settings.net_label_size)) {
+        settings.net_label_size = std::max(*r, (int64_t)0.5_mm);
         apply_settings();
     }
 }

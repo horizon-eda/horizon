@@ -51,9 +51,8 @@ ToolResponse ToolAssignPart::begin(const ToolArgs &args)
     }
     if (!part_uuid) {
         auto current_part_uuid = comp->part ? comp->part->uuid : UUID();
-        auto r = imp->dialogs.select_part(doc.r->get_pool(), entity->uuid, current_part_uuid, true);
-        if (r.first) {
-            part_uuid = r.second;
+        if (auto r = imp->dialogs.select_part(doc.r->get_pool(), entity->uuid, current_part_uuid, true)) {
+            part_uuid = *r;
         }
     }
     if (part_uuid) {

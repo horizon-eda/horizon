@@ -18,24 +18,21 @@ bool ToolPlacePad::can_begin()
 
 ToolResponse ToolPlacePad::begin(const ToolArgs &args)
 {
-    std::cout << "tool add comp\n";
-    bool r;
-    UUID padstack_uuid;
-    std::tie(r, padstack_uuid) = imp->dialogs.select_padstack(doc.r->get_pool(), doc.k->get_package()->uuid);
-    if (!r) {
+    if (auto r = imp->dialogs.select_padstack(doc.r->get_pool(), doc.k->get_package()->uuid)) {
+        padstack = doc.r->get_pool()->get_padstack(*r);
+        create_pad(args.coords);
+
+        imp->tool_bar_set_actions({
+                {InToolActionID::LMB},
+                {InToolActionID::RMB},
+                {InToolActionID::ROTATE},
+                {InToolActionID::EDIT, "edit pad"},
+        });
+        return ToolResponse();
+    }
+    else {
         return ToolResponse::end();
     }
-
-    padstack = doc.r->get_pool()->get_padstack(padstack_uuid);
-    create_pad(args.coords);
-
-    imp->tool_bar_set_actions({
-            {InToolActionID::LMB},
-            {InToolActionID::RMB},
-            {InToolActionID::ROTATE},
-            {InToolActionID::EDIT, "edit pad"},
-    });
-    return ToolResponse();
 }
 
 void ToolPlacePad::create_pad(const Coordi &pos)

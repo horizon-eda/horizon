@@ -33,19 +33,16 @@ static std::string slurp_from_file(const std::string &filename)
 
 ToolResponse ToolImportKiCadPackage::begin(const ToolArgs &args)
 {
-    bool r;
-    std::string filename;
-
-    std::tie(r, filename) = imp->dialogs.ask_kicad_package_filename();
-    if (!r) {
+    if (auto r = imp->dialogs.ask_kicad_package_filename()) {
+        SEXPR::PARSER parser;
+        std::unique_ptr<SEXPR::SEXPR> sexpr_data(parser.Parse(slurp_from_file(*r)));
+        KiCadPackageParser kp(*doc.k->get_package(), doc.k->get_pool());
+        kp.parse(sexpr_data.get());
+        return ToolResponse::commit();
+    }
+    else {
         return ToolResponse::end();
     }
-
-    SEXPR::PARSER parser;
-    std::unique_ptr<SEXPR::SEXPR> sexpr_data(parser.Parse(slurp_from_file(filename)));
-    KiCadPackageParser kp(*doc.k->get_package(), doc.k->get_pool());
-    kp.parse(sexpr_data.get());
-    return ToolResponse::commit();
 }
 
 ToolResponse ToolImportKiCadPackage::update(const ToolArgs &args)

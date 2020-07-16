@@ -35,10 +35,11 @@ ToolResponse ToolMapSymbol::begin(const ToolArgs &args)
             return ToolResponse::end();
         }
 
-        bool r;
         if (gates_out.size() > 1) {
-            std::tie(r, selected_gate) = imp->dialogs.map_symbol(gates_out);
-            if (!r) {
+            if (auto r = imp->dialogs.map_symbol(gates_out)) {
+                selected_gate = *r;
+            }
+            else {
                 return ToolResponse::end();
             }
         }
@@ -91,7 +92,6 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
             if (data_mode == false) {
                 gates_out.erase(UUIDPath<2>(sym_current->component->uuid, sym_current->gate->uuid));
 
-                bool r;
                 if (gates_out.size() == 0) {
                     return ToolResponse::commit();
                 }
@@ -99,8 +99,10 @@ ToolResponse ToolMapSymbol::update(const ToolArgs &args)
                     selected_gate = gates_out.begin()->first;
                 }
                 else {
-                    std::tie(r, selected_gate) = imp->dialogs.map_symbol(gates_out);
-                    if (!r) {
+                    if (auto r = imp->dialogs.map_symbol(gates_out)) {
+                        selected_gate = *r;
+                    }
+                    else {
                         return ToolResponse::commit();
                     }
                 }

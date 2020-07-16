@@ -91,10 +91,9 @@ ToolResponse ToolSetDiffpair::begin(const ToolArgs &args)
             return ToolResponse::end();
         }
 
-        auto r = imp->dialogs.select_net(doc.c->get_block(), false);
-        if (r.first) {
-            if (r.second != net->uuid) {
-                auto other_net = &doc.c->get_block()->nets.at(r.second);
+        if (auto r = imp->dialogs.select_net(doc.c->get_block(), false)) {
+            if (*r != net->uuid) {
+                auto other_net = &doc.c->get_block()->nets.at(*r);
                 if (other_net->diffpair) {
                     imp->tool_bar_flash("Selected net is already a diffpair");
                 }

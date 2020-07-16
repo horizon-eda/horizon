@@ -117,164 +117,166 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         return ToolResponse::end();
     }
     if (edge_mode) {
-        auto r = imp->dialogs.ask_datum("Edge length", ai.get());
-        if (!r.first) {
-            return ToolResponse::end();
-        }
-        double l = r.second / 2.0;
-        for (const auto &it : args.selection) {
-            if (it.type == ObjectType::POLYGON_EDGE) {
-                Polygon *poly = doc.r->get_polygon(it.uuid);
-                auto v1i = it.vertex;
-                auto v2i = (it.vertex + 1) % poly->vertices.size();
-                Polygon::Vertex *v1 = &poly->vertices.at(v1i);
-                Polygon::Vertex *v2 = &poly->vertices.at(v2i);
-                Coordi center = (v1->position + v2->position) / 2;
-                Coord<double> half = v2->position - center;
-                double halflen = sqrt(half.mag_sq());
-                double factor = l / halflen;
-                half *= factor;
-                Coordi halfi(half.x, half.y);
+        if (auto r = imp->dialogs.ask_datum("Edge length", ai.get())) {
+            double l = *r / 2.0;
+            for (const auto &it : args.selection) {
+                if (it.type == ObjectType::POLYGON_EDGE) {
+                    Polygon *poly = doc.r->get_polygon(it.uuid);
+                    auto v1i = it.vertex;
+                    auto v2i = (it.vertex + 1) % poly->vertices.size();
+                    Polygon::Vertex *v1 = &poly->vertices.at(v1i);
+                    Polygon::Vertex *v2 = &poly->vertices.at(v2i);
+                    Coordi center = (v1->position + v2->position) / 2;
+                    Coord<double> half = v2->position - center;
+                    double halflen = sqrt(half.mag_sq());
+                    double factor = l / halflen;
+                    half *= factor;
+                    Coordi halfi(half.x, half.y);
 
-                const auto &uu = it.uuid;
-                bool has_v1 =
-                        std::find_if(args.selection.cbegin(), args.selection.cend(),
-                                     [uu, v1i](const auto a) {
-                                         return a.type == ObjectType::POLYGON_VERTEX && a.uuid == uu && a.vertex == v1i;
-                                     })
-                        != args.selection.cend();
-                bool has_v2 =
-                        std::find_if(args.selection.cbegin(), args.selection.cend(),
-                                     [uu, v2i](const auto a) {
-                                         return a.type == ObjectType::POLYGON_VERTEX && a.uuid == uu && a.vertex == v2i;
-                                     })
-                        != args.selection.cend();
-                if (has_v1 && has_v2) {
-                    // nop
-                }
-                else if (has_v1 && !has_v2) {
-                    // keep v1, move only v2
-                    auto t = v2->position;
-                    v2->position = v1->position + halfi * 2;
-                    auto d = v2->position - t;
-                    v2->arc_center += d;
-                }
-                else if (!has_v1 && has_v2) {
-                    // keep v2, move only v1
-                    auto t = v1->position;
-                    v1->position = v2->position - halfi * 2;
-                    auto d = v1->position - t;
-                    v1->arc_center += d;
-                }
-                else if (!has_v1 && !has_v2) {
-                    auto t = v1->position;
-                    v1->position = center - halfi;
-                    auto d = v1->position - t;
-                    v1->arc_center += d;
+                    const auto &uu = it.uuid;
+                    bool has_v1 = std::find_if(args.selection.cbegin(), args.selection.cend(),
+                                               [uu, v1i](const auto a) {
+                                                   return a.type == ObjectType::POLYGON_VERTEX && a.uuid == uu
+                                                          && a.vertex == v1i;
+                                               })
+                                  != args.selection.cend();
+                    bool has_v2 = std::find_if(args.selection.cbegin(), args.selection.cend(),
+                                               [uu, v2i](const auto a) {
+                                                   return a.type == ObjectType::POLYGON_VERTEX && a.uuid == uu
+                                                          && a.vertex == v2i;
+                                               })
+                                  != args.selection.cend();
+                    if (has_v1 && has_v2) {
+                        // nop
+                    }
+                    else if (has_v1 && !has_v2) {
+                        // keep v1, move only v2
+                        auto t = v2->position;
+                        v2->position = v1->position + halfi * 2;
+                        auto d = v2->position - t;
+                        v2->arc_center += d;
+                    }
+                    else if (!has_v1 && has_v2) {
+                        // keep v2, move only v1
+                        auto t = v1->position;
+                        v1->position = v2->position - halfi * 2;
+                        auto d = v1->position - t;
+                        v1->arc_center += d;
+                    }
+                    else if (!has_v1 && !has_v2) {
+                        auto t = v1->position;
+                        v1->position = center - halfi;
+                        auto d = v1->position - t;
+                        v1->arc_center += d;
 
-                    t = v2->position;
-                    v2->position = center + halfi;
-                    d = v2->position - t;
-                    v2->arc_center += d;
+                        t = v2->position;
+                        v2->position = center + halfi;
+                        d = v2->position - t;
+                        v2->arc_center += d;
+                    }
                 }
             }
+        }
+        else {
+            return ToolResponse::end();
         }
     }
     else if (line_mode) {
-        auto r = imp->dialogs.ask_datum("Line length", ai.get());
-        if (!r.first) {
-            return ToolResponse::end();
-        }
-        double l = r.second / 2.0;
-        for (const auto &it : args.selection) {
-            if (it.type == ObjectType::LINE) {
-                Line *line = doc.r->get_line(it.uuid);
-                Junction *j1 = dynamic_cast<Junction *>(line->from.ptr);
-                Junction *j2 = dynamic_cast<Junction *>(line->to.ptr);
-                Coordi center = (j1->position + j2->position) / 2;
-                Coord<double> half = j2->position - center;
-                double halflen = sqrt(half.mag_sq());
-                double factor = l / halflen;
-                half *= factor;
-                Coordi halfi(half.x, half.y);
+        if (auto r = imp->dialogs.ask_datum("Line length", ai.get())) {
+            double l = *r / 2.0;
+            for (const auto &it : args.selection) {
+                if (it.type == ObjectType::LINE) {
+                    Line *line = doc.r->get_line(it.uuid);
+                    Junction *j1 = dynamic_cast<Junction *>(line->from.ptr);
+                    Junction *j2 = dynamic_cast<Junction *>(line->to.ptr);
+                    Coordi center = (j1->position + j2->position) / 2;
+                    Coord<double> half = j2->position - center;
+                    double halflen = sqrt(half.mag_sq());
+                    double factor = l / halflen;
+                    half *= factor;
+                    Coordi halfi(half.x, half.y);
 
-                bool has_v1 = std::find_if(args.selection.cbegin(), args.selection.cend(),
-                                           [j1](const auto a) {
-                                               return a.type == ObjectType::JUNCTION && a.uuid == j1->uuid;
-                                           })
-                              != args.selection.cend();
-                bool has_v2 = std::find_if(args.selection.cbegin(), args.selection.cend(),
-                                           [j2](const auto a) {
-                                               return a.type == ObjectType::JUNCTION && a.uuid == j2->uuid;
-                                           })
-                              != args.selection.cend();
-                if (has_v1 && has_v2) {
-                    // nop
-                }
-                else if (has_v1 && !has_v2) {
-                    // keep v1, move only v2
-                    j2->position = j1->position + halfi * 2;
-                }
-                else if (!has_v1 && has_v2) {
-                    // keep v2, move only v1
-                    j1->position = j2->position - halfi * 2;
-                }
-                else if (!has_v1 && !has_v2) {
-                    j1->position = center - halfi;
-                    j2->position = center + halfi;
+                    bool has_v1 = std::find_if(args.selection.cbegin(), args.selection.cend(),
+                                               [j1](const auto a) {
+                                                   return a.type == ObjectType::JUNCTION && a.uuid == j1->uuid;
+                                               })
+                                  != args.selection.cend();
+                    bool has_v2 = std::find_if(args.selection.cbegin(), args.selection.cend(),
+                                               [j2](const auto a) {
+                                                   return a.type == ObjectType::JUNCTION && a.uuid == j2->uuid;
+                                               })
+                                  != args.selection.cend();
+                    if (has_v1 && has_v2) {
+                        // nop
+                    }
+                    else if (has_v1 && !has_v2) {
+                        // keep v1, move only v2
+                        j2->position = j1->position + halfi * 2;
+                    }
+                    else if (!has_v1 && has_v2) {
+                        // keep v2, move only v1
+                        j1->position = j2->position - halfi * 2;
+                    }
+                    else if (!has_v1 && !has_v2) {
+                        j1->position = center - halfi;
+                        j2->position = center + halfi;
+                    }
                 }
             }
+        }
+        else {
+            return ToolResponse::end();
         }
     }
     else if (arc_mode) {
-        auto r = imp->dialogs.ask_datum("Arc radius");
-        if (!r.first) {
-            return ToolResponse::end();
-        }
-        double l = r.second;
-        for (const auto &it : args.selection) {
-            if (it.type == ObjectType::POLYGON_ARC_CENTER) {
-                Polygon *poly = doc.r->get_polygon(it.uuid);
-                auto v1i = it.vertex;
-                auto v2i = (it.vertex + 1) % poly->vertices.size();
-                Polygon::Vertex *v1 = &poly->vertices.at(v1i);
-                Polygon::Vertex *v2 = &poly->vertices.at(v2i);
-                Coord<double> r1 = v1->position - v1->arc_center;
-                Coord<double> r2 = v2->position - v1->arc_center;
-                r1 *= l / sqrt(r1.mag_sq());
-                r2 *= l / sqrt(r2.mag_sq());
-                v1->position = v1->arc_center + Coordi(r1.x, r1.y);
-                v2->position = v1->arc_center + Coordi(r2.x, r2.y);
+        if (auto r = imp->dialogs.ask_datum("Arc radius")) {
+            double l = *r;
+            for (const auto &it : args.selection) {
+                if (it.type == ObjectType::POLYGON_ARC_CENTER) {
+                    Polygon *poly = doc.r->get_polygon(it.uuid);
+                    auto v1i = it.vertex;
+                    auto v2i = (it.vertex + 1) % poly->vertices.size();
+                    Polygon::Vertex *v1 = &poly->vertices.at(v1i);
+                    Polygon::Vertex *v2 = &poly->vertices.at(v2i);
+                    Coord<double> r1 = v1->position - v1->arc_center;
+                    Coord<double> r2 = v2->position - v1->arc_center;
+                    r1 *= l / sqrt(r1.mag_sq());
+                    r2 *= l / sqrt(r2.mag_sq());
+                    v1->position = v1->arc_center + Coordi(r1.x, r1.y);
+                    v2->position = v1->arc_center + Coordi(r2.x, r2.y);
+                }
             }
+        }
+        else {
+            return ToolResponse::end();
         }
     }
     else if (hole_mode) {
-        auto r = imp->dialogs.ask_datum_coord("Hole position", ac.get());
-        if (!r.first) {
-            return ToolResponse::end();
-        }
-        for (const auto &it : args.selection) {
-            if (it.type == ObjectType::HOLE) {
-                doc.r->get_hole(it.uuid)->placement.shift = r.second;
+        if (auto r = imp->dialogs.ask_datum_coord("Hole position", ac.get())) {
+            for (const auto &it : args.selection) {
+                if (it.type == ObjectType::HOLE) {
+                    doc.r->get_hole(it.uuid)->placement.shift = *r;
+                }
             }
+        }
+        else {
+            return ToolResponse::end();
         }
     }
     else if (junction_mode) {
-        bool r;
-        Coordi c;
-        std::pair<bool, bool> rc;
-        std::tie(r, c, rc) = imp->dialogs.ask_datum_coord2("Junction position", ac.get());
-
-        if (!r) {
-            return ToolResponse::end();
-        }
-        for (const auto &it : args.selection) {
-            if (it.type == ObjectType::JUNCTION) {
-                if (rc.first)
-                    doc.r->get_junction(it.uuid)->position.x = c.x;
-                if (rc.second)
-                    doc.r->get_junction(it.uuid)->position.y = c.y;
+        if (auto r = imp->dialogs.ask_datum_coord2("Junction position", ac.get())) {
+            auto [c, rc] = *r;
+            for (const auto &it : args.selection) {
+                if (it.type == ObjectType::JUNCTION) {
+                    if (rc.first)
+                        doc.r->get_junction(it.uuid)->position.x = c.x;
+                    if (rc.second)
+                        doc.r->get_junction(it.uuid)->position.y = c.y;
+                }
             }
+        }
+        else {
+            return ToolResponse::end();
         }
     }
     else if (pad_mode) {
@@ -287,18 +289,15 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         }
         if (!pad)
             return ToolResponse::end();
-        std::string new_text;
-        bool r;
-        std::tie(r, new_text) = imp->dialogs.ask_datum_string("Enter pad name", pad->name);
-        if (r) {
+        if (auto r = imp->dialogs.ask_datum_string("Enter pad name", pad->name)) {
             for (const auto &it : args.selection) {
                 if (it.type == ObjectType::PAD) {
-                    doc.k->get_package()->pads.at(it.uuid).name = new_text;
+                    doc.k->get_package()->pads.at(it.uuid).name = *r;
                 }
             }
         }
         else {
-            return ToolResponse::revert();
+            return ToolResponse::end();
         }
     }
     else if (net_mode) {
@@ -327,11 +326,12 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         }
         if (!net)
             return ToolResponse::end();
-        bool r = false;
-        std::string net_name;
-        std::tie(r, net_name) = imp->dialogs.ask_datum_string("Enter net name", net->name);
-        if (r) {
-            net->name = net_name;
+
+        if (auto r = imp->dialogs.ask_datum_string("Enter net name", net->name)) {
+            net->name = *r;
+        }
+        else {
+            return ToolResponse::end();
         }
     }
     else if (text_mode) {
@@ -344,18 +344,16 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         }
         if (!text)
             return ToolResponse::end();
-        std::string new_text;
-        bool r;
-        std::tie(r, new_text) = imp->dialogs.ask_datum_string_multiline("Enter text", text->text);
-        if (r) {
+
+        if (auto r = imp->dialogs.ask_datum_string_multiline("Enter text", text->text)) {
             for (const auto &it : args.selection) {
                 if (it.type == ObjectType::TEXT) {
-                    doc.r->get_text(it.uuid)->text = new_text;
+                    doc.r->get_text(it.uuid)->text = *r;
                 }
             }
         }
         else {
-            return ToolResponse::revert();
+            return ToolResponse::end();
         }
     }
     else if (dim_mode) {
@@ -399,43 +397,42 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
             def = sqrt((*p_ref - *p_var).mag_sq());
             break;
         }
-        auto r = imp->dialogs.ask_datum("Dimension length", def);
-        if (!r.first) {
-            return ToolResponse::end();
+        if (auto r = imp->dialogs.ask_datum("Dimension length", def)) {
+            switch (dim->mode) {
+            case Dimension::Mode::HORIZONTAL:
+                p_var->x = p_ref->x + (*r * sgn(p_var->x - p_ref->x));
+                break;
+
+            case Dimension::Mode::VERTICAL:
+                p_var->y = p_ref->y + (*r * sgn(p_var->y - p_ref->y));
+                break;
+
+            case Dimension::Mode::DISTANCE: {
+                Coord<double> v = *p_var - *p_ref;
+                v *= 1 / sqrt(v.mag_sq());
+                v *= *r;
+                *p_var = *p_ref + Coordi(v.x, v.y);
+            } break;
+            }
         }
-        switch (dim->mode) {
-        case Dimension::Mode::HORIZONTAL:
-            p_var->x = p_ref->x + (r.second * sgn(p_var->x - p_ref->x));
-            break;
-
-        case Dimension::Mode::VERTICAL:
-            p_var->y = p_ref->y + (r.second * sgn(p_var->y - p_ref->y));
-            break;
-
-        case Dimension::Mode::DISTANCE: {
-            Coord<double> v = *p_var - *p_ref;
-            v *= 1 / sqrt(v.mag_sq());
-            v *= r.second;
-            *p_var = *p_ref + Coordi(v.x, v.y);
-        } break;
+        else {
+            return ToolResponse::end();
         }
     }
     else if (vertex_mode) {
-        bool r;
-        Coordi c;
-        std::pair<bool, bool> rc;
-        std::tie(r, c, rc) = imp->dialogs.ask_datum_coord2("Vertex position", ac.get());
-
-        if (!r) {
-            return ToolResponse::end();
-        }
-        for (const auto &it : args.selection) {
-            if (it.type == ObjectType::POLYGON_VERTEX) {
-                if (rc.first)
-                    doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).position.x = c.x;
-                if (rc.second)
-                    doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).position.y = c.y;
+        if (auto r = imp->dialogs.ask_datum_coord2("Vertex position", ac.get())) {
+            auto [c, rc] = *r;
+            for (const auto &it : args.selection) {
+                if (it.type == ObjectType::POLYGON_VERTEX) {
+                    if (rc.first)
+                        doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).position.x = c.x;
+                    if (rc.second)
+                        doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).position.y = c.y;
+                }
             }
+        }
+        else {
+            return ToolResponse::end();
         }
     }
     else {

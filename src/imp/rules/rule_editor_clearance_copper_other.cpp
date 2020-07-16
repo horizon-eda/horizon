@@ -160,12 +160,11 @@ void RuleEditorClearanceCopperOther::set_some(int row, int col)
 {
     Dialogs dias;
     dias.set_parent(dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW)));
-    auto res = dias.ask_datum("Enter clearance", 0.1_mm);
-    if (!res.first)
-        return;
-    for (auto &it : spin_buttons) {
-        if ((it.first.first == row || row == -1) && (it.first.second == col || col == -1)) {
-            it.second->set_value(res.second);
+    if (auto r = dias.ask_datum("Enter clearance", 0.1_mm)) {
+        for (auto &it : spin_buttons) {
+            if ((it.first.first == row || row == -1) && (it.first.second == col || col == -1)) {
+                it.second->set_value(*r);
+            }
         }
     }
 }

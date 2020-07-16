@@ -224,13 +224,14 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
         return ToolResponse::commit();
     }
     if (tool_id == ToolID::MOVE_EXACTLY) {
-        auto r = imp->dialogs.ask_datum_coord("Move exactly");
-        if (!r.first) {
+        if (auto r = imp->dialogs.ask_datum_coord("Move exactly")) {
+            move_do(*r);
+            finish();
+            return ToolResponse::commit();
+        }
+        else {
             return ToolResponse::end();
         }
-        move_do(r.second);
-        finish();
-        return ToolResponse::commit();
     }
 
     imp->tool_bar_set_actions({

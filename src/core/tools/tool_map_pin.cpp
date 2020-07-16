@@ -67,11 +67,12 @@ ToolResponse ToolMapPin::begin(const ToolArgs &args)
         return ToolResponse::end();
     }
 
-    bool r;
     UUID selected_pin;
     if (pins_unplaced > 1 && from_sidebar == false) {
-        std::tie(r, selected_pin) = imp->dialogs.map_pin(pins);
-        if (!r) {
+        if (auto r = imp->dialogs.map_pin(pins)) {
+            selected_pin = *r;
+        }
+        else {
             return ToolResponse::end();
         }
     }
@@ -205,10 +206,8 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
             break;
 
         case InToolActionID::EDIT: {
-            bool r;
-            UUID selected_pin;
-            std::tie(r, selected_pin) = imp->dialogs.map_pin(pins);
-            if (r) {
+            if (auto r = imp->dialogs.map_pin(pins)) {
+                UUID selected_pin = *r;
                 doc.y->get_symbol()->pins.erase(pin->uuid);
 
                 auto x = std::find_if(pins.begin(), pins.end(),

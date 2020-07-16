@@ -33,15 +33,16 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
     std::cout << "tool add part\n";
     Schematic *sch = doc.c->get_schematic();
 
-    bool r;
     if (tool_id == ToolID::ADD_PART) {
         UUID part_uuid;
         if (auto data = dynamic_cast<const ToolDataAddPart *>(args.data.get())) {
             part_uuid = data->part_uuid;
         }
         if (!part_uuid) {
-            std::tie(r, part_uuid) = imp->dialogs.select_part(doc.r->get_pool(), UUID(), UUID());
-            if (!r) {
+            if (auto r = imp->dialogs.select_part(doc.r->get_pool(), UUID(), UUID())) {
+                part_uuid = *r;
+            }
+            else {
                 return ToolResponse::end();
             }
         }
@@ -54,14 +55,14 @@ ToolResponse ToolAddPart::begin(const ToolArgs &args)
         comp->part = part;
     }
     else {
-        UUID entity_uuid;
-        std::tie(r, entity_uuid) = imp->dialogs.select_entity(doc.r->get_pool());
-        if (!r) {
+        if (auto r = imp->dialogs.select_entity(doc.r->get_pool())) {
+            auto uu = UUID::random();
+            comp = &sch->block->components.emplace(uu, uu).first->second;
+            comp->entity = doc.c->get_pool()->get_entity(*r);
+        }
+        else {
             return ToolResponse::end();
         }
-        auto uu = UUID::random();
-        comp = &sch->block->components.emplace(uu, uu).first->second;
-        comp->entity = doc.c->get_pool()->get_entity(entity_uuid);
     }
     comp->refdes = comp->entity->prefix + "?";
     comp->tag = create_tag();

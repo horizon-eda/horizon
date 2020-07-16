@@ -18,20 +18,19 @@ bool ToolPlacePowerSymbol::can_begin()
 
 bool ToolPlacePowerSymbol::begin_attached()
 {
-    bool r;
-    UUID net_uuid;
-    std::tie(r, net_uuid) = imp->dialogs.select_net(doc.c->get_schematic()->block, true);
-    if (!r) {
+    if (auto r = imp->dialogs.select_net(doc.c->get_schematic()->block, true)) {
+        net = &doc.c->get_schematic()->block->nets.at(*r);
+        imp->tool_bar_set_actions({
+                {InToolActionID::LMB},
+                {InToolActionID::RMB},
+                {InToolActionID::ROTATE},
+                {InToolActionID::MIRROR},
+        });
+        return true;
+    }
+    else {
         return false;
     }
-    net = &doc.c->get_schematic()->block->nets.at(net_uuid);
-    imp->tool_bar_set_actions({
-            {InToolActionID::LMB},
-            {InToolActionID::RMB},
-            {InToolActionID::ROTATE},
-            {InToolActionID::MIRROR},
-    });
-    return true;
 }
 
 void ToolPlacePowerSymbol::create_attached()

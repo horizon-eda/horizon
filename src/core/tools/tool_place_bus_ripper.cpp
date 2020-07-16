@@ -20,32 +20,28 @@ bool ToolPlaceBusRipper::can_begin()
 
 bool ToolPlaceBusRipper::begin_attached()
 {
-    std::cout << "tool place bus ripper\n";
+    if (auto r = imp->dialogs.select_bus(doc.c->get_schematic()->block)) {
+        imp->tool_bar_set_actions({
+                {InToolActionID::LMB},
+                {InToolActionID::RMB},
+                {InToolActionID::ROTATE},
+                {InToolActionID::MIRROR},
+                {InToolActionID::EDIT, "select member"},
+        });
+        bus = &doc.c->get_schematic()->block->buses.at(*r);
 
-    imp->tool_bar_set_actions({
-            {InToolActionID::LMB},
-            {InToolActionID::RMB},
-            {InToolActionID::ROTATE},
-            {InToolActionID::MIRROR},
-            {InToolActionID::EDIT, "select member"},
-    });
-
-    bool r;
-    UUID bus_uuid;
-    std::tie(r, bus_uuid) = imp->dialogs.select_bus(doc.c->get_schematic()->block);
-    if (!r) {
+        for (auto &it : bus->members) {
+            bus_members.push_back(&it.second);
+        }
+        if (bus_members.size() == 0)
+            return false;
+        std::sort(bus_members.begin(), bus_members.end(),
+                  [](auto a, auto b) { return strcmp_natural(a->name, b->name) < 0; });
+        return true;
+    }
+    else {
         return false;
     }
-    bus = &doc.c->get_schematic()->block->buses.at(bus_uuid);
-
-    for (auto &it : bus->members) {
-        bus_members.push_back(&it.second);
-    }
-    if (bus_members.size() == 0)
-        return false;
-    std::sort(bus_members.begin(), bus_members.end(),
-              [](auto a, auto b) { return strcmp_natural(a->name, b->name) < 0; });
-    return true;
 }
 
 void ToolPlaceBusRipper::create_attached()
@@ -115,22 +111,16 @@ bool ToolPlaceBusRipper::update_attached(const ToolArgs &args)
             }
             return true;
 
-        case InToolActionID::EDIT: {
-            bool r;
-            UUID bus_member_uuid;
+        case InToolActionID::EDIT:
+            if (auto r = imp->dialogs.select_bus_member(doc.c->get_schematic()->block, bus->uuid)) {
+                Bus::Member *bus_member = &bus->members.at(*r);
 
-            std::tie(r, bus_member_uuid) = imp->dialogs.select_bus_member(doc.c->get_schematic()->block, bus->uuid);
-            if (!r)
-                return true;
-            Bus::Member *bus_member = &bus->members.at(bus_member_uuid);
-
-            auto p = std::find(bus_members.begin(), bus_members.end(), bus_member);
-            bus_member_current = p - bus_members.begin();
-            delete_attached();
-            create_attached();
-
+                auto p = std::find(bus_members.begin(), bus_members.end(), bus_member);
+                bus_member_current = p - bus_members.begin();
+                delete_attached();
+                create_attached();
+            }
             return true;
-        }
 
         case InToolActionID::ROTATE:
             ri->orientation = transform_orientation(ri->orientation, true);

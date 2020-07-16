@@ -17,22 +17,19 @@ bool ToolPlaceBoardHole::can_begin()
 
 ToolResponse ToolPlaceBoardHole::begin(const ToolArgs &args)
 {
-    std::cout << "tool add comp\n";
-    bool r;
-    UUID padstack_uuid;
-    std::tie(r, padstack_uuid) = imp->dialogs.select_hole_padstack(doc.r->get_pool());
-    if (!r) {
+    if (auto r = imp->dialogs.select_hole_padstack(doc.r->get_pool())) {
+        padstack = doc.r->get_pool()->get_padstack(*r);
+        create_hole(args.coords);
+
+        imp->tool_bar_set_actions({
+                {InToolActionID::LMB},
+                {InToolActionID::RMB},
+        });
+        return ToolResponse();
+    }
+    else {
         return ToolResponse::end();
     }
-
-    padstack = doc.r->get_pool()->get_padstack(padstack_uuid);
-    create_hole(args.coords);
-
-    imp->tool_bar_set_actions({
-            {InToolActionID::LMB},
-            {InToolActionID::RMB},
-    });
-    return ToolResponse();
 }
 
 void ToolPlaceBoardHole::create_hole(const Coordi &pos)

@@ -59,9 +59,10 @@ ToolResponse ToolMapPackage::begin(const ToolArgs &args)
 
     UUID selected_component;
     if (components_from_selection.size() == 0) {
-        bool r;
-        std::tie(r, selected_component) = imp->dialogs.map_package(components);
-        if (!r) {
+        if (auto r = imp->dialogs.map_package(components)) {
+            selected_component = *r;
+        }
+        else {
             return ToolResponse::end();
         }
 
@@ -154,11 +155,9 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
             }
             return ToolResponse::commit();
 
-        case InToolActionID::EDIT: {
-            bool r;
-            UUID selected_component;
-            std::tie(r, selected_component) = imp->dialogs.map_package(components);
-            if (r) {
+        case InToolActionID::EDIT:
+            if (auto r = imp->dialogs.map_package(components)) {
+                UUID selected_component = *r;
                 doc.b->get_board()->packages.erase(pkg->uuid);
 
                 auto x = std::find_if(components.begin(), components.end(), [selected_component](const auto &a) {
@@ -170,7 +169,7 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
                 Component *comp = components.at(component_index).first;
                 place_package(comp, args.coords);
             }
-        } break;
+            break;
 
         case InToolActionID::ROTATE:
         case InToolActionID::MIRROR:

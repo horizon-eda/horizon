@@ -89,9 +89,8 @@ ToolResponse ToolPlaceText::begin(const ToolArgs &args)
             {InToolActionID::ENTER_SIZE, "text size"},
             {InToolActionID::EDIT, "change text"},
     });
-    auto r = imp->dialogs.ask_datum_string("Enter text", temp->text);
-    if (r.first) {
-        temp->text = r.second;
+    if (auto r = imp->dialogs.ask_datum_string("Enter text", temp->text)) {
+        temp->text = *r;
     }
     else {
         doc.r->delete_text(temp->uuid);
@@ -134,24 +133,21 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
             return ToolResponse::commit();
 
         case InToolActionID::EDIT: {
-            auto r = imp->dialogs.ask_datum_string("Enter text", temp->text);
-            if (r.first) {
-                temp->text = r.second;
+            if (auto r = imp->dialogs.ask_datum_string("Enter text", temp->text)) {
+                temp->text = *r;
             }
         } break;
 
         case InToolActionID::ENTER_WIDTH: {
-            auto r = imp->dialogs.ask_datum("Enter width", settings.get_layer(temp->layer).width);
-            if (r.first) {
-                settings.layers[temp->layer].width = std::max(r.second, (int64_t)0);
+            if (auto r = imp->dialogs.ask_datum("Enter width", settings.get_layer(temp->layer).width)) {
+                settings.layers[temp->layer].width = std::max(*r, (int64_t)0);
                 apply_settings();
             }
         } break;
 
         case InToolActionID::ENTER_SIZE: {
-            auto r = imp->dialogs.ask_datum("Enter size", settings.get_layer(temp->layer).size);
-            if (r.first) {
-                settings.layers[temp->layer].size = std::max(r.second, (int64_t)0);
+            if (auto r = imp->dialogs.ask_datum("Enter size", settings.get_layer(temp->layer).size)) {
+                settings.layers[temp->layer].size = std::max(*r, (int64_t)0);
                 apply_settings();
             }
         } break;

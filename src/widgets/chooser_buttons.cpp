@@ -23,9 +23,8 @@ void ViaPadstackButton::on_clicked()
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
     Dialogs dias;
     dias.set_parent(top);
-    auto r = dias.select_via_padstack(&via_padstack_provider);
-    if (r.first) {
-        p_property_selected_uuid = r.second;
+    if (auto r = dias.select_via_padstack(&via_padstack_provider)) {
+        p_property_selected_uuid = *r;
         update_label();
     }
 }

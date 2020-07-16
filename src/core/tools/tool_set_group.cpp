@@ -61,21 +61,19 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
         UUID new_group;
         if (tool_id == ToolID::SET_NEW_GROUP) {
             new_group = UUID::random();
-            auto r = imp->dialogs.ask_datum_string("Group name", "");
-            if (r.first) {
-                block->group_names[new_group] = r.second;
+            if (auto r = imp->dialogs.ask_datum_string("Group name", "")) {
+                block->group_names[new_group] = *r;
             }
             else {
-                return ToolResponse::revert();
+                return ToolResponse::end();
             }
         }
         else if (tool_id == ToolID::SET_GROUP) {
-            auto r = imp->dialogs.select_group_tag(block, false, (*comps.begin())->group);
-            if (r.first) {
-                new_group = r.second;
+            if (auto r = imp->dialogs.select_group_tag(block, false, (*comps.begin())->group)) {
+                new_group = *r;
             }
             else {
-                return ToolResponse::revert();
+                return ToolResponse::end();
             }
         }
         for (auto comp : comps) {
@@ -89,21 +87,19 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
         UUID new_tag;
         if (tool_id == ToolID::SET_NEW_TAG) {
             new_tag = UUID::random();
-            auto r = imp->dialogs.ask_datum_string("Tag name", "");
-            if (r.first) {
-                block->tag_names[new_tag] = r.second;
+            if (auto r = imp->dialogs.ask_datum_string("Tag name", "")) {
+                block->tag_names[new_tag] = *r;
             }
             else {
-                return ToolResponse::revert();
+                return ToolResponse::end();
             }
         }
         else if (tool_id == ToolID::SET_TAG) {
-            auto r = imp->dialogs.select_group_tag(block, true, (*comps.begin())->group);
-            if (r.first) {
-                new_tag = r.second;
+            if (auto r = imp->dialogs.select_group_tag(block, true, (*comps.begin())->group)) {
+                new_tag = *r;
             }
             else {
-                return ToolResponse::revert();
+                return ToolResponse::end();
             }
         }
         for (auto comp : comps) {
@@ -113,25 +109,23 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
 
     case ToolID::RENAME_GROUP: {
         auto comp = *comps.begin();
-        auto r = imp->dialogs.ask_datum_string("Group name", block->get_group_name(comp->group));
-        if (r.first) {
+        if (auto r = imp->dialogs.ask_datum_string("Group name", block->get_group_name(comp->group))) {
             if (comp->group)
-                block->group_names[comp->group] = r.second;
+                block->group_names[comp->group] = *r;
         }
         else {
-            return ToolResponse::revert();
+            return ToolResponse::end();
         }
     } break;
 
     case ToolID::RENAME_TAG: {
         auto comp = *comps.begin();
-        auto r = imp->dialogs.ask_datum_string("Tag name", block->get_tag_name(comp->tag));
-        if (r.first) {
+        if (auto r = imp->dialogs.ask_datum_string("Tag name", block->get_tag_name(comp->tag))) {
             if (comp->tag)
-                block->tag_names[comp->tag] = r.second;
+                block->tag_names[comp->tag] = *r;
         }
         else {
-            return ToolResponse::revert();
+            return ToolResponse::end();
         }
     } break;
 

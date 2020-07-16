@@ -74,12 +74,11 @@ TitleBlockValuesEditor::TitleBlockValuesEditor(std::map<std::string, std::string
             Dialogs dias;
             auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
             dias.set_parent(top);
-            auto r = dias.ask_datum_string("Enter Key", "");
-            if (r.first) {
+            if (auto r = dias.ask_datum_string("Enter Key", "")) {
                 auto row = *store->append();
-                if (values.count(r.second) == 0) {
-                    row[list_columns.key] = r.second;
-                    values[r.second] = "";
+                if (values.count(*r) == 0) {
+                    row[list_columns.key] = *r;
+                    values[*r] = "";
                 }
             }
         });

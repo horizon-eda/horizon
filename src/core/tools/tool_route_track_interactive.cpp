@@ -660,9 +660,8 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                 return ToolResponse::revert();
 
             case InToolActionID::LENGTH_TUNING_LENGTH: {
-                auto r = imp->dialogs.ask_datum("Target length", meander_settings.m_targetLength);
-                if (r.first) {
-                    meander_settings.m_targetLength = r.second;
+                if (auto r = imp->dialogs.ask_datum("Target length", meander_settings.m_targetLength)) {
+                    meander_settings.m_targetLength = *r;
                     meander_placer->UpdateSettings(meander_settings);
                     router->Move(VECTOR2I(args.coords.x, args.coords.y), NULL);
                 }
@@ -823,9 +822,8 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
             switch (args.action) {
             case InToolActionID::ENTER_WIDTH: {
                 PNS::SIZES_SETTINGS sz(router->Sizes());
-                auto r = imp->dialogs.ask_datum("Track width", sz.TrackWidth());
-                if (r.first) {
-                    sz.SetTrackWidth(r.second);
+                if (auto r = imp->dialogs.ask_datum("Track width", sz.TrackWidth())) {
+                    sz.SetTrackWidth(*r);
                     sz.SetWidthFromRules(false);
                     router->UpdateSizes(sz);
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
@@ -849,9 +847,8 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
             } break;
 
             case InToolActionID::CLEARANCE_OFFSET: {
-                auto r = imp->dialogs.ask_datum("Routing offset", .1_mm);
-                if (r.first) {
-                    iface->set_override_routing_offset(r.second);
+                if (auto r = imp->dialogs.ask_datum("Routing offset", .1_mm)) {
+                    iface->set_override_routing_offset(*r);
                     router->Move(wrapper->m_endSnapPoint, wrapper->m_endItem);
                 }
             } break;

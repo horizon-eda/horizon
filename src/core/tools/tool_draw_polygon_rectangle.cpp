@@ -266,9 +266,8 @@ ToolResponse ToolDrawPolygonRectangle::update(const ToolArgs &args)
 
         case InToolActionID::POLYGON_DECORATION_SIZE:
             if (corner_radius == 0) {
-                auto r = imp->dialogs.ask_datum("Decoration size", decoration_size);
-                if (r.first) {
-                    decoration_size = r.second;
+                if (auto r = imp->dialogs.ask_datum("Decoration size", decoration_size)) {
+                    decoration_size = *r;
                 }
                 update_polygon();
             }
@@ -290,9 +289,8 @@ ToolResponse ToolDrawPolygonRectangle::update(const ToolArgs &args)
             break;
 
         case InToolActionID::POLYGON_CORNER_RADIUS: {
-            auto r = imp->dialogs.ask_datum("Corner radius", corner_radius);
-            if (r.first) {
-                corner_radius = r.second;
+            if (auto r = imp->dialogs.ask_datum("Corner radius", corner_radius)) {
+                corner_radius = *r;
             }
             update_polygon();
         } break;

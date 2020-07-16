@@ -28,9 +28,8 @@ json ToolHelperLineWidthSetting::Settings::serialize() const
 
 void ToolHelperLineWidthSetting::ask_line_width()
 {
-    auto r = imp->dialogs.ask_datum("Enter width", settings.width);
-    if (r.first) {
-        settings.width = std::max(r.second, (int64_t)0);
+    if (auto r = imp->dialogs.ask_datum("Enter width", settings.width)) {
+        settings.width = std::max(*r, (int64_t)0);
         apply_settings();
     }
 }

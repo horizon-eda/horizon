@@ -17,22 +17,20 @@ bool ToolPlaceBoardPanel::can_begin()
 
 ToolResponse ToolPlaceBoardPanel::begin(const ToolArgs &args)
 {
-    bool r;
-    UUID board_uuid;
-    std::tie(r, board_uuid) = imp->dialogs.select_included_board(*doc.b->get_board());
-    if (!r) {
+    if (auto r = imp->dialogs.select_included_board(*doc.b->get_board())) {
+        inc_board = &doc.b->get_board()->included_boards.at(*r);
+        create_board(args.coords);
+
+        imp->tool_bar_set_actions({
+                {InToolActionID::LMB},
+                {InToolActionID::RMB},
+                {InToolActionID::ROTATE},
+        });
+        return ToolResponse();
+    }
+    else {
         return ToolResponse::end();
     }
-
-    inc_board = &doc.b->get_board()->included_boards.at(board_uuid);
-    create_board(args.coords);
-
-    imp->tool_bar_set_actions({
-            {InToolActionID::LMB},
-            {InToolActionID::RMB},
-            {InToolActionID::ROTATE},
-    });
-    return ToolResponse();
 }
 
 void ToolPlaceBoardPanel::create_board(const Coordi &pos)

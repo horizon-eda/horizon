@@ -91,24 +91,23 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
             return ToolResponse::end();
         }
 
-        bool r;
-        UUID net_uuid;
-        std::tie(r, net_uuid) =
-                imp->dialogs.select_net(doc.c->get_schematic()->block, nsinfo.net->is_power, nsinfo.net->uuid);
-        if (!r) {
-            return ToolResponse::end();
-        }
-        Net *net = &doc.c->get_schematic()->block->nets.at(net_uuid);
-        auto pins = doc.c->get_sheet()->get_pins_connected_to_net_segment(net_segment);
-        doc.c->get_schematic()->block->extract_pins(pins, net);
-        if (nsinfo.net->is_power) {
-            for (auto &it : doc.c->get_sheet()->power_symbols) {
-                if (it.second.junction->net_segment == net_segment) {
-                    assert(it.second.net.uuid == nsinfo.net->uuid);
-                    it.second.net = net;
+        if (auto r = imp->dialogs.select_net(doc.c->get_schematic()->block, nsinfo.net->is_power, nsinfo.net->uuid)) {
+            Net *net = &doc.c->get_schematic()->block->nets.at(*r);
+            auto pins = doc.c->get_sheet()->get_pins_connected_to_net_segment(net_segment);
+            doc.c->get_schematic()->block->extract_pins(pins, net);
+            if (nsinfo.net->is_power) {
+                for (auto &it : doc.c->get_sheet()->power_symbols) {
+                    if (it.second.junction->net_segment == net_segment) {
+                        assert(it.second.net.uuid == nsinfo.net->uuid);
+                        it.second.net = net;
+                    }
                 }
             }
         }
+        else {
+            return ToolResponse::end();
+        }
+
 
         return ToolResponse::commit();
     }

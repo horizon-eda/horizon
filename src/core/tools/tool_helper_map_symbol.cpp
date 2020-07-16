@@ -20,10 +20,11 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
     }
     if (auto_selected)
         *auto_selected = false;
-    bool r = false;
     if (n != 1) {
-        std::tie(r, selected_symbol) = imp->dialogs.select_symbol(doc.r->get_pool(), unit_uu);
-        if (!r) {
+        if (auto r = imp->dialogs.select_symbol(doc.r->get_pool(), unit_uu)) {
+            selected_symbol = *r;
+        }
+        else {
             return nullptr;
         }
     }

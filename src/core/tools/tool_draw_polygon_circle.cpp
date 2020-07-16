@@ -87,9 +87,8 @@ ToolResponse ToolDrawPolygonCircle::update(const ToolArgs &args)
 
         case InToolActionID::ENTER_DATUM:
             if (step == 1) {
-                auto r = imp->dialogs.ask_datum("Radius", 1_mm);
-                if (r.first) {
-                    second_pos = first_pos + Coordi(r.second, 0);
+                if (auto r = imp->dialogs.ask_datum("Radius", 1_mm)) {
+                    second_pos = first_pos + Coordi(*r, 0);
                     update_polygon();
                     return ToolResponse::commit();
                 }
