@@ -43,7 +43,6 @@ enum class ToolID {
     MAP_PACKAGE,
     DRAW_TRACK,
     PLACE_VIA,
-    ROUTE_TRACK,
     DRAG_KEEP_SLOPE,
     ADD_PART,
     ANNOTATE,

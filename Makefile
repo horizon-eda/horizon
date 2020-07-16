@@ -201,7 +201,6 @@ SRC_IMP = \
 	src/core/tools/tool_map_package.cpp\
 	src/core/tools/tool_draw_track.cpp\
 	src/core/tools/tool_place_via.cpp\
-	src/core/tools/tool_route_track.cpp\
 	src/core/tools/tool_drag_keep_slope.cpp\
 	src/core/tools/tool_add_part.cpp\
 	src/core/tools/tool_smash.cpp\

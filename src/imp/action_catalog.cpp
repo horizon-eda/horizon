@@ -459,10 +459,6 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::EDIT_VIA},
          {"Edit via", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 
-        {{ActionID::TOOL, ToolID::ROUTE_TRACK},
-         {"Route track (old)", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
-
         {{ActionID::TOOL, ToolID::DRAW_TRACK},
          {"Draw track", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 
@@ -997,7 +993,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(MAP_PACKAGE),
         TOOL_LUT_ITEM(DRAW_TRACK),
         TOOL_LUT_ITEM(PLACE_VIA),
-        TOOL_LUT_ITEM(ROUTE_TRACK),
         TOOL_LUT_ITEM(DRAG_KEEP_SLOPE),
         TOOL_LUT_ITEM(ADD_PART),
         TOOL_LUT_ITEM(ANNOTATE),

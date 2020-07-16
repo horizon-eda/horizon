@@ -44,7 +44,6 @@
 #include "tools/tool_place_text.hpp"
 #include "tools/tool_place_via.hpp"
 #include "tools/tool_rotate_arbitrary.hpp"
-#include "tools/tool_route_track.hpp"
 #include "tools/tool_route_track_interactive.hpp"
 #include "tools/tool_set_diffpair.hpp"
 #include "tools/tool_set_via_net.hpp"
@@ -196,9 +195,6 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::PLACE_VIA:
         return std::make_unique<ToolPlaceVia>(this, tool_id);
-
-    case ToolID::ROUTE_TRACK:
-        return std::make_unique<ToolRouteTrack>(this, tool_id);
 
     case ToolID::DRAG_KEEP_SLOPE:
         return std::make_unique<ToolDragKeepSlope>(this, tool_id);
