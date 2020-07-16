@@ -15,10 +15,6 @@ public:
     {
         return false;
     }
-    bool handles_esc() override
-    {
-        return true;
-    }
 
     class Settings : public ToolSettings {
     public:

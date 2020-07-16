@@ -1395,31 +1395,7 @@ void ImpBase::goto_layer(int layer)
 
 bool ImpBase::handle_key_press(GdkEventKey *key_event)
 {
-    if (core->tool_is_active()) {
-        if (handle_action_key(key_event))
-            return true;
-
-        ToolArgs args;
-        args.coords = canvas->get_cursor_pos();
-        args.work_layer = canvas->property_work_layer();
-        if (!core->tool_handles_esc() && key_event->keyval == GDK_KEY_Escape) {
-            args.type = ToolEventType::CLICK;
-            args.button = 3;
-        }
-        else {
-            args.type = ToolEventType::KEY;
-            args.key = key_event->keyval;
-            if (key_event->state & grid_fine_modifier)
-                args.mod = ToolArgs::MOD_FINE;
-        }
-
-        ToolResponse r = core->tool_update(args);
-        tool_process(r);
-        return true;
-    }
-    else {
-        return handle_action_key(key_event);
-    }
+    return handle_action_key(key_event);
     return false;
 }
 
@@ -1588,14 +1564,8 @@ bool ImpBase::handle_click_release(GdkEventButton *button_event)
 {
     if (core->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)) {
         ToolArgs args;
-        if (core->get_tool_actions().size()) {
-            args.type = ToolEventType::ACTION;
-            args.action = InToolActionID::LMB_RELEASE;
-        }
-        else {
-            args.type = ToolEventType::CLICK_RELEASE;
-            args.button = button_event->button;
-        }
+        args.type = ToolEventType::ACTION;
+        args.action = InToolActionID::LMB_RELEASE;
         args.coords = canvas->get_cursor_pos();
         args.target = canvas->get_current_target();
         args.work_layer = canvas->property_work_layer();
@@ -1706,17 +1676,11 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
     if (core->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)
         && button_event->type != GDK_2BUTTON_PRESS && button_event->type != GDK_3BUTTON_PRESS) {
         ToolArgs args;
-        if (core->get_tool_actions().size()) {
-            args.type = ToolEventType::ACTION;
-            if (button_event->button == 1)
-                args.action = InToolActionID::LMB;
-            else
-                args.action = InToolActionID::RMB;
-        }
-        else {
-            args.type = ToolEventType::CLICK;
-            args.button = button_event->button;
-        }
+        args.type = ToolEventType::ACTION;
+        if (button_event->button == 1)
+            args.action = InToolActionID::LMB;
+        else
+            args.action = InToolActionID::RMB;
         args.coords = canvas->get_cursor_pos();
         args.target = canvas->get_current_target();
         args.work_layer = canvas->property_work_layer();

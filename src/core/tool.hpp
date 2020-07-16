@@ -12,7 +12,7 @@
 namespace horizon {
 using json = nlohmann::json;
 
-enum class ToolEventType { NONE, MOVE, CLICK, CLICK_RELEASE, KEY, ACTION, LAYER_CHANGE, DATA };
+enum class ToolEventType { NONE, MOVE, ACTION, LAYER_CHANGE, DATA };
 
 enum class ToolID;
 
@@ -26,15 +26,7 @@ public:
     Coordi coords;
     std::set<SelectableRef> selection;
     bool keep_selection = false;
-    unsigned int button = 0;
-    unsigned int key = 0;
     InToolActionID action = InToolActionID::NONE;
-    enum Modifieres {
-        MOD_FINE = (1 << 0),
-        MOD_ALT = (1 << 1),
-        MOD_CTRL = (1 << 2),
-    };
-    unsigned int mod = 0;
 
     Target target;
     int work_layer = 0;
@@ -177,14 +169,6 @@ public:
      * @returns true if this Tool is specific to the selection
      */
     virtual bool is_specific()
-    {
-        return false;
-    }
-
-    /**
-     * @returns true if this Tool can handle esc by itself
-     */
-    virtual bool handles_esc()
     {
         return false;
     }
