@@ -6,6 +6,7 @@
 #include "core/tool_id.hpp"
 #include "action_editor.hpp"
 #include "imp/in_tool_action_catalog.hpp"
+#include <set>
 
 namespace horizon {
 class InToolActionEditor : public ActionEditorBase {
