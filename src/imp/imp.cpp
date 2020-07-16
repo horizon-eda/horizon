@@ -2251,7 +2251,8 @@ void ImpBase::tool_bar_append_action(InToolActionID action1, InToolActionID acti
             icon_name += "rmb";
         }
         icon_name += "-symbolic";
-        auto img = Gtk::manage(new Gtk::Image(icon_name, Gtk::ICON_SIZE_BUTTON));
+        auto img = Gtk::manage(new Gtk::Image);
+        img->set_from_icon_name(icon_name, Gtk::ICON_SIZE_BUTTON);
         img->show();
         box->pack_start(*img, false, false, 0);
     }
