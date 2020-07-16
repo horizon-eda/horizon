@@ -4,7 +4,6 @@
 #include "pool/part.hpp"
 #include <algorithm>
 #include "document/idocument.hpp"
-#include <gdk/gdkkeysyms.h>
 #include <sstream>
 
 namespace horizon {

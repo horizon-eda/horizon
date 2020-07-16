@@ -6,7 +6,6 @@
 #include "util/util.hpp"
 #include <algorithm>
 #include <iostream>
-#include <gdk/gdkkeysyms.h>
 #include "canvas/canvas_gl.hpp"
 
 namespace horizon {

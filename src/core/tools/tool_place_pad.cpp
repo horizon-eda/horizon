@@ -4,7 +4,6 @@
 #include "imp/imp_interface.hpp"
 #include <iostream>
 #include "pool/pool.hpp"
-#include <gdk/gdkkeysyms.h>
 
 namespace horizon {
 

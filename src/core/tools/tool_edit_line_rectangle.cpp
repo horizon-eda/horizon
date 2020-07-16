@@ -4,7 +4,6 @@
 #include <iostream>
 #include "document/idocument.hpp"
 #include "common/line.hpp"
-#include <gdk/gdkkeysyms.h>
 
 namespace horizon {
 

@@ -3,7 +3,6 @@
 #include "common/picture.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>
-#include <gdk/gdkkeysyms.h>
 #include "util/picture_util.hpp"
 #include "dialogs/enter_datum_window.hpp"
 

@@ -3,7 +3,6 @@
 #include "board/board.hpp"
 #include "imp/imp_interface.hpp"
 #include <iostream>
-#include <gdk/gdkkeysyms.h>
 #include "logger/logger.hpp"
 
 namespace horizon {

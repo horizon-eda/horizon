@@ -3,7 +3,6 @@
 #include "imp/imp_interface.hpp"
 #include "util/util.hpp"
 #include "document/idocument.hpp"
-#include <gdk/gdkkeysyms.h>
 #include "util/selection_util.hpp"
 #include "clipper/clipper.hpp"
 #include "dialogs/enter_datum_window.hpp"

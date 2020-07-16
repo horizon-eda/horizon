@@ -4,7 +4,6 @@
 #include "imp/imp_interface.hpp"
 #include "pool/part.hpp"
 #include <iostream>
-#include <gdk/gdkkeysyms.h>
 
 namespace horizon {
 ToolMapPackage::ToolMapPackage(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid)

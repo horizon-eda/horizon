@@ -13,7 +13,6 @@
 #include "util/accumulator.hpp"
 #include "util/util.hpp"
 #include <iostream>
-#include <gdk/gdkkeysyms.h>
 #include "core/tool_id.hpp"
 
 namespace horizon {

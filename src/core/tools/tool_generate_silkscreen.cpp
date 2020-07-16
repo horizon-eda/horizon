@@ -6,7 +6,6 @@
 #include "util/util.hpp"
 #include "tool_generate_silkscreen.hpp"
 #include "nlohmann/json.hpp"
-#include <gdk/gdkkeysyms.h>
 #include <sstream>
 #include <iomanip>
 

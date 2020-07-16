@@ -4,7 +4,6 @@
 #include "document/idocument_symbol.hpp"
 #include "pool/symbol.hpp"
 #include "imp/imp_interface.hpp"
-#include <gdk/gdkkeysyms.h>
 #include <iostream>
 
 namespace horizon {
