@@ -269,6 +269,7 @@ void UnitEditor::handle_add()
     int index = 0;
     {
         auto children = pins_listbox->get_children();
+        index = children.size();
         int i = 0;
         for (auto &ch : children) {
             auto row = dynamic_cast<Gtk::ListBoxRow *>(ch);
