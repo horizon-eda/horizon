@@ -2,6 +2,7 @@
 #include "document/idocument_schematic.hpp"
 #include "schematic/schematic.hpp"
 #include "imp/imp_interface.hpp"
+#include "util/util.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -49,15 +50,12 @@ ToolResponse ToolBendLineNet::update(const ToolArgs &args)
         temp->position = args.coords;
     }
     else if (args.type == ToolEventType::ACTION) {
-        switch (args.action) {
-        case InToolActionID::LMB:
+        if (any_of(args.action, {InToolActionID::LMB, InToolActionID::COMMIT})
+            || (is_transient && args.action == InToolActionID::LMB_RELEASE)) {
             return ToolResponse::commit();
-
-        case InToolActionID::RMB:
-        case InToolActionID::CANCEL:
+        }
+        else if (any_of(args.action, {InToolActionID::RMB, InToolActionID::CANCEL})) {
             return ToolResponse::revert();
-
-        default:;
         }
     }
     return ToolResponse();

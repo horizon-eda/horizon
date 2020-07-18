@@ -25,6 +25,7 @@ class SchematicPreferences {
 public:
     bool show_all_junctions = false;
     bool drag_start_net_line = true;
+    bool bend_non_ortho = true;
 
     void load_from_json(const json &j);
     json serialize() const;

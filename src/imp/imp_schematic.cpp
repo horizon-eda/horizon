@@ -1044,6 +1044,19 @@ void ImpSchematic::update_unplaced()
     unplaced_box->update(core_schematic.get_schematic()->get_unplaced_gates());
 }
 
+ToolID ImpSchematic::get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> &sel) const
+{
+    if (preferences.schematic.bend_non_ortho && sel.size() == 1 && sel.begin()->type == ObjectType::LINE_NET) {
+        const auto &ln = core_schematic.get_sheet()->net_lines.at(sel.begin()->uuid);
+        auto from = ln.from.get_position();
+        auto to = ln.to.get_position();
+        if (!((from.x == to.x) || (from.y == to.y))) {
+            return ToolID::BEND_LINE_NET;
+        }
+    }
+    return ImpBase::get_tool_for_drag_move(ctrl, sel);
+}
+
 void ImpSchematic::expand_selection_for_property_panel(std::set<SelectableRef> &sel_extra,
                                                        const std::set<SelectableRef> &sel)
 {

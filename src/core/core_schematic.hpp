@@ -21,6 +21,7 @@ public:
     SchematicSymbol *get_schematic_symbol(const UUID &uu) override;
     Schematic *get_schematic() override;
     Sheet *get_sheet() override;
+    const Sheet *get_sheet() const;
     Text *get_text(const UUID &uu) override;
 
     Junction *insert_junction(const UUID &uu) override;

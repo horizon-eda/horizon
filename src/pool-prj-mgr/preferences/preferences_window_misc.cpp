@@ -133,6 +133,13 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
                     preferences.schematic.show_all_junctions));
             gr->add_row(*r);
         }
+        {
+            auto r = Gtk::manage(new PreferencesRowBool(
+                    "Drag to bend non-orthogonal net lines",
+                    "Dragging non-orthogonal net lines will invoke the bend instad of the move tool", preferences,
+                    preferences.schematic.bend_non_ortho));
+            gr->add_row(*r);
+        }
     }
     {
         auto gr = Gtk::manage(new PreferencesGroup("Board"));

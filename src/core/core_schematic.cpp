@@ -57,6 +57,12 @@ Sheet *CoreSchematic::get_sheet()
 {
     return &sch.sheets.at(sheet_uuid);
 }
+
+const Sheet *CoreSchematic::get_sheet() const
+{
+    return &sch.sheets.at(sheet_uuid);
+}
+
 Line *CoreSchematic::get_line(const UUID &uu)
 {
     auto &sheet = sch.sheets.at(sheet_uuid);

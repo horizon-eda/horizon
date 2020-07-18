@@ -168,6 +168,7 @@ json SchematicPreferences::serialize() const
     json j;
     j["show_all_junctions"] = show_all_junctions;
     j["drag_start_net_line"] = drag_start_net_line;
+    j["bend_non_ortho"] = bend_non_ortho;
     return j;
 }
 
@@ -175,6 +176,7 @@ void SchematicPreferences::load_from_json(const json &j)
 {
     show_all_junctions = j.value("show_all_junctions", false);
     drag_start_net_line = j.value("drag_start_net_line", true);
+    bend_non_ortho = j.value("bend_non_ortho", true);
 }
 
 json BoardPreferences::serialize() const

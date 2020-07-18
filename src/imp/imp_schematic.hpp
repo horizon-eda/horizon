@@ -33,6 +33,9 @@ protected:
         return &searcher;
     }
 
+    ToolID get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> &sel) const override;
+
+
 private:
     void canvas_update() override;
     CoreSchematic core_schematic;
