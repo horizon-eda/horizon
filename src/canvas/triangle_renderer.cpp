@@ -291,6 +291,8 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
                         buf.colors[i] = apply_highlight(ca.appearance.colors.at(k), highlight_mode, layer);
                 }
                 auto lc = ca.get_layer_color(layer);
+                buf.colors[static_cast<int>(ColorP::AIRWIRE_ROUTER)] =
+                        array_from_color(ca.appearance.colors.at(ColorP::AIRWIRE_ROUTER));
                 buf.colors[static_cast<int>(ColorP::FROM_LAYER)] = apply_highlight(lc, highlight_mode, layer);
                 buf.colors[static_cast<int>(ColorP::LAYER_HIGHLIGHT)] =
                         array_from_color(lc) + ca.appearance.highlight_lighten;

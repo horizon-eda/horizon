@@ -292,12 +292,14 @@ void Canvas::object_ref_pop()
 {
     object_refs_current.pop_back();
     object_ref_idx.pop_back();
+    assert(group_tris == nullptr);
 }
 
 void Canvas::object_ref_push(const ObjectRef &ref)
 {
     object_refs_current.push_back(ref);
     object_ref_idx.push_back(&object_refs[ref]);
+    assert(group_tris == nullptr);
 }
 
 void Canvas::begin_group(int layer)
