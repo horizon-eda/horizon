@@ -89,7 +89,7 @@ ToolResponse ToolPlaceText::begin(const ToolArgs &args)
             {InToolActionID::ENTER_SIZE, "text size"},
             {InToolActionID::EDIT, "change text"},
     });
-    if (auto r = imp->dialogs.ask_datum_string("Enter text", temp->text)) {
+    if (auto r = imp->dialogs.ask_datum_string_multiline("Enter text", temp->text)) {
         temp->text = *r;
     }
     else {
@@ -133,7 +133,7 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
             return ToolResponse::commit();
 
         case InToolActionID::EDIT: {
-            if (auto r = imp->dialogs.ask_datum_string("Enter text", temp->text)) {
+            if (auto r = imp->dialogs.ask_datum_string_multiline("Enter text", temp->text)) {
                 temp->text = *r;
             }
         } break;
