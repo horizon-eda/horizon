@@ -47,6 +47,7 @@ void Preferences::load_default()
     canvas_non_layer = CanvasPreferences();
     canvas_non_layer.appearance.layer_colors[0] = {1, 1, 0};
     key_sequences.load_from_json(json_from_resource("/org/horizon-eda/horizon/imp/keys_default.json"));
+    in_tool_key_sequences.load_from_json(json_from_resource("/org/horizon-eda/horizon/imp/in_tool_keys_default.json"));
     capture_output = capture_output_default;
 }
 
