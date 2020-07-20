@@ -11,7 +11,7 @@ Entity::Entity(const UUID &uu, const json &j, Pool &pool)
 
 {
     {
-        const json &o = j["gates"];
+        const json &o = j.at("gates");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             gates.emplace(std::make_pair(u, Gate(u, it.value(), pool)));

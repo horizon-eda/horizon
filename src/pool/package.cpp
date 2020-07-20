@@ -62,35 +62,35 @@ Package::Package(const UUID &uu, const json &j, Pool &pool)
       parameter_program(this, j.value("parameter_program", ""))
 {
     {
-        const json &o = j["junctions"];
+        const json &o = j.at("junctions");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             junctions.emplace(std::make_pair(u, Junction(u, it.value())));
         }
     }
     {
-        const json &o = j["lines"];
+        const json &o = j.at("lines");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             lines.emplace(std::make_pair(u, Line(u, it.value(), *this)));
         }
     }
     {
-        const json &o = j["arcs"];
+        const json &o = j.at("arcs");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             arcs.emplace(std::make_pair(u, Arc(u, it.value(), *this)));
         }
     }
     {
-        const json &o = j["texts"];
+        const json &o = j.at("texts");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             texts.emplace(std::make_pair(u, Text(u, it.value())));
         }
     }
     {
-        const json &o = j["pads"];
+        const json &o = j.at("pads");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             pads.emplace(std::make_pair(u, Pad(u, it.value(), pool)));

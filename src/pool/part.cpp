@@ -45,7 +45,7 @@ Part::Part(const UUID &uu, const json &j, Pool &pool)
     else {
         entity = pool.get_entity(j.at("entity").get<std::string>());
         package = pool.get_package(j.at("package").get<std::string>());
-        const json &o = j["pad_map"];
+        const json &o = j.at("pad_map");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto pad_uuid = UUID(it.key());
             if (package->pads.count(pad_uuid)) {
