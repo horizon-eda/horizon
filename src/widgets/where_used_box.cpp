@@ -27,7 +27,7 @@ WhereUsedBox::WhereUsedBox(Pool &p) : Gtk::Box(Gtk::Orientation::ORIENTATION_VER
     view->show();
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
     sc->set_shadow_type(Gtk::SHADOW_IN);
-    sc->set_min_content_height(100);
+    sc->set_min_content_height(200);
     sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     sc->add(*view);
     sc->show_all();
@@ -42,11 +42,11 @@ void WhereUsedBox::clear()
     store->clear();
 }
 
-void WhereUsedBox::load(ObjectType type, const UUID &uu)
+size_t WhereUsedBox::load(ObjectType type, const UUID &uu)
 {
     store->clear();
     if (!uu)
-        return;
+        return 0;
     SQLite::Query q(pool.db,
                     "WITH RECURSIVE where_used(typex, uuidx) AS ( SELECT ?, ? UNION "
                     "SELECT type, uuid FROM dependencies, where_used "
@@ -60,6 +60,7 @@ void WhereUsedBox::load(ObjectType type, const UUID &uu)
     q.bind(1, object_type_lut.lookup_reverse(type));
     q.bind(2, uu);
     q.step(); // drop first one
+    size_t count = 0;
     while (q.step()) {
         std::string type_str = q.get<std::string>(0);
         UUID uuid = q.get<std::string>(1);
@@ -70,7 +71,9 @@ void WhereUsedBox::load(ObjectType type, const UUID &uu)
         row[list_columns.type] = object_type_lut.lookup(type_str);
         row[list_columns.uuid] = uuid;
         row[list_columns.name] = name;
+        count++;
     }
+    return count;
 }
 
 void WhereUsedBox::row_activated(const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *column)
@@ -80,6 +83,16 @@ void WhereUsedBox::row_activated(const Gtk::TreeModel::Path &path, Gtk::TreeView
         Gtk::TreeModel::Row row = *it;
         s_signal_goto.emit(row[list_columns.type], row[list_columns.uuid]);
     }
+}
+
+ItemSet WhereUsedBox::get_items() const
+{
+    ItemSet r;
+    for (const auto &it : store->children()) {
+        Gtk::TreeModel::Row row = *it;
+        r.emplace(row[list_columns.type], row[list_columns.uuid]);
+    }
+    return r;
 }
 
 } // namespace horizon

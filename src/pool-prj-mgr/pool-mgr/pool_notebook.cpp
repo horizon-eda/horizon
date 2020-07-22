@@ -22,6 +22,7 @@
 #include "widgets/part_preview.hpp"
 #include <thread>
 #include "nlohmann/json.hpp"
+#include "widgets/where_used_box.hpp"
 
 #ifdef G_OS_WIN32
 #undef ERROR
@@ -317,18 +318,62 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
 void PoolNotebook::handle_delete(ObjectType ty, const UUID &uu)
 {
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
-    Gtk::MessageDialog md(*top, "Permanently delete " + object_descriptions.at(ty).name + "?", false /* use_markup */,
-                          Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
-    md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
-    md.add_button("Delete", Gtk::RESPONSE_OK)->get_style_context()->add_class("destructive-action");
-    if (md.run() == Gtk::RESPONSE_OK) {
-        auto filename = pool.get_filename(ty, uu);
-        if (ty == ObjectType::PACKAGE) {
-            auto dir = Glib::path_get_dirname(filename);
-            rmdir_recursive(dir);
+
+    std::string item_name;
+    {
+        SQLite::Query q(pool.db, "SELECT name FROM all_items_view WHERE type = ? and uuid = ?");
+        q.bind(1, object_type_lut.lookup_reverse(ty));
+        q.bind(2, uu);
+        if (q.step()) {
+            item_name = q.get<std::string>(0);
         }
-        else {
-            Gio::File::create_for_path(filename)->remove();
+    }
+
+    Gtk::MessageDialog md(*top, "Permanently delete " + object_descriptions.at(ty).name + " \"" + item_name + "\" ?",
+                          false /* use_markup */, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE);
+    auto box = Gtk::manage(new WhereUsedBox(pool));
+    const auto cnt = box->load(ty, uu);
+    ItemSet items_del = {{ty, uu}};
+    if (cnt) {
+        box->property_margin() = 10;
+        md.get_content_area()->pack_start(*box, true, true, 0);
+        md.get_content_area()->show_all();
+        md.get_content_area()->set_spacing(0);
+    }
+    else {
+        delete box;
+    }
+
+
+    static constexpr int RESP_DEL_THIS = 1;
+    static constexpr int RESP_DEL_ALL = 2;
+
+    md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+    if (cnt == 0) {
+        md.add_button("Delete", RESP_DEL_THIS)->get_style_context()->add_class("destructive-action");
+    }
+    else {
+        md.add_button("Delete and break dependents", RESP_DEL_THIS)
+                ->get_style_context()
+                ->add_class("destructive-action");
+        md.add_button("Delete dependents as well", RESP_DEL_ALL)->get_style_context()->add_class("destructive-action");
+    }
+
+    const auto resp = md.run();
+    if (any_of(resp, {RESP_DEL_THIS, RESP_DEL_ALL})) {
+        if (resp == RESP_DEL_ALL) {
+            auto deps = box->get_items();
+            items_del.insert(deps.begin(), deps.end());
+        }
+        for (const auto &[it_ty, it_uu] : items_del) {
+            auto filename = pool.get_filename(it_ty, it_uu);
+            if (it_ty == ObjectType::PACKAGE) {
+                auto dir = Glib::path_get_dirname(filename);
+                rmdir_recursive(dir);
+            }
+            else {
+                Gio::File::create_for_path(filename)->remove();
+            }
         }
         pool_update();
     }

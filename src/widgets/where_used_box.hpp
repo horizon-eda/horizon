@@ -3,14 +3,16 @@
 #include "common/common.hpp"
 #include "util/uuid.hpp"
 #include "util/pool_goto_provider.hpp"
+#include "util/item_set.hpp"
 
 namespace horizon {
 class WhereUsedBox : public Gtk::Box, public PoolGotoProvider {
 public:
     WhereUsedBox(class Pool &pool);
 
-    void load(ObjectType type, const UUID &uu);
+    size_t load(ObjectType type, const UUID &uu);
     void clear();
+    ItemSet get_items() const;
 
 private:
     Pool &pool;
