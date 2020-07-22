@@ -82,15 +82,27 @@ void UnplacedBox::row_activated(const Gtk::TreeModel::Path &path, Gtk::TreeViewC
 
 void UnplacedBox::update(const std::map<UUIDPath<2>, std::string> &items)
 {
-    Gtk::TreeModel::Row row;
-    store->freeze_notify();
-    store->clear();
-    set_visible(items.size() > 0);
-    for (const auto &it : items) {
-        row = *(store->append());
-        row[list_columns.text] = it.second;
-        row[list_columns.uuid] = it.first;
+    set_visible(items.size());
+    std::set<UUIDPath<2>> items_available;
+    {
+        auto ch = store->children();
+        for (auto it = ch.begin(); it != ch.end();) {
+            Gtk::TreeModel::Row row = *it;
+            if (items.count(row[list_columns.uuid]) == 0) {
+                store->erase(it++);
+            }
+            else {
+                it++;
+                items_available.emplace(row[list_columns.uuid]);
+            }
+        }
     }
-    store->thaw_notify();
+    for (const auto &[uu, name] : items) {
+        if (items_available.count(uu) == 0) {
+            Gtk::TreeModel::Row row = *(store->append());
+            row[list_columns.text] = name;
+            row[list_columns.uuid] = uu;
+        }
+    }
 }
 } // namespace horizon
