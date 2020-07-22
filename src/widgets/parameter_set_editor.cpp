@@ -101,11 +101,20 @@ ParameterSetEditor::ParameterSetEditor(ParameterSet *ps, bool populate_init)
     pack_start(*add_button, false, false, 0);
 
 
-    auto popover = Gtk::manage(new Gtk::Popover());
-    popover_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 8));
-    popover->add(*popover_box);
-    add_button->set_popover(*popover);
-    popover->signal_show().connect(sigc::mem_fun(*this, &ParameterSetEditor::update_popover_box));
+    add_button->set_menu(menu);
+    menu.signal_show().connect(sigc::mem_fun(*this, &ParameterSetEditor::update_menu));
+    for (int i = 1; i < (static_cast<int>(ParameterID::N_PARAMETERS)); i++) {
+        auto id = static_cast<ParameterID>(i);
+        auto item = Gtk::manage(new Gtk::MenuItem(parameter_id_to_name(id)));
+        item->signal_activate().connect([this, id] {
+            (*parameter_set)[id] = 0.5_mm;
+            auto pe = Gtk::manage(new ParameterEditor(id, this));
+            listbox->add(*pe);
+            s_signal_changed.emit();
+        });
+        menu.append(*item);
+        menu_items.emplace(id, *item);
+    }
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
     sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -168,30 +177,11 @@ void ParameterSetEditor::add_or_set_parameter(ParameterID param, int64_t value)
     s_signal_changed.emit();
 }
 
-void ParameterSetEditor::update_popover_box()
+void ParameterSetEditor::update_menu()
 {
-    for (auto it : popover_box->get_children()) {
-        delete it;
-    }
     for (int i = 1; i < (static_cast<int>(ParameterID::N_PARAMETERS)); i++) {
         auto id = static_cast<ParameterID>(i);
-        if (parameter_set->count(id) == 0) {
-            auto bu = Gtk::manage(new Gtk::Button(parameter_id_to_name(id)));
-            bu->signal_clicked().connect([this, id] {
-                auto popover = dynamic_cast<Gtk::Popover *>(popover_box->get_ancestor(GTK_TYPE_POPOVER));
-#if GTK_CHECK_VERSION(3, 22, 0)
-                popover->popdown();
-#else
-                popover->hide();
-#endif
-                (*parameter_set)[id] = 0.5_mm;
-                auto pe = Gtk::manage(new ParameterEditor(id, this));
-                listbox->add(*pe);
-                s_signal_changed.emit();
-            });
-            popover_box->pack_start(*bu, false, false, 0);
-        }
+        menu_items.at(id).set_visible(parameter_set->count(id) == 0);
     }
-    popover_box->show_all();
 }
 } // namespace horizon

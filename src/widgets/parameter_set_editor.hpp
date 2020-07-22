@@ -35,10 +35,11 @@ protected:
 private:
     Gtk::MenuButton *add_button = nullptr;
     Gtk::ListBox *listbox = nullptr;
-    Gtk::Box *popover_box = nullptr;
+    Gtk::Menu menu;
+    std::map<ParameterID, Gtk::MenuItem &> menu_items;
     ParameterSet *parameter_set;
     Glib::RefPtr<Gtk::SizeGroup> sg_label;
-    void update_popover_box();
+    void update_menu();
 
     type_signal_activate_last s_signal_activate_last;
 
