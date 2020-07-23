@@ -75,6 +75,7 @@ void PoolNotebook::handle_duplicate_symbol(const UUID &uu)
         sym.name += " (Copy)";
         sym.uuid = UUID::random();
         save_json_to_file(fn, sym.serialize());
+        pool_update(nullptr, {fn});
         appwin->spawn(PoolProjectManagerProcess::Type::IMP_SYMBOL, {fn});
     }
 }

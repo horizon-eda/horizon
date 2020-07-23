@@ -61,6 +61,7 @@ void PoolNotebook::handle_duplicate_padstack(const UUID &uu)
         ps.name += " (Copy)";
         ps.uuid = UUID::random();
         save_json_to_file(fn, ps.serialize());
+        pool_update(nullptr, {fn});
         appwin->spawn(PoolProjectManagerProcess::Type::IMP_PADSTACK, {fn});
     }
 }

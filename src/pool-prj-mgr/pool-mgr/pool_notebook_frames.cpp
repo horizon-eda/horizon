@@ -39,6 +39,7 @@ void PoolNotebook::handle_create_frame()
         Frame fr(horizon::UUID::random());
         fr.name = "fixme";
         save_json_to_file(fn, fr.serialize());
+        pool_update(nullptr, {fn});
         appwin->spawn(PoolProjectManagerProcess::Type::IMP_FRAME, {fn});
     }
 }
