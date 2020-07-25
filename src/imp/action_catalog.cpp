@@ -835,6 +835,9 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOGGLE_SNAP_TO_TARGETS, ToolID::NONE},
          {"Toggle snap to targets", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC,
           ActionCatalogItem::FLAGS_IN_TOOL}},
+
+        {{ActionID::PARTS_WINDOW, ToolID::NONE},
+         {"Parts window", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -947,6 +950,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(FOOTPRINT_GENERATOR),
         ACTION_LUT_ITEM(SET_GRID_ORIGIN),
         ACTION_LUT_ITEM(TOGGLE_SNAP_TO_TARGETS),
+        ACTION_LUT_ITEM(PARTS_WINDOW),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \
