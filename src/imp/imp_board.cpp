@@ -21,6 +21,7 @@
 #include "airwire_filter_window.hpp"
 #include "core/tool_id.hpp"
 #include "widgets/action_button.hpp"
+#include "parts_window.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
@@ -525,6 +526,7 @@ void ImpBoard::construct()
         core_board.set_needs_save();
         canvas_update();
         airwire_filter_window->update_nets();
+        parts_window->update();
     });
 
     {
@@ -603,6 +605,23 @@ void ImpBoard::construct()
     connect_action(ActionID::TUNING, [this](const auto &a) { tuning_window->present(); });
     connect_action(ActionID::TUNING_ADD_TRACKS, sigc::mem_fun(*this, &ImpBoard::handle_measure_tracks));
     connect_action(ActionID::TUNING_ADD_TRACKS_ALL, sigc::mem_fun(*this, &ImpBoard::handle_measure_tracks));
+
+    parts_window = new PartsWindow(*core_board.get_board());
+    parts_window->set_transient_for(*main_window);
+    connect_action(ActionID::PARTS_WINDOW, [this](const auto &a) { parts_window->present(); });
+    parts_window->update();
+    parts_window->signal_selected().connect([this](const auto &comps) {
+        highlights.clear();
+        std::set<UUID> pkgs;
+        for (const auto &[uu, pkg] : core_board.get_board()->packages) {
+            if (comps.count(pkg.component->uuid)) {
+                highlights.emplace(ObjectType::BOARD_PACKAGE, uu);
+                pkgs.insert(uu);
+            }
+        }
+        update_highlights();
+        view_3d_window->set_highlights(pkgs);
+    });
 
     connect_action(ActionID::HIGHLIGHT_NET, [this](const auto &a) {
         highlights.clear();

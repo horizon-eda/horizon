@@ -91,6 +91,7 @@ enum class ActionID {
     SET_GRID_ORIGIN,
     DISTRACTION_FREE,
     TOGGLE_SNAP_TO_TARGETS,
+    PARTS_WINDOW,
 };
 
 using ActionToolID = std::pair<ActionID, ToolID>;
