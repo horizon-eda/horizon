@@ -1697,7 +1697,7 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
             }
         }
     }
-    else if (!core->tool_is_active() && button_event->button == 1) {
+    else if (!core->tool_is_active() && button_event->button == 1 && !(button_event->state & Gdk::SHIFT_MASK)) {
         handle_maybe_drag();
     }
     else if (!core->tool_is_active() && button_event->button == 3) {
