@@ -8,13 +8,13 @@ namespace horizon {
 
 class TuningWindow : public Gtk::Window {
 public:
-    TuningWindow(const class Board *brd);
+    TuningWindow(const class Board &brd);
     void update();
     void add_tracks(const std::set<UUID> &tracks, bool all);
     uint64_t get_ref_length() const;
 
 private:
-    const Board *board;
+    const Board &board;
 
     class ListColumns : public Gtk::TreeModelColumnRecord {
     public:

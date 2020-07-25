@@ -4,7 +4,7 @@
 #include <iomanip>
 
 namespace horizon {
-TuningWindow::TuningWindow(const Board *brd) : Gtk::Window(), board(brd), state_store(this, "tuning")
+TuningWindow::TuningWindow(const Board &brd) : Gtk::Window(), board(brd), state_store(this, "tuning")
 {
     set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
     auto header = Gtk::manage(new Gtk::HeaderBar());
@@ -185,7 +185,7 @@ void TuningWindow::add_tracks(const std::set<UUID> &tracks_uuid, bool all)
 {
     std::map<const Net *, std::set<const Track *>> tracks;
     for (const auto &it : tracks_uuid) {
-        auto track = &board->tracks.at(it);
+        auto track = &board.tracks.at(it);
         if (track->net) {
             tracks[track->net].insert(track);
         }
@@ -220,15 +220,15 @@ void TuningWindow::update()
         Gtk::TreeModel::Row row = *it;
         uint64_t length = 0;
         if (row[list_columns.all_tracks]) {
-            for (auto &it_track : board->tracks) {
+            for (auto &it_track : board.tracks) {
                 if (it_track.second.net && it_track.second.net->uuid == row[list_columns.net])
                     length += get_track_length(it_track.second);
             }
         }
         else {
             for (const auto &track_uuid : row.get_value(list_columns.tracks)) {
-                if (board->tracks.count(track_uuid)) {
-                    auto &track = board->tracks.at(track_uuid);
+                if (board.tracks.count(track_uuid)) {
+                    auto &track = board.tracks.at(track_uuid);
                     length += get_track_length(track);
                 }
             }

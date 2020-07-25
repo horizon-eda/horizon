@@ -589,7 +589,7 @@ void ImpBoard::construct()
         step_export_window->generate();
     });
 
-    tuning_window = new TuningWindow(core_board.get_board());
+    tuning_window = new TuningWindow(*core_board.get_board());
     tuning_window->set_transient_for(*main_window);
     imp_interface->signal_request_length_tuning_ref().connect([this] { return tuning_window->get_ref_length(); });
 
