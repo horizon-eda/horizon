@@ -35,9 +35,13 @@ ToolResponse ToolChangeUnit::begin(const ToolArgs &args)
             }
         }
         sym->unit = new_unit;
-        for (const auto &it : pinmap) {
-            sym->pins.emplace(it.second, sym->pins.at(it.first));
+        for (const auto &[old_pin, new_pin] : pinmap) {
+            if (new_pin != old_pin) {
+                auto &x = sym->pins.emplace(new_pin, sym->pins.at(old_pin)).first->second;
+                x.uuid = new_pin;
+            }
         }
+        // deleted unit pins will get removed from symbol during expand
         return ToolResponse::commit();
     }
     else {
