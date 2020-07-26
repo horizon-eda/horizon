@@ -30,6 +30,7 @@ public:
     std::map<std::string, Glib::DateTime> recent_items;
 
     std::deque<UUID> part_favorites;
+    bool pool_doc_info_bar_dismissed = false;
 
     void close_appwindows(std::set<Gtk::Window *> wins);
     Preferences &get_preferences();

@@ -89,6 +89,7 @@ void PoolProjectManagerApplication::load_from_config(const std::string &config_f
             part_favorites.push_back(it.value().get<std::string>());
         }
     }
+    pool_doc_info_bar_dismissed = j.value("pool_doc_info_bar_dismissed", false);
     recent_from_json(recent_items, j);
 }
 
@@ -175,6 +176,7 @@ void PoolProjectManagerApplication::on_shutdown()
     for (const auto &it : recent_items) {
         j["recent"][it.first] = it.second.to_unix();
     }
+    j["pool_doc_info_bar_dismissed"] = pool_doc_info_bar_dismissed;
     save_json_to_file(config_filename, j);
 }
 

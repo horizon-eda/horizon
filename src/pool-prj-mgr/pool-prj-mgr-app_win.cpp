@@ -67,6 +67,8 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("menu_new_project", menu_new_project);
     builder->get_widget("hamburger_menu_button", hamburger_menu_button);
     builder->get_widget("info_bar_pool_not_added", info_bar_pool_not_added);
+    builder->get_widget("info_bar_pool_doc", info_bar_pool_doc);
+
     set_view_mode(ViewMode::OPEN);
 
     {
@@ -118,6 +120,14 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
         info_bar_hide(info_bar_pool_not_added);
     });
     info_bar_hide(info_bar_pool_not_added);
+
+    info_bar_pool_doc->signal_response().connect([this](int resp) {
+        if (resp == Gtk::RESPONSE_OK) {
+            info_bar_hide(info_bar_pool_doc);
+            app->pool_doc_info_bar_dismissed = true;
+        }
+    });
+    info_bar_hide(info_bar_pool_doc);
 
     show_output_button->signal_clicked().connect([this] {
         output_window->present();
@@ -846,6 +856,8 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
         button_update->show();
         hamburger_menu_button->show();
         header->set_title("Pool manager");
+        if (!app->pool_doc_info_bar_dismissed)
+            info_bar_show(info_bar_pool_doc);
         break;
 
     case ViewMode::DOWNLOAD:

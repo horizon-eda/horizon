@@ -135,6 +135,8 @@ private:
 
     class OutputWindow *output_window = nullptr;
 
+    Gtk::InfoBar *info_bar_pool_doc = nullptr;
+
     std::unique_ptr<Project> project = nullptr;
     std::string project_filename;
     bool project_needs_save = false;
