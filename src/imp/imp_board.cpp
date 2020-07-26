@@ -622,6 +622,8 @@ void ImpBoard::construct()
         update_highlights();
         view_3d_window->set_highlights(pkgs);
     });
+    if (m_meta.count("parts"))
+        parts_window->load_from_json(m_meta.at("parts"));
 
     connect_action(ActionID::HIGHLIGHT_NET, [this](const auto &a) {
         highlights.clear();
@@ -1172,6 +1174,7 @@ void ImpBoard::get_save_meta(json &j)
     ImpLayer::get_save_meta(j);
     j["board_display_options"] = board_display_options_box->serialize();
     j["nets"] = airwire_filter_window->serialize();
+    j["parts"] = parts_window->serialize();
 }
 
 std::vector<std::string> ImpBoard::get_view_hints()

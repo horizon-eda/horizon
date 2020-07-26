@@ -3,6 +3,7 @@
 #include "pool/part.hpp"
 #include "util/util.hpp"
 #include "util/gtk_util.hpp"
+#include "nlohmann/json.hpp"
 
 namespace horizon {
 PartsWindow::PartsWindow(const Board &brd) : Gtk::Window(), board(brd), state_store(this, "parts")
@@ -107,6 +108,33 @@ void PartsWindow::update()
         row[list_columns.placed] = parts_placed.count(part->uuid);
         row[list_columns.qty] = comps.size();
         row[list_columns.components] = comp_uuids;
+    }
+}
+
+json PartsWindow::serialize() const
+{
+    json j;
+    for (const auto &it : store->children()) {
+        Gtk::TreeModel::Row row = *it;
+        if (row[list_columns.placed]) {
+            j.push_back((std::string)row.get_value(list_columns.part));
+        }
+    }
+
+    json k;
+    k["parts_placed"] = j;
+    return k;
+}
+
+void PartsWindow::load_from_json(const json &j)
+{
+    std::set<UUID> parts_placed;
+    for (const auto &it : j.at("parts_placed")) {
+        parts_placed.emplace(it.get<std::string>());
+    }
+    for (auto &it : store->children()) {
+        Gtk::TreeModel::Row row = *it;
+        row[list_columns.placed] = parts_placed.count(row[list_columns.part]);
     }
 }
 

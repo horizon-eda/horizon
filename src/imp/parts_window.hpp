@@ -3,8 +3,10 @@
 #include <gtkmm.h>
 #include "util/uuid.hpp"
 #include "util/window_state_store.hpp"
+#include "nlohmann/json_fwd.hpp"
 
 namespace horizon {
+using json = nlohmann::json;
 
 class PartsWindow : public Gtk::Window {
 public:
@@ -16,6 +18,10 @@ public:
     {
         return s_signal_selected;
     }
+
+    json serialize() const;
+    void load_from_json(const json &j);
+
 
 private:
     const Board &board;
