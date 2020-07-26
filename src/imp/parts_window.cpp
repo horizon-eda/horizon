@@ -62,6 +62,9 @@ PartsWindow::PartsWindow(const Board &brd) : Gtk::Window(), board(brd), state_st
         s_signal_selected.emit(comps_sel);
     });
 
+    tree_view->set_search_column(list_columns.refdes);
+    store->set_sort_column(list_columns.refdes, Gtk::SORT_ASCENDING);
+
     sc->add(*tree_view);
     sc->show_all();
     add(*sc);
