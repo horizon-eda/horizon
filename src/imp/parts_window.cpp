@@ -63,7 +63,18 @@ PartsWindow::PartsWindow(const Board &brd) : Gtk::Window(), board(brd), state_st
         s_signal_selected.emit(comps_sel);
     });
 
-    tree_view->set_search_column(list_columns.refdes);
+    tree_view->set_search_column(list_columns.components);
+    tree_view->set_search_equal_func([this](const Glib::RefPtr<Gtk::TreeModel> &model, int c,
+                                            const Glib::ustring &needle, const Gtk::TreeModel::iterator &it) {
+        auto cneedle = needle.casefold();
+        for (const auto &comp_uu : it->get_value(list_columns.components)) {
+            const auto &comp = board.block->components.at(comp_uu);
+            if (Glib::ustring(comp.refdes).casefold() == cneedle) {
+                return false; // found
+            }
+        }
+        return true; // not found
+    });
     store->set_sort_column(list_columns.refdes, Gtk::SORT_ASCENDING);
 
     sc->add(*tree_view);
