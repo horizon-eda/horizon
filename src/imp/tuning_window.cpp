@@ -12,6 +12,8 @@ TuningWindow::TuningWindow(const Board &brd) : Gtk::Window(), board(brd), state_
     header->set_title("Length tuning");
     set_titlebar(*header);
     header->show();
+    if (!state_store.get_default_set())
+        set_default_size(500, 500);
 
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
     {
