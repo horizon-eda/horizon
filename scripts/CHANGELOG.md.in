@@ -1,3 +1,121 @@
+# Version 1.2.0
+
+## Added features
+
+ - Action bar for easy access to commonly-used actions (136cf038e599570819297cffe84ac951bcf61cc1)
+ - Bitmap picture import for schematic, package, board (6f7edd75e634a512f669d3ba17973f4b146a7f32)
+ - KiCad symbol import (8f109717fe4b0a59973c38b089c9d049fce79177)
+ - Searchable airwire filter window (e4842cae282bf63f514b199e848397dcfedb61c1)
+ - Color by net in board editor (3accc33cafbb1808f7c699c75cb1ddc71cc69b00)
+ - Configurable in-tool key sequences (07283ce78fce6679e0d12c158742fa759bc25ced)
+ - Grid supports non-zero offset and non-square spacing (9d96d2114c290a8dd9f6e00596b57265837f3c37)
+ - Gate swapping (47a5a6e3336259f2e5ccab3d33f71e73a50947ab)
+ - Symbol to unit cross probing (d1f81db235220fb6317317bf841b5f3fe03639c1)
+ - Layer pairs for switching layers after placing vias (176b8e2ff2a62efa9aaeb2c5cc42da7af6beb29e)
+ - Distraction-free mode (111309c6be1d0193664dae6a93e4fa113a9d7a83)
+ - References to sheets in schematic (ca23d34aecde221f0c5c4c90348bc7fe2aebca53)
+ 
+## Enhancements
+
+ - Progressive model loading in 3D preview (10d52d749d1eb931fd1b384640b093966aa5a17e)
+ - Show scale bar in preview canvas (edaa9649d105ba6a981887534d860c0b852209bc)
+ - Show placeholder in length tuning window (38044b2b99d795f05f3f359866f9a388b6de3851)
+ - Show key sequences in context menu (3441ff5ae7015e3e9e9e8d729c68b2f927e712b8)
+ - Selection qualifier is remembered when switching selection tools (9af4a659f144e9434f0bef1dc9a0321bc4d82743)
+ - Selection is is remembered for each sheet (273c9bc64080e42ea461a485898a22035712a961)
+ - Make minimum line width configurable (309e41f2357aa9c06ee1fe5c87dcbd06b2909604)
+ - Search can do exact matching rather than substring search (266fe7af05ba217a2ef755cf488e5996fc63f457)
+ - Show placeholder in unit editor (8fa9452b467b62227f17a281bbb05a8a9029f74e)
+ - Add link to pool in project manager (66e66c6f1fe7dd349155813114dc96c705c1732c)
+ - Move Part wizard button to Parts tab (6ae93615ab72be615892730fcba99edb320293e7)
+ - Improve layout of unit and entity editors (810fdbad87a9059446556f5b9fda855f67730836, 0119cb8782c998464d43bae34675a0756f4d3c20, 555f2ff65ecaa427db01d1ad6ce1b063af357760)
+ - Make sure symbol is in view when placing symbol (c61afdb6e1b1fdec9738531fc480e8583922754d)
+ - Tool popover is resizable (1240fb8b81549176888e25af8783c0148d0ca0fb)
+ - Hint for reloading the netlist in board editor (94e82b77e686c49a1b00daa9db5f1be96dc88b59)
+ - Kicad package import handles circular pads (b5125e3d1793f71213cdd3d0ba521ac93f5f7a2b)
+ - View options menu (4e2fb333bb23a7fbb6f10a7216f073ab10f03a71)
+ - Package browser can sort by pad count (e53098d481488b49ca6912fb4b40b46d04aebae5)
+ - Show pin names in pads (43186500bd916a77f0f44ff2f84747cc46af8de9)
+ - Show net names in vias (9adf7ca6447ef575ff7c8caa076b8e9fb04ccad3)
+ - Deleting a track chain also deletes vias on the way (24e990440851097be05a457dcab3571e4503dfc7)
+ - Kicad package import handles rectangular pads with round corners (6eb90ba3b455d19f08606254e562b09aec0e1516)
+ - Kicad package import handles obround pads (27d3d7eba01b7b39c5ee248c3fda967564a276b3)
+ - Place via tool asks for net rather than padstack (a1b0e4955842e61ed105d1555e2599326d6dd920)
+ - Draw polygon rectangle tool rememberes mode (092fec906916aecbe73217bb1923ff9511c0b123)
+ - Rules window position is stored for each editor type (ecb51e0a2d49bb9582ade37ed9d14ce69d659a76)
+ - Grid snaps to pixel grid for improved sharpness (017049d57ad5c8f081c77166011cff2bc2fab412)
+ - Update KiCad router to 5.1.6 (9e107c65024dbc9d43004489b1cd013c86fd6bd9)
+ - Option for moving single tracks with router (956d8f5fa6dc2637449a3cad666eb86575c368b4)
+ - Add router settings window (bf007017473129dfb036e0a6309e2fe2905a3dd0)
+ - Improve router performance (1f86cf35f82c650fe3cedd8abc2532ec1eac1548, 651475c9b73faec6f4e9174fc2549c5334a9a55a, f68df8534fb8e7bd85a32c1e9c9f8d86f204d307)
+ - Button for copying logs to clipboard (7b9e8d840ea75a463026016f7cab0ef4db01837f)
+ - Work layer only display modes (703ea35ef8274dacca82f778fd6d879a2d9f2372)
+ - Allow changing net while placing via (e04d8f33786e57185b808e1f06fcc17027162f20)
+ - Make zero-width selectables smaller (6c8fd8ef8b769e7f61fc83a59caefddebdf15fd9)
+ - Show all polygon edges when selecting polygon (20b14f0541026f3224958e00d1c032cf1cdc4f63)
+ - Adjust plane priorities from property sidebar (1ad4b04de230608b27e72528a631b5bd9589c23d)
+ - Show planes in head-up display (ebb804f6e2f495d7f9dfcaa2bc55749075589e49)
+ - Don't show clarify selection menu if there's only one line/point among the selection candidates (ab058c3af2793cd4b374a3f51e639775b9b8e4a3)
+ - Make minimum selectable size and target snap radius configurable (96be373247bcbde5488e70a3c5c1aef62c7e342c)
+ - Add option for snapping to targets on schematic (bff1bbfca3f4687ea22ef2338378de14954a0c8a)
+ - Enable scale and rotate arbitrary tool in schematic (685469b72b4e84efd9d61dc2524233a688eb55cb)
+ - Make length tuning window sortable by length (23136ad244e1152fcefa5cdc9e639700335c6f01)
+ - Length tuning tool uses reference from length tuning window (0d0340e466f5ec6d83973d2b4e9cc634e819189d)
+ - Optionally bend non-orthogonal net lines when dragging (e0eb9e3fbce1c1a8f9177d9f86935149ccd1627d)
+ - Show more information when deleting a pool item (9d813cba76cc72bfd2b5f0c442168c477b691b03)
+ - Show infor bar with links to docs in pool manager (5c42c2ac2cfd694be3c181a0a23f1439c53231ba)
+
+## Bugfixes
+
+ - Resize symbol tool respects quadrant the tool was started in (80b2b672d4ee5244d41fe9f6f3ece7bbf7ec4ed8)
+ - Don't show empty groups in tool popover (3f6d5285b92fd6c07ff8c23425a5ef412b080555)
+ - Fix copying frame of current sheet to new sheet (c437557e98dd4522dcf2e223d7e66cf0e1e28604)
+ - Properly set button sensitivity in part editor (3009711842cf8549195d98dce917cea948b8be91)
+ - Annotations: Fix gap filling for multi page components (75139e8a24cf1484ac8373f622f68f4d692530ee)
+ - Don't crash when deleting junction attached to bus ripper (bd1e9ae5975f1257ca43c4e3b3ffb2216261c84c)
+ - Ignore mechanical pads for alternate package compatibility check (5ee3cf6e9464e259f33ea62fc6753a3fd236fed3)
+ - Don't draw connection lines from no-net junctions and mechanical pads (0328bd42fc7a2cf48857bf2720950c955a81b91a)
+ - Copy/paste copies tracks attached to pads (0328bd42fc7a2cf48857bf2720950c955a81b91a)
+ - Save no parametric data in part editor (c2795bb3bdfe4ffe8ac7248e58d706343ab243d2)
+ - Fix pool update if not duplicating symbol (6eb90ba3b455d19f08606254e562b09aec0e1516)
+ - Properly implement target snap filter in tools (cc5c029e630a70fb9e3423c278a397758d998058)
+ - Don't render invisible annotations (3816fd0f4b23d1cbc7fed2825046256f052f0ec2)
+ - Git tab doesn't crash if 3D model is used in more than one package (867e7ec51a84e6098cccf944837c5d7c8c986271)
+ - Update catch-all warning in rules window when switching rules (2eb90b3bcc4cdd0973fa00495df1051e04f4465a)
+ - Only show catch-all warning in rules window if actually required (2eb90b3bcc4cdd0973fa00495df1051e04f4465a)
+ - Show pad name overlay at the right position of pad's bounding box center isn't at origin (ab0272d43c6fccfe26402f17c3daeee0d9beead8)
+ - Fix pointer warping while panning (4f963c5c72ceb9f1829e3c7aceb804e6edda9d3a)
+ - Don't snap to invisible SMD pads (02539c741d6daa8410035876814386fda4259d50)
+ - Avoid drive not ready errors on win32 (9b0d1e94f7b616009bb5a81f4301bdd840b15292)
+ - Prevent errors during triangulation for 3D preview (7f1ba24ebbe7bbfcdb8918afab16b57f41356281)
+ - Fade unhighlighted objects to background color rather than black in dim mode (edcdb97eef3d8f1ea09b3350cbf350f2dc9bd0f0)
+ - Refresh units after updating pool (2c6655a3f114533b77120c6303afc801299d8573)
+ - Avoid exception when loading keys for unavailable tool (182c967daf7417fc8295ec1521d07b4b898f141c)
+ - Avoid crashes by using `json::at` rather than `[]` (55505e6c343949d262f29fa8121256ce88e051cf)
+ - Use multiline text editor when placing text (bebd57a8bfc9570931c66a602ae5494d9d853d69)
+ - Use menu rather than cropped popover in parameter set editor (935c270155391af9ac96e88c3fa91374ab7e86ca)
+ - Keep scrolling position in unplaced box (83ec1bead7e47b78596a6c080e53ad03e1636e4e)
+ - Incrementally update pool when duplicating items (8a978bf4a0752dedb13e1365cf3f0d37678c96c6)
+ - Fix symbol pin UUID when changing a symbol's unit (494f19aed7cc1e061f0caa8750859a3dcf887daf)
+ - Don't trigger drag when holding shift for pan (397757d240d830d88292c326a07d47943143482d)
+
+## Changed behavior
+
+ - Move some actions to more appropriate groups (e29462e49a00974ae964e1116d0530049974cbef, e29462e49a00974ae964e1116d0530049974cbef)
+ - Pool is updated when saving parts, not after closing the editor (e9305b327022187b9ad63c928eeb7911a439e4a3)
+ - Widgets in unit/entity editor rows don't receive scroll events anymore (6e15a9e02234651a7a9dca721ffa7700ea299663)
+ - Center of polygon arcs and arcs gets projected onto the perpendicular bisector of start and end point to force constant radius (ae7b2938e314492890dbf9a56a66c091dd888242)
+
+## Removals
+
+ - Place package button is gone since the same functionality is available from the unplaced list (ac7d7c1ce24922f830432f9627bbf3c434b76146)
+ - Homegrown old router tool (079530f636117e76472c017548cfd7896b94ff53)
+
+## Misc
+
+ - Combine low-content pages in preferences dialog (45770afeac6cc9a3f9a82db25bf981e19a5955c1)
+ - Bump C++ version to C++17 (35faedad9609db0c8432ac589bdd52157e093446)
+
 # Version 1.1.1
 
 ## Bugfixes

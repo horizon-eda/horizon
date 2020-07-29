@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2019 horizon-eda.org -->
+<!-- Copyright 2020 horizon-eda.org -->
 <component type="desktop-application">
   <id>org.horizon_eda.HorizonEDA</id>
   <metadata_license>CC0-1.0</metadata_license>
@@ -39,6 +39,26 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+    <release version="1.2.0" date="2020-07-29">
+      <url>https://github.com/horizon-eda/horizon/releases/tag/v1.2.0</url>
+      <description>
+        <p>New features</p>
+        <ul>
+          <li>Action bar for easy access to commonly-used actions</li>
+          <li>Bitmap picture import for schematic, package, board</li>
+          <li>KiCad symbol import</li>
+          <li>Searchable airwire filter window</li>
+          <li>Color by net in board editor</li>
+          <li>Configurable in-tool key sequences</li>
+          <li>Grid supports non-zero offset and non-square spacing</li>
+          <li>Gate swapping</li>
+          <li>Symbol to unit cross probing</li>
+          <li>Layer pairs for switching layers after placing vias</li>
+          <li>Distraction-free mode</li>
+          <li>References to sheets in schematic</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.1.1" date="2020-05-04">
       <url>https://github.com/horizon-eda/horizon/releases/tag/v1.1.1</url>
       <description>
