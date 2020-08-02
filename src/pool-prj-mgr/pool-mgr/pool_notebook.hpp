@@ -114,6 +114,7 @@ private:
     void add_preview_stack_switcher(Gtk::Box *bbox, Gtk::Stack *stack);
 
     void handle_delete(ObjectType ty, const UUID &uu);
+    void handle_move_rename(ObjectType ty, const UUID &uu);
     void handle_copy_path(ObjectType ty, const UUID &uu);
     void add_context_menu(class PoolBrowser *br);
 

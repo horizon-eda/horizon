@@ -38,6 +38,8 @@ public:
 
     virtual std::string get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_out = nullptr);
     const std::string &get_base_path() const;
+    bool check_filename(ObjectType type, const std::string &filename, std::string *error_msg = nullptr) const;
+
     /**
      * The database connection.
      * You may use it to perform more advanced queries on the pool.

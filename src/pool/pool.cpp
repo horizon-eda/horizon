@@ -314,4 +314,71 @@ std::string Pool::get_model_filename(const UUID &pkg_uuid, const UUID &model_uui
         return "";
     }
 }
+
+static std::string get_dir_for_type(ObjectType type)
+{
+    using O = ObjectType;
+    switch (type) {
+    case O::UNIT:
+        return "units";
+
+    case O::SYMBOL:
+        return "symbols";
+
+    case O::ENTITY:
+        return "entities";
+
+    case O::PADSTACK:
+        return "padstacks";
+
+    case O::PACKAGE:
+        return "packages";
+
+    case O::PART:
+        return "parts";
+
+    case O::FRAME:
+        return "frames";
+
+    default:
+        return "";
+    }
+}
+
+static bool check_type(ObjectType type)
+{
+    return get_dir_for_type(type).size();
+}
+
+bool Pool::check_filename(ObjectType type, const std::string &filename, std::string *error_msg) const
+{
+    if (!check_type(type)) {
+        if (error_msg)
+            *error_msg = "unsupported object type";
+        return false;
+    }
+    if (type == ObjectType::PADSTACK) {
+        const std::string bp_ps = Glib::build_filename(base_path, get_dir_for_type(type));
+        if (Gio::File::create_for_path(filename)->has_prefix(Gio::File::create_for_path(bp_ps)))
+            return true;
+        const std::string bp_pkg = Glib::build_filename(base_path, get_dir_for_type(type));
+        if (Gio::File::create_for_path(filename)->has_prefix(Gio::File::create_for_path(bp_pkg))) {
+            return true;
+        }
+        if (error_msg)
+            *error_msg = "incorrect directory";
+        return false;
+    }
+    else {
+        const std::string bp = Glib::build_filename(base_path, get_dir_for_type(type));
+        auto r = Gio::File::create_for_path(filename)->has_prefix(Gio::File::create_for_path(bp));
+        if (!r) {
+            if (error_msg)
+                *error_msg = "incorrect directory";
+        }
+        return r;
+    }
+}
+
+
 } // namespace horizon

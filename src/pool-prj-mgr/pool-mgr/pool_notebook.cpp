@@ -303,6 +303,7 @@ void PoolNotebook::add_context_menu(PoolBrowser *br)
 {
     ObjectType ty = br->get_type();
     br->add_context_menu_item("Delete", [this, ty](const UUID &uu) { handle_delete(ty, uu); });
+    br->add_context_menu_item("Move/rename", [this, ty](const UUID &uu) { handle_move_rename(ty, uu); });
     br->add_context_menu_item("Copy path", [this, ty](const UUID &uu) { handle_copy_path(ty, uu); });
     br->add_context_menu_item("Copy UUID", [this, ty](const UUID &uu) {
         auto clip = Gtk::Clipboard::get();
@@ -376,6 +377,49 @@ void PoolNotebook::handle_delete(ObjectType ty, const UUID &uu)
             }
         }
         pool_update();
+    }
+}
+
+
+void PoolNotebook::handle_move_rename(ObjectType ty, const UUID &uu)
+{
+    auto filename = pool.get_filename(ty, uu);
+    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+
+    GtkFileChooserNative *native =
+            gtk_file_chooser_native_new("Move item", top->gobj(), GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+    auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+    chooser->set_current_name(Glib::path_get_basename(filename));
+    while (1) {
+        chooser->set_current_folder(Glib::path_get_dirname(filename));
+        auto resp = gtk_native_dialog_run(GTK_NATIVE_DIALOG(native));
+        if (resp == GTK_RESPONSE_ACCEPT) {
+            const std::string new_filename = chooser->get_filename();
+            try {
+                std::string e;
+                if (!pool.check_filename(ty, new_filename, &e)) {
+                    throw std::runtime_error(e);
+                }
+                Gio::File::create_for_path(filename)->move(Gio::File::create_for_path(new_filename));
+                pool_update();
+                return;
+            }
+            catch (const std::exception &e) {
+                Gtk::MessageDialog md(*top, "Error moving item", false /* use_markup */, Gtk::MESSAGE_ERROR,
+                                      Gtk::BUTTONS_OK);
+                md.set_secondary_text(e.what());
+                md.run();
+            }
+            catch (const Gio::Error &e) {
+                Gtk::MessageDialog md(*top, "Error moving item", false /* use_markup */, Gtk::MESSAGE_ERROR,
+                                      Gtk::BUTTONS_OK);
+                md.set_secondary_text(e.what());
+                md.run();
+            }
+        }
+        else {
+            return;
+        }
     }
 }
 
