@@ -294,11 +294,11 @@ void Canvas3DBase::prepare_packages()
         return;
     package_transform_idxs.clear();
     package_transforms.clear();
-    std::map<std::string, std::set<const BoardPackage *>> pkg_map;
+    std::map<std::pair<std::string, bool>, std::set<const BoardPackage *>> pkg_map;
     for (const auto &it : brd->packages) {
         auto model = it.second.package.get_model(it.second.model);
         if (model)
-            pkg_map[model->filename].insert(&it.second);
+            pkg_map[{model->filename, it.second.component->nopopulate}].insert(&it.second);
     }
 
     for (const auto &it_pkg : pkg_map) {
