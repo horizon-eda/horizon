@@ -13,7 +13,9 @@ before_build:
     - where candle
     - echo %APPVEYOR_REPO_TAG%
     - bash -c "pacman -R mingw-w64-i686-gcc-ada mingw-w64-i686-gcc-objc mingw-w64-x86_64-gcc-ada mingw-w64-x86_64-gcc-objc --noconfirm || true"
+    - bash -c "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz && pacman -U --noconfirm msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
     - bash -c "pacman -Syu --noconfirm"
+    - taskkill /f /fi "MODULES eq msys-2.0.dll"
     - bash -c "pacman -Syu --noconfirm"
     - bash -c "pacman -S --noconfirm --needed mingw-w64-%MSYS2_ARCH%-{gcc,gtkmm3,boost,sqlite3,toolchain,zeromq,glm,libgit2,oce,podofo,libzip} zip make"
 
