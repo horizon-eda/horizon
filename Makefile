@@ -669,19 +669,21 @@ endif
 
 
 ifeq ($(OS),Windows_NT)
-    LDFLAGS += -lrpcrt4
-    DEFINES += -DWIN32_UUID
-    LDFLAGS_GUI = -Wl,-subsystem,windows
+	LDFLAGS += -lrpcrt4
+	DEFINES += -DWIN32_UUID
+	LDFLAGS_GUI = -Wl,-subsystem,windows
 else
-    UNAME := $(shell uname)
-    ifeq ($(UNAME), FreeBSD)
-        CXXFLAGS += -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR
-    endif
-    ifeq ($(UNAME), Darwin)
-        # do nothing on mac os
-    else
-        LDFLAGS += -fuse-ld=gold
-    endif
+	UNAME := $(shell uname)
+	ifeq ($(UNAME), FreeBSD)
+		CXXFLAGS += -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR
+	endif
+	ifeq ($(UNAME), Darwin)
+		# do nothing on mac os
+	else
+		# allow ld.gold to be overriden by command line
+		GOLD = -fuse-ld=gold
+		LDFLAGS += $(GOLD)
+	endif
 endif
 
 SRC_SHARED = $(SRC_COMMON) \
