@@ -92,7 +92,6 @@ enum class BoolAttr : intptr_t {
     RENDER_BACKGROUND,
     SHOW_SILKSCREEN,
     SHOW_MODELS,
-    SHOW_DNP_MODELS,
     SHOW_SOLDER_MASK,
     SHOW_SOLDER_PASTE,
     SHOW_SUBSTRATE,
@@ -113,9 +112,6 @@ static bool &get_bool_attr(PyObject *pself, void *pa)
 
     case BoolAttr::SHOW_MODELS:
         return ex->show_models;
-
-    case BoolAttr::SHOW_DNP_MODELS:
-        return ex->show_dnp_models;
 
     case BoolAttr::SHOW_SOLDER_MASK:
         return ex->show_solder_mask;
@@ -327,8 +323,6 @@ static PyGetSetDef PyImage3DExporter_getset[] = {
          reinterpret_cast<void *>(BoolAttr::RENDER_BACKGROUND)},
 
         {"show_models", &bool_attr_get, &bool_attr_set, NULL, reinterpret_cast<void *>(BoolAttr::SHOW_MODELS)},
-
-        {"show_dnp_models", &bool_attr_get, &bool_attr_set, NULL, reinterpret_cast<void *>(BoolAttr::SHOW_DNP_MODELS)},
 
         {"show_silkscreen", &bool_attr_get, &bool_attr_set, NULL, reinterpret_cast<void *>(BoolAttr::SHOW_SILKSCREEN)},
 
