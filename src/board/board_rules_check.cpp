@@ -258,6 +258,17 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board *brd, RulesCheck
                         patch_pairs.emplace(k);
                     }
                 }
+                else if (layer == it.first.layer && it.first.net != it_other.first.net
+                         && it.first.type != PatchType::OTHER && it.first.type != PatchType::TEXT
+                         && it_other.first.type == PatchType::HOLE_PTH) {
+                    // ignore layer of plated holes, as it's expected to be different from current layer
+                    std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey> k = {it.first, it_other.first};
+                    auto k2 = k;
+                    std::swap(k2.first, k2.second);
+                    if (patch_pairs.count(k) == 0 && patch_pairs.count(k2) == 0) {
+                        patch_pairs.emplace(k);
+                    }
+                }
             }
         }
     }
