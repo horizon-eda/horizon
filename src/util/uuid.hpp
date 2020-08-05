@@ -38,7 +38,7 @@ public:
     {
         size_t r = 0;
         for (size_t i = 0; i < 16; i++) {
-            r ^= uu[i] << ((i % sizeof(size_t)) * 8);
+            r ^= ((size_t)uu[i]) << ((i % sizeof(size_t)) * 8);
         }
         return r;
     }
