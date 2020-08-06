@@ -2,7 +2,6 @@
 #include "common/common.hpp"
 #include "util/uuid.hpp"
 #include <array>
-#include <experimental/optional>
 #include <gtkmm.h>
 #include <set>
 namespace horizon {
