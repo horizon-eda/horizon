@@ -220,6 +220,8 @@ protected:
 
     class ActionButton &add_action_button(ActionToolID action);
     class ActionButtonMenu &add_action_button_menu(const char *icon_name);
+    class ActionButton &add_action_button_polygon();
+    class ActionButton &add_action_button_line();
 
     virtual ToolID get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> &sel) const;
 

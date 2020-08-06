@@ -2227,6 +2227,22 @@ ActionButtonMenu &ImpBase::add_action_button_menu(const char *icon_name)
     return *ab;
 }
 
+ActionButton &ImpBase::add_action_button_polygon()
+{
+    auto &b = add_action_button(make_action(ToolID::DRAW_POLYGON));
+    b.add_action(make_action(ToolID::DRAW_POLYGON_RECTANGLE));
+    b.add_action(make_action(ToolID::DRAW_POLYGON_CIRCLE));
+    return b;
+}
+
+ActionButton &ImpBase::add_action_button_line()
+{
+    auto &b = add_action_button(make_action(ToolID::DRAW_LINE));
+    b.add_action(make_action(ToolID::DRAW_LINE_RECTANGLE));
+    b.add_action(make_action(ToolID::DRAW_ARC));
+    return b;
+}
+
 void ImpBase::tool_bar_set_actions(const std::vector<ActionLabelInfo> &labels)
 {
     if (in_tool_action_label_infos != labels) {

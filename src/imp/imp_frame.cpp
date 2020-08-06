@@ -41,16 +41,8 @@ void ImpFrame::construct()
     hamburger_menu->append("Frame properties...", "win.edit_frame");
     add_tool_action(ToolID::EDIT_FRAME_PROPERTIES, "edit_frame");
 
-    {
-        auto &b = add_action_button(make_action(ToolID::DRAW_LINE));
-        b.add_action(make_action(ToolID::DRAW_LINE_RECTANGLE));
-        b.add_action(make_action(ToolID::DRAW_ARC));
-    }
-    {
-        auto &b = add_action_button(make_action(ToolID::DRAW_POLYGON));
-        b.add_action(make_action(ToolID::DRAW_POLYGON_RECTANGLE));
-        b.add_action(make_action(ToolID::DRAW_POLYGON_CIRCLE));
-    }
+    add_action_button_line();
+    add_action_button_polygon();
     add_action_button(make_action(ToolID::PLACE_TEXT));
 
 

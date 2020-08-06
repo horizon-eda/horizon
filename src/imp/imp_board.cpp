@@ -803,20 +803,12 @@ void ImpBoard::construct()
         auto &b = add_action_button(make_action(ToolID::ROUTE_TRACK_INTERACTIVE));
         b.add_action(make_action(ToolID::ROUTE_DIFFPAIR_INTERACTIVE));
     }
-    {
-        auto &b = add_action_button(make_action(ToolID::DRAW_POLYGON));
-        b.add_action(make_action(ToolID::DRAW_POLYGON_RECTANGLE));
-        b.add_action(make_action(ToolID::DRAW_POLYGON_CIRCLE));
-    }
+    add_action_button_polygon();
     {
         auto &b = add_action_button(make_action(ToolID::PLACE_BOARD_HOLE));
         b.add_action(make_action(ToolID::PLACE_VIA));
     }
-    {
-        auto &b = add_action_button(make_action(ToolID::DRAW_LINE));
-        b.add_action(make_action(ToolID::DRAW_LINE_RECTANGLE));
-        b.add_action(make_action(ToolID::DRAW_ARC));
-    }
+    add_action_button_line();
 
     add_action_button(make_action(ToolID::PLACE_TEXT));
     add_action_button(make_action(ToolID::DRAW_DIMENSION));

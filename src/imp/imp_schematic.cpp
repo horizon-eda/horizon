@@ -542,11 +542,7 @@ void ImpSchematic::construct()
         b.add_action(make_action(ToolID::PLACE_BUS_RIPPER));
     }
     add_action_button(make_action(ToolID::PLACE_POWER_SYMBOL));
-    {
-        auto &b = add_action_button(make_action(ToolID::DRAW_LINE));
-        b.add_action(make_action(ToolID::DRAW_LINE_RECTANGLE));
-        b.add_action(make_action(ToolID::DRAW_ARC));
-    }
+    add_action_button_line();
     add_action_button(make_action(ToolID::PLACE_TEXT));
 
     if (!core_schematic.get_project_meta_loaded_from_block())

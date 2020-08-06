@@ -144,12 +144,7 @@ void ImpPadstack::construct()
     add_action_button(make_action(ToolID::PLACE_SHAPE_OBROUND));
     add_action_button(make_action(ToolID::PLACE_HOLE)).set_margin_top(5);
     add_action_button(make_action(ToolID::PLACE_HOLE_SLOT));
-    {
-        auto &b = add_action_button(make_action(ToolID::DRAW_POLYGON));
-        b.set_margin_top(5);
-        b.add_action(make_action(ToolID::DRAW_POLYGON_RECTANGLE));
-        b.add_action(make_action(ToolID::DRAW_POLYGON_CIRCLE));
-    }
+    add_action_button_polygon().set_margin_top(5);
     update_header();
 }
 
