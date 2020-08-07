@@ -2,7 +2,6 @@
 #include "entity.hpp"
 #include "package.hpp"
 #include "util/uuid.hpp"
-#include "util/uuid_provider.hpp"
 #include <fstream>
 #include <map>
 #include <vector>
@@ -10,7 +9,7 @@
 namespace horizon {
 using json = nlohmann::json;
 
-class Part : public UUIDProvider {
+class Part {
 private:
     Part(const UUID &uu, const json &j, Pool &pool);
     const std::string empty;

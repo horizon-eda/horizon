@@ -2,7 +2,6 @@
 #include "nlohmann/json_fwd.hpp"
 #include "unit.hpp"
 #include "util/uuid.hpp"
-#include "util/uuid_provider.hpp"
 #include "util/uuid_ptr.hpp"
 #include <fstream>
 #include <map>
@@ -11,11 +10,11 @@
 namespace horizon {
 using json = nlohmann::json;
 
-class Gate : public UUIDProvider {
+class Gate {
 public:
     Gate(const UUID &uu, const json &, class Pool &pool);
     Gate(const UUID &uu);
-    virtual UUID get_uuid() const;
+    UUID get_uuid() const;
     UUID uuid;
     std::string name;
     std::string suffix;

@@ -646,7 +646,7 @@ SRC_OCE_EXPORT = \
 
 SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PGM_TEST) $(SRC_POOL_PRJ_MGR) $(SRC_GEN_PKG))
 
-INC = -Isrc -I3rd_party -I$(BUILDDIR)/gen
+INC = -Isrc -isystem 3rd_party -I$(BUILDDIR)/gen
 
 DEFINES = -D_USE_MATH_DEFINES -DGLM_ENABLE_EXPERIMENTAL
 
@@ -658,8 +658,8 @@ LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq lib
 
 OPTIMIZE = -fdata-sections -ffunction-sections
 DEBUGFLAGS = -g3
-CXXFLAGS += $(DEBUGFLAGS) $(DEFINES) $(OPTIMIZE) $(shell $(PKG_CONFIG) --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -std=c++17 -O3
-CFLAGS = $(filter-out -std=%,$(CXXFLAGS)) -std=c99
+CXXFLAGS += $(DEBUGFLAGS) $(DEFINES) $(OPTIMIZE) $(shell $(PKG_CONFIG) --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -Wsuggest-override -std=c++17 -O3
+CFLAGS = $(filter-out -Wsuggest-override, $(filter-out -std=%,$(CXXFLAGS))) -std=c99
 LDFLAGS += -lm -lpthread
 GLIB_COMPILE_RESOURCES = $(shell $(PKG_CONFIG) --variable=glib_compile_resources gio-2.0)
 
@@ -767,8 +767,8 @@ OBJ_GEN_PKG      = $(addprefix $(OBJDIR)/,$(SRC_GEN_PKG:.cpp=.o))
 
 
 
-INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router -I3rd_party
-INC_OCE ?= -I/opt/opencascade/inc/ -I/mingw64/include/oce/ -I/usr/include/oce -I/usr/include/opencascade -I${CASROOT}/include/opencascade -I${CASROOT}/include/oce -I/usr/local/include/OpenCASCADE
+INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router -isystem 3rd_party
+INC_OCE ?= -isystem /opt/opencascade/inc/ -isystem /mingw64/include/oce/ -isystem /usr/include/oce -isystem /usr/include/opencascade -isystem ${CASROOT}/include/opencascade -isystem ${CASROOT}/include/oce -isystem /usr/local/include/OpenCASCADE
 INC_PYTHON = $(shell $(PKG_CONFIG) --cflags python3 py3cairo)
 OCE_LIBDIRS = -L/opt/opencascade/lib/ -L${CASROOT}/lib
 LDFLAGS_OCE = $(OCE_LIBDIRS) -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -lTKTopAlgo -lTKPrim -lTKBO

@@ -1,7 +1,6 @@
 #pragma once
 #include "util/uuid.hpp"
 #include "common.hpp"
-#include "util/uuid_provider.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "util/placement.hpp"
 #include "polygon.hpp"
@@ -16,7 +15,7 @@ using json = nlohmann::json;
 /**
  * For commonly used Pad shapes
  */
-class Shape : public UUIDProvider {
+class Shape {
 public:
     Shape(const UUID &uu, const json &j);
     Shape(const UUID &uu);
@@ -33,7 +32,7 @@ public:
     Polygon to_polygon() const;
     std::pair<Coordi, Coordi> get_bbox() const;
 
-    virtual UUID get_uuid() const;
+    UUID get_uuid() const;
 
     json serialize() const;
 };

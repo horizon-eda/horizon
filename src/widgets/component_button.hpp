@@ -24,7 +24,7 @@ private:
     void update_label();
     void cs_activated(const UUID &uu);
     UUID component_current;
-    virtual void on_toggled();
+    void on_toggled() override;
 
     type_signal_changed s_signal_changed;
 };

@@ -1,7 +1,6 @@
 #pragma once
 #include "util/uuid.hpp"
 #include "common.hpp"
-#include "util/uuid_provider.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "polygon.hpp"
 #include <vector>
@@ -16,7 +15,7 @@ using json = nlohmann::json;
 /**
  * A hole with diameter and position, that's it.
  */
-class Hole : public UUIDProvider {
+class Hole {
 public:
     Hole(const UUID &uu, const json &j);
     Hole(const UUID &uu);
@@ -39,7 +38,7 @@ public:
     Polygon to_polygon() const;
 
 
-    virtual UUID get_uuid() const;
+    UUID get_uuid() const;
 
     // not stored
     json serialize() const;

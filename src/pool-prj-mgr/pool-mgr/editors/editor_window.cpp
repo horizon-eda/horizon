@@ -27,7 +27,7 @@ public:
         : EditorWindowStore(fn), unit(filename.size() ? Unit::new_from_file(filename) : Unit(UUID::random()))
     {
     }
-    void save_as(const std::string &fn)
+    void save_as(const std::string &fn) override
     {
         save_json_to_file(fn, unit.serialize());
         filename = fn;
@@ -50,7 +50,7 @@ public:
           entity(filename.size() ? Entity::new_from_file(filename, *pool) : Entity(UUID::random()))
     {
     }
-    void save_as(const std::string &fn)
+    void save_as(const std::string &fn) override
     {
         save_json_to_file(fn, entity.serialize());
         filename = fn;
@@ -72,7 +72,7 @@ public:
         : EditorWindowStore(fn), part(filename.size() ? Part::new_from_file(filename, *pool) : Part(UUID::random()))
     {
     }
-    void save_as(const std::string &fn)
+    void save_as(const std::string &fn) override
     {
         save_json_to_file(fn, part.serialize());
         filename = fn;

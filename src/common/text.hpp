@@ -2,7 +2,6 @@
 #include "util/uuid.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "common.hpp"
-#include "util/uuid_provider.hpp"
 #include "util/placement.hpp"
 #include "util/text_data.hpp"
 #include <vector>
@@ -16,7 +15,7 @@ enum class TextOrigin { BASELINE, CENTER, BOTTOM };
 /**
  * Used wherever a user-editable text is needed.
  */
-class Text : public UUIDProvider {
+class Text {
 public:
     Text(const UUID &uu, const json &j);
     Text(const UUID &uu);
@@ -44,7 +43,7 @@ public:
      */
     bool from_smash = false;
 
-    UUID get_uuid() const override;
+    UUID get_uuid() const;
     json serialize() const;
 };
 } // namespace horizon

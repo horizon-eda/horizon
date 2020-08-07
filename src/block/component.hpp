@@ -36,12 +36,12 @@ public:
  * When a part Pis assigned, the value of the Component gets overriden by the
  * Part.
  */
-class Component : public UUIDProvider {
+class Component {
 public:
     Component(const UUID &uu, const json &j, class Pool &pool, class Block *block = nullptr);
     Component(const UUID &uu);
 
-    virtual UUID get_uuid() const;
+    UUID get_uuid() const;
 
     UUID uuid;
     const class Entity *entity;

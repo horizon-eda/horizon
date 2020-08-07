@@ -3,7 +3,6 @@
 #include "nlohmann/json_fwd.hpp"
 #include "common/common.hpp"
 #include "util/uuid_ptr.hpp"
-#include "util/uuid_provider.hpp"
 #include "common/junction.hpp"
 #include "block/bus.hpp"
 #include <vector>
@@ -18,12 +17,12 @@ using json = nlohmann::json;
 /**
  * Make a Bus member's Net available on the schematic.
  */
-class BusRipper : public UUIDProvider {
+class BusRipper {
 public:
     BusRipper(const UUID &uu, const json &j, class Sheet &sheet, class Block &block);
     BusRipper(const UUID &uu, const json &j);
     BusRipper(const UUID &uu);
-    virtual UUID get_uuid() const;
+    UUID get_uuid() const;
     UUID uuid;
 
     uuid_ptr<Junction> junction;

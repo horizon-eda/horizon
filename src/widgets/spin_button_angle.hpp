@@ -8,8 +8,8 @@ public:
     SpinButtonAngle();
 
 protected:
-    virtual int on_input(double *new_value);
-    virtual bool on_output();
-    virtual void on_wrapped();
+    int on_input(double *new_value) override;
+    bool on_output() override;
+    void on_wrapped() override;
 };
 } // namespace horizon

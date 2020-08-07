@@ -24,17 +24,17 @@ public:
     BoardRules(const BoardRules &other);
     void operator=(const BoardRules &other);
 
-    void load_from_json(const json &j);
+    void load_from_json(const json &j) override;
     RulesCheckResult check(RuleID id, const class Board *b, class RulesCheckCache &cache,
                            check_status_cb_t status_cb) const;
     void apply(RuleID id, class Board *b, class ViaPadstackProvider &vpp) const;
-    json serialize() const;
-    std::set<RuleID> get_rule_ids() const;
+    json serialize() const override;
+    std::set<RuleID> get_rule_ids() const override;
     const Rule *get_rule(RuleID id) const override;
     const Rule *get_rule(RuleID id, const UUID &uu) const override;
     std::map<UUID, const Rule *> get_rules(RuleID id) const override;
-    void remove_rule(RuleID id, const UUID &uu);
-    Rule *add_rule(RuleID id);
+    void remove_rule(RuleID id, const UUID &uu) override;
+    Rule *add_rule(RuleID id) override;
     void cleanup(const class Block *block);
 
     uint64_t get_default_track_width(const class Net *net, int layer) const;

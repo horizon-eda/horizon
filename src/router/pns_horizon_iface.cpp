@@ -79,7 +79,7 @@ public:
     int DpCoupledNet(int aNet) override;
     int DpNetPolarity(int aNet) override;
     bool DpNetPair(PNS::ITEM *aItem, int &aNetP, int &aNetN) override;
-    std::string NetName(int aNet);
+    std::string NetName(int aNet) override;
 
 private:
     PNS::ROUTER *m_router;

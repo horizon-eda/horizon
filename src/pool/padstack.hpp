@@ -9,7 +9,6 @@
 #include "parameter/program.hpp"
 #include "parameter/program_polygon.hpp"
 #include "util/uuid.hpp"
-#include "util/uuid_provider.hpp"
 #include <fstream>
 #include <map>
 #include <set>
@@ -18,7 +17,7 @@
 namespace horizon {
 using json = nlohmann::json;
 
-class Padstack : public UUIDProvider, public LayerProvider {
+class Padstack : public LayerProvider {
 public:
     class MyParameterProgram : public ParameterProgramPolygon {
         friend Padstack;
@@ -62,7 +61,7 @@ public:
     MyParameterProgram parameter_program;
     std::pair<bool, std::string> apply_parameter_set(const ParameterSet &ps);
 
-    UUID get_uuid() const override;
+    UUID get_uuid() const;
     std::pair<Coordi, Coordi> get_bbox(bool copper_only = false) const;
     void expand_inner(unsigned int n_inner);
     const std::map<int, Layer> &get_layers() const override;

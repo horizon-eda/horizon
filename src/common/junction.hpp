@@ -1,7 +1,6 @@
 #pragma once
 #include "util/uuid.hpp"
 #include "common.hpp"
-#include "util/uuid_provider.hpp"
 #include "block/net.hpp"
 #include "util/uuid_ptr.hpp"
 #include "nlohmann/json_fwd.hpp"
@@ -22,7 +21,7 @@ using json = nlohmann::json;
  * When used on a Board or a Sheet, a Junction may get assigned a Net
  * or a Bus and a net segment.
  */
-class Junction : public UUIDProvider {
+class Junction {
 public:
     Junction(const UUID &uu, const json &j);
     Junction(const UUID &uu);
@@ -31,7 +30,7 @@ public:
     Coord<int64_t> position;
 
 
-    virtual UUID get_uuid() const;
+    UUID get_uuid() const;
 
     // not stored
     uuid_ptr<Net> net = nullptr;

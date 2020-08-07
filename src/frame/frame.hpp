@@ -9,7 +9,6 @@
 #include "common/text.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
-#include "util/uuid_provider.hpp"
 #include <fstream>
 #include <map>
 #include <set>
@@ -18,14 +17,14 @@
 namespace horizon {
 using json = nlohmann::json;
 
-class Frame : public ObjectProvider, public LayerProvider, public UUIDProvider {
+class Frame : public ObjectProvider, public LayerProvider {
 public:
     Frame(const UUID &uu, const json &j);
     Frame(const UUID &uu);
     static Frame new_from_file(const std::string &filename);
     std::pair<Coordi, Coordi> get_bbox(bool all = false) const;
     Junction *get_junction(const UUID &uu) override;
-    UUID get_uuid() const override;
+    UUID get_uuid() const;
 
     json serialize() const;
 

@@ -1,7 +1,6 @@
 #pragma once
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
-#include "util/uuid_provider.hpp"
 #include "common/lut.hpp"
 #include <fstream>
 #include <map>
@@ -15,7 +14,7 @@ using json = nlohmann::json;
  * A Pin represents a logical pin of a Unit.
  */
 
-class Pin : public UUIDProvider {
+class Pin {
 public:
     enum class Direction {
         INPUT,
@@ -57,7 +56,7 @@ public:
  * An example for a Unit may be a "single-ended NAND gate".
  * \ref Unit "Units" are stored in an Entity.
  */
-class Unit : public UUIDProvider {
+class Unit {
 private:
     Unit(const UUID &uu, const json &j);
 

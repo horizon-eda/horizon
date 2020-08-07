@@ -10,7 +10,6 @@
 #include "nlohmann/json_fwd.hpp"
 #include "unit.hpp"
 #include "util/uuid.hpp"
-#include "util/uuid_provider.hpp"
 #include <fstream>
 #include <map>
 #include <set>
@@ -19,7 +18,7 @@
 namespace horizon {
 using json = nlohmann::json;
 
-class SymbolPin : public UUIDProvider {
+class SymbolPin {
 public:
     enum class ConnectorStyle { BOX, NONE, NC };
 
@@ -68,7 +67,7 @@ public:
     Pin::Direction direction = Pin::Direction::BIDIRECTIONAL;
 
     json serialize() const;
-    virtual UUID get_uuid() const;
+    UUID get_uuid() const;
 };
 
 class Symbol : public ObjectProvider, public LayerProvider {
@@ -77,8 +76,8 @@ public:
     Symbol(const UUID &uu);
     static Symbol new_from_file(const std::string &filename, Pool &pool);
     std::pair<Coordi, Coordi> get_bbox(bool all = false) const;
-    virtual Junction *get_junction(const UUID &uu);
-    virtual SymbolPin *get_symbol_pin(const UUID &uu);
+    virtual Junction *get_junction(const UUID &uu) override;
+    SymbolPin *get_symbol_pin(const UUID &uu);
 
     json serialize() const;
 

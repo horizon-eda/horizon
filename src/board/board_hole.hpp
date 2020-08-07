@@ -4,7 +4,6 @@
 #include "pool/padstack.hpp"
 #include "util/placement.hpp"
 #include "util/uuid.hpp"
-#include "util/uuid_provider.hpp"
 #include "util/uuid_ptr.hpp"
 #include <fstream>
 #include <map>
@@ -13,7 +12,7 @@
 namespace horizon {
 using json = nlohmann::json;
 
-class BoardHole : public UUIDProvider {
+class BoardHole {
 public:
     BoardHole(const UUID &uu, const json &, class Block *block = nullptr, class Pool *pool = nullptr);
     BoardHole(const UUID &uu, const Padstack *ps);
@@ -25,7 +24,7 @@ public:
 
     uuid_ptr<Net> net = nullptr;
 
-    virtual UUID get_uuid() const;
+    UUID get_uuid() const;
     json serialize() const;
 };
 } // namespace horizon

@@ -5,7 +5,6 @@
 #include "pool/pool.hpp"
 #include "util/placement.hpp"
 #include "util/uuid.hpp"
-#include "util/uuid_provider.hpp"
 #include "util/uuid_ptr.hpp"
 #include <fstream>
 #include <map>
@@ -14,7 +13,7 @@
 namespace horizon {
 using json = nlohmann::json;
 
-class BoardPackage : public UUIDProvider {
+class BoardPackage {
 public:
     BoardPackage(const UUID &uu, const json &, Block &block, Pool &pool);
     BoardPackage(const UUID &uu, Component *comp);
@@ -38,7 +37,7 @@ public:
 
     std::string replace_text(const std::string &t, bool *replaced = nullptr) const;
 
-    UUID get_uuid() const override;
+    UUID get_uuid() const;
     json serialize() const;
     static std::vector<UUID> peek_texts(const json &j);
 };

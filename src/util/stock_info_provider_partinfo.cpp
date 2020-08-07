@@ -126,7 +126,7 @@ private:
 
 class StockInfoRecordPartinfo : public StockInfoRecord {
 public:
-    const UUID &get_uuid() const
+    const UUID &get_uuid() const override
     {
         return uuid;
     }

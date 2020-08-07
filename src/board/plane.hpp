@@ -62,8 +62,8 @@ public:
     std::deque<Fragment> fragments;
     unsigned int revision = 0;
 
-    Type get_type() const;
-    UUID get_uuid() const;
+    Type get_type() const override;
+    UUID get_uuid() const override;
     std::string get_name() const;
 
     json serialize() const;

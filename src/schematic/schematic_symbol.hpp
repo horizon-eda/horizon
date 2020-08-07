@@ -7,7 +7,6 @@
 #include "block/block.hpp"
 #include "util/uuid_ptr.hpp"
 #include "util/placement.hpp"
-#include "util/uuid_provider.hpp"
 #include "pool/pool.hpp"
 #include <vector>
 #include <map>
@@ -16,7 +15,7 @@
 namespace horizon {
 using json = nlohmann::json;
 
-class SchematicSymbol : public UUIDProvider {
+class SchematicSymbol {
 public:
     SchematicSymbol(const UUID &uu, const json &, Pool &pool, Block *block = nullptr);
     SchematicSymbol(const UUID &uu, const Symbol *sym);
@@ -38,7 +37,7 @@ public:
 
     std::string replace_text(const std::string &t, bool *replaced, const class Schematic &sch) const;
 
-    UUID get_uuid() const override;
+    UUID get_uuid() const;
     json serialize() const;
 };
 } // namespace horizon

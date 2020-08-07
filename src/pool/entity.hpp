@@ -10,7 +10,7 @@
 namespace horizon {
 using json = nlohmann::json;
 
-class Entity : public UUIDProvider {
+class Entity {
 private:
     Entity(const UUID &uu, const json &, class Pool &pool);
 

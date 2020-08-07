@@ -13,7 +13,7 @@
 namespace horizon {
 class DocumentBoard : public virtual Document, public virtual IDocumentBoard {
 public:
-    bool has_object_type(ObjectType type) const;
+    bool has_object_type(ObjectType type) const override;
     std::string get_display_name(ObjectType type, const UUID &uu) override;
 
 protected:

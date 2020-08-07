@@ -3,7 +3,6 @@
 #include "nlohmann/json_fwd.hpp"
 #include "common/common.hpp"
 #include "common/junction.hpp"
-#include "util/uuid_provider.hpp"
 #include "util/uuid_ptr.hpp"
 #include "schematic_symbol.hpp"
 #include "block/net.hpp"
@@ -21,7 +20,7 @@ using json = nlohmann::json;
  * LineNet is similar to Line, except it denotes electrical connection.
  * When connected to a BusLabel, it denotes a Bus.
  */
-class LineNet : public UUIDProvider {
+class LineNet {
 public:
     enum class End { TO, FROM };
 
@@ -30,7 +29,7 @@ public:
 
     void update_refs(class Sheet &sheet);
     bool is_connected_to(const UUID &uu_sym, const UUID &uu_pin) const;
-    virtual UUID get_uuid() const;
+    UUID get_uuid() const;
     bool coord_on_line(const Coordi &coord) const;
 
     uuid_ptr<Net> net = nullptr;

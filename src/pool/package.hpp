@@ -14,7 +14,6 @@
 #include "package/package_rules.hpp"
 #include "package/pad.hpp"
 #include "util/uuid.hpp"
-#include "util/uuid_provider.hpp"
 #include "util/warning.hpp"
 #include "parameter/program_polygon.hpp"
 #include "common/picture.hpp"
@@ -26,7 +25,7 @@
 namespace horizon {
 using json = nlohmann::json;
 
-class Package : public ObjectProvider, public LayerProvider, public UUIDProvider {
+class Package : public ObjectProvider, public LayerProvider {
 public:
     class MyParameterProgram : public ParameterProgramPolygon {
         friend Package;
@@ -75,7 +74,7 @@ public:
     void update_warnings();
     int get_max_pad_name() const;
 
-    UUID get_uuid() const override;
+    UUID get_uuid() const;
 
     Package(const Package &pkg);
     void operator=(Package const &pkg);

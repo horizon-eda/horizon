@@ -7,7 +7,7 @@ public:
     SpinButtonDim();
 
 protected:
-    virtual int on_input(double *new_value);
-    virtual bool on_output();
+    int on_input(double *new_value) override;
+    bool on_output() override;
 };
 } // namespace horizon

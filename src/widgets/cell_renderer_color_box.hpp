@@ -15,13 +15,13 @@ public:
     }
 
 protected:
-    virtual void render_vfunc(const Cairo::RefPtr<Cairo::Context> &cr, Gtk::Widget &widget,
-                              const Gdk::Rectangle &background_area, const Gdk::Rectangle &cell_area,
-                              Gtk::CellRendererState flags);
+    void render_vfunc(const Cairo::RefPtr<Cairo::Context> &cr, Gtk::Widget &widget,
+                      const Gdk::Rectangle &background_area, const Gdk::Rectangle &cell_area,
+                      Gtk::CellRendererState flags) override;
 
-    virtual void get_preferred_width_vfunc(Gtk::Widget &widget, int &min_w, int &nat_w) const;
+    void get_preferred_width_vfunc(Gtk::Widget &widget, int &min_w, int &nat_w) const override;
 
-    virtual void get_preferred_height_vfunc(Gtk::Widget &widget, int &min_h, int &nat_h) const;
+    void get_preferred_height_vfunc(Gtk::Widget &widget, int &min_h, int &nat_h) const override;
 
 private:
     type_property_color p_property_color;

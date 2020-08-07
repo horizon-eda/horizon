@@ -3,7 +3,6 @@
 #include "net.hpp"
 #include "pool/unit.hpp"
 #include "util/uuid.hpp"
-#include "util/uuid_provider.hpp"
 #include "util/uuid_ptr.hpp"
 #include <deque>
 #include <fstream>
@@ -18,9 +17,9 @@ using json = nlohmann::json;
  * for the Net. The member's name is independent from
  * the the Net's name.
  */
-class Bus : public UUIDProvider {
+class Bus {
 public:
-    class Member : public UUIDProvider {
+    class Member {
     public:
         Member(const UUID &uu, const json &, class Block &block);
         Member(const UUID &uu);
@@ -28,12 +27,12 @@ public:
         std::string name;
         uuid_ptr<Net> net = nullptr;
         json serialize() const;
-        virtual UUID get_uuid() const;
+        UUID get_uuid() const;
     };
 
     Bus(const UUID &uu, const json &, class Block &block);
     Bus(const UUID &uu);
-    virtual UUID get_uuid() const;
+    UUID get_uuid() const;
     UUID uuid;
     std::string name;
     std::map<UUID, Member> members;

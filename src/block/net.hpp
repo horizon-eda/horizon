@@ -2,7 +2,6 @@
 #include "nlohmann/json_fwd.hpp"
 #include "pool/unit.hpp"
 #include "util/uuid.hpp"
-#include "util/uuid_provider.hpp"
 #include "util/uuid_ptr.hpp"
 #include <fstream>
 #include <map>
@@ -13,12 +12,12 @@
 namespace horizon {
 using json = nlohmann::json;
 
-class Net : public UUIDProvider {
+class Net {
 public:
     Net(const UUID &uu, const json &, class Block &block);
     Net(const UUID &uu, const json &);
     Net(const UUID &uu);
-    virtual UUID get_uuid() const;
+    UUID get_uuid() const;
     UUID uuid;
     std::string name;
     bool is_power = false;

@@ -11,15 +11,15 @@ class PackageRules : public Rules {
 public:
     PackageRules();
 
-    void load_from_json(const json &j);
+    void load_from_json(const json &j) override;
     RulesCheckResult check(RuleID id, const class Package *pkg, class RulesCheckCache &cache) const;
-    json serialize() const;
-    std::set<RuleID> get_rule_ids() const;
+    json serialize() const override;
+    std::set<RuleID> get_rule_ids() const override;
     const Rule *get_rule(RuleID id) const override;
     const Rule *get_rule(RuleID id, const UUID &uu) const override;
     std::map<UUID, const Rule *> get_rules(RuleID id) const override;
-    void remove_rule(RuleID id, const UUID &uu);
-    Rule *add_rule(RuleID id);
+    void remove_rule(RuleID id, const UUID &uu) override;
+    Rule *add_rule(RuleID id) override;
 
 private:
     RulePackageChecks rule_package_checks;

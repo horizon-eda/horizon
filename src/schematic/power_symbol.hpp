@@ -2,7 +2,6 @@
 #include "util/uuid.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "common/common.hpp"
-#include "util/uuid_provider.hpp"
 #include "block/block.hpp"
 #include "util/uuid_ptr.hpp"
 #include "common/junction.hpp"
@@ -20,7 +19,7 @@ using json = nlohmann::json;
  * will make
  * its junction connected to this Net.
  */
-class PowerSymbol : UUIDProvider {
+class PowerSymbol {
 public:
     PowerSymbol(const UUID &uu, const json &j, class Sheet *sheet = nullptr, class Block *block = nullptr);
     PowerSymbol(const UUID &uu);
@@ -32,7 +31,7 @@ public:
     Orientation orientation = Orientation::DOWN;
     void mirrorx();
 
-    virtual UUID get_uuid() const;
+    UUID get_uuid() const;
     void update_refs(Sheet &sheet, Block &block);
 
     json serialize() const;

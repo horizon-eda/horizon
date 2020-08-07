@@ -12,7 +12,7 @@ namespace horizon {
 using json = nlohmann::json;
 
 
-class PolygonUsage : public UUIDProvider {
+class PolygonUsage {
 public:
     enum class Type { INVALID, PLANE, KEEPOUT };
     virtual Type get_type() const = 0;
@@ -24,7 +24,7 @@ public:
  * Polygon used in Padstack, Package and Board for
  * specifying filled Regions. Edges may either be straight lines or arcs.
  */
-class Polygon : public UUIDProvider {
+class Polygon {
 public:
     class Vertex {
     public:
