@@ -132,6 +132,7 @@ Symbol::Symbol(const UUID &uu, const json &j, Pool &pool)
     : uuid(uu), unit(pool.get_unit(j.at("unit").get<std::string>())), name(j.value("name", "")),
       can_expand(j.value("can_expand", false))
 {
+    check_object_type(j, ObjectType::SYMBOL);
     if (j.count("junctions")) {
         const json &o = j["junctions"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {

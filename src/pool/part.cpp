@@ -8,6 +8,7 @@ namespace horizon {
 Part::Part(const UUID &uu, const json &j, Pool &pool)
     : uuid(uu), inherit_tags(j.value("inherit_tags", false)), inherit_model(j.value("inherit_model", true))
 {
+    check_object_type(j, ObjectType::PART);
     attributes[Attribute::MPN] = {j.at("MPN").at(0).get<bool>(), j.at("MPN").at(1).get<std::string>()};
     attributes[Attribute::VALUE] = {j.at("value").at(0).get<bool>(), j.at("value").at(1).get<std::string>()};
     attributes[Attribute::MANUFACTURER] = {j.at("manufacturer").at(0).get<bool>(),

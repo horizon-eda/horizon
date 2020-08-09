@@ -589,4 +589,11 @@ Coordd project_onto_perp_bisector(const Coordd &a, const Coordd &b, const Coordd
     return p + d * u;
 }
 
+void check_object_type(const json &j, ObjectType type)
+{
+    if (j.at("type") != object_type_lut.lookup_reverse(type)) {
+        throw std::runtime_error("wrong object type");
+    }
+}
+
 } // namespace horizon

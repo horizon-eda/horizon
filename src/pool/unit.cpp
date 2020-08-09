@@ -54,6 +54,7 @@ UUID Pin::get_uuid() const
 Unit::Unit(const UUID &uu, const json &j)
     : uuid(uu), name(j.at("name").get<std::string>()), manufacturer(j.value("manufacturer", ""))
 {
+    check_object_type(j, ObjectType::UNIT);
     const json &o = j.at("pins");
     for (auto it = o.cbegin(); it != o.cend(); ++it) {
         auto pin_uuid = UUID(it.key());

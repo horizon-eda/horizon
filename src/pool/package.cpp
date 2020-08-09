@@ -61,6 +61,7 @@ Package::Package(const UUID &uu, const json &j, Pool &pool)
     : uuid(uu), name(j.at("name").get<std::string>()), manufacturer(j.value("manufacturer", "")),
       parameter_program(this, j.value("parameter_program", ""))
 {
+    check_object_type(j, ObjectType::PACKAGE);
     {
         const json &o = j.at("junctions");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {

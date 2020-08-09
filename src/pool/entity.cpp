@@ -10,6 +10,7 @@ Entity::Entity(const UUID &uu, const json &j, Pool &pool)
       prefix(j.at("prefix").get<std::string>())
 
 {
+    check_object_type(j, ObjectType::ENTITY);
     {
         const json &o = j.at("gates");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {

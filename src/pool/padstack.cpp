@@ -177,6 +177,7 @@ Padstack::Padstack(const UUID &uu, const json &j)
     : uuid(uu), name(j.at("name").get<std::string>()), well_known_name(j.value("well_known_name", "")),
       parameter_program(this, j.value("parameter_program", ""))
 {
+    check_object_type(j, ObjectType::PADSTACK);
     {
         const json &o = j["polygons"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {

@@ -11,6 +11,7 @@ namespace horizon {
 Frame::Frame(const UUID &uu, const json &j)
     : uuid(uu), name(j.value("name", "")), width(j.value("width", 297_mm)), height(j.value("height", 210_mm))
 {
+    check_object_type(j, ObjectType::FRAME);
     if (j.count("junctions")) {
         const json &o = j["junctions"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {

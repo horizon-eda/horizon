@@ -91,4 +91,6 @@ template <typename T> constexpr bool any_of(T value, std::initializer_list<T> ch
     return std::count(choices.begin(), choices.end(), value);
 }
 
+void check_object_type(const json &j, ObjectType type);
+
 } // namespace horizon
