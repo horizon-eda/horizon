@@ -10,6 +10,13 @@ public:
     autofree_ptr(std::function<void(T *)> ffn) : free_fn(ffn)
     {
     }
+
+    autofree_ptr(autofree_ptr &&) = delete;
+    autofree_ptr &operator=(autofree_ptr &&) = delete;
+
+    autofree_ptr(autofree_ptr const &) = delete;
+    autofree_ptr &operator=(autofree_ptr const &) = delete;
+
     T *ptr = nullptr;
     std::function<void(T *)> free_fn;
 
