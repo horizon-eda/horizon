@@ -375,19 +375,19 @@ std::map<std::string, std::string> Canvas3DBase::get_model_filenames(Pool &pool)
 
 
             try {
-                pool_package = pool.get_package(it.second.pool_package->uuid, &pkg_pool_uuid);
+                pool_package = pool.get_package(it.second.package.uuid, &pkg_pool_uuid);
             }
             catch (const std::runtime_error &e) {
                 // it's okay
             }
             if (it.second.pool_package == pool_package) {
                 // package is from pool, ask pool for model filename (might come from cache)
-                model_filename = pool.get_model_filename(it.second.pool_package->uuid, model->uuid);
+                model_filename = pool.get_model_filename(it.second.package.uuid, model->uuid);
             }
             else {
                 // package is not from pool (from package editor, use filename relative to current pool)
                 if (pkg_pool_uuid && pkg_pool_uuid != this_pool_uuid) { // pkg is open in RO mode from included pool
-                    model_filename = pool.get_model_filename(it.second.pool_package->uuid, model->uuid);
+                    model_filename = pool.get_model_filename(it.second.package.uuid, model->uuid);
                 }
                 else { // really editing package
                     model_filename = Glib::build_filename(pool.get_base_path(), model->filename);
