@@ -99,6 +99,51 @@ void ImpPackage::update_monitor()
     set_monitor_items(items);
 }
 
+void ImpPackage::check_alt_pkg()
+{
+    const UUID alt_uuid = browser_alt_button->property_selected_uuid();
+    if (!alt_uuid)
+        return;
+    const auto pkg_uuid = core_package.get_package()->uuid;
+    if (pkg_uuid == alt_uuid) {
+        browser_alt_button->property_selected_uuid() = UUID();
+        return;
+    }
+    pool->db.execute("DROP VIEW IF EXISTS pkg_deps");
+    {
+        pool->db.execute(
+                        "CREATE TEMPORARY view pkg_deps AS SELECT uuid, dep_uuid FROM dependencies WHERE "
+                        "type = 'package' AND dep_type = 'package' AND uuid != '" + (std::string)pkg_uuid + "' "
+                        "UNION SELECT '" + (std::string)pkg_uuid + "', '" + (std::string) alt_uuid+ "'");
+    }
+    {
+        SQLite::Query q(pool->db,
+                        "WITH FindRoot AS ( "
+                        "SELECT uuid, dep_uuid, uuid as path, 0 AS Distance "
+                        "FROM pkg_deps WHERE uuid = $pkg "
+                        "UNION ALL "
+                        "SELECT C.uuid, P.dep_uuid, C.path || ' > ' || P.uuid, C.Distance + 1 "
+                        "FROM pkg_deps AS P "
+                        " JOIN FindRoot AS C "
+                        " ON C.dep_uuid = P.uuid AND P.dep_uuid != P.uuid AND C.dep_uuid != C.uuid "
+                        ") "
+                        "SELECT * "
+                        "FROM FindRoot AS R "
+                        "WHERE R.uuid = R.dep_uuid AND R.Distance > 0");
+        q.bind("$pkg", pkg_uuid);
+        while (q.step()) {
+            Gtk::MessageDialog md(*main_window, "Can't set as alt. package", false /* use_markup */, Gtk::MESSAGE_ERROR,
+                                  Gtk::BUTTONS_OK);
+            md.set_secondary_text("Cyclic dependency");
+            md.run();
+            browser_alt_button->property_selected_uuid() = UUID();
+            break;
+        }
+    }
+
+    pool->db.execute("DROP VIEW IF EXISTS pkg_deps");
+}
+
 void ImpPackage::construct()
 {
     ImpLayer::construct_layer_box();
@@ -218,7 +263,7 @@ void ImpPackage::construct()
     entry_tags->show();
     header_button->add_widget("Tags", entry_tags);
 
-    auto browser_alt_button = Gtk::manage(new PoolBrowserButton(ObjectType::PACKAGE, pool.get()));
+    browser_alt_button = Gtk::manage(new PoolBrowserButton(ObjectType::PACKAGE, pool.get()));
     browser_alt_button->get_browser()->set_show_none(true);
     header_button->add_widget("Alternate for", browser_alt_button);
 
@@ -236,7 +281,10 @@ void ImpPackage::construct()
     entry_manufacturer->signal_changed().connect([this] { core_package.set_needs_save(); });
     entry_tags->signal_changed().connect([this] { core_package.set_needs_save(); });
 
-    browser_alt_button->property_selected_uuid().signal_changed().connect([this] { core_package.set_needs_save(); });
+    browser_alt_button->property_selected_uuid().signal_changed().connect([this] {
+        check_alt_pkg();
+        core_package.set_needs_save();
+    });
 
     if (core_package.get_package()->name.size() == 0) { // new package
         entry_name->set_text(Glib::path_get_basename(Glib::path_get_dirname(core_package.get_filename())));
@@ -260,7 +308,7 @@ void ImpPackage::construct()
 
     update_monitor();
 
-    core_package.signal_save().connect([this, entry_manufacturer, entry_tags, browser_alt_button] {
+    core_package.signal_save().connect([this, entry_manufacturer, entry_tags] {
         auto pkg = core_package.get_package();
         pkg->tags = entry_tags->get_tags();
         pkg->name = entry_name->get_text();

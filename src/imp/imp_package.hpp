@@ -55,6 +55,8 @@ private:
 
     class HeaderButton *header_button = nullptr;
     Gtk::Entry *entry_name = nullptr;
+    class PoolBrowserButton *browser_alt_button = nullptr;
+    void check_alt_pkg();
 
     void update_header();
 };
