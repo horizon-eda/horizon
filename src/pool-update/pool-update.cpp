@@ -693,6 +693,10 @@ void PoolUpdater::update_packages(const std::string &directory)
     std::set<UUID> visited;
     auto root = graph.get_root();
     update_package_node(root, visited);
+    for (const auto node : graph.get_not_visited(visited)) {
+        status_cb(PoolUpdateStatus::FILE_ERROR, node->filename,
+                  "package not visited (might be due to circular dependency)");
+    }
 }
 
 void PoolUpdater::update_package_node(const PoolUpdateNode &node, std::set<UUID> &visited)
@@ -904,6 +908,10 @@ void PoolUpdater::update_parts(const std::string &directory)
     std::set<UUID> visited;
     auto root = graph.get_root();
     update_part_node(root, visited);
+    for (const auto node : graph.get_not_visited(visited)) {
+        status_cb(PoolUpdateStatus::FILE_ERROR, node->filename,
+                  "part not visited (might be due to circular dependency)");
+    }
 }
 
 void PoolUpdater::add_dependency(ObjectType type, const UUID &uu, ObjectType dep_type, const UUID &dep_uuid)

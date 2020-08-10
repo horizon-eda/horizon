@@ -67,4 +67,14 @@ void PoolUpdateGraph::dump(const std::string &filename)
     }
     ofs << "}";
 }
+
+std::set<const PoolUpdateNode *> PoolUpdateGraph::get_not_visited(const std::set<UUID> &visited)
+{
+    std::set<const PoolUpdateNode *> not_visited;
+    for (const auto &[uu, node] : nodes) {
+        if (visited.count(uu) == 0)
+            not_visited.insert(&node);
+    }
+    return not_visited;
+}
 } // namespace horizon

@@ -24,6 +24,7 @@ public:
     void add_node(const UUID &uu, const std::string &filename, const std::set<UUID> &dependencies);
     void dump(const std::string &filename);
     std::set<std::pair<const PoolUpdateNode *, UUID>> update_dependants();
+    std::set<const PoolUpdateNode *> get_not_visited(const std::set<UUID> &visited);
 
     const PoolUpdateNode &get_root() const;
 
