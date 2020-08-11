@@ -418,6 +418,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
          {"Edit line rectangle", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
+        {{ActionID::TOOL, ToolID::DRAW_LINE_CIRCLE},
+         {"Draw line circle", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
         {{ActionID::TOOL, ToolID::PLACE_PAD},
          {"Place pad", ActionGroup::PACKAGE, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
           ActionCatalogItem::FLAGS_DEFAULT}},
@@ -1097,5 +1101,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(ROUND_OFF_VERTEX),
         TOOL_LUT_ITEM(SWAP_GATES),
         TOOL_LUT_ITEM(PLACE_PICTURE),
+        TOOL_LUT_ITEM(DRAW_LINE_CIRCLE),
 };
 } // namespace horizon

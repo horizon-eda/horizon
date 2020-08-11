@@ -298,7 +298,8 @@ void Canvas3DBase::prepare_packages()
     for (const auto &it : brd->packages) {
         auto model = it.second.package.get_model(it.second.model);
         if (model)
-            pkg_map[{model->filename, it.second.component->nopopulate}].insert(&it.second);
+            pkg_map[{model->filename, it.second.component ? it.second.component->nopopulate : false}].insert(
+                    &it.second);
     }
 
     for (const auto &it_pkg : pkg_map) {

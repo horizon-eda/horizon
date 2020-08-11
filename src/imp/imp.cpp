@@ -2239,6 +2239,7 @@ ActionButton &ImpBase::add_action_button_line()
 {
     auto &b = add_action_button(make_action(ToolID::DRAW_LINE));
     b.add_action(make_action(ToolID::DRAW_LINE_RECTANGLE));
+    b.add_action(make_action(ToolID::DRAW_LINE_CIRCLE));
     b.add_action(make_action(ToolID::DRAW_ARC));
     return b;
 }
