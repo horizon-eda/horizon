@@ -211,6 +211,7 @@ SRC_IMP = \
 	src/core/tools/tool_draw_polygon_rectangle.cpp\
 	src/core/tools/tool_draw_line_rectangle.cpp\
 	src/core/tools/tool_edit_line_rectangle.cpp\
+	src/core/tools/tool_draw_line_circle.cpp\
 	src/core/tools/tool_helper_map_symbol.cpp\
 	src/core/tools/tool_helper_move.cpp\
 	src/core/tools/tool_helper_merge.cpp\

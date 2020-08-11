@@ -190,6 +190,7 @@ void ImpSymbol::construct()
     add_action_button(make_action(ToolID::PLACE_REFDES_AND_VALUE));
     {
         auto &x = add_action_button(make_action(ToolID::DRAW_LINE));
+        x.add_action(make_action(ToolID::DRAW_LINE_CIRCLE));
         x.add_action(make_action(ToolID::DRAW_ARC));
     }
     add_action_button(make_action(ToolID::PLACE_TEXT));

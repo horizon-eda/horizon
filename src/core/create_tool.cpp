@@ -12,6 +12,7 @@
 #include "tools/tool_draw_line.hpp"
 #include "tools/tool_draw_line_net.hpp"
 #include "tools/tool_draw_line_rectangle.hpp"
+#include "tools/tool_draw_line_circle.hpp"
 #include "tools/tool_draw_polygon.hpp"
 #include "tools/tool_draw_polygon_rectangle.hpp"
 #include "tools/tool_draw_track.hpp"
@@ -225,6 +226,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::EDIT_LINE_RECTANGLE:
         return std::make_unique<ToolEditLineRectangle>(this, tool_id);
+
+    case ToolID::DRAW_LINE_CIRCLE:
+        return std::make_unique<ToolDrawLineCircle>(this, tool_id);
 
     case ToolID::ROUTE_TRACK_INTERACTIVE:
     case ToolID::ROUTE_DIFFPAIR_INTERACTIVE:

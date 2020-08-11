@@ -17,6 +17,7 @@ static const std::map<ActionToolID, const char *> action_icons = {
         {make_action(ToolID::PLACE_SHAPE_RECTANGLE), "action-place-shape-rectangle-symbolic"},
         {make_action(ToolID::DRAW_LINE), "action-draw-line-symbolic"},
         {make_action(ToolID::DRAW_LINE_RECTANGLE), "action-draw-line-rectangle-symbolic"},
+        {make_action(ToolID::DRAW_LINE_CIRCLE), "action-draw-line-circle-symbolic"},
         {make_action(ToolID::PLACE_HOLE), "action-place-hole-symbolic"},
         {make_action(ToolID::PLACE_BOARD_HOLE), "action-place-hole-symbolic"},
         {make_action(ToolID::PLACE_HOLE_SLOT), "action-place-hole-slot-symbolic"},
