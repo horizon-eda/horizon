@@ -296,5 +296,9 @@ private:
     std::vector<ActionLabelInfo> in_tool_action_label_infos;
 
     void show_preferences(std::optional<std::string> page = std::nullopt);
+
+    void init_search();
+    void init_key();
+    void init_action();
 };
 } // namespace horizon

@@ -154,6 +154,10 @@ SRC_IMP = \
 	src/imp/imp_main.cpp \
 	src/imp/main_window.cpp \
 	src/imp/imp.cpp \
+	src/imp/imp_search.cpp \
+	src/imp/imp_key.cpp \
+	src/imp/imp_hud.cpp \
+	src/imp/imp_action.cpp \
 	src/imp/imp_layer.cpp\
 	src/imp/imp_symbol.cpp\
 	src/imp/imp_schematic.cpp\
