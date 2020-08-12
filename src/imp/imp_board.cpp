@@ -567,7 +567,7 @@ void ImpBoard::construct()
         pdf_export_window->generate();
     });
 
-    view_3d_window = View3DWindow::create(core_board.get_board(), pool.get());
+    view_3d_window = View3DWindow::create(*core_board.get_board(), *pool.get(), View3DWindow::Mode::BOARD);
     view_3d_window->set_solder_mask_color(rgba_from_color(core_board.get_colors()->solder_mask));
     view_3d_window->set_substrate_color(rgba_from_color(core_board.get_colors()->substrate));
     view_3d_window->signal_changed().connect([this] {

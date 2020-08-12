@@ -8,8 +8,10 @@
 namespace horizon {
 class View3DWindow : public Gtk::Window, public Changeable {
 public:
-    View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Board *b, class Pool *p);
-    static View3DWindow *create(const class Board *b, class Pool *p);
+    enum class Mode { BOARD, PACKAGE };
+    View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Board &b, class Pool &p,
+                 Mode mode);
+    static View3DWindow *create(const class Board &b, class Pool &p, Mode mode);
     void update(bool clear = false);
     void set_highlights(const std::set<UUID> &pkgs);
     void add_widget(Gtk::Widget *w);
@@ -28,8 +30,9 @@ public:
 
 private:
     class Canvas3D *canvas = nullptr;
-    const class Board *board;
-    class Pool *pool = nullptr;
+    const class Board &board;
+    class Pool &pool;
+    const Mode mode;
     Gtk::Box *main_box = nullptr;
     Gtk::Revealer *model_loading_revealer = nullptr;
     Gtk::Spinner *model_loading_spinner = nullptr;

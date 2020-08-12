@@ -339,10 +339,9 @@ void Canvas3D::load_models_thread(std::map<std::string, std::string> model_filen
     }
 }
 
-void Canvas3D::load_models_async(Pool *pool)
+void Canvas3D::load_models_async(Pool &pool)
 {
-    std::map<std::string, std::string> model_filenames =
-            get_model_filenames(*pool); // first: relative, second: absolute
+    std::map<std::string, std::string> model_filenames = get_model_filenames(pool); // first: relative, second: absolute
 
     map_erase_if(model_filenames,
                  [](const auto &it) { return !Glib::file_test(it.second, Glib::FILE_TEST_IS_REGULAR); });

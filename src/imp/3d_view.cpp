@@ -4,12 +4,12 @@
 
 namespace horizon {
 
-View3DWindow *View3DWindow::create(const class Board *b, class Pool *p)
+View3DWindow *View3DWindow::create(const class Board &b, class Pool &p, Mode m)
 {
     View3DWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/imp/3d_view.ui");
-    x->get_widget_derived("window", w, b, p);
+    x->get_widget_derived("window", w, b, p, m);
 
     return w;
 }
@@ -37,9 +37,9 @@ public:
     const float elevation;
 };
 
-View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Board *bo,
-                           class Pool *p)
-    : Gtk::Window(cobject), board(bo), pool(p), state_store(this, "imp-board-3d")
+View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Board &bo,
+                           class Pool &p, Mode md)
+    : Gtk::Window(cobject), board(bo), pool(p), mode(md), state_store(this, "imp-board-3d")
 {
     Gtk::Box *gl_box;
     x->get_widget("gl_box", gl_box);
@@ -156,19 +156,35 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         canvas->queue_draw();
     });
 
-    Gtk::RadioButton *models_none_rb;
-    x->get_widget("models_none_rb", models_none_rb);
-    models_none_rb->property_active().signal_changed().connect([this, models_none_rb] {
-        canvas->show_models = !models_none_rb->get_active();
-        canvas->queue_draw();
-    });
+    {
+        Gtk::RadioButton *models_none_rb;
+        x->get_widget("models_none_rb", models_none_rb);
+        models_none_rb->property_active().signal_changed().connect([this, models_none_rb] {
+            canvas->show_models = !models_none_rb->get_active();
+            canvas->queue_draw();
+        });
+    }
 
-    Gtk::RadioButton *models_placed_rb;
-    x->get_widget("models_placed_rb", models_placed_rb);
-    models_placed_rb->property_active().signal_changed().connect([this, models_placed_rb] {
-        canvas->show_dnp_models = !models_placed_rb->get_active();
-        canvas->queue_draw();
-    });
+    {
+        Gtk::RadioButton *models_placed_rb;
+        x->get_widget("models_placed_rb", models_placed_rb);
+        if (mode == Mode::BOARD) {
+            models_placed_rb->property_active().signal_changed().connect([this, models_placed_rb] {
+                canvas->show_dnp_models = !models_placed_rb->get_active();
+                canvas->queue_draw();
+            });
+        }
+        else {
+            models_placed_rb->hide();
+        }
+    }
+    {
+        Gtk::RadioButton *models_all_rb;
+        x->get_widget("models_all_rb", models_all_rb);
+        if (mode == Mode::PACKAGE) {
+            models_all_rb->set_active();
+        }
+    }
 
     Gtk::Switch *layer_colors_switch;
     x->get_widget("layer_colors_switch", layer_colors_switch);
@@ -256,7 +272,7 @@ void View3DWindow::set_smooth_zoom(bool smooth)
 void View3DWindow::update(bool clear)
 {
     s_signal_request_update.emit();
-    canvas->update(*board);
+    canvas->update(board);
     if (clear)
         canvas->clear_3d_models();
     canvas->load_models_async(pool);

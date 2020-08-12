@@ -333,7 +333,7 @@ void ImpPackage::construct_3d()
     fake_board.set_n_inner_layers(0);
     fake_board.stackup.at(0).substrate_thickness = 1.6_mm;
 
-    view_3d_window = View3DWindow::create(&fake_board, pool.get());
+    view_3d_window = View3DWindow::create(fake_board, *pool.get(), View3DWindow::Mode::PACKAGE);
     view_3d_window->signal_request_update().connect([this] {
         fake_board.polygons.clear();
         {
