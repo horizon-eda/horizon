@@ -503,12 +503,7 @@ void ImpBase::run(int argc, char *argv[])
 #endif
     });
 
-    connect_action(ActionID::PREFERENCES, [this](const auto &a) {
-        json j;
-        j["op"] = "preferences";
-        allow_set_foreground_window(mgr_pid);
-        this->send_json(j);
-    });
+    connect_action(ActionID::PREFERENCES, [this](const auto &a) { show_preferences(); });
 
     for (const auto &it : action_catalog) {
         if ((it.first.first == ActionID::TOOL) && (it.second.availability & get_editor_type_for_action())) {
@@ -888,6 +883,17 @@ void ImpBase::run(int argc, char *argv[])
     }
 
     app->run(*main_window);
+}
+
+void ImpBase::show_preferences(std::optional<std::string> page)
+{
+    json j;
+    j["op"] = "preferences";
+    if (page) {
+        j["page"] = *page;
+    }
+    allow_set_foreground_window(mgr_pid);
+    this->send_json(j);
 }
 
 void ImpBase::parameter_window_add_polygon_expand(ParameterWindow *parameter_window)
@@ -1399,10 +1405,73 @@ bool ImpBase::handle_key_press(GdkEventKey *key_event)
     return false;
 }
 
-bool ImpBase::keys_match(const KeySequence &keys) const
+ImpBase::MatchResult ImpBase::keys_match(const KeySequence &keys) const
 {
-    auto minl = std::min(keys_current.size(), keys.size());
-    return minl && std::equal(keys_current.begin(), keys_current.begin() + minl, keys.begin());
+    const auto minl = std::min(keys_current.size(), keys.size());
+    const bool match = minl && std::equal(keys_current.begin(), keys_current.begin() + minl, keys.begin());
+    if (!match)
+        return MatchResult::NONE;
+    else if (keys_current.size() == keys.size())
+        return MatchResult::COMPLETE;
+    else
+        return MatchResult::PREFIX;
+}
+
+class KeyConflictDialog : public Gtk::MessageDialog {
+public:
+    KeyConflictDialog(Gtk::Window *parent, const std::list<std::pair<std::string, KeySequence>> &conflicts);
+    enum Response { RESPONSE_PREFS = 1 };
+
+private:
+    class ListColumns : public Gtk::TreeModelColumnRecord {
+    public:
+        ListColumns()
+        {
+            Gtk::TreeModelColumnRecord::add(name);
+            Gtk::TreeModelColumnRecord::add(keys);
+        }
+        Gtk::TreeModelColumn<Glib::ustring> name;
+        Gtk::TreeModelColumn<Glib::ustring> keys;
+    };
+    ListColumns list_columns;
+
+    Glib::RefPtr<Gtk::ListStore> store;
+
+    Gtk::TreeView *tv = nullptr;
+};
+
+
+KeyConflictDialog::KeyConflictDialog(Gtk::Window *parent,
+                                     const std::list<std::pair<std::string, KeySequence>> &conflicts)
+    : Gtk::MessageDialog(*parent, "Key sequences conflict", false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK)
+{
+    set_secondary_text("The key sequences listed below conflict with each other");
+    add_button("Open preferences", RESPONSE_PREFS);
+
+    store = Gtk::ListStore::create(list_columns);
+
+    tv = Gtk::manage(new Gtk::TreeView(store));
+    tv->get_selection()->set_mode(Gtk::SELECTION_NONE);
+    tv->append_column("Action", list_columns.name);
+    tv->append_column("Key sequence", list_columns.keys);
+
+
+    auto sc = Gtk::manage(new Gtk::ScrolledWindow);
+    sc->set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+    sc->set_shadow_type(Gtk::SHADOW_IN);
+    sc->property_margin() = 10;
+    sc->set_propagate_natural_height(true);
+    sc->add(*tv);
+
+    for (const auto &[act, keys] : conflicts) {
+        Gtk::TreeModel::Row row = *store->append();
+        row[list_columns.name] = act;
+        row[list_columns.keys] = key_sequence_to_string(keys);
+    }
+
+    get_content_area()->pack_start(*sc, true, true, 0);
+    get_content_area()->show_all();
+    get_content_area()->set_spacing(0);
 }
 
 bool ImpBase::handle_action_key(GdkEventKey *ev)
@@ -1449,8 +1518,8 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
             keys_current.emplace_back(keyval, mod);
         }
         auto in_tool_actions = core->get_tool_actions();
-        std::set<InToolActionID> in_tool_actions_matched;
-        std::set<ActionConnection *> connections_matched;
+        std::map<InToolActionID, std::pair<MatchResult, KeySequence>> in_tool_actions_matched;
+        std::map<ActionConnection *, std::pair<MatchResult, KeySequence>> connections_matched;
         auto selection = canvas->get_selection();
         update_action_sensitivity();
         for (auto &it : action_connections) {
@@ -1465,8 +1534,9 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
                 }
                 if (can_begin) {
                     for (const auto &it2 : it.second.key_sequences) {
-                        if (keys_match(it2)) {
-                            connections_matched.insert(&it.second);
+                        if (const auto m = keys_match(it2); m != MatchResult::NONE) {
+                            connections_matched.emplace(std::piecewise_construct, std::forward_as_tuple(&it.second),
+                                                        std::forward_as_tuple(m, it2));
                         }
                     }
                 }
@@ -1476,14 +1546,13 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
             for (const auto &[action, seqs] : in_tool_key_sequeces_preferences.keys) {
                 if (in_tool_actions.count(action)) {
                     for (const auto &seq : seqs) {
-                        if (keys_match(seq))
-                            in_tool_actions_matched.insert(action);
+                        if (const auto m = keys_match(seq); m != MatchResult::NONE)
+                            in_tool_actions_matched.emplace(std::piecewise_construct, std::forward_as_tuple(action),
+                                                            std::forward_as_tuple(m, seq));
                     }
                 }
             }
         }
-
-        std::cout << "match " << connections_matched.size() << " " << in_tool_actions_matched.size() << std::endl;
 
         if (connections_matched.size() == 1 && in_tool_actions_matched.size() == 1) {
             main_window->tool_hint_label->set_text("Ambiguous");
@@ -1492,7 +1561,7 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
         else if (connections_matched.size() == 1) {
             main_window->tool_hint_label->set_text(key_sequence_to_string(keys_current));
             keys_current.clear();
-            auto conn = *connections_matched.begin();
+            auto conn = connections_matched.begin()->first;
             if (!trigger_action({conn->action_id, conn->tool_id})) {
                 main_window->tool_hint_label->set_text(">");
                 return false;
@@ -1507,13 +1576,39 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
             args.coords = canvas->get_cursor_pos();
             args.work_layer = canvas->property_work_layer();
             args.type = ToolEventType::ACTION;
-            args.action = *in_tool_actions_matched.begin();
+            args.action = in_tool_actions_matched.begin()->first;
             ToolResponse r = core->tool_update(args);
             tool_process(r);
 
             return true;
         }
         else if (connections_matched.size() > 1 || in_tool_actions_matched.size() > 1) { // still ambigous
+            std::list<std::pair<std::string, KeySequence>> conflicts;
+            bool have_conflict = false;
+            for (const auto &[conn, it] : connections_matched) {
+                const auto &[res, seq] = it;
+                if (res == MatchResult::COMPLETE) {
+                    have_conflict = true;
+                }
+                conflicts.emplace_back(action_catalog.at(std::make_pair(conn->action_id, conn->tool_id)).name, seq);
+            }
+            for (const auto &[act, it] : in_tool_actions_matched) {
+                const auto &[res, seq] = it;
+                if (res == MatchResult::COMPLETE) {
+                    have_conflict = true;
+                }
+                conflicts.emplace_back(in_tool_action_catalog.at(act).name + " (in-tool action)", seq);
+            }
+            if (have_conflict) {
+                main_window->tool_hint_label->set_text("Key sequences conflict");
+                keys_current.clear();
+                KeyConflictDialog dia(main_window, conflicts);
+                if (dia.run() == KeyConflictDialog::RESPONSE_PREFS) {
+                    show_preferences("keys");
+                }
+                return false;
+            }
+
             main_window->tool_hint_label->set_text(key_sequence_to_string(keys_current) + "?");
             return true;
         }

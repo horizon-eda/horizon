@@ -246,7 +246,8 @@ private:
     Gtk::MenuItem *create_context_menu_item(ActionToolID act);
 
     KeySequence keys_current;
-    bool keys_match(const KeySequence &keys) const;
+    enum class MatchResult { NONE, PREFIX, COMPLETE };
+    MatchResult keys_match(const KeySequence &keys) const;
     bool handle_action_key(GdkEventKey *ev);
     void handle_tool_action(const ActionConnection &conn);
     void handle_select_polygon(const ActionConnection &a);
@@ -293,5 +294,7 @@ private:
     void tool_bar_clear_actions();
     InToolKeySequencesPreferences in_tool_key_sequeces_preferences;
     std::vector<ActionLabelInfo> in_tool_action_label_infos;
+
+    void show_preferences(std::optional<std::string> page = std::nullopt);
 };
 } // namespace horizon

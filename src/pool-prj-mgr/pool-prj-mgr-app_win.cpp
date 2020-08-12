@@ -442,7 +442,9 @@ json PoolProjectManagerAppWindow::handle_req(const json &j)
         }
     }
     else if (op == "preferences") {
-        app->show_preferences_window(timestamp);
+        auto win = app->show_preferences_window(timestamp);
+        if (j.count("page"))
+            win->show_page(j.at("page"));
     }
     else if (op == "show-in-pool-mgr") {
         UUID uu = j.at("uuid").get<std::string>();

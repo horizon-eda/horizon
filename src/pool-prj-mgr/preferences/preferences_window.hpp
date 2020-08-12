@@ -8,6 +8,7 @@ class PreferencesWindow : public Gtk::Window {
 public:
     PreferencesWindow(class Preferences &pr);
     void open_pool(const std::string &path = "");
+    void show_page(const std::string &pg);
 
 private:
     class Preferences &preferences;
