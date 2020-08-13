@@ -705,8 +705,8 @@ void Board::expand_packages()
     bool expanded_package = false;
     for (auto &it : packages) {
         it.second.pool_package = it.second.component->part->package;
-        it.second.model = it.second.component->part->get_model();
         if ((expand_flags & EXPAND_PACKAGES) && (packages_expand.size() == 0 || packages_expand.count(it.first))) {
+            it.second.model = it.second.component->part->get_model();
             expanded_package = true;
             if (it.second.alternate_package) {
                 std::set<std::string> pads_from_primary, pads_from_alt;
@@ -743,6 +743,10 @@ void Board::expand_packages()
                             auto &pad = it.second.package.pads.emplace(uu, it_pad.second).first->second;
                             pad.uuid = uu;
                         }
+                    }
+
+                    if (it.second.package.models.size() == 1) { // alt pkg only has one model
+                        it.second.model = it.second.package.models.begin()->first;
                     }
                 }
             }
