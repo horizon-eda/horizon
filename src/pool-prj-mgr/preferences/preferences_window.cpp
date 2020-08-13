@@ -87,4 +87,9 @@ void PreferencesWindow::open_pool(const std::string &path)
     pool_prefs_editor->add_pool(path);
 }
 
+void PreferencesWindow::show_page(const std::string &pg)
+{
+    stack->set_visible_child(pg);
+}
+
 } // namespace horizon
