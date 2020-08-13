@@ -129,9 +129,6 @@ public:
     STEPExportSettings step_export_settings;
     PnPExportSettings pnp_export_settings;
 
-    ClipperLib::Paths obstacles;
-    ClipperLib::Path track_path;
-
     enum ExpandFlags {
         EXPAND_ALL = 0xff,
         EXPAND_PROPAGATE_NETS = (1 << 0),

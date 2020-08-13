@@ -1472,27 +1472,6 @@ void Canvas::render(const Board &brd, bool interactive, PanelMode mode, OutlineM
         for (const auto &it : brd.connection_lines) {
             render(it.second);
         }
-
-        for (const auto &path : brd.obstacles) {
-            for (auto it = path.cbegin(); it < path.cend(); it++) {
-                if (it != path.cbegin()) {
-                    auto b = it - 1;
-                    draw_line(Coordf(b->X, b->Y), Coordf(it->X, it->Y), ColorP::AIRWIRE, 10000, false, 0);
-                }
-            }
-        }
-
-        unsigned int i = 0;
-        for (auto it = brd.track_path.cbegin(); it < brd.track_path.cend(); it++) {
-            if (it != brd.track_path.cbegin()) {
-                auto b = it - 1;
-                draw_line(Coordf(b->X, b->Y), Coordf(it->X, it->Y), ColorP::AIRWIRE, 10000, false, 0);
-            }
-            if (i % 2 == 0) {
-                draw_line(Coordf(it->X, it->Y), Coordf(it->X, it->Y), ColorP::AIRWIRE, 10000, false, .1_mm);
-            }
-            i++;
-        }
         for (const auto &it : brd.warnings) {
             render(it);
         }
