@@ -103,6 +103,7 @@ void Grid::render()
         int mod = (ca.m_width / ca.scale) / spmin + 4;
         glUniform1i(grid_mod_loc, mod);
         int n = mod * ((ca.m_height / ca.scale) / spmin + 4);
+        std::cout << "grid " << n << " mod " << mod << std::endl;
         glDrawArraysInstanced(GL_LINES, 0, 4, n);
     }
 
