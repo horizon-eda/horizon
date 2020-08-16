@@ -4,6 +4,11 @@
 #include "nlohmann/json.hpp"
 #include "common/text.hpp"
 #include "document/idocument.hpp"
+#include "document/idocument_board.hpp"
+#include "core/tool_id.hpp"
+#include "util/selection_util.hpp"
+#include "board/board.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 
@@ -58,7 +63,17 @@ ToolPlaceText::ToolPlaceText(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolH
 
 bool ToolPlaceText::can_begin()
 {
-    return doc.r->has_object_type(ObjectType::TEXT);
+    if (tool_id == ToolID::PLACE_TEXT)
+        return doc.r->has_object_type(ObjectType::TEXT);
+    else if (tool_id == ToolID::ADD_TEXT)
+        return sel_count_type(selection, ObjectType::BOARD_PACKAGE) == 1;
+    else
+        return false;
+}
+
+bool ToolPlaceText::is_specific()
+{
+    return tool_id == ToolID::ADD_TEXT;
 }
 
 void ToolPlaceText::apply_settings()
@@ -73,10 +88,24 @@ void ToolPlaceText::apply_settings()
 ToolResponse ToolPlaceText::begin(const ToolArgs &args)
 {
     std::cout << "tool place text\n";
+    if (tool_id == ToolID::ADD_TEXT) {
+        pkg = &doc.b->get_board()->packages.at(sel_find_one(selection, ObjectType::BOARD_PACKAGE).uuid);
+    }
 
     temp = doc.r->insert_text(UUID::random());
     imp->set_snap_filter({{ObjectType::TEXT, temp->uuid}});
-    temp->layer = args.work_layer;
+    if (pkg) {
+        if (pkg->flip)
+            temp->layer = BoardLayers::BOTTOM_SILKSCREEN;
+        else
+            temp->layer = BoardLayers::TOP_SILKSCREEN;
+        imp->set_work_layer(temp->layer);
+        temp->text = "$VALUE";
+        temp->text_override = pkg->replace_text(temp->text, &temp->overridden);
+    }
+    else {
+        temp->layer = args.work_layer;
+    }
     temp->placement.shift = args.coords;
     selection = {{temp->uuid, ObjectType::TEXT}};
     apply_settings();
@@ -89,13 +118,18 @@ ToolResponse ToolPlaceText::begin(const ToolArgs &args)
             {InToolActionID::ENTER_SIZE, "text size"},
             {InToolActionID::EDIT, "change text"},
     });
-    if (auto r = imp->dialogs.ask_datum_string_multiline("Enter text", temp->text)) {
-        temp->text = *r;
+    if (!pkg) {
+        if (auto r = imp->dialogs.ask_datum_string_multiline("Enter text", temp->text)) {
+            temp->text = *r;
+        }
+        else {
+            doc.r->delete_text(temp->uuid);
+            selection.clear();
+            return ToolResponse::end();
+        }
     }
     else {
-        doc.r->delete_text(temp->uuid);
-        selection.clear();
-        return ToolResponse::end();
+        pkg->texts.push_back(temp);
     }
 
     return ToolResponse();
@@ -110,13 +144,18 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
         case InToolActionID::LMB: {
+            if (tool_id == ToolID::ADD_TEXT) {
+                selection = {{temp->uuid, ObjectType::TEXT}};
+                return ToolResponse::commit();
+            }
+
             text = &temp->text;
             texts_placed.push_front(temp);
             auto old_text = temp;
             temp = doc.r->insert_text(UUID::random());
             imp->set_snap_filter({{ObjectType::TEXT, temp->uuid}});
             temp->text = *text;
-            temp->layer = args.work_layer;
+            temp->layer = old_text->layer;
             temp->placement = old_text->placement;
             temp->placement.shift = args.coords;
             selection = {{temp->uuid, ObjectType::TEXT}};
@@ -135,6 +174,8 @@ ToolResponse ToolPlaceText::update(const ToolArgs &args)
         case InToolActionID::EDIT: {
             if (auto r = imp->dialogs.ask_datum_string_multiline("Enter text", temp->text)) {
                 temp->text = *r;
+                if (pkg)
+                    temp->text_override = pkg->replace_text(temp->text, &temp->overridden);
             }
         } break;
 

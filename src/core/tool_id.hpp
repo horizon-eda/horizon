@@ -145,5 +145,6 @@ enum class ToolID {
     ROUND_OFF_VERTEX,
     SWAP_GATES,
     PLACE_PICTURE,
+    ADD_TEXT,
 };
 } // namespace horizon

@@ -129,6 +129,7 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
         return std::make_unique<ToolAddPart>(this, tool_id);
 
     case ToolID::PLACE_TEXT:
+    case ToolID::ADD_TEXT:
         return std::make_unique<ToolPlaceText>(this, tool_id);
 
     case ToolID::PLACE_NET_LABEL:
