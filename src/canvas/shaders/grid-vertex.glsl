@@ -7,8 +7,13 @@ uniform vec2 grid_0;
 uniform int grid_mod;
 uniform float mark_size;
 
+int my_mod(int a, int b) {
+	int d = a/b;
+	return a - (b*d);
+}
+
 void main() {
-	int gr_x = int(mod(gl_InstanceID, grid_mod));
+	int gr_x = int(my_mod(gl_InstanceID, grid_mod));
 	int gr_y = int(gl_InstanceID/grid_mod);
 	float size = mark_size;
 	if(gl_VertexID >= 4) {
