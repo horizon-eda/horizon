@@ -100,9 +100,9 @@ void Grid::render()
         glDrawArraysInstanced(GL_LINES, 2, 2, n);
     }
     else {
-        int mod = (ca.m_width / ca.scale) / spmin + 4;
+        int mod = ceil((ca.m_width / ca.scale) / spmin) + 2;
         glUniform1i(grid_mod_loc, mod);
-        int n = mod * ((ca.m_height / ca.scale) / spmin + 4);
+        int n = mod * ceil((ca.m_height / ca.scale) / spmin + 2);
         glDrawArraysInstanced(GL_LINES, 0, 4, n);
     }
 
