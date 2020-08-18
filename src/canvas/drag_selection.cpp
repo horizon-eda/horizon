@@ -276,9 +276,12 @@ void DragSelection::drag_end(GdkEventButton *button_event)
             std::cout << "click select" << std::endl;
             if (ca.selection_mode == CanvasGL::SelectionMode::HOVER) { // just select what was
                                                                        // selecte by hover select
-                ca.set_selection_mode(CanvasGL::SelectionMode::NORMAL);
-                ca.selectables.update_preview(ca.get_selection());
-                ca.s_signal_selection_changed.emit();
+                auto sel = ca.get_selection();
+                if (sel.size()) {
+                    ca.set_selection_mode(CanvasGL::SelectionMode::NORMAL);
+                    ca.selectables.update_preview(sel);
+                    ca.s_signal_selection_changed.emit();
+                }
             }
             else {
                 std::set<SelectableRef> selection;
