@@ -12,6 +12,13 @@ void ImpBase::init_action()
             connect_action(it.first.second);
         }
     }
+    connect_action(ActionID::PAN_LEFT, sigc::mem_fun(*this, &ImpBase::handle_pan_action));
+    connect_action(ActionID::PAN_RIGHT, sigc::mem_fun(*this, &ImpBase::handle_pan_action));
+    connect_action(ActionID::PAN_UP, sigc::mem_fun(*this, &ImpBase::handle_pan_action));
+    connect_action(ActionID::PAN_DOWN, sigc::mem_fun(*this, &ImpBase::handle_pan_action));
+
+    connect_action(ActionID::ZOOM_IN, sigc::mem_fun(*this, &ImpBase::handle_zoom_action));
+    connect_action(ActionID::ZOOM_OUT, sigc::mem_fun(*this, &ImpBase::handle_zoom_action));
 }
 
 ActionButton &ImpBase::add_action_button(ActionToolID action)
@@ -249,6 +256,41 @@ ActionConnection &ImpBase::connect_action(ActionID action_id, ToolID tool_id,
                         .first->second;
 
     return act;
+}
+
+void ImpBase::handle_pan_action(const ActionConnection &c)
+{
+    Coordf d;
+    switch (c.action_id) {
+    case ActionID::PAN_DOWN:
+        d.y = -1;
+        break;
+
+    case ActionID::PAN_UP:
+        d.y = 1;
+        break;
+
+    case ActionID::PAN_LEFT:
+        d.x = 1;
+        break;
+
+    case ActionID::PAN_RIGHT:
+        d.x = -1;
+        break;
+    default:
+        return;
+    }
+    auto [sc, offset] = canvas->get_scale_and_offset();
+    offset += d * 50;
+    canvas->set_scale_and_offset(sc, offset);
+}
+
+void ImpBase::handle_zoom_action(const ActionConnection &c)
+{
+    auto factor = 1.5;
+    if (c.action_id == ActionID::ZOOM_OUT)
+        factor = 1 / factor;
+    canvas->zoom_to_center(factor);
 }
 
 } // namespace horizon

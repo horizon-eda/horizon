@@ -2029,5 +2029,125 @@
             "8": []
         },
         "tool": "MIRROR_CURSOR"
+    },
+    {
+        "action": "PAN_UP",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "Up",
+                        "mod": 4
+                    }
+                ],
+                [
+                    {
+                        "key": "KP_Up",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "PAN_DOWN",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "Down",
+                        "mod": 4
+                    }
+                ],
+                [
+                    {
+                        "key": "KP_Down",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "PAN_LEFT",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "Left",
+                        "mod": 4
+                    }
+                ],
+                [
+                    {
+                        "key": "KP_Left",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "PAN_RIGHT",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "Right",
+                        "mod": 4
+                    }
+                ],
+                [
+                    {
+                        "key": "KP_Right",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "ZOOM_IN",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "KP_Add",
+                        "mod": 0
+                    }
+                ],
+                [
+                    {
+                        "key": "equal",
+                        "mod": 4
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
+    },
+    {
+        "action": "ZOOM_OUT",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "KP_Subtract",
+                        "mod": 0
+                    }
+                ],
+                [
+                    {
+                        "key": "minus",
+                        "mod": 4
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
     }
 ]

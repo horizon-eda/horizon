@@ -122,6 +122,7 @@ public:
     void zoom_to_bbox(const Coordf &a, const Coordf &b);
     void zoom_to_bbox(const std::pair<Coordf, Coordf> &bb);
     void ensure_min_size(float w, float h);
+    void zoom_to_center(float factor);
 
     Glib::PropertyProxy<int> property_work_layer()
     {
@@ -294,6 +295,8 @@ private:
     bool can_snap_to_target(const Target &t) const;
 
     std::vector<ColorI> colors2;
+
+    bool can_set_scale() const;
 
 protected:
     void on_size_allocate(Gtk::Allocation &alloc) override;

@@ -845,6 +845,30 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
 
         {{ActionID::TOOL, ToolID::ADD_TEXT},
          {"Add text", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::PAN_LEFT, ToolID::NONE},
+         {"Pan left", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_IN_TOOL}},
+
+        {{ActionID::PAN_RIGHT, ToolID::NONE},
+         {"Pan right", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_IN_TOOL}},
+
+        {{ActionID::PAN_UP, ToolID::NONE},
+         {"Pan up", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_IN_TOOL}},
+
+        {{ActionID::PAN_DOWN, ToolID::NONE},
+         {"Pan down", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_IN_TOOL}},
+
+        {{ActionID::ZOOM_IN, ToolID::NONE},
+         {"Zoom in", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_IN_TOOL}},
+
+        {{ActionID::ZOOM_OUT, ToolID::NONE},
+         {"Zoom out", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_IN_TOOL}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -958,6 +982,12 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(SET_GRID_ORIGIN),
         ACTION_LUT_ITEM(TOGGLE_SNAP_TO_TARGETS),
         ACTION_LUT_ITEM(PARTS_WINDOW),
+        ACTION_LUT_ITEM(PAN_UP),
+        ACTION_LUT_ITEM(PAN_DOWN),
+        ACTION_LUT_ITEM(PAN_LEFT),
+        ACTION_LUT_ITEM(PAN_RIGHT),
+        ACTION_LUT_ITEM(ZOOM_IN),
+        ACTION_LUT_ITEM(ZOOM_OUT),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

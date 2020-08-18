@@ -92,6 +92,12 @@ enum class ActionID {
     DISTRACTION_FREE,
     TOGGLE_SNAP_TO_TARGETS,
     PARTS_WINDOW,
+    PAN_UP,
+    PAN_DOWN,
+    PAN_LEFT,
+    PAN_RIGHT,
+    ZOOM_IN,
+    ZOOM_OUT,
 };
 
 using ActionToolID = std::pair<ActionID, ToolID>;

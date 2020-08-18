@@ -15,8 +15,16 @@ std::pair<float, Coordf> CanvasGL::get_scale_and_offset()
     return std::make_pair(scale, offset);
 }
 
+bool CanvasGL::can_set_scale() const
+{
+    return !(pan_dragging || zoom_animator.is_running() || gesture_zoom->is_recognized()
+             || gesture_drag->is_recognized());
+}
+
 void CanvasGL::set_scale_and_offset(float sc, Coordf ofs)
 {
+    if (!can_set_scale())
+        return;
     scale = sc;
     offset = ofs;
     update_viewmat();
@@ -431,6 +439,12 @@ void CanvasGL::zoom_to_bbox(const std::pair<Coordf, Coordf> &bb)
     zoom_to_bbox(bb.first, bb.second);
 }
 
+void CanvasGL::zoom_to_center(float factor)
+{
+    if (!can_set_scale())
+        return;
+    set_scale(m_width / 2, m_height / 2, scale * factor);
+}
 
 void CanvasGL::ensure_min_size(float w, float h)
 {

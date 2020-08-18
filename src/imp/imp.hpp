@@ -300,5 +300,8 @@ private:
     void init_search();
     void init_key();
     void init_action();
+
+    void handle_pan_action(const ActionConnection &c);
+    void handle_zoom_action(const ActionConnection &c);
 };
 } // namespace horizon
