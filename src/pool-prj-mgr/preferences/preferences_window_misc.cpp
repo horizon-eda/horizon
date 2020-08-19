@@ -66,6 +66,44 @@ void PreferencesRowBool::activate()
     sw->set_active(!sw->get_active());
 }
 
+class PreferencesRowNumeric : public PreferencesRow {
+public:
+    PreferencesRowNumeric(const std::string &title, const std::string &subtitle, Preferences &prefs, float &v);
+
+    Gtk::SpinButton &get_spinbutton();
+    void bind();
+
+private:
+    Preferences &preferences;
+    float &value;
+    Gtk::SpinButton *sp = nullptr;
+};
+
+PreferencesRowNumeric::PreferencesRowNumeric(const std::string &title, const std::string &subtitle, Preferences &prefs,
+                                             float &v)
+    : PreferencesRow(title, subtitle), preferences(prefs), value(v)
+{
+    sp = Gtk::manage(new Gtk::SpinButton);
+    sp->set_valign(Gtk::ALIGN_CENTER);
+    sp->show();
+    pack_start(*sp, false, false, 0);
+}
+
+void PreferencesRowNumeric::bind()
+{
+    sp->set_value(value);
+    sp->signal_value_changed().connect([this] {
+        value = sp->get_value();
+        preferences.signal_changed().emit();
+    });
+}
+
+Gtk::SpinButton &PreferencesRowNumeric::get_spinbutton()
+{
+    return *sp;
+}
+
+
 class PreferencesGroup : public Gtk::Box {
 public:
     PreferencesGroup(const std::string &title);
@@ -183,6 +221,23 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
             auto r = Gtk::manage(new PreferencesRowBool("Smooth zoom 2D views",
                                                         "Use mass spring damper model to smooth zooming", preferences,
                                                         preferences.zoom.smooth_zoom_2d));
+            gr->add_row(*r);
+        }
+        {
+            auto r =
+                    Gtk::manage(new PreferencesRowNumeric("Zoom factor", "How far to zoom in on each mouse wheel click",
+                                                          preferences, preferences.zoom.zoom_factor));
+            auto &sp = r->get_spinbutton();
+            sp.set_range(10, 100);
+            sp.set_increments(10, 10);
+            sp.set_width_chars(5);
+            sp.set_alignment(1);
+            sp.signal_output().connect([&sp] {
+                int v = sp.get_value_as_int();
+                sp.set_text(std::to_string(v) + " %");
+                return true;
+            });
+            r->bind();
             gr->add_row(*r);
         }
         {

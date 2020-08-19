@@ -104,11 +104,11 @@ int CanvasGL::_animate_step(GdkFrameClock *frame_clock)
     }
     auto s = zoom_animator.get_s();
 
-    set_scale(zoom_animation_pos.x, zoom_animation_pos.y, zoom_animation_scale_orig * pow(1.5, s));
+    set_scale(zoom_animation_pos.x, zoom_animation_pos.y, zoom_animation_scale_orig * pow(zoom_base, s));
 
     if (std::abs((s - zoom_animator.target) / std::max(std::abs(zoom_animator.target), 1.f)) < .005) {
         set_scale(zoom_animation_pos.x, zoom_animation_pos.y,
-                  zoom_animation_scale_orig * pow(1.5, zoom_animator.target));
+                  zoom_animation_scale_orig * pow(zoom_base, zoom_animator.target));
         zoom_animator.stop();
         return G_SOURCE_REMOVE;
     }
@@ -166,7 +166,7 @@ void CanvasGL::pan_zoom(GdkEventScroll *scroll_event, bool to_cursor)
         zoom_animation_pos.y = y;
     }
     else {
-        set_scale(x, y, scale * pow(1.5, inc));
+        set_scale(x, y, scale * pow(zoom_base, inc));
     }
 }
 } // namespace horizon

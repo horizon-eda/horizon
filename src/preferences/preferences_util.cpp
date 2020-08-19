@@ -28,6 +28,7 @@ void preferences_apply_to_canvas(class CanvasGL *ca, const class Preferences &pr
 {
     ca->smooth_zoom = prefs.zoom.smooth_zoom_2d;
     ca->touchpad_pan = prefs.zoom.touchpad_pan;
+    ca->zoom_base = 1 + (prefs.zoom.zoom_factor / 100);
 }
 
 } // namespace horizon

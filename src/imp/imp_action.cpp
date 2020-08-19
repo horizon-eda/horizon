@@ -287,7 +287,7 @@ void ImpBase::handle_pan_action(const ActionConnection &c)
 
 void ImpBase::handle_zoom_action(const ActionConnection &c)
 {
-    auto factor = 1.5;
+    auto factor = canvas->zoom_base;
     if (c.action_id == ActionID::ZOOM_OUT)
         factor = 1 / factor;
     canvas->zoom_to_center(factor);

@@ -152,6 +152,8 @@ public:
     bool smooth_zoom = true;
     bool snap_to_targets = true;
 
+    float zoom_base = 1.5;
+
     void inhibit_drag_selection();
 
     int _animate_step(GdkFrameClock *frame_clock);
