@@ -173,6 +173,7 @@ bool ImpBase::handle_close(GdkEventAny *ev)
         md.add_button("Close without Saving", 1);
         md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
         md.add_button("Save", 2);
+        md.set_default_response(Gtk::RESPONSE_CANCEL);
         switch (md.run()) {
         case 1:
             core->delete_autosave();
