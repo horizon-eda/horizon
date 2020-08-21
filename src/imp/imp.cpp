@@ -381,6 +381,7 @@ void ImpBase::run(int argc, char *argv[])
     }
 
     canvas->signal_selection_mode_changed().connect([this](auto mode) {
+        set_action_sensitive(make_action(ActionID::CLICK_SELECT), mode == CanvasGL::SelectionMode::HOVER);
         if (mode == CanvasGL::SelectionMode::HOVER) {
             main_window->selection_mode_label->set_text("Hover select");
         }
@@ -389,6 +390,11 @@ void ImpBase::run(int argc, char *argv[])
         }
     });
     canvas->set_selection_mode(CanvasGL::SelectionMode::HOVER);
+
+    connect_action(ActionID::CLICK_SELECT, [this](const auto &c) {
+        canvas->set_selection({});
+        canvas->set_selection_mode(CanvasGL::SelectionMode::NORMAL);
+    });
 
     panels = Gtk::manage(new PropertyPanels(core));
     panels->show_all();

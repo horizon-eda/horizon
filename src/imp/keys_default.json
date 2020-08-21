@@ -2149,5 +2149,19 @@
             ]
         },
         "tool": "NONE"
+    },
+    {
+        "action": "CLICK_SELECT",
+        "keys": {
+            "255": [
+                [
+                    {
+                        "key": "grave",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "NONE"
     }
 ]
