@@ -869,6 +869,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::ZOOM_OUT, ToolID::NONE},
          {"Zoom out", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_IN_TOOL}},
+
+        {{ActionID::CLICK_SELECT, ToolID::NONE},
+         {"Click select mode", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -988,6 +992,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(PAN_RIGHT),
         ACTION_LUT_ITEM(ZOOM_IN),
         ACTION_LUT_ITEM(ZOOM_OUT),
+        ACTION_LUT_ITEM(CLICK_SELECT),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

@@ -98,6 +98,7 @@ enum class ActionID {
     PAN_RIGHT,
     ZOOM_IN,
     ZOOM_OUT,
+    CLICK_SELECT,
 };
 
 using ActionToolID = std::pair<ActionID, ToolID>;
