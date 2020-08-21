@@ -388,10 +388,7 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                     }
                 }
                 else if (sel_from_canvas.size() == 0) {
-                    if (toggle)
-                        ca.set_selection(selection);
-                    else
-                        ca.set_selection({});
+                    ca.set_selection_mode(CanvasGL::SelectionMode::HOVER);
                 }
             }
         }
