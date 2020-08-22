@@ -41,9 +41,9 @@ public:
     {
         return &board.rules;
     }
-    horizon::LayerProvider *get_layer_provider() override
+    horizon::LayerProvider &get_layer_provider() override
     {
-        return &board;
+        return board;
     }
     horizon::ViaPadstackProvider *get_via_padstack_provider() override
     {

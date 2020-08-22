@@ -90,11 +90,6 @@ public:
     void set_property_commit();
     bool get_property_transaction() const;
 
-    class LayerProvider *get_layer_provider() override
-    {
-        return nullptr;
-    };
-
     /**
      * @returns the current document's meta information.
      * Meta information contains grid spacing and layer setup.

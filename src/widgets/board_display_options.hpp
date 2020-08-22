@@ -8,7 +8,7 @@ class BoardDisplayOptionsBox : public Gtk::Box {
     friend class LayerOptionsExp;
 
 public:
-    BoardDisplayOptionsBox(class LayerProvider *lp);
+    BoardDisplayOptionsBox(class LayerProvider &lp);
 
     typedef sigc::signal<void, int, LayerDisplay> type_signal_set_layer_display;
     type_signal_set_layer_display signal_set_layer_display()
@@ -21,7 +21,7 @@ public:
     void update();
 
 private:
-    class LayerProvider *lp;
+    class LayerProvider &lp;
     type_signal_set_layer_display s_signal_set_layer_display;
 
     Gtk::Expander *expander_all = nullptr;

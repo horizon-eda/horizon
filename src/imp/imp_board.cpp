@@ -884,7 +884,7 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
         }
         s += "Layers: ";
         for (auto layer : layers) {
-            s += core->get_layer_provider()->get_layers().at(layer).name + " ";
+            s += core->get_layer_provider().get_layers().at(layer).name + " ";
         }
         s += "\nTotal length: " + dim_to_string(length, false);
         if (sel_count_type(sel, ObjectType::TRACK) == 1) {
@@ -934,7 +934,7 @@ std::string ImpBoard::get_hud_text(std::set<SelectableRef> &sel)
                 s += "\n\n<b>Plane " + plane->net->name + "</b>\n";
                 s += "Priority: " + std::to_string(plane->priority) + "\n";
                 s += "Layer: ";
-                s += core_board.get_layer_provider()->get_layers().at(poly->layer).name + "\n";
+                s += core_board.get_layer_provider().get_layers().at(poly->layer).name + "\n";
             }
         }
     }

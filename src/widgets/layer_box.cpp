@@ -166,7 +166,7 @@ void LayerBoxRow::set_force_visible(bool v)
     update_image();
 }
 
-LayerBox::LayerBox(LayerProvider *lpr, bool show_title)
+LayerBox::LayerBox(LayerProvider &lpr, bool show_title)
     : Glib::ObjectBase(typeid(LayerBox)), Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 2), lp(lpr),
       p_property_work_layer(*this, "work-layer"), p_property_layer_opacity(*this, "layer-opacity"),
       p_property_highlight_mode(*this, "highlight-mode"), p_property_layer_mode(*this, "layer-mode")
@@ -276,7 +276,7 @@ LayerBox::LayerBox(LayerProvider *lpr, bool show_title)
 
 void LayerBox::update()
 {
-    auto layers = lp->get_layers();
+    auto layers = lp.get_layers();
     std::set<int> layers_from_lp;
     std::set<int> layers_from_lb;
     for (const auto &it : layers) {

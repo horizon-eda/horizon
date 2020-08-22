@@ -198,9 +198,9 @@ std::string CorePadstack::get_display_name(ObjectType type, const UUID &uu)
     }
 }
 
-LayerProvider *CorePadstack::get_layer_provider()
+LayerProvider &CorePadstack::get_layer_provider()
 {
-    return &padstack;
+    return padstack;
 }
 
 std::map<UUID, Polygon> *CorePadstack::get_polygon_map()

@@ -23,7 +23,7 @@ void RuleEditorTrackWidth::populate()
 
     Gtk::Grid *layer_grid;
     builder->get_widget("layer_grid", layer_grid);
-    auto layers = core->get_layer_provider()->get_layers();
+    auto layers = core->get_layer_provider().get_layers();
     int top = 1;
     for (auto it = layers.rbegin(); it != layers.rend(); it++) {
         auto &la = it->second;

@@ -264,9 +264,9 @@ void CoreSymbol::history_load(unsigned int i)
     s_signal_rebuilt.emit();
 }
 
-LayerProvider *CoreSymbol::get_layer_provider()
+LayerProvider &CoreSymbol::get_layer_provider()
 {
-    return &sym;
+    return sym;
 }
 
 const Symbol *CoreSymbol::get_canvas_data()

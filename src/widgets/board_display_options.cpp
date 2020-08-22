@@ -12,7 +12,7 @@ class LayerOptionsExp : public Gtk::Expander {
 
 public:
     LayerOptionsExp(BoardDisplayOptionsBox *p, int l)
-        : Gtk::Expander(p->lp->get_layers().at(l).name), parent(p), layer(l)
+        : Gtk::Expander(p->lp.get_layers().at(l).name), parent(p), layer(l)
     {
         box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 2));
         add(*box);
@@ -130,7 +130,7 @@ private:
     }
 };
 
-BoardDisplayOptionsBox::BoardDisplayOptionsBox(LayerProvider *lpi) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 2), lp(lpi)
+BoardDisplayOptionsBox::BoardDisplayOptionsBox(LayerProvider &lpi) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 2), lp(lpi)
 {
     expander_all = Gtk::manage(new Gtk::Expander("Expand all"));
     expander_all->get_style_context()->add_class("dim-label");
@@ -174,7 +174,7 @@ void BoardDisplayOptionsBox::update()
 {
     std::set<int> layers_from_lp;
     std::set<int> layers_from_box;
-    for (const auto &it : lp->get_layers()) {
+    for (const auto &it : lp.get_layers()) {
         layers_from_lp.emplace(it.first);
     }
 
@@ -190,7 +190,7 @@ void BoardDisplayOptionsBox::update()
         }
     }
     for (auto layer : layers_from_lp) {
-        if (layers_from_box.count(layer) == 0 && lp->get_layers().at(layer).copper) { // need to add if copper
+        if (layers_from_box.count(layer) == 0 && lp.get_layers().at(layer).copper) { // need to add if copper
             auto optns = Gtk::manage(new LayerOptionsCopper(this, layer));
             optns->construct();
             pack_start(*optns, false, false, 0);

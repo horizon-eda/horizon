@@ -45,7 +45,7 @@ PDFLayerEditor::PDFLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::
     x->get_widget("layer_color", layer_color);
     parent->sg_layer_name->add_widget(*layer_checkbutton);
 
-    layer_checkbutton->set_label(parent->core->get_layer_provider()->get_layers().at(layer->layer).name);
+    layer_checkbutton->set_label(parent->core->get_layer_provider().get_layers().at(layer->layer).name);
     bind_widget(layer_checkbutton, layer->enabled);
     layer_checkbutton->signal_toggled().connect([this] { s_signal_changed.emit(); });
     {

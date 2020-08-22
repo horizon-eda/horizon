@@ -637,7 +637,7 @@ void ImpBase::run(int argc, char *argv[])
 
     main_window->signal_delete_event().connect(sigc::mem_fun(*this, &ImpBase::handle_close));
 
-    for (const auto &la : core->get_layer_provider()->get_layers()) {
+    for (const auto &la : core->get_layer_provider().get_layers()) {
         canvas->set_layer_display(la.first, LayerDisplay(true, LayerDisplay::Mode::FILL));
     }
 
@@ -1024,7 +1024,7 @@ void ImpBase::add_hamburger_menu()
 void ImpBase::layer_up_down(bool up)
 {
     int wl = canvas->property_work_layer();
-    auto layers = core->get_layer_provider()->get_layers();
+    auto layers = core->get_layer_provider().get_layers();
     std::vector<int> layer_indexes;
     layer_indexes.reserve(layers.size());
     std::transform(layers.begin(), layers.end(), std::back_inserter(layer_indexes),
@@ -1044,7 +1044,7 @@ void ImpBase::layer_up_down(bool up)
 
 void ImpBase::goto_layer(int layer)
 {
-    if (core->get_layer_provider()->get_layers().count(layer)) {
+    if (core->get_layer_provider().get_layers().count(layer)) {
         canvas->property_work_layer() = layer;
     }
 }
@@ -1247,7 +1247,7 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
                     if (display_name.size()) {
                         text += " " + display_name;
                     }
-                    auto layers = core->get_layer_provider()->get_layers();
+                    auto layers = core->get_layer_provider().get_layers();
                     if (layers.count(sr.layer)) {
                         text += " (" + layers.at(sr.layer).name + ")";
                     }

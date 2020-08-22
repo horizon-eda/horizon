@@ -45,7 +45,7 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
         }
         s += "Layers: ";
         for (auto layer : layers) {
-            s += core->get_layer_provider()->get_layers().at(layer).name + " ";
+            s += core->get_layer_provider().get_layers().at(layer).name + " ";
         }
         s += "\nTotal length: " + dim_to_string(length, false);
         sel_erase_type(sel, ObjectType::LINE);
@@ -64,7 +64,7 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
                 const auto pair = li->get_vertices_for_edge(it.vertex);
                 length += sqrt((li->vertices[pair.first].position - li->vertices[pair.second].position).mag_sq());
                 s += "Layer: ";
-                s += core->get_layer_provider()->get_layers().at(li->layer).name + " ";
+                s += core->get_layer_provider().get_layers().at(li->layer).name + " ";
                 s += "\nLength: " + dim_to_string(length, false);
                 sel_erase_type(sel, ObjectType::POLYGON_EDGE);
                 break;

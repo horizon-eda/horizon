@@ -513,9 +513,9 @@ void CoreBoard::rebuild(bool from_undo)
     std::cout << "rebuild took " << elapsed_secs << std::endl;
 }
 
-LayerProvider *CoreBoard::get_layer_provider()
+LayerProvider &CoreBoard::get_layer_provider()
 {
-    return &brd;
+    return brd;
 }
 
 const Board *CoreBoard::get_canvas_data()

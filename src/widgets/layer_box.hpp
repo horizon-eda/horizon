@@ -7,7 +7,7 @@
 namespace horizon {
 class LayerBox : public Gtk::Box {
 public:
-    LayerBox(class LayerProvider *lp, bool show_title = true);
+    LayerBox(class LayerProvider &lp, bool show_title = true);
     void set_layer_color(int layer, const Color &c);
     void update();
     Glib::PropertyProxy<int> property_work_layer()
@@ -39,7 +39,7 @@ public:
     void load_from_json(const json &j);
 
 private:
-    class LayerProvider *lp;
+    class LayerProvider &lp;
 
     Gtk::ListBox *lb = nullptr;
 

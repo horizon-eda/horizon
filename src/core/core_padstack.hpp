@@ -9,7 +9,7 @@ public:
     CorePadstack(const std::string &filename, IPool &pool);
     bool has_object_type(ObjectType ty) const override;
 
-    class LayerProvider *get_layer_provider() override;
+    class LayerProvider &get_layer_provider() override;
 
     void rebuild(bool from_undo = false) override;
 

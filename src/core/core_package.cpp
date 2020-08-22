@@ -42,9 +42,9 @@ bool CorePackage::has_object_type(ObjectType ty) const
     return false;
 }
 
-LayerProvider *CorePackage::get_layer_provider()
+LayerProvider &CorePackage::get_layer_provider()
 {
-    return &package;
+    return package;
 }
 
 Package &CorePackage::get_package()

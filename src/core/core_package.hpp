@@ -18,7 +18,7 @@ public:
     Hole *get_hole(const UUID &uu=true);
     void delete_hole(const UUID &uu);*/
 
-    class LayerProvider *get_layer_provider() override;
+    class LayerProvider &get_layer_provider() override;
 
     bool set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property,
                       const class PropertyValue &value) override;

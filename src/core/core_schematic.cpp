@@ -48,9 +48,9 @@ Block *CoreSchematic::get_block()
     return get_schematic()->block;
 }
 
-LayerProvider *CoreSchematic::get_layer_provider()
+LayerProvider &CoreSchematic::get_layer_provider()
 {
-    return get_sheet();
+    return *get_sheet();
 }
 
 Sheet *CoreSchematic::get_sheet()

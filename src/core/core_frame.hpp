@@ -12,7 +12,7 @@ public:
 
     Frame &get_frame() override;
     const Frame *get_canvas_data() const;
-    class LayerProvider *get_layer_provider() override;
+    class LayerProvider &get_layer_provider() override;
 
     void rebuild(bool from_undo = false) override;
 

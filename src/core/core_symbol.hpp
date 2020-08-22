@@ -28,7 +28,7 @@ public:
     SymbolPin &insert_symbol_pin(const UUID &uu) override;
     void delete_symbol_pin(const UUID &uu) override;
 
-    class LayerProvider *get_layer_provider() override;
+    class LayerProvider &get_layer_provider() override;
 
     std::vector<Line *> get_lines() override;
     std::vector<Arc *> get_arcs() override;

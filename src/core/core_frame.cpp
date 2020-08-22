@@ -58,9 +58,9 @@ void CoreFrame::rebuild(bool from_undo)
     Core::rebuild(from_undo);
 }
 
-LayerProvider *CoreFrame::get_layer_provider()
+LayerProvider &CoreFrame::get_layer_provider()
 {
-    return &frame;
+    return frame;
 }
 
 const Frame *CoreFrame::get_canvas_data() const

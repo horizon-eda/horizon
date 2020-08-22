@@ -46,7 +46,7 @@ public:
     std::vector<NetLabel *> get_net_labels() override;
 
     class Block *get_block() override;
-    class LayerProvider *get_layer_provider() override;
+    class LayerProvider &get_layer_provider() override;
 
     bool set_property(ObjectType type, const UUID &uu, ObjectProperty::ID property,
                       const class PropertyValue &value) override;

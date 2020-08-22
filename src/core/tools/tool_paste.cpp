@@ -56,7 +56,7 @@ private:
 
 void ToolPaste::fix_layer(int &la)
 {
-    if (doc.r->get_layer_provider()->get_layers().count(la) == 0) {
+    if (doc.r->get_layer_provider().get_layers().count(la) == 0) {
         la = 0;
     }
 }

@@ -486,7 +486,7 @@ void Core::layers_to_meta(PropertyMeta &meta)
 {
     PropertyMetaLayers &m = dynamic_cast<PropertyMetaLayers &>(meta);
     m.layers.clear();
-    for (const auto &it : get_layer_provider()->get_layers()) {
+    for (const auto &it : get_layer_provider().get_layers()) {
         m.layers.emplace(it.first, it.second);
     }
 }

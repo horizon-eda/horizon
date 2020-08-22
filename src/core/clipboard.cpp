@@ -54,7 +54,7 @@ void ClipboardManager::on_clipboard_get(Gtk::SelectionData &selection_data, guin
             cr->scale(1, -1);
             cr->translate(1e3, -1e3);
             CanvasCairo ca(cr);
-            ca.update(buffer, docs.r->get_layer_provider());
+            ca.update(buffer, &docs.r->get_layer_provider());
         }
         selection_data.set("image/svg+xml", stream.str());
     }

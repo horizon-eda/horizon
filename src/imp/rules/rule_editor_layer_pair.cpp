@@ -44,7 +44,7 @@ void RuleEditorLayerPair::populate()
 Gtk::ComboBoxText &RuleEditorLayerPair::make_layer_combo(int &v)
 {
     auto layer_combo = Gtk::manage(new Gtk::ComboBoxText());
-    for (const auto &it : core->get_layer_provider()->get_layers()) {
+    for (const auto &it : core->get_layer_provider().get_layers()) {
         if (it.second.copper)
             layer_combo->insert(0, std::to_string(it.first), it.second.name + ": " + std::to_string(it.first));
     }

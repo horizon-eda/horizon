@@ -39,7 +39,7 @@ void RuleEditorPlane::populate()
     grid->attach(*match_editor, 0, 1, 1, 1);
 
     auto *layer_combo = Gtk::manage(new Gtk::ComboBoxText());
-    for (const auto &it : core->get_layer_provider()->get_layers()) {
+    for (const auto &it : core->get_layer_provider().get_layers()) {
         if (it.second.copper)
             layer_combo->insert(0, std::to_string(it.first), it.second.name + ": " + std::to_string(it.first));
     }
