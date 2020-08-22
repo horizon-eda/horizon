@@ -177,8 +177,8 @@ void Buffer::load(std::set<SelectableRef> selection)
             net->net_class = &net_class_dummy;
         }
         else if (it.type == ObjectType::SYMBOL_PIN) {
-            auto x = doc.y->get_symbol_pin(it.uuid);
-            pins.emplace(x->uuid, *x);
+            auto &x = doc.y->get_symbol_pin(it.uuid);
+            pins.emplace(x.uuid, x);
         }
         else if (it.type == ObjectType::HOLE) {
             auto x = doc.r->get_hole(it.uuid);

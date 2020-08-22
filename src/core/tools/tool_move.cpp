@@ -156,7 +156,7 @@ Coordi ToolMove::get_selection_center()
             accu.accumulate(doc.b->get_board()->holes.at(it.uuid).placement.shift);
             break;
         case ObjectType::SYMBOL_PIN:
-            accu.accumulate(doc.y->get_symbol_pin(it.uuid)->position);
+            accu.accumulate(doc.y->get_symbol_pin(it.uuid).position);
             break;
         case ObjectType::SCHEMATIC_SYMBOL:
             accu.accumulate(doc.c->get_schematic_symbol(it.uuid)->placement.shift);

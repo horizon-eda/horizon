@@ -47,7 +47,7 @@ void ToolHelperMove::move_do(const Coordi &delta)
             doc.r->get_hole(it.uuid)->placement.shift += delta;
             break;
         case ObjectType::SYMBOL_PIN:
-            doc.y->get_symbol_pin(it.uuid)->position += delta;
+            doc.y->get_symbol_pin(it.uuid).position += delta;
             break;
         case ObjectType::SCHEMATIC_SYMBOL:
             doc.c->get_schematic_symbol(it.uuid)->placement.shift += delta;
@@ -207,9 +207,9 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
             break;
 
         case ObjectType::SYMBOL_PIN: {
-            SymbolPin *pin = doc.y->get_symbol_pin(it.uuid);
-            transform(pin->position, center, rotate);
-            pin->orientation = transform_orientation(pin->orientation, rotate);
+            auto &pin = doc.y->get_symbol_pin(it.uuid);
+            transform(pin.position, center, rotate);
+            pin.orientation = transform_orientation(pin.orientation, rotate);
         } break;
 
         case ObjectType::BUS_RIPPER: {

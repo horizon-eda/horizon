@@ -23,8 +23,8 @@ ToolResponse ToolChangeUnit::begin(const ToolArgs &args)
     if (auto r = imp->dialogs.select_unit(doc.r->get_pool())) {
         UUID unit_uuid = *r;
         auto new_unit = doc.r->get_pool().get_unit(unit_uuid);
-        auto sym = doc.y->get_symbol();
-        const auto old_unit = sym->unit;
+        auto &sym = doc.y->get_symbol();
+        const auto old_unit = sym.unit;
         std::map<UUID, UUID> pinmap; // old pin->new pin
         for (const auto &it : new_unit->pins) {
             auto pin_name = it.second.primary_name;
@@ -34,10 +34,10 @@ ToolResponse ToolChangeUnit::begin(const ToolArgs &args)
                 pinmap[it_old_pin->first] = it.first;
             }
         }
-        sym->unit = new_unit;
+        sym.unit = new_unit;
         for (const auto &[old_pin, new_pin] : pinmap) {
             if (new_pin != old_pin) {
-                auto &x = sym->pins.emplace(new_pin, sym->pins.at(old_pin)).first->second;
+                auto &x = sym.pins.emplace(new_pin, sym.pins.at(old_pin)).first->second;
                 x.uuid = new_pin;
             }
         }

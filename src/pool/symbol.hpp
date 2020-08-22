@@ -77,7 +77,6 @@ public:
     static Symbol new_from_file(const std::string &filename, IPool &pool);
     std::pair<Coordi, Coordi> get_bbox(bool all = false) const;
     virtual Junction *get_junction(const UUID &uu) override;
-    SymbolPin *get_symbol_pin(const UUID &uu);
 
     json serialize() const;
 

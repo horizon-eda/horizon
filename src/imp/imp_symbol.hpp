@@ -27,6 +27,7 @@ private:
     void canvas_update() override;
     void apply_preferences() override;
     CoreSymbol core_symbol;
+    Symbol &symbol;
     SearcherSymbol searcher;
 
     class HeaderButton *header_button = nullptr;

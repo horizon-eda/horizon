@@ -19,7 +19,7 @@ ToolResponse ToolResizeSymbol::begin(const ToolArgs &args)
 {
 
     pos_orig = args.coords;
-    const auto &sym = *doc.y->get_symbol();
+    const auto &sym = doc.y->get_symbol();
     for (const auto &it : sym.pins) {
         positions.emplace(std::piecewise_construct, std::forward_as_tuple(ObjectType::SYMBOL_PIN, it.first),
                           std::forward_as_tuple(it.second.position));
@@ -51,7 +51,7 @@ void ToolResizeSymbol::update_positions(const Coordi &ac)
         d.x *= -1;
     auto c = d + delta_key;
     imp->tool_bar_set_tip(coord_to_string(c, true));
-    auto &sym = *doc.y->get_symbol();
+    auto &sym = doc.y->get_symbol();
     for (auto &it : sym.pins) {
         const auto k = std::make_pair(ObjectType::SYMBOL_PIN, it.first);
         const auto &p = positions.at(k);

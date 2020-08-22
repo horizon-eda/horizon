@@ -209,10 +209,6 @@ Junction *Symbol::get_junction(const UUID &uu)
 {
     return junctions.count(uu) ? &junctions.at(uu) : nullptr;
 }
-SymbolPin *Symbol::get_symbol_pin(const UUID &uu)
-{
-    return pins.count(uu) ? &pins.at(uu) : nullptr;
-}
 
 void Symbol::update_refs()
 {

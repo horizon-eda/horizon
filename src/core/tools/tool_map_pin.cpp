@@ -4,8 +4,6 @@
 #include "imp/imp_interface.hpp"
 #include "tool_helper_move.hpp"
 #include "util/util.hpp"
-#include <algorithm>
-#include <iostream>
 #include "canvas/canvas_gl.hpp"
 
 namespace horizon {
@@ -28,28 +26,27 @@ void ToolMapPin::create_pin(const UUID &uu)
     pin_last2 = pin_last;
     pin_last = pin;
 
-    pin = doc.y->insert_symbol_pin(uu);
+    pin = &doc.y->insert_symbol_pin(uu);
     pin->length = 2.5_mm;
-    pin->name = doc.y->get_symbol()->unit->pins.at(uu).primary_name;
+    pin->name = doc.y->get_symbol().unit->pins.at(uu).primary_name;
     pin->orientation = orientation;
     update_annotation();
 }
 
 ToolResponse ToolMapPin::begin(const ToolArgs &args)
 {
-    std::cout << "tool map pin\n";
     bool from_sidebar = false;
     for (const auto &it : args.selection) {
         if (it.type == ObjectType::SYMBOL_PIN) {
-            if (doc.y->get_symbol()->pins.count(it.uuid) == 0) { // unplaced pin
-                pins.emplace_back(&doc.y->get_symbol()->unit->pins.at(it.uuid), false);
+            if (doc.y->get_symbol().pins.count(it.uuid) == 0) { // unplaced pin
+                pins.emplace_back(&doc.y->get_symbol().unit->pins.at(it.uuid), false);
                 from_sidebar = true;
             }
         }
     }
     if (pins.size() == 0) {
-        for (const auto &it : doc.y->get_pins()) {
-            pins.emplace_back(it, false);
+        for (const auto &it : doc.y->get_symbol().unit->pins) {
+            pins.emplace_back(&it.second, false);
         }
     }
     std::sort(pins.begin(), pins.end(), [](const auto &a, const auto &b) {
@@ -57,7 +54,7 @@ ToolResponse ToolMapPin::begin(const ToolArgs &args)
     });
 
     for (auto &it : pins) {
-        if (doc.y->get_symbol_pin(it.first->uuid)) {
+        if (doc.y->get_symbol().pins.count(it.first->uuid)) {
             it.second = true;
         }
     }
@@ -175,7 +172,7 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
         case InToolActionID::RMB:
         case InToolActionID::CANCEL:
             if (pin) {
-                doc.y->get_symbol()->pins.erase(pin->uuid);
+                doc.y->get_symbol().pins.erase(pin->uuid);
             }
             return ToolResponse::commit();
 
@@ -208,7 +205,7 @@ ToolResponse ToolMapPin::update(const ToolArgs &args)
         case InToolActionID::EDIT: {
             if (auto r = imp->dialogs.map_pin(pins)) {
                 UUID selected_pin = *r;
-                doc.y->get_symbol()->pins.erase(pin->uuid);
+                doc.y->get_symbol().pins.erase(pin->uuid);
 
                 auto x = std::find_if(pins.begin(), pins.end(),
                                       [selected_pin](const auto &a) { return a.first->uuid == selected_pin; });

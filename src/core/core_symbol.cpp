@@ -52,9 +52,9 @@ Line *CoreSymbol::get_line(const UUID &uu)
 {
     return &sym.lines.at(uu);
 }
-SymbolPin *CoreSymbol::get_symbol_pin(const UUID &uu)
+SymbolPin &CoreSymbol::get_symbol_pin(const UUID &uu)
 {
-    return sym.get_symbol_pin(uu);
+    return sym.pins.at(uu);
 }
 Arc *CoreSymbol::get_arc(const UUID &uu)
 {
@@ -95,10 +95,9 @@ void CoreSymbol::delete_symbol_pin(const UUID &uu)
 {
     sym.pins.erase(uu);
 }
-SymbolPin *CoreSymbol::insert_symbol_pin(const UUID &uu)
+SymbolPin &CoreSymbol::insert_symbol_pin(const UUID &uu)
 {
-    auto x = sym.pins.emplace(std::make_pair(uu, uu));
-    return &(x.first->second);
+    return sym.pins.emplace(uu, uu).first->second;
 }
 
 std::vector<Line *> CoreSymbol::get_lines()
@@ -114,15 +113,6 @@ std::vector<Arc *> CoreSymbol::get_arcs()
 {
     std::vector<Arc *> r;
     for (auto &it : sym.arcs) {
-        r.push_back(&it.second);
-    }
-    return r;
-}
-
-std::vector<const Pin *> CoreSymbol::get_pins()
-{
-    std::vector<const Pin *> r;
-    for (auto &it : sym.unit->pins) {
         r.push_back(&it.second);
     }
     return r;
@@ -248,7 +238,7 @@ std::string CoreSymbol::get_display_name(ObjectType type, const UUID &uu)
 {
     switch (type) {
     case ObjectType::SYMBOL_PIN:
-        return get_symbol_pin(uu)->name;
+        return get_symbol_pin(uu).name;
 
     default:
         return Core::get_display_name(type, uu);
@@ -296,9 +286,9 @@ std::pair<Coordi, Coordi> CoreSymbol::get_bbox()
     return bb;
 }
 
-Symbol *CoreSymbol::get_symbol()
+Symbol &CoreSymbol::get_symbol()
 {
-    return &sym;
+    return sym;
 }
 
 void CoreSymbol::reload_pool()
