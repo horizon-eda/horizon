@@ -44,7 +44,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/transform.hpp>
 
-namespace STEPImporter {
+namespace horizon::STEPImporter {
 
 // adapted from
 // https://github.com/KiCad/kicad-source-mirror/blob/master/plugins/3d/oce/loadmodel.cpp
@@ -366,4 +366,4 @@ std::deque<Face> import(const std::string &filename)
 
     return faces;
 }
-} // namespace STEPImporter
+} // namespace horizon::STEPImporter

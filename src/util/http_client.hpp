@@ -3,7 +3,7 @@
 #include <curl/curl.h>
 #include <string>
 
-namespace HTTP {
+namespace horizon::HTTP {
 class Client {
     friend size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp);
 
@@ -50,4 +50,4 @@ public:
 private:
     const std::string base_url;
 };
-} // namespace HTTP
+} // namespace horizon::HTTP

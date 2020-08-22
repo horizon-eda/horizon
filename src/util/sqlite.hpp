@@ -4,7 +4,7 @@
 #include <string>
 #include <tuple>
 
-namespace SQLite {
+namespace horizon::SQLite {
 class noncopyable {
 protected:
     noncopyable() = default;
@@ -73,4 +73,4 @@ public:
 private:
     sqlite3 *db = nullptr;
 };
-} // namespace SQLite
+} // namespace horizon::SQLite

@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-namespace CSV {
+namespace horizon::CSV {
 
 class Csv {
 public:
@@ -46,4 +46,4 @@ private:
 
 std::istream &operator>>(std::istream &is, Csv &obj);
 
-} // namespace CSV
+} // namespace horizon::CSV

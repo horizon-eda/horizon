@@ -1,8 +1,7 @@
 #include "bitmap_font_util.hpp"
 #include <epoxy/gl.h>
 
-namespace horizon {
-namespace bitmap_font {
+namespace horizon::bitmap_font {
 #include "bitmap_font/bitmap_font_img.c"
 #include "bitmap_font/bitmap_font_desc.c"
 void load_texture()
@@ -39,5 +38,4 @@ float get_min_y()
 {
     return font_information.min_y;
 }
-} // namespace bitmap_font
-} // namespace horizon
+} // namespace horizon::bitmap_font

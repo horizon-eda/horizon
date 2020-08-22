@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include "nlohmann/json.hpp"
 
-namespace HTTP {
+namespace horizon::HTTP {
 
 static size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp)
 {
@@ -120,4 +120,4 @@ json RESTClient::post(const std::string &url, const json &postdata_j)
     return json::parse(Client::post(base_url + url, postdata_j.dump()));
 }
 
-} // namespace HTTP
+} // namespace horizon::HTTP

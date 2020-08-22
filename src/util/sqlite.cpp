@@ -3,7 +3,7 @@
 #include <string.h>
 #include "util/util.hpp"
 
-namespace SQLite {
+namespace horizon::SQLite {
 
 static char *my_strndup(const char *src, size_t len)
 {
@@ -140,4 +140,4 @@ Database::~Database()
         std::cout << "error closing database" << std::endl;
     }
 }
-} // namespace SQLite
+} // namespace horizon::SQLite

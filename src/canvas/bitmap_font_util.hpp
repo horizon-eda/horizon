@@ -1,7 +1,6 @@
 #pragma once
 
-namespace horizon {
-namespace bitmap_font {
+namespace horizon::bitmap_font {
 void load_texture();
 
 class GlyphInfo {
@@ -20,5 +19,4 @@ public:
 GlyphInfo get_glyph_info(unsigned int glyph);
 unsigned int get_smooth_pixels();
 float get_min_y();
-} // namespace bitmap_font
-} // namespace horizon
+} // namespace horizon::bitmap_font

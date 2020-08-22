@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-namespace STEPImporter {
+namespace horizon::STEPImporter {
 class Color {
 public:
     float r;
@@ -34,4 +34,4 @@ public:
 };
 
 std::deque<Face> import(const std::string &filename);
-} // namespace STEPImporter
+} // namespace horizon::STEPImporter

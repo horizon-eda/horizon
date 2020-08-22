@@ -7,11 +7,11 @@
 #include "../pool_notebook.hpp" //for processes
 #include "util/window_state_store.hpp"
 
+namespace horizon {
+
 namespace CSV {
 class Csv;
 }
-
-namespace horizon {
 
 class PartWizard : public Gtk::Window {
     friend class PadEditor;

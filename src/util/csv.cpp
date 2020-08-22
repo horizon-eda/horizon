@@ -1,7 +1,7 @@
 #include "csv.hpp"
 #include <istream>
 
-namespace CSV {
+namespace horizon::CSV {
 Csv::Csv(const std::string &adelim) : delim(adelim)
 {
 }
@@ -112,4 +112,4 @@ std::istream &operator>>(std::istream &is, Csv &csv)
     return is;
 }
 
-} // namespace CSV
+} // namespace horizon::CSV
