@@ -1,4 +1,4 @@
-#include "pool.hpp"
+#include "ipool.hpp"
 #include "package.hpp"
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
@@ -57,7 +57,7 @@ json Package::Model::serialize() const
     return j;
 }
 
-Package::Package(const UUID &uu, const json &j, Pool &pool)
+Package::Package(const UUID &uu, const json &j, IPool &pool)
     : uuid(uu), name(j.at("name").get<std::string>()), manufacturer(j.value("manufacturer", "")),
       parameter_program(this, j.value("parameter_program", ""))
 {
@@ -66,35 +66,35 @@ Package::Package(const UUID &uu, const json &j, Pool &pool)
         const json &o = j.at("junctions");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            junctions.emplace(std::make_pair(u, Junction(u, it.value())));
+            junctions.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
         }
     }
     {
         const json &o = j.at("lines");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            lines.emplace(std::make_pair(u, Line(u, it.value(), *this)));
+            lines.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
         }
     }
     {
         const json &o = j.at("arcs");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            arcs.emplace(std::make_pair(u, Arc(u, it.value(), *this)));
+            arcs.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
         }
     }
     {
         const json &o = j.at("texts");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            texts.emplace(std::make_pair(u, Text(u, it.value())));
+            texts.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
         }
     }
     {
         const json &o = j.at("pads");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            pads.emplace(std::make_pair(u, Pad(u, it.value(), pool)));
+            pads.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), pool));
         }
     }
 
@@ -102,7 +102,7 @@ Package::Package(const UUID &uu, const json &j, Pool &pool)
         const json &o = j["polygons"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            polygons.emplace(std::make_pair(u, Polygon(u, it.value())));
+            polygons.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
         }
     }
     if (j.count("keepouts")) {
@@ -161,7 +161,7 @@ Package::Package(const UUID &uu, const json &j, Pool &pool)
     }
 }
 
-Package Package::new_from_file(const std::string &filename, Pool &pool)
+Package Package::new_from_file(const std::string &filename, IPool &pool)
 {
     auto j = load_json_from_file(filename);
     return Package(UUID(j.at("uuid").get<std::string>()), j, pool);
@@ -215,7 +215,7 @@ void Package::operator=(Package const &pkg)
     update_refs();
 }
 
-void Package::update_refs(Pool &pool)
+void Package::update_refs(IPool &pool)
 {
     for (auto &it : pads) {
         it.second.pool_padstack = pool.get_padstack(it.second.pool_padstack.uuid);

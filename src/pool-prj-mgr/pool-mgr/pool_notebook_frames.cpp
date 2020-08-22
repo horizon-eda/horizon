@@ -72,7 +72,7 @@ void PoolNotebook::handle_duplicate_frame(const UUID &uu)
 
 void PoolNotebook::construct_frames()
 {
-    auto br = Gtk::manage(new PoolBrowserFrame(&pool));
+    auto br = Gtk::manage(new PoolBrowserFrame(pool));
     br->set_show_path(true);
     browsers.emplace(ObjectType::FRAME, br);
     br->show();

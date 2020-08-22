@@ -16,9 +16,9 @@ class BOMExportWindow : public Gtk::Window, public Changeable {
 
 public:
     BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Block *block,
-                    class BOMExportSettings *settings, class Pool &pool, const std::string &project_dir);
+                    class BOMExportSettings *settings, class IPool &pool, const std::string &project_dir);
     static BOMExportWindow *create(Gtk::Window *p, class Block *block, class BOMExportSettings *settings,
-                                   class Pool &pool, const std::string &project_dir);
+                                   class IPool &pool, const std::string &project_dir);
 
     void set_can_export(bool v);
     void generate();
@@ -29,7 +29,7 @@ public:
 private:
     class Block *block;
     class BOMExportSettings *settings;
-    class Pool &pool;
+    class IPool &pool;
     PoolParametric pool_parametric;
 
     void update_concrete_parts();

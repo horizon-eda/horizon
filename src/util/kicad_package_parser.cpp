@@ -4,12 +4,12 @@
 #include "sexpr/sexpr.h"
 #include "util/util.hpp"
 #include "board/board_layers.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "logger/logger.hpp"
 
 namespace horizon {
 
-KiCadPackageParser::KiCadPackageParser(Package &p, Pool *po) : package(p), pool(po)
+KiCadPackageParser::KiCadPackageParser(Package &p, IPool &po) : package(p), pool(po)
 {
 }
 
@@ -213,7 +213,7 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
     }
     const Padstack *padstack = nullptr;
     if (padstack_name.size()) {
-        padstack = pool->get_well_known_padstack(padstack_name);
+        padstack = pool.get_well_known_padstack(padstack_name);
         if (!padstack) {
             Logger::get().log_warning("Well-kown padstack '" + padstack_name + "' not found in pool",
                                       Logger::Domain::TOOL);

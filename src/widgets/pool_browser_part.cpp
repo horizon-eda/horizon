@@ -1,11 +1,12 @@
 #include "pool_browser_part.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
+#include "util/sqlite.hpp"
 #include "pool/part.hpp"
 #include "widgets/tag_entry.hpp"
 #include <set>
 
 namespace horizon {
-PoolBrowserPart::PoolBrowserPart(Pool *p, const UUID &uu) : PoolBrowserStockinfo(p), entity_uuid(uu)
+PoolBrowserPart::PoolBrowserPart(IPool &p, const UUID &uu) : PoolBrowserStockinfo(p), entity_uuid(uu)
 {
     construct();
     MPN_entry = create_search_entry("MPN");
@@ -115,7 +116,7 @@ void PoolBrowserPart::search()
              "AND (parts.entity=$entity or $entity_all) ";
     query << sort_controller->get_order_by();
     std::cout << query.str() << std::endl;
-    SQLite::Query q(pool->db, query.str());
+    SQLite::Query q(pool.get_db(), query.str());
     q.bind("$mpn", "%" + MPN_search + "%");
     q.bind("$desc", "%" + desc_search + "%");
     q.bind("$manufacturer", "%" + manufacturer_search + "%");
@@ -188,7 +189,7 @@ PoolBrowser::PoolItemSource PoolBrowserPart::pool_item_source_from_row(const Gtk
 void PoolBrowserPart::add_copy_name_context_menu_item()
 {
     add_context_menu_item("Copy MPN", [this](const UUID &uu) {
-        auto part = pool->get_part(uu);
+        auto part = pool.get_part(uu);
         auto clip = Gtk::Clipboard::get();
         clip->set_text(part->get_MPN());
     });

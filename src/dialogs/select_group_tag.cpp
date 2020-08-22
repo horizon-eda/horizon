@@ -26,7 +26,7 @@ void SelectGroupTagDialog::row_activated(const Gtk::TreeModel::Path &path, Gtk::
     }
 }
 
-SelectGroupTagDialog::SelectGroupTagDialog(Gtk::Window *parent, const Block *block, bool tag_mode)
+SelectGroupTagDialog::SelectGroupTagDialog(Gtk::Window *parent, const Block &block, bool tag_mode)
     : Gtk::Dialog(tag_mode ? "Select tag" : "Select group", *parent,
                   Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
 {
@@ -37,7 +37,7 @@ SelectGroupTagDialog::SelectGroupTagDialog(Gtk::Window *parent, const Block *blo
 
     button_ok->signal_clicked().connect(sigc::mem_fun(*this, &SelectGroupTagDialog::ok_clicked));
 
-    const auto &names = tag_mode ? block->tag_names : block->group_names;
+    const auto &names = tag_mode ? block.tag_names : block.group_names;
 
     std::vector<std::pair<UUID, std::string>> names_sorted;
     for (const auto &it : names) {
@@ -54,7 +54,7 @@ SelectGroupTagDialog::SelectGroupTagDialog(Gtk::Window *parent, const Block *blo
             row[list_columns.uuid] = it.first;
             row[list_columns.name] = it.second;
             std::vector<const Component *> comps;
-            for (const auto &it_comp : block->components) {
+            for (const auto &it_comp : block.components) {
                 if (tag_mode) {
                     if (it_comp.second.tag == it.first) {
                         comps.push_back(&it_comp.second);

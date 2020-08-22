@@ -4,7 +4,7 @@
 #include "schematic/schematic.hpp"
 #include "imp/imp_interface.hpp"
 #include "pool/part.hpp"
-#include <iostream>
+#include "pool/pool.hpp"
 
 namespace horizon {
 
@@ -39,7 +39,6 @@ const Entity *ToolAssignPart::get_entity()
 
 ToolResponse ToolAssignPart::begin(const ToolArgs &args)
 {
-    std::cout << "tool assing part\n";
     const Entity *entity = get_entity();
 
     if (!entity) {
@@ -56,7 +55,7 @@ ToolResponse ToolAssignPart::begin(const ToolArgs &args)
         }
     }
     if (part_uuid) {
-        auto part = doc.r->get_pool()->get_part(part_uuid);
+        auto part = doc.r->get_pool().get_part(part_uuid);
         if (part->entity->uuid != entity->uuid) {
             imp->tool_bar_flash("wrong entity");
             return ToolResponse::end();

@@ -1,9 +1,10 @@
 #include "pool_browser_padstack.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
+#include "util/sqlite.hpp"
 #include <set>
 
 namespace horizon {
-PoolBrowserPadstack::PoolBrowserPadstack(Pool *p) : PoolBrowser(p)
+PoolBrowserPadstack::PoolBrowserPadstack(IPool &p) : PoolBrowser(p)
 {
     construct();
     name_entry = create_search_entry("Name");
@@ -52,7 +53,7 @@ void PoolBrowserPadstack::search()
 
     std::string name_search = name_entry->get_text();
 
-    SQLite::Query q(pool->db,
+    SQLite::Query q(pool.get_db(),
                     "SELECT padstacks.uuid, padstacks.name, padstacks.type, "
                     "packages.name, padstacks.filename, padstacks.pool_uuid, padstacks.overridden FROM padstacks LEFT "
                     "JOIN packages ON padstacks.package = packages.uuid WHERE "

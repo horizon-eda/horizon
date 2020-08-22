@@ -1,5 +1,5 @@
 #include "pool_browser_parametric.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "pool/part.hpp"
 #include "util/util.hpp"
 
@@ -65,8 +65,7 @@ static double string_to_double(const std::string &s)
 
 class ParametricFilterBox : public Gtk::Box {
 public:
-    ParametricFilterBox(PoolParametric *p, const PoolParametric::Column &col)
-        : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4), pool(p), column(col)
+    ParametricFilterBox(const PoolParametric::Column &col) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4), column(col)
     {
         store = Gtk::ListStore::create(list_columns);
         if (col.type == PoolParametric::Column::Type::QUANTITY) {
@@ -188,7 +187,6 @@ public:
     }
 
 private:
-    PoolParametric *pool;
     const PoolParametric::Column &column;
     Gtk::TreeView *view = nullptr;
     class ListColumns : public Gtk::TreeModelColumnRecord {
@@ -207,8 +205,8 @@ private:
     type_signal_activated s_signal_activated;
 };
 
-PoolBrowserParametric::PoolBrowserParametric(Pool *p, PoolParametric *pp, const std::string &table_name)
-    : PoolBrowserStockinfo(p), pool_parametric(pp), table(pp->get_tables().at(table_name)), list_columns(table)
+PoolBrowserParametric::PoolBrowserParametric(IPool &p, PoolParametric &pp, const std::string &table_name)
+    : PoolBrowserStockinfo(p), pool_parametric(pp), table(pp.get_tables().at(table_name)), list_columns(table)
 {
     search_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
     search_box->property_margin() = 10;
@@ -216,7 +214,7 @@ PoolBrowserParametric::PoolBrowserParametric(Pool *p, PoolParametric *pp, const 
     auto filters_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10));
 
     auto add_filter_col = [this, &filters_box](auto &col) {
-        auto fbox = Gtk::manage(new ParametricFilterBox(pool_parametric, col));
+        auto fbox = Gtk::manage(new ParametricFilterBox(col));
         fbox->signal_activated().connect([this] {
             apply_filters();
             search();
@@ -228,7 +226,7 @@ PoolBrowserParametric::PoolBrowserParametric(Pool *p, PoolParametric *pp, const 
         columns.emplace(col.name, col);
     };
 
-    for (const auto &col : pool_parametric->get_extra_columns()) {
+    for (const auto &col : pool_parametric.get_extra_columns()) {
         add_filter_col(col);
     }
 
@@ -393,7 +391,7 @@ void PoolBrowserParametric::search()
     }
     qs += sort_controller->get_order_by();
     std::cout << qs << std::endl;
-    SQLite::Query q(pool_parametric->db, qs);
+    SQLite::Query q(pool_parametric.db, qs);
     bind_set(q, "_manufacturer", manufacturers);
     bind_set(q, "_package", packages);
     if (similar_part_uuid) {
@@ -533,7 +531,7 @@ PoolBrowser::PoolItemSource PoolBrowserParametric::pool_item_source_from_row(con
 void PoolBrowserParametric::add_copy_name_context_menu_item()
 {
     add_context_menu_item("Copy MPN", [this](const UUID &uu) {
-        auto part = pool->get_part(uu);
+        auto part = pool.get_part(uu);
         auto clip = Gtk::Clipboard::get();
         clip->set_text(part->get_MPN());
     });
@@ -551,7 +549,7 @@ void PoolBrowserParametric::set_similar_part_uuid(const UUID &uu)
 
 void PoolBrowserParametric::filter_similar(const UUID &uu, float tol)
 {
-    auto part = pool->get_part(uu);
+    auto part = pool.get_part(uu);
     if (part->parametric.count("table") == 0)
         return;
     if (part->parametric.at("table") != table.name)

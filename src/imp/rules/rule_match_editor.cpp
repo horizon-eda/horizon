@@ -26,8 +26,7 @@ RuleMatchEditor::RuleMatchEditor(RuleMatch *ma, class IDocument *c)
 
     sel_stack = Gtk::manage(new Gtk::Stack());
     sel_stack->set_homogeneous(true);
-    Block *block = core->get_block();
-    assert(block);
+    Block &block = *core->get_block();
 
     net_button = Gtk::manage(new NetButton(block));
     net_button->set_net(match->net);

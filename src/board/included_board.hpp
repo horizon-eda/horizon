@@ -1,7 +1,6 @@
 #pragma once
 #include "util/uuid.hpp"
 #include "nlohmann/json_fwd.hpp"
-#include "pool/pool_cached.hpp"
 #include <memory>
 
 namespace horizon {

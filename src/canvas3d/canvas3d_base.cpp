@@ -10,6 +10,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glibmm/miscutils.h>
 #include "pool/pool_manager.hpp"
+#include "pool/ipool.hpp"
 
 namespace horizon {
 
@@ -358,7 +359,7 @@ void Canvas3DBase::load_3d_model(const std::string &filename, const std::string 
 }
 
 
-std::map<std::string, std::string> Canvas3DBase::get_model_filenames(Pool &pool)
+std::map<std::string, std::string> Canvas3DBase::get_model_filenames(IPool &pool)
 {
     std::map<std::string, std::string> model_filenames; // first: relative, second: absolute
     for (const auto &it : brd->packages) {

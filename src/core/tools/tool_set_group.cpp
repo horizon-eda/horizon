@@ -53,7 +53,7 @@ bool ToolSetGroup::can_begin()
 ToolResponse ToolSetGroup::begin(const ToolArgs &args)
 {
     auto comps = get_components();
-    auto block = doc.c->get_block();
+    auto &block = *doc.c->get_block();
     switch (tool_id) {
     case ToolID::SET_GROUP:
     case ToolID::SET_NEW_GROUP:
@@ -62,7 +62,7 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
         if (tool_id == ToolID::SET_NEW_GROUP) {
             new_group = UUID::random();
             if (auto r = imp->dialogs.ask_datum_string("Group name", "")) {
-                block->group_names[new_group] = *r;
+                block.group_names[new_group] = *r;
             }
             else {
                 return ToolResponse::end();
@@ -88,7 +88,7 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
         if (tool_id == ToolID::SET_NEW_TAG) {
             new_tag = UUID::random();
             if (auto r = imp->dialogs.ask_datum_string("Tag name", "")) {
-                block->tag_names[new_tag] = *r;
+                block.tag_names[new_tag] = *r;
             }
             else {
                 return ToolResponse::end();
@@ -109,9 +109,9 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
 
     case ToolID::RENAME_GROUP: {
         auto comp = *comps.begin();
-        if (auto r = imp->dialogs.ask_datum_string("Group name", block->get_group_name(comp->group))) {
+        if (auto r = imp->dialogs.ask_datum_string("Group name", block.get_group_name(comp->group))) {
             if (comp->group)
-                block->group_names[comp->group] = *r;
+                block.group_names[comp->group] = *r;
         }
         else {
             return ToolResponse::end();
@@ -120,9 +120,9 @@ ToolResponse ToolSetGroup::begin(const ToolArgs &args)
 
     case ToolID::RENAME_TAG: {
         auto comp = *comps.begin();
-        if (auto r = imp->dialogs.ask_datum_string("Tag name", block->get_tag_name(comp->tag))) {
+        if (auto r = imp->dialogs.ask_datum_string("Tag name", block.get_tag_name(comp->tag))) {
             if (comp->tag)
-                block->tag_names[comp->tag] = *r;
+                block.tag_names[comp->tag] = *r;
         }
         else {
             return ToolResponse::end();

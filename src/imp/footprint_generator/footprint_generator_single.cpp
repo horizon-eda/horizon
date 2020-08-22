@@ -1,7 +1,8 @@
 #include "footprint_generator_single.hpp"
 #include "widgets/pool_browser_button.hpp"
 #include "document/idocument_package.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
+#include "pool/package.hpp"
 
 namespace horizon {
 FootprintGeneratorSingle::FootprintGeneratorSingle(IDocumentPackage *c)
@@ -68,7 +69,7 @@ bool FootprintGeneratorSingle::generate()
     int64_t pad_width = sp_pad_width->get_value_as_int();
     int64_t pad_height = sp_pad_height->get_value_as_int();
     int64_t y0 = (pad_count - 1) * (pitch / 2);
-    auto padstack = core->get_pool()->get_padstack(browser_button->property_selected_uuid());
+    auto padstack = core->get_pool().get_padstack(browser_button->property_selected_uuid());
     for (unsigned int i = 0; i < pad_count; i++) {
         auto uu = UUID::random();
         auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;

@@ -75,9 +75,9 @@ FabOutputSettings::FabOutputSettings(const json &j)
     }
 }
 
-void FabOutputSettings::update_for_board(const Board *brd)
+void FabOutputSettings::update_for_board(const Board &brd)
 {
-    auto layers_from_board = brd->get_layers();
+    auto layers_from_board = brd.get_layers();
     // remove layers not on board
     map_erase_if(layers, [layers_from_board](const auto &it) { return layers_from_board.count(it.first) == 0; });
 

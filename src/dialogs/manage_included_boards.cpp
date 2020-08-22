@@ -5,6 +5,7 @@
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
 #include "board/board.hpp"
+#include "pool/pool_cached.hpp"
 
 namespace horizon {
 

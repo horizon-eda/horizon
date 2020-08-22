@@ -4,6 +4,7 @@
 #include "rule_match_editor.hpp"
 #include "widgets/chooser_buttons.hpp"
 #include "widgets/plane_editor.hpp"
+#include "common/layer_provider.hpp"
 
 namespace horizon {
 void RuleEditorPlane::populate()

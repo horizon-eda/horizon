@@ -12,7 +12,7 @@ using json = nlohmann::json;
 
 class Gate {
 public:
-    Gate(const UUID &uu, const json &, class Pool &pool);
+    Gate(const UUID &uu, const json &, class IPool &pool);
     Gate(const UUID &uu);
     UUID get_uuid() const;
     UUID uuid;

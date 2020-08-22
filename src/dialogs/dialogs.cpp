@@ -37,6 +37,8 @@
 #include "enter_datum_window.hpp"
 #include "router_settings_window.hpp"
 #include <glibmm.h>
+#include "pool/ipool.hpp"
+#include "widgets/net_selector.hpp"
 
 namespace horizon {
 void Dialogs::set_parent(Gtk::Window *w)
@@ -72,7 +74,7 @@ std::optional<UUIDPath<2>> Dialogs::map_symbol(const std::map<UUIDPath<2>, std::
     }
 }
 
-std::optional<UUID> Dialogs::select_symbol(Pool *pool, const UUID &unit_uuid)
+std::optional<UUID> Dialogs::select_symbol(IPool &pool, const UUID &unit_uuid)
 {
     PoolBrowserDialog dia(parent, ObjectType::SYMBOL, pool);
     auto br = dynamic_cast<PoolBrowserSymbol *>(dia.get_browser());
@@ -86,7 +88,7 @@ std::optional<UUID> Dialogs::select_symbol(Pool *pool, const UUID &unit_uuid)
     }
 }
 
-std::optional<UUID> Dialogs::select_padstack(Pool *pool, const UUID &package_uuid)
+std::optional<UUID> Dialogs::select_padstack(IPool &pool, const UUID &package_uuid)
 {
     PoolBrowserDialog dia(parent, ObjectType::PADSTACK, pool);
     auto br = dynamic_cast<PoolBrowserPadstack *>(dia.get_browser());
@@ -100,7 +102,7 @@ std::optional<UUID> Dialogs::select_padstack(Pool *pool, const UUID &package_uui
     }
 }
 
-std::optional<UUID> Dialogs::select_hole_padstack(Pool *pool)
+std::optional<UUID> Dialogs::select_hole_padstack(IPool &pool)
 {
     PoolBrowserDialog dia(parent, ObjectType::PADSTACK, pool);
     auto br = dynamic_cast<PoolBrowserPadstack *>(dia.get_browser());
@@ -117,7 +119,7 @@ std::optional<UUID> Dialogs::select_hole_padstack(Pool *pool)
     }
 }
 
-std::optional<UUID> Dialogs::select_entity(Pool *pool)
+std::optional<UUID> Dialogs::select_entity(IPool &pool)
 {
     PoolBrowserDialog dia(parent, ObjectType::ENTITY, pool);
     if (dia.run() == Gtk::RESPONSE_OK) {
@@ -128,7 +130,7 @@ std::optional<UUID> Dialogs::select_entity(Pool *pool)
     }
 }
 
-std::optional<UUID> Dialogs::select_unit(Pool *pool)
+std::optional<UUID> Dialogs::select_unit(IPool &pool)
 {
     PoolBrowserDialog dia(parent, ObjectType::UNIT, pool);
     if (dia.run() == Gtk::RESPONSE_OK) {
@@ -139,7 +141,7 @@ std::optional<UUID> Dialogs::select_unit(Pool *pool)
     }
 }
 
-std::optional<UUID> Dialogs::select_net(class Block *block, bool power_only, const UUID &net_default)
+std::optional<UUID> Dialogs::select_net(const Block &block, bool power_only, const UUID &net_default)
 {
     SelectNetDialog dia(parent, block, "Select net");
     dia.net_selector->set_power_only(power_only);
@@ -152,7 +154,7 @@ std::optional<UUID> Dialogs::select_net(class Block *block, bool power_only, con
         return {};
     }
 }
-std::optional<UUID> Dialogs::select_bus(class Block *block)
+std::optional<UUID> Dialogs::select_bus(const Block &block)
 {
     SelectNetDialog dia(parent, block, "Select bus");
     dia.net_selector->set_bus_mode(true);
@@ -164,7 +166,7 @@ std::optional<UUID> Dialogs::select_bus(class Block *block)
         return {};
     }
 }
-std::optional<UUID> Dialogs::select_bus_member(class Block *block, const UUID &bus_uuid)
+std::optional<UUID> Dialogs::select_bus_member(const Block &block, const UUID &bus_uuid)
 {
     SelectNetDialog dia(parent, block, "Select bus member");
     dia.net_selector->set_bus_member_mode(bus_uuid);
@@ -177,7 +179,7 @@ std::optional<UUID> Dialogs::select_bus_member(class Block *block, const UUID &b
     }
 }
 
-std::optional<UUID> Dialogs::select_group_tag(const class Block *block, bool tag_mode, const UUID &current)
+std::optional<UUID> Dialogs::select_group_tag(const Block &block, bool tag_mode, const UUID &current)
 {
     SelectGroupTagDialog dia(parent, block, tag_mode);
     auto r = dia.run();
@@ -213,25 +215,25 @@ bool Dialogs::edit_via(std::set<class Via *> &vias, class ViaPadstackProvider &v
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-unsigned int Dialogs::ask_net_merge(Net *net, Net *into)
+unsigned int Dialogs::ask_net_merge(Net &net, Net &into)
 {
     AskNetMergeDialog dia(parent, net, into);
     return dia.run();
 }
 
-bool Dialogs::manage_buses(Block *b)
+bool Dialogs::manage_buses(Block &b)
 {
     ManageBusesDialog dia(parent, b);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::manage_net_classes(Block *b)
+bool Dialogs::manage_net_classes(Block &b)
 {
     ManageNetClassesDialog dia(parent, b);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::manage_power_nets(Block *b)
+bool Dialogs::manage_power_nets(Block &b)
 {
     ManagePowerNetsDialog dia(parent, b);
     return dia.run() == Gtk::RESPONSE_OK;
@@ -243,31 +245,31 @@ bool Dialogs::manage_included_boards(Board &b)
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::annotate(Schematic *s)
+bool Dialogs::annotate(Schematic &s)
 {
     AnnotateDialog dia(parent, s);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_pad_parameter_set(std::set<class Pad *> &pads, Pool *pool, class Package *pkg)
+bool Dialogs::edit_pad_parameter_set(std::set<class Pad *> &pads, IPool &pool, class Package &pkg)
 {
     PadParameterSetDialog dia(parent, pads, pool, pkg);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_board_hole(std::set<class BoardHole *> &holes, Pool *pool, Block *block)
+bool Dialogs::edit_board_hole(std::set<class BoardHole *> &holes, IPool &pool, Block &block)
 {
     BoardHoleDialog dia(parent, holes, pool, block);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_schematic_properties(class Schematic *sch, class Pool *pool)
+bool Dialogs::edit_schematic_properties(class Schematic &sch, class IPool &pool)
 {
     SchematicPropertiesDialog dia(parent, sch, pool);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_frame_properties(class Frame *fr)
+bool Dialogs::edit_frame_properties(class Frame &fr)
 {
     EditFrameDialog dia(parent, fr);
     return dia.run() == Gtk::RESPONSE_OK;
@@ -360,14 +362,14 @@ std::optional<int> Dialogs::ask_datum_angle(const std::string &label, int def)
     }
 }
 
-std::optional<UUID> Dialogs::select_part(Pool *pool, const UUID &entity_uuid, const UUID &part_uuid, bool show_none)
+std::optional<UUID> Dialogs::select_part(IPool &pool, const UUID &entity_uuid, const UUID &part_uuid, bool show_none)
 {
     PoolBrowserDialog dia(parent, ObjectType::PART, pool);
     auto br = dynamic_cast<PoolBrowserPart *>(dia.get_browser());
     br->set_show_none(show_none);
     br->set_entity_uuid(entity_uuid);
     if (part_uuid) {
-        auto part = pool->get_part(part_uuid);
+        auto part = pool.get_part(part_uuid);
         br->set_MPN(part->get_MPN());
     }
     auto r = dia.run();
@@ -391,7 +393,7 @@ std::optional<UUID> Dialogs::map_package(const std::vector<std::pair<Component *
     }
 }
 
-std::optional<UUID> Dialogs::select_via_padstack(class ViaPadstackProvider *vpp)
+std::optional<UUID> Dialogs::select_via_padstack(class ViaPadstackProvider &vpp)
 {
     SelectViaPadstackDialog dia(parent, vpp);
     auto r = dia.run();
@@ -403,19 +405,19 @@ std::optional<UUID> Dialogs::select_via_padstack(class ViaPadstackProvider *vpp)
     }
 }
 
-bool Dialogs::edit_plane(class Plane *plane, class Board *brd, class Block *block)
+bool Dialogs::edit_plane(class Plane &plane, class Board &brd)
 {
-    EditPlaneDialog dia(parent, plane, brd, block);
+    EditPlaneDialog dia(parent, plane, brd);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_keepout(class Keepout *keepout, class IDocument *c, bool add_mode)
+bool Dialogs::edit_keepout(class Keepout &keepout, class IDocument &c, bool add_mode)
 {
     EditKeepoutDialog dia(parent, keepout, c, add_mode);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
-bool Dialogs::edit_stackup(class IDocumentBoard *doc)
+bool Dialogs::edit_stackup(class IDocumentBoard &doc)
 {
     EditStackupDialog dia(parent, doc);
     return dia.run() == Gtk::RESPONSE_OK;
@@ -476,7 +478,7 @@ std::optional<std::string> Dialogs::ask_picture_filename()
     }
 }
 
-class SymbolPinNamesWindow *Dialogs::show_symbol_pin_names_window(class SchematicSymbol *symbol)
+class SymbolPinNamesWindow *Dialogs::show_symbol_pin_names_window(class SchematicSymbol &symbol)
 {
     if (window_nonmodal)
         return nullptr;
@@ -496,7 +498,7 @@ class RenumberPadsWindow *Dialogs::show_renumber_pads_window(class Package *pkg,
     return win;
 }
 
-class GenerateSilkscreenWindow *Dialogs::show_generate_silkscreen_window(class ToolSettings *settings)
+class GenerateSilkscreenWindow *Dialogs::show_generate_silkscreen_window(class ToolSettings &settings)
 {
     if (window_nonmodal)
         return nullptr;

@@ -82,7 +82,7 @@ ToolResponse ToolEditPlane::begin(const ToolArgs &args)
         poly->usage = plane;
     }
     UUID plane_uuid = plane->uuid;
-    bool r = imp->dialogs.edit_plane(plane, brd, doc.b->get_block());
+    bool r = imp->dialogs.edit_plane(*plane, *brd);
     if (r) {
         if (brd->planes.count(plane_uuid)) // may have been deleted
             brd->update_plane(plane);

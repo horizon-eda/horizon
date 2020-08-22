@@ -8,7 +8,7 @@ namespace horizon {
 
 class Image3DExporter : public Canvas3DBase {
 public:
-    Image3DExporter(const class Board &brd, class Pool &pool, unsigned int width, unsigned int height);
+    Image3DExporter(const class Board &brd, class IPool &pool, unsigned int width, unsigned int height);
 
     void load_3d_models();
     Cairo::RefPtr<Cairo::Surface> render_to_surface();
@@ -16,7 +16,7 @@ public:
     bool render_background = false;
 
 private:
-    class Pool &pool;
+    class IPool &pool;
     void *ctx = nullptr; // to get around including osmesa here
     std::vector<unsigned char> buffer;
     void check_ctx();

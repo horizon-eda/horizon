@@ -27,7 +27,7 @@ void SelectViaPadstackDialog::row_activated(const Gtk::TreeModel::Path &path, Gt
     }
 }
 
-SelectViaPadstackDialog::SelectViaPadstackDialog(Gtk::Window *parent, ViaPadstackProvider *vpp)
+SelectViaPadstackDialog::SelectViaPadstackDialog(Gtk::Window *parent, ViaPadstackProvider &vpp)
     : Gtk::Dialog("Select Via Padstack", *parent,
                   Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       via_padstack_provider(vpp)
@@ -41,7 +41,7 @@ SelectViaPadstackDialog::SelectViaPadstackDialog(Gtk::Window *parent, ViaPadstac
 
     store = Gtk::ListStore::create(list_columns);
     Gtk::TreeModel::Row row;
-    for (const auto &it : via_padstack_provider->get_padstacks_available()) {
+    for (const auto &it : via_padstack_provider.get_padstacks_available()) {
         row = *(store->append());
         row[list_columns.uuid] = it.first;
         row[list_columns.name] = it.second.name;

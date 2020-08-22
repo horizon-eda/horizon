@@ -2,10 +2,11 @@
 #include "pool/part.hpp"
 #include "nlohmann/json.hpp"
 #include "block/block.hpp"
+#include "pool/ipool.hpp"
 
 namespace horizon {
 
-BoardPackage::BoardPackage(const UUID &uu, const json &j, Block &block, Pool &pool)
+BoardPackage::BoardPackage(const UUID &uu, const json &j, Block &block, IPool &pool)
     : uuid(uu), component(&block.components.at(j.at("component").get<std::string>())),
       pool_package(component->part->package), package(*pool_package), placement(j.at("placement")),
       flip(j.at("flip").get<bool>()), smashed(j.value("smashed", false)),

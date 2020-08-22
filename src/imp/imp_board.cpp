@@ -22,6 +22,7 @@
 #include "core/tool_id.hpp"
 #include "widgets/action_button.hpp"
 #include "parts_window.hpp"
+#include "pool/pool_cached.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,

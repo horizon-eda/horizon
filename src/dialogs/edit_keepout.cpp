@@ -1,9 +1,6 @@
 #include "edit_keepout.hpp"
 #include "widgets/net_button.hpp"
 #include "widgets/spin_button_dim.hpp"
-#include <iostream>
-#include <deque>
-#include <algorithm>
 #include "document/idocument.hpp"
 #include "common/keepout.hpp"
 #include "board/board_layers.hpp"
@@ -16,7 +13,7 @@ namespace horizon {
 static const std::vector<PatchType> patch_types_cu = {PatchType::TRACK, PatchType::PAD, PatchType::PAD_TH,
                                                       PatchType::PLANE, PatchType::VIA, PatchType::HOLE_PTH};
 
-EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout *k, IDocument *core, bool add_mode)
+EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout &k, IDocument &core, bool add_mode)
     : Gtk::Dialog("Edit Keepout", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       keepout(k)
 {
@@ -34,7 +31,7 @@ EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout *k, IDocument 
     box->set_halign(Gtk::ALIGN_CENTER);
     box->set_valign(Gtk::ALIGN_CENTER);
 
-    bool is_cu = BoardLayers::is_copper(keepout->polygon->layer);
+    bool is_cu = BoardLayers::is_copper(keepout.polygon->layer);
     auto grid = Gtk::manage(new Gtk::Grid);
     grid->set_row_spacing(10);
     grid->set_column_spacing(10);
@@ -42,21 +39,21 @@ EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout *k, IDocument 
     {
         auto en = Gtk::manage(new Gtk::Entry);
         grid_attach_label_and_widget(grid, "Keepout class", en, top);
-        bind_widget(en, keepout->keepout_class);
+        bind_widget(en, keepout.keepout_class);
     }
     // TBD
     /*{
         auto sw = Gtk::manage(new Gtk::Switch);
         sw->set_halign(Gtk::ALIGN_START);
         grid_attach_label_and_widget(grid, "Exposed copper only", sw, top);
-        bind_widget(sw, keepout->exposed_cu_only);
+        bind_widget(sw, keepout.exposed_cu_only);
     }*/
     {
         auto sw = Gtk::manage(new Gtk::Switch);
         sw->set_halign(Gtk::ALIGN_START);
         grid_attach_label_and_widget(grid, "All copper layers", sw, top);
         if (is_cu) {
-            bind_widget(sw, keepout->all_cu_layers);
+            bind_widget(sw, keepout.all_cu_layers);
         }
         else {
             sw->set_sensitive(false);
@@ -72,13 +69,13 @@ EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout *k, IDocument 
     for (const auto pt : patch_types_cu) {
         auto cb = Gtk::manage(new Gtk::CheckButton(patch_type_names.at(pt)));
         if (is_cu) {
-            cb->set_active(keepout->patch_types_cu.count(pt));
+            cb->set_active(keepout.patch_types_cu.count(pt));
             cb->signal_toggled().connect([this, cb, pt] {
                 if (cb->get_active()) {
-                    keepout->patch_types_cu.insert(pt);
+                    keepout.patch_types_cu.insert(pt);
                 }
                 else {
-                    keepout->patch_types_cu.erase(pt);
+                    keepout.patch_types_cu.erase(pt);
                 }
             });
         }
@@ -95,8 +92,8 @@ EditKeepoutDialog::EditKeepoutDialog(Gtk::Window *parent, Keepout *k, IDocument 
 
     if (!add_mode) {
         auto delete_button = Gtk::manage(new Gtk::Button("Delete Keepout"));
-        delete_button->signal_clicked().connect([this, core] {
-            core->delete_keepout(keepout->uuid);
+        delete_button->signal_clicked().connect([this, &core] {
+            core.delete_keepout(keepout.uuid);
             response(Gtk::RESPONSE_OK);
         });
         box->pack_start(*delete_button, false, false, 0);

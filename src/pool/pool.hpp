@@ -9,6 +9,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include "ipool.hpp"
 
 #include "util/sqlite.hpp"
 
@@ -18,27 +19,32 @@ namespace horizon {
  * Stores objects (Unit, Entity, Symbol, Part, etc.) from the pool.
  * Objects are lazy-loaded when they're accessed for the first time.
  */
-class Pool {
+class Pool : public IPool {
 public:
     /**
      * Constructs a Pool
      * @param base_path Path to the pool containing the pool.db
      */
     Pool(const std::string &base_path, bool read_only = true);
-    const class Unit *get_unit(const UUID &uu, UUID *pool_uuid_out = nullptr);
-    const class Entity *get_entity(const UUID &uu, UUID *pool_uuid_out = nullptr);
-    const class Symbol *get_symbol(const UUID &uu, UUID *pool_uuid_out = nullptr);
-    const class Padstack *get_padstack(const UUID &uu, UUID *pool_uuid_out = nullptr);
-    const class Padstack *get_well_known_padstack(const std::string &name, UUID *pool_uuid_out = nullptr);
-    const class Package *get_package(const UUID &uu, UUID *pool_uuid_out = nullptr);
-    const class Part *get_part(const UUID &uu, UUID *pool_uuid_out = nullptr);
-    const class Frame *get_frame(const UUID &uu, UUID *pool_uuid_out = nullptr);
+    const class Unit *get_unit(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    const class Entity *get_entity(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    const class Symbol *get_symbol(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    const class Padstack *get_padstack(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    const class Padstack *get_well_known_padstack(const std::string &name, UUID *pool_uuid_out = nullptr) override;
+    const class Package *get_package(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    const class Part *get_part(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    const class Frame *get_frame(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
     std::set<UUID> get_alternate_packages(const UUID &uu);
-    virtual std::string get_model_filename(const UUID &pkg_uuid, const UUID &model_uuid);
+    std::string get_model_filename(const UUID &pkg_uuid, const UUID &model_uuid) override;
 
     virtual std::string get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_out = nullptr);
-    const std::string &get_base_path() const;
+    const std::string &get_base_path() const override;
     bool check_filename(ObjectType type, const std::string &filename, std::string *error_msg = nullptr) const;
+
+    SQLite::Database &get_db() override
+    {
+        return db;
+    }
 
     /**
      * The database connection.

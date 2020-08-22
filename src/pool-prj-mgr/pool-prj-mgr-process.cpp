@@ -8,7 +8,7 @@ namespace horizon {
 
 PoolProjectManagerProcess::PoolProjectManagerProcess(const UUID &uu, PoolProjectManagerProcess::Type ty,
                                                      const std::vector<std::string> &args,
-                                                     const std::vector<std::string> &ienv, Pool *pool,
+                                                     const std::vector<std::string> &ienv, IPool *pool,
                                                      class PoolParametric *pool_parametric, bool read_only,
                                                      bool is_temp)
     : uuid(uu), type(ty)

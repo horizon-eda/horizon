@@ -1,13 +1,12 @@
 #pragma once
 #include <gtkmm.h>
-#include "block/block.hpp"
-#include "net_selector.hpp"
+#include "util/uuid.hpp"
 
 namespace horizon {
 
 class NetButton : public Gtk::MenuButton {
 public:
-    NetButton(Block *b);
+    NetButton(const class Block &b);
     void set_net(const UUID &uu);
     UUID get_net();
     typedef sigc::signal<void, UUID> type_signal_changed;
@@ -18,9 +17,9 @@ public:
     void update();
 
 private:
-    Block *block;
+    const Block &block;
     Gtk::Popover *popover;
-    NetSelector *ns;
+    class NetSelector *ns;
     void update_label();
     void ns_activated(const UUID &uu);
     UUID net_current;

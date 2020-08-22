@@ -1,15 +1,16 @@
 #include "unit_preview.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "canvas/canvas.hpp"
 #include "util/util.hpp"
 #include "util/gtk_util.hpp"
 #include "util/sqlite.hpp"
 #include "common/object_descr.hpp"
 #include "preview_canvas.hpp"
+#include "pool/unit.hpp"
 
 namespace horizon {
 
-UnitPreview::UnitPreview(class Pool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
+UnitPreview::UnitPreview(class IPool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
 {
     auto symbol_sel_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
     symbol_sel_box->property_margin() = 8;
@@ -56,7 +57,7 @@ void UnitPreview::load(const Unit *u)
         return;
     }
 
-    SQLite::Query q(pool.db, "SELECT uuid, name FROM symbols WHERE unit=? ORDER BY name");
+    SQLite::Query q(pool.get_db(), "SELECT uuid, name FROM symbols WHERE unit=? ORDER BY name");
     q.bind(1, unit->uuid);
     bool have_symbol = false;
     while (q.step()) {

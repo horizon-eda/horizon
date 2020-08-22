@@ -100,7 +100,7 @@ void PoolNotebook::handle_duplicate_unit(const UUID &uu)
 
 void PoolNotebook::construct_units()
 {
-    auto br = Gtk::manage(new PoolBrowserUnit(&pool));
+    auto br = Gtk::manage(new PoolBrowserUnit(pool));
     br->set_show_path(true);
     br->signal_activated().connect([this, br] { handle_edit_unit(br->get_selected()); });
 

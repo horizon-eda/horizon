@@ -8,7 +8,7 @@ class SEXPR;
 namespace horizon {
 class KiCadPackageParser {
 public:
-    KiCadPackageParser(class Package &p, class Pool *po);
+    KiCadPackageParser(class Package &p, class IPool &po);
     void parse(const SEXPR::SEXPR *data);
 
 private:
@@ -21,6 +21,6 @@ private:
     Junction *get_or_create_junction(const Coordi &c);
 
     Package &package;
-    Pool *pool;
+    IPool &pool;
 };
 } // namespace horizon

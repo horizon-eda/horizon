@@ -37,7 +37,7 @@ public:
 
 class Sheet : public ObjectProvider, public LayerProvider {
 public:
-    Sheet(const UUID &uu, const json &, Block &Block, class Pool &pool);
+    Sheet(const UUID &uu, const json &, Block &Block, class IPool &pool);
     Sheet(const UUID &uu);
     UUID uuid;
     std::string name;

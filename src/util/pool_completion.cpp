@@ -1,5 +1,6 @@
 #include "pool_completion.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
+#include "util/sqlite.hpp"
 
 namespace horizon {
 class CompletionColumns : public Gtk::TreeModel::ColumnRecord {
@@ -14,14 +15,14 @@ public:
 
 CompletionColumns cpl_columns;
 
-Glib::RefPtr<Gtk::EntryCompletion> create_pool_manufacturer_completion(class Pool *pool)
+Glib::RefPtr<Gtk::EntryCompletion> create_pool_manufacturer_completion(class IPool &pool)
 {
     auto cpl = Gtk::EntryCompletion::create();
     auto store = Gtk::ListStore::create(cpl_columns);
     cpl->set_model(store);
     cpl->set_text_column(cpl_columns.manufacturer);
 
-    SQLite::Query q(pool->db,
+    SQLite::Query q(pool.get_db(),
                     "SELECT DISTINCT manufacturer FROM parts WHERE manufacturer != '' UNION SELECT DISTINCT "
                     "manufacturer FROm packages WHERE manufacturer != '' ORDER BY manufacturer");
     while (q.step()) {

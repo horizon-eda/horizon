@@ -34,7 +34,7 @@ ToolResponse ToolEditSymbolPinNames::begin(const ToolArgs &args)
     hl.clear();
     hl.emplace(ObjectType::SCHEMATIC_SYMBOL, sym->uuid);
     imp->update_highlights();
-    win = imp->dialogs.show_symbol_pin_names_window(sym);
+    win = imp->dialogs.show_symbol_pin_names_window(*sym);
     return ToolResponse();
 }
 

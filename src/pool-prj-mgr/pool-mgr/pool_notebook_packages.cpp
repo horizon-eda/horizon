@@ -140,7 +140,7 @@ void PoolNotebook::handle_duplicate_package(const UUID &uu)
 
 void PoolNotebook::construct_packages()
 {
-    auto br = Gtk::manage(new PoolBrowserPackage(&pool));
+    auto br = Gtk::manage(new PoolBrowserPackage(pool));
     br->set_show_path(true);
     br->signal_activated().connect([this, br] { handle_edit_package(br->get_selected()); });
 

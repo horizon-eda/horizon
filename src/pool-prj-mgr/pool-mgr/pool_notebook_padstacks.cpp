@@ -68,7 +68,7 @@ void PoolNotebook::handle_duplicate_padstack(const UUID &uu)
 
 void PoolNotebook::construct_padstacks()
 {
-    auto br = Gtk::manage(new PoolBrowserPadstack(&pool));
+    auto br = Gtk::manage(new PoolBrowserPadstack(pool));
     br->set_show_path(true);
     br->set_include_padstack_type(Padstack::Type::VIA, true);
     br->set_include_padstack_type(Padstack::Type::MECHANICAL, true);

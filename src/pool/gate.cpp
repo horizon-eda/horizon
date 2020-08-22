@@ -1,10 +1,10 @@
 #include "gate.hpp"
-#include "pool.hpp"
+#include "ipool.hpp"
 #include "nlohmann/json.hpp"
 
 namespace horizon {
 
-Gate::Gate(const UUID &uu, const json &j, Pool &pool)
+Gate::Gate(const UUID &uu, const json &j, IPool &pool)
     : uuid(uu), name(j.at("name").get<std::string>()), suffix(j.at("suffix").get<std::string>()),
       swap_group(j.value("swap_group", 0)), unit(pool.get_unit(j.at("unit").get<std::string>()))
 

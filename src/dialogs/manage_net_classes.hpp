@@ -1,23 +1,14 @@
 #pragma once
 #include <gtkmm.h>
-#include <array>
-#include <set>
-#include "common/common.hpp"
-#include "util/uuid.hpp"
-#include "block/block.hpp"
 namespace horizon {
-
 
 class ManageNetClassesDialog : public Gtk::Dialog {
 public:
-    ManageNetClassesDialog(Gtk::Window *parent, Block *b);
-    bool valid = false;
+    ManageNetClassesDialog(Gtk::Window *parent, class Block &b);
 
 private:
-    Block *block = nullptr;
+    Block &block;
     Gtk::ListBox *listbox = nullptr;
     void handle_add_net_class();
-
-    void ok_clicked();
 };
 } // namespace horizon

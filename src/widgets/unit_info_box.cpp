@@ -24,7 +24,7 @@ private:
 
 static PinDirectionMap pin_direction_map;
 
-UnitInfoBox::UnitInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Pool &p)
+UnitInfoBox::UnitInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IPool &p)
     : Gtk::Box(cobject), pool(p)
 {
 
@@ -92,7 +92,7 @@ UnitInfoBox::UnitInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     view->append_column("Alt. names", list_columns.alt_names);
 }
 
-UnitInfoBox *UnitInfoBox::create(Pool &p)
+UnitInfoBox *UnitInfoBox::create(IPool &p)
 {
     UnitInfoBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();

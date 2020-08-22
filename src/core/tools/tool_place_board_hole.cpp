@@ -2,6 +2,7 @@
 #include "document/idocument_board.hpp"
 #include "board/board.hpp"
 #include "imp/imp_interface.hpp"
+#include "pool/ipool.hpp"
 #include <iostream>
 
 namespace horizon {
@@ -18,7 +19,7 @@ bool ToolPlaceBoardHole::can_begin()
 ToolResponse ToolPlaceBoardHole::begin(const ToolArgs &args)
 {
     if (auto r = imp->dialogs.select_hole_padstack(doc.r->get_pool())) {
-        padstack = doc.r->get_pool()->get_padstack(*r);
+        padstack = doc.r->get_pool().get_padstack(*r);
         create_hole(args.coords);
 
         imp->tool_bar_set_actions({

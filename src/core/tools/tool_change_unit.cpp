@@ -4,7 +4,7 @@
 #include "imp/imp_interface.hpp"
 #include "pool/unit.hpp"
 #include <iostream>
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 
 namespace horizon {
 
@@ -22,7 +22,7 @@ ToolResponse ToolChangeUnit::begin(const ToolArgs &args)
 
     if (auto r = imp->dialogs.select_unit(doc.r->get_pool())) {
         UUID unit_uuid = *r;
-        auto new_unit = doc.r->get_pool()->get_unit(unit_uuid);
+        auto new_unit = doc.r->get_pool().get_unit(unit_uuid);
         auto sym = doc.y->get_symbol();
         const auto old_unit = sym->unit;
         std::map<UUID, UUID> pinmap; // old pin->new pin

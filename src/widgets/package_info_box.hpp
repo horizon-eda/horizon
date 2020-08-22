@@ -9,12 +9,12 @@ namespace horizon {
 
 class PackageInfoBox : public Gtk::Box, public PoolGotoProvider {
 public:
-    PackageInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Pool &p);
-    static PackageInfoBox *create(Pool &p);
+    PackageInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class IPool &p);
+    static PackageInfoBox *create(IPool &p);
     void load(const class Package *p);
 
 private:
-    Pool &pool;
+    IPool &pool;
     class WhereUsedBox *where_used_box = nullptr;
 
     Gtk::Label *label_name = nullptr;

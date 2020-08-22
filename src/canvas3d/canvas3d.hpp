@@ -36,7 +36,7 @@ public:
 
     void set_msaa(unsigned int samples);
 
-    void load_models_async(class Pool &pool);
+    void load_models_async(class IPool &pool);
 
     void view_all();
 

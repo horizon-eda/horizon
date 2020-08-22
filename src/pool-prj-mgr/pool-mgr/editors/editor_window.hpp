@@ -23,7 +23,7 @@ public:
 
 class EditorWindow : public Gtk::Window, public PoolGotoProvider {
 public:
-    EditorWindow(ObjectType type, const std::string &filename, class Pool *p, class PoolParametric *pp, bool read_only,
+    EditorWindow(ObjectType type, const std::string &filename, class IPool *p, class PoolParametric *pp, bool read_only,
                  bool is_temp);
     void reload();
     bool get_need_update() const;
@@ -53,7 +53,7 @@ private:
     std::unique_ptr<EditorWindowStore> store = nullptr;
     PoolEditorInterface *iface = nullptr;
     Gtk::Button *save_button = nullptr;
-    class Pool *pool;
+    class IPool &pool;
     class PoolParametric *pool_parametric;
     bool need_update = false;
     std::string original_filename;

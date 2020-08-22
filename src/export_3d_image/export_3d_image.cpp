@@ -5,7 +5,7 @@
 
 namespace horizon {
 
-Image3DExporter::Image3DExporter(const class Board &abrd, class Pool &apool, unsigned int awidth, unsigned int aheight)
+Image3DExporter::Image3DExporter(const class Board &abrd, class IPool &apool, unsigned int awidth, unsigned int aheight)
     : pool(apool)
 {
     width = awidth;

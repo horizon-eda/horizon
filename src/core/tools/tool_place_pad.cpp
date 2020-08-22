@@ -19,7 +19,7 @@ bool ToolPlacePad::can_begin()
 ToolResponse ToolPlacePad::begin(const ToolArgs &args)
 {
     if (auto r = imp->dialogs.select_padstack(doc.r->get_pool(), doc.k->get_package()->uuid)) {
-        padstack = doc.r->get_pool()->get_padstack(*r);
+        padstack = doc.r->get_pool().get_padstack(*r);
         create_pad(args.coords);
 
         imp->tool_bar_set_actions({
@@ -85,7 +85,7 @@ ToolResponse ToolPlacePad::update(const ToolArgs &args)
         case InToolActionID::EDIT: {
             std::set<Pad *> pads{temp};
             auto params = temp->parameter_set;
-            if (imp->dialogs.edit_pad_parameter_set(pads, doc.r->get_pool(), doc.k->get_package())
+            if (imp->dialogs.edit_pad_parameter_set(pads, doc.r->get_pool(), *doc.k->get_package())
                 == false) { // rollback
                 temp->parameter_set = params;
             }

@@ -14,7 +14,6 @@
 #include "fab_output_settings.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "plane.hpp"
-#include "pool/pool.hpp"
 #include "track.hpp"
 #include "util/uuid.hpp"
 #include "util/warning.hpp"
@@ -51,8 +50,8 @@ private:
     void vacuum_junctions();
 
 public:
-    Board(const UUID &uu, const json &, Block &block, Pool &pool, ViaPadstackProvider &vpp);
-    static Board new_from_file(const std::string &filename, Block &block, Pool &pool, ViaPadstackProvider &vpp);
+    Board(const UUID &uu, const json &, Block &block, IPool &pool, ViaPadstackProvider &vpp);
+    static Board new_from_file(const std::string &filename, Block &block, IPool &pool, ViaPadstackProvider &vpp);
     Board(const UUID &uu, Block &block);
 
     void expand(bool careful = false);

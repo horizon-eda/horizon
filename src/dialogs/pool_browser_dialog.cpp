@@ -9,7 +9,7 @@
 #include "widgets/preview_canvas.hpp"
 
 namespace horizon {
-PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool *ipool, bool use_preview)
+PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, IPool &ipool, bool use_preview)
     : Gtk::Dialog("Select Something", Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       pool(ipool)
 {
@@ -69,7 +69,7 @@ PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool 
         auto paned = Gtk::manage(new Gtk::Paned(Gtk::ORIENTATION_HORIZONTAL));
         paned->add1(*browser);
 
-        auto preview = Gtk::manage(new PreviewCanvas(*pool, layered));
+        auto preview = Gtk::manage(new PreviewCanvas(pool, layered));
         browser->signal_selected().connect([this, preview, type] { preview->load(type, browser->get_selected()); });
         paned->add2(*preview);
         get_content_area()->pack_start(*paned, true, true, 0);

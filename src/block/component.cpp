@@ -3,6 +3,7 @@
 #include "logger/logger.hpp"
 #include "pool/part.hpp"
 #include "nlohmann/json.hpp"
+#include "pool/ipool.hpp"
 
 namespace horizon {
 
@@ -33,7 +34,7 @@ Connection::Connection(const json &j, Block *block)
         net.uuid = j.at("net").get<std::string>();
 }
 
-Component::Component(const UUID &uu, const json &j, Pool &pool, Block *block)
+Component::Component(const UUID &uu, const json &j, IPool &pool, Block *block)
     : uuid(uu), entity(pool.get_entity(j.at("entity").get<std::string>())), refdes(j.at("refdes").get<std::string>()),
       value(j.at("value").get<std::string>()), nopopulate(j.value("nopopulate", false))
 {

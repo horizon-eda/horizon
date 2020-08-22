@@ -12,13 +12,13 @@ public:
     class TagLabel;
     friend TagPopover;
     friend TagLabel;
-    TagEntry(class Pool &p, ObjectType t, bool edit_mode = false);
+    TagEntry(class IPool &p, ObjectType t, bool edit_mode = false);
     std::set<std::string> get_tags() const;
     void set_tags(const std::set<std::string> &tags);
     void clear();
 
 private:
-    class Pool &pool;
+    class IPool &pool;
     const ObjectType type;
     const bool edit_mode;
     Gtk::MenuButton *add_button = nullptr;

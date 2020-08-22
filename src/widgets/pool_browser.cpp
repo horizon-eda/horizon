@@ -1,5 +1,5 @@
 #include "pool_browser.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include <set>
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
@@ -8,11 +8,11 @@
 #include "tag_entry.hpp"
 
 namespace horizon {
-PoolBrowser::PoolBrowser(Pool *p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
+PoolBrowser::PoolBrowser(IPool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
 {
     const auto &pools = PoolManager::get().get_pools();
-    if (pools.count(pool->get_base_path())) {
-        const auto &mpool = pools.at(pool->get_base_path());
+    if (pools.count(pool.get_base_path())) {
+        const auto &mpool = pools.at(pool.get_base_path());
         pools_included = mpool.pools_included.size();
         pool_uuid = mpool.uuid;
     }
@@ -29,7 +29,7 @@ Gtk::Entry *PoolBrowser::create_search_entry(const std::string &label)
 
 TagEntry *PoolBrowser::create_tag_entry(const std::string &label)
 {
-    auto entry = Gtk::manage(new TagEntry(*pool, get_type()));
+    auto entry = Gtk::manage(new TagEntry(pool, get_type()));
     add_search_widget(label, *entry);
     entry->signal_changed().connect(sigc::mem_fun(*this, &PoolBrowser::search));
     tag_entries.insert(entry);

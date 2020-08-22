@@ -123,7 +123,7 @@ void UnitEditor::sort()
     pins_listbox->unset_sort_func();
 }
 
-UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Unit *u, class Pool *p)
+UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Unit &u, class IPool &p)
     : Gtk::Box(cobject), unit(u), pool(p)
 {
     x->get_widget("unit_name", name_entry);
@@ -142,19 +142,19 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     HelpButton::pack_into(x, "box_names", HelpTexts::UNIT_PIN_ALT_NAMES);
 
-    name_entry->set_text(unit->name);
+    name_entry->set_text(unit.name);
     name_entry->signal_changed().connect([this] {
-        unit->name = name_entry->get_text();
+        unit.name = name_entry->get_text();
         needs_save = true;
     });
-    manufacturer_entry->set_text(unit->manufacturer);
+    manufacturer_entry->set_text(unit.manufacturer);
     manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
     manufacturer_entry->signal_changed().connect([this] {
-        unit->manufacturer = manufacturer_entry->get_text();
+        unit.manufacturer = manufacturer_entry->get_text();
         needs_save = true;
     });
 
-    for (auto &it : unit->pins) {
+    for (auto &it : unit.pins) {
         auto ed = PinEditor::create(&it.second, this);
         ed->show_all();
         pins_listbox->append(*ed);
@@ -189,9 +189,9 @@ void UnitEditor::handle_delete()
     for (auto &row : rows) {
         delete row;
     }
-    for (auto it = unit->pins.begin(); it != unit->pins.end();) {
+    for (auto it = unit.pins.begin(); it != unit.pins.end();) {
         if (uuids.find(it->first) != uuids.end()) {
-            unit->pins.erase(it++);
+            unit.pins.erase(it++);
         }
         else {
             it++;
@@ -258,7 +258,7 @@ void UnitEditor::handle_add()
     }
 
     auto uu = UUID::random();
-    auto pin = &unit->pins.emplace(uu, uu).first->second;
+    auto pin = &unit.pins.emplace(uu, uu).first->second;
     if (pin_selected) {
         pin->swap_group = pin_selected->swap_group;
         pin->direction = pin_selected->direction;
@@ -345,7 +345,7 @@ void UnitEditor::select(const ItemSet &items)
     }
 }
 
-UnitEditor *UnitEditor::create(Unit *u, class Pool *p)
+UnitEditor *UnitEditor::create(Unit &u, class IPool &p)
 {
     UnitEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();

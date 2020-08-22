@@ -5,7 +5,7 @@
 #include "pool/entity.hpp"
 
 namespace horizon {
-EntityInfoBox::EntityInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Pool &p)
+EntityInfoBox::EntityInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IPool &p)
     : Gtk::Box(cobject), pool(p)
 {
 
@@ -100,7 +100,7 @@ EntityInfoBox::EntityInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     });
 }
 
-EntityInfoBox *EntityInfoBox::create(Pool &p)
+EntityInfoBox *EntityInfoBox::create(IPool &p)
 {
     EntityInfoBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();

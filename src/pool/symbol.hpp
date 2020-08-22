@@ -72,9 +72,9 @@ public:
 
 class Symbol : public ObjectProvider, public LayerProvider {
 public:
-    Symbol(const UUID &uu, const json &j, class Pool &pool);
+    Symbol(const UUID &uu, const json &j, class IPool &pool);
     Symbol(const UUID &uu);
-    static Symbol new_from_file(const std::string &filename, Pool &pool);
+    static Symbol new_from_file(const std::string &filename, IPool &pool);
     std::pair<Coordi, Coordi> get_bbox(bool all = false) const;
     virtual Junction *get_junction(const UUID &uu) override;
     SymbolPin *get_symbol_pin(const UUID &uu);

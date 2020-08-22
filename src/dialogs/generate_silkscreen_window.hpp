@@ -10,14 +10,14 @@
 namespace horizon {
 class GenerateSilkscreenWindow : public ToolWindow {
 public:
-    GenerateSilkscreenWindow(Gtk::Window *parent, class ImpInterface *intf, class ToolSettings *stg);
+    GenerateSilkscreenWindow(Gtk::Window *parent, class ImpInterface *intf, class ToolSettings &stg);
 
     void update();
 
 private:
     void load_defaults();
 
-    ToolGenerateSilkscreen::Settings *settings;
+    ToolGenerateSilkscreen::Settings &settings;
 
     Gtk::Entry *entry_prefix = nullptr;
     SpinButtonDim *sp_silk = nullptr;

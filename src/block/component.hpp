@@ -38,13 +38,13 @@ public:
  */
 class Component {
 public:
-    Component(const UUID &uu, const json &j, class Pool &pool, class Block *block = nullptr);
+    Component(const UUID &uu, const json &j, class IPool &pool, class Block *block = nullptr);
     Component(const UUID &uu);
 
     UUID get_uuid() const;
 
     UUID uuid;
-    const class Entity *entity;
+    const class Entity *entity = nullptr;
     const class Part *part = nullptr;
     std::string refdes;
     std::string value;

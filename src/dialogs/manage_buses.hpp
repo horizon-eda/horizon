@@ -2,20 +2,18 @@
 #include <gtkmm.h>
 #include <array>
 #include <set>
-#include "common/common.hpp"
 #include "util/uuid.hpp"
-#include "block/block.hpp"
 namespace horizon {
 
 
 class ManageBusesDialog : public Gtk::Dialog {
 public:
-    ManageBusesDialog(Gtk::Window *parent, Block *b);
+    ManageBusesDialog(Gtk::Window *parent, class Block &b);
     bool valid = false;
 
 
 private:
-    Block *block = nullptr;
+    Block &block;
     Gtk::Stack *stack;
     Gtk::ToolButton *delete_button;
     void add_bus();

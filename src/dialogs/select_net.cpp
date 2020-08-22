@@ -1,5 +1,6 @@
 #include "select_net.hpp"
-#include <iostream>
+#include "block/block.hpp"
+#include "widgets/net_selector.hpp"
 
 namespace horizon {
 
@@ -21,7 +22,7 @@ void SelectNetDialog::net_selected(const UUID &uu)
 }
 
 
-SelectNetDialog::SelectNetDialog(Gtk::Window *parent, Block *b, const std::string &ti)
+SelectNetDialog::SelectNetDialog(Gtk::Window *parent, const Block &b, const std::string &ti)
     : Gtk::Dialog(ti, *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
 {
     add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);

@@ -10,12 +10,12 @@ namespace horizon {
 
 class UnitInfoBox : public Gtk::Box, public PoolGotoProvider {
 public:
-    UnitInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Pool &p);
-    static UnitInfoBox *create(Pool &p);
+    UnitInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class IPool &p);
+    static UnitInfoBox *create(IPool &p);
     void load(const Unit *u);
 
 private:
-    Pool &pool;
+    IPool &pool;
     class WhereUsedBox *where_used_box = nullptr;
 
     Gtk::Label *label_name = nullptr;

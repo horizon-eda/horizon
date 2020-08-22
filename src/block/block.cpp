@@ -5,10 +5,11 @@
 #include "nlohmann/json.hpp"
 #include "pool/part.hpp"
 #include "util/util.hpp"
+#include "pool/ipool.hpp"
 
 namespace horizon {
 
-Block::Block(const UUID &uu, const json &j, Pool &pool) : uuid(uu), name(j.at("name").get<std::string>())
+Block::Block(const UUID &uu, const json &j, IPool &pool) : uuid(uu), name(j.at("name").get<std::string>())
 {
     Logger::log_info("loading block " + (std::string)uuid, Logger::Domain::BLOCK);
     if (j.count("net_classes")) {
@@ -114,7 +115,7 @@ Block::Block(const UUID &uu) : uuid(uu)
     net_class_default = &net_classes.begin()->second;
 }
 
-Block Block::new_from_file(const std::string &filename, Pool &obj)
+Block Block::new_from_file(const std::string &filename, IPool &obj)
 {
     auto j = load_json_from_file(filename);
     return Block(UUID(j.at("uuid").get<std::string>()), j, obj);

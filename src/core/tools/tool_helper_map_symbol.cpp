@@ -4,6 +4,7 @@
 #include "canvas/canvas_gl.hpp"
 #include "imp/imp_interface.hpp"
 #include "util/sqlite.hpp"
+#include "pool/ipool.hpp"
 
 namespace horizon {
 const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool *auto_selected)
@@ -11,7 +12,7 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
     UUID selected_symbol;
 
     std::string query = "SELECT symbols.uuid FROM symbols WHERE symbols.unit = ?";
-    SQLite::Query q(doc.r->get_pool()->db, query);
+    SQLite::Query q(doc.r->get_pool().get_db(), query);
     q.bind(1, unit_uu);
     int n = 0;
     while (q.step()) {
@@ -36,7 +37,7 @@ const Symbol *ToolHelperMapSymbol::get_symbol_for_unit(const UUID &unit_uu, bool
         return nullptr;
     }
 
-    return doc.c->get_pool()->get_symbol(selected_symbol);
+    return doc.c->get_pool().get_symbol(selected_symbol);
 }
 
 

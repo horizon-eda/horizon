@@ -5,7 +5,7 @@
 namespace horizon {
 class PoolBrowserPadstack : public PoolBrowser {
 public:
-    PoolBrowserPadstack(class Pool *p);
+    PoolBrowserPadstack(class IPool &p);
     void search() override;
     void set_package_uuid(const UUID &uu);
     void set_include_padstack_type(Padstack::Type ty, bool v);

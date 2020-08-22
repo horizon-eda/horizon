@@ -1,11 +1,10 @@
 #pragma once
-
 #include "pool_browser.hpp"
 
 namespace horizon {
 class PoolBrowserUnit : public PoolBrowser {
 public:
-    PoolBrowserUnit(class Pool *p);
+    PoolBrowserUnit(class IPool &p);
     void search() override;
     ObjectType get_type() const override
     {

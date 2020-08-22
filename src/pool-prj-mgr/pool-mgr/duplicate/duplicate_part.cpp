@@ -108,7 +108,7 @@ DuplicatePartWidget::DuplicatePartWidget(Pool *p, const UUID &part_uuid, Gtk::Bo
     manufacturer_entry = Gtk::manage(new Gtk::Entry);
     manufacturer_entry->set_text(part->get_manufacturer());
     manufacturer_entry->set_hexpand(true);
-    manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
+    manufacturer_entry->set_completion(create_pool_manufacturer_completion(*pool));
 
     grid_attach_label_and_widget(grid, "Manufacturer", manufacturer_entry, top);
 

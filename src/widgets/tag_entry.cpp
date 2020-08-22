@@ -1,5 +1,6 @@
 #include "tag_entry.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
+#include "util/sqlite.hpp"
 
 namespace horizon {
 
@@ -153,7 +154,7 @@ void TagEntry::TagPopover::update_list()
     }
     query << "GROUP BY tag "
              "ORDER BY prefix DESC, cnt DESC";
-    SQLite::Query q(parent->pool.db, query.str());
+    SQLite::Query q(parent->pool.get_db(), query.str());
     {
         size_t i = 0;
         for (const auto &it : tags_existing) {
@@ -197,7 +198,7 @@ void TagEntry::TagPopover::update_list_edit()
     query << "'') ";
     query << "GROUP BY tag "
              "ORDER BY prefix DESC, n_ex DESC, cnt DESC";
-    SQLite::Query q(parent->pool.db, query.str());
+    SQLite::Query q(parent->pool.get_db(), query.str());
     {
         size_t i = 0;
         for (const auto &it : tags_existing) {
@@ -220,7 +221,7 @@ void TagEntry::TagPopover::update_list_edit()
     }
 }
 
-TagEntry::TagEntry(Pool &p, ObjectType t, bool e)
+TagEntry::TagEntry(IPool &p, ObjectType t, bool e)
     : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4), pool(p), type(t), edit_mode(e)
 {
     box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
@@ -342,7 +343,7 @@ void TagEntry::update_add_button_sensitivity()
         query << "0) AND type = $type "
                  "GROUP by tags.uuid HAVING count(*) >= $ntags) ";
 
-        SQLite::Query q(pool.db, query.str());
+        SQLite::Query q(pool.get_db(), query.str());
         {
             size_t i = 0;
             for (const auto &it : tags) {

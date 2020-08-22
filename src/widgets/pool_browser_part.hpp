@@ -4,7 +4,7 @@
 namespace horizon {
 class PoolBrowserPart : public PoolBrowserStockinfo {
 public:
-    PoolBrowserPart(class Pool *p, const UUID &euuid = UUID());
+    PoolBrowserPart(class IPool &p, const UUID &euuid = UUID());
     void search() override;
     void set_MPN(const std::string &s);
     void set_entity_uuid(const UUID &uu);

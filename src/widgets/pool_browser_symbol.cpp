@@ -1,8 +1,9 @@
 #include "pool_browser_symbol.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
+#include "util/sqlite.hpp"
 
 namespace horizon {
-PoolBrowserSymbol::PoolBrowserSymbol(Pool *p, const UUID &uu) : PoolBrowser(p), unit_uuid(uu)
+PoolBrowserSymbol::PoolBrowserSymbol(IPool &p, const UUID &uu) : PoolBrowser(p), unit_uuid(uu)
 {
     construct();
     name_entry = create_search_entry("Name");
@@ -48,7 +49,7 @@ void PoolBrowserSymbol::search()
             "symbols.unit = units.uuid AND (units.uuid=? OR ?) AND "
             "symbols.name LIKE ?"
             + sort_controller->get_order_by();
-    SQLite::Query q(pool->db, query);
+    SQLite::Query q(pool.get_db(), query);
     q.bind(1, unit_uuid);
     q.bind(2, unit_uuid == UUID());
     q.bind(3, "%" + name_search + "%");

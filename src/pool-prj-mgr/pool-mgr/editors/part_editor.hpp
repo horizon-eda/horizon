@@ -8,18 +8,18 @@ namespace horizon {
 
 class PartEditor : public Gtk::Box, public PoolEditorInterface {
 public:
-    PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Part *p, class Pool *po,
-               class PoolParametric *pp);
-    static PartEditor *create(class Part *p, class Pool *po, class PoolParametric *pp);
+    PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Part &p, class IPool &po,
+               class PoolParametric &pp);
+    static PartEditor *create(class Part &p, class IPool &po, class PoolParametric &pp);
     void reload() override;
     void save() override;
 
     virtual ~PartEditor(){};
 
 private:
-    class Part *part;
-    class Pool *pool;
-    class PoolParametric *pool_parametric;
+    class Part &part;
+    class IPool &pool;
+    class PoolParametric &pool_parametric;
 
     class EntryWithInheritance *w_mpn = nullptr;
     class EntryWithInheritance *w_value = nullptr;

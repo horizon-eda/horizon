@@ -1,6 +1,6 @@
 #include "bom_export_settings.hpp"
 #include "nlohmann/json.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "pool/part.hpp"
 
 namespace horizon {
@@ -10,7 +10,7 @@ const LutEnumStr<BOMExportSettings::CSVSettings::Order> bom_order_lut = {
         {"desc", BOMExportSettings::CSVSettings::Order::DESC},
 };
 
-BOMExportSettings::BOMExportSettings(const json &j, Pool &pool)
+BOMExportSettings::BOMExportSettings(const json &j, IPool &pool)
     : csv_settings(j.at("csv_settings")), output_filename(j.at("output_filename").get<std::string>()),
       include_nopopulate(j.value("include_nopopulate", true))
 {

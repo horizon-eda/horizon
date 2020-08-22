@@ -8,7 +8,7 @@ namespace horizon {
 
 class PoolBrowserButton : public Gtk::Button {
 public:
-    PoolBrowserButton(ObjectType type, Pool *ipool);
+    PoolBrowserButton(ObjectType type, IPool &ipool);
     class PoolBrowser *get_browser();
     Glib::PropertyProxy<horizon::UUID> property_selected_uuid()
     {
@@ -17,7 +17,7 @@ public:
 
 private:
     Glib::Property<UUID> p_property_selected_uuid;
-    Pool *pool;
+    IPool &pool;
     ObjectType type;
     UUID selected_uuid;
     PoolBrowserDialog dia;

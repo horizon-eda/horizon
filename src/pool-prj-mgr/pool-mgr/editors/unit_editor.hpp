@@ -9,14 +9,14 @@ class UnitEditor : public Gtk::Box, public PoolEditorInterface {
     friend class PinEditor;
 
 public:
-    UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Unit *u, class Pool *p);
-    static UnitEditor *create(class Unit *u, class Pool *p);
+    UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Unit &u, class IPool &p);
+    static UnitEditor *create(class Unit &u, class IPool &p);
     void select(const ItemSet &items) override;
 
     virtual ~UnitEditor(){};
 
 private:
-    class Unit *unit = nullptr;
+    class Unit &unit;
     Gtk::Entry *name_entry = nullptr;
     Gtk::Entry *manufacturer_entry = nullptr;
     Gtk::ListBox *pins_listbox = nullptr;
@@ -34,6 +34,6 @@ private:
     void sort();
     void handle_activate(class PinEditor *ed);
 
-    Pool *pool;
+    IPool &pool;
 };
 } // namespace horizon

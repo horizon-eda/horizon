@@ -12,13 +12,13 @@ namespace horizon {
 
 class StackupLayerEditor : public Gtk::Box {
 public:
-    StackupLayerEditor(EditStackupDialog *parent, int la, bool cu);
+    StackupLayerEditor(EditStackupDialog &parent, int la, bool cu);
     SpinButtonDim *sp = nullptr;
     int layer;
     bool copper;
 };
 
-StackupLayerEditor::StackupLayerEditor(EditStackupDialog *parent, int ly, bool cu)
+StackupLayerEditor::StackupLayerEditor(EditStackupDialog &parent, int ly, bool cu)
     : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10), layer(ly), copper(cu)
 {
     auto colorbox = Gtk::manage(new Gtk::DrawingArea);
@@ -36,7 +36,7 @@ StackupLayerEditor::StackupLayerEditor(EditStackupDialog *parent, int ly, bool c
     });
     pack_start(*colorbox, false, false, 0);
 
-    std::string label_str = parent->board->get_layers().at(layer).name;
+    std::string label_str = parent.board.get_layers().at(layer).name;
     if (cu) {
         label_str += " (Copper)";
     }
@@ -45,7 +45,7 @@ StackupLayerEditor::StackupLayerEditor(EditStackupDialog *parent, int ly, bool c
     }
 
     auto la = Gtk::manage(new Gtk::Label(label_str));
-    parent->sg_layer_name->add_widget(*la);
+    parent.sg_layer_name->add_widget(*la);
     la->set_xalign(0);
     la->show();
     pack_start(*la, false, false, 0);
@@ -63,9 +63,9 @@ StackupLayerEditor::StackupLayerEditor(EditStackupDialog *parent, int ly, bool c
 }
 
 
-EditStackupDialog::EditStackupDialog(Gtk::Window *parent, IDocumentBoard *c)
+EditStackupDialog::EditStackupDialog(Gtk::Window *parent, IDocumentBoard &c)
     : Gtk::Dialog("Edit Stackup", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
-      core(c), board(core->get_board())
+      core(c), board(*core.get_board())
 {
     add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
     auto ok_button = add_button("OK", Gtk::ResponseType::RESPONSE_OK);
@@ -86,7 +86,7 @@ EditStackupDialog::EditStackupDialog(Gtk::Window *parent, IDocumentBoard *c)
     sp_n_inner_layers->set_range(0, 4);
     sp_n_inner_layers->set_digits(0);
     sp_n_inner_layers->set_increments(1, 1);
-    sp_n_inner_layers->set_value(board->get_n_inner_layers());
+    sp_n_inner_layers->set_value(board.get_n_inner_layers());
     sp_n_inner_layers->signal_value_changed().connect(sigc::mem_fun(*this, &EditStackupDialog::update_layers));
     box2->pack_start(*sp_n_inner_layers, true, true, 0);
 
@@ -117,45 +117,44 @@ EditStackupDialog::EditStackupDialog(Gtk::Window *parent, IDocumentBoard *c)
 void EditStackupDialog::update_layers()
 {
     auto n_inner_layers = sp_n_inner_layers->get_value_as_int();
-    board->set_n_inner_layers(n_inner_layers);
+    board.set_n_inner_layers(n_inner_layers);
     for (auto ch : lb->get_children()) {
         auto ed = dynamic_cast<StackupLayerEditor *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
         saved[{ed->layer, ed->copper}] = ed->sp->get_value_as_int();
         delete ch;
     }
-    auto ed_top = Gtk::manage(new StackupLayerEditor(this, BoardLayers::TOP_COPPER, true));
+    auto ed_top = Gtk::manage(new StackupLayerEditor(*this, BoardLayers::TOP_COPPER, true));
     if (saved.count({BoardLayers::TOP_COPPER, true}))
         ed_top->sp->set_value(saved.at({BoardLayers::TOP_COPPER, true}));
-    else if (board->stackup.count(BoardLayers::TOP_COPPER))
-        ed_top->sp->set_value(board->stackup.at(BoardLayers::TOP_COPPER).thickness);
+    else if (board.stackup.count(BoardLayers::TOP_COPPER))
+        ed_top->sp->set_value(board.stackup.at(BoardLayers::TOP_COPPER).thickness);
     lb->add(*ed_top);
 
-    auto ed_top_sub = Gtk::manage(new StackupLayerEditor(this, BoardLayers::TOP_COPPER, false));
+    auto ed_top_sub = Gtk::manage(new StackupLayerEditor(*this, BoardLayers::TOP_COPPER, false));
     if (saved.count({BoardLayers::TOP_COPPER, false}))
         ed_top_sub->sp->set_value(saved.at({BoardLayers::TOP_COPPER, false}));
-    else if (board->stackup.count(BoardLayers::TOP_COPPER))
-        ed_top_sub->sp->set_value(board->stackup.at(BoardLayers::TOP_COPPER).substrate_thickness);
+    else if (board.stackup.count(BoardLayers::TOP_COPPER))
+        ed_top_sub->sp->set_value(board.stackup.at(BoardLayers::TOP_COPPER).substrate_thickness);
     lb->add(*ed_top_sub);
 
     for (int i = 0; i < n_inner_layers; i++) {
         int layer = -i - 1;
         for (const auto cu : {true, false}) {
-            auto ed = Gtk::manage(new StackupLayerEditor(this, layer, cu));
+            auto ed = Gtk::manage(new StackupLayerEditor(*this, layer, cu));
             if (saved.count({layer, cu}))
                 ed->sp->set_value(saved.at({layer, cu}));
-            else if (board->stackup.count(layer))
-                ed->sp->set_value(cu ? board->stackup.at(layer).thickness
-                                     : board->stackup.at(layer).substrate_thickness);
+            else if (board.stackup.count(layer))
+                ed->sp->set_value(cu ? board.stackup.at(layer).thickness : board.stackup.at(layer).substrate_thickness);
             lb->add(*ed);
         }
     }
 
 
-    auto ed_bottom = Gtk::manage(new StackupLayerEditor(this, BoardLayers::BOTTOM_COPPER, true));
+    auto ed_bottom = Gtk::manage(new StackupLayerEditor(*this, BoardLayers::BOTTOM_COPPER, true));
     if (saved.count({BoardLayers::BOTTOM_COPPER, true}))
         ed_bottom->sp->set_value(saved.at({BoardLayers::BOTTOM_COPPER, true}));
-    else if (board->stackup.count(BoardLayers::BOTTOM_COPPER))
-        ed_bottom->sp->set_value(board->stackup.at(BoardLayers::BOTTOM_COPPER).thickness);
+    else if (board.stackup.count(BoardLayers::BOTTOM_COPPER))
+        ed_bottom->sp->set_value(board.stackup.at(BoardLayers::BOTTOM_COPPER).thickness);
     lb->add(*ed_bottom);
 
     lb->show_all();
@@ -164,21 +163,21 @@ void EditStackupDialog::update_layers()
 void EditStackupDialog::ok_clicked()
 {
     auto n_inner_layers = sp_n_inner_layers->get_value_as_int();
-    board->set_n_inner_layers(n_inner_layers);
+    board.set_n_inner_layers(n_inner_layers);
     for (auto ch : lb->get_children()) {
         auto ed = dynamic_cast<StackupLayerEditor *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
         if (ed->copper) {
-            board->stackup.at(ed->layer).thickness = ed->sp->get_value_as_int();
+            board.stackup.at(ed->layer).thickness = ed->sp->get_value_as_int();
         }
         else {
-            board->stackup.at(ed->layer).substrate_thickness = ed->sp->get_value_as_int();
+            board.stackup.at(ed->layer).substrate_thickness = ed->sp->get_value_as_int();
         }
     }
-    map_erase_if(board->tracks, [this](const auto &x) { return board->get_layers().count(x.second.layer) == 0; });
-    map_erase_if(board->polygons, [this](const auto &x) { return board->get_layers().count(x.second.layer) == 0; });
-    map_erase_if(board->lines, [this](const auto &x) { return board->get_layers().count(x.second.layer) == 0; });
-    map_erase_if(board->texts, [this](const auto &x) { return board->get_layers().count(x.second.layer) == 0; });
-    core->get_fab_output_settings()->update_for_board(board);
-    board->update_pdf_export_settings(*core->get_pdf_export_settings());
+    map_erase_if(board.tracks, [this](const auto &x) { return board.get_layers().count(x.second.layer) == 0; });
+    map_erase_if(board.polygons, [this](const auto &x) { return board.get_layers().count(x.second.layer) == 0; });
+    map_erase_if(board.lines, [this](const auto &x) { return board.get_layers().count(x.second.layer) == 0; });
+    map_erase_if(board.texts, [this](const auto &x) { return board.get_layers().count(x.second.layer) == 0; });
+    core.get_fab_output_settings()->update_for_board(board);
+    board.update_pdf_export_settings(*core.get_pdf_export_settings());
 }
 } // namespace horizon

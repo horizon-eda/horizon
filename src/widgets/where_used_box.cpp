@@ -1,9 +1,10 @@
 #include "where_used_box.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
+#include "util/sqlite.hpp"
 #include "common/object_descr.hpp"
 
 namespace horizon {
-WhereUsedBox::WhereUsedBox(Pool &p) : Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 4), pool(p)
+WhereUsedBox::WhereUsedBox(IPool &p) : Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 4), pool(p)
 {
     auto *la = Gtk::manage(new Gtk::Label());
     la->set_markup("<b>Where used</b>");
@@ -47,7 +48,7 @@ size_t WhereUsedBox::load(ObjectType type, const UUID &uu)
     store->clear();
     if (!uu)
         return 0;
-    SQLite::Query q(pool.db,
+    SQLite::Query q(pool.get_db(),
                     "WITH RECURSIVE where_used(typex, uuidx) AS ( SELECT ?, ? UNION "
                     "SELECT type, uuid FROM dependencies, where_used "
                     "WHERE dependencies.dep_type = where_used.typex "

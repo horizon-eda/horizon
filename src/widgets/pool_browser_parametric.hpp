@@ -8,7 +8,7 @@ class PoolBrowserParametric : public PoolBrowserStockinfo {
 public:
     class FilterAppliedLabel;
     friend FilterAppliedLabel;
-    PoolBrowserParametric(class Pool *p, class PoolParametric *pp, const std::string &table_name);
+    PoolBrowserParametric(class IPool &p, class PoolParametric &pp, const std::string &table_name);
     void search() override;
     ObjectType get_type() const override
     {
@@ -27,7 +27,7 @@ protected:
     Gtk::TreeModelColumn<std::shared_ptr<StockInfoRecord>> &get_stock_info_column() override;
 
 private:
-    class PoolParametric *pool_parametric;
+    class PoolParametric &pool_parametric;
     const PoolParametric::Table &table;
     std::map<std::string, std::reference_wrapper<const PoolParametric::Column>> columns;
     UUID similar_part_uuid;

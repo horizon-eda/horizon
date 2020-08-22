@@ -1,5 +1,7 @@
 #pragma once
 #include "included_board.hpp"
+#include "util/uuid_ptr.hpp"
+#include "util/placement.hpp"
 
 namespace horizon {
 class BoardPanel {

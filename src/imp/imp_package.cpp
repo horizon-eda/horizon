@@ -23,6 +23,7 @@
 #include "widgets/action_button.hpp"
 #include <iomanip>
 #include "core/tool_id.hpp"
+#include "pool/pool_cached.hpp"
 
 namespace horizon {
 ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path)
@@ -257,13 +258,13 @@ void ImpPackage::construct()
     entry_name->signal_activate().connect(sigc::mem_fun(*this, &ImpPackage::update_header));
 
     auto entry_manufacturer = header_button->add_entry("Manufacturer");
-    entry_manufacturer->set_completion(create_pool_manufacturer_completion(pool.get()));
+    entry_manufacturer->set_completion(create_pool_manufacturer_completion(*pool.get()));
 
     auto entry_tags = Gtk::manage(new TagEntry(*pool.get(), ObjectType::PACKAGE, true));
     entry_tags->show();
     header_button->add_widget("Tags", entry_tags);
 
-    browser_alt_button = Gtk::manage(new PoolBrowserButton(ObjectType::PACKAGE, pool.get()));
+    browser_alt_button = Gtk::manage(new PoolBrowserButton(ObjectType::PACKAGE, *pool.get()));
     browser_alt_button->get_browser()->set_show_none(true);
     header_button->add_widget("Alternate for", browser_alt_button);
 

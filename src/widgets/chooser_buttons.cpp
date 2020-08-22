@@ -2,10 +2,6 @@
 #include "dialogs/dialogs.hpp"
 #include "board/via_padstack_provider.hpp"
 #include "pool/padstack.hpp"
-#include "pool/package.hpp"
-#include "pool/pool.hpp"
-#include "pool/part.hpp"
-#include "pool_browser.hpp"
 
 namespace horizon {
 
@@ -23,7 +19,7 @@ void ViaPadstackButton::on_clicked()
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
     Dialogs dias;
     dias.set_parent(top);
-    if (auto r = dias.select_via_padstack(&via_padstack_provider)) {
+    if (auto r = dias.select_via_padstack(via_padstack_provider)) {
         p_property_selected_uuid = *r;
         update_label();
     }

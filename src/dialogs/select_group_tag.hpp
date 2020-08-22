@@ -11,7 +11,7 @@ namespace horizon {
 
 class SelectGroupTagDialog : public Gtk::Dialog {
 public:
-    SelectGroupTagDialog(Gtk::Window *parent, const class Block *block, bool tag_mode);
+    SelectGroupTagDialog(Gtk::Window *parent, const class Block &block, bool tag_mode);
     UUID selected_uuid;
     bool selection_valid = false;
 

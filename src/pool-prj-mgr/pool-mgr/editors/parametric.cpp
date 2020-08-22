@@ -124,8 +124,8 @@ private:
 };
 
 
-ParametricEditor::ParametricEditor(PoolParametric *p, const std::string &t)
-    : Gtk::Grid(), pool(p), table(pool->get_tables().at(t))
+ParametricEditor::ParametricEditor(PoolParametric &p, const std::string &t)
+    : Gtk::Grid(), pool(p), table(pool.get_tables().at(t))
 {
     set_row_spacing(10);
     set_column_spacing(10);

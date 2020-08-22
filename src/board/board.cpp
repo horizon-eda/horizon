@@ -7,6 +7,8 @@
 #include "util/picture_load.hpp"
 #include <list>
 #include "nlohmann/json.hpp"
+#include "pool/ipool.hpp"
+#include "pool/pool_cached.hpp"
 
 namespace horizon {
 
@@ -30,7 +32,7 @@ BoardColors::BoardColors() : solder_mask({0, .5, 0}), substrate({.2, .15, 0})
 {
 }
 
-Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadstackProvider &vpp)
+Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, ViaPadstackProvider &vpp)
     : uuid(uu), block(&iblock), name(j.at("name").get<std::string>()), n_inner_layers(j.value("n_inner_layers", 0))
 {
     Logger::log_info("loading board " + (std::string)uuid, Logger::Domain::BOARD);
@@ -247,12 +249,12 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, Pool &pool, ViaPadsta
             Logger::log_warning("couldn't load p&p export settings", Logger::Domain::BOARD, e.what());
         }
     }
-    fab_output_settings.update_for_board(this);
+    fab_output_settings.update_for_board(*this);
     update_pdf_export_settings(pdf_export_settings);
     update_refs(); // fill in smashed texts
 }
 
-Board Board::new_from_file(const std::string &filename, Block &block, Pool &pool, ViaPadstackProvider &vpp)
+Board Board::new_from_file(const std::string &filename, Block &block, IPool &pool, ViaPadstackProvider &vpp)
 {
     auto j = load_json_from_file(filename);
     return Board(UUID(j.at("uuid").get<std::string>()), j, block, pool, vpp);
@@ -415,7 +417,7 @@ void Board::set_n_inner_layers(unsigned int n)
         stackup.emplace(-j, -j);
     }
     map_erase_if(stackup, [this](const auto &x) { return layers.count(x.first) == 0; });
-    fab_output_settings.update_for_board(this);
+    fab_output_settings.update_for_board(*this);
     update_pdf_export_settings(pdf_export_settings);
 }
 

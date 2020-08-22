@@ -91,7 +91,7 @@ ToolResponse ToolMoveNetSegment::begin(const ToolArgs &args)
             return ToolResponse::end();
         }
 
-        if (auto r = imp->dialogs.select_net(doc.c->get_schematic()->block, nsinfo.net->is_power, nsinfo.net->uuid)) {
+        if (auto r = imp->dialogs.select_net(*doc.c->get_schematic()->block, nsinfo.net->is_power, nsinfo.net->uuid)) {
             Net *net = &doc.c->get_schematic()->block->nets.at(*r);
             auto pins = doc.c->get_sheet()->get_pins_connected_to_net_segment(net_segment);
             doc.c->get_schematic()->block->extract_pins(pins, net);

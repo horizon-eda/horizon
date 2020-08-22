@@ -3,10 +3,11 @@
 #include "util/util.hpp"
 #include "util/gtk_util.hpp"
 #include "pool/package.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
+#include "util/sqlite.hpp"
 
 namespace horizon {
-PackageInfoBox::PackageInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Pool &p)
+PackageInfoBox::PackageInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IPool &p)
     : Gtk::Box(cobject), pool(p)
 {
 
@@ -111,7 +112,7 @@ PackageInfoBox::PackageInfoBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::
     });
 }
 
-PackageInfoBox *PackageInfoBox::create(Pool &p)
+PackageInfoBox *PackageInfoBox::create(IPool &p)
 {
     PackageInfoBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
@@ -151,7 +152,7 @@ void PackageInfoBox::load(const Package *package)
     if (package) {
         std::map<const Padstack *, std::pair<unsigned int, bool>> padstacks;
         {
-            SQLite::Query q(pool.db, "SELECT uuid FROM padstacks WHERE package=?");
+            SQLite::Query q(pool.get_db(), "SELECT uuid FROM padstacks WHERE package=?");
             q.bind(1, package->uuid);
             while (q.step()) {
                 UUID uu = q.get<std::string>(0);

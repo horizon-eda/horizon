@@ -1,20 +1,17 @@
 #pragma once
 #include <gtkmm.h>
-#include <array>
-#include <set>
-#include "common/common.hpp"
 #include "util/uuid.hpp"
 namespace horizon {
 
 
 class SelectViaPadstackDialog : public Gtk::Dialog {
 public:
-    SelectViaPadstackDialog(Gtk::Window *parent, class ViaPadstackProvider *vpp);
+    SelectViaPadstackDialog(Gtk::Window *parent, class ViaPadstackProvider &vpp);
     UUID selected_uuid;
     bool selection_valid = false;
     // virtual ~MainWindow();
 private:
-    ViaPadstackProvider *via_padstack_provider;
+    ViaPadstackProvider &via_padstack_provider;
 
     class ListColumns : public Gtk::TreeModelColumnRecord {
     public:

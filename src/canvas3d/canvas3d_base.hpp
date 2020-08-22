@@ -111,7 +111,7 @@ protected:
 
     void load_3d_model(const std::string &filename, const std::string &filename_abs);
 
-    std::map<std::string, std::string> get_model_filenames(class Pool &pool);
+    std::map<std::string, std::string> get_model_filenames(class IPool &pool);
 
     std::mutex models_loading_mutex;
 

@@ -1,23 +1,24 @@
 #pragma once
+#include "util/uuid.hpp"
+#include "util/uuid_ptr.hpp"
+#include <map>
+#include <set>
 #include "entity.hpp"
 #include "package.hpp"
-#include "util/uuid.hpp"
-#include <fstream>
-#include <map>
-#include <vector>
+#include "nlohmann/json_fwd.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
 
 class Part {
 private:
-    Part(const UUID &uu, const json &j, Pool &pool);
+    Part(const UUID &uu, const json &j, class IPool &pool);
     const std::string empty;
 
 public:
     class PadMapItem {
     public:
-        PadMapItem(const Gate *g, const Pin *p) : gate(g), pin(p)
+        PadMapItem(const class Gate *g, const class Pin *p) : gate(g), pin(p)
         {
         }
         uuid_ptr<const Gate> gate;
@@ -25,7 +26,7 @@ public:
     };
     Part(const UUID &uu);
 
-    static Part new_from_file(const std::string &filename, Pool &pool);
+    static Part new_from_file(const std::string &filename, IPool &pool);
     UUID uuid;
 
     enum class Attribute { MPN, VALUE, MANUFACTURER, DATASHEET, DESCRIPTION };
@@ -44,13 +45,13 @@ public:
 
     std::set<std::string> tags;
     bool inherit_tags = false;
-    uuid_ptr<const Entity> entity;
-    uuid_ptr<const Package> package;
+    uuid_ptr<const class Entity> entity;
+    uuid_ptr<const class Package> package;
     UUID model;
     bool inherit_model = true;
-    uuid_ptr<const Part> base;
+    uuid_ptr<const class Part> base;
 
-    void update_refs(Pool &pool);
+    void update_refs(IPool &pool);
     UUID get_uuid() const;
 
     std::map<std::string, std::string> parametric;

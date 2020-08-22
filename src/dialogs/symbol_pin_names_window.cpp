@@ -232,10 +232,10 @@ void SymbolPinNamesWindow::handle_import()
     }
 }
 
-SymbolPinNamesWindow::SymbolPinNamesWindow(Gtk::Window *parent, ImpInterface *intf, SchematicSymbol *s)
+SymbolPinNamesWindow::SymbolPinNamesWindow(Gtk::Window *parent, ImpInterface *intf, SchematicSymbol &s)
     : ToolWindow(parent, intf), sym(s)
 {
-    set_title("Symbol " + s->component->refdes + s->gate->suffix + " pin names");
+    set_title("Symbol " + s.component->refdes + s.gate->suffix + " pin names");
     set_default_size(300, 700);
     auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
 
@@ -246,9 +246,9 @@ SymbolPinNamesWindow::SymbolPinNamesWindow(Gtk::Window *parent, ImpInterface *in
                                   .enum_items) {
         mode_combo->append(std::to_string(it.first), it.second);
     }
-    mode_combo->set_active_id(std::to_string(static_cast<int>(sym->pin_display_mode)));
+    mode_combo->set_active_id(std::to_string(static_cast<int>(sym.pin_display_mode)));
     mode_combo->signal_changed().connect([this, mode_combo] {
-        sym->pin_display_mode = static_cast<SchematicSymbol::PinDisplayMode>(std::stoi(mode_combo->get_active_id()));
+        sym.pin_display_mode = static_cast<SchematicSymbol::PinDisplayMode>(std::stoi(mode_combo->get_active_id()));
         emit_event(ToolDataWindow::Event::UPDATE);
     });
 
@@ -264,7 +264,7 @@ SymbolPinNamesWindow::SymbolPinNamesWindow(Gtk::Window *parent, ImpInterface *in
     auto sep = Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
     box->pack_start(*sep, false, false, 0);
 
-    editor = Gtk::manage(new GatePinEditor(sym->component, sym->gate));
+    editor = Gtk::manage(new GatePinEditor(sym.component, sym.gate));
     editor->signal_changed().connect([this] { emit_event(ToolDataWindow::Event::UPDATE); });
     editor->signal_selected_rows_changed().connect([this] { emit_event(ToolDataWindow::Event::UPDATE); });
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());

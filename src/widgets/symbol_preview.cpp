@@ -1,14 +1,13 @@
 #include "symbol_preview.hpp"
 #include "pool/symbol.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "canvas/canvas.hpp"
 #include "util/util.hpp"
-#include "util/sqlite.hpp"
 #include "common/object_descr.hpp"
 #include "preview_canvas.hpp"
 
 namespace horizon {
-SymbolPreview::SymbolPreview(class Pool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
+SymbolPreview::SymbolPreview(IPool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
 {
 
     canvas_symbol = Gtk::manage(new PreviewCanvas(pool, false));

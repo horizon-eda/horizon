@@ -7,11 +7,11 @@ namespace horizon {
 
 class SchematicPropertiesDialog : public Gtk::Dialog {
 public:
-    SchematicPropertiesDialog(Gtk::Window *parent, class Schematic *c, class Pool *pool);
+    SchematicPropertiesDialog(Gtk::Window *parent, class Schematic &c, class IPool &pool);
 
 
 private:
-    class Schematic *sch;
+    class Schematic &sch;
 
 
     void ok_clicked();

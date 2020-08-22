@@ -1,19 +1,16 @@
 #pragma once
 #include <gtkmm.h>
-#include <array>
-#include <set>
-#include "common/common.hpp"
-#include "util/uuid.hpp"
+
 namespace horizon {
 class EditStackupDialog : public Gtk::Dialog {
     friend class StackupLayerEditor;
 
 public:
-    EditStackupDialog(Gtk::Window *parent, class IDocumentBoard *core);
+    EditStackupDialog(Gtk::Window *parent, class IDocumentBoard &core);
 
 private:
-    class IDocumentBoard *core = nullptr;
-    class Board *board = nullptr;
+    class IDocumentBoard &core;
+    class Board &board;
     Gtk::ListBox *lb = nullptr;
     Gtk::SpinButton *sp_n_inner_layers = nullptr;
     void ok_clicked();

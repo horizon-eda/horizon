@@ -8,12 +8,12 @@
 namespace horizon {
 class UnitPreview : public Gtk::Box, public PreviewBase {
 public:
-    UnitPreview(class Pool &pool);
+    UnitPreview(class IPool &pool);
 
     void load(const class Unit *unit);
 
 private:
-    class Pool &pool;
+    class IPool &pool;
     const class Unit *unit = nullptr;
     class PreviewCanvas *canvas_symbol = nullptr;
     Gtk::ComboBoxText *combo_symbol = nullptr;

@@ -18,7 +18,7 @@ bool ToolPlacePowerSymbol::can_begin()
 
 bool ToolPlacePowerSymbol::begin_attached()
 {
-    if (auto r = imp->dialogs.select_net(doc.c->get_schematic()->block, true)) {
+    if (auto r = imp->dialogs.select_net(*doc.c->get_schematic()->block, true)) {
         net = &doc.c->get_schematic()->block->nets.at(*r);
         imp->tool_bar_set_actions({
                 {InToolActionID::LMB},

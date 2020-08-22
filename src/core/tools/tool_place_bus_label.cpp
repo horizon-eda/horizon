@@ -18,7 +18,7 @@ bool ToolPlaceBusLabel::can_begin()
 
 bool ToolPlaceBusLabel::begin_attached()
 {
-    if (auto r = imp->dialogs.select_bus(doc.c->get_schematic()->block)) {
+    if (auto r = imp->dialogs.select_bus(*doc.c->get_schematic()->block)) {
         imp->tool_bar_set_actions({
                 {InToolActionID::LMB},
                 {InToolActionID::RMB},

@@ -5,7 +5,7 @@
 namespace horizon {
 class NetSelector : public Gtk::Box {
 public:
-    NetSelector(class Block *b);
+    NetSelector(const class Block &b);
     void set_power_only(bool p);
     void set_bus_mode(bool b);
     void set_bus_member_mode(const UUID &bus_uuid);
@@ -34,11 +34,11 @@ private:
         Gtk::TreeModelColumn<bool> is_power;
     };
     ListColumns list_columns;
-    Block *block;
+    const Block &block;
     bool power_only = false;
     bool bus_mode = false;
     bool bus_member_mode = false;
-    class Bus *bus = nullptr;
+    const class Bus *bus = nullptr;
 
 
     Gtk::TreeView *view;

@@ -10,7 +10,7 @@ using json = nlohmann::json;
 
 class BOMExportSettings {
 public:
-    BOMExportSettings(const json &, class Pool &pool);
+    BOMExportSettings(const json &, class IPool &pool);
     BOMExportSettings();
     json serialize() const;
 

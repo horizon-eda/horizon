@@ -1,6 +1,6 @@
 #include "sheet.hpp"
 #include "pool/part.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "util/util.hpp"
 #include "logger/logger.hpp"
 #include "logger/log_util.hpp"
@@ -9,7 +9,7 @@
 
 namespace horizon {
 
-Sheet::Sheet(const UUID &uu, const json &j, Block &block, Pool &pool)
+Sheet::Sheet(const UUID &uu, const json &j, Block &block, IPool &pool)
     : uuid(uu), name(j.at("name").get<std::string>()), index(j.at("index").get<unsigned int>()), frame(UUID())
 {
     Logger::log_info("loading sheet " + name, Logger::Domain::SCHEMATIC);

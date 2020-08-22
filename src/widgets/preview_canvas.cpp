@@ -1,8 +1,9 @@
 #include "preview_canvas.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "pool/symbol.hpp"
 #include "pool/package.hpp"
 #include "pool/part.hpp"
+#include "frame/frame.hpp"
 #include "board/board_layers.hpp"
 #include "preferences/preferences_util.hpp"
 #include "canvas/canvas_gl.hpp"
@@ -60,7 +61,7 @@ private:
     float m_length = 1e6;
 };
 
-PreviewCanvas::PreviewCanvas(Pool &p, bool layered) : Glib::ObjectBase(typeid(PreviewCanvas)), pool(p)
+PreviewCanvas::PreviewCanvas(IPool &p, bool layered) : Glib::ObjectBase(typeid(PreviewCanvas)), pool(p)
 {
     canvas = Gtk::manage(new CanvasGL());
     if (layered)

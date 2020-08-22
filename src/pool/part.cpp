@@ -1,11 +1,13 @@
 #include "part.hpp"
-#include "pool.hpp"
+#include "ipool.hpp"
+#include "entity.hpp"
+#include "package.hpp"
 #include "common/lut.hpp"
 #include "nlohmann/json.hpp"
 #include "util/util.hpp"
 
 namespace horizon {
-Part::Part(const UUID &uu, const json &j, Pool &pool)
+Part::Part(const UUID &uu, const json &j, IPool &pool)
     : uuid(uu), inherit_tags(j.value("inherit_tags", false)), inherit_model(j.value("inherit_model", true))
 {
     check_object_type(j, ObjectType::PART);
@@ -158,7 +160,7 @@ Part::Part(const UUID &uu) : uuid(uu)
     attributes[Attribute::DESCRIPTION] = {false, ""};
 }
 
-Part Part::new_from_file(const std::string &filename, Pool &pool)
+Part Part::new_from_file(const std::string &filename, IPool &pool)
 {
     auto j = load_json_from_file(filename);
     return Part(UUID(j.at("uuid").get<std::string>()), j, pool);
@@ -223,7 +225,7 @@ UUID Part::get_uuid() const
     return uuid;
 }
 
-void Part::update_refs(Pool &pool)
+void Part::update_refs(IPool &pool)
 {
     entity = pool.get_entity(entity.uuid);
     package = pool.get_package(package.uuid);

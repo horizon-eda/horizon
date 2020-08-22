@@ -7,7 +7,6 @@
 #include "block/block.hpp"
 #include "util/uuid_ptr.hpp"
 #include "util/placement.hpp"
-#include "pool/pool.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -17,7 +16,7 @@ using json = nlohmann::json;
 
 class SchematicSymbol {
 public:
-    SchematicSymbol(const UUID &uu, const json &, Pool &pool, Block *block = nullptr);
+    SchematicSymbol(const UUID &uu, const json &, class IPool &pool, Block *block = nullptr);
     SchematicSymbol(const UUID &uu, const Symbol *sym);
     UUID uuid;
     const Symbol *pool_symbol;

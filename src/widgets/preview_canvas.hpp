@@ -6,7 +6,7 @@
 namespace horizon {
 class PreviewCanvas : public Gtk::Overlay {
 public:
-    PreviewCanvas(class Pool &pool, bool layered);
+    PreviewCanvas(class IPool &pool, bool layered);
     void load(ObjectType ty, const UUID &uu, const Placement &pl = Placement(), bool fit = true);
     void load_symbol(const UUID &uu, const Placement &pl = Placement(), bool fit = true, const UUID &uu_part = UUID(),
                      const UUID &uu_gate = UUID());
@@ -16,7 +16,7 @@ public:
     void clear();
 
 private:
-    class Pool &pool;
+    class IPool &pool;
     class CanvasGL *canvas = nullptr;
     Gtk::Label *scale_label = nullptr;
     Gtk::Frame *frame = nullptr;

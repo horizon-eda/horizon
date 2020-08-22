@@ -38,7 +38,7 @@ int ToolHelperMerge::merge_nets(Net *net, Net *into)
         }
     }
     else if (net->is_named() && into->is_named()) {
-        int r = imp->dialogs.ask_net_merge(net, into);
+        int r = imp->dialogs.ask_net_merge(*net, *into);
         if (r == 1) {
             // nop, nets are already as we want them to
         }

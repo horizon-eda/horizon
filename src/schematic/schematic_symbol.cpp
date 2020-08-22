@@ -3,6 +3,7 @@
 #include "common/lut.hpp"
 #include "nlohmann/json.hpp"
 #include "schematic.hpp"
+#include "pool/ipool.hpp"
 
 namespace horizon {
 
@@ -13,7 +14,7 @@ static const LutEnumStr<SchematicSymbol::PinDisplayMode> pdm_lut = {
         {"custom_only", SchematicSymbol::PinDisplayMode::CUSTOM_ONLY},
 };
 
-SchematicSymbol::SchematicSymbol(const UUID &uu, const json &j, Pool &pool, Block *block)
+SchematicSymbol::SchematicSymbol(const UUID &uu, const json &j, IPool &pool, Block *block)
     : uuid(uu), pool_symbol(pool.get_symbol(j.at("symbol").get<std::string>())), symbol(*pool_symbol),
       placement(j.at("placement")), smashed(j.value("smashed", false)),
       display_directions(j.value("display_directions", false)), display_all_pads(j.value("display_all_pads", true)),

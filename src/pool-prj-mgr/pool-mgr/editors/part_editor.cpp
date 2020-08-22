@@ -11,6 +11,7 @@
 #include <glibmm.h>
 #include "util/pool_completion.hpp"
 #include "parametric.hpp"
+#include "pool/ipool.hpp"
 
 namespace horizon {
 class EntryWithInheritance : public Gtk::Box {
@@ -138,8 +139,8 @@ private:
     Gtk::Entry *entry = nullptr;
 };
 
-PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Part *p, Pool *po,
-                       PoolParametric *pp)
+PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Part &p, IPool &po,
+                       PoolParametric &pp)
     : Gtk::Box(cobject), part(p), pool(po), pool_parametric(pp)
 {
 
@@ -161,7 +162,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     {
         Gtk::Box *tag_box;
         x->get_widget("tags", tag_box);
-        w_tags = Gtk::manage(new TagEntry(*pool, ObjectType::PART, true));
+        w_tags = Gtk::manage(new TagEntry(pool, ObjectType::PART, true));
         w_tags->show();
         tag_box->pack_start(*w_tags, true, true, 0);
     }
@@ -222,19 +223,19 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
 
     for (auto &it : attr_editors) {
-        it.second->property_can_inherit() = part->base;
-        it.second->set_text_this(part->attributes.at(it.first).second);
-        if (part->base) {
-            it.second->set_text_inherit(part->base->attributes.at(it.first).second);
-            it.second->property_inherit() = part->attributes.at(it.first).first;
+        it.second->property_can_inherit() = part.base;
+        it.second->set_text_this(part.attributes.at(it.first).second);
+        if (part.base) {
+            it.second->set_text_inherit(part.base->attributes.at(it.first).second);
+            it.second->property_inherit() = part.attributes.at(it.first).first;
         }
         it.second->entry->signal_changed().connect([this, it] {
             needs_save = true;
-            part->attributes[it.first] = it.second->get_as_pair();
+            part.attributes[it.first] = it.second->get_as_pair();
         });
         it.second->button->signal_toggled().connect([this, it] {
             needs_save = true;
-            part->attributes[it.first] = it.second->get_as_pair();
+            part.attributes[it.first] = it.second->get_as_pair();
         });
     }
 
@@ -242,10 +243,10 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     w_change_package_button->signal_clicked().connect(sigc::mem_fun(*this, &PartEditor::change_package));
 
-    w_tags_inherit->set_active(part->inherit_tags);
+    w_tags_inherit->set_active(part.inherit_tags);
     w_tags_inherit->signal_toggled().connect([this] { needs_save = true; });
 
-    w_tags->set_tags(part->tags);
+    w_tags->set_tags(part.tags);
     w_tags->signal_changed().connect([this] { needs_save = true; });
 
     pin_store = Gtk::ListStore::create(pin_list_columns);
@@ -302,7 +303,7 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     update_map_buttons();
     w_tv_pads->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &PartEditor::update_map_buttons));
     w_tv_pins->get_selection()->signal_changed().connect(sigc::mem_fun(*this, &PartEditor::update_map_buttons));
-    w_change_package_button->set_sensitive(!part->base);
+    w_change_package_button->set_sensitive(!part.base);
 
     w_button_unmap->signal_clicked().connect([this] {
         auto sel = w_tv_pads->get_selection();
@@ -393,10 +394,10 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
 
     update_mapped();
     populate_models();
-    w_model_combo->set_active_id((std::string)part->model);
+    w_model_combo->set_active_id((std::string)part.model);
 
-    if (part->base) {
-        w_model_inherit->set_active(part->inherit_model);
+    if (part.base) {
+        w_model_inherit->set_active(part.inherit_model);
         w_model_inherit->signal_toggled().connect([this] {
             needs_save = true;
             update_model_inherit();
@@ -410,13 +411,13 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     w_model_combo->signal_changed().connect([this] { needs_save = true; });
 
     w_parametric_table_combo->append("", "None");
-    for (const auto &it : pool_parametric->get_tables()) {
+    for (const auto &it : pool_parametric.get_tables()) {
         w_parametric_table_combo->append(it.first, it.second.display_name);
     }
     w_parametric_table_combo->set_active_id("");
-    if (part->parametric.count("table")) {
-        std::string tab = part->parametric.at("table");
-        if (pool_parametric->get_tables().count(tab)) {
+    if (part.parametric.count("table")) {
+        std::string tab = part.parametric.at("table");
+        if (pool_parametric.get_tables().count(tab)) {
             w_parametric_table_combo->set_active_id(tab);
         }
     }
@@ -425,9 +426,9 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         needs_save = true;
         update_parametric_editor();
     });
-    w_parametric_from_base->set_sensitive(part->base);
+    w_parametric_from_base->set_sensitive(part.base);
     w_parametric_from_base->signal_clicked().connect([this] {
-        if (part->base) {
+        if (part.base) {
             needs_save = true;
         }
     });
@@ -435,19 +436,19 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     w_orderable_MPNs_add_button->signal_clicked().connect([this] {
         needs_save = true;
         auto uu = UUID::random();
-        part->orderable_MPNs.emplace(uu, "");
+        part.orderable_MPNs.emplace(uu, "");
         auto ed = create_orderable_MPN_editor(uu);
         ed->focus();
     });
 
-    for (const auto &it : part->orderable_MPNs) {
+    for (const auto &it : part.orderable_MPNs) {
         create_orderable_MPN_editor(it.first);
     }
     update_orderable_MPNs_label();
 }
 class OrderableMPNEditor *PartEditor::create_orderable_MPN_editor(const UUID &uu)
 {
-    auto ed = Gtk::manage(new OrderableMPNEditor(*part, uu));
+    auto ed = Gtk::manage(new OrderableMPNEditor(part, uu));
     w_orderable_MPNs_box->pack_start(*ed, false, false, 0);
     ed->signal_changed().connect([this] {
         needs_save = true;
@@ -459,7 +460,7 @@ class OrderableMPNEditor *PartEditor::create_orderable_MPN_editor(const UUID &uu
 
 void PartEditor::update_map_buttons()
 {
-    if (part->base) {
+    if (part.base) {
         w_button_map->set_sensitive(false);
         w_button_unmap->set_sensitive(false);
         w_button_automap->set_sensitive(false);
@@ -530,7 +531,7 @@ void PartEditor::update_model_inherit()
 {
     auto active = w_model_inherit->get_active();
     if (active) {
-        w_model_combo->set_active_id((std::string)part->base->model);
+        w_model_combo->set_active_id((std::string)part.base->model);
     }
     w_model_combo->set_sensitive(!active);
 }
@@ -547,35 +548,34 @@ void PartEditor::update_entries()
 {
 
 
-    if (part->base) {
+    if (part.base) {
         w_base_label->set_markup(
-                "<a href=\"" + (std::string)part->base->uuid + "\">"
-                + Glib::Markup::escape_text(part->base->get_MPN() + append_with_slash(part->base->get_manufacturer()))
+                "<a href=\"" + (std::string)part.base->uuid + "\">"
+                + Glib::Markup::escape_text(part.base->get_MPN() + append_with_slash(part.base->get_manufacturer()))
                 + "</a>");
-        w_entity_label->set_markup("<a href=\"" + (std::string)part->base->entity->uuid + "\">"
-                                   + Glib::Markup::escape_text(part->base->entity->name
-                                                               + append_with_slash(part->base->entity->manufacturer))
+        w_entity_label->set_markup("<a href=\"" + (std::string)part.base->entity->uuid + "\">"
+                                   + Glib::Markup::escape_text(part.base->entity->name
+                                                               + append_with_slash(part.base->entity->manufacturer))
                                    + "</a>");
-        w_package_label->set_markup("<a href=\"" + (std::string)part->base->package->uuid + "\">"
-                                    + Glib::Markup::escape_text(part->base->package->name
-                                                                + append_with_slash(part->base->package->manufacturer))
+        w_package_label->set_markup("<a href=\"" + (std::string)part.base->package->uuid + "\">"
+                                    + Glib::Markup::escape_text(part.base->package->name
+                                                                + append_with_slash(part.base->package->manufacturer))
                                     + "</a>");
     }
     else {
         w_base_label->set_text("none");
         w_entity_label->set_markup(
-                "<a href=\"" + (std::string)part->entity->uuid + "\">"
-                + Glib::Markup::escape_text(part->entity->name + append_with_slash(part->entity->manufacturer))
-                + "</a>");
+                "<a href=\"" + (std::string)part.entity->uuid + "\">"
+                + Glib::Markup::escape_text(part.entity->name + append_with_slash(part.entity->manufacturer)) + "</a>");
         w_package_label->set_markup(
-                "<a href=\"" + (std::string)part->package->uuid + "\">"
-                + Glib::Markup::escape_text(part->package->name + append_with_slash(part->package->manufacturer))
+                "<a href=\"" + (std::string)part.package->uuid + "\">"
+                + Glib::Markup::escape_text(part.package->name + append_with_slash(part.package->manufacturer))
                 + "</a>");
     }
 
-    if (part->base) {
+    if (part.base) {
         std::stringstream s;
-        auto tags_from_base = part->base->get_tags();
+        auto tags_from_base = part.base->get_tags();
         std::copy(tags_from_base.begin(), tags_from_base.end(), std::ostream_iterator<std::string>(s, " "));
         w_tags_inherited->set_text(s.str());
     }
@@ -583,7 +583,7 @@ void PartEditor::update_entries()
         w_tags_inherited->set_text("");
     }
 
-    w_tags_inherit->set_sensitive(part->base);
+    w_tags_inherit->set_sensitive(part.base);
 }
 
 void PartEditor::change_package()
@@ -592,14 +592,14 @@ void PartEditor::change_package()
     PoolBrowserDialog dia(top, ObjectType::PACKAGE, pool);
     if (dia.run() == Gtk::RESPONSE_OK) {
         needs_save = true;
-        part->package = pool->get_package(dia.get_browser()->get_selected());
+        part.package = pool.get_package(dia.get_browser()->get_selected());
         auto ch = pad_store->children();
         std::set<UUID> pads_exisiting;
         for (auto it = ch.begin(); it != ch.end();) {
             Gtk::TreeModel::Row row = *it;
             auto pad_name = row[pad_list_columns.pad_name];
             UUID pad_uuid;
-            for (const auto &it_pad : part->package->pads) {
+            for (const auto &it_pad : part.package->pads) {
                 if (it_pad.second.name == pad_name) {
                     pad_uuid = it_pad.second.uuid;
                     break;
@@ -614,7 +614,7 @@ void PartEditor::change_package()
                 pad_store->erase(it++);
             }
         }
-        for (const auto &it : part->package->pads) {
+        for (const auto &it : part.package->pads) {
             if (pads_exisiting.count(it.first) == 0) {
                 Gtk::TreeModel::Row row = *(pad_store->append());
                 row[pad_list_columns.pad_uuid] = it.first;
@@ -625,53 +625,53 @@ void PartEditor::change_package()
         update_entries();
         update_mapped();
         populate_models();
-        w_model_combo->set_active_id((std::string)part->package->default_model);
+        w_model_combo->set_active_id((std::string)part.package->default_model);
     }
 }
 
 void PartEditor::reload()
 {
-    part->update_refs(*pool);
+    part.update_refs(pool);
     update_entries();
 }
 
 void PartEditor::save()
 {
     for (auto &it : attr_editors) {
-        part->attributes[it.first] = it.second->get_as_pair();
+        part.attributes[it.first] = it.second->get_as_pair();
     }
 
-    part->inherit_model = w_model_inherit->get_active();
+    part.inherit_model = w_model_inherit->get_active();
 
     if (w_model_combo->get_active_row_number() != -1)
-        part->model = UUID(w_model_combo->get_active_id());
+        part.model = UUID(w_model_combo->get_active_id());
     else
-        part->model = UUID();
+        part.model = UUID();
 
-    part->tags = w_tags->get_tags();
-    part->inherit_tags = w_tags_inherit->get_active();
+    part.tags = w_tags->get_tags();
+    part.inherit_tags = w_tags_inherit->get_active();
 
-    part->pad_map.clear();
+    part.pad_map.clear();
     for (const auto &it : pad_store->children()) {
-        if (it[pad_list_columns.gate_uuid] != UUID() && part->package->pads.count(it[pad_list_columns.pad_uuid])) {
-            const horizon::Gate *gate = &part->entity->gates.at(it[pad_list_columns.gate_uuid]);
+        if (it[pad_list_columns.gate_uuid] != UUID() && part.package->pads.count(it[pad_list_columns.pad_uuid])) {
+            const horizon::Gate *gate = &part.entity->gates.at(it[pad_list_columns.gate_uuid]);
             const horizon::Pin *pin = &gate->unit->pins.at(it[pad_list_columns.pin_uuid]);
-            part->pad_map.emplace(it[pad_list_columns.pad_uuid], horizon::Part::PadMapItem(gate, pin));
+            part.pad_map.emplace(it[pad_list_columns.pad_uuid], horizon::Part::PadMapItem(gate, pin));
         }
     }
 
     if (parametric_editor) {
-        part->parametric = parametric_editor->get_values();
+        part.parametric = parametric_editor->get_values();
     }
     else {
-        part->parametric.clear();
+        part.parametric.clear();
     }
 
-    part->orderable_MPNs.clear();
+    part.orderable_MPNs.clear();
 
     for (auto ch : w_orderable_MPNs_box->get_children()) {
         if (auto w = dynamic_cast<OrderableMPNEditor *>(ch)) {
-            part->orderable_MPNs.emplace(w->get_uuid(), w->get_MPN());
+            part.orderable_MPNs.emplace(w->get_uuid(), w->get_MPN());
         }
     }
 
@@ -687,7 +687,7 @@ void PartEditor::update_treeview()
     pin_store->clear();
     pad_store->clear();
 
-    for (const auto &it_gate : part->entity->gates) {
+    for (const auto &it_gate : part.entity->gates) {
         for (const auto &it_pin : it_gate.second.unit->pins) {
             Gtk::TreeModel::Row row = *(pin_store->append());
             row[pin_list_columns.gate_uuid] = it_gate.first;
@@ -697,13 +697,13 @@ void PartEditor::update_treeview()
         }
     }
 
-    for (const auto &it : part->package->pads) {
+    for (const auto &it : part.package->pads) {
         if (it.second.pool_padstack->type != Padstack::Type::MECHANICAL) {
             Gtk::TreeModel::Row row = *(pad_store->append());
             row[pad_list_columns.pad_uuid] = it.first;
             row[pad_list_columns.pad_name] = it.second.name;
-            if (part->pad_map.count(it.first)) {
-                const auto &x = part->pad_map.at(it.first);
+            if (part.pad_map.count(it.first)) {
+                const auto &x = part.pad_map.at(it.first);
                 row[pad_list_columns.gate_uuid] = x.gate->uuid;
                 row[pad_list_columns.gate_name] = x.gate->name;
                 row[pad_list_columns.pin_uuid] = x.pin->uuid;
@@ -743,7 +743,7 @@ void PartEditor::update_mapped()
 void PartEditor::populate_models()
 {
     w_model_combo->remove_all();
-    for (const auto &it : part->package->models) {
+    for (const auto &it : part.package->models) {
         w_model_combo->append((std::string)it.first, Glib::path_get_basename(it.second.filename));
     }
 }
@@ -756,12 +756,12 @@ void PartEditor::update_parametric_editor()
     }
     parametric_editor = nullptr;
     auto tab = w_parametric_table_combo->get_active_id();
-    if (pool_parametric->get_tables().count(tab)) {
+    if (pool_parametric.get_tables().count(tab)) {
         auto ed = Gtk::manage(new ParametricEditor(pool_parametric, tab));
         ed->show();
         w_parametric_box->pack_start(*ed, true, true, 0);
-        if (part->parametric.count("table") && part->parametric.at("table") == tab) {
-            ed->update(part->parametric);
+        if (part.parametric.count("table") && part.parametric.at("table") == tab) {
+            ed->update(part.parametric);
         }
         parametric_editor = ed;
         parametric_editor->signal_changed().connect([this] { needs_save = true; });
@@ -773,10 +773,10 @@ void PartEditor::copy_from_other_part()
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
     PoolBrowserDialog dia(top, ObjectType::PART, pool);
     auto br = dynamic_cast<PoolBrowserPart *>(dia.get_browser());
-    br->set_entity_uuid(part->entity->uuid);
+    br->set_entity_uuid(part.entity->uuid);
     if (dia.run() == Gtk::RESPONSE_OK) {
         auto uu = dia.get_browser()->get_selected();
-        auto other_part = pool->get_part(uu);
+        auto other_part = pool.get_part(uu);
         for (auto &it_pad : pad_store->children()) {
             Gtk::TreeModel::Row row_pad = *it_pad;
             if (row_pad.get_value(pad_list_columns.gate_uuid) == UUID()) { // only update unmapped pads
@@ -800,7 +800,7 @@ void PartEditor::copy_from_other_part()
     }
 }
 
-PartEditor *PartEditor::create(Part *p, Pool *po, PoolParametric *pp)
+PartEditor *PartEditor::create(Part &p, IPool &po, PoolParametric &pp)
 {
     PartEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();

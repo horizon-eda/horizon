@@ -44,7 +44,7 @@ KiCadSymbolImportWizard::KiCadSymbolImportWizard(BaseObjectType *cobject, const 
     {
         Gtk::Paned *pane_package;
         x->get_widget("pane_package", pane_package);
-        browser_package = Gtk::manage(new PoolBrowserPackage(&pool, true));
+        browser_package = Gtk::manage(new PoolBrowserPackage(pool, true));
         browser_package->show();
         pane_package->add1(*browser_package);
 

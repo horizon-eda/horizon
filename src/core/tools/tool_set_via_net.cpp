@@ -50,7 +50,7 @@ ToolResponse ToolSetViaNet::begin(const ToolArgs &args)
     }
 
     if (tool_id == ToolID::SET_VIA_NET) {
-        if (auto r = imp->dialogs.select_net(doc.b->get_block(), false)) {
+        if (auto r = imp->dialogs.select_net(*doc.b->get_block(), false)) {
             auto net = &doc.b->get_block()->nets.at(*r);
             for (auto via : vias)
                 via->net_set = net;

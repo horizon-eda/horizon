@@ -4,7 +4,7 @@
 #include "util/util.hpp"
 #include "export_bom/export_bom.hpp"
 #include "pool/part.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "widgets/generic_combo_box.hpp"
 #include "widgets/pool_browser_parametric.hpp"
 #include "preferences/preferences_provider.hpp"
@@ -44,7 +44,7 @@ std::string BOMExportWindow::MyAdapter::get_column_name(int col) const
 }
 
 BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Block *blo,
-                                 BOMExportSettings *s, Pool &p, const std::string &project_dir)
+                                 BOMExportSettings *s, IPool &p, const std::string &project_dir)
     : Gtk::Window(cobject), block(blo), settings(s), pool(p), pool_parametric(pool.get_base_path()),
       state_store(this, "imp-bom-export"), adapter(settings->csv_settings.columns)
 {
@@ -387,7 +387,7 @@ void BOMExportWindow::update_concrete_parts()
         meta_part_current = part->uuid;
         concrete_parts_label->set_text("Similar parts to " + part->get_MPN());
 
-        browser_param = Gtk::manage(new PoolBrowserParametric(&pool, &pool_parametric, part->parametric.at("table")));
+        browser_param = Gtk::manage(new PoolBrowserParametric(pool, pool_parametric, part->parametric.at("table")));
         browser_param->set_similar_part_uuid(part->uuid);
         browser_param->search();
         float tol = rb_tol_10->get_active() ? .1 : .01;
@@ -430,7 +430,7 @@ void BOMExportWindow::update_export_button()
     widget_set_insensitive_tooltip(*export_button, txt);
 }
 
-BOMExportWindow *BOMExportWindow::create(Gtk::Window *p, Block *b, BOMExportSettings *s, Pool &pool,
+BOMExportWindow *BOMExportWindow::create(Gtk::Window *p, Block *b, BOMExportSettings *s, IPool &pool,
                                          const std::string &project_dir)
 {
     BOMExportWindow *w;

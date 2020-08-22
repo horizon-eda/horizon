@@ -1,6 +1,6 @@
 #include "entity_preview.hpp"
 #include "pool/entity.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "pool/part.hpp"
 #include "canvas/canvas.hpp"
 #include "util/util.hpp"
@@ -9,7 +9,7 @@
 #include "preview_canvas.hpp"
 
 namespace horizon {
-EntityPreview::EntityPreview(class Pool &p, bool show_goto) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
+EntityPreview::EntityPreview(class IPool &p, bool show_goto) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
 {
 
     auto symbol_sel_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
@@ -124,7 +124,7 @@ void EntityPreview::handle_gate_sel()
     auto unit = gate->unit;
 
     bool have_symbols = false;
-    SQLite::Query q(pool.db, "SELECT uuid, name FROM symbols WHERE unit=? ORDER BY name");
+    SQLite::Query q(pool.get_db(), "SELECT uuid, name FROM symbols WHERE unit=? ORDER BY name");
     q.bind(1, unit->uuid);
     while (q.step()) {
         UUID uu = q.get<std::string>(0);

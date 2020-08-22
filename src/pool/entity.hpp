@@ -12,12 +12,12 @@ using json = nlohmann::json;
 
 class Entity {
 private:
-    Entity(const UUID &uu, const json &, class Pool &pool);
+    Entity(const UUID &uu, const json &, class IPool &pool);
 
 public:
     Entity(const UUID &uu);
 
-    static Entity new_from_file(const std::string &filename, Pool &pool);
+    static Entity new_from_file(const std::string &filename, IPool &pool);
     UUID uuid;
     std::string name;
     std::string manufacturer;
@@ -25,7 +25,7 @@ public:
     std::set<std::string> tags;
     std::map<UUID, Gate> gates;
     json serialize() const;
-    void update_refs(Pool &pool);
+    void update_refs(IPool &pool);
     UUID get_uuid() const;
 };
 } // namespace horizon

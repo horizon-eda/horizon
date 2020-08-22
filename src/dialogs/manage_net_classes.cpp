@@ -1,30 +1,28 @@
 #include "manage_net_classes.hpp"
-#include <iostream>
-#include <deque>
-#include <algorithm>
+#include "block/block.hpp"
 
 namespace horizon {
 
 class NetClassEditor : public Gtk::Box {
 public:
-    NetClassEditor(NetClass *nc, Block *bl) : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4), net_class(nc), block(bl)
+    NetClassEditor(NetClass &nc, Block &bl) : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4), net_class(nc), block(bl)
     {
         entry = Gtk::manage(new Gtk::Entry());
-        entry->set_text(nc->name);
-        entry->signal_changed().connect([this] { net_class->name = entry->get_text(); });
+        entry->set_text(nc.name);
+        entry->signal_changed().connect([this] { net_class.name = entry->get_text(); });
         pack_start(*entry, true, true, 0);
 
         delete_button = Gtk::manage(new Gtk::Button());
         delete_button->set_image_from_icon_name("list-remove-symbolic", Gtk::ICON_SIZE_BUTTON);
-        delete_button->set_sensitive(block->net_class_default != nc);
+        delete_button->set_sensitive(block.net_class_default != &nc);
         pack_start(*delete_button, false, false, 0);
         delete_button->signal_clicked().connect([this] {
-            for (auto &it_net : block->nets) {
-                if (it_net.second.net_class == net_class) {
-                    it_net.second.net_class = block->net_class_default;
+            for (auto &it_net : block.nets) {
+                if (it_net.second.net_class == &net_class) {
+                    it_net.second.net_class = block.net_class_default;
                 }
             }
-            block->net_classes.erase(net_class->uuid);
+            block.net_classes.erase(net_class.uuid);
             delete this->get_parent();
         });
 
@@ -43,8 +41,8 @@ public:
     }
 
 private:
-    NetClass *net_class;
-    Block *block;
+    NetClass &net_class;
+    Block &block;
     Gtk::Entry *entry = nullptr;
 };
 
@@ -56,7 +54,7 @@ static void header_fun(Gtk::ListBoxRow *row, Gtk::ListBoxRow *before)
     }
 }
 
-ManageNetClassesDialog::ManageNetClassesDialog(Gtk::Window *parent, Block *bl)
+ManageNetClassesDialog::ManageNetClassesDialog(Gtk::Window *parent, Block &bl)
     : Gtk::Dialog("Manage net classes", *parent,
                   Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       block(bl)
@@ -91,8 +89,8 @@ ManageNetClassesDialog::ManageNetClassesDialog(Gtk::Window *parent, Block *bl)
     box->pack_start(*sc, true, true, 0);
 
 
-    for (auto &it : block->net_classes) {
-        auto nce = Gtk::manage(new NetClassEditor(&it.second, block));
+    for (auto &it : block.net_classes) {
+        auto nce = Gtk::manage(new NetClassEditor(it.second, block));
         listbox->add(*nce);
     }
 
@@ -104,9 +102,9 @@ ManageNetClassesDialog::ManageNetClassesDialog(Gtk::Window *parent, Block *bl)
 void ManageNetClassesDialog::handle_add_net_class()
 {
     auto uu = UUID::random();
-    auto x = &block->net_classes.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu))
+    auto &x = block.net_classes.emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu))
                       .first->second;
-    x->name = "fixme";
+    x.name = "fixme";
 
     auto nce = Gtk::manage(new NetClassEditor(x, block));
     listbox->prepend(*nce);

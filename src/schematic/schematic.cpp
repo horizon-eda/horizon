@@ -7,6 +7,7 @@
 #include "util/util.hpp"
 #include "logger/logger.hpp"
 #include "util/picture_load.hpp"
+#include "pool/ipool.hpp"
 
 namespace horizon {
 
@@ -46,7 +47,7 @@ json Schematic::Annotation::serialize() const
     return j;
 }
 
-Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, Pool &pool)
+Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, IPool &pool)
     : uuid(uu), block(&iblock), name(j.at("name").get<std::string>()),
       group_tag_visible(j.value("group_tag_visible", false)), annotation(j.value("annotation", json()))
 {
@@ -78,7 +79,7 @@ Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, Pool &pool)
     update_refs();
 }
 
-Schematic Schematic::new_from_file(const std::string &filename, Block &block, Pool &pool)
+Schematic Schematic::new_from_file(const std::string &filename, Block &block, IPool &pool)
 {
     auto j = load_json_from_file(filename);
     return Schematic(UUID(j.at("uuid").get<std::string>()), j, block, pool);

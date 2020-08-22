@@ -1,8 +1,6 @@
 #include "annotate.hpp"
 #include "widgets/net_button.hpp"
-#include <iostream>
-#include <deque>
-#include <algorithm>
+#include "schematic/schematic.hpp"
 
 namespace horizon {
 
@@ -30,7 +28,7 @@ void GangedSwitch::append(const std::string &id, const std::string &label)
     pack_start(*rb, false, false, 0);
 }
 
-AnnotateDialog::AnnotateDialog(Gtk::Window *parent, Schematic *s)
+AnnotateDialog::AnnotateDialog(Gtk::Window *parent, Schematic &s)
     : Gtk::Dialog("Annotation", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       sch(s)
 {
@@ -57,7 +55,7 @@ AnnotateDialog::AnnotateDialog(Gtk::Window *parent, Schematic *s)
         w_order = Gtk::manage(new Gtk::ComboBoxText());
         w_order->append(std::to_string(static_cast<int>(Schematic::Annotation::Order::RIGHT_DOWN)), "Right-Down");
         w_order->append(std::to_string(static_cast<int>(Schematic::Annotation::Order::DOWN_RIGHT)), "Down-Right");
-        w_order->set_active_id(std::to_string(static_cast<int>(sch->annotation.order)));
+        w_order->set_active_id(std::to_string(static_cast<int>(sch.annotation.order)));
         grid->attach(*la, 0, top, 1, 1);
         grid->attach(*w_order, 1, top, 1, 1);
         top++;
@@ -71,7 +69,7 @@ AnnotateDialog::AnnotateDialog(Gtk::Window *parent, Schematic *s)
         w_mode->append(std::to_string(static_cast<int>(Schematic::Annotation::Mode::SHEET_100)), "Sheet increment 100");
         w_mode->append(std::to_string(static_cast<int>(Schematic::Annotation::Mode::SHEET_1000)),
                        "Sheet increment 1000");
-        w_mode->set_active_id(std::to_string(static_cast<int>(sch->annotation.mode)));
+        w_mode->set_active_id(std::to_string(static_cast<int>(sch.annotation.mode)));
         grid->attach(*la, 0, top, 1, 1);
         grid->attach(*w_mode, 1, top, 1, 1);
         top++;
@@ -82,7 +80,7 @@ AnnotateDialog::AnnotateDialog(Gtk::Window *parent, Schematic *s)
         la->get_style_context()->add_class("dim-label");
         w_keep = Gtk::manage(new Gtk::Switch());
         w_keep->set_halign(Gtk::ALIGN_START);
-        w_keep->set_active(sch->annotation.keep);
+        w_keep->set_active(sch.annotation.keep);
         grid->attach(*la, 0, top, 1, 1);
         grid->attach(*w_keep, 1, top, 1, 1);
         top++;
@@ -93,7 +91,7 @@ AnnotateDialog::AnnotateDialog(Gtk::Window *parent, Schematic *s)
         la->get_style_context()->add_class("dim-label");
         w_ignore_unknown = Gtk::manage(new Gtk::Switch());
         w_ignore_unknown->set_halign(Gtk::ALIGN_START);
-        w_ignore_unknown->set_active(sch->annotation.ignore_unknown);
+        w_ignore_unknown->set_active(sch.annotation.ignore_unknown);
         grid->attach(*la, 0, top, 1, 1);
         grid->attach(*w_ignore_unknown, 1, top, 1, 1);
         top++;
@@ -104,7 +102,7 @@ AnnotateDialog::AnnotateDialog(Gtk::Window *parent, Schematic *s)
         la->get_style_context()->add_class("dim-label");
         w_fill_gaps = Gtk::manage(new Gtk::Switch());
         w_fill_gaps->set_halign(Gtk::ALIGN_START);
-        w_fill_gaps->set_active(sch->annotation.fill_gaps);
+        w_fill_gaps->set_active(sch.annotation.fill_gaps);
         grid->attach(*la, 0, top, 1, 1);
         grid->attach(*w_fill_gaps, 1, top, 1, 1);
         top++;
@@ -118,11 +116,11 @@ AnnotateDialog::AnnotateDialog(Gtk::Window *parent, Schematic *s)
 
 void AnnotateDialog::ok_clicked()
 {
-    sch->annotation.order = static_cast<Schematic::Annotation::Order>(std::stoi(w_order->get_active_id()));
-    sch->annotation.mode = static_cast<Schematic::Annotation::Mode>(std::stoi(w_mode->get_active_id()));
-    sch->annotation.fill_gaps = w_fill_gaps->get_active();
-    sch->annotation.keep = w_keep->get_active();
-    sch->annotation.ignore_unknown = w_ignore_unknown->get_active();
-    sch->annotate();
+    sch.annotation.order = static_cast<Schematic::Annotation::Order>(std::stoi(w_order->get_active_id()));
+    sch.annotation.mode = static_cast<Schematic::Annotation::Mode>(std::stoi(w_mode->get_active_id()));
+    sch.annotation.fill_gaps = w_fill_gaps->get_active();
+    sch.annotation.keep = w_keep->get_active();
+    sch.annotation.ignore_unknown = w_ignore_unknown->get_active();
+    sch.annotate();
 }
 } // namespace horizon

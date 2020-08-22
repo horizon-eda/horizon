@@ -8,6 +8,7 @@
 #include "schematic/schematic.hpp"
 #include "board/board.hpp"
 #include "nlohmann/json.hpp"
+#include "pool/pool_cached.hpp"
 
 namespace horizon {
 

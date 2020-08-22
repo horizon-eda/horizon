@@ -3,7 +3,7 @@
 #include "widgets/pool_browser_package.hpp"
 
 namespace horizon {
-CreatePartDialog::CreatePartDialog(Gtk::Window *parent, Pool *ipool, const UUID &entity_uuid, const UUID &package_uuid)
+CreatePartDialog::CreatePartDialog(Gtk::Window *parent, IPool &ipool, const UUID &entity_uuid, const UUID &package_uuid)
     : Gtk::Dialog("Select Entity and Package", *parent,
                   Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       pool(ipool)

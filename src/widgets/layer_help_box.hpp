@@ -7,7 +7,7 @@
 namespace horizon {
 class LayerHelpBox : public Gtk::ScrolledWindow {
 public:
-    LayerHelpBox(class Pool &p);
+    LayerHelpBox(class IPool &p);
     void set_layer(int layer);
 
     typedef sigc::signal<void, ActionToolID> type_signal_trigger_action;

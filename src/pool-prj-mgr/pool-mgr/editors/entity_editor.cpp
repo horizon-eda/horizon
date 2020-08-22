@@ -9,6 +9,7 @@
 #include "util/gtk_util.hpp"
 #include "widgets/help_button.hpp"
 #include "help_texts.hpp"
+#include "pool/ipool.hpp"
 
 namespace horizon {
 
@@ -98,7 +99,7 @@ static void bind_entry(Gtk::Entry *e, std::string &s, bool &needs_save)
     });
 }
 
-EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Entity *e, Pool *p)
+EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Entity &e, IPool &p)
     : Gtk::Box(cobject), entity(e), pool(p)
 {
     x->get_widget("entity_name", name_entry);
@@ -106,7 +107,7 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     {
         Gtk::Box *tag_box;
         x->get_widget("entity_tags", tag_box);
-        tag_entry = Gtk::manage(new TagEntry(*pool, ObjectType::ENTITY, true));
+        tag_entry = Gtk::manage(new TagEntry(pool, ObjectType::ENTITY, true));
         tag_entry->show();
         tag_box->pack_start(*tag_entry, true, true, 0);
     }
@@ -128,14 +129,14 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     sg_swap_group = decltype(sg_name)::cast_dynamic(x->get_object("sg_swap_group"));
     sg_unit = decltype(sg_name)::cast_dynamic(x->get_object("sg_unit"));
 
-    bind_entry(name_entry, entity->name, needs_save);
-    bind_entry(manufacturer_entry, entity->manufacturer, needs_save);
+    bind_entry(name_entry, entity.name, needs_save);
+    bind_entry(manufacturer_entry, entity.manufacturer, needs_save);
     manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
-    bind_entry(prefix_entry, entity->prefix, needs_save);
+    bind_entry(prefix_entry, entity.prefix, needs_save);
 
-    tag_entry->set_tags(entity->tags);
+    tag_entry->set_tags(entity.tags);
     tag_entry->signal_changed().connect([this] {
-        entity->tags = tag_entry->get_tags();
+        entity.tags = tag_entry->get_tags();
         needs_save = true;
     });
 
@@ -153,7 +154,7 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         }
     });
 
-    for (auto &it : entity->gates) {
+    for (auto &it : entity.gates) {
         auto ed = GateEditor::create(&it.second, this);
         ed->show_all();
         gates_listbox->append(*ed);
@@ -168,7 +169,7 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
 
 void EntityEditor::reload()
 {
-    entity->update_refs(*pool);
+    entity.update_refs(pool);
     auto children = gates_listbox->get_children();
     for (auto &ch : children) {
         auto row = dynamic_cast<Gtk::ListBoxRow *>(ch);
@@ -189,9 +190,9 @@ void EntityEditor::handle_delete()
     for (auto &row : rows) {
         delete row;
     }
-    for (auto it = entity->gates.begin(); it != entity->gates.end();) {
+    for (auto it = entity.gates.begin(); it != entity.gates.end();) {
         if (uuids.find(it->first) != uuids.end()) {
-            entity->gates.erase(it++);
+            entity.gates.erase(it++);
         }
         else {
             it++;
@@ -214,8 +215,8 @@ void EntityEditor::handle_add()
         auto unit_uu = dia.get_browser()->get_selected();
         if (unit_uu) {
             auto uu = UUID::random();
-            auto gate = &entity->gates.emplace(uu, uu).first->second;
-            gate->unit = pool->get_unit(unit_uu);
+            auto gate = &entity.gates.emplace(uu, uu).first->second;
+            gate->unit = pool.get_unit(unit_uu);
 
             auto ed = GateEditor::create(gate, this);
             ed->show_all();
@@ -239,7 +240,7 @@ void EntityEditor::handle_add()
     needs_save = true;
 }
 
-EntityEditor *EntityEditor::create(Entity *e, class Pool *p)
+EntityEditor *EntityEditor::create(Entity &e, class IPool &p)
 {
     EntityEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();

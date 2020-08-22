@@ -27,7 +27,7 @@ void PoolNotebook::handle_create_part()
     auto entity_uuid = browsers.at(ObjectType::ENTITY)->get_selected();
     auto package_uuid = browsers.at(ObjectType::PACKAGE)->get_selected();
     {
-        CreatePartDialog dia(top, &pool, entity_uuid, package_uuid);
+        CreatePartDialog dia(top, pool, entity_uuid, package_uuid);
         if (dia.run() == Gtk::RESPONSE_OK) {
             entity_uuid = dia.get_entity();
             package_uuid = dia.get_package();
@@ -100,7 +100,7 @@ void PoolNotebook::handle_duplicate_part(const UUID &uu)
 
 void PoolNotebook::construct_parts()
 {
-    auto br = Gtk::manage(new PoolBrowserPart(&pool));
+    auto br = Gtk::manage(new PoolBrowserPart(pool));
     br->set_show_path(true);
     br->signal_activated().connect([this, br] { handle_edit_part(br->get_selected()); });
 

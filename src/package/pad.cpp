@@ -1,10 +1,10 @@
 #include "pad.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "nlohmann/json.hpp"
 
 namespace horizon {
 
-Pad::Pad(const UUID &uu, const json &j, Pool &pool)
+Pad::Pad(const UUID &uu, const json &j, IPool &pool)
     : uuid(uu), pool_padstack(pool.get_padstack(j.at("padstack").get<std::string>())), padstack(*pool_padstack),
       placement(j.at("placement")), name(j.at("name").get<std::string>())
 {

@@ -7,6 +7,7 @@
 #include "widgets/parameter_set_editor.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "dialogs/dialogs.hpp"
+#include "common/layer_provider.hpp"
 
 namespace horizon {
 

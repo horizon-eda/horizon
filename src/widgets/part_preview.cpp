@@ -1,6 +1,6 @@
 #include "part_preview.hpp"
 #include "pool/part.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "canvas/canvas.hpp"
 #include "util/util.hpp"
 #include "util/sqlite.hpp"
@@ -9,7 +9,7 @@
 #include "entity_preview.hpp"
 
 namespace horizon {
-PartPreview::PartPreview(class Pool &p, bool sgoto) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p), show_goto(sgoto)
+PartPreview::PartPreview(IPool &p, bool sgoto) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p), show_goto(sgoto)
 {
     auto infogrid = Gtk::manage(new Gtk::Grid());
     infogrid->property_margin() = 8;
@@ -239,7 +239,7 @@ void PartPreview::load(const Part *p)
     const class Package *pkg = part->package;
     combo_package->append(pkg->uuid, pkg->name + " (Primary)");
 
-    SQLite::Query q(pool.db,
+    SQLite::Query q(pool.get_db(),
                     "SELECT uuid, name FROM packages WHERE alternate_for=? "
                     "ORDER BY name");
     q.bind(1, pkg->uuid);

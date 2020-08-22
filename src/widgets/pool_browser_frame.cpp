@@ -1,8 +1,9 @@
 #include "pool_browser_frame.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
+#include "util/sqlite.hpp"
 
 namespace horizon {
-PoolBrowserFrame::PoolBrowserFrame(Pool *p) : PoolBrowser(p)
+PoolBrowserFrame::PoolBrowserFrame(IPool &p) : PoolBrowser(p)
 {
     construct();
     name_entry = create_search_entry("Name");
@@ -36,7 +37,7 @@ void PoolBrowserFrame::search()
             "SELECT frames.uuid, frames.name, frames.filename, frames.pool_uuid, frames.overridden FROM frames WHERE "
             "frames.name LIKE ?"
             + sort_controller->get_order_by();
-    SQLite::Query q(pool->db, query);
+    SQLite::Query q(pool.get_db(), query);
     q.bind(1, "%" + name_search + "%");
 
     Gtk::TreeModel::Row row;

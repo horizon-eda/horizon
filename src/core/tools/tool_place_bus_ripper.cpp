@@ -20,7 +20,7 @@ bool ToolPlaceBusRipper::can_begin()
 
 bool ToolPlaceBusRipper::begin_attached()
 {
-    if (auto r = imp->dialogs.select_bus(doc.c->get_schematic()->block)) {
+    if (auto r = imp->dialogs.select_bus(*doc.c->get_schematic()->block)) {
         imp->tool_bar_set_actions({
                 {InToolActionID::LMB},
                 {InToolActionID::RMB},
@@ -112,7 +112,7 @@ bool ToolPlaceBusRipper::update_attached(const ToolArgs &args)
             return true;
 
         case InToolActionID::EDIT:
-            if (auto r = imp->dialogs.select_bus_member(doc.c->get_schematic()->block, bus->uuid)) {
+            if (auto r = imp->dialogs.select_bus_member(*doc.c->get_schematic()->block, bus->uuid)) {
                 Bus::Member *bus_member = &bus->members.at(*r);
 
                 auto p = std::find(bus_members.begin(), bus_members.end(), bus_member);

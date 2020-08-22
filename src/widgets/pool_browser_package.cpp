@@ -1,10 +1,11 @@
 #include "pool_browser_package.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
+#include "util/sqlite.hpp"
 #include "tag_entry.hpp"
 #include <set>
 
 namespace horizon {
-PoolBrowserPackage::PoolBrowserPackage(Pool *p, bool pads_filter) : PoolBrowser(p)
+PoolBrowserPackage::PoolBrowserPackage(IPool &p, bool pads_filter) : PoolBrowser(p)
 {
     construct();
     name_entry = create_search_entry("Name");
@@ -106,7 +107,7 @@ void PoolBrowserPackage::search()
     }
     qs << sort_controller->get_order_by();
 
-    SQLite::Query q(pool->db, qs.str());
+    SQLite::Query q(pool.get_db(), qs.str());
     q.bind("$name", "%" + name_search + "%");
     q.bind("$manufacturer", "%" + manufacturer_search + "%");
     int i = 0;

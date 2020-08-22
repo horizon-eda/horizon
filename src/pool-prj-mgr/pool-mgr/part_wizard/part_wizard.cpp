@@ -85,7 +85,7 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     entry_add_sanitizer(part_description_entry);
     entry_add_sanitizer(part_datasheet_entry);
 
-    part_manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
+    part_manufacturer_entry->set_completion(create_pool_manufacturer_completion(*pool));
 
     part_mpn_entry->signal_changed().connect(sigc::mem_fun(*this, &PartWizard::update_can_finish));
     entity_name_entry->signal_changed().connect(sigc::mem_fun(*this, &PartWizard::update_can_finish));
@@ -141,7 +141,7 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     {
         Gtk::Paned *page_package;
         x->get_widget("page_package", page_package);
-        browser_package = Gtk::manage(new PoolBrowserPackage(pool));
+        browser_package = Gtk::manage(new PoolBrowserPackage(*pool));
         browser_package->show();
         page_package->add1(*browser_package);
 

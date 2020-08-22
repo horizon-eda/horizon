@@ -25,7 +25,7 @@ public:
     {
     }
     json serialize() const;
-    void update_for_board(const class Board *brd);
+    void update_for_board(const class Board &brd);
 
     std::map<int, GerberLayer> layers;
 

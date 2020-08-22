@@ -25,6 +25,7 @@
 #include "autosave_recovery_dialog.hpp"
 #include "util/item_set.hpp"
 #include "prj-mgr/pool_cache_monitor.hpp"
+#include "pool/pool_cached.hpp"
 
 namespace horizon {
 PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject,

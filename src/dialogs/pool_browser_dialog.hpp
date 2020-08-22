@@ -5,17 +5,16 @@
 #include "common/common.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_path.hpp"
-#include "pool/pool.hpp"
 namespace horizon {
 
 
 class PoolBrowserDialog : public Gtk::Dialog {
 public:
-    PoolBrowserDialog(Gtk::Window *parent, ObjectType type, Pool *ipool, bool use_preview = true);
+    PoolBrowserDialog(Gtk::Window *parent, ObjectType type, class IPool &ipool, bool use_preview = true);
     class PoolBrowser *get_browser();
 
 private:
-    Pool *pool;
+    class IPool &pool;
     class PoolBrowser *browser = nullptr;
 };
 } // namespace horizon

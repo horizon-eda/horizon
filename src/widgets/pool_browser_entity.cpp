@@ -1,10 +1,11 @@
 #include "pool_browser_entity.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
+#include "util/sqlite.hpp"
 #include "tag_entry.hpp"
 #include <set>
 
 namespace horizon {
-PoolBrowserEntity::PoolBrowserEntity(Pool *p) : PoolBrowser(p)
+PoolBrowserEntity::PoolBrowserEntity(IPool &p) : PoolBrowser(p)
 {
     construct();
     name_entry = create_search_entry("Name");
@@ -75,7 +76,7 @@ void PoolBrowserEntity::search()
         query = qs.str();
     }
     std::cout << query << std::endl;
-    SQLite::Query q(pool->db, query);
+    SQLite::Query q(pool.get_db(), query);
     q.bind("$name", "%" + name_search + "%");
     int i = 0;
     for (const auto &it : tags) {

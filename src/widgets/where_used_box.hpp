@@ -8,14 +8,14 @@
 namespace horizon {
 class WhereUsedBox : public Gtk::Box, public PoolGotoProvider {
 public:
-    WhereUsedBox(class Pool &pool);
+    WhereUsedBox(class IPool &pool);
 
     size_t load(ObjectType type, const UUID &uu);
     void clear();
     ItemSet get_items() const;
 
 private:
-    Pool &pool;
+    IPool &pool;
 
     class ListColumns : public Gtk::TreeModelColumnRecord {
     public:

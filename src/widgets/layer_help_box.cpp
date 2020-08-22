@@ -3,12 +3,12 @@
 #include "util/str_util.hpp"
 #include "nlohmann/json.hpp"
 #include "imp/action_catalog.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "pool/pool_manager.hpp"
 #include <iostream>
 
 namespace horizon {
-LayerHelpBox::LayerHelpBox(class Pool &pool) : Gtk::ScrolledWindow()
+LayerHelpBox::LayerHelpBox(class IPool &pool) : Gtk::ScrolledWindow()
 {
     label = Gtk::manage(new Gtk::Label());
     label->set_text("fixme");

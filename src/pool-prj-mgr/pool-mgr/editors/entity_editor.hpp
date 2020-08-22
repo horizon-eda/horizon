@@ -9,14 +9,14 @@ class EntityEditor : public Gtk::Box, public PoolEditorInterface {
     friend class GateEditor;
 
 public:
-    EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Entity *e, class Pool *p);
-    static EntityEditor *create(class Entity *e, class Pool *p);
+    EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Entity &e, class IPool &p);
+    static EntityEditor *create(class Entity &e, class IPool &p);
     void reload() override;
 
     virtual ~EntityEditor(){};
 
 private:
-    class Entity *entity = nullptr;
+    class Entity &entity;
     Gtk::Entry *name_entry = nullptr;
     Gtk::Entry *manufacturer_entry = nullptr;
     Gtk::Entry *prefix_entry = nullptr;
@@ -34,6 +34,6 @@ private:
 
     void handle_add();
     void handle_delete();
-    Pool *pool;
+    IPool &pool;
 };
 } // namespace horizon

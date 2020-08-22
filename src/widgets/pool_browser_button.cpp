@@ -1,12 +1,13 @@
 #include "pool_browser_button.hpp"
 #include "pool/padstack.hpp"
 #include "pool/package.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "pool/part.hpp"
 #include "pool_browser.hpp"
+#include "frame/frame.hpp"
 
 namespace horizon {
-PoolBrowserButton::PoolBrowserButton(ObjectType ty, Pool *ipool)
+PoolBrowserButton::PoolBrowserButton(ObjectType ty, IPool &ipool)
     : Glib::ObjectBase(typeid(PoolBrowserButton)), Gtk::Button("fixme"),
       p_property_selected_uuid(*this, "selected-uuid"), pool(ipool), type(ty), dia(nullptr, type, pool)
 {
@@ -43,16 +44,16 @@ void PoolBrowserButton::update_label()
     }
     switch (type) {
     case ObjectType::PADSTACK:
-        set_label(pool->get_padstack(selected_uuid)->name);
+        set_label(pool.get_padstack(selected_uuid)->name);
         break;
     case ObjectType::PACKAGE:
-        set_label(pool->get_package(selected_uuid)->name);
+        set_label(pool.get_package(selected_uuid)->name);
         break;
     case ObjectType::FRAME:
-        set_label(pool->get_frame(selected_uuid)->name);
+        set_label(pool.get_frame(selected_uuid)->name);
         break;
     case ObjectType::PART:
-        set_label(pool->get_part(selected_uuid)->get_MPN());
+        set_label(pool.get_part(selected_uuid)->get_MPN());
         break;
     default:
         set_label("fixme");

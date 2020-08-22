@@ -12,7 +12,7 @@ namespace horizon {
 
 class ViaPadstackProvider {
 public:
-    ViaPadstackProvider(const std::string &p, class Pool &po);
+    ViaPadstackProvider(const std::string &p, class IPool &po);
     const Padstack *get_padstack(const UUID &uu);
     void update_available();
     class PadstackEntry {
@@ -28,7 +28,7 @@ public:
 
 private:
     std::string base_path;
-    class Pool &pool;
+    class IPool &pool;
 
     std::map<UUID, Padstack> padstacks;
     std::map<UUID, PadstackEntry> padstacks_available;

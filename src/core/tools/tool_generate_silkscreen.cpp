@@ -212,7 +212,7 @@ ToolResponse ToolGenerateSilkscreen::begin(const ToolArgs &args)
 
     imp->set_work_layer(BoardLayers::TOP_SILKSCREEN);
 
-    win = imp->dialogs.show_generate_silkscreen_window(&settings);
+    win = imp->dialogs.show_generate_silkscreen_window(settings);
 
     imp->tool_bar_set_actions({
             {InToolActionID::LMB, "select package polygon"},

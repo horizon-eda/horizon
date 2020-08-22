@@ -14,7 +14,7 @@ using json = nlohmann::json;
 
 class BoardHole {
 public:
-    BoardHole(const UUID &uu, const json &, class Block *block = nullptr, class Pool *pool = nullptr);
+    BoardHole(const UUID &uu, const json &, class Block *block = nullptr, class IPool *pool = nullptr);
     BoardHole(const UUID &uu, const Padstack *ps);
     UUID uuid;
     const Padstack *pool_padstack;

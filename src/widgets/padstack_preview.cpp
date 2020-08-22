@@ -1,6 +1,6 @@
 #include "padstack_preview.hpp"
 #include "pool/package.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "canvas/canvas.hpp"
 #include "util/util.hpp"
 #include "util/sqlite.hpp"
@@ -8,9 +8,8 @@
 #include "preview_canvas.hpp"
 
 namespace horizon {
-PadstackPreview::PadstackPreview(class Pool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
+PadstackPreview::PadstackPreview(class IPool &p) : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0), pool(p)
 {
-
     canvas_padstack = Gtk::manage(new PreviewCanvas(pool, true));
 
     top_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 4));
@@ -60,7 +59,7 @@ void PadstackPreview::load(const UUID &uu)
     if (!uu) {
         return;
     }
-    SQLite::Query q(pool.db, "SELECT package FROM padstacks WHERE uuid = ?");
+    SQLite::Query q(pool.get_db(), "SELECT package FROM padstacks WHERE uuid = ?");
     q.bind(1, uu);
     if (q.step()) {
         UUID pkg_uuid = q.get<std::string>(0);

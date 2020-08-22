@@ -8,12 +8,12 @@
 namespace horizon {
 class PadstackPreview : public Gtk::Box, public PoolGotoProvider {
 public:
-    PadstackPreview(class Pool &pool);
+    PadstackPreview(class IPool &pool);
 
     void load(const UUID &uu);
 
 private:
-    class Pool &pool;
+    class IPool &pool;
     class PreviewCanvas *canvas_padstack = nullptr;
 
     Gtk::Label *package_label = nullptr;

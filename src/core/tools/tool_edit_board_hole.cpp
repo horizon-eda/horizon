@@ -29,7 +29,7 @@ std::set<BoardHole *> ToolEditBoardHole::get_holes()
 ToolResponse ToolEditBoardHole::begin(const ToolArgs &args)
 {
     auto holes = get_holes();
-    auto r = imp->dialogs.edit_board_hole(holes, doc.r->get_pool(), doc.b->get_block());
+    auto r = imp->dialogs.edit_board_hole(holes, doc.r->get_pool(), *doc.b->get_block());
     if (r) {
         return ToolResponse::commit();
     }

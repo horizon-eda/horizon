@@ -2,7 +2,6 @@
 #include "block/component.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "pool/package.hpp"
-#include "pool/pool.hpp"
 #include "util/placement.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_ptr.hpp"
@@ -15,7 +14,7 @@ using json = nlohmann::json;
 
 class BoardPackage {
 public:
-    BoardPackage(const UUID &uu, const json &, Block &block, Pool &pool);
+    BoardPackage(const UUID &uu, const json &, Block &block, class IPool &pool);
     BoardPackage(const UUID &uu, Component *comp);
     BoardPackage(const UUID &uu);
     BoardPackage(shallow_copy_t sh, const BoardPackage &other);

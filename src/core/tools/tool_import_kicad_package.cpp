@@ -7,6 +7,7 @@
 #include "util/util.hpp"
 #include <iostream>
 #include <sstream>
+#include "pool/pool.hpp"
 
 namespace horizon {
 

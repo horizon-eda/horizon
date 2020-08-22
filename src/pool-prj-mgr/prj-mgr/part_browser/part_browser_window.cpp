@@ -340,7 +340,7 @@ void PartBrowserWindow::set_can_assign(bool v)
 
 PoolBrowserPart *PartBrowserWindow::add_search(const UUID &part)
 {
-    auto ch = Gtk::manage(new PoolBrowserPart(&pool));
+    auto ch = Gtk::manage(new PoolBrowserPart(pool));
     if (PreferencesProvider::get_prefs().partinfo.is_enabled()) {
         auto prv = std::make_unique<StockInfoProviderPartinfo>(pool.get_base_path());
         ch->add_stock_info_provider(std::move(prv));
@@ -370,7 +370,7 @@ PoolBrowserPart *PartBrowserWindow::add_search(const UUID &part)
 
 PoolBrowserParametric *PartBrowserWindow::add_search_parametric(const std::string &table_name)
 {
-    auto ch = Gtk::manage(new PoolBrowserParametric(&pool, &pool_parametric, table_name));
+    auto ch = Gtk::manage(new PoolBrowserParametric(pool, pool_parametric, table_name));
     if (PreferencesProvider::get_prefs().partinfo.is_enabled()) {
         auto prv = std::make_unique<StockInfoProviderPartinfo>(pool.get_base_path());
         ch->add_stock_info_provider(std::move(prv));

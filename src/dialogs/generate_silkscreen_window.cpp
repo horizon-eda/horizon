@@ -4,8 +4,8 @@
 #include <math.h>
 
 namespace horizon {
-GenerateSilkscreenWindow::GenerateSilkscreenWindow(Gtk::Window *parent, ImpInterface *intf, ToolSettings *stg)
-    : ToolWindow(parent, intf), settings(dynamic_cast<ToolGenerateSilkscreen::Settings *>(stg))
+GenerateSilkscreenWindow::GenerateSilkscreenWindow(Gtk::Window *parent, ImpInterface *intf, ToolSettings &stg)
+    : ToolWindow(parent, intf), settings(dynamic_cast<ToolGenerateSilkscreen::Settings &>(stg))
 {
     set_title("Generate silkscreen");
 
@@ -21,13 +21,13 @@ GenerateSilkscreenWindow::GenerateSilkscreenWindow(Gtk::Window *parent, ImpInter
 
     sp_silk = Gtk::manage(new SpinButtonDim);
     sp_silk->set_range(0, 5_mm);
-    sp_silk->set_value(settings->expand_silk);
+    sp_silk->set_value(settings.expand_silk);
     sp_silk->signal_value_changed().connect(sigc::mem_fun(*this, &GenerateSilkscreenWindow::update));
     grid_attach_label_and_widget(grid, "Outline offset", sp_silk, top);
 
     sp_pad = Gtk::manage(new SpinButtonDim);
     sp_pad->set_range(0, 5_mm);
-    sp_pad->set_value(settings->expand_pad);
+    sp_pad->set_value(settings.expand_pad);
     sp_pad->signal_value_changed().connect(sigc::mem_fun(*this, &GenerateSilkscreenWindow::update));
     grid_attach_label_and_widget(grid, "Pad offset", sp_pad, top);
 
@@ -56,10 +56,10 @@ void GenerateSilkscreenWindow::load_defaults()
 void GenerateSilkscreenWindow::update()
 {
     if (sp_silk) {
-        settings->expand_silk = sp_silk->get_value_as_int();
+        settings.expand_silk = sp_silk->get_value_as_int();
     }
     if (sp_pad) {
-        settings->expand_pad = sp_pad->get_value_as_int();
+        settings.expand_pad = sp_pad->get_value_as_int();
     }
     emit_event(ToolDataWindow::Event::UPDATE);
 }

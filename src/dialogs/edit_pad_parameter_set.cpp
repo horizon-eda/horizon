@@ -5,6 +5,7 @@
 #include "widgets/pool_browser_padstack.hpp"
 #include "pool/package.hpp"
 #include "util/util.hpp"
+#include "pool/ipool.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>
@@ -25,8 +26,8 @@ private:
     }
 };
 
-PadParameterSetDialog::PadParameterSetDialog(Gtk::Window *parent, std::set<class Pad *> &pads, Pool *p,
-                                             class Package *pkg)
+PadParameterSetDialog::PadParameterSetDialog(Gtk::Window *parent, std::set<class Pad *> &pads, IPool &p,
+                                             class Package &pkg)
     : Gtk::Dialog("Edit pad", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       pool(p)
 {
@@ -56,7 +57,7 @@ PadParameterSetDialog::PadParameterSetDialog(Gtk::Window *parent, std::set<class
     padstack_apply_all_button->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
     padstack_apply_all_button->set_tooltip_text("Apply to all pads");
     padstack_apply_all_button->signal_clicked().connect([this, pads] {
-        auto ps = pool->get_padstack(padstack_button->property_selected_uuid());
+        auto ps = pool.get_padstack(padstack_button->property_selected_uuid());
         for (auto &it : pads) {
             it->pool_padstack = ps;
             it->padstack = *ps;
@@ -76,7 +77,7 @@ PadParameterSetDialog::PadParameterSetDialog(Gtk::Window *parent, std::set<class
         padmap.emplace(it->uuid, it);
     }
 
-    combo->signal_changed().connect([this, combo, padmap, box, box2, pads, pkg] {
+    combo->signal_changed().connect([this, combo, padmap, box, box2, pads, &pkg] {
         UUID uu(combo->get_active_id());
         auto pad = padmap.at(uu);
         if (editor)
@@ -97,10 +98,10 @@ PadParameterSetDialog::PadParameterSetDialog(Gtk::Window *parent, std::set<class
 
         padstack_button = Gtk::manage(new PoolBrowserButton(ObjectType::PADSTACK, pool));
         auto br = dynamic_cast<PoolBrowserPadstack *>(padstack_button->get_browser());
-        br->set_package_uuid(pkg->uuid);
+        br->set_package_uuid(pkg.uuid);
         padstack_button->property_selected_uuid() = pad->pool_padstack->uuid;
         padstack_button->property_selected_uuid().signal_changed().connect([this, pad] {
-            auto ps = pool->get_padstack(padstack_button->property_selected_uuid());
+            auto ps = pool.get_padstack(padstack_button->property_selected_uuid());
             pad->pool_padstack = ps;
             pad->padstack = *ps;
         });

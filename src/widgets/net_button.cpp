@@ -1,7 +1,9 @@
 #include "net_button.hpp"
+#include "block/block.hpp"
+#include "net_selector.hpp"
 
 namespace horizon {
-NetButton::NetButton(Block *b) : Gtk::MenuButton(), block(b)
+NetButton::NetButton(const Block &b) : Gtk::MenuButton(), block(b)
 {
     popover = Gtk::manage(new Gtk::Popover(*this));
     ns = Gtk::manage(new NetSelector(block));
@@ -31,7 +33,7 @@ void NetButton::update()
 
 void NetButton::set_net(const UUID &uu)
 {
-    if (block->nets.count(uu)) {
+    if (block.nets.count(uu)) {
         net_current = uu;
     }
     else {
@@ -48,7 +50,7 @@ UUID NetButton::get_net()
 void NetButton::update_label()
 {
     if (net_current) {
-        set_label(block->nets.at(net_current).name);
+        set_label(block.nets.at(net_current).name);
     }
     else {
         set_label("<no net>");

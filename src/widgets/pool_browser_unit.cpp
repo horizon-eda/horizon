@@ -1,9 +1,9 @@
 #include "pool_browser_unit.hpp"
-#include "pool/pool.hpp"
-#include "widgets/cell_renderer_color_box.hpp"
+#include "pool/ipool.hpp"
+#include "util/sqlite.hpp"
 
 namespace horizon {
-PoolBrowserUnit::PoolBrowserUnit(Pool *p) : PoolBrowser(p)
+PoolBrowserUnit::PoolBrowserUnit(IPool &p) : PoolBrowser(p)
 {
     construct();
     name_entry = create_search_entry("Name");
@@ -39,7 +39,7 @@ void PoolBrowserUnit::search()
             "SELECT units.uuid, units.name, units.manufacturer, units.filename, units.pool_uuid, units.overridden "
             "FROM units WHERE units.name LIKE ?"
             + sort_controller->get_order_by();
-    SQLite::Query q(pool->db, query);
+    SQLite::Query q(pool.get_db(), query);
     q.bind(1, "%" + name_search + "%");
 
     Gtk::TreeModel::Row row;

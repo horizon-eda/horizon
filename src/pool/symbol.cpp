@@ -2,7 +2,7 @@
 #include "common/junction.hpp"
 #include "common/line.hpp"
 #include "common/lut.hpp"
-#include "pool.hpp"
+#include "ipool.hpp"
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
@@ -128,7 +128,7 @@ UUID SymbolPin::get_uuid() const
     return uuid;
 }
 
-Symbol::Symbol(const UUID &uu, const json &j, Pool &pool)
+Symbol::Symbol(const UUID &uu, const json &j, IPool &pool)
     : uuid(uu), unit(pool.get_unit(j.at("unit").get<std::string>())), name(j.value("name", "")),
       can_expand(j.value("can_expand", false))
 {
@@ -199,7 +199,7 @@ Symbol::Symbol(const UUID &uu) : uuid(uu)
 {
 }
 
-Symbol Symbol::new_from_file(const std::string &filename, Pool &pool)
+Symbol Symbol::new_from_file(const std::string &filename, IPool &pool)
 {
     auto j = load_json_from_file(filename);
     return Symbol(UUID(j.at("uuid").get<std::string>()), j, pool);

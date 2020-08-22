@@ -56,9 +56,9 @@ public:
         return nullptr;
     }
 
-    class Pool *get_pool() override
+    class IPool &get_pool() override
     {
-        return m_pool;
+        return *m_pool;
     }
     virtual ObjectType get_object_type() const = 0;
 

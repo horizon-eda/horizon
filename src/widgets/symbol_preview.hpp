@@ -8,13 +8,13 @@
 namespace horizon {
 class SymbolPreview : public Gtk::Box, public PoolGotoProvider {
 public:
-    SymbolPreview(class Pool &pool);
+    SymbolPreview(class IPool &pool);
 
     void load(const UUID &uu);
 
 private:
     UUID symbol;
-    class Pool &pool;
+    class IPool &pool;
     class PreviewCanvas *canvas_symbol = nullptr;
 
     Gtk::RadioButton *rb_normal = nullptr;

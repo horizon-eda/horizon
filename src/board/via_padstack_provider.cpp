@@ -1,12 +1,13 @@
 #include "via_padstack_provider.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "util/util.hpp"
+#include "util/sqlite.hpp"
 #include <glibmm.h>
 #include <glibmm/fileutils.h>
 #include "nlohmann/json.hpp"
 
 namespace horizon {
-ViaPadstackProvider::ViaPadstackProvider(const std::string &bp, Pool &po) : base_path(bp), pool(po)
+ViaPadstackProvider::ViaPadstackProvider(const std::string &bp, IPool &po) : base_path(bp), pool(po)
 {
     update_available();
 }
@@ -23,7 +24,7 @@ void ViaPadstackProvider::update_available()
                                         PadstackEntry(filename, j.at("name").get<std::string>() + " (local)"));
         }
     }
-    SQLite::Query q(pool.db,
+    SQLite::Query q(pool.get_db(),
                     "SELECT padstacks.uuid, padstacks.name FROM padstacks "
                     "WHERE padstacks.type = 'via'");
     while (q.step()) {

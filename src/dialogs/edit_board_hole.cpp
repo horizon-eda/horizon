@@ -6,6 +6,8 @@
 #include "widgets/pool_browser_padstack.hpp"
 #include "board/board_hole.hpp"
 #include "util/util.hpp"
+#include "pool/ipool.hpp"
+#include "block/block.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>
@@ -26,7 +28,7 @@ private:
     }
 };
 
-BoardHoleDialog::BoardHoleDialog(Gtk::Window *parent, std::set<BoardHole *> &holes, Pool *p, Block *b)
+BoardHoleDialog::BoardHoleDialog(Gtk::Window *parent, std::set<BoardHole *> &holes, IPool &p, Block &b)
     : Gtk::Dialog("Edit hole", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       pool(p), block(b)
 {
@@ -65,7 +67,7 @@ BoardHoleDialog::BoardHoleDialog(Gtk::Window *parent, std::set<BoardHole *> &hol
     padstack_apply_all_button->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
     padstack_apply_all_button->set_tooltip_text("Apply to all pads");
     padstack_apply_all_button->signal_clicked().connect([this, holes] {
-        auto ps = pool->get_padstack(padstack_button->property_selected_uuid());
+        auto ps = pool.get_padstack(padstack_button->property_selected_uuid());
         for (auto &it : holes) {
             it->pool_padstack = ps;
             it->padstack = *ps;
@@ -77,7 +79,7 @@ BoardHoleDialog::BoardHoleDialog(Gtk::Window *parent, std::set<BoardHole *> &hol
     net_apply_all_button->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
     net_apply_all_button->set_tooltip_text("Apply to all pads");
     net_apply_all_button->signal_clicked().connect([this, holes] {
-        auto net = block->get_net(net_button->get_net());
+        auto net = block.get_net(net_button->get_net());
         for (auto &it : holes) {
             if (it->pool_padstack->type == Padstack::Type::HOLE)
                 it->net = net;
@@ -122,7 +124,7 @@ BoardHoleDialog::BoardHoleDialog(Gtk::Window *parent, std::set<BoardHole *> &hol
         br->set_include_padstack_type(Padstack::Type::BOTTOM, false);
         padstack_button->property_selected_uuid() = hole->pool_padstack->uuid;
         padstack_button->property_selected_uuid().signal_changed().connect([this, hole] {
-            auto ps = pool->get_padstack(padstack_button->property_selected_uuid());
+            auto ps = pool.get_padstack(padstack_button->property_selected_uuid());
             hole->pool_padstack = ps;
             hole->padstack = *ps;
             net_button->set_sensitive(ps->type == Padstack::Type::HOLE);
@@ -144,7 +146,7 @@ BoardHoleDialog::BoardHoleDialog(Gtk::Window *parent, std::set<BoardHole *> &hol
         else
             net_button->set_sensitive(false);
 
-        net_button->signal_changed().connect([this, hole](const UUID &net_uu) { hole->net = block->get_net(net_uu); });
+        net_button->signal_changed().connect([this, hole](const UUID &net_uu) { hole->net = block.get_net(net_uu); });
         grid->attach(*net_button, 1, 1, 1, 1);
         net_button->show();
     });

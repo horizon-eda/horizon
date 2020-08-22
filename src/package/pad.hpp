@@ -14,7 +14,7 @@ using json = nlohmann::json;
 
 class Pad {
 public:
-    Pad(const UUID &uu, const json &, class Pool &pool);
+    Pad(const UUID &uu, const json &, class IPool &pool);
     Pad(const UUID &uu, const Padstack *ps);
     UUID uuid;
     uuid_ptr<const Padstack> pool_padstack;

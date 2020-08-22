@@ -4,7 +4,6 @@
 #include "nlohmann/json_fwd.hpp"
 #include "net.hpp"
 #include "net_class.hpp"
-#include "pool/pool.hpp"
 #include "util/uuid.hpp"
 #include "bom_export_settings.hpp"
 #include <fstream>
@@ -25,9 +24,9 @@ using json = nlohmann::json;
  */
 class Block {
 public:
-    Block(const UUID &uu, const json &, Pool &pool);
+    Block(const UUID &uu, const json &, class IPool &pool);
     Block(const UUID &uu);
-    static Block new_from_file(const std::string &filename, Pool &pool);
+    static Block new_from_file(const std::string &filename, IPool &pool);
     static std::map<std::string, std::string> peek_project_meta(const std::string &filename);
     Net *get_net(const UUID &uu);
     UUID uuid;

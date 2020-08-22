@@ -6,7 +6,7 @@
 #include "util/gtk_util.hpp"
 
 namespace horizon {
-NetSelector::NetSelector(Block *bl) : Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 16), block(bl)
+NetSelector::NetSelector(const Block &bl) : Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 16), block(bl)
 {
 
     store = Gtk::ListStore::create(list_columns);
@@ -46,7 +46,7 @@ void NetSelector::update()
 
     if (bus_mode) {
         view->get_column(0)->set_title("Bus");
-        for (const auto &it : block->buses) {
+        for (const auto &it : block.buses) {
             row = *(store->append());
             row[list_columns.name] = it.second.name;
             row[list_columns.uuid] = it.second.uuid;
@@ -62,7 +62,7 @@ void NetSelector::update()
     }
     else {
         view->get_column(0)->set_title("Net");
-        for (const auto &it : block->nets) {
+        for (const auto &it : block.nets) {
             if (it.second.is_named() && (!power_only || it.second.is_power)) {
                 row = *(store->append());
                 row[list_columns.name] = it.second.name;
@@ -87,7 +87,7 @@ void NetSelector::set_bus_mode(bool b)
 void NetSelector::set_bus_member_mode(const UUID &bus_uuid)
 {
     bus_member_mode = true;
-    bus = &block->buses.at(bus_uuid);
+    bus = &block.buses.at(bus_uuid);
     update();
 }
 

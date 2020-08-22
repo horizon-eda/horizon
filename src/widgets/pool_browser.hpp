@@ -10,7 +10,7 @@
 namespace horizon {
 class PoolBrowser : public Gtk::Box, public SelectionProvider {
 public:
-    PoolBrowser(class Pool *pool);
+    PoolBrowser(class IPool &pool);
     UUID get_selected() override;
     bool get_any_selected();
     void set_show_none(bool v);
@@ -31,7 +31,7 @@ public:
 
 protected:
     void construct(Gtk::Widget *search_box = nullptr);
-    class Pool *pool = nullptr;
+    class IPool &pool;
     UUID pool_uuid;
     bool pools_included = false;
     bool show_none = false;

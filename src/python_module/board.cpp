@@ -33,9 +33,9 @@ public:
     {
         return &block;
     }
-    horizon::Pool *get_pool() override
+    horizon::IPool &get_pool() override
     {
-        return &pool;
+        return pool;
     }
     horizon::Rules *get_rules() override
     {

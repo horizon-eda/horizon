@@ -4,7 +4,7 @@
 
 namespace horizon {
 
-View3DWindow *View3DWindow::create(const class Board &b, class Pool &p, Mode m)
+View3DWindow *View3DWindow::create(const class Board &b, class IPool &p, Mode m)
 {
     View3DWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
@@ -38,7 +38,7 @@ public:
 };
 
 View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const class Board &bo,
-                           class Pool &p, Mode md)
+                           class IPool &p, Mode md)
     : Gtk::Window(cobject), board(bo), pool(p), mode(md), state_store(this, "imp-board-3d")
 {
     Gtk::Box *gl_box;

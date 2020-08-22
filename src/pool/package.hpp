@@ -60,9 +60,9 @@ public:
         json serialize() const;
     };
 
-    Package(const UUID &uu, const json &j, class Pool &pool);
+    Package(const UUID &uu, const json &j, class IPool &pool);
     Package(const UUID &uu);
-    static Package new_from_file(const std::string &filename, class Pool &pool);
+    static Package new_from_file(const std::string &filename, class IPool &pool);
 
     json serialize() const;
     Junction *get_junction(const UUID &uu) override;
@@ -106,7 +106,7 @@ public:
 
     std::vector<Warning> warnings;
 
-    void update_refs(class Pool &pool);
+    void update_refs(class IPool &pool);
 
     void save_pictures(const std::string &dir) const;
     void load_pictures(const std::string &dir);

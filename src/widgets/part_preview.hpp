@@ -10,12 +10,12 @@
 namespace horizon {
 class PartPreview : public Gtk::Box, public PreviewBase {
 public:
-    PartPreview(class Pool &pool, bool show_goto = true);
+    PartPreview(class IPool &pool, bool show_goto = true);
 
     void load(const class Part *part);
 
 private:
-    class Pool &pool;
+    class IPool &pool;
     const bool show_goto;
     const class Part *part = nullptr;
     class EntityPreview *entity_preview = nullptr;

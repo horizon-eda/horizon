@@ -6,7 +6,7 @@
 #include "logger/logger.hpp"
 #include "util/str_util.hpp"
 #include "document/idocument_package.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "canvas/canvas_gl.hpp"
 
 namespace horizon {
@@ -33,7 +33,7 @@ FootagDisplay::FootagDisplay(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 
     params = footag_get_param(ctx);
 
-    canvas_package = Gtk::manage(new PreviewCanvas(*core->get_pool(), true));
+    canvas_package = Gtk::manage(new PreviewCanvas(core->get_pool(), true));
     canvas_package->set_size_request(400, 500);
     canvas_package->signal_size_allocate().connect([this](auto &alloc) {
         if (autofit->get_active() && !(alloc == old_alloc)) {
@@ -340,7 +340,7 @@ static const char *padstack_names[] = {
 
 static_assert(sizeof(padstack_names) / sizeof(padstack_names[0]) == FOOTAG_PADSTACK_NUM, "sizes dont match");
 
-static const Padstack *getpadstack(Pool &pool, enum footag_padstack stack)
+static const Padstack *getpadstack(IPool &pool, enum footag_padstack stack)
 {
     const std::string ps_name = padstack_names[stack];
     auto ps = pool.get_well_known_padstack(ps_name);
@@ -368,7 +368,7 @@ void FootagDisplay::calc(Package *pkg, const struct footag_spec *s)
         if (p->stack == FOOTAG_PADSTACK_NONE) {
             continue;
         }
-        auto ps = getpadstack(*core->get_pool(), p->stack);
+        auto ps = getpadstack(core->get_pool(), p->stack);
         if (!ps) {
             continue;
         }

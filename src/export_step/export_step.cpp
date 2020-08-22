@@ -3,6 +3,7 @@
 #include "board/board_layers.hpp"
 #include "canvas/canvas_patch.hpp"
 #include "util/util.hpp"
+#include "pool/ipool.hpp"
 
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <TDocStd_Document.hxx>
@@ -371,7 +372,7 @@ static double angle_to_rad(int angle)
     return (angle / 32768.) * M_PI;
 }
 
-void export_step(const std::string &filename, const Board &brd, class Pool &pool, bool include_models,
+void export_step(const std::string &filename, const Board &brd, class IPool &pool, bool include_models,
                  std::function<void(const std::string &)> progress_cb, const BoardColors *colors,
                  const std::string &prefix)
 {

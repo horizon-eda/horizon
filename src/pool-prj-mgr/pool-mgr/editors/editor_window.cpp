@@ -7,7 +7,7 @@
 #include "pool/part.hpp"
 #include "util/util.hpp"
 #include "util/str_util.hpp"
-#include "pool/pool.hpp"
+#include "pool/ipool.hpp"
 #include "nlohmann/json.hpp"
 
 namespace horizon {
@@ -45,9 +45,9 @@ public:
 
 class EntityStore : public EditorWindowStore {
 public:
-    EntityStore(const std::string &fn, class Pool *pool)
+    EntityStore(const std::string &fn, class IPool &pool)
         : EditorWindowStore(fn),
-          entity(filename.size() ? Entity::new_from_file(filename, *pool) : Entity(UUID::random()))
+          entity(filename.size() ? Entity::new_from_file(filename, pool) : Entity(UUID::random()))
     {
     }
     void save_as(const std::string &fn) override
@@ -68,8 +68,8 @@ public:
 
 class PartStore : public EditorWindowStore {
 public:
-    PartStore(const std::string &fn, class Pool *pool)
-        : EditorWindowStore(fn), part(filename.size() ? Part::new_from_file(filename, *pool) : Part(UUID::random()))
+    PartStore(const std::string &fn, class IPool &pool)
+        : EditorWindowStore(fn), part(filename.size() ? Part::new_from_file(filename, pool) : Part(UUID::random()))
     {
     }
     void save_as(const std::string &fn) override
@@ -88,9 +88,9 @@ public:
     Part part;
 };
 
-EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p, class PoolParametric *pp,
+EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p, class PoolParametric *pp,
                            bool read_only, bool is_temp)
-    : Gtk::Window(), type(ty), pool(p), pool_parametric(pp),
+    : Gtk::Window(), type(ty), pool(*p), pool_parametric(pp),
       state_store(this, "pool-editor-win-" + std::to_string(static_cast<int>(type)))
 {
     set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
@@ -111,7 +111,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p, 
     case ObjectType::UNIT: {
         auto st = new UnitStore(filename);
         store.reset(st);
-        auto ed = UnitEditor::create(&st->unit, pool);
+        auto ed = UnitEditor::create(st->unit, pool);
         editor = ed;
         iface = ed;
         hb->set_title("Unit Editor");
@@ -119,7 +119,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p, 
     case ObjectType::ENTITY: {
         auto st = new EntityStore(filename, pool);
         store.reset(st);
-        auto ed = EntityEditor::create(&st->entity, pool);
+        auto ed = EntityEditor::create(st->entity, pool);
         editor = ed;
         iface = ed;
         hb->set_title("Entity Editor");
@@ -127,7 +127,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, Pool *p, 
     case ObjectType::PART: {
         auto st = new PartStore(filename, pool);
         store.reset(st);
-        auto ed = PartEditor::create(&st->part, pool, pool_parametric);
+        auto ed = PartEditor::create(st->part, pool, *pool_parametric);
         editor = ed;
         iface = ed;
         hb->set_title("Part Editor");
@@ -236,13 +236,13 @@ void EditorWindow::save()
         chooser->set_current_name(store->get_name() + ".json");
         switch (type) {
         case ObjectType::UNIT:
-            chooser->set_current_folder(Glib::build_filename(pool->get_base_path(), "units"));
+            chooser->set_current_folder(Glib::build_filename(pool.get_base_path(), "units"));
             break;
         case ObjectType::ENTITY:
-            chooser->set_current_folder(Glib::build_filename(pool->get_base_path(), "entities"));
+            chooser->set_current_folder(Glib::build_filename(pool.get_base_path(), "entities"));
             break;
         case ObjectType::PART:
-            chooser->set_current_folder(Glib::build_filename(pool->get_base_path(), "parts"));
+            chooser->set_current_folder(Glib::build_filename(pool.get_base_path(), "parts"));
             break;
         default:;
         }
