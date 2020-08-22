@@ -18,6 +18,7 @@ protected:
 private:
     void canvas_update() override;
     CoreFrame core_frame;
+    Frame &frame;
 
     class HeaderButton *header_button = nullptr;
     Gtk::Entry *name_entry = nullptr;

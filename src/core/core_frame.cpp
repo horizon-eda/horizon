@@ -68,9 +68,9 @@ const Frame *CoreFrame::get_canvas_data() const
     return &frame;
 }
 
-Frame *CoreFrame::get_frame()
+Frame &CoreFrame::get_frame()
 {
-    return &frame;
+    return frame;
 }
 
 CoreFrame::HistoryItem::HistoryItem(const Frame &fr) : frame(fr)

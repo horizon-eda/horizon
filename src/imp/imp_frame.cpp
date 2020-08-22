@@ -6,7 +6,7 @@
 
 namespace horizon {
 ImpFrame::ImpFrame(const std::string &frame_filename, const std::string &pool_path)
-    : ImpBase(pool_path), core_frame(frame_filename, *pool.get())
+    : ImpBase(pool_path), core_frame(frame_filename, *pool.get()), frame(core_frame.get_frame())
 {
     core = &core_frame;
     core_frame.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
@@ -28,15 +28,12 @@ void ImpFrame::construct()
     header_button->signal_closed().connect(sigc::mem_fun(*this, &ImpFrame::update_header));
 
     name_entry = header_button->add_entry("Name");
-    name_entry->set_text(core_frame.get_frame()->name);
-    name_entry->set_width_chars(std::min<int>(core_frame.get_frame()->name.size(), 20));
+    name_entry->set_text(frame.name);
+    name_entry->set_width_chars(std::min<int>(frame.name.size(), 20));
     name_entry->signal_changed().connect([this] { core_frame.set_needs_save(); });
     name_entry->signal_activate().connect(sigc::mem_fun(*this, &ImpFrame::update_header));
 
-    core->signal_save().connect([this] {
-        auto frame = core_frame.get_frame();
-        frame->name = name_entry->get_text();
-    });
+    core->signal_save().connect([this] { frame.name = name_entry->get_text(); });
 
     hamburger_menu->append("Frame properties...", "win.edit_frame");
     add_tool_action(ToolID::EDIT_FRAME_PROPERTIES, "edit_frame");

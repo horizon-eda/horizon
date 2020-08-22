@@ -62,7 +62,7 @@ ToolResponse ToolManageBuses::begin(const ToolArgs &args)
         r = imp->dialogs.manage_power_nets(*doc.c->get_block());
     }
     else if (tool_id == ToolID::EDIT_FRAME_PROPERTIES) {
-        r = imp->dialogs.edit_frame_properties(*doc.f->get_frame());
+        r = imp->dialogs.edit_frame_properties(doc.f->get_frame());
     }
     else if (tool_id == ToolID::TOGGLE_GROUP_TAG_VISIBLE) {
         auto sch = doc.c->get_schematic();
