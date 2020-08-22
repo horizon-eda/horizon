@@ -44,15 +44,15 @@ bool ToolGenerateSilkscreen::can_begin()
 bool ToolGenerateSilkscreen::select_polygon()
 {
     bool ret = true;
-    auto pkg = doc.k->get_package();
+    auto &pkg = doc.k->get_package();
     for (const auto &it : selection) {
         if (it.layer == BoardLayers::TOP_PACKAGE
             && (it.type == ObjectType::POLYGON_EDGE || it.type == ObjectType::POLYGON_VERTEX)) {
-            pp = pkg->get_polygon(it.uuid);
+            pp = pkg.get_polygon(it.uuid);
         }
     }
     if (!pp) {
-        for (const auto &it : pkg->polygons) {
+        for (const auto &it : pkg.polygons) {
             if (it.second.layer == BoardLayers::TOP_PACKAGE) {
                 if (!pp) {
                     pp = &it.second;
@@ -81,8 +81,8 @@ bool ToolGenerateSilkscreen::select_polygon()
 
 void ToolGenerateSilkscreen::clear_silkscreen()
 {
-    auto pkg = doc.k->get_package();
-    map_erase_if(pkg->lines, [](const auto &a) { return a.second.layer == BoardLayers::TOP_SILKSCREEN; });
+    auto &pkg = doc.k->get_package();
+    map_erase_if(pkg.lines, [](const auto &a) { return a.second.layer == BoardLayers::TOP_SILKSCREEN; });
 }
 
 ToolResponse ToolGenerateSilkscreen::redraw_silkscreen()
@@ -151,7 +151,7 @@ void ToolGenerateSilkscreen::restore_package_visibility()
 
 ToolResponse ToolGenerateSilkscreen::begin(const ToolArgs &args)
 {
-    auto pkg = doc.k->get_package();
+    auto &pkg = doc.k->get_package();
     pp = nullptr;
 
     if (!select_polygon()) {
@@ -164,7 +164,7 @@ ToolResponse ToolGenerateSilkscreen::begin(const ToolArgs &args)
         }
     }
 
-    for (const auto &it : pkg->pads) {
+    for (const auto &it : pkg.pads) {
         for (const auto &it_poly : it.second.padstack.polygons) {
             if (it_poly.second.layer == BoardLayers::TOP_COPPER) {
                 ClipperLib::Path pad_path;

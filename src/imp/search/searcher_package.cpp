@@ -13,7 +13,7 @@ std::list<Searcher::SearchResult> SearcherPackage::search(const Searcher::Search
     if (!q.is_valid())
         return results;
     if (q.types.count(Type::PAD)) {
-        for (const auto &it : doc.get_package()->pads) {
+        for (const auto &it : doc.get_package().pads) {
             if (q.matches(it.second.name)) {
                 results.emplace_back(Type::PAD, it.first);
                 auto &x = results.back();

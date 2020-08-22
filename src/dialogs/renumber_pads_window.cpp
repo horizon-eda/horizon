@@ -5,13 +5,13 @@
 #include <math.h>
 
 namespace horizon {
-RenumberPadsWindow::RenumberPadsWindow(Gtk::Window *parent, ImpInterface *intf, Package *a_pkg,
+RenumberPadsWindow::RenumberPadsWindow(Gtk::Window *parent, ImpInterface *intf, Package &a_pkg,
                                        const std::set<UUID> &a_pads)
     : ToolWindow(parent, intf), pkg(a_pkg)
 {
     set_title("Renumber pads");
     for (const auto &it : a_pads) {
-        pads.insert(&pkg->pads.at(it));
+        pads.insert(&pkg.pads.at(it));
     }
 
 

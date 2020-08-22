@@ -165,7 +165,7 @@ Coordi ToolMove::get_selection_center()
             accu.accumulate(doc.b->get_board()->packages.at(it.uuid).placement.shift);
             break;
         case ObjectType::PAD:
-            accu.accumulate(doc.k->get_package()->pads.at(it.uuid).placement.shift);
+            accu.accumulate(doc.k->get_package().pads.at(it.uuid).placement.shift);
             break;
         case ObjectType::TEXT:
             accu.accumulate(doc.r->get_text(it.uuid)->placement.shift);

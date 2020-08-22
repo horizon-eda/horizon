@@ -9,13 +9,13 @@ namespace horizon {
 
 class RenumberPadsWindow : public ToolWindow {
 public:
-    RenumberPadsWindow(Gtk::Window *parent, class ImpInterface *intf, class Package *pkg, const std::set<UUID> &pads);
+    RenumberPadsWindow(Gtk::Window *parent, class ImpInterface *intf, class Package &pkg, const std::set<UUID> &pads);
 
     const std::vector<class Pad *> &get_pads_sorted();
     void renumber();
 
 private:
-    class Package *pkg = nullptr;
+    class Package &pkg;
     std::set<class Pad *> pads;
 
     bool circular = false;

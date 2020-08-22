@@ -8,7 +8,7 @@
 namespace horizon {
 class FootprintGeneratorBase : public Gtk::Box {
 public:
-    FootprintGeneratorBase(const char *resource, class IDocumentPackage *c);
+    FootprintGeneratorBase(const char *resource, class IDocumentPackage &c);
     Glib::PropertyProxy<bool> property_can_generate()
     {
         return p_property_can_generate.get_proxy();
@@ -22,6 +22,7 @@ protected:
 
     SVGOverlay *overlay = nullptr;
     Gtk::Box *box_top = nullptr;
-    class IDocumentPackage *core;
+    class IDocumentPackage &core;
+    class Package &package;
 };
 } // namespace horizon

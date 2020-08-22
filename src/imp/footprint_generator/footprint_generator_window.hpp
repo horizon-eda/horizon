@@ -8,8 +8,8 @@ namespace horizon {
 
 class FootprintGeneratorWindow : public Gtk::Window {
 public:
-    FootprintGeneratorWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x);
-    static FootprintGeneratorWindow *create(Gtk::Window *p, class CorePackage *c);
+    FootprintGeneratorWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class CorePackage &c);
+    static FootprintGeneratorWindow *create(Gtk::Window *p, class CorePackage &c);
     typedef sigc::signal<void> type_signal_generated;
     type_signal_generated signal_generated()
     {
@@ -17,9 +17,9 @@ public:
     }
 
 private:
-    Gtk::Stack *stack;
-    CorePackage *core;
-    Gtk::Button *generate_button;
+    CorePackage &core;
+    Gtk::Stack *stack = nullptr;
+    Gtk::Button *generate_button = nullptr;
     void update_can_generate();
     type_signal_generated s_signal_generated;
 };

@@ -246,7 +246,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
             doc.r->delete_hole(it.uuid);
             break;
         case ObjectType::PAD:
-            doc.k->get_package()->pads.erase(it.uuid);
+            doc.k->get_package().pads.erase(it.uuid);
             break;
         case ObjectType::BOARD_HOLE:
             doc.b->get_board()->holes.erase(it.uuid);

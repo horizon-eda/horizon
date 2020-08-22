@@ -9,7 +9,7 @@ public:
     CorePackage(const std::string &filename, IPool &pool);
     bool has_object_type(ObjectType ty) const override;
 
-    Package *get_package() override;
+    Package &get_package() override;
 
     /*Polygon *insert_polygon(const UUID &uu);
     Polygon *get_polygon(const UUID &uu=true);

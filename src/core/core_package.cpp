@@ -47,9 +47,9 @@ LayerProvider *CorePackage::get_layer_provider()
     return &package;
 }
 
-Package *CorePackage::get_package()
+Package &CorePackage::get_package()
 {
-    return &package;
+    return package;
 }
 
 Rules *CorePackage::get_rules()

@@ -4,6 +4,6 @@
 namespace horizon {
 class IDocumentPackage : public virtual IDocument {
 public:
-    virtual class Package *get_package() = 0;
+    virtual class Package &get_package() = 0;
 };
 } // namespace horizon

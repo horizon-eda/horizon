@@ -5,7 +5,7 @@
 #include "pool/package.hpp"
 
 namespace horizon {
-FootprintGeneratorGrid::FootprintGeneratorGrid(IDocumentPackage *c)
+FootprintGeneratorGrid::FootprintGeneratorGrid(IDocumentPackage &c)
     : Glib::ObjectBase(typeid(FootprintGeneratorGrid)),
       FootprintGeneratorBase("/org/horizon-eda/horizon/imp/footprint_generator/grid.svg", c)
 {
@@ -123,18 +123,17 @@ bool FootprintGeneratorGrid::generate()
 {
     if (!property_can_generate())
         return false;
-    auto pkg = core->get_package();
     int64_t pitch_h = sp_pitch_h->get_value_as_int();
     int64_t pitch_v = sp_pitch_v->get_value_as_int();
     int64_t pad_width = sp_pad_width->get_value_as_int();
     int64_t pad_height = sp_pad_height->get_value_as_int();
 
-    auto padstack = core->get_pool().get_padstack(browser_button->property_selected_uuid());
+    auto padstack = core.get_pool().get_padstack(browser_button->property_selected_uuid());
 
     for (size_t x = 0; x < pad_count_h; x++) {
         for (size_t y = 0; y < pad_count_v; y++) {
             auto uu = UUID::random();
-            auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
+            auto &pad = package.pads.emplace(uu, Pad(uu, padstack)).first->second;
             pad.placement.shift.x = pitch_h * x - (pitch_h * (pad_count_h - 1)) / 2;
             pad.placement.shift.y = -pitch_v * y + (pitch_v * (pad_count_v - 1)) / 2;
             if (padstack->parameter_set.count(ParameterID::PAD_DIAMETER)) {

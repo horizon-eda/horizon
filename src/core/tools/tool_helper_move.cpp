@@ -56,7 +56,7 @@ void ToolHelperMove::move_do(const Coordi &delta)
             doc.b->get_board()->packages.at(it.uuid).placement.shift += delta;
             break;
         case ObjectType::PAD:
-            doc.k->get_package()->pads.at(it.uuid).placement.shift += delta;
+            doc.k->get_package().pads.at(it.uuid).placement.shift += delta;
             break;
         case ObjectType::BOARD_HOLE:
             doc.b->get_board()->holes.at(it.uuid).placement.shift += delta;
@@ -307,10 +307,10 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
 
         case ObjectType::PAD: {
-            Pad *pad = &doc.k->get_package()->pads.at(it.uuid);
-            transform(pad->placement.shift, center, rotate);
+            auto &pad = doc.k->get_package().pads.at(it.uuid);
+            transform(pad.placement.shift, center, rotate);
             if (rotate) {
-                pad->placement.inc_angle_deg(-90);
+                pad.placement.inc_angle_deg(-90);
             }
         } break;
 

@@ -2,7 +2,7 @@
 #include "footag/display.hpp"
 
 namespace horizon {
-FootprintGeneratorFootag::FootprintGeneratorFootag(IDocumentPackage *c)
+FootprintGeneratorFootag::FootprintGeneratorFootag(IDocumentPackage &c)
     : Glib::ObjectBase(typeid(FootprintGeneratorFootag)), sidebar(), separator(Gtk::Orientation::ORIENTATION_VERTICAL),
       stack()
 {

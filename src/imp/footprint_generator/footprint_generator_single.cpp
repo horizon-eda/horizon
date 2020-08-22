@@ -5,7 +5,7 @@
 #include "pool/package.hpp"
 
 namespace horizon {
-FootprintGeneratorSingle::FootprintGeneratorSingle(IDocumentPackage *c)
+FootprintGeneratorSingle::FootprintGeneratorSingle(IDocumentPackage &c)
     : Glib::ObjectBase(typeid(FootprintGeneratorSingle)), FootprintGeneratorBase(
                                                                   "/org/horizon-eda/horizon/imp/footprint_generator/"
                                                                   "single.svg",
@@ -64,15 +64,14 @@ bool FootprintGeneratorSingle::generate()
 {
     if (!property_can_generate())
         return false;
-    auto pkg = core->get_package();
     int64_t pitch = sp_pitch->get_value_as_int();
     int64_t pad_width = sp_pad_width->get_value_as_int();
     int64_t pad_height = sp_pad_height->get_value_as_int();
     int64_t y0 = (pad_count - 1) * (pitch / 2);
-    auto padstack = core->get_pool().get_padstack(browser_button->property_selected_uuid());
+    auto padstack = core.get_pool().get_padstack(browser_button->property_selected_uuid());
     for (unsigned int i = 0; i < pad_count; i++) {
         auto uu = UUID::random();
-        auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
+        auto &pad = package.pads.emplace(uu, Pad(uu, padstack)).first->second;
         pad.placement.shift = {0, y0 - pitch * i};
         pad.placement.set_angle_deg(270);
         pad.name = std::to_string(i + 1);

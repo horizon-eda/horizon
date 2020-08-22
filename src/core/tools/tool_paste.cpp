@@ -147,15 +147,15 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
     if (j.count("pads") && doc.k) {
         const json &o = j["pads"];
         std::vector<Pad *> pads;
-        int max_name = doc.k->get_package()->get_max_pad_name();
+        int max_name = doc.k->get_package().get_max_pad_name();
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto &x = doc.k->get_package()->pads.emplace(u, Pad(u, it.value(), doc.r->get_pool())).first->second;
+            auto &x = doc.k->get_package().pads.emplace(u, Pad(u, it.value(), doc.r->get_pool())).first->second;
             apply_shift(x.placement.shift, cursor_pos_canvas);
             pads.push_back(&x);
             selection.emplace(u, ObjectType::PAD);
         }
-        doc.k->get_package()->apply_parameter_set({});
+        doc.k->get_package().apply_parameter_set({});
         if (max_name > 0) {
             std::sort(pads.begin(), pads.end(),
                       [](const Pad *a, const Pad *b) { return strcmp_natural(a->name, b->name) < 0; });

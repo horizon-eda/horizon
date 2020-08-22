@@ -20,13 +20,13 @@ bool ToolGenerateCourtyard::can_begin()
 ToolResponse ToolGenerateCourtyard::begin(const ToolArgs &args)
 {
     Coordi a, b;
-    auto pkg = doc.k->get_package();
-    for (const auto &it : pkg->pads) {
+    auto &pkg = doc.k->get_package();
+    for (const auto &it : pkg.pads) {
         auto bb_pad = it.second.placement.transform_bb(it.second.padstack.get_bbox(true));
         a = Coordi::min(a, bb_pad.first);
         b = Coordi::max(b, bb_pad.second);
     }
-    for (const auto &it_poly : pkg->polygons) {
+    for (const auto &it_poly : pkg.polygons) {
         if (it_poly.second.layer == BoardLayers::TOP_PACKAGE) {
             auto poly = it_poly.second.remove_arcs();
             for (const auto &it : poly.vertices) {
@@ -42,7 +42,7 @@ ToolResponse ToolGenerateCourtyard::begin(const ToolArgs &args)
     }
 
     Polygon *courtyard_poly = nullptr;
-    for (auto &it : pkg->polygons) {
+    for (auto &it : pkg.polygons) {
         if (it.second.layer == BoardLayers::TOP_COURTYARD) {
             courtyard_poly = &it.second;
             imp->tool_bar_flash("modified existing courtyard polygon");

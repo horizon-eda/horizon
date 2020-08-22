@@ -37,7 +37,7 @@ ToolResponse ToolImportKiCadPackage::begin(const ToolArgs &args)
     if (auto r = imp->dialogs.ask_kicad_package_filename()) {
         SEXPR::PARSER parser;
         std::unique_ptr<SEXPR::SEXPR> sexpr_data(parser.Parse(slurp_from_file(*r)));
-        KiCadPackageParser kp(*doc.k->get_package(), doc.k->get_pool());
+        KiCadPackageParser kp(doc.k->get_package(), doc.k->get_pool());
         kp.parse(sexpr_data.get());
         return ToolResponse::commit();
     }

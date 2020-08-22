@@ -488,7 +488,7 @@ class SymbolPinNamesWindow *Dialogs::show_symbol_pin_names_window(class Schemati
     return win;
 }
 
-class RenumberPadsWindow *Dialogs::show_renumber_pads_window(class Package *pkg, const std::set<UUID> &pads)
+class RenumberPadsWindow *Dialogs::show_renumber_pads_window(class Package &pkg, const std::set<UUID> &pads)
 {
     if (window_nonmodal)
         return nullptr;

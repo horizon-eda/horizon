@@ -283,7 +283,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         Pad *pad = nullptr;
         for (const auto &it : args.selection) {
             if (it.type == ObjectType::PAD) {
-                pad = &doc.k->get_package()->pads.at(it.uuid);
+                pad = &doc.k->get_package().pads.at(it.uuid);
                 break;
             }
         }
@@ -292,7 +292,7 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         if (auto r = imp->dialogs.ask_datum_string("Enter pad name", pad->name)) {
             for (const auto &it : args.selection) {
                 if (it.type == ObjectType::PAD) {
-                    doc.k->get_package()->pads.at(it.uuid).name = *r;
+                    doc.k->get_package().pads.at(it.uuid).name = *r;
                 }
             }
         }

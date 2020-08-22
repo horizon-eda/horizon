@@ -27,8 +27,8 @@
 
 namespace horizon {
 ImpPackage::ImpPackage(const std::string &package_filename, const std::string &pool_path)
-    : ImpLayer(pool_path), core_package(package_filename, *pool), searcher(core_package), fake_block(UUID::random()),
-      fake_board(UUID::random(), fake_block)
+    : ImpLayer(pool_path), core_package(package_filename, *pool), package(core_package.get_package()),
+      searcher(core_package), fake_block(UUID::random()), fake_board(UUID::random(), fake_block)
 {
     core = &core_package;
     core_package.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));
@@ -38,7 +38,7 @@ ImpPackage::ImpPackage(const std::string &package_filename, const std::string &p
 void ImpPackage::canvas_update()
 {
     canvas->update(*core_package.get_canvas_data());
-    warnings_box->update(core_package.get_package()->warnings);
+    warnings_box->update(package.warnings);
     update_highlights();
 }
 
@@ -53,7 +53,7 @@ std::string ImpPackage::get_hud_text(std::set<SelectableRef> &sel)
 {
     std::string s;
     if (sel_count_type(sel, ObjectType::PAD) == 1) {
-        const auto &pad = core_package.get_package()->pads.at(sel_find_one(sel, ObjectType::PAD).uuid);
+        const auto &pad = package.pads.at(sel_find_one(sel, ObjectType::PAD).uuid);
         s += "<b>Pad " + pad.name + "</b>\n";
         for (const auto &it : pad.parameter_set) {
             s += parameter_id_to_name(it.first) + ": " + dim_to_string(it.second, true) + "\n";
@@ -61,11 +61,10 @@ std::string ImpPackage::get_hud_text(std::set<SelectableRef> &sel)
         sel_erase_type(sel, ObjectType::PAD);
     }
     else if (sel_count_type(sel, ObjectType::PAD) == 2) {
-        const auto &pkg = core_package.get_package();
         std::vector<const Pad *> pads;
         for (const auto &it : sel) {
             if (it.type == ObjectType::PAD) {
-                pads.push_back(&pkg->pads.at(it.uuid));
+                pads.push_back(&package.pads.at(it.uuid));
             }
         }
         assert(pads.size() == 2);
@@ -93,8 +92,7 @@ void ImpPackage::update_action_sensitivity()
 void ImpPackage::update_monitor()
 {
     ItemSet items;
-    const auto pkg = core_package.get_package();
-    for (const auto &it : pkg->pads) {
+    for (const auto &it : package.pads) {
         items.emplace(ObjectType::PADSTACK, it.second.pool_padstack->uuid);
     }
     set_monitor_items(items);
@@ -105,7 +103,7 @@ void ImpPackage::check_alt_pkg()
     const UUID alt_uuid = browser_alt_button->property_selected_uuid();
     if (!alt_uuid)
         return;
-    const auto pkg_uuid = core_package.get_package()->uuid;
+    const auto pkg_uuid = package.uuid;
     if (pkg_uuid == alt_uuid) {
         browser_alt_button->property_selected_uuid() = UUID();
         return;
@@ -157,11 +155,11 @@ void ImpPackage::construct()
         auto sel = canvas->get_selection();
         if (sel_count_type(sel, ObjectType::PAD)) {
             auto uu = sel_find_one(sel, ObjectType::PAD).uuid;
-            this->edit_pool_item(ObjectType::PADSTACK, core_package.get_package()->pads.at(uu).pool_padstack->uuid);
+            this->edit_pool_item(ObjectType::PADSTACK, package.pads.at(uu).pool_padstack->uuid);
         }
     });
 
-    footprint_generator_window = FootprintGeneratorWindow::create(main_window, &core_package);
+    footprint_generator_window = FootprintGeneratorWindow::create(main_window, core_package);
     footprint_generator_window->signal_generated().connect(sigc::mem_fun(*this, &ImpBase::canvas_update_from_pp));
 
     auto parameter_window =
@@ -179,7 +177,7 @@ void ImpPackage::construct()
         parameter_window->add_button(button);
         button->signal_clicked().connect([this, parameter_window] {
             const Polygon *poly = nullptr;
-            for (const auto &it : core_package.get_package()->polygons) {
+            for (const auto &it : package.polygons) {
                 if (it.second.vertices.size() == 4 && !it.second.has_arcs()
                     && it.second.parameter_class == "courtyard") {
                     poly = &it.second;
@@ -218,8 +216,7 @@ void ImpPackage::construct()
     parameter_window->signal_apply().connect([this, parameter_window] {
         if (core->tool_is_active())
             return;
-        auto ps = core_package.get_package();
-        auto r_compile = ps->parameter_program.set_code(core_package.parameter_program_code);
+        auto r_compile = package.parameter_program.set_code(core_package.parameter_program_code);
         if (r_compile.first) {
             parameter_window->set_error_message("<b>Compile error:</b>" + r_compile.second);
             return;
@@ -227,8 +224,8 @@ void ImpPackage::construct()
         else {
             parameter_window->set_error_message("");
         }
-        ps->parameter_set = core_package.parameter_set;
-        auto r = ps->parameter_program.run(ps->parameter_set);
+        package.parameter_set = core_package.parameter_set;
+        auto r = package.parameter_program.run(package.parameter_set);
         if (r.first) {
             parameter_window->set_error_message("<b>Run error:</b>" + r.second);
             return;
@@ -269,13 +266,12 @@ void ImpPackage::construct()
     header_button->add_widget("Alternate for", browser_alt_button);
 
     {
-        auto pkg = core_package.get_package();
-        entry_name->set_text(pkg->name);
-        entry_manufacturer->set_text(pkg->manufacturer);
+        entry_name->set_text(package.name);
+        entry_manufacturer->set_text(package.manufacturer);
         std::stringstream s;
-        entry_tags->set_tags(pkg->tags);
-        if (pkg->alternate_for)
-            browser_alt_button->property_selected_uuid() = pkg->alternate_for->uuid;
+        entry_tags->set_tags(package.tags);
+        if (package.alternate_for)
+            browser_alt_button->property_selected_uuid() = package.alternate_for->uuid;
     }
 
     entry_name->signal_changed().connect([this] { core_package.set_needs_save(); });
@@ -287,7 +283,7 @@ void ImpPackage::construct()
         core_package.set_needs_save();
     });
 
-    if (core_package.get_package()->name.size() == 0) { // new package
+    if (package.name.size() == 0) { // new package
         entry_name->set_text(Glib::path_get_basename(Glib::path_get_dirname(core_package.get_filename())));
     }
 
@@ -310,16 +306,15 @@ void ImpPackage::construct()
     update_monitor();
 
     core_package.signal_save().connect([this, entry_manufacturer, entry_tags] {
-        auto pkg = core_package.get_package();
-        pkg->tags = entry_tags->get_tags();
-        pkg->name = entry_name->get_text();
-        pkg->manufacturer = entry_manufacturer->get_text();
+        package.tags = entry_tags->get_tags();
+        package.name = entry_name->get_text();
+        package.manufacturer = entry_manufacturer->get_text();
         UUID alt_uuid = browser_alt_button->property_selected_uuid();
         if (alt_uuid) {
-            pkg->alternate_for = pool->get_package(alt_uuid);
+            package.alternate_for = pool->get_package(alt_uuid);
         }
         else {
-            pkg->alternate_for = nullptr;
+            package.alternate_for = nullptr;
         }
     });
 

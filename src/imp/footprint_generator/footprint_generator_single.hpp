@@ -4,7 +4,7 @@
 namespace horizon {
 class FootprintGeneratorSingle : public FootprintGeneratorBase {
 public:
-    FootprintGeneratorSingle(class IDocumentPackage *c);
+    FootprintGeneratorSingle(class IDocumentPackage &c);
     bool generate() override;
 
 private:

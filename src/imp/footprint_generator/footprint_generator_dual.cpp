@@ -6,7 +6,7 @@
 #include "pool/package.hpp"
 
 namespace horizon {
-FootprintGeneratorDual::FootprintGeneratorDual(IDocumentPackage *c)
+FootprintGeneratorDual::FootprintGeneratorDual(IDocumentPackage &c)
     : Glib::ObjectBase(typeid(FootprintGeneratorDual)),
       FootprintGeneratorBase("/org/horizon-eda/horizon/imp/footprint_generator/dual.svg", c)
 {
@@ -130,18 +130,17 @@ bool FootprintGeneratorDual::generate()
 {
     if (!property_can_generate())
         return false;
-    auto pkg = core->get_package();
     int64_t spacing = sp_spacing->get_value_as_int();
     int64_t pitch = sp_pitch->get_value_as_int();
     int64_t y0 = (pad_count / 2 - 1) * (pitch / 2);
     int64_t pad_width = sp_pad_width->get_value_as_int();
     int64_t pad_height = sp_pad_height->get_value_as_int();
-    auto padstack = core->get_pool().get_padstack(browser_button->property_selected_uuid());
+    auto padstack = core.get_pool().get_padstack(browser_button->property_selected_uuid());
     for (auto it : {-1, 1}) {
         for (unsigned int i = 0; i < pad_count / 2; i++) {
             auto uu = UUID::random();
 
-            auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
+            auto &pad = package.pads.emplace(uu, Pad(uu, padstack)).first->second;
             pad.placement.shift = {it * spacing, y0 - pitch * i};
             if (padstack->parameter_set.count(ParameterID::PAD_DIAMETER)) {
                 pad.parameter_set[ParameterID::PAD_DIAMETER] = std::min(pad_width, pad_height);

@@ -5,9 +5,9 @@
 #include "pool/package.hpp"
 
 namespace horizon {
-FootprintGeneratorBase::FootprintGeneratorBase(const char *resource, IDocumentPackage *c)
+FootprintGeneratorBase::FootprintGeneratorBase(const char *resource, IDocumentPackage &c)
     : Glib::ObjectBase(typeid(FootprintGeneratorBase)), Gtk::Box(Gtk::ORIENTATION_VERTICAL, 4),
-      p_property_can_generate(*this, "can-generate"), core(c)
+      p_property_can_generate(*this, "can-generate"), core(c), package(core.get_package())
 {
     box_top = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
     pack_start(*box_top, false, false, 0);
@@ -16,9 +16,9 @@ FootprintGeneratorBase::FootprintGeneratorBase(const char *resource, IDocumentPa
         auto la = Gtk::manage(new Gtk::Label("Padstack:"));
         tbox->pack_start(*la, false, false, 0);
 
-        browser_button = Gtk::manage(new PoolBrowserButton(ObjectType::PADSTACK, core->get_pool()));
+        browser_button = Gtk::manage(new PoolBrowserButton(ObjectType::PADSTACK, core.get_pool()));
         auto br = dynamic_cast<PoolBrowserPadstack *>(browser_button->get_browser());
-        br->set_package_uuid(c->get_package()->uuid);
+        br->set_package_uuid(package.uuid);
         browser_button->property_selected_uuid().signal_changed().connect(
                 [this] { p_property_can_generate = browser_button->property_selected_uuid() != UUID(); });
         tbox->pack_start(*browser_button, false, false, 0);

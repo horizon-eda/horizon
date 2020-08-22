@@ -20,7 +20,7 @@ std::set<Pad *> ToolEditPadParameterSet::get_pads()
     std::set<Pad *> pads;
     for (const auto &it : selection) {
         if (it.type == ObjectType::PAD) {
-            pads.emplace(&doc.k->get_package()->pads.at(it.uuid));
+            pads.emplace(&doc.k->get_package().pads.at(it.uuid));
         }
     }
     return pads;
@@ -29,7 +29,7 @@ std::set<Pad *> ToolEditPadParameterSet::get_pads()
 ToolResponse ToolEditPadParameterSet::begin(const ToolArgs &args)
 {
     auto pads = get_pads();
-    auto r = imp->dialogs.edit_pad_parameter_set(pads, doc.r->get_pool(), *doc.k->get_package());
+    auto r = imp->dialogs.edit_pad_parameter_set(pads, doc.r->get_pool(), doc.k->get_package());
     if (r) {
         return ToolResponse::commit();
     }

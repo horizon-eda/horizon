@@ -39,12 +39,13 @@ protected:
 private:
     void canvas_update() override;
     CorePackage core_package;
+    Package &package;
     SearcherPackage searcher;
 
     Block fake_block;
     Board fake_board;
 
-    class FootprintGeneratorWindow *footprint_generator_window;
+    class FootprintGeneratorWindow *footprint_generator_window = nullptr;
     class View3DWindow *view_3d_window = nullptr;
     std::string ask_3d_model_filename(const std::string &current_filename = "");
     void construct_3d();

@@ -166,8 +166,8 @@ void Buffer::load(std::set<SelectableRef> selection)
             junctions.emplace(x->uuid, *x);
         }
         else if (it.type == ObjectType::PAD) {
-            auto x = &doc.k->get_package()->pads.at(it.uuid);
-            pads.emplace(x->uuid, *x);
+            auto &x = doc.k->get_package().pads.at(it.uuid);
+            pads.emplace(x.uuid, x);
         }
         else if (it.type == ObjectType::NET) {
             auto &x = doc.r->get_block()->nets.at(it.uuid);

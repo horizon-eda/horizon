@@ -3,7 +3,7 @@
 namespace horizon {
 class FootprintGeneratorFootag : public Gtk::Box {
 public:
-    FootprintGeneratorFootag(class IDocumentPackage *c);
+    FootprintGeneratorFootag(class IDocumentPackage &c);
     bool generate();
 
 protected:

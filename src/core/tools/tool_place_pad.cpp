@@ -18,7 +18,7 @@ bool ToolPlacePad::can_begin()
 
 ToolResponse ToolPlacePad::begin(const ToolArgs &args)
 {
-    if (auto r = imp->dialogs.select_padstack(doc.r->get_pool(), doc.k->get_package()->uuid)) {
+    if (auto r = imp->dialogs.select_padstack(doc.r->get_pool(), doc.k->get_package().uuid)) {
         padstack = doc.r->get_pool().get_padstack(*r);
         create_pad(args.coords);
 
@@ -37,18 +37,18 @@ ToolResponse ToolPlacePad::begin(const ToolArgs &args)
 
 void ToolPlacePad::create_pad(const Coordi &pos)
 {
-    Package *pkg = doc.k->get_package();
+    auto &pkg = doc.k->get_package();
     auto uu = UUID::random();
-    temp = &pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
+    temp = &pkg.pads.emplace(uu, Pad(uu, padstack)).first->second;
     temp->placement.shift = pos;
     for (auto &p : padstack->parameters_required) {
         temp->parameter_set[p] = padstack->parameter_set.at(p);
     }
-    if (pkg->pads.size() == 1) { // first pad
+    if (pkg.pads.size() == 1) { // first pad
         temp->name = "1";
     }
     else {
-        int max_name = pkg->get_max_pad_name();
+        int max_name = pkg.get_max_pad_name();
         if (max_name > 0) {
             temp->name = std::to_string(max_name + 1);
         }
@@ -68,12 +68,12 @@ ToolResponse ToolPlacePad::update(const ToolArgs &args)
             create_pad(args.coords);
             temp->placement.set_angle(old_pad->placement.get_angle());
             temp->parameter_set = old_pad->parameter_set;
-            doc.k->get_package()->apply_parameter_set({});
+            doc.k->get_package().apply_parameter_set({});
         } break;
 
         case InToolActionID::RMB:
         case InToolActionID::CANCEL:
-            doc.k->get_package()->pads.erase(temp->uuid);
+            doc.k->get_package().pads.erase(temp->uuid);
             temp = 0;
             selection.clear();
             return ToolResponse::commit();
@@ -85,11 +85,11 @@ ToolResponse ToolPlacePad::update(const ToolArgs &args)
         case InToolActionID::EDIT: {
             std::set<Pad *> pads{temp};
             auto params = temp->parameter_set;
-            if (imp->dialogs.edit_pad_parameter_set(pads, doc.r->get_pool(), *doc.k->get_package())
+            if (imp->dialogs.edit_pad_parameter_set(pads, doc.r->get_pool(), doc.k->get_package())
                 == false) { // rollback
                 temp->parameter_set = params;
             }
-            doc.k->get_package()->apply_parameter_set({});
+            doc.k->get_package().apply_parameter_set({});
         } break;
 
         default:;

@@ -5,7 +5,7 @@
 #include "pool/package.hpp"
 
 namespace horizon {
-FootprintGeneratorQuad::FootprintGeneratorQuad(IDocumentPackage *c)
+FootprintGeneratorQuad::FootprintGeneratorQuad(IDocumentPackage &c)
     : Glib::ObjectBase(typeid(FootprintGeneratorQuad)),
       FootprintGeneratorBase("/org/horizon-eda/horizon/imp/footprint_generator/quad.svg", c)
 {
@@ -92,18 +92,17 @@ bool FootprintGeneratorQuad::generate()
 {
     if (!property_can_generate())
         return false;
-    auto pkg = core->get_package();
     int64_t pitch = sp_pitch->get_value_as_int();
     int64_t spacing_h = sp_spacing_h->get_value_as_int();
     int64_t y0 = (pad_count_v - 1) * (pitch / 2);
     int64_t pad_width = sp_pad_width->get_value_as_int();
     int64_t pad_height = sp_pad_height->get_value_as_int();
 
-    auto padstack = core->get_pool().get_padstack(browser_button->property_selected_uuid());
+    auto padstack = core.get_pool().get_padstack(browser_button->property_selected_uuid());
     for (auto it : {-1, 1}) {
         for (unsigned int i = 0; i < pad_count_v; i++) {
             auto uu = UUID::random();
-            auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
+            auto &pad = package.pads.emplace(uu, Pad(uu, padstack)).first->second;
             pad.placement.shift = {it * spacing_h, y0 - pitch * i};
             if (padstack->parameter_set.count(ParameterID::PAD_DIAMETER)) {
                 pad.parameter_set[ParameterID::PAD_DIAMETER] = std::min(pad_width, pad_height);
@@ -128,7 +127,7 @@ bool FootprintGeneratorQuad::generate()
     for (auto it : {-1, 1}) {
         for (unsigned int i = 0; i < pad_count_h; i++) {
             auto uu = UUID::random();
-            auto &pad = pkg->pads.emplace(uu, Pad(uu, padstack)).first->second;
+            auto &pad = package.pads.emplace(uu, Pad(uu, padstack)).first->second;
             pad.placement.shift = {x0 + pitch * i, it * spacing_v};
             if (padstack->parameter_set.count(ParameterID::PAD_DIAMETER)) {
                 pad.parameter_set[ParameterID::PAD_DIAMETER] = std::min(pad_width, pad_height);
