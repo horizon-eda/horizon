@@ -3,6 +3,7 @@
 #include "common/object_descr.hpp"
 #include <algorithm>
 #include <iostream>
+#include <assert.h>
 
 namespace horizon {
 PropertyPanels::PropertyPanels(Core *c) : Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 16), core(c)

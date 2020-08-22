@@ -15,7 +15,8 @@ Entity::Entity(const UUID &uu, const json &j, IPool &pool)
         const json &o = j.at("gates");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            gates.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), pool));
+            gates.emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                          std::forward_as_tuple(u, it.value(), pool));
         }
     }
     if (j.count("tags")) {

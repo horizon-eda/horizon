@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <set>
 
 namespace horizon {
 class UUID;
@@ -22,6 +23,9 @@ public:
     virtual const std::string &get_base_path() const = 0;
 
     virtual std::string get_model_filename(const UUID &pkg_uuid, const UUID &model_uuid) = 0;
+    virtual std::set<UUID> get_alternate_packages(const UUID &uu) = 0;
+
+    virtual void clear() = 0;
 
     virtual ~IPool()
     {

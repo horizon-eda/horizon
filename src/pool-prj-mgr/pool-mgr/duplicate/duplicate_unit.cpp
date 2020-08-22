@@ -15,8 +15,8 @@ class DuplicateSymbolWidget : public Gtk::Box {
     friend class DuplicateUnitWidget;
 
 public:
-    DuplicateSymbolWidget(Pool *p, const UUID &sym_uuid)
-        : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10), pool(p), sym(pool->get_symbol(sym_uuid))
+    DuplicateSymbolWidget(Pool &p, const UUID &sym_uuid)
+        : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10), pool(p), sym(*pool.get_symbol(sym_uuid))
     {
         auto explain_label = Gtk::manage(new Gtk::Label);
         explain_label->get_style_context()->add_class("dim-label");
@@ -27,7 +27,7 @@ public:
 
         auto cb = Gtk::manage(new Gtk::CheckButton);
         auto la = Gtk::manage(new Gtk::Label);
-        la->set_markup("<b>Symbol: " + sym->name + "</b>");
+        la->set_markup("<b>Symbol: " + sym.name + "</b>");
         cb->add(*la);
         cb->show_all();
         cb->set_active(true);
@@ -51,13 +51,13 @@ public:
         int top = 0;
 
         name_entry = Gtk::manage(new Gtk::Entry);
-        name_entry->set_text(sym->name + " (Copy)");
+        name_entry->set_text(sym.name + " (Copy)");
         name_entry->set_hexpand(true);
         grid_attach_label_and_widget(grid, "Name", name_entry, top);
 
-        location_entry = Gtk::manage(new LocationEntry(pool->get_base_path()));
+        location_entry = Gtk::manage(new LocationEntry(pool.get_base_path()));
         location_entry->set_filename(
-                DuplicateUnitWidget::insert_filename(pool->get_filename(ObjectType::SYMBOL, sym->uuid), "-copy"));
+                DuplicateUnitWidget::insert_filename(pool.get_filename(ObjectType::SYMBOL, sym.uuid), "-copy"));
         grid_attach_label_and_widget(grid, "Filename", location_entry, top);
 
         grid->show_all();
@@ -69,7 +69,7 @@ public:
     std::string duplicate(const UUID &new_unit_uuid)
     {
         if (grid->get_visible()) {
-            Symbol new_sym(*sym);
+            Symbol new_sym(sym);
             new_sym.uuid = UUID::random();
             new_sym.name = name_entry->get_text();
             auto new_sym_json = new_sym.serialize();
@@ -84,19 +84,19 @@ public:
     }
 
 private:
-    Pool *pool;
-    const Symbol *sym;
+    Pool &pool;
+    const Symbol &sym;
     Gtk::Entry *name_entry = nullptr;
     class LocationEntry *location_entry = nullptr;
     Gtk::Grid *grid = nullptr;
 };
 
 
-DuplicateUnitWidget::DuplicateUnitWidget(Pool *p, const UUID &unit_uuid, bool optional)
-    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10), pool(p), unit(pool->get_unit(unit_uuid))
+DuplicateUnitWidget::DuplicateUnitWidget(Pool &p, const UUID &unit_uuid, bool optional)
+    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10), pool(p), unit(*pool.get_unit(unit_uuid))
 {
     auto la = Gtk::manage(new Gtk::Label);
-    la->set_markup("<b>Unit: " + unit->name + "</b>");
+    la->set_markup("<b>Unit: " + unit.name + "</b>");
     la->set_xalign(0);
     la->show();
     if (!optional) {
@@ -143,20 +143,20 @@ DuplicateUnitWidget::DuplicateUnitWidget(Pool *p, const UUID &unit_uuid, bool op
     int top = 0;
 
     name_entry = Gtk::manage(new Gtk::Entry);
-    name_entry->set_text(unit->name + " (Copy)");
+    name_entry->set_text(unit.name + " (Copy)");
     name_entry->set_hexpand(true);
     grid_attach_label_and_widget(grid, "Name", name_entry, top);
 
-    location_entry = Gtk::manage(new LocationEntry(pool->get_base_path()));
-    location_entry->set_filename(insert_filename(pool->get_filename(ObjectType::UNIT, unit->uuid), "-copy"));
+    location_entry = Gtk::manage(new LocationEntry(pool.get_base_path()));
+    location_entry->set_filename(insert_filename(pool.get_filename(ObjectType::UNIT, unit.uuid), "-copy"));
     grid_attach_label_and_widget(grid, "Filename", location_entry, top);
 
     grid->show_all();
     grid->set_margin_bottom(10);
     pack_start(*grid, false, false, 0);
 
-    SQLite::Query q(pool->db, "SELECT uuid FROM symbols WHERE unit=?");
-    q.bind(1, unit->uuid);
+    SQLite::Query q(pool.db, "SELECT uuid FROM symbols WHERE unit=?");
+    q.bind(1, unit.uuid);
     while (q.step()) {
         auto ws = Gtk::manage(new DuplicateSymbolWidget(pool, UUID(q.get<std::string>(0))));
         pack_start(*ws, false, false, 0);
@@ -169,7 +169,7 @@ DuplicateUnitWidget::DuplicateUnitWidget(Pool *p, const UUID &unit_uuid, bool op
 UUID DuplicateUnitWidget::duplicate(std::vector<std::string> *filenames)
 {
     if (grid->get_visible()) {
-        Unit new_unit(*unit);
+        Unit new_unit(unit);
         new_unit.uuid = UUID::random();
         new_unit.name = name_entry->get_text();
         save_json_to_file(location_entry->get_filename(), new_unit.serialize());
@@ -186,13 +186,13 @@ UUID DuplicateUnitWidget::duplicate(std::vector<std::string> *filenames)
         return new_unit.uuid;
     }
     else {
-        return unit->uuid;
+        return unit.uuid;
     }
 }
 
 UUID DuplicateUnitWidget::get_uuid() const
 {
-    return unit->uuid;
+    return unit.uuid;
 }
 
 std::string DuplicateUnitWidget::insert_filename(const std::string &fn, const std::string &ins)

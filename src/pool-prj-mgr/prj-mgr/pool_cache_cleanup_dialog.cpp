@@ -22,7 +22,7 @@ void PoolCacheCleanupDialog::action_toggled(const Glib::ustring &path)
 
 
 PoolCacheCleanupDialog::PoolCacheCleanupDialog(Gtk::Window *parent, const std::set<std::string> &filenames,
-                                               const std::set<std::string> &models_delete, class Pool *pool)
+                                               const std::set<std::string> &models_delete, class IPool &pool)
     : Gtk::Dialog("Clean up Pool Cache", *parent,
                   Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
 
@@ -67,7 +67,7 @@ PoolCacheCleanupDialog::PoolCacheCleanupDialog(Gtk::Window *parent, const std::s
         std::string type_str = j_cache.at("type");
         row[list_columns.filename] = fi;
         if (type_str == "part") {
-            auto part = Part::new_from_file(fi, *pool);
+            auto part = Part::new_from_file(fi, pool);
             row[list_columns.name] = part.get_MPN() + " / " + part.get_manufacturer();
         }
         else {

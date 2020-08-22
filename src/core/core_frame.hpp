@@ -1,15 +1,13 @@
 #pragma once
 #include "frame/frame.hpp"
 #include "core.hpp"
-#include <iostream>
-#include <memory>
 #include "nlohmann/json.hpp"
 #include "document/idocument_frame.hpp"
 
 namespace horizon {
 class CoreFrame : public Core, public IDocumentFrame {
 public:
-    CoreFrame(const std::string &frame_filename);
+    CoreFrame(const std::string &frame_filename, IPool &pool);
     bool has_object_type(ObjectType ty) const override;
 
     Frame *get_frame() override;

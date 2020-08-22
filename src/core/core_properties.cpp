@@ -4,8 +4,13 @@
 #include "common/layer_provider.hpp"
 #include "common/polygon.hpp"
 #include "common/picture.hpp"
+#include "common/arc.hpp"
+#include "common/text.hpp"
+#include "common/line.hpp"
+#include "common/keepout.hpp"
 #include "core.hpp"
 #include "util/util.hpp"
+#include <assert.h>
 
 namespace horizon {
 #define HANDLED                                                                                                        \

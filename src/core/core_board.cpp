@@ -1,31 +1,29 @@
 #include "core_board.hpp"
 #include "board/board_layers.hpp"
 #include "core_properties.hpp"
-#include "pool/part.hpp"
 #include "util/util.hpp"
-#include <algorithm>
 #include "nlohmann/json.hpp"
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
 #include "pool/pool_cached.hpp"
+#include "pool/part.hpp"
 
 namespace horizon {
 CoreBoard::CoreBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
-                     const std::string &pictures_dir, Pool &pool)
-    : via_padstack_provider(via_dir, pool), block(Block::new_from_file(block_filename, pool)),
+                     const std::string &pictures_dir, IPool &pool)
+    : Core(pool), via_padstack_provider(via_dir, pool), block(Block::new_from_file(block_filename, pool)),
       brd(Board::new_from_file(board_filename, block, pool, via_padstack_provider)), rules(brd.rules),
       fab_output_settings(brd.fab_output_settings), pdf_export_settings(brd.pdf_export_settings),
       step_export_settings(brd.step_export_settings), pnp_export_settings(brd.pnp_export_settings), colors(brd.colors),
       m_board_filename(board_filename), m_block_filename(block_filename), m_pictures_dir(pictures_dir)
 {
-    m_pool = &pool;
     brd.load_pictures(pictures_dir);
     rebuild();
 }
 
 void CoreBoard::reload_netlist()
 {
-    block = Block::new_from_file(m_block_filename, *m_pool);
+    block = Block::new_from_file(m_block_filename, m_pool);
     brd.block = &block;
     brd.update_refs();
     for (auto it = brd.packages.begin(); it != brd.packages.end();) {
@@ -303,9 +301,9 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             if (!alt_uuid) {
                 pkg->alternate_package = nullptr;
             }
-            else if (m_pool->get_alternate_packages(pkg->pool_package->uuid).count(alt_uuid)
+            else if (m_pool.get_alternate_packages(pkg->pool_package->uuid).count(alt_uuid)
                      != 0) { // see if really an alt package for pkg
-                pkg->alternate_package = m_pool->get_package(alt_uuid);
+                pkg->alternate_package = m_pool.get_package(alt_uuid);
             }
         } break;
 
@@ -454,8 +452,8 @@ bool CoreBoard::get_property_meta(ObjectType type, const UUID &uu, ObjectPropert
             PropertyMetaNetClasses &m = dynamic_cast<PropertyMetaNetClasses &>(meta);
             m.net_classes.clear();
             m.net_classes.emplace(UUID(), pkg->pool_package->name + " (default)");
-            for (const auto &it : m_pool->get_alternate_packages(pkg->pool_package->uuid)) {
-                m.net_classes.emplace(it, m_pool->get_package(it)->name);
+            for (const auto &it : m_pool.get_alternate_packages(pkg->pool_package->uuid)) {
+                m.net_classes.emplace(it, m_pool.get_package(it)->name);
             }
             return true;
         }

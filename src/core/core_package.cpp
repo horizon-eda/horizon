@@ -1,24 +1,22 @@
 #include "core_package.hpp"
 #include "core_properties.hpp"
-#include <algorithm>
-#include <fstream>
 #include "nlohmann/json.hpp"
 #include "logger/logger.hpp"
 #include "util/util.hpp"
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
+#include "pool/ipool.hpp"
 
 namespace horizon {
-CorePackage::CorePackage(const std::string &filename, Pool &pool)
-    : package(Package::new_from_file(filename, pool)), m_filename(filename),
+CorePackage::CorePackage(const std::string &filename, IPool &pool)
+    : Core(pool), package(Package::new_from_file(filename, pool)), m_filename(filename),
       m_pictures_dir(Glib::build_filename(Glib::path_get_dirname(filename), "pictures")), rules(package.rules),
       parameter_program_code(package.parameter_program.get_code()), parameter_set(package.parameter_set),
       models(package.models), default_model(package.default_model)
 {
     package.load_pictures(m_pictures_dir);
     rebuild();
-    m_pool = &pool;
 }
 
 bool CorePackage::has_object_type(ObjectType ty) const
@@ -241,8 +239,8 @@ const Package *CorePackage::get_canvas_data()
 
 void CorePackage::reload_pool()
 {
-    m_pool->clear();
-    package.update_refs(*m_pool);
+    m_pool.clear();
+    package.update_refs(m_pool);
     history_clear();
     rebuild();
 }

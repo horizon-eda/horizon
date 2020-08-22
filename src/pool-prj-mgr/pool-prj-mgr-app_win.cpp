@@ -1544,7 +1544,7 @@ void PoolProjectManagerAppWindow::cleanup_pool_cache()
         }
     }
 
-    PoolCacheCleanupDialog dia(pool_cache_window, files_to_delete, models_to_delete, &pool_cached);
+    PoolCacheCleanupDialog dia(pool_cache_window, files_to_delete, models_to_delete, pool_cached);
     dia.run();
 }
 

@@ -6,12 +6,12 @@
 #include "util/util.hpp"
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
+#include "pool/ipool.hpp"
 
 namespace horizon {
-CoreSymbol::CoreSymbol(const std::string &filename, Pool &pool)
-    : sym(Symbol::new_from_file(filename, pool)), m_filename(filename)
+CoreSymbol::CoreSymbol(const std::string &filename, IPool &pool)
+    : Core(pool), sym(Symbol::new_from_file(filename, pool)), m_filename(filename)
 {
-    m_pool = &pool;
     rebuild();
 }
 
@@ -303,8 +303,8 @@ Symbol *CoreSymbol::get_symbol()
 
 void CoreSymbol::reload_pool()
 {
-    m_pool->clear();
-    sym.unit = m_pool->get_unit(sym.unit.uuid);
+    m_pool.clear();
+    sym.unit = m_pool.get_unit(sym.unit.uuid);
     history_clear();
     rebuild();
 }

@@ -1,6 +1,5 @@
 #pragma once
 #include "core.hpp"
-#include "pool/pool.hpp"
 #include "pool/symbol.hpp"
 #include <deque>
 #include <iostream>
@@ -10,7 +9,7 @@
 namespace horizon {
 class CoreSymbol : public Core, public IDocumentSymbol {
 public:
-    CoreSymbol(const std::string &filename, Pool &pool);
+    CoreSymbol(const std::string &filename, IPool &pool);
     bool has_object_type(ObjectType ty) const override;
     Symbol *get_symbol() override;
 

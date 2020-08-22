@@ -73,14 +73,16 @@ Package::Package(const UUID &uu, const json &j, IPool &pool)
         const json &o = j.at("lines");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            lines.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
+            lines.emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                          std::forward_as_tuple(u, it.value(), *this));
         }
     }
     {
         const json &o = j.at("arcs");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            arcs.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), *this));
+            arcs.emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                         std::forward_as_tuple(u, it.value(), *this));
         }
     }
     {
@@ -94,7 +96,8 @@ Package::Package(const UUID &uu, const json &j, IPool &pool)
         const json &o = j.at("pads");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            pads.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value(), pool));
+            pads.emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                         std::forward_as_tuple(u, it.value(), pool));
         }
     }
 

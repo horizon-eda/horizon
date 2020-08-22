@@ -1,11 +1,11 @@
 #include "property_panel.hpp"
-#include <iostream>
 #include "common/object_descr.hpp"
 #include "property_editor.hpp"
 #include "property_panels.hpp"
 #include "core/core.hpp"
 #include "util/util.hpp"
 #include "util/gtk_util.hpp"
+#include <assert.h>
 
 namespace horizon {
 

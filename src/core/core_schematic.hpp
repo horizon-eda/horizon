@@ -1,18 +1,15 @@
 #pragma once
 #include "block/block.hpp"
 #include "core.hpp"
-#include "pool/pool.hpp"
-#include "pool/symbol.hpp"
 #include "schematic/schematic.hpp"
 #include "document/idocument_schematic.hpp"
-#include <iostream>
 #include <memory>
 
 namespace horizon {
 class CoreSchematic : public Core, public virtual IDocumentSchematic {
 public:
     CoreSchematic(const std::string &schematic_filename, const std::string &block_filename,
-                  const std::string &pictures_dir, Pool &pool);
+                  const std::string &pictures_dir, IPool &pool);
     bool has_object_type(ObjectType ty) const override;
 
     Junction *get_junction(const UUID &uu) override;

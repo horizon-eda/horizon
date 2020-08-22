@@ -274,4 +274,9 @@ void Core::autosave()
     save(autosave_suffix);
 }
 
+Core::Core(IPool &pool) : m_pool(pool)
+{
+}
+
+
 } // namespace horizon

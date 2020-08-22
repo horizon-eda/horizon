@@ -32,7 +32,7 @@ LocationEntry *PartWizard::pack_location_entry(const Glib::RefPtr<Gtk::Builder> 
 }
 
 PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const UUID &pkg_uuid,
-                       const std::string &bp, class Pool *po, PoolProjectManagerAppWindow *aw)
+                       const std::string &bp, class Pool &po, PoolProjectManagerAppWindow *aw)
     : Gtk::Window(cobject), pool_base_path(bp), pool(po), part(UUID::random()), entity(UUID::random()), appwin(aw),
       state_store(this, "part-wizard")
 {
@@ -57,7 +57,7 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     {
         Gtk::Box *tag_box;
         x->get_widget("entity_tags", tag_box);
-        entity_tags_entry = Gtk::manage(new TagEntry(*pool, ObjectType::ENTITY, true));
+        entity_tags_entry = Gtk::manage(new TagEntry(pool, ObjectType::ENTITY, true));
         entity_tags_entry->show();
         tag_box->pack_start(*entity_tags_entry, true, true, 0);
     }
@@ -70,7 +70,7 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     {
         Gtk::Box *tag_box;
         x->get_widget("part_tags", tag_box);
-        part_tags_entry = Gtk::manage(new TagEntry(*pool, ObjectType::PART, true));
+        part_tags_entry = Gtk::manage(new TagEntry(pool, ObjectType::PART, true));
         part_tags_entry->show();
         tag_box->pack_start(*part_tags_entry, true, true, 0);
     }
@@ -85,7 +85,7 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     entry_add_sanitizer(part_description_entry);
     entry_add_sanitizer(part_datasheet_entry);
 
-    part_manufacturer_entry->set_completion(create_pool_manufacturer_completion(*pool));
+    part_manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
 
     part_mpn_entry->signal_changed().connect(sigc::mem_fun(*this, &PartWizard::update_can_finish));
     entity_name_entry->signal_changed().connect(sigc::mem_fun(*this, &PartWizard::update_can_finish));
@@ -141,11 +141,11 @@ PartWizard::PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     {
         Gtk::Paned *page_package;
         x->get_widget("page_package", page_package);
-        browser_package = Gtk::manage(new PoolBrowserPackage(*pool));
+        browser_package = Gtk::manage(new PoolBrowserPackage(pool));
         browser_package->show();
         page_package->add1(*browser_package);
 
-        auto preview = Gtk::manage(new PreviewCanvas(*pool, true));
+        auto preview = Gtk::manage(new PreviewCanvas(pool, true));
         button_select->set_sensitive(false);
         browser_package->signal_selected().connect([this, preview] {
             preview->load(ObjectType::PACKAGE, browser_package->get_selected());
@@ -269,7 +269,7 @@ void PartWizard::handle_select()
 {
     auto p = browser_package->get_selected();
     if (p) {
-        set_pkg(pool->get_package(p));
+        set_pkg(pool.get_package(p));
         set_mode(Mode::ASSIGN);
     }
 }
@@ -403,9 +403,9 @@ void PartWizard::finish()
             auto unit_filename = ed->unit_location_entry->get_filename();
             save_json_to_file(unit_filename, ed->gate->unit->serialize());
 
-            auto symbol_filename_src = pool->get_tmp_filename(ObjectType::SYMBOL, symbols.at(ed->gate->unit->uuid));
+            auto symbol_filename_src = pool.get_tmp_filename(ObjectType::SYMBOL, symbols.at(ed->gate->unit->uuid));
             auto symbol_filename_dest = ed->symbol_location_entry->get_filename();
-            auto sym = Symbol::new_from_file(symbol_filename_src, *pool);
+            auto sym = Symbol::new_from_file(symbol_filename_src, pool);
             sym.name = ed->symbol_name_entry->get_text();
             save_json_to_file(symbol_filename_dest, sym.serialize());
         }
@@ -691,9 +691,9 @@ void PartWizard::prepare_edit()
             ed->show_all();
             ed->edit_symbol_button->signal_clicked().connect([this, ed] {
                 auto symbol_uuid = symbols.at(ed->gate->unit->uuid);
-                auto symbol_filename = pool->get_tmp_filename(ObjectType::SYMBOL, symbol_uuid);
+                auto symbol_filename = pool.get_tmp_filename(ObjectType::SYMBOL, symbol_uuid);
                 {
-                    auto sym = Symbol::new_from_file(symbol_filename, *pool);
+                    auto sym = Symbol::new_from_file(symbol_filename, pool);
                     sym.name = ed->symbol_name_entry->get_text();
                     save_json_to_file(symbol_filename, sym.serialize());
                 }
@@ -705,7 +705,7 @@ void PartWizard::prepare_edit()
                     processes.erase(symbol_filename);
                     symbols_open.erase(symbol_uuid);
                     {
-                        auto sym = Symbol::new_from_file(symbol_filename, *pool);
+                        auto sym = Symbol::new_from_file(symbol_filename, pool);
                         ed->symbol_name_entry->set_text(sym.name);
                     }
                     update_can_finish();
@@ -824,13 +824,13 @@ void PartWizard::update_part()
             std::cout << "del sym" << std::endl;
 
             {
-                auto unit_filename = pool->get_tmp_filename(ObjectType::UNIT, uu);
+                auto unit_filename = pool.get_tmp_filename(ObjectType::UNIT, uu);
                 auto fi = Gio::File::create_for_path(unit_filename);
                 fi->remove();
             }
 
             {
-                auto sym_filename = pool->get_tmp_filename(ObjectType::SYMBOL, symbols.at(uu));
+                auto sym_filename = pool.get_tmp_filename(ObjectType::SYMBOL, symbols.at(uu));
                 auto fi = Gio::File::create_for_path(sym_filename);
                 fi->remove();
                 symbols.erase(uu);
@@ -851,11 +851,11 @@ void PartWizard::update_part()
             Symbol sym(UUID::random());
             sym.unit = &it.second;
             sym.name = "edit me";
-            auto filename = pool->get_tmp_filename(ObjectType::SYMBOL, sym.uuid);
+            auto filename = pool.get_tmp_filename(ObjectType::SYMBOL, sym.uuid);
             save_json_to_file(filename, sym.serialize());
             symbols.emplace(sym.unit->uuid, sym.uuid);
         }
-        auto filename = pool->get_tmp_filename(ObjectType::UNIT, it.second.uuid);
+        auto filename = pool.get_tmp_filename(ObjectType::UNIT, it.second.uuid);
         save_json_to_file(filename, it.second.serialize());
     }
 }
@@ -864,8 +864,8 @@ void PartWizard::update_symbol_pins_mapped()
 {
     for (const auto &it : symbols) {
         const auto &unit_uu = it.first;
-        auto symbol_filename = pool->get_tmp_filename(ObjectType::SYMBOL, it.second);
-        auto sym = Symbol::new_from_file(symbol_filename, *pool);
+        auto symbol_filename = pool.get_tmp_filename(ObjectType::SYMBOL, it.second);
+        auto sym = Symbol::new_from_file(symbol_filename, pool);
         auto n_pins = sym.pins.size();
         symbol_pins_mapped[unit_uu] = n_pins;
     }
@@ -912,7 +912,7 @@ void PartWizard::autofill()
 
 void PartWizard::reload()
 {
-    part.package = pool->get_package(part.package.uuid);
+    part.package = pool.get_package(part.package.uuid);
 }
 
 void PartWizard::update_can_finish()
@@ -1094,7 +1094,7 @@ void PartWizard::update_steps()
     steps_grid->show_all();
 }
 
-PartWizard *PartWizard::create(const UUID &pkg_uuid, const std::string &bp, class Pool *po,
+PartWizard *PartWizard::create(const UUID &pkg_uuid, const std::string &bp, class Pool &po,
                                class PoolProjectManagerAppWindow *aw)
 {
     PartWizard *w;
@@ -1109,11 +1109,11 @@ PartWizard *PartWizard::create(const UUID &pkg_uuid, const std::string &bp, clas
 PartWizard::~PartWizard()
 {
     for (auto &it : units) {
-        auto filename = pool->get_tmp_filename(ObjectType::UNIT, it.second.uuid);
+        auto filename = pool.get_tmp_filename(ObjectType::UNIT, it.second.uuid);
         Gio::File::create_for_path(filename)->remove();
     }
     for (auto &it : symbols) {
-        auto filename = pool->get_tmp_filename(ObjectType::SYMBOL, it.second);
+        auto filename = pool.get_tmp_filename(ObjectType::SYMBOL, it.second);
         Gio::File::create_for_path(filename)->remove();
     }
 }

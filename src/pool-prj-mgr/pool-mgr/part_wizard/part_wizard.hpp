@@ -19,8 +19,8 @@ class PartWizard : public Gtk::Window {
 
 public:
     PartWizard(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const UUID &pkg_uuid,
-               const std::string &bp, class Pool *po, class PoolProjectManagerAppWindow *aw);
-    static PartWizard *create(const UUID &pkg_uuid, const std::string &pool_base_path, class Pool *po,
+               const std::string &bp, class Pool &po, class PoolProjectManagerAppWindow *aw);
+    static PartWizard *create(const UUID &pkg_uuid, const std::string &pool_base_path, class Pool &po,
                               class PoolProjectManagerAppWindow *aw);
     std::vector<std::string> get_files_saved() const;
     void reload();
@@ -31,7 +31,7 @@ private:
     const class Package *pkg = nullptr;
     void set_pkg(const Package *p);
     std::string pool_base_path;
-    class Pool *pool;
+    class Pool &pool;
 
     Gtk::HeaderBar *header = nullptr;
     Gtk::Button *button_back = nullptr;

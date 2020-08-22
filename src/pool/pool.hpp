@@ -34,7 +34,7 @@ public:
     const class Package *get_package(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
     const class Part *get_part(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
     const class Frame *get_frame(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
-    std::set<UUID> get_alternate_packages(const UUID &uu);
+    std::set<UUID> get_alternate_packages(const UUID &uu) override;
     std::string get_model_filename(const UUID &pkg_uuid, const UUID &model_uuid) override;
 
     virtual std::string get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_out = nullptr);
@@ -56,7 +56,7 @@ public:
      * Doing so will invalidate all references pointers by get_entity and
      * friends.
      */
-    void clear();
+    void clear() override;
     std::string get_tmp_filename(ObjectType type, const UUID &uu) const;
     static int get_required_schema_version();
     virtual ~Pool();

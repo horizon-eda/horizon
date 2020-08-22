@@ -1,13 +1,12 @@
 #include "board_hole.hpp"
-#include "pool/part.hpp"
 #include "pool/ipool.hpp"
 #include "nlohmann/json.hpp"
 #include "block/block.hpp"
 
 namespace horizon {
 
-BoardHole::BoardHole(const UUID &uu, const json &j, Block *block, IPool *pool)
-    : uuid(uu), pool_padstack(pool->get_padstack(j.at("padstack").get<std::string>())), padstack(*pool_padstack),
+BoardHole::BoardHole(const UUID &uu, const json &j, Block *block, IPool &pool)
+    : uuid(uu), pool_padstack(pool.get_padstack(j.at("padstack").get<std::string>())), padstack(*pool_padstack),
       placement(j.at("placement")), parameter_set(parameter_set_from_json(j.at("parameter_set")))
 {
     if (j.count("net")) {

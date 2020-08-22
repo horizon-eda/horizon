@@ -75,7 +75,7 @@ void PoolNotebook::handle_part_wizard()
 {
     if (!part_wizard) {
         auto package_uuid = browsers.at(ObjectType::PACKAGE)->get_selected();
-        part_wizard = PartWizard::create(package_uuid, base_path, &pool, appwin);
+        part_wizard = PartWizard::create(package_uuid, base_path, pool, appwin);
         part_wizard->present();
         part_wizard->signal_hide().connect([this] {
             auto files_saved = part_wizard->get_files_saved();

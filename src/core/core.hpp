@@ -1,19 +1,14 @@
 #pragma once
 #include "canvas/selectables.hpp"
-#include "canvas/target.hpp"
-#include "common/layer.hpp"
 #include "common/object_descr.hpp"
-#include "common/keepout.hpp"
-#include "tool_data.hpp"
 #include "nlohmann/json_fwd.hpp"
-#include "pool/pool.hpp"
-#include "pool/symbol.hpp"
 #include <gdk/gdkkeysyms.h>
-#include <iostream>
+#include <deque>
 #include <memory>
 #include <sigc++/sigc++.h>
 #include "tool.hpp"
 #include "document/document.hpp"
+#include "util/placement.hpp"
 
 namespace horizon {
 
@@ -58,7 +53,7 @@ public:
 
     class IPool &get_pool() override
     {
-        return *m_pool;
+        return m_pool;
     }
     virtual ObjectType get_object_type() const = 0;
 
@@ -116,8 +111,6 @@ public:
     {
     }
     std::set<SelectableRef> &get_tool_selection();
-    Pool *m_pool;
-
     std::set<InToolActionID> get_tool_actions() const;
 
     bool get_needs_save() const;
@@ -178,6 +171,9 @@ public:
     }
 
 protected:
+    Core(class IPool &pool);
+    class IPool &m_pool;
+
     std::unique_ptr<ToolBase> tool = nullptr;
     type_signal_tool_changed s_signal_tool_changed;
     type_signal_rebuilt s_signal_rebuilt;

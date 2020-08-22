@@ -1,17 +1,12 @@
 #pragma once
-#include "common/layer.hpp"
 #include "core.hpp"
 #include "pool/padstack.hpp"
-#include "pool/pool.hpp"
-#include <deque>
-#include <iostream>
-#include <memory>
 #include "document/idocument_padstack.hpp"
 
 namespace horizon {
 class CorePadstack : public Core, public virtual IDocumentPadstack {
 public:
-    CorePadstack(const std::string &filename, Pool &pool);
+    CorePadstack(const std::string &filename, IPool &pool);
     bool has_object_type(ObjectType ty) const override;
 
     class LayerProvider *get_layer_provider() override;

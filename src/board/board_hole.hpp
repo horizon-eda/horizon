@@ -5,16 +5,13 @@
 #include "util/placement.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_ptr.hpp"
-#include <fstream>
-#include <map>
-#include <vector>
 
 namespace horizon {
 using json = nlohmann::json;
 
 class BoardHole {
 public:
-    BoardHole(const UUID &uu, const json &, class Block *block = nullptr, class IPool *pool = nullptr);
+    BoardHole(const UUID &uu, const json &, class Block *block, class IPool &pool);
     BoardHole(const UUID &uu, const Padstack *ps);
     UUID uuid;
     const Padstack *pool_padstack;

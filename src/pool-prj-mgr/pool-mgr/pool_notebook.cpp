@@ -450,7 +450,7 @@ void PoolNotebook::show_duplicate_window(ObjectType ty, const UUID &uu)
     if (!uu)
         return;
     if (!duplicate_window) {
-        duplicate_window = new DuplicateWindow(&pool, ty, uu);
+        duplicate_window = new DuplicateWindow(pool, ty, uu);
         duplicate_window->present();
         duplicate_window->signal_hide().connect([this] {
             auto files_duplicated = duplicate_window->get_filenames();

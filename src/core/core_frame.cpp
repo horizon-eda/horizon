@@ -1,14 +1,12 @@
 #include "core_frame.hpp"
 #include "util/util.hpp"
-#include <algorithm>
-#include <memory>
 #include "nlohmann/json.hpp"
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
 
 namespace horizon {
-CoreFrame::CoreFrame(const std::string &frame_filename)
-    : frame(Frame::new_from_file(frame_filename)), m_frame_filename(frame_filename)
+CoreFrame::CoreFrame(const std::string &frame_filename, IPool &pool)
+    : Core(pool), frame(Frame::new_from_file(frame_filename)), m_frame_filename(frame_filename)
 {
     rebuild();
 }

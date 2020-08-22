@@ -392,7 +392,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             auto brd = doc.b->get_board();
             auto x = &brd->holes
                               .emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                                       std::forward_as_tuple(u, it.value(), nullptr, &doc.r->get_pool()))
+                                       std::forward_as_tuple(u, it.value(), nullptr, doc.r->get_pool()))
                               .first->second;
             if (net_xlat.count(x->net.uuid)) {
                 x->net = &brd->block->nets.at(net_xlat.at(x->net.uuid));

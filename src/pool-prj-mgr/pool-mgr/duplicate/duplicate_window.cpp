@@ -5,7 +5,7 @@
 #include "common/object_descr.hpp"
 
 namespace horizon {
-DuplicateWindow::DuplicateWindow(class Pool *p, ObjectType ty, const UUID &uu) : Gtk::Window(), pool(p)
+DuplicateWindow::DuplicateWindow(class Pool &p, ObjectType ty, const UUID &uu) : Gtk::Window(), pool(p)
 {
     set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
     auto hb = Gtk::manage(new Gtk::HeaderBar());

@@ -1,17 +1,14 @@
 #pragma once
 #include <gtkmm.h>
 #include "common/common.hpp"
-#include "util/uuid.hpp"
-#include "nlohmann/json_fwd.hpp"
 #include <set>
 
 namespace horizon {
-using json = nlohmann::json;
 
 class PoolCacheCleanupDialog : public Gtk::Dialog {
 public:
     PoolCacheCleanupDialog(Gtk::Window *parent, const std::set<std::string> &filenames_delete,
-                           const std::set<std::string> &models_delete, class Pool *pool);
+                           const std::set<std::string> &models_delete, class IPool &pool);
 
 private:
     void do_cleanup();

@@ -1,20 +1,17 @@
 #include "core_padstack.hpp"
 #include "core_properties.hpp"
-#include <algorithm>
-#include <fstream>
 #include "nlohmann/json.hpp"
 #include "util/util.hpp"
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
 
 namespace horizon {
-CorePadstack::CorePadstack(const std::string &filename, Pool &pool)
-    : padstack(Padstack::new_from_file(filename)), m_filename(filename),
+CorePadstack::CorePadstack(const std::string &filename, IPool &pool)
+    : Core(pool), padstack(Padstack::new_from_file(filename)), m_filename(filename),
       parameter_program_code(padstack.parameter_program.get_code()), parameter_set(padstack.parameter_set),
       parameters_required(padstack.parameters_required)
 {
     rebuild();
-    m_pool = &pool;
 }
 
 bool CorePadstack::has_object_type(ObjectType ty) const

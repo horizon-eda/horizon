@@ -6,15 +6,15 @@
 namespace horizon {
 class DuplicatePartWidget : public Gtk::Box, public DuplicateBase {
 public:
-    DuplicatePartWidget(class Pool *p, const UUID &part_uuid, Gtk::Box *ubox);
+    DuplicatePartWidget(class Pool &p, const UUID &part_uuid, Gtk::Box *ubox);
     UUID duplicate(std::vector<std::string> *filenames) override;
 
-    static UUID duplicate_package(class Pool *pool, const UUID &uu, const std::string &new_dir,
+    static UUID duplicate_package(class Pool &pool, const UUID &uu, const std::string &new_dir,
                                   const std::string &new_name, std::vector<std::string> *filenames = nullptr);
 
 private:
-    class Pool *pool;
-    const class Part *part;
+    class Pool &pool;
+    const class Part &part;
     Gtk::Entry *mpn_entry = nullptr;
     Gtk::Entry *manufacturer_entry = nullptr;
     class LocationEntry *location_entry = nullptr;

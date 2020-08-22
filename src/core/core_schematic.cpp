@@ -9,8 +9,9 @@
 
 namespace horizon {
 CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename,
-                             const std::string &pictures_dir, Pool &pool)
-    : block(Block::new_from_file(block_filename, pool)), project_meta_loaded_from_block(block.project_meta.size()),
+                             const std::string &pictures_dir, IPool &pool)
+    : Core(pool), block(Block::new_from_file(block_filename, pool)),
+      project_meta_loaded_from_block(block.project_meta.size()),
       sch(Schematic::new_from_file(schematic_filename, block, pool)), rules(sch.rules),
       bom_export_settings(block.bom_export_settings), pdf_export_settings(sch.pdf_export_settings),
       m_schematic_filename(schematic_filename), m_block_filename(block_filename), m_pictures_dir(pictures_dir)
@@ -18,7 +19,6 @@ CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::s
     auto x = std::find_if(sch.sheets.cbegin(), sch.sheets.cend(), [](const auto &a) { return a.second.index == 1; });
     assert(x != sch.sheets.cend());
     sheet_uuid = x->first;
-    m_pool = &pool;
     sch.load_pictures(m_pictures_dir);
     rebuild();
 }

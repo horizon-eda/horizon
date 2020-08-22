@@ -6,7 +6,7 @@
 
 namespace horizon {
 ImpFrame::ImpFrame(const std::string &frame_filename, const std::string &pool_path)
-    : ImpBase(pool_path), core_frame(frame_filename)
+    : ImpBase(pool_path), core_frame(frame_filename, *pool.get())
 {
     core = &core_frame;
     core_frame.signal_tool_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_tool_change));

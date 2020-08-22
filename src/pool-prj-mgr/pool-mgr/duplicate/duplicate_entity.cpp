@@ -11,11 +11,11 @@
 #include "nlohmann/json.hpp"
 
 namespace horizon {
-DuplicateEntityWidget::DuplicateEntityWidget(Pool *p, const UUID &entity_uuid, Gtk::Box *ubox, bool optional)
-    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10), pool(p), entity(pool->get_entity(entity_uuid))
+DuplicateEntityWidget::DuplicateEntityWidget(Pool &p, const UUID &entity_uuid, Gtk::Box *ubox, bool optional)
+    : Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10), pool(p), entity(*pool.get_entity(entity_uuid))
 {
     auto la = Gtk::manage(new Gtk::Label);
-    la->set_markup("<b>Entity: " + entity->name + "</b>");
+    la->set_markup("<b>Entity: " + entity.name + "</b>");
     la->set_xalign(0);
     la->show();
     if (!optional) {
@@ -61,13 +61,13 @@ DuplicateEntityWidget::DuplicateEntityWidget(Pool *p, const UUID &entity_uuid, G
     int top = 0;
 
     name_entry = Gtk::manage(new Gtk::Entry);
-    name_entry->set_text(entity->name + " (Copy)");
+    name_entry->set_text(entity.name + " (Copy)");
     name_entry->set_hexpand(true);
     grid_attach_label_and_widget(grid, "Name", name_entry, top);
 
-    location_entry = Gtk::manage(new LocationEntry(pool->get_base_path()));
+    location_entry = Gtk::manage(new LocationEntry(pool.get_base_path()));
     location_entry->set_filename(
-            DuplicateUnitWidget::insert_filename(pool->get_filename(ObjectType::ENTITY, entity->uuid), "-copy"));
+            DuplicateUnitWidget::insert_filename(pool.get_filename(ObjectType::ENTITY, entity.uuid), "-copy"));
     grid_attach_label_and_widget(grid, "Filename", location_entry, top);
 
     grid->show_all();
@@ -79,7 +79,7 @@ DuplicateEntityWidget::DuplicateEntityWidget(Pool *p, const UUID &entity_uuid, G
     unit_box = ubox;
 
     std::set<UUID> units;
-    for (const auto &it : entity->gates) {
+    for (const auto &it : entity.gates) {
         units.insert(it.second.unit->uuid);
     }
 
@@ -94,13 +94,13 @@ DuplicateEntityWidget::DuplicateEntityWidget(Pool *p, const UUID &entity_uuid, G
 
 UUID DuplicateEntityWidget::get_uuid() const
 {
-    return entity->uuid;
+    return entity.uuid;
 }
 
 UUID DuplicateEntityWidget::duplicate(std::vector<std::string> *filenames)
 {
     if (grid->get_visible()) {
-        Entity new_entity(*entity);
+        Entity new_entity(entity);
         new_entity.uuid = UUID::random();
         new_entity.name = name_entry->get_text();
         auto new_entity_json = new_entity.serialize();
@@ -126,7 +126,7 @@ UUID DuplicateEntityWidget::duplicate(std::vector<std::string> *filenames)
         return new_entity.uuid;
     }
     else {
-        return entity->uuid;
+        return entity.uuid;
     }
 }
 } // namespace horizon
