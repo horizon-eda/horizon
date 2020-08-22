@@ -35,7 +35,7 @@ ToolResponse ToolPlaceShape::begin(const ToolArgs &args)
 void ToolPlaceShape::create_shape(const Coordi &c)
 {
     auto uu = UUID::random();
-    temp = &doc.a->get_padstack()->shapes.emplace(uu, uu).first->second;
+    temp = &doc.a->get_padstack().shapes.emplace(uu, uu).first->second;
     temp->placement.shift = c;
     switch (tool_id) {
     case ToolID::PLACE_SHAPE_RECTANGLE:
@@ -70,7 +70,7 @@ ToolResponse ToolPlaceShape::update(const ToolArgs &args)
 
         case InToolActionID::RMB:
         case InToolActionID::CANCEL:
-            doc.a->get_padstack()->shapes.erase(temp->uuid);
+            doc.a->get_padstack().shapes.erase(temp->uuid);
             temp = 0;
             selection.clear();
             for (auto it : shapes_placed) {

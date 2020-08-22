@@ -189,8 +189,8 @@ void Buffer::load(std::set<SelectableRef> selection)
             polygons.emplace(x->uuid, *x);
         }
         else if (it.type == ObjectType::SHAPE) {
-            auto x = &doc.a->get_padstack()->shapes.at(it.uuid);
-            shapes.emplace(x->uuid, *x);
+            auto &x = doc.a->get_padstack().shapes.at(it.uuid);
+            shapes.emplace(x.uuid, x);
         }
         else if (it.type == ObjectType::DIMENSION) {
             auto x = doc.r->get_dimension(it.uuid);

@@ -301,7 +301,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
             doc.b->get_board()->vias.erase(it.uuid);
             break;
         case ObjectType::SHAPE:
-            doc.a->get_padstack()->shapes.erase(it.uuid);
+            doc.a->get_padstack().shapes.erase(it.uuid);
             break;
         case ObjectType::TEXT:
             doc.r->delete_text(it.uuid);

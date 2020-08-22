@@ -4,6 +4,6 @@
 namespace horizon {
 class IDocumentPadstack : public virtual IDocument {
 public:
-    virtual class Padstack *get_padstack() = 0;
+    virtual class Padstack &get_padstack() = 0;
 };
 } // namespace horizon

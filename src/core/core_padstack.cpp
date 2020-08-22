@@ -234,9 +234,9 @@ const Padstack *CorePadstack::get_canvas_data()
     return &padstack;
 }
 
-Padstack *CorePadstack::get_padstack()
+Padstack &CorePadstack::get_padstack()
 {
-    return &padstack;
+    return padstack;
 }
 
 std::pair<Coordi, Coordi> CorePadstack::get_bbox()

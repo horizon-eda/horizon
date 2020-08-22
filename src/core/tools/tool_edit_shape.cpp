@@ -2,7 +2,6 @@
 #include "document/idocument_padstack.hpp"
 #include "pool/padstack.hpp"
 #include "imp/imp_interface.hpp"
-#include <iostream>
 
 namespace horizon {
 
@@ -22,7 +21,7 @@ std::set<Shape *> ToolEditShape::get_shapes()
     std::set<Shape *> shapes;
     for (const auto &it : selection) {
         if (it.type == ObjectType::SHAPE) {
-            shapes.emplace(&doc.a->get_padstack()->shapes.at(it.uuid));
+            shapes.emplace(&doc.a->get_padstack().shapes.at(it.uuid));
         }
     }
     return shapes;
@@ -30,8 +29,6 @@ std::set<Shape *> ToolEditShape::get_shapes()
 
 ToolResponse ToolEditShape::begin(const ToolArgs &args)
 {
-    std::cout << "tool edit shape\n";
-
     auto shapes = get_shapes();
 
     bool r = imp->dialogs.edit_shapes(shapes);

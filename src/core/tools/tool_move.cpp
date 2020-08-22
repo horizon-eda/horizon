@@ -183,7 +183,7 @@ Coordi ToolMove::get_selection_center()
             accu.accumulate(doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center);
             break;
         case ObjectType::SHAPE:
-            accu.accumulate(doc.a->get_padstack()->shapes.at(it.uuid).placement.shift);
+            accu.accumulate(doc.a->get_padstack().shapes.at(it.uuid).placement.shift);
             break;
         case ObjectType::BOARD_PANEL:
             accu.accumulate(doc.b->get_board()->board_panels.at(it.uuid).placement.shift);

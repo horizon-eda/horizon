@@ -71,7 +71,7 @@ void ToolHelperMove::move_do(const Coordi &delta)
             doc.r->get_polygon(it.uuid)->vertices.at(it.vertex).arc_center += delta;
             break;
         case ObjectType::SHAPE:
-            doc.a->get_padstack()->shapes.at(it.uuid).placement.shift += delta;
+            doc.a->get_padstack().shapes.at(it.uuid).placement.shift += delta;
             break;
         case ObjectType::BOARD_PANEL:
             doc.b->get_board()->board_panels.at(it.uuid).placement.shift += delta;
@@ -339,10 +339,10 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
 
         case ObjectType::SHAPE: {
-            Shape *shape = &doc.a->get_padstack()->shapes.at(it.uuid);
-            transform(shape->placement.shift, center, rotate);
+            auto &shape = doc.a->get_padstack().shapes.at(it.uuid);
+            transform(shape.placement.shift, center, rotate);
             if (rotate) {
-                shape->placement.inc_angle_deg(-90);
+                shape.placement.inc_angle_deg(-90);
             }
         } break;
 

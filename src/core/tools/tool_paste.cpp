@@ -342,8 +342,8 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
         const json &o = j["shapes"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID::random();
-            auto x = &doc.a->get_padstack()->shapes.emplace(u, Shape(u, it.value())).first->second;
-            x->placement.shift += shift;
+            auto &x = doc.a->get_padstack().shapes.emplace(u, Shape(u, it.value())).first->second;
+            x.placement.shift += shift;
             selection.emplace(u, ObjectType::SHAPE);
         }
     }

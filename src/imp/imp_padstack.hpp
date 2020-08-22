@@ -21,6 +21,7 @@ protected:
 private:
     void canvas_update() override;
     CorePadstack core_padstack;
+    Padstack &padstack;
 
     class HeaderButton *header_button = nullptr;
     Gtk::Entry *name_entry = nullptr;
