@@ -20,6 +20,7 @@
 #include "schematic/power_symbol.hpp"
 #include "schematic/sheet.hpp"
 #include "frame/frame.hpp"
+#include "pool/decal.hpp"
 #include "selectables.hpp"
 #include "selection_filter.hpp"
 #include "target.hpp"
@@ -1459,6 +1460,9 @@ void Canvas::render(const Board &brd, bool interactive, PanelMode mode, OutlineM
     for (const auto &it : brd.arcs) {
         render(it.second, interactive);
     }
+    for (const auto &it : brd.decals) {
+        render(it.second);
+    }
     if (mode == PanelMode::INCLUDE) {
         for (const auto &it : brd.board_panels) {
             render(it.second);
@@ -1530,6 +1534,29 @@ void Canvas::render(const Frame &fr, bool on_sheet)
     draw_line(Coordf(0, fr.height), Coordf(), c);
 }
 
+void Canvas::render(const Decal &dec, bool interactive)
+{
+    if (interactive) {
+        for (const auto &it : dec.junctions) {
+            auto &junc = it.second;
+            selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, 10000, true);
+            targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position));
+        }
+    }
+    for (const auto &it : dec.lines) {
+        render(it.second, interactive);
+    }
+    for (const auto &it : dec.arcs) {
+        render(it.second, interactive);
+    }
+    for (const auto &it : dec.polygons) {
+        render(it.second, interactive);
+    }
+    for (const auto &it : dec.texts) {
+        render(it.second, interactive);
+    }
+}
+
 void Canvas::render(const Picture &pic)
 {
     if (!pic.data && !img_mode) {
@@ -1553,6 +1580,20 @@ void Canvas::render(const Picture &pic)
         return;
     selectables.append_angled(pic.uuid, ObjectType::PICTURE, pic.placement.shift, pic.placement.shift, {w, h},
                               pic.placement.get_angle_rad());
+}
+
+void Canvas::render(const BoardDecal &decal)
+{
+    transform_save();
+    transform.accumulate(decal.placement);
+    auto bb = decal.decal.get_bbox();
+    if (decal.flip) {
+        transform.invert_angle();
+    }
+    selectables.append(decal.uuid, ObjectType::BOARD_DECAL, {0, 0}, bb.first, bb.second, 0,
+                       decal.flip ? BoardLayers::BOTTOM_COPPER : BoardLayers::TOP_COPPER);
+    render(decal.decal, false);
+    transform_restore();
 }
 
 } // namespace horizon

@@ -4,6 +4,7 @@
 #include "pool/package.hpp"
 #include "pool/part.hpp"
 #include "frame/frame.hpp"
+#include "pool/decal.hpp"
 #include "board/board_layers.hpp"
 #include "preferences/preferences_util.hpp"
 #include "canvas/canvas_gl.hpp"
@@ -222,6 +223,18 @@ void PreviewCanvas::load(ObjectType type, const UUID &uu, const Placement &pl, b
         Frame fr = *pool.get_frame(uu);
         canvas->property_layer_opacity() = 100;
         canvas->update(fr, false);
+        pad = 1_mm;
+    } break;
+
+    case ObjectType::DECAL: {
+        const Decal &dec = *pool.get_decal(uu);
+        canvas->property_layer_opacity() = 75;
+        for (const auto &la : dec.get_layers()) {
+            auto ld = LayerDisplay::Mode::FILL_ONLY;
+            if (la.second.copper || la.first == BoardLayers::TOP_SILKSCREEN)
+                canvas->set_layer_display(la.first, LayerDisplay(true, ld));
+        }
+        canvas->update(dec, false);
         pad = 1_mm;
     } break;
     default:;

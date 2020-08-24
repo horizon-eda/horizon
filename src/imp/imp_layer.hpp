@@ -20,6 +20,7 @@ protected:
     Glib::RefPtr<Glib::Binding> layer_opacity_binding;
     void apply_preferences() override;
     void get_save_meta(json &j) override;
+    virtual void load_default_layers();
 
     CanvasPreferences *get_canvas_preferences() override
     {

@@ -20,5 +20,6 @@ public:
     class IDocumentPackage *k;
     class IDocumentBoard *b;
     class IDocumentFrame *f;
+    class IDocumentDecal *d;
 };
 } // namespace horizon

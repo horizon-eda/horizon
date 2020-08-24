@@ -869,6 +869,9 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::ZOOM_OUT, ToolID::NONE},
          {"Zoom out", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_NO_POPOVER | ActionCatalogItem::FLAGS_IN_TOOL}},
+
+        {{ActionID::TOOL, ToolID::PLACE_DECAL},
+         {"Place decal", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1136,5 +1139,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(PLACE_PICTURE),
         TOOL_LUT_ITEM(DRAW_LINE_CIRCLE),
         TOOL_LUT_ITEM(ADD_TEXT),
+        TOOL_LUT_ITEM(PLACE_DECAL),
 };
 } // namespace horizon

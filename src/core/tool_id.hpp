@@ -146,5 +146,6 @@ enum class ToolID {
     SWAP_GATES,
     PLACE_PICTURE,
     ADD_TEXT,
+    PLACE_DECAL,
 };
 } // namespace horizon

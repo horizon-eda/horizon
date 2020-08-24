@@ -1,0 +1,21 @@
+{
+"layer_opacity": 50.0,
+"layers": {
+	"0": {
+		"display_mode": "fill",
+		"visible": true
+	},
+	"10": {
+		"display_mode": "outline",
+		"visible": true
+	},
+	"20": {
+		"display_mode": "fill_only",
+		"visible": true
+	},
+	"50": {
+		"display_mode": "outline",
+		"visible": true
+	}
+}
+}

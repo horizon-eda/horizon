@@ -191,6 +191,9 @@ Coordi ToolMove::get_selection_center()
         case ObjectType::PICTURE:
             accu.accumulate(doc.r->get_picture(it.uuid)->placement.shift);
             break;
+        case ObjectType::BOARD_DECAL:
+            accu.accumulate(doc.b->get_board()->decals.at(it.uuid).placement.shift);
+            break;
         default:;
         }
     }

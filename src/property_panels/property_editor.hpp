@@ -281,4 +281,11 @@ protected:
     Gtk::Widget *create_editor() override;
 };
 
+class PropertyEditorScale : public PropertyEditorDouble {
+    using PropertyEditorDouble::PropertyEditorDouble;
+
+protected:
+    Gtk::Widget *create_editor() override;
+};
+
 } // namespace horizon

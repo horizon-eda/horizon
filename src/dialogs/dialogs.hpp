@@ -35,6 +35,8 @@ public:
     std::optional<UUID> select_bus_member(const class Block &block, const UUID &bus_uuid);
     std::optional<UUID> select_group_tag(const class Block &block, bool tag_mode, const UUID &current);
     std::optional<UUID> select_included_board(const class Board &brd);
+    std::optional<UUID> select_decal(class IPool &pool);
+
     unsigned int ask_net_merge(class Net &net, class Net &into);
     bool manage_buses(class Block &b);
     bool manage_net_classes(class Block &b);

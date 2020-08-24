@@ -3,6 +3,7 @@
 #include "common/layer_provider.hpp"
 #include "schematic/sheet.hpp"
 #include "frame/frame.hpp"
+#include "pool/decal.hpp"
 #include "util/util.hpp"
 #include <algorithm>
 #include <iostream>
@@ -234,6 +235,14 @@ void Canvas::update(const class Frame &fr, bool edit)
     clear();
     layer_provider = &fr;
     render(fr, !edit);
+    request_push();
+}
+
+void Canvas::update(const class Decal &dec, bool edit)
+{
+    clear();
+    layer_provider = &dec;
+    render(dec, edit);
     request_push();
 }
 

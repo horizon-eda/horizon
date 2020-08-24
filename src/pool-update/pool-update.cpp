@@ -108,6 +108,7 @@ private:
     std::string base_path;
     pool_update_cb_t status_cb;
     void update_frames(const std::string &directory, const std::string &prefix = "");
+    void update_decals(const std::string &directory, const std::string &prefix = "");
     void update_units(const std::string &directory, const std::string &prefix = "");
     void update_entities(const std::string &directory, const std::string &prefix = "");
     void update_symbols(const std::string &directory, const std::string &prefix = "");
@@ -124,6 +125,7 @@ private:
     bool exists(ObjectType type, const UUID &uu);
 
     void update_frame(const std::string &filename, bool partial);
+    void update_decal(const std::string &filename, bool partial);
     void update_part(const std::string &filename, bool partial);
     void update_unit(const std::string &filename, bool partial);
     void update_symbol(const std::string &filename, bool partial);
@@ -176,6 +178,9 @@ void PoolUpdater::update_some(const std::string &pool_base_path, const std::vect
         switch (type) {
         case ObjectType::FRAME:
             update_frame(filename, true);
+            break;
+        case ObjectType::DECAL:
+            update_decal(filename, true);
             break;
         case ObjectType::PART:
             update_part(filename, true);
@@ -295,6 +300,17 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
         }
     }
     pool->db.execute("COMMIT");
+
+    status_cb(PoolUpdateStatus::INFO, "", "decals");
+    pool->db.execute("BEGIN TRANSACTION");
+    pool->db.execute("DELETE FROM decals");
+    for (const auto &bp : base_paths) {
+        if (Glib::file_test(Glib::build_filename(bp, "decals"), Glib::FILE_TEST_IS_DIR)) {
+            set_pool_info(bp);
+            update_decals(Glib::build_filename(bp, "decals"));
+        }
+    }
+    pool->db.execute("COMMIT");
 }
 
 PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb(cb)
@@ -353,6 +369,55 @@ void PoolUpdater::update_frame(const std::string &filename, bool partial)
                         "($uuid, $name, $filename, $pool_uuid, $overridden)");
         q.bind("$uuid", frame.uuid);
         q.bind("$name", frame.name);
+        q.bind("$filename", get_path_rel(filename));
+        q.bind("$pool_uuid", pool_uuid);
+        q.bind("$overridden", overridden);
+        q.step();
+    }
+    catch (const std::exception &e) {
+        status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
+    }
+    catch (...) {
+        status_cb(PoolUpdateStatus::FILE_ERROR, filename, "unknown exception");
+    }
+}
+
+void PoolUpdater::update_decals(const std::string &directory, const std::string &prefix)
+{
+    Glib::Dir dir(directory);
+    for (const auto &it : dir) {
+        std::string filename = Glib::build_filename(directory, it);
+        if (endswith(it, ".json")) {
+            update_decal(filename, false);
+        }
+        else if (Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
+            update_decals(filename, Glib::build_filename(prefix, it));
+        }
+    }
+}
+
+
+void PoolUpdater::update_decal(const std::string &filename, bool partial)
+{
+    try {
+        status_cb(PoolUpdateStatus::FILE, filename, "");
+        auto decal = Decal::new_from_file(filename);
+        bool overridden = false;
+        if (exists(ObjectType::DECAL, decal.uuid)) {
+            overridden = true;
+            SQLite::Query q(pool->db, "DELETE FROM decals WHERE uuid = ?");
+            q.bind(1, decal.uuid);
+            q.step();
+        }
+        if (partial)
+            overridden = false;
+        SQLite::Query q(pool->db,
+                        "INSERT INTO DECALS "
+                        "(uuid, name, filename, pool_uuid, overridden) "
+                        "VALUES "
+                        "($uuid, $name, $filename, $pool_uuid, $overridden)");
+        q.bind("$uuid", decal.uuid);
+        q.bind("$name", decal.name);
         q.bind("$filename", get_path_rel(filename));
         q.bind("$pool_uuid", pool_uuid);
         q.bind("$overridden", overridden);

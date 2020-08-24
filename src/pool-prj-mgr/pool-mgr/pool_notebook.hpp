@@ -108,6 +108,11 @@ private:
     void handle_create_frame();
     void handle_duplicate_frame(const UUID &uu);
 
+    void construct_decals();
+    void handle_edit_decal(const UUID &uu);
+    void handle_create_decal();
+    void handle_duplicate_decal(const UUID &uu);
+
     Gtk::Button *add_action_button(const std::string &label, Gtk::Box *bbox, sigc::slot0<void>);
     Gtk::Button *add_action_button(const std::string &label, Gtk::Box *bbox, class PoolBrowser *br,
                                    sigc::slot1<void, UUID>);

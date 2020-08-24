@@ -77,6 +77,7 @@ SRC_COMMON = \
 	src/board/step_export_settings.cpp\
 	src/board/pnp_export_settings.cpp\
 	src/board/pnp.cpp\
+	src/board/board_decal.cpp\
 	src/pool/pool.cpp \
 	src/util/placement.cpp\
 	src/util/util.cpp\
@@ -106,6 +107,7 @@ SRC_COMMON = \
 	src/common/picture.cpp\
 	src/util/picture_data.cpp\
 	src/util/picture_load.cpp\
+	src/pool/decal.cpp\
 
 
 ifeq ($(OS),Windows_NT)
@@ -166,6 +168,7 @@ SRC_IMP = \
 	src/imp/imp_package_3d.cpp\
 	src/imp/imp_board.cpp\
 	src/imp/imp_frame.cpp\
+	src/imp/imp_decal.cpp\
 	src/imp/tool_popover.cpp\
 	src/imp/selection_filter_dialog.cpp\
 	src/imp/action.cpp\
@@ -263,6 +266,7 @@ SRC_IMP = \
 	src/core/tools/tool_round_off_vertex.cpp\
 	src/core/tools/tool_swap_gates.cpp\
 	src/core/tools/tool_place_picture.cpp\
+	src/core/tools/tool_place_decal.cpp\
 	src/document/documents.cpp\
 	src/core/clipboard.cpp\
 	src/core/buffer.cpp\
@@ -306,6 +310,7 @@ SRC_IMP = \
 	src/core/core_package.cpp\
 	src/core/core_board.cpp\
 	src/core/core_frame.cpp\
+	src/core/core_decal.cpp\
 	src/property_panels/property_panels.cpp\
 	src/property_panels/property_panel.cpp\
 	src/property_panels/property_editor.cpp\
@@ -354,6 +359,7 @@ SRC_IMP = \
 	src/widgets/pool_browser_unit.cpp\
 	src/widgets/pool_browser_symbol.cpp\
 	src/widgets/pool_browser_frame.cpp\
+	src/widgets/pool_browser_decal.cpp\
 	src/widgets/pool_browser_stockinfo.cpp\
 	src/widgets/plane_editor.cpp\
 	src/widgets/title_block_values_editor.cpp\
@@ -530,6 +536,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-mgr/pool_notebook_packages.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_notebook_parts.cpp\
 	src/pool-prj-mgr/pool-mgr/pool_notebook_frames.cpp\
+	src/pool-prj-mgr/pool-mgr/pool_notebook_decals.cpp\
 	src/pool-prj-mgr/pool-mgr/editors/unit_editor.cpp\
 	src/pool-prj-mgr/pool-mgr/editors/part_editor.cpp\
 	src/pool-prj-mgr/pool-mgr/editors/parametric.cpp\
@@ -557,6 +564,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/pool_browser_part.cpp\
 	src/widgets/pool_browser_package.cpp\
 	src/widgets/pool_browser_frame.cpp\
+	src/widgets/pool_browser_decal.cpp\
 	src/widgets/pool_browser_parametric.cpp\
 	src/dialogs/pool_browser_dialog.cpp\
 	src/widgets/pool_browser_stockinfo.cpp\

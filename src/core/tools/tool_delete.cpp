@@ -263,6 +263,9 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         case ObjectType::BOARD_PANEL:
             doc.b->get_board()->board_panels.erase(it.uuid);
             break;
+        case ObjectType::BOARD_DECAL:
+            doc.b->get_board()->decals.erase(it.uuid);
+            break;
         case ObjectType::PICTURE:
             doc.r->delete_picture(it.uuid);
             break;

@@ -5,7 +5,18 @@
 namespace horizon {
 class PoolProjectManagerProcess {
 public:
-    enum class Type { IMP_SYMBOL, IMP_PADSTACK, IMP_PACKAGE, IMP_SCHEMATIC, IMP_BOARD, IMP_FRAME, UNIT, ENTITY, PART };
+    enum class Type {
+        IMP_SYMBOL,
+        IMP_PADSTACK,
+        IMP_PACKAGE,
+        IMP_SCHEMATIC,
+        IMP_BOARD,
+        IMP_FRAME,
+        IMP_DECAL,
+        UNIT,
+        ENTITY,
+        PART
+    };
     PoolProjectManagerProcess(const UUID &uu, Type ty, const std::vector<std::string> &args,
                               const std::vector<std::string> &env, class IPool *pool,
                               class PoolParametric *pool_parametric, bool read_only, bool is_temp);

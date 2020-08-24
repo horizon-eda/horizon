@@ -1132,6 +1132,7 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBoard::get_selection_filte
             {ObjectType::BOARD_PACKAGE, {layers_package, false}},
             {ObjectType::TRACK, {layers_track, false}},
             {ObjectType::VIA, {}},
+            {ObjectType::BOARD_DECAL, {}},
             {ObjectType::POLYGON, {layers_polygon, true}},
             {ObjectType::TEXT, {layers_line, true}},
             {ObjectType::LINE, {layers_line, true}},

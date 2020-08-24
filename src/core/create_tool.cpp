@@ -79,6 +79,7 @@
 #include "tools/tool_round_off_vertex.hpp"
 #include "tools/tool_swap_gates.hpp"
 #include "tools/tool_place_picture.hpp"
+#include "tools/tool_place_decal.hpp"
 
 namespace horizon {
 
@@ -379,6 +380,9 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id)
 
     case ToolID::PLACE_PICTURE:
         return std::make_unique<ToolPlacePicture>(this, tool_id);
+
+    case ToolID::PLACE_DECAL:
+        return std::make_unique<ToolPlaceDecal>(this, tool_id);
 
     default:
         return nullptr;

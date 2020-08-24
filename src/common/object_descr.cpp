@@ -316,5 +316,19 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::ON_TOP, {ObjectProperty::Type::BOOL, "On top", 4}},
                   {ObjectProperty::ID::OPACITY, {ObjectProperty::Type::OPACITY, "Opacity", 5}},
           }}},
+        {ObjectType::DECAL, {"Decal", "Decals", {}}},
+        {ObjectType::BOARD_DECAL,
+         {"Decal",
+          "Decals",
+          {
+                  {ObjectProperty::ID::NAME, {ObjectProperty::Type::STRING_RO, "Name", 0}},
+                  {ObjectProperty::ID::POSITION_X, {ObjectProperty::Type::DIM, "Position X", 1}},
+                  {ObjectProperty::ID::POSITION_Y, {ObjectProperty::Type::DIM, "Position Y", 2}},
+                  {ObjectProperty::ID::ANGLE, {ObjectProperty::Type::ANGLE, "Angle", 3}},
+                  {ObjectProperty::ID::FLIPPED, {ObjectProperty::Type::BOOL, "Flipped", 4}},
+                  {ObjectProperty::ID::SCALE, {ObjectProperty::Type::SCALE, "Scale", 5}},
+
+          }}},
+
 };
 } // namespace horizon

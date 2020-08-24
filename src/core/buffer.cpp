@@ -39,6 +39,7 @@ void Buffer::clear()
     buses.clear();
     bus_labels.clear();
     bus_rippers.clear();
+    decals.clear();
 }
 
 void Buffer::load(std::set<SelectableRef> selection)
@@ -331,6 +332,10 @@ void Buffer::load(std::set<SelectableRef> selection)
             auto &hole = board_holes.emplace(x->uuid, *x).first->second;
             hole.net.update(nets);
         }
+        if (it.type == ObjectType::BOARD_DECAL) {
+            auto &x = doc.b->get_board()->decals.at(it.uuid);
+            decals.emplace(x.uuid, x).first->second;
+        }
     }
 
     for (const auto &it : selection) {
@@ -451,6 +456,10 @@ json Buffer::serialize()
     j["bus_rippers"] = json::object();
     for (const auto &it : bus_rippers) {
         j["bus_rippers"][(std::string)it.first] = it.second.serialize();
+    }
+    j["decals"] = json::object();
+    for (const auto &it : decals) {
+        j["decals"][(std::string)it.first] = it.second.serialize();
     }
     return j;
 }

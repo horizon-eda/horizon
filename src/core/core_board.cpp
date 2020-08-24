@@ -275,6 +275,32 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         }
     } break;
 
+    case ObjectType::BOARD_DECAL: {
+        auto &decal = brd.decals.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::NAME:
+            dynamic_cast<PropertyValueString &>(value).value = decal.decal.name;
+            return true;
+
+        case ObjectProperty::ID::POSITION_X:
+        case ObjectProperty::ID::POSITION_Y:
+        case ObjectProperty::ID::ANGLE:
+            get_placement(decal.placement, value, property);
+            return true;
+
+        case ObjectProperty::ID::FLIPPED:
+            dynamic_cast<PropertyValueBool &>(value).value = decal.flip;
+            return true;
+
+        case ObjectProperty::ID::SCALE:
+            dynamic_cast<PropertyValueDouble &>(value).value = decal.scale;
+            return true;
+
+        default:
+            return false;
+        }
+    } break;
+
     default:
         return false;
     }
@@ -423,6 +449,29 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         case ObjectProperty::ID::POSITION_Y:
         case ObjectProperty::ID::ANGLE:
             set_placement(hole->placement, value, property);
+            break;
+
+        default:
+            return false;
+        }
+    } break;
+
+    case ObjectType::BOARD_DECAL: {
+        auto &decal = brd.decals.at(uu);
+        switch (property) {
+        case ObjectProperty::ID::POSITION_X:
+        case ObjectProperty::ID::POSITION_Y:
+        case ObjectProperty::ID::ANGLE:
+            set_placement(decal.placement, value, property);
+            break;
+
+        case ObjectProperty::ID::FLIPPED:
+            decal.flip = dynamic_cast<const PropertyValueBool &>(value).value;
+            break;
+
+        case ObjectProperty::ID::SCALE:
+            decal.scale = dynamic_cast<const PropertyValueDouble &>(value).value;
+            decal.apply_scale();
             break;
 
         default:

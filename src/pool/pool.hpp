@@ -5,6 +5,7 @@
 #include "frame/frame.hpp"
 #include "package.hpp"
 #include "package/pad.hpp"
+#include "decal.hpp"
 #include <fstream>
 #include <map>
 #include <set>
@@ -34,6 +35,7 @@ public:
     const class Package *get_package(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
     const class Part *get_part(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
     const class Frame *get_frame(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
+    const class Decal *get_decal(const UUID &uu, UUID *pool_uuid_out = nullptr) override;
     std::set<UUID> get_alternate_packages(const UUID &uu) override;
     std::string get_model_filename(const UUID &pkg_uuid, const UUID &model_uuid) override;
 
@@ -73,6 +75,7 @@ protected:
     std::map<UUID, Package> packages;
     std::map<UUID, Part> parts;
     std::map<UUID, Frame> frames;
+    std::map<UUID, Decal> decals;
     std::map<std::pair<ObjectType, UUID>, UUID> pool_uuid_cache;
     void get_pool_uuid(ObjectType type, const UUID &uu, UUID *pool_uuid_out);
 };

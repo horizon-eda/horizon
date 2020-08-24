@@ -198,6 +198,13 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, ViaPadst
             load_and_log(pictures, ObjectType::PICTURE, std::forward_as_tuple(u, it.value()), Logger::Domain::BOARD);
         }
     }
+    if (j.count("decals")) {
+        const json &o = j["decals"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID(it.key());
+            load_and_log(decals, ObjectType::DECAL, std::forward_as_tuple(u, it.value(), pool), Logger::Domain::BOARD);
+        }
+    }
     if (j.count("rules")) {
         try {
             rules.load_from_json(j.at("rules"));
@@ -292,7 +299,7 @@ Board::Board(const Board &brd, CopyMode copy_mode)
     : layers(brd.layers), uuid(brd.uuid), block(brd.block), name(brd.name), polygons(brd.polygons), holes(brd.holes),
       junctions(brd.junctions), tracks(brd.tracks), texts(brd.texts), lines(brd.lines), arcs(brd.arcs),
       planes(brd.planes), keepouts(brd.keepouts), dimensions(brd.dimensions), connection_lines(brd.connection_lines),
-      included_boards(brd.included_boards), board_panels(brd.board_panels), pictures(brd.pictures),
+      included_boards(brd.included_boards), board_panels(brd.board_panels), pictures(brd.pictures), decals(brd.decals),
       warnings(brd.warnings), rules(brd.rules), fab_output_settings(brd.fab_output_settings), airwires(brd.airwires),
       stackup(brd.stackup), colors(brd.colors), pdf_export_settings(brd.pdf_export_settings),
       step_export_settings(brd.step_export_settings), pnp_export_settings(brd.pnp_export_settings),
@@ -576,6 +583,7 @@ void Board::expand(bool careful)
     }
 
     expand_packages();
+    expand_decals();
 
     for (auto &it : junctions) {
         it.second.layer = 10000;
@@ -691,6 +699,29 @@ void Board::expand(bool careful)
     expand_flags = EXPAND_ALL;
     packages_expand.clear();
     airwires_expand.clear();
+}
+
+void Board::expand_decals()
+{
+    for (auto &[uu, dec] : decals) {
+        dec.decal = *dec.pool_decal;
+        dec.placement.mirror = dec.flip;
+        if (dec.flip) {
+            for (auto &it2 : dec.decal.lines) {
+                flip_package_layer(it2.second.layer);
+            }
+            for (auto &it2 : dec.decal.arcs) {
+                flip_package_layer(it2.second.layer);
+            }
+            for (auto &it2 : dec.decal.texts) {
+                flip_package_layer(it2.second.layer);
+            }
+            for (auto &it2 : dec.decal.polygons) {
+                flip_package_layer(it2.second.layer);
+            }
+        }
+        dec.apply_scale();
+    }
 }
 
 void Board::expand_packages()
@@ -1235,6 +1266,12 @@ json Board::serialize() const
         j["pictures"] = json::object();
         for (const auto &it : pictures) {
             j["pictures"][(std::string)it.first] = it.second.serialize();
+        }
+    }
+    if (decals.size()) {
+        j["decals"] = json::object();
+        for (const auto &it : decals) {
+            j["decals"][(std::string)it.first] = it.second.serialize();
         }
     }
     return j;

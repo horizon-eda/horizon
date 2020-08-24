@@ -95,6 +95,10 @@ PropertyPanel::PropertyPanel(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
             e = new PropertyEditorPriority(type, property, this);
             break;
 
+        case ObjectProperty::Type::SCALE:
+            e = new PropertyEditorScale(type, property, this);
+            break;
+
         default:
             e = new PropertyEditor(type, property, this);
         }

@@ -440,4 +440,14 @@ Gtk::Widget *PropertyEditorOpacity::create_editor()
     return sp;
 }
 
+Gtk::Widget *PropertyEditorScale::create_editor()
+{
+    PropertyEditorDouble::create_editor();
+    ScopedBlock block(connections);
+    sp->set_range(.1, 10);
+    sp->set_increments(.1, .1);
+    sp->set_digits(1);
+    return sp;
+}
+
 } // namespace horizon

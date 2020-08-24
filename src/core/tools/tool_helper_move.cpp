@@ -79,6 +79,9 @@ void ToolHelperMove::move_do(const Coordi &delta)
         case ObjectType::PICTURE:
             doc.r->get_picture(it.uuid)->placement.shift += delta;
             break;
+        case ObjectType::BOARD_DECAL:
+            doc.b->get_board()->decals.at(it.uuid).placement.shift += delta;
+            break;
         case ObjectType::DIMENSION: {
             auto dim = doc.r->get_dimension(it.uuid);
             if (it.vertex < 2) {
@@ -343,6 +346,19 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
             transform(shape.placement.shift, center, rotate);
             if (rotate) {
                 shape.placement.inc_angle_deg(-90);
+            }
+        } break;
+
+        case ObjectType::BOARD_DECAL: {
+            auto &decal = doc.b->get_board()->decals.at(it.uuid);
+            transform(decal.placement.shift, center, rotate);
+            if (rotate) {
+                decal.placement.inc_angle_deg(-90);
+            }
+            else {
+                decal.flip ^= true;
+                decal.placement.invert_angle();
+                doc.b->get_board()->expand_decals();
             }
         } break;
 

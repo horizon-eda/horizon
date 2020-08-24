@@ -23,6 +23,7 @@
 #include "board/board_panel.hpp"
 #include "schematic/bus_label.hpp"
 #include "schematic/bus_ripper.hpp"
+#include "board/board_decal.hpp"
 #include "util/uuid.hpp"
 #include <map>
 #include <set>
@@ -57,6 +58,7 @@ public:
     std::map<UUID, Bus> buses;
     std::map<UUID, BusLabel> bus_labels;
     std::map<UUID, BusRipper> bus_rippers;
+    std::map<UUID, BoardDecal> decals;
 
     json serialize();
 

@@ -38,6 +38,7 @@ public:
     enum class PanelMode { INCLUDE, SKIP };
     void update(const class Board &brd, PanelMode mode = PanelMode::INCLUDE);
     void update(const class Frame &fr, bool edit = true);
+    void update(const class Decal &dec, bool edit = true);
 
     ObjectRef add_line(const std::deque<Coordi> &pts, int64_t width, ColorP color, int layer);
     void remove_obj(const ObjectRef &r);
@@ -128,6 +129,8 @@ protected:
     void render(const class ConnectionLine &line);
     void render(const class BoardPanel &panel);
     void render(const class Picture &pic);
+    void render(const class Decal &decal, bool interactive = true);
+    void render(const class BoardDecal &decal);
 
     bool needs_push = true;
     virtual void request_push() = 0;

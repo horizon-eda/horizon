@@ -19,6 +19,7 @@ public:
     virtual const class Package *get_package(const UUID &uu, UUID *pool_uuid_out = nullptr) = 0;
     virtual const class Part *get_part(const UUID &uu, UUID *pool_uuid_out = nullptr) = 0;
     virtual const class Frame *get_frame(const UUID &uu, UUID *pool_uuid_out = nullptr) = 0;
+    virtual const class Decal *get_decal(const UUID &uu, UUID *pool_uuid_out = nullptr) = 0;
     virtual SQLite::Database &get_db() = 0;
     virtual const std::string &get_base_path() const = 0;
 

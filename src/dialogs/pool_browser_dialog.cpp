@@ -6,6 +6,7 @@
 #include "widgets/pool_browser_package.hpp"
 #include "widgets/pool_browser_padstack.hpp"
 #include "widgets/pool_browser_frame.hpp"
+#include "widgets/pool_browser_decal.hpp"
 #include "widgets/preview_canvas.hpp"
 
 namespace horizon {
@@ -56,6 +57,11 @@ PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, IPool
     case ObjectType::FRAME:
         browser = Gtk::manage(new PoolBrowserFrame(pool));
         set_title("Select Frame");
+        break;
+    case ObjectType::DECAL:
+        browser = Gtk::manage(new PoolBrowserDecal(pool));
+        set_title("Select Decal");
+        layered = true;
         break;
     default:;
     }

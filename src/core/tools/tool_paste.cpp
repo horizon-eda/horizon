@@ -422,6 +422,19 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
             }
         }
     }
+    if (j.count("decals") && doc.b) {
+        const json &o = j["decals"];
+        for (auto it = o.cbegin(); it != o.cend(); ++it) {
+            auto u = UUID::random();
+            auto brd = doc.b->get_board();
+            auto &x = brd->decals
+                              .emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                                       std::forward_as_tuple(u, it.value(), doc.r->get_pool()))
+                              .first->second;
+            apply_shift(x.placement.shift, cursor_pos_canvas);
+            selection.emplace(u, ObjectType::BOARD_DECAL);
+        }
+    }
     if (selection.size() == 0) {
         imp->tool_bar_flash("Empty buffer");
         return ToolResponse::revert();

@@ -405,6 +405,19 @@ std::optional<UUID> Dialogs::select_via_padstack(class ViaPadstackProvider &vpp)
     }
 }
 
+std::optional<UUID> Dialogs::select_decal(IPool &pool)
+{
+    PoolBrowserDialog dia(parent, ObjectType::DECAL, pool);
+    auto br = dia.get_browser();
+    auto r = dia.run();
+    if (r == Gtk::RESPONSE_OK) {
+        return br->get_selected();
+    }
+    else {
+        return {};
+    }
+}
+
 bool Dialogs::edit_plane(class Plane &plane, class Board &brd)
 {
     EditPlaneDialog dia(parent, plane, brd);

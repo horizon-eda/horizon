@@ -33,6 +33,7 @@ void Pool::clear()
     packages.clear();
     parts.clear();
     frames.clear();
+    decals.clear();
     pool_uuid_cache.clear();
 }
 
@@ -66,6 +67,10 @@ std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_
 
     case ObjectType::FRAME:
         query = "SELECT filename, pool_uuid FROM frames WHERE uuid = ?";
+        break;
+
+    case ObjectType::DECAL:
+        query = "SELECT filename, pool_uuid FROM decals WHERE uuid = ?";
         break;
 
     default:
@@ -105,24 +110,13 @@ std::string Pool::get_filename(ObjectType type, const UUID &uu, UUID *pool_uuid_
 
     switch (type) {
     case ObjectType::UNIT:
-        return Glib::build_filename(bp, filename);
-
     case ObjectType::ENTITY:
-        return Glib::build_filename(bp, filename);
-
     case ObjectType::SYMBOL:
-        return Glib::build_filename(bp, filename);
-
     case ObjectType::PACKAGE:
-        return Glib::build_filename(bp, filename);
-
     case ObjectType::PADSTACK:
-        return Glib::build_filename(bp, filename);
-
     case ObjectType::PART:
-        return Glib::build_filename(bp, filename);
-
     case ObjectType::FRAME:
+    case ObjectType::DECAL:
         return Glib::build_filename(bp, filename);
 
     default:
@@ -137,7 +131,7 @@ const std::string &Pool::get_base_path() const
 
 int Pool::get_required_schema_version()
 { // keep in sync with schema definition
-    return 15;
+    return 16;
 }
 
 std::string Pool::get_tmp_filename(ObjectType type, const UUID &uu) const
@@ -174,6 +168,9 @@ std::string Pool::get_flat_filename(ObjectType type, const UUID &uu) const
 
     case ObjectType::FRAME:
         return "frame_" + suffix;
+
+    case ObjectType::DECAL:
+        return "decal_" + suffix;
 
     default:
         return "";
@@ -279,7 +276,7 @@ const Part *Pool::get_part(const UUID &uu, UUID *pool_uuid_out)
 
 const Frame *Pool::get_frame(const UUID &uu, UUID *pool_uuid_out)
 {
-    if (parts.count(uu) == 0) {
+    if (frames.count(uu) == 0) {
         std::string path = get_filename(ObjectType::FRAME, uu, pool_uuid_out);
         Frame f = Frame::new_from_file(path);
         frames.insert(std::make_pair(uu, f));
@@ -288,6 +285,19 @@ const Frame *Pool::get_frame(const UUID &uu, UUID *pool_uuid_out)
         get_pool_uuid(ObjectType::FRAME, uu, pool_uuid_out);
     }
     return &frames.at(uu);
+}
+
+const Decal *Pool::get_decal(const UUID &uu, UUID *pool_uuid_out)
+{
+    if (decals.count(uu) == 0) {
+        std::string path = get_filename(ObjectType::DECAL, uu, pool_uuid_out);
+        Decal d = Decal::new_from_file(path);
+        decals.insert(std::make_pair(uu, d));
+    }
+    else {
+        get_pool_uuid(ObjectType::DECAL, uu, pool_uuid_out);
+    }
+    return &decals.at(uu);
 }
 
 std::set<UUID> Pool::get_alternate_packages(const UUID &uu)
@@ -339,6 +349,9 @@ static std::string get_dir_for_type(ObjectType type)
 
     case O::FRAME:
         return "frames";
+
+    case O::DECAL:
+        return "decals";
 
     default:
         return "";

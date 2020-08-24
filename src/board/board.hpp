@@ -26,9 +26,7 @@
 #include "included_board.hpp"
 #include "board_panel.hpp"
 #include "common/picture.hpp"
-#include <fstream>
-#include <map>
-#include <vector>
+#include "board_decal.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -56,6 +54,7 @@ public:
 
     void expand(bool careful = false);
     void expand_packages();
+    void expand_decals();
 
     Board(const Board &brd);
     Board(shallow_copy_t sh, const Board &brd);
@@ -104,6 +103,7 @@ public:
     std::map<UUID, IncludedBoard> included_boards;
     std::map<UUID, BoardPanel> board_panels;
     std::map<UUID, Picture> pictures;
+    std::map<UUID, BoardDecal> decals;
 
     std::vector<Warning> warnings;
 

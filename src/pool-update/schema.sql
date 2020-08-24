@@ -1,4 +1,4 @@
-PRAGMA user_version=15; --keep in sync with pool.cpp
+PRAGMA user_version=16; --keep in sync with pool.cpp
 
 DROP TABLE IF EXISTS "units";
 CREATE TABLE "units" (
@@ -131,6 +131,16 @@ CREATE TABLE "dependencies" (
 	UNIQUE('type', 'uuid', 'dep_type', 'dep_uuid') ON CONFLICT IGNORE
 );
 
+DROP TABLE IF EXISTS "decals";
+CREATE TABLE "decals" (
+	'uuid'	TEXT NOT NULL UNIQUE,
+	'name'	TEXT NOT NULL,
+	'filename'	TEXT NOT NULL,
+	'pool_uuid'	TEXT NOT NULL,
+	'overridden'	BOOL NOT NULL,
+	PRIMARY KEY('uuid')
+);
+
 DROP VIEW IF EXISTS "all_items_view";
 CREATE VIEW "all_items_view" AS
 	SELECT 'unit' AS 'type', uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid FROM units UNION
@@ -139,6 +149,7 @@ CREATE VIEW "all_items_view" AS
 	SELECT 'padstack' AS 'type', uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid FROM padstacks UNION
 	SELECT 'package' AS 'type', uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid FROM packages UNION
 	SELECT 'frame' AS 'type', uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid FROM frames UNION
+	SELECT 'decal' AS 'type', uuid AS uuid, filename AS filename, name AS name, pool_uuid AS pool_uuid FROM decals UNION
 	SELECT 'part' AS 'type', uuid AS uuid, filename AS filename, MPN AS name, pool_uuid AS pool_uuid FROM parts;
 
 DROP VIEW IF EXISTS "tags_view";

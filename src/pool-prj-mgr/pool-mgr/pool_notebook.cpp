@@ -224,6 +224,7 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
     construct_packages();
     construct_parts();
     construct_frames();
+    construct_decals();
 
     {
         if (PoolManager::get().get_pools().count(pool.get_base_path())) {
@@ -432,12 +433,17 @@ void PoolNotebook::handle_copy_path(ObjectType ty, const UUID &uu)
 
 void PoolNotebook::go_to(ObjectType type, const UUID &uu)
 {
-    browsers.at(type)->go_to(uu);
-    static const std::map<ObjectType, int> pages = {
-            {ObjectType::UNIT, 0},    {ObjectType::SYMBOL, 1}, {ObjectType::ENTITY, 2}, {ObjectType::PADSTACK, 3},
-            {ObjectType::PACKAGE, 4}, {ObjectType::PART, 5},   {ObjectType::FRAME, 6},
-    };
-    set_current_page(pages.at(type));
+    auto br = browsers.at(type);
+    br->go_to(uu);
+    Gtk::Widget *last_ancestor = nullptr;
+    Gtk::Widget *ancestor = br;
+    while (ancestor != this) {
+        last_ancestor = ancestor;
+        ancestor = ancestor->get_parent();
+    }
+    auto page = page_num(*last_ancestor);
+    assert(page != -1);
+    set_current_page(page);
 }
 
 const UUID &PoolNotebook::get_pool_uuid() const

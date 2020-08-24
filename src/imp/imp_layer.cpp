@@ -62,10 +62,15 @@ void ImpLayer::construct_layer_box(bool pack)
         }
     }
     if (!layers_loaded) {
-        layer_box->load_from_json(
-                json_from_resource("/org/horizon-eda/horizon/imp/"
-                                   "layer_display_default.json"));
+        load_default_layers();
     }
+}
+
+void ImpLayer::load_default_layers()
+{
+    layer_box->load_from_json(
+            json_from_resource("/org/horizon-eda/horizon/imp/"
+                               "layer_display_default.json"));
 }
 
 void ImpLayer::get_save_meta(json &j)
