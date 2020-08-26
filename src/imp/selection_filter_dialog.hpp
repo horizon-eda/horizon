@@ -28,6 +28,7 @@ private:
         bool get_all_active();
         bool expanded = false;
         bool blocked = false;
+        bool work_layer_only_enabled = false;
     };
 
     std::map<ObjectType, Type> checkbuttons;

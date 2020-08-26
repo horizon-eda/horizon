@@ -1128,16 +1128,17 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBoard::get_selection_filte
     layers_track.insert(layers_track.end(), inner_layers.begin(), inner_layers.end());
     append_bottom_layers(layers_track);
 
+    using Flag = ImpBase::SelectionFilterInfo::Flag;
     std::map<ObjectType, ImpBase::SelectionFilterInfo> r = {
-            {ObjectType::BOARD_PACKAGE, {layers_package, false}},
-            {ObjectType::TRACK, {layers_track, false}},
-            {ObjectType::VIA, {}},
+            {ObjectType::BOARD_PACKAGE, {layers_package, Flag::DEFAULT}},
+            {ObjectType::TRACK, {layers_track, Flag::DEFAULT}},
+            {ObjectType::VIA, {{}, Flag::WORK_LAYER_ONLY_ENABLED}},
             {ObjectType::BOARD_DECAL, {}},
-            {ObjectType::POLYGON, {layers_polygon, true}},
-            {ObjectType::TEXT, {layers_line, true}},
-            {ObjectType::LINE, {layers_line, true}},
-            {ObjectType::JUNCTION, {}},
-            {ObjectType::ARC, {layers_line, true}},
+            {ObjectType::POLYGON, {layers_polygon, Flag::HAS_OTHERS}},
+            {ObjectType::TEXT, {layers_line, Flag::HAS_OTHERS}},
+            {ObjectType::LINE, {layers_line, Flag::HAS_OTHERS}},
+            {ObjectType::JUNCTION, {layers_track, Flag::HAS_OTHERS}},
+            {ObjectType::ARC, {layers_line, Flag::HAS_OTHERS}},
             {ObjectType::DIMENSION, {}},
             {ObjectType::BOARD_HOLE, {}},
             {ObjectType::CONNECTION_LINE, {}},

@@ -1,6 +1,7 @@
 #pragma once
 #include "common/common.hpp"
 #include "util/uuid_path.hpp"
+#include "util/layer_range.hpp"
 
 namespace horizon {
 class Target {
@@ -9,8 +10,8 @@ public:
     ObjectType type;
     Coordi p;
     unsigned int vertex = 0;
-    int layer = 10000;
-    Target(const UUIDPath<2> &uu, ObjectType ot, const Coordi &pi, unsigned int v = 0, int l = 10000)
+    LayerRange layer = 10000;
+    Target(const UUIDPath<2> &uu, ObjectType ot, const Coordi &pi, unsigned int v = 0, LayerRange l = 10000)
         : path(uu), type(ot), p(pi), vertex(v), layer(l){};
     Target() : type(ObjectType::INVALID){};
     bool is_valid() const

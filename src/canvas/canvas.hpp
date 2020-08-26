@@ -61,6 +61,7 @@ public:
     void set_layer_color(int layer, const Color &color);
 
     bool layer_is_visible(int layer) const;
+    bool layer_is_visible(LayerRange layer) const;
 
     bool show_all_junctions_in_schematic = false;
     bool show_text_in_tracks = false;

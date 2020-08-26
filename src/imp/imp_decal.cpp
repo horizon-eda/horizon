@@ -59,12 +59,13 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpDecal::get_selection_filte
             BoardLayers::TOP_COPPER,
 
     };
+    using Flag = ImpBase::SelectionFilterInfo::Flag;
     std::map<ObjectType, ImpBase::SelectionFilterInfo> r = {
             {ObjectType::JUNCTION, {}},
-            {ObjectType::POLYGON, {my_layers, false}},
-            {ObjectType::LINE, {my_layers, false}},
-            {ObjectType::ARC, {my_layers, false}},
-            {ObjectType::TEXT, {my_layers, false}},
+            {ObjectType::POLYGON, {my_layers, Flag::DEFAULT}},
+            {ObjectType::LINE, {my_layers, Flag::DEFAULT}},
+            {ObjectType::ARC, {my_layers, Flag::DEFAULT}},
+            {ObjectType::TEXT, {my_layers, Flag::DEFAULT}},
     };
     return r;
 }

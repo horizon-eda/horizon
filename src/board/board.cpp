@@ -597,16 +597,9 @@ void Board::expand(bool careful)
             if (it_ft.is_junc()) {
                 auto ju = it_ft.junc;
                 ju->connection_count++;
-                if (ju->layer == 10000) { // none assigned
-                    ju->layer = it.second.layer;
-                }
-                else if (ju->layer == 10001) { // invalid
-                                               // nop
-                }
-                else if (ju->layer != it.second.layer) {
-                    ju->layer = 10001;
+                ju->layer.merge(it.second.layer);
+                if (ju->layer.is_multilayer())
                     ju->needs_via = true;
-                }
             }
         }
         if (it.second.from.get_position() == it.second.to.get_position()) {
@@ -618,9 +611,7 @@ void Board::expand(bool careful)
         it.second.from->connection_count++;
         it.second.to->connection_count++;
         for (const auto &ju : {it.second.from, it.second.to}) {
-            if (ju->layer == 10000) { // none assigned
-                ju->layer = it.second.layer;
-            }
+            ju->layer.merge(it.second.layer);
         }
     }
     for (const auto &it : arcs) {
@@ -628,9 +619,7 @@ void Board::expand(bool careful)
         it.second.to->connection_count++;
         it.second.center->connection_count++;
         for (const auto &ju : {it.second.from, it.second.to, it.second.center}) {
-            if (ju->layer == 10000) { // none assigned
-                ju->layer = it.second.layer;
-            }
+            ju->layer.merge(it.second.layer);
         }
     }
 

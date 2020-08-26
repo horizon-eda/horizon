@@ -757,6 +757,14 @@ bool CanvasGL::layer_is_visible(int layer) const
         return layer == work_layer || layer >= 10000;
 }
 
+bool CanvasGL::layer_is_visible(LayerRange layer) const
+{
+    if (layer_mode == LayerMode::AS_IS)
+        return Canvas::layer_is_visible(layer);
+    else
+        return layer.overlaps(work_layer) || layer.start() >= 10000;
+}
+
 void CanvasGL::set_colors2(const std::vector<ColorI> &c)
 {
     colors2 = c;

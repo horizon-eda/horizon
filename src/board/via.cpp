@@ -2,6 +2,7 @@
 #include "board.hpp"
 #include "parameter/set.hpp"
 #include "nlohmann/json.hpp"
+#include "board/board_layers.hpp"
 
 namespace horizon {
 
@@ -48,7 +49,7 @@ Via::Via(shallow_copy_t sh, const Via &other)
 void Via::expand(const Board &brd)
 {
     junction->has_via = true;
-    junction->layer = 10000;
+    junction->layer = LayerRange(BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER);
     padstack = *vpp_padstack;
     ParameterSet ps_via = parameter_set;
     ps_via.emplace(ParameterID::VIA_SOLDER_MASK_EXPANSION, brd.rules.get_parameters()->via_solder_mask_expansion);

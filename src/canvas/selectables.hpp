@@ -1,6 +1,7 @@
 #pragma once
 #include "common/common.hpp"
 #include "util/uuid.hpp"
+#include "util/layer_range.hpp"
 #include <map>
 #include <set>
 
@@ -34,8 +35,8 @@ public:
     UUID uuid;
     ObjectType type;
     unsigned int vertex;
-    int layer;
-    SelectableRef(const UUID &uu, ObjectType ty, unsigned int v = 0, int la = 10000)
+    LayerRange layer;
+    SelectableRef(const UUID &uu, ObjectType ty, unsigned int v = 0, LayerRange la = 10000)
         : uuid(uu), type(ty), vertex(v), layer(la)
     {
     }
@@ -71,14 +72,14 @@ public:
     Selectables(const class Canvas &ca);
     void clear();
     void append(const UUID &uu, ObjectType ot, const Coordf &center, const Coordf &a, const Coordf &b,
-                unsigned int vertex = 0, int layer = 10000, bool always = false);
-    void append(const UUID &uu, ObjectType ot, const Coordf &center, unsigned int vertex = 0, int layer = 10000,
+                unsigned int vertex = 0, LayerRange layer = 10000, bool always = false);
+    void append(const UUID &uu, ObjectType ot, const Coordf &center, unsigned int vertex = 0, LayerRange layer = 10000,
                 bool always = false);
     void append_angled(const UUID &uu, ObjectType ot, const Coordf &center, const Coordf &box_center,
-                       const Coordf &box_dim, float angle, unsigned int vertex = 0, int layer = 10000,
+                       const Coordf &box_dim, float angle, unsigned int vertex = 0, LayerRange layer = 10000,
                        bool always = false);
     void append_line(const UUID &uu, ObjectType ot, const Coordf &p0, const Coordf &p1, float width,
-                     unsigned int vertex = 0, int layer = 10000, bool always = false);
+                     unsigned int vertex = 0, LayerRange layer = 10000, bool always = false);
     void update_preview(const std::set<SelectableRef> &sel);
 
     void group_begin();

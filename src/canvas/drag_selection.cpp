@@ -304,8 +304,12 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                             text += " " + display_name;
                         }
                         auto layers = ca.layer_provider->get_layers();
-                        if (layers.count(sr.layer)) {
-                            text += " (" + layers.at(sr.layer).name + ")";
+                        if (layers.count(sr.layer.start()) && layers.count(sr.layer.end())) {
+                            if (sr.layer.is_multilayer())
+                                text += " (" + layers.at(sr.layer.start()).name + +" - "
+                                        + layers.at(sr.layer.end()).name + ")";
+                            else
+                                text += " (" + layers.at(sr.layer.start()).name + ")";
                         }
                         Gtk::MenuItem *la = nullptr;
                         if (toggle) {

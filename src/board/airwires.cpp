@@ -186,8 +186,8 @@ void Board::update_airwires(bool fast, const std::set<UUID> &nets_only)
                 auto la_from = it.second.from.get_layer();
                 auto la_to = it.second.to.get_layer();
 
-                if ((la_from == la || la_from == 10002) && (la_to == la || la_to == 10002)) { // only add connection
-                                                                                              // if layers match
+                if (la_from.overlaps(la) && la_to.overlaps(la)) { // only add connection
+                                                                  // if layers match
                     if (connmap.count(it.second.from) && connmap.count(it.second.to)) {
                         auto i_from = connmap.at(it.second.from);
                         auto i_to = connmap.at(it.second.to);
@@ -208,8 +208,7 @@ void Board::update_airwires(bool fast, const std::set<UUID> &nets_only)
                         for (const auto &pt : points) {
                             Coordi x(pt.x, pt.y);
                             auto la = points_ref.at(pt.id).get_layer();
-                            if ((plane->polygon->layer == la || la == 10002)
-                                && frag.contains(x)) { // point is th or on same layer
+                            if ((la.overlaps(plane->polygon->layer)) && frag.contains(x)) {
 
                                 if (last_point_id >= 0) {
                                     edges_from_board.emplace(last_point_id, pt.id);

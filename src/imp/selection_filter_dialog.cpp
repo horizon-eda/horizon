@@ -69,6 +69,8 @@ SelectionFilterDialog::SelectionFilterDialog(Gtk::Window *parent, SelectionFilte
             connect_doubleclick(cb);
 
             checkbuttons[ot].checkbutton = cb;
+            checkbuttons[ot].work_layer_only_enabled =
+                    it.second.flags == ImpBase::SelectionFilterInfo::Flag::WORK_LAYER_ONLY_ENABLED;
             auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 3));
             box->property_margin() = 3;
             if (it.second.layers.size() != 0) {
@@ -108,7 +110,7 @@ SelectionFilterDialog::SelectionFilterDialog(Gtk::Window *parent, SelectionFilte
         for (auto layer : it.second.layers) {
             add_layer_button(ot, layer, -1);
         }
-        if (it.second.has_others) {
+        if (it.second.flags == ImpBase::SelectionFilterInfo::Flag::HAS_OTHERS) {
             auto cbl = Gtk::manage(new Gtk::CheckButton("Others"));
             cbl->property_margin() = 3;
             cbl->set_margin_start(sub_margin);
@@ -169,7 +171,7 @@ void SelectionFilterDialog::update_filter()
 {
     for (const auto &it : checkbuttons) {
         if (it.second.layer_buttons.size() == 0) {
-            if (work_layer_only)
+            if (work_layer_only && !it.second.work_layer_only_enabled)
                 selection_filter.object_filter[it.first].other_layers = false;
             else
                 selection_filter.object_filter[it.first].other_layers = it.second.checkbutton->get_active();
@@ -209,19 +211,17 @@ void SelectionFilterDialog::update_work_layer_only()
         saved.clear();
         for (auto &it : checkbuttons) {
             saved[it.first];
-            if (it.second.layer_buttons.size() == 0) {
+            if (it.second.layer_buttons.size() == 0 && !it.second.work_layer_only_enabled) {
                 if (it.second.checkbutton->get_active())
                     saved.at(it.first).insert(0);
                 it.second.checkbutton->set_active(false);
                 it.second.checkbutton->set_sensitive(false);
             }
-            else {
-                if (it.second.expand_button) {
-                    if (it.second.expand_button->get_active())
-                        saved.at(it.first).insert(10001);
-                    it.second.expand_button->set_active(false);
-                    it.second.expand_button->set_sensitive(false);
-                }
+            else if (it.second.expand_button) {
+                if (it.second.expand_button->get_active())
+                    saved.at(it.first).insert(10001);
+                it.second.expand_button->set_active(false);
+                it.second.expand_button->set_sensitive(false);
             }
         }
     }
@@ -231,10 +231,10 @@ void SelectionFilterDialog::update_work_layer_only()
             if (saved.count(it.first)) {
                 const auto &sav = saved.at(it.first);
                 it.second.checkbutton->set_sensitive(true);
-                if (it.second.layer_buttons.size() == 0) {
+                if (it.second.layer_buttons.size() == 0 && !it.second.work_layer_only_enabled) {
                     it.second.checkbutton->set_active(sav.count(0));
                 }
-                else {
+                else if (it.second.expand_button) {
                     it.second.expand_button->set_active(sav.count(10001));
                     it.second.expand_button->set_sensitive(true);
                 }

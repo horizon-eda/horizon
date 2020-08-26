@@ -37,6 +37,23 @@ bool Canvas::layer_is_visible(int layer) const
     return layer == work_layer || get_layer_display(layer).visible;
 }
 
+bool Canvas::layer_is_visible(LayerRange layer) const
+{
+    if (!layer.is_multilayer())
+        return layer_is_visible(layer.start());
+    if (layer.overlaps(work_layer))
+        return true;
+    for (auto la : {layer.start(), layer.end()}) {
+        if (la == work_layer || get_layer_display(la).visible)
+            return true;
+    }
+    for (const auto &[la, ld] : layer_display) {
+        if (ld.visible && layer.overlaps(la))
+            return true;
+    }
+    return false;
+}
+
 void Canvas::clear()
 {
     selectables.clear();

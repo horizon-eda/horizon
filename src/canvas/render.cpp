@@ -54,8 +54,6 @@ void Canvas::render(const Junction &junc, bool interactive, ObjectType mode)
     if (mode == ObjectType::BOARD)
         draw = false;
 
-    auto layer = layer_display.count(junc.layer) ? junc.layer : 10000;
-
     object_ref_push(ObjectType::JUNCTION, junc.uuid);
     if (draw) {
         if (junc.connection_count == 2) {
@@ -76,8 +74,8 @@ void Canvas::render(const Junction &junc, bool interactive, ObjectType mode)
     object_ref_pop();
 
     if (interactive) {
-        selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, layer);
-        targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position), 0, layer);
+        selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, junc.layer);
+        targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position), 0, junc.layer);
     }
 }
 
@@ -1285,7 +1283,7 @@ void Canvas::render(const Via &via, bool interactive)
     }
     auto bb = via.padstack.get_bbox();
     if (interactive)
-        selectables.append(via.uuid, ObjectType::VIA, {0, 0}, bb.first, bb.second);
+        selectables.append(via.uuid, ObjectType::VIA, {0, 0}, bb.first, bb.second, 0, via.junction->layer);
     img_net(via.junction->net);
     img_patch_type(PatchType::VIA);
     if (interactive)

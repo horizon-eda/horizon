@@ -93,7 +93,7 @@ Selectables::Selectables(const Canvas &c) : ca(c)
 }
 
 void Selectables::append(const UUID &uu, ObjectType ot, const Coordf &center, const Coordf &a, const Coordf &b,
-                         unsigned int vertex, int layer, bool always)
+                         unsigned int vertex, LayerRange layer, bool always)
 {
     Placement tr = ca.transform;
     if (tr.mirror)
@@ -104,14 +104,14 @@ void Selectables::append(const UUID &uu, ObjectType ot, const Coordf &center, co
     append_angled(uu, ot, center, box_center, box_dim, tr.get_angle_rad(), vertex, layer, always);
 }
 
-void Selectables::append(const UUID &uu, ObjectType ot, const Coordf &center, unsigned int vertex, int layer,
+void Selectables::append(const UUID &uu, ObjectType ot, const Coordf &center, unsigned int vertex, LayerRange layer,
                          bool always)
 {
     append(uu, ot, center, center, center, vertex, layer, always);
 }
 
 void Selectables::append_angled(const UUID &uu, ObjectType ot, const Coordf &center, const Coordf &box_center,
-                                const Coordf &box_dim, float angle, unsigned int vertex, int layer, bool always)
+                                const Coordf &box_dim, float angle, unsigned int vertex, LayerRange layer, bool always)
 {
     items_map.emplace(std::piecewise_construct, std::forward_as_tuple(uu, ot, vertex, layer),
                       std::forward_as_tuple(items.size()));
@@ -121,7 +121,7 @@ void Selectables::append_angled(const UUID &uu, ObjectType ot, const Coordf &cen
 }
 
 void Selectables::append_line(const UUID &uu, ObjectType ot, const Coordf &p0, const Coordf &p1, float width,
-                              unsigned int vertex, int layer, bool always)
+                              unsigned int vertex, LayerRange layer, bool always)
 {
     float box_height = width;
     Coordf delta = p1 - p0;
