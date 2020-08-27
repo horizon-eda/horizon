@@ -1252,7 +1252,7 @@ void Canvas::render(const BoardPackage &pkg, bool interactive)
     }
     if (interactive) {
         selectables.append(pkg.uuid, ObjectType::BOARD_PACKAGE, {0, 0}, bb.first, bb.second, 0,
-                           pkg.flip ? BoardLayers::BOTTOM_PACKAGE : BoardLayers::TOP_PACKAGE);
+                           pkg.flip ? BoardLayers::BOTTOM_COPPER : BoardLayers::TOP_COPPER);
         targets.emplace_back(pkg.uuid, ObjectType::BOARD_PACKAGE, pkg.placement.shift);
 
         for (const auto &[pad_uuid, pad] : pkg.package.pads) {

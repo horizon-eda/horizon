@@ -1122,7 +1122,7 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpBoard::get_selection_filte
     layers_polygon.insert(layers_polygon.end(), inner_layers.begin(), inner_layers.end());
     append_bottom_layers(layers_polygon);
 
-    std::vector<int> layers_package = {BoardLayers::TOP_PACKAGE, BoardLayers::BOTTOM_PACKAGE};
+    std::vector<int> layers_package = {BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER};
 
     std::vector<int> layers_track = {BoardLayers::TOP_COPPER};
     layers_track.insert(layers_track.end(), inner_layers.begin(), inner_layers.end());
