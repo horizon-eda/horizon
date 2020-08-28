@@ -3,6 +3,7 @@
 #include "core/tool_id.hpp"
 #include "util/util.hpp"
 #include "in_tool_action_catalog.hpp"
+#include "logger/logger.hpp"
 
 namespace horizon {
 void ImpBase::init_action()
@@ -291,6 +292,22 @@ void ImpBase::handle_zoom_action(const ActionConnection &c)
     if (c.action_id == ActionID::ZOOM_OUT)
         factor = 1 / factor;
     canvas->zoom_to_center(factor);
+}
+
+void ImpBase::force_end_tool()
+{
+    for (auto i = 0; i < 5; i++) {
+        ToolArgs args;
+        args.coords = canvas->get_cursor_pos();
+        args.work_layer = canvas->property_work_layer();
+        args.type = ToolEventType::ACTION;
+        args.action = InToolActionID::CANCEL;
+        ToolResponse r = core->tool_update(args);
+        tool_process(r);
+        if (!core->tool_is_active())
+            return;
+    }
+    Logger::get().log_critical("Tool didn't end", Logger::Domain::IMP, "end the tool and repeat the last action");
 }
 
 } // namespace horizon

@@ -303,5 +303,7 @@ private:
 
     void handle_pan_action(const ActionConnection &c);
     void handle_zoom_action(const ActionConnection &c);
+
+    void force_end_tool();
 };
 } // namespace horizon

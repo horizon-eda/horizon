@@ -180,6 +180,7 @@ bool ImpBase::handle_close(GdkEventAny *ev)
             return false; // close
 
         case 2:
+            force_end_tool();
             trigger_action(ActionID::SAVE);
             core->delete_autosave();
             return false; // close
@@ -1415,6 +1416,7 @@ bool ImpBase::handle_broadcast(const json &j)
         return true;
     }
     else if (op == "save") {
+        force_end_tool();
         trigger_action(ActionID::SAVE);
         return true;
     }
