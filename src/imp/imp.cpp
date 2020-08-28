@@ -1331,7 +1331,17 @@ void ImpBase::tool_process(ToolResponse &resp)
     }
     if (!no_update) {
         canvas_update();
-        canvas->set_selection(core->get_tool_selection());
+        if (core->tool_is_active()) {
+            canvas->set_selection(core->get_tool_selection());
+        }
+        else {
+            if (canvas->get_selection_mode() == CanvasGL::SelectionMode::NORMAL) {
+                canvas->set_selection(core->get_tool_selection());
+            }
+            else {
+                canvas->set_selection({});
+            }
+        }
     }
     if (resp.next_tool != ToolID::NONE) {
         highlights.clear();
