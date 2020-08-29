@@ -181,6 +181,7 @@ public:
     SelectionFilter selection_filter;
 
     bool layer_is_visible(int layer) const;
+    bool layer_is_visible(LayerRange layer) const;
 
     void set_colors2(const std::vector<ColorI> &c);
 

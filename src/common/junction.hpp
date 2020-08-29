@@ -5,9 +5,7 @@
 #include "util/uuid_ptr.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "block/bus.hpp"
-#include <vector>
-#include <map>
-#include <fstream>
+#include "util/layer_range.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -37,7 +35,7 @@ public:
     uuid_ptr<Bus> bus = nullptr;
     UUID net_segment = UUID();
     bool warning = false;
-    int layer = 10000;
+    LayerRange layer = 10000;
     bool needs_via = false;
     bool has_via = false; // in schematic: true if has net label, etc.
     unsigned int connection_count = 0;

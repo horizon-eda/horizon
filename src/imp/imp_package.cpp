@@ -387,15 +387,17 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpPackage::get_selection_fil
     std::vector<int> layers_polygon = {BoardLayers::TOP_COURTYARD, BoardLayers::TOP_ASSEMBLY, BoardLayers::TOP_PACKAGE,
                                        BoardLayers::TOP_SILKSCREEN};
     append_bottom_layers(layers_polygon);
+
+    using Flag = ImpBase::SelectionFilterInfo::Flag;
     std::map<ObjectType, ImpBase::SelectionFilterInfo> r = {
-            {ObjectType::PAD, {}},
-            {ObjectType::LINE, {layers_line, true}},
-            {ObjectType::TEXT, {layers_text, true}},
+            {ObjectType::PAD, {{}, Flag::WORK_LAYER_ONLY_ENABLED}},
+            {ObjectType::LINE, {layers_line, Flag::HAS_OTHERS}},
+            {ObjectType::TEXT, {layers_text, Flag::HAS_OTHERS}},
             {ObjectType::JUNCTION, {}},
-            {ObjectType::POLYGON, {layers_polygon, true}},
+            {ObjectType::POLYGON, {layers_polygon, Flag::HAS_OTHERS}},
             {ObjectType::DIMENSION, {}},
             {ObjectType::PICTURE, {}},
-            {ObjectType::ARC, {layers_line, true}},
+            {ObjectType::ARC, {layers_line, Flag::HAS_OTHERS}},
     };
     return r;
 }

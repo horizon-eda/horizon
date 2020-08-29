@@ -166,10 +166,11 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpPadstack::get_selection_fi
     const std::vector<int> my_layers = {BoardLayers::TOP_PASTE,   BoardLayers::TOP_MASK,      BoardLayers::TOP_COPPER,
                                         BoardLayers::IN1_COPPER,  BoardLayers::BOTTOM_COPPER, BoardLayers::BOTTOM_MASK,
                                         BoardLayers::BOTTOM_PASTE};
+    using Flag = ImpBase::SelectionFilterInfo::Flag;
     std::map<ObjectType, ImpBase::SelectionFilterInfo> r = {
-            {ObjectType::SHAPE, {my_layers, false}},
+            {ObjectType::SHAPE, {my_layers, Flag::DEFAULT}},
             {ObjectType::HOLE, {}},
-            {ObjectType::POLYGON, {my_layers, false}},
+            {ObjectType::POLYGON, {my_layers, Flag::DEFAULT}},
     };
     return r;
 }

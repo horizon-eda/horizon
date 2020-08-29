@@ -107,11 +107,9 @@ Coordi Track::Connection::get_position() const
     }
 }
 
-int Track::Connection::get_layer() const
+LayerRange Track::Connection::get_layer() const
 {
     if (is_junc()) {
-        if (junc->has_via)
-            return 10002;
         return junc->layer;
     }
     else if (is_pad()) {
@@ -122,9 +120,10 @@ int Track::Connection::get_layer() const
             return BoardLayers::BOTTOM_COPPER;
         }
         else if (pad->padstack.type == Padstack::Type::THROUGH) {
-            return 10002;
+            return LayerRange(BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER);
         }
     }
+    assert(false);
     return 10000;
 }
 

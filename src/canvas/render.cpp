@@ -54,8 +54,6 @@ void Canvas::render(const Junction &junc, bool interactive, ObjectType mode)
     if (mode == ObjectType::BOARD)
         draw = false;
 
-    auto layer = layer_display.count(junc.layer) ? junc.layer : 10000;
-
     object_ref_push(ObjectType::JUNCTION, junc.uuid);
     if (draw) {
         if (junc.connection_count == 2) {
@@ -76,8 +74,8 @@ void Canvas::render(const Junction &junc, bool interactive, ObjectType mode)
     object_ref_pop();
 
     if (interactive) {
-        selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, layer);
-        targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position), 0, layer);
+        selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, junc.layer);
+        targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position), 0, junc.layer);
     }
 }
 
@@ -1114,7 +1112,7 @@ void Canvas::render_pad_overlay(const Pad &pad)
     transform_restore();
 }
 
-static int get_target_layer_for_padstack_type(Padstack::Type type)
+static LayerRange get_layer_for_padstack_type(Padstack::Type type)
 {
     if (type == Padstack::Type::TOP) {
         return BoardLayers::TOP_COPPER;
@@ -1123,7 +1121,7 @@ static int get_target_layer_for_padstack_type(Padstack::Type type)
         return BoardLayers::BOTTOM_COPPER;
     }
     else {
-        return 10000;
+        return LayerRange(BoardLayers::BOTTOM_COPPER, BoardLayers::TOP_COPPER);
     }
 }
 
@@ -1190,10 +1188,10 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omi
             transform_save();
             transform.accumulate(pad.placement);
             auto bb = pad.padstack.get_bbox();
-            selectables.append(pad.uuid, ObjectType::PAD, {0, 0}, bb.first, bb.second);
+            const auto layer = get_layer_for_padstack_type(pad.padstack.type);
+            selectables.append(pad.uuid, ObjectType::PAD, {0, 0}, bb.first, bb.second, 0, layer);
             transform_restore();
-            int target_layer = get_target_layer_for_padstack_type(pad.padstack.type);
-            targets.emplace_back(pad.uuid, ObjectType::PAD, pad.placement.shift, 0, target_layer);
+            targets.emplace_back(pad.uuid, ObjectType::PAD, pad.placement.shift, 0, layer);
         }
         for (const auto &it : pkg.warnings) {
             render(it);
@@ -1254,13 +1252,13 @@ void Canvas::render(const BoardPackage &pkg, bool interactive)
     }
     if (interactive) {
         selectables.append(pkg.uuid, ObjectType::BOARD_PACKAGE, {0, 0}, bb.first, bb.second, 0,
-                           pkg.flip ? BoardLayers::BOTTOM_PACKAGE : BoardLayers::TOP_PACKAGE);
+                           pkg.flip ? BoardLayers::BOTTOM_COPPER : BoardLayers::TOP_COPPER);
         targets.emplace_back(pkg.uuid, ObjectType::BOARD_PACKAGE, pkg.placement.shift);
 
         for (const auto &[pad_uuid, pad] : pkg.package.pads) {
-            int target_layer = get_target_layer_for_padstack_type(pad.padstack.type);
+            const auto layer = get_layer_for_padstack_type(pad.padstack.type);
             targets.emplace_back(UUIDPath<2>(pkg.uuid, pad.uuid), ObjectType::PAD,
-                                 transform.transform(pad.placement.shift), 0, target_layer);
+                                 transform.transform(pad.placement.shift), 0, layer);
         }
     }
     if (interactive)
@@ -1285,7 +1283,7 @@ void Canvas::render(const Via &via, bool interactive)
     }
     auto bb = via.padstack.get_bbox();
     if (interactive)
-        selectables.append(via.uuid, ObjectType::VIA, {0, 0}, bb.first, bb.second);
+        selectables.append(via.uuid, ObjectType::VIA, {0, 0}, bb.first, bb.second, 0, via.junction->layer);
     img_net(via.junction->net);
     img_patch_type(PatchType::VIA);
     if (interactive)
@@ -1318,7 +1316,8 @@ void Canvas::render(const BoardHole &hole, bool interactive)
     transform.accumulate(hole.placement);
     auto bb = hole.padstack.get_bbox();
     if (interactive)
-        selectables.append(hole.uuid, ObjectType::BOARD_HOLE, {0, 0}, bb.first, bb.second);
+        selectables.append(hole.uuid, ObjectType::BOARD_HOLE, {0, 0}, bb.first, bb.second, 0,
+                           LayerRange(BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER));
     img_net(hole.net);
     if (hole.padstack.type == Padstack::Type::HOLE)
         img_patch_type(PatchType::HOLE_PTH);

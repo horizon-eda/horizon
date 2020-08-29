@@ -58,14 +58,19 @@ public:
 
     class SelectionFilterInfo {
     public:
+        enum class Flag {
+            DEFAULT,
+            HAS_OTHERS,
+            WORK_LAYER_ONLY_ENABLED,
+        };
         SelectionFilterInfo()
         {
         }
-        SelectionFilterInfo(const std::vector<int> &l, bool o) : layers(l), has_others(o)
+        SelectionFilterInfo(const std::vector<int> &l, Flag fl) : layers(l), flags(fl)
         {
         }
         std::vector<int> layers;
-        bool has_others = false;
+        Flag flags = Flag::DEFAULT;
     };
 
     virtual std::map<ObjectType, SelectionFilterInfo> get_selection_filter_info() const;

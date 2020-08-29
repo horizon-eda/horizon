@@ -97,6 +97,13 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
         }
     }
 
+    if (sel_count_type(sel, ObjectType::JUNCTION) == 1) {
+        const auto ju = core->get_junction(sel_find_one(sel, ObjectType::JUNCTION).uuid);
+        s += "\n\n<b>Junction:</b>\n";
+        s += "Layers " + std::to_string(ju->layer.start()) + " — " + std::to_string(ju->layer.end()) + "\n";
+        sel_erase_type(sel, ObjectType::JUNCTION);
+    }
+
     trim(s);
     if (sel.size()) {
         s += "\n\n<b>Others:</b>\n";
