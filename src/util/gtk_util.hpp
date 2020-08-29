@@ -53,6 +53,7 @@ void tree_view_scroll_to_selection(Gtk::TreeView *view);
 Gtk::TreeViewColumn *tree_view_append_column_ellipsis(Gtk::TreeView *view, const std::string &name,
                                                       const Gtk::TreeModelColumnBase &column,
                                                       Pango::EllipsizeMode ellipsize);
+void tree_view_set_search_contains(Gtk::TreeView *view);
 
 void entry_set_warning(Gtk::Entry *e, const std::string &text);
 

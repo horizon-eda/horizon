@@ -300,4 +300,58 @@ void widget_remove_scroll_events(Gtk::Widget &widget)
     util_remove_scroll_events(widget.gobj());
 }
 
+// adapted from gtktreeview.c gtk_tree_view_search_equal_func
+static gboolean search_eq(GtkTreeModel *model, gint column, const gchar *key, GtkTreeIter *iter, gpointer search_data)
+{
+    gboolean retval = TRUE;
+    const gchar *str;
+    gchar *normalized_string;
+    gchar *normalized_key;
+    gchar *case_normalized_string = NULL;
+    gchar *case_normalized_key = NULL;
+    GValue value = G_VALUE_INIT;
+    GValue transformed = G_VALUE_INIT;
+
+    gtk_tree_model_get_value(model, iter, column, &value);
+
+    g_value_init(&transformed, G_TYPE_STRING);
+
+    if (!g_value_transform(&value, &transformed)) {
+        g_value_unset(&value);
+        return TRUE;
+    }
+
+    g_value_unset(&value);
+
+    str = g_value_get_string(&transformed);
+    if (!str) {
+        g_value_unset(&transformed);
+        return TRUE;
+    }
+
+    normalized_string = g_utf8_normalize(str, -1, G_NORMALIZE_ALL);
+    normalized_key = g_utf8_normalize(key, -1, G_NORMALIZE_ALL);
+
+    if (normalized_string && normalized_key) {
+        case_normalized_string = g_utf8_casefold(normalized_string, -1);
+        case_normalized_key = g_utf8_casefold(normalized_key, -1);
+
+        if (strstr(case_normalized_string, case_normalized_key) != NULL)
+            retval = FALSE;
+    }
+
+    g_value_unset(&transformed);
+    g_free(normalized_key);
+    g_free(normalized_string);
+    g_free(case_normalized_key);
+    g_free(case_normalized_string);
+
+    return retval;
+}
+
+void tree_view_set_search_contains(Gtk::TreeView *view)
+{
+    gtk_tree_view_set_search_equal_func(view->gobj(), &search_eq, nullptr, nullptr);
+}
+
 } // namespace horizon
