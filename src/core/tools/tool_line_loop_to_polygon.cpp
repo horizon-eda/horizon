@@ -157,7 +157,7 @@ ToolResponse ToolLineLoopToPolygon::begin(const ToolArgs &args)
                 connectors.insert(con);
         }
         poly->layer = start_junction->layer;
-        if (doc.c || doc.y || doc.f)
+        if (doc.c || doc.y || doc.f || poly->layer == 10000)
             poly->layer = 0;
 
         for (auto con : connectors) {

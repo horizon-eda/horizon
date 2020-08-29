@@ -395,7 +395,7 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::IMPORT_DXF},
          {"Import dxf", ActionGroup::EXPORT_IMPORT,
           ActionCatalogItem::AVAILABLE_IN_BOARD | ActionCatalogItem::AVAILABLE_IN_PACKAGE
-                  | ActionCatalogItem::AVAILABLE_IN_FRAME,
+                  | ActionCatalogItem::AVAILABLE_IN_FRAME | ActionCatalogItem::AVAILABLE_IN_DECAL,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::PLACE_JUNCTION},
