@@ -718,7 +718,8 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
                   | ActionCatalogItem::FLAGS_NO_PREFERENCES}},
 
         {{ActionID::TOOL, ToolID::IMPORT_KICAD_PACKAGE},
-         {"Import KiCad package", ActionGroup::EXPORT_IMPORT, ActionCatalogItem::AVAILABLE_IN_PACKAGE,
+         {"Import KiCad package", ActionGroup::EXPORT_IMPORT,
+          ActionCatalogItem::AVAILABLE_IN_PACKAGE | ActionCatalogItem::AVAILABLE_IN_DECAL,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::TOOL, ToolID::SMASH_SILKSCREEN_GRAPHICS},

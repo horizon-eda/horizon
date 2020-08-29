@@ -1,6 +1,7 @@
 #include "kicad_package_parser.hpp"
 #include "util/util.hpp"
 #include "pool/package.hpp"
+#include "pool/decal.hpp"
 #include "sexpr/sexpr.h"
 #include "util/util.hpp"
 #include "board/board_layers.hpp"
@@ -13,33 +14,36 @@ KiCadPackageParser::KiCadPackageParser(Package &p, IPool &po) : package(p), pool
 {
 }
 
-Junction *KiCadPackageParser::get_or_create_junction(const Coordi &c)
+KiCadDecalParser::KiCadDecalParser(Decal &d) : decal(d)
+{
+}
+
+Junction *KiCadModuleParser::get_or_create_junction(const Coordi &c)
 {
     if (junctions.count(c))
         return junctions.at(c);
     else {
-        auto uu = UUID::random();
-        auto &ju = package.junctions.emplace(uu, uu).first->second;
+        auto &ju = create_junction();
         ju.position = c;
         junctions.emplace(c, &ju);
         return &ju;
     }
 }
 
-Coordi KiCadPackageParser::get_coord(const SEXPR::SEXPR *data, size_t offset)
+Coordi KiCadModuleParser::get_coord(const SEXPR::SEXPR *data, size_t offset)
 {
     auto c = get_size(data, offset);
     return Coordi(c.x, -c.y);
 }
 
-Coordi KiCadPackageParser::get_size(const SEXPR::SEXPR *data, size_t offset)
+Coordi KiCadModuleParser::get_size(const SEXPR::SEXPR *data, size_t offset)
 {
     auto x = data->GetChild(offset)->GetDouble();
     auto y = data->GetChild(offset + 1)->GetDouble();
     return Coordi(x * 1_mm, y * 1_mm);
 }
 
-int KiCadPackageParser::get_layer(const std::string &l)
+int KiCadModuleParser::get_layer(const std::string &l)
 {
     if (l == "F.SilkS")
         return BoardLayers::TOP_SILKSCREEN;
@@ -63,7 +67,7 @@ int KiCadPackageParser::get_layer(const std::string &l)
     }
 }
 
-void KiCadPackageParser::parse_line(const SEXPR::SEXPR *data)
+Line *KiCadModuleParser::parse_line(const SEXPR::SEXPR *data)
 {
     auto nc = data->GetNumberOfChildren();
     Coordi start;
@@ -87,7 +91,7 @@ void KiCadPackageParser::parse_line(const SEXPR::SEXPR *data)
                     layer = get_layer(l);
                 }
                 catch (...) {
-                    return; // ignore
+                    return nullptr; // ignore
                 }
             }
             else if (tag == "width") {
@@ -96,18 +100,14 @@ void KiCadPackageParser::parse_line(const SEXPR::SEXPR *data)
         }
     }
 
-    if (layer == BoardLayers::TOP_SILKSCREEN || layer == BoardLayers::TOP_ASSEMBLY) {
-        auto from = get_or_create_junction(start);
-        auto to = get_or_create_junction(end);
-        auto uu = UUID::random();
-        auto &line = package.lines.emplace(uu, uu).first->second;
-        line.from = from;
-        line.to = to;
-        line.width = width;
-        line.layer = layer;
-        if (layer == BoardLayers::TOP_ASSEMBLY)
-            line.width = 0;
-    }
+    auto from = get_or_create_junction(start);
+    auto to = get_or_create_junction(end);
+    auto &line = create_line();
+    line.from = from;
+    line.to = to;
+    line.width = width;
+    line.layer = layer;
+    return &line;
 }
 void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
 {
@@ -276,7 +276,93 @@ void KiCadPackageParser::parse_pad(const SEXPR::SEXPR *data)
     }
 }
 
+void KiCadModuleParser::parse_poly(const SEXPR::SEXPR *data)
+{
+    const SEXPR::SEXPR *pts = nullptr;
+    int layer = 10000;
+
+    const auto nc = data->GetNumberOfChildren();
+    for (size_t i_ch = 1; i_ch < nc; i_ch++) {
+        auto ch = data->GetChild(i_ch);
+        const auto &tag = ch->GetChild(0)->GetSymbol();
+        if (tag == "pts") {
+            pts = ch;
+        }
+        else if (tag == "layer") {
+            layer = get_layer(ch->GetChild(1)->GetSymbol());
+        }
+    }
+
+    if (!pts) {
+        throw std::runtime_error("no points for polygon");
+    }
+    if (layer == 10000) {
+        throw std::runtime_error("no layer for polygon");
+    }
+
+    auto &poly = create_polygon();
+    poly.layer = layer;
+
+    const auto npts = pts->GetNumberOfChildren();
+    for (size_t i = 1; i < npts; i++) {
+        auto c = get_coord(pts->GetChild(i), 1);
+        poly.vertices.emplace_back(c);
+    }
+}
+
+
 void KiCadPackageParser::parse(const SEXPR::SEXPR *data)
+{
+    if (!data->IsList())
+        throw std::runtime_error("data must be list");
+    {
+        auto ch = data->GetChild(0);
+        if (ch->GetSymbol() != "module") {
+            throw std::runtime_error("not a module");
+        }
+    }
+    auto nc = data->GetNumberOfChildren();
+    for (size_t i_ch = 0; i_ch < nc; i_ch++) {
+        auto ch = data->GetChild(i_ch);
+        if (ch->IsList()) {
+            auto type = ch->GetChild(0)->GetSymbol();
+            if (type == "fp_line") {
+                if (auto line = parse_line(ch)) {
+                    if (line->layer != BoardLayers::TOP_ASSEMBLY && line->layer != BoardLayers::TOP_SILKSCREEN) {
+                        package.lines.erase(line->uuid);
+                    }
+                    else if (line->layer == BoardLayers::TOP_ASSEMBLY) {
+                        line->width = 0;
+                    }
+                }
+            }
+            else if (type == "pad") {
+                parse_pad(ch);
+            }
+        }
+    }
+}
+
+Junction &KiCadPackageParser::create_junction()
+{
+    const auto uu = UUID::random();
+    return package.junctions.emplace(uu, uu).first->second;
+}
+
+Polygon &KiCadPackageParser::create_polygon()
+{
+    const auto uu = UUID::random();
+    return package.polygons.emplace(uu, uu).first->second;
+}
+
+Line &KiCadPackageParser::create_line()
+{
+    const auto uu = UUID::random();
+    return package.lines.emplace(uu, uu).first->second;
+}
+
+
+void KiCadDecalParser::parse(const SEXPR::SEXPR *data)
 {
     if (!data->IsList())
         throw std::runtime_error("data must be list");
@@ -294,11 +380,30 @@ void KiCadPackageParser::parse(const SEXPR::SEXPR *data)
             if (type == "fp_line") {
                 parse_line(ch);
             }
-            if (type == "pad") {
-                parse_pad(ch);
+            else if (type == "fp_poly") {
+                parse_poly(ch);
             }
         }
     }
 }
+
+Junction &KiCadDecalParser::create_junction()
+{
+    const auto uu = UUID::random();
+    return decal.junctions.emplace(uu, uu).first->second;
+}
+
+Polygon &KiCadDecalParser::create_polygon()
+{
+    const auto uu = UUID::random();
+    return decal.polygons.emplace(uu, uu).first->second;
+}
+
+Line &KiCadDecalParser::create_line()
+{
+    const auto uu = UUID::random();
+    return decal.lines.emplace(uu, uu).first->second;
+}
+
 
 } // namespace horizon
