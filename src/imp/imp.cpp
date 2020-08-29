@@ -295,8 +295,7 @@ void ImpBase::run(int argc, char *argv[])
             },
             false);
     canvas->signal_button_release_event().connect(sigc::mem_fun(*this, &ImpBase::handle_click_release));
-    canvas->signal_request_display_name().connect(
-            [this](ObjectType ty, UUID uu) { return core->get_display_name(ty, uu); });
+    canvas->signal_request_display_name().connect(sigc::mem_fun(*this, &ImpBase::get_complete_display_name));
 
     init_key();
 
@@ -1249,19 +1248,7 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
             else if (sel.size() > 1) { // multiple items: do our own menu
                 canvas->set_selection({}, false);
                 for (const auto &sr : sel) {
-                    std::string text = object_descriptions.at(sr.type).name;
-                    auto display_name = core->get_display_name(sr.type, sr.uuid);
-                    if (display_name.size()) {
-                        text += " " + display_name;
-                    }
-                    auto layers = core->get_layer_provider().get_layers();
-                    if (layers.count(sr.layer.start()) && layers.count(sr.layer.end())) {
-                        if (sr.layer.is_multilayer())
-                            text += " (" + layers.at(sr.layer.start()).name + +" - " + layers.at(sr.layer.end()).name
-                                    + ")";
-                        else
-                            text += " (" + layers.at(sr.layer.start()).name + ")";
-                    }
+                    std::string text = get_complete_display_name(sr);
                     auto la = Gtk::manage(new Gtk::MenuItem(text));
 
                     la->signal_select().connect([this, sr] {
@@ -1305,6 +1292,24 @@ bool ImpBase::handle_click(GdkEventButton *button_event)
     }
     return false;
 }
+
+std::string ImpBase::get_complete_display_name(const SelectableRef &sr)
+{
+    std::string text = object_descriptions.at(sr.type).name;
+    auto display_name = core->get_display_name(sr.type, sr.uuid);
+    if (display_name.size()) {
+        text += " " + display_name;
+    }
+    auto layers = core->get_layer_provider().get_layers();
+    if (layers.count(sr.layer.start()) && layers.count(sr.layer.end())) {
+        if (sr.layer.is_multilayer())
+            text += " (" + layers.at(sr.layer.start()).name + +" - " + layers.at(sr.layer.end()).name + ")";
+        else
+            text += " (" + layers.at(sr.layer.start()).name + ")";
+    }
+    return text;
+}
+
 
 void ImpBase::handle_maybe_drag()
 {

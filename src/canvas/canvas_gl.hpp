@@ -100,7 +100,7 @@ public:
         return grid.mul;
     }
 
-    typedef sigc::signal<std::string, ObjectType, UUID> type_signal_request_display_name;
+    typedef sigc::signal<std::string, const SelectableRef &> type_signal_request_display_name;
     type_signal_request_display_name signal_request_display_name()
     {
         return s_signal_request_display_name;

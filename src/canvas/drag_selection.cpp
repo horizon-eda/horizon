@@ -301,19 +301,7 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                         ca.clarify_menu->remove(*it);
                     }
                     for (const auto sr : sel_from_canvas) {
-                        std::string text = object_descriptions.at(sr.type).name;
-                        auto display_name = ca.s_signal_request_display_name.emit(sr.type, sr.uuid);
-                        if (display_name.size()) {
-                            text += " " + display_name;
-                        }
-                        auto layers = ca.layer_provider->get_layers();
-                        if (layers.count(sr.layer.start()) && layers.count(sr.layer.end())) {
-                            if (sr.layer.is_multilayer())
-                                text += " (" + layers.at(sr.layer.start()).name + +" - "
-                                        + layers.at(sr.layer.end()).name + ")";
-                            else
-                                text += " (" + layers.at(sr.layer.start()).name + ")";
-                        }
+                        auto text = ca.s_signal_request_display_name.emit(sr);
                         Gtk::MenuItem *la = nullptr;
                         if (toggle) {
                             auto l = Gtk::manage(new Gtk::CheckMenuItem(text));

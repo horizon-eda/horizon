@@ -310,5 +310,7 @@ private:
     void handle_zoom_action(const ActionConnection &c);
 
     void force_end_tool();
+
+    std::string get_complete_display_name(const SelectableRef &sr);
 };
 } // namespace horizon
