@@ -31,6 +31,11 @@ public:
         void load_from_json(const json &j) override;
         int effort = 1;
         bool remove_loops = true;
+        enum class Mode { WALKAROUND, PUSH, BEND, STRAIGHT };
+        Mode mode = Mode::WALKAROUND;
+        static const std::map<Mode, std::string> mode_names;
+
+        bool drc = true;
     };
 
     const ToolSettings *get_settings_const() const override
@@ -83,11 +88,12 @@ private:
 
     Board *board = nullptr;
     const class BoardRules *rules = nullptr;
-    bool shove = false;
 
     void update_tip();
     class Track *get_track(const std::set<SelectableRef> &sel);
     class Via *get_via(const std::set<SelectableRef> &sel);
     bool is_tune() const;
+    bool settings_window_visible = false;
+    void update_settings_window();
 };
 } // namespace horizon

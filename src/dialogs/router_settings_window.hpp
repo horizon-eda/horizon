@@ -11,8 +11,14 @@ namespace horizon {
 class RouterSettingsWindow : public ToolWindow {
 public:
     RouterSettingsWindow(Gtk::Window *parent, class ImpInterface *intf, class ToolSettings &stg);
+    void set_is_routing(bool is_routing);
 
 private:
+    using Mode = ToolRouteTrackInteractive::Settings::Mode;
+
     ToolRouteTrackInteractive::Settings &settings;
+    Gtk::Switch *drc_switch = nullptr;
+    Gtk::ComboBoxText *mode_combo = nullptr;
+    void update_drc();
 };
 } // namespace horizon

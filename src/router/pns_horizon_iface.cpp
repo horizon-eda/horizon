@@ -359,6 +359,10 @@ public:
             auto pt = aLine.CPoint(i);
             pts.emplace_back(pt.x, pt.y);
         }
+        if (aLine.IsClosed()) {
+            auto pt = aLine.CPoint(0);
+            pts.emplace_back(pt.x, pt.y);
+        }
         lines.insert(m_canvas->add_line(pts, aWidth, horizon::ColorP::AIRWIRE_ROUTER, 10000));
     }
 
@@ -843,6 +847,9 @@ void PNS_HORIZON_IFACE::DisplayItem(const PNS::ITEM *aItem, int aColor, int aCle
         la = via_item->Layers().End();
         m_preview_items.insert(
                 canvas->add_line(pts, via_item->Diameter(), horizon::ColorP::LAYER_HIGHLIGHT, layer_from_router(la)));
+    }
+    else if (aItem->Kind() == PNS::ITEM::SOLID_T) {
+        // it's okay
     }
     else {
         assert(false);

@@ -12,10 +12,10 @@
 #include "util/util.hpp"
 #include "core/tool_id.hpp"
 #include "util/selection_util.hpp"
+#include "dialogs/router_settings_window.hpp"
 #include <iostream>
 #include <iomanip>
 #include "nlohmann/json.hpp"
-#include "core/tool_data_window.hpp"
 
 namespace horizon {
 
@@ -44,11 +44,26 @@ ToolRouteTrackInteractive::ToolRouteTrackInteractive(IDocument *c, ToolID tid) :
 {
 }
 
+const std::map<ToolRouteTrackInteractive::Settings::Mode, std::string> ToolRouteTrackInteractive::Settings::mode_names =
+        {{ToolRouteTrackInteractive::Settings::Mode::BEND, "45 degree"},
+         {ToolRouteTrackInteractive::Settings::Mode::STRAIGHT, "Straight"},
+         {ToolRouteTrackInteractive::Settings::Mode::PUSH, "Push & shove"},
+         {ToolRouteTrackInteractive::Settings::Mode::WALKAROUND, "Walkaround"}};
+
+static const LutEnumStr<ToolRouteTrackInteractive::Settings::Mode> mode_lut = {
+        {"bend", ToolRouteTrackInteractive::Settings::Mode::BEND},
+        {"straight", ToolRouteTrackInteractive::Settings::Mode::STRAIGHT},
+        {"push", ToolRouteTrackInteractive::Settings::Mode::PUSH},
+        {"walkaround", ToolRouteTrackInteractive::Settings::Mode::WALKAROUND},
+};
+
 json ToolRouteTrackInteractive::Settings::serialize() const
 {
     json j;
     j["effort"] = effort;
     j["remove_loops"] = remove_loops;
+    j["drc"] = drc;
+    j["mode"] = mode_lut.lookup_reverse(mode);
     return j;
 }
 
@@ -56,6 +71,8 @@ void ToolRouteTrackInteractive::Settings::load_from_json(const json &j)
 {
     effort = j.value("effort", 1);
     remove_loops = j.value("remove_loops", true);
+    drc = j.value("drc", true);
+    mode = mode_lut.lookup(j.value("mode", ""), Settings::Mode::WALKAROUND);
 }
 
 void ToolRouteTrackInteractive::apply_settings()
@@ -65,6 +82,7 @@ void ToolRouteTrackInteractive::apply_settings()
     PNS::ROUTING_SETTINGS routing_settings(router->Settings());
     routing_settings.SetRemoveLoops(settings.remove_loops);
     routing_settings.SetOptimizerEffort(static_cast<PNS::PNS_OPTIMIZATION_EFFORT>(settings.effort));
+    routing_settings.SetCanViolateDRC(!settings.drc);
     router->LoadSettings(routing_settings);
 }
 
@@ -539,7 +557,32 @@ bool ToolWrapper::prepareInteractive()
     */
     tool->router->UpdateSizes(sizes);
     PNS::ROUTING_SETTINGS settings(tool->router->Settings());
-    settings.SetMode(tool->shove ? PNS::RM_Shove : PNS::RM_Walkaround);
+    using Mode = ToolRouteTrackInteractive::Settings::Mode;
+    switch (tool->settings.mode) {
+    case Mode::WALKAROUND:
+        settings.SetMode(PNS::RM_Walkaround);
+        settings.SetFreeAngleMode(false);
+        settings.SetCanViolateDRC(false);
+        break;
+
+    case Mode::PUSH:
+        settings.SetMode(PNS::RM_Shove);
+        settings.SetFreeAngleMode(false);
+        settings.SetCanViolateDRC(false);
+        break;
+
+    case Mode::BEND:
+        settings.SetMode(PNS::RM_MarkObstacles);
+        settings.SetFreeAngleMode(false);
+        settings.SetCanViolateDRC(!tool->settings.drc);
+        break;
+
+    case Mode::STRAIGHT:
+        settings.SetMode(PNS::RM_MarkObstacles);
+        settings.SetFreeAngleMode(true);
+        settings.SetCanViolateDRC(!tool->settings.drc);
+        break;
+    }
     tool->router->LoadSettings(settings);
 
     if (!tool->router->StartRouting(m_startSnapPoint, m_startItem, routingLayer)) {
@@ -719,13 +762,32 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                         }
                     }
                     state = State::ROUTING;
+                    update_settings_window();
                     if (!wrapper->prepareInteractive()) {
                         return ToolResponse::end();
                     }
                     break;
 
                 case InToolActionID::ROUTER_MODE:
-                    shove ^= true;
+                    if (!imp->dialogs.get_nonmodal()) {
+                        switch (settings.mode) {
+                        case Settings::Mode::BEND:
+                            settings.mode = Settings::Mode::STRAIGHT;
+                            break;
+
+                        case Settings::Mode::STRAIGHT:
+                            settings.mode = Settings::Mode::BEND;
+                            break;
+
+                        case Settings::Mode::WALKAROUND:
+                            settings.mode = Settings::Mode::PUSH;
+                            break;
+
+                        case Settings::Mode::PUSH:
+                            settings.mode = Settings::Mode::WALKAROUND;
+                            break;
+                        }
+                    }
                     break;
 
                 case InToolActionID::RMB:
@@ -757,6 +819,7 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                         imp->get_highlights().clear();
                         imp->update_highlights();
                         update_tip();
+                        update_settings_window();
                         return ToolResponse();
                     }
                     imp->canvas_update();
@@ -787,6 +850,7 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                     imp->get_highlights().clear();
                     imp->update_highlights();
                     update_tip();
+                    update_settings_window();
                     return ToolResponse();
 
                 case InToolActionID::CANCEL:
@@ -860,6 +924,8 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
 
             case InToolActionID::ROUTER_SETTINGS:
                 imp->dialogs.show_router_settings_window(settings);
+                settings_window_visible = true;
+                update_settings_window();
                 break;
 
             default:;
@@ -869,6 +935,10 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
             if (auto data = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
                 if (data->event == ToolDataWindow::Event::UPDATE) {
                     apply_settings();
+                }
+                else if (data->event == ToolDataWindow::Event::CLOSE) {
+                    settings_window_visible = false;
+                    update_tip();
                 }
             }
         }
@@ -960,13 +1030,10 @@ void ToolRouteTrackInteractive::update_tip()
     else {
         actions.emplace_back(InToolActionID::LMB, "select staring point");
         actions.emplace_back(InToolActionID::RMB, "cancel");
-        actions.emplace_back(InToolActionID::ROUTER_MODE);
+        if (!settings_window_visible)
+            actions.emplace_back(InToolActionID::ROUTER_MODE);
         actions.emplace_back(InToolActionID::ROUTER_SETTINGS);
-        ss << "Mode: ";
-        if (shove)
-            ss << "shove";
-        else
-            ss << "walkaround";
+        ss << "Mode: " << Glib::Markup::escape_text(Settings::mode_names.at(settings.mode));
         if (wrapper->m_startItem) {
             auto nc = wrapper->m_startItem->Net();
             auto net = iface->get_net_for_code(nc);
@@ -979,4 +1046,13 @@ void ToolRouteTrackInteractive::update_tip()
     imp->tool_bar_set_actions(actions);
     imp->tool_bar_set_tip(ss.str());
 }
+
+void ToolRouteTrackInteractive::update_settings_window()
+{
+    if (auto win = dynamic_cast<RouterSettingsWindow *>(imp->dialogs.get_nonmodal())) {
+        win->set_is_routing(state == State::ROUTING);
+    }
+}
+
+
 } // namespace horizon

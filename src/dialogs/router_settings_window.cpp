@@ -22,6 +22,39 @@ RouterSettingsWindow::RouterSettingsWindow(Gtk::Window *parent, ImpInterface *in
     int top = 0;
 
     {
+        mode_combo = Gtk::manage(new Gtk::ComboBoxText);
+        mode_combo->set_halign(Gtk::ALIGN_START);
+        auto add_mode = [this](auto mode) {
+            mode_combo->append(std::to_string(static_cast<int>(mode)),
+                               ToolRouteTrackInteractive::Settings::mode_names.at(mode));
+        };
+        add_mode(Mode::WALKAROUND);
+        add_mode(Mode::PUSH);
+        add_mode(Mode::BEND);
+        add_mode(Mode::STRAIGHT);
+        mode_combo->set_active_id(std::to_string(static_cast<int>(settings.mode)));
+        mode_combo->signal_changed().connect([this] {
+            auto mode = static_cast<Mode>(std::stoi(mode_combo->get_active_id()));
+            settings.mode = mode;
+            update_drc();
+            emit_event(ToolDataWindow::Event::UPDATE);
+        });
+        grid_attach_label_and_widget(grid, "Mode", mode_combo, top);
+    }
+    {
+        drc_switch = Gtk::manage(new Gtk::Switch);
+        drc_switch->set_halign(Gtk::ALIGN_START);
+        update_drc();
+
+        drc_switch->property_active().signal_changed().connect([this] {
+            if (drc_switch->get_sensitive()) {
+                settings.drc = drc_switch->get_active();
+                emit_event(ToolDataWindow::Event::UPDATE);
+            }
+        });
+        grid_attach_label_and_widget(grid, "DRC", drc_switch, top);
+    }
+    {
         auto sw = Gtk::manage(new Gtk::Switch);
         sw->set_halign(Gtk::ALIGN_START);
         bind_widget(sw, settings.remove_loops);
@@ -53,6 +86,23 @@ RouterSettingsWindow::RouterSettingsWindow(Gtk::Window *parent, ImpInterface *in
 
     grid->show_all();
     add(*grid);
+}
+
+void RouterSettingsWindow::update_drc()
+{
+    bool drc_forced = any_of(settings.mode, {Mode::WALKAROUND, Mode::PUSH});
+    drc_switch->set_sensitive(!drc_forced);
+    if (drc_forced) {
+        drc_switch->set_active(true);
+    }
+    else {
+        drc_switch->set_active(settings.drc);
+    }
+}
+
+void RouterSettingsWindow::set_is_routing(bool is_routing)
+{
+    mode_combo->set_sensitive(!is_routing);
 }
 
 } // namespace horizon
