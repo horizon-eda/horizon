@@ -14,6 +14,7 @@
 #include "rule_editor_via.hpp"
 #include "rule_editor_clearance_copper_keepout.hpp"
 #include "rule_editor_layer_pair.hpp"
+#include "rule_editor_clearance_same_net.hpp"
 #include "rules/cache.hpp"
 #include "rules/rule_descr.hpp"
 #include "rules/rules.hpp"
@@ -485,6 +486,10 @@ RuleEditor *RulesWindow::create_editor(Rule *r)
 
     case RuleID::LAYER_PAIR:
         e = new RuleEditorLayerPair(r, core);
+        break;
+
+    case RuleID::CLEARANCE_SAME_NET:
+        e = new RuleEditorClearanceSameNet(r, core);
         break;
 
     default:
