@@ -27,8 +27,8 @@ GerberLayerEditor::GerberLayerEditor(BaseObjectType *cobject, const Glib::RefPtr
                                      FabOutputSettings::GerberLayer &la)
     : Gtk::Box(cobject), parent(pa), layer(la)
 {
-    x->get_widget("gerber_layer_checkbutton", gerber_layer_checkbutton);
-    x->get_widget("gerber_layer_filename_entry", gerber_layer_filename_entry);
+    GET_WIDGET(gerber_layer_checkbutton);
+    GET_WIDGET(gerber_layer_filename_entry);
     parent.sg_layer_name->add_widget(*gerber_layer_checkbutton);
 
     gerber_layer_checkbutton->set_label(parent.brd.get_layers().at(layer.layer).name);
@@ -53,18 +53,18 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     : Gtk::Window(cobject), core(c), brd(*core.get_board()), settings(core.get_fab_output_settings()),
       state_store(this, "imp-fab-output")
 {
-    x->get_widget("gerber_layers_box", gerber_layers_box);
-    x->get_widget("prefix_entry", prefix_entry);
-    x->get_widget("directory_entry", directory_entry);
-    x->get_widget("npth_filename_entry", npth_filename_entry);
-    x->get_widget("pth_filename_entry", pth_filename_entry);
-    x->get_widget("npth_filename_label", npth_filename_label);
-    x->get_widget("pth_filename_label", pth_filename_label);
-    x->get_widget("generate_button", generate_button);
-    x->get_widget("directory_button", directory_button);
-    x->get_widget("drill_mode_combo", drill_mode_combo);
-    x->get_widget("log_textview", log_textview);
-    x->get_widget("zip_output", zip_output_switch);
+    GET_WIDGET(gerber_layers_box);
+    GET_WIDGET(prefix_entry);
+    GET_WIDGET(directory_entry);
+    GET_WIDGET(npth_filename_entry);
+    GET_WIDGET(pth_filename_entry);
+    GET_WIDGET(npth_filename_label);
+    GET_WIDGET(pth_filename_label);
+    GET_WIDGET(generate_button);
+    GET_WIDGET(directory_button);
+    GET_WIDGET(drill_mode_combo);
+    GET_WIDGET(log_textview);
+    GET_WIDGET(zip_output_switch);
 
     export_filechooser.attach(directory_entry, directory_button, this);
     export_filechooser.set_project_dir(project_dir);

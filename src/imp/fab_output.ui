@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkBox" id="gerber_layer_editor">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="margin_left">10</property>
-    <property name="margin_right">10</property>
+    <property name="margin_start">10</property>
+    <property name="margin_end">10</property>
     <property name="margin_top">5</property>
     <property name="margin_bottom">5</property>
     <property name="spacing">10</property>
@@ -67,31 +67,12 @@
   <object class="GtkWindow" id="window">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
-    <child type="titlebar">
-      <object class="GtkHeaderBar">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="title">Fabrication outputs</property>
-        <property name="show_close_button">True</property>
-        <child>
-          <object class="GtkButton" id="generate_button">
-            <property name="label" translatable="yes">Generate</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <style>
-              <class name="suggested-action"/>
-            </style>
-          </object>
-        </child>
-      </object>
-    </child>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">20</property>
-        <property name="margin_right">20</property>
+        <property name="margin_start">20</property>
+        <property name="margin_end">20</property>
         <property name="margin_top">20</property>
         <property name="margin_bottom">20</property>
         <property name="orientation">vertical</property>
@@ -431,7 +412,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkSwitch" id="zip_output">
+                          <object class="GtkSwitch" id="zip_output_switch">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="halign">start</property>
@@ -510,7 +491,6 @@
                     <property name="can_focus">True</property>
                     <property name="hscrollbar_policy">never</property>
                     <property name="shadow_type">in</property>
-                    <property name="propagate_natural_height">True</property>
                     <child>
                       <object class="GtkViewport">
                         <property name="visible">True</property>
@@ -566,6 +546,25 @@
             <property name="fill">True</property>
             <property name="position">2</property>
           </packing>
+        </child>
+      </object>
+    </child>
+    <child type="titlebar">
+      <object class="GtkHeaderBar">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="title">Fabrication outputs</property>
+        <property name="show_close_button">True</property>
+        <child>
+          <object class="GtkButton" id="generate_button">
+            <property name="label" translatable="yes">Generate</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <style>
+              <class name="suggested-action"/>
+            </style>
+          </object>
         </child>
       </object>
     </child>
