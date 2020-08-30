@@ -559,7 +559,7 @@
                             <property name="can_focus">False</property>
                             <property name="spacing">20</property>
                             <child>
-                              <object class="GtkLabel" id="tool_bar_label">
+                              <object class="GtkLabel" id="tool_bar_name_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">Tool frobnicate</property>
@@ -580,7 +580,7 @@
                                 <property name="transition_duration">100</property>
                                 <property name="transition_type">slide-up-down</property>
                                 <child>
-                                  <object class="GtkLabel" id="tool_bar_tip">
+                                  <object class="GtkLabel" id="tool_bar_tip_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="halign">start</property>
@@ -593,7 +593,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="tool_bar_flash">
+                                  <object class="GtkLabel" id="tool_bar_flash_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="halign">start</property>
