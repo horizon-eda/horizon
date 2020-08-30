@@ -13,6 +13,7 @@ public:
     json create_pull_request(const std::string &owner, const std::string &repo, const std::string &title,
                              const std::string &branch, const std::string &base, const std::string &body);
     json get_pull_requests(const std::string &owner, const std::string &repo);
+    json get_pull_request(const std::string &owner, const std::string &repo, unsigned int pr);
 
     HTTP::RESTClient client;
 

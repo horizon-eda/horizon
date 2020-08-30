@@ -42,4 +42,9 @@ json GitHubClient::get_pull_requests(const std::string &owner, const std::string
 {
     return client.get("/repos/" + owner + "/" + repo + "/pulls");
 }
+
+json GitHubClient::get_pull_request(const std::string &owner, const std::string &repo, unsigned int pr)
+{
+    return client.get("/repos/" + owner + "/" + repo + "/pulls/" + std::to_string(pr));
+}
 } // namespace horizon

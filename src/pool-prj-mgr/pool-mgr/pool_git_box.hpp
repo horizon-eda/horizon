@@ -32,6 +32,10 @@ private:
     Gtk::Box *diff_box = nullptr;
     Gtk::Button *add_with_deps_button = nullptr;
 
+    Gtk::Button *pr_button = nullptr;
+    Gtk::Button *back_to_master_button = nullptr;
+    Gtk::Button *back_to_master_delete_button = nullptr;
+
     void make_treeview(Gtk::TreeView *treeview);
 
     class TreeColumns : public Gtk::TreeModelColumnRecord {
@@ -72,5 +76,7 @@ private:
     void update_store_from_db_prepare();
     void update_store_from_db(Glib::RefPtr<Gtk::ListStore> store);
     void handle_add_with_deps();
+    void handle_pr();
+    void handle_back_to_master(bool delete_pr);
 };
 } // namespace horizon

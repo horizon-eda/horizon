@@ -117,6 +117,7 @@ public:
     ActionBarPreferences action_bar;
     InToolKeySequencesPreferences in_tool_key_sequences;
 
+    bool show_pull_request_tools = false;
 
     typedef sigc::signal<void> type_signal_changed;
     type_signal_changed signal_changed()
