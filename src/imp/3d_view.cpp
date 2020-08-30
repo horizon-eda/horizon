@@ -1,6 +1,7 @@
 #include "3d_view.hpp"
 #include "canvas3d/canvas3d.hpp"
 #include "util/step_importer.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 
@@ -42,26 +43,26 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     : Gtk::Window(cobject), board(bo), pool(p), mode(md), state_store(this, "imp-board-3d")
 {
     Gtk::Box *gl_box;
-    x->get_widget("gl_box", gl_box);
+    GET_WIDGET(gl_box);
 
     canvas = Gtk::manage(new Canvas3D);
     gl_box->pack_start(*canvas, true, true, 0);
     canvas->show();
 
-    Gtk::Revealer *rev;
-    x->get_widget("revealer", rev);
+    Gtk::Revealer *revealer;
+    GET_WIDGET(revealer);
     Gtk::ToggleButton *settings_button;
-    x->get_widget("settings_button", settings_button);
+    GET_WIDGET(settings_button);
     settings_button->signal_toggled().connect(
-            [settings_button, rev] { rev->set_reveal_child(settings_button->get_active()); });
+            [settings_button, revealer] { revealer->set_reveal_child(settings_button->get_active()); });
 
     Gtk::Button *update_button;
-    x->get_widget("update_button", update_button);
+    GET_WIDGET(update_button);
     update_button->signal_clicked().connect([this] { update(); });
 
     {
         Gtk::Box *view_buttons_box;
-        x->get_widget("view_buttons_box", view_buttons_box);
+        GET_WIDGET(view_buttons_box);
         std::vector<ViewInfo> views = {{"front", "Front", 270., 0.}, {"back", "Back", 90., 0.},
                                        {"top", "Top", 270., 89.99},  {"bottom", "Bottom", 270., -89.99},
                                        {"right", "Right", 0., 0.},   {"left", "Left", 180., 0.}};
@@ -83,13 +84,13 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
 
     Gtk::Button *rotate_left_button;
     Gtk::Button *rotate_right_button;
-    x->get_widget("rotate_left_button", rotate_left_button);
-    x->get_widget("rotate_right_button", rotate_right_button);
+    GET_WIDGET(rotate_left_button);
+    GET_WIDGET(rotate_right_button);
     rotate_left_button->signal_clicked().connect([this] { canvas->inc_cam_azimuth(-90); });
     rotate_right_button->signal_clicked().connect([this] { canvas->inc_cam_azimuth(90); });
 
     Gtk::Button *view_all_button;
-    x->get_widget("view_all_button", view_all_button);
+    GET_WIDGET(view_all_button);
     view_all_button->signal_clicked().connect([this] { canvas->view_all(); });
 
     auto explode_adj = Glib::RefPtr<Gtk::Adjustment>::cast_dynamic(x->get_object("explode_adj"));
@@ -98,14 +99,14 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         canvas->queue_draw();
     });
 
-    x->get_widget("solder_mask_color_button", solder_mask_color_button);
+    GET_WIDGET(solder_mask_color_button);
     bind_color_button(solder_mask_color_button, canvas->solder_mask_color, [this] {
         canvas->queue_draw();
         s_signal_changed.emit();
     });
     solder_mask_color_button->set_color(Gdk::Color("#008000"));
 
-    x->get_widget("background_top_color_button", background_top_color_button);
+    GET_WIDGET(background_top_color_button);
     bind_color_button(background_top_color_button, canvas->background_top_color, [this] {
         canvas->queue_draw();
         if (!setting_background_color_from_preset && background_color_preset_combo)
@@ -113,7 +114,7 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     });
     background_top_color_button->set_color(Gdk::Color("#333365"));
 
-    x->get_widget("background_bottom_color_button", background_bottom_color_button);
+    GET_WIDGET(background_bottom_color_button);
     bind_color_button(background_bottom_color_button, canvas->background_bottom_color, [this] {
         canvas->queue_draw();
         if (!setting_background_color_from_preset && background_color_preset_combo)
@@ -122,27 +123,27 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     background_bottom_color_button->set_color(Gdk::Color("#9797aa"));
 
     Gtk::Switch *solder_mask_switch;
-    x->get_widget("solder_mask_switch", solder_mask_switch);
+    GET_WIDGET(solder_mask_switch);
     solder_mask_switch->property_active().signal_changed().connect([this, solder_mask_switch] {
         canvas->show_solder_mask = solder_mask_switch->get_active();
         canvas->queue_draw();
     });
 
     Gtk::Switch *silkscreen_switch;
-    x->get_widget("silkscreen_switch", silkscreen_switch);
+    GET_WIDGET(silkscreen_switch);
     silkscreen_switch->property_active().signal_changed().connect([this, silkscreen_switch] {
         canvas->show_silkscreen = silkscreen_switch->get_active();
         canvas->queue_draw();
     });
 
     Gtk::Switch *substrate_switch;
-    x->get_widget("substrate_switch", substrate_switch);
+    GET_WIDGET(substrate_switch);
     substrate_switch->property_active().signal_changed().connect([this, substrate_switch] {
         canvas->show_substrate = substrate_switch->get_active();
         canvas->queue_draw();
     });
 
-    x->get_widget("substrate_color_button", substrate_color_button);
+    GET_WIDGET(substrate_color_button);
     bind_color_button(substrate_color_button, canvas->substrate_color, [this] {
         canvas->queue_draw();
         s_signal_changed.emit();
@@ -150,7 +151,7 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     substrate_color_button->set_color(Gdk::Color("#332600"));
 
     Gtk::Switch *paste_switch;
-    x->get_widget("paste_switch", paste_switch);
+    GET_WIDGET(paste_switch);
     paste_switch->property_active().signal_changed().connect([this, paste_switch] {
         canvas->show_solder_paste = paste_switch->get_active();
         canvas->queue_draw();
@@ -158,7 +159,7 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
 
     {
         Gtk::RadioButton *models_none_rb;
-        x->get_widget("models_none_rb", models_none_rb);
+        GET_WIDGET(models_none_rb);
         models_none_rb->property_active().signal_changed().connect([this, models_none_rb] {
             canvas->show_models = !models_none_rb->get_active();
             canvas->queue_draw();
@@ -167,7 +168,7 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
 
     {
         Gtk::RadioButton *models_placed_rb;
-        x->get_widget("models_placed_rb", models_placed_rb);
+        GET_WIDGET(models_placed_rb);
         if (mode == Mode::BOARD) {
             models_placed_rb->property_active().signal_changed().connect([this, models_placed_rb] {
                 canvas->show_dnp_models = !models_placed_rb->get_active();
@@ -180,27 +181,27 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     }
     {
         Gtk::RadioButton *models_all_rb;
-        x->get_widget("models_all_rb", models_all_rb);
+        GET_WIDGET(models_all_rb);
         if (mode == Mode::PACKAGE) {
             models_all_rb->set_active();
         }
     }
 
     Gtk::Switch *layer_colors_switch;
-    x->get_widget("layer_colors_switch", layer_colors_switch);
+    GET_WIDGET(layer_colors_switch);
     layer_colors_switch->property_active().signal_changed().connect([this, layer_colors_switch] {
         canvas->use_layer_colors = layer_colors_switch->get_active();
         canvas->queue_draw();
     });
 
     Gtk::RadioButton *proj_persp_rb;
-    x->get_widget("proj_persp_rb", proj_persp_rb);
+    GET_WIDGET(proj_persp_rb);
     proj_persp_rb->signal_toggled().connect([this, proj_persp_rb] {
         canvas->projection = proj_persp_rb->get_active() ? Canvas3D::Projection::PERSP : Canvas3D::Projection::ORTHO;
         canvas->queue_draw();
     });
 
-    x->get_widget("background_color_preset_combo", background_color_preset_combo);
+    GET_WIDGET(background_color_preset_combo);
 
     // gradients from https://uigradients.com/
     static const std::vector<std::pair<std::string, std::pair<Gdk::Color, Gdk::Color>>> background_color_presets = {
@@ -233,9 +234,9 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
         }
     });
 
-    x->get_widget("model_loading_revealer", model_loading_revealer);
-    x->get_widget("model_loading_spinner", model_loading_spinner);
-    x->get_widget("model_loading_progress", model_loading_progress);
+    GET_WIDGET(model_loading_revealer);
+    GET_WIDGET(model_loading_spinner);
+    GET_WIDGET(model_loading_progress);
     canvas->signal_models_loading().connect([this](unsigned int i, unsigned int n) {
         bool loading = i < n;
         model_loading_revealer->set_reveal_child(loading);
@@ -245,7 +246,7 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     });
 
     Gtk::ComboBoxText *msaa_combo;
-    x->get_widget("msaa_combo", msaa_combo);
+    GET_WIDGET(msaa_combo);
     msaa_combo->append("0", "Off");
     for (int i = 1; i < 5; i *= 2) {
         msaa_combo->append(std::to_string(i), std::to_string(i) + "× MSAA");
@@ -256,8 +257,8 @@ View3DWindow::View3DWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     });
     msaa_combo->set_active_id("4");
 
-    x->get_widget("main_box", main_box);
-} // namespace horizon
+    GET_WIDGET(main_box);
+}
 
 void View3DWindow::add_widget(Gtk::Widget *w)
 {
