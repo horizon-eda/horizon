@@ -548,7 +548,7 @@ void ImpBoard::construct()
         la->property_margin() = 10;
     }
 
-    fab_output_window = FabOutputWindow::create(main_window, &core_board, project_dir);
+    fab_output_window = FabOutputWindow::create(main_window, core_board, project_dir);
     core->signal_tool_changed().connect([this](ToolID t) { fab_output_window->set_can_generate(t == ToolID::NONE); });
     core->signal_rebuilt().connect([this] { fab_output_window->reload_layers(); });
     fab_output_window->signal_changed().connect([this] { core_board.set_needs_save(); });
@@ -559,7 +559,7 @@ void ImpBoard::construct()
     });
 
     pdf_export_window =
-            PDFExportWindow::create(main_window, &core_board, *core_board.get_pdf_export_settings(), project_dir);
+            PDFExportWindow::create(main_window, core_board, *core_board.get_pdf_export_settings(), project_dir);
     pdf_export_window->signal_changed().connect([this] { core_board.set_needs_save(); });
     core->signal_rebuilt().connect([this] { pdf_export_window->reload_layers(); });
     connect_action(ActionID::PDF_EXPORT_WINDOW, [this](const auto &c) { pdf_export_window->present(); });
@@ -584,7 +584,7 @@ void ImpBoard::construct()
         return false;
     });
 
-    step_export_window = StepExportWindow::create(main_window, &core_board, project_dir);
+    step_export_window = StepExportWindow::create(main_window, core_board, project_dir);
     step_export_window->signal_changed().connect([this] { core_board.set_needs_save(); });
     connect_action(ActionID::STEP_EXPORT_WINDOW, [this](const auto &c) { step_export_window->present(); });
     connect_action(ActionID::EXPORT_STEP, [this](const auto &c) {

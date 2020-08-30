@@ -20,45 +20,45 @@ namespace horizon {
 
 class PDFLayerEditor : public Gtk::Box, public Changeable {
 public:
-    PDFLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PDFExportWindow *pa,
-                   PDFExportSettings::Layer *la);
-    static PDFLayerEditor *create(PDFExportWindow *pa, PDFExportSettings::Layer *la);
+    PDFLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PDFExportWindow &pa,
+                   PDFExportSettings::Layer &la);
+    static PDFLayerEditor *create(PDFExportWindow &pa, PDFExportSettings::Layer &la);
 
 
 private:
-    PDFExportWindow *parent;
+    PDFExportWindow &parent;
     Gtk::CheckButton *layer_checkbutton = nullptr;
     Gtk::RadioButton *layer_fill = nullptr;
     Gtk::RadioButton *layer_outline = nullptr;
     Gtk::ColorButton *layer_color = nullptr;
 
-    PDFExportSettings::Layer *layer = nullptr;
+    PDFExportSettings::Layer &layer;
 };
 
-PDFLayerEditor::PDFLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PDFExportWindow *pa,
-                               PDFExportSettings::Layer *la)
+PDFLayerEditor::PDFLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PDFExportWindow &pa,
+                               PDFExportSettings::Layer &la)
     : Gtk::Box(cobject), parent(pa), layer(la)
 {
     x->get_widget("layer_checkbutton", layer_checkbutton);
     x->get_widget("layer_fill", layer_fill);
     x->get_widget("layer_outline", layer_outline);
     x->get_widget("layer_color", layer_color);
-    parent->sg_layer_name->add_widget(*layer_checkbutton);
+    parent.sg_layer_name->add_widget(*layer_checkbutton);
 
-    layer_checkbutton->set_label(parent->core->get_layer_provider().get_layers().at(layer->layer).name);
-    bind_widget(layer_checkbutton, layer->enabled);
+    layer_checkbutton->set_label(parent.core.get_layer_provider().get_layers().at(layer.layer).name);
+    bind_widget(layer_checkbutton, layer.enabled);
     layer_checkbutton->signal_toggled().connect([this] { s_signal_changed.emit(); });
     {
         std::map<PDFExportSettings::Layer::Mode, Gtk::RadioButton *> widgets = {
                 {PDFExportSettings::Layer::Mode::FILL, layer_fill},
                 {PDFExportSettings::Layer::Mode::OUTLINE, layer_outline}};
-        bind_widget<PDFExportSettings::Layer::Mode>(widgets, layer->mode,
+        bind_widget<PDFExportSettings::Layer::Mode>(widgets, layer.mode,
                                                     [this](auto mode) { s_signal_changed.emit(); });
     }
-    bind_widget(layer_color, layer->color, [this](auto color) { s_signal_changed.emit(); });
+    bind_widget(layer_color, layer.color, [this](auto color) { s_signal_changed.emit(); });
 }
 
-PDFLayerEditor *PDFLayerEditor::create(PDFExportWindow *pa, PDFExportSettings::Layer *la)
+PDFLayerEditor *PDFLayerEditor::create(PDFExportWindow &pa, PDFExportSettings::Layer &la)
 {
     PDFLayerEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
@@ -83,7 +83,7 @@ void PDFExportWindow::MyExportFileChooser::prepare_filename(std::string &filenam
     }
 }
 
-PDFExportWindow *PDFExportWindow::create(Gtk::Window *p, IDocument *c, PDFExportSettings &s, const std::string &pd)
+PDFExportWindow *PDFExportWindow::create(Gtk::Window *p, IDocument &c, PDFExportSettings &s, const std::string &pd)
 {
     PDFExportWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
@@ -93,7 +93,7 @@ PDFExportWindow *PDFExportWindow::create(Gtk::Window *p, IDocument *c, PDFExport
     return w;
 }
 
-PDFExportWindow::PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocument *c,
+PDFExportWindow::PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocument &c,
                                  PDFExportSettings &s, const std::string &pd)
     : Gtk::Window(cobject), core(c), settings(s)
 {
@@ -122,7 +122,7 @@ PDFExportWindow::PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
         grid_attach_label_and_widget(grid, "Min. line width", sp, top);
     }
 
-    if (dynamic_cast<IDocumentSchematic *>(core)) {
+    if (dynamic_cast<IDocumentSchematic *>(&core)) {
         Gtk::ScrolledWindow *sc;
         x->get_widget("layers_sc", sc);
         sc->set_visible(false);
@@ -188,7 +188,7 @@ void PDFExportWindow::reload_layers()
               [](const auto a, const auto b) { return b->layer < a->layer; });
 
     for (auto la : layers_sorted) {
-        auto ed = PDFLayerEditor::create(this, la);
+        auto ed = PDFLayerEditor::create(*this, *la);
         ed->signal_changed().connect([this] { s_signal_changed.emit(); });
         layers_box->add(*ed);
         ed->show();
@@ -224,13 +224,13 @@ void PDFExportWindow::update_export_button()
 void PDFExportWindow::export_thread(PDFExportSettings s)
 {
     try {
-        if (auto core_sch = dynamic_cast<IDocumentSchematic *>(core)) {
+        if (auto core_sch = dynamic_cast<IDocumentSchematic *>(&core)) {
             export_pdf(*core_sch->get_schematic(), s, [this](std::string st, double p) {
                 status_dispatcher.set_status(StatusDispatcher::Status::BUSY, st, p);
             });
             status_dispatcher.set_status(StatusDispatcher::Status::DONE, "Done", 1);
         }
-        else if (auto core_brd = dynamic_cast<IDocumentBoard *>(core)) {
+        else if (auto core_brd = dynamic_cast<IDocumentBoard *>(&core)) {
             export_pdf(*core_brd->get_board(), s, [this](std::string st, double p) {
                 status_dispatcher.set_status(StatusDispatcher::Status::BUSY, st, p);
             });

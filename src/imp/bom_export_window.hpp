@@ -15,9 +15,9 @@ class BOMExportWindow : public Gtk::Window, public Changeable {
     friend class OrderableMPNSelector;
 
 public:
-    BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Block *block,
-                    class BOMExportSettings *settings, class IPool &pool, const std::string &project_dir);
-    static BOMExportWindow *create(Gtk::Window *p, class Block *block, class BOMExportSettings *settings,
+    BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class Block &block,
+                    class BOMExportSettings &settings, class IPool &pool, const std::string &project_dir);
+    static BOMExportWindow *create(Gtk::Window *p, class Block &block, class BOMExportSettings &settings,
                                    class IPool &pool, const std::string &project_dir);
 
     void set_can_export(bool v);
@@ -27,8 +27,8 @@ public:
     void update();
 
 private:
-    class Block *block;
-    class BOMExportSettings *settings;
+    class Block &block;
+    class BOMExportSettings &settings;
     class IPool &pool;
     PoolParametric pool_parametric;
 

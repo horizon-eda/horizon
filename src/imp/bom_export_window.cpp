@@ -43,10 +43,10 @@ std::string BOMExportWindow::MyAdapter::get_column_name(int col) const
     return bom_column_names.at(static_cast<BOMColumn>(col));
 }
 
-BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Block *blo,
-                                 BOMExportSettings *s, IPool &p, const std::string &project_dir)
+BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, Block &blo,
+                                 BOMExportSettings &s, IPool &p, const std::string &project_dir)
     : Gtk::Window(cobject), block(blo), settings(s), pool(p), pool_parametric(pool.get_base_path()),
-      state_store(this, "imp-bom-export"), adapter(settings->csv_settings.columns)
+      state_store(this, "imp-bom-export"), adapter(settings.csv_settings.columns)
 {
 
     GET_WIDGET(export_button);
@@ -72,15 +72,15 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
     export_filechooser.attach(filename_entry, filename_button, this);
     export_filechooser.set_project_dir(project_dir);
-    export_filechooser.bind_filename(settings->output_filename);
+    export_filechooser.bind_filename(settings.output_filename);
     export_filechooser.signal_changed().connect([this] {
         s_signal_changed.emit();
         update_export_button();
     });
 
-    nopopulate_check->set_active(settings->include_nopopulate);
+    nopopulate_check->set_active(settings.include_nopopulate);
     nopopulate_check->signal_toggled().connect([this] {
-        settings->include_nopopulate = nopopulate_check->get_active();
+        settings.include_nopopulate = nopopulate_check->get_active();
         s_signal_changed.emit();
         update_preview();
     });
@@ -88,9 +88,9 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     for (const auto &it : bom_column_names) {
         sort_column_combo->append(std::to_string(static_cast<int>(it.first)), it.second);
     }
-    sort_column_combo->set_active_id(std::to_string(static_cast<int>(settings->csv_settings.sort_column)));
+    sort_column_combo->set_active_id(std::to_string(static_cast<int>(settings.csv_settings.sort_column)));
     sort_column_combo->signal_changed().connect([this] {
-        settings->csv_settings.sort_column = static_cast<BOMColumn>(std::stoi(sort_column_combo->get_active_id()));
+        settings.csv_settings.sort_column = static_cast<BOMColumn>(std::stoi(sort_column_combo->get_active_id()));
         update_preview();
         s_signal_changed.emit();
     });
@@ -101,7 +101,7 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
                 {BOMExportSettings::CSVSettings::Order::DESC, "Desc."},
         };
 
-        bind_widget<BOMExportSettings::CSVSettings::Order>(sort_order_combo, its, settings->csv_settings.order,
+        bind_widget<BOMExportSettings::CSVSettings::Order>(sort_order_combo, its, settings.csv_settings.order,
                                                            [this](BOMExportSettings::CSVSettings::Order o) {
                                                                update_preview();
                                                                s_signal_changed.emit();
@@ -142,7 +142,7 @@ BOMExportWindow::BOMExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     button_set_similar->signal_clicked().connect(sigc::mem_fun(*this, &BOMExportWindow::handle_set_similar));
 
     button_clear_similar->signal_clicked().connect([this] {
-        settings->concrete_parts.erase(meta_part_current);
+        settings.concrete_parts.erase(meta_part_current);
         update_meta_mapping();
         s_signal_changed.emit();
         update_similar_button_sensitivity();
@@ -164,7 +164,7 @@ void BOMExportWindow::update_similar_button_sensitivity()
         button_clear_similar->set_sensitive(false);
         return;
     }
-    button_clear_similar->set_sensitive(settings->concrete_parts.count(meta_part_current));
+    button_clear_similar->set_sensitive(settings.concrete_parts.count(meta_part_current));
     button_set_similar->set_sensitive(browser_param ? browser_param->get_selected() : false);
 }
 
@@ -172,7 +172,7 @@ void BOMExportWindow::handle_set_similar()
 {
     auto sel = browser_param->get_selected();
     if (sel) {
-        settings->concrete_parts[meta_part_current] = pool.get_part(sel);
+        settings.concrete_parts[meta_part_current] = pool.get_part(sel);
         update_meta_mapping();
         s_signal_changed.emit();
     }
@@ -197,8 +197,8 @@ void BOMExportWindow::flash(const std::string &s)
 void BOMExportWindow::generate()
 {
     try {
-        export_BOM(export_filechooser.get_filename_abs(), *block, *settings);
-        flash("BOM written to " + settings->output_filename);
+        export_BOM(export_filechooser.get_filename_abs(), block, settings);
+        flash("BOM written to " + settings.output_filename);
     }
     catch (const std::exception &e) {
         flash("Error: " + std::string(e.what()));
@@ -211,14 +211,14 @@ void BOMExportWindow::generate()
 
 void BOMExportWindow::update_preview()
 {
-    auto rows = block->get_BOM(*settings);
+    auto rows = block.get_BOM(settings);
     std::vector<BOMRow> bom;
     std::transform(rows.begin(), rows.end(), std::back_inserter(bom), [](const auto &it) { return it.second; });
     std::sort(bom.begin(), bom.end(), [this](const auto &a, const auto &b) {
-        auto sa = a.get_column(settings->csv_settings.sort_column);
-        auto sb = b.get_column(settings->csv_settings.sort_column);
+        auto sa = a.get_column(settings.csv_settings.sort_column);
+        auto sb = b.get_column(settings.csv_settings.sort_column);
         auto c = strcmp_natural(sa, sb);
-        if (settings->csv_settings.order == BOMExportSettings::CSVSettings::Order::ASC)
+        if (settings.csv_settings.order == BOMExportSettings::CSVSettings::Order::ASC)
             return c < 0;
         else
             return c > 0;
@@ -231,7 +231,7 @@ void BOMExportWindow::update_preview()
         row[list_columns_preview.row] = it;
     }
 
-    for (auto col : settings->csv_settings.columns) {
+    for (auto col : settings.csv_settings.columns) {
         auto cr_text = Gtk::manage(new Gtk::CellRendererText());
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn(bom_column_names.at(col)));
         tvc->set_resizable();
@@ -255,29 +255,29 @@ void BOMExportWindow::update_preview()
 
 class OrderableMPNSelector : public Gtk::Box {
 public:
-    OrderableMPNSelector(const Part *p, BOMExportWindow *par)
-        : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10), part(p), parent(par), settings(*parent->settings)
+    OrderableMPNSelector(const Part &p, BOMExportWindow &par)
+        : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10), part(p), parent(par), settings(parent.settings)
     {
         property_margin() = 5;
         set_margin_start(10);
         set_margin_end(10);
-        auto la_manufacturer = Gtk::manage(new Gtk::Label(part->get_manufacturer()));
+        auto la_manufacturer = Gtk::manage(new Gtk::Label(part.get_manufacturer()));
         la_manufacturer->set_xalign(0);
         la_manufacturer->show();
         pack_start(*la_manufacturer, false, false, 0);
-        parent->sg_manufacturer->add_widget(*la_manufacturer);
+        parent.sg_manufacturer->add_widget(*la_manufacturer);
 
-        auto la_MPN = Gtk::manage(new Gtk::Label(part->get_MPN()));
+        auto la_MPN = Gtk::manage(new Gtk::Label(part.get_MPN()));
         la_MPN->set_xalign(0);
         la_MPN->show();
         pack_start(*la_MPN, false, false, 0);
-        parent->sg_MPN->add_widget(*la_MPN);
+        parent.sg_MPN->add_widget(*la_MPN);
 
         auto combo = Gtk::manage(new GenericComboBox<UUID>());
-        combo->append(UUID(), part->get_MPN() + " (base)");
+        combo->append(UUID(), part.get_MPN() + " (base)");
         std::vector<std::pair<UUID, std::string>> orderable_MPNs_sorted;
 
-        for (const auto &it : part->orderable_MPNs) {
+        for (const auto &it : part.orderable_MPNs) {
             orderable_MPNs_sorted.push_back(it);
         }
         std::sort(orderable_MPNs_sorted.begin(), orderable_MPNs_sorted.end(),
@@ -288,22 +288,22 @@ public:
 
         combo->show();
         pack_start(*combo, false, false, 0);
-        parent->sg_orderable_MPN->add_widget(*combo);
+        parent.sg_orderable_MPN->add_widget(*combo);
 
-        if (settings.orderable_MPNs.count(part->uuid))
-            combo->set_active_key(settings.orderable_MPNs.at(part->uuid));
+        if (settings.orderable_MPNs.count(part.uuid))
+            combo->set_active_key(settings.orderable_MPNs.at(part.uuid));
         else
             combo->set_active_key(UUID());
         combo->signal_changed().connect([this, combo] {
-            settings.orderable_MPNs[part->uuid] = combo->get_active_key();
-            parent->update_preview();
-            parent->signal_changed().emit();
+            settings.orderable_MPNs[part.uuid] = combo->get_active_key();
+            parent.update_preview();
+            parent.signal_changed().emit();
         });
     }
 
 private:
-    const Part *part;
-    BOMExportWindow *parent;
+    const Part &part;
+    BOMExportWindow &parent;
     BOMExportSettings &settings;
 };
 
@@ -315,13 +315,13 @@ void BOMExportWindow::update_orderable_MPNs()
             delete ch;
         }
     }
-    BOMExportSettings my_settings(*settings);
+    BOMExportSettings my_settings(settings);
     my_settings.include_nopopulate = true;
-    auto rows = block->get_BOM(my_settings);
+    auto rows = block.get_BOM(my_settings);
     for (const auto &row : rows) {
         auto part = row.first;
         if (part->orderable_MPNs.size()) {
-            auto ed = Gtk::manage(new OrderableMPNSelector(part, this));
+            auto ed = Gtk::manage(new OrderableMPNSelector(*part, *this));
             ed->show();
             orderable_MPNs_listbox->append(*ed);
         }
@@ -335,7 +335,7 @@ void BOMExportWindow::update()
     meta_parts_tv->unset_model();
     meta_parts_store->clear();
     std::map<const Part *, unsigned int> parts;
-    for (const auto &it : block->components) {
+    for (const auto &it : block.components) {
         if (it.second.part) {
             parts[it.second.part]++;
         }
@@ -360,8 +360,8 @@ void BOMExportWindow::update_meta_mapping()
     for (auto it : meta_parts_store->children()) {
         Gtk::TreeModel::Row row = *it;
         UUID uu = row[meta_parts_list_columns.uuid];
-        if (settings->concrete_parts.count(uu)) {
-            auto part = settings->concrete_parts.at(uu);
+        if (settings.concrete_parts.count(uu)) {
+            auto part = settings.concrete_parts.at(uu);
             row[meta_parts_list_columns.concrete_MPN] = part->get_MPN();
             row[meta_parts_list_columns.concrete_value] = part->get_value();
             row[meta_parts_list_columns.concrete_manufacturer] = part->get_manufacturer();
@@ -420,7 +420,7 @@ void BOMExportWindow::update_export_button()
 {
     std::string txt;
     if (can_export) {
-        if (settings->output_filename.size() == 0) {
+        if (settings.output_filename.size() == 0) {
             txt = "output filename not set";
         }
     }
@@ -430,7 +430,7 @@ void BOMExportWindow::update_export_button()
     widget_set_insensitive_tooltip(*export_button, txt);
 }
 
-BOMExportWindow *BOMExportWindow::create(Gtk::Window *p, Block *b, BOMExportSettings *s, IPool &pool,
+BOMExportWindow *BOMExportWindow::create(Gtk::Window *p, Block &b, BOMExportSettings &s, IPool &pool,
                                          const std::string &project_dir)
 {
     BOMExportWindow *w;

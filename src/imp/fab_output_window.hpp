@@ -12,18 +12,18 @@ class FabOutputWindow : public Gtk::Window, public Changeable {
     friend class GerberLayerEditor;
 
 public:
-    FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class IDocumentBoard *c,
+    FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class IDocumentBoard &c,
                     const std::string &project_dir);
-    static FabOutputWindow *create(Gtk::Window *p, class IDocumentBoard *c, const std::string &project_dir);
+    static FabOutputWindow *create(Gtk::Window *p, class IDocumentBoard &c, const std::string &project_dir);
 
     void set_can_generate(bool v);
     void reload_layers();
     void generate();
 
 private:
-    class IDocumentBoard *core;
-    class Board *brd;
-    class FabOutputSettings *settings;
+    class IDocumentBoard &core;
+    class Board &brd;
+    class FabOutputSettings &settings;
     Gtk::ListBox *gerber_layers_box = nullptr;
     Gtk::Entry *npth_filename_entry = nullptr;
     Gtk::Entry *pth_filename_entry = nullptr;

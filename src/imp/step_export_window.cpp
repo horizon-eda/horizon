@@ -24,7 +24,7 @@ void StepExportWindow::MyExportFileChooser::prepare_filename(std::string &filena
     }
 }
 
-StepExportWindow *StepExportWindow::create(Gtk::Window *p, IDocumentBoard *c, const std::string &project_dir)
+StepExportWindow *StepExportWindow::create(Gtk::Window *p, IDocumentBoard &c, const std::string &project_dir)
 {
     StepExportWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
@@ -34,9 +34,9 @@ StepExportWindow *StepExportWindow::create(Gtk::Window *p, IDocumentBoard *c, co
     return w;
 }
 
-StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocumentBoard *c,
+StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocumentBoard &c,
                                    const std::string &project_dir)
-    : Gtk::Window(cobject), core(c), settings(*core->get_step_export_settings())
+    : Gtk::Window(cobject), core(c), settings(*core.get_step_export_settings())
 {
     set_modal(true);
     x->get_widget("header", header);
@@ -111,7 +111,7 @@ void StepExportWindow::export_thread(STEPExportSettings my_settings)
 {
     try {
         export_step(
-                my_settings.filename, *core->get_board(), core->get_pool(), my_settings.include_3d_models,
+                my_settings.filename, *core.get_board(), core.get_pool(), my_settings.include_3d_models,
                 [this](const std::string &msg) {
                     {
                         std::lock_guard<std::mutex> guard(msg_queue_mutex);
@@ -119,7 +119,7 @@ void StepExportWindow::export_thread(STEPExportSettings my_settings)
                     }
                     export_dispatcher.emit();
                 },
-                core->get_colors(), my_settings.prefix);
+                core.get_colors(), my_settings.prefix);
     }
     catch (const std::exception &e) {
         {

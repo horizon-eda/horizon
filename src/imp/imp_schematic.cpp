@@ -446,8 +446,8 @@ void ImpSchematic::construct()
     connect_action(ActionID::HIGHLIGHT_GROUP, sigc::mem_fun(*this, &ImpSchematic::handle_highlight_group_tag));
     connect_action(ActionID::HIGHLIGHT_TAG, sigc::mem_fun(*this, &ImpSchematic::handle_highlight_group_tag));
 
-    bom_export_window = BOMExportWindow::create(main_window, core_schematic.get_block(),
-                                                core_schematic.get_bom_export_settings(), *pool.get(), project_dir);
+    bom_export_window = BOMExportWindow::create(main_window, *core_schematic.get_block(),
+                                                *core_schematic.get_bom_export_settings(), *pool.get(), project_dir);
 
     connect_action(ActionID::BOM_EXPORT_WINDOW, [this](const auto &c) { bom_export_window->present(); });
     connect_action(ActionID::EXPORT_BOM, [this](const auto &c) {
@@ -459,8 +459,8 @@ void ImpSchematic::construct()
     core->signal_tool_changed().connect([this](ToolID t) { bom_export_window->set_can_export(t == ToolID::NONE); });
     core->signal_rebuilt().connect([this] { bom_export_window->update(); });
 
-    pdf_export_window = PDFExportWindow::create(main_window, dynamic_cast<IDocument *>(&core_schematic),
-                                                *core_schematic.get_pdf_export_settings(), project_dir);
+    pdf_export_window = PDFExportWindow::create(main_window, core_schematic, *core_schematic.get_pdf_export_settings(),
+                                                project_dir);
     pdf_export_window->signal_changed().connect([this] { core_schematic.set_needs_save(); });
     connect_action(ActionID::PDF_EXPORT_WINDOW, [this](const auto &c) { pdf_export_window->present(); });
     connect_action(ActionID::EXPORT_PDF, [this](const auto &c) {

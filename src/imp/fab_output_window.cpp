@@ -11,34 +11,34 @@ namespace horizon {
 
 class GerberLayerEditor : public Gtk::Box, public Changeable {
 public:
-    GerberLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, FabOutputWindow *pa,
-                      FabOutputSettings::GerberLayer *la);
-    static GerberLayerEditor *create(FabOutputWindow *pa, FabOutputSettings::GerberLayer *la);
-    FabOutputWindow *parent;
+    GerberLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, FabOutputWindow &pa,
+                      FabOutputSettings::GerberLayer &la);
+    static GerberLayerEditor *create(FabOutputWindow &pa, FabOutputSettings::GerberLayer &la);
+    FabOutputWindow &parent;
 
 private:
     Gtk::CheckButton *gerber_layer_checkbutton = nullptr;
     Gtk::Entry *gerber_layer_filename_entry = nullptr;
 
-    FabOutputSettings::GerberLayer *layer = nullptr;
+    FabOutputSettings::GerberLayer &layer;
 };
 
-GerberLayerEditor::GerberLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, FabOutputWindow *pa,
-                                     FabOutputSettings::GerberLayer *la)
+GerberLayerEditor::GerberLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, FabOutputWindow &pa,
+                                     FabOutputSettings::GerberLayer &la)
     : Gtk::Box(cobject), parent(pa), layer(la)
 {
     x->get_widget("gerber_layer_checkbutton", gerber_layer_checkbutton);
     x->get_widget("gerber_layer_filename_entry", gerber_layer_filename_entry);
-    parent->sg_layer_name->add_widget(*gerber_layer_checkbutton);
+    parent.sg_layer_name->add_widget(*gerber_layer_checkbutton);
 
-    gerber_layer_checkbutton->set_label(parent->brd->get_layers().at(layer->layer).name);
-    bind_widget(gerber_layer_checkbutton, layer->enabled);
+    gerber_layer_checkbutton->set_label(parent.brd.get_layers().at(layer.layer).name);
+    bind_widget(gerber_layer_checkbutton, layer.enabled);
     gerber_layer_checkbutton->signal_toggled().connect([this] { s_signal_changed.emit(); });
-    bind_widget(gerber_layer_filename_entry, layer->filename);
+    bind_widget(gerber_layer_filename_entry, layer.filename);
     gerber_layer_filename_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
 }
 
-GerberLayerEditor *GerberLayerEditor::create(FabOutputWindow *pa, FabOutputSettings::GerberLayer *la)
+GerberLayerEditor *GerberLayerEditor::create(FabOutputWindow &pa, FabOutputSettings::GerberLayer &la)
 {
     GerberLayerEditor *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
@@ -48,9 +48,9 @@ GerberLayerEditor *GerberLayerEditor::create(FabOutputWindow *pa, FabOutputSetti
     return w;
 }
 
-FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocumentBoard *c,
+FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocumentBoard &c,
                                  const std::string &project_dir)
-    : Gtk::Window(cobject), core(c), brd(core->get_board()), settings(core->get_fab_output_settings()),
+    : Gtk::Window(cobject), core(c), brd(*core.get_board()), settings(*core.get_fab_output_settings()),
       state_store(this, "imp-fab-output")
 {
     x->get_widget("gerber_layers_box", gerber_layers_box);
@@ -68,32 +68,32 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
     export_filechooser.attach(directory_entry, directory_button, this);
     export_filechooser.set_project_dir(project_dir);
-    export_filechooser.bind_filename(settings->output_directory);
+    export_filechooser.bind_filename(settings.output_directory);
     export_filechooser.signal_changed().connect([this] {
         s_signal_changed.emit();
         update_export_button();
     });
     export_filechooser.set_action(GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
 
-    bind_widget(prefix_entry, settings->prefix, [this](std::string &) {
+    bind_widget(prefix_entry, settings.prefix, [this](std::string &) {
         s_signal_changed.emit();
         update_export_button();
     });
     prefix_entry->signal_changed().connect([this] { s_signal_changed.emit(); });
-    bind_widget(npth_filename_entry, settings->drill_npth_filename, [this](std::string &) {
+    bind_widget(npth_filename_entry, settings.drill_npth_filename, [this](std::string &) {
         s_signal_changed.emit();
         update_export_button();
     });
-    bind_widget(pth_filename_entry, settings->drill_pth_filename, [this](std::string &) {
+    bind_widget(pth_filename_entry, settings.drill_pth_filename, [this](std::string &) {
         s_signal_changed.emit();
         update_export_button();
     });
-    bind_widget(zip_output_switch, settings->zip_output);
+    bind_widget(zip_output_switch, settings.zip_output);
     zip_output_switch->property_active().signal_changed().connect([this] { s_signal_changed.emit(); });
 
-    drill_mode_combo->set_active_id(FabOutputSettings::mode_lut.lookup_reverse(settings->drill_mode));
+    drill_mode_combo->set_active_id(FabOutputSettings::mode_lut.lookup_reverse(settings.drill_mode));
     drill_mode_combo->signal_changed().connect([this] {
-        settings->drill_mode = FabOutputSettings::mode_lut.lookup(drill_mode_combo->get_active_id());
+        settings.drill_mode = FabOutputSettings::mode_lut.lookup(drill_mode_combo->get_active_id());
         update_drill_visibility();
         s_signal_changed.emit();
         update_export_button();
@@ -105,7 +105,7 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     outline_width_sp = Gtk::manage(new SpinButtonDim());
     outline_width_sp->set_range(.01_mm, 10_mm);
     outline_width_sp->show();
-    bind_widget(outline_width_sp, settings->outline_width);
+    bind_widget(outline_width_sp, settings.outline_width);
     outline_width_sp->signal_value_changed().connect([this] { s_signal_changed.emit(); });
     {
         Gtk::Box *b = nullptr;
@@ -121,10 +121,10 @@ FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 
 void FabOutputWindow::reload_layers()
 {
-    if (n_layers == settings->layers.size())
+    if (n_layers == settings.layers.size())
         return;
     else
-        n_layers = settings->layers.size();
+        n_layers = settings.layers.size();
 
     {
         auto children = gerber_layers_box->get_children();
@@ -132,15 +132,15 @@ void FabOutputWindow::reload_layers()
             delete ch;
     }
     std::vector<FabOutputSettings::GerberLayer *> layers_sorted;
-    layers_sorted.reserve(settings->layers.size());
-    for (auto &la : settings->layers) {
+    layers_sorted.reserve(settings.layers.size());
+    for (auto &la : settings.layers) {
         layers_sorted.push_back(&la.second);
     }
     std::sort(layers_sorted.begin(), layers_sorted.end(),
               [](const auto a, const auto b) { return b->layer < a->layer; });
 
     for (auto la : layers_sorted) {
-        auto ed = GerberLayerEditor::create(this, la);
+        auto ed = GerberLayerEditor::create(*this, *la);
         ed->signal_changed().connect([this] {
             s_signal_changed.emit();
             update_export_button();
@@ -153,7 +153,7 @@ void FabOutputWindow::reload_layers()
 
 void FabOutputWindow::update_drill_visibility()
 {
-    if (settings->drill_mode == FabOutputSettings::DrillMode::INDIVIDUAL) {
+    if (settings.drill_mode == FabOutputSettings::DrillMode::INDIVIDUAL) {
         npth_filename_entry->set_visible(true);
         npth_filename_label->set_visible(true);
         pth_filename_label->set_text("PTH suffix");
@@ -174,8 +174,8 @@ void FabOutputWindow::generate()
     if (!generate_button->get_sensitive())
         return;
 
-    RulesCheckCache cache(core);
-    auto r = rules_check(*core->get_rules(), RuleID::PREFLIGHT_CHECKS, *core, cache, &cb_nop);
+    RulesCheckCache cache(&core);
+    auto r = rules_check(*core.get_rules(), RuleID::PREFLIGHT_CHECKS, core, cache, &cb_nop);
     if (r.level != RulesCheckErrorLevel::PASS) {
         Gtk::MessageDialog md(*this, "Preflight checks didn't pass", false /* use_markup */, Gtk::MESSAGE_ERROR,
                               Gtk::BUTTONS_NONE);
@@ -189,10 +189,10 @@ void FabOutputWindow::generate()
     }
 
     try {
-        FabOutputSettings my_settings = *settings;
+        FabOutputSettings my_settings = settings;
         my_settings.output_directory = export_filechooser.get_filename_abs();
         my_settings.zip_output = zip_output_switch->get_active();
-        GerberExporter ex(brd, &my_settings);
+        GerberExporter ex(&brd, &my_settings);
         ex.generate();
         log_textview->get_buffer()->set_text(ex.get_log());
     }
@@ -217,22 +217,22 @@ void FabOutputWindow::update_export_button()
 {
     std::string txt;
     if (can_export) {
-        if (settings->output_directory.size()) {
-            if (settings->prefix.size()) {
-                if (settings->drill_mode == FabOutputSettings::DrillMode::INDIVIDUAL) {
-                    if (settings->drill_pth_filename.size() == 0 || settings->drill_npth_filename.size() == 0) {
+        if (settings.output_directory.size()) {
+            if (settings.prefix.size()) {
+                if (settings.drill_mode == FabOutputSettings::DrillMode::INDIVIDUAL) {
+                    if (settings.drill_pth_filename.size() == 0 || settings.drill_npth_filename.size() == 0) {
                         txt = "drill filenames not set";
                     }
                 }
                 else {
-                    if (settings->drill_pth_filename.size() == 0) {
+                    if (settings.drill_pth_filename.size() == 0) {
                         txt = "drill filename not set";
                     }
                 }
                 if (txt.size() == 0) { // still okay
-                    for (const auto &it : settings->layers) {
+                    for (const auto &it : settings.layers) {
                         if (it.second.enabled && it.second.filename.size() == 0) {
-                            txt = brd->get_layers().at(it.first).name + " filename not set";
+                            txt = brd.get_layers().at(it.first).name + " filename not set";
                             break;
                         }
                     }
@@ -252,7 +252,7 @@ void FabOutputWindow::update_export_button()
     widget_set_insensitive_tooltip(*generate_button, txt);
 }
 
-FabOutputWindow *FabOutputWindow::create(Gtk::Window *p, IDocumentBoard *c, const std::string &project_dir)
+FabOutputWindow *FabOutputWindow::create(Gtk::Window *p, IDocumentBoard &c, const std::string &project_dir)
 {
     FabOutputWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();

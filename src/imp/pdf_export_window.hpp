@@ -13,16 +13,16 @@ class PDFExportWindow : public Gtk::Window, public Changeable {
     friend class PDFLayerEditor;
 
 public:
-    PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class IDocument *c,
+    PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class IDocument &c,
                     class PDFExportSettings &s, const std::string &project_dir);
-    static PDFExportWindow *create(Gtk::Window *p, class IDocument *c, class PDFExportSettings &s,
+    static PDFExportWindow *create(Gtk::Window *p, class IDocument &c, class PDFExportSettings &s,
                                    const std::string &project_dir);
 
     void generate();
     void reload_layers();
 
 private:
-    class IDocument *core;
+    class IDocument &core;
     class PDFExportSettings &settings;
 
     class MyExportFileChooser : public ExportFileChooser {
