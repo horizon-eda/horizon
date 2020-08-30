@@ -16,7 +16,7 @@ static const std::vector<PatchType> patch_types = {PatchType::PAD, PatchType::PA
 
 void RuleEditorClearanceSameNet::populate()
 {
-    rule2 = dynamic_cast<RuleClearanceSameNet *>(rule);
+    rule2 = &dynamic_cast<RuleClearanceSameNet &>(rule);
 
     auto editor = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 20));
     editor->set_margin_start(20);
@@ -41,14 +41,14 @@ void RuleEditorClearanceSameNet::populate()
     }
 
 
-    auto match_editor = Gtk::manage(new RuleMatchEditor(&rule2->match, core));
+    auto match_editor = Gtk::manage(new RuleMatchEditor(rule2->match, core));
     match_editor->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     match_editor->signal_updated().connect([this] { s_signal_updated.emit(); });
     match_editor->set_hexpand(true);
     grid->attach(*match_editor, 0, 1, 1, 1);
 
     auto *layer_combo = Gtk::manage(new Gtk::ComboBoxText());
-    for (const auto &it : core->get_layer_provider().get_layers()) {
+    for (const auto &it : core.get_layer_provider().get_layers()) {
         if (it.second.copper)
             layer_combo->insert(0, std::to_string(it.first), it.second.name + ": " + std::to_string(it.first));
     }

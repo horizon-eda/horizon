@@ -16,7 +16,7 @@ static const std::vector<PatchType> patch_types = {
 
 void RuleEditorClearanceCopper::populate()
 {
-    rule2 = dynamic_cast<RuleClearanceCopper *>(rule);
+    rule2 = &dynamic_cast<RuleClearanceCopper &>(rule);
 
     builder = Gtk::Builder::create_from_resource(
             "/org/horizon-eda/horizon/imp/rules/"
@@ -26,19 +26,19 @@ void RuleEditorClearanceCopper::populate()
     pack_start(*editor, true, true, 0);
 
     {
-        auto match_editor = create_rule_match_editor("match1_box", &rule2->match_1);
+        auto match_editor = create_rule_match_editor("match1_box", rule2->match_1);
         match_editor->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
         match_editor->signal_updated().connect([this] { s_signal_updated.emit(); });
     }
     {
-        auto match_editor = create_rule_match_editor("match2_box", &rule2->match_2);
+        auto match_editor = create_rule_match_editor("match2_box", rule2->match_2);
         match_editor->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
         match_editor->signal_updated().connect([this] { s_signal_updated.emit(); });
     }
     Gtk::ComboBoxText *layer_combo;
     builder->get_widget("layer_combo", layer_combo);
 
-    for (const auto &it : core->get_layer_provider().get_layers()) {
+    for (const auto &it : core.get_layer_provider().get_layers()) {
         if (it.second.copper)
             layer_combo->insert(0, std::to_string(it.first), it.second.name + ": " + std::to_string(it.first));
     }

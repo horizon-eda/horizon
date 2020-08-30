@@ -25,7 +25,7 @@ static const char *text_preflight =
 void RuleEditorPackageChecks::populate()
 {
     Gtk::Label *editor = Gtk::manage(new Gtk::Label);
-    if (dynamic_cast<RulePackageChecks *>(rule)) {
+    if (dynamic_cast<RulePackageChecks *>(&rule)) {
         editor->set_text(text_pkg);
     }
     else {

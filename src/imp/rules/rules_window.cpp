@@ -73,10 +73,9 @@ private:
     Gtk::Label *label_text = nullptr;
 };
 
-RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, CanvasGL *ca, Rules *ru,
-                         class Core *c)
-    : Gtk::Window(cobject), canvas(ca), rules(ru), core(c),
-      state_store(this, "imp-rules-" + object_type_lut.lookup_reverse(core->get_object_type()))
+RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, CanvasGL &ca, class Core &c)
+    : Gtk::Window(cobject), canvas(ca), core(c), rules(*core.get_rules()),
+      state_store(this, "imp-rules-" + object_type_lut.lookup_reverse(core.get_object_type()))
 {
     x->get_widget("lb_rules", lb_rules);
     x->get_widget("lb_multi", lb_multi);
@@ -96,7 +95,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
 
     lb_rules->signal_row_selected().connect(
             [this](Gtk::ListBoxRow *row) { rule_selected(dynamic_cast<RuleLabel *>(row->get_child())->id); });
-    for (const auto id : rules->get_rule_ids()) {
+    for (const auto id : rules.get_rule_ids()) {
         const auto &desc = rule_descriptions.at(id);
         auto la = Gtk::manage(new RuleLabel(sg_order, desc.name, id));
         la->show();
@@ -127,7 +126,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         auto row = lb_multi->get_selected_row();
         if (row) {
             auto la = dynamic_cast<RuleLabel *>(row->get_child());
-            rules->remove_rule(la->id, la->uuid);
+            rules.remove_rule(la->id, la->uuid);
             update_rule_instances(la->id);
             update_warning();
             s_signal_changed.emit();
@@ -135,7 +134,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     });
 
     button_rule_instance_add->signal_clicked().connect([this] {
-        rules->add_rule(rule_current);
+        rules.add_rule(rule_current);
         update_rule_instances(rule_current);
         lb_multi->select_row(*lb_multi->get_row_at_index(0));
         update_warning();
@@ -146,7 +145,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         auto row = lb_multi->get_selected_row();
         if (row) {
             auto la = dynamic_cast<RuleLabel *>(row->get_child());
-            rules->move_rule(la->id, la->uuid, -1);
+            rules.move_rule(la->id, la->uuid, -1);
             update_rule_instance_labels();
             update_warning();
             s_signal_changed.emit();
@@ -156,7 +155,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         auto row = lb_multi->get_selected_row();
         if (row) {
             auto la = dynamic_cast<RuleLabel *>(row->get_child());
-            rules->move_rule(la->id, la->uuid, 1);
+            rules.move_rule(la->id, la->uuid, 1);
             update_rule_instance_labels();
             update_warning();
             s_signal_changed.emit();
@@ -229,14 +228,14 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         check_result_treeview->append_column(*tvc);
     }
 
-    annotation = canvas->create_annotation();
+    annotation = canvas.create_annotation();
 
     signal_show().connect([this] {
-        canvas->markers.set_domain_visible(MarkerDomain::CHECK, true);
+        canvas.markers.set_domain_visible(MarkerDomain::CHECK, true);
         annotation->set_visible(true);
     });
     signal_hide().connect([this] {
-        canvas->markers.set_domain_visible(MarkerDomain::CHECK, false);
+        canvas.markers.set_domain_visible(MarkerDomain::CHECK, false);
         annotation->set_visible(false);
     });
 
@@ -253,7 +252,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
 
     dispatcher.connect([this] {
         std::lock_guard<std::mutex> guard(run_store_mutex);
-        auto &dom = canvas->markers.get_domain(MarkerDomain::CHECK);
+        auto &dom = canvas.markers.get_domain(MarkerDomain::CHECK);
         for (const auto &it : run_store) {
             if (it.second.result.level != RulesCheckErrorLevel::NOT_RUN) { // has completed
                 it.second.row[tree_columns.result] = it.second.result.level;
@@ -286,7 +285,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
                 it.second.row[tree_columns.status] = it.second.status;
             }
         }
-        canvas->update_markers();
+        canvas.update_markers();
         check_result_treeview->expand_all();
         map_erase_if(run_store, [](auto &a) { return a.second.result.level != RulesCheckErrorLevel::NOT_RUN; });
         if (run_store.size() == 0) {
@@ -304,12 +303,12 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
 
 void RulesWindow::apply_rules()
 {
-    if (core->tool_is_active())
+    if (core.tool_is_active())
         return;
-    for (auto &rule : rules->get_rule_ids()) {
-        rules_apply(rules, rule, core);
+    for (auto &rule : rules.get_rule_ids()) {
+        rules_apply(&rules, rule, &core);
     }
-    core->rebuild();
+    core.rebuild();
     s_signal_canvas_update.emit();
     s_signal_changed.emit();
 }
@@ -318,7 +317,7 @@ void RulesWindow::check_thread(RuleID id)
 {
     RulesCheckResult result;
     try {
-        result = rules_check(rules, id, core, *cache.get(), [this, id](const std::string &status) {
+        result = rules_check(&rules, id, &core, *cache.get(), [this, id](const std::string &status) {
             {
                 std::lock_guard<std::mutex> guard(run_store_mutex);
                 run_store.at(id).status = status;
@@ -353,9 +352,9 @@ void RulesWindow::check_thread(RuleID id)
 void RulesWindow::run_checks()
 {
     check_result_store->clear();
-    auto &dom = canvas->markers.get_domain(MarkerDomain::CHECK);
+    auto &dom = canvas.markers.get_domain(MarkerDomain::CHECK);
     dom.clear();
-    cache.reset(new RulesCheckCache(core));
+    cache.reset(new RulesCheckCache(&core));
     annotation->clear();
     run_store.clear();
     pulse_connection = Glib::signal_timeout().connect(sigc::track_obj(
@@ -368,7 +367,7 @@ void RulesWindow::run_checks()
                                                               },
                                                               *this),
                                                       750 / 12);
-    for (auto rule_id : rules->get_rule_ids()) {
+    for (auto rule_id : rules.get_rule_ids()) {
         if (rule_descriptions.at(rule_id).can_check) {
             Gtk::TreeModel::iterator iter = check_result_store->append();
             Gtk::TreeModel::Row row = *iter;
@@ -401,17 +400,17 @@ void RulesWindow::rule_selected(RuleID id)
         update_warning();
     }
     else {
-        auto rule = rules->get_rule(id);
-        show_editor(create_editor(rule));
+        auto rule = rules.get_rule(id);
+        show_editor(create_editor(*rule));
     }
 }
 
 void RulesWindow::rule_instance_selected(RuleID id, const UUID &uu)
 {
-    auto rule = rules->get_rule(id, uu);
+    auto rule = rules.get_rule(id, uu);
     if (rule == nullptr)
         return;
-    show_editor(create_editor(rule));
+    show_editor(create_editor(*rule));
 }
 
 void RulesWindow::show_editor(RuleEditor *e)
@@ -434,10 +433,10 @@ void RulesWindow::show_editor(RuleEditor *e)
     });
 }
 
-RuleEditor *RulesWindow::create_editor(Rule *r)
+RuleEditor *RulesWindow::create_editor(Rule &r)
 {
     RuleEditor *e = nullptr;
-    switch (r->id) {
+    switch (r.id) {
     case RuleID::HOLE_SIZE:
         e = new RuleEditorHoleSize(r, core);
         break;
@@ -501,12 +500,12 @@ RuleEditor *RulesWindow::create_editor(Rule *r)
 
 Block *RulesWindow::get_block()
 {
-    return core->get_block();
+    return core.get_block();
 }
 
 void RulesWindow::update_rule_instances(RuleID id)
 {
-    auto inst = rules->get_rules(id);
+    auto inst = rules.get_rules(id);
     auto row = lb_multi->get_selected_row();
     UUID uu;
     if (row) {
@@ -536,7 +535,7 @@ void RulesWindow::update_rule_instance_labels()
 {
     for (auto ch : lb_multi->get_children()) {
         auto la = dynamic_cast<RuleLabel *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
-        auto rule = rules->get_rule(la->id, la->uuid);
+        auto rule = rules.get_rule(la->id, la->uuid);
         la->set_text(rule->get_brief(get_block()));
         la->set_sensitive(rule->enabled);
         la->set_order(rule->get_order());
@@ -550,7 +549,7 @@ void RulesWindow::update_rules_enabled()
         auto la = dynamic_cast<RuleLabel *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
         auto is_multi = rule_descriptions.at(la->id).multi;
         if (!is_multi) {
-            auto r = rules->get_rule(la->id);
+            auto r = rules.get_rule(la->id);
             la->set_sensitive(r->enabled);
         }
     }
@@ -576,7 +575,7 @@ void RulesWindow::update_warning()
         return;
     }
 
-    auto sorted = rules->get_rules_sorted(rule_current);
+    auto sorted = rules.get_rules_sorted(rule_current);
     if (sorted.size() == 0) {
         rev_warn->set_reveal_child(true);
     }
@@ -586,12 +585,12 @@ void RulesWindow::update_warning()
     }
 }
 
-RulesWindow *RulesWindow::create(Gtk::Window *p, CanvasGL *ca, Rules *ru, Core *c)
+RulesWindow *RulesWindow::create(Gtk::Window *p, CanvasGL &ca, Core &c)
 {
     RulesWindow *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/imp/rules/rules_window.ui");
-    x->get_widget_derived("window", w, ca, ru, c);
+    x->get_widget_derived("window", w, ca, c);
     w->set_transient_for(*p);
     return w;
 }

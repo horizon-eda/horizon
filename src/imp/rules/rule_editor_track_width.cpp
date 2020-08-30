@@ -8,7 +8,7 @@
 namespace horizon {
 void RuleEditorTrackWidth::populate()
 {
-    rule2 = dynamic_cast<RuleTrackWidth *>(rule);
+    rule2 = &dynamic_cast<RuleTrackWidth &>(rule);
 
     builder = Gtk::Builder::create_from_resource(
             "/org/horizon-eda/horizon/imp/rules/"
@@ -17,13 +17,13 @@ void RuleEditorTrackWidth::populate()
     builder->get_widget("editor", editor);
     pack_start(*editor, true, true, 0);
 
-    auto match_editor = create_rule_match_editor("match_box", &rule2->match);
+    auto match_editor = create_rule_match_editor("match_box", rule2->match);
     match_editor->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     match_editor->signal_updated().connect([this] { s_signal_updated.emit(); });
 
     Gtk::Grid *layer_grid;
     builder->get_widget("layer_grid", layer_grid);
-    auto layers = core->get_layer_provider().get_layers();
+    auto layers = core.get_layer_provider().get_layers();
     int top = 1;
     for (auto it = layers.rbegin(); it != layers.rend(); it++) {
         auto &la = it->second;

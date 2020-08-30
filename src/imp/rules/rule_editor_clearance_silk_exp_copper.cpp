@@ -31,7 +31,7 @@ void RuleEditorClearanceSilkscreenExposedCopper::populate()
     pack_start(*grid, true, true, 0);
     grid->set_halign(Gtk::ALIGN_START);
 
-    if (auto rule1 = dynamic_cast<RuleClearanceSilkscreenExposedCopper *>(rule)) {
+    if (auto rule1 = dynamic_cast<RuleClearanceSilkscreenExposedCopper *>(&rule)) {
         auto sp_top = create_sp_dim("Top clearance");
         auto sp_bot = create_sp_dim("Bottom clearance");
         sp_top->set_range(0, 100_mm);
@@ -47,7 +47,7 @@ void RuleEditorClearanceSilkscreenExposedCopper::populate()
             s_signal_updated.emit();
         });
     }
-    else if (auto rule2 = dynamic_cast<RuleParameters *>(rule)) {
+    else if (auto rule2 = dynamic_cast<RuleParameters *>(&rule)) {
         auto sp_solder = create_sp_dim("Solder mask expansion");
         auto sp_paste = create_sp_dim("Paste mask contraction");
         auto sp_courtyard = create_sp_dim("Courtyard expansion");

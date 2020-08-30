@@ -12,9 +12,8 @@ namespace horizon {
 
 class RulesWindow : public Gtk::Window, public Changeable {
 public:
-    RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class CanvasGL *ca, class Rules *ru,
-                class Core *c);
-    static RulesWindow *create(Gtk::Window *p, class CanvasGL *ca, class Rules *ru, class Core *c);
+    RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, class CanvasGL &ca, class Core &c);
+    static RulesWindow *create(Gtk::Window *p, class CanvasGL &ca, class Core &c);
     typedef sigc::signal<void, Coordi, UUID> type_signal_goto;
     type_signal_goto signal_goto()
     {
@@ -56,10 +55,10 @@ private:
     void update_warning();
 
 
-    CanvasGL *canvas = nullptr;
-    Rules *rules = nullptr;
-    Core *core = nullptr;
-    class CanvasAnnotation *annotation;
+    CanvasGL &canvas;
+    Core &core;
+    Rules &rules;
+    class CanvasAnnotation *annotation = nullptr;
 
     class Block *get_block();
     type_signal_goto s_signal_goto;
@@ -68,7 +67,7 @@ private:
 
     class RuleEditor *editor = nullptr;
     void show_editor(RuleEditor *e);
-    RuleEditor *create_editor(Rule *r);
+    RuleEditor *create_editor(Rule &r);
 
     class TreeColumns : public Gtk::TreeModelColumnRecord {
     public:

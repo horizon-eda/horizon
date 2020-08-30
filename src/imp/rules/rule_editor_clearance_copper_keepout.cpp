@@ -16,7 +16,7 @@ static const std::vector<PatchType> patch_types_cu = {PatchType::TRACK, PatchTyp
 
 void RuleEditorClearanceCopperKeepout::populate()
 {
-    rule2 = dynamic_cast<RuleClearanceCopperKeepout *>(rule);
+    rule2 = &dynamic_cast<RuleClearanceCopperKeepout &>(rule);
 
     auto editor = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 20));
     editor->set_margin_start(20);
@@ -46,13 +46,13 @@ void RuleEditorClearanceCopperKeepout::populate()
         grid->attach(*la, 2, 0, 1, 1);
     }
 
-    auto match_editor = Gtk::manage(new RuleMatchEditor(&rule2->match, core));
+    auto match_editor = Gtk::manage(new RuleMatchEditor(rule2->match, core));
     match_editor->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     match_editor->signal_updated().connect([this] { s_signal_updated.emit(); });
     match_editor->set_hexpand(true);
     grid->attach(*match_editor, 0, 1, 1, 1);
 
-    auto match_keepout_editor = Gtk::manage(new RuleMatchKeepoutEditor(&rule2->match_keepout, core));
+    auto match_keepout_editor = Gtk::manage(new RuleMatchKeepoutEditor(rule2->match_keepout, core));
     match_keepout_editor->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     match_keepout_editor->signal_updated().connect([this] { s_signal_updated.emit(); });
     match_keepout_editor->set_hexpand(true);

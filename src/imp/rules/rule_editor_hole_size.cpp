@@ -6,7 +6,7 @@
 namespace horizon {
 void RuleEditorHoleSize::populate()
 {
-    rule2 = dynamic_cast<RuleHoleSize *>(rule);
+    rule2 = &dynamic_cast<RuleHoleSize &>(rule);
 
     builder = Gtk::Builder::create_from_resource("/org/horizon-eda/horizon/imp/rules/rule_editor_hole_size.ui");
     Gtk::Box *editor;
@@ -28,7 +28,7 @@ void RuleEditorHoleSize::populate()
         s_signal_updated.emit();
     });
 
-    auto match_editor = create_rule_match_editor("match_box", &rule2->match);
+    auto match_editor = create_rule_match_editor("match_box", rule2->match);
     match_editor->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     match_editor->signal_updated().connect([this] { s_signal_updated.emit(); });
 

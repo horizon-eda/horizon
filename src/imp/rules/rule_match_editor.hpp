@@ -4,7 +4,7 @@
 namespace horizon {
 class RuleMatchEditor : public Gtk::Box {
 public:
-    RuleMatchEditor(class RuleMatch *ma, class IDocument *c);
+    RuleMatchEditor(class RuleMatch &ma, class IDocument &c);
     typedef sigc::signal<void> type_signal_updated;
     type_signal_updated signal_updated()
     {
@@ -17,8 +17,8 @@ private:
     class NetButton *net_button = nullptr;
     class NetClassButton *net_class_button = nullptr;
     Gtk::Entry *net_name_regex_entry = nullptr;
-    RuleMatch *match;
-    class IDocument *core;
+    RuleMatch &match;
+    class IDocument &core;
     type_signal_updated s_signal_updated;
 };
 } // namespace horizon

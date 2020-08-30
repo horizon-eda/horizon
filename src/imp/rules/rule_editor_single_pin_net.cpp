@@ -4,7 +4,7 @@
 namespace horizon {
 void RuleEditorSinglePinNet::populate()
 {
-    rule2 = dynamic_cast<RuleSinglePinNet *>(rule);
+    rule2 = &dynamic_cast<RuleSinglePinNet &>(rule);
 
     Gtk::CheckButton *editor = Gtk::manage(new Gtk::CheckButton("Include unnamed nets"));
     editor->set_valign(Gtk::ALIGN_START);

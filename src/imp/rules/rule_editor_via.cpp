@@ -9,7 +9,7 @@
 namespace horizon {
 void RuleEditorVia::populate()
 {
-    rule2 = dynamic_cast<RuleVia *>(rule);
+    rule2 = &dynamic_cast<RuleVia &>(rule);
 
     auto editor = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 10));
 
@@ -31,13 +31,13 @@ void RuleEditorVia::populate()
         grid->attach(*la, 1, 0, 1, 1);
     }
 
-    auto match_editor = Gtk::manage(new RuleMatchEditor(&rule2->match, core));
+    auto match_editor = Gtk::manage(new RuleMatchEditor(rule2->match, core));
     match_editor->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
     match_editor->signal_updated().connect([this] { s_signal_updated.emit(); });
     grid->attach(*match_editor, 0, 1, 1, 1);
 
-    auto c = dynamic_cast<IDocumentBoard *>(core);
-    auto ps_button = Gtk::manage(new ViaPadstackButton(*c->get_via_padstack_provider()));
+    auto &c = dynamic_cast<IDocumentBoard &>(core);
+    auto ps_button = Gtk::manage(new ViaPadstackButton(*c.get_via_padstack_provider()));
     ps_button->property_selected_uuid() = rule2->padstack;
     ps_button->property_selected_uuid().signal_changed().connect(
             [this, ps_button] { rule2->padstack = ps_button->property_selected_uuid(); });
