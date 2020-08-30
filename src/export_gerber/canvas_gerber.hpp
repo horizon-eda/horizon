@@ -4,7 +4,7 @@
 namespace horizon {
 class CanvasGerber : public Canvas {
 public:
-    CanvasGerber(class GerberExporter *exp);
+    CanvasGerber(class GerberExporter &exp);
     void push() override
     {
     }
@@ -20,6 +20,6 @@ private:
     void img_set_padstack(bool v) override;
     bool padstack_mode = false;
 
-    GerberExporter *exporter;
+    GerberExporter &exporter;
 };
 } // namespace horizon

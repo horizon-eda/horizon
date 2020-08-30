@@ -120,7 +120,7 @@ static PyObject *PyBoard_export_gerber(PyObject *pself, PyObject *args)
     try {
         auto settings_json = json_from_py(py_export_settings);
         horizon::FabOutputSettings settings(settings_json);
-        horizon::GerberExporter ex(&self->board->board, &settings);
+        horizon::GerberExporter ex(self->board->board, settings);
         ex.generate();
     }
     catch (const std::exception &e) {

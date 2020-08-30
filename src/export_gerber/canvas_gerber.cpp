@@ -7,7 +7,7 @@
 #include "util/util.hpp"
 
 namespace horizon {
-CanvasGerber::CanvasGerber(GerberExporter *exp) : Canvas::Canvas(), exporter(exp)
+CanvasGerber::CanvasGerber(GerberExporter &exp) : Canvas::Canvas(), exporter(exp)
 {
     img_mode = true;
 }
@@ -36,7 +36,7 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
                 img_line(it->position, it_next->position, outline_width, ipoly.layer);
             }
             else if (it->type == Polygon::Vertex::Type::ARC) {
-                if (GerberWriter *wr = exporter->get_writer_for_layer(ipoly.layer)) {
+                if (GerberWriter *wr = exporter.get_writer_for_layer(ipoly.layer)) {
                     Coordi from = it->position;
                     Coordi to = it_next->position;
                     Coordd centerd = project_onto_perp_bisector(from, to, it->arc_center);
@@ -52,7 +52,7 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
         }
     }
     else if (auto plane = dynamic_cast<const Plane *>(ipoly.usage.ptr)) {
-        if (GerberWriter *wr = exporter->get_writer_for_layer(ipoly.layer)) {
+        if (GerberWriter *wr = exporter.get_writer_for_layer(ipoly.layer)) {
             for (const auto &frag : plane->fragments) {
                 bool dark = true; // first path ist outline, the rest are holes
                 for (const auto &path : frag.paths) {
@@ -66,7 +66,7 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
         // nop
     }
     else {
-        if (GerberWriter *wr = exporter->get_writer_for_layer(ipoly.layer)) {
+        if (GerberWriter *wr = exporter.get_writer_for_layer(ipoly.layer)) {
             ClipperLib::Path path;
             std::transform(poly.vertices.begin(), poly.vertices.end(), std::back_inserter(path),
                            [&tr, this](const Polygon::Vertex &v) {
@@ -86,7 +86,7 @@ void CanvasGerber::img_polygon(const Polygon &ipoly, bool tr)
 
 void CanvasGerber::img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, int layer, bool tr)
 {
-    if (GerberWriter *wr = exporter->get_writer_for_layer(layer)) {
+    if (GerberWriter *wr = exporter.get_writer_for_layer(layer)) {
         if (tr)
             wr->draw_line(transform.transform(p0), transform.transform(p1), width);
         else
@@ -104,7 +104,7 @@ void CanvasGerber::img_padstack(const Padstack &padstack)
         layers.insert(it.second.layer);
     }
     for (const auto layer : layers) {
-        if (GerberWriter *wr = exporter->get_writer_for_layer(layer)) {
+        if (GerberWriter *wr = exporter.get_writer_for_layer(layer)) {
             wr->draw_padstack(padstack, layer, transform);
         }
     }
@@ -117,7 +117,7 @@ void CanvasGerber::img_set_padstack(bool v)
 
 void CanvasGerber::img_hole(const Hole &hole)
 {
-    auto wr = exporter->get_drill_writer(hole.plated);
+    auto wr = exporter.get_drill_writer(hole.plated);
     if (hole.shape == Hole::Shape::ROUND)
         wr->draw_hole(transform.transform(hole.placement.shift), hole.diameter);
     else if (hole.shape == Hole::Shape::SLOT) {

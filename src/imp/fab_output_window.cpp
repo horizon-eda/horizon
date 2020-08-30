@@ -192,7 +192,7 @@ void FabOutputWindow::generate()
         FabOutputSettings my_settings = settings;
         my_settings.output_directory = export_filechooser.get_filename_abs();
         my_settings.zip_output = zip_output_switch->get_active();
-        GerberExporter ex(&brd, &my_settings);
+        GerberExporter ex(brd, my_settings);
         ex.generate();
         log_textview->get_buffer()->set_text(ex.get_log());
     }
