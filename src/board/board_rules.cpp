@@ -188,10 +188,10 @@ void BoardRules::cleanup(const Block *block)
     }
 }
 
-void BoardRules::apply(RuleID id, Board *brd, ViaPadstackProvider &vpp) const
+void BoardRules::apply(RuleID id, Board &brd, ViaPadstackProvider &vpp) const
 {
     if (id == RuleID::TRACK_WIDTH) {
-        for (auto &it : brd->tracks) {
+        for (auto &it : brd.tracks) {
             auto &track = it.second;
             if (track.width_from_rules && track.net) {
                 track.width = get_default_track_width(track.net, track.layer);
@@ -199,10 +199,10 @@ void BoardRules::apply(RuleID id, Board *brd, ViaPadstackProvider &vpp) const
         }
     }
     else if (id == RuleID::PARAMETERS) {
-        brd->rules.rule_parameters = rule_parameters;
+        brd.rules.rule_parameters = rule_parameters;
     }
     else if (id == RuleID::VIA) {
-        for (auto &it : brd->vias) {
+        for (auto &it : brd.vias) {
             auto &via = it.second;
             if (via.from_rules && via.junction->net) {
                 if (auto ps = vpp.get_padstack(get_via_padstack_uuid(via.junction->net))) {
@@ -213,7 +213,7 @@ void BoardRules::apply(RuleID id, Board *brd, ViaPadstackProvider &vpp) const
         }
     }
     else if (id == RuleID::PLANE) {
-        for (auto &it : brd->planes) {
+        for (auto &it : brd.planes) {
             auto &plane = it.second;
             if (plane.from_rules && plane.net) {
                 plane.settings = get_plane_settings(plane.net, plane.polygon->layer);

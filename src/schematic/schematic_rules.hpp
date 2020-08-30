@@ -12,7 +12,7 @@ public:
     SchematicRules();
 
     void load_from_json(const json &j) override;
-    RulesCheckResult check(RuleID id, const class Schematic *sch, class RulesCheckCache &cache) const;
+    RulesCheckResult check(RuleID id, const class Schematic &sch, class RulesCheckCache &cache) const;
     void apply(RuleID id, class Schematic *sch);
     json serialize() const override;
     std::set<RuleID> get_rule_ids() const override;
@@ -25,6 +25,6 @@ public:
 private:
     RuleSinglePinNet rule_single_pin_net;
 
-    RulesCheckResult check_single_pin_net(const class Schematic *sch, class RulesCheckCache &cache) const;
+    RulesCheckResult check_single_pin_net(const class Schematic &sch, class RulesCheckCache &cache) const;
 };
 } // namespace horizon

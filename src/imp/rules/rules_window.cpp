@@ -306,7 +306,7 @@ void RulesWindow::apply_rules()
     if (core.tool_is_active())
         return;
     for (auto &rule : rules.get_rule_ids()) {
-        rules_apply(&rules, rule, &core);
+        rules_apply(rules, rule, core);
     }
     core.rebuild();
     s_signal_canvas_update.emit();
@@ -317,7 +317,7 @@ void RulesWindow::check_thread(RuleID id)
 {
     RulesCheckResult result;
     try {
-        result = rules_check(&rules, id, &core, *cache.get(), [this, id](const std::string &status) {
+        result = rules_check(rules, id, core, *cache.get(), [this, id](const std::string &status) {
             {
                 std::lock_guard<std::mutex> guard(run_store_mutex);
                 run_store.at(id).status = status;

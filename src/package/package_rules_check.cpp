@@ -6,12 +6,12 @@
 #include <ctype.h>
 
 namespace horizon {
-RulesCheckResult PackageRules::check_package(const class Package *pkg) const
+RulesCheckResult PackageRules::check_package(const class Package &pkg) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
 
-    if (pkg->name.size() == 0) {
+    if (pkg.name.size() == 0) {
         r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
         auto &x = r.errors.back();
         x.comment = "Package has no name";
@@ -21,7 +21,7 @@ RulesCheckResult PackageRules::check_package(const class Package *pkg) const
     int silk_refdes_count = 0;
     int assy_refdes_count = 0;
     const Text *silkscreen_refdes = nullptr;
-    for (const auto &it : pkg->texts) {
+    for (const auto &it : pkg.texts) {
         const auto &txt = it.second;
         if (txt.text == "$RD"
             && (txt.layer == BoardLayers::TOP_SILKSCREEN || txt.layer == BoardLayers::BOTTOM_SILKSCREEN)) {
@@ -63,7 +63,7 @@ RulesCheckResult PackageRules::check_package(const class Package *pkg) const
     int courtyard_top_count = 0;
     int courtyard_bottom_count = 0;
 
-    for (const auto &it : pkg->polygons) {
+    for (const auto &it : pkg.polygons) {
         if (it.second.layer == BoardLayers::TOP_COURTYARD) {
             courtyard_top_count++;
         }
@@ -74,7 +74,7 @@ RulesCheckResult PackageRules::check_package(const class Package *pkg) const
 
     int lines_assy = 0;
     int lines_pkg = 0;
-    for (const auto &it : pkg->lines) {
+    for (const auto &it : pkg.lines) {
         if (it.second.layer == BoardLayers::TOP_ASSEMBLY || it.second.layer == BoardLayers::BOTTOM_ASSEMBLY) {
             lines_assy++;
         }
@@ -95,7 +95,7 @@ RulesCheckResult PackageRules::check_package(const class Package *pkg) const
         x.has_location = false;
     }
 
-    for (const auto &it : pkg->polygons) {
+    for (const auto &it : pkg.polygons) {
         if (it.second.layer == BoardLayers::TOP_COURTYARD || it.second.layer == BoardLayers::BOTTOM_COURTYARD) {
             if (it.second.parameter_class != "courtyard") {
                 r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
@@ -119,7 +119,7 @@ RulesCheckResult PackageRules::check_package(const class Package *pkg) const
     }
 
     std::set<std::string> pad_names;
-    for (const auto &it : pkg->pads) {
+    for (const auto &it : pkg.pads) {
         const auto &name = it.second.name;
         if (pad_names.insert(name).second == false) {
             r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
@@ -149,7 +149,7 @@ RulesCheckResult PackageRules::check_package(const class Package *pkg) const
         }
     }
 
-    for (const auto &it : pkg->polygons) {
+    for (const auto &it : pkg.polygons) {
         if (it.second.layer == BoardLayers::TOP_SILKSCREEN || it.second.layer == BoardLayers::BOTTOM_SILKSCREEN) {
             r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
             auto &x = r.errors.back();
@@ -162,7 +162,7 @@ RulesCheckResult PackageRules::check_package(const class Package *pkg) const
     return r;
 }
 
-RulesCheckResult PackageRules::check(RuleID id, const Package *pkg, RulesCheckCache &cache) const
+RulesCheckResult PackageRules::check(RuleID id, const Package &pkg, RulesCheckCache &cache) const
 {
     switch (id) {
     case RuleID::PACKAGE_CHECKS:

@@ -12,7 +12,7 @@ public:
     PackageRules();
 
     void load_from_json(const json &j) override;
-    RulesCheckResult check(RuleID id, const class Package *pkg, class RulesCheckCache &cache) const;
+    RulesCheckResult check(RuleID id, const class Package &pkg, class RulesCheckCache &cache) const;
     json serialize() const override;
     std::set<RuleID> get_rule_ids() const override;
     const Rule *get_rule(RuleID id) const override;
@@ -24,6 +24,6 @@ public:
 private:
     RulePackageChecks rule_package_checks;
 
-    RulesCheckResult check_package(const class Package *pkg) const;
+    RulesCheckResult check_package(const class Package &pkg) const;
 };
 } // namespace horizon

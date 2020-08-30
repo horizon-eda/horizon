@@ -175,7 +175,7 @@ void FabOutputWindow::generate()
         return;
 
     RulesCheckCache cache(core);
-    auto r = rules_check(core->get_rules(), RuleID::PREFLIGHT_CHECKS, core, cache, &cb_nop);
+    auto r = rules_check(*core->get_rules(), RuleID::PREFLIGHT_CHECKS, *core, cache, &cb_nop);
     if (r.level != RulesCheckErrorLevel::PASS) {
         Gtk::MessageDialog md(*this, "Preflight checks didn't pass", false /* use_markup */, Gtk::MESSAGE_ERROR,
                               Gtk::BUTTONS_NONE);

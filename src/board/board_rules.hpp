@@ -26,9 +26,9 @@ public:
     void operator=(const BoardRules &other);
 
     void load_from_json(const json &j) override;
-    RulesCheckResult check(RuleID id, const class Board *b, class RulesCheckCache &cache,
+    RulesCheckResult check(RuleID id, const class Board &b, class RulesCheckCache &cache,
                            check_status_cb_t status_cb) const;
-    void apply(RuleID id, class Board *b, class ViaPadstackProvider &vpp) const;
+    void apply(RuleID id, class Board &b, class ViaPadstackProvider &vpp) const;
     json serialize() const override;
     std::set<RuleID> get_rule_ids() const override;
     const Rule *get_rule(RuleID id) const override;
@@ -74,16 +74,16 @@ private:
     RuleParameters rule_parameters;
     RulePreflightChecks rule_preflight_checks;
 
-    RulesCheckResult check_track_width(const class Board *b) const;
-    RulesCheckResult check_hole_size(const class Board *b) const;
-    RulesCheckResult check_clearance_copper(const class Board *b, class RulesCheckCache &cache,
+    RulesCheckResult check_track_width(const class Board &b) const;
+    RulesCheckResult check_hole_size(const class Board &b) const;
+    RulesCheckResult check_clearance_copper(const class Board &b, class RulesCheckCache &cache,
                                             check_status_cb_t status_cb) const;
-    RulesCheckResult check_clearance_copper_non_copper(const class Board *b, class RulesCheckCache &cache,
+    RulesCheckResult check_clearance_copper_non_copper(const class Board &b, class RulesCheckCache &cache,
                                                        check_status_cb_t status_cb) const;
-    RulesCheckResult check_preflight(const class Board *b) const;
-    RulesCheckResult check_clearance_copper_keepout(const class Board *b, class RulesCheckCache &cache,
+    RulesCheckResult check_preflight(const class Board &b) const;
+    RulesCheckResult check_clearance_copper_keepout(const class Board &b, class RulesCheckCache &cache,
                                                     check_status_cb_t status_cb) const;
-    RulesCheckResult check_clearance_same_net(const class Board *b, class RulesCheckCache &cache,
+    RulesCheckResult check_clearance_same_net(const class Board &b, class RulesCheckCache &cache,
                                               check_status_cb_t status_cb) const;
 };
 } // namespace horizon

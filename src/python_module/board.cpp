@@ -301,7 +301,7 @@ static PyObject *PyBoard_run_checks(PyObject *pself, PyObject *args)
         horizon::RulesCheckCache cache(self->board);
         json j;
         for (auto id : ids) {
-            auto r = self->board->board.rules.check(id, &self->board->board, cache, &dummy_callback);
+            auto r = self->board->board.rules.check(id, self->board->board, cache, &dummy_callback);
             j[horizon::rule_id_lut.lookup_reverse(id)] = r.serialize();
         }
         return py_from_json(j);

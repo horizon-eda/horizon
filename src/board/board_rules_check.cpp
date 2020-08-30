@@ -19,12 +19,12 @@ static std::string get_net_name(const Net *net)
         return "(" + net->name + ")";
 }
 
-RulesCheckResult BoardRules::check_track_width(const Board *brd) const
+RulesCheckResult BoardRules::check_track_width(const Board &brd) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
     auto rules = get_rules_sorted<RuleTrackWidth>(RuleID::TRACK_WIDTH);
-    for (const auto &it : brd->tracks) {
+    for (const auto &it : brd.tracks) {
         auto width = it.second.width;
         Net *net = it.second.net;
         auto layer = it.second.layer;
@@ -73,12 +73,12 @@ static RulesCheckError *check_hole(RulesCheckResult &r, uint64_t dia, const Rule
     return nullptr;
 }
 
-RulesCheckResult BoardRules::check_hole_size(const Board *brd) const
+RulesCheckResult BoardRules::check_hole_size(const Board &brd) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
     auto rules = get_rules_sorted<RuleHoleSize>(RuleID::HOLE_SIZE);
-    for (const auto &it : brd->holes) {
+    for (const auto &it : brd.holes) {
         Net *net = it.second.net;
         for (const auto &it_hole : it.second.padstack.holes) {
             auto dia = it_hole.second.diameter;
@@ -93,7 +93,7 @@ RulesCheckResult BoardRules::check_hole_size(const Board *brd) const
         }
     }
 
-    for (const auto &it : brd->vias) {
+    for (const auto &it : brd.vias) {
         Net *net = it.second.junction->net;
         for (const auto &it_hole : it.second.padstack.holes) {
             auto dia = it_hole.second.diameter;
@@ -108,7 +108,7 @@ RulesCheckResult BoardRules::check_hole_size(const Board *brd) const
         }
     }
 
-    for (const auto &it : brd->packages) {
+    for (const auto &it : brd.packages) {
         for (const auto &it_pad : it.second.package.pads) {
             Net *net = it_pad.second.net;
             for (const auto &it_hole : it_pad.second.padstack.holes) {
@@ -153,7 +153,7 @@ static std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint> get_patch_bb(const 
 static std::deque<RulesCheckError>
 clearance_cu_worker(std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::PatchKey>> &patch_pairs,
                     std::mutex &patch_pair_mutex, const std::map<CanvasPatch::PatchKey, ClipperLib::Paths> &patches,
-                    const Board *brd, const BoardRules *rules, int n_patch_pairs, check_status_cb_t status_cb)
+                    const Board &brd, const BoardRules &rules, int n_patch_pairs, check_status_cb_t status_cb)
 {
     std::deque<RulesCheckError> r_errors;
     while (true) {
@@ -176,12 +176,12 @@ clearance_cu_worker(std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::Patch
         auto p1 = patch_pair.first;
         auto p2 = patch_pair.second;
 
-        Net *net1 = p1.net ? &brd->block->nets.at(p1.net) : nullptr;
-        Net *net2 = p2.net ? &brd->block->nets.at(p2.net) : nullptr;
+        Net *net1 = p1.net ? &brd.block->nets.at(p1.net) : nullptr;
+        Net *net2 = p2.net ? &brd.block->nets.at(p2.net) : nullptr;
 
         // figure out the clearance between this patch pair
         uint64_t clearance = 0;
-        auto rule_clearance = rules->get_clearance_copper(net1, net2, p1.layer);
+        auto rule_clearance = rules.get_clearance_copper(net1, net2, p1.layer);
         if (rule_clearance) {
             clearance = rule_clearance->get_clearance(p1.type, p2.type);
         }
@@ -233,7 +233,7 @@ clearance_cu_worker(std::set<std::pair<CanvasPatch::PatchKey, CanvasPatch::Patch
     return r_errors;
 }
 
-RulesCheckResult BoardRules::check_clearance_copper(const Board *brd, RulesCheckCache &cache,
+RulesCheckResult BoardRules::check_clearance_copper(const Board &brd, RulesCheckCache &cache,
                                                     check_status_cb_t status_cb) const
 {
     RulesCheckResult r;
@@ -243,7 +243,7 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board *brd, RulesCheck
     std::set<int> layers;
     const auto &patches = c->get_canvas()->get_patches();
     for (const auto &it : patches) { // collect copper layers
-        if (brd->get_layers().count(it.first.layer) && brd->get_layers().at(it.first.layer).copper) {
+        if (brd.get_layers().count(it.first.layer) && brd.get_layers().at(it.first.layer).copper) {
             layers.emplace(it.first.layer);
         }
     }
@@ -288,8 +288,8 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board *brd, RulesCheck
     std::mutex patch_pair_mutex;
     for (size_t i = 0; i < std::thread::hardware_concurrency(); i++) {
         results.push_back(std::async(std::launch::async, clearance_cu_worker, std::ref(patch_pairs),
-                                     std::ref(patch_pair_mutex), std::ref(patches), brd, this, n_patch_pairs,
-                                     status_cb));
+                                     std::ref(patch_pair_mutex), std::ref(patches), std::ref(brd), std::ref(*this),
+                                     n_patch_pairs, status_cb));
     }
     for (auto &it : results) {
         auto res = it.get();
@@ -300,7 +300,7 @@ RulesCheckResult BoardRules::check_clearance_copper(const Board *brd, RulesCheck
     return r;
 }
 
-RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board *brd, RulesCheckCache &cache,
+RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board &brd, RulesCheckCache &cache,
                                                                check_status_cb_t status_cb) const
 {
     RulesCheckResult r;
@@ -315,9 +315,9 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board *brd,
         auto &patch_npth = patches.at(npth_key);
 
         for (const auto &it : patches) {
-            if (brd->get_layers().count(it.first.layer)
-                && brd->get_layers().at(it.first.layer).copper) { // need to check copper layer
-                Net *net = it.first.net ? &brd->block->nets.at(it.first.net) : nullptr;
+            if (brd.get_layers().count(it.first.layer)
+                && brd.get_layers().at(it.first.layer).copper) { // need to check copper layer
+                Net *net = it.first.net ? &brd.block->nets.at(it.first.net) : nullptr;
 
                 auto clearance = get_clearance_copper_other(net, it.first.layer)
                                          ->get_clearance(it.first.type, PatchType::HOLE_NPTH);
@@ -360,7 +360,7 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board *brd,
     // other cu
     std::set<int> layers;
     for (const auto &it : patches) { // collect copper layers
-        if (brd->get_layers().count(it.first.layer) && brd->get_layers().at(it.first.layer).copper) {
+        if (brd.get_layers().count(it.first.layer) && brd.get_layers().at(it.first.layer).copper) {
             layers.emplace(it.first.layer);
         }
     }
@@ -390,7 +390,7 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board *brd,
             auto p_non_other = it.second;
             if (!is_other(p_other.type))
                 std::swap(p_other, p_non_other);
-            Net *net = p_non_other.net ? &brd->block->nets.at(p_non_other.net) : nullptr;
+            Net *net = p_non_other.net ? &brd.block->nets.at(p_non_other.net) : nullptr;
 
             // figure out the clearance between this patch pair
             uint64_t clearance = 0;
@@ -451,9 +451,9 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board *brd,
     }
 
     for (const auto &it : patches) {
-        if (brd->get_layers().count(it.first.layer)
-            && brd->get_layers().at(it.first.layer).copper) { // need to check copper layer
-            Net *net = it.first.net ? &brd->block->nets.at(it.first.net) : nullptr;
+        if (brd.get_layers().count(it.first.layer)
+            && brd.get_layers().at(it.first.layer).copper) { // need to check copper layer
+            Net *net = it.first.net ? &brd.block->nets.at(it.first.net) : nullptr;
 
             auto clearance = get_clearance_copper_other(net, it.first.layer)
                                      ->get_clearance(it.first.type, PatchType::BOARD_EDGE);
@@ -494,7 +494,7 @@ RulesCheckResult BoardRules::check_clearance_copper_non_copper(const Board *brd,
     return r;
 }
 
-RulesCheckResult BoardRules::check_preflight(const Board *brd) const
+RulesCheckResult BoardRules::check_preflight(const Board &brd) const
 {
     RulesCheckResult r;
     r.level = RulesCheckErrorLevel::PASS;
@@ -503,8 +503,8 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd) const
         return r;
     }
 
-    for (const auto &it_net : brd->airwires) {
-        const auto &net = brd->block->nets.at(it_net.first);
+    for (const auto &it_net : brd.airwires) {
+        const auto &net = brd.block->nets.at(it_net.first);
         for (const auto &it : it_net.second) {
             r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
             auto &e = r.errors.back();
@@ -513,7 +513,7 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd) const
             e.comment = "Airwire of net " + net.name;
         }
     }
-    for (const auto &it : brd->planes) {
+    for (const auto &it : brd.planes) {
         if (it.second.fragments.size() == 0) {
             r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
             auto &e = r.errors.back();
@@ -522,7 +522,7 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd) const
             e.comment = "Plane of net " + (it.second.net ? it.second.net->name : "No net") + " has no fragments";
         }
     }
-    for (const auto &it : brd->block->components) {
+    for (const auto &it : brd.block->components) {
         if (!it.second.part) {
             r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
             auto &e = r.errors.back();
@@ -531,11 +531,11 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd) const
         }
     }
     std::set<const Component *> unplaced_components;
-    std::transform(brd->block->components.begin(), brd->block->components.end(),
+    std::transform(brd.block->components.begin(), brd.block->components.end(),
                    std::inserter(unplaced_components, unplaced_components.begin()),
                    [](const auto &it) { return &it.second; });
 
-    for (const auto &it : brd->packages) {
+    for (const auto &it : brd.packages) {
         unplaced_components.erase(it.second.component);
     }
 
@@ -546,7 +546,7 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd) const
         e.comment = "Component " + it->refdes + " is not placed";
     }
 
-    for (const auto &it : brd->tracks) {
+    for (const auto &it : brd.tracks) {
         auto &track = it.second;
         if (!track.net) {
             r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
@@ -557,7 +557,7 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd) const
         }
     }
 
-    for (const auto &it : brd->polygons) {
+    for (const auto &it : brd.polygons) {
         bool is_keepout = dynamic_cast<const Keepout *>(it.second.usage.ptr);
         bool is_plane = dynamic_cast<Plane *>(it.second.usage.ptr);
         if (BoardLayers::is_copper(it.second.layer) && !(is_plane || is_keepout)) {
@@ -567,11 +567,11 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd) const
             if (e.has_location)
                 e.location = it.second.vertices.front().position;
             e.comment =
-                    "Polygon on layer " + brd->get_layers().at(it.second.layer).name + " is not a keepout or a plane";
+                    "Polygon on layer " + brd.get_layers().at(it.second.layer).name + " is not a keepout or a plane";
         }
     }
 
-    for (const auto &it : brd->lines) {
+    for (const auto &it : brd.lines) {
         if (it.second.layer == BoardLayers::L_OUTLINE) {
             r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
             auto &e = r.errors.back();
@@ -582,7 +582,7 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd) const
         }
     }
 
-    for (const auto &it : brd->arcs) {
+    for (const auto &it : brd.arcs) {
         if (it.second.layer == BoardLayers::L_OUTLINE) {
             r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
             auto &e = r.errors.back();
@@ -598,7 +598,7 @@ RulesCheckResult BoardRules::check_preflight(const Board *brd) const
 }
 
 
-RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board *brd, RulesCheckCache &cache,
+RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board &brd, RulesCheckCache &cache,
                                                             check_status_cb_t status_cb) const
 {
     RulesCheckResult r;
@@ -609,11 +609,11 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board *brd, Ru
     std::set<int> layers;
     const auto &patches = c->get_canvas()->get_patches();
     for (const auto &it : patches) { // collect copper layers
-        if (brd->get_layers().count(it.first.layer) && brd->get_layers().at(it.first.layer).copper) {
+        if (brd.get_layers().count(it.first.layer) && brd.get_layers().at(it.first.layer).copper) {
             layers.emplace(it.first.layer);
         }
     }
-    auto keepout_contours = brd->get_keepout_contours();
+    auto keepout_contours = brd.get_keepout_contours();
     auto n_patches = patches.size();
     auto n_keepouts = keepout_contours.size();
     int i_keepout = 0;
@@ -634,7 +634,7 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board *brd, Ru
                 && (it.first.layer == keepout->polygon->layer || keepout->all_cu_layers)
                 && keepout->patch_types_cu.count(it.first.type)) {
 
-                const Net *net = it.first.net ? &brd->block->nets.at(it.first.net) : nullptr;
+                const Net *net = it.first.net ? &brd.block->nets.at(it.first.net) : nullptr;
                 int64_t clearance = 0;
                 for (const auto &rule : rules) {
                     if (rule->match.match(net)
@@ -686,7 +686,7 @@ RulesCheckResult BoardRules::check_clearance_copper_keepout(const Board *brd, Ru
     return r;
 }
 
-RulesCheckResult BoardRules::check_clearance_same_net(const Board *brd, RulesCheckCache &cache,
+RulesCheckResult BoardRules::check_clearance_same_net(const Board &brd, RulesCheckCache &cache,
                                                       check_status_cb_t status_cb) const
 {
     RulesCheckResult r;
@@ -697,7 +697,7 @@ RulesCheckResult BoardRules::check_clearance_same_net(const Board *brd, RulesChe
     std::set<int> layers;
     const auto &patches = c->get_canvas()->get_patches();
     for (const auto &it : patches) { // collect copper layers
-        if (brd->get_layers().count(it.first.layer) && brd->get_layers().at(it.first.layer).copper) {
+        if (brd.get_layers().count(it.first.layer) && brd.get_layers().at(it.first.layer).copper) {
             layers.emplace(it.first.layer);
         }
     }
@@ -725,7 +725,7 @@ RulesCheckResult BoardRules::check_clearance_same_net(const Board *brd, RulesChe
         }
 
         for (const auto &[p1, p2] : patch_pairs) {
-            const Net *net = p1.net ? &brd->block->nets.at(p1.net) : nullptr;
+            const Net *net = p1.net ? &brd.block->nets.at(p1.net) : nullptr;
             auto rule = get_clearance_same_net(net, layer);
             auto clearance = rule->get_clearance(p1.type, p2.type);
             if (clearance >= 0) {
@@ -755,7 +755,7 @@ RulesCheckResult BoardRules::check_clearance_same_net(const Board *brd, RulesChe
                         }
                         e.location = acc.get();
                         e.comment = patch_type_names.at(p1.type) + " near " + patch_type_names.at(p2.type) + " "
-                                    + get_net_name(net) + " on layer " + brd->get_layers().at(layer).name;
+                                    + get_net_name(net) + " on layer " + brd.get_layers().at(layer).name;
                         e.error_polygons = {ite};
                     }
                 }
@@ -769,7 +769,7 @@ RulesCheckResult BoardRules::check_clearance_same_net(const Board *brd, RulesChe
 }
 
 
-RulesCheckResult BoardRules::check(RuleID id, const Board *brd, RulesCheckCache &cache,
+RulesCheckResult BoardRules::check(RuleID id, const Board &brd, RulesCheckCache &cache,
                                    check_status_cb_t status_cb) const
 {
     switch (id) {
