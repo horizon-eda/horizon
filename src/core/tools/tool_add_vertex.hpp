@@ -22,11 +22,17 @@ public:
                 I::LMB,
                 I::CANCEL,
                 I::RMB,
+                I::FLIP_DIRECTION,
         };
     }
 
 private:
-    class Polygon *poly = nullptr;
+    Polygon *poly = nullptr;
     Polygon::Vertex *vertex = nullptr;
+    int vertex_index = 0;
+    unsigned int n_vertices_placed = 0;
+    bool flip_direction = false;
+    void update_tip();
+    void add_vertex(const Coordi &c);
 };
 } // namespace horizon

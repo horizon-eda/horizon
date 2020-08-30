@@ -77,6 +77,9 @@ const std::map<InToolActionID, InToolActionCatalogItem> in_tool_action_catalog =
          {"shove/walkaround", ToolID::ROUTE_TRACK_INTERACTIVE, InToolActionCatalogItem::FLAGS_DEFAULT}},
 
         {InToolActionID::NC_MODE, {"NC mode", ToolID::SET_NC, InToolActionCatalogItem::FLAGS_DEFAULT}},
+
+        {InToolActionID::FLIP_DIRECTION,
+         {"Flip direction", ToolID::ADD_VERTEX, InToolActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 
@@ -137,6 +140,7 @@ const LutEnumStr<InToolActionID> in_tool_action_lut = {
         LUT_ITEM(CLEARANCE_OFFSET_DEFAULT),
         LUT_ITEM(ROUTER_MODE),
         LUT_ITEM(NC_MODE),
+        LUT_ITEM(FLIP_DIRECTION),
 };
 
 

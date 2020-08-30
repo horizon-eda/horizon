@@ -72,6 +72,9 @@ enum class InToolActionID {
 
     // set NC
     NC_MODE,
+
+    // add vertex
+    FLIP_DIRECTION,
 };
 
 } // namespace horizon
