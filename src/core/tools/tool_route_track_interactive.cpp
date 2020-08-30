@@ -173,7 +173,7 @@ ToolResponse ToolRouteTrackInteractive::begin(const ToolArgs &args)
     iface->create_debug_decorator(imp->get_canvas());
     iface->SetCanvas(imp->get_canvas());
     iface->SetRules(rules);
-    iface->SetViaPadstackProvider(doc.b->get_via_padstack_provider());
+    iface->SetViaPadstackProvider(&doc.b->get_via_padstack_provider());
     // m_iface->SetHostFrame( m_frame );
 
     router = new PNS::ROUTER;

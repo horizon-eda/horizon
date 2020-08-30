@@ -27,28 +27,33 @@ public:
     const Board *get_canvas_data();
     Board *get_board() override;
     const Board *get_board() const;
-    ViaPadstackProvider *get_via_padstack_provider() override;
-    class Rules *get_rules() override;
-    FabOutputSettings *get_fab_output_settings() override
+
+    ViaPadstackProvider &get_via_padstack_provider() override
     {
-        return &fab_output_settings;
-    }
-    PDFExportSettings *get_pdf_export_settings() override
-    {
-        return &pdf_export_settings;
-    }
-    STEPExportSettings *get_step_export_settings() override
-    {
-        return &step_export_settings;
-    }
-    PnPExportSettings *get_pnp_export_settings() override
-    {
-        return &pnp_export_settings;
+        return via_padstack_provider;
     }
 
-    BoardColors *get_colors() override
+    class Rules *get_rules() override;
+    FabOutputSettings &get_fab_output_settings() override
     {
-        return &colors;
+        return fab_output_settings;
+    }
+    PDFExportSettings &get_pdf_export_settings() override
+    {
+        return pdf_export_settings;
+    }
+    STEPExportSettings &get_step_export_settings() override
+    {
+        return step_export_settings;
+    }
+    PnPExportSettings &get_pnp_export_settings() override
+    {
+        return pnp_export_settings;
+    }
+
+    BoardColors &get_colors() override
+    {
+        return colors;
     }
     void update_rules() override;
 

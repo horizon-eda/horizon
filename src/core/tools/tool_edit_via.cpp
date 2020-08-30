@@ -29,7 +29,7 @@ std::set<Via *> ToolEditVia::get_vias()
 ToolResponse ToolEditVia::begin(const ToolArgs &args)
 {
     auto holes = get_vias();
-    bool r = imp->dialogs.edit_via(holes, *doc.b->get_via_padstack_provider());
+    bool r = imp->dialogs.edit_via(holes, doc.b->get_via_padstack_provider());
     if (r) {
         return ToolResponse::commit();
     }

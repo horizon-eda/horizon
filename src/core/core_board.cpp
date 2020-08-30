@@ -597,11 +597,6 @@ void CoreBoard::update_rules()
     brd.rules = rules;
 }
 
-ViaPadstackProvider *CoreBoard::get_via_padstack_provider()
-{
-    return &via_padstack_provider;
-}
-
 CoreBoard::HistoryItem::HistoryItem(const Block &b, const Board &r) : block(b), brd(shallow_copy, r)
 {
 }

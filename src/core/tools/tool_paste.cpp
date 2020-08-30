@@ -356,7 +356,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
                               .emplace(std::piecewise_construct, std::forward_as_tuple(u),
                                        std::forward_as_tuple(u, it.value()))
                               .first->second;
-            if (auto ps = doc.b->get_via_padstack_provider()->get_padstack(x->vpp_padstack.uuid)) {
+            if (auto ps = doc.b->get_via_padstack_provider().get_padstack(x->vpp_padstack.uuid)) {
                 x->vpp_padstack = ps;
                 x->padstack = *ps;
                 x->padstack.apply_parameter_set(x->parameter_set);

@@ -37,7 +37,7 @@ void RuleEditorVia::populate()
     grid->attach(*match_editor, 0, 1, 1, 1);
 
     auto &c = dynamic_cast<IDocumentBoard &>(core);
-    auto ps_button = Gtk::manage(new ViaPadstackButton(*c.get_via_padstack_provider()));
+    auto ps_button = Gtk::manage(new ViaPadstackButton(c.get_via_padstack_provider()));
     ps_button->property_selected_uuid() = rule2->padstack;
     ps_button->property_selected_uuid().signal_changed().connect(
             [this, ps_button] { rule2->padstack = ps_button->property_selected_uuid(); });

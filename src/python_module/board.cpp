@@ -45,29 +45,29 @@ public:
     {
         return board;
     }
-    horizon::ViaPadstackProvider *get_via_padstack_provider() override
+    horizon::ViaPadstackProvider &get_via_padstack_provider() override
     {
-        return &vpp;
+        return vpp;
     }
-    horizon::FabOutputSettings *get_fab_output_settings() override
+    horizon::FabOutputSettings &get_fab_output_settings() override
     {
-        return &board.fab_output_settings;
+        return board.fab_output_settings;
     }
-    horizon::PDFExportSettings *get_pdf_export_settings() override
+    horizon::PDFExportSettings &get_pdf_export_settings() override
     {
-        return &board.pdf_export_settings;
+        return board.pdf_export_settings;
     }
-    horizon::STEPExportSettings *get_step_export_settings() override
+    horizon::STEPExportSettings &get_step_export_settings() override
     {
-        return &board.step_export_settings;
+        return board.step_export_settings;
     }
-    horizon::PnPExportSettings *get_pnp_export_settings() override
+    horizon::PnPExportSettings &get_pnp_export_settings() override
     {
-        return &board.pnp_export_settings;
+        return board.pnp_export_settings;
     }
-    horizon::BoardColors *get_colors() override
+    horizon::BoardColors &get_colors() override
     {
-        return &board.colors;
+        return board.colors;
     }
 };
 

@@ -36,7 +36,7 @@ StepExportWindow *StepExportWindow::create(Gtk::Window *p, IDocumentBoard &c, co
 
 StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocumentBoard &c,
                                    const std::string &project_dir)
-    : Gtk::Window(cobject), core(c), settings(*core.get_step_export_settings())
+    : Gtk::Window(cobject), core(c), settings(core.get_step_export_settings())
 {
     set_modal(true);
     x->get_widget("header", header);
@@ -119,7 +119,7 @@ void StepExportWindow::export_thread(STEPExportSettings my_settings)
                     }
                     export_dispatcher.emit();
                 },
-                core.get_colors(), my_settings.prefix);
+                &core.get_colors(), my_settings.prefix);
     }
     catch (const std::exception &e) {
         {

@@ -559,7 +559,7 @@ void ImpBoard::construct()
     });
 
     pdf_export_window =
-            PDFExportWindow::create(main_window, core_board, *core_board.get_pdf_export_settings(), project_dir);
+            PDFExportWindow::create(main_window, core_board, core_board.get_pdf_export_settings(), project_dir);
     pdf_export_window->signal_changed().connect([this] { core_board.set_needs_save(); });
     core->signal_rebuilt().connect([this] { pdf_export_window->reload_layers(); });
     connect_action(ActionID::PDF_EXPORT_WINDOW, [this](const auto &c) { pdf_export_window->present(); });
@@ -569,11 +569,11 @@ void ImpBoard::construct()
     });
 
     view_3d_window = View3DWindow::create(*core_board.get_board(), *pool.get(), View3DWindow::Mode::BOARD);
-    view_3d_window->set_solder_mask_color(rgba_from_color(core_board.get_colors()->solder_mask));
-    view_3d_window->set_substrate_color(rgba_from_color(core_board.get_colors()->substrate));
+    view_3d_window->set_solder_mask_color(rgba_from_color(core_board.get_colors().solder_mask));
+    view_3d_window->set_substrate_color(rgba_from_color(core_board.get_colors().substrate));
     view_3d_window->signal_changed().connect([this] {
-        core_board.get_colors()->solder_mask = color_from_rgba(view_3d_window->get_solder_mask_color());
-        core_board.get_colors()->substrate = color_from_rgba(view_3d_window->get_substrate_color());
+        core_board.get_colors().solder_mask = color_from_rgba(view_3d_window->get_solder_mask_color());
+        core_board.get_colors().substrate = color_from_rgba(view_3d_window->get_substrate_color());
         core_board.set_needs_save();
     });
     view_3d_window->signal_key_press_event().connect([this](GdkEventKey *ev) {
@@ -729,7 +729,7 @@ void ImpBoard::construct()
 
 
     pnp_export_window = PnPExportWindow::create(main_window, *core_board.get_board(),
-                                                *core_board.get_pnp_export_settings(), project_dir);
+                                                core_board.get_pnp_export_settings(), project_dir);
 
     connect_action(ActionID::PNP_EXPORT_WINDOW, [this](const auto &c) { pnp_export_window->present(); });
     connect_action(ActionID::EXPORT_PNP, [this](const auto &c) {

@@ -50,7 +50,7 @@ GerberLayerEditor *GerberLayerEditor::create(FabOutputWindow &pa, FabOutputSetti
 
 FabOutputWindow::FabOutputWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, IDocumentBoard &c,
                                  const std::string &project_dir)
-    : Gtk::Window(cobject), core(c), brd(*core.get_board()), settings(*core.get_fab_output_settings()),
+    : Gtk::Window(cobject), core(c), brd(*core.get_board()), settings(core.get_fab_output_settings()),
       state_store(this, "imp-fab-output")
 {
     x->get_widget("gerber_layers_box", gerber_layers_box);

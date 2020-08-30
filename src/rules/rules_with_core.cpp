@@ -28,7 +28,7 @@ void rules_apply(Rules &r, RuleID id, class IDocument &c)
 {
     if (auto rules = dynamic_cast<BoardRules *>(&r)) {
         auto &core = dynamic_cast<IDocumentBoard &>(c);
-        rules->apply(id, *core.get_board(), *core.get_via_padstack_provider());
+        rules->apply(id, *core.get_board(), core.get_via_padstack_provider());
     }
 }
 } // namespace horizon
