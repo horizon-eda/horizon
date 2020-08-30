@@ -21,6 +21,7 @@
 #include "rules/rules_with_core.hpp"
 #include "util/util.hpp"
 #include "core/core.hpp"
+#include "util/gtk_util.hpp"
 
 #include <thread>
 
@@ -77,20 +78,20 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     : Gtk::Window(cobject), canvas(ca), core(c), rules(*core.get_rules()),
       state_store(this, "imp-rules-" + object_type_lut.lookup_reverse(core.get_object_type()))
 {
-    x->get_widget("lb_rules", lb_rules);
-    x->get_widget("lb_multi", lb_multi);
-    x->get_widget("rev_multi", rev_multi);
-    x->get_widget("button_rule_instance_add", button_rule_instance_add);
-    x->get_widget("button_rule_instance_remove", button_rule_instance_remove);
-    x->get_widget("button_rule_instance_move_up", button_rule_instance_move_up);
-    x->get_widget("button_rule_instance_move_down", button_rule_instance_move_down);
-    x->get_widget("rule_editor_box", rule_editor_box);
-    x->get_widget("results_tv", check_result_treeview);
-    x->get_widget("run_button", run_button);
-    x->get_widget("apply_button", apply_button);
-    x->get_widget("stack", stack);
-    x->get_widget("stack_switcher", stack_switcher);
-    x->get_widget("rev_warn", rev_warn);
+    GET_WIDGET(lb_rules);
+    GET_WIDGET(lb_multi);
+    GET_WIDGET(rev_multi);
+    GET_WIDGET(button_rule_instance_add);
+    GET_WIDGET(button_rule_instance_remove);
+    GET_WIDGET(button_rule_instance_move_up);
+    GET_WIDGET(button_rule_instance_move_down);
+    GET_WIDGET(rule_editor_box);
+    GET_WIDGET(check_result_treeview);
+    GET_WIDGET(run_button);
+    GET_WIDGET(apply_button);
+    GET_WIDGET(stack);
+    GET_WIDGET(stack_switcher);
+    GET_WIDGET(rev_warn);
     sg_order = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 
     lb_rules->signal_row_selected().connect(
