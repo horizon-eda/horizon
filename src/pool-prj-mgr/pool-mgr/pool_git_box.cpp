@@ -10,6 +10,7 @@
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "preferences/preferences_provider.hpp"
 #include "preferences/preferences.hpp"
+#include <iomanip>
 
 namespace horizon {
 
@@ -539,7 +540,7 @@ void PoolGitBox::handle_pr()
             }
 
             autofree_ptr<git_object> treeish(git_object_free);
-            if (git_reference_peel(&treeish.ptr, pr_branch_orig, GIT_OBJECT_TREE) != 0) {
+            if (git_reference_peel(&treeish.ptr, pr_branch_orig, GIT_OBJ_TREE) != 0) {
                 throw std::runtime_error("peel");
             }
 
