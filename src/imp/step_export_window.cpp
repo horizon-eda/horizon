@@ -39,14 +39,14 @@ StepExportWindow::StepExportWindow(BaseObjectType *cobject, const Glib::RefPtr<G
     : Gtk::Window(cobject), core(c), settings(core.get_step_export_settings())
 {
     set_modal(true);
-    x->get_widget("header", header);
-    x->get_widget("spinner", spinner);
-    x->get_widget("export_button", export_button);
-    x->get_widget("filename_button", filename_button);
-    x->get_widget("filename_entry", filename_entry);
-    x->get_widget("prefix_entry", prefix_entry);
-    x->get_widget("log_textview", log_textview);
-    x->get_widget("include_3d_models_switch", include_3d_models_switch);
+    GET_WIDGET(header);
+    GET_WIDGET(spinner);
+    GET_WIDGET(export_button);
+    GET_WIDGET(filename_button);
+    GET_WIDGET(filename_entry);
+    GET_WIDGET(prefix_entry);
+    GET_WIDGET(log_textview);
+    GET_WIDGET(include_3d_models_switch);
 
     export_button->signal_clicked().connect(sigc::mem_fun(*this, &StepExportWindow::generate));
 
