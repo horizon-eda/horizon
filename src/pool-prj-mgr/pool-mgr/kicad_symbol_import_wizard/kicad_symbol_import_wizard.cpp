@@ -1,6 +1,7 @@
 #include "kicad_symbol_import_wizard.hpp"
 #include "util/util.hpp"
 #include "util/str_util.hpp"
+#include "util/gtk_util.hpp"
 #include "widgets/pool_browser_package.hpp"
 #include "widgets/preview_canvas.hpp"
 #include "nlohmann/json.hpp"
@@ -17,33 +18,33 @@ KiCadSymbolImportWizard::KiCadSymbolImportWizard(BaseObjectType *cobject, const 
                                                  class PoolProjectManagerAppWindow *aw, const std::string &lib_filename)
     : Gtk::Window(cobject), pool(po), appwin(aw), state_store(this, "kicad-symbol-import-wizard")
 {
-    x->get_widget("header", header);
-    x->get_widget("stack", stack);
-    x->get_widget("button_next", button_next);
-    x->get_widget("button_finish", button_finish);
-    x->get_widget("button_skip", button_skip);
-    x->get_widget("button_prev", button_prev);
-    x->get_widget("tv_symbols", tv_symbols);
-    x->get_widget("edit_gates_box", edit_gates_box);
-    x->get_widget("part_box", part_box);
-    x->get_widget("preview_part_sp", preview_part_sp);
-    x->get_widget("merge_pins_cb", merge_pins_cb);
-    x->get_widget("fp_info_label", fp_info_label);
-    x->get_widget("fp_info_label_sym", fp_info_label_sym);
-    x->get_widget("button_autofill", button_autofill);
+    GET_WIDGET(header);
+    GET_WIDGET(stack);
+    GET_WIDGET(button_next);
+    GET_WIDGET(button_finish);
+    GET_WIDGET(button_skip);
+    GET_WIDGET(button_prev);
+    GET_WIDGET(tv_symbols);
+    GET_WIDGET(edit_gates_box);
+    GET_WIDGET(part_box);
+    GET_WIDGET(preview_part_sp);
+    GET_WIDGET(merge_pins_cb);
+    GET_WIDGET(fp_info_label);
+    GET_WIDGET(fp_info_label_sym);
+    GET_WIDGET(button_autofill);
 
-    x->get_widget("button_part_edit", button_part_edit);
+    GET_WIDGET(button_part_edit);
     button_part_edit->signal_clicked().connect(sigc::mem_fun(*this, &KiCadSymbolImportWizard::handle_edit_part));
     {
         Gtk::Button *button_entity_edit;
-        x->get_widget("button_entity_edit", button_entity_edit);
+        GET_WIDGET(button_entity_edit);
         button_entity_edit->signal_clicked().connect(
                 sigc::mem_fun(*this, &KiCadSymbolImportWizard::handle_edit_entity));
     }
 
     {
         Gtk::Paned *pane_package;
-        x->get_widget("pane_package", pane_package);
+        GET_WIDGET(pane_package);
         browser_package = Gtk::manage(new PoolBrowserPackage(pool, true));
         browser_package->show();
         pane_package->add1(*browser_package);
@@ -62,7 +63,7 @@ KiCadSymbolImportWizard::KiCadSymbolImportWizard(BaseObjectType *cobject, const 
 
     {
         Gtk::Box *symbol_preview_box = nullptr;
-        x->get_widget("symbol_preview_box", symbol_preview_box);
+        GET_WIDGET(symbol_preview_box);
         symbol_preview = Gtk::manage(new PreviewCanvas(pool, false));
         symbol_preview->show();
         symbol_preview_box->pack_start(*symbol_preview, true, true, 0);
