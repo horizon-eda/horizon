@@ -921,5 +921,8 @@ clean_res:
 -include  $(OBJ_ALL:.o=.d)
 -include  $(OBJ_ROUTER:.o=.d)
 -include  $(OBJ_OCE:.o=.d)
+-include  $(OBJ_SHARED:.o=.d)
+-include  $(OBJ_SHARED_OCE:.o=.d)
+-include  $(OBJ_PYTHON:.o=.d)
 
 .PHONY: clean clean_router clean_oce clean_res install
