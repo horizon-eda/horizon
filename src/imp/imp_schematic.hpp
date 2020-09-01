@@ -71,5 +71,7 @@ private:
     Glib::RefPtr<Gio::SimpleAction> toggle_snap_to_targets_action;
 
     int get_board_pid();
+
+    UUID net_from_selectable(const SelectableRef &sr);
 };
 } // namespace horizon

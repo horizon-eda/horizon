@@ -88,5 +88,7 @@ private:
 
     Gtk::Popover *reload_netlist_popover = nullptr;
     sigc::connection reload_netlist_delay_conn;
+
+    UUID net_from_selectable(const SelectableRef &sr);
 };
 } // namespace horizon

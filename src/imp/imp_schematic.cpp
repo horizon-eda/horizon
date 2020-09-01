@@ -410,34 +410,23 @@ void ImpSchematic::construct()
 
     connect_action(ActionID::HIGHLIGHT_NET, [this](const auto &a) {
         highlights.clear();
-        auto sheet = core_schematic.get_sheet();
         for (const auto &it : canvas->get_selection()) {
-            switch (it.type) {
-            case ObjectType::LINE_NET: {
-                auto &li = sheet->net_lines.at(it.uuid);
-                if (li.net) {
-                    highlights.emplace(ObjectType::NET, li.net->uuid);
+            if (auto uu = net_from_selectable(it)) {
+                highlights.emplace(ObjectType::NET, uu);
+            }
+        }
+        this->update_highlights();
+    });
+
+    connect_action(ActionID::HIGHLIGHT_NET_CLASS, [this](const auto &a) {
+        highlights.clear();
+        for (const auto &it : canvas->get_selection()) {
+            if (auto uu = net_from_selectable(it)) {
+                const auto &net_sel = core_schematic.get_block()->nets.at(uu);
+                for (const auto &[net_uu, net] : core_schematic.get_block()->nets) {
+                    if (net.net_class == net_sel.net_class)
+                        highlights.emplace(ObjectType::NET, net_uu);
                 }
-            } break;
-            case ObjectType::NET_LABEL: {
-                auto &la = sheet->net_labels.at(it.uuid);
-                if (la.junction->net) {
-                    highlights.emplace(ObjectType::NET, la.junction->net->uuid);
-                }
-            } break;
-            case ObjectType::POWER_SYMBOL: {
-                auto &sym = sheet->power_symbols.at(it.uuid);
-                if (sym.junction->net) {
-                    highlights.emplace(ObjectType::NET, sym.junction->net->uuid);
-                }
-            } break;
-            case ObjectType::JUNCTION: {
-                auto &ju = sheet->junctions.at(it.uuid);
-                if (ju.net) {
-                    highlights.emplace(ObjectType::NET, ju.net->uuid);
-                }
-            } break;
-            default:;
             }
         }
         this->update_highlights();
@@ -576,18 +565,20 @@ void ImpSchematic::update_action_sensitivity()
     set_action_sensitive(make_action(ActionID::MOVE_TO_OTHER_SHEET), sel.size() > 0);
     set_action_sensitive(make_action(ActionID::GO_TO_BOARD), sockets_connected);
 
-    set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET), std::any_of(sel.begin(), sel.end(), [](const auto &x) {
-                             switch (x.type) {
-                             case ObjectType::LINE_NET:
-                             case ObjectType::NET_LABEL:
-                             case ObjectType::JUNCTION:
-                             case ObjectType::POWER_SYMBOL:
-                                 return true;
+    const bool can_highlight_net = std::any_of(sel.begin(), sel.end(), [](const auto &x) {
+        switch (x.type) {
+        case ObjectType::LINE_NET:
+        case ObjectType::NET_LABEL:
+        case ObjectType::JUNCTION:
+        case ObjectType::POWER_SYMBOL:
+            return true;
 
-                             default:
-                                 return false;
-                             }
-                         }));
+        default:
+            return false;
+        }
+    });
+    set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET), can_highlight_net);
+    set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET_CLASS), can_highlight_net);
     bool can_higlight_group = false;
     bool can_higlight_tag = false;
     if (sel.size() == 1 && (*sel.begin()).type == ObjectType::SCHEMATIC_SYMBOL) {
@@ -603,6 +594,39 @@ void ImpSchematic::update_action_sensitivity()
     set_action_sensitive(make_action(ActionID::HIGHLIGHT_TAG), can_higlight_tag);
 
     ImpBase::update_action_sensitivity();
+}
+
+UUID ImpSchematic::net_from_selectable(const SelectableRef &sr)
+{
+    const auto &sheet = *core_schematic.get_sheet();
+    switch (sr.type) {
+    case ObjectType::LINE_NET: {
+        auto &li = sheet.net_lines.at(sr.uuid);
+        if (li.net) {
+            return li.net->uuid;
+        }
+    } break;
+    case ObjectType::NET_LABEL: {
+        auto &la = sheet.net_labels.at(sr.uuid);
+        if (la.junction->net) {
+            return la.junction->net->uuid;
+        }
+    } break;
+    case ObjectType::POWER_SYMBOL: {
+        auto &sym = sheet.power_symbols.at(sr.uuid);
+        if (sym.junction->net) {
+            return sym.junction->net->uuid;
+        }
+    } break;
+    case ObjectType::JUNCTION: {
+        auto &ju = sheet.junctions.at(sr.uuid);
+        if (ju.net) {
+            return ju.net->uuid;
+        }
+    } break;
+    default:;
+    }
+    return UUID();
 }
 
 std::string ImpSchematic::get_hud_text(std::set<SelectableRef> &sel)

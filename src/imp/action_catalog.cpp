@@ -877,6 +877,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::CLICK_SELECT, ToolID::NONE},
          {"Click select mode", ActionGroup::SELECTION, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::HIGHLIGHT_NET_CLASS, ToolID::NONE},
+         {"Highlight net class", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
+          ActionCatalogItem::FLAGS_SPECIFIC}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -997,6 +1001,7 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(ZOOM_IN),
         ACTION_LUT_ITEM(ZOOM_OUT),
         ACTION_LUT_ITEM(CLICK_SELECT),
+        ACTION_LUT_ITEM(HIGHLIGHT_NET_CLASS),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

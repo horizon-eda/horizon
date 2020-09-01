@@ -275,6 +275,7 @@ void ImpBoard::update_action_sensitivity()
     });
 
     set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET), can_select_more);
+    set_action_sensitive(make_action(ActionID::HIGHLIGHT_NET_CLASS), can_select_more);
     set_action_sensitive(make_action(ActionID::SELECT_MORE), can_select_more);
     set_action_sensitive(make_action(ActionID::SELECT_MORE_NO_VIA), can_select_more);
     set_action_sensitive(make_action(ActionID::FILTER_AIRWIRES), can_select_more || n_pkgs);
@@ -629,31 +630,27 @@ void ImpBoard::construct()
     connect_action(ActionID::HIGHLIGHT_NET, [this](const auto &a) {
         highlights.clear();
         for (const auto &it : canvas->get_selection()) {
-            auto board = core_board.get_board();
-            switch (it.type) {
-            case ObjectType::TRACK: {
-                auto &track = board->tracks.at(it.uuid);
-                if (track.net) {
-                    highlights.emplace(ObjectType::NET, track.net->uuid);
-                }
-            } break;
-            case ObjectType::VIA: {
-                auto &via = board->vias.at(it.uuid);
-                if (via.junction->net) {
-                    highlights.emplace(ObjectType::NET, via.junction->net->uuid);
-                }
-            } break;
-            case ObjectType::JUNCTION: {
-                auto &ju = board->junctions.at(it.uuid);
-                if (ju.net) {
-                    highlights.emplace(ObjectType::NET, ju.net->uuid);
-                }
-            } break;
-            default:;
+            if (auto uu = net_from_selectable(it)) {
+                highlights.emplace(ObjectType::NET, uu);
             }
         }
         this->update_highlights();
     });
+
+    connect_action(ActionID::HIGHLIGHT_NET_CLASS, [this](const auto &a) {
+        highlights.clear();
+        for (const auto &it : canvas->get_selection()) {
+            if (auto uu = net_from_selectable(it)) {
+                const auto &net_sel = core_board.get_block()->nets.at(uu);
+                for (const auto &[net_uu, net] : core_board.get_block()->nets) {
+                    if (net.net_class == net_sel.net_class)
+                        highlights.emplace(ObjectType::NET, net_uu);
+                }
+            }
+        }
+        this->update_highlights();
+    });
+
     connect_action(ActionID::SELECT_MORE, sigc::mem_fun(*this, &ImpBoard::handle_select_more));
     connect_action(ActionID::SELECT_MORE_NO_VIA, sigc::mem_fun(*this, &ImpBoard::handle_select_more));
 
@@ -815,6 +812,33 @@ void ImpBoard::construct()
     add_action_button(make_action(ToolID::DRAW_DIMENSION));
 
     display_control_notebook->show();
+}
+
+UUID ImpBoard::net_from_selectable(const SelectableRef &sr)
+{
+    const auto &board = *core_board.get_board();
+    switch (sr.type) {
+    case ObjectType::TRACK: {
+        auto &track = board.tracks.at(sr.uuid);
+        if (track.net) {
+            return track.net->uuid;
+        }
+    } break;
+    case ObjectType::VIA: {
+        auto &via = board.vias.at(sr.uuid);
+        if (via.junction->net) {
+            return via.junction->net->uuid;
+        }
+    } break;
+    case ObjectType::JUNCTION: {
+        auto &ju = board.junctions.at(sr.uuid);
+        if (ju.net) {
+            return ju.net->uuid;
+        }
+    } break;
+    default:;
+    }
+    return UUID();
 }
 
 void ImpBoard::update_airwires()

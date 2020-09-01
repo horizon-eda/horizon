@@ -99,6 +99,7 @@ enum class ActionID {
     ZOOM_IN,
     ZOOM_OUT,
     CLICK_SELECT,
+    HIGHLIGHT_NET_CLASS,
 };
 
 using ActionToolID = std::pair<ActionID, ToolID>;
