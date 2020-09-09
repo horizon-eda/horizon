@@ -572,8 +572,8 @@ void PoolGitBox::handle_pr()
             if (git_merge_analysis(&merge_analysis, &merge_prefs, repo, &acom, 1) != 0) {
                 throw std::runtime_error("error getting merge analysis");
             }
-            if (merge_analysis != GIT_MERGE_ANALYSIS_NORMAL) {
-                throw std::runtime_error("merge not normal");
+            if (!(merge_analysis & GIT_MERGE_ANALYSIS_NORMAL)) {
+                throw std::runtime_error("merge not normal " + std::to_string(merge_analysis));
             }
 
             git_merge_options merge_opts = GIT_MERGE_OPTIONS_INIT;
