@@ -5,7 +5,7 @@ on:
     branches: [ docker ]
 
 jobs:
-  docker:
+  docker-python:
     runs-on: ubuntu-latest
     steps:
     - name: login to docker
@@ -14,7 +14,7 @@ jobs:
       with:
         path: src
     - name: build docker image
-      run: docker build . -f src/Dockerfile --network=host -t horizoneda/horizon:latest
+      run: docker build . -f src/Dockerfile-python --network=host -t horizoneda/horizon:latest
     - name: test docker image
       run: docker run horizoneda/horizon:latest python3 -c 'import horizon'
     - name: publish docker image
