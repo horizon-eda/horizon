@@ -13,7 +13,7 @@ Rule::Rule(const UUID &uu) : uuid(uu)
 {
 }
 
-Rule::Rule(const UUID &uu, const json &j) : uuid(uu), order(j.value("order", 0)), enabled(j.at("enabled"))
+Rule::Rule(const UUID &uu, const json &j) : uuid(uu), enabled(j.at("enabled")), order(j.value("order", 0))
 {
 }
 
