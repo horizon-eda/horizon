@@ -109,6 +109,8 @@ SRC_COMMON = \
 	src/util/picture_data.cpp\
 	src/util/picture_load.cpp\
 	src/pool/decal.cpp\
+	src/symbol/symbol_rules.cpp\
+	src/symbol/rule_symbol_checks.cpp\
 
 
 ifeq ($(OS),Windows_NT)
@@ -389,6 +391,7 @@ SRC_IMP = \
 	src/board/board_rules_check.cpp\
 	src/schematic/schematic_rules_check.cpp\
 	src/package/package_rules_check.cpp\
+	src/symbol/symbol_rules_check.cpp\
 	src/board/plane_update.cpp\
 	src/imp/symbol_preview/symbol_preview_window.cpp\
 	src/imp/symbol_preview/preview_box.cpp\

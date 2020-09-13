@@ -477,6 +477,7 @@ RuleEditor *RulesWindow::create_editor(Rule &r)
 
     case RuleID::PACKAGE_CHECKS:
     case RuleID::PREFLIGHT_CHECKS:
+    case RuleID::SYMBOL_CHECKS:
         e = new RuleEditorPackageChecks(r, core);
         break;
 

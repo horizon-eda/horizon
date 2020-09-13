@@ -3,8 +3,10 @@
 #include "document/idocument_board.hpp"
 #include "document/idocument_schematic.hpp"
 #include "document/idocument_package.hpp"
+#include "document/idocument_symbol.hpp"
 #include "schematic/schematic_rules.hpp"
 #include "package/package_rules.hpp"
+#include "symbol/symbol_rules.hpp"
 
 namespace horizon {
 RulesCheckResult rules_check(Rules &r, RuleID id, class IDocument &c, RulesCheckCache &cache,
@@ -21,6 +23,10 @@ RulesCheckResult rules_check(Rules &r, RuleID id, class IDocument &c, RulesCheck
     if (auto rules = dynamic_cast<PackageRules *>(&r)) {
         auto &core = dynamic_cast<IDocumentPackage &>(c);
         return rules->check(id, core.get_package(), cache);
+    }
+    if (auto rules = dynamic_cast<SymbolRules *>(&r)) {
+        auto &core = dynamic_cast<IDocumentSymbol &>(c);
+        return rules->check(id, core.get_symbol());
     }
     return RulesCheckResult();
 }

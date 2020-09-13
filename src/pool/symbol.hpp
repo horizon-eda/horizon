@@ -10,10 +10,7 @@
 #include "nlohmann/json_fwd.hpp"
 #include "unit.hpp"
 #include "util/uuid.hpp"
-#include <fstream>
-#include <map>
-#include <set>
-#include <vector>
+#include "symbol/symbol_rules.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -101,6 +98,8 @@ public:
 
     std::map<std::tuple<int, bool, UUID>, Placement> text_placements;
     void apply_placement(const Placement &p);
+
+    SymbolRules rules;
 
 private:
     void update_refs();

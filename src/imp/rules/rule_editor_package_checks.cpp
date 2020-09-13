@@ -1,5 +1,4 @@
 #include "rule_editor_package_checks.hpp"
-#include "package/rule_package_checks.hpp"
 
 namespace horizon {
 
@@ -22,14 +21,26 @@ static const char *text_preflight =
         "• No polygons without usage on copper layers\n"
         "• Board outline is drawn using polygons\n";
 
+static const char *text_sym =
+        "This rule checks if the symbol contains all required objects:\n"
+        "• Refdes & value texts\n"
+        "• No off-grid pins\n"
+        "• No unplaced pins\n"
+        "• No overlapping pins\n"
+        "• Pin placement\n";
+
+
 void RuleEditorPackageChecks::populate()
 {
     Gtk::Label *editor = Gtk::manage(new Gtk::Label);
-    if (dynamic_cast<RulePackageChecks *>(&rule)) {
+    if (rule.id == RuleID::PACKAGE_CHECKS) {
         editor->set_text(text_pkg);
     }
-    else {
+    else if (rule.id == RuleID::PREFLIGHT_CHECKS) {
         editor->set_text(text_preflight);
+    }
+    else if (rule.id == RuleID::SYMBOL_CHECKS) {
+        editor->set_text(text_sym);
     }
     editor->set_xalign(0);
     editor->set_valign(Gtk::ALIGN_START);

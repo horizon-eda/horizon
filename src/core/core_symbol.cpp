@@ -34,6 +34,11 @@ bool CoreSymbol::has_object_type(ObjectType ty) const
     return false;
 }
 
+Rules *CoreSymbol::get_rules()
+{
+    return &rules;
+}
+
 std::map<UUID, Text> *CoreSymbol::get_text_map()
 {
     return &sym.texts;

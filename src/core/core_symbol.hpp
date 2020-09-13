@@ -58,6 +58,9 @@ public:
         return ObjectType::SYMBOL;
     }
 
+    class Rules *get_rules() override;
+
+
 private:
     std::map<UUID, Text> *get_text_map() override;
     std::map<UUID, Polygon> *get_polygon_map() override;
@@ -65,6 +68,8 @@ private:
     Symbol sym;
     std::string m_filename;
     Symbol::PinDisplayMode pin_display_mode = Symbol::PinDisplayMode::PRIMARY;
+
+    SymbolRules rules;
 
     class HistoryItem : public Core::HistoryItem {
     public:
