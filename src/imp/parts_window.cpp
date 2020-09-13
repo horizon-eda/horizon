@@ -97,7 +97,8 @@ void PartsWindow::update()
     store->clear();
     std::map<const Part *, std::list<const Component *>> parts;
     for (const auto &[uu, comp] : board.block->components) {
-        parts[comp.part].push_back(&comp);
+        if (comp.part)
+            parts[comp.part].push_back(&comp);
     }
     for (auto &[part, comps] : parts) {
         comps.sort([](const auto &a, const auto &b) { return strcmp_natural(a->refdes, b->refdes) < 0; });
