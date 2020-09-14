@@ -22,7 +22,7 @@ RulesCheckResult rules_check(Rules &r, RuleID id, class IDocument &c, RulesCheck
     }
     if (auto rules = dynamic_cast<PackageRules *>(&r)) {
         auto &core = dynamic_cast<IDocumentPackage &>(c);
-        return rules->check(id, core.get_package(), cache);
+        return rules->check(id, core.get_package());
     }
     if (auto rules = dynamic_cast<SymbolRules *>(&r)) {
         auto &core = dynamic_cast<IDocumentSymbol &>(c);

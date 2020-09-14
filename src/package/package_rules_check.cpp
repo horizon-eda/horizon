@@ -162,7 +162,7 @@ RulesCheckResult PackageRules::check_package(const class Package &pkg) const
     return r;
 }
 
-RulesCheckResult PackageRules::check(RuleID id, const Package &pkg, RulesCheckCache &cache) const
+RulesCheckResult PackageRules::check(RuleID id, const Package &pkg) const
 {
     switch (id) {
     case RuleID::PACKAGE_CHECKS:
