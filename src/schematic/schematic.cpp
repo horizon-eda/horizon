@@ -797,6 +797,9 @@ void Schematic::expand(bool careful)
                 }
             }
         }
+        else {
+            sheet.frame = Frame(UUID());
+        }
     }
 
     if (!careful) {

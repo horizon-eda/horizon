@@ -1,6 +1,7 @@
 #include "schematic_properties.hpp"
 #include "schematic/schematic.hpp"
 #include "widgets/pool_browser_button.hpp"
+#include "widgets/pool_browser.hpp"
 #include "widgets/title_block_values_editor.hpp"
 #include "widgets/project_meta_editor.hpp"
 #include "pool/ipool.hpp"
@@ -56,10 +57,16 @@ SheetEditor::SheetEditor(Sheet &s, Schematic &c, IPool &pool) : Gtk::Box(Gtk::OR
     append_widget("Title", title_entry);
 
     auto frame_button = Gtk::manage(new PoolBrowserButton(ObjectType::FRAME, pool));
+    frame_button->get_browser()->set_show_none(true);
     if (sheet.pool_frame)
         frame_button->property_selected_uuid() = sheet.pool_frame->uuid;
-    frame_button->property_selected_uuid().signal_changed().connect(
-            [this, frame_button, &pool] { sheet.pool_frame = pool.get_frame(frame_button->property_selected_uuid()); });
+    frame_button->property_selected_uuid().signal_changed().connect([this, frame_button, &pool] {
+        UUID uu = frame_button->property_selected_uuid();
+        if (uu)
+            sheet.pool_frame = pool.get_frame(uu);
+        else
+            sheet.pool_frame = nullptr;
+    });
     append_widget("Frame", frame_button);
 
     pack_start(*grid, false, false, 0);
