@@ -262,7 +262,7 @@ void ImpPackage::construct()
     header_button->add_widget("Tags", entry_tags);
 
     browser_alt_button = Gtk::manage(new PoolBrowserButton(ObjectType::PACKAGE, *pool.get()));
-    browser_alt_button->get_browser()->set_show_none(true);
+    browser_alt_button->get_browser().set_show_none(true);
     header_button->add_widget("Alternate for", browser_alt_button);
 
     {

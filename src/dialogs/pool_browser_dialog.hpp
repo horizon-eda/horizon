@@ -11,7 +11,7 @@ namespace horizon {
 class PoolBrowserDialog : public Gtk::Dialog {
 public:
     PoolBrowserDialog(Gtk::Window *parent, ObjectType type, class IPool &ipool, bool use_preview = true);
-    class PoolBrowser *get_browser();
+    class PoolBrowser &get_browser();
 
 private:
     class IPool &pool;

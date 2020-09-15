@@ -116,12 +116,12 @@ BoardHoleDialog::BoardHoleDialog(Gtk::Window *parent, std::set<BoardHole *> &hol
             delete padstack_button;
 
         padstack_button = Gtk::manage(new PoolBrowserButton(ObjectType::PADSTACK, pool));
-        auto br = dynamic_cast<PoolBrowserPadstack *>(padstack_button->get_browser());
-        br->set_include_padstack_type(Padstack::Type::MECHANICAL, true);
-        br->set_include_padstack_type(Padstack::Type::HOLE, true);
-        br->set_include_padstack_type(Padstack::Type::TOP, false);
-        br->set_include_padstack_type(Padstack::Type::THROUGH, false);
-        br->set_include_padstack_type(Padstack::Type::BOTTOM, false);
+        auto &br = dynamic_cast<PoolBrowserPadstack &>(padstack_button->get_browser());
+        br.set_include_padstack_type(Padstack::Type::MECHANICAL, true);
+        br.set_include_padstack_type(Padstack::Type::HOLE, true);
+        br.set_include_padstack_type(Padstack::Type::TOP, false);
+        br.set_include_padstack_type(Padstack::Type::THROUGH, false);
+        br.set_include_padstack_type(Padstack::Type::BOTTOM, false);
         padstack_button->property_selected_uuid() = hole->pool_padstack->uuid;
         padstack_button->property_selected_uuid().signal_changed().connect([this, hole] {
             auto ps = pool.get_padstack(padstack_button->property_selected_uuid());

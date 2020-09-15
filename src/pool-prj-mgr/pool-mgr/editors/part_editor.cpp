@@ -592,7 +592,7 @@ void PartEditor::change_package()
     PoolBrowserDialog dia(top, ObjectType::PACKAGE, pool);
     if (dia.run() == Gtk::RESPONSE_OK) {
         needs_save = true;
-        part.package = pool.get_package(dia.get_browser()->get_selected());
+        part.package = pool.get_package(dia.get_browser().get_selected());
         auto ch = pad_store->children();
         std::set<UUID> pads_exisiting;
         for (auto it = ch.begin(); it != ch.end();) {
@@ -772,10 +772,10 @@ void PartEditor::copy_from_other_part()
 {
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
     PoolBrowserDialog dia(top, ObjectType::PART, pool);
-    auto br = dynamic_cast<PoolBrowserPart *>(dia.get_browser());
-    br->set_entity_uuid(part.entity->uuid);
+    auto &br = dynamic_cast<PoolBrowserPart &>(dia.get_browser());
+    br.set_entity_uuid(part.entity->uuid);
     if (dia.run() == Gtk::RESPONSE_OK) {
-        auto uu = dia.get_browser()->get_selected();
+        auto uu = br.get_selected();
         auto other_part = pool.get_part(uu);
         for (auto &it_pad : pad_store->children()) {
             Gtk::TreeModel::Row row_pad = *it_pad;

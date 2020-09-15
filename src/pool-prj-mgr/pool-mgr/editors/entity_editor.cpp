@@ -212,7 +212,7 @@ void EntityEditor::handle_add()
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
     PoolBrowserDialog dia(top, ObjectType::UNIT, pool);
     if (dia.run() == Gtk::RESPONSE_OK) {
-        auto unit_uu = dia.get_browser()->get_selected();
+        auto unit_uu = dia.get_browser().get_selected();
         if (unit_uu) {
             auto uu = UUID::random();
             auto gate = &entity.gates.emplace(uu, uu).first->second;

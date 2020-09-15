@@ -18,7 +18,7 @@ PoolBrowserButton::PoolBrowserButton(ObjectType ty, IPool &ipool)
     });
 }
 
-class PoolBrowser *PoolBrowserButton::get_browser()
+class PoolBrowser &PoolBrowserButton::get_browser()
 {
     return dia.get_browser();
 }
@@ -28,9 +28,9 @@ void PoolBrowserButton::on_clicked()
     Gtk::Button::on_clicked();
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
     dia.set_transient_for(*top);
-    dia.get_browser()->go_to(p_property_selected_uuid.get_value());
+    dia.get_browser().go_to(p_property_selected_uuid.get_value());
     if (dia.run() == Gtk::RESPONSE_OK) {
-        selected_uuid = dia.get_browser()->get_selected();
+        selected_uuid = dia.get_browser().get_selected();
         p_property_selected_uuid.set_value(selected_uuid);
         update_label();
     }

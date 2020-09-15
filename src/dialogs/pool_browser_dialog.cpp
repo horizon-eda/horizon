@@ -91,8 +91,9 @@ PoolBrowserDialog::PoolBrowserDialog(Gtk::Window *parent, ObjectType type, IPool
 }
 
 
-PoolBrowser *PoolBrowserDialog::get_browser()
+PoolBrowser &PoolBrowserDialog::get_browser()
 {
-    return browser;
+    assert(browser);
+    return *browser;
 }
 } // namespace horizon

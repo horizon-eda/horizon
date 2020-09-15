@@ -97,8 +97,8 @@ PadParameterSetDialog::PadParameterSetDialog(Gtk::Window *parent, std::set<class
             delete padstack_button;
 
         padstack_button = Gtk::manage(new PoolBrowserButton(ObjectType::PADSTACK, pool));
-        auto br = dynamic_cast<PoolBrowserPadstack *>(padstack_button->get_browser());
-        br->set_package_uuid(pkg.uuid);
+        auto &br = dynamic_cast<PoolBrowserPadstack &>(padstack_button->get_browser());
+        br.set_package_uuid(pkg.uuid);
         padstack_button->property_selected_uuid() = pad->pool_padstack->uuid;
         padstack_button->property_selected_uuid().signal_changed().connect([this, pad] {
             auto ps = pool.get_padstack(padstack_button->property_selected_uuid());

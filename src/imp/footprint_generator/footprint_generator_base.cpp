@@ -17,8 +17,8 @@ FootprintGeneratorBase::FootprintGeneratorBase(const char *resource, IDocumentPa
         tbox->pack_start(*la, false, false, 0);
 
         browser_button = Gtk::manage(new PoolBrowserButton(ObjectType::PADSTACK, core.get_pool()));
-        auto br = dynamic_cast<PoolBrowserPadstack *>(browser_button->get_browser());
-        br->set_package_uuid(package.uuid);
+        auto &br = dynamic_cast<PoolBrowserPadstack &>(browser_button->get_browser());
+        br.set_package_uuid(package.uuid);
         browser_button->property_selected_uuid().signal_changed().connect(
                 [this] { p_property_can_generate = browser_button->property_selected_uuid() != UUID(); });
         tbox->pack_start(*browser_button, false, false, 0);

@@ -57,7 +57,7 @@ SheetEditor::SheetEditor(Sheet &s, Schematic &c, IPool &pool) : Gtk::Box(Gtk::OR
     append_widget("Title", title_entry);
 
     auto frame_button = Gtk::manage(new PoolBrowserButton(ObjectType::FRAME, pool));
-    frame_button->get_browser()->set_show_none(true);
+    frame_button->get_browser().set_show_none(true);
     if (sheet.pool_frame)
         frame_button->property_selected_uuid() = sheet.pool_frame->uuid;
     frame_button->property_selected_uuid().signal_changed().connect([this, frame_button, &pool] {

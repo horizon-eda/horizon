@@ -77,11 +77,11 @@ std::optional<UUIDPath<2>> Dialogs::map_symbol(const std::map<UUIDPath<2>, std::
 std::optional<UUID> Dialogs::select_symbol(IPool &pool, const UUID &unit_uuid)
 {
     PoolBrowserDialog dia(parent, ObjectType::SYMBOL, pool);
-    auto br = dynamic_cast<PoolBrowserSymbol *>(dia.get_browser());
-    br->set_unit_uuid(unit_uuid);
+    auto &br = dynamic_cast<PoolBrowserSymbol &>(dia.get_browser());
+    br.set_unit_uuid(unit_uuid);
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
-        return br->get_selected();
+        return br.get_selected();
     }
     else {
         return {};
@@ -91,11 +91,11 @@ std::optional<UUID> Dialogs::select_symbol(IPool &pool, const UUID &unit_uuid)
 std::optional<UUID> Dialogs::select_padstack(IPool &pool, const UUID &package_uuid)
 {
     PoolBrowserDialog dia(parent, ObjectType::PADSTACK, pool);
-    auto br = dynamic_cast<PoolBrowserPadstack *>(dia.get_browser());
-    br->set_package_uuid(package_uuid);
-    br->set_include_padstack_type(Padstack::Type::MECHANICAL, true);
+    auto &br = dynamic_cast<PoolBrowserPadstack &>(dia.get_browser());
+    br.set_package_uuid(package_uuid);
+    br.set_include_padstack_type(Padstack::Type::MECHANICAL, true);
     if (dia.run() == Gtk::RESPONSE_OK) {
-        return br->get_selected();
+        return br.get_selected();
     }
     else {
         return {};
@@ -105,14 +105,14 @@ std::optional<UUID> Dialogs::select_padstack(IPool &pool, const UUID &package_uu
 std::optional<UUID> Dialogs::select_hole_padstack(IPool &pool)
 {
     PoolBrowserDialog dia(parent, ObjectType::PADSTACK, pool);
-    auto br = dynamic_cast<PoolBrowserPadstack *>(dia.get_browser());
-    br->set_include_padstack_type(Padstack::Type::MECHANICAL, true);
-    br->set_include_padstack_type(Padstack::Type::HOLE, true);
-    br->set_include_padstack_type(Padstack::Type::TOP, false);
-    br->set_include_padstack_type(Padstack::Type::THROUGH, false);
-    br->set_include_padstack_type(Padstack::Type::BOTTOM, false);
+    auto &br = dynamic_cast<PoolBrowserPadstack &>(dia.get_browser());
+    br.set_include_padstack_type(Padstack::Type::MECHANICAL, true);
+    br.set_include_padstack_type(Padstack::Type::HOLE, true);
+    br.set_include_padstack_type(Padstack::Type::TOP, false);
+    br.set_include_padstack_type(Padstack::Type::THROUGH, false);
+    br.set_include_padstack_type(Padstack::Type::BOTTOM, false);
     if (dia.run() == Gtk::RESPONSE_OK) {
-        return br->get_selected();
+        return br.get_selected();
     }
     else {
         return {};
@@ -123,7 +123,7 @@ std::optional<UUID> Dialogs::select_entity(IPool &pool)
 {
     PoolBrowserDialog dia(parent, ObjectType::ENTITY, pool);
     if (dia.run() == Gtk::RESPONSE_OK) {
-        return dia.get_browser()->get_selected();
+        return dia.get_browser().get_selected();
     }
     else {
         return {};
@@ -134,7 +134,7 @@ std::optional<UUID> Dialogs::select_unit(IPool &pool)
 {
     PoolBrowserDialog dia(parent, ObjectType::UNIT, pool);
     if (dia.run() == Gtk::RESPONSE_OK) {
-        return dia.get_browser()->get_selected();
+        return dia.get_browser().get_selected();
     }
     else {
         return {};
@@ -365,16 +365,16 @@ std::optional<int> Dialogs::ask_datum_angle(const std::string &label, int def)
 std::optional<UUID> Dialogs::select_part(IPool &pool, const UUID &entity_uuid, const UUID &part_uuid, bool show_none)
 {
     PoolBrowserDialog dia(parent, ObjectType::PART, pool);
-    auto br = dynamic_cast<PoolBrowserPart *>(dia.get_browser());
-    br->set_show_none(show_none);
-    br->set_entity_uuid(entity_uuid);
+    auto &br = dynamic_cast<PoolBrowserPart &>(dia.get_browser());
+    br.set_show_none(show_none);
+    br.set_entity_uuid(entity_uuid);
     if (part_uuid) {
         auto part = pool.get_part(part_uuid);
-        br->set_MPN(part->get_MPN());
+        br.set_MPN(part->get_MPN());
     }
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
-        return br->get_selected();
+        return br.get_selected();
     }
     else {
         return {};
@@ -408,10 +408,10 @@ std::optional<UUID> Dialogs::select_via_padstack(class ViaPadstackProvider &vpp)
 std::optional<UUID> Dialogs::select_decal(IPool &pool)
 {
     PoolBrowserDialog dia(parent, ObjectType::DECAL, pool);
-    auto br = dia.get_browser();
+    auto &br = dia.get_browser();
     auto r = dia.run();
     if (r == Gtk::RESPONSE_OK) {
-        return br->get_selected();
+        return br.get_selected();
     }
     else {
         return {};
