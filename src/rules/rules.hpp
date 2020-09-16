@@ -19,6 +19,7 @@ std::string rules_check_error_level_to_string(RulesCheckErrorLevel lev);
 class RulesCheckError {
 public:
     RulesCheckError(RulesCheckErrorLevel lev);
+    RulesCheckError(RulesCheckErrorLevel lev, const std::string &comment);
 
     RulesCheckErrorLevel level = RulesCheckErrorLevel::NOT_RUN;
     UUID sheet;

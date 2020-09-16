@@ -42,6 +42,10 @@ RulesCheckError::RulesCheckError(RulesCheckErrorLevel lev) : level(lev)
 {
 }
 
+RulesCheckError::RulesCheckError(RulesCheckErrorLevel lev, const std::string &c) : level(lev), comment(c)
+{
+}
+
 json RulesCheckError::serialize() const
 {
     json j;
