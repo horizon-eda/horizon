@@ -11,6 +11,7 @@ public:
     virtual void save()
     {
         needs_save = false;
+        s_signal_needs_save.emit();
     }
     bool get_needs_save() const
     {
@@ -20,7 +21,21 @@ public:
     {
     }
 
+    typedef sigc::signal<void> type_signal_needs_save;
+    type_signal_needs_save signal_needs_save()
+    {
+        return s_signal_needs_save;
+    }
+
 protected:
+    void set_needs_save()
+    {
+        needs_save = true;
+        s_signal_needs_save.emit();
+    }
+
+private:
     bool needs_save = false;
+    type_signal_needs_save s_signal_needs_save;
 };
 } // namespace horizon

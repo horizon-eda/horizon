@@ -2,7 +2,6 @@
 #include <gtkmm.h>
 #include "common/common.hpp"
 #include <memory>
-#include "editor_interface.hpp"
 #include "util/window_state_store.hpp"
 #include "util/pool_goto_provider.hpp"
 #include "util/item_set.hpp"
@@ -51,7 +50,7 @@ public:
 private:
     ObjectType type;
     std::unique_ptr<EditorWindowStore> store = nullptr;
-    PoolEditorInterface *iface = nullptr;
+    class PoolEditorInterface *iface = nullptr;
     Gtk::Button *save_button = nullptr;
     class IPool &pool;
     class PoolParametric *pool_parametric;

@@ -35,5 +35,7 @@ private:
     void handle_add();
     void handle_delete();
     IPool &pool;
+
+    void bind_entry(Gtk::Entry *e, std::string &s);
 };
 } // namespace horizon

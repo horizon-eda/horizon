@@ -45,7 +45,7 @@ PinEditor::PinEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
     name_entry->set_text(pin->primary_name);
     name_entry->signal_changed().connect([this] {
         pin->primary_name = name_entry->get_text();
-        parent->needs_save = true;
+        parent->set_needs_save();
     });
     name_entry->signal_activate().connect([this] { parent->handle_activate(this); });
     name_entry->signal_focus_in_event().connect([this](GdkEventFocus *ev) {
@@ -72,7 +72,7 @@ PinEditor::PinEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
         std::istream_iterator<std::string> end;
         std::vector<std::string> names(begin, end);
         pin->names = names;
-        parent->needs_save = true;
+        parent->set_needs_save();
     });
 
     auto propagate = [this](std::function<void(PinEditor *)> fn) {
@@ -92,7 +92,7 @@ PinEditor::PinEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &
     dir_combo->signal_changed().connect([this, propagate] {
         pin->direction = static_cast<Pin::Direction>(std::stoi(dir_combo->get_active_id()));
         propagate([this](PinEditor *ed) { ed->dir_combo->set_active_id(dir_combo->get_active_id()); });
-        parent->needs_save = true;
+        parent->set_needs_save();
     });
 }
 
@@ -145,13 +145,13 @@ UnitEditor::UnitEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     name_entry->set_text(unit.name);
     name_entry->signal_changed().connect([this] {
         unit.name = name_entry->get_text();
-        needs_save = true;
+        set_needs_save();
     });
     manufacturer_entry->set_text(unit.manufacturer);
     manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
     manufacturer_entry->signal_changed().connect([this] {
         unit.manufacturer = manufacturer_entry->get_text();
-        needs_save = true;
+        set_needs_save();
     });
 
     for (auto &it : unit.pins) {
@@ -202,7 +202,7 @@ void UnitEditor::handle_delete()
         if (row)
             pins_listbox->select_row(*row);
     }
-    needs_save = true;
+    set_needs_save();
 }
 
 static std::string inc_pin_name(const std::string &s, int inc = 1)
@@ -300,7 +300,7 @@ void UnitEditor::handle_add()
             break;
         }
     }
-    needs_save = true;
+    set_needs_save();
 }
 
 void UnitEditor::handle_activate(PinEditor *ed)

@@ -55,19 +55,19 @@ GateEditor::GateEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     name_entry->set_text(gate->name);
     name_entry->signal_changed().connect([this] {
         gate->name = name_entry->get_text();
-        parent->needs_save = true;
+        parent->set_needs_save();
     });
 
     suffix_entry->set_text(gate->suffix);
     suffix_entry->signal_changed().connect([this] {
         gate->suffix = suffix_entry->get_text();
-        parent->needs_save = true;
+        parent->set_needs_save();
     });
 
     swap_group_spin_button->set_value(gate->swap_group);
     swap_group_spin_button->signal_value_changed().connect([this] {
         gate->swap_group = swap_group_spin_button->get_value_as_int();
-        parent->needs_save = true;
+        parent->set_needs_save();
     });
 
     reload();
@@ -90,12 +90,12 @@ GateEditor *GateEditor::create(Gate *g, EntityEditor *pa)
     return w;
 }
 
-static void bind_entry(Gtk::Entry *e, std::string &s, bool &needs_save)
+void EntityEditor::bind_entry(Gtk::Entry *e, std::string &s)
 {
     e->set_text(s);
-    e->signal_changed().connect([e, &s, &needs_save] {
+    e->signal_changed().connect([this, e, &s] {
         s = e->get_text();
-        needs_save = true;
+        set_needs_save();
     });
 }
 
@@ -129,15 +129,15 @@ EntityEditor::EntityEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Buil
     sg_swap_group = decltype(sg_name)::cast_dynamic(x->get_object("sg_swap_group"));
     sg_unit = decltype(sg_name)::cast_dynamic(x->get_object("sg_unit"));
 
-    bind_entry(name_entry, entity.name, needs_save);
-    bind_entry(manufacturer_entry, entity.manufacturer, needs_save);
+    bind_entry(name_entry, entity.name);
+    bind_entry(manufacturer_entry, entity.manufacturer);
     manufacturer_entry->set_completion(create_pool_manufacturer_completion(pool));
-    bind_entry(prefix_entry, entity.prefix, needs_save);
+    bind_entry(prefix_entry, entity.prefix);
 
     tag_entry->set_tags(entity.tags);
     tag_entry->signal_changed().connect([this] {
         entity.tags = tag_entry->get_tags();
-        needs_save = true;
+        set_needs_save();
     });
 
     gates_listbox->set_sort_func([](Gtk::ListBoxRow *a, Gtk::ListBoxRow *b) {
@@ -203,7 +203,7 @@ void EntityEditor::handle_delete()
         if (row)
             gates_listbox->select_row(*row);
     }
-    needs_save = true;
+    set_needs_save();
 }
 
 
@@ -237,7 +237,7 @@ void EntityEditor::handle_add()
             gates_listbox->invalidate_sort();
         }
     }
-    needs_save = true;
+    set_needs_save();
 }
 
 EntityEditor *EntityEditor::create(Entity &e, class IPool &p)
