@@ -114,7 +114,7 @@ public:
         bu->show();
         pack_start(*bu, false, false, 0);
         bu->signal_clicked().connect([this] {
-            entry->set_text("");
+            part.orderable_MPNs.erase(uuid);
             s_signal_changed.emit();
             delete this;
         });
@@ -230,12 +230,12 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             it.second->property_inherit() = part.attributes.at(it.first).first;
         }
         it.second->entry->signal_changed().connect([this, it] {
-            set_needs_save();
             part.attributes[it.first] = it.second->get_as_pair();
+            set_needs_save();
         });
         it.second->button->signal_toggled().connect([this, it] {
-            set_needs_save();
             part.attributes[it.first] = it.second->get_as_pair();
+            set_needs_save();
         });
     }
 
@@ -247,7 +247,10 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     w_tags_inherit->signal_toggled().connect([this] { set_needs_save(); });
 
     w_tags->set_tags(part.tags);
-    w_tags->signal_changed().connect([this] { set_needs_save(); });
+    w_tags->signal_changed().connect([this] {
+        part.tags = w_tags->get_tags();
+        set_needs_save();
+    });
 
     pin_store = Gtk::ListStore::create(pin_list_columns);
     pin_store->set_sort_func(pin_list_columns.pin_name,
@@ -434,11 +437,12 @@ PartEditor::PartEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     });
 
     w_orderable_MPNs_add_button->signal_clicked().connect([this] {
-        set_needs_save();
         auto uu = UUID::random();
         part.orderable_MPNs.emplace(uu, "");
         auto ed = create_orderable_MPN_editor(uu);
         ed->focus();
+        set_needs_save();
+        update_orderable_MPNs_label();
     });
 
     for (const auto &it : part.orderable_MPNs) {
@@ -450,7 +454,9 @@ class OrderableMPNEditor *PartEditor::create_orderable_MPN_editor(const UUID &uu
 {
     auto ed = Gtk::manage(new OrderableMPNEditor(part, uu));
     w_orderable_MPNs_box->pack_start(*ed, false, false, 0);
-    ed->signal_changed().connect([this] {
+    ed->signal_changed().connect([this, ed] {
+        if (part.orderable_MPNs.count(ed->get_uuid()))
+            part.orderable_MPNs.at(ed->get_uuid()) = ed->get_MPN();
         set_needs_save();
         update_orderable_MPNs_label();
     });
@@ -481,12 +487,8 @@ void PartEditor::update_map_buttons()
 void PartEditor::update_orderable_MPNs_label()
 {
     std::string s;
-    for (auto ch : w_orderable_MPNs_box->get_children()) {
-        if (auto w = dynamic_cast<OrderableMPNEditor *>(ch)) {
-            auto m = w->get_MPN();
-            if (m.size())
-                s += Glib::Markup::escape_text(m) + ", ";
-        }
+    for (const auto &[uu, mpn] : part.orderable_MPNs) {
+        s += Glib::Markup::escape_text(mpn) + ", ";
     }
     if (s.size()) {
         s.pop_back();
@@ -626,6 +628,7 @@ void PartEditor::change_package()
         update_mapped();
         populate_models();
         w_model_combo->set_active_id((std::string)part.package->default_model);
+        set_needs_save();
     }
 }
 
@@ -637,10 +640,6 @@ void PartEditor::reload()
 
 void PartEditor::save()
 {
-    for (auto &it : attr_editors) {
-        part.attributes[it.first] = it.second->get_as_pair();
-    }
-
     part.inherit_model = w_model_inherit->get_active();
 
     if (w_model_combo->get_active_row_number() != -1)
@@ -648,31 +647,13 @@ void PartEditor::save()
     else
         part.model = UUID();
 
-    part.tags = w_tags->get_tags();
     part.inherit_tags = w_tags_inherit->get_active();
-
-    part.pad_map.clear();
-    for (const auto &it : pad_store->children()) {
-        if (it[pad_list_columns.gate_uuid] != UUID() && part.package->pads.count(it[pad_list_columns.pad_uuid])) {
-            const horizon::Gate *gate = &part.entity->gates.at(it[pad_list_columns.gate_uuid]);
-            const horizon::Pin *pin = &gate->unit->pins.at(it[pad_list_columns.pin_uuid]);
-            part.pad_map.emplace(it[pad_list_columns.pad_uuid], horizon::Part::PadMapItem(gate, pin));
-        }
-    }
 
     if (parametric_editor) {
         part.parametric = parametric_editor->get_values();
     }
     else {
         part.parametric.clear();
-    }
-
-    part.orderable_MPNs.clear();
-
-    for (auto ch : w_orderable_MPNs_box->get_children()) {
-        if (auto w = dynamic_cast<OrderableMPNEditor *>(ch)) {
-            part.orderable_MPNs.emplace(w->get_uuid(), w->get_MPN());
-        }
     }
 
     PoolEditorInterface::save();
@@ -738,6 +719,15 @@ void PartEditor::update_mapped()
     }
     w_pin_stat->set_text(std::to_string(pin_store->children().size() - pins_mapped.size()) + " pins not mapped");
     w_pad_stat->set_text(std::to_string(n_pads_not_mapped) + " pads not mapped");
+
+    part.pad_map.clear();
+    for (const auto &it : pad_store->children()) {
+        if (it[pad_list_columns.gate_uuid] != UUID() && part.package->pads.count(it[pad_list_columns.pad_uuid])) {
+            const horizon::Gate *gate = &part.entity->gates.at(it[pad_list_columns.gate_uuid]);
+            const horizon::Pin *pin = &gate->unit->pins.at(it[pad_list_columns.pin_uuid]);
+            part.pad_map.emplace(it[pad_list_columns.pad_uuid], Part::PadMapItem(gate, pin));
+        }
+    }
 }
 
 void PartEditor::populate_models()

@@ -637,6 +637,11 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-mgr/kicad_symbol_import_wizard/gate_editor.cpp\
 	src/util/kicad_lib_parser.cpp\
 	src/widgets/capture_dialog.cpp\
+	src/widgets/color_box.cpp\
+	src/checks/check_util.cpp\
+	src/checks/check_entity.cpp\
+	src/checks/check_unit.cpp\
+	src/checks/check_part.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

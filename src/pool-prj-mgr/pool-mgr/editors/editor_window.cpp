@@ -9,6 +9,10 @@
 #include "util/str_util.hpp"
 #include "pool/ipool.hpp"
 #include "nlohmann/json.hpp"
+#include "widgets/color_box.hpp"
+#include "checks/check_entity.hpp"
+#include "checks/check_unit.hpp"
+#include "checks/check_part.hpp"
 
 namespace horizon {
 
@@ -40,6 +44,10 @@ public:
     {
         return unit.uuid;
     }
+    RulesCheckResult run_checks() const override
+    {
+        return check_unit(unit);
+    }
     Unit unit;
 };
 
@@ -63,6 +71,10 @@ public:
     {
         return entity.uuid;
     }
+    RulesCheckResult run_checks() const override
+    {
+        return check_entity(entity);
+    }
     Entity entity;
 };
 
@@ -85,6 +97,10 @@ public:
     {
         return part.uuid;
     }
+    RulesCheckResult run_checks() const override
+    {
+        return check_part(part);
+    }
     Part part;
 };
 
@@ -101,6 +117,26 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
     if (read_only)
         save_button->set_sensitive(false);
     hb->pack_start(*save_button);
+
+    check_button = Gtk::manage(new Gtk::MenuButton());
+    {
+        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
+        check_color_box = Gtk::manage(new ColorBox);
+        check_color_box->set_valign(Gtk::ALIGN_CENTER);
+        check_color_box->set_size_request(16, 16);
+        box->pack_start(*check_color_box, false, false, 0);
+        auto la = Gtk::manage(new Gtk::Label("Checks"));
+        box->pack_start(*la, false, false, 0);
+        check_button->add(*box);
+    }
+    check_popover = Gtk::manage(new Gtk::Popover);
+    check_button->set_popover(*check_popover);
+    check_label = Gtk::manage(new Gtk::Label("foo"));
+    check_label->property_margin() = 10;
+    check_popover->add(*check_label);
+    check_label->show();
+    hb->pack_end(*check_button);
+
 
     hb->show_all();
     hb->set_show_close_button(true);
@@ -156,6 +192,12 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
         save_button->set_sensitive(iface->get_needs_save());
         iface->signal_needs_save().connect([this] { save_button->set_sensitive(iface->get_needs_save()); });
     }
+    iface->signal_needs_save().connect([this] {
+        if (iface->get_needs_save()) {
+            run_checks();
+        }
+    });
+    run_checks();
 
     if (!state_store.get_default_set())
         set_default_size(-1, 600);
@@ -304,6 +346,25 @@ void EditorWindow::select(const ItemSet &items)
 const UUID &EditorWindow::get_uuid() const
 {
     return store->get_uuid();
+}
+
+void EditorWindow::run_checks()
+{
+    auto r = store->run_checks();
+    check_color_box->set_color(rules_check_error_level_to_color(r.level));
+    std::string s;
+    if (r.level == RulesCheckErrorLevel::PASS) {
+        s += "Checks passed";
+    }
+    else {
+        s += "Checks didn't pass";
+    }
+    s += "\n";
+    for (const auto &it : r.errors) {
+        s += " • " + it.comment + "\n";
+    }
+    trim(s);
+    check_label->set_text(s);
 }
 
 } // namespace horizon
