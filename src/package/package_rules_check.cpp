@@ -3,6 +3,7 @@
 #include "rules/cache.hpp"
 #include "util/accumulator.hpp"
 #include "util/util.hpp"
+#include "util/str_util.hpp"
 #include <ctype.h>
 
 namespace horizon {
@@ -156,6 +157,17 @@ RulesCheckResult PackageRules::check_package(const class Package &pkg) const
             x.comment = "Don't use polygons on silkscreen, use lines instead";
             x.has_location = false;
         }
+    }
+
+    {
+        std::string param_code = pkg.parameter_program.get_code();
+        trim(param_code);
+        if (!param_code.size())
+            r.errors.emplace_back(RulesCheckErrorLevel::WARN, "Empty parameter program");
+    }
+
+    if (pkg.parameter_set.count(ParameterID::COURTYARD_EXPANSION) == 0) {
+        r.errors.emplace_back(RulesCheckErrorLevel::WARN, "Missing courtyard expansion parameter");
     }
 
     r.update();

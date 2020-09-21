@@ -9,7 +9,8 @@ static const char *text_pkg =
         "• Silkscreen refdes width and size\n"
         "• Courtyards polygon\n"
         "• Pad naming convention\n"
-        "• No polygons on silkscreen\n";
+        "• No polygons on silkscreen\n"
+        "• Parameter program not empty\n";
 
 static const char *text_preflight =
         "This rule checks if the board is ready for fabrication output:\n"
