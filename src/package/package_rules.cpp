@@ -15,25 +15,33 @@ void PackageRules::load_from_json(const json &j)
         const json &o = j["package_checks"];
         rule_package_checks = RulePackageChecks(o);
     }
+    if (j.count("clearance_package")) {
+        const json &o = j["clearance_package"];
+        rule_clearance_package = RuleClearancePackage(o);
+    }
 }
 
 json PackageRules::serialize() const
 {
     json j;
     j["package_checks"] = rule_package_checks.serialize();
+    j["clearance_package"] = rule_clearance_package.serialize();
 
     return j;
 }
 
 std::set<RuleID> PackageRules::get_rule_ids() const
 {
-    return {RuleID::PACKAGE_CHECKS};
+    return {RuleID::PACKAGE_CHECKS, RuleID::CLEARANCE_PACKAGE};
 }
 
 const Rule *PackageRules::get_rule(RuleID id) const
 {
     if (id == RuleID::PACKAGE_CHECKS) {
         return &rule_package_checks;
+    }
+    else if (id == RuleID::CLEARANCE_PACKAGE) {
+        return &rule_clearance_package;
     }
     return nullptr;
 }

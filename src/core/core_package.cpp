@@ -261,6 +261,7 @@ void CorePackage::save(const std::string &suffix)
     package.parameter_program.set_code(parameter_program_code);
     package.models = models;
     package.default_model = default_model;
+    package.rules = rules;
 
     s_signal_save.emit();
 

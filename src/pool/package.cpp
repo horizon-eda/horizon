@@ -162,6 +162,9 @@ Package::Package(const UUID &uu, const json &j, IPool &pool)
         }
         default_model = j.at("default_model").get<std::string>();
     }
+    if (j.count("rules")) {
+        rules.load_from_json(j.at("rules"));
+    }
 }
 
 Package Package::new_from_file(const std::string &filename, IPool &pool)
@@ -434,6 +437,7 @@ json Package::serialize() const
             j["pictures"][(std::string)it.first] = it.second.serialize();
         }
     }
+    j["rules"] = rules.serialize();
     return j;
 }
 

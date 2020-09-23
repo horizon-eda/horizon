@@ -50,6 +50,7 @@ SRC_COMMON = \
 	src/package/pad.cpp\
 	src/package/package_rules.cpp\
 	src/package/rule_package_checks.cpp\
+	src/package/rule_clearance_package.cpp\
 	src/board/board.cpp\
 	src/board/board_package.cpp\
 	src/board/track.cpp\

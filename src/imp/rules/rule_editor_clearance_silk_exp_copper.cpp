@@ -1,6 +1,7 @@
 #include "rule_editor_clearance_silk_exp_copper.hpp"
 #include "board/rule_clearance_silk_exp_copper.hpp"
 #include "board/rule_parameters.hpp"
+#include "package/rule_clearance_package.hpp"
 #include "widgets/spin_button_dim.hpp"
 
 namespace horizon {
@@ -87,6 +88,26 @@ void RuleEditorClearanceSilkscreenExposedCopper::populate()
 
         sp_courtyard->signal_value_changed().connect([this, sp_courtyard, rule2] {
             rule2->courtyard_expansion = sp_courtyard->get_value_as_int();
+            s_signal_updated.emit();
+        });
+    }
+    else if (auto rule2 = dynamic_cast<RuleClearancePackage *>(&rule)) {
+        auto sp_silk_cu = create_sp_dim("Silkscreen to copper clearance");
+        auto sp_silk_pkg = create_sp_dim("Silkscreen to package clearance");
+
+        sp_silk_cu->set_range(0, 100_mm);
+        sp_silk_pkg->set_range(0, 100_mm);
+
+        sp_silk_cu->set_value(rule2->clearance_silkscreen_cu);
+        sp_silk_pkg->set_value(rule2->clearance_silkscreen_pkg);
+
+        sp_silk_cu->signal_value_changed().connect([this, sp_silk_cu, rule2] {
+            rule2->clearance_silkscreen_cu = sp_silk_cu->get_value_as_int();
+            s_signal_updated.emit();
+        });
+
+        sp_silk_pkg->signal_value_changed().connect([this, sp_silk_pkg, rule2] {
+            rule2->clearance_silkscreen_pkg = sp_silk_pkg->get_value_as_int();
             s_signal_updated.emit();
         });
     }

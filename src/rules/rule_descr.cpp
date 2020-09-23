@@ -18,5 +18,6 @@ const std::map<RuleID, RuleDescription> rule_descriptions = {
         {RuleID::LAYER_PAIR, {"Layer pairs", true, false, false}},
         {RuleID::CLEARANCE_SAME_NET, {"Same net clearance", true, true, false}},
         {RuleID::SYMBOL_CHECKS, {"Symbol checks", false, true}},
+        {RuleID::CLEARANCE_PACKAGE, {"Package clearance", false, true}},
 };
 }

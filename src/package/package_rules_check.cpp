@@ -4,6 +4,7 @@
 #include "util/accumulator.hpp"
 #include "util/util.hpp"
 #include "util/str_util.hpp"
+#include "board/board_layers.hpp"
 #include <ctype.h>
 
 namespace horizon {
@@ -174,11 +175,83 @@ RulesCheckResult PackageRules::check_package(const class Package &pkg) const
     return r;
 }
 
+
+RulesCheckResult PackageRules::check_clearance(const class Package &pkg) const
+{
+    RulesCheckResult r;
+    r.level = RulesCheckErrorLevel::PASS;
+
+    CanvasPatch ca;
+    ca.update(pkg);
+
+    std::map<int, ClipperLib::ClipperOffset> clippers_offset;
+    std::set<int> layers;
+    for (const auto &[key, paths] : ca.get_patches()) {
+        if (any_of(static_cast<BoardLayers::Layer>(key.layer),
+                   {BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER, BoardLayers::TOP_PACKAGE,
+                    BoardLayers::BOTTOM_PACKAGE})) {
+            clippers_offset[key.layer].AddPaths(paths, ClipperLib::jtRound, ClipperLib::etClosedPolygon);
+        }
+        layers.insert(key.layer);
+    }
+    std::map<int, ClipperLib::Paths> paths;
+    for (auto &[layer, cl] : clippers_offset) {
+        if (BoardLayers::is_copper(layer)) {
+            cl.Execute(paths[layer], rule_clearance_package.clearance_silkscreen_cu);
+        }
+        else {
+            cl.Execute(paths[layer], rule_clearance_package.clearance_silkscreen_pkg);
+        }
+    }
+
+    static const std::vector<std::pair<int, int>> check_pairs = {
+            {BoardLayers::TOP_COPPER, BoardLayers::TOP_SILKSCREEN},
+            {BoardLayers::BOTTOM_COPPER, BoardLayers::BOTTOM_SILKSCREEN},
+            {BoardLayers::TOP_PACKAGE, BoardLayers::TOP_SILKSCREEN},
+            {BoardLayers::BOTTOM_PACKAGE, BoardLayers::BOTTOM_SILKSCREEN},
+    };
+
+    for (const auto [l_ex, l_silk] : check_pairs) {
+        if (layers.count(l_ex) && layers.count(l_silk)) {
+            ClipperLib::Clipper cl;
+            cl.AddPaths(paths.at(l_ex), ClipperLib::ptClip, true);
+            for (const auto &[key, p_paths] : ca.get_patches()) {
+                if (key.layer == l_silk) {
+                    cl.AddPaths(p_paths, ClipperLib::ptSubject, true);
+                }
+            }
+            ClipperLib::Paths errors;
+            cl.Execute(ClipperLib::ctIntersection, errors, ClipperLib::pftNonZero);
+            if (errors.size()) {
+                r.errors.emplace_back(RulesCheckErrorLevel::FAIL);
+                auto &e = r.errors.back();
+                e.has_location = true;
+                Accumulator<Coordi> acc;
+                for (const auto &ite : errors) {
+                    for (const auto &ite2 : ite) {
+                        acc.accumulate({ite2.X, ite2.Y});
+                    }
+                }
+                e.location = acc.get();
+                e.comment = BoardLayers::get_layer_name(l_ex) + " near " + BoardLayers::get_layer_name(l_silk);
+                e.error_polygons = errors;
+            }
+        }
+    }
+
+    r.update();
+    return r;
+}
+
+
 RulesCheckResult PackageRules::check(RuleID id, const Package &pkg) const
 {
     switch (id) {
     case RuleID::PACKAGE_CHECKS:
         return check_package(pkg);
+
+    case RuleID::CLEARANCE_PACKAGE:
+        return check_clearance(pkg);
 
     default:
         return RulesCheckResult();

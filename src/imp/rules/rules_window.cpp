@@ -444,6 +444,7 @@ RuleEditor *RulesWindow::create_editor(Rule &r)
 
     case RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER:
     case RuleID::PARAMETERS:
+    case RuleID::CLEARANCE_PACKAGE:
         e = new RuleEditorClearanceSilkscreenExposedCopper(r, core);
         break;
 

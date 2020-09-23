@@ -1,6 +1,7 @@
 #pragma once
 #include "nlohmann/json_fwd.hpp"
 #include "rule_package_checks.hpp"
+#include "rule_clearance_package.hpp"
 #include "rules/rules.hpp"
 #include "util/uuid.hpp"
 
@@ -23,7 +24,9 @@ public:
 
 private:
     RulePackageChecks rule_package_checks;
+    RuleClearancePackage rule_clearance_package;
 
     RulesCheckResult check_package(const class Package &pkg) const;
+    RulesCheckResult check_clearance(const class Package &pkg) const;
 };
 } // namespace horizon
