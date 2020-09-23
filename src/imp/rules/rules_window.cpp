@@ -102,6 +102,15 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         la->show();
         lb_rules->append(*la);
     }
+
+    {
+        const auto ids = rules.get_rule_ids();
+        const bool can_apply =
+                std::any_of(ids.begin(), ids.end(), [](const auto id) { return rule_descriptions.at(id).can_apply; });
+        if (!can_apply)
+            apply_button->hide();
+    }
+
     lb_multi->signal_selected_rows_changed().connect([this] {
         bool selected = lb_multi->get_selected_row() != nullptr;
         button_rule_instance_remove->set_sensitive(selected && enabled);
