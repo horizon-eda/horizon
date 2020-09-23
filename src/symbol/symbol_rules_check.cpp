@@ -92,10 +92,7 @@ RulesCheckResult SymbolRules::check_symbol(const Symbol &sym) const
             const bool is_box = find_junction(bb * Coordi(1, 1)) && find_junction(bb * Coordi(1, -1))
                                 && find_junction(bb * Coordi(-1, 1)) && find_junction(bb * Coordi(-1, -1));
             if (is_box) {
-                r.errors.emplace_back(RulesCheckErrorLevel::PASS);
-                auto &x = r.errors.back();
-                x.comment = "Is box symbol";
-                x.has_location = false;
+                r.errors.emplace_back(RulesCheckErrorLevel::PASS, "Is box symbol");
                 const int64_t txt_spacing = 1.25_mm;
                 if (txt_refdes && txt_refdes->placement.shift.y != bb.y + txt_spacing) {
                     r.errors.emplace_back(RulesCheckErrorLevel::WARN);

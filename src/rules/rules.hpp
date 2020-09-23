@@ -54,6 +54,10 @@ public:
 
     virtual const Rule *get_rule(RuleID id) const = 0;
     Rule *get_rule(RuleID id);
+    Rule *get_rule_nc(RuleID id)
+    {
+        return get_rule(id);
+    }
 
     virtual const Rule *get_rule(RuleID id, const UUID &uu) const = 0;
     Rule *get_rule(RuleID id, const UUID &uu);
