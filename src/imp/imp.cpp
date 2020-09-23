@@ -268,6 +268,15 @@ bool ImpBase::property_panel_has_focus()
     return property_has_focus;
 }
 
+void ImpBase::set_flip_view(bool flip)
+{
+    canvas->set_flip_view(flip);
+    canvas_update_from_pp();
+    update_view_hints();
+    apply_arrow_keys();
+    g_simple_action_set_state(bottom_view_action->gobj(), g_variant_new_boolean(canvas->get_flip_view()));
+}
+
 void ImpBase::run(int argc, char *argv[])
 {
     auto app = Gtk::Application::create(argc, argv, "org.horizon_eda.HorizonEDA.imp", Gio::APPLICATION_NON_UNIQUE);
@@ -511,26 +520,11 @@ void ImpBase::run(int argc, char *argv[])
 
     init_action();
 
-    connect_action(ActionID::VIEW_TOP, [this](const auto &a) {
-        canvas->set_flip_view(false);
-        this->canvas_update_from_pp();
-        this->update_view_hints();
-        g_simple_action_set_state(bottom_view_action->gobj(), g_variant_new_boolean(canvas->get_flip_view()));
-    });
+    connect_action(ActionID::VIEW_TOP, [this](const auto &a) { set_flip_view(false); });
 
-    connect_action(ActionID::VIEW_BOTTOM, [this](const auto &a) {
-        canvas->set_flip_view(true);
-        this->canvas_update_from_pp();
-        this->update_view_hints();
-        g_simple_action_set_state(bottom_view_action->gobj(), g_variant_new_boolean(canvas->get_flip_view()));
-    });
+    connect_action(ActionID::VIEW_BOTTOM, [this](const auto &a) { set_flip_view(true); });
 
-    connect_action(ActionID::FLIP_VIEW, [this](const auto &a) {
-        canvas->set_flip_view(!canvas->get_flip_view());
-        this->canvas_update_from_pp();
-        this->update_view_hints();
-        g_simple_action_set_state(bottom_view_action->gobj(), g_variant_new_boolean(canvas->get_flip_view()));
-    });
+    connect_action(ActionID::FLIP_VIEW, [this](const auto &a) { set_flip_view(!canvas->get_flip_view()); });
 
     bottom_view_action = main_window->add_action_bool("bottom_view", false);
     bottom_view_action->signal_change_state().connect([this](const Glib::VariantBase &v) {
@@ -925,44 +919,14 @@ void ImpBase::apply_preferences()
     in_tool_key_sequeces_preferences.keys.erase(InToolActionID::LMB);
     in_tool_key_sequeces_preferences.keys.erase(InToolActionID::RMB);
     in_tool_key_sequeces_preferences.keys.erase(InToolActionID::LMB_RELEASE);
+    apply_arrow_keys();
+
     {
         const auto mod0 = static_cast<GdkModifierType>(0);
-        action_connections.at(make_action(ToolID::MOVE_KEY_LEFT)).key_sequences = {{{GDK_KEY_Left, mod0}}};
-        action_connections.at(make_action(ToolID::MOVE_KEY_RIGHT)).key_sequences = {{{GDK_KEY_Right, mod0}}};
-        action_connections.at(make_action(ToolID::MOVE_KEY_UP)).key_sequences = {{{GDK_KEY_Up, mod0}}};
-        action_connections.at(make_action(ToolID::MOVE_KEY_DOWN)).key_sequences = {{{GDK_KEY_Down, mod0}}};
 
         in_tool_key_sequeces_preferences.keys[InToolActionID::CANCEL] = {{{GDK_KEY_Escape, mod0}}};
         in_tool_key_sequeces_preferences.keys[InToolActionID::COMMIT] = {{{GDK_KEY_Return, mod0}},
                                                                          {{GDK_KEY_KP_Enter, mod0}}};
-
-        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_LEFT] = {{{GDK_KEY_Left, mod0}}};
-        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_RIGHT] = {{{GDK_KEY_Right, mod0}}};
-        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_UP] = {{{GDK_KEY_Up, mod0}}};
-        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_DOWN] = {{{GDK_KEY_Down, mod0}}};
-    }
-    {
-        switch (canvas_prefs->appearance.grid_fine_modifier) {
-        case Appearance::GridFineModifier::ALT:
-            grid_fine_modifier = GDK_MOD1_MASK;
-            break;
-        case Appearance::GridFineModifier::CTRL:
-            grid_fine_modifier = GDK_CONTROL_MASK;
-            break;
-        }
-        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_LEFT)).key_sequences = {
-                {{GDK_KEY_Left, grid_fine_modifier}}};
-        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_RIGHT)).key_sequences = {
-                {{GDK_KEY_Right, grid_fine_modifier}}};
-        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_UP)).key_sequences = {
-                {{GDK_KEY_Up, grid_fine_modifier}}};
-        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_DOWN)).key_sequences = {
-                {{GDK_KEY_Down, grid_fine_modifier}}};
-        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_LEFT_FINE] = {{{GDK_KEY_Left, grid_fine_modifier}}};
-        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_RIGHT_FINE] = {
-                {{GDK_KEY_Right, grid_fine_modifier}}};
-        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_UP_FINE] = {{{GDK_KEY_Up, grid_fine_modifier}}};
-        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_DOWN_FINE] = {{{GDK_KEY_Down, grid_fine_modifier}}};
     }
 
     key_sequence_dialog->clear();

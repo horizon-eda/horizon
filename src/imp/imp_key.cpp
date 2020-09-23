@@ -240,4 +240,49 @@ bool ImpBase::handle_action_key(GdkEventKey *ev)
     return false;
 }
 
+void ImpBase::apply_arrow_keys()
+{
+    auto canvas_prefs = get_canvas_preferences();
+
+    const auto flip = canvas->get_flip_view();
+
+    const auto left = flip ? GDK_KEY_Right : GDK_KEY_Left;
+    const auto right = flip ? GDK_KEY_Left : GDK_KEY_Right;
+    const auto up = GDK_KEY_Up;
+    const auto down = GDK_KEY_Down;
+
+    {
+        const auto mod0 = static_cast<GdkModifierType>(0);
+        action_connections.at(make_action(ToolID::MOVE_KEY_LEFT)).key_sequences = {{{left, mod0}}};
+        action_connections.at(make_action(ToolID::MOVE_KEY_RIGHT)).key_sequences = {{{right, mod0}}};
+        action_connections.at(make_action(ToolID::MOVE_KEY_UP)).key_sequences = {{{up, mod0}}};
+        action_connections.at(make_action(ToolID::MOVE_KEY_DOWN)).key_sequences = {{{down, mod0}}};
+
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_LEFT] = {{{left, mod0}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_RIGHT] = {{{right, mod0}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_UP] = {{{up, mod0}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_DOWN] = {{{down, mod0}}};
+    }
+    {
+        GdkModifierType grid_fine_modifier = GDK_MOD1_MASK;
+
+        switch (canvas_prefs->appearance.grid_fine_modifier) {
+        case Appearance::GridFineModifier::ALT:
+            grid_fine_modifier = GDK_MOD1_MASK;
+            break;
+        case Appearance::GridFineModifier::CTRL:
+            grid_fine_modifier = GDK_CONTROL_MASK;
+            break;
+        }
+        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_LEFT)).key_sequences = {{{left, grid_fine_modifier}}};
+        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_RIGHT)).key_sequences = {{{right, grid_fine_modifier}}};
+        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_UP)).key_sequences = {{{up, grid_fine_modifier}}};
+        action_connections.at(make_action(ToolID::MOVE_KEY_FINE_DOWN)).key_sequences = {{{down, grid_fine_modifier}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_LEFT_FINE] = {{{left, grid_fine_modifier}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_RIGHT_FINE] = {{{right, grid_fine_modifier}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_UP_FINE] = {{{up, grid_fine_modifier}}};
+        in_tool_key_sequeces_preferences.keys[InToolActionID::MOVE_DOWN_FINE] = {{{down, grid_fine_modifier}}};
+    }
+}
+
 } // namespace horizon

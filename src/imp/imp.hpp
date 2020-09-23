@@ -274,8 +274,6 @@ private:
     std::map<ActionToolID, bool> action_sensitivity;
     type_signal_action_sensitive s_signal_action_sensitive;
 
-    GdkModifierType grid_fine_modifier = GDK_MOD1_MASK;
-
     bool property_panel_has_focus();
 
     sigc::connection initial_view_all_conn;
@@ -312,5 +310,8 @@ private:
     void force_end_tool();
 
     std::string get_complete_display_name(const SelectableRef &sr);
+
+    void set_flip_view(bool flip);
+    void apply_arrow_keys();
 };
 } // namespace horizon
