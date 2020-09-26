@@ -86,7 +86,7 @@ RulesCheckResult check_entity(const Entity &entity)
             else {
                 std::set<UUID> units;
                 for (const auto &gate : gates) {
-                    units.insert(gate->uuid);
+                    units.insert(gate->unit->uuid);
                 }
                 if (units.size() > 1) {
                     r.errors.emplace_back(RulesCheckErrorLevel::WARN,
