@@ -208,9 +208,6 @@ private:
     Coord<int64_t> cursor_pos_grid;
     bool cursor_external = false;
 
-    GLuint renderbuffer;
-    GLuint stencilrenderbuffer;
-    GLuint fbo;
     bool needs_resize = false;
     enum PushFilter {
         PF_NONE = 0,

@@ -150,16 +150,6 @@ void CanvasGL::on_size_allocate(Gtk::Allocation &alloc)
 
 void CanvasGL::resize_buffers()
 {
-    GLint rb;
-    GLint samples = gl_clamp_samples(appearance.msaa);
-    glGetIntegerv(GL_RENDERBUFFER_BINDING, &rb); // save rb
-    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_RGBA8, m_width * get_scale_factor(),
-                                     m_height * get_scale_factor());
-    glBindRenderbuffer(GL_RENDERBUFFER, stencilrenderbuffer);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH24_STENCIL8, m_width * get_scale_factor(),
-                                     m_height * get_scale_factor());
-    glBindRenderbuffer(GL_RENDERBUFFER, rb);
 }
 
 void CanvasGL::on_realize()
@@ -180,32 +170,7 @@ void CanvasGL::on_realize()
     picture_renderer.realize();
     GL_CHECK_ERROR
 
-    GLint fb;
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fb); // save fb
-
-    glGenRenderbuffers(1, &renderbuffer);
-    glGenRenderbuffers(1, &stencilrenderbuffer);
-
     resize_buffers();
-
-    GL_CHECK_ERROR
-
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, stencilrenderbuffer);
-
-    GL_CHECK_ERROR
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        Gtk::MessageDialog md("Error setting up framebuffer, will now exit", false /* use_markup */, Gtk::MESSAGE_ERROR,
-                              Gtk::BUTTONS_OK);
-        md.run();
-    }
-    glBindFramebuffer(GL_FRAMEBUFFER, fb);
-
-    GL_CHECK_ERROR
 }
 
 bool CanvasGL::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
@@ -218,11 +183,6 @@ bool CanvasGL::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
         resize_buffers();
         needs_resize = false;
     }
-
-    GLint fb;
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fb); // save fb
-
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     GL_CHECK_ERROR
     {
@@ -249,17 +209,8 @@ bool CanvasGL::on_render(const Glib::RefPtr<Gdk::GLContext> &context)
     marker_renderer.render();
     glDisable(GL_BLEND);
 
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-    glBlitFramebuffer(0, 0, m_width * get_scale_factor(), m_height * get_scale_factor(), 0, 0,
-                      m_width * get_scale_factor(), m_height * get_scale_factor(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, fb);
-
-    GL_CHECK_ERROR
 
     glFlush();
-    GL_CHECK_ERROR
     return Gtk::GLArea::on_render(context);
 }
 
