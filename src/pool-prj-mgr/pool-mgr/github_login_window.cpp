@@ -158,7 +158,7 @@ void GitHubLoginWindow::worker_thread()
             }
 
             for (int i = 0; i < interval; i++) {
-                sleep(1);
+                Glib::usleep(1e6);
                 if (cancel)
                     return;
             }
