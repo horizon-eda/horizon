@@ -777,7 +777,7 @@ struct PushPayload {
     std::string ref_status;
 };
 
-static int push_cred_cb(git_credential **out, const char *url, const char *user_from_url, unsigned int allowed_types,
+static int push_cred_cb(git_cred **out, const char *url, const char *user_from_url, unsigned int allowed_types,
                         void *payload)
 {
     auto pl = reinterpret_cast<PushPayload *>(payload);
