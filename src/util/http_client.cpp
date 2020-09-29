@@ -100,6 +100,35 @@ std::string Client::post(const std::string &url, const std::string &postdata_i)
     return response;
 }
 
+std::string Client::post_form(const std::string &url, const std::vector<std::pair<std::string, std::string>> &fields)
+{
+    std::string full_url = url;
+    curl_easy_setopt(curl, CURLOPT_URL, full_url.c_str());
+    auto mime = curl_mime_init(curl);
+    for (const auto &[key, value] : fields) {
+        auto part = curl_mime_addpart(mime);
+        curl_mime_name(part, key.c_str());
+        curl_mime_data(part, value.c_str(), CURL_ZERO_TERMINATED);
+    }
+    curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+    response.clear();
+    auto res = curl_easy_perform(curl);
+    curl_mime_free(mime);
+    if (res != CURLE_OK) {
+        std::string errorstr = curl_easy_strerror(res);
+        std::string errorstr_buf(errbuf);
+        throw std::runtime_error("error performing POST to" + full_url + " :" + errorstr + " " + errorstr_buf);
+    }
+    long code = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+    if (code < 200 || code > 299) {
+        throw std::runtime_error("unexpected HTTP response code " + std::to_string(code) + " when accessing " + full_url
+                                 + " response: " + response);
+    }
+    return response;
+}
+
+
 Client::~Client()
 {
     curl_slist_free_all(header_list);

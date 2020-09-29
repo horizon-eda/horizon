@@ -643,6 +643,7 @@ SRC_POOL_PRJ_MGR = \
 	src/checks/check_entity.cpp\
 	src/checks/check_unit.cpp\
 	src/checks/check_part.cpp\
+	src/pool-prj-mgr/pool-mgr/github_login_window.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

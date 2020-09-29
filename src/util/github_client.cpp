@@ -15,6 +15,14 @@ json GitHubClient::login(const std::string &user, const std::string &passwd)
     return client.get("/user");
 }
 
+json GitHubClient::login_token(const std::string &token)
+{
+    client.append_header("authorization: Bearer " + token);
+    auto r = client.get("/user");
+    login_user = r.at("login");
+    return r;
+}
+
 json GitHubClient::get_repo(const std::string &owner, const std::string &repo)
 {
     return client.get("/repos/" + owner + "/" + repo);

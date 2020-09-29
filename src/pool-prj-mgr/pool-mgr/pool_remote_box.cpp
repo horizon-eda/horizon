@@ -11,55 +11,10 @@
 #include "util/github_client.hpp"
 #include "util/str_util.hpp"
 #include "util/util.hpp"
+#include "github_login_window.hpp"
 #include <iomanip>
 
 namespace horizon {
-
-class SignInDialog : public Gtk::Dialog {
-public:
-    SignInDialog(Gtk::Window *parent);
-
-    Gtk::Entry *user_entry = nullptr;
-    Gtk::Entry *password_entry = nullptr;
-};
-
-SignInDialog::SignInDialog(Gtk::Window *parent)
-    : Gtk::Dialog("Sign in with GitHub", *parent,
-                  Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
-{
-    add_button("Cancel", Gtk::ResponseType::RESPONSE_CANCEL);
-    add_button("Sign in", Gtk::ResponseType::RESPONSE_OK);
-    set_default_response(Gtk::RESPONSE_OK);
-    auto grid = Gtk::manage(new Gtk::Grid);
-    grid->set_row_spacing(10);
-    grid->set_column_spacing(10);
-    grid->set_halign(Gtk::ALIGN_CENTER);
-
-    int top = 0;
-    user_entry = Gtk::manage(new Gtk::Entry);
-    grid_attach_label_and_widget(grid, "Username", user_entry, top);
-
-    password_entry = Gtk::manage(new Gtk::Entry);
-    password_entry->set_visibility(false);
-    grid_attach_label_and_widget(grid, "Password", password_entry, top);
-
-    user_entry->signal_activate().connect([this] { password_entry->grab_focus(); });
-    password_entry->signal_activate().connect([this] { response(Gtk::RESPONSE_OK); });
-
-    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 20));
-    box->property_margin() = 20;
-    box->pack_start(*grid, true, true, 0);
-
-    auto la = Gtk::manage(new Gtk::Label());
-    la->set_markup(
-            "Your credentials will not be saved.\nDon't have a GitHub account? "
-            "<a href='https://github.com/join'>Sign up</a>");
-    la->get_style_context()->add_class("dim-label");
-    box->pack_start(*la, false, false, 0);
-
-    get_content_area()->add(*box);
-    box->show_all();
-}
 
 class ConfirmPrDialog : public Gtk::Dialog {
 public:
@@ -113,6 +68,8 @@ ConfirmPrDialog::ConfirmPrDialog(Gtk::Window *parent)
     box->show_all();
 }
 
+static const std::string github_client_id = "094ac4cbd2e4a51820b4";
+
 PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PoolNotebook *nb)
     : Gtk::Box(cobject), notebook(nb)
 {
@@ -133,6 +90,46 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     x->get_widget("remote_pr_title_entry", pr_title_entry);
     x->get_widget("remote_pr_body_textview", pr_body_textview);
     x->get_widget("pr_spinner", pr_spinner);
+    x->get_widget("remote_login_button", login_button);
+    x->get_widget("remote_logout_button", logout_button);
+    logout_button->hide();
+
+    login_button->signal_clicked().connect([this] {
+        if (Glib::file_test(get_token_filename(), Glib::FILE_TEST_IS_REGULAR) && login_succeeded) {
+            update_login();
+            return;
+        }
+
+        auto lw = GitHubLoginWindow::create(get_token_filename(), github_client_id);
+        auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+        lw->set_transient_for(*top);
+        lw->set_modal(true);
+        lw->signal_hide().connect([this, lw] {
+            delete lw;
+            update_login();
+        });
+        lw->present();
+    });
+
+    logout_button->signal_clicked().connect([this] {
+        auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+        Gtk::MessageDialog md(*top, "Log out?", false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE, true);
+        md.set_secondary_text(
+                "Before logging out, you might want to <a "
+                "href=\"https://github.com/settings/connections/applications/"
+                        + github_client_id + "\">revoke</a> the authentication token.",
+                true);
+        md.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+        md.add_button("Log out", Gtk::RESPONSE_OK);
+        md.set_default_response(Gtk::RESPONSE_CANCEL);
+        if (md.run() == Gtk::RESPONSE_OK) {
+            Gio::File::create_for_path(get_token_filename())->remove();
+            gh_username.clear();
+            gh_token.clear();
+            update_login();
+            upgrade_label->set_text("");
+        }
+    });
 
     pull_requests_listbox->set_header_func(sigc::ptr_fun(header_func_separator));
 
@@ -181,11 +178,13 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
         upgrade_spinner->property_active() = !git_thread_error;
         upgrade_label->set_text(git_thread_status);
         if (gh_username.size()) {
-            gh_signed_in_label->set_text(gh_username);
+            gh_signed_in_label->set_text("Logged in: " + gh_username);
         }
         else {
-            gh_signed_in_label->set_text("not signed in");
+            gh_signed_in_label->set_text("Not logged in");
         }
+        login_button->set_visible(gh_username.size() == 0);
+        logout_button->set_visible(gh_username.size() || login_succeeded == false);
         if (!git_thread_busy) {
             notebook->pool_updating = false;
         }
@@ -202,6 +201,9 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
             update_items_merge();
             pr_title_entry->set_text("");
             pr_body_textview->get_buffer()->set_text("");
+            handle_refresh_prs();
+        }
+        if (git_thread_mode == GitThreadMode::LOGIN && !git_thread_busy && !git_thread_error) {
             handle_refresh_prs();
         }
     });
@@ -459,16 +461,6 @@ void PoolRemoteBox::handle_create_pr()
         return;
 
     auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
-    if (gh_username.size() == 0) {
-        SignInDialog dia_sign_in(top);
-        if (dia_sign_in.run() == Gtk::RESPONSE_OK) {
-            gh_username = dia_sign_in.user_entry->get_text();
-            gh_password = dia_sign_in.password_entry->get_text();
-        }
-        else {
-            return;
-        }
-    }
 
     { // confirm user name
         autofree_ptr<git_repository> repo(git_repository_free);
@@ -558,6 +550,7 @@ void PoolRemoteBox::refresh_prs_thread()
         pr_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Refreshing");
         GitHubClient client;
         pull_requests = client.get_pull_requests(gh_owner, gh_repo);
+        std::cout << "get prs" << std::endl;
         /*pull_requests = json::array();
         {
                 json j;
@@ -681,6 +674,88 @@ void PoolRemoteBox::remote_upgrade_thread()
     }
 }
 
+std::string PoolRemoteBox::get_token_filename() const
+{
+    return Glib::build_filename(notebook->remote_repo, ".auth.json");
+}
+
+bool PoolRemoteBox::update_login()
+{
+    if (gh_username.size())
+        return false;
+    if (git_thread_busy)
+        return false;
+    const auto auth_avail = Glib::file_test(get_token_filename(), Glib::FILE_TEST_IS_REGULAR);
+    if (!auth_avail) {
+        gh_signed_in_label->set_text("Not logged in");
+        login_button->show();
+        logout_button->hide();
+    }
+    else {
+        if (notebook->pool_updating)
+            return false;
+        notebook->pool_updating = true;
+        git_thread_busy = true;
+        git_thread_error = false;
+        git_thread_mode = GitThreadMode::LOGIN;
+
+        std::thread thr(&PoolRemoteBox::login_thread, this);
+
+        thr.detach();
+        return true;
+    }
+    return false;
+}
+
+void PoolRemoteBox::login_once()
+{
+    if (logged_in_once)
+        return;
+
+    if (!update_login())
+        handle_refresh_prs();
+    logged_in_once = true;
+}
+
+void PoolRemoteBox::login_thread()
+{
+    try {
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            git_thread_status = "Logging in...";
+        }
+        git_thread_dispatcher.emit();
+
+        auto j_auth = load_json_from_file(get_token_filename());
+
+        auto token = j_auth.at("token");
+
+        GitHubClient client;
+        auto user_info = client.login_token(token);
+
+        gh_username = user_info.at("login");
+        gh_token = token;
+
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            git_thread_busy = false;
+            git_thread_status = "Logged in";
+        }
+        login_succeeded = true;
+        git_thread_dispatcher.emit();
+    }
+    catch (const std::exception &e) {
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            login_succeeded = false;
+            git_thread_busy = false;
+            git_thread_error = true;
+            git_thread_status = "Error: " + std::string(e.what());
+        }
+        git_thread_dispatcher.emit();
+    }
+}
+
 void PoolRemoteBox::checkout_master(git_repository *repo)
 {
     autofree_ptr<git_object> treeish(git_object_free);
@@ -697,6 +772,26 @@ void PoolRemoteBox::checkout_master(git_repository *repo)
     }
 }
 
+struct PushPayload {
+    git_cred_userpass_payload userpass;
+    std::string ref_status;
+};
+
+static int push_cred_cb(git_credential **out, const char *url, const char *user_from_url, unsigned int allowed_types,
+                        void *payload)
+{
+    auto pl = reinterpret_cast<PushPayload *>(payload);
+    return git_cred_userpass(out, url, user_from_url, allowed_types, &pl->userpass);
+}
+
+static int push_ref_cb(const char *refname, const char *status, void *data)
+{
+    auto pl = reinterpret_cast<PushPayload *>(data);
+    if (status)
+        pl->ref_status += std::string(refname) + ":" + std::string(status) + " ";
+    return 0;
+}
+
 void PoolRemoteBox::create_pr_thread()
 {
     try {
@@ -707,16 +802,19 @@ void PoolRemoteBox::create_pr_thread()
         }
         git_thread_dispatcher.emit();
 
+        if (gh_token.size() == 0) {
+            throw std::runtime_error("not logged in");
+        }
+
         GitHubClient client;
         json user_info;
         try {
-            user_info = client.login(gh_username, gh_password);
-            gh_username = user_info.at("login");
+            user_info = client.login_token(gh_token);
             git_thread_dispatcher.emit();
         }
         catch (const std::runtime_error &e) {
             gh_username = "";
-            throw std::runtime_error("can't sign in");
+            throw std::runtime_error("can't log in");
         }
 
         if (items_merge.size() == 0 && models_merge.size() == 0) {
@@ -742,24 +840,7 @@ void PoolRemoteBox::create_pr_thread()
             throw std::runtime_error("error opening repo");
         }
 
-
-        std::string user_email;
-        std::string user_name;
         std::cout << std::setw(4) << user_info << std::endl;
-        try {
-            user_email = user_info.at("email");
-        }
-        catch (...) {
-            user_email = "horizon@0x83.eu";
-        }
-
-        try {
-            user_name = user_info.at("name");
-        }
-        catch (...) {
-            user_name = "horizon pool manager";
-        }
-
 
         autofree_ptr<git_remote> my_remote(git_remote_free);
         if (git_remote_lookup(&my_remote.ptr, repo, gh_username.c_str()) != 0) {
@@ -895,7 +976,7 @@ void PoolRemoteBox::create_pr_thread()
 
 
             autofree_ptr<git_signature> signature(git_signature_free);
-            git_signature_now(&signature.ptr, user_name.c_str(), user_email.c_str());
+            git_signature_default(&signature.ptr, repo);
 
             git_oid new_commit_oid;
             if (git_commit_create(&new_commit_oid, repo, "HEAD", signature, signature, "UTF-8", pr_title.c_str(), tree,
@@ -915,13 +996,14 @@ void PoolRemoteBox::create_pr_thread()
 
         { // push
             git_push_options push_opts = GIT_PUSH_OPTIONS_INIT;
-            push_opts.callbacks.credentials = git_cred_userpass;
-            git_cred_userpass_payload payload;
-            payload.username = gh_username.c_str();
-            payload.password = gh_password.c_str();
+            push_opts.callbacks.credentials = push_cred_cb;
+            push_opts.callbacks.push_update_reference = push_ref_cb;
+            PushPayload payload;
+            payload.userpass.username = gh_username.c_str();
+            payload.userpass.password = gh_token.c_str();
             push_opts.callbacks.payload = &payload;
 
-            std::string refspec = "refs/heads/" + new_branch_name;
+            std::string refspec = "refs/heads/" + new_branch_name; // + ":refs/heads/" + new_branch_name;
             char *refspec_c = strdup(refspec.c_str());
 
             const git_strarray refs = {&refspec_c, 1};
@@ -933,6 +1015,9 @@ void PoolRemoteBox::create_pr_thread()
                 throw std::runtime_error("error pushing " + errstr);
             }
             free(refspec_c);
+            if (payload.ref_status.size()) {
+                throw std::runtime_error("error pushing " + payload.ref_status);
+            }
         }
 
         {

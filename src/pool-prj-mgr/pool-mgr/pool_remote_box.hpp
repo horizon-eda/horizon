@@ -8,6 +8,7 @@
 #include <git2.h>
 #include "util/status_dispatcher.hpp"
 #include "util/item_set.hpp"
+#include <atomic>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -21,6 +22,8 @@ public:
     void merge_3d_model(const std::string &filename);
     void handle_refresh_prs();
     bool prs_refreshed_once = false;
+
+    void login_once();
 
 private:
     class PoolNotebook *notebook = nullptr;
@@ -60,6 +63,8 @@ private:
     Gtk::ListBox *pull_requests_listbox = nullptr;
     Gtk::Spinner *pr_spinner = nullptr;
     StatusDispatcher pr_status_dispatcher;
+    Gtk::Button *login_button = nullptr;
+    Gtk::Button *logout_button = nullptr;
 
 
     void handle_remote_upgrade();
@@ -70,11 +75,14 @@ private:
     void remote_upgrade_thread();
     void create_pr_thread();
     void refresh_prs_thread();
+    void login_thread();
     void checkout_master(git_repository *repo);
+    std::string get_token_filename() const;
+    bool update_login();
 
     Glib::Dispatcher git_thread_dispatcher;
 
-    enum class GitThreadMode { UPGRADE, PULL_REQUEST };
+    enum class GitThreadMode { UPGRADE, PULL_REQUEST, LOGIN };
     GitThreadMode git_thread_mode = GitThreadMode::UPGRADE;
     bool git_thread_busy = false;
     std::string git_thread_status;
@@ -94,9 +102,12 @@ private:
     void update_prs();
 
     std::string gh_username;
-    std::string gh_password;
+    std::string gh_token;
 
     std::string pr_title;
     std::string pr_body;
+
+    bool logged_in_once = false;
+    std::atomic<bool> login_succeeded = true;
 };
 } // namespace horizon

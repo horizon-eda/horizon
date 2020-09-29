@@ -8,6 +8,7 @@ class GitHubClient {
 public:
     GitHubClient();
     json login(const std::string &user, const std::string &passwd);
+    json login_token(const std::string &token);
     json get_repo(const std::string &owner, const std::string &repo);
     json create_fork(const std::string &owner, const std::string &repo);
     json create_pull_request(const std::string &owner, const std::string &repo, const std::string &title,

@@ -19,6 +19,7 @@ public:
 
     std::string get(const std::string &url);
     std::string post(const std::string &url, const std::string &postdata = "");
+    std::string post_form(const std::string &url, const std::vector<std::pair<std::string, std::string>> &fields);
 
     ~Client();
 

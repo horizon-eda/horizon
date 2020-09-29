@@ -245,9 +245,10 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
         remote_box->unreference();
 
         signal_switch_page().connect([this](Gtk::Widget *page, int page_num) {
-            if (page == remote_box && !remote_box->prs_refreshed_once) {
-                remote_box->handle_refresh_prs();
-                remote_box->prs_refreshed_once = true;
+            if (in_destruction())
+                return;
+            if (page == remote_box) {
+                remote_box->login_once();
             }
         });
     }
