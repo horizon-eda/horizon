@@ -65,6 +65,7 @@ private:
     StatusDispatcher pr_status_dispatcher;
     Gtk::Button *login_button = nullptr;
     Gtk::Button *logout_button = nullptr;
+    Gtk::CheckButton *show_only_my_prs_cb = nullptr;
 
 
     void handle_remote_upgrade();
@@ -100,6 +101,7 @@ private:
     bool exists_in_pool(class Pool &pool, ObjectType ty, const UUID &uu);
 
     void update_prs();
+    void update_my_prs();
 
     std::string gh_username;
     std::string gh_token;

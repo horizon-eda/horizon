@@ -92,6 +92,7 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     x->get_widget("pr_spinner", pr_spinner);
     x->get_widget("remote_login_button", login_button);
     x->get_widget("remote_logout_button", logout_button);
+    x->get_widget("show_only_my_prs_cb", show_only_my_prs_cb);
     logout_button->hide();
 
     login_button->signal_clicked().connect([this] {
@@ -125,6 +126,7 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
         if (md.run() == Gtk::RESPONSE_OK) {
             Gio::File::create_for_path(get_token_filename())->remove();
             gh_username.clear();
+            update_my_prs();
             gh_token.clear();
             update_login();
             upgrade_label->set_text("");
@@ -132,6 +134,8 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     });
 
     pull_requests_listbox->set_header_func(sigc::ptr_fun(header_func_separator));
+
+    show_only_my_prs_cb->signal_toggled().connect(sigc::mem_fun(*this, &PoolRemoteBox::update_prs));
 
     autofree_ptr<git_repository> repo(git_repository_free);
     if (git_repository_open(&repo.ptr, notebook->remote_repo.c_str()) != 0) {
@@ -185,6 +189,7 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
         }
         login_button->set_visible(gh_username.size() == 0);
         logout_button->set_visible(gh_username.size() || login_succeeded == false);
+        update_my_prs();
         if (!git_thread_busy) {
             notebook->pool_updating = false;
         }
@@ -307,6 +312,19 @@ PullRequestItemBox *PullRequestItemBox::create(const json &j)
     return w;
 }
 
+void PoolRemoteBox::update_my_prs()
+{
+    if (gh_username.size()) {
+        if (!show_only_my_prs_cb->get_sensitive())
+            show_only_my_prs_cb->set_active(true);
+        show_only_my_prs_cb->set_sensitive(true);
+    }
+    else {
+        show_only_my_prs_cb->set_active(false);
+        show_only_my_prs_cb->set_sensitive(false);
+    }
+}
+
 void PoolRemoteBox::update_prs()
 {
     {
@@ -317,6 +335,12 @@ void PoolRemoteBox::update_prs()
     }
 
     for (auto it = pull_requests.cbegin(); it != pull_requests.cend(); ++it) {
+        if (gh_username.size() && show_only_my_prs_cb->get_active()) {
+            std::string user = it.value().at("user").at("login");
+            if (user != gh_username)
+                continue;
+        }
+
         auto box = PullRequestItemBox::create(it.value());
         pull_requests_listbox->append(*box);
         box->show();
