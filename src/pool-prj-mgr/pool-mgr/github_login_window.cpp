@@ -29,7 +29,8 @@ GitHubLoginWindow::GitHubLoginWindow(BaseObjectType *cobject, const Glib::RefPtr
     GET_WIDGET(browser_button);
 
     copy_button->signal_clicked().connect([this] { Gtk::Clipboard::get()->set_text(user_code); });
-    browser_button->signal_clicked().connect([this] { show_uri(verification_uri, GDK_CURRENT_TIME); });
+    browser_button->signal_clicked().connect(
+            [this] { gtk_show_uri_on_window(gobj(), verification_uri.c_str(), GDK_CURRENT_TIME, nullptr); });
 
     dispatcher.connect([this] {
         if (user.size()) { // done
