@@ -55,4 +55,14 @@ json GitHubClient::get_pull_request(const std::string &owner, const std::string 
 {
     return client.get("/repos/" + owner + "/" + repo + "/pulls/" + std::to_string(pr));
 }
+
+json GitHubClient::add_issue_comment(const std::string &owner, const std::string &repo, unsigned int id,
+                                     const std::string &body)
+{
+    json j;
+    j["body"] = body;
+
+    return client.post("/repos/" + owner + "/" + repo + "/issues/" + std::to_string(id) + "/comments", j);
+}
+
 } // namespace horizon

@@ -16,6 +16,8 @@ public:
     json get_pull_requests(const std::string &owner, const std::string &repo);
     json get_pull_request(const std::string &owner, const std::string &repo, unsigned int pr);
 
+    json add_issue_comment(const std::string &owner, const std::string &repo, unsigned int id, const std::string &body);
+
     HTTP::RESTClient client;
 
 private:
