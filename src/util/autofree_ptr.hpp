@@ -11,7 +11,12 @@ public:
     {
     }
 
-    autofree_ptr(autofree_ptr &&) = delete;
+    autofree_ptr(autofree_ptr &&other)
+    {
+        ptr = other.ptr;
+        free_fn = other.free_fn;
+        other.ptr = nullptr;
+    }
     autofree_ptr &operator=(autofree_ptr &&) = delete;
 
     autofree_ptr(autofree_ptr const &) = delete;
@@ -37,7 +42,8 @@ public:
 
     ~autofree_ptr()
     {
-        free_fn(ptr);
+        if (ptr)
+            free_fn(ptr);
     }
 };
 } // namespace horizon
