@@ -185,6 +185,8 @@ public:
 
     void set_colors2(const std::vector<ColorI> &c);
 
+    int get_last_grid_div() const;
+
 protected:
     void push() override;
     void request_push() override;
@@ -300,6 +302,8 @@ private:
     std::vector<ColorI> colors2;
 
     bool can_set_scale() const;
+
+    int last_grid_div = 1;
 
 protected:
     void on_size_allocate(Gtk::Allocation &alloc) override;

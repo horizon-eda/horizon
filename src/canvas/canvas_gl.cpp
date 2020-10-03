@@ -332,11 +332,23 @@ Coordi CanvasGL::snap_to_grid(const Coordi &c, unsigned int div) const
     return grid.origin + Coordi(xi, yi);
 }
 
+int CanvasGL::get_last_grid_div() const
+{
+    return last_grid_div;
+}
+
 void CanvasGL::cursor_move(GdkEvent *motion_event)
 {
     gdouble x, y;
     gdk_event_get_coords(motion_event, &x, &y);
     cursor_pos = screen2canvas(Coordf(x, y));
+
+    GdkModifierType state;
+    gdk_event_get_state(motion_event, &state);
+    last_grid_div = 1;
+    if (state & grid_fine_modifier) {
+        last_grid_div = 10;
+    }
 
     if (cursor_external) {
         Coordi c(cursor_pos.x, cursor_pos.y);
@@ -344,14 +356,7 @@ void CanvasGL::cursor_move(GdkEvent *motion_event)
         return;
     }
 
-    GdkModifierType state;
-    gdk_event_get_state(motion_event, &state);
-    unsigned int div = 1;
-    if (state & grid_fine_modifier) {
-        div = 10;
-    }
-
-    Coordi t = snap_to_grid(Coordi(cursor_pos.x, cursor_pos.y), div);
+    Coordi t = snap_to_grid(Coordi(cursor_pos.x, cursor_pos.y), last_grid_div);
 
     const auto &f = std::find_if(targets.begin(), targets.end(), [t, this](const auto &a) -> bool {
         return a.p == t && this->layer_is_visible(a.layer) && can_snap_to_target(a);

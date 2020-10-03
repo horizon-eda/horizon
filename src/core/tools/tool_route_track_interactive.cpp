@@ -353,7 +353,7 @@ const VECTOR2I ToolWrapper::snapToItem(bool aEnabled, PNS::ITEM *aItem, VECTOR2I
     VECTOR2I anchor;
 
     if (!aItem || !aEnabled) {
-        auto snapped = tool->canvas->snap_to_grid(Coordi(aP.x, aP.y));
+        auto snapped = tool->canvas->snap_to_grid(Coordi(aP.x, aP.y), tool->canvas->get_last_grid_div());
         return VECTOR2I(snapped.x, snapped.y);
     }
 
@@ -376,7 +376,7 @@ const VECTOR2I ToolWrapper::snapToItem(bool aEnabled, PNS::ITEM *aItem, VECTOR2I
         else if ((aP - s.B).EuclideanNorm() < w / 2)
             anchor = s.B;
         else {
-            auto snapped = tool->canvas->snap_to_grid(Coordi(aP.x, aP.y));
+            auto snapped = tool->canvas->snap_to_grid(Coordi(aP.x, aP.y), tool->canvas->get_last_grid_div());
             anchor = AlignToSegment(aP, VECTOR2I(snapped.x, snapped.y), s);
         }
         break;
