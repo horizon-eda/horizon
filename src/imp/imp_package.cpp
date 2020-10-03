@@ -393,7 +393,7 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpPackage::get_selection_fil
             {ObjectType::PAD, {{}, Flag::WORK_LAYER_ONLY_ENABLED}},
             {ObjectType::LINE, {layers_line, Flag::HAS_OTHERS}},
             {ObjectType::TEXT, {layers_text, Flag::HAS_OTHERS}},
-            {ObjectType::JUNCTION, {}},
+            {ObjectType::JUNCTION, {layers_line, Flag::HAS_OTHERS}},
             {ObjectType::POLYGON, {layers_polygon, Flag::HAS_OTHERS}},
             {ObjectType::DIMENSION, {}},
             {ObjectType::PICTURE, {}},
