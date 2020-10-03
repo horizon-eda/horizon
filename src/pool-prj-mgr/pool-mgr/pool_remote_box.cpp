@@ -237,6 +237,14 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
         merge_items_view->append_column(*tvc);
     }
 
+    merge_items_view->signal_row_activated().connect(
+            [this](const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *col) {
+                Gtk::TreeModel::Row row = *item_store->get_iter(path);
+                const ObjectType type = row[list_columns.type];
+                if (type != ObjectType::MODEL_3D)
+                    notebook->go_to(type, row[list_columns.uuid]);
+            });
+
     merge_items_view->append_column("Name", list_columns.name);
 
     merge_items_clear_button->signal_clicked().connect([this] {
@@ -1379,6 +1387,11 @@ void PoolRemoteBox::update_pr_thread()
         push_branch(my_remote, pr_update_branch);
 
         if (pr_body.size()) {
+            {
+                std::lock_guard<std::mutex> lock(git_thread_mutex);
+                git_thread_status = "Adding comment...";
+            }
+            git_thread_dispatcher.emit();
             client.add_issue_comment(gh_owner, gh_repo, pr_update_nr, pr_body);
         }
 
