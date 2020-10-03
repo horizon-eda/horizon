@@ -66,24 +66,32 @@ private:
     Gtk::Button *login_button = nullptr;
     Gtk::Button *logout_button = nullptr;
     Gtk::CheckButton *show_only_my_prs_cb = nullptr;
+    Gtk::Button *pr_update_button = nullptr;
+    Gtk::Button *pr_update_cancel_button = nullptr;
 
 
     void handle_remote_upgrade();
     void handle_create_pr();
+    void handle_update_pr();
     void update_body_placeholder_label();
 
 
     void remote_upgrade_thread();
     void create_pr_thread();
+    void update_pr_thread();
     void refresh_prs_thread();
     void login_thread();
     void checkout_master(git_repository *repo);
     std::string get_token_filename() const;
     bool update_login();
+    void set_pr_update_mode(unsigned int pr, const std::string branch_name);
+
+    static int pr_diff_file_cb_c(const git_diff_delta *delta, float progress, void *pl);
+    void pr_diff_file_cb(const git_diff_delta *delta);
 
     Glib::Dispatcher git_thread_dispatcher;
 
-    enum class GitThreadMode { UPGRADE, PULL_REQUEST, LOGIN };
+    enum class GitThreadMode { UPGRADE, PULL_REQUEST, PULL_REQUEST_UPDATE, LOGIN };
     GitThreadMode git_thread_mode = GitThreadMode::UPGRADE;
     bool git_thread_busy = false;
     std::string git_thread_status;
@@ -99,6 +107,8 @@ private:
     void update_items_merge();
     ItemSet get_referenced(ObjectType ty, const UUID &uu);
     bool exists_in_pool(class Pool &pool, ObjectType ty, const UUID &uu);
+    git_oid items_to_tree(git_repository *repo);
+    void push_branch(git_remote *remote, const std::string &branch_name);
 
     void update_prs();
     void update_my_prs();
@@ -108,6 +118,9 @@ private:
 
     std::string pr_title;
     std::string pr_body;
+
+    unsigned int pr_update_nr = 0;
+    std::string pr_update_branch;
 
     bool logged_in_once = false;
     std::atomic<bool> login_succeeded = true;

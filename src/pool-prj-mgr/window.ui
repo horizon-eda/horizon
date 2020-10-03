@@ -349,6 +349,32 @@
           </packing>
         </child>
         <child>
+          <object class="GtkButton" id="pr_update_button">
+            <property name="label" translatable="yes">Update PR #42</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="pr_update_cancel_button">
+            <property name="label" translatable="yes">Cancel</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkButton" id="remote_login_button">
             <property name="label" translatable="yes">Log in</property>
             <property name="visible">True</property>
@@ -359,7 +385,7 @@
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="pack_type">end</property>
-            <property name="position">2</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
@@ -373,7 +399,7 @@
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="pack_type">end</property>
-            <property name="position">3</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child>
@@ -414,7 +440,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">4</property>
+            <property name="position">6</property>
           </packing>
         </child>
         <child>
@@ -428,7 +454,7 @@
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="pack_type">end</property>
-            <property name="position">5</property>
+            <property name="position">7</property>
           </packing>
         </child>
         <child>
@@ -475,7 +501,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">6</property>
+            <property name="position">8</property>
           </packing>
         </child>
       </object>
@@ -682,7 +708,9 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">10</property>
+                <property name="valign">baseline</property>
+                <property name="margin_start">10</property>
+                <property name="margin_end">10</property>
                 <property name="margin_bottom">10</property>
                 <property name="label" translatable="yes">Pull request message</property>
                 <property name="xalign">0</property>
@@ -3253,7 +3281,7 @@ In case of modifying an existing part, provide rationale for the modification.</
         <property name="spacing">10</property>
         <child>
           <object class="GtkLinkButton" id="pull_request_item_link">
-            <property name="label" translatable="yes">button</property>
+            <property name="label" translatable="yes">Open on GitHub</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -3264,6 +3292,20 @@ In case of modifying an existing part, provide rationale for the modification.</
             <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="pull_request_update_button">
+            <property name="label" translatable="yes">Update PR</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -3278,7 +3320,7 @@ In case of modifying an existing part, provide rationale for the modification.</
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>

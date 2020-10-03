@@ -93,6 +93,8 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
     x->get_widget("remote_login_button", login_button);
     x->get_widget("remote_logout_button", logout_button);
     x->get_widget("show_only_my_prs_cb", show_only_my_prs_cb);
+    x->get_widget("pr_update_button", pr_update_button);
+    x->get_widget("pr_update_cancel_button", pr_update_cancel_button);
     logout_button->hide();
 
     login_button->signal_clicked().connect([this] {
@@ -133,6 +135,8 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
         }
     });
 
+    pr_update_cancel_button->signal_clicked().connect([this] { set_pr_update_mode(0, ""); });
+
     pull_requests_listbox->set_header_func(sigc::ptr_fun(header_func_separator));
 
     show_only_my_prs_cb->signal_toggled().connect(sigc::mem_fun(*this, &PoolRemoteBox::update_prs));
@@ -163,6 +167,7 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 
     upgrade_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolRemoteBox::handle_remote_upgrade));
     create_pr_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolRemoteBox::handle_create_pr));
+    pr_update_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolRemoteBox::handle_update_pr));
     refresh_prs_button->signal_clicked().connect(sigc::mem_fun(*this, &PoolRemoteBox::handle_refresh_prs));
 
     pr_status_dispatcher.attach(pr_spinner);
@@ -200,7 +205,7 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
             if (dia.get_merged())
                 notebook->pool_update();
         }
-        if (git_thread_mode == GitThreadMode::PULL_REQUEST && !git_thread_busy && !git_thread_error) {
+        else if (git_thread_mode == GitThreadMode::PULL_REQUEST && !git_thread_busy && !git_thread_error) {
             items_merge.clear();
             models_merge.clear();
             update_items_merge();
@@ -208,7 +213,11 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
             pr_body_textview->get_buffer()->set_text("");
             handle_refresh_prs();
         }
-        if (git_thread_mode == GitThreadMode::LOGIN && !git_thread_busy && !git_thread_error) {
+        else if (git_thread_mode == GitThreadMode::PULL_REQUEST_UPDATE && !git_thread_busy && !git_thread_error) {
+            set_pr_update_mode(0, "");
+            handle_refresh_prs();
+        }
+        else if (git_thread_mode == GitThreadMode::LOGIN && !git_thread_busy && !git_thread_error) {
             handle_refresh_prs();
         }
     });
@@ -269,45 +278,188 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 
     pr_body_textview->get_buffer()->signal_changed().connect([this] { update_body_placeholder_label(); });
 
+    set_pr_update_mode(0, "");
+}
 
+int diff_file_cb_c(const git_diff_delta *delta, float progress, void *pl)
+{
+    auto &diff_files = *reinterpret_cast<std::vector<std::string> *>(pl);
+    if (delta->status == GIT_DELTA_ADDED || delta->status == GIT_DELTA_MODIFIED) {
+        diff_files.push_back(delta->new_file.path);
+    }
+    return 0;
+}
+
+static std::pair<git_oid, autofree_ptr<git_tree>> find_base(git_repository *repo, git_commit *latest_commit)
+{
+    git_oid oid_base;
+    autofree_ptr<git_tree> base_tree(git_tree_free);
+    {
+        autofree_ptr<git_object> master_obj(git_object_free);
+        if (git_revparse_single(&master_obj.ptr, repo, "master") != 0) {
+            throw std::runtime_error("error looking up master");
+        }
+        if (git_merge_base(&oid_base, repo, git_object_id(reinterpret_cast<git_object *>(latest_commit)),
+                           git_object_id(master_obj))
+            != 0) {
+            throw std::runtime_error("error finding merge base");
+        }
+
+        autofree_ptr<git_commit> base_commit(git_commit_free);
+        if (git_commit_lookup(&base_commit.ptr, repo, &oid_base) != 0) {
+            throw std::runtime_error("error finding merge base commit");
+        }
+        if (git_commit_tree(&base_tree.ptr, base_commit) != 0) {
+            throw std::runtime_error("error finding merge base tree");
+        }
+    }
+    return {oid_base, std::move(base_tree)};
+}
+
+void PoolRemoteBox::pr_diff_file_cb(const git_diff_delta *delta)
+{
+    SQLite::Query q(notebook->pool.db, "INSERT INTO 'git_files' VALUES (?)");
+    q.bind(1, std::string(delta->new_file.path));
+    q.step();
+}
+
+int PoolRemoteBox::pr_diff_file_cb_c(const git_diff_delta *delta, float progress, void *pl)
+{
+    auto self = reinterpret_cast<PoolRemoteBox *>(pl);
+    self->pr_diff_file_cb(delta);
+    return 0;
+}
+
+
+void PoolRemoteBox::set_pr_update_mode(unsigned int pr, const std::string branch_name)
+{
+    pr_update_button->set_visible(pr);
+    pr_update_cancel_button->set_visible(pr);
+    create_pr_button->set_visible(!pr);
+    pr_update_nr = pr;
+    pr_update_branch = branch_name;
+    pr_update_button->set_label("Update PR #" + std::to_string(pr));
+    update_prs();
+    if (!pr) {
+        items_merge.clear();
+        models_merge.clear();
+        update_items_merge();
+        pr_title_entry->set_text("");
+        pr_body_textview->get_buffer()->set_text("");
+        return;
+    }
+
+    autofree_ptr<git_repository> repo(git_repository_free);
+    if (git_repository_open(&repo.ptr, notebook->remote_repo.c_str()) != 0) {
+        throw std::runtime_error("error opening repo");
+    }
+
+    autofree_ptr<git_reference> branch(git_reference_free);
+    if (git_branch_lookup(&branch.ptr, repo, branch_name.c_str(), GIT_BRANCH_LOCAL) != 0) {
+        throw std::runtime_error("branch lookup: " + branch_name);
+    }
+
+    autofree_ptr<git_commit> latest_commit(git_commit_free);
+    if (git_reference_peel(reinterpret_cast<git_object **>(&latest_commit.ptr), branch, GIT_OBJ_COMMIT) != 0) {
+        throw std::runtime_error("branch peel");
+    }
+
+    pr_title_entry->set_text(git_commit_message(latest_commit));
+
+
+    auto [oid_base, base_tree] = find_base(repo, latest_commit);
+
+    autofree_ptr<git_tree> tree(git_tree_free);
+    git_commit_tree(&tree.ptr, latest_commit);
+
+    autofree_ptr<git_diff> diff(git_diff_free);
+    git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+    git_diff_tree_to_tree(&diff.ptr, repo, base_tree, tree, &diff_opts);
+
+
+    notebook->pool.db.execute("CREATE TEMP TABLE 'git_files' ('git_filename' TEXT NOT NULL);");
+    notebook->pool.db.execute("BEGIN TRANSACTION");
+    git_diff_foreach(diff, &PoolRemoteBox::pr_diff_file_cb_c, nullptr, nullptr, nullptr, this);
+    notebook->pool.db.execute("COMMIT");
+
+    SQLite::Query q(
+            notebook->pool.db,
+            "SELECT type, uuid, name, filename FROM git_files LEFT JOIN "
+            "(SELECT type, uuid, name, filename FROM all_items_view UNION ALL SELECT DISTINCT 'model_3d' AS type, "
+            "'00000000-0000-0000-0000-000000000000' as uuid, '' as name, model_filename as filename FROM models) "
+            "ON filename=git_filename WHERE filename IS NOT NULL");
+    while (q.step()) {
+        const ObjectType type = object_type_lut.lookup(q.get<std::string>(0));
+        const UUID uu = q.get<std::string>(1);
+        const auto filename = q.get<std::string>(3);
+        if (type == ObjectType::MODEL_3D) {
+            models_merge.emplace(filename);
+        }
+        else {
+            items_merge.emplace(type, uu);
+        }
+    }
     update_items_merge();
+
+    notebook->pool.db.execute("DROP TABLE 'git_files'");
 }
 
 class PullRequestItemBox : public Gtk::Box {
 public:
-    PullRequestItemBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const json &j);
-    static PullRequestItemBox *create(const json &j);
-    const std::string filename;
+    PullRequestItemBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const json &j,
+                       const std::string &gh_user, bool no_update);
+    static PullRequestItemBox *create(const json &j, const std::string &gh_user, bool no_update);
+    const std::string gh_user;
+    const int pr_number;
+    const std::string branch_name;
+
+public:
+    typedef sigc::signal<void> type_signal_update_clicked;
+    type_signal_update_clicked signal_update_clicked()
+    {
+        return s_signal_update_clicked;
+    }
 
 private:
+    type_signal_update_clicked s_signal_update_clicked;
 };
 
-PullRequestItemBox::PullRequestItemBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const json &j)
-    : Gtk::Box(cobject)
+PullRequestItemBox::PullRequestItemBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, const json &j,
+                                       const std::string &a_gh_user, bool no_update)
+    : Gtk::Box(cobject), gh_user(a_gh_user), pr_number(j.at("number")), branch_name(j.at("head").at("ref"))
 {
     Gtk::Label *name_label, *descr_label, *number_label;
     Gtk::LinkButton *link_button;
+    Gtk::Button *update_button;
     x->get_widget("pull_request_item_name_label", name_label);
     x->get_widget("pull_request_item_descr_label", descr_label);
     x->get_widget("pull_request_item_number_label", number_label);
     x->get_widget("pull_request_item_link", link_button);
+    x->get_widget("pull_request_update_button", update_button);
+
+    update_button->signal_clicked().connect([this] { s_signal_update_clicked.emit(); });
 
     name_label->set_text(j.at("title").get<std::string>());
-    int nr = j.at("number");
-    number_label->set_text("#" + std::to_string(nr));
-    link_button->set_label("Open on GitHub");
+    number_label->set_text("#" + std::to_string(pr_number));
     link_button->set_uri(j.at("_links").at("html").at("href").get<std::string>());
-    std::string open_user = j.at("user").at("login");
-    std::string created_at = j.at("created_at");
+    const std::string open_user = j.at("user").at("login");
+
+    const bool is_pool_mgr_branch = Glib::Regex::match_simple(
+            "^pool_mgr_[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-"
+            "f]{12}$",
+            branch_name);
+
+    update_button->set_visible(!no_update && open_user == gh_user && is_pool_mgr_branch);
+    const std::string created_at = j.at("created_at");
     descr_label->set_text("opened by " + open_user + " on " + created_at);
 }
 
-PullRequestItemBox *PullRequestItemBox::create(const json &j)
+PullRequestItemBox *PullRequestItemBox::create(const json &j, const std::string &gh_user, bool no_update)
 {
     PullRequestItemBox *w;
     Glib::RefPtr<Gtk::Builder> x = Gtk::Builder::create();
     x->add_from_resource("/org/horizon-eda/horizon/pool-prj-mgr/window.ui", "pull_request_item");
-    x->get_widget_derived("pull_request_item", w, j);
+    x->get_widget_derived("pull_request_item", w, j, gh_user, no_update);
     w->reference();
     return w;
 }
@@ -334,14 +486,15 @@ void PoolRemoteBox::update_prs()
         }
     }
 
-    for (auto it = pull_requests.cbegin(); it != pull_requests.cend(); ++it) {
+    for (const auto &it : pull_requests) {
         if (gh_username.size() && show_only_my_prs_cb->get_active()) {
-            std::string user = it.value().at("user").at("login");
+            std::string user = it.at("user").at("login");
             if (user != gh_username)
                 continue;
         }
 
-        auto box = PullRequestItemBox::create(it.value());
+        auto box = PullRequestItemBox::create(it, gh_username, pr_update_nr != 0);
+        box->signal_update_clicked().connect([this, box] { set_pr_update_mode(box->pr_number, box->branch_name); });
         pull_requests_listbox->append(*box);
         box->show();
         box->unreference();
@@ -530,6 +683,29 @@ void PoolRemoteBox::handle_create_pr()
     trim(pr_body);
 
     std::thread thr(&PoolRemoteBox::create_pr_thread, this);
+
+    thr.detach();
+}
+
+void PoolRemoteBox::handle_update_pr()
+{
+    if (notebook->pool_updating)
+        return;
+
+    if (!pr_update_nr)
+        return;
+
+    notebook->pool_updating = true;
+    git_thread_busy = true;
+    git_thread_error = false;
+    git_thread_mode = GitThreadMode::PULL_REQUEST_UPDATE;
+
+    pr_body = pr_body_textview->get_buffer()->get_text();
+    pr_title = pr_title_entry->get_text();
+    trim(pr_title);
+    trim(pr_body);
+
+    std::thread thr(&PoolRemoteBox::update_pr_thread, this);
 
     thr.detach();
 }
@@ -816,6 +992,88 @@ static int push_ref_cb(const char *refname, const char *status, void *data)
     return 0;
 }
 
+git_oid PoolRemoteBox::items_to_tree(git_repository *repo)
+{
+    autofree_ptr<git_index> index(git_index_free);
+    if (git_repository_index(&index.ptr, repo) != 0) {
+        throw std::runtime_error("index error");
+    }
+
+    std::set<std::string> files_merge;
+
+    for (const auto &it : items_merge) {
+        SQLite::Query q(notebook->pool.db,
+                        "SELECT filename FROM all_items_view WHERE "
+                        "uuid = ? AND type = ?");
+        q.bind(1, it.second);
+        q.bind(2, object_type_lut.lookup_reverse(it.first));
+        if (q.step()) {
+            std::string filename = q.get<std::string>(0);
+            files_merge.insert(filename);
+        }
+    }
+    files_merge.insert(models_merge.begin(), models_merge.end());
+
+    for (std::string filename : files_merge) {
+        std::cout << "merge " << filename << std::endl;
+        std::string filename_src = Glib::build_filename(notebook->base_path, filename);
+        std::string filename_dest = Glib::build_filename(notebook->remote_repo, filename);
+        std::string dirname_dest = Glib::path_get_dirname(filename_dest);
+        if (!Glib::file_test(dirname_dest, Glib::FILE_TEST_IS_DIR))
+            Gio::File::create_for_path(dirname_dest)->make_directory_with_parents();
+        Gio::File::create_for_path(filename_src)
+                ->copy(Gio::File::create_for_path(filename_dest), Gio::FILE_COPY_OVERWRITE);
+
+#ifdef G_OS_WIN32
+        replace_backslash(filename);
+#endif
+
+        if (git_index_add_bypath(index, filename.c_str()) != 0) {
+            auto last_error = giterr_last();
+            std::string err_str = last_error->message;
+            throw std::runtime_error("add error: " + err_str);
+        }
+    }
+
+    if (git_index_write(index) != 0) {
+        throw std::runtime_error("error saving index");
+    }
+
+    git_oid tree_oid;
+    if (git_index_write_tree(&tree_oid, index) != 0) {
+        throw std::runtime_error("error saving index");
+    }
+
+    return tree_oid;
+}
+
+void PoolRemoteBox::push_branch(git_remote *remote, const std::string &branch_name)
+{
+    git_push_options push_opts = GIT_PUSH_OPTIONS_INIT;
+    push_opts.callbacks.credentials = push_cred_cb;
+    push_opts.callbacks.push_update_reference = push_ref_cb;
+    PushPayload payload;
+    payload.userpass.username = gh_username.c_str();
+    payload.userpass.password = gh_token.c_str();
+    push_opts.callbacks.payload = &payload;
+
+    std::string refspec = "refs/heads/" + branch_name; // + ":refs/heads/" + new_branch_name;
+    char *refspec_c = strdup(refspec.c_str());
+
+    const git_strarray refs = {&refspec_c, 1};
+
+    if (git_remote_push(remote, &refs, &push_opts) != 0) {
+        auto err = giterr_last();
+        std::string errstr = err->message;
+        free(refspec_c);
+        throw std::runtime_error("error pushing " + errstr);
+    }
+    free(refspec_c);
+    if (payload.ref_status.size()) {
+        throw std::runtime_error("error pushing " + payload.ref_status);
+    }
+}
+
 void PoolRemoteBox::create_pr_thread()
 {
     try {
@@ -831,9 +1089,8 @@ void PoolRemoteBox::create_pr_thread()
         }
 
         GitHubClient client;
-        json user_info;
         try {
-            user_info = client.login_token(gh_token);
+            client.login_token(gh_token);
             git_thread_dispatcher.emit();
         }
         catch (const std::runtime_error &e) {
@@ -863,8 +1120,6 @@ void PoolRemoteBox::create_pr_thread()
         if (git_repository_open(&repo.ptr, notebook->remote_repo.c_str()) != 0) {
             throw std::runtime_error("error opening repo");
         }
-
-        std::cout << std::setw(4) << user_info << std::endl;
 
         autofree_ptr<git_remote> my_remote(git_remote_free);
         if (git_remote_lookup(&my_remote.ptr, repo, gh_username.c_str()) != 0) {
@@ -932,57 +1187,7 @@ void PoolRemoteBox::create_pr_thread()
             }
         }
 
-        git_oid tree_oid;
-        {
-            autofree_ptr<git_index> index(git_index_free);
-            if (git_repository_index(&index.ptr, repo) != 0) {
-                throw std::runtime_error("index error");
-            }
-
-            std::set<std::string> files_merge;
-
-            for (const auto &it : items_merge) {
-                SQLite::Query q(notebook->pool.db,
-                                "SELECT filename FROM all_items_view WHERE "
-                                "uuid = ? AND type = ?");
-                q.bind(1, it.second);
-                q.bind(2, object_type_lut.lookup_reverse(it.first));
-                if (q.step()) {
-                    std::string filename = q.get<std::string>(0);
-                    files_merge.insert(filename);
-                }
-            }
-            files_merge.insert(models_merge.begin(), models_merge.end());
-
-            for (std::string filename : files_merge) {
-                std::cout << "merge " << filename << std::endl;
-                std::string filename_src = Glib::build_filename(notebook->base_path, filename);
-                std::string filename_dest = Glib::build_filename(notebook->remote_repo, filename);
-                std::string dirname_dest = Glib::path_get_dirname(filename_dest);
-                if (!Glib::file_test(dirname_dest, Glib::FILE_TEST_IS_DIR))
-                    Gio::File::create_for_path(dirname_dest)->make_directory_with_parents();
-                Gio::File::create_for_path(filename_src)
-                        ->copy(Gio::File::create_for_path(filename_dest), Gio::FILE_COPY_OVERWRITE);
-
-#ifdef G_OS_WIN32
-                replace_backslash(filename);
-#endif
-
-                if (git_index_add_bypath(index, filename.c_str()) != 0) {
-                    auto last_error = giterr_last();
-                    std::string err_str = last_error->message;
-                    throw std::runtime_error("add error: " + err_str);
-                }
-            }
-
-            if (git_index_write(index) != 0) {
-                throw std::runtime_error("error saving index");
-            }
-
-            if (git_index_write_tree(&tree_oid, index) != 0) {
-                throw std::runtime_error("error saving index");
-            }
-        }
+        git_oid tree_oid = items_to_tree(repo);
 
         {
             autofree_ptr<git_tree> tree(git_tree_free);
@@ -1018,31 +1223,7 @@ void PoolRemoteBox::create_pr_thread()
 
         checkout_master(repo);
 
-        { // push
-            git_push_options push_opts = GIT_PUSH_OPTIONS_INIT;
-            push_opts.callbacks.credentials = push_cred_cb;
-            push_opts.callbacks.push_update_reference = push_ref_cb;
-            PushPayload payload;
-            payload.userpass.username = gh_username.c_str();
-            payload.userpass.password = gh_token.c_str();
-            push_opts.callbacks.payload = &payload;
-
-            std::string refspec = "refs/heads/" + new_branch_name; // + ":refs/heads/" + new_branch_name;
-            char *refspec_c = strdup(refspec.c_str());
-
-            const git_strarray refs = {&refspec_c, 1};
-
-            if (git_remote_push(my_remote, &refs, &push_opts) != 0) {
-                auto err = giterr_last();
-                std::string errstr = err->message;
-                free(refspec_c);
-                throw std::runtime_error("error pushing " + errstr);
-            }
-            free(refspec_c);
-            if (payload.ref_status.size()) {
-                throw std::runtime_error("error pushing " + payload.ref_status);
-            }
-        }
+        push_branch(my_remote, new_branch_name);
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
@@ -1079,4 +1260,153 @@ void PoolRemoteBox::create_pr_thread()
         git_thread_dispatcher.emit();
     }
 }
+
+void PoolRemoteBox::update_pr_thread()
+{
+    try {
+
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            git_thread_status = "Authenticating...";
+        }
+        git_thread_dispatcher.emit();
+
+        if (gh_token.size() == 0) {
+            throw std::runtime_error("not logged in");
+        }
+
+        GitHubClient client;
+        try {
+            client.login_token(gh_token);
+            git_thread_dispatcher.emit();
+        }
+        catch (const std::runtime_error &e) {
+            gh_username = "";
+            throw std::runtime_error("can't log in");
+        }
+
+        if (items_merge.size() == 0 && models_merge.size() == 0) {
+            throw std::runtime_error("no items to merge");
+        }
+
+        if (pr_title.size() == 0) {
+            throw std::runtime_error("please enter title");
+        }
+
+
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            git_thread_status = "Opening repository...";
+        }
+        git_thread_dispatcher.emit();
+
+        autofree_ptr<git_repository> repo(git_repository_free);
+        if (git_repository_open(&repo.ptr, notebook->remote_repo.c_str()) != 0) {
+            throw std::runtime_error("error opening repo");
+        }
+
+        autofree_ptr<git_remote> my_remote(git_remote_free);
+        if (git_remote_lookup(&my_remote.ptr, repo, gh_username.c_str()) != 0) {
+            throw std::runtime_error("can't find remote");
+        }
+
+
+        autofree_ptr<git_reference> branch(git_reference_free);
+        if (git_branch_lookup(&branch.ptr, repo, pr_update_branch.c_str(), GIT_BRANCH_LOCAL) != 0) {
+            throw std::runtime_error("branch lookup");
+        }
+
+        autofree_ptr<git_commit> latest_commit(git_commit_free);
+        if (git_reference_peel(reinterpret_cast<git_object **>(&latest_commit.ptr), branch, GIT_OBJ_COMMIT) != 0) {
+            throw std::runtime_error("branch peel");
+        }
+
+        auto [oid_base, base_tree] = find_base(repo, latest_commit);
+
+        {
+            git_checkout_options checkout_opts = GIT_CHECKOUT_OPTIONS_INIT;
+            checkout_opts.checkout_strategy = GIT_CHECKOUT_SAFE;
+            if (git_checkout_tree(repo, reinterpret_cast<git_object *>(base_tree.ptr), &checkout_opts) != 0) {
+                throw std::runtime_error("error checking out tree");
+            }
+        }
+        if (git_repository_set_head_detached(repo, &oid_base) != 0) {
+            throw std::runtime_error("error setting detached head");
+        }
+
+        {
+            auto tree_oid = items_to_tree(repo);
+            autofree_ptr<git_tree> tree(git_tree_free);
+            if (git_tree_lookup(&tree.ptr, repo, &tree_oid) != 0) {
+                throw std::runtime_error("error looking up tree");
+            }
+
+            autofree_ptr<git_signature> signature(git_signature_free);
+            git_signature_default(&signature.ptr, repo);
+
+            const git_commit *parent_commit_p = latest_commit.ptr;
+
+            git_oid new_commit_oid;
+            if (git_commit_create(&new_commit_oid, repo, NULL, signature, signature, "UTF-8", pr_title.c_str(), tree, 1,
+                                  &parent_commit_p)
+                != 0) {
+                throw std::runtime_error("error committing");
+            }
+
+            git_reference *new_ref = nullptr;
+            if (git_reference_set_target(&new_ref, branch, &new_commit_oid, "update pr") != 0) {
+                throw std::runtime_error("error updating branch");
+            }
+        }
+        checkout_master(repo);
+        {
+            autofree_ptr<git_object> obj(git_object_free);
+            git_revparse_single(&obj.ptr, repo, "master");
+
+            git_checkout_options checkout_opts = GIT_CHECKOUT_OPTIONS_INIT;
+            if (git_reset(repo, obj, GIT_RESET_HARD, &checkout_opts) != 0) {
+                throw std::runtime_error("error resetting");
+            }
+        }
+
+
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            git_thread_status = "Pushing...";
+        }
+        git_thread_dispatcher.emit();
+
+        push_branch(my_remote, pr_update_branch);
+
+        if (pr_body.size()) {
+            client.add_issue_comment(gh_owner, gh_repo, pr_update_nr, pr_body);
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            git_thread_busy = false;
+            git_thread_status = "Done";
+        }
+        git_thread_dispatcher.emit();
+    }
+    catch (const std::exception &e) {
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            git_thread_busy = false;
+            git_thread_error = true;
+            git_thread_status = "Error: " + std::string(e.what());
+        }
+        git_thread_dispatcher.emit();
+    }
+    catch (const Gio::Error &e) {
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            git_thread_busy = false;
+            git_thread_error = true;
+            git_thread_status = "IO Error: " + std::string(e.what());
+        }
+        git_thread_dispatcher.emit();
+    }
+}
+
 } // namespace horizon
