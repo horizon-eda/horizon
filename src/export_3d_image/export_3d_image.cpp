@@ -37,7 +37,6 @@ Image3DExporter::Image3DExporter(const class Board &abrd, class IPool &apool, un
 
     brd = &abrd;
     ca.update(*brd);
-    prepare_packages();
     prepare();
     push();
 }
@@ -59,6 +58,7 @@ void Image3DExporter::load_3d_models()
         load_3d_model(it.first, it.second);
     }
     update_max_package_height();
+    prepare_packages();
     face_renderer.push();
 }
 

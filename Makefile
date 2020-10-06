@@ -651,6 +651,38 @@ SRC_PGM_TEST = \
 SRC_GEN_PKG = \
 	src/gen-pkg/gen-pkg.cpp
 
+SRC_PR_REVIEW = \
+	src/pr-review/pr-review.cpp\
+	src/pr-review/canvas_cairo2.cpp\
+	src/pool-update/pool-update.cpp\
+	src/pool-update/graph.cpp\
+	src/pool-update/pool-update_parametric.cpp\
+	src/canvas/canvas.cpp \
+	src/canvas/appearance.cpp \
+	src/canvas/render.cpp \
+	src/canvas/draw.cpp \
+	src/canvas/text.cpp \
+	src/canvas/hershey_fonts.cpp \
+	src/canvas/image.cpp\
+	src/canvas/selectables.cpp\
+	src/canvas/fragment_cache.cpp\
+	src/canvas/canvas_patch.cpp\
+	src/util/text_data.cpp \
+	3rd_party/polypartition/polypartition.cpp\
+	3rd_party/poly2tri/common/shapes.cpp\
+	3rd_party/poly2tri/sweep/cdt.cpp\
+	3rd_party/poly2tri/sweep/sweep.cpp\
+	3rd_party/poly2tri/sweep/sweep_context.cpp\
+	3rd_party/poly2tri/sweep/advancing_front.cpp\
+	src/package/package_rules_check.cpp\
+	src/symbol/symbol_rules_check.cpp\
+	src/util/step_importer.cpp\
+	src/util/clipper_util.cpp\
+	src/checks/check_util.cpp\
+	src/checks/check_entity.cpp\
+	src/checks/check_unit.cpp\
+	src/checks/check_part.cpp\
+
 SRC_OCE = \
 	src/util/step_importer.cpp\
 	src/export_step/export_step.cpp\
@@ -669,7 +701,7 @@ SRC_OCE_EXPORT = \
 	src/export_step/export_step.cpp\
 	src/util/step_importer.cpp\
 
-SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PGM_TEST) $(SRC_POOL_PRJ_MGR) $(SRC_GEN_PKG))
+SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PGM_TEST) $(SRC_POOL_PRJ_MGR) $(SRC_GEN_PKG) $(SRC_PR_REVIEW))
 
 INC = -Isrc -isystem 3rd_party -I$(BUILDDIR)/gen
 
@@ -711,6 +743,16 @@ else
 	endif
 endif
 
+SRC_SHARED_3D = \
+	src/export_3d_image/export_3d_image.cpp\
+	src/canvas3d/canvas3d_base.cpp\
+	src/canvas3d/canvas_mesh.cpp\
+	src/canvas3d/background.cpp\
+	src/canvas3d/wall.cpp\
+	src/canvas3d/cover.cpp\
+	src/canvas3d/face.cpp\
+	src/canvas/gl_util.cpp\
+
 SRC_SHARED = $(SRC_COMMON) \
 	src/pool/pool_cached.cpp \
 	src/export_pdf/canvas_pdf.cpp \
@@ -751,14 +793,7 @@ SRC_SHARED = $(SRC_COMMON) \
 	src/pool-update/pool-update.cpp \
 	src/pool-update/pool-update_parametric.cpp\
 	src/pool-update/graph.cpp\
-	src/export_3d_image/export_3d_image.cpp\
-	src/canvas3d/canvas3d_base.cpp\
-	src/canvas3d/canvas_mesh.cpp\
-	src/canvas3d/background.cpp\
-	src/canvas3d/wall.cpp\
-	src/canvas3d/cover.cpp\
-	src/canvas3d/face.cpp\
-	src/canvas/gl_util.cpp\
+	$(SRC_SHARED_3D)
 
 SRC_SHARED_GEN = $(SRC_COMMON_GEN)
 
@@ -780,6 +815,7 @@ OBJ_PYTHON       = $(addprefix $(PICOBJDIR)/,$(SRC_PYTHON:.cpp=.o))
 OBJ_SHARED       = $(addprefix $(PICOBJDIR)/,$(SRC_SHARED:.cpp=.o))
 OBJ_SHARED      += $(addprefix $(PICOBJDIR)/,$(SRC_SHARED_GEN:.cpp=.o))
 OBJ_SHARED_OCE   = $(addprefix $(PICOBJDIR)/,$(SRC_OCE_EXPORT:.cpp=.o))
+OBJ_SHARED_3D    = $(addprefix $(PICOBJDIR)/,$(SRC_SHARED_3D:.cpp=.o))
 
 
 OBJ_IMP          = $(addprefix $(OBJDIR)/,$(SRC_IMP:.cpp=.o))
@@ -789,6 +825,7 @@ OBJ_PRJ_UTIL     = $(addprefix $(OBJDIR)/,$(SRC_PRJ_UTIL:.cpp=.o))
 OBJ_POOL_PRJ_MGR = $(addprefix $(OBJDIR)/,$(SRC_POOL_PRJ_MGR:.cpp=.o)) $(OBJ_RES)
 OBJ_PGM_TEST     = $(addprefix $(OBJDIR)/,$(SRC_PGM_TEST:.cpp=.o))
 OBJ_GEN_PKG      = $(addprefix $(OBJDIR)/,$(SRC_GEN_PKG:.cpp=.o))
+OBJ_PR_REVIEW    = $(addprefix $(OBJDIR)/,$(SRC_PR_REVIEW:.cpp=.o))
 
 
 
@@ -860,6 +897,10 @@ $(BUILDDIR)/horizon-pgm-test: $(OBJ_COMMON) $(OBJ_PGM_TEST)
 $(BUILDDIR)/horizon-gen-pkg: $(OBJ_COMMON) $(OBJ_GEN_PKG)
 	$(ECHO) " $@"
 	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4) -o $@
+
+$(BUILDDIR)/horizon-pr-review: $(OBJ_COMMON) $(OBJ_PR_REVIEW) $(OBJ_SHARED_3D)
+	$(ECHO) " $@"
+	$(QUIET)$(CXX) $^ $(LDFLAGS) $(INC) $(CXXFLAGS) $(shell $(PKG_CONFIG) --libs $(LIBS_COMMON) glibmm-2.4 giomm-2.4 cairomm-1.0 libgit2) -lOSMesa $(OCE_LIBDIRS) -lTKernel -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -o $@
 
 $(BUILDDIR)/horizon.so: $(OBJ_PYTHON) $(OBJ_SHARED) $(OBJ_SHARED_OCE)
 	$(ECHO) " $@"
