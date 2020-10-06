@@ -58,9 +58,6 @@ RulesCheckResult check_part(const Part &part)
     }
 
     for (const auto &[uu, mpn] : part.orderable_MPNs) {
-        if (mpn == part.get_MPN()) {
-            r.errors.emplace_back(RulesCheckErrorLevel::WARN, "MPN repeated in orderable MPNs");
-        }
         if (needs_trim(mpn)) {
             r.errors.emplace_back(RulesCheckErrorLevel::FAIL,
                                   "Orderable MPN \"" + mpn + "\" has trailing/leading whitespace");
