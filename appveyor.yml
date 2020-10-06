@@ -12,11 +12,14 @@ before_build:
     - set PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;C:\Program Files (x86)\WiX Toolset v3.11\bin;%PATH%
     - where candle
     - echo %APPVEYOR_REPO_TAG%
+    - bash -c "echo 'Server = https://mirror.selfnet.de/msys2/mingw/i686/' > /etc/pacman.d/mirrorlist.mingw32"
+    - bash -c "echo 'Server = https://mirror.selfnet.de/msys2/mingw/x86_64/' > /etc/pacman.d/mirrorlist.mingw64"
+    - bash -c "echo 'Server = https://mirror.selfnet.de/msys2/msys/$arch/' > /etc/pacman.d/mirrorlist.msys"
     - bash -c "pacman -R mingw-w64-i686-gcc-ada mingw-w64-i686-gcc-objc mingw-w64-x86_64-gcc-ada mingw-w64-x86_64-gcc-objc --noconfirm || true"
-    - bash -c "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz && pacman -U --noconfirm msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
-    - bash -c "pacman -Syu --noconfirm"
+    - bash -c "curl -O http://mirror.selfnet.de/msys2/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz && pacman -U --noconfirm msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
+    - bash -c "pacman -Syu --noconfirm --ignore=pacman-mirrors"
     - taskkill /f /fi "MODULES eq msys-2.0.dll"
-    - bash -c "pacman -Syu --noconfirm"
+    - bash -c "pacman -Syu --noconfirm --ignore=pacman-mirrors"
     - bash -c "pacman -S --noconfirm --needed mingw-w64-%MSYS2_ARCH%-{gcc,gtkmm3,boost,sqlite3,toolchain,zeromq,glm,libgit2,oce,podofo,libzip} zip make"
 
 build_script:
