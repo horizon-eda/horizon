@@ -40,6 +40,19 @@ void ToolPlacePowerSymbol::create_attached()
     sym = &doc.c->get_sheet()->power_symbols.emplace(uu, uu).first->second;
     sym->net = net;
     sym->junction = temp;
+
+    switch (net->power_symbol_style) {
+    case Net::PowerSymbolStyle::ANTENNA:
+    case Net::PowerSymbolStyle::DOT:
+        sym->orientation = Orientation::UP;
+        break;
+
+    case Net::PowerSymbolStyle::GND:
+    case Net::PowerSymbolStyle::EARTH:
+        sym->orientation = Orientation::DOWN;
+        break;
+    }
+
     if (old_sym) {
         sym->mirror = old_sym->mirror;
         sym->orientation = old_sym->orientation;
@@ -118,7 +131,26 @@ bool ToolPlacePowerSymbol::update_attached(const ToolArgs &args)
                     line->to.connect(temp);
                     schsym->component->connections.emplace(UUIDPath<2>(schsym->gate->uuid, pin->uuid), net);
 
-                    temp->position.y -= 1.25_mm;
+                    Coordi offset;
+                    switch (sym->orientation) {
+                    case Orientation::DOWN:
+                        offset.y = -1;
+                        break;
+
+                    case Orientation::UP:
+                        offset.y = 1;
+                        break;
+
+                    case Orientation::RIGHT:
+                        offset.x = 1;
+                        break;
+
+                    case Orientation::LEFT:
+                        offset.x = -1;
+                        break;
+                    }
+
+                    temp->position += offset * 1.25_mm;
                     create_junction(args.coords);
                     create_attached();
                 }
