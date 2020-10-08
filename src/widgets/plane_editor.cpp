@@ -45,12 +45,12 @@ PlaneEditor::PlaneEditor(PlaneSettings *sets, int *priority) : Gtk::Grid(), sett
         b1->set_mode(false);
         box->pack_start(*b1, true, true, 0);
 
-        auto b2 = Gtk::manage(new Gtk::RadioButton("Square"));
+        auto b2 = Gtk::manage(new Gtk::RadioButton("Bevel"));
         b2->set_mode(false);
         b2->join_group(*b1);
         box->pack_start(*b2, true, true, 0);
 
-        auto b3 = Gtk::manage(new Gtk::RadioButton("Miter"));
+        auto b3 = Gtk::manage(new Gtk::RadioButton("Sharp"));
         b3->set_mode(false);
         b3->join_group(*b1);
         box->pack_start(*b3, true, true, 0);
