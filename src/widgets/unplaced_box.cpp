@@ -93,6 +93,7 @@ void UnplacedBox::update(const std::map<UUIDPath<2>, std::string> &items)
             }
             else {
                 it++;
+                row[list_columns.text] = items.at(row[list_columns.uuid]);
                 items_available.emplace(row[list_columns.uuid]);
             }
         }
