@@ -140,33 +140,30 @@ void ImpSchematic::update_highlights()
 bool ImpSchematic::handle_broadcast(const json &j)
 {
     if (!ImpBase::handle_broadcast(j)) {
-        if (core_schematic.tool_is_active())
-            return true;
         std::string op = j.at("op");
         guint32 timestamp = j.value("time", 0);
         if (op == "place-part") {
+            force_end_tool();
             main_window->present(timestamp);
             auto data = std::make_unique<ToolAddPart::ToolDataAddPart>(j.at("part").get<std::string>());
             tool_begin(ToolID::ADD_PART, false, {}, std::move(data));
         }
-        else if (op == "assign-part") {
+        else if (op == "assign-part" && !core->tool_is_active()) {
             main_window->present(timestamp);
             auto data = std::make_unique<ToolAddPart::ToolDataAddPart>(j.at("part").get<std::string>());
             tool_begin(ToolID::ASSIGN_PART, false, {}, std::move(data));
         }
-        else if (op == "highlight" && cross_probing_enabled) {
-            if (!core_schematic.tool_is_active()) {
-                highlights.clear();
-                const json &o = j["objects"];
-                for (auto it = o.cbegin(); it != o.cend(); ++it) {
-                    auto type = static_cast<ObjectType>(it.value().at("type").get<int>());
-                    UUID uu(it.value().at("uuid").get<std::string>());
-                    highlights.emplace(type, uu);
-                }
-                update_highlights();
+        else if (op == "highlight" && cross_probing_enabled && !core->tool_is_active()) {
+            highlights.clear();
+            const json &o = j["objects"];
+            for (auto it = o.cbegin(); it != o.cend(); ++it) {
+                auto type = static_cast<ObjectType>(it.value().at("type").get<int>());
+                UUID uu(it.value().at("uuid").get<std::string>());
+                highlights.emplace(type, uu);
             }
+            update_highlights();
         }
-        else if (op == "backannotate" && !core_schematic.tool_is_active()) {
+        else if (op == "backannotate") {
             auto data = std::make_unique<ToolBackannotateConnectionLines::ToolDataBackannotate>();
             const json &o = j.at("connections");
             for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -181,11 +178,13 @@ bool ImpSchematic::handle_broadcast(const json &j)
                     data->connections.push_back(item);
             }
             if (data->connections.size()) {
+                force_end_tool();
                 main_window->present(timestamp);
                 tool_begin(ToolID::BACKANNOTATE_CONNECTION_LINES, true, {}, std::move(data));
             }
         }
-        else if (op == "edit-meta" && !core_schematic.tool_is_active()) {
+        else if (op == "edit-meta") {
+            force_end_tool();
             main_window->present(timestamp);
             tool_begin(ToolID::EDIT_SCHEMATIC_PROPERTIES);
         }

@@ -142,11 +142,9 @@ void ImpBoard::apply_net_colors()
 bool ImpBoard::handle_broadcast(const json &j)
 {
     if (!ImpBase::handle_broadcast(j)) {
-        if (core_board.tool_is_active())
-            return true;
         std::string op = j.at("op");
         guint32 timestamp = j.value("time", 0);
-        if (op == "highlight" && cross_probing_enabled) {
+        if (op == "highlight" && cross_probing_enabled && !core->tool_is_active()) {
             highlights.clear();
             const json &o = j["objects"];
             for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -157,6 +155,7 @@ bool ImpBoard::handle_broadcast(const json &j)
             update_highlights();
         }
         else if (op == "place") {
+            force_end_tool();
             main_window->present(timestamp);
             std::set<SelectableRef> components;
             const json &o = j["components"];
@@ -170,10 +169,11 @@ bool ImpBoard::handle_broadcast(const json &j)
             tool_begin(ToolID::MAP_PACKAGE, true, components);
         }
         else if (op == "reload-netlist") {
+            force_end_tool();
             main_window->present(timestamp);
             trigger_action(ActionID::RELOAD_NETLIST);
         }
-        else if (op == "reload-netlist-hint") {
+        else if (op == "reload-netlist-hint" && !core->tool_is_active()) {
             reload_netlist_delay_conn = Glib::signal_timeout().connect(
                     [this] {
 #if GTK_CHECK_VERSION(3, 22, 0)

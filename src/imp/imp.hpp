@@ -229,6 +229,7 @@ protected:
     class ActionButton &add_action_button_line();
 
     virtual ToolID get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> &sel) const;
+    void force_end_tool();
 
 private:
     void fix_cursor_pos();
@@ -306,8 +307,6 @@ private:
 
     void handle_pan_action(const ActionConnection &c);
     void handle_zoom_action(const ActionConnection &c);
-
-    void force_end_tool();
 
     std::string get_complete_display_name(const SelectableRef &sr);
 
