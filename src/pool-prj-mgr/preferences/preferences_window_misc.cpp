@@ -269,6 +269,11 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
                                                         preferences, preferences.action_bar.remember));
             gr->add_row(*r);
         }
+        {
+            auto r = Gtk::manage(new PreferencesRowBool("Always show", "Also show action bar if a tool is active",
+                                                        preferences, preferences.action_bar.show_in_tool));
+            gr->add_row(*r);
+        }
     }
 }
 

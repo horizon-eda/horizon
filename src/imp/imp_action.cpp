@@ -27,7 +27,10 @@ ActionButton &ImpBase::add_action_button(ActionToolID action)
     main_window->set_use_action_bar(true);
     auto ab = Gtk::manage(new ActionButton(action, action_connections));
     ab->show();
-    ab->signal_action().connect([this](auto act) { this->trigger_action(act); });
+    ab->signal_action().connect([this](auto act) {
+        force_end_tool();
+        this->trigger_action(act);
+    });
     main_window->action_bar_box->pack_start(*ab, false, false, 0);
     action_buttons.push_back(ab);
     return *ab;
@@ -38,7 +41,10 @@ ActionButtonMenu &ImpBase::add_action_button_menu(const char *icon_name)
     main_window->set_use_action_bar(true);
     auto ab = Gtk::manage(new ActionButtonMenu(icon_name, action_connections));
     ab->show();
-    ab->signal_action().connect([this](auto act) { this->trigger_action(act); });
+    ab->signal_action().connect([this](auto act) {
+        force_end_tool();
+        this->trigger_action(act);
+    });
     main_window->action_bar_box->pack_start(*ab, false, false, 0);
     action_buttons.push_back(ab);
     return *ab;
@@ -296,6 +302,9 @@ void ImpBase::handle_zoom_action(const ActionConnection &c)
 
 void ImpBase::force_end_tool()
 {
+    if (!core->tool_is_active())
+        return;
+
     for (auto i = 0; i < 5; i++) {
         ToolArgs args;
         args.coords = canvas->get_cursor_pos();

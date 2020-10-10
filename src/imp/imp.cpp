@@ -1388,7 +1388,7 @@ void ImpBase::handle_tool_change(ToolID id)
     }
     main_window->tool_bar_set_visible(id != ToolID::NONE);
     tool_bar_clear_actions();
-    main_window->action_bar_revealer->set_reveal_child(id == ToolID::NONE);
+    main_window->action_bar_revealer->set_reveal_child(preferences.action_bar.show_in_tool || id == ToolID::NONE);
 }
 
 void ImpBase::handle_warning_selected(const Coordi &pos)

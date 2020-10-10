@@ -375,6 +375,7 @@ json ActionBarPreferences::serialize() const
     json j;
     j["enable"] = enable;
     j["remember"] = remember;
+    j["show_in_tool"] = show_in_tool;
     return j;
 }
 
@@ -382,6 +383,7 @@ void ActionBarPreferences::load_from_json(const json &j)
 {
     enable = j.value("enable", true);
     remember = j.value("remember", true);
+    show_in_tool = j.value("show_in_tool", true);
 }
 
 json Preferences::serialize() const

@@ -90,6 +90,7 @@ class ActionBarPreferences {
 public:
     bool enable = true;
     bool remember = true;
+    bool show_in_tool = true;
 
     void load_from_json(const json &j);
     json serialize() const;
