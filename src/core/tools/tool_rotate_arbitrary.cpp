@@ -274,18 +274,20 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
             ref = args.coords;
         }
         else if (state == State::SCALE) {
-            double vr = sqrt((ref - origin).mag_sq());
-            double v = sqrt((args.coords - origin).mag_sq());
+            const double vr = sqrt((ref - origin).mag_sq());
+            const double v = sqrt((args.coords - origin).mag_sq());
             scale = v / vr;
             apply_placements_scale(scale);
         }
         else if (state == State::ROTATE) {
-            auto rref = args.coords;
+            const auto rref = args.coords;
             annotation->clear();
             annotation->draw_line(origin, rref, ColorP::FROM_LAYER, 2);
 
-            auto v = rref - origin;
-            double angle = atan2(v.y, v.x);
+            const auto v = rref - origin;
+            const auto v0 = ref - origin;
+            const double angle0 = atan2(v0.y, v0.x);
+            const double angle = atan2(v.y, v.x) - angle0;
             iangle = ((angle / (2 * M_PI)) * 65536);
             iangle += 65536 * 2;
             iangle %= 65536;
@@ -301,9 +303,12 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
         case InToolActionID::LMB:
             if (tool_id == ToolID::ROTATE_ARBITRARY) {
                 if (state == State::ORIGIN) {
-                    state = State::ROTATE;
+                    state = State::REF;
+                }
+                else if (state == State::REF) {
                     imp->set_snap_filter_from_selection(selection);
                     update_tip();
+                    state = State::ROTATE;
                 }
                 else {
                     return ToolResponse::commit();
