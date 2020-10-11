@@ -351,7 +351,8 @@ void Buffer::load(std::set<SelectableRef> selection)
                         for (auto &it_ft : {it_line.second.from, it_line.second.to}) {
                             if (it_ft.is_pin()) {
                                 for (const auto &it_sym : symbols) {
-                                    if (it_sym.second.component == comp && it_ft.symbol == &it_sym.second) {
+                                    if (it_sym.second.component == comp && it_sym.second.gate->uuid == x.first.at(0)
+                                        && it_ft.symbol == &it_sym.second) {
                                         return false;
                                     }
                                 }
