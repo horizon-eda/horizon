@@ -17,7 +17,7 @@ PreferencesRow::PreferencesRow(const std::string &title, const std::string &subt
 {
     set_valign(Gtk::ALIGN_CENTER);
     property_margin() = 10;
-    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 0));
+    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 2));
 
     {
         auto la = Gtk::manage(new Gtk::Label);
@@ -119,6 +119,7 @@ PreferencesGroup::PreferencesGroup(const std::string &title) : Gtk::Box(Gtk::ORI
     la->set_markup("<b>" + Glib::Markup::escape_text(title) + "</b>");
     la->show();
     la->set_xalign(0);
+    la->set_margin_start(2);
     pack_start(*la, false, false, 0);
 
     auto sc = Gtk::manage(new Gtk::ScrolledWindow);
