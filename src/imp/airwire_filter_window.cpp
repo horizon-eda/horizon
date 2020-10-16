@@ -355,11 +355,13 @@ void AirwireFilterWindow::load_from_json(const json &j)
 {
     for (const auto &[key, value] : j.at("airwires_visible").items()) {
         const UUID net = key;
-        airwires_visible[net] = value;
+        if (block.nets.count(net))
+            airwires_visible[net] = value;
     }
     for (const auto &[key, value] : j.at("net_colors").items()) {
         const UUID net = key;
-        net_colors[net] = colori_from_json(value);
+        if (block.nets.count(net))
+            net_colors[net] = colori_from_json(value);
     }
     for (auto &it : store->children()) {
         Gtk::TreeModel::Row row = *it;
