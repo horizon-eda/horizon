@@ -46,7 +46,7 @@ RecentItemBox::RecentItemBox(const std::string &name, const std::string &pa, con
     }
 
     Glib::signal_timeout().connect_seconds(sigc::bind_return(sigc::mem_fun(*this, &RecentItemBox::update_time), true),
-                                           1);
+                                           30);
     add_events(Gdk::BUTTON_PRESS_MASK);
     signal_button_press_event().connect([this](GdkEventButton *ev) {
         if (gdk_event_triggers_context_menu((GdkEvent *)ev)) {
