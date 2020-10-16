@@ -4,11 +4,7 @@
 #include "preferences/preferences_provider.hpp"
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
-#ifdef G_OS_WIN32
-#undef ERROR
-#undef DELETE
-#undef DUPLICATE
-#endif
+#include "util/win32_undef.hpp"
 #include "preferences/preferences.hpp"
 #include <list>
 #include <iomanip>

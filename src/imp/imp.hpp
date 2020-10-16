@@ -19,12 +19,7 @@
 #include "grid_controller.hpp"
 #include "util/action_label.hpp"
 #include <optional>
-
-#ifdef G_OS_WIN32
-#undef DELETE
-#undef DUPLICATE
-#undef ERROR
-#endif
+#include "util/win32_undef.hpp"
 
 namespace horizon {
 

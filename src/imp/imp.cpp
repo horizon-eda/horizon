@@ -31,6 +31,11 @@
 #include "widgets/action_button.hpp"
 #include "in_tool_action_catalog.hpp"
 
+#ifdef G_OS_WIN32
+#include <winsock2.h>
+#endif
+#include "util/win32_undef.hpp"
+
 namespace horizon {
 
 std::unique_ptr<Pool> make_pool(const PoolParams &p)

@@ -13,6 +13,11 @@
 #include "preferences/preferences_provider.hpp"
 #include "widgets/about_dialog.hpp"
 
+#ifdef G_OS_WIN32
+#include <winsock2.h>
+#include "util/win32_undef.hpp"
+#endif
+
 namespace horizon {
 
 PoolProjectManagerApplication::PoolProjectManagerApplication()

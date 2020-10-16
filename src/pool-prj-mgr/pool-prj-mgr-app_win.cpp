@@ -27,6 +27,11 @@
 #include "prj-mgr/pool_cache_monitor.hpp"
 #include "pool/pool_cached.hpp"
 
+#ifdef G_OS_WIN32
+#include <winsock2.h>
+#endif
+#include "util/win32_undef.hpp"
+
 namespace horizon {
 PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject,
                                                          const Glib::RefPtr<Gtk::Builder> &refBuilder,

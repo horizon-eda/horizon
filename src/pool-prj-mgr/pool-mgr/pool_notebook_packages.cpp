@@ -8,10 +8,7 @@
 #include "widgets/pool_browser_package.hpp"
 #include "pool_remote_box.hpp"
 #include "widgets/package_info_box.hpp"
-
-#ifdef G_OS_WIN32
-#undef ERROR
-#endif
+#include "util/win32_undef.hpp"
 #include "widgets/preview_canvas.hpp"
 
 namespace horizon {
