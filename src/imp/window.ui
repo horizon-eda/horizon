@@ -713,6 +713,7 @@
                     </child>
                   </object>
                   <packing>
+                    <property name="pass_through">True</property>
                     <property name="index">1</property>
                   </packing>
                 </child>
