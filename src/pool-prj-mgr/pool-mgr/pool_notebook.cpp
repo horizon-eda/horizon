@@ -23,10 +23,7 @@
 #include <thread>
 #include "nlohmann/json.hpp"
 #include "widgets/where_used_box.hpp"
-
-#ifdef G_OS_WIN32
-#undef ERROR
-#endif
+#include "util/win32_undef.hpp"
 
 namespace horizon {
 

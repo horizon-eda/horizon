@@ -13,6 +13,7 @@
 #include "util/util.hpp"
 #include "github_login_window.hpp"
 #include <iomanip>
+#include "util/win32_undef.hpp"
 
 namespace horizon {
 

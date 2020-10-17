@@ -3,11 +3,7 @@
 #include <memory>
 #include "util/uuid.hpp"
 #include <zmq.hpp>
-#ifdef G_OS_WIN32
-#undef ERROR
-#undef DELETE
-#undef DUPLICATE
-#endif
+#include "util/win32_undef.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "util/editor_process.hpp"
 #include "util/window_state_store.hpp"

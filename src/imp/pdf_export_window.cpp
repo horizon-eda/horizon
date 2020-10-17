@@ -9,11 +9,7 @@
 #include "widgets/spin_button_dim.hpp"
 #include "common/layer_provider.hpp"
 #include <podofo/podofo.h>
-#ifdef G_OS_WIN32
-#undef DELETE
-#undef DUPLICATE
-#undef ERROR
-#endif
+#include "util/win32_undef.hpp"
 #include <thread>
 
 namespace horizon {

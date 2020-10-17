@@ -4,12 +4,9 @@
 #include <vector>
 #include "util/uuid.hpp"
 #include <set>
+#include "util/win32_undef.hpp"
 
 namespace horizon {
-
-#ifdef G_OS_WIN32
-#undef ERROR
-#endif
 
 enum class PoolUpdateStatus { INFO, FILE, FILE_ERROR, ERROR, DONE };
 typedef std::function<void(PoolUpdateStatus, std::string, std::string)> pool_update_cb_t;

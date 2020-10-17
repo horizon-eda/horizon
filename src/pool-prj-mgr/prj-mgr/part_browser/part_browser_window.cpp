@@ -5,11 +5,7 @@
 #include "widgets/pool_browser_parametric.hpp"
 #include "util/stock_info_provider_partinfo.hpp"
 #include "preferences/preferences_provider.hpp"
-#ifdef G_OS_WIN32
-#undef ERROR
-#undef DELETE
-#undef DUPLICATE
-#endif
+#include "util/win32_undef.hpp"
 #include "preferences/preferences.hpp"
 #include "util/gtk_util.hpp"
 #include "pool-prj-mgr/prj-mgr/pool_cache_status.hpp"
