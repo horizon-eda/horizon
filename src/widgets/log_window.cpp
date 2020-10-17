@@ -2,9 +2,8 @@
 #include "log_view.hpp"
 
 namespace horizon {
-LogWindow::LogWindow(Gtk::Window *p) : Gtk::Window()
+LogWindow::LogWindow() : Gtk::Window()
 {
-    set_transient_for(*p);
     set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
     auto hb = Gtk::manage(new Gtk::HeaderBar());
     hb->set_show_close_button(true);

@@ -12,6 +12,9 @@
 #include "preferences/preferences_window.hpp"
 #include "preferences/preferences_provider.hpp"
 #include "widgets/about_dialog.hpp"
+#include "widgets/log_window.hpp"
+#include "logger/logger.hpp"
+#include "widgets/log_view.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -113,9 +116,11 @@ void PoolProjectManagerApplication::on_startup()
     curl_global_init(CURL_GLOBAL_ALL);
 
     add_action("preferences", [this] { show_preferences_window(); });
+    add_action("logger", [this] { show_log_window(); });
     add_action("quit", sigc::mem_fun(*this, &PoolProjectManagerApplication::on_action_quit));
     add_action("new_window", sigc::mem_fun(*this, &PoolProjectManagerApplication::on_action_new_window));
     add_action("about", sigc::mem_fun(*this, &PoolProjectManagerApplication::on_action_about));
+    add_action("view_log", [this] { show_log_window(); });
     set_accel_for_action("app.quit", "<Ctrl>Q");
 
     recent_items.clear();
@@ -141,6 +146,10 @@ void PoolProjectManagerApplication::on_startup()
         send_json(0, j);
     });
 
+    log_window = new LogWindow();
+    log_dispatcher.set_handler([this](const auto &it) { log_window->get_view()->push_log(it); });
+    Logger::get().set_log_handler([this](const Logger::Item &it) { log_dispatcher.log(it); });
+
     Gtk::IconTheme::get_default()->add_resource_path("/org/horizon-eda/horizon/icons");
     Gtk::Window::set_default_icon_name("horizon-eda");
 
@@ -164,6 +173,12 @@ PreferencesWindow *PoolProjectManagerApplication::show_preferences_window(guint3
     }
     preferences_window->present(timestamp);
     return preferences_window;
+}
+
+LogWindow *PoolProjectManagerApplication::show_log_window(guint32 timestamp)
+{
+    log_window->present(timestamp);
+    return log_window;
 }
 
 void PoolProjectManagerApplication::on_shutdown()

@@ -8,6 +8,7 @@
 #include <glibmm/datetime.h>
 #include "util/win32_undef.hpp"
 #include "preferences/preferences.hpp"
+#include "logger/log_dispatcher.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -35,6 +36,7 @@ public:
                    guint32 timestamp = 0);
 
     class PreferencesWindow *show_preferences_window(guint32 timestamp = 0);
+    class LogWindow *show_log_window(guint32 timestamp = 0);
 
     typedef sigc::signal<void, UUID> type_signal_pool_updated;
     type_signal_pool_updated signal_pool_updated()
@@ -61,6 +63,9 @@ private:
     void load_from_config(const std::string &config_filename);
     Preferences preferences;
     class PreferencesWindow *preferences_window = nullptr;
+
+    LogDispatcher log_dispatcher;
+    class LogWindow *log_window = nullptr;
 
     type_signal_pool_updated s_signal_pool_updated;
 

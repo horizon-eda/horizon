@@ -635,7 +635,8 @@ void ImpBase::run(int argc, char *argv[])
             [this](ActionID action_id, ToolID tool_id) { trigger_action(std::make_pair(action_id, tool_id)); });
 
 
-    log_window = new LogWindow(main_window);
+    log_window = new LogWindow();
+    log_window->set_transient_for(*main_window);
     Logger::get().set_log_handler([this](const Logger::Item &it) { log_window->get_view()->push_log(it); });
 
     main_window->add_action("view_log", [this] { log_window->present(); });

@@ -5,7 +5,7 @@ namespace horizon {
 
 class LogWindow : public Gtk::Window {
 public:
-    LogWindow(Gtk::Window *p);
+    LogWindow();
     class LogView *get_view()
     {
         return view;
