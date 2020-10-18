@@ -7,6 +7,7 @@
 #include "pool/part.hpp"
 #include "util/util.hpp"
 #include "util/str_util.hpp"
+#include "util/gtk_util.hpp"
 #include "pool/ipool.hpp"
 #include "nlohmann/json.hpp"
 #include "widgets/color_box.hpp"
@@ -48,6 +49,14 @@ public:
     {
         return check_unit(unit);
     }
+    const FileVersion &get_version() const override
+    {
+        return unit.version;
+    }
+    ObjectType get_type() const override
+    {
+        return ObjectType::UNIT;
+    }
     Unit unit;
 };
 
@@ -75,6 +84,14 @@ public:
     {
         return check_entity(entity);
     }
+    const FileVersion &get_version() const override
+    {
+        return entity.version;
+    }
+    ObjectType get_type() const override
+    {
+        return ObjectType::ENTITY;
+    }
     Entity entity;
 };
 
@@ -101,6 +118,14 @@ public:
     {
         return check_part(part);
     }
+    const FileVersion &get_version() const override
+    {
+        return part.version;
+    }
+    ObjectType get_type() const override
+    {
+        return ObjectType::PART;
+    }
     Part part;
 };
 
@@ -114,8 +139,6 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
     set_titlebar(*hb);
 
     save_button = Gtk::manage(new Gtk::Button());
-    if (read_only)
-        save_button->set_sensitive(false);
     hb->pack_start(*save_button);
 
     check_button = Gtk::manage(new Gtk::MenuButton());
@@ -170,9 +193,34 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
     } break;
     default:;
     }
+
+    auto box = Gtk::manage(new Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL, 0));
+    add(*box);
+    box->show();
+
+    {
+        const auto &version = store->get_version();
+        if (version.get_app() != version.get_file()) {
+            info_bar = Gtk::manage(new Gtk::InfoBar());
+            auto label = Gtk::manage(new Gtk::Label);
+            label->set_line_wrap(true);
+            dynamic_cast<Gtk::Container &>(*info_bar->get_content_area()).add(*label);
+            label->show();
+            label->set_text(version.get_message(store->get_type()));
+            if (version.get_app() < version.get_file()) {
+                read_only = true;
+            }
+            info_bar->show();
+            box->pack_start(*info_bar, false, false, 0);
+        }
+    }
+
     editor->show();
-    add(*editor);
+    box->pack_start(*editor, true, true, 0);
     editor->unreference();
+
+    if (read_only)
+        save_button->set_sensitive(false);
 
     if (is_temp) {
         Gio::File::create_for_path(filename)->remove();
@@ -304,6 +352,8 @@ void EditorWindow::save()
             need_update = true;
         }
     }
+    if (info_bar)
+        info_bar_hide(info_bar);
 }
 
 std::string EditorWindow::fix_filename(std::string s)

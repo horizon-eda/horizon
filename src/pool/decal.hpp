@@ -8,6 +8,7 @@
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
 #include "common/object_provider.hpp"
+#include "util/file_version.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -30,6 +31,8 @@ public:
     std::map<UUID, Line> lines;
     std::map<UUID, Arc> arcs;
     std::map<UUID, Text> texts;
+
+    FileVersion version;
 
     UUID get_uuid() const;
     std::pair<Coordi, Coordi> get_bbox() const;

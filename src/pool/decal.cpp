@@ -6,10 +6,12 @@
 
 namespace horizon {
 
+static const unsigned int app_version = 0;
 
-Decal::Decal(const UUID &uu, const json &j) : uuid(uu), name(j.value("name", ""))
+Decal::Decal(const UUID &uu, const json &j) : uuid(uu), name(j.value("name", "")), version(app_version, j)
 {
     check_object_type(j, ObjectType::DECAL);
+    version.check(ObjectType::DECAL, name, uuid);
     if (j.count("junctions")) {
         const json &o = j["junctions"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -48,7 +50,7 @@ Decal::Decal(const UUID &uu, const json &j) : uuid(uu), name(j.value("name", "")
     map_erase_if(polygons, [](const auto &a) { return a.second.vertices.size() == 0; });
 }
 
-Decal::Decal(const UUID &uu) : uuid(uu)
+Decal::Decal(const UUID &uu) : uuid(uu), version(app_version)
 {
 }
 
@@ -80,7 +82,7 @@ void Decal::update_refs()
 
 Decal::Decal(const Decal &fr)
     : uuid(fr.uuid), name(fr.name), junctions(fr.junctions), polygons(fr.polygons), lines(fr.lines), arcs(fr.arcs),
-      texts(fr.texts)
+      texts(fr.texts), version(fr.version)
 {
     update_refs();
 }
@@ -94,6 +96,7 @@ void Decal::operator=(Decal const &fr)
     arcs = fr.arcs;
     texts = fr.texts;
     polygons = fr.polygons;
+    version = fr.version;
     update_refs();
 }
 
@@ -131,6 +134,7 @@ std::pair<Coordi, Coordi> Decal::get_bbox() const
 json Decal::serialize() const
 {
     json j;
+    version.serialize(j);
     j["type"] = "decal";
     j["name"] = name;
     j["uuid"] = (std::string)uuid;

@@ -69,6 +69,8 @@ public:
 
     void disable_grid_options();
 
+    void set_version_info(const std::string &s);
+
     // virtual ~MainWindow();
 private:
     Gtk::Box *gl_container = nullptr;
@@ -101,6 +103,9 @@ private:
     Gtk::Revealer *grid_options_revealer = nullptr;
 
     Gtk::Stack *grid_box_stack = nullptr;
+
+    Gtk::InfoBar *version_info_bar = nullptr;
+    Gtk::Label *version_label = nullptr;
 
     bool tool_bar_use_actions = false;
 };

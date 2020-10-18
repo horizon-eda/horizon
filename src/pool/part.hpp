@@ -6,6 +6,7 @@
 #include "entity.hpp"
 #include "package.hpp"
 #include "nlohmann/json_fwd.hpp"
+#include "util/file_version.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -57,6 +58,9 @@ public:
     std::map<std::string, std::string> parametric;
 
     std::map<UUID, PadMapItem> pad_map;
+
+    FileVersion version;
+
     json serialize() const;
 };
 } // namespace horizon

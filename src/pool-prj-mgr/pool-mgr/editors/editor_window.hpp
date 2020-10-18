@@ -15,6 +15,8 @@ public:
     virtual void save_as(const std::string &fn) = 0;
     virtual std::string get_name() const = 0;
     virtual const UUID &get_uuid() const = 0;
+    virtual const class FileVersion &get_version() const = 0;
+    virtual ObjectType get_type() const = 0;
     std::string filename;
 
     virtual RulesCheckResult run_checks() const = 0;
@@ -60,6 +62,7 @@ private:
     class ColorBox *check_color_box = nullptr;
     Gtk::Popover *check_popover = nullptr;
     Gtk::Label *check_label = nullptr;
+    Gtk::InfoBar *info_bar = nullptr;
     class IPool &pool;
     class PoolParametric *pool_parametric;
     bool need_update = false;

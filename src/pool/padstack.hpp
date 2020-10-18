@@ -13,6 +13,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include "util/file_version.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -59,6 +60,9 @@ public:
     ParameterSet parameter_set;
     std::set<ParameterID> parameters_required;
     MyParameterProgram parameter_program;
+
+    FileVersion version;
+
     std::pair<bool, std::string> apply_parameter_set(const ParameterSet &ps);
 
     UUID get_uuid() const;

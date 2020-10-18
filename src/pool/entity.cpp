@@ -5,12 +5,14 @@
 
 namespace horizon {
 
+static const unsigned int app_version = 0;
+
 Entity::Entity(const UUID &uu, const json &j, IPool &pool)
     : uuid(uu), name(j.at("name").get<std::string>()), manufacturer(j.value("manufacturer", "")),
-      prefix(j.at("prefix").get<std::string>())
-
+      prefix(j.at("prefix").get<std::string>()), version(app_version, j)
 {
     check_object_type(j, ObjectType::ENTITY);
+    version.check(ObjectType::ENTITY, name, uuid);
     {
         const json &o = j.at("gates");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -24,7 +26,7 @@ Entity::Entity(const UUID &uu, const json &j, IPool &pool)
     }
 }
 
-Entity::Entity(const UUID &uu) : uuid(uu)
+Entity::Entity(const UUID &uu) : uuid(uu), version(app_version)
 {
 }
 
@@ -37,6 +39,7 @@ Entity Entity::new_from_file(const std::string &filename, IPool &pool)
 json Entity::serialize() const
 {
     json j;
+    version.serialize(j);
     j["type"] = "entity";
     j["name"] = name;
     j["manufacturer"] = manufacturer;

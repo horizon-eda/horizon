@@ -45,6 +45,11 @@ public:
         return ObjectType::PACKAGE;
     }
 
+    const FileVersion &get_version() const override
+    {
+        return package.version;
+    }
+
 private:
     std::map<UUID, Junction> *get_junction_map() override;
     std::map<UUID, Line> *get_line_map() override;

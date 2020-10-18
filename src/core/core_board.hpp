@@ -68,6 +68,11 @@ public:
         return ObjectType::BOARD;
     }
 
+    const FileVersion &get_version() const override
+    {
+        return brd.version;
+    }
+
 private:
     ViaPadstackProvider via_padstack_provider;
 

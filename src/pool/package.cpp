@@ -57,11 +57,14 @@ json Package::Model::serialize() const
     return j;
 }
 
+static const unsigned int app_version = 0;
+
 Package::Package(const UUID &uu, const json &j, IPool &pool)
     : uuid(uu), name(j.at("name").get<std::string>()), manufacturer(j.value("manufacturer", "")),
-      parameter_program(this, j.value("parameter_program", ""))
+      parameter_program(this, j.value("parameter_program", "")), version(app_version, j)
 {
     check_object_type(j, ObjectType::PACKAGE);
+    version.check(ObjectType::PACKAGE, name, uuid);
     {
         const json &o = j.at("junctions");
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -173,7 +176,7 @@ Package Package::new_from_file(const std::string &filename, IPool &pool)
     return Package(UUID(j.at("uuid").get<std::string>()), j, pool);
 }
 
-Package::Package(const UUID &uu) : uuid(uu), parameter_program(this, "")
+Package::Package(const UUID &uu) : uuid(uu), parameter_program(this, ""), version(app_version)
 {
 }
 
@@ -192,7 +195,7 @@ Package::Package(const Package &pkg)
       lines(pkg.lines), arcs(pkg.arcs), texts(pkg.texts), pads(pkg.pads), polygons(pkg.polygons),
       keepouts(pkg.keepouts), dimensions(pkg.dimensions), pictures(pkg.pictures), parameter_set(pkg.parameter_set),
       parameter_program(pkg.parameter_program), models(pkg.models), default_model(pkg.default_model),
-      alternate_for(pkg.alternate_for), warnings(pkg.warnings)
+      alternate_for(pkg.alternate_for), version(pkg.version), warnings(pkg.warnings)
 {
     update_refs();
 }
@@ -217,6 +220,7 @@ void Package::operator=(Package const &pkg)
     models = pkg.models;
     default_model = pkg.default_model;
     alternate_for = pkg.alternate_for;
+    version = pkg.version;
     warnings = pkg.warnings;
     update_refs();
 }
@@ -385,6 +389,7 @@ const std::map<int, Layer> &Package::get_layers() const
 json Package::serialize() const
 {
     json j;
+    version.serialize(j);
     j["uuid"] = (std::string)uuid;
     j["type"] = "package";
     j["name"] = name;

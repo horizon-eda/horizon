@@ -59,6 +59,11 @@ MainWindow::MainWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     GET_WIDGET(tool_bar_action_tip_label);
     GET_WIDGET(tool_bar_actions_box);
 
+    GET_WIDGET(version_info_bar);
+    GET_WIDGET(version_label);
+
+    set_version_info("");
+
     grid_options_button->signal_clicked().connect([this] {
         const auto a = grid_options_button->get_active();
         grid_options_revealer->set_reveal_child(a);
@@ -244,6 +249,17 @@ void MainWindow::tool_bar_append_action(Gtk::Widget &w)
 {
     w.show();
     tool_bar_actions_box->pack_start(w, false, false, 0);
+}
+
+void MainWindow::set_version_info(const std::string &s)
+{
+    if (s.size()) {
+        info_bar_show(version_info_bar);
+        version_label->set_text(s);
+    }
+    else {
+        info_bar_hide(version_info_bar);
+    }
 }
 
 MainWindow *MainWindow::create()

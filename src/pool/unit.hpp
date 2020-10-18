@@ -6,6 +6,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include "util/file_version.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -67,6 +68,8 @@ public:
     std::string name;
     std::string manufacturer;
     std::map<UUID, Pin> pins;
+    FileVersion version;
+
     json serialize() const;
     UUID get_uuid() const;
 };

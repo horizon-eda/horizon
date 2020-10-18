@@ -13,6 +13,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include "util/file_version.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -42,6 +43,8 @@ public:
 
     int64_t width = 297_mm;
     int64_t height = 210_mm;
+
+    FileVersion version;
 
 private:
     void update_refs();

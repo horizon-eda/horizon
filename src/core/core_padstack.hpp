@@ -34,6 +34,11 @@ public:
         return ObjectType::PADSTACK;
     }
 
+    const FileVersion &get_version() const override
+    {
+        return padstack.version;
+    }
+
 private:
     std::map<UUID, Polygon> *get_polygon_map() override;
     std::map<UUID, Hole> *get_hole_map() override;

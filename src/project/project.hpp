@@ -3,6 +3,7 @@
 #include "nlohmann/json_fwd.hpp"
 #include <map>
 #include <deque>
+#include "util/file_version.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -41,6 +42,8 @@ public:
     std::string pictures_directory;
     std::string board_filename;
     std::string pool_cache_directory;
+
+    FileVersion version;
 
     json serialize() const;
 

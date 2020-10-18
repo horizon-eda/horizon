@@ -329,6 +329,7 @@ const std::map<ObjectType, ObjectDescription> object_descriptions = {
                   {ObjectProperty::ID::SCALE, {ObjectProperty::Type::SCALE, "Scale", 5}},
 
           }}},
+        {ObjectType::PROJECT, {"Project", "Projects", {}}},
 
 };
 } // namespace horizon

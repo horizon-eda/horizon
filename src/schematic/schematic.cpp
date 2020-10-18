@@ -47,9 +47,12 @@ json Schematic::Annotation::serialize() const
     return j;
 }
 
+static const unsigned int app_version = 0;
+
 Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, IPool &pool)
     : uuid(uu), block(&iblock), name(j.at("name").get<std::string>()),
-      group_tag_visible(j.value("group_tag_visible", false)), annotation(j.value("annotation", json()))
+      group_tag_visible(j.value("group_tag_visible", false)), annotation(j.value("annotation", json())),
+      version(app_version, j)
 {
     {
         const json &o = j["sheets"];
@@ -85,7 +88,7 @@ Schematic Schematic::new_from_file(const std::string &filename, Block &block, IP
     return Schematic(UUID(j.at("uuid").get<std::string>()), j, block, pool);
 }
 
-Schematic::Schematic(const UUID &uu, Block &bl) : uuid(uu), block(&bl)
+Schematic::Schematic(const UUID &uu, Block &bl) : uuid(uu), block(&bl), version(app_version)
 {
     auto suu = UUID::random();
     sheets.emplace(suu, suu);
@@ -1000,7 +1003,8 @@ Glib::RefPtr<Glib::Regex> Schematic::get_sheetref_regex()
 
 Schematic::Schematic(const Schematic &sch)
     : uuid(sch.uuid), block(sch.block), name(sch.name), sheets(sch.sheets), rules(sch.rules),
-      group_tag_visible(sch.group_tag_visible), annotation(sch.annotation), pdf_export_settings(sch.pdf_export_settings)
+      group_tag_visible(sch.group_tag_visible), annotation(sch.annotation),
+      pdf_export_settings(sch.pdf_export_settings), version(sch.version)
 {
     update_refs();
 }
@@ -1062,6 +1066,7 @@ void Schematic::update_refs()
 json Schematic::serialize() const
 {
     json j;
+    version.serialize(j);
     j["type"] = "schematic_block";
     j["uuid"] = (std::string)uuid;
     j["block"] = (std::string)block->uuid;

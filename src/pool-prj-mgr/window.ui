@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.36.0 -->
+<!-- Generated with glade 3.38.1 -->
 <interface>
   <requires lib="gtk+" version="3.18"/>
   <object class="GtkBox" id="box_git">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
+    <property name="can-focus">False</property>
     <property name="orientation">vertical</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_left">10</property>
-        <property name="margin_right">10</property>
-        <property name="margin_top">8</property>
-        <property name="margin_bottom">8</property>
+        <property name="can-focus">False</property>
+        <property name="margin-left">10</property>
+        <property name="margin-right">10</property>
+        <property name="margin-top">8</property>
+        <property name="margin-bottom">8</property>
         <property name="spacing">8</property>
         <child>
           <object class="GtkButton" id="button_git_refresh">
             <property name="label" translatable="yes">Refresh</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -31,9 +31,9 @@
         <child>
           <object class="GtkLabel" id="label_git_info">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="label" translatable="yes">label</property>
-            <property name="width_chars">20</property>
+            <property name="width-chars">20</property>
             <property name="xalign">0</property>
           </object>
           <packing>
@@ -46,8 +46,8 @@
           <object class="GtkButton" id="button_git_pr">
             <property name="label" translatable="yes">Test PR</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -58,13 +58,13 @@
         <child>
           <object class="GtkBox" id="box_git_back_to_master">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <child>
               <object class="GtkButton" id="button_git_back_to_master">
                 <property name="label" translatable="yes">Back to master</property>
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -76,8 +76,8 @@
               <object class="GtkButton" id="button_git_back_to_master_delete">
                 <property name="label" translatable="yes">and delete PR branches</property>
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -105,7 +105,7 @@
     <child>
       <object class="GtkSeparator">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -116,28 +116,28 @@
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_left">20</property>
-        <property name="margin_right">20</property>
-        <property name="margin_top">20</property>
-        <property name="margin_bottom">20</property>
+        <property name="can-focus">False</property>
+        <property name="margin-left">20</property>
+        <property name="margin-right">20</property>
+        <property name="margin-top">20</property>
+        <property name="margin-bottom">20</property>
         <property name="spacing">20</property>
         <property name="homogeneous">True</property>
         <child>
           <object class="GtkBox" id="git_diff_box">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
             <property name="spacing">5</property>
             <child>
               <object class="GtkBox" id="box3">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Diff to master</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
@@ -153,9 +153,9 @@
                   <object class="GtkCheckButton" id="checkbutton_git_diff_show_deleted">
                     <property name="label" translatable="yes">Show deleted</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="draw_indicator">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="draw-indicator">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -167,10 +167,10 @@
                   <object class="GtkCheckButton" id="checkbutton_git_diff_show_modified">
                     <property name="label" translatable="yes">Show modified</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
                     <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
+                    <property name="draw-indicator">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -188,13 +188,13 @@
             <child>
               <object class="GtkScrolledWindow">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="hscrollbar_policy">never</property>
-                <property name="shadow_type">in</property>
+                <property name="can-focus">True</property>
+                <property name="hscrollbar-policy">never</property>
+                <property name="shadow-type">in</property>
                 <child>
                   <object class="GtkTreeView" id="git_diff_treeview">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can-focus">True</property>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection"/>
                     </child>
@@ -217,18 +217,18 @@
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
             <property name="spacing">5</property>
             <child>
               <object class="GtkBox" id="box5">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Status</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
@@ -245,8 +245,8 @@
                     <property name="label" translatable="yes">git add with dependencies</property>
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -267,13 +267,13 @@
             <child>
               <object class="GtkScrolledWindow">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="hscrollbar_policy">never</property>
-                <property name="shadow_type">in</property>
+                <property name="can-focus">True</property>
+                <property name="hscrollbar-policy">never</property>
+                <property name="shadow-type">in</property>
                 <child>
                   <object class="GtkTreeView" id="git_status_treeview">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can-focus">True</property>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection"/>
                     </child>
@@ -310,24 +310,24 @@
   </object>
   <object class="GtkBox" id="box_remote">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
+    <property name="can-focus">False</property>
     <property name="orientation">vertical</property>
     <child>
       <object class="GtkBox">
-        <property name="width_request">-1</property>
+        <property name="width-request">-1</property>
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_start">10</property>
-        <property name="margin_end">10</property>
-        <property name="margin_top">10</property>
-        <property name="margin_bottom">10</property>
+        <property name="can-focus">False</property>
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
         <property name="spacing">8</property>
         <child>
           <object class="GtkButton" id="button_upgrade_pool">
             <property name="label" translatable="yes">Upgrade pool</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -339,8 +339,8 @@
           <object class="GtkButton" id="button_do_create_pr">
             <property name="label" translatable="yes">Create pull request</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -352,8 +352,8 @@
           <object class="GtkButton" id="pr_update_button">
             <property name="label" translatable="yes">Update PR #42</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -365,8 +365,8 @@
           <object class="GtkButton" id="pr_update_cancel_button">
             <property name="label" translatable="yes">Cancel</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -378,13 +378,13 @@
           <object class="GtkButton" id="remote_login_button">
             <property name="label" translatable="yes">Log in</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="pack_type">end</property>
+            <property name="pack-type">end</property>
             <property name="position">4</property>
           </packing>
         </child>
@@ -392,26 +392,26 @@
           <object class="GtkButton" id="remote_logout_button">
             <property name="label" translatable="yes">Log out</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="pack_type">end</property>
+            <property name="pack-type">end</property>
             <property name="position">5</property>
           </packing>
         </child>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_right">8</property>
+            <property name="can-focus">False</property>
+            <property name="margin-right">8</property>
             <property name="spacing">4</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="label" translatable="yes">GitHub repo:</property>
                 <style>
                   <class name="dim-label"/>
@@ -426,9 +426,9 @@
             <child>
               <object class="GtkLabel" id="remote_gh_repo_link_label">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="label" translatable="yes">label</property>
-                <property name="track_visited_links">False</property>
+                <property name="track-visited-links">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -446,33 +446,33 @@
         <child>
           <object class="GtkLabel" id="remote_gh_signed_in_label">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_right">8</property>
+            <property name="can-focus">False</property>
+            <property name="margin-right">8</property>
             <property name="label" translatable="yes">not logged in</property>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="pack_type">end</property>
+            <property name="pack-type">end</property>
             <property name="position">7</property>
           </packing>
         </child>
         <child>
           <object class="GtkRevealer" id="upgrade_revealer">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="transition_type">crossfade</property>
+            <property name="can-focus">False</property>
+            <property name="transition-type">crossfade</property>
             <child>
               <object class="GtkBox">
-                <property name="width_request">200</property>
+                <property name="width-request">200</property>
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="halign">center</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel" id="upgrade_label">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Cloning...</property>
                     <property name="wrap">True</property>
                     <property name="selectable">True</property>
@@ -487,7 +487,7 @@
                 <child>
                   <object class="GtkSpinner" id="upgrade_spinner">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -514,7 +514,7 @@
     <child>
       <object class="GtkSeparator">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -525,25 +525,25 @@
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <child>
           <object class="GtkBox" id="box2">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
+                <property name="can-focus">False</property>
+                <property name="margin-left">10</property>
+                <property name="margin-right">10</property>
+                <property name="margin-top">10</property>
+                <property name="margin-bottom">10</property>
                 <property name="spacing">20</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Items to be merged</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
@@ -559,13 +559,13 @@
                   <object class="GtkButton" id="merge_items_clear_button">
                     <property name="label" translatable="yes">Clear</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="pack_type">end</property>
+                    <property name="pack-type">end</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
@@ -573,13 +573,13 @@
                   <object class="GtkButton" id="merge_items_remove_button">
                     <property name="label" translatable="yes">Remove</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="pack_type">end</property>
+                    <property name="pack-type">end</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
@@ -593,7 +593,7 @@
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -604,16 +604,16 @@
             <child>
               <object class="GtkOverlay">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <child>
                   <object class="GtkScrolledWindow">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">never</property>
+                    <property name="can-focus">True</property>
+                    <property name="hscrollbar-policy">never</property>
                     <child>
                       <object class="GtkTreeView" id="merge_items_view">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can-focus">True</property>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection"/>
                         </child>
@@ -627,11 +627,11 @@
                 <child type="overlay">
                   <object class="GtkLabel" id="merge_items_placeholder_label">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="halign">center</property>
                     <property name="valign">center</property>
-                    <property name="margin_left">20</property>
-                    <property name="margin_right">20</property>
+                    <property name="margin-left">20</property>
+                    <property name="margin-right">20</property>
                     <property name="label" translatable="yes">Add the items you want to merge using the "Merge ..." buttons from the other tabs.</property>
                     <property name="justify">center</property>
                     <property name="wrap">True</property>
@@ -640,7 +640,7 @@
                     </style>
                   </object>
                   <packing>
-                    <property name="pass_through">True</property>
+                    <property name="pass-through">True</property>
                   </packing>
                 </child>
               </object>
@@ -653,7 +653,7 @@
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -664,16 +664,16 @@
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
+                <property name="can-focus">False</property>
+                <property name="margin-left">10</property>
+                <property name="margin-right">10</property>
+                <property name="margin-top">10</property>
+                <property name="margin-bottom">10</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Pull Request/Commit title</property>
                     <style>
                       <class name="dim-label"/>
@@ -688,8 +688,8 @@
                 <child>
                   <object class="GtkEntry" id="remote_pr_title_entry">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="placeholder_text" translatable="yes">e.g. add NE555</property>
+                    <property name="can-focus">True</property>
+                    <property name="placeholder-text" translatable="yes">e.g. add NE555</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -707,11 +707,11 @@
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="valign">baseline</property>
-                <property name="margin_start">10</property>
-                <property name="margin_end">10</property>
-                <property name="margin_bottom">10</property>
+                <property name="margin-start">10</property>
+                <property name="margin-end">10</property>
+                <property name="margin-bottom">10</property>
                 <property name="label" translatable="yes">Pull request message</property>
                 <property name="xalign">0</property>
                 <attributes>
@@ -727,7 +727,7 @@
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -738,21 +738,21 @@
             <child>
               <object class="GtkOverlay">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <child>
                   <object class="GtkScrolledWindow">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">never</property>
+                    <property name="can-focus">True</property>
+                    <property name="hscrollbar-policy">never</property>
                     <child>
                       <object class="GtkTextView" id="remote_pr_body_textview">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="wrap_mode">word</property>
-                        <property name="left_margin">10</property>
-                        <property name="right_margin">10</property>
-                        <property name="top_margin">10</property>
-                        <property name="bottom_margin">10</property>
+                        <property name="can-focus">True</property>
+                        <property name="wrap-mode">word</property>
+                        <property name="left-margin">10</property>
+                        <property name="right-margin">10</property>
+                        <property name="top-margin">10</property>
+                        <property name="bottom-margin">10</property>
                         <property name="monospace">True</property>
                       </object>
                     </child>
@@ -764,7 +764,7 @@
                 <child type="overlay">
                   <object class="GtkLabel" id="pr_body_placeholder_label">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="halign">center</property>
                     <property name="valign">center</property>
                     <property name="label" translatable="yes">Briefly explain what you're adding and provide references to documentation such as datasheets.
@@ -776,7 +776,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                     </style>
                   </object>
                   <packing>
-                    <property name="pass_through">True</property>
+                    <property name="pass-through">True</property>
                   </packing>
                 </child>
               </object>
@@ -796,7 +796,7 @@ In case of modifying an existing part, provide rationale for the modification.</
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -807,21 +807,21 @@ In case of modifying an existing part, provide rationale for the modification.</
         <child>
           <object class="GtkBox" id="box1">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
+                <property name="can-focus">False</property>
+                <property name="margin-left">10</property>
+                <property name="margin-right">10</property>
+                <property name="margin-top">10</property>
+                <property name="margin-bottom">10</property>
                 <property name="spacing">20</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Open Pull Requests</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
@@ -838,9 +838,9 @@ In case of modifying an existing part, provide rationale for the modification.</
                     <property name="label" translatable="yes">Show only mine</property>
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="draw_indicator">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="draw-indicator">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -852,25 +852,25 @@ In case of modifying an existing part, provide rationale for the modification.</
                   <object class="GtkButton" id="button_refresh_pull_requests">
                     <property name="label" translatable="yes">Refresh</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="pack_type">end</property>
+                    <property name="pack-type">end</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkSpinner" id="pr_spinner">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="pack_type">end</property>
+                    <property name="pack-type">end</property>
                     <property name="position">3</property>
                   </packing>
                 </child>
@@ -884,7 +884,7 @@ In case of modifying an existing part, provide rationale for the modification.</
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -895,18 +895,18 @@ In case of modifying an existing part, provide rationale for the modification.</
             <child>
               <object class="GtkScrolledWindow">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="hscrollbar_policy">never</property>
+                <property name="can-focus">True</property>
+                <property name="hscrollbar-policy">never</property>
                 <child>
                   <object class="GtkViewport">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <child>
                       <object class="GtkListBox" id="pull_requests_listbox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="selection_mode">none</property>
-                        <property name="activate_on_single_click">False</property>
+                        <property name="can-focus">False</property>
+                        <property name="selection-mode">none</property>
+                        <property name="activate-on-single-click">False</property>
                       </object>
                     </child>
                   </object>
@@ -944,43 +944,43 @@ In case of modifying an existing part, provide rationale for the modification.</
   </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">go-next-symbolic</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">go-next-symbolic</property>
   </object>
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">go-previous-symbolic</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">go-previous-symbolic</property>
   </object>
   <object class="GtkImage" id="image3">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">go-up-symbolic</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">go-up-symbolic</property>
   </object>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">go-down-symbolic</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">go-down-symbolic</property>
   </object>
   <object class="GtkBox" id="box_settings">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
+    <property name="can-focus">False</property>
     <property name="orientation">vertical</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_left">8</property>
-        <property name="margin_right">8</property>
-        <property name="margin_top">8</property>
-        <property name="margin_bottom">8</property>
+        <property name="can-focus">False</property>
+        <property name="margin-left">8</property>
+        <property name="margin-right">8</property>
+        <property name="margin-top">8</property>
+        <property name="margin-bottom">8</property>
         <property name="spacing">8</property>
         <child>
           <object class="GtkButton" id="button_save_pool">
             <property name="label" translatable="yes">Save</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -991,8 +991,8 @@ In case of modifying an existing part, provide rationale for the modification.</
         <child>
           <object class="GtkLabel" id="pool_settings_hint_label">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="use_markup">True</property>
+            <property name="can-focus">False</property>
+            <property name="use-markup">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1019,7 +1019,7 @@ In case of modifying an existing part, provide rationale for the modification.</
     <child>
       <object class="GtkSeparator">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -1030,28 +1030,29 @@ In case of modifying an existing part, provide rationale for the modification.</
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="halign">center</property>
-            <property name="margin_top">50</property>
-            <property name="margin_bottom">50</property>
+            <property name="margin-top">50</property>
+            <property name="margin-bottom">50</property>
             <property name="orientation">vertical</property>
             <property name="spacing">20</property>
             <child>
+              <!-- n-columns=3 n-rows=3 -->
               <object class="GtkGrid" id="grid2">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="hexpand">False</property>
-                <property name="row_spacing">10</property>
-                <property name="column_spacing">10</property>
+                <property name="row-spacing">10</property>
+                <property name="column-spacing">10</property>
                 <child>
                   <object class="GtkLabel" id="label11">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="halign">end</property>
                     <property name="label" translatable="yes">Pool name</property>
                     <style>
@@ -1059,21 +1060,42 @@ In case of modifying an existing part, provide rationale for the modification.</
                     </style>
                   </object>
                   <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">0</property>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">0</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkEntry" id="pool_settings_name_entry">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can-focus">True</property>
                     <property name="hexpand">True</property>
-                    <property name="width_chars">30</property>
+                    <property name="width-chars">30</property>
                   </object>
                   <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">0</property>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">0</property>
                   </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
                 </child>
               </object>
               <packing>
@@ -1083,15 +1105,16 @@ In case of modifying an existing part, provide rationale for the modification.</
               </packing>
             </child>
             <child>
+              <!-- n-columns=3 n-rows=3 -->
               <object class="GtkGrid">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="row_spacing">10</property>
-                <property name="column_spacing">25</property>
+                <property name="can-focus">False</property>
+                <property name="row-spacing">10</property>
+                <property name="column-spacing">25</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Pools available</property>
                     <property name="xalign">0</property>
                     <attributes>
@@ -1099,69 +1122,69 @@ In case of modifying an existing part, provide rationale for the modification.</
                     </attributes>
                   </object>
                   <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">0</property>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">0</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkScrolledWindow">
-                    <property name="width_request">300</property>
+                    <property name="width-request">300</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can-focus">True</property>
                     <property name="vexpand">True</property>
-                    <property name="hscrollbar_policy">never</property>
-                    <property name="shadow_type">in</property>
+                    <property name="hscrollbar-policy">never</property>
+                    <property name="shadow-type">in</property>
                     <child>
                       <object class="GtkViewport">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkListBox" id="pool_settings_available_listbox">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="selection_mode">browse</property>
-                            <property name="activate_on_single_click">False</property>
+                            <property name="can-focus">False</property>
+                            <property name="selection-mode">browse</property>
+                            <property name="activate-on-single-click">False</property>
                           </object>
                         </child>
                       </object>
                     </child>
                   </object>
                   <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">1</property>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">1</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkScrolledWindow">
-                    <property name="width_request">300</property>
+                    <property name="width-request">300</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">never</property>
-                    <property name="shadow_type">in</property>
+                    <property name="can-focus">True</property>
+                    <property name="hscrollbar-policy">never</property>
+                    <property name="shadow-type">in</property>
                     <child>
                       <object class="GtkViewport">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkListBox" id="pool_settings_included_listbox">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="selection_mode">browse</property>
-                            <property name="activate_on_single_click">False</property>
+                            <property name="can-focus">False</property>
+                            <property name="selection-mode">browse</property>
+                            <property name="activate-on-single-click">False</property>
                           </object>
                         </child>
                       </object>
                     </child>
                   </object>
                   <packing>
-                    <property name="left_attach">2</property>
-                    <property name="top_attach">1</property>
+                    <property name="left-attach">2</property>
+                    <property name="top-attach">1</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Pools included</property>
                     <property name="xalign">0</property>
                     <attributes>
@@ -1169,25 +1192,25 @@ In case of modifying an existing part, provide rationale for the modification.</
                     </attributes>
                   </object>
                   <packing>
-                    <property name="left_attach">2</property>
-                    <property name="top_attach">0</property>
+                    <property name="left-attach">2</property>
+                    <property name="top-attach">0</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="halign">center</property>
                     <property name="valign">center</property>
-                    <property name="margin_top">20</property>
-                    <property name="margin_bottom">20</property>
+                    <property name="margin-top">20</property>
+                    <property name="margin-bottom">20</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkButton" id="pool_inc_button">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
                         <property name="image">image1</property>
                       </object>
                       <packing>
@@ -1199,9 +1222,9 @@ In case of modifying an existing part, provide rationale for the modification.</
                     <child>
                       <object class="GtkButton" id="pool_excl_button">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="margin_bottom">5</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <property name="margin-bottom">5</property>
                         <property name="image">image2</property>
                       </object>
                       <packing>
@@ -1213,9 +1236,9 @@ In case of modifying an existing part, provide rationale for the modification.</
                     <child>
                       <object class="GtkButton" id="pool_up_button">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="margin_top">5</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <property name="margin-top">5</property>
                         <property name="image">image3</property>
                       </object>
                       <packing>
@@ -1227,8 +1250,8 @@ In case of modifying an existing part, provide rationale for the modification.</
                     <child>
                       <object class="GtkButton" id="pool_down_button">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
                         <property name="image">image4</property>
                       </object>
                       <packing>
@@ -1239,9 +1262,18 @@ In case of modifying an existing part, provide rationale for the modification.</
                     </child>
                   </object>
                   <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">1</property>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">1</property>
                   </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
                 </child>
                 <child>
                   <placeholder/>
@@ -1273,24 +1305,25 @@ In case of modifying an existing part, provide rationale for the modification.</
   </object>
   <object class="GtkBox" id="info_box">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="margin_left">20</property>
-    <property name="margin_right">20</property>
-    <property name="margin_top">20</property>
-    <property name="margin_bottom">20</property>
+    <property name="can-focus">False</property>
+    <property name="margin-left">20</property>
+    <property name="margin-right">20</property>
+    <property name="margin-top">20</property>
+    <property name="margin-bottom">20</property>
     <property name="spacing">20</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
+          <!-- n-columns=3 n-rows=3 -->
           <object class="GtkGrid" id="info_grid">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="row_spacing">10</property>
-            <property name="column_spacing">10</property>
+            <property name="can-focus">False</property>
+            <property name="row-spacing">10</property>
+            <property name="column-spacing">10</property>
             <child>
               <placeholder/>
             </child>
@@ -1328,12 +1361,12 @@ In case of modifying an existing part, provide rationale for the modification.</
         <child>
           <object class="GtkScrolledWindow">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="shadow_type">in</property>
+            <property name="can-focus">True</property>
+            <property name="shadow-type">in</property>
             <child>
               <object class="GtkTreeView" id="info_tv">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can-focus">True</property>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection"/>
                 </child>
@@ -1356,7 +1389,7 @@ In case of modifying an existing part, provide rationale for the modification.</
     <child>
       <object class="GtkBox" id="info_where_used_box">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="vexpand">True</property>
         <property name="orientation">vertical</property>
         <child>
@@ -1378,51 +1411,51 @@ In case of modifying an existing part, provide rationale for the modification.</
   </object>
   <object class="GtkMenu" id="menu1">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
+    <property name="can-focus">False</property>
     <child>
       <object class="GtkMenuItem" id="menu_new_project">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="label" translatable="yes">Project</property>
-        <property name="use_underline">True</property>
+        <property name="use-underline">True</property>
       </object>
     </child>
     <child>
       <object class="GtkMenuItem" id="menu_new_pool">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="label" translatable="yes">Pool</property>
-        <property name="use_underline">True</property>
+        <property name="use-underline">True</property>
       </object>
     </child>
   </object>
   <object class="GtkApplicationWindow" id="app_window">
-    <property name="can_focus">False</property>
+    <property name="can-focus">False</property>
     <property name="title" translatable="yes">Example Application</property>
-    <property name="default_width">600</property>
-    <property name="default_height">400</property>
+    <property name="default-width">600</property>
+    <property name="default-height">400</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkInfoBar" id="info_bar">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="message_type">error</property>
-            <property name="show_close_button">True</property>
+            <property name="can-focus">False</property>
+            <property name="message-type">error</property>
+            <property name="show-close-button">True</property>
             <child internal-child="action_area">
               <object class="GtkButtonBox">
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="spacing">6</property>
-                <property name="layout_style">end</property>
+                <property name="layout-style">end</property>
                 <child>
                   <object class="GtkButton" id="show_output_button">
                     <property name="label" translatable="yes">Show output</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1439,12 +1472,12 @@ In case of modifying an existing part, provide rationale for the modification.</
             </child>
             <child internal-child="content_area">
               <object class="GtkBox">
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="spacing">16</property>
                 <child>
                   <object class="GtkLabel" id="info_bar_label">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">label</property>
                   </object>
                   <packing>
@@ -1473,19 +1506,19 @@ In case of modifying an existing part, provide rationale for the modification.</
         <child>
           <object class="GtkInfoBar" id="info_bar_pool_not_added">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="show_close_button">True</property>
+            <property name="can-focus">False</property>
+            <property name="show-close-button">True</property>
             <child internal-child="action_area">
               <object class="GtkButtonBox">
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="spacing">6</property>
-                <property name="layout_style">end</property>
+                <property name="layout-style">end</property>
                 <child>
                   <object class="GtkButton" id="button1">
                     <property name="label" translatable="yes">Add this pool</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1502,12 +1535,12 @@ In case of modifying an existing part, provide rationale for the modification.</
             </child>
             <child internal-child="content_area">
               <object class="GtkBox">
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="spacing">16</property>
                 <child>
                   <object class="GtkLabel" id="info_bar_label1">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">This pool isn't added in the preferences and can't be used in projects.</property>
                   </object>
                   <packing>
@@ -1539,12 +1572,12 @@ In case of modifying an existing part, provide rationale for the modification.</
         <child>
           <object class="GtkInfoBar" id="info_bar_pool_doc">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <child internal-child="action_area">
               <object class="GtkButtonBox">
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="spacing">6</property>
-                <property name="layout_style">end</property>
+                <property name="layout-style">end</property>
                 <child>
                   <placeholder/>
                 </child>
@@ -1555,8 +1588,8 @@ In case of modifying an existing part, provide rationale for the modification.</
                   <object class="GtkButton" id="button2">
                     <property name="label" translatable="yes">Got it</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1573,14 +1606,14 @@ In case of modifying an existing part, provide rationale for the modification.</
             </child>
             <child internal-child="content_area">
               <object class="GtkBox">
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="spacing">16</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="label" translatable="yes">New here? Have a look at &lt;a href="https://horizon-eda.readthedocs.io/en/latest/pool-why.html" title="https://horizon-eda.readthedocs.io/en/latest/pool-why.html"&gt;Documentation&lt;/a&gt; for an explanation of the pool's structure.</property>
-                    <property name="use_markup">True</property>
+                    <property name="use-markup">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1612,39 +1645,103 @@ In case of modifying an existing part, provide rationale for the modification.</
           </packing>
         </child>
         <child>
+          <object class="GtkInfoBar" id="info_bar_version">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child internal-child="action_area">
+              <object class="GtkButtonBox">
+                <property name="can-focus">False</property>
+                <property name="spacing">6</property>
+                <property name="layout-style">end</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child internal-child="content_area">
+              <object class="GtkBox">
+                <property name="can-focus">False</property>
+                <property name="spacing">16</property>
+                <child>
+                  <object class="GtkLabel" id="version_label">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">label</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkStack" id="stack">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="transition_duration">100</property>
-            <property name="transition_type">crossfade</property>
+            <property name="can-focus">False</property>
+            <property name="transition-duration">100</property>
+            <property name="transition-type">crossfade</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="halign">center</property>
-                <property name="margin_left">50</property>
-                <property name="margin_right">50</property>
+                <property name="margin-left">50</property>
+                <property name="margin-right">50</property>
                 <property name="hexpand">False</property>
                 <property name="vexpand">True</property>
                 <property name="spacing">50</property>
                 <property name="homogeneous">True</property>
                 <child>
                   <object class="GtkBox">
-                    <property name="width_request">300</property>
+                    <property name="width-request">300</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_top">20</property>
-                    <property name="margin_bottom">20</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-top">20</property>
+                    <property name="margin-bottom">20</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Recent pools</property>
                             <property name="xalign">0</property>
                             <attributes>
@@ -1660,13 +1757,13 @@ In case of modifying an existing part, provide rationale for the modification.</
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Last used</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="pack_type">end</property>
+                            <property name="pack-type">end</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
@@ -1680,18 +1777,18 @@ In case of modifying an existing part, provide rationale for the modification.</
                     <child>
                       <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">never</property>
-                        <property name="shadow_type">in</property>
+                        <property name="can-focus">True</property>
+                        <property name="hscrollbar-policy">never</property>
+                        <property name="shadow-type">in</property>
                         <child>
                           <object class="GtkViewport">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <child>
                               <object class="GtkListBox" id="recent_pools_listbox">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="selection_mode">none</property>
+                                <property name="can-focus">False</property>
+                                <property name="selection-mode">none</property>
                               </object>
                             </child>
                           </object>
@@ -1712,21 +1809,21 @@ In case of modifying an existing part, provide rationale for the modification.</
                 </child>
                 <child>
                   <object class="GtkBox">
-                    <property name="width_request">350</property>
+                    <property name="width-request">350</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_top">20</property>
-                    <property name="margin_bottom">20</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-top">20</property>
+                    <property name="margin-bottom">20</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Recent projects</property>
                             <property name="xalign">0</property>
                             <attributes>
@@ -1742,13 +1839,13 @@ In case of modifying an existing part, provide rationale for the modification.</
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Last used</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="pack_type">end</property>
+                            <property name="pack-type">end</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
@@ -1762,18 +1859,18 @@ In case of modifying an existing part, provide rationale for the modification.</
                     <child>
                       <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">never</property>
-                        <property name="shadow_type">in</property>
+                        <property name="can-focus">True</property>
+                        <property name="hscrollbar-policy">never</property>
+                        <property name="shadow-type">in</property>
                         <child>
                           <object class="GtkViewport">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <child>
                               <object class="GtkListBox" id="recent_projects_listbox">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="selection_mode">none</property>
+                                <property name="can-focus">False</property>
+                                <property name="selection-mode">none</property>
                               </object>
                             </child>
                           </object>
@@ -1801,7 +1898,7 @@ In case of modifying an existing part, provide rationale for the modification.</
             <child>
               <object class="GtkBox" id="pool_box">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <placeholder/>
@@ -1809,16 +1906,16 @@ In case of modifying an existing part, provide rationale for the modification.</
                 <child>
                   <object class="GtkRevealer" id="pool_update_status_rev">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkProgressBar" id="pool_update_progress">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="fraction">1</property>
                           </object>
                           <packing>
@@ -1830,15 +1927,15 @@ In case of modifying an existing part, provide rationale for the modification.</
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="margin_left">8</property>
-                            <property name="margin_right">8</property>
-                            <property name="margin_top">8</property>
-                            <property name="margin_bottom">8</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-left">8</property>
+                            <property name="margin-right">8</property>
+                            <property name="margin-top">8</property>
+                            <property name="margin-bottom">8</property>
                             <child>
                               <object class="GtkLabel" id="pool_update_status_label">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">label</property>
                                 <property name="selectable">True</property>
                                 <property name="ellipsize">middle</property>
@@ -1854,13 +1951,13 @@ In case of modifying an existing part, provide rationale for the modification.</
                               <object class="GtkButton" id="pool_update_status_close_button">
                                 <property name="label" translatable="yes">Close</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
-                                <property name="pack_type">end</property>
+                                <property name="pack-type">end</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -1877,7 +1974,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="pack_type">end</property>
+                    <property name="pack-type">end</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
@@ -1891,26 +1988,27 @@ In case of modifying an existing part, provide rationale for the modification.</
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="halign">center</property>
-                <property name="margin_left">50</property>
-                <property name="margin_right">50</property>
-                <property name="margin_top">50</property>
-                <property name="margin_bottom">50</property>
+                <property name="margin-left">50</property>
+                <property name="margin-right">50</property>
+                <property name="margin-top">50</property>
+                <property name="margin-bottom">50</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">40</property>
                 <child>
+                  <!-- n-columns=3 n-rows=3 -->
                   <object class="GtkGrid">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="halign">center</property>
                     <property name="valign">start</property>
-                    <property name="row_spacing">20</property>
-                    <property name="column_spacing">10</property>
+                    <property name="row-spacing">20</property>
+                    <property name="column-spacing">10</property>
                     <child>
                       <object class="GtkLabel" id="label1">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="halign">end</property>
                         <property name="valign">start</property>
                         <property name="label" translatable="yes">GitHub repository</property>
@@ -1919,14 +2017,14 @@ In case of modifying an existing part, provide rationale for the modification.</
                         </style>
                       </object>
                       <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label3">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="halign">end</property>
                         <property name="valign">start</property>
                         <property name="label" translatable="yes">Destination directory</property>
@@ -1935,24 +2033,24 @@ In case of modifying an existing part, provide rationale for the modification.</
                         </style>
                       </object>
                       <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">1</property>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">1</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkBox" id="box4">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <child>
                               <object class="GtkEntry" id="download_dest_dir_entry">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can-focus">True</property>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -1964,8 +2062,8 @@ In case of modifying an existing part, provide rationale for the modification.</
                               <object class="GtkButton" id="download_dest_dir_button">
                                 <property name="label" translatable="yes">Browse...</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1986,11 +2084,11 @@ In case of modifying an existing part, provide rationale for the modification.</
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Directory in which the pool will be cloned. Has to be empty and will be created if neccessary.</property>
                             <property name="justify">fill</property>
                             <property name="wrap">True</property>
-                            <property name="max_width_chars">40</property>
+                            <property name="max-width-chars">40</property>
                             <property name="xalign">0</property>
                             <attributes>
                               <attribute name="scale" value="0.83299999999999996"/>
@@ -2007,53 +2105,54 @@ In case of modifying an existing part, provide rationale for the modification.</
                         </child>
                       </object>
                       <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">1</property>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">1</property>
                       </packing>
                     </child>
                     <child>
+                      <!-- n-columns=3 n-rows=3 -->
                       <object class="GtkGrid">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="row_spacing">5</property>
-                        <property name="column_spacing">5</property>
+                        <property name="can-focus">False</property>
+                        <property name="row-spacing">5</property>
+                        <property name="column-spacing">5</property>
                         <child>
                           <object class="GtkEntry" id="download_gh_username_entry">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
+                            <property name="can-focus">True</property>
                             <property name="text" translatable="yes">horizon-eda</property>
                           </object>
                           <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">0</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkEntry" id="download_gh_repo_entry">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
+                            <property name="can-focus">True</property>
                             <property name="text" translatable="yes">horizon-pool</property>
                           </object>
                           <packing>
-                            <property name="left_attach">2</property>
-                            <property name="top_attach">0</property>
+                            <property name="left-attach">2</property>
+                            <property name="top-attach">0</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">/</property>
                           </object>
                           <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">0</property>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">0</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Username</property>
                             <property name="xalign">0</property>
                             <attributes>
@@ -2064,14 +2163,14 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </style>
                           </object>
                           <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">1</property>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">1</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Repository (has to be public)</property>
                             <property name="xalign">0</property>
                             <attributes>
@@ -2082,18 +2181,42 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </style>
                           </object>
                           <packing>
-                            <property name="left_attach">2</property>
-                            <property name="top_attach">1</property>
+                            <property name="left-attach">2</property>
+                            <property name="top-attach">1</property>
                           </packing>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
                         </child>
                         <child>
                           <placeholder/>
                         </child>
                       </object>
                       <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">0</property>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">0</property>
                       </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>
@@ -2105,19 +2228,19 @@ In case of modifying an existing part, provide rationale for the modification.</
                 <child>
                   <object class="GtkRevealer" id="download_revealer">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="transition_type">crossfade</property>
+                    <property name="can-focus">False</property>
+                    <property name="transition-type">crossfade</property>
                     <child>
                       <object class="GtkBox">
-                        <property name="width_request">200</property>
+                        <property name="width-request">200</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="halign">center</property>
                         <property name="spacing">10</property>
                         <child>
                           <object class="GtkLabel" id="download_label">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Cloning...</property>
                             <property name="xalign">0</property>
                           </object>
@@ -2130,7 +2253,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                         <child>
                           <object class="GtkSpinner" id="download_spinner">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -2157,17 +2280,17 @@ In case of modifying an existing part, provide rationale for the modification.</
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkInfoBar" id="prj_pool_info_bar">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <child internal-child="action_area">
                       <object class="GtkButtonBox">
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="spacing">6</property>
-                        <property name="layout_style">end</property>
+                        <property name="layout-style">end</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -2186,12 +2309,12 @@ In case of modifying an existing part, provide rationale for the modification.</
                     </child>
                     <child internal-child="content_area">
                       <object class="GtkBox">
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="spacing">16</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Pool has been changed, save and reopen this project to use the new pool</property>
                           </object>
                           <packing>
@@ -2220,22 +2343,23 @@ In case of modifying an existing part, provide rationale for the modification.</
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="halign">center</property>
-                    <property name="margin_top">50</property>
-                    <property name="margin_bottom">50</property>
+                    <property name="margin-top">50</property>
+                    <property name="margin-bottom">50</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">20</property>
                     <child>
+                      <!-- n-columns=3 n-rows=4 -->
                       <object class="GtkGrid" id="grid1">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="row_spacing">10</property>
-                        <property name="column_spacing">10</property>
+                        <property name="can-focus">False</property>
+                        <property name="row-spacing">10</property>
+                        <property name="column-spacing">10</property>
                         <child>
                           <object class="GtkLabel" id="label6">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="halign">end</property>
                             <property name="label" translatable="yes">Project Title</property>
                             <style>
@@ -2243,14 +2367,14 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </style>
                           </object>
                           <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">0</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkLabel" id="label7">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="halign">end</property>
                             <property name="valign">start</property>
                             <property name="label" translatable="yes">Pool</property>
@@ -2259,27 +2383,27 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </style>
                           </object>
                           <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">3</property>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">3</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="orientation">vertical</property>
                             <property name="spacing">2</property>
                             <child>
                               <object class="GtkBox">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <child>
                                   <object class="GtkLabel" id="label_pool_name">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
+                                    <property name="can-focus">False</property>
                                     <property name="halign">start</property>
                                     <property name="label" translatable="yes">fixme</property>
-                                    <property name="track_visited_links">False</property>
+                                    <property name="track-visited-links">False</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -2291,13 +2415,13 @@ In case of modifying an existing part, provide rationale for the modification.</
                                   <object class="GtkButton" id="prj_pool_change_button">
                                     <property name="label" translatable="yes">Change</property>
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
+                                    <property name="can-focus">True</property>
+                                    <property name="receives-default">True</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="pack_type">end</property>
+                                    <property name="pack-type">end</property>
                                     <property name="position">2</property>
                                   </packing>
                                 </child>
@@ -2311,7 +2435,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                             <child>
                               <object class="GtkLabel" id="label_pool_path">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="halign">start</property>
                                 <property name="label" translatable="yes">fixme</property>
                                 <style>
@@ -2326,14 +2450,14 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </child>
                           </object>
                           <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">3</property>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">3</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkLabel" id="label13">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="halign">end</property>
                             <property name="label" translatable="yes">Project Directory</property>
                             <style>
@@ -2341,20 +2465,20 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </style>
                           </object>
                           <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">2</property>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">2</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="hexpand">True</property>
                             <property name="spacing">10</property>
                             <child>
                               <object class="GtkLabel" id="label_project_directory">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="halign">start</property>
                                 <property name="label" translatable="yes">fixme</property>
                                 <property name="selectable">True</property>
@@ -2369,26 +2493,26 @@ In case of modifying an existing part, provide rationale for the modification.</
                               <object class="GtkButton" id="prj_open_dir_button">
                                 <property name="label" translatable="yes">Open</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
-                                <property name="pack_type">end</property>
+                                <property name="pack-type">end</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">2</property>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">2</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkLabel" id="label2">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="halign">end</property>
                             <property name="label" translatable="yes">Author</property>
                             <style>
@@ -2396,30 +2520,30 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </style>
                           </object>
                           <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">1</property>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">1</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkLabel" id="label_project_author">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="halign">start</property>
                             <property name="label" translatable="yes">fixme</property>
                           </object>
                           <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">1</property>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">1</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <child>
                               <object class="GtkLabel" id="label_project_title">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="halign">start</property>
                                 <property name="label" translatable="yes">fixme</property>
                               </object>
@@ -2433,21 +2557,33 @@ In case of modifying an existing part, provide rationale for the modification.</
                               <object class="GtkButton" id="prj_edit_meta_button">
                                 <property name="label" translatable="yes">Edit</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
-                                <property name="pack_type">end</property>
+                                <property name="pack-type">end</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">0</property>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">0</property>
                           </packing>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
                         </child>
                       </object>
                       <packing>
@@ -2457,28 +2593,29 @@ In case of modifying an existing part, provide rationale for the modification.</
                       </packing>
                     </child>
                     <child>
+                      <!-- n-columns=4 n-rows=3 -->
                       <object class="GtkGrid">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="row_spacing">10</property>
-                        <property name="column_spacing">20</property>
-                        <property name="column_homogeneous">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="row-spacing">10</property>
+                        <property name="column-spacing">20</property>
+                        <property name="column-homogeneous">True</property>
                         <child>
                           <object class="GtkButton" id="button_top_schematic">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
                             <child>
                               <object class="GtkBox">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="orientation">vertical</property>
                                 <property name="spacing">2</property>
                                 <child>
                                   <object class="GtkImage">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="icon_name">edit-schematic-symbolic</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="icon-name">edit-schematic-symbolic</property>
                                     <property name="icon_size">6</property>
                                   </object>
                                   <packing>
@@ -2490,7 +2627,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                                 <child>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
+                                    <property name="can-focus">False</property>
                                     <property name="label" translatable="yes">Schematic</property>
                                   </object>
                                   <packing>
@@ -2503,26 +2640,26 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </child>
                           </object>
                           <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">0</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkButton" id="button_board">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
                             <child>
                               <object class="GtkBox">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="orientation">vertical</property>
                                 <property name="spacing">2</property>
                                 <child>
                                   <object class="GtkImage">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="icon_name">edit-board-symbolic</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="icon-name">edit-board-symbolic</property>
                                     <property name="icon_size">6</property>
                                   </object>
                                   <packing>
@@ -2534,7 +2671,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                                 <child>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
+                                    <property name="can-focus">False</property>
                                     <property name="label" translatable="yes">Board</property>
                                   </object>
                                   <packing>
@@ -2547,26 +2684,26 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </child>
                           </object>
                           <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">0</property>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">0</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkButton" id="button_part_browser">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
                             <child>
                               <object class="GtkBox">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="orientation">vertical</property>
                                 <property name="spacing">2</property>
                                 <child>
                                   <object class="GtkImage">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="icon_name">system-search-symbolic</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="icon-name">system-search-symbolic</property>
                                     <property name="icon_size">6</property>
                                   </object>
                                   <packing>
@@ -2578,7 +2715,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                                 <child>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
+                                    <property name="can-focus">False</property>
                                     <property name="label" translatable="yes">Part Browser</property>
                                   </object>
                                   <packing>
@@ -2591,26 +2728,26 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </child>
                           </object>
                           <packing>
-                            <property name="left_attach">2</property>
-                            <property name="top_attach">0</property>
+                            <property name="left-attach">2</property>
+                            <property name="top-attach">0</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkButton" id="button_pool_cache">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
                             <child>
                               <object class="GtkBox">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can-focus">False</property>
                                 <property name="orientation">vertical</property>
                                 <property name="spacing">2</property>
                                 <child>
                                   <object class="GtkImage">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="icon_name">system-file-manager-symbolic</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="icon-name">system-file-manager-symbolic</property>
                                     <property name="icon_size">6</property>
                                   </object>
                                   <packing>
@@ -2622,7 +2759,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                                 <child>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
+                                    <property name="can-focus">False</property>
                                     <property name="label" translatable="yes">Pool Cache</property>
                                   </object>
                                   <packing>
@@ -2635,23 +2772,35 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </child>
                           </object>
                           <packing>
-                            <property name="left_attach">3</property>
-                            <property name="top_attach">0</property>
+                            <property name="left-attach">3</property>
+                            <property name="top-attach">0</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkLabel" id="pool_cache_status_label">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="margin_left">9</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-left">9</property>
                             <property name="wrap">True</property>
-                            <property name="max_width_chars">0</property>
+                            <property name="max-width-chars">0</property>
                             <property name="xalign">0</property>
                           </object>
                           <packing>
-                            <property name="left_attach">3</property>
-                            <property name="top_attach">1</property>
+                            <property name="left-attach">3</property>
+                            <property name="top-attach">1</property>
                           </packing>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
                         </child>
                         <child>
                           <placeholder/>
@@ -2685,19 +2834,19 @@ In case of modifying an existing part, provide rationale for the modification.</
             </child>
             <child>
               <object class="GtkBox">
-                <property name="width_request">500</property>
+                <property name="width-request">500</property>
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="halign">center</property>
                 <property name="valign">start</property>
-                <property name="margin_top">30</property>
-                <property name="margin_bottom">30</property>
+                <property name="margin-top">30</property>
+                <property name="margin-bottom">30</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">15</property>
                 <child>
                   <object class="GtkBox" id="new_project_meta_box">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <placeholder/>
@@ -2712,7 +2861,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                 <child>
                   <object class="GtkSeparator">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2721,16 +2870,17 @@ In case of modifying an existing part, provide rationale for the modification.</
                   </packing>
                 </child>
                 <child>
+                  <!-- n-columns=3 n-rows=3 -->
                   <object class="GtkGrid">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="hexpand">True</property>
-                    <property name="row_spacing">20</property>
-                    <property name="column_spacing">10</property>
+                    <property name="row-spacing">20</property>
+                    <property name="column-spacing">10</property>
                     <child>
                       <object class="GtkLabel" id="label5">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="halign">end</property>
                         <property name="valign">start</property>
                         <property name="label" translatable="yes">Base Path</property>
@@ -2739,20 +2889,20 @@ In case of modifying an existing part, provide rationale for the modification.</
                         </style>
                       </object>
                       <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">1</property>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">1</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkFileChooserButton" id="create_project_path_chooser">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="action">select-folder</property>
                             <property name="title" translatable="yes">Select base path</property>
                           </object>
@@ -2765,7 +2915,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Directory in which the project's directory will be created.</property>
                             <property name="xalign">0</property>
                             <attributes>
@@ -2783,14 +2933,14 @@ In case of modifying an existing part, provide rationale for the modification.</
                         </child>
                       </object>
                       <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">1</property>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">1</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label8">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="halign">end</property>
                         <property name="label" translatable="yes">Project Directory</property>
                         <style>
@@ -2798,14 +2948,14 @@ In case of modifying an existing part, provide rationale for the modification.</
                         </style>
                       </object>
                       <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">2</property>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">2</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label9">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="halign">end</property>
                         <property name="label" translatable="yes">Pool</property>
                         <style>
@@ -2813,33 +2963,42 @@ In case of modifying an existing part, provide rationale for the modification.</
                         </style>
                       </object>
                       <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkComboBoxText" id="create_project_pool_combo">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="hexpand">True</property>
                       </object>
                       <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">0</property>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="create_project_dir_label">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="label" translatable="yes">label</property>
                         <property name="ellipsize">middle</property>
                         <property name="xalign">0</property>
                       </object>
                       <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">2</property>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">2</property>
                       </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>
@@ -2856,19 +3015,20 @@ In case of modifying an existing part, provide rationale for the modification.</
               </packing>
             </child>
             <child>
+              <!-- n-columns=3 n-rows=3 -->
               <object class="GtkGrid">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="halign">center</property>
                 <property name="valign">start</property>
-                <property name="margin_top">50</property>
-                <property name="margin_bottom">50</property>
-                <property name="row_spacing">20</property>
-                <property name="column_spacing">10</property>
+                <property name="margin-top">50</property>
+                <property name="margin-bottom">50</property>
+                <property name="row-spacing">20</property>
+                <property name="column-spacing">10</property>
                 <child>
                   <object class="GtkLabel" id="label10">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="halign">end</property>
                     <property name="valign">start</property>
                     <property name="label" translatable="yes">Pool Name</property>
@@ -2877,22 +3037,22 @@ In case of modifying an existing part, provide rationale for the modification.</
                     </style>
                   </object>
                   <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">0</property>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">0</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkEntry" id="create_pool_name_entry">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="width_chars">50</property>
-                        <property name="placeholder_text" translatable="yes">e.g.: my super duper pool</property>
+                        <property name="can-focus">True</property>
+                        <property name="width-chars">50</property>
+                        <property name="placeholder-text" translatable="yes">e.g.: my super duper pool</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -2903,7 +3063,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="label" translatable="yes">May contain spaces and other special characters</property>
                         <property name="xalign">0</property>
                         <attributes>
@@ -2921,14 +3081,14 @@ In case of modifying an existing part, provide rationale for the modification.</
                     </child>
                   </object>
                   <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">0</property>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">0</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkLabel" id="label12">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="halign">end</property>
                     <property name="valign">start</property>
                     <property name="label" translatable="yes">Base Path</property>
@@ -2937,20 +3097,20 @@ In case of modifying an existing part, provide rationale for the modification.</
                     </style>
                   </object>
                   <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">1</property>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">1</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkFileChooserButton" id="create_pool_path_chooser">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="action">select-folder</property>
                         <property name="title" translatable="yes">Select base path</property>
                       </object>
@@ -2963,7 +3123,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Directory in which the pool will be created. Has to be empty.</property>
                         <property name="xalign">0</property>
                         <attributes>
@@ -2981,9 +3141,24 @@ In case of modifying an existing part, provide rationale for the modification.</
                     </child>
                   </object>
                   <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">1</property>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">1</property>
                   </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
                 </child>
               </object>
               <packing>
@@ -2996,7 +3171,7 @@ In case of modifying an existing part, provide rationale for the modification.</
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </object>
@@ -3004,20 +3179,20 @@ In case of modifying an existing part, provide rationale for the modification.</
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
+        <property name="can-focus">True</property>
         <property name="title">Horizon EDA</property>
-        <property name="show_close_button">True</property>
+        <property name="show-close-button">True</property>
         <child>
           <object class="GtkMenuButton" id="button_new">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
             <property name="popup">menu1</property>
-            <property name="use_popover">False</property>
+            <property name="use-popover">False</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="label" translatable="yes">New...</property>
               </object>
             </child>
@@ -3030,8 +3205,8 @@ In case of modifying an existing part, provide rationale for the modification.</
           <object class="GtkButton" id="button_open">
             <property name="label" translatable="yes">Open...</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="position">1</property>
@@ -3040,14 +3215,14 @@ In case of modifying an existing part, provide rationale for the modification.</
         <child>
           <object class="GtkButton" id="button_close">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Return to pool list</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Return to pool list</property>
             <child>
               <object class="GtkImage" id="navigation_previous_icon">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">go-previous-symbolic</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">go-previous-symbolic</property>
                 <property name="icon_size">1</property>
               </object>
             </child>
@@ -3060,8 +3235,8 @@ In case of modifying an existing part, provide rationale for the modification.</
           <object class="GtkButton" id="button_cancel">
             <property name="label" translatable="yes">Cancel</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="position">3</property>
@@ -3071,8 +3246,8 @@ In case of modifying an existing part, provide rationale for the modification.</
           <object class="GtkButton" id="button_save">
             <property name="label" translatable="yes">Save all</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="position">4</property>
@@ -3082,8 +3257,8 @@ In case of modifying an existing part, provide rationale for the modification.</
           <object class="GtkButton" id="button_update">
             <property name="label" translatable="yes">Update pool</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="position">5</property>
@@ -3093,14 +3268,14 @@ In case of modifying an existing part, provide rationale for the modification.</
           <object class="GtkButton" id="button_do_download">
             <property name="label" translatable="yes">Download</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
             <style>
               <class name="suggested-action"/>
             </style>
           </object>
           <packing>
-            <property name="pack_type">end</property>
+            <property name="pack-type">end</property>
             <property name="position">6</property>
           </packing>
         </child>
@@ -3108,8 +3283,8 @@ In case of modifying an existing part, provide rationale for the modification.</
           <object class="GtkButton" id="button_download">
             <property name="label" translatable="yes">Download pool...</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="position">6</property>
@@ -3118,7 +3293,7 @@ In case of modifying an existing part, provide rationale for the modification.</
         <child>
           <object class="GtkSpinner" id="spinner_update">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
           </object>
           <packing>
             <property name="position">8</property>
@@ -3129,32 +3304,32 @@ In case of modifying an existing part, provide rationale for the modification.</
             <property name="label" translatable="yes">Create</property>
             <property name="visible">True</property>
             <property name="sensitive">False</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
             <style>
               <class name="suggested-action"/>
             </style>
           </object>
           <packing>
-            <property name="pack_type">end</property>
+            <property name="pack-type">end</property>
             <property name="position">9</property>
           </packing>
         </child>
         <child>
           <object class="GtkMenuButton" id="hamburger_menu_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">open-menu-symbolic</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">open-menu-symbolic</property>
               </object>
             </child>
           </object>
           <packing>
-            <property name="pack_type">end</property>
+            <property name="pack-type">end</property>
             <property name="position">10</property>
           </packing>
         </child>
@@ -3220,22 +3395,22 @@ In case of modifying an existing part, provide rationale for the modification.</
   </object>
   <object class="GtkBox" id="pull_request_item">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="margin_left">12</property>
-    <property name="margin_right">12</property>
-    <property name="margin_top">12</property>
-    <property name="margin_bottom">12</property>
+    <property name="can-focus">False</property>
+    <property name="margin-left">12</property>
+    <property name="margin-right">12</property>
+    <property name="margin-top">12</property>
+    <property name="margin-bottom">12</property>
     <property name="orientation">vertical</property>
     <property name="spacing">6</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="spacing">12</property>
         <child>
           <object class="GtkLabel" id="pull_request_item_name_label">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="label" translatable="yes">PR name</property>
             <property name="wrap">True</property>
             <property name="xalign">0</property>
@@ -3252,7 +3427,7 @@ In case of modifying an existing part, provide rationale for the modification.</
         <child>
           <object class="GtkLabel" id="pull_request_item_number_label">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="label" translatable="yes">#3</property>
             <attributes>
               <attribute name="weight" value="bold"/>
@@ -3277,20 +3452,20 @@ In case of modifying an existing part, provide rationale for the modification.</
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="spacing">10</property>
         <child>
           <object class="GtkLinkButton" id="pull_request_item_link">
             <property name="label" translatable="yes">Open on GitHub</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
             <property name="relief">none</property>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="pack_type">end</property>
+            <property name="pack-type">end</property>
             <property name="position">0</property>
           </packing>
         </child>
@@ -3298,20 +3473,20 @@ In case of modifying an existing part, provide rationale for the modification.</
           <object class="GtkButton" id="pull_request_update_button">
             <property name="label" translatable="yes">Update PR</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="pack_type">end</property>
+            <property name="pack-type">end</property>
             <property name="position">1</property>
           </packing>
         </child>
         <child>
           <object class="GtkLabel" id="pull_request_item_descr_label">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="label" translatable="yes">opened by ... on...</property>
             <style>
               <class name="dim-label"/>

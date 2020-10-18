@@ -71,6 +71,8 @@ std::string Logger::domain_to_string(Logger::Domain dom)
         return "Interactive manipulator";
     case Logger::Domain::IMPORT:
         return "Import";
+    case Logger::Domain::VERSION:
+        return "Version";
     default:
         return "Unspecified";
     }

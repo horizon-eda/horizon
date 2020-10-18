@@ -54,6 +54,8 @@ public:
     virtual std::string get_display_name(ObjectType type, const UUID &uu) = 0;
     virtual std::string get_display_name(ObjectType type, const UUID &uu, const UUID &sheet) = 0;
 
+    virtual const class FileVersion &get_version() const = 0;
+
     virtual ~IDocument()
     {
     }

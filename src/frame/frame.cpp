@@ -7,11 +7,14 @@
 
 namespace horizon {
 
+static const unsigned int app_version = 0;
 
 Frame::Frame(const UUID &uu, const json &j)
-    : uuid(uu), name(j.value("name", "")), width(j.value("width", 297_mm)), height(j.value("height", 210_mm))
+    : uuid(uu), name(j.value("name", "")), width(j.value("width", 297_mm)), height(j.value("height", 210_mm)),
+      version(app_version, j)
 {
     check_object_type(j, ObjectType::FRAME);
+    version.check(ObjectType::FRAME, name, uuid);
     if (j.count("junctions")) {
         const json &o = j["junctions"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -50,7 +53,7 @@ Frame::Frame(const UUID &uu, const json &j)
     map_erase_if(polygons, [](const auto &a) { return a.second.vertices.size() == 0; });
 }
 
-Frame::Frame(const UUID &uu) : uuid(uu)
+Frame::Frame(const UUID &uu) : uuid(uu), version(app_version)
 {
 }
 
@@ -82,7 +85,7 @@ void Frame::update_refs()
 
 Frame::Frame(const Frame &fr)
     : uuid(fr.uuid), name(fr.name), junctions(fr.junctions), lines(fr.lines), arcs(fr.arcs), texts(fr.texts),
-      polygons(fr.polygons), width(fr.width), height(fr.height)
+      polygons(fr.polygons), width(fr.width), height(fr.height), version(fr.version)
 {
     update_refs();
 }
@@ -98,6 +101,7 @@ void Frame::operator=(Frame const &fr)
     polygons = fr.polygons;
     width = fr.width;
     height = fr.height;
+    version = fr.version;
     update_refs();
 }
 
@@ -118,6 +122,7 @@ std::pair<Coordi, Coordi> Frame::get_bbox(bool all) const
 json Frame::serialize() const
 {
     json j;
+    version.serialize(j);
     j["type"] = "frame";
     j["name"] = name;
     j["uuid"] = (std::string)uuid;

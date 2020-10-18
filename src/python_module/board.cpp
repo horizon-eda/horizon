@@ -69,6 +69,10 @@ public:
     {
         return board.colors;
     }
+    const horizon::FileVersion &get_version() const override
+    {
+        return board.version;
+    }
 };
 
 class BoardWrapper *create_board_wrapper(const horizon::Project &prj)

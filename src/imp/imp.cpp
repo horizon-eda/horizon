@@ -467,6 +467,7 @@ void ImpBase::run(int argc, char *argv[])
             if (!j.is_null()) {
                 save_json_to_file(core->get_filename() + meta_suffix, j);
             }
+            main_window->set_version_info("");
         }
     });
     connect_action(ActionID::UNDO, [this](const auto &a) {
@@ -806,6 +807,8 @@ void ImpBase::run(int argc, char *argv[])
     update_view_hints();
 
     connect_action(ActionID::SELECT_POLYGON, sigc::mem_fun(*this, &ImpBase::handle_select_polygon));
+
+    check_version();
 
     {
         json j;
@@ -1596,6 +1599,15 @@ void ImpBase::handle_select_polygon(const ActionConnection &a)
 ObjectType ImpBase::get_editor_type() const
 {
     return core->get_object_type();
+}
+
+void ImpBase::check_version()
+{
+    const auto &version = core->get_version();
+    main_window->set_version_info(version.get_message(core->get_object_type()));
+    if (version.get_app() < version.get_file()) {
+        set_read_only(true);
+    }
 }
 
 } // namespace horizon

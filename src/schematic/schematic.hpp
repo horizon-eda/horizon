@@ -10,6 +10,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include "util/file_version.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -113,6 +114,8 @@ public:
     void annotate();
 
     PDFExportSettings pdf_export_settings;
+
+    FileVersion version;
 
     json serialize() const;
     void save_pictures(const std::string &dir) const;

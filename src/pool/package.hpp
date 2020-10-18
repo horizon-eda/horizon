@@ -21,6 +21,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include "util/file_version.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -103,6 +104,8 @@ public:
     const Model *get_model(const UUID &uu = UUID()) const;
 
     const class Package *alternate_for = nullptr;
+
+    FileVersion version;
 
     std::vector<Warning> warnings;
 

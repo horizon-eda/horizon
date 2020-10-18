@@ -6,6 +6,7 @@
 #include <fstream>
 #include <map>
 #include <vector>
+#include "util/file_version.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -24,6 +25,8 @@ public:
     std::string prefix;
     std::set<std::string> tags;
     std::map<UUID, Gate> gates;
+
+    FileVersion version;
     json serialize() const;
     void update_refs(IPool &pool);
     UUID get_uuid() const;

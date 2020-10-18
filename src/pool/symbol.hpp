@@ -11,6 +11,7 @@
 #include "unit.hpp"
 #include "util/uuid.hpp"
 #include "symbol/symbol_rules.hpp"
+#include "util/file_version.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -100,6 +101,7 @@ public:
     void apply_placement(const Placement &p);
 
     SymbolRules rules;
+    FileVersion version;
 
 private:
     void update_refs();

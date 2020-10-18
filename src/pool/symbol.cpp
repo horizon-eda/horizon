@@ -128,11 +128,14 @@ UUID SymbolPin::get_uuid() const
     return uuid;
 }
 
+static const unsigned int app_version = 0;
+
 Symbol::Symbol(const UUID &uu, const json &j, IPool &pool)
     : uuid(uu), unit(pool.get_unit(j.at("unit").get<std::string>())), name(j.value("name", "")),
-      can_expand(j.value("can_expand", false))
+      can_expand(j.value("can_expand", false)), version(app_version, j)
 {
     check_object_type(j, ObjectType::SYMBOL);
+    version.check(ObjectType::SYMBOL, name, uuid);
     if (j.count("junctions")) {
         const json &o = j["junctions"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -195,7 +198,7 @@ Symbol::Symbol(const UUID &uu, const json &j, IPool &pool)
     }
 }
 
-Symbol::Symbol(const UUID &uu) : uuid(uu)
+Symbol::Symbol(const UUID &uu) : uuid(uu), version(app_version)
 {
 }
 
@@ -228,7 +231,7 @@ void Symbol::update_refs()
 Symbol::Symbol(const Symbol &sym)
     : uuid(sym.uuid), unit(sym.unit), name(sym.name), pins(sym.pins), junctions(sym.junctions), lines(sym.lines),
       arcs(sym.arcs), texts(sym.texts), polygons(sym.polygons), can_expand(sym.can_expand),
-      text_placements(sym.text_placements)
+      text_placements(sym.text_placements), version(sym.version)
 {
     update_refs();
 }
@@ -246,7 +249,7 @@ void Symbol::operator=(Symbol const &sym)
     polygons = sym.polygons;
     can_expand = sym.can_expand;
     text_placements = sym.text_placements;
-
+    version = sym.version;
     update_refs();
 }
 
@@ -318,6 +321,7 @@ void Symbol::apply_placement(const Placement &p)
 json Symbol::serialize() const
 {
     json j;
+    version.serialize(j);
     j["type"] = "symbol";
     j["name"] = name;
     j["uuid"] = (std::string)uuid;

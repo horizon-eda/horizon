@@ -149,7 +149,7 @@ ParameterProgram::CommandHandler Padstack::MyParameterProgram::get_command(const
 Padstack::Padstack(const Padstack &ps)
     : uuid(ps.uuid), name(ps.name), type(ps.type), polygons(ps.polygons), holes(ps.holes), shapes(ps.shapes),
       parameter_set(ps.parameter_set), parameters_required(ps.parameters_required),
-      parameter_program(ps.parameter_program)
+      parameter_program(ps.parameter_program), version(ps.version)
 {
     update_refs();
 }
@@ -165,6 +165,7 @@ void Padstack::operator=(Padstack const &ps)
     parameter_set = ps.parameter_set;
     parameters_required = ps.parameters_required;
     parameter_program = ps.parameter_program;
+    version = ps.version;
     update_refs();
 }
 
@@ -173,11 +174,14 @@ void Padstack::update_refs()
     parameter_program.ps = this;
 }
 
+static const unsigned int app_version = 0;
+
 Padstack::Padstack(const UUID &uu, const json &j)
     : uuid(uu), name(j.at("name").get<std::string>()), well_known_name(j.value("well_known_name", "")),
-      parameter_program(this, j.value("parameter_program", ""))
+      parameter_program(this, j.value("parameter_program", "")), version(app_version, j)
 {
     check_object_type(j, ObjectType::PADSTACK);
+    version.check(ObjectType::PADSTACK, name, uuid);
     {
         const json &o = j["polygons"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
@@ -220,13 +224,14 @@ Padstack Padstack::new_from_file(const std::string &filename)
     return Padstack(UUID(j.at("uuid").get<std::string>()), j);
 }
 
-Padstack::Padstack(const UUID &uu) : uuid(uu), parameter_program(this, "")
+Padstack::Padstack(const UUID &uu) : uuid(uu), parameter_program(this, ""), version(app_version)
 {
 }
 
 json Padstack::serialize() const
 {
     json j;
+    version.serialize(j);
     j["uuid"] = (std::string)uuid;
     j["type"] = "padstack";
     j["name"] = name;

@@ -59,6 +59,7 @@ enum class ObjectType {
     PICTURE,
     DECAL,
     BOARD_DECAL,
+    PROJECT,
 };
 enum class PatchType { OTHER, TRACK, PAD, PAD_TH, VIA, PLANE, HOLE_PTH, HOLE_NPTH, BOARD_EDGE, TEXT, N_TYPES };
 

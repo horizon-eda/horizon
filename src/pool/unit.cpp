@@ -51,10 +51,14 @@ UUID Pin::get_uuid() const
     return uuid;
 }
 
+static const unsigned int app_version = 0;
+
 Unit::Unit(const UUID &uu, const json &j)
-    : uuid(uu), name(j.at("name").get<std::string>()), manufacturer(j.value("manufacturer", ""))
+    : uuid(uu), name(j.at("name").get<std::string>()), manufacturer(j.value("manufacturer", "")),
+      version(app_version, j)
 {
     check_object_type(j, ObjectType::UNIT);
+    version.check(ObjectType::UNIT, name, uuid);
     const json &o = j.at("pins");
     for (auto it = o.cbegin(); it != o.cend(); ++it) {
         auto pin_uuid = UUID(it.key());
@@ -62,7 +66,7 @@ Unit::Unit(const UUID &uu, const json &j)
     }
 }
 
-Unit::Unit(const UUID &uu) : uuid(uu)
+Unit::Unit(const UUID &uu) : uuid(uu), version(app_version)
 {
 }
 
@@ -75,6 +79,7 @@ Unit Unit::new_from_file(const std::string &filename)
 json Unit::serialize() const
 {
     json j;
+    version.serialize(j);
     j["type"] = "unit";
     j["name"] = name;
     j["manufacturer"] = manufacturer;

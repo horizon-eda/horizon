@@ -60,6 +60,11 @@ public:
 
     class Rules *get_rules() override;
 
+    const FileVersion &get_version() const override
+    {
+        return sym.version;
+    }
+
 
 private:
     std::map<UUID, Text> *get_text_map() override;

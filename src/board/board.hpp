@@ -27,6 +27,7 @@
 #include "board_panel.hpp"
 #include "common/picture.hpp"
 #include "board_decal.hpp"
+#include "util/file_version.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -127,6 +128,8 @@ public:
     PDFExportSettings pdf_export_settings;
     STEPExportSettings step_export_settings;
     PnPExportSettings pnp_export_settings;
+
+    FileVersion version;
 
     enum ExpandFlags {
         EXPAND_ALL = 0xff,

@@ -29,14 +29,18 @@ static void mkdir_if_not_exists(const std::string &dir, bool keep)
     }
 }
 
+static const unsigned int app_version = 0;
+
 Project::Project(const UUID &uu, const json &j, const std::string &base)
     : base_path(base), uuid(uu), pool_uuid(j.at("pool_uuid").get<std::string>()),
       vias_directory(Glib::build_filename(base, j.at("vias_directory"))),
       pictures_directory(Glib::build_filename(base, j.value("pictures_directory", "pictures"))),
       board_filename(Glib::build_filename(base, j.at("board_filename"))),
       pool_cache_directory(Glib::build_filename(base, j.value("pool_cache_directory", "cache"))),
-      title_old(j.value("title", "")), name_old(j.value("name", ""))
+      version(app_version, j), title_old(j.value("title", "")), name_old(j.value("name", ""))
 {
+    check_object_type(j, ObjectType::PROJECT);
+    version.check(ObjectType::PROJECT, "", uuid);
 
     mkdir_if_not_exists(pool_cache_directory, false);
     mkdir_if_not_exists(vias_directory, true);
@@ -64,7 +68,7 @@ Project Project::new_from_file(const std::string &filename)
     return Project(UUID(j.at("uuid").get<std::string>()), j, Glib::path_get_dirname(filename));
 }
 
-Project::Project(const UUID &uu) : uuid(uu)
+Project::Project(const UUID &uu) : uuid(uu), version(app_version)
 {
 }
 
@@ -139,6 +143,7 @@ std::string Project::get_filename_rel(const std::string &p) const
 json Project::serialize() const
 {
     json j;
+    version.serialize(j);
     j["type"] = "project";
     j["uuid"] = (std::string)uuid;
     j["title"] = title_old;

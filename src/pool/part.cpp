@@ -7,8 +7,12 @@
 #include "util/util.hpp"
 
 namespace horizon {
+
+static const unsigned int app_version = 0;
+
 Part::Part(const UUID &uu, const json &j, IPool &pool)
-    : uuid(uu), inherit_tags(j.value("inherit_tags", false)), inherit_model(j.value("inherit_model", true))
+    : uuid(uu), inherit_tags(j.value("inherit_tags", false)), inherit_model(j.value("inherit_model", true)),
+      version(app_version, j)
 {
     check_object_type(j, ObjectType::PART);
     attributes[Attribute::MPN] = {j.at("MPN").at(0).get<bool>(), j.at("MPN").at(1).get<std::string>()};
@@ -67,6 +71,7 @@ Part::Part(const UUID &uu, const json &j, IPool &pool)
             }
         }
     }
+    version.check(ObjectType::PART, get_MPN(), uuid);
     if (j.count("tags")) {
         tags = j.at("tags").get<std::set<std::string>>();
     }
@@ -151,7 +156,7 @@ UUID Part::get_model() const
         return model;
 }
 
-Part::Part(const UUID &uu) : uuid(uu)
+Part::Part(const UUID &uu) : uuid(uu), version(app_version)
 {
     attributes[Attribute::MPN] = {false, ""};
     attributes[Attribute::MANUFACTURER] = {false, ""};
@@ -169,6 +174,7 @@ Part Part::new_from_file(const std::string &filename, IPool &pool)
 json Part::serialize() const
 {
     json j;
+    version.serialize(j);
     j["type"] = "part";
     j["uuid"] = (std::string)uuid;
 

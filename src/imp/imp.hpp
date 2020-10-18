@@ -307,5 +307,6 @@ private:
 
     void set_flip_view(bool flip);
     void apply_arrow_keys();
+    void check_version();
 };
 } // namespace horizon

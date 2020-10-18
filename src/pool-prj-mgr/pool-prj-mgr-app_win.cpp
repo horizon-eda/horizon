@@ -74,6 +74,8 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("hamburger_menu_button", hamburger_menu_button);
     builder->get_widget("info_bar_pool_not_added", info_bar_pool_not_added);
     builder->get_widget("info_bar_pool_doc", info_bar_pool_doc);
+    builder->get_widget("info_bar_version", info_bar_version);
+    builder->get_widget("version_label", version_label);
 
     set_view_mode(ViewMode::OPEN);
 
@@ -591,6 +593,9 @@ void PoolProjectManagerAppWindow::handle_cancel()
 
 void PoolProjectManagerAppWindow::save_project()
 {
+    if (project_read_only)
+        return;
+    set_version_info("");
     save_json_to_file(project_filename, project->serialize());
     project_needs_save = false;
 }
@@ -856,6 +861,7 @@ void PoolProjectManagerAppWindow::set_view_mode(ViewMode mode)
         hamburger_menu_button->show();
         header->set_title("Horizon EDA");
         update_recent_items();
+        set_version_info("");
         break;
 
     case ViewMode::POOL:
@@ -1101,6 +1107,17 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         }
         std::string pool_path = prj_pool->base_path;
         check_schema_update(pool_path);
+
+        {
+            project_read_only = false;
+            const auto &version = project->version;
+            set_version_info(
+                    version.get_message(ObjectType::PROJECT)
+                    + " This only applies to the project file. Board and Schematic might have different versions.");
+            if (version.get_app() < version.get_file()) {
+                project_read_only = true;
+            }
+        }
 
         view_project.label_project_directory->set_text(Glib::path_get_dirname(project_filename));
 
@@ -1557,6 +1574,18 @@ void PoolProjectManagerAppWindow::update_pool_cache_status_now()
 {
     if (pool_cache_monitor) {
         pool_cache_monitor->update_now();
+    }
+}
+
+
+void PoolProjectManagerAppWindow::set_version_info(const std::string &s)
+{
+    if (s.size()) {
+        info_bar_show(info_bar_version);
+        version_label->set_text(s);
+    }
+    else {
+        info_bar_hide(info_bar_version);
     }
 }
 

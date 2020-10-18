@@ -91,6 +91,11 @@ public:
         return ObjectType::SCHEMATIC;
     }
 
+    const FileVersion &get_version() const override
+    {
+        return sch.version;
+    }
+
 private:
     Block block;
     const bool project_meta_loaded_from_block;

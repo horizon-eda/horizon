@@ -133,6 +133,9 @@ private:
 
     Gtk::InfoBar *info_bar_pool_doc = nullptr;
 
+    Gtk::InfoBar *info_bar_version = nullptr;
+    Gtk::Label *version_label = nullptr;
+
     std::unique_ptr<Project> project = nullptr;
     std::string project_filename;
     bool project_needs_save = false;
@@ -200,6 +203,9 @@ private:
     static int git_transfer_cb(const git_transfer_progress *stats, void *payload);
     bool downloading = false;
     bool download_cancel = false;
+
+    void set_version_info(const std::string &s);
+    bool project_read_only = false;
 
 public:
     zmq::context_t &zctx;

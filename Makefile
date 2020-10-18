@@ -112,6 +112,7 @@ SRC_COMMON = \
 	src/pool/decal.cpp\
 	src/symbol/symbol_rules.cpp\
 	src/symbol/rule_symbol_checks.cpp\
+	src/util/file_version.cpp
 
 
 ifeq ($(OS),Windows_NT)

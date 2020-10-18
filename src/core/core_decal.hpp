@@ -25,6 +25,11 @@ public:
         return ObjectType::DECAL;
     }
 
+    const FileVersion &get_version() const override
+    {
+        return decal.version;
+    }
+
 private:
     std::map<UUID, Polygon> *get_polygon_map() override;
     std::map<UUID, Junction> *get_junction_map() override;
