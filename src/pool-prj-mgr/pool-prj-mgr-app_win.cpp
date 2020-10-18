@@ -1111,9 +1111,15 @@ void PoolProjectManagerAppWindow::open_file_view(const Glib::RefPtr<Gio::File> &
         {
             project_read_only = false;
             const auto &version = project->version;
-            set_version_info(
-                    version.get_message(ObjectType::PROJECT)
-                    + " This only applies to the project file. Board and Schematic might have different versions.");
+            const auto version_msg = version.get_message(ObjectType::PROJECT);
+            if (version_msg.size()) {
+                set_version_info(
+                        version_msg
+                        + " This only applies to the project file. Board and Schematic might have different versions.");
+            }
+            else {
+                set_version_info("");
+            }
             if (version.get_app() < version.get_file()) {
                 project_read_only = true;
             }
