@@ -550,6 +550,8 @@ std::unique_ptr<PNS::SOLID> PNS_HORIZON_IFACE::syncPad(const horizon::BoardPacka
     }
     tr.accumulate(pad->placement);
     auto solid = syncPadstack(&pad->padstack, tr);
+    if (!solid)
+        return nullptr;
 
     if (pad->net)
         solid->SetNet(get_net_code(pad->net->uuid));
@@ -561,6 +563,8 @@ std::unique_ptr<PNS::SOLID> PNS_HORIZON_IFACE::syncPad(const horizon::BoardPacka
 std::unique_ptr<PNS::SOLID> PNS_HORIZON_IFACE::syncHole(const horizon::BoardHole *hole)
 {
     auto solid = syncPadstack(&hole->padstack, hole->placement);
+    if (!solid)
+        return nullptr;
 
     if (hole->net)
         solid->SetNet(get_net_code(hole->net->uuid));
@@ -693,6 +697,8 @@ std::unique_ptr<PNS::SOLID> PNS_HORIZON_IFACE::syncPadstack(const horizon::Padst
 
     ClipperLib::Paths poly_union;
     clipper.Execute(ClipperLib::ctUnion, poly_union, ClipperLib::pftNonZero);
+    if (poly_union.size() == 0) // nothing we care about
+        return nullptr;
     if (poly_union.size() != 1) {
         throw std::runtime_error("invalid pad polygons: " + std::to_string(poly_union.size()));
     }
