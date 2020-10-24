@@ -863,7 +863,16 @@ void PoolRemoteBox::remote_upgrade_thread()
             git_thread_status = "Updating local pool...";
         }
         git_thread_dispatcher.emit();
-        pool_update(notebook->base_path);
+        unsigned int n_errors = 0;
+        pool_update(notebook->base_path,
+                    [&n_errors](PoolUpdateStatus status, std::string filename, std::string message) {
+                        if (status == PoolUpdateStatus::FILE_ERROR) {
+                            n_errors++;
+                        }
+                    });
+        if (n_errors) {
+            throw std::runtime_error("local pool update encountered errors");
+        }
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
