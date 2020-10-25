@@ -6,7 +6,7 @@ namespace horizon {
 
 BoardDecal::BoardDecal(const UUID &uu, const json &j, IPool &pool)
     : uuid(uu), pool_decal(pool.get_decal(j.at("decal").get<std::string>())), decal(*pool_decal),
-      placement(j.at("placement")), flip(j.at("flip").get<bool>())
+      placement(j.at("placement")), flip(j.at("flip").get<bool>()), scale(j.value("scale", 1.0))
 {
 }
 
@@ -20,6 +20,7 @@ json BoardDecal::serialize() const
     j["decal"] = (std::string)pool_decal->uuid;
     j["placement"] = placement.serialize();
     j["flip"] = flip;
+    j["scale"] = scale;
     return j;
 }
 
