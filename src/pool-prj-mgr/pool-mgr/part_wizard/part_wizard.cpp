@@ -424,6 +424,7 @@ void PartWizard::handle_link()
         editors.push_back(ed);
     }
     link_pads(editors);
+    update_pin_warnings();
 }
 
 void PartWizard::link_pads(const std::deque<PadEditor *> &editors)
