@@ -33,7 +33,9 @@ PDFExportSettings::Layer::Layer(int l, const Color &c, Mode m, bool e) : layer(l
 
 PDFExportSettings::PDFExportSettings(const json &j)
     : output_filename(j.at("output_filename").get<std::string>()), min_line_width(j.at("min_line_width")),
-      reverse_layers(j.value("reverse_layers", false)), mirror(j.value("mirror", false))
+      reverse_layers(j.value("reverse_layers", false)), mirror(j.value("mirror", false)),
+      render_holes(j.value("render_holes", false)), set_holes_size(j.value("set_holes_size", false)),
+      holes_diameter(j.value("holes_diameter", 0))
 {
     if (j.count("layers")) {
         const json &o = j.at("layers");
@@ -65,6 +67,9 @@ json PDFExportSettings::serialize_board() const
     }
     j["reverse_layers"] = reverse_layers;
     j["mirror"] = mirror;
+    j["render_holes"] = render_holes;
+    j["set_holes_size"] = set_holes_size;
+    j["holes_diameter"] = holes_diameter;
     return j;
 }
 
