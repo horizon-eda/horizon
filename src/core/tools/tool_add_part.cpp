@@ -134,6 +134,7 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
                 }
                 sym_current->placement = old_symbol->placement;
                 sym_current->placement.shift = args.coords;
+                sym_current->symbol.apply_placement(sym_current->placement);
 
                 selection.clear();
                 selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
@@ -147,6 +148,7 @@ ToolResponse ToolAddPart::update(const ToolArgs &args)
                     sym_current = sym;
                     current_gate++;
                     sym_current->placement.shift = args.coords;
+                    sym_current->symbol.apply_placement(sym_current->placement);
                     selection.clear();
                     selection.emplace(sym_current->uuid, ObjectType::SCHEMATIC_SYMBOL);
                     return ToolResponse();
