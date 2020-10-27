@@ -21,9 +21,10 @@ public:
     bool mirror = false;
     bool include_text = true;
 
-    bool render_holes = false;
     bool set_holes_size = false;
     uint64_t holes_diameter = 0;
+
+    enum { HOLES_LAYER = 1000 };
 
     class Layer {
     public:

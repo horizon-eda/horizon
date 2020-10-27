@@ -37,6 +37,7 @@ private:
     void img_draw_text(const Coordf &p, float size, const std::string &rtext, int angle, bool flip, TextOrigin origin,
                        int layer = 10000, uint64_t width = 0, TextData::Font font = TextData::Font::SIMPLEX,
                        bool center = false, bool mirror = false) override;
+    void img_hole(const Hole &hole) override;
     bool pdf_layer_visible(int l) const;
     Color get_pdf_layer_color(int layer) const;
 };
