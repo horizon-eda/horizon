@@ -1588,7 +1588,7 @@ void PoolProjectManagerAppWindow::set_version_info(const std::string &s)
 {
     if (s.size()) {
         info_bar_show(info_bar_version);
-        version_label->set_text(s);
+        version_label->set_markup(s);
     }
     else {
         info_bar_hide(info_bar_version);

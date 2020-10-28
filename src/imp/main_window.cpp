@@ -255,7 +255,7 @@ void MainWindow::set_version_info(const std::string &s)
 {
     if (s.size()) {
         info_bar_show(version_info_bar);
-        version_label->set_text(s);
+        version_label->set_markup(s);
     }
     else {
         info_bar_hide(version_info_bar);

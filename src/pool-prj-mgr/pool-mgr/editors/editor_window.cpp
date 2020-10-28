@@ -206,7 +206,7 @@ EditorWindow::EditorWindow(ObjectType ty, const std::string &filename, IPool *p,
             label->set_line_wrap(true);
             dynamic_cast<Gtk::Container &>(*info_bar->get_content_area()).add(*label);
             label->show();
-            label->set_text(version.get_message(store->get_type()));
+            label->set_markup(version.get_message(store->get_type()));
             if (version.get_app() < version.get_file()) {
                 read_only = true;
             }

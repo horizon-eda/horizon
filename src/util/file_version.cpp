@@ -36,11 +36,12 @@ void FileVersion::check(ObjectType type, const std::string &name, const class UU
 std::string FileVersion::get_message(ObjectType type) const
 {
     const auto &t = object_descriptions.at(type).name;
+    const std::string learn_more = "<a href=\"https://docs.horizon-eda.org/en/latest/version.html\">Learn more</a>";
     if (app > file) {
-        return "This " + t + " has been created with an older version of Horizon EDA. Saving will update it to the latest version that might be incompatible with older versions of Horizon EDA.";
+        return "This " + t + " has been created with an older version of Horizon EDA. Saving will update it to the latest version that might be incompatible with older versions of Horizon EDA. " + learn_more;
     }
     else if (file > app) {
-        return "This " + t + " has been created with a newer version of Horizon EDA. Some content may not display correctly. To preserve fidelity, this " + t + " has been opened read-only.";
+        return "This " + t + " has been created with a newer version of Horizon EDA. Some content may not display correctly. To preserve fidelity, this " + t + " has been opened read-only. " + learn_more;
     }
     else {
         return "";
