@@ -24,7 +24,7 @@ public:
     bool set_holes_size = false;
     uint64_t holes_diameter = 0;
 
-    enum { HOLES_LAYER = 1000 };
+    enum { HOLES_LAYER = 10000 };
 
     class Layer {
     public:
