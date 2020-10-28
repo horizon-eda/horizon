@@ -1,3 +1,13 @@
+# Version 1.2.1
+
+## Bugfixes
+
+ - Fix crash in router due to undefined behaviour ([37882e0](https://github.com/horizon-eda/horizon/commit/37882e0f9619f634d7681932f0e2b72c4ec20a93))
+
+## Misc
+
+ - Makefile: allow gold linker to be disabled ([6113054](https://github.com/horizon-eda/horizon/commit/6113054dc674e508ca018debabe1974c1cc994a4))
+
 # Version 1.2.0
 
 ## Added features
