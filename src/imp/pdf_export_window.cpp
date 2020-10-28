@@ -140,17 +140,21 @@ PDFExportWindow::PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
             grid_attach_label_and_widget(grid, "Orientation", box, top);
         }
         {
-            auto box = make_boolean_ganged_switch(settings.set_holes_size, "Actual", "Specified",
-                                                  [this](auto v) { s_signal_changed.emit(); });
+            auto box = make_boolean_ganged_switch(settings.set_holes_size, "Actual", "Specified", [this](auto v) {
+                s_signal_changed.emit();
+                holes_diameter_spin->set_sensitive(settings.set_holes_size);
+            });
 
             grid_attach_label_and_widget(grid, "Holes size", box, top);
         }
         {
             auto sp = Gtk::manage(new SpinButtonDim);
             sp->set_range(0, 10.0_mm);
+            sp->set_sensitive(settings.set_holes_size);
             bind_widget(sp, settings.holes_diameter);
             sp->signal_value_changed().connect([this] { s_signal_changed.emit(); });
             grid_attach_label_and_widget(grid, "Holes diameter", sp, top);
+            holes_diameter_spin = sp;
         }
     }
 
