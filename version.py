@@ -1,6 +1,6 @@
 major = 1
-minor = 2
-micro = 1
-name = "Canopus"
+minor = 3
+micro = 0
+name = "Daedalus"
 
 string = ".".join(str(x) for x in (major, minor, micro))

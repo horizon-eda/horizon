@@ -1,3 +1,135 @@
+# Version 1.3.0
+
+## New features
+
+### Board editor
+
+ - Decals for putting logos and symbols on boards ([d2e88d7](https://github.com/horizon-eda/horizon/commit/d2e88d71601604c82a7ba680fe3da3dfe694ead1))
+ - "Add text" tool for adding text linked to packages ([6fbfb78](https://github.com/horizon-eda/horizon/commit/6fbfb786172c339867845a6bf199ec404218bd0f))
+ - Same net clearance check ([46c2156](https://github.com/horizon-eda/horizon/commit/46c2156b1cdc57d885a5c343216e92bd43c6f7cb))
+ - Support highlight collisions and DRC off mode in router ([078d543](https://github.com/horizon-eda/horizon/commit/078d54340f4ccaa8cb1718d10780265a01cc803f))
+
+### Editors (interactive manipulator)
+
+ - Actions for pan and zoom ([1d57d9c](https://github.com/horizon-eda/horizon/commit/1d57d9c6f63466698e4935e002032efb3a744026))
+ - Draw circle tool ([b63a8c1](https://github.com/horizon-eda/horizon/commit/b63a8c1f2f70083c4ac80926382a70e90aa1f321))
+ - Highlight net class action in schematic and board ([9f1a240](https://github.com/horizon-eda/horizon/commit/9f1a24093cc1aa8c3c815a0a225f0d4ee86f1f3a))
+
+### Pool manager
+
+ - Support moving and renaming pool items ([14de320](https://github.com/horizon-eda/horizon/commit/14de3200d7e3e43df879dfd05cb4cfa2eae11d27))
+ - Pull request review tool (needs to be enabled in `prefs.json`) ([e2d4cd2](https://github.com/horizon-eda/horizon/commit/e2d4cd2b9194dffba13a8bffd83254f118e6adc7))
+ - Checks for Units/Entities/Parts ([76c596c](https://github.com/horizon-eda/horizon/commit/76c596ca5d08e7f43ac33b26d8b48e1b90025d33))
+
+### Symbol editor
+
+ - Symbol checks ([a873327](https://github.com/horizon-eda/horizon/commit/a873327f7fe02fec1b43612b3e3dca3da6e7cfea))
+
+### 3D preview
+
+ - Add option for hiding "do not populate" components ([d7d6a9c](https://github.com/horizon-eda/horizon/commit/d7d6a9cacac6fc9bc72417b2434d68458f3dc530))
+
+### Package editor
+
+ - Clearance checks ([a448a3c](https://github.com/horizon-eda/horizon/commit/a448a3c383d3a0af29d65e6e256b8388c860feb5))
+
+### Misc
+
+ - Store application version information in pool items and projects ([9f5cc52](https://github.com/horizon-eda/horizon/commit/9f5cc52a3e65389ad2ea6f4af63753876543b3ff))
+
+## Enhancements
+
+### Internals
+
+ - Check object type when loading pool items ([b961e7a](https://github.com/horizon-eda/horizon/commit/b961e7af71fd3afc3671d4e9101445c29dcac559))
+
+### Package editor
+
+ - Avoid dependency cycles when setting alternate package ([2c3efac](https://github.com/horizon-eda/horizon/commit/2c3efac5212af11fc89d1e22d575437179490989))
+
+### Editors (interactive manipulator)
+
+ - Tell user about conflicting key sequences ([b63a8c1](https://github.com/horizon-eda/horizon/commit/b63a8c1f2f70083c4ac80926382a70e90aa1f321))
+ - Make zoom factor configurable ([b5303b4](https://github.com/horizon-eda/horizon/commit/b5303b460d9ef79b73a7cbee5e490f7b472617e6))
+ - Add action for entering click select mode ([da13af6](https://github.com/horizon-eda/horizon/commit/da13af6b4bde5f3b73b6b6bce638471f30c81eef))
+ - Use layer ranges for improved selection usability in work layer only selection filter mode ([ed7d975](https://github.com/horizon-eda/horizon/commit/ed7d975a1dce767b4a2e0a82e96cea0d3cb37e76))
+ - The "add polygon vertex" tool supports adding more than one vertex per invocation ([2129b75](https://github.com/horizon-eda/horizon/commit/2129b758796b228c35ee24033d90862ddb6991e2))
+ - Only show apply rules button where applicable ([22fdd70](https://github.com/horizon-eda/horizon/commit/22fdd70578eb8e5a5f2be0d95df4a752731c541f))
+ - Bottom view also flips arrow keys ([6a44ebe](https://github.com/horizon-eda/horizon/commit/6a44ebe04d60d6aa0f1efa33a73dce4331148b74))
+ - Rotate arbitrary tool uses reference angle ([cccf0bd](https://github.com/horizon-eda/horizon/commit/cccf0bd0ab48ddad31b169b2035375a2f1753eb2))
+ - Current tool is ended before starting tools triggered externally (such as placing part) ([cf70e2a](https://github.com/horizon-eda/horizon/commit/cf70e2a2c2c4e6d73fa831081e7fcc42b1811fd0))
+ - Option for showing action bar if tool is active ([8d46953](https://github.com/horizon-eda/horizon/commit/8d4695396d49bbc88afb7e829d7eb6697083c1e4))
+
+### Schematic editor
+
+ - Support unsetting frame ([f4491d3](https://github.com/horizon-eda/horizon/commit/f4491d3284fe3ef7cfd4ce994ff8cc2bd198d828))
+ - Use more sensible shift when placing power symbols on pins ([4bc6da5](https://github.com/horizon-eda/horizon/commit/4bc6da5fc9f257f1143538a92b0aa379df3d8fdf))
+
+### Board editor
+
+ - Router respects find grid key ([70f2f85](https://github.com/horizon-eda/horizon/commit/70f2f8531742f884054a18df2d4f469673afaf8c))
+
+### Pool update
+
+ - Improved detection of cycles among pool items ([6c8a184](https://github.com/horizon-eda/horizon/commit/6c8a1840b6cb929ff7ce8ec0aef7f53a6101db45))
+
+### Preferences
+
+ - Search for actions by substring rather than prefix ([14aa7d7](https://github.com/horizon-eda/horizon/commit/14aa7d752a871734417eef702303399e6e66d73d))
+
+### Pool manager
+
+ - Only enable save button in Unit/Entity/Part editor if needed ([994927c](https://github.com/horizon-eda/horizon/commit/994927c6d1b732b2551ac3caa96804680bb083fa))
+ - Use device authentication in remote tab ([69c8b92](https://github.com/horizon-eda/horizon/commit/69c8b92a455e494179ea76e86d2de5d1458ef97b))
+ - Option for only showing pull requests of signed in user ([eda6b5f](https://github.com/horizon-eda/horizon/commit/eda6b5f32dcc3630a5d72084a53b153fe3a85b75))
+ - It's now possible to update pull requests opened with the pool manager ([b406423](https://github.com/horizon-eda/horizon/commit/b406423a6a3182ce2d8e56fcb5c80a1f84997eb6))
+ - Log window in pool/project manager ([6720349](https://github.com/horizon-eda/horizon/commit/67203496641814bd754a46c094860f55548d280b))
+
+## Bugfixes
+
+### Board Editor
+
+ - DRC doesn't ignore barrel of PTH holes without pads ([5490eae](https://github.com/horizon-eda/horizon/commit/5490eae5bf79397828c6da50a8bf2c9788e75c75))
+ - Use 3D model from alternate package if it has only one model ([96cf811](https://github.com/horizon-eda/horizon/commit/96cf811793915ccb2157095dcf99d1f9a4691308))
+ - Parts window doesn't crash if component has no part ([cbf9df3](https://github.com/horizon-eda/horizon/commit/cbf9df3af5350a65e72ea1511c8bb095eb381a53))
+ - Update refdes in unplaced list when reloading netlist ([d42e44e](https://github.com/horizon-eda/horizon/commit/d42e44e0a94c8bcb21cb8a6cc696290c56be4b1b))
+ - Don't load nonexistent nets in airwire filter ([1a14686](https://github.com/horizon-eda/horizon/commit/1a146869375354bee6daeb0e990a0e0b97507c93))
+ - Router doesn't crash on pads with zero polygons ([e43a830](https://github.com/horizon-eda/horizon/commit/e43a8309cb2e697318596401d54bf478c709a41d))
+
+### Canvas
+
+ - Fix grid rendering on some platforms ([8e457c1](https://github.com/horizon-eda/horizon/commit/8e457c1d277b857fb24dbe5ff97f33ab485e682e))
+
+### Editors (interactive manipulator)
+
+ - Also save on exit if a tool is active ([12bc268](https://github.com/horizon-eda/horizon/commit/12bc268785771fe17fef301e36fd978614d2cb29)) 
+ - Make cursor work near head-up display ([cae3fe2](https://github.com/horizon-eda/horizon/commit/cae3fe282de3f504a51441f7940b9a24c128973a))
+
+### Schematic editor
+
+ - Remove nonexistent connections in copy/paste ([0ceaf2e](https://github.com/horizon-eda/horizon/commit/0ceaf2ef9686bb83af3217ca0ec4e17f7ae3b37b))
+ - Update symbol text placement while placing symbol ([431f7e6](https://github.com/horizon-eda/horizon/commit/431f7e63accfd007766ba39bd9f36d739b3abc35))
+
+### Pool/project manager
+
+ - Increase recent list refresh interval for reduced idle CPU usage ([3570e85](https://github.com/horizon-eda/horizon/commit/3570e859e6e6ecf82e493cc5a513edcac0c03c6a))
+ - Catch errors in local pool update during pool upgrade ([86e6476](https://github.com/horizon-eda/horizon/commit/86e6476b258ecbeb48066a3e33fe88a2f9ade5b9))
+
+### Part wizard
+
+ - Update duplicate pad name warning after linking pads ([c0d7756](https://github.com/horizon-eda/horizon/commit/c0d7756957fafda420349d18c3936473564728eb))
+ - Properly check for `.json` suffix in filenames ([6598cc3](https://github.com/horizon-eda/horizon/commit/6598cc33a4f57a6634b029fac46f45ae895a70c2))
+
+## Changed behavior
+
+### Editors (interactive manipulator)
+
+ - Only exit hover select mode if actually clicking one something ([a17b450](https://github.com/horizon-eda/horizon/commit/a17b4504f797d0cd6b95e4377cc1e840b2119dd1))
+
+### Board editor
+
+ - Plane styles got renamed to reduce confusion ([7ec340e](https://github.com/horizon-eda/horizon/commit/7ec340e30753c1eaa93ee437f10b8e9bd9589646))
+
 # Version 1.2.1
 
 ## Bugfixes
