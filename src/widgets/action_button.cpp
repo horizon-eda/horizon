@@ -54,7 +54,10 @@ ActionButton::ActionButton(ActionToolID act, const std::map<ActionToolID, Action
     get_style_context()->add_class("osd");
     button = Gtk::manage(new Gtk::Button);
     set_primary_action(action);
-    button->signal_clicked().connect([this] { s_signal_action.emit(action); });
+    button->signal_clicked().connect([this] {
+        button_current = -1;
+        s_signal_action.emit(action);
+    });
     button->signal_button_press_event().connect(
             [this](GdkEventButton *ev) {
                 if (!menu_button->get_visible())
