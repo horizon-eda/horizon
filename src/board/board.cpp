@@ -32,7 +32,7 @@ BoardColors::BoardColors() : solder_mask({0, .5, 0}), substrate({.2, .15, 0})
 {
 }
 
-static const unsigned int app_version = 0;
+static const unsigned int app_version = 1;
 
 Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, ViaPadstackProvider &vpp)
     : uuid(uu), block(&iblock), name(j.at("name").get<std::string>()), version(app_version, j),
