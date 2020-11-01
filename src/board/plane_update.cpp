@@ -8,6 +8,26 @@
 
 namespace horizon {
 
+class MyCanvasPatch : public CanvasPatch {
+public:
+    using CanvasPatch::CanvasPatch;
+
+protected:
+    bool img_layer_is_visible(int layer) const override
+    {
+        if (BoardLayers::is_copper(layer))
+            return true;
+
+        if (layer == BoardLayers::L_OUTLINE)
+            return true;
+
+        if (layer == 10000)
+            return true;
+
+        return false;
+    }
+};
+
 static void polynode_to_fragment(Plane *plane, const ClipperLib::PolyNode *node)
 {
     assert(node->IsHole() == false);
@@ -79,7 +99,7 @@ static bool bb_isect(const std::pair<ClipperLib::IntPoint, ClipperLib::IntPoint>
 
 void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPads *ca_pads_ext)
 {
-    CanvasPatch ca_my;
+    MyCanvasPatch ca_my;
     const CanvasPatch *ca = ca_ext;
     if (!ca_ext) {
         ca_my.update(*this, Canvas::PanelMode::SKIP);
@@ -473,7 +493,7 @@ void Board::update_planes()
     CanvasPads cp;
     cp.update(*this, Canvas::PanelMode::SKIP);
 
-    CanvasPatch ca;
+    MyCanvasPatch ca;
     ca.update(*this, Canvas::PanelMode::SKIP);
 
     for (auto priority : plane_priorities) {

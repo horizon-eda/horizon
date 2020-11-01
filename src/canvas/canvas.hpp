@@ -180,6 +180,10 @@ protected:
     void draw_lock(const Coordf &center, float size, ColorP color = ColorP::FROM_LAYER, int layer = 10000,
                    bool tr = true);
 
+    virtual bool img_layer_is_visible(int layer) const
+    {
+        return true;
+    }
     virtual void img_net(const class Net *net)
     {
     }

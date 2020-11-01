@@ -8,6 +8,8 @@ void Canvas::img_line(const Coordi &p0, const Coordi &p1, const uint64_t width, 
 {
     if (!img_mode)
         return;
+    if (!img_layer_is_visible(layer))
+        return;
     UUID uu;
     Polygon poly(uu);
     poly.layer = layer;
