@@ -63,6 +63,7 @@ private:
 
 public:
     static Unit new_from_file(const std::string &filename);
+    static unsigned int get_app_version();
     Unit(const UUID &uu);
     UUID uuid;
     std::string name;

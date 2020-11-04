@@ -49,6 +49,11 @@ json Schematic::Annotation::serialize() const
 
 static const unsigned int app_version = 0;
 
+unsigned int Schematic::get_app_version()
+{
+    return app_version;
+}
+
 Schematic::Schematic(const UUID &uu, const json &j, Block &iblock, IPool &pool)
     : uuid(uu), block(&iblock), name(j.at("name").get<std::string>()),
       group_tag_visible(j.value("group_tag_visible", false)), annotation(j.value("annotation", json())),

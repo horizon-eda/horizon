@@ -8,6 +8,11 @@ namespace horizon {
 
 static const unsigned int app_version = 0;
 
+unsigned int Decal::get_app_version()
+{
+    return app_version;
+}
+
 Decal::Decal(const UUID &uu, const json &j) : uuid(uu), name(j.value("name", "")), version(app_version, j)
 {
     check_object_type(j, ObjectType::DECAL);

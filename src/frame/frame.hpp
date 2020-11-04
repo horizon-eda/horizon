@@ -23,6 +23,7 @@ public:
     Frame(const UUID &uu, const json &j);
     Frame(const UUID &uu);
     static Frame new_from_file(const std::string &filename);
+    static unsigned int get_app_version();
     std::pair<Coordi, Coordi> get_bbox(bool all = false) const;
     Junction *get_junction(const UUID &uu) override;
     UUID get_uuid() const;

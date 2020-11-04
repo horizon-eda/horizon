@@ -130,6 +130,11 @@ UUID SymbolPin::get_uuid() const
 
 static const unsigned int app_version = 0;
 
+unsigned int Symbol::get_app_version()
+{
+    return app_version;
+}
+
 Symbol::Symbol(const UUID &uu, const json &j, IPool &pool)
     : uuid(uu), unit(pool.get_unit(j.at("unit").get<std::string>())), name(j.value("name", "")),
       can_expand(j.value("can_expand", false)), version(app_version, j)

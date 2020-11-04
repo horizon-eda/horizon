@@ -27,6 +27,7 @@ private:
 
 public:
     static Project new_from_file(const std::string &filename);
+    static unsigned int get_app_version();
     Project(const UUID &uu);
     ProjectBlock &get_top_block();
     const ProjectBlock &get_top_block() const;

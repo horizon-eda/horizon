@@ -73,6 +73,7 @@ public:
     Symbol(const UUID &uu, const json &j, class IPool &pool);
     Symbol(const UUID &uu);
     static Symbol new_from_file(const std::string &filename, IPool &pool);
+    static unsigned int get_app_version();
     std::pair<Coordi, Coordi> get_bbox(bool all = false) const;
     virtual Junction *get_junction(const UUID &uu) override;
 

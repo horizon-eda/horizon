@@ -34,6 +34,7 @@ private:
 public:
     static Schematic new_from_file(const std::string &filename, Block &block, IPool &pool);
     Schematic(const UUID &uu, Block &block);
+    static unsigned int get_app_version();
 
     /**
      * This is where the magic happens.

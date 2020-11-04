@@ -53,6 +53,11 @@ UUID Pin::get_uuid() const
 
 static const unsigned int app_version = 0;
 
+unsigned int Unit::get_app_version()
+{
+    return app_version;
+}
+
 Unit::Unit(const UUID &uu, const json &j)
     : uuid(uu), name(j.at("name").get<std::string>()), manufacturer(j.value("manufacturer", "")),
       version(app_version, j)

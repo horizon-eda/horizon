@@ -18,6 +18,7 @@ public:
     Decal(const UUID &uu, const json &j);
     Decal(const UUID &uu);
     static Decal new_from_file(const std::string &filename);
+    static unsigned int get_app_version();
 
     json serialize() const;
 

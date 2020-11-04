@@ -10,6 +10,11 @@ namespace horizon {
 
 static const unsigned int app_version = 0;
 
+unsigned int Part::get_app_version()
+{
+    return app_version;
+}
+
 Part::Part(const UUID &uu, const json &j, IPool &pool)
     : uuid(uu), inherit_tags(j.value("inherit_tags", false)), inherit_model(j.value("inherit_model", true)),
       version(app_version, j)

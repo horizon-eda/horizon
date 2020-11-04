@@ -64,6 +64,7 @@ public:
     Package(const UUID &uu, const json &j, class IPool &pool);
     Package(const UUID &uu);
     static Package new_from_file(const std::string &filename, class IPool &pool);
+    static unsigned int get_app_version();
 
     json serialize() const;
     Junction *get_junction(const UUID &uu) override;

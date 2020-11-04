@@ -52,6 +52,7 @@ public:
     Board(const UUID &uu, const json &, Block &block, IPool &pool, ViaPadstackProvider &vpp);
     static Board new_from_file(const std::string &filename, Block &block, IPool &pool, ViaPadstackProvider &vpp);
     Board(const UUID &uu, Block &block);
+    static unsigned int get_app_version();
 
     void expand(bool careful = false);
     void expand_packages();

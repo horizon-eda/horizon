@@ -59,6 +59,11 @@ json Package::Model::serialize() const
 
 static const unsigned int app_version = 0;
 
+unsigned int Package::get_app_version()
+{
+    return app_version;
+}
+
 Package::Package(const UUID &uu, const json &j, IPool &pool)
     : uuid(uu), name(j.at("name").get<std::string>()), manufacturer(j.value("manufacturer", "")),
       parameter_program(this, j.value("parameter_program", "")), version(app_version, j)

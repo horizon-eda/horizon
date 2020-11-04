@@ -31,6 +31,11 @@ static void mkdir_if_not_exists(const std::string &dir, bool keep)
 
 static const unsigned int app_version = 0;
 
+unsigned int Project::get_app_version()
+{
+    return app_version;
+}
+
 Project::Project(const UUID &uu, const json &j, const std::string &base)
     : base_path(base), uuid(uu), pool_uuid(j.at("pool_uuid").get<std::string>()),
       vias_directory(Glib::build_filename(base, j.at("vias_directory"))),

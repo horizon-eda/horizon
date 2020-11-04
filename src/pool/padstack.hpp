@@ -43,6 +43,7 @@ public:
     Padstack(const UUID &uu, const json &j);
     Padstack(const UUID &uu);
     static Padstack new_from_file(const std::string &filename);
+    static unsigned int get_app_version();
 
     json serialize() const;
 

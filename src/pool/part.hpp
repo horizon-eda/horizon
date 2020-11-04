@@ -28,6 +28,7 @@ public:
     Part(const UUID &uu);
 
     static Part new_from_file(const std::string &filename, IPool &pool);
+    static unsigned int get_app_version();
     UUID uuid;
 
     enum class Attribute { MPN, VALUE, MANUFACTURER, DATASHEET, DESCRIPTION };

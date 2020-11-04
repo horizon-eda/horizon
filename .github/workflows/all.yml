@@ -64,10 +64,14 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: apt-get update -y && apt-get install git build-essential libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git python3-cairo-dev libosmesa6-dev -y
+    - name: Install pyyaml for version check
+      run: apt-get install -y python3-yaml
     - name: Build
       run: make -j2 build/horizon.so
     - name: Test python module
       run: python3 -c 'import sys; sys.path.append("build"); import horizon'
+    - name: Check app versions
+      run: python3 scripts/check_app_versions.py
 
   build-py-ubuntu:
     runs-on: ubuntu-18.04

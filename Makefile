@@ -700,6 +700,7 @@ SRC_PYTHON = \
 	src/python_module/pool_manager.cpp \
 	src/python_module/pool.cpp \
 	src/python_module/3d_image_exporter.cpp \
+	src/python_module/version.cpp \
 
 SRC_OCE_EXPORT = \
 	src/export_step/export_step.cpp\

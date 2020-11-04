@@ -19,6 +19,7 @@ public:
     Entity(const UUID &uu);
 
     static Entity new_from_file(const std::string &filename, IPool &pool);
+    static unsigned int get_app_version();
     UUID uuid;
     std::string name;
     std::string manufacturer;

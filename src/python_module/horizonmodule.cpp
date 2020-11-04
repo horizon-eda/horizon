@@ -13,11 +13,17 @@
 #include "pool_manager.hpp"
 #include "pool.hpp"
 #include "3d_image_exporter.hpp"
+#include "version.hpp"
 
 PyDoc_STRVAR(module_doc, "Parts of horizon as a module");
 
+static struct PyMethodDef methods[] = {
+        {"get_app_version", &py_get_app_version, METH_VARARGS, "Get object app version"},
+        {NULL, NULL, 0, NULL},
+};
+
 static struct PyModuleDef horizonmodule = {
-        PyModuleDef_HEAD_INIT, "horizon", module_doc, -1, NULL, NULL, NULL, NULL, NULL};
+        PyModuleDef_HEAD_INIT, "horizon", module_doc, -1, methods, NULL, NULL, NULL, NULL};
 
 extern "C" {
 PyMODINIT_FUNC PyInit_horizon(void);

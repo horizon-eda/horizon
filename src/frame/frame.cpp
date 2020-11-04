@@ -9,6 +9,11 @@ namespace horizon {
 
 static const unsigned int app_version = 0;
 
+unsigned int Frame::get_app_version()
+{
+    return app_version;
+}
+
 Frame::Frame(const UUID &uu, const json &j)
     : uuid(uu), name(j.value("name", "")), width(j.value("width", 297_mm)), height(j.value("height", 210_mm)),
       version(app_version, j)
