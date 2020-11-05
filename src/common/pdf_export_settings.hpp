@@ -21,6 +21,11 @@ public:
     bool mirror = false;
     bool include_text = true;
 
+    bool set_holes_size = false;
+    uint64_t holes_diameter = 0;
+
+    enum { HOLES_LAYER = 10000 };
+
     class Layer {
     public:
         Layer(int l, const json &j);
