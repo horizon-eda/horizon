@@ -36,6 +36,7 @@ private:
     Gtk::Entry *filename_entry = nullptr;
     Gtk::Button *filename_button = nullptr;
     class SpinButtonDim *min_line_width_sp = nullptr;
+    Gtk::SpinButton *holes_diameter_spin = nullptr;
     Gtk::Grid *grid = nullptr;
     Gtk::ListBox *layers_box;
     Glib::RefPtr<Gtk::SizeGroup> sg_layer_name;

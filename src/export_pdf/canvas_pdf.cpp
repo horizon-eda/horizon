@@ -2,6 +2,7 @@
 #include "common/pdf_export_settings.hpp"
 #include "util/str_util.hpp"
 #include "common/polygon.hpp"
+#include "common/hole.hpp"
 #include "canvas/appearance.hpp"
 #include "board/plane.hpp"
 
@@ -185,6 +186,39 @@ void CanvasPDF::img_polygon(const Polygon &ipoly, bool tr)
     painter->Restore();
 }
 
+void CanvasPDF::img_hole(const Hole &hole)
+{
+    if (!pdf_layer_visible(PDFExportSettings::HOLES_LAYER))
+        return;
+    painter->Save();
+
+    auto color = get_pdf_layer_color(PDFExportSettings::HOLES_LAYER);
+    painter->SetColor(color.r, color.g, color.b);
+    painter->SetStrokingColor(color.r, color.g, color.b);
+    painter->SetStrokeWidthMM(to_um(settings.min_line_width));
+
+    auto hole2 = hole;
+    if (settings.set_holes_size) {
+        hole2.diameter = settings.holes_diameter;
+    }
+    auto poly = hole2.to_polygon().remove_arcs(64);
+    bool first = true;
+    for (const auto &it : poly.vertices) {
+        Coordi p = it.position;
+        p = transform.transform(p);
+        if (first)
+            painter->MoveToMM(to_um(p.x), to_um(p.y));
+        else
+            painter->LineToMM(to_um(p.x), to_um(p.y));
+        first = false;
+    }
+    painter->ClosePath();
+    if (fill)
+        painter->Fill(true);
+    else
+        painter->Stroke();
+    painter->Restore();
+}
 
 void CanvasPDF::request_push()
 {

@@ -1,1 +1,3 @@
-versions: {}
+versions:
+  board:
+    1: add holes to PDF export

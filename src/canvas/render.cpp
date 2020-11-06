@@ -1335,6 +1335,9 @@ void Canvas::render(const BoardHole &hole, bool interactive)
 
 void Canvas::render(const class Dimension &dim)
 {
+    if (img_mode)
+        return;
+
     Coordd p0 = dim.p0;
     Coordd p1 = dim.p1;
 

@@ -32,7 +32,7 @@ BoardColors::BoardColors() : solder_mask({0, .5, 0}), substrate({.2, .15, 0})
 {
 }
 
-static const unsigned int app_version = 0;
+static const unsigned int app_version = 1;
 
 unsigned int Board::get_app_version()
 {
@@ -440,8 +440,9 @@ void Board::update_pdf_export_settings(PDFExportSettings &settings)
 {
     auto layers_from_board = get_layers();
     // remove layers not on board
-    map_erase_if(settings.layers,
-                 [&layers_from_board](const auto &it) { return layers_from_board.count(it.first) == 0; });
+    map_erase_if(settings.layers, [&layers_from_board](const auto &it) {
+        return it.first != PDFExportSettings::HOLES_LAYER && layers_from_board.count(it.first) == 0;
+    });
 
     // add new layers
     auto add_layer = [&settings](int l, bool enable = true) {
@@ -449,6 +450,9 @@ void Board::update_pdf_export_settings(PDFExportSettings &settings)
                 std::piecewise_construct, std::forward_as_tuple(l),
                 std::forward_as_tuple(l, Color(0, 0, 0), PDFExportSettings::Layer::Mode::OUTLINE, enable));
     };
+
+    // add holes layer
+    add_layer(PDFExportSettings::HOLES_LAYER, false);
 
     add_layer(BoardLayers::OUTLINE_NOTES);
     add_layer(BoardLayers::L_OUTLINE);

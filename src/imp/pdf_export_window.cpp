@@ -41,7 +41,10 @@ PDFLayerEditor::PDFLayerEditor(BaseObjectType *cobject, const Glib::RefPtr<Gtk::
     x->get_widget("layer_color", layer_color);
     parent.sg_layer_name->add_widget(*layer_checkbutton);
 
-    layer_checkbutton->set_label(parent.core.get_layer_provider().get_layers().at(layer.layer).name);
+    auto name = layer.layer == PDFExportSettings::HOLES_LAYER
+                        ? "Holes"
+                        : parent.core.get_layer_provider().get_layers().at(layer.layer).name;
+    layer_checkbutton->set_label(name);
     bind_widget(layer_checkbutton, layer.enabled);
     layer_checkbutton->signal_toggled().connect([this] { s_signal_changed.emit(); });
     {
@@ -135,6 +138,23 @@ PDFExportWindow::PDFExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
                                                   [this](auto v) { s_signal_changed.emit(); });
 
             grid_attach_label_and_widget(grid, "Orientation", box, top);
+        }
+        {
+            auto box = make_boolean_ganged_switch(settings.set_holes_size, "Actual", "Specified", [this](auto v) {
+                s_signal_changed.emit();
+                holes_diameter_spin->set_sensitive(settings.set_holes_size);
+            });
+
+            grid_attach_label_and_widget(grid, "Holes size", box, top);
+        }
+        {
+            auto sp = Gtk::manage(new SpinButtonDim);
+            sp->set_range(0, 10.0_mm);
+            sp->set_sensitive(settings.set_holes_size);
+            bind_widget(sp, settings.holes_diameter);
+            sp->signal_value_changed().connect([this] { s_signal_changed.emit(); });
+            grid_attach_label_and_widget(grid, "Holes diameter", sp, top);
+            holes_diameter_spin = sp;
         }
     }
 
