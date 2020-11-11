@@ -72,6 +72,7 @@ SRC_COMMON = \
 	src/board/rule_clearance_copper_keepout.cpp\
 	src/board/rule_layer_pair.cpp\
 	src/board/rule_clearance_same_net.cpp\
+	3rd_party/delaunator/delaunator.cpp\
 	src/board/airwires.cpp\
 	src/board/fab_output_settings.cpp\
 	src/board/board_hole.cpp\
@@ -718,9 +719,9 @@ ifneq ($(OS),Windows_NT)
 endif
 LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq libgit2 libcurl glm
 
-OPTIMIZE = -fdata-sections -ffunction-sections
+OPTIMIZE = -fdata-sections -ffunction-sections -O3
 DEBUGFLAGS = -g3
-CXXFLAGS += $(DEBUGFLAGS) $(DEFINES) $(OPTIMIZE) $(shell $(PKG_CONFIG) --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -Wsuggest-override -std=c++17 -O3
+CXXFLAGS += $(DEBUGFLAGS) $(DEFINES) $(OPTIMIZE) $(shell $(PKG_CONFIG) --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -Wsuggest-override -std=c++17
 CFLAGS = $(filter-out -Wsuggest-override, $(filter-out -std=%,$(CXXFLAGS))) -std=c99
 LDFLAGS += -lm -lpthread
 GLIB_COMPILE_RESOURCES = $(shell $(PKG_CONFIG) --variable=glib_compile_resources gio-2.0)
