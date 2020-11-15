@@ -9,6 +9,7 @@
 #include "util/status_dispatcher.hpp"
 #include "util/item_set.hpp"
 #include <atomic>
+#include "util/autofree_ptr.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -79,6 +80,8 @@ private:
     void remote_upgrade_thread();
     void create_pr_thread();
     void update_pr_thread();
+    void update_prepare_pr_thread();
+    autofree_ptr<git_remote> get_or_create_remote(class GitHubClient &client, git_repository *repo);
     void refresh_prs_thread();
     void login_thread();
     void checkout_master(git_repository *repo);
@@ -91,7 +94,7 @@ private:
 
     Glib::Dispatcher git_thread_dispatcher;
 
-    enum class GitThreadMode { UPGRADE, PULL_REQUEST, PULL_REQUEST_UPDATE, LOGIN };
+    enum class GitThreadMode { UPGRADE, PULL_REQUEST, PULL_REQUEST_UPDATE, LOGIN, PULL_REQUEST_UPDATE_PREPARE };
     GitThreadMode git_thread_mode = GitThreadMode::UPGRADE;
     bool git_thread_busy = false;
     std::string git_thread_status;

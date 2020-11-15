@@ -221,6 +221,10 @@ PoolRemoteBox::PoolRemoteBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
         else if (git_thread_mode == GitThreadMode::LOGIN && !git_thread_busy && !git_thread_error) {
             handle_refresh_prs();
         }
+        else if (git_thread_mode == GitThreadMode::PULL_REQUEST_UPDATE_PREPARE && !git_thread_busy
+                 && !git_thread_error) {
+            set_pr_update_mode(pr_update_nr, pr_update_branch);
+        }
     });
 
 
@@ -342,19 +346,16 @@ int PoolRemoteBox::pr_diff_file_cb_c(const git_diff_delta *delta, float progress
 
 void PoolRemoteBox::set_pr_update_mode(unsigned int pr, const std::string branch_name)
 {
-    pr_update_button->set_visible(pr);
-    pr_update_cancel_button->set_visible(pr);
-    create_pr_button->set_visible(!pr);
-    pr_update_nr = pr;
-    pr_update_branch = branch_name;
-    pr_update_button->set_label("Update PR #" + std::to_string(pr));
-    update_prs();
     if (!pr) {
         items_merge.clear();
         models_merge.clear();
         update_items_merge();
         pr_title_entry->set_text("");
         pr_body_textview->get_buffer()->set_text("");
+        pr_update_button->set_visible(false);
+        pr_update_cancel_button->set_visible(false);
+        create_pr_button->set_visible(true);
+        pr_update_nr = 0;
         return;
     }
 
@@ -364,9 +365,36 @@ void PoolRemoteBox::set_pr_update_mode(unsigned int pr, const std::string branch
     }
 
     autofree_ptr<git_reference> branch(git_reference_free);
-    if (git_branch_lookup(&branch.ptr, repo, branch_name.c_str(), GIT_BRANCH_LOCAL) != 0) {
+    if (const auto err = git_branch_lookup(&branch.ptr, repo, branch_name.c_str(), GIT_BRANCH_LOCAL);
+        err == GIT_ENOTFOUND) {
+        // branch not found
+
+        if (notebook->pool_updating)
+            return;
+
+        notebook->pool_updating = true;
+        git_thread_busy = true;
+        git_thread_error = false;
+        git_thread_mode = GitThreadMode::PULL_REQUEST_UPDATE_PREPARE;
+
+        pr_update_nr = pr;
+        pr_update_branch = branch_name;
+
+        std::thread thr(&PoolRemoteBox::update_prepare_pr_thread, this);
+
+        thr.detach();
+
+        return;
+    }
+    else if (err != 0) {
         throw std::runtime_error("branch lookup: " + branch_name);
     }
+
+    pr_update_button->set_visible(true);
+    pr_update_cancel_button->set_visible(true);
+    create_pr_button->set_visible(false);
+    pr_update_button->set_label("Update PR #" + std::to_string(pr));
+    update_prs();
 
     autofree_ptr<git_commit> latest_commit(git_commit_free);
     if (git_reference_peel(reinterpret_cast<git_object **>(&latest_commit.ptr), branch, GIT_OBJ_COMMIT) != 0) {
@@ -1092,6 +1120,56 @@ void PoolRemoteBox::push_branch(git_remote *remote, const std::string &branch_na
     }
 }
 
+autofree_ptr<git_remote> PoolRemoteBox::get_or_create_remote(GitHubClient &client, git_repository *repo)
+{
+    autofree_ptr<git_remote> my_remote(git_remote_free);
+    if (const auto err = git_remote_lookup(&my_remote.ptr, repo, gh_username.c_str()); err == GIT_ENOTFOUND) {
+        // remote doesn't exist, fork upstream
+        auto fork_info = client.create_fork(gh_owner, gh_repo);
+        int retries = 60;
+        json forked_repo;
+        while (retries) {
+            try {
+                forked_repo = client.get_repo(gh_username, gh_repo);
+                break;
+            }
+            catch (const std::exception &e) {
+                retries--;
+                {
+                    std::lock_guard<std::mutex> lock(git_thread_mutex);
+                    git_thread_status = "Waiting for fork... (" + std::string(e.what()) + ")";
+                }
+                git_thread_dispatcher.emit();
+                Glib::usleep(1e6);
+            }
+            catch (...) {
+                retries--;
+                {
+                    std::lock_guard<std::mutex> lock(git_thread_mutex);
+                    git_thread_status = "Waiting for fork...";
+                }
+                git_thread_dispatcher.emit();
+                Glib::usleep(1e6);
+            }
+        }
+        if (retries == 0) {
+            throw std::runtime_error("timeout waiting for fork");
+        }
+
+        std::string fork_url = fork_info.at("clone_url");
+        if (git_remote_create(&my_remote.ptr, repo, gh_username.c_str(), fork_url.c_str()) != 0) {
+            throw std::runtime_error("error adding remote");
+        }
+        return my_remote;
+    }
+    else if (err == 0) {
+        return my_remote;
+    }
+    else {
+        throw std::runtime_error("error looking up remote");
+    }
+}
+
 void PoolRemoteBox::create_pr_thread()
 {
     try {
@@ -1139,45 +1217,7 @@ void PoolRemoteBox::create_pr_thread()
             throw std::runtime_error("error opening repo");
         }
 
-        autofree_ptr<git_remote> my_remote(git_remote_free);
-        if (git_remote_lookup(&my_remote.ptr, repo, gh_username.c_str()) != 0) {
-            // remote doesn't exist, fork upstream
-            auto fork_info = client.create_fork(gh_owner, gh_repo);
-            int retries = 60;
-            json forked_repo;
-            while (retries) {
-                try {
-                    forked_repo = client.get_repo(gh_username, gh_repo);
-                    break;
-                }
-                catch (const std::exception &e) {
-                    retries--;
-                    {
-                        std::lock_guard<std::mutex> lock(git_thread_mutex);
-                        git_thread_status = "Waiting for fork... (" + std::string(e.what()) + ")";
-                    }
-                    git_thread_dispatcher.emit();
-                    Glib::usleep(1e6);
-                }
-                catch (...) {
-                    retries--;
-                    {
-                        std::lock_guard<std::mutex> lock(git_thread_mutex);
-                        git_thread_status = "Waiting for fork...";
-                    }
-                    git_thread_dispatcher.emit();
-                    Glib::usleep(1e6);
-                }
-            }
-            if (retries == 0) {
-                throw std::runtime_error("timeout waiting for fork");
-            }
-
-            std::string fork_url = fork_info.at("clone_url");
-            if (git_remote_create(&my_remote.ptr, repo, gh_username.c_str(), fork_url.c_str()) != 0) {
-                throw std::runtime_error("error adding remote");
-            }
-        }
+        auto my_remote = get_or_create_remote(client, repo);
 
         checkout_master(repo);
 
@@ -1403,6 +1443,114 @@ void PoolRemoteBox::update_pr_thread()
             }
             git_thread_dispatcher.emit();
             client.add_issue_comment(gh_owner, gh_repo, pr_update_nr, pr_body);
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            git_thread_busy = false;
+            git_thread_status = "Done";
+        }
+        git_thread_dispatcher.emit();
+    }
+    catch (const std::exception &e) {
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            git_thread_busy = false;
+            git_thread_error = true;
+            git_thread_status = "Error: " + std::string(e.what());
+        }
+        git_thread_dispatcher.emit();
+    }
+    catch (const Gio::Error &e) {
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            git_thread_busy = false;
+            git_thread_error = true;
+            git_thread_status = "IO Error: " + std::string(e.what());
+        }
+        git_thread_dispatcher.emit();
+    }
+}
+
+
+void PoolRemoteBox::update_prepare_pr_thread()
+{
+    try {
+
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            git_thread_status = "Authenticating...";
+        }
+        git_thread_dispatcher.emit();
+
+        if (gh_token.size() == 0) {
+            throw std::runtime_error("not logged in");
+        }
+
+        GitHubClient client;
+        try {
+            client.login_token(gh_token);
+            git_thread_dispatcher.emit();
+        }
+        catch (const std::runtime_error &e) {
+            gh_username = "";
+            throw std::runtime_error("can't log in");
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            git_thread_status = "Opening repository...";
+        }
+        git_thread_dispatcher.emit();
+
+        autofree_ptr<git_repository> repo(git_repository_free);
+        if (git_repository_open(&repo.ptr, notebook->remote_repo.c_str()) != 0) {
+            throw std::runtime_error("error opening repo");
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(git_thread_mutex);
+            git_thread_status = "Adding remote...";
+        }
+        git_thread_dispatcher.emit();
+        auto my_remote = get_or_create_remote(client, repo);
+
+        autofree_ptr<git_reference> branch(git_reference_free);
+        if (const auto err = git_branch_lookup(&branch.ptr, repo, pr_update_branch.c_str(), GIT_BRANCH_LOCAL);
+            err == GIT_ENOTFOUND) {
+            // branch not found, fetch
+            std::string refspec = "refs/heads/" + pr_update_branch;
+            char *refspec_c = strdup(refspec.c_str());
+
+            const git_strarray refs = {&refspec_c, 1};
+            git_fetch_options fetch_opts = GIT_FETCH_OPTIONS_INIT;
+            {
+                std::lock_guard<std::mutex> lock(git_thread_mutex);
+                git_thread_status = "Fetching branch...";
+            }
+            git_thread_dispatcher.emit();
+            if (git_remote_fetch(my_remote, &refs, &fetch_opts, NULL) != 0) {
+                free(refspec_c);
+                throw std::runtime_error("error fetching");
+            }
+            free(refspec_c);
+
+            // set up local branch
+            autofree_ptr<git_annotated_commit> latest_commit(git_annotated_commit_free);
+            if (git_annotated_commit_from_revspec(&latest_commit.ptr, repo,
+                                                  (gh_username + "/" + pr_update_branch).c_str())
+                != 0) {
+                throw std::runtime_error("error getting latest commit");
+            }
+
+            autofree_ptr<git_reference> local_branch(git_reference_free);
+            if (git_branch_create_from_annotated(&local_branch.ptr, repo, pr_update_branch.c_str(), latest_commit, 0)
+                != 0) {
+                throw std::runtime_error("error creating local branch");
+            }
+        }
+        else if (err != 0) {
+            throw std::runtime_error("branch lookup");
         }
 
         {
