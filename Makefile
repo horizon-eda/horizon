@@ -72,6 +72,7 @@ SRC_COMMON = \
 	src/board/rule_clearance_copper_keepout.cpp\
 	src/board/rule_layer_pair.cpp\
 	src/board/rule_clearance_same_net.cpp\
+	3rd_party/delaunator/delaunator.cpp\
 	src/board/airwires.cpp\
 	src/board/fab_output_settings.cpp\
 	src/board/board_hole.cpp\
