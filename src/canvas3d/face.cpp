@@ -142,7 +142,7 @@ void FaceRenderer::render()
     if (ca.models_loading_mutex.try_lock()) {
         glUseProgram(program);
         glBindVertexArray(vao);
-
+        GL_CHECK_ERROR
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(ca.viewmat));
         glUniformMatrix4fv(proj_loc, 1, GL_FALSE, glm::value_ptr(ca.projmat));
         glUniform3fv(cam_normal_loc, 1, glm::value_ptr(ca.cam_normal));
@@ -151,7 +151,7 @@ void FaceRenderer::render()
         glUniform1f(z_bottom_loc, ca.ca.get_layer(BoardLayers::BOTTOM_COPPER).offset
                                           + (ca.ca.get_layer(BoardLayers::BOTTOM_COPPER).explode_mul - 4) * ca.explode);
         glUniform1f(highlight_intensity_loc, ca.highlight_intensity);
-
+        GL_CHECK_ERROR
         for (const auto &it : ca.models) {
             std::pair<std::string, bool> populate = {it.first, false};
             std::pair<std::string, bool> nopopulate = {it.first, true};

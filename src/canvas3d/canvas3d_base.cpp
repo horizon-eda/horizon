@@ -216,13 +216,14 @@ void Canvas3DBase::render(RenderBackground mode)
     else {
         projmat = glm::ortho(-width * m, width * m, -height * m, height * m, -d, d);
     }
-
+    GL_CHECK_ERROR
     cam_normal = glm::normalize(cam_offset);
+    GL_CHECK_ERROR
     wall_renderer.render();
-
+    GL_CHECK_ERROR
     if (show_models)
         face_renderer.render();
-
+    GL_CHECK_ERROR
     cover_renderer.render();
 
     GL_CHECK_ERROR
