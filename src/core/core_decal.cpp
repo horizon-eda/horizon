@@ -83,8 +83,8 @@ void CoreDecal::history_push()
 
 void CoreDecal::history_load(unsigned int i)
 {
-    auto x = dynamic_cast<CoreDecal::HistoryItem *>(history.at(history_current).get());
-    decal = x->decal;
+    const auto &x = dynamic_cast<CoreDecal::HistoryItem &>(*history.at(history_current));
+    decal = x.decal;
     s_signal_rebuilt.emit();
 }
 

@@ -609,9 +609,9 @@ void CoreBoard::history_push()
 
 void CoreBoard::history_load(unsigned int i)
 {
-    auto x = dynamic_cast<CoreBoard::HistoryItem *>(history.at(history_current).get());
-    brd.emplace(x->brd);
-    block.emplace(x->block);
+    const auto &x = dynamic_cast<CoreBoard::HistoryItem &>(*history.at(history_current));
+    brd.emplace(x.brd);
+    block.emplace(x.block);
     brd->block = &*block;
     brd->update_refs();
     brd->expand();

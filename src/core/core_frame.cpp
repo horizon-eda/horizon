@@ -84,8 +84,8 @@ void CoreFrame::history_push()
 
 void CoreFrame::history_load(unsigned int i)
 {
-    auto x = dynamic_cast<CoreFrame::HistoryItem *>(history.at(history_current).get());
-    frame = x->frame;
+    const auto &x = dynamic_cast<CoreFrame::HistoryItem &>(*history.at(history_current));
+    frame = x.frame;
     frame.expand();
     s_signal_rebuilt.emit();
 }

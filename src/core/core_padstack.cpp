@@ -224,8 +224,8 @@ void CorePadstack::history_push()
 
 void CorePadstack::history_load(unsigned int i)
 {
-    auto x = dynamic_cast<CorePadstack::HistoryItem *>(history.at(history_current).get());
-    padstack = x->padstack;
+    const auto &x = dynamic_cast<CorePadstack::HistoryItem &>(*history.at(history_current));
+    padstack = x.padstack;
     s_signal_rebuilt.emit();
 }
 

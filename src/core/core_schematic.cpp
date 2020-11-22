@@ -628,9 +628,9 @@ void CoreSchematic::history_push()
 
 void CoreSchematic::history_load(unsigned int i)
 {
-    auto x = dynamic_cast<CoreSchematic::HistoryItem *>(history.at(history_current).get());
-    sch.emplace(x->sch);
-    block.emplace(x->block);
+    const auto &x = dynamic_cast<CoreSchematic::HistoryItem &>(*history.at(history_current));
+    sch.emplace(x.sch);
+    block.emplace(x.block);
     sch->block = &*block;
     sch->update_refs();
     s_signal_rebuilt.emit();

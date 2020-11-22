@@ -228,8 +228,8 @@ void CorePackage::history_push()
 
 void CorePackage::history_load(unsigned int i)
 {
-    auto x = dynamic_cast<CorePackage::HistoryItem *>(history.at(history_current).get());
-    package = x->package;
+    const auto &x = dynamic_cast<CorePackage::HistoryItem &>(*history.at(history_current));
+    package = x.package;
 }
 
 const Package &CorePackage::get_canvas_data()

@@ -263,8 +263,8 @@ void CoreSymbol::history_push()
 
 void CoreSymbol::history_load(unsigned int i)
 {
-    auto x = dynamic_cast<CoreSymbol::HistoryItem *>(history.at(history_current).get());
-    sym = x->sym;
+    const auto &x = dynamic_cast<CoreSymbol::HistoryItem &>(*history.at(history_current));
+    sym = x.sym;
     sym.expand(pin_display_mode);
     s_signal_rebuilt.emit();
 }
