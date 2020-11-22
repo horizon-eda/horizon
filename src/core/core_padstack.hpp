@@ -24,7 +24,7 @@ public:
 
     std::string get_display_name(ObjectType type, const UUID &uu) override;
 
-    const Padstack *get_canvas_data();
+    const Padstack &get_canvas_data();
     std::pair<Coordi, Coordi> get_bbox() override;
 
     const std::string &get_filename() const override;

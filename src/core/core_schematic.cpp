@@ -612,9 +612,9 @@ void CoreSchematic::rebuild(bool from_undo)
     std::cout << "rebuild took " << elapsed_secs << std::endl;
 }
 
-const Sheet *CoreSchematic::get_canvas_data()
+const Sheet &CoreSchematic::get_canvas_data()
 {
-    return &sch->sheets.at(sheet_uuid);
+    return sch->sheets.at(sheet_uuid);
 }
 
 void CoreSchematic::history_push()

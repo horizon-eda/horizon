@@ -232,9 +232,9 @@ void CorePackage::history_load(unsigned int i)
     package = x->package;
 }
 
-const Package *CorePackage::get_canvas_data()
+const Package &CorePackage::get_canvas_data()
 {
-    return &package;
+    return package;
 }
 
 void CorePackage::reload_pool()

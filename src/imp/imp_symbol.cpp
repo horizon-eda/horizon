@@ -17,8 +17,8 @@ ImpSymbol::ImpSymbol(const std::string &symbol_filename, const std::string &pool
 
 void ImpSymbol::canvas_update()
 {
-    canvas->update(*core_symbol.get_canvas_data());
-    symbol_preview_window->update(*core_symbol.get_canvas_data());
+    canvas->update(core_symbol.get_canvas_data());
+    symbol_preview_window->update(core_symbol.get_canvas_data());
     update_bbox_annotation();
 }
 

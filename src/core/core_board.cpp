@@ -568,9 +568,9 @@ LayerProvider &CoreBoard::get_layer_provider()
     return *brd;
 }
 
-const Board *CoreBoard::get_canvas_data()
+const Board &CoreBoard::get_canvas_data()
 {
-    return &*brd;
+    return *brd;
 }
 
 Board *CoreBoard::get_board()

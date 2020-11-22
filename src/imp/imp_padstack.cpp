@@ -18,7 +18,7 @@ ImpPadstack::ImpPadstack(const std::string &padstack_filename, const std::string
 
 void ImpPadstack::canvas_update()
 {
-    canvas->update(*core_padstack.get_canvas_data());
+    canvas->update(core_padstack.get_canvas_data());
 }
 
 class ImpPadstackParameterSetEditor : public ParameterSetEditor {

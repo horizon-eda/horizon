@@ -77,7 +77,7 @@ public:
     void delete_sheet(const UUID &uu);
 
     void set_sheet(const UUID &uu);
-    const Sheet *get_canvas_data();
+    const Sheet &get_canvas_data();
     std::pair<Coordi, Coordi> get_bbox() override;
 
     const std::string &get_filename() const override;

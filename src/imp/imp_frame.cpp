@@ -14,7 +14,7 @@ ImpFrame::ImpFrame(const std::string &frame_filename, const std::string &pool_pa
 
 void ImpFrame::canvas_update()
 {
-    canvas->update(*core_frame.get_canvas_data());
+    canvas->update(core_frame.get_canvas_data());
 }
 
 void ImpFrame::construct()

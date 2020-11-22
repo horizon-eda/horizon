@@ -229,9 +229,9 @@ void CorePadstack::history_load(unsigned int i)
     s_signal_rebuilt.emit();
 }
 
-const Padstack *CorePadstack::get_canvas_data()
+const Padstack &CorePadstack::get_canvas_data()
 {
-    return &padstack;
+    return padstack;
 }
 
 Padstack &CorePadstack::get_padstack()

@@ -11,7 +11,7 @@ public:
     bool has_object_type(ObjectType ty) const override;
 
     Frame &get_frame() override;
-    const Frame *get_canvas_data() const;
+    const Frame &get_canvas_data() const;
     class LayerProvider &get_layer_provider() override;
 
     void rebuild(bool from_undo = false) override;

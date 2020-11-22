@@ -31,7 +31,7 @@ ImpSchematic::ImpSchematic(const std::string &schematic_filename, const std::str
 
 void ImpSchematic::canvas_update()
 {
-    canvas->update(*core_schematic.get_canvas_data());
+    canvas->update(core_schematic.get_canvas_data());
     warnings_box->update(core_schematic.get_sheet()->warnings);
     update_highlights();
 }

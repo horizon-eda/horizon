@@ -25,7 +25,7 @@ public:
     void rebuild(bool from_undo = false) override;
     void reload_netlist();
 
-    const Board *get_canvas_data();
+    const Board &get_canvas_data();
     Board *get_board() override;
     const Board *get_board() const;
 

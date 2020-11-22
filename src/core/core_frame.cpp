@@ -63,9 +63,9 @@ LayerProvider &CoreFrame::get_layer_provider()
     return frame;
 }
 
-const Frame *CoreFrame::get_canvas_data() const
+const Frame &CoreFrame::get_canvas_data() const
 {
-    return &frame;
+    return frame;
 }
 
 Frame &CoreFrame::get_frame()

@@ -62,9 +62,9 @@ LayerProvider &CoreDecal::get_layer_provider()
     return decal;
 }
 
-const Decal *CoreDecal::get_canvas_data() const
+const Decal &CoreDecal::get_canvas_data() const
 {
-    return &decal;
+    return decal;
 }
 
 Decal &CoreDecal::get_decal()

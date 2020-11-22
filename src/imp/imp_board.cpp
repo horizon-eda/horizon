@@ -37,7 +37,7 @@ ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_f
 
 void ImpBoard::canvas_update()
 {
-    canvas->update(*core_board.get_canvas_data());
+    canvas->update(core_board.get_canvas_data());
     warnings_box->update(core_board.get_board()->warnings);
     apply_net_colors();
     update_highlights();

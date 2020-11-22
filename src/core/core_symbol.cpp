@@ -274,9 +274,9 @@ LayerProvider &CoreSymbol::get_layer_provider()
     return sym;
 }
 
-const Symbol *CoreSymbol::get_canvas_data()
+const Symbol &CoreSymbol::get_canvas_data()
 {
-    return &sym;
+    return sym;
 }
 
 std::pair<Coordi, Coordi> CoreSymbol::get_bbox()

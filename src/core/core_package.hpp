@@ -32,7 +32,7 @@ public:
 
     void rebuild(bool from_undo = false) override;
 
-    const Package *get_canvas_data();
+    const Package &get_canvas_data();
     std::pair<Coordi, Coordi> get_bbox() override;
     json get_meta() override;
 

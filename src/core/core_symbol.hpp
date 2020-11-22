@@ -44,7 +44,7 @@ public:
 
     std::string get_display_name(ObjectType type, const UUID &uu) override;
 
-    const Symbol *get_canvas_data();
+    const Symbol &get_canvas_data();
     std::pair<Coordi, Coordi> get_bbox() override;
 
     void reload_pool() override;

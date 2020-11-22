@@ -17,7 +17,7 @@ ImpDecal::ImpDecal(const std::string &decal_filename, const std::string &pool_pa
 
 void ImpDecal::canvas_update()
 {
-    canvas->update(*core_decal.get_canvas_data());
+    canvas->update(core_decal.get_canvas_data());
 }
 
 void ImpDecal::construct()

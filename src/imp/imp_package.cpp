@@ -37,7 +37,7 @@ ImpPackage::ImpPackage(const std::string &package_filename, const std::string &p
 
 void ImpPackage::canvas_update()
 {
-    canvas->update(*core_package.get_canvas_data());
+    canvas->update(core_package.get_canvas_data());
     warnings_box->update(package.warnings);
     update_highlights();
 }
