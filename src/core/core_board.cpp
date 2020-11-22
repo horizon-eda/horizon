@@ -621,6 +621,17 @@ void CoreBoard::history_load(unsigned int i)
     brd->expand();
 }
 
+void CoreBoard::reload_pool()
+{
+    const auto brd_j = brd->serialize();
+    const auto block_j = block->serialize();
+    m_pool.clear();
+    block.emplace(block->uuid, block_j, m_pool);
+    brd.emplace(brd->uuid, brd_j, *block, m_pool, via_padstack_provider);
+    history_clear();
+    rebuild();
+}
+
 json CoreBoard::get_meta()
 {
     return get_meta_from_file(m_board_filename);

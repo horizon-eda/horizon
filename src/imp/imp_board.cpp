@@ -811,6 +811,8 @@ void ImpBoard::construct()
     add_action_button(make_action(ToolID::PLACE_TEXT));
     add_action_button(make_action(ToolID::DRAW_DIMENSION));
 
+    update_monitor();
+
     display_control_notebook->show();
 }
 
@@ -1232,6 +1234,17 @@ void ImpBoard::update_net_colors()
         }
         canvas->set_colors2(t);
     }
+}
+
+
+void ImpBoard::update_monitor()
+{
+    ItemSet mon_items = core_board.get_block()->get_pool_items_used();
+    {
+        ItemSet items = core_board.get_board()->get_pool_items_used();
+        mon_items.insert(items.begin(), items.end());
+    }
+    set_monitor_items(mon_items);
 }
 
 ImpBoard::~ImpBoard()

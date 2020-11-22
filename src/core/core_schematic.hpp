@@ -97,6 +97,8 @@ public:
         return sch->version;
     }
 
+    void reload_pool() override;
+
 private:
     std::optional<Block> block;
     const bool project_meta_loaded_from_block;

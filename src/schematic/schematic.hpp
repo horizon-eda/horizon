@@ -28,10 +28,10 @@ using json = nlohmann::json;
  */
 class Schematic {
 private:
-    Schematic(const UUID &uu, const json &, Block &block, class IPool &pool);
     unsigned int update_nets();
 
 public:
+    Schematic(const UUID &uu, const json &, Block &block, class IPool &pool);
     static Schematic new_from_file(const std::string &filename, Block &block, IPool &pool);
     Schematic(const UUID &uu, Block &block);
     static unsigned int get_app_version();

@@ -626,7 +626,8 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
 
         {{ActionID::RELOAD_POOL, ToolID::NONE},
          {"Reload pool", ActionGroup::UNKNOWN,
-          ActionCatalogItem::AVAILABLE_IN_PACKAGE | ActionCatalogItem::AVAILABLE_IN_SYMBOL,
+          ActionCatalogItem::AVAILABLE_IN_PACKAGE | ActionCatalogItem::AVAILABLE_IN_SYMBOL
+                  | ActionCatalogItem::AVAILABLE_IN_SCHEMATIC | ActionCatalogItem::AVAILABLE_IN_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
 
         {{ActionID::EDIT_PADSTACK, ToolID::NONE},

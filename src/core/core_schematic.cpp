@@ -6,6 +6,7 @@
 #include "nlohmann/json.hpp"
 #include <giomm/file.h>
 #include <glibmm/fileutils.h>
+#include "pool/ipool.hpp"
 
 namespace horizon {
 CoreSchematic::CoreSchematic(const std::string &schematic_filename, const std::string &block_filename,
@@ -633,6 +634,17 @@ void CoreSchematic::history_load(unsigned int i)
     sch->block = &*block;
     sch->update_refs();
     s_signal_rebuilt.emit();
+}
+
+void CoreSchematic::reload_pool()
+{
+    const auto sch_j = sch->serialize();
+    const auto block_j = block->serialize();
+    m_pool.clear();
+    block.emplace(block->uuid, block_j, m_pool);
+    sch.emplace(sch->uuid, sch_j, *block, m_pool);
+    history_clear();
+    rebuild();
 }
 
 std::pair<Coordi, Coordi> CoreSchematic::get_bbox()

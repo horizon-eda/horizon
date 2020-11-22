@@ -74,6 +74,8 @@ public:
         return brd->version;
     }
 
+    void reload_pool() override;
+
 private:
     ViaPadstackProvider via_padstack_provider;
 

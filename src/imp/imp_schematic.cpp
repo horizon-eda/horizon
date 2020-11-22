@@ -533,6 +533,8 @@ void ImpSchematic::construct()
     add_action_button_line();
     add_action_button(make_action(ToolID::PLACE_TEXT));
 
+    update_monitor();
+
     if (!core_schematic.get_project_meta_loaded_from_block())
         core_schematic.set_needs_save();
 }
@@ -1111,4 +1113,15 @@ void ImpSchematic::expand_selection_for_property_panel(std::set<SelectableRef> &
         }
     }
 }
+
+void ImpSchematic::update_monitor()
+{
+    ItemSet mon_items = core_schematic.get_block()->get_pool_items_used();
+    {
+        ItemSet items = core_schematic.get_schematic()->get_pool_items_used();
+        mon_items.insert(items.begin(), items.end());
+    }
+    set_monitor_items(mon_items);
+}
+
 } // namespace horizon
