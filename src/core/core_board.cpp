@@ -610,10 +610,6 @@ void CoreBoard::history_push()
 void CoreBoard::history_load(unsigned int i)
 {
     auto x = dynamic_cast<CoreBoard::HistoryItem *>(history.at(history_current).get());
-    std::map<UUID, unsigned int> plane_revs;
-    for (const auto &it : brd->planes) {
-        plane_revs[it.first] = it.second.revision;
-    }
     brd.emplace(x->brd);
     block.emplace(x->block);
     brd->block = &*block;
