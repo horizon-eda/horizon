@@ -4,6 +4,7 @@
 #include "core.hpp"
 #include "nlohmann/json.hpp"
 #include "document/document_board.hpp"
+#include <optional>
 
 namespace horizon {
 class CoreBoard : public Core, public DocumentBoard {
@@ -70,14 +71,14 @@ public:
 
     const FileVersion &get_version() const override
     {
-        return brd.version;
+        return brd->version;
     }
 
 private:
     ViaPadstackProvider via_padstack_provider;
 
-    Block block;
-    Board brd;
+    std::optional<Block> block;
+    std::optional<Board> brd;
 
     BoardRules rules;
     FabOutputSettings fab_output_settings;

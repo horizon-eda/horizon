@@ -4,6 +4,7 @@
 #include "schematic/schematic.hpp"
 #include "document/idocument_schematic.hpp"
 #include <memory>
+#include <optional>
 
 namespace horizon {
 class CoreSchematic : public Core, public virtual IDocumentSchematic {
@@ -93,13 +94,13 @@ public:
 
     const FileVersion &get_version() const override
     {
-        return sch.version;
+        return sch->version;
     }
 
 private:
-    Block block;
+    std::optional<Block> block;
     const bool project_meta_loaded_from_block;
-    Schematic sch;
+    std::optional<Schematic> sch;
 
     SchematicRules rules;
 
