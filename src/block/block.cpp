@@ -422,4 +422,33 @@ void Block::swap_gates(const UUID &comp_uu, const UUID &g1_uu, const UUID &g2_uu
     comp.connections = new_connections;
 }
 
+ItemSet Block::get_pool_items_used() const
+{
+    ItemSet items_needed;
+    auto add_part = [&items_needed](const Part *part) {
+        while (part) {
+            items_needed.emplace(ObjectType::PART, part->uuid);
+            items_needed.emplace(ObjectType::PACKAGE, part->package.uuid);
+            for (const auto &it_pad : part->package->pads) {
+                items_needed.emplace(ObjectType::PADSTACK, it_pad.second.pool_padstack->uuid);
+            }
+            part = part->base;
+        }
+    };
+
+    for (const auto &it : components) {
+        items_needed.emplace(ObjectType::ENTITY, it.second.entity->uuid);
+        for (const auto &it_gate : it.second.entity->gates) {
+            items_needed.emplace(ObjectType::UNIT, it_gate.second.unit->uuid);
+        }
+        if (it.second.part) {
+            add_part(it.second.part);
+        }
+    }
+    for (const auto &it : bom_export_settings.concrete_parts) {
+        add_part(it.second);
+    }
+    return items_needed;
+}
+
 } // namespace horizon

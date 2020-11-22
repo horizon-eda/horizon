@@ -10,6 +10,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include "util/item_set.hpp"
 
 namespace horizon {
 using json = nlohmann::json;
@@ -78,6 +79,8 @@ public:
     Net *insert_net();
 
     std::string get_net_name(const UUID &uu) const;
+
+    ItemSet get_pool_items_used() const;
 
     json serialize();
 

@@ -1461,51 +1461,17 @@ void PoolProjectManagerAppWindow::cleanup_pool_cache()
     auto board = Board::new_from_file(project->board_filename, block, pool_cached, vpp);
     board.expand();
 
-    auto add_part = [&items_needed](const Part *part) {
-        while (part) {
-            items_needed.emplace(ObjectType::PART, part->uuid);
-            items_needed.emplace(ObjectType::PACKAGE, part->package.uuid);
-            for (const auto &it_pad : part->package->pads) {
-                items_needed.emplace(ObjectType::PADSTACK, it_pad.second.pool_padstack->uuid);
-            }
-            if (part->base)
-                part = part->base;
-            else
-                part = nullptr;
-        }
-    };
-
-    for (const auto &it : block.components) {
-        items_needed.emplace(ObjectType::ENTITY, it.second.entity->uuid);
-        for (const auto &it_gate : it.second.entity->gates) {
-            items_needed.emplace(ObjectType::UNIT, it_gate.second.unit->uuid);
-        }
-        if (it.second.part) {
-            add_part(it.second.part);
-        }
+    {
+        auto items = block.get_pool_items_used();
+        items_needed.insert(items.begin(), items.end());
     }
-    for (const auto &it : block.bom_export_settings.concrete_parts) {
-        add_part(it.second);
+    {
+        auto items = sch.get_pool_items_used();
+        items_needed.insert(items.begin(), items.end());
     }
-    for (const auto &it_sheet : sch.sheets) {
-        for (const auto &it_sym : it_sheet.second.symbols) {
-            items_needed.emplace(ObjectType::SYMBOL, it_sym.second.pool_symbol->uuid);
-        }
-        if (it_sheet.second.pool_frame)
-            items_needed.emplace(ObjectType::FRAME, it_sheet.second.pool_frame->uuid);
-    }
-    for (const auto &it_pkg : board.packages) {
-        // don't use pool_package because of alternate pkg
-        items_needed.emplace(ObjectType::PACKAGE, it_pkg.second.package.uuid);
-        for (const auto &it_pad : it_pkg.second.package.pads) {
-            items_needed.emplace(ObjectType::PADSTACK, it_pad.second.pool_padstack->uuid);
-        }
-    }
-    for (const auto &it_via : board.vias) {
-        items_needed.emplace(ObjectType::PADSTACK, it_via.second.vpp_padstack->uuid);
-    }
-    for (const auto &it_hole : board.holes) {
-        items_needed.emplace(ObjectType::PADSTACK, it_hole.second.pool_padstack->uuid);
+    {
+        auto items = board.get_pool_items_used();
+        items_needed.insert(items.begin(), items.end());
     }
 
     std::map<std::pair<ObjectType, UUID>, std::string> items_cached;

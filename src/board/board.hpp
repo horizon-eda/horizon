@@ -147,6 +147,8 @@ public:
     void save_pictures(const std::string &dir) const;
     void load_pictures(const std::string &dir);
 
+    ItemSet get_pool_items_used() const;
+
 private:
     unsigned int n_inner_layers = 0;
     ClipperLib::Paths get_thermals(class Plane *plane, const class CanvasPads *ca) const;

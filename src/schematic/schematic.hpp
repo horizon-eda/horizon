@@ -121,5 +121,7 @@ public:
     json serialize() const;
     void save_pictures(const std::string &dir) const;
     void load_pictures(const std::string &dir);
+
+    ItemSet get_pool_items_used() const;
 };
 } // namespace horizon

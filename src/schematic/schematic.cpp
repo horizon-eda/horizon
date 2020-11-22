@@ -1118,4 +1118,18 @@ void Schematic::load_pictures(const std::string &dir)
     pictures_load(pictures, dir, "sch");
 }
 
+ItemSet Schematic::get_pool_items_used() const
+{
+    ItemSet items_needed;
+
+    for (const auto &it_sheet : sheets) {
+        for (const auto &it_sym : it_sheet.second.symbols) {
+            items_needed.emplace(ObjectType::SYMBOL, it_sym.second.pool_symbol->uuid);
+        }
+        if (it_sheet.second.pool_frame)
+            items_needed.emplace(ObjectType::FRAME, it_sheet.second.pool_frame->uuid);
+    }
+    return items_needed;
+}
+
 } // namespace horizon

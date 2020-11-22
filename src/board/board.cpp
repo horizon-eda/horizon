@@ -1289,4 +1289,27 @@ void Board::load_pictures(const std::string &dir)
     pictures_load({&pictures}, dir, "brd");
 }
 
+ItemSet Board::get_pool_items_used() const
+{
+    ItemSet items_needed;
+
+    for (const auto &it_pkg : packages) {
+        // don't use pool_package because of alternate pkg
+        items_needed.emplace(ObjectType::PACKAGE, it_pkg.second.package.uuid);
+        for (const auto &it_pad : it_pkg.second.package.pads) {
+            items_needed.emplace(ObjectType::PADSTACK, it_pad.second.pool_padstack->uuid);
+        }
+    }
+    for (const auto &it_via : vias) {
+        items_needed.emplace(ObjectType::PADSTACK, it_via.second.vpp_padstack->uuid);
+    }
+    for (const auto &it_hole : holes) {
+        items_needed.emplace(ObjectType::PADSTACK, it_hole.second.pool_padstack->uuid);
+    }
+    for (const auto &it_decal : decals) {
+        items_needed.emplace(ObjectType::DECAL, it_decal.second.pool_decal->uuid);
+    }
+    return items_needed;
+}
+
 } // namespace horizon
