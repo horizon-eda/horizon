@@ -532,6 +532,8 @@ void ImpBase::run(int argc, char *argv[])
 
     connect_action(ActionID::FLIP_VIEW, [this](const auto &a) { set_flip_view(!canvas->get_flip_view()); });
 
+    connect_action(ActionID::SELECT_POLYGON, sigc::mem_fun(*this, &ImpBase::handle_select_polygon));
+
     bottom_view_action = main_window->add_action_bool("bottom_view", false);
     bottom_view_action->signal_change_state().connect([this](const Glib::VariantBase &v) {
         auto b = Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(v).get();
@@ -805,8 +807,6 @@ void ImpBase::run(int argc, char *argv[])
         set_window_title_from_block();
     }
     update_view_hints();
-
-    connect_action(ActionID::SELECT_POLYGON, sigc::mem_fun(*this, &ImpBase::handle_select_polygon));
 
     check_version();
 
