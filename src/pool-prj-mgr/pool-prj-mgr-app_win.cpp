@@ -206,17 +206,23 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
                                       [this](Glib::IOCondition cond) {
                                           while (sock_mgr.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
                                               zmq::message_t msg;
-                                              sock_mgr.recv(&msg);
-                                              char *data = (char *)msg.data();
-                                              json jrx = json::parse(data);
-                                              json jtx = handle_req(jrx);
+                                              const auto st = sock_mgr.recv(msg);
+                                              if (st.has_value()) {
+                                                  char *data = (char *)msg.data();
+                                                  json jrx = json::parse(data);
+                                                  json jtx = handle_req(jrx);
 
-                                              std::string stx = jtx.dump();
-                                              zmq::message_t tx(stx.size() + 1);
-                                              memcpy(((uint8_t *)tx.data()), stx.c_str(), stx.size());
-                                              auto m = (char *)tx.data();
-                                              m[tx.size() - 1] = 0;
-                                              sock_mgr.send(tx);
+                                                  std::string stx = jtx.dump();
+                                                  zmq::message_t tx(stx.size() + 1);
+                                                  memcpy(((uint8_t *)tx.data()), stx.c_str(), stx.size());
+                                                  auto m = (char *)tx.data();
+                                                  m[tx.size() - 1] = 0;
+                                                  sock_mgr.send(tx, zmq::send_flags::none);
+                                              }
+                                              else {
+                                                  Logger::log_warning("recieved an empty message",
+                                                                      Logger::Domain::UNSPECIFIED);
+                                              }
                                           }
                                           return true;
                                       },
