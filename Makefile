@@ -454,6 +454,7 @@ SRC_IMP = \
 	src/util/picture_util.cpp\
 	src/imp/grid_controller.cpp\
 	src/imp/parts_window.cpp\
+	src/util/zmq_helper.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\
@@ -649,6 +650,7 @@ SRC_POOL_PRJ_MGR = \
 	src/widgets/log_view.cpp\
 	src/widgets/log_window.cpp\
 	src/logger/log_dispatcher.cpp\
+	src/util/zmq_helper.cpp\
 
 SRC_PGM_TEST = \
 	src/pgm-test/pgm-test.cpp

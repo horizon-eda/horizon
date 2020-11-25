@@ -26,6 +26,7 @@
 #include "util/item_set.hpp"
 #include "prj-mgr/pool_cache_monitor.hpp"
 #include "pool/pool_cached.hpp"
+#include "util/zmq_helper.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -206,17 +207,18 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
                                       [this](Glib::IOCondition cond) {
                                           while (sock_mgr.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
                                               zmq::message_t msg;
-                                              sock_mgr.recv(&msg);
-                                              char *data = (char *)msg.data();
-                                              json jrx = json::parse(data);
-                                              json jtx = handle_req(jrx);
+                                              if (zmq_helper::recv(sock_mgr, msg)) {
+                                                  char *data = (char *)msg.data();
+                                                  json jrx = json::parse(data);
+                                                  json jtx = handle_req(jrx);
 
-                                              std::string stx = jtx.dump();
-                                              zmq::message_t tx(stx.size() + 1);
-                                              memcpy(((uint8_t *)tx.data()), stx.c_str(), stx.size());
-                                              auto m = (char *)tx.data();
-                                              m[tx.size() - 1] = 0;
-                                              sock_mgr.send(tx);
+                                                  std::string stx = jtx.dump();
+                                                  zmq::message_t tx(stx.size() + 1);
+                                                  memcpy(((uint8_t *)tx.data()), stx.c_str(), stx.size());
+                                                  auto m = (char *)tx.data();
+                                                  m[tx.size() - 1] = 0;
+                                                  zmq_helper::send(sock_mgr, tx);
+                                              }
                                           }
                                           return true;
                                       },
