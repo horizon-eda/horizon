@@ -15,6 +15,7 @@
 #include "widgets/log_window.hpp"
 #include "logger/logger.hpp"
 #include "widgets/log_view.hpp"
+#include "util/zmq_helper.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -47,7 +48,7 @@ void PoolProjectManagerApplication::send_json(int pid, const json &j)
     memcpy(((uint8_t *)msg.data()) + 4, s.c_str(), s.size());
     auto m = (char *)msg.data();
     m[msg.size() - 1] = 0;
-    sock_broadcast.send(msg);
+    zmq_helper::send(sock_broadcast, msg);
 }
 
 Glib::RefPtr<PoolProjectManagerApplication> PoolProjectManagerApplication::create()

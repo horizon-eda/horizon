@@ -30,6 +30,7 @@
 #include "preferences/preferences_util.hpp"
 #include "widgets/action_button.hpp"
 #include "in_tool_action_catalog.hpp"
+#include "util/zmq_helper.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -79,13 +80,14 @@ ImpBase::ImpBase(const PoolParams &params)
                 [this](Glib::IOCondition cond) {
                     while (sock_broadcast_rx.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
                         zmq::message_t msg;
-                        sock_broadcast_rx.recv(&msg);
-                        int prefix;
-                        memcpy(&prefix, msg.data(), 4);
-                        char *data = ((char *)msg.data()) + 4;
-                        json j = json::parse(data);
-                        if (prefix == 0 || prefix == getpid()) {
-                            handle_broadcast(j);
+                        if (zmq_helper::recv(sock_broadcast_rx, msg)) {
+                            int prefix;
+                            memcpy(&prefix, msg.data(), 4);
+                            char *data = ((char *)msg.data()) + 4;
+                            json j = json::parse(data);
+                            if (prefix == 0 || prefix == getpid()) {
+                                handle_broadcast(j);
+                            }
                         }
                     }
                     return true;
@@ -125,7 +127,7 @@ json ImpBase::send_json(const json &j)
     auto m = (char *)msg.data();
     m[msg.size() - 1] = 0;
     try {
-        if (sock_project.send(msg) == false) {
+        if (zmq_helper::send(sock_project, msg) == false) {
             sockets_broken = true;
             sockets_connected = false;
             show_sockets_broken_dialog("send timeout");
@@ -141,7 +143,7 @@ json ImpBase::send_json(const json &j)
 
     zmq::message_t rx;
     try {
-        if (sock_project.recv(&rx) == false) {
+        if (zmq_helper::recv(sock_project, rx) == false) {
             sockets_broken = true;
             sockets_connected = false;
             show_sockets_broken_dialog("receive timeout");

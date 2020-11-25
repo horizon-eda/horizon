@@ -26,6 +26,7 @@
 #include "util/item_set.hpp"
 #include "prj-mgr/pool_cache_monitor.hpp"
 #include "pool/pool_cached.hpp"
+#include "util/zmq_helper.hpp"
 
 #ifdef G_OS_WIN32
 #include <winsock2.h>
@@ -206,8 +207,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
                                       [this](Glib::IOCondition cond) {
                                           while (sock_mgr.getsockopt<int>(ZMQ_EVENTS) & ZMQ_POLLIN) {
                                               zmq::message_t msg;
-                                              const auto st = sock_mgr.recv(msg);
-                                              if (st.has_value()) {
+                                              if (zmq_helper::recv(sock_mgr, msg)) {
                                                   char *data = (char *)msg.data();
                                                   json jrx = json::parse(data);
                                                   json jtx = handle_req(jrx);
@@ -217,11 +217,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
                                                   memcpy(((uint8_t *)tx.data()), stx.c_str(), stx.size());
                                                   auto m = (char *)tx.data();
                                                   m[tx.size() - 1] = 0;
-                                                  sock_mgr.send(tx, zmq::send_flags::none);
-                                              }
-                                              else {
-                                                  Logger::log_warning("recieved an empty message",
-                                                                      Logger::Domain::UNSPECIFIED);
+                                                  zmq_helper::send(sock_mgr, tx);
                                               }
                                           }
                                           return true;
