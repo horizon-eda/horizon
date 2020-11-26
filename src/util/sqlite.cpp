@@ -134,6 +134,13 @@ void Query::bind(const char *name, const horizon::UUID &v)
     bind(name, (std::string)v);
 }
 
+void Query::reset()
+{
+    if (sqlite3_reset(stmt) != SQLITE_OK) {
+        throw std::runtime_error(sqlite3_errmsg(db.db));
+    }
+}
+
 Database::~Database()
 {
     if (sqlite3_close_v2(db) != SQLITE_OK) {

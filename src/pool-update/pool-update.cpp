@@ -104,7 +104,13 @@ public:
                      std::set<UUID> &all_parts_updated);
 
 private:
-    std::unique_ptr<Pool> pool;
+    std::optional<Pool> pool;
+    std::optional<SQLite::Query> q_exists;
+    std::optional<SQLite::Query> q_add_dependency;
+    std::optional<SQLite::Query> q_insert_part;
+    std::optional<SQLite::Query> q_add_tag;
+
+
     std::string base_path;
     pool_update_cb_t status_cb;
     void update_frames(const std::string &directory, const std::string &prefix = "");
@@ -120,6 +126,7 @@ private:
     void update_parts(const std::string &directory);
     void update_part_node(const PoolUpdateNode &node, std::set<UUID> &visited);
     void add_dependency(ObjectType type, const UUID &uu, ObjectType dep_type, const UUID &dep_uuid);
+    void add_tag(ObjectType type, const UUID &uu, const std::string &tag);
     void clear_dependencies(ObjectType type, const UUID &uu);
     void clear_tags(ObjectType type, const UUID &uu);
     bool exists(ObjectType type, const UUID &uu);
@@ -140,10 +147,10 @@ private:
 
 bool PoolUpdater::exists(ObjectType type, const UUID &uu)
 {
-    SQLite::Query q(pool->db, "SELECT uuid FROM all_items_view WHERE uuid = ? AND type = ?");
-    q.bind(1, uu);
-    q.bind(2, object_type_lut.lookup_reverse(type));
-    return q.step();
+    q_exists->reset();
+    q_exists->bind(1, uu);
+    q_exists->bind(2, object_type_lut.lookup_reverse(type));
+    return q_exists->step();
 }
 
 void PoolUpdater::set_pool_info(const std::string &bp)
@@ -330,7 +337,19 @@ PoolUpdater::PoolUpdater(const std::string &bp, pool_update_cb_t cb) : status_cb
             status_cb(PoolUpdateStatus::INFO, "", "created db from schema");
         }
     }
-    pool = std::make_unique<Pool>(bp, false);
+    pool.emplace(bp, false);
+    q_exists.emplace(pool->db, "SELECT uuid FROM all_items_view WHERE uuid = ? AND type = ?");
+    q_add_dependency.emplace(pool->db, "INSERT INTO dependencies VALUES (?, ?, ?, ?)");
+    q_insert_part.emplace(pool->db,
+                          "INSERT INTO parts "
+                          "(uuid, MPN, manufacturer, entity, package, description, filename, pool_uuid, overridden, "
+                          "parametric_table, base) "
+                          "VALUES "
+                          "($uuid, $MPN, $manufacturer, $entity, $package, $description, $filename, $pool_uuid, "
+                          "$overridden, $parametric_table, $base)");
+    q_add_tag.emplace(pool->db,
+                      "INSERT into tags (tag, uuid, type) "
+                      "VALUES ($tag, $uuid, $type)");
     pool->db.execute("PRAGMA journal_mode=WAL");
 }
 
@@ -528,12 +547,7 @@ void PoolUpdater::update_entity(const std::string &filename, bool partial)
         q.bind("$filename", get_path_rel(filename));
         q.step();
         for (const auto &it_tag : entity.tags) {
-            SQLite::Query q2(pool->db,
-                             "INSERT into tags (tag, uuid, type) "
-                             "VALUES ($tag, $uuid, 'entity')");
-            q2.bind("$uuid", entity.uuid);
-            q2.bind("$tag", it_tag);
-            q2.step();
+            add_tag(ObjectType::ENTITY, entity.uuid, it_tag);
         }
         for (const auto &it_gate : entity.gates) {
             add_dependency(ObjectType::ENTITY, entity.uuid, ObjectType::UNIT, it_gate.second.unit->uuid);
@@ -824,12 +838,7 @@ void PoolUpdater::update_package(const std::string &filename, bool partial)
         q.bind("$overridden", overridden);
         q.step();
         for (const auto &it_tag : package.tags) {
-            SQLite::Query q2(pool->db,
-                             "INSERT into tags (tag, uuid, type) VALUES "
-                             "($tag, $uuid, 'package')");
-            q2.bind("$uuid", package.uuid);
-            q2.bind("$tag", it_tag);
-            q2.step();
+            add_tag(ObjectType::PACKAGE, package.uuid, it_tag);
         }
         for (const auto &it_model : package.models) {
             SQLite::Query q2(pool->db,
@@ -883,33 +892,22 @@ void PoolUpdater::update_part(const std::string &filename, bool partial)
             std::string table;
             if (part.parametric.count("table"))
                 table = part.parametric.at("table");
-            SQLite::Query q(pool->db,
-                            "INSERT INTO parts "
-                            "(uuid, MPN, manufacturer, entity, package, description, filename, pool_uuid, overridden, "
-                            "parametric_table, base) "
-                            "VALUES "
-                            "($uuid, $MPN, $manufacturer, $entity, $package, $description, $filename, $pool_uuid, "
-                            "$overridden, $parametric_table, $base)");
-            q.bind("$uuid", part.uuid);
-            q.bind("$MPN", part.get_MPN());
-            q.bind("$manufacturer", part.get_manufacturer());
-            q.bind("$package", part.package->uuid);
-            q.bind("$entity", part.entity->uuid);
-            q.bind("$description", part.get_description());
-            q.bind("$pool_uuid", pool_uuid);
-            q.bind("$overridden", overridden);
-            q.bind("$parametric_table", table);
-            q.bind("$base", part.base ? part.base->uuid : UUID());
-            q.bind("$filename", get_path_rel(filename));
-            q.step();
+            q_insert_part->reset();
+            q_insert_part->bind("$uuid", part.uuid);
+            q_insert_part->bind("$MPN", part.get_MPN());
+            q_insert_part->bind("$manufacturer", part.get_manufacturer());
+            q_insert_part->bind("$package", part.package->uuid);
+            q_insert_part->bind("$entity", part.entity->uuid);
+            q_insert_part->bind("$description", part.get_description());
+            q_insert_part->bind("$pool_uuid", pool_uuid);
+            q_insert_part->bind("$overridden", overridden);
+            q_insert_part->bind("$parametric_table", table);
+            q_insert_part->bind("$base", part.base ? part.base->uuid : UUID());
+            q_insert_part->bind("$filename", get_path_rel(filename));
+            q_insert_part->step();
 
             for (const auto &it_tag : part.get_tags()) {
-                SQLite::Query q2(pool->db,
-                                 "INSERT into tags (tag, uuid, type) VALUES "
-                                 "($tag, $uuid, 'part')");
-                q2.bind("$uuid", part.uuid);
-                q2.bind("$tag", it_tag);
-                q2.step();
+                add_tag(ObjectType::PART, part.uuid, it_tag);
             }
             for (const auto &it_MPN : part.orderable_MPNs) {
                 SQLite::Query q2(pool->db,
@@ -981,12 +979,21 @@ void PoolUpdater::update_parts(const std::string &directory)
 
 void PoolUpdater::add_dependency(ObjectType type, const UUID &uu, ObjectType dep_type, const UUID &dep_uuid)
 {
-    SQLite::Query q(pool->db, "INSERT INTO dependencies VALUES (?, ?, ?, ?)");
-    q.bind(1, object_type_lut.lookup_reverse(type));
-    q.bind(2, uu);
-    q.bind(3, object_type_lut.lookup_reverse(dep_type));
-    q.bind(4, dep_uuid);
-    q.step();
+    q_add_dependency->reset();
+    q_add_dependency->bind(1, object_type_lut.lookup_reverse(type));
+    q_add_dependency->bind(2, uu);
+    q_add_dependency->bind(3, object_type_lut.lookup_reverse(dep_type));
+    q_add_dependency->bind(4, dep_uuid);
+    q_add_dependency->step();
+}
+
+void PoolUpdater::add_tag(ObjectType type, const UUID &uu, const std::string &tag)
+{
+    q_add_tag->reset();
+    q_add_tag->bind("$type", object_type_lut.lookup_reverse(type));
+    q_add_tag->bind("$uuid", uu);
+    q_add_tag->bind("$tag", tag);
+    q_add_tag->step();
 }
 
 void PoolUpdater::clear_tags(ObjectType type, const UUID &uu)

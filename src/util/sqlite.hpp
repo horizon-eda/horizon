@@ -43,6 +43,7 @@ public:
     void bind(const char *name, int v);
     void bind(int idx, const horizon::UUID &v);
     void bind(const char *name, const horizon::UUID &v);
+    void reset();
 
 private:
     class Database &db;

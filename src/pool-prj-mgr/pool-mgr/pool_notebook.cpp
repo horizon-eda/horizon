@@ -503,6 +503,7 @@ void PoolNotebook::pool_update_thread()
     std::cout << "hello from thread" << std::endl;
 
     try {
+        clock_t begin = clock();
         horizon::pool_update(
                 pool.get_base_path(),
                 [this](PoolUpdateStatus st, std::string filename, std::string msg) {
@@ -513,6 +514,9 @@ void PoolNotebook::pool_update_thread()
                     pool_update_dispatcher.emit();
                 },
                 true, pool_update_filenames);
+        clock_t end = clock();
+        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+        std::cout << "pool update took " << elapsed_secs << std::endl;
     }
     catch (const std::runtime_error &e) {
         {
