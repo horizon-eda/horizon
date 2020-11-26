@@ -15,8 +15,9 @@ void PoolProjectManagerAppWindow::handle_do_download()
     if (dest_dir.size()) {
         download_status_dispatcher.reset("Starting...");
         download_cancel = false;
-        std::thread dl_thread(&PoolProjectManagerAppWindow::download_thread, this,
-                              download_gh_username_entry->get_text(), download_gh_repo_entry->get_text(), dest_dir);
+        const std::string gh_user = download_gh_username_entry->get_text();
+        const std::string gh_repo = download_gh_repo_entry->get_text();
+        std::thread dl_thread(&PoolProjectManagerAppWindow::download_thread, this, gh_user, gh_repo, dest_dir);
         dl_thread.detach();
         downloading = true;
     }
