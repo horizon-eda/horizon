@@ -312,6 +312,9 @@ void AirwireFilterWindow::update_nets()
         if (brd.airwires.count(net_uuid)) {
             row[list_columns.n_airwires] = brd.airwires.at(net_uuid).size();
         }
+        else {
+            row[list_columns.n_airwires] = 0;
+        }
     }
     auto nc_current = netclass_combo->get_active_id();
     netclass_combo->remove_all();
