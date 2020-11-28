@@ -2,6 +2,7 @@
 #include "pool/pool_parametric.hpp"
 #include "pool/pool.hpp"
 #include "pool/part.hpp"
+#include "pool-update_pool.hpp"
 #include <sstream>
 
 namespace horizon {
@@ -12,12 +13,12 @@ static void status_cb_nop(PoolUpdateStatus st, const std::string msg, const std:
 
 class PoolUpdaterParametric {
 public:
-    PoolUpdaterParametric(const std::string &pool_base_path, pool_update_cb_t status_cb);
+    PoolUpdaterParametric(PoolUpdatePool &pool, pool_update_cb_t status_cb);
     void update();
     void update(const std::set<UUID> &parts);
 
 private:
-    Pool pool;
+    PoolUpdatePool &pool;
     PoolParametric pool_parametric;
     const std::map<std::string, PoolParametric::Table> &tables;
     std::string base_path;
@@ -26,9 +27,9 @@ private:
     void update_part(const UUID &uu, bool del);
 };
 
-PoolUpdaterParametric::PoolUpdaterParametric(const std::string &pool_base_path, pool_update_cb_t cb)
-    : pool(pool_base_path), pool_parametric(pool_base_path, false), tables(pool_parametric.get_tables()),
-      base_path(pool_base_path), status_cb(cb)
+PoolUpdaterParametric::PoolUpdaterParametric(PoolUpdatePool &apool, pool_update_cb_t cb)
+    : pool(apool), pool_parametric(pool.get_base_path(), false), tables(pool_parametric.get_tables()),
+      base_path(pool.get_base_path()), status_cb(cb)
 {
     pool_parametric.db.execute("PRAGMA journal_mode=WAL");
 }
@@ -83,8 +84,8 @@ void PoolUpdaterParametric::update(const std::set<UUID> &parts)
 
 void PoolUpdaterParametric::update_part(const UUID &uu, bool del)
 {
-    auto filename = pool.get_filename(ObjectType::PART, uu);
-    auto part = Part::new_from_file(filename, pool);
+    const auto &part = *pool.get_part(uu);
+    const auto filename = pool.get_part_filename(uu);
     status_cb(PoolUpdateStatus::FILE, filename, "");
     if (!part.parametric.count("table"))
         return;
@@ -147,11 +148,11 @@ void PoolUpdaterParametric::update_part(const UUID &uu, bool del)
     }
 }
 
-void pool_update_parametric(const std::string &pool_base_path, pool_update_cb_t status_cb, const std::set<UUID> &parts)
+void pool_update_parametric(PoolUpdatePool &pool, pool_update_cb_t status_cb, const std::set<UUID> &parts)
 {
     if (!status_cb)
         status_cb = &status_cb_nop;
-    PoolUpdaterParametric updater(pool_base_path, status_cb);
+    PoolUpdaterParametric updater(pool, status_cb);
     if (parts.size() == 0) {
         updater.update();
     }

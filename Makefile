@@ -123,6 +123,11 @@ SRC_COMMON_GEN += $(GENDIR)/resources.cpp
 SRC_COMMON_GEN += $(GENDIR)/version_gen.cpp
 SRC_COMMON_GEN += $(GENDIR)/help_texts.cpp
 
+SRC_POOL_UPDATE = \
+	src/pool-update/pool-update.cpp\
+	src/pool-update/pool-update_parametric.cpp\
+	src/pool-update/pool-update_pool.cpp\
+	src/pool-update/graph.cpp\
 
 SRC_CANVAS = \
 	src/canvas/canvas.cpp \
@@ -524,9 +529,7 @@ SRC_ROUTER = \
 
 SRC_POOL_UTIL = \
 	src/pool-util/util_main.cpp\
-	src/pool-update/pool-update.cpp\
-	src/pool-update/graph.cpp\
-	src/pool-update/pool-update_parametric.cpp\
+	$(SRC_POOL_UPDATE)
 
 SRC_PRJ_UTIL = \
 	src/prj-util/util_main.cpp
@@ -583,9 +586,7 @@ SRC_POOL_PRJ_MGR = \
 	src/util/sort_controller.cpp\
 	src/util/editor_process.cpp\
 	$(SRC_CANVAS)\
-	src/pool-update/pool-update.cpp\
-	src/pool-update/pool-update_parametric.cpp\
-	src/pool-update/graph.cpp\
+	$(SRC_POOL_UPDATE)\
 	src/util/gtk_util.cpp\
 	src/util/window_state_store.cpp\
 	src/util/http_client.cpp\
@@ -661,9 +662,7 @@ SRC_GEN_PKG = \
 SRC_PR_REVIEW = \
 	src/pr-review/pr-review.cpp\
 	src/pr-review/canvas_cairo2.cpp\
-	src/pool-update/pool-update.cpp\
-	src/pool-update/graph.cpp\
-	src/pool-update/pool-update_parametric.cpp\
+	$(SRC_POOL_UPDATE)\
 	src/canvas/canvas.cpp \
 	src/canvas/appearance.cpp \
 	src/canvas/render.cpp \
@@ -709,7 +708,7 @@ SRC_OCE_EXPORT = \
 	src/export_step/export_step.cpp\
 	src/util/step_importer.cpp\
 
-SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_POOL_UPDATE_PARA) $(SRC_PGM_TEST) $(SRC_POOL_PRJ_MGR) $(SRC_GEN_PKG) $(SRC_PR_REVIEW))
+SRC_ALL = $(sort $(SRC_COMMON) $(SRC_IMP) $(SRC_POOL_UTIL) $(SRC_PRJ_UTIL) $(SRC_PGM_TEST) $(SRC_POOL_PRJ_MGR) $(SRC_GEN_PKG) $(SRC_PR_REVIEW))
 
 INC = -Isrc -isystem 3rd_party -I$(BUILDDIR)/gen
 
@@ -798,9 +797,7 @@ SRC_SHARED = $(SRC_COMMON) \
 	src/document/document_board.cpp \
 	src/rules/cache.cpp \
 	src/board/board_rules_check.cpp \
-	src/pool-update/pool-update.cpp \
-	src/pool-update/pool-update_parametric.cpp\
-	src/pool-update/graph.cpp\
+	$(SRC_POOL_UPDATE)\
 	$(SRC_SHARED_3D)
 
 SRC_SHARED_GEN = $(SRC_COMMON_GEN)

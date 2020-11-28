@@ -18,10 +18,12 @@
 #include "nlohmann/json.hpp"
 #include "pool/pool_manager.hpp"
 #include "common/object_descr.hpp"
+#include "pool-update_pool.hpp"
 
 namespace horizon {
 
 using json = nlohmann::json;
+
 
 static void pkg_add_dir_to_graph(PoolUpdateGraph &graph, const std::string &directory, pool_update_cb_t status_cb)
 {
@@ -75,8 +77,13 @@ public:
     void update_some(const std::string &pool_base_path, const std::vector<std::string> &filenames,
                      std::set<UUID> &all_parts_updated);
 
+    PoolUpdatePool &get_pool()
+    {
+        return *pool;
+    }
+
 private:
-    std::optional<Pool> pool;
+    std::optional<PoolUpdatePool> pool;
     std::optional<SQLite::Query> q_exists;
     std::optional<SQLite::Query> q_add_dependency;
     std::optional<SQLite::Query> q_insert_part;
@@ -937,6 +944,7 @@ void PoolUpdater::update_part(const std::string &filename, bool partial)
                 add_dependency(ObjectType::PART, part.uuid, ObjectType::ENTITY, part.entity->uuid);
                 add_dependency(ObjectType::PART, part.uuid, ObjectType::PACKAGE, part.package->uuid);
             }
+            pool->inject_part(part, filename, pool_uuid);
         }
     }
     catch (const std::exception &e) {
@@ -1059,9 +1067,9 @@ void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb, 
 
     if (parametric) {
         if (filenames.size() == 0) // complete update
-            pool_update_parametric(pool_base_path, status_cb);
+            pool_update_parametric(updater.get_pool(), status_cb);
         else if (parts_updated.size())
-            pool_update_parametric(pool_base_path, status_cb, parts_updated);
+            pool_update_parametric(updater.get_pool(), status_cb, parts_updated);
     }
     status_cb(PoolUpdateStatus::DONE, "done", "");
 }
