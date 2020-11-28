@@ -149,6 +149,7 @@ void Board::update_airwires(bool fast, const std::set<UUID> &nets_only)
         std::map<Track::Connection, int> connmap;
         std::vector<double> points_for_delaunator;
         delaunator::Points pts(points_for_delaunator);
+        std::map<Coordi, std::vector<size_t>> pts_map;
 
         // collect possible ratsnest points
         for (auto &it_junc : junctions) {
@@ -157,6 +158,7 @@ void Board::update_airwires(bool fast, const std::set<UUID> &nets_only)
                 points_for_delaunator.emplace_back(pos.x);
                 points_for_delaunator.emplace_back(pos.y);
                 points_ref.emplace_back(&it_junc.second);
+                pts_map[pos].push_back(pts.size() - 1);
             }
         }
         for (auto &it_pkg : packages) {
@@ -167,6 +169,7 @@ void Board::update_airwires(bool fast, const std::set<UUID> &nets_only)
                     points_for_delaunator.emplace_back(pos.x);
                     points_for_delaunator.emplace_back(pos.y);
                     points_ref.push_back(conn);
+                    pts_map[pos].push_back(pts.size() - 1);
                 }
             }
         }
@@ -174,8 +177,29 @@ void Board::update_airwires(bool fast, const std::set<UUID> &nets_only)
             connmap[points_ref[i]] = i;
         }
 
-        // collect edges formed by tracks
+
         std::set<std::pair<size_t, size_t>> edges_from_board;
+        std::vector<std::pair<size_t, size_t>> zero_length_airwires;
+
+        // collect edges formed by overlapping points
+        for (const auto &[pos, idxs] : pts_map) {
+            if (idxs.size() > 1) {
+                for (size_t i = 0; i < idxs.size(); i++) {
+                    for (size_t j = i + 1; j < idxs.size(); j++) {
+                        const auto p1 = idxs.at(i);
+                        const auto p2 = idxs.at(j);
+                        if (points_ref.at(p1).get_layer().overlaps(points_ref.at(p2).get_layer())) {
+                            edges_from_board.emplace(p1, p2);
+                        }
+                        else {
+                            zero_length_airwires.emplace_back(p1, p2);
+                        }
+                    }
+                }
+            }
+        }
+
+        // collect edges formed by tracks
         for (auto &it : tracks) {
             if (it.second.net == net) {
                 auto la = it.second.layer;
@@ -277,11 +301,17 @@ void Board::update_airwires(bool fast, const std::set<UUID> &nets_only)
             }
         }
 
+        // add zero length airwires
+        for (const auto &[a, b] : zero_length_airwires) {
+            edges_for_mst.push_back({a, b, 1e9});
+        }
+
         std::stable_sort(edges_for_mst.begin(), edges_for_mst.end(),
                          [](const auto &a, const auto &b) { return a.weight < b.weight; });
 
         // run MST algorithm for removing superflous edges
         auto edges_from_mst = kruskalMST(pts.size(), edges_for_mst);
+
 
         if (edges_from_mst.size()) {
             auto &li = airwires[net->uuid];
