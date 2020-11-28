@@ -8,7 +8,7 @@ namespace horizon {
 class PoolUpdateErrorDialog : public Gtk::Dialog {
 public:
     PoolUpdateErrorDialog(Gtk::Window *parent,
-                          const std::deque<std::tuple<PoolUpdateStatus, std::string, std::string>> &errors);
+                          const std::list<std::tuple<PoolUpdateStatus, std::string, std::string>> &errors);
 
 private:
     class ListColumns : public Gtk::TreeModelColumnRecord {

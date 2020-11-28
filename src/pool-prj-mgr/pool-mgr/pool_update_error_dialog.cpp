@@ -3,7 +3,7 @@
 
 namespace horizon {
 PoolUpdateErrorDialog::PoolUpdateErrorDialog(
-        Gtk::Window *parent, const std::deque<std::tuple<PoolUpdateStatus, std::string, std::string>> &errors)
+        Gtk::Window *parent, const std::list<std::tuple<PoolUpdateStatus, std::string, std::string>> &errors)
     : Gtk::Dialog("Pool update errors ", *parent,
                   Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
 {
@@ -11,10 +11,11 @@ PoolUpdateErrorDialog::PoolUpdateErrorDialog(
 
     store = Gtk::ListStore::create(list_columns);
     Gtk::TreeModel::Row row;
-    for (auto it : errors) {
+
+    for (const auto &[status, filename, msg] : errors) {
         row = *(store->append());
-        row[list_columns.filename] = std::get<1>(it);
-        row[list_columns.error] = std::get<2>(it);
+        row[list_columns.filename] = filename;
+        row[list_columns.error] = msg;
     }
 
     view = Gtk::manage(new Gtk::TreeView(store));

@@ -221,9 +221,11 @@ void PoolUpdater::update_some(const std::string &pool_base_path, const std::vect
 
 void PoolUpdater::update(const std::vector<std::string> &base_paths)
 {
-    status_cb(PoolUpdateStatus::INFO, "", "tags");
+    status_cb(PoolUpdateStatus::INFO, "", "Tags");
     pool->db.execute("DELETE FROM tags");
     pool->db.execute("DELETE FROM dependencies");
+
+    status_cb(PoolUpdateStatus::INFO, "", "Units");
     pool->db.execute("BEGIN TRANSACTION");
     pool->db.execute("DELETE FROM units");
     for (const auto &bp : base_paths) {
@@ -232,7 +234,7 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
     }
     pool->db.execute("COMMIT");
 
-    status_cb(PoolUpdateStatus::INFO, "", "entities");
+    status_cb(PoolUpdateStatus::INFO, "", "Entities");
     pool->db.execute("BEGIN TRANSACTION");
     pool->db.execute("DELETE FROM entities");
     for (const auto &bp : base_paths) {
@@ -241,7 +243,7 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
     }
     pool->db.execute("COMMIT");
 
-    status_cb(PoolUpdateStatus::INFO, "", "symbols");
+    status_cb(PoolUpdateStatus::INFO, "", "Symbols");
     pool->db.execute("BEGIN TRANSACTION");
     pool->db.execute("DELETE FROM symbols");
     for (const auto &bp : base_paths) {
@@ -250,7 +252,7 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
     }
     pool->db.execute("COMMIT");
 
-    status_cb(PoolUpdateStatus::INFO, "", "padstacks");
+    status_cb(PoolUpdateStatus::INFO, "", "Padstacks");
     pool->db.execute("BEGIN TRANSACTION");
     pool->db.execute("DELETE FROM padstacks");
     for (const auto &bp : base_paths) {
@@ -260,7 +262,7 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
     }
     pool->db.execute("COMMIT");
 
-    status_cb(PoolUpdateStatus::INFO, "", "packages");
+    status_cb(PoolUpdateStatus::INFO, "", "Packages");
     pool->db.execute("BEGIN TRANSACTION");
     pool->db.execute("DELETE FROM packages");
     pool->db.execute("DELETE FROM models");
@@ -270,7 +272,7 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
     }
     pool->db.execute("COMMIT");
 
-    status_cb(PoolUpdateStatus::INFO, "", "parts");
+    status_cb(PoolUpdateStatus::INFO, "", "Parts");
     pool->db.execute("BEGIN TRANSACTION");
     pool->db.execute("DELETE FROM parts");
     pool->db.execute("DELETE FROM orderable_MPNs");
@@ -280,7 +282,7 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
     }
     pool->db.execute("COMMIT");
 
-    status_cb(PoolUpdateStatus::INFO, "", "frames");
+    status_cb(PoolUpdateStatus::INFO, "", "Frames");
     pool->db.execute("BEGIN TRANSACTION");
     pool->db.execute("DELETE FROM frames");
     for (const auto &bp : base_paths) {
@@ -291,7 +293,7 @@ void PoolUpdater::update(const std::vector<std::string> &base_paths)
     }
     pool->db.execute("COMMIT");
 
-    status_cb(PoolUpdateStatus::INFO, "", "decals");
+    status_cb(PoolUpdateStatus::INFO, "", "Decals");
     pool->db.execute("BEGIN TRANSACTION");
     pool->db.execute("DELETE FROM decals");
     for (const auto &bp : base_paths) {
@@ -1071,7 +1073,8 @@ void pool_update(const std::string &pool_base_path, pool_update_cb_t status_cb, 
         else if (parts_updated.size())
             pool_update_parametric(updater.get_pool(), status_cb, parts_updated);
     }
-    status_cb(PoolUpdateStatus::DONE, "done", "");
+    status_cb(PoolUpdateStatus::INFO, "", "Done");
+    status_cb(PoolUpdateStatus::DONE, "", "");
 }
 
 } // namespace horizon

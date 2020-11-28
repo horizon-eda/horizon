@@ -24,6 +24,9 @@ private:
     std::string base_path;
     pool_update_cb_t status_cb;
 
+    SQLite::Query &get_insert_query(const PoolParametric::Table &table);
+    std::map<std::string, SQLite::Query> insert_queries;
+
     void update_part(const UUID &uu, bool del);
 };
 
@@ -32,6 +35,27 @@ PoolUpdaterParametric::PoolUpdaterParametric(PoolUpdatePool &apool, pool_update_
       base_path(pool.get_base_path()), status_cb(cb)
 {
     pool_parametric.db.execute("PRAGMA journal_mode=WAL");
+}
+
+SQLite::Query &PoolUpdaterParametric::get_insert_query(const PoolParametric::Table &table)
+{
+    if (!insert_queries.count(table.name)) {
+        std::string qs = "INSERT INTO " + table.name + " VALUES (?, ";
+        for (size_t i = 0; i < table.columns.size(); i++) {
+            qs += "?,";
+        }
+        qs.pop_back();
+        qs += ")";
+        return insert_queries
+                .emplace(std::piecewise_construct, std::forward_as_tuple(table.name),
+                         std::forward_as_tuple(pool_parametric.db, qs))
+                .first->second;
+    }
+    else {
+        auto &q = insert_queries.at(table.name);
+        q.reset();
+        return q;
+    }
 }
 
 void PoolUpdaterParametric::update()
@@ -98,14 +122,7 @@ void PoolUpdaterParametric::update_part(const UUID &uu, bool del)
             q.bind(1, uu);
             q.step();
         }
-
-        std::string qs = "INSERT INTO " + table.name + " VALUES (?, ";
-        for (size_t i = 0; i < table.columns.size(); i++) {
-            qs += "?,";
-        }
-        qs.pop_back();
-        qs += ")";
-        SQLite::Query q(pool_parametric.db, qs);
+        auto &q = get_insert_query(table);
         q.bind(1, part.uuid);
         for (size_t i = 0; i < table.columns.size(); i++) {
             auto &col = table.columns.at(i);
@@ -152,6 +169,7 @@ void pool_update_parametric(PoolUpdatePool &pool, pool_update_cb_t status_cb, co
 {
     if (!status_cb)
         status_cb = &status_cb_nop;
+    status_cb(PoolUpdateStatus::INFO, "", "Parametric data");
     PoolUpdaterParametric updater(pool, status_cb);
     if (parts.size() == 0) {
         updater.update();

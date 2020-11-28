@@ -174,38 +174,43 @@ PoolNotebook::PoolNotebook(const std::string &bp, class PoolProjectManagerAppWin
             if (in_pool_update_handler)
                 return;
             SetReset rst(in_pool_update_handler);
-            std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
-            while (pool_update_status_queue.size()) {
-                std::string last_filename;
-                std::string last_msg;
-                PoolUpdateStatus last_status;
-
-                std::tie(last_status, last_filename, last_msg) = pool_update_status_queue.front();
-
-                appwin->set_pool_update_status_text(last_filename);
-                if (last_status == PoolUpdateStatus::DONE) {
-                    pool_updated(true);
-                    if (pool_update_filenames.size() == 0) // only for full update
-                        pool_update_n_files_last = pool_update_n_files;
-                }
-                else if (last_status == PoolUpdateStatus::FILE) {
-                    pool_update_last_file = last_filename;
-                    pool_update_n_files++;
-                    if (pool_update_n_files_last && pool_update_filenames.size() == 0) { // only for full update
-                        appwin->set_pool_update_progress((float)pool_update_n_files / pool_update_n_files_last);
+            decltype(pool_update_status_queue) my_queue;
+            {
+                std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
+                my_queue.splice(my_queue.begin(), pool_update_status_queue);
+            }
+            if (my_queue.size()) {
+                const auto last_info = pool_update_last_info;
+                for (const auto &[last_status, last_filename, last_msg] : my_queue) {
+                    if (last_status == PoolUpdateStatus::DONE) {
+                        pool_updated(true);
+                        if (pool_update_filenames.size() == 0) // only for full update
+                            pool_update_n_files_last = pool_update_n_files;
                     }
-                    else {
-                        appwin->set_pool_update_progress(-1);
+                    else if (last_status == PoolUpdateStatus::FILE) {
+                        pool_update_last_file = last_filename;
+                        pool_update_n_files++;
+                    }
+                    else if (last_status == PoolUpdateStatus::INFO) {
+                        pool_update_last_info = last_msg;
+                    }
+                    else if (last_status == PoolUpdateStatus::FILE_ERROR) {
+                        pool_update_error_queue.emplace_back(last_status, last_filename, last_msg);
+                    }
+                    else if (last_status == PoolUpdateStatus::ERROR) {
+                        appwin->set_pool_update_status_text(last_msg + " Last file: " + pool_update_last_file);
+                        pool_updated(false);
+                        return;
                     }
                 }
-                else if (last_status == PoolUpdateStatus::FILE_ERROR) {
-                    pool_update_error_queue.emplace_back(last_status, last_filename, last_msg);
+                if (pool_update_last_info != last_info)
+                    appwin->set_pool_update_status_text(pool_update_last_info);
+                if (pool_update_n_files_last && pool_update_filenames.size() == 0) { // only for full update
+                    appwin->set_pool_update_progress((float)pool_update_n_files / pool_update_n_files_last);
                 }
-                else if (last_status == PoolUpdateStatus::ERROR) {
-                    appwin->set_pool_update_status_text(last_msg + " Last file: " + pool_update_last_file);
-                    pool_updated(false);
+                else {
+                    appwin->set_pool_update_progress(-1);
                 }
-                pool_update_status_queue.pop_front();
             }
         });
     }

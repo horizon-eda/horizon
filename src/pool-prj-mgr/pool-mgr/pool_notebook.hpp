@@ -48,12 +48,13 @@ private:
     Glib::Dispatcher pool_update_dispatcher;
     bool in_pool_update_handler = false;
     std::mutex pool_update_status_queue_mutex;
-    std::deque<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_status_queue;
-    std::deque<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_error_queue;
+    std::list<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_status_queue;
+    std::list<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_error_queue;
     bool pool_updating = false;
     void pool_updated(bool success);
     void reload();
     std::string pool_update_last_file;
+    std::string pool_update_last_info;
     unsigned int pool_update_n_files = 0;
     unsigned int pool_update_n_files_last = 0;
     std::function<void()> pool_update_done_cb = nullptr;
