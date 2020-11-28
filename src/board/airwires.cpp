@@ -301,16 +301,17 @@ void Board::update_airwires(bool fast, const std::set<UUID> &nets_only)
             }
         }
 
+        // add zero length airwires
+        for (const auto &[a, b] : zero_length_airwires) {
+            edges_for_mst.push_back({a, b, 1e9});
+        }
+
         std::stable_sort(edges_for_mst.begin(), edges_for_mst.end(),
                          [](const auto &a, const auto &b) { return a.weight < b.weight; });
 
         // run MST algorithm for removing superflous edges
         auto edges_from_mst = kruskalMST(pts.size(), edges_for_mst);
 
-        // add zero length airwires
-        for (const auto &[a, b] : zero_length_airwires) {
-            edges_from_mst.push_back({a, b, 0});
-        }
 
         if (edges_from_mst.size()) {
             auto &li = airwires[net->uuid];
