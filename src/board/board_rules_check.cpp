@@ -510,7 +510,11 @@ RulesCheckResult BoardRules::check_preflight(const Board &brd) const
             auto &e = r.errors.back();
             e.has_location = true;
             e.location = (it.from.get_position() + it.to.get_position()) / 2;
-            e.comment = "Airwire of net " + net.name;
+            std::string prefix = "Airwire";
+            if (it.from.get_position() == it.to.get_position()) {
+                prefix = "Zero length airwire";
+            }
+            e.comment = prefix + " of net " + brd.block->get_net_name(net.uuid);
         }
     }
     for (const auto &it : brd.planes) {
