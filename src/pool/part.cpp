@@ -173,6 +173,11 @@ Part::Part(const UUID &uu) : uuid(uu), version(app_version)
 Part Part::new_from_file(const std::string &filename, IPool &pool)
 {
     auto j = load_json_from_file(filename);
+    return new_from_json(j, pool);
+}
+
+Part Part::new_from_json(const json &j, IPool &pool)
+{
     return Part(UUID(j.at("uuid").get<std::string>()), j, pool);
 }
 

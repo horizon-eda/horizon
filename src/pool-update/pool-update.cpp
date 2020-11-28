@@ -54,34 +54,6 @@ static void pkg_add_dir_to_graph(PoolUpdateGraph &graph, const std::string &dire
     }
 }
 
-static void part_add_dir_to_graph(PoolUpdateGraph &graph, const std::string &directory, pool_update_cb_t status_cb)
-{
-    Glib::Dir dir(directory);
-    for (const auto &it : dir) {
-        std::string filename = Glib::build_filename(directory, it);
-        if (endswith(it, ".json")) {
-            try {
-                json j = load_json_from_file(filename);
-
-                std::set<UUID> dependencies;
-                UUID part_uuid = j.at("uuid").get<std::string>();
-                if (j.count("base")) {
-                    dependencies.emplace(j.at("base").get<std::string>());
-                }
-                graph.add_node(part_uuid, filename, dependencies);
-            }
-            catch (const std::exception &e) {
-                status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
-            }
-            catch (...) {
-                status_cb(PoolUpdateStatus::FILE_ERROR, filename, "unknown exception");
-            }
-        }
-        else if (Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
-            part_add_dir_to_graph(graph, filename, status_cb);
-        }
-    }
-}
 
 static std::set<UUID> uuids_from_missing(const std::set<std::pair<const PoolUpdateNode *, UUID>> &missing)
 {
@@ -139,6 +111,10 @@ private:
     void update_entity(const std::string &filename, bool partial);
     void update_package(const std::string &filename, bool partial);
     void update_padstack(const std::string &filename);
+
+    void part_add_dir_to_graph(PoolUpdateGraph &graph, const std::string &directory);
+    std::map<std::string, json> json_cache;
+    const json &load_json(const std::string &filename);
 
     UUID pool_uuid;
     void set_pool_info(const std::string &bp);
@@ -865,12 +841,48 @@ void PoolUpdater::update_package(const std::string &filename, bool partial)
     }
 }
 
+const json &PoolUpdater::load_json(const std::string &filename)
+{
+    if (!json_cache.count(filename))
+        json_cache.emplace(filename, load_json_from_file(filename));
+    return json_cache.at(filename);
+}
+
+void PoolUpdater::part_add_dir_to_graph(PoolUpdateGraph &graph, const std::string &directory)
+{
+    Glib::Dir dir(directory);
+    for (const auto &it : dir) {
+        std::string filename = Glib::build_filename(directory, it);
+        if (endswith(it, ".json")) {
+            try {
+                const auto &j = load_json(filename);
+
+                std::set<UUID> dependencies;
+                UUID part_uuid = j.at("uuid").get<std::string>();
+                if (j.count("base")) {
+                    dependencies.emplace(j.at("base").get<std::string>());
+                }
+                graph.add_node(part_uuid, filename, dependencies);
+            }
+            catch (const std::exception &e) {
+                status_cb(PoolUpdateStatus::FILE_ERROR, filename, e.what());
+            }
+            catch (...) {
+                status_cb(PoolUpdateStatus::FILE_ERROR, filename, "unknown exception");
+            }
+        }
+        else if (Glib::file_test(filename, Glib::FILE_TEST_IS_DIR)) {
+            part_add_dir_to_graph(graph, filename);
+        }
+    }
+}
+
 void PoolUpdater::update_part(const std::string &filename, bool partial)
 {
     try {
         if (filename.size()) {
             status_cb(PoolUpdateStatus::FILE, filename, "");
-            auto part = Part::new_from_file(filename, *pool);
+            auto part = Part::new_from_json(load_json(filename), *pool);
             bool overridden = false;
             if (exists(ObjectType::PART, part.uuid)) {
                 overridden = true;
@@ -953,7 +965,7 @@ void PoolUpdater::update_part_node(const PoolUpdateNode &node, std::set<UUID> &v
 void PoolUpdater::update_parts(const std::string &directory)
 {
     PoolUpdateGraph graph;
-    part_add_dir_to_graph(graph, directory, status_cb);
+    part_add_dir_to_graph(graph, directory);
     {
         auto missing = graph.update_dependants();
         auto uuids_missing = uuids_from_missing(missing);
