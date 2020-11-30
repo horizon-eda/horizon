@@ -71,7 +71,7 @@ public:
     {
         if (grid->get_visible()) {
             return DuplicatePartWidget::duplicate_package(pool, pkg.uuid, location_entry->get_filename(),
-                                                          name_entry->get_text());
+                                                          name_entry->get_text(), filenames);
         }
         else {
             return pkg.uuid;
