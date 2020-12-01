@@ -155,7 +155,8 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
     for (const auto &patch : ca->get_patches()) { // add cutouts
         if ((patch.first.layer == poly.layer && patch.first.net != plane->net->uuid && patch.second.size()
              && patch.first.type != PatchType::OTHER && patch.first.type != PatchType::TEXT)
-            || (patch.first.layer == 10000 && patch.first.type == PatchType::HOLE_NPTH)) {
+            || ((patch.first.layer == 10000)
+                && ((patch.first.type == PatchType::HOLE_NPTH) || (patch.first.type == PatchType::HOLE_PTH)))) {
 
             int64_t clearance = 0;
             if (patch.first.type != PatchType::HOLE_NPTH) { // copper
