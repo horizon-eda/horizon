@@ -36,7 +36,7 @@ RuleMatchEditor::RuleMatchEditor(RuleMatch &ma, class IDocument &c)
     });
     sel_stack->add(*net_button, std::to_string(static_cast<int>(RuleMatch::Mode::NET)));
 
-    net_class_button = Gtk::manage(new NetClassButton(core.get_block()));
+    net_class_button = Gtk::manage(new NetClassButton(*core.get_block()));
     if (!match.net_class) {
         match.net_class = core.get_block()->net_class_default->uuid;
     }

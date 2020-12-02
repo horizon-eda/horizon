@@ -36,7 +36,7 @@ void RuleEditorDiffpair::populate()
         grid->attach(*la, 1, 0, 1, 1);
     }
 
-    auto net_class_button = Gtk::manage(new NetClassButton(core.get_block()));
+    auto net_class_button = Gtk::manage(new NetClassButton(*core.get_block()));
     net_class_button->set_net_class(rule2->net_class);
     net_class_button->signal_net_class_changed().connect([this](const UUID &net_class) {
         rule2->net_class = net_class;
