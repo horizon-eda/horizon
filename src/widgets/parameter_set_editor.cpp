@@ -71,6 +71,9 @@ public:
         if (auto extra_button = parent->create_extra_widget(id)) {
             pack_start(*extra_button, false, false, 0);
         }
+        if (auto apply_all_button = parent->create_apply_all_button(id)) {
+            pack_start(*apply_all_button, false, false, 0);
+        }
 
 
         set_margin_start(4);
@@ -136,6 +139,11 @@ ParameterSetEditor::ParameterSetEditor(ParameterSet *ps, bool populate_init)
     pack_start(*sc, true, true, 0);
 }
 
+void ParameterSetEditor::set_has_apply_all(const std::string &tooltip_text)
+{
+    apply_all_tooltip_text.emplace(tooltip_text);
+}
+
 void ParameterSetEditor::set_button_margin_left(int margin)
 {
     add_button->set_margin_start(margin);
@@ -184,4 +192,16 @@ void ParameterSetEditor::update_menu()
         menu_items.at(id).set_visible(parameter_set->count(id) == 0);
     }
 }
+
+Gtk::Widget *ParameterSetEditor::create_apply_all_button(ParameterID id)
+{
+    if (!apply_all_tooltip_text)
+        return nullptr;
+    auto w = Gtk::manage(new Gtk::Button());
+    w->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
+    w->set_tooltip_text(apply_all_tooltip_text.value());
+    w->signal_clicked().connect([this, id] { s_signal_apply_all.emit(id); });
+    return w;
+}
+
 } // namespace horizon

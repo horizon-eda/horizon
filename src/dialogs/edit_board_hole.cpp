@@ -14,20 +14,6 @@
 
 namespace horizon {
 
-class MyParameterSetEditor : public ParameterSetEditor {
-public:
-private:
-    using ParameterSetEditor::ParameterSetEditor;
-    Gtk::Widget *create_extra_widget(ParameterID id) override
-    {
-        auto w = Gtk::manage(new Gtk::Button());
-        w->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
-        w->set_tooltip_text("Apply to all selected holes (Shift+Enter)");
-        w->signal_clicked().connect([this, id] { s_signal_apply_all.emit(id); });
-        return w;
-    }
-};
-
 BoardHoleDialog::BoardHoleDialog(Gtk::Window *parent, std::set<BoardHole *> &holes, IPool &p, Block &b)
     : Gtk::Dialog("Edit hole", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
       pool(p), block(b)
@@ -101,7 +87,8 @@ BoardHoleDialog::BoardHoleDialog(Gtk::Window *parent, std::set<BoardHole *> &hol
         auto hole = holemap.at(uu);
         if (editor)
             delete editor;
-        editor = Gtk::manage(new MyParameterSetEditor(&hole->parameter_set, false));
+        editor = Gtk::manage(new ParameterSetEditor(&hole->parameter_set, false));
+        editor->set_has_apply_all("Apply to all selected holes (Shift+Enter)");
         editor->populate();
         editor->signal_apply_all().connect([holes, hole](ParameterID id) {
             for (auto it : holes) {

@@ -13,6 +13,7 @@ public:
     void focus_first();
     void set_button_margin_left(int margin);
     void add_or_set_parameter(ParameterID param, int64_t value);
+    void set_has_apply_all(const std::string &tooltip_text);
 
     typedef sigc::signal<void> type_signal_activate_last;
     type_signal_activate_last signal_activate_last()
@@ -32,6 +33,8 @@ protected:
     {
     }
 
+    Gtk::Widget *create_apply_all_button(ParameterID id);
+
 private:
     Gtk::MenuButton *add_button = nullptr;
     Gtk::ListBox *listbox = nullptr;
@@ -40,6 +43,7 @@ private:
     ParameterSet *parameter_set;
     Glib::RefPtr<Gtk::SizeGroup> sg_label;
     void update_menu();
+    std::optional<std::string> apply_all_tooltip_text;
 
     type_signal_activate_last s_signal_activate_last;
 

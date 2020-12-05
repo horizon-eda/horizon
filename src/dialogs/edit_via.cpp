@@ -10,20 +10,6 @@
 
 namespace horizon {
 
-class MyParameterSetEditor : public ParameterSetEditor {
-public:
-private:
-    using ParameterSetEditor::ParameterSetEditor;
-    Gtk::Widget *create_extra_widget(ParameterID id) override
-    {
-        auto w = Gtk::manage(new Gtk::Button());
-        w->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
-        w->set_tooltip_text("Apply to all selected vias (Shift+Enter)");
-        w->signal_clicked().connect([this, id] { s_signal_apply_all.emit(id); });
-        return w;
-    }
-};
-
 EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, ViaPadstackProvider &vpp)
     : Gtk::Dialog("Edit via", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR)
 {
@@ -96,7 +82,8 @@ EditViaDialog::EditViaDialog(Gtk::Window *parent, std::set<Via *> &vias, ViaPads
         auto via = viamap.at(uu);
         if (editor)
             delete editor;
-        editor = Gtk::manage(new MyParameterSetEditor(&via->parameter_set, false));
+        editor = Gtk::manage(new ParameterSetEditor(&via->parameter_set, false));
+        editor->set_has_apply_all("Apply to all selected vias (Shift+Enter)");
         editor->populate();
         editor->signal_apply_all().connect([vias, via](ParameterID id) {
             for (auto it : vias) {

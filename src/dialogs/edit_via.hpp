@@ -13,7 +13,7 @@ public:
     bool valid = false;
 
 private:
-    class MyParameterSetEditor *editor = nullptr;
+    class ParameterSetEditor *editor = nullptr;
     Gtk::CheckButton *cb_from_rules = nullptr;
     class ViaPadstackButton *button_vp = nullptr;
     void update_sensitive();

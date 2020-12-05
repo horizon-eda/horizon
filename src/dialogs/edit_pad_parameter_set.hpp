@@ -10,7 +10,7 @@ public:
 
 private:
     class IPool &pool;
-    class MyParameterSetEditor *editor = nullptr;
+    class ParameterSetEditor *editor = nullptr;
     class PoolBrowserButton *padstack_button = nullptr;
 };
 } // namespace horizon

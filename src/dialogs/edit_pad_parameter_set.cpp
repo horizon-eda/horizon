@@ -12,20 +12,6 @@
 
 namespace horizon {
 
-class MyParameterSetEditor : public ParameterSetEditor {
-public:
-private:
-    using ParameterSetEditor::ParameterSetEditor;
-    Gtk::Widget *create_extra_widget(ParameterID id) override
-    {
-        auto w = Gtk::manage(new Gtk::Button());
-        w->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
-        w->set_tooltip_text("Apply to all selected pads (Shift+Enter)");
-        w->signal_clicked().connect([this, id] { s_signal_apply_all.emit(id); });
-        return w;
-    }
-};
-
 PadParameterSetDialog::PadParameterSetDialog(Gtk::Window *parent, std::set<class Pad *> &pads, IPool &p,
                                              class Package &pkg)
     : Gtk::Dialog("Edit pad", *parent, Gtk::DialogFlags::DIALOG_MODAL | Gtk::DialogFlags::DIALOG_USE_HEADER_BAR),
@@ -82,7 +68,8 @@ PadParameterSetDialog::PadParameterSetDialog(Gtk::Window *parent, std::set<class
         auto pad = padmap.at(uu);
         if (editor)
             delete editor;
-        editor = Gtk::manage(new MyParameterSetEditor(&pad->parameter_set, false));
+        editor = Gtk::manage(new ParameterSetEditor(&pad->parameter_set, false));
+        editor->set_has_apply_all("Apply to all selected pads (Shift+Enter)");
         editor->populate();
         editor->signal_apply_all().connect([pads, pad](ParameterID id) {
             for (auto it : pads) {
