@@ -3,7 +3,7 @@
 #include "util/util.hpp"
 #include "pad_editor.hpp"
 #include "gate_editor.hpp"
-#include "location_entry.hpp"
+#include "widgets/location_entry.hpp"
 #include "util/str_util.hpp"
 #include "util/gtk_util.hpp"
 #include "util/pool_completion.hpp"

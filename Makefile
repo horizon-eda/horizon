@@ -558,7 +558,7 @@ SRC_POOL_PRJ_MGR = \
 	src/pool-prj-mgr/pool-mgr/part_wizard/part_wizard.cpp\
 	src/pool-prj-mgr/pool-mgr/part_wizard/pad_editor.cpp\
 	src/pool-prj-mgr/pool-mgr/part_wizard/gate_editor.cpp\
-	src/pool-prj-mgr/pool-mgr/part_wizard/location_entry.cpp\
+	src/widgets/location_entry.cpp\
 	src/pool-prj-mgr/pool-mgr/duplicate/duplicate_unit.cpp\
 	src/pool-prj-mgr/pool-mgr/duplicate/duplicate_entity.cpp\
 	src/pool-prj-mgr/pool-mgr/duplicate/duplicate_part.cpp\

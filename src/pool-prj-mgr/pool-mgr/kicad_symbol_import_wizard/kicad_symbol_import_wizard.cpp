@@ -7,7 +7,7 @@
 #include "nlohmann/json.hpp"
 #include "pool-prj-mgr/pool-prj-mgr-app_win.hpp"
 #include "gate_editor.hpp"
-#include "../part_wizard/location_entry.hpp"
+#include "widgets/location_entry.hpp"
 #include "canvas/canvas_gl.hpp"
 #include "pool-prj-mgr/pool-mgr/editors/editor_window.hpp"
 
