@@ -38,7 +38,7 @@ public:
         auto entry = Gtk::manage(new Gtk::Entry);
         bind_widget(entry, inc.project_filename);
         ebox->pack_start(*entry, true, true, 0);
-        auto button = Gtk::manage(new Gtk::Button("Browse..."));
+        auto button = Gtk::manage(new Gtk::Button("Browse…"));
         button->signal_clicked().connect([this, entry] {
             auto fn = parent.ask_filename(entry->get_text());
             if (fn.size()) {

@@ -216,7 +216,7 @@ void PDFExportWindow::generate()
 {
     if (settings.output_filename.size() == 0 || is_busy)
         return;
-    status_dispatcher.reset("Starting...");
+    status_dispatcher.reset("Starting…");
     PDFExportSettings my_settings = settings;
     my_settings.output_filename = export_filechooser.get_filename_abs();
     std::thread thr(&PDFExportWindow::export_thread, this, my_settings);

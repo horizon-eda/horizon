@@ -35,7 +35,7 @@ void ImpFrame::construct()
 
     core->signal_save().connect([this] { frame.name = name_entry->get_text(); });
 
-    hamburger_menu->append("Frame properties...", "win.edit_frame");
+    hamburger_menu->append("Frame properties…", "win.edit_frame");
     add_tool_action(ToolID::EDIT_FRAME_PROPERTIES, "edit_frame");
 
     add_action_button_line();

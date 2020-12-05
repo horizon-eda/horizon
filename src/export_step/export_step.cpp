@@ -385,7 +385,7 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
     auto assy_label = assy->NewShape();
     TDataStd_Name::Set(assy_label, (prefix + "PCA").c_str());
 
-    progress_cb("Board outline...");
+    progress_cb("Board outline…");
     ClipperLib::Clipper cl;
     {
         CanvasPatch canvas;
@@ -415,20 +415,20 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
         }
     }
 
-    progress_cb("Board cutouts...");
+    progress_cb("Board cutouts…");
     std::deque<TopoDS_Shape> cutouts;
     for (const auto &hole_node : result.Childs.front()->Childs) {
         auto hole_outline = hole_node->Contour;
         cutouts.push_back(prism_from_countour(hole_outline, total_thickness));
     }
 
-    progress_cb("Holes...");
+    progress_cb("Holes…");
     {
         CanvasHole canvas_hole(cutouts, total_thickness);
         canvas_hole.update(brd);
     }
 
-    progress_cb("Creating board...");
+    progress_cb("Creating board…");
     TopoDS_Shape board = prism_from_countour(outline, total_thickness);
     for (const auto &it : cutouts) {
         board = BRepAlgoAPI_Cut(board, it);
@@ -459,7 +459,7 @@ void export_step(const std::string &filename, const Board &brd, class IPool &poo
     }
 
     if (include_models) {
-        progress_cb("Packages...");
+        progress_cb("Packages…");
         auto n_pkg = brd.packages.size();
         size_t i = 1;
         std::vector<const BoardPackage *> pkgs;

@@ -628,7 +628,7 @@ void ImpBase::run(int argc, char *argv[])
 
         {
             auto button = create_action_button(make_action(ActionID::RULES));
-            button->set_label("Rules...");
+            button->set_label("Rules…");
             main_window->header->pack_start(*button);
             button->show();
         }

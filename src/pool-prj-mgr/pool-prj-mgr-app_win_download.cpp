@@ -13,7 +13,7 @@ void PoolProjectManagerAppWindow::handle_do_download()
 
     std::string dest_dir = download_dest_dir_entry->get_text();
     if (dest_dir.size()) {
-        download_status_dispatcher.reset("Starting...");
+        download_status_dispatcher.reset("Starting…");
         download_cancel = false;
         std::thread dl_thread(&PoolProjectManagerAppWindow::download_thread, this,
                               download_gh_username_entry->get_text(), download_gh_repo_entry->get_text(), dest_dir);
@@ -61,7 +61,7 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
             }
         }
 
-        download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Fetching clone URL...");
+        download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Fetching clone URL…");
 
         GitHubClient client;
         json repo = client.get_repo(gh_username, gh_repo);
@@ -76,7 +76,7 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
         clone_opts.fetch_opts.callbacks.transfer_progress = &PoolProjectManagerAppWindow::git_transfer_cb;
         clone_opts.fetch_opts.callbacks.payload = this;
 
-        download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Cloning repository...");
+        download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Cloning repository…");
 
         auto remote_dir = Glib::build_filename(dest_dir, ".remote");
         Gio::File::create_for_path(remote_dir)->make_directory_with_parents();
@@ -90,13 +90,13 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
         RETURN_IF_CANCELLED
 
 
-        download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Updating remote pool...");
+        download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Updating remote pool…");
 
         pool_update(remote_dir);
         RETURN_IF_CANCELLED
         Pool pool_remote(remote_dir);
 
-        download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Copying...");
+        download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Copying…");
 
         {
             SQLite::Query q(pool_remote.db, "SELECT filename FROM all_items_view");

@@ -426,7 +426,7 @@ void ImpBoard::construct()
     hamburger_menu->append("PDF Export", "win.export_pdf");
     main_window->add_action("export_pdf", [this] { trigger_action(ActionID::PDF_EXPORT_WINDOW); });
 
-    hamburger_menu->append("Stackup...", "win.edit_stackup");
+    hamburger_menu->append("Stackup…", "win.edit_stackup");
     add_tool_action(ToolID::EDIT_STACKUP, "edit_stackup");
 
     hamburger_menu->append("Update all planes", "win.update_all_planes");

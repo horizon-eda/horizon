@@ -274,13 +274,13 @@ void ImpSchematic::construct()
     hamburger_menu->append("Annotate", "win.annotate");
     add_tool_action(ToolID::ANNOTATE, "annotate");
 
-    hamburger_menu->append("Buses...", "win.manage_buses");
+    hamburger_menu->append("Buses…", "win.manage_buses");
     add_tool_action(ToolID::MANAGE_BUSES, "manage_buses");
 
-    hamburger_menu->append("Net classes...", "win.manage_nc");
+    hamburger_menu->append("Net classes…", "win.manage_nc");
     add_tool_action(ToolID::MANAGE_NET_CLASSES, "manage_nc");
 
-    hamburger_menu->append("Power Nets...", "win.manage_pn");
+    hamburger_menu->append("Power Nets…", "win.manage_pn");
     add_tool_action(ToolID::MANAGE_POWER_NETS, "manage_pn");
 
     hamburger_menu->append("Schematic properties", "win.sch_properties");

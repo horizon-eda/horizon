@@ -333,8 +333,8 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     if (rules.can_export()) {
         hamburger_menu = Gio::Menu::create();
         hamburger_menu_button->set_menu_model(hamburger_menu);
-        hamburger_menu->append("Export...", "rules.export");
-        hamburger_menu->append("Import...", "rules.import");
+        hamburger_menu->append("Export…", "rules.export");
+        hamburger_menu->append("Import…", "rules.import");
     }
     else {
         hamburger_menu_button->hide();

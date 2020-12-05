@@ -127,7 +127,7 @@ ModelEditor::ModelEditor(ImpPackage &iimp, const UUID &iuu) : Gtk::Box(Gtk::ORIE
         });
         box->pack_end(*delete_button, false, false, 0);
 
-        auto browse_button = Gtk::manage(new Gtk::Button("Browse..."));
+        auto browse_button = Gtk::manage(new Gtk::Button("Browse…"));
         browse_button->signal_clicked().connect([this, entry] {
             Package::Model *model2 = nullptr;
             if (imp.core_package.models.count(uu)) {

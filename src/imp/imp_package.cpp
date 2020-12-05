@@ -166,7 +166,7 @@ void ImpPackage::construct()
             new ParameterWindow(main_window, &core_package.parameter_program_code, &core_package.parameter_set);
     parameter_window->signal_changed().connect([this] { core_package.set_needs_save(); });
     {
-        auto button = Gtk::manage(new Gtk::Button("Parameters..."));
+        auto button = Gtk::manage(new Gtk::Button("Parameters…"));
         main_window->header->pack_start(*button);
         button->show();
         button->signal_clicked().connect([parameter_window] { parameter_window->present(); });

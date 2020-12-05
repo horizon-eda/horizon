@@ -122,7 +122,7 @@ void PoolNotebook::construct_parts()
     add_action_button("Create Part from Part", bbox, br,
                       sigc::mem_fun(*this, &PoolNotebook::handle_create_part_from_part));
 
-    add_action_button("Part Wizard...", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_part_wizard))
+    add_action_button("Part Wizard…", bbox, sigc::mem_fun(*this, &PoolNotebook::handle_part_wizard))
             ->get_style_context()
             ->add_class("suggested-action");
 

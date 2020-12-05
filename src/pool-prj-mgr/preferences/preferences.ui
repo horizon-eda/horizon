@@ -67,7 +67,7 @@
                 <property name="margin_right">10</property>
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
-                <property name="label" translatable="yes">Add key sequence...</property>
+                <property name="label" translatable="yes">Add key sequence…</property>
               </object>
             </child>
           </object>
@@ -940,7 +940,7 @@
             <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="key_sequences_save_button">
-                <property name="label" translatable="yes">Export...</property>
+                <property name="label" translatable="yes">Export…</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -953,7 +953,7 @@
             </child>
             <child>
               <object class="GtkButton" id="key_sequences_load_button">
-                <property name="label" translatable="yes">Import...</property>
+                <property name="label" translatable="yes">Import…</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>

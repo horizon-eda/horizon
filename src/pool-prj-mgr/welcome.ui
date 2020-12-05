@@ -465,7 +465,7 @@ Open a existing pool from disk and activate it.</property>
                     </child>
                     <child>
                       <object class="GtkButton" id="button_git_add_pool">
-                        <property name="label" translatable="yes">Add pool...</property>
+                        <property name="label" translatable="yes">Add pool…</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>

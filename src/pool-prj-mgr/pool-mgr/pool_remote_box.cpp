@@ -663,7 +663,7 @@ void PoolRemoteBox::handle_refresh_prs()
         return;
     notebook->pool_updating = true;
 
-    pr_status_dispatcher.reset("Starting...");
+    pr_status_dispatcher.reset("Starting…");
     std::thread thr(&PoolRemoteBox::refresh_prs_thread, this);
 
     thr.detach();
@@ -809,7 +809,7 @@ void PoolRemoteBox::remote_upgrade_thread()
     try {
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Opening repository...";
+            git_thread_status = "Opening repository…";
         }
         git_thread_dispatcher.emit();
 
@@ -825,7 +825,7 @@ void PoolRemoteBox::remote_upgrade_thread()
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Fetching...";
+            git_thread_status = "Fetching…";
         }
         git_thread_dispatcher.emit();
 
@@ -881,14 +881,14 @@ void PoolRemoteBox::remote_upgrade_thread()
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Updating remote pool...";
+            git_thread_status = "Updating remote pool…";
         }
         git_thread_dispatcher.emit();
         pool_update(notebook->remote_repo);
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Updating local pool...";
+            git_thread_status = "Updating local pool…";
         }
         git_thread_dispatcher.emit();
         unsigned int n_errors = 0;
@@ -968,7 +968,7 @@ void PoolRemoteBox::login_thread()
     try {
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Logging in...";
+            git_thread_status = "Logging in…";
         }
         git_thread_dispatcher.emit();
 
@@ -1137,7 +1137,7 @@ autofree_ptr<git_remote> PoolRemoteBox::get_or_create_remote(GitHubClient &clien
                 retries--;
                 {
                     std::lock_guard<std::mutex> lock(git_thread_mutex);
-                    git_thread_status = "Waiting for fork... (" + std::string(e.what()) + ")";
+                    git_thread_status = "Waiting for fork… (" + std::string(e.what()) + ")";
                 }
                 git_thread_dispatcher.emit();
                 Glib::usleep(1e6);
@@ -1146,7 +1146,7 @@ autofree_ptr<git_remote> PoolRemoteBox::get_or_create_remote(GitHubClient &clien
                 retries--;
                 {
                     std::lock_guard<std::mutex> lock(git_thread_mutex);
-                    git_thread_status = "Waiting for fork...";
+                    git_thread_status = "Waiting for fork…";
                 }
                 git_thread_dispatcher.emit();
                 Glib::usleep(1e6);
@@ -1176,7 +1176,7 @@ void PoolRemoteBox::create_pr_thread()
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Authenticating...";
+            git_thread_status = "Authenticating…";
         }
         git_thread_dispatcher.emit();
 
@@ -1208,7 +1208,7 @@ void PoolRemoteBox::create_pr_thread()
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Opening repository...";
+            git_thread_status = "Opening repository…";
         }
         git_thread_dispatcher.emit();
 
@@ -1275,7 +1275,7 @@ void PoolRemoteBox::create_pr_thread()
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Pushing...";
+            git_thread_status = "Pushing…";
         }
         git_thread_dispatcher.emit();
 
@@ -1285,7 +1285,7 @@ void PoolRemoteBox::create_pr_thread()
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Creating pull request...";
+            git_thread_status = "Creating pull request…";
         }
         git_thread_dispatcher.emit();
 
@@ -1325,7 +1325,7 @@ void PoolRemoteBox::update_pr_thread()
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Authenticating...";
+            git_thread_status = "Authenticating…";
         }
         git_thread_dispatcher.emit();
 
@@ -1354,7 +1354,7 @@ void PoolRemoteBox::update_pr_thread()
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Opening repository...";
+            git_thread_status = "Opening repository…";
         }
         git_thread_dispatcher.emit();
 
@@ -1430,7 +1430,7 @@ void PoolRemoteBox::update_pr_thread()
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Pushing...";
+            git_thread_status = "Pushing…";
         }
         git_thread_dispatcher.emit();
 
@@ -1439,7 +1439,7 @@ void PoolRemoteBox::update_pr_thread()
         if (pr_body.size()) {
             {
                 std::lock_guard<std::mutex> lock(git_thread_mutex);
-                git_thread_status = "Adding comment...";
+                git_thread_status = "Adding comment…";
             }
             git_thread_dispatcher.emit();
             client.add_issue_comment(gh_owner, gh_repo, pr_update_nr, pr_body);
@@ -1479,7 +1479,7 @@ void PoolRemoteBox::update_prepare_pr_thread()
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Authenticating...";
+            git_thread_status = "Authenticating…";
         }
         git_thread_dispatcher.emit();
 
@@ -1499,7 +1499,7 @@ void PoolRemoteBox::update_prepare_pr_thread()
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Opening repository...";
+            git_thread_status = "Opening repository…";
         }
         git_thread_dispatcher.emit();
 
@@ -1510,7 +1510,7 @@ void PoolRemoteBox::update_prepare_pr_thread()
 
         {
             std::lock_guard<std::mutex> lock(git_thread_mutex);
-            git_thread_status = "Adding remote...";
+            git_thread_status = "Adding remote…";
         }
         git_thread_dispatcher.emit();
         auto my_remote = get_or_create_remote(client, repo);
@@ -1526,7 +1526,7 @@ void PoolRemoteBox::update_prepare_pr_thread()
             git_fetch_options fetch_opts = GIT_FETCH_OPTIONS_INIT;
             {
                 std::lock_guard<std::mutex> lock(git_thread_mutex);
-                git_thread_status = "Fetching branch...";
+                git_thread_status = "Fetching branch…";
             }
             git_thread_dispatcher.emit();
             if (git_remote_fetch(my_remote, &refs, &fetch_opts, NULL) != 0) {

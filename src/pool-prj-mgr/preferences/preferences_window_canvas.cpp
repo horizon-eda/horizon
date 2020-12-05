@@ -244,13 +244,13 @@ CanvasPreferencesEditor::CanvasPreferencesEditor(BaseObjectType *cobject, const 
     {
 
         {
-            auto it = Gtk::manage(new Gtk::MenuItem("Export..."));
+            auto it = Gtk::manage(new Gtk::MenuItem("Export…"));
             it->signal_activate().connect(sigc::mem_fun(*this, &CanvasPreferencesEditor::handle_export));
             it->show();
             color_preset_menu->append(*it);
         }
         {
-            auto it = Gtk::manage(new Gtk::MenuItem("Import..."));
+            auto it = Gtk::manage(new Gtk::MenuItem("Import…"));
             it->signal_activate().connect(sigc::mem_fun(*this, &CanvasPreferencesEditor::handle_import));
             it->show();
             color_preset_menu->append(*it);

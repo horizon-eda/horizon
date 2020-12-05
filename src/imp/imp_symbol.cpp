@@ -60,7 +60,7 @@ void ImpSymbol::construct()
     });
 
     {
-        auto button = Gtk::manage(new Gtk::Button("Preview..."));
+        auto button = Gtk::manage(new Gtk::Button("Preview…"));
         main_window->header->pack_start(*button);
         button->show();
         button->signal_clicked().connect([this] { symbol_preview_window->present(); });

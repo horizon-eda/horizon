@@ -101,7 +101,7 @@ void ImpPadstack::construct()
     parameter_window->signal_changed().connect([this] { core_padstack.set_needs_save(); });
     parameter_window_add_polygon_expand(parameter_window);
     {
-        auto button = Gtk::manage(new Gtk::Button("Parameters..."));
+        auto button = Gtk::manage(new Gtk::Button("Parameters…"));
         main_window->header->pack_start(*button);
         button->show();
         button->signal_clicked().connect([parameter_window] { parameter_window->present(); });

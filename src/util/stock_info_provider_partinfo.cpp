@@ -514,7 +514,7 @@ void StockInfoProviderPartinfo::add_columns(Gtk::TreeView *treeview,
         auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
         auto v = row.get_value(column);
         if (v == nullptr) {
-            mcr->property_text() = "Loading...";
+            mcr->property_text() = "Loading…";
         }
         else {
             if (auto p = dynamic_cast<const StockInfoRecordPartinfo *>(v.get())) {

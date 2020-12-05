@@ -473,7 +473,7 @@
                   <object class="GtkLabel" id="upgrade_label">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">Cloning...</property>
+                    <property name="label" translatable="yes">Cloning…</property>
                     <property name="wrap">True</property>
                     <property name="selectable">True</property>
                     <property name="xalign">0</property>
@@ -632,7 +632,7 @@
                     <property name="valign">center</property>
                     <property name="margin-left">20</property>
                     <property name="margin-right">20</property>
-                    <property name="label" translatable="yes">Add the items you want to merge using the "Merge ..." buttons from the other tabs.</property>
+                    <property name="label" translatable="yes">Add the items you want to merge using the "Merge …" buttons from the other tabs.</property>
                     <property name="justify">center</property>
                     <property name="wrap">True</property>
                     <style>
@@ -2060,7 +2060,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                             </child>
                             <child>
                               <object class="GtkButton" id="download_dest_dir_button">
-                                <property name="label" translatable="yes">Browse...</property>
+                                <property name="label" translatable="yes">Browse…</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="receives-default">True</property>
@@ -2241,7 +2241,7 @@ In case of modifying an existing part, provide rationale for the modification.</
                           <object class="GtkLabel" id="download_label">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Cloning...</property>
+                            <property name="label" translatable="yes">Cloning…</property>
                             <property name="xalign">0</property>
                           </object>
                           <packing>
@@ -3193,7 +3193,7 @@ In case of modifying an existing part, provide rationale for the modification.</
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">New...</property>
+                <property name="label" translatable="yes">New…</property>
               </object>
             </child>
             <style>
@@ -3203,7 +3203,7 @@ In case of modifying an existing part, provide rationale for the modification.</
         </child>
         <child>
           <object class="GtkButton" id="button_open">
-            <property name="label" translatable="yes">Open...</property>
+            <property name="label" translatable="yes">Open…</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
@@ -3281,7 +3281,7 @@ In case of modifying an existing part, provide rationale for the modification.</
         </child>
         <child>
           <object class="GtkButton" id="button_download">
-            <property name="label" translatable="yes">Download pool...</property>
+            <property name="label" translatable="yes">Download pool…</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
@@ -3487,7 +3487,7 @@ In case of modifying an existing part, provide rationale for the modification.</
           <object class="GtkLabel" id="pull_request_item_descr_label">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">opened by ... on...</property>
+            <property name="label" translatable="yes">opened by … on…</property>
             <style>
               <class name="dim-label"/>
             </style>

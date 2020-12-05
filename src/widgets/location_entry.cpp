@@ -37,7 +37,7 @@ LocationEntry::LocationEntry(const std::string &rel) : Gtk::Box(), relative_to(r
 
     entry->signal_changed().connect([this] { s_signal_changed.emit(); });
 
-    auto button = Gtk::manage(new Gtk::Button("Browse..."));
+    auto button = Gtk::manage(new Gtk::Button("Browse…"));
     pack_start(*button, false, false, 0);
     button->signal_clicked().connect(sigc::mem_fun(*this, &LocationEntry::handle_button));
     button->show();
