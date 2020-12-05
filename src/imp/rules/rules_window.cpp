@@ -22,6 +22,9 @@
 #include "util/util.hpp"
 #include "core/core.hpp"
 #include "util/gtk_util.hpp"
+#include "nlohmann/json.hpp"
+#include "import.hpp"
+#include "export.hpp"
 
 #include <thread>
 
@@ -49,11 +52,22 @@ public:
             sg->add_widget(*label_order);
         }
         label_text->show();
+
+        img_imported = Gtk::manage(new Gtk::Image);
+        img_imported->set_margin_start(4);
+        img_imported->set_from_icon_name("rule-imported-symbolic", Gtk::ICON_SIZE_BUTTON);
+        img_imported->set_tooltip_text("This rule has recently been imported");
+        pack_start(*img_imported, false, false, 0);
     }
 
     void set_text(const std::string &t)
     {
         label_text->set_markup(t);
+    }
+
+    void set_imported(bool imported)
+    {
+        img_imported->set_visible(imported);
     }
 
     void set_order(int o)
@@ -72,6 +86,7 @@ private:
     int order = 0;
     Gtk::Label *label_order = nullptr;
     Gtk::Label *label_text = nullptr;
+    Gtk::Image *img_imported = nullptr;
 };
 
 RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, CanvasGL &ca, class Core &c)
@@ -144,8 +159,8 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     });
 
     button_rule_instance_add->signal_clicked().connect([this] {
-        rules.add_rule(rule_current);
-        update_rule_instances(rule_current);
+        rules.add_rule(rule_id_current);
+        update_rule_instances(rule_id_current);
         lb_multi->select_row(*lb_multi->get_row_at_index(0));
         update_warning();
         s_signal_changed.emit();
@@ -173,7 +188,7 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
     });
     run_button->signal_clicked().connect(sigc::mem_fun(*this, &RulesWindow::run_checks));
     apply_button->signal_clicked().connect(sigc::mem_fun(*this, &RulesWindow::apply_rules));
-    update_rules_enabled();
+    update_rule_labels();
 
     check_result_store = Gtk::TreeStore::create(tree_columns);
     check_result_treeview->set_model(check_result_store);
@@ -308,6 +323,23 @@ RulesWindow::RulesWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builde
         }
     });
 
+    action_group = Gio::SimpleActionGroup::create();
+    insert_action_group("rules", action_group);
+    action_group->add_action("export", sigc::mem_fun(*this, &RulesWindow::export_rules));
+    action_group->add_action("import", sigc::mem_fun(*this, &RulesWindow::import_rules));
+
+    Gtk::MenuButton *hamburger_menu_button;
+    GET_WIDGET(hamburger_menu_button);
+    if (rules.can_export()) {
+        hamburger_menu = Gio::Menu::create();
+        hamburger_menu_button->set_menu_model(hamburger_menu);
+        hamburger_menu->append("Export...", "rules.export");
+        hamburger_menu->append("Import...", "rules.import");
+    }
+    else {
+        hamburger_menu_button->hide();
+    }
+
     signal_delete_event().connect([this](GdkEventAny *ev) { return !run_button->get_sensitive(); });
 }
 
@@ -321,6 +353,79 @@ void RulesWindow::apply_rules()
     core.rebuild();
     s_signal_canvas_update.emit();
     s_signal_changed.emit();
+}
+
+void RulesWindow::export_rules()
+{
+    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+    RuleExportDialog dia;
+    dia.set_transient_for(*top);
+    if (dia.run() == Gtk::RESPONSE_OK) {
+        std::string error_str;
+        try {
+            auto j = rules_export(rules, dia.get_export_info(), core);
+            save_json_to_file(dia.get_filename(), j);
+        }
+        catch (const std::exception &e) {
+            error_str = e.what();
+        }
+        catch (...) {
+            error_str = "unknown error";
+        }
+        if (error_str.size()) {
+            Gtk::MessageDialog edia(dia, "Export error", false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+            edia.set_secondary_text(error_str);
+            edia.run();
+        }
+    }
+}
+
+void RulesWindow::import_rules()
+{
+    auto top = dynamic_cast<Gtk::Window *>(get_ancestor(GTK_TYPE_WINDOW));
+    std::string filename;
+    {
+        GtkFileChooserNative *native = gtk_file_chooser_native_new("Import rules", GTK_WINDOW(top->gobj()),
+                                                                   GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+        auto chooser = Glib::wrap(GTK_FILE_CHOOSER(native));
+        auto filter = Gtk::FileFilter::create();
+        filter->set_name("Horizon rules");
+        filter->add_pattern("*.json");
+        chooser->add_filter(filter);
+
+        if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT) {
+            filename = chooser->get_filename();
+        }
+        else {
+            return;
+        }
+    }
+    std::string error_str;
+    try {
+        auto j = load_json_from_file(filename);
+        auto import_info = rules_get_import_info(j);
+        auto dia = make_rule_import_dialog(*import_info, core);
+        dia->set_transient_for(*top);
+        if (dia->run() == Gtk::RESPONSE_OK) {
+            auto map = dia->get_import_map();
+            rules.import_rules(import_info->get_rules(), *map);
+            update_rule_labels();
+            update_rule_instance_labels();
+            reload_editor();
+            s_signal_changed.emit();
+        }
+    }
+    catch (const std::exception &e) {
+        error_str = e.what();
+    }
+    catch (...) {
+        error_str = "unknown error";
+    }
+    if (error_str.size()) {
+        Gtk::MessageDialog dia(*top, "Import error", false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
+        dia.set_secondary_text(error_str);
+        dia.run();
+    }
 }
 
 void RulesWindow::check_thread(RuleID id)
@@ -403,7 +508,7 @@ void RulesWindow::rule_selected(RuleID id)
 {
     auto multi = rule_descriptions.at(id).multi;
     rev_multi->set_reveal_child(multi);
-    rule_current = id;
+    rule_id_current = id;
     if (multi) {
         show_editor(nullptr);
         update_rule_instances(id);
@@ -423,10 +528,16 @@ void RulesWindow::rule_instance_selected(RuleID id, const UUID &uu)
     show_editor(create_editor(*rule));
 }
 
+void RulesWindow::reload_editor()
+{
+    if (editor)
+        show_editor(create_editor(editor->get_rule()));
+}
+
 void RulesWindow::show_editor(RuleEditor *e)
 {
     if (editor) {
-        rule_editor_box->remove(*editor);
+        delete editor;
         editor = nullptr;
     }
     if (e == nullptr)
@@ -437,7 +548,7 @@ void RulesWindow::show_editor(RuleEditor *e)
     editor->show();
     editor->signal_updated().connect([this] {
         update_rule_instance_labels();
-        update_rules_enabled();
+        update_rule_labels();
         update_warning();
         s_signal_changed.emit();
     });
@@ -530,6 +641,7 @@ void RulesWindow::update_rule_instances(RuleID id)
         auto la = Gtk::manage(
                 new RuleLabel(sg_order, it.second->get_brief(get_block()), id, it.first, it.second->get_order()));
         la->set_sensitive(it.second->enabled);
+        la->set_imported(it.second->imported);
         la->show();
         lb_multi->append(*la);
         if (it.first == uu) {
@@ -551,11 +663,12 @@ void RulesWindow::update_rule_instance_labels()
         la->set_text(rule->get_brief(get_block()));
         la->set_sensitive(rule->enabled);
         la->set_order(rule->get_order());
+        la->set_imported(rule->imported);
     }
     lb_multi->invalidate_sort();
 }
 
-void RulesWindow::update_rules_enabled()
+void RulesWindow::update_rule_labels()
 {
     for (auto ch : lb_rules->get_children()) {
         auto la = dynamic_cast<RuleLabel *>(dynamic_cast<Gtk::ListBoxRow *>(ch)->get_child());
@@ -563,6 +676,12 @@ void RulesWindow::update_rules_enabled()
         if (!is_multi) {
             auto r = rules.get_rule(la->id);
             la->set_sensitive(r->enabled);
+            la->set_imported(r->imported);
+        }
+        else {
+            auto r = rules.get_rules(la->id);
+            auto imported = std::any_of(r.begin(), r.end(), [](const auto x) { return x.second->imported; });
+            la->set_imported(imported);
         }
     }
 }
@@ -582,12 +701,12 @@ void RulesWindow::set_enabled(bool enable)
 
 void RulesWindow::update_warning()
 {
-    if (!rule_descriptions.at(rule_current).needs_match_all) {
+    if (!rule_descriptions.at(rule_id_current).needs_match_all) {
         rev_warn->set_reveal_child(false);
         return;
     }
 
-    auto sorted = rules.get_rules_sorted(rule_current);
+    auto sorted = rules.get_rules_sorted(rule_id_current);
     if (sorted.size() == 0) {
         rev_warn->set_reveal_child(true);
     }

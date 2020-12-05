@@ -7,11 +7,12 @@ namespace horizon {
 class RuleClearanceSameNet : public Rule {
 public:
     RuleClearanceSameNet(const UUID &uu);
-    RuleClearanceSameNet(const UUID &uu, const json &j);
+    RuleClearanceSameNet(const UUID &uu, const json &j, const RuleImportMap &import_map);
     json serialize() const override;
 
     std::string get_brief(const class Block *block = nullptr) const override;
     bool is_match_all() const override;
+    bool can_export() const override;
 
     int64_t get_clearance(PatchType a, PatchType b) const;
     void set_clearance(PatchType a, PatchType b, int64_t c);

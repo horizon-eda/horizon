@@ -6,10 +6,14 @@ namespace horizon {
 class RuleParameters : public Rule {
 public:
     RuleParameters();
-    RuleParameters(const json &j);
+    RuleParameters(const json &j, const RuleImportMap &import_map);
     json serialize() const override;
 
     std::string get_brief(const class Block *block = nullptr) const override;
+    bool can_export() const override
+    {
+        return true;
+    }
 
     uint64_t solder_mask_expansion = 0.1_mm;
     uint64_t paste_mask_contraction = 0;

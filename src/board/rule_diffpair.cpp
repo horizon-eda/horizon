@@ -10,9 +10,9 @@ RuleDiffpair::RuleDiffpair(const UUID &uu) : Rule(uu)
     id = RuleID::DIFFPAIR;
 }
 
-RuleDiffpair::RuleDiffpair(const UUID &uu, const json &j)
-    : net_class(j.at("net_class").get<std::string>()), layer(j.at("layer")), track_width(j.at("track_width")),
-      track_gap(j.at("track_gap")), via_gap(j.at("via_gap"))
+RuleDiffpair::RuleDiffpair(const UUID &uu, const json &j, const RuleImportMap &import_map)
+    : Rule(uu, j, import_map), net_class(import_map.get_net_class(j.at("net_class").get<std::string>())),
+      layer(j.at("layer")), track_width(j.at("track_width")), track_gap(j.at("track_gap")), via_gap(j.at("via_gap"))
 {
     id = RuleID::DIFFPAIR;
 }

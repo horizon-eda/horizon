@@ -4,6 +4,7 @@
 #include "rules/cache.hpp"
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
+#include "board_rules_import.hpp"
 
 namespace horizon {
 BoardRules::BoardRules()
@@ -43,12 +44,18 @@ void BoardRules::operator=(const BoardRules &other)
 
 void BoardRules::load_from_json(const json &j)
 {
+    RuleImportMap imap;
+    import_rules(j, imap);
+}
+
+void BoardRules::import_rules(const json &j, const RuleImportMap &import_map)
+{
     if (j.count("hole_size")) {
         const json &o = j["hole_size"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             rule_hole_size.emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                                   std::forward_as_tuple(u, it.value()));
+                                   std::forward_as_tuple(u, it.value(), import_map));
         }
         fix_order(RuleID::HOLE_SIZE);
     }
@@ -57,7 +64,7 @@ void BoardRules::load_from_json(const json &j)
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             rule_track_width.emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                                     std::forward_as_tuple(u, it.value()));
+                                     std::forward_as_tuple(u, it.value(), import_map));
         }
         fix_order(RuleID::TRACK_WIDTH);
     }
@@ -66,7 +73,7 @@ void BoardRules::load_from_json(const json &j)
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             rule_clearance_copper.emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                                          std::forward_as_tuple(u, it.value()));
+                                          std::forward_as_tuple(u, it.value(), import_map));
         }
         fix_order(RuleID::CLEARANCE_COPPER);
         update_sorted();
@@ -75,7 +82,8 @@ void BoardRules::load_from_json(const json &j)
         const json &o = j["via"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            rule_via.emplace(std::piecewise_construct, std::forward_as_tuple(u), std::forward_as_tuple(u, it.value()));
+            rule_via.emplace(std::piecewise_construct, std::forward_as_tuple(u),
+                             std::forward_as_tuple(u, it.value(), import_map));
         }
         fix_order(RuleID::VIA);
     }
@@ -84,7 +92,7 @@ void BoardRules::load_from_json(const json &j)
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             rule_clearance_copper_other.emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                                                std::forward_as_tuple(u, it.value()));
+                                                std::forward_as_tuple(u, it.value(), import_map));
         }
         fix_order(RuleID::CLEARANCE_COPPER_OTHER);
     }
@@ -93,7 +101,7 @@ void BoardRules::load_from_json(const json &j)
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             rule_clearance_copper_other.emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                                                std::forward_as_tuple(u, it.value()));
+                                                std::forward_as_tuple(u, it.value(), import_map));
         }
         fix_order(RuleID::CLEARANCE_COPPER_OTHER);
     }
@@ -102,7 +110,7 @@ void BoardRules::load_from_json(const json &j)
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             rule_plane.emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                               std::forward_as_tuple(u, it.value()));
+                               std::forward_as_tuple(u, it.value(), import_map));
         }
         fix_order(RuleID::PLANE);
     }
@@ -111,7 +119,7 @@ void BoardRules::load_from_json(const json &j)
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             rule_diffpair.emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                                  std::forward_as_tuple(u, it.value()));
+                                  std::forward_as_tuple(u, it.value(), import_map));
         }
         fix_order(RuleID::DIFFPAIR);
     }
@@ -129,7 +137,7 @@ void BoardRules::load_from_json(const json &j)
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
             rule_layer_pair.emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                                    std::forward_as_tuple(u, it.value()));
+                                    std::forward_as_tuple(u, it.value(), import_map));
         }
         fix_order(RuleID::LAYER_PAIR);
     }
@@ -137,17 +145,17 @@ void BoardRules::load_from_json(const json &j)
         for (const auto &[key, value] : j.at("clearance_same_net").items()) {
             UUID u = key;
             rule_clearance_same_net.emplace(std::piecewise_construct, std::forward_as_tuple(u),
-                                            std::forward_as_tuple(u, value));
+                                            std::forward_as_tuple(u, value, import_map));
         }
         fix_order(RuleID::CLEARANCE_SAME_NET);
     }
     if (j.count("clearance_silkscreen_exposed_copper")) {
         const json &o = j["clearance_silkscreen_exposed_copper"];
-        rule_clearance_silkscreen_exposed_copper = RuleClearanceSilkscreenExposedCopper(o);
+        rule_clearance_silkscreen_exposed_copper = RuleClearanceSilkscreenExposedCopper(o, import_map);
     }
     if (j.count("parameters")) {
         const json &o = j["parameters"];
-        rule_parameters = RuleParameters(o);
+        rule_parameters = RuleParameters(o, import_map);
     }
 }
 
@@ -222,52 +230,40 @@ void BoardRules::apply(RuleID id, Board &brd, ViaPadstackProvider &vpp) const
     }
 }
 
-json BoardRules::serialize() const
+json BoardRules::serialize_or_export(Rule::SerializeMode mode) const
 {
     json j;
-    j["hole_size"] = json::object();
-    for (const auto &it : rule_hole_size) {
-        j["hole_size"][(std::string)it.first] = it.second.serialize();
-    }
-    j["track_width"] = json::object();
-    for (const auto &it : rule_track_width) {
-        j["track_width"][(std::string)it.first] = it.second.serialize();
-    }
-    j["clearance_copper"] = json::object();
-    for (const auto &it : rule_clearance_copper) {
-        j["clearance_copper"][(std::string)it.first] = it.second.serialize();
-    }
-    j["via"] = json::object();
-    for (const auto &it : rule_via) {
-        j["via"][(std::string)it.first] = it.second.serialize();
-    }
-    j["plane"] = json::object();
-    for (const auto &it : rule_plane) {
-        j["plane"][(std::string)it.first] = it.second.serialize();
-    }
-    j["diffpair"] = json::object();
-    for (const auto &it : rule_diffpair) {
-        j["diffpair"][(std::string)it.first] = it.second.serialize();
-    }
-    j["clearance_copper_other"] = json::object();
-    for (const auto &it : rule_clearance_copper_other) {
-        j["clearance_copper_other"][(std::string)it.first] = it.second.serialize();
-    }
-    j["clearance_copper_keepout"] = json::object();
-    for (const auto &it : rule_clearance_copper_keepout) {
-        j["clearance_copper_keepout"][(std::string)it.first] = it.second.serialize();
-    }
-    j["layer_pair"] = json::object();
-    for (const auto &it : rule_layer_pair) {
-        j["layer_pair"][(std::string)it.first] = it.second.serialize();
-    }
-    j["clearance_same_net"] = json::object();
-    for (const auto &it : rule_clearance_same_net) {
-        j["clearance_same_net"][(std::string)it.first] = it.second.serialize();
-    }
+    const bool is_serialize = mode == Rule::SerializeMode::SERIALIZE;
+
+#define SERIALIZE(_rule)                                                                                               \
+    do {                                                                                                               \
+        j[#_rule] = json::object();                                                                                    \
+        for (const auto &[uu, rule] : rule_##_rule) {                                                                  \
+            if (is_serialize || rule.can_export())                                                                     \
+                j[#_rule][(std::string)uu] = rule.serialize();                                                         \
+        }                                                                                                              \
+    } while (false)
+
+    SERIALIZE(hole_size);
+    SERIALIZE(track_width);
+    SERIALIZE(clearance_copper);
+    SERIALIZE(via);
+    SERIALIZE(plane);
+    SERIALIZE(diffpair);
+    SERIALIZE(clearance_copper_other);
+    SERIALIZE(clearance_copper_keepout);
+    SERIALIZE(clearance_same_net);
+
+#undef SERIALIZE
+
     j["clearance_silkscreen_exposed_copper"] = rule_clearance_silkscreen_exposed_copper.serialize();
     j["parameters"] = rule_parameters.serialize();
     return j;
+}
+
+json BoardRules::serialize() const
+{
+    return serialize_or_export(Rule::SerializeMode::SERIALIZE);
 }
 
 std::set<RuleID> BoardRules::get_rule_ids() const
@@ -674,5 +670,20 @@ int BoardRules::get_layer_pair(const Net *net, int layer) const
     return layer;
 }
 
+json BoardRules::export_rules(const class RulesExportInfo &export_info, const Board &brd) const
+{
+    json j;
+    j["type"] = "rules";
+    j["rules_type"] = "board";
+    j["n_inner_layers"] = brd.get_n_inner_layers();
+    j["net_classes"] = json::object();
+    for (const auto &[uu, nc] : brd.block->net_classes) {
+        j["net_classes"][(std::string)uu] = nc.name;
+    }
+    j["net_class_default"] = (std::string)brd.block->net_class_default->uuid;
+    j["rules"] = serialize_or_export(Rule::SerializeMode::EXPORT);
+    export_info.serialize(j);
+    return j;
+}
 
 } // namespace horizon

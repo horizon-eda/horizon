@@ -7,11 +7,12 @@ namespace horizon {
 class RuleClearanceCopperOther : public Rule {
 public:
     RuleClearanceCopperOther(const UUID &uu);
-    RuleClearanceCopperOther(const UUID &uu, const json &j);
+    RuleClearanceCopperOther(const UUID &uu, const json &j, const RuleImportMap &import_map);
     json serialize() const override;
 
     std::string get_brief(const class Block *block = nullptr) const override;
     bool is_match_all() const override;
+    bool can_export() const override;
 
     uint64_t get_clearance(PatchType pt_copper, PatchType pt_non_copper) const;
     void set_clearance(PatchType pt_copper, PatchType pt_non_copper, uint64_t c);

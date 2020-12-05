@@ -11,8 +11,8 @@ RuleClearanceSameNet::RuleClearanceSameNet(const UUID &uu) : Rule(uu)
     id = RuleID::CLEARANCE_SAME_NET;
 }
 
-RuleClearanceSameNet::RuleClearanceSameNet(const UUID &uu, const json &j)
-    : Rule(uu, j), match(j.at("match")), layer(j.at("layer"))
+RuleClearanceSameNet::RuleClearanceSameNet(const UUID &uu, const json &j, const RuleImportMap &import_map)
+    : Rule(uu, j, import_map), match(j.at("match"), import_map), layer(j.at("layer"))
 {
     id = RuleID::CLEARANCE_SAME_NET;
 
@@ -79,6 +79,11 @@ std::string RuleClearanceSameNet::get_brief(const class Block *block) const
 bool RuleClearanceSameNet::is_match_all() const
 {
     return match.mode == RuleMatch::Mode::ALL && layer == 10000;
+}
+
+bool RuleClearanceSameNet::can_export() const
+{
+    return match.can_export();
 }
 
 } // namespace horizon

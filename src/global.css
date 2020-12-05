@@ -110,3 +110,15 @@
 .imp-key-box > label:not(:last-child) {
   border-right: 2px solid;
 }
+
+.rule-import-header > *:not(:first-child) {
+  border-left: 1px solid rgba(0,0,0,.1);
+}
+
+.rule-import-header label {
+  padding: 5px 10px 5px 10px;
+}
+
+.rule-import-header {
+  border-bottom: 1px solid rgba(0,0,0,.05);
+}

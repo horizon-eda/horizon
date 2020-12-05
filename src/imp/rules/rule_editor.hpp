@@ -9,6 +9,10 @@ namespace horizon {
 class RuleEditor : public Gtk::Box {
 public:
     RuleEditor(Rule &r, class IDocument &c);
+    Rule &get_rule()
+    {
+        return rule;
+    }
     virtual void populate();
     typedef sigc::signal<void> type_signal_updated;
     type_signal_updated signal_updated()

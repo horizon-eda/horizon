@@ -51,16 +51,16 @@
      inkscape:snap-bbox="true"
      inkscape:snap-nodes="true"
      showborder="false"
-     inkscape:current-layer="g6747"
+     inkscape:current-layer="layer12"
      inkscape:window-maximized="1"
      inkscape:window-y="39"
      inkscape:window-x="0"
-     inkscape:cy="511.54532"
-     inkscape:cx="94.252346"
-     inkscape:zoom="22.56"
+     inkscape:cy="550.21036"
+     inkscape:cx="-106.75127"
+     inkscape:zoom="7.9761645"
      showgrid="true"
      id="namedview88"
-     inkscape:window-height="721"
+     inkscape:window-height="826"
      inkscape:window-width="1916"
      inkscape:pageshadow="2"
      inkscape:pageopacity="1"
@@ -2711,6 +2711,23 @@
          x="-95.000198"
          y="768"
          transform="scale(-1,1)" />
+    </g>
+    <g
+       inkscape:label="rule-imported"
+       id="g1804"
+       transform="translate(20.000002)">
+      <rect
+         y="766"
+         x="-103.0002"
+         height="15.999999"
+         width="15.999999"
+         id="rect1794"
+         style="color:#bebebe;display:inline;overflow:visible;visibility:visible;fill:#1a1a1a;stroke:none;stroke-width:1;marker:none;filter:url(#filter5387)"
+         transform="scale(-1,1)" />
+      <path
+         id="path35543"
+         style="display:inline;fill:#bebebe;fill-opacity:1;stroke:none"
+         d="m 95.000198,767 c -3.86599,0 -7,3.134 -7,7 0,3.86599 3.13401,7 7,7 3.86599,0 7.000002,-3.13401 7.000002,-7 0,-3.866 -3.134012,-7 -7.000002,-7 z m -1,3 h 2 v 2 h -2 z m 0,3 h 2 v 5 h -2 z" />
     </g>
   </g>
   <text

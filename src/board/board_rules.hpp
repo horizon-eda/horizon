@@ -55,6 +55,14 @@ public:
 
     int get_layer_pair(const Net *net, int layer) const;
 
+    json export_rules(const class RulesExportInfo &export_info, const Board &brd) const;
+    void import_rules(const json &j, const RuleImportMap &import_map) override;
+
+    bool can_export() const override
+    {
+        return true;
+    }
+
 private:
     std::map<UUID, RuleHoleSize> rule_hole_size;
     std::map<UUID, RuleTrackWidth> rule_track_width;
@@ -85,5 +93,7 @@ private:
                                                     check_status_cb_t status_cb) const;
     RulesCheckResult check_clearance_same_net(const class Board &b, class RulesCheckCache &cache,
                                               check_status_cb_t status_cb) const;
+
+    json serialize_or_export(Rule::SerializeMode mode) const;
 };
 } // namespace horizon

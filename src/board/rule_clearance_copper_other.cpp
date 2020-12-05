@@ -11,8 +11,9 @@ RuleClearanceCopperOther::RuleClearanceCopperOther(const UUID &uu) : Rule(uu)
     id = RuleID::CLEARANCE_COPPER_OTHER;
 }
 
-RuleClearanceCopperOther::RuleClearanceCopperOther(const UUID &uu, const json &j)
-    : Rule(uu, j), match(j.at("match")), layer(j.at("layer")), routing_offset(j.value("routing_offset", 0.05_mm))
+RuleClearanceCopperOther::RuleClearanceCopperOther(const UUID &uu, const json &j, const RuleImportMap &import_map)
+    : Rule(uu, j, import_map), match(j.at("match"), import_map), layer(j.at("layer")),
+      routing_offset(j.value("routing_offset", 0.05_mm))
 {
     id = RuleID::CLEARANCE_COPPER_OTHER;
     {
@@ -80,6 +81,11 @@ std::string RuleClearanceCopperOther::get_brief(const class Block *block) const
 bool RuleClearanceCopperOther::is_match_all() const
 {
     return match.mode == RuleMatch::Mode::ALL && layer == 10000;
+}
+
+bool RuleClearanceCopperOther::can_export() const
+{
+    return match.can_export();
 }
 
 } // namespace horizon

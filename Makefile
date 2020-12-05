@@ -94,6 +94,7 @@ SRC_COMMON = \
 	src/rules/rule_descr.cpp\
 	src/rules/rule_match.cpp\
 	src/rules/rule_match_keepout.cpp\
+	src/rules/rules_import_export.cpp\
 	src/parameter/program.cpp\
 	src/parameter/set.cpp\
 	3rd_party/clipper/clipper.cpp\
@@ -394,9 +395,13 @@ SRC_IMP = \
 	src/imp/rules/rule_editor_clearance_copper_keepout.cpp\
 	src/imp/rules/rule_editor_layer_pair.cpp\
 	src/imp/rules/rule_editor_clearance_same_net.cpp\
+	src/imp/rules/import.cpp\
+	src/imp/rules/export.cpp\
+	src/widgets/location_entry.cpp\
 	src/rules/rules_with_core.cpp\
 	src/rules/cache.cpp\
 	src/board/board_rules_check.cpp\
+	src/board/board_rules_import.cpp\
 	src/schematic/schematic_rules_check.cpp\
 	src/package/package_rules_check.cpp\
 	src/symbol/symbol_rules_check.cpp\

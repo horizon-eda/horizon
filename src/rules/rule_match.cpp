@@ -4,6 +4,7 @@
 #include "common/lut.hpp"
 #include <glibmm.h>
 #include "nlohmann/json.hpp"
+#include "rule.hpp"
 
 namespace horizon {
 static const LutEnumStr<RuleMatch::Mode> mode_lut = {
@@ -16,10 +17,16 @@ static const LutEnumStr<RuleMatch::Mode> mode_lut = {
 RuleMatch::RuleMatch()
 {
 }
+
 RuleMatch::RuleMatch(const json &j)
     : mode(mode_lut.lookup(j.at("mode"))), net(j.at("net").get<std::string>()),
       net_class(j.at("net_class").get<std::string>()), net_name_regex(j.at("net_name_regex").get<std::string>())
 {
+}
+
+RuleMatch::RuleMatch(const json &j, const RuleImportMap &import_map) : RuleMatch(j)
+{
+    net_class = import_map.get_net_class(net_class);
 }
 
 json RuleMatch::serialize() const
@@ -95,4 +102,17 @@ std::string RuleMatch::get_brief(const Block *block) const
     }
     return "";
 }
+
+bool RuleMatch::can_export() const
+{
+    switch (mode) {
+    case Mode::ALL:
+    case Mode::NET_CLASS:
+    case Mode::NET_NAME_REGEX:
+        return true;
+    default:
+        return false;
+    }
+}
+
 } // namespace horizon

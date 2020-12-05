@@ -49,6 +49,12 @@ class Rules {
 public:
     Rules();
     virtual void load_from_json(const json &j) = 0;
+    virtual void import_rules(const json &j, const class RuleImportMap &import_map)
+    {
+        throw std::logic_error("import_rules not implemented");
+    }
+
+
     virtual json serialize() const = 0;
     virtual std::set<RuleID> get_rule_ids() const = 0;
 
@@ -95,6 +101,11 @@ public:
     void move_rule(RuleID id, const UUID &uu, int dir);
 
     virtual ~Rules();
+
+    virtual bool can_export() const
+    {
+        return false;
+    }
 
 protected:
     void fix_order(RuleID id);

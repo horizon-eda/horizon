@@ -24,7 +24,8 @@ RuleTrackWidth::RuleTrackWidth(const UUID &uu) : Rule(uu)
     id = RuleID::TRACK_WIDTH;
 }
 
-RuleTrackWidth::RuleTrackWidth(const UUID &uu, const json &j) : Rule(uu, j), match(j.at("match"))
+RuleTrackWidth::RuleTrackWidth(const UUID &uu, const json &j, const RuleImportMap &import_map)
+    : Rule(uu, j, import_map), match(j.at("match"), import_map)
 {
     id = RuleID::TRACK_WIDTH;
     {
@@ -57,6 +58,11 @@ std::string RuleTrackWidth::get_brief(const class Block *block) const
 bool RuleTrackWidth::is_match_all() const
 {
     return match.mode == RuleMatch::Mode::ALL;
+}
+
+bool RuleTrackWidth::can_export() const
+{
+    return match.can_export();
 }
 
 } // namespace horizon

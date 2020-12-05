@@ -10,7 +10,8 @@ RuleLayerPair::RuleLayerPair(const UUID &uu) : Rule(uu)
     id = RuleID::LAYER_PAIR;
 }
 
-RuleLayerPair::RuleLayerPair(const UUID &uu, const json &j) : Rule(uu, j), match(j.at("match")), layers(j.at("layers"))
+RuleLayerPair::RuleLayerPair(const UUID &uu, const json &j, const RuleImportMap &import_map)
+    : Rule(uu, j, import_map), match(j.at("match"), import_map), layers(j.at("layers"))
 {
     id = RuleID::LAYER_PAIR;
 }
@@ -26,6 +27,11 @@ json RuleLayerPair::serialize() const
 std::string RuleLayerPair::get_brief(const class Block *block) const
 {
     return "Match " + match.get_brief(block);
+}
+
+bool RuleLayerPair::can_export() const
+{
+    return match.can_export();
 }
 
 } // namespace horizon

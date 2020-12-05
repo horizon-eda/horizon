@@ -9,7 +9,7 @@ RuleParameters::RuleParameters() : Rule()
     id = RuleID::PARAMETERS;
 }
 
-RuleParameters::RuleParameters(const json &j) : Rule(j)
+RuleParameters::RuleParameters(const json &j, const RuleImportMap &import_map) : Rule(j, import_map)
 {
     id = RuleID::PARAMETERS;
     solder_mask_expansion = j.at("solder_mask_expansion");

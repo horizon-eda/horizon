@@ -17,8 +17,19 @@ Rule::Rule(const UUID &uu, const json &j) : uuid(uu), enabled(j.at("enabled")), 
 {
 }
 
+Rule::Rule(const UUID &uu, const json &j, const RuleImportMap &import_map) : Rule(uu, j)
+{
+    order = import_map.get_order(order);
+    imported = import_map.is_imported();
+}
+
 Rule::Rule(const json &j) : enabled(j.at("enabled"))
 {
+}
+
+Rule::Rule(const json &j, const RuleImportMap &import_map) : Rule(j)
+{
+    imported = import_map.is_imported();
 }
 
 json Rule::serialize() const

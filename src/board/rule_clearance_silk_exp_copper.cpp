@@ -9,7 +9,9 @@ RuleClearanceSilkscreenExposedCopper::RuleClearanceSilkscreenExposedCopper() : R
     id = RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER;
 }
 
-RuleClearanceSilkscreenExposedCopper::RuleClearanceSilkscreenExposedCopper(const json &j) : Rule(j)
+RuleClearanceSilkscreenExposedCopper::RuleClearanceSilkscreenExposedCopper(const json &j,
+                                                                           const RuleImportMap &import_map)
+    : Rule(j, import_map)
 {
     id = RuleID::CLEARANCE_SILKSCREEN_EXPOSED_COPPER;
     clearance_top = j.at("clearance_top");

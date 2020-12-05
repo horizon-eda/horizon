@@ -6,7 +6,7 @@ namespace horizon {
 class RuleClearanceSilkscreenExposedCopper : public Rule {
 public:
     RuleClearanceSilkscreenExposedCopper();
-    RuleClearanceSilkscreenExposedCopper(const json &j);
+    RuleClearanceSilkscreenExposedCopper(const json &j, const RuleImportMap &import_map);
     json serialize() const override;
 
     std::string get_brief(const class Block *block = nullptr) const override;

@@ -9,8 +9,9 @@ RuleHoleSize::RuleHoleSize(const UUID &uu) : Rule(uu)
     id = RuleID::HOLE_SIZE;
 }
 
-RuleHoleSize::RuleHoleSize(const UUID &uu, const json &j)
-    : Rule(uu, j), diameter_min(j.at("diameter_min")), diameter_max(j.at("diameter_max")), match(j.at("match"))
+RuleHoleSize::RuleHoleSize(const UUID &uu, const json &j, const RuleImportMap &import_map)
+    : Rule(uu, j, import_map), diameter_min(j.at("diameter_min")), diameter_max(j.at("diameter_max")),
+      match(j.at("match"), import_map)
 {
     id = RuleID::HOLE_SIZE;
 }
@@ -28,4 +29,10 @@ std::string RuleHoleSize::get_brief(const class Block *block) const
 {
     return "Match " + match.get_brief(block);
 }
+
+bool RuleHoleSize::can_export() const
+{
+    return match.can_export();
+}
+
 } // namespace horizon

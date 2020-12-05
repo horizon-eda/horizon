@@ -30,16 +30,39 @@ enum class RuleID {
 
 extern const LutEnumStr<RuleID> rule_id_lut;
 
+class RuleImportMap {
+public:
+    virtual UUID get_net_class(const UUID &uu) const
+    {
+        return uu;
+    }
+    virtual int get_order(int order) const
+    {
+        return order;
+    }
+    virtual bool is_imported() const
+    {
+        return false;
+    }
+
+    virtual ~RuleImportMap()
+    {
+    }
+};
+
 class Rule {
     friend class Rules;
 
 public:
     Rule(const UUID &uu);
     Rule(const json &j);
+    Rule(const json &j, const RuleImportMap &import_map);
     Rule(const UUID &uu, const json &j);
+    Rule(const UUID &uu, const json &j, const RuleImportMap &import_map);
     UUID uuid;
     RuleID id = RuleID::NONE;
     bool enabled = true;
+    bool imported = false;
     int get_order() const
     {
         return order;
@@ -52,7 +75,14 @@ public:
         return false;
     }
 
+    virtual bool can_export() const
+    {
+        return false;
+    }
+
     virtual ~Rule();
+
+    enum class SerializeMode { SERIALIZE, EXPORT };
 
 protected:
     Rule();

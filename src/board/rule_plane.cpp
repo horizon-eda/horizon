@@ -9,8 +9,8 @@ RulePlane::RulePlane(const UUID &uu) : Rule(uu)
     id = RuleID::PLANE;
 }
 
-RulePlane::RulePlane(const UUID &uu, const json &j)
-    : Rule(uu, j), match(j.at("match")), layer(j.at("layer")), settings(j.at("settings"))
+RulePlane::RulePlane(const UUID &uu, const json &j, const RuleImportMap &import_map)
+    : Rule(uu, j, import_map), match(j.at("match"), import_map), layer(j.at("layer")), settings(j.at("settings"))
 {
     id = RuleID::PLANE;
 }
@@ -32,6 +32,11 @@ std::string RulePlane::get_brief(const class Block *block) const
 bool RulePlane::is_match_all() const
 {
     return match.mode == RuleMatch::Mode::ALL && layer == 10000;
+}
+
+bool RulePlane::can_export() const
+{
+    return match.can_export();
 }
 
 } // namespace horizon

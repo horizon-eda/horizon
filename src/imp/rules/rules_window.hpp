@@ -51,7 +51,7 @@ private:
     void rule_instance_selected(RuleID id, const UUID &uu);
     void update_rule_instances(RuleID id);
     void update_rule_instance_labels();
-    void update_rules_enabled();
+    void update_rule_labels();
     void update_warning();
 
 
@@ -63,11 +63,12 @@ private:
     class Block *get_block();
     type_signal_goto s_signal_goto;
     type_signal_canvas_update s_signal_canvas_update;
-    RuleID rule_current = RuleID::NONE;
+    RuleID rule_id_current = RuleID::NONE;
 
     class RuleEditor *editor = nullptr;
     void show_editor(RuleEditor *e);
     RuleEditor *create_editor(Rule &r);
+    void reload_editor();
 
     class TreeColumns : public Gtk::TreeModelColumnRecord {
     public:
@@ -118,5 +119,11 @@ private:
 
     WindowStateStore state_store;
     bool enabled = true;
+
+    Glib::RefPtr<Gio::Menu> hamburger_menu;
+    Glib::RefPtr<Gio::SimpleActionGroup> action_group;
+
+    void export_rules();
+    void import_rules();
 };
 } // namespace horizon

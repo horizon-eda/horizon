@@ -73,6 +73,7 @@
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-route-diffpair-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-lmb-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/scalable/actions/action-rmb-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/scalable/actions/rule-imported-symbolic.svg</file>
     <file>icons/scalable/apps/horizon-eda.svg</file>
     <file>icons/16x16/apps/horizon-eda.png</file>
     <file>icons/32x32/apps/horizon-eda.png</file>
@@ -90,6 +91,7 @@
     <file>imp/rules/rule_editor_hole_size.ui</file>
     <file>imp/rules/rule_editor_track_width.ui</file>
     <file>imp/rules/rule_editor_clearance_copper.ui</file>
+    <file>imp/rules/rule_export.ui</file>
     <file>imp/fab_output.ui</file>
     <file>imp/bom_export.ui</file>
     <file>imp/pdf_export.ui</file>
