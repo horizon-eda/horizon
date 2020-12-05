@@ -37,6 +37,10 @@ ParameterWindow::ParameterWindow(Gtk::Window *p, std::string *ppc, ParameterSet 
     }
     auto sc = Gtk::manage(new Gtk::ScrolledWindow());
     tv = Gtk::manage(new Gtk::TextView());
+    tv->set_top_margin(5);
+    tv->set_bottom_margin(5);
+    tv->set_left_margin(5);
+    tv->set_right_margin(5);
     tv->get_buffer()->set_text(*ppc);
     tv->set_monospace(true);
     tv->get_buffer()->signal_changed().connect([ppc, this] {
