@@ -12,11 +12,6 @@ static void header_fun(Gtk::ListBoxRow *row, Gtk::ListBoxRow *before)
     }
 }
 
-Gtk::Widget *ParameterSetEditor::create_extra_widget(ParameterID id)
-{
-    return nullptr;
-}
-
 class ParameterEditor : public Gtk::Box {
 public:
     ParameterEditor(ParameterID id, ParameterSetEditor *pse)
@@ -62,19 +57,21 @@ public:
         delete_button->set_image_from_icon_name("list-remove-symbolic", Gtk::ICON_SIZE_BUTTON);
         pack_start(*delete_button, false, false, 0);
         delete_button->signal_clicked().connect([this] {
-            parent->erase_cb(parameter_id);
+            parent->s_signal_remove_extra_widget.emit(parameter_id);
             parent->parameter_set->erase(parameter_id);
             parent->s_signal_changed.emit();
             delete this->get_parent();
         });
 
-        if (auto extra_button = parent->create_extra_widget(id)) {
-            pack_start(*extra_button, false, false, 0);
+        for (auto extra_widget : parent->s_signal_create_extra_widget.emit(id)) {
+            if (auto ch = dynamic_cast<Changeable *>(extra_widget)) {
+                ch->signal_changed().connect([this] { parent->s_signal_changed.emit(); });
+            }
+            pack_start(*extra_widget, false, false, 0);
         }
         if (auto apply_all_button = parent->create_apply_all_button(id)) {
             pack_start(*apply_all_button, false, false, 0);
         }
-
 
         set_margin_start(4);
         set_margin_end(4);

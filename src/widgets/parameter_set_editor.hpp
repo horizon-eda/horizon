@@ -2,6 +2,7 @@
 #include <gtkmm.h>
 #include "parameter/set.hpp"
 #include "util/changeable.hpp"
+#include "util/vector_accumulator.hpp"
 
 namespace horizon {
 class ParameterSetEditor : public Gtk::Box, public Changeable {
@@ -27,15 +28,20 @@ public:
         return s_signal_apply_all;
     }
 
-protected:
-    virtual Gtk::Widget *create_extra_widget(ParameterID id);
-    virtual void erase_cb(ParameterID id)
+    typedef sigc::signal<Gtk::Widget *, ParameterID>::accumulated<vector_accumulator<Gtk::Widget *>>
+            type_signal_create_extra_widget;
+    type_signal_create_extra_widget signal_create_extra_widget()
     {
+        return s_signal_create_extra_widget;
     }
 
-    Gtk::Widget *create_apply_all_button(ParameterID id);
+    type_signal_apply_all signal_remove_extra_widget()
+    {
+        return s_signal_remove_extra_widget;
+    }
 
 private:
+    Gtk::Widget *create_apply_all_button(ParameterID id);
     Gtk::MenuButton *add_button = nullptr;
     Gtk::ListBox *listbox = nullptr;
     Gtk::Menu menu;
@@ -46,6 +52,9 @@ private:
     std::optional<std::string> apply_all_tooltip_text;
 
     type_signal_activate_last s_signal_activate_last;
+
+    type_signal_create_extra_widget s_signal_create_extra_widget;
+    type_signal_apply_all s_signal_remove_extra_widget;
 
 protected:
     type_signal_apply_all s_signal_apply_all;

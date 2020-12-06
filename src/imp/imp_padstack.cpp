@@ -21,37 +21,12 @@ void ImpPadstack::canvas_update()
     canvas->update(core_padstack.get_canvas_data());
 }
 
-class ImpPadstackParameterSetEditor : public ParameterSetEditor {
+class MyCheckButton : public Gtk::CheckButton, public Changeable {
 public:
-    ImpPadstackParameterSetEditor(ParameterSet *ps, std::set<ParameterID> *ps_reqd)
-        : ParameterSetEditor(ps, false), parameters_required(ps_reqd)
+    MyCheckButton(const std::string &s) : Gtk::CheckButton(s)
     {
+        signal_toggled().connect([this] { s_signal_changed.emit(); });
     }
-
-private:
-    Gtk::Widget *create_extra_widget(ParameterID id) override
-    {
-        auto w = Gtk::manage(new Gtk::CheckButton("Required"));
-        w->set_tooltip_text("Parameter has to be set in pad");
-        w->set_active(parameters_required->count(id));
-        w->signal_toggled().connect([this, id, w] {
-            s_signal_changed.emit();
-            if (w->get_active()) {
-                parameters_required->insert(id);
-            }
-            else {
-                parameters_required->erase(id);
-            }
-        });
-        return w;
-    }
-
-    void erase_cb(ParameterID id) override
-    {
-        parameters_required->erase(id);
-    }
-
-    std::set<ParameterID> *parameters_required;
 };
 
 void ImpPadstack::construct()
@@ -94,8 +69,26 @@ void ImpPadstack::construct()
     type_combo->set_active_id(Padstack::type_lut.lookup_reverse(padstack.type));
     type_combo->signal_changed().connect([this] { core_padstack.set_needs_save(); });
 
-    auto editor = new ImpPadstackParameterSetEditor(&core_padstack.parameter_set, &core_padstack.parameters_required);
+    auto editor = new ParameterSetEditor(&core_padstack.parameter_set, false); //, &core_padstack.parameters_required);
+    editor->signal_create_extra_widget().connect([this](ParameterID id) {
+        auto w = Gtk::manage(new MyCheckButton("Required"));
+        w->set_tooltip_text("Parameter has to be set in pad");
+        w->set_active(core_padstack.parameters_required.count(id));
+        w->signal_toggled().connect([this, id, w] {
+            if (w->get_active()) {
+                core_padstack.parameters_required.insert(id);
+            }
+            else {
+                core_padstack.parameters_required.erase(id);
+            }
+        });
+        return w;
+    });
+
+    editor->signal_remove_extra_widget().connect(
+            [this](ParameterID id) { core_padstack.parameters_required.erase(id); });
     editor->populate();
+
     auto parameter_window = new ParameterWindow(main_window, &core_padstack.parameter_program_code,
                                                 &core_padstack.parameter_set, editor);
     parameter_window->signal_changed().connect([this] { core_padstack.set_needs_save(); });
