@@ -2,7 +2,7 @@
 #include <gtkmm.h>
 #include "parameter/set.hpp"
 #include "util/changeable.hpp"
-#include "util/vector_accumulator.hpp"
+#include "util/list_accumulator.hpp"
 
 namespace horizon {
 class ParameterSetEditor : public Gtk::Box, public Changeable {
@@ -28,7 +28,7 @@ public:
         return s_signal_apply_all;
     }
 
-    typedef sigc::signal<Gtk::Widget *, ParameterID>::accumulated<vector_accumulator<Gtk::Widget *>>
+    typedef sigc::signal<Gtk::Widget *, ParameterID>::accumulated<list_accumulator<Gtk::Widget *, false>>
             type_signal_create_extra_widget;
     type_signal_create_extra_widget signal_create_extra_widget()
     {

@@ -57,8 +57,17 @@ ParameterWindow::ParameterWindow(Gtk::Window *p, std::string *ppc, ParameterSet 
     if (editor)
         parameter_set_editor = Gtk::manage(editor);
     else
-        parameter_set_editor = Gtk::manage(new ParameterSetEditor(ps));
+        parameter_set_editor = Gtk::manage(new ParameterSetEditor(ps, false));
 
+    parameter_set_editor->signal_create_extra_widget().connect([this](ParameterID id) {
+        auto w = Gtk::manage(new Gtk::Button);
+        w->set_image_from_icon_name("insert-text-symbolic", Gtk::ICON_SIZE_BUTTON);
+        w->set_tooltip_text("Insert into parameter program");
+        w->signal_clicked().connect([this, id] { insert_parameter(id); });
+        return w;
+    });
+
+    parameter_set_editor->populate();
     parameter_set_editor->signal_changed().connect([this] { s_signal_changed.emit(); });
     box->pack_start(*parameter_set_editor, false, false, 0);
 
@@ -90,6 +99,11 @@ void ParameterWindow::add_button(Gtk::Widget *button)
 void ParameterWindow::insert_text(const std::string &text)
 {
     tv->get_buffer()->insert_at_cursor(text);
+}
+
+void ParameterWindow::insert_parameter(ParameterID id)
+{
+    insert_text("get-parameter [ " + parameter_id_to_string(id) + " ]\n");
 }
 
 void ParameterWindow::set_error_message(const std::string &s)

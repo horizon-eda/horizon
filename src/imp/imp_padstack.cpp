@@ -87,7 +87,6 @@ void ImpPadstack::construct()
 
     editor->signal_remove_extra_widget().connect(
             [this](ParameterID id) { core_padstack.parameters_required.erase(id); });
-    editor->populate();
 
     auto parameter_window = new ParameterWindow(main_window, &core_padstack.parameter_program_code,
                                                 &core_padstack.parameter_set, editor);

@@ -36,5 +36,6 @@ private:
     Gtk::TextView *tv = nullptr;
 
     class ParameterSetEditor *parameter_set_editor = nullptr;
+    void insert_parameter(ParameterID id);
 };
 } // namespace horizon
