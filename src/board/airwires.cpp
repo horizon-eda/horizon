@@ -86,11 +86,6 @@ static std::vector<Edge> kruskalMST(size_t npts, const std::vector<Edge> &aEdges
     return edges_out;
 }
 
-static double cross(const Coordd &a, const Coordd &b)
-{
-    return (a.x * b.y) - (a.y * b.x);
-}
-
 static bool points_are_linear(const delaunator::Points &points)
 {
     if (points.size() < 3)
@@ -112,7 +107,7 @@ static bool points_are_linear(const delaunator::Points &points)
         const Coordd p(pp.x(), pp.y());
         const Coordd vp = p - p0;
         if (vp.mag_sq() > 1e6) {
-            if (cross(v, vp) != 0)
+            if (v.cross(vp) != 0)
                 return false;
         }
     }

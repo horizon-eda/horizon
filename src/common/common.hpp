@@ -175,6 +175,11 @@ public:
         return x * a.x + y * a.y;
     }
 
+    T cross(const Coord<T> &other) const
+    {
+        return (x * other.y) - (y * other.x);
+    }
+
     /**
      * @returns squared magnitude of this
      */
