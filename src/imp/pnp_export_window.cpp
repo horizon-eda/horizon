@@ -3,6 +3,8 @@
 #include "util/gtk_util.hpp"
 #include "util/util.hpp"
 #include "export_pnp/export_pnp.hpp"
+#include "widgets/help_button.hpp"
+#include "help_texts.hpp"
 
 namespace horizon {
 
@@ -39,6 +41,9 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
     GET_WIDGET(filename_top_label);
     GET_WIDGET(filename_bottom_label);
     GET_WIDGET(preview_tv);
+    GET_WIDGET(customize_revealer);
+    GET_WIDGET(customize_check);
+    GET_WIDGET(customize_grid);
 
     export_filechooser.attach(directory_entry, directory_button, this);
     export_filechooser.set_project_dir(project_dir);
@@ -88,6 +93,70 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
             s_signal_changed.emit();
             update_preview();
         });
+    }
+
+    {
+        Gtk::Widget *position_format_box;
+        GET_WIDGET(position_format_box);
+        HelpButton::pack_into(x, "position_format_box", HelpTexts::POSITION_FORMAT, HelpButton::FLAG_NON_MODAL);
+    }
+
+    {
+        int top = 3;
+        for (const auto &[id, name] : pnp_column_names) {
+            auto entry = Gtk::manage(new Gtk::Entry);
+            entry->show();
+            auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 5));
+            {
+                auto la = Gtk::manage(new Gtk::Label("Col:"));
+                la->get_style_context()->add_class("dim-label");
+                la->set_xalign(0);
+                box->pack_start(*la, true, true, 0);
+            }
+            {
+                auto la = Gtk::manage(new Gtk::Label(name));
+                la->get_style_context()->add_class("dim-label");
+                la->set_xalign(1);
+                box->pack_start(*la, true, true, 0);
+            }
+            box->show_all();
+            if (top == 3) {
+                box->set_margin_top(10);
+                entry->set_margin_top(10);
+            }
+            customize_grid->attach(*box, 0, top);
+            customize_grid->attach(*entry, 1, top);
+            top++;
+            bind_widget(entry, settings.column_names[id], [this](std::string &) {
+                s_signal_changed.emit();
+                update_preview();
+            });
+        }
+    }
+    customize_check->set_active(settings.customize);
+    customize_revealer->set_reveal_child(settings.customize);
+    customize_check->signal_toggled().connect([this] {
+        const auto a = customize_check->get_active();
+        customize_revealer->set_reveal_child(a);
+        settings.customize = a;
+        update_preview();
+        s_signal_changed.emit();
+    });
+    {
+#define BIND_ENTRY(name_)                                                                                              \
+    do {                                                                                                               \
+        Gtk::Entry *name_##_entry;                                                                                     \
+        GET_WIDGET(name_##_entry);                                                                                     \
+        bind_widget(name_##_entry, settings.name_, [this](std::string &) {                                             \
+            s_signal_changed.emit();                                                                                   \
+            update_preview();                                                                                          \
+        });                                                                                                            \
+    } while (0)
+
+        BIND_ENTRY(position_format);
+        BIND_ENTRY(top_side);
+        BIND_ENTRY(bottom_side);
+#undef BIND_ENTRY
     }
 
     store = Gtk::ListStore::create(list_columns_preview);
@@ -156,7 +225,7 @@ void PnPExportWindow::update_preview()
 
     for (auto col : settings.columns) {
         auto cr_text = Gtk::manage(new Gtk::CellRendererText());
-        auto tvc = Gtk::manage(new Gtk::TreeViewColumn(pnp_column_names.at(col)));
+        auto tvc = Gtk::manage(new Gtk::TreeViewColumn(settings.get_column_name(col)));
         auto attributes_list = pango_attr_list_new();
         auto attribute_font_features = pango_attr_font_features_new("tnum 1");
         pango_attr_list_insert(attributes_list, attribute_font_features);
@@ -177,7 +246,7 @@ void PnPExportWindow::update_preview()
             Gtk::TreeModel::Row row = *it;
             PnPRow pnprow = row[list_columns_preview.row];
             auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
-            mcr->property_text() = pnprow.get_column(col);
+            mcr->property_text() = pnprow.get_column(col, settings);
         });
         preview_tv->append_column(*tvc);
     }

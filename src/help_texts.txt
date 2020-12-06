@@ -19,3 +19,10 @@ If there's only a single gate, its name should be "Main".
 If a pin has multiple functions, add these here, separated by spaces.
 
 For example: Pin name: PB0, alternate names: I2C0_SDA ADC2_IN.
+
+#POSITION_FORMAT
+<tt>printf</tt>-style formatting for positions.
+
+<tt>%.</tt>&lt;precision&gt;&lt;unit&gt;
+precision: number of decimal places 0...9
+unit: <tt>m</tt>: millimeter, <tt>i</tt>: inch, <tt>t</tt>: thou/mil, <tt>u</tt>: micrometer
