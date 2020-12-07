@@ -124,8 +124,8 @@ PnPExportWindow::PnPExportWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk
                 box->set_margin_top(10);
                 entry->set_margin_top(10);
             }
-            customize_grid->attach(*box, 0, top);
-            customize_grid->attach(*entry, 1, top);
+            customize_grid->attach(*box, 0, top, 1, 1);
+            customize_grid->attach(*entry, 1, top, 1, 1);
             top++;
             bind_widget(entry, settings.column_names[id], [this](std::string &) {
                 s_signal_changed.emit();
