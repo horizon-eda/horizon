@@ -27,6 +27,8 @@ protected:
         return &preferences.canvas_layer;
     }
 
+    void handle_extra_button(const GdkEventButton *button_event) override;
+
     ~ImpLayer()
     {
     }

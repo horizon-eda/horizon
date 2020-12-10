@@ -255,6 +255,17 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
         }
     }
     {
+        auto gr = Gtk::manage(new PreferencesGroup("Mouse"));
+        box->pack_start(*gr, false, false, 0);
+        gr->show();
+        {
+            auto r = Gtk::manage(new PreferencesRowBool("Switch layers with navigation buttons",
+                                                        "Use back/forward buttons on mouse to move one layer down/up",
+                                                        preferences, preferences.mouse.switch_layers));
+            gr->add_row(*r);
+        }
+    }
+    {
         auto gr = Gtk::manage(new PreferencesGroup("Action Bar"));
         box->pack_start(*gr, false, false, 0);
         gr->show();

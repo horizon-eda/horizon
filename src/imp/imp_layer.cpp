@@ -66,6 +66,26 @@ void ImpLayer::construct_layer_box(bool pack)
     }
 }
 
+void ImpLayer::handle_extra_button(const GdkEventButton *button_event)
+{
+    if (!preferences.mouse.switch_layers)
+        return;
+
+    switch (button_event->button) {
+    case 6:
+    case 8:
+        trigger_action(ActionID::LAYER_DOWN);
+        break;
+
+    case 7:
+    case 9:
+        trigger_action(ActionID::LAYER_UP);
+        break;
+
+    default:;
+    }
+}
+
 void ImpLayer::load_default_layers()
 {
     layer_box->load_from_json(

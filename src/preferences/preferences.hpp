@@ -96,6 +96,14 @@ public:
     json serialize() const;
 };
 
+class MousePreferences {
+public:
+    bool switch_layers = true;
+
+    void load_from_json(const json &j);
+    json serialize() const;
+};
+
 class Preferences {
 public:
     Preferences();
@@ -117,6 +125,7 @@ public:
     PartInfoPreferences partinfo;
     ActionBarPreferences action_bar;
     InToolKeySequencesPreferences in_tool_key_sequences;
+    MousePreferences mouse;
 
     bool show_pull_request_tools = false;
 

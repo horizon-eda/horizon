@@ -113,6 +113,9 @@ protected:
     bool handle_key_press(GdkEventKey *key_event);
     void handle_cursor_move(const Coordi &pos);
     bool handle_click(GdkEventButton *button_event);
+    virtual void handle_extra_button(const GdkEventButton *button_event)
+    {
+    }
     bool handle_click_release(GdkEventButton *button_event);
     bool handle_context_menu(GdkEventButton *button_event);
     void tool_process(ToolResponse &resp);

@@ -1167,6 +1167,11 @@ void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRe
 
 bool ImpBase::handle_click(GdkEventButton *button_event)
 {
+    if (button_event->button > 3) {
+        handle_extra_button(button_event);
+        return false;
+    }
+
     if (button_event->button != 2)
         set_search_mode(false);
 

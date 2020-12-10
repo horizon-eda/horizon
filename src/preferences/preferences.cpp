@@ -386,6 +386,18 @@ void ActionBarPreferences::load_from_json(const json &j)
     show_in_tool = j.value("show_in_tool", true);
 }
 
+json MousePreferences::serialize() const
+{
+    json j;
+    j["switch_layers"] = switch_layers;
+    return j;
+}
+
+void MousePreferences::load_from_json(const json &j)
+{
+    switch_layers = j.value("switch_layers", true);
+}
+
 json Preferences::serialize() const
 {
     json j;
@@ -399,6 +411,7 @@ json Preferences::serialize() const
     j["capture_output"] = capture_output;
     j["partinfo"] = partinfo.serialize();
     j["action_bar"] = action_bar.serialize();
+    j["mouse"] = mouse.serialize();
     j["show_pull_request_tools"] = show_pull_request_tools;
     return j;
 }
@@ -428,6 +441,8 @@ void Preferences::load_from_json(const json &j)
         in_tool_key_sequences.load_from_json(j.at("in_tool_key_sequences"));
     if (j.count("action_bar"))
         action_bar.load_from_json(j.at("action_bar"));
+    if (j.count("mouse"))
+        mouse.load_from_json(j.at("mouse"));
     key_sequences.append_from_json(json_from_resource("/org/horizon-eda/horizon/imp/keys_default.json"));
     in_tool_key_sequences.append_from_json(
             json_from_resource("/org/horizon-eda/horizon/imp/in_tool_keys_default.json"));
