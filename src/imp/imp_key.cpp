@@ -12,7 +12,7 @@ void ImpBase::init_key()
     connect_action(ActionID::HELP, [this](const auto &a) { key_sequence_dialog->show(); });
 }
 
-bool ImpBase::handle_key_press(GdkEventKey *key_event)
+bool ImpBase::handle_key_press(const GdkEventKey *key_event)
 {
     return handle_action_key(key_event);
     return false;
@@ -87,7 +87,7 @@ KeyConflictDialog::KeyConflictDialog(Gtk::Window *parent,
     get_content_area()->set_spacing(0);
 }
 
-bool ImpBase::handle_action_key(GdkEventKey *ev)
+bool ImpBase::handle_action_key(const GdkEventKey *ev)
 {
     if (ev->is_modifier)
         return false;

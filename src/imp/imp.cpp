@@ -160,7 +160,7 @@ json ImpBase::send_json(const json &j)
     return json::parse(rxdata);
 }
 
-bool ImpBase::handle_close(GdkEventAny *ev)
+bool ImpBase::handle_close(const GdkEventAny *ev)
 {
     bool dontask = false;
     Glib::getenv("HORIZON_NOEXITCONFIRM", dontask);
@@ -1058,7 +1058,7 @@ void ImpBase::fix_cursor_pos()
     canvas->update_cursor_pos(x, y);
 }
 
-bool ImpBase::handle_click_release(GdkEventButton *button_event)
+bool ImpBase::handle_click_release(const GdkEventButton *button_event)
 {
     if (core->tool_is_active() && button_event->button != 2 && !(button_event->state & Gdk::SHIFT_MASK)) {
         ToolArgs args;
@@ -1165,7 +1165,7 @@ void ImpBase::create_context_menu(Gtk::Menu *parent, const std::set<SelectableRe
         delete sep;
 }
 
-bool ImpBase::handle_click(GdkEventButton *button_event)
+bool ImpBase::handle_click(const GdkEventButton *button_event)
 {
     if (button_event->button > 3) {
         handle_extra_button(button_event);

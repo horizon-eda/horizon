@@ -110,21 +110,21 @@ protected:
     virtual void expand_selection_for_property_panel(std::set<SelectableRef> &sel_extra,
                                                      const std::set<SelectableRef> &sel);
     void handle_selection_changed(void);
-    bool handle_key_press(GdkEventKey *key_event);
+    bool handle_key_press(const GdkEventKey *key_event);
     void handle_cursor_move(const Coordi &pos);
-    bool handle_click(GdkEventButton *button_event);
+    bool handle_click(const GdkEventButton *button_event);
     virtual void handle_extra_button(const GdkEventButton *button_event)
     {
     }
-    bool handle_click_release(GdkEventButton *button_event);
-    bool handle_context_menu(GdkEventButton *button_event);
+    bool handle_click_release(const GdkEventButton *button_event);
+    bool handle_context_menu(const GdkEventButton *button_event);
     void tool_process(ToolResponse &resp);
     void tool_begin(ToolID id, bool override_selection = false, const std::set<SelectableRef> &sel = {},
                     std::unique_ptr<ToolData> data = nullptr);
     void add_tool_button(ToolID id, const std::string &label, bool left = true);
     void handle_warning_selected(const Coordi &pos);
     virtual bool handle_broadcast(const json &j);
-    bool handle_close(GdkEventAny *ev);
+    bool handle_close(const GdkEventAny *ev);
     json send_json(const json &j);
 
     bool trigger_action(const ActionToolID &action);
@@ -252,7 +252,7 @@ private:
     KeySequence keys_current;
     enum class MatchResult { NONE, PREFIX, COMPLETE };
     MatchResult keys_match(const KeySequence &keys) const;
-    bool handle_action_key(GdkEventKey *ev);
+    bool handle_action_key(const GdkEventKey *ev);
     void handle_tool_action(const ActionConnection &conn);
     void handle_select_polygon(const ActionConnection &a);
 
