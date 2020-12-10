@@ -137,9 +137,9 @@ protected:
 
     Preferences preferences;
 
-    virtual CanvasPreferences *get_canvas_preferences()
+    virtual const CanvasPreferences &get_canvas_preferences()
     {
-        return &preferences.canvas_non_layer;
+        return preferences.canvas_non_layer;
     }
     virtual void apply_preferences();
 

@@ -898,10 +898,10 @@ void ImpBase::handle_drag(bool ctrl)
 
 void ImpBase::apply_preferences()
 {
-    auto canvas_prefs = get_canvas_preferences();
-    canvas->set_appearance(canvas_prefs->appearance);
+    const auto &canvas_prefs = get_canvas_preferences();
+    canvas->set_appearance(canvas_prefs.appearance);
     if (core->tool_is_active()) {
-        canvas->set_cursor_size(canvas_prefs->appearance.cursor_size_tool);
+        canvas->set_cursor_size(canvas_prefs.appearance.cursor_size_tool);
     }
     canvas->show_all_junctions_in_schematic = preferences.schematic.show_all_junctions;
 
@@ -1397,10 +1397,10 @@ void ImpBase::handle_tool_change(ToolID id)
         main_window->tool_bar_set_tool_name(action_catalog.at({ActionID::TOOL, id}).name);
         main_window->tool_bar_set_tool_tip("");
         main_window->hud_hide();
-        canvas->set_cursor_size(get_canvas_preferences()->appearance.cursor_size_tool);
+        canvas->set_cursor_size(get_canvas_preferences().appearance.cursor_size_tool);
     }
     else {
-        canvas->set_cursor_size(get_canvas_preferences()->appearance.cursor_size);
+        canvas->set_cursor_size(get_canvas_preferences().appearance.cursor_size);
     }
     main_window->tool_bar_set_visible(id != ToolID::NONE);
     tool_bar_clear_actions();

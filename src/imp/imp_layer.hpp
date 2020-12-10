@@ -22,9 +22,9 @@ protected:
     void get_save_meta(json &j) override;
     virtual void load_default_layers();
 
-    CanvasPreferences *get_canvas_preferences() override
+    const CanvasPreferences &get_canvas_preferences() override
     {
-        return &preferences.canvas_layer;
+        return preferences.canvas_layer;
     }
 
     void handle_extra_button(const GdkEventButton *button_event) override;

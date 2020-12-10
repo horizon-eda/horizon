@@ -104,7 +104,7 @@ void ImpBase::search_go(int dir)
     }
     auto &dom = canvas->markers.get_domain(MarkerDomain::SEARCH);
     dom.at(search_result_current).size = MarkerRef::Size::SMALL;
-    dom.at(search_result_current).color = get_canvas_preferences()->appearance.colors.at(ColorP::SEARCH);
+    dom.at(search_result_current).color = get_canvas_preferences().appearance.colors.at(ColorP::SEARCH);
     if (dir > 0) {
         search_result_current = (search_result_current + 1) % search_results.size();
     }
@@ -115,7 +115,7 @@ void ImpBase::search_go(int dir)
             search_result_current = search_results.size() - 1;
     }
     dom.at(search_result_current).size = MarkerRef::Size::DEFAULT;
-    dom.at(search_result_current).color = get_canvas_preferences()->appearance.colors.at(ColorP::SEARCH_CURRENT);
+    dom.at(search_result_current).color = get_canvas_preferences().appearance.colors.at(ColorP::SEARCH_CURRENT);
     auto n_results = search_results.size();
     std::string status;
     if (n_results == 1) {
@@ -146,7 +146,7 @@ void ImpBase::update_search_markers()
     auto &dom = canvas->markers.get_domain(MarkerDomain::SEARCH);
     dom.clear();
     for (const auto &it : search_results) {
-        dom.emplace_back(it.location, get_canvas_preferences()->appearance.colors.at(ColorP::SEARCH), it.sheet);
+        dom.emplace_back(it.location, get_canvas_preferences().appearance.colors.at(ColorP::SEARCH), it.sheet);
         dom.back().size = MarkerRef::Size::SMALL;
     }
     canvas->update_markers();

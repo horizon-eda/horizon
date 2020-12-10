@@ -242,7 +242,7 @@ bool ImpBase::handle_action_key(const GdkEventKey *ev)
 
 void ImpBase::apply_arrow_keys()
 {
-    auto canvas_prefs = get_canvas_preferences();
+    const auto &canvas_prefs = get_canvas_preferences();
 
     const auto flip = canvas->get_flip_view();
 
@@ -266,7 +266,7 @@ void ImpBase::apply_arrow_keys()
     {
         GdkModifierType grid_fine_modifier = GDK_MOD1_MASK;
 
-        switch (canvas_prefs->appearance.grid_fine_modifier) {
+        switch (canvas_prefs.appearance.grid_fine_modifier) {
         case Appearance::GridFineModifier::ALT:
             grid_fine_modifier = GDK_MOD1_MASK;
             break;
