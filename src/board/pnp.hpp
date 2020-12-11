@@ -31,6 +31,6 @@ public:
     enum class Side { TOP, BOTTOM };
     Side side;
 
-    std::string get_column(PnPColumn col) const;
+    std::string get_column(PnPColumn col, const class PnPExportSettings &settings) const;
 };
 } // namespace horizon

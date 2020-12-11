@@ -22,7 +22,7 @@ static void export_PnP(const std::string &filename, const std::vector<PnPRow> &p
         auto &x = out.back();
         x.reserve(cols.size());
         for (const auto &it : cols) {
-            x.push_back(pnp_column_names.at(it));
+            x.push_back(settings.get_column_name(it));
         }
     }
 
@@ -33,7 +33,7 @@ static void export_PnP(const std::string &filename, const std::vector<PnPRow> &p
             auto &x = out.back();
             x.reserve(cols.size());
             for (const auto &col : cols) {
-                x.push_back(row.get_column(col));
+                x.push_back(row.get_column(col, settings));
             }
         }
     }

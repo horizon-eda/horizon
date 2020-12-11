@@ -26,6 +26,13 @@ public:
 
     bool include_nopopulate = true;
 
+    bool customize = false;
+    std::string position_format;
+    std::string top_side;
+    std::string bottom_side;
+    std::map<PnPColumn, std::string> column_names;
+    const std::string &get_column_name(PnPColumn col) const;
+
     std::string output_directory;
 
     std::string filename_top;

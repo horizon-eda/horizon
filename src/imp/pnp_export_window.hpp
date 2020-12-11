@@ -43,6 +43,11 @@ private:
     Gtk::Entry *filename_merged_entry = nullptr;
     Gtk::Entry *filename_top_entry = nullptr;
     Gtk::Entry *filename_bottom_entry = nullptr;
+
+    Gtk::CheckButton *customize_check = nullptr;
+    Gtk::Revealer *customize_revealer = nullptr;
+    Gtk::Grid *customize_grid = nullptr;
+
     bool can_export = true;
     void update_export_button();
 
