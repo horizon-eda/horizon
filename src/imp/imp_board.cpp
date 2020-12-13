@@ -728,15 +728,22 @@ void ImpBoard::construct()
     pnp_export_window = PnPExportWindow::create(main_window, *core_board.get_board(),
                                                 core_board.get_pnp_export_settings(), project_dir);
 
-    connect_action(ActionID::PNP_EXPORT_WINDOW, [this](const auto &c) { pnp_export_window->present(); });
+    connect_action(ActionID::PNP_EXPORT_WINDOW, [this](const auto &c) {
+        pnp_export_window->update();
+        pnp_export_window->present();
+    });
     connect_action(ActionID::EXPORT_PNP, [this](const auto &c) {
+        pnp_export_window->update();
         pnp_export_window->present();
         pnp_export_window->generate();
     });
 
     pnp_export_window->signal_changed().connect([this] { core_board.set_needs_save(); });
     core->signal_tool_changed().connect([this](ToolID t) { pnp_export_window->set_can_export(t == ToolID::NONE); });
-    core->signal_rebuilt().connect([this] { pnp_export_window->update(); });
+    core->signal_rebuilt().connect([this] {
+        if (pnp_export_window->get_visible())
+            pnp_export_window->update();
+    });
 
     airwire_filter_window = AirwireFilterWindow::create(main_window, *core_board.get_board());
     airwire_filter_window->update_nets();
