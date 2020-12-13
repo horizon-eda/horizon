@@ -356,9 +356,7 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
                 decal.placement.inc_angle_deg(-90);
             }
             else {
-                decal.flip ^= true;
-                decal.placement.invert_angle();
-                doc.b->get_board()->expand_decals();
+                decal.set_flip(!decal.get_flip(), *doc.b->get_board());
             }
         } break;
 

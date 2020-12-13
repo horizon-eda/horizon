@@ -10,7 +10,7 @@ using json = nlohmann::json;
 
 class BoardDecal {
 public:
-    BoardDecal(const UUID &uu, const json &, class IPool &pool);
+    BoardDecal(const UUID &uu, const json &, class IPool &pool, const class Board &brd);
     BoardDecal(const UUID &uu);
     UUID uuid;
 
@@ -18,12 +18,20 @@ public:
     Decal decal;
 
     Placement placement;
+
+    void set_flip(bool b, const class Board &brd);
+    bool get_flip() const;
+
+    void set_scale(double sc);
+    double get_scale() const;
+
+    UUID get_uuid() const;
+    json serialize() const;
+
+private:
     bool flip = false;
     double scale = 1;
 
     void apply_scale();
-
-    UUID get_uuid() const;
-    json serialize() const;
 };
 } // namespace horizon

@@ -210,7 +210,8 @@ Board::Board(const UUID &uu, const json &j, Block &iblock, IPool &pool, ViaPadst
         const json &o = j["decals"];
         for (auto it = o.cbegin(); it != o.cend(); ++it) {
             auto u = UUID(it.key());
-            load_and_log(decals, ObjectType::DECAL, std::forward_as_tuple(u, it.value(), pool), Logger::Domain::BOARD);
+            load_and_log(decals, ObjectType::DECAL, std::forward_as_tuple(u, it.value(), pool, *this),
+                         Logger::Domain::BOARD);
         }
     }
     if (j.count("rules")) {
@@ -492,6 +493,13 @@ void Board::flip_package_layer(int &layer) const
     }
 }
 
+int Board::get_package_layer(bool flip, int layer) const
+{
+    if (flip)
+        flip_package_layer(layer);
+    return layer;
+}
+
 void Board::propagate_nets()
 {
     // reset
@@ -595,7 +603,6 @@ void Board::expand(bool careful)
     }
 
     expand_packages();
-    expand_decals();
 
     for (auto &it : junctions) {
         it.second.layer = 10000;
@@ -700,29 +707,6 @@ void Board::expand(bool careful)
     expand_flags = EXPAND_ALL;
     packages_expand.clear();
     airwires_expand.clear();
-}
-
-void Board::expand_decals()
-{
-    for (auto &[uu, dec] : decals) {
-        dec.decal = *dec.pool_decal;
-        dec.placement.mirror = dec.flip;
-        if (dec.flip) {
-            for (auto &it2 : dec.decal.lines) {
-                flip_package_layer(it2.second.layer);
-            }
-            for (auto &it2 : dec.decal.arcs) {
-                flip_package_layer(it2.second.layer);
-            }
-            for (auto &it2 : dec.decal.texts) {
-                flip_package_layer(it2.second.layer);
-            }
-            for (auto &it2 : dec.decal.polygons) {
-                flip_package_layer(it2.second.layer);
-            }
-        }
-        dec.apply_scale();
-    }
 }
 
 void Board::expand_packages()

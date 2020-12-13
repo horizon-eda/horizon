@@ -1589,11 +1589,11 @@ void Canvas::render(const BoardDecal &decal)
     transform_save();
     transform.accumulate(decal.placement);
     auto bb = decal.decal.get_bbox();
-    if (decal.flip) {
+    if (decal.get_flip()) {
         transform.invert_angle();
     }
     selectables.append(decal.uuid, ObjectType::BOARD_DECAL, {0, 0}, bb.first, bb.second, 0,
-                       decal.flip ? BoardLayers::BOTTOM_COPPER : BoardLayers::TOP_COPPER);
+                       decal.get_flip() ? BoardLayers::BOTTOM_COPPER : BoardLayers::TOP_COPPER);
     render(decal.decal, false);
     transform_restore();
 }

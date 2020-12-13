@@ -277,7 +277,7 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
     } break;
 
     case ObjectType::BOARD_DECAL: {
-        auto &decal = brd->decals.at(uu);
+        const auto &decal = brd->decals.at(uu);
         switch (property) {
         case ObjectProperty::ID::NAME:
             dynamic_cast<PropertyValueString &>(value).value = decal.decal.name;
@@ -290,11 +290,11 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             return true;
 
         case ObjectProperty::ID::FLIPPED:
-            dynamic_cast<PropertyValueBool &>(value).value = decal.flip;
+            dynamic_cast<PropertyValueBool &>(value).value = decal.get_flip();
             return true;
 
         case ObjectProperty::ID::SCALE:
-            dynamic_cast<PropertyValueDouble &>(value).value = decal.scale;
+            dynamic_cast<PropertyValueDouble &>(value).value = decal.get_scale();
             return true;
 
         default:
@@ -467,12 +467,11 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             break;
 
         case ObjectProperty::ID::FLIPPED:
-            decal.flip = dynamic_cast<const PropertyValueBool &>(value).value;
+            decal.set_flip(dynamic_cast<const PropertyValueBool &>(value).value, *brd);
             break;
 
         case ObjectProperty::ID::SCALE:
-            decal.scale = dynamic_cast<const PropertyValueDouble &>(value).value;
-            decal.apply_scale();
+            decal.set_scale(dynamic_cast<const PropertyValueDouble &>(value).value);
             break;
 
         default:

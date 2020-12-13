@@ -56,7 +56,6 @@ public:
 
     void expand(bool careful = false);
     void expand_packages();
-    void expand_decals();
 
     Board(const Board &brd);
     Board(shallow_copy_t sh, const Board &brd);
@@ -149,10 +148,13 @@ public:
 
     ItemSet get_pool_items_used() const;
 
+    void flip_package_layer(int &layer) const;
+    int get_package_layer(bool flip, int layer) const;
+
 private:
     unsigned int n_inner_layers = 0;
     ClipperLib::Paths get_thermals(class Plane *plane, const class CanvasPads *ca) const;
-    void flip_package_layer(int &layer) const;
+
     Board(const Board &brd, CopyMode copy_mode);
 };
 } // namespace horizon
