@@ -117,6 +117,12 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
                 set_snap_filter();
             }
             else {
+                if (temp->vertices.size() > 3 && temp->vertices.front().position == vertex->position) {
+                    // closed cycle
+                    temp->vertices.pop_back();
+                    return ToolResponse::commit();
+                }
+
                 last_vertex = vertex;
                 append_vertex(args.coords);
             }
