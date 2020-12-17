@@ -119,7 +119,7 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
                 if (temp->vertices.size() > 3 && temp->vertices.front().position == vertex->position) {
                     // closed cycle
                     temp->vertices.pop_back();
-                    return ToolResponse::commit();
+                    return commit();
                 }
 
                 last_vertex = vertex;
@@ -132,9 +132,9 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
             temp->vertices.pop_back();
             vertex = nullptr;
             if (!temp->is_valid()) {
-                doc.r->delete_polygon(temp->uuid);
+                return ToolResponse::revert();
             }
-            return ToolResponse::commit();
+            return commit();
             break;
 
         case InToolActionID::TOGGLE_ARC:
@@ -168,4 +168,10 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
     update_tip();
     return ToolResponse();
 }
+
+ToolResponse ToolDrawPolygon::commit()
+{
+    return ToolResponse::commit();
+}
+
 } // namespace horizon

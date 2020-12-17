@@ -19,8 +19,11 @@ public:
         };
     }
 
-private:
+protected:
     Polygon *temp = nullptr;
+    virtual ToolResponse commit();
+
+private:
     Polygon::Vertex *vertex = nullptr;
     Polygon::Vertex *last_vertex = nullptr;
     enum class ArcMode { OFF, NEXT, CURRENT };

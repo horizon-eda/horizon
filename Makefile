@@ -212,6 +212,7 @@ SRC_IMP = \
 	src/core/tools/tool_place_bus_ripper.cpp\
 	src/core/tools/tool_manage_buses.cpp\
 	src/core/tools/tool_draw_polygon.cpp\
+	src/core/tools/tool_draw_plane.cpp\
 	src/core/tools/tool_enter_datum.cpp\
 	src/core/tools/tool_place_hole.cpp\
 	src/core/tools/tool_place_pad.cpp\

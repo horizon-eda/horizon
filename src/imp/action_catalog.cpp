@@ -882,6 +882,13 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::HIGHLIGHT_NET_CLASS, ToolID::NONE},
          {"Highlight net class", ActionGroup::UNKNOWN, ActionCatalogItem::AVAILABLE_IN_SCHEMATIC_AND_BOARD,
           ActionCatalogItem::FLAGS_SPECIFIC}},
+
+        {{ActionID::TOOL, ToolID::DRAW_PLANE},
+         {"Draw plane", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_BOARD, ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::DRAW_KEEPOUT},
+         {"Draw keepout", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1152,5 +1159,7 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(DRAW_LINE_CIRCLE),
         TOOL_LUT_ITEM(ADD_TEXT),
         TOOL_LUT_ITEM(PLACE_DECAL),
+        TOOL_LUT_ITEM(DRAW_PLANE),
+        TOOL_LUT_ITEM(DRAW_KEEPOUT),
 };
 } // namespace horizon

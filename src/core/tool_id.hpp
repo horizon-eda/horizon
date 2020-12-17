@@ -147,5 +147,7 @@ enum class ToolID {
     PLACE_PICTURE,
     ADD_TEXT,
     PLACE_DECAL,
+    DRAW_PLANE,
+    DRAW_KEEPOUT,
 };
 } // namespace horizon
