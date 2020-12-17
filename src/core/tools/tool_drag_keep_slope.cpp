@@ -17,22 +17,22 @@ bool ToolDragKeepSlope::can_begin()
     return sel_count_type(selection, ObjectType::TRACK) > 0;
 }
 
-ToolDragKeepSlope::TrackInfo::TrackInfo(Track *tr, Track *fr, Track *to) : track(tr), track_from(fr), track_to(to)
+ToolDragKeepSlope::TrackInfo::TrackInfo(Track &tr, const Track &track_from, const Track &track_to) : track(tr)
 {
-    if (track_from->from.junc == track->from.junc) {
-        pos_from2 = track_from->to.get_position();
+    if (track_from.from.junc == track.from.junc) {
+        pos_from2 = track_from.to.get_position();
     }
     else {
-        pos_from2 = track_from->from.get_position();
+        pos_from2 = track_from.from.get_position();
     }
-    if (track_to->from.junc == track->to.junc) {
-        pos_to2 = track_to->to.get_position();
+    if (track_to.from.junc == track.to.junc) {
+        pos_to2 = track_to.to.get_position();
     }
     else {
-        pos_to2 = track_to->from.get_position();
+        pos_to2 = track_to.from.get_position();
     }
-    pos_from_orig = tr->from.get_position();
-    pos_to_orig = tr->to.get_position();
+    pos_from_orig = tr.from.get_position();
+    pos_to_orig = tr.to.get_position();
 }
 
 ToolResponse ToolDragKeepSlope::begin(const ToolArgs &args)
@@ -66,7 +66,7 @@ ToolResponse ToolDragKeepSlope::begin(const ToolArgs &args)
                     assert(tr_to);
                     if ((tr_from->from.get_position() != tr_from->to.get_position())
                         && (tr_to->from.get_position() != tr_to->to.get_position())) {
-                        track_info.emplace_back(track, tr_from, tr_to);
+                        track_info.emplace_back(*track, *tr_from, *tr_to);
                         selection.emplace(it);
                         selection.emplace(track->from.junc->uuid, ObjectType::JUNCTION);
                         selection.emplace(track->to.junc->uuid, ObjectType::JUNCTION);
@@ -92,23 +92,9 @@ ToolResponse ToolDragKeepSlope::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
         for (const auto &it : track_info) {
-            Coordd vfrom = it.pos_from_orig - it.pos_from2;
-            Coordd vto = it.pos_to_orig - it.pos_to2;
-            Coordd vtr = it.pos_to_orig - it.pos_from_orig;
-            Coordd vtrn(vtr.y, -vtr.x);
-
-            Coordd vshift = args.coords - pos_orig;
-            Coordd vshift2 = (vtrn * (vtrn.dot(vshift))) / vtrn.mag_sq();
-
-            Coordd shift_from = (vfrom * vshift2.mag_sq()) / (vfrom.dot(vshift2));
-            Coordd shift_to = (vto * vshift2.mag_sq()) / (vto.dot(vshift2));
-            if (vshift2.mag_sq() == 0) {
-                shift_from = {0, 0};
-                shift_to = {0, 0};
-            }
-
-            it.track->from.junc->position = it.pos_from_orig + Coordi(shift_from.x, shift_from.y);
-            it.track->to.junc->position = it.pos_to_orig + Coordi(shift_to.x, shift_to.y);
+            const auto [pos_from, pos_to] = it.get_pos(args.coords - pos_orig);
+            it.track.from.junc->position = pos_from;
+            it.track.to.junc->position = pos_to;
         }
     }
     else if (args.type == ToolEventType::ACTION) {

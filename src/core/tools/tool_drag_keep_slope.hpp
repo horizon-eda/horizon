@@ -1,6 +1,6 @@
 #pragma once
-#include "board/track.hpp"
 #include "core/tool.hpp"
+#include <util/keep_slope_util.hpp>
 #include <deque>
 
 namespace horizon {
@@ -26,16 +26,11 @@ public:
     }
 
 private:
-    class TrackInfo {
+    class TrackInfo : public KeepSlopeInfo {
     public:
-        Track *track = nullptr; // the track itself
-        Track *track_from = nullptr;
-        Track *track_to = nullptr;
-        Coordi pos_from2;
-        Coordi pos_to2;
-        Coordi pos_from_orig;
-        Coordi pos_to_orig;
-        TrackInfo(Track *tr, Track *fr, Track *to);
+        class Track &track; // the track itself
+
+        TrackInfo(Track &tr, const Track &fr, const Track &to);
         // TrackInfo(Track *a, Track *b, Track *c): track(a), track_from(b),
         // track_to(c) {}
     };
