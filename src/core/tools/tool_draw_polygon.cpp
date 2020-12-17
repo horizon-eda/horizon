@@ -2,6 +2,7 @@
 #include "document/idocument_padstack.hpp"
 #include "pool/padstack.hpp"
 #include "imp/imp_interface.hpp"
+#include "util/util.hpp"
 #include <iostream>
 #include <sstream>
 
@@ -37,6 +38,7 @@ void ToolDrawPolygon::append_vertex(const Coordi &c)
         vertex->position = get_coord_restrict(last_vertex->position, c);
     else
         vertex->position = c;
+    selection = {{temp->uuid, ObjectType::POLYGON_VERTEX, static_cast<unsigned int>(temp->vertices.size() - 1)}};
 }
 
 void ToolDrawPolygon::set_snap_filter()
@@ -79,7 +81,8 @@ void ToolDrawPolygon::update_tip()
 void ToolDrawPolygon::update_vertex(const Coordi &c)
 {
     if (arc_mode == ArcMode::CURRENT && last_vertex) {
-        last_vertex->arc_center = c;
+        const auto p = project_onto_perp_bisector(last_vertex->position, vertex->position, c);
+        last_vertex->arc_center = Coordi(p.x, p.y);
     }
     else {
         if (last_vertex == nullptr) {
@@ -107,6 +110,8 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
             }
             else if (arc_mode == ArcMode::NEXT) {
                 arc_mode = ArcMode::CURRENT;
+                selection = {{temp->uuid, ObjectType::POLYGON_ARC_CENTER,
+                              static_cast<unsigned int>(temp->vertices.size() - 2)}};
                 last_vertex->type = Polygon::Vertex::Type::ARC;
                 last_vertex->arc_center = args.coords;
                 set_snap_filter();
