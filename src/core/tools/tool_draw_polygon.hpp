@@ -28,5 +28,6 @@ private:
     void update_tip();
     void update_vertex(const Coordi &c);
     void set_snap_filter();
+    void append_vertex(const Coordi &c);
 };
 } // namespace horizon

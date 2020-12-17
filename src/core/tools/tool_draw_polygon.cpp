@@ -22,12 +22,21 @@ ToolResponse ToolDrawPolygon::begin(const ToolArgs &args)
 
     temp = doc.r->insert_polygon(UUID::random());
     temp->layer = args.work_layer;
-    vertex = temp->append_vertex();
-    vertex->position = args.coords;
-    set_snap_filter();
+    append_vertex(args.coords);
 
     update_tip();
     return ToolResponse();
+}
+
+void ToolDrawPolygon::append_vertex(const Coordi &c)
+{
+    vertex = temp->append_vertex();
+    set_snap_filter();
+    cycle_restrict_mode_xy();
+    if (last_vertex)
+        vertex->position = get_coord_restrict(last_vertex->position, c);
+    else
+        vertex->position = c;
 }
 
 void ToolDrawPolygon::set_snap_filter()
@@ -94,10 +103,7 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
             if (arc_mode == ArcMode::CURRENT) {
                 arc_mode = ArcMode::OFF;
                 last_vertex = vertex;
-                vertex = temp->append_vertex();
-                set_snap_filter();
-                cycle_restrict_mode_xy();
-                vertex->position = get_coord_restrict(last_vertex->position, args.coords);
+                append_vertex(args.coords);
             }
             else if (arc_mode == ArcMode::NEXT) {
                 arc_mode = ArcMode::CURRENT;
@@ -107,10 +113,7 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
             }
             else {
                 last_vertex = vertex;
-                vertex = temp->append_vertex();
-                set_snap_filter();
-                cycle_restrict_mode_xy();
-                vertex->position = get_coord_restrict(last_vertex->position, args.coords);
+                append_vertex(args.coords);
             }
             break;
 
