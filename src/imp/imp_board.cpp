@@ -94,8 +94,14 @@ void ImpBoard::update_highlights()
         if (it.type == ObjectType::COMPONENT) {
             for (const auto &it_pkg : core_board.get_board()->packages) {
                 if (it_pkg.second.component->uuid == it.uuid) {
-                    ObjectRef ref(ObjectType::BOARD_PACKAGE, it_pkg.first);
-                    canvas->set_flags(ref, TriangleInfo::FLAG_HIGHLIGHT, 0);
+                    {
+                        ObjectRef ref(ObjectType::BOARD_PACKAGE, it_pkg.first);
+                        canvas->set_flags(ref, TriangleInfo::FLAG_HIGHLIGHT, 0);
+                    }
+                    for (const auto text : it_pkg.second.texts) {
+                        ObjectRef ref(ObjectType::TEXT, text->uuid);
+                        canvas->set_flags(ref, TriangleInfo::FLAG_HIGHLIGHT, 0);
+                    }
                 }
             }
         }
