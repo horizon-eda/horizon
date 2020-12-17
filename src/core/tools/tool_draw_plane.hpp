@@ -6,7 +6,7 @@ namespace horizon {
 class ToolDrawPlane : public ToolDrawPolygon {
 public:
     using ToolDrawPolygon::ToolDrawPolygon;
-    bool can_begin()  override;
+    bool can_begin() override;
 
 protected:
     ToolResponse commit() override;
