@@ -53,7 +53,6 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
 
     // Display the length if a single edge of a polygon is given
     if (sel_count_type(sel, ObjectType::POLYGON_EDGE) == 1) {
-
         auto n = sel_count_type(sel, ObjectType::POLYGON_EDGE);
         s += "\n\n<b>" + std::to_string(n) + " " + object_descriptions.at(ObjectType::POLYGON_EDGE).get_name_for_n(n)
              + "</b>\n";
@@ -66,7 +65,21 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
                 s += "Layer: ";
                 s += core->get_layer_provider().get_layers().at(li->layer).name + " ";
                 s += "\nLength: " + dim_to_string(length, false);
+                if (preferences.hud_debug)
+                    s += "\nVertex: " + std::to_string(it.vertex);
                 sel_erase_type(sel, ObjectType::POLYGON_EDGE);
+                break;
+            }
+        }
+    }
+    if (preferences.hud_debug && (sel_count_type(sel, ObjectType::POLYGON_VERTEX) == 1)) {
+        auto n = sel_count_type(sel, ObjectType::POLYGON_VERTEX);
+        s += "\n\n<b>" + std::to_string(n) + " " + object_descriptions.at(ObjectType::POLYGON_VERTEX).get_name_for_n(n)
+             + "</b>\n";
+        for (const auto &it : sel) {
+            if (it.type == ObjectType::POLYGON_VERTEX) {
+                s += "Vertex: " + std::to_string(it.vertex);
+                sel_erase_type(sel, ObjectType::POLYGON_VERTEX);
                 break;
             }
         }
@@ -97,7 +110,7 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
         }
     }
 
-    if (sel_count_type(sel, ObjectType::JUNCTION) == 1) {
+    if (preferences.hud_debug && (sel_count_type(sel, ObjectType::JUNCTION) == 1)) {
         const auto ju = core->get_junction(sel_find_one(sel, ObjectType::JUNCTION).uuid);
         s += "\n\n<b>Junction:</b>\n";
         s += "Layers " + std::to_string(ju->layer.start()) + " — " + std::to_string(ju->layer.end()) + "\n";

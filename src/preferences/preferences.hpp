@@ -129,6 +129,7 @@ public:
     MousePreferences mouse;
 
     bool show_pull_request_tools = false;
+    bool hud_debug = false;
 
     typedef sigc::signal<void> type_signal_changed;
     type_signal_changed signal_changed()

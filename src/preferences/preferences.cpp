@@ -415,6 +415,7 @@ json Preferences::serialize() const
     j["action_bar"] = action_bar.serialize();
     j["mouse"] = mouse.serialize();
     j["show_pull_request_tools"] = show_pull_request_tools;
+    j["hud_debug"] = hud_debug;
     return j;
 }
 
@@ -450,6 +451,7 @@ void Preferences::load_from_json(const json &j)
             json_from_resource("/org/horizon-eda/horizon/imp/in_tool_keys_default.json"));
     capture_output = j.value("capture_output", capture_output_default);
     show_pull_request_tools = j.value("show_pull_request_tools", false);
+    hud_debug = j.value("hud_debug", false);
     if (j.count("partinfo"))
         partinfo.load_from_json(j.at("partinfo"));
 }
