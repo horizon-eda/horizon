@@ -55,6 +55,8 @@ public:
 
     Vertex *append_vertex(const Coordi &pos = Coordi());
     std::pair<unsigned int, unsigned int> get_vertices_for_edge(unsigned int edge);
+    const Vertex &get_vertex(int edge) const;
+    Vertex &get_vertex(int edge);
     /**
      * @param precision how many line segments per arc
      * @returns a new Polygon that has the arcs replaced by straight line

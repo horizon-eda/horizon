@@ -143,6 +143,18 @@ std::pair<unsigned int, unsigned int> Polygon::get_vertices_for_edge(unsigned in
     return {edge, (edge + 1) % vertices.size()};
 }
 
+const Polygon::Vertex &Polygon::get_vertex(int edge) const
+{
+    while (edge < 0)
+        edge += vertices.size();
+    return vertices.at(edge % vertices.size());
+}
+
+Polygon::Vertex &Polygon::get_vertex(int edge)
+{
+    return const_cast<Polygon::Vertex &>(const_cast<const Polygon *>(this)->get_vertex(edge));
+}
+
 json Polygon::serialize() const
 {
     json j;
