@@ -186,6 +186,7 @@ SRC_IMP = \
 	src/imp/action.cpp\
 	src/imp/action_catalog.cpp\
 	src/imp/in_tool_action_catalog.cpp\
+	src/imp/clipboard_handler.cpp\
 	$(SRC_CANVAS) \
 	src/document/document.cpp \
 	src/document/document_board.cpp \
@@ -282,8 +283,11 @@ SRC_IMP = \
 	src/core/tools/tool_place_decal.cpp\
 	src/core/tools/tool_drag_polygon_edge.cpp\
 	src/document/documents.cpp\
-	src/core/clipboard.cpp\
-	src/core/buffer.cpp\
+	src/core/clipboard/clipboard.cpp\
+	src/core/clipboard/clipboard_padstack.cpp\
+	src/core/clipboard/clipboard_package.cpp\
+	src/core/clipboard/clipboard_schematic.cpp\
+	src/core/clipboard/clipboard_board.cpp\
 	src/dialogs/map_pin.cpp\
 	src/dialogs/map_symbol.cpp\
 	src/dialogs/map_package.cpp\

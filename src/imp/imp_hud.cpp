@@ -4,6 +4,7 @@
 #include "util/selection_util.hpp"
 #include "pool/entity.hpp"
 #include "pool/part.hpp"
+#include "block/block.hpp"
 
 namespace horizon {
 void ImpBase::hud_update()

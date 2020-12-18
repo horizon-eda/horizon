@@ -34,7 +34,6 @@ public:
     void update(const class Sheet &sheet);
     void update(const class Padstack &padstack, bool edit = true);
     void update(const class Package &pkg, bool edit = true);
-    void update(const class Buffer &buf, class LayerProvider *lp);
     enum class PanelMode { INCLUDE, SKIP };
     void update(const class Board &brd, PanelMode mode = PanelMode::INCLUDE);
     void update(const class Frame &fr, bool edit = true);
@@ -117,7 +116,6 @@ protected:
                 bool omit_silkscreen = false, bool omit_outline = false);
     void render_pad_overlay(const class Pad &pad);
     void render(const class Pad &pad);
-    void render(const class Buffer &buf);
     enum class OutlineMode { INCLUDE, OMIT };
     void render(const class Board &brd, bool interactive = true, PanelMode mode = PanelMode::INCLUDE,
                 OutlineMode outline_mode = OutlineMode::INCLUDE);

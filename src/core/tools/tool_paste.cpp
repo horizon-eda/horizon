@@ -10,7 +10,7 @@
 #include "imp/imp_interface.hpp"
 #include "pool/entity.hpp"
 #include "util/util.hpp"
-#include "core/buffer.hpp"
+#include "core/clipboard/clipboard.hpp"
 #include <iostream>
 #include <gtkmm.h>
 #include "core/tool_id.hpp"
@@ -467,9 +467,8 @@ ToolResponse ToolPaste::begin(const ToolArgs &args)
     }
 
     if (tool_id == ToolID::DUPLICATE) {
-        Buffer buffer(doc);
-        buffer.load(args.selection);
-        paste_data = buffer.serialize();
+        auto clip = ClipboardBase::create(*doc.r);
+        paste_data = clip->process(args.selection);
         paste_data["cursor_pos"] = args.coords.as_array();
         return begin_paste(paste_data, args.coords);
     }

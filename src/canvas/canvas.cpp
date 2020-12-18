@@ -233,13 +233,6 @@ void Canvas::update(const Package &pkg, bool edit)
     request_push();
 }
 
-void Canvas::update(const Buffer &buf, LayerProvider *lp)
-{
-    clear();
-    layer_provider = lp;
-    render(buf);
-    request_push();
-}
 void Canvas::update(const Board &brd, PanelMode mode)
 {
     clear();

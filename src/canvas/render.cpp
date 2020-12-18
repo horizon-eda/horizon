@@ -5,7 +5,6 @@
 #include "common/hole.hpp"
 #include "common/polygon.hpp"
 #include "common/text.hpp"
-#include "core/buffer.hpp"
 #include "layer_display.hpp"
 #include "package/pad.hpp"
 #include "poly2tri/poly2tri.h"
@@ -1204,43 +1203,6 @@ void Canvas::render(const Package &pkg, bool interactive, bool smashed, bool omi
         for (const auto &it : pkg.pictures) {
             render(it.second);
         }
-    }
-}
-
-void Canvas::render(const Buffer &buf)
-{
-    for (const auto &it : buf.junctions) {
-        render(it.second);
-    }
-    for (const auto &it : buf.pins) {
-        render(it.second);
-    }
-    for (const auto &it : buf.holes) {
-        render(it.second);
-    }
-    for (const auto &it : buf.lines) {
-        render(it.second);
-    }
-    for (const auto &it : buf.texts) {
-        render(it.second);
-    }
-    for (const auto &it : buf.arcs) {
-        render(it.second);
-    }
-    for (const auto &it : buf.pads) {
-        render(it.second);
-    }
-    for (const auto &it : buf.symbols) {
-        render(it.second);
-    }
-    for (const auto &it : buf.net_lines) {
-        render(it.second);
-    }
-    for (const auto &it : buf.power_symbols) {
-        render(it.second);
-    }
-    for (const auto &it : buf.net_labels) {
-        render(it.second);
     }
 }
 

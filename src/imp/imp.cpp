@@ -290,10 +290,8 @@ void ImpBase::run(int argc, char *argv[])
 
     main_window = MainWindow::create();
     canvas = main_window->canvas;
-    {
-        Documents docs(core);
-        clipboard.reset(new ClipboardManager(docs));
-    }
+    clipboard = ClipboardBase::create(*core);
+    clipboard_handler = std::make_unique<ClipboardHandler>(*clipboard);
 
     canvas->signal_selection_changed().connect(sigc::mem_fun(*this, &ImpBase::handle_selection_changed));
     canvas->signal_cursor_moved().connect(sigc::mem_fun(*this, &ImpBase::handle_cursor_move));
@@ -488,8 +486,9 @@ void ImpBase::run(int argc, char *argv[])
         this->canvas_update_from_pp();
     });
 
-    connect_action(ActionID::COPY,
-                   [this](const auto &a) { clipboard->copy(canvas->get_selection(), canvas->get_cursor_pos()); });
+    connect_action(ActionID::COPY, [this](const auto &a) {
+        clipboard_handler->copy(canvas->get_selection(), canvas->get_cursor_pos());
+    });
 
     connect_action(ActionID::VIEW_ALL, [this](const auto &a) {
         auto bbox = canvas->get_bbox();

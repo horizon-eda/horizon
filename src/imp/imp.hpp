@@ -1,5 +1,4 @@
 #pragma once
-#include "core/clipboard.hpp"
 #include "core/core.hpp"
 #include "imp_interface.hpp"
 #include "keyseq_dialog.hpp"
@@ -19,6 +18,8 @@
 #include "grid_controller.hpp"
 #include "util/action_label.hpp"
 #include <optional>
+#include "core/clipboard/clipboard.hpp"
+#include "clipboard_handler.hpp"
 #include "util/win32_undef.hpp"
 
 namespace horizon {
@@ -86,7 +87,8 @@ protected:
 
     std::unique_ptr<Pool> pool;
     class Core *core = nullptr;
-    std::unique_ptr<ClipboardManager> clipboard = nullptr;
+    std::unique_ptr<ClipboardBase> clipboard = nullptr;
+    std::unique_ptr<ClipboardHandler> clipboard_handler = nullptr;
     std::unique_ptr<KeySequenceDialog> key_sequence_dialog = nullptr;
     std::unique_ptr<ImpInterface> imp_interface = nullptr;
     Glib::RefPtr<Glib::Binding> grid_spacing_binding;
