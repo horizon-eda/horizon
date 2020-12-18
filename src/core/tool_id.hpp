@@ -149,5 +149,6 @@ enum class ToolID {
     PLACE_DECAL,
     DRAW_PLANE,
     DRAW_KEEPOUT,
+    DRAG_POLYGON_EDGE
 };
 } // namespace horizon

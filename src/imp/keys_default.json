@@ -584,6 +584,20 @@
     {
         "action": "TOOL",
         "keys": {
+            "255": [
+                [
+                    {
+                        "key": "g",
+                        "mod": 0
+                    }
+                ]
+            ]
+        },
+        "tool": "DRAG_POLYGON_EDGE"
+    },
+    {
+        "action": "TOOL",
+        "keys": {
             "16": [],
             "2": [],
             "255": [

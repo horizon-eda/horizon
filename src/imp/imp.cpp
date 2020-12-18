@@ -872,8 +872,11 @@ ToolID ImpBase::get_tool_for_drag_move(bool ctrl, const std::set<SelectableRef> 
 {
     if (ctrl)
         return ToolID::DUPLICATE;
-    else
-        return ToolID::MOVE;
+
+    if (preferences.mouse.drag_polygon_edges && sel.size() == 1 && sel.begin()->type == ObjectType::POLYGON_EDGE)
+        return ToolID::DRAG_POLYGON_EDGE;
+
+    return ToolID::MOVE;
 }
 
 void ImpBase::handle_drag(bool ctrl)

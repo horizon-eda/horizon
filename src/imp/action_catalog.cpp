@@ -889,6 +889,10 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::DRAW_KEEPOUT},
          {"Draw keepout", ActionGroup::BOARD, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::TOOL, ToolID::DRAG_POLYGON_EDGE},
+         {"Drag polygon edge", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1161,5 +1165,6 @@ const LutEnumStr<ToolID> tool_lut = {
         TOOL_LUT_ITEM(PLACE_DECAL),
         TOOL_LUT_ITEM(DRAW_PLANE),
         TOOL_LUT_ITEM(DRAW_KEEPOUT),
+        TOOL_LUT_ITEM(DRAG_POLYGON_EDGE),
 };
 } // namespace horizon

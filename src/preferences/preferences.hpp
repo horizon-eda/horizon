@@ -99,6 +99,7 @@ public:
 class MousePreferences {
 public:
     bool switch_layers = true;
+    bool drag_polygon_edges = true;
 
     void load_from_json(const json &j);
     json serialize() const;

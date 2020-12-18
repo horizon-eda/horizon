@@ -390,12 +390,14 @@ json MousePreferences::serialize() const
 {
     json j;
     j["switch_layers"] = switch_layers;
+    j["drag_polygon_edges"] = drag_polygon_edges;
     return j;
 }
 
 void MousePreferences::load_from_json(const json &j)
 {
     switch_layers = j.value("switch_layers", true);
+    drag_polygon_edges = j.value("drag_polygon_edges", true);
 }
 
 json Preferences::serialize() const

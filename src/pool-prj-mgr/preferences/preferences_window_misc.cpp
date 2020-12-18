@@ -264,6 +264,13 @@ MiscPreferencesEditor::MiscPreferencesEditor(Preferences &prefs) : preferences(p
                                                         preferences, preferences.mouse.switch_layers));
             gr->add_row(*r);
         }
+        {
+            auto r = Gtk::manage(new PreferencesRowBool(
+                    "Keep slope when dragging polygon edge",
+                    "Dragging a polgon edge will invoke the \"Drag polygon edge\" rather than the \"Move\" tool",
+                    preferences, preferences.mouse.drag_polygon_edges));
+            gr->add_row(*r);
+        }
     }
     {
         auto gr = Gtk::manage(new PreferencesGroup("Action Bar"));
