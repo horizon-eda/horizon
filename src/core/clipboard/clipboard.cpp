@@ -113,4 +113,3 @@ void ClipboardBase::serialize(json &j)
 }
 
 } // namespace horizon
-

@@ -133,7 +133,6 @@ SRC_POOL_UPDATE = \
 SRC_CANVAS = \
 	src/canvas/canvas.cpp \
 	src/canvas/canvas_gl.cpp \
-	src/canvas/canvas_cairo.cpp \
 	src/canvas/grid.cpp \
 	src/canvas/gl_util.cpp \
 	src/canvas/pan.cpp \
