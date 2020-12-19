@@ -26,6 +26,9 @@ public:
                 "T must be a descendant of MyBase"
             );*/
     }
+    uuid_ptr(nullptr_t) : ptr(nullptr), uuid(UUID())
+    {
+    }
     T &operator*()
     {
 #ifdef UUID_PTR_CHECK
@@ -58,7 +61,7 @@ public:
 
     T *ptr;
     UUID uuid;
-    void update(std::map<UUID, T> &map)
+    template <typename U> void update(std::map<UUID, U> &map)
     {
         if (uuid) {
             if (map.count(uuid)) {
@@ -69,7 +72,7 @@ public:
             }
         }
     }
-    void update(const std::map<UUID, T_without_const> &map)
+    template <typename U> void update(const std::map<UUID, U> &map)
     {
         if (uuid) {
             if (map.count(uuid)) {

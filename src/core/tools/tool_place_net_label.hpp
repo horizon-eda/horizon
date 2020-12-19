@@ -1,13 +1,13 @@
 #pragma once
 #include "core/tool.hpp"
 #include "schematic/net_label.hpp"
-#include "tool_place_junction.hpp"
+#include "tool_place_junction_schematic.hpp"
 #include "tool_helper_draw_net_setting.hpp"
 #include <forward_list>
 
 namespace horizon {
 
-class ToolPlaceNetLabel : public ToolPlaceJunction, public ToolHelperDrawNetSetting {
+class ToolPlaceNetLabel : public ToolPlaceJunctionSchematic, public ToolHelperDrawNetSetting {
 public:
     ToolPlaceNetLabel(IDocument *c, ToolID tid);
     bool can_begin() override;

@@ -20,7 +20,8 @@ ToolResponse ToolDrawTrack::begin(const ToolArgs &args)
 {
     std::cout << "tool draw track\n";
 
-    temp_junc = doc.b->insert_junction(UUID::random());
+    const auto uu = UUID::random();
+    temp_junc = &doc.b->get_board()->junctions.emplace(uu, uu).first->second;
     imp->set_snap_filter({{ObjectType::JUNCTION, temp_junc->uuid}});
     temp_junc->position = args.coords;
     temp_track = nullptr;
@@ -58,27 +59,26 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
         switch (args.action) {
         case InToolActionID::LMB:
             if (args.target.type == ObjectType::JUNCTION) {
-                uuid_ptr<Junction> j = doc.b->get_junction(args.target.path.at(0));
+                auto &j = doc.b->get_board()->junctions.at(args.target.path.at(0));
                 if (temp_track != nullptr) {
-                    if (temp_track->net && j->net && (temp_track->net->uuid != j->net->uuid)) {
+                    if (temp_track->net && j.net && (temp_track->net->uuid != j.net->uuid)) {
                         return ToolResponse();
                     }
-                    temp_track->to.connect(j);
+                    temp_track->to.connect(&j);
                     if (temp_track->net) {
-                        j->net = temp_track->net;
+                        j.net = temp_track->net;
                     }
                     else {
-                        temp_track->net = j->net;
+                        temp_track->net = j.net;
                     }
                 }
 
                 create_temp_track();
-                temp_junc->net = j->net;
-                temp_junc->net_segment = j->net_segment;
-                temp_track->from.connect(j);
+                temp_junc->net = j.net;
+                temp_track->from.connect(&j);
                 temp_track->to.connect(temp_junc);
-                temp_track->net = j->net;
-                temp_track->width = rules->get_default_track_width(j->net, 0);
+                temp_track->net = j.net;
+                temp_track->width = rules->get_default_track_width(j.net, 0);
             }
             else if (args.target.type == ObjectType::PAD) {
                 auto pkg = &doc.b->get_board()->packages.at(args.target.path.at(0));
@@ -101,8 +101,9 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
             }
 
             else {
-                Junction *last = temp_junc;
-                temp_junc = doc.b->insert_junction(UUID::random());
+                BoardJunction *last = temp_junc;
+                const auto uu = UUID::random();
+                temp_junc = &doc.b->get_board()->junctions.emplace(uu, uu).first->second;
                 imp->set_snap_filter({{ObjectType::JUNCTION, temp_junc->uuid}});
                 temp_junc->position = args.coords;
                 if (last && temp_track) {
@@ -113,7 +114,6 @@ ToolResponse ToolDrawTrack::update(const ToolArgs &args)
                 }
                 if (last) {
                     temp_junc->net = last->net;
-                    temp_junc->net_segment = last->net_segment;
                 }
 
                 create_temp_track();

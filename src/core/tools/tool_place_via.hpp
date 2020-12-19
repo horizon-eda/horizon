@@ -5,9 +5,9 @@
 
 namespace horizon {
 
-class ToolPlaceVia : public ToolPlaceJunction {
+class ToolPlaceVia : public ToolPlaceJunctionT<class BoardJunction> {
 public:
-    ToolPlaceVia(IDocument *c, ToolID tid);
+    using ToolPlaceJunctionT<BoardJunction>::ToolPlaceJunctionT;
     bool can_begin() override;
     std::set<InToolActionID> get_actions() const override
     {
@@ -21,6 +21,7 @@ public:
     }
 
 protected:
+    void insert_junction() override;
     void create_attached() override;
     void delete_attached() override;
     bool begin_attached() override;

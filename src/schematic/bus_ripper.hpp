@@ -3,7 +3,6 @@
 #include "nlohmann/json_fwd.hpp"
 #include "common/common.hpp"
 #include "util/uuid_ptr.hpp"
-#include "common/junction.hpp"
 #include "block/bus.hpp"
 #include <vector>
 #include <map>
@@ -25,12 +24,12 @@ public:
     UUID get_uuid() const;
     UUID uuid;
 
-    uuid_ptr<Junction> junction;
+    uuid_ptr<class SchematicJunction> junction;
     Orientation orientation = Orientation::UP;
     void mirror();
     uuid_ptr<Bus> bus = nullptr;
     uuid_ptr<Bus::Member> bus_member = nullptr;
-    unsigned int connection_count = 0;
+    std::vector<UUID> connections;
 
     void update_refs(class Sheet &sheet, class Block &block);
     Coordi get_connector_pos() const;

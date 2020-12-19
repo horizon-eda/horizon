@@ -4,9 +4,10 @@
 
 namespace horizon {
 
-class ToolPlaceJunction : public virtual ToolBase {
+
+class ToolPlaceJunctionBase : public virtual ToolBase {
 public:
-    ToolPlaceJunction(IDocument *c, ToolID tid);
+    using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;
@@ -20,10 +21,19 @@ public:
         };
     }
 
+    virtual ~ToolPlaceJunctionBase()
+    {
+    }
+
 protected:
-    class Junction *temp = 0;
+    virtual class Junction *get_junction() = 0;
     std::forward_list<Junction *> junctions_placed;
 
+    virtual void insert_junction() = 0;
+    virtual bool junction_placed()
+    {
+        return false;
+    }
     void create_junction(const Coordi &c);
     virtual void create_attached()
     {
@@ -35,13 +45,31 @@ protected:
     {
         return false;
     }
-    virtual bool check_line(class LineNet *li)
-    {
-        return true;
-    }
     virtual bool begin_attached()
     {
         return true;
     }
 };
+
+template <typename T> class ToolPlaceJunctionT : public ToolPlaceJunctionBase {
+public:
+    using ToolPlaceJunctionBase::ToolPlaceJunctionBase;
+
+protected:
+    T *temp = nullptr;
+
+    Junction *get_junction() override
+    {
+        return temp;
+    };
+};
+
+class ToolPlaceJunction : public ToolPlaceJunctionT<Junction> {
+public:
+    using ToolPlaceJunctionT<Junction>::ToolPlaceJunctionT;
+
+protected:
+    void insert_junction() override;
+};
+
 } // namespace horizon

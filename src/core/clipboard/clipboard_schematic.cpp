@@ -164,7 +164,7 @@ void ClipboardSchematic::serialize(json &j)
 
         case ObjectType::LINE_NET: {
             auto line = sh.net_lines.at(it.uuid);
-            std::map<UUID, Junction> extra_junctions;
+            std::map<UUID, SchematicJunction> extra_junctions;
             for (auto &it_ft : {&line.from, &line.to}) {
                 if (it_ft->is_bus_ripper()) {
                     if (bus_rippers.count(it_ft->bus_ripper->uuid) == 0) {

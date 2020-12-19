@@ -68,12 +68,6 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
                 }
             }
         }
-        else if (it.type == ObjectType::NET_LABEL) {
-            Junction *ju = doc.c->get_sheet()->net_labels.at(it.uuid).junction;
-            if (ju->connection_count == 0) {
-                delete_extra.emplace(ju->uuid, ObjectType::JUNCTION);
-            }
-        }
         else if (it.type == ObjectType::SCHEMATIC_SYMBOL) {
             auto sym = doc.c->get_schematic_symbol(it.uuid);
             doc.c->get_schematic()->disconnect_symbol(doc.c->get_sheet(), sym);
@@ -111,7 +105,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
                                                         // junctions
             auto *power_sym = &doc.c->get_sheet()->power_symbols.at(it.uuid);
             auto sheet = doc.c->get_sheet();
-            Junction *j = power_sym->junction;
+            SchematicJunction *j = power_sym->junction;
             sheet->power_symbols.erase(power_sym->uuid);
 
             // now, we've got a net segment with one less power symbol
@@ -127,20 +121,21 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         }
         else if (it.type == ObjectType::BUS_RIPPER) { // need to erase bus
                                                       // rippers junctions
-            auto *ripper = &doc.c->get_sheet()->bus_rippers.at(it.uuid);
-            auto sheet = doc.c->get_sheet();
-            if (ripper->connection_count == 0) {
+            auto &sheet = *doc.c->get_sheet();
+            auto &ripper = sheet.bus_rippers.at(it.uuid);
+
+            if (ripper.connections.size() == 0) {
                 // just delete it
-                sheet->bus_rippers.erase(ripper->uuid);
+                sheet.bus_rippers.erase(ripper.uuid);
             }
             else {
-                Junction *j = sheet->replace_bus_ripper(ripper);
-                sheet->bus_rippers.erase(ripper->uuid);
-                sheet->propagate_net_segments();
-                auto ns = sheet->analyze_net_segments();
-                auto &nsinfo = ns.at(j->net_segment);
+                auto &j = sheet.replace_bus_ripper(ripper);
+                sheet.bus_rippers.erase(ripper.uuid);
+                sheet.propagate_net_segments();
+                auto ns = sheet.analyze_net_segments();
+                auto &nsinfo = ns.at(j.net_segment);
                 if (!nsinfo.has_label) {
-                    auto pins = sheet->get_pins_connected_to_net_segment(j->net_segment);
+                    auto pins = sheet.get_pins_connected_to_net_segment(j.net_segment);
                     doc.c->get_schematic()->block->extract_pins(pins);
                 }
             }
@@ -171,7 +166,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
             bool multi = false;
             for (const auto &it_ft : {track.from, track.to}) {
                 if (it_ft.is_junc()) {
-                    const Junction *ju = it_ft.junc;
+                    const BoardJunction *ju = it_ft.junc;
                     for (const auto &it_track : doc.b->get_board()->tracks) {
                         if (it_track.second.uuid != track.uuid
                             && (it_track.second.from.junc == ju || it_track.second.to.junc == ju)) {

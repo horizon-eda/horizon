@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolPlaceBusLabel::ToolPlaceBusLabel(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolPlaceJunction(c, tid)
-{
-}
-
 bool ToolPlaceBusLabel::can_begin()
 {
     return doc.c;
@@ -68,7 +64,7 @@ bool ToolPlaceBusLabel::update_attached(const ToolArgs &args)
         switch (args.action) {
         case InToolActionID::LMB:
             if (args.target.type == ObjectType::JUNCTION) {
-                Junction *j = doc.r->get_junction(args.target.path.at(0));
+                SchematicJunction *j = &doc.c->get_sheet()->junctions.at(args.target.path.at(0));
                 if (j->net)
                     return true;
                 if (j->bus && j->bus != bus)

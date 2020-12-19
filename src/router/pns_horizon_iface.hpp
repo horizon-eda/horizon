@@ -14,6 +14,7 @@ class Pad;
 class Track;
 class Via;
 class CanvasGL;
+class BoardJunction;
 class Junction;
 class Net;
 class BoardRules;
@@ -141,6 +142,6 @@ private:
     std::list<PNS_HORIZON_PARENT_ITEM> parents;
 
     std::pair<horizon::BoardPackage *, horizon::Pad *> find_pad(int layer, const horizon::Coord<int64_t> &c);
-    horizon::Junction *find_junction(int layer, const horizon::Coord<int64_t> &c);
+    horizon::BoardJunction *find_junction(int layer, const horizon::Coord<int64_t> &c);
 };
 } // namespace PNS

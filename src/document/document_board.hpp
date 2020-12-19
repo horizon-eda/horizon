@@ -15,10 +15,12 @@ class DocumentBoard : public virtual Document, public virtual IDocumentBoard {
 public:
     bool has_object_type(ObjectType type) const override;
     std::string get_display_name(ObjectType type, const UUID &uu) override;
+    class Junction *insert_junction(const class UUID &uu) override;
+    class Junction *get_junction(const UUID &uu) override;
+    void delete_junction(const UUID &uu) override;
 
 protected:
     std::map<UUID, Polygon> *get_polygon_map() override;
-    std::map<UUID, Junction> *get_junction_map() override;
     std::map<UUID, Text> *get_text_map() override;
     std::map<UUID, Line> *get_line_map() override;
     std::map<UUID, Dimension> *get_dimension_map() override;

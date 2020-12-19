@@ -21,7 +21,8 @@ ToolResponse ToolDrawLineNet::begin(const ToolArgs &args)
 {
     std::cout << "tool draw net line junction\n";
 
-    temp_junc_head = doc.c->insert_junction(UUID::random());
+    const auto uu = UUID::random();
+    temp_junc_head = &doc.c->get_sheet()->junctions.emplace(uu, uu).first->second;
     imp->set_snap_filter({{ObjectType::JUNCTION, temp_junc_head->uuid}});
     temp_junc_head->position = args.coords;
     selection.clear();
@@ -42,8 +43,9 @@ void ToolDrawLineNet::set_snap_filter()
 
 void ToolDrawLineNet::restart(const Coordi &c)
 {
-    doc.c->get_schematic()->expand(); // gets rid of warnings...
-    temp_junc_head = doc.c->insert_junction(UUID::random());
+    doc.c->get_schematic()->expand(); // gets rid of warning=s...
+    const auto uu = UUID::random();
+    temp_junc_head = &doc.c->get_sheet()->junctions.emplace(uu, uu).first->second;
     temp_junc_head->position = c;
     temp_junc_mid = nullptr;
     temp_line_head = nullptr;
@@ -73,9 +75,10 @@ void ToolDrawLineNet::move_temp_junc(const Coordi &c)
     }
 }
 
-Junction *ToolDrawLineNet::make_temp_junc(const Coordi &c)
+SchematicJunction *ToolDrawLineNet::make_temp_junc(const Coordi &c)
 {
-    Junction *j = doc.r->insert_junction(UUID::random());
+    const auto uu = UUID::random();
+    SchematicJunction *j = &doc.c->get_sheet()->junctions.emplace(uu, uu).first->second;
     j->position = c;
     return j;
 }
@@ -136,7 +139,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
         case InToolActionID::LMB: {
-            Junction *ju = nullptr;
+            SchematicJunction *ju = nullptr;
             SchematicSymbol *sym = nullptr;
             uuid_ptr<SymbolPin> pin = nullptr;
             BusRipper *rip = nullptr;
@@ -144,7 +147,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             Bus *bus = nullptr;
             if (!temp_line_head) { // no line yet, first click
                 if (args.target.type == ObjectType::JUNCTION) {
-                    ju = doc.r->get_junction(args.target.path.at(0));
+                    ju = &doc.c->get_sheet()->junctions.at(args.target.path.at(0));
                     net = ju->net;
                     bus = ju->bus;
                 }
@@ -197,7 +200,6 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
                                 bus = li->bus;
                                 ju->net = li->net;
                                 ju->bus = li->bus;
-                                ju->connection_count = 3;
                                 break;
                             }
                         }
@@ -214,7 +216,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             else { // already have net line
                 component_floating = nullptr;
                 if (args.target.type == ObjectType::JUNCTION) {
-                    ju = doc.r->get_junction(args.target.path.at(0));
+                    ju = &doc.c->get_sheet()->junctions.at(args.target.path.at(0));
                     auto do_merge = merge_bus_net(temp_line_head->net, temp_line_head->bus, ju->net, ju->bus);
                     if (do_merge) {
                         temp_line_head->to.connect(ju);
@@ -378,7 +380,7 @@ ToolResponse ToolDrawLineNet::update(const ToolArgs &args)
             return ToolResponse::commit();
 
         case InToolActionID::PLACE_JUNCTION: {
-            Junction *ju = temp_junc_head;
+            SchematicJunction *ju = temp_junc_head;
             temp_junc_mid = make_temp_junc(args.coords);
             temp_junc_mid->net = ju->net;
             temp_junc_mid->bus = ju->bus;

@@ -313,21 +313,23 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
 
 void ToolMove::collect_nets()
 {
+    if (!doc.b)
+        return;
+    const auto &brd = *doc.b->get_board();
     for (const auto &it : selection) {
         switch (it.type) {
-
         case ObjectType::BOARD_PACKAGE: {
-            BoardPackage *pkg = &doc.b->get_board()->packages.at(it.uuid);
-            for (const auto &itt : pkg->package.pads) {
+            const auto &pkg = brd.packages.at(it.uuid);
+            for (const auto &itt : pkg.package.pads) {
                 if (itt.second.net)
                     nets.insert(itt.second.net->uuid);
             }
         } break;
 
         case ObjectType::JUNCTION: {
-            auto ju = doc.r->get_junction(it.uuid);
-            if (ju->net)
-                nets.insert(ju->net->uuid);
+            const auto &ju = brd.junctions.at(it.uuid);
+            if (ju.net)
+                nets.insert(ju.net->uuid);
         } break;
         default:;
         }

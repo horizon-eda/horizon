@@ -2,16 +2,10 @@
 #include "util/uuid.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "common/common.hpp"
-#include "common/junction.hpp"
 #include "util/uuid_ptr.hpp"
-#include "schematic_symbol.hpp"
-#include "block/net.hpp"
-#include "block/bus.hpp"
-#include "power_symbol.hpp"
-#include "bus_ripper.hpp"
+#include "util/uuid_path.hpp"
 #include <vector>
 #include <map>
-#include <fstream>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -32,8 +26,8 @@ public:
     UUID get_uuid() const;
     bool coord_on_line(const Coordi &coord) const;
 
-    uuid_ptr<Net> net = nullptr;
-    uuid_ptr<Bus> bus = nullptr;
+    uuid_ptr<class Net> net = nullptr;
+    uuid_ptr<class Bus> bus = nullptr;
     UUID net_segment = UUID();
 
 
@@ -45,14 +39,14 @@ public:
         {
         }
         Connection(const json &j, Sheet *sheet);
-        uuid_ptr<Junction> junc = nullptr;
-        uuid_ptr<SchematicSymbol> symbol = nullptr;
-        uuid_ptr<SymbolPin> pin = nullptr;
-        uuid_ptr<BusRipper> bus_ripper = nullptr;
+        uuid_ptr<class SchematicJunction> junc = nullptr;
+        uuid_ptr<class SchematicSymbol> symbol = nullptr;
+        uuid_ptr<class SymbolPin> pin = nullptr;
+        uuid_ptr<class BusRipper> bus_ripper = nullptr;
         bool operator<(const Connection &other) const;
         bool operator==(const Connection &other) const;
 
-        void connect(Junction *j);
+        void connect(SchematicJunction *j);
         void connect(BusRipper *r);
         void connect(SchematicSymbol *j, SymbolPin *pin);
         UUIDPath<2> get_pin_path() const;

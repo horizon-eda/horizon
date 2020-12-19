@@ -33,7 +33,8 @@ ToolResponse ToolBendLineNet::begin(const ToolArgs &args)
     if (it->type != ObjectType::LINE_NET)
         return ToolResponse::end();
 
-    temp = doc.c->insert_junction(UUID::random());
+    const auto uu = UUID::random();
+    temp = &doc.c->get_sheet()->junctions.emplace(uu, uu).first->second;
     temp->position = args.coords;
 
     LineNet *li = &doc.c->get_sheet()->net_lines.at(it->uuid);

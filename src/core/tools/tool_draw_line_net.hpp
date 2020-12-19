@@ -32,8 +32,8 @@ public:
     }
 
 private:
-    class Junction *temp_junc_head = 0;
-    Junction *temp_junc_mid = 0;
+    class SchematicJunction *temp_junc_head = 0;
+    SchematicJunction *temp_junc_mid = 0;
     class LineNet *temp_line_head = 0;
     class LineNet *temp_line_mid = 0;
     class NetLabel *net_label = nullptr;
@@ -47,7 +47,7 @@ private:
     UUIDPath<2> connpath_floating;
     class SymbolPin *pin_start = nullptr;
 
-    Junction *make_temp_junc(const Coordi &c);
+    SchematicJunction *make_temp_junc(const Coordi &c);
     void apply_settings() override;
     void set_snap_filter();
 };

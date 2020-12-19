@@ -6,6 +6,7 @@
 #include "logger/log_util.hpp"
 #include "common/object_descr.hpp"
 #include "nlohmann/json.hpp"
+#include "common/junction_util.hpp"
 
 namespace horizon {
 
@@ -117,7 +118,7 @@ Sheet::Sheet(const UUID &uu) : uuid(uu), name("First sheet"), index(1), frame(UU
 {
 }
 
-LineNet *Sheet::split_line_net(LineNet *it, Junction *ju)
+LineNet *Sheet::split_line_net(LineNet *it, SchematicJunction *ju)
 {
     auto uu = UUID::random();
     LineNet *li = &net_lines.emplace(std::make_pair(uu, uu)).first->second;
@@ -131,32 +132,34 @@ LineNet *Sheet::split_line_net(LineNet *it, Junction *ju)
     return li;
 }
 
-void Sheet::merge_net_lines(LineNet *a, LineNet *b, Junction *ju)
+void Sheet::merge_net_lines(SchematicJunction &ju)
 {
-    if (a->from.junc == ju) {
-        if (b->from.junc == ju) {
-            a->from = b->to;
+    auto &a = net_lines.at(ju.connected_net_lines.at(0));
+    auto &b = net_lines.at(ju.connected_net_lines.at(1));
+    if (a.from.junc == &ju) {
+        if (b.from.junc == &ju) {
+            a.from = b.to;
         }
         else {
-            a->from = b->from;
+            a.from = b.from;
         }
     }
     else {
-        assert(a->to.junc == ju);
-        if (b->from.junc == ju) {
-            a->to = b->to;
+        assert(a.to.junc == &ju);
+        if (b.from.junc == &ju) {
+            a.to = b.to;
         }
         else {
-            a->to = b->from;
+            a.to = b.from;
         }
     }
 
     // delete junction
     // delete b
-    junctions.erase(ju->uuid);
-    net_lines.erase(b->uuid);
-    if (a->from.is_junc() && a->to.is_junc() && a->from.junc == a->to.junc) {
-        net_lines.erase(a->uuid);
+    junctions.erase(ju.uuid);
+    net_lines.erase(b.uuid);
+    if (a.from.is_junc() && a.to.is_junc() && a.from.junc == a.to.junc) {
+        net_lines.erase(a.uuid);
     }
 }
 
@@ -235,106 +238,91 @@ void Sheet::expand_symbol(const UUID &sym_uuid, const Schematic &sch)
 
 void Sheet::vacuum_junctions()
 {
-    for (auto it = junctions.begin(); it != junctions.end();) {
-        if (it->second.connection_count == 0 && !it->second.has_via) {
-            it = junctions.erase(it);
+    map_erase_if(junctions, [](auto &x) {
+        return x.second.connected_net_lines.size() == 0 && x.second.only_net_lines_connected();
+    });
+}
+
+void Sheet::update_junction_connections()
+{
+    for (auto &[uu, it] : junctions) {
+        it.clear();
+        it.connected_bus_labels.clear();
+        it.connected_bus_rippers.clear();
+        it.connected_net_lines.clear();
+        it.connected_power_symbols.clear();
+        it.connected_net_labels.clear();
+    }
+    for (auto &[uu, it] : net_lines) {
+        for (const auto &it_ft : {it.from, it.to}) {
+            if (it_ft.is_junc()) {
+                auto &ju = *it_ft.junc;
+                ju.connected_net_lines.push_back(uu);
+            }
         }
-        else {
-            it++;
+    }
+
+    JunctionUtil::update(lines);
+    JunctionUtil::update(arcs);
+
+    for (auto &[uu, it] : bus_rippers) {
+        it.junction->connected_bus_rippers.push_back(uu);
+    }
+    for (auto &[uu, it] : bus_labels) {
+        it.junction->connected_bus_labels.push_back(uu);
+    }
+    for (auto &[uu, it] : net_labels) {
+        it.junction->connected_net_labels.push_back(uu);
+    }
+    for (auto &[uu, it] : power_symbols) {
+        it.junction->connected_power_symbols.push_back(uu);
+    }
+}
+
+void Sheet::update_bus_ripper_connections()
+{
+    for (auto &[uu, it] : bus_rippers) {
+        it.connections.clear();
+    }
+    for (auto &[uu, it] : net_lines) {
+        for (const auto &it_ft : {it.from, it.to}) {
+            if (it_ft.is_bus_ripper()) {
+                it_ft.bus_ripper->connections.push_back(uu);
+            }
         }
     }
 }
 
-void Sheet::simplify_net_lines(bool simplify)
+void Sheet::simplify_net_lines()
 {
     unsigned int n_merged = 1;
     while (n_merged) {
         n_merged = 0;
-        for (auto &it_junc : junctions) {
-            if (!simplify) {
-                it_junc.second.net = nullptr;
-                it_junc.second.has_via = false;
-            }
-            it_junc.second.connection_count = 0;
-        }
-        for (auto &it_rip : bus_rippers) {
-            it_rip.second.connection_count = 0;
-        }
-        std::set<UUID> junctions_with_label;
-        for (const auto &it : net_labels) {
-            junctions_with_label.emplace(it.second.junction->uuid);
-            it.second.junction->has_via = true;
-        }
-        for (const auto &it : bus_labels) {
-            junctions_with_label.emplace(it.second.junction->uuid);
-            it.second.junction->has_via = true;
-        }
-        for (const auto &it : bus_rippers) {
-            junctions_with_label.emplace(it.second.junction->uuid);
-            it.second.junction->has_via = true;
-        }
-        for (const auto &it : power_symbols) {
-            junctions_with_label.emplace(it.second.junction->uuid);
-            it.second.junction->connection_count++;
-        }
-        for (const auto &it : lines) {
-            for (auto &it_ft : {it.second.from, it.second.to}) {
-                junctions_with_label.emplace(it_ft->uuid);
-                it_ft->has_via = true;
+        std::vector<UUID> junctions_to_maybe_merge;
+        for (auto &[uu, it] : junctions) {
+            if (it.connected_net_lines.size() == 2 && it.only_net_lines_connected()) {
+                junctions_to_maybe_merge.push_back(uu);
             }
         }
-        for (const auto &it : arcs) {
-            for (auto &it_ft : {it.second.from, it.second.to, it.second.center}) {
-                junctions_with_label.emplace(it_ft->uuid);
-                it_ft->has_via = true;
-            }
-        }
-
-        std::map<UUID, std::set<UUID>> junction_connections;
-        for (auto &it_line : net_lines) {
-            if (!simplify) {
-                it_line.second.net = nullptr;
-            }
-            for (auto &it_ft : {it_line.second.from, it_line.second.to}) {
-                if (it_ft.is_junc()) {
-                    it_ft.junc->connection_count++;
-                    if (!junction_connections.count(it_ft.junc.uuid)) {
-                        junction_connections.emplace(it_ft.junc.uuid, std::set<UUID>());
-                    }
-                    junction_connections.at(it_ft.junc.uuid).emplace(it_line.first);
-                }
-                else if (it_ft.is_bus_ripper()) {
-                    it_ft.bus_ripper->connection_count++;
-                }
-            }
-        }
-        if (simplify) {
-            for (const auto &it : junction_connections) {
-                if (it.second.size() == 2) {
-                    const auto &connections = it.second;
-                    auto itc = connections.begin();
-                    if (net_lines.count(*itc) == 0)
-                        continue;
-                    auto &line_a = net_lines.at(*itc);
-                    itc++;
-                    if (net_lines.count(*itc) == 0)
-                        continue;
-                    auto &line_b = net_lines.at(*itc);
-
+        for (const auto &uu : junctions_to_maybe_merge) {
+            if (junctions.count(uu)) {
+                auto &ju = junctions.at(uu);
+                if (ju.connected_net_lines.size() == 2) {
+                    const auto &line_a = net_lines.at(ju.connected_net_lines.at(0));
+                    const auto &line_b = net_lines.at(ju.connected_net_lines.at(1));
                     auto va = line_a.to.get_position() - line_a.from.get_position();
                     auto vb = line_b.to.get_position() - line_b.from.get_position();
-
-                    if ((va.dot(vb)) * (va.dot(vb)) == va.mag_sq() * vb.mag_sq()) {
-                        if (junctions_with_label.count(it.first) == 0) {
-                            merge_net_lines(&line_a, &line_b, &junctions.at(it.first));
-                            n_merged++;
-                        }
+                    if (va.cross(vb) == 0) {
+                        merge_net_lines(ju);
+                        n_merged++;
+                        update_junction_connections();
                     }
                 }
             }
         }
     }
 }
+
 
 void Sheet::fix_junctions()
 {
@@ -345,7 +333,6 @@ void Sheet::fix_junctions()
             if (ju->net_segment == li->net_segment && li->from.junc != ju && li->to.junc != ju) {
                 if (li->coord_on_line(ju->position)) {
                     split_line_net(li, ju);
-                    ju->connection_count += 2;
                 }
             }
         }
@@ -361,12 +348,6 @@ void Sheet::delete_duplicate_net_lines()
             del = true;
         if (conns.emplace(li.second.to, li.second.from).second == false)
             del = true;
-        if (del) {
-            for (const auto &it_ft : {li.second.from, li.second.to}) {
-                if (it_ft.is_junc() && it_ft.junc->connection_count)
-                    it_ft.junc->connection_count--;
-            }
-        }
         return del;
     });
 }
@@ -481,7 +462,7 @@ void Sheet::propagate_net_segments()
     }
 }
 
-NetSegmentInfo::NetSegmentInfo(Junction *ju) : position(ju->position), net(ju->net), bus(ju->bus)
+NetSegmentInfo::NetSegmentInfo(SchematicJunction *ju) : position(ju->position), net(ju->net), bus(ju->bus)
 {
 }
 NetSegmentInfo::NetSegmentInfo(LineNet *li)
@@ -583,7 +564,7 @@ std::set<UUIDPath<3>> Sheet::get_pins_connected_to_net_segment(const UUID &uu_se
     return r;
 }
 
-void Sheet::replace_junction(Junction *j, SchematicSymbol *sym, SymbolPin *pin)
+void Sheet::replace_junction(SchematicJunction *j, SchematicSymbol *sym, SymbolPin *pin)
 {
     for (auto &it_line : net_lines) {
         for (auto it_ft : {&it_line.second.from, &it_line.second.to}) {
@@ -594,7 +575,7 @@ void Sheet::replace_junction(Junction *j, SchematicSymbol *sym, SymbolPin *pin)
     }
 }
 
-void Sheet::merge_junction(Junction *j, Junction *into)
+void Sheet::merge_junction(SchematicJunction *j, SchematicJunction *into)
 {
     for (auto &it : net_lines) {
         if (it.second.from.junc == j) {
@@ -637,17 +618,18 @@ void Sheet::merge_junction(Junction *j, Junction *into)
     junctions.erase(j->uuid);
 }
 
-Junction *Sheet::replace_bus_ripper(BusRipper *rip)
+SchematicJunction &Sheet::replace_bus_ripper(BusRipper &rip)
 {
     auto uu = UUID::random();
-    Junction *j = &junctions.emplace(uu, uu).first->second;
-    j->net = rip->bus_member->net;
-    j->position = rip->get_connector_pos();
+    auto &j = junctions.emplace(uu, uu).first->second;
+    j.net = rip.bus_member->net;
+    j.position = rip.get_connector_pos();
 
-    for (auto &it_line : net_lines) {
-        for (auto it_ft : {&it_line.second.from, &it_line.second.to}) {
-            if (it_ft->bus_ripper == rip) {
-                it_ft->connect(j);
+    for (auto &it : rip.connections) {
+        auto &line = net_lines.at(it);
+        for (auto it_ft : {&line.from, &line.to}) {
+            if (it_ft->bus_ripper == &rip) {
+                it_ft->connect(&j);
             }
         }
     }

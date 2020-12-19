@@ -4,6 +4,7 @@
 #include "nlohmann/json.hpp"
 #include "board/board_layers.hpp"
 #include "util/picture_load.hpp"
+#include "common/junction_util.hpp"
 
 namespace horizon {
 
@@ -300,29 +301,14 @@ void Package::expand()
 {
     map_erase_if(keepouts, [this](auto &it) { return polygons.count(it.second.polygon.uuid) == 0; });
     for (auto &it : junctions) {
-        it.second.layer = 10000;
-        it.second.has_via = false;
-        it.second.needs_via = false;
-        it.second.connection_count = 0;
+        it.second.clear();
     }
+    JunctionUtil::update(lines);
+    JunctionUtil::update(arcs);
 
-    for (const auto &it : lines) {
-        it.second.from->connection_count++;
-        it.second.to->connection_count++;
-        for (auto &ju : {it.second.from, it.second.to}) {
-            ju->layer.merge(it.second.layer);
-        }
-    }
-    for (const auto &it : arcs) {
-        it.second.from->connection_count++;
-        it.second.to->connection_count++;
-        it.second.center->connection_count++;
-        for (auto &ju : {it.second.from, it.second.to}) {
-            ju->layer.merge(it.second.layer);
-        }
-    }
-
-    map_erase_if(junctions, [](const auto &it) { return it.second.connection_count == 0; });
+    map_erase_if(junctions, [](const auto &it) {
+        return (it.second.connected_lines.size() == 0) && (it.second.connected_arcs.size() == 0);
+    });
 }
 
 void Package::update_warnings()

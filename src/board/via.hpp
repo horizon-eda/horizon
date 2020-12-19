@@ -1,6 +1,6 @@
 #pragma once
 #include "common/common.hpp"
-#include "common/junction.hpp"
+#include "board/board_junction.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "pool/padstack.hpp"
 #include "util/uuid.hpp"
@@ -22,7 +22,7 @@ public:
     UUID uuid;
 
     uuid_ptr<Net> net_set = nullptr;
-    uuid_ptr<Junction> junction = nullptr;
+    uuid_ptr<BoardJunction> junction = nullptr;
     uuid_ptr<const Padstack> vpp_padstack;
     Padstack padstack;
     void expand(const class Board &brd);

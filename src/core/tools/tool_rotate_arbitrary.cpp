@@ -79,8 +79,8 @@ void ToolRotateArbitrary::expand_selection()
     if (doc.c) {
         for (const auto &it : selection) {
             if (it.type == ObjectType::JUNCTION) {
-                const auto ju = doc.r->get_junction(it.uuid);
-                if (ju->net) {
+                const auto &ju = doc.c->get_sheet()->junctions.at(it.uuid);
+                if (ju.net) {
                     sel_remove.insert(it);
                 }
             }

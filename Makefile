@@ -18,6 +18,7 @@ SRC_COMMON = \
 	src/pool/part.cpp\
 	src/common/common.cpp \
 	src/common/junction.cpp \
+	src/common/junction_util.cpp \
 	src/common/line.cpp \
 	src/common/arc.cpp \
 	src/common/layer_provider.cpp \
@@ -32,6 +33,7 @@ SRC_COMMON = \
 	src/schematic/schematic.cpp\
 	src/schematic/sheet.cpp\
 	src/common/text.cpp\
+	src/schematic/schematic_junction.cpp\
 	src/schematic/line_net.cpp\
 	src/schematic/net_label.cpp\
 	src/schematic/bus_label.cpp\
@@ -195,6 +197,7 @@ SRC_IMP = \
 	src/core/core_properties.cpp\
 	src/core/tools/tool_move.cpp\
 	src/core/tools/tool_place_junction.cpp\
+	src/core/tools/tool_place_junction_schematic.cpp\
 	src/core/tools/tool_draw_line.cpp\
 	src/core/tools/tool_delete.cpp\
 	src/core/tools/tool_draw_arc.cpp\

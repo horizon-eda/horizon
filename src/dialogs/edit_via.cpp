@@ -4,6 +4,7 @@
 #include "board/via.hpp"
 #include "board/via_padstack_provider.hpp"
 #include "util/util.hpp"
+#include "block/net.hpp"
 #include <iostream>
 #include <deque>
 #include <algorithm>

@@ -31,7 +31,7 @@ Track::Connection::Connection(const json &j, Board *brd)
     }
 }
 
-Track::Connection::Connection(Junction *j)
+Track::Connection::Connection(BoardJunction *j)
 {
     connect(j);
 }
@@ -69,7 +69,7 @@ bool Track::Connection::is_pad() const
     return false;
 }
 
-void Track::Connection::connect(Junction *j)
+void Track::Connection::connect(BoardJunction *j)
 {
     junc = j;
     package = nullptr;
@@ -142,21 +142,6 @@ json Track::Connection::serialize() const
         assert(false);
     }
     return j;
-}
-
-UUID Track::Connection::get_net_segment() const
-{
-    if (is_junc()) {
-        return junc->net_segment;
-    }
-    else if (is_pad()) {
-        return UUID();
-        // return pad->net_segment;
-    }
-    else {
-        assert(false);
-        return UUID();
-    }
 }
 
 Net *Track::Connection::get_net()

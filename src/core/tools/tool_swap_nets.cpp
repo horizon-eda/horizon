@@ -24,7 +24,7 @@ std::set<UUID> ToolSwapNets::get_net_segments()
     std::set<UUID> net_segments;
     for (const auto &it : selection) {
         if (it.type == ObjectType::JUNCTION) {
-            net_segments.insert(doc.r->get_junction(it.uuid)->net_segment);
+            net_segments.insert(doc.c->get_sheet()->junctions.at(it.uuid).net_segment);
         }
         else if (it.type == ObjectType::LINE_NET) {
             net_segments.insert(doc.c->get_sheet()->net_lines.at(it.uuid).net_segment);

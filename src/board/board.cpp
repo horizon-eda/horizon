@@ -9,6 +9,7 @@
 #include "nlohmann/json.hpp"
 #include "pool/ipool.hpp"
 #include "pool/pool_cached.hpp"
+#include "common/junction_util.hpp"
 
 namespace horizon {
 
@@ -395,6 +396,43 @@ void Board::update_refs()
     }
 }
 
+void Board::update_junction_connections()
+{
+    for (auto &[uu, it] : junctions) {
+        it.clear();
+        it.connected_connection_lines.clear();
+        it.connected_tracks.clear();
+        it.connected_vias.clear();
+        it.has_via = false;
+        it.needs_via = false;
+    }
+    for (auto &[uu, it] : tracks) {
+        for (const auto &it_ft : {it.from, it.to}) {
+            if (it_ft.is_junc()) {
+                auto &ju = *it_ft.junc;
+                ju.connected_tracks.push_back(uu);
+                ju.layer.merge(it.layer);
+                if (ju.layer.is_multilayer())
+                    ju.needs_via = true;
+            }
+        }
+    }
+
+    JunctionUtil::update(lines);
+    JunctionUtil::update(arcs);
+
+    for (auto &[uu, it] : connection_lines) {
+        for (const auto &it_ft : {it.from, it.to}) {
+            if (it_ft.is_junc())
+                it_ft.junc->connected_connection_lines.push_back(uu);
+        }
+    }
+    for (auto &[uu, it] : vias) {
+        it.junction->has_via = true;
+        it.junction->connected_vias.push_back(uu);
+    }
+}
+
 unsigned int Board::get_n_inner_layers() const
 {
     return n_inner_layers;
@@ -571,14 +609,11 @@ void Board::propagate_nets()
 
 void Board::vacuum_junctions()
 {
-    for (auto it = junctions.begin(); it != junctions.end();) {
-        if (it->second.connection_count == 0 && it->second.has_via == false) {
-            it = junctions.erase(it);
-        }
-        else {
-            it++;
-        }
-    }
+    map_erase_if(junctions, [this](auto &x) {
+        const BoardJunction &ju = x.second;
+        return (ju.connected_lines.size() == 0) && (ju.connected_arcs.size() == 0) && (ju.connected_tracks.size() == 0)
+               && (ju.connected_vias.size() == 0);
+    });
 }
 
 
@@ -604,41 +639,12 @@ void Board::expand(bool careful)
 
     expand_packages();
 
-    for (auto &it : junctions) {
-        it.second.layer = 10000;
-        it.second.has_via = false;
-        it.second.needs_via = false;
-        it.second.connection_count = 0;
-    }
+    update_junction_connections();
 
     for (const auto &it : tracks) {
-        for (const auto &it_ft : {it.second.from, it.second.to}) {
-            if (it_ft.is_junc()) {
-                auto ju = it_ft.junc;
-                ju->connection_count++;
-                ju->layer.merge(it.second.layer);
-                if (ju->layer.is_multilayer())
-                    ju->needs_via = true;
-            }
-        }
+
         if (it.second.from.get_position() == it.second.to.get_position()) {
             warnings.emplace_back(it.second.from.get_position(), "Zero length track");
-        }
-    }
-
-    for (const auto &it : lines) {
-        it.second.from->connection_count++;
-        it.second.to->connection_count++;
-        for (const auto &ju : {it.second.from, it.second.to}) {
-            ju->layer.merge(it.second.layer);
-        }
-    }
-    for (const auto &it : arcs) {
-        it.second.from->connection_count++;
-        it.second.to->connection_count++;
-        it.second.center->connection_count++;
-        for (const auto &ju : {it.second.from, it.second.to, it.second.center}) {
-            ju->layer.merge(it.second.layer);
         }
     }
 
@@ -861,14 +867,14 @@ void Board::expand_packages()
 
 void Board::disconnect_package(BoardPackage *pkg)
 {
-    std::map<Pad *, Junction *> pad_junctions;
+    std::map<Pad *, BoardJunction *> pad_junctions;
     for (auto &it_track : tracks) {
         Track *tr = &it_track.second;
         // if((line->to_symbol && line->to_symbol->uuid == it.uuid) ||
         // (line->from_symbol &&line->from_symbol->uuid == it.uuid)) {
         for (auto it_ft : {&tr->to, &tr->from}) {
             if (it_ft->package == pkg) {
-                Junction *j = nullptr;
+                BoardJunction *j = nullptr;
                 if (pad_junctions.count(it_ft->pad)) {
                     j = pad_junctions.at(it_ft->pad);
                 }
@@ -974,7 +980,7 @@ void Board::smash_package_silkscreen_graphics(BoardPackage *pkg)
     auto tr = pkg->placement;
     if (pkg->flip)
         tr.invert_angle();
-    auto get_junction = [&junction_xlat, this, pkg, tr](Junction *ju) {
+    auto get_junction = [&junction_xlat, this, pkg, tr](Junction *ju) -> Junction * {
         if (junction_xlat.count(ju)) {
             return junction_xlat.at(ju);
         }

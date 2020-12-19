@@ -1081,14 +1081,15 @@ ToolID ImpSchematic::get_tool_for_drag_move(bool ctrl, const std::set<Selectable
 void ImpSchematic::expand_selection_for_property_panel(std::set<SelectableRef> &sel_extra,
                                                        const std::set<SelectableRef> &sel)
 {
+    const auto &sheet = *core_schematic.get_sheet();
     for (const auto &it : sel) {
         switch (it.type) {
         case ObjectType::SCHEMATIC_SYMBOL:
             sel_extra.emplace(core_schematic.get_schematic_symbol(it.uuid)->component->uuid, ObjectType::COMPONENT);
             break;
         case ObjectType::JUNCTION:
-            if (core->get_junction(it.uuid)->net) {
-                sel_extra.emplace(core->get_junction(it.uuid)->net->uuid, ObjectType::NET);
+            if (sheet.junctions.at(it.uuid).net) {
+                sel_extra.emplace(sheet.junctions.at(it.uuid).net->uuid, ObjectType::NET);
             }
             break;
         case ObjectType::LINE_NET: {

@@ -75,7 +75,7 @@ ToolResponse ToolCopyTracks::update(const ToolArgs &args)
                     return ToolResponse();
                 }
 
-                std::map<Junction *, Junction *> junction_map;
+                std::map<BoardJunction *, BoardJunction *> junction_map;
 
                 for (auto it : source_tracks) {
                     auto delta_angle = dest_pkg.placement.get_angle() - ref_pkg->placement.get_angle();

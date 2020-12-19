@@ -1,13 +1,14 @@
 #pragma once
 #include "core/tool.hpp"
-#include "tool_place_junction.hpp"
+#include "tool_place_junction_schematic.hpp"
 #include <forward_list>
 
 namespace horizon {
 
-class ToolPlaceBusLabel : public ToolPlaceJunction {
+class ToolPlaceBusLabel : public ToolPlaceJunctionSchematic {
 public:
-    ToolPlaceBusLabel(IDocument *c, ToolID tid);
+    using ToolPlaceJunctionSchematic::ToolPlaceJunctionSchematic;
+
     bool can_begin() override;
     std::set<InToolActionID> get_actions() const override
     {

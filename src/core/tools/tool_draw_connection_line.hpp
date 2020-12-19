@@ -20,7 +20,7 @@ public:
     }
 
 private:
-    class Junction *temp_junc = 0;
+    class BoardJunction *temp_junc = 0;
     class ConnectionLine *temp_line = 0;
     class ConnectionLine *temp_line_last = 0;
     class ConnectionLine *temp_line_last2 = 0;

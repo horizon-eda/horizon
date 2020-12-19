@@ -2,7 +2,7 @@
 #include "block/net.hpp"
 #include "board_package.hpp"
 #include "common/common.hpp"
-#include "common/junction.hpp"
+#include "board_junction.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "util/uuid.hpp"
 #include "util/uuid_ptr.hpp"
@@ -36,20 +36,19 @@ public:
         {
         }
         Connection(const json &j, Board *brd = nullptr);
-        Connection(Junction *j);
+        Connection(BoardJunction *j);
         Connection(BoardPackage *pkg, Pad *pad);
-        uuid_ptr<Junction> junc = nullptr;
+        uuid_ptr<BoardJunction> junc = nullptr;
         uuid_ptr<BoardPackage> package = nullptr;
         uuid_ptr<Pad> pad = nullptr;
         bool operator<(const Track::Connection &other) const;
         bool operator==(const Track::Connection &other) const;
 
-        void connect(Junction *j);
+        void connect(BoardJunction *j);
         void connect(BoardPackage *pkg, Pad *pad);
         UUIDPath<2> get_pad_path() const;
         bool is_junc() const;
         bool is_pad() const;
-        UUID get_net_segment() const;
         void update_refs(class Board &brd);
         Coordi get_position() const;
         LayerRange get_layer() const;

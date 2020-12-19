@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolPlaceVia::ToolPlaceVia(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolPlaceJunction(c, tid)
-{
-}
-
 bool ToolPlaceVia::can_begin()
 {
     return doc.b;
@@ -38,6 +34,12 @@ bool ToolPlaceVia::begin_attached()
     else {
         return false;
     }
+}
+
+void ToolPlaceVia::insert_junction()
+{
+    const auto uu = UUID::random();
+    temp = &doc.b->get_board()->junctions.emplace(uu, uu).first->second;
 }
 
 void ToolPlaceVia::create_attached()
@@ -75,7 +77,7 @@ bool ToolPlaceVia::update_attached(const ToolArgs &args)
         switch (args.action) {
         case InToolActionID::LMB:
             if (args.target.type == ObjectType::JUNCTION) {
-                Junction *j = doc.r->get_junction(args.target.path.at(0));
+                auto j = &doc.b->get_board()->junctions.at(args.target.path.at(0));
                 via->junction = j;
                 create_attached();
                 return true;

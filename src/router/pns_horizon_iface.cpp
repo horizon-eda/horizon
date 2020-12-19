@@ -915,7 +915,7 @@ std::pair<horizon::BoardPackage *, horizon::Pad *> PNS_HORIZON_IFACE::find_pad(i
     return {nullptr, nullptr};
 }
 
-horizon::Junction *PNS_HORIZON_IFACE::find_junction(int layer, const horizon::Coordi &c)
+horizon::BoardJunction *PNS_HORIZON_IFACE::find_junction(int layer, const horizon::Coordi &c)
 {
     for (auto &it : board->junctions) {
         if ((layer == 10000 || it.second.layer == layer || it.second.has_via) && it.second.position == c) {

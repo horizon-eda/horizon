@@ -23,7 +23,7 @@ public:
     std::string name;
     ParameterSet parameter_set;
 
-    uuid_ptr<Net> net = nullptr;
+    uuid_ptr<class Net> net = nullptr;
     bool is_nc = false;
     std::string secondary_text;
 

@@ -1,12 +1,12 @@
 #pragma once
 #include "block/bus.hpp"
 #include "core/tool.hpp"
-#include "tool_place_junction.hpp"
+#include "tool_place_junction_schematic.hpp"
 #include "tool_helper_move.hpp"
 
 namespace horizon {
 
-class ToolPlaceBusRipper : public ToolPlaceJunction, public ToolHelperMove {
+class ToolPlaceBusRipper : public ToolPlaceJunctionSchematic, public ToolHelperMove {
 public:
     ToolPlaceBusRipper(IDocument *c, ToolID tid);
     bool can_begin() override;

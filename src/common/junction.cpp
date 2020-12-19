@@ -18,6 +18,13 @@ Junction::Junction(const UUID &uu) : uuid(uu)
 {
 }
 
+void Junction::clear()
+{
+    connected_lines.clear();
+    connected_arcs.clear();
+    layer = 10000;
+}
+
 json Junction::serialize() const
 {
     json j;

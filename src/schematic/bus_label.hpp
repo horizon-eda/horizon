@@ -3,14 +3,8 @@
 #include "nlohmann/json_fwd.hpp"
 #include "common/common.hpp"
 #include "util/uuid_ptr.hpp"
-#include "common/junction.hpp"
-#include "block/bus.hpp"
-#include <vector>
-#include <map>
-#include <set>
-#include <fstream>
 #include "nlohmann/json_fwd.hpp"
-
+#include <set>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -30,12 +24,12 @@ public:
     enum class Style { PLAIN, FLAG };
     Style style = Style::FLAG;
 
-    uuid_ptr<Junction> junction;
+    uuid_ptr<class SchematicJunction> junction;
     Orientation orientation = Orientation::RIGHT;
     uint64_t size = 1.5_mm;
     std::set<unsigned int> on_sheets;
     bool offsheet_refs = true;
-    uuid_ptr<Bus> bus;
+    uuid_ptr<class Bus> bus;
 
     json serialize() const;
 };

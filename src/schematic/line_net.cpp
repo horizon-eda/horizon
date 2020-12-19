@@ -78,7 +78,7 @@ bool LineNet::Connection::is_pin() const
     return false;
 }
 
-void LineNet::Connection::connect(Junction *j)
+void LineNet::Connection::connect(SchematicJunction *j)
 {
     junc = j;
     symbol = nullptr;

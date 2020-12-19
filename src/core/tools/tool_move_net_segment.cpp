@@ -27,7 +27,7 @@ UUID ToolMoveNetSegment::get_net_segment()
     for (const auto &it : selection) {
         UUID this_ns;
         if (it.type == ObjectType::JUNCTION) {
-            this_ns = doc.r->get_junction(it.uuid)->net_segment;
+            this_ns = doc.c->get_sheet()->junctions.at(it.uuid).net_segment;
         }
         else if (it.type == ObjectType::LINE_NET) {
             this_ns = doc.c->get_sheet()->net_lines.at(it.uuid).net_segment;

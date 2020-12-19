@@ -9,7 +9,7 @@
 namespace horizon {
 
 ToolPlaceBusRipper::ToolPlaceBusRipper(IDocument *c, ToolID tid)
-    : ToolBase(c, tid), ToolPlaceJunction(c, tid), ToolHelperMove(c, tid)
+    : ToolBase(c, tid), ToolPlaceJunctionSchematic(c, tid), ToolHelperMove(c, tid)
 {
 }
 
@@ -82,7 +82,7 @@ bool ToolPlaceBusRipper::update_attached(const ToolArgs &args)
         switch (args.action) {
         case InToolActionID::LMB:
             if (args.target.type == ObjectType::JUNCTION) {
-                Junction *j = doc.r->get_junction(args.target.path.at(0));
+                SchematicJunction *j = &doc.c->get_sheet()->junctions.at(args.target.path.at(0));
                 if (j->bus != bus) {
                     imp->tool_bar_flash("junction connected to wrong bus");
                     return true;

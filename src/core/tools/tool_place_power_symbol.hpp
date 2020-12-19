@@ -1,14 +1,15 @@
 #pragma once
 #include "core/tool.hpp"
 #include "schematic/power_symbol.hpp"
-#include "tool_place_junction.hpp"
+#include "tool_place_junction_schematic.hpp"
 #include <forward_list>
 
 namespace horizon {
 
-class ToolPlacePowerSymbol : public ToolPlaceJunction {
+class ToolPlacePowerSymbol : public ToolPlaceJunctionSchematic {
 public:
-    ToolPlacePowerSymbol(IDocument *c, ToolID tid);
+    using ToolPlaceJunctionSchematic::ToolPlaceJunctionSchematic;
+
     bool can_begin() override;
     std::set<InToolActionID> get_actions() const override
     {

@@ -2,13 +2,7 @@
 #include "util/uuid.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "common/common.hpp"
-#include "block/block.hpp"
 #include "util/uuid_ptr.hpp"
-#include "common/junction.hpp"
-#include <vector>
-#include <map>
-#include <fstream>
-
 
 namespace horizon {
 using json = nlohmann::json;
@@ -25,8 +19,8 @@ public:
     PowerSymbol(const UUID &uu);
 
     UUID uuid;
-    uuid_ptr<Junction> junction;
-    uuid_ptr<Net> net;
+    uuid_ptr<class SchematicJunction> junction;
+    uuid_ptr<class Net> net;
     bool mirror = false;
     Orientation orientation = Orientation::DOWN;
     void mirrorx();

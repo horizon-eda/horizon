@@ -21,7 +21,7 @@ public:
     }
 
 private:
-    Junction *temp_junc = 0;
+    class BoardJunction *temp_junc = 0;
     Track *temp_track = 0;
     Track *create_temp_track();
     class BoardRules *rules;

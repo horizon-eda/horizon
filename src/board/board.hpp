@@ -6,7 +6,7 @@
 #include "clipper/clipper.hpp"
 #include "common/dimension.hpp"
 #include "common/hole.hpp"
-#include "common/junction.hpp"
+#include "board_junction.hpp"
 #include "common/layer_provider.hpp"
 #include "common/polygon.hpp"
 #include "common/keepout.hpp"
@@ -61,6 +61,7 @@ public:
     Board(shallow_copy_t sh, const Board &brd);
     void operator=(const Board &brd) = delete;
     void update_refs();
+    void update_junction_connections();
     void update_airwires(bool fast = false, const std::set<UUID> &nets = {});
     void disconnect_package(BoardPackage *pkg);
 
@@ -91,7 +92,7 @@ public:
     std::map<UUID, Polygon> polygons;
     std::map<UUID, BoardHole> holes;
     std::map<UUID, BoardPackage> packages;
-    std::map<UUID, Junction> junctions;
+    std::map<UUID, BoardJunction> junctions;
     std::map<UUID, Track> tracks;
     std::map<UUID, Via> vias;
     std::map<UUID, Text> texts;

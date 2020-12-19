@@ -16,6 +16,7 @@
 #include "common/layer_provider.hpp"
 #include "frame/frame.hpp"
 #include "common/picture.hpp"
+#include "schematic_junction.hpp"
 #include <vector>
 #include <map>
 #include <fstream>
@@ -26,7 +27,7 @@ using json = nlohmann::json;
 class NetSegmentInfo {
 public:
     NetSegmentInfo(LineNet *li);
-    NetSegmentInfo(Junction *ju);
+    NetSegmentInfo(SchematicJunction *ju);
     bool has_label = false;
     bool has_power_sym = false;
     Coordi position;
@@ -43,9 +44,8 @@ public:
     std::string name;
     unsigned int index;
 
-    std::map<UUID, Junction> junctions;
+    std::map<UUID, SchematicJunction> junctions;
     std::map<UUID, SchematicSymbol> symbols;
-    // std::map<UUID, class JunctionPin> junction_pins;
     std::map<UUID, class LineNet> net_lines;
     std::map<UUID, class Text> texts;
     std::map<UUID, NetLabel> net_labels;
@@ -58,11 +58,11 @@ public:
     std::map<std::string, std::string> title_block_values;
     std::vector<Warning> warnings;
 
-    LineNet *split_line_net(LineNet *it, Junction *ju);
-    void merge_net_lines(LineNet *a, LineNet *b, Junction *ju);
+    LineNet *split_line_net(LineNet *it, SchematicJunction *ju);
+    void merge_net_lines(SchematicJunction &ju);
     void expand_symbols(const class Schematic &sch);
     void expand_symbol(const UUID &sym_uuid, const Schematic &sch);
-    void simplify_net_lines(bool simplify);
+    void simplify_net_lines();
     void fix_junctions();
     void delete_duplicate_net_lines();
     void vacuum_junctions();
@@ -70,11 +70,14 @@ public:
     void propagate_net_segments();
     std::map<UUID, NetSegmentInfo> analyze_net_segments(bool place_warnings = false);
     std::set<UUIDPath<3>> get_pins_connected_to_net_segment(const UUID &uu_segment);
+    void update_junction_connections();
+    void update_bus_ripper_connections();
 
-    void replace_junction(Junction *j, SchematicSymbol *sym, SymbolPin *pin);
-    Junction *replace_bus_ripper(BusRipper *rip);
+    void replace_junction(SchematicJunction *j, SchematicSymbol *sym, SymbolPin *pin);
+    SchematicJunction &replace_bus_ripper(BusRipper &rip);
 
-    void merge_junction(Junction *j, Junction *into); // merge junction j into "into" j will be deleted
+    void merge_junction(SchematicJunction *j,
+                        SchematicJunction *into); // merge junction j into "into" j will be deleted
 
     // void replace_junction(Junction *j, PowerSymbol *sym);
     // void replace_power_symbol(PowerSymbol *sym, Junction *j);

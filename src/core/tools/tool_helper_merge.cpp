@@ -106,7 +106,7 @@ void ToolHelperMerge::merge_selected_junctions()
         return;
     for (const auto &it : selection) {
         if (it.type == ObjectType::JUNCTION) {
-            auto ju = doc.c->get_junction(it.uuid);
+            auto ju = &doc.c->get_sheet()->junctions.at(it.uuid);
             for (auto &it_other : doc.c->get_sheet()->junctions) {
                 auto ju_other = &it_other.second;
                 if (!selection.count(SelectableRef(ju_other->uuid, ObjectType::JUNCTION))) { // not in selection

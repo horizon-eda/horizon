@@ -36,6 +36,26 @@ namespace horizon {
 void Canvas::render(const Junction &junc, bool interactive, ObjectType mode)
 {
     ColorP c = ColorP::JUNCTION;
+    bool draw = true;
+
+    if (mode == ObjectType::BOARD)
+        draw = false;
+
+    object_ref_push(ObjectType::JUNCTION, junc.uuid);
+    if (draw) {
+        draw_cross(junc.position, 0.25_mm, c);
+    }
+    object_ref_pop();
+
+    if (interactive) {
+        selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, junc.layer);
+        targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position), 0, junc.layer);
+    }
+}
+
+void Canvas::render(const SchematicJunction &junc)
+{
+    ColorP c = ColorP::JUNCTION;
     if (junc.net) {
         if (junc.net->diffpair)
             c = ColorP::DIFFPAIR;
@@ -45,37 +65,28 @@ void Canvas::render(const Junction &junc, bool interactive, ObjectType mode)
     if (junc.bus) {
         c = ColorP::BUS;
     }
-    if (junc.warning) {
-        draw_error(junc.position, 2e5, "");
-    }
-    bool draw = true;
-
-    if (mode == ObjectType::BOARD)
-        draw = false;
-
     object_ref_push(ObjectType::JUNCTION, junc.uuid);
-    if (draw) {
-        if (junc.connection_count == 2) {
-            if (show_all_junctions_in_schematic)
-                draw_plus(junc.position, 250000, c);
-        }
-        else if (junc.connection_count >= 3 && mode == ObjectType::SCHEMATIC) {
-            draw_line(junc.position, junc.position + Coordi(0, 1000), c, 0, true, 0.75_mm);
-            img_line(junc.position, junc.position + Coordi(0, 1000), 0.75_mm, 0, true);
-        }
-        else if (junc.has_via && mode == ObjectType::SCHEMATIC) {
-            // nop
-        }
-        else {
-            draw_cross(junc.position, 0.25_mm, c);
-        }
-    }
-    object_ref_pop();
 
-    if (interactive) {
-        selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, junc.layer);
-        targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position), 0, junc.layer);
+    auto connection_count = junc.connected_net_lines.size() + junc.connected_power_symbols.size();
+    if (connection_count == 2) {
+        if (show_all_junctions_in_schematic)
+            draw_plus(junc.position, 250000, c);
     }
+    else if (connection_count >= 3) {
+        draw_line(junc.position, junc.position + Coordi(0, 1000), c, 0, true, 0.75_mm);
+        img_line(junc.position, junc.position + Coordi(0, 1000), 0.75_mm, 0, true);
+    }
+    else if (junc.connected_bus_labels.size() || junc.connected_bus_rippers.size()
+             || junc.connected_net_labels.size()) {
+        // nop
+    }
+    else {
+        draw_cross(junc.position, 0.25_mm, c);
+    }
+
+
+    selectables.append(junc.uuid, ObjectType::JUNCTION, junc.position, 0, junc.layer);
+    targets.emplace_back(junc.uuid, ObjectType::JUNCTION, transform.transform(junc.position), 0, junc.layer);
 }
 
 void Canvas::render(const PowerSymbol &sym)
@@ -720,7 +731,7 @@ void Canvas::render(const BusRipper &ripper)
     auto connector_pos = ripper.get_connector_pos();
     img_auto_line = img_mode;
     draw_line(ripper.junction->position, connector_pos, c);
-    if (ripper.connection_count < 1) {
+    if (ripper.connections.size() < 1) {
         draw_box(connector_pos, 0.25_mm, c);
     }
     img_auto_line = false;
@@ -1007,7 +1018,7 @@ void Canvas::render(const Sheet &sheet)
         render(sheet.frame, true);
     }
     for (const auto &it : sheet.junctions) {
-        render(it.second, true, ObjectType::SCHEMATIC);
+        render(it.second);
     }
     for (const auto &it : sheet.symbols) {
         render(it.second);

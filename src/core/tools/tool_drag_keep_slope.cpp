@@ -44,7 +44,7 @@ ToolResponse ToolDragKeepSlope::begin(const ToolArgs &args)
         if (it.type == ObjectType::TRACK) {
             auto track = &doc.b->get_board()->tracks.at(it.uuid);
             if (track->from.is_junc() && track->to.is_junc()) {
-                if (track->from.junc->connection_count == 2 && track->to.junc->connection_count == 2) {
+                if (track->from.junc->connected_tracks.size() == 2 && track->to.junc->connected_tracks.size() == 2) {
                     Track *tr_from = nullptr;
                     Track *tr_to = nullptr;
                     for (auto &it_tr : doc.b->get_board()->tracks) {

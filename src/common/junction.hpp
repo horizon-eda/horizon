@@ -1,11 +1,9 @@
 #pragma once
 #include "util/uuid.hpp"
 #include "common.hpp"
-#include "block/net.hpp"
-#include "util/uuid_ptr.hpp"
 #include "nlohmann/json_fwd.hpp"
-#include "block/bus.hpp"
 #include "util/layer_range.hpp"
+#include <vector>
 
 namespace horizon {
 using json = nlohmann::json;
@@ -27,19 +25,17 @@ public:
     UUID uuid;
     Coord<int64_t> position;
 
-
     UUID get_uuid() const;
 
     // not stored
-    uuid_ptr<Net> net = nullptr;
-    uuid_ptr<Bus> bus = nullptr;
-    UUID net_segment = UUID();
-    bool warning = false;
     LayerRange layer = 10000;
-    bool needs_via = false;
-    bool has_via = false; // in schematic: true if has net label, etc.
-    unsigned int connection_count = 0;
+    std::vector<UUID> connected_lines;
+    std::vector<UUID> connected_arcs;
+    void clear();
 
     json serialize() const;
+    virtual ~Junction()
+    {
+    }
 };
 } // namespace horizon

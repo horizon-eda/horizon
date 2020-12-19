@@ -25,7 +25,6 @@ public:
     }
 
 private:
-    class Junction *temp = 0;
-    std::forward_list<Junction *> junctions_placed;
+    class SchematicJunction *temp = 0;
 };
 } // namespace horizon

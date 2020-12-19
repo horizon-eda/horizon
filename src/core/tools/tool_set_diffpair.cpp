@@ -14,18 +14,19 @@ ToolSetDiffpair::ToolSetDiffpair(IDocument *c, ToolID tid) : ToolBase(c, tid)
 std::pair<Net *, Net *> ToolSetDiffpair::get_net()
 {
     std::set<Net *> nets;
+    auto &sheet = *doc.c->get_sheet();
     for (const auto &it : selection) {
         if (it.type == ObjectType::JUNCTION) {
-            nets.insert(doc.c->get_junction(it.uuid)->net);
+            nets.insert(sheet.junctions.at(it.uuid).net);
         }
         else if (it.type == ObjectType::LINE_NET) {
-            nets.insert(doc.c->get_sheet()->net_lines.at(it.uuid).net);
+            nets.insert(sheet.net_lines.at(it.uuid).net);
         }
         else if (it.type == ObjectType::POWER_SYMBOL) {
-            nets.insert(doc.c->get_sheet()->power_symbols.at(it.uuid).junction->net);
+            nets.insert(sheet.power_symbols.at(it.uuid).junction->net);
         }
         else if (it.type == ObjectType::NET_LABEL) {
-            nets.insert(doc.c->get_sheet()->net_labels.at(it.uuid).junction->net);
+            nets.insert(sheet.net_labels.at(it.uuid).junction->net);
         }
     }
     if (nets.size() == 1) {

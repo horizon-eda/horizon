@@ -55,7 +55,7 @@ void ClipboardBoard::serialize(json &j)
 
         case ObjectType::TRACK: {
             auto track = brd.tracks.at(it.uuid);
-            std::map<UUID, Junction> extra_junctions;
+            std::map<UUID, BoardJunction> extra_junctions;
             for (auto &it_ft : {&track.from, &track.to}) {
                 if (it_ft->is_pad()) {
                     auto uu = UUID::random();

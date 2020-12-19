@@ -112,7 +112,8 @@ void Schematic::autoconnect_symbol(Sheet *sheet, SchematicSymbol *sym)
         for (auto it_junc = sheet->junctions.begin(); it_junc != sheet->junctions.end();) {
             bool erase = false;
             if (!it_junc->second.bus && it_junc->second.position == pin_pos
-                && (it_junc->second.net || it_junc->second.connection_count > 0)) {
+                && (it_junc->second.net || it_junc->second.connected_net_lines.size()
+                    || it_junc->second.connected_power_symbols.size())) {
                 erase = true;
                 bool net_created = false;
                 if (it_junc->second.net == nullptr) {
@@ -205,14 +206,14 @@ void Schematic::disconnect_symbol(Sheet *sheet, SchematicSymbol *sym)
 {
     assert(sheet == &sheets.at(sheet->uuid));
     assert(sym == &sheet->symbols.at(sym->uuid));
-    std::map<const SymbolPin *, Junction *> pin_junctions;
+    std::map<const SymbolPin *, SchematicJunction *> pin_junctions;
     for (auto &it_line : sheet->net_lines) {
         LineNet *line = &it_line.second;
         // if((line->to_symbol && line->to_symbol->uuid == it.uuid) ||
         // (line->from_symbol &&line->from_symbol->uuid == it.uuid)) {
         for (auto it_ft : {&line->to, &line->from}) {
             if (it_ft->symbol == sym) {
-                Junction *j = nullptr;
+                SchematicJunction *j = nullptr;
                 if (pin_junctions.count(it_ft->pin)) {
                     j = pin_junctions.at(it_ft->pin);
                 }
@@ -566,12 +567,11 @@ void Schematic::expand(bool careful)
         }
 
         sheet.delete_dependants();
-        if (!careful) {
-            sheet.simplify_net_lines(false);
-        }
+        sheet.update_junction_connections();
         sheet.propagate_net_segments();
         if (!careful)
             sheet.vacuum_junctions();
+        sheet.update_junction_connections();
 
         auto net_segments = sheet.analyze_net_segments();
 
@@ -671,6 +671,7 @@ void Schematic::expand(bool careful)
                 it_junc.second.bus = net_segments.at(it_junc.second.net_segment).bus;
             }
         }
+        sheet.update_junction_connections();
     }
 
 
@@ -678,13 +679,21 @@ void Schematic::expand(bool careful)
         Sheet &sheet = it_sheet.second;
         if (!careful) {
             sheet.fix_junctions();
+            sheet.update_junction_connections();
             sheet.delete_duplicate_net_lines();
-            sheet.simplify_net_lines(true);
+            sheet.update_junction_connections();
+            sheet.simplify_net_lines();
+            sheet.update_junction_connections();
         }
         sheet.propagate_net_segments();
         sheet.analyze_net_segments(true);
     }
     update_refs();
+
+    for (auto &[uu, sheet] : sheets) {
+        sheet.update_bus_ripper_connections();
+    }
+
 
     // warn juncs
     for (auto &it_sheet : sheets) {

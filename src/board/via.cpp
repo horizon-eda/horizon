@@ -48,7 +48,7 @@ Via::Via(shallow_copy_t sh, const Via &other)
 
 void Via::expand(const Board &brd)
 {
-    junction->has_via = true;
+
     junction->layer = LayerRange(BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER);
     padstack = *vpp_padstack;
     ParameterSet ps_via = parameter_set;

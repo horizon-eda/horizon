@@ -96,6 +96,7 @@ protected:
 
     void render(const class Symbol &sym, bool on_sheet = false, bool smashed = false, ColorP co = ColorP::FROM_LAYER);
     void render(const class Junction &junc, bool interactive = true, ObjectType mode = ObjectType::INVALID);
+    void render(const class SchematicJunction &junc);
     void render(const class Line &line, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
     void render(const class SymbolPin &pin, bool interactive = true, ColorP co = ColorP::FROM_LAYER);
     void render(const class Arc &arc, bool interactive = true, ColorP co = ColorP::FROM_LAYER);

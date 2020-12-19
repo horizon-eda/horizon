@@ -6,6 +6,7 @@
 #include "common/junction.hpp"
 #include "common/arc.hpp"
 #include "common/line.hpp"
+#include <deque>
 
 namespace horizon {
 static int64_t fix(int64_t x)

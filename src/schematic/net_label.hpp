@@ -3,7 +3,6 @@
 #include "nlohmann/json_fwd.hpp"
 #include "common/common.hpp"
 #include "util/uuid_ptr.hpp"
-#include "common/junction.hpp"
 #include <vector>
 #include <map>
 #include <set>
@@ -28,7 +27,7 @@ public:
     enum class Style { PLAIN, FLAG };
     Style style = Style::FLAG;
 
-    uuid_ptr<Junction> junction;
+    uuid_ptr<class SchematicJunction> junction;
     Orientation orientation = Orientation::RIGHT;
     uint64_t size = 1.5_mm;
     std::set<unsigned int> on_sheets;

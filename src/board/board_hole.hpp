@@ -19,7 +19,7 @@ public:
     Placement placement;
     ParameterSet parameter_set;
 
-    uuid_ptr<Net> net = nullptr;
+    uuid_ptr<class Net> net;
 
     UUID get_uuid() const;
     json serialize() const;

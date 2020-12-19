@@ -6,10 +6,23 @@ std::map<UUID, Polygon> *DocumentBoard::get_polygon_map()
 {
     return &get_board()->polygons;
 }
-std::map<UUID, Junction> *DocumentBoard::get_junction_map()
+
+Junction *DocumentBoard::insert_junction(const UUID &uu)
 {
-    return &get_board()->junctions;
+    auto x = get_board()->junctions.emplace(std::make_pair(uu, uu));
+    return &(x.first->second);
 }
+
+Junction *DocumentBoard::get_junction(const UUID &uu)
+{
+    return &get_board()->junctions.at(uu);
+}
+
+void DocumentBoard::delete_junction(const UUID &uu)
+{
+    get_board()->junctions.erase(uu);
+}
+
 std::map<UUID, Text> *DocumentBoard::get_text_map()
 {
     return &get_board()->texts;
