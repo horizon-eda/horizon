@@ -26,7 +26,7 @@ public:
                 "T must be a descendant of MyBase"
             );*/
     }
-    uuid_ptr(nullptr_t) : ptr(nullptr), uuid(UUID())
+    uuid_ptr(std::nullptr_t) : ptr(nullptr), uuid(UUID())
     {
     }
     T &operator*()
