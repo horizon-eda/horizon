@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolEditLineRectangle::ToolEditLineRectangle(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolEditLineRectangle::can_begin()
 {
     if (!doc.r->has_object_type(ObjectType::LINE))

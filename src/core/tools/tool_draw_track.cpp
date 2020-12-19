@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolDrawTrack::ToolDrawTrack(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolDrawTrack::can_begin()
 {
     return doc.b;

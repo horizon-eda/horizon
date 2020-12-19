@@ -4,9 +4,8 @@
 namespace horizon {
 class ToolHelperGetSymbol : public virtual ToolBase {
 public:
-    ToolHelperGetSymbol(IDocument *c, ToolID tid) : ToolBase(c, tid)
-    {
-    }
+    using ToolBase::ToolBase;
+
 
 protected:
     class SchematicSymbol *get_symbol();

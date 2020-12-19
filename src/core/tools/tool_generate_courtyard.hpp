@@ -1,12 +1,11 @@
 #pragma once
 #include "core/tool.hpp"
-#include <set>
 
 namespace horizon {
 
 class ToolGenerateCourtyard : public ToolBase {
 public:
-    ToolGenerateCourtyard(IDocument *c, ToolID tid);
+    using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

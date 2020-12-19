@@ -1,12 +1,11 @@
 #pragma once
-#include "board/track.hpp"
 #include "core/tool.hpp"
 
 namespace horizon {
 
 class ToolDrawTrack : public ToolBase {
 public:
-    ToolDrawTrack(IDocument *c, ToolID tid);
+    using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;
@@ -22,7 +21,7 @@ public:
 
 private:
     class BoardJunction *temp_junc = 0;
-    Track *temp_track = 0;
+    class Track *temp_track = 0;
     Track *create_temp_track();
     class BoardRules *rules;
 };

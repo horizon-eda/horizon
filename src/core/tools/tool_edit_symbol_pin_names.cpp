@@ -8,10 +8,6 @@
 
 namespace horizon {
 
-ToolEditSymbolPinNames::ToolEditSymbolPinNames(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolHelperGetSymbol(c, tid)
-{
-}
-
 bool ToolEditSymbolPinNames::can_begin()
 {
     return get_symbol();

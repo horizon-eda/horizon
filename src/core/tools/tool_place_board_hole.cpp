@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolPlaceBoardHole::ToolPlaceBoardHole(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolPlaceBoardHole::can_begin()
 {
     return doc.b;

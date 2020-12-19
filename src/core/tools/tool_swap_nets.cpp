@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolSwapNets::ToolSwapNets(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolSwapNets::can_begin()
 {
     if (!doc.c) {

@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolSetDiffpair::ToolSetDiffpair(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 std::pair<Net *, Net *> ToolSetDiffpair::get_net()
 {
     std::set<Net *> nets;

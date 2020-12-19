@@ -5,7 +5,7 @@
 namespace horizon {
 class ToolMapPackage : public ToolHelperMove {
 public:
-    ToolMapPackage(IDocument *c, ToolID tid);
+    using ToolHelperMove::ToolHelperMove;
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

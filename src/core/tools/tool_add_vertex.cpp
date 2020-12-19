@@ -5,10 +5,6 @@
 
 namespace horizon {
 
-ToolAddVertex::ToolAddVertex(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolAddVertex::can_begin()
 {
     return std::count_if(selection.begin(), selection.end(),

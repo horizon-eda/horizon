@@ -9,10 +9,6 @@
 
 namespace horizon {
 
-ToolRoundOffVertex::ToolRoundOffVertex(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolRoundOffVertex::can_begin()
 {
     return sel_count_type(selection, ObjectType::POLYGON_VERTEX) == 1;

@@ -1,12 +1,11 @@
 #pragma once
 #include "core/tool.hpp"
-#include <forward_list>
 
 namespace horizon {
 
 class ToolEditVia : public ToolBase {
 public:
-    ToolEditVia(IDocument *c, ToolID tid);
+    using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

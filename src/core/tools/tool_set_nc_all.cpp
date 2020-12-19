@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolSetNotConnectedAll::ToolSetNotConnectedAll(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolSetNotConnectedAll::can_begin()
 {
     for (const auto &it : selection) {

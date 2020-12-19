@@ -4,9 +4,7 @@
 namespace horizon {
 class ToolHelperMapSymbol : public virtual ToolBase {
 public:
-    ToolHelperMapSymbol(IDocument *c, ToolID tid) : ToolBase(c, tid)
-    {
-    }
+    using ToolBase::ToolBase;
 
 protected:
     class SchematicSymbol *map_symbol(class Component *c, const class Gate *g);

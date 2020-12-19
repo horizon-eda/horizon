@@ -9,10 +9,6 @@
 
 namespace horizon {
 
-ToolEditPlane::ToolEditPlane(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 Polygon *ToolEditPlane::get_poly()
 {
     Polygon *poly = nullptr;

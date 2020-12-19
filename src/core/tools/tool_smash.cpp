@@ -8,10 +8,6 @@
 
 namespace horizon {
 
-ToolSmash::ToolSmash(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolSmash::can_begin()
 {
     for (const auto &it : selection) {

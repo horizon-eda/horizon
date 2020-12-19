@@ -8,10 +8,6 @@
 
 namespace horizon {
 
-ToolDrawConnectionLine::ToolDrawConnectionLine(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolDrawConnectionLine::can_begin()
 {
     return doc.b;

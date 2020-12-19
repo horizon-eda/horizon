@@ -1,6 +1,7 @@
 #pragma once
 #include "core/tool.hpp"
 #include "tool_place_junction.hpp"
+#include "board/board_junction.hpp"
 #include <forward_list>
 
 namespace horizon {

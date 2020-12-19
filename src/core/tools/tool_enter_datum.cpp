@@ -13,10 +13,6 @@
 
 namespace horizon {
 
-ToolEnterDatum::ToolEnterDatum(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 template <typename T> T sgn(T x)
 {
     if (x < 0)

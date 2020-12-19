@@ -25,10 +25,6 @@ json ToolDrawPolygonRectangle::Settings::serialize() const
     return j;
 }
 
-ToolDrawPolygonRectangle::ToolDrawPolygonRectangle(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolDrawPolygonRectangle::can_begin()
 {
     return doc.r->has_object_type(ObjectType::POLYGON);

@@ -16,10 +16,6 @@
 
 namespace horizon {
 
-ToolDelete::ToolDelete(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolDelete::can_begin()
 {
     return selection.size() > 0;

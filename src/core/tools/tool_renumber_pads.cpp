@@ -8,10 +8,6 @@
 
 namespace horizon {
 
-ToolRenumberPads::ToolRenumberPads(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolRenumberPads::can_begin()
 {
     return get_pads().size() > 1;

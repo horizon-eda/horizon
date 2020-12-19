@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolSetViaNet::ToolSetViaNet(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 std::set<Via *> ToolSetViaNet::get_vias()
 {
     std::set<Via *> vias;

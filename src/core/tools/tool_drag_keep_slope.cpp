@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolDragKeepSlope::ToolDragKeepSlope(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolDragKeepSlope::can_begin()
 {
     if (!doc.b)

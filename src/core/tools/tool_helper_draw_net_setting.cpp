@@ -5,10 +5,6 @@
 
 namespace horizon {
 
-ToolHelperDrawNetSetting::ToolHelperDrawNetSetting(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 ToolID ToolHelperDrawNetSetting::get_tool_id_for_settings() const
 {
     return ToolID::DRAW_NET;

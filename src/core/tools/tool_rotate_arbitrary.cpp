@@ -18,10 +18,6 @@
 
 namespace horizon {
 
-ToolRotateArbitrary::ToolRotateArbitrary(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 void ToolRotateArbitrary::expand_selection()
 {
     std::set<SelectableRef> new_sel;

@@ -6,14 +6,11 @@
 #include "util/util.hpp"
 #include "tool_generate_silkscreen.hpp"
 #include "nlohmann/json.hpp"
+#include "pool/package.hpp"
 #include <sstream>
 #include <iomanip>
 
 namespace horizon {
-
-ToolGenerateSilkscreen::ToolGenerateSilkscreen(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
 
 void ToolGenerateSilkscreen::Settings::load_from_json(const json &j)
 {

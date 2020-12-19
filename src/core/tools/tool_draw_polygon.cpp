@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolDrawPolygon::ToolDrawPolygon(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolDrawPolygon::can_begin()
 {
     return doc.r->has_object_type(ObjectType::POLYGON);

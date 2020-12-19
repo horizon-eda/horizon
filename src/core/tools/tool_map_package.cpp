@@ -6,9 +6,6 @@
 #include <iostream>
 
 namespace horizon {
-ToolMapPackage::ToolMapPackage(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid)
-{
-}
 
 bool ToolMapPackage::can_begin()
 {

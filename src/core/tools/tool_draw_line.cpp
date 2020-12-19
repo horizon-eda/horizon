@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolDrawLine::ToolDrawLine(IDocument *c, ToolID tid) : ToolHelperLineWidthSetting(c, tid)
-{
-}
-
 bool ToolDrawLine::can_begin()
 {
     return doc.r->has_object_type(ObjectType::LINE);

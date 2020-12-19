@@ -1,13 +1,12 @@
 #pragma once
 #include "core/tool.hpp"
-#include "pool/package.hpp"
-#include <set>
+#include "clipper/clipper.hpp"
 
 namespace horizon {
 
 class ToolGenerateSilkscreen : public ToolBase {
 public:
-    ToolGenerateSilkscreen(IDocument *c, ToolID tid);
+    using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;
@@ -54,7 +53,7 @@ private:
 
     class GenerateSilkscreenWindow *win = nullptr;
     Settings settings;
-    const Polygon *pp;
+    const class Polygon *pp;
     bool package_visible;
     ClipperLib::Path path_pkg;
     ClipperLib::Paths pads;

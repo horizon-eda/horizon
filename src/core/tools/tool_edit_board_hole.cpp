@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolEditBoardHole::ToolEditBoardHole(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolEditBoardHole::can_begin()
 {
     return get_holes().size() > 0;

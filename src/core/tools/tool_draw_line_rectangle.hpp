@@ -6,7 +6,7 @@ namespace horizon {
 
 class ToolDrawLineRectangle : public ToolHelperLineWidthSetting {
 public:
-    ToolDrawLineRectangle(IDocument *c, ToolID tid);
+    using ToolHelperLineWidthSetting::ToolHelperLineWidthSetting;
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

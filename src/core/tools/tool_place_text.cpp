@@ -57,10 +57,6 @@ json ToolPlaceText::Settings::serialize() const
     return j;
 }
 
-ToolPlaceText::ToolPlaceText(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid)
-{
-}
-
 bool ToolPlaceText::can_begin()
 {
     if (tool_id == ToolID::PLACE_TEXT)

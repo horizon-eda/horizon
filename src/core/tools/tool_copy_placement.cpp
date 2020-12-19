@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolCopyPlacement::ToolCopyPlacement(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolCopyPlacement::can_begin()
 {
     if (!doc.b)

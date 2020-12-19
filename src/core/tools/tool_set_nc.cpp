@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolSetNotConnected::ToolSetNotConnected(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolSetNotConnected::can_begin()
 {
     return doc.c;

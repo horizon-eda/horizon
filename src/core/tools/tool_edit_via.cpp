@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolEditVia::ToolEditVia(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolEditVia::can_begin()
 {
     return get_vias().size() > 0;

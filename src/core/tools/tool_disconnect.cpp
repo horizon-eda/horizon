@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolDisconnect::ToolDisconnect(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolDisconnect::can_begin()
 {
     for (const auto &it : selection) {

@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolSwapGates::ToolSwapGates(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 std::pair<class SchematicSymbol *, SchematicSymbol *> ToolSwapGates::get_symbols()
 {
     std::pair<class SchematicSymbol *, SchematicSymbol *> r(nullptr, nullptr);

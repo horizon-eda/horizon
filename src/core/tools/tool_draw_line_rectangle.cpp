@@ -8,10 +8,6 @@
 
 namespace horizon {
 
-ToolDrawLineRectangle::ToolDrawLineRectangle(IDocument *c, ToolID tid) : ToolHelperLineWidthSetting(c, tid)
-{
-}
-
 void ToolDrawLineRectangle::apply_settings()
 {
     for (auto &li : lines) {

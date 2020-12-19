@@ -1,13 +1,13 @@
 #pragma once
 #include "core/tool.hpp"
-#include <util/keep_slope_util.hpp>
+#include "util/keep_slope_util.hpp"
 #include <deque>
 
 namespace horizon {
 
 class ToolDragKeepSlope : public ToolBase {
 public:
-    ToolDragKeepSlope(IDocument *c, ToolID tid);
+    using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

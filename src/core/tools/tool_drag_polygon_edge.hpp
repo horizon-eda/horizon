@@ -1,5 +1,4 @@
 #pragma once
-#include "common/polygon.hpp"
 #include "core/tool.hpp"
 #include "util/keep_slope_util.hpp"
 
@@ -28,11 +27,11 @@ public:
 private:
     class PolyInfo : public KeepSlopeInfo {
     public:
-        PolyInfo(const Polygon &poly, int edge);
+        PolyInfo(const class Polygon &poly, int edge);
     };
     std::optional<PolyInfo> poly_info;
 
-    Polygon *poly = nullptr;
+    class Polygon *poly = nullptr;
     class Plane *plane = nullptr;
     unsigned int edge = 0;
     Coordi pos_orig;

@@ -8,10 +8,6 @@
 
 namespace horizon {
 
-ToolMapPin::ToolMapPin(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolMapPin::can_begin()
 {
     return doc.y;

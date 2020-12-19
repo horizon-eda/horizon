@@ -5,9 +5,8 @@
 namespace horizon {
 class ToolHelperMove : public virtual ToolBase, public ToolHelperRestrict {
 public:
-    ToolHelperMove(class IDocument *c, ToolID tid) : ToolBase(c, tid)
-    {
-    }
+    using ToolBase::ToolBase;
+
     static Orientation transform_orientation(Orientation orientation, bool rotate, bool reverse = false);
 
 protected:

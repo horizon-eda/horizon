@@ -8,10 +8,6 @@
 
 namespace horizon {
 
-ToolChangeUnit::ToolChangeUnit(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolChangeUnit::can_begin()
 {
     return doc.y;

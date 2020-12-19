@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolEditPadParameterSet::ToolEditPadParameterSet(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolEditPadParameterSet::can_begin()
 {
     return get_pads().size() > 0;

@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolPlaceHole::ToolPlaceHole(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolPlaceHole::can_begin()
 {
     return doc.r->has_object_type(ObjectType::HOLE);

@@ -9,10 +9,6 @@
 
 namespace horizon {
 
-ToolImportDXF::ToolImportDXF(IDocument *c, ToolID tid) : ToolBase(c, tid), ToolHelperMove(c, tid)
-{
-}
-
 bool ToolImportDXF::can_begin()
 {
     return doc.r->has_object_type(ObjectType::ARC) && doc.r->has_object_type(ObjectType::LINE);

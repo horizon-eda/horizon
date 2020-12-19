@@ -5,10 +5,6 @@
 
 namespace horizon {
 
-ToolUpdateAllPlanes::ToolUpdateAllPlanes(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolUpdateAllPlanes::can_begin()
 {
     return doc.b;

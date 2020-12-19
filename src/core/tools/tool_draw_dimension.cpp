@@ -7,9 +7,6 @@
 #include <sstream>
 
 namespace horizon {
-ToolDrawDimension::ToolDrawDimension(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
 
 bool ToolDrawDimension::can_begin()
 {

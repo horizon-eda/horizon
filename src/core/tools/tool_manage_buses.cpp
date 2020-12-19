@@ -6,12 +6,9 @@
 #include "schematic/schematic.hpp"
 #include <iostream>
 #include "core/tool_id.hpp"
+#include "imp/imp_interface.hpp"
 
 namespace horizon {
-
-ToolManageBuses::ToolManageBuses(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
 
 bool ToolManageBuses::can_begin()
 {

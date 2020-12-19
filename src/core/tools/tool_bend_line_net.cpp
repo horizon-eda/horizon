@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolBendLineNet::ToolBendLineNet(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolBendLineNet::can_begin()
 {
     if (selection.size() != 1)

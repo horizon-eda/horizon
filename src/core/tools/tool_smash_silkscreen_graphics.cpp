@@ -5,10 +5,6 @@
 
 namespace horizon {
 
-ToolSmashSilkscreenGraphics::ToolSmashSilkscreenGraphics(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolSmashSilkscreenGraphics::can_begin()
 {
     for (const auto &it : selection) {

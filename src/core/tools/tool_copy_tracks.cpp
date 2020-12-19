@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolCopyTracks::ToolCopyTracks(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolCopyTracks::can_begin()
 {
     if (!doc.b)

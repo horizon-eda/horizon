@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolDrawPolygonCircle::ToolDrawPolygonCircle(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolDrawPolygonCircle::can_begin()
 {
     return doc.r->has_object_type(ObjectType::POLYGON);

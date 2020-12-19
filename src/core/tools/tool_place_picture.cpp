@@ -8,10 +8,6 @@
 
 namespace horizon {
 
-ToolPlacePicture::ToolPlacePicture(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolPlacePicture::can_begin()
 {
     return doc.r->has_object_type(ObjectType::PICTURE);

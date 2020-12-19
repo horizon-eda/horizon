@@ -10,10 +10,6 @@
 
 namespace horizon {
 
-ToolImportKiCadPackage::ToolImportKiCadPackage(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolImportKiCadPackage::can_begin()
 {
     return doc.k || doc.d;

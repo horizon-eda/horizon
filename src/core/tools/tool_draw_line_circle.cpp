@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolDrawLineCircle::ToolDrawLineCircle(IDocument *c, ToolID tid) : ToolHelperLineWidthSetting(c, tid)
-{
-}
-
 bool ToolDrawLineCircle::can_begin()
 {
     return doc.r->has_object_type(ObjectType::ARC);

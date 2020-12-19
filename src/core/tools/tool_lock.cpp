@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolLock::ToolLock(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 std::set<Via *> ToolLock::get_vias(bool locked)
 {
     std::set<Via *> vias;

@@ -7,11 +7,6 @@
 
 namespace horizon {
 
-ToolGenerateCourtyard::ToolGenerateCourtyard(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
-
 bool ToolGenerateCourtyard::can_begin()
 {
     return doc.k;

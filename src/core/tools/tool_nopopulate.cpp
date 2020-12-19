@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolNoPopulate::ToolNoPopulate(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolNoPopulate::can_begin()
 {
     for (const auto &it : selection) {

@@ -5,10 +5,6 @@
 
 namespace horizon {
 
-ToolEditShape::ToolEditShape(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolEditShape::can_begin()
 {
     if (!doc.a)

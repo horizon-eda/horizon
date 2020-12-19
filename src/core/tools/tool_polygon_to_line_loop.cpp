@@ -9,10 +9,6 @@
 
 namespace horizon {
 
-ToolPolygonToLineLoop::ToolPolygonToLineLoop(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolPolygonToLineLoop::can_begin()
 {
     if (!(doc.r->has_object_type(ObjectType::LINE) && doc.r->has_object_type(ObjectType::POLYGON)))

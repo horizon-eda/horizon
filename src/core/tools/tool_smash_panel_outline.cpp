@@ -5,10 +5,6 @@
 
 namespace horizon {
 
-ToolSmashPanelOutline::ToolSmashPanelOutline(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolSmashPanelOutline::can_begin()
 {
     for (const auto &it : selection) {

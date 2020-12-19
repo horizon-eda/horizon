@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolResizeSymbol::ToolResizeSymbol(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolResizeSymbol::can_begin()
 {
     return doc.y;

@@ -26,10 +26,6 @@ bool ToolBackannotateConnectionLines::ToolDataBackannotate::Item::is_valid() con
     return component || net;
 }
 
-ToolBackannotateConnectionLines::ToolBackannotateConnectionLines(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolBackannotateConnectionLines::can_begin()
 {
     return doc.c;

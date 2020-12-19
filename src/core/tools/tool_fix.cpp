@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolFix::ToolFix(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolFix::can_begin()
 {
     for (const auto &it : selection) {

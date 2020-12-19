@@ -11,10 +11,6 @@
 
 namespace horizon {
 
-ToolAddKeepout::ToolAddKeepout(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 Polygon *ToolAddKeepout::get_poly()
 {
     Polygon *poly = nullptr;

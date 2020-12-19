@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolPlacePad::ToolPlacePad(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolPlacePad::can_begin()
 {
     return doc.k;

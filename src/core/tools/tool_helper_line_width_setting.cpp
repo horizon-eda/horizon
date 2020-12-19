@@ -5,10 +5,6 @@
 
 namespace horizon {
 
-ToolHelperLineWidthSetting::ToolHelperLineWidthSetting(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 ToolID ToolHelperLineWidthSetting::get_tool_id_for_settings() const
 {
     return ToolID::DRAW_LINE;

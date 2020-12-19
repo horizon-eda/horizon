@@ -4,7 +4,7 @@
 namespace horizon {
 class ToolPlaceBoardPanel : public ToolBase {
 public:
-    ToolPlaceBoardPanel(IDocument *c, ToolID tid);
+    using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;
     ToolResponse update(const ToolArgs &args) override;
     bool can_begin() override;

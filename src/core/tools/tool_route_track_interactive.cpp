@@ -40,10 +40,6 @@ public:
     ToolRouteTrackInteractive *tool = nullptr;
 };
 
-ToolRouteTrackInteractive::ToolRouteTrackInteractive(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 const std::map<ToolRouteTrackInteractive::Settings::Mode, std::string> ToolRouteTrackInteractive::Settings::mode_names =
         {{ToolRouteTrackInteractive::Settings::Mode::BEND, "45 degree"},
          {ToolRouteTrackInteractive::Settings::Mode::STRAIGHT, "Straight"},

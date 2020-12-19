@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolPlaceDecal::ToolPlaceDecal(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolPlaceDecal::can_begin()
 {
     return doc.b;

@@ -9,10 +9,6 @@
 
 namespace horizon {
 
-ToolMoveNetSegment::ToolMoveNetSegment(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolMoveNetSegment::can_begin()
 {
     if (!doc.c) {

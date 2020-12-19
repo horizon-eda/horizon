@@ -8,10 +8,6 @@
 
 namespace horizon {
 
-ToolAssignPart::ToolAssignPart(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolAssignPart::can_begin()
 {
     return get_entity() != nullptr;

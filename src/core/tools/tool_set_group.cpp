@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolSetGroup::ToolSetGroup(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 std::set<Component *> ToolSetGroup::get_components()
 {
     std::set<Component *> components;

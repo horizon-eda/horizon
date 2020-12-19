@@ -6,10 +6,6 @@
 
 namespace horizon {
 
-ToolPlaceBoardPanel::ToolPlaceBoardPanel(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolPlaceBoardPanel::can_begin()
 {
     return doc.b && doc.b->get_board()->included_boards.size();

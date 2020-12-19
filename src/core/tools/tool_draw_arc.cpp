@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolDrawArc::ToolDrawArc(IDocument *c, ToolID tid) : ToolHelperLineWidthSetting(c, tid)
-{
-}
-
 void ToolDrawArc::apply_settings()
 {
     if (temp_arc)

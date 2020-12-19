@@ -7,10 +7,6 @@
 
 namespace horizon {
 
-ToolPlaceRefdesAndValue::ToolPlaceRefdesAndValue(IDocument *c, ToolID tid) : ToolBase(c, tid)
-{
-}
-
 bool ToolPlaceRefdesAndValue::can_begin()
 {
     return doc.y;
