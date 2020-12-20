@@ -317,6 +317,8 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         switch (property) {
         case ObjectProperty::ID::FLIPPED:
             pkg->flip = dynamic_cast<const PropertyValueBool &>(value).value;
+            pkg->update(*brd);
+            brd->update_refs();
             break;
 
         case ObjectProperty::ID::FIXED:

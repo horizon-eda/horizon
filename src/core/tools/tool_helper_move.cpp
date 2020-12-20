@@ -295,8 +295,8 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
             else {
                 pkg->flip ^= true;
                 pkg->placement.invert_angle();
-                brd->expand_flags = Board::EXPAND_PACKAGES;
-                brd->packages_expand.insert(it.uuid);
+                pkg->update(*brd);
+                brd->update_refs();
             }
 
         } break;
@@ -372,9 +372,6 @@ void ToolHelperMove::move_mirror_or_rotate(const Coordi &center, bool rotate)
         } break;
         default:;
         }
-    }
-    if (doc.b && doc.b->get_board()->packages_expand.size()) {
-        doc.b->get_board()->expand();
     }
 }
 } // namespace horizon

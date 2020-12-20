@@ -750,6 +750,7 @@ void PNS_HORIZON_IFACE::SyncWorld(PNS::NODE *aWorld)
         return;
     }
     parents.clear();
+    junctions_maybe_erased.clear();
 
     for (const auto &it : board->tracks) {
         auto segment = syncTrack(&it.second);
@@ -884,6 +885,10 @@ void PNS_HORIZON_IFACE::RemoveItem(PNS::ITEM *aItem)
     // std::cout << "!!!iface remove item " << parent << " " << aItem->KindStr() << std::endl;
     if (parent) {
         if (parent->track) {
+            for (auto &it_ft : {parent->track->from, parent->track->to}) {
+                if (it_ft.junc)
+                    junctions_maybe_erased.insert(it_ft.junc);
+            }
             board->tracks.erase(parent->track->uuid);
         }
         else if (parent->via) {
@@ -937,11 +942,12 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
         horizon::Coordi from(s.A.x, s.A.y);
         horizon::Coordi to(s.B.x, s.B.y);
         track->width = seg->Width();
+        track->net = get_net_for_code(seg->Net());
 
         auto layer = layer_from_router(seg->Layer());
         track->layer = layer;
 
-        auto connect = [this, &layer](horizon::Track::Connection &conn, const horizon::Coordi &c) {
+        auto connect = [this, &layer, track](horizon::Track::Connection &conn, const horizon::Coordi &c) {
             auto p = find_pad(layer, c);
             if (p.first) {
                 conn.connect(p.first, p.second);
@@ -956,6 +962,7 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
                     auto ju = &board->junctions.emplace(juu, juu).first->second;
                     ju->layer = layer;
                     ju->position = c;
+                    ju->net = track->net;
                     conn.connect(ju);
                 }
             }
@@ -989,9 +996,11 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
                 auto juu = horizon::UUID::random();
                 auto ju = &board->junctions.emplace(juu, juu).first->second;
                 ju->position = c;
+                ju->net = net;
                 via->junction = ju;
             }
             via->junction->has_via = true;
+            via->expand(*board);
             aItem->SetParent(get_parent(via));
         }
     } break;
@@ -1003,12 +1012,24 @@ void PNS_HORIZON_IFACE::AddItem(PNS::ITEM *aItem)
 
 void PNS_HORIZON_IFACE::Commit()
 {
-    board->expand(true);
+    board->update_junction_connections();
+    for (auto ju : junctions_maybe_erased) {
+        if (!(ju->connected_arcs.size() || ju->connected_lines.size() || ju->connected_vias.size()
+              || ju->connected_tracks.size())) {
+            for (auto &it : ju->connected_connection_lines)
+                board->connection_lines.erase(it);
+            board->junctions.erase(ju->uuid);
+        }
+    }
+    junctions_maybe_erased.clear();
     EraseView();
 }
 
 void PNS_HORIZON_IFACE::UpdateNet(int aNetCode)
 {
+    if (const auto net = get_net_for_code(aNetCode)) {
+        board->update_airwires(false, {net->uuid});
+    }
     wxLogTrace("PNS", "Update-net %d", aNetCode);
 }
 

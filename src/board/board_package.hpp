@@ -25,6 +25,10 @@ public:
 
     const Package *pool_package;
     Package package;
+    bool update_package(const class Board &brd);
+    void update_texts(const class Board &brd);
+    void update_nets();
+    void update(const class Board &brd);
 
     Placement placement;
     bool flip = false;

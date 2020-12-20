@@ -97,14 +97,14 @@ void ToolMapPackage::place_package(Component *comp, const Coordi &c)
     pkg->placement.shift = c;
     pkg->flip = flipped;
     pkg->placement.set_angle(angle);
-    brd->packages_expand = {uu};
-    brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_PACKAGES | Board::EXPAND_AIRWIRES);
-    brd->expand(true);
+    pkg->update(*brd);
+
     nets.clear();
     for (const auto &it : pkg->package.pads) {
         if (it.second.net)
             nets.insert(it.second.net->uuid);
     }
+    brd->update_airwires(true, nets);
     selection.clear();
     selection.emplace(uu, ObjectType::BOARD_PACKAGE);
     update_tooltip();

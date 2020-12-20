@@ -132,15 +132,9 @@ public:
 
     FileVersion version;
 
-    enum ExpandFlags {
-        EXPAND_ALL = 0xff,
-        EXPAND_PROPAGATE_NETS = (1 << 0),
-        EXPAND_AIRWIRES = (1 << 1),
-        EXPAND_PACKAGES = (1 << 2)
-    };
+    enum ExpandFlags { EXPAND_ALL = 0xff, EXPAND_PROPAGATE_NETS = (1 << 0), EXPAND_AIRWIRES = (1 << 1) };
 
     ExpandFlags expand_flags = EXPAND_ALL;
-    std::set<UUID> packages_expand;
     std::set<UUID> airwires_expand;
 
     json serialize() const;
@@ -151,6 +145,7 @@ public:
 
     void flip_package_layer(int &layer) const;
     int get_package_layer(bool flip, int layer) const;
+    ParameterSet get_parameters() const;
 
 private:
     unsigned int n_inner_layers = 0;
