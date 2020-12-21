@@ -358,8 +358,7 @@ ToolResponse ToolPaste::begin_paste(const json &j, const Coordi &cursor_pos_canv
                               .first->second;
             if (auto ps = doc.b->get_via_padstack_provider().get_padstack(x->vpp_padstack.uuid)) {
                 x->vpp_padstack = ps;
-                x->padstack = *ps;
-                x->padstack.apply_parameter_set(x->parameter_set);
+                x->expand(*brd);
             }
             if (brd->block->nets.count(x->net_set.uuid)) {
                 x->net_set = &brd->block->nets.at(x->net_set.uuid);
