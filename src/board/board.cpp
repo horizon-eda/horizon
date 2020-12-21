@@ -629,7 +629,7 @@ static std::string replace_text_map(const std::string &s, const std::map<std::st
     return replace_placeholders(s, fn, true);
 }
 
-void Board::expand(bool careful)
+void Board::expand()
 {
     delete_dependants();
     warnings.clear();

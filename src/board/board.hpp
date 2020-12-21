@@ -54,7 +54,7 @@ public:
     Board(const UUID &uu, Block &block);
     static unsigned int get_app_version();
 
-    void expand(bool careful = false);
+    void expand();
     void expand_packages();
 
     Board(const Board &brd);
