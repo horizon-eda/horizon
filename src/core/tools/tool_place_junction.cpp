@@ -72,6 +72,7 @@ ToolResponse ToolPlaceJunctionBase::update(const ToolArgs &args)
             for (auto it : junctions_placed) {
                 selection.emplace(it->uuid, ObjectType::JUNCTION);
             }
+            finish();
             return ToolResponse::commit();
 
         default:;

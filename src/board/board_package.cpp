@@ -226,4 +226,14 @@ void BoardPackage::update(const Board &brd)
     update_nets();
 }
 
+std::set<UUID> BoardPackage::get_nets() const
+{
+    std::set<UUID> nets;
+    for (const auto &[uu, pad] : package.pads) {
+        if (pad.net)
+            nets.insert(pad.net->uuid);
+    }
+    return nets;
+}
+
 } // namespace horizon

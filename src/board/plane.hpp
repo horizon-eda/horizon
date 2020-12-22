@@ -60,12 +60,19 @@ public:
     PlaneSettings settings;
 
     std::deque<Fragment> fragments;
-    unsigned int revision = 0;
+    void clear();
+    unsigned int get_revision() const
+    {
+        return revision;
+    }
 
     Type get_type() const override;
     UUID get_uuid() const override;
     std::string get_name() const;
 
     json serialize() const;
+
+private:
+    unsigned int revision = 0;
 };
 } // namespace horizon

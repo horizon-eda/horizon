@@ -29,6 +29,7 @@ public:
     void update_texts(const class Board &brd);
     void update_nets();
     void update(const class Board &brd);
+    std::set<UUID> get_nets() const;
 
     Placement placement;
     bool flip = false;

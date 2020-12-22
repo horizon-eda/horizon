@@ -59,15 +59,18 @@ ToolResponse ToolEditPlane::begin(const ToolArgs &args)
     auto poly = get_poly();
     Plane *plane = nullptr;
     auto brd = doc.b->get_board();
+    std::set<UUID> nets;
     if (tool_id == ToolID::EDIT_PLANE || tool_id == ToolID::UPDATE_PLANE || tool_id == ToolID::CLEAR_PLANE) {
         plane = dynamic_cast<Plane *>(poly->usage.ptr);
+        nets.insert(plane->net->uuid);
         if (tool_id == ToolID::UPDATE_PLANE) {
             brd->update_plane(plane);
+            brd->update_airwires(false, {plane->net->uuid});
             return ToolResponse::commit();
         }
         else if (tool_id == ToolID::CLEAR_PLANE) {
-            plane->fragments.clear();
-            plane->revision++;
+            plane->clear();
+            brd->update_airwires(false, {plane->net->uuid});
             return ToolResponse::commit();
         }
     }
@@ -80,8 +83,11 @@ ToolResponse ToolEditPlane::begin(const ToolArgs &args)
     UUID plane_uuid = plane->uuid;
     bool r = imp->dialogs.edit_plane(*plane, *brd);
     if (r) {
-        if (brd->planes.count(plane_uuid)) // may have been deleted
+        if (brd->planes.count(plane_uuid)) { // may have been deleted
+            nets.insert(plane->net->uuid);
             brd->update_plane(plane);
+            brd->update_airwires(false, nets);
+        }
         else {
             poly->usage = nullptr;
             brd->update_planes();

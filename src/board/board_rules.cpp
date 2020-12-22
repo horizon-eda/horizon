@@ -208,6 +208,10 @@ void BoardRules::apply(RuleID id, Board &brd, ViaPadstackProvider &vpp) const
     }
     else if (id == RuleID::PARAMETERS) {
         brd.rules.rule_parameters = rule_parameters;
+        const auto pset = brd.get_parameters();
+        for (auto &[uu, it] : brd.packages) {
+            it.package.apply_parameter_set(pset);
+        }
     }
     else if (id == RuleID::VIA) {
         for (auto &it : brd.vias) {
@@ -216,6 +220,7 @@ void BoardRules::apply(RuleID id, Board &brd, ViaPadstackProvider &vpp) const
                 if (auto ps = vpp.get_padstack(get_via_padstack_uuid(via.junction->net))) {
                     via.parameter_set = get_via_parameter_set(via.junction->net);
                     via.vpp_padstack = ps;
+                    via.expand(brd);
                 }
             }
         }

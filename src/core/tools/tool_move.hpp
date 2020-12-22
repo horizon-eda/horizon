@@ -2,10 +2,11 @@
 #include "core/tool.hpp"
 #include "tool_helper_merge.hpp"
 #include "tool_helper_move.hpp"
+#include "tool_helper_collect_nets.hpp"
 
 namespace horizon {
 
-class ToolMove : public ToolHelperMove, public ToolHelperMerge {
+class ToolMove : public ToolHelperMove, public ToolHelperMerge, public ToolHelperCollectNets {
 public:
     ToolMove(IDocument *c, ToolID tid);
     ToolResponse begin(const ToolArgs &args) override;
@@ -46,10 +47,9 @@ private:
     void update_tip();
     void do_move(const Coordi &c);
 
-    void collect_nets();
     std::set<UUID> nets;
 
-    bool update_airwires = true;
+    void update_airwires();
     void finish();
     bool is_key = false;
     Coordi key_delta;

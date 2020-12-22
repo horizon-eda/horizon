@@ -138,6 +138,12 @@ Plane::Fragment::Fragment(const json &j) : orphan(j.at("orphan"))
     }
 }
 
+void Plane::clear()
+{
+    fragments.clear();
+    revision++;
+}
+
 json Plane::Fragment::serialize() const
 {
     json j;

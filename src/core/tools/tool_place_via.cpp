@@ -17,6 +17,7 @@ bool ToolPlaceVia::begin_attached()
     rules = dynamic_cast<BoardRules *>(doc.b->get_rules());
     if (auto r = imp->dialogs.select_net(*doc.b->get_block(), false)) {
         net = doc.b->get_block()->get_net(*r);
+        nets.insert(net->uuid);
         auto ps_uu = rules->get_via_padstack_uuid(net);
         if (!ps_uu) {
             Logger::log_warning("Didn't find a via for net " + net->name, Logger::Domain::TOOL,
@@ -55,6 +56,7 @@ void ToolPlaceVia::create_attached()
     via->junction = temp;
     via->from_rules = true;
     via->net_set = net;
+    via->junction->net = net;
     via->parameter_set = rules->get_via_parameter_set(net);
     via->expand(*doc.b->get_board());
 }
@@ -69,6 +71,12 @@ void ToolPlaceVia::delete_attached()
 void ToolPlaceVia::update_tip()
 {
     imp->tool_bar_set_tip(net->name);
+}
+
+void ToolPlaceVia::finish()
+{
+    doc.b->get_board()->airwires_expand = nets;
+    doc.b->get_board()->expand_flags = Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES;
 }
 
 bool ToolPlaceVia::update_attached(const ToolArgs &args)
@@ -88,6 +96,7 @@ bool ToolPlaceVia::update_attached(const ToolArgs &args)
             if (via) {
                 if (auto r = imp->dialogs.select_net(*doc.b->get_block(), false)) {
                     net = doc.b->get_block()->get_net(*r);
+                    nets.insert(net->uuid);
                     via->net_set = net;
                     via->parameter_set = rules->get_via_parameter_set(net);
                     via->expand(*doc.b->get_board());

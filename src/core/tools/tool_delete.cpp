@@ -91,6 +91,7 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         }
     }
     delete_extra.insert(args.selection.begin(), args.selection.end());
+    const auto nets = nets_from_selection(delete_extra);
     for (const auto &it : delete_extra) {
         if (it.type == ObjectType::LINE_NET) { // need to erase net lines before symbols
             LineNet *line = &doc.c->get_sheet()->net_lines.at(it.uuid);
@@ -330,10 +331,19 @@ ToolResponse ToolDelete::begin(const ToolArgs &args)
         if (!it->is_valid()) {
             doc.r->delete_polygon(it->uuid);
         }
+        else if (doc.b) {
+            if (auto plane = dynamic_cast<Plane *>(it->usage.ptr)) {
+                if (plane->fragments.size())
+                    doc.b->get_board()->update_plane(plane);
+            }
+        }
     }
     if (doc.b) {
         auto brd = doc.b->get_board();
-        brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES | Board::EXPAND_PROPAGATE_NETS);
+        if (nets.size()) {
+            brd->airwires_expand = nets;
+            brd->expand_flags = Board::EXPAND_AIRWIRES | Board::EXPAND_PROPAGATE_NETS;
+        }
     }
 
     return ToolResponse::commit();

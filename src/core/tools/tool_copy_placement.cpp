@@ -33,6 +33,7 @@ ToolResponse ToolCopyPlacement::update(const ToolArgs &args)
                 const auto &ref_pkg = brd->packages.at(pkg_uuid);
                 const auto &ref_group = ref_pkg.component->group;
                 const auto &ref_tag = ref_pkg.component->tag;
+                std::set<UUID> nets;
 
                 std::set<BoardPackage *> target_pkgs;
                 for (const auto &it : selection) {
@@ -65,6 +66,11 @@ ToolResponse ToolCopyPlacement::update(const ToolArgs &args)
                 if (!target_pkg) {
                     imp->tool_bar_flash("no target package found");
                     return ToolResponse::revert();
+                }
+
+                for (const auto &pkg : target_pkgs) {
+                    const auto n = pkg->get_nets();
+                    nets.insert(n.begin(), n.end());
                 }
 
                 for (auto it : target_pkgs) {
@@ -112,7 +118,7 @@ ToolResponse ToolCopyPlacement::update(const ToolArgs &args)
                         }
                     }
                 }
-
+                doc.b->get_board()->update_airwires(false, nets);
                 return ToolResponse::commit();
             }
             else {

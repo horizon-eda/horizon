@@ -1,9 +1,10 @@
 #pragma once
 #include "core/tool.hpp"
+#include "tool_helper_collect_nets.hpp"
 
 namespace horizon {
 
-class ToolEnterDatum : public ToolBase {
+class ToolEnterDatum : public virtual ToolBase, public ToolHelperCollectNets {
 public:
     using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;

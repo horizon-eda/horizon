@@ -179,5 +179,6 @@ void EditStackupDialog::ok_clicked()
     map_erase_if(board.texts, [this](const auto &x) { return board.get_layers().count(x.second.layer) == 0; });
     core.get_fab_output_settings().update_for_board(board);
     board.update_pdf_export_settings(core.get_pdf_export_settings());
+    board.expand_flags = Board::EXPAND_VIAS | Board::EXPAND_PACKAGES; // expand inner layers of padstacks
 }
 } // namespace horizon

@@ -238,6 +238,8 @@ SRC_IMP = \
 	src/core/tools/tool_helper_map_symbol.cpp\
 	src/core/tools/tool_helper_move.cpp\
 	src/core/tools/tool_helper_merge.cpp\
+	src/core/tools/tool_helper_collect_nets.cpp\
+	src/core/tools/tool_helper_plane.cpp\
 	src/core/tools/tool_edit_via.cpp\
 	src/core/tools/tool_rotate_arbitrary.cpp\
 	src/core/tools/tool_edit_plane.cpp\

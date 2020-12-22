@@ -73,6 +73,10 @@ ToolResponse ToolDragKeepSlope::begin(const ToolArgs &args)
     }
     pos_orig = args.coords;
 
+    for (const auto &it : track_info) {
+        nets.insert(it.track.net->uuid);
+    }
+
     if (selection.size() < 1)
         return ToolResponse::end();
 
@@ -92,11 +96,14 @@ ToolResponse ToolDragKeepSlope::update(const ToolArgs &args)
             it.track.from.junc->position = pos_from;
             it.track.to.junc->position = pos_to;
         }
+        doc.b->get_board()->update_airwires(true, nets);
     }
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
-        case InToolActionID::LMB:
+        case InToolActionID::LMB: {
+            doc.b->get_board()->update_airwires(false, nets);
             return ToolResponse::commit();
+        }
 
         case InToolActionID::RMB:
         case InToolActionID::CANCEL:

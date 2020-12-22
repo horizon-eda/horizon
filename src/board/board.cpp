@@ -329,7 +329,8 @@ Board::Board(const Board &brd, CopyMode copy_mode)
                          std::forward_as_tuple(shallow_copy, it.second));
         }
     }
-    update_refs();
+    if (copy_mode == CopyMode::DEEP)
+        update_refs();
 }
 
 Board::Board(const Board &brd) : Board(brd, CopyMode::DEEP)
@@ -631,6 +632,12 @@ static std::string replace_text_map(const std::string &s, const std::map<std::st
 
 void Board::expand()
 {
+    expand_flags = EXPAND_ALL;
+    expand_some();
+}
+
+void Board::expand_some()
+{
     delete_dependants();
     warnings.clear();
 
@@ -638,7 +645,12 @@ void Board::expand()
         it.second.overridden = false;
     }
 
-    expand_packages();
+    if (expand_flags & EXPAND_PACKAGES)
+        expand_packages();
+
+    for (auto &[uu, pkg] : packages) {
+        pkg.update_texts(*this);
+    }
 
     update_junction_connections();
 
@@ -650,8 +662,10 @@ void Board::expand()
     }
 
     auto params = rules.get_parameters();
-    for (auto &it : vias) {
-        it.second.expand(*this);
+    if (expand_flags & EXPAND_VIAS) {
+        for (auto &it : vias) {
+            it.second.expand(*this);
+        }
     }
     for (auto &it : holes) {
         it.second.padstack = *it.second.pool_padstack;
@@ -708,10 +722,12 @@ void Board::expand()
         }
     }
 
-    if (expand_flags & EXPAND_AIRWIRES)
+    if (expand_flags & EXPAND_ALL_AIRWIRES)
+        update_all_airwires();
+    else if (expand_flags & EXPAND_AIRWIRES)
         update_airwires(false, airwires_expand);
 
-    expand_flags = EXPAND_ALL;
+    expand_flags = EXPAND_NONE;
     airwires_expand.clear();
 }
 
@@ -738,8 +754,6 @@ void Board::expand_packages()
             Logger::log_critical("Package " + it.second.component->refdes + " parameter program failed",
                                  Logger::Domain::BOARD, msg);
         }
-
-        it.second.update_texts(*this);
     }
 
     update_refs();
@@ -770,6 +784,7 @@ void Board::disconnect_package(BoardPackage *pkg)
                 }
                 auto c = it_ft->get_position();
                 j->position = c;
+                j->net = it_ft->pad->net;
                 it_ft->connect(j);
             }
         }

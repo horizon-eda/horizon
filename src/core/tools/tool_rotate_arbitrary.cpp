@@ -102,6 +102,8 @@ ToolResponse ToolRotateArbitrary::begin(const ToolArgs &args)
     annotation->set_visible(true);
     annotation->set_display(LayerDisplay(true, LayerDisplay::Mode::OUTLINE));
 
+    nets = nets_from_selection(selection);
+
     update_tip();
     return ToolResponse();
 }
@@ -260,6 +262,12 @@ void ToolRotateArbitrary::apply_placements_scale(double sc)
     }
 }
 
+void ToolRotateArbitrary::update_airwires(bool fast)
+{
+    if (doc.b)
+        doc.b->get_board()->update_airwires(fast, nets);
+}
+
 ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
@@ -274,6 +282,7 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
             const double v = sqrt((args.coords - origin).mag_sq());
             scale = v / vr;
             apply_placements_scale(scale);
+            update_airwires(true);
         }
         else if (state == State::ROTATE) {
             const auto rref = args.coords;
@@ -290,6 +299,7 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
             if (snap)
                 iangle = round_multiple(iangle, 8192);
             apply_placements_rotation(iangle);
+            update_airwires(true);
         }
         update_tip();
         return ToolResponse();
@@ -307,6 +317,7 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
                     state = State::ROTATE;
                 }
                 else {
+                    update_airwires(false);
                     return ToolResponse::commit();
                 }
             }
@@ -322,6 +333,7 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
                     update_tip();
                 }
                 else {
+                    update_airwires(false);
                     return ToolResponse::commit();
                 }
             }
@@ -338,6 +350,7 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
         case InToolActionID::ENTER_DATUM: {
             if (auto r = imp->dialogs.ask_datum_angle("Enter angle", 0)) {
                 apply_placements_rotation(*r);
+                update_airwires(false);
                 return ToolResponse::commit();
             }
         } break;

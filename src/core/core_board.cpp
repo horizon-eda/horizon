@@ -63,7 +63,7 @@ void CoreBoard::reload_netlist()
     }
     brd->update_refs();
     rules.cleanup(&*block);
-
+    brd->expand_flags = Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_ALL_AIRWIRES | Board::EXPAND_PACKAGES;
     rebuild();
 }
 
@@ -319,6 +319,11 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             pkg->flip = dynamic_cast<const PropertyValueBool &>(value).value;
             pkg->update(*brd);
             brd->update_refs();
+            brd->expand_flags |= Board::EXPAND_AIRWIRES;
+            {
+                const auto n = pkg->get_nets();
+                brd->airwires_expand.insert(n.begin(), n.end());
+            }
             break;
 
         case ObjectProperty::ID::FIXED:
@@ -334,6 +339,13 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
                      != 0) { // see if really an alt package for pkg
                 pkg->alternate_package = m_pool.get_package(alt_uuid);
             }
+            pkg->update(*brd);
+            brd->update_refs();
+            brd->expand_flags |= Board::EXPAND_AIRWIRES;
+            {
+                const auto n = pkg->get_nets();
+                brd->airwires_expand.insert(n.begin(), n.end());
+            }
         } break;
 
         case ObjectProperty::ID::POSITION_X:
@@ -346,6 +358,11 @@ bool CoreBoard::set_property(ObjectType type, const UUID &uu, ObjectProperty::ID
             auto delta = pkg->placement.shift - shift_before;
             for (auto &text : pkg->texts) {
                 text->placement.shift += delta;
+            }
+            brd->expand_flags |= Board::EXPAND_AIRWIRES;
+            {
+                const auto n = pkg->get_nets();
+                brd->airwires_expand.insert(n.begin(), n.end());
             }
         } break;
 
@@ -557,7 +574,7 @@ bool CoreBoard::get_property_meta(ObjectType type, const UUID &uu, ObjectPropert
 void CoreBoard::rebuild(bool from_undo)
 {
     clock_t begin = clock();
-    brd->expand();
+    brd->expand_some();
     Core::rebuild(from_undo);
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
@@ -611,11 +628,12 @@ void CoreBoard::history_push()
 void CoreBoard::history_load(unsigned int i)
 {
     const auto &x = dynamic_cast<CoreBoard::HistoryItem &>(*history.at(history_current));
-    brd.emplace(x.brd);
+    brd.emplace(shallow_copy, x.brd);
     block.emplace(x.block);
     brd->block = &*block;
     brd->update_refs();
-    brd->expand();
+    brd->expand_flags = Board::EXPAND_PACKAGES | Board::EXPAND_VIAS;
+    brd->expand_some();
 }
 
 void CoreBoard::reload_pool()

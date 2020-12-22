@@ -34,6 +34,7 @@ private:
         // TrackInfo(Track *a, Track *b, Track *c): track(a), track_from(b),
         // track_to(c) {}
     };
+    std::set<UUID> nets;
 
     std::deque<TrackInfo> track_info;
     Coordi pos_orig;

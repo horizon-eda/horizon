@@ -104,6 +104,7 @@ void ToolMapPackage::place_package(Component *comp, const Coordi &c)
         if (it.second.net)
             nets.insert(it.second.net->uuid);
     }
+    all_nets.insert(nets.begin(), nets.end());
     brd->update_airwires(true, nets);
     selection.clear();
     selection.emplace(uu, ObjectType::BOARD_PACKAGE);
@@ -139,6 +140,7 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
                 component_index++;
             }
             if (component_index == components.size()) {
+                doc.b->get_board()->update_airwires(false, all_nets);
                 return ToolResponse::commit();
             }
             Component *comp = components.at(component_index).first;
@@ -150,6 +152,7 @@ ToolResponse ToolMapPackage::update(const ToolArgs &args)
             if (pkg) {
                 doc.b->get_board()->packages.erase(pkg->uuid);
             }
+            doc.b->get_board()->update_airwires(false, all_nets);
             return ToolResponse::commit();
 
         case InToolActionID::EDIT:

@@ -1,10 +1,10 @@
 #pragma once
 #include "common/polygon.hpp"
-#include "core/tool.hpp"
+#include "tool_helper_plane.hpp"
 
 namespace horizon {
 
-class ToolAddVertex : public ToolBase {
+class ToolAddVertex : public virtual ToolBase, public ToolHelperPlane {
 public:
     using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;

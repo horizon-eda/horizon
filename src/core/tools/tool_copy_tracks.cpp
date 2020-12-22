@@ -72,6 +72,7 @@ ToolResponse ToolCopyTracks::update(const ToolArgs &args)
                 }
 
                 std::map<BoardJunction *, BoardJunction *> junction_map;
+                std::set<UUID> nets;
 
                 for (auto it : source_tracks) {
                     auto delta_angle = dest_pkg.placement.get_angle() - ref_pkg->placement.get_angle();
@@ -116,6 +117,8 @@ ToolResponse ToolCopyTracks::update(const ToolArgs &args)
                                     dest->package = &it_pkg.second;
                                     if (dest->package->package.pads.count(src->pad->uuid)) {
                                         dest->pad = &dest->package->package.pads.at(src->pad->uuid);
+                                        if (dest->pad->net)
+                                            nets.insert(dest->pad->net->uuid);
                                     }
                                     else {
                                         success = false;
@@ -145,10 +148,14 @@ ToolResponse ToolCopyTracks::update(const ToolArgs &args)
                         new_via.junction = junction_map.at(via->junction);
                         new_via.from_rules = via->from_rules;
                         new_via.net_set = via->net_set;
+                        if (new_via.net_set)
+                            nets.insert(new_via.net_set->uuid);
                         new_via.parameter_set = via->parameter_set;
+                        new_via.expand(*brd);
                     }
                 }
-
+                brd->airwires_expand = nets;
+                brd->expand_flags = Board::EXPAND_AIRWIRES | Board::EXPAND_PROPAGATE_NETS;
                 return ToolResponse::commit();
             }
             else {

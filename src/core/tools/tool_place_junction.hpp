@@ -49,6 +49,9 @@ protected:
     {
         return true;
     }
+    virtual void finish()
+    {
+    }
 };
 
 template <typename T> class ToolPlaceJunctionT : public ToolPlaceJunctionBase {

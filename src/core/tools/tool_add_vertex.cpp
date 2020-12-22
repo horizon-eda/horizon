@@ -42,6 +42,9 @@ ToolResponse ToolAddVertex::begin(const ToolArgs &args)
     vertex = &*poly->vertices.insert(poly->vertices.begin() + vertex_index, args.coords);
     selection.clear();
     selection.emplace(poly->uuid, ObjectType::POLYGON_VERTEX, vertex_index);
+
+    plane_init(*poly);
+
     update_tip();
     return ToolResponse();
 }
@@ -93,6 +96,7 @@ ToolResponse ToolAddVertex::update(const ToolArgs &args)
             }
             else {
                 poly->vertices.erase(poly->vertices.begin() + vertex_index);
+                plane_finish();
                 return ToolResponse::commit();
             }
 

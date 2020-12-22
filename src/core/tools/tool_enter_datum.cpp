@@ -5,6 +5,8 @@
 #include "document/idocument_padstack.hpp"
 #include "pool/padstack.hpp"
 #include "document/idocument_schematic.hpp"
+#include "document/idocument_board.hpp"
+#include "board/board.hpp"
 #include "schematic/schematic.hpp"
 #include "imp/imp_interface.hpp"
 #include "util/accumulator.hpp"
@@ -435,6 +437,9 @@ ToolResponse ToolEnterDatum::begin(const ToolArgs &args)
         return ToolResponse::end();
     }
 
+    if (doc.b) {
+        doc.b->get_board()->update_airwires(false, nets_from_selection(selection));
+    }
 
     return ToolResponse::commit();
 }

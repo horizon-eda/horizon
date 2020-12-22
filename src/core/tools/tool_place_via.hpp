@@ -26,9 +26,11 @@ protected:
     void create_attached() override;
     void delete_attached() override;
     bool begin_attached() override;
+    void finish() override;
     bool update_attached(const ToolArgs &args) override;
     class Via *via = nullptr;
     class Net *net = nullptr;
+    std::set<UUID> nets;
 
     std::forward_list<class Via *> vias_placed;
 

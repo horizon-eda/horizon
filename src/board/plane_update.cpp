@@ -113,8 +113,7 @@ void Board::update_plane(Plane *plane, const CanvasPatch *ca_ext, const CanvasPa
         ca_pads = &ca_pads_my;
     }
 
-    plane->fragments.clear();
-    plane->revision++;
+    plane->clear();
 
     ClipperLib::Clipper cl_plane;
     ClipperLib::Path poly_path; // path from polygon contour
@@ -483,9 +482,11 @@ static void plane_update_worker(std::mutex &mutex, std::set<Plane *> &planes, Bo
 void Board::update_planes()
 {
     std::map<int, std::set<Plane *>> planes_by_priority;
+    std::set<UUID> nets;
     for (auto &it : planes) {
         it.second.fragments.clear();
         planes_by_priority[it.second.priority].insert(&it.second);
+        nets.insert(it.second.net->uuid);
     }
     std::vector<int> plane_priorities;
     std::transform(planes_by_priority.begin(), planes_by_priority.end(), std::back_inserter(plane_priorities),
@@ -521,6 +522,7 @@ void Board::update_planes()
             ca.append_polygon(*(plane->polygon));
         }
     }
+    update_airwires(false, nets);
 }
 
 ClipperLib::Paths Board::get_thermals(Plane *plane, const CanvasPads *cp) const

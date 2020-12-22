@@ -11,9 +11,10 @@ static const Coordf coordf_from_pt(const p2t::Point *pt)
 
 const std::vector<std::array<Coordf, 3>> &FragmentCache::get_triangles(const Plane &plane)
 {
-    if (planes.count(plane.uuid) == 0 || planes.at(plane.uuid).revision != plane.revision) { // not found or out of date
+    if (planes.count(plane.uuid) == 0
+        || planes.at(plane.uuid).revision != plane.get_revision()) { // not found or out of date
         planes[plane.uuid];
-        planes[plane.uuid].revision = plane.revision;
+        planes[plane.uuid].revision = plane.get_revision();
         planes[plane.uuid].triangles.clear();
         for (const auto &frag : plane.fragments) {
             std::vector<p2t::Point> point_store;

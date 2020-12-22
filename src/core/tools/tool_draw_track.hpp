@@ -22,7 +22,7 @@ public:
 private:
     class BoardJunction *temp_junc = 0;
     class Track *temp_track = 0;
-    Track *create_temp_track();
+    void create_temp_track();
     class BoardRules *rules;
 };
 } // namespace horizon

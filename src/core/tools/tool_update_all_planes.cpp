@@ -12,14 +12,17 @@ bool ToolUpdateAllPlanes::can_begin()
 
 ToolResponse ToolUpdateAllPlanes::begin(const ToolArgs &args)
 {
+    auto &brd = *doc.b->get_board();
     if (tool_id == ToolID::UPDATE_ALL_PLANES) {
-        doc.b->get_board()->update_planes();
+        brd.update_planes();
     }
     else if (tool_id == ToolID::CLEAR_ALL_PLANES) {
-        for (auto &it : doc.b->get_board()->planes) {
-            it.second.fragments.clear();
-            it.second.revision++;
+        std::set<UUID> nets;
+        for (auto &it : brd.planes) {
+            it.second.clear();
+            nets.insert(it.second.net->uuid);
         }
+        brd.update_airwires(false, nets);
     }
     return ToolResponse::commit();
 }

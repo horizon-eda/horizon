@@ -1,10 +1,11 @@
 #pragma once
 #include "core/tool.hpp"
 #include "util/keep_slope_util.hpp"
+#include "tool_helper_plane.hpp"
 
 namespace horizon {
 
-class ToolDragPolygonEdge : public ToolBase {
+class ToolDragPolygonEdge : public virtual ToolBase, public ToolHelperPlane {
 public:
     using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;
@@ -32,7 +33,6 @@ private:
     std::optional<PolyInfo> poly_info;
 
     class Polygon *poly = nullptr;
-    class Plane *plane = nullptr;
     unsigned int edge = 0;
     Coordi pos_orig;
     void update_tip();

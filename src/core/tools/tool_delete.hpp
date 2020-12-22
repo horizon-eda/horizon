@@ -1,9 +1,9 @@
 #pragma once
-#include "core/tool.hpp"
+#include "tool_helper_collect_nets.hpp"
 
 namespace horizon {
 
-class ToolDelete : public ToolBase {
+class ToolDelete : public virtual ToolBase, public ToolHelperCollectNets {
 public:
     using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;

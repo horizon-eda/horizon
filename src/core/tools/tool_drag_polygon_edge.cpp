@@ -1,9 +1,8 @@
 #include "tool_drag_polygon_edge.hpp"
 #include "common/polygon.hpp"
 #include "imp/imp_interface.hpp"
-#include "document/idocument_board.hpp"
+#include "document/idocument.hpp"
 #include "util/selection_util.hpp"
-#include "board/board.hpp"
 
 namespace horizon {
 
@@ -48,12 +47,8 @@ ToolResponse ToolDragPolygonEdge::begin(const ToolArgs &args)
     imp->set_snap_filter({{ObjectType::POLYGON, poly->uuid}});
     poly_info.emplace(*poly, edge);
     pos_orig = args.coords;
-    plane = dynamic_cast<Plane *>(poly->usage.ptr);
 
-    if (plane) {
-        plane->fragments.clear();
-        plane->revision++;
-    }
+    plane_init(*poly);
 
     update_tip();
     return ToolResponse();
@@ -75,12 +70,7 @@ ToolResponse ToolDragPolygonEdge::update(const ToolArgs &args)
             // fall through
 
         case InToolActionID::LMB:
-            if (doc.b && plane) {
-                auto brd = doc.b->get_board();
-                brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
-                brd->airwires_expand = {plane->net->uuid};
-                brd->update_plane(plane);
-            }
+            plane_finish();
             return ToolResponse::commit();
 
         case InToolActionID::RMB:

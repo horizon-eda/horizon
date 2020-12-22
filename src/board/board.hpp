@@ -55,14 +55,14 @@ public:
     static unsigned int get_app_version();
 
     void expand();
-    void expand_packages();
+    void expand_some();
 
     Board(const Board &brd);
     Board(shallow_copy_t sh, const Board &brd);
     void operator=(const Board &brd) = delete;
     void update_refs();
     void update_junction_connections();
-    void update_airwires(bool fast = false, const std::set<UUID> &nets = {});
+    void update_airwires(bool fast, const std::set<UUID> &nets);
     void disconnect_package(BoardPackage *pkg);
 
     void smash_package(BoardPackage *pkg);
@@ -132,7 +132,15 @@ public:
 
     FileVersion version;
 
-    enum ExpandFlags { EXPAND_ALL = 0xff, EXPAND_PROPAGATE_NETS = (1 << 0), EXPAND_AIRWIRES = (1 << 1) };
+    enum ExpandFlags {
+        EXPAND_NONE = 0,
+        EXPAND_ALL = 0xff,
+        EXPAND_PROPAGATE_NETS = (1 << 0),
+        EXPAND_AIRWIRES = (1 << 1),
+        EXPAND_PACKAGES = (1 << 2),
+        EXPAND_VIAS = (1 << 3),
+        EXPAND_ALL_AIRWIRES = (1 << 4),
+    };
 
     ExpandFlags expand_flags = EXPAND_ALL;
     std::set<UUID> airwires_expand;
@@ -150,7 +158,22 @@ public:
 private:
     unsigned int n_inner_layers = 0;
     ClipperLib::Paths get_thermals(class Plane *plane, const class CanvasPads *ca) const;
+    void update_all_airwires();
+    void update_airwire(bool fast, const UUID &net);
 
     Board(const Board &brd, CopyMode copy_mode);
+    void expand_packages();
 };
+
+inline Board::ExpandFlags operator|(Board::ExpandFlags a, Board::ExpandFlags b)
+{
+    return static_cast<Board::ExpandFlags>(static_cast<int>(a) | static_cast<int>(b));
+}
+
+inline Board::ExpandFlags operator|=(Board::ExpandFlags &a, Board::ExpandFlags b)
+{
+    return a = (a | b);
+}
+
+
 } // namespace horizon

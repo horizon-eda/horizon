@@ -2,10 +2,11 @@
 #include "core/tool.hpp"
 #include "canvas/selectables.hpp"
 #include "util/placement.hpp"
+#include "tool_helper_collect_nets.hpp"
 
 namespace horizon {
 
-class ToolRotateArbitrary : public ToolBase {
+class ToolRotateArbitrary : public virtual ToolBase, public ToolHelperCollectNets {
 public:
     using ToolBase::ToolBase;
     ToolResponse begin(const ToolArgs &args) override;
@@ -39,5 +40,7 @@ private:
     State state = State::ORIGIN;
     std::map<SelectableRef, Placement> placements;
     class CanvasAnnotation *annotation = nullptr;
+    std::set<UUID> nets;
+    void update_airwires(bool fast);
 };
 } // namespace horizon

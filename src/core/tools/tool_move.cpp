@@ -214,7 +214,7 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
     else
         selection_center = get_selection_center();
 
-    collect_nets();
+    nets = nets_from_selection(selection);
 
     if (tool_id == ToolID::ROTATE || tool_id == ToolID::MIRROR_X || tool_id == ToolID::MIRROR_Y
         || tool_id == ToolID::ROTATE_CURSOR || tool_id == ToolID::MIRROR_CURSOR) {
@@ -250,14 +250,14 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
         if (it.type == ObjectType::POLYGON_VERTEX || it.type == ObjectType::POLYGON_EDGE) {
             auto poly = doc.r->get_polygon(it.uuid);
             if (auto plane = dynamic_cast<Plane *>(poly->usage.ptr)) {
-                planes.insert(plane);
+                if (plane->fragments.size())
+                    planes.insert(plane);
             }
         }
     }
 
     for (auto plane : planes) {
-        plane->fragments.clear();
-        plane->revision++;
+        plane->clear();
     }
 
     InToolActionID action = InToolActionID::NONE;
@@ -311,31 +311,6 @@ ToolResponse ToolMove::begin(const ToolArgs &args)
     return ToolResponse();
 }
 
-void ToolMove::collect_nets()
-{
-    if (!doc.b)
-        return;
-    const auto &brd = *doc.b->get_board();
-    for (const auto &it : selection) {
-        switch (it.type) {
-        case ObjectType::BOARD_PACKAGE: {
-            const auto &pkg = brd.packages.at(it.uuid);
-            for (const auto &itt : pkg.package.pads) {
-                if (itt.second.net)
-                    nets.insert(itt.second.net->uuid);
-            }
-        } break;
-
-        case ObjectType::JUNCTION: {
-            const auto &ju = brd.junctions.at(it.uuid);
-            if (ju.net)
-                nets.insert(ju.net->uuid);
-        } break;
-        default:;
-        }
-    }
-}
-
 bool ToolMove::can_begin()
 {
     expand_selection();
@@ -352,13 +327,17 @@ void ToolMove::update_tip()
     imp->tool_bar_set_tip(s);
 }
 
+void ToolMove::update_airwires()
+{
+    if (doc.b && nets.size()) {
+        doc.b->get_board()->update_airwires(true, nets);
+    }
+}
 
 void ToolMove::do_move(const Coordi &d)
 {
     move_do_cursor(d);
-    if (doc.b && update_airwires && nets.size()) {
-        doc.b->get_board()->update_airwires(true, nets);
-    }
+    update_airwires();
     update_tip();
 }
 
@@ -378,11 +357,10 @@ void ToolMove::finish()
     }
     if (doc.b) {
         auto brd = doc.b->get_board();
-        brd->expand_flags = static_cast<Board::ExpandFlags>(Board::EXPAND_AIRWIRES);
-        brd->airwires_expand = nets;
         for (auto plane : planes) {
             brd->update_plane(plane);
         }
+        brd->update_airwires(false, nets);
     }
 }
 
@@ -423,6 +401,7 @@ ToolResponse ToolMove::update(const ToolArgs &args)
                     sp = sp / 10;
                 key_delta += dir * sp;
                 move_do(dir * sp);
+                update_airwires();
                 update_tip();
             }
         }

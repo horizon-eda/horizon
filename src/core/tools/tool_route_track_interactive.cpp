@@ -666,8 +666,6 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
                 if (router->FixRoute(wrapper->m_endSnapPoint, wrapper->m_endItem)) {
                     router->StopRouting();
                     imp->canvas_update();
-                    board->expand_flags =
-                            static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
                     return ToolResponse::commit();
                 }
             }
@@ -688,8 +686,6 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
             case InToolActionID::LMB:
                 if (router->FixRoute(VECTOR2I(args.coords.x, args.coords.y), NULL)) {
                     router->StopRouting();
-                    board->expand_flags =
-                            static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
                     return ToolResponse::commit();
                 }
                 break;
@@ -788,8 +784,6 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
 
                 case InToolActionID::RMB:
                 case InToolActionID::CANCEL:
-                    board->expand_flags =
-                            static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
                     return ToolResponse::commit();
 
                 default:;
@@ -851,8 +845,6 @@ ToolResponse ToolRouteTrackInteractive::update(const ToolArgs &args)
 
                 case InToolActionID::CANCEL:
                     router->StopRouting();
-                    board->expand_flags =
-                            static_cast<Board::ExpandFlags>(Board::EXPAND_PROPAGATE_NETS | Board::EXPAND_AIRWIRES);
                     return ToolResponse::commit();
 
                 case InToolActionID::POSTURE:

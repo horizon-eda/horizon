@@ -93,6 +93,8 @@ ToolResponse ToolRoundOffVertex::begin(const ToolArgs &args)
 
     update_cursor(args.coords);
 
+    plane_init(*poly);
+
     imp->tool_bar_set_actions({
             {InToolActionID::LMB, "set radius"},
             {InToolActionID::RMB},
@@ -138,6 +140,7 @@ ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
         case InToolActionID::LMB:
+            plane_finish();
             return ToolResponse::commit();
 
         case InToolActionID::RMB:
@@ -166,6 +169,7 @@ ToolResponse ToolRoundOffVertex::update(const ToolArgs &args)
                 }
             }
             else if (data->event == ToolDataWindow::Event::OK) {
+                plane_finish();
                 return ToolResponse::commit();
             }
         }
