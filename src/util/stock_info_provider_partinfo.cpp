@@ -43,7 +43,7 @@ public:
         std::unique_lock<std::mutex> lk(mutex);
         std::string q = "{ match(parts: [";
         for (const auto &it : parts) {
-            q += "{mpn: {part: \"" + it.second.first + "\", manufacturer: \"" + it.second.second + "\"}},";
+            q += "{mpn: {part: \"" + it.second.first + "*\", manufacturer: \"" + it.second.second + "\"}},";
         }
         q += ",]) {\
         		datasheet\
