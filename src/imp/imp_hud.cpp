@@ -87,6 +87,17 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
         }
     }
 
+    if (preferences.hud_debug && (sel_count_type(sel, ObjectType::TEXT) == 1)) {
+        const auto txt = core->get_text(sel_find_one(sel, ObjectType::TEXT).uuid);
+        s += "\n\n<b>Text:</b>\n";
+        if (txt->overridden) {
+            s += "Overriden: " + txt->text_override;
+        }
+        else {
+            s += "Not overridden";
+        }
+    }
+
     if (sel_count_type(sel, ObjectType::TEXT) == 1) {
         const auto text = core->get_text(sel_find_one(sel, ObjectType::TEXT).uuid);
         const auto txt = Glib::ustring(text->text);
