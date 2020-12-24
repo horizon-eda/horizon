@@ -123,7 +123,7 @@ std::map<UUID, Polygon> &Padstack::MyParameterProgram::get_polygons()
 ParameterProgram::CommandHandler Padstack::MyParameterProgram::get_command(const std::string &cmd)
 {
     using namespace std::placeholders;
-    if (auto r = ParameterProgram::get_command(cmd)) {
+    if (auto r = ParameterProgramPolygon::get_command(cmd)) {
         return r;
     }
     else if (cmd == "set-shape") {
@@ -131,15 +131,6 @@ ParameterProgram::CommandHandler Padstack::MyParameterProgram::get_command(const
     }
     else if (cmd == "set-hole") {
         return static_cast<CommandHandler>(&Padstack::MyParameterProgram::set_hole);
-    }
-    else if (cmd == "set-polygon") {
-        return static_cast<CommandHandler>(&Padstack::MyParameterProgram::set_polygon);
-    }
-    else if (cmd == "set-polygon-vertices") {
-        return static_cast<CommandHandler>(&Padstack::MyParameterProgram::set_polygon_vertices);
-    }
-    else if (cmd == "expand-polygon") {
-        return static_cast<CommandHandler>(&Padstack::MyParameterProgram::expand_polygon);
     }
     return nullptr;
 }

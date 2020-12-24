@@ -17,24 +17,6 @@ std::map<UUID, Polygon> &Package::MyParameterProgram::get_polygons()
     return pkg->polygons;
 }
 
-ParameterProgram::CommandHandler Package::MyParameterProgram::get_command(const std::string &cmd)
-{
-    using namespace std::placeholders;
-    if (auto r = ParameterProgram::get_command(cmd)) {
-        return r;
-    }
-    else if (cmd == "set-polygon") {
-        return static_cast<CommandHandler>(&Package::MyParameterProgram::set_polygon);
-    }
-    else if (cmd == "set-polygon-vertices") {
-        return static_cast<CommandHandler>(&Package::MyParameterProgram::set_polygon_vertices);
-    }
-    else if (cmd == "expand-polygon") {
-        return static_cast<CommandHandler>(&Package::MyParameterProgram::expand_polygon);
-    }
-    return nullptr;
-}
-
 Package::Model::Model(const UUID &uu, const std::string &fn) : uuid(uu), filename(fn)
 {
 }

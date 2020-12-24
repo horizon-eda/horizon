@@ -15,6 +15,8 @@ protected:
     std::optional<std::string> expand_polygon(const TokenCommand &cmd);
     virtual std::map<UUID, Polygon> &get_polygons() = 0;
 
+    CommandHandler get_command(const std::string &cmd) override;
+
     virtual ~ParameterProgramPolygon()
     {
     }

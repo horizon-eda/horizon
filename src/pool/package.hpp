@@ -35,7 +35,6 @@ public:
         std::map<UUID, Polygon> &get_polygons() override;
 
     private:
-        ParameterProgram::CommandHandler get_command(const std::string &cmd) override;
         class Package *pkg = nullptr;
 
     public:

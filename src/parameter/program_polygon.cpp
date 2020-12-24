@@ -141,4 +141,21 @@ std::optional<std::string> ParameterProgramPolygon::expand_polygon(const TokenCo
     return {};
 }
 
+ParameterProgram::CommandHandler ParameterProgramPolygon::get_command(const std::string &cmd)
+{
+    if (auto r = ParameterProgram::get_command(cmd)) {
+        return r;
+    }
+    else if (cmd == "set-polygon") {
+        return static_cast<CommandHandler>(&ParameterProgramPolygon::set_polygon);
+    }
+    else if (cmd == "set-polygon-vertices") {
+        return static_cast<CommandHandler>(&ParameterProgramPolygon::set_polygon_vertices);
+    }
+    else if (cmd == "expand-polygon") {
+        return static_cast<CommandHandler>(&ParameterProgramPolygon::expand_polygon);
+    }
+    return nullptr;
+}
+
 } // namespace horizon
