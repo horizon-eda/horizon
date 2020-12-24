@@ -14,11 +14,11 @@ Padstack::MyParameterProgram::MyParameterProgram(Padstack *p, const std::string 
 {
 }
 
-std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const TokenCommand &cmd)
+std::optional<std::string> Padstack::MyParameterProgram::set_shape(const TokenCommand &cmd)
 {
     if (cmd.arguments.size() < 2 || cmd.arguments.at(0)->type != Token::Type::STR
         || cmd.arguments.at(1)->type != Token::Type::STR)
-        return {true, "not enough arguments"};
+        return "not enough arguments";
 
     const auto &pclass = dynamic_cast<TokenString &>(*cmd.arguments.at(0).get()).string;
     const auto &form = dynamic_cast<TokenString &>(*cmd.arguments.at(1).get()).string;
@@ -26,7 +26,7 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const Token
     if (form == "rectangle") {
         int64_t width, height;
         if (stack_pop(height) || stack_pop(width))
-            return {true, "empty stack"};
+            return "empty stack";
         for (auto &it : ps->shapes) {
             if (it.second.parameter_class == pclass) {
                 it.second.form = Shape::Form::RECTANGLE;
@@ -37,7 +37,7 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const Token
     else if (form == "circle") {
         int64_t diameter;
         if (stack_pop(diameter))
-            return {true, "empty stack"};
+            return "empty stack";
         for (auto &it : ps->shapes) {
             if (it.second.parameter_class == pclass) {
                 it.second.form = Shape::Form::CIRCLE;
@@ -48,7 +48,7 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const Token
     else if (form == "obround") {
         int64_t width, height;
         if (stack_pop(height) || stack_pop(width))
-            return {true, "empty stack"};
+            return "empty stack";
         for (auto &it : ps->shapes) {
             if (it.second.parameter_class == pclass) {
                 it.second.form = Shape::Form::OBROUND;
@@ -59,7 +59,7 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const Token
     else if (form == "position") {
         int64_t x, y;
         if (stack_pop(y) || stack_pop(x))
-            return {true, "empty stack"};
+            return "empty stack";
         for (auto &it : ps->shapes) {
             if (it.second.parameter_class == pclass) {
                 it.second.placement.shift = {x, y};
@@ -68,17 +68,17 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const Token
     }
 
     else {
-        return {true, "unknown form " + form};
+        return "unknown form " + form;
     }
 
-    return {false, ""};
+    return {};
 }
 
-std::pair<bool, std::string> Padstack::MyParameterProgram::set_hole(const TokenCommand &cmd)
+std::optional<std::string> Padstack::MyParameterProgram::set_hole(const TokenCommand &cmd)
 {
     if (cmd.arguments.size() < 2 || cmd.arguments.at(0)->type != Token::Type::STR
         || cmd.arguments.at(1)->type != Token::Type::STR)
-        return {true, "not enough arguments"};
+        return "not enough arguments";
 
     const auto &pclass = dynamic_cast<TokenString &>(*cmd.arguments.at(0).get()).string;
     const auto &shape = dynamic_cast<TokenString &>(*cmd.arguments.at(1).get()).string;
@@ -86,7 +86,7 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_hole(const TokenC
     if (shape == "round") {
         int64_t diameter;
         if (stack_pop(diameter))
-            return {true, "empty stack"};
+            return "empty stack";
         for (auto &it : ps->holes) {
             if (it.second.parameter_class == pclass) {
                 it.second.shape = Hole::Shape::ROUND;
@@ -97,7 +97,7 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_hole(const TokenC
     else if (shape == "slot") {
         int64_t diameter, length;
         if (stack_pop(length) || stack_pop(diameter))
-            return {true, "empty stack"};
+            return "empty stack";
         for (auto &it : ps->holes) {
             if (it.second.parameter_class == pclass) {
                 it.second.shape = Hole::Shape::SLOT;
@@ -108,10 +108,10 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_hole(const TokenC
     }
 
     else {
-        return {true, "unknown shape " + shape};
+        return "unknown shape " + shape;
     }
 
-    return {false, ""};
+    return {};
 }
 
 std::map<UUID, Polygon> &Padstack::MyParameterProgram::get_polygons()
@@ -316,7 +316,7 @@ static void copy_param(ParameterSet &dest, const ParameterSet &src, const std::s
     }
 }
 
-std::pair<bool, std::string> Padstack::apply_parameter_set(const ParameterSet &ps)
+std::optional<std::string> Padstack::apply_parameter_set(const ParameterSet &ps)
 {
     auto ps_this = parameter_set;
     copy_param(ps_this, ps,

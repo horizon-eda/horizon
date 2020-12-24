@@ -16,11 +16,11 @@ public:
     ParameterProgram(const std::string &s);
     ParameterProgram(const ParameterProgram &other);
     ParameterProgram &operator=(const ParameterProgram &other);
-    std::pair<bool, std::string> get_init_error();
+    std::optional<std::string> get_init_error();
     const std::string &get_code() const;
-    std::pair<bool, std::string> set_code(const std::string &s);
+    std::optional<std::string> set_code(const std::string &s);
 
-    std::pair<bool, std::string> run(const ParameterSet &pset = {});
+    std::optional<std::string> run(const ParameterSet &pset = {});
     using Stack = std::vector<int64_t>;
     const auto &get_stack() const
     {
@@ -109,7 +109,7 @@ protected:
         }
     };
 
-    using CommandHandler = std::pair<bool, std::string> (ParameterProgram::*)(const TokenCommand &cmd);
+    using CommandHandler = std::optional<std::string> (ParameterProgram::*)(const TokenCommand &cmd);
     virtual CommandHandler get_command(const std::string &cmd);
 
     std::vector<int64_t> stack;
@@ -117,13 +117,13 @@ protected:
 private:
     std::string code;
 
-    std::pair<bool, std::string> compile();
-    std::pair<bool, std::string> init_error = {false, ""};
+    std::optional<std::string> compile();
+    std::optional<std::string> init_error;
     std::vector<std::unique_ptr<Token>> tokens;
 
-    std::pair<bool, std::string> cmd_dump(const TokenCommand &cmd);
-    std::pair<bool, std::string> cmd_math1(const TokenCommand &cmd);
-    std::pair<bool, std::string> cmd_math2(const TokenCommand &cmd);
-    std::pair<bool, std::string> cmd_math3(const TokenCommand &cmd);
+    std::optional<std::string> cmd_dump(const TokenCommand &cmd);
+    std::optional<std::string> cmd_math1(const TokenCommand &cmd);
+    std::optional<std::string> cmd_math2(const TokenCommand &cmd);
+    std::optional<std::string> cmd_math3(const TokenCommand &cmd);
 };
 } // namespace horizon

@@ -30,8 +30,8 @@ public:
         ParameterProgram::CommandHandler get_command(const std::string &cmd) override;
         class Padstack *ps = nullptr;
 
-        std::pair<bool, std::string> set_shape(const TokenCommand &cmd);
-        std::pair<bool, std::string> set_hole(const TokenCommand &cmd);
+        std::optional<std::string> set_shape(const TokenCommand &cmd);
+        std::optional<std::string> set_hole(const TokenCommand &cmd);
 
     public:
         MyParameterProgram(class Padstack *p, const std::string &code);
@@ -64,7 +64,7 @@ public:
 
     FileVersion version;
 
-    std::pair<bool, std::string> apply_parameter_set(const ParameterSet &ps);
+    std::optional<std::string> apply_parameter_set(const ParameterSet &ps);
 
     UUID get_uuid() const;
     std::pair<Coordi, Coordi> get_bbox(bool copper_only = false) const;

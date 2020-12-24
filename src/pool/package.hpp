@@ -71,7 +71,7 @@ public:
     Polygon *get_polygon(const UUID &uu) override;
     std::pair<Coordi, Coordi> get_bbox() const;
     const std::map<int, Layer> &get_layers() const override;
-    std::pair<bool, std::string> apply_parameter_set(const ParameterSet &ps);
+    std::optional<std::string> apply_parameter_set(const ParameterSet &ps);
     void expand();
     void update_warnings();
     int get_max_pad_name() const;

@@ -750,9 +750,9 @@ void Board::expand_packages()
     for (auto &it : packages) {
         if (it.second.update_package(*this) == false)
             warnings.emplace_back(it.second.placement.shift, "Incompatible alt pkg");
-        if (auto [err, msg] = it.second.package.apply_parameter_set(pset); err) {
+        if (auto err = it.second.package.apply_parameter_set(pset)) {
             Logger::log_critical("Package " + it.second.component->refdes + " parameter program failed",
-                                 Logger::Domain::BOARD, msg);
+                                 Logger::Domain::BOARD, err.value());
         }
     }
 

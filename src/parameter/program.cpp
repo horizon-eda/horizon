@@ -27,7 +27,7 @@ ParameterProgram &ParameterProgram::operator=(const ParameterProgram &other)
     return *this;
 }
 
-std::pair<bool, std::string> ParameterProgram::get_init_error()
+std::optional<std::string> ParameterProgram::get_init_error()
 {
     return init_error;
 }
@@ -37,7 +37,7 @@ const std::string &ParameterProgram::get_code() const
     return code;
 }
 
-std::pair<bool, std::string> ParameterProgram::set_code(const std::string &s)
+std::optional<std::string> ParameterProgram::set_code(const std::string &s)
 {
     code = s;
     return compile();
@@ -56,7 +56,7 @@ bool ParameterProgram::stack_pop(int64_t &va)
 }
 
 
-std::pair<bool, std::string> ParameterProgram::cmd_dump(const TokenCommand &cmd)
+std::optional<std::string> ParameterProgram::cmd_dump(const TokenCommand &cmd)
 {
     auto sz = stack.size();
     for (const auto &it : stack) {
@@ -64,14 +64,14 @@ std::pair<bool, std::string> ParameterProgram::cmd_dump(const TokenCommand &cmd)
         std::cout << sz << ": " << it << "\n";
     }
     std::cout << std::endl;
-    return {false, ""};
+    return {};
 }
 
-std::pair<bool, std::string> ParameterProgram::cmd_math1(const TokenCommand &cmd)
+std::optional<std::string> ParameterProgram::cmd_math1(const TokenCommand &cmd)
 {
     int64_t a;
     if (stack_pop(a))
-        return {true, "empty stack"};
+        return "empty stack";
     if (cmd.command == "dup") {
         stack.push_back(a);
         stack.push_back(a);
@@ -79,14 +79,14 @@ std::pair<bool, std::string> ParameterProgram::cmd_math1(const TokenCommand &cmd
     else if (cmd.command == "chs") {
         stack.push_back(-a);
     }
-    return {false, ""};
+    return {};
 }
 
-std::pair<bool, std::string> ParameterProgram::cmd_math3(const TokenCommand &cmd)
+std::optional<std::string> ParameterProgram::cmd_math3(const TokenCommand &cmd)
 {
     int64_t a, b, c;
     if (stack_pop(c) || stack_pop(b) || stack_pop(a))
-        return {true, "empty stack"};
+        return "empty stack";
     if (cmd.command == "+xy") {
         stack.push_back(a + c);
         stack.push_back(b + c);
@@ -95,14 +95,14 @@ std::pair<bool, std::string> ParameterProgram::cmd_math3(const TokenCommand &cmd
         stack.push_back(a - c);
         stack.push_back(b - c);
     }
-    return {false, ""};
+    return {};
 }
 
-std::pair<bool, std::string> ParameterProgram::cmd_math2(const TokenCommand &cmd)
+std::optional<std::string> ParameterProgram::cmd_math2(const TokenCommand &cmd)
 {
     int64_t a, b;
     if (stack_pop(b) || stack_pop(a))
-        return {true, "empty stack"};
+        return "empty stack";
     if (cmd.command[0] == '+') {
         stack.push_back(a + b);
     }
@@ -125,7 +125,7 @@ std::pair<bool, std::string> ParameterProgram::cmd_math2(const TokenCommand &cmd
         stack.push_back(b);
         stack.push_back(a);
     }
-    return {false, ""};
+    return {};
 }
 
 ParameterProgram::CommandHandler ParameterProgram::get_command(const std::string &cmd)
@@ -146,7 +146,7 @@ ParameterProgram::CommandHandler ParameterProgram::get_command(const std::string
         return nullptr;
 }
 
-std::pair<bool, std::string> ParameterProgram::run(const ParameterSet &pset)
+std::optional<std::string> ParameterProgram::run(const ParameterSet &pset)
 {
     stack.clear();
     for (const auto &token : tokens) {
@@ -155,26 +155,26 @@ std::pair<bool, std::string> ParameterProgram::run(const ParameterSet &pset)
             auto &tok = dynamic_cast<const TokenCommand &>(*token.get());
             if (auto cmd = get_command(tok.command)) {
                 auto r = std::invoke(cmd, *this, tok);
-                if (r.first) {
+                if (r.has_value()) {
                     return r;
                 }
             }
             else if (tok.command == "get-parameter") {
                 if (tok.arguments.size() < 1 || tok.arguments.at(0)->type != Token::Type::STR) {
-                    return {true, "get-parameter requires one string argument"};
+                    return "get-parameter requires one string argument";
                 }
                 auto &arg = dynamic_cast<const TokenString &>(*tok.arguments.at(0).get()).string;
                 ParameterID pid = parameter_id_from_string(arg);
                 if (pid == ParameterID::INVALID) {
-                    return {true, "invalid parameter " + arg};
+                    return "invalid parameter " + arg;
                 }
                 if (pset.count(pid) == 0) {
-                    return {true, "parameter not found: " + parameter_id_to_string(pid)};
+                    return "parameter not found: " + parameter_id_to_string(pid);
                 }
                 stack.push_back(pset.at(pid));
             }
             else {
-                return {true, "unknown command " + tok.command};
+                return "unknown command " + tok.command;
             }
         } break;
         case Token::Type::INT: {
@@ -187,11 +187,11 @@ std::pair<bool, std::string> ParameterProgram::run(const ParameterSet &pset)
         }
     }
 
-    return {false, ""};
+    return {};
 }
 
 
-std::pair<bool, std::string> ParameterProgram::compile()
+std::optional<std::string> ParameterProgram::compile()
 {
     std::stringstream iss(code);
     std::vector<std::string> stokens{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
@@ -235,23 +235,23 @@ std::pair<bool, std::string> ParameterProgram::compile()
         }
         else if (token == "[") {
             if (arg_mode == true) {
-                return {true, "repeated ["};
+                return "repeated [";
             }
             if (tokens.back()->type != Token::Type::CMD) {
-                return {true, "[ has to follow command token"};
+                return "[ has to follow command token";
             }
             arg_mode = true;
         }
         else if (token == "]") {
             if (arg_mode == false) {
-                return {true, "repeated ]"};
+                return "repeated ]";
             }
             arg_mode = false;
         }
         else {
-            return {true, "unhandled token " + token};
+            return "unhandled token " + token;
         }
     }
-    return {false, ""};
+    return {};
 }
 } // namespace horizon

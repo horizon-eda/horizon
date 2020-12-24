@@ -216,18 +216,18 @@ void ImpPackage::construct()
     parameter_window->signal_apply().connect([this, parameter_window] {
         if (core->tool_is_active())
             return;
-        auto r_compile = package.parameter_program.set_code(core_package.parameter_program_code);
-        if (r_compile.first) {
-            parameter_window->set_error_message("<b>Compile error:</b>" + r_compile.second);
+
+        if (auto r = package.parameter_program.set_code(core_package.parameter_program_code)) {
+            parameter_window->set_error_message("<b>Compile error:</b>" + r.value());
             return;
         }
         else {
             parameter_window->set_error_message("");
         }
         package.parameter_set = core_package.parameter_set;
-        auto r = package.parameter_program.run(package.parameter_set);
-        if (r.first) {
-            parameter_window->set_error_message("<b>Run error:</b>" + r.second);
+
+        if (auto r = package.parameter_program.run(package.parameter_set)) {
+            parameter_window->set_error_message("<b>Run error:</b>" + r.value());
             return;
         }
         else {

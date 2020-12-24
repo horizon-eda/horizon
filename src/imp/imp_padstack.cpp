@@ -104,18 +104,18 @@ void ImpPadstack::construct()
         if (core->tool_is_active())
             return;
         auto &ps = padstack;
-        auto r_compile = ps.parameter_program.set_code(core_padstack.parameter_program_code);
-        if (r_compile.first) {
-            parameter_window->set_error_message("<b>Compile error:</b>" + r_compile.second);
+
+        if (auto r = ps.parameter_program.set_code(core_padstack.parameter_program_code)) {
+            parameter_window->set_error_message("<b>Compile error:</b>" + r.value());
             return;
         }
         else {
             parameter_window->set_error_message("");
         }
         ps.parameter_set = core_padstack.parameter_set;
-        auto r = ps.parameter_program.run(ps.parameter_set);
-        if (r.first) {
-            parameter_window->set_error_message("<b>Run error:</b>" + r.second);
+
+        if (auto r = ps.parameter_program.run(ps.parameter_set)) {
+            parameter_window->set_error_message("<b>Run error:</b>" + r.value());
             return;
         }
         else {

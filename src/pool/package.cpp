@@ -273,13 +273,13 @@ static void copy_param(ParameterSet &dest, const ParameterSet &src, const std::s
     }
 }
 
-std::pair<bool, std::string> Package::apply_parameter_set(const ParameterSet &ps)
+std::optional<std::string> Package::apply_parameter_set(const ParameterSet &ps)
 {
     auto ps_this = parameter_set;
     copy_param(ps_this, ps, ParameterID::COURTYARD_EXPANSION);
     {
         auto r = parameter_program.run(ps_this);
-        if (r.first) {
+        if (r.has_value()) {
             return r;
         }
     }
@@ -289,12 +289,11 @@ std::pair<bool, std::string> Package::apply_parameter_set(const ParameterSet &ps
         copy_param(ps_pad, ps,
                    {ParameterID::SOLDER_MASK_EXPANSION, ParameterID::PASTE_MASK_CONTRACTION,
                     ParameterID::HOLE_SOLDER_MASK_EXPANSION});
-        auto r = it.second.padstack.apply_parameter_set(ps_pad);
-        if (r.first) {
-            return {r.first, "Pad " + it.second.name + ": " + r.second};
+        if (auto r = it.second.padstack.apply_parameter_set(ps_pad)) {
+            return "Pad " + it.second.name + ": " + r.value();
         }
     }
-    return {false, ""};
+    return {};
 }
 
 void Package::expand()

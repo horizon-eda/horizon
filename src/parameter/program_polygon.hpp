@@ -10,9 +10,9 @@ public:
     using ParameterProgram::ParameterProgram;
 
 protected:
-    std::pair<bool, std::string> set_polygon(const TokenCommand &cmd);
-    std::pair<bool, std::string> set_polygon_vertices(const TokenCommand &cmd);
-    std::pair<bool, std::string> expand_polygon(const TokenCommand &cmd);
+    std::optional<std::string> set_polygon(const TokenCommand &cmd);
+    std::optional<std::string> set_polygon_vertices(const TokenCommand &cmd);
+    std::optional<std::string> expand_polygon(const TokenCommand &cmd);
     virtual std::map<UUID, Polygon> &get_polygons() = 0;
 
     virtual ~ParameterProgramPolygon()

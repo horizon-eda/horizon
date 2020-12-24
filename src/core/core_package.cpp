@@ -212,9 +212,8 @@ bool CorePackage::get_property_meta(ObjectType type, const UUID &uu, ObjectPrope
 
 void CorePackage::rebuild(bool from_undo)
 {
-    auto r = package.apply_parameter_set({});
-    if (r.first) {
-        Logger::get().log_critical("Parameter program failed", Logger::Domain::CORE, r.second);
+    if (auto r = package.apply_parameter_set({})) {
+        Logger::get().log_critical("Parameter program failed", Logger::Domain::CORE, r.value());
     }
     package.expand();
     package.update_warnings();
