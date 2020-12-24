@@ -56,7 +56,7 @@ bool ParameterProgram::stack_pop(int64_t &va)
 }
 
 
-std::pair<bool, std::string> ParameterProgram::cmd_dump(const TokenCommand *cmd)
+std::pair<bool, std::string> ParameterProgram::cmd_dump(const TokenCommand &cmd)
 {
     auto sz = stack.size();
     for (const auto &it : stack) {
@@ -67,61 +67,61 @@ std::pair<bool, std::string> ParameterProgram::cmd_dump(const TokenCommand *cmd)
     return {false, ""};
 }
 
-std::pair<bool, std::string> ParameterProgram::cmd_math1(const TokenCommand *cmd)
+std::pair<bool, std::string> ParameterProgram::cmd_math1(const TokenCommand &cmd)
 {
     int64_t a;
     if (stack_pop(a))
         return {true, "empty stack"};
-    if (cmd->command == "dup") {
+    if (cmd.command == "dup") {
         stack.push_back(a);
         stack.push_back(a);
     }
-    else if (cmd->command == "chs") {
+    else if (cmd.command == "chs") {
         stack.push_back(-a);
     }
     return {false, ""};
 }
 
-std::pair<bool, std::string> ParameterProgram::cmd_math3(const TokenCommand *cmd)
+std::pair<bool, std::string> ParameterProgram::cmd_math3(const TokenCommand &cmd)
 {
     int64_t a, b, c;
     if (stack_pop(c) || stack_pop(b) || stack_pop(a))
         return {true, "empty stack"};
-    if (cmd->command == "+xy") {
+    if (cmd.command == "+xy") {
         stack.push_back(a + c);
         stack.push_back(b + c);
     }
-    else if (cmd->command == "-xy") {
+    else if (cmd.command == "-xy") {
         stack.push_back(a - c);
         stack.push_back(b - c);
     }
     return {false, ""};
 }
 
-std::pair<bool, std::string> ParameterProgram::cmd_math2(const ParameterProgram::TokenCommand *cmd)
+std::pair<bool, std::string> ParameterProgram::cmd_math2(const TokenCommand &cmd)
 {
     int64_t a, b;
     if (stack_pop(b) || stack_pop(a))
         return {true, "empty stack"};
-    if (cmd->command[0] == '+') {
+    if (cmd.command[0] == '+') {
         stack.push_back(a + b);
     }
-    else if (cmd->command[0] == '-') {
+    else if (cmd.command[0] == '-') {
         stack.push_back(a - b);
     }
-    else if (cmd->command[0] == '*') {
+    else if (cmd.command[0] == '*') {
         stack.push_back(a * b);
     }
-    else if (cmd->command[0] == '/') {
+    else if (cmd.command[0] == '/') {
         stack.push_back(a / b);
     }
-    else if (cmd->command == "dupc") {
+    else if (cmd.command == "dupc") {
         stack.push_back(a);
         stack.push_back(b);
         stack.push_back(a);
         stack.push_back(b);
     }
-    else if (cmd->command == "swap") {
+    else if (cmd.command == "swap") {
         stack.push_back(b);
         stack.push_back(a);
     }
@@ -152,21 +152,21 @@ std::pair<bool, std::string> ParameterProgram::run(const ParameterSet &pset)
     for (const auto &token : tokens) {
         switch (token->type) {
         case Token::Type::CMD: {
-            auto tok = dynamic_cast<TokenCommand *>(token.get());
-            if (auto cmd = get_command(tok->command)) {
+            auto &tok = dynamic_cast<const TokenCommand &>(*token.get());
+            if (auto cmd = get_command(tok.command)) {
                 auto r = std::invoke(cmd, *this, tok);
                 if (r.first) {
                     return r;
                 }
             }
-            else if (tok->command == "get-parameter") {
-                if (tok->arguments.size() < 1 || tok->arguments.at(0)->type != Token::Type::STR) {
+            else if (tok.command == "get-parameter") {
+                if (tok.arguments.size() < 1 || tok.arguments.at(0)->type != Token::Type::STR) {
                     return {true, "get-parameter requires one string argument"};
                 }
-                auto arg = dynamic_cast<TokenString *>(tok->arguments.at(0).get());
-                ParameterID pid = parameter_id_from_string(arg->string);
+                auto &arg = dynamic_cast<const TokenString &>(*tok.arguments.at(0).get()).string;
+                ParameterID pid = parameter_id_from_string(arg);
                 if (pid == ParameterID::INVALID) {
-                    return {true, "invalid parameter " + arg->string};
+                    return {true, "invalid parameter " + arg};
                 }
                 if (pset.count(pid) == 0) {
                     return {true, "parameter not found: " + parameter_id_to_string(pid)};
@@ -174,12 +174,12 @@ std::pair<bool, std::string> ParameterProgram::run(const ParameterSet &pset)
                 stack.push_back(pset.at(pid));
             }
             else {
-                return {true, "unknown command " + tok->command};
+                return {true, "unknown command " + tok.command};
             }
         } break;
         case Token::Type::INT: {
-            auto tok = dynamic_cast<TokenInt *>(token.get());
-            stack.push_back(tok->value);
+            auto &tok = dynamic_cast<const TokenInt &>(*token.get());
+            stack.push_back(tok.value);
         } break;
         case Token::Type::STR:
         case Token::Type::UUID:
@@ -210,8 +210,7 @@ std::pair<bool, std::string> ParameterProgram::compile()
         Glib::ustring token(it);
         Glib::MatchInfo ma;
         // std::cout << "tok " << it << std::endl;
-        std::vector<std::unique_ptr<Token>> &ts =
-                arg_mode ? dynamic_cast<TokenCommand *>(tokens.back().get())->arguments : tokens;
+        auto &ts = arg_mode ? dynamic_cast<TokenCommand &>(*tokens.back().get()).arguments : tokens;
         if (regex_math->match(token, ma)) {
             tokens.push_back(std::make_unique<TokenCommand>(ma.fetch(1)));
         }

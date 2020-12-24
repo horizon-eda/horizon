@@ -14,14 +14,14 @@ Padstack::MyParameterProgram::MyParameterProgram(Padstack *p, const std::string 
 {
 }
 
-std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const ParameterProgram::TokenCommand *cmd)
+std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const TokenCommand &cmd)
 {
-    if (cmd->arguments.size() < 2 || cmd->arguments.at(0)->type != ParameterProgram::Token::Type::STR
-        || cmd->arguments.at(1)->type != ParameterProgram::Token::Type::STR)
+    if (cmd.arguments.size() < 2 || cmd.arguments.at(0)->type != Token::Type::STR
+        || cmd.arguments.at(1)->type != Token::Type::STR)
         return {true, "not enough arguments"};
 
-    auto pclass = dynamic_cast<ParameterProgram::TokenString *>(cmd->arguments.at(0).get())->string;
-    auto form = dynamic_cast<ParameterProgram::TokenString *>(cmd->arguments.at(1).get())->string;
+    const auto &pclass = dynamic_cast<TokenString &>(*cmd.arguments.at(0).get()).string;
+    const auto &form = dynamic_cast<TokenString &>(*cmd.arguments.at(1).get()).string;
 
     if (form == "rectangle") {
         int64_t width, height;
@@ -74,14 +74,14 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const Param
     return {false, ""};
 }
 
-std::pair<bool, std::string> Padstack::MyParameterProgram::set_hole(const ParameterProgram::TokenCommand *cmd)
+std::pair<bool, std::string> Padstack::MyParameterProgram::set_hole(const TokenCommand &cmd)
 {
-    if (cmd->arguments.size() < 2 || cmd->arguments.at(0)->type != ParameterProgram::Token::Type::STR
-        || cmd->arguments.at(1)->type != ParameterProgram::Token::Type::STR)
+    if (cmd.arguments.size() < 2 || cmd.arguments.at(0)->type != Token::Type::STR
+        || cmd.arguments.at(1)->type != Token::Type::STR)
         return {true, "not enough arguments"};
 
-    auto pclass = dynamic_cast<ParameterProgram::TokenString *>(cmd->arguments.at(0).get())->string;
-    auto shape = dynamic_cast<ParameterProgram::TokenString *>(cmd->arguments.at(1).get())->string;
+    const auto &pclass = dynamic_cast<TokenString &>(*cmd.arguments.at(0).get()).string;
+    const auto &shape = dynamic_cast<TokenString &>(*cmd.arguments.at(1).get()).string;
 
     if (shape == "round") {
         int64_t diameter;

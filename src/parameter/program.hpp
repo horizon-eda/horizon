@@ -109,7 +109,7 @@ protected:
         }
     };
 
-    using CommandHandler = std::pair<bool, std::string> (ParameterProgram::*)(const TokenCommand *cmd);
+    using CommandHandler = std::pair<bool, std::string> (ParameterProgram::*)(const TokenCommand &cmd);
     virtual CommandHandler get_command(const std::string &cmd);
 
     std::vector<int64_t> stack;
@@ -121,9 +121,9 @@ private:
     std::pair<bool, std::string> init_error = {false, ""};
     std::vector<std::unique_ptr<Token>> tokens;
 
-    std::pair<bool, std::string> cmd_dump(const ParameterProgram::TokenCommand *cmd);
-    std::pair<bool, std::string> cmd_math1(const ParameterProgram::TokenCommand *cmd);
-    std::pair<bool, std::string> cmd_math2(const ParameterProgram::TokenCommand *cmd);
-    std::pair<bool, std::string> cmd_math3(const ParameterProgram::TokenCommand *cmd);
+    std::pair<bool, std::string> cmd_dump(const TokenCommand &cmd);
+    std::pair<bool, std::string> cmd_math1(const TokenCommand &cmd);
+    std::pair<bool, std::string> cmd_math2(const TokenCommand &cmd);
+    std::pair<bool, std::string> cmd_math3(const TokenCommand &cmd);
 };
 } // namespace horizon
