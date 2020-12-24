@@ -5,6 +5,7 @@
 #include "pool/entity.hpp"
 #include "pool/part.hpp"
 #include "block/block.hpp"
+#include "board/board_junction.hpp"
 
 namespace horizon {
 void ImpBase::hud_update()
@@ -115,6 +116,13 @@ std::string ImpBase::get_hud_text(std::set<SelectableRef> &sel)
         const auto ju = core->get_junction(sel_find_one(sel, ObjectType::JUNCTION).uuid);
         s += "\n\n<b>Junction:</b>\n";
         s += "Layers " + std::to_string(ju->layer.start()) + " — " + std::to_string(ju->layer.end()) + "\n";
+        const Net *net = nullptr;
+        if (auto ju_b = dynamic_cast<BoardJunction *>(ju))
+            net = ju_b->net;
+        if (net)
+            s += "Net: " + core->get_block()->get_net_name(net->uuid);
+        else
+            s += "No net";
         sel_erase_type(sel, ObjectType::JUNCTION);
     }
 
