@@ -14,8 +14,7 @@ Padstack::MyParameterProgram::MyParameterProgram(Padstack *p, const std::string 
 {
 }
 
-std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const ParameterProgram::TokenCommand *cmd,
-                                                                     std::deque<int64_t> &stack)
+std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const ParameterProgram::TokenCommand *cmd)
 {
     if (cmd->arguments.size() < 2 || cmd->arguments.at(0)->type != ParameterProgram::Token::Type::STR
         || cmd->arguments.at(1)->type != ParameterProgram::Token::Type::STR)
@@ -26,7 +25,7 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const Param
 
     if (form == "rectangle") {
         int64_t width, height;
-        if (stack_pop(stack, height) || stack_pop(stack, width))
+        if (stack_pop(height) || stack_pop(width))
             return {true, "empty stack"};
         for (auto &it : ps->shapes) {
             if (it.second.parameter_class == pclass) {
@@ -37,7 +36,7 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const Param
     }
     else if (form == "circle") {
         int64_t diameter;
-        if (stack_pop(stack, diameter))
+        if (stack_pop(diameter))
             return {true, "empty stack"};
         for (auto &it : ps->shapes) {
             if (it.second.parameter_class == pclass) {
@@ -48,7 +47,7 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const Param
     }
     else if (form == "obround") {
         int64_t width, height;
-        if (stack_pop(stack, height) || stack_pop(stack, width))
+        if (stack_pop(height) || stack_pop(width))
             return {true, "empty stack"};
         for (auto &it : ps->shapes) {
             if (it.second.parameter_class == pclass) {
@@ -59,7 +58,7 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const Param
     }
     else if (form == "position") {
         int64_t x, y;
-        if (stack_pop(stack, y) || stack_pop(stack, x))
+        if (stack_pop(y) || stack_pop(x))
             return {true, "empty stack"};
         for (auto &it : ps->shapes) {
             if (it.second.parameter_class == pclass) {
@@ -75,8 +74,7 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_shape(const Param
     return {false, ""};
 }
 
-std::pair<bool, std::string> Padstack::MyParameterProgram::set_hole(const ParameterProgram::TokenCommand *cmd,
-                                                                    std::deque<int64_t> &stack)
+std::pair<bool, std::string> Padstack::MyParameterProgram::set_hole(const ParameterProgram::TokenCommand *cmd)
 {
     if (cmd->arguments.size() < 2 || cmd->arguments.at(0)->type != ParameterProgram::Token::Type::STR
         || cmd->arguments.at(1)->type != ParameterProgram::Token::Type::STR)
@@ -87,7 +85,7 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_hole(const Parame
 
     if (shape == "round") {
         int64_t diameter;
-        if (stack_pop(stack, diameter))
+        if (stack_pop(diameter))
             return {true, "empty stack"};
         for (auto &it : ps->holes) {
             if (it.second.parameter_class == pclass) {
@@ -98,7 +96,7 @@ std::pair<bool, std::string> Padstack::MyParameterProgram::set_hole(const Parame
     }
     else if (shape == "slot") {
         int64_t diameter, length;
-        if (stack_pop(stack, length) || stack_pop(stack, diameter))
+        if (stack_pop(length) || stack_pop(diameter))
             return {true, "empty stack"};
         for (auto &it : ps->holes) {
             if (it.second.parameter_class == pclass) {
@@ -129,19 +127,19 @@ ParameterProgram::CommandHandler Padstack::MyParameterProgram::get_command(const
         return r;
     }
     else if (cmd == "set-shape") {
-        return std::bind(std::mem_fn(&Padstack::MyParameterProgram::set_shape), this, _1, _2);
+        return static_cast<CommandHandler>(&Padstack::MyParameterProgram::set_shape);
     }
     else if (cmd == "set-hole") {
-        return std::bind(std::mem_fn(&Padstack::MyParameterProgram::set_hole), this, _1, _2);
+        return static_cast<CommandHandler>(&Padstack::MyParameterProgram::set_hole);
     }
     else if (cmd == "set-polygon") {
-        return std::bind(std::mem_fn(&Padstack::MyParameterProgram::set_polygon), this, _1, _2);
+        return static_cast<CommandHandler>(&Padstack::MyParameterProgram::set_polygon);
     }
     else if (cmd == "set-polygon-vertices") {
-        return std::bind(std::mem_fn(&Padstack::MyParameterProgram::set_polygon_vertices), this, _1, _2);
+        return static_cast<CommandHandler>(&Padstack::MyParameterProgram::set_polygon_vertices);
     }
     else if (cmd == "expand-polygon") {
-        return std::bind(std::mem_fn(&Padstack::MyParameterProgram::expand_polygon), this, _1, _2);
+        return static_cast<CommandHandler>(&Padstack::MyParameterProgram::expand_polygon);
     }
     return nullptr;
 }

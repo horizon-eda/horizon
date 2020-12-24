@@ -43,7 +43,7 @@ std::pair<bool, std::string> ParameterProgram::set_code(const std::string &s)
     return compile();
 }
 
-bool ParameterProgram::stack_pop(std::deque<int64_t> &stack, int64_t &va)
+bool ParameterProgram::stack_pop(int64_t &va)
 {
     if (stack.size()) {
         va = stack.back();
@@ -55,114 +55,106 @@ bool ParameterProgram::stack_pop(std::deque<int64_t> &stack, int64_t &va)
     }
 }
 
-class ParameterCommands {
-public:
-    static std::pair<bool, std::string> dump(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack)
-    {
-        auto sz = stack.size();
-        for (const auto &it : stack) {
-            sz--;
-            std::cout << sz << ": " << it << "\n";
-        }
-        std::cout << std::endl;
-        return {false, ""};
-    }
 
-    static std::pair<bool, std::string> math1(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack)
-    {
-        int64_t a;
-        if (ParameterProgram::stack_pop(stack, a))
-            return {true, "empty stack"};
-        if (cmd->command == "dup") {
-            stack.push_back(a);
-            stack.push_back(a);
-        }
-        else if (cmd->command == "chs") {
-            stack.push_back(-a);
-        }
-        return {false, ""};
-    }
-
-    static std::pair<bool, std::string> math3(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack)
-    {
-        int64_t a, b, c;
-        if (ParameterProgram::stack_pop(stack, c) || ParameterProgram::stack_pop(stack, b)
-            || ParameterProgram::stack_pop(stack, a))
-            return {true, "empty stack"};
-        if (cmd->command == "+xy") {
-            stack.push_back(a + c);
-            stack.push_back(b + c);
-        }
-        else if (cmd->command == "-xy") {
-            stack.push_back(a - c);
-            stack.push_back(b - c);
-        }
-        return {false, ""};
-    }
-
-    static std::pair<bool, std::string> math2(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack)
-    {
-        int64_t a, b;
-        if (ParameterProgram::stack_pop(stack, b) || ParameterProgram::stack_pop(stack, a))
-            return {true, "empty stack"};
-        if (cmd->command[0] == '+') {
-            stack.push_back(a + b);
-        }
-        else if (cmd->command[0] == '-') {
-            stack.push_back(a - b);
-        }
-        else if (cmd->command[0] == '*') {
-            stack.push_back(a * b);
-        }
-        else if (cmd->command[0] == '/') {
-            stack.push_back(a / b);
-        }
-        else if (cmd->command == "dupc") {
-            stack.push_back(a);
-            stack.push_back(b);
-            stack.push_back(a);
-            stack.push_back(b);
-        }
-        else if (cmd->command == "swap") {
-            stack.push_back(b);
-            stack.push_back(a);
-        }
-        return {false, ""};
-    }
-
-    static std::function<std::pair<bool, std::string>(const ParameterProgram::TokenCommand *cmd,
-                                                      std::deque<int64_t> &stack)>
-    get_command(const std::string &cmd)
-    {
-        static const std::map<std::string,
-                              std::function<std::pair<bool, std::string>(const ParameterProgram::TokenCommand *cmd,
-                                                                         std::deque<int64_t> &stack)>>
-                commands = {{"dump", &dump}, {"+", &math2},   {"-", &math2},    {"*", &math2},
-                            {"/", &math2},   {"dup", &math1}, {"dupc", &math2}, {"swap", &math2},
-                            {"+xy", &math3}, {"-xy", &math3}, {"chs", &math1}};
-
-        if (commands.count(cmd))
-            return commands.at(cmd);
-        else
-            return nullptr;
-    }
-};
-
-std::function<std::pair<bool, std::string>(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack)>
-ParameterProgram::get_command(const std::string &cmd)
+std::pair<bool, std::string> ParameterProgram::cmd_dump(const TokenCommand *cmd)
 {
-    return ParameterCommands::get_command(cmd);
+    auto sz = stack.size();
+    for (const auto &it : stack) {
+        sz--;
+        std::cout << sz << ": " << it << "\n";
+    }
+    std::cout << std::endl;
+    return {false, ""};
+}
+
+std::pair<bool, std::string> ParameterProgram::cmd_math1(const TokenCommand *cmd)
+{
+    int64_t a;
+    if (stack_pop(a))
+        return {true, "empty stack"};
+    if (cmd->command == "dup") {
+        stack.push_back(a);
+        stack.push_back(a);
+    }
+    else if (cmd->command == "chs") {
+        stack.push_back(-a);
+    }
+    return {false, ""};
+}
+
+std::pair<bool, std::string> ParameterProgram::cmd_math3(const TokenCommand *cmd)
+{
+    int64_t a, b, c;
+    if (stack_pop(c) || stack_pop(b) || stack_pop(a))
+        return {true, "empty stack"};
+    if (cmd->command == "+xy") {
+        stack.push_back(a + c);
+        stack.push_back(b + c);
+    }
+    else if (cmd->command == "-xy") {
+        stack.push_back(a - c);
+        stack.push_back(b - c);
+    }
+    return {false, ""};
+}
+
+std::pair<bool, std::string> ParameterProgram::cmd_math2(const ParameterProgram::TokenCommand *cmd)
+{
+    int64_t a, b;
+    if (stack_pop(b) || stack_pop(a))
+        return {true, "empty stack"};
+    if (cmd->command[0] == '+') {
+        stack.push_back(a + b);
+    }
+    else if (cmd->command[0] == '-') {
+        stack.push_back(a - b);
+    }
+    else if (cmd->command[0] == '*') {
+        stack.push_back(a * b);
+    }
+    else if (cmd->command[0] == '/') {
+        stack.push_back(a / b);
+    }
+    else if (cmd->command == "dupc") {
+        stack.push_back(a);
+        stack.push_back(b);
+        stack.push_back(a);
+        stack.push_back(b);
+    }
+    else if (cmd->command == "swap") {
+        stack.push_back(b);
+        stack.push_back(a);
+    }
+    return {false, ""};
+}
+
+ParameterProgram::CommandHandler ParameterProgram::get_command(const std::string &cmd)
+{
+    using namespace std::placeholders;
+    static const std::map<std::string, ParameterProgram::CommandHandler> commands = {
+            {"dump", &ParameterProgram::cmd_dump},  {"+", &ParameterProgram::cmd_math2},
+            {"-", &ParameterProgram::cmd_math2},    {"*", &ParameterProgram::cmd_math2},
+            {"/", &ParameterProgram::cmd_math2},    {"dup", &ParameterProgram::cmd_math1},
+            {"dupc", &ParameterProgram::cmd_math2}, {"swap", &ParameterProgram::cmd_math2},
+            {"+xy", &ParameterProgram::cmd_math3},  {"-xy", &ParameterProgram::cmd_math3},
+            {"chs", &ParameterProgram::cmd_math1},
+    };
+
+    if (commands.count(cmd))
+        return commands.at(cmd);
+    else
+        return nullptr;
 }
 
 std::pair<bool, std::string> ParameterProgram::run(const ParameterSet &pset)
 {
-    std::deque<int64_t> stack;
+    stack.clear();
     for (const auto &token : tokens) {
         switch (token->type) {
         case Token::Type::CMD: {
             auto tok = dynamic_cast<TokenCommand *>(token.get());
             if (auto cmd = get_command(tok->command)) {
-                auto r = cmd(tok, stack);
+                auto r = std::invoke(cmd, *this, tok);
                 if (r.first) {
                     return r;
                 }
@@ -202,7 +194,7 @@ std::pair<bool, std::string> ParameterProgram::run(const ParameterSet &pset)
 std::pair<bool, std::string> ParameterProgram::compile()
 {
     std::stringstream iss(code);
-    std::deque<std::string> stokens{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
+    std::vector<std::string> stokens{std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>{}};
 
     const auto regex_int = Glib::Regex::create("^([+-]?\\d+)$");
     const auto regex_dim = Glib::Regex::create("^([+-]?(?:\\d*\\.)?\\d+)mm$");
@@ -218,7 +210,7 @@ std::pair<bool, std::string> ParameterProgram::compile()
         Glib::ustring token(it);
         Glib::MatchInfo ma;
         // std::cout << "tok " << it << std::endl;
-        std::deque<std::unique_ptr<Token>> &ts =
+        std::vector<std::unique_ptr<Token>> &ts =
                 arg_mode ? dynamic_cast<TokenCommand *>(tokens.back().get())->arguments : tokens;
         if (regex_math->match(token, ma)) {
             tokens.push_back(std::make_unique<TokenCommand>(ma.fetch(1)));

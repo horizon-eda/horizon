@@ -3,8 +3,7 @@
 
 namespace horizon {
 
-std::pair<bool, std::string> ParameterProgramPolygon::set_polygon(const ParameterProgram::TokenCommand *cmd,
-                                                                  std::deque<int64_t> &stack)
+std::pair<bool, std::string> ParameterProgramPolygon::set_polygon(const ParameterProgram::TokenCommand *cmd)
 {
     if (cmd->arguments.size() < 4)
         return {true, "not enough arguments for set-polygon"};
@@ -24,7 +23,7 @@ std::pair<bool, std::string> ParameterProgramPolygon::set_polygon(const Paramete
 
     if (shape == "rectangle") {
         int64_t width, height;
-        if (ParameterProgram::stack_pop(stack, height) || ParameterProgram::stack_pop(stack, width))
+        if (stack_pop(height) || stack_pop(width))
             return {true, "empty stack"};
         for (auto &it : get_polygons()) {
             if (it.second.parameter_class == pclass) {
@@ -39,7 +38,7 @@ std::pair<bool, std::string> ParameterProgramPolygon::set_polygon(const Paramete
     }
     else if (shape == "circle") {
         int64_t diameter;
-        if (ParameterProgram::stack_pop(stack, diameter))
+        if (stack_pop(diameter))
             return {true, "empty stack"};
         for (auto &it : get_polygons()) {
             if (it.second.parameter_class == pclass) {
@@ -64,8 +63,7 @@ std::pair<bool, std::string> ParameterProgramPolygon::set_polygon(const Paramete
     return {false, ""};
 }
 
-std::pair<bool, std::string> ParameterProgramPolygon::set_polygon_vertices(const ParameterProgram::TokenCommand *cmd,
-                                                                           std::deque<int64_t> &stack)
+std::pair<bool, std::string> ParameterProgramPolygon::set_polygon_vertices(const ParameterProgram::TokenCommand *cmd)
 {
     if (cmd->arguments.size() < 2 || cmd->arguments.at(0)->type != ParameterProgram::Token::Type::STR
         || cmd->arguments.at(1)->type != ParameterProgram::Token::Type::INT)
@@ -83,7 +81,7 @@ std::pair<bool, std::string> ParameterProgramPolygon::set_polygon_vertices(const
     }
     for (std::size_t i = 0; i < n_vertices; i++) {
         Coordi c;
-        if (stack_pop(stack, c.y) || stack_pop(stack, c.x)) {
+        if (stack_pop(c.y) || stack_pop(c.x)) {
             return {true, "empty stack"};
         }
         for (auto &it : get_polygons()) {
@@ -96,8 +94,7 @@ std::pair<bool, std::string> ParameterProgramPolygon::set_polygon_vertices(const
 }
 
 
-std::pair<bool, std::string> ParameterProgramPolygon::expand_polygon(const ParameterProgram::TokenCommand *cmd,
-                                                                     std::deque<int64_t> &stack)
+std::pair<bool, std::string> ParameterProgramPolygon::expand_polygon(const ParameterProgram::TokenCommand *cmd)
 {
     if (cmd->arguments.size() < 1 || cmd->arguments.at(0)->type != ParameterProgram::Token::Type::STR)
         return {true, "not enough arguments"};
@@ -120,7 +117,7 @@ std::pair<bool, std::string> ParameterProgramPolygon::expand_polygon(const Param
     }
 
     int64_t expand;
-    if (stack_pop(stack, expand))
+    if (stack_pop(expand))
         return {true, "empty stack"};
 
     ClipperLib::ClipperOffset ofs;

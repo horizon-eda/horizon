@@ -1,6 +1,6 @@
 #pragma once
 #include "set.hpp"
-#include <deque>
+#include <vector>
 #include <functional>
 #include <memory>
 #include <string>
@@ -21,8 +21,13 @@ public:
     std::pair<bool, std::string> set_code(const std::string &s);
 
     std::pair<bool, std::string> run(const ParameterSet &pset = {});
+    using Stack = std::vector<int64_t>;
+    const auto &get_stack() const
+    {
+        return stack;
+    }
 
-    static bool stack_pop(std::deque<int64_t> &stack, int64_t &va);
+    bool stack_pop(int64_t &va);
 
 protected:
     class Token {
@@ -68,7 +73,7 @@ protected:
         }
 
         const std::string command;
-        std::deque<std::unique_ptr<Token>> arguments;
+        std::vector<std::unique_ptr<Token>> arguments;
 
         std::unique_ptr<Token> clone() const override
         {
@@ -103,15 +108,22 @@ protected:
             return std::make_unique<TokenUUID>(*this);
         }
     };
-    using CommandHandler =
-            std::function<std::pair<bool, std::string>(const TokenCommand *cmd, std::deque<int64_t> &stack)>;
+
+    using CommandHandler = std::pair<bool, std::string> (ParameterProgram::*)(const TokenCommand *cmd);
     virtual CommandHandler get_command(const std::string &cmd);
+
+    std::vector<int64_t> stack;
 
 private:
     std::string code;
+
     std::pair<bool, std::string> compile();
     std::pair<bool, std::string> init_error = {false, ""};
+    std::vector<std::unique_ptr<Token>> tokens;
 
-    std::deque<std::unique_ptr<Token>> tokens;
+    std::pair<bool, std::string> cmd_dump(const ParameterProgram::TokenCommand *cmd);
+    std::pair<bool, std::string> cmd_math1(const ParameterProgram::TokenCommand *cmd);
+    std::pair<bool, std::string> cmd_math2(const ParameterProgram::TokenCommand *cmd);
+    std::pair<bool, std::string> cmd_math3(const ParameterProgram::TokenCommand *cmd);
 };
 } // namespace horizon

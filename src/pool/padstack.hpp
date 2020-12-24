@@ -30,8 +30,8 @@ public:
         ParameterProgram::CommandHandler get_command(const std::string &cmd) override;
         class Padstack *ps = nullptr;
 
-        std::pair<bool, std::string> set_shape(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack);
-        std::pair<bool, std::string> set_hole(const ParameterProgram::TokenCommand *cmd, std::deque<int64_t> &stack);
+        std::pair<bool, std::string> set_shape(const ParameterProgram::TokenCommand *cmd);
+        std::pair<bool, std::string> set_hole(const ParameterProgram::TokenCommand *cmd);
 
     public:
         MyParameterProgram(class Padstack *p, const std::string &code);
