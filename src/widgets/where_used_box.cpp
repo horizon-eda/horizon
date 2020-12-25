@@ -53,11 +53,11 @@ size_t WhereUsedBox::load(ObjectType type, const UUID &uu)
                     "SELECT type, uuid FROM dependencies, where_used "
                     "WHERE dependencies.dep_type = where_used.typex "
                     "AND dependencies.dep_uuid = where_used.uuidx) "
-                    "SELECT where_used.typex, where_used.uuidx, all_items_view.name "
-                    "FROM where_used "
-                    "LEFT JOIN all_items_view "
-                    "ON where_used.typex = all_items_view.type "
-                    "AND where_used.uuidx = all_items_view.uuid;");
+                    "SELECT where_used.typex, where_used.uuidx, "
+                    "(SELECT all_items_view.name FROM all_items_view "
+                    "WHERE where_used.typex = all_items_view.type "
+                    "AND where_used.uuidx = all_items_view.uuid) "
+                    "FROM where_used");
     q.bind(1, object_type_lut.lookup_reverse(type));
     q.bind(2, uu);
     q.step(); // drop first one
