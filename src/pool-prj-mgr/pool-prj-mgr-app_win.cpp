@@ -960,9 +960,10 @@ private:
     std::string base_path;
     Glib::Dispatcher dispatcher;
     std::mutex pool_update_status_queue_mutex;
-    std::deque<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_status_queue;
+    std::list<std::tuple<PoolUpdateStatus, std::string, std::string>> pool_update_status_queue;
     Gtk::Label *filename_label = nullptr;
     void pool_update_thread();
+    std::string pool_update_last_info;
 };
 
 ForcedPoolUpdateDialog::ForcedPoolUpdateDialog(const std::string &bp, Gtk::Window *parent)
@@ -987,7 +988,7 @@ ForcedPoolUpdateDialog::ForcedPoolUpdateDialog(const std::string &bp, Gtk::Windo
     filename_label = Gtk::manage(new Gtk::Label);
     filename_label->get_style_context()->add_class("dim-label");
     filename_label->set_ellipsize(Pango::ELLIPSIZE_START);
-    filename_label->set_xalign(1);
+    filename_label->set_xalign(0);
     box->pack_start(*filename_label, false, false, 0);
 
     box->property_margin() = 10;
@@ -998,19 +999,25 @@ ForcedPoolUpdateDialog::ForcedPoolUpdateDialog(const std::string &bp, Gtk::Windo
     thr.detach();
 
     dispatcher.connect([this] {
-        std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
-        while (pool_update_status_queue.size()) {
-            std::string last_filename;
-            std::string last_msg;
-            PoolUpdateStatus last_status;
+        decltype(pool_update_status_queue) my_queue;
+        {
+            std::lock_guard<std::mutex> guard(pool_update_status_queue_mutex);
+            my_queue.splice(my_queue.begin(), pool_update_status_queue);
+        }
 
-            std::tie(last_status, last_filename, last_msg) = pool_update_status_queue.front();
-            filename_label->set_text(last_filename);
-            if (last_status == PoolUpdateStatus::DONE) {
-                response(1);
+        if (my_queue.size()) {
+            const auto last_info = pool_update_last_info;
+            for (const auto &[last_status, last_filename, last_msg] : my_queue) {
+                if (last_status == PoolUpdateStatus::DONE) {
+                    // delay prevents deleted dispatcher warnings
+                    Glib::signal_timeout().connect_once([this] { response(1); }, 200);
+                }
+                else if (last_status == PoolUpdateStatus::INFO) {
+                    pool_update_last_info = last_msg;
+                }
             }
-
-            pool_update_status_queue.pop_front();
+            if (pool_update_last_info != last_info)
+                filename_label->set_text(pool_update_last_info);
         }
     });
 }
@@ -1042,8 +1049,6 @@ bool PoolProjectManagerAppWindow::check_schema_update(const std::string &base_pa
         update_required = true;
     }
     if (update_required) {
-        // Gtk::MessageDialog md("Schema update required", false /* use_markup */, Gtk::MESSAGE_ERROR,
-        // Gtk::BUTTONS_OK); md.run(); horizon::pool_update(base_path);
         ForcedPoolUpdateDialog dia(base_path, this);
         while (dia.run() != 1) {
         }
