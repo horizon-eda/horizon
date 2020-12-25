@@ -162,20 +162,20 @@ void ImpPackage::construct()
     footprint_generator_window = FootprintGeneratorWindow::create(main_window, core_package);
     footprint_generator_window->signal_generated().connect(sigc::mem_fun(*this, &ImpBase::canvas_update_from_pp));
 
-    auto parameter_window =
+    parameter_window =
             new ParameterWindow(main_window, &core_package.parameter_program_code, &core_package.parameter_set);
     parameter_window->signal_changed().connect([this] { core_package.set_needs_save(); });
     {
         auto button = Gtk::manage(new Gtk::Button("Parameters…"));
         main_window->header->pack_start(*button);
         button->show();
-        button->signal_clicked().connect([parameter_window] { parameter_window->present(); });
+        button->signal_clicked().connect([this] { parameter_window->present(); });
     }
     parameter_window_add_polygon_expand(parameter_window);
     {
         auto button = Gtk::manage(new Gtk::Button("Insert courtyard program"));
         parameter_window->add_button(button);
-        button->signal_clicked().connect([this, parameter_window] {
+        button->signal_clicked().connect([this] {
             const Polygon *poly = nullptr;
             for (const auto &it : package.polygons) {
                 if (it.second.vertices.size() == 4 && !it.second.has_arcs()
@@ -213,7 +213,7 @@ void ImpPackage::construct()
             }
         });
     }
-    parameter_window->signal_apply().connect([this, parameter_window] {
+    parameter_window->signal_apply().connect([this] {
         if (core->tool_is_active())
             return;
 
@@ -405,8 +405,10 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpPackage::get_selection_fil
 
 void ImpPackage::update_header()
 {
-    header_button->set_label(entry_name->get_text());
-    set_window_title(entry_name->get_text());
+    const auto &name = entry_name->get_text();
+    header_button->set_label(name);
+    set_window_title(name);
+    parameter_window->set_subtitle(name);
 }
 
 ImpPackage::~ImpPackage()

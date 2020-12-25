@@ -26,6 +26,8 @@ private:
     class HeaderButton *header_button = nullptr;
     Gtk::Entry *name_entry = nullptr;
 
+    class ParameterWindow *parameter_window = nullptr;
+
     void update_header();
 };
 } // namespace horizon

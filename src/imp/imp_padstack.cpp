@@ -51,12 +51,6 @@ void ImpPadstack::construct()
     well_known_name_entry->set_text(padstack.well_known_name);
     well_known_name_entry->signal_changed().connect([this, well_known_name_entry] { core_padstack.set_needs_save(); });
 
-    core_padstack.signal_save().connect([this, well_known_name_entry] {
-        padstack.name = name_entry->get_text();
-        padstack.well_known_name = well_known_name_entry->get_text();
-        header_button->set_label(padstack.name);
-    });
-
     auto type_combo = Gtk::manage(new Gtk::ComboBoxText());
     type_combo->append("top", "Top");
     type_combo->append("bottom", "Bottom");
@@ -68,6 +62,12 @@ void ImpPadstack::construct()
     header_button->add_widget("Type", type_combo);
     type_combo->set_active_id(Padstack::type_lut.lookup_reverse(padstack.type));
     type_combo->signal_changed().connect([this] { core_padstack.set_needs_save(); });
+
+    core_padstack.signal_save().connect([this, well_known_name_entry, type_combo] {
+        padstack.name = name_entry->get_text();
+        padstack.well_known_name = well_known_name_entry->get_text();
+        padstack.type = Padstack::type_lut.lookup(type_combo->get_active_id());
+    });
 
     auto editor = new ParameterSetEditor(&core_padstack.parameter_set, false); //, &core_padstack.parameters_required);
     editor->signal_create_extra_widget().connect([this](ParameterID id) {
@@ -88,19 +88,19 @@ void ImpPadstack::construct()
     editor->signal_remove_extra_widget().connect(
             [this](ParameterID id) { core_padstack.parameters_required.erase(id); });
 
-    auto parameter_window = new ParameterWindow(main_window, &core_padstack.parameter_program_code,
-                                                &core_padstack.parameter_set, editor);
+    parameter_window = new ParameterWindow(main_window, &core_padstack.parameter_program_code,
+                                           &core_padstack.parameter_set, editor);
     parameter_window->signal_changed().connect([this] { core_padstack.set_needs_save(); });
     parameter_window_add_polygon_expand(parameter_window);
     {
         auto button = Gtk::manage(new Gtk::Button("Parameters…"));
         main_window->header->pack_start(*button);
         button->show();
-        button->signal_clicked().connect([parameter_window] { parameter_window->present(); });
+        button->signal_clicked().connect([this] { parameter_window->present(); });
     }
 
 
-    parameter_window->signal_apply().connect([this, parameter_window] {
+    parameter_window->signal_apply().connect([this] {
         if (core->tool_is_active())
             return;
         auto &ps = padstack;
@@ -124,11 +124,7 @@ void ImpPadstack::construct()
         core_padstack.rebuild();
         canvas_update();
     });
-    core->signal_tool_changed().connect(
-            [parameter_window](ToolID t) { parameter_window->set_can_apply(t == ToolID::NONE); });
-
-    core_padstack.signal_save().connect(
-            [this, type_combo] { padstack.type = Padstack::type_lut.lookup(type_combo->get_active_id()); });
+    core->signal_tool_changed().connect([this](ToolID t) { parameter_window->set_can_apply(t == ToolID::NONE); });
 
     add_action_button(make_action(ToolID::PLACE_SHAPE));
     add_action_button(make_action(ToolID::PLACE_SHAPE_RECTANGLE));
@@ -169,8 +165,10 @@ std::map<ObjectType, ImpBase::SelectionFilterInfo> ImpPadstack::get_selection_fi
 
 void ImpPadstack::update_header()
 {
-    header_button->set_label(name_entry->get_text());
-    set_window_title(name_entry->get_text());
+    const auto &name = name_entry->get_text();
+    header_button->set_label(name);
+    set_window_title(name);
+    parameter_window->set_subtitle(name);
 }
 
 

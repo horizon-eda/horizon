@@ -59,6 +59,9 @@ private:
     class PoolBrowserButton *browser_alt_button = nullptr;
     void check_alt_pkg();
 
+    class ParameterWindow *parameter_window = nullptr;
+
+
     void update_header();
 };
 } // namespace horizon

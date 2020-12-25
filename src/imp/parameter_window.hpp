@@ -27,6 +27,8 @@ public:
         return parameter_set_editor;
     }
 
+    void set_subtitle(const std::string &t);
+
 private:
     type_signal_apply s_signal_apply;
     Gtk::Button *apply_button = nullptr;
@@ -34,6 +36,7 @@ private:
     Gtk::Label *bar_label = nullptr;
     Gtk::Box *extra_button_box = nullptr;
     Gtk::TextView *tv = nullptr;
+    Gtk::HeaderBar *hb = nullptr;
 
     class ParameterSetEditor *parameter_set_editor = nullptr;
     void insert_parameter(ParameterID id);

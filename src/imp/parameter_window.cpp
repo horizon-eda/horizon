@@ -7,7 +7,7 @@ ParameterWindow::ParameterWindow(Gtk::Window *p, std::string *ppc, ParameterSet 
 {
     set_transient_for(*p);
     set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
-    auto hb = Gtk::manage(new Gtk::HeaderBar());
+    hb = Gtk::manage(new Gtk::HeaderBar());
     hb->set_show_close_button(true);
     hb->set_title("Parameters");
 
@@ -83,6 +83,11 @@ ParameterWindow::ParameterWindow(Gtk::Window *p, std::string *ppc, ParameterSet 
     add(*box2);
     bar->hide();
     extra_button_box->hide();
+}
+
+void ParameterWindow::set_subtitle(const std::string &t)
+{
+    hb->set_subtitle(t);
 }
 
 void ParameterWindow::set_can_apply(bool v)
