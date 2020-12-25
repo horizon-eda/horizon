@@ -5,9 +5,12 @@
 #include "util/uuid.hpp"
 #include "common/common.hpp"
 #include "nlohmann/json.hpp"
+#include "util/sqlite.hpp"
 #include <git2.h>
+#include "util/sort_controller.hpp"
 
 class git_repository;
+
 
 namespace horizon {
 using json = nlohmann::json;
@@ -47,34 +50,38 @@ private:
             Gtk::TreeModelColumnRecord::add(uuid);
 
             Gtk::TreeModelColumnRecord::add(status);
-            Gtk::TreeModelColumnRecord::add(status_flags);
             Gtk::TreeModelColumnRecord::add(path);
         }
         Gtk::TreeModelColumn<Glib::ustring> name;
         Gtk::TreeModelColumn<ObjectType> type;
         Gtk::TreeModelColumn<UUID> uuid;
 
-        Gtk::TreeModelColumn<git_delta_t> status;
-        Gtk::TreeModelColumn<unsigned int> status_flags;
+        Gtk::TreeModelColumn<unsigned int> status;
         Gtk::TreeModelColumn<std::string> path;
     };
     TreeColumns list_columns;
 
     Glib::RefPtr<Gtk::ListStore> diff_store;
-    Glib::RefPtr<Gtk::TreeModelFilter> diff_store_filtered;
-    Glib::RefPtr<Gtk::TreeModelSort> diff_store_sorted;
-
     Glib::RefPtr<Gtk::ListStore> status_store;
-    Glib::RefPtr<Gtk::TreeModelSort> status_store_sorted;
-    void install_sort(Glib::RefPtr<Gtk::TreeSortable> store);
+
+    std::optional<SQLite::Query> q_diff;
+    std::optional<SQLite::Query> q_status;
+
+    std::optional<SortController> sort_controller_diff;
+    std::optional<SortController> sort_controller_status;
+
+    void update_diff();
+    void update_status();
+
+    enum class View { DIFF, STATUS };
+
+    void store_from_db(View view, const std::string &extra_q = "");
 
     static int diff_file_cb_c(const git_diff_delta *delta, float progress, void *pl);
     static int status_cb_c(const char *path, unsigned int status_flags, void *payload);
     void status_cb(const char *path, unsigned int status_flags);
     void diff_file_cb(const git_diff_delta *delta);
 
-    void update_store_from_db_prepare();
-    void update_store_from_db(Glib::RefPtr<Gtk::ListStore> store);
     void handle_add_with_deps();
     void handle_pr();
     void handle_back_to_master(bool delete_pr);

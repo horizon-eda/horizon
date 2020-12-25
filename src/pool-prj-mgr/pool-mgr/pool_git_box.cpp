@@ -27,7 +27,6 @@ void PoolGitBox::make_treeview(Gtk::TreeView *treeview)
             else
                 mcr->property_text() = object_descriptions.at(row[list_columns.type]).name;
         });
-        tvc->set_sort_column(list_columns.type);
         treeview->append_column(*tvc);
     }
     {
@@ -64,27 +63,6 @@ static const std::map<unsigned int, std::string> status_names = {{GIT_STATUS_CUR
                                                                  {GIT_STATUS_IGNORED, "Ignored"},
                                                                  {GIT_STATUS_CONFLICTED, "Conflicted"}};
 
-void PoolGitBox::install_sort(Glib::RefPtr<Gtk::TreeSortable> store)
-{
-    store->set_sort_func(list_columns.type,
-                         [this](const Gtk::TreeModel::iterator &a, const Gtk::TreeModel::iterator &b) {
-                             Gtk::TreeModel::Row ra = *a;
-                             Gtk::TreeModel::Row rb = *b;
-                             ObjectType ta = ra[list_columns.type];
-                             ObjectType tb = rb[list_columns.type];
-                             return static_cast<int>(ta) - static_cast<int>(tb);
-                         });
-    store->set_sort_func(list_columns.status,
-                         [this](const Gtk::TreeModel::iterator &a, const Gtk::TreeModel::iterator &b) {
-                             Gtk::TreeModel::Row ra = *a;
-                             Gtk::TreeModel::Row rb = *b;
-                             git_delta_t ta = ra[list_columns.status];
-                             git_delta_t tb = rb[list_columns.status];
-                             return static_cast<int>(ta) - static_cast<int>(tb);
-                         });
-    store->set_sort_column(list_columns.status_flags, Gtk::SORT_ASCENDING);
-}
-
 PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &x, PoolNotebook *nb)
     : Gtk::Box(cobject), notebook(nb)
 {
@@ -101,31 +79,15 @@ PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
     status_treeview->get_selection()->signal_changed().connect(
             [this] { add_with_deps_button->set_sensitive(status_treeview->get_selection()->count_selected_rows()); });
 
-    diff_show_deleted_checkbutton->signal_toggled().connect([this] { diff_store_filtered->refilter(); });
-    diff_show_modified_checkbutton->signal_toggled().connect([this] { diff_store_filtered->refilter(); });
+    diff_show_deleted_checkbutton->signal_toggled().connect([this] { update_diff(); });
+    diff_show_modified_checkbutton->signal_toggled().connect([this] { update_diff(); });
 
     diff_store = Gtk::ListStore::create(list_columns);
     status_store = Gtk::ListStore::create(list_columns);
-    status_store_sorted = Gtk::TreeModelSort::create(status_store);
 
-    diff_store_filtered = Gtk::TreeModelFilter::create(diff_store);
-    diff_store_filtered->set_visible_func([this](const Gtk::TreeModel::const_iterator &it) -> bool {
-        const Gtk::TreeModel::Row row = *it;
-        git_delta_t status = row[list_columns.status];
-        if (status == GIT_DELTA_DELETED)
-            return diff_show_deleted_checkbutton->get_active();
-        else if (status == GIT_DELTA_MODIFIED)
-            return diff_show_modified_checkbutton->get_active();
-        else
-            return true;
-    });
-    diff_store_sorted = Gtk::TreeModelSort::create(diff_store_filtered);
 
-    install_sort(status_store_sorted);
-    install_sort(diff_store_sorted);
-
-    diff_treeview->set_model(diff_store_sorted);
-    status_treeview->set_model(status_store_sorted);
+    diff_treeview->set_model(diff_store);
+    status_treeview->set_model(status_store);
     {
         auto cr = Gtk::manage(new Gtk::CellRendererText());
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn("State", *cr));
@@ -151,17 +113,22 @@ PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             }
             mcr->property_text() = state;
         });
-        tvc->set_sort_column(list_columns.status);
         diff_treeview->append_column(*tvc);
     }
     make_treeview(diff_treeview);
+    sort_controller_diff.emplace(diff_treeview);
+    sort_controller_diff->add_column(0, "status");
+    sort_controller_diff->add_column(1, "type");
+    sort_controller_diff->set_sort(0, SortController::Sort::ASC);
+    sort_controller_diff->signal_changed().connect(sigc::mem_fun(*this, &PoolGitBox::update_diff));
+
     {
         auto cr = Gtk::manage(new Gtk::CellRendererText());
         auto tvc = Gtk::manage(new Gtk::TreeViewColumn("Status", *cr));
         tvc->set_cell_data_func(*cr, [this](Gtk::CellRenderer *tcr, const Gtk::TreeModel::iterator &it) {
             Gtk::TreeModel::Row row = *it;
             auto mcr = dynamic_cast<Gtk::CellRendererText *>(tcr);
-            unsigned int status_flags = row[list_columns.status_flags];
+            unsigned int status_flags = row[list_columns.status];
             std::string s;
             for (const auto &it_st : status_names) {
                 if (status_flags & it_st.first) {
@@ -174,10 +141,14 @@ PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
             }
             mcr->property_text() = s;
         });
-        tvc->set_sort_column(list_columns.status_flags);
         status_treeview->append_column(*tvc);
     }
     make_treeview(status_treeview);
+    sort_controller_status.emplace(status_treeview);
+    sort_controller_status->add_column(0, "status");
+    sort_controller_status->add_column(1, "type");
+    sort_controller_status->set_sort(0, SortController::Sort::ASC);
+    sort_controller_status->signal_changed().connect(sigc::mem_fun(*this, &PoolGitBox::update_status));
 
 
     x->get_widget("button_git_pr", pr_button);
@@ -192,17 +163,24 @@ PoolGitBox::PoolGitBox(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>
         back_to_master_button->hide();
         back_to_master_delete_button->hide();
     }
+
+    notebook->pool.db.execute(
+            "CREATE TEMP TABLE 'git_files_status' ('git_filename' TEXT NOT NULL, status INTEGER NOT NULL);");
+    notebook->pool.db.execute(
+            "CREATE TEMP TABLE 'git_files_diff' ('git_filename' TEXT NOT NULL, status INTEGER NOT NULL);");
+    notebook->pool.db.execute("CREATE INDEX git_file_status ON git_files_status (git_filename)");
+    notebook->pool.db.execute("CREATE INDEX git_file_diff ON git_files_diff (git_filename)");
+
+    q_diff.emplace(notebook->pool.db, "INSERT INTO 'git_files_diff' VALUES (?, ?)");
+    q_status.emplace(notebook->pool.db, "INSERT INTO 'git_files_status' VALUES (?, ?)");
 }
 
 void PoolGitBox::diff_file_cb(const git_diff_delta *delta)
 {
-    Gtk::TreeModel::Row row = *diff_store->append();
-    row[list_columns.status] = delta->status;
-    row[list_columns.path] = delta->new_file.path;
-    row[list_columns.type] = ObjectType::INVALID;
-    SQLite::Query q(notebook->pool.db, "INSERT INTO 'git_files' VALUES (?)");
-    q.bind(1, std::string(delta->new_file.path));
-    q.step();
+    q_diff->reset();
+    q_diff->bind(1, std::string(delta->new_file.path));
+    q_diff->bind(2, delta->status);
+    q_diff->step();
 }
 
 int PoolGitBox::diff_file_cb_c(const git_diff_delta *delta, float progress, void *pl)
@@ -222,13 +200,10 @@ int PoolGitBox::status_cb_c(const char *path, unsigned int status_flags, void *p
 void PoolGitBox::status_cb(const char *path, unsigned int status_flags)
 {
     if (!(status_flags & GIT_STATUS_IGNORED)) {
-        Gtk::TreeModel::Row row = *status_store->append();
-        row[list_columns.path] = path;
-        row[list_columns.type] = ObjectType::INVALID;
-        row[list_columns.status_flags] = status_flags;
-        SQLite::Query q(notebook->pool.db, "INSERT INTO 'git_files' VALUES (?)");
-        q.bind(1, std::string(path));
-        q.step();
+        q_status->reset();
+        q_status->bind(1, std::string(path));
+        q_status->bind(2, status_flags);
+        q_status->step();
     }
 }
 
@@ -279,22 +254,20 @@ void PoolGitBox::refresh()
         {
             autofree_ptr<git_diff> diff(git_diff_free);
             git_diff_tree_to_workdir_with_index(&diff.ptr, repo, tree_master, nullptr);
-            diff_treeview->unset_model();
-            diff_store->clear();
-            update_store_from_db_prepare();
+            notebook->pool.db.execute("BEGIN");
+            notebook->pool.db.execute("DELETE FROM git_files_diff");
             git_diff_foreach(diff, &PoolGitBox::diff_file_cb_c, nullptr, nullptr, nullptr, this);
-            update_store_from_db(diff_store);
-            diff_treeview->set_model(diff_store_sorted);
+            notebook->pool.db.execute("COMMIT");
             diff_box->set_visible(tree_master != tree_head);
+            update_diff();
         }
 
         {
-            status_treeview->unset_model();
-            status_store->clear();
-            update_store_from_db_prepare();
+            notebook->pool.db.execute("BEGIN");
+            notebook->pool.db.execute("DELETE FROM git_files_status");
             git_status_foreach(repo, &PoolGitBox::status_cb_c, this);
-            update_store_from_db(status_store);
-            status_treeview->set_model(status_store_sorted);
+            notebook->pool.db.execute("COMMIT");
+            update_status();
         }
 
 
@@ -315,44 +288,70 @@ void PoolGitBox::refresh()
     }
 }
 
-void PoolGitBox::update_store_from_db_prepare()
+void PoolGitBox::store_from_db(View view, const std::string &extra_q)
 {
-    notebook->pool.db.execute("CREATE TEMP TABLE 'git_files' ('git_filename' TEXT NOT NULL);");
-    notebook->pool.db.execute("BEGIN TRANSACTION");
-}
+    const std::string table = view == View::DIFF ? "git_files_diff" : "git_files_status";
+    const std::string order =
+            view == View::DIFF ? sort_controller_diff->get_order_by() : sort_controller_status->get_order_by();
+    auto store = view == View::DIFF ? diff_store : status_store;
 
-void PoolGitBox::update_store_from_db(Glib::RefPtr<Gtk::ListStore> store)
-{
-    notebook->pool.db.execute("COMMIT");
-    notebook->pool.db.execute("CREATE INDEX git_file ON git_files (git_filename)");
-    SQLite::Query q(
-            notebook->pool.db,
-            "SELECT type, uuid, name, filename FROM git_files LEFT JOIN "
-            "(SELECT type, uuid, name, filename FROM all_items_view UNION ALL SELECT DISTINCT 'model_3d' AS type, "
-            "'00000000-0000-0000-0000-000000000000' as uuid, '' as name, model_filename as filename FROM models) "
-            "ON filename=git_filename");
-    auto it = store->children().begin();
+    const std::string qs = "SELECT type, uuid, name, git_filename, status FROM " + table + " LEFT JOIN "
+           "(SELECT type, uuid, name, filename FROM all_items_view UNION ALL SELECT DISTINCT 'model_3d' AS type, "
+           "'00000000-0000-0000-0000-000000000000' as uuid, '' as name, model_filename as filename FROM models) "
+           "ON filename=git_filename " + extra_q  + " " + order;
+    SQLite::Query q(notebook->pool.db, qs);
     while (q.step()) {
-        if (it != store->children().end()) {
-            if (it->get_value(list_columns.path) == q.get<std::string>(3)) {
-                ObjectType type = object_type_lut.lookup(q.get<std::string>(0));
-                UUID uu = q.get<std::string>(1);
-                std::string name = q.get<std::string>(2);
-                it->set_value(list_columns.type, type);
-                it->set_value(list_columns.uuid, uu);
-                it->set_value(list_columns.name, Glib::ustring(name));
-            }
-            else {
-                it->set_value(list_columns.name, Glib::ustring("Not found in pool"));
-            }
-            it++;
+        Gtk::TreeModel::Row row = *store->append();
+        const auto stype = q.get<std::string>(0);
+        row[list_columns.path] = q.get<std::string>(3);
+        row[list_columns.status] = q.get<int>(4);
+        if (stype.size()) {
+            ObjectType type = object_type_lut.lookup(stype);
+            UUID uu = q.get<std::string>(1);
+            std::string name = q.get<std::string>(2);
+            row[list_columns.type] = type;
+            row[list_columns.uuid] = uu;
+            row[list_columns.name] = name;
         }
         else {
-            throw std::runtime_error("db vs store mismatch");
+            row[list_columns.type] = ObjectType::INVALID;
+            row[list_columns.uuid] = UUID();
+            row[list_columns.name] = "Not found in pool";
         }
     }
+}
 
-    notebook->pool.db.execute("DROP TABLE 'git_files'");
+void PoolGitBox::update_diff()
+{
+    diff_treeview->unset_model();
+    diff_store->clear();
+    const bool show_deleted = diff_show_deleted_checkbutton->get_active();
+    const bool show_modified = diff_show_modified_checkbutton->get_active();
+    std::string where;
+    if (show_deleted && show_modified) {
+        // pass
+    }
+    else if (show_deleted && !show_modified) {
+        where = "WHERE status != " + std::to_string(GIT_DELTA_MODIFIED);
+    }
+    else if (!show_deleted && show_modified) {
+        where = "WHERE status != " + std::to_string(GIT_DELTA_DELETED);
+    }
+    else if (!show_deleted && !show_modified) {
+        where = "WHERE status NOT IN (" + std::to_string(GIT_DELTA_DELETED) + "," + std::to_string(GIT_DELTA_MODIFIED)
+                + ")";
+    }
+    store_from_db(View::DIFF, where);
+    diff_treeview->set_model(diff_store);
+}
+
+
+void PoolGitBox::update_status()
+{
+    status_treeview->unset_model();
+    status_store->clear();
+    store_from_db(View::STATUS);
+    status_treeview->set_model(status_store);
 }
 
 void PoolGitBox::handle_add_with_deps()
