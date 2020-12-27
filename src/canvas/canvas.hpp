@@ -148,9 +148,10 @@ protected:
                   bool tr = true, uint64_t width = 0);
     void draw_arc(const Coord<float> &center, float radius, float a0, float a1, ColorP color = ColorP::FROM_LAYER,
                   int layer = 10000, bool tr = true, uint64_t width = 0);
-    std::pair<Coordf, Coordf> draw_arc2(const Coord<float> &center, float radius0, float a0, float radius1, float a1,
-                                        ColorP color = ColorP::FROM_LAYER, int layer = 10000, bool tr = true,
-                                        uint64_t width = 0);
+    std::pair<Coordf, Coordf> draw_arc2(const Coord<float> &center, float radius0, float a0, float a1, ColorP color,
+                                        int layer, uint64_t width);
+    void draw_arc0(const Coord<float> &center, float radius0, float a0, float a1, ColorP color, int layer,
+                   uint64_t width);
     std::pair<Coordf, Coordf> draw_text0(const Coordf &p, float size, const std::string &rtext, int angle, bool flip,
                                          TextOrigin origin, ColorP color, int layer = 10000, uint64_t width = 0,
                                          bool draw = true, TextData::Font font = TextData::Font::SIMPLEX,

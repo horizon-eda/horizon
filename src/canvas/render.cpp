@@ -595,10 +595,9 @@ void Canvas::render(const Arc &arc, bool interactive, ColorP co)
     Coordf b(arc.to->position);   // ,b,c;
     Coordf c = project_onto_perp_bisector(a, b, arc.center->position);
     float radius0 = sqrt(sq(c.x - a.x) + sq(c.y - a.y));
-    float radius1 = sqrt(sq(c.x - b.x) + sq(c.y - b.y));
     float a0 = atan2f(a.y - c.y, a.x - c.x);
     float a1 = atan2f(b.y - c.y, b.x - c.x);
-    auto bb = draw_arc2(c, radius0, a0, radius1, a1, co, arc.layer, true, arc.width);
+    auto bb = draw_arc2(c, radius0, a0, a1, co, arc.layer, arc.width);
     Coordf t(radius0, radius0);
     if (interactive)
         selectables.append(arc.uuid, ObjectType::ARC, c, bb.first, bb.second, 0, arc.layer);

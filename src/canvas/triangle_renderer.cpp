@@ -107,6 +107,16 @@ void TriangleRenderer::realize()
                                                      "triangle-circle-fragment.glsl",
                                                      "/org/horizon-eda/horizon/canvas/shaders/"
                                                      "triangle-circle-geometry.glsl");
+    program_arc0 = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas/shaders/triangle-vertex.glsl",
+                                                   "/org/horizon-eda/horizon/canvas/shaders/"
+                                                   "triangle-arc0-fragment.glsl",
+                                                   "/org/horizon-eda/horizon/canvas/shaders/"
+                                                   "triangle-arc0-geometry.glsl");
+    program_arc = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas/shaders/triangle-vertex.glsl",
+                                                  "/org/horizon-eda/horizon/canvas/shaders/"
+                                                  "triangle-arc-fragment.glsl",
+                                                  "/org/horizon-eda/horizon/canvas/shaders/"
+                                                  "triangle-arc-geometry.glsl");
     GL_CHECK_ERROR;
     glGenBuffers(1, &ubo);
     glBindBuffer(GL_UNIFORM_BUFFER, ubo);
@@ -123,6 +133,8 @@ void TriangleRenderer::realize()
     glUniformBlockBinding(program_line, block_index, binding_point_index);
     glUniformBlockBinding(program_glyph, block_index, binding_point_index);
     glUniformBlockBinding(program_circle, block_index, binding_point_index);
+    glUniformBlockBinding(program_arc, block_index, binding_point_index);
+    glUniformBlockBinding(program_arc0, block_index, binding_point_index);
     GL_CHECK_ERROR;
     vao = create_vao(program_line0, vbo, ebo);
     GL_CHECK_ERROR;
@@ -270,6 +282,14 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
 
             case Type::CIRCLE:
                 glUseProgram(program_circle);
+                break;
+
+            case Type::ARC0:
+                glUseProgram(program_arc0);
+                break;
+
+            case Type::ARC:
+                glUseProgram(program_arc);
                 break;
             }
             switch (highlight_mode) {
@@ -423,6 +443,12 @@ void TriangleRenderer::push()
                 auto ty = Type::LINE;
                 if (tri_info.flags & TriangleInfo::FLAG_GLYPH) {
                     ty = Type::GLYPH;
+                }
+                else if ((tri_info.flags & TriangleInfo::FLAG_ARC) && tri.y2 == 0) {
+                    ty = Type::ARC0;
+                }
+                else if (tri_info.flags & TriangleInfo::FLAG_ARC) {
+                    ty = Type::ARC;
                 }
                 else if (!isnan(tri.y2)) {
                     ty = Type::TRIANGLE;

@@ -38,6 +38,7 @@ public:
     static const int FLAG_HIGHLIGHT = 1 << 1;
     static const int FLAG_BUTT = 1 << 2;
     static const int FLAG_GLYPH = 1 << 3;
+    static const int FLAG_ARC = 1 << 4;
 };
 
 } // namespace horizon

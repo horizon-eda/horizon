@@ -83,39 +83,64 @@ void Canvas::draw_arc(const Coordf &center, float radius, float a0, float a1, Co
         a0 += dphi;
     }
 }
-std::pair<Coordf, Coordf> Canvas::draw_arc2(const Coordf &center, float radius0, float a0, float radius1, float a1,
-                                            ColorP color, int layer, bool tr, uint64_t width)
+
+static void c2pi(float &x)
+{
+    while (x < 0)
+        x += 2 * M_PI;
+
+    while (x > 2 * M_PI)
+        x -= 2 * M_PI;
+}
+
+std::pair<Coordf, Coordf> Canvas::draw_arc2(const Coordf &center, float radius0, float a0, float a1, ColorP color,
+                                            int layer, uint64_t width)
 {
     unsigned int segments = 64;
-    if (a0 < 0) {
-        a0 += 2 * M_PI;
-    }
-    if (a1 < 0) {
-        a1 += 2 * M_PI;
-    }
+    c2pi(a0);
+    c2pi(a1);
+
     float dphi = a1 - a0;
-    if (dphi < 0) {
-        dphi += 2 * M_PI;
-    }
-    float dr = radius1 - radius0;
-    dr /= segments;
+    c2pi(dphi);
     dphi /= segments;
     std::pair<Coordf, Coordf> bb(center + Coordf::euler(radius0, a0), center + Coordf::euler(radius0, a0));
+    float a = a0;
     while (segments--) {
-        Coordf p0 = center + Coordf::euler(radius0, a0);
-        Coordf p1 = center + Coordf::euler(radius0 + dr, a0 + dphi);
+        Coordf p0 = center + Coordf::euler(radius0, a);
+        Coordf p1 = center + Coordf::euler(radius0, a + dphi);
         bb.first = Coordf::min(bb.first, p0);
         bb.first = Coordf::min(bb.first, p1);
         bb.second = Coordf::max(bb.second, p0);
         bb.second = Coordf::max(bb.second, p1);
         if (img_mode)
-            img_line(Coordi(p0.x, p0.y), Coordi(p1.x, p1.y), width, layer, tr);
-        else
-            draw_line(p0, p1, color, layer, tr, width);
-        a0 += dphi;
-        radius0 += dr;
+            img_line(Coordi(p0.x, p0.y), Coordi(p1.x, p1.y), width, layer, true);
+
+        a += dphi;
     }
+    if (!img_mode)
+        draw_arc0(center, radius0, a0, a1, color, layer, width);
+
     return bb;
+}
+
+void Canvas::draw_arc0(const Coordf &center, float radius0, float a0, float a1, ColorP color, int layer, uint64_t width)
+{
+
+    c2pi(a1);
+    float dphi = a1 - a0;
+    c2pi(dphi);
+
+    Coordf p0 = transform.transform(center);
+    if (transform.mirror) {
+        a0 = -(a0 - M_PI / 2) + M_PI / 2 - dphi;
+        a0 -= transform.get_angle_rad();
+    }
+    else {
+        a0 += transform.get_angle_rad();
+    }
+
+    c2pi(a0);
+    add_triangle(layer, p0, Coordf(a0, dphi), Coordf(radius0, width), color, TriangleInfo::FLAG_ARC);
 }
 
 void Canvas::draw_error(const Coordf &center, float sc, const std::string &text, bool tr)
