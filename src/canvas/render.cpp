@@ -774,7 +774,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
         return;
     if (auto plane = dynamic_cast<Plane *>(poly.usage.ptr)) {
         triangle_type_current = TriangleInfo::Type::PLANE_FILL;
-        auto tris = fragment_cache.get_triangles(*plane);
+        const auto &tris = fragment_cache.get_triangles(*plane);
         object_ref_push(ObjectType::PLANE, plane->uuid);
         begin_group(poly.layer);
         for (const auto &tri : tris) {
