@@ -82,6 +82,7 @@ bool BoardDecal::get_flip() const
 void BoardDecal::set_flip(bool fl, const Board &brd)
 {
     flip = fl;
+    placement.mirror = fl;
     for (auto &[uu, it] : decal.lines) {
         it.layer = brd.get_package_layer(flip, pool_decal->lines.at(uu).layer);
     }
