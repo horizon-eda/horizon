@@ -446,7 +446,7 @@ Gtk::Widget *PropertyEditorScale::create_editor()
     ScopedBlock block(connections);
     sp->set_range(.1, 10);
     sp->set_increments(.1, .1);
-    sp->set_digits(1);
+    sp->set_digits(3);
     return sp;
 }
 
