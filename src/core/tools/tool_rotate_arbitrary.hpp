@@ -39,6 +39,7 @@ private:
     enum class State { ORIGIN, ROTATE, REF, SCALE };
     State state = State::ORIGIN;
     std::map<SelectableRef, Placement> placements;
+    std::map<UUID, double> decal_scales;
     class CanvasAnnotation *annotation = nullptr;
     std::set<UUID> nets;
     void update_airwires(bool fast);
