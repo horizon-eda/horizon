@@ -71,7 +71,7 @@ public:
     bool is_valid() const;
 
     UUID uuid;
-    std::deque<Vertex> vertices;
+    std::vector<Vertex> vertices;
     int layer = 0;
     std::string parameter_class;
 

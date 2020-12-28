@@ -77,6 +77,7 @@ std::optional<std::string> ParameterProgramPolygon::set_polygon_vertices(const T
     for (auto &it : get_polygons()) {
         if (it.second.parameter_class == pclass) {
             it.second.vertices.clear();
+            it.second.vertices.reserve(n_vertices);
         }
     }
     for (std::size_t i = 0; i < n_vertices; i++) {
@@ -86,7 +87,7 @@ std::optional<std::string> ParameterProgramPolygon::set_polygon_vertices(const T
         }
         for (auto &it : get_polygons()) {
             if (it.second.parameter_class == pclass) {
-                it.second.vertices.emplace_front(c);
+                it.second.vertices.emplace_back(c);
             }
         }
     }
