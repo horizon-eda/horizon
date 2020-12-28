@@ -792,6 +792,23 @@ bool ArcRemovalProxy::had_arcs() const
 {
     return ppoly != &parent;
 }
+
+static bool poly_is_rect(const Polygon &poly)
+{
+    if (poly.vertices.size() != 4)
+        return false;
+    for (size_t i = 0; i < 4; i++) {
+        const auto &p0 = poly.get_vertex(i).position;
+        const auto &p1 = poly.get_vertex(i + 1).position;
+        const auto &p2 = poly.get_vertex(i + 2).position;
+        const auto v0 = p1 - p0;
+        const auto v1 = p2 - p1;
+        if (v0.dot(v1) != 0)
+            return false;
+    }
+    return true;
+}
+
 void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
 {
     img_polygon(ipoly);
@@ -839,32 +856,41 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
     }
     else { // normal polygon
         triangle_type_current = TriangleInfo::Type::POLYGON;
-        TPPLPoly po;
-        po.Init(poly.vertices.size());
-        po.SetHole(false);
-        {
-            size_t i = 0;
-            for (auto &it : poly.vertices) {
-                po[i].x = it.position.x;
-                po[i].y = it.position.y;
-                i++;
-            }
-        }
-        std::list<TPPLPoly> outpolys;
-        TPPLPartition part;
-        po.SetOrientation(TPPL_CCW);
-        part.Triangulate_EC(&po, &outpolys);
         begin_group(poly.layer);
-        for (auto &tri : outpolys) {
-            assert(tri.GetNumPoints() == 3);
-            Coordf p0 = transform.transform(coordf_from_pt(tri[0]));
-            Coordf p1 = transform.transform(coordf_from_pt(tri[1]));
-            Coordf p2 = transform.transform(coordf_from_pt(tri[2]));
-            add_triangle(poly.layer, p0, p1, p2, co);
+        if (poly_is_rect(poly)) {
+            const Coordf p0 = (poly.get_vertex(0).position + poly.get_vertex(1).position) / 2;
+            const Coordf p1 = (poly.get_vertex(2).position + poly.get_vertex(3).position) / 2;
+            const float width = sqrt((poly.get_vertex(0).position - poly.get_vertex(1).position).mag_sq());
+            add_triangle(poly.layer, transform.transform(p0), transform.transform(p1), Coordf(width, NAN), co,
+                         TriangleInfo::FLAG_BUTT);
         }
-        for (size_t i = 0; i < poly.vertices.size(); i++) {
-            draw_line(poly.vertices[i].position, poly.vertices[(i + 1) % poly.vertices.size()].position, co,
-                      poly.layer);
+        else {
+            TPPLPoly po;
+            po.Init(poly.vertices.size());
+            po.SetHole(false);
+            {
+                size_t i = 0;
+                for (auto &it : poly.vertices) {
+                    po[i].x = it.position.x;
+                    po[i].y = it.position.y;
+                    i++;
+                }
+            }
+            std::list<TPPLPoly> outpolys;
+            TPPLPartition part;
+            po.SetOrientation(TPPL_CCW);
+            part.Triangulate_EC(&po, &outpolys);
+            for (auto &tri : outpolys) {
+                assert(tri.GetNumPoints() == 3);
+                Coordf p0 = transform.transform(coordf_from_pt(tri[0]));
+                Coordf p1 = transform.transform(coordf_from_pt(tri[1]));
+                Coordf p2 = transform.transform(coordf_from_pt(tri[2]));
+                add_triangle(poly.layer, p0, p1, p2, co);
+            }
+            for (size_t i = 0; i < poly.vertices.size(); i++) {
+                draw_line(poly.vertices[i].position, poly.vertices[(i + 1) % poly.vertices.size()].position, co,
+                          poly.layer);
+            }
         }
         end_group();
         triangle_type_current = TriangleInfo::Type::NONE;
