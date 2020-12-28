@@ -35,6 +35,8 @@
 #include "select_included_board.hpp"
 #include "manage_included_boards.hpp"
 #include "enter_datum_window.hpp"
+#include "enter_datum_angle_window.hpp"
+#include "enter_datum_scale_window.hpp"
 #include "router_settings_window.hpp"
 #include <glibmm.h>
 #include "pool/ipool.hpp"
@@ -523,11 +525,9 @@ class GenerateSilkscreenWindow *Dialogs::show_generate_silkscreen_window(class T
 
 EnterDatumWindow *Dialogs::show_enter_datum_window(const std::string &label, int64_t def)
 {
-    if (window_nonmodal) {
-        if (auto win = dynamic_cast<EnterDatumWindow *>(window_nonmodal)) {
-            win->present();
-            return win;
-        }
+    if (auto win = dynamic_cast<EnterDatumWindow *>(window_nonmodal)) {
+        win->present();
+        return win;
     }
     auto win = new EnterDatumWindow(parent, interface, label, def);
     window_nonmodal = win;
@@ -536,13 +536,37 @@ EnterDatumWindow *Dialogs::show_enter_datum_window(const std::string &label, int
     return win;
 }
 
+EnterDatumAngleWindow *Dialogs::show_enter_datum_angle_window(const std::string &label, uint16_t def)
+{
+    if (auto win = dynamic_cast<EnterDatumAngleWindow *>(window_nonmodal)) {
+        win->present();
+        return win;
+    }
+    auto win = new EnterDatumAngleWindow(parent, interface, label, def);
+    window_nonmodal = win;
+    win->signal_hide().connect([this] { close_nonmodal(); });
+    win->present();
+    return win;
+}
+
+EnterDatumScaleWindow *Dialogs::show_enter_datum_scale_window(const std::string &label, double def)
+{
+    if (auto win = dynamic_cast<EnterDatumScaleWindow *>(window_nonmodal)) {
+        win->present();
+        return win;
+    }
+    auto win = new EnterDatumScaleWindow(parent, interface, label, def);
+    window_nonmodal = win;
+    win->signal_hide().connect([this] { close_nonmodal(); });
+    win->present();
+    return win;
+}
+
 RouterSettingsWindow *Dialogs::show_router_settings_window(ToolSettings &settings)
 {
-    if (window_nonmodal) {
-        if (auto win = dynamic_cast<RouterSettingsWindow *>(window_nonmodal)) {
-            win->present();
-            return win;
-        }
+    if (auto win = dynamic_cast<RouterSettingsWindow *>(window_nonmodal)) {
+        win->present();
+        return win;
     }
     auto win = new RouterSettingsWindow(parent, interface, settings);
     window_nonmodal = win;

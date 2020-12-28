@@ -69,6 +69,8 @@ public:
     class GenerateSilkscreenWindow *show_generate_silkscreen_window(class ToolSettings &settings);
     class EnterDatumWindow *show_enter_datum_window(const std::string &label, int64_t def = 0);
     class RouterSettingsWindow *show_router_settings_window(class ToolSettings &settings);
+    class EnterDatumAngleWindow *show_enter_datum_angle_window(const std::string &label, uint16_t def = 0);
+    class EnterDatumScaleWindow *show_enter_datum_scale_window(const std::string &label, double def = 1);
 
     void close_nonmodal();
     class ToolWindow *get_nonmodal();

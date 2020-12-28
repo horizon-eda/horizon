@@ -15,6 +15,8 @@
 #include "util/util.hpp"
 #include <iostream>
 #include "core/tool_id.hpp"
+#include "dialogs/enter_datum_angle_window.hpp"
+#include "dialogs/enter_datum_scale_window.hpp"
 
 namespace horizon {
 
@@ -140,7 +142,6 @@ void ToolRotateArbitrary::update_tip()
         actions.emplace_back(InToolActionID::LMB, "finish");
         actions.emplace_back(InToolActionID::RMB);
         actions.emplace_back(InToolActionID::TOGGLE_ANGLE_SNAP, "toggle snap");
-        actions.emplace_back(InToolActionID::ENTER_DATUM, "enter angle");
 
         std::string s = "Angle: " + angle_to_string(iangle, false);
         if (snap)
@@ -153,6 +154,13 @@ void ToolRotateArbitrary::update_tip()
         std::stringstream ss;
         ss << "Scale: " << scale;
         imp->tool_bar_set_tip(ss.str());
+    }
+
+    if (state != State::ORIGIN) {
+        if (tool_id == ToolID::ROTATE_ARBITRARY)
+            actions.emplace_back(InToolActionID::ENTER_DATUM, "enter angle");
+        else
+            actions.emplace_back(InToolActionID::ENTER_DATUM, "enter scale");
     }
 
     imp->tool_bar_set_actions(actions);
@@ -284,11 +292,15 @@ void ToolRotateArbitrary::update_airwires(bool fast)
 ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
 {
     if (args.type == ToolEventType::MOVE) {
+        if (imp->dialogs.get_nonmodal())
+            return ToolResponse();
         if (state == State::ORIGIN) {
             origin = args.coords;
         }
         else if (state == State::REF) {
             ref = args.coords;
+            annotation->clear();
+            annotation->draw_line(origin, ref, ColorP::FROM_LAYER, 2);
         }
         else if (state == State::SCALE) {
             const double vr = sqrt((ref - origin).mag_sq());
@@ -299,11 +311,15 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
         }
         else if (state == State::ROTATE) {
             const auto rref = args.coords;
-            annotation->clear();
-            annotation->draw_line(origin, rref, ColorP::FROM_LAYER, 2);
-
             const auto v = rref - origin;
             const auto v0 = ref - origin;
+            annotation->clear();
+            annotation->draw_line(origin, ref, ColorP::FROM_LAYER, 2);
+            annotation->draw_arc(origin, sqrt(v0.mag_sq()) / 3, atan2(v0.y, v0.x), atan2(v.y, v.x), ColorP::FROM_LAYER,
+                                 2);
+            annotation->draw_line(origin, rref, ColorP::FROM_LAYER, 2);
+
+
             const double angle0 = atan2(v0.y, v0.x);
             const double angle = atan2(v.y, v.x) - angle0;
             iangle = ((angle / (2 * M_PI)) * 65536);
@@ -320,6 +336,8 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
     else if (args.type == ToolEventType::ACTION) {
         switch (args.action) {
         case InToolActionID::LMB:
+            if (imp->dialogs.get_nonmodal())
+                break;
             if (tool_id == ToolID::ROTATE_ARBITRARY) {
                 if (state == State::ORIGIN) {
                     state = State::REF;
@@ -338,18 +356,17 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
                 if (state == State::ORIGIN) {
                     state = State::REF;
                     ref = args.coords;
-                    update_tip();
                 }
                 else if (state == State::REF) {
                     state = State::SCALE;
                     imp->set_snap_filter_from_selection(selection);
-                    update_tip();
                 }
                 else {
                     update_airwires(false);
                     return ToolResponse::commit();
                 }
             }
+            update_tip();
             break;
 
         case InToolActionID::RMB:
@@ -357,18 +374,46 @@ ToolResponse ToolRotateArbitrary::update(const ToolArgs &args)
             return ToolResponse::revert();
 
         case InToolActionID::TOGGLE_ANGLE_SNAP:
+            if (imp->dialogs.get_nonmodal())
+                break;
             snap ^= true;
+            update_tip();
             break;
 
-        case InToolActionID::ENTER_DATUM: {
-            if (auto r = imp->dialogs.ask_datum_angle("Enter angle", 0)) {
-                apply_placements_rotation(*r);
+        case InToolActionID::ENTER_DATUM:
+            if (state != State::ORIGIN) {
+                if (tool_id == ToolID::ROTATE_ARBITRARY)
+                    imp->dialogs.show_enter_datum_angle_window("Enter rotation angle", iangle);
+                else
+                    imp->dialogs.show_enter_datum_scale_window("Enter scale", scale);
+                annotation->clear();
+            }
+            break;
+
+        default:;
+        }
+    }
+    else if (args.type == ToolEventType::DATA) {
+        if (auto data = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
+            if (data->event == ToolDataWindow::Event::UPDATE) {
+                if (auto d = dynamic_cast<const ToolDataEnterDatumAngleWindow *>(args.data.get())) {
+                    apply_placements_rotation(d->value);
+                    iangle = d->value;
+                    update_tip();
+                }
+                if (auto d = dynamic_cast<const ToolDataEnterDatumScaleWindow *>(args.data.get())) {
+                    apply_placements_scale(d->value);
+                    scale = d->value;
+                    update_tip();
+                }
+            }
+            else if (data->event == ToolDataWindow::Event::OK) {
                 update_airwires(false);
                 return ToolResponse::commit();
             }
-        } break;
-
-        default:;
+            else if (data->event == ToolDataWindow::Event::CLOSE) {
+                return ToolResponse::revert();
+            }
         }
     }
     return ToolResponse();

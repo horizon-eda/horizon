@@ -324,6 +324,8 @@ SRC_IMP = \
 	src/dialogs/select_included_board.cpp\
 	src/dialogs/manage_included_boards.cpp\
 	src/dialogs/enter_datum_window.cpp\
+	src/dialogs/enter_datum_angle_window.cpp\
+	src/dialogs/enter_datum_scale_window.cpp\
 	src/dialogs/router_settings_window.cpp\
 	src/util/sort_controller.cpp\
 	src/core/core_symbol.cpp\

@@ -53,4 +53,11 @@ void CanvasAnnotation::draw_line(const Coordf &from, const Coordf &to, ColorP co
     ca->add_triangle(layer, from, to, Coordf(width, NAN), color, highlight ? TriangleInfo::FLAG_HIGHLIGHT : 0, color2);
     ca->request_push();
 }
+
+void CanvasAnnotation::draw_arc(const Coordf &center, float radius0, float a0, float a1, ColorP color, uint64_t width)
+{
+    ca->draw_arc0(center, radius0, a0, a1, color, layer, width);
+    ca->request_push();
+}
+
 } // namespace horizon
