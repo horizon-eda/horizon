@@ -6,11 +6,14 @@ namespace horizon {
 void ToolHelperPlane::plane_init(Polygon &poly)
 {
     plane = dynamic_cast<Plane *>(poly.usage.ptr);
+    if (!plane)
+        return;
+
     if (plane->fragments.size() == 0)
         plane = nullptr;
-    if (plane) {
+
+    if (plane)
         plane->clear();
-    }
 }
 
 void ToolHelperPlane::plane_finish()
