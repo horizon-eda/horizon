@@ -307,7 +307,7 @@ SRC_IMP = \
 	src/dialogs/edit_shape.cpp\
 	src/dialogs/manage_net_classes.cpp\
 	src/dialogs/manage_power_nets.cpp\
-	src/dialogs/edit_pad_parameter_set.cpp\
+	src/dialogs/pad_parameter_set_window.cpp\
 	src/dialogs/edit_via.cpp\
 	src/dialogs/pool_browser_dialog.cpp\
 	src/dialogs/schematic_properties.cpp\

@@ -19,7 +19,7 @@
 #include "annotate.hpp"
 #include "pool/part.hpp"
 #include "edit_shape.hpp"
-#include "edit_pad_parameter_set.hpp"
+#include "pad_parameter_set_window.hpp"
 #include "schematic_properties.hpp"
 #include "edit_via.hpp"
 #include "edit_plane.hpp"
@@ -250,12 +250,6 @@ bool Dialogs::manage_included_boards(Board &b)
 bool Dialogs::annotate(Schematic &s)
 {
     AnnotateDialog dia(parent, s);
-    return dia.run() == Gtk::RESPONSE_OK;
-}
-
-bool Dialogs::edit_pad_parameter_set(std::set<class Pad *> &pads, IPool &pool, class Package &pkg)
-{
-    PadParameterSetDialog dia(parent, pads, pool, pkg);
     return dia.run() == Gtk::RESPONSE_OK;
 }
 
@@ -569,6 +563,20 @@ RouterSettingsWindow *Dialogs::show_router_settings_window(ToolSettings &setting
         return win;
     }
     auto win = new RouterSettingsWindow(parent, interface, settings);
+    window_nonmodal = win;
+    win->signal_hide().connect([this] { close_nonmodal(); });
+    win->present();
+    return win;
+}
+
+PadParameterSetWindow *Dialogs::show_pad_parameter_set_window(std::set<class Pad *> &pads, class IPool &pool,
+                                                              class Package &pkg)
+{
+    if (auto win = dynamic_cast<PadParameterSetWindow *>(window_nonmodal)) {
+        win->present();
+        return win;
+    }
+    auto win = new PadParameterSetWindow(parent, interface, pads, pool, pkg);
     window_nonmodal = win;
     win->signal_hide().connect([this] { close_nonmodal(); });
     win->present();

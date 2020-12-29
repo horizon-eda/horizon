@@ -58,6 +58,7 @@ public:
         pack_start(*delete_button, false, false, 0);
         delete_button->signal_clicked().connect([this] {
             parent->s_signal_remove_extra_widget.emit(parameter_id);
+            parent->s_signal_apply_all_toggled.emit(parameter_id, false);
             parent->parameter_set->erase(parameter_id);
             parent->s_signal_changed.emit();
             delete this->get_parent();
@@ -69,8 +70,9 @@ public:
             }
             pack_start(*extra_widget, false, false, 0);
         }
-        if (auto apply_all_button = parent->create_apply_all_button(id)) {
-            pack_start(*apply_all_button, false, false, 0);
+        if (auto bu = parent->create_apply_all_button(id)) {
+            apply_all_toggle_button = dynamic_cast<Gtk::ToggleButton *>(bu);
+            pack_start(*bu, false, false, 0);
         }
 
         set_margin_start(4);
@@ -80,6 +82,8 @@ public:
         show_all();
     }
     SpinButtonDim *sp = nullptr;
+    Gtk::ToggleButton *apply_all_toggle_button = nullptr;
+
 
     const ParameterID parameter_id;
 
@@ -141,6 +145,13 @@ void ParameterSetEditor::set_has_apply_all(const std::string &tooltip_text)
     apply_all_tooltip_text.emplace(tooltip_text);
 }
 
+void ParameterSetEditor::set_has_apply_all_toggle(const std::string &tooltip_text)
+{
+    apply_all_tooltip_text.emplace(tooltip_text);
+    apply_all_toggle = true;
+}
+
+
 void ParameterSetEditor::set_button_margin_left(int margin)
 {
     add_button->set_margin_start(margin);
@@ -194,11 +205,29 @@ Gtk::Widget *ParameterSetEditor::create_apply_all_button(ParameterID id)
 {
     if (!apply_all_tooltip_text)
         return nullptr;
-    auto w = Gtk::manage(new Gtk::Button());
-    w->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
-    w->set_tooltip_text(apply_all_tooltip_text.value());
-    w->signal_clicked().connect([this, id] { s_signal_apply_all.emit(id); });
-    return w;
+    if (apply_all_toggle) {
+        auto w = Gtk::manage(new Gtk::ToggleButton("All"));
+        w->set_tooltip_text(apply_all_tooltip_text.value());
+        w->signal_clicked().connect([this, id, w] { s_signal_apply_all_toggled.emit(id, w->get_active()); });
+        return w;
+    }
+    else {
+        auto w = Gtk::manage(new Gtk::Button());
+        w->set_image_from_icon_name("object-select-symbolic", Gtk::ICON_SIZE_BUTTON);
+        w->set_tooltip_text(apply_all_tooltip_text.value());
+        w->signal_clicked().connect([this, id] { s_signal_apply_all.emit(id); });
+        return w;
+    }
+}
+
+void ParameterSetEditor::set_apply_all(std::set<ParameterID> params)
+{
+    auto rows = listbox->get_children();
+    for (auto row : rows) {
+        auto w = dynamic_cast<ParameterEditor *>(dynamic_cast<Gtk::ListBoxRow *>(row)->get_child());
+        if (w->apply_all_toggle_button)
+            w->apply_all_toggle_button->set_active(params.count(w->parameter_id));
+    }
 }
 
 } // namespace horizon

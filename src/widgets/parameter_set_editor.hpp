@@ -15,6 +15,8 @@ public:
     void set_button_margin_left(int margin);
     void add_or_set_parameter(ParameterID param, int64_t value);
     void set_has_apply_all(const std::string &tooltip_text);
+    void set_has_apply_all_toggle(const std::string &tooltip_text);
+    void set_apply_all(std::set<ParameterID> params);
 
     typedef sigc::signal<void> type_signal_activate_last;
     type_signal_activate_last signal_activate_last()
@@ -26,6 +28,12 @@ public:
     type_signal_apply_all signal_apply_all()
     {
         return s_signal_apply_all;
+    }
+
+    typedef sigc::signal<void, ParameterID, bool> type_signal_apply_all_toggled;
+    type_signal_apply_all_toggled signal_apply_all_toggled()
+    {
+        return s_signal_apply_all_toggled;
     }
 
     typedef sigc::signal<Gtk::Widget *, ParameterID>::accumulated<list_accumulator<Gtk::Widget *, false>>
@@ -50,6 +58,7 @@ private:
     Glib::RefPtr<Gtk::SizeGroup> sg_label;
     void update_menu();
     std::optional<std::string> apply_all_tooltip_text;
+    bool apply_all_toggle = false;
 
     type_signal_activate_last s_signal_activate_last;
 
@@ -58,5 +67,6 @@ private:
 
 protected:
     type_signal_apply_all s_signal_apply_all;
+    type_signal_apply_all_toggled s_signal_apply_all_toggled;
 };
 } // namespace horizon

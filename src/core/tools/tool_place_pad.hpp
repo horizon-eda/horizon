@@ -1,5 +1,6 @@
 #pragma once
 #include "core/tool.hpp"
+#include "parameter/set.hpp"
 
 namespace horizon {
 class ToolPlacePad : public ToolBase {
@@ -19,6 +20,7 @@ public:
 private:
     const class Padstack *padstack = nullptr;
     class Pad *temp = nullptr;
+    ParameterSet temp_param;
     void create_pad(const Coordi &c);
 };
 } // namespace horizon

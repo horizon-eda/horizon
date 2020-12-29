@@ -2,7 +2,7 @@
 #include "document/idocument_package.hpp"
 #include "pool/package.hpp"
 #include "imp/imp_interface.hpp"
-#include <iostream>
+#include "dialogs/tool_window.hpp"
 #include "pool/pool.hpp"
 
 namespace horizon {
@@ -54,10 +54,10 @@ void ToolPlacePad::create_pad(const Coordi &pos)
 ToolResponse ToolPlacePad::update(const ToolArgs &args)
 {
 
-    if (args.type == ToolEventType::MOVE) {
+    if (args.type == ToolEventType::MOVE && !imp->dialogs.get_nonmodal()) {
         temp->placement.shift = args.coords;
     }
-    else if (args.type == ToolEventType::ACTION) {
+    else if (args.type == ToolEventType::ACTION && !imp->dialogs.get_nonmodal()) {
         switch (args.action) {
         case InToolActionID::LMB: {
             auto old_pad = temp;
@@ -80,15 +80,22 @@ ToolResponse ToolPlacePad::update(const ToolArgs &args)
 
         case InToolActionID::EDIT: {
             std::set<Pad *> pads{temp};
-            auto params = temp->parameter_set;
-            if (imp->dialogs.edit_pad_parameter_set(pads, doc.r->get_pool(), doc.k->get_package())
-                == false) { // rollback
-                temp->parameter_set = params;
-            }
-            doc.k->get_package().apply_parameter_set({});
+            temp_param = temp->parameter_set;
+            imp->dialogs.show_pad_parameter_set_window(pads, doc.r->get_pool(), doc.k->get_package());
         } break;
 
         default:;
+        }
+    }
+    else if (args.type == ToolEventType::DATA) {
+        if (auto data = dynamic_cast<const ToolDataWindow *>(args.data.get())) {
+            if (data->event == ToolDataWindow::Event::CLOSE) {
+                temp->parameter_set = temp_param;
+                doc.k->get_package().apply_parameter_set({});
+            }
+            if (data->event == ToolDataWindow::Event::OK) {
+                imp->dialogs.close_nonmodal();
+            }
         }
     }
     return ToolResponse();

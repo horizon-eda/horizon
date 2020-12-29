@@ -43,7 +43,6 @@ public:
     bool manage_power_nets(class Block &b);
     bool manage_via_templates(class Board &b, class ViaPadstackProvider &vpp);
     bool manage_included_boards(class Board &b);
-    bool edit_pad_parameter_set(std::set<class Pad *> &pads, class IPool &pool, class Package &pkg);
     bool edit_board_hole(std::set<class BoardHole *> &holes, class IPool &pool, class Block &block);
     bool annotate(class Schematic &s);
     bool edit_plane(class Plane &plane, class Board &brd);
@@ -71,6 +70,8 @@ public:
     class RouterSettingsWindow *show_router_settings_window(class ToolSettings &settings);
     class EnterDatumAngleWindow *show_enter_datum_angle_window(const std::string &label, uint16_t def = 0);
     class EnterDatumScaleWindow *show_enter_datum_scale_window(const std::string &label, double def = 1);
+    class PadParameterSetWindow *show_pad_parameter_set_window(std::set<class Pad *> &pads, class IPool &pool,
+                                                               class Package &pkg);
 
     void close_nonmodal();
     class ToolWindow *get_nonmodal();

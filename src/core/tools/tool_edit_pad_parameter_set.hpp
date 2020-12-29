@@ -13,8 +13,18 @@ public:
     {
         return true;
     }
+    std::set<InToolActionID> get_actions() const override
+    {
+        using I = InToolActionID;
+        return {
+                I::LMB,
+        };
+    }
 
 private:
+    std::set<class Pad *> pads;
+    void select_pads();
+    class PadParameterSetWindow *win = nullptr;
     std::set<class Pad *> get_pads();
 };
 } // namespace horizon
