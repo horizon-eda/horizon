@@ -1,5 +1,6 @@
 #pragma once
 #include <gtkmm.h>
+#include <set>
 #include "parameter/set.hpp"
 #include "util/changeable.hpp"
 #include "util/list_accumulator.hpp"
