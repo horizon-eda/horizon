@@ -1,5 +1,6 @@
 #include "tool_window.hpp"
 #include "imp/imp_interface.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 
@@ -11,6 +12,7 @@ ToolWindow::ToolWindow(Gtk::Window *parent, ImpInterface *intf) : interface(intf
     headerbar->set_show_close_button(false);
     headerbar->show();
     set_titlebar(*headerbar);
+    install_esc_to_close(*this);
 
     auto sg = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_HORIZONTAL);
 

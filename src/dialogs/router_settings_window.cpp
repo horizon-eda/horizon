@@ -9,7 +9,6 @@ RouterSettingsWindow::RouterSettingsWindow(Gtk::Window *parent, ImpInterface *in
 {
     set_title("Router settings");
     set_use_ok(false);
-    install_esc_to_close(*this);
 
     auto grid = Gtk::manage(new Gtk::Grid());
     grid->set_column_spacing(10);
