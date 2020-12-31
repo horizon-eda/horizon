@@ -1,3 +1,4 @@
 versions:
   board:
     1: add holes to PDF export
+    2: support pick & place export format customisation

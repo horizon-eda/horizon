@@ -33,7 +33,7 @@ BoardColors::BoardColors() : solder_mask({0, .5, 0}), substrate({.2, .15, 0})
 {
 }
 
-static const unsigned int app_version = 1;
+static const unsigned int app_version = 2;
 
 unsigned int Board::get_app_version()
 {
