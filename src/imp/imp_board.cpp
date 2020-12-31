@@ -23,6 +23,7 @@
 #include "widgets/action_button.hpp"
 #include "parts_window.hpp"
 #include "pool/pool_cached.hpp"
+#include "widgets/spin_button_angle.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
@@ -714,6 +715,17 @@ void ImpBoard::construct()
     core_board.signal_rebuilt().connect([this] { selection_filter_dialog->update_layers(); });
 
     main_window->left_panel->pack_start(*display_control_notebook, false, false);
+
+    {
+        auto sp_angle = Gtk::manage(new SpinButtonAngle);
+        sp_angle->show();
+        sp_angle->signal_value_changed().connect([this, sp_angle] {
+            canvas->set_view_angle(sp_angle->get_value() / 32768 * M_PI);
+            canvas_update_from_pp();
+        });
+
+        main_window->left_panel->pack_end(*sp_angle, false, false, 0);
+    }
 
     unplaced_box = Gtk::manage(new UnplacedBox("Package"));
     unplaced_box->show();

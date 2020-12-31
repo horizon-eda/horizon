@@ -467,7 +467,8 @@ void CanvasGL::update_viewmat()
     auto scale_x = scale;
     if (flip_view)
         scale_x = -scale;
-    viewmat = glm::scale(glm::translate(glm::mat3(1), glm::vec2(offset.x, offset.y)), glm::vec2(scale_x, -scale));
+    viewmat = glm::scale(glm::rotate(glm::translate(glm::mat3(1), glm::vec2(offset.x, offset.y)), -view_angle),
+                         glm::vec2(scale_x, -scale));
     viewmat_noflip = glm::scale(glm::translate(glm::mat3(1), glm::vec2(offset.x, offset.y)), glm::vec2(scale, -scale));
 }
 
@@ -504,9 +505,20 @@ void CanvasGL::set_flip_view(bool fl)
     update_viewmat();
 }
 
+void CanvasGL::set_view_angle(float angle)
+{
+    view_angle = angle;
+    update_viewmat();
+}
+
 bool CanvasGL::get_flip_view() const
 {
     return flip_view;
+}
+
+float CanvasGL::get_view_angle() const
+{
+    return view_angle;
 }
 
 Coordf CanvasGL::screen2canvas(const Coordf &p) const

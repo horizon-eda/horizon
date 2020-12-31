@@ -68,6 +68,9 @@ public:
     void set_flip_view(bool fl);
     bool get_flip_view() const override;
 
+    void set_view_angle(float a);
+    float get_view_angle() const override;
+
     void set_cursor_size(float size);
     void set_cursor_size(Appearance::CursorSize);
 
@@ -204,6 +207,7 @@ private:
     glm::mat3 viewmat;
     glm::mat3 viewmat_noflip;
     bool flip_view = false;
+    float view_angle = 0;
     void update_viewmat();
 
     Coord<float> cursor_pos;

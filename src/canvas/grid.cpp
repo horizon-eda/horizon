@@ -60,7 +60,7 @@ void Grid::render()
     glUseProgram(program);
     glBindVertexArray(vao);
     glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca.screenmat));
-    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca.viewmat_noflip));
+    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca.viewmat));
     glUniform1f(mark_size_loc, mark_size);
     auto color = ca.get_color(ColorP::GRID);
     glUniform4f(color_loc, color.r, color.g, color.b, ca.appearance.grid_opacity);
@@ -74,9 +74,29 @@ void Grid::render()
         sp_px = sp * ca.scale;
     }
 
+    Coordf a, b;
+    {
+        std::array<Coordf, 4> ps;
+        size_t i = 0;
+        for (const auto x : {0.f, ca.m_width}) {
+            for (const auto y : {0.f, ca.m_height}) {
+                ps.at(i++) = ca.screen2canvas({x, y});
+            }
+        }
+        a = ps.front();
+        b = a;
+        for (const auto &it : ps) {
+            a = Coordf::min(a, it);
+            b = Coordf::max(b, it);
+        }
+        // std::cout << "view " << a.x << " " << a.y << " " << b.x << " " << b.y << std::endl;
+    }
+
     Coord<float> grid_0;
-    grid_0.x = (round(((-ca.offset.x / ca.scale) - origin.x) / sp.x) - 1) * sp.x + origin.x;
-    grid_0.y = (round(((-(ca.m_height - ca.offset.y) / ca.scale) - origin.y) / sp.y) - 1) * sp.y + origin.y;
+    grid_0.x = (round((a.x - origin.x) / sp.x) - 1) * sp.x + origin.x;
+    grid_0.y = (round((a.y - origin.y) / sp.y) - 1) * sp.y + origin.y;
+
+    // std::cout << "gr0 " << grid_0.x << " " << grid_0.y << std::endl;
 
     if (mul != newmul) {
         mul = newmul;
@@ -100,9 +120,9 @@ void Grid::render()
         glDrawArraysInstanced(GL_LINES, 2, 2, n);
     }
     else {
-        int mod = ceil((ca.m_width / ca.scale) / spmin) + 2;
+        int mod = ceil((b.x - a.x) / spmin) + 2;
         glUniform1i(grid_mod_loc, mod);
-        int n = mod * ceil((ca.m_height / ca.scale) / spmin + 2);
+        int n = mod * ceil((b.y - a.y) / spmin + 2);
         glDrawArraysInstanced(GL_LINES, 0, 4, n);
     }
 
