@@ -134,9 +134,26 @@ private:
             items_unsupported.emplace(type, 0);
     }
 
-    void addCircle(const DL_CircleData &) override
+    void addCircle(const DL_CircleData &d) override
     {
-        add_unsupported(DXFImporter::UnsupportedType::CIRCLE);
+        auto center = get_or_create_junction(d.cx, d.cy);
+        auto from = get_or_create_junction(d.cx - d.radius, d.cy);
+        auto to = get_or_create_junction(d.cx + d.radius, d.cy);
+        auto arc = core->insert_arc(UUID::random());
+
+        arcs_out.insert(arc);
+        arc->layer = layer;
+        arc->width = width;
+        arc->center = center;
+        arc->from = from;
+        arc->to = to;
+        auto arc2 = core->insert_arc(UUID::random());
+        arcs_out.insert(arc2);
+        arc2->layer = layer;
+        arc2->width = width;
+        arc2->center = center;
+        arc2->from = to;
+        arc2->to = from;
     }
 
     void addEllipse(const DL_EllipseData &) override

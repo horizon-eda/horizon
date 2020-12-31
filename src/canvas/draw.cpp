@@ -62,6 +62,59 @@ void Canvas::draw_box(const Coordf &p, float size, ColorP color, int layer, bool
     draw_line(p + Coordf(-size, -size), p + Coordf(-size, size), color, layer, tr, width);
 }
 
+void Canvas::draw_bezier2(const Coord<float> &start, const Coord<float> &mid, const Coord<float> &end, ColorP color,
+                          int layer, bool tr, uint64_t width)
+{
+    const int segments = 24;
+    int count = segments;
+    if ((start.x == mid.x && start.y == mid.y)
+        || (end.x == mid.x && end.y == mid.y)) { // if mid==start or mid==end, then it is just a line
+        draw_line(start, end, color, layer, tr, width);
+        return;
+    }
+    float t = 0;
+    Coord<float> lstart, lend, p0 = start, p1;
+
+    while (count--) {
+        t += 1.0 / segments;
+        lstart = start + (mid - start) * t;
+        lend = mid + (end - mid) * t;
+        p1 = lstart + (lend - lstart) * t;
+        draw_line(p0, p1, color, layer, tr, width);
+        p0 = p1;
+    }
+}
+
+void Canvas::draw_curve(const Coord<float> &start, const Coord<float> &end, float diviation, ColorP color, int layer,
+                        bool tr, uint64_t width)
+{
+    Coord<float> delta = end - start;
+    Coord<float> unit;
+    unit.x = 0;
+    unit.y = 1.0;
+
+    Coord<float> mid = (start + end) * 0.5;
+    delta *= diviation;
+    float x = delta.x;
+    delta.x = -delta.y;
+    delta.y = x;
+    mid += delta;
+    draw_bezier2(start, mid, end, color, layer, tr, width);
+}
+
+void Canvas::draw_circle(const Coord<float> &center, float radius, ColorP color, int layer, bool tr, uint64_t width)
+{
+    unsigned int segments = 64;
+    float a0 = 0;
+    float dphi = 2 * M_PI;
+    dphi /= segments;
+    while (segments--) {
+        draw_line(center + Coordf::euler(radius, a0), center + Coordf::euler(radius, a0 + dphi), color, layer, tr,
+                  width);
+        a0 += dphi;
+    }
+}
+
 void Canvas::draw_arc(const Coordf &center, float radius, float a0, float a1, ColorP color, int layer, bool tr,
                       uint64_t width)
 {
