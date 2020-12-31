@@ -62,9 +62,33 @@ void Canvas::draw_box(const Coordf &p, float size, ColorP color, int layer, bool
     draw_line(p + Coordf(-size, -size), p + Coordf(-size, size), color, layer, tr, width);
 }
 
-void Canvas::draw_arc(const Coordf &center, float radius, float a0, float a1, ColorP color, int layer, bool tr,
-                      uint64_t width)
+
+static void c2pi(float &x)
 {
+    while (x < 0)
+        x += 2 * M_PI;
+
+    while (x > 2 * M_PI)
+        x -= 2 * M_PI;
+}
+
+void Canvas::draw_arc(const Coordf &center, float radius, float a0, float a1, ColorP color, int layer)
+{
+    if (!img_mode) {
+        const Coordf p0 = transform.transform(center);
+        const float dphi = a1 - a0;
+        if (transform.mirror) {
+            a0 = -(a0 - M_PI / 2) + M_PI / 2 - dphi;
+            a0 -= transform.get_angle_rad();
+        }
+        else {
+            a0 += transform.get_angle_rad();
+        }
+
+        c2pi(a0);
+        add_triangle(layer, p0, Coordf(a0, dphi), Coordf(radius, 0), color, TriangleInfo::FLAG_ARC);
+        return;
+    }
     unsigned int segments = 64;
     if (a0 < 0) {
         a0 += 2 * M_PI;
@@ -78,20 +102,16 @@ void Canvas::draw_arc(const Coordf &center, float radius, float a0, float a1, Co
     }
     dphi /= segments;
     while (segments--) {
-        draw_line(center + Coordf::euler(radius, a0), center + Coordf::euler(radius, a0 + dphi), color, layer, tr,
-                  width);
+        draw_line(center + Coordf::euler(radius, a0), center + Coordf::euler(radius, a0 + dphi), color, layer, true, 0);
         a0 += dphi;
     }
 }
 
-static void c2pi(float &x)
+void Canvas::draw_circle(const Coord<float> &center, float radius, ColorP color, int layer)
 {
-    while (x < 0)
-        x += 2 * M_PI;
-
-    while (x > 2 * M_PI)
-        x -= 2 * M_PI;
+    draw_arc(center, radius, 0, 2 * M_PI, color, layer);
 }
+
 
 std::pair<Coordf, Coordf> Canvas::draw_arc2(const Coordf &center, float radius0, float a0, float a1, ColorP color,
                                             int layer, uint64_t width)

@@ -146,7 +146,7 @@ void Canvas::render(const PowerSymbol &sym)
         }
         else {
             draw_line({0, 0}, {0, 1_mm}, c, 0);
-            draw_arc({0, 1.75_mm}, 0.75_mm, 0, 2 * M_PI, ColorP::FROM_LAYER, 0, true, 0);
+            draw_circle({0, 1.75_mm}, 0.75_mm, ColorP::FROM_LAYER, 0);
             selectables.append(sym.uuid, ObjectType::POWER_SYMBOL, {0, 0}, {-.75_mm, 2.5_mm}, {.75_mm, 0_mm});
         }
         transform_restore();
@@ -453,7 +453,7 @@ void Canvas::render(const SymbolPin &pin, bool interactive, ColorP co)
     }
 
     if (pin.decoration.dot) {
-        draw_arc(Coordf(-((int64_t)pin.length) + dot_size / 2, 0), dot_size / 2, 0, 2 * M_PI, c_main, 0, true, 0);
+        draw_circle(Coordf(-((int64_t)pin.length) + dot_size / 2, 0), dot_size / 2, c_main, 0);
     }
     if (pin.decoration.clock) {
         draw_line(Coordf(-(int64_t)pin.length, .375_mm), Coordf(-(int64_t)pin.length - .75_mm, 0), c_main, 0, true, 0);
@@ -988,26 +988,27 @@ void Canvas::render(const Hole &hole, bool interactive)
 
     transform_save();
     transform.accumulate(hole.placement);
-    int64_t d = hole.diameter / 2;
-    int64_t l = std::max((int64_t)hole.length / 2 - d, (int64_t)0);
+    const int64_t r = hole.diameter / 2;
+    const int64_t l = std::max((int64_t)hole.length / 2 - r, (int64_t)0);
     if (hole.shape == Hole::Shape::ROUND) {
         draw_line(Coordf(), Coordf(100, 0), co, 10000, true, hole.diameter);
+        draw_circle(Coordf(), r);
         if (hole.plated) {
-            draw_line(Coordf(), Coordf(100, 0), co, 10000, true, hole.diameter * 0.9);
+            draw_circle(Coordf(), r * 0.9);
         }
         float x = hole.diameter / 2 / M_SQRT2;
         draw_line(Coordi(-x, -x), Coordi(x, x), co);
         draw_line(Coordi(x, -x), Coordi(-x, x), co);
         if (interactive)
-            selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-d, -d), Coordi(d, d));
+            selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-r, -r), Coordi(r, r));
     }
     else if (hole.shape == Hole::Shape::SLOT) {
-        draw_arc(Coordi(-l, 0), d, 0, 2 * M_PI, co);
-        draw_arc(Coordi(l, 0), d, 0, 2 * M_PI, co);
-        draw_line(Coordi(-l, -d), Coordi(l, -d), co);
-        draw_line(Coordi(-l, d), Coordi(l, d), co);
+        draw_circle(Coordi(-l, 0), r, co);
+        draw_circle(Coordi(l, 0), r, co);
+        draw_line(Coordi(-l, -r), Coordi(l, -r), co);
+        draw_line(Coordi(-l, r), Coordi(l, r), co);
         if (interactive)
-            selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-l - d, -d), Coordi(l + d, +d));
+            selectables.append(hole.uuid, ObjectType::HOLE, Coordi(), Coordi(-l - r, -r), Coordi(l + r, +r));
     }
     if (interactive)
         targets.emplace_back(hole.uuid, ObjectType::HOLE, hole.placement.shift);
