@@ -35,11 +35,11 @@ void main() {
     a0 = p1.x;
     a1 = p1.y;
 	
-	float r = p2.x;
+	float border_width = min_line_width;
+	float r = p2.x + border_width/scale/2;
 	float h = r*2;
 	float z = 2;
 	
-	float border_width = min_line_width;
 	border_threshold = 1-border_width/(r*scale);
 	
 	for(int i = 0; i<3; i++) {
