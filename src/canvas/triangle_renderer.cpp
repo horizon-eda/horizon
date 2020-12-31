@@ -372,22 +372,37 @@ void TriangleRenderer::render()
 
     const auto &modes = ca.highlight_on_top ? modes_on_top : modes_normal;
 
+    std::vector<std::pair<int, std::set<std::pair<int, bool>>>> normal_layers;
+    normal_layers.reserve(layers.size());
+    for (const auto layer : layers) {
+        const auto &ld = ca.get_layer_display(layer);
+        if (layer != ca.work_layer && layer < 10000 && ld.visible && !ca.layer_is_annotation(layer))
+            normal_layers.push_back({layer, {}});
+    }
+    normal_layers.push_back({ca.work_layer, {}});
+
+    for (const auto &[k, overlay_layer] : ca.overlay_layers) {
+        const auto &[layer, ignore_flip] = k;
+        auto f = std::find_if(normal_layers.rbegin(), normal_layers.rend(),
+                              [&layer](const auto &x) { return layer.overlaps(x.first); });
+        if (f != normal_layers.crend()) {
+            f->second.emplace(overlay_layer, ignore_flip);
+        }
+    }
+
     render_annotations(false); // annotation bottom
     for (const auto &highlight_modes : modes) {
-        for (auto layer : layers) {
-            const auto &ld = ca.get_layer_display(layer);
-            if (layer != ca.work_layer && layer < 10000 && ld.visible && !ca.layer_is_annotation(layer)) {
-                for (const auto highlight_mode : highlight_modes) {
-                    if (ca.layer_mode == CanvasGL::LayerMode::WORK_ONLY) {
-                        if (highlight_mode == HighlightMode::SKIP)
-                            continue;
-                    }
-                    render_layer_with_overlay(layer, highlight_mode);
+        for (const auto &[layer, overlays] : normal_layers) {
+            for (const auto highlight_mode : highlight_modes) {
+                if (layer != ca.work_layer && ca.layer_mode == CanvasGL::LayerMode::WORK_ONLY
+                    && highlight_mode == HighlightMode::SKIP)
+                    continue;
+
+                render_layer(layer, highlight_mode);
+                for (const auto &[overlay, ignore_flip] : overlays) {
+                    render_layer(overlay, highlight_mode, ignore_flip);
                 }
             }
-        }
-        for (const auto highlight_mode : highlight_modes) {
-            render_layer_with_overlay(ca.work_layer, highlight_mode);
         }
         for (auto layer : layers) {
             const auto &ld = ca.get_layer_display(layer);

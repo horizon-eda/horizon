@@ -1145,19 +1145,18 @@ void Canvas::render_pad_overlay(const Pad &pad)
     auto pad_width = abs(b.x - a.x);
     auto pad_height = abs(b.y - a.y);
 
-    std::set<int> text_layers;
+    int text_layer = 10000;
     switch (pad.padstack.type) {
     case Padstack::Type::TOP:
-        text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER, true));
+        text_layer = get_overlay_layer(BoardLayers::TOP_COPPER, true);
         break;
 
     case Padstack::Type::BOTTOM:
-        text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER, true));
+        text_layer = get_overlay_layer(BoardLayers::BOTTOM_COPPER, true);
         break;
 
     default:
-        text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER, true));
-        text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER, true));
+        text_layer = get_overlay_layer({BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER}, true);
     }
 
     Placement tr = transform;
@@ -1167,18 +1166,16 @@ void Canvas::render_pad_overlay(const Pad &pad)
     }
 
     set_lod_size(std::min(pad_height, pad_width));
-    for (const auto overlay_layer : text_layers) {
-        if (pad.secondary_text.size()) {
-            draw_bitmap_text_box(tr, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, overlay_layer,
-                                 TextBoxMode::UPPER);
-            draw_bitmap_text_box(tr, pad_width, pad_height, pad.secondary_text, ColorP::TEXT_OVERLAY, overlay_layer,
-                                 TextBoxMode::LOWER);
-        }
-        else {
-            draw_bitmap_text_box(tr, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, overlay_layer,
-                                 TextBoxMode::FULL);
-        }
+
+    if (pad.secondary_text.size()) {
+        draw_bitmap_text_box(tr, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, text_layer, TextBoxMode::UPPER);
+        draw_bitmap_text_box(tr, pad_width, pad_height, pad.secondary_text, ColorP::TEXT_OVERLAY, text_layer,
+                             TextBoxMode::LOWER);
     }
+    else {
+        draw_bitmap_text_box(tr, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, text_layer, TextBoxMode::FULL);
+    }
+
     set_lod_size(-1);
     transform_restore();
 }
@@ -1332,7 +1329,10 @@ void Canvas::render(const Via &via, bool interactive)
         auto size = (bb.second.x - bb.first.x) * 1.2;
         set_lod_size(size);
         Placement p(via.junction->position);
-        draw_bitmap_text_box(p, size, size, via.junction->net->name, ColorP::TEXT_OVERLAY, 10000, TextBoxMode::FULL);
+        if (get_flip_view())
+            p.shift.x *= -1;
+        const auto ol = get_overlay_layer({BoardLayers::BOTTOM_COPPER, BoardLayers::TOP_COPPER}, true);
+        draw_bitmap_text_box(p, size, size, via.junction->net->name, ColorP::TEXT_OVERLAY, ol, TextBoxMode::FULL);
         set_lod_size(-1);
     }
 

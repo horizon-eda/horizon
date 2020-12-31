@@ -269,7 +269,7 @@ void Canvas::transform_restore()
     }
 }
 
-int Canvas::get_overlay_layer(int layer, bool ignore_flip)
+int Canvas::get_overlay_layer(const LayerRange &layer, bool ignore_flip)
 {
     if (overlay_layers.count({layer, ignore_flip}) == 0) {
         auto ol = overlay_layer_current++;
@@ -283,12 +283,10 @@ int Canvas::get_overlay_layer(int layer, bool ignore_flip)
 
 bool Canvas::is_overlay_layer(int overlay_layer, int layer) const
 {
-    for (const bool ignore_flip : {true, false}) {
-        const auto k = std::make_pair(layer, ignore_flip);
-        if (overlay_layers.count(k)) {
-            if (overlay_layers.at(k) == overlay_layer)
+    for (const auto &[k, v] : overlay_layers) {
+        if (k.first.overlaps(layer))
+            if (v == overlay_layer)
                 return true;
-        }
     }
     return false;
 }

@@ -234,9 +234,9 @@ protected:
 
     TriangleInfo::Type triangle_type_current = TriangleInfo::Type::NONE;
 
-    std::map<std::pair<int, bool>, int> overlay_layers; // layer, ignore_flip -> overlay layer
+    std::map<std::pair<LayerRange, bool>, int> overlay_layers; // layer, ignore_flip -> overlay layer
     int overlay_layer_current = first_overlay_layer;
-    int get_overlay_layer(int layer, bool ignore_flip = false);
+    int get_overlay_layer(const LayerRange &layer, bool ignore_flip = false);
     bool is_overlay_layer(int overlay_layer, int layer) const;
 
     FragmentCache fragment_cache;
