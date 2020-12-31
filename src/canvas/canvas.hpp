@@ -146,6 +146,9 @@ protected:
                    bool tr = true, uint64_t width = 0);
     void draw_box(const Coord<float> &o, float size, ColorP color = ColorP::FROM_LAYER, int layer = 10000,
                   bool tr = true, uint64_t width = 0);
+    void draw_bezier2(const Coord<float> &start,const Coord<float> &mid,const Coord<float> &end, ColorP color = ColorP::FROM_LAYER, int layer = 10000, bool tr = true, uint64_t width = 0);
+    void draw_curve(const Coord<float> &start,const Coord<float> &end,float diviation=0.1, ColorP color = ColorP::FROM_LAYER, int layer = 10000, bool tr = true, uint64_t width = 0);
+    void draw_circle(const Coord<float> &center, float radius, ColorP color = ColorP::FROM_LAYER,int layer = 10000, bool tr = true, uint64_t width = 0);
     void draw_arc(const Coord<float> &center, float radius, float a0, float a1, ColorP color = ColorP::FROM_LAYER,
                   int layer = 10000, bool tr = true, uint64_t width = 0);
     std::pair<Coordf, Coordf> draw_arc2(const Coord<float> &center, float radius0, float a0, float a1, ColorP color,

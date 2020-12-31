@@ -958,6 +958,8 @@ $(OBJ_RES): $(OBJDIR)/%.res: %.rc
 	windres $< -O coff -o $@
 
 install: $(BUILDDIR)/horizon-imp $(BUILDDIR)/horizon-eda
+	strip $(BUILDDIR)/horizon-imp
+	strip $(BUILDDIR)/horizon-eda
 	mkdir -p $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m755 $(BUILDDIR)/horizon-imp $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m755 $(BUILDDIR)/horizon-eda $(DESTDIR)$(BINDIR)

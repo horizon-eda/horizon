@@ -54,9 +54,28 @@ void CanvasAnnotation::draw_line(const Coordf &from, const Coordf &to, ColorP co
     ca->request_push();
 }
 
+void CanvasAnnotation::draw_circle(const Coordf &center, float radius0, ColorP color, uint64_t width)
+{
+    ca->draw_circle(center, radius0,color, layer,false, width);
+    ca->request_push();
+}
+
 void CanvasAnnotation::draw_arc(const Coordf &center, float radius0, float a0, float a1, ColorP color, uint64_t width)
 {
-    ca->draw_arc0(center, radius0, a0, a1, color, layer, width);
+    ca->draw_arc(center, radius0,a0,a1, color, layer,false, width);
+    ca->request_push();
+}
+
+
+void CanvasAnnotation::draw_curve(const Coordf &start, const Coordf &end, float divation, ColorP color, uint64_t width)
+{
+    ca->draw_curve(start,end,divation, color, layer,  false, width);
+    ca->request_push();
+}
+
+void CanvasAnnotation:: draw_bezier2(const Coordf &p0, const Coordf &p1, const Coordf &p2,  ColorP color, uint64_t width)
+{
+    ca->draw_bezier2(p0,p1,p2, color, layer, false, width);
     ca->request_push();
 }
 

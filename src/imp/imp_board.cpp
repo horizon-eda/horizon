@@ -48,18 +48,18 @@ void ImpBoard::canvas_update()
 void ImpBoard::update_airwire_annotation()
 {
     airwire_annotation->clear();
-    for (const auto &[net, airwires] : core_board.get_board()->airwires) {
+    for ( auto &[net, airwires] : core_board.get_board()->airwires) {
         if (!airwire_filter_window->airwire_is_visible(net))
             continue;
-        const bool highlight = highlights.count(ObjectRef(ObjectType::NET, net));
+         bool highlight = highlights.count(ObjectRef(ObjectType::NET, net));
         uint8_t color2 = 0;
         if (net_color_map.count(net))
             color2 = net_color_map.at(net);
         if (core_board.tool_is_active() && !highlight && highlights.size())
             continue;
-        for (const auto &airwire : airwires) {
-            airwire_annotation->draw_line(airwire.from.get_position(), airwire.to.get_position(), ColorP::AIRWIRE, 0,
-                                          highlight, color2);
+        for (auto &airwire : airwires) {
+             auto color = airwire.from.get_net()->is_power ?   ColorP::AIRWIRE_ROUTER :ColorP::AIRWIRE;            
+            airwire_annotation->draw_curve(airwire.from.get_position(), airwire.to.get_position(),0.2, color, 0);
         }
     }
 }
