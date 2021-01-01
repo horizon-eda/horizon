@@ -959,7 +959,6 @@ void Canvas::render(const Hole &hole, bool interactive)
     const int64_t r = hole.diameter / 2;
     const int64_t l = std::max((int64_t)hole.length / 2 - r, (int64_t)0);
     if (hole.shape == Hole::Shape::ROUND) {
-        draw_line(Coordf(), Coordf(100, 0), co, 10000, true, hole.diameter);
         draw_circle(Coordf(), r);
         if (hole.plated) {
             draw_circle(Coordf(), r * 0.9);
