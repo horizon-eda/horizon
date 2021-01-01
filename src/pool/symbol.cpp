@@ -6,7 +6,7 @@
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
-#include <iostream>
+#include "util/bbox_accumulator.hpp"
 
 namespace horizon {
 
@@ -294,23 +294,19 @@ void Symbol::expand(PinDisplayMode mode)
 
 std::pair<Coordi, Coordi> Symbol::get_bbox(bool all) const
 {
-    Coordi a;
-    Coordi b;
+    BBoxAccumulator<Coordi::type> acc;
     for (const auto &it : junctions) {
-        a = Coordi::min(a, it.second.position);
-        b = Coordi::max(b, it.second.position);
+        acc.accumulate(it.second.position);
     }
     for (const auto &it : pins) {
-        a = Coordi::min(a, it.second.position);
-        b = Coordi::max(b, it.second.position);
+        acc.accumulate(it.second.position);
     }
     if (all) {
         for (const auto &it : texts) {
-            a = Coordi::min(a, it.second.placement.shift);
-            b = Coordi::max(b, it.second.placement.shift);
+            acc.accumulate(it.second.placement.shift);
         }
     }
-    return std::make_pair(a, b);
+    return acc.get_or_0();
 }
 
 void Symbol::apply_placement(const Placement &p)

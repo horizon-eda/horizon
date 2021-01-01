@@ -5,6 +5,7 @@
 #include "board/board_layers.hpp"
 #include "util/picture_load.hpp"
 #include "common/junction_util.hpp"
+#include "util/bbox_accumulator.hpp"
 
 namespace horizon {
 
@@ -311,22 +312,17 @@ void Package::update_warnings()
 
 std::pair<Coordi, Coordi> Package::get_bbox() const
 {
-    Coordi a;
-    Coordi b;
+    BBoxAccumulator<Coordi::type> acc;
     for (const auto &it : pads) {
         auto bb_pad = it.second.placement.transform_bb(it.second.padstack.get_bbox());
-        a = Coordi::min(a, bb_pad.first);
-        b = Coordi::max(b, bb_pad.second);
+        acc.accumulate(bb_pad);
     }
     for (const auto &it : polygons) {
         if (it.second.layer == BoardLayers::TOP_PACKAGE || it.second.layer == BoardLayers::BOTTOM_PACKAGE) {
-            for (const auto &v : it.second.vertices) {
-                a = Coordi::min(a, v.position);
-                b = Coordi::max(b, v.position);
-            }
+            acc.accumulate(it.second.get_bbox());
         }
     }
-    return std::make_pair(a, b);
+    return acc.get_or_0();
 }
 
 static std::map<int, Layer> pkg_layers;

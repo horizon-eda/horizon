@@ -3,6 +3,7 @@
 #include "common/lut.hpp"
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
+#include "util/bbox_accumulator.hpp"
 
 namespace horizon {
 
@@ -259,27 +260,19 @@ UUID Padstack::get_uuid() const
 
 std::pair<Coordi, Coordi> Padstack::get_bbox(bool copper_only) const
 {
-    Coordi a;
-    Coordi b;
+    BBoxAccumulator<Coordi::type> acc;
     for (const auto &it : polygons) {
         if (!copper_only || BoardLayers::is_copper(it.second.layer)) {
-            auto poly = it.second.remove_arcs(8);
-            for (const auto &v : poly.vertices) {
-                a = Coordi::min(a, v.position);
-                b = Coordi::max(b, v.position);
-            }
+            acc.accumulate(it.second.get_bbox());
         }
     }
     for (const auto &it : shapes) {
         if (!copper_only || BoardLayers::is_copper(it.second.layer)) {
-            auto bb = it.second.placement.transform_bb(it.second.get_bbox());
-
-            a = Coordi::min(a, bb.first);
-            b = Coordi::max(b, bb.second);
+            const auto bb = it.second.placement.transform_bb(it.second.get_bbox());
+            acc.accumulate(bb);
         }
     }
-
-    return std::make_pair(a, b);
+    return acc.get_or_0();
 }
 
 const std::map<int, Layer> &Padstack::get_layers() const

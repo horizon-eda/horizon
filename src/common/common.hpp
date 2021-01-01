@@ -80,6 +80,8 @@ public:
     T x;
     T y;
 
+    using type = T;
+
     // WTF, but works
     // template<typename U = T>
     // Coord(double ix, double iy, typename std::enable_if<std::is_same<U,

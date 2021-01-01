@@ -2,6 +2,8 @@
 #include "lut.hpp"
 #include "nlohmann/json.hpp"
 #include "util/util.hpp"
+#include "util/bbox_accumulator.hpp"
+#include "util/polygon_arc_removal_proxy.hpp"
 
 namespace horizon {
 
@@ -153,6 +155,17 @@ const Polygon::Vertex &Polygon::get_vertex(int edge) const
 Polygon::Vertex &Polygon::get_vertex(int edge)
 {
     return const_cast<Polygon::Vertex &>(const_cast<const Polygon *>(this)->get_vertex(edge));
+}
+
+std::pair<Coordi, Coordi> Polygon::get_bbox() const
+{
+    PolygonArcRemovalProxy proxy(*this, 8);
+    const auto &poly = proxy.get();
+    BBoxAccumulator<Coordi::type> acc;
+    for (const auto &v : poly.vertices) {
+        acc.accumulate(v.position);
+    }
+    return acc.get();
 }
 
 json Polygon::serialize() const
