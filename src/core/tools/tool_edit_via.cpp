@@ -24,9 +24,12 @@ std::set<Via *> ToolEditVia::get_vias()
 
 ToolResponse ToolEditVia::begin(const ToolArgs &args)
 {
-    auto holes = get_vias();
-    bool r = imp->dialogs.edit_via(holes, doc.b->get_via_padstack_provider());
+    auto vias = get_vias();
+    bool r = imp->dialogs.edit_via(vias, doc.b->get_via_padstack_provider());
     if (r) {
+        for (auto via : vias) {
+            via->expand(*doc.b->get_board());
+        }
         return ToolResponse::commit();
     }
     else {
