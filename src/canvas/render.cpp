@@ -829,7 +829,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
             const Coordf p0 = (poly.get_vertex(0).position + poly.get_vertex(1).position) / 2;
             const Coordf p1 = (poly.get_vertex(2).position + poly.get_vertex(3).position) / 2;
             const float width = sqrt((poly.get_vertex(0).position - poly.get_vertex(1).position).mag_sq());
-            add_triangle(poly.layer, transform.transform(p0), transform.transform(p1), Coordf(width, NAN), co,
+            add_triangle(poly.layer, transform.transform(p0), transform.transform(p1), Coordf(width, 1), co,
                          TriangleInfo::FLAG_BUTT);
         }
         else {
@@ -930,7 +930,7 @@ void Canvas::render(const Shape &shape, bool interactive)
         auto w = shape.params.at(0);
         auto h = shape.params.at(1);
         add_triangle(shape.layer, transform.transform(Coordf(-w / 2, 0)), transform.transform(Coordf(w / 2, 0)),
-                     Coordf(h, NAN), ColorP::FROM_LAYER, TriangleInfo::FLAG_BUTT);
+                     Coordf(h, 0), ColorP::FROM_LAYER, TriangleInfo::FLAG_BUTT);
         transform_restore();
     }
     else if (shape.form == Shape::Form::OBROUND) {

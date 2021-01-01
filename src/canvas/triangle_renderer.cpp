@@ -465,6 +465,9 @@ void TriangleRenderer::push()
                 else if (tri_info.flags & TriangleInfo::FLAG_ARC) {
                     ty = Type::ARC;
                 }
+                else if (tri_info.flags & TriangleInfo::FLAG_BUTT) {
+                    ty = Type::LINE_BUTT;
+                }
                 else if (!isnan(tri.y2)) {
                     ty = Type::TRIANGLE;
                 }
@@ -474,9 +477,7 @@ void TriangleRenderer::push()
                 else if (isnan(tri.y1) && isnan(tri.x2) && isnan(tri.y2)) {
                     ty = Type::CIRCLE;
                 }
-                else if (isnan(tri.y2) && (tri_info.flags & TriangleInfo::FLAG_BUTT)) {
-                    ty = Type::LINE_BUTT;
-                }
+
                 else if (isnan(tri.y2)) {
                     ty = Type::LINE;
                 }

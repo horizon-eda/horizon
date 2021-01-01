@@ -372,7 +372,7 @@ std::pair<Coordf, Coordf> Canvas::get_bbox(bool visible_only) const
                     acc.accumulate(points.at(0) + offset);
                     acc.accumulate(points.at(1) + offset);
                 }
-                else if (std::isnan(it2.y2) && (it_info.flags & TriangleInfo::FLAG_BUTT)) { // line
+                else if (it_info.flags & TriangleInfo::FLAG_BUTT) { // line
                     const Coordf v = points.at(1) - points.at(0);
                     const Coordf vn = Coordf(-v.y, v.x) / sqrt(v.mag_sq());
                     const Coordf w = vn * (it2.x2 / 2);
