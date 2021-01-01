@@ -27,6 +27,7 @@
 #include "util/util.hpp"
 #include "board/board_panel.hpp"
 #include "common/picture.hpp"
+#include "util/polygon_arc_removal_proxy.hpp"
 #include <algorithm>
 #include <ctime>
 #include <sstream>
@@ -760,39 +761,6 @@ static const Coordf coordf_from_pt(const TPPLPoint &p)
     return Coordf(p.x, p.y);
 }
 
-class ArcRemovalProxy {
-public:
-    ArcRemovalProxy(const Polygon &poly, unsigned int precision = 16);
-    const Polygon &get() const;
-    bool had_arcs() const;
-
-private:
-    const Polygon &parent;
-    std::optional<Polygon> poly_arcs_removed;
-    const Polygon *ppoly = nullptr;
-};
-
-ArcRemovalProxy::ArcRemovalProxy(const Polygon &poly, unsigned int precision) : parent(poly)
-{
-    if (parent.has_arcs()) {
-        poly_arcs_removed.emplace(parent.remove_arcs(precision));
-        ppoly = &poly_arcs_removed.value();
-    }
-    else {
-        ppoly = &parent;
-    }
-}
-
-const Polygon &ArcRemovalProxy::get() const
-{
-    return *ppoly;
-}
-
-bool ArcRemovalProxy::had_arcs() const
-{
-    return ppoly != &parent;
-}
-
 static bool poly_is_rect(const Polygon &poly)
 {
     if (poly.vertices.size() != 4)
@@ -814,7 +782,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
     img_polygon(ipoly);
     if (img_mode)
         return;
-    const ArcRemovalProxy arc_removal_proxy{ipoly, 64};
+    const PolygonArcRemovalProxy arc_removal_proxy{ipoly, 64};
     const auto &poly = arc_removal_proxy.get();
     if (poly.vertices.size() == 0)
         return;

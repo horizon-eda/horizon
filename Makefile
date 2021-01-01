@@ -164,6 +164,7 @@ SRC_CANVAS = \
 	src/canvas/appearance.cpp\
 	src/canvas/bitmap_font_util.cpp\
 	src/canvas/picture_renderer.cpp\
+	src/util/polygon_arc_removal_proxy.cpp\
 
 SRC_IMP = \
 	src/imp/imp_main.cpp \
