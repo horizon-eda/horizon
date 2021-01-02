@@ -73,6 +73,7 @@ void install_esc_to_close(Gtk::Window &win);
 void widget_set_insensitive_tooltip(Gtk::Widget &w, const std::string &txt);
 
 void widget_remove_scroll_events(Gtk::Widget &widget);
+void spinbutton_connect_activate(Gtk::SpinButton *sp, std::function<void()> cb);
 
 #define GET_WIDGET(name)                                                                                               \
     do {                                                                                                               \

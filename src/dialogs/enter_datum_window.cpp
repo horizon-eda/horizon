@@ -1,6 +1,7 @@
 #include "enter_datum_window.hpp"
 #include "widgets/spin_button_dim.hpp"
 #include "imp/imp_interface.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 
@@ -20,7 +21,7 @@ EnterDatumWindow::EnterDatumWindow(Gtk::Window *parent, class ImpInterface *intf
     sp->set_margin_start(8);
     sp->set_range(0, 1e9);
     sp->set_value(def);
-    sp->signal_activate().connect([this] { emit_event(ToolDataWindow::Event::OK); });
+    spinbutton_connect_activate(sp, [this] { emit_event(ToolDataWindow::Event::OK); });
     sp->signal_value_changed().connect([this] {
         auto data = std::make_unique<ToolDataEnterDatumWindow>();
         data->event = ToolDataWindow::Event::UPDATE;

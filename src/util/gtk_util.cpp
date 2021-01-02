@@ -354,4 +354,19 @@ void tree_view_set_search_contains(Gtk::TreeView *view)
     gtk_tree_view_set_search_equal_func(view->gobj(), &search_eq, nullptr, nullptr);
 }
 
+void spinbutton_connect_activate(Gtk::SpinButton *sp, std::function<void()> cb)
+{
+    sp->signal_activate().connect(
+            [sp, cb] {
+                const auto old_value = sp->get_value();
+                sp->update();
+                const auto new_value = sp->get_value();
+                if (old_value == new_value)
+                    cb();
+                else
+                    sp->select_region(0, -1);
+            },
+            false);
+}
+
 } // namespace horizon
