@@ -29,6 +29,7 @@
 
 #include <Poly_PolygonOnTriangulation.hxx>
 #include <Poly_Triangulation.hxx>
+#include <TShort_Array1OfShortReal.hxx>
 #include <Precision.hxx>
 #include <Quantity_Color.hxx>
 
