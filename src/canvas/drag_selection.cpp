@@ -195,7 +195,7 @@ void DragSelection::drag_begin(GdkEventButton *button_event)
         active = 1;
         sel_o = Coordf(x, y);
         if (!is_line_sel(ca.selection_tool)) {
-            box.sel_a = ca.screen2canvas(sel_o);
+            box.sel_a = sel_o;
             box.sel_b = box.sel_a;
         }
         else {
@@ -234,7 +234,7 @@ void DragSelection::drag_move(GdkEventMotion *motion_event)
     }
     else if (active == 2) {
         if (!is_line_sel(ca.selection_tool)) {
-            box.sel_b = ca.screen2canvas(Coordf(x, y));
+            box.sel_b = Coordf(x, y);
             box.update();
         }
         else {
@@ -395,10 +395,12 @@ void DragSelection::drag_end(GdkEventButton *button_event)
 
 void DragSelection::Box::update()
 {
-    float xmin = std::min(sel_a.x, sel_b.x);
-    float xmax = std::max(sel_a.x, sel_b.x);
-    float ymin = std::min(sel_a.y, sel_b.y);
-    float ymax = std::max(sel_a.y, sel_b.y);
+    const auto sel_a_ca = ca.screen2canvas(sel_a);
+    const auto sel_b_ca = ca.screen2canvas(sel_b);
+    float xmin = std::min(sel_a_ca.x, sel_b_ca.x);
+    float xmax = std::max(sel_a_ca.x, sel_b_ca.x);
+    float ymin = std::min(sel_a_ca.y, sel_b_ca.y);
+    float ymax = std::max(sel_a_ca.y, sel_b_ca.y);
     unsigned int i = 0;
     for (auto &it : ca.selectables.items) {
         it.set_flag(Selectable::Flag::PRELIGHT, false);
@@ -406,7 +408,7 @@ void DragSelection::Box::update()
             auto sq = ca.selection_qualifier;
 
             if (sq == CanvasGL::SelectionQualifier::AUTO) {
-                if (sel_a.x < sel_b.x)
+                if (sel_a_ca.x < sel_b_ca.x)
                     sq = CanvasGL::SelectionQualifier::INCLUDE_BOX;
                 else
                     sq = CanvasGL::SelectionQualifier::TOUCH_BOX;

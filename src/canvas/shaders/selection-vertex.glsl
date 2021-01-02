@@ -25,5 +25,5 @@ void main() {
 	dim = abs(tr - bl);
 	x=t-bl;
 	
-	gl_Position = vec4((screenmat*viewmat*vec3(t, 1)), 1);
+	gl_Position = vec4((screenmat*vec3(t, 1)), 1);
 }
