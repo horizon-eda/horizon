@@ -15,6 +15,7 @@ FaceRenderer::FaceRenderer(Canvas3DBase &c) : ca(c)
 static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out, GLuint &vbo_instance_out)
 {
     GLuint position_index = glGetAttribLocation(program, "position");
+    GLuint normal_index = glGetAttribLocation(program, "normal");
     GLuint color_index = glGetAttribLocation(program, "color");
     GLuint offset_index = glGetAttribLocation(program, "offset");
     GLuint angle_index = glGetAttribLocation(program, "angle");
@@ -36,21 +37,16 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out, GLuin
     glGenBuffers(1, &ebuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebuffer);
 
-    Canvas3DBase::FaceVertex vertices[] = {
-            //   Position
-            {-1, -1, 5, 255, 255, 0},
-            {-1, 1, 5, 255, 0, 0},
-            {1, 1, 5, 255, 0, 0},
-            {1, -1, 5, 255, 0, 0},
-    };
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
     uint32_t elements[] = {0, 1, 2, 2, 3, 0};
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
     /* enable and set the position attribute */
     glEnableVertexAttribArray(position_index);
-    glVertexAttribPointer(position_index, 3, GL_FLOAT, GL_FALSE, sizeof(Canvas3DBase::FaceVertex), 0);
+    glVertexAttribPointer(position_index, 3, GL_FLOAT, GL_FALSE, sizeof(Canvas3DBase::FaceVertex),
+                          (void *)offsetof(Canvas3DBase::FaceVertex, x));
+    glEnableVertexAttribArray(normal_index);
+    glVertexAttribPointer(normal_index, 3, GL_FLOAT, GL_FALSE, sizeof(Canvas3DBase::FaceVertex),
+                          (void *)offsetof(Canvas3DBase::FaceVertex, nx));
     glEnableVertexAttribArray(color_index);
     glVertexAttribPointer(color_index, 3, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Canvas3DBase::FaceVertex),
                           (void *)offsetof(Canvas3DBase::FaceVertex, r));
@@ -103,9 +99,7 @@ static GLuint create_vao(GLuint program, GLuint &vbo_out, GLuint &ebo_out, GLuin
 void FaceRenderer::realize()
 {
     program = gl_create_program_from_resource("/org/horizon-eda/horizon/canvas3d/shaders/face-vertex.glsl",
-                                              "/org/horizon-eda/horizon/canvas3d/shaders/face-fragment.glsl",
-                                              "/org/horizon-eda/horizon/canvas3d/shaders/"
-                                              "face-geometry.glsl");
+                                              "/org/horizon-eda/horizon/canvas3d/shaders/face-fragment.glsl", nullptr);
     vao = create_vao(program, vbo, ebo, vbo_instance);
 
     GET_LOC(this, view);

@@ -48,13 +48,16 @@ public:
 
     class FaceVertex {
     public:
-        FaceVertex(float ix, float iy, float iz, uint8_t ir, uint8_t ig, uint8_t ib)
-            : x(ix), y(iy), z(iz), r(ir), g(ig), b(ib), _pad(0)
+        FaceVertex(float ix, float iy, float iz, float inx, float iny, float inz, uint8_t ir, uint8_t ig, uint8_t ib)
+            : x(ix), y(iy), z(iz), nx(inx), ny(iny), nz(inz), r(ir), g(ig), b(ib), _pad(0)
         {
         }
         float x;
         float y;
         float z;
+        float nx;
+        float ny;
+        float nz;
 
         uint8_t r;
         uint8_t g;
