@@ -158,9 +158,6 @@ static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *col
 
     Poly::ComputeNormals(triangulation);
 
-    std::cout << "norm " << triangulation->NbNodes() << " " << triangulation->Normals().Size()
-              << " tess=" << isTessellate << std::endl;
-
     const TColgp_Array1OfPnt &arrPolyNodes = triangulation->Nodes();
     const Poly_Array1OfTriangle &arrTriangles = triangulation->Triangles();
     const TShort_Array1OfShortReal &arrNormals = triangulation->Normals();
