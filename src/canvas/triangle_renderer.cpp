@@ -333,16 +333,6 @@ void TriangleRenderer::render_layer(int layer, HighlightMode highlight_mode, boo
     stencil++;
 }
 
-void TriangleRenderer::render_layer_with_overlay(int layer, HighlightMode highlight_mode)
-{
-    render_layer(layer, highlight_mode);
-    for (auto ignore_flip : {false, true}) {
-        if (ca.overlay_layers.count({layer, ignore_flip}))
-            render_layer(ca.overlay_layers.at({layer, ignore_flip}), highlight_mode, ignore_flip);
-    }
-}
-
-
 void TriangleRenderer::render()
 {
     glBindVertexArray(vao);
