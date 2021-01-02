@@ -742,10 +742,11 @@ LIBS_ALL = $(LIBS_COMMON) gtkmm-3.0 epoxy cairomm-pdf-1.0 librsvg-2.0 libzmq lib
 
 OPTIMIZE = -fdata-sections -ffunction-sections -O3
 DEBUGFLAGS = -g3
-CXXFLAGS += $(DEBUGFLAGS) $(DEFINES) $(OPTIMIZE) $(shell $(PKG_CONFIG) --cflags $(LIBS_ALL)) -MP -MMD -pthread -Wall -Wshadow -Wsuggest-override -std=c++17
+PKG_CONFIG_LIBS := $(shell $(PKG_CONFIG) --cflags $(LIBS_ALL))
+CXXFLAGS += $(DEBUGFLAGS) $(DEFINES) $(OPTIMIZE) $(PKG_CONFIG_LIBS) -MP -MMD -pthread -Wall -Wshadow -Wsuggest-override -std=c++17
 CFLAGS = $(filter-out -Wsuggest-override, $(filter-out -std=%,$(CXXFLAGS))) -std=c99
 LDFLAGS += -lm -lpthread
-GLIB_COMPILE_RESOURCES = $(shell $(PKG_CONFIG) --variable=glib_compile_resources gio-2.0)
+GLIB_COMPILE_RESOURCES := $(shell $(PKG_CONFIG) --variable=glib_compile_resources gio-2.0)
 
 ifeq ($(DEBUG),1)
 	CXXFLAGS += -DUUID_PTR_CHECK -DCONNECTION_CHECK
@@ -856,7 +857,7 @@ OBJ_PR_REVIEW    = $(addprefix $(OBJDIR)/,$(SRC_PR_REVIEW:.cpp=.o))
 
 INC_ROUTER = -I3rd_party/router/include/ -I3rd_party/router -isystem 3rd_party
 INC_OCE ?= -isystem /opt/opencascade/inc/ -isystem /mingw64/include/oce/ -isystem /usr/include/oce -isystem /usr/include/opencascade -isystem ${CASROOT}/include/opencascade -isystem ${CASROOT}/include/oce -isystem /usr/local/include/OpenCASCADE
-INC_PYTHON = $(shell $(PKG_CONFIG) --cflags python3 py3cairo)
+INC_PYTHON := $(shell $(PKG_CONFIG) --cflags python3 py3cairo)
 OCE_LIBDIRS = -L/opt/opencascade/lib/ -L${CASROOT}/lib
 LDFLAGS_OCE = $(OCE_LIBDIRS) -lTKSTEP  -lTKernel  -lTKXCAF -lTKXSBase -lTKBRep -lTKCDF -lTKXDESTEP -lTKLCAF -lTKMath -lTKMesh -lTKTopAlgo -lTKPrim -lTKBO
 ifeq ($(OS),Windows_NT)
