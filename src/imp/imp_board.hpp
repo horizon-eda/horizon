@@ -91,6 +91,11 @@ private:
     Gtk::Popover *reload_netlist_popover = nullptr;
     sigc::connection reload_netlist_delay_conn;
 
+    int view_angle = 0;
+    void set_view_angle(int angle);
+    Gtk::Label *view_angle_label = nullptr;
+    Gtk::Button *view_angle_button = nullptr;
+
     UUID net_from_selectable(const SelectableRef &sr);
 };
 } // namespace horizon

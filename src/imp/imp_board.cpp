@@ -24,6 +24,7 @@
 #include "parts_window.hpp"
 #include "pool/pool_cached.hpp"
 #include "widgets/spin_button_angle.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
@@ -458,6 +459,30 @@ void ImpBoard::construct()
     view_options_menu_append_action("Nets…", "win.airwire_filter");
 
     view_options_menu_append_action("Bottom view", "win.bottom_view");
+    {
+        auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
+        box->get_style_context()->add_class("linked");
+        view_options_menu->pack_start(*box, false, false, 0);
+
+        auto left_button = Gtk::manage(new Gtk::Button);
+        left_button->set_image_from_icon_name("object-rotate-left-symbolic");
+        left_button->signal_clicked().connect([this] { set_view_angle(view_angle + 8192); });
+        box->pack_start(*left_button, true, true, 0);
+
+        view_angle_button = Gtk::manage(new Gtk::Button);
+        view_angle_button->signal_clicked().connect([this] { set_view_angle(0); });
+        view_angle_label = Gtk::manage(new Gtk::Label);
+        view_angle_button->add(*view_angle_label);
+        label_set_tnum(view_angle_label);
+        box->pack_start(*view_angle_button, true, true, 0);
+
+        auto right_button = Gtk::manage(new Gtk::Button);
+        right_button->set_image_from_icon_name("object-rotate-right-symbolic");
+        right_button->signal_clicked().connect([this] { set_view_angle(view_angle - 8192); });
+        box->pack_start(*right_button, true, true, 0);
+
+        box->show_all();
+    }
 
     if (sockets_connected) {
         hamburger_menu->append("Cross probing", "win.cross_probing");
@@ -716,17 +741,6 @@ void ImpBoard::construct()
 
     main_window->left_panel->pack_start(*display_control_notebook, false, false);
 
-    {
-        auto sp_angle = Gtk::manage(new SpinButtonAngle);
-        sp_angle->show();
-        sp_angle->signal_value_changed().connect([this, sp_angle] {
-            canvas->set_view_angle(sp_angle->get_value() / 32768 * M_PI);
-            canvas_update_from_pp();
-        });
-
-        main_window->left_panel->pack_end(*sp_angle, false, false, 0);
-    }
-
     unplaced_box = Gtk::manage(new UnplacedBox("Package"));
     unplaced_box->show();
     main_window->left_panel->pack_end(*unplaced_box, true, true, 0);
@@ -839,6 +853,46 @@ void ImpBoard::construct()
     update_monitor();
 
     display_control_notebook->show();
+
+    set_view_angle(0);
+}
+
+static std::string view_angle_to_string(int x, bool pos_only)
+{
+    while (x < 0) {
+        x += 65536;
+    }
+    x %= 65536;
+    if (!pos_only && x > 32768)
+        x -= 65536;
+
+    std::ostringstream ss;
+    ss.imbue(get_locale());
+    if (x >= 0) {
+        ss << "+";
+    }
+    else {
+        ss << "−"; // this is U+2212 MINUS SIGN, has same width as +
+    }
+    ss << std::fixed << std::setprecision(1) << std::setw(5) << std::setfill('0') << std::internal
+       << std::abs((x / 65536.0) * 360) << " °"; // NBSP
+    return ss.str();
+}
+
+void ImpBoard::set_view_angle(int angle)
+{
+    view_angle = angle;
+    while (view_angle > 65535) {
+        view_angle -= 65536;
+    }
+    while (view_angle < 0) {
+        view_angle += 65536;
+    }
+    canvas->set_view_angle(angle * M_PI / 32768);
+    view_angle_label->set_text(view_angle_to_string(view_angle, false));
+    view_angle_button->set_sensitive(view_angle != 0);
+    canvas_update_from_pp();
+    update_view_hints();
 }
 
 UUID ImpBoard::net_from_selectable(const SelectableRef &sr)
@@ -1229,7 +1283,8 @@ std::vector<std::string> ImpBoard::get_view_hints()
 
     if (airwire_filter_window->get_filtered())
         r.emplace_back("airwires filtered");
-
+    if (view_angle != 0)
+        r.emplace_back(view_angle_to_string(view_angle, false));
     return r;
 }
 
