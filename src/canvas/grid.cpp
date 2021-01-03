@@ -53,6 +53,7 @@ void Grid::realize()
     GET_LOC(this, grid_mod);
     GET_LOC(this, mark_size);
     GET_LOC(this, color);
+    GET_LOC(this, angle);
 }
 
 void Grid::render()
@@ -62,6 +63,7 @@ void Grid::render()
     glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca.screenmat));
     glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca.viewmat));
     glUniform1f(mark_size_loc, mark_size);
+    glUniform1f(angle_loc, ca.view_angle);
     auto color = ca.get_color(ColorP::GRID);
     glUniform4f(color_loc, color.r, color.g, color.b, ca.appearance.grid_opacity);
 
@@ -109,13 +111,13 @@ void Grid::render()
     auto spmin = std::min(sp.x, sp.y);
     glLineWidth(1 * ca.get_scale_factor());
     if (mark_size > 100) {
-        glUniform1f(mark_size_loc, ca.m_height * 2);
-        int n = (ca.m_width / ca.scale) / spmin + 4;
+        glUniform1f(mark_size_loc, (b.y - a.y) * ca.scale * 2);
+        int n = (b.x - a.x) / spmin + 4;
         glUniform1i(grid_mod_loc, n + 1);
         glDrawArraysInstanced(GL_LINES, 0, 2, n);
 
-        glUniform1f(mark_size_loc, ca.m_width * 2);
-        n = (ca.m_height / ca.scale) / spmin + 4;
+        glUniform1f(mark_size_loc, (b.x - a.x) * ca.scale * 2);
+        n = (b.y - a.y) / spmin + 4;
         glUniform1i(grid_mod_loc, 1);
         glDrawArraysInstanced(GL_LINES, 2, 2, n);
     }

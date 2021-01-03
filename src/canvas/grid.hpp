@@ -33,5 +33,6 @@ private:
     GLuint grid_mod_loc;
     GLuint mark_size_loc;
     GLuint color_loc;
+    GLuint angle_loc;
 };
 } // namespace horizon
