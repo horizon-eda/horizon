@@ -527,6 +527,12 @@ Coordf CanvasGL::screen2canvas(const Coordf &p) const
     return {cp.x, cp.y};
 }
 
+Coordf CanvasGL::canvas2screen(const Coordf &p) const
+{
+    auto cp = viewmat * glm::vec3(p.x, p.y, 1);
+    return {cp.x, cp.y};
+}
+
 std::set<SelectableRef> CanvasGL::get_selection()
 {
     std::set<SelectableRef> r;

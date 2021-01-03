@@ -1309,9 +1309,18 @@ void Canvas::render(const Via &via, bool interactive)
     if (show_text_in_vias && interactive && via.junction->net && via.junction->net->name.size()) {
         auto size = (bb.second.x - bb.first.x) * 1.2;
         set_lod_size(size);
-        Placement p(via.junction->position);
+        // Placement p(via.junction->position);
+        // if (get_flip_view())
+        //    p.shift.x *= -1;
+        Placement p;
+        p.set_angle_rad(get_view_angle());
         if (get_flip_view())
+            p.invert_angle();
+        p.accumulate(Placement(via.junction->position));
+        if (get_flip_view()) {
             p.shift.x *= -1;
+        }
+        p.set_angle(0);
         const auto ol = get_overlay_layer({BoardLayers::BOTTOM_COPPER, BoardLayers::TOP_COPPER}, true);
         draw_bitmap_text_box(p, size, size, via.junction->net->name, ColorP::TEXT_OVERLAY, ol, TextBoxMode::FULL);
         set_lod_size(-1);

@@ -209,6 +209,7 @@ private:
     bool flip_view = false;
     float view_angle = 0;
     void update_viewmat();
+    Coordf canvas2screen(const Coordf &p) const;
 
     Coord<float> cursor_pos;
     Coord<int64_t> cursor_pos_grid;
