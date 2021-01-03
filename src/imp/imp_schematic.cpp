@@ -476,7 +476,7 @@ void ImpSchematic::construct()
         g_simple_action_set_state(toggle_snap_to_targets_action->gobj(),
                                   g_variant_new_boolean(canvas->snap_to_targets));
     });
-    view_options_menu->append("Snap to targets", "win.snap_to_targets");
+    view_options_menu_append_action("Snap to targets", "win.snap_to_targets");
 
     toggle_snap_to_targets_action = main_window->add_action_bool("snap_to_targets", canvas->snap_to_targets);
     toggle_snap_to_targets_action->signal_change_state().connect([this](const Glib::VariantBase &v) {

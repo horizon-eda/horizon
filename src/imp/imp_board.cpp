@@ -455,9 +455,9 @@ void ImpBoard::construct()
     main_window->add_action("tuning", [this] { trigger_action(ActionID::TUNING); });
 
     add_tool_action(ActionID::AIRWIRE_FILTER_WINDOW, "airwire_filter");
-    view_options_menu->append("Nets…", "win.airwire_filter");
+    view_options_menu_append_action("Nets…", "win.airwire_filter");
 
-    view_options_menu->append("Bottom view", "win.bottom_view");
+    view_options_menu_append_action("Bottom view", "win.bottom_view");
 
     if (sockets_connected) {
         hamburger_menu->append("Cross probing", "win.cross_probing");

@@ -296,7 +296,7 @@ void ImpPackage::construct()
     hamburger_menu->append("Reload pool", "win.reload_pool");
     main_window->add_action("reload_pool", [this] { trigger_action(ActionID::RELOAD_POOL); });
 
-    view_options_menu->append("Bottom view", "win.bottom_view");
+    view_options_menu_append_action("Bottom view", "win.bottom_view");
 
     connect_action(ActionID::FOOTPRINT_GENERATOR, [this](auto &a) {
         footprint_generator_window->present();
