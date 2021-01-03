@@ -160,6 +160,7 @@ void Grid::render_cursor(Coord<int64_t> &coord)
     glUniform2f(grid_size_loc, 0, 0);
     glUniform2f(grid_0_loc, coord.x, coord.y);
     glUniform1i(grid_mod_loc, 1);
+    glUniform1f(angle_loc, 0);
 
     auto bgcolor = ca.get_color(ColorP::BACKGROUND);
     glUniform4f(color_loc, bgcolor.r, bgcolor.g, bgcolor.b, 1);
