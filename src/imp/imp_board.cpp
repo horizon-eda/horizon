@@ -25,6 +25,7 @@
 #include "pool/pool_cached.hpp"
 #include "widgets/spin_button_angle.hpp"
 #include "util/gtk_util.hpp"
+#include <iomanip>
 
 namespace horizon {
 ImpBoard::ImpBoard(const std::string &board_filename, const std::string &block_filename, const std::string &via_dir,
