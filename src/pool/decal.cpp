@@ -3,6 +3,7 @@
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
 #include "board/board_layers.hpp"
+#include "util/bbox_accumulator.hpp"
 
 namespace horizon {
 
@@ -120,20 +121,14 @@ static std::pair<Coordi, Coordi> get_line_bb(const Line &li)
 
 std::pair<Coordi, Coordi> Decal::get_bbox() const
 {
-    Coordi a;
-    Coordi b;
+    BBoxAccumulator<Coordi::type> acc;
     for (const auto &it : lines) {
-        auto [bb_a, bb_b] = get_line_bb(it.second);
-        a = Coordi::min(a, bb_a);
-        b = Coordi::max(b, bb_b);
+        acc.accumulate(get_line_bb(it.second));
     }
     for (const auto &it : polygons) {
-        for (const auto &v : it.second.vertices) {
-            a = Coordi::min(a, v.position);
-            b = Coordi::max(b, v.position);
-        }
+        acc.accumulate(it.second.get_bbox());
     }
-    return std::make_pair(a, b);
+    return acc.get_or_0();
 }
 
 json Decal::serialize() const

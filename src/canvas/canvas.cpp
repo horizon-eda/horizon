@@ -6,7 +6,7 @@
 #include "pool/decal.hpp"
 #include "util/util.hpp"
 #include <algorithm>
-#include <iostream>
+#include "util/bbox_accumulator.hpp"
 
 namespace horizon {
 
@@ -269,7 +269,7 @@ void Canvas::transform_restore()
     }
 }
 
-int Canvas::get_overlay_layer(int layer, bool ignore_flip)
+int Canvas::get_overlay_layer(const LayerRange &layer, bool ignore_flip)
 {
     if (overlay_layers.count({layer, ignore_flip}) == 0) {
         auto ol = overlay_layer_current++;
@@ -283,12 +283,10 @@ int Canvas::get_overlay_layer(int layer, bool ignore_flip)
 
 bool Canvas::is_overlay_layer(int overlay_layer, int layer) const
 {
-    for (const bool ignore_flip : {true, false}) {
-        const auto k = std::make_pair(layer, ignore_flip);
-        if (overlay_layers.count(k)) {
-            if (overlay_layers.at(k) == overlay_layer)
+    for (const auto &[k, v] : overlay_layers) {
+        if (k.first.overlaps(layer))
+            if (v == overlay_layer)
                 return true;
-        }
     }
     return false;
 }
@@ -349,35 +347,49 @@ void Canvas::end_group()
 
 std::pair<Coordf, Coordf> Canvas::get_bbox(bool visible_only) const
 {
-    Coordf a, b;
+    BBoxAccumulator<Coordf::type> acc;
     for (const auto &it : triangles) {
         if (visible_only == false || get_layer_display(it.first).visible) {
             for (const auto &[it2, it_info] : it.second) {
                 if (it_info.flags & TriangleInfo::FLAG_GLYPH)
                     continue;
-                std::vector<Coordf> points = {Coordf(it2.x0, it2.y0), Coordf(it2.x1, it2.y2), Coordf(it2.x1, it2.y2)};
-                if (std::isnan(it2.y1) && std::isnan(it2.x2) && std::isnan(it2.y2)) { // circle
-                    auto r = Coordf(it2.x1, it2.x1);
-                    a = Coordf::min(a, points.at(0) - r);
-                    b = Coordf::max(b, points.at(0) + r);
+                const std::vector<Coordf> points = {Coordf(it2.x0, it2.y0), Coordf(it2.x1, it2.y1),
+                                                    Coordf(it2.x2, it2.y2)};
+                if (it_info.flags & TriangleInfo::FLAG_ARC) {
+                    const float r = it2.x2 + it2.y2 / 2;
+                    const auto rv = Coordf(r, r);
+                    acc.accumulate({points.at(0) - rv, points.at(0) + rv});
                 }
-                else if (std::isnan(it2.y2)) { // line
+                else if (std::isnan(it2.y1) && std::isnan(it2.x2) && std::isnan(it2.y2)) { // circle
+                    auto r = Coordf(it2.x1, it2.x1);
+                    acc.accumulate({points.at(0) - r, points.at(0) + r});
+                }
+                else if (std::isnan(it2.y2) && !(it_info.flags & TriangleInfo::FLAG_BUTT)) { // line
                     float width = it2.x2;
                     Coordf offset(width / 2, width / 2);
-                    a = Coordf::min(a, points.at(0) - offset);
-                    a = Coordf::min(a, points.at(1) - offset);
-                    b = Coordf::max(b, points.at(0) + offset);
-                    b = Coordf::max(b, points.at(1) + offset);
+                    acc.accumulate(points.at(0) - offset);
+                    acc.accumulate(points.at(1) - offset);
+                    acc.accumulate(points.at(0) + offset);
+                    acc.accumulate(points.at(1) + offset);
+                }
+                else if (it_info.flags & TriangleInfo::FLAG_BUTT) { // line
+                    const Coordf v = points.at(1) - points.at(0);
+                    const Coordf vn = Coordf(-v.y, v.x) / sqrt(v.mag_sq());
+                    const Coordf w = vn * (it2.x2 / 2);
+                    acc.accumulate(points.at(0) - w);
+                    acc.accumulate(points.at(1) - w);
+                    acc.accumulate(points.at(0) + w);
+                    acc.accumulate(points.at(1) + w);
                 }
                 else { // triangle
                     for (const auto &p : points) {
-                        a = Coordf::min(a, p);
-                        b = Coordf::max(b, p);
+                        acc.accumulate(p);
                     }
                 }
             }
         }
     }
+    const auto [a, b] = acc.get_or_0();
     if (sqrt((b - a).mag_sq()) < .1_mm)
         return std::make_pair(Coordf(-5_mm, -5_mm), Coordf(5_mm, 5_mm));
     else

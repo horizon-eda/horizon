@@ -29,11 +29,13 @@
 
 #include <Poly_PolygonOnTriangulation.hxx>
 #include <Poly_Triangulation.hxx>
+#include <TShort_Array1OfShortReal.hxx>
 #include <Precision.hxx>
 #include <Quantity_Color.hxx>
 
 #include <TDF_ChildIterator.hxx>
 #include <TDF_LabelSequence.hxx>
+#include <Poly.hxx>
 
 #define USER_PREC (0.14)
 #define USER_ANGLE (0.52359878)
@@ -43,6 +45,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/transform.hpp>
+#include <map>
 
 namespace horizon::STEPImporter {
 
@@ -116,6 +119,11 @@ static bool getColor(DATA &data, TDF_Label label, Quantity_Color &color)
     return false;
 }
 
+bool operator<(glm::vec<3, float, glm::packed_highp> a, glm::vec<3, float, glm::packed_highp> b)
+{
+    return std::make_tuple(a.x, a.y, a.z) < std::make_tuple(b.x, b.y, b.z);
+}
+
 static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *color, const glm::mat4 &mat = glm::mat4(1))
 {
     if (Standard_True == face.IsNull())
@@ -154,8 +162,11 @@ static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *col
         }
     } while (0);
 
+    Poly::ComputeNormals(triangulation);
+
     const TColgp_Array1OfPnt &arrPolyNodes = triangulation->Nodes();
     const Poly_Array1OfTriangle &arrTriangles = triangulation->Triangles();
+    const TShort_Array1OfShortReal &arrNormals = triangulation->Normals();
 
     data.faces->emplace_back();
     auto &face_out = data.faces->back();
@@ -169,11 +180,40 @@ static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *col
     }
     face_out.vertices.reserve(triangulation->NbNodes());
 
+    std::map<Vertex, std::vector<size_t>> pts_map;
     for (int i = 1; i <= triangulation->NbNodes(); i++) {
         gp_XYZ v(arrPolyNodes(i).Coord());
-        glm::vec4 vg(v.X(), v.Y(), v.Z(), 1);
+        const glm::vec4 vg(v.X(), v.Y(), v.Z(), 1);
+        const auto vt = mat * vg;
+        const Vertex vertex(vt.x, vt.y, vt.z);
+        pts_map[vertex].push_back(i - 1);
+        face_out.vertices.push_back(vertex);
+    }
+
+    face_out.normals.reserve(triangulation->NbNodes());
+    for (int i = 1; i <= triangulation->NbNodes(); i++) {
+        auto offset = (i - 1) * 3 + 1;
+        auto x = arrNormals(offset + 0);
+        auto y = arrNormals(offset + 1);
+        auto z = arrNormals(offset + 2);
+        glm::vec4 vg(x, y, z, 0);
         auto vt = mat * vg;
-        face_out.vertices.emplace_back(vt.x, vt.y, vt.z);
+        vt /= vt.length();
+        face_out.normals.emplace_back(vt.x, vt.y, vt.z);
+    }
+
+    // average normals at coincident vertices
+    for (const auto &[k, v] : pts_map) {
+        if (v.size() > 1) {
+            Vertex n_acc(0, 0, 0);
+            for (const auto idx : v) {
+                n_acc += face_out.normals.at(idx);
+            }
+            n_acc /= v.size();
+            for (const auto idx : v) {
+                face_out.normals.at(idx) = n_acc;
+            }
+        }
     }
 
     face_out.triangle_indices.reserve(triangulation->NbTriangles());

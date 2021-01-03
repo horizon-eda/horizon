@@ -32,14 +32,14 @@ void main() {
 	color_to_fragment = get_color(color_to_geom[0], color2_to_geom[0]);
 	
 	float border_width = min_line_width;
-	float width = p2.x/2+(border_width/scale/2);
+	float width = p2.x/2+(p2.y*border_width/scale/2);
 		
 	width = max(width, min_line_width*.5/scale);
 	vec2 v = p1-p0;
 	vec2 o = vec2(-v.y, v.x);
 	o /= length(o);
 	o *= width;
-	vec2 vw = (v/length(v))*(min_line_width/scale/2);
+	vec2 vw = (v/length(v))*(p2.y*min_line_width/scale/2);
 	p0 -= vw;
 	p1 += vw;
 		

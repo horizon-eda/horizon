@@ -1,8 +1,8 @@
 #include "enter_datum_scale_window.hpp"
 #include "imp/imp_interface.hpp"
+#include "util/gtk_util.hpp"
 
 namespace horizon {
-
 
 EnterDatumScaleWindow::EnterDatumScaleWindow(Gtk::Window *parent, class ImpInterface *intf, const std::string &label,
                                              double def)
@@ -21,7 +21,7 @@ EnterDatumScaleWindow::EnterDatumScaleWindow(Gtk::Window *parent, class ImpInter
     sp->set_increments(.1, .1);
     sp->set_digits(3);
     sp->set_value(def);
-    sp->signal_activate().connect([this] { emit_event(ToolDataWindow::Event::OK); });
+    spinbutton_connect_activate(sp, [this] { emit_event(ToolDataWindow::Event::OK); });
     sp->signal_value_changed().connect([this] {
         auto data = std::make_unique<ToolDataEnterDatumScaleWindow>();
         data->event = ToolDataWindow::Event::UPDATE;

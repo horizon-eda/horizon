@@ -10,6 +10,7 @@
 #include "pool/ipool.hpp"
 #include "pool/pool_cached.hpp"
 #include "common/junction_util.hpp"
+#include "util/bbox_accumulator.hpp"
 
 namespace horizon {
 
@@ -1026,20 +1027,13 @@ std::vector<KeepoutContour> Board::get_keepout_contours() const
 }
 std::pair<Coordi, Coordi> Board::get_bbox() const
 {
-    Coordi a, b;
-    bool found = false;
+    BBoxAccumulator<Coordi::type> acc;
     for (const auto &it : polygons) {
         if (it.second.layer == BoardLayers::L_OUTLINE) { // outline
-            found = true;
-            for (const auto &v : it.second.vertices) {
-                a = Coordi::min(a, v.position);
-                b = Coordi::max(b, v.position);
-            }
+            acc.accumulate(it.second.get_bbox());
         }
     }
-    if (!found)
-        return {{-10_mm, -10_mm}, {10_mm, 10_mm}};
-    return {a, b};
+    return acc.get_or({{-10_mm, -10_mm}, {10_mm, 10_mm}});
 }
 
 std::map<const BoardPackage *, PnPRow> Board::get_PnP(const PnPExportSettings &settings) const

@@ -38,7 +38,6 @@ private:
 
     enum class HighlightMode { SKIP, ONLY };
     void render_layer(int layer, HighlightMode highlight_mode, bool ignore_flip = false);
-    void render_layer_with_overlay(int layer, HighlightMode highlight_mode);
     void render_annotations(bool top);
     std::array<float, 4> apply_highlight(const class Color &color, HighlightMode mode, int layer) const;
     int stencil = 0;

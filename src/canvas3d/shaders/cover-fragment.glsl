@@ -6,5 +6,6 @@ in vec3 normal_to_fragment;
 uniform vec3 cam_normal;
 
 void main() {
-  outputColor = vec4(color_to_fragment.rgb*(abs(dot(cam_normal, normal_to_fragment))+.1), color_to_fragment.a);
+  float shade = pow(min(1, abs(dot(cam_normal, normal_to_fragment))+.1), 1/2.2);
+  outputColor = vec4(color_to_fragment.rgb*shade, color_to_fragment.a);
 }

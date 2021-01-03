@@ -83,6 +83,11 @@ public:
         return (m_start != aOther.m_start) || (m_end != aOther.m_end);
     }
 
+    bool operator<(const LayerRange &aOther) const
+    {
+        return std::make_pair(m_start, m_end) < std::make_pair(aOther.m_start, aOther.m_end);
+    }
+
 private:
     int m_start;
     int m_end;

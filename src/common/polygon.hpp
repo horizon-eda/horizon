@@ -69,6 +69,7 @@ public:
      */
     bool has_arcs() const;
     bool is_valid() const;
+    std::pair<Coordi, Coordi> get_bbox() const;
 
     UUID uuid;
     std::vector<Vertex> vertices;

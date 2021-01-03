@@ -27,6 +27,7 @@
 #include "util/util.hpp"
 #include "board/board_panel.hpp"
 #include "common/picture.hpp"
+#include "util/polygon_arc_removal_proxy.hpp"
 #include <algorithm>
 #include <ctime>
 #include <sstream>
@@ -764,39 +765,6 @@ static const Coordf coordf_from_pt(const TPPLPoint &p)
     return Coordf(p.x, p.y);
 }
 
-class ArcRemovalProxy {
-public:
-    ArcRemovalProxy(const Polygon &poly, unsigned int precision = 16);
-    const Polygon &get() const;
-    bool had_arcs() const;
-
-private:
-    const Polygon &parent;
-    std::optional<Polygon> poly_arcs_removed;
-    const Polygon *ppoly = nullptr;
-};
-
-ArcRemovalProxy::ArcRemovalProxy(const Polygon &poly, unsigned int precision) : parent(poly)
-{
-    if (parent.has_arcs()) {
-        poly_arcs_removed.emplace(parent.remove_arcs(precision));
-        ppoly = &poly_arcs_removed.value();
-    }
-    else {
-        ppoly = &parent;
-    }
-}
-
-const Polygon &ArcRemovalProxy::get() const
-{
-    return *ppoly;
-}
-
-bool ArcRemovalProxy::had_arcs() const
-{
-    return ppoly != &parent;
-}
-
 static bool poly_is_rect(const Polygon &poly)
 {
     if (poly.vertices.size() != 4)
@@ -818,7 +786,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
     img_polygon(ipoly);
     if (img_mode)
         return;
-    const ArcRemovalProxy arc_removal_proxy{ipoly, 64};
+    const PolygonArcRemovalProxy arc_removal_proxy{ipoly, 64};
     const auto &poly = arc_removal_proxy.get();
     if (poly.vertices.size() == 0)
         return;
@@ -865,7 +833,7 @@ void Canvas::render(const Polygon &ipoly, bool interactive, ColorP co)
             const Coordf p0 = (poly.get_vertex(0).position + poly.get_vertex(1).position) / 2;
             const Coordf p1 = (poly.get_vertex(2).position + poly.get_vertex(3).position) / 2;
             const float width = sqrt((poly.get_vertex(0).position - poly.get_vertex(1).position).mag_sq());
-            add_triangle(poly.layer, transform.transform(p0), transform.transform(p1), Coordf(width, NAN), co,
+            add_triangle(poly.layer, transform.transform(p0), transform.transform(p1), Coordf(width, 1), co,
                          TriangleInfo::FLAG_BUTT);
         }
         else {
@@ -966,7 +934,7 @@ void Canvas::render(const Shape &shape, bool interactive)
         auto w = shape.params.at(0);
         auto h = shape.params.at(1);
         add_triangle(shape.layer, transform.transform(Coordf(-w / 2, 0)), transform.transform(Coordf(w / 2, 0)),
-                     Coordf(h, NAN), ColorP::FROM_LAYER, TriangleInfo::FLAG_BUTT);
+                     Coordf(h, 0), ColorP::FROM_LAYER, TriangleInfo::FLAG_BUTT);
         transform_restore();
     }
     else if (shape.form == Shape::Form::OBROUND) {
@@ -995,7 +963,6 @@ void Canvas::render(const Hole &hole, bool interactive)
     const int64_t r = hole.diameter / 2;
     const int64_t l = std::max((int64_t)hole.length / 2 - r, (int64_t)0);
     if (hole.shape == Hole::Shape::ROUND) {
-        draw_line(Coordf(), Coordf(100, 0), co, 10000, true, hole.diameter);
         draw_circle(Coordf(), r);
         if (hole.plated) {
             draw_circle(Coordf(), r * 0.9);
@@ -1149,19 +1116,18 @@ void Canvas::render_pad_overlay(const Pad &pad)
     auto pad_width = abs(b.x - a.x);
     auto pad_height = abs(b.y - a.y);
 
-    std::set<int> text_layers;
+    int text_layer = 10000;
     switch (pad.padstack.type) {
     case Padstack::Type::TOP:
-        text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER, true));
+        text_layer = get_overlay_layer(BoardLayers::TOP_COPPER, true);
         break;
 
     case Padstack::Type::BOTTOM:
-        text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER, true));
+        text_layer = get_overlay_layer(BoardLayers::BOTTOM_COPPER, true);
         break;
 
     default:
-        text_layers.emplace(get_overlay_layer(BoardLayers::TOP_COPPER, true));
-        text_layers.emplace(get_overlay_layer(BoardLayers::BOTTOM_COPPER, true));
+        text_layer = get_overlay_layer({BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER}, true);
     }
 
     Placement tr;
@@ -1181,18 +1147,16 @@ void Canvas::render_pad_overlay(const Pad &pad)
     }
 
     set_lod_size(std::min(pad_height, pad_width));
-    for (const auto overlay_layer : text_layers) {
-        if (pad.secondary_text.size()) {
-            draw_bitmap_text_box(tr, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, overlay_layer,
-                                 TextBoxMode::UPPER);
-            draw_bitmap_text_box(tr, pad_width, pad_height, pad.secondary_text, ColorP::TEXT_OVERLAY, overlay_layer,
-                                 TextBoxMode::LOWER);
-        }
-        else {
-            draw_bitmap_text_box(tr, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, overlay_layer,
-                                 TextBoxMode::FULL);
-        }
+
+    if (pad.secondary_text.size()) {
+        draw_bitmap_text_box(tr, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, text_layer, TextBoxMode::UPPER);
+        draw_bitmap_text_box(tr, pad_width, pad_height, pad.secondary_text, ColorP::TEXT_OVERLAY, text_layer,
+                             TextBoxMode::LOWER);
     }
+    else {
+        draw_bitmap_text_box(tr, pad_width, pad_height, pad.name, ColorP::TEXT_OVERLAY, text_layer, TextBoxMode::FULL);
+    }
+
     set_lod_size(-1);
     transform_restore();
 }
@@ -1346,7 +1310,10 @@ void Canvas::render(const Via &via, bool interactive)
         auto size = (bb.second.x - bb.first.x) * 1.2;
         set_lod_size(size);
         Placement p(via.junction->position);
-        draw_bitmap_text_box(p, size, size, via.junction->net->name, ColorP::TEXT_OVERLAY, 10000, TextBoxMode::FULL);
+        if (get_flip_view())
+            p.shift.x *= -1;
+        const auto ol = get_overlay_layer({BoardLayers::BOTTOM_COPPER, BoardLayers::TOP_COPPER}, true);
+        draw_bitmap_text_box(p, size, size, via.junction->net->name, ColorP::TEXT_OVERLAY, ol, TextBoxMode::FULL);
         set_lod_size(-1);
     }
 
