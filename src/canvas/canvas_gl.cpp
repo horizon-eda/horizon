@@ -467,6 +467,7 @@ void CanvasGL::update_viewmat()
     auto scale_x = scale;
     if (flip_view)
         scale_x = -scale;
+    std::cout << offset.x << " " << offset.y << std::endl;
     viewmat = glm::scale(glm::rotate(glm::translate(glm::mat3(1), glm::vec2(offset.x, offset.y)), -view_angle),
                          glm::vec2(scale_x, -scale));
     viewmat_noflip = glm::scale(glm::translate(glm::mat3(1), glm::vec2(offset.x, offset.y)), glm::vec2(scale, -scale));
@@ -505,8 +506,22 @@ void CanvasGL::set_flip_view(bool fl)
     update_viewmat();
 }
 
+static void rotate(float &x, float &y, float a)
+{
+    float ix = x;
+    float iy = y;
+    x = ix * cos(a) - iy * sin(a);
+    y = ix * sin(a) + iy * cos(a);
+}
+
 void CanvasGL::set_view_angle(float angle)
 {
+    const auto delta = angle - view_angle;
+    const Coordf m(m_width / 2, m_height / 2);
+    const auto o = offset - m;
+    auto o2 = o;
+    rotate(o2.x, o2.y, -delta);
+    offset += (o2 - o);
     view_angle = angle;
     update_viewmat();
 }
