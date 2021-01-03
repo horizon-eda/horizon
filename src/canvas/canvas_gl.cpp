@@ -414,29 +414,30 @@ void CanvasGL::request_push(PushFilter filter)
     queue_draw();
 }
 
-void CanvasGL::center_and_zoom(const Coordi &center, float sc)
+void CanvasGL::center_and_zoom(const Coordf &center, float sc)
 {
     // we want center to be at width, height/2
     if (sc > 0)
         scale = sc;
-    offset.x = -((center.x * (flip_view ? -1 : 1) * scale) - m_width / 2);
-    offset.y = -((center.y * -scale) - m_height / 2);
+    const Coordf m(m_width / 2, m_height / 2);
+    const auto c = canvas2screen(center);
+    offset -= (c - m);
     update_viewmat();
     s_signal_scale_changed.emit();
     queue_draw();
 }
 
-void CanvasGL::zoom_to_bbox(const Coordf &a, const Coordf &b)
+void CanvasGL::zoom_to_bbox(const Coordf &a_a, const Coordf &a_b)
 {
+    Placement tr;
+    tr.set_angle_rad(view_angle);
+    auto [a, b] = tr.transform_bb(std::make_pair(a_a, a_b));
     auto sc_x = m_width / abs(a.x - b.x);
     auto sc_y = m_height / abs(a.y - b.y);
     scale = std::min(sc_x, sc_y);
-    auto center = (a + b) / 2;
-    offset.x = -((center.x * (flip_view ? -1 : 1) * scale) - m_width / 2);
-    offset.y = -((center.y * -scale) - m_height / 2);
+    auto center = (a_a + a_b) / 2;
     update_viewmat();
-    s_signal_scale_changed.emit();
-    queue_draw();
+    center_and_zoom(center, scale);
 }
 
 void CanvasGL::zoom_to_bbox(const std::pair<Coordf, Coordf> &bb)
@@ -501,7 +502,14 @@ void CanvasGL::set_flip_view(bool fl)
     auto toggled = fl != flip_view;
     flip_view = fl;
     if (toggled) {
-        offset.x = m_width - offset.x;
+        // mirror offset at vertical (angle 0) line at view angle through viewport center
+        const Coordf m(m_width / 2, m_height / 2);
+        const Coordf p = offset;
+        const Coordf l(sin(view_angle), cos(view_angle));
+        const auto u = l.dot(p) - l.dot(m);
+        const auto pc = m + l * u;
+        const auto pm = pc * 2 - p;
+        offset = pm;
     }
     update_viewmat();
 }

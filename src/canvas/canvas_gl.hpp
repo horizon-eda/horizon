@@ -121,7 +121,7 @@ public:
         return s_signal_scale_changed;
     }
 
-    void center_and_zoom(const Coordi &center, float scale = -1);
+    void center_and_zoom(const Coordf &center, float scale = -1);
     void zoom_to_bbox(const Coordf &a, const Coordf &b);
     void zoom_to_bbox(const std::pair<Coordf, Coordf> &bb);
     void ensure_min_size(float w, float h);
