@@ -893,6 +893,22 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
         {{ActionID::TOOL, ToolID::DRAG_POLYGON_EDGE},
          {"Drag polygon edge", ActionGroup::GRAPHICS, ActionCatalogItem::AVAILABLE_EVERYWHERE,
           ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::ROTATE_VIEW_LEFT, ToolID::NONE},
+         {"Rotate view left", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::ROTATE_VIEW_RIGHT, ToolID::NONE},
+         {"Rotate view right", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::ROTATE_VIEW_RESET, ToolID::NONE},
+         {"Reset view rotation", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
+
+        {{ActionID::ROTATE_VIEW, ToolID::NONE},
+         {"Rotate view", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
+          ActionCatalogItem::FLAGS_DEFAULT}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {
@@ -1014,6 +1030,10 @@ const LutEnumStr<ActionID> action_lut = {
         ACTION_LUT_ITEM(ZOOM_OUT),
         ACTION_LUT_ITEM(CLICK_SELECT),
         ACTION_LUT_ITEM(HIGHLIGHT_NET_CLASS),
+        ACTION_LUT_ITEM(ROTATE_VIEW_LEFT),
+        ACTION_LUT_ITEM(ROTATE_VIEW_RIGHT),
+        ACTION_LUT_ITEM(ROTATE_VIEW_RESET),
+        ACTION_LUT_ITEM(ROTATE_VIEW),
 };
 
 #define TOOL_LUT_ITEM(x)                                                                                               \

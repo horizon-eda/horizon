@@ -21,6 +21,7 @@ protected:
     void apply_preferences() override;
     void get_save_meta(json &j) override;
     virtual void load_default_layers();
+    void add_view_angle_buttons();
 
     const CanvasPreferences &get_canvas_preferences() override
     {
@@ -32,5 +33,16 @@ protected:
     ~ImpLayer()
     {
     }
+
+    std::vector<std::string> get_view_hints() override;
+
+    int view_angle = 1;
+    void set_view_angle(int angle);
+    Gtk::Label *view_angle_label = nullptr;
+    Gtk::Button *view_angle_button = nullptr;
+    static std::string view_angle_to_string(int x);
+
+    class ViewAngleWindow *view_angle_window = nullptr;
+    sigc::connection view_angle_window_conn;
 };
 } // namespace horizon

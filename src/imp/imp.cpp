@@ -1565,9 +1565,6 @@ std::vector<std::string> ImpBase::get_view_hints()
     if (distraction_free)
         r.emplace_back("distraction free mode");
 
-    if (canvas->get_flip_view())
-        r.emplace_back("bottom view");
-
     if (selection_filter_dialog->get_filtered())
         r.emplace_back("selection filtered");
     return r;

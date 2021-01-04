@@ -468,7 +468,6 @@ void CanvasGL::update_viewmat()
     auto scale_x = scale;
     if (flip_view)
         scale_x = -scale;
-    std::cout << offset.x << " " << offset.y << std::endl;
     viewmat = glm::scale(glm::rotate(glm::translate(glm::mat3(1), glm::vec2(offset.x, offset.y)), -view_angle),
                          glm::vec2(scale_x, -scale));
     viewmat_noflip = glm::scale(glm::translate(glm::mat3(1), glm::vec2(offset.x, offset.y)), glm::vec2(scale, -scale));

@@ -480,6 +480,7 @@ SRC_IMP = \
 	src/util/zmq_helper.cpp\
 	src/widgets/help_button.cpp\
 	src/util/keep_slope_util.cpp\
+	src/imp/view_angle_window.cpp\
 
 SRC_IMPC = \
 	3rd_party/footag/wiz.c\
