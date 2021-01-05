@@ -47,14 +47,6 @@ bool Selectable::is_box() const
     return width > 0 && height > 0;
 }
 
-static void rotate(float &x, float &y, float a)
-{
-    float ix = x;
-    float iy = y;
-    x = ix * cos(a) - iy * sin(a);
-    y = ix * sin(a) + iy * cos(a);
-}
-
 std::array<Coordf, 4> Selectable::get_corners() const
 {
     std::array<Coordf, 4> r;
@@ -65,8 +57,7 @@ std::array<Coordf, 4> Selectable::get_corners() const
     r[2] = Coordf(w, h) / 2;
     r[3] = Coordf(w, -h) / 2;
     for (auto &it : r) {
-        rotate(it.x, it.y, angle);
-        it += Coordf(c_x, c_y);
+        it = it.rotate(angle) + Coordf(c_x, c_y);
     }
     return r;
 }

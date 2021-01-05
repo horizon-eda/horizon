@@ -168,6 +168,13 @@ public:
         return Coord<float>(r * cos(phi), r * sin(phi));
     }
 
+    Coord<float> rotate(float a) const
+    {
+        const float x2 = x * cos(a) - y * sin(a);
+        const float y2 = x * sin(a) + y * cos(a);
+        return {x2, y2};
+    }
+
     /**
      * @param a other coordinate
      * @returns dot product of \p a and this
