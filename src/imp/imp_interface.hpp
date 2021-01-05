@@ -27,6 +27,7 @@ public:
     void canvas_update();
     class CanvasGL *get_canvas();
     Coordi get_grid_spacing() const;
+    Coordi transform_arrow_keys(const Coordi &c) const;
     void tool_update_data(std::unique_ptr<ToolData> data);
 
     void update_highlights();

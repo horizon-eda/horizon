@@ -24,15 +24,15 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
 
         {{ActionID::FLIP_VIEW, ToolID::NONE},
          {"Flip view", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::VIEW_TOP, ToolID::NONE},
          {"View top", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::VIEW_BOTTOM, ToolID::NONE},
          {"View bottom", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::LAYER_DOWN, ToolID::NONE},
          {"Layer down", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, ActionCatalogItem::FLAGS_IN_TOOL}},
@@ -896,19 +896,19 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
 
         {{ActionID::ROTATE_VIEW_LEFT, ToolID::NONE},
          {"Rotate view left", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::ROTATE_VIEW_RIGHT, ToolID::NONE},
          {"Rotate view right", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::ROTATE_VIEW_RESET, ToolID::NONE},
          {"Reset view rotation", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::ROTATE_VIEW, ToolID::NONE},
          {"Rotate view", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_IN_TOOL}},
 };
 
 const std::vector<std::pair<ActionGroup, std::string>> action_group_catalog = {

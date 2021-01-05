@@ -280,7 +280,6 @@ void ImpBase::set_flip_view(bool flip)
     canvas->set_flip_view(flip);
     canvas_update_from_pp();
     update_view_hints();
-    apply_arrow_keys();
     g_simple_action_set_state(bottom_view_action->gobj(), g_variant_new_boolean(canvas->get_flip_view()));
 }
 
@@ -966,8 +965,11 @@ void ImpBase::apply_preferences()
 
 void ImpBase::canvas_update_from_pp()
 {
-    if (core->tool_is_active())
+    if (core->tool_is_active()) {
+        canvas_update();
+        canvas->set_selection(core->get_tool_selection());
         return;
+    }
 
     auto sel = canvas->get_selection();
     canvas_update();

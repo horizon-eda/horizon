@@ -244,10 +244,8 @@ void ImpBase::apply_arrow_keys()
 {
     const auto &canvas_prefs = get_canvas_preferences();
 
-    const auto flip = canvas->get_flip_view();
-
-    const auto left = flip ? GDK_KEY_Right : GDK_KEY_Left;
-    const auto right = flip ? GDK_KEY_Left : GDK_KEY_Right;
+    const auto left = GDK_KEY_Left;
+    const auto right = GDK_KEY_Right;
     const auto up = GDK_KEY_Up;
     const auto down = GDK_KEY_Down;
 

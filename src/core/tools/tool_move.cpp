@@ -397,10 +397,11 @@ ToolResponse ToolMove::update(const ToolArgs &args)
             const auto [dir, fine] = dir_from_action(args.action);
             if (dir.x || dir.y) {
                 auto sp = imp->get_grid_spacing();
+                auto shift = imp->transform_arrow_keys(dir * sp);
                 if (fine)
-                    sp = sp / 10;
-                key_delta += dir * sp;
-                move_do(dir * sp);
+                    shift = shift / 10;
+                key_delta += shift;
+                move_do(shift);
                 update_airwires();
                 update_tip();
             }

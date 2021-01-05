@@ -121,12 +121,12 @@ void ImpLayer::add_view_angle_buttons()
 
     auto left_button = Gtk::manage(new Gtk::Button);
     left_button->set_image_from_icon_name("object-rotate-left-symbolic");
-    left_button->signal_clicked().connect([this] { set_view_angle(view_angle + 8192); });
+    left_button->signal_clicked().connect([this] { trigger_action(ActionID::ROTATE_VIEW_LEFT); });
     left_button->set_tooltip_text("Rotate left by 45°");
     box->pack_start(*left_button, true, true, 0);
 
     view_angle_button = Gtk::manage(new Gtk::Button);
-    view_angle_button->signal_clicked().connect([this] { set_view_angle(0); });
+    view_angle_button->signal_clicked().connect([this] { trigger_action(ActionID::ROTATE_VIEW_RESET); });
     view_angle_label = Gtk::manage(new Gtk::Label);
     view_angle_button->add(*view_angle_label);
     label_set_tnum(view_angle_label);
@@ -135,7 +135,7 @@ void ImpLayer::add_view_angle_buttons()
 
     auto right_button = Gtk::manage(new Gtk::Button);
     right_button->set_image_from_icon_name("object-rotate-right-symbolic");
-    right_button->signal_clicked().connect([this] { set_view_angle(view_angle - 8192); });
+    right_button->signal_clicked().connect([this] { trigger_action(ActionID::ROTATE_VIEW_RIGHT); });
     right_button->set_tooltip_text("Rotate right by 45°");
     box->pack_start(*right_button, true, true, 0);
 
@@ -177,7 +177,7 @@ std::string ImpLayer::view_angle_to_string(int x)
     ss << std::fixed << std::setprecision(1) << std::internal << std::abs((x / 65536.0) * 360);
     auto s = ss.str();
     std::string pad;
-    for (int i = 0; i < (5 - s.size()); i++) {
+    for (int i = 0; i < (5 - (int)s.size()); i++) {
         pad += " ";
     }
     return sign + pad + s + "°";
