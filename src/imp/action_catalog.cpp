@@ -24,15 +24,15 @@ const std::map<ActionToolID, ActionCatalogItem> action_catalog = {
 
         {{ActionID::FLIP_VIEW, ToolID::NONE},
          {"Flip view", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::VIEW_TOP, ToolID::NONE},
          {"View top", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::VIEW_BOTTOM, ToolID::NONE},
          {"View bottom", ActionGroup::VIEW, ActionCatalogItem::AVAILABLE_IN_PACKAGE_AND_BOARD,
-          ActionCatalogItem::FLAGS_DEFAULT}},
+          ActionCatalogItem::FLAGS_IN_TOOL}},
 
         {{ActionID::LAYER_DOWN, ToolID::NONE},
          {"Layer down", ActionGroup::LAYER, ActionCatalogItem::AVAILABLE_LAYERED, ActionCatalogItem::FLAGS_IN_TOOL}},
