@@ -2,6 +2,7 @@
 #include "canvas_gl.hpp"
 #include "gl_util.hpp"
 #include <glm/gtc/type_ptr.hpp>
+#include "util/bbox_accumulator.hpp"
 
 namespace horizon {
 Grid::Grid(const CanvasGL &c) : ca(c), spacing(1.25_mm, 1.25_mm), mark_size(5)
@@ -53,6 +54,7 @@ void Grid::realize()
     GET_LOC(this, grid_mod);
     GET_LOC(this, mark_size);
     GET_LOC(this, color);
+    GET_LOC(this, angle);
 }
 
 void Grid::render()
@@ -60,8 +62,9 @@ void Grid::render()
     glUseProgram(program);
     glBindVertexArray(vao);
     glUniformMatrix3fv(screenmat_loc, 1, GL_FALSE, glm::value_ptr(ca.screenmat));
-    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca.viewmat_noflip));
+    glUniformMatrix3fv(viewmat_loc, 1, GL_FALSE, glm::value_ptr(ca.viewmat));
     glUniform1f(mark_size_loc, mark_size);
+    glUniform1f(angle_loc, ca.view_angle);
     auto color = ca.get_color(ColorP::GRID);
     glUniform4f(color_loc, color.r, color.g, color.b, ca.appearance.grid_opacity);
 
@@ -74,9 +77,17 @@ void Grid::render()
         sp_px = sp * ca.scale;
     }
 
+    BBoxAccumulator<Coordf::type> acc;
+    for (const auto x : {0.f, ca.m_width}) {
+        for (const auto y : {0.f, ca.m_height}) {
+            acc.accumulate(ca.screen2canvas({x, y}));
+        }
+    }
+    const auto [a, b] = acc.get();
+
     Coord<float> grid_0;
-    grid_0.x = (round(((-ca.offset.x / ca.scale) - origin.x) / sp.x) - 1) * sp.x + origin.x;
-    grid_0.y = (round(((-(ca.m_height - ca.offset.y) / ca.scale) - origin.y) / sp.y) - 1) * sp.y + origin.y;
+    grid_0.x = (round((a.x - origin.x) / sp.x) - 1) * sp.x + origin.x;
+    grid_0.y = (round((a.y - origin.y) / sp.y) - 1) * sp.y + origin.y;
 
     if (mul != newmul) {
         mul = newmul;
@@ -89,20 +100,20 @@ void Grid::render()
     auto spmin = std::min(sp.x, sp.y);
     glLineWidth(1 * ca.get_scale_factor());
     if (mark_size > 100) {
-        glUniform1f(mark_size_loc, ca.m_height * 2);
-        int n = (ca.m_width / ca.scale) / spmin + 4;
+        glUniform1f(mark_size_loc, (b.y - a.y) * ca.scale * 2);
+        int n = (b.x - a.x) / spmin + 4;
         glUniform1i(grid_mod_loc, n + 1);
         glDrawArraysInstanced(GL_LINES, 0, 2, n);
 
-        glUniform1f(mark_size_loc, ca.m_width * 2);
-        n = (ca.m_height / ca.scale) / spmin + 4;
+        glUniform1f(mark_size_loc, (b.x - a.x) * ca.scale * 2);
+        n = (b.y - a.y) / spmin + 4;
         glUniform1i(grid_mod_loc, 1);
         glDrawArraysInstanced(GL_LINES, 2, 2, n);
     }
     else {
-        int mod = ceil((ca.m_width / ca.scale) / spmin) + 2;
+        int mod = ceil((b.x - a.x) / spmin) + 2;
         glUniform1i(grid_mod_loc, mod);
-        int n = mod * ceil((ca.m_height / ca.scale) / spmin + 2);
+        int n = mod * ceil((b.y - a.y) / spmin + 2);
         glDrawArraysInstanced(GL_LINES, 0, 4, n);
     }
 
@@ -138,6 +149,7 @@ void Grid::render_cursor(Coord<int64_t> &coord)
     glUniform2f(grid_size_loc, 0, 0);
     glUniform2f(grid_0_loc, coord.x, coord.y);
     glUniform1i(grid_mod_loc, 1);
+    glUniform1f(angle_loc, 0);
 
     auto bgcolor = ca.get_color(ColorP::BACKGROUND);
     glUniform4f(color_loc, bgcolor.r, bgcolor.g, bgcolor.b, 1);

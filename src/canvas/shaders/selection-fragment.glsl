@@ -7,7 +7,7 @@ uniform int fill;
 uniform vec3 color;
 
 void main() {
-	float border = 3/scale;
+	float border = 3;
 	float alpha = .2;
 	if(fill == 0) {
 		alpha = 0;

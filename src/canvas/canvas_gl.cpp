@@ -414,29 +414,30 @@ void CanvasGL::request_push(PushFilter filter)
     queue_draw();
 }
 
-void CanvasGL::center_and_zoom(const Coordi &center, float sc)
+void CanvasGL::center_and_zoom(const Coordf &center, float sc)
 {
     // we want center to be at width, height/2
     if (sc > 0)
         scale = sc;
-    offset.x = -((center.x * (flip_view ? -1 : 1) * scale) - m_width / 2);
-    offset.y = -((center.y * -scale) - m_height / 2);
+    const Coordf m(m_width / 2, m_height / 2);
+    const auto c = canvas2screen(center);
+    offset -= (c - m);
     update_viewmat();
     s_signal_scale_changed.emit();
     queue_draw();
 }
 
-void CanvasGL::zoom_to_bbox(const Coordf &a, const Coordf &b)
+void CanvasGL::zoom_to_bbox(const Coordf &a_a, const Coordf &a_b)
 {
+    Placement tr;
+    tr.set_angle_rad(view_angle);
+    auto [a, b] = tr.transform_bb(std::make_pair(a_a, a_b));
     auto sc_x = m_width / abs(a.x - b.x);
     auto sc_y = m_height / abs(a.y - b.y);
     scale = std::min(sc_x, sc_y);
-    auto center = (a + b) / 2;
-    offset.x = -((center.x * (flip_view ? -1 : 1) * scale) - m_width / 2);
-    offset.y = -((center.y * -scale) - m_height / 2);
+    auto center = (a_a + a_b) / 2;
     update_viewmat();
-    s_signal_scale_changed.emit();
-    queue_draw();
+    center_and_zoom(center, scale);
 }
 
 void CanvasGL::zoom_to_bbox(const std::pair<Coordf, Coordf> &bb)
@@ -467,7 +468,8 @@ void CanvasGL::update_viewmat()
     auto scale_x = scale;
     if (flip_view)
         scale_x = -scale;
-    viewmat = glm::scale(glm::translate(glm::mat3(1), glm::vec2(offset.x, offset.y)), glm::vec2(scale_x, -scale));
+    viewmat = glm::scale(glm::rotate(glm::translate(glm::mat3(1), glm::vec2(offset.x, offset.y)), -view_angle),
+                         glm::vec2(scale_x, -scale));
     viewmat_noflip = glm::scale(glm::translate(glm::mat3(1), glm::vec2(offset.x, offset.y)), glm::vec2(scale, -scale));
 }
 
@@ -499,8 +501,26 @@ void CanvasGL::set_flip_view(bool fl)
     auto toggled = fl != flip_view;
     flip_view = fl;
     if (toggled) {
-        offset.x = m_width - offset.x;
+        // mirror offset at vertical (angle 0) line at view angle through viewport center
+        const Coordf m(m_width / 2, m_height / 2);
+        const Coordf p = offset;
+        const Coordf l(sin(view_angle), cos(view_angle));
+        const auto u = l.dot(p) - l.dot(m);
+        const auto pc = m + l * u;
+        const auto pm = pc * 2 - p;
+        offset = pm;
     }
+    update_viewmat();
+}
+
+void CanvasGL::set_view_angle(float angle)
+{
+    const auto delta = angle - view_angle;
+    const Coordf m(m_width / 2, m_height / 2);
+    const auto o = offset - m;
+    const auto o2 = o.rotate(-delta);
+    offset += (o2 - o);
+    view_angle = angle;
     update_viewmat();
 }
 
@@ -509,9 +529,20 @@ bool CanvasGL::get_flip_view() const
     return flip_view;
 }
 
+float CanvasGL::get_view_angle() const
+{
+    return view_angle;
+}
+
 Coordf CanvasGL::screen2canvas(const Coordf &p) const
 {
     auto cp = glm::inverse(viewmat) * glm::vec3(p.x, p.y, 1);
+    return {cp.x, cp.y};
+}
+
+Coordf CanvasGL::canvas2screen(const Coordf &p) const
+{
+    auto cp = viewmat * glm::vec3(p.x, p.y, 1);
     return {cp.x, cp.y};
 }
 

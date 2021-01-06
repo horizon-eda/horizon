@@ -100,6 +100,10 @@ enum class ActionID {
     ZOOM_OUT,
     CLICK_SELECT,
     HIGHLIGHT_NET_CLASS,
+    ROTATE_VIEW_LEFT,
+    ROTATE_VIEW_RIGHT,
+    ROTATE_VIEW_RESET,
+    ROTATE_VIEW,
 };
 
 using ActionToolID = std::pair<ActionID, ToolID>;

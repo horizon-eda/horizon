@@ -68,6 +68,9 @@ public:
     void set_flip_view(bool fl);
     bool get_flip_view() const override;
 
+    void set_view_angle(float a);
+    float get_view_angle() const override;
+
     void set_cursor_size(float size);
     void set_cursor_size(Appearance::CursorSize);
 
@@ -118,7 +121,7 @@ public:
         return s_signal_scale_changed;
     }
 
-    void center_and_zoom(const Coordi &center, float scale = -1);
+    void center_and_zoom(const Coordf &center, float scale = -1);
     void zoom_to_bbox(const Coordf &a, const Coordf &b);
     void zoom_to_bbox(const std::pair<Coordf, Coordf> &bb);
     void ensure_min_size(float w, float h);
@@ -204,7 +207,9 @@ private:
     glm::mat3 viewmat;
     glm::mat3 viewmat_noflip;
     bool flip_view = false;
+    float view_angle = 0;
     void update_viewmat();
+    Coordf canvas2screen(const Coordf &p) const;
 
     Coord<float> cursor_pos;
     Coord<int64_t> cursor_pos_grid;

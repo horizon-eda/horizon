@@ -6,9 +6,10 @@ out vec2 dim;
 uniform vec2 a,b;
 
 void main() {
-	
-	vec2 bl = min(a,b);
-	vec2 tr = max(a,b);
+	vec2 a_screen = (viewmat*vec3(a,1)).xy;
+	vec2 b_screen = (viewmat*vec3(b,1)).xy;
+	vec2 bl = min(a_screen,b_screen);
+	vec2 tr = max(a_screen,b_screen);
 	vec2 t = vec2(0,0);
 	if(gl_VertexID == 0) {
 		t = vec2(bl.x, bl.y);
@@ -25,5 +26,5 @@ void main() {
 	dim = abs(tr - bl);
 	x=t-bl;
 	
-	gl_Position = vec4((screenmat*viewmat*vec3(t, 1)), 1);
+	gl_Position = vec4((screenmat*vec3(t, 1)), 1);
 }

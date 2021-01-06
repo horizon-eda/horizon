@@ -282,8 +282,12 @@ void Canvas::render(const Track &track, bool interactive)
         set_lod_size(width);
         auto vec = (track.from.get_position() - track.to.get_position());
         auto length = sqrt(vec.mag_sq());
-        Placement p(center);
-        p.set_angle_rad(atan2(vec.y, vec.x));
+        Placement p;
+        p.set_angle_rad(get_view_angle());
+        if (get_flip_view())
+            p.invert_angle();
+        p.accumulate(Placement(center));
+        p.set_angle_rad(p.get_angle_rad() + atan2(vec.y, vec.x));
         if (get_flip_view()) {
             p.shift.x *= -1;
             p.invert_angle();
@@ -1126,7 +1130,17 @@ void Canvas::render_pad_overlay(const Pad &pad)
         text_layer = get_overlay_layer({BoardLayers::TOP_COPPER, BoardLayers::BOTTOM_COPPER}, true);
     }
 
-    Placement tr = transform;
+    Placement tr;
+    tr.set_angle_rad(get_view_angle());
+    if (get_flip_view())
+        tr.invert_angle();
+    {
+        Placement tr2 = transform;
+        if (tr2.mirror)
+            tr2.invert_angle();
+        tr2.mirror = false;
+        tr.accumulate(tr2);
+    }
     if (get_flip_view()) {
         tr.shift.x *= -1;
         tr.invert_angle();
@@ -1295,9 +1309,15 @@ void Canvas::render(const Via &via, bool interactive)
     if (show_text_in_vias && interactive && via.junction->net && via.junction->net->name.size()) {
         auto size = (bb.second.x - bb.first.x) * 1.2;
         set_lod_size(size);
-        Placement p(via.junction->position);
+        Placement p;
+        p.set_angle_rad(get_view_angle());
         if (get_flip_view())
+            p.invert_angle();
+        p.accumulate(Placement(via.junction->position));
+        if (get_flip_view()) {
             p.shift.x *= -1;
+        }
+        p.set_angle(0);
         const auto ol = get_overlay_layer({BoardLayers::BOTTOM_COPPER, BoardLayers::TOP_COPPER}, true);
         draw_bitmap_text_box(p, size, size, via.junction->net->name, ColorP::TEXT_OVERLAY, ol, TextBoxMode::FULL);
         set_lod_size(-1);
