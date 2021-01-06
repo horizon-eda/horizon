@@ -211,7 +211,7 @@ void Canvas3DBase::render(RenderBackground mode)
     float m = get_magic_number() / height * cam_distance;
     float d = cam_dist_max * 2;
     if (projection == Projection::PERSP) {
-        projmat = glm::perspective(glm::radians(cam_fov), width / height, cam_dist_min / 2, cam_dist_max * 2);
+        projmat = glm::perspective(glm::radians(cam_fov), (float)width / height, cam_dist_min / 2, cam_dist_max * 2);
     }
     else {
         projmat = glm::ortho(-width * m, width * m, -height * m, height * m, -d, d);

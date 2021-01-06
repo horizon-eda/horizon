@@ -89,8 +89,8 @@ public:
 protected:
     Appearance appearance;
 
-    float width = 100;
-    float height = 100;
+    int width = 100;
+    int height = 100;
 
     CoverRenderer cover_renderer;
     WallRenderer wall_renderer;
