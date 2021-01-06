@@ -203,7 +203,8 @@ protected:
     void update_view_hints();
     virtual std::vector<std::string> get_view_hints();
 
-    Glib::RefPtr<Gio::Menu> view_options_menu;
+    Gtk::Box *view_options_menu = nullptr;
+    void view_options_menu_append_action(const std::string &label, const std::string &action);
 
     virtual Searcher *get_searcher_ptr()
     {

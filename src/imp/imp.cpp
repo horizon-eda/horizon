@@ -667,17 +667,23 @@ void ImpBase::run(int argc, char *argv[])
 
     add_hamburger_menu();
 
-    view_options_menu = Gio::Menu::create();
-    main_window->view_options_button->set_menu_model(view_options_menu);
+    auto view_options_popover = Gtk::manage(new Gtk::PopoverMenu);
+    main_window->view_options_button->set_popover(*view_options_popover);
     {
         Gdk::Rectangle rect;
         rect.set_width(24);
         main_window->view_options_button->get_popover()->set_pointing_to(rect);
     }
 
-    view_options_menu->append("Distraction free mode", "win.distraction_free");
+    view_options_menu = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+    view_options_menu->set_border_width(9);
+    view_options_popover->add(*view_options_menu);
+    view_options_menu->show();
+    view_options_popover->child_property_submenu(*view_options_menu) = "main";
+
+    view_options_menu_append_action("Distraction free mode", "win.distraction_free");
     add_tool_action(ActionID::SELECTION_FILTER, "selection_filter");
-    view_options_menu->append("Selection filter", "win.selection_filter");
+    view_options_menu_append_action("Selection filter", "win.selection_filter");
 
     imp_interface = std::make_unique<ImpInterface>(this);
 
@@ -1621,6 +1627,16 @@ void ImpBase::check_version()
     if (version.get_app() < version.get_file()) {
         set_read_only(true);
     }
+}
+
+void ImpBase::view_options_menu_append_action(const std::string &label, const std::string &action)
+{
+    auto bu = Gtk::manage(new Gtk::ModelButton);
+    bu->set_label(label);
+    bu->get_child()->set_halign(Gtk::ALIGN_START);
+    gtk_actionable_set_action_name(GTK_ACTIONABLE(bu->gobj()), action.c_str());
+    view_options_menu->pack_start(*bu, false, false, 0);
+    bu->show();
 }
 
 } // namespace horizon
