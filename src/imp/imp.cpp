@@ -280,7 +280,6 @@ void ImpBase::set_flip_view(bool flip)
     canvas->set_flip_view(flip);
     canvas_update_from_pp();
     update_view_hints();
-    apply_arrow_keys();
     g_simple_action_set_state(bottom_view_action->gobj(), g_variant_new_boolean(canvas->get_flip_view()));
 }
 
@@ -1567,9 +1566,6 @@ std::vector<std::string> ImpBase::get_view_hints()
     std::vector<std::string> r;
     if (distraction_free)
         r.emplace_back("distraction free mode");
-
-    if (canvas->get_flip_view())
-        r.emplace_back("bottom view");
 
     if (selection_filter_dialog->get_filtered())
         r.emplace_back("selection filtered");

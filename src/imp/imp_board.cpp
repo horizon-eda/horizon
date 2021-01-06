@@ -457,6 +457,7 @@ void ImpBoard::construct()
     view_options_menu_append_action("Nets…", "win.airwire_filter");
 
     view_options_menu_append_action("Bottom view", "win.bottom_view");
+    add_view_angle_actions();
 
     if (sockets_connected) {
         hamburger_menu->append("Cross probing", "win.cross_probing");
@@ -827,6 +828,8 @@ void ImpBoard::construct()
     update_monitor();
 
     display_control_notebook->show();
+
+    set_view_angle(0);
 }
 
 UUID ImpBoard::net_from_selectable(const SelectableRef &sr)
@@ -1213,7 +1216,7 @@ void ImpBoard::get_save_meta(json &j)
 
 std::vector<std::string> ImpBoard::get_view_hints()
 {
-    auto r = ImpBase::get_view_hints();
+    auto r = ImpLayer::get_view_hints();
 
     if (airwire_filter_window->get_filtered())
         r.emplace_back("airwires filtered");

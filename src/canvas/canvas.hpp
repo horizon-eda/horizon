@@ -71,6 +71,11 @@ public:
         return false;
     };
 
+    virtual float get_view_angle() const
+    {
+        return 0;
+    }
+
     std::pair<Coordf, Coordf> get_bbox(bool visible_only = true) const;
 
     static const int first_overlay_layer = 30000;

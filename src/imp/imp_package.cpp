@@ -297,6 +297,7 @@ void ImpPackage::construct()
     main_window->add_action("reload_pool", [this] { trigger_action(ActionID::RELOAD_POOL); });
 
     view_options_menu_append_action("Bottom view", "win.bottom_view");
+    add_view_angle_actions();
 
     connect_action(ActionID::FOOTPRINT_GENERATOR, [this](auto &a) {
         footprint_generator_window->present();
@@ -334,6 +335,7 @@ void ImpPackage::construct()
     }
 
     update_header();
+    set_view_angle(0);
 }
 
 

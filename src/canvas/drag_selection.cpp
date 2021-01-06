@@ -4,6 +4,7 @@
 #include "common/layer_provider.hpp"
 #include "common/object_descr.hpp"
 #include "gl_util.hpp"
+#include "util/util.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
 namespace horizon {
@@ -393,35 +394,59 @@ void DragSelection::drag_end(GdkEventButton *button_event)
     }
 }
 
+static ClipperLib::IntPoint to_pt(const Coordf &p)
+{
+    return ClipperLib::IntPoint(p.x, p.y);
+}
+
 void DragSelection::Box::update()
 {
-    float xmin = std::min(sel_a.x, sel_b.x);
-    float xmax = std::max(sel_a.x, sel_b.x);
-    float ymin = std::min(sel_a.y, sel_b.y);
-    float ymax = std::max(sel_a.y, sel_b.y);
+    const auto sel_center = (sel_a + sel_b) / 2;
+    const auto sel_a_screen = ca.canvas2screen(sel_a);
+    const auto sel_b_screen = ca.canvas2screen(sel_b);
+    const auto sel_width = std::abs(sel_b_screen.x - sel_a_screen.x) / ca.scale;
+    const auto sel_height = std::abs(sel_b_screen.y - sel_a_screen.y) / ca.scale;
+    const auto sel_angle = (ca.flip_view ? -1 : 1) * ca.view_angle;
+    auto in_box = [sel_center, sel_width, sel_height, sel_angle](Coordf p) {
+        p -= sel_center;
+        p = p.rotate(sel_angle);
+        return std::abs(p.x) < sel_width / 2 && std::abs(p.y) < sel_height / 2;
+    };
+    auto sq = ca.selection_qualifier;
+
+    if (sq == CanvasGL::SelectionQualifier::AUTO) {
+        if (sel_a_screen.x < sel_b_screen.x)
+            sq = CanvasGL::SelectionQualifier::INCLUDE_BOX;
+        else
+            sq = CanvasGL::SelectionQualifier::TOUCH_BOX;
+    }
+
+    ClipperLib::Path clbox(4);
+    if (sq == CanvasGL::SelectionQualifier::TOUCH_BOX) {
+        const auto sz1 = Coordf(sel_width / 2, sel_height / 2).rotate(-sel_angle);
+        const auto sz2 = Coordf(sel_width / 2, sel_height / -2).rotate(-sel_angle);
+        clbox.at(0) = to_pt(sel_center + sz1);
+        clbox.at(1) = to_pt(sel_center + sz2);
+        clbox.at(2) = to_pt(sel_center - sz1);
+        clbox.at(3) = to_pt(sel_center - sz2);
+    }
+
     unsigned int i = 0;
     for (auto &it : ca.selectables.items) {
         it.set_flag(Selectable::Flag::PRELIGHT, false);
         if (ca.selection_filter.can_select(ca.selectables.items_ref[i])) {
-            auto sq = ca.selection_qualifier;
 
-            if (sq == CanvasGL::SelectionQualifier::AUTO) {
-                if (sel_a.x < sel_b.x)
-                    sq = CanvasGL::SelectionQualifier::INCLUDE_BOX;
-                else
-                    sq = CanvasGL::SelectionQualifier::TOUCH_BOX;
-            }
 
             if (sq == CanvasGL::SelectionQualifier::INCLUDE_ORIGIN) {
-                if (it.x > xmin && it.x < xmax && it.y > ymin && it.y < ymax) {
+                if (in_box({it.x, it.y})) {
                     it.set_flag(Selectable::Flag::PRELIGHT, true);
                 }
                 fill = true;
             }
             else if (sq == CanvasGL::SelectionQualifier::INCLUDE_BOX) {
                 auto corners = it.get_corners();
-                if (std::all_of(corners.begin(), corners.end(), [xmin, xmax, ymin, ymax](const auto &a) {
-                        return a.x > xmin && a.x < xmax && a.y > ymin && a.y < ymax;
+                if (std::all_of(corners.begin(), corners.end(), [in_box](const auto &a) {
+                        return in_box({a.x, a.y});
                     })) {
                     it.set_flag(Selectable::Flag::PRELIGHT, true);
                 }
@@ -429,12 +454,6 @@ void DragSelection::Box::update()
             }
             else if (sq == CanvasGL::SelectionQualifier::TOUCH_BOX) {
                 // possible optimisation: don't use clipper
-                ClipperLib::Path clbox(4);
-                clbox.at(0) = ClipperLib::IntPoint(xmin, ymin);
-                clbox.at(1) = ClipperLib::IntPoint(xmin, ymax);
-                clbox.at(2) = ClipperLib::IntPoint(xmax, ymax);
-                clbox.at(3) = ClipperLib::IntPoint(xmax, ymin);
-
                 ClipperLib::Path sel(4);
                 auto corners = it.get_corners();
                 for (size_t j = 0; j < 4; j++) {

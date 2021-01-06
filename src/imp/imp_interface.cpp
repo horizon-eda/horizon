@@ -123,4 +123,16 @@ void ImpInterface::tool_bar_set_actions(const std::vector<ActionLabelInfo> &labe
     imp->tool_bar_set_actions(labels);
 }
 
+Coordi ImpInterface::transform_arrow_keys(const Coordi &c) const
+{
+    if (auto imp_layer = dynamic_cast<ImpLayer *>(imp)) {
+        const Placement tr({}, -imp_layer->view_angle, imp->canvas->get_flip_view());
+        return tr.transform(c);
+    }
+    else {
+        return c;
+    }
+}
+
+
 } // namespace horizon

@@ -3,6 +3,10 @@
 #include "widgets/layer_box.hpp"
 #include "util/util.hpp"
 #include "nlohmann/json.hpp"
+#include "util/gtk_util.hpp"
+#include "view_angle_window.hpp"
+#include "widgets/spin_button_angle.hpp"
+#include <iomanip>
 
 namespace horizon {
 void ImpLayer::construct_layer_box(bool pack)
@@ -100,7 +104,6 @@ void ImpLayer::get_save_meta(json &j)
     j["grid_settings"] = grid_controller->serialize();
 }
 
-
 void ImpLayer::apply_preferences()
 {
     const auto &canvas_prefs = get_canvas_preferences();
@@ -109,4 +112,109 @@ void ImpLayer::apply_preferences()
     }
     ImpBase::apply_preferences();
 }
+
+void ImpLayer::add_view_angle_actions()
+{
+    auto box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL));
+    box->set_margin_top(3);
+    box->get_style_context()->add_class("linked");
+    view_options_menu->pack_start(*box, false, false, 0);
+
+    auto left_button = Gtk::manage(new Gtk::Button);
+    left_button->set_image_from_icon_name("object-rotate-left-symbolic");
+    left_button->signal_clicked().connect([this] { trigger_action(ActionID::ROTATE_VIEW_LEFT); });
+    left_button->set_tooltip_text("Rotate left by 45°");
+    box->pack_start(*left_button, true, true, 0);
+
+    view_angle_button = Gtk::manage(new Gtk::Button);
+    view_angle_button->signal_clicked().connect([this] { trigger_action(ActionID::ROTATE_VIEW_RESET); });
+    view_angle_label = Gtk::manage(new Gtk::Label);
+    view_angle_button->add(*view_angle_label);
+    label_set_tnum(view_angle_label);
+    view_angle_button->set_tooltip_text("Reset rotation");
+    box->pack_start(*view_angle_button, true, true, 0);
+
+    auto right_button = Gtk::manage(new Gtk::Button);
+    right_button->set_image_from_icon_name("object-rotate-right-symbolic");
+    right_button->signal_clicked().connect([this] { trigger_action(ActionID::ROTATE_VIEW_RIGHT); });
+    right_button->set_tooltip_text("Rotate right by 45°");
+    box->pack_start(*right_button, true, true, 0);
+
+    box->show_all();
+
+    view_angle_window = new ViewAngleWindow();
+    view_angle_window->set_transient_for(*main_window);
+    view_angle_window_conn = view_angle_window->get_spinbutton().signal_changed().connect(
+            [this] { set_view_angle(view_angle_window->get_spinbutton().get_value_as_int()); });
+
+    connect_action(ActionID::ROTATE_VIEW_LEFT, [this](const auto &a) { set_view_angle(view_angle + 8192); });
+    connect_action(ActionID::ROTATE_VIEW_RIGHT, [this](const auto &a) { set_view_angle(view_angle - 8192); });
+    connect_action(ActionID::ROTATE_VIEW_RESET, [this](const auto &a) { set_view_angle(0); });
+    connect_action(ActionID::ROTATE_VIEW, [this](const auto &a) {
+        view_angle_window->present();
+        view_angle_window->get_spinbutton().grab_focus();
+    });
+}
+
+static std::string view_angle_to_string(int x)
+{
+    const bool pos_only = false;
+    while (x < 0) {
+        x += 65536;
+    }
+    x %= 65536;
+    if (!pos_only && x > 32768)
+        x -= 65536;
+
+    std::ostringstream ss;
+    ss.imbue(get_locale());
+    std::string sign;
+    if (x >= 0) {
+        sign = "+";
+    }
+    else {
+        sign = "−"; // this is U+2212 MINUS SIGN, has same width as +
+    }
+    ss << std::fixed << std::setprecision(1) << std::internal << std::abs((x / 65536.0) * 360);
+    auto s = ss.str();
+    std::string pad;
+    for (int i = 0; i < (5 - (int)s.size()); i++) {
+        pad += " ";
+    }
+    return sign + pad + s + "°";
+}
+
+void ImpLayer::set_view_angle(int angle)
+{
+    if (angle == view_angle)
+        return;
+    view_angle = angle;
+    while (view_angle > 65535) {
+        view_angle -= 65536;
+    }
+    while (view_angle < 0) {
+        view_angle += 65536;
+    }
+    canvas->set_view_angle(angle * M_PI / 32768);
+    view_angle_label->set_text(view_angle_to_string(view_angle));
+    view_angle_button->set_sensitive(view_angle != 0);
+    view_angle_window_conn.block();
+    view_angle_window->get_spinbutton().set_value(view_angle);
+    view_angle_window_conn.unblock();
+    canvas_update_from_pp();
+    update_view_hints();
+}
+
+std::vector<std::string> ImpLayer::get_view_hints()
+{
+    auto r = ImpBase::get_view_hints();
+
+    if (canvas->get_flip_view())
+        r.emplace_back("bottom view");
+
+    if (view_angle != 0)
+        r.emplace_back(view_angle_to_string(view_angle));
+    return r;
+}
+
 } // namespace horizon
