@@ -62,6 +62,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     builder->get_widget("download_revealer", download_revealer);
     builder->get_widget("download_label", download_label);
     builder->get_widget("download_spinner", download_spinner);
+    builder->get_widget("download_progress", download_progress);
     builder->get_widget("download_gh_repo_entry", download_gh_repo_entry);
     builder->get_widget("download_gh_username_entry", download_gh_username_entry);
     builder->get_widget("download_dest_dir_button", download_dest_dir_button);
@@ -148,6 +149,7 @@ PoolProjectManagerAppWindow::PoolProjectManagerAppWindow(BaseObjectType *cobject
     download_status_dispatcher.attach(download_revealer);
     download_status_dispatcher.attach(download_label);
     download_status_dispatcher.attach(download_spinner);
+    download_status_dispatcher.attach(download_progress);
     label_set_tnum(download_label);
 
     download_status_dispatcher.signal_notified().connect([this](const StatusDispatcher::Notification &n) {

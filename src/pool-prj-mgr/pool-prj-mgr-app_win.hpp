@@ -100,6 +100,7 @@ private:
     Gtk::Revealer *download_revealer = nullptr;
     Gtk::Label *download_label = nullptr;
     Gtk::Spinner *download_spinner = nullptr;
+    Gtk::ProgressBar *download_progress = nullptr;
     Gtk::MenuButton *hamburger_menu_button = nullptr;
 
     Gtk::Entry *download_gh_username_entry = nullptr;
@@ -201,6 +202,7 @@ private:
     bool check_autosave(PoolProjectManagerProcess::Type type, const std::vector<std::string> &filenames);
 
     static int git_transfer_cb(const git_transfer_progress *stats, void *payload);
+    static void git_checkout_progress_cb(const char *path, size_t completed_steps, size_t total_steps, void *payload);
     bool downloading = false;
     bool download_cancel = false;
 

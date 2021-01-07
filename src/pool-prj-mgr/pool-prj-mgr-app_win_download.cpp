@@ -30,11 +30,21 @@ void PoolProjectManagerAppWindow::handle_do_download()
 int PoolProjectManagerAppWindow::git_transfer_cb(const git_transfer_progress *stats, void *payload)
 {
     auto self = static_cast<PoolProjectManagerAppWindow *>(payload);
-    std::string msg = "Cloning: fetching object " + format_m_of_n(stats->received_objects, stats->total_objects);
-    self->download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, msg);
+    const std::string msg = "Cloning: fetching object " + format_m_of_n(stats->received_objects, stats->total_objects);
+    self->download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, msg,
+                                                ((double)stats->received_objects) / stats->total_objects);
     if (self->download_cancel)
         return -1;
     return 0;
+}
+
+void PoolProjectManagerAppWindow::git_checkout_progress_cb(const char *path, size_t completed_steps, size_t total_steps,
+                                                           void *payload)
+{
+    auto self = static_cast<PoolProjectManagerAppWindow *>(payload);
+    const std::string msg = "Cloning: checking out " + format_m_of_n(completed_steps, total_steps);
+    self->download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, msg,
+                                                ((double)completed_steps) / total_steps);
 }
 
 #define RETURN_IF_CANCELLED                                                                                            \
@@ -75,6 +85,8 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
         clone_opts.checkout_opts = checkout_opts;
         clone_opts.fetch_opts.callbacks.transfer_progress = &PoolProjectManagerAppWindow::git_transfer_cb;
         clone_opts.fetch_opts.callbacks.payload = this;
+        clone_opts.checkout_opts.progress_cb = &PoolProjectManagerAppWindow::git_checkout_progress_cb;
+        clone_opts.checkout_opts.progress_payload = this;
 
         download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Cloning repository…");
 
@@ -98,10 +110,22 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
 
         download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, "Copying…");
 
+        size_t n_total = 0;
+        size_t i = 0;
+        {
+            SQLite::Query q_count(pool_remote.db,
+                                  "SELECT SUM(n) FROM (SELECT COUNT(filename) AS n FROM all_items_view UNION "
+                                  "SELECT COUNT(DISTINCT model_filename) AS n FROM models);");
+            q_count.step();
+            n_total = q_count.get<int>(0);
+        }
         {
             SQLite::Query q(pool_remote.db, "SELECT filename FROM all_items_view");
             while (q.step()) {
                 RETURN_IF_CANCELLED
+                const std::string msg = "Copying " + format_m_of_n(i, n_total);
+                download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, msg, ((double)i) / n_total);
+                i++;
                 std::string filename = q.get<std::string>(0);
                 auto dirname = Glib::build_filename(dest_dir, Glib::path_get_dirname(filename));
                 if (!Glib::file_test(dirname, Glib::FILE_TEST_IS_DIR)) {
@@ -115,6 +139,9 @@ void PoolProjectManagerAppWindow::download_thread(std::string gh_username, std::
             SQLite::Query q(pool_remote.db, "SELECT DISTINCT model_filename FROM models");
             while (q.step()) {
                 RETURN_IF_CANCELLED
+                const std::string msg = "Copying " + format_m_of_n(i, n_total);
+                download_status_dispatcher.set_status(StatusDispatcher::Status::BUSY, msg, ((double)i) / n_total);
+                i++;
                 std::string filename = q.get<std::string>(0);
                 auto remote_filename = Glib::build_filename(remote_dir, filename);
                 if (Glib::file_test(remote_filename, Glib::FILE_TEST_IS_REGULAR)) {
