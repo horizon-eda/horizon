@@ -119,11 +119,6 @@ static bool getColor(DATA &data, TDF_Label label, Quantity_Color &color)
     return false;
 }
 
-bool operator<(glm::vec<3, float, glm::packed_highp> a, glm::vec<3, float, glm::packed_highp> b)
-{
-    return std::make_tuple(a.x, a.y, a.z) < std::make_tuple(b.x, b.y, b.z);
-}
-
 static bool processFace(const TopoDS_Face &face, DATA &data, Quantity_Color *color, const glm::mat4 &mat = glm::mat4(1))
 {
     if (Standard_True == face.IsNull())
