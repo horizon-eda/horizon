@@ -8,7 +8,7 @@ on:
     branches: [ master ]
 
 env:
-  GTK_VERSION: "3.24.24-1"
+  GTK_VERSION: "3.24.24-2"
 
 jobs:
   build-win32:
