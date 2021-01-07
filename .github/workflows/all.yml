@@ -36,8 +36,22 @@ jobs:
     - name: Build
       run: make -j2
 
+  build-clang:
+    runs-on: ubuntu-latest
+    container: debian:buster
+    needs: stylecheck
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: apt-get update -y && apt-get install git build-essential clang libsqlite3-dev util-linux librsvg2-dev libcairomm-1.0-dev libepoxy-dev libgtkmm-3.0-dev uuid-dev libboost-dev  libzmq5 libzmq3-dev libglm-dev libgit2-dev libcurl4-gnutls-dev liboce-ocaf-dev libpodofo-dev python3-dev libzip-dev git -y
+    - name: Check version
+      run: python3 check_version.py
+    - name: Build
+      run: make -j2 CXX=clang LDFLAGS='-lstdc++ -lm -lpthread'
+
   build-ubuntu:
     runs-on: ubuntu-18.04
+    needs: stylecheck
     steps:
     - uses: actions/checkout@v2
     - name: Install dependencies
@@ -75,6 +89,7 @@ jobs:
 
   build-py-ubuntu:
     runs-on: ubuntu-18.04
+    needs: stylecheck
     steps:
     - uses: actions/checkout@v2
     - name: Install dependencies
