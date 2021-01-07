@@ -372,10 +372,11 @@ void TriangleRenderer::render()
     normal_layers.push_back({ca.work_layer, {}});
 
     for (const auto &[k, overlay_layer] : ca.overlay_layers) {
-        const auto &[layer, ignore_flip] = k;
+        const auto layer = k.first;
+        const auto ignore_flip = k.second;
         auto f = std::find_if(normal_layers.rbegin(), normal_layers.rend(),
-                              [&layer](const auto &x) { return layer.overlaps(x.first); });
-        if (f != normal_layers.crend()) {
+                              [layer](const auto &x) { return layer.overlaps(x.first); });
+        if (f != normal_layers.rend()) {
             f->second.emplace(overlay_layer, ignore_flip);
         }
     }
