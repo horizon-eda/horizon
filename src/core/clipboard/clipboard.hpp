@@ -9,6 +9,9 @@ public:
     json process(const std::set<SelectableRef> &sel);
 
     static std::unique_ptr<ClipboardBase> create(class IDocument &doc);
+    virtual ~ClipboardBase()
+    {
+    }
 
 protected:
     virtual void expand_selection();
