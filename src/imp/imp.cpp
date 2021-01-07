@@ -1243,19 +1243,9 @@ bool ImpBase::handle_click(const GdkEventButton *button_event)
                     std::string text = get_complete_display_name(sr);
                     auto la = Gtk::manage(new Gtk::MenuItem(text));
 
-                    la->signal_select().connect([this, sr] {
-                        canvas->set_selection({sr}, false);
-#ifdef G_OS_WIN32 // work around a bug(?) in intel(?) GPU drivers on windows
-                        Glib::signal_idle().connect_once([this] { canvas->queue_draw(); });
-#endif
-                    });
+                    la->signal_select().connect([this, sr] { canvas->set_selection({sr}, false); });
 
-                    la->signal_deselect().connect([this] {
-                        canvas->set_selection({}, false);
-#ifdef G_OS_WIN32 // work around a bug(?) in intel(?) GPU drivers on windows
-                        Glib::signal_idle().connect_once([this] { canvas->queue_draw(); });
-#endif
-                    });
+                    la->signal_deselect().connect([this] { canvas->set_selection({}, false); });
 
                     auto submenu = Gtk::manage(new Gtk::Menu);
 

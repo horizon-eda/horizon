@@ -325,9 +325,6 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                             else {
                                 ca.set_selection({sr}, false);
                             }
-#ifdef G_OS_WIN32 // work around a bug(?) in intel(?) GPU drivers on windows
-                            Glib::signal_idle().connect_once([this] { ca.queue_draw(); });
-#endif
                         });
                         la->signal_deselect().connect([this, selection, toggle] {
                             if (toggle) {
@@ -336,9 +333,6 @@ void DragSelection::drag_end(GdkEventButton *button_event)
                             else {
                                 ca.set_selection({}, false);
                             }
-#ifdef G_OS_WIN32 // work around a bug(?) in intel(?) GPU drivers on windows
-                            Glib::signal_idle().connect_once([this] { ca.queue_draw(); });
-#endif
                         });
                         la->signal_activate().connect([this, sr, selection, toggle] {
                             auto sel = selection;
