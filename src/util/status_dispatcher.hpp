@@ -12,7 +12,7 @@ public:
     enum class Status { BUSY, DONE, ERROR };
 
     void reset(const std::string &msg);
-    void set_status(Status status, const std::string &msg, double progress = 0);
+    void set_status(Status status, const std::string &msg, double progress = -1);
 
     class Notification {
     public:

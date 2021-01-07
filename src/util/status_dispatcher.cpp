@@ -36,8 +36,10 @@ void StatusDispatcher::notify()
         label->set_text(m);
     if (spinner)
         spinner->property_active() = status == StatusDispatcher::Status::BUSY;
-    if (progress_bar)
+    if (progress_bar) {
+        progress_bar->set_visible(progress >= 0);
         progress_bar->set_fraction(progress);
+    }
     Notification n;
     n.status = st;
     n.msg = m;
