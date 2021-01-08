@@ -27,10 +27,14 @@ AskDatumStringDialog::AskDatumStringDialog(Gtk::Window *parent, const std::strin
         entry->signal_key_press_event().connect([this](GdkEventKey *ev) {
             if (ev->keyval == GDK_KEY_Return && (ev->state & Gdk::SHIFT_MASK)) {
                 auto txt = get_text();
+                auto pos = entry->get_position();
+                txt.insert(pos, "\n");
                 stack->set_transition_duration(100);
                 stack->set_visible_child("view");
-                set_text(txt + "\n");
-                view->get_buffer()->place_cursor(view->get_buffer()->end());
+                set_text(txt);
+                auto iter = view->get_buffer()->begin();
+                iter.forward_cursor_positions(pos + 1);
+                view->get_buffer()->place_cursor(iter);
                 return true;
             }
             return false;
