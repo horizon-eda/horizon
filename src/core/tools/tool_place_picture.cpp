@@ -77,6 +77,9 @@ ToolResponse ToolPlacePicture::update(const ToolArgs &args)
                     return ToolResponse();
                 }
             }
+            else if (data->event == ToolDataWindow::Event::OK) {
+                imp->dialogs.close_nonmodal();
+            }
         }
     }
     return ToolResponse();
