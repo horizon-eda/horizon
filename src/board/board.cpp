@@ -1191,7 +1191,7 @@ ItemSet Board::get_pool_items_used() const
         items_needed.emplace(ObjectType::PADSTACK, it_hole.second.pool_padstack->uuid);
     }
     for (const auto &it_decal : decals) {
-        items_needed.emplace(ObjectType::DECAL, it_decal.second.pool_decal->uuid);
+        items_needed.emplace(ObjectType::DECAL, it_decal.second.get_decal().uuid);
     }
     return items_needed;
 }

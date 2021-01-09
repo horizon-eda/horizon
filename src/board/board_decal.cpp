@@ -6,15 +6,16 @@
 namespace horizon {
 
 BoardDecal::BoardDecal(const UUID &uu, const json &j, IPool &pool, const Board &brd)
-    : uuid(uu), pool_decal(pool.get_decal(j.at("decal").get<std::string>())), decal(*pool_decal),
-      placement(j.at("placement")), flip(j.at("flip").get<bool>()), scale(j.value("scale", 1.0))
+    : uuid(uu), placement(j.at("placement")), pool_decal(pool.get_decal(j.at("decal").get<std::string>())),
+      decal(*pool_decal), flip(j.at("flip").get<bool>()), scale(j.value("scale", 1.0))
 {
     apply_scale();
-    set_flip(flip, brd);
+    set_flip(flip, brd); // calls update_layers
 }
 
-BoardDecal::BoardDecal(const UUID &uu) : uuid(uu), pool_decal(nullptr), decal(UUID())
+BoardDecal::BoardDecal(const UUID &uu, const Decal &dec) : uuid(uu), pool_decal(&dec), decal(*pool_decal)
 {
+    update_layers();
 }
 
 json BoardDecal::serialize() const
@@ -94,6 +95,34 @@ void BoardDecal::set_flip(bool fl, const Board &brd)
     }
     for (auto &[uu, it] : decal.polygons) {
         it.layer = brd.get_package_layer(flip, pool_decal->polygons.at(uu).layer);
+    }
+    update_layers();
+}
+
+const Decal &BoardDecal::get_decal() const
+{
+    return decal;
+}
+
+const LayerRange &BoardDecal::get_layers() const
+{
+    return layers;
+}
+
+void BoardDecal::update_layers()
+{
+    layers = LayerRange();
+    for (auto &[uu, it] : decal.lines) {
+        layers.merge(it.layer);
+    }
+    for (auto &[uu, it] : decal.arcs) {
+        layers.merge(it.layer);
+    }
+    for (auto &[uu, it] : decal.texts) {
+        layers.merge(it.layer);
+    }
+    for (auto &[uu, it] : decal.polygons) {
+        layers.merge(it.layer);
     }
 }
 

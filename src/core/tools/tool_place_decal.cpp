@@ -15,10 +15,13 @@ ToolResponse ToolPlaceDecal::begin(const ToolArgs &args)
 {
     if (auto r = imp->dialogs.select_decal(doc.b->get_pool())) {
         auto uu = UUID::random();
-        temp = &doc.b->get_board()->decals.emplace(uu, uu).first->second;
-        temp->pool_decal = doc.b->get_pool().get_decal(*r);
-        temp->decal = *temp->pool_decal;
+        const auto &dec = *doc.b->get_pool().get_decal(*r);
+        temp = &doc.b->get_board()
+                        ->decals
+                        .emplace(std::piecewise_construct, std::forward_as_tuple(uu), std::forward_as_tuple(uu, dec))
+                        .first->second;
         temp->placement.shift = args.coords;
+        imp->set_work_layer(temp->get_layers().start());
 
         imp->tool_bar_set_actions({
                 {InToolActionID::LMB},
@@ -57,6 +60,11 @@ ToolResponse ToolPlaceDecal::update(const ToolArgs &args)
         case InToolActionID::MIRROR:
             temp->set_flip(!temp->get_flip(), *doc.b->get_board());
             temp->placement.invert_angle();
+
+            if (temp->get_flip())
+                imp->set_work_layer(temp->get_layers().end());
+            else
+                imp->set_work_layer(temp->get_layers().start());
             break;
 
         default:;

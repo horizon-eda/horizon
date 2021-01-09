@@ -280,7 +280,7 @@ bool CoreBoard::get_property(ObjectType type, const UUID &uu, ObjectProperty::ID
         const auto &decal = brd->decals.at(uu);
         switch (property) {
         case ObjectProperty::ID::NAME:
-            dynamic_cast<PropertyValueString &>(value).value = decal.decal.name;
+            dynamic_cast<PropertyValueString &>(value).value = decal.get_decal().name;
             return true;
 
         case ObjectProperty::ID::POSITION_X:

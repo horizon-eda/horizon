@@ -11,11 +11,11 @@ using json = nlohmann::json;
 class BoardDecal {
 public:
     BoardDecal(const UUID &uu, const json &, class IPool &pool, const class Board &brd);
-    BoardDecal(const UUID &uu);
+    BoardDecal(const UUID &uu, const Decal &dec);
     UUID uuid;
 
-    const Decal *pool_decal;
-    Decal decal;
+    const LayerRange &get_layers() const;
+    const Decal &get_decal() const;
 
     Placement placement;
 
@@ -29,8 +29,14 @@ public:
     json serialize() const;
 
 private:
+    const Decal *pool_decal;
+    Decal decal;
+
     bool flip = false;
     double scale = 1;
+    LayerRange layers;
+
+    void update_layers();
 
     void apply_scale();
 };
