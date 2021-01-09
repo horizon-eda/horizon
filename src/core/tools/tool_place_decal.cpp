@@ -54,6 +54,11 @@ ToolResponse ToolPlaceDecal::update(const ToolArgs &args)
             temp->placement.inc_angle_deg(-90);
             break;
 
+        case InToolActionID::MIRROR:
+            temp->set_flip(!temp->get_flip(), *doc.b->get_board());
+            temp->placement.invert_angle();
+            break;
+
         default:;
         }
     }
