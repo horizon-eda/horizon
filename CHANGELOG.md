@@ -1,3 +1,93 @@
+# Version 1.4.0
+
+## New features
+
+### Board Editor
+
+ - Aribtrary view rotation ([d69b69c](https://github.com/horizon-eda/horizon/commit/d69b69c5359adae77ea2af388b1a5e0fea802a7e))
+ - Rule export/import ([5f33144](https://github.com/horizon-eda/horizon/commit/5f33144c20fc00555be300de432dd32378640a28))
+ - Pick&place epxort format can be be customized ([3ecc1bf](https://github.com/horizon-eda/horizon/commit/3ecc1bfe11efa193392d353a12f95c4f781d3ac8))
+
+### Editors (interactive manipulator)
+
+ - Measurement tool ([478bc50](https://github.com/horizon-eda/horizon/commit/478bc5063899eb2803d0a2a080af369668c7eb81))
+ - Drag polygon edge tool ([084ac07](https://github.com/horizon-eda/horizon/commit/084ac072a957ca779e38421b6d437e4438a54d11))
+ - Support pool reload in schematic and board ([f5214b2](https://github.com/horizon-eda/horizon/commit/f5214b21b36b2b27adc8fe1932f20a8d8ad416e2))
+
+## Enhancements
+
+### Board editor
+
+ - Thermals in planes follow minimum width setting ([43c1928](https://github.com/horizon-eda/horizon/commit/43c1928869f090d5db59985191d5474577b6d2b4))
+ - Place decal tool: Scale is adjustable from tool ([d351448](https://github.com/horizon-eda/horizon/commit/d351448d51fb292eeb8e60f17b4dca48fce64402))
+ - Show holes in PDF export ([8de3dab](https://github.com/horizon-eda/horizon/commit/8de3dabb660e3cc9e1f7be3b5ce9e69ff5f7ac9a))
+ - Improved rebuild performance afer tools ([06fcd68](https://github.com/horizon-eda/horizon/commit/06fcd68829cf6acd62b2285efac9d8260444d6a6))
+ - Draw plane/keepout tools for drawing planes/keepouts in one step ([e53f200](https://github.com/horizon-eda/horizon/commit/e53f200bdf3339abf1d8fedb1048fdc749354e2c))
+ - Highlighting a package also highlights smashed texts ([1aedb43](https://github.com/horizon-eda/horizon/commit/1aedb433591823380a536d49e03e894aab64e484))
+ - Show show more descriptive net names in preflight check ([3088cc8](https://github.com/horizon-eda/horizon/commit/3088cc8eb51891a9e8699e3ff5b0d2a54dd7dcaf))
+
+### Editors (interactive manipulator)
+ - Draw dimension tool: Label size is adjustable from tool ([07e0310](https://github.com/horizon-eda/horizon/commit/07e0310a338d9ef23c6337c0ebe9c9cc5c550cc9))
+ - View can be flipped if a tool is active ([e213caf](https://github.com/horizon-eda/horizon/commit/e213caf18917ba46fb954183d8aa34a785f1e2b4))
+ - Nonmodal enter datum windows don't immediately close after entering value ([bdc84fb](https://github.com/horizon-eda/horizon/commit/bdc84fb8ce0a6f2cfe9a5bfc7291ca2dbd3a38e3))
+ - Arcs are drawn as such, not as line segments ([1367178](https://github.com/horizon-eda/horizon/commit/13671785b4b07f77c681a075163b8645ad85aeb1))
+ - Rotate arbitrary/scale tool uses nonmodal dialogs ([b14e5f4](https://github.com/horizon-eda/horizon/commit/b14e5f438bdff38a5d0df7567b2f625aaf7846a0))
+ - Rotate arbitrary/scale tool supports decals ([e8cc033](https://github.com/horizon-eda/horizon/commit/e8cc033b90476a3645896605ae40b846bd1f3c98))
+ - Draw polygon tool: finish by closing polygon ([4707cc2](https://github.com/horizon-eda/horizon/commit/4707cc2b7e43944c0c4547148da3408b90f7e407))
+ - Parameters window: add insert parameter button ([4d137c3](https://github.com/horizon-eda/horizon/commit/4d137c37b408bb4bc0277942021d01a5e2dc915d))
+ - Use navigation buttons (back/forward) to switch layers ([f871566](https://github.com/horizon-eda/horizon/commit/f8715665467e0b348ebb16090d308faffd9ab858))
+
+### Package editor
+
+ - Edit pad tool uses non modal dialog ([e2bf3b2](https://github.com/horizon-eda/horizon/commit/e2bf3b2dcce2c3e276be9f0924dc67b82a303ba1))
+
+### 3D preview
+
+ - Render gamma-correct background gradient ([67e0c4b](https://github.com/horizon-eda/horizon/commit/67e0c4b642dfd286aa88de03bf652c553c13af45))
+ - Use gamma-correct shading ([693942f](https://github.com/horizon-eda/horizon/commit/693942f43774e55f7f02eb69ddbf5eb37c5dad2a))
+ - Render models with smooth normals ([6395e2e](https://github.com/horizon-eda/horizon/commit/6395e2e61b3950bc848c4654e43e468d0d71923f))
+
+### Pool manager
+
+ - Improved progress reporting during pool download ([0781a51](https://github.com/horizon-eda/horizon/commit/0781a511497f68795348b2b7c7db968e94e2c2e4))
+ - Git tab performance enhancements ([7c6a02f](https://github.com/horizon-eda/horizon/commit/7c6a02fb24e640872f3eb8cbb15cef4174d42c0b))
+ - "Where used" list performance enhancements ([4e7dc29](https://github.com/horizon-eda/horizon/commit/4e7dc293ae1517a5c7a4c16a195fd2d8f0b14194))
+ - Pool update is 2× to 5× times faster ([bd95955](https://github.com/horizon-eda/horizon/commit/bd95955f4f2e4e3a8f12823d3e0cba757dab3cc6), [b5603e3](https://github.com/horizon-eda/horizon/commit/b5603e3da80e817418a8116a4cc45bcfbc5f3d42), [acb4124](https://github.com/horizon-eda/horizon/commit/acb4124e37267a6fed2c3e2fdc5214a017bbac3d), [2806973](https://github.com/horizon-eda/horizon/commit/28069739a0d79e0df370339956f43c6f2da85f70))
+ - Properly update pool after duplicating part with package ([f64af58](https://github.com/horizon-eda/horizon/commit/f64af586dcf39286ee5f30321a2bb6e9b55a7a48))
+ - Partinfo searches by MPN prefix rather than exact match ([ac48399](https://github.com/horizon-eda/horizon/commit/ac48399234f0073d8701275ff488a86dc326f00b))
+
+
+## Bugfixes
+
+### Board editor
+
+ - Make decals only selectable on used layers ([cb34b24](https://github.com/horizon-eda/horizon/commit/cb34b24e7b70e11df2e8f9333822e9c33bb09dbf))
+ - Place decal tool: Support mirroring decal ([5f7a85d](https://github.com/horizon-eda/horizon/commit/5f7a85d334b87867363d7e8eb17ff5db554a1ff0))
+ - Via overlay stays readable in bottom view ([bd8b7db](https://github.com/horizon-eda/horizon/commit/bd8b7db4fac45f5f4bffff7941c8dc5fee5f4b4a))
+ - Decals are actually mirrored if mirrored ([435dde1](https://github.com/horizon-eda/horizon/commit/435dde1547e0406f39b70c1093e8d74280e0d995))
+ - Add plane cutout for pth barrels ([f3e813e](https://github.com/horizon-eda/horizon/commit/f3e813e0b74bae763aa12179f36dd0640f720f76))
+ - Ignore irrelvant layer during plane updated ([8fb868b](https://github.com/horizon-eda/horizon/commit/8fb868bfb8df60f6b0ada62843071efb8f6aee12))
+ - Properly handle zero length airwires ([d4f8ffe](https://github.com/horizon-eda/horizon/commit/d4f8ffee8649caf3bdc31f671929b390365bf39f))
+ - Properly display nets with no airwires in nets window ([dad6c71](https://github.com/horizon-eda/horizon/commit/dad6c714cc43df72c877024f552134d3d3345bb0))
+
+### Schematic editor
+
+ - Don't crash if connected symbol pin is deleted in symbol ([9cf9a52](https://github.com/horizon-eda/horizon/commit/9cf9a528318b3b5f3b1c2084d8ebb25ac8316d3c))
+
+### Editors
+
+ - Multiline text edit dialog: insert newline at cursor ([5780aff](https://github.com/horizon-eda/horizon/commit/5780affd9a3fed4e89c7ca58691459752755e98a))
+ - Load select polygon action keybindings on startup ([88d0bbc](https://github.com/horizon-eda/horizon/commit/88d0bbc10942708369586147a5ac9a460fafa65b))
+ - Don't show action button menu if clicked the wrong way ([47654f3](https://github.com/horizon-eda/horizon/commit/47654f33852957b3870d48ee5ab0343775d7ceb6))
+
+### Pool manager
+
+ - Remote tab: Don't crash if there's no local branch when updating a pull request ([88ca981](https://github.com/horizon-eda/horizon/commit/88ca98115bd32a99fc48cc4c812b44c75d3e6334))
+
+### Windows builds
+
+ - Use patched gtk to work around intel GPU driver bug ([84a1837](https://github.com/horizon-eda/horizon/commit/84a18373d3fc3c234bc35086d5e0eb7c261f9e15))
+
 # Version 1.3.0
 
 ## New features
