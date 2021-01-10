@@ -27,6 +27,10 @@ ToolResponse ToolDrawPolygon::begin(const ToolArgs &args)
 void ToolDrawPolygon::append_vertex(const Coordi &c)
 {
     vertex = temp->append_vertex();
+    if (temp->vertices.size() >= 2)
+        last_vertex = &temp->vertices.at(temp->vertices.size() - 2);
+    else
+        last_vertex = nullptr;
     set_snap_filter();
     cycle_restrict_mode_xy();
     if (last_vertex)
@@ -100,7 +104,6 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
         case InToolActionID::LMB:
             if (arc_mode == ArcMode::CURRENT) {
                 arc_mode = ArcMode::OFF;
-                last_vertex = vertex;
                 append_vertex(args.coords);
             }
             else if (arc_mode == ArcMode::NEXT) {
@@ -118,7 +121,6 @@ ToolResponse ToolDrawPolygon::update(const ToolArgs &args)
                     return commit();
                 }
 
-                last_vertex = vertex;
                 append_vertex(args.coords);
             }
             break;
